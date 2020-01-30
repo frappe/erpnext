@@ -183,7 +183,7 @@ def get_items_list(pos_profile, company):
 		left join `tabItem Default` id on id.parent = i.name and id.company = %s
 		left join `tabUOM Conversion Detail` c on i.name = c.parent and i.sales_uom = c.uom
 		where
-			i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1
+			i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1 and i.is_fixed_asset = 0
 			{cond}
 		""".format(cond=cond), tuple([company] + args_list), as_dict=1)
 

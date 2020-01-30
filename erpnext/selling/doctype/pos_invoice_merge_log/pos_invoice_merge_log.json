@@ -41,7 +41,7 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval:docstatus==0",
+   "collapsible_depends_on": "eval:doc.docstatus==0",
    "fieldname": "references_section",
    "fieldtype": "Section Break",
    "label": "References"
@@ -64,7 +64,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-01-28 15:07:56.781367",
+ "modified": "2020-01-29 13:52:51.688154",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "POS Invoice Merge Log",
