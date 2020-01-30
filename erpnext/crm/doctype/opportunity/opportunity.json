@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
@@ -412,7 +413,8 @@
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
- "modified": "2019-09-30 12:58:37.385400",
+ "links": [],
+ "modified": "2020-01-24 09:11:53.710359",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

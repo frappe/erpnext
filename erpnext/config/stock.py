@@ -56,6 +56,14 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Material Request Details",
+					"doctype": "Material Request Details",
+					"onboard": 1,
+					"dependencies": ["Item Price"],
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Stock Balance",
 					"doctype": "Stock Ledger Entry",
 					"onboard": 1,
