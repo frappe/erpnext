@@ -143,7 +143,22 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			frm.set_value('currency', frappe.defaults.get_user_default("Currency"));
 		}
 
+		this.amount_opportunity();
 		this.setup_queries();
+	},
+
+	amount_opportunity: function () {
+		if (cur_frm.doc.party_name != null) {
+			frappe.call({
+				method: "erpnext.crm.doctype.opportunity.opportunity.amount_opportunity",
+				args: {
+					"Item": cur_frm.doc.party_name
+				}, callback: function (data) {
+					cur_frm.set_value("opportunity_amount", data.message.opportunity_amount);
+					cur_frm.set_value("currency", data.message.currency);
+				}
+			})
+		}
 	},
 
 	setup_queries: function() {
