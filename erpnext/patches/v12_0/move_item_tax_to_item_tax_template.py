@@ -49,12 +49,13 @@ def execute():
 		item_tax_template_name = get_item_tax_template(item_tax_templates, item_tax_map, item_code)
 
 		# update the item tax table
-		item = frappe.get_doc("Item", item_code)
-		item.set("taxes", [])
-		item.append("taxes", {"item_tax_template": item_tax_template_name, "tax_category": ""})
 		frappe.db.sql("delete from `tabItem Tax` where parent=%s and parenttype='Item'", item_code)
-		for d in item.taxes:
-			d.db_insert()
+		if item_tax_template_name:
+			item = frappe.get_doc("Item", item_code)
+			item.set("taxes", [])
+			item.append("taxes", {"item_tax_template": item_tax_template_name, "tax_category": ""})
+			for d in item.taxes:
+				d.db_insert()
 
 	doctypes = [
 		'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice',
@@ -95,30 +96,35 @@ def get_item_tax_template(item_tax_templates, item_tax_map, item_code, parenttyp
 		else:
 			parts = tax_type.strip().split(" - ")
 			account_name = " - ".join(parts[:-1])
-			company = get_company(parts[-1], parenttype, parent)
-			parent_account = frappe.db.get_value("Account",
-				filters={"account_type": "Tax", "root_type": "Liability", "is_group": 0, "company": company}, fieldname="parent_account")
-			if not parent_account:
+			if not account_name:
+				tax_type = None
+			else:
+				company = get_company(parts[-1], parenttype, parent)
 				parent_account = frappe.db.get_value("Account",
-					filters={"account_type": "Tax", "root_type": "Liability", "is_group": 1, "company": company})
-			filters = {
-				"account_name": account_name,
-				"company": company,
-				"account_type": "Tax",
-				"parent_account": parent_account
-			}
-			tax_type = frappe.db.get_value("Account", filters)
-			if not tax_type:
-				account = frappe.new_doc("Account")
-				account.update(filters)
-				account.insert()
-				tax_type = account.name
+					filters={"account_type": "Tax", "root_type": "Liability", "is_group": 0, "company": company}, fieldname="parent_account")
+				if not parent_account:
+					parent_account = frappe.db.get_value("Account",
+						filters={"account_type": "Tax", "root_type": "Liability", "is_group": 1, "company": company})
+				filters = {
+					"account_name": account_name,
+					"company": company,
+					"account_type": "Tax",
+					"parent_account": parent_account
+				}
+				tax_type = frappe.db.get_value("Account", filters)
+				if not tax_type:
+					account = frappe.new_doc("Account")
+					account.update(filters)
+					account.insert()
+					tax_type = account.name
 
-		item_tax_template.append("taxes", {"tax_type": tax_type, "tax_rate": tax_rate})
-		item_tax_templates.setdefault(item_tax_template.title, {})
-		item_tax_templates[item_tax_template.title][tax_type] = tax_rate
-	item_tax_template.save()
-	return item_tax_template.name
+		if tax_type:
+			item_tax_template.append("taxes", {"tax_type": tax_type, "tax_rate": tax_rate})
+			item_tax_templates.setdefault(item_tax_template.title, {})
+			item_tax_templates[item_tax_template.title][tax_type] = tax_rate
+	if item_tax_template.get("taxes"):
+		item_tax_template.save()
+		return item_tax_template.name
 
 def get_company(company_abbr, parenttype=None, parent=None):
 	if parenttype and parent:
