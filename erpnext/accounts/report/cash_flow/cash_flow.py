@@ -136,6 +136,8 @@ def get_account_type_based_gl_data(company, start_date, end_date, account_type, 
 
 			cond = """ AND (finance_book in (%s, %s, '') OR finance_book IS NULL)
 				""" %(frappe.db.escape(filters.finance_book), frappe.db.escape(company_fb))
+	else:
+		cond = "AND (finance_book = '' OR finance_book IS NULL)"
 
 	gl_sum = frappe.db.sql_list("""
 		select sum(credit) - sum(debit)
