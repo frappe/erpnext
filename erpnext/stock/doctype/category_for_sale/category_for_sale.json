@@ -1,0 +1,34 @@
+{
+ "actions": [],
+ "autoname": "Prompt",
+ "creation": "2020-01-30 15:13:54.007211",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [],
+ "fields": [],
+ "links": [],
+ "modified": "2020-01-30 15:13:54.007211",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Category for sale",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

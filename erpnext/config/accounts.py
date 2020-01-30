@@ -16,6 +16,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Reason for sale",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
 					"name": "Customer",
 					"description": _("Customer database."),
 					"onboard": 1,
