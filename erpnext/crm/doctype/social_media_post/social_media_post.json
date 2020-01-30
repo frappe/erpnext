@@ -1,0 +1,116 @@
+{
+ "actions": [],
+ "autoname": "format: CRM-SMP-{YYYY}-{MM}-{DD}-{###}",
+ "creation": "2020-01-30 11:53:13.872864",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "is_scheduled",
+  "sheduled_time",
+  "column_break_3",
+  "status",
+  "content",
+  "text",
+  "image",
+  "post_to",
+  "twitter",
+  "column_break_9",
+  "linkedin",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "text",
+   "fieldtype": "Long Text",
+   "label": "Text Content"
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "label": "Image"
+  },
+  {
+   "fieldname": "post_to",
+   "fieldtype": "Section Break",
+   "label": "Post to"
+  },
+  {
+   "default": "0",
+   "fieldname": "twitter",
+   "fieldtype": "Check",
+   "label": "Twitter"
+  },
+  {
+   "default": "0",
+   "fieldname": "linkedin",
+   "fieldtype": "Check",
+   "label": "LinkedIn"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Social Media Post",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_scheduled",
+   "fieldtype": "Check",
+   "label": "Scheduled Post"
+  },
+  {
+   "depends_on": "eval: doc.is_scheduled===1",
+   "fieldname": "sheduled_time",
+   "fieldtype": "Datetime",
+   "label": "Scheduled Time"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Scheduled\nPosted"
+  },
+  {
+   "fieldname": "content",
+   "fieldtype": "Section Break",
+   "label": "Content"
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-01-31 11:00:46.778657",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Social Media Post",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
