@@ -127,7 +127,7 @@ frappe.ui.form.on('Stock Entry', {
 		if(!frm.doc.docstatus) {
 			// allow user to select Item Batches manually
 			frappe.db.get_value("Stock Settings", "Stock Settings", "automatically_set_batch_nos_based_on_fifo", (r) => {
-				if (!r.message.automatically_set_batch_nos_based_on_fifo) {
+				if (!cint(r.automatically_set_batch_nos_based_on_fifo)) {
 					frm.add_custom_button(__('Select Item Batches'), () => {
 						frm.trigger("select_batch_no");
 					});
