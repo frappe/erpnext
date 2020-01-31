@@ -113,7 +113,7 @@ frappe.ui.form.on("Leave Application", {
 			}
 		}
 		else {
-			frm.doc.half_day_date = "";
+			frm.set_value("half_day_date", "");
 		}
 		frm.trigger("calculate_total_days");
 	},
