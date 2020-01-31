@@ -5,10 +5,18 @@
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
- "field_order": [],
- "fields": [],
+ "field_order": [
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "description",
+   "fieldtype": "Data",
+   "label": "Description"
+  }
+ ],
  "links": [],
- "modified": "2020-01-30 15:13:54.007211",
+ "modified": "2020-01-31 16:43:22.133848",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Category for sale",
