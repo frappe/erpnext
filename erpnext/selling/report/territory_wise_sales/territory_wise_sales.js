@@ -10,7 +10,13 @@ frappe.query_reports["Territory wise Sales"] = {
 			fieldname:"expected_closing_date",
 			label: __("Expected Closing Date"),
 			fieldtype: "DateRange",
-			default: [frappe.datetime.add_months(frappe.datetime.get_today(),-1), frappe.datetime.get_today()]
+			default: [frappe.datetime.add_months(frappe.datetime.get_today(),-1), frappe.datetime.get_today()],
+		},
+		{
+			fieldname: "company",
+			label: __("Company"),
+			fieldtype: "Link",
+			options: "Company",
 		}
 	]
 };
