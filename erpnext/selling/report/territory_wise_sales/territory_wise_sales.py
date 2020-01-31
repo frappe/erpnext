@@ -58,13 +58,13 @@ def get_data(filters=None):
 
 	for territory in frappe.get_all("Territory"):
 		territory_opportunities = list(filter(lambda x: x.territory == territory.name, opportunities)) if opportunities and opportunities else []
-		t_opportunity_names = [t.name for t in territory_opportunities] if territory_opportunities else None
+		t_opportunity_names = [t.name for t in territory_opportunities] if territory_opportunities else []
 
 		territory_quotations = list(filter(lambda x: x.opportunity in t_opportunity_names, quotations)) if t_opportunity_names and quotations else []
-		t_quotation_names = [t.name for t in territory_quotations] if territory_quotations else None
+		t_quotation_names = [t.name for t in territory_quotations] if territory_quotations else []
 
 		territory_orders = list(filter(lambda x: x.quotation in t_quotation_names, sales_orders)) if t_quotation_names and sales_orders else []
-		t_order_names = [t.name for t in territory_orders] if territory_orders else None
+		t_order_names = [t.name for t in territory_orders] if territory_orders else []
 
 		territory_invoices = list(filter(lambda x: x.sales_order in t_order_names, sales_invoices)) if t_order_names and sales_invoices else []
 
