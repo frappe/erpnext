@@ -167,11 +167,11 @@ class Issue(Document):
 
 		if not service_level_agreement:
 			if frappe.db.get_value("Issue", self.name, "service_level_agreement"):
-				frappe.throw(_("Couldn't Set Service Level Agreement {0}.".format(self.service_level_agreement)))
+				frappe.throw(_("Couldn't Set Service Level Agreement {0}.").format(self.service_level_agreement))
 			return
 
 		if (service_level_agreement.customer and self.customer) and not (service_level_agreement.customer == self.customer):
-			frappe.throw(_("This Service Level Agreement is specific to Customer {0}".format(service_level_agreement.customer)))
+			frappe.throw(_("This Service Level Agreement is specific to Customer {0}").format(service_level_agreement.customer))
 
 		self.service_level_agreement = service_level_agreement.name
 		self.priority = service_level_agreement.default_priority if not priority else priority
@@ -238,7 +238,7 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 		allotted_days = service_level.get("resolution_time")
 		time_period = service_level.get("resolution_time_period")
 	else:
-		frappe.throw(_("{0} parameter is invalid".format(parameter)))
+		frappe.throw(_("{0} parameter is invalid").format(parameter))
 
 	allotted_hours = 0
 	if time_period == 'Hour':
