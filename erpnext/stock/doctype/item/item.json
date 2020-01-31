@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_guest_to_view": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -16,6 +17,8 @@
   "variant_of",
   "item_name",
   "item_group",
+  "category_for_purchase",
+  "category_for_sale",
   "is_item_from_hub",
   "stock_uom",
   "column_break0",
@@ -1035,14 +1038,27 @@
    "fieldname": "auto_create_assets",
    "fieldtype": "Check",
    "label": "Auto Create Assets on Purchase"
+  },
+  {
+   "fieldname": "category_for_purchase",
+   "fieldtype": "Link",
+   "label": "Category for purchase",
+   "options": "Category for purchase"
+  },
+  {
+   "fieldname": "category_for_sale",
+   "fieldtype": "Link",
+   "label": "Category for sale",
+   "options": "Category for sale"
   }
  ],
  "has_web_view": 1,
  "icon": "fa fa-tag",
  "idx": 2,
  "image_field": "image",
+ "links": [],
  "max_attachments": 1,
- "modified": "2019-12-13 12:15:56.197246",
+ "modified": "2020-01-30 15:15:44.332309",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
