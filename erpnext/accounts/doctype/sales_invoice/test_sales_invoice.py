@@ -1656,7 +1656,17 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 
 		from erpnext.accounts.deferred_revenue import convert_deferred_revenue_to_income
-		convert_deferred_revenue_to_income(start_date="2019-01-01", end_date="2019-01-31")
+
+		pda1 = frappe.get_doc(dict(
+			doctype='Process Deferred Accounting',
+			posting_date=nowdate(),
+			start_date="2019-01-01",
+			end_date="2019-01-31",
+			type="Income"
+		))
+
+		pda1.insert()
+		pda1.submit()
 
 		expected_gle = [
 			[deferred_account, 33.85, 0.0, "2019-01-31"],
@@ -1665,7 +1675,16 @@ class TestSalesInvoice(unittest.TestCase):
 
 		check_gl_entries(self, si.name, expected_gle, "2019-01-10")
 
-		convert_deferred_revenue_to_income(start_date="2019-01-01", end_date="2019-03-31")
+		pda2 = frappe.get_doc(dict(
+			doctype='Process Deferred Accounting',
+			posting_date=nowdate(),
+			start_date="2019-01-01",
+			end_date="2019-01-31",
+			type="Income"
+		))
+
+		pda2.insert()
+		pda2.submit()
 
 		expected_gle = [
 			[deferred_account, 43.08, 0.0, "2019-02-28"],
