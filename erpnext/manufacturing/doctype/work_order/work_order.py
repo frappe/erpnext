@@ -12,8 +12,7 @@ from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_bom_items
 from dateutil.relativedelta import relativedelta
 from erpnext.stock.doctype.item.item import validate_end_of_life
 from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
-from erpnext.manufacturing.doctype.job_card.job_card import OverlapError
-from erpnext.stock.doctype.stock_entry.stock_entry import get_additional_costs
+from erpnext.projects.doctype.timesheet.timesheet import OverlapError
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
 from erpnext.stock.stock_balance import get_planned_qty, update_bin_qty
 from frappe.utils.csvutils import getlink
@@ -38,7 +37,7 @@ class WorkOrder(Document):
 		ms = frappe.get_doc("Manufacturing Settings")
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
-
+		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
 
 	def validate(self):
 		self.validate_production_item()
@@ -278,10 +277,11 @@ class WorkOrder(Document):
 				enable_capacity_planning=enable_capacity_planning, auto_create=True)
 
 			if enable_capacity_planning and job_card_doc:
-				row.planned_start_time = job_card_doc.time_logs[0].from_time
+				row.planned_start_time = job_card_doc.time_logs[-1].from_time
 				row.planned_end_time = job_card_doc.time_logs[-1].to_time
 
 				if date_diff(row.planned_start_time, original_start_time) > plan_days:
+					frappe.message_log.pop()
 					frappe.throw(_("Unable to find the time slot in the next {0} days for the operation {1}.")
 						.format(plan_days, row.operation), CapacityError)
 
@@ -657,8 +657,9 @@ def make_work_order(item, qty=0, project=None):
 	wo_doc = frappe.new_doc("Work Order")
 	wo_doc.production_item = item
 	wo_doc.update(item_details)
-	if qty > 0:
-		wo_doc.qty = qty
+
+	if flt(qty) > 0:
+		wo_doc.qty = flt(qty)
 		wo_doc.get_items_and_operations_from_bom()
 
 	return wo_doc
@@ -683,8 +684,7 @@ def set_work_order_ops(name):
 @frappe.whitelist()
 def make_stock_entry(work_order_id, purpose, qty=None):
 	work_order = frappe.get_doc("Work Order", work_order_id)
-	if not frappe.db.get_value("Warehouse", work_order.wip_warehouse, "is_group") \
-			and not work_order.skip_transfer:
+	if not frappe.db.get_value("Warehouse", work_order.wip_warehouse, "is_group"):
 		wip_warehouse = work_order.wip_warehouse
 	else:
 		wip_warehouse = None
@@ -708,10 +708,6 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 		stock_entry.from_warehouse = wip_warehouse
 		stock_entry.to_warehouse = work_order.fg_warehouse
 		stock_entry.project = work_order.project
-		if purpose=="Manufacture":
-			additional_costs = get_additional_costs(work_order, fg_qty=stock_entry.fg_completed_qty,
-				company=work_order.company)
-			stock_entry.set("additional_costs", additional_costs)
 
 	stock_entry.set_stock_entry_type()
 	stock_entry.get_items()

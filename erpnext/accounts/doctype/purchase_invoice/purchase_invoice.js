@@ -167,8 +167,15 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	make_comment_dialog_and_block_invoice: function(){
 		const me = this;
 
-		const title = __('Add Comment');
+		const title = __('Block Invoice');
 		const fields = [
+			{
+				fieldname: 'release_date',
+				read_only: 0,
+				fieldtype:'Date',
+				label: __('Release Date'),
+				default: me.frm.doc.release_date
+			},
 			{
 				fieldname: 'hold_comment',
 				read_only: 0,
@@ -187,7 +194,11 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			const dialog_data = me.dialog.get_values();
 			frappe.call({
 				'method': 'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.block_invoice',
-				'args': {'name': me.frm.doc.name, 'hold_comment': dialog_data.hold_comment},
+				'args': {
+					'name': me.frm.doc.name,
+					'hold_comment': dialog_data.hold_comment,
+					'release_date': dialog_data.release_date
+				},
 				'callback': (r) => me.frm.reload_doc()
 			});
 			me.dialog.hide();
@@ -382,21 +393,11 @@ cur_frm.fields_dict['items'].grid.get_field("item_code").get_query = function(do
 
 cur_frm.fields_dict['credit_to'].get_query = function(doc) {
 	// filter on Account
-	if (doc.supplier) {
-		return {
-			filters: {
-				'account_type': 'Payable',
-				'is_group': 0,
-				'company': doc.company
-			}
-		}
-	} else {
-		return {
-			filters: {
-				'report_type': 'Balance Sheet',
-				'is_group': 0,
-				'company': doc.company
-			}
+	return {
+		filters: {
+			'account_type': 'Payable',
+			'is_group': 0,
+			'company': doc.company
 		}
 	}
 }

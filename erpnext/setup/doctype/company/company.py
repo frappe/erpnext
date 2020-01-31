@@ -14,6 +14,7 @@ from frappe.model.document import Document
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.utils.nestedset import NestedSet
 
+from past.builtins import cmp
 import functools
 
 class Company(NestedSet):
@@ -46,6 +47,7 @@ class Company(NestedSet):
 		self.validate_perpetual_inventory()
 		self.check_country_change()
 		self.set_chart_of_accounts()
+		self.validate_parent_company()
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -187,6 +189,13 @@ class Company(NestedSet):
 		if self.parent_company:
 			self.create_chart_of_accounts_based_on = "Existing Company"
 			self.existing_company = self.parent_company
+
+	def validate_parent_company(self):
+		if self.parent_company:
+			is_group = frappe.get_value('Company', self.parent_company, 'is_group')
+
+			if not is_group:
+				frappe.throw(_("Parent Company must be a group company"))
 
 	def set_default_accounts(self):
 		default_accounts = {

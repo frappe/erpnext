@@ -264,8 +264,8 @@ def filter_out_zero_value_rows(data, parent_children_map, show_zero_values=False
 
 def add_total_row(out, root_type, balance_must_be, period_list, company_currency):
 	total_row = {
-		"account_name": "'" + _("Total {0} ({1})").format(_(root_type), _(balance_must_be)) + "'",
-		"account": "'" + _("Total {0} ({1})").format(_(root_type), _(balance_must_be)) + "'",
+		"account_name": _("Total {0} ({1})").format(_(root_type), _(balance_must_be)),
+		"account": _("Total {0} ({1})").format(_(root_type), _(balance_must_be)),
 		"currency": company_currency
 	}
 
@@ -408,9 +408,9 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 
 		if filters.get("finance_book"):
 			if filters.get("include_default_book_entries"):
-				additional_conditions.append("finance_book in (%(finance_book)s, %(company_fb)s)")
+				additional_conditions.append("(finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)")
 			else:
-				additional_conditions.append("finance_book in (%(finance_book)s)")
+				additional_conditions.append("(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)")
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:

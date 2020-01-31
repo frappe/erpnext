@@ -139,7 +139,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				this.dialog.set_value('serial_no', d.serial_no);
 			}
 
-			if (d.batch_no) {
+			if (d.has_batch_no && d.batch_no) {
 				this.frm.doc.items.forEach(data => {
 					if(data.item_code == d.item_code) {
 						this.dialog.fields_dict.batches.df.data.push({
@@ -316,7 +316,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 								frappe.call({
 									method: 'erpnext.stock.doctype.batch.batch.get_batch_qty',
 									args: {
-										batch_no: this.doc.batch_no,
+										batch_no: me.item.batch_no,
 										warehouse: me.warehouse_details.name,
 										item_code: me.item_code
 									},
@@ -392,9 +392,14 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			delivery_document_no: ""
 		}
 
+		if (this.has_batch) {
+			serial_no_filters["batch_no"] = this.item.batch_no;
+		}
+
 		if (me.warehouse_details.name) {
 			serial_no_filters['warehouse'] = me.warehouse_details.name;
 		}
+
 		return [
 			{fieldtype: 'Section Break', label: __('Serial Numbers')},
 			{
