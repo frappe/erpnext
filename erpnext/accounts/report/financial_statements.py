@@ -348,7 +348,8 @@ def set_gl_entries_by_account(
 	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
 
 	accounts = frappe.db.sql_list("""select name from `tabAccount`
-		where lft >= %s and rgt <= %s""", (root_lft, root_rgt))
+		where lft >= %s and rgt <= %s and company = %s""", (root_lft, root_rgt, company))
+
 	additional_conditions += " and account in ({})"\
 		.format(", ".join([frappe.db.escape(d) for d in accounts]))
 
