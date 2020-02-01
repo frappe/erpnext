@@ -15,7 +15,7 @@ class QualityProcedure(NestedSet):
 			if process.procedure:
 				doc = frappe.get_doc("Quality Procedure", process.procedure)
 				if doc.parent_quality_procedure:
-					frappe.throw(_("{0} already has a Parent Procedure {1}.".format(process.procedure, doc.parent_quality_procedure)))
+					frappe.throw(_("{0} already has a Parent Procedure {1}.").format(process.procedure, doc.parent_quality_procedure))
 				self.is_group = 1
 
 	def on_update(self):

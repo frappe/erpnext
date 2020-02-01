@@ -184,7 +184,7 @@ def get_conditions(filters):
 
 	if filters.get("finance_book"):
 		if filters.get("include_default_book_entries"):
-			conditions.append("finance_book in (%(finance_book)s, %(company_fb)s)")
+			conditions.append("(finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)")
 		else:
 			conditions.append("finance_book in (%(finance_book)s)")
 
@@ -373,19 +373,19 @@ def get_columns(filters):
 			"width": 180
 		},
 		{
-			"label": _("Debit ({0})".format(currency)),
+			"label": _("Debit ({0})").format(currency),
 			"fieldname": "debit",
 			"fieldtype": "Float",
 			"width": 100
 		},
 		{
-			"label": _("Credit ({0})".format(currency)),
+			"label": _("Credit ({0})").format(currency),
 			"fieldname": "credit",
 			"fieldtype": "Float",
 			"width": 100
 		},
 		{
-			"label": _("Balance ({0})".format(currency)),
+			"label": _("Balance ({0})").format(currency),
 			"fieldname": "balance",
 			"fieldtype": "Float",
 			"width": 130

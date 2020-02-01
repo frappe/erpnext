@@ -225,7 +225,7 @@ class SalesInvoice(SellingController):
 				total_amount_in_payments += payment.amount
 			invoice_total = self.rounded_total or self.grand_total
 			if total_amount_in_payments < invoice_total:
-				frappe.throw(_("Total payments amount can't be greater than {}".format(-invoice_total)))
+				frappe.throw(_("Total payments amount can't be greater than {}").format(-invoice_total))
 
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
@@ -1041,11 +1041,11 @@ class SalesInvoice(SellingController):
 			si_serial_nos = set(get_serial_nos(serial_nos))
 
 			if si_serial_nos - dn_serial_nos:
-				frappe.throw(_("Serial Numbers in row {0} does not match with Delivery Note".format(item.idx)))
+				frappe.throw(_("Serial Numbers in row {0} does not match with Delivery Note").format(item.idx))
 
 			if item.serial_no and cint(item.qty) != len(si_serial_nos):
-				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.".format(
-					item.idx, item.qty, item.item_code, len(si_serial_nos))))
+				frappe.throw(_("Row {0}: {1} Serial numbers required for Item {2}. You have provided {3}.").format(
+					item.idx, item.qty, item.item_code, len(si_serial_nos)))
 
 	def validate_serial_against_sales_invoice(self):
 		""" check if serial number is already used in other sales invoice """
@@ -1064,8 +1064,8 @@ class SalesInvoice(SellingController):
 					and self.name != serial_no_details.sales_invoice:
 					sales_invoice_company = frappe.db.get_value("Sales Invoice", serial_no_details.sales_invoice, "company")
 					if sales_invoice_company == self.company:
-						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}"
-							.format(serial_no, serial_no_details.sales_invoice)))
+						frappe.throw(_("Serial Number: {0} is already referenced in Sales Invoice: {1}")
+							.format(serial_no, serial_no_details.sales_invoice))
 
 	def update_project(self):
 		if self.project:
@@ -1238,24 +1238,27 @@ class SalesInvoice(SellingController):
 				self.status = 'Draft'
 			return
 
+		precision = self.precision("outstanding_amount")
+		outstanding_amount = flt(self.outstanding_amount, precision)
+
 		if not status:
 			if self.docstatus == 2:
 				status = "Cancelled"
 			elif self.docstatus == 1:
-				if flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
+				if outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
 					self.status = "Overdue and Discounted"
-				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()):
+				elif outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()):
 					self.status = "Overdue"
-				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
+				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
 					self.status = "Unpaid and Discounted"
-				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
+				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()):
 					self.status = "Unpaid"
 				#Check if outstanding amount is 0 due to credit note issued against invoice
-				elif flt(self.outstanding_amount) <= 0 and self.is_return == 0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+				elif outstanding_amount <= 0 and self.is_return == 0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
 					self.status = "Credit Note Issued"
 				elif self.is_return == 1:
 					self.status = "Return"
-				elif flt(self.outstanding_amount)<=0:
+				elif outstanding_amount <=0:
 					self.status = "Paid"
 				else:
 					self.status = "Submitted"
