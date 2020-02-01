@@ -106,7 +106,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			group_by_field, subtotal_display_field = get_group_by_and_display_fields(filters)
 			data, prev_group_by_value = add_total_row(data, filters, prev_group_by_value, d, total_row_map,
 				group_by_field, subtotal_display_field, grand_total)
-			update_total_row(row, total_row_map, d.get(group_by_field, ''), tax_columns)
+			add_sub_total_row(row, total_row_map, d.get(group_by_field, ''), tax_columns)
 
 		data.append(row)
 
@@ -565,10 +565,10 @@ def add_total_row(data, filters, prev_group_by_value, item, total_row_map,
 def get_display_value(filters, group_by_field, item):
 	if filters.get('group_by') == 'Item':
 		if item.get('item_code') != item.get('item_name'):
-			value =  item.get('item_code') + "<br><br>" + \
-			"<span style='font-weight: normal'>" + item.get('item_name') + "</span>"
+			value =  cstr(item.get('item_code')) + "<br><br>" + \
+			"<span style='font-weight: normal'>" + cstr(item.get('item_name')) + "</span>"
 		else:
-			value =  cstr(item.get('item_code'))
+			value =  item.get('item_code', '')
 	elif filters.get('group_by') in ('Customer', 'Supplier'):
 		party = frappe.scrub(filters.get('group_by'))
 		if item.get(party) != item.get(party+'_name'):
@@ -594,7 +594,7 @@ def get_group_by_and_display_fields(filters):
 
 	return group_by_field, subtotal_display_field
 
-def update_total_row(item, total_row_map, group_by_value, tax_columns):
+def add_sub_total_row(item, total_row_map, group_by_value, tax_columns):
 	total_row = total_row_map.get(group_by_value)
 	total_row['stock_qty'] += item['stock_qty']
 	total_row['amount'] += item['amount']
