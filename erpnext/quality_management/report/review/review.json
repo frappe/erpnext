@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2020-01-26 20:14:45.354719",
+ "modified": "2020-02-01 11:03:23.816448",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Review",
@@ -20,6 +20,9 @@
  "roles": [
   {
    "role": "System Manager"
+  },
+  {
+   "role": "Quality Manager"
   }
  ]
 }
