@@ -307,14 +307,15 @@ class SellingController(StockController):
 			if so and so_item_rows:
 				sales_order = frappe.get_doc("Sales Order", so)
 
-				if sales_order.status in ["Closed", "Cancelled"]:
+				if sales_order.status in ["Closed", "Cancelled"] and not frappe.flags.ignored_closed_or_disabled:
 					frappe.throw(_("{0} {1} is cancelled or closed").format(_("Sales Order"), so),
 						frappe.InvalidStatusError)
 
 				sales_order.update_reserved_qty(so_item_rows)
 
 	def update_stock_ledger(self):
-		self.update_reserved_qty()
+		if not frappe.flags.do_not_update_reserved_qty:
+			self.update_reserved_qty()
 
 		sl_entries = []
 		for d in self.get_item_list():

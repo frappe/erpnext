@@ -486,7 +486,8 @@ class BuyingController(StockController):
 					frappe.get_meta(item_row.doctype).get_label(fieldname), item_row['item_code'])))
 
 	def update_stock_ledger(self, allow_negative_stock=False, via_landed_cost_voucher=False):
-		self.update_ordered_and_reserved_qty()
+		if not frappe.flags.do_not_update_reserved_qty:
+			self.update_ordered_and_reserved_qty()
 
 		sl_entries = []
 		stock_items = self.get_stock_items()
@@ -547,7 +548,7 @@ class BuyingController(StockController):
 			if po and po_item_rows:
 				po_obj = frappe.get_doc("Purchase Order", po)
 
-				if po_obj.status in ["Closed", "Cancelled"]:
+				if po_obj.status in ["Closed", "Cancelled"] and not frappe.flags.ignored_closed_or_disabled:
 					frappe.throw(_("{0} {1} is cancelled or closed").format(_("Purchase Order"), po),
 						frappe.InvalidStatusError)
 

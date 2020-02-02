@@ -241,3 +241,94 @@ def repost_gle_for_stock_transactions(posting_date=None, posting_time=None, for_
 	update_gl_entries_after(posting_date, posting_time, for_warehouses=for_warehouses)
 
 	frappe.db.auto_commit_on_many_writes = 0
+
+def repost_all_stock_vouchers():
+	import datetime
+	import os
+	import json
+
+	frappe.flags.ignored_closed_or_disabled = 1
+	frappe.flags.do_not_update_reserved_qty = 1
+	frappe.db.auto_commit_on_many_writes = 1
+
+	print("Enabling Allow Negative Stock")
+	frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+
+	filename = "repost_all_stock_vouchers_checkpoint.json"
+	if not os.path.isfile(filename):
+		print("No checkpoint found")
+		print("Updating Purchase Valuation Rates")
+		precs = frappe.db.sql("select 'Purchase Receipt' as doctype, name from `tabPurchase Receipt` where docstatus=1")
+		pinvs = frappe.db.sql("select 'Purchase Invoice' as doctype, name from `tabPurchase Invoice` where docstatus=1")
+		for doctype, name in precs + pinvs:
+			doc = frappe.get_doc(doctype, name)
+
+			if doc.doctype == "Purchase Receipt":
+				doc.set_billed_valuation_amounts()
+
+			doc.set_landed_cost_voucher_amount()
+			doc.update_valuation_rate("items")
+
+			for d in doc.items:
+				d.db_update()
+
+			doc.clear_cache()
+
+		frappe.db.commit()
+
+		print("Getting Stock Vouchers List")
+		vouchers = frappe.db.sql("""select distinct voucher_type, voucher_no
+			from `tabStock Ledger Entry` sle
+			order by posting_date, posting_time, name""")
+
+		print("Deleting SLEs")
+		frappe.db.sql("delete from `tabStock Ledger Entry`")
+
+		print("Deleting GLEs")
+		for voucher_type, voucher_no in vouchers:
+			frappe.db.sql("""delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
+		print()
+
+		frappe.db.commit()
+	else:
+		print("Checkpoint found")
+		with open(filename, "r") as f:
+			vouchers = json.loads(f.read())
+
+	start_time = datetime.datetime.now()
+	print("Starting at: {0}".format(start_time))
+
+	i = 0
+	for voucher_type, voucher_no in vouchers:
+		try:
+			doc = frappe.get_doc(voucher_type, voucher_no)
+			if voucher_type == "Stock Entry":
+				doc.calculate_rate_and_amount()
+			elif voucher_type=="Purchase Receipt" and doc.is_subcontracted == "Yes":
+				doc.validate()
+
+			doc.update_stock_ledger()
+			doc.make_gl_entries(repost_future_gle=False)
+
+			frappe.db.commit()
+			i += 1
+			doc.clear_cache()
+
+			now_time = datetime.datetime.now()
+			total_duration = now_time - start_time
+			repost_rate = flt(i) / total_duration.seconds if total_duration.seconds else "Inf"
+			remaining_duration = datetime.timedelta(seconds=(len(vouchers) - i) / flt(repost_rate)) if flt(repost_rate) else "N/A"
+			print("{0} / {1}: Elapsed Time: {4} | Rate: {5:.2f} Vouchers/Sec | ETA: {6} | {2} {3}".format(i, len(vouchers), voucher_type, voucher_no,
+				total_duration, flt(repost_rate), remaining_duration))
+		except:
+			with open(filename, "w") as f:
+				print("Creating checkpoint")
+				f.write(json.dumps(vouchers[i:]))
+
+			frappe.db.rollback()
+			raise
+
+	print("Disabling Allow Negative Stock")
+	frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 0)
+	frappe.db.commit()
+	frappe.db.auto_commit_on_many_writes = 0

@@ -462,6 +462,9 @@ def get_pyt_term_template(party_name, party_type, company=None):
 	return template
 
 def validate_party_frozen_disabled(party_type, party_name):
+	if frappe.flags.ignored_closed_or_disabled:
+		return
+
 	if party_type and party_name:
 		if party_type in ("Customer", "Supplier", "Letter of Credit"):
 			party = frappe.get_cached_value(party_type, party_name, ["is_frozen", "disabled"], as_dict=True)
