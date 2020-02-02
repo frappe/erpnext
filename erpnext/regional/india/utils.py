@@ -358,7 +358,7 @@ def calculate_hra_exemption_for_period(doc):
 
 def get_ewb_data(dt, dn):
 	if dt != 'Sales Invoice':
-		frappe.throw(_('e-Way Bill JSON can only be generated from Sales Invoice'))
+		frappe.throw(_('E-Way Bill JSON can only be generated from Sales Invoice'))
 
 	dn = dn.split(',')
 
@@ -381,7 +381,7 @@ def get_ewb_data(dt, dn):
 		elif doc.gst_category in ['Overseas', 'Deemed Export']:
 			data.subSupplyType = 3
 		else:
-			frappe.throw(_('Unsupported GST Category for e-Way Bill JSON generation'))
+			frappe.throw(_('Unsupported GST Category for E-Way Bill JSON generation'))
 
 		data.docType = 'INV'
 		data.docDate = frappe.utils.formatdate(doc.posting_date, 'dd/mm/yyyy')
@@ -537,10 +537,10 @@ def get_item_list(data, doc):
 
 def validate_sales_invoice(doc):
 	if doc.docstatus != 1:
-		frappe.throw(_('e-Way Bill JSON can only be generated from submitted document'))
+		frappe.throw(_('E-Way Bill JSON can only be generated from submitted document'))
 
 	if doc.is_return:
-		frappe.throw(_('e-Way Bill JSON cannot be generated for Sales Return as of now'))
+		frappe.throw(_('E-Way Bill JSON cannot be generated for Sales Return as of now'))
 
 	if doc.ewaybill:
 		frappe.throw(_('e-Way Bill already exists for this document'))
@@ -550,7 +550,7 @@ def validate_sales_invoice(doc):
 
 	for fieldname in reqd_fields:
 		if not doc.get(fieldname):
-			frappe.throw(_('{} is required to generate e-Way Bill JSON').format(
+			frappe.throw(_('{} is required to generate E-Way Bill JSON').format(
 				doc.meta.get_label(fieldname)
 			))
 
