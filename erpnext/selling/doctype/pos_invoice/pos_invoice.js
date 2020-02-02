@@ -63,20 +63,6 @@ erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend(
 			}, function() {
 				me.apply_pricing_rule();
 			});
-
-		// if(this.frm.doc.customer) {
-		// 	frappe.call({
-		// 		"method": "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_loyalty_programs",
-		// 		"args": {
-		// 			"customer": this.frm.doc.customer
-		// 		},
-		// 		callback: function(r) {
-		// 			if(r.message && r.message.length) {
-		// 				select_loyalty_program(me.frm, r.message);
-		// 			}
-		// 		}
-		// 	});
-		// }
 	},
 
 	amount: function(){

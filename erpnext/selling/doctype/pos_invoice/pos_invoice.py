@@ -11,7 +11,7 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
-	get_loyalty_program_details_with_points, get_loyalty_details, validate_loyalty_points
+	get_loyalty_program_details_with_points, validate_loyalty_points
 from erpnext.selling.doctype.pos_invoice.pos import update_multi_mode_option
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, set_account_for_mode_of_payment
@@ -23,7 +23,8 @@ class POSInvoice(SalesInvoice):
 		super(POSInvoice, self).__init__(*args, **kwargs)
 	
 	def validate(self):
-		super(POSInvoice, self).validate()
+		# run on validate method of selling controller
+		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
 		self.validate_pos_paid_amount()
 		self.validate_pos_return()
@@ -40,6 +41,11 @@ class POSInvoice(SalesInvoice):
 				self.verify_payment_amount_is_positive()
 			if self.is_return:
 				self.verify_payment_amount_is_negative()
+		
+		if self.redeem_loyalty_points:
+			lp = frappe.get_doc('Loyalty Program', self.loyalty_program)
+			self.loyalty_redemption_account = lp.expense_account if not self.loyalty_redemption_account else self.loyalty_redemption_account
+			self.loyalty_redemption_cost_center = lp.cost_center if not self.loyalty_redemption_cost_center else self.loyalty_redemption_cost_center
 
 		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points:
 			validate_loyalty_points(self, self.loyalty_points)
@@ -48,28 +54,21 @@ class POSInvoice(SalesInvoice):
 		set_account_for_mode_of_payment(self)
 
 	def on_submit(self):
-		pass
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
-		# if not self.is_return and self.loyalty_program:
-		# 	self.make_loyalty_point_entry()
-		# elif self.is_return and self.return_against and self.loyalty_program:
-		# 	against_si_doc = frappe.get_doc("POS Invoice", self.return_against)
-		# 	against_si_doc.delete_loyalty_point_entry()
-		# 	against_si_doc.make_loyalty_point_entry()
-		# if self.redeem_loyalty_points and self.loyalty_points:
-		# 	self.apply_loyalty_points()
+		if self.loyalty_program:
+			self.make_loyalty_point_entry()
+
+		if self.redeem_loyalty_points and self.loyalty_points:
+			self.apply_loyalty_points()
 	
 	def on_cancel(self):
 		# run on cancel method of selling controller
 		super(SalesInvoice, self).on_cancel()
-		# if not self.is_return and self.loyalty_program:
-		# 	self.delete_loyalty_point_entry()
-		# elif self.is_return and self.return_against and self.loyalty_program:
-		# 	against_si_doc = frappe.get_doc("Sales Invoice", self.return_against)
-		# 	against_si_doc.delete_loyalty_point_entry()
-		# 	against_si_doc.make_loyalty_point_entry()
+		if self.loyalty_program:
+			self.delete_loyalty_point_entry()
 	
 	def on_update(self):
+		# return process?
 		pass
 
 	def validate_pos_paid_amount(self):

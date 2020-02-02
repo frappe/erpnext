@@ -152,20 +152,89 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				get_item_details: (item_code) => {
 					return this.items.get(item_code);
 				},
-				get_loyalty_details: () => {
-					var me = this;
+				get_customer_loyalty_programs: (customer) => {
+					if (customer) {
+						frappe.call({
+							method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_loyalty_programs",
+							args: {
+								"customer": customer,
+							},
+							callback: (r) => {
+								if (r.message) {
+									if (r.message.length == 1) {
+										// set the only loyalty_program found
+										this.frm.set_value('loyalty_program', r.message[0])
+									}
+									// reset the loyalty_program_field to handle case for consequent customer changes
+									this.wrapper.find('.lp-link-field').empty();
+									// make loyalty program selection field for multiple programs found
+									let for_selection = r.message.length > 1 ? true : false;
+									this.cart.events.show_loyalty_program_field(for_selection, r.message);
+								}
+							}
+						});
+					}
+				},
+				setup_loyalty_program_fields: (customer) => {
+					if (!customer && this.loyalty_program_field) {
+						// if customer has been set before and is now been unset
+						// then remove loyalty_program_field
+						this.cart.events.set_loyalty_details({
+							loyalty_points: 0,
+							loyalty_program: '',
+							expense_account: '',
+							cost_center: ''
+						}, false)
+					} else {
+						// get loyalty programs for case when 2 or more are available
+						this.cart.events.get_customer_loyalty_programs(customer);
+					}
+				},
+				show_loyalty_program_field: (for_selection, programs) => {
+					let query = {};
+					if (for_selection) {
+						query = { 
+							filters: { name: ['in', programs] }
+						};
+					}
+					this.loyalty_program_field = frappe.ui.form.make_control({
+						df: {
+							fieldtype: 'Link',
+							label: 'Loyalty Program',
+							fieldname: 'loyalty_program',
+							options: 'Loyalty Program',
+							reqd: for_selection ? 1 : 0,
+							read_only: for_selection ? 0 : 1,
+							get_query() {
+								return query
+							},
+							onchange: () => {
+								let loyalty_program = this.loyalty_program_field.get_value();
+								if (loyalty_program && loyalty_program.length) {
+									this.cart.events.get_loyalty_details(loyalty_program);
+									this.frm.set_value('loyalty_program', loyalty_program)
+								}
+							}
+						},
+						parent: this.wrapper.find('.lp-link-field'),
+						render_input: true
+					});
+					this.loyalty_program_field.set_value(this.frm.doc.loyalty_program);
+				},
+				get_loyalty_details: (loyalty_program) => {
 					if (this.frm.doc.customer) {
 						frappe.call({
-							method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details",
+							method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points",
 							args: {
-								"customer": me.frm.doc.customer,
-								"expiry_date": me.frm.doc.posting_date,
-								"company": me.frm.doc.company,
+								"customer": this.frm.doc.customer,
+								"loyalty_program": loyalty_program,
+								"expiry_date": this.frm.doc.posting_date,
+								"company": this.frm.doc.company,
 								"silent": true
 							},
-							callback: function(r) {
-								if (r.message.loyalty_program && r.message.loyalty_points) {
-									me.cart.events.set_loyalty_details(r.message, true);
+							callback: (r) => {
+								if (r.message.loyalty_program) {
+									this.cart.events.set_loyalty_details(r.message, true);
 								}
 								if (!r.message.loyalty_program) {
 									var loyalty_details = {
@@ -174,7 +243,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 										expense_account: '',
 										cost_center: ''
 									}
-									me.cart.events.set_loyalty_details(loyalty_details, false);
+									this.cart.events.set_loyalty_details(loyalty_details, false);
 								}
 							}
 						});
@@ -183,14 +252,22 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				set_loyalty_details: (details, view_status) => {
 					if (view_status) {
 						this.cart.available_loyalty_points.$wrapper.removeClass("hide");
+						this.loyalty_program_field.$wrapper.removeClass("hide");
 					} else {
 						this.cart.available_loyalty_points.$wrapper.addClass("hide");
+						this.loyalty_program_field.$wrapper.addClass("hide");
 					}
 					this.cart.available_loyalty_points.set_value(details.loyalty_points);
 					this.cart.available_loyalty_points.refresh_input();
 					this.frm.set_value("loyalty_program", details.loyalty_program);
 					this.frm.set_value("loyalty_redemption_account", details.expense_account);
 					this.frm.set_value("loyalty_redemption_cost_center", details.cost_center);
+
+					if (this.loyalty_program_field.get_value() != details.loyalty_program) {
+						// to avoid loop, set_loyalty_details > on_change > get_loyalty_details > set_loyalty_details
+						this.loyalty_program_field.set_value(details.loyalty_program);
+						this.loyalty_program_field.refresh_input();
+					}
 				}
 			}
 		});
@@ -411,22 +488,23 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			frm: this.frm,
 			events: {
 				submit_form: () => {
-					this.submit_sales_invoice();
+					this.submit_pos_invoice();
 				}
 			}
 		});
 	}
 
-	submit_sales_invoice() {
+	submit_pos_invoice() {
+		console.log(this.frm.doc.loyalty_program)
 		this.frm.savesubmit()
 			.then((r) => {
 				if (r && r.doc) {
 					this.frm.doc.docstatus = r.doc.docstatus;
+					console.log(r.doc.loyalty_program)
 					frappe.show_alert({
 						indicator: 'green',
-						message: __(`Sales invoice ${r.doc.name} created succesfully`)
+						message: __(`POS invoice ${r.doc.name} created succesfully`)
 					});
-
 					this.toggle_editing();
 					this.set_form_action();
 					this.set_primary_action_in_modal();
@@ -762,7 +840,8 @@ class POSCart {
 				<div class="row">
 					<div class="number-pad-container col-sm-6"></div>
 					<div class="col-sm-6 loyalty-program-section">
-						<div class="loyalty-program-field"> </div>
+						<div class="lp-link-field"> </div>
+						<div class="lp-points-field"> </div>
 					</div>
 				</div>
 			</div>
@@ -775,12 +854,6 @@ class POSCart {
 		this.$discount_amount = this.wrapper.find('.discount-amount');
 		this.$grand_total = this.wrapper.find('.grand-total');
 		this.$qty_total = this.wrapper.find('.quantity-total');
-		// this.$loyalty_button = this.wrapper.find('.loyalty-button');
-
-		// this.$loyalty_button.on('click', () => {
-		// 	this.loyalty_button.show();
-		// })
-
 		this.toggle_taxes_and_totals(false);
 		this.$grand_total.on('click', () => {
 			this.toggle_taxes_and_totals();
@@ -963,8 +1036,9 @@ class POSCart {
 					}
 				},
 				onchange: () => {
-					this.events.on_customer_change(this.customer_field.get_value());
-					this.events.get_loyalty_details();
+					let customer = this.customer_field.get_value()
+					this.events.on_customer_change(customer);
+					this.events.setup_loyalty_program_fields(customer);
 				}
 			},
 			parent: this.wrapper.find('.customer-field'),
@@ -1044,7 +1118,7 @@ class POSCart {
 				read_only: 1,
 				fieldname: 'available_loyalty_points'
 			},
-			parent: this.wrapper.find('.loyalty-program-field')
+			parent: this.wrapper.find('.lp-points-field')
 		});
 		this.available_loyalty_points.set_value(this.frm.doc.loyalty_points);
 	}
