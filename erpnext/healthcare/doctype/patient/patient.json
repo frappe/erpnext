@@ -81,10 +81,11 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "label": "Patient ID",
+   "label": "Series",
    "options": "HLC-PAT-.YYYY.-",
    "print_hide": 1,
-   "report_hide": 1
+   "report_hide": 1,
+   "set_only_once": 1
   },
   {
    "bold": 1,
@@ -362,7 +363,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2020-01-29 13:56:10.174897",
+ "modified": "2020-01-31 17:50:59.797789",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
