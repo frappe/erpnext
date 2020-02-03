@@ -7,8 +7,8 @@ frappe.query_reports["Territory wise Sales"] = {
 	"breadcrumb":"Selling",
 	"filters": [
 		{
-			fieldname:"expected_closing_date",
-			label: __("Expected Closing Date"),
+			fieldname:"transaction_date",
+			label: __("Transaction Date"),
 			fieldtype: "DateRange",
 			default: [frappe.datetime.add_months(frappe.datetime.get_today(),-1), frappe.datetime.get_today()],
 		},
