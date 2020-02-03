@@ -88,7 +88,7 @@ class DeliveryTrip(Document):
 			note_doc.save()
 
 		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
-		frappe.msgprint(_("Delivery Notes {0} updated".format(", ".join(delivery_notes))))
+		frappe.msgprint(_("Delivery Notes {0} updated").format(", ".join(delivery_notes)))
 
 	def process_route(self, optimize):
 		"""

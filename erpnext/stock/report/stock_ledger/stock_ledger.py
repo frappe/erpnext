@@ -38,10 +38,13 @@ def execute(filters=None):
 
 			sle.update({
 				"qty_after_transaction": actual_qty,
-				"stock_value": stock_value,
-				"in_qty": max(sle.actual_qty, 0),
-				"out_qty": min(sle.actual_qty, 0)
+				"stock_value": stock_value
 			})
+
+		sle.update({
+			"in_qty": max(sle.actual_qty, 0),
+			"out_qty": min(sle.actual_qty, 0)
+		})
 
 		# get the name of the item that was produced using this item
 		if sle.voucher_type == "Stock Entry":

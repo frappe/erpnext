@@ -185,7 +185,7 @@ def add_activity(course, content_type, content, program):
 
 	student = get_current_student()
 	if not student:
-		return frappe.throw(_("Student with email {0} does not exist".format(frappe.session.user)), frappe.DoesNotExistError)
+		return frappe.throw(_("Student with email {0} does not exist").format(frappe.session.user), frappe.DoesNotExistError)
 
 	enrollment = get_or_create_course_enrollment(course, program)
 	if content_type == 'Quiz':
@@ -220,7 +220,7 @@ def get_quiz(quiz_name, course):
 		quiz = frappe.get_doc("Quiz", quiz_name)
 		questions = quiz.get_questions()
 	except:
-		frappe.throw(_("Quiz {0} does not exist".format(quiz_name)))
+		frappe.throw(_("Quiz {0} does not exist").format(quiz_name))
 		return None
 
 	questions = [{
@@ -347,7 +347,7 @@ def get_or_create_course_enrollment(course, program):
 	if not course_enrollment:
 		program_enrollment = get_enrollment('program', program, student.name)
 		if not program_enrollment:
-			frappe.throw(_("You are not enrolled in program {0}".format(program)))
+			frappe.throw(_("You are not enrolled in program {0}").format(program))
 			return
 		return student.enroll_in_course(course_name=course, program_enrollment=get_enrollment('program', program, student.name))
 	else:
