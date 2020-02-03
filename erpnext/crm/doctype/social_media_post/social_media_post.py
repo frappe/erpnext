@@ -23,3 +23,15 @@ class SocialMediaPost(Document):
 		if self.linkedin:
 			linkedin = frappe.get_doc("LinkedIn Settings")
 			linkedin.post(self.text, self.image)
+		
+		self.status = "Posted"
+
+def process_scheduled_social_media_posts():
+	import datetime
+	posts = frappe.get_list("Social Media Post", filters={"status": "Scheduled"}, fields= ["name", "scheduled_time"])
+	start = frappe.utils.now_datetime()
+	end = start + datetime.timedelta(minutes=59)
+	for post in posts:
+		post_time = frappe.utils.get_datetime(post.scheduled_time)
+		if post_time > start and post_time <= end:
+			post.post()
