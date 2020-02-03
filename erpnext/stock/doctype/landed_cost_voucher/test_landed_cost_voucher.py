@@ -201,7 +201,7 @@ class TestLandedCostVoucher(unittest.TestCase):
 		pr.load_from_db()
 
 		self.assertEqual(pr.items[0].landed_cost_voucher_amount, 100)
-		self.assertEqual(pr.items[0].landed_cost_voucher_amount, 100)
+		self.assertEqual(pr.items[1].landed_cost_voucher_amount, 100)
 
 def make_landed_cost_voucher(** args):
 	args = frappe._dict(args)
