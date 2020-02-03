@@ -6,26 +6,15 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from erpnext.hr.doctype.salary_structure.test_salary_structure import make_employee
+from erpnext.loan_management.doctype.loan.test_loan import create_loan_type, create_loan_accounts
 
 class TestLoanApplication(unittest.TestCase):
 	def setUp(self):
-		self.create_loan_type()
-		self.applicant = make_employee("kate_loan@loan.com")
+		create_loan_accounts()
+		create_loan_type("Home Loan", 500000, 9.2, 0, 1, 0, 'Cash', 'Payment Account - _TC', 'Loan Account - _TC',
+			'Interest Income Account - _TC', 'Penalty Income Account - _TC', 'Repay Over Number of Periods', 18)
+		self.applicant = make_employee("kate_loan@loan.com", "_Test Company")
 		self.create_loan_application()
-
-	def create_loan_type(self):
-		if not frappe.db.get_value("Loan Type", "Home Loan"):
-			loan_type = frappe.get_doc({
-				"doctype": "Loan Type",
-				"loan_name": "Home Loan",
-				"is_term_loan": 1,
-				"maximum_loan_amount": 500000,
-				"rate_of_interest": 9.2,
-				"repayment_method": "Repay Over Number of Periods",
-				"repayment_periods": 18
-			}).insert()
-
-			loan_type.submit()
 
 	def create_loan_application(self):
 		if not frappe.db.get_value("Loan Application", {"applicant":self.applicant}, "name"):
@@ -36,7 +25,8 @@ class TestLoanApplication(unittest.TestCase):
 				"rate_of_interest": 9.2,
 				"loan_amount": 250000,
 				"repayment_method": "Repay Over Number of Periods",
-				"repayment_periods": 18
+				"repayment_periods": 18,
+				"company": "_Test Company"
 			})
 			loan_application.insert()
 

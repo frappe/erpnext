@@ -1,4 +1,6 @@
 {
+ "actions": [],
+ "autoname": "LM-PLA-.#####",
  "creation": "2019-09-19 06:08:12.363640",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -40,7 +42,8 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-10-10 02:29:24.796845",
+ "links": [],
+ "modified": "2020-02-01 08:14:33.978636",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Process Loan Interest Accrual",

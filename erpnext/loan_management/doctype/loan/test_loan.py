@@ -364,7 +364,8 @@ def create_loan_accounts():
 		}).insert(ignore_permissions=True)
 
 def create_loan_type(loan_name, maximum_loan_amount, rate_of_interest, penalty_interest_rate=None, is_term_loan=None, grace_period_in_days=None,
-	mode_of_payment=None, payment_account=None, loan_account=None, interest_income_account=None, penalty_income_account=None):
+	mode_of_payment=None, payment_account=None, loan_account=None, interest_income_account=None, penalty_income_account=None,
+	repayment_method=None, repayment_periods=None):
 
 	if not frappe.db.exists("Loan Type", loan_name):
 		loan_type = frappe.get_doc({
@@ -381,6 +382,8 @@ def create_loan_type(loan_name, maximum_loan_amount, rate_of_interest, penalty_i
 			"loan_account": loan_account,
 			"interest_income_account": interest_income_account,
 			"penalty_income_account": penalty_income_account,
+			"repayment_method": repayment_method,
+			"repayment_periods": repayment_periods
 		}).insert()
 
 		loan_type.submit()

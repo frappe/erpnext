@@ -78,7 +78,10 @@ class LoanDisbursement(AccountsController):
 				"against_voucher_type": "Loan",
 				"against_voucher": self.against_loan,
 				"remarks": "Against Loan:" + self.against_loan,
-				"cost_center": self.cost_center
+				"cost_center": self.cost_center,
+				"party_type": self.applicant_type,
+				"party": self.applicant,
+				"posting_date": self.disbursement_date
 			})
 		)
 
@@ -91,7 +94,10 @@ class LoanDisbursement(AccountsController):
 				"against_voucher_type": "Loan",
 				"against_voucher": self.against_loan,
 				"remarks": "Against Loan:" + self.against_loan,
-				"cost_center": self.cost_center
+				"cost_center": self.cost_center,
+				"party_type": self.applicant_type,
+				"party": self.applicant,
+				"posting_date": self.disbursement_date
 			})
 		)
 

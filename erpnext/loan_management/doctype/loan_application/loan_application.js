@@ -31,17 +31,23 @@ frappe.ui.form.on('Loan Application', {
 	add_toolbar_buttons: function(frm) {
 		if (frm.doc.status == "Approved") {
 
-			frappe.db.get_value("Loan Security Pledge", {"loan_application": frm.doc.name}, "name", (r) => {
+			frappe.db.get_value("Loan Security Pledge", {"loan_application": frm.doc.name, "docstatus": 1}, "name", (r) => {
 				if (!r) {
 					frm.add_custom_button(__('Loan Security Pledge'), function() {
 						frm.trigger('create_loan_security_pledge')
 					},__('Create'))
 				}
-			})
+			});
 
-			frm.add_custom_button(__('Loan'), function() {
-				frm.trigger('create_loan');
-			},__('Create'));
+			frappe.db.get_value("Loan", {"loan_application": frm.doc.name, "docstatus": 1}, "name", (r) => {
+				if (!r) {
+					frm.add_custom_button(__('Loan'), function() {
+						frm.trigger('create_loan')
+					},__('Create'))
+				} else {
+					frm.set_df_property('status', 'read_only', 1);
+				}
+			});
 		}
 	},
 	create_loan: function(frm) {

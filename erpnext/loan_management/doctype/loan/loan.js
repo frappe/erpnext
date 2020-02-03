@@ -62,7 +62,9 @@ frappe.ui.form.on('Loan', {
 				frm.add_custom_button(__('Loan Disbursement'), function() {
 					frm.trigger("make_loan_disbursement");
 				},__('Create'));
-			} else if (["Disbursed", "Partially Disbursed"].includes(frm.doc.status) && (frm.doc.applicant_type == 'Member' || frm.doc.repay_from_salary == 0)) {
+			} 
+			
+			if (["Disbursed", "Partially Disbursed"].includes(frm.doc.status) && (!frm.doc.repay_from_salary)) {
 				frm.add_custom_button(__('Loan Repayment'), function() {
 					frm.trigger("make_repayment_entry");
 				},__('Create'));

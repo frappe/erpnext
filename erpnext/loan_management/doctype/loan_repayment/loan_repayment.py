@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import json
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, getdate
 from six import iteritems
 from frappe.model.document import Document
 from frappe.utils import date_diff, add_days, getdate, add_months, get_first_day, get_datetime
@@ -149,7 +149,10 @@ class LoanRepayment(AccountsController):
 				"against_voucher_type": "Loan",
 				"against_voucher": self.against_loan,
 				"remarks": "Against Loan:" + self.against_loan,
-				"cost_center": self.cost_center
+				"cost_center": self.cost_center,
+				"party_type": self.applicant_type,
+				"party": self.applicant,
+				"posting_date": getdate(self.posting_date)
 			})
 		)
 
@@ -162,7 +165,10 @@ class LoanRepayment(AccountsController):
 				"against_voucher_type": "Loan",
 				"against_voucher": self.against_loan,
 				"remarks": "Against Loan:" + self.against_loan,
-				"cost_center": self.cost_center
+				"cost_center": self.cost_center,
+				"party_type": self.applicant_type,
+				"party": self.applicant,
+				"posting_date": getdate(self.posting_date)
 			})
 		)
 
@@ -176,7 +182,10 @@ class LoanRepayment(AccountsController):
 				"against_voucher_type": "Loan",
 				"against_voucher": self.against_loan,
 				"remarks": "Against Loan:" + self.against_loan,
-				"cost_center": self.cost_center
+				"cost_center": self.cost_center,
+				"party_type": self.applicant_type,
+				"party": self.applicant,
+				"posting_date": getdate(self.posting_date)
 			})
 		)
 
@@ -191,7 +200,8 @@ class LoanRepayment(AccountsController):
 				"against_voucher_type": "Loan",
 				"against_voucher": self.against_loan,
 				"remarks": "Against Loan:" + self.against_loan,
-				"cost_center": self.cost_center
+				"cost_center": self.cost_center,
+				"posting_date": getdate(self.posting_date)
 			})
 		)
 

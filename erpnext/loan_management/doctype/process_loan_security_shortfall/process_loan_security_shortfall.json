@@ -1,4 +1,6 @@
 {
+ "actions": [],
+ "autoname": "LM-PLS-.#####",
  "creation": "2019-09-19 06:43:26.742336",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -27,7 +29,8 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-11-16 13:57:58.554688",
+ "links": [],
+ "modified": "2020-02-01 08:14:05.845161",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Process Loan Security Shortfall",
