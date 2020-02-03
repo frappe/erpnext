@@ -79,7 +79,7 @@ def add_custom_roles_for_reports():
 def add_permissions():
 	for doctype in ('GST HSN Code', 'GST Settings'):
 		add_permission(doctype, 'All', 0)
-		for role in ('Accounts Manager', 'System Manager', 'Item Manager', 'Stock Mnager'):
+		for role in ('Accounts Manager', 'System Manager', 'Item Manager', 'Stock Manager'):
 			add_permission(doctype, role, 0)
 			update_permission_property(doctype, role, 0, 'write', 1)
 			update_permission_property(doctype, role, 0, 'create', 1)
