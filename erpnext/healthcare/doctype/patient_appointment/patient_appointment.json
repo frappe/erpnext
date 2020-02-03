@@ -19,7 +19,6 @@
   "get_procedure_from_encounter",
   "procedure_prescription",
   "service_unit",
-  "check_availability",
   "section_break_12",
   "practitioner",
   "department",
@@ -100,7 +99,7 @@
   {
    "fieldname": "procedure_template",
    "fieldtype": "Link",
-   "label": "Procedure",
+   "label": "Clinical Procedure Template",
    "options": "Clinical Procedure Template",
    "set_only_once": 1
   },
@@ -124,12 +123,6 @@
    "label": "Service Unit",
    "options": "Healthcare Service Unit",
    "set_only_once": 1
-  },
-  {
-   "depends_on": "eval:doc.__islocal",
-   "fieldname": "check_availability",
-   "fieldtype": "Button",
-   "label": "Check availability"
   },
   {
    "fieldname": "section_break_12",
@@ -289,7 +282,7 @@
   }
  ],
  "links": [],
- "modified": "2020-02-03 21:22:03.313138",
+ "modified": "2020-02-03 23:38:41.821141",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",
