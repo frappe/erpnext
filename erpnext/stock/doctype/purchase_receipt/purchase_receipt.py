@@ -620,7 +620,7 @@ def get_item_account_wise_additional_cost(purchase_document):
 	item_account_wise_cost = {}
 
 	for lcv in landed_cost_vouchers:
-		landed_cost_voucher_doc = frappe.get_cached_doc("Landed Cost Voucher", lcv.parent)
+		landed_cost_voucher_doc = frappe.get_doc("Landed Cost Voucher", lcv.parent)
 		based_on_field = frappe.scrub(landed_cost_voucher_doc.distribute_charges_based_on)
 		total_item_cost = 0
 
