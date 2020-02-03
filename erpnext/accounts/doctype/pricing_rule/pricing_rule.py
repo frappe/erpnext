@@ -56,12 +56,12 @@ class PricingRule(Document):
 
 		if not self.selling and self.applicable_for in ["Customer", "Customer Group",
 				"Territory", "Sales Partner", "Campaign"]:
-			throw(_("Selling must be checked, if Applicable For is selected as {0}"
-				.format(self.applicable_for)))
+			throw(_("Selling must be checked, if Applicable For is selected as {0}")
+				.format(self.applicable_for))
 
 		if not self.buying and self.applicable_for in ["Supplier", "Supplier Group"]:
-			throw(_("Buying must be checked, if Applicable For is selected as {0}"
-				.format(self.applicable_for)))
+			throw(_("Buying must be checked, if Applicable For is selected as {0}")
+				.format(self.applicable_for))
 
 	def validate_min_max_qty(self):
 		if self.min_qty and self.max_qty and flt(self.min_qty) > flt(self.max_qty):
@@ -243,7 +243,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 
 			if pricing_rule.coupon_code_based==1 and args.coupon_code==None:
 				return item_details
-				
+
 			if not pricing_rule.validate_applied_rule:
 				if pricing_rule.price_or_product_discount == "Price":
 					apply_price_discount_rule(pricing_rule, item_details, args)
