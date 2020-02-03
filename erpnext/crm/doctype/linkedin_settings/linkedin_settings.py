@@ -40,13 +40,13 @@ class LinkedInSettings(Document):
 		
 		try:
 			r = requests.post(url, data=body, headers=headers)
+			r.raise_for_status()
 		except Exception as e:
 			print(e)
-		if r.status_code == 200:
-			res = frappe.parse_json(r.content.decode())
-			self.access_token = res["access_token"]
-			self.save()
-			self.get_me()
+		res = frappe.parse_json(r.content.decode())
+		self.access_token = res["access_token"]
+		self.save()
+		self.get_me()
 
 	def upload_image(self, media):
 		media = get_file_path(media)
@@ -78,7 +78,6 @@ class LinkedInSettings(Document):
 			return None
 		return asset
 
-
 	def get_me(self):
 		headers = {
 			"Authorization": "Bearer {}".format(self.access_token)
@@ -86,12 +85,18 @@ class LinkedInSettings(Document):
 		url = "https://api.linkedin.com/v2/me"
 		try:
 			r = requests.get(url, headers=headers)
+			r.raise_for_status()
 		except Exception as e:
-			print(e)
-		if r.status_code == 200:
-			response = frappe.parse_json(r.content.decode())
-			self.person_urn = response["id"]
-			self.save()
+			frappe.throw(e)
+		response = frappe.parse_json(r.content.decode())
+		self.person_urn = response["id"]
+		self.save()
+		
+		frappe.local.response["type"] = "redirect"
+		frappe.local.response["location"] = "/desk#Form/{0}".format(quote("LinkedIn Settings"))
+
+		frappe.msgprint(_("LinkedIn Settings has been configured."))
+
 
 	def post(self, text, media=None):
 		if not media:
@@ -137,11 +142,9 @@ class LinkedInSettings(Document):
 		}
 		try:
 			r = requests.post(url, json=body, headers=headers)
+			r.raise_for_status()
 		except Exception as e:
-			print(e)
-		print("Posted")
-		print(r.headers)
-		print(r.content)
+			frappe.throw(e)
 		return r
 
 @frappe.whitelist()

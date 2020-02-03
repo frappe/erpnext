@@ -53,14 +53,21 @@ class TwitterSettings(Document):
 			self.oauth_secret = response.get("oauth_token_secret")[0]
 			self.account_name = response.get("screen_name")[0]
 			self.save()
+			
+			frappe.local.response["type"] = "redirect"
+			frappe.local.response["location"] = "/desk#Form/{0}".format(quote("Twitter Settings"))
+
+			frappe.msgprint(_("Twitter Integration has been configured."))
+		else:
+			frappe.throw("Something Went Wrong. Please make sure your Consumer Key and Consumer Secret are correct")
 
 	def post(self, text, media=None):
 		if not media:
-			self.send_tweet(text)
+			return self.send_tweet(text)
 
 		if media:
 			media_id = self.upload_image(media)
-			self.send_tweet(text, media_id)
+			return self.send_tweet(text, media_id)
 	
 	def upload_image(self, media):
 		media = get_file_path(media)
@@ -149,14 +156,12 @@ class TwitterSettings(Document):
 			"status": text,
 			"media_ids": media_id
 		}
-
 		try :
 			r = requests.post(url, auth=oauth, params=params)
+			r.raise_for_status()
 		except Exception as e:
 			frappe.throw(e)
-			print(e)
-			return
-		print(r.content)
+		return r.json()["id_str"]
 
 @frappe.whitelist()
 def callback(oauth_token, oauth_verifier):
