@@ -29,6 +29,19 @@ frappe.ui.form.on('Patient Appointment', {
 				}
 			};
 		});
+
+		if (frm.is_new()) {
+			frm.page.set_primary_action(__('Check Availability'), function() {
+				if (!frm.doc.patient) {
+					frappe.throw(__('Please select a patient first'));
+				} else {
+					check_and_set_availability(frm);
+				}
+			});
+		} else {
+			frm.page.set_primary_action(__('Save'), () => frm.save());
+		}
+
 		if(frm.doc.patient){
 			frm.add_custom_button(__('Patient History'), function() {
 				frappe.route_options = {"patient": frm.doc.patient};
@@ -102,9 +115,6 @@ frappe.ui.form.on('Patient Appointment', {
 				frm.set_df_property("paid_amount", "reqd", 0);
 			}
 		});
-	},
-	check_availability: function(frm) {
-		check_and_set_availability(frm);
 	},
 	onload:function(frm){
 		if(frm.is_new()) {
