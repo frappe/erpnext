@@ -443,6 +443,9 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			"doctype": "Purchase Taxes and Charges",
 			"add_if_empty": True
 		},
+		"Payment Schedule": {
+			"doctype": "Payment Schedule"
+		}
 	}
 
 	if frappe.get_single("Accounts Settings").automatically_fetch_payment_terms == 1:
