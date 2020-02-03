@@ -292,8 +292,12 @@ var get_procedure_prescribed = function(frm){
 		frappe.call({
 			method:"erpnext.healthcare.doctype.patient_appointment.patient_appointment.get_procedure_prescribed",
 			args: {patient: frm.doc.patient},
-			callback: function(r){
-				show_procedure_templates(frm, r.message);
+			callback: function(r) {
+				if (r.message && r.message.length) {
+					show_procedure_templates(frm, r.message);
+				} else {
+					frappe.msgprint(__("No Prescribed Procedures found for the selected patient"));
+				}
 			}
 		});
 	}
