@@ -57,14 +57,26 @@ def get_data(filters=None):
 	sales_invoices = get_sales_invoice(sales_orders)
 
 	for territory in frappe.get_all("Territory"):
-		territory_opportunities = list(filter(lambda x: x.territory == territory.name, opportunities)) if opportunities and opportunities else []
-		t_opportunity_names = [t.name for t in territory_opportunities] if territory_opportunities else []
+		territory_opportunities = []
+		if opportunities:
+			territory_opportunities = list(filter(lambda x: x.territory == territory.name, opportunities))
+		t_opportunity_names = []
+		if territory_opportunities:
+			t_opportunity_names = [t.name for t in territory_opportunities] 
 
-		territory_quotations = list(filter(lambda x: x.opportunity in t_opportunity_names, quotations)) if t_opportunity_names and quotations else []
-		t_quotation_names = [t.name for t in territory_quotations] if territory_quotations else []
+		territory_quotations = []
+		if t_opportunity_names and quotations:
+			territory_quotations = list(filter(lambda x: x.opportunity in t_opportunity_names, quotations))
+		t_quotation_names = []
+		if territory_quotations:
+			t_quotation_names = [t.name for t in territory_quotations]
 
-		territory_orders = list(filter(lambda x: x.quotation in t_quotation_names, sales_orders)) if t_quotation_names and sales_orders else []
-		t_order_names = [t.name for t in territory_orders] if territory_orders else []
+		territory_orders = []
+		if t_quotation_names and sales_orders:
+			list(filter(lambda x: x.quotation in t_quotation_names, sales_orders))
+		t_order_names = []
+		if territory_orders:
+			t_order_names = [t.name for t in territory_orders] 
 
 		territory_invoices = list(filter(lambda x: x.sales_order in t_order_names, sales_invoices)) if t_order_names and sales_invoices else []
 
@@ -83,7 +95,7 @@ def get_opportunities(filters):
 	conditions = ""
 
 	if filters.from_date and filters.to_date:
-		conditions = " WHERE expected_closing between %(from_date)s and %(to_date)s"
+		conditions = " WHERE transaction_date between %(from_date)s and %(to_date)s"
 	
 	if filters.company:
 		if conditions:
