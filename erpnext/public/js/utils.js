@@ -514,9 +514,18 @@ erpnext.utils.update_child_items = function(opts) {
 }
 
 erpnext.utils.map_current_doc = function(opts) {
-	if(opts.get_query_filters) {
-		opts.get_query = function() {
-			return {filters: opts.get_query_filters};
+	let query_args = {};
+	if (opts.get_query_filters) {
+		query_args.filters = opts.get_query_filters;
+	}
+
+	if (opts.get_query_method) {
+		query_args.query = opts.get_query_method;
+	}
+
+	if (query_args.filters || query_args.query) {
+		opts.get_query = () => {
+			return query_args;
 		}
 	}
 	var _map = function() {
@@ -600,8 +609,6 @@ erpnext.utils.map_current_doc = function(opts) {
 			date_field: opts.date_field || undefined,
 			setters: opts.setters,
 			get_query: opts.get_query,
-			method: opts.query_method,
-			method_args: opts.query_method_args,
 			action: function(selections, args) {
 				let values = selections;
 				if(values.length === 0){

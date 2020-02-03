@@ -366,14 +366,21 @@ def make_purchase_order_based_on_supplier(source_name, target_doc=None, args=Non
 @frappe.whitelist()
 def get_items_based_on_default_supplier(supplier):
 	supplier_items = [d.parent for d in frappe.db.get_all("Item Default",
-		{"default_supplier": supplier}, 'parent')]
+		{"default_supplier": supplier, "parenttype": "Item"}, 'parent')]
 
 	return supplier_items
 
 @frappe.whitelist()
-def get_material_requests_based_on_supplier(method_args):
-	method_args = json.loads(method_args)
-	supplier = method_args.get("supplier")
+def get_material_requests_based_on_supplier(doctype, txt, searchfield, start, page_len, filters):
+	conditions = ""
+	if txt:
+		conditions += "and mr.name like '%%"+txt+"%%' "
+
+	if filters.get("transaction_date"):
+		date = filters.get("transaction_date")[1]
+		conditions += "and mr.transaction_date between '{0}' and '{1}' ".format(date[0], date[1])
+
+	supplier = filters.get("supplier")
 	supplier_items = get_items_based_on_default_supplier(supplier)
 
 	if not supplier_items:
@@ -382,13 +389,17 @@ def get_material_requests_based_on_supplier(method_args):
 	material_requests = frappe.db.sql("""select distinct mr.name, transaction_date,company
 		from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
 		where mr.name = mr_item.parent
-			and mr_item.item_code in (%s)
+			and mr_item.item_code in ({0})
 			and mr.material_request_type = 'Purchase'
 			and mr.per_ordered < 99.99
 			and mr.docstatus = 1
 			and mr.status != 'Stopped'
-		order by mr_item.item_code ASC""" % ', '.join(['%s']*len(supplier_items)),
-		tuple(supplier_items),as_dict=1)
+			and mr.company = '{1}'
+			{2}
+		order by mr_item.item_code ASC
+		limit {3} offset {4} """ \
+		.format(', '.join(['%s']*len(supplier_items)), filters.get("company"), conditions, page_len, start),
+		tuple(supplier_items), as_dict=1)
 
 	return material_requests
 

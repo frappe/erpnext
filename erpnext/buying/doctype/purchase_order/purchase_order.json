@@ -170,8 +170,8 @@
    "search_index": 1
   },
   {
+   "description": "Fetch items based on Default Supplier.",
    "depends_on": "eval:doc.supplier && doc.docstatus===0 && (!(doc.items && doc.items.length) || (doc.items.length==1 && !doc.items[0].item_code))",
-   "description": "Based on Supplier.",
    "fieldname": "get_items_from_open_material_requests",
    "fieldtype": "Button",
    "label": "Get Items from Open Material Requests"
