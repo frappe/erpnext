@@ -25,6 +25,7 @@ class Quotation(SellingController):
 	def validate(self):
 		super(Quotation, self).validate()
 		self.set_status()
+		self.set_total_deduction_product()
 		self.update_opportunity()
 		self.validate_order_type()
 		self.validate_uom_is_integer("stock_uom", "qty")
@@ -32,6 +33,17 @@ class Quotation(SellingController):
 		self.set_customer_name()
 		if self.items:
 			self.with_items = 1
+	
+	def set_total_deduction_product(self):
+		if self.docstatus==1:
+			total_deduction = 0
+
+			Quotation_Item = frappe.get_all("Quotation Item", ["item_code", "price_list_rate", "discount_amount"], filters = {"parent":self.name})
+
+			for item in Quotation_Item:
+				total_deduction += item.discount_amount
+			
+			self.total_product_deduction = total_deduction
 
 	def validate_valid_till(self):
 		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
