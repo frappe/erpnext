@@ -388,6 +388,7 @@ DocType: BOM Update Tool,New BOM,አዲስ BOM
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Prescribed Procedures,የታዘዙ ሸቀጦች
 apps/erpnext/erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js,Show only POS,POS ብቻ አሳይ
 DocType: Supplier Group,Supplier Group Name,የአቅራቢው የቡድን ስም
+apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,ተገኝነትን እንደ ምልክት ያድርጉ <b></b>
 DocType: Driver,Driving License Categories,የመንጃ ፍቃድ ምድቦች
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please enter Delivery Date,እባክዎ የመላኪያ ቀን ያስገቡ
 DocType: Depreciation Schedule,Make Depreciation Entry,የእርጅና Entry አድርግ
@@ -4192,6 +4193,8 @@ DocType: Homepage,Homepage,መነሻ ገጽ
 DocType: Grant Application,Grant Application Details ,የመተግበሪያ ዝርዝሮችን ይስጡ
 DocType: Employee Separation,Employee Separation,የሰራተኛ መለያ
 DocType: BOM Item,Original Item,የመጀመሪያው ንጥል
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","ይህንን ሰነድ ለመሰረዝ እባክዎ ሰራተኛውን <a href=""#Form/Employee/{0}"">{0}</a> \ ያጥፉ"
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Doc Date,Doc Date
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py,Fee Records Created - {0},ክፍያ መዛግብት ፈጥሯል - {0}
 DocType: Asset Category Account,Asset Category Account,የንብረት ምድብ መለያ
@@ -5205,6 +5208,7 @@ apps/erpnext/erpnext/config/projects.py,Cost of various activities,የተለያ�
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}","ወደ ክስተቶች በማቀናበር ላይ {0}, የሽያጭ አካላት ከታች ያለውን ጋር ተያይዞ ሠራተኛው የተጠቃሚ መታወቂያ የለውም ጀምሮ {1}"
 DocType: Timesheet,Billing Details,አከፋፈል ዝርዝሮች
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Source and target warehouse must be different,የመነሻ እና የመድረሻ መጋዘን የተለየ መሆን አለበት
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,በሰብአዊ ሀብት&gt; የሰው ሠራሽ ቅንጅቶች ውስጥ የሰራተኛ መለያ ስም መስሪያ ስርዓት ያዋቅሩ
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Failed. Please check your GoCardless Account for more details,ክፍያ አልተሳካም. ለተጨማሪ ዝርዝሮች እባክዎ የ GoCardless መለያዎን ይመልከቱ
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Not allowed to update stock transactions older than {0},አይደለም በላይ የቆዩ የአክሲዮን ግብይቶችን ለማዘመን አይፈቀድላቸውም {0}
 DocType: Stock Entry,Inspection Required,የምርመራ ያስፈልጋል
@@ -5437,6 +5441,7 @@ DocType: Bank Account,IBAN,IBAN
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Current BOM and New BOM can not be same,የአሁኑ BOM ኒው BOM ተመሳሳይ መሆን አይችልም
 apps/erpnext/erpnext/hr/report/salary_register/salary_register.py,Salary Slip ID,የቀጣሪ መታወቂያ
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Date Of Retirement must be greater than Date of Joining,ጡረታ መካከል ቀን በመቀላቀል ቀን የበለጠ መሆን አለበት
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,አቅራቢ&gt; የአቅራቢ ዓይነት
 apps/erpnext/erpnext/stock/doctype/item/item.js,Multiple Variants,በርካታ ስሪቶች
 DocType: Sales Invoice,Against Income Account,የገቢ መለያ ላይ
 apps/erpnext/erpnext/controllers/website_list_for_contact.py,{0}% Delivered,{0}% ደርሷል
@@ -6265,6 +6270,7 @@ DocType: Program Enrollment,Institute's Bus,የኢንስቲቱ አውቶቡስ
 DocType: Accounts Settings,Role Allowed to Set Frozen Accounts & Edit Frozen Entries,ሚና Frozen መለያዎች &amp; አርትዕ Frozen ግቤቶችን አዘጋጅ የሚፈቀድለት
 DocType: Supplier Scorecard Scoring Variable,Path,ዱካ
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Cannot convert Cost Center to ledger as it has child nodes,ይህ ልጅ መገናኛ ነጥቦች አሉት እንደ የመቁጠር ወደ ወጪ ማዕከል መለወጥ አይቻልም
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},UOM የልወጣ ሁኔታ ({0} -&gt; {1}) ለንጥል አልተገኘም {{2}
 DocType: Production Plan,Total Planned Qty,የታቀደ አጠቃላይ ቅደም ተከተል
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Transactions already retreived from the statement,ግብይቶቹ ቀደም ሲል ከ መግለጫው ተመልሰዋል።
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,በመክፈት ላይ እሴት
@@ -6487,6 +6493,7 @@ DocType: Lab Test,Result Date,ውጤት ቀን
 DocType: Purchase Order,To Receive,መቀበል
 DocType: Leave Period,Holiday List for Optional Leave,የአማራጭ ፈቃድ የአፈፃጸም ዝርዝር
 DocType: Item Tax Template,Tax Rates,የግብር ተመኖች
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,የንጥል ኮድ&gt; የንጥል ቡድን&gt; የምርት ስም
 DocType: Asset,Asset Owner,የንብረት ባለቤት
 DocType: Item,Website Content,የድር ጣቢያ ይዘት።
 DocType: Bank Account,Integration ID,የተቀናጀ መታወቂያ።
@@ -6612,6 +6619,7 @@ apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.
 DocType: Stock Entry Detail,Additional Cost,ተጨማሪ ወጪ
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,"Can not filter based on Voucher No, if grouped by Voucher","ቫውቸር ምንም ላይ የተመሠረተ ማጣሪያ አይችሉም, ቫውቸር በ ተመድበው ከሆነ"
 DocType: Quality Inspection,Incoming,ገቢ
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,እባክዎን ለተማሪ ተገኝነት በማዋቀር&gt; በቁጥር ተከታታይ በኩል ያዘጋጁ
 apps/erpnext/erpnext/setup/doctype/company/company.js,Default tax templates for sales and purchase are created.,ለሽያጭ እና ለግዢ ነባሪ የግብር አብነቶች ተፈጥረዋል.
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.py,Assessment Result record {0} already exists.,የአመሳሾቹ ውጤት ዘገባ {0} አስቀድሞም ይገኛል.
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","ምሳሌ ABCD. #####. ተከታታይነት ከተዘጋጀ እና የቡድን ቁጥር በግብይቶች ውስጥ ካልተጠቀሰ, በዚህ ተከታታይ ላይ ተመስርተው ራስ-ሰር ቁጥሩ ቁጥር ይፈጠራል. ለእዚህ ንጥል እቃ ዝርዝር በግልጽ ለመጥቀስ የሚፈልጉ ከሆነ, ይህንን ባዶ ይተውት. ማሳሰቢያ: ይህ ቅንብር በስምሪት ቅንጅቶች ውስጥ ከሚታወቀው Seriesing ቅድመ-ቅጥያ ቅድሚያ ይሰጠዋል."
@@ -6953,6 +6961,7 @@ DocType: Journal Entry,Write Off Entry,Entry ጠፍቷል ይጻፉ
 DocType: BOM,Rate Of Materials Based On,ደረጃ ይስጡ እቃዎች ላይ የተመረኮዘ ላይ
 DocType: Education Settings,"If enabled, field Academic Term will be Mandatory in Program Enrollment Tool.","ከነቃ, የአካዳሚክ የትምህርት ጊዜ በፕሮግራም ምዝገባ ፕሮግራም ውስጥ አስገዳጅ ይሆናል."
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,"Values of exempt, nil rated and non-GST inward supplies",የነፃ ፣ የ Nil ደረጃ እና GST ያልሆኑ ውስጣዊ አቅርቦቶች እሴቶች።
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,ደንበኛ&gt; የደንበኛ ቡድን&gt; ግዛት
 apps/erpnext/erpnext/regional/report/datev/datev.py,<b>Company</b> is a mandatory filter.,<b>ኩባንያ</b> የግዴታ ማጣሪያ ነው።
 apps/erpnext/erpnext/education/doctype/student_attendance_tool/student_attendance_tool.js,Uncheck all,ሁሉንም አታመልክት
 DocType: Purchase Taxes and Charges,On Item Quantity,በእቃ ቁጥር።
@@ -6997,6 +7006,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Join,ተቀላቀል
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py,Shortage Qty,እጥረት ብዛት
 DocType: Purchase Invoice,Input Service Distributor,የግቤት አገልግሎት አሰራጭ
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item variant {0} exists with same attributes,ንጥል ተለዋጭ {0} ተመሳሳይ ባሕርያት ጋር አለ
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,እባክዎ በትምህርቱ&gt; የትምህርት ቅንብሮች ውስጥ የትምህርት አሰጣጥ / መለያ መመሪያን ያዋቅሩ
 DocType: Loan,Repay from Salary,ደመወዝ ከ ልከፍለው
 DocType: Exotel Settings,API Token,ኤ.ፒ.አይ. የምስክር ወረቀት
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Requesting payment against {0} {1} for amount {2},ላይ ክፍያ በመጠየቅ ላይ {0} {1} መጠን ለ {2}

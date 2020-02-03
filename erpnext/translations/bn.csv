@@ -386,6 +386,7 @@ DocType: BOM Update Tool,New BOM,নতুন BOM
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Prescribed Procedures,নির্ধারিত পদ্ধতি
 apps/erpnext/erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js,Show only POS,শুধুমাত্র পিওএস দেখান
 DocType: Supplier Group,Supplier Group Name,সরবরাহকারী গ্রুপ নাম
+apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,হিসাবে উপস্থিতি চিহ্নিত করুন <b></b>
 DocType: Driver,Driving License Categories,ড্রাইভিং লাইসেন্স বিভাগ
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please enter Delivery Date,ডেলিভারি তারিখ লিখুন দয়া করে
 DocType: Depreciation Schedule,Make Depreciation Entry,অবচয় এণ্ট্রি করুন
@@ -4126,6 +4127,8 @@ DocType: Homepage,Homepage,হোম পেজ
 DocType: Grant Application,Grant Application Details ,আবেদনপত্র জমা দিন
 DocType: Employee Separation,Employee Separation,কর্মচারী বিচ্ছেদ
 DocType: BOM Item,Original Item,মৌলিক আইটেম
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","এই নথিটি বাতিল করতে দয়া করে কর্মচারী <a href=""#Form/Employee/{0}"">{0}</a> delete মুছুন"
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Doc Date,ডক তারিখ
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py,Fee Records Created - {0},ফি রেকর্ডস নির্মিত - {0}
 DocType: Asset Category Account,Asset Category Account,অ্যাসেট শ্রেণী অ্যাকাউন্ট
@@ -5131,6 +5134,7 @@ apps/erpnext/erpnext/config/projects.py,Cost of various activities,বিভি�
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}","জন্য ইভেন্ট নির্ধারণ {0}, যেহেতু কর্মচারী সেলস ব্যক্তি নিচে সংযুক্ত একটি ইউজার আইডি নেই {1}"
 DocType: Timesheet,Billing Details,পূর্ণ রূপ প্রকাশ
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Source and target warehouse must be different,উত্স এবং লক্ষ্য গুদাম আলাদা হতে হবে
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,মানব সম্পদ&gt; এইচআর সেটিংসে কর্মচারী নামকরণ সিস্টেম সেটআপ করুন
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Failed. Please check your GoCardless Account for more details,পেমেন্ট ব্যর্থ হয়েছে. আরো তথ্যের জন্য আপনার GoCardless অ্যাকাউন্ট চেক করুন
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Not allowed to update stock transactions older than {0},বেশী না পুরোনো স্টক লেনদেন হালনাগাদ করার অনুমতি {0}
 DocType: Stock Entry,Inspection Required,ইন্সপেকশন প্রয়োজনীয়
@@ -5360,6 +5364,7 @@ DocType: Bank Account,IBAN,IBAN রয়েছে
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Current BOM and New BOM can not be same,বর্তমান BOM এবং নতুন BOM একই হতে পারে না
 apps/erpnext/erpnext/hr/report/salary_register/salary_register.py,Salary Slip ID,বেতন স্লিপ আইডি
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Date Of Retirement must be greater than Date of Joining,অবসর তারিখ যোগদান তারিখ থেকে বড় হওয়া উচিত
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,সরবরাহকারী&gt; সরবরাহকারী প্রকার
 apps/erpnext/erpnext/stock/doctype/item/item.js,Multiple Variants,একাধিক বৈকল্পিক
 DocType: Sales Invoice,Against Income Account,আয় অ্যাকাউন্টের বিরুদ্ধে
 apps/erpnext/erpnext/controllers/website_list_for_contact.py,{0}% Delivered,{0}% বিতরণ করা হয়েছে
@@ -6178,6 +6183,7 @@ DocType: Program Enrollment,Institute's Bus,ইনস্টিটিউটের
 DocType: Accounts Settings,Role Allowed to Set Frozen Accounts & Edit Frozen Entries,ভূমিকা হিমায়িত একাউন্টস ও সম্পাদনা হিমায়িত সাজপোশাকটি সেট করার মঞ্জুরি
 DocType: Supplier Scorecard Scoring Variable,Path,পথ
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Cannot convert Cost Center to ledger as it has child nodes,এটা সন্তানের নোড আছে খতিয়ান করার খরচ কেন্দ্র রূপান্তর করতে পারবেন না
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},ইউওএম রূপান্তর ফ্যাক্টর ({0} -&gt; {1}) আইটেমটির জন্য পাওয়া যায় নি: {2}
 DocType: Production Plan,Total Planned Qty,মোট পরিকল্পিত পরিমাণ
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Transactions already retreived from the statement,ইতিমধ্যে বিবৃতি থেকে লেনদেন প্রত্যাহার করা হয়েছে
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,খোলা মূল্য
@@ -6396,6 +6402,7 @@ DocType: Lab Test,Result Date,ফলাফল তারিখ
 DocType: Purchase Order,To Receive,গ্রহণ করতে
 DocType: Leave Period,Holiday List for Optional Leave,ঐচ্ছিক তালিকার জন্য হলিডে তালিকা
 DocType: Item Tax Template,Tax Rates,করের হার
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,আইটেম কোড&gt; আইটেম গ্রুপ&gt; ব্র্যান্ড
 DocType: Asset,Asset Owner,সম্পদ মালিক
 DocType: Item,Website Content,ওয়েবসাইট সামগ্রী
 DocType: Bank Account,Integration ID,ইন্টিগ্রেশন আইডি
@@ -6518,6 +6525,7 @@ apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.
 DocType: Stock Entry Detail,Additional Cost,অতিরিক্ত খরচ
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,"Can not filter based on Voucher No, if grouped by Voucher","ভাউচার কোন উপর ভিত্তি করে ফিল্টার করতে পারবে না, ভাউচার দ্বারা গ্রুপকৃত যদি"
 DocType: Quality Inspection,Incoming,ইনকামিং
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,দয়া করে সেটআপ&gt; নম্বরিং সিরিজের মাধ্যমে উপস্থিতির জন্য সংখ্যায়ন সিরিজটি সেট করুন
 apps/erpnext/erpnext/setup/doctype/company/company.js,Default tax templates for sales and purchase are created.,বিক্রয় এবং ক্রয় জন্য ডিফল্ট ট্যাক্স টেমপ্লেট তৈরি করা হয়।
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.py,Assessment Result record {0} already exists.,মূল্যায়ন ফলাফল রেকর্ড {0} ইতিমধ্যে বিদ্যমান।
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","উদাহরণ: ABCD। ##### যদি সিরিজ সেট করা থাকে এবং ব্যাচ নাম লেনদেনের ক্ষেত্রে উল্লেখ করা হয় না, তাহলে এই সিরিজের উপর ভিত্তি করে স্বয়ংক্রিয় ব্যাচ নম্বর তৈরি করা হবে। আপনি যদি সবসময় এই আইটেমটির জন্য ব্যাচ নংকে স্পষ্টভাবে উল্লেখ করতে চান, তবে এই ফাঁকা স্থানটি ছেড়ে দিন। দ্রষ্টব্য: এই সেটিং স্টক সেটিংসের নামকরণ সিরিজ প্রিফিক্সের উপর অগ্রাধিকার পাবে।"
@@ -6854,6 +6862,7 @@ DocType: Journal Entry,Write Off Entry,এন্ট্রি বন্ধ লি
 DocType: BOM,Rate Of Materials Based On,হার উপকরণ ভিত্তি করে
 DocType: Education Settings,"If enabled, field Academic Term will be Mandatory in Program Enrollment Tool.","যদি সক্রিয় থাকে, তাহলে প্রোগ্রাম এনরোলমেন্ট টুল এ ক্ষেত্রটি একাডেমিক টার্ম বাধ্যতামূলক হবে।"
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,"Values of exempt, nil rated and non-GST inward supplies","অব্যাহতি, শূন্য রেটযুক্ত এবং জিএসটি অ অভ্যন্তরীণ সরবরাহের মান supplies"
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,গ্রাহক&gt; গ্রাহক গোষ্ঠী&gt; অঞ্চল
 apps/erpnext/erpnext/regional/report/datev/datev.py,<b>Company</b> is a mandatory filter.,<b>সংস্থা</b> একটি বাধ্যতামূলক ফিল্টার।
 apps/erpnext/erpnext/education/doctype/student_attendance_tool/student_attendance_tool.js,Uncheck all,সব অচিহ্নিত
 DocType: Purchase Taxes and Charges,On Item Quantity,আইটেম পরিমাণে
@@ -6898,6 +6907,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Join,যোগদান
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py,Shortage Qty,ঘাটতি Qty
 DocType: Purchase Invoice,Input Service Distributor,ইনপুট পরিষেবা বিতরণকারী
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item variant {0} exists with same attributes,আইটেম বৈকল্পিক {0} একই বৈশিষ্ট্যাবলী সঙ্গে বিদ্যমান
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,অনুগ্রহ করে শিক্ষা&gt; শিক্ষা সেটিংসে প্রশিক্ষক নামকরণ সিস্টেম সেটআপ করুন
 DocType: Loan,Repay from Salary,বেতন থেকে শুধা
 DocType: Exotel Settings,API Token,এপিআই টোকেন
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Requesting payment against {0} {1} for amount {2},বিরুদ্ধে পেমেন্ট অনুরোধ {0} {1} পরিমাণ জন্য {2}

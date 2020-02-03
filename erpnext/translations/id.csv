@@ -389,6 +389,7 @@ DocType: BOM Update Tool,New BOM,BOM Baru
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Prescribed Procedures,Prosedur yang Ditetapkan
 apps/erpnext/erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js,Show only POS,Hanya tampilkan POS
 DocType: Supplier Group,Supplier Group Name,Nama Grup Pemasok
+apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,Tandai kehadiran sebagai <b></b>
 DocType: Driver,Driving License Categories,Kategori Lisensi Mengemudi
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please enter Delivery Date,Harap masukkan Tanggal Pengiriman
 DocType: Depreciation Schedule,Make Depreciation Entry,Membuat Penyusutan Masuk
@@ -999,6 +1000,7 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,Increment ca
 DocType: Company,Delete Company Transactions,Hapus Transaksi Perusahaan
 DocType: Production Plan Item,Quantity and Description,Kuantitas dan Deskripsi
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Reference No and Reference Date is mandatory for Bank transaction,Referensi ada dan Tanggal referensi wajib untuk transaksi Bank
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Silakan tentukan Seri Penamaan untuk {0} melalui Pengaturan&gt; Pengaturan&gt; Seri Penamaan
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Tambah / Edit Pajak dan Biaya
 DocType: Payment Entry Reference,Supplier Invoice No,Nomor Faktur Supplier
 DocType: Territory,For reference,Untuk referensi
@@ -4221,6 +4223,8 @@ DocType: Homepage,Homepage,Homepage
 DocType: Grant Application,Grant Application Details ,Berikan Rincian Aplikasi
 DocType: Employee Separation,Employee Separation,Pemisahan Karyawan
 DocType: BOM Item,Original Item,Barang Asli
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","Hapus Karyawan <a href=""#Form/Employee/{0}"">{0}</a> \ untuk membatalkan dokumen ini"
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Doc Date,Tanggal Dokumen
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py,Fee Records Created - {0},Biaya Rekaman Dibuat - {0}
 DocType: Asset Category Account,Asset Category Account,Aset Kategori Akun
@@ -5238,6 +5242,7 @@ apps/erpnext/erpnext/config/projects.py,Cost of various activities,Biaya berbaga
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}","Mengatur Acara untuk {0}, karena karyawan yang melekat di bawah Penjualan Orang tidak memiliki User ID {1}"
 DocType: Timesheet,Billing Details,Detail penagihan
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Source and target warehouse must be different,Sumber dan gudang target harus berbeda
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,Silakan atur Sistem Penamaan Karyawan di Sumber Daya Manusia&gt; Pengaturan SDM
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Failed. Please check your GoCardless Account for more details,Pembayaran gagal. Silakan periksa Akun GoCardless Anda untuk lebih jelasnya
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Not allowed to update stock transactions older than {0},Tidak diizinkan memperbarui transaksi persediaan lebih lama dari {0}
 DocType: Stock Entry,Inspection Required,Inspeksi Diperlukan
@@ -5471,6 +5476,7 @@ DocType: Bank Account,IBAN,IBAN
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Current BOM and New BOM can not be same,BOM Lancar dan New BOM tidak bisa sama
 apps/erpnext/erpnext/hr/report/salary_register/salary_register.py,Salary Slip ID,Slip Gaji ID
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Date Of Retirement must be greater than Date of Joining,Tanggal Of Pensiun harus lebih besar dari Tanggal Bergabung
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Pemasok&gt; Jenis Pemasok
 apps/erpnext/erpnext/stock/doctype/item/item.js,Multiple Variants,Beberapa varian
 DocType: Sales Invoice,Against Income Account,Terhadap Akun Pendapatan
 apps/erpnext/erpnext/controllers/website_list_for_contact.py,{0}% Delivered,{0}% Terkirim
@@ -6300,6 +6306,7 @@ DocType: Program Enrollment,Institute's Bus,Bus Institut
 DocType: Accounts Settings,Role Allowed to Set Frozen Accounts & Edit Frozen Entries,Peran Diizinkan Set Beku Account & Edit Frozen Entri
 DocType: Supplier Scorecard Scoring Variable,Path,Jalan
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Cannot convert Cost Center to ledger as it has child nodes,Tidak dapat mengkonversi Pusat Biaya untuk buku karena memiliki node anak
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},Faktor Konversi UOM ({0} -&gt; {1}) tidak ditemukan untuk item: {2}
 DocType: Production Plan,Total Planned Qty,Total Rencana Qty
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Transactions already retreived from the statement,Transaksi sudah diambil dari pernyataan
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,Nilai pembukaan
@@ -6522,6 +6529,7 @@ DocType: Lab Test,Result Date,Tanggal hasil
 DocType: Purchase Order,To Receive,Menerima
 DocType: Leave Period,Holiday List for Optional Leave,Daftar Liburan untuk Cuti Opsional
 DocType: Item Tax Template,Tax Rates,Tarif pajak
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Kode Barang&gt; Grup Barang&gt; Merek
 DocType: Asset,Asset Owner,Pemilik aset
 DocType: Item,Website Content,Konten situs web
 DocType: Bank Account,Integration ID,ID Integrasi
@@ -6647,6 +6655,7 @@ apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.
 DocType: Stock Entry Detail,Additional Cost,Biaya tambahan
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,"Can not filter based on Voucher No, if grouped by Voucher","Tidak dapat memfilter berdasarkan No. Voucher, jika dikelompokkan berdasarkan Voucher"
 DocType: Quality Inspection,Incoming,Incoming
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Silakan atur seri penomoran untuk Kehadiran melalui Pengaturan&gt; Seri Penomoran
 apps/erpnext/erpnext/setup/doctype/company/company.js,Default tax templates for sales and purchase are created.,Template pajak default untuk penjualan dan pembelian telah dibuat.
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.py,Assessment Result record {0} already exists.,Catatan Hasil Penilaian {0} sudah ada.
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Contoh: ABCD. #####. Jika seri disetel dan Batch No tidak disebutkan dalam transaksi, maka nomor bets otomatis akan dibuat berdasarkan seri ini. Jika Anda selalu ingin menyebutkan secara eksplisit Batch No untuk item ini, biarkan ini kosong. Catatan: pengaturan ini akan menjadi prioritas di atas Awalan Seri Penamaan dalam Pengaturan Stok."
@@ -6988,6 +6997,7 @@ DocType: Journal Entry,Write Off Entry,Menulis Off Entri
 DocType: BOM,Rate Of Materials Based On,Laju Bahan Berbasis On
 DocType: Education Settings,"If enabled, field Academic Term will be Mandatory in Program Enrollment Tool.","Jika diaktifkan, bidang Istilah Akademik akan Wajib di Alat Pendaftaran Program."
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,"Values of exempt, nil rated and non-GST inward supplies","Nilai pasokan masuk yang dikecualikan, nihil, dan non-GST"
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Pelanggan&gt; Grup Pelanggan&gt; Wilayah
 apps/erpnext/erpnext/regional/report/datev/datev.py,<b>Company</b> is a mandatory filter.,<b>Perusahaan</b> adalah filter wajib.
 apps/erpnext/erpnext/education/doctype/student_attendance_tool/student_attendance_tool.js,Uncheck all,Jangan tandai semua
 DocType: Purchase Taxes and Charges,On Item Quantity,Pada Kuantitas Barang
@@ -7032,6 +7042,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Join,Bergabung
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py,Shortage Qty,Kekurangan Jumlah
 DocType: Purchase Invoice,Input Service Distributor,Distributor Layanan Input
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item variant {0} exists with same attributes,Item varian {0} ada dengan atribut yang sama
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Silakan siapkan Sistem Penamaan Instruktur di Pendidikan&gt; Pengaturan Pendidikan
 DocType: Loan,Repay from Salary,Membayar dari Gaji
 DocType: Exotel Settings,API Token,Token API
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Requesting payment against {0} {1} for amount {2},Meminta pembayaran terhadap {0} {1} untuk jumlah {2}

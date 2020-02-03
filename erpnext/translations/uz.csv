@@ -389,6 +389,7 @@ DocType: BOM Update Tool,New BOM,Yangi BOM
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Prescribed Procedures,Belgilangan protseduralar
 apps/erpnext/erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js,Show only POS,Faqat qalinni ko&#39;rsatish
 DocType: Supplier Group,Supplier Group Name,Yetkazib beruvchining guruh nomi
+apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,Davomi sifatida belgilang <b></b>
 DocType: Driver,Driving License Categories,Haydovchilik guvohnomasi kategoriyalari
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please enter Delivery Date,"Iltimos, etkazib berish sanasi kiriting"
 DocType: Depreciation Schedule,Make Depreciation Entry,Amortizatsiyani kiritish
@@ -998,6 +999,7 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,Increment ca
 DocType: Company,Delete Company Transactions,Kompaniya jarayonini o&#39;chirish
 DocType: Production Plan Item,Quantity and Description,Miqdori va tavsifi
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Reference No and Reference Date is mandatory for Bank transaction,Bank bo&#39;yicha bitim uchun Yo&#39;naltiruvchi Yo&#39;naltiruvchi va Yo&#39;nalish sanasi majburiy hisoblanadi
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,"Iltimos, sozlash&gt; Sozlamalar&gt; Nomlash seriyalari orqali {0} uchun nomlash seriyasini o&#39;rnating"
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Soliqlarni va to&#39;lovlarni qo&#39;shish / tahrirlash
 DocType: Payment Entry Reference,Supplier Invoice No,Yetkazib beruvchi hisob raqami №
 DocType: Territory,For reference,Malumot uchun
@@ -4192,6 +4194,8 @@ DocType: Homepage,Homepage,Bosh sahifa
 DocType: Grant Application,Grant Application Details ,Dastur haqida batafsil ma&#39;lumot
 DocType: Employee Separation,Employee Separation,Xodimlarni ajratish
 DocType: BOM Item,Original Item,Asl modda
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","Ushbu hujjatni bekor qilish uchun <a href=""#Form/Employee/{0}"">{0}</a> \ xodimini o&#39;chiring"
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Doc Date,Doc tarixi
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py,Fee Records Created - {0},Yaratilgan yozuvlar - {0}
 DocType: Asset Category Account,Asset Category Account,Aktiv turkumidagi hisob
@@ -5207,6 +5211,7 @@ apps/erpnext/erpnext/config/projects.py,Cost of various activities,Turli faoliya
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}","Tadbirlarni {0} ga sozlash, chunki quyida ko&#39;rsatilgan Sotish Sotuviga qo&#39;yilgan xodimlar uchun foydalanuvchi identifikatori yo&#39;q {1}"
 DocType: Timesheet,Billing Details,To&#39;lov ma&#39;lumoti
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Source and target warehouse must be different,Resurslar va maqsadli omborlar boshqacha bo&#39;lishi kerak
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,"Iltimos, xodimlarni nomlash tizimini inson resurslari&gt; Kadrlar sozlamalarida o&#39;rnating"
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Failed. Please check your GoCardless Account for more details,"To&#39;lov amalga oshmadi. Iltimos, batafsil ma&#39;lumot uchun GoCardsiz hisobingizni tekshiring"
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Not allowed to update stock transactions older than {0},{0} dan katta aktsiyalarini yangilash uchun ruxsat berilmadi
 DocType: Stock Entry,Inspection Required,Tekshirish kerak
@@ -5440,6 +5445,7 @@ DocType: Bank Account,IBAN,IBAN
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Current BOM and New BOM can not be same,Joriy BOM va yangi BOM bir xil bo&#39;lishi mumkin emas
 apps/erpnext/erpnext/hr/report/salary_register/salary_register.py,Salary Slip ID,Ish haqi miqdori
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Date Of Retirement must be greater than Date of Joining,Pensiya tarixi sanasi qo&#39;shilish sanasidan katta bo&#39;lishi kerak
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Ta&#39;minotchi&gt; Ta&#39;minotchi turi
 apps/erpnext/erpnext/stock/doctype/item/item.js,Multiple Variants,Bir nechta varianti
 DocType: Sales Invoice,Against Income Account,Daromad hisobiga qarshi
 apps/erpnext/erpnext/controllers/website_list_for_contact.py,{0}% Delivered,{0}% taslim etildi
@@ -6268,6 +6274,7 @@ DocType: Program Enrollment,Institute's Bus,Institut avtobusi
 DocType: Accounts Settings,Role Allowed to Set Frozen Accounts & Edit Frozen Entries,Muzlatilgan hisoblarni sozlash va muzlatilgan yozuvlarni tahrir qilish uchun roli mumkin
 DocType: Supplier Scorecard Scoring Variable,Path,Yo&#39;l
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Cannot convert Cost Center to ledger as it has child nodes,"Xarajatli markazni kitob nusxa ko&#39;chirish qurilmasiga aylantira olmaysiz, chunki u tugmachalarga ega"
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},UOM konversiya koeffitsienti ({0} -&gt; {1}) quyidagi element uchun topilmadi: {2}
 DocType: Production Plan,Total Planned Qty,Jami rejalashtirilgan miqdori
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Transactions already retreived from the statement,Bitimlar allaqachon bayonotdan uzoqlashgan
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,Ochilish qiymati
@@ -6490,6 +6497,7 @@ DocType: Lab Test,Result Date,Natija sanasi
 DocType: Purchase Order,To Receive,Qabul qilmoq
 DocType: Leave Period,Holiday List for Optional Leave,Majburiy bo&#39;lmagan yo&#39;l uchun dam olish ro&#39;yxati
 DocType: Item Tax Template,Tax Rates,Soliq stavkalari
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Element kodi&gt; Tovar guruhi&gt; Tovar
 DocType: Asset,Asset Owner,Shaxs egasi
 DocType: Item,Website Content,Veb-sayt tarkibi
 DocType: Bank Account,Integration ID,Integratsiya identifikatori
@@ -6615,6 +6623,7 @@ apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.
 DocType: Stock Entry Detail,Additional Cost,Qo&#39;shimcha xarajatlar
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,"Can not filter based on Voucher No, if grouped by Voucher","Voucher tomonidan guruhlangan bo&#39;lsa, Voucher No ga asoslangan holda filtrlay olmaydi"
 DocType: Quality Inspection,Incoming,Kiruvchi
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Iltimos Setup&gt; Raqamlash seriyalari orqali qatnashish uchun raqamlash seriyasini sozlang
 apps/erpnext/erpnext/setup/doctype/company/company.js,Default tax templates for sales and purchase are created.,Savdo va xarid uchun odatiy soliq namunalari yaratilgan.
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.py,Assessment Result record {0} already exists.,Baholash natijasi {0} allaqachon mavjud.
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Misol: ABCD. #####. Jarayonlarda seriya o&#39;rnatilgan bo&#39;lsa va Batch No ko&#39;rsatilgan bo&#39;lsa, bu ketma-ketlik asosida avtomatik partiya raqami yaratiladi. Agar siz doimo bu element uchun &quot;Partiya No&quot; ni aniq ko&#39;rsatishni istasangiz, bo&#39;sh qoldiring. Eslatma: Ushbu sozlama Stok Sozlamalarida Nominal Seriya Prefiksidan ustunlik qiladi."
@@ -6956,6 +6965,7 @@ DocType: Journal Entry,Write Off Entry,Yozuvni yozing
 DocType: BOM,Rate Of Materials Based On,Materiallar asoslari
 DocType: Education Settings,"If enabled, field Academic Term will be Mandatory in Program Enrollment Tool.","Agar yoqilsa, dasturni ro&#39;yxatga olish vositasida Akademiyasi muddat majburiy bo&#39;ladi."
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,"Values of exempt, nil rated and non-GST inward supplies","Ishlab chiqarilmaydigan, nolga teng va GST bo&#39;lmagan ichki ta&#39;minot qiymatlari"
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Xaridor&gt; Mijozlar guruhi&gt; Hudud
 apps/erpnext/erpnext/regional/report/datev/datev.py,<b>Company</b> is a mandatory filter.,<b>Kompaniya</b> majburiy filtrdir.
 apps/erpnext/erpnext/education/doctype/student_attendance_tool/student_attendance_tool.js,Uncheck all,Barchasini olib tashlang
 DocType: Purchase Taxes and Charges,On Item Quantity,Miqdori miqdori bo&#39;yicha
@@ -7000,6 +7010,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Join,Ishtirok etish
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py,Shortage Qty,Miqdori miqdori
 DocType: Purchase Invoice,Input Service Distributor,Kirish xizmati tarqatuvchisi
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item variant {0} exists with same attributes,{0} mahsulot varianti bir xil xususiyatlarga ega
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,"Iltimos, Ta&#39;lim beruvchiga nom berish tizimini Ta&#39;lim sozlamalarida o&#39;rnating"
 DocType: Loan,Repay from Salary,Ish haqidan to&#39;lash
 DocType: Exotel Settings,API Token,API token
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Requesting payment against {0} {1} for amount {2},{0} {1} dan {2}

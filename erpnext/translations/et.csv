@@ -386,6 +386,7 @@ DocType: BOM Update Tool,New BOM,New Bom
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Prescribed Procedures,Ettenähtud protseduurid
 apps/erpnext/erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js,Show only POS,Kuva ainult POS
 DocType: Supplier Group,Supplier Group Name,Tarnija grupi nimi
+apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,Märgi kohalolijaks kui <b></b>
 DocType: Driver,Driving License Categories,Juhtimiskategooriad
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please enter Delivery Date,Palun sisesta saatekuupäev
 DocType: Depreciation Schedule,Make Depreciation Entry,Tee kulum Entry
@@ -994,6 +995,7 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,Increment ca
 DocType: Company,Delete Company Transactions,Kustuta tehingutes
 DocType: Production Plan Item,Quantity and Description,Kogus ja kirjeldus
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Reference No and Reference Date is mandatory for Bank transaction,Viitenumber ja viited kuupäev on kohustuslik Bank tehingu
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,"Valige Seadistamise seeria väärtuseks {0}, mis asub seadistuse&gt; Seadistused&gt; Seeriate nimetamine"
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Klienditeenindus Lisa / uuenda maksud ja tasud
 DocType: Payment Entry Reference,Supplier Invoice No,Tarnija Arve nr
 DocType: Territory,For reference,Sest viide
@@ -4189,6 +4191,8 @@ DocType: Homepage,Homepage,Kodulehekülg
 DocType: Grant Application,Grant Application Details ,Toetage rakenduse üksikasju
 DocType: Employee Separation,Employee Separation,Töötaja eraldamine
 DocType: BOM Item,Original Item,Originaalüksus
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","Selle dokumendi tühistamiseks kustutage töötaja <a href=""#Form/Employee/{0}"">{0}</a> \"
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Doc Date,Dokumendi kuupäev
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py,Fee Records Created - {0},Fee Records Loodud - {0}
 DocType: Asset Category Account,Asset Category Account,Põhivarakategoori konto
@@ -5203,6 +5207,7 @@ apps/erpnext/erpnext/config/projects.py,Cost of various activities,Kulude erinev
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}","Seadistamine Sündmused {0}, kuna töötaja juurde allpool müügiisikuid ei ole Kasutaja ID {1}"
 DocType: Timesheet,Billing Details,Arved detailid
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Source and target warehouse must be different,Allika ja eesmärgi ladu peavad olema erinevad
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,Palun seadistage töötajate nimetamise süsteem personaliressursist&gt; HR-sätted
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Failed. Please check your GoCardless Account for more details,"Makse ebaõnnestus. Palun kontrollige oma GoCardlessi kontot, et saada lisateavet"
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Not allowed to update stock transactions older than {0},Ei ole lubatud uuendada laos tehingute vanem kui {0}
 DocType: Stock Entry,Inspection Required,Ülevaatus Nõutav
@@ -5434,6 +5439,7 @@ DocType: Bank Account,IBAN,IBAN
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Current BOM and New BOM can not be same,Praegune BOM ja Uus BOM saa olla samad
 apps/erpnext/erpnext/hr/report/salary_register/salary_register.py,Salary Slip ID,Palgatõend ID
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Date Of Retirement must be greater than Date of Joining,Erru minemise peab olema suurem kui Liitumis
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Tarnija&gt; Tarnija tüüp
 apps/erpnext/erpnext/stock/doctype/item/item.js,Multiple Variants,Mitmed variandid
 DocType: Sales Invoice,Against Income Account,Sissetuleku konto
 apps/erpnext/erpnext/controllers/website_list_for_contact.py,{0}% Delivered,{0}% tarnitud
@@ -6260,6 +6266,7 @@ DocType: Program Enrollment,Institute's Bus,Instituudi buss
 DocType: Accounts Settings,Role Allowed to Set Frozen Accounts & Edit Frozen Entries,Role lubatud kehtestada külmutatud kontode ja Edit Külmutatud kanded
 DocType: Supplier Scorecard Scoring Variable,Path,Tee
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Cannot convert Cost Center to ledger as it has child nodes,"Ei saa teisendada Cost Center pearaamatu, sest see on tütartippu"
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},UOM teisendustegurit ({0} -&gt; {1}) üksusele {2} ei leitud
 DocType: Production Plan,Total Planned Qty,Kokku planeeritud kogus
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Transactions already retreived from the statement,Tehingud on avaldusest juba taganenud
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,Seis
@@ -6482,6 +6489,7 @@ DocType: Lab Test,Result Date,Tulemuse kuupäev
 DocType: Purchase Order,To Receive,Saama
 DocType: Leave Period,Holiday List for Optional Leave,Puhkusloetelu valikuliseks puhkuseks
 DocType: Item Tax Template,Tax Rates,Maksumäärad
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Kauba kood&gt; esemerühm&gt; kaubamärk
 DocType: Asset,Asset Owner,Vara omanik
 DocType: Item,Website Content,Veebisaidi sisu
 DocType: Bank Account,Integration ID,Integratsiooni ID
@@ -6607,6 +6615,7 @@ apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.
 DocType: Stock Entry Detail,Additional Cost,Lisakulu
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,"Can not filter based on Voucher No, if grouped by Voucher","Ei filtreerimiseks Voucher Ei, kui rühmitatud Voucher"
 DocType: Quality Inspection,Incoming,Saabuva
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Palun seadistage kohaloleku jaoks numeratsiooniseeria seadistamise&gt; Numeratsiooniseeria kaudu
 apps/erpnext/erpnext/setup/doctype/company/company.js,Default tax templates for sales and purchase are created.,Müügile ja ostule pääseb alla maksumallid.
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.py,Assessment Result record {0} already exists.,Hindamise tulemuste register {0} on juba olemas.
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Näide: ABCD. #####. Kui seeria on seatud ja partii number tehingutes ei mainita, luuakse selle seeria põhjal automaatne partii number. Kui soovite alati selgesõnaliselt märkida selle üksuse partii nr, jätke see tühjaks. Märkus: see seade eelistab nimeserveri eesliidet varu seadetes."
@@ -6948,6 +6957,7 @@ DocType: Journal Entry,Write Off Entry,Kirjutage Off Entry
 DocType: BOM,Rate Of Materials Based On,Hinda põhinevatest materjalidest
 DocType: Education Settings,"If enabled, field Academic Term will be Mandatory in Program Enrollment Tool.","Kui see on aktiveeritud, on programmi akadeemiline termin kohustuslik programmi registreerimisvahendis."
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,"Values of exempt, nil rated and non-GST inward supplies","Maksust vabastatud, nullmääraga ja mitte-GST-sisendtarnete väärtused"
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Klient&gt; kliendirühm&gt; territoorium
 apps/erpnext/erpnext/regional/report/datev/datev.py,<b>Company</b> is a mandatory filter.,<b>Ettevõte</b> on kohustuslik filter.
 apps/erpnext/erpnext/education/doctype/student_attendance_tool/student_attendance_tool.js,Uncheck all,Puhasta kõik
 DocType: Purchase Taxes and Charges,On Item Quantity,Kauba kogus
@@ -6992,6 +7002,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Join,liituma
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py,Shortage Qty,Puuduse Kogus
 DocType: Purchase Invoice,Input Service Distributor,Sisendteenuse levitaja
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item variant {0} exists with same attributes,Punkt variant {0} on olemas sama atribuute
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Seadistage juhendaja nimetamise süsteem jaotises Haridus&gt; Hariduse sätted
 DocType: Loan,Repay from Salary,Tagastama alates Palk
 DocType: Exotel Settings,API Token,API tunnus
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Requesting payment against {0} {1} for amount {2},TELLIN tasumises {0} {1} jaoks kogus {2}
