@@ -39,7 +39,6 @@ DocType: Payroll Period,Standard Tax Exemption Amount,標準免稅額
 DocType: Exchange Rate Revaluation Account,New Exchange Rate,新匯率
 apps/erpnext/erpnext/shopping_cart/doctype/shopping_cart_settings/shopping_cart_settings.py,Currency is required for Price List {0},價格表{0}需填入貨幣種類
 DocType: Sales Taxes and Charges Template,* Will be calculated in the transaction.,*將被計算在該交易。
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,請在人力資源&gt;人力資源設置中設置員工命名系統
 DocType: Purchase Order,Customer Contact,客戶聯絡
 DocType: Shift Type,Enable Auto Attendance,啟用自動出勤
 apps/erpnext/erpnext/stock/doctype/quick_stock_balance/quick_stock_balance.js,Please enter Warehouse and Date,請輸入倉庫和日期
@@ -84,6 +83,7 @@ DocType: SMS Center,All Supplier Contact,所有供應商聯絡
 DocType: Support Settings,Support Settings,支持設置
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account {0} is added in the child company {1},子公司{1}中添加了帳戶{0}
 apps/erpnext/erpnext/erpnext_integrations/doctype/exotel_settings/exotel_settings.py,Invalid credentials,無效證件
+apps/erpnext/erpnext/hr/doctype/employee_attendance_tool/employee_attendance_tool.js,Mark Work From Home,標記在家工作
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,ITC Available (whether in full op part),ITC可用（無論是全部操作部分）
 DocType: Amazon MWS Settings,Amazon MWS Settings,亞馬遜MWS設置
 apps/erpnext/erpnext/erpnext_integrations/doctype/tally_migration/tally_migration.py,Processing Vouchers,處理優惠券
@@ -240,6 +240,7 @@ DocType: Tax Rule,Tax Type,稅收類型
 ,Completed Work Orders,完成的工作訂單
 DocType: Support Settings,Forum Posts,論壇帖子
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py,"The task has been enqueued as a background job. In case there is any issue on processing in background, the system will add a comment about the error on this Stock Reconciliation and revert to the Draft stage",該任務已被列入後台工作。如果在後台處理有任何問題，系統將在此庫存對帳中添加有關錯誤的註釋，並恢復到草稿階段
+apps/erpnext/erpnext/controllers/accounts_controller.py,Row #{0}: Cannot delete item {1} which has work order assigned to it.,第＃{0}行：無法刪除已為其分配了工作訂單的項目{1}。
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/utils.py,"Sorry,coupon code validity has not started",抱歉，優惠券代碼有效期尚未開始
 apps/erpnext/erpnext/regional/india/utils.py,Taxable Amount,應稅金額
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py,You are not authorized to add or update entries before {0},你無權添加或更新{0}之前的條目
@@ -364,7 +365,6 @@ DocType: Purchase Invoice Item,Item Tax Amount Included in Value,物品稅金額
 apps/erpnext/erpnext/non_profit/doctype/member/member_dashboard.py,Membership Details,會員資格
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py,{0} {1}: Supplier is required against Payable account {2},{0} {1}：需要對供應商應付賬款{2}
 apps/erpnext/erpnext/config/buying.py,Items and Pricing,項目和定價
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,客戶&gt;客戶組&gt;地區
 apps/erpnext/erpnext/projects/doctype/project/project_dashboard.html,Total hours: {0},總時間：{0}
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py,From Date should be within the Fiscal Year. Assuming From Date = {0},從日期應該是在財政年度內。假設起始日期＝{0}
 DocType: Drug Prescription,Interval,間隔
@@ -408,7 +408,6 @@ apps/erpnext/erpnext/templates/emails/request_for_quotation.html,The request for
 DocType: Quiz Result,Selected Option,選擇的選項
 DocType: SG Creation Tool Course,SG Creation Tool Course,SG創建工具課程
 DocType: Bank Statement Transaction Invoice Item,Payment Description,付款說明
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,請通過設置&gt;設置&gt;命名系列為{0}設置命名系列
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Insufficient Stock,庫存不足
 DocType: Email Digest,New Sales Orders,新的銷售訂單
 DocType: Bank Account,Bank Account,銀行帳戶
@@ -706,6 +705,7 @@ DocType: Request for Quotation,Request for Quotation,詢價
 DocType: Healthcare Settings,Require Lab Test Approval,需要實驗室測試批准
 DocType: Attendance,Working Hours,工作時間
 apps/erpnext/erpnext/accounts/doctype/opening_invoice_creation_tool/opening_invoice_creation_tool_dashboard.html,Total Outstanding,總計傑出
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},找不到項目{2}的UOM轉換因子（{0}-&gt; {1}）
 DocType: Naming Series,Change the starting / current sequence number of an existing series.,更改現有系列的開始/當前的序列號。
 DocType: Accounts Settings,Percentage you are allowed to bill more against the amount ordered. For example: If the order value is $100 for an item and tolerance is set as 10% then you are allowed to bill for $110.,允許您根據訂購金額收取更多費用的百分比。例如：如果某個商品的訂單價值為100美元，而且公差設置為10％，那麼您可以支付110美元的費用。
 DocType: Dosage Strength,Strength,強度
@@ -1151,7 +1151,6 @@ DocType: Timesheet,Total Billed Hours,帳單總時間
 DocType: Pricing Rule Item Group,Pricing Rule Item Group,定價規則項目組
 DocType: Travel Itinerary,Travel To,前往
 apps/erpnext/erpnext/config/accounts.py,Exchange Rate Revaluation master.,匯率重估主數據。
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,請通過“設置”&gt;“編號序列”為出勤設置編號序列
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js,Write Off Amount,核銷金額
 DocType: Leave Block List Allow,Allow User,允許用戶
 DocType: Journal Entry,Bill No,帳單號碼
@@ -1498,6 +1497,7 @@ apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py,To
 DocType: Production Plan Item,"If enabled, system will create the work order for the exploded items against which BOM is available.",如果啟用，系統將為BOM可用的爆炸項目創建工作訂單。
 DocType: Sales Team,Incentives,獎勵
 apps/erpnext/erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py,Difference Value,差異值
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,請通過“設置”&gt;“編號序列”為出勤設置編號序列
 DocType: SMS Log,Requested Numbers,請求號碼
 DocType: Volunteer,Evening,晚間
 DocType: Quiz,Quiz Configuration,測驗配置
@@ -1650,6 +1650,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js,"For 'Produ
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,From Place,從地方
 DocType: Student Admission,Publish on website,發布在網站上
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Supplier Invoice Date cannot be greater than Posting Date,供應商發票的日期不能超過過帳日期更大
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,物料代碼&gt;物料組&gt;品牌
 DocType: Purchase Invoice Item,Purchase Order Item,採購訂單項目
 DocType: Agriculture Task,Agriculture Task,農業任務
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Indirect Income,間接收入
@@ -2205,7 +2206,6 @@ DocType: Promotional Scheme,Product Discount Slabs,產品折扣板
 DocType: Target Detail,Target Distribution,目標分佈
 DocType: Purchase Invoice,06-Finalization of Provisional assessment,06-定期評估
 apps/erpnext/erpnext/erpnext_integrations/doctype/tally_migration/tally_migration.py,Importing Parties and Addresses,進口締約方和地址
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},找不到項目{2}的UOM轉換因子（{0}-&gt; {1}）
 DocType: Salary Slip,Bank Account No.,銀行賬號
 DocType: Naming Series,This is the number of the last created transaction with this prefix,這就是以這個前綴的最後一個創建的事務數
 DocType: Supplier Scorecard,"Scorecard variables can be used, as well as:
@@ -2561,6 +2561,9 @@ DocType: Asset Maintenance Task,Certificate Required,證書要求
 DocType: Company,Default Holiday List,預設假日表列
 DocType: Pricing Rule,Supplier Group,供應商集團
 apps/erpnext/erpnext/manufacturing/doctype/job_card/job_card.py,Row {0}: From Time and To Time of {1} is overlapping with {2},行{0}：從時間和結束時間{1}是具有重疊{2}
+apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,"A BOM with name {0} already exists for item {1}.
+					<br> Did you rename the item? Please contact Administrator / Tech support
+				",項目{1}的名稱為{0}的BOM已存在。 <br>您重命名了嗎？請聯繫管理員/技術支持
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Stock Liabilities,現貨負債
 DocType: Purchase Invoice,Supplier Warehouse,供應商倉庫
 DocType: Opportunity,Contact Mobile No,聯絡手機號碼
@@ -2968,6 +2971,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,Material Consumpti
 apps/erpnext/erpnext/public/js/call_popup/call_popup.js,View all issues from {0},查看{0}中的所有問題
 DocType: Quality Meeting Table,Quality Meeting Table,質量會議桌
 apps/erpnext/erpnext/templates/pages/help.html,Visit the forums,訪問論壇
+apps/erpnext/erpnext/projects/doctype/task/task.py,Cannot complete task {0} as its dependant task {1} are not ccompleted / cancelled.,無法完成任務{0}，因為其相關任務{1}尚未完成/取消。
 DocType: Student,Student Mobile Number,學生手機號碼
 DocType: Item,Has Variants,有變種
 DocType: Employee Benefit Claim,Claim Benefit For,索賠利益
@@ -3113,7 +3117,6 @@ DocType: Inpatient Record,Discharge,卸貨
 DocType: Task,Total Billing Amount (via Time Sheet),總開票金額（通過時間表）
 apps/erpnext/erpnext/education/doctype/fee_structure/fee_structure.js,Create Fee Schedule,創建收費表
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py,Repeat Customer Revenue,重複客戶收入
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,請在“教育”&gt;“教育設置”中設置教師命名系統
 DocType: Quiz,Enter 0 to waive limit,輸入0以放棄限制
 DocType: Bank Statement Settings,Mapped Items,映射項目
 DocType: Amazon MWS Settings,IT,它
@@ -3146,7 +3149,6 @@ apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py,"T
 						Please create or link {1} Assets with respective document.",創建或鏈接到{0}的資產不足。 \請創建{1}資產或將其與相應的文檔鏈接。
 DocType: Pricing Rule,Apply Rule On Brand,在品牌上應用規則
 DocType: Task,Actual End Date (via Time Sheet),實際結束日期（通過時間表）
-apps/erpnext/erpnext/projects/doctype/task/task.py,Cannot close task {0} as its dependant task {1} is not closed.,無法關閉任務{0}，因為其依賴任務{1}未關閉。
 DocType: Soil Texture,Soil Type,土壤類型
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Amount {0} {1} against {2} {3},量{0} {1}對{2} {3}
 ,Quotation Trends,報價趨勢
@@ -3174,6 +3176,7 @@ DocType: Student Report Generation Tool,Add Letterhead,添加信頭
 DocType: Program Enrollment,Self-Driving Vehicle,自駕車
 DocType: Supplier Scorecard Standing,Supplier Scorecard Standing,供應商記分卡站立
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py,Row {0}: Bill of Materials not found for the Item {1},行{0}：材料清單未找到項目{1}
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,請在人力資源&gt;人力資源設置中設置員工命名系統
 DocType: Journal Entry,Accounts Receivable,應收帳款
 DocType: Quality Goal,Objectives,目標
 DocType: HR Settings,Role Allowed to Create Backdated Leave Application,允許創建回退休假申請的角色
@@ -3306,6 +3309,7 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Job Descr
 DocType: Student Applicant,Applied,應用的
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Details of Outward Supplies and inward supplies liable to reverse charge,向外供應和向內供應的詳細信息可能被撤銷費用
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js,Re-open,重新打開
+apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.py,Not permitted. Please disable the Lab Test Template,不允許。請禁用實驗室測試模板
 DocType: Sales Invoice Item,Qty as per Stock UOM,數量按庫存計量單位
 apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/student_and_guardian_contact_details.py,Guardian2 Name,Guardian2名稱
 DocType: Attendance,Attendance Request,出席請求
@@ -3359,6 +3363,7 @@ apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Please set GST Accou
 apps/erpnext/erpnext/regional/report/gstr_1/gstr_1.js,Type of Business,業務類型
 DocType: Sales Invoice,Consumer,消費者
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py,"Please select Allocated Amount, Invoice Type and Invoice Number in atleast one row",請ATLEAST一行選擇分配金額，發票類型和發票號碼
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,請通過設置&gt;設置&gt;命名系列為{0}設置命名系列
 apps/erpnext/erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py,Cost of New Purchase,新的採購成本
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py,Sales Order required for Item {0},所需的{0}項目銷售訂單
 DocType: Grant Application,Grant Description,授予說明
@@ -3382,7 +3387,6 @@ DocType: Payment Request,Transaction Details,交易明細
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Please click on 'Generate Schedule' to get schedule,請在“產生排程”點擊以得到排程表
 DocType: Item,"Purchase, Replenishment Details",購買，補貨細節
 DocType: Products Settings,Enable Field Filters,啟用字段過濾器
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,物料代碼&gt;物料組&gt;品牌
 apps/erpnext/erpnext/stock/doctype/item/item.py,"""Customer Provided Item"" cannot be Purchase Item also",客戶提供的物品“也不能是購買項目
 DocType: Blanket Order Item,Ordered Quantity,訂購數量
 apps/erpnext/erpnext/public/js/setup_wizard.js,"e.g. ""Build tools for builders""",例如「建設建設者工具“
@@ -3813,7 +3817,7 @@ DocType: BOM,Operating Cost (Company Currency),營業成本（公司貨幣）
 DocType: Authorization Rule,Applicable To (Role),適用於（角色）
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html,Pending Leaves,等待葉子
 DocType: BOM Update Tool,Replace BOM,更換BOM
-apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.py,Code {0} already exist,代碼{0}已經存在
+apps/erpnext/erpnext/healthcare/doctype/healthcare_service_unit_type/healthcare_service_unit_type.py,Code {0} already exist,代碼{0}已經存在
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,Sales orders are not available for production,銷售訂單不可用於生產
 DocType: Company,Fixed Asset Depreciation Settings,固定資產折舊設置
 DocType: Item,Will also apply for variants unless overrridden,同時將申請變種，除非overrridden
@@ -3921,6 +3925,7 @@ DocType: Projects Settings,Ignore Employee Time Overlap,忽略員工時間重疊
 DocType: Warranty Claim,Service Address,服務地址
 apps/erpnext/erpnext/erpnext_integrations/doctype/tally_migration/tally_migration.js,Import Master Data,導入主數據
 DocType: Asset Maintenance Task,Calibration,校準
+apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.py,Lab Test Item {0} already exist,實驗室測試項目{0}已存在
 apps/erpnext/erpnext/projects/report/billing_summary.py,Billable Hours,可開票時間
 apps/erpnext/erpnext/patches/v11_0/add_default_email_template_for_leave.py,Leave Status Notification,離開狀態通知
 DocType: Patient Appointment,Procedure Prescription,程序處方
@@ -4260,7 +4265,7 @@ apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_
 ,Salary Register,薪酬註冊
 DocType: Company,Default warehouse for Sales Return,銷售退貨的默認倉庫
 DocType: Pick List,Parent Warehouse,家長倉庫
-DocType: Subscription,Net Total,總淨值
+DocType: C-Form Invoice Detail,Net Total,總淨值
 apps/erpnext/erpnext/stock/doctype/batch/batch.py,"Set item's shelf life in days, to set expiry based on manufacturing date plus shelf-life.",設置項目的保質期（以天為單位），根據生產日期和保質期設置到期日。
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py,Default BOM not found for Item {0} and Project {1},項目{0}和項目{1}找不到默認BOM
 apps/erpnext/erpnext/regional/italy/utils.py,Row {0}: Please set the Mode of Payment in Payment Schedule,行{0}：請在付款時間表中設置付款方式
@@ -4592,8 +4597,6 @@ apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Cost Center wit
 DocType: QuickBooks Migrator,Authorization URL,授權URL
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Amount {0} {1} {2} {3},金額{0} {1} {2} {3}
 DocType: Account,Depreciation,折舊
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","請刪除員工<a href=""#Form/Employee/{0}"">{0}</a> \以取消此文檔"
 apps/erpnext/erpnext/accounts/doctype/share_transfer/share_transfer.py,The number of shares and the share numbers are inconsistent,股份數量和股票數量不一致
 apps/erpnext/erpnext/stock/report/supplier_wise_sales_analytics/supplier_wise_sales_analytics.py,Supplier(s),供應商（S）
 DocType: Employee Attendance Tool,Employee Attendance Tool,員工考勤工具
@@ -4883,7 +4886,6 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,"Even if ther
 DocType: Plant Analysis Criteria,Plant Analysis Criteria,植物分析標準
 DocType: Supplier,Supplier Details,供應商詳細資訊
 DocType: Setup Progress,Setup Progress,設置進度
-DocType: Expense Claim,Approval Status,審批狀態
 apps/erpnext/erpnext/accounts/doctype/shipping_rule/shipping_rule.py,From value must be less than to value in row {0},來源值必須小於列{0}的值
 DocType: Program,Intro Video,介紹視頻
 DocType: Manufacturing Settings,Default Warehouses for Production,默認生產倉庫
@@ -5201,7 +5203,6 @@ DocType: Purchase Invoice,Rounded Total,整數總計
 apps/erpnext/erpnext/healthcare/doctype/practitioner_schedule/practitioner_schedule.js,Slots for {0} are not added to the schedule,{0}的插槽未添加到計劃中
 DocType: Product Bundle,List items that form the package.,形成包列表項。
 apps/erpnext/erpnext/assets/doctype/asset_movement/asset_movement.py,Target Location is required while transferring Asset {0},轉移資產{0}時需要目標位置
-apps/erpnext/erpnext/healthcare/doctype/lab_test_template/lab_test_template.py,Not permitted. Please disable the Test Template,不允許。請禁用測試模板
 DocType: Sales Invoice,Distance (in km),距離（公里）
 apps/erpnext/erpnext/accounts/doctype/monthly_distribution/monthly_distribution.py,Percentage Allocation should be equal to 100%,百分比分配總和應該等於100%
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js,Please select Posting Date before selecting Party,在選擇之前，甲方請選擇發布日期
@@ -5323,7 +5324,6 @@ apps/erpnext/erpnext/education/report/student_and_guardian_contact_details/stude
 DocType: Purchase Invoice,Price List Exchange Rate,價目表匯率
 apps/erpnext/erpnext/patches/v11_0/rename_supplier_type_to_supplier_group.py,All Supplier Groups,所有供應商組織
 DocType: Employee Boarding Activity,Required for Employee Creation,員工創建需要
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,供應商&gt;供應商類型
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account Number {0} already used in account {1},已在帳戶{1}中使用的帳號{0}
 DocType: Hotel Room Reservation,Booked,預訂
 DocType: Detected Disease,Tasks Created,創建的任務
@@ -5385,7 +5385,6 @@ DocType: Production Plan Item,Product Bundle Item,產品包項目
 DocType: Sales Partner,Sales Partner Name,銷售合作夥伴名稱
 apps/erpnext/erpnext/hooks.py,Request for Quotations,索取報價
 DocType: Payment Reconciliation,Maximum Invoice Amount,最大發票額
-apps/erpnext/erpnext/accounts/doctype/bank_account/test_bank_account.py,BankAccount.validate_iban() failed for empty IBAN,BankAccount.validate_iban（）因空IBAN而失敗
 DocType: Normal Test Items,Normal Test Items,正常測試項目
 DocType: QuickBooks Migrator,Company Settings,公司設置
 DocType: Additional Salary,Overwrite Salary Structure Amount,覆蓋薪資結構金額
@@ -5526,6 +5525,7 @@ DocType: Customer,Account Manager,客戶經理
 DocType: Leave Allocation,Leave Period,休假期間
 DocType: Item,Default Material Request Type,默認材料請求類型
 DocType: Supplier Scorecard,Evaluation Period,評估期
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,客戶&gt;客戶組&gt;地區
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js,Work Order not created,工作訂單未創建
 apps/erpnext/erpnext/hr/doctype/employee_benefit_application/employee_benefit_application.py,"An amount of {0} already claimed for the component {1},\
 						 set the amount equal or greater than {2}",已為組件{1}申請的金額{0}，設置等於或大於{2}的金額
@@ -5858,8 +5858,11 @@ apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,Serial #,序列�
 DocType: Material Request Plan Item,Required Quantity,所需數量
 DocType: Lab Test Template,Lab Test Template,實驗室測試模板
 apps/erpnext/erpnext/accounts/doctype/accounting_period/accounting_period.py,Accounting Period overlaps with {0},會計期間與{0}重疊
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,供應商&gt;供應商類型
 apps/erpnext/erpnext/setup/doctype/company/company.py,Sales Account,銷售帳戶
 DocType: Purchase Invoice Item,Total Weight,總重量
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","請刪除員工<a href=""#Form/Employee/{0}"">{0}</a> \以取消此文檔"
 DocType: Pick List Item,Pick List Item,選擇清單項目
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Commission on Sales,銷售佣金
 DocType: Job Offer Term,Value / Description,值/說明
@@ -5964,6 +5967,7 @@ apps/erpnext/erpnext/setup/doctype/company/company.js,Date of Commencement shoul
 DocType: Contract,Signed On,簽名
 DocType: Bank Account,Party Type,黨的類型
 DocType: Discounted Invoice,Discounted Invoice,特價發票
+apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,將出席人數標記為<b></b>
 DocType: Payment Schedule,Payment Schedule,付款時間表
 apps/erpnext/erpnext/hr/doctype/employee_checkin/employee_checkin.py,No Employee found for the given employee field value. '{}': {},找不到給定員工字段值的員工。 &#39;{}&#39;：{}
 DocType: Item Attribute Value,Abbreviation,縮寫
@@ -6059,7 +6063,6 @@ DocType: Purchase Invoice,Reason For Putting On Hold,擱置的理由
 DocType: Employee,Personal Email,個人電子郵件
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py,Total Variance,總方差
 DocType: Accounts Settings,"If enabled, the system will post accounting entries for inventory automatically.",如果啟用，系統將自動為發布庫存會計分錄。
-apps/erpnext/erpnext/accounts/doctype/bank_account/test_bank_account.py,BankAccount.validate_iban() accepted invalid IBAN {},BankAccount.validate_iban（）接受了無效的IBAN {}
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Attendance for employee {0} is already marked for this day,考勤員工{0}已標記為這一天
 DocType: Work Order Operation,"in Minutes
 Updated via 'Time Log'","在分
@@ -6304,6 +6307,7 @@ DocType: Asset Maintenance Log,Has Certificate,有證書
 DocType: Appointment,Customer Details,客戶詳細資訊
 DocType: Asset,Check if Asset requires Preventive Maintenance or Calibration,檢查資產是否需要預防性維護或校準
 apps/erpnext/erpnext/public/js/setup_wizard.js,Company Abbreviation cannot have more than 5 characters,公司縮寫不能超過5個字符
+apps/erpnext/erpnext/setup/doctype/company/company.py,Parent Company must be a group company,母公司必須是集團公司
 DocType: Employee,Reports to,隸屬於
 ,Unpaid Expense Claim,未付費用報銷
 DocType: Payment Entry,Paid Amount,支付的金額
@@ -6387,6 +6391,7 @@ DocType: Shopify Settings,Import Sales Invoice from Shopify if Payment is marked
 apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py,Opp Count,Opp Count
 apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py,Opp Count,Opp Count
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py,Both Trial Period Start Date and Trial Period End Date must be set,必須設置試用期開始日期和試用期結束日期
+DocType: Appointment,Appointment With,預約
 apps/erpnext/erpnext/controllers/accounts_controller.py,Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total,支付計劃中的總付款金額必須等於大/圓
 apps/erpnext/erpnext/stock/doctype/item/item.py,"""Customer Provided Item"" cannot have Valuation Rate",客戶提供的物品“不能有估價率
 DocType: Subscription Plan Detail,Plan,計劃
@@ -6512,7 +6517,6 @@ apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py,Opp/L
 apps/erpnext/erpnext/crm/report/campaign_efficiency/campaign_efficiency.py,Opp/Lead %,Opp / Lead％
 DocType: Bank Guarantee,Bank Account Info,銀行賬戶信息
 DocType: Bank Guarantee,Bank Guarantee Type,銀行擔保類型
-apps/erpnext/erpnext/accounts/doctype/bank_account/test_bank_account.py,BankAccount.validate_iban() failed for valid IBAN {},BankAccount.validate_iban（）因有效IBAN {}失敗
 DocType: Payment Schedule,Invoice Portion,發票部分
 ,Asset Depreciations and Balances,資產折舊和平衡
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Amount {0} {1} transferred from {2} to {3},金額{0} {1}從轉移{2}到{3}
@@ -7125,7 +7129,6 @@ DocType: Dosage Form,Dosage Form,劑型
 apps/erpnext/erpnext/crm/doctype/email_campaign/email_campaign.py,Please set up the Campaign Schedule in the Campaign {0},請在廣告系列{0}中設置廣告系列計劃
 apps/erpnext/erpnext/config/buying.py,Price List master.,價格表主檔
 DocType: Task,Review Date,評論日期
-apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,將出席人數標記為<b></b>
 DocType: BOM,Allow Alternative Item,允許替代項目
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.js,Purchase Receipt doesn't have any Item for which Retain Sample is enabled.,購買收據沒有任何啟用了保留樣本的項目。
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py,Invoice Grand Total,發票總計
@@ -7339,7 +7342,6 @@ apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.htm
 DocType: Amazon MWS Settings,Max Retry Limit,最大重試限制
 apps/erpnext/erpnext/accounts/page/pos/pos.js,Price List not found or disabled,價格表未找到或被禁用
 DocType: Content Activity,Last Activity ,上次活動
-DocType: Student Applicant,Approved,批准
 DocType: Pricing Rule,Price,價格
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py,Employee relieved on {0} must be set as 'Left',員工解除對{0}必須設定為“左”
 DocType: Guardian,Guardian,監護人
@@ -7492,6 +7494,7 @@ apps/erpnext/erpnext/setup/doctype/currency_exchange/currency_exchange.py,From C
 DocType: Taxable Salary Slab,Percent Deduction,扣除百分比
 DocType: Stock Entry,Repack,重新包裝
 apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js,Select to add Serial Number.,選擇添加序列號。
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,請在“教育”&gt;“教育設置”中設置教師命名系統
 apps/erpnext/erpnext/regional/italy/utils.py,Please set Fiscal Code for the customer '%s',請為客戶&#39;％s&#39;設置財務代碼
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js,Please select the Company first,請先選擇公司
 DocType: Item Attribute,Numeric Values,數字值
@@ -7507,6 +7510,7 @@ DocType: Salary Detail,Additional Amount,額外金額
 apps/erpnext/erpnext/templates/includes/cart/cart_dropdown.html,Cart is Empty,車是空的
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,"Item {0} has no Serial No. Only serilialized items \
 						can have delivery based on Serial No",項目{0}沒有序列號只有serilialized items \可以根據序列號進行交付
+apps/erpnext/erpnext/assets/report/fixed_asset_register/fixed_asset_register.py,Depreciated Amount,折舊額
 DocType: Work Order,Actual Operating Cost,實際運行成本
 DocType: Payment Entry,Cheque/Reference No,支票/參考編號
 apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js,Fetch based on FIFO,基於FIFO獲取
