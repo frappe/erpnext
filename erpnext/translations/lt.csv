@@ -389,6 +389,7 @@ DocType: BOM Update Tool,New BOM,nauja BOM
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Prescribed Procedures,Nustatytos procedūros
 apps/erpnext/erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js,Show only POS,Rodyti tik POS
 DocType: Supplier Group,Supplier Group Name,Tiekėjo grupės pavadinimas
+apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,Pažymėkite dalyvavimą kaip <b></b>
 DocType: Driver,Driving License Categories,Vairuotojo pažymėjimo kategorijos
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please enter Delivery Date,Įveskite pristatymo datą
 DocType: Depreciation Schedule,Make Depreciation Entry,Padaryti nusidėvėjimo įrašą
@@ -4229,6 +4230,8 @@ DocType: Homepage,Homepage,Pagrindinis puslapis
 DocType: Grant Application,Grant Application Details ,Pareiškimo detalės
 DocType: Employee Separation,Employee Separation,Darbuotojų atskyrimas
 DocType: BOM Item,Original Item,Originalus elementas
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","Ištrinkite darbuotoją <a href=""#Form/Employee/{0}"">{0}</a> \, kad galėtumėte atšaukti šį dokumentą"
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Doc Date,Dokumento data
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py,Fee Records Created - {0},Fee Įrašai Sukurta - {0}
 DocType: Asset Category Account,Asset Category Account,Turto Kategorija paskyra
@@ -5255,6 +5258,7 @@ apps/erpnext/erpnext/config/projects.py,Cost of various activities,Išlaidos įv
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}","Nustatymas įvykių {0}, nes pridedamas prie žemiau pardavėjai darbuotojas neturi naudotojo ID {1}"
 DocType: Timesheet,Billing Details,Atsiskaitymo informacija
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Source and target warehouse must be different,Originalo ir vertimo sandėlis turi skirtis
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,Prašome nustatyti darbuotojų įvardijimo sistemą skyriuje Žmogiškieji ištekliai&gt; HR nustatymai
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Failed. Please check your GoCardless Account for more details,"Mokėjimas nepavyko. Prašome patikrinti savo &quot;GoCardless&quot; sąskaitą, kad gautumėte daugiau informacijos"
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Not allowed to update stock transactions older than {0},Neleidžiama atnaujinti akcijų sandorius senesnis nei {0}
 DocType: Stock Entry,Inspection Required,Patikrinimo Reikalinga
@@ -5488,6 +5492,7 @@ DocType: Bank Account,IBAN,IBAN
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Current BOM and New BOM can not be same,Dabartinis BOM ir Naujoji BOM negali būti tas pats
 apps/erpnext/erpnext/hr/report/salary_register/salary_register.py,Salary Slip ID,Pajamos Kuponas ID
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Date Of Retirement must be greater than Date of Joining,Data nuo išėjimo į pensiją turi būti didesnis nei įstoti data
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Tiekėjas&gt; Tiekėjo tipas
 apps/erpnext/erpnext/stock/doctype/item/item.js,Multiple Variants,Keli variantai
 DocType: Sales Invoice,Against Income Account,Prieš pajamų sąskaita
 apps/erpnext/erpnext/controllers/website_list_for_contact.py,{0}% Delivered,{0}% Pristatyta
@@ -6329,6 +6334,7 @@ DocType: Program Enrollment,Institute's Bus,Instituto autobusas
 DocType: Accounts Settings,Role Allowed to Set Frozen Accounts & Edit Frozen Entries,Vaidmuo leidžiama nustatyti užšaldytų sąskaitų ir redaguoti Šaldyti įrašai
 DocType: Supplier Scorecard Scoring Variable,Path,Kelias
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Cannot convert Cost Center to ledger as it has child nodes,"Negali konvertuoti Cost centrą knygoje, nes ji turi vaikų mazgai"
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},UOM konversijos koeficientas ({0} -&gt; {1}) nerastas elementui: {2}
 DocType: Production Plan,Total Planned Qty,Bendras planuojamas kiekis
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Transactions already retreived from the statement,Sandoriai jau atimami iš pareiškimo
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,atidarymo kaina
@@ -6552,6 +6558,7 @@ DocType: Lab Test,Result Date,Rezultato data
 DocType: Purchase Order,To Receive,Gauti
 DocType: Leave Period,Holiday List for Optional Leave,Atostogų sąrašas pasirinktinai
 DocType: Item Tax Template,Tax Rates,Mokesčių tarifai
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Prekės kodas&gt; Prekių grupė&gt; Prekės ženklas
 DocType: Asset,Asset Owner,Turto savininkas
 DocType: Item,Website Content,Svetainės turinys
 DocType: Bank Account,Integration ID,Integracijos ID
@@ -6677,6 +6684,7 @@ apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.
 DocType: Stock Entry Detail,Additional Cost,Papildoma Kaina
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,"Can not filter based on Voucher No, if grouped by Voucher","Negali filtruoti pagal lakšto, jei grupuojamas kuponą"
 DocType: Quality Inspection,Incoming,įeinantis
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Prašome nustatyti numeracijos serijas lankymui per sąranką&gt; Numeravimo serijos
 apps/erpnext/erpnext/setup/doctype/company/company.js,Default tax templates for sales and purchase are created.,Sukuriami numatyti mokesčių šablonai pardavimui ir pirkimui.
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.py,Assessment Result record {0} already exists.,Vertinimo rezultatų įrašas {0} jau egzistuoja.
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Pavyzdys: ABCD. #####. Jei serijos yra nustatytos ir partijos Nr nėra minimi sandoriuose, tada automatinis partijos numeris bus sukurtas pagal šią seriją. Jei visada norite aiškiai paminėti šios prekės partiją, palikite tuščią. Pastaba: šis nustatymas bus pirmenybė prieš vardų serijos prefiksą, esantį atsargų nustatymuose."
@@ -7020,6 +7028,7 @@ DocType: Journal Entry,Write Off Entry,Nurašyti įrašą
 DocType: BOM,Rate Of Materials Based On,Norma medžiagų pagrindu
 DocType: Education Settings,"If enabled, field Academic Term will be Mandatory in Program Enrollment Tool.","Jei įjungta, &quot;Academic Term&quot; laukas bus privalomas programos įregistravimo įrankyje."
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,"Values of exempt, nil rated and non-GST inward supplies","Neapmokestinamų, neapmokestinamų ir ne GST įvežamų atsargų vertės"
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Klientas&gt; Klientų grupė&gt; Teritorija
 apps/erpnext/erpnext/regional/report/datev/datev.py,<b>Company</b> is a mandatory filter.,<b>Bendrovė</b> yra privalomas filtras.
 apps/erpnext/erpnext/education/doctype/student_attendance_tool/student_attendance_tool.js,Uncheck all,Nuimkite visus
 DocType: Purchase Taxes and Charges,On Item Quantity,Ant prekės kiekio
@@ -7065,6 +7074,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Join,prisijungti
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py,Shortage Qty,trūkumo Kiekis
 DocType: Purchase Invoice,Input Service Distributor,Įvesties paslaugų platintojas
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item variant {0} exists with same attributes,Prekė variantas {0} egzistuoja pačių savybių
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Prašome įdiegti instruktoriaus pavadinimo sistemą švietime&gt; Švietimo nustatymai
 DocType: Loan,Repay from Salary,Grąžinti iš Pajamos
 DocType: Exotel Settings,API Token,API prieigos raktas
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Requesting payment against {0} {1} for amount {2},"Prašančioji mokėjimą nuo {0} {1} už sumą, {2}"

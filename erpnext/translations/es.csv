@@ -389,6 +389,7 @@ DocType: BOM Update Tool,New BOM,Nueva Solicitud de Materiales
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Prescribed Procedures,Procedimientos Prescritos
 apps/erpnext/erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js,Show only POS,Mostrar solo POS
 DocType: Supplier Group,Supplier Group Name,Nombre del Grupo de Proveedores
+apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,Marcar asistencia como <b></b>
 DocType: Driver,Driving License Categories,Categorías de Licencia de Conducir
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please enter Delivery Date,"Por favor, introduzca la Fecha de Entrega"
 DocType: Depreciation Schedule,Make Depreciation Entry,Hacer la Entrada de Depreciación
@@ -999,6 +1000,7 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,Increment ca
 DocType: Company,Delete Company Transactions,Eliminar las transacciones de la compañía
 DocType: Production Plan Item,Quantity and Description,Cantidad y descripción
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Reference No and Reference Date is mandatory for Bank transaction,Nro de referencia y fecha de referencia es obligatoria para las transacciones bancarias
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Configure Naming Series para {0} a través de Configuración&gt; Configuración&gt; Naming Series
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Añadir / Editar Impuestos y Cargos
 DocType: Payment Entry Reference,Supplier Invoice No,Factura de proveedor No.
 DocType: Territory,For reference,Para referencia
@@ -4199,6 +4201,8 @@ DocType: Homepage,Homepage,Página Principal
 DocType: Grant Application,Grant Application Details ,Detalles de Solicitud de Subvención
 DocType: Employee Separation,Employee Separation,Separación de Empleados
 DocType: BOM Item,Original Item,Artículo Original
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","Elimine el empleado <a href=""#Form/Employee/{0}"">{0}</a> \ para cancelar este documento"
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Doc Date,Fecha del Doc
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py,Fee Records Created - {0},Registros de cuotas creados - {0}
 DocType: Asset Category Account,Asset Category Account,Cuenta de categoría de activos
@@ -5228,6 +5232,7 @@ apps/erpnext/erpnext/config/projects.py,Cost of various activities,Costo de dive
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}","Ajustar Eventos a {0}, ya que el Empleado adjunto a las Personas de Venta siguientes no tiene un ID de Usuario{1}."
 DocType: Timesheet,Billing Details,Detalles de facturación
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Source and target warehouse must be different,Almacén de Origen y Destino deben ser diferentes
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,Configure el Sistema de nombres de empleados en Recursos humanos&gt; Configuración de recursos humanos
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Failed. Please check your GoCardless Account for more details,Pago Fallido. Verifique su Cuenta GoCardless para más detalles
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Not allowed to update stock transactions older than {0},No tiene permisos para actualizar las transacciones de stock mayores al  {0}
 DocType: Stock Entry,Inspection Required,Inspección Requerida
@@ -5461,6 +5466,7 @@ DocType: Bank Account,IBAN,IBAN
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Current BOM and New BOM can not be same,La lista de materiales (LdM) actual y la nueva no pueden ser las mismas
 apps/erpnext/erpnext/hr/report/salary_register/salary_register.py,Salary Slip ID,ID de Nómina
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Date Of Retirement must be greater than Date of Joining,La fecha de jubilación debe ser mayor que la fecha de ingreso
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Proveedor&gt; Tipo de proveedor
 apps/erpnext/erpnext/stock/doctype/item/item.js,Multiple Variants,Multiples Variantes
 DocType: Sales Invoice,Against Income Account,Contra cuenta de ingresos
 apps/erpnext/erpnext/controllers/website_list_for_contact.py,{0}% Delivered,{0}% Entregado
@@ -6290,6 +6296,7 @@ DocType: Program Enrollment,Institute's Bus,Autobús del Instituto
 DocType: Accounts Settings,Role Allowed to Set Frozen Accounts & Edit Frozen Entries,Rol que permite definir cuentas congeladas y editar asientos congelados
 DocType: Supplier Scorecard Scoring Variable,Path,Camino
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Cannot convert Cost Center to ledger as it has child nodes,"No se puede convertir de 'Centros de Costos' a una cuenta del libro mayor, ya que tiene sub-grupos"
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},Factor de conversión de UOM ({0} -&gt; {1}) no encontrado para el elemento: {2}
 DocType: Production Plan,Total Planned Qty,Cantidad Total Planificada
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Transactions already retreived from the statement,Transacciones ya retiradas del extracto
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,Valor de Apertura
@@ -6512,6 +6519,7 @@ DocType: Lab Test,Result Date,Fecha del Resultado
 DocType: Purchase Order,To Receive,Recibir
 DocType: Leave Period,Holiday List for Optional Leave,Lista de vacaciones para la licencia opcional
 DocType: Item Tax Template,Tax Rates,Las tasas de impuestos
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Código de artículo&gt; Grupo de artículos&gt; Marca
 DocType: Asset,Asset Owner,Propietario del activo
 DocType: Item,Website Content,Contenido del sitio web
 DocType: Bank Account,Integration ID,ID de integración
@@ -6637,6 +6645,7 @@ apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.
 DocType: Stock Entry Detail,Additional Cost,Costo adicional
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,"Can not filter based on Voucher No, if grouped by Voucher","No se puede filtrar en función al 'No. de comprobante', si esta agrupado por el nombre"
 DocType: Quality Inspection,Incoming,Entrante
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Configure la serie de numeración para la Asistencia a través de Configuración&gt; Serie de numeración
 apps/erpnext/erpnext/setup/doctype/company/company.js,Default tax templates for sales and purchase are created.,Se crean plantillas de impuestos predeterminadas para ventas y compras.
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.py,Assessment Result record {0} already exists.,El registro de Resultados de la Evaluación {0} ya existe.
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Ejemplo: ABCD. #####. Si se establece una serie y no se menciona el No de lote en las transacciones, se creará un número de lote automático basado en esta serie. Si siempre quiere mencionar explícitamente el No de lote para este artículo, déjelo en blanco. Nota: esta configuración tendrá prioridad sobre el Prefijo de denominación de serie en Configuración de stock."
@@ -6978,6 +6987,7 @@ DocType: Journal Entry,Write Off Entry,Diferencia de desajuste
 DocType: BOM,Rate Of Materials Based On,Valor de materiales basado en
 DocType: Education Settings,"If enabled, field Academic Term will be Mandatory in Program Enrollment Tool.","Si está habilitado, el término académico del campo será obligatorio en la herramienta de inscripción al programa."
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,"Values of exempt, nil rated and non-GST inward supplies","Valores de suministros internos exentos, nulos y no GST"
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Cliente&gt; Grupo de clientes&gt; Territorio
 apps/erpnext/erpnext/regional/report/datev/datev.py,<b>Company</b> is a mandatory filter.,<b>La empresa</b> es un filtro obligatorio.
 apps/erpnext/erpnext/education/doctype/student_attendance_tool/student_attendance_tool.js,Uncheck all,Desmarcar todos
 DocType: Purchase Taxes and Charges,On Item Quantity,En Cantidad de Item
@@ -7022,6 +7032,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Join,Unirse
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py,Shortage Qty,Cantidad faltante
 DocType: Purchase Invoice,Input Service Distributor,Distribuidor de servicio de entrada
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item variant {0} exists with same attributes,Existe la variante de artículo {0} con mismos atributos
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Configure el Sistema de nombres de instructores en Educación&gt; Configuración de educación
 DocType: Loan,Repay from Salary,Reembolso del Salario
 DocType: Exotel Settings,API Token,Token API
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Requesting payment against {0} {1} for amount {2},Solicitando el pago contra {0} {1} para la cantidad {2}

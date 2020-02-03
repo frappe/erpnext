@@ -389,6 +389,7 @@ DocType: BOM Update Tool,New BOM,Új Anyagjegyzék
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Prescribed Procedures,Előírt eljárások
 apps/erpnext/erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js,Show only POS,Csak POS megjelenítése
 DocType: Supplier Group,Supplier Group Name,A beszállító csoport neve
+apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,Jelölje meg a részvételt mint <b></b>
 DocType: Driver,Driving License Categories,Vezetői engedély kategóriái
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please enter Delivery Date,"Kérjük, adja meg a szállítási határidőt"
 DocType: Depreciation Schedule,Make Depreciation Entry,ÉCS bejegyzés generálás
@@ -997,6 +998,7 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,Increment ca
 DocType: Company,Delete Company Transactions,Vállalati tranzakciók törlése
 DocType: Production Plan Item,Quantity and Description,Mennyiség és leírás
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Reference No and Reference Date is mandatory for Bank transaction,Hivatkozási szám és Referencia dátum kötelező a Banki tranzakcióhoz
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,"Kérjük, állítsa a Naming Series értékét a (z) {0} beállításra a Beállítás&gt; Beállítások&gt; Soros elnevezés menüponttal"
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Adók és költségek hozzáadása / szerkesztése
 DocType: Payment Entry Reference,Supplier Invoice No,Beszállítói számla száma
 DocType: Territory,For reference,Referenciaként
@@ -4198,6 +4200,8 @@ DocType: Homepage,Homepage,Kezdőlap
 DocType: Grant Application,Grant Application Details ,Támogatási kérelem részletei
 DocType: Employee Separation,Employee Separation,Munkavállalói elválasztás
 DocType: BOM Item,Original Item,Eredeti tétel
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","Kérjük, törölje a (z) <a href=""#Form/Employee/{0}"">{0}</a> alkalmazottat a dokumentum visszavonásához"
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Doc Date,Doc dátum
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py,Fee Records Created - {0},Díj rekordok létrehozva - {0}
 DocType: Asset Category Account,Asset Category Account,Vagyontárgy kategória főkönyvi számla
@@ -5214,6 +5218,7 @@ apps/erpnext/erpnext/config/projects.py,Cost of various activities,Különböző
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}","Beállítás Események {0}, mivel az Alkalmazott hozzácsatolt a lenti értékesítőkhöz, akiknek  nincsenek felhasználói azonosítói: {1}"
 DocType: Timesheet,Billing Details,Számlázási adatok
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Source and target warehouse must be different,Forrás és cél raktárnak különböznie kell
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,"Kérjük, állítsa be a Munkavállalók elnevezési rendszerét a Humán erőforrás&gt; HR beállítások menüpontban"
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Failed. Please check your GoCardless Account for more details,Fizetés meghiúsult. További részletekért tekintse meg GoCardless-fiókját
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Not allowed to update stock transactions older than {0},"Nem engedélyezett a készlet tranzakciók frissítése, mely régebbi, mint {0}"
 DocType: Stock Entry,Inspection Required,Minőség-ellenőrzés szükséges
@@ -5447,6 +5452,7 @@ DocType: Bank Account,IBAN,IBAN
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Current BOM and New BOM can not be same,Jelenlegi anyagjegyzék és az ÚJ anyagjegyzés nem lehet ugyanaz
 apps/erpnext/erpnext/hr/report/salary_register/salary_register.py,Salary Slip ID,Bérpapír ID
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Date Of Retirement must be greater than Date of Joining,"Nyugdíjazás dátumának nagyobbnak kell lennie, mint Csatlakozás dátuma"
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Szállító&gt; Beszállító típusa
 apps/erpnext/erpnext/stock/doctype/item/item.js,Multiple Variants,Több változat
 DocType: Sales Invoice,Against Income Account,Elleni jövedelem számla
 apps/erpnext/erpnext/controllers/website_list_for_contact.py,{0}% Delivered,{0}% szállítva
@@ -6275,6 +6281,7 @@ DocType: Program Enrollment,Institute's Bus,Intézmény busza
 DocType: Accounts Settings,Role Allowed to Set Frozen Accounts & Edit Frozen Entries,Beosztás élesítheni a zárolt számlákat & szerkeszthesse a zárolt bejegyzéseket
 DocType: Supplier Scorecard Scoring Variable,Path,Útvonal
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Cannot convert Cost Center to ledger as it has child nodes,Nem lehet átalakítani költséghelyet főkönyvi számlán hiszen vannak al csomópontjai
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},UOM konverziós tényező ({0} -&gt; {1}) nem található az elemre: {2}
 DocType: Production Plan,Total Planned Qty,Teljes tervezett mennyiség
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Transactions already retreived from the statement,A tranzakciók már visszavonultak a nyilatkozatból
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,Nyitó érték
@@ -6495,6 +6502,7 @@ DocType: Lab Test,Result Date,Eredmény dátuma
 DocType: Purchase Order,To Receive,Beérkeztetés
 DocType: Leave Period,Holiday List for Optional Leave,Távolléti lista az opcionális távollétekhez
 DocType: Item Tax Template,Tax Rates,Adókulcsok
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Cikkszám&gt; Tételcsoport&gt; Márka
 DocType: Asset,Asset Owner,Vagyontárgy tulajdonos
 DocType: Item,Website Content,Weboldal tartalma
 DocType: Bank Account,Integration ID,Integrációs azonosító
@@ -6620,6 +6628,7 @@ apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.
 DocType: Stock Entry Detail,Additional Cost,Járulékos költség
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,"Can not filter based on Voucher No, if grouped by Voucher","Nem tudja szűrni utalvány szám alapján, ha utalványonként csoportosított"
 DocType: Quality Inspection,Incoming,Bejövő
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,"Kérjük, állítsa be a számozási sorozatokat a jelenléthez a Beállítás&gt; Számozási sorozat segítségével"
 apps/erpnext/erpnext/setup/doctype/company/company.js,Default tax templates for sales and purchase are created.,Az értékesítés és a vásárlás alapértelmezett adómintáit létre hozták.
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.py,Assessment Result record {0} already exists.,Értékelés eredménye rekord {0} már létezik.
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Példa: ABCD. #####. Ha sorozatot állít be, és a tétel nem szerepel a tranzakciókban, akkor a sorozaton alapuló automatikus tételszám kerül létrehozásra. Ha mindig erről a tételr köteg számról szeretné kifejezetten megemlíteni a tételszámot, hagyja üresen. Megjegyzés: ez a beállítás elsőbbséget élvez a készletbeállítások között az elnevezési sorozat előtag felett a leltár beállításoknál."
@@ -6961,6 +6970,7 @@ DocType: Journal Entry,Write Off Entry,Leíró Bejegyzés
 DocType: BOM,Rate Of Materials Based On,Anyagköltség számítás módja
 DocType: Education Settings,"If enabled, field Academic Term will be Mandatory in Program Enrollment Tool.","Ha engedélyezve van, az Akadémiai mező mező kötelező lesz a program beiratkozási eszközben."
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,"Values of exempt, nil rated and non-GST inward supplies","Az adómentes, nulla névleges és nem GST behozatali termékek értékei"
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Vevő&gt; Vevőcsoport&gt; Terület
 apps/erpnext/erpnext/regional/report/datev/datev.py,<b>Company</b> is a mandatory filter.,<b>A társaság</b> kötelező szűrő.
 apps/erpnext/erpnext/education/doctype/student_attendance_tool/student_attendance_tool.js,Uncheck all,Összes kijelöletlen
 DocType: Purchase Taxes and Charges,On Item Quantity,A tétel mennyiségen
@@ -7005,6 +7015,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Join,Csatlakozik
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py,Shortage Qty,Hiány Mennyisége
 DocType: Purchase Invoice,Input Service Distributor,Bemeneti szolgáltató
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item variant {0} exists with same attributes,Tétel változat {0} létezik azonos Jellemzőkkel
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,"Kérjük, állítsa be az Oktató elnevezési rendszert az Oktatás&gt; Oktatási beállítások menüben"
 DocType: Loan,Repay from Salary,Bérből törleszteni
 DocType: Exotel Settings,API Token,API token
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Requesting payment against {0} {1} for amount {2},Fizetési igény ehhez {0} {1} ezzel az összeggel {2}

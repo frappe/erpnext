@@ -389,6 +389,7 @@ DocType: BOM Update Tool,New BOM,Nova llista de materials
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Prescribed Procedures,Procediments prescrits
 apps/erpnext/erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js,Show only POS,Mostra només TPV
 DocType: Supplier Group,Supplier Group Name,Nom del grup del proveïdor
+apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,Marcar l&#39;assistència com <b></b>
 DocType: Driver,Driving License Categories,Categories de llicències de conducció
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please enter Delivery Date,Introduïu la data de lliurament
 DocType: Depreciation Schedule,Make Depreciation Entry,Fer l&#39;entrada de Depreciació
@@ -999,6 +1000,7 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,Increment ca
 DocType: Company,Delete Company Transactions,Eliminar Transaccions Empresa
 DocType: Production Plan Item,Quantity and Description,Quantitat i descripció
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Reference No and Reference Date is mandatory for Bank transaction,No de referència i data de referència és obligatòria per a les transaccions bancàries
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Configureu Naming Series per a {0} mitjançant Configuració&gt; Configuració&gt; Sèries de nom
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Afegeix / Edita les taxes i càrrecs
 DocType: Payment Entry Reference,Supplier Invoice No,Número de Factura de Proveïdor
 DocType: Territory,For reference,Per referència
@@ -4240,6 +4242,8 @@ DocType: Homepage,Homepage,pàgina principal
 DocType: Grant Application,Grant Application Details ,Concediu els detalls de la sol·licitud
 DocType: Employee Separation,Employee Separation,Separació d&#39;empleats
 DocType: BOM Item,Original Item,Article original
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","Elimineu l&#39;empleat <a href=""#Form/Employee/{0}"">{0}</a> \ per cancel·lar aquest document"
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Doc Date,Data de doc
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py,Fee Records Created - {0},Els registres d&#39;honoraris creats - {0}
 DocType: Asset Category Account,Asset Category Account,Compte categoria d&#39;actius
@@ -5269,6 +5273,7 @@ apps/erpnext/erpnext/config/projects.py,Cost of various activities,Cost de diver
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}","Configura els esdeveniments a {0}, ja que l&#39;empleat que estigui connectat a la continuació venedors no té un ID d&#39;usuari {1}"
 DocType: Timesheet,Billing Details,Detalls de facturació
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Source and target warehouse must be different,Origen i destí de dipòsit han de ser diferents
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,Configureu el sistema de nominació dels empleats a Recursos humans&gt; Configuració de recursos humans
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Failed. Please check your GoCardless Account for more details,"El pagament ha fallat. Si us plau, consulteu el vostre compte GoCardless per obtenir més detalls"
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Not allowed to update stock transactions older than {0},No es permet actualitzar les transaccions de valors més grans de {0}
 DocType: Stock Entry,Inspection Required,Inspecció requerida
@@ -5502,6 +5507,7 @@ DocType: Bank Account,IBAN,IBAN
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Current BOM and New BOM can not be same,El BOM actual i el nou no poden ser el mateix
 apps/erpnext/erpnext/hr/report/salary_register/salary_register.py,Salary Slip ID,Salari Slip ID
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Date Of Retirement must be greater than Date of Joining,Data de la jubilació ha de ser major que la data del contracte
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Proveïdor&gt; Tipus de proveïdor
 apps/erpnext/erpnext/stock/doctype/item/item.js,Multiple Variants,Variants múltiples
 DocType: Sales Invoice,Against Income Account,Contra el Compte d'Ingressos
 apps/erpnext/erpnext/controllers/website_list_for_contact.py,{0}% Delivered,{0}% Lliurat
@@ -6332,6 +6338,7 @@ DocType: Program Enrollment,Institute's Bus,Bus de l&#39;Institut
 DocType: Accounts Settings,Role Allowed to Set Frozen Accounts & Edit Frozen Entries,Paper deixa forjar congelats Comptes i editar les entrades congelades
 DocType: Supplier Scorecard Scoring Variable,Path,Camí
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Cannot convert Cost Center to ledger as it has child nodes,"No es pot convertir de centres de cost per al llibre major, ja que té nodes secundaris"
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},Factor de conversió UOM ({0} -&gt; {1}) no trobat per a l&#39;element: {2}
 DocType: Production Plan,Total Planned Qty,Total de quantitats planificades
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Transactions already retreived from the statement,Les transaccions ja s&#39;han recuperat de l&#39;estat
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,Valor d&#39;obertura
@@ -6554,6 +6561,7 @@ DocType: Lab Test,Result Date,Data de resultats
 DocType: Purchase Order,To Receive,Rebre
 DocType: Leave Period,Holiday List for Optional Leave,Llista de vacances per a la licitació opcional
 DocType: Item Tax Template,Tax Rates,Tipus d’impostos
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Codi de l&#39;article&gt; Grup d&#39;elements&gt; Marca
 DocType: Asset,Asset Owner,Propietari d&#39;actius
 DocType: Item,Website Content,Contingut del lloc web
 DocType: Bank Account,Integration ID,ID d&#39;integració
@@ -6680,6 +6688,7 @@ apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.
 DocType: Stock Entry Detail,Additional Cost,Cost addicional
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,"Can not filter based on Voucher No, if grouped by Voucher","Can not filter based on Voucher No, if grouped by Voucher"
 DocType: Quality Inspection,Incoming,Entrant
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Configureu les sèries de numeració per assistència mitjançant Configuració&gt; Sèries de numeració
 apps/erpnext/erpnext/setup/doctype/company/company.js,Default tax templates for sales and purchase are created.,Es creen plantilles d&#39;impostos predeterminades per a vendes i compra.
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.py,Assessment Result record {0} already exists.,El registre del resultat de l&#39;avaluació {0} ja existeix.
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Exemple: ABCD. #####. Si s&#39;estableix la sèrie i el lot no es menciona en les transaccions, es crearà un nombre automàtic de lot en funció d&#39;aquesta sèrie. Si sempre voleu esmentar explícitament No per a aquest element, deixeu-lo en blanc. Nota: aquesta configuració tindrà prioritat sobre el Prefix de la sèrie de noms a la configuració de valors."
@@ -7021,6 +7030,7 @@ DocType: Journal Entry,Write Off Entry,Escriu Off Entrada
 DocType: BOM,Rate Of Materials Based On,Tarifa de materials basats en
 DocType: Education Settings,"If enabled, field Academic Term will be Mandatory in Program Enrollment Tool.","Si està habilitat, el camp acadèmic de camp serà obligatori en l&#39;eina d&#39;inscripció del programa."
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,"Values of exempt, nil rated and non-GST inward supplies","Valors dels subministraments interns exempts, no classificats i no GST"
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Client&gt; Grup de clients&gt; Territori
 apps/erpnext/erpnext/regional/report/datev/datev.py,<b>Company</b> is a mandatory filter.,<b>L’empresa</b> és un filtre obligatori.
 apps/erpnext/erpnext/education/doctype/student_attendance_tool/student_attendance_tool.js,Uncheck all,desactivar tot
 DocType: Purchase Taxes and Charges,On Item Quantity,Quantitat de l&#39;article
@@ -7065,6 +7075,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Join,unir-se
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py,Shortage Qty,Quantitat escassetat
 DocType: Purchase Invoice,Input Service Distributor,Distribuïdor de servei d’entrada
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item variant {0} exists with same attributes,Hi ha la variant d&#39;article {0} amb mateixos atributs
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Configureu un sistema de nom de l’Instructor a Educació&gt; Configuració d’educació
 DocType: Loan,Repay from Salary,Pagar del seu sou
 DocType: Exotel Settings,API Token,Títol API
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Requesting payment against {0} {1} for amount {2},Sol·licitant el pagament contra {0} {1} per la quantitat {2}

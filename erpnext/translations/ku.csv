@@ -380,6 +380,7 @@ DocType: BOM Update Tool,New BOM,New BOM
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Prescribed Procedures,Pêvajûkirinên Qeydkirî
 apps/erpnext/erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js,Show only POS,POS tenê nîşan bide
 DocType: Supplier Group,Supplier Group Name,Navê Giştî
+apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,Mark beşdarbûn wek <b></b>
 DocType: Driver,Driving License Categories,Kategorî
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please enter Delivery Date,"Ji kerema xwe, Dîroka Deliveryê bike"
 DocType: Depreciation Schedule,Make Depreciation Entry,Make Peyam Farhad.
@@ -986,6 +987,7 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,Increment ca
 DocType: Company,Delete Company Transactions,Vemirandina Transactions Company
 DocType: Production Plan Item,Quantity and Description,Quantity and Description
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Reference No and Reference Date is mandatory for Bank transaction,Çavkanî No û Date: Çavkanî ji bo muameleyan Bank wêneke e
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Ji kerema xwe Sêwirandina Navên foran ji bo {0} bi hêla Setup&gt; Mîhengên&gt; Navên Pîroz bikin
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Lê zêde bike Baca / Edit û doz li
 DocType: Payment Entry Reference,Supplier Invoice No,Supplier bi fatûreyên No
 DocType: Territory,For reference,ji bo referansa
@@ -5149,6 +5151,7 @@ apps/erpnext/erpnext/config/projects.py,Cost of various activities,Cost ji çala
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}","Bikin Events {0}, ji ber ku Employee girêdayî jêr Persons Sales nade a ID&#39;ya bikarhêner heye ne {1}"
 DocType: Timesheet,Billing Details,Details Billing
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Source and target warehouse must be different,Source û warehouse target divê cuda bê
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,Ji kerema xwe di Resavkaniya Mirovan de&gt; Sîstema Navkirin a Karmendiyê Saz bikin&gt; Mîhengên HR
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Failed. Please check your GoCardless Account for more details,Payment failed. Ji kerema xwe ji berfirehtir ji bo Agahdariya GoCardless binihêre
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Not allowed to update stock transactions older than {0},destûra te ya rojanekirina muameleyên borsayê yên kevintir ji {0}
 DocType: Stock Entry,Inspection Required,Serperiştiya Required
@@ -5378,6 +5381,7 @@ DocType: Bank Account,IBAN,IBAN
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Current BOM and New BOM can not be same,BOM û niha New BOM ne dikarin heman
 apps/erpnext/erpnext/hr/report/salary_register/salary_register.py,Salary Slip ID,Meaş ID Slip
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Date Of Retirement must be greater than Date of Joining,"Date Of Teqawîdiyê, divê mezintir Date of bizaveka be"
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Hilberîner&gt; Tîpa pêşkêşkar
 apps/erpnext/erpnext/stock/doctype/item/item.js,Multiple Variants,Pirrjimar Pirrjimar
 DocType: Sales Invoice,Against Income Account,Li dijî Account da-
 apps/erpnext/erpnext/controllers/website_list_for_contact.py,{0}% Delivered,{0}% Çiyan
@@ -6415,6 +6419,7 @@ DocType: Lab Test,Result Date,Result Date
 DocType: Purchase Order,To Receive,Hildan
 DocType: Leave Period,Holiday List for Optional Leave,Lîsteya Bersîvê Ji bo Bijareya Bijartinê
 DocType: Item Tax Template,Tax Rates,Rêjeyên bacan
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Koda Babetê&gt; Koma Rêzan&gt; Brand
 DocType: Asset,Asset Owner,Xwedêkariya xwedan
 DocType: Item,Website Content,Naveroka malperê
 DocType: Bank Account,Integration ID,Nasnameya yekbûnê
@@ -6538,6 +6543,7 @@ apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.
 DocType: Stock Entry Detail,Additional Cost,Cost Additional
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,"Can not filter based on Voucher No, if grouped by Voucher","Can filter li ser Voucher No bingeha ne, eger ji aliyê Vienna kom"
 DocType: Quality Inspection,Incoming,Incoming
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Ji kerema xwe ji hêla Tevlêbûnê&gt; Pêjeya Hejmarbûnê ve ji bo Pêvekêşandinê hejmarên hejmaran bikin
 apps/erpnext/erpnext/setup/doctype/company/company.js,Default tax templates for sales and purchase are created.,Saziyên bacê yên ji bo firotin û kirînê ji nû ve tên afirandin.
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.py,Assessment Result record {0} already exists.,Nirxandina encamê {0} jixwe heye.
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Nimûne: ABCD. #####. Heke ku rêzikek vekirî ye û Batch Na ne di nav veguhestinê de nirxandin, hingê hejmarek navnîşa otobusê otomatîk li ser vê pirtûkê hatiye afirandin. Heke hûn herdem herdem ji bo vê yekê tiştek balkêş binivîsin, ji vê derê vekin. Têbînî: ev sazkirinê dê li ser Sîsteyên Sûkê li ser Nameya Cîhanê ya Sermaseyê pêşniyar bibin."
@@ -6874,6 +6880,7 @@ DocType: Journal Entry,Write Off Entry,Hewe Off Peyam
 DocType: BOM,Rate Of Materials Based On,Rate ji materyalên li ser bingeha
 DocType: Education Settings,"If enabled, field Academic Term will be Mandatory in Program Enrollment Tool.","Heke çalak, zeviya Termê akademîk dê di navendên Bernameya Enrollmentê de nerast be."
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,"Values of exempt, nil rated and non-GST inward supplies","Nirxên amûrên xwerû, jêkûpêkkirî û ne-GST navxweyî"
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Mişterî&gt; Koma Xerîdar&gt; Herêm
 apps/erpnext/erpnext/regional/report/datev/datev.py,<b>Company</b> is a mandatory filter.,<b>Pargîdan</b> fîlterkerek domdar e.
 apps/erpnext/erpnext/education/doctype/student_attendance_tool/student_attendance_tool.js,Uncheck all,menuya hemû
 DocType: Purchase Taxes and Charges,On Item Quantity,Li ser qumarê tişt
@@ -6919,6 +6926,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Join,Bihevgirêdan
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py,Shortage Qty,kêmbûna Qty
 DocType: Purchase Invoice,Input Service Distributor,Belavkarê Karûbarê Input
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item variant {0} exists with same attributes,variant babete {0} bi taybetmendiyên xwe heman heye
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Ji kerema xwe Li Perwerde&gt; Mîhengên Perwerdehiyê Sîstema Navkirin a Sêwiran saz bikin
 DocType: Loan,Repay from Salary,H&#39;eyfê ji Salary
 DocType: Exotel Settings,API Token,API Token
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Requesting payment against {0} {1} for amount {2},Ku daxwaz dikin tezmînat li dijî {0} {1} ji bo mîktarê {2}

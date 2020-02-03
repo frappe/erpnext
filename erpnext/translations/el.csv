@@ -389,6 +389,7 @@ DocType: BOM Update Tool,New BOM,Νέα Λ.Υ.
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Prescribed Procedures,Προβλεπόμενες Διαδικασίες
 apps/erpnext/erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js,Show only POS,Εμφάνιση μόνο POS
 DocType: Supplier Group,Supplier Group Name,Όνομα ομάδας προμηθευτών
+apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,Σημειώστε τη συμμετοχή ως <b></b>
 DocType: Driver,Driving License Categories,Κατηγορίες Άδειας οδήγησης
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please enter Delivery Date,Εισαγάγετε την ημερομηνία παράδοσης
 DocType: Depreciation Schedule,Make Depreciation Entry,Κάντε Αποσβέσεις Έναρξη
@@ -999,6 +1000,7 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,Increment ca
 DocType: Company,Delete Company Transactions,Διαγραφή Συναλλαγές Εταιρείας
 DocType: Production Plan Item,Quantity and Description,Ποσότητα και περιγραφή
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Reference No and Reference Date is mandatory for Bank transaction,Αριθμός αναφοράς και ημερομηνία αναφοράς είναι υποχρεωτική για την Τράπεζα συναλλαγών
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Ορίστε την Ονοματοδοσία για {0} μέσω του Setup&gt; Settings&gt; Naming Series
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Προσθήκη / επεξεργασία φόρων και επιβαρύνσεων
 DocType: Payment Entry Reference,Supplier Invoice No,Αρ. τιμολογίου του προμηθευτή
 DocType: Territory,For reference,Για αναφορά
@@ -4237,6 +4239,8 @@ DocType: Homepage,Homepage,Αρχική σελίδα
 DocType: Grant Application,Grant Application Details ,Λεπτομέρειες αίτησης επιχορήγησης
 DocType: Employee Separation,Employee Separation,Διαχωρισμός υπαλλήλων
 DocType: BOM Item,Original Item,Αρχικό στοιχείο
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","Διαγράψτε τον υπάλληλο <a href=""#Form/Employee/{0}"">{0}</a> \ για να ακυρώσετε αυτό το έγγραφο"
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Doc Date,Ημερομηνία εγγράφου
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py,Fee Records Created - {0},Εγγραφές τέλους Δημιουργήθηκε - {0}
 DocType: Asset Category Account,Asset Category Account,Asset Κατηγορία Λογαριασμού
@@ -5266,6 +5270,7 @@ apps/erpnext/erpnext/config/projects.py,Cost of various activities,Το κόστ
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}","Ρύθμιση Εκδηλώσεις σε {0}, καθόσον ο εργαζόμενος συνδέεται με την παρακάτω Πωλήσεις Άτομα που δεν έχει ένα όνομα χρήστη {1}"
 DocType: Timesheet,Billing Details,λεπτομέρειες χρέωσης
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Source and target warehouse must be different,Πηγή και αποθήκη στόχος πρέπει να είναι διαφορετική
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,Ρυθμίστε το Σύστημα Ονοματοδοσίας Εργαζομένων σε Ανθρώπινο Δυναμικό&gt; Ρυθμίσεις HR
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Failed. Please check your GoCardless Account for more details,Η πληρωμή απέτυχε. Ελέγξτε το λογαριασμό GoCardless για περισσότερες λεπτομέρειες
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Not allowed to update stock transactions older than {0},Δεν επιτρέπεται να ενημερώσετε συναλλαγές αποθέματος παλαιότερες από {0}
 DocType: Stock Entry,Inspection Required,Απαιτείται έλεγχος
@@ -5499,6 +5504,7 @@ DocType: Bank Account,IBAN,IBAN
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Current BOM and New BOM can not be same,Η τρέχουσα Λ.Υ. και η νέα Λ.Υ. δεν μπορεί να είναι ίδιες
 apps/erpnext/erpnext/hr/report/salary_register/salary_register.py,Salary Slip ID,Μισθός ID Slip
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Date Of Retirement must be greater than Date of Joining,Η ημερομηνία συνταξιοδότησης πρέπει να είναι μεταγενέστερη από την ημερομηνία πρόσληψης
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Προμηθευτής&gt; Τύπος προμηθευτή
 apps/erpnext/erpnext/stock/doctype/item/item.js,Multiple Variants,Πολλαπλές παραλλαγές
 DocType: Sales Invoice,Against Income Account,Κατά τον λογαριασμό εσόδων
 apps/erpnext/erpnext/controllers/website_list_for_contact.py,{0}% Delivered,{0}% Παραδόθηκαν
@@ -6328,6 +6334,7 @@ DocType: Program Enrollment,Institute's Bus,Bus του Ινστιτούτου
 DocType: Accounts Settings,Role Allowed to Set Frozen Accounts & Edit Frozen Entries,Ο ρόλος επιτρέπεται να καθορίζει παγωμένους λογαριασμούς & να επεξεργάζετε παγωμένες καταχωρήσεις
 DocType: Supplier Scorecard Scoring Variable,Path,Μονοπάτι
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Cannot convert Cost Center to ledger as it has child nodes,"Δεν είναι δυνατή η μετατροπή του κέντρου κόστους σε καθολικό, όπως έχει κόμβους-παιδιά"
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},UOM Ο συντελεστής μετατροπής ({0} -&gt; {1}) δεν βρέθηκε για το στοιχείο: {2}
 DocType: Production Plan,Total Planned Qty,Συνολική προγραμματισμένη ποσότητα
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Transactions already retreived from the statement,Οι συναλλαγές έχουν ήδη ανατραπεί από τη δήλωση
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,Αξία ανοίγματος
@@ -6550,6 +6557,7 @@ DocType: Lab Test,Result Date,Ημερομηνία αποτελεσμάτων
 DocType: Purchase Order,To Receive,Να Λάβω
 DocType: Leave Period,Holiday List for Optional Leave,Λίστα διακοπών για προαιρετική άδεια
 DocType: Item Tax Template,Tax Rates,Φορολογικοί δείκτες
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Κωδικός στοιχείου&gt; Ομάδα στοιχείων&gt; Μάρκα
 DocType: Asset,Asset Owner,Ιδιοκτήτης περιουσιακών στοιχείων
 DocType: Item,Website Content,Περιεχόμενο ιστότοπου
 DocType: Bank Account,Integration ID,Αναγνωριστικό ενοποίησης
@@ -6676,6 +6684,7 @@ apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.
 DocType: Stock Entry Detail,Additional Cost,Πρόσθετο κόστος
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,"Can not filter based on Voucher No, if grouped by Voucher","Δεν μπορείτε να φιλτράρετε με βάση αρ. αποδεικτικού, αν είναι ομαδοποιημένες ανά αποδεικτικό"
 DocType: Quality Inspection,Incoming,Εισερχόμενος
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Ρυθμίστε τη σειρά αρίθμησης για τη συμμετοχή μέσω του προγράμματος Εγκατάστασης&gt; Σειρά αρίθμησης
 apps/erpnext/erpnext/setup/doctype/company/company.js,Default tax templates for sales and purchase are created.,Προεπιλεγμένα πρότυπα φόρου για τις πωλήσεις και την αγορά δημιουργούνται.
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.py,Assessment Result record {0} already exists.,Η καταγραφή Αποτέλεσμα Αξιολόγησης {0} υπάρχει ήδη.
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Παράδειγμα: ABCD. #####. Εάν έχει οριστεί σειρά και η Παρτίδα αριθ. Δεν αναφέρεται στις συναλλαγές, τότε θα δημιουργηθεί αυτόματος αριθμός παρτίδας βάσει αυτής της σειράς. Εάν θέλετε πάντα να αναφέρετε ρητώς τον αριθμό παρτίδας για αυτό το στοιχείο, αφήστε το κενό. Σημείωση: αυτή η ρύθμιση θα έχει προτεραιότητα σε σχέση με το πρόθεμα σειράς ονομάτων στις ρυθμίσεις αποθεμάτων."
@@ -7017,6 +7026,7 @@ DocType: Journal Entry,Write Off Entry,Καταχώρηση διαγραφής
 DocType: BOM,Rate Of Materials Based On,Τιμή υλικών με βάση
 DocType: Education Settings,"If enabled, field Academic Term will be Mandatory in Program Enrollment Tool.","Αν είναι ενεργοποιημένη, ο τομέας Ακαδημαϊκός όρος θα είναι υποχρεωτικός στο εργαλείο εγγραφής προγραμμάτων."
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,"Values of exempt, nil rated and non-GST inward supplies","Τιμές εξαιρούμενων, μηδενικού και μη πραγματικών εισαγωγικών προμηθειών"
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Πελάτης&gt; Ομάδα πελατών&gt; Επικράτεια
 apps/erpnext/erpnext/regional/report/datev/datev.py,<b>Company</b> is a mandatory filter.,<b>Η εταιρεία</b> είναι υποχρεωτικό φίλτρο.
 apps/erpnext/erpnext/education/doctype/student_attendance_tool/student_attendance_tool.js,Uncheck all,Καταργήστε την επιλογή όλων
 DocType: Purchase Taxes and Charges,On Item Quantity,Σχετικά με την ποσότητα του στοιχείου
@@ -7061,6 +7071,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Join,Συμμετοχή
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py,Shortage Qty,Έλλειψη ποσότητας
 DocType: Purchase Invoice,Input Service Distributor,Διανομέας υπηρεσιών εισόδου
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item variant {0} exists with same attributes,Παραλλαγή Θέση {0} υπάρχει με ίδια χαρακτηριστικά
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Ρυθμίστε το Σύστημα Ονοματοδοσίας Εκπαιδευτών στην Εκπαίδευση&gt; Ρυθμίσεις Εκπαίδευσης
 DocType: Loan,Repay from Salary,Επιστρέψει από το μισθό
 DocType: Exotel Settings,API Token,API Token
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Requesting payment against {0} {1} for amount {2},Ζητώντας την καταβολή εναντίον {0} {1} για ποσό {2}

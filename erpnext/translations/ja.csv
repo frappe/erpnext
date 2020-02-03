@@ -389,6 +389,7 @@ DocType: BOM Update Tool,New BOM,新しい部品表
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Prescribed Procedures,規定の手続き
 apps/erpnext/erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js,Show only POS,POSのみ表示
 DocType: Supplier Group,Supplier Group Name,サプライヤグループ名
+apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,出席としてマーク<b></b>
 DocType: Driver,Driving License Categories,運転免許のカテゴリ
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please enter Delivery Date,納期を入力してください
 DocType: Depreciation Schedule,Make Depreciation Entry,減価償却のエントリを作成します
@@ -1000,6 +1001,7 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,Increment ca
 DocType: Company,Delete Company Transactions,会社の取引を削除
 DocType: Production Plan Item,Quantity and Description,数量と説明
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Reference No and Reference Date is mandatory for Bank transaction,銀行取引には参照番号と参照日が必須です
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,[設定]&gt; [設定]&gt; [命名シリーズ]で{0}の命名シリーズを設定してください
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,租税公課の追加/編集
 DocType: Payment Entry Reference,Supplier Invoice No,サプライヤー請求番号
 DocType: Territory,For reference,参考のため
@@ -4257,6 +4259,8 @@ DocType: Homepage,Homepage,ホームページ
 DocType: Grant Application,Grant Application Details ,助成金申請詳細
 DocType: Employee Separation,Employee Separation,従業員の分離
 DocType: BOM Item,Original Item,オリジナルアイテム
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","このドキュメントをキャンセルするには、従業員<a href=""#Form/Employee/{0}"">{0}</a> \を削除してください"
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Doc Date,ドキュメントの日付
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py,Fee Records Created - {0},作成したフィーレコード -  {0}
 DocType: Asset Category Account,Asset Category Account,資産カテゴリーアカウント
@@ -5285,6 +5289,7 @@ apps/erpnext/erpnext/config/projects.py,Cost of various activities,様々な活�
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}",以下の営業担当者に配置された従業員にはユーザーID {1} が無いため、{0}にイベントを設定します
 DocType: Timesheet,Billing Details,支払明細
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Source and target warehouse must be different,ソースとターゲット・ウェアハウスは異なっている必要があります
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,人事管理&gt; HR設定で従業員命名システムを設定してください
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Failed. Please check your GoCardless Account for more details,支払いに失敗しました。詳細はGoCardlessアカウントで確認してください
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Not allowed to update stock transactions older than {0},{0}よりも古い在庫取引を更新することはできません
 DocType: Stock Entry,Inspection Required,要検査
@@ -5518,6 +5523,7 @@ DocType: Bank Account,IBAN,IBAN
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Current BOM and New BOM can not be same,「現在の部品表」と「新しい部品表」は同じにすることはできません
 apps/erpnext/erpnext/hr/report/salary_register/salary_register.py,Salary Slip ID,給与明細ID
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Date Of Retirement must be greater than Date of Joining,退職日は入社日より後でなければなりません
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,サプライヤ&gt;サプライヤタイプ
 apps/erpnext/erpnext/stock/doctype/item/item.js,Multiple Variants,複数のバリエーション
 DocType: Sales Invoice,Against Income Account,対損益勘定
 apps/erpnext/erpnext/controllers/website_list_for_contact.py,{0}% Delivered,{0}％配送済
@@ -6347,6 +6353,7 @@ DocType: Program Enrollment,Institute's Bus,研究所のバス
 DocType: Accounts Settings,Role Allowed to Set Frozen Accounts & Edit Frozen Entries,アカウントの凍結と凍結エントリの編集が許可された役割
 DocType: Supplier Scorecard Scoring Variable,Path,パス
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Cannot convert Cost Center to ledger as it has child nodes,子ノードがあるため、コストセンターを元帳に変換することはできません
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},アイテムのUOM換算係数（{0}-&gt; {1}）が見つかりません：{2}
 DocType: Production Plan,Total Planned Qty,計画総数
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Transactions already retreived from the statement,ステートメントからすでに取り出されたトランザクション
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,始値
@@ -6569,6 +6576,7 @@ DocType: Lab Test,Result Date,結果の日付
 DocType: Purchase Order,To Receive,受領する
 DocType: Leave Period,Holiday List for Optional Leave,オプション休暇の休日一覧
 DocType: Item Tax Template,Tax Rates,税率
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,商品コード&gt;商品グループ&gt;ブランド
 DocType: Asset,Asset Owner,資産所有者
 DocType: Item,Website Content,ウェブサイトのコンテンツ
 DocType: Bank Account,Integration ID,統合ID
@@ -6695,6 +6703,7 @@ apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.
 DocType: Stock Entry Detail,Additional Cost,追加費用
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,"Can not filter based on Voucher No, if grouped by Voucher",伝票でグループ化されている場合、伝票番号でフィルタリングすることはできません。
 DocType: Quality Inspection,Incoming,収入
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,[設定]&gt; [番号シリーズ]を使用して、出席の番号シリーズを設定してください
 apps/erpnext/erpnext/setup/doctype/company/company.js,Default tax templates for sales and purchase are created.,販売および購買のデフォルト税テンプレートが登録されます。
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.py,Assessment Result record {0} already exists.,評価結果レコード{0}は既に存在します。
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.",例：ABCD。#####。 seriesが設定され、トランザクションでBatch Noが指定されていない場合、このシリーズに基づいて自動バッチ番号が作成されます。この項目のBatch Noを明示的に指定する場合は、この項目を空白のままにしておきます。注：この設定は、ストック設定のネーミングシリーズ接頭辞よりも優先されます。
@@ -7034,6 +7043,7 @@ DocType: Journal Entry,Write Off Entry,償却エントリ
 DocType: BOM,Rate Of Materials Based On,資材単価基準
 DocType: Education Settings,"If enabled, field Academic Term will be Mandatory in Program Enrollment Tool.",有効にすると、Program Enrollment ToolにAcademic Termフィールドが必須となります。
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,"Values of exempt, nil rated and non-GST inward supplies",免除、ゼロ評価および非GSTの対内供給の価値
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,顧客&gt;顧客グループ&gt;テリトリー
 apps/erpnext/erpnext/regional/report/datev/datev.py,<b>Company</b> is a mandatory filter.,<b>会社</b>は必須フィルターです。
 apps/erpnext/erpnext/education/doctype/student_attendance_tool/student_attendance_tool.js,Uncheck all,すべて選択解除
 DocType: Purchase Taxes and Charges,On Item Quantity,商品数量について
@@ -7078,6 +7088,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Join,参加
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py,Shortage Qty,不足数量
 DocType: Purchase Invoice,Input Service Distributor,入力サービス配給業者
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item variant {0} exists with same attributes,アイテムバリエーション{0}は同じ属性で存在しています
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,[教育]&gt; [教育の設定]でインストラクターの命名システムを設定してください
 DocType: Loan,Repay from Salary,給与から返済
 DocType: Exotel Settings,API Token,APIトークン
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Requesting payment against {0} {1} for amount {2},量 {2} 用の {0} {1}に対する支払依頼

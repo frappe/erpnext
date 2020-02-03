@@ -390,6 +390,7 @@ DocType: BOM Update Tool,New BOM,新建物料清单
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Prescribed Procedures,规定程序
 apps/erpnext/erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js,Show only POS,只显示POS
 DocType: Supplier Group,Supplier Group Name,供应商群组名称
+apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,将出席人数标记为<b></b>
 DocType: Driver,Driving License Categories,驾驶执照类别
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please enter Delivery Date,请输入交货日期
 DocType: Depreciation Schedule,Make Depreciation Entry,创建计算折旧凭证
@@ -1007,6 +1008,7 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,Increment ca
 DocType: Company,Delete Company Transactions,删除正式上线前的测试数据
 DocType: Production Plan Item,Quantity and Description,数量和描述
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Reference No and Reference Date is mandatory for Bank transaction,银行交易中参考编号和参考日期必填
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,请通过设置&gt;设置&gt;命名系列为{0}设置命名系列
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,添加/编辑税金及费用
 DocType: Payment Entry Reference,Supplier Invoice No,供应商费用清单编号
 DocType: Territory,For reference,供参考
@@ -4255,6 +4257,8 @@ DocType: Homepage,Homepage,主页
 DocType: Grant Application,Grant Application Details ,授予申请细节
 DocType: Employee Separation,Employee Separation,员工离职
 DocType: BOM Item,Original Item,原物料
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","请删除员工<a href=""#Form/Employee/{0}"">{0}</a> \以取消此文档"
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Doc Date,Doc Date
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py,Fee Records Created - {0},费纪录已建立 -  {0}
 DocType: Asset Category Account,Asset Category Account,资产类别的科目
@@ -5279,6 +5283,7 @@ apps/erpnext/erpnext/config/projects.py,Cost of various activities,各种活动�
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}",设置活动为{0}，因为附连到下面的销售者的员工不具有用户ID {1}
 DocType: Timesheet,Billing Details,开票（帐单）信息
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Source and target warehouse must be different,源和目标仓库必须是不同的
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,请在人力资源&gt;人力资源设置中设置员工命名系统
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Failed. Please check your GoCardless Account for more details,支付失败。请检查您的GoCardless科目以了解更多信息
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Not allowed to update stock transactions older than {0},不允许对早于{0}的库存交易进行更新
 DocType: Stock Entry,Inspection Required,需要检验
@@ -5514,6 +5519,7 @@ DocType: Bank Account,IBAN,IBAN
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Current BOM and New BOM can not be same,当前BOM和新BOM不能相同
 apps/erpnext/erpnext/hr/report/salary_register/salary_register.py,Salary Slip ID,工资单编号
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Date Of Retirement must be greater than Date of Joining,退休日期必须大于入职日期
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,供应商&gt;供应商类型
 apps/erpnext/erpnext/stock/doctype/item/item.js,Multiple Variants,多种变体
 DocType: Sales Invoice,Against Income Account,针对的收益账目
 apps/erpnext/erpnext/controllers/website_list_for_contact.py,{0}% Delivered,{0}％交付
@@ -6355,6 +6361,7 @@ DocType: Program Enrollment,Institute's Bus,学院的巴士
 DocType: Accounts Settings,Role Allowed to Set Frozen Accounts & Edit Frozen Entries,允许设置冻结科目和编辑冻结凭证的角色
 DocType: Supplier Scorecard Scoring Variable,Path,路径
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Cannot convert Cost Center to ledger as it has child nodes,不能将成本中心转换为分类账，因为它有子项。
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},找不到项目{2}的UOM转换因子（{0}-&gt; {1}）
 DocType: Production Plan,Total Planned Qty,总计划数量
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Transactions already retreived from the statement,已从报表中检索到的交易
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,期初金额
@@ -6578,6 +6585,7 @@ DocType: Lab Test,Result Date,结果日期
 DocType: Purchase Order,To Receive,等收货
 DocType: Leave Period,Holiday List for Optional Leave,可选假期的假期列表
 DocType: Item Tax Template,Tax Rates,税率
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,物料代码&gt;物料组&gt;品牌
 DocType: Asset,Asset Owner,资产所有者
 DocType: Item,Website Content,网站内容
 DocType: Bank Account,Integration ID,集成ID
@@ -6704,6 +6712,7 @@ apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.
 DocType: Stock Entry Detail,Additional Cost,额外费用
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,"Can not filter based on Voucher No, if grouped by Voucher",按凭证分类后不能根据凭证编号过滤
 DocType: Quality Inspection,Incoming,来料检验
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,请通过“设置”&gt;“编号序列”为出勤设置编号序列
 apps/erpnext/erpnext/setup/doctype/company/company.js,Default tax templates for sales and purchase are created.,销售和采购的默认税收模板被创建。
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.py,Assessment Result record {0} already exists.,评估结果记录{0}已经存在。
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.",例如：ABCD。#####。如果系列已设置且交易中未输入批号，则将根据此系列创建自动批号。如果您始终想要明确提及此料品的批号，请将此留为空白。注意：此设置将优先于库存设置中的名录前缀。
@@ -7047,6 +7056,7 @@ DocType: Journal Entry,Write Off Entry,销帐分录
 DocType: BOM,Rate Of Materials Based On,基于以下的物料单价
 DocType: Education Settings,"If enabled, field Academic Term will be Mandatory in Program Enrollment Tool.",如果启用，则在学期注册工具中，字段学术期限将是强制性的。
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,"Values of exempt, nil rated and non-GST inward supplies",豁免，零税率和非商品及服务税内向供应的价值
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,客户&gt;客户组&gt;地区
 apps/erpnext/erpnext/regional/report/datev/datev.py,<b>Company</b> is a mandatory filter.,<b>公司</b>是强制性过滤器。
 apps/erpnext/erpnext/education/doctype/student_attendance_tool/student_attendance_tool.js,Uncheck all,取消全选
 DocType: Purchase Taxes and Charges,On Item Quantity,关于物品数量
@@ -7092,6 +7102,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Join,加入
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py,Shortage Qty,短缺数量
 DocType: Purchase Invoice,Input Service Distributor,输入服务分销商
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item variant {0} exists with same attributes,相同属性物料变体{0}已存在
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,请在“教育”&gt;“教育设置”中设置教师命名系统
 DocType: Loan,Repay from Salary,从工资偿还
 DocType: Exotel Settings,API Token,API令牌
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Requesting payment against {0} {1} for amount {2},请求对付款{0} {1}量{2}

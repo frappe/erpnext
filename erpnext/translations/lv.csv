@@ -388,6 +388,7 @@ DocType: BOM Update Tool,New BOM,Jaunais BOM
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Prescribed Procedures,Noteiktas procedūras
 apps/erpnext/erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js,Show only POS,Rādīt tikai POS
 DocType: Supplier Group,Supplier Group Name,Piegādātāja grupas nosaukums
+apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,Atzīmēt apmeklējumu kā <b></b>
 DocType: Driver,Driving License Categories,Vadītāja apliecību kategorijas
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please enter Delivery Date,"Lūdzu, ievadiet piegādes datumu"
 DocType: Depreciation Schedule,Make Depreciation Entry,Padarīt Nolietojums Entry
@@ -1002,6 +1003,7 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,Increment ca
 DocType: Company,Delete Company Transactions,Dzēst Uzņēmums Darījumi
 DocType: Production Plan Item,Quantity and Description,Daudzums un apraksts
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Reference No and Reference Date is mandatory for Bank transaction,Atsauces Nr un atsauces datums ir obligāta Bank darījumu
+apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,"Lūdzu, iestatiet nosaukšanas sēriju uz {0}, izmantojot Iestatīšana&gt; Iestatījumi&gt; Sēriju nosaukšana"
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Pievienot / rediģēt nodokļiem un maksājumiem
 DocType: Payment Entry Reference,Supplier Invoice No,Piegādātāju rēķinu Nr
 DocType: Territory,For reference,Par atskaites
@@ -4226,6 +4228,8 @@ DocType: Homepage,Homepage,Mājaslapa
 DocType: Grant Application,Grant Application Details ,Piešķirt pieteikuma informāciju
 DocType: Employee Separation,Employee Separation,Darbinieku nodalīšana
 DocType: BOM Item,Original Item,Oriģināla prece
+apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
+					to cancel this document","Lūdzu, izdzēsiet darbinieku <a href=""#Form/Employee/{0}"">{0}</a> \, lai atceltu šo dokumentu"
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Doc Date,Doc Datums
 apps/erpnext/erpnext/education/doctype/program_enrollment/program_enrollment.py,Fee Records Created - {0},Maksa Records Izveidoja - {0}
 DocType: Asset Category Account,Asset Category Account,Asset kategorija konts
@@ -5250,6 +5254,7 @@ apps/erpnext/erpnext/config/projects.py,Cost of various activities,Izmaksas daž
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}","Setting notikumi {0}, jo darbinieku pievienots zemāk Sales personām nav lietotāja ID {1}"
 DocType: Timesheet,Billing Details,Norēķinu Details
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Source and target warehouse must be different,Avota un mērķa noliktava jāatšķiras
+apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,"Lūdzu, iestatiet Personāla nosaukšanas sistēma personāla resursos&gt; HR iestatījumi"
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Failed. Please check your GoCardless Account for more details,"Maksājums neizdevās. Lai saņemtu sīkāku informāciju, lūdzu, pārbaudiet GoCardless kontu"
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Not allowed to update stock transactions older than {0},"Nav atļauts izmainīt akciju darījumiem, kas vecāki par {0}"
 DocType: Stock Entry,Inspection Required,Inspekcija Nepieciešamais
@@ -5483,6 +5488,7 @@ DocType: Bank Account,IBAN,IBAN
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Current BOM and New BOM can not be same,Pašreizējā BOM un New BOM nevar būt vienādi
 apps/erpnext/erpnext/hr/report/salary_register/salary_register.py,Salary Slip ID,Alga Slip ID
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Date Of Retirement must be greater than Date of Joining,Brīža līdz pensionēšanās jābūt lielākam nekā datums savienošana
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Piegādātājs&gt; Piegādātāja tips
 apps/erpnext/erpnext/stock/doctype/item/item.js,Multiple Variants,Vairāki varianti
 DocType: Sales Invoice,Against Income Account,Pret ienākuma kontu
 apps/erpnext/erpnext/controllers/website_list_for_contact.py,{0}% Delivered,{0}% Pasludināts
@@ -6324,6 +6330,7 @@ DocType: Program Enrollment,Institute's Bus,Institūta autobuss
 DocType: Accounts Settings,Role Allowed to Set Frozen Accounts & Edit Frozen Entries,Loma atļauts noteikt iesaldētos kontus un rediģēt Saldētas Ieraksti
 DocType: Supplier Scorecard Scoring Variable,Path,Ceļš
 apps/erpnext/erpnext/accounts/doctype/cost_center/cost_center.py,Cannot convert Cost Center to ledger as it has child nodes,"Nevar pārvērst izmaksu centru, lai grāmatai, jo tā ir bērnu mezgliem"
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},Vienumam {2} nav atrasts UOM konversijas koeficients ({0} -&gt; {1}).
 DocType: Production Plan,Total Planned Qty,Kopējais plānotais daudzums
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Transactions already retreived from the statement,Darījumi jau ir atkāpti no paziņojuma
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,atklāšanas Value
@@ -6547,6 +6554,7 @@ DocType: Lab Test,Result Date,Rezultāta datums
 DocType: Purchase Order,To Receive,Saņemt
 DocType: Leave Period,Holiday List for Optional Leave,Brīvdienu saraksts izvēles atvaļinājumam
 DocType: Item Tax Template,Tax Rates,Nodokļu likmes
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Preces kods&gt; Vienību grupa&gt; Zīmols
 DocType: Asset,Asset Owner,Īpašuma īpašnieks
 DocType: Item,Website Content,Vietnes saturs
 DocType: Bank Account,Integration ID,Integrācijas ID
@@ -6673,6 +6681,7 @@ apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.
 DocType: Stock Entry Detail,Additional Cost,Papildu izmaksas
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,"Can not filter based on Voucher No, if grouped by Voucher","Nevar filtrēt balstīta uz kupona, ja grupēti pēc kuponu"
 DocType: Quality Inspection,Incoming,Ienākošs
+apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,"Lūdzu, iestatiet apmeklējumu numerācijas sērijas, izmantojot Iestatīšana&gt; Numerācijas sērija"
 apps/erpnext/erpnext/setup/doctype/company/company.js,Default tax templates for sales and purchase are created.,Tiek veidoti noklusējuma nodokļu veidnes pārdošanai un pirkšanai.
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.py,Assessment Result record {0} already exists.,Novērtējuma rezultātu reģistrs {0} jau eksistē.
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Piemērs: ABCD. #####. Ja sērija ir iestatīta un Partijas Nr nav minēts darījumos, automātiskais partijas numurs tiks izveidots, pamatojoties uz šo sēriju. Ja jūs vienmēr vēlaties skaidri norādīt šī vienuma partijas Nr, atstājiet šo tukšu. Piezīme. Šis iestatījums būs prioritāte salīdzinājumā ar nosaukumu sērijas prefiksu krājumu iestatījumos."
@@ -7016,6 +7025,7 @@ DocType: Journal Entry,Write Off Entry,Uzrakstiet Off Entry
 DocType: BOM,Rate Of Materials Based On,Novērtējiet materiālu specifikācijas Based On
 DocType: Education Settings,"If enabled, field Academic Term will be Mandatory in Program Enrollment Tool.","Ja tas ir iespējots, lauka akadēmiskais termins būs obligāts programmas uzņemšanas rīkā."
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,"Values of exempt, nil rated and non-GST inward supplies","Ar nodokli neapliekamo, ar nulli apliekamo un ar GST nesaistīto iekšējo piegāžu vērtības"
+apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Klients&gt; Klientu grupa&gt; Teritorija
 apps/erpnext/erpnext/regional/report/datev/datev.py,<b>Company</b> is a mandatory filter.,<b>Uzņēmums</b> ir obligāts filtrs.
 apps/erpnext/erpnext/education/doctype/student_attendance_tool/student_attendance_tool.js,Uncheck all,Noņemiet visas
 DocType: Purchase Taxes and Charges,On Item Quantity,Uz preces daudzumu
@@ -7061,6 +7071,7 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Join,pievienoties
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py,Shortage Qty,Trūkums Daudz
 DocType: Purchase Invoice,Input Service Distributor,Ievades pakalpojumu izplatītājs
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item variant {0} exists with same attributes,Postenis variants {0} nepastāv ar tiem pašiem atribūtiem
+apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,"Lūdzu, iestatiet instruktora nosaukšanas sistēmu sadaļā Izglītība&gt; Izglītības iestatījumi"
 DocType: Loan,Repay from Salary,Atmaksāt no algas
 DocType: Exotel Settings,API Token,API pilnvara
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Requesting payment against {0} {1} for amount {2},Pieprasot samaksu pret {0} {1} par summu {2}
