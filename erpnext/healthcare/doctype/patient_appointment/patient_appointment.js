@@ -11,7 +11,7 @@ frappe.ui.form.on('Patient Appointment', {
 	refresh: function(frm) {
 		frm.set_query("patient", function () {
 			return {
-				filters: {"status": "Disabled"}
+				filters: {"status": "Active"}
 			};
 		});
 		frm.set_query("practitioner", function() {
