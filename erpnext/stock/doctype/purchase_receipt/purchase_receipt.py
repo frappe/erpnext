@@ -11,8 +11,10 @@ import frappe.defaults
 from erpnext.controllers.buying_controller import BuyingController
 from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
-from erpnext.buying.utils import check_for_closed_status
+from frappe.model.mapper import get_mapped_doc
+from erpnext.buying.utils import check_on_hold_or_closed_status
 from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_disabled
+from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from six import iteritems
 
 form_grid_templates = {
@@ -93,7 +95,7 @@ class PurchaseReceipt(BuyingController):
 				'target_parent_dt': 'Purchase Receipt',
 				'target_parent_field': 'per_completed',
 				'percent_join_name': self.return_against,
-				'no_tolerance': 1
+				'no_allowance': 1
 			})
 			self.status_updater.append({
 				'source_dt': 'Purchase Receipt Item',
@@ -121,7 +123,7 @@ class PurchaseReceipt(BuyingController):
 		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 
-		self.check_for_closed_status()
+		self.check_on_hold_or_closed_status()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
@@ -170,13 +172,13 @@ class PurchaseReceipt(BuyingController):
 		return po_qty, po_warehouse
 
 	# Check for Closed status
-	def check_for_closed_status(self):
+	def check_on_hold_or_closed_status(self):
 		check_list =[]
 		for d in self.get('items'):
 			if (d.meta.get_field('purchase_order') and d.purchase_order
 				and d.purchase_order not in check_list):
 				check_list.append(d.purchase_order)
-				check_for_closed_status('Purchase Order', d.purchase_order)
+				check_on_hold_or_closed_status('Purchase Order', d.purchase_order)
 
 	# on submit
 	def on_submit(self):
@@ -211,7 +213,7 @@ class PurchaseReceipt(BuyingController):
 	def on_cancel(self):
 		super(PurchaseReceipt, self).on_cancel()
 
-		self.check_for_closed_status()
+		self.check_on_hold_or_closed_status()
 		# Check if Purchase Invoice has been submitted against current Purchase Order
 		submitted = frappe.db.sql("""select t1.name
 			from `tabPurchase Invoice` t1,`tabPurchase Invoice Item` t2
@@ -262,7 +264,7 @@ class PurchaseReceipt(BuyingController):
 						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 						"debit": stock_value_diff
-					}, warehouse_account[d.warehouse]["account_currency"]))
+					}, warehouse_account[d.warehouse]["account_currency"], item=d))
 
 					# Item net amount
 					stock_rbnb_currency = get_account_currency(stock_rbnb)
@@ -285,7 +287,7 @@ class PurchaseReceipt(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(d.landed_cost_voucher_amount),
 							"project": d.project
-						}))
+						}, item=d))
 
 					# sub-contracting warehouse
 					if flt(d.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
@@ -295,7 +297,7 @@ class PurchaseReceipt(BuyingController):
 							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(d.rm_supp_cost)
-						}, warehouse_account[self.supplier_warehouse]["account_currency"]))
+						}, warehouse_account[self.supplier_warehouse]["account_currency"], item=d))
 
 					# divisional loss adjustment
 					valuation_amount_as_per_doc = valuation_net_amount + valuation_item_tax_amount + \
@@ -317,14 +319,13 @@ class PurchaseReceipt(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"debit": divisional_loss,
 							"project": d.project
-						}, stock_rbnb_currency))
+						}, stock_rbnb_currency, item=d))
 
 				elif d.warehouse not in warehouse_with_no_account or \
 					d.rejected_warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(d.warehouse)
 
-		if not is_cwip_accounting_disabled():
-			self.get_asset_gl_entry(gl_entries)
+		self.get_asset_gl_entry(gl_entries, expenses_included_in_valuation)
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
 		for tax in self.get("taxes"):
@@ -378,14 +379,23 @@ class PurchaseReceipt(BuyingController):
 
 		return process_gl_map(gl_entries)
 
-	def get_asset_gl_entry(self, gl_entries):
+	def get_asset_gl_entry(self, gl_entries, expenses_included_in_valuation=None):
+		arbnb_account, cwip_account = None, None
+
+		cwip_disabled = is_cwip_accounting_disabled()
+
+		if not expenses_included_in_valuation:
+			expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+
 		for d in self.get("items"):
-			if d.is_fixed_asset:
+			if d.is_fixed_asset and not (arbnb_account and cwip_account):
 				arbnb_account = self.get_company_default("asset_received_but_not_billed")
 
 				# CWIP entry
 				cwip_account = get_asset_account("capital_work_in_progress_account", d.asset,
 					company = self.company)
+
+			if d.is_fixed_asset and not cwip_disabled:
 
 				asset_amount = flt(d.net_amount) + flt(d.item_tax_amount/self.conversion_rate)
 				base_asset_amount = flt(d.base_net_amount + d.item_tax_amount)
@@ -399,7 +409,7 @@ class PurchaseReceipt(BuyingController):
 					"debit": base_asset_amount,
 					"debit_in_account_currency": (base_asset_amount
 						if cwip_account_currency == self.company_currency else asset_amount)
-				}))
+				}, item=d))
 
 				# Asset received but not billed
 				asset_rbnb_currency = get_account_currency(arbnb_account)
@@ -411,7 +421,37 @@ class PurchaseReceipt(BuyingController):
 					"credit": base_asset_amount,
 					"credit_in_account_currency": (base_asset_amount
 						if asset_rbnb_currency == self.company_currency else asset_amount)
-				}))
+				}, item=d))
+
+			if d.is_fixed_asset and flt(d.landed_cost_voucher_amount):
+				asset_account = (get_asset_category_account(d.asset, 'fixed_asset_account',
+					company = self.company) if cwip_disabled else cwip_account)
+
+				gl_entries.append(self.get_gl_dict({
+					"account": expenses_included_in_valuation,
+					"against": asset_account,
+					"cost_center": d.cost_center,
+					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+					"credit": flt(d.landed_cost_voucher_amount),
+					"project": d.project
+				}, item=d))
+
+				gl_entries.append(self.get_gl_dict({
+					"account": asset_account,
+					"against": expenses_included_in_valuation,
+					"cost_center": d.cost_center,
+					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+					"debit": flt(d.landed_cost_voucher_amount),
+					"project": d.project
+				}, item=d))
+
+				if d.asset:
+					doc = frappe.get_doc("Asset", d.asset)
+					frappe.db.set_value("Asset", d.asset, "gross_purchase_amount",
+						doc.gross_purchase_amount + flt(d.landed_cost_voucher_amount))
+
+					frappe.db.set_value("Asset", d.asset, "purchase_receipt_amount",
+						doc.purchase_receipt_amount + flt(d.landed_cost_voucher_amount))
 
 		return gl_entries
 
@@ -550,7 +590,8 @@ def make_purchase_invoice(source_name, target_doc=None):
 		"Purchase Receipt": {
 			"doctype": "Purchase Invoice",
 			"field_map": {
-				"supplier_warehouse":"supplier_warehouse"
+				"supplier_warehouse":"supplier_warehouse",
+				"is_return": "is_return"
 			},
 			"validation": {
 				"docstatus": ["=", 1],
@@ -587,3 +628,24 @@ def make_purchase_return(source_name, target_doc=None):
 def update_purchase_receipt_status(docname, status):
 	pr = frappe.get_doc("Purchase Receipt", docname)
 	pr.update_status(status)
+
+@frappe.whitelist()
+def make_stock_entry(source_name,target_doc=None):
+	def set_missing_values(source, target):
+		target.stock_entry_type = "Material Transfer"
+		target.purpose =  "Material Transfer"
+
+	doclist = get_mapped_doc("Purchase Receipt", source_name,{
+		"Purchase Receipt": {
+			"doctype": "Stock Entry",
+		},
+		"Purchase Receipt Item": {
+			"doctype": "Stock Entry Detail",
+			"field_map": {
+				"warehouse": "s_warehouse",
+				"parent": "reference_purchase_receipt"
+			},
+		},
+	}, target_doc, set_missing_values)
+
+	return doclist

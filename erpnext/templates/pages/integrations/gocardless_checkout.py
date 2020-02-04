@@ -9,7 +9,6 @@ from erpnext.erpnext_integrations.doctype.gocardless_settings.gocardless_setting
 from frappe.utils import get_url
 
 no_cache = 1
-no_sitemap = 1
 
 expected_keys = ('amount', 'title', 'description', 'reference_doctype', 'reference_docname',
 	'payer_name', 'payer_email', 'order_id', 'currency')

@@ -4,9 +4,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, cint, getdate, now
+from frappe.utils import flt, cint, getdate, now, date_diff
 from erpnext.stock.utils import update_included_uom_in_dict_report
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
+
+from erpnext.stock.report.stock_ageing.stock_ageing import get_fifo_queue, get_average_age
 
 from six import iteritems
 
@@ -38,6 +40,10 @@ def execute(filters=None):
 
 	sle = get_stock_ledger_entries(filters, items)
 
+	if filters.get('show_stock_ageing_data'):
+		filters['show_warehouse_wise_stock'] = True
+		item_wise_fifo_queue = get_fifo_queue(filters, sle)
+
 	# if no stock ledger entry found return
 	if not sle:
 		return columns, []
@@ -47,7 +53,10 @@ def execute(filters=None):
 	item_reorder_detail_map = get_item_reorder_details(item_map.keys())
 
 	data = []
-	conversion_factors = []
+	conversion_factors = {}
+
+	_func = lambda x: x[1]
+
 	for (company, item, warehouse) in sorted(iwb_map):
 		if item_map.get(item):
 			qty_dict = iwb_map[(company, item, warehouse)]
@@ -96,9 +105,10 @@ def execute(filters=None):
 					report_data["variant_{}".format(i)] = item_map[item].get(v)
 
 			if include_uom:
-				conversion_factors.append(item_map[item].conversion_factor)
+				conversion_factors.setdefault(item, item_map[item].conversion_factor)
 
-			data.append(report_data)
+			if filters.get('show_stock_ageing_data'):
+				fifo_queue = item_wise_fifo_queue[(item, warehouse)].get('fifo_queue')
 
 	if filters.get('show_variant_attributes', 0) == 1:
 		for i, v in enumerate(get_variants_attributes()):
@@ -135,6 +145,14 @@ def get_columns(filters, show_amounts=True):
 		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 100}
 	]
 
+	if filters.get('show_stock_ageing_data'):
+		columns += [{'label': _('Average Age'), 'fieldname': 'average_age', 'width': 100},
+		{'label': _('Earliest Age'), 'fieldname': 'earliest_age', 'width': 100},
+		{'label': _('Latest Age'), 'fieldname': 'latest_age', 'width': 100}]
+
+	if filters.get('show_variant_attributes'):
+		columns += [{'label': att_name, 'fieldname': att_name, 'width': 100} for att_name in get_variants_attributes()]
+
 	if not show_amounts:
 		columns = filter(lambda d: not d.get("is_value"), columns)
 
@@ -149,7 +167,7 @@ def get_conditions(filters):
 		frappe.throw(_("'From Date' is required"))
 
 	if filters.get("to_date"):
-		conditions += " and sle.posting_date <= '%s'" % frappe.db.escape(filters.get("to_date"))
+		conditions += " and sle.posting_date <= %s" % frappe.db.escape(filters.get("to_date"))
 	else:
 		frappe.throw(_("'To Date' is required"))
 
@@ -161,24 +179,29 @@ def get_conditions(filters):
 				where wh.lft >= %s and wh.rgt <= %s and sle.warehouse = wh.name)"%(warehouse_details.lft,
 				warehouse_details.rgt)
 
+	if filters.get("warehouse_type") and not filters.get("warehouse"):
+		conditions += " and exists (select name from `tabWarehouse` wh \
+			where wh.warehouse_type = '%s' and sle.warehouse = wh.name)"%(filters.get("warehouse_type"))
+
 	return conditions
 
 def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
 	if items:
 		item_conditions_sql = ' and sle.item_code in ({})'\
-			.format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items]))
+			.format(', '.join([frappe.db.escape(i, percent=False) for i in items]))
 
 	conditions = get_conditions(filters)
 
 	return frappe.db.sql("""
 		select
 			sle.item_code, warehouse, sle.posting_date, sle.actual_qty, sle.valuation_rate,
-			sle.company, sle.voucher_type, sle.qty_after_transaction, sle.stock_value_difference
+			sle.company, sle.voucher_type, sle.qty_after_transaction, sle.stock_value_difference,
+			sle.item_code as name, sle.voucher_no
 		from
 			`tabStock Ledger Entry` sle force index (posting_sort_index)
 		where sle.docstatus < 2 %s %s
-		order by sle.posting_date, sle.posting_time, sle.name""" %
+		order by sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty""" % #nosec
 		(item_conditions_sql, conditions), as_dict=1)
 
 def get_item_warehouse_map(filters, sle):
@@ -291,10 +314,9 @@ def get_item_details(items, sle, filters):
 	cf_field = cf_join = ""
 	if filters.get("include_uom"):
 		cf_field = ", ucd.conversion_factor"
-		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom='%s'" \
+		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%s" \
 			% frappe.db.escape(filters.get("include_uom"))
 
-	item_codes = ', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])
 	res = frappe.db.sql("""
 		select
 			item.name, item.item_name, item.description, item.item_group, item.brand,
@@ -323,7 +345,7 @@ def get_item_reorder_details(items):
 			select parent, warehouse, warehouse_reorder_qty, warehouse_reorder_level
 			from `tabItem Reorder`
 			where parent in ({0})
-		""".format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items])), as_dict=1)
+		""".format(', '.join([frappe.db.escape(i, percent=False) for i in items])), as_dict=1)
 
 	return dict((d.parent + d.warehouse, d) for d in item_reorder_details)
 

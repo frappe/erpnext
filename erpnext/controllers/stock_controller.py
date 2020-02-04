@@ -82,7 +82,7 @@ class StockController(AccountsController):
 							"debit": flt(sle.stock_value_difference, 2),
 							"project": item_row.get("project") or self.get("project") or self.get("set_project"),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
-						}, warehouse_account[sle.warehouse]["account_currency"]))
+						}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
 
 						# to target warehouse / expense account
 						gl_list.append(self.get_gl_dict({
@@ -93,7 +93,7 @@ class StockController(AccountsController):
 							"credit": flt(sle.stock_value_difference, 2),
 							"project": item_row.get("project") or self.get("project") or self.get("set_project"),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No"
-						}))
+						}, item=item_row))
 					elif sle.warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(sle.warehouse)
 
@@ -476,7 +476,7 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
 		from `tabStock Ledger Entry` sle
 		where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) {condition}
-		order by timestamp(sle.posting_date, sle.posting_time) asc, name asc""".format(condition=condition),
+		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc""".format(condition=condition),
 		tuple([posting_date, posting_time] + values), as_dict=True):
 			future_stock_vouchers.append([d.voucher_type, d.voucher_no])
 

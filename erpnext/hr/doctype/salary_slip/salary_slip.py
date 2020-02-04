@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import datetime, math
 
-from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words
+from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, getdate
 from frappe.model.naming import make_autoname
 
 from frappe import msgprint, _
@@ -75,7 +75,7 @@ class SalarySlip(TransactionBase):
 
 	def on_trash(self):
 		from frappe.model.naming import revert_series_if_last
-		revert_series_if_last(self.series, self.name, self)
+		revert_series_if_last(self.series, self.name)
 
 	def get_status(self):
 		if self.docstatus == 0:
@@ -255,16 +255,19 @@ class SalarySlip(TransactionBase):
 		for d in range(working_days):
 			dt = add_days(cstr(getdate(self.start_date)), d)
 			leave = frappe.db.sql("""
-				select t1.name, t1.half_day
-				from `tabLeave Application` t1, `tabLeave Type` t2
-				where t2.name = t1.leave_type
-				and t2.is_lwp = 1
-				and t1.docstatus = 1
-				and t1.employee = %(employee)s
-				and CASE WHEN t2.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date and ifnull(t1.salary_slip, '') = ''
+				SELECT t1.name,
+					CASE WHEN t1.half_day_date = %(dt)s or t1.to_date = t1.from_date
+					THEN t1.half_day else 0 END
+				FROM `tabLeave Application` t1, `tabLeave Type` t2
+				WHERE t2.name = t1.leave_type
+				AND t2.is_lwp = 1
+				AND t1.docstatus = 1
+				AND t1.employee = %(employee)s
+				AND CASE WHEN t2.include_holiday != 1 THEN %(dt)s not in ('{0}') and %(dt)s between from_date and to_date and ifnull(t1.salary_slip, '') = ''
 				WHEN t2.include_holiday THEN %(dt)s between from_date and to_date and ifnull(t1.salary_slip, '') = ''
 				END
 				""".format(holidays), {"employee": self.employee, "dt": dt})
+
 			if leave:
 				lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
 		return lwp
@@ -779,13 +782,20 @@ class SalarySlip(TransactionBase):
 
 	def email_salary_slip(self):
 		receiver = frappe.db.get_value("Employee", self.employee, "prefered_email")
+		hr_settings = frappe.get_single("HR Settings")
+		message = "Please see attachment"
+		password = None
+		if hr_settings.encrypt_salary_slips_in_emails:
+			password = generate_password_for_pdf(hr_settings.password_policy, self.employee)
+			message += """<br>Note: Your salary slip is password protected,
+				the password to unlock the PDF is of the format {0}. """.format(hr_settings.password_policy)
 
 		if receiver:
 			email_args = {
 				"recipients": [receiver],
-				"message": _("Please see attachment"),
+				"message": _(message),
 				"subject": 'Salary Slip - from {0} to {1}'.format(self.start_date, self.end_date),
-				"attachments": [frappe.attach_print(self.doctype, self.name, file_name=self.name)],
+				"attachments": [frappe.attach_print(self.doctype, self.name, file_name=self.name, password=password)],
 				"reference_doctype": self.doctype,
 				"reference_name": self.name
 				}
@@ -837,3 +847,7 @@ def unlink_ref_doc_from_salary_slip(ref_no):
 		for ss in linked_ss:
 			ss_doc = frappe.get_doc("Salary Slip", ss)
 			frappe.db.set_value("Salary Slip", ss_doc.name, "journal_entry", "")
+
+def generate_password_for_pdf(policy_template, employee):
+	employee = frappe.get_doc("Employee", employee)
+	return policy_template.format(**employee.as_dict())

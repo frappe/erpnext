@@ -17,7 +17,7 @@ def get_ordered_to_be_billed_data(args):
 
 	return frappe.db.sql("""
 		Select
-			`{parent_tab}`.name, `{parent_tab}`.{date_field}, `{parent_tab}`.{party}, `{parent_tab}`.{party}_name,
+			`{parent_tab}`.name, `{parent_tab}`.status, `{parent_tab}`.{date_field}, `{parent_tab}`.{party}, `{parent_tab}`.{party}_name,
 			{project_field}, `{child_tab}`.item_code, `{child_tab}`.base_amount,
 			(`{child_tab}`.billed_amt * ifnull(`{parent_tab}`.conversion_rate, 1)),
 			(`{child_tab}`.base_amount - (`{child_tab}`.billed_amt * ifnull(`{parent_tab}`.conversion_rate, 1))),

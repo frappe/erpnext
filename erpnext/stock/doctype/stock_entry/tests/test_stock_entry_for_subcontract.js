@@ -6,7 +6,7 @@ QUnit.test("test material Transfer to manufacture", function(assert) {
 	frappe.run_serially([
 		() => {
 			return frappe.tests.make('Stock Entry', [
-				{purpose:'Subcontract'},
+				{purpose:'Send to Subcontractor'},
 				{from_warehouse:'Work In Progress - '+frappe.get_abbr(frappe.defaults.get_default('Company'))},
 				{to_warehouse:'Finished Goods - '+frappe.get_abbr(frappe.defaults.get_default('Company'))},
 				{items: [

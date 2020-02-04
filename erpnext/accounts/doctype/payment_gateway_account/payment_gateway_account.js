@@ -1,6 +1,10 @@
-cur_frm.cscript.refresh = function(doc, dt, dn){
-	if(!doc.__islocal){
-		var df = frappe.meta.get_docfield(doc.doctype, "payment_gateway", doc.name);
-		df.read_only = 1;
+// Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and Contributors
+// License: GNU General Public License v3. See license.txt
+
+frappe.ui.form.on('Payment Gateway Account', {
+	refresh(frm) {
+		if(!frm.doc.__islocal) {
+			frm.set_df_property('payment_gateway', 'read_only', 1);
+		}
 	}
-}
+});

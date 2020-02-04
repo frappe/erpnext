@@ -66,17 +66,17 @@ frappe.ui.form.on("Item", {
 			if(frm.doc.variant_based_on==="Item Attribute") {
 				frm.add_custom_button(__("Single Variant"), function() {
 					erpnext.item.show_single_variant_dialog(frm);
-				}, __("Make"));
+				}, __('Create'));
 				frm.add_custom_button(__("Multiple Variants"), function() {
 					erpnext.item.show_multiple_variants_dialog(frm);
-				}, __("Make"));
+				}, __('Create'));
 			} else {
 				frm.add_custom_button(__("Variant"), function() {
 					erpnext.item.show_modal_for_manufacturers(frm);
-				}, __("Make"));
+				}, __('Create'));
 			}
 
-			frm.page.set_inner_btn_group_as_primary(__("Make"));
+			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 		if (frm.doc.variant_of) {
 			frm.set_intro(__('This Item is a Variant of {0} (Template).',
@@ -113,6 +113,8 @@ frappe.ui.form.on("Item", {
 
 		const alt_uom_readonly = (!frm.doc.__islocal && frm.doc.alt_uom && flt(frm.doc.alt_uom_size)) ? 1 : 0;
 		frm.set_df_property('alt_uom_size', 'read_only', alt_uom_readonly);
+
+		frm.toggle_reqd('customer', frm.doc.is_customer_provided_item ? 1:0);
 	},
 
 	validate: function(frm){
@@ -121,6 +123,10 @@ frappe.ui.form.on("Item", {
 
 	image: function() {
 		refresh_field("image_view");
+	},
+
+	is_customer_provided_item: function(frm) {
+		frm.toggle_reqd('customer', frm.doc.is_customer_provided_item ? 1:0);
 	},
 
 	is_fixed_asset: function(frm) {
@@ -183,6 +189,10 @@ frappe.ui.form.on("Item", {
 		if (frm.doc.default_warehouse && !frm.doc.website_warehouse){
 			frm.set_value("website_warehouse", frm.doc.default_warehouse);
 		}
+	},
+
+	set_meta_tags(frm) {
+		frappe.utils.set_meta_tag(frm.doc.route);
 	}
 });
 
@@ -397,7 +407,7 @@ $.extend(erpnext.item, {
 			]
 		});
 
-		dialog.set_primary_action(__('Make'), function() {
+		dialog.set_primary_action(__('Create'), function() {
 			var data = dialog.get_values();
 			if(!data) return;
 
@@ -443,7 +453,7 @@ $.extend(erpnext.item, {
 								lengths.push(selected_attributes[key].length);
 							});
 							if(lengths.includes(0)) {
-								me.multiple_variant_dialog.get_primary_btn().html(__("Make Variants"));
+								me.multiple_variant_dialog.get_primary_btn().html(__('Create Variants'));
 								me.multiple_variant_dialog.disable_primary_action();
 							} else {
 								let no_of_combinations = lengths.reduce((a, b) => a * b, 1);
@@ -474,7 +484,7 @@ $.extend(erpnext.item, {
 				].concat(fields)
 			});
 
-			me.multiple_variant_dialog.set_primary_action(__("Make Variants"), () => {
+			me.multiple_variant_dialog.set_primary_action(__('Create Variants'), () => {
 				let selected_attributes = get_selected_attributes();
 
 				me.multiple_variant_dialog.hide();
@@ -600,21 +610,22 @@ $.extend(erpnext.item, {
 				"label": row.attribute,
 				"fieldname": row.attribute,
 				"fieldtype": fieldtype,
-				"reqd": 1,
+				"reqd": 0,
 				"description": desc
 			})
 		}
 
 		var d = new frappe.ui.Dialog({
-			title: __("Make Variant"),
+			title: __('Create Variant'),
 			fields: fields
 		});
 
-		d.set_primary_action(__("Make"), function() {
+		d.set_primary_action(__('Create'), function() {
 			var args = d.get_values();
 			if(!args) return;
 			frappe.call({
 				method: "erpnext.controllers.item_variant.get_variant",
+				btn: d.get_primary_btn(),
 				args: {
 					"template": frm.doc.name,
 					"args": d.get_values()

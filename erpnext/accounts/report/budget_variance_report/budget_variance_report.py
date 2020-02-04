@@ -56,7 +56,7 @@ def execute(filters=None):
 	return columns, data
 
 def validate_filters(filters):
-	if filters.get("budget_against")=="Project" and filters.get("cost_center"):
+	if filters.get("budget_against") != "Cost Center" and filters.get("cost_center"):
 		frappe.throw(_("Filter based on Cost Center is only applicable if Budget Against is selected as Cost Center"))
 
 def get_columns(filters):
@@ -92,14 +92,17 @@ def get_cost_centers(filters):
 	if filters.get("budget_against") == "Cost Center":
 		cond = "order by lft"
 
-	return frappe.db.sql_list("""select name from `tab{tab}` where company=%s
-		{cond}""".format(tab=filters.get("budget_against"), cond=cond), filters.get("company"))
+	if filters.get("budget_against") in ["Cost Center", "Project"]:
+		return frappe.db.sql_list("""select name from `tab{tab}` where company=%s
+			{cond}""".format(tab=filters.get("budget_against"), cond=cond), filters.get("company"))
+	else:
+		return frappe.db.sql_list("""select name from `tab{tab}`""".format(tab=filters.get("budget_against"))) #nosec
 
 #Get cost center & target details
 def get_cost_center_target_details(filters):
 	cond = ""
 	if filters.get("cost_center"):
-		cond += " and b.cost_center='%s'" % frappe.db.escape(filters.get("cost_center"))
+		cond += " and b.cost_center=%s" % frappe.db.escape(filters.get("cost_center"))
 
 	return frappe.db.sql("""
 			select b.{budget_against} as budget_against, b.monthly_distribution, ba.account, ba.budget_amount,b.fiscal_year

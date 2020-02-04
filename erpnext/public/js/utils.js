@@ -58,46 +58,19 @@ $.extend(erpnext, {
 				.css({"margin-bottom": "10px", "margin-top": "10px"})
 				.appendTo(grid_row.grid_form.fields_dict.serial_no.$wrapper));
 
+		var me = this;
 		$btn.on("click", function() {
-			var d = new frappe.ui.Dialog({
-				title: __("Add Serial No"),
-				fields: [
-					{
-						"fieldtype": "Link",
-						"fieldname": "serial_no",
-						"options": "Serial No",
-						"label": __("Serial No"),
-						"get_query": function () {
-							return {
-								filters: {
-									item_code: grid_row.doc.item_code,
-									warehouse: cur_frm.doc.is_return ? null : grid_row.doc.warehouse,
-									batch_no: grid_row.doc.batch_no || null
-								}
-							}
-						}
-					},
-					{
-						"fieldtype": "Button",
-						"fieldname": "add",
-						"label": __("Add")
-					}
-				]
-			});
+			let callback = '';
+			let on_close = '';
 
-			d.get_input("add").on("click", function() {
-				var serial_no = d.get_value("serial_no");
-				if(serial_no) {
-					var val = (grid_row.doc.serial_no || "").split("\n").concat([serial_no]).join("\n");
-					grid_row.grid_form.fields_dict.serial_no.set_model_value(val.trim());
-				}
-				d.hide();
-				return false;
-			});
+			if (grid_row.doc.serial_no) {
+				grid_row.doc.has_serial_no = true;
+			}
 
-			d.show();
+			me.show_serial_batch_selector(grid_row.frm, grid_row.doc,
+				callback, on_close, true);
 		});
-	}
+	},
 });
 
 
@@ -201,7 +174,7 @@ $.extend(erpnext.utils, {
 
 	make_subscription: function(doctype, docname) {
 		frappe.call({
-			method: "frappe.desk.doctype.auto_repeat.auto_repeat.make_auto_repeat",
+			method: "frappe.automation.doctype.auto_repeat.auto_repeat.make_auto_repeat",
 			args: {
 				doctype: doctype,
 				docname: docname
@@ -547,15 +520,19 @@ erpnext.utils.select_alternate_items = function(opts) {
 
 erpnext.utils.update_child_items = function(opts) {
 	const frm = opts.frm;
-
+	const cannot_add_row = (typeof opts.cannot_add_row === 'undefined') ? true : opts.cannot_add_row;
+	const child_docname = (typeof opts.cannot_add_row === 'undefined') ? "items" : opts.child_docname;
 	this.data = [];
 	const dialog = new frappe.ui.Dialog({
 		title: __("Update Items"),
 		fields: [
 			{fieldtype:'Section Break', label: __('Items')},
 			{
-				fieldname: "trans_items", fieldtype: "Table", cannot_add_rows: true,
-				in_place_edit: true, data: this.data,
+				fieldname: "trans_items",
+				fieldtype: "Table",
+				cannot_add_rows: cannot_add_row,
+				in_place_edit: true,
+				data: this.data,
 				get_data: () => {
 					return this.data;
 				},
@@ -591,10 +568,12 @@ erpnext.utils.update_child_items = function(opts) {
 			const trans_items = this.get_values()["trans_items"];
 			frappe.call({
 				method: 'erpnext.controllers.accounts_controller.update_child_qty_rate',
+				freeze: true,
 				args: {
 					'parent_doctype': frm.doc.doctype,
 					'trans_items': trans_items,
-					'parent_doctype_name': frm.doc.name
+					'parent_doctype_name': frm.doc.name,
+					'child_docname': child_docname
 				},
 				callback: function() {
 					frm.reload_doc();

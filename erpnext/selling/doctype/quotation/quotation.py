@@ -34,7 +34,7 @@ class Quotation(SellingController):
 			self.with_items = 1
 
 	def validate_valid_till(self):
-		if self.valid_till and self.valid_till < self.transaction_date:
+		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
 			frappe.throw(_("Valid till date cannot be before transaction date"))
 
 	def has_sales_order(self):
@@ -70,12 +70,20 @@ class Quotation(SellingController):
 		opp.status = None
 		opp.set_status(update=True)
 
-	def declare_order_lost(self, reason):
+	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_sales_order():
 			frappe.db.set(self, 'status', 'Lost')
-			frappe.db.set(self, 'order_lost_reason', reason)
+
+			if detailed_reason:
+				frappe.db.set(self, 'order_lost_reason', detailed_reason)
+
+			for reason in lost_reasons_list:
+				self.append('lost_reasons', reason)
+
 			self.update_opportunity()
 			self.update_lead()
+			self.save()
+
 		else:
 			frappe.throw(_("Cannot set as Lost as Sales Order is made."))
 
@@ -89,6 +97,8 @@ class Quotation(SellingController):
 		self.update_lead()
 
 	def on_cancel(self):
+		super(Quotation, self).on_cancel()
+
 		#update enquiry status
 		self.set_status(update=True)
 		self.update_opportunity()
@@ -132,6 +142,9 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 		if customer:
 			target.customer = customer.name
 			target.customer_name = customer.customer_name
+		if source.referral_sales_partner:
+			target.sales_partner=source.referral_sales_partner
+			target.commission_rate=frappe.get_value('Sales Partner', source.referral_sales_partner, 'commission_rate')
 		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = ignore_permissions
 		target.run_method("set_missing_values")

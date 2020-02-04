@@ -23,6 +23,6 @@ def query_task(doctype, txt, searchfield, start, page_len, filters):
 			`%s`,
 			subject
 		limit %s, %s""" %
-		(frappe.db.escape(searchfield), "%s", "%s", match_conditions, "%s",
-			frappe.db.escape(searchfield), "%s", frappe.db.escape(searchfield), "%s", "%s"),
+		(searchfield, "%s", "%s", match_conditions, "%s",
+			searchfield, "%s", searchfield, "%s", "%s"),
 		(search_string, search_string, order_by_string, order_by_string, start, page_len))

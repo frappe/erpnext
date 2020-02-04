@@ -14,7 +14,7 @@ def execute(filters=None):
 
 def get_column():
 	return [
-		_("Purchase Receipt") + ":Link/Purchase Receipt:120", _("Date") + ":Date:100",
+		_("Purchase Receipt") + ":Link/Purchase Receipt:120", _("Status") + "::120", _("Date") + ":Date:100",
 		_("Supplier") + ":Link/Supplier:120", _("Supplier Name") + "::120",
 		_("Project") + ":Link/Project:120", _("Item Code") + ":Link/Item:120",
 		_("Amount") + ":Currency:100", _("Billed Amount") + ":Currency:100", _("Amount to Bill") + ":Currency:100",

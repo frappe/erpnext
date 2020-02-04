@@ -1,7 +1,23 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 frappe.ui.form.on("Project", {
-	setup: function (frm) {
+	setup: function(frm) {
+		frm.make_methods = {
+			'Timesheet': () => {
+				let doctype = 'Timesheet';
+				frappe.model.with_doctype(doctype, () => {
+					let new_doc = frappe.model.get_new_doc(doctype);
+
+					// add a new row and set the project
+					let time_log = frappe.model.get_new_doc('Timesheet Detail');
+					time_log.project = frm.doc.name;
+					new_doc.time_logs = [time_log];
+
+					frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
+				});
+			},
+		}
+
 		frm.custom_make_buttons = {};
 		frm.make_button_dts = [
 			'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice',
@@ -26,7 +42,6 @@ frappe.ui.form.on("Project", {
 			}
 		);
 	},
-
 	onload: function (frm) {
 		var so = frappe.meta.get_docfield("Project", "sales_order");
 		so.get_route_options_for_new_doc = function (field) {
@@ -53,21 +68,6 @@ frappe.ui.form.on("Project", {
 
 			if (frm.doc.customer) {
 				filters["customer"] = frm.doc.customer;
-			}
-
-			return {
-				filters: filters
-			}
-		});
-
-		// serial no
-		frm.set_query('serial_no', function () {
-			var filters = {};
-			if (frm.doc.item_code) {
-				filters['item_code'] = frm.doc.item_code;
-			}
-			if (frm.doc.customer) {
-				filters['customer'] = frm.doc.customer;
 			}
 
 			return {
@@ -107,21 +107,20 @@ frappe.ui.form.on("Project", {
 
 			frm.trigger('show_dashboard');
 		}
-
-		frm.events.refresh_make_buttons(frm);
-	},
-	tasks_refresh: function (frm) {
-		var grid = frm.get_field('tasks').grid;
-		grid.wrapper.find('select[data-fieldname="status"]').each(function () {
-			if ($(this).val() === 'Open') {
-				$(this).addClass('input-indicator-open');
-			} else {
-				$(this).removeClass('input-indicator-open');
-			}
-		});
+		frm.events.set_buttons(frm);
 	},
 
-	refresh_make_buttons: function (frm) {
+	set_buttons: function(frm) {
+		if (!frm.is_new()) {
+			frm.add_custom_button(__('Completed'), () => {
+				frm.events.set_status(frm, 'Completed');
+			}, __('Set Status'));
+
+			frm.add_custom_button(__('Cancelled'), () => {
+				frm.events.set_status(frm, 'Cancelled');
+			}, __('Set Status'));
+		}
+
 		if (!frm.doc.__islocal) {
 			var item_table_fieldnames = {
 				'Maintenance Visit': 'purposes',
@@ -182,36 +181,12 @@ frappe.ui.form.on("Project", {
 			})
 		}
 	}
-});
 
-frappe.ui.form.on("Project Task", {
-	edit_task: function(frm, doctype, name) {
-		var doc = frappe.get_doc(doctype, name);
-		if(doc.task_id) {
-			frappe.set_route("Form", "Task", doc.task_id);
-		} else {
-			frappe.msgprint(__("Save the document first."));
-		}
+	set_status: function(frm, status) {
+		frappe.confirm(__('Set Project and all Tasks to status {0}?', [status.bold()]), () => {
+			frappe.xcall('erpnext.projects.doctype.project.project.set_project_status',
+				{project: frm.doc.name, status: status}).then(() => { /* page will auto reload */ });
+		});
 	},
 
-	edit_timesheet: function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn];
-		frappe.route_options = {"project": frm.doc.name, "task": child.task_id};
-		frappe.set_route("List", "Timesheet");
-	},
-
-	make_timesheet: function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn];
-		frappe.model.with_doctype('Timesheet', function() {
-			var doc = frappe.model.get_new_doc('Timesheet');
-			var row = frappe.model.add_child(doc, 'time_logs');
-			row.project = frm.doc.name;
-			row.task = child.task_id;
-			frappe.set_route('Form', doc.doctype, doc.name);
-		})
-	},
-
-	status: function(frm, doctype, name) {
-		frm.trigger('tasks_refresh');
-	},
 });

@@ -1,17 +1,14 @@
 [
 	{
-		"course_name": "_Test Course",
-		"course_code": "TC100",
+		"course_name": "TC100",
 		"course_abbreviation": "TC"
 	},
 	{
-		"course_name": "_Test Course 1",
-		"course_code": "TC101",
+		"course_name": "TC101",
 		"course_abbreviation": "TC1"
 	},
 	{
-		"course_name": "_Test Course 2",
-		"course_code": "TC102",
+		"course_name": "TC102",
 		"course_abbreviation": "TC2"
 	}
 ]

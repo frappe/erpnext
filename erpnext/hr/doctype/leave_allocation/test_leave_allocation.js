@@ -34,7 +34,7 @@ QUnit.test("Test: Leave allocation [HR]", function (assert) {
 		() => assert.equal(today_date, cur_frm.doc.from_date,
 			"from date correctly set"),
 		// check for total leaves
-		() => assert.equal(cur_frm.doc.carry_forwarded_leaves + 2, cur_frm.doc.total_leaves_allocated,
+		() => assert.equal(cur_frm.doc.unused_leaves + 2, cur_frm.doc.total_leaves_allocated,
 			"total leave calculation is correctly set"),
 		() => done()
 	]);

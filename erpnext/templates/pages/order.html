@@ -8,23 +8,37 @@
 {% block title %}{{ doc.name }}{% endblock %}
 
 {% block header %}
-	<h1>{{ doc.name }}</h1>
+	<h1 class="m-0">{{ doc.name }}</h1>
 {% endblock %}
 
 {% block header_actions %}
-<a class='btn btn-xs btn-default' href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}&format={{ print_format }}' target="_blank" rel="noopener noreferrer">{{ _("Print") }}</a>
+<div class="dropdown">
+	<button class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+		<span>{{ _('Actions') }}</span>
+		<b class="caret"></b>
+	</button>
+	<ul class="dropdown-menu dropdown-menu-right" role="menu">
+		{% if doc.doctype == 'Purchase Order' %}
+		<a class="dropdown-item" href="/api/method/erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice_from_portal?purchase_order_name={{ doc.name }}" data-action="make_purchase_invoice">{{ _("Make Purchase Invoice") }}</a>
+		{% endif %}
+		<a class="dropdown-item" href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}&format={{ print_format }}'
+			target="_blank" rel="noopener noreferrer">
+			{{ _("Print") }}
+		</a>
+	</ul>
+</div>
+
 {% endblock %}
 
 {% block page_content %}
 
 <div class="row transaction-subheading">
-	<div class="col-xs-6">
-
+	<div class="col-6">
 		<span class="indicator {{ doc.indicator_color or ("blue" if doc.docstatus==1 else "darkgrey") }}">
 			{{ _(doc.get('indicator_title')) or _(doc.status) or _("Submitted") }}
 		</span>
 	</div>
-	<div class="col-xs-6 text-muted text-right small">
+	<div class="col-6 text-muted text-right small">
 		{{ frappe.utils.formatdate(doc.transaction_date, 'medium') }}
 		{% if doc.valid_till %}
 		<p>
@@ -34,16 +48,14 @@
 	</div>
 </div>
 
-<p class='small' style='padding-top: 15px;'>
-{% if doc.doctype == 'Supplier Quotation' %}
-	<b>{{ doc.supplier_name}}</b>
-{% else %}
-	<b>{{ doc.customer_name}}</b>
-{% endif %}
-{% if doc.contact_display %}
-	<br>
-	{{ doc.contact_display }}
-{% endif %}
+<p class="small my-3">
+	{%- set party_name = doc.supplier_name if doc.doctype in ['Supplier Quotation', 'Purchase Invoice', 'Purchase Order'] else doc.customer_name %}
+	<b>{{ party_name }}</b>
+
+	{% if doc.contact_display and doc.contact_display != party_name %}
+		<br>
+		{{ doc.contact_display }}
+	{% endif %}
 </p>
 
 {% if doc._header %}
@@ -55,7 +67,7 @@
 	<!-- items -->
 	<div class="order-item-table">
 		<div class="row order-items order-item-header text-muted">
-			<div class="col-sm-6 col-xs-6 h6 text-uppercase">
+			<div class="col-sm-6 col-6 h6 text-uppercase">
 				{{ _("Item") }}
 			</div>
 			<div class="col-sm-3 col-xs-3 text-right h6 text-uppercase">
@@ -67,7 +79,7 @@
 		</div>
 		{% for d in doc.items %}
 		<div class="row order-items">
-			<div class="col-sm-6 col-xs-6">
+			<div class="col-sm-6 col-6">
 				{{ item_name_and_description(d) }}
 			</div>
 			<div class="col-sm-3 col-xs-3 text-right">
@@ -85,11 +97,10 @@
 	</div>
 
 	<!-- taxes -->
-	<div class="order-taxes row">
-		<div class="col-sm-6"><!-- empty --></div>
-		<div class="col-sm-6 text-right">
+	<div class="order-taxes d-flex justify-content-end">
+		<table>
 			{% include "erpnext/templates/includes/order/order_taxes.html" %}
-		</div>
+		</table>
 	</div>
 </div>
 
@@ -115,7 +126,7 @@
 							<div class="control-input">
 								<input class="form-control" type="number" min="0" max="{{ available_loyalty_points }}" id="loyalty-point-to-redeem">
 							</div>
-							<p class="help-box small text-muted hidden-xs"> Available Points: {{ available_loyalty_points }} </p>
+							<p class="help-box small text-muted d-none d-sm-block"> Available Points: {{ available_loyalty_points }} </p>
 						</div>
 					</div>
 					{% endif %}

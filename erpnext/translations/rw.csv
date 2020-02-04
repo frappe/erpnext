@@ -1,0 +1,4 @@
+apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,{0} {1} is not submitted,{0} {1} Ntiremezwa
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html,'Total','Byose'
+apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,{0} {1} must be submitted,{0} {1} Isabwe Kwemezwa
+DocType: POS Profile,[Select],[Hitamo]

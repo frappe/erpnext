@@ -14,14 +14,13 @@ from frappe.integrations.utils import get_payment_gateway_controller
 from frappe.utils.background_jobs import enqueue
 from erpnext.erpnext_integrations.stripe_integration import create_stripe_subscription
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
-from frappe.model.mapper import get_mapped_doc
 
 class PaymentRequest(Document):
 	def validate(self):
 		if self.get("__islocal"):
 			self.status = 'Draft'
 		self.validate_reference_document()
-		self.validate_payment_request()
+		self.validate_payment_request_amount()
 		self.validate_currency()
 		self.validate_subscription_details()
 
@@ -29,10 +28,19 @@ class PaymentRequest(Document):
 		if not self.reference_doctype or not self.reference_name:
 			frappe.throw(_("To create a Payment Request reference document is required"))
 
-	def validate_payment_request(self):
-		if frappe.db.get_value("Payment Request", {"reference_name": self.reference_name,
-			"name": ("!=", self.name), "status": ("not in", ["Initiated", "Paid"]), "docstatus": 1}, "name"):
-			frappe.throw(_("Payment Request already exists {0}".format(self.reference_name)))
+	def validate_payment_request_amount(self):
+		existing_payment_request_amount = \
+			get_existing_payment_request_amount(self.reference_doctype, self.reference_name)
+
+		if existing_payment_request_amount:
+			ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
+			if (hasattr(ref_doc, "order_type") \
+					and getattr(ref_doc, "order_type") != "Shopping Cart"):
+				ref_amount = get_amount(ref_doc)
+
+				if existing_payment_request_amount + flt(self.grand_total)> ref_amount:
+					frappe.throw(_("Total Payment Request amount cannot be greater than {0} amount"
+						.format(self.reference_doctype)))
 
 	def validate_currency(self):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
@@ -272,7 +280,7 @@ def make_payment_request(**args):
 	args = frappe._dict(args)
 
 	ref_doc = frappe.get_doc(args.dt, args.dn)
-	grand_total = get_amount(ref_doc, args.dt)
+	grand_total = get_amount(ref_doc)
 	if args.loyalty_points and args.dt == "Sales Order":
 		from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 		loyalty_amount = validate_loyalty_points(ref_doc, int(args.loyalty_points))
@@ -282,17 +290,25 @@ def make_payment_request(**args):
 
 	gateway_account = get_gateway_details(args) or frappe._dict()
 
-	existing_payment_request = frappe.db.get_value("Payment Request",
-		{"reference_doctype": args.dt, "reference_name": args.dn, "docstatus": ["!=", 2]})
-
 	bank_account = (get_party_bank_account(args.get('party_type'), args.get('party'))
 		if args.get('party_type') else '')
+
+	existing_payment_request = None
+	if args.order_type == "Shopping Cart":
+		existing_payment_request = frappe.db.get_value("Payment Request",
+			{"reference_doctype": args.dt, "reference_name": args.dn, "docstatus": ("!=", 2)})
 
 	if existing_payment_request:
 		frappe.db.set_value("Payment Request", existing_payment_request, "grand_total", grand_total, update_modified=False)
 		pr = frappe.get_doc("Payment Request", existing_payment_request)
-
 	else:
+		if args.order_type != "Shopping Cart":
+			existing_payment_request_amount = \
+				get_existing_payment_request_amount(args.dt, args.dn)
+
+			if existing_payment_request_amount:
+				grand_total -= existing_payment_request_amount
+
 		pr = frappe.new_doc("Payment Request")
 		pr.update({
 			"payment_gateway_account": gateway_account.get("name"),
@@ -328,8 +344,9 @@ def make_payment_request(**args):
 
 	return pr.as_dict()
 
-def get_amount(ref_doc, dt):
+def get_amount(ref_doc):
 	"""get amount based on doctype"""
+	dt = ref_doc.doctype
 	if dt in ["Sales Order", "Purchase Order"]:
 		grand_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
 
@@ -347,6 +364,17 @@ def get_amount(ref_doc, dt):
 
 	else:
 		frappe.throw(_("Payment Entry is already created"))
+
+def get_existing_payment_request_amount(ref_dt, ref_dn):
+	existing_payment_request_amount = frappe.db.sql("""
+		select sum(grand_total)
+		from `tabPayment Request`
+		where
+			reference_doctype = %s
+			and reference_name = %s
+			and docstatus = 1
+	""", (ref_dt, ref_dn))
+	return flt(existing_payment_request_amount[0][0]) if existing_payment_request_amount else 0
 
 def get_gateway_details(args):
 	"""return gateway and payment account of default payment gateway"""
@@ -426,7 +454,9 @@ def get_subscription_details(reference_doctype, reference_name):
 
 @frappe.whitelist()
 def make_payment_order(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
 	def set_missing_values(source, target):
+		target.payment_order_type = "Payment Request"
 		target.append('references', {
 			'reference_doctype': source.reference_doctype,
 			'reference_name': source.reference_name,

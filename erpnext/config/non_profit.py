@@ -11,6 +11,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Chapter",
 					"description": _("Chapter information."),
+					"onboard": 1,
 				}
 			]
 		},
@@ -21,11 +22,13 @@ def get_data():
 					"type": "doctype",
 					"name": "Member",
 					"description": _("Member information."),
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "Membership",
 					"description": _("Memebership Details"),
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
@@ -41,6 +44,7 @@ def get_data():
 					"type": "doctype",
 					"name": "Volunteer",
 					"description": _("Volunteer information."),
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",

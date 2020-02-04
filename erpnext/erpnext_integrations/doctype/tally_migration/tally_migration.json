@@ -1,0 +1,219 @@
+{
+ "beta": 1,
+ "creation": "2019-02-01 14:27:09.485238",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "status",
+  "master_data",
+  "is_master_data_processed",
+  "is_master_data_imported",
+  "column_break_2",
+  "tally_creditors_account",
+  "tally_debtors_account",
+  "company_section",
+  "tally_company",
+  "column_break_8",
+  "erpnext_company",
+  "processed_files_section",
+  "chart_of_accounts",
+  "parties",
+  "addresses",
+  "column_break_17",
+  "uoms",
+  "items",
+  "vouchers",
+  "accounts_section",
+  "default_warehouse",
+  "round_off_account",
+  "column_break_21",
+  "default_cost_center",
+  "day_book_section",
+  "day_book_data",
+  "column_break_27",
+  "is_day_book_data_processed",
+  "is_day_book_data_imported"
+ ],
+ "fields": [
+  {
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Status"
+  },
+  {
+   "fieldname": "master_data",
+   "fieldtype": "Attach",
+   "in_list_view": 1,
+   "label": "Master Data"
+  },
+  {
+   "default": "Sundry Creditors",
+   "fieldname": "tally_creditors_account",
+   "fieldtype": "Data",
+   "label": "Tally Creditors Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Sundry Debtors",
+   "fieldname": "tally_debtors_account",
+   "fieldtype": "Data",
+   "label": "Tally Debtors Account",
+   "reqd": 1
+  },
+  {
+   "depends_on": "is_master_data_processed",
+   "fieldname": "company_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "tally_company",
+   "fieldtype": "Data",
+   "label": "Tally Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "erpnext_company",
+   "fieldtype": "Data",
+   "label": "ERPNext Company"
+  },
+  {
+   "fieldname": "processed_files_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Processed Files"
+  },
+  {
+   "fieldname": "chart_of_accounts",
+   "fieldtype": "Attach",
+   "label": "Chart of Accounts"
+  },
+  {
+   "fieldname": "parties",
+   "fieldtype": "Attach",
+   "label": "Parties"
+  },
+  {
+   "fieldname": "addresses",
+   "fieldtype": "Attach",
+   "label": "Addresses"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "uoms",
+   "fieldtype": "Attach",
+   "label": "UOMs"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Attach",
+   "label": "Items"
+  },
+  {
+   "fieldname": "vouchers",
+   "fieldtype": "Attach",
+   "label": "Vouchers"
+  },
+  {
+   "depends_on": "is_master_data_imported",
+   "fieldname": "accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "default_warehouse",
+   "fieldtype": "Link",
+   "label": "Default Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "round_off_account",
+   "fieldtype": "Link",
+   "label": "Round Off Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_cost_center",
+   "fieldtype": "Link",
+   "label": "Default Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "is_master_data_processed",
+   "fieldtype": "Check",
+   "label": "Is Master Data Processed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "is_day_book_data_processed",
+   "fieldtype": "Check",
+   "label": "Is Day Book Data Processed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "is_day_book_data_imported",
+   "fieldtype": "Check",
+   "label": "Is Day Book Data Imported",
+   "read_only": 1
+  },
+  {
+   "fieldname": "is_master_data_imported",
+   "fieldtype": "Check",
+   "label": "Is Master Data Imported",
+   "read_only": 1
+  },
+  {
+   "depends_on": "is_master_data_imported",
+   "fieldname": "day_book_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "day_book_data",
+   "fieldtype": "Attach",
+   "in_list_view": 1,
+   "label": "Day Book Data"
+  }
+ ],
+ "modified": "2019-04-29 05:46:54.394967",
+ "modified_by": "Administrator",
+ "module": "ERPNext Integrations",
+ "name": "Tally Migration",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

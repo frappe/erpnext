@@ -125,6 +125,7 @@ def make_stock_entry(**args):
 		'expense_account': args.expense_account
 	})
 
+	s.set_stock_entry_type()
 	if not args.do_not_save:
 		s.insert()
 		if not args.do_not_submit:

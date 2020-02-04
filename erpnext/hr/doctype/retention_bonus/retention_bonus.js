@@ -10,8 +10,13 @@ frappe.ui.form.on('Retention Bonus', {
 				}
 			};
 		});
-	},
-	refresh: function(frm) {
 
+		frm.set_query("salary_component", function() {
+			return {
+				filters: {
+					"type": "Earning"
+				}
+			};
+		});
 	}
 });

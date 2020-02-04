@@ -8,6 +8,10 @@ frappe.ui.form.on("POS Profile", "onload", function(frm) {
 		return { filters: { selling: 1 } };
 	});
 
+	frm.set_query("tc_name", function() {
+		return { filters: { selling: 1 } };
+	});
+
 	erpnext.queries.setup_queries(frm, "Warehouse", function() {
 		return erpnext.queries.warehouse(frm.doc);
 	});
@@ -28,7 +32,7 @@ frappe.ui.form.on('POS Profile', {
 			return {
 				filters: [
 					['Print Format', 'doc_type', '=', 'Sales Invoice'],
-					['Print Format', 'print_format_type', '=', 'Server'],
+					['Print Format', 'print_format_type', '=', 'Jinja'],
 				]
 			};
 		});
@@ -42,7 +46,7 @@ frappe.ui.form.on('POS Profile', {
 		});
 
 		frm.set_query("print_format", function() {
-			return { filters: { doc_type: "Sales Invoice", print_format_type: "Js"} };
+			return { filters: { doc_type: "Sales Invoice", print_format_type: "JS"} };
 		});
 
 		frappe.db.get_value('POS Settings', 'POS Settings', 'use_pos_in_offline_mode', (r) => {

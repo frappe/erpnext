@@ -18,6 +18,7 @@ from erpnext.accounts.doctype.account.test_account import get_inventory_account,
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.stock.doctype.item.test_item import create_item
 from six import iteritems
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 from erpnext.regional.india.utils import get_ewb_data
 
 class TestSalesInvoice(unittest.TestCase):
@@ -583,6 +584,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.get("taxes")[6].tax_amount = 2
 
 		si.insert()
+		print(si.name)
 
 		expected_values = [
 			{
@@ -867,7 +869,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# check gl entries
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
-			order by account asc, debit asc""", si.name, as_dict=1)
+			order by account asc, debit asc, credit asc""", si.name, as_dict=1)
 		self.assertTrue(gl_entries)
 
 		stock_in_hand = get_inventory_account('_Test Company')
@@ -891,7 +893,6 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_gl_entries[i][2], gle.credit)
 
 		si.cancel()
-		frappe.delete_doc('Sales Invoice', si.name)
 		gle = frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 
@@ -1754,6 +1755,61 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertEqual(expected_gle[i][2], gle.credit)
 			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
+	def test_inter_company_transaction(self):
+
+		if not frappe.db.exists("Customer", "_Test Internal Customer"):
+			customer = frappe.get_doc({
+				"customer_group": "_Test Customer Group",
+				"customer_name": "_Test Internal Customer",
+				"customer_type": "Individual",
+				"doctype": "Customer",
+				"territory": "_Test Territory",
+				"is_internal_customer": 1,
+				"represents_company": "_Test Company 1"
+			})
+
+			customer.append("companies", {
+				"company": "Wind Power LLC"
+			})
+
+			customer.insert()
+
+		if not frappe.db.exists("Supplier", "_Test Internal Supplier"):
+			supplier = frappe.get_doc({
+				"supplier_group": "_Test Supplier Group",
+				"supplier_name": "_Test Internal Supplier",
+				"doctype": "Supplier",
+				"is_internal_supplier": 1,
+				"represents_company": "Wind Power LLC"
+			})
+
+			supplier.append("companies", {
+				"company": "_Test Company 1"
+			})
+
+			supplier.insert()
+
+		si = create_sales_invoice(
+			company = "Wind Power LLC",
+			customer = "_Test Internal Customer",
+			debit_to = "Debtors - WP",
+			warehouse = "Stores - WP",
+			income_account = "Sales - WP",
+			expense_account = "Cost of Goods Sold - WP",
+			cost_center = "Main - WP",
+			currency = "USD",
+			do_not_save = 1
+		)
+
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.submit()
+
+		target_doc = make_inter_company_transaction("Sales Invoice", si.name)
+		target_doc.submit()
+
+		self.assertEqual(target_doc.company, "_Test Company 1")
+		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
+
 	def test_eway_bill_json(self):
 		if not frappe.db.exists('Address', '_Test Address for Eway bill-Billing'):
 			address = frappe.get_doc({
@@ -1825,6 +1881,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.company_address = "_Test Address for Eway bill-Billing"
 		si.customer_address = "_Test Customer-Address for Eway bill-Shipping"
 		si.vehicle_no = "KA12KA1234"
+		si.gst_category = "Registered Regular"
 
 		si.append("taxes", {
 			"charge_type": "On Net Total",

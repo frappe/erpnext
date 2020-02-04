@@ -175,3 +175,9 @@ def add_node():
 def convert_to_group_or_ledger():
 	args = frappe.form_dict
 	return frappe.get_doc("Warehouse", args.docname).convert_to_group_or_ledger()
+
+def get_child_warehouses(warehouse):
+	p_warehouse = frappe.get_doc("Warehouse", warehouse)
+
+	return frappe.db.sql_list("""select name from `tabWarehouse`
+		where lft >= %s and rgt =< %s""", (p_warehouse.lft, p_warehouse.rgt))

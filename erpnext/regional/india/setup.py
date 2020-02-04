@@ -94,21 +94,41 @@ def make_custom_fields(update=True):
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
 		fieldtype='Data', fetch_from='item_code.gst_hsn_code', insert_after='description',
 		allow_on_submit=1, print_hide=1, fetch_if_empty=1)
-	invoice_gst_fields = [
+	nil_rated_exempt = dict(fieldname='is_nil_exempt', label='Is nil rated or exempted',
+		fieldtype='Check', fetch_from='item_code.is_nil_exempt', insert_after='gst_hsn_code',
+		print_hide=1)
+	is_non_gst = dict(fieldname='is_non_gst', label='Is Non GST',
+		fieldtype='Check', fetch_from='item_code.is_non_gst', insert_after='is_nil_exempt',
+		print_hide=1)
+
+	purchase_invoice_gst_category = [
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
 			insert_after='language', print_hide=1, collapsible=1),
+		dict(fieldname='gst_category', label='GST Category',
+			fieldtype='Select', insert_after='gst_section', print_hide=1,
+			options='\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nUIN Holders',
+			fetch_from='supplier.gst_category', fetch_if_empty=1)
+	]
+
+	sales_invoice_gst_category = [
+		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
+			insert_after='language', print_hide=1, collapsible=1),
+		dict(fieldname='gst_category', label='GST Category',
+			fieldtype='Select', insert_after='gst_section', print_hide=1,
+			options='\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders',
+			fetch_from='customer.gst_category', fetch_if_empty=1)
+	]
+
+	invoice_gst_fields = [
 		dict(fieldname='invoice_copy', label='Invoice Copy',
-			fieldtype='Select', insert_after='gst_section', print_hide=1, allow_on_submit=1,
+			fieldtype='Select', insert_after='gst_category', print_hide=1, allow_on_submit=1,
 			options='Original for Recipient\nDuplicate for Transporter\nDuplicate for Supplier\nTriplicate for Supplier'),
 		dict(fieldname='reverse_charge', label='Reverse Charge',
 			fieldtype='Select', insert_after='invoice_copy', print_hide=1,
 			options='Y\nN', default='N'),
-		dict(fieldname='invoice_type', label='Invoice Type',
-			fieldtype='Select', insert_after='invoice_copy', print_hide=1,
-			options='Regular\nSEZ\nExport\nDeemed Export', default='Regular'),
 		dict(fieldname='export_type', label='Export Type',
-			fieldtype='Select', insert_after='invoice_type', print_hide=1,
-			depends_on='eval:in_list(["SEZ", "Export", "Deemed Export"], doc.invoice_type)',
+			fieldtype='Select', insert_after='reverse_charge', print_hide=1,
+			depends_on='eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
 			options='\nWith Payment of Tax\nWithout Payment of Tax'),
 		dict(fieldname='ecommerce_gstin', label='E-commerce GSTIN',
 			fieldtype='Data', insert_after='export_type', print_hide=1),
@@ -134,7 +154,7 @@ def make_custom_fields(update=True):
 	purchase_invoice_itc_fields = [
 			dict(fieldname='eligibility_for_itc', label='Eligibility For ITC',
 				fieldtype='Select', insert_after='reason_for_issuing_document', print_hide=1,
-				options='input\ninput service\ncapital goods\nineligible', default="ineligible"),
+				options='Input Service Distributor\nImport Of Service\nImport Of Capital Goods\nIneligible\nAll Other ITC', default="All Other ITC"),
 			dict(fieldname='itc_integrated_tax', label='Availed ITC Integrated Tax',
 				fieldtype='Data', insert_after='eligibility_for_itc', print_hide=1),
 			dict(fieldname='itc_central_tax', label='Availed ITC Central Tax',
@@ -163,13 +183,13 @@ def make_custom_fields(update=True):
 	sales_invoice_shipping_fields = [
 			dict(fieldname='port_code', label='Port Code',
 				fieldtype='Data', insert_after='reason_for_issuing_document', print_hide=1,
-				depends_on="eval:doc.invoice_type=='Export' "),
+				depends_on="eval:doc.gst_category=='Overseas' "),
 			dict(fieldname='shipping_bill_number', label=' Shipping Bill Number',
 				fieldtype='Data', insert_after='port_code', print_hide=1,
-				depends_on="eval:doc.invoice_type=='Export' "),
+				depends_on="eval:doc.gst_category=='Overseas' "),
 			dict(fieldname='shipping_bill_date', label='Shipping Bill Date',
 				fieldtype='Date', insert_after='shipping_bill_number', print_hide=1,
-				depends_on="eval:doc.invoice_type=='Export' ")
+				depends_on="eval:doc.gst_category=='Overseas' "),
 		]
 
 	inter_state_gst_field = [
@@ -334,7 +354,7 @@ def make_custom_fields(update=True):
 			'fieldtype': 'Data',
 			'depends_on': 'eval:(doc.docstatus === 1)',
 			'allow_on_submit': 1,
-			'insert_after': 'project',
+			'insert_after': 'tax_id',
 			'translatable': 0
 		}
 	]
@@ -348,11 +368,10 @@ def make_custom_fields(update=True):
 			dict(fieldname='gst_state_number', label='GST State Number',
 				fieldtype='Data', insert_after='gst_state', read_only=1),
 		],
-		'Purchase Invoice': invoice_gst_fields + purchase_invoice_gst_fields + purchase_invoice_itc_fields,
+		'Purchase Invoice': purchase_invoice_gst_category + invoice_gst_fields + purchase_invoice_itc_fields + purchase_invoice_gst_fields,
 		'Purchase Order': purchase_invoice_gst_fields,
 		'Purchase Receipt': purchase_invoice_gst_fields,
-		'Sales Invoice': (invoice_gst_fields + sales_invoice_gst_fields
-			+ sales_invoice_shipping_fields + si_ewaybill_fields),
+		'Sales Invoice': sales_invoice_gst_category + invoice_gst_fields + sales_invoice_shipping_fields + sales_invoice_gst_fields + si_ewaybill_fields,
 		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields + sales_invoice_shipping_fields,
 		'Sales Order': sales_invoice_gst_fields,
 		'Sales Taxes and Charges Template': inter_state_gst_field,
@@ -360,16 +379,20 @@ def make_custom_fields(update=True):
 		'Item': [
 			dict(fieldname='gst_hsn_code', label='HSN/SAC',
 				fieldtype='Link', options='GST HSN Code', insert_after='item_group'),
+			dict(fieldname='is_nil_exempt', label='Is nil rated or exempted',
+				fieldtype='Check', insert_after='gst_hsn_code'),
+			dict(fieldname='is_non_gst', label='Is Non GST ',
+				fieldtype='Check', insert_after='is_nil_exempt')
 		],
-		'Quotation Item': [hsn_sac_field],
-		'Supplier Quotation Item': [hsn_sac_field],
-		'Sales Order Item': [hsn_sac_field],
-		'Delivery Note Item': [hsn_sac_field],
-		'Sales Invoice Item': [hsn_sac_field],
-		'Purchase Order Item': [hsn_sac_field],
-		'Purchase Receipt Item': [hsn_sac_field],
-		'Purchase Invoice Item': [hsn_sac_field],
-		'Material Request Item': [hsn_sac_field],
+		'Quotation Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Supplier Quotation Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Sales Order Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Delivery Note Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Sales Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Purchase Order Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Purchase Receipt Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Purchase Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Material Request Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Employee': [
 			dict(fieldname='ifsc_code', label='IFSC Code',
 				fieldtype='Data', insert_after='bank_ac_no', print_hide=1,
@@ -377,13 +400,13 @@ def make_custom_fields(update=True):
 		],
 		'Company': [
 			dict(fieldname='hra_section', label='HRA Settings',
-				fieldtype='Section Break', insert_after='asset_received_but_not_billed'),
+				fieldtype='Section Break', insert_after='asset_received_but_not_billed', collapsible=1),
 			dict(fieldname='basic_component', label='Basic Component',
 				fieldtype='Link', options='Salary Component', insert_after='hra_section'),
 			dict(fieldname='hra_component', label='HRA Component',
 				fieldtype='Link', options='Salary Component', insert_after='basic_component'),
 			dict(fieldname='arrear_component', label='Arrear Component',
-				fieldtype='Link', options='Salary Component', insert_after='hra_component')
+				fieldtype='Link', options='Salary Component', insert_after='hra_component'),
 		],
 		'Employee Tax Exemption Declaration':[
 			dict(fieldname='hra_section', label='HRA Exemption',
@@ -428,10 +451,27 @@ def make_custom_fields(update=True):
 				'fieldtype': 'Data',
 				'insert_after': 'supplier_type',
 				'depends_on': 'eval:doc.is_transporter'
+			},
+			{
+				'fieldname': 'gst_category',
+				'label': 'GST Category',
+				'fieldtype': 'Select',
+				'insert_after': 'gst_transporter_id',
+				'options': 'Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nUIN Holders',
+				'default': 'Unregistered'
+			}
+		],
+		'Customer': [
+			{
+				'fieldname': 'gst_category',
+				'label': 'GST Category',
+				'fieldtype': 'Select',
+				'insert_after': 'customer_type',
+				'options': 'Registered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders',
+				'default': 'Unregistered'
 			}
 		]
 	}
-
 	create_custom_fields(custom_fields, update=update)
 
 def make_fixtures(company=None):
@@ -447,9 +487,9 @@ def make_fixtures(company=None):
 			doc.flags.ignore_permissions = True
 			doc.insert()
 		except frappe.NameError:
-			pass
+			frappe.clear_messages()
 		except frappe.DuplicateEntryError:
-			pass
+			frappe.clear_messages()
 
 	# create records for Tax Withholding Category
 	set_tax_withholding_category(company)
@@ -483,7 +523,9 @@ def set_tax_withholding_category(company):
 			doc.insert()
 		except frappe.DuplicateEntryError:
 			doc = frappe.get_doc("Tax Withholding Category", d.get("name"))
-			doc.append("accounts", accounts[0])
+
+			if accounts:
+				doc.append("accounts", accounts[0])
 
 			# if fiscal year don't match with any of the already entered data, append rate row
 			fy_exist = [k for k in doc.get('rates') if k.get('fiscal_year')==fiscal_year]

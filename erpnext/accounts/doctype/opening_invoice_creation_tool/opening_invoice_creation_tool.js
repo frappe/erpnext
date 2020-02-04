@@ -10,13 +10,29 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 				}
 			};
 		});
+
+		frm.set_query('cost_center', 'invoices', function(doc, cdt, cdn) {
+			return {
+				filters: {
+					'company': doc.company
+				}
+			};
+		});
+
+		frm.set_query('cost_center', function(doc) {
+			return {
+				filters: {
+					'company': doc.company
+				}
+			};
+		});
 	},
 
 	refresh: function(frm) {
 		erpnext.hide_company(frm);
 		frm.disable_save();
 		frm.trigger("make_dashboard");
-		frm.page.set_primary_action(__("Make Invoices"), () => {
+		frm.page.set_primary_action(__('Create Invoices'), () => {
 			let btn_primary = frm.page.btn_primary.get(0);
 			return frm.call({
 				doc: frm.doc,
@@ -85,6 +101,11 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 			if (!row.temporary_opening_account) {
 				row.temporary_opening_account = frm.doc.__onload.temporary_opening_account;
 			}
+
+			if(!row.cost_center) {
+				row.cost_center = frm.doc.cost_center;
+			}
+
 			row.party_type = frm.doc.invoice_type == "Sales"? "Customer": "Supplier";
 		});
 	}

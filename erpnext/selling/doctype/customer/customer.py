@@ -90,7 +90,7 @@ class Customer(TransactionBase):
 	def update_customer_groups(self):
 		ignore_doctypes = ["Lead", "Opportunity", "POS Profile", "Tax Rule", "Pricing Rule"]
 		if frappe.flags.customer_group_changed:
-			update_linked_doctypes('Customer', frappe.db.escape(self.name), 'Customer Group',
+			update_linked_doctypes('Customer', self.name, 'Customer Group',
 				self.customer_group, ignore_doctypes)
 
 	def create_primary_contact(self):
@@ -170,13 +170,18 @@ class Customer(TransactionBase):
 			frappe.throw(_("A Customer Group exists with same name please change the Customer name or rename the Customer Group"), frappe.NameError)
 
 	def validate_credit_limit_on_change(self):
-		if self.get("__islocal") or not self.credit_limit \
-			or self.credit_limit == frappe.db.get_value("Customer", self.name, "credit_limit"):
+		if self.get("__islocal") or not self.credit_limits:
 			return
 
-		for company in frappe.get_all("Company"):
-			outstanding_amt = get_customer_outstanding(self.name, company.name)
-			if flt(self.credit_limit) < outstanding_amt:
+		company_record = []
+		for limit in self.credit_limits:
+			if limit.company in company_record:
+				frappe.throw(_("Credit limit is already defined for the Company {0}").format(limit.company, self.name))
+			else:
+				company_record.append(limit.company)
+
+			outstanding_amt = get_customer_outstanding(self.name, limit.company)
+			if flt(limit.credit_limit) < outstanding_amt:
 				frappe.throw(_("""New credit limit is less than current outstanding amount for the customer. Credit limit has to be atleast {0}""").format(outstanding_amt))
 
 	def on_trash(self):
@@ -263,12 +268,21 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 			throw(_("Please contact to the user who have Sales Master Manager {0} role")
 				.format(" / " + credit_controller if credit_controller else ""))
 
-def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False):
+def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):
 	# Outstanding based on GL Entries
+
+	cond = ""
+	if cost_center:
+		lft, rgt = frappe.get_cached_value("Cost Center",
+			cost_center, ['lft', 'rgt'])
+
+		cond = """ and cost_center in (select name from `tabCost Center` where
+			lft >= {0} and rgt <= {1})""".format(lft, rgt)
+
 	outstanding_based_on_gle = frappe.db.sql("""
 		select sum(debit) - sum(credit)
-		from `tabGL Entry`
-		where party_type = 'Customer' and party = %s and company=%s""", (customer, company))
+		from `tabGL Entry` where party_type = 'Customer'
+		and party = %s and company=%s {0}""".format(cond), (customer, company))
 
 	outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
 
@@ -316,11 +330,13 @@ def get_credit_limit(customer, company):
 	credit_limit = None
 
 	if customer:
-		credit_limit, customer_group = frappe.get_cached_value("Customer",
-			customer, ["credit_limit", "customer_group"])
+		credit_limit = frappe.db.get_value("Customer Credit Limit",
+			{'parent': customer, 'parenttype': 'Customer', 'company': company}, 'credit_limit')
 
 		if not credit_limit:
-			credit_limit = frappe.get_cached_value("Customer Group", customer_group, "credit_limit")
+			customer_group = frappe.get_cached_value("Customer", customer, 'customer_group')
+			credit_limit = frappe.db.get_value("Customer Credit Limit",
+				{'parent': customer_group, 'parenttype': 'Customer Group', 'company': company}, 'credit_limit')
 
 	if not credit_limit:
 		credit_limit = frappe.get_cached_value('Company',  company,  "credit_limit")
@@ -331,14 +347,17 @@ def make_contact(args, is_primary_contact=1):
 	contact = frappe.get_doc({
 		'doctype': 'Contact',
 		'first_name': args.get('name'),
-		'mobile_no': args.get('mobile_no'),
-		'email_id': args.get('email_id'),
 		'is_primary_contact': is_primary_contact,
 		'links': [{
 			'link_doctype': args.get('doctype'),
 			'link_name': args.get('name')
 		}]
-	}).insert()
+	})
+	if args.get('email_id'):
+		contact.add_email(args.get('email_id'), is_primary=True)
+	if args.get('mobile_no'):
+		contact.add_phone(args.get('mobile_no'), is_primary_mobile_no=True)
+	contact.insert()
 
 	return contact
 

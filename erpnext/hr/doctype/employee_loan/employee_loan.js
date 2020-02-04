@@ -46,7 +46,7 @@ frappe.ui.form.on('Employee Loan', {
 
 	refresh: function (frm) {
 		if (frm.doc.docstatus == 1 && (frm.doc.status == "Sanctioned" || frm.doc.status == "Partially Disbursed")) {
-			frm.add_custom_button(__('Make Disbursement Entry'), function () {
+			frm.add_custom_button(__('Create Disbursement Entry'), function () {
 				frm.trigger("make_jv");
 			})
 		}

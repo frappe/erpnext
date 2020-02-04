@@ -62,7 +62,7 @@ def repost_actual_qty(item_code, warehouse, allow_zero_rate=False, allow_negativ
 def get_balance_qty_from_sle(item_code, warehouse):
 	balance_qty = frappe.db.sql("""select qty_after_transaction from `tabStock Ledger Entry`
 		where item_code=%s and warehouse=%s and is_cancelled='No'
-		order by posting_date desc, posting_time desc, name desc
+		order by posting_date desc, posting_time desc, creation desc
 		limit 1""", (item_code, warehouse))
 
 	return flt(balance_qty[0][0]) if balance_qty else 0.0

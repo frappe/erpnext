@@ -4,24 +4,38 @@
 //c-form js file
 // -----------------------------
 
+frappe.ui.form.on('C-Form', {
+	setup(frm) {
+		frm.fields_dict.invoices.grid.get_field("invoice_no").get_query = function(doc) {
+			return {
+				filters: {
+					"docstatus": 1,
+					"customer": doc.customer,
+					"company": doc.company,
+					"c_form_applicable": 'Yes',
+					"c_form_no": ''
+				}
+			};
+		}
 
-cur_frm.fields_dict.invoices.grid.get_field("invoice_no").get_query = function(doc) {
-	return {
-		filters: {
-			"docstatus": 1,
-			"customer": doc.customer,
-			"company": doc.company,
-			"c_form_applicable": 'Yes',
-			"c_form_no": ''
+		frm.fields_dict.state.get_query = function() {
+			return {
+				filters: {
+					country: "India"
+				}
+			};
 		}
 	}
-}
+});
 
-cur_frm.fields_dict.state.get_query = function(doc) {
-	return {filters: { country: "India"}}
-}
+frappe.ui.form.on('C-Form Invoice Detail', {
+	invoice_no(frm, cdt, cdn) {
+		let d = frappe.get_doc(cdt, cdn);
 
-cur_frm.cscript.invoice_no = function(doc, cdt, cdn) {
-	var d = locals[cdt][cdn];
-	return get_server_fields('get_invoice_details', d.invoice_no, 'invoices', doc, cdt, cdn, 1);
-}
+		frm.call('get_invoice_details', {
+			invoice_no: d.invoice_no
+		}).then(r => {
+			frappe.model.set_value(cdt, cdn, r.message);
+		});
+	}
+});

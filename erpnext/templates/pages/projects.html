@@ -20,11 +20,11 @@
 	aria-valuemin="0" aria-valuemax="100" style="width:{{ doc.percent_complete|round|int }}%;">
 	</div>
 </div>
-{% endif %}		
+{% endif %}
 
 <div class="clearfix">
   <h4 style="float: left;">{{ _("Tasks") }}</h4>
-  <a class="btn btn-secondary btn-default btn-sm" style="float: right; position: relative; top: 10px;" href='/tasks?new=1&project={{ doc.project_name }}'>{{ _("New task") }}</a>
+  <a class="btn btn-secondary btn-light btn-sm" style="float: right; position: relative; top: 10px;" href='/tasks?new=1&project={{ doc.project_name }}'>{{ _("New task") }}</a>
 </div>
 
 <p>

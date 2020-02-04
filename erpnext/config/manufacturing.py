@@ -4,53 +4,33 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Production"),
-			"icon": "fa fa-star",
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Work Order",
-					"description": _("Orders released for production."),
-				},
-				{
-					"type": "doctype",
-					"name": "Production Plan",
-					"description": _("Generate Material Requests (MRP) and Work Orders."),
-				},
-				{
-					"type": "doctype",
-					"name": "Stock Entry",
-				},
-				{
-					"type": "doctype",
-					"name": "Timesheet",
-					"description": _("Time Sheet for manufacturing."),
-				},
-
-			]
-		},
-		{
 			"label": _("Bill of Materials"),
 			"items": [
 				{
 					"type": "doctype",
-					"name": "BOM",
-					"description": _("Bill of Materials (BOM)"),
-					"label": _("Bill of Materials")
+					"name": "Item",
+					"description": _("All Products or Services."),
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "BOM",
+					"description": _("Bill of Materials (BOM)"),
+					"label": _("Bill of Materials"),
+					"onboard": 1,
+					"dependencies": ["Item"]
+				},
+				{
+					"type": "doctype",
+					"name": "BOM Browser",
 					"icon": "fa fa-sitemap",
 					"label": _("BOM Browser"),
 					"description": _("Tree of Bill of Materials"),
 					"link": "Tree/BOM",
+					"onboard": 1,
+					"dependencies": ["Item"]
 				},
-				{
-					"type": "doctype",
-					"name": "Item",
-					"description": _("All Products or Services."),
-				},
+
 				{
 					"type": "doctype",
 					"name": "Workstation",
@@ -61,7 +41,48 @@ def get_data():
 					"name": "Operation",
 					"description": _("Details of the operations carried out."),
 				},
+				{
+					"type": "doctype",
+					"name": "Routing"
+				}
 
+			]
+		},
+		{
+			"label": _("Production"),
+			"icon": "fa fa-star",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Work Order",
+					"description": _("Orders released for production."),
+					"onboard": 1,
+					"dependencies": ["Item", "BOM"]
+				},
+				{
+					"type": "doctype",
+					"name": "Production Plan",
+					"description": _("Generate Material Requests (MRP) and Work Orders."),
+					"onboard": 1,
+					"dependencies": ["Item", "BOM"]
+				},
+				{
+					"type": "doctype",
+					"name": "Stock Entry",
+					"onboard": 1,
+					"dependencies": ["Item"]
+				},
+				{
+					"type": "doctype",
+					"name": "Timesheet",
+					"description": _("Time Sheet for manufacturing."),
+					"onboard": 1,
+					"dependencies": ["Activity Type"]
+				},
+				{
+					"type": "doctype",
+					"name": "Job Card"
+				}
 			]
 		},
 		{
@@ -73,10 +94,17 @@ def get_data():
 					"name": "BOM Update Tool",
 					"description": _("Replace BOM and update latest price in all BOMs"),
 				},
+				{
+					"type": "page",
+					"label": _("BOM Comparison Tool"),
+					"name": "bom-comparison-tool",
+					"description": _("Compare BOMs for changes in Raw Materials and Operations"),
+					"data_doctype": "BOM"
+				},
 			]
 		},
 		{
-			"label": _("Setup"),
+			"label": _("Settings"),
 			"items": [
 				{
 					"type": "doctype",

@@ -7,8 +7,9 @@ from frappe import _
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
 from frappe.utils import getdate, flt
 
+
 def execute(filters=None):
-	if not filters: 
+	if not filters:
 		filters = {}
 
 	validate_filters(filters)
@@ -23,7 +24,6 @@ def execute(filters=None):
 
 		if d.reference_type == "Purchase Invoice":
 			payment_amount = flt(d.debit) or -1 * flt(d.credit)
-
 		else:
 			payment_amount = flt(d.credit) or -1 * flt(d.debit)
 
@@ -37,7 +37,7 @@ def execute(filters=None):
 
 		if d.against_voucher:
 			ReceivablePayableReport(filters).get_ageing_data(invoice.posting_date, d)
-		
+
 		row = [
 			d.voucher_type, d.voucher_no, d.party_type, d.party, d.posting_date, d.against_voucher,
 			invoice.posting_date, invoice.due_date, d.debit, d.credit, d.remarks, 

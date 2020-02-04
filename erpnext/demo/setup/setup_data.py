@@ -10,13 +10,14 @@ from erpnext.demo.domains import data
 from frappe import _
 
 def setup(domain):
+	frappe.flags.in_demo = 1
 	complete_setup(domain)
 	setup_demo_page()
 	setup_fiscal_year()
 	setup_holiday_list()
 	setup_user()
 	setup_employee()
-	setup_user_roles()
+	setup_user_roles(domain)
 	setup_role_permissions()
 	setup_custom_field_for_domain()
 
@@ -183,13 +184,19 @@ def setup_salary_structure(employees, salary_slip_based_on_timesheet=0):
 
 	return ss
 
-def setup_user_roles():
+def setup_user_roles(domain):
 	user = frappe.get_doc('User', 'demo@erpnext.com')
 	user.add_roles('HR User', 'HR Manager', 'Accounts User', 'Accounts Manager',
 		'Stock User', 'Stock Manager', 'Sales User', 'Sales Manager', 'Purchase User',
 		'Purchase Manager', 'Projects User', 'Manufacturing User', 'Manufacturing Manager',
-		'Support Team', 'Academics User', 'Physician', 'Healthcare Administrator', 'Laboratory User',
-		'Nursing User', 'Patient')
+		'Support Team')
+
+	if domain == "Healthcare":
+		user.add_roles('Physician', 'Healthcare Administrator', 'Laboratory User',
+			'Nursing User', 'Patient')
+
+	if domain == "Education":
+		user.add_roles('Academics User')
 
 	if not frappe.db.get_global('demo_hr_user'):
 		user = frappe.get_doc('User', 'CaitlinSnow@example.com')
@@ -219,7 +226,7 @@ def setup_user_roles():
 
 	if not frappe.db.get_global('demo_manufacturing_user'):
 		user = frappe.get_doc('User', 'NeptuniaAquaria@example.com')
-		user.add_roles('Manufacturing User', 'Stock User', 'Purchase User', 'Accounts User')
+		user.add_roles('Manufacturing User', 'Stock Manager', 'Stock User', 'Purchase User', 'Accounts User')
 		update_employee_department(user.name, 'Production')
 		frappe.db.set_global('demo_manufacturing_user', user.name)
 
@@ -241,11 +248,12 @@ def setup_user_roles():
 		update_employee_department(user.name, 'Management')
 		frappe.db.set_global('demo_projects_user', user.name)
 
-	if not frappe.db.get_global('demo_education_user'):
-		user = frappe.get_doc('User', 'ArthurCurry@example.com')
-		user.add_roles('Academics User')
-		update_employee_department(user.name, 'Management')
-		frappe.db.set_global('demo_education_user', user.name)
+	if domain == "Education":
+		if not frappe.db.get_global('demo_education_user'):
+			user = frappe.get_doc('User', 'ArthurCurry@example.com')
+			user.add_roles('Academics User')
+			update_employee_department(user.name, 'Management')
+			frappe.db.set_global('demo_education_user', user.name)
 
 	#Add Expense Approver
 	user = frappe.get_doc('User', 'ClarkKent@example.com')

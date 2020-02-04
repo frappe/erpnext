@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-import frappe.defaults
 from six import iteritems
 from email_reply_parser import EmailReplyParser
 from frappe.utils import (flt, getdate, get_url, now,
@@ -12,8 +11,7 @@ from frappe.utils import (flt, getdate, get_url, now,
 from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
-from erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group import is_holiday_today
-from frappe.model.naming import set_name_by_naming_series
+from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 from frappe.model.document import Document
 
 class Project(Document):
@@ -21,10 +19,6 @@ class Project(Document):
 		return '{0}: {1}'.format(_(self.status), frappe.safe_decode(self.project_name))
 
 	def onload(self):
-		"""Load project tasks for quick view"""
-		if not self.get('__unsaved') and not self.get("tasks"):
-			self.load_tasks()
-
 		self.set_onload('activity_summary', frappe.db.sql('''select activity_type,
 			sum(hours) as total_hours
 			from `tabTimesheet Detail` where project=%s and docstatus < 2 group by activity_type
@@ -35,165 +29,42 @@ class Project(Document):
 	def before_print(self):
 		self.onload()
 
-	def autoname(self):
-		project_naming_by = frappe.defaults.get_global_default('project_naming_by')
-		if project_naming_by == 'Naming Series':
-			set_name_by_naming_series(self)
-		else:
-			self.name = self.project_name
-
-	def load_tasks(self):
-		"""Load `tasks` from the database"""
-		project_task_custom_fields = frappe.get_all("Custom Field", {"dt": "Project Task"}, "fieldname")
-
-		self.tasks = []
-		for task in self.get_tasks():
-			task_map = {
-				"title": task.subject,
-				"status": task.status,
-				"start_date": task.exp_start_date,
-				"end_date": task.exp_end_date,
-				"description": task.description,
-				"task_id": task.name,
-				"task_weight": task.task_weight,
-				"service_person": task.service_person
-			}
-
-			self.map_custom_fields(task, task_map, project_task_custom_fields)
-
-			self.append("tasks", task_map)
-
-	def get_tasks(self):
-		if self.name is None:
-			return {}
-		else:
-			filters = {"project": self.name}
-
-			if self.get("deleted_task_list"):
-				filters.update({
-					'name': ("not in", self.deleted_task_list)
-				})
-
-			return frappe.get_all("Task", "*", filters, order_by="exp_start_date asc, status asc")
 
 	def validate(self):
-		self.validate_weights()
-		self.sync_tasks()
-		self.tasks = []
-		self.load_tasks()
-		self.validate_dates()
-		self.validate_serial_no()
+		if not self.is_new():
+			self.copy_from_template()
 		self.send_welcome_email()
-		self.update_percent_complete(from_validate=True)
+		self.update_costing()
+		self.update_percent_complete()
 
-	def validate_dates(self):
-		if self.tasks:
-			for d in self.tasks:
-				if self.expected_start_date:
-					if d.start_date and getdate(d.start_date) < getdate(self.expected_start_date):
-						frappe.throw(_("Start date of task <b>{0}</b> cannot be less than <b>{1}</b> expected start date <b>{2}</b>")
-							.format(d.title, self.name, self.expected_start_date))
-					if d.end_date and getdate(d.end_date) < getdate(self.expected_start_date):
-						frappe.throw(_("End date of task <b>{0}</b> cannot be less than <b>{1}</b> expected start date <b>{2}</b>")
-							.format(d.title, self.name, self.expected_start_date))
+	def copy_from_template(self):
+		'''
+		Copy tasks from template
+		'''
+		if self.project_template and not frappe.db.get_all('Task', dict(project = self.name), limit=1):
 
-				if self.expected_end_date:
-					if d.start_date and getdate(d.start_date) > getdate(self.expected_end_date):
-						frappe.throw(_("Start date of task <b>{0}</b> cannot be greater than <b>{1}</b> expected end date <b>{2}</b>")
-							.format(d.title, self.name, self.expected_end_date))
-					if d.end_date and getdate(d.end_date) > getdate(self.expected_end_date):
-						frappe.throw(_("End date of task <b>{0}</b> cannot be greater than <b>{1}</b> expected end date <b>{2}</b>")
-							.format(d.title, self.name, self.expected_end_date))
+			# has a template, and no loaded tasks, so lets create
+			if not self.expected_start_date:
+				# project starts today
+				self.expected_start_date = today()
 
-		if self.expected_start_date and self.expected_end_date:
-			if getdate(self.expected_end_date) < getdate(self.expected_start_date):
-				frappe.throw(_("Expected End Date can not be less than Expected Start Date"))
+			template = frappe.get_doc('Project Template', self.project_template)
 
-	def validate_weights(self):
-		for task in self.tasks:
-			if task.task_weight is not None:
-				if task.task_weight < 0:
-					frappe.throw(_("Task weight cannot be negative"))
+			if not self.project_type:
+				self.project_type = template.project_type
 
-	def sync_tasks(self):
-		"""sync tasks and remove table"""
-		if not hasattr(self, "deleted_task_list"):
-			self.set("deleted_task_list", [])
-
-		if self.flags.dont_sync_tasks: return
-		task_names = []
-
-		existing_task_data = {}
-
-		fields = ["title", "status", "start_date", "end_date", "description", "task_weight", "task_id", "service_person"]
-		exclude_fieldtype = ["Button", "Column Break",
-			"Section Break", "Table", "Read Only", "Attach", "Attach Image", "Color", "Geolocation", "HTML", "Image"]
-
-		custom_fields = frappe.get_all("Custom Field", {"dt": "Project Task",
-			"fieldtype": ("not in", exclude_fieldtype)}, "fieldname")
-
-		for d in custom_fields:
-			fields.append(d.fieldname)
-
-		for d in frappe.get_all('Project Task',
-			fields = fields,
-			filters = {'parent': self.name}):
-			existing_task_data.setdefault(d.task_id, d)
-
-		for t in self.tasks:
-			if t.task_id:
-				task = frappe.get_doc("Task", t.task_id)
-			else:
-				task = frappe.new_doc("Task")
-				task.project = self.name
-
-			if not t.task_id or self.is_row_updated(t, existing_task_data, fields):
-				task.update({
-					"subject": t.title,
-					"status": t.status,
-					"exp_start_date": t.start_date,
-					"exp_end_date": t.end_date,
-					"description": t.description,
-					"task_weight": t.task_weight,
-					"service_person": t.service_person
-				})
-
-				self.map_custom_fields(t, task, custom_fields)
-
-				task.flags.ignore_links = True
-				task.flags.from_project = True
-				task.flags.ignore_feed = True
-
-				if t.task_id:
-					task.update({
-						"modified_by": frappe.session.user,
-						"modified": now()
-					})
-
-					task.run_method("validate")
-					task.db_update()
-					task.notify_update()
-				else:
-					task.save(ignore_permissions = True)
-				task_names.append(task.name)
-			else:
-				task_names.append(task.name)
-
-		# delete
-		for t in frappe.get_all("Task", ["name"], {"project": self.name, "name": ("not in", task_names)}):
-			self.deleted_task_list.append(t.name)
-
-	def validate_serial_no(self):
-		if self.serial_no:
-			serial_no = frappe.db.get_value('Serial No', self.serial_no, ['item_code', 'customer'], as_dict=1)
-			if not self.item_code and serial_no.item_code:
-				self.item_code = serial_no.item_code
-				self.item_name = frappe.get_cached_value("Item", self.item_code, 'item_name')
-			elif self.item_code != serial_no.item_code:
-				frappe.throw(_("Serial No {0} belongs to {1}".format(self.serial_no, serial_no.item_code)))
-
-			if self.customer and serial_no.customer and self.customer != serial_no.customer:
-				frappe.throw(_("Serial No {0} is assigned to Customer {1}".format(self.serial_no, serial_no.customer)))
+			# create tasks from template
+			for task in template.tasks:
+				frappe.get_doc(dict(
+					doctype = 'Task',
+					subject = task.subject,
+					project = self.name,
+					status = 'Open',
+					exp_start_date = add_days(self.expected_start_date, task.start),
+					exp_end_date = add_days(self.expected_start_date, task.start + task.duration),
+					description = task.description,
+					task_weight = task.task_weight
+				)).insert()
 
 	def is_row_updated(self, row, existing_task_data, fields):
 		if self.get("__islocal") or not existing_task_data: return True
@@ -204,56 +75,58 @@ class Project(Document):
 			if row.get(field) != d.get(field):
 				return True
 
-	def map_custom_fields(self, source, target, custom_fields):
-		for field in custom_fields:
-			target.update({
-				field.fieldname: source.get(field.fieldname)
-			})
-
 	def update_project(self):
+		'''Called externally by Task'''
 		self.update_percent_complete()
 		self.update_costing()
+		self.db_update()
 
 	def after_insert(self):
+		self.copy_from_template()
 		if self.sales_order:
 			frappe.db.set_value("Sales Order", self.sales_order, "project", self.name)
 
-	def update_percent_complete(self, from_validate=False):
-		if not self.tasks:
-			if self.status == "Completed" :
+	def update_percent_complete(self):
+		if self.percent_complete_method == "Manual":
+			if self.status == "Completed":
 				self.percent_complete = 100
 			return
-			
-		total = frappe.db.sql("""select count(name) from tabTask where project=%s""", self.name)[0][0]
-		if not total and self.percent_complete:
+
+		total = frappe.db.count('Task', dict(project=self.name))
+
+		if not total:
 			self.percent_complete = 0
-		if (self.percent_complete_method == "Task Completion" and total > 0) or (
-			not self.percent_complete_method and total > 0):
-			completed = frappe.db.sql("""select count(name) from tabTask where
-				project=%s and status in ('Closed', 'Cancelled')""", self.name)[0][0]
-			self.percent_complete = flt(flt(completed) / total * 100, 2)
+		else:
+			if (self.percent_complete_method == "Task Completion" and total > 0) or (
+				not self.percent_complete_method and total > 0):
+				completed = frappe.db.sql("""select count(name) from tabTask where
+					project=%s and status in ('Cancelled', 'Completed')""", self.name)[0][0]
+				self.percent_complete = flt(flt(completed) / total * 100, 2)
 
-		if (self.percent_complete_method == "Task Progress" and total > 0):
-			progress = frappe.db.sql("""select sum(progress) from tabTask where
-				project=%s""", self.name)[0][0]
-			self.percent_complete = flt(flt(progress) / total, 2)
+			if (self.percent_complete_method == "Task Progress" and total > 0):
+				progress = frappe.db.sql("""select sum(progress) from tabTask where
+					project=%s""", self.name)[0][0]
+				self.percent_complete = flt(flt(progress) / total, 2)
 
-		if (self.percent_complete_method == "Task Weight" and total > 0):
-			weight_sum = frappe.db.sql("""select sum(task_weight) from tabTask where
-				project=%s""", self.name)[0][0]
-			weighted_progress = frappe.db.sql("""select progress,task_weight from tabTask where
-				project=%s""", self.name, as_dict=1)
-			pct_complete = 0
-			for row in weighted_progress:
-				pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
-			self.percent_complete = flt(flt(pct_complete), 2)
+			if (self.percent_complete_method == "Task Weight" and total > 0):
+				weight_sum = frappe.db.sql("""select sum(task_weight) from tabTask where
+					project=%s""", self.name)[0][0]
+				weighted_progress = frappe.db.sql("""select progress, task_weight from tabTask where
+					project=%s""", self.name, as_dict=1)
+				pct_complete = 0
+				for row in weighted_progress:
+					pct_complete += row["progress"] * frappe.utils.safe_div(row["task_weight"], weight_sum)
+				self.percent_complete = flt(flt(pct_complete), 2)
+
+		# don't update status if it is cancelled
+		if self.status == 'Cancelled':
+			return
+
 		if self.percent_complete == 100:
 			self.status = "Completed"
-		elif not self.status == "Cancelled":
-			self.status = "Open"
 
-		if not from_validate:
-			self.db_update()
+		else:
+			self.status = "Open"
 
 	def update_costing(self):
 		from_time_sheet = frappe.db.sql("""select
@@ -281,7 +154,6 @@ class Project(Document):
 		self.update_sales_amount()
 		self.update_billed_amount()
 		self.calculate_gross_margin()
-		self.db_update()
 
 	def calculate_gross_margin(self):
 		expense_amount = (flt(self.total_costing_amount) + flt(self.total_expense_claim)
@@ -331,57 +203,6 @@ class Project(Document):
 				frappe.sendmail(user.user, subject=_("Project Collaboration Invitation"),
 								content=content.format(*messages))
 				user.welcome_email_sent = 1
-
-	def on_update(self):
-		self.delete_task()
-		self.load_tasks()
-		self.update_project()
-		self.update_dependencies_on_duplicated_project()
-
-	def delete_task(self):
-		if not self.get('deleted_task_list'): return
-
-		for d in self.get('deleted_task_list'):
-			# unlink project
-			frappe.db.set_value('Task', d, 'project', '')
-
-		self.deleted_task_list = []
-
-	def update_dependencies_on_duplicated_project(self):
-		if self.flags.dont_sync_tasks: return
-		if not self.copied_from:
-			self.copied_from = self.name
-
-		if self.name != self.copied_from and self.get('__unsaved'):
-			# duplicated project
-			dependency_map = {}
-			for task in self.tasks:
-				_task = frappe.db.get_value(
-					'Task',
-					{"subject": task.title, "project": self.copied_from},
-					['name', 'depends_on_tasks'],
-					as_dict=True
-				)
-
-				if _task is None:
-					continue
-
-				name = _task.name
-
-				dependency_map[task.title] = [x['subject'] for x in frappe.get_list(
-					'Task Depends On', {"parent": name}, ['subject'])]
-
-			for key, value in iteritems(dependency_map):
-				task_name = frappe.db.get_value('Task', {"subject": key, "project": self.name })
-
-				task_doc = frappe.get_doc('Task', task_name)
-
-				for dt in value:
-					dt_name = frappe.db.get_value('Task', {"subject": dt, "project": self.name})
-					task_doc.append('depends_on', {"task": dt_name})
-
-				task_doc.db_update()
-
 
 def get_timeline_data(doctype, name):
 	'''Return timeline for attendance'''
@@ -511,7 +332,7 @@ def get_projects_for_collect_progress(frequency, fields):
 def send_project_update_email_to_users(project):
 	doc = frappe.get_doc('Project', project)
 
-	if is_holiday_today(doc.holiday_list) or not doc.users: return
+	if is_holiday(doc.holiday_list) or not doc.users: return
 
 	project_update = frappe.get_doc({
 		"doctype" : "Project Update",
@@ -622,6 +443,23 @@ def create_kanban_board_if_not_exists(project):
 		quick_kanban_board('Task', project, 'status')
 
 	return True
+
+@frappe.whitelist()
+def set_project_status(project, status):
+	'''
+	set status for project and all related tasks
+	'''
+	if not status in ('Completed', 'Cancelled'):
+		frappe.throw(_('Status must be Cancelled or Completed'))
+
+	project = frappe.get_doc('Project', project)
+	frappe.has_permission(doc = project, throw = True)
+
+	for task in frappe.get_all('Task', dict(project = project.name)):
+		frappe.db.set_value('Task', task.name, 'status', status)
+
+	project.status = status
+	project.save()
 
 @frappe.whitelist()
 def make_against_project(project_name, dt):

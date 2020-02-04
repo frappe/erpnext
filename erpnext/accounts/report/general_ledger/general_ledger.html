@@ -64,7 +64,7 @@ for(var i=0, l=data.length; i<l; i++) {
 		</tr>
 	</thead>
 	<tbody>
-		{% for(var i=0, l=data.length; i<l; i++) { %}
+		{% for(var i=0, l=data.length-1; i<l; i++) { %}
 			<tr>
 			{% if(data[i].posting_date) { %}
 				<td class="text-center text-nowrap">

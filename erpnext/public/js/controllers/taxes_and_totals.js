@@ -20,6 +20,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		if(item.discount_percentage) {
 			item.discount_amount = flt(item.rate_with_margin) * flt(item.discount_percentage) / 100;
+		}
+
+		if (item.discount_amount) {
 			item.rate = flt((item.rate_with_margin) - (item.discount_amount), precision('rate', item));
 		} else {
 			item.discount_amount = 0;
@@ -82,21 +85,18 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			if(this.frm.doc.currency == company_currency) {
 				this.frm.set_value("conversion_rate", 1);
 			} else {
-				frappe.throw(repl('%(conversion_rate_label)s' +
-					__(' is mandatory. Maybe Currency Exchange record is not created for ') +
-				'%(from_currency)s' + __(" to ") + '%(to_currency)s', {
-					"conversion_rate_label": conversion_rate_label,
-					"from_currency": this.frm.doc.currency,
-					"to_currency": company_currency
-				}));
+				const err_message = __('{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}', [
+					conversion_rate_label,
+					this.frm.doc.currency,
+					company_currency
+				]);
+				frappe.throw(err_message);
 			}
-
 		}
 	},
 
 	calculate_item_values: function() {
 		var me = this;
-
 		if (!this.discount_amount_applied) {
 			$.each(this.frm.doc["items"] || [], function(i, item) {
 				frappe.model.round_floats_in(item);
@@ -112,8 +112,13 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					rate_before_discount = item.rate;
 				}
 
-				item.amount_before_discount = flt(rate_before_discount * item.qty, precision("amount_before_discount", item));
-				item.amount = flt(item.rate * item.qty, precision("amount", item));
+				if ((!item.qty) && me.frm.doc.is_return) {
+					item.amount_before_discount = flt(rate_before_discount * -1, precision("amount_before_discount", item));
+					item.amount = flt(item.rate * -1, precision("amount", item));
+				} else {
+					item.amount_before_discount = flt(rate_before_discount * item.qty, precision("amount_before_discount", item));
+					item.amount = flt(item.rate * item.qty, precision("amount", item));
+				}
 				item.total_discount = flt(item.amount_before_discount - item.amount, precision("total_discount", item));
 
 				item.taxable_rate = cint(item.apply_discount_after_taxes) ? rate_before_discount : item.rate;

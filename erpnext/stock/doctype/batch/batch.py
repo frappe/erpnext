@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+from six import text_type
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -61,7 +62,7 @@ def _make_naming_series_key(prefix):
 	:param prefix: Naming series prefix gotten from Stock Settings
 	:return: The derived key. If no prefix is given, an empty string is returned
 	"""
-	if not isinstance(prefix, string_types):
+	if not text_type(prefix):
 		return ''
 	else:
 		return prefix.upper() + '.#####'
@@ -121,8 +122,8 @@ class Batch(Document):
 			self.expiry_date = add_days(self.manufacturing_date, shelf_life_in_days)
 
 		if has_expiry_date and not self.expiry_date:
-			frappe.throw(_('Expiry date is mandatory for selected item'))
-			frappe.msgprint(_('Set items shelf life in days, to set expiry based on manufacturing_date plus self life'))
+			frappe.msgprint(_('Expiry date is mandatory for selected item.'))
+			frappe.throw(_("Set item's shelf life in days, to set expiry based on manufacturing date plus shelf-life."))
 
 	def get_name_from_naming_series(self):
 		"""
@@ -202,6 +203,7 @@ def split_batch(batch_no, item_code, warehouse, qty, new_batch_id=None):
 			),
 		]
 	))
+	stock_entry.set_stock_entry_type()
 	stock_entry.insert()
 	stock_entry.submit()
 

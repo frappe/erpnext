@@ -12,7 +12,7 @@
                         "Accrued Rebates Due from Suppliers": {
                             "account_type": "Receivable"
                         }, 
-                        "Accured Income from Suppliers": {
+                        "Accrued Income from Suppliers": {
                             "account_type": "Receivable"
                         }, 
                         "Other Debtors": {
@@ -54,7 +54,7 @@
                             }
                         }, 
                         "Petty Cash": {
-                            "Petty Cash - Admininistration": {
+                            "Petty Cash - Administration": {
                                 "account_type": "Cash"
                             }, 
                             "Petty Cash - Others": {
@@ -85,13 +85,13 @@
                         "Handling Difference in Inventory": {
                             "account_type": "Stock Adjustment"
                         }, 
-                        "Items Delivered to Customs on temprary Base": {}
+                        "Items Delivered to Customs on temporary Base": {}
                     }, 
                     "Stock in Hand": {
                         "account_type": "Stock"
                     }
                 }, 
-                "Perliminary and Preoperating Expenses": {
+                "Preliminary and Preoperating Expenses": {
                     "Preoperating Expenses": {}
                 }, 
                 "Prepayments & Deposits": {
@@ -150,16 +150,16 @@
                             "account_type": "Fixed Asset"
                         }, 
                         "Leasehold Improvement": {}, 
-                        "Motor Vehicules": {
+                        "Motor Vehicles": {
                             "account_type": "Fixed Asset"
                         }, 
-                        "Work In Progrees": {}, 
+                        "Work In Progress": {}, 
                         "account_type": "Fixed Asset"
                     }
                 }, 
                 "Intangible Assets": {
                     "Computer Card Renewal": {}, 
-                    "Dispoal of Outlets": {}, 
+                    "Disposal of Outlets": {}, 
                     "Registration of Trademarks": {}
                 }, 
                 "Intercompany Accounts": {}, 
@@ -218,7 +218,7 @@
             }, 
             "MISC Charges": {
                 "Other Charges": {
-                    "Captial Loss": {
+                    "Capital Loss": {
                         "Disposal of Business Branch": {}, 
                         "Loss On Fixed Assets Disposal": {}, 
                         "Loss on Difference on Exchange": {}
@@ -253,14 +253,14 @@
                         "Other Bank Charges": {}
                     }, 
                     "Communications": {
-                        "Courrier": {}, 
+                        "Courier": {}, 
                         "Others - Communication": {}, 
                         "Telephone": {}, 
                         "Web Site Hosting Fees": {}
                     }, 
                     "Office & Various Expenses": {
                         "Cleaning": {}, 
-                        "Convoyance Expenses": {}, 
+                        "Conveyance Expenses": {}, 
                         "Gifts & Donations": {}, 
                         "Insurance": {}, 
                         "Kitchen and Buffet Expenses": {}, 
@@ -325,7 +325,7 @@
             "Current Liabilities": {
                 "Accounts Payable": {
                     "Payables": {
-                        "Advance Paybale to Suppliers": {
+                        "Advance Payable to Suppliers": {
                             "account_type": "Payable"
                         }, 
                         "Consigned Payable": {

@@ -1,13 +1,11 @@
-{% from "erpnext/templates/includes/macros.html" import product_image_square %}
+{% from "erpnext/templates/includes/macros.html" import product_image_square, product_image %}
 
 {% macro item_name_and_description(d, doc) %}
     <div class="row">
-        <div class="col-xs-4 col-sm-2 order-image-col">
-            <div class="order-image">
-                {{ product_image_square(d.image) }}
-            </div>
+        <div class="col-3">
+			{{ product_image(d.image) }}
         </div>
-        <div class="col-xs-8 col-sm-10">
+        <div class="col-9">
             {{ d.item_code }}
             <p class="text-muted small">{{ d.description }}</p>
 			{% set supplier_part_no = frappe.db.get_value("Item Supplier", {'parent': d.item_code, 'supplier': doc.supplier}, "supplier_part_no") %}

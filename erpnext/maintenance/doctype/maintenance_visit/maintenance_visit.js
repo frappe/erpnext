@@ -4,12 +4,32 @@
 frappe.provide("erpnext.maintenance");
 
 frappe.ui.form.on('Maintenance Visit', {
+	refresh: function(frm) {
+		//filters for serial_no based on item_code
+		frm.set_query('serial_no', 'purposes', function(frm, cdt, cdn) {
+			let item = locals[cdt][cdn];
+			return {
+				filters: {
+					'item_code': item.item_code
+				}
+			};
+		});
+	},
 	setup: function(frm) {
 		frm.set_query('contact_person', erpnext.queries.contact_query);
 		frm.set_query('customer_address', erpnext.queries.address_query);
+		frm.set_query('customer', erpnext.queries.customer);
+	},
+	onload: function(frm) {
+		if (!frm.doc.status) {
+			frm.set_value({status:'Draft'});
+		}
+		if (frm.doc.__islocal) {
+			frm.set_value({mntc_date: frappe.datetime.get_today()});
+		}
 	},
 	customer: function(frm) {
-		erpnext.utils.get_party_details(frm)
+		erpnext.utils.get_party_details(frm);
 	},
 	customer_address: function(frm) {
 		erpnext.utils.get_address_display(frm, 'customer_address', 'address_display');
@@ -80,16 +100,3 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 });
 
 $.extend(cur_frm.cscript, new erpnext.maintenance.MaintenanceVisit({frm: cur_frm}));
-
-cur_frm.cscript.onload = function(doc, dt, dn) {
-	if(!doc.status) set_multiple(dt,dn,{status:'Draft'});
-	if(doc.__islocal) set_multiple(dt,dn,{mntc_date: frappe.datetime.get_today()});
-
-	// set add fetch for item_code's item_name and description
-	cur_frm.add_fetch('item_code', 'item_name', 'item_name');
-	cur_frm.add_fetch('item_code', 'description', 'description');
-}
-
-cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
-	return {query: "erpnext.controllers.queries.customer_query" }
-}

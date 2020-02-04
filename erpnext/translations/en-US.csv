@@ -1,7 +1,7 @@
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +90,Cheques Required,Checks Required
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html +93,Cheques Required,Checks Required
 apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py +97,Row #{0}: Clearance date {1} cannot be before Cheque Date {2},Row #{0}: Clearance date {1} cannot be before Check Date {2}
 apps/erpnext/erpnext/utilities/user_progress.py +210,People who teach at your organisation,People who teach at your organization
-apps/erpnext/erpnext/stock/stock_ledger.py +478,"Valuation rate not found for the Item {0}, which is required to do accounting entries for {1} {2}. If the item is transacting as a zero valuation rate item in the {1}, please mention that in the {1} Item table. Otherwise, please create an incoming stock transaction for the item or mention valuation rate in the Item record, and then try submiting/cancelling this entry","Valuation rate not found for the Item {0}, which is required to do accounting entries for {1} {2}. If the item is transacting as a zero valuation rate item in the {1}, please mention that in the {1} Item table. Otherwise, please create an incoming stock transaction for the item or mention valuation rate in the Item record, and then try submitting/canceling this entry"
+apps/erpnext/erpnext/stock/stock_ledger.py +482,"Valuation rate not found for the Item {0}, which is required to do accounting entries for {1} {2}. If the item is transacting as a zero valuation rate item in the {1}, please mention that in the {1} Item table. Otherwise, please create an incoming stock transaction for the item or mention valuation rate in the Item record, and then try submiting/cancelling this entry","Valuation rate not found for the Item {0}, which is required to do accounting entries for {1} {2}. If the item is transacting as a zero valuation rate item in the {1}, please mention that in the {1} Item table. Otherwise, please create an incoming stock transaction for the item or mention valuation rate in the Item record, and then try submitting/canceling this entry"
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py +115,"Leave cannot be applied/cancelled before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}","Leave cannot be applied/canceled before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}"
 apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py +33,Cancel Material Visit {0} before cancelling this Warranty Claim,Cancel Material Visit {0} before canceling this Warranty Claim
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.py +100,"Appointment cancelled, Please review and cancel the invoice {0}","Appointment canceled, Please review and cancel the invoice {0}"
@@ -13,35 +13,35 @@ DocType: Cheque Print Template,Cheque Size,Check Size
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py +25,Maintenance Status has to be Cancelled or Completed to Submit,Maintenance Status has to be Canceled or Completed to Submit
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py +486,'Entries' cannot be empty,'Entries' can not be empty
 apps/erpnext/erpnext/setup/doctype/company/company.py +84,"Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency.","Cannot change company's default currency, because there are existing transactions. Transactions must be canceled to change the default currency."
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +252,Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Maintenance Visit {0} must be canceled before cancelling this Sales Order
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +232,Sales Invoice {0} must be cancelled before cancelling this Sales Order,Sales Invoice {0} must be canceled before cancelling this Sales Order
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +257,Maintenance Visit {0} must be cancelled before cancelling this Sales Order,Maintenance Visit {0} must be canceled before cancelling this Sales Order
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +235,Sales Invoice {0} must be cancelled before cancelling this Sales Order,Sales Invoice {0} must be canceled before cancelling this Sales Order
 DocType: Bank Reconciliation Detail,Cheque Date,Check Date
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py +249,"Stopped Work Order cannot be cancelled, Unstop it first to cancel","Stopped Work Order cannot be canceled, Unstop it first to cancel"
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.py +164,Material Request {0} is cancelled or stopped,Material Request {0} is canceled or stopped
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +187,Closed order cannot be cancelled. Unclose to cancel.,Closed order cannot be canceled. Unclose to cancel.
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +242,Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,Maintenance Schedule {0} must be canceled before cancelling this Sales Order
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +188,Closed order cannot be cancelled. Unclose to cancel.,Closed order cannot be canceled. Unclose to cancel.
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +246,Maintenance Schedule {0} must be cancelled before cancelling this Sales Order,Maintenance Schedule {0} must be canceled before cancelling this Sales Order
 DocType: Accounts Settings,Unlink Payment on Cancellation of Invoice,Unlink Payment on Cancelation of Invoice
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +222,Delivery Notes {0} must be cancelled before cancelling this Sales Order,Delivery Notes {0} must be canceled before cancelling this Sales Order
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +262,Work Order {0} must be cancelled before cancelling this Sales Order,Work Order {0} must be canceled before cancelling this Sales Order
-apps/erpnext/erpnext/config/accounts.py +300,Setup cheque dimensions for printing,Setup check dimensions for printing
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +224,Delivery Notes {0} must be cancelled before cancelling this Sales Order,Delivery Notes {0} must be canceled before cancelling this Sales Order
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +268,Work Order {0} must be cancelled before cancelling this Sales Order,Work Order {0} must be canceled before cancelling this Sales Order
+apps/erpnext/erpnext/config/accounts.py +240,Setup cheque dimensions for printing,Setup check dimensions for printing
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py +42,Cheques and Deposits incorrectly cleared,Checks and Deposits incorrectly cleared
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +134,{0} {1} is cancelled so the action cannot be completed,{0} {1} is canceled so the action cannot be completed
-apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +297,Packing Slip(s) cancelled,Packing Slip(s) canceled
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +130,{0} {1} is cancelled so the action cannot be completed,{0} {1} is canceled so the action cannot be completed
+apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py +300,Packing Slip(s) cancelled,Packing Slip(s) canceled
 DocType: Payment Entry,Cheque/Reference No,Check/Reference No
-apps/erpnext/erpnext/assets/doctype/asset/asset.py +288,"Asset cannot be cancelled, as it is already {0}","Asset cannot be canceled, as it is already {0}"
+apps/erpnext/erpnext/assets/doctype/asset/asset.py +297,"Asset cannot be cancelled, as it is already {0}","Asset cannot be canceled, as it is already {0}"
 DocType: Bank Reconciliation,Select account head of the bank where cheque was deposited.,Select account head of the bank where check was deposited.
 DocType: Cheque Print Template,Cheque Print Template,Check Print Template
-apps/erpnext/erpnext/controllers/buying_controller.py +490,{0} {1} is cancelled or closed,{0} {1} is canceled or closed
-apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +164,Quotation {0} is cancelled,Quotation {0} is canceled
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +356,Timesheet {0} is already completed or cancelled,Timesheet {0} is already completed or canceled
+apps/erpnext/erpnext/controllers/buying_controller.py +503,{0} {1} is cancelled or closed,{0} {1} is canceled or closed
+apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py +165,Quotation {0} is cancelled,Quotation {0} is canceled
+apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py +367,Timesheet {0} is already completed or cancelled,Timesheet {0} is already completed or canceled
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py +136,Payment Cancelled. Please check your GoCardless Account for more details,Payment Canceled. Please check your GoCardless Account for more details
-apps/erpnext/erpnext/stock/doctype/item/item.py +820,Item {0} is cancelled,Item {0} is canceled
+apps/erpnext/erpnext/stock/doctype/item/item.py +840,Item {0} is cancelled,Item {0} is canceled
 DocType: Serial No,Is Cancelled,Is Canceled
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +233,{0} {1} is cancelled or stopped,{0} {1} is canceled or stopped
-apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +178,Colour,Color
+apps/erpnext/erpnext/stock/doctype/material_request/material_request.py +227,{0} {1} is cancelled or stopped,{0} {1} is canceled or stopped
+apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +155,Colour,Color
 DocType: Bank Reconciliation Detail,Cheque Number,Check Number
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py +65,Cancel Material Visits {0} before cancelling this Maintenance Visit,Cancel Material Visits {0} before canceling this Maintenance Visit
 DocType: Employee,Cheque,Check
 DocType: Cheque Print Template,Cheque Height,Check Height
 DocType: Cheque Print Template,Cheque Width,Check Width
-apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +158,Wire Transfer,Wire Transfer
+apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py +135,Wire Transfer,Wire Transfer

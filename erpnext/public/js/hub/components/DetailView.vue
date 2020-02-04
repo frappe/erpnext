@@ -31,7 +31,7 @@
 						<base-image :src="image" :alt="title" />
 					</div>
 				</div>
-				<div class="col-md-8">
+				<div class="col-md-8" style='padding-left: 30px;'>
 					<h2>{{ title }}</h2>
 					<div class="text-muted">
 						<slot name="detail-header-item"></slot>

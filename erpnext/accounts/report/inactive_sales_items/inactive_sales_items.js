@@ -38,4 +38,4 @@ frappe.query_reports["Inactive Sales Items"] = {
 			default: 30
 		},
 	]
-}
+};

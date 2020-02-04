@@ -136,7 +136,7 @@ class SerialNo(StockController):
 		sle_dict = {}
 		for sle in frappe.db.sql("""select * from `tabStock Ledger Entry`
 			where serial_no like %s and item_code=%s and ifnull(is_cancelled, 'No')='No'
-			order by posting_date desc, posting_time desc, name desc""",
+			order by posting_date desc, posting_time desc, creation desc""",
 			("%%%s%%" % self.name, self.item_code), as_dict=1):
 				if self.name.upper() in get_serial_nos(sle.serial_no):
 					if cint(sle.actual_qty) > 0:
@@ -171,7 +171,7 @@ class SerialNo(StockController):
 			where fieldname='serial_no' and fieldtype in ('Text', 'Small Text')"""):
 
 			for item in frappe.db.sql("""select name, serial_no from `tab%s`
-				where serial_no like '%%%s%%'""" % (dt[0], frappe.db.escape(old))):
+				where serial_no like %s""" % (dt[0], frappe.db.escape('%' + old + '%'))):
 
 				serial_nos = map(lambda i: new if i.upper()==old.upper() else i, item[1].split('\n'))
 				frappe.db.sql("""update `tab%s` set serial_no = %s
@@ -222,7 +222,7 @@ def validate_serial_no(sle, item_det):
 						frappe.throw(_("Serial No {0} has already been received").format(serial_no),
 							SerialNoDuplicateError)
 
-					if (sr.delivery_document_no and sle.voucher_type != 'Stock Entry'
+					if (sr.delivery_document_no and sle.voucher_type not in ['Stock Entry', 'Stock Reconciliation']
 						and sle.voucher_type == sr.delivery_document_type):
 						return_against = frappe.db.get_value(sle.voucher_type, sle.voucher_no, 'return_against')
 						if return_against and return_against != sr.delivery_document_no:
@@ -299,7 +299,7 @@ def validate_so_serial_no(sr, sales_order,):
 		be delivered""").format(sales_order, sr.item_code, sr.name))
 
 def has_duplicate_serial_no(sn, sle):
-	if sn.warehouse:
+	if sn.warehouse and sle.voucher_type != 'Stock Reconciliation':
 		return True
 
 	if sn.company != sle.company:
@@ -353,6 +353,7 @@ def get_auto_serial_nos(serial_no_series, qty):
 
 def auto_make_serial_nos(args):
 	serial_nos = get_serial_nos(args.get('serial_no'))
+	created_numbers = []
 	for serial_no in serial_nos:
 		if frappe.db.exists("Serial No", serial_no):
 			sr = frappe.get_doc("Serial No", serial_no)
@@ -362,12 +363,19 @@ def auto_make_serial_nos(args):
 			sr.batch_no = args.get('batch_no')
 			sr.location = args.get('location')
 			sr.company = args.get('company')
+			sr.supplier = args.get('supplier')
 			if sr.sales_order and args.get('voucher_type') == "Stock Entry" \
 				and not args.get('actual_qty', 0) > 0:
 				sr.sales_order = None
 			sr.save(ignore_permissions=True)
 		elif args.get('actual_qty', 0) > 0:
-			make_serial_no(serial_no, args)
+			created_numbers.append(make_serial_no(serial_no, args))
+
+	form_links = list(map(lambda d: frappe.utils.get_link_to_form('Serial No', d), created_numbers))
+	if len(form_links) == 1:
+		frappe.msgprint(_("Serial No {0} created").format(form_links[0]))
+	elif len(form_links) > 0:
+		frappe.msgprint(_("The following serial numbers were created: <br> {0}").format(', '.join(form_links)))
 
 def get_item_details(item_code):
 	return frappe.db.sql("""select name, has_batch_no, docstatus,
@@ -390,17 +398,18 @@ def make_serial_no(serial_no, args):
 	sr.via_stock_ledger = args.get('via_stock_ledger') or True
 	sr.asset = args.get('asset')
 	sr.location = args.get('location')
+	
 
 	if args.get('purchase_document_type'):
 		sr.purchase_document_type = args.get('purchase_document_type')
 		sr.purchase_document_no = args.get('purchase_document_no')
+		sr.supplier = args.get('supplier')
 
 	sr.insert()
 	if args.get('warehouse'):
 		sr.warehouse = args.get('warehouse')
 		sr.save()
 
-	frappe.msgprint(_("Serial No {0} created").format(sr.name))
 	return sr.name
 
 def update_serial_nos_after_submit(controller, parentfield):
@@ -411,16 +420,20 @@ def update_serial_nos_after_submit(controller, parentfield):
 	if not stock_ledger_entries: return
 
 	for d in controller.get(parentfield):
+		if d.serial_no:
+			continue
+
 		update_rejected_serial_nos = True if (controller.doctype in ("Purchase Receipt", "Purchase Invoice")
 			and d.rejected_qty) else False
 		accepted_serial_nos_updated = False
+
 		if controller.doctype == "Stock Entry":
 			warehouse = d.t_warehouse
 			qty = d.transfer_qty
 		else:
 			warehouse = d.warehouse
-			qty = d.stock_qty
-
+			qty = (d.qty if controller.doctype == "Stock Reconciliation"
+				else d.stock_qty)
 		for sle in stock_ledger_entries:
 			if sle.voucher_detail_no==d.name:
 				if not accepted_serial_nos_updated and qty and abs(sle.actual_qty)==qty \
@@ -470,3 +483,13 @@ def get_serial_no_item_customer(serial_no):
 		"customer": details.customer,
 		"customer_name": frappe.db.get_value("Customer", details.customer, "customer_name") if details.customer else ""
 	}
+
+@frappe.whitelist()
+def auto_fetch_serial_number(qty, item_code, warehouse):
+	serial_numbers = frappe.get_list("Serial No", filters={
+		"item_code": item_code,
+		"warehouse": warehouse,
+		"delivery_document_no": "",
+		"sales_invoice": ""
+	}, limit=qty, order_by="creation")
+	return [item['name'] for item in serial_numbers]

@@ -9,6 +9,7 @@ from frappe import _
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
 from frappe.utils import cstr, getdate
 from erpnext.accounts.doctype.account.account import RootNotEditable
+from frappe.desk.doctype.global_search_settings.global_search_settings import update_global_search_doctypes
 
 default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
 	"Cold Calling", "Exhibition", "Supplier Reference", "Mass Mailing",
@@ -64,7 +65,7 @@ def install(country=None):
 		{'doctype': 'Leave Type', 'leave_type_name': _('Casual Leave'), 'name': _('Casual Leave'),
 			'allow_encashment': 1, 'is_carry_forward': 1, 'max_continuous_days_allowed': '3', 'include_holiday': 1},
 		{'doctype': 'Leave Type', 'leave_type_name': _('Compensatory Off'), 'name': _('Compensatory Off'),
-			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1},
+			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1, 'is_compensatory':1 },
 		{'doctype': 'Leave Type', 'leave_type_name': _('Sick Leave'), 'name': _('Sick Leave'),
 			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1},
 		{'doctype': 'Leave Type', 'leave_type_name': _('Privilege Leave'), 'name': _('Privilege Leave'),
@@ -81,6 +82,19 @@ def install(country=None):
 		{'doctype': 'Employment Type', 'employee_type_name': _('Piecework')},
 		{'doctype': 'Employment Type', 'employee_type_name': _('Intern')},
 		{'doctype': 'Employment Type', 'employee_type_name': _('Apprentice')},
+
+
+		# Stock Entry Type
+		{'doctype': 'Stock Entry Type', 'name': 'Material Issue', 'purpose': 'Material Issue'},
+		{'doctype': 'Stock Entry Type', 'name': 'Material Receipt', 'purpose': 'Material Receipt'},
+		{'doctype': 'Stock Entry Type', 'name': 'Material Transfer', 'purpose': 'Material Transfer'},
+		{'doctype': 'Stock Entry Type', 'name': 'Manufacture', 'purpose': 'Manufacture'},
+		{'doctype': 'Stock Entry Type', 'name': 'Repack', 'purpose': 'Repack'},
+		{'doctype': 'Stock Entry Type', 'name': 'Send to Subcontractor', 'purpose': 'Send to Subcontractor'},
+		{'doctype': 'Stock Entry Type', 'name': 'Material Transfer for Manufacture', 'purpose': 'Material Transfer for Manufacture'},
+		{'doctype': 'Stock Entry Type', 'name': 'Material Consumption for Manufacture', 'purpose': 'Material Consumption for Manufacture'},
+		{'doctype': 'Stock Entry Type', 'name': 'Send to Warehouse', 'purpose': 'Send to Warehouse'},
+		{'doctype': 'Stock Entry Type', 'name': 'Receive at Warehouse', 'purpose': 'Receive at Warehouse'},
 
 		# Designation
 		{'doctype': 'Designation', 'designation_name': _('CEO')},
@@ -159,6 +173,11 @@ def install(country=None):
 			{"attribute_value": _("Black"), "abbr": "BLA"},
 			{"attribute_value": _("White"), "abbr": "WHI"}
 		]},
+
+		# Issue Priority
+		{'doctype': 'Issue Priority', 'name': _('Low')},
+		{'doctype': 'Issue Priority', 'name': _('Medium')},
+		{'doctype': 'Issue Priority', 'name': _('High')},
 
 		#Job Applicant Source
 		{'doctype': 'Job Applicant Source', 'source_name': _('Website Listing')},
@@ -253,9 +272,11 @@ def install(country=None):
 	from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_default_records
 	make_default_records()
 
-	make_records(records, True)
+	make_records(records)
 
 	set_more_defaults()
+
+	update_global_search_doctypes()
 
 	# path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(country))
 	# if os.path.exists(path.encode("utf-8")):
@@ -351,7 +372,12 @@ def add_sale_stages():
 def install_company(args):
 	records = [
 		# Fiscal Year
-		{ "doctype": "Fiscal Year", 'year': get_fy_details(args.fy_start_date, args.fy_end_date), 'year_start_date': args.fy_start_date, 'year_end_date': args.fy_end_date },
+		{
+			'doctype': "Fiscal Year",
+			'year': get_fy_details(args.fy_start_date, args.fy_end_date),
+			'year_start_date': args.fy_start_date,
+			'year_end_date': args.fy_end_date
+		},
 
 		# Company
 		{
@@ -367,7 +393,7 @@ def install_company(args):
 		}
 	]
 
-	make_records(records, True)
+	make_records(records)
 
 
 def install_post_company_fixtures(args=None):
@@ -453,12 +479,13 @@ def install_defaults(args=None):
 
 				frappe.db.set_value("Company", args.company_name, "default_bank_account", bank_account.name, update_modified=False)
 
-				return doc
 			except RootNotEditable:
 				frappe.throw(_("Bank account cannot be named as {0}").format(args.bank_account))
 			except frappe.DuplicateEntryError:
 				# bank account same as a CoA entry
 				pass
+
+	add_dashboards()
 
 	# Now, with fixtures out of the way, onto concrete stuff
 	records = [
@@ -475,7 +502,28 @@ def install_defaults(args=None):
 		},
 	]
 
-	make_records(records, True)
+	make_records(records)
+
+def add_dashboards():
+	from erpnext.setup.setup_wizard.data.dashboard_charts import get_company_for_dashboards
+
+	if not get_company_for_dashboards():
+		return
+
+	from erpnext.setup.setup_wizard.data.dashboard_charts import get_default_dashboards
+	from frappe.modules.import_file import import_file_by_path
+
+	dashboard_data = get_default_dashboards()
+
+	# create account balance timeline before creating dashbaord charts
+	doctype = "dashboard_chart_source"
+	docname = "account_balance_timeline"
+	folder = os.path.dirname(frappe.get_module("erpnext.accounts").__file__)
+	doc_path = os.path.join(folder, doctype, docname, docname) + ".json"
+	import_file_by_path(doc_path, force=0, for_sync=True)
+
+	make_records(dashboard_data["Charts"])
+	make_records(dashboard_data["Dashboards"])
 
 
 def get_fy_details(fy_start_date, fy_end_date):

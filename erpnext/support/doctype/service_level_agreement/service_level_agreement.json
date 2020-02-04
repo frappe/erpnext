@@ -1,0 +1,195 @@
+{
+ "autoname": "format:SLA-{service_level}-{####}",
+ "creation": "2018-12-26 21:08:15.448812",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enable",
+  "service_level",
+  "default_service_level_agreement",
+  "holiday_list",
+  "column_break_2",
+  "employee_group",
+  "default_priority",
+  "entity_section",
+  "entity_type",
+  "column_break_10",
+  "entity",
+  "agreement_details_section",
+  "start_date",
+  "active",
+  "column_break_7",
+  "end_date",
+  "response_and_resolution_time_section",
+  "priorities",
+  "support_and_resolution_section_break",
+  "support_and_resolution"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "depends_on": "eval: !doc.customer;",
+   "fieldname": "default_service_level_agreement",
+   "fieldtype": "Check",
+   "label": "Default Service Level Agreement"
+  },
+  {
+   "fieldname": "service_level",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Service Level",
+   "options": "Service Level",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "service_level.holiday_list",
+   "fieldname": "holiday_list",
+   "fieldtype": "Link",
+   "label": "Holiday List",
+   "options": "Holiday List",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "service_level.employee_group",
+   "fieldname": "employee_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Employee Group",
+   "options": "Employee Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "agreement_details_section",
+   "fieldtype": "Section Break",
+   "label": "Agreement Details"
+  },
+  {
+   "depends_on": "eval: !doc.default_service_level_agreement",
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "depends_on": "eval: !doc.default_contract",
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: !doc.default_service_level_agreement",
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "response_and_resolution_time_section",
+   "fieldtype": "Section Break",
+   "label": "Response and Resolution Time"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "support_and_resolution_section_break",
+   "fieldtype": "Section Break",
+   "label": "Support Hours"
+  },
+  {
+   "fieldname": "support_and_resolution",
+   "fieldtype": "Table",
+   "label": "Support and Resolution",
+   "options": "Service Day"
+  },
+  {
+   "fieldname": "priorities",
+   "fieldtype": "Table",
+   "label": "Priorities",
+   "options": "Service Level Priority"
+  },
+  {
+   "fetch_from": "service_level.default_priority",
+   "fieldname": "default_priority",
+   "fieldtype": "Link",
+   "label": "Default Priority",
+   "options": "Issue Priority",
+   "read_only": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "active",
+   "fieldtype": "Check",
+   "label": "Active",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "entity",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Entity",
+   "options": "entity_type"
+  },
+  {
+   "depends_on": "eval: !doc.default_service_level_agreement",
+   "fieldname": "entity_section",
+   "fieldtype": "Section Break",
+   "label": "Entity"
+  },
+  {
+   "fieldname": "entity_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Entity Type",
+   "options": "\nCustomer\nCustomer Group\nTerritory"
+  },
+  {
+   "default": "1",
+   "fieldname": "enable",
+   "fieldtype": "Check",
+   "label": "Enable"
+  }
+ ],
+ "modified": "2019-07-09 17:22:16.402939",
+ "modified_by": "Administrator",
+ "module": "Support",
+ "name": "Service Level Agreement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

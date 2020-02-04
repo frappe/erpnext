@@ -245,10 +245,10 @@
 	}
 }
 
-.number-spinner {
-	width:100px;
-	margin-top:5px;
-}
+// .number-spinner {
+// 	width:100px;
+// 	margin-top:5px;
+// }
 
 .cart-btn {
 	border-color: #ccc;
@@ -359,5 +359,26 @@
 
 	&:hover {
 		border-color: @brand-primary;
+	}
+}
+
+.item-slideshow-image {
+	height: 3rem;
+	width: 3rem;
+	object-fit: contain;
+	padding: 0.5rem;
+	border: 1px solid @border-color;
+	border-radius: 4px;
+	cursor: pointer;
+
+	&:hover, &.active {
+		border-color: @brand-primary;
+	}
+}
+
+.section-products {
+	.card-img-top {
+		max-height: 300px;
+		object-fit: contain;
 	}
 }

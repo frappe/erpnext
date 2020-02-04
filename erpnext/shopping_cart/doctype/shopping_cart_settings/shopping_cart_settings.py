@@ -28,9 +28,10 @@ class ShoppingCartSettings(Document):
 				raise_exception=ShoppingCartSetupError)
 
 		price_list_currency_map = frappe.db.get_values("Price List",
-			[self.price_list],
-			"currency")
+			[self.price_list], "currency")
 
+		price_list_currency_map = dict(price_list_currency_map)
+		
 		# check if all price lists have a currency
 		for price_list, currency in price_list_currency_map.items():
 			if not currency:
@@ -39,8 +40,8 @@ class ShoppingCartSettings(Document):
 		expected_to_exist = [currency + "-" + company_currency
 			for currency in price_list_currency_map.values()
 			if currency != company_currency]
-		
-		# manqala 20/09/2016: set up selection parameters for query from tabCurrency Exchange	
+
+		# manqala 20/09/2016: set up selection parameters for query from tabCurrency Exchange
 		from_currency = [currency for currency in price_list_currency_map.values() if currency != company_currency]
 		to_currency = company_currency
 		# manqala end

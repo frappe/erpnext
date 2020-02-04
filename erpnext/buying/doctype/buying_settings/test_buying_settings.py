@@ -3,7 +3,7 @@
 # See license.txt
 from __future__ import unicode_literals
 
-import frappe
+# import frappe
 import unittest
 
 class TestBuyingSettings(unittest.TestCase):

@@ -7,22 +7,22 @@ import json
 
 def get_context(context):
 	project_user = frappe.db.get_value("Project User", {"parent": frappe.form_dict.project, "user": frappe.session.user} , ["user", "view_attachments"], as_dict= True)
-	if not project_user or frappe.session.user == 'Guest': 
+	if frappe.session.user != 'Administrator' and (not project_user or frappe.session.user == 'Guest'):
 		raise frappe.PermissionError
-		
+
 	context.no_cache = 1
 	context.show_sidebar = True
 	project = frappe.get_doc('Project', frappe.form_dict.project)
 
 	project.has_permission('read')
-	
+
 	project.tasks = get_tasks(project.name, start=0, item_status='open',
 		search=frappe.form_dict.get("search"))
 
 	project.timesheets = get_timesheets(project.name, start=0,
 		search=frappe.form_dict.get("search"))
 
-	if project_user.view_attachments:
+	if project_user and project_user.view_attachments:
 		project.attachments = get_attachments(project.name)
 
 	context.doc = project
@@ -46,7 +46,7 @@ def get_tasks(project, start=0, search=None, item_status=None):
 			task.todo=task.todo[0]
 			task.todo.user_image = frappe.db.get_value('User', task.todo.owner, 'user_image')
 
-		
+
 		task.comment_count = len(json.loads(task._comments or "[]"))
 
 		task.css_seen = ''
@@ -86,7 +86,7 @@ def get_timesheets(project, start=0, search=None):
 			timesheet.info.css_seen = ''
 			if timesheet.info._seen:
 				if frappe.session.user in json.loads(timesheet.info._seen):
-					timesheet.info.css_seen = 'seen'		
+					timesheet.info.css_seen = 'seen'
 	return timesheets
 
 @frappe.whitelist()

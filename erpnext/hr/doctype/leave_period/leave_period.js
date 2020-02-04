@@ -68,7 +68,7 @@ frappe.ui.form.on('Leave Period', {
 				},
 				{
 					"label": "Add unused leaves from previous allocations",
-					"fieldname": "carry_forward_leaves",
+					"fieldname": "carry_forward",
 					"fieldtype": "Check"
 				}
 			],

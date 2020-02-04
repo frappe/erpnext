@@ -3,30 +3,31 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
 from frappe import _
-import requests
+from frappe.utils.password import get_decrypted_password
 from plaid import Client
 from plaid.errors import APIError, ItemError
+
+import frappe
+import requests
 
 class PlaidConnector():
 	def __init__(self, access_token=None):
 
-		if not(frappe.conf.get("plaid_client_id") and frappe.conf.get("plaid_secret") and frappe.conf.get("plaid_public_key")):
-			frappe.throw(_("Please complete your Plaid API configuration before synchronizing your account"))
+		plaid_settings = frappe.get_single("Plaid Settings")
 
 		self.config = {
-			"plaid_client_id": frappe.conf.get("plaid_client_id"),
-			"plaid_secret": frappe.conf.get("plaid_secret"),
-			"plaid_public_key": frappe.conf.get("plaid_public_key"),
-			"plaid_env": frappe.conf.get("plaid_env")
+			"plaid_client_id": plaid_settings.plaid_client_id,
+			"plaid_secret": get_decrypted_password("Plaid Settings", "Plaid Settings", 'plaid_secret'),
+			"plaid_public_key": plaid_settings.plaid_public_key,
+			"plaid_env": plaid_settings.plaid_env
 		}
 
-		self.client = Client(client_id=self.config["plaid_client_id"],
-			secret=self.config["plaid_secret"],
-			public_key=self.config["plaid_public_key"],
-			environment=self.config["plaid_env"]
-		)
+		self.client = Client(client_id=self.config.get("plaid_client_id"),
+			secret=self.config.get("plaid_secret"),
+			public_key=self.config.get("plaid_public_key"),
+			environment=self.config.get("plaid_env")
+			)
 
 		self.access_token = access_token
 

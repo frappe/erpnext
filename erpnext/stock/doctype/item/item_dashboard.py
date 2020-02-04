@@ -46,5 +46,9 @@ def get_data():
 				'label': _('Traceability'),
 				'items': ['Serial No', 'Batch']
 			},
+			{
+				'label': _('Manufacture'),
+				'items': ['Production Plan', 'Work Order', 'Item Manufacturer']
+			}
 		]
 	}

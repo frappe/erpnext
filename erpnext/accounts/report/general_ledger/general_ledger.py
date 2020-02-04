@@ -9,6 +9,8 @@ from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from frappe.desk.query_report import group_report_data, hide_columns_if_filtered
+from six import iteritems
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from collections import OrderedDict
 
 def execute(filters=None):
@@ -23,6 +25,9 @@ def execute(filters=None):
 
 	for acc in frappe.db.sql("""select name, is_group from tabAccount""", as_dict=1):
 		account_details.setdefault(acc.name, acc)
+
+	if filters.get('party'):
+		filters.party = frappe.parse_json(filters.get("party"))
 
 	validate_filters(filters, account_details)
 
@@ -52,12 +57,10 @@ def validate_filters(filters, account_details):
 		frappe.throw(_("From Date must be before To Date"))
 
 	if filters.get('project'):
-		projects = cstr(filters.get("project")).strip()
-		filters.project = [d.strip() for d in projects.split(',') if d]
+		filters.project = frappe.parse_json(filters.get('project'))
 
 	if filters.get('cost_center'):
-		cost_centers = cstr(filters.get("cost_center")).strip()
-		filters.cost_center = [d.strip() for d in cost_centers.split(',') if d]
+		filters.cost_center = frappe.parse_json(filters.get('cost_center'))
 
 
 def validate_party(filters):
@@ -67,12 +70,13 @@ def validate_party(filters):
 		if not party_type:
 			frappe.throw(_("To filter based on Party, select Party Type first"))
 		else:
-			if not frappe.db.exists(party_type, party):
-				frappe.throw(_("Invalid {0}: {1}").format(party_type, party))
+			for d in party:
+				if not frappe.db.exists(party_type, d):
+					frappe.throw(_("Invalid {0}: {1}").format(party_type, d))
 
 def set_account_currency(filters):
 	filters["company_currency"] = frappe.get_cached_value('Company',  filters.company,  "default_currency")
-	if filters.get("account") or filters.get('party'):
+	if filters.get("account") or filters.get('party') and len(filters.party) == 1):
 		account_currency = None
 
 		if filters.get("account"):
@@ -80,7 +84,7 @@ def set_account_currency(filters):
 		elif filters.get("party_type") and filters.get("party"):
 			gle_currency = frappe.db.get_value(
 				"GL Entry", {
-					"party_type": filters.party_type, "party": filters.party, "company": filters.company
+					"party_type": filters.party_type, "party": filters.party[0], "company": filters.company
 				},
 				"account_currency"
 			)
@@ -89,7 +93,7 @@ def set_account_currency(filters):
 				account_currency = gle_currency
 			else:
 				account_currency = (None if not frappe.get_meta(filters.party_type).has_field('default_currency') else
-					frappe.db.get_value(filters.party_type, filters.party, "default_currency"))
+					frappe.db.get_value(filters.party_type, filters.party[0], "default_currency"))
 
 		filters["account_currency"] = account_currency or filters.company_currency
 		if filters.account_currency != filters.company_currency and not filters.presentation_currency:
@@ -221,7 +225,7 @@ def get_conditions(filters):
 		conditions.append("party_type=%(party_type)s")
 
 	if filters.get("party"):
-		conditions.append("party=%(party)s")
+		conditions.append("party in %(party)s")
 
 	if filters.get("account") or filters.get("party") \
 			or filters.get("group_by") in [_("Group by Account"), _("Group by Party")]:
@@ -241,13 +245,23 @@ def get_conditions(filters):
 			and steam.parent = party and steam.parenttype = party_type)""".format(lft, rgt))
 
 	if filters.get("finance_book"):
-		conditions.append("ifnull(finance_book, '') in (%(finance_book)s, '')")
+		if filters.get("include_default_book_entries"):
+			conditions.append("finance_book in (%(finance_book)s, %(company_fb)s)")
+		else:
+			conditions.append("finance_book in (%(finance_book)s)")
 
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
 
 	if match_conditions:
 		conditions.append(match_conditions)
+
+	accounting_dimensions = get_accounting_dimensions()
+
+	if accounting_dimensions:
+		for dimension in accounting_dimensions:
+			if filters.get(dimension):
+				conditions.append("{0} in (%({0})s)".format(dimension))
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 

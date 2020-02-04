@@ -67,7 +67,10 @@ class TestBatch(unittest.TestCase):
 					rate = 10
 				)
 			]
-		)).insert()
+		))
+
+		stock_entry.set_stock_entry_type()
+		stock_entry.insert()
 		stock_entry.submit()
 
 		self.assertTrue(stock_entry.items[0].batch_no)
@@ -136,7 +139,10 @@ class TestBatch(unittest.TestCase):
 					s_warehouse=receipt.items[0].warehouse,
 				)
 			]
-		)).insert()
+		))
+
+		stock_entry.set_stock_entry_type()
+		stock_entry.insert()
 		stock_entry.submit()
 
 		# assert same batch is selected
@@ -193,7 +199,10 @@ class TestBatch(unittest.TestCase):
 					allow_zero_valuation_rate = 1
 				)
 			]
-		)).insert()
+		))
+
+		stock_entry.set_stock_entry_type()
+		stock_entry.insert()
 		stock_entry.submit()
 
 	def test_batch_name_with_naming_series(self):

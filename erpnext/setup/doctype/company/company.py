@@ -64,18 +64,21 @@ class Company(NestedSet):
 		})
 
 	def validate_default_accounts(self):
-		for field in ["default_bank_account", "default_cash_account",
+		accounts = [
+			"default_bank_account", "default_cash_account",
 			"default_receivable_account", "default_payable_account",
 			"default_expense_account", "default_income_account",
 			"stock_received_but_not_billed", "stock_adjustment_account",
 			"expenses_included_in_valuation", "default_payroll_payable_account", "default_letter_of_credit_account",
 			"temporary_opening_account",
-			"sales_tax_account", "service_tax_account", "extra_tax_account", "further_tax_account", "advance_tax_account"]:
-				if self.get(field):
-					for_company = frappe.db.get_value("Account", self.get(field), "company")
-					if for_company != self.name:
-						frappe.throw(_("Account {0} does not belong to company: {1}")
-							.format(self.get(field), self.name))
+			"sales_tax_account", "service_tax_account", "extra_tax_account", "further_tax_account", "advance_tax_account"
+		]
+
+		for field in accounts:
+			if self.get(field):
+				for_company = frappe.db.get_value("Account", self.get(field), "company")
+				if for_company != self.name:
+					frappe.throw(_("Account {0} does not belong to company: {1}").format(self.get(field), self.name))
 
 	def validate_currency(self):
 		if self.is_new():
@@ -98,8 +101,6 @@ class Company(NestedSet):
 		if frappe.flags.country_change:
 			install_country_fixtures(self.name)
 			self.create_default_tax_template()
-
-
 
 		if not frappe.db.get_value("Department", {"company": self.name}):
 			from erpnext.setup.setup_wizard.operations.install_fixtures import install_post_company_fixtures
@@ -184,21 +185,29 @@ class Company(NestedSet):
 			self.existing_company = self.parent_company
 
 	def set_default_accounts(self):
-		self._set_default_account("default_cash_account", "Cash")
-		self._set_default_account("default_bank_account", "Bank")
-		self._set_default_account("round_off_account", "Round Off")
-		self._set_default_account("accumulated_depreciation_account", "Accumulated Depreciation")
-		self._set_default_account("depreciation_expense_account", "Depreciation")
-		self._set_default_account("capital_work_in_progress_account", "Capital Work in Progress")
-		self._set_default_account("asset_received_but_not_billed", "Asset Received But Not Billed")
-		self._set_default_account("expenses_included_in_asset_valuation", "Expenses Included In Asset Valuation")
+		default_accounts = {
+			"default_cash_account": "Cash",
+			"default_bank_account": "Bank",
+			"round_off_account": "Round Off",
+			"accumulated_depreciation_account": "Accumulated Depreciation",
+			"depreciation_expense_account": "Depreciation",
+			"capital_work_in_progress_account": "Capital Work in Progress",
+			"asset_received_but_not_billed": "Asset Received But Not Billed",
+			"expenses_included_in_asset_valuation": "Expenses Included In Asset Valuation"
+		}
 
 		if self.enable_perpetual_inventory:
-			self._set_default_account("stock_received_but_not_billed", "Stock Received But Not Billed")
-			self._set_default_account("default_inventory_account", "Stock")
-			self._set_default_account("stock_adjustment_account", "Stock Adjustment")
-			self._set_default_account("expenses_included_in_valuation", "Expenses Included In Valuation")
-			self._set_default_account("default_expense_account", "Cost of Goods Sold")
+			default_accounts.update({
+				"stock_received_but_not_billed": "Stock Received But Not Billed",
+				"default_inventory_account": "Stock",
+				"stock_adjustment_account": "Stock Adjustment",
+				"expenses_included_in_valuation": "Expenses Included In Valuation",
+				"default_expense_account": "Cost of Goods Sold"
+			})
+
+		for default_account in default_accounts:
+			if self.is_new() or frappe.flags.in_test or frappe.flags.in_demo:
+				self._set_default_account(default_account, default_accounts.get(default_account))
 
 		if not self.default_income_account:
 			income_account = frappe.db.get_value("Account",
@@ -259,8 +268,7 @@ class Company(NestedSet):
 		if self.get(fieldname):
 			return
 
-		account = frappe.db.get_value("Account", {"account_type": account_type,
-			"is_group": 0, "company": self.name})
+		account = frappe.db.get_value("Account", {"account_type": account_type, "is_group": 0, "company": self.name})
 
 		if account:
 			self.db_set(fieldname, account)
@@ -268,7 +276,7 @@ class Company(NestedSet):
 	def set_mode_of_payment_account(self):
 		cash = frappe.db.get_value('Mode of Payment', {'type': 'Cash'}, 'name')
 		if cash and self.default_cash_account \
-				and not frappe.db.get_value('Mode of Payment Account', {'company': self.name, 'parent': cash}):
+			and not frappe.db.get_value('Mode of Payment Account', {'company': self.name, 'parent': cash}):
 			mode_of_payment = frappe.get_doc('Mode of Payment', cash)
 			mode_of_payment.append('accounts', {
 				'company': self.name,
@@ -349,6 +357,11 @@ class Company(NestedSet):
 			where doctype='Global Defaults' and field='default_company'
 			and value=%s""", self.name)
 
+		# reset default company
+		frappe.db.sql("""update `tabSingles` set value=""
+			where doctype='Chart of Accounts Importer' and field='company'
+			and value=%s""", self.name)
+
 		# delete BOMs
 		boms = frappe.db.sql_list("select name from tabBOM where company=%s", self.name)
 		if boms:
@@ -383,7 +396,7 @@ def replace_abbr(company, old, new):
 	def _rename_record(doc):
 		parts = doc[0].rsplit(" - ", 1)
 		if len(parts) == 1 or parts[1].lower() == old.lower():
-			frappe.rename_doc(dt, doc[0], parts[0] + " - " + new, force=1)
+			frappe.rename_doc(dt, doc[0], parts[0] + " - " + new, force=True)
 
 	def _rename_records(dt):
 		# rename is expensive so let's be economical with memory usage
@@ -417,17 +430,19 @@ def update_company_current_month_sales(company):
 	current_month_year = formatdate(today(), "MM-yyyy")
 
 	results = frappe.db.sql('''
-		select
-			sum(base_grand_total) as total, date_format(posting_date, '%m-%Y') as month_year
-		from
+		SELECT
+			SUM(base_grand_total) AS total,
+			DATE_FORMAT(`posting_date`, '%m-%Y') AS month_year
+		FROM
 			`tabSales Invoice`
-		where
-			date_format(posting_date, '%m-%Y')="{0}"
-			and docstatus = 1
-			and company = "{1}"
-		group by
+		WHERE
+			DATE_FORMAT(`posting_date`, '%m-%Y') = '{current_month_year}'
+			AND docstatus = 1
+			AND company = {company}
+		GROUP BY
 			month_year
-	'''.format(current_month_year, frappe.db.escape(company)), as_dict = True)
+	'''.format(current_month_year=current_month_year, company=frappe.db.escape(company)),
+		as_dict = True)
 
 	monthly_total = results[0]['total'] if len(results) > 0 else 0
 
@@ -437,7 +452,7 @@ def update_company_monthly_sales(company):
 	'''Cache past year monthly sales of every company based on sales invoices'''
 	from frappe.utils.goal import get_monthly_results
 	import json
-	filter_str = "company = '{0}' and status != 'Draft' and docstatus=1".format(frappe.db.escape(company))
+	filter_str = "company = {0} and status != 'Draft' and docstatus=1".format(frappe.db.escape(company))
 	month_to_value_dict = get_monthly_results("Sales Invoice", "base_grand_total",
 		"posting_date", filter_str, "sum")
 
@@ -469,9 +484,9 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 		from
 			`tab{doctype}` comp
 		where
-			ifnull(parent_company, "")="{parent}"
+			ifnull(parent_company, "")={parent}
 		""".format(
-			doctype = frappe.db.escape(doctype),
+			doctype = doctype,
 			parent=frappe.db.escape(parent)
 		), as_dict=1)
 

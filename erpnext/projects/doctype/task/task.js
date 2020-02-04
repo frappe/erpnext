@@ -38,23 +38,9 @@ frappe.ui.form.on("Task", {
 
 				if (frappe.model.can_read("Expense Claim")) {
 					frm.add_custom_button(__("Expense Claims"), () => {
-						frappe.route_options = { "project": frm.doc.project, "task": frm.doc.name }
+						frappe.route_options = { "project": frm.doc.project, "task": frm.doc.name };
 						frappe.set_route("List", "Expense Claim");
 					}, __("View"), true);
-				}
-
-				if (frm.perm[0].write) {
-					if (!["Closed", "Cancelled"].includes(frm.doc.status)) {
-						frm.add_custom_button(__("Close"), () => {
-							frm.set_value("status", "Closed");
-							frm.save();
-						});
-					} else {
-						frm.add_custom_button(__("Reopen"), () => {
-							frm.set_value("status", "Open");
-							frm.save();
-						});
-					}
 				}
 			}
 		}
@@ -66,13 +52,6 @@ frappe.ui.form.on("Task", {
 				query: "erpnext.projects.doctype.task.task.get_project"
 			}
 		};
-	},
-
-	project: function(frm) {
-		if(frm.doc.project) {
-			return get_server_fields('get_project_details', '','', frm.doc, frm.doc.doctype,
-				frm.doc.name, 1);
-		}
 	},
 
 	is_group: function (frm) {

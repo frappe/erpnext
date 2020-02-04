@@ -100,7 +100,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 
 	cond = []
 	if date:
-		cond.append("posting_date <= '%s'" % frappe.db.escape(cstr(date)))
+		cond.append("posting_date <= %s" % frappe.db.escape(cstr(date)))
 	else:
 		# get balance of all entries that exist
 		date = nowdate()
@@ -136,7 +136,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 			)""" % (cc.lft, cc.rgt))
 
 		else:
-			cond.append("""gle.cost_center = "%s" """ % (frappe.db.escape(cost_center, percent=False), ))
+			cond.append("""gle.cost_center = %s """ % (frappe.db.escape(cost_center, percent=False), ))
 
 
 	if account:
@@ -161,14 +161,14 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 			if acc.account_currency == frappe.get_cached_value('Company',  acc.company,  "default_currency"):
 				in_account_currency = False
 		else:
-			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account, percent=False), ))
+			cond.append("""gle.account = %s """ % (frappe.db.escape(account, percent=False), ))
 
 	if party_type and party:
-		cond.append("""gle.party_type = "%s" and gle.party = "%s" """ %
+		cond.append("""gle.party_type = %s and gle.party = %s """ %
 			(frappe.db.escape(party_type), frappe.db.escape(party, percent=False)))
 
 	if company:
-		cond.append("""gle.company = "%s" """ % (frappe.db.escape(company, percent=False)))
+		cond.append("""gle.company = %s """ % (frappe.db.escape(company, percent=False)))
 
 	if account or (party_type and party):
 		if in_account_currency:
@@ -210,7 +210,7 @@ def get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account,
 def get_count_on(account, fieldname, date):
 	cond = []
 	if date:
-		cond.append("posting_date <= '%s'" % frappe.db.escape(cstr(date)))
+		cond.append("posting_date <= %s" % frappe.db.escape(cstr(date)))
 	else:
 		# get balance of all entries that exist
 		date = nowdate()
@@ -245,7 +245,7 @@ def get_count_on(account, fieldname, date):
 				and ac.lft >= %s and ac.rgt <= %s
 			)""" % (acc.lft, acc.rgt))
 		else:
-			cond.append("""gle.account = "%s" """ % (frappe.db.escape(account, percent=False), ))
+			cond.append("""gle.account = %s """ % (frappe.db.escape(account, percent=False), ))
 
 		entries = frappe.db.sql("""
 			SELECT name, posting_date, account, party_type, party,debit,credit,
@@ -340,7 +340,6 @@ def reconcile_against_document(args):
 	"""
 		Cancel JV, Update aginst document, split if required and resubmit jv
 	"""
-
 	for d in args:
 
 		check_if_advance_entry_modified(d)
@@ -513,7 +512,7 @@ def update_reference_in_journal_entry(d, jv_doc):
 	for dn, dt in set(to_update_advance_amount):
 		frappe.get_doc(dn, dt).set_total_advance_paid()
 
-def update_reference_in_payment_entry(d, payment_entry):
+def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 	reference_details = {
 		"reference_doctype": d.against_voucher_type,
 		"reference_name": d.against_voucher,
@@ -549,7 +548,17 @@ def update_reference_in_payment_entry(d, payment_entry):
 	payment_entry.setup_party_account_field()
 	payment_entry.set_missing_values()
 	payment_entry.set_amounts()
-	payment_entry.save(ignore_permissions=True)
+
+	if d.difference_amount and d.difference_account:
+		payment_entry.set_gain_or_loss(account_details={
+			'account': d.difference_account,
+			'cost_center': payment_entry.cost_center or frappe.get_cached_value('Company',
+				payment_entry.company, "cost_center"),
+			'amount': d.difference_amount
+		})
+
+	if not do_not_save:
+		payment_entry.save(ignore_permissions=True)
 
 	for dn, dt in set(to_update_advance_amount):
 		frappe.get_doc(dn, dt).set_total_advance_paid()
@@ -755,7 +764,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, include
 	""".format(payment_dr_or_cr=payment_dr_or_cr), {
 		"party_type": party_type,
 		"party": party,
-		"account": account,
+		"account": account
 	}, as_dict=True)
 
 	pe_map = frappe._dict()
@@ -771,6 +780,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, include
 				due_date = frappe.db.get_value(
 					d.voucher_type, d.voucher_no, "posting_date" if party_type == "Employee" else "due_date")
 
+			if d.voucher_type != "Purchase Invoice" or d.voucher_no not in held_invoices:
 				outstanding_invoices.append(
 					frappe._dict({
 						'voucher_no': d.voucher_no,

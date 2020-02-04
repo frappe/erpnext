@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
+import json
 import frappe.defaults
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from frappe.utils import flt, add_days, nowdate, getdate
@@ -15,7 +16,7 @@ from erpnext.stock.doctype.material_request.test_material_request import make_ma
 from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.controllers.accounts_controller import update_child_qty_rate
-import json
+from erpnext.controllers.status_updater import OverAllowanceError
 
 class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_receipt(self):
@@ -41,7 +42,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.load_from_db()
 		self.assertEqual(po.get("items")[0].received_qty, 4)
 
-		frappe.db.set_value('Item', '_Test Item', 'tolerance', 50)
+		frappe.db.set_value('Item', '_Test Item', 'over_delivery_receipt_allowance', 50)
 
 		pr = create_pr_against_po(po.name, received_qty=8)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
@@ -57,12 +58,12 @@ class TestPurchaseOrder(unittest.TestCase):
 
 	def test_ordered_qty_against_pi_with_update_stock(self):
 		existing_ordered_qty = get_ordered_qty()
-
 		po = create_purchase_order()
 
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 10)
 
-		frappe.db.set_value('Item', '_Test Item', 'tolerance', 50)
+		frappe.db.set_value('Item', '_Test Item', 'over_delivery_receipt_allowance', 50)
+		frappe.db.set_value('Item', '_Test Item', 'over_billing_allowance', 20)
 
 		pi = make_pi_from_po(po.name)
 		pi.update_stock = 1
@@ -80,6 +81,11 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		po.load_from_db()
 		self.assertEqual(po.get("items")[0].received_qty, 0)
+
+		frappe.db.set_value('Item', '_Test Item', 'over_delivery_receipt_allowance', 0)
+		frappe.db.set_value('Item', '_Test Item', 'over_billing_allowance', 0)
+		frappe.db.set_value("Accounts Settings", None, "over_billing_allowance", 0)
+
 
 	def test_update_child_qty_rate(self):
 		mr = make_material_request(qty=10)
@@ -192,6 +198,15 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		self.assertEqual(pi.doctype, "Purchase Invoice")
 		self.assertEqual(len(pi.get("items", [])), 1)
+
+	def test_purchase_order_on_hold(self):
+		po = create_purchase_order(item_code="_Test Product Bundle Item")
+		po.db_set('Status', "On Hold")
+		pi = make_pi_from_po(po.name)
+		pr = make_purchase_receipt(po.name)
+		self.assertRaises(frappe.ValidationError, pr.submit)
+		self.assertRaises(frappe.ValidationError, pi.submit)
+
 
 	def test_make_purchase_invoice_with_terms(self):
 		po = create_purchase_order(do_not_save=True)
@@ -417,6 +432,11 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		self.assertEquals(bin5.reserved_qty_for_sub_contract, bin2.reserved_qty_for_sub_contract - 6)
 
+		make_stock_entry(target="_Test Warehouse 1 - _TC", item_code="_Test Item",
+			qty=40, basic_rate=100)
+		make_stock_entry(target="_Test Warehouse 1 - _TC", item_code="_Test Item Home Desktop 100",
+			qty=40, basic_rate=100)
+
 		# make Purchase Receipt against PO
 		pr = make_purchase_receipt(po.name)
 		pr.supplier_warehouse = "_Test Warehouse 1 - _TC"
@@ -541,6 +561,50 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		self.assertEquals(se_items, supplied_items)
 		update_backflush_based_on("BOM")
+
+	def test_advance_payment_entry_unlink_against_purchase_order(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		frappe.db.set_value("Accounts Settings", "Accounts Settings",
+			"unlink_advance_payment_on_cancelation_of_order", 1)
+
+		po_doc = create_purchase_order()
+
+		pe = get_payment_entry("Purchase Order", po_doc.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_from_account_currency = po_doc.currency
+		pe.paid_to_account_currency = po_doc.currency
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 1
+		pe.paid_amount = po_doc.grand_total
+		pe.save(ignore_permissions=True)
+		pe.submit()
+
+		po_doc = frappe.get_doc('Purchase Order', po_doc.name)
+		po_doc.cancel()
+
+		pe_doc = frappe.get_doc('Payment Entry', pe.name)
+		pe_doc.cancel()
+
+		frappe.db.set_value("Accounts Settings", "Accounts Settings",
+			"unlink_advance_payment_on_cancelation_of_order", 0)
+
+	def test_schedule_date(self):
+		po = create_purchase_order(do_not_submit=True)
+		po.schedule_date = None
+		po.append("items", {
+			"item_code": "_Test Item",
+			"qty": 1,
+			"rate": 100,
+			"schedule_date": add_days(nowdate(), 5)
+		})
+		po.save()
+		self.assertEqual(po.schedule_date, add_days(nowdate(), 1))
+
+		po.items[0].schedule_date = add_days(nowdate(), 2)
+		po.save()
+		self.assertEqual(po.schedule_date, add_days(nowdate(), 2))
+
 
 def make_pr_against_po(po, received_qty=0):
 	pr = make_purchase_receipt(po)

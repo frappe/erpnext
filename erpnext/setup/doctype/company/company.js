@@ -17,6 +17,14 @@ frappe.ui.form.on("Company", {
 				filters: {"is_group": 1}
 			}
 		});
+
+		frm.set_query("default_selling_terms", function() {
+			return { filters: { selling: 1 } };
+		});
+
+		frm.set_query("default_buying_terms", function() {
+			return { filters: { buying: 1 } };
+		});
 	},
 
 	company_name: function(frm) {
@@ -62,7 +70,7 @@ frappe.ui.form.on("Company", {
 			frm.toggle_enable("default_currency", (frm.doc.__onload &&
 				!frm.doc.__onload.transactions_exist));
 
-			frm.add_custom_button(__('Make Tax Template'), function() {
+			frm.add_custom_button(__('Create Tax Template'), function() {
 				frm.trigger("make_default_tax_template");
 			});
 
@@ -84,7 +92,7 @@ frappe.ui.form.on("Company", {
 
 			frm.add_custom_button(__('Default Tax Template'), function() {
 				frm.trigger("make_default_tax_template");
-			}, __("Make"));
+			}, __('Create'));
 		}
 
 		erpnext.company.set_chart_of_accounts_options(frm.doc);
@@ -276,4 +284,5 @@ var disbale_coa_fields = function(frm, bool=true) {
 	frm.set_df_property("create_chart_of_accounts_based_on", "read_only", bool);
 	frm.set_df_property("chart_of_accounts", "read_only", bool);
 	frm.set_df_property("existing_company", "read_only", bool);
-};
+}
+

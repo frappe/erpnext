@@ -86,17 +86,23 @@ class ShareTransfer(Document):
 				frappe.throw(_('The field From Shareholder cannot be blank'))
 			if self.from_folio_no is None or self.from_folio_no is '':
 				self.to_folio_no = self.autoname_folio(self.to_shareholder)
+			if self.asset_account is None:
+				frappe.throw(_('The field Asset Account cannot be blank'))
 		elif (self.transfer_type == 'Issue'):
 			self.from_shareholder = ''
 			if self.to_shareholder is None or self.to_shareholder == '':
 				frappe.throw(_('The field To Shareholder cannot be blank'))
 			if self.to_folio_no is None or self.to_folio_no is '':
 				self.to_folio_no = self.autoname_folio(self.to_shareholder)
+			if self.asset_account is None:
+				frappe.throw(_('The field Asset Account cannot be blank'))
 		else:
 			if self.from_shareholder is None or self.to_shareholder is None:
 				frappe.throw(_('The fields From Shareholder and To Shareholder cannot be blank'))
 			if self.to_folio_no is None or self.to_folio_no is '':
 				self.to_folio_no = self.autoname_folio(self.to_shareholder)
+		if self.equity_or_liability_account is None:
+				frappe.throw(_('The field Equity/Liability Account cannot be blank'))
 		if self.from_shareholder == self.to_shareholder:
 			frappe.throw(_('The seller and the buyer cannot be the same'))
 		if self.no_of_shares != self.to_no - self.from_no + 1:

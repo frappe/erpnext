@@ -9,7 +9,9 @@
         </div>
         <div class="col-xs-8 col-sm-10">
             {{ d.item_code }}
-            <div class="text-muted small item-description">{{ d.description }}</div>
+            <div class="text-muted small item-description">
+				{{ html2text(d.description) | truncate(140) }}
+			</div>
         </div>
     </div>
 {% endmacro %}
@@ -25,14 +27,14 @@
            {{ d.item_name|truncate(25) }}
 			<div class="input-group number-spinner">
                 <span class="input-group-btn">
-                    <button class="btn btn-default cart-btn" data-dir="dwn">
+                    <button class="btn btn-light cart-btn" data-dir="dwn">
                         –</button>
                 </span>
 	            <input class="form-control text-right cart-qty"
 		            value = "{{ d.get_formatted('qty') }}"
 		            data-item-code="{{ d.item_code }}">
                 <span class="input-group-btn">
-                    <button class="btn btn-default cart-btn" data-dir="up">
+                    <button class="btn btn-light cart-btn" data-dir="up">
                         +</button>
                 </span>
 			</div>

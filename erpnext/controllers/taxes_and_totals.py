@@ -65,9 +65,13 @@ class calculate_taxes_and_totals(object):
 
 				if item.discount_percentage == 100:
 					item.rate = 0.0
-				elif not item.rate:
-					item.rate = flt(item.price_list_rate *
-						(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
+				elif item.price_list_rate:
+					if not item.rate or (item.pricing_rules and item.discount_percentage > 0):
+						item.rate = flt(item.price_list_rate *
+							(1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
+						item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
+					elif item.discount_amount and item.pricing_rules:
+						item.rate =  item.price_list_rate - item.discount_amount
 
 				has_margin_field = item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']
 
@@ -422,6 +426,8 @@ class calculate_taxes_and_totals(object):
 		elif tax.charge_type == "On Previous Row Total":
 			current_tax_amount = (tax_rate / 100.0) * \
 				self.doc.get("taxes")[cint(tax.row_id) - 1].grand_total_for_current_item
+		elif tax.charge_type == "On Item Quantity":
+			current_tax_amount = tax_rate * item.stock_qty
 
 		self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 
@@ -706,16 +712,17 @@ class calculate_taxes_and_totals(object):
 		rate_with_margin = 0.0
 		base_rate_with_margin = 0.0
 		if item.price_list_rate:
-			if item.pricing_rule and not self.doc.ignore_pricing_rule:
-				pricing_rule = frappe.get_doc('Pricing Rule', item.pricing_rule)
+			if item.pricing_rules and not self.doc.ignore_pricing_rule:
+				for d in item.pricing_rules.split(','):
+					pricing_rule = frappe.get_doc('Pricing Rule', d)
 
-				if (pricing_rule.margin_type == 'Amount' and pricing_rule.currency == self.doc.currency)\
-						or (pricing_rule.margin_type == 'Percentage'):
-					item.margin_type = pricing_rule.margin_type
-					item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
-				else:
-					item.margin_type = None
-					item.margin_rate_or_amount = 0.0
+					if (pricing_rule.margin_type == 'Amount' and pricing_rule.currency == self.doc.currency)\
+							or (pricing_rule.margin_type == 'Percentage'):
+						item.margin_type = pricing_rule.margin_type
+						item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
+					else:
+						item.margin_type = None
+						item.margin_rate_or_amount = 0.0
 
 			if item.margin_type and item.margin_rate_or_amount:
 				margin_value = item.margin_rate_or_amount if item.margin_type == 'Amount' else flt(item.price_list_rate) * flt(item.margin_rate_or_amount) / 100

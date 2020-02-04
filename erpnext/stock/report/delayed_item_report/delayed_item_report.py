@@ -28,12 +28,12 @@ class DelayedItemReport(object):
 			conditions = " and `tabSales Invoice`.update_stock = 1 and `tabSales Invoice`.is_pos = 0"
 
 		if self.filters.get("item_group"):
-			conditions += " and `tab%s`.item_group = '%s'" % (child_doc,
+			conditions += " and `tab%s`.item_group = %s" % (child_doc,
 				frappe.db.escape(self.filters.get("item_group")))
 
 		for field in ["customer", "customer_group", "company"]:
 			if self.filters.get(field):
-				conditions += " and `tab%s`.%s = '%s'" % (doctype,
+				conditions += " and `tab%s`.%s = %s" % (doctype,
 					field, frappe.db.escape(self.filters.get(field)))
 
 		sales_order_field = "against_sales_order"

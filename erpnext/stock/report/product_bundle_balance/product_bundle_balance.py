@@ -141,7 +141,7 @@ def get_stock_ledger_entries(filters, items):
 		return []
 
 	item_conditions_sql = ' and sle.item_code in ({})' \
-		.format(', '.join(['"' + frappe.db.escape(i, percent=False) + '"' for i in items]))
+		.format(', '.join([frappe.db.escape(i) for i in items]))
 
 	conditions = get_sle_conditions(filters)
 
@@ -176,7 +176,7 @@ def get_sle_conditions(filters):
 	if not filters.get("date"):
 		frappe.throw(_("'Date' is required"))
 
-	conditions += " and sle.posting_date <= '%s'" % frappe.db.escape(filters.get("date"))
+	conditions += " and sle.posting_date <= %s" % frappe.db.escape(filters.get("date"))
 
 	if filters.get("warehouse"):
 		warehouse_details = frappe.db.get_value("Warehouse", filters.get("warehouse"), ["lft", "rgt"], as_dict=1)

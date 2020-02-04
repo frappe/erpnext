@@ -21,6 +21,9 @@ class BankReconciliation(Document):
 		if not self.include_reconciled_entries:
 			condition = "and ({0}clearance_date is null or {0}clearance_date='0000-00-00')"
 
+		account_cond = ""
+		if self.bank_account_no:
+			account_cond = " and t2.bank_account_no = {0}".format(frappe.db.escape(self.bank_account_no))
 
 		journal_entries = frappe.db.sql("""
 			select 
@@ -38,6 +41,9 @@ class BankReconciliation(Document):
 			order by t1.posting_date ASC, t1.name DESC
 		""".format(condition.format("t2.")), (self.bank_account, self.from_date, self.to_date), as_dict=1)
 
+		if self.bank_account_no:
+			condition += " and bank_account = %(bank_account_no)s"
+
 		payment_entries = frappe.db.sql("""
 			select
 				"Payment Entry" as payment_document, name as payment_entry,
@@ -53,7 +59,8 @@ class BankReconciliation(Document):
 			order by
 				posting_date ASC, name DESC
 		""".format(condition.format("")),
-		        {"account":self.bank_account, "from":self.from_date, "to":self.to_date}, as_dict=1)
+		        {"account":self.bank_account, "from":self.from_date,
+				"to":self.to_date, "bank_account_no": self.bank_account_no}, as_dict=1)
 
 		pos_entries = []
 		if self.include_pos_transactions:
@@ -96,7 +103,7 @@ class BankReconciliation(Document):
 		for d in self.get('payment_entries'):
 			if d.clearance_date:
 				if not d.payment_document:
-					frappe.throw(_("Row #{0}: Payment document is required to complete the trasaction"))
+					frappe.throw(_("Row #{0}: Payment document is required to complete the transaction"))
 
 				if d.cheque_date and getdate(d.clearance_date) < getdate(d.cheque_date):
 					frappe.throw(_("Row #{0}: Clearance date {1} cannot be before Cheque Date {2}")
@@ -106,10 +113,8 @@ class BankReconciliation(Document):
 				if not d.clearance_date:
 					d.clearance_date = None
 
-				frappe.db.set_value(d.payment_document, d.payment_entry, "clearance_date", d.clearance_date)
-				frappe.db.sql("""update `tab{0}` set clearance_date = %s, modified = %s 
-					where name=%s""".format(d.get("payment_detail_dt") or d.payment_document),
-				(d.clearance_date, nowdate(), d.get("payment_detail_dn") or d.payment_entry))
+				payment_entry = frappe.get_doc(d.payment_document, d.payment_entry)
+				payment_entry.db_set('clearance_date', d.clearance_date)
 
 				clearance_date_updated = True
 

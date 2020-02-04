@@ -203,12 +203,11 @@ def get_children(doctype, parent=None, location=None, is_root=False):
 		from
 			`tab{doctype}` comp
 		where
-			ifnull(parent_location, "")="{parent}"
+			ifnull(parent_location, "")={parent}
 		""".format(
-		doctype=frappe.db.escape(doctype),
-		parent=frappe.db.escape(parent)
-	), as_dict=1)
-
+			doctype=doctype,
+			parent=frappe.db.escape(parent)
+		), as_dict=1)
 
 @frappe.whitelist()
 def add_node():

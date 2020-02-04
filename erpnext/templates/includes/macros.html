@@ -1,7 +1,4 @@
 {% macro product_image_square(website_image, css_class="") %}
-{% if website_image -%}
-	<meta itemprop="image" content="{{ frappe.utils.quoted(website_image) | abs_url }}"></meta>
-{%- endif %}
 <div class="product-image product-image-square
 	{% if not website_image -%} missing-image {%- endif %} {{ css_class }}"
 	{% if website_image -%}
@@ -11,12 +8,8 @@
 {% endmacro %}
 
 {% macro product_image(website_image, css_class="") %}
-    <div class="product-image {% if not website_image -%} missing-image {%- endif %} {{ css_class }}">
-    	{% if website_image -%}
-			<a href="{{ frappe.utils.quoted(website_image) }}">
-				<img itemprop="image" src="{{ frappe.utils.quoted(website_image) | abs_url }}" class="img-responsive">
-			</a>
-    	{%- endif %}
+    <div class="border text-center rounded h-100 {{ css_class }}" style="overflow: hidden;">
+		<img itemprop="image" class="website-image h-100 w-100" src="{{ frappe.utils.quoted(website_image or 'no-image.jpg') | abs_url }}">
     </div>
 {% endmacro %}
 
@@ -32,4 +25,36 @@
 			</a>
     	{%- endif %}
     </div>
+{% endmacro %}
+
+{% macro render_homepage_section(section) %}
+
+{% if section.section_based_on == 'Custom HTML' and section.section_html %}
+	{{ section.section_html }}
+{% elif section.section_based_on == 'Cards' %}
+<section class="container my-5">
+	<h3>{{ section.name }}</h3>
+
+	<div class="row">
+		{% for card in section.section_cards %}
+		<div class="col-md-{{ section.column_value }} mb-4">
+			<div class="card h-100 justify-content-between">
+				{% if card.image %}
+				<div class="website-image-lazy" data-class="card-img-top h-100" data-src="{{ card.image }}" data-alt="{{ card.title }}"></div>
+				{% endif %}
+				<div class="card-body">
+					<h5 class="card-title">{{ card.title }}</h5>
+					<p class="card-subtitle mb-2 text-muted">{{ card.subtitle or '' }}</p>
+					<p class="card-text">{{ card.content or '' | truncate(140, True) }}</p>
+				</div>
+				<div class="card-body flex-grow-0">
+					<a href="{{ card.route }}" class="card-link">{{ _('More details') }}</a>
+				</div>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+</section>
+{% endif %}
+
 {% endmacro %}

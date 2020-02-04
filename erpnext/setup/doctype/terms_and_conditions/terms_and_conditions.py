@@ -3,9 +3,11 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _, throw
 import json
 from frappe.model.document import Document
 from frappe.utils.jinja import validate_template
+from frappe.utils import cint
 
 from six import string_types
 
@@ -13,6 +15,8 @@ class TermsandConditions(Document):
 	def validate(self):
 		if self.terms:
 			validate_template(self.terms)
+		if not cint(self.buying) and not cint(self.selling) and not cint(self.hr) and not cint(self.disabled):
+			throw(_("At least one of the Applicable Modules should be selected"))
 
 @frappe.whitelist()
 def get_terms_and_conditions(template_name, doc):

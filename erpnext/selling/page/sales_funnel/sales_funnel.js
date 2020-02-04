@@ -90,70 +90,31 @@ erpnext.SalesFunnel = class SalesFunnel {
 
 	get_data(btn) {
 		var me = this;
-		if (me.options.chart == 'sales_funnel'){
-			frappe.call({
-				method: "erpnext.selling.page.sales_funnel.sales_funnel.get_funnel_data",
-				args: {
-					from_date: this.options.from_date,
-					to_date: this.options.to_date,
-					company: this.company
-				},
-				btn: btn,
-				callback: function(r) {
-					if(!r.exc) {
-						me.options.data = r.message;
-						if (me.options.data=='empty') {
-							const $parent = me.elements.funnel_wrapper;
-							$parent.html(__('No data for this period'));
-						} else {
-							me.render_funnel();
-						}
+		const method_map = {
+			"sales_funnel": "erpnext.selling.page.sales_funnel.sales_funnel.get_funnel_data",
+			"opp_by_lead_source": "erpnext.selling.page.sales_funnel.sales_funnel.get_opp_by_lead_source",
+			"sales_pipeline": "erpnext.selling.page.sales_funnel.sales_funnel.get_pipeline_data"
+		};
+		frappe.call({
+			method: method_map[this.options.chart],
+			args: {
+				from_date: this.options.from_date,
+				to_date: this.options.to_date,
+				company: this.company
+			},
+			btn: btn,
+			callback: function(r) {
+				if(!r.exc) {
+					me.options.data = r.message;
+					if (me.options.data=='empty') {
+						const $parent = me.elements.funnel_wrapper;
+						$parent.html(__('No data for this period'));
+					} else {
+						me.render();
 					}
 				}
-			});
-		} else if (me.options.chart == 'opp_by_lead_source'){
-			frappe.call({
-				method: "erpnext.selling.page.sales_funnel.sales_funnel.get_opp_by_lead_source",
-				args: {
-					from_date: this.options.from_date,
-					to_date: this.options.to_date,
-					company: this.company
-				},
-				btn: btn,
-				callback: function(r) {
-					if(!r.exc) {
-						me.options.data = r.message;
-						if (me.options.data=='empty') {
-							const $parent = me.elements.funnel_wrapper;
-							$parent.html(__('No data for this period'));
-						} else {
-							me.render_opp_by_lead_source();
-						}
-					}
-				}
-			});
-		} else if (me.options.chart == 'sales_pipeline'){
-			frappe.call({
-				method: "erpnext.selling.page.sales_funnel.sales_funnel.get_pipeline_data",
-				args: {
-					from_date: this.options.from_date,
-					to_date: this.options.to_date,
-					company: this.company
-				},
-				btn: btn,
-				callback: function(r) {
-					if(!r.exc) {
-						me.options.data = r.message;
-						if (me.options.data=='empty') {
-							const $parent = me.elements.funnel_wrapper;
-							$parent.html(__('No data for this period'));
-						} else {
-							me.render_pipeline();
-						}
-					}
-				}
-			});
-		}
+			}
+		});
 	}
 
 	render() {
@@ -161,9 +122,9 @@ erpnext.SalesFunnel = class SalesFunnel {
 		if (me.options.chart == 'sales_funnel'){
 			me.render_funnel();
 		} else if (me.options.chart == 'opp_by_lead_source'){
-			me.render_opp_by_lead_source();
+			me.render_chart("Sales Opportunities by Source");
 		} else if (me.options.chart == 'sales_pipeline'){
-			me.render_pipeline();
+			me.render_chart("Sales Pipeline by Stage");
 		}
 	}
 
@@ -270,15 +231,15 @@ erpnext.SalesFunnel = class SalesFunnel {
 		context.fillText(__(title), width + 20, y_mid);
 	}
 
-	render_opp_by_lead_source() {
+	render_chart(title) {
 		let me = this;
 		let currency = frappe.defaults.get_default("currency");
 
 		let chart_data = me.options.data ? me.options.data : null;
 
 		const parent = me.elements.funnel_wrapper[0];
-		this.chart = new Chart(parent, {
-			title: __("Sales Opportunities by Source"),
+		this.chart = new frappe.Chart(parent, {
+			title: title,
 			height: 400,
 			data: chart_data,
 			type: 'bar',
@@ -288,25 +249,6 @@ erpnext.SalesFunnel = class SalesFunnel {
 			tooltipOptions: {
 				formatTooltipY: d => format_currency(d, currency),
 			}
-		});
-	}
-
-	render_pipeline() {
-		let me = this;
-		let currency = frappe.defaults.get_default("currency");
-
-		let chart_data = me.options.data ? me.options.data : null;
-
-		const parent = me.elements.funnel_wrapper[0];
-		this.chart = new Chart(parent, {
-			title: __("Sales Pipeline by Stage"),
-			height: 400,
-			data: chart_data,
-			type: 'bar',
-			tooltipOptions: {
-				formatTooltipY: d => format_currency(d, currency),
-			},
-			colors: ['light-green', 'green']
 		});
 	}
 };

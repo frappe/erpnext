@@ -13,8 +13,11 @@ from erpnext.utilities.product import get_price, get_qty_in_stock
 def get_product_info_for_website(item_code):
 	"""get product price / stock info for website"""
 
-	cart_quotation = _get_cart_quotation()
 	cart_settings = get_shopping_cart_settings()
+	if not cart_settings.enabled:
+		return frappe._dict()
+
+	cart_quotation = _get_cart_quotation()
 
 	price = get_price(
 		item_code,
@@ -41,10 +44,10 @@ def get_product_info_for_website(item_code):
 			if item:
 				product_info["qty"] = item[0].qty
 
-	return {
+	return frappe._dict({
 		"product_info": product_info,
 		"cart_settings": cart_settings
-	}
+	})
 
 def set_product_info_for_website(item):
 	"""set product price uom for website"""

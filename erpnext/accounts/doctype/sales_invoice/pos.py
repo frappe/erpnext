@@ -239,7 +239,7 @@ def get_contacts(customers):
 
 	for data in customers:
 		contact = frappe.db.sql(""" select email_id, phone, mobile_no from `tabContact`
-			where is_primary_contact =1 and name in
+			where is_primary_contact=1 and name in
 			(select parent from `tabDynamic Link` where link_doctype = 'Customer' and link_name = %s
 			and parenttype = 'Contact')""", data.name, as_dict=1)
 		if contact:
@@ -318,7 +318,7 @@ def get_item_tax_data():
 	# example: {'Consulting Services': {'Excise 12 - TS': '12.000'}}
 
 	itemwise_tax = {}
-	taxes = frappe.db.sql(""" select parent, tax_type, tax_rate from `tabItem Tax`""", as_dict=1)
+	taxes = frappe.db.sql(""" select parent, tax_type, tax_rate from `tabItem Tax Template Detail`""", as_dict=1)
 
 	for tax in taxes:
 		if tax.parent not in itemwise_tax:

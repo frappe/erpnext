@@ -20,6 +20,6 @@ def get_party_type(doctype, txt, searchfield, start, page_len, filters):
 			where `{key}` LIKE %(txt)s {cond}
 			order by name limit %(start)s, %(page_len)s"""
 			.format(key=searchfield, cond=cond), {
-				'txt': "%%%s%%" % frappe.db.escape(txt),
+				'txt': '%' + txt + '%',
 				'start': start, 'page_len': page_len
 			})

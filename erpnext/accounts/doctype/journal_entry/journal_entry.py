@@ -3,13 +3,14 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext, json
-from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, nowdate, cint
+from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, nowdate, cint, get_link_to_form
 from frappe import msgprint, _, scrub
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_balance_on_voucher, get_account_currency
 from erpnext.accounts.party import get_party_account
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.hr.doctype.loan.loan import update_disbursement_status, update_total_amount_paid
+from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import get_party_account_based_on_invoice_discounting
 
 from six import string_types, iteritems
 
@@ -57,7 +58,22 @@ class JournalEntry(AccountsController):
 		self.update_expense_claim()
 		self.update_loan()
 		self.update_inter_company_jv()
+		self.update_invoice_discounting()
 
+	def on_cancel(self):
+		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
+		from erpnext.hr.doctype.salary_slip.salary_slip import unlink_ref_doc_from_salary_slip
+		unlink_ref_doc_from_payment_entries(self, validate_permission=True)
+		unlink_ref_doc_from_salary_slip(self.name)
+		self.make_gl_entries(1)
+		self.update_advance_paid()
+		self.update_expense_claim()
+		self.update_loan()
+		self.unlink_advance_entry_reference()
+		self.unlink_asset_reference()
+		self.unlink_inter_company_jv()
+		self.unlink_asset_adjustment_entry()
+		self.update_invoice_discounting()
 
 	def get_title(self):
 		return self.pay_to_recd_from or self.accounts[0].account
@@ -86,19 +102,36 @@ class JournalEntry(AccountsController):
 			frappe.db.set_value("Journal Entry", self.inter_company_journal_entry_reference,\
 				"inter_company_journal_entry_reference", self.name)
 
-	def on_cancel(self):
-		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
-		from erpnext.hr.doctype.salary_slip.salary_slip import unlink_ref_doc_from_salary_slip
-		unlink_ref_doc_from_payment_entries(self, validate_permission=True)
-		unlink_ref_doc_from_salary_slip(self.name)
-		self.make_gl_entries(1)
-		self.update_advance_paid()
-		self.update_expense_claim()
-		self.update_loan()
-		self.unlink_advance_entry_reference()
-		self.unlink_asset_reference()
-		self.unlink_inter_company_jv()
-		self.unlink_asset_adjustment_entry()
+	def update_invoice_discounting(self):
+		def _validate_invoice_discounting_status(inv_disc, id_status, expected_status, row_id):
+			id_link = get_link_to_form("Invoice Discounting", inv_disc)
+			if id_status != expected_status:
+				frappe.throw(_("Row #{0}: Status must be {1} for Invoice Discounting {2}").format(d.idx, expected_status, id_link))
+
+		invoice_discounting_list = list(set([d.reference_name for d in self.accounts if d.reference_type=="Invoice Discounting"]))
+		for inv_disc in invoice_discounting_list:
+			inv_disc_doc = frappe.get_doc("Invoice Discounting", inv_disc)
+			status = None
+			for d in self.accounts:
+				if d.account == inv_disc_doc.short_term_loan and d.reference_name == inv_disc:
+					if self.docstatus == 1:
+						if d.credit > 0:
+							_validate_invoice_discounting_status(inv_disc, inv_disc_doc.status, "Sanctioned", d.idx)
+							status = "Disbursed"
+						elif d.debit > 0:
+							_validate_invoice_discounting_status(inv_disc, inv_disc_doc.status, "Disbursed", d.idx)
+							status = "Settled"
+					else:
+						if d.credit > 0:
+							_validate_invoice_discounting_status(inv_disc, inv_disc_doc.status, "Disbursed", d.idx)
+							status = "Sanctioned"
+						elif d.debit > 0:
+							_validate_invoice_discounting_status(inv_disc, inv_disc_doc.status, "Settled", d.idx)
+							status = "Disbursed"
+					break
+			if status:
+				inv_disc_doc.set_status(status=status)
+
 
 	def unlink_advance_entry_reference(self):
 		for d in self.get("accounts"):
@@ -262,6 +295,9 @@ class JournalEntry(AccountsController):
 						else:
 							billing_party, account = against_voucher
 							billing_party_type, account_field = field_dict.get(d.reference_type)
+
+						if d.reference_type == "Sales Invoice":
+							account = get_party_account_based_on_invoice_discounting(d.reference_name) or against_voucher[1]
 
 						if billing_party != d.party or billing_party_type != d.party_type or account != d.account:
 							frappe.throw(_("Row {0}: Party / Account does not match with {1} / {2} in {3} {4}")
@@ -540,6 +576,7 @@ class JournalEntry(AccountsController):
 					self.get_gl_dict({
 						"account": d.account,
 						"party_type": d.party_type,
+						"due_date": self.due_date,
 						"party": d.party,
 						"against": d.against_account,
 						"debit": flt(d.debit, d.precision("debit")),
@@ -557,7 +594,7 @@ class JournalEntry(AccountsController):
 						"cost_center": d.cost_center,
 						"project": d.project,
 						"finance_book": self.finance_book
-					})
+					}, item=d)
 				)
 		return gl_map
 
@@ -758,7 +795,7 @@ def get_payment_entry_against_invoice(dt, dn, amount=None,  debit_in_account_cur
 	ref_doc = frappe.get_doc(dt, dn)
 	if dt == "Sales Invoice":
 		party_type = "Customer"
-		party_account = ref_doc.debit_to
+		party_account = get_party_account_based_on_invoice_discounting(dn) or ref_doc.debit_to
 	else:
 		party_type = "Supplier" if not ref_doc.get("letter_of_credit") else "Letter of Credit"
 		party_account = ref_doc.credit_to
@@ -783,7 +820,6 @@ def get_payment_entry_against_invoice(dt, dn, amount=None,  debit_in_account_cur
 		"bank_account": bank_account,
 		"journal_entry": journal_entry
 	})
-
 
 def get_payment_entry(ref_doc, args):
 	cost_center = ref_doc.get("cost_center") or frappe.get_cached_value('Company',  ref_doc.company,  "cost_center")
@@ -856,10 +892,10 @@ def get_opening_accounts(company):
 	accounts = frappe.db.sql_list("""select
 			name from tabAccount
 		where
-			is_group=0 and report_type='Balance Sheet' and company=%s and
-			name not in(select distinct account from tabWarehouse where
+			is_group=0 and report_type='Balance Sheet' and company={0} and
+			name not in (select distinct account from tabWarehouse where
 			account is not null and account != '')
-		order by name asc""", frappe.db.escape(company))
+		order by name asc""".format(frappe.db.escape(company)))
 
 	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
 
@@ -910,7 +946,7 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 			from `tabJournal Entry` jv, `tabJournal Entry Account` jv_detail
 			where jv_detail.parent = jv.name and jv_detail.account = %s and ifnull(jv_detail.party, '') = %s
 			and (jv_detail.reference_type is null or jv_detail.reference_type = '')
-			and jv.docstatus = 1 and jv.`{0}` like %s order by jv.name desc limit %s, %s""".format(frappe.db.escape(searchfield)),
+			and jv.docstatus = 1 and jv.`{0}` like %s order by jv.name desc limit %s, %s""".format(searchfield),
 			(filters.get("account"), cstr(filters.get("party")), "%{0}%".format(txt), start, page_len))
 
 @frappe.whitelist()

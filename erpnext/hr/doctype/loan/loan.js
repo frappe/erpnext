@@ -145,7 +145,7 @@ frappe.ui.form.on('Loan', {
 		}
 
 		dialog.show()
-		dialog.set_primary_action(__('Make Repayment Entry'), function() {
+		dialog.set_primary_action(__('Create Repayment Entry'), function() {
 			frm.values = dialog.get_values();
 			if(frm.values) {
 				_make_repayment_entry(frm, dialog.fields_dict.payments.grid.get_selected_children());

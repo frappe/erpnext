@@ -6,7 +6,6 @@ from frappe.utils import today, getdate, add_days
 from erpnext.accounts.report.accounts_receivable.accounts_receivable import execute
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from six import iteritems
 
 class TestAccountsReceivable(unittest.TestCase):
 	def test_accounts_receivable(self):
@@ -15,45 +14,44 @@ class TestAccountsReceivable(unittest.TestCase):
 
 		filters = {
 			'company': '_Test Company 2',
-			'based_on_payment_terms': 1
+			'based_on_payment_terms': 1,
+			'report_date': today(),
+			'range1': 30,
+			'range2': 60,
+			'range3': 90,
+			'range4': 120
 		}
 
+		# check invoice grand total and invoiced column's value for 3 payment terms
 		name = make_sales_invoice()
 		report = execute(filters)
 
-		expected_data = [
-			{'invoice_grand_total': 100, 'invoiced_amount': 30},
-			{'invoice_grand_total': 100, 'invoiced_amount': 50},
-			{'invoice_grand_total': 100, 'invoiced_amount': 20}
-		]
+		expected_data = [[100, 30], [100, 50], [100, 20]]
 
-		for i, row in enumerate(expected_data):
-			for col, value in iteritems(row):
-				self.assertEqual(value, report[1][i][col])
+		for i in range(3):
+			row = report[1][i-1]
+			self.assertEqual(expected_data[i-1], [row.invoice_grand_total, row.invoiced])
 
+		# check invoice grand total, invoiced, paid and outstanding column's value after payment
 		make_payment(name)
 		report = execute(filters)
 
-		expected_data_after_payment = [
-			{'invoice_grand_total': 100, 'invoiced_amount': 50},
-			{'invoice_grand_total': 100, 'invoiced_amount': 20}
-		]
+		expected_data_after_payment = [[100, 50, 10, 40], [100, 20, 0, 20]]
 
-		for i, row in enumerate(expected_data_after_payment):
-			for col, value in iteritems(row):
-				self.assertEqual(value, report[1][i][col])
+		for i in range(2):
+			row = report[1][i-1]
+			self.assertEqual(expected_data_after_payment[i-1],
+				[row.invoice_grand_total, row.invoiced, row.paid, row.outstanding])
 
+		# check invoice grand total, invoiced, paid and outstanding column's value after credit note
 		make_credit_note(name)
 		report = execute(filters)
 
-		expected_data_after_credit_note = [
-			{'invoice_grand_total': 100, 'invoiced_amount': 100, 'paid_amount': 30, 'return_amount': 100, 'outstanding_amount': -30}
-		]
+		expected_data_after_credit_note = [100, 0, 0, 40, -40]
 
-		for i, row in enumerate(expected_data_after_credit_note):
-			for col, value in iteritems(row):
-				self.assertEqual(value, report[1][i][col])
-
+		row = report[1][0]
+		self.assertEqual(expected_data_after_credit_note,
+			[row.invoice_grand_total, row.invoiced, row.paid, row.credit_note, row.outstanding])
 
 def make_sales_invoice():
 	frappe.set_user("Administrator")
@@ -77,7 +75,7 @@ def make_sales_invoice():
 	return si.name
 
 def make_payment(docname):
-	pe = get_payment_entry("Sales Invoice", docname, bank_account="Cash - _TC2", party_amount=30)
+	pe = get_payment_entry("Sales Invoice", docname, bank_account="Cash - _TC2", party_amount=40)
 	pe.paid_from = "Debtors - _TC2"
 	pe.insert()
 	pe.submit()
@@ -95,3 +93,4 @@ def make_credit_note(docname):
 			cost_center = '_Test Company 2 - _TC2',
 			is_return = 1,
 			return_against = docname)
+

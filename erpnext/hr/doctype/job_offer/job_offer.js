@@ -4,6 +4,12 @@
 frappe.provide("erpnext.job_offer");
 
 frappe.ui.form.on("Job Offer", {
+	onload: function (frm) {
+		frm.set_query("select_terms", function() {
+			return { filters: { hr: 1 } };
+		});
+	},
+
 	select_terms: function (frm) {
 		erpnext.utils.get_terms(frm.doc.select_terms, frm.doc, function (r) {
 			if (!r.exc) {
@@ -15,7 +21,7 @@ frappe.ui.form.on("Job Offer", {
 	refresh: function (frm) {
 		if ((!frm.doc.__islocal) && (frm.doc.status == 'Accepted')
 			&& (frm.doc.docstatus === 1) && (!frm.doc.__onload || !frm.doc.__onload.employee)) {
-			frm.add_custom_button(__('Make Employee'),
+			frm.add_custom_button(__('Create Employee'),
 				function () {
 					erpnext.job_offer.make_employee(frm);
 				}

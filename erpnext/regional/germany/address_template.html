@@ -1,0 +1,8 @@
+{{ address_line1 }}<br>
+{% if address_line2 %}{{ address_line2 }}<br>{% endif -%}
+{{ pincode }} {{ city }}<br>
+{% if country %}{{ country }}<br>{% endif -%}
+<br>
+{% if phone %}Tel: {{ phone }}<br>{% endif -%}
+{% if fax %}Fax: {{ fax }}<br>{% endif -%}
+{% if email_id %}E-Mail: {{ email_id }}<br>{% endif -%}

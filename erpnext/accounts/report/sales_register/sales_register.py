@@ -6,6 +6,8 @@ import frappe
 from frappe.utils import flt
 from frappe.model.meta import get_field_precision
 from frappe import msgprint, _
+from frappe.model.meta import get_field_precision
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
 def execute(filters=None):
 	return _execute(filters)
@@ -70,6 +72,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 			if tax_acc not in income_accounts:
 				tax_amount_precision = get_field_precision(frappe.get_meta("Sales Taxes and Charges").get_field("tax_amount"), currency=company_currency) or 2
 				tax_amount = flt(invoice_tax_map.get(inv.name, {}).get(tax_acc), tax_amount_precision)
+				total_tax += tax_amount
 				row.append(tax_amount)
 
 		# total tax, grand total, outstanding amount & rounded total
@@ -163,6 +166,16 @@ def get_conditions(filters):
 		conditions +=  """ and exists(select name from `tabSales Invoice Item`
 			 where parent=`tabSales Invoice`.name
 			 	and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s)"""
+
+	accounting_dimensions = get_accounting_dimensions()
+
+	if accounting_dimensions:
+		for dimension in accounting_dimensions:
+			if filters.get(dimension):
+				conditions += """ and exists(select name from `tabSales Invoice Item`
+					where parent=`tabSales Invoice`.name
+						and ifnull(`tabSales Invoice Item`.{0}, '') = %({0})s)""".format(dimension)
+
 
 	return conditions
 

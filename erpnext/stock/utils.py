@@ -57,13 +57,13 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 
 	if item_code:
 		values.append(item_code)
-		condition.append(" AND item_code = %s")
+		condition += " AND item_code = %s"
 
 	stock_ledger_entries = frappe.db.sql("""
 		SELECT item_code, stock_value, name, warehouse
 		FROM `tabStock Ledger Entry` sle
 		WHERE posting_date <= %s {0}
-		ORDER BY timestamp(posting_date, posting_time) DESC, name DESC
+		ORDER BY timestamp(posting_date, posting_time) DESC, creation DESC
 	""".format(condition), values, as_dict=1)
 
 	sle_map = {}
@@ -174,7 +174,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 		in_rate = get_valuation_rate(args.get('item_code'), args.get('warehouse'),
 			args.get('voucher_type'), voucher_no, args.get('allow_zero_valuation'),
 			currency=erpnext.get_company_currency(args.get('company')), company=args.get('company'),
-			raise_error_if_no_rate=True)
+			raise_error_if_no_rate=raise_error_if_no_rate)
 
 	return in_rate
 
@@ -272,7 +272,7 @@ def update_included_uom_in_list_report(columns, result, include_uom, conversion_
 			if convertible_cols[col_idx] == 'rate':
 				columns[col_idx+1]['label'] += " (per {})".format(include_uom)
 			else:
-				columns[col_idx+1]['label'] += " ({})".format(include_uom)
+				columns[next_col]['label'] += ' ({})'.format(include_uom)
 
 	for row_idx, row in enumerate(result):
 		new_row = []

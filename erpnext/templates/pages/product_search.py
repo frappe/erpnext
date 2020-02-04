@@ -8,7 +8,6 @@ from erpnext.setup.doctype.item_group.item_group import get_item_for_list_in_htm
 from erpnext.shopping_cart.product_info import set_product_info_for_website
 
 no_cache = 1
-no_sitemap = 1
 
 def get_context(context):
 	context.show_search = True

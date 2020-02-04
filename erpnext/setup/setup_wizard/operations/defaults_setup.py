@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import cstr, getdate
-from frappe.core.doctype.communication.comment import add_info_comment
 
 def set_default_settings(args):
 	# enable default currency
@@ -114,9 +113,7 @@ def create_territories():
 
 def create_feed_and_todo():
 	"""update Activity feed and create todo for creation of item, customer, vendor"""
-	add_info_comment(**{
-		"subject": _("ERPNext Setup Complete!")
-	})
+	return
 
 def get_fy_details(fy_start_date, fy_end_date):
 	start_year = getdate(fy_start_date).year

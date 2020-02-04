@@ -22,6 +22,8 @@ erpnext.SMSManager = function SMSManager(doc) {
 
 		if (in_list(['Sales Order', 'Delivery Note', 'Sales Invoice'], doc.doctype))
 			this.show(doc.contact_person, 'Customer', doc.customer, '', default_msg[doc.doctype]);
+		else if (doc.doctype === 'Quotation')
+			this.show(doc.contact_person, 'Customer', doc.party_name, '', default_msg[doc.doctype]);
 		else if (in_list(['Purchase Order', 'Purchase Receipt'], doc.doctype))
 			this.show(doc.contact_person, 'Supplier', doc.supplier, '', default_msg[doc.doctype]);
 		else if (doc.doctype == 'Lead')

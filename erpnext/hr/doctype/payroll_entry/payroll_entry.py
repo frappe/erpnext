@@ -14,12 +14,12 @@ from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 class PayrollEntry(Document):
 	def onload(self):
 		if not self.docstatus==1 or self.salary_slips_submitted:
-			return
+    			return
 
 		# check if salary slips were manually submitted
 		entries = frappe.db.count("Salary Slip", {'payroll_entry': self.name, 'docstatus': 1}, ['name'])
 		if cint(entries) == len(self.employees):
-			self.set_onload("submitted_ss", True)
+    			self.set_onload("submitted_ss", True)
 
 	def on_submit(self):
 		self.create_salary_slips()
@@ -29,13 +29,17 @@ class PayrollEntry(Document):
 			if self.validate_employee_attendance():
 				frappe.throw(_("Cannot Submit, Employees left to mark attendance"))
 
+	def on_cancel(self):
+		frappe.delete_doc("Salary Slip", frappe.db.sql_list("""select name from `tabSalary Slip`
+			where payroll_entry=%s """, (self.name)))
+
 	def get_emp_list(self):
 		"""
 			Returns list of active employees based on selected criteria
 			and for which salary structure exists
 		"""
 		cond = self.get_filter_condition()
-		cond += self.get_joining_releiving_condition()
+		cond += self.get_joining_relieving_condition()
 
 		condition = ''
 		if self.payroll_frequency:
@@ -89,7 +93,7 @@ class PayrollEntry(Document):
 
 		return cond
 
-	def get_joining_releiving_condition(self):
+	def get_joining_relieving_condition(self):
 		cond = """
 			and ifnull(t1.date_of_joining, '0000-00-00') <= '%(end_date)s'
 			and ifnull(t1.relieving_date, '2199-12-31') >= '%(start_date)s'
@@ -124,6 +128,8 @@ class PayrollEntry(Document):
 				frappe.enqueue(create_salary_slips_for_employees, timeout=600, employees=emp_list, args=args)
 			else:
 				create_salary_slips_for_employees(emp_list, args, publish_progress=False)
+				# since this method is called via frm.call this doc needs to be updated manually
+				self.reload()
 
 	def get_sal_slip_list(self, ss_status, as_dict=False):
 		"""
@@ -335,6 +341,7 @@ class PayrollEntry(Document):
 		journal_entry.set("accounts", [
 			{
 				"account": self.payment_account,
+				"bank_account": self.bank_account,
 				"credit_in_account_currency": payment_amount
 			},
 			{

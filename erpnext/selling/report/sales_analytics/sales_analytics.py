@@ -5,9 +5,9 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
 from frappe.utils import getdate, flt, add_to_date, add_days, cstr
+from six import iteritems
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from erpnext.accounts.utils import get_fiscal_year
-from six import iteritems
 
 def execute(filters=None):
 	return Analytics(filters).run()
@@ -25,7 +25,7 @@ class Analytics(object):
 		self.get_columns()
 		self.get_data()
 		self.get_chart_data()
-		return self.columns, self.data , None, self.chart
+		return self.columns, self.data, None, self.chart
 
 	def get_columns(self):
 		self.columns = [{
@@ -228,7 +228,7 @@ class Analytics(object):
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 	def get_rows(self):
-		self.data=[]
+		self.data = []
 		self.get_periodic_data()
 
 		total_row = frappe._dict({"entity": _("'Total'"), "total": 0})
@@ -252,6 +252,10 @@ class Analytics(object):
 				total_row["total"] += amount
 
 			row["total"] = total
+
+			if self.filters.tree_type == "Item":
+				row["stock_uom"] = period_data.get("stock_uom")
+
 			self.data.append(row)
 
 	def get_rows_by_group(self):
@@ -268,7 +272,7 @@ class Analytics(object):
 				period = self.get_period(end_date)
 				amount = flt(self.entity_periodic_data.get(d.name, {}).get(period, 0.0))
 				row[scrub(period)] = amount
-				if d.parent:
+				if d.parent and (self.filters.tree_type != "Order Type" or d.parent == "Order Types"):
 					self.entity_periodic_data.setdefault(d.parent, frappe._dict()).setdefault(period, 0.0)
 					self.entity_periodic_data[d.parent][period] += amount
 				total += amount
@@ -284,13 +288,16 @@ class Analytics(object):
 			self.entity_periodic_data.setdefault(d.entity, frappe._dict()).setdefault(period, 0.0)
 			self.entity_periodic_data[d.entity][period] += flt(d.value_field)
 
+			if self.filters.tree_type == "Item":
+				self.entity_periodic_data[d.entity]['stock_uom'] = d.stock_uom
+
 	def get_period(self, posting_date):
 		if self.filters.range == 'Weekly':
 			period = "Week " + str(posting_date.isocalendar()[1]) + " " + str(posting_date.year)
 		elif self.filters.range == 'Monthly':
 			period = str(self.months[posting_date.month - 1]) + " " + str(posting_date.year)
 		elif self.filters.range == 'Quarterly':
-			period = "Quarter " + str(((posting_date.month-1)//3)+1) +" " + str(posting_date.year)
+			period = "Quarter " + str(((posting_date.month - 1) // 3) + 1) + " " + str(posting_date.year)
 		else:
 			year = get_fiscal_year(posting_date, company=self.filters.company)
 			period = str(year[0])
@@ -308,7 +315,7 @@ class Analytics(object):
 		}.get(self.filters.range, 1)
 
 		if self.filters.range in ['Monthly', 'Quarterly']:
-			from_date = from_date.replace(day = 1)
+			from_date = from_date.replace(day=1)
 		elif self.filters.range == "Yearly":
 			from_date = get_fiscal_year(from_date)[1]
 		else:
@@ -346,7 +353,7 @@ class Analytics(object):
 
 		self.group_entries = frappe.db.sql("""select name, lft, rgt , {parent} as parent
 			from `tab{tree}` order by lft"""
-			.format(tree=self.filters.tree_type, parent=parent), as_dict=1)
+		.format(tree=self.filters.tree_type, parent=parent), as_dict=1)
 
 		for d in self.group_entries:
 			if d.parent:
@@ -359,7 +366,7 @@ class Analytics(object):
 		self.chart = {
 			"data": {
 				'labels': labels,
-				'datasets':[]
+				'datasets': []
 			},
 			"type": "line",
 			"fieldtype": self.get_value_fieldtype()

@@ -13,6 +13,9 @@ def get_data():
 			},
 			{
 				'items': ['Leave Period', 'Shift Type']
+			},
+			{
+				'items': ['Service Level', 'Service Level Agreement']
 			}
 		]
 	}

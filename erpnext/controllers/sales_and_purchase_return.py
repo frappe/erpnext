@@ -34,11 +34,15 @@ def validate_return_against(doc):
 			if get_datetime(return_posting_datetime) < get_datetime(ref_posting_datetime):
 				frappe.throw(_("Posting timestamp must be after {0}").format(format_datetime(ref_posting_datetime)))
 
+			# validate same exchange rate
+			if doc.conversion_rate != ref_doc.conversion_rate:
+				frappe.throw(_("Exchange Rate must be same as {0} {1} ({2})")
+					.format(doc.doctype, doc.return_against, ref_doc.conversion_rate))
+
 		# validate same transaction type
 		if doc.meta.get_field("transaction_type") and doc.transaction_type != ref_doc.transaction_type:
 			frappe.throw(_("Transaction Type must be the same as {0} {1} ({2})")
 				.format(doc.doctype, doc.return_against, ref_doc.transaction_type))
-
 
 def validate_returned_items(doc):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
