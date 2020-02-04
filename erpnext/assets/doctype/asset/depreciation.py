@@ -9,7 +9,7 @@ from frappe.utils import flt, today, getdate, cint
 
 def post_depreciation_entries(date=None):
 	# Return if automatic booking of asset depreciation is disabled
-	if not cint(frappe.db.get_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically")):
+	if cint(frappe.db.get_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically"))==1:
 		return
 
 	if not date:
