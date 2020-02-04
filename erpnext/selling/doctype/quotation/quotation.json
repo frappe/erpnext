@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:08",
@@ -41,6 +42,7 @@
   "ignore_pricing_rule",
   "items_section",
   "items",
+  "total_product_deduction",
   "pricing_rule_details",
   "pricing_rules",
   "sec_break23",
@@ -922,13 +924,20 @@
    "label": "Lost Reasons",
    "options": "Lost Reason Detail",
    "read_only": 1
+  },
+  {
+   "fieldname": "total_product_deduction",
+   "fieldtype": "Currency",
+   "label": "Total product deduction",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
+ "links": [],
  "max_attachments": 1,
- "modified": "2019-11-12 13:19:11.895715",
+ "modified": "2020-02-03 17:06:18.326368",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

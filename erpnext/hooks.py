@@ -10,7 +10,7 @@ app_color = "#e74c3c"
 app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
-app_logo_url = '/assets/erpnext/images/erp-icon.svg'
+app_logo_url = '/assets/erpnext/images/leaf.svg'
 
 
 develop_version = '12.x.x-develop'
@@ -79,8 +79,8 @@ website_generators = ["Item Group", "Item", "BOM", "Sales Partner",
 	"Job Opening", "Student Admission"]
 
 website_context = {
-	"favicon": 	"/assets/erpnext/images/favicon.png",
-	"splash_image": "/assets/erpnext/images/erp-icon.svg"
+	"favicon": 	"/assets/erpnext/images/leaf.svg",
+	"splash_image": "/assets/erpnext/images/leaf.svg"
 }
 
 website_route_rules = [
@@ -318,7 +318,7 @@ scheduler_events = {
 	]
 }
 
-email_brand_image = "assets/erpnext/images/erpnext-logo.jpg"
+email_brand_image = "assets/erpnext/images/leaf.svg"
 
 default_mail_footer = """
 	<span>

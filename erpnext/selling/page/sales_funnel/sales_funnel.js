@@ -7,7 +7,6 @@ frappe.pages['sales-funnel'].on_page_load = function(wrapper) {
 		title: __('Sales Funnel'),
 		single_column: true
 	});
-
 	wrapper.sales_funnel = new erpnext.SalesFunnel(wrapper);
 
 	frappe.breadcrumbs.add("Selling");
@@ -34,6 +33,14 @@ erpnext.SalesFunnel = class SalesFunnel {
 			}
 		}),
 
+		this.currency_field = wrapper.page.add_field({"fieldtype": "Link", "fieldname": "currency", "options": "Currency",
+			"label": __("Currency"), "reqd": 1, "default": frappe.defaults.get_user_default('currency'),
+			change: function() {
+				me.currency = this.value || frappe.defaults.get_user_default('currency');
+				me.get_data();
+			}
+		}),
+
 		this.elements = {
 			layout: $(wrapper).find(".layout-main"),
 			from_date: wrapper.page.add_date(__("From Date")),
@@ -53,6 +60,7 @@ erpnext.SalesFunnel = class SalesFunnel {
 			.appendTo(this.elements.layout);
 
 		this.company = frappe.defaults.get_user_default('company');
+		this.currency = frappe.defaults.get_user_default('currency');
 		this.options = {
 			from_date: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
 			to_date: frappe.datetime.get_today(),
@@ -66,7 +74,6 @@ erpnext.SalesFunnel = class SalesFunnel {
 			} else {
 				me.elements[k].val(v);
 			}
-
 			me.elements[k].on("change", function() {
 				if (['from_date', 'to_date'].includes(k)) {
 					me.options[k] = frappe.datetime.user_to_str($(this).val()) != 'Invalid date' ? frappe.datetime.user_to_str($(this).val()) : frappe.datetime.get_today();
@@ -100,7 +107,8 @@ erpnext.SalesFunnel = class SalesFunnel {
 			args: {
 				from_date: this.options.from_date,
 				to_date: this.options.to_date,
-				company: this.company
+				company: this.company,
+				currency: this.currency
 			},
 			btn: btn,
 			callback: function(r) {
@@ -150,7 +158,6 @@ erpnext.SalesFunnel = class SalesFunnel {
 			me.draw_triangle(x_start, x_mid, x_end, y, me.options.height);
 
 			y_old = y;
-
 			// new y
 			y = y + d.height;
 
@@ -158,10 +165,9 @@ erpnext.SalesFunnel = class SalesFunnel {
 			var half_side = (me.options.height - y) / Math.sqrt(3);
 			x_start = x_mid - half_side;
 			x_end = x_mid + half_side;
-
 			var y_mid = y_old + (y - y_old) / 2.0;
-
 			me.draw_legend(x_mid, y_mid, me.options.width, me.options.height, d.value + " - " + d.title);
+			me.draw_legend(x_mid, y_mid + 20, me.options.width, me.options.height, d.currency + " " + d.amount);
 		});
 	}
 
@@ -173,17 +179,20 @@ erpnext.SalesFunnel = class SalesFunnel {
 		// calculate width and height options
 		this.options.width = $(this.elements.funnel_wrapper).width() * 2.0 / 3.0;
 		this.options.height = (Math.sqrt(3) * this.options.width) / 2.0;
-
 		// calculate total weightage
 		// as height decreases, area decreases by the square of the reduction
 		// hence, compensating by squaring the index value
 		this.options.total_weightage = this.options.data.reduce(
 			function(prev, curr, i) { return prev + Math.pow(i+1, 2) * curr.value; }, 0.0);
-
 		// calculate height for each data
+		var arr = this.options.data;
+		var count = arr.length;
+
 		$.each(this.options.data, function(i, d) {
-			d.height = me.options.height * d.value * Math.pow(i+1, 2) / me.options.total_weightage;
-		});
+			var size = me.options.height / count;
+			d.height = size;
+			// d.height = me.options.height * d.value * Math.pow(i+1, 2) / me.options.total_weightage;
+			});
 
 		this.elements.canvas = $('<canvas></canvas>')
 			.appendTo(this.elements.funnel_wrapper.empty())
@@ -230,6 +239,11 @@ erpnext.SalesFunnel = class SalesFunnel {
 		context.font = "1.1em sans-serif";
 		context.fillText(__(title), width + 20, y_mid);
 	}
+
+	// click(this){
+	// 	// this.draw_legend.click()
+	// 	debugger
+	// }
 
 	render_chart(title) {
 		let me = this;
