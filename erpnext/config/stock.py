@@ -157,6 +157,14 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Category for sale",
+				},
+				{
+					"type": "doctype",
+					"name": "Category for purchase",
+				},
+				{
+					"type": "doctype",
 					"name": "Price List",
 				},
 				{
