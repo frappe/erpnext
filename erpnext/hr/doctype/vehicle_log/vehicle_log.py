@@ -18,12 +18,17 @@ class VehicleLog(Document):
 					if not (service_detail.service_item and service_detail.type and service_detail.frequency and service_detail.expense_amount):
 							frappe.throw(_("Service Item,Type,frequency and expense amount are required"))
 
+	def before_save(self):
+		model_details = get_make_model(self.license_plate)
+		self.make = model_details[0]
+		self.model = model_details[1]
+		self.last_odometer = model_details[2]
+		self.employee = model_details[3]
+
 	def on_submit(self):
-		print("I am here")
 		frappe.db.set_value("Vehicle", self.license_plate, "last_odometer", self.odometer)
 
 	def on_cancel(self):
-		print("sel"*10, self.last_odometer, self.odometer)
 		distance_travelled = self.odometer - self.last_odometer
 		if(distance_travelled > 0):
 			updated_odometer_value = int(frappe.db.get_value("Vehicle", self.license_plate, "last_odometer")) - distance_travelled
@@ -32,7 +37,7 @@ class VehicleLog(Document):
 @frappe.whitelist()
 def get_make_model(license_plate):
 	vehicle=frappe.get_doc("Vehicle",license_plate)
-	return (vehicle.make,vehicle.model,vehicle.last_odometer,vehicle.employee)
+	return (vehicle.make, vehicle.model, vehicle.last_odometer, vehicle.employee)
 
 @frappe.whitelist()
 def make_expense_claim(docname):
