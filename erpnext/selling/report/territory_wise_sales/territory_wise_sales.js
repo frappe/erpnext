@@ -3,7 +3,7 @@
 /* eslint-disable */
 
 
-frappe.query_reports["Territory wise Sales"] = {
+frappe.query_reports["Territory-wise Sales"] = {
 	"breadcrumb":"Selling",
 	"filters": [
 		{
