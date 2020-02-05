@@ -43,7 +43,7 @@ def get_data(report_filters):
 def get_stock_ledger_data(report_filters, filters):
 	if report_filters.account:
 		warehouses = get_warehouses_based_on_account(report_filters.account,
-			report_filters.warehouse)
+			report_filters.company)
 
 		filters["warehouse"] = ("in", warehouses)
 

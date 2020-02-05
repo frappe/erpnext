@@ -81,24 +81,24 @@ class SalaryStructure(Document):
 		return employees
 
 	@frappe.whitelist()
-	def assign_salary_structure(self, grade=None, department=None, designation=None,employee=None,
+	def assign_salary_structure(self, company=None, grade=None, department=None, designation=None,employee=None,
 			from_date=None, base=None,variable=None):
-		employees = self.get_employees(grade= grade,department= department,designation= designation,name=employee)
+		employees = self.get_employees(company= company, grade= grade,department= department,designation= designation,name=employee)
 
 		if employees:
 			if len(employees) > 20:
 				frappe.enqueue(assign_salary_structure_for_employees, timeout=600,
 					employees=employees, salary_structure=self,from_date=from_date, base=base,variable=variable)
 			else:
-				assign_salary_structure_for_employees(employees, self,from_date=from_date, base=base,variable=variable)
+				assign_salary_structure_for_employees(employees, self, from_date=from_date, base=base,variable=variable)
 		else:
 			frappe.msgprint(_("No Employee Found"))
 
 
 
-def assign_salary_structure_for_employees(employees, salary_structure,from_date=None, base=None,variable=None):
+def assign_salary_structure_for_employees(employees, salary_structure, from_date=None, base=None,variable=None):
 	salary_structures_assignments = []
-	existing_assignments_for = get_existing_assignments(employees, salary_structure.name,from_date)
+	existing_assignments_for = get_existing_assignments(employees, salary_structure, from_date)
 	count=0
 	for employee in employees:
 		if employee in existing_assignments_for:
@@ -117,6 +117,7 @@ def create_salary_structures_assignment(employee, salary_structure, from_date, b
 	assignment = frappe.new_doc("Salary Structure Assignment")
 	assignment.employee = employee
 	assignment.salary_structure = salary_structure.name
+	assignment.company = salary_structure.company
 	assignment.from_date = from_date
 	assignment.base = base
 	assignment.variable = variable
@@ -125,12 +126,12 @@ def create_salary_structures_assignment(employee, salary_structure, from_date, b
 	return assignment.name
 
 
-def get_existing_assignments(employees, salary_structure,from_date):
+def get_existing_assignments(employees, salary_structure, from_date):
 	salary_structures_assignments = frappe.db.sql_list("""
 		select distinct employee from `tabSalary Structure Assignment`
 		where salary_structure=%s and employee in (%s)
-		and from_date=%s and docstatus=1
-	""" % ('%s', ', '.join(['%s']*len(employees)),'%s'), [salary_structure] + employees+[from_date])
+		and from_date=%s  and company= %s and docstatus=1
+	""" % ('%s', ', '.join(['%s']*len(employees)),'%s', '%s'), [salary_structure.name] + employees+[from_date]+[salary_structure.company])
 	if salary_structures_assignments:
 		frappe.msgprint(_("Skipping Salary Structure Assignment for the following employees, as Salary Structure Assignment records already exists against them. {0}")
 			.format("\n".join(salary_structures_assignments)))
@@ -170,7 +171,7 @@ def make_salary_slip(source_name, target_doc = None, employee = None, as_print =
 def get_employees(salary_structure):
 	employees = frappe.get_list('Salary Structure Assignment',
 		filters={'salary_structure': salary_structure, 'docstatus': 1}, fields=['employee'])
-	
+
 	if not employees:
 		frappe.throw(_("There's no Employee with Salary Structure: {0}. \
 			Assign {1} to an Employee to preview Salary Slip").format(salary_structure, salary_structure))

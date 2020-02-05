@@ -9,59 +9,76 @@ from frappe.model.rename_doc import rename_doc
 from frappe import _
 
 class LabTestTemplate(Document):
+	def after_insert(self):
+		if not self.item:
+			create_item_from_template(self)
+
+	def validate(self):
+		self.enable_disable_item()
+
 	def on_update(self):
-		#Item and Price List update --> if (change_in_item)
-		if(self.change_in_item and self.is_billable == 1 and self.item):
-			updating_item(self)
-			item_price = item_price_exist(self)
+		# if change_in_item update Item and Price List
+		if self.change_in_item and self.is_billable and self.item:
+			self.update_item()
+			item_price = self.item_price_exists()
 			if not item_price:
-				if(self.lab_test_rate != 0.0):
+				if self.lab_test_rate != 0.0:
 					price_list_name = frappe.db.get_value("Price List", {"selling": 1})
-					if(self.lab_test_rate):
+					if self.lab_test_rate:
 						make_item_price(self.lab_test_code, price_list_name, self.lab_test_rate)
 					else:
 						make_item_price(self.lab_test_code, price_list_name, 0.0)
 			else:
 				frappe.db.set_value("Item Price", item_price, "price_list_rate", self.lab_test_rate)
 
-			frappe.db.set_value(self.doctype,self.name,"change_in_item",0)
-		elif(self.is_billable == 0 and self.item):
-			frappe.db.set_value("Item",self.item,"disabled",1)
+			frappe.db.set_value(self.doctype, self.name, "change_in_item", 0)
+
+		elif not self.is_billable and self.item:
+			frappe.db.set_value("Item", self.item, "disabled", 1)
+
 		self.reload()
 
-	def after_insert(self):
-		if not self.item:
-			create_item_from_template(self)
-
-	#Call before delete the template
 	def on_trash(self):
-		# remove template refernce from item and disable item
-		if(self.item):
+		# remove template reference from item and disable item
+		if self.item:
 			try:
-				frappe.delete_doc("Item",self.item, force=True)
+				frappe.delete_doc("Item", self.item)
 			except Exception:
-				frappe.throw(_("""Not permitted. Please disable the Test Template"""))
+				frappe.throw(_("Not permitted. Please disable the Lab Test Template"))
 
-def item_price_exist(doc):
-	item_price = frappe.db.exists({
-	"doctype": "Item Price",
-	"item_code": doc.lab_test_code})
-	if(item_price):
-		return item_price[0][0]
-	else:
-		return False
+	def enable_disable_item(self):
+		if self.is_billable:
+			if self.disabled:
+				frappe.db.set_value('Item', self.item, 'disabled', 1)
+			else:
+				frappe.db.set_value('Item', self.item, 'disabled', 0)
 
-def updating_item(self):
-	frappe.db.sql("""update `tabItem` set item_name=%s, item_group=%s, disabled=0, standard_rate=%s,
-		description=%s, modified=NOW() where item_code=%s""",
-		(self.lab_test_name, self.lab_test_group , self.lab_test_rate, self.lab_test_description, self.item))
+	def update_item(self):
+		item = frappe.get_doc("Item", self.item)
+		if item:
+			item.update({
+				"item_name": self.lab_test_name,
+				"item_group": self.lab_test_group,
+				"disabled": 0,
+				"standard_rate": self.lab_test_rate,
+				"description": self.lab_test_description
+			})
+			item.save()
+
+	def item_price_exists(self):
+		item_price = frappe.db.exists({"doctype": "Item Price", "item_code": self.lab_test_code})
+		if item_price:
+			return item_price[0][0]
+		else:
+			return False
+
 
 def create_item_from_template(doc):
-	if(doc.is_billable == 1):
+	if doc.is_billable:
 		disabled = 0
 	else:
 		disabled = 1
-	#insert item
+	# insert item
 	item =  frappe.get_doc({
 	"doctype": "Item",
 	"item_code": doc.lab_test_code,
@@ -78,9 +95,9 @@ def create_item_from_template(doc):
 	"stock_uom": "Unit"
 	}).insert(ignore_permissions=True)
 
-	#insert item price
-	#get item price list to insert item price
-	if(doc.lab_test_rate != 0.0):
+	# insert item price
+	# get item price list to insert item price
+	if doc.lab_test_rate != 0.0:
 		price_list_name = frappe.db.get_value("Price List", {"selling": 1})
 		if(doc.lab_test_rate):
 			make_item_price(item.name, price_list_name, doc.lab_test_rate)
@@ -89,10 +106,10 @@ def create_item_from_template(doc):
 			make_item_price(item.name, price_list_name, 0.0)
 			item.standard_rate = 0.0
 	item.save(ignore_permissions = True)
-	#Set item to the template
+	# Set item in the template
 	frappe.db.set_value("Lab Test Template", doc.name, "item", item.name)
 
-	doc.reload() #refresh the doc after insert.
+	doc.reload()
 
 def make_item_price(item, price_list_name, item_price):
 	frappe.get_doc({
@@ -104,22 +121,13 @@ def make_item_price(item, price_list_name, item_price):
 
 @frappe.whitelist()
 def change_test_code_from_template(lab_test_code, doc):
-	args = json.loads(doc)
-	doc = frappe._dict(args)
+	doc = frappe._dict(json.loads(doc))
 
-	item_exist = frappe.db.exists({
-		"doctype": "Item",
-		"item_code": lab_test_code})
-	if(item_exist):
-		frappe.throw(_("Code {0} already exist").format(lab_test_code))
+	if frappe.db.exists({ "doctype": "Item", "item_code": lab_test_code}):
+		frappe.throw(_("Lab Test Item {0} already exist").format(lab_test_code))
 	else:
 		rename_doc("Item", doc.name, lab_test_code, ignore_permissions=True)
-		frappe.db.set_value("Lab Test Template",doc.name,"lab_test_code",lab_test_code)
+		frappe.db.set_value("Lab Test Template", doc.name, "lab_test_code", lab_test_code)
+		frappe.db.set_value("Lab Test Template", doc.name, "lab_test_name", lab_test_code)
 		rename_doc("Lab Test Template", doc.name, lab_test_code, ignore_permissions=True)
 	return lab_test_code
-
-@frappe.whitelist()
-def disable_enable_test_template(status, name,  is_billable):
-	frappe.db.set_value("Lab Test Template",name,"disabled",status)
-	if(is_billable == 1):
-		frappe.db.set_value("Item",name,"disabled",status)

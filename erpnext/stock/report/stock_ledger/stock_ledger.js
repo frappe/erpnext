@@ -83,6 +83,9 @@ frappe.query_reports["Stock Ledger"] = {
 		if (column.fieldname == "out_qty" && data.out_qty < 0) {
 			value = "<span style='color:red'>" + value + "</span>";
 		}
+		else if (column.fieldname == "in_qty" && data.in_qty > 0) {
+			value = "<span style='color:green'>" + value + "</span>";
+		}
 
 		return value;
 	},

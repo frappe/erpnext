@@ -18,7 +18,7 @@ class CForm(Document):
 					`tabSales Invoice` where name = %s and docstatus = 1""", d.invoice_no)
 
 				if inv and inv[0][0] != 'Yes':
-					frappe.throw(_("C-form is not applicable for Invoice: {0}".format(d.invoice_no)))
+					frappe.throw(_("C-form is not applicable for Invoice: {0}").format(d.invoice_no))
 
 				elif inv and inv[0][1] and inv[0][1] != self.name:
 					frappe.throw(_("""Invoice {0} is tagged in another C-form: {1}.
