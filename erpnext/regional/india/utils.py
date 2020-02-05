@@ -395,7 +395,7 @@ def get_ewb_data(dt, dn):
 		elif doc.gst_category in ['Overseas', 'Deemed Export']:
 			data.subSupplyType = 3
 		else:
-			frappe.throw(_('Unsupported GST Category for e-Way Bill JSON generation'))
+			frappe.throw(_('Unsupported GST Category for E-Way Bill JSON generation'))
 
 		data.docType = 'INV'
 		data.docDate = frappe.utils.formatdate(doc.posting_date, 'dd/mm/yyyy')
@@ -551,10 +551,10 @@ def get_item_list(data, doc):
 
 def validate_doc(doc):
 	if doc.docstatus != 1:
-		frappe.throw(_('e-Way Bill JSON can only be generated from submitted document'))
+		frappe.throw(_('E-Way Bill JSON can only be generated from submitted document'))
 
 	if doc.is_return:
-		frappe.throw(_('e-Way Bill JSON cannot be generated for Sales Return as of now'))
+		frappe.throw(_('E-Way Bill JSON cannot be generated for Sales Return as of now'))
 
 	if doc.ewaybill:
 		frappe.throw(_('e-Way Bill already exists for this document'))
@@ -564,9 +564,9 @@ def validate_doc(doc):
 
 	for fieldname in reqd_fields:
 		if not doc.get(fieldname):
-			frappe.throw(_('{} is required to generate e-Way Bill JSON'.format(
+			frappe.throw(_('{} is required to generate E-Way Bill JSON').format(
 				doc.meta.get_label(fieldname)
-			)))
+			))
 
 	if len(doc.company_gstin) < 15:
 		frappe.throw(_('You must be a registered supplier to generate e-Way Bill'))

@@ -54,7 +54,7 @@ class MaintenanceSchedule(TransactionBase):
 					email_map[d.sales_person] = sp.get_email_id()
 				except frappe.ValidationError:
 					no_email_sp.append(d.sales_person)
-					
+
 			if no_email_sp:
 				frappe.msgprint(
 					frappe._("Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}").format(
@@ -66,7 +66,7 @@ class MaintenanceSchedule(TransactionBase):
 				parent=%s""", (d.sales_person, d.item_code, self.name), as_dict=1)
 
 			for key in scheduled_date:
-				description =frappe._("Reference: {0}, Item Code: {1} and Customer: {2}").format(self.name, d.item_code, self.customer)	
+				description =frappe._("Reference: {0}, Item Code: {1} and Customer: {2}").format(self.name, d.item_code, self.customer)
 				frappe.get_doc({
 					"doctype": "Event",
 					"owner": email_map.get(d.sales_person, self.owner),
@@ -146,11 +146,11 @@ class MaintenanceSchedule(TransactionBase):
 			if not d.item_code:
 				throw(_("Please select item code"))
 			elif not d.start_date or not d.end_date:
-				throw(_("Please select Start Date and End Date for Item {0}".format(d.item_code)))
+				throw(_("Please select Start Date and End Date for Item {0}").format(d.item_code))
 			elif not d.no_of_visits:
 				throw(_("Please mention no of visits required"))
 			elif not d.sales_person:
-				throw(_("Please select a Sales Person for item: {0}".format(d.item_name)))
+				throw(_("Please select a Sales Person for item: {0}").format(d.item_name))
 
 			if getdate(d.start_date) >= getdate(d.end_date):
 				throw(_("Start date should be less than end date for Item {0}").format(d.item_code))

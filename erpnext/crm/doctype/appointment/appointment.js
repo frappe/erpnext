@@ -13,5 +13,14 @@ frappe.ui.form.on('Appointment', {
 				frappe.set_route("Form", "Event", frm.doc.calendar_event);
 			});
 		}
+	},
+	onload: function(frm){
+		frm.set_query("appointment_with", function(){
+			return {
+				filters : {
+					"name": ["in", ["Customer", "Lead"]]
+				}
+			};
+		});
 	}
 });

@@ -371,7 +371,7 @@ def get_material_requests_based_on_supplier(supplier):
 	supplier_items = [d.parent for d in frappe.db.get_all("Item Default",
 		{"default_supplier": supplier}, 'parent')]
 	if not supplier_items:
-		frappe.throw(_("{0} is not the default supplier for any items.".format(supplier)))
+		frappe.throw(_("{0} is not the default supplier for any items.").format(supplier))
 
 	material_requests = frappe.db.sql_list("""select distinct mr.name
 		from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
@@ -385,6 +385,18 @@ def get_material_requests_based_on_supplier(supplier):
 		tuple(supplier_items))
 
 	return material_requests, supplier_items
+
+def get_default_supplier_query(doctype, txt, searchfield, start, page_len, filters):
+	doc = frappe.get_doc("Material Request", filters.get("doc"))
+	item_list = []
+	for d in doc.items:
+		item_list.append(d.item_code)
+
+	return frappe.db.sql("""select default_supplier
+		from `tabItem Default`
+		where parent in ({0}) and
+		default_supplier IS NOT NULL
+		""".format(', '.join(['%s']*len(item_list))),tuple(item_list))
 
 @frappe.whitelist()
 def make_supplier_quotation(source_name, target_doc=None):

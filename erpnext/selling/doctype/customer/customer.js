@@ -55,6 +55,14 @@ frappe.ui.form.on("Customer", {
 				}
 			}
 		})
+
+		frm.set_query('default_bank_account', function() {
+			return {
+				filters: {
+					'is_company_account': 1
+				}
+			}
+		});
 	},
 	customer_primary_address: function(frm){
 		if(frm.doc.customer_primary_address){
@@ -103,7 +111,7 @@ frappe.ui.form.on("Customer", {
 		}
 
 		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Customer'}
-		frm.toggle_display(['address_html','contact_html','primary_address_and_contact_detail'], !frm.doc.__islocal);
+		frm.toggle_display(['address_html','contact_html'], !frm.doc.__islocal);
 
 		if(!frm.doc.__islocal) {
 			frappe.contacts.render_address_and_contact(frm);

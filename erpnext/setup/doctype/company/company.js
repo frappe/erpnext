@@ -4,6 +4,15 @@
 frappe.provide("erpnext.company");
 
 frappe.ui.form.on("Company", {
+	onload: function(frm) {
+		if (frm.doc.__islocal && frm.doc.parent_company) {
+			frappe.db.get_value('Company', frm.doc.parent_company, 'is_group', (r) => {
+				if (!r.is_group) {
+					frm.set_value('parent_company', '');
+				}
+			});
+		}
+	},
 	setup: function(frm) {
 		erpnext.company.setup_queries(frm);
 		frm.set_query("hra_component", function(){
