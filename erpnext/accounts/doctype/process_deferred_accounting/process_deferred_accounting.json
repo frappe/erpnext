@@ -37,14 +37,14 @@
    "fieldname": "start_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Start Date",
+   "label": "Service Start Date",
    "reqd": 1
   },
   {
    "fieldname": "end_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "End Date",
+   "label": "Service End Date",
    "reqd": 1
   },
   {
@@ -69,12 +69,13 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-01-29 19:54:08.656850",
+ "modified": "2020-02-06 18:18:09.852844",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Deferred Accounting",
