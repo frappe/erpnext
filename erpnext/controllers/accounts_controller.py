@@ -21,7 +21,7 @@ from six import text_type
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
 force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules",
-	"allow_zero_valuation_rate", "apply_discount_after_taxes")
+	"allow_zero_valuation_rate", "apply_discount_after_taxes", "has_batch_no")
 
 
 class AccountsController(TransactionBase):

@@ -243,11 +243,11 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	"""
 
 	batch_no = None
-	batches = get_batches(item_code, warehouse, qty, throw, serial_no)
+	batches = get_batches(item_code, warehouse)
 
 	for batch in batches:
-		if cint(qty) <= cint(batch.qty):
-			batch_no = batch.batch_id
+		if flt(qty) <= flt(batch.qty):
+			batch_no = batch.name
 			break
 
 	if not batch_no:
@@ -257,32 +257,55 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
 
 	return batch_no
 
+@frappe.whitelist()
+def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1, conversion_factor=1):
+	if not warehouse or not qty:
+		return []
 
-def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
-	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-	cond = ''
-	if serial_no:
-		batch = frappe.get_all("Serial No",
-			fields = ["distinct batch_no"],
-			filters= {
-				"item_code": item_code,
-				"warehouse": warehouse,
-				"name": ("in", get_serial_nos(serial_no))
-			}
-		)
+	batches = get_batches(item_code, warehouse)
 
-		if batch and len(batch) > 1:
-			return []
+	selected_batches = []
 
-		cond = " and `tabBatch`.name = %s" %(frappe.db.escape(batch[0].batch_no))
+	qty = flt(qty)
+	conversion_factor = flt(conversion_factor or 1)
+	stock_qty = qty * conversion_factor
+	remaining_qty = stock_qty
 
-	return frappe.db.sql("""
-		select batch_id, sum(`tabStock Ledger Entry`.actual_qty) as qty
-		from `tabBatch`
-			join `tabStock Ledger Entry` ignore index (item_code, warehouse)
-				on (`tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no )
-		where `tabStock Ledger Entry`.item_code = %s and `tabStock Ledger Entry`.warehouse = %s
-			and (`tabBatch`.expiry_date >= CURDATE() or `tabBatch`.expiry_date IS NULL) {0}
-		group by batch_id
-		order by `tabBatch`.expiry_date ASC, `tabBatch`.creation ASC
-	""".format(cond), (item_code, warehouse), as_dict=True)
+	for batch in batches:
+		if remaining_qty <= 0:
+			break
+		if stock_qty <= flt(batch.qty):
+			return [{
+				'batch_no': batch.name,
+				'available_qty': batch.qty / conversion_factor,
+				'selected_qty': qty
+			}]
+
+		selected_qty = min(remaining_qty, batch.qty)
+		selected_batches.append({
+			'batch_no': batch.name,
+			'available_qty': batch.qty / conversion_factor,
+			'selected_qty': selected_qty / conversion_factor
+		})
+
+		remaining_qty -= selected_qty
+
+	if remaining_qty > 0:
+		total_selected_qty = stock_qty - remaining_qty
+		frappe.msgprint(_("Only {0} {1} found in {2}".format(total_selected_qty, item_code, warehouse)))
+
+	return selected_batches
+
+
+def get_batches(item_code, warehouse):
+	batches = frappe.db.sql("""
+		select b.name, sum(sle.actual_qty) as qty, b.expiry_date,
+			min(timestamp(sle.posting_date, sle.posting_time)) received_date
+		from `tabBatch` b
+		join `tabStock Ledger Entry` sle ignore index (item_code, warehouse) on b.name = sle.batch_no
+		where sle.item_code = %s and sle.warehouse = %s and (b.expiry_date >= CURDATE() or b.expiry_date IS NULL)
+		group by b.name
+		having qty > 0
+	""", (item_code, warehouse), as_dict=True)
+
+	return sorted(batches, key=lambda d: (d.expiry_date, d.received_date))

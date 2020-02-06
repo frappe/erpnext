@@ -74,36 +74,54 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			{
 				fieldname: 'qty',
 				fieldtype:'Float',
-				read_only: me.has_batch,
+				read_only: 0,
 				label: __(me.has_batch ? 'Total Qty' : 'Qty'),
 				default: 0
 			},
 			{
 				fieldname: 'auto_fetch_button',
 				fieldtype:'Button',
-				hidden: me.has_batch,
+				hidden: 0,
 				label: __('Fetch based on FIFO'),
 				click: () => {
 					let qty = this.dialog.fields_dict.qty.get_value();
-					let numbers = frappe.call({
-						method: "erpnext.stock.doctype.serial_no.serial_no.auto_fetch_serial_number",
-						args: {
-							qty: qty,
-							item_code: me.item_code,
-							warehouse: me.warehouse_details.name
-						}
-					});
 
-					numbers.then((data) => {
-						let auto_fetched_serial_numbers = data.message;
-						let records_length = auto_fetched_serial_numbers.length;
-						if (records_length < qty) {
-							frappe.msgprint(`Fetched only ${records_length} serial numbers.`);
-						}
-						let serial_no_list_field = this.dialog.fields_dict.serial_no;
-						numbers = auto_fetched_serial_numbers.join('\n');
-						serial_no_list_field.set_value(numbers);
-					});
+					if (me.has_batch) {
+						let qty = flt(this.dialog.fields_dict.qty.get_value());
+						frappe.call({
+							method: "erpnext.stock.doctype.batch.batch.get_sufficient_batch_or_fifo",
+							args: {
+								qty: qty,
+								item_code: me.item_code,
+								warehouse: me.warehouse_details.name
+							},
+							callback: function (r) {
+								if (r.message) {
+									me.set_batch_nos(r.message);
+								}
+							}
+						});
+					} else {
+						let numbers = frappe.call({
+							method: "erpnext.stock.doctype.serial_no.serial_no.auto_fetch_serial_number",
+							args: {
+								qty: qty,
+								item_code: me.item_code,
+								warehouse: me.warehouse_details.name
+							}
+						});
+
+						numbers.then((data) => {
+							let auto_fetched_serial_numbers = data.message;
+							let records_length = auto_fetched_serial_numbers.length;
+							if (records_length < qty) {
+								frappe.msgprint(`Fetched only ${records_length} serial numbers.`);
+							}
+							let serial_no_list_field = this.dialog.fields_dict.serial_no;
+							numbers = auto_fetched_serial_numbers.join('\n');
+							serial_no_list_field.set_value(numbers);
+						});
+					}
 				}
 			}
 		];
@@ -158,6 +176,10 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			this.update_total_qty();
 		}
 
+		if (this.on_make_dialog) {
+			this.on_make_dialog(me);
+		}
+
 		this.dialog.show();
 	},
 
@@ -174,7 +196,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			return false;
 		}
 		if(this.has_batch) {
-			if(values.batches.length === 0 || !values.batches) {
+			if(!values.batches || values.batches.length === 0) {
 				frappe.throw(__("Please select batches for batched item "
 					+ values.item_code));
 				return false;
@@ -202,24 +224,36 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		}
 	},
 
+	set_batch_nos: function(data) {
+		var batches = this.dialog.fields_dict.batches;
+		batches.grid.df.data = data;
+		$.each(batches.grid.df.data || [], function (i, row) {
+			row.name = "batch " + (i + 1);
+			row.idx = i + 1;
+		});
+		batches.grid.refresh();
+	},
+
 	set_items: function() {
 		var me = this;
 		if(this.has_batch) {
+			var new_idx = this.item.idx + 1;
 			this.values.batches.map((batch, i) => {
 				let batch_no = batch.batch_no;
 				let row = '';
 
 				if (i !== 0 && !this.batch_exists(batch_no)) {
-					row = this.frm.add_child("items", {
-						'item_code': this.item.item_code,
-						'item_name': this.item.item_name,
-						'price_list_rate': this.item.price_list_rate,
-						'rate': this.item.rate,
+					row = frappe.model.copy_doc(this.item, true, this.frm.doc, 'items');
+					Object.assign(row, {
 						'qty': batch.selected_qty,
-						'batch_no': batch_no,
-						'actual_qty': this.item.actual_qty,
-						'discount_percentage': this.item.discount_percentage
+						'batch_no': batch_no
 					});
+					this.frm.doc.items.pop();
+					this.frm.doc.items.splice(new_idx-1, 0, row);
+					$.each(this.frm.doc.items, function (i, d) {
+						d.idx = i + 1;
+					});
+					new_idx += 1;
 				} else {
 					row = this.frm.doc.items.find(i => i.batch_no === batch_no);
 				}
@@ -257,15 +291,19 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		}
 	},
 
-	update_total_qty: function() {
+	update_total_qty: function(qty) {
 		let qty_field = this.dialog.fields_dict.qty;
-		let total_qty = 0;
+		if (qty) {
+			qty_field.set_input(qty);
+		} else {
+			let total_qty = 0;
 
-		this.dialog.fields_dict.batches.df.data.forEach(data => {
-			total_qty += flt(data.selected_qty);
-		});
+			this.dialog.fields_dict.batches.df.data.forEach(data => {
+				total_qty += flt(data.selected_qty);
+			});
 
-		qty_field.set_input(total_qty);
+			qty_field.set_input(total_qty);
+		}
 	},
 
 	get_batch_fields: function() {
@@ -322,7 +360,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 									},
 									callback: (r) => {
 										this.grid_row.on_grid_fields_dict
-											.available_qty.set_value(r.message || 0);
+											.available_qty.set_value(flt(r.message) / (flt(me.item.conversion_factor) || 1));
 									}
 								});
 

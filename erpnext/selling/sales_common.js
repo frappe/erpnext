@@ -26,6 +26,18 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				}
 			};
 		});
+
+		var me = this;
+		$(me.frm.wrapper).on("grid-row-render", function(e, grid_row) {
+			if(grid_row.doc && grid_row.doc.doctype === me.frm.doc.doctype + " Item") {
+				$(grid_row.wrapper).off('focus', 'input').on('focus', 'input', function() {
+					me.frm.focused_item_dn = grid_row.doc.name;
+					var show_select_batch = me.frm.doc.docstatus === 0 && !me.frm.doc.is_return && grid_row.doc.has_batch_no
+						&& (me.frm.doc.doctype === 'Delivery Note' || (me.frm.doc.doctype === 'Sales Invoice' && me.frm.doc.update_stock));
+					me.toggle_select_batch_button(show_select_batch);
+				});
+			}
+		});
 	},
 
 	setup_queries: function() {
@@ -110,6 +122,14 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		$.each(this.frm.doc.items || [], function(item, i) {
 			me.set_qty_color_based_on_availability(item);
 		});
+		if (me.frm.doc.docstatus == 0) {
+			this.frm.fields_dict.items.grid.add_custom_button(__("Select Batches"), function() {
+				if (me.frm.focused_item_dn) {
+					me.set_batch_number(me.frm.doc.doctype + " Item", me.frm.focused_item_dn, true);
+				}
+			});
+			this.frm.fields_dict.items.grid.custom_buttons[__("Select Batches")].addClass('hidden');
+		}
 	},
 
 	customer: function() {
@@ -395,20 +415,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 
-	conversion_factor: function(doc, cdt, cdn, dont_fetch_price_list_rate) {
+	conversion_factor: function(doc, cdt, cdn, dont_fetch_price_list_rate, dont_fetch_batch_no) {
 	    this._super(doc, cdt, cdn, dont_fetch_price_list_rate);
-		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn) &&
-			in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-				if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
-				this.set_batch_number(cdt, cdn);
-			}
-	},
-
-	qty: function(doc, cdt, cdn) {
-		this._super(doc, cdt, cdn);
-
-		if(in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
-			if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
+		this._super(doc, cdt, cdn, dont_fetch_price_list_rate);
+		if(!dont_fetch_batch_no) {
 			this.set_batch_number(cdt, cdn);
 		}
 	},
@@ -417,25 +427,52 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	* @param {string} cdt - Document Doctype
 	* @param {string} cdn - Document name
 	*/
-	set_batch_number: function(cdt, cdn) {
+	set_batch_number: function(cdt, cdn, show_dialog) {
 		const doc = frappe.get_doc(cdt, cdn);
-		if (doc && doc.has_batch_no) {
-			this._set_batch_number(doc);
+		if (doc && frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
+			if (!doc.delivery_note && (this.frm.doc.update_stock || this.frm.doc.doctype != 'Sales Invoice') && !this.frm.doc.is_return) {
+				this._set_batch_number(doc, show_dialog);
+			}
 		}
 	},
 
-	_set_batch_number: function(doc) {
-		return frappe.call({
-			method: 'erpnext.stock.doctype.batch.batch.get_batch_no',
-			args: {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': flt(doc.qty) * flt(doc.conversion_factor)},
-			callback: function(r) {
-				if(r.message) {
-					frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);
-				} else {
-				    frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);
+	_set_batch_number: function(doc, show_dialog) {
+		var me = this;
+
+		if (doc.has_batch_no && frappe.meta.get_docfield(doc.doctype, "batch_no", doc.name)) {
+			return frappe.call({
+				method: 'erpnext.stock.doctype.batch.batch.get_sufficient_batch_or_fifo',
+				args: {
+					'item_code': doc.item_code,
+					'warehouse': doc.s_warehouse || doc.warehouse,
+					'qty': flt(doc.qty),
+					'conversion_factor': flt(doc.conversion_factor)
+				},
+				callback: function (r) {
+					if (r.message) {
+						if (r.message.length === 1 && !show_dialog) {
+							frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message[0].batch_no);
+						} else {
+							erpnext.show_serial_batch_selector(me.frm, doc, (item) => {
+								me.qty(item, item.doctype, item.name, true);
+							}, null, true, (obj) => {
+								obj.set_batch_nos(r.message);
+								obj.update_total_qty(doc.qty);
+							});
+						}
+					}
 				}
-			}
-		});
+			});
+		}
+	},
+
+	toggle_select_batch_button: function(show) {
+		var button = this.frm.fields_dict.items.grid.custom_buttons[__("Select Batches")];
+		if (show) {
+			button.removeClass('hidden');
+		} else {
+			button.addClass('hidden');
+		}
 	},
 
 	to_warehouse: function() {
