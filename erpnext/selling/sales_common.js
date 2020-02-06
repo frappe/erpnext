@@ -446,7 +446,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					'item_code': doc.item_code,
 					'warehouse': doc.s_warehouse || doc.warehouse,
 					'qty': flt(doc.qty),
-					'conversion_factor': flt(doc.conversion_factor)
+					'conversion_factor': flt(doc.conversion_factor),
+					'sales_order_item': doc.so_detail
 				},
 				callback: function (r) {
 					if (r.message) {

@@ -485,14 +485,44 @@ def get_serial_no_item_customer(serial_no):
 	}
 
 @frappe.whitelist()
-def auto_fetch_serial_number(qty, item_code, warehouse, batch_no=None):
+def auto_fetch_serial_number(qty, item_code, warehouse, batch_no=None, sales_order_item=None):
+	qty = cint(qty)
 	filters = {
 		"item_code": item_code,
 		"warehouse": warehouse,
-		"delivery_document_no": "",
-		"sales_invoice": ""
+		"delivery_document_no": ['is', 'not set'],
+		"sales_invoice": ['is', 'not set'],
+		"purchase_date": ['is', 'set']
 	}
 	if batch_no:
 		filters['batch_no'] = batch_no
-	serial_numbers = frappe.get_list("Serial No", filters=filters, limit=qty, order_by="creation")
-	return [item['name'] for item in serial_numbers]
+
+	limit = None if sales_order_item else qty
+	serial_numbers = frappe.get_list("Serial No", filters=filters, limit=limit,
+		order_by="timestamp(purchase_date, purchase_time)")
+	serial_numbers = [d['name'] for d in serial_numbers]
+
+	if sales_order_item:
+		batch_condition = "and pr_item.batch_no = %(batch_no)s" if batch_no else ""
+		serial_nos_purchased_against_so = frappe.db.sql_list("""
+			select pr_item.serial_no
+			from `tabPurchase Receipt Item` pr_item
+			inner join `tabPurchase Order Item` po_item on po_item.name = pr_item.purchase_order_item
+			where pr_item.docstatus = 1 and po_item.sales_order_item = %(sales_order_item)s {0}
+		""".format(batch_condition), {
+			'sales_order_item': sales_order_item,
+			'batch_no': batch_no
+		})
+
+		if serial_nos_purchased_against_so:
+			preferred_serial_nos = []
+			for serial_no_string in serial_nos_purchased_against_so:
+				preferred_serial_nos += cstr(serial_no_string).split("\n")
+			preferred_serial_nos = [serial_no for serial_no in preferred_serial_nos if serial_no]
+
+			available_preferred_serial_nos = [serial_no for serial_no in serial_numbers if serial_no in preferred_serial_nos]
+			unpreferred_serial_nos = [serial_no for serial_no in serial_numbers if serial_no not in available_preferred_serial_nos]
+
+			serial_numbers = available_preferred_serial_nos + unpreferred_serial_nos
+
+	return serial_numbers[:qty]

@@ -234,7 +234,7 @@ def set_batch_nos(doc, warehouse_field, throw=False):
 					frappe.throw(_("Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches").format(d.idx, d.batch_no, batch_qty, qty))
 
 @frappe.whitelist()
-def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
+def get_batch_no(item_code, warehouse, qty=1, throw=False, sales_order_item=None):
 	"""
 	Get batch number using First Expiring First Out method.
 	:param item_code: `item_code` of Item Document
@@ -244,7 +244,7 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	"""
 
 	batch_no = None
-	batches = get_batches(item_code, warehouse)
+	batches = get_batches(item_code, warehouse, sales_order_item=sales_order_item)
 
 	for batch in batches:
 		if flt(qty) <= flt(batch.qty):
@@ -259,11 +259,11 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	return batch_no
 
 @frappe.whitelist()
-def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1, conversion_factor=1, exclude_batches=None):
+def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1, conversion_factor=1, exclude_batches=None, sales_order_item=None):
 	if not warehouse or not qty:
 		return []
 
-	batches = get_batches(item_code, warehouse)
+	batches = get_batches(item_code, warehouse, sales_order_item=sales_order_item)
 	selected_batches = []
 
 	if isinstance(exclude_batches, string_types):
@@ -305,7 +305,7 @@ def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1, conversion_factor=
 	return selected_batches
 
 
-def get_batches(item_code, warehouse):
+def get_batches(item_code, warehouse, sales_order_item=None):
 	batches = frappe.db.sql("""
 		select b.name, sum(sle.actual_qty) as qty, b.expiry_date,
 			min(timestamp(sle.posting_date, sle.posting_time)) received_date
@@ -316,4 +316,18 @@ def get_batches(item_code, warehouse):
 		having qty > 0
 	""", (item_code, warehouse), as_dict=True)
 
-	return sorted(batches, key=lambda d: (d.expiry_date, d.received_date))
+	batches = sorted(batches, key=lambda d: (d.expiry_date, d.received_date))
+
+	if sales_order_item:
+		batches_purchased_against_so = frappe.db.sql_list("""
+			select pr_item.batch_no
+			from `tabPurchase Receipt Item` pr_item
+			inner join `tabPurchase Order Item` po_item on po_item.name = pr_item.purchase_order_item
+			where pr_item.docstatus = 1 and po_item.sales_order_item = %s
+		""", sales_order_item)
+
+		available_preferred_batches = [batch for batch in batches if batch.name in batches_purchased_against_so]
+		unpreferred_batches = [batch for batch in batches if batch.name not in batches_purchased_against_so]
+		batches = available_preferred_batches + unpreferred_batches
+
+	return batches

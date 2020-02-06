@@ -705,7 +705,7 @@ def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_m
 							continue
 
 						serial_nos_to_remove = cstr(dn_item.serial_no).split("\n")
-						current_batch.serial_nos = list(filter(lambda d: d not in serial_nos_to_remove, current_batch.serial_nos))
+						current_batch.serial_nos = list(filter(lambda d: d and d not in serial_nos_to_remove, current_batch.serial_nos))
 
 				if batch_wise_details:
 					batches = list(batch_wise_details.values())

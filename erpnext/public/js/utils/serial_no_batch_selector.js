@@ -96,8 +96,10 @@ erpnext.SerialNoBatchSelector = Class.extend({
 							method: "erpnext.stock.doctype.batch.batch.get_sufficient_batch_or_fifo",
 							args: {
 								qty: qty,
+								conversion_factor: me.item.conversion_factor,
 								item_code: me.item_code,
-								warehouse: me.warehouse_details.name
+								warehouse: me.warehouse_details.name,
+								sales_order_item: me.item.so_detail
 							},
 							callback: function (r) {
 								if (r.message) {
@@ -112,7 +114,8 @@ erpnext.SerialNoBatchSelector = Class.extend({
 								qty: qty,
 								item_code: me.item_code,
 								batch_no: me.item.batch_no,
-								warehouse: me.warehouse_details.name
+								warehouse: me.warehouse_details.name,
+								sales_order_item: me.item.so_detail
 							}
 						});
 
