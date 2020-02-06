@@ -1544,7 +1544,7 @@ DocType: Sales Invoice,Payment Due Date,پرداخت با توجه تاریخ
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.",Qty رزرو شده: مقدار سفارش برای فروش سفارش داده می شود ، اما تحویل داده نمی شود.
 DocType: Drug Prescription,Interval UOM,فاصله UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save",در صورتی که آدرس انتخاب شده پس از ذخیره ویرایش، مجددا انتخاب کنید
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Qty رزرو شده برای قراردادهای فرعی: مقدار مواد اولیه برای ساخت وسایل فرعی.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Qty رزرو شده برای قراردادهای فرعی: مقدار مواد اولیه برای ساخت وسایل فرعی.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,مورد متغیر {0} در حال حاضر با ویژگی های همان وجود دارد
 DocType: Item,Hub Publishing Details,جزئیات انتشار هاب
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&#39;افتتاح&#39;

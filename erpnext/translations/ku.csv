@@ -1551,7 +1551,7 @@ DocType: Sales Invoice,Payment Due Date,Payment Date ji ber
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Qty Reserve: Quantity ferman da firotanê, lê nehatiye radest kirin."
 DocType: Drug Prescription,Interval UOM,UOM Interfer
 DocType: Customer,"Reselect, if the chosen address is edited after save","Hilbijêre, eger navnîşana bijartî piştî tomarkirinê hate guherandin"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Qiyama Reserve ji bo Nekokkêşanê: Kêmasiya madeyên xav ji bo çêkirina tiştên subcotracted.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Qiyama Reserve ji bo Nekokkêşanê: Kêmasiya madeyên xav ji bo çêkirina tiştên subcontracted.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Babetê Variant {0} ji xwe bi taybetmendiyên xwe heman heye
 DocType: Item,Hub Publishing Details,Agahdariyên Hub
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&#39;Dergeh&#39;

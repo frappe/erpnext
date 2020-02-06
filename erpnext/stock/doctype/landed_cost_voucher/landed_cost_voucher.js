@@ -93,7 +93,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 			<table class="table table-bordered" style="background-color: #f9f9f9;">
 				<tr><td>
 					<h4>
-						<i class="fa fa-hand-right"></i> 
+						<i class="fa fa-hand-right"></i>
 						${__("Notes")}:
 					</h4>
 					<ul>

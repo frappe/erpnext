@@ -1594,7 +1594,7 @@ DocType: Sales Invoice,Payment Due Date,지불 기한
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","예약 수량 : 수량 판매를 위해 주문,하지만 배달되지 않습니다."
 DocType: Drug Prescription,Interval UOM,간격 UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save",저장 후 선택한 주소를 다시 선택한 경우 다시 선택하십시오.
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,외주 용 예약 수량 : 추심 품목을 만들기위한 원자재 수량.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,외주 용 예약 수량 : 추심 품목을 만들기위한 원자재 수량.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,항목 변형 {0} 이미 동일한 속성을 가진 존재
 DocType: Item,Hub Publishing Details,허브 출판 세부 정보
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&#39;열기&#39;

@@ -182,6 +182,7 @@ standard_portal_menu_items = [
 	{"title": _("Admission"), "route": "/admissions", "reference_doctype": "Student Admission", "role": "Student"},
 	{"title": _("Certification"), "route": "/certification", "reference_doctype": "Certification Application", "role": "Non Profit Portal User"},
 	{"title": _("Material Request"), "route": "/material-requests", "reference_doctype": "Material Request", "role": "Customer"},
+	{"title": _("Appointment Booking"), "route": "/book_appointment"},
 ]
 
 default_roles = [
@@ -235,24 +236,23 @@ doc_events = {
 	("Sales Taxes and Charges Template", 'Price List'): {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
 	},
-
 	"Website Settings": {
 		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
 	},
 	"Sales Invoice": {
-		"on_submit": ["erpnext.regional.france.utils.create_transaction_log", "erpnext.regional.italy.utils.sales_invoice_on_submit"],
+		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.regional.italy.utils.sales_invoice_on_submit"],
 		"on_cancel": "erpnext.regional.italy.utils.sales_invoice_on_cancel",
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	"Payment Entry": {
-		"on_submit": ["erpnext.regional.france.utils.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"],
+		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"],
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	'Address': {
-		'validate': ['erpnext.regional.india.utils.validate_gstin_for_india', 'erpnext.regional.italy.utils.set_state_code']
+		'validate': ['erpnext.regional.india.utils.validate_gstin_for_india', 'erpnext.regional.italy.utils.set_state_code', 'erpnext.regional.india.utils.update_gst_category']
 	},
-	('Sales Invoice', 'Purchase Invoice', 'Delivery Note'): {
-		'validate': 'erpnext.regional.india.utils.set_place_of_supply'
+	('Sales Invoice', 'Sales Order', 'Delivery Note', 'Purchase Invoice', 'Purchase Order', 'Purchase Receipt'): {
+		'validate': ['erpnext.regional.india.utils.set_place_of_supply']
 	},
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
@@ -283,7 +283,6 @@ scheduler_events = {
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
-		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",
 		"erpnext.crm.doctype.opportunity.opportunity.auto_close_opportunity",
 		"erpnext.controllers.accounts_controller.update_invoice_status",
@@ -303,9 +302,11 @@ scheduler_events = {
 		"erpnext.quality_management.doctype.quality_review.quality_review.review",
 		"erpnext.support.doctype.service_level_agreement.service_level_agreement.check_agreement_status",
 		"erpnext.crm.doctype.email_campaign.email_campaign.send_email_to_leads_or_contacts",
-		"erpnext.crm.doctype.email_campaign.email_campaign.set_email_campaign_status"
+		"erpnext.crm.doctype.email_campaign.email_campaign.set_email_campaign_status",
+		"erpnext.selling.doctype.quotation.quotation.set_expired_status"
 	],
 	"daily_long": [
+		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
 		"erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry.process_expired_allocation",
 		"erpnext.hr.utils.generate_leave_encashment"

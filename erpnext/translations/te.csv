@@ -1545,7 +1545,7 @@ DocType: Sales Invoice,Payment Due Date,చెల్లింపు గడువ
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","రిజర్వు చేయబడిన Qty: పరిమాణం అమ్మకానికి ఆర్డర్ చేయబడింది, కానీ పంపిణీ చేయబడలేదు."
 DocType: Drug Prescription,Interval UOM,విరామం UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","ఎంపిక చేసిన చిరునామా సేవ్ అయిన తర్వాత సవరించబడితే, ఎంపికను తీసివేయండి"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,సబ్ కాంట్రాక్ట్ కోసం రిజర్వు చేయబడిన క్యూటి: సబ్‌కట్రాక్టెడ్ వస్తువులను తయారు చేయడానికి ముడి పదార్థాల పరిమాణం.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,సబ్ కాంట్రాక్ట్ కోసం రిజర్వు చేయబడిన క్యూటి: సబ్‌కట్రాక్టెడ్ వస్తువులను తయారు చేయడానికి ముడి పదార్థాల పరిమాణం.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,అంశం వేరియంట్ {0} ఇప్పటికే అదే గుణ ఉంది
 DocType: Item,Hub Publishing Details,హబ్ ప్రచురణ వివరాలు
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&#39;ప్రారంభిస్తున్నాడు&#39;

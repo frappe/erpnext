@@ -286,14 +286,14 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		if (in_list(['serial_no', 'batch_no'], field)) {
 			args[field] = value;
 		}
-
+		
 		// add to cur_frm
 		const item = this.frm.add_child('items', args);
 		frappe.flags.hide_serial_batch_dialog = true;
 
 		frappe.run_serially([
 			() => {
-				this.frm.script_manager.trigger('item_code', item.doctype, item.name)
+				return this.frm.script_manager.trigger('item_code', item.doctype, item.name)
 					.then(() => {
 						this.frm.script_manager.trigger('qty', item.doctype, item.name)
 							.then(() => {
@@ -451,7 +451,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	change_pos_profile() {
 		return new Promise((resolve) => {
-			const on_submit = ({ pos_profile, set_as_default }) => {
+			const on_submit = ({ company, pos_profile, set_as_default }) => {
 				if (pos_profile) {
 					this.pos_profile = pos_profile;
 				}
@@ -461,7 +461,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 						method: "erpnext.accounts.doctype.pos_profile.pos_profile.set_default_profile",
 						args: {
 							'pos_profile': pos_profile,
-							'company': this.frm.doc.company
+							'company': company
 						}
 					}).then(() => {
 						this.on_change_pos_profile();
@@ -471,7 +471,42 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				}
 			}
 
-			frappe.prompt(this.get_prompt_fields(),
+
+			let me = this;
+
+			var dialog = frappe.prompt([{
+					fieldtype: 'Link',
+					label: __('Company'),
+					options: 'Company',
+					fieldname: 'company',
+					default: me.frm.doc.company,
+					reqd: 1,
+					onchange: function(e) {
+							me.get_default_pos_profile(this.value).then((r) => {
+								dialog.set_value('pos_profile', (r && r.name)? r.name : '');
+							});
+						}
+					},
+					{
+					fieldtype: 'Link',
+					label: __('POS Profile'),
+					options: 'POS Profile',
+					fieldname: 'pos_profile',
+					default: me.frm.doc.pos_profile,
+					reqd: 1,
+					get_query: () => {
+						return {
+							query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
+							filters: {
+								company: dialog.get_value('company')
+							}
+						};
+					}
+				}, {
+					fieldtype: 'Check',
+					label: __('Set as default'),
+					fieldname: 'set_as_default'
+				}],
 				on_submit,
 				__('Select POS Profile')
 			);
@@ -494,26 +529,9 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		]);
 	}
 
-	get_prompt_fields() {
-		return [{
-			fieldtype: 'Link',
-			label: __('POS Profile'),
-			options: 'POS Profile',
-			fieldname: 'pos_profile',
-			reqd: 1,
-			get_query: () => {
-				return {
-					query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
-					filters: {
-						company: this.frm.doc.company
-					}
-				};
-			}
-		}, {
-			fieldtype: 'Check',
-			label: __('Set as default'),
-			fieldname: 'set_as_default'
-		}];
+	get_default_pos_profile(company) {
+		return frappe.xcall("erpnext.stock.get_item_details.get_pos_profile",
+			{'company': company})
 	}
 
 	setup_company() {

@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import getdate, validate_email_address, today, add_years, format_datetime
+from frappe.utils import getdate, validate_email_address, today, add_years, format_datetime, cstr
 from frappe.model.naming import set_name_by_naming_series
 from frappe import throw, _, scrub
 from frappe.permissions import add_user_permission, remove_user_permission, \
@@ -167,10 +167,11 @@ class Employee(NestedSet):
 	def validate_status(self):
 		if self.status == 'Left':
 			reports_to = frappe.db.get_all('Employee',
-				filters={'reports_to': self.name}
+				filters={'reports_to': self.name, 'status': "Active"},
+				fields=['name','employee_name']
 			)
 			if reports_to:
-				link_to_employees = [frappe.utils.get_link_to_form('Employee', employee.name) for employee in reports_to]
+				link_to_employees = [frappe.utils.get_link_to_form('Employee', employee.name, label=employee.employee_name) for employee in reports_to]
 				throw(_("Employee status cannot be set to 'Left' as following employees are currently reporting to this employee:&nbsp;")
 					+ ', '.join(link_to_employees), EmployeeLeftValidationError)
 			if not self.relieving_date:
@@ -217,8 +218,8 @@ class Employee(NestedSet):
 
 	def reset_employee_emails_cache(self):
 		prev_doc = self.get_doc_before_save() or {}
-		cell_number = self.get('cell_number')
-		prev_number = prev_doc.get('cell_number')
+		cell_number = cstr(self.get('cell_number'))
+		prev_number = cstr(prev_doc.get('cell_number'))
 		if (cell_number != prev_number or
 			self.get('user_id') != prev_doc.get('user_id')):
 			frappe.cache().hdel('employees_with_number', cell_number)

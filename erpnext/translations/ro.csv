@@ -1594,7 +1594,7 @@ DocType: Sales Invoice,Payment Due Date,Data scadentă de plată
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Rezervate Cantitate: Cantitatea comandat de vânzare, dar nu livrat."
 DocType: Drug Prescription,Interval UOM,Interval UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save",Resetați dacă adresa editată este editată după salvare
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Cantitate rezervată pentru subcontract: cantitate de materii prime pentru a face obiecte subcontractate.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Cantitate rezervată pentru subcontract: cantitate de materii prime pentru a face obiecte subcontractate.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Postul Varianta {0} există deja cu aceleași atribute
 DocType: Item,Hub Publishing Details,Detalii privind publicarea Hubului
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&quot;Deschiderea&quot;

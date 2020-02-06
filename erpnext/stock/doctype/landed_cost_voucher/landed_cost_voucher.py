@@ -267,6 +267,9 @@ class LandedCostVoucher(AccountsController):
 	def update_landed_cost(self):
 		for d in self.get("purchase_receipts"):
 			doc = frappe.get_doc(d.receipt_document_type, d.receipt_document)
+			
+			# check if there are {qty} assets created and linked to this receipt document
+			self.validate_asset_qty_and_status(d.receipt_document_type, doc)
 
 			# set landed cost voucher amount in pr item
 			doc.set_landed_cost_voucher_amount()
@@ -278,8 +281,10 @@ class LandedCostVoucher(AccountsController):
 			for item in doc.get("items"):
 				item.db_update()
 
+			# asset rate will be updated while creating asset gl entries from PI or PY
+
 			# update latest valuation rate in serial no
-			update_rate_in_serial_no(doc)
+			update_rate_in_serial_no_for_non_asset_items(doc)
 
 			# update stock & gl entries for cancelled state of PR
 			doc.docstatus = 2
@@ -288,7 +293,7 @@ class LandedCostVoucher(AccountsController):
 
 			# update stock & gl entries for submit state of PR
 			doc.docstatus = 1
-			doc.update_stock_ledger(via_landed_cost_voucher=True)
+			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
 			doc.make_gl_entries()
 
 	def make_gl_entries(self, cancel=False):
@@ -345,7 +350,24 @@ class LandedCostVoucher(AccountsController):
 
 		return gl_entry
 
-def update_rate_in_serial_no(receipt_document):
+	def validate_asset_qty_and_status(self, receipt_document_type, receipt_document):
+		for item in self.get('items'):
+			if item.is_fixed_asset:
+				receipt_document_type = 'purchase_invoice' if item.receipt_document_type == 'Purchase Invoice' \
+						else 'purchase_receipt'
+				docs = frappe.db.get_all('Asset', filters={ receipt_document_type: item.receipt_document,
+					'item_code': item.item_code }, fields=['name', 'docstatus'])
+				if not docs or len(docs) != item.qty:
+					frappe.throw(_('There are not enough asset created or linked to {0}. \
+						Please create or link {1} Assets with respective document.').format(item.receipt_document, item.qty))
+				if docs:
+					for d in docs:
+						if d.docstatus == 1:
+							frappe.throw(_('{2} <b>{0}</b> has submitted Assets.\
+								Remove Item <b>{1}</b> from table to continue.').format(
+									item.receipt_document, item.item_code, item.receipt_document_type))
+
+def update_rate_in_serial_no_for_non_asset_items(receipt_document):
 	for item in receipt_document.get("items"):
 		if item.serial_no:
 			serial_nos = get_serial_nos(item.serial_no)

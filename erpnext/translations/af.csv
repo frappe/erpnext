@@ -1562,7 +1562,7 @@ DocType: Sales Invoice,Payment Due Date,Betaaldatum
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Voorbehou Aantal: Hoeveelheid te koop bestel, maar nie afgelewer nie."
 DocType: Drug Prescription,Interval UOM,Interval UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Herstel, as die gekose adres geredigeer word na die stoor"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Voorbehou Aantal vir Onderkontrakte: Hoeveelheid grondstowwe om onderverpakte items te maak.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Voorbehou Aantal vir Onderkontrakte: Hoeveelheid grondstowwe om onderverpakte items te maak.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Item Variant {0} bestaan reeds met dieselfde eienskappe
 DocType: Item,Hub Publishing Details,Hub Publishing Details
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&#39;Oopmaak&#39;

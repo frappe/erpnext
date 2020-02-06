@@ -1594,7 +1594,7 @@ DocType: Sales Invoice,Payment Due Date,Дата платежа
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Защищены Кол-во: Количество приказал на продажу, но не поставлены."
 DocType: Drug Prescription,Interval UOM,Интервал UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Повторно выберите, если выбранный адрес отредактирован после сохранения"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Зарезервированное кол-во для субконтракта: количество сырья для изготовления субподрядных изделий.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Зарезервированное кол-во для субконтракта: количество сырья для изготовления субподрядных изделий.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Модификация продукта {0} с этими атрибутами уже существует
 DocType: Item,Hub Publishing Details,Сведения о публикации концентратора
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',«Открывается»

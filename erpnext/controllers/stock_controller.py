@@ -20,6 +20,7 @@ class StockController(AccountsController):
 	def validate(self):
 		super(StockController, self).validate()
 		self.validate_inspection()
+		self.validate_serialized_batch()
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if self.docstatus == 2:
@@ -42,6 +43,18 @@ class StockController(AccountsController):
 			gl_entries = self.get_asset_gl_entry(gl_entries)
 			make_gl_entries(gl_entries, from_repost=from_repost)
 
+	def validate_serialized_batch(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		for d in self.get("items"):
+			if not (hasattr(d, 'serial_no') and d.serial_no and d.batch_no): continue
+
+			serial_nos = get_serial_nos(d.serial_no)
+			for serial_no_data in frappe.get_all("Serial No",
+				filters={"name": ("in", serial_nos)}, fields=["batch_no", "name"]):
+				if serial_no_data.batch_no != d.batch_no:
+					frappe.throw(_("Row #{0}: Serial No {1} does not belong to Batch {2}")
+						.format(d.idx, serial_no_data.name, d.batch_no))
+
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
 
@@ -54,6 +67,7 @@ class StockController(AccountsController):
 		gl_list = []
 		warehouse_with_no_account = []
 
+		precision = frappe.get_precision("GL Entry", "debit_in_account_currency")
 		for item_row in voucher_details:
 			sle_list = sle_map.get(item_row.name)
 			if sle_list:
@@ -79,8 +93,7 @@ class StockController(AccountsController):
 							"against": item_row.expense_account,
 							"cost_center": item_row.cost_center or self.get("cost_center"),
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"debit": flt(sle.stock_value_difference, 2),
-							"project": item_row.get("project") or self.get("project") or self.get("set_project"),
+							"debit": flt(sle.stock_value_difference, precision),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
 						}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
 
@@ -90,7 +103,7 @@ class StockController(AccountsController):
 							"against": warehouse_account[sle.warehouse]["account"],
 							"cost_center": item_row.cost_center or self.get("cost_center"),
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"credit": flt(sle.stock_value_difference, 2),
+							"credit": flt(sle.stock_value_difference, precision),
 							"project": item_row.get("project") or self.get("project") or self.get("set_project"),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No"
 						}, item=item_row))
@@ -214,41 +227,6 @@ class StockController(AccountsController):
 						supplier=getattr(self, 'supplier', None),
 						reference_doctype=self.doctype,
 						reference_name=self.name)).insert().name
-
-	def make_adjustment_entry(self, expected_gle, voucher_obj):
-		from erpnext.accounts.utils import get_stock_and_account_difference
-		account_list = [d.account for d in expected_gle]
-		acc_diff = get_stock_and_account_difference(account_list,
-			expected_gle[0].posting_date, self.company)
-
-		cost_center = self.get_company_default("cost_center")
-		stock_adjustment_account = self.get_company_default("stock_adjustment_account")
-
-		gl_entries = []
-		for account, diff in acc_diff.items():
-			if diff:
-				gl_entries.append([
-					# stock in hand account
-					voucher_obj.get_gl_dict({
-						"account": account,
-						"against": stock_adjustment_account,
-						"debit": diff,
-						"remarks": "Adjustment Accounting Entry for Stock",
-					}),
-
-					# account against stock in hand
-					voucher_obj.get_gl_dict({
-						"account": stock_adjustment_account,
-						"against": account,
-						"credit": diff,
-						"cost_center": self.get("cost_center") or cost_center,
-						"remarks": "Adjustment Accounting Entry for Stock",
-					}),
-				])
-
-		if gl_entries:
-			from erpnext.accounts.general_ledger import make_gl_entries
-			make_gl_entries(gl_entries)
 
 	def check_expense_account(self, item):
 		if not item.get("expense_account"):

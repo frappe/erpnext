@@ -1556,7 +1556,7 @@ DocType: Sales Invoice,Payment Due Date,Afati i pageses
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Sasia e rezervuar: Sasia e porositur për shitje, por nuk dorëzohet."
 DocType: Drug Prescription,Interval UOM,Interval UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Reselect, nëse adresa e zgjedhur është redaktuar pas ruajtjes"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Sasia e rezervuar për nënkontrakt: Sasia e lëndëve të para për të bërë sende nënkontraktuese.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Sasia e rezervuar për nënkontrakt: Sasia e lëndëve të para për të bërë sende nënkontraktuese.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Item Varianti {0} tashmë ekziston me atributet e njëjta
 DocType: Item,Hub Publishing Details,Detajet e botimit të Hub
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&quot;Hapja&quot;

@@ -1450,7 +1450,7 @@ apps/erpnext/erpnext/stock/page/stock_balance/stock_balance.js,Projected Qty,預
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.",保留數量：訂購數量待出售，但尚未交付。
 DocType: Drug Prescription,Interval UOM,間隔UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save",重新選擇，如果所選地址在保存後被編輯
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,分包合同的保留數量：製作分項目的原材料數量。
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,分包合同的保留數量：製作分項目的原材料數量。
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,項目變種{0}已經具有相同屬性的存在
 DocType: Item,Hub Publishing Details,Hub發布細節
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',“開放”

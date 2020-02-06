@@ -1562,7 +1562,7 @@ DocType: Sales Invoice,Payment Due Date,Greiðsla Due Date
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Frátekið magn: Magn pantað til sölu, en ekki afhent."
 DocType: Drug Prescription,Interval UOM,Interval UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Veldu aftur, ef valið heimilisfang er breytt eftir að vista"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Frátekið magn fyrir undirverktaka: Magn hráefna til að búa til undirverktaka hluti.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Frátekið magn fyrir undirverktaka: Magn hráefna til að búa til undirverktaka hluti.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Liður Variant {0} er þegar til staðar með sömu eiginleika
 DocType: Item,Hub Publishing Details,Hub Publishing Upplýsingar
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&#39;Opening&#39;

@@ -24,6 +24,8 @@ def execute(filters=None):
 	if opening_row:
 		data.append(opening_row)
 
+	actual_qty = stock_value = 0
+
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
 		alt_uom_size = item_detail.alt_uom_size if filters.qty_field == "Contents Qty" and item_detail.alt_uom else 1.0

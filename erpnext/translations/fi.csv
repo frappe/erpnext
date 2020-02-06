@@ -1562,7 +1562,7 @@ DocType: Sales Invoice,Payment Due Date,Maksun eräpäivä
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Varattu määrä: Myytävänä oleva määrä, mutta ei toimitettu."
 DocType: Drug Prescription,Interval UOM,Interval UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save","Vahvista valinta uudelleen, jos valittua osoitetta muokataan tallennuksen jälkeen"
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Varattu määrä alihankintasopimuksille: Raaka-aineiden määrä alihankittujen tuotteiden valmistamiseksi.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Varattu määrä alihankintasopimuksille: Raaka-aineiden määrä alihankittujen tuotteiden valmistamiseksi.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Tuote Variant {0} on jo olemassa samoja ominaisuuksia
 DocType: Item,Hub Publishing Details,Hub-julkaisutiedot
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening','Avattu'

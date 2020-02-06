@@ -40,6 +40,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		invalidate_cache_for(self)
 		self.validate_name_with_item()
 		self.validate_one_root()
+		self.delete_child_item_groups_key()
 
 	def make_route(self):
 		'''Make website route'''
@@ -59,6 +60,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 	def on_trash(self):
 		NestedSet.on_trash(self)
 		WebsiteGenerator.on_trash(self)
+		self.delete_child_item_groups_key()
 
 	def validate_name_with_item(self):
 		if frappe.db.exists("Item", self.name):
@@ -83,6 +85,9 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 			context.update(get_slideshow(self))
 
 		return context
+
+	def delete_child_item_groups_key(self):
+		frappe.cache().hdel("child_item_groups", self.name)
 
 @frappe.whitelist(allow_guest=True)
 def get_product_list_for_group(product_group=None, start=0, limit=10, search=None):
@@ -137,6 +142,7 @@ def get_child_groups_for_list_in_html(item_group, start, limit, search):
 		fields = ['name', 'route', 'description', 'image'],
 		filters = dict(
 			show_in_website = 1,
+			parent_item_group = item_group.name,
 			lft = ('>', item_group.lft),
 			rgt = ('<', item_group.rgt),
 		),
@@ -167,6 +173,19 @@ def get_child_groups(item_group_name):
 	return frappe.db.sql("""select name
 		from `tabItem Group` where lft>=%(lft)s and rgt<=%(rgt)s
 			and show_in_website = 1""", {"lft": item_group.lft, "rgt": item_group.rgt})
+
+def get_child_item_groups(item_group_name):
+	child_item_groups = frappe.cache().hget("child_item_groups", item_group_name)
+
+	if not child_item_groups:
+		item_group = frappe.get_cached_doc("Item Group", item_group_name)
+
+		child_item_groups = [d.name for d in frappe.get_all('Item Group',
+			filters= {'lft': ('>=', item_group.lft),'rgt': ('>=', item_group.rgt)})]
+
+		frappe.cache().hset("child_item_groups", item_group_name, child_item_groups)
+
+	return child_item_groups or {}
 
 def get_item_for_list_in_html(context):
 	# add missing absolute link in files

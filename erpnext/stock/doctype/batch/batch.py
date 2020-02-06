@@ -185,9 +185,17 @@ def get_batches_by_oldest(item_code, warehouse):
 def split_batch(batch_no, item_code, warehouse, qty, new_batch_id=None):
 	"""Split the batch into a new batch"""
 	batch = frappe.get_doc(dict(doctype='Batch', item=item_code, batch_id=new_batch_id)).insert()
+
+	company = frappe.db.get_value('Stock Ledger Entry', dict(
+			item_code=item_code,
+			batch_no=batch_no,
+			warehouse=warehouse
+		), ['company'])
+
 	stock_entry = frappe.get_doc(dict(
 		doctype='Stock Entry',
 		purpose='Repack',
+		company=company,
 		items=[
 			dict(
 				item_code=item_code,
@@ -218,16 +226,14 @@ def set_batch_nos(doc, warehouse_field, throw=False):
 		warehouse = d.get(warehouse_field, None)
 		if has_batch_no and warehouse and qty > 0:
 			if not d.batch_no:
-				d.batch_no = get_batch_no(d.item_code, warehouse, qty, throw)
+				d.batch_no = get_batch_no(d.item_code, warehouse, qty, throw, d.serial_no)
 			else:
 				batch_qty = get_batch_qty(batch_no=d.batch_no, warehouse=warehouse)
 				if flt(batch_qty, d.precision("qty")) < flt(qty, d.precision("qty")):
 					frappe.throw(_("Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches").format(d.idx, d.batch_no, batch_qty, qty))
 
-
-
 @frappe.whitelist()
-def get_batch_no(item_code, warehouse, qty=1, throw=False):
+def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	"""
 	Get batch number using First Expiring First Out method.
 	:param item_code: `item_code` of Item Document
@@ -237,7 +243,7 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False):
 	"""
 
 	batch_no = None
-	batches = get_batches(item_code, warehouse, qty, throw)
+	batches = get_batches(item_code, warehouse, qty, throw, serial_no)
 
 	for batch in batches:
 		if cint(qty) <= cint(batch.qty):
@@ -252,16 +258,31 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False):
 	return batch_no
 
 
-def get_batches(item_code, warehouse, qty=1, throw=False):
-	batches = frappe.db.sql(
-		'select batch_id, sum(actual_qty) as qty from `tabBatch` join `tabStock Ledger Entry` ignore index (item_code, warehouse) '
-		'on (`tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no )'
-		'where `tabStock Ledger Entry`.item_code = %s and  `tabStock Ledger Entry`.warehouse = %s '
-		'and (`tabBatch`.expiry_date >= CURDATE() or `tabBatch`.expiry_date IS NULL)'
-		'group by batch_id '
-		'order by `tabBatch`.expiry_date ASC, `tabBatch`.creation ASC',
-		(item_code, warehouse),
-		as_dict=True
-	)
+def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+	cond = ''
+	if serial_no:
+		batch = frappe.get_all("Serial No",
+			fields = ["distinct batch_no"],
+			filters= {
+				"item_code": item_code,
+				"warehouse": warehouse,
+				"name": ("in", get_serial_nos(serial_no))
+			}
+		)
 
-	return batches
+		if batch and len(batch) > 1:
+			return []
+
+		cond = " and `tabBatch`.name = %s" %(frappe.db.escape(batch[0].batch_no))
+
+	return frappe.db.sql("""
+		select batch_id, sum(`tabStock Ledger Entry`.actual_qty) as qty
+		from `tabBatch`
+			join `tabStock Ledger Entry` ignore index (item_code, warehouse)
+				on (`tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no )
+		where `tabStock Ledger Entry`.item_code = %s and `tabStock Ledger Entry`.warehouse = %s
+			and (`tabBatch`.expiry_date >= CURDATE() or `tabBatch`.expiry_date IS NULL) {0}
+		group by batch_id
+		order by `tabBatch`.expiry_date ASC, `tabBatch`.creation ASC
+	""".format(cond), (item_code, warehouse), as_dict=True)

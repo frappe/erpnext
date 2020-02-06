@@ -28,7 +28,6 @@ class GLEntry(Document):
 		self.validate_and_set_fiscal_year()
 		self.pl_must_have_cost_center()
 		self.validate_cost_center()
-		self.validate_dimensions_for_pl_and_bs()
 
 		if not self.flags.from_repost:
 			self.check_pl_account()
@@ -38,6 +37,7 @@ class GLEntry(Document):
 	def on_update_with_args(self, adv_adj, from_repost=False):
 		if not from_repost:
 			self.validate_account_details(adv_adj)
+			self.validate_dimensions_for_pl_and_bs()
 			check_freezing_date(self.posting_date, adv_adj)
 
 		validate_frozen_account(self.account, adv_adj)

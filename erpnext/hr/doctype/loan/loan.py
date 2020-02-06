@@ -16,6 +16,7 @@ class Loan(AccountsController):
 		self.make_repayment_schedule()
 		self.set_repayment_period()
 		self.calculate_totals()
+		self.set_status(from_validate=True)
 
 	def set_missing_fields(self):
 		if not self.company:
@@ -95,43 +96,57 @@ class Loan(AccountsController):
 		self.total_payment = 0
 		self.total_interest_payable = 0
 		self.total_amount_paid = 0
-		for data in self.repayment_schedule:
-			self.total_payment += data.total_payment
-			self.total_interest_payable +=data.interest_amount
-			if data.paid:
-				self.total_amount_paid += data.total_payment
+		for schedule in self.repayment_schedule:
+			self.total_payment += schedule.total_payment
+			self.total_interest_payable +=schedule.interest_amount
+			if schedule.paid:
+				self.total_amount_paid += schedule.total_payment
 
-def update_total_amount_paid(doc):
-	total_amount_paid = 0
-	for data in doc.repayment_schedule:
-		if data.paid:
-			total_amount_paid += data.total_payment
-	frappe.db.set_value("Loan", doc.name, "total_amount_paid", total_amount_paid)
+	def update_total_amount_paid(self):
+		total_amount_paid = 0
+		for schedule in self.repayment_schedule:
+			if schedule.paid:
+				total_amount_paid += schedule.total_payment
+		frappe.db.set_value("Loan", self.name, "total_amount_paid", total_amount_paid)
 
-def update_disbursement_status(doc):
-	disbursement = frappe.db.sql("""
-		select posting_date, ifnull(sum(credit_in_account_currency), 0) as disbursed_amount
-		from `tabGL Entry`
-		where account = %s and against_voucher_type = 'Loan' and against_voucher = %s
-	""", (doc.payment_account, doc.name), as_dict=1)[0]
+	def set_status(self, from_validate=False):
+		disbursement = self.get_disbursement_entry()
+		disbursement_date = None
 
-	disbursement_date = None
-	if not disbursement or disbursement.disbursed_amount == 0:
-		status = "Sanctioned"
-	elif disbursement.disbursed_amount == doc.loan_amount:
-		disbursement_date = disbursement.posting_date
-		status = "Disbursed"
-	elif disbursement.disbursed_amount > doc.loan_amount:
-		frappe.throw(_("Disbursed Amount cannot be greater than Loan Amount {0}").format(doc.loan_amount))
+		self.status = "Draft"
 
-	if status == 'Disbursed' and getdate(disbursement_date) > getdate(frappe.db.get_value("Loan", doc.name, "repayment_start_date")):
+		if (not disbursement or disbursement.disbursed_amount == 0) and self.docstatus == 1:
+			self.status = "Sanctioned"
+		if disbursement:
+			self.validate_disbursed_amount_and_loan_amount(disbursement.disbursed_amount)
+			if disbursement.disbursed_amount == self.loan_amount and disbursement.disbursed_amount != 0:
+				self.status = "Disbursed"
+				disbursement_date = disbursement.posting_date
+				self.validate_disbursement_date(disbursement_date, self.status)
+
+		if self.total_amount_paid == self.total_payment:
+			self.status = "Repaid/Closed"
+
+		if not from_validate:
+			frappe.db.set_value("Loan", self.name, "status", self.status)
+			if disbursement_date:
+				frappe.db.set_value("Loan", self.name, "disbursement_date", disbursement_date)
+
+	def validate_disbursement_date(self, disbursement_date, loan_status):
+		if loan_status == 'Disbursed' and getdate(disbursement_date) > getdate(frappe.db.get_value("Loan", self.name, "repayment_start_date")):
 			frappe.throw(_("Disbursement Date cannot be after Loan Repayment Start Date"))
 
-	frappe.db.sql("""
-		update `tabLoan`
-		set status = %s, disbursement_date = %s
-		where name = %s
-	""", (status, disbursement_date, doc.name))
+
+	def validate_disbursed_amount_and_loan_amount(self, disbursed_amount):
+		if disbursed_amount > self.loan_amount:
+			frappe.throw(_("Disbursed Amount cannot be greater than Loan Amount {0}").format(self.loan_amount))
+
+	def get_disbursement_entry(self):
+		return frappe.db.sql("""
+			select posting_date, ifnull(sum(credit_in_account_currency), 0) as disbursed_amount
+			from `tabGL Entry`
+			where account = %s and against_voucher_type = 'Loan' and against_voucher = %s
+		""", (self.payment_account, self.name), as_dict=1)[0]
 
 def validate_repayment_method(repayment_method, loan_amount, monthly_repayment_amount, repayment_periods):
 	if repayment_method == "Repay Over Number of Periods" and not repayment_periods:

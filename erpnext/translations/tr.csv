@@ -1724,7 +1724,7 @@ DocType: Sales Invoice,Payment Due Date,Son Ödeme Tarihi
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","Ayrılan Miktar: Satış için sipariş edilen, ancak teslim edilmeyen miktar."
 DocType: Drug Prescription,Interval UOM,Aralık UOM&#39;sı
 DocType: Customer,"Reselect, if the chosen address is edited after save",Seçilen adres kaydedildikten sonra değiştirilirse yeniden seç
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,Ayrılmış Taşeron Miktarı: Taşeron ürün yapmak için hammadde miktarı.
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,Ayrılmış Taşeron Miktarı: Taşeron ürün yapmak için hammadde miktarı.
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,Öğe Variant {0} zaten aynı özelliklere sahip bulunmaktadır
 DocType: Item,Hub Publishing Details,Hub Yayınlama Ayrıntıları
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',&#39;Açılış&#39;

@@ -1544,7 +1544,7 @@ DocType: Sales Invoice,Payment Due Date,পরিশোধযোগ্য তা
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"Reserved Qty: Quantity ordered for sale, but not delivered.","সংরক্ষিত পরিমাণ: পরিমাণ বিক্রয়ের জন্য অর্ডার করা হয়েছে, তবে বিতরণ করা হয়নি।"
 DocType: Drug Prescription,Interval UOM,অন্তর্বর্তী UOM
 DocType: Customer,"Reselect, if the chosen address is edited after save",সংরক্ষণ করার পরে যদি নির্বাচিত ঠিকানাটি সম্পাদনা করা হয় তবে নির্বাচন বাতিল করুন
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcotracted items.,সাবকন্ট্রাক্টের জন্য সংরক্ষিত পরিমাণ: উপকোট্রাক্ট আইটেমগুলি তৈরি করতে কাঁচামাল পরিমাণ।
+apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Reserved Qty for Subcontract: Raw materials quantity to make subcontracted items.,সাবকন্ট্রাক্টের জন্য সংরক্ষিত পরিমাণ: উপকোট্রাক্ট আইটেমগুলি তৈরি করতে কাঁচামাল পরিমাণ।
 apps/erpnext/erpnext/stock/doctype/item/item.js,Item Variant {0} already exists with same attributes,আইটেম ভেরিয়েন্ট {0} ইতিমধ্যে একই বৈশিষ্ট্যাবলী সঙ্গে বিদ্যমান
 DocType: Item,Hub Publishing Details,হাব প্রকাশনা বিবরণ
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,'Opening',' শুরু'

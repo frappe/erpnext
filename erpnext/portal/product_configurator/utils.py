@@ -302,6 +302,8 @@ def get_items(filters=None, search=None):
 	if isinstance(filters, dict):
 		filters = [['Item', fieldname, '=', value] for fieldname, value in filters.items()]
 
+	enabled_items_filter = get_conditions({ 'disabled': 0 }, 'and')
+
 	show_in_website_condition = ''
 	if products_settings.hide_variants:
 		show_in_website_condition = get_conditions({'show_in_website': 1 }, 'and')
@@ -313,19 +315,32 @@ def get_items(filters=None, search=None):
 
 	search_condition = ''
 	if search:
+		# Default fields to search from
+		default_fields = {'name', 'item_name', 'description', 'item_group'}
+
+		# Get meta search fields
+		meta = frappe.get_meta("Item")
+		meta_fields = set(meta.get_search_fields())
+
+		# Join the meta fields and default fields set
+		search_fields = default_fields.union(meta_fields)
+		try:
+			if frappe.db.count('Item', cache=True) > 50000:
+				search_fields.remove('description')
+		except KeyError:
+			pass
+
+		# Build or filters for query
 		search = '%{}%'.format(search)
-		or_filters = [
-			['name', 'like', search],
-			['item_name', 'like', search],
-			['description', 'like', search],
-			['item_group', 'like', search]
-		]
+		or_filters = [[field, 'like', search] for field in search_fields]
+
 		search_condition = get_conditions(or_filters, 'or')
 
 	filter_condition = get_conditions(filters, 'and')
 
 	where_conditions = ' and '.join(
-		[condition for condition in [show_in_website_condition, search_condition, filter_condition] if condition]
+		[condition for condition in [enabled_items_filter, show_in_website_condition, \
+			search_condition, filter_condition] if condition]
 	)
 
 	left_joins = []

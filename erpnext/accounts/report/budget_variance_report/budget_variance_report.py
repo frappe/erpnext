@@ -12,22 +12,22 @@ from six import iteritems
 from pprint import pprint
 def execute(filters=None):
 	if not filters: filters = {}
-	validate_filters(filters)
+
 	columns = get_columns(filters)
-	if filters.get("cost_center"):
-		cost_centers = [filters.get("cost_center")]
+	if filters.get("budget_against_filter"):
+		dimensions = filters.get("budget_against_filter")
 	else:
-		cost_centers = get_cost_centers(filters)
+		dimensions = get_cost_centers(filters)
 
 	period_month_ranges = get_period_month_ranges(filters["period"], filters["from_fiscal_year"])
-	cam_map = get_cost_center_account_month_map(filters)
+	cam_map = get_dimension_account_month_map(filters)
 
 	data = []
-	for cost_center in cost_centers:
-		cost_center_items = cam_map.get(cost_center)
-		if cost_center_items:
-			for account, monthwise_data in iteritems(cost_center_items):
-				row = [cost_center, account]
+	for dimension in dimensions:
+		dimension_items = cam_map.get(dimension)
+		if dimension_items:
+			for account, monthwise_data in iteritems(dimension_items):
+				row = [dimension, account]
 				totals = [0, 0, 0]
 				for year in get_fiscal_years(filters):
 					last_total = 0
@@ -55,10 +55,6 @@ def execute(filters=None):
 
 	return columns, data
 
-def validate_filters(filters):
-	if filters.get("budget_against") != "Cost Center" and filters.get("cost_center"):
-		frappe.throw(_("Filter based on Cost Center is only applicable if Budget Against is selected as Cost Center"))
-
 def get_columns(filters):
 	columns = [_(filters.get("budget_against")) + ":Link/%s:150"%(filters.get("budget_against")), _("Account") + ":Link/Account:150"]
 
@@ -69,7 +65,7 @@ def get_columns(filters):
 	for year in fiscal_year:
 		for from_date, to_date in get_period_date_ranges(filters["period"], year[0]):
 			if filters["period"] == "Yearly":
-				labels = [_("Budget") + " " + str(year[0]), _("Actual ") + " " + str(year[0]), _("Varaiance ") + " " + str(year[0])]
+				labels = [_("Budget") + " " + str(year[0]), _("Actual ") + " " + str(year[0]), _("Variance ") + " " + str(year[0])]
 				for label in labels:
 					columns.append(label+":Float:150")
 			else:
@@ -98,11 +94,12 @@ def get_cost_centers(filters):
 	else:
 		return frappe.db.sql_list("""select name from `tab{tab}`""".format(tab=filters.get("budget_against"))) #nosec
 
-#Get cost center & target details
-def get_cost_center_target_details(filters):
+#Get dimension & target details
+def get_dimension_target_details(filters):
 	cond = ""
-	if filters.get("cost_center"):
-		cond += " and b.cost_center=%s" % frappe.db.escape(filters.get("cost_center"))
+	if filters.get("budget_against_filter"):
+		cond += " and b.{budget_against} in (%s)".format(budget_against = \
+			frappe.scrub(filters.get('budget_against'))) % ', '.join(['%s']* len(filters.get('budget_against_filter')))
 
 	return frappe.db.sql("""
 			select b.{budget_against} as budget_against, b.monthly_distribution, ba.account, ba.budget_amount,b.fiscal_year
@@ -110,8 +107,8 @@ def get_cost_center_target_details(filters):
 			where b.name=ba.parent and b.docstatus = 1 and b.fiscal_year between %s and %s
 			and b.budget_against = %s and b.company=%s {cond} order by b.fiscal_year
 		""".format(budget_against=filters.get("budget_against").replace(" ", "_").lower(), cond=cond),
-		(filters.from_fiscal_year,filters.to_fiscal_year,filters.budget_against, filters.company), as_dict=True)
-
+		tuple([filters.from_fiscal_year,filters.to_fiscal_year,filters.budget_against, filters.company] + filters.get('budget_against_filter')), 
+		as_dict=True)
 
 
 #Get target distribution details of accounts of cost center
@@ -153,14 +150,14 @@ def get_actual_details(name, filters):
 
 	return cc_actual_details
 
-def get_cost_center_account_month_map(filters):
+def get_dimension_account_month_map(filters):
 	import datetime
-	cost_center_target_details = get_cost_center_target_details(filters)
+	dimension_target_details = get_dimension_target_details(filters)
 	tdd = get_target_distribution_details(filters)
 
 	cam_map = {}
 
-	for ccd in cost_center_target_details:
+	for ccd in dimension_target_details:
 		actual_details = get_actual_details(ccd.budget_against, filters)
 
 		for month_id in range(1, 13):
