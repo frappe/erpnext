@@ -485,11 +485,14 @@ def get_serial_no_item_customer(serial_no):
 	}
 
 @frappe.whitelist()
-def auto_fetch_serial_number(qty, item_code, warehouse):
-	serial_numbers = frappe.get_list("Serial No", filters={
+def auto_fetch_serial_number(qty, item_code, warehouse, batch_no=None):
+	filters = {
 		"item_code": item_code,
 		"warehouse": warehouse,
 		"delivery_document_no": "",
 		"sales_invoice": ""
-	}, limit=qty, order_by="creation")
+	}
+	if batch_no:
+		filters['batch_no'] = batch_no
+	serial_numbers = frappe.get_list("Serial No", filters=filters, limit=qty, order_by="creation")
 	return [item['name'] for item in serial_numbers]

@@ -107,6 +107,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 							args: {
 								qty: qty,
 								item_code: me.item_code,
+								batch_no: me.item.batch_no,
 								warehouse: me.warehouse_details.name
 							}
 						});
