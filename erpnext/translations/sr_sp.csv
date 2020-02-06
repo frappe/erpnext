@@ -810,7 +810,7 @@ DocType: Shipping Rule Condition,Shipping Rule Condition,Uslovi  pravila nabavke
 apps/erpnext/erpnext/config/help.py,Opening Stock Balance,Početno stanje zalihe
 ,Customer Credit Balance,Kreditni limit kupca
 apps/erpnext/erpnext/public/js/templates/address_list.html,No address added yet.,Adresa još nije dodata.
-DocType: Subscription,Net Total,Ukupno bez PDV-a
+DocType: C-Form Invoice Detail,Net Total,Ukupno bez PDV-a
 DocType: Sales Invoice,Total Qty,Ukupna kol.
 DocType: Purchase Invoice,Return,Povraćaj
 DocType: Sales Order Item,Delivery Warehouse,Skladište dostave
