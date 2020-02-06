@@ -67,6 +67,7 @@
   "against_sales_invoice",
   "si_detail",
   "section_break_40",
+  "has_batch_no",
   "batch_no",
   "serial_no",
   "actual_batch_qty",
@@ -698,11 +699,19 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "has_batch_no",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Batch No",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-25 22:08:27.452734",
+ "modified": "2019-09-20 15:09:22.184490",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

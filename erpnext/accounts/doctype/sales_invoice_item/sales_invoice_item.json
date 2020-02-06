@@ -77,6 +77,7 @@
   "warehouse",
   "target_warehouse",
   "quality_inspection",
+  "has_batch_no",
   "batch_no",
   "col_break5",
   "allow_zero_valuation_rate",
@@ -783,12 +784,19 @@
    "fieldtype": "Link",
    "label": "Finance Book",
    "options": "Finance Book"
+  },
+  {
+   "default": "0",
+   "fieldname": "has_batch_no",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Batch No",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "links": [],
- "modified": "2019-12-04 12:22:38.517710",
+ "modified": "2019-09-20 15:09:52.687401",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
