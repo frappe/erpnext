@@ -70,12 +70,12 @@ erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend(
 	},
 
 	change_amount: function(){
-		// if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
-		// 	this.calculate_write_off_amount();
-		// }else {
-		// 	this.frm.set_value("change_amount", 0.0);
-		// 	this.frm.set_value("base_change_amount", 0.0);
-		// }
+		if(this.frm.doc.paid_amount > this.frm.doc.grand_total){
+			this.calculate_write_off_amount();
+		}else {
+			this.frm.set_value("change_amount", 0.0);
+			this.frm.set_value("base_change_amount", 0.0);
+		}
 
 		this.frm.refresh_fields();
 	},
@@ -95,11 +95,65 @@ erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend(
 
 		this.calculate_outstanding_amount(false);
 		this.frm.refresh_fields();
-	},
+	}
 })
 
 $.extend(cur_frm.cscript, new erpnext.selling.POSInvoiceController({ frm: cur_frm }))
 
 frappe.ui.form.on('POS Invoice', {
-	
+	redeem_loyalty_points: function(frm) {
+		frm.events.get_loyalty_details(frm);
+	},
+
+	loyalty_points: function(frm) {
+		if (frm.redemption_conversion_factor) {
+			frm.events.set_loyalty_points(frm);
+		} else {
+			frappe.call({
+				method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_redeemption_factor",
+				args: {
+					"loyalty_program": frm.doc.loyalty_program
+				},
+				callback: function(r) {
+					if (r) {
+						frm.redemption_conversion_factor = r.message;
+						frm.events.set_loyalty_points(frm);
+					}
+				}
+			});
+		}
+	},
+
+	get_loyalty_details: function(frm) {
+		if (frm.doc.customer && frm.doc.redeem_loyalty_points) {
+			frappe.call({
+				method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details",
+				args: {
+					"customer": frm.doc.customer,
+					"loyalty_program": frm.doc.loyalty_program,
+					"expiry_date": frm.doc.posting_date,
+					"company": frm.doc.company
+				},
+				callback: function(r) {
+					if (r) {
+						frm.set_value("loyalty_redemption_account", r.message.expense_account);
+						frm.set_value("loyalty_redemption_cost_center", r.message.cost_center);
+						frm.redemption_conversion_factor = r.message.conversion_factor;
+					}
+				}
+			});
+		}
+	},
+
+	set_loyalty_points: function(frm) {
+		if (frm.redemption_conversion_factor) {
+			let loyalty_amount = flt(frm.redemption_conversion_factor*flt(frm.doc.loyalty_points), precision("loyalty_amount"));
+			var remaining_amount = flt(frm.doc.grand_total) - flt(frm.doc.total_advance) - flt(frm.doc.write_off_amount);
+			if (frm.doc.grand_total && (remaining_amount < loyalty_amount)) {
+				let redeemable_points = parseInt(remaining_amount/frm.redemption_conversion_factor);
+				frappe.throw(__("You can only redeem max {0} points in this order.",[redeemable_points]));
+			}
+			frm.set_value("loyalty_amount", loyalty_amount);
+		}
+	},
 });

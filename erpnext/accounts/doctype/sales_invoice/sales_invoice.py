@@ -134,7 +134,7 @@ class SalesInvoice(SellingController):
 		if self.is_pos and self.is_return:
 			self.verify_payment_amount_is_negative()
 
-		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points:
+		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points and not self.is_consolidated:
 			validate_loyalty_points(self, self.loyalty_points)
 
 	def validate_fixed_asset(self):
@@ -201,13 +201,13 @@ class SalesInvoice(SellingController):
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
-		if not self.is_return and self.loyalty_program:
+		if not self.is_return and not self.is_consolidated and self.loyalty_program:
 			self.make_loyalty_point_entry()
-		elif self.is_return and self.return_against and self.loyalty_program:
+		elif self.is_return and self.return_against and not self.is_consolidated and self.loyalty_program:
 			against_si_doc = frappe.get_doc("Sales Invoice", self.return_against)
 			against_si_doc.delete_loyalty_point_entry()
 			against_si_doc.make_loyalty_point_entry()
-		if self.redeem_loyalty_points and self.loyalty_points:
+		if self.redeem_loyalty_points and not self.is_consolidated and self.loyalty_points:
 			self.apply_loyalty_points()
 
 		# Healthcare Service Invoice.
@@ -266,9 +266,9 @@ class SalesInvoice(SellingController):
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
 			update_company_current_month_sales(self.company)
 			self.update_project()
-		if not self.is_return and self.loyalty_program:
+		if not self.is_return and not self.is_consolidated and self.loyalty_program:
 			self.delete_loyalty_point_entry()
-		elif self.is_return and self.return_against and self.loyalty_program:
+		elif self.is_return and self.return_against and not self.is_consolidated and self.loyalty_program:
 			against_si_doc = frappe.get_doc("Sales Invoice", self.return_against)
 			against_si_doc.delete_loyalty_point_entry()
 			against_si_doc.make_loyalty_point_entry()

@@ -210,9 +210,12 @@ erpnext.pos.PointOfSale = class PointOfSale {
 							},
 							onchange: () => {
 								let loyalty_program = this.loyalty_program_field.get_value();
-								if (loyalty_program && loyalty_program.length) {
+								if (loyalty_program) {
 									this.cart.events.get_loyalty_details(loyalty_program);
 									this.frm.set_value('loyalty_program', loyalty_program)
+									if (for_selection) {
+										frappe.db.set_value('Customer', this.frm.doc.customer, 'loyalty_program', loyalty_program);
+									}
 								}
 							}
 						},
@@ -495,12 +498,10 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	submit_pos_invoice() {
-		console.log(this.frm.doc.loyalty_program)
 		this.frm.savesubmit()
 			.then((r) => {
 				if (r && r.doc) {
 					this.frm.doc.docstatus = r.doc.docstatus;
-					console.log(r.doc.loyalty_program)
 					frappe.show_alert({
 						indicator: 'green',
 						message: __(`POS invoice ${r.doc.name} created succesfully`)

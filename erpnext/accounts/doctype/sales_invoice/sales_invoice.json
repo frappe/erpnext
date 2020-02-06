@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:05",
@@ -13,6 +12,7 @@
   "customer_name",
   "tax_id",
   "is_pos",
+  "is_consolidated",
   "pos_profile",
   "offline_pos_name",
   "is_return",
@@ -1563,13 +1563,20 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_consolidated",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Consolidated",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "links": [],
- "modified": "2019-12-30 19:15:59.580414",
+ "modified": "2020-02-03 12:15:41.414709",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

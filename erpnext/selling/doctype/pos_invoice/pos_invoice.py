@@ -7,7 +7,6 @@ import frappe
 from frappe.model.document import Document
 from erpnext.controllers.selling_controller import SellingController
 from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
-from frappe.model.mapper import get_mapped_doc
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
@@ -34,7 +33,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_write_off_account()
 		self.validate_account_for_change_amount()
 		self.validate_item_cost_centers()
-		self.set_status()
+		self.set_status(update=True)
 		if cint(self.is_pos):
 			self.validate_pos()
 			if not self.is_return:
@@ -97,6 +96,38 @@ class POSInvoice(SalesInvoice):
 			invoice_total = self.rounded_total or self.grand_total
 			if total_amount_in_payments < invoice_total:
 				frappe.throw(_("Total payments amount can't be greater than {}".format(-invoice_total)))
+
+	def set_status(self, update=False, status=None, update_modified=True):
+		if self.is_new():
+			if self.get('amended_from'):
+				self.status = 'Draft'
+			return
+
+		if not status:
+			if self.docstatus == 2:
+				status = "Cancelled"
+			elif self.docstatus == 1:
+				if self.consolidated_invoice:
+					self.status = "Consolidated"
+				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
+					self.status = "Overdue and Discounted"
+				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()):
+					self.status = "Overdue"
+				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
+					self.status = "Unpaid and Discounted"
+				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
+					self.status = "Unpaid"
+				elif self.is_return == 1:
+					self.status = "Returned"
+				elif flt(self.outstanding_amount)<=0:
+					self.status = "Paid"
+				else:
+					self.status = "Submitted"
+			else:
+				self.status = "Draft"
+
+		if update:
+			self.db_set('status', self.status, update_modified = update_modified)
 	
 	def set_pos_fields(self, for_validate=False):
 		"""Set retail related fields from POS Profiles"""
@@ -188,68 +219,3 @@ class POSInvoice(SalesInvoice):
 		for data in self.payments:
 			if not data.account:
 				data.account = get_bank_cash_account(data.mode_of_payment, self.company).get("account")
-
-def process_merging_into_sales_invoice():
-	filters = {
-		'consolidated_invoice': [ 'in', [ '', None ]]
-	}
-	pos_invoices = frappe.db.get_all('POS Invoice', filters=filters,
-		fields=['name', 'posting_date', 'grand_total', 'customer'])
-
-	# pos_invoice_customer_map = { 'Customer 1': [{}, {}, {}], 'Custoemr 2' : [{}] }
-	pos_invoice_customer_map = {}
-
-	for invoice in pos_invoices:
-		customer = invoice['customer']
-		pos_invoice_customer_map.setdefault(customer, [])
-		pos_invoice_customer_map[customer].append(invoice)
-	
-	create_sales_invoices(pos_invoice_customer_map)
-	create_merge_logs(pos_invoice_customer_map)
-
-def create_sales_invoices(pos_invoice_customer_map):
-	for customer, invoices in iteritems(pos_invoice_customer_map):
-		sales_invoice = frappe.new_doc('Sales Invoice')
-		sales_invoice.customer = customer
-		sales_invoice.is_pos = 1
-		sales_invoice.posting_date = getdate(nowdate())
-
-		for d in invoices:
-			d.consolidated_invoice = sales_invoice.name
-			doc = frappe.get_doc('POS Invoice', d.name)
-			sales_invoice = get_mapped_doc("POS Invoice", d.name, {
-				"POS Invoice": {
-					"doctype": "Sales Invoice",
-					"validation": {
-						"docstatus": ["=", 1]
-					}
-				},
-				"POS Invoice Item": {
-					"doctype": "Sales Invoice Item",
-				}
-			}, sales_invoice)
-
-		sales_invoice.save()
-		sales_invoice.submit()
-		doc.update({'consolidated_invoice': sales_invoice.name})
-		doc.save()
-
-
-def create_merge_logs(pos_invoice_customer_map):	
-	for customer, invoices in iteritems(pos_invoice_customer_map):
-		merge_log = frappe.new_doc('POS Invoice Merge Log')
-		merge_log.posting_date = getdate(nowdate())
-		merge_log.customer = customer
-
-		refs = []
-		for d in invoices:
-			refs.append({
-				'pos_invoice': d.name,
-				'date': d.posting_date,
-				'amount': d.grand_total
-			})
-			merge_log.consolidated_invoice = d.consolidated_invoice
-
-		merge_log.set('pos_invoices', refs)
-		merge_log.save()
-		merge_log.submit()

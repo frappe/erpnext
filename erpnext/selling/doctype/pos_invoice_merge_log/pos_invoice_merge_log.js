@@ -2,7 +2,15 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('POS Invoice Merge Log', {
-	// refresh: function(frm) {
-
-	// }
+	setup: function(frm) {
+		frm.set_query("pos_invoice", "pos_invoices", doc => {
+			return{
+				filters: { 
+					'docstatus': 1,
+					'customer': doc.customer, 
+					'consolidated_invoice': '' 
+				}
+			}
+		});
+	}
 });
