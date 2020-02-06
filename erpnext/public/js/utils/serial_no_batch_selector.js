@@ -12,6 +12,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		if (d.has_batch_no && (!d.batch_no || (this.show_dialog && this.show_dialog !== 'serial_no'))) {
 			this.has_batch = 1;
 			this.setup();
+		// !(this.show_dialog == false) ensures that show_dialog is implictly true, even when undefined
 		} else if(this.show_dialog || this.show_dialog === 'serial_no' || (d.has_serial_no && !d.has_batch_no)) {
 			this.has_batch = 0;
 			this.setup();
@@ -142,10 +143,6 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			title: title,
 			fields: fields
 		});
-
-		if (this.item.serial_no) {
-			this.dialog.fields_dict.serial_no.set_value(this.item.serial_no);
-		}
 
 		this.dialog.set_primary_action(__('Insert'), function() {
 			me.values = me.dialog.get_values();
@@ -436,6 +433,10 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 		if (me.warehouse_details.name) {
 			serial_no_filters['warehouse'] = me.warehouse_details.name;
+		}
+
+		if (me.item.batch_no) {
+			serial_no_filters['batch_no'] = me.item.batch_no;
 		}
 		return [
 			{fieldtype: 'Section Break', label: __('Serial Numbers')},
