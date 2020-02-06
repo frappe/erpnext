@@ -117,6 +117,13 @@ def get_data():
 					"name": "Lead Owner Efficiency",
 					"doctype": "Lead",
 					"dependencies": ["Lead"]
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Territory-wise Sales",
+					"doctype": "Opportunity",
+					"dependencies": ["Opportunity"]
 				}
 			]
 		},
