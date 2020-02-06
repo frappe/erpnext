@@ -1584,3 +1584,28 @@ def create_invoice_discounting(source_name, target_doc=None):
 	})
 
 	return invoice_discounting
+
+def get_all_sales_invoice_receivable_accounts(sales_invoice):
+	party_accounts = []
+
+	invoice_account = frappe.db.get_value("Sales Invoice", sales_invoice, "debit_to")
+	if invoice_account:
+		party_accounts.append(invoice_account)
+
+	all_invoice_discounting = frappe.db.sql("""
+		select par.accounts_receivable_discounted, par.accounts_receivable_unpaid, par.accounts_receivable_credit
+		from `tabInvoice Discounting` par
+		where par.docstatus=1 and exists(
+			select ch.name from `tabDiscounted Invoice` ch where par.name=ch.parent and ch.sales_invoice = %s
+		)
+	""", sales_invoice, as_dict=1)
+
+	for d in all_invoice_discounting:
+		if d.accounts_receivable_discounted:
+			party_accounts.append(d.accounts_receivable_discounted)
+		if d.accounts_receivable_unpaid:
+			party_accounts.append(d.accounts_receivable_unpaid)
+		if d.accounts_receivable_credit:
+			party_accounts.append(d.accounts_receivable_credit)
+
+	return list(set(party_accounts))

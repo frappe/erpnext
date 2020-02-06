@@ -12,6 +12,7 @@ from erpnext.accounts.party import validate_party_gle_currency, validate_party_f
 from erpnext.accounts.utils import get_account_currency, get_balance_on_voucher, get_fiscal_year
 from erpnext.exceptions import InvalidAccountCurrency
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_checks_for_pl_and_bs_accounts
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_all_sales_invoice_receivable_accounts
 
 exclude_from_linked_with = True
 class GLEntry(Document):
@@ -206,6 +207,11 @@ def update_outstanding_amt(voucher_type, voucher_no, account, party_type, party,
 		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 	else:
 		return
+
+	if voucher_type == "Sales Invoice":
+		receivable_accounts = get_all_sales_invoice_receivable_accounts(voucher_no)
+		if receivable_accounts:
+			account = list(set([account] + receivable_accounts))
 
 	bal = get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account, dr_or_cr=dr_or_cr)
 	ref_doc = frappe.get_doc(voucher_type, voucher_no)
