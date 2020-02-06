@@ -94,8 +94,10 @@ def get_data(filters=None):
 def get_opportunities(filters):
 	conditions = ""
 
-	if filters.from_date and filters.to_date:
-		conditions = " WHERE transaction_date between %(from_date)s and %(to_date)s"
+	if filters.get('transaction_date'):
+		conditions = " WHERE transaction_date between {0} and {1}".format(
+			frappe.db.escape(filters['transaction_date'][0]), 
+			frappe.db.escape(filters['transaction_date'][1]))
 	
 	if filters.company:
 		if conditions:
@@ -108,7 +110,7 @@ def get_opportunities(filters):
 	return frappe.db.sql("""
 		SELECT name, territory, opportunity_amount
 		FROM `tabOpportunity` {0}
-	""".format(conditions), filters, as_dict=1) #nosec
+	""".format(conditions), filters, as_dict=1, debug=1) #nosec
 
 def get_quotations(opportunities):
 	if not opportunities:
