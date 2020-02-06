@@ -63,15 +63,12 @@ $.extend(erpnext, {
 			let callback = '';
 			let on_close = '';
 
-			frappe.model.get_value('Item', {'name':grid_row.doc.item_code}, 'has_serial_no',
-				(data) => {
-					if(data) {
-						grid_row.doc.has_serial_no = data.has_serial_no;
-						me.show_serial_batch_selector(grid_row.frm, grid_row.doc,
-							callback, on_close, true);
-					}
-				}
-			);
+			if (grid_row.doc.serial_no) {
+				grid_row.doc.has_serial_no = true;
+			}
+
+			me.show_serial_batch_selector(grid_row.frm, grid_row.doc,
+				callback, on_close, 'serial_no');
 		});
 	},
 
@@ -89,7 +86,7 @@ $.extend(erpnext, {
 			});
 			frappe.set_route('Form','Journal Entry', journal_entry.name);
 		});
-	}
+	},
 });
 
 

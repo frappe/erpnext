@@ -11,6 +11,7 @@ from frappe.utils import flt, cint
 from frappe.utils.jinja import render_template
 from frappe.utils.data import add_days
 from six import string_types
+import json
 
 class UnableToSelectBatchError(frappe.ValidationError):
 	pass
@@ -258,13 +259,17 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	return batch_no
 
 @frappe.whitelist()
-def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1, conversion_factor=1):
+def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1, conversion_factor=1, exclude_batches=None):
 	if not warehouse or not qty:
 		return []
 
 	batches = get_batches(item_code, warehouse)
-
 	selected_batches = []
+
+	if isinstance(exclude_batches, string_types):
+		json.loads(exclude_batches)
+	if exclude_batches is None:
+		exclude_batches = []
 
 	qty = flt(qty)
 	conversion_factor = flt(conversion_factor or 1)
@@ -272,6 +277,9 @@ def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1, conversion_factor=
 	remaining_qty = stock_qty
 
 	for batch in batches:
+		if batch.name in exclude_batches:
+			continue
+
 		if remaining_qty <= 0:
 			break
 		if stock_qty <= flt(batch.qty):

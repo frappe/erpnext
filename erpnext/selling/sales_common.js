@@ -455,7 +455,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 						} else {
 							erpnext.show_serial_batch_selector(me.frm, doc, (item) => {
 								me.qty(item, item.doctype, item.name, true);
-							}, null, true, (obj) => {
+							}, null, 'batch_no', (obj) => {
 								obj.set_batch_nos(r.message);
 								obj.update_total_qty(doc.qty);
 							});

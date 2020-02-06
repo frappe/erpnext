@@ -5,11 +5,14 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		this.show_dialog = show_dialog;
 		// frm, item, warehouse_details, has_batch, oldest
 		let d = this.item;
-		if (d && d.has_batch_no && (!d.batch_no || this.show_dialog)) {
+
+		if (!d) {
+			return;
+		}
+		if (d.has_batch_no && (!d.batch_no || (this.show_dialog && this.show_dialog !== 'serial_no'))) {
 			this.has_batch = 1;
 			this.setup();
-		// !(this.show_dialog == false) ensures that show_dialog is implictly true, even when undefined
-		} else if(d && d.has_serial_no && !(this.show_dialog == false)) {
+		} else if(this.show_dialog || this.show_dialog === 'serial_no' || (d.has_serial_no && !d.has_batch_no)) {
 			this.has_batch = 0;
 			this.setup();
 		}
@@ -158,7 +161,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				this.dialog.set_value('serial_no', d.serial_no);
 			}
 
-			if (d.has_batch_no && d.batch_no) {
+			if (this.has_batch && d.batch_no) {
 				this.frm.doc.items.forEach(data => {
 					if(data.item_code == d.item_code) {
 						this.dialog.fields_dict.batches.df.data.push({
