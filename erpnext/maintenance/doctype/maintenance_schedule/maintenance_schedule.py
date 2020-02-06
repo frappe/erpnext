@@ -193,7 +193,7 @@ class MaintenanceSchedule(TransactionBase):
 
 			if sr_details.amc_expiry_date and getdate(sr_details.amc_expiry_date) >= getdate(amc_start_date):
 				throw(_("Serial No {0} is under maintenance contract upto {1}")
-					.format(serial_no, sr_details.amc_start_date))
+					.format(serial_no, sr_details.amc_expiry_date))
 
 			if not sr_details.warehouse and sr_details.delivery_date and \
 				getdate(sr_details.delivery_date) >= getdate(amc_start_date):
