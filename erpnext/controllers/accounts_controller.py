@@ -298,6 +298,8 @@ class AccountsController(TransactionBase):
 
 					if ret.get("pricing_rules"):
 						self.apply_pricing_rule_on_items(item, ret)
+						if self.docstatus == 1:
+							self.set_pricing_rules_table()
 
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)
@@ -593,6 +595,21 @@ class AccountsController(TransactionBase):
 		if lst:
 			from erpnext.accounts.utils import reconcile_against_document
 			reconcile_against_document(lst)
+
+	def set_pricing_rules_table(self):
+		if self.doctype in ['Purchase Order', 'Sales Order', 'Sales Invoice', 'Purchase Invoice',
+							'Supplier Quotation', 'Purchase Receipt', 'Delivery Note', 'Quotation']:
+			# Clear the child table if already set
+			# Only pricing rules which are applied will show up here
+			self.set("pricing_rules", [])
+
+			for item in self.items:
+				if item.pricing_rules:
+					self.append("pricing_rules", {
+						"pricing_rule": item.pricing_rules.split(",")[0], 
+						"item_code": item.item_code,
+						"rule_applied": 1
+					})
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
