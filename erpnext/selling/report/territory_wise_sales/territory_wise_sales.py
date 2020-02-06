@@ -110,7 +110,7 @@ def get_opportunities(filters):
 	return frappe.db.sql("""
 		SELECT name, territory, opportunity_amount
 		FROM `tabOpportunity` {0}
-	""".format(conditions), filters, as_dict=1, debug=1) #nosec
+	""".format(conditions), filters, as_dict=1) #nosec
 
 def get_quotations(opportunities):
 	if not opportunities:
