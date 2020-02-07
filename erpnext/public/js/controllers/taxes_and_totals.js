@@ -35,7 +35,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		// Advance calculation applicable to Sales /Purchase Invoice
 		if(in_list(["Sales Invoice", "Purchase Invoice"], this.frm.doc.doctype)
 			&& this.frm.doc.docstatus < 2 && !this.frm.doc.is_return) {
-			console.log('Here');
 			this.calculate_total_advance(update_paid_amount);
 		}
 
