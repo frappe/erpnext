@@ -379,6 +379,7 @@ def auto_make_serial_nos(args):
 			if sr.sales_order and args.get('voucher_type') == "Stock Entry" \
 				and not args.get('actual_qty', 0) > 0:
 				sr.sales_order = None
+			sr.update_serial_no_reference()
 			sr.save(ignore_permissions=True)
 		elif args.get('actual_qty', 0) > 0:
 			created_numbers.append(make_serial_no(serial_no, args))
