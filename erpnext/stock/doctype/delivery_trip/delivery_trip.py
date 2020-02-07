@@ -189,22 +189,6 @@ class DeliveryTrip(Document):
 
 		return route_list
 
-	def sanitize_address(self, address):
-		"""
-		Remove HTML breaks in a given address
-
-		Args:
-			address (str): Address to be sanitized
-
-		Returns:
-			(str): Sanitized address
-		"""
-
-		address = address.split('<br>')
-
-		# Only get the first 4 blocks of the address
-		return ', '.join(address[:3])
-
 	def rearrange_stops(self, optimized_order, start):
 		"""
 		Re-arrange delivery stops based on order optimized
