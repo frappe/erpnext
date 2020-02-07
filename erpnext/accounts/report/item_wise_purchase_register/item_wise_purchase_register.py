@@ -6,7 +6,7 @@ import frappe, erpnext
 from frappe import _
 from frappe.utils import flt
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import (get_tax_accounts,
-	get_grand_total, add_total_row, get_display_value, get_group_by_and_display_fields, update_total_row,
+	get_grand_total, add_total_row, get_display_value, get_group_by_and_display_fields, add_sub_total_row,
 	get_group_by_conditions)
 
 def execute(filters=None):
@@ -29,6 +29,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 
 	data = []
 	total_row_map = {}
+	skip_total_row = 0
 	prev_group_by_value = ''
 
 	if filters.get('group_by'):
@@ -96,8 +97,8 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			row.update({'percent_gt': flt(row['total']/grand_total) * 100})
 			group_by_field, subtotal_display_field = get_group_by_and_display_fields(filters)
 			data, prev_group_by_value = add_total_row(data, filters, prev_group_by_value, d, total_row_map,
-				group_by_field, subtotal_display_field, grand_total)
-			update_total_row(row, total_row_map, d.get(group_by_field, ''), tax_columns)
+				group_by_field, subtotal_display_field, grand_total, tax_columns)
+			add_sub_total_row(row, total_row_map, d.get(group_by_field, ''), tax_columns)
 
 		data.append(row)
 
@@ -106,8 +107,11 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		total_row['percent_gt'] = flt(total_row['total']/grand_total * 100)
 		data.append(total_row)
 		data.append({})
+		add_sub_total_row(total_row, total_row_map, 'total_row', tax_columns)
+		data.append(total_row_map.get('total_row'))
+		skip_total_row = 1
 
-	return columns, data
+	return columns, data, None, None, None, skip_total_row
 
 
 def get_columns(additional_table_columns, filters):
