@@ -35,7 +35,7 @@ class BankReconciliation(Document):
 				and ifnull(t1.is_opening, 'No') = 'No' %(condition)s
 			group by t2.account, t1.name
 			order by t1.posting_date ASC, t1.name DESC
-		""", {"condition":condition, "account":self.account, "from":self.from_date, "to":self.to_date}, as_dict=1)
+		""", {"condition":condition, "account": self.account, "from": self.from_date, "to": self.to_date}, as_dict=1)
 
 		payment_entries = frappe.db.sql("""
 			select
@@ -52,8 +52,8 @@ class BankReconciliation(Document):
 				and bank_account = %(bank_account)s
 			order by
 				posting_date ASC, name DESC
-		""", {"account":self.account, "from":self.from_date,
-				"to":self.to_date, "bank_account": self.bank_account}, as_dict=1)
+		""", {"account": self.account, "from":self.from_date,
+				"to": self.to_date, "bank_account": self.bank_account}, as_dict=1)
 
 		pos_entries = []
 		if self.include_pos_transactions:
