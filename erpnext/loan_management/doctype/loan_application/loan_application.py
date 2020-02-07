@@ -134,7 +134,10 @@ def create_loan(source_name, target_doc=None, submit=0):
 			"validation": {
 				"docstatus": ["=", 1]
 			},
-			"postprocess": update_accounts
+			"postprocess": update_accounts,
+			"field_no_map": [
+				"is_secured_loan"
+			]
 		}
 	}, target_doc)
 

@@ -17,18 +17,17 @@ class TestLoanApplication(unittest.TestCase):
 		self.create_loan_application()
 
 	def create_loan_application(self):
-		if not frappe.db.get_value("Loan Application", {"applicant":self.applicant}, "name"):
-			loan_application = frappe.new_doc("Loan Application")
-			loan_application.update({
-				"applicant": self.applicant,
-				"loan_type": "Home Loan",
-				"rate_of_interest": 9.2,
-				"loan_amount": 250000,
-				"repayment_method": "Repay Over Number of Periods",
-				"repayment_periods": 18,
-				"company": "_Test Company"
-			})
-			loan_application.insert()
+		loan_application = frappe.new_doc("Loan Application")
+		loan_application.update({
+			"applicant": self.applicant,
+			"loan_type": "Home Loan",
+			"rate_of_interest": 9.2,
+			"loan_amount": 250000,
+			"repayment_method": "Repay Over Number of Periods",
+			"repayment_periods": 18,
+			"company": "_Test Company"
+		})
+		loan_application.insert()
 
 
 	def test_loan_totals(self):

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "LM-LIA-.#####",
  "creation": "2019-09-09 22:34:36.346812",
  "doctype": "DocType",
@@ -138,13 +139,15 @@
  ],
  "in_create": 1,
  "is_submittable": 1,
- "modified": "2019-10-09 09:26:00.091765",
+ "links": [],
+ "modified": "2020-02-07 01:22:06.924125",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Interest Accrual",
  "owner": "Administrator",
  "permissions": [
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -154,9 +157,11 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -166,6 +171,7 @@
    "report": 1,
    "role": "Loan Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

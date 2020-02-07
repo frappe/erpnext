@@ -252,7 +252,7 @@
    "default": "0",
    "fieldname": "total_payment",
    "fieldtype": "Currency",
-   "label": "Total Payment",
+   "label": "Total Payable Amount",
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -350,7 +350,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-03 05:04:58.629929",
+ "modified": "2020-02-07 01:31:25.172173",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
