@@ -265,7 +265,7 @@
    "bold": 1,
    "fieldname": "person_to_be_contacted",
    "fieldtype": "Data",
-   "label": "Emergency Contact"
+   "label": "Emergency Contact Name"
   },
   {
    "fieldname": "relation",
@@ -787,7 +787,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2019-12-11 13:22:18.323622",
+ "modified": "2020-01-09 04:23:55.611366",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

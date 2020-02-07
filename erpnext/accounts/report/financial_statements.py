@@ -13,7 +13,7 @@ import frappe, erpnext
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
 from erpnext.accounts.utils import get_fiscal_year
 from frappe import _
-from frappe.utils import (flt, getdate, get_first_day, add_months, add_days, formatdate)
+from frappe.utils import (flt, getdate, get_first_day, add_months, add_days, formatdate, cstr)
 
 from six import itervalues
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
@@ -175,7 +175,7 @@ def calculate_values(
 			d = accounts_by_name.get(entry.account)
 			if not d:
 				frappe.msgprint(
-					_("Could not retrieve information for {0}.".format(entry.account)), title="Error",
+					_("Could not retrieve information for {0}.").format(entry.account), title="Error",
 					raise_exception=1
 				)
 			for period in period_list:
@@ -348,40 +348,42 @@ def set_gl_entries_by_account(
 	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
 
 	accounts = frappe.db.sql_list("""select name from `tabAccount`
-		where lft >= %s and rgt <= %s""", (root_lft, root_rgt))
-	additional_conditions += " and account in ({})"\
-		.format(", ".join([frappe.db.escape(d) for d in accounts]))
+		where lft >= %s and rgt <= %s and company = %s""", (root_lft, root_rgt, company))
 
-	gl_filters = {
-		"company": company,
-		"from_date": from_date,
-		"to_date": to_date,
-		"finance_book": filters.get("finance_book")
-	}
+	if accounts:
+		additional_conditions += " and account in ({})"\
+			.format(", ".join([frappe.db.escape(d) for d in accounts]))
 
-	if filters.get("include_default_book_entries"):
-		gl_filters["company_fb"] = frappe.db.get_value("Company",
-			company, 'default_finance_book')
+		gl_filters = {
+			"company": company,
+			"from_date": from_date,
+			"to_date": to_date,
+			"finance_book": cstr(filters.get("finance_book"))
+		}
 
-	for key, value in filters.items():
-		if value:
-			gl_filters.update({
-				key: value
-			})
+		if filters.get("include_default_book_entries"):
+			gl_filters["company_fb"] = frappe.db.get_value("Company",
+				company, 'default_finance_book')
 
-	gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
-		where company=%(company)s
-		{additional_conditions}
-		and posting_date <= %(to_date)s
-		order by account, posting_date""".format(additional_conditions=additional_conditions), gl_filters, as_dict=True) #nosec
+		for key, value in filters.items():
+			if value:
+				gl_filters.update({
+					key: value
+				})
 
-	if filters and filters.get('presentation_currency'):
-		convert_to_presentation_currency(gl_entries, get_currency(filters))
+		gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
+			where company=%(company)s
+			{additional_conditions}
+			and posting_date <= %(to_date)s
+			order by account, posting_date""".format(additional_conditions=additional_conditions), gl_filters, as_dict=True) #nosec
 
-	for entry in gl_entries:
-		gl_entries_by_account.setdefault(entry.account, []).append(entry)
+		if filters and filters.get('presentation_currency'):
+			convert_to_presentation_currency(gl_entries, get_currency(filters))
 
-	return gl_entries_by_account
+		for entry in gl_entries:
+			gl_entries_by_account.setdefault(entry.account, []).append(entry)
+
+		return gl_entries_by_account
 
 
 def get_additional_conditions(from_date, ignore_closing_entries, filters):
@@ -406,12 +408,11 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 			filters.cost_center = get_cost_centers_with_children(filters.cost_center)
 			additional_conditions.append("cost_center in %(cost_center)s")
 
-		if filters.get("finance_book"):
-			if filters.get("include_default_book_entries"):
-				additional_conditions.append("finance_book in (%(finance_book)s, %(company_fb)s)")
-			else:
-				additional_conditions.append("finance_book in (%(finance_book)s)")
-
+		if filters.get("include_default_book_entries"):
+			additional_conditions.append("(finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)")
+		else:
+			additional_conditions.append("(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)")
+		
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
 			if filters.get(dimension):
@@ -430,7 +431,7 @@ def get_cost_centers_with_children(cost_centers):
 			children = frappe.get_all("Cost Center", filters={"lft": [">=", lft], "rgt": ["<=", rgt]})
 			all_cost_centers += [c.name for c in children]
 		else:
-			frappe.throw(_("Cost Center: {0} does not exist".format(d)))
+			frappe.throw(_("Cost Center: {0} does not exist").format(d))
 
 	return list(set(all_cost_centers))
 

@@ -13,7 +13,7 @@ from frappe.model.document import Document
 
 
 class ItemPrice(Document):
-	
+
 	def validate(self):
 		self.validate_item()
 		self.validate_dates()
@@ -51,7 +51,7 @@ class ItemPrice(Document):
 	def check_duplicates(self):
 		conditions = "where item_code=%(item_code)s and price_list=%(price_list)s and name != %(name)s"
 
-		for field in ['uom', 'min_qty', 'valid_from',
+		for field in ['uom', 'valid_from',
 			'valid_upto', 'packing_unit', 'customer', 'supplier']:
 			if self.get(field):
 				conditions += " and {0} = %({1})s".format(field, field)
