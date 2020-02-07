@@ -28,6 +28,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 
 	data = []
 	total_row_map = {}
+	skip_total_row = 0
 	prev_group_by_value = ''
 
 	if filters.get('group_by'):
@@ -105,7 +106,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			row.update({'percent_gt': flt(row['total']/grand_total) * 100})
 			group_by_field, subtotal_display_field = get_group_by_and_display_fields(filters)
 			data, prev_group_by_value = add_total_row(data, filters, prev_group_by_value, d, total_row_map,
-				group_by_field, subtotal_display_field, grand_total)
+				group_by_field, subtotal_display_field, grand_total, tax_columns)
 			add_sub_total_row(row, total_row_map, d.get(group_by_field, ''), tax_columns)
 
 		data.append(row)
@@ -115,8 +116,11 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		total_row['percent_gt'] = flt(total_row['total']/grand_total * 100)
 		data.append(total_row)
 		data.append({})
-
-	return columns, data
+		add_sub_total_row(total_row, total_row_map, 'total_row', tax_columns)
+		data.append(total_row_map.get('total_row'))
+		skip_total_row = 1
+	
+	return columns, data, None, None, None, skip_total_row
 
 def get_columns(additional_table_columns, filters):
 	columns = []
@@ -541,13 +545,13 @@ def get_tax_accounts(item_list, columns, company_currency,
 	return itemised_tax, tax_columns
 
 def add_total_row(data, filters, prev_group_by_value, item, total_row_map,
-	group_by_field, subtotal_display_field, grand_total):
+	group_by_field, subtotal_display_field, grand_total, tax_columns):
 	if prev_group_by_value != item.get(group_by_field, ''):
 		if prev_group_by_value:
 			total_row = total_row_map.get(prev_group_by_value)
-			total_row['percent_gt'] = flt(total_row['total']/grand_total * 100)
 			data.append(total_row)
 			data.append({})
+			add_sub_total_row(total_row, total_row_map, 'total_row', tax_columns)
 
 		prev_group_by_value = item.get(group_by_field, '')
 
@@ -557,7 +561,18 @@ def add_total_row(data, filters, prev_group_by_value, item, total_row_map,
 			'amount': 0.0,
 			'bold': 1,
 			'total_tax': 0.0,
-			'total': 0.0
+			'total': 0.0,
+			'percent_gt': 0.0
+		})
+
+		total_row_map.setdefault('total_row', {
+			subtotal_display_field: "Total",
+			'stock_qty': 0.0,
+			'amount': 0.0,
+			'bold': 1,
+			'total_tax': 0.0,
+			'total': 0.0,
+			'percent_gt': 0.0
 		})
 
 	return data, prev_group_by_value
@@ -600,6 +615,7 @@ def add_sub_total_row(item, total_row_map, group_by_value, tax_columns):
 	total_row['amount'] += item['amount']
 	total_row['total_tax'] += item['total_tax']
 	total_row['total'] += item['total']
+	total_row['percent_gt'] += item['percent_gt']
 
 	for tax in tax_columns:
 		total_row.setdefault(frappe.scrub(tax + ' Amount'), 0.0)
