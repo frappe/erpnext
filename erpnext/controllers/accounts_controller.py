@@ -58,7 +58,7 @@ class AccountsController(TransactionBase):
 					(is_supplier_payment and supplier.hold_type in ['All', 'Payments']):
 				if not supplier.release_date or getdate(nowdate()) <= supplier.release_date:
 					frappe.msgprint(
-						_('{0} is blocked so this transaction cannot proceed'.format(supplier_name)), raise_exception=1)
+						_('{0} is blocked so this transaction cannot proceed').format(supplier_name), raise_exception=1)
 
 	def validate(self):
 		if not self.get('is_return'):
@@ -926,7 +926,7 @@ def validate_taxes_and_charges(tax):
 			frappe.throw(
 				_("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"))
 		elif not tax.row_id:
-			frappe.throw(_("Please specify a valid Row ID for row {0} in table {1}".format(tax.idx, _(tax.doctype))))
+			frappe.throw(_("Please specify a valid Row ID for row {0} in table {1}").format(tax.idx, _(tax.doctype)))
 		elif tax.row_id and cint(tax.row_id) >= cint(tax.idx):
 			frappe.throw(_("Cannot refer row number greater than or equal to current row number for this Charge type"))
 
@@ -1173,7 +1173,7 @@ def check_and_delete_children(parent, data):
 
 		if parent.doctype == "Purchase Order" and flt(d.received_qty):
 			frappe.throw(_("Row #{0}: Cannot delete item {1} which has already been received").format(d.idx, d.item_code))
-		
+
 		if flt(d.billed_amt):
 			frappe.throw(_("Row #{0}: Cannot delete item {1} which has already been billed.").format(d.idx, d.item_code))
 
