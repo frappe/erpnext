@@ -38,7 +38,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			this.calculate_total_advance(update_paid_amount);
 		}
 
-		if (this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.is_pos && 
+		if (this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.is_pos &&
 			this.frm.doc.is_return) {
 			this.update_paid_amount_for_return();
 		}
@@ -643,23 +643,23 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		var me = this;
 		var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 
-			if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
-				var total_amount_to_pay = flt((grand_total - this.frm.doc.total_advance
-					- this.frm.doc.write_off_amount), precision("grand_total"));
-			} else {
-				var total_amount_to_pay = flt(
-					(flt(grand_total*this.frm.doc.conversion_rate, precision("grand_total"))
-						- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount),
-					precision("base_grand_total")
-				);
-			}
-			
-			$.each(this.frm.doc['payments'] || [], function(index, data) {
-				data.base_amount = flt(total_amount_to_pay, precision("base_amount"));
-				data.amount = flt(total_amount_to_pay / me.frm.doc.conversion_rate, precision("amount"));
-			});	
+		if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
+			var total_amount_to_pay = flt((grand_total - this.frm.doc.total_advance
+				- this.frm.doc.write_off_amount), precision("grand_total"));
+		} else {
+			var total_amount_to_pay = flt(
+				(flt(grand_total*this.frm.doc.conversion_rate, precision("grand_total"))
+					- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount),
+				precision("base_grand_total")
+			);
+		}
 
-			this.calculate_paid_amount();
+		$.each(this.frm.doc['payments'] || [], function(index, data) {
+			data.base_amount = flt(total_amount_to_pay, precision("base_amount"));
+			data.amount = flt(total_amount_to_pay / me.frm.doc.conversion_rate, precision("amount"));
+		});
+
+		this.calculate_paid_amount();
 	},
 
 	set_default_payment: function(total_amount_to_pay, update_paid_amount) {
