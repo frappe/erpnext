@@ -174,7 +174,7 @@ class Appointment(Document):
 			'status': 'Open',
 			'type': 'Public',
 			'send_reminder': frappe.db.get_single_value('Appointment Booking Settings', 'email_reminders'),
-			'event_participants': [dict(reference_doctype='Lead', reference_docname=self.party)]
+			'event_participants': [dict(reference_doctype=self.appointment_with, reference_docname=self.party)]
 		})
 		employee = _get_employee_from_user(self._assign)
 		if employee:
