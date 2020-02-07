@@ -262,6 +262,30 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEqual(pr2.per_billed, 80)
 		self.assertEqual(pr2.status, "To Bill")
 
+	def test_serial_no_against_purchase_receipt(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		item_code = "Test Manual Created Serial No"
+		if not frappe.db.exists("Item", item_code):
+			item = make_item(item_code, dict(has_serial_no=1))
+
+		serial_no = random_string(5)
+		pr_doc = make_purchase_receipt(item_code=item_code,
+			qty=1, serial_no = serial_no)
+
+		self.assertEqual(serial_no, frappe.db.get_value("Serial No",
+			{"purchase_document_type": "Purchase Receipt", "purchase_document_no": pr_doc.name}, "name"))
+
+		item_code = "Test Auto Created Serial No"
+		if not frappe.db.exists("Item", item_code):
+			item = make_item(item_code, dict(has_serial_no=1, serial_no_series="KLJL.###"))
+
+		new_pr_doc = make_purchase_receipt(item_code=item_code, qty=1)
+
+		serial_no = get_serial_nos(new_pr_doc[0].serial_no)[0]
+		self.assertEqual(serial_no, frappe.db.get_value("Serial No",
+			{"purchase_document_type": "Purchase Receipt", "purchase_document_no": new_pr_doc.name}, "name"))
+
 	def test_not_accept_duplicate_serial_no(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
