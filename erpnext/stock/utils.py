@@ -248,6 +248,10 @@ def is_group_warehouse(warehouse):
 	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
 		frappe.throw(_("Group node warehouse is not allowed to select for transactions"))
 
+def get_available_serial_nos(item_code, warehouse):
+	return frappe.get_all("Serial No", filters={'item_code': item_code,
+		'warehouse': warehouse, 'delivery_document_no': ''}) or []
+
 def format_item_name(doc):
 	if doc.get('item_name') and doc.get('item_name') != doc.get('item_code'):
 		if doc.get('hide_item_code'):
@@ -272,7 +276,7 @@ def update_included_uom_in_list_report(columns, result, include_uom, conversion_
 			if convertible_cols[col_idx] == 'rate':
 				columns[col_idx+1]['label'] += " (per {})".format(include_uom)
 			else:
-				columns[next_col]['label'] += ' ({})'.format(include_uom)
+				columns[col_idx+1]['label'] += " ({})".format(include_uom)
 
 	for row_idx, row in enumerate(result):
 		new_row = []
