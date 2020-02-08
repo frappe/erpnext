@@ -76,7 +76,7 @@ def validate_party(filters):
 
 def set_account_currency(filters):
 	filters["company_currency"] = frappe.get_cached_value('Company',  filters.company,  "default_currency")
-	if filters.get("account") or filters.get('party') and len(filters.party) == 1):
+	if filters.get("account") or filters.get('party') and len(filters.party) == 1:
 		account_currency = None
 
 		if filters.get("account"):
