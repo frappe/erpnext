@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "cypress": "^3.4.1",
-    "snyk": "^1.288.0"
+    "snyk": "^1.290.1"
   },
   "scripts": {
     "snyk-protect": "snyk protect",
