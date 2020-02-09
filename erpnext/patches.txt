@@ -13,6 +13,7 @@ erpnext.patches.v4_0.apply_user_permissions
 erpnext.patches.v4_0.move_warehouse_user_to_restrictions
 erpnext.patches.v4_0.global_defaults_to_system_settings
 erpnext.patches.v4_0.update_incharge_name_to_sales_person_in_maintenance_schedule
+execute:frappe.reload_doc("HR", "doctype", "HR Settings") #2020-01-16
 execute:frappe.reload_doc('stock', 'doctype', 'warehouse') # 2017-04-24
 execute:frappe.reload_doc('accounts', 'doctype', 'sales_invoice') # 2016-08-31
 execute:frappe.reload_doc('selling', 'doctype', 'sales_order') # 2014-01-29
@@ -513,7 +514,6 @@ erpnext.patches.v11_0.rename_employee_loan_to_loan
 erpnext.patches.v11_0.move_leave_approvers_from_employee #13-06-2018
 erpnext.patches.v11_0.update_department_lft_rgt
 erpnext.patches.v11_0.add_default_email_template_for_leave
-execute:frappe.reload_doc("HR", "doctype", "HR Settings")
 erpnext.patches.v11_0.set_default_email_template_in_hr #08-06-2018
 erpnext.patches.v11_0.uom_conversion_data #30-06-2018
 erpnext.patches.v10_0.taxes_issue_with_pos
@@ -586,6 +586,7 @@ erpnext.patches.v11_0.add_permissions_in_gst_settings
 erpnext.patches.v11_1.setup_guardian_role
 execute:frappe.delete_doc('DocType', 'Notification Control')
 erpnext.patches.v12_0.set_gst_category
+erpnext.patches.v12_0.update_gst_category
 erpnext.patches.v11_0.remove_barcodes_field_from_copy_fields_to_variants
 erpnext.patches.v12_0.set_task_status
 erpnext.patches.v11_0.make_italian_localization_fields # 26-03-2019
@@ -638,10 +639,21 @@ erpnext.patches.v12_0.add_variant_of_in_item_attribute_table
 erpnext.patches.v12_0.rename_bank_account_field_in_journal_entry_account
 erpnext.patches.v12_0.create_default_energy_point_rules
 erpnext.patches.v12_0.set_produced_qty_field_in_sales_order_for_work_order
-erpnext.patches.v12_0.generate_leave_ledger_entries
 erpnext.patches.v12_0.set_default_shopify_app_type
+erpnext.patches.v12_0.set_cwip_and_delete_asset_settings
 erpnext.patches.v12_0.set_expense_account_in_landed_cost_voucher_taxes
 erpnext.patches.v12_0.replace_accounting_with_accounts_in_home_settings
 erpnext.patches.v12_0.set_payment_entry_status
 erpnext.patches.v12_0.update_owner_fields_in_acc_dimension_custom_fields
+erpnext.patches.v12_0.add_export_type_field_in_party_master
+erpnext.patches.v12_0.remove_denied_leaves_from_leave_ledger
+erpnext.patches.v12_0.update_price_or_product_discount
+erpnext.patches.v12_0.set_production_capacity_in_workstation
+erpnext.patches.v12_0.set_employee_preferred_emails
+erpnext.patches.v12_0.set_against_blanket_order_in_sales_and_purchase_order
+erpnext.patches.v12_0.set_cost_center_in_child_table_of_expense_claim
+erpnext.patches.v12_0.set_lead_title_field
+erpnext.patches.v12_0.set_permission_einvoicing
+erpnext.patches.v12_0.set_published_in_hub_tracked_item
+erpnext.patches.v12_0.set_job_offer_applicant_email
 erpnext.patches.v12_0.create_irs_1099_field_united_states

@@ -125,7 +125,6 @@ class Item(WebsiteGenerator):
 		self.validate_auto_reorder_enabled_in_stock_settings()
 		self.cant_change()
 		self.update_show_in_website()
-		self.validate_manufacturer()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -144,13 +143,6 @@ class Item(WebsiteGenerator):
 		'''Clean HTML description if set'''
 		if cint(frappe.db.get_single_value('Stock Settings', 'clean_description_html')):
 			self.description = clean_html(self.description)
-
-	def validate_manufacturer(self):
-		list_man = [(x.manufacturer, x.manufacturer_part_no) for x in self.get('manufacturers')]
-		set_man = set(list_man)
-
-		if len(list_man) != len(set_man):
-			frappe.throw(_("Duplicate entry in Manufacturers table"))
 
 	def validate_customer_provided_part(self):
 		if self.is_customer_provided_item:
@@ -559,7 +551,7 @@ class Item(WebsiteGenerator):
 						"""select parent from `tabItem Barcode` where barcode = %s and parent != %s""", (item_barcode.barcode, self.name))
 					if duplicate:
 						frappe.throw(_("Barcode {0} already used in Item {1}").format(
-							item_barcode.barcode, duplicate[0][0]), frappe.DuplicateEntryError)
+							item_barcode.barcode, duplicate[0][0]))
 
 					item_barcode.barcode_type = "" if item_barcode.barcode_type not in options else item_barcode.barcode_type
 					if item_barcode.barcode_type and item_barcode.barcode_type.upper() in ('EAN', 'UPC-A', 'EAN-13', 'EAN-8'):
@@ -645,7 +637,7 @@ class Item(WebsiteGenerator):
 											json.dumps(item_wise_tax_detail), update_modified=False)
 
 	def set_last_purchase_rate(self, new_name):
-		last_purchase_rate = get_last_purchase_details(new_name).get("base_rate", 0)
+		last_purchase_rate = get_last_purchase_details(new_name).get("base_net_rate", 0)
 		frappe.db.set_value("Item", new_name, "last_purchase_rate", last_purchase_rate)
 
 	def recalculate_bin_qty(self, new_name):
@@ -822,7 +814,7 @@ class Item(WebsiteGenerator):
 			for d in self.attributes:
 				if d.attribute in attributes:
 					frappe.throw(
-						_("Attribute {0} selected multiple times in Attributes Table".format(d.attribute)))
+						_("Attribute {0} selected multiple times in Attributes Table").format(d.attribute))
 				else:
 					attributes.append(d.attribute)
 
@@ -884,6 +876,54 @@ class Item(WebsiteGenerator):
 			if not enabled:
 				frappe.msgprint(msg=_("You have to enable auto re-order in Stock Settings to maintain re-order levels."), title=_("Enable Auto Re-Order"), indicator="orange")
 
+	def create_onboarding_docs(self, args):
+		defaults = frappe.defaults.get_defaults()
+		for i in range(1, args.get('max_count')):
+			item = args.get('item_' + str(i))
+			if item:
+				default_warehouse = ''
+				default_warehouse = frappe.db.get_value('Warehouse', filters={
+					'warehouse_name': _('Finished Goods'),
+					'company': defaults.get('company_name')
+				})
+
+				try:
+					frappe.get_doc({
+						'doctype': self.doctype,
+						'item_code': item,
+						'item_name': item,
+						'description': item,
+						'show_in_website': 1,
+						'is_sales_item': 1,
+						'is_purchase_item': 1,
+						'is_stock_item': 1,
+						'item_group': _('Products'),
+						'stock_uom': _(args.get('item_uom_' + str(i))),
+						'item_defaults': [{
+							'default_warehouse': default_warehouse,
+							'company': defaults.get('company_name')
+						}]
+					}).insert()
+
+				except frappe.NameError:
+					pass
+				else:
+					if args.get('item_price_' + str(i)):
+						item_price = flt(args.get('tem_price_' + str(i)))
+
+						price_list_name = frappe.db.get_value('Price List', {'selling': 1})
+						make_item_price(item, price_list_name, item_price)
+						price_list_name = frappe.db.get_value('Price List', {'buying': 1})
+						make_item_price(item, price_list_name, item_price)
+
+def make_item_price(item, price_list_name, item_price):
+	frappe.get_doc({
+		'doctype': 'Item Price',
+		'price_list': price_list_name,
+		'item_code': item,
+		'price_list_rate': item_price
+	}).insert()
+
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''
 	out = {}
@@ -942,7 +982,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	last_purchase_order = frappe.db.sql("""\
 		select po.name, po.transaction_date, po.conversion_rate,
 			po_item.conversion_factor, po_item.base_price_list_rate,
-			po_item.discount_percentage, po_item.base_rate
+			po_item.discount_percentage, po_item.base_rate, po_item.base_net_rate
 		from `tabPurchase Order` po, `tabPurchase Order Item` po_item
 		where po.docstatus = 1 and po_item.item_code = %s and po.name != %s and
 			po.name = po_item.parent
@@ -953,7 +993,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	last_purchase_receipt = frappe.db.sql("""\
 		select pr.name, pr.posting_date, pr.posting_time, pr.conversion_rate,
 			pr_item.conversion_factor, pr_item.base_price_list_rate, pr_item.discount_percentage,
-			pr_item.base_rate
+			pr_item.base_rate, pr_item.base_net_rate
 		from `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pr_item
 		where pr.docstatus = 1 and pr_item.item_code = %s and pr.name != %s and
 			pr.name = pr_item.parent
@@ -984,6 +1024,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	out = frappe._dict({
 		"base_price_list_rate": flt(last_purchase.base_price_list_rate) / conversion_factor,
 		"base_rate": flt(last_purchase.base_rate) / conversion_factor,
+		"base_net_rate": flt(last_purchase.net_rate) / conversion_factor,
 		"discount_percentage": flt(last_purchase.discount_percentage),
 		"purchase_date": purchase_date
 	})
@@ -992,7 +1033,8 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	out.update({
 		"price_list_rate": out.base_price_list_rate / conversion_rate,
 		"rate": out.base_rate / conversion_rate,
-		"base_rate": out.base_rate
+		"base_rate": out.base_rate,
+		"base_net_rate": out.base_net_rate
 	})
 
 	return out

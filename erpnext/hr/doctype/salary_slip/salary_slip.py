@@ -50,7 +50,8 @@ class SalarySlip(TransactionBase):
 		self.calculate_net_pay()
 
 		company_currency = erpnext.get_company_currency(self.company)
-		self.total_in_words = money_in_words(self.rounded_total, company_currency)
+		total = self.net_pay if self.is_rounding_total_disabled() else self.rounded_total
+		self.total_in_words = money_in_words(total, company_currency)
 
 		if frappe.db.get_single_value("HR Settings", "max_working_hours_against_timesheet"):
 			max_working_hours = frappe.db.get_single_value("HR Settings", "max_working_hours_against_timesheet")
@@ -89,6 +90,9 @@ class SalarySlip(TransactionBase):
 	def validate_dates(self):
 		if date_diff(self.end_date, self.start_date) < 0:
 			frappe.throw(_("To date cannot be before From date"))
+
+	def is_rounding_total_disabled(self):
+		return cint(frappe.db.get_single_value("HR Settings", "disable_rounded_total"))
 
 	def check_existing(self):
 		if not self.salary_slip_based_on_timesheet:
@@ -360,11 +364,11 @@ class SalarySlip(TransactionBase):
 			return amount
 
 		except NameError as err:
-			frappe.throw(_("Name error: {0}".format(err)))
+			frappe.throw(_("Name error: {0}").format(err))
 		except SyntaxError as err:
-			frappe.throw(_("Syntax error in formula or condition: {0}".format(err)))
+			frappe.throw(_("Syntax error in formula or condition: {0}").format(err))
 		except Exception as e:
-			frappe.throw(_("Error in formula or condition: {0}".format(e)))
+			frappe.throw(_("Error in formula or condition: {0}").format(e))
 			raise
 
 	def add_employee_benefits(self, payroll_period):
@@ -701,11 +705,11 @@ class SalarySlip(TransactionBase):
 			if condition:
 				return frappe.safe_eval(condition, self.whitelisted_globals, data)
 		except NameError as err:
-			frappe.throw(_("Name error: {0}".format(err)))
+			frappe.throw(_("Name error: {0}").format(err))
 		except SyntaxError as err:
-			frappe.throw(_("Syntax error in condition: {0}".format(err)))
+			frappe.throw(_("Syntax error in condition: {0}").format(err))
 		except Exception as e:
-			frappe.throw(_("Error in formula or condition: {0}".format(e)))
+			frappe.throw(_("Error in formula or condition: {0}").format(e))
 			raise
 
 	def get_salary_slip_row(self, salary_component):

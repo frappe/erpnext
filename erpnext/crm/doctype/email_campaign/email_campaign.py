@@ -41,7 +41,8 @@ class EmailCampaign(Document):
 		email_campaign_exists = frappe.db.exists("Email Campaign", {
 			"campaign_name": self.campaign_name,
 			"recipient": self.recipient,
-			"status": ("in", ["In Progress", "Scheduled"])
+			"status": ("in", ["In Progress", "Scheduled"]),
+			"name": ("!=", self.name)
 		})
 		if email_campaign_exists:
 			frappe.throw(_("The Campaign '{0}' already exists for the {1} '{2}'").format(self.campaign_name, self.email_campaign_for, self.recipient))
@@ -73,13 +74,13 @@ def send_mail(entry, email_campaign):
 
 	email_template = frappe.get_doc("Email Template", entry.get("email_template"))
 	sender = frappe.db.get_value("User", email_campaign.get("sender"), 'email')
-
+	context = {"doc": frappe.get_doc(email_campaign.email_campaign_for, email_campaign.recipient)}
 	# send mail and link communication to document
 	comm = make(
 		doctype = "Email Campaign",
 		name = email_campaign.name,
-		subject = email_template.get("subject"),
-		content = email_template.get("response"),
+		subject = frappe.render_template(email_template.get("subject"), context),
+		content = frappe.render_template(email_template.get("response"), context),
 		sender = sender,
 		recipients = recipient,
 		communication_medium = "Email",

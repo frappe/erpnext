@@ -14,6 +14,9 @@ from frappe.model.document import Document
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.utils.nestedset import NestedSet
 
+from past.builtins import cmp
+import functools
+
 class Company(NestedSet):
 	nsm_parent_field = 'parent_company'
 
@@ -44,6 +47,7 @@ class Company(NestedSet):
 		self.validate_perpetual_inventory()
 		self.check_country_change()
 		self.set_chart_of_accounts()
+		self.validate_parent_company()
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -185,6 +189,13 @@ class Company(NestedSet):
 		if self.parent_company:
 			self.create_chart_of_accounts_based_on = "Existing Company"
 			self.existing_company = self.parent_company
+
+	def validate_parent_company(self):
+		if self.parent_company:
+			is_group = frappe.get_value('Company', self.parent_company, 'is_group')
+
+			if not is_group:
+				frappe.throw(_("Parent Company must be a group company"))
 
 	def set_default_accounts(self):
 		default_accounts = {
@@ -560,3 +571,26 @@ def get_timeline_data(doctype, name):
 		return json.loads(history) if history and '{' in history else {}
 
 	return date_to_value_dict
+
+@frappe.whitelist()
+def get_default_company_address(name, sort_key='is_primary_address', existing_address=None):
+	if sort_key not in ['is_shipping_address', 'is_primary_address']:
+		return None
+
+	out = frappe.db.sql(""" SELECT
+			addr.name, addr.%s
+		FROM
+			`tabAddress` addr, `tabDynamic Link` dl
+		WHERE
+			dl.parent = addr.name and dl.link_doctype = 'Company' and
+			dl.link_name = %s and ifnull(addr.disabled, 0) = 0
+		""" %(sort_key, '%s'), (name)) #nosec
+
+	if existing_address:
+		if existing_address in [d[0] for d in out]:
+			return existing_address
+
+	if out:
+		return sorted(out, key = functools.cmp_to_key(lambda x,y: cmp(y[1], x[1])))[0][0]
+	else:
+		return None

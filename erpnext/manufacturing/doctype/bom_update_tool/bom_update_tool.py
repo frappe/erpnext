@@ -9,6 +9,7 @@ from frappe import _
 from six import string_types
 from erpnext.manufacturing.doctype.bom.bom import get_boms_in_bottom_up_order
 from frappe.model.document import Document
+import click
 
 class BOMUpdateTool(Document):
 	def replace_bom(self):
@@ -17,7 +18,8 @@ class BOMUpdateTool(Document):
 		frappe.cache().delete_key('bom_children')
 		bom_list = self.get_parent_boms(self.new_bom)
 		updated_bom = []
-
+		with click.progressbar(bom_list) as bom_list:
+			pass
 		for bom in bom_list:
 			try:
 				bom_obj = frappe.get_cached_doc('BOM', bom)

@@ -4,20 +4,16 @@ frappe.ui.form.on("Project", {
 	setup(frm) {
 		frm.make_methods = {
 			'Timesheet': () => {
-				let doctype = 'Timesheet';
-				frappe.model.with_doctype(doctype, () => {
-					let new_doc = frappe.model.get_new_doc(doctype);
-
-					// add a new row and set the project
-					let time_log = frappe.model.get_new_doc('Timesheet Detail');
-					time_log.project = frm.doc.name;
-					time_log.parent = new_doc.name;
-					time_log.parentfield = 'time_logs';
-					time_log.parenttype = 'Timesheet';
-					new_doc.time_logs = [time_log];
-
-					frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
-				});
+				open_form(frm, "Timesheet", "Timesheet Detail", "time_logs");
+			},
+			'Purchase Order': () => {
+				open_form(frm, "Purchase Order", "Purchase Order Item", "items");
+			},
+			'Purchase Receipt': () => {
+				open_form(frm, "Purchase Receipt", "Purchase Receipt Item", "items");
+			},
+			'Purchase Invoice': () => {
+				open_form(frm, "Purchase Invoice", "Purchase Invoice Item", "items");
 			},
 		};
 	},
@@ -53,23 +49,6 @@ frappe.ui.form.on("Project", {
 				filters: filters
 			};
 		});
-
-		if (frappe.model.can_read("Task")) {
-			frm.add_custom_button(__("Gantt Chart"), function () {
-				frappe.route_options = {
-					"project": frm.doc.name
-				};
-				frappe.set_route("List", "Task", "Gantt");
-			});
-
-			frm.add_custom_button(__("Kanban Board"), () => {
-				frappe.call('erpnext.projects.doctype.project.project.create_kanban_board_if_not_exists', {
-					project: frm.doc.project_name
-				}).then(() => {
-					frappe.set_route('List', 'Task', 'Kanban', frm.doc.project_name);
-				});
-			});
-		}
 	},
 
 	refresh: function (frm) {
@@ -97,6 +76,23 @@ frappe.ui.form.on("Project", {
 				frm.events.set_status(frm, 'Cancelled');
 			}, __('Set Status'));
 		}
+
+		if (frappe.model.can_read("Task")) {
+			frm.add_custom_button(__("Gantt Chart"), function () {
+				frappe.route_options = {
+					"project": frm.doc.name
+				};
+				frappe.set_route("List", "Task", "Gantt");
+			});
+
+			frm.add_custom_button(__("Kanban Board"), () => {
+				frappe.call('erpnext.projects.doctype.project.project.create_kanban_board_if_not_exists', {
+					project: frm.doc.project_name
+				}).then(() => {
+					frappe.set_route('List', 'Task', 'Kanban', frm.doc.project_name);
+				});
+			});
+		}
 	},
 
 	create_duplicate: function(frm) {
@@ -123,3 +119,20 @@ frappe.ui.form.on("Project", {
 	},
 
 });
+
+function open_form(frm, doctype, child_doctype, parentfield) {
+	frappe.model.with_doctype(doctype, () => {
+		let new_doc = frappe.model.get_new_doc(doctype);
+
+		// add a new row and set the project
+		let new_child_doc = frappe.model.get_new_doc(child_doctype);
+		new_child_doc.project = frm.doc.name;
+		new_child_doc.parent = new_doc.name;
+		new_child_doc.parentfield = parentfield;
+		new_child_doc.parenttype = doctype;
+		new_doc[parentfield] = [new_child_doc];
+
+		frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
+	});
+
+}

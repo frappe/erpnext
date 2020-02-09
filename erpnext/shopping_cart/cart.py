@@ -66,6 +66,7 @@ def place_order():
 
 	from erpnext.selling.doctype.quotation.quotation import _make_sales_order
 	sales_order = frappe.get_doc(_make_sales_order(quotation.name, ignore_permissions=True))
+	sales_order.payment_schedule = []
 
 	if not cint(cart_settings.allow_items_not_in_stock):
 		for item in sales_order.get("items"):
@@ -430,7 +431,7 @@ def get_debtors_account(cart_settings):
 	payment_gateway_account_currency = \
 		frappe.get_doc("Payment Gateway Account", cart_settings.payment_gateway_account).currency
 
-	account_name = _("Debtors ({0})".format(payment_gateway_account_currency))
+	account_name = _("Debtors ({0})").format(payment_gateway_account_currency)
 
 	debtors_account_name = get_account_name("Receivable", "Asset", is_group=0,\
 		account_currency=payment_gateway_account_currency, company=cart_settings.company)

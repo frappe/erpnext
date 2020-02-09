@@ -16,7 +16,7 @@ frappe.ui.form.on('Quick Stock Balance', {
 			frm.add_custom_button(__('Stock Balance Report'), () => {
 				frappe.set_route('query-report', 'Stock Balance',
 					{ 'item_code': frm.doc.item, 'warehouse': frm.doc.warehouse });
-			}).addClass("btn-primary");
+			});
 		}
 	},
 

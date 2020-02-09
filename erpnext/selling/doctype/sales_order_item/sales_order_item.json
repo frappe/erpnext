@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-03-07 11:42:58",
  "doctype": "DocType",
@@ -68,6 +69,7 @@
   "target_warehouse",
   "prevdoc_docname",
   "col_break4",
+  "against_blanket_order",
   "blanket_order",
   "blanket_order_rate",
   "planning_section",
@@ -76,10 +78,12 @@
   "ordered_qty",
   "planned_qty",
   "column_break_69",
-  "delivered_qty",
   "work_order_qty",
+  "delivered_qty",
   "produced_qty",
   "returned_qty",
+  "shopping_cart_section",
+  "additional_notes",
   "section_break_63",
   "page_break",
   "item_tax_rate",
@@ -148,6 +152,7 @@
    "width": "300px"
   },
   {
+   "allow_on_submit": 1,
    "columns": 2,
    "depends_on": "eval: !parent.skip_delivery_note",
    "fieldname": "delivery_date",
@@ -574,6 +579,7 @@
    "report_hide": 1
   },
   {
+   "depends_on": "eval:doc.against_blanket_order",
    "fieldname": "blanket_order",
    "fieldtype": "Link",
    "label": "Blanket Order",
@@ -581,6 +587,7 @@
    "options": "Blanket Order"
   },
   {
+   "depends_on": "eval:doc.against_blanket_order",
    "fieldname": "blanket_order_rate",
    "fieldtype": "Currency",
    "label": "Blanket Order Rate",
@@ -741,11 +748,29 @@
    "fieldname": "image_section",
    "fieldtype": "Section Break",
    "label": "Image"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "shopping_cart_section",
+   "fieldtype": "Section Break",
+   "label": "Shopping Cart"
+  },
+  {
+   "fieldname": "additional_notes",
+   "fieldtype": "Text",
+   "label": "Additional Notes"
+  },
+  {
+   "default": "0",
+   "fieldname": "against_blanket_order",
+   "fieldtype": "Check",
+   "label": "Against Blanket Order"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-10-10 08:46:26.244823",
+ "links": [],
+ "modified": "2020-01-13 12:29:03.103797",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

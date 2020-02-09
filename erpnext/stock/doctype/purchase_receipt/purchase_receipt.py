@@ -14,7 +14,7 @@ from erpnext.accounts.utils import get_account_currency
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from erpnext.buying.utils import check_on_hold_or_closed_status
-from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_disabled
+from erpnext.assets.doctype.asset.asset import get_asset_account, is_cwip_accounting_enabled
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from six import iteritems
 
@@ -82,11 +82,22 @@ class PurchaseReceipt(BuyingController):
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", ["qty", "received_qty"])
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
+		self.validate_cwip_accounts()
 
 		self.check_on_hold_or_closed_status()
 
 		if getdate(self.posting_date) > getdate(nowdate()):
 			throw(_("Posting Date cannot be future date"))
+
+	def validate_cwip_accounts(self):
+		for item in self.get('items'):
+			if item.is_fixed_asset and is_cwip_accounting_enabled(item.asset_category):
+				# check cwip accounts before making auto assets
+				# Improves UX by not giving messages of "Assets Created" before throwing error of not finding arbnb account
+				arbnb_account = self.get_company_default("asset_received_but_not_billed")
+				cwip_account = get_asset_account("capital_work_in_progress_account", asset_category = item.asset_category, \
+					company = self.company)
+				break
 
 	def validate_with_previous_doc(self):
 		super(PurchaseReceipt, self).validate_with_previous_doc({
@@ -184,6 +195,7 @@ class PurchaseReceipt(BuyingController):
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
+		self.delete_auto_created_batches()
 
 	def get_current_stock(self):
 		for d in self.get('supplied_items'):
@@ -234,7 +246,7 @@ class PurchaseReceipt(BuyingController):
 					negative_expense_to_be_booked += flt(d.item_tax_amount)
 
 					# Amount added through landed-cost-voucher
-					if landed_cost_entries:
+					if d.landed_cost_voucher_amount and landed_cost_entries:
 						for account, amount in iteritems(landed_cost_entries[(d.item_code, d.name)]):
 							gl_entries.append(self.get_gl_dict({
 								"account": account,
@@ -281,15 +293,15 @@ class PurchaseReceipt(BuyingController):
 					d.rejected_warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(d.warehouse)
 
-		self.get_asset_gl_entry(gl_entries, expenses_included_in_valuation)
+		self.get_asset_gl_entry(gl_entries)
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
 		for tax in self.get("taxes"):
 			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
 				if not tax.cost_center:
 					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
-				valuation_tax.setdefault(tax.cost_center, 0)
-				valuation_tax[tax.cost_center] += \
+				valuation_tax.setdefault(tax.name, 0)
+				valuation_tax[tax.name] += \
 					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.base_tax_amount_after_discount_amount)
 
 		if negative_expense_to_be_booked and valuation_tax:
@@ -297,119 +309,129 @@ class PurchaseReceipt(BuyingController):
 			# If expenses_included_in_valuation account has been credited in against PI
 			# and charges added via Landed Cost Voucher,
 			# post valuation related charges on "Stock Received But Not Billed"
+			# introduced in 2014 for backward compatibility of expenses already booked in expenses_included_in_valuation account
 
 			negative_expense_booked_in_pi = frappe.db.sql("""select name from `tabPurchase Invoice Item` pi
 				where docstatus = 1 and purchase_receipt=%s
 				and exists(select name from `tabGL Entry` where voucher_type='Purchase Invoice'
 					and voucher_no=pi.parent and account=%s)""", (self.name, expenses_included_in_valuation))
 
-			if negative_expense_booked_in_pi:
-				expenses_included_in_valuation = stock_rbnb
-
 			against_account = ", ".join([d.account for d in gl_entries if flt(d.debit) > 0])
 			total_valuation_amount = sum(valuation_tax.values())
 			amount_including_divisional_loss = negative_expense_to_be_booked
 			i = 1
-			for cost_center, amount in iteritems(valuation_tax):
-				if i == len(valuation_tax):
-					applicable_amount = amount_including_divisional_loss
-				else:
-					applicable_amount = negative_expense_to_be_booked * (amount / total_valuation_amount)
-					amount_including_divisional_loss -= applicable_amount
+			for tax in self.get("taxes"):
+				if valuation_tax.get(tax.name):
 
-				gl_entries.append(
-					self.get_gl_dict({
-						"account": expenses_included_in_valuation,
-						"cost_center": cost_center,
-						"credit": applicable_amount,
-						"remarks": self.remarks or _("Accounting Entry for Stock"),
-						"against": against_account
-					})
-				)
+					if negative_expense_booked_in_pi:
+						account = stock_rbnb
+					else:
+						account = tax.account_head
 
-				i += 1
+					if i == len(valuation_tax):
+						applicable_amount = amount_including_divisional_loss
+					else:
+						applicable_amount = negative_expense_to_be_booked * (valuation_tax[tax.name] / total_valuation_amount)
+						amount_including_divisional_loss -= applicable_amount
+
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": account,
+							"cost_center": tax.cost_center,
+							"credit": applicable_amount,
+							"remarks": self.remarks or _("Accounting Entry for Stock"),
+							"against": against_account
+						}, item=tax)
+					)
+
+					i += 1
 
 		if warehouse_with_no_account:
 			frappe.msgprint(_("No accounting entries for the following warehouses") + ": \n" +
 				"\n".join(warehouse_with_no_account))
-
+		
 		return process_gl_map(gl_entries)
 
-	def get_asset_gl_entry(self, gl_entries, expenses_included_in_valuation=None):
-		arbnb_account, cwip_account = None, None
-
-		cwip_disabled = is_cwip_accounting_disabled()
-
-		if not expenses_included_in_valuation:
-			expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
-
-		for d in self.get("items"):
-			if d.is_fixed_asset and not (arbnb_account and cwip_account):
-				arbnb_account = self.get_company_default("asset_received_but_not_billed")
-
-				# CWIP entry
-				cwip_account = get_asset_account("capital_work_in_progress_account", d.asset,
-					company = self.company)
-
-			if d.is_fixed_asset and not cwip_disabled:
-
-				asset_amount = flt(d.net_amount) + flt(d.item_tax_amount/self.conversion_rate)
-				base_asset_amount = flt(d.base_net_amount + d.item_tax_amount)
-
-				cwip_account_currency = get_account_currency(cwip_account)
-				gl_entries.append(self.get_gl_dict({
-					"account": cwip_account,
-					"against": arbnb_account,
-					"cost_center": d.cost_center,
-					"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
-					"debit": base_asset_amount,
-					"debit_in_account_currency": (base_asset_amount
-						if cwip_account_currency == self.company_currency else asset_amount)
-				}, item=d))
-
-				# Asset received but not billed
-				asset_rbnb_currency = get_account_currency(arbnb_account)
-				gl_entries.append(self.get_gl_dict({
-					"account": arbnb_account,
-					"against": cwip_account,
-					"cost_center": d.cost_center,
-					"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
-					"credit": base_asset_amount,
-					"credit_in_account_currency": (base_asset_amount
-						if asset_rbnb_currency == self.company_currency else asset_amount)
-				}, item=d))
-
-			if d.is_fixed_asset and flt(d.landed_cost_voucher_amount):
-				asset_account = (get_asset_category_account(d.asset, 'fixed_asset_account',
-					company = self.company) if cwip_disabled else cwip_account)
-
-				gl_entries.append(self.get_gl_dict({
-					"account": expenses_included_in_valuation,
-					"against": asset_account,
-					"cost_center": d.cost_center,
-					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-					"credit": flt(d.landed_cost_voucher_amount),
-					"project": d.project
-				}, item=d))
-
-				gl_entries.append(self.get_gl_dict({
-					"account": asset_account,
-					"against": expenses_included_in_valuation,
-					"cost_center": d.cost_center,
-					"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-					"debit": flt(d.landed_cost_voucher_amount),
-					"project": d.project
-				}, item=d))
-
-				if d.asset:
-					doc = frappe.get_doc("Asset", d.asset)
-					frappe.db.set_value("Asset", d.asset, "gross_purchase_amount",
-						doc.gross_purchase_amount + flt(d.landed_cost_voucher_amount))
-
-					frappe.db.set_value("Asset", d.asset, "purchase_receipt_amount",
-						doc.purchase_receipt_amount + flt(d.landed_cost_voucher_amount))
-
+	def get_asset_gl_entry(self, gl_entries):
+		for item in self.get("items"):
+			if item.is_fixed_asset:
+				if is_cwip_accounting_enabled(item.asset_category):
+					self.add_asset_gl_entries(item, gl_entries)
+				if flt(item.landed_cost_voucher_amount):
+					self.add_lcv_gl_entries(item, gl_entries)
+					# update assets gross amount by its valuation rate
+					# valuation rate is total of net rate, raw mat supp cost, tax amount, lcv amount per item
+					self.update_assets(item, item.valuation_rate)
 		return gl_entries
+
+	def add_asset_gl_entries(self, item, gl_entries):
+		arbnb_account = self.get_company_default("asset_received_but_not_billed")
+		# This returns category's cwip account if not then fallback to company's default cwip account
+		cwip_account = get_asset_account("capital_work_in_progress_account", asset_category = item.asset_category, \
+			company = self.company)
+
+		asset_amount = flt(item.net_amount) + flt(item.item_tax_amount/self.conversion_rate)
+		base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
+
+		cwip_account_currency = get_account_currency(cwip_account)
+		# debit cwip account
+		gl_entries.append(self.get_gl_dict({
+			"account": cwip_account,
+			"against": arbnb_account,
+			"cost_center": item.cost_center,
+			"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+			"debit": base_asset_amount,
+			"debit_in_account_currency": (base_asset_amount
+				if cwip_account_currency == self.company_currency else asset_amount)
+		}, item=item))
+
+		asset_rbnb_currency = get_account_currency(arbnb_account)
+		# credit arbnb account
+		gl_entries.append(self.get_gl_dict({
+			"account": arbnb_account,
+			"against": cwip_account,
+			"cost_center": item.cost_center,
+			"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
+			"credit": base_asset_amount,
+			"credit_in_account_currency": (base_asset_amount
+				if asset_rbnb_currency == self.company_currency else asset_amount)
+		}, item=item))
+
+	def add_lcv_gl_entries(self, item, gl_entries):
+		expenses_included_in_asset_valuation = self.get_company_default("expenses_included_in_asset_valuation")
+		if not is_cwip_accounting_enabled(item.asset_category):
+			asset_account = get_asset_category_account(asset_category=item.asset_category, \
+					fieldname='fixed_asset_account', company=self.company)
+		else:
+			# This returns company's default cwip account
+			asset_account = get_asset_account("capital_work_in_progress_account", company=self.company)
+
+		gl_entries.append(self.get_gl_dict({
+			"account": expenses_included_in_asset_valuation,
+			"against": asset_account,
+			"cost_center": item.cost_center,
+			"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+			"credit": flt(item.landed_cost_voucher_amount),
+			"project": item.project
+		}, item=item))
+
+		gl_entries.append(self.get_gl_dict({
+			"account": asset_account,
+			"against": expenses_included_in_asset_valuation,
+			"cost_center": item.cost_center,
+			"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+			"debit": flt(item.landed_cost_voucher_amount),
+			"project": item.project
+		}, item=item))
+
+	def update_assets(self, item, valuation_rate):
+		assets = frappe.db.get_all('Asset',
+			filters={ 'purchase_receipt': self.name, 'item_code': item.item_code }
+		)
+
+		for asset in assets:
+			frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(valuation_rate))
+			frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(valuation_rate))
 
 	def update_status(self, status):
 		self.set_status(update=True, status = status)
@@ -517,7 +539,8 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"purchase_order_item": "po_detail",
 				"purchase_order": "purchase_order",
 				"is_fixed_asset": "is_fixed_asset",
-				"asset": "asset",
+				"asset_location": "asset_location",
+				"asset_category": 'asset_category'
 			},
 			"postprocess": update_item,
 			"filter": lambda d: get_pending_qty(d)[0] <= 0 if not doc.get("is_return") else get_pending_qty(d)[0] > 0
@@ -588,28 +611,29 @@ def make_stock_entry(source_name,target_doc=None):
 	return doclist
 
 def get_item_account_wise_additional_cost(purchase_document):
-	landed_cost_voucher = frappe.get_value("Landed Cost Purchase Receipt",
-		{"receipt_document": purchase_document}, "parent")
+	landed_cost_vouchers = frappe.get_all("Landed Cost Purchase Receipt", fields=["parent"],
+		filters = {"receipt_document": purchase_document, "docstatus": 1})
 
-	if not landed_cost_voucher:
+	if not landed_cost_vouchers:
 		return
-
-	total_item_cost = 0
+	
 	item_account_wise_cost = {}
-	landed_cost_voucher_doc = frappe.get_doc("Landed Cost Voucher", landed_cost_voucher)
-	based_on_field = frappe.scrub(landed_cost_voucher_doc.distribute_charges_based_on)
 
-	for item in landed_cost_voucher_doc.items:
-		if item.receipt_document == purchase_document:
+	for lcv in landed_cost_vouchers:
+		landed_cost_voucher_doc = frappe.get_doc("Landed Cost Voucher", lcv.parent)
+		based_on_field = frappe.scrub(landed_cost_voucher_doc.distribute_charges_based_on)
+		total_item_cost = 0
+
+		for item in landed_cost_voucher_doc.items:
 			total_item_cost += item.get(based_on_field)
 
-	for item in landed_cost_voucher_doc.items:
-		if item.receipt_document == purchase_document:
-			for account in landed_cost_voucher_doc.taxes:
-				item_account_wise_cost.setdefault((item.item_code, item.purchase_receipt_item), {})
-				item_account_wise_cost[(item.item_code, item.purchase_receipt_item)].setdefault(account.expense_account, 0.0)
-				item_account_wise_cost[(item.item_code, item.purchase_receipt_item)][account.expense_account] += \
-					account.amount * item.get(based_on_field) / total_item_cost
+		for item in landed_cost_voucher_doc.items:
+			if item.receipt_document == purchase_document:
+				for account in landed_cost_voucher_doc.taxes:
+					item_account_wise_cost.setdefault((item.item_code, item.purchase_receipt_item), {})
+					item_account_wise_cost[(item.item_code, item.purchase_receipt_item)].setdefault(account.expense_account, 0.0)
+					item_account_wise_cost[(item.item_code, item.purchase_receipt_item)][account.expense_account] += \
+						account.amount * item.get(based_on_field) / total_item_cost
 
 	return item_account_wise_cost
 

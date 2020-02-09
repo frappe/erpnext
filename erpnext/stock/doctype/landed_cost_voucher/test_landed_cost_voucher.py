@@ -54,9 +54,10 @@ class TestLandedCostVoucher(unittest.TestCase):
 			expected_values = {
 				stock_in_hand_account: [800.0, 0.0],
 				"Stock Received But Not Billed - TCP1": [0.0, 500.0],
-				"Expenses Included In Valuation - TCP1": [0.0, 300.0]
+				"Expenses Included In Valuation - TCP1": [0.0, 50.0],
+				"_Test Account Customs Duty - TCP1": [0.0, 150],
+				"_Test Account Shipping Charges - TCP1": [0.0, 100.00]
 			}
-
 		else:
 			expected_values = {
 				stock_in_hand_account: [400.0, 0.0],
@@ -160,6 +161,76 @@ class TestLandedCostVoucher(unittest.TestCase):
 
 		self.assertEqual(lcv.items[0].applicable_charges, 41.07)
 		self.assertEqual(lcv.items[2].applicable_charges, 41.08)
+
+	def test_multiple_landed_cost_voucher_against_pr(self):
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", 
+			supplier_warehouse = "Stores - TCP1", do_not_save=True)
+
+		pr.append("items", {
+			"item_code": "_Test Item",
+			"warehouse": "Stores - TCP1",
+			"cost_center": "Main - TCP1",
+			"qty": 5,
+			"rate": 100
+		})
+
+		pr.submit()
+
+		lcv1 = make_landed_cost_voucher(receipt_document_type = 'Purchase Receipt', 
+			receipt_document=pr.name, charges=100, do_not_save=True)
+
+		lcv1.insert()
+		lcv1.set('items', [
+			lcv1.get('items')[0]
+		])
+		distribute_landed_cost_on_items(lcv1)
+
+		lcv1.submit()
+
+		lcv2 = make_landed_cost_voucher(receipt_document_type = 'Purchase Receipt', 
+			receipt_document=pr.name, charges=100, do_not_save=True)
+
+		lcv2.insert()
+		lcv2.set('items', [
+			lcv2.get('items')[1]
+		])
+		distribute_landed_cost_on_items(lcv2)
+
+		lcv2.submit()
+
+		pr.load_from_db()
+
+		self.assertEqual(pr.items[0].landed_cost_voucher_amount, 100)
+		self.assertEqual(pr.items[1].landed_cost_voucher_amount, 100)
+
+def make_landed_cost_voucher(** args):
+	args = frappe._dict(args)
+	ref_doc = frappe.get_doc(args.receipt_document_type, args.receipt_document)
+
+	lcv = frappe.new_doc('Landed Cost Voucher')
+	lcv.company = '_Test Company'
+	lcv.distribute_charges_based_on = 'Amount'
+
+	lcv.set('purchase_receipts', [{
+		"receipt_document_type": args.receipt_document_type,
+		"receipt_document": args.receipt_document,
+		"supplier": ref_doc.supplier,
+		"posting_date": ref_doc.posting_date,
+		"grand_total": ref_doc.grand_total
+	}])
+
+	lcv.set("taxes", [{
+		"description": "Shipping Charges",
+		"expense_account": "Expenses Included In Valuation - TCP1",
+		"amount": args.charges
+	}])
+
+	if not args.do_not_save:
+		lcv.insert()
+		if not args.do_not_submit:
+			lcv.submit()
+
+	return lcv
 
 
 def submit_landed_cost_voucher(receipt_document_type, receipt_document, charges=50):

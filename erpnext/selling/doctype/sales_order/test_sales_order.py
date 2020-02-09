@@ -12,6 +12,7 @@ from erpnext.selling.doctype.sales_order.sales_order import make_work_orders
 from erpnext.controllers.accounts_controller import update_child_qty_rate
 import json
 from erpnext.selling.doctype.sales_order.sales_order import make_raw_material_request
+from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
 
 class TestSalesOrder(unittest.TestCase):
 	def tearDown(self):
@@ -320,7 +321,12 @@ class TestSalesOrder(unittest.TestCase):
 		create_dn_against_so(so.name, 4)
 		make_sales_invoice(so.name)
 
-		trans_item = json.dumps([{'item_code' : '_Test Item 2', 'rate' : 200, 'qty' : 7}])
+		first_item_of_so = so.get("items")[0]
+		trans_item = json.dumps([
+			{'item_code' : first_item_of_so.item_code, 'rate' : first_item_of_so.rate, \
+				'qty' : first_item_of_so.qty, 'docname': first_item_of_so.name},
+			{'item_code' : '_Test Item 2', 'rate' : 200, 'qty' : 7}
+		])
 		update_child_qty_rate('Sales Order', trans_item, so.name)
 
 		so.reload()
@@ -328,6 +334,48 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(so.get("items")[-1].rate, 200)
 		self.assertEqual(so.get("items")[-1].qty, 7)
 		self.assertEqual(so.get("items")[-1].amount, 1400)
+		self.assertEqual(so.status, 'To Deliver and Bill')
+	
+	def test_remove_item_in_update_child_qty_rate(self):
+		so = make_sales_order(**{
+			"item_list": [{
+				"item_code": '_Test Item',
+				"qty": 5,
+				"rate":1000
+			}]
+		})
+		create_dn_against_so(so.name, 2)
+		make_sales_invoice(so.name)
+
+		# add an item so as to try removing items
+		trans_item = json.dumps([
+			{"item_code": '_Test Item', "qty": 5, "rate":1000, "docname": so.get("items")[0].name},
+			{"item_code": '_Test Item 2', "qty": 2, "rate":500}
+		])
+		update_child_qty_rate('Sales Order', trans_item, so.name)
+		so.reload()
+		self.assertEqual(len(so.get("items")), 2)
+
+		# check if delivered items can be removed
+		trans_item = json.dumps([{
+			"item_code": '_Test Item 2',
+			"qty": 2,
+			"rate":500,
+			"docname": so.get("items")[1].name
+		}])
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate, 'Sales Order', trans_item, so.name)
+
+		#remove last added item
+		trans_item = json.dumps([{
+			"item_code": '_Test Item',
+			"qty": 5,
+			"rate":1000,
+			"docname": so.get("items")[0].name
+		}])
+		update_child_qty_rate('Sales Order', trans_item, so.name)
+		
+		so.reload()
+		self.assertEqual(len(so.get("items")), 1)
 		self.assertEqual(so.status, 'To Deliver and Bill')
 
 
@@ -819,6 +867,25 @@ class TestSalesOrder(unittest.TestCase):
 		mr_doc = frappe.get_doc('Material Request',mr.get('name'))
 		self.assertEqual(mr_doc.items[0].sales_order, so.name)
 
+	def test_so_optional_blanket_order(self):
+		"""
+			Expected result: Blanket order Ordered Quantity should only be affected on Sales Order with against_blanket_order = 1.
+			Second Sales Order should not add on to Blanket Orders Ordered Quantity.
+		"""
+
+		bo = make_blanket_order(blanket_order_type = "Selling", quantity = 10, rate = 10)
+
+		so = make_sales_order(item_code= "_Test Item", qty = 5, against_blanket_order = 1)
+		so_doc = frappe.get_doc('Sales Order', so.get('name'))
+		# To test if the SO has a Blanket Order
+		self.assertTrue(so_doc.items[0].blanket_order)
+
+		so = make_sales_order(item_code= "_Test Item", qty = 5, against_blanket_order = 0)
+		so_doc = frappe.get_doc('Sales Order', so.get('name'))
+		# To test if the SO does NOT have a Blanket Order
+		self.assertEqual(so_doc.items[0].blanket_order, None)
+
+
 def make_sales_order(**args):
 	so = frappe.new_doc("Sales Order")
 	args = frappe._dict(args)
@@ -845,7 +912,8 @@ def make_sales_order(**args):
 			"warehouse": args.warehouse,
 			"qty": args.qty or 10,
 			"uom": args.uom or None,
-			"rate": args.rate or 100
+			"rate": args.rate or 100,
+			"against_blanket_order": args.against_blanket_order
 		})
 
 	so.delivery_date = add_days(so.transaction_date, 10)

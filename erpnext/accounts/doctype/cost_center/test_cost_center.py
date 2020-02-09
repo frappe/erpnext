@@ -1,12 +1,26 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
-
-
+import unittest
 import frappe
+
 test_records = frappe.get_test_records('Cost Center')
 
+class TestCostCenter(unittest.TestCase):
+	def test_cost_center_creation_against_child_node(self):
 
+		if not frappe.db.get_value('Cost Center', {'name': '_Test Cost Center 2 - _TC'}):
+			frappe.get_doc(test_records[1]).insert()
+
+		cost_center = frappe.get_doc({
+			'doctype': 'Cost Center',
+			'cost_center_name': '_Test Cost Center 3',
+			'parent_cost_center': '_Test Cost Center 2 - _TC',
+			'is_group': 0,
+			'company': '_Test Company'
+		})
+
+		self.assertRaises(frappe.ValidationError, cost_center.save)
 
 def create_cost_center(**args):
 	args = frappe._dict(args)

@@ -126,7 +126,7 @@ def generate_taxes():
 
 def make_expense_claim(payable_account, amount, sanctioned_amount, company, account, project=None, task_name=None, do_not_submit=False, taxes=None):
 	employee = frappe.db.get_value("Employee", {"status": "Active"})
-	currency = frappe.db.get_value('Company', company, 'default_currency')
+	currency, cost_center = frappe.db.get_value('Company', company, ['default_currency', 'cost_center'])
 	expense_claim = {
 		 "doctype": "Expense Claim",
 		 "employee": employee,
@@ -134,12 +134,15 @@ def make_expense_claim(payable_account, amount, sanctioned_amount, company, acco
 		 "approval_status": "Approved",
 		 "company": company,
 		'currency': currency,
-		 "expenses":
-			[{"expense_type": "Travel",
+		 "expenses": [{
+			"expense_type": "Travel",
 			"default_account": account,
-			'currency': currency,
+			"currency": currency,
 			"amount": amount,
-			"sanctioned_amount": sanctioned_amount}]}
+			"sanctioned_amount": sanctioned_amount,
+			"cost_center": cost_center
+			}]
+		}
 	if taxes:
 		expense_claim.update(taxes)
 
