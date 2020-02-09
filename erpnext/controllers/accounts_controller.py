@@ -1135,6 +1135,7 @@ def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname,
 	child_item.reqd_by_date = p_doctype.delivery_date
 	child_item.uom = item.stock_uom
 	child_item.conversion_factor = get_conversion_factor(item_code, item.stock_uom).get("conversion_factor") or 1.0
+	child_item.warehouse = p_doctype.set_warehouse or p_doctype.items[0].warehouse
 	return child_item
 
 
