@@ -23,6 +23,8 @@
   "customer_group",
   "territory",
   "tax_id",
+  "tax_cnic",
+  "tax_strn",
   "tax_category",
   "disabled",
   "is_internal_customer",
@@ -464,12 +466,26 @@
    "fieldtype": "Table",
    "label": "Credit Limit",
    "options": "Customer Credit Limit"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "tax_cnic",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "CNIC"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "tax_strn",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "STRN"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2019-09-06 12:40:31.801424",
+ "modified": "2020-02-09 16:21:48.514633",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

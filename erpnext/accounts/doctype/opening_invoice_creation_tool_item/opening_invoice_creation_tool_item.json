@@ -4,22 +4,70 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "qty",
+  "item_name",
+  "outstanding_amount",
   "party_type",
   "party",
   "temporary_opening_account",
-  "column_break_3",
-  "posting_date",
-  "due_date",
-  "section_break_5",
-  "item_name",
-  "outstanding_amount",
-  "column_break_4",
-  "qty",
-  "accounting_dimensions_section",
   "cost_center",
-  "dimension_col_break"
+  "remarks",
+  "sales_person",
+  "transaction_type",
+  "old_name",
+  "posting_date",
+  "due_date"
  ],
  "fields": [
+  {
+   "columns": 2,
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Remarks"
+  },
+  {
+   "depends_on": "eval:parent.invoice_type == \"Sales\"",
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "label": "Sales Person",
+   "options": "Sales Person"
+  },
+  {
+   "depends_on": "eval:parent.invoice_type == \"Sales\"",
+   "fieldname": "transaction_type",
+   "fieldtype": "Link",
+   "label": "Transaction Type",
+   "options": "Transaction Type"
+  },
+  {
+   "columns": 2,
+   "fieldname": "old_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Old Name"
+  },
+  {
+   "default": "1",
+   "fieldname": "qty",
+   "fieldtype": "Data",
+   "label": "Quantity"
+  },
+  {
+   "default": "Opening Invoice Item",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Outstanding",
+   "reqd": 1
+  },
   {
    "fieldname": "party_type",
    "fieldtype": "Link",
@@ -29,6 +77,7 @@
    "read_only": 1
   },
   {
+   "columns": 2,
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
@@ -43,70 +92,28 @@
    "options": "Account"
   },
   {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
+   "columns": 2,
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Cost Center",
+   "options": "Cost Center"
   },
   {
-   "default": "Today",
+   "columns": 1,
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Posting Date"
   },
   {
-   "default": "Today",
    "fieldname": "due_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "label": "Due Date"
-  },
-  {
-   "fieldname": "section_break_5",
-   "fieldtype": "Section Break"
-  },
-  {
-   "default": "Opening Invoice Item",
-   "fieldname": "item_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Item Name"
-  },
-  {
-   "default": "0",
-   "fieldname": "outstanding_amount",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Outstanding Amount",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_4",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "1",
-   "fieldname": "qty",
-   "fieldtype": "Data",
-   "label": "Quantity"
-  },
-  {
-   "fieldname": "cost_center",
-   "fieldtype": "Link",
-   "label": "Cost Center",
-   "options": "Cost Center"
-  },
-  {
-   "fieldname": "accounting_dimensions_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
-  },
-  {
-   "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break"
   }
  ],
  "istable": 1,
- "modified": "2019-07-25 15:00:00.460695",
+ "modified": "2020-02-09 16:15:37.763604",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool Item",

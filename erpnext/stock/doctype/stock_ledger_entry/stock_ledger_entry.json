@@ -15,6 +15,8 @@
   "voucher_type",
   "voucher_no",
   "voucher_detail_no",
+  "party_type",
+  "party",
   "actual_qty",
   "incoming_rate",
   "outgoing_rate",
@@ -268,13 +270,32 @@
    "hidden": 1,
    "label": "To Rename",
    "search_index": 1
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "label": "Party Type",
+   "options": "DocType",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_filter": 1,
+   "in_standard_filter": 1,
+   "label": "Party",
+   "options": "party_type",
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "hide_toolbar": 1,
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
- "modified": "2019-11-27 12:17:31.522675",
+ "modified": "2020-02-09 16:30:00.579901",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",

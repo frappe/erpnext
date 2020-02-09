@@ -5,6 +5,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "user_remark",
   "type_of_payment",
   "naming_series",
   "payment_type",
@@ -25,10 +26,12 @@
   "payment_accounts_section",
   "party_balance",
   "paid_from",
+  "account_paid_from_type",
   "paid_from_account_currency",
   "paid_from_account_balance",
   "column_break_18",
   "paid_to",
+  "account_paid_to_type",
   "paid_to_account_currency",
   "paid_to_account_balance",
   "payment_amounts_section",
@@ -572,10 +575,33 @@
    "label": "Status",
    "options": "\nDraft\nSubmitted\nCancelled",
    "read_only": 1
+  },
+  {
+   "fieldname": "user_remark",
+   "fieldtype": "Small Text",
+   "label": "User Remark",
+   "no_copy": 1,
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "account_paid_from_type",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Account Paid From Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "paid_to.account_type",
+   "fieldname": "account_paid_to_type",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Account Paid To Type",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-11-06 12:59:43.151721",
+ "modified": "2020-02-09 16:06:37.896684",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

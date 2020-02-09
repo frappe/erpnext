@@ -6,6 +6,9 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "alt_uom_size",
+  "alt_uom_qty",
+  "alt_uom",
   "barcode",
   "section_break_2",
   "s_warehouse",
@@ -17,6 +20,7 @@
   "col_break2",
   "item_name",
   "section_break_8",
+  "hide_item_code",
   "description",
   "column_break_10",
   "image",
@@ -490,11 +494,41 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "alt_uom",
+   "fieldname": "alt_uom_size",
+   "fieldtype": "Float",
+   "label": "Container Size",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "alt_uom",
+   "fieldname": "alt_uom_qty",
+   "fieldtype": "Float",
+   "label": "Contents Qty",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "alt_uom",
+   "fieldtype": "Link",
+   "label": "Contents UOM",
+   "options": "UOM",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "hide_item_code",
+   "fieldtype": "Check",
+   "label": "Hide Item Code"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-08-20 14:01:02.319754",
+ "modified": "2020-02-09 16:29:57.407640",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

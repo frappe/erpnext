@@ -6,48 +6,17 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "invoices",
   "company",
-  "create_missing_party",
-  "column_break_3",
   "invoice_type",
-  "accounting_dimensions_section",
-  "cost_center",
-  "dimension_col_break",
-  "section_break_4",
-  "invoices"
+  "item_code"
  ],
  "fields": [
   {
-   "fieldname": "company",
+   "fieldname": "item_code",
    "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Company",
-   "options": "Company",
-   "reqd": 1
-  },
-  {
-   "default": "0",
-   "description": "Create missing customer or supplier.",
-   "fieldname": "create_missing_party",
-   "fieldtype": "Check",
-   "label": "Create Missing Party"
-  },
-  {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "invoice_type",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Invoice Type",
-   "options": "Sales\nPurchase",
-   "reqd": 1
-  },
-  {
-   "fieldname": "section_break_4",
-   "fieldtype": "Section Break",
-   "label": "Invoices"
+   "label": "Opening Invoice Item Code",
+   "options": "Item"
   },
   {
    "allow_bulk_edit": 1,
@@ -57,25 +26,25 @@
    "reqd": 1
   },
   {
-   "fieldname": "cost_center",
+   "fieldname": "company",
    "fieldtype": "Link",
-   "label": "Cost Center",
-   "options": "Cost Center"
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "accounting_dimensions_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
-  },
-  {
-   "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break"
+   "fieldname": "invoice_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Invoice Type",
+   "options": "Sales\nPurchase",
+   "reqd": 1
   }
  ],
  "hide_toolbar": 1,
  "issingle": 1,
- "modified": "2019-07-25 14:57:33.187689",
+ "modified": "2020-02-09 16:13:44.730606",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool",

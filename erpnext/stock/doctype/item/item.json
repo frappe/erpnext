@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_guest_to_view": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -12,6 +11,7 @@
  "engine": "InnoDB",
  "field_order": [
   "name_and_description_section",
+  "item_naming_by",
   "naming_series",
   "item_code",
   "variant_of",
@@ -19,9 +19,12 @@
   "item_group",
   "is_item_from_hub",
   "stock_uom",
+  "alt_uom",
+  "alt_uom_size",
   "column_break0",
   "disabled",
   "allow_alternative_item",
+  "hide_in_price_list",
   "is_stock_item",
   "include_item_in_manufacturing",
   "opening_stock",
@@ -36,6 +39,9 @@
   "image",
   "section_break_11",
   "brand",
+  "item_source",
+  "default_supplier",
+  "hs_code",
   "description",
   "sb_barcodes",
   "barcodes",
@@ -51,6 +57,7 @@
   "reorder_section",
   "reorder_levels",
   "unit_of_measure_conversion",
+  "uom_conversion_graph",
   "uoms",
   "serial_nos_and_batches",
   "has_batch_no",
@@ -67,6 +74,7 @@
   "variant_based_on",
   "attributes",
   "defaults",
+  "show_item_code",
   "item_defaults",
   "purchase_details",
   "is_purchase_item",
@@ -80,6 +88,9 @@
   "customer",
   "supplier_details",
   "delivered_by_supplier",
+  "manufacturer",
+  "manufacturer_item_code",
+  "manufacturer_part_no",
   "column_break2",
   "supplier_items",
   "foreign_trade_details",
@@ -1037,15 +1048,102 @@
    "fieldname": "auto_create_assets",
    "fieldtype": "Check",
    "label": "Auto Create Assets on Purchase"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "default": "Item Name",
+   "depends_on": "eval:doc.__islocal",
+   "fieldname": "item_naming_by",
+   "fieldtype": "Select",
+   "label": "Item Naming By",
+   "options": "Item Code\nItem Name\nNaming Series",
+   "set_only_once": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "bold": 1,
+   "fieldname": "alt_uom",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Contents Unit of Measure",
+   "options": "UOM"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "depends_on": "alt_uom",
+   "fieldname": "alt_uom_size",
+   "fieldtype": "Float",
+   "label": "Container Size"
+  },
+  {
+   "default": "0",
+   "fieldname": "hide_in_price_list",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Hide In Price List",
+   "no_copy": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "default": "Local",
+   "fieldname": "item_source",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Item Source",
+   "options": "Local\nImported"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "default_supplier",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "hs_code",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "HS Code",
+   "options": "HS Code"
+  },
+  {
+   "description": "Will also apply for variants",
+   "fieldname": "uom_conversion_graph",
+   "fieldtype": "Table",
+   "label": "UOM Conversions",
+   "options": "UOM Conversion Graph"
+  },
+  {
+   "fieldname": "show_item_code",
+   "fieldtype": "Select",
+   "label": "Show Item Code",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "manufacturer",
+   "fieldtype": "Link",
+   "label": "Manufacturer",
+   "options": "Manufacturer"
+  },
+  {
+   "fieldname": "manufacturer_item_code",
+   "fieldtype": "Data",
+   "label": "Manufacturer SKU"
+  },
+  {
+   "fieldname": "manufacturer_part_no",
+   "fieldtype": "Data",
+   "label": "Manufacturer Part Number"
   }
  ],
  "has_web_view": 1,
  "icon": "fa fa-tag",
  "idx": 2,
  "image_field": "image",
- "links": [],
  "max_attachments": 1,
- "modified": "2020-01-02 19:13:59.295963",
+ "modified": "2020-02-09 16:28:17.283512",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

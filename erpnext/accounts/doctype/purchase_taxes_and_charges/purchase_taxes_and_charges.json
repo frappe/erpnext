@@ -22,13 +22,14 @@
   "section_break_9",
   "tax_amount",
   "tax_amount_after_discount_amount",
+  "displayed_total",
   "total",
   "column_break_14",
   "base_tax_amount",
   "base_total",
   "base_tax_amount_after_discount_amount",
-  "item_wise_tax_detail",
-  "parenttype"
+  "base_displayed_total",
+  "item_wise_tax_detail"
  ],
  "fields": [
   {
@@ -197,15 +198,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "parenttype",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Parenttype",
-   "oldfieldname": "parenttype",
-   "oldfieldtype": "Data",
-   "print_hide": 1
-  },
-  {
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -213,15 +205,33 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "displayed_total",
+   "fieldtype": "Currency",
+   "label": "Total",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_displayed_total",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Total (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-25 23:08:38.281025",
+ "modified": "2020-02-09 16:10:18.548640",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",
  "owner": "Administrator",
  "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
  "track_changes": 1
 }

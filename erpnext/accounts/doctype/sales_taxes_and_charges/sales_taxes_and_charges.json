@@ -3,6 +3,7 @@
  "doctype": "DocType",
  "document_type": "Setup",
  "editable_grid": 1,
+ "engine": "InnoDB",
  "field_order": [
   "charge_type",
   "row_id",
@@ -19,12 +20,13 @@
   "tax_amount",
   "total",
   "tax_amount_after_discount_amount",
+  "displayed_total",
   "column_break_13",
   "base_tax_amount",
   "base_total",
   "base_tax_amount_after_discount_amount",
-  "item_wise_tax_detail",
-  "parenttype"
+  "base_displayed_total",
+  "item_wise_tax_detail"
  ],
  "fields": [
   {
@@ -174,17 +176,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "parenttype",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "in_filter": 1,
-   "label": "Parenttype",
-   "oldfieldname": "parenttype",
-   "oldfieldtype": "Data",
-   "print_hide": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -192,15 +183,33 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "displayed_total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_displayed_total",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Total (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-25 22:59:38.740883",
+ "modified": "2020-02-09 16:17:53.133450",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Taxes and Charges",
  "owner": "Administrator",
  "permissions": [],
+ "sort_field": "modified",
  "sort_order": "ASC"
 }

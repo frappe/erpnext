@@ -12,6 +12,7 @@
   "stock_entry_type",
   "outgoing_stock_entry",
   "purpose",
+  "for_maintenance",
   "company",
   "work_order",
   "purchase_order",
@@ -622,12 +623,19 @@
    "label": "Pick List",
    "options": "Pick List",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:in_list(['Material Receipt', 'Material Issue'], doc.purpose)",
+   "fieldname": "for_maintenance",
+   "fieldtype": "Check",
+   "label": "For Repairs and Maintenance"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2019-09-27 14:38:20.801420",
+ "modified": "2020-02-09 16:29:35.140208",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

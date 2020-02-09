@@ -8,6 +8,13 @@
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
+  "buying_apply_discount_after_taxes",
+  "selling_apply_discount_after_taxes",
+  "extra_tax_account",
+  "further_tax_account",
+  "advance_tax_account",
+  "sales_tax_account",
+  "service_tax_account",
   "details",
   "company_name",
   "abbr",
@@ -31,6 +38,8 @@
   "chart_of_accounts",
   "existing_company",
   "tax_id",
+  "tax_strn",
+  "provincial_strn",
   "date_of_establishment",
   "sales_settings",
   "monthly_sales_target",
@@ -49,6 +58,7 @@
   "discount_received_account",
   "exchange_gain_loss_account",
   "unrealized_exchange_gain_loss_account",
+  "temporary_opening_account",
   "column_break0",
   "allow_account_creation_against_child_company",
   "default_payable_account",
@@ -59,6 +69,7 @@
   "default_deferred_expense_account",
   "default_payroll_payable_account",
   "default_expense_claim_payable_account",
+  "default_letter_of_credit_account",
   "section_break_22",
   "cost_center",
   "column_break_26",
@@ -85,6 +96,7 @@
   "exception_budget_approver_role",
   "company_info",
   "company_logo",
+  "invoice_letterhead",
   "date_of_incorporation",
   "address_html",
   "date_of_commencement",
@@ -720,12 +732,84 @@
    "fieldtype": "Link",
    "label": "Default Buying Terms",
    "options": "Terms and Conditions"
+  },
+  {
+   "fieldname": "buying_apply_discount_after_taxes",
+   "fieldtype": "Select",
+   "label": "Apply Discount After Taxes For Purchase",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "selling_apply_discount_after_taxes",
+   "fieldtype": "Select",
+   "label": "Apply Discount After Taxes For Sales",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "extra_tax_account",
+   "fieldtype": "Link",
+   "label": "Extra Tax Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "further_tax_account",
+   "fieldtype": "Link",
+   "label": "Further Tax Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "advance_tax_account",
+   "fieldtype": "Link",
+   "label": "Advance Tax Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "sales_tax_account",
+   "fieldtype": "Link",
+   "label": "Sales Tax Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "service_tax_account",
+   "fieldtype": "Link",
+   "label": "Service Tax Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "tax_strn",
+   "fieldtype": "Data",
+   "label": "STRN"
+  },
+  {
+   "fieldname": "provincial_strn",
+   "fieldtype": "Data",
+   "label": "Provincial STRN"
+  },
+  {
+   "fieldname": "temporary_opening_account",
+   "fieldtype": "Link",
+   "label": "Temporary Opening Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "default_letter_of_credit_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Default Letter of Credit Account",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "fieldname": "invoice_letterhead",
+   "fieldtype": "HTML Editor",
+   "label": "Invoice Letterhead"
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "image_field": "company_logo",
- "modified": "2019-11-22 13:04:47.470768",
+ "modified": "2020-02-09 16:24:56.931651",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

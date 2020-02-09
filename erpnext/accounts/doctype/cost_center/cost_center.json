@@ -14,6 +14,7 @@
   "parent_cost_center",
   "company",
   "cb0",
+  "tax_description",
   "is_group",
   "disabled",
   "lft",
@@ -119,11 +120,16 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "fieldname": "tax_description",
+   "fieldtype": "Small Text",
+   "label": "Tax Description"
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
- "modified": "2019-09-16 14:44:17.103548",
+ "modified": "2020-02-09 15:56:57.824204",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cost Center",

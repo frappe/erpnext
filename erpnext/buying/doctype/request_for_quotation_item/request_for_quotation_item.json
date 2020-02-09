@@ -202,6 +202,7 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "0",
    "fieldname": "page_break",
    "fieldtype": "Check",
    "label": "Page Break",
@@ -222,7 +223,7 @@
   }
  ],
  "istable": 1,
- "modified": "2019-05-01 17:50:23.703801",
+ "modified": "2020-02-09 04:22:08.293525",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation Item",

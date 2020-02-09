@@ -30,9 +30,12 @@
   "reference",
   "reference_type",
   "reference_name",
+  "clearance_date",
   "reference_due_date",
   "project",
   "col_break3",
+  "cheque_no",
+  "cheque_date",
   "is_advance",
   "user_remark",
   "against_account"
@@ -267,11 +270,36 @@
    "fieldtype": "Link",
    "label": "Bank Account",
    "options": "Bank Account"
+  },
+  {
+   "fieldname": "clearance_date",
+   "fieldtype": "Date",
+   "label": "Clearance Date",
+   "no_copy": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "cheque_no",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "in_standard_filter": 1,
+   "label": "Reference Number",
+   "no_copy": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "cheque_date",
+   "fieldtype": "Date",
+   "in_standard_filter": 1,
+   "label": "Reference Date",
+   "no_copy": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-01-13 12:41:33.968025",
+ "modified": "2020-02-09 16:03:57.827096",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",

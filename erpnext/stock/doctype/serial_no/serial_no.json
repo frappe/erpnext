@@ -6,6 +6,7 @@
  "description": "Distinct unit of an Item",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "details",
   "column_break0",
@@ -425,7 +426,7 @@
  ],
  "icon": "fa fa-barcode",
  "idx": 1,
- "modified": "2019-08-07 17:28:32.243280",
+ "modified": "2020-02-09 04:22:17.203144",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
