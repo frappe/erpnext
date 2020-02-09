@@ -644,3 +644,4 @@ erpnext.patches.v12_0.set_expense_account_in_landed_cost_voucher_taxes
 erpnext.patches.v12_0.replace_accounting_with_accounts_in_home_settings
 erpnext.patches.v12_0.set_payment_entry_status
 erpnext.patches.v12_0.update_owner_fields_in_acc_dimension_custom_fields
+erpnext.patches.v12_0.create_irs_1099_field_united_states
