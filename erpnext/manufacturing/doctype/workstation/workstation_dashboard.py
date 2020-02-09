@@ -6,8 +6,14 @@ def get_data():
 		'fieldname': 'workstation',
 		'transactions': [
 			{
-				'label': _('Manufacture'),
-				'items': ['BOM', 'Routing', 'Work Order', 'Job Card', 'Operation', 'Timesheet']
+				'label': _('Master'),
+				'items': ['BOM', 'Routing', 'Operation']
+			},
+			{
+				'label': _('Transaction'),
+				'items': ['Work Order', 'Job Card', 'Timesheet']
 			}
-		]
+		],
+		'disable_create_buttons': ['BOM', 'Routing', 'Operation',
+			'Work Order', 'Job Card', 'Timesheet']
 	}

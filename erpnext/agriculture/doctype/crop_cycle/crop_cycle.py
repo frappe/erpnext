@@ -44,34 +44,32 @@ class CropCycle(Document):
 				self.import_disease_tasks(disease.disease, disease.start_date)
 				disease.tasks_created = True
 
-				frappe.msgprint(_("Tasks have been created for managing the {0} disease (on row {1})".format(disease.disease, disease.idx)))
+				frappe.msgprint(_("Tasks have been created for managing the {0} disease (on row {1})").format(disease.disease, disease.idx))
 
 	def import_disease_tasks(self, disease, start_date):
 		disease_doc = frappe.get_doc('Disease', disease)
 		self.create_task(disease_doc.treatment_task, self.name, start_date)
 
 	def create_project(self, period, crop_tasks):
-		project = frappe.new_doc("Project")
-		project.update({
+		project = frappe.get_doc({
+			"doctype": "Project",
 			"project_name": self.title,
 			"expected_start_date": self.start_date,
 			"expected_end_date": add_days(self.start_date, period - 1)
-		})
-		project.insert()
+		}).insert()
 
 		return project.name
 
 	def create_task(self, crop_tasks, project_name, start_date):
 		for crop_task in crop_tasks:
-			task = frappe.new_doc("Task")
-			task.update({
+			frappe.get_doc({
+				"doctype": "Task",
 				"subject": crop_task.get("task_name"),
 				"priority": crop_task.get("priority"),
 				"project": project_name,
 				"exp_start_date": add_days(start_date, crop_task.get("start_day") - 1),
 				"exp_end_date": add_days(start_date, crop_task.get("end_day") - 1)
-			})
-			task.insert()
+			}).insert()
 
 	def reload_linked_analysis(self):
 		linked_doctypes = ['Soil Texture', 'Soil Analysis', 'Plant Analysis']

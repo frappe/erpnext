@@ -38,6 +38,8 @@ class AttendanceRequest(Document):
 				attendance.employee_name = self.employee_name
 				if self.half_day and date_diff(getdate(self.half_day_date), getdate(attendance_date)) == 0:
 					attendance.status = "Half Day"
+				elif self.reason == "Work From Home":
+					attendance.status = "Work From Home"
 				else:
 					attendance.status = "Present"
 				attendance.attendance_date = attendance_date

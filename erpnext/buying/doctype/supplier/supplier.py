@@ -56,3 +56,23 @@ class Supplier(TransactionBase):
 	def after_rename(self, olddn, newdn, merge=False):
 		if frappe.defaults.get_global_default('supp_master_name') == 'Supplier Name':
 			frappe.db.set(self, "supplier_name", newdn)
+
+	def create_onboarding_docs(self, args):
+		defaults = frappe.defaults.get_defaults()
+		for i in range(1, args.get('max_count')):
+			supplier = args.get('supplier_name_' + str(i))
+			if supplier:
+				try:
+					doc = frappe.get_doc({
+						'doctype': self.doctype,
+						'supplier_name': supplier,
+						'supplier_group': _('Local'),
+						'company': defaults.get('company')
+					}).insert()
+
+					if args.get('supplier_email_' + str(i)):
+						from erpnext.selling.doctype.customer.customer import create_contact
+						create_contact(supplier, 'Supplier',
+							doc.name, args.get('supplier_email_' + str(i)))
+				except frappe.NameError:
+					pass

@@ -30,7 +30,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			&& frappe.meta.has_field(this.frm.doc.doctype, "disable_rounded_total")) {
 
 				var df = frappe.meta.get_docfield(this.frm.doc.doctype, "disable_rounded_total");
-				var disable = df.default || cint(frappe.sys_defaults.disable_rounded_total);
+				var disable = cint(df.default) || cint(frappe.sys_defaults.disable_rounded_total);
 				this.frm.set_value("disable_rounded_total", disable);
 		}
 
@@ -107,6 +107,12 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				filters:{ 'item_code': row.item_code }
 			}
 		});
+
+		if(this.frm.fields_dict["items"].grid.get_field('item_code')) {
+			this.frm.set_query("item_tax_template", "items", function(doc, cdt, cdn) {
+				return me.set_query_for_item_tax_template(doc, cdt, cdn)
+			});
+		}
 	},
 
 	refresh: function(doc) {

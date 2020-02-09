@@ -22,7 +22,7 @@ class ProductionPlan(Document):
 	def validate_data(self):
 		for d in self.get('po_items'):
 			if not d.bom_no:
-				frappe.throw(_("Please select BOM for Item in Row {0}".format(d.idx)))
+				frappe.throw(_("Please select BOM for Item in Row {0}").format(d.idx))
 			else:
 				validate_bom_no(d.item_code, d.bom_no)
 
@@ -99,7 +99,7 @@ class ProductionPlan(Document):
 			self.get_mr_items()
 
 	def get_so_items(self):
-		so_list = [d.sales_order for d in self.get("sales_orders", []) if d.sales_order]
+		so_list = [d.sales_order for d in self.sales_orders if d.sales_order]
 		if not so_list:
 			msgprint(_("Please enter Sales Orders in the above table"))
 			return []
@@ -109,7 +109,7 @@ class ProductionPlan(Document):
 			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
 
 		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
-			(qty - work_order_qty) * conversion_factor as pending_qty, name
+			(qty - work_order_qty) * conversion_factor as pending_qty, description, name
 			from `tabSales Order Item` so_item
 			where parent in (%s) and docstatus = 1 and qty > work_order_qty
 			and exists (select name from `tabBOM` bom where bom.item=so_item.item_code
@@ -121,7 +121,7 @@ class ProductionPlan(Document):
 
 		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as warehouse,
 			(((so_item.qty - so_item.work_order_qty) * pi.qty) / so_item.qty)
-				as pending_qty, pi.parent_item, so_item.name
+				as pending_qty, pi.parent_item, pi.description, so_item.name
 			from `tabSales Order Item` so_item, `tabPacked Item` pi
 			where so_item.parent = pi.parent and so_item.docstatus = 1
 			and pi.parent_item = so_item.item_code
@@ -134,7 +134,7 @@ class ProductionPlan(Document):
 		self.calculate_total_planned_qty()
 
 	def get_mr_items(self):
-		mr_list = [d.material_request for d in self.get("material_requests", []) if d.material_request]
+		mr_list = [d.material_request for d in self.material_requests if d.material_request]
 		if not mr_list:
 			msgprint(_("Please enter Material Requests in the above table"))
 			return []
@@ -143,7 +143,7 @@ class ProductionPlan(Document):
 		if self.item_code:
 			item_condition = " and mr_item.item_code ={0}".format(frappe.db.escape(self.item_code))
 
-		items = frappe.db.sql("""select distinct parent, name, item_code, warehouse,
+		items = frappe.db.sql("""select distinct parent, name, item_code, warehouse, description,
 			(qty - ordered_qty) as pending_qty
 			from `tabMaterial Request Item` mr_item
 			where parent in (%s) and docstatus = 1 and qty > ordered_qty
@@ -162,7 +162,7 @@ class ProductionPlan(Document):
 				'include_exploded_items': 1,
 				'warehouse': data.warehouse,
 				'item_code': data.item_code,
-				'description': item_details and item_details.description or '',
+				'description': data.description or item_details.description,
 				'stock_uom': item_details and item_details.stock_uom or '',
 				'bom_no': item_details and item_details.bom_no or '',
 				'planned_qty': data.pending_qty,
@@ -174,10 +174,12 @@ class ProductionPlan(Document):
 			if self.get_items_from == "Sales Order":
 				pi.sales_order = data.parent
 				pi.sales_order_item = data.name
+				pi.description = data.description
 
 			elif self.get_items_from == "Material Request":
 				pi.material_request = data.parent
 				pi.material_request_item = data.name
+				pi.description = data.description
 
 	def calculate_total_planned_qty(self):
 		self.total_planned_qty = 0
@@ -195,7 +197,6 @@ class ProductionPlan(Document):
 		for data in self.po_items:
 			if data.name == production_plan_item:
 				data.produced_qty = produced_qty
-				data.pending_qty = data.planned_qty - data.produced_qty
 				data.db_update()
 
 		self.calculate_total_produced_qty()
@@ -302,6 +303,7 @@ class ProductionPlan(Document):
 				wo_list.extend(work_orders)
 
 		frappe.flags.mute_messages = False
+
 		if wo_list:
 			wo_list = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
 				(p, p) for p in wo_list]
@@ -309,16 +311,15 @@ class ProductionPlan(Document):
 		else :
 			msgprint(_("No Work Orders created"))
 
-
 	def make_work_order_for_sub_assembly_items(self, item):
 		work_orders = []
 		bom_data = {}
 
-		get_sub_assembly_items(item.get("bom_no"), bom_data, item.get("qty"))
+		get_sub_assembly_items(item.get("bom_no"), bom_data)
 
 		for key, data in bom_data.items():
 			data.update({
-				'qty': data.get("stock_qty"),
+				'qty': data.get("stock_qty") * item.get("qty"),
 				'production_plan': self.name,
 				'company': self.company,
 				'fg_warehouse': item.get("fg_warehouse"),
@@ -528,7 +529,6 @@ def get_material_request_items(row, sales_order,
 		required_qty = ceil(required_qty)
 
 	if required_qty > 0:
-		print(row)
 		return {
 			'item_code': row.item_code,
 			'item_name': row.item_name,
@@ -561,7 +561,7 @@ def get_sales_orders(self):
 		item_filter += " and so_item.item_code = %(item)s"
 
 	open_so = frappe.db.sql("""
-		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total as grand_total
+		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
 		from `tabSales Order` so, `tabSales Order Item` so_item
 		where so_item.parent = so.name
 			and so.docstatus = 1 and so.status not in ("Stopped", "Closed")
@@ -615,6 +615,9 @@ def get_items_for_material_requests(doc, ignore_existing_ordered_qty=None):
 
 	doc['mr_items'] = []
 	po_items = doc.get('po_items') if doc.get('po_items') else doc.get('items')
+	if not po_items:
+		frappe.throw(_("Items are required to pull the raw materials which is associated with it."))
+
 	company = doc.get('company')
 	warehouse = doc.get('for_warehouse')
 
@@ -625,7 +628,7 @@ def get_items_for_material_requests(doc, ignore_existing_ordered_qty=None):
 	for data in po_items:
 		planned_qty = data.get('required_qty') or data.get('planned_qty')
 		ignore_existing_ordered_qty = data.get('ignore_existing_ordered_qty') or ignore_existing_ordered_qty
-		warehouse = warehouse or data.get("warehouse")
+		warehouse = data.get("warehouse") or warehouse
 
 		item_details = {}
 		if data.get("bom") or data.get("bom_no"):
@@ -708,11 +711,11 @@ def get_item_data(item_code):
 
 	return {
 		"bom_no": item_details.get("bom_no"),
-		"stock_uom": item_details.get("stock_uom"),
-		"description": item_details.get("description")
+		"stock_uom": item_details.get("stock_uom")
+#		"description": item_details.get("description")
 	}
 
-def get_sub_assembly_items(bom_no, bom_data, qty):
+def get_sub_assembly_items(bom_no, bom_data):
 	data = get_children('BOM', parent = bom_no)
 	for d in data:
 		if d.expandable:
@@ -729,6 +732,6 @@ def get_sub_assembly_items(bom_no, bom_data, qty):
 				})
 
 			bom_item = bom_data.get(key)
-			bom_item["stock_qty"] += ((d.stock_qty * qty) / d.parent_bom_qty)
+			bom_item["stock_qty"] += d.stock_qty / d.parent_bom_qty
 
-			get_sub_assembly_items(bom_item.get("bom_no"), bom_data, bom_item["stock_qty"])
+			get_sub_assembly_items(bom_item.get("bom_no"), bom_data)

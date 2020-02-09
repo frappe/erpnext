@@ -4,6 +4,15 @@
 frappe.provide("erpnext.company");
 
 frappe.ui.form.on("Company", {
+	onload: function(frm) {
+		if (frm.doc.__islocal && frm.doc.parent_company) {
+			frappe.db.get_value('Company', frm.doc.parent_company, 'is_group', (r) => {
+				if (!r.is_group) {
+					frm.set_value('parent_company', '');
+				}
+			});
+		}
+	},
 	setup: function(frm) {
 		erpnext.company.setup_queries(frm);
 		frm.set_query("hra_component", function(){
@@ -29,7 +38,8 @@ frappe.ui.form.on("Company", {
 
 	company_name: function(frm) {
 		if(frm.doc.__islocal) {
-			let parts = frm.doc.company_name.split();
+			// add missing " " arg in split method
+			let parts = frm.doc.company_name.split(" ");
 			let abbr = $.map(parts, function (p) {
 				return p? p.substr(0, 1) : null;
 			}).join("");

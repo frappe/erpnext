@@ -92,6 +92,17 @@ frappe.ui.form.on("Delivery Note", {
 			}, __('Create'));
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
+	},
+
+	to_warehouse: function(frm) {
+		if(frm.doc.to_warehouse) {
+			["items", "packed_items"].forEach(doctype => {
+				frm.doc[doctype].forEach(d => {
+					frappe.model.set_value(d.doctype, d.name,
+						"target_warehouse", frm.doc.to_warehouse);
+				});
+			});
+		}
 	}
 });
 

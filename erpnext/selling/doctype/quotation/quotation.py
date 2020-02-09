@@ -26,7 +26,6 @@ class Quotation(SellingController):
 		super(Quotation, self).validate()
 		self.set_status()
 		self.update_opportunity()
-		self.validate_order_type()
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_valid_till()
 		self.set_customer_name()
@@ -39,9 +38,6 @@ class Quotation(SellingController):
 
 	def has_sales_order(self):
 		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.name, "docstatus": 1})
-
-	def validate_order_type(self):
-		super(Quotation, self).validate_order_type()
 
 	def update_lead(self):
 		if self.quotation_to == "Lead" and self.party_name:
@@ -184,6 +180,14 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	# postprocess: fetch shipping address, set missing values
 
 	return doclist
+
+def set_expired_status():
+	frappe.db.sql("""
+		UPDATE
+			`tabQuotation` SET `status` = 'Expired'
+		WHERE
+			`status` not in ('Ordered', 'Expired', 'Lost', 'Cancelled') AND `valid_till` < %s
+		""", (nowdate()))
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):

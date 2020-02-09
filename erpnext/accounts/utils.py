@@ -513,7 +513,7 @@ def remove_ref_doc_link_from_jv(ref_type, ref_no):
 			where reference_type=%s and reference_name=%s
 			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
 
-		frappe.msgprint(_("Journal Entries {0} are un-linked".format("\n".join(linked_jv))))
+		frappe.msgprint(_("Journal Entries {0} are un-linked").format("\n".join(linked_jv)))
 
 def remove_ref_doc_link_from_pe(ref_type, ref_no):
 	linked_pe = frappe.db.sql_list("""select parent from `tabPayment Entry Reference`
@@ -536,7 +536,7 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 				where name=%s""", (pe_doc.total_allocated_amount, pe_doc.base_total_allocated_amount,
 					pe_doc.unallocated_amount, now(), frappe.session.user, pe))
 
-		frappe.msgprint(_("Payment Entries {0} are un-linked".format("\n".join(linked_pe))))
+		frappe.msgprint(_("Payment Entries {0} are un-linked").format("\n".join(linked_pe)))
 
 @frappe.whitelist()
 def get_company_default(company, fieldname):
@@ -569,7 +569,7 @@ def get_stock_and_account_balance(account=None, posting_date=None, company=None)
 
 	warehouse_account = get_warehouse_account_map(company)
 
-	account_balance = get_balance_on(account, posting_date, in_account_currency=False)
+	account_balance = get_balance_on(account, posting_date, in_account_currency=False, ignore_account_permission=True)
 
 	related_warehouses = [wh for wh, wh_details in warehouse_account.items()
 		if wh_details.account == account and not wh_details.is_group]
@@ -630,7 +630,7 @@ def get_held_invoices(party_type, party):
 			'select name from `tabPurchase Invoice` where release_date IS NOT NULL and release_date > CURDATE()',
 			as_dict=1
 		)
-		held_invoices = [d['name'] for d in held_invoices]
+		held_invoices = set([d['name'] for d in held_invoices])
 
 	return held_invoices
 
@@ -639,14 +639,20 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
-	if erpnext.get_party_account_type(party_type) == 'Receivable':
+	if account:
+		root_type, account_type = frappe.get_cached_value("Account", account, ["root_type", "account_type"])
+		party_account_type = "Receivable" if root_type == "Asset" else "Payable"
+		party_account_type = account_type or party_account_type
+	else:
+		party_account_type = erpnext.get_party_account_type(party_type)
+
+	if party_account_type == 'Receivable':
 		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 		payment_dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 	else:
 		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 		payment_dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 
-	invoice = 'Sales Invoice' if erpnext.get_party_account_type(party_type) == 'Receivable' else 'Purchase Invoice'
 	held_invoices = get_held_invoices(party_type, party)
 
 	invoice_list = frappe.db.sql("""
@@ -665,7 +671,6 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 		group by voucher_type, voucher_no
 		order by posting_date, name""".format(
 			dr_or_cr=dr_or_cr,
-			invoice = invoice,
 			condition=condition or ""
 		), {
 			"party_type": party_type,
@@ -887,3 +892,9 @@ def get_allow_cost_center_in_entry_of_bs_account():
 	def generator():
 		return cint(frappe.db.get_value('Accounts Settings', None, 'allow_cost_center_in_entry_of_bs_account'))
 	return frappe.local_cache("get_allow_cost_center_in_entry_of_bs_account", (), generator, regenerate_if_none=True)
+
+def get_stock_accounts(company):
+	return frappe.get_all("Account", filters = {
+		"account_type": "Stock",
+		"company": company
+	})

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-01-10 16:34:16",
@@ -28,9 +29,10 @@
   "from_wip_warehouse",
   "update_consumed_material_cost_in_project",
   "warehouses",
+  "source_warehouse",
   "wip_warehouse",
-  "fg_warehouse",
   "column_break_12",
+  "fg_warehouse",
   "scrap_warehouse",
   "required_items_section",
   "required_items",
@@ -225,12 +227,14 @@
    "options": "fa fa-building"
   },
   {
+   "description": "This is a location where operations are executed.",
    "fieldname": "wip_warehouse",
    "fieldtype": "Link",
    "label": "Work-in-Progress Warehouse",
    "options": "Warehouse"
   },
   {
+   "description": "This is a location where final product stored.",
    "fieldname": "fg_warehouse",
    "fieldtype": "Link",
    "label": "Target Warehouse",
@@ -241,6 +245,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "This is a location where scraped materials are stored.",
    "fieldname": "scrap_warehouse",
    "fieldtype": "Link",
    "label": "Scrap Warehouse",
@@ -462,13 +467,21 @@
    "fieldname": "update_consumed_material_cost_in_project",
    "fieldtype": "Check",
    "label": "Update Consumed Material Cost In Project"
+  },
+  {
+   "description": "This is a location where raw materials are available.",
+   "fieldname": "source_warehouse",
+   "fieldtype": "Link",
+   "label": "Source Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-cogs",
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2019-08-28 12:29:35.315239",
+ "links": [],
+ "modified": "2020-01-31 12:46:23.636033",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
