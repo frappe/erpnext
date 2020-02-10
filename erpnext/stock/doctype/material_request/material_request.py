@@ -371,7 +371,7 @@ def get_material_requests_based_on_supplier(supplier):
 	supplier_items = [d.parent for d in frappe.db.get_all("Item Default",
 		{"default_supplier": supplier}, 'parent')]
 	if not supplier_items:
-		frappe.throw(_("{0} is not the default supplier for any items.".format(supplier)))
+		frappe.throw(_("{0} is not the default supplier for any items.").format(supplier))
 
 	material_requests = frappe.db.sql_list("""select distinct mr.name
 		from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item

@@ -2089,7 +2089,6 @@ apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py,Fiscal Year 
 DocType: Coupon Code,Pricing Rule,כלל תמחור
 apps/erpnext/erpnext/controllers/selling_controller.py,To {0} | {1} {2},כדי {0} | {1} {2}
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js,Set as Lost,קבע כאבוד
-DocType: Student Applicant,Approved,אושר
 DocType: BOM,Raw Material Cost,עלות חומרי גלם
 DocType: Announcement,Posted By,פורסם על ידי
 DocType: BOM,Operating Cost,עלות הפעלה
@@ -3096,7 +3095,7 @@ apps/erpnext/erpnext/templates/includes/product_list.js,Nothing more to show.,ש
 DocType: Journal Entry,Debit Note,הערה חיוב
 DocType: Stock Entry Detail,Material Request used to make this Stock Entry,בקשת חומר המשמשת לייצור Stock רשומת זו
 DocType: Stock Settings,Item Naming By,פריט מתן שמות על ידי
-DocType: Subscription,Net Total,"סה""כ נקי"
+DocType: C-Form Invoice Detail,Net Total,"סה""כ נקי"
 ,Stock Ledger,יומן מלאי
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Stock cannot exist for Item {0} since has variants,המניה לא יכול להתקיים לפריט {0} שכן יש גרסאות
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Aerospace,התעופה והחלל
@@ -3260,7 +3259,6 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Casual Le
 DocType: Packing Slip Item,DN Detail,פרט DN
 apps/erpnext/erpnext/accounts/doctype/invoice_discounting/invoice_discounting.js,Accounting Ledger,החשבונאות לדג&#39;ר
 DocType: Sales Invoice,Against Income Account,נגד חשבון הכנסות
-DocType: Expense Claim,Approval Status,סטטוס אישור
 DocType: Quality Inspection,Readings,קריאות
 DocType: Lead,Channel Partner,Channel Partner
 DocType: Item Attribute Value,Item Attribute Value,פריט תכונה ערך

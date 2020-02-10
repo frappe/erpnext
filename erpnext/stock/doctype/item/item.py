@@ -814,7 +814,7 @@ class Item(WebsiteGenerator):
 			for d in self.attributes:
 				if d.attribute in attributes:
 					frappe.throw(
-						_("Attribute {0} selected multiple times in Attributes Table".format(d.attribute)))
+						_("Attribute {0} selected multiple times in Attributes Table").format(d.attribute))
 				else:
 					attributes.append(d.attribute)
 

@@ -22,7 +22,7 @@ class ProductionPlan(Document):
 	def validate_data(self):
 		for d in self.get('po_items'):
 			if not d.bom_no:
-				frappe.throw(_("Please select BOM for Item in Row {0}".format(d.idx)))
+				frappe.throw(_("Please select BOM for Item in Row {0}").format(d.idx))
 			else:
 				validate_bom_no(d.item_code, d.bom_no)
 
