@@ -270,6 +270,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "0",
    "fieldname": "is_return",
    "fieldtype": "Check",
@@ -353,9 +354,9 @@
    "depends_on": "return_against",
    "fieldname": "return_against",
    "fieldtype": "Link",
-   "label": "Return Against Sales Invoice",
+   "label": "Return Against POS Invoice",
    "no_copy": 1,
-   "options": "Sales Invoice",
+   "options": "POS Invoice",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1575,7 +1576,7 @@
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2020-02-03 20:00:25.893694",
+ "modified": "2020-02-07 16:19:07.648210",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "POS Invoice",

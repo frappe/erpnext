@@ -9,6 +9,21 @@ erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend(
 		this._super(doc);
 	},
 
+	refresh(doc) {
+		if (doc.docstatus == 1 && !doc.is_return) {
+			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
+				cur_frm.add_custom_button(__('Return'),
+					this.make_sales_return, __('Create'));
+				cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
+			}
+		}
+
+		if (this.frm.doc.is_return) {
+			this.frm.return_print_format = "Sales Invoice Return";
+			cur_frm.set_value('consolidated_invoice', '');
+		}
+	},
+
 	is_pos: function(frm){
 		this.set_pos_data();
 	},
@@ -95,7 +110,14 @@ erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend(
 
 		this.calculate_outstanding_amount(false);
 		this.frm.refresh_fields();
-	}
+	},
+
+	make_sales_return: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.pos_invoice.pos_invoice.make_sales_return",
+			frm: cur_frm
+		})
+	},
 })
 
 $.extend(cur_frm.cscript, new erpnext.selling.POSInvoiceController({ frm: cur_frm }))

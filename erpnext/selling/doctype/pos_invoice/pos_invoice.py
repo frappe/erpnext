@@ -56,7 +56,10 @@ class POSInvoice(SalesInvoice):
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
 		if self.loyalty_program:
 			self.make_loyalty_point_entry()
-
+		elif self.is_return and self.return_against and self.loyalty_program:
+			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
+			against_psi_doc.delete_loyalty_point_entry()
+			against_psi_doc.make_loyalty_point_entry()
 		if self.redeem_loyalty_points and self.loyalty_points:
 			self.apply_loyalty_points()
 	
@@ -65,10 +68,10 @@ class POSInvoice(SalesInvoice):
 		super(SalesInvoice, self).on_cancel()
 		if self.loyalty_program:
 			self.delete_loyalty_point_entry()
-	
-	def on_update(self):
-		# return process?
-		pass
+		elif self.is_return and self.return_against and self.loyalty_program:
+			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
+			against_psi_doc.delete_loyalty_point_entry()
+			against_psi_doc.make_loyalty_point_entry()
 
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
@@ -117,8 +120,10 @@ class POSInvoice(SalesInvoice):
 					self.status = "Unpaid and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
 					self.status = "Unpaid"
+				elif flt(self.outstanding_amount) <= 0 and self.is_return == 0 and frappe.db.get_value('POS Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+					self.status = "Credit Note Issued"
 				elif self.is_return == 1:
-					self.status = "Returned"
+					self.status = "Return"
 				elif flt(self.outstanding_amount)<=0:
 					self.status = "Paid"
 				else:
@@ -219,3 +224,9 @@ class POSInvoice(SalesInvoice):
 		for data in self.payments:
 			if not data.account:
 				data.account = get_bank_cash_account(data.mode_of_payment, self.company).get("account")
+
+
+@frappe.whitelist()
+def make_sales_return(source_name, target_doc=None):
+	from erpnext.controllers.sales_and_purchase_return import make_return_doc
+	return make_return_doc("POS Invoice", source_name, target_doc)
