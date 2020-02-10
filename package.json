@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "cypress": "^3.4.1",
     "snyk": "^1.290.1"
   },
   "scripts": {
