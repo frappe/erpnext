@@ -49,6 +49,13 @@ class Analytics(object):
 				"options": "UOM",
 				"width": 100
 			})
+			self.columns.append({
+				"label": _("Item Brand"),
+				"fieldname": 'item_brand',
+				"fieldtype": "Link",
+				"options": "Brand",
+				"width": 100
+			})
 
 		for end_date in self.periodic_daterange:
 			period = self.get_period(end_date)
@@ -138,13 +145,18 @@ class Analytics(object):
 		else:
 			value_field = 'stock_qty'
 
+		if "item_brand" in self.filters:
+			brand_filter = f'i.brand = "{self.filters.get("item_brand")}" and'
+		else:
+			brand_filter = ""
+
 		self.entries = frappe.db.sql("""
-			select i.item_code as entity, i.item_name as entity_name, i.stock_uom, i.{value_field} as value_field, s.{date_field}
+			select i.item_code as entity, i.item_name as entity_name, i.stock_uom, i.brand, i.{value_field} as value_field, s.{date_field}
 			from `tab{doctype} Item` i , `tab{doctype}` s
 			where s.name = i.parent and i.docstatus = 1 and s.company = %s
-			and s.{date_field} between %s and %s
+			and {brand_filter} s.{date_field} between %s and %s
 		"""
-		.format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type),
+		.format(date_field=self.date_field, value_field=value_field, doctype=self.filters.doc_type, brand_filter=brand_filter),
 		(self.filters.company, self.filters.from_date, self.filters.to_date), as_dict=1)
 
 		self.entity_names = {}
@@ -211,6 +223,7 @@ class Analytics(object):
 
 			if self.filters.tree_type == "Item":
 				row["stock_uom"] = period_data.get("stock_uom")
+				row["item_brand"] = period_data.get("item_brand")
 
 			self.data.append(row)
 
@@ -248,6 +261,7 @@ class Analytics(object):
 
 			if self.filters.tree_type == "Item":
 				self.entity_periodic_data[d.entity]['stock_uom'] = d.stock_uom
+				self.entity_periodic_data[d.entity]['item_brand'] = d.brand
 
 	def get_period(self, posting_date):
 		if self.filters.range == 'Weekly':
