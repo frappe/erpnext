@@ -1054,7 +1054,7 @@ class StockEntry(StockController):
 			req_qty_each = flt(req_qty / manufacturing_qty)
 			consumed_qty = flt(req_items[0].consumed_qty)
 
-			if trans_qty and manufacturing_qty >= (produced_qty + flt(self.fg_completed_qty)):
+			if trans_qty and manufacturing_qty > (produced_qty + flt(self.fg_completed_qty)):
 				if qty >= req_qty:
 					qty = (req_qty/trans_qty) * flt(self.fg_completed_qty)
 				else:
