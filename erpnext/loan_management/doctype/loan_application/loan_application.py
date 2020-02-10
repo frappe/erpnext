@@ -21,8 +21,8 @@ class LoanApplication(Document):
 			self.repayment_periods, self.is_term_loan)
 
 		self.validate_loan_type()
-		self.set_loan_amount()
 		self.set_pledge_amount()
+		self.set_loan_amount()
 		self.validate_loan_amount()
 		self.get_repayment_details()
 		self.check_sanctioned_amount_limit()
@@ -62,7 +62,7 @@ class LoanApplication(Document):
 				proposed_pledge.qty = cint(proposed_pledge.amount/proposed_pledge.loan_security_price)
 
 			proposed_pledge.amount = proposed_pledge.qty * proposed_pledge.loan_security_price
-			proposed_pledge.post_haircut_amount = proposed_pledge.amount - (proposed_pledge.amount * proposed_pledge.haircut/100)
+			proposed_pledge.post_haircut_amount = cint(proposed_pledge.amount - (proposed_pledge.amount * proposed_pledge.haircut/100))
 
 	def get_repayment_details(self):
 
@@ -106,7 +106,7 @@ class LoanApplication(Document):
 		if not self.loan_amount and self.is_secured_loan and self.proposed_pledges:
 			self.loan_amount = 0
 			for security in self.proposed_pledges:
-				self.loan_amount += security.amount - (security.amount * security.haircut/100)
+				self.loan_amount += security.post_haircut_amount
 
 @frappe.whitelist()
 def create_loan(source_name, target_doc=None, submit=0):

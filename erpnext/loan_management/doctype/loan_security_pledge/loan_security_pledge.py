@@ -36,10 +36,10 @@ class LoanSecurityPledge(Document):
 				pledge.qty = cint(pledge.amount/pledge.loan_security_price)
 
 			pledge.amount = pledge.qty * pledge.loan_security_price
-			pledge.post_haircut_amount = pledge.amount - (pledge.amount * pledge.haircut/100)
+			pledge.post_haircut_amount = cint(pledge.amount - (pledge.amount * pledge.haircut/100))
 
 			total_security_value += pledge.amount
-			maximum_loan_value += pledge.amount - (pledge.amount * pledge.haircut)/100
+			maximum_loan_value += pledge.post_haircut_amount
 
 		self.total_security_value = total_security_value
 		self.maximum_loan_value = maximum_loan_value
