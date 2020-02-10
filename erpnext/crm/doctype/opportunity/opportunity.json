@@ -22,6 +22,7 @@
   "sales_stage",
   "order_lost_reason",
   "mins_to_first_response",
+  "expected_closing",
   "next_contact",
   "contact_by",
   "contact_date",
@@ -155,6 +156,11 @@
    "fieldtype": "Float",
    "label": "Mins to first response",
    "read_only": 1
+  },
+  {
+   "fieldname": "expected_closing",
+   "fieldtype": "Date",
+   "label": "Expected Closing Date"
   },
   {
    "collapsible": 1,

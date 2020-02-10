@@ -22,7 +22,7 @@ class ServiceLevel(Document):
 		for priority in self.priorities:
 			# Check if response and resolution time is set for every priority
 			if not (priority.response_time or priority.resolution_time):
-				frappe.throw(_("Set Response Time and Resolution for Priority {0} at index {1}.".format(priority.priority, priority.idx)))
+				frappe.throw(_("Set Response Time and Resolution for Priority {0} at index {1}.").format(priority.priority, priority.idx))
 
 			priorities.append(priority.priority)
 
@@ -44,12 +44,12 @@ class ServiceLevel(Document):
 				resolution = priority.resolution_time * 7
 
 			if response > resolution:
-				frappe.throw(_("Response Time for {0} at index {1} can't be greater than Resolution Time.".format(priority.priority, priority.idx)))
+				frappe.throw(_("Response Time for {0} at index {1} can't be greater than Resolution Time.").format(priority.priority, priority.idx))
 
 		# Check if repeated priority
 		if not len(set(priorities)) == len(priorities):
 			repeated_priority = get_repeated(priorities)
-			frappe.throw(_("Priority {0} has been repeated.".format(repeated_priority)))
+			frappe.throw(_("Priority {0} has been repeated.").format(repeated_priority))
 
 		# Check if repeated default priority
 		if not len(set(default_priority)) == len(default_priority):
@@ -81,7 +81,7 @@ class ServiceLevel(Document):
 		# Check for repeated workday
 		if not len(set(support_days)) == len(support_days):
 			repeated_days = get_repeated(support_days)
-			frappe.throw(_("Workday {0} has been repeated.".format(repeated_days)))
+			frappe.throw(_("Workday {0} has been repeated.").format(repeated_days))
 
 def get_repeated(values):
 	unique_list = []
