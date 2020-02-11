@@ -790,11 +790,12 @@ class ReceivablePayableReport(object):
 		rows = []
 		for row in self.data:
 			row = frappe._dict(row)
-			values = [row.range1, row.range2, row.range3, row.range4, row.range5]
-			precision = cint(frappe.db.get_default("float_precision")) or 2
-			rows.append({
-				'values': [flt(val, precision) for val in values]
-			})
+			if not cint(row.bold):
+				values = [row.range1, row.range2, row.range3, row.range4, row.range5]
+				precision = cint(frappe.db.get_default("float_precision")) or 2
+				rows.append({
+					'values': [flt(val, precision) for val in values]
+				})
 
 		self.chart = {
 			"data": {
