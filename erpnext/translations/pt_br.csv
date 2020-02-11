@@ -757,7 +757,6 @@ DocType: Asset,Straight Line,Linha reta
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,You cannot credit and debit same account at the same time,Você não pode ter débito e crédito na mesma conta
 apps/erpnext/erpnext/projects/report/daily_timesheet_summary/daily_timesheet_summary.py,To Datetime,Até a Data e Hora
 DocType: Course Topic,Topic,Tópico
-DocType: Expense Claim,Approval Status,Estado da Aprovação
 DocType: BOM Update Tool,The new BOM after replacement,A nova LDM após substituição
 apps/erpnext/erpnext/hr/doctype/employee/employee_tree.js,New Employee,Novo Colaborador
 apps/erpnext/erpnext/public/js/controllers/transaction.js,Please set 'Apply Additional Discount On',"Por favor, defina &quot;Aplicar desconto adicional em &#39;"

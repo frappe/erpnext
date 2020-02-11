@@ -25,7 +25,7 @@ frappe.ui.form.on("Sales Invoice", {
 		if(frm.doc.docstatus == 1 && !frm.is_dirty()
 			&& !frm.doc.is_return && !frm.doc.ewaybill) {
 
-			frm.add_custom_button('e-Way Bill JSON', () => {
+			frm.add_custom_button('E-Way Bill JSON', () => {
 				var w = window.open(
 					frappe.urllib.get_full_url(
 						"/api/method/erpnext.regional.india.utils.generate_ewb_json?"
@@ -36,7 +36,7 @@ frappe.ui.form.on("Sales Invoice", {
 				if (!w) {
 					frappe.msgprint(__("Please enable pop-ups")); return;
 				}
-			}, __("Make"));
+			}, __("Create"));
 		}
 	}
 
