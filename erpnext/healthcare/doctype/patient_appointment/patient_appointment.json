@@ -9,10 +9,11 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
-  "inpatient_record",
   "patient",
-  "appointment_type",
-  "duration",
+  "patient_name",
+  "patient_sex",
+  "patient_age",
+  "inpatient_record",
   "column_break_1",
   "status",
   "procedure_template",
@@ -22,20 +23,18 @@
   "section_break_12",
   "practitioner",
   "department",
+  "appointment_type",
   "column_break_17",
   "appointment_date",
   "appointment_time",
-  "section_break_16",
-  "patient_name",
-  "patient_sex",
-  "column_break_21",
-  "patient_age",
-  "section_break_1",
   "appointment_datetime",
+  "duration",
+  "section_break_16",
+  "invoiced",
+  "ref_sales_invoice",
+  "column_break_2",
   "mode_of_payment",
   "paid_amount",
-  "column_break_2",
-  "invoiced",
   "company",
   "section_break_3",
   "notes",
@@ -73,11 +72,10 @@
    "set_only_once": 1
   },
   {
-   "description": "In Minutes",
    "fieldname": "duration",
    "fieldtype": "Int",
    "in_filter": 1,
-   "label": "Duration"
+   "label": "Duration (In Minutes)"
   },
   {
    "fieldname": "column_break_1",
@@ -104,9 +102,10 @@
    "set_only_once": 1
   },
   {
+   "depends_on": "eval:doc.__islocal && doc.patient",
    "fieldname": "get_procedure_from_encounter",
    "fieldtype": "Button",
-   "label": "Get prescribed procedures"
+   "label": "Get Prescribed Clinical Procedures"
   },
   {
    "fieldname": "procedure_prescription",
@@ -195,19 +194,10 @@
    "report_hide": 1
   },
   {
-   "fieldname": "column_break_21",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "patient_age",
    "fieldtype": "Data",
    "label": "Patient Age",
    "read_only": 1
-  },
-  {
-   "fieldname": "section_break_1",
-   "fieldtype": "Section Break",
-   "set_only_once": 1
   },
   {
    "fieldname": "appointment_datetime",
@@ -279,10 +269,17 @@
    "label": "Reminded",
    "print_hide": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "ref_sales_invoice",
+   "fieldtype": "Link",
+   "label": "Reference Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2020-02-03 23:38:41.821141",
+ "modified": "2020-02-10 22:38:55.401247",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",
