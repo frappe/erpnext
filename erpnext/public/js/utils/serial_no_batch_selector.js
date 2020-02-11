@@ -90,7 +90,8 @@ erpnext.SerialNoBatchSelector = Class.extend({
 						args: {
 							qty: qty,
 							item_code: me.item_code,
-							warehouse: me.warehouse_details.name
+							warehouse: me.warehouse_details.name,
+							batch_no: me.item.batch_no || null
 						}
 					});
 
@@ -390,6 +391,10 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		let serial_no_filters = {
 			item_code: me.item_code,
 			delivery_document_no: ""
+		}
+
+		if (this.item.batch_no) {
+			serial_no_filters["batch_no"] = this.item.batch_no;
 		}
 
 		if (me.warehouse_details.name) {
