@@ -418,7 +418,6 @@ def make_serial_no(serial_no, args):
 	sr.asset = args.get('asset')
 	sr.location = args.get('location')
 
-
 	if args.get('purchase_document_type'):
 		sr.purchase_document_type = args.get('purchase_document_type')
 		sr.purchase_document_no = args.get('purchase_document_no')
@@ -494,10 +493,11 @@ def get_delivery_note_serial_no(item_code, qty, delivery_note):
 	return serial_nos
 
 @frappe.whitelist()
-def auto_fetch_serial_number(qty, item_code, warehouse):
+def auto_fetch_serial_number(qty, item_code, warehouse, batch_no=None):
 	serial_numbers = frappe.get_list("Serial No", filters={
 		"item_code": item_code,
 		"warehouse": warehouse,
+		"batch_no": batch_no,
 		"delivery_document_no": "",
 		"sales_invoice": ""
 	}, limit=qty, order_by="creation")
