@@ -292,6 +292,7 @@ def set_more_defaults():
 	selling_settings.dn_required = "No"
 	selling_settings.allow_multiple_items = 1
 	selling_settings.sales_update_frequency = "Each Transaction"
+	selling_settings.selling_price_list = _("Standard Selling")
 	selling_settings.save()
 
 	add_uom_data()
@@ -307,6 +308,7 @@ def set_more_defaults():
 	buying_settings.pr_required = "No"
 	buying_settings.maintain_same_rate = 1
 	buying_settings.allow_multiple_items = 1
+	selling_settings.buying_price_list = _("Standard Buying")
 	buying_settings.save()
 
 	hr_settings = frappe.get_doc("HR Settings")
