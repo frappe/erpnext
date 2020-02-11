@@ -656,3 +656,4 @@ erpnext.patches.v12_0.set_lead_title_field
 erpnext.patches.v12_0.set_permission_einvoicing
 erpnext.patches.v12_0.set_published_in_hub_tracked_item
 erpnext.patches.v12_0.set_job_offer_applicant_email
+erpnext.patches.v12_0.create_irs_1099_field_united_states
