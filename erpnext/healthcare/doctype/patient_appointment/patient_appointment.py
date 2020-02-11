@@ -103,6 +103,7 @@ def invoice_appointment(appointment_doc):
 	sales_invoice.save(ignore_permissions=True)
 	sales_invoice.submit()
 	frappe.msgprint(_("Sales Invoice {0} created as paid".format(sales_invoice.name)), alert=True)
+	frappe.db.set_value('Patient Appointment', appointment_doc.name, 'ref_sales_invoice', sales_invoice.name)
 
 def appointment_cancel(appointment_id):
 	appointment = frappe.get_doc("Patient Appointment", appointment_id)

@@ -40,8 +40,30 @@ frappe.ui.form.on('Patient Appointment', {
 
 		if (frm.is_new()) {
 			frm.page.set_primary_action(__('Check Availability'), function() {
+				frappe.db.get_value('Healthcare Settings', {name: 'Healthcare Settings'}, 'manage_appointment_invoice_automatically', (settings) => {
+					if (settings.manage_appointment_invoice_automatically) {
+						if (!frm.doc.mode_of_payment) {
+							frappe.msgprint({
+								title: __('Not Allowed'),
+								message: __('Please select a Mode of Payment first'),
+								indicator: 'red'
+							});
+						}
+						if (!frm.doc.paid_amount) {
+							frappe.msgprint({
+								title: __('Not Allowed'),
+								message: __('Please set the Paid Amount first'),
+								indicator: 'red'
+							});
+						}
+					}
+				});
 				if (!frm.doc.patient) {
-					frappe.throw(__('Please select a patient first'));
+					frappe.msgprint({
+						title: __('Not Allowed'),
+						message: __('Please select Patient first'),
+						indicator: 'red'
+					});
 				} else {
 					check_and_set_availability(frm);
 				}
@@ -301,7 +323,7 @@ let get_prescribed_procedure = function(frm) {
 	} else {
 		frappe.msgprint({
 			title: __('Not Allowed'),
-			message: __('Please select Patient first')
+			message: __('Please select a Patient first')
 		});
 	}
 };
