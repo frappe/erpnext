@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import json
 from frappe import _, throw, scrub
-from frappe.utils import (today, flt, cint, fmt_money, formatdate,
+from frappe.utils import (today, flt, cint, fmt_money, formatdate, cstr,
 	getdate, add_days, add_months, get_last_day, nowdate, get_link_to_form)
 from erpnext.stock.get_item_details import get_conversion_factor, get_item_details
 from erpnext.setup.utils import get_exchange_rate
@@ -18,6 +18,7 @@ from erpnext.accounts.doctype.pricing_rule.utils import (apply_pricing_rule_on_t
 	apply_pricing_rule_for_free_items, get_applied_pricing_rules)
 from erpnext.exceptions import InvalidCurrency
 from six import text_type
+import re
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
 force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules",
