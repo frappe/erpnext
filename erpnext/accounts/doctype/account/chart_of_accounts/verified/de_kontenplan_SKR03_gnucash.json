@@ -82,16 +82,25 @@
 				"IV. Kassenbestand, Bundesbankguthaben, Guthaben bei Kreditinstituten und Schecks.": {
 					"is_group": 1,
 					"Kasse": {
-						"account_number": "1000",
-						"account_type": "Cash"
+						"account_type": "Cash",
+						"is_group": 1,
+						"Kasse": {
+							"is_group": 1,
+							"account_number": "1000",
+							"account_type": "Cash"
+						}
 					},
-					"Postbank": {
-						"account_number": "1100",
-						"account_type": "Bank"
-					},
-					"Bankkonto": {
-						"account_number": "1200",
-						"account_type": "Bank"
+					"Bank": {
+						"is_group": 1,
+						"account_type": "Bank",
+						"Postbank": {
+							"account_number": "1100",
+							"account_type": "Bank"
+						},
+						"Bankkonto": {
+							"account_number": "1200",
+							"account_type": "Bank"
+						}
 					}
 				}
 			},
