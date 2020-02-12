@@ -372,7 +372,7 @@
   {
    "depends_on": "eval:doc.__islocal",
    "fieldname": "address_title",
-   "fieldtype": "HTML",
+   "fieldtype": "Data",
    "label": "Address Title",
    "print_hide": 1
   },
@@ -431,7 +431,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2019-12-24 02:43:36.756000",
+ "modified": "2020-02-11 19:54:59.502481",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
