@@ -102,7 +102,7 @@ def invoice_appointment(appointment_doc):
 
 	sales_invoice.save(ignore_permissions=True)
 	sales_invoice.submit()
-	frappe.msgprint(_("Sales Invoice {0} created as paid".format(sales_invoice.name)), alert=True)
+	frappe.msgprint(_("Sales Invoice {0} created as paid").format(sales_invoice.name), alert=True)
 
 def appointment_cancel(appointment_id):
 	appointment = frappe.get_doc("Patient Appointment", appointment_id)
@@ -111,7 +111,7 @@ def appointment_cancel(appointment_id):
 		sales_invoice = exists_sales_invoice(appointment)
 		if sales_invoice and cancel_sales_invoice(sales_invoice):
 			frappe.msgprint(
-				_("Appointment {0} and Sales Invoice {1} cancelled".format(appointment.name, sales_invoice.name))
+				_("Appointment {0} and Sales Invoice {1} cancelled").format(appointment.name, sales_invoice.name)
 			)
 		else:
 			validity = validity_exists(appointment.practitioner, appointment.patient)
@@ -121,7 +121,7 @@ def appointment_cancel(appointment_id):
 					visited = fee_validity.visited - 1
 					frappe.db.set_value("Fee Validity", fee_validity.name, "visited", visited)
 					frappe.msgprint(
-						_("Appointment cancelled, Please review and cancel the invoice {0}".format(fee_validity.ref_invoice))
+						_("Appointment cancelled, Please review and cancel the invoice {0}").format(fee_validity.ref_invoice)
 					)
 				else:
 					frappe.msgprint(_("Appointment cancelled"))
@@ -203,7 +203,7 @@ def get_availability_data(date, practitioner):
 	if employee:
 		# Check if it is Holiday
 		if is_holiday(employee, date):
-			frappe.throw(_("{0} is a company holiday".format(date)))
+			frappe.throw(_("{0} is a company holiday").format(date))
 
 		# Check if He/She on Leave
 		leave_record = frappe.db.sql("""select half_day from `tabLeave Application`
@@ -221,7 +221,7 @@ def get_availability_data(date, practitioner):
 			if schedule.schedule:
 				practitioner_schedule = frappe.get_doc("Practitioner Schedule", schedule.schedule)
 			else:
-				frappe.throw(_("{0} does not have a Healthcare Practitioner Schedule. Add it in Healthcare Practitioner master".format(practitioner)))
+				frappe.throw(_("{0} does not have a Healthcare Practitioner Schedule. Add it in Healthcare Practitioner master").format(practitioner))
 
 			if practitioner_schedule:
 				available_slots = []
@@ -259,7 +259,7 @@ def get_availability_data(date, practitioner):
 						"avail_slot":available_slots, 'appointments': appointments})
 
 	else:
-		frappe.throw(_("{0} does not have a Healthcare Practitioner Schedule. Add it in Healthcare Practitioner master".format(practitioner)))
+		frappe.throw(_("{0} does not have a Healthcare Practitioner Schedule. Add it in Healthcare Practitioner master").format(practitioner))
 
 	if not available_slots and not slot_details:
 		# TODO: return available slots in nearby dates

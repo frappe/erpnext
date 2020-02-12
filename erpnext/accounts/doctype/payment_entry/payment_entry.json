@@ -332,6 +332,7 @@
    "label": "Reference"
   },
   {
+   "depends_on": "eval:doc.docstatus==0",
    "fieldname": "get_outstanding_invoice",
    "fieldtype": "Button",
    "label": "Get Outstanding Invoice"
@@ -575,7 +576,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-11-06 12:59:43.151721",
+ "modified": "2019-12-08 13:02:30.016610",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

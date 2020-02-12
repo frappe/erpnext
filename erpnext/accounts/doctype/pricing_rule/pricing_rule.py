@@ -34,8 +34,7 @@ class PricingRule(Document):
 
 	def validate_duplicate_apply_on(self):
 		field = apply_on_dict.get(self.apply_on)
-		values = [d.get(frappe.scrub(self.apply_on)) for d in self.get(field)]
-
+		values = [d.get(frappe.scrub(self.apply_on)) for d in self.get(field) if field]
 		if len(values) != len(set(values)):
 			frappe.throw(_("Duplicate {0} found in the table").format(self.apply_on))
 
@@ -48,18 +47,21 @@ class PricingRule(Document):
 		if tocheck and not self.get(tocheck):
 			throw(_("{0} is required").format(self.meta.get_label(tocheck)), frappe.MandatoryError)
 
+		if self.price_or_product_discount == 'Price' and not self.rate_or_discount:
+			throw(_("Rate or Discount is required for the price discount."), frappe.MandatoryError)
+
 	def validate_applicable_for_selling_or_buying(self):
 		if not self.selling and not self.buying:
 			throw(_("Atleast one of the Selling or Buying must be selected"))
 
 		if not self.selling and self.applicable_for in ["Customer", "Customer Group",
 				"Territory", "Sales Partner", "Campaign"]:
-			throw(_("Selling must be checked, if Applicable For is selected as {0}"
-				.format(self.applicable_for)))
+			throw(_("Selling must be checked, if Applicable For is selected as {0}")
+				.format(self.applicable_for))
 
 		if not self.buying and self.applicable_for in ["Supplier", "Supplier Group"]:
-			throw(_("Buying must be checked, if Applicable For is selected as {0}"
-				.format(self.applicable_for)))
+			throw(_("Buying must be checked, if Applicable For is selected as {0}")
+				.format(self.applicable_for))
 
 	def validate_min_max_qty(self):
 		if self.min_qty and self.max_qty and flt(self.min_qty) > flt(self.max_qty):
@@ -183,7 +185,7 @@ def get_serial_no_for_item(args):
 
 def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=False):
 	from erpnext.accounts.doctype.pricing_rule.utils import (get_pricing_rules,
-		get_applied_pricing_rules, get_pricing_rule_items)
+		get_applied_pricing_rules, get_pricing_rule_items, get_product_discount_rule)
 
 	if isinstance(doc, string_types):
 		doc = json.loads(doc)
@@ -241,10 +243,12 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 
 			if pricing_rule.coupon_code_based==1 and args.coupon_code==None:
 				return item_details
-				
-			if (not pricing_rule.validate_applied_rule and
-				pricing_rule.price_or_product_discount == "Price"):
-				apply_price_discount_pricing_rule(pricing_rule, item_details, args)
+
+			if not pricing_rule.validate_applied_rule:
+				if pricing_rule.price_or_product_discount == "Price":
+					apply_price_discount_rule(pricing_rule, item_details, args)
+				else:
+					get_product_discount_rule(pricing_rule, item_details, doc)
 
 		item_details.has_pricing_rule = 1
 
@@ -294,7 +298,7 @@ def get_pricing_rule_details(args, pricing_rule):
 		'child_docname': args.get('child_docname')
 	})
 
-def apply_price_discount_pricing_rule(pricing_rule, item_details, args):
+def apply_price_discount_rule(pricing_rule, item_details, args):
 	item_details.pricing_rule_for = pricing_rule.rate_or_discount
 
 	if ((pricing_rule.margin_type == 'Amount' and pricing_rule.currency == args.currency)

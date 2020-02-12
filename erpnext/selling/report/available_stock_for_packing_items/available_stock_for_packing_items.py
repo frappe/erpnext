@@ -7,7 +7,7 @@ from frappe.utils import flt
 
 def execute(filters=None):
 	if not filters: filters = {}
-	
+
 	columns = get_columns()
 	iwq_map = get_item_warehouse_quantity_map()
 	item_map = get_item_details()
@@ -15,22 +15,23 @@ def execute(filters=None):
 	for sbom, warehouse in iwq_map.items():
 		total = 0
 		total_qty = 0
-		
+
 		for wh, item_qty in warehouse.items():
 			total += 1
-			row = [sbom, item_map.get(sbom).item_name, item_map.get(sbom).description, 
-					item_map.get(sbom).stock_uom, wh]
-			available_qty = item_qty
-			total_qty += flt(available_qty)
-			row += [available_qty]
-			
-			if available_qty:
-				data.append(row)
-				if (total == len(warehouse)):
-					row = ["", "", "Total", "", "", total_qty]
+			if item_map.get(sbom):
+				row = [sbom, item_map.get(sbom).item_name, item_map.get(sbom).description,
+						item_map.get(sbom).stock_uom, wh]
+				available_qty = item_qty
+				total_qty += flt(available_qty)
+				row += [available_qty]
+
+				if available_qty:
 					data.append(row)
+					if (total == len(warehouse)):
+						row = ["", "", "Total", "", "", total_qty]
+						data.append(row)
 	return columns, data
-		
+
 def get_columns():
 	columns = ["Item Code:Link/Item:100", "Item Name::100", "Description::120", \
 				"UOM:Link/UOM:80", "Warehouse:Link/Warehouse:100", "Quantity::100"]

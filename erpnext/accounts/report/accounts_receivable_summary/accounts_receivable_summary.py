@@ -36,7 +36,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			self.filters.report_date) or {}
 
 		for party, party_dict in iteritems(self.party_total):
-			if party_dict.outstanding <= 0:
+			if party_dict.outstanding == 0:
 				continue
 
 			row = frappe._dict()

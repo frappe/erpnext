@@ -5,10 +5,10 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from frappe.utils import flt, time_diff_in_hours, now, add_days, cint
+from frappe.utils import flt, time_diff_in_hours, now, add_months, cint, today
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
-from erpnext.manufacturing.doctype.work_order.work_order \
-	import make_stock_entry, ItemHasVariantError, stop_unstop, StockOverProductionError, OverProductionError
+from erpnext.manufacturing.doctype.work_order.work_order import (make_stock_entry, 
+	ItemHasVariantError, stop_unstop, StockOverProductionError, OverProductionError, CapacityError)
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.utils import get_bin
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
@@ -307,13 +307,49 @@ class TestWorkOrder(unittest.TestCase):
 			{'docstatus': 1, 'with_operations': 1, 'company': '_Test Company'}, ['name', 'item'])
 
 		if data:
+			frappe.db.set_value("Manufacturing Settings",
+				None, "disable_capacity_planning", 0)
+
 			bom, bom_item = data
 
 			bom_doc = frappe.get_doc('BOM', bom)
 			work_order = make_wo_order_test_record(item=bom_item, qty=1, bom_no=bom)
+			self.assertTrue(work_order.planned_end_date)
 
 			job_cards = frappe.get_all('Job Card', filters = {'work_order': work_order.name})
 			self.assertEqual(len(job_cards), len(bom_doc.operations))
+
+	def test_capcity_planning(self):
+		frappe.db.set_value("Manufacturing Settings", None, {
+			"disable_capacity_planning": 0,
+			"capacity_planning_for_days": 1
+		})
+
+		data = frappe.get_cached_value('BOM', {'docstatus': 1, 'item': '_Test FG Item 2',
+			'with_operations': 1, 'company': '_Test Company'}, ['name', 'item'])
+
+		if data:
+			bom, bom_item = data
+
+			planned_start_date = add_months(today(), months=-1)
+			work_order = make_wo_order_test_record(item=bom_item,
+				qty=10, bom_no=bom, planned_start_date=planned_start_date)
+
+			work_order1 = make_wo_order_test_record(item=bom_item,
+				qty=30, bom_no=bom, planned_start_date=planned_start_date, do_not_submit=1)
+
+			self.assertRaises(CapacityError, work_order1.submit)
+
+			frappe.db.set_value("Manufacturing Settings", None, {
+				"capacity_planning_for_days": 30
+			})
+
+			work_order1.reload()
+			work_order1.submit()
+			self.assertTrue(work_order1.docstatus, 1)
+
+			work_order1.cancel()
+			work_order.cancel()
 
 	def test_work_order_with_non_transfer_item(self):
 		items = {'Finished Good Transfer Item': 1, '_Test FG Item': 1, '_Test FG Item 1': 0}
@@ -371,13 +407,11 @@ def make_wo_order_test_record(**args):
 	wo_order.skip_transfer=1
 	wo_order.get_items_and_operations_from_bom()
 	wo_order.sales_order = args.sales_order or None
+	wo_order.planned_start_date = args.planned_start_date or now()
 
 	if args.source_warehouse:
 		for item in wo_order.get("required_items"):
 			item.source_warehouse = args.source_warehouse
-
-	if args.planned_start_date:
-		wo_order.planned_start_date = args.planned_start_date
 
 	if not args.do_not_save:
 		wo_order.insert()

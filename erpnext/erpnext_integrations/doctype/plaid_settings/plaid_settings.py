@@ -53,13 +53,17 @@ def add_institution(token, response):
 
 @frappe.whitelist()
 def add_bank_accounts(response, bank, company):
-	response = json.loads(response) if not "accounts" in response else response
+	try:
+		response = json.loads(response)
+	except TypeError:
+		pass
+
 	bank = json.loads(bank)
 	result = []
 
 	default_gl_account = get_default_bank_cash_account(company, "Bank")
 	if not default_gl_account:
-		frappe.throw(_("Please setup a default bank account for company {0}".format(company)))
+		frappe.throw(_("Please setup a default bank account for company {0}").format(company))
 
 	for account in response["accounts"]:
 		acc_type = frappe.db.get_value("Account Type", account["type"])

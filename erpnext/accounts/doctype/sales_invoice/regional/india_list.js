@@ -12,7 +12,7 @@ frappe.listview_settings['Sales Invoice'].onload = function (doclist) {
 
 		for (let doc of selected_docs) {
 			if (doc.docstatus !== 1) {
-				frappe.throw(__("e-Way Bill JSON can only be generated from a submitted document"));
+				frappe.throw(__("E-Way Bill JSON can only be generated from a submitted document"));
 			}
 		}
 
@@ -29,5 +29,5 @@ frappe.listview_settings['Sales Invoice'].onload = function (doclist) {
 
 	};
 
-	doclist.page.add_actions_menu_item(__('Generate e-Way Bill JSON'), action, false);
+	doclist.page.add_actions_menu_item(__('Generate E-Way Bill JSON'), action, false);
 };

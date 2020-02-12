@@ -34,7 +34,6 @@ class SalesOrder(SellingController):
 
 	def validate(self):
 		super(SalesOrder, self).validate()
-		self.validate_order_type()
 		self.validate_delivery_date()
 		self.validate_proj_cust()
 		self.validate_po()
@@ -99,9 +98,6 @@ class SalesOrder(SellingController):
 				if not res:
 					frappe.msgprint(_("Quotation {0} not of type {1}")
 						.format(d.prevdoc_docname, self.order_type))
-
-	def validate_order_type(self):
-		super(SalesOrder, self).validate_order_type()
 
 	def validate_delivery_date(self):
 		if self.order_type == 'Sales' and not self.skip_delivery_note:
@@ -380,6 +376,9 @@ class SalesOrder(SellingController):
 	def get_work_order_items(self, for_raw_material_request=0):
 		'''Returns items with BOM that already do not have a linked work order'''
 		items = []
+		item_codes = [i.item_code for i in self.items]
+		product_bundle_parents = [pb.new_item_code for pb in frappe.get_all("Product Bundle", {"new_item_code": ["in", item_codes]}, ["new_item_code"])]
+
 		for table in [self.items, self.packed_items]:
 			for i in table:
 				bom = get_default_bom_item(i.item_code)
@@ -391,7 +390,7 @@ class SalesOrder(SellingController):
 				else:
 					pending_qty = stock_qty
 
-				if pending_qty:
+				if pending_qty and i.item_code not in product_bundle_parents:
 					if bom:
 						items.append(dict(
 							name= i.name,
@@ -420,7 +419,7 @@ class SalesOrder(SellingController):
 
 		def _get_delivery_date(ref_doc_delivery_date, red_doc_transaction_date, transaction_date):
 			delivery_date = get_next_schedule_date(ref_doc_delivery_date,
-				auto_repeat_doc.frequency, cint(auto_repeat_doc.repeat_on_day))
+				auto_repeat_doc.frequency, auto_repeat_doc.start_date, cint(auto_repeat_doc.repeat_on_day))
 
 			if delivery_date <= transaction_date:
 				delivery_date_diff = frappe.utils.date_diff(ref_doc_delivery_date, red_doc_transaction_date)
@@ -578,8 +577,12 @@ def make_delivery_note(source_name, target_doc=None, skip_item_mapping=False):
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
 
-		# set company address
-		target.update(get_company_address(target.company))
+		if source.company_address:
+			target.update({'company_address': source.company_address})
+		else:
+			# set company address
+			target.update(get_company_address(target.company))
+
 		if target.company_address:
 			target.update(get_fetch_values("Delivery Note", 'company_address', target.company_address))
 
@@ -645,8 +648,12 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
 
-		# set company address
-		target.update(get_company_address(target.company))
+		if source.company_address:
+			target.update({'company_address': source.company_address})
+		else:
+			# set company address
+			target.update(get_company_address(target.company))
+
 		if target.company_address:
 			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
 

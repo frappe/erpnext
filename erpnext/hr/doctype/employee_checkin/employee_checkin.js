@@ -2,7 +2,9 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Employee Checkin', {
-	// refresh: function(frm) {
-
-	// }
+	setup: (frm) => {
+		if(!frm.doc.time) {
+			frm.set_value("time", frappe.datetime.now_datetime());
+		}
+	}
 });

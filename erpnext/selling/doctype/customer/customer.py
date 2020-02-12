@@ -12,6 +12,7 @@ from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
 from frappe.model.rename_doc import update_linked_doctypes
+from frappe.model.mapper import get_mapped_doc
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -53,6 +54,7 @@ class Customer(TransactionBase):
 		self.validate_credit_limit_on_change()
 		self.set_loyalty_program()
 		self.check_customer_group_change()
+		self.validate_default_bank_account()
 
 		# set loyalty program tier
 		if frappe.db.exists('Customer', self.name):
@@ -70,6 +72,11 @@ class Customer(TransactionBase):
 		if not self.get('__islocal'):
 			if self.customer_group != frappe.db.get_value('Customer', self.name, 'customer_group'):
 				frappe.flags.customer_group_changed = True
+
+	def validate_default_bank_account(self):
+		if self.default_bank_account:
+			is_company_account = frappe.db.get_value('Bank Account', self.default_bank_account, 'is_company_account')
+			frappe.throw(_("{0} is not a company bank account").format(frappe.bold(self.default_bank_account)))
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
@@ -237,6 +244,66 @@ def create_contact(contact, party_type, party, email):
 	contact.append('email_ids', dict(email_id=email, is_primary=1))
 	contact.append('links', dict(link_doctype=party_type, link_name=party))
 	contact.insert()
+
+@frappe.whitelist()
+def make_quotation(source_name, target_doc=None):
+
+	def set_missing_values(source, target):
+		_set_missing_values(source, target)
+
+	target_doc = get_mapped_doc("Customer", source_name,
+		{"Customer": {
+			"doctype": "Quotation",
+			"field_map": {
+				"name":"party_name"
+			}
+		}}, target_doc, set_missing_values)
+
+	target_doc.quotation_to = "Customer"
+	target_doc.run_method("set_missing_values")
+	target_doc.run_method("set_other_charges")
+	target_doc.run_method("calculate_taxes_and_totals")
+
+	price_list = frappe.get_value("Customer", source_name, 'default_price_list')
+	if price_list:
+		target_doc.selling_price_list = price_list
+
+	return target_doc
+
+@frappe.whitelist()
+def make_opportunity(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		_set_missing_values(source, target)
+
+	target_doc = get_mapped_doc("Customer", source_name,
+		{"Customer": {
+			"doctype": "Opportunity",
+			"field_map": {
+				"name": "party_name",
+				"doctype": "opportunity_from",
+			}
+		}}, target_doc, set_missing_values)
+
+	return target_doc
+
+def _set_missing_values(source, target):
+	address = frappe.get_all('Dynamic Link', {
+			'link_doctype': source.doctype,
+			'link_name': source.name,
+			'parenttype': 'Address',
+		}, ['parent'], limit=1)
+
+	contact = frappe.get_all('Dynamic Link', {
+			'link_doctype': source.doctype,
+			'link_name': source.name,
+			'parenttype': 'Contact',
+		}, ['parent'], limit=1)
+
+	if address:
+		target.customer_address = address[0].parent
+
+	if contact:
+		target.contact_person = contact[0].parent
 
 @frappe.whitelist()
 def get_loyalty_programs(doc):
