@@ -154,14 +154,31 @@ class Lead(SellingController):
 		else:
 			first_name, last_name = self.lead_name, None
 
-		contact_fields = ["email_id", "salutation", "gender", "designation", "phone", "mobile_no"]
-
 		contact = frappe.new_doc("Contact")
-		contact.update({contact_field: self.get(contact_field) for contact_field in contact_fields})
 		contact.update({
 			"first_name": first_name,
-			"last_name": last_name
+			"last_name": last_name,
+			"salutation": self.salutation,
+			"gender": self.gender,
+			"designation": self.designation
 		})
+
+		if self.email_id:
+			contact.append("email_ids", {
+				"email_id": self.email_id,
+				"is_primary": True
+			})
+
+		if self.phone:
+			contact.append("phone_nos", {
+				"phone": self.phone
+			})
+
+		if self.mobile_no:
+			contact.append("phone_nos", {
+				"phone": self.mobile_no
+			})
+
 		contact.insert()
 
 		return contact
@@ -178,6 +195,7 @@ class Lead(SellingController):
 
 		# update contact links
 		if self.contact_doc:
+			self.contact_doc.address = self.address_doc.name if self.address_doc else None
 			self.contact_doc.append("links", {
 				"link_doctype": "Lead",
 				"link_name": self.name,
