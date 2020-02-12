@@ -17,6 +17,8 @@ from erpnext.stock.doctype.material_request.material_request import make_purchas
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.controllers.accounts_controller import update_child_qty_rate
 from erpnext.controllers.status_updater import OverAllowanceError
+from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
+
 
 class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_receipt(self):
@@ -115,6 +117,73 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(po.get("items")[0].qty, 7)
 		self.assertEqual(po.get("items")[0].amount, 1400)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 3)
+
+	
+	def test_add_new_item_in_update_child_qty_rate(self):
+		po = create_purchase_order(do_not_save=1)
+		po.items[0].qty = 4
+		po.save()
+		po.submit()
+		pr = make_pr_against_po(po.name, 2)
+
+		po.load_from_db()
+		first_item_of_po = po.get("items")[0]
+
+		trans_item = json.dumps([
+			{
+				'item_code': first_item_of_po.item_code,
+				'rate': first_item_of_po.rate,
+				'qty': first_item_of_po.qty,
+				'docname': first_item_of_po.name
+			},
+			{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7}
+		])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+
+		po.reload()
+		self.assertEquals(len(po.get('items')), 2)
+		self.assertEqual(po.status, 'To Receive and Bill')
+
+	
+	def test_remove_item_in_update_child_qty_rate(self):
+		po = create_purchase_order(do_not_save=1)
+		po.items[0].qty = 4
+		po.save()
+		po.submit()
+		pr = make_pr_against_po(po.name, 2)
+
+		po.reload()
+		first_item_of_po = po.get("items")[0]
+		# add an item
+		trans_item = json.dumps([
+			{
+				'item_code': first_item_of_po.item_code,
+				'rate': first_item_of_po.rate,
+				'qty': first_item_of_po.qty,
+				'docname': first_item_of_po.name
+			},
+			{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7}])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+
+		po.reload()
+		# check if can remove received item
+		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7, 'docname': po.get("items")[1].name}])
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate, 'Purchase Order', trans_item, po.name)
+
+		first_item_of_po = po.get("items")[0]
+		trans_item = json.dumps([
+			{
+				'item_code': first_item_of_po.item_code,
+				'rate': first_item_of_po.rate,
+				'qty': first_item_of_po.qty,
+				'docname': first_item_of_po.name
+			}
+		])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+
+		po.reload()
+		self.assertEquals(len(po.get('items')), 1)
+		self.assertEqual(po.status, 'To Receive and Bill')
 
 	def test_update_qty(self):
 		po = create_purchase_order()
@@ -620,6 +689,27 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.save()
 		self.assertEqual(po.schedule_date, add_days(nowdate(), 2))
 
+	
+	def test_po_optional_blanket_order(self):
+		"""
+			Expected result: Blanket order Ordered Quantity should only be affected on Purchase Order with against_blanket_order = 1.
+			Second Purchase Order should not add on to Blanket Orders Ordered Quantity.
+		"""
+
+		bo = make_blanket_order(blanket_order_type = "Purchasing", quantity = 10, rate = 10)
+
+		po = create_purchase_order(item_code= "_Test Item", qty = 5, against_blanket_order = 1)
+		po_doc = frappe.get_doc('Purchase Order', po.get('name'))
+		# To test if the PO has a Blanket Order
+		self.assertTrue(po_doc.items[0].blanket_order)
+
+		po = create_purchase_order(item_code= "_Test Item", qty = 5, against_blanket_order = 0)
+		po_doc = frappe.get_doc('Purchase Order', po.get('name'))
+		# To test if the PO does NOT have a Blanket Order
+		self.assertEqual(po_doc.items[0].blanket_order, None)
+
+
+
 
 def make_pr_against_po(po, received_qty=0):
 	pr = make_purchase_receipt(po)
@@ -693,7 +783,8 @@ def create_purchase_order(**args):
 		"qty": args.qty or 10,
 		"rate": args.rate or 500,
 		"schedule_date": add_days(nowdate(), 1),
-		"include_exploded_items": args.get('include_exploded_items', 1)
+		"include_exploded_items": args.get('include_exploded_items', 1),
+		"against_blanket_order": args.against_blanket_order
 	})
 	if not args.do_not_save:
 		po.insert()

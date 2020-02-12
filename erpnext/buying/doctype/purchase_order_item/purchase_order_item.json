@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-05-24 19:29:06",
  "doctype": "DocType",
@@ -67,6 +68,7 @@
   "supplier_quotation",
   "supplier_quotation_item",
   "col_break5",
+  "against_blanket_order",
   "blanket_order",
   "blanket_order_rate",
   "item_group",
@@ -511,6 +513,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.against_blanket_order",
    "fieldname": "blanket_order",
    "fieldtype": "Link",
    "label": "Blanket Order",
@@ -518,6 +521,7 @@
    "options": "Blanket Order"
   },
   {
+   "depends_on": "eval:doc.against_blanket_order",
    "fieldname": "blanket_order_rate",
    "fieldtype": "Currency",
    "label": "Blanket Order Rate",
@@ -703,6 +707,12 @@
   },
   {
    "default": "0",
+   "fieldname": "against_blanket_order",
+   "fieldtype": "Check",
+   "label": "Against Blanket Order"
+  },
+  {
+   "default": "0",
    "fetch_from": "item_code.is_fixed_asset",
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
@@ -712,7 +722,8 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-11-07 17:19:12.090355",
+ "links": [],
+ "modified": "2019-12-06 13:17:12.142799",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

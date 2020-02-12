@@ -130,10 +130,10 @@ class Opportunity(TransactionBase):
 
 	def has_lost_quotation(self):
 		lost_quotation = frappe.db.sql("""
-			select q.name
-			from `tabQuotation` q, `tabQuotation Item` qi
-			where q.name = qi.parent and q.docstatus=1
-				and qi.prevdoc_docname =%s and q.status = 'Lost'
+			select name
+			from `tabQuotation`
+			where docstatus=1
+				and opportunity =%s and status = 'Lost'
 			""", self.name)
 		if lost_quotation:
 			if self.has_active_quotation():
@@ -307,7 +307,7 @@ def set_multiple_status(names, status):
 
 def auto_close_opportunity():
 	""" auto close the `Replied` Opportunities after 7 days """
-	auto_close_after_days = frappe.db.get_value("Support Settings", "Support Settings", "close_opportunity_after_days") or 15
+	auto_close_after_days = frappe.db.get_single_value("Selling Settings", "close_opportunity_after_days") or 15
 
 	opportunities = frappe.db.sql(""" select name from tabOpportunity where status='Replied' and
 		modified<DATE_SUB(CURDATE(), INTERVAL %s DAY) """, (auto_close_after_days), as_dict=True)

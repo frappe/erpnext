@@ -43,10 +43,18 @@ class TestLeavePeriod(unittest.TestCase):
 		leave_period.grant_leave_allocation(employee=employee_doc_name)
 		self.assertEqual(get_leave_balance_on(employee_doc_name, leave_type, today()), 20)
 
-def create_leave_period(from_date, to_date):
+def create_leave_period(from_date, to_date, company=None):
+	leave_period = frappe.db.get_value('Leave Period',
+		dict(company=company or erpnext.get_default_company(),
+			from_date=from_date,
+			to_date=to_date,
+			is_active=1), 'name')
+	if leave_period:
+		return frappe.get_doc("Leave Period", leave_period)
+
 	leave_period = frappe.get_doc({
 		"doctype": "Leave Period",
-		"company": erpnext.get_default_company(),
+		"company": company or erpnext.get_default_company(),
 		"from_date": from_date,
 		"to_date": to_date,
 		"is_active": 1

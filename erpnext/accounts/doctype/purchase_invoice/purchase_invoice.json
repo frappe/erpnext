@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -417,6 +418,7 @@
    "fieldname": "contact_email",
    "fieldtype": "Small Text",
    "label": "Contact Email",
+   "options": "Email",
    "print_hide": 1,
    "read_only": 1
   },
@@ -705,7 +707,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Text",
+   "fieldtype": "Long Text",
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -1287,7 +1289,8 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2019-09-17 22:31:42.666601",
+ "links": [],
+ "modified": "2019-12-30 19:13:49.610538",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

@@ -283,7 +283,7 @@ class EmailDigest(Document):
 						card.value = card.value *-1
 					card.value = self.fmt_money(card.value,False if key in ("bank_balance", "credit_balance") else True)
 
-					cache.setex(cache_key, card, 24 * 60 * 60)
+					cache.set_value(cache_key, card, expires_in_sec=24 * 60 * 60)
 
 				context.cards.append(card)
 

@@ -50,8 +50,8 @@ class POSClosingVoucher(Document):
 			})
 
 		if user:
-			frappe.throw(_("POS Closing Voucher alreday exists for {0} between date {1} and {2}"
-				.format(self.user, self.period_start_date, self.period_end_date)))
+			frappe.throw(_("POS Closing Voucher alreday exists for {0} between date {1} and {2}")
+				.format(self.user, self.period_start_date, self.period_end_date))
 
 	def set_invoice_list(self, invoice_list):
 		self.sales_invoices_summary = []

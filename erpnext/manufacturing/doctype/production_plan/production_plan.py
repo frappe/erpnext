@@ -22,7 +22,7 @@ class ProductionPlan(Document):
 	def validate_data(self):
 		for d in self.get('po_items'):
 			if not d.bom_no:
-				frappe.throw(_("Please select BOM for Item in Row {0}".format(d.idx)))
+				frappe.throw(_("Please select BOM for Item in Row {0}").format(d.idx))
 			else:
 				validate_bom_no(d.item_code, d.bom_no)
 
@@ -615,6 +615,9 @@ def get_items_for_material_requests(doc, ignore_existing_ordered_qty=None):
 
 	doc['mr_items'] = []
 	po_items = doc.get('po_items') if doc.get('po_items') else doc.get('items')
+	if not po_items:
+		frappe.throw(_("Items are required to pull the raw materials which is associated with it."))
+
 	company = doc.get('company')
 	warehouse = doc.get('for_warehouse')
 
@@ -729,6 +732,6 @@ def get_sub_assembly_items(bom_no, bom_data):
 				})
 
 			bom_item = bom_data.get(key)
-			bom_item["stock_qty"] += d.stock_qty
+			bom_item["stock_qty"] += d.stock_qty / d.parent_bom_qty
 
 			get_sub_assembly_items(bom_item.get("bom_no"), bom_data)

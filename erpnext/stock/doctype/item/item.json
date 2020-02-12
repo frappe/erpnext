@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_guest_to_view": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -135,8 +136,7 @@
   "publish_in_hub",
   "hub_category_to_publish",
   "hub_warehouse",
-  "synced_with_hub",
-  "manufacturers"
+  "synced_with_hub"
  ],
  "fields": [
   {
@@ -570,6 +570,7 @@
   {
    "default": "0.00",
    "depends_on": "is_stock_item",
+   "description": "Minimum quantity should be as per Stock UOM",
    "fieldname": "min_order_qty",
    "fieldtype": "Float",
    "label": "Minimum Order Qty",
@@ -1017,12 +1018,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "manufacturers",
-   "fieldtype": "Table",
-   "label": "Manufacturers",
-   "options": "Item Manufacturer"
-  },
-  {
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "over_delivery_receipt_allowance",
    "fieldtype": "Float",
@@ -1048,8 +1043,9 @@
  "icon": "fa fa-tag",
  "idx": 2,
  "image_field": "image",
+ "links": [],
  "max_attachments": 1,
- "modified": "2019-10-09 17:05:59.576119",
+ "modified": "2020-01-02 19:13:59.295963",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

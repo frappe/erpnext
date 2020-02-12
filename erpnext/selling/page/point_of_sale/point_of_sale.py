@@ -160,3 +160,8 @@ def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 			where {condition} and (name like %(txt)s) limit {start}, {page_len}"""
 		.format(condition = cond, start=start, page_len= page_len),
 			{'txt': '%%%s%%' % txt})
+
+@frappe.whitelist()
+def get_pos_fields():
+	return frappe.get_all("POS Field", fields=["label", "fieldname",
+		"fieldtype", "default_value", "reqd", "read_only", "options"])

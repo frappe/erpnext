@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2013-08-02 13:45:23",
  "doctype": "DocType",
  "document_type": "Other",
@@ -13,6 +14,7 @@
   "expense_approver_mandatory_in_expense_claim",
   "payroll_settings",
   "include_holidays_in_total_working_days",
+  "disable_rounded_total",
   "max_working_hours_against_timesheet",
   "column_break_11",
   "email_salary_slip_to_employee",
@@ -21,10 +23,12 @@
   "leave_settings",
   "leave_approval_notification_template",
   "leave_status_notification_template",
+  "role_allowed_to_create_backdated_leave_application",
   "column_break_18",
   "leave_approver_mandatory_in_leave_application",
   "show_leaves_of_all_department_members_in_calendar",
   "auto_leave_encashment",
+  "restrict_backdated_leave_application",
   "hiring_settings",
   "check_vacancies"
  ],
@@ -160,12 +164,33 @@
    "fieldname": "auto_leave_encashment",
    "fieldtype": "Check",
    "label": "Auto Leave Encashment"
+  },
+  {
+   "default": "0",
+   "description": "If checked, hides and disables Rounded Total field in Salary Slips",
+   "fieldname": "disable_rounded_total",
+   "fieldtype": "Check",
+   "label": "Disable Rounded Total"
+  },
+  {
+   "default": "0",
+   "fieldname": "restrict_backdated_leave_application",
+   "fieldtype": "Check",
+   "label": "Restrict Backdated Leave Application"
+  },
+  {
+   "depends_on": "eval:doc.restrict_backdated_leave_application == 1",
+   "fieldname": "role_allowed_to_create_backdated_leave_application",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Create Backdated Leave Application",
+   "options": "Role"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2019-08-05 13:07:17.993968",
+ "links": [],
+ "modified": "2020-01-06 18:46:30.189815",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
