@@ -72,17 +72,16 @@ def get_transactions(filters, as_dict=1):
 			case gl.debit when 0 then 'H' else 'S' end as 'Soll/Haben-Kennzeichen',
 
 			/* account number or, if empty, party account number */
-			coalesce(acc.account_number, acc_pa.account_number) as 'Kontonummer',
+			coalesce(acc.account_number, acc_pa.account_number) as 'Konto',
 
 			/* against number or, if empty, party against number */
 			coalesce(acc_against.account_number, acc_against_pa.account_number) as 'Gegenkonto (ohne BU-Schlüssel)',
 			
 			gl.posting_date as 'Belegdatum',
+			gl.voucher_no as 'Belegfeld 1',
 			gl.remarks as 'Buchungstext',
-			gl.voucher_type as 'Beleginfo - Art 1',
-			gl.voucher_no as 'Beleginfo - Inhalt 1',
-			gl.against_voucher_type as 'Beleginfo - Art 2',
-			gl.against_voucher as 'Beleginfo - Inhalt 2'
+			gl.against_voucher_type as 'Beleginfo - Art 1',
+			gl.against_voucher as 'Beleginfo - Inhalt 1'
 
 		FROM `tabGL Entry` gl
 
