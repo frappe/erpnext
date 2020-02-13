@@ -239,8 +239,6 @@ def get_datev_csv(data, filters, csv_class):
 	filters -- dict
 	csv_class -- defines DATA_CATEGORY, FORMAT_NAME and COLUMNS
 	"""
-	header = get_header(filters, csv_class)
-
 	empty_df = pd.DataFrame(columns=csv_class.COLUMNS)
 	data_df = pd.DataFrame.from_records(data)
 
@@ -252,7 +250,6 @@ def get_datev_csv(data, filters, csv_class):
 	if csv_class.DATA_CATEGORY == DataCategory.ACCOUNT_NAMES:
 		result['Sprach-ID'] = 'de-DE'
 
-	header = ';'.join(header).encode('latin_1')
 	data = result.to_csv(
 		# Reason for str(';'): https://github.com/pandas-dev/pandas/issues/6035
 		sep=str(';'),
@@ -273,10 +270,13 @@ def get_datev_csv(data, filters, csv_class):
 	if not six.PY2:
 		data = data.encode('latin_1')
 
+	header = get_header(filters, csv_class)
+	header = ';'.join(header).encode('latin_1')
+
 	# 1st Row: Header with meta data
-	# 2nd Row: Data heading (Überschrift der Nutzdaten)
-	# 3rd Row: – n: Data (Nutzdaten)
-	return header + b'\r\n\r\n' + data
+	# 2nd Row: Data heading (Überschrift der Nutzdaten), included in `data` here.
+	# 3rd - nth Row: Data (Nutzdaten)
+	return header + b'\r\n' + data
 
 
 def get_header(filters, csv_class):
