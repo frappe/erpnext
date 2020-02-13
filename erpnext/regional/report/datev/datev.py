@@ -274,66 +274,89 @@ def get_datev_csv(data, filters, csv_class):
 	if not six.PY2:
 		data = data.encode('latin_1')
 
-	return header + b'\r\n' + data
+	# 1st Row: Header with meta data
+	# 2nd Row: Data heading (Überschrift der Nutzdaten)
+	# 3rd Row: – n: Data (Nutzdaten)
+	return header + b'\r\n\r\n' + data
 
 
 def get_header(filters, csv_class):
+	coa = frappe.get_value("Company", filters.get("company"), "chart_of_accounts")
+	coa_used = "SKR04" if "SKR04" in coa else ("SKR03" if "SKR03" in coa else "")
+
 	header = [
-		# A = DATEV format
-		#   DTVF = created by DATEV software,
-		#   EXTF = created by other software
+		# DATEV format
+		#   "DTVF" = created by DATEV software,
+		#   "EXTF" = created by other software
 		'"EXTF"',
-		# B = version of the DATEV format
+		# version of the DATEV format
 		#   141 = 1.41, 
 		#   510 = 5.10,
 		#   720 = 7.20
-		"700",
+		'700',
 		csv_class.DATA_CATEGORY,
 		csv_class.FORMAT_NAME,
-		# E = Format version (regarding format name)
+		# Format version (regarding format name)
 		csv_class.FORMAT_VERSION,
-		# F = Generated on
+		# Generated on
 		datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
-		# G = Imported on -- stays empty
-		"",
-		# H = Origin (SV = other (?), RE = KARE)
-		"SV",
+		# Imported on -- stays empty
+		'',
+		# Origin. Any two symbols, will be replaced by "SV" on import.
+		'"EN"',
 		# I = Exported by
-		frappe.session.user,
+		'"%s"' % frappe.session.user,
 		# J = Imported by -- stays empty
-		"",
+		'',
 		# K = Tax consultant number (Beraternummer)
 		frappe.get_value("DATEV Settings", filters.get("company"), "consultant_number"),
-		"",
 		# L = Tax client number (Mandantennummer)
 		frappe.get_value("DATEV Settings", filters.get("company"), "client_number"),
-		"",
 		# M = Start of the fiscal year (Wirtschaftsjahresbeginn)
 		frappe.utils.formatdate(frappe.defaults.get_user_default("year_start_date"), "yyyyMMdd"),
 		# N = Length of account numbers (Sachkontenlänge)
-		"4",
+		# minimum of 4, 5 if debtors/creditors are included
+		'5',
 		# O = Transaction batch start date (YYYYMMDD)
 		frappe.utils.formatdate(filters.get('from_date'), "yyyyMMdd"),
 		# P = Transaction batch end date (YYYYMMDD)
 		frappe.utils.formatdate(filters.get('to_date'), "yyyyMMdd"),
 		# Q = Description (for example, "January - February 2019 Transactions")
-		"{} - {} {}".format(
+		'"{} - {} {}"'.format(
 				frappe.utils.formatdate(filters.get('from_date'), "MMMM yyyy"),
 				frappe.utils.formatdate(filters.get('to_date'), "MMMM yyyy"),
 				csv_class.FORMAT_NAME
 		),
 		# R = Diktatkürzel
-		"",
+		'',
 		# S = Buchungstyp
-		#   1 = Transaction batch (Buchungsstapel),
+		#   1 = Transaction batch (Finanzbuchführung),
 		#   2 = Annual financial statement (Jahresabschluss)
-		"1" if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else "",
+		'1' if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
 		# T = Rechnungslegungszweck
-		"",
+		'',
 		# U = Festschreibung
-		"",
-		# V = Kontoführungs-Währungskennzeichen des Geldkontos
-		frappe.get_value("Company", filters.get("company"), "default_currency")
+		'',
+		# V = Default currency, for example, "EUR"
+		'"%s"' % frappe.get_value("Company", filters.get("company"), "default_currency"),
+		# reserviert
+		'',
+		# Derivatskennzeichen
+		'',
+		# reserviert
+		'',
+		# reserviert
+		'',
+		# SKR
+		'"%s"' % coa_used,
+		# Branchen-Lösungs-ID
+		'',
+		# reserviert
+		'',
+		# reserviert
+		'',
+		# Anwendungsinformation (Verarbeitungskennzeichen der abgebenden Anwendung)
+		''
 	]
 	return header
 
