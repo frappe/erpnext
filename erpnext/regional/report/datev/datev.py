@@ -293,7 +293,7 @@ def get_header(filters, csv_class):
 		# E = Format version (regarding format name)
 		csv_class.FORMAT_VERSION,
 		# F = Generated on
-		datetime.datetime.now().strftime("%Y%m%d"),
+		datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
 		# G = Imported on -- stays empty
 		"",
 		# H = Origin (SV = other (?), RE = KARE)
