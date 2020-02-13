@@ -282,7 +282,7 @@ def get_header(filters, csv_class):
 		# A = DATEV format
 		#   DTVF = created by DATEV software,
 		#   EXTF = created by other software
-		"EXTF",
+		'"EXTF"',
 		# B = version of the DATEV format
 		#   141 = 1.41, 
 		#   510 = 5.10,
