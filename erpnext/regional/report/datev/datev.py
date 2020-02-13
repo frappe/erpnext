@@ -287,7 +287,7 @@ def get_header(filters, csv_class):
 		#   141 = 1.41, 
 		#   510 = 5.10,
 		#   720 = 7.20
-		"510",
+		"700",
 		csv_class.DATA_CATEGORY,
 		csv_class.FORMAT_NAME,
 		# E = Format version (regarding format name)
