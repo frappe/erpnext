@@ -303,10 +303,10 @@ def get_header(filters, csv_class):
 		# J = Imported by -- stays empty
 		"",
 		# K = Tax consultant number (Beraternummer)
-		frappe.get_value("DATEV Settings", filters.get("company"), "consultant_number") or "",
+		frappe.get_value("DATEV Settings", filters.get("company"), "consultant_number"),
 		"",
 		# L = Tax client number (Mandantennummer)
-		frappe.get_value("DATEV Settings", filters.get("company"), "client_number") or "",
+		frappe.get_value("DATEV Settings", filters.get("company"), "client_number"),
 		"",
 		# M = Start of the fiscal year (Wirtschaftsjahresbeginn)
 		frappe.utils.formatdate(frappe.defaults.get_user_default("year_start_date"), "yyyyMMdd"),
