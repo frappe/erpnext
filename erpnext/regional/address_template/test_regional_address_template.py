@@ -21,7 +21,7 @@ class TestRegionalAddressTemplate(TestCase):
 		"""Get the countries and paths from the templates directory."""
 		templates = get_address_templates()
 		self.assertIsInstance(templates, list)
-		self.assertIsInstance(templates[0], dict)
+		self.assertIsInstance(templates[0], tuple)
 
 	def test_create_address_template(self):
 		"""Create a new Address Template."""

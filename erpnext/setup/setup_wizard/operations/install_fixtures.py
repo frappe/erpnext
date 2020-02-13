@@ -11,7 +11,7 @@ from frappe.utils import cstr, getdate
 from frappe.desk.doctype.global_search_settings.global_search_settings import update_global_search_doctypes
 
 from erpnext.accounts.doctype.account.account import RootNotEditable
-from erpnext.regional.address_template.setup import setup as set_up_address_templates
+from erpnext.regional.address_template.setup import set_up_address_templates
 
 default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
 	"Cold Calling", "Exhibition", "Supplier Reference", "Mass Mailing",
@@ -32,7 +32,7 @@ def install(country=None):
 		{ 'doctype': 'Domain', 'domain': 'Agriculture'},
 		{ 'doctype': 'Domain', 'domain': 'Non Profit'},
 
-		# address template	
+		# ensure at least an empty Address Template exists for this Country	
 		{'doctype':"Address Template", "country": country},
 
 		# item group
@@ -274,7 +274,7 @@ def install(country=None):
 	
 	make_default_records()
 	make_records(records)
-	set_up_address_templates()
+	set_up_address_templates(default_country=country)
 	set_more_defaults()
 	update_global_search_doctypes()
 
