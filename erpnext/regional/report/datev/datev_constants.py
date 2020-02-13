@@ -13,24 +13,27 @@ TRANSACTION_COLUMNS = [
 	"Basis-Umsatz",
 	"WKZ Basis-Umsatz",
 	# Konto/Gegenkonto
-	"Kontonummer",
+	"Konto",
 	"Gegenkonto (ohne BU-Schlüssel)",
 	"BU-Schlüssel",
 	# Datum
 	"Belegdatum",
-	# Belegfelder
+	# Rechnungs- / Belegnummer
 	"Belegfeld 1",
+	# z.B. Fälligkeitsdatum Format: TTMMJJ
 	"Belegfeld 2",
-	# Weitere Felder
+	# Skonto-Betrag / -Abzug (Der Wert 0 ist unzulässig)
 	"Skonto",
+	# Beschreibung des Buchungssatzes
 	"Buchungstext",
-	# OPOS-Informationen
+	# Mahn- / Zahl-Sperre (1 = Postensperre)
 	"Postensperre",
 	"Diverse Adressnummer",
 	"Geschäftspartnerbank",
 	"Sachverhalt",
+	# Keine Mahnzinsen
 	"Zinssperre",
-	# Digitaler Beleg
+	# Link auf den Buchungsbeleg (Programmkürzel + GUID)
 	"Beleglink",
 	# Beleginfo
 	"Beleginfo - Art 1",
@@ -49,22 +52,30 @@ TRANSACTION_COLUMNS = [
 	"Beleginfo - Inhalt 7",
 	"Beleginfo - Art 8",
 	"Beleginfo - Inhalt 8",
-	# Kostenrechnung
-	"Kost 1 - Kostenstelle",
-	"Kost 2 - Kostenstelle",
-	"Kost-Menge",
-	# Steuerrechnung
-	"EU-Land u. UStID",
+	# Zuordnung des Geschäftsvorfalls für die Kostenrechnung
+	"KOST1 - Kostenstelle",
+	"KOST2 - Kostenstelle",
+	"KOST-Menge",
+	# USt-ID-Nummer (Beispiel: DE133546770)
+	"EU-Mitgliedstaat u. USt-IdNr.",
+	# Der im EU-Bestimmungsland gültige Steuersatz
 	"EU-Steuersatz",
+	# I = Ist-Versteuerung,
+	# K = keine Umsatzsteuerrechnung
+	# P = Pauschalierung (z. B. für Land- und Forstwirtschaft),
+	# S = Soll-Versteuerung
 	"Abw. Versteuerungsart",
-	# L+L Sachverhalt
+	# Sachverhalte gem. § 13b Abs. 1 Satz 1 Nrn. 1.-5. UStG
 	"Sachverhalt L+L",
+	# Steuersatz / Funktion zum L+L-Sachverhalt (Beispiel: Wert 190 für 19%)
 	"Funktionsergänzung L+L",
-	# Funktion Steuerschlüssel 49
+	# Bei Verwendung des BU-Schlüssels 49 für „andere Steuersätze“ muss der
+	# steuerliche Sachverhalt mitgegeben werden
 	"BU 49 Hauptfunktionstyp",
 	"BU 49 Hauptfunktionsnummer",
 	"BU 49 Funktionsergänzung",
-	# Zusatzinformationen
+	# Zusatzinformationen, besitzen den Charakter eines Notizzettels und können
+	# frei erfasst werden.
 	"Zusatzinformation - Art 1",
 	"Zusatzinformation - Inhalt 1",
 	"Zusatzinformation - Art 2",
@@ -105,54 +116,76 @@ TRANSACTION_COLUMNS = [
 	"Zusatzinformation - Inhalt 19",
 	"Zusatzinformation - Art 20",
 	"Zusatzinformation - Inhalt 20",
-	# Mengenfelder LuF
+	# Wirkt sich nur bei Sachverhalt mit SKR 14 Land- und Forstwirtschaft aus,
+	# für andere SKR werden die Felder beim Import / Export überlesen bzw.
+	# leer exportiert.
 	"Stück",
 	"Gewicht",
-	# Forderungsart
+	# 1 = Lastschrift
+	# 2 = Mahnung
+	# 3 = Zahlung
 	"Zahlweise",
 	"Forderungsart",
+	# JJJJ
 	"Veranlagungsjahr",
+	# TTMMJJJJ
 	"Zugeordnete Fälligkeit",
-	# Weitere Felder
+	# 1 = Einkauf von Waren
+	# 2 = Erwerb von Roh-Hilfs- und Betriebsstoffen
 	"Skontotyp",
-	# Anzahlungen
+	# Allgemeine Bezeichnung, des Auftrags / Projekts.
 	"Auftragsnummer",
+	# AA = Angeforderte Anzahlung / Abschlagsrechnung
+	# AG = Erhaltene Anzahlung (Geldeingang)
+	# AV = Erhaltene Anzahlung (Verbindlichkeit)
+	# SR = Schlussrechnung
+	# SU = Schlussrechnung (Umbuchung)
+	# SG = Schlussrechnung (Geldeingang)
+	# SO = Sonstige
 	"Buchungstyp",
 	"USt-Schlüssel (Anzahlungen)",
-	"EU-Land (Anzahlungen)",
+	"EU-Mitgliedstaat (Anzahlungen)",
 	"Sachverhalt L+L (Anzahlungen)",
 	"EU-Steuersatz (Anzahlungen)",
 	"Erlöskonto (Anzahlungen)",
-	# Stapelinformationen
+	# Wird beim Import durch SV (Stapelverarbeitung) ersetzt.
 	"Herkunft-Kz",
-	# Technische Identifikation
-	"Buchungs GUID",
-	# Kostenrechnung
-	"Kost-Datum",
-	# OPOS-Informationen
+	# Wird von DATEV verwendet.
+	"Leerfeld",
+	# Format TTMMJJJJ
+	"KOST-Datum",
+	# Vom Zahlungsempfänger individuell vergebenes Kennzeichen eines Mandats
+	# (z.B. Rechnungs- oder Kundennummer).
 	"SEPA-Mandatsreferenz",
+	# 1 = Skontosperre
+	# 0 = Keine Skontosperre
 	"Skontosperre",
 	# Gesellschafter und Sonderbilanzsachverhalt
 	"Gesellschaftername",
+	# Amtliche Nummer aus der Feststellungserklärung
 	"Beteiligtennummer",
 	"Identifikationsnummer",
 	"Zeichnernummer",
-	# OPOS-Informationen
+	# Format TTMMJJJJ
 	"Postensperre bis",
 	# Gesellschafter und Sonderbilanzsachverhalt
 	"Bezeichnung SoBil-Sachverhalt",
 	"Kennzeichen SoBil-Buchung",
-	# Stapelinformationen
+	# 0 = keine Festschreibung
+	# 1 = Festschreibung
 	"Festschreibung",
-	# Datum
+	# Format TTMMJJJJ
 	"Leistungsdatum",
+	# Format TTMMJJJJ
 	"Datum Zuord. Steuerperiode",
-	# OPOS-Informationen
+	# OPOS-Informationen, Format TTMMJJJJ
 	"Fälligkeit",
-	# Konto/Gegenkonto
+	# G oder 1 = Generalumkehr
+	# 0 = keine Generalumkehr
 	"Generalumkehr (GU)",
 	# Steuersatz für Steuerschlüssel
 	"Steuersatz",
+	# Beispiel: DE für Deutschland
 	"Land"
 ]
 

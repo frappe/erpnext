@@ -315,8 +315,7 @@ def get_header(filters, csv_class):
 		# M = Start of the fiscal year (Wirtschaftsjahresbeginn)
 		frappe.utils.formatdate(frappe.defaults.get_user_default("year_start_date"), "yyyyMMdd"),
 		# N = Length of account numbers (Sachkontenlänge)
-		# minimum of 4, 5 if debtors/creditors are included
-		'5',
+		'4',
 		# O = Transaction batch start date (YYYYMMDD)
 		frappe.utils.formatdate(filters.get('from_date'), "yyyyMMdd"),
 		# P = Transaction batch end date (YYYYMMDD)
