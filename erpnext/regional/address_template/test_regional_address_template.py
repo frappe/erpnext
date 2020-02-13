@@ -33,7 +33,7 @@ class TestRegionalAddressTemplate(TestCase):
 	def test_update_address_template(self):
 		"""Update an existing Address Template."""
 		country = ensure_country("Germany")
-		if not frappe.db.exists("Address Template", country):
+		if not frappe.db.exists("Address Template", country.name):
 			template = frappe.get_doc({
 				"doctype": "Address Template",
 				"country": country.name,
