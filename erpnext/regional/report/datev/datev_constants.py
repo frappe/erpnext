@@ -472,8 +472,8 @@ QUERY_REPORT_COLUMNS = [
 		"fieldtype": "Data",
 	},
 	{
-		"label": "Kontonummer",
-		"fieldname": "Kontonummer",
+		"label": "Konto",
+		"fieldname": "Konto",
 		"fieldtype": "Data",
 	},
 	{
@@ -487,27 +487,22 @@ QUERY_REPORT_COLUMNS = [
 		"fieldtype": "Date",
 	},
 	{
+		"label": "Belegfeld 1",
+		"fieldname": "Belegfeld 1",
+		"fieldtype": "Data",
+	},
+	{
 		"label": "Buchungstext",
 		"fieldname": "Buchungstext",
 		"fieldtype": "Text",
 	},
 	{
 		"label": "Beleginfo - Art 1",
-		"fieldname": "Beleginfo - Art 1",
-		"fieldtype": "Data",
-	},
-	{
-		"label": "Beleginfo - Inhalt 1",
-		"fieldname": "Beleginfo - Inhalt 1",
-		"fieldtype": "Data",
-	},
-	{
-		"label": "Beleginfo - Art 2",
 		"fieldname": "Beleginfo - Art 2",
 		"fieldtype": "Data",
 	},
 	{
-		"label": "Beleginfo - Inhalt 2",
+		"label": "Beleginfo - Inhalt 1",
 		"fieldname": "Beleginfo - Inhalt 2",
 		"fieldtype": "Data",
 	}
