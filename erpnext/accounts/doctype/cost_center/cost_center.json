@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_copy": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -123,7 +124,8 @@
  ],
  "icon": "fa fa-money",
  "idx": 1,
- "modified": "2019-09-16 14:44:17.103548",
+ "links": [],
+ "modified": "2020-01-28 13:50:23.430434",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cost Center",
@@ -162,7 +164,6 @@
    "role": "Purchase User"
   }
  ],
- "quick_entry": 1,
  "search_fields": "parent_cost_center, is_group",
  "show_name_in_global_search": 1,
  "sort_field": "modified",

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -122,7 +123,7 @@
   {
    "fieldname": "default_bank_account",
    "fieldtype": "Link",
-   "label": "Default Bank Account",
+   "label": "Default Company Bank Account",
    "options": "Bank Account"
   },
   {
@@ -322,8 +323,9 @@
   },
   {
    "fieldname": "primary_address",
-   "fieldtype": "Read Only",
-   "label": "Primary Address"
+   "fieldtype": "Text",
+   "label": "Primary Address",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -469,7 +471,8 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2019-09-06 12:40:31.801424",
+ "links": [],
+ "modified": "2020-01-29 20:36:37.879581",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

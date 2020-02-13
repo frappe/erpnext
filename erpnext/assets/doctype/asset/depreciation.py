@@ -10,7 +10,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import g
 
 def post_depreciation_entries(date=None):
 	# Return if automatic booking of asset depreciation is disabled
-	if not cint(frappe.db.get_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically")):
+	if not cint(frappe.db.get_single_value("Accounts Settings", "book_asset_depreciation_entry_automatically")):
 		return
 
 	if not date:
@@ -22,7 +22,7 @@ def post_depreciation_entries(date=None):
 def get_depreciable_assets(date):
 	return frappe.db.sql_list("""select a.name
 		from tabAsset a, `tabDepreciation Schedule` ds
-		where a.name = ds.parent and a.docstatus=1 and ds.schedule_date<=%s
+		where a.name = ds.parent and a.docstatus=1 and ds.schedule_date<=%s and a.calculate_depreciation = 1
 			and a.status in ('Submitted', 'Partially Depreciated')
 			and ifnull(ds.journal_entry, '')=''""", date)
 

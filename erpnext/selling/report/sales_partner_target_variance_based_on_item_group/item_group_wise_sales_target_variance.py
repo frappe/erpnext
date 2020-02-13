@@ -78,19 +78,19 @@ def get_columns(filters, period_list, partner_doctype):
 
 		columns.extend([{
 			"fieldname": target_key,
-			"label": _("Target ({})".format(period.label)),
+			"label": _("Target ({})").format(period.label),
 			"fieldtype": fieldtype,
 			"options": options,
 			"width": 100
 		}, {
 			"fieldname": period.key,
-			"label": _("Achieved ({})".format(period.label)),
+			"label": _("Achieved ({})").format(period.label),
 			"fieldtype": fieldtype,
 			"options": options,
 			"width": 100
 		}, {
 			"fieldname": variance_key,
-			"label": _("Variance ({})".format(period.label)),
+			"label": _("Variance ({})").format(period.label),
 			"fieldtype": fieldtype,
 			"options": options,
 			"width": 100

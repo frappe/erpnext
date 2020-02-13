@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cint
+from frappe.utils import cint, cstr
 from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import get_net_profit_loss
 from erpnext.accounts.utils import get_fiscal_year
@@ -129,13 +129,13 @@ def get_account_type_based_gl_data(company, start_date, end_date, account_type, 
 	cond = ""
 	filters = frappe._dict(filters)
 
-	if filters.finance_book:
-		cond = " and finance_book = %s" %(frappe.db.escape(filters.finance_book))
-		if filters.include_default_book_entries:
-			company_fb = frappe.db.get_value("Company", company, 'default_finance_book')
+	if filters.include_default_book_entries:
+		company_fb = frappe.db.get_value("Company", company, 'default_finance_book')
+		cond = """ AND (finance_book in (%s, %s, '') OR finance_book IS NULL)
+			""" %(frappe.db.escape(filters.finance_book), frappe.db.escape(company_fb))
+	else:
+		cond = " AND (finance_book in (%s, '') OR finance_book IS NULL)" %(frappe.db.escape(cstr(filters.finance_book)))
 
-			cond = """ and finance_book in (%s, %s)
-				""" %(frappe.db.escape(filters.finance_book), frappe.db.escape(company_fb))
 
 	gl_sum = frappe.db.sql_list("""
 		select sum(credit) - sum(debit)

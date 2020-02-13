@@ -489,13 +489,13 @@ def get_pricing_rule_items(pr_doc):
 
 	for d in pr_doc.get(pricing_rule_apply_on):
 		if apply_on == 'item_group':
-			get_child_item_groups(d.get(apply_on))
+			apply_on_data.extend(get_child_item_groups(d.get(apply_on)))
 		else:
 			apply_on_data.append(d.get(apply_on))
 
 	if pr_doc.apply_rule_on_other:
 		apply_on = frappe.scrub(pr_doc.apply_rule_on_other)
-		apply_on_data.append(pr_doc.get(apply_on))
+		apply_on_data.append(pr_doc.get("other_" + apply_on))
 
 	return list(set(apply_on_data))
 

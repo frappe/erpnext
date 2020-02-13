@@ -259,6 +259,6 @@ def get_tax_account_head(tax):
 		{"parent": "Shopify Settings", "shopify_tax": tax_title}, "tax_account")
 
 	if not tax_account:
-		frappe.throw(_("Tax Account not specified for Shopify Tax {0}".format(tax.get("title"))))
+		frappe.throw(_("Tax Account not specified for Shopify Tax {0}").format(tax.get("title")))
 
 	return tax_account

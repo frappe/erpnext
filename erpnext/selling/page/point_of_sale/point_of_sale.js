@@ -631,6 +631,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 						this.frm.allow_edit_rate = r.message.allow_edit_rate;
 						this.frm.allow_edit_discount = r.message.allow_edit_discount;
 						this.frm.doc.campaign = r.message.campaign;
+						this.frm.allow_print_before_pay = r.message.allow_print_before_pay;
 					}
 				}
 
@@ -672,7 +673,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	}
 
 	set_form_action() {
-		if(this.frm.doc.docstatus == 1 || (this.frm.doc.allow_print_before_pay == 1&&this.frm.doc.items.length>0)){
+		if(this.frm.doc.docstatus == 1 || (this.frm.allow_print_before_pay == 1 && this.frm.doc.items.length > 0)){
 			this.page.set_secondary_action(__("Print"), async() => {
 				if(this.frm.doc.docstatus != 1 ){
 					await this.frm.save();
