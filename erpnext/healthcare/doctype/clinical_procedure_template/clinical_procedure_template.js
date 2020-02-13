@@ -2,11 +2,13 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Clinical Procedure Template', {
+	setup: function(frm) {
+		frm.add_fetch('item_code', 'item_group', 'item_group');
+	},
 	template: function(frm) {
-		if(!frm.doc.item_code)
-			frm.set_value("item_code", frm.doc.template);
-		if(!frm.doc.description)
+		if(!frm.doc.description) {
 			frm.set_value("description", frm.doc.template);
+		}
 		mark_change_in_item(frm);
 	},
 	rate: function(frm) {
