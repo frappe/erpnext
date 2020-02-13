@@ -291,7 +291,7 @@ def get_header(filters, csv_class):
 		csv_class.DATA_CATEGORY,
 		csv_class.FORMAT_NAME,
 		# E = Format version (regarding format name)
-		"",
+		csv_class.FORMAT_VERSION,
 		# F = Generated on
 		datetime.datetime.now().strftime("%Y%m%d"),
 		# G = Imported on -- stays empty
