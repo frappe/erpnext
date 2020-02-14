@@ -29,13 +29,12 @@ class SerialNo(StockController):
 		self.via_stock_ledger = False
 
 	def validate(self):
-		if self.get("__islocal") and self.warehouse:
+		if self.get("__islocal") and self.warehouse and not self.via_stock_ledger:
 			frappe.throw(_("New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt"), SerialNoCannotCreateDirectError)
 
 		self.set_maintenance_status()
 		self.validate_warehouse()
 		self.validate_item()
-		self.on_stock_ledger_entry()
 
 	def set_maintenance_status(self):
 		if not self.warranty_expiry_date and not self.amc_expiry_date:
@@ -68,7 +67,7 @@ class SerialNo(StockController):
 		"""
 			Validate whether serial no is required for this item
 		"""
-		item = frappe.get_doc("Item", self.item_code)
+		item = frappe.get_cached_doc("Item", self.item_code)
 		if item.has_serial_no!=1:
 			frappe.throw(_("Item {0} is not setup for Serial Nos. Check Item master").format(self.item_code))
 
@@ -117,9 +116,9 @@ class SerialNo(StockController):
 				"warranty_expiry_date"):
 					self.set(fieldname, None)
 
-	def get_last_sle(self):
+	def get_last_sle(self, serial_no=None):
 		entries = {}
-		sle_dict = self.get_stock_ledger_entries()
+		sle_dict = self.get_stock_ledger_entries(serial_no)
 		if sle_dict:
 			if sle_dict.get("incoming", []):
 				entries["purchase_sle"] = sle_dict["incoming"][0]
@@ -132,13 +131,28 @@ class SerialNo(StockController):
 
 		return entries
 
-	def get_stock_ledger_entries(self):
+	def get_stock_ledger_entries(self, serial_no=None):
 		sle_dict = {}
-		for sle in frappe.db.sql("""select * from `tabStock Ledger Entry`
-			where serial_no like %s and item_code=%s and ifnull(is_cancelled, 'No')='No'
-			order by posting_date desc, posting_time desc, creation desc""",
-			("%%%s%%" % self.name, self.item_code), as_dict=1):
-				if self.name.upper() in get_serial_nos(sle.serial_no):
+		if not serial_no:
+			serial_no = self.name
+
+		for sle in frappe.db.sql("""
+			SELECT voucher_type, voucher_no,
+				posting_date, posting_time, incoming_rate, actual_qty, serial_no
+			FROM
+				`tabStock Ledger Entry`
+			WHERE
+				item_code=%s AND company = %s AND ifnull(is_cancelled, 'No')='No'
+				AND (serial_no = %s
+					OR serial_no like %s
+					OR serial_no like %s
+					OR serial_no like %s
+				)
+			ORDER BY
+				posting_date desc, posting_time desc, creation desc""",
+			(self.item_code, self.company,
+				serial_no, serial_no+'\n%', '%\n'+serial_no, '%\n'+serial_no+'\n%'), as_dict=1):
+				if serial_no.upper() in get_serial_nos(sle.serial_no):
 					if cint(sle.actual_qty) > 0:
 						sle_dict.setdefault("incoming", []).append(sle)
 					else:
@@ -178,12 +192,11 @@ class SerialNo(StockController):
 					where name=%s""" % (dt[0], '%s', '%s'),
 					('\n'.join(list(serial_nos)), item[0]))
 
-	def on_stock_ledger_entry(self):
-		if self.via_stock_ledger and not self.get("__islocal"):
-			last_sle = self.get_last_sle()
-			self.set_purchase_details(last_sle.get("purchase_sle"))
-			self.set_sales_details(last_sle.get("delivery_sle"))
-			self.set_maintenance_status()
+	def update_serial_no_reference(self, serial_no=None):
+		last_sle = self.get_last_sle(serial_no)
+		self.set_purchase_details(last_sle.get("purchase_sle"))
+		self.set_sales_details(last_sle.get("delivery_sle"))
+		self.set_maintenance_status()
 
 def process_serial_no(sle):
 	item_det = get_item_details(sle.item_code)
@@ -368,6 +381,7 @@ def auto_make_serial_nos(args):
 			if sr.sales_order and voucher_type == "Stock Entry" \
 				and not args.get('actual_qty', 0) > 0:
 				sr.sales_order = None
+			sr.update_serial_no_reference()
 			sr.save(ignore_permissions=True)
 		elif args.get('actual_qty', 0) > 0:
 			created_numbers.append(make_serial_no(serial_no, args))
@@ -407,27 +421,16 @@ def get_serial_nos(serial_no):
 
 def make_serial_no(serial_no, args):
 	sr = frappe.new_doc("Serial No")
-	sr.warehouse = None
-	sr.dont_update_if_missing.append("warehouse")
-	sr.flags.ignore_permissions = True
 	sr.serial_no = serial_no
 	sr.item_code = args.get('item_code')
 	sr.company = args.get('company')
 	sr.batch_no = args.get('batch_no')
 	sr.via_stock_ledger = args.get('via_stock_ledger') or True
-	sr.asset = args.get('asset')
-	sr.location = args.get('location')
+	sr.warehouse = args.get('warehouse')
 
-
-	if args.get('purchase_document_type'):
-		sr.purchase_document_type = args.get('purchase_document_type')
-		sr.purchase_document_no = args.get('purchase_document_no')
-		sr.supplier = args.get('supplier')
-
-	sr.insert()
-	if args.get('warehouse'):
-		sr.warehouse = args.get('warehouse')
-		sr.save()
+	sr.validate_item()
+	sr.update_serial_no_reference(serial_no)
+	sr.db_insert()
 
 	return sr.name
 
@@ -494,10 +497,11 @@ def get_delivery_note_serial_no(item_code, qty, delivery_note):
 	return serial_nos
 
 @frappe.whitelist()
-def auto_fetch_serial_number(qty, item_code, warehouse):
+def auto_fetch_serial_number(qty, item_code, warehouse, batch_no=None):
 	serial_numbers = frappe.get_list("Serial No", filters={
 		"item_code": item_code,
 		"warehouse": warehouse,
+		"batch_no": batch_no,
 		"delivery_document_no": "",
 		"sales_invoice": ""
 	}, limit=qty, order_by="creation")

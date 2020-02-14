@@ -47,7 +47,7 @@ class ProductionPlan(Document):
 				'sales_order': data.name,
 				'sales_order_date': data.transaction_date,
 				'customer': data.customer,
-				'grand_total': data.grand_total
+				'grand_total': data.base_grand_total
 			})
 
 	def get_pending_material_requests(self):
