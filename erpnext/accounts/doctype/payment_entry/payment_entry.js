@@ -923,6 +923,12 @@ frappe.ui.form.on('Payment Entry', {
 				}
 			});
 		}
+	},
+
+	validate:function(frm) {
+		if (frm.doc.references.length === 0) {
+			frappe.throw(__("Please add <b>Payment References</b> to create Payment Entry."));
+		}
 	}
 });
 
