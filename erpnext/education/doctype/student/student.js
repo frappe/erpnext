@@ -25,7 +25,13 @@ frappe.ui.form.on('Student', {
 					{party_type:'Student', party:frm.doc.name});
 			});
 		}
-	}
+	},
+	validate: function (frm) {
+		console.log("test")
+		if (frappe.datetime.get_today() < frm.doc.joining_date) {
+			frappe.throw("Joining date cannot be greater than today")
+		}
+	},
 });
 
 frappe.ui.form.on('Student Guardian', {
