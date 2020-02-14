@@ -7,9 +7,9 @@ cur_frm.email_field = "email_id";
 erpnext.LeadController = frappe.ui.form.Controller.extend({
 	setup: function () {
 		this.frm.make_methods = {
-			'Customer': this.make_customer,
+			'Customer': this.create_customer,
 			'Quotation': this.make_quotation,
-			'Opportunity': this.make_opportunity
+			'Opportunity': this.create_opportunity
 		};
 
 		this.frm.toggle_reqd("lead_name", !this.frm.doc.organization_lead);
@@ -47,14 +47,14 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	make_customer: function () {
+	create_customer: function () {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_customer",
 			frm: cur_frm
 		})
 	},
 
-	make_opportunity: function () {
+	create_opportunity: function () {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.lead.lead.make_opportunity",
 			frm: cur_frm
