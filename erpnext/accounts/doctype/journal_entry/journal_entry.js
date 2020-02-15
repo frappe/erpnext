@@ -452,23 +452,19 @@ frappe.ui.form.on("Journal Entry Account", {
 
 	debit_in_account_currency: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
-		
 		if(row.debit_in_account_currency < 0 || row.debit_in_account_currency === 0){
 			frappe.model.set_value(cdt, cdn, "debit_in_account_currency", '');
 			frappe.throw(__("Debit Amount cannot be zero or negative."));
 		}
-
 		erpnext.journal_entry.set_exchange_rate(frm, cdt, cdn);
 	},
 
 	credit_in_account_currency: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
-
 		if(row.credit_in_account_currency < 0 || row.credit_in_account_currency === 0){
 			frappe.model.set_value(cdt, cdn, "credit_in_account_currency", '');
 			frappe.throw(__("Credit Amount cannot be zero or negative."));
 		}
-
 		erpnext.journal_entry.set_exchange_rate(frm, cdt, cdn);
 	},
 
