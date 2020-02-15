@@ -359,30 +359,10 @@ class StatusUpdater(Document):
 			args['update_modified'] = ', modified = now(), modified_by = {0}'\
 				.format(frappe.db.escape(frappe.session.user))
 
-	def update_billing_status_for_zero_amount_refdoc(self, ref_dt):
-		ref_fieldname = frappe.scrub(ref_dt)
+	def update_billing_status_for_zero_amount(self, ref_dt, ref_fieldname):
+		zero_amount_refdoc = set([d.get(ref_fieldname) for d in self.get("items", [])
+			if d.get(ref_fieldname) and d.base_net_amount == 0])
 
-		ref_docs = [item.get(ref_fieldname) for item in (self.get('items') or []) if item.get(ref_fieldname)]
-		if not ref_docs:
-			return
-
-		zero_amount_refdocs = frappe.db.sql_list("""
-			SELECT
-				name
-			from
-				`tab{ref_dt}`
-			where
-				docstatus = 1
-				and base_net_total = 0
-				and name in %(ref_docs)s
-		""".format(ref_dt=ref_dt), {
-			'ref_docs': ref_docs
-		})
-
-		if zero_amount_refdocs:
-			self.update_billing_status(zero_amount_refdocs, ref_dt, ref_fieldname)
-
-	def update_billing_status(self, zero_amount_refdoc, ref_dt, ref_fieldname):
 		for ref_dn in zero_amount_refdoc:
 			ref_doc_qty = flt(frappe.db.sql("""
 				select ifnull(sum(qty), 0)

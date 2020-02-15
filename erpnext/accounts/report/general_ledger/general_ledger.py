@@ -295,7 +295,7 @@ def postprocess_group(filters, group_object, grouped_by):
 				customer = frappe.get_cached_doc("Customer", grouped_by['party'])
 				group_object.sales_person = ", ".join(set([d.sales_person for d in customer.sales_team]))
 
-		group_object.rows = filter(lambda d: not d.get("to_remove"), group_object.rows)
+		group_object.rows = list(filter(lambda d: not d.get("to_remove"), group_object.rows))
 
 		if 'voucher_no' not in grouped_by:
 			group_object.rows.insert(0, group_object.totals.opening)
