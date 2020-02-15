@@ -50,8 +50,8 @@ frappe.ui.form.on("Instructor", {
 		}
 	}
 });
-cur_frm.fields_dict['employee'].get_query = function(doc, cdt, cdn) {
+cur_frm.fields_dict['employee'].get_query = function(doc) {
 	if(doc.department) {
 		return { filters: [['Department','=', doc.department]] }
 	}
-}
+};
