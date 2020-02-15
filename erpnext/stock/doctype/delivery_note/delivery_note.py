@@ -267,8 +267,8 @@ class DeliveryNote(SellingController):
 		if not self.is_return:
 			self.check_credit_limit()
 
-		elif self.issue_credit_note:
-			self.make_return_invoice()
+		# elif self.issue_credit_note:
+		#	self.make_return_invoice()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
