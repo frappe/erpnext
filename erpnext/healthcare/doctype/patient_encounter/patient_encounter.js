@@ -313,3 +313,16 @@ var calculate_age = function(birth) {
 	var years =  age.getFullYear() - 1970;
 	return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)";
 };
+
+frappe.ui.form.on('Codification Table', {
+	codification_table_add: function(frm){
+		frm.fields_dict['codification_table'].grid.get_field('medical_code').get_query = function(doc){
+			var medical_code_list = [];
+			if(!doc.__islocal) medical_code_list.push(doc.name);
+			$.each(doc.codification_table, function(idx, val){
+				if (val.medical_code) medical_code_list.push(val.medical_code);
+			});
+			return { filters: [['Medical Code', 'name', 'not in', medical_code_list]] };
+		};
+	}
+});
