@@ -43,6 +43,7 @@ class SalesOrder(SellingController):
 		self.validate_warehouse()
 		self.validate_drop_ship()
 		self.validate_serial_no_based_delivery()
+		self.validate_auto_repeat_date()
 		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_order_reference)
 
 		if self.coupon_code:
@@ -462,6 +463,12 @@ class SalesOrder(SellingController):
 				frappe.throw(_("Cannot ensure delivery by Serial No as \
 				Item {0} is added with and without Ensure Delivery by \
 				Serial No.").format(item.item_code))
+
+	def validate_auto_repeat_date(self):
+		if self.from_date > self.to_date:
+			frappe.throw("From Date cannot be greater than To Date in Auto repeat section.")
+		else:
+			pass
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

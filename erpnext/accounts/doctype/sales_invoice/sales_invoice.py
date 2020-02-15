@@ -91,6 +91,7 @@ class SalesInvoice(SellingController):
 		self.validate_fixed_asset()
 		self.set_income_account_for_fixed_assets()
 		self.validate_item_cost_centers()
+		self.validate_subscription_date()
 		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_invoice_reference)
 
 		if cint(self.is_pos):
@@ -1270,6 +1271,12 @@ class SalesInvoice(SellingController):
 
 		if update:
 			self.db_set('status', self.status, update_modified = update_modified)
+
+	def validate_subscription_date(self):
+		if self.from_date > self.to_date:
+			frappe.throw("From Date cannot be greater than To Date in Subscription section.")
+		else:
+			pass
 
 def validate_inter_company_party(doctype, party, company, inter_company_reference):
 	if not party:
