@@ -16,6 +16,6 @@ frappe.ui.form.on('Student Admission', {
 		if(frm.doc.admission_end_date && frm.doc.admission_end_date <= frm.doc.admission_start_date){
 			frm.set_value("admission_end_date", "");
 			frappe.throw(__("Please select the valid <b>Admission End Date</b>"));
-		}	
+		}
 	}
 });
