@@ -297,7 +297,7 @@ frappe.ui.form.on("Material Request Plan Item", {
 	}
 });
 
-cur_frm.fields_dict['sales_orders'].grid.get_field("sales_order").get_query = function(doc) {
+cur_frm.fields_dict['sales_orders'].grid.get_field("sales_order").get_query = function() {
 	return{
 		filters: [
 			['Sales Order','docstatus', '=' ,1]
