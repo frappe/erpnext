@@ -4,8 +4,8 @@
 frappe.ui.form.on('Department', {
 	onload: function(frm) {
 		frm.set_query("parent_department", function(){
-	        return { "filters": [["Department", "is_group", "=", 1]]}
-	    });
+			return {"filters": [["Department", "is_group", "=", 1]]};
+		});
 	},
 	refresh: function(frm) {
 		// read-only for root department
@@ -13,7 +13,6 @@ frappe.ui.form.on('Department', {
 			frm.set_read_only();
 			frm.set_intro(__("This is a root department and cannot be edited."));
 		}
-		
 	},
 	validate: function(frm) {
 		if(frm.doc.name=="All Departments") {
