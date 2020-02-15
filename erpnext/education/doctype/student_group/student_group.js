@@ -70,6 +70,16 @@ frappe.ui.form.on("Student Group", {
 	group_based_on: function(frm) {
 		if (frm.doc.group_based_on == "Batch") {
 			frm.doc.course = null;
+			frm.set_df_property('program', 'reqd', 1);
+			frm.set_df_property('course', 'reqd', 0);
+		}
+		else if (frm.doc.group_based_on == "Course") {
+		frm.set_df_property('program', 'reqd', 0);
+		frm.set_df_property('course', 'reqd', 1);
+		}
+		else if (frm.doc.group_based_on == "Activity") {
+			frm.set_df_property('program', 'reqd', 0);
+			frm.set_df_property('course', 'reqd', 0);
 		}
 	},
 
