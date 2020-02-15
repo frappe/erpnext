@@ -1291,13 +1291,13 @@ class SalesInvoice(SellingController):
 
 		if not status:
 			if self.docstatus == 2:
-				status = "Cancelled"
+				self.status = "Cancelled"
 			elif self.docstatus == 1:
-				if flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
+				if flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()) and self.is_discounted and self.get_discounting_status() == 'Disbursed':
 					self.status = "Overdue and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()):
 					self.status = "Overdue"
-				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
+				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.is_discounted and self.get_discounting_status() == 'Disbursed':
 					self.status = "Unpaid and Discounted"
 				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
 					self.status = "Unpaid"
@@ -1306,7 +1306,7 @@ class SalesInvoice(SellingController):
 					self.status = "Credit Note Issued"
 				elif self.is_return == 1:
 					self.status = "Return"
-				elif flt(self.outstanding_amount)<=0:
+				elif flt(self.outstanding_amount) <= 0:
 					self.status = "Paid"
 				else:
 					self.status = "Submitted"
@@ -1314,7 +1314,7 @@ class SalesInvoice(SellingController):
 				self.status = "Draft"
 
 		if update:
-			self.db_set('status', self.status, update_modified = update_modified)
+			self.db_set('status', self.status, update_modified=update_modified)
 
 def validate_inter_company_party(doctype, party, company, inter_company_reference):
 	if not party:
