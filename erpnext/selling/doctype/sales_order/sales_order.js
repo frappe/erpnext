@@ -75,6 +75,12 @@ frappe.ui.form.on("Sales Order", {
 		});
 
 		erpnext.queries.setup_warehouse_query(frm);
+
+		$('.grid-add-multiple-rows').click(function() {
+			$.each(frm.doc.items || [], function(i, d) {
+				if(!d.item_code) frm.doc.items = [];
+			});
+		});
 	},
 
 	delivery_date: function(frm) {
