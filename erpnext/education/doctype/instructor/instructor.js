@@ -12,7 +12,6 @@ frappe.ui.form.on("Instructor", {
 					}
 				};
 			});
-
 			frm.set_query("department", "instructor_log", function() {
 				return {
 					"filters": {
@@ -51,3 +50,8 @@ frappe.ui.form.on("Instructor", {
 		}
 	}
 });
+cur_frm.fields_dict['employee'].get_query = function(doc, cdt, cdn) {
+	if(doc.department) {
+		return { filters: [['Department','=', doc.department]] }
+	}
+}
