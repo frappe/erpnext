@@ -17,10 +17,11 @@ frappe.ui.form.on("Supplier", {
 				}
 			}
 		});
-		frm.set_query("default_bank_account", function() {
+		frm.set_query("default_bank_account", function(doc, cdt, cdn) {
 			return {
 				filters: {
-					"is_company_account":1
+					"is_company_account":0,
+					"party":doc.name
 				}
 			}
 		});
