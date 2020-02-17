@@ -24,8 +24,6 @@
   "iban",
   "column_break_12",
   "bank_account_no",
-  "branch_code",
-  "swift_number",
   "address_and_contact",
   "address_html",
   "website",
@@ -144,17 +142,6 @@
    "in_list_view": 1,
    "label": "Bank Account No",
    "length": 30
-  },
-  {
-   "fieldname": "branch_code",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Branch Code"
-  },
-  {
-   "fieldname": "swift_number",
-   "fieldtype": "Data",
-   "label": "SWIFT number"
   },
   {
    "fieldname": "address_and_contact",
