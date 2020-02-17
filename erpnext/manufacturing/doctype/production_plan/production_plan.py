@@ -625,7 +625,6 @@ def get_items_for_material_requests(doc, ignore_existing_ordered_qty=None):
 	for data in po_items:
 		planned_qty = data.get('required_qty') or data.get('planned_qty')
 		ignore_existing_ordered_qty = data.get('ignore_existing_ordered_qty') or ignore_existing_ordered_qty
-		warehouse = data.get("warehouse") or warehouse
 
 		item_details = {}
 		if data.get("bom") or data.get("bom_no"):

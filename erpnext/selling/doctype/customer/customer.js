@@ -55,6 +55,14 @@ frappe.ui.form.on("Customer", {
 				}
 			}
 		})
+
+		frm.set_query('default_bank_account', function() {
+			return {
+				filters: {
+					'is_company_account': 1
+				}
+			}
+		});
 	},
 	customer_primary_address: function(frm){
 		if(frm.doc.customer_primary_address){

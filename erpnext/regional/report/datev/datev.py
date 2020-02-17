@@ -160,7 +160,7 @@ def get_gl_entries(filters, as_dict):
 		where gl.company = %(company)s 
 		and DATE(gl.posting_date) >= %(from_date)s
 		and DATE(gl.posting_date) <= %(to_date)s
-		order by 'Belegdatum', gl.voucher_no""", filters, as_dict=as_dict, as_utf8=1)
+		order by 'Belegdatum', gl.voucher_no""", filters, as_dict=as_dict)
 
 	return gl_entries
 
