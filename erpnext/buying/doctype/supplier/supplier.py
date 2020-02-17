@@ -58,7 +58,7 @@ class Supplier(TransactionBase):
 			frappe.db.set(self, "supplier_name", newdn)
 
 	def create_onboarding_docs(self, args):
-		company = defaults.get('company') or \
+		company = frappe.defaults.get_defaults().get('company') or \
 			frappe.db.get_single_value('Global Defaults', 'default_company')
 
 		for i in range(1, args.get('max_count')):
