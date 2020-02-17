@@ -7,9 +7,11 @@ import frappe
 from frappe import _
 from frappe.utils import get_link_to_form
 from frappe.model.document import Document
+from frappe import throw, _
 
 class StudentLeaveApplication(Document):
 	def validate(self):
+		self.validate_dates()
 		self.validate_duplicate()
 
 	def validate_duplicate(self):
@@ -30,3 +32,7 @@ class StudentLeaveApplication(Document):
 			link = get_link_to_form("Student Leave Application", data[0].name)
 			frappe.throw(_("Leave application {0} already exists against the student {1}")
 				.format(link, self.student))
+
+	def validate_dates(self):
+		if self.to_date < self.from_date :
+			throw(_("To Date cannot be less than From Date"))
