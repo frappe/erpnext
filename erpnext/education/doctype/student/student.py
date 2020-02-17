@@ -24,7 +24,7 @@ class Student(Document):
 	def validate_dates(self):
 		for sibling in self.siblings:
 			if sibling.date_of_birth and getdate(sibling.date_of_birth) >= getdate():
-				frappe.throw(_("Row {0}:Sibling Date of Birth cannot be greater than today").format(sibling.idx))
+				frappe.throw(_("Row {0}:Sibling Date of Birth cannot be greater than today.").format(sibling.idx))
 				
 		if self.date_of_birth and getdate(self.date_of_birth) >= getdate(today()):
 			frappe.throw(_("Date of Birth cannot be greater than today."))
