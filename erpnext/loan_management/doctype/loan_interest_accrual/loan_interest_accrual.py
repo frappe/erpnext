@@ -142,8 +142,8 @@ def make_loan_interest_accrual_entry(loan, applicant_type, applicant, interest_i
 		loan_interest_accrual.applicant = applicant
 		loan_interest_accrual.interest_income_account = interest_income_account
 		loan_interest_accrual.loan_account = loan_account
-		loan_interest_accrual.pending_principal_amount = pending_principal_amount
-		loan_interest_accrual.interest_amount = interest_amount
+		loan_interest_accrual.pending_principal_amount = flt(pending_principal_amount, 2)
+		loan_interest_accrual.interest_amount = flt(interest_amount, 2)
 		loan_interest_accrual.posting_date = posting_date or nowdate()
 		loan_interest_accrual.process_loan_interest_accrual = process_loan_interest
 
