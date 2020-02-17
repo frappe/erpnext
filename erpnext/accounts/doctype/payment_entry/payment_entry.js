@@ -585,15 +585,6 @@ frappe.ui.form.on('Payment Entry', {
 			}
 		}
 	},
-
-	fetch_all_outstanding: function(frm) {
-		let filters = {
-			'from_posting_date': '2010-01-01',
-			'to_posting_date': frm.doc.posting_date,
-			'allocate_payment_amount': 1
-		}
-		frm.events.get_outstanding_documents(frm, filters);
-	},
 	get_outstanding_documents: function(frm, filters) {
 		frm.clear_table("references");
 
