@@ -124,17 +124,18 @@ class ReceivablePayableReport(object):
 				self.invoices.add(gle.voucher_no)
 
 	def init_subtotal_row(self, party):
-		self.total_row_map.setdefault(party, {
-			'party': party,
-			'bold': 1
-		})
+		if not self.total_row_map.get(party):
+			self.total_row_map.setdefault(party, {
+				'party': party,
+				'bold': 1
+			})
 
-		for field in self.get_currency_fields():
-			self.total_row_map[party][field] = 0.0
+			for field in self.get_currency_fields():
+				self.total_row_map[party][field] = 0.0
 
 	def get_currency_fields(self):
 		return ['invoiced', 'paid', 'credit_note', 'outstanding', 'range1',
-			'range2', 'range3', 'range4']
+			'range2', 'range3', 'range4', 'range5']
 
 	def update_voucher_balance(self, gle):
 		# get the row where this balance needs to be updated
@@ -164,10 +165,10 @@ class ReceivablePayableReport(object):
 		total_row = self.total_row_map.get(party)
 
 		for field in self.get_currency_fields():
-			total_row[field] += row[field]
+			total_row[field] += row.get(field, 0.0)
 
 	def append_subtotal_row(self, party):
-		sub_total_row = self.total_row_map.get(self.previous_party)
+		sub_total_row = self.total_row_map.get(party)
 		self.data.append(sub_total_row)
 		self.data.append({})
 		self.update_sub_total_row(sub_total_row, 'Total')
@@ -230,6 +231,7 @@ class ReceivablePayableReport(object):
 					self.append_row(row)
 
 		if self.filters.get('group_by_party'):
+			self.append_subtotal_row(self.previous_party)
 			self.data.append(self.total_row_map.get('Total'))
 
 	def append_row(self, row):
