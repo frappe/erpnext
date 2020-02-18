@@ -485,7 +485,6 @@ frappe.ui.form.on('Payment Entry', {
 
 	paid_amount: function(frm) {
 		frm.set_value("base_paid_amount", flt(frm.doc.paid_amount) * flt(frm.doc.source_exchange_rate));
-		frm.trigger("reset_received_amount");
 	},
 
 	received_amount: function(frm) {
@@ -523,10 +522,10 @@ frappe.ui.form.on('Payment Entry', {
 			frm.set_value("base_received_amount", frm.doc.base_paid_amount);
 		}
 
-		if(frm.doc.payment_type == "Receive")
-			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.paid_amount);
-		else
-			frm.events.set_unallocated_amount(frm);
+		// if(frm.doc.payment_type == "Receive")
+		// 	frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.paid_amount);
+		// else
+		// 	frm.events.set_unallocated_amount(frm);
 	},
 
 	get_outstanding_invoice: function(frm) {
@@ -657,9 +656,9 @@ frappe.ui.form.on('Payment Entry', {
 						(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Student")
 					) {
 						if(total_positive_outstanding > total_negative_outstanding)
-							if (!frm.doc.paid_amount)
-								frm.set_value("paid_amount",
-									total_positive_outstanding - total_negative_outstanding);
+							if (!frm.doc.paid_amount){}
+								// frm.set_value("paid_amount",
+								// 	total_positive_outstanding - total_negative_outstanding);
 					} else if (
 						total_negative_outstanding &&
 						total_positive_outstanding < total_negative_outstanding
