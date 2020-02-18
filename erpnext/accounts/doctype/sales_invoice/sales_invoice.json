@@ -28,7 +28,13 @@
   "return_against",
   "column_break_21",
   "update_billed_amount_in_sales_order",
+  "billing",
+  "patient_statement",
+  "cashier",
+  "cai",
+  "authorized_range",
   "accounting_dimensions_section",
+  "deadline_for_authorization",
   "project",
   "dimension_col_break",
   "cost_center",
@@ -1571,13 +1577,49 @@
    "label": "Reason for sale",
    "options": "Reason for sale",
    "reqd": 1
+  },
+  {
+   "fieldname": "cashier",
+   "fieldtype": "Data",
+   "label": "Cashier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cai",
+   "fieldtype": "Data",
+   "label": "CAI",
+   "read_only": 1
+  },
+  {
+   "fieldname": "authorized_range",
+   "fieldtype": "Data",
+   "label": "Authorized Range",
+   "read_only": 1
+  },
+  {
+   "fieldname": "deadline_for_authorization",
+   "fieldtype": "Data",
+   "label": "Deadline for authorization",
+   "read_only": 1
+  },
+  {
+   "fieldname": "patient_statement",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Patient Statement",
+   "options": "Patient statement"
+  },
+  {
+   "fieldname": "billing",
+   "fieldtype": "Section Break",
+   "label": "Billing"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-01-30 15:40:30.184552",
+ "modified": "2020-02-17 15:48:47.306239",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
