@@ -115,6 +115,8 @@
   "campaign",
   "source",
   "column_break5",
+  "is_internal_customer",
+  "inter_company_reference",
   "per_billed",
   "customer_group",
   "territory",
@@ -1234,13 +1236,27 @@
   {
    "fieldname": "section_break_18",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fetch_from": "customer.is_internal_customer",
+   "fieldname": "is_internal_customer",
+   "fieldtype": "Check",
+   "label": "Is Internal Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "inter_company_reference",
+   "fieldtype": "Link",
+   "label": "Inter Company Reference",
+   "options": "Purchase Receipt"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-30 19:17:13.122644",
+ "modified": "2019-12-31 19:17:13.122644",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
