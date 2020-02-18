@@ -450,6 +450,83 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEquals(pi2.items[0].qty, 2)
 		self.assertEquals(pi2.items[1].qty, 1)
 
+	def test_stock_transfer_from_purchase_receipt(self):
+		set_perpetual_inventory(1)
+		pr = make_purchase_receipt(do_not_save=1)
+		pr.supplier_warehouse = ''
+		pr.items[0].from_warehouse = '_Test Warehouse 2 - _TC'
+
+		pr.submit()
+
+		gl_entries = get_gl_entries('Purchase Receipt', pr.name)
+		sl_entries = get_sl_entries('Purchase Receipt', pr.name)
+
+		self.assertFalse(gl_entries)
+
+		expected_sle = {
+			'_Test Warehouse 2 - _TC': -5,
+			'_Test Warehouse - _TC': 5
+		}
+
+		for sle in sl_entries:
+			self.assertEqual(expected_sle[sle.warehouse], sle.actual_qty)
+
+		set_perpetual_inventory(0)
+
+	def test_stock_transfer_from_purchase_receipt_with_valuation(self):
+		set_perpetual_inventory(1)
+		warehouse = frappe.get_doc('Warehouse', '_Test Warehouse 2 - _TC')
+		warehouse.account = '_Test Account Stock In Hand - _TC'
+		warehouse.save()
+
+		pr = make_purchase_receipt(do_not_save=1)
+		pr.items[0].from_warehouse = '_Test Warehouse 2 - _TC'
+		pr.supplier_warehouse = ''
+
+
+		pr.append('taxes', {
+			'charge_type': 'On Net Total',
+			'account_head': '_Test Account Shipping Charges - _TC',
+			'category': 'Valuation and Total',
+			'cost_center': 'Main - _TC',
+			'description': 'Test',
+			'rate': 9
+		})
+
+		pr.submit()
+
+		gl_entries = get_gl_entries('Purchase Receipt', pr.name)
+		sl_entries = get_sl_entries('Purchase Receipt', pr.name)
+
+		expected_gle = [
+			['Stock In Hand - _TC', 272.5, 0.0],
+			['_Test Account Stock In Hand - _TC', 0.0, 250.0],
+			['_Test Account Shipping Charges - _TC', 0.0, 22.5]
+		]
+
+		expected_sle = {
+			'_Test Warehouse 2 - _TC': -5,
+			'_Test Warehouse - _TC': 5
+		}
+
+		for sle in sl_entries:
+			self.assertEqual(expected_sle[sle.warehouse], sle.actual_qty)
+
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(gle.account, expected_gle[i][0])
+			self.assertEqual(gle.debit, expected_gle[i][1])
+			self.assertEqual(gle.credit, expected_gle[i][2])
+
+		warehouse.account = ''
+		warehouse.save()
+		set_perpetual_inventory(0)
+
+
+def get_sl_entries(voucher_type, voucher_no):
+	return frappe.db.sql(""" select actual_qty, warehouse, stock_value_difference
+		from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s
+		order by posting_time desc""", (voucher_type, voucher_no), as_dict=1)
+
 def get_gl_entries(voucher_type, voucher_no):
 	return frappe.db.sql("""select account, debit, credit, cost_center
 		from `tabGL Entry` where voucher_type=%s and voucher_no=%s

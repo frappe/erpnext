@@ -180,7 +180,7 @@ class SellingController(StockController):
 
 			last_purchase_rate, is_stock_item = frappe.get_cached_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
 			last_purchase_rate_in_sales_uom = last_purchase_rate / (it.conversion_factor or 1)
-			if flt(it.base_rate) < flt(last_purchase_rate_in_sales_uom):
+			if flt(it.base_rate) < flt(last_purchase_rate_in_sales_uom) and not self.get('is_internal_customer'):
 				throw_message(it.item_name, last_purchase_rate_in_sales_uom, "last purchase rate")
 
 			last_valuation_rate = frappe.db.sql("""
@@ -190,7 +190,8 @@ class SellingController(StockController):
 				""", (it.item_code, it.warehouse))
 			if last_valuation_rate:
 				last_valuation_rate_in_sales_uom = last_valuation_rate[0][0] / (it.conversion_factor or 1)
-				if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate_in_sales_uom):
+				if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate_in_sales_uom) \
+					and not self.get('is_internal_customer'):
 					throw_message(it.name, last_valuation_rate_in_sales_uom, "valuation rate")
 
 
@@ -300,7 +301,7 @@ class SellingController(StockController):
 					d.conversion_factor = get_conversion_factor(d.item_code, d.uom).get("conversion_factor") or 1.0
 				return_rate = 0
 				if cint(self.is_return) and self.return_against and self.docstatus==1:
-					return_rate = self.get_incoming_rate_for_sales_return(d.item_code, self.return_against)
+					return_rate = self.get_incoming_rate_for_return(d.item_code, self.return_against)
 
 				# On cancellation or if return entry submission, make stock ledger entry for
 				# target warehouse first, to update serial no values properly
