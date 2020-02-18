@@ -625,7 +625,6 @@ def get_items_for_material_requests(doc, ignore_existing_ordered_qty=None):
 	for data in po_items:
 		planned_qty = data.get('required_qty') or data.get('planned_qty')
 		ignore_existing_ordered_qty = data.get('ignore_existing_ordered_qty') or ignore_existing_ordered_qty
-		warehouse = data.get("warehouse") or warehouse
 
 		item_details = {}
 		if data.get("bom") or data.get("bom_no"):
@@ -729,6 +728,6 @@ def get_sub_assembly_items(bom_no, bom_data):
 				})
 
 			bom_item = bom_data.get(key)
-			bom_item["stock_qty"] += d.stock_qty
+			bom_item["stock_qty"] += d.stock_qty / d.parent_bom_qty
 
 			get_sub_assembly_items(bom_item.get("bom_no"), bom_data)

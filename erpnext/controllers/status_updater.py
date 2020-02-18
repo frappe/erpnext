@@ -182,7 +182,7 @@ class StatusUpdater(Document):
 						if args.get('no_allowance'):
 							item['reduce_by'] = item[args['target_field']] - item[args['target_ref_field']]
 							if item['reduce_by'] > .01:
-								self.limits_crossed_error(args, item)
+								self.limits_crossed_error(args, item, "qty")
 
 						elif item[args['target_ref_field']]:
 							self.check_overflow_with_allowance(item, args)

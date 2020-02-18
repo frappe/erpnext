@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:05",
@@ -373,7 +372,8 @@
    "no_copy": 1,
    "options": "Sales Invoice",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "column_break_21",
@@ -1568,8 +1568,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "links": [],
- "modified": "2019-12-30 19:15:59.580414",
+ "modified": "2020-02-10 04:57:11.221180",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
