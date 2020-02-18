@@ -687,6 +687,102 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.save()
 		self.assertEqual(po.schedule_date, add_days(nowdate(), 2))
 
+	def test_subcontracted_items_with_same_raw_material(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		update_backflush_based_on("Material Transferred for Subcontract")
+
+		if not frappe.db.exists("Item", "Sub-Contract-Same Raw Material"):
+			make_item("Sub-Contract-Same Raw Material", {
+				"is_stock_item": 1,
+			})
+
+		make_stock_entry(target="_Test Warehouse - _TC", item_code="Sub-Contract-Same Raw Material",
+			qty=80, basic_rate=100, purpose="Material Receipt")
+
+		for item_code in ["Sub-Contract-Same-RM Item 1", "Sub-Contract-Same-RM Item 2",
+			"Sub-Contract-Same-RM Item 3"]:
+			if not frappe.db.exists("Item", item_code):
+				make_item(item_code, {
+					"is_stock_item": 1,
+					"is_sub_contracted_item": 1
+				})
+
+			if not frappe.db.exists("BOM", {"item": item_code}):
+				make_bom(item = item_code, quantity = 7,
+					raw_materials = ['Sub-Contract-Same Raw Material'])
+
+		po = create_purchase_order(item_code= "Sub-Contract-Same-RM Item 1", qty = 77,
+			is_subcontracted = "Yes", do_not_save=True)
+
+		for item_code, qty in {"Sub-Contract-Same-RM Item 2": 140, "Sub-Contract-Same-RM Item 3": 343}.items():
+			po.append("items", {
+				"item_code": item_code,
+				"warehouse": "_Test Warehouse - _TC",
+				"qty": qty
+			})
+
+		po.supplier_warehouse = "_Test Warehouse 1 - _TC"
+		po.set_missing_values()
+		po.submit()
+
+		rm_item = [
+			{
+				"item_code": "Sub-Contract-Same-RM Item 1",
+				"rm_item_code": "Sub-Contract-Same Raw Material",
+				"item_name": "Sub-Contract-Same Raw Material",
+				"qty": 11,
+				"warehouse": "_Test Warehouse - _TC",
+				"rate": 100,
+				"amount": 600,
+				"stock_uom": "Nos",
+				"name": po.supplied_items[0].name
+			},
+			{
+				"item_code": "Sub-Contract-Same-RM Item 2",
+				"rm_item_code": "Sub-Contract-Same Raw Material",
+				"item_name": "Sub-Contract-Same Raw Material",
+				"qty": 20,
+				"warehouse": "_Test Warehouse - _TC",
+				"rate": 100,
+				"amount": 600,
+				"stock_uom": "Nos",
+				"name": po.supplied_items[1].name
+			},
+			{
+				"item_code": "Sub-Contract-Same-RM Item 3",
+				"rm_item_code": "Sub-Contract-Same Raw Material",
+				"item_name": "Sub-Contract-Same Raw Material",
+				"qty": 49,
+				"warehouse": "_Test Warehouse - _TC",
+				"rate": 100,
+				"amount": 600,
+				"stock_uom": "Nos",
+				"name": po.supplied_items[2].name
+			},
+		]
+
+		# to transfer materials from store to supplier's warehouse
+		rm_item_string = json.dumps(rm_item)
+		se1 = frappe.get_doc(make_subcontract_transfer_entry(po.name, rm_item_string))
+		se1.to_warehouse = "_Test Warehouse 1 - _TC"
+		se1.submit()
+
+		pr = make_purchase_receipt(po.name)
+		pr.get("items")[0].qty = 21
+		pr.get("items")[1].qty = 56
+		pr.get("items")[2].qty = 259
+		pr.set_missing_values()
+		pr.submit()
+
+		po.load_from_db()
+		pr = make_purchase_receipt(po.name)
+		pr.insert()
+
+		self.assertEquals(pr.supplied_items[0].required_qty, 8)
+		self.assertEquals(pr.supplied_items[1].required_qty, 12)
+		self.assertEquals(pr.supplied_items[2].required_qty, 12)
+
+		update_backflush_based_on("BOM")
 
 def make_pr_against_po(po, received_qty=0):
 	pr = make_purchase_receipt(po)

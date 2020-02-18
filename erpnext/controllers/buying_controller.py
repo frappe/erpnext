@@ -801,6 +801,8 @@ def get_extra_materials_parent_item_qty(purchase_orders):
 		group_by = "item_code")
 
 	for d in raw_materials:
+		if d.qty <= 0: continue
+
 		key = (d.item_code, d.parent)
 		if key not in fg_yet_to_be_received:
 			fg_yet_to_be_received[key] = d.qty
