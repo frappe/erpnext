@@ -1013,7 +1013,7 @@ def unblock_invoice(name):
 
 
 @frappe.whitelist()
-def block_invoice(name, hold_comment):
+def block_invoice(name, release_date, hold_comment=None):
 	if frappe.db.exists('Purchase Invoice', name):
 		pi = frappe.get_doc('Purchase Invoice', name)
 		pi.block_invoice(hold_comment)
