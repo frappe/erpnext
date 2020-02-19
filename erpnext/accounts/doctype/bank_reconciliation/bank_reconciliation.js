@@ -3,16 +3,16 @@
 
 frappe.ui.form.on("Bank Reconciliation", {
 	setup: function(frm) {
-		frm.add_fetch("bank_account", "account_currency", "account_currency");
+		frm.add_fetch("account", "account_currency", "account_currency");
 	},
 
 	onload: function(frm) {
 
 		let default_bank_account =  frappe.defaults.get_user_default("Company")? 
 			locals[":Company"][frappe.defaults.get_user_default("Company")]["default_bank_account"]: "";
-		frm.set_value("bank_account", default_bank_account);
+		frm.set_value("account", default_bank_account);
 
-		frm.set_query("bank_account", function() {
+		frm.set_query("account", function() {
 			return {
 				"filters": {
 					"account_type": ["in",["Bank","Cash"]],

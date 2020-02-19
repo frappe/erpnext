@@ -245,7 +245,16 @@ def make_custom_fields(update=True):
 			'insert_after': 'lr_date',
 			'print_hide': 1,
 			'translatable': 0
-		}
+		},
+		{
+			'fieldname': 'ewaybill',
+			'label': 'E-Way Bill No.',
+			'fieldtype': 'Data',
+			'depends_on': 'eval:(doc.docstatus === 1)',
+			'allow_on_submit': 1,
+			'insert_after': 'customer_name_in_arabic',
+			'translatable': 0,
+    	}
 	]
 
 	si_ewaybill_fields = [
@@ -361,7 +370,7 @@ def make_custom_fields(update=True):
 		},
 		{
 			'fieldname': 'ewaybill',
-			'label': 'e-Way Bill No.',
+			'label': 'E-Way Bill No.',
 			'fieldtype': 'Data',
 			'depends_on': 'eval:(doc.docstatus === 1)',
 			'allow_on_submit': 1,

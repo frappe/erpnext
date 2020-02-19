@@ -35,8 +35,7 @@ def get_party_details(party=None, account=None, party_type="Customer", company=N
 
 def _get_party_details(party=None, account=None, party_type="Customer", company=None, posting_date=None,
 	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False,
-	fetch_payment_terms_template=True, party_address=None, company_address=None,shipping_address=None, pos_profile=None):
-
+	fetch_payment_terms_template=True, party_address=None, company_address=None, shipping_address=None, pos_profile=None):
 	party_details = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype))
 	party = party_details[party_type.lower()]
 
