@@ -12,6 +12,7 @@
   "customer",
   "customer_name",
   "tax_id",
+  "type_document",
   "is_pos",
   "pos_profile",
   "offline_pos_name",
@@ -23,12 +24,19 @@
   "set_posting_time",
   "due_date",
   "reason_for_sale",
+  "patient_statement",
   "amended_from",
   "returns",
   "return_against",
   "column_break_21",
   "update_billed_amount_in_sales_order",
+  "billing",
+  "cashier",
+  "cai",
+  "numeration",
+  "authorized_range",
   "accounting_dimensions_section",
+  "deadline_for_authorization",
   "project",
   "dimension_col_break",
   "cost_center",
@@ -1571,13 +1579,63 @@
    "label": "Reason for sale",
    "options": "Reason for sale",
    "reqd": 1
+  },
+  {
+   "fieldname": "cashier",
+   "fieldtype": "Data",
+   "label": "Cashier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cai",
+   "fieldtype": "Data",
+   "label": "CAI",
+   "read_only": 1
+  },
+  {
+   "fieldname": "authorized_range",
+   "fieldtype": "Data",
+   "label": "Authorized Range",
+   "read_only": 1
+  },
+  {
+   "fieldname": "deadline_for_authorization",
+   "fieldtype": "Data",
+   "label": "Deadline for authorization",
+   "read_only": 1
+  },
+  {
+   "fieldname": "patient_statement",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Patient Statement",
+   "options": "Patient statement"
+  },
+  {
+   "fieldname": "billing",
+   "fieldtype": "Section Break",
+   "label": "Billing"
+  },
+  {
+   "fieldname": "numeration",
+   "fieldtype": "Data",
+   "label": "Numeration",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "type_document",
+   "fieldtype": "Link",
+   "label": "Type Document",
+   "options": "GType Document",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-01-30 15:40:30.184552",
+ "modified": "2020-02-19 13:18:30.116830",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

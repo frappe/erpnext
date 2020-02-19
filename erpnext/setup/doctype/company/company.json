@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:company_name",
@@ -561,7 +562,8 @@
    "fieldname": "expenses_included_in_asset_valuation",
    "fieldtype": "Link",
    "label": "Expenses Included In Asset Valuation",
-   "options": "Account"
+   "options": "Account",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_40",
@@ -725,7 +727,8 @@
  "icon": "fa fa-building",
  "idx": 1,
  "image_field": "company_logo",
- "modified": "2019-11-22 13:04:47.470768",
+ "links": [],
+ "modified": "2020-02-14 15:37:19.179839",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
