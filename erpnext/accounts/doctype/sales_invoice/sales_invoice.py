@@ -1462,6 +1462,8 @@ def get_inter_company_details(doc, doctype):
 		"company": company
 	}
 
+def on_doctype_update():
+	frappe.db.add_index("Sales Invoice", ["return_against"])
 
 def validate_inter_company_transaction(doc, doctype):
 

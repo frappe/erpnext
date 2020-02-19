@@ -300,6 +300,9 @@ def update_against_account(voucher_type, voucher_no):
 		if d.against != new_against:
 			frappe.db.set_value("GL Entry", d.name, "against", new_against)
 
+def on_doctype_update():
+	frappe.db.add_index("GL Entry", ["against_voucher_type"])
+	frappe.db.add_index("GL Entry", ["voucher_type"])
 
 def rename_gle_sle_docs():
 	for doctype in ["GL Entry", "Stock Ledger Entry"]:
