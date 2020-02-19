@@ -640,7 +640,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	update_paid_amount_for_return: function() {
-		var me = this;
 		var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 
 		if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
