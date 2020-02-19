@@ -18,7 +18,7 @@ class VehicleLog(Document):
 					if not (service_detail.service_item and service_detail.type and service_detail.frequency and service_detail.expense_amount):
 							frappe.throw(_("Service Item,Type,frequency and expense amount are required"))
 
-	def before_save(self):
+	def before_insert(self):
 		model_details = get_make_model(self.license_plate)
 		self.make = model_details[0]
 		self.model = model_details[1]
