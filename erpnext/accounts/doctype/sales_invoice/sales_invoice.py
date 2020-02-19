@@ -1244,7 +1244,7 @@ class SalesInvoice(SellingController):
 		precision = self.precision("outstanding_amount")
 		outstanding_amount = flt(self.outstanding_amount, precision)
 		due_date = getdate(self.due_date)
-		nowdate = getdate(nowdate())
+		nowdate = getdate()
 		discountng_status = self.get_discounting_status()
 
 		if not status:
