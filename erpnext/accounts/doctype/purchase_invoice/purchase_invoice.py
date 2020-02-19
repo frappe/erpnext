@@ -125,6 +125,55 @@ class PurchaseInvoice(BuyingController):
 			else:
 				self.remarks = _("No Remarks")
 
+	def set_status(self):
+		if self.is_new():
+			if self.get('amended_from'):
+				self.status = 'Draft'
+			return
+
+		if not status:
+			precision = self.precision("outstanding_amount")
+			args = {
+				'purchase_invoice': self.name,
+				'docstatus': self.docstatus,
+				'outstanding_amount': self.outstanding_amount,
+				'due_date': self.due_date, 
+				'is_return': self.is_return, 
+				'precision': precision
+			}
+			status = get_status(data=args)
+
+		if update:
+			self.db_set('status', status, update_modified = update_modified)
+
+def get_status(**kwargs):
+	data = kwargs.get('data')
+
+	outstanding_amount = flt(data.outstanding_amount, data.precision)
+	due_date = getdate(data.due_date)
+	now_date = getdate()
+
+	if data.docstatus == 2:
+		status = "Cancelled"
+	elif data.docstatus == 1:
+		if outstanding_amount > 0 and due_date < now_date:
+			status = "Overdue"
+		elif outstanding_amount > 0 and due_date >= now_date:
+			status = "Unpaid"
+		#Check if outstanding amount is 0 due to debit note issued against invoice
+		elif outstanding_amount <= 0 and data.is_return == 0 and frappe.db.get_value('Purchase Invoice', {'is_return': 1, 'return_against': data.purchase_invoice, 'docstatus': 1}):
+			status = "Debit Note Issued"
+		elif data.is_return == 1:
+			status = "Return"
+		elif outstanding_amount <=0:
+			status = "Paid"
+		else:
+			status = "Submitted"
+	else:
+		status = "Draft"
+	
+	return status
+
 	def set_missing_values(self, for_validate=False):
 		if not self.credit_to:
 			self.credit_to = get_party_account("Supplier", self.supplier, self.company)

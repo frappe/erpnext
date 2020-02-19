@@ -232,11 +232,37 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 		if bal < 0 and not on_cancel:
 			frappe.throw(_("Outstanding for {0} cannot be less than zero ({1})").format(against_voucher, fmt_money(bal)))
 
+	update_outstanding_amt_in_ref(against_voucher, against_voucher_type, bal)
+
+def update_outstanding_amt_in_ref(against_voucher, against_voucher_type, bal):
 	# Update outstanding amt on against voucher
-	if against_voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
+	if against_voucher_type == "Sales Invoice":
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_status
+		data = frappe.db.get_value(against_voucher_type, against_voucher, 
+			["name as sales_invoice", "outstanding_amount", 
+			"due_date", "is_return", "is_discounted", "docstatus"], as_dict=1)
+
+		precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
+		data.setdefault('precision', precision)
+	elif against_voucher_type == "Purchase Invoice":
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_status
+		data = frappe.db.get_value(against_voucher_type, against_voucher, 
+			["name as purchase_invoice", "outstanding_amount", 
+			"due_date", "is_return", "docstatus"], as_dict=1)
+
+		precision = frappe.get_precision("Purchase Invoice", "outstanding_amount")
+		data.setdefault('precision', precision)
+	elif against_voucher_type == "Fees":
 		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
 		ref_doc.db_set('outstanding_amount', bal)
 		ref_doc.set_status(update=True)
+		return
+	
+	status = get_status(data=data)
+	frappe.db.set_value(against_voucher_type, against_voucher, {
+		'outstanding_amount': bal,
+		'status': status
+	})
 
 def validate_frozen_account(account, adv_adj=None):
 	frozen_account = frappe.db.get_value("Account", account, "freeze_account")
