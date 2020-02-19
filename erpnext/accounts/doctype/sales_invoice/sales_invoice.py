@@ -28,7 +28,7 @@ from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.healthcare.utils import manage_invoice_submit_cancel
 
 from six import iteritems
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -136,8 +136,9 @@ class SalesInvoice(SellingController):
 
 		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points:
 			validate_loyalty_points(self, self.loyalty_points)
-		
-		self.assign_cai()
+
+		if self.numeration is None:
+			self.assign_cai()
 	
 	def initial_number(self, number):
 
@@ -156,17 +157,17 @@ class SalesInvoice(SellingController):
 		elif number >= 1000000 and number < 10000000:
 			return("0" + str(number))
 		elif number >= 10000000:
-			return(str(num))
+			return(str(number))
 
 	def assign_cai(self):
 		user = frappe.session.user
-		gcai_allocation = frappe.get_all("GCAI Allocation", ["branch", "pos"], filters = {"user": user})
+		gcai_allocation = frappe.get_all("GCAI Allocation", ["branch", "pos"], filters = {"user": user, "company": self.company, "type_document": self.type_document})
 
 		if not gcai_allocation:
 			frappe.throw(_("The user {} does not have an assigned CAI".format(user)))
 
 		for item in gcai_allocation:
-			cais = frappe.get_all("GCAI", ["codedocument", "codebranch", "codepos","initial_range", "final_range", "current_numbering", "name", "cai", "due_date"], filters = {"company": self.company, "sucursal": item.branch, "pos_name": item.pos, "state": "Valid"})
+			cais = frappe.get_all("GCAI", ["codedocument", "codebranch", "codepos","initial_range", "final_range", "current_numbering", "name", "cai", "due_date"], filters = {"company": self.company, "sucursal": item.branch, "pos_name": item.pos, "state": "Valid", "type_document": self.type_document})
 			
 			if not cais:
 				frappe.throw(_("There is no CAI available to generate this invoice."))
@@ -214,25 +215,24 @@ class SalesInvoice(SellingController):
 		if amount <= gcai_setting[0].expired_amount:
 			frappe.msgprint(_("There are only {} numbers available for this CAI.".format(amount)))
 		
-		now = datetime.now()
+		now = date.today()
 		days = timedelta(days=int(gcai_setting[0].expired_days))
 
 		sum_dates = now+days
 
 		if str(date) <= str(sum_dates):
-			for i in range(gcai_setting[0].expired_days):
-				now1 = datetime.now()
-				days1 = timedelta(days=int(gcai_setting[0].expired_days))
+			for i in range(int(gcai_setting[0].expired_days)):		
+				now1 = date.today()
+				days1 = timedelta(days=i)
 
 				sum_dates1 = now1+days1
-
-				if str(date) <= str(sum_dates):
+				if str(date) == str(sum_dates1):
 					frappe.msgprint(_("This CAI expires in {} days.".format(i)))
-					break
-	
+					break		
+					
 	def validate_cai(self, name):
 		doc_duedate = frappe.get_doc("GCAI", name)
-		doc_duedate.state = "Invalid"
+		doc_duedate.state = "{}".format("Expired")
 		doc_duedate.save()
 
 	def validate_fixed_asset(self):
