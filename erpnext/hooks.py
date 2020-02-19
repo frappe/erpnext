@@ -80,7 +80,7 @@ website_generators = ["Item Group", "Item", "BOM", "Sales Partner",
 
 website_context = {
 	"favicon": 	"/assets/erpnext/images/leaf.svg",
-	"splash_image": "/assets/erpnext/images/leaf.svg"
+	"splash_image": "/assets/erpnext/images/unnamed.gif"
 }
 
 website_route_rules = [
