@@ -187,7 +187,6 @@ class SalarySlip(TransactionBase):
 		make_salary_slip(self._salary_structure_doc.name, self)
 
 	def get_working_days_details(self, joining_date=None, relieving_date=None, lwp=None, absent_days=None,for_preview=0):
-
 		payroll_based_on = frappe.db.get_value("HR Settings", None, "payroll_based_on")
 
 		if not joining_date:
@@ -225,6 +224,8 @@ class SalarySlip(TransactionBase):
 				non_working_days = actual_absent_days
 			elif absent_days != actual_absent_days:
 				frappe.msgprint(_("Number of Absent days does not match your Attendance record"))
+			else:
+				non_working_days =  actual_absent_days
 
 			self.absent_days = non_working_days
 
@@ -306,7 +307,6 @@ class SalarySlip(TransactionBase):
 				AND docstatus = 1
 				AND attendance_date between %s and %s
 			GROUP BY status''', values=(self.employee, self.start_date, self.end_date), as_dict = 1)
-
 		if attendances:
 			attendance_map = { attendance.status: attendance for attendance in attendances}
 			absent_days = 0

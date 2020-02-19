@@ -33,6 +33,37 @@ class TestSalarySlip(unittest.TestCase):
 		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
 		frappe.set_user("Administrator")
 
+	def test_salary_slip_based_on_attendance_or_leave(self):
+		no_of_days = self.get_no_of_days()
+
+		# Payroll based on attendance
+		frappe.db.set_value("HR Settings", None, "payroll_based_on", "Attendance")
+		emp_id = make_employee("test_for_attendance@salary.com")
+
+		frappe.db.set_value("Employee",emp_id ,"relieving_date", None)
+		frappe.db.set_value("Employee",emp_id ,"status", "Active")
+
+		from erpnext.hr.doctype.attendance.attendance import mark_attendance
+
+		mark_attendance(emp_id, add_days(nowdate(), -3), 'Absent')
+		mark_attendance(emp_id, add_days(nowdate(), -5), 'Half Day') #count as 0.5 non working
+
+		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Slip Test Holiday List")
+		ss = make_employee_salary_slip("test_for_attendance@salary.com", "Monthly")
+
+		self.assertEqual(ss.absent_days, 1.5)
+
+		days_in_month = no_of_days[0]
+		no_of_holidays = no_of_days[1]
+
+		self.assertEqual(ss.payment_days, days_in_month - no_of_holidays - 1.5)
+
+		#Gross pay calculation based on attendances
+		gross_pay = 78000 - ((78000 / (days_in_month - no_of_holidays)) * flt(ss.absent_days))
+
+		self.assertEqual(ss.gross_pay, gross_pay)
+
+
 	def test_salary_slip_with_holidays_included(self):
 		no_of_days = self.get_no_of_days()
 		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 1)
