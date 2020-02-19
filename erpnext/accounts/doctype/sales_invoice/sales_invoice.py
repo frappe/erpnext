@@ -212,23 +212,24 @@ class SalesInvoice(SellingController):
 	def alerts(self, date, amount):
 		gcai_setting = frappe.get_all("GCai Settings", ["expired_days", "expired_amount"])
 
-		if amount <= gcai_setting[0].expired_amount:
-			frappe.msgprint(_("There are only {} numbers available for this CAI.".format(amount)))
+		if len(gcai_setting) > 0:
+			if amount <= gcai_setting[0].expired_amount:
+				frappe.msgprint(_("There are only {} numbers available for this CAI.".format(amount)))
 		
-		now = date.today()
-		days = timedelta(days=int(gcai_setting[0].expired_days))
+			now = date.today()
+			days = timedelta(days=int(gcai_setting[0].expired_days))
 
-		sum_dates = now+days
+			sum_dates = now+days
 
-		if str(date) <= str(sum_dates):
-			for i in range(int(gcai_setting[0].expired_days)):		
-				now1 = date.today()
-				days1 = timedelta(days=i)
+			if str(date) <= str(sum_dates):
+				for i in range(int(gcai_setting[0].expired_days)):		
+					now1 = date.today()
+					days1 = timedelta(days=i)
 
-				sum_dates1 = now1+days1
-				if str(date) == str(sum_dates1):
-					frappe.msgprint(_("This CAI expires in {} days.".format(i)))
-					break		
+					sum_dates1 = now1+days1
+					if str(date) == str(sum_dates1):
+						frappe.msgprint(_("This CAI expires in {} days.".format(i)))
+						break		
 					
 	def validate_cai(self, name):
 		doc_duedate = frappe.get_doc("GCAI", name)
