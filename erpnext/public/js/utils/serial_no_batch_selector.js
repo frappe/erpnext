@@ -317,7 +317,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 								frappe.call({
 									method: 'erpnext.stock.doctype.batch.batch.get_batch_qty',
 									args: {
-										batch_no: this.doc.batch_no,
+										batch_no: me.item.batch_no,
 										warehouse: me.warehouse_details.name,
 										item_code: me.item_code
 									},

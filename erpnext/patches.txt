@@ -656,3 +656,5 @@ erpnext.patches.v12_0.set_lead_title_field
 erpnext.patches.v12_0.add_default_birthday_email_template
 erpnext.patches.v12_0.set_employee_preferred_emails
 erpnext.patches.v12_0.set_job_offer_applicant_email
+erpnext.patches.v12_0.rename_bank_reconciliation_fields # 2020-01-22
+erpnext.patches.v12_0.create_irs_1099_field_united_states

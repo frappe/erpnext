@@ -1,10 +1,12 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "creation": "2013-03-07 18:50:32",
  "description": "A logical Warehouse against which stock entries are made.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "warehouse_detail",
   "warehouse_name",
@@ -226,7 +228,8 @@
  ],
  "icon": "fa fa-building",
  "idx": 1,
- "modified": "2019-05-22 11:17:23.357490",
+ "links": [],
+ "modified": "2020-01-28 13:50:59.368846",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",
@@ -279,8 +282,8 @@
    "role": "Manufacturing User"
   }
  ],
- "quick_entry": 1,
  "show_name_in_global_search": 1,
+ "sort_field": "modified",
  "sort_order": "DESC",
  "title_field": "warehouse_name"
 }
