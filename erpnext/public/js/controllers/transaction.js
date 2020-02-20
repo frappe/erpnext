@@ -853,15 +853,19 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	conversion_factor: function(doc, cdt, cdn, dont_fetch_price_list_rate) {
-		if(doc.doctype != 'Material Request' && frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
+		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
 			var item = frappe.get_doc(cdt, cdn);
 			frappe.model.round_floats_in(item, ["qty", "conversion_factor"]);
 			item.stock_qty = flt(item.qty * item.conversion_factor, precision("stock_qty", item));
-			item.total_weight = flt(item.stock_qty * item.weight_per_unit);
 			refresh_field("stock_qty", item.name, item.parentfield);
-			refresh_field("total_weight", item.name, item.parentfield);
 			this.toggle_conversion_factor(item);
-			this.calculate_net_weight();
+
+			if(doc.doctype != "Material Request") {
+				item.total_weight = flt(item.stock_qty * item.weight_per_unit);
+				refresh_field("total_weight", item.name, item.parentfield);
+				this.calculate_net_weight();
+			}
+
 			if (!dont_fetch_price_list_rate &&
 				frappe.meta.has_field(doc.doctype, "price_list_currency")) {
 				this.apply_price_list(item, true);

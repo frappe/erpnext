@@ -124,7 +124,7 @@ class LandedCostVoucher(Document):
 
 			# update stock & gl entries for submit state of PR
 			doc.docstatus = 1
-			doc.update_stock_ledger(via_landed_cost_voucher=True)
+			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
 			doc.make_gl_entries()
 
 	def update_rate_in_serial_no(self, receipt_document):
