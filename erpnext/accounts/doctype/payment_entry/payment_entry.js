@@ -485,6 +485,7 @@ frappe.ui.form.on('Payment Entry', {
 
 	paid_amount: function(frm) {
 		frm.set_value("base_paid_amount", flt(frm.doc.paid_amount) * flt(frm.doc.source_exchange_rate));
+		frm.trigger("reset_received_amount");
 	},
 
 	received_amount: function(frm) {
