@@ -83,6 +83,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Payroll Date",
+   "mandatory_depends_on": "eval:(doc.is_recurring==0)",
    "search_index": 1
   },
   {
@@ -141,18 +142,20 @@
    "depends_on": "eval:(doc.is_recurring==1)",
    "fieldname": "from_date",
    "fieldtype": "Date",
-   "label": "From Date"
+   "label": "From Date",
+   "mandatory_depends_on": "eval:(doc.is_recurring==1)"
   },
   {
    "depends_on": "eval:(doc.is_recurring==1)",
    "fieldname": "to_date",
    "fieldtype": "Date",
-   "label": "To Date"
+   "label": "To Date",
+   "mandatory_depends_on": "eval:(doc.is_recurring==1)"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-01-13 18:25:56.254114",
+ "modified": "2020-02-20 12:36:00.087629",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Additional Salary",
