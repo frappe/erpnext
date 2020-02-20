@@ -1605,13 +1605,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "patient_statement",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Patient Statement",
-   "options": "Patient statement"
-  },
-  {
    "fieldname": "billing",
    "fieldtype": "Section Break",
    "label": "Billing"
@@ -1627,15 +1620,20 @@
    "fieldname": "type_document",
    "fieldtype": "Link",
    "label": "Type Document",
-   "options": "GType Document",
-   "reqd": 1
+   "options": "GType Document"
+  },
+  {
+   "fieldname": "patient_statement",
+   "fieldtype": "Link",
+   "label": "Patient Statement",
+   "options": "Patient statement"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-19 13:18:30.116830",
+ "modified": "2020-02-20 15:38:05.092046",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
