@@ -222,7 +222,13 @@ frappe.ui.form.on('Material Request', {
 				fieldname:'default_supplier',
 				fieldtype: 'Link',
 				options: 'Supplier',
-				description: __('Selected Supplier must be the Default Supplier of one of the items below.'),
+				description: __('Select a Supplier from the Default Supplier List of the items below.'),
+				get_query: () => {
+					return {
+						query: "erpnext.stock.doctype.material_request.material_request.get_default_supplier_query",
+						filters: {'doc': frm.doc.name}
+					}
+				}
 			},
 			(values) => {
 				frappe.model.open_mapped_doc({
