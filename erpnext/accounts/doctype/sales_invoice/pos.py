@@ -152,8 +152,11 @@ def update_multi_mode_option(doc, pos_profile):
 
 
 def get_mode_of_payment(doc):
-	return frappe.db.sql(""" select mpa.default_account, mpa.parent, mp.type as type from `tabMode of Payment Account` mpa, \
-			`tabMode of Payment` mp where mpa.parent = mp.name and mpa.company = %(company)s""", {'company': doc.company}, as_dict=1)
+	return frappe.db.sql("""
+		select mpa.default_account, mpa.parent, mp.type as type 
+		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp 
+		where mpa.parent = mp.name and mpa.company = %(company)s and mp.enabled = 1""",
+	{'company': doc.company}, as_dict=1)
 
 
 def update_tax_table(doc):
