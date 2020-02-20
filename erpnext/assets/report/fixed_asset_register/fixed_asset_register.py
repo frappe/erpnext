@@ -41,6 +41,42 @@ def get_columns(filters):
 			"width": 90
 		},
 		{
+			"label": _("Purchase Date"),
+			"fieldtype": "Date",
+			"fieldname": "purchase_date",
+			"width": 90
+		},
+		{
+			"label": _("Available For Use Date"),
+			"fieldtype": "Date",
+			"fieldname": "available_for_use_date",
+			"width": 90
+		},
+		{
+			"label": _("Gross Purchase Amount"),
+			"fieldname": "gross_purchase_amount",
+			"options": "Currency",
+			"width": 90
+		},
+		{
+			"label": _("Asset Value"),
+			"fieldname": "asset_value",
+			"options": "Currency",
+			"width": 90
+		},
+		{
+			"label": _("Opening Accumulated Depreciation"),
+			"fieldname": "opening_accumulated_depreciation",
+			"options": "Currency",
+			"width": 90
+		},
+		{
+			"label": _("Depreciated Amount"),
+			"fieldname": "depreciated_amount",
+			"options": "Currency",
+			"width": 90
+		},
+		{
 			"label": _("Cost Center"),
 			"fieldtype": "Link",
 			"fieldname": "cost_center",
@@ -55,50 +91,35 @@ def get_columns(filters):
 			"width": 100
 		},
 		{
-			"label": _("Location"),
-			"fieldtype": "Link",
-			"fieldname": "location",
-			"options": "Location",
-			"width": 100
-		},
-		{
-			"label": _("Purchase Date"),
-			"fieldtype": "Date",
-			"fieldname": "purchase_date",
-			"width": 90
-		},
-		{
-			"label": _("Gross Purchase Amount"),
-			"fieldname": "gross_purchase_amount",
-			"options": "Currency",
-			"width": 90
-		},
-		{
 			"label": _("Vendor Name"),
 			"fieldtype": "Data",
 			"fieldname": "vendor_name",
 			"width": 100
 		},
 		{
-			"label": _("Available For Use Date"),
-			"fieldtype": "Date",
-			"fieldname": "available_for_use_date",
-			"width": 90
-		},
-		{
-			"label": _("Asset Value"),
-			"fieldname": "asset_value",
-			"options": "Currency",
-			"width": 90
+			"label": _("Location"),
+			"fieldtype": "Link",
+			"fieldname": "location",
+			"options": "Location",
+			"width": 100
 		},
 	]
 
 def get_conditions(filters):
-	conditions = {'docstatus': 1}
+	conditions = { 'docstatus': 1 }
 	status = filters.status
+	date = filters.date
 
-	if filters.company:
+	if filters.get('company'):
 		conditions["company"] = filters.company
+	if filters.get('purchase_date'):
+		conditions["purchase_date"] = ('<=', filters.get('purchase_date'))
+	if filters.get('available_for_use_date'):
+		conditions["available_for_use_date"] = ('<=', filters.get('available_for_use_date'))
+	if filters.get('is_existing_asset'):
+		conditions["is_existing_asset"] = filters.get('is_existing_asset')
+	if filters.get('asset_category'):
+		conditions["asset_category"] = filters.get('asset_category')
 
 	# In Store assets are those that are not sold or scrapped
 	operand = 'not in'
@@ -114,7 +135,7 @@ def get_data(filters):
 	data = []
 
 	conditions = get_conditions(filters)
-	depreciation_amount_map = get_finance_book_value_map(filters.date, filters.finance_book)
+	depreciation_amount_map = get_finance_book_value_map(filters)
 	pr_supplier_map = get_purchase_receipt_supplier_map()
 	pi_supplier_map = get_purchase_invoice_supplier_map()
 
@@ -136,6 +157,8 @@ def get_data(filters):
 				"cost_center": asset.cost_center,
 				"vendor_name": pr_supplier_map.get(asset.purchase_receipt) or pi_supplier_map.get(asset.purchase_invoice),
 				"gross_purchase_amount": asset.gross_purchase_amount,
+				"opening_accumulated_depreciation": asset.opening_accumulated_depreciation,
+				"depreciated_amount": depreciation_amount_map.get(asset.name) or 0.0,
 				"available_for_use_date": asset.available_for_use_date,
 				"location": asset.location,
 				"asset_category": asset.asset_category,
@@ -146,9 +169,9 @@ def get_data(filters):
 
 	return data
 
-def get_finance_book_value_map(date, finance_book=''):
-	if not date:
-		date = today()
+def get_finance_book_value_map(filters):
+	date = filters.get('purchase_date') or filters.get('available_for_use_date') or today()
+
 	return frappe._dict(frappe.db.sql(''' Select
 		parent, SUM(depreciation_amount)
 		FROM `tabDepreciation Schedule`
@@ -157,7 +180,7 @@ def get_finance_book_value_map(date, finance_book=''):
 			AND schedule_date<=%s
 			AND journal_entry IS NOT NULL
 			AND ifnull(finance_book, '')=%s
-		GROUP BY parent''', (date, cstr(finance_book))))
+		GROUP BY parent''', (date, cstr(filters.finance_book or ''))))
 
 def get_purchase_receipt_supplier_map():
 	return frappe._dict(frappe.db.sql(''' Select

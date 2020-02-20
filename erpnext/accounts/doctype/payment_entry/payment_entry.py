@@ -102,7 +102,9 @@ class PaymentEntry(AccountsController):
 
 			self.bank = bank_data.bank
 			self.bank_account_no = bank_data.bank_account_no
-			self.set(field, bank_data.account)
+
+			if not self.get(field):
+				self.set(field, bank_data.account)
 
 	def validate_allocated_amount(self):
 		for d in self.get("references"):
