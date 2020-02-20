@@ -443,7 +443,7 @@ class TestLeaveApplication(unittest.TestCase):
 		while(i<6):
 			allocate_earned_leaves()
 			i += 1
-		self.assertEqual(get_leave_balance_on(employee.name, leave_type, nowdate()), 12)
+		self.assertEqual(get_leave_balance_on(employee.name, leave_type, nowdate()), 9)
 
 	# test to not consider current leave in leave balance while submitting
 	def test_current_leave_on_submit(self):
