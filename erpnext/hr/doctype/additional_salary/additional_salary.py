@@ -54,11 +54,11 @@ def get_additional_salary_component(employee, start_date, end_date, component_ty
 		from `tabAdditional Salary`
 		where employee=%(employee)s
 			and docstatus = 1
-			and (payroll_date between %(from_date)s and %(to_date)s)
-			or (
-				(from_date between %(from_date)s and %(to_date)s)
-				or(to_date between %(from_date)s and %(to_date)s)
-			)
+			and (
+					payroll_date between %(from_date)s and %(to_date)s
+				or
+					from_date <= %(to_date)s and to_date >= %(to_date)s
+				)
 		and type = %(component_type)s
 		group by salary_component, overwrite_salary_structure_amount
 		order by salary_component, overwrite_salary_structure_amount
