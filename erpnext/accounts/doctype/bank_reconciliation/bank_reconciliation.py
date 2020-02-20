@@ -21,10 +21,6 @@ class BankReconciliation(Document):
 		if not self.include_reconciled_entries:
 			condition = " and (clearance_date is null or clearance_date='0000-00-00')"
 
-		account_cond = ""
-		if self.bank_account_no:
-			account_cond = " and t2.bank_account_no = {0}".format(frappe.db.escape(self.bank_account_no))
-
 		journal_entries = frappe.db.sql("""
 			select
 				"Journal Entry" as payment_document, t1.name as payment_entry,
@@ -34,15 +30,12 @@ class BankReconciliation(Document):
 			from
 				`tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where
-				t2.parent = t1.name and t2.account = %s and t1.docstatus=1
-				and t1.posting_date >= %s and t1.posting_date <= %s
-				and ifnull(t1.is_opening, 'No') = 'No' {0} {1}
+				t2.parent = t1.name and t2.account = %(account)s and t1.docstatus=1
+				and t1.posting_date >= %(from)s and t1.posting_date <= %(to)s
+				and ifnull(t1.is_opening, 'No') = 'No' %(condition)s
 			group by t2.account, t1.name
 			order by t1.posting_date ASC, t1.name DESC
-		""".format(condition, account_cond), (self.bank_account, self.from_date, self.to_date), as_dict=1)
-
-		if self.bank_account_no:
-			condition = " and bank_account = %(bank_account_no)s"
+		""", {"condition":condition, "account": self.account, "from": self.from_date, "to": self.to_date}, as_dict=1)
 
 		payment_entries = frappe.db.sql("""
 			select
@@ -55,12 +48,12 @@ class BankReconciliation(Document):
 			from `tabPayment Entry`
 			where
 				(paid_from=%(account)s or paid_to=%(account)s) and docstatus=1
-				and posting_date >= %(from)s and posting_date <= %(to)s {0}
+				and posting_date >= %(from)s and posting_date <= %(to)s
+				and bank_account = %(bank_account)s
 			order by
 				posting_date ASC, name DESC
-		""".format(condition),
-		        {"account":self.bank_account, "from":self.from_date,
-				"to":self.to_date, "bank_account_no": self.bank_account_no}, as_dict=1)
+		""", {"account": self.account, "from":self.from_date,
+				"to": self.to_date, "bank_account": self.bank_account}, as_dict=1)
 
 		pos_entries = []
 		if self.include_pos_transactions:
@@ -72,11 +65,10 @@ class BankReconciliation(Document):
 				from `tabSales Invoice Payment` sip, `tabSales Invoice` si, `tabAccount` account
 				where
 					sip.account=%(account)s and si.docstatus=1 and sip.parent = si.name
-					and account.name = sip.account and si.posting_date >= %(from)s and si.posting_date <= %(to)s {0}
+					and account.name = sip.account and si.posting_date >= %(from)s and si.posting_date <= %(to)s
 				order by
 					si.posting_date ASC, si.name DESC
-			""".format(condition),
-			        {"account":self.bank_account, "from":self.from_date, "to":self.to_date}, as_dict=1)
+			""", {"account":self.account, "from":self.from_date, "to":self.to_date}, as_dict=1)
 
 		entries = sorted(list(payment_entries)+list(journal_entries+list(pos_entries)),
 			key=lambda k: k['posting_date'] or getdate(nowdate()))

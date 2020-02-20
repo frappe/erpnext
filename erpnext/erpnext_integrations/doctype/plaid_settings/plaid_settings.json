@@ -49,9 +49,10 @@
   },
   {
    "fieldname": "plaid_env",
-   "fieldtype": "Data",
+   "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Plaid Environment"
+   "label": "Plaid Environment",
+   "options": "sandbox\ndevelopment\nproduction"
   },
   {
    "fieldname": "column_break_2",
@@ -69,7 +70,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-01-05 10:00:22.137832",
+ "modified": "2020-02-07 15:21:11.616231",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Plaid Settings",

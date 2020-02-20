@@ -280,7 +280,7 @@ class Subscription(Document):
 
 		if self.additional_discount_percentage or self.additional_discount_amount:
 			discount_on = self.apply_additional_discount
-			invoice.apply_additional_discount = discount_on if discount_on else 'Grand Total'
+			invoice.apply_discount_on = discount_on if discount_on else 'Grand Total'
 
 		# Subscription period
 		invoice.from_date = self.current_invoice_start

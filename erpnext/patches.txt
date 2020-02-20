@@ -648,3 +648,5 @@ erpnext.patches.v12_0.update_owner_fields_in_acc_dimension_custom_fields
 erpnext.patches.v12_0.remove_denied_leaves_from_leave_ledger
 erpnext.patches.v12_0.update_price_or_product_discount
 erpnext.patches.v12_0.add_export_type_field_in_party_master
+erpnext.patches.v12_0.rename_bank_reconciliation_fields # 2020-01-22
+erpnext.patches.v12_0.create_irs_1099_field_united_states

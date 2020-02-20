@@ -110,6 +110,7 @@ class StockEntry(StockController):
 		self.update_cost_in_project()
 		self.update_transferred_qty()
 		self.update_quality_inspection()
+		self.delete_auto_created_batches()
 
 	def set_job_card_data(self):
 		if self.job_card and not self.work_order:
@@ -484,7 +485,7 @@ class StockEntry(StockController):
 					if self.work_order \
 						and frappe.db.get_single_value("Manufacturing Settings", "material_consumption"):
 						bom_items = self.get_bom_raw_materials(d.transfer_qty)
-						raw_material_cost = sum([flt(d.qty)*flt(d.rate) for d in bom_items.values()])
+						raw_material_cost = sum([flt(row.qty)*flt(row.rate) for row in bom_items.values()])
 
 					if raw_material_cost:
 						d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
@@ -1055,7 +1056,7 @@ class StockEntry(StockController):
 			req_qty_each = flt(req_qty / manufacturing_qty)
 			consumed_qty = flt(req_items[0].consumed_qty)
 
-			if trans_qty and manufacturing_qty >= (produced_qty + flt(self.fg_completed_qty)):
+			if trans_qty and manufacturing_qty > (produced_qty + flt(self.fg_completed_qty)):
 				if qty >= req_qty:
 					qty = (req_qty/trans_qty) * flt(self.fg_completed_qty)
 				else:
