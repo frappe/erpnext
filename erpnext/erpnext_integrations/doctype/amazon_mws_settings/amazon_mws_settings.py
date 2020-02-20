@@ -7,7 +7,6 @@ import frappe
 from frappe.model.document import Document
 import dateutil
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
-from erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_methods import get_products_details, get_orders
 
 class AmazonMWSSettings(Document):
 	def validate(self):
@@ -19,12 +18,12 @@ class AmazonMWSSettings(Document):
 
 	def get_products_details(self):
 		if self.enable_amazon == 1:
-			get_products_details()
+			frappe.enqueue('erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_methods.get_products_details')
 
 	def get_order_details(self):
 		if self.enable_amazon == 1:
 			after_date = dateutil.parser.parse(self.after_date).strftime("%Y-%m-%d")
-			get_orders(after_date = after_date)
+			frappe.enqueue('erpnext.erpnext_integrations.doctype.amazon_mws_settings.amazon_methods.get_orders', after_date=after_date)
 
 def schedule_get_order_details():
 	mws_settings = frappe.get_doc("Amazon MWS Settings")
