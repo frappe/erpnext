@@ -439,10 +439,11 @@ class TestLeaveApplication(unittest.TestCase):
 
 		# validate earned leaves creation without maximum leaves
 		frappe.db.set_value('Leave Type', leave_type, 'max_leaves_allowed', 0)
-		while(i<14):
+		i = 0
+		while(i<6):
 			allocate_earned_leaves()
 			i += 1
-		self.assertEqual(get_leave_balance_on(employee.name, leave_type, nowdate()), 14)
+		self.assertEqual(get_leave_balance_on(employee.name, leave_type, nowdate()), 9)
 
 	# test to not consider current leave in leave balance while submitting
 	def test_current_leave_on_submit(self):
