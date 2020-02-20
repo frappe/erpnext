@@ -235,30 +235,28 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 	update_outstanding_amt_in_ref(against_voucher, against_voucher_type, bal)
 
 def update_outstanding_amt_in_ref(against_voucher, against_voucher_type, bal):
+	data = []
 	# Update outstanding amt on against voucher
-	if against_voucher_type == "Sales Invoice":
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_status
-		data = frappe.db.get_value(against_voucher_type, against_voucher, 
-			["name as sales_invoice", "outstanding_amount", 
-			"due_date", "is_return", "is_discounted", "docstatus"], as_dict=1)
-
-		precision = frappe.get_precision("Sales Invoice", "outstanding_amount")
-		data.setdefault('precision', precision)
-	elif against_voucher_type == "Purchase Invoice":
-		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_status
-		data = frappe.db.get_value(against_voucher_type, against_voucher, 
-			["name as purchase_invoice", "outstanding_amount", 
-			"due_date", "is_return", "docstatus"], as_dict=1)
-
-		precision = frappe.get_precision("Purchase Invoice", "outstanding_amount")
-		data.setdefault('precision', precision)
-	elif against_voucher_type == "Fees":
+	if against_voucher_type == "Fees":
 		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
 		ref_doc.db_set('outstanding_amount', bal)
 		ref_doc.set_status(update=True)
 		return
-	
-	status = get_status(data=data)
+	elif against_voucher_type == "Purchase Invoice":
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_status
+		data = frappe.db.get_value(against_voucher_type, against_voucher, 
+			["name as purchase_invoice", "outstanding_amount", 
+			"is_return", "due_date", "docstatus"])
+	elif against_voucher_type == "Sales Invoice":
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_status
+		data = frappe.db.get_value(against_voucher_type, against_voucher, 
+			["name as sales_invoice", "outstanding_amount", "is_discounted", 
+			"is_return", "due_date", "docstatus"])
+
+	precision = frappe.get_precision(against_voucher_type, "outstanding_amount")
+	data = list(data)
+	data.append(precision)
+	status = get_status(data)
 	frappe.db.set_value(against_voucher_type, against_voucher, {
 		'outstanding_amount': bal,
 		'status': status
@@ -301,8 +299,8 @@ def update_against_account(voucher_type, voucher_no):
 			frappe.db.set_value("GL Entry", d.name, "against", new_against)
 
 def on_doctype_update():
-	frappe.db.add_index("GL Entry", ["against_voucher_type"])
-	frappe.db.add_index("GL Entry", ["voucher_type"])
+	frappe.db.add_index("GL Entry", ["against_voucher_type", "against_voucher"])
+	frappe.db.add_index("GL Entry", ["voucher_type", "voucher_no"])
 
 def rename_gle_sle_docs():
 	for doctype in ["GL Entry", "Stock Ledger Entry"]:

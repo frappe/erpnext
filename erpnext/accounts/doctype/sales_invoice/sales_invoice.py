@@ -1219,16 +1219,16 @@ class SalesInvoice(SellingController):
 
 		if not status:
 			precision = self.precision("outstanding_amount")
-			args = {
-				'sales_invoice': self.name,
-				'docstatus': self.docstatus,
-				'outstanding_amount': self.outstanding_amount,
-				'due_date': self.due_date, 
-				'is_return': self.is_return, 
-				'is_discounted': self.is_discounted, 
-				'precision': precision
-			}
-			status = get_status(data=args)
+			args = [
+				self.name,
+				self.outstanding_amount,
+				self.is_discounted, 
+				self.is_return, 
+				self.due_date, 
+				self.docstatus,
+				precision,
+			]
+			status = get_status(args)
 		
 		if update:
 			self.db_set('status', status, update_modified = update_modified)
@@ -1253,32 +1253,32 @@ def get_discounting_status(sales_invoice):
 
 	return status
 
-def get_status(**kwargs):
-	data = kwargs.get('data')
+def get_status(*args):
+	sales_invoice, outstanding_amount, is_discounted, is_return, due_date, docstatus, precision = args[0]
 	
 	discounting_status = None
-	if data.is_discounted:
-		discounting_status = get_discounting_status(data.sales_invoice)
+	if is_discounted:
+		discounting_status = get_discounting_status(sales_invoice)
 
-	outstanding_amount = flt(data.outstanding_amount, data.precision)
-	due_date = getdate(data.due_date)
+	outstanding_amount = flt(outstanding_amount, precision)
+	due_date = getdate(due_date)
 	now_date = getdate()
 
-	if data.docstatus == 2:
+	if docstatus == 2:
 		status = "Cancelled"
-	elif data.docstatus == 1:
-		if outstanding_amount > 0 and due_date < now_date and data.is_discounted and discounting_status=='Disbursed':
+	elif docstatus == 1:
+		if outstanding_amount > 0 and due_date < now_date and is_discounted and discounting_status=='Disbursed':
 			status = "Overdue and Discounted"
 		elif outstanding_amount > 0 and due_date < now_date:
 			status = "Overdue"
-		elif outstanding_amount > 0 and due_date >= now_date and data.is_discounted and discounting_status=='Disbursed':
+		elif outstanding_amount > 0 and due_date >= now_date and is_discounted and discounting_status=='Disbursed':
 			status = "Unpaid and Discounted"
 		elif outstanding_amount > 0 and due_date >= now_date:
 			status = "Unpaid"
 		#Check if outstanding amount is 0 due to credit note issued against invoice
-		elif outstanding_amount <= 0 and data.is_return == 0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': data.sales_invoice, 'docstatus': 1}):
+		elif outstanding_amount <= 0 and is_return == 0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': sales_invoice, 'docstatus': 1}):
 			status = "Credit Note Issued"
-		elif data.is_return == 1:
+		elif is_return == 1:
 			status = "Return"
 		elif outstanding_amount <=0:
 			status = "Paid"
@@ -1455,9 +1455,6 @@ def get_inter_company_details(doc, doctype):
 		"party": party,
 		"company": company
 	}
-
-def on_doctype_update():
-	frappe.db.add_index("Sales Invoice", ["return_against"])
 
 def validate_inter_company_transaction(doc, doctype):
 
