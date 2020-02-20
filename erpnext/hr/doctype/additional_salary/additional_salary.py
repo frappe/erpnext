@@ -24,10 +24,6 @@ class AdditionalSalary(Document):
 		date_of_joining, relieving_date = frappe.db.get_value("Employee", self.employee,
 			["date_of_joining", "relieving_date"])
 
-		if not self.is_recurring and not self.payroll_date:
-			frappe.msgprint(_("Please enter Payroll Date."), indicator='blue', raise_exception=1)
-		if self.is_recurring and not self.from_date and not self.to_date:
-			frappe.msgprint(_("Please enter From Date and To Date."), indicator='blue', raise_exception=1)
 		if getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("From Date can not be greater than To Date."))
 
