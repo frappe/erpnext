@@ -213,6 +213,9 @@ class Customer(TransactionBase):
 
 	def create_onboarding_docs(self, args):
 		defaults = frappe.defaults.get_defaults()
+		company = defaults.get('company') or \
+			frappe.db.get_single_value('Global Defaults', 'default_company')
+
 		for i in range(1, args.get('max_count')):
 			customer = args.get('customer_name_' + str(i))
 			if customer:
@@ -223,7 +226,7 @@ class Customer(TransactionBase):
 						'customer_type': 'Company',
 						'customer_group': _('Commercial'),
 						'territory': defaults.get('country'),
-						'company': defaults.get('company')
+						'company': company
 					}).insert()
 
 					if args.get('customer_email_' + str(i)):
