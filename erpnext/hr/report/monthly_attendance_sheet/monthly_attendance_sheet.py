@@ -37,13 +37,22 @@ def execute(filters=None):
 
 		total_p = total_a = total_l = 0.0
 		for day in range(filters["total_days_in_month"]):
-			status = att_map.get(emp).get(day + 1, "None")
-			status_map = {"Present": "P", "Absent": "A", "Half Day": "HD", "On Leave": "L", "None": "", "Holiday":"<b>H</b>"}
-			if status == "None" and holiday_map:
+			status = att_map.get(emp).get(day + 1)
+			status_map = {
+				"Absent": "A",
+				"Half Day": "HD",
+				"Holiday":"<b>H</b>",
+				"On Leave": "L",
+				"Present": "P",
+				"Work From Home": "WFH"
+			}
+
+			if status is None and holiday_map:
 				emp_holiday_list = emp_det.holiday_list if emp_det.holiday_list else default_holiday_list
 				if emp_holiday_list in holiday_map and (day+1) in holiday_map[emp_holiday_list]:
 					status = "Holiday"
-			row.append(status_map[status])
+
+			row.append(status_map.get(status, ""))
 
 			if status == "Present":
 				total_p += 1
@@ -66,7 +75,7 @@ def execute(filters=None):
 
 		leave_details = frappe.db.sql("""select leave_type, status, count(*) as count from `tabAttendance`\
 			where leave_type is not NULL %s group by leave_type, status""" % conditions, filters, as_dict=1)
-		
+
 		time_default_counts = frappe.db.sql("""select (select count(*) from `tabAttendance` where \
 			late_entry = 1 %s) as late_entry_count, (select count(*) from tabAttendance where \
 			early_exit = 1 %s) as early_exit_count""" % (conditions, conditions), filters)
@@ -85,7 +94,7 @@ def execute(filters=None):
 				row.append(leaves[d])
 			else:
 				row.append("0.0")
-		
+
 		row.extend([time_default_counts[0][0],time_default_counts[0][1]])
 		data.append(row)
 	return columns, data
