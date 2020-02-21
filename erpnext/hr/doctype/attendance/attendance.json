@@ -58,11 +58,12 @@
   {
    "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
-   "fieldtype": "Read Only",
+   "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Employee Name",
    "oldfieldname": "employee_name",
-   "oldfieldtype": "Data"
+   "oldfieldtype": "Data",
+   "read_only": 1
   },
   {
    "depends_on": "working_hours",
@@ -174,8 +175,7 @@
  "icon": "fa fa-ok",
  "idx": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-01-27 20:25:29.572281",
+ "modified": "2020-02-19 14:25:32.945842",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",
