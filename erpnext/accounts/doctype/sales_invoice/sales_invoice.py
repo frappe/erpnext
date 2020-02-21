@@ -1455,6 +1455,22 @@ def get_inter_company_details(doc, doctype):
 		"party": party,
 		"company": company
 	}
+  
+def get_internal_party(parties, link_doctype, doc):
+	if len(parties) == 1:
+			party = parties[0].name
+	else:
+		# If more than one Internal Supplier/Customer, get supplier/customer on basis of address
+		if doc.get('company_address') or doc.get('shipping_address'):
+			party = frappe.db.get_value("Dynamic Link", {"parent": doc.get('company_address') or doc.get('shipping_address'),
+			"parenttype": "Address", "link_doctype": link_doctype}, "link_name")
+
+			if not party:
+				party = parties[0].name
+		else:
+			party = parties[0].name
+
+	return party
 
 def validate_inter_company_transaction(doc, doctype):
 
