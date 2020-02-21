@@ -1235,7 +1235,7 @@ class SalesInvoice(SellingController):
 				precision,
 			]
 			status = get_status(args)
-		
+
 		if update:
 			self.db_set('status', status, update_modified = update_modified)
 
