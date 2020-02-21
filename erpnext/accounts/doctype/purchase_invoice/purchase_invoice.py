@@ -138,7 +138,7 @@ class PurchaseInvoice(BuyingController):
 				self.outstanding_amount,
 				self.is_return, 
 				self.due_date, 
-				self.docstatus
+				self.docstatus,
 				precision
 			]
 			status = get_status(args)
@@ -146,7 +146,7 @@ class PurchaseInvoice(BuyingController):
 		if update:
 			self.db_set('status', status, update_modified = update_modified)
 
-def get_status(**kwargs):
+def get_status(*args):
 	purchase_invoice, outstanding_amount, is_return, due_date, docstatus, precision = args[0]
 
 	outstanding_amount = flt(outstanding_amount, precision)

@@ -1465,9 +1465,6 @@ def get_inter_company_details(doc, doctype):
 		"party": party,
 		"company": company
 	}
-
-def on_doctype_update():
-	frappe.db.add_index("Sales Invoice", ["return_against"])
   
 def get_internal_party(parties, link_doctype, doc):
 	if len(parties) == 1:
