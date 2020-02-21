@@ -589,7 +589,7 @@ def transfer_asset(args):
 
 	frappe.db.commit()
 
-	frappe.msgprint(_("Asset Movement record {0} created").format("<a href='#Form/Asset Movement/{0}'>{0}</a>".format(movement_entry.name)))
+	frappe.msgprint(_("Asset Movement record {0} created").format("<a href='#Form/Asset Movement/{0}'>{0}</a>").format(movement_entry.name))
 
 @frappe.whitelist()
 def get_item_details(item_code, asset_category):
@@ -611,7 +611,7 @@ def get_asset_account(account_name, asset=None, asset_category=None, company=Non
 	if asset:
 		account = get_asset_category_account(account_name, asset=asset,
 				asset_category = asset_category, company = company)
-	
+
 	if not asset and not account:
 		account = get_asset_category_account(account_name, asset_category = asset_category, company = company)
 
@@ -620,7 +620,7 @@ def get_asset_account(account_name, asset=None, asset_category=None, company=Non
 
 	if not account:
 		if not asset_category:
-			frappe.throw(_("Set {0} in company {2}").format(account_name.replace('_', ' ').title(), company))
+			frappe.throw(_("Set {0} in company {1}").format(account_name.replace('_', ' ').title(), company))
 		else:
 			frappe.throw(_("Set {0} in asset category {1} or company {2}")
 				.format(account_name.replace('_', ' ').title(), asset_category, company))

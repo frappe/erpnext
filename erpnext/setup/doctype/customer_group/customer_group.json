@@ -1,11 +1,12 @@
 {
- "_comments": "[]",
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:customer_group_name",
  "creation": "2013-01-10 16:34:23",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "customer_group_name",
   "parent_customer_group",
@@ -136,7 +137,8 @@
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
- "modified": "2019-09-06 12:40:14.954697",
+ "links": [],
+ "modified": "2020-01-28 13:49:23.961708",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Customer Group",
@@ -187,8 +189,8 @@
    "role": "Sales Manager"
   }
  ],
- "quick_entry": 1,
  "search_fields": "parent_customer_group",
  "show_name_in_global_search": 1,
+ "sort_field": "modified",
  "sort_order": "DESC"
 }

@@ -37,7 +37,7 @@ class AssessmentPlan(Document):
 		for d in self.assessment_criteria:
 			max_score += d.maximum_score
 		if self.maximum_assessment_score != max_score:
-			frappe.throw(_("Sum of Scores of Assessment Criteria needs to be {0}.".format(self.maximum_assessment_score)))
+			frappe.throw(_("Sum of Scores of Assessment Criteria needs to be {0}.").format(self.maximum_assessment_score))
 
 	def validate_assessment_criteria(self):
 		assessment_criteria_list = frappe.db.sql_list(''' select apc.assessment_criteria

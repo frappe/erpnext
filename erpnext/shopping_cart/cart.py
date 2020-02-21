@@ -431,7 +431,7 @@ def get_debtors_account(cart_settings):
 	payment_gateway_account_currency = \
 		frappe.get_doc("Payment Gateway Account", cart_settings.payment_gateway_account).currency
 
-	account_name = _("Debtors ({0})".format(payment_gateway_account_currency))
+	account_name = _("Debtors ({0})").format(payment_gateway_account_currency)
 
 	debtors_account_name = get_account_name("Receivable", "Asset", is_group=0,\
 		account_currency=payment_gateway_account_currency, company=cart_settings.company)

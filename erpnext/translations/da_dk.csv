@@ -14,7 +14,7 @@ DocType: Pricing Rule,Selling,Selling
 DocType: Sales Order,%  Delivered,% Leveres
 DocType: Lead,Lead Owner,Bly Owner
 apps/erpnext/erpnext/controllers/stock_controller.py,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Udgiftområde er obligatorisk for varen {2}
-apps/erpnext/erpnext/config/accounting.py,Tax template for selling transactions.,Skat skabelon til at sælge transaktioner.
+apps/erpnext/erpnext/config/accounts.py,Tax template for selling transactions.,Skat skabelon til at sælge transaktioner.
 apps/erpnext/erpnext/controllers/accounts_controller.py, or ,o
 DocType: Sales Order,% of materials billed against this Sales Order,% Af materialer faktureret mod denne Sales Order
 DocType: SMS Center,All Lead (Open),Alle Bly (Open)

@@ -96,7 +96,11 @@ def build_forest(data):
 			if parent_account == account_name == child:
 				return [parent_account]
 			elif account_name == child:
-				return [child] + return_parent(data, parent_account)
+				parent_account_list = return_parent(data, parent_account)
+				if not parent_account_list:
+					frappe.throw(_("The parent account {0} does not exists")
+						.format(parent_account))
+				return [child] + parent_account_list
 
 	charts_map, paths = {}, []
 
