@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
@@ -119,6 +120,7 @@
    "default": "Medium",
    "fieldname": "priority",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Priority",
    "options": "Issue Priority"
@@ -363,8 +365,9 @@
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "modified": "2019-09-11 09:03:57.465623",
- "modified_by": "himanshu@erpnext.com",
+ "links": [],
+ "modified": "2020-02-18 21:26:35.636013",
+ "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
  "owner": "Administrator",
