@@ -59,6 +59,7 @@ frappe.ui.form.on("Opportunity", {
 	contact_person: erpnext.utils.get_contact_details,
 
 	opportunity_from: function(frm) {
+		frm.trigger('setup_queries');
 		frm.toggle_reqd("party_name", frm.doc.opportunity_from);
 		frm.trigger("set_dynamic_field_label");
 	},
