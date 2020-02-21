@@ -814,7 +814,7 @@ class Item(WebsiteGenerator):
 			for d in self.attributes:
 				if d.attribute in attributes:
 					frappe.throw(
-						_("Attribute {0} selected multiple times in Attributes Table".format(d.attribute)))
+						_("Attribute {0} selected multiple times in Attributes Table").format(d.attribute))
 				else:
 					attributes.append(d.attribute)
 
@@ -877,14 +877,16 @@ class Item(WebsiteGenerator):
 				frappe.msgprint(msg=_("You have to enable auto re-order in Stock Settings to maintain re-order levels."), title=_("Enable Auto Re-Order"), indicator="orange")
 
 	def create_onboarding_docs(self, args):
-		defaults = frappe.defaults.get_defaults()
+		company = frappe.defaults.get_defaults().get('company') or \
+			frappe.db.get_single_value('Global Defaults', 'default_company')
+
 		for i in range(1, args.get('max_count')):
 			item = args.get('item_' + str(i))
 			if item:
 				default_warehouse = ''
 				default_warehouse = frappe.db.get_value('Warehouse', filters={
 					'warehouse_name': _('Finished Goods'),
-					'company': defaults.get('company_name')
+					'company': company
 				})
 
 				try:
@@ -901,7 +903,7 @@ class Item(WebsiteGenerator):
 						'stock_uom': _(args.get('item_uom_' + str(i))),
 						'item_defaults': [{
 							'default_warehouse': default_warehouse,
-							'company': defaults.get('company_name')
+							'company': company
 						}]
 					}).insert()
 
@@ -909,7 +911,7 @@ class Item(WebsiteGenerator):
 					pass
 				else:
 					if args.get('item_price_' + str(i)):
-						item_price = flt(args.get('tem_price_' + str(i)))
+						item_price = flt(args.get('item_price_' + str(i)))
 
 						price_list_name = frappe.db.get_value('Price List', {'selling': 1})
 						make_item_price(item, price_list_name, item_price)

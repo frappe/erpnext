@@ -101,6 +101,11 @@ frappe.query_reports["Accounts Payable"] = {
 			"options": "Supplier Group"
 		},
 		{
+			"fieldname": "group_by_party",
+			"label": __("Group By Supplier"),
+			"fieldtype": "Check"
+		},
+		{
 			"fieldname":"based_on_payment_terms",
 			"label": __("Based On Payment Terms"),
 			"fieldtype": "Check",
@@ -112,6 +117,16 @@ frappe.query_reports["Accounts Payable"] = {
 			"hidden": 1
 		}
 	],
+
+	"formatter": function(value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+		if (data && data.bold) {
+			value = value.bold();
+
+		}
+		return value;
+	},
+
 	onload: function(report) {
 		report.page.add_inner_button(__("Accounts Payable Summary"), function() {
 			var filters = report.get_values();

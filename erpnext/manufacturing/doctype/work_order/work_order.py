@@ -461,7 +461,7 @@ class WorkOrder(Document):
 	def validate_operation_time(self):
 		for d in self.operations:
 			if not d.time_in_mins > 0:
-				frappe.throw(_("Operation Time must be greater than 0 for Operation {0}".format(d.operation)))
+				frappe.throw(_("Operation Time must be greater than 0 for Operation {0}").format(d.operation))
 
 	def update_required_items(self):
 		'''
