@@ -2,6 +2,12 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 	onload: function (frm) {
 		frm.set_value("company", "");
 		frm.set_value("import_file", "");
+
+		frappe.db.get_value('File', {'attached_to_doctype': 'Chart of Accounts Importer'}, 'file_url', (r) => {
+			if (r) {
+				frm.set_value('import_file', r.file_url);
+			}
+		});
 	},
 	refresh: function (frm) {
 		// disable default save
@@ -17,17 +23,15 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 		if (frm.page && frm.page.show_import_button) {
 			create_import_button(frm);
 		}
+	},
 
-		// show download template button when company is properly selected
-		if(frm.doc.company) {
-			// download the csv template file
-			frm.add_custom_button(__("Download template"), function () {
-				let get_template_url = 'erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.download_template';
-				open_url_post(frappe.request.url, { cmd: get_template_url, doctype: frm.doc.doctype });
-			});
-		} else {
-			frm.set_value("import_file", "");
-		}
+	download_template: function(frm) {
+		open_url_post(
+			'/api/method/erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.download_template',
+			{
+				file_type: frm.doc.file_type
+			}
+		)
 	},
 
 	import_file: function (frm) {
@@ -41,21 +45,23 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 	},
 
 	company: function (frm) {
-		// validate that no Gl Entry record for the company exists.
-		frappe.call({
-			method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.validate_company",
-			args: {
-				company: frm.doc.company
-			},
-			callback: function(r) {
-				if(r.message===false) {
-					frm.set_value("company", "");
-					frappe.throw(__("Transactions against the company already exist! "));
-				} else {
-					frm.trigger("refresh");
+		if (frm.doc.company) {
+			// validate that no Gl Entry record for the company exists.
+			frappe.call({
+				method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.validate_company",
+				args: {
+					company: frm.doc.company
+				},
+				callback: function(r) {
+					if(r.message===false) {
+						frm.set_value("company", "");
+						frappe.throw(__("Transactions against the company already exist! "));
+					} else {
+						frm.trigger("refresh");
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 });
 
@@ -87,6 +93,7 @@ var create_import_button = function(frm) {
 			freeze: true,
 			freeze_message: __("Creating Accounts..."),
 			callback: function(r) {
+				console.log(r, '###########');
 				if(!r.exc) {
 					clearInterval(frm.page["interval"]);
 					frm.page.set_indicator(__('Import Successfull'), 'blue');
@@ -118,7 +125,8 @@ var generate_tree_preview = function(frm) {
 		args: {
 			file_name: frm.doc.import_file,
 			parent: parent,
-			doctype: 'Chart of Accounts Importer'
+			doctype: 'Chart of Accounts Importer',
+			file_type: frm.doc.file_type
 		},
 		onclick: function(node) {
 			parent = node.value;
