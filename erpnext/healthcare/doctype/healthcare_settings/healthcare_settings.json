@@ -13,7 +13,7 @@
   "column_break_9",
   "collect_registration_fee",
   "registration_fee",
-  "manage_appointment_invoice_automatically",
+  "automate_appointment_invoicing",
   "max_visit",
   "valid_days",
   "healthcare_service_items",
@@ -32,15 +32,15 @@
   "lab_test_approval_required",
   "custom_signature_in_print",
   "out_patient_sms_alerts",
-  "reg_msg",
-  "reg_sms",
-  "app_con",
-  "app_con_msg",
-  "no_con",
+  "send_registration_msg",
+  "registration_msg",
+  "send_appointment_confirmation",
+  "appointment_confirmation_msg",
+  "avoid_confirmation",
   "column_break_16",
-  "app_rem",
-  "app_rem_msg",
-  "rem_before",
+  "send_appointment_reminder",
+  "appointment_reminder_msg",
+  "remind_before",
   "laboratory_sms_alerts",
   "sms_printed",
   "column_break_28",
@@ -76,13 +76,6 @@
    "label": "Registration Fee",
    "mandatory_depends_on": "eval:doc.collect_registration_fee == 1",
    "options": "Currency"
-  },
-  {
-   "default": "0",
-   "description": "Manage Appointment Invoice submit and cancel automatically for Patient Encounter",
-   "fieldname": "manage_appointment_invoice_automatically",
-   "fieldtype": "Check",
-   "label": "Invoice Appointments Automatically"
   },
   {
    "description": "The number of free follow ups (Patient Encounters in valid days) allowed",
@@ -132,64 +125,8 @@
    "label": "Out Patient SMS Alerts"
   },
   {
-   "default": "0",
-   "fieldname": "reg_sms",
-   "fieldtype": "Check",
-   "label": "Patient Registration"
-  },
-  {
-   "default": "Hello {{doc.patient}}, Thank you for registering with  {{doc.company}}. Your ID is {{doc.id}} . Please note this ID for future reference. \nThank You, Get well soon!",
-   "depends_on": "reg_sms",
-   "fieldname": "reg_msg",
-   "fieldtype": "Small Text",
-   "ignore_xss_filter": 1,
-   "label": "Registration Message"
-  },
-  {
-   "default": "0",
-   "fieldname": "app_con",
-   "fieldtype": "Check",
-   "label": "Appointment Confirmation"
-  },
-  {
-   "default": "Hello {{doc.patient}}, You have scheduled an appointment with {{doc.practitioner}} by {{doc.start_dt}} at  {{doc.company}}.\nThank you, Good day!",
-   "depends_on": "app_con",
-   "fieldname": "app_con_msg",
-   "fieldtype": "Small Text",
-   "ignore_xss_filter": 1,
-   "label": "Confirmation Message"
-  },
-  {
-   "default": "0",
-   "depends_on": "app_con",
-   "description": "Do not confirm if appointment is created for the same day",
-   "fieldname": "no_con",
-   "fieldtype": "Check",
-   "label": "Avoid Confirmation"
-  },
-  {
    "fieldname": "column_break_16",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "app_rem",
-   "fieldtype": "Check",
-   "label": "Appointment Reminder"
-  },
-  {
-   "default": "Hello {{doc.patient}}, You have an appointment with {{doc.practitioner}} by {{doc.appointment_time}} at  {{doc.company}}.\nThank you, Good day!\n",
-   "depends_on": "app_rem",
-   "fieldname": "app_rem_msg",
-   "fieldtype": "Small Text",
-   "ignore_xss_filter": 1,
-   "label": "Reminder Message"
-  },
-  {
-   "depends_on": "app_rem",
-   "fieldname": "rem_before",
-   "fieldtype": "Time",
-   "label": "Remind Before"
   },
   {
    "collapsible": 1,
@@ -291,11 +228,74 @@
    "fieldtype": "Select",
    "label": "Patient Name By",
    "options": "Patient Name\nNaming Series"
+  },
+  {
+   "default": "0",
+   "description": "Manage Appointment Invoice submit and cancel automatically for Patient Encounter",
+   "fieldname": "automate_appointment_invoicing",
+   "fieldtype": "Check",
+   "label": "Automate Appointment Invoicing"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_registration_msg",
+   "fieldtype": "Check",
+   "label": "Patient Registration"
+  },
+  {
+   "default": "Hello {{doc.patient}}, Thank you for registering with  {{doc.company}}. Your ID is {{doc.id}} . Please note this ID for future reference. \nThank You, Get well soon!",
+   "depends_on": "send_registration_msg",
+   "fieldname": "registration_msg",
+   "fieldtype": "Small Text",
+   "ignore_xss_filter": 1,
+   "label": "Registration Message"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_appointment_confirmation",
+   "fieldtype": "Check",
+   "label": "Appointment Confirmation"
+  },
+  {
+   "default": "Hello {{doc.patient}}, You have scheduled an appointment with {{doc.practitioner}} by {{doc.start_dt}} at  {{doc.company}}.\nThank you, Good day!",
+   "depends_on": "send_appointment_confirmation",
+   "fieldname": "appointment_confirmation_msg",
+   "fieldtype": "Small Text",
+   "ignore_xss_filter": 1,
+   "label": "Confirmation Message"
+  },
+  {
+   "default": "0",
+   "depends_on": "send_appointment_confirmation",
+   "description": "Do not confirm if appointment is created for the same day",
+   "fieldname": "avoid_confirmation",
+   "fieldtype": "Check",
+   "label": "Avoid Confirmation"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_appointment_reminder",
+   "fieldtype": "Check",
+   "label": "Appointment Reminder"
+  },
+  {
+   "default": "Hello {{doc.patient}}, You have an appointment with {{doc.practitioner}} by {{doc.appointment_time}} at  {{doc.company}}.\nThank you, Good day!\n",
+   "depends_on": "send_appointment_reminder",
+   "fieldname": "appointment_reminder_msg",
+   "fieldtype": "Small Text",
+   "ignore_xss_filter": 1,
+   "label": "Reminder Message"
+  },
+  {
+   "depends_on": "send_appointment_reminder",
+   "fieldname": "remind_before",
+   "fieldtype": "Time",
+   "label": "Remind Before"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-01-29 14:31:56.983534",
+ "modified": "2020-02-24 10:51:23.015896",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",

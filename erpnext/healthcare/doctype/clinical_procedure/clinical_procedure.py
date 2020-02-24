@@ -174,35 +174,42 @@ def create_stock_entry(doc):
 	stock_entry.insert(ignore_permissions = True)
 	stock_entry.submit()
 
-@frappe.whitelist()
-def create_procedure(appointment):
-	appointment = frappe.get_doc("Patient Appointment",appointment)
-	procedure = frappe.new_doc("Clinical Procedure")
-	procedure.appointment = appointment.name
-	procedure.patient = appointment.patient
-	procedure.patient_age = appointment.patient_age
-	procedure.patient_sex = appointment.patient_sex
-	procedure.procedure_template = appointment.procedure_template
-	procedure.prescription = appointment.procedure_prescription
-	procedure.practitioner = appointment.practitioner
-	procedure.invoiced = appointment.invoiced
-	procedure.medical_department = appointment.department
-	procedure.start_date = appointment.appointment_date
-	procedure.start_time = appointment.appointment_time
-	procedure.notes = appointment.notes
-	procedure.service_unit = appointment.service_unit
-	procedure.company = appointment.company
-	consume_stock = frappe.db.get_value("Clinical Procedure Template", appointment.procedure_template, "consume_stock")
-	if consume_stock == 1:
-		procedure.consume_stock = True
-		warehouse = False
-		if appointment.service_unit:
-			warehouse = frappe.db.get_value("Healthcare Service Unit", appointment.service_unit, "warehouse")
-		if not warehouse:
-			warehouse = frappe.db.get_value("Stock Settings", None, "default_warehouse")
-		if warehouse:
-			procedure.warehouse = warehouse
-	return procedure.as_dict()
+def make_procedure(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		consume_stock = frappe.db.get_value("Clinical Procedure Template", source.procedure_template, "consume_stock")
+		if consume_stock:
+			target.consume_stock = 1
+			warehouse = None
+			if source.service_unit:
+				warehouse = frappe.db.get_value("Healthcare Service Unit", source.service_unit, "warehouse")
+			if not warehouse:
+				warehouse = frappe.db.get_value("Stock Settings", None, "default_warehouse")
+			if warehouse:
+				target.warehouse = warehouse
+
+	doc = get_mapped_doc('Patient Appointment', source_name, {
+			'Patient Appointment': {
+				'doctype': 'Clinical Procedure',
+				'field_map': [
+					['appointment', 'name'],
+					['patient', 'patient'],
+					['patient_age', 'patient_age'],
+					['patient_sex', 'patient_sex'],
+					['procedure_template', 'procedure_template'],
+					['prescription', 'procedure_prescription'],
+					['practitioner', 'practitioner'],
+					['medical_department', 'department'],
+					['start_date', 'appointment_date'],
+					['start_time', 'appointment_time'],
+					['notes', 'notes'],
+					['service_unit', 'service_unit'],
+					['company', 'company'],
+					['invoiced', 'invoiced']
+				]
+			}
+		}, target_doc, set_missing_values)
+
+	return doc
 
 def insert_clinical_procedure_to_medical_record(doc):
 	subject = cstr(doc.procedure_template)

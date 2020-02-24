@@ -40,8 +40,8 @@ frappe.ui.form.on('Patient Appointment', {
 
 		if (frm.is_new()) {
 			frm.page.set_primary_action(__('Check Availability'), function() {
-				frappe.db.get_value('Healthcare Settings', {name: 'Healthcare Settings'}, 'manage_appointment_invoice_automatically', (settings) => {
-					if (settings.manage_appointment_invoice_automatically) {
+				frappe.db.get_value('Healthcare Settings', {name: 'Healthcare Settings'}, 'automate_appointment_invoicing', (settings) => {
+					if (settings.automate_appointment_invoicing) {
 						if (!frm.doc.mode_of_payment) {
 							frappe.msgprint({
 								title: __('Not Allowed'),
@@ -76,7 +76,7 @@ frappe.ui.form.on('Patient Appointment', {
 			frm.add_custom_button(__('Patient History'), function() {
 				frappe.route_options = {'patient': frm.doc.patient};
 				frappe.set_route('patient_history');
-			},__('View'));
+			}, __('View'));
 		}
 
 		if (frm.doc.status == 'Open' || (frm.doc.status == 'Scheduled' && !frm.doc.__islocal)) {
@@ -88,18 +88,24 @@ frappe.ui.form.on('Patient Appointment', {
 			});
 
 			if (frm.doc.procedure_template) {
-				frm.add_custom_button(__('Procedure'), function(){
-					create_procedure(frm);
-				},'Create');
+				frm.add_custom_button(__('Clinical Procedure'), function(){
+					frappe.model.open_mapped_doc({
+						method: 'erpnext.healthcare.doctype.clinical_procedure.clinical_procedure.create_procedure',
+						frm: frm,
+					});
+				}, __('Create'));
 			} else {
 				frm.add_custom_button(__('Patient Encounter'), function() {
-					create_encounter(frm);
-				},'Create');
+					frappe.model.open_mapped_doc({
+						method: 'erpnext.healthcare.doctype.patient_appointment.patient_appointment.make_encounter',
+						frm: frm,
+					});
+				}, __('Create'));
 			}
 
 			frm.add_custom_button(__('Vital Signs'), function() {
 				create_vital_signs(frm);
-			},'Create');
+			}, __('Create'));
 		}
 
 		if (frm.doc.status == 'Pending') {
@@ -111,8 +117,8 @@ frappe.ui.form.on('Patient Appointment', {
 			});
 		}
 
-		frappe.db.get_value('Healthcare Settings', {name: 'Healthcare Settings'}, 'manage_appointment_invoice_automatically', (settings) => {
-			if (settings.manage_appointment_invoice_automatically) {
+		frappe.db.get_value('Healthcare Settings', {name: 'Healthcare Settings'}, 'automate_appointment_invoicing', (settings) => {
+			if (settings.automate_appointment_invoicing) {
 				frm.set_df_property('mode_of_payment', 'hidden', 0);
 				frm.set_df_property('paid_amount', 'hidden', 0);
 				frm.set_df_property('mode_of_payment', 'reqd', 1);
@@ -371,34 +377,6 @@ let show_procedure_templates = function(frm, result){
 		$(repl('<div class="col-xs-12" style="padding-top:20px;" >%(msg)s</div></div>', {msg: msg})).appendTo(html_field);
 	}
 	d.show();
-};
-
-let create_procedure = function(frm) {
-	let doc = frm.doc;
-	frappe.call({
-		method: 'erpnext.healthcare.doctype.clinical_procedure.clinical_procedure.create_procedure',
-		args: {appointment: doc.name},
-		callback: function(data) {
-			if (!data.exc) {
-				let doclist = frappe.model.sync(data.message);
-				frappe.set_route('Form', doclist[0].doctype, doclist[0].name);
-			}
-		}
-	});
-};
-
-let create_encounter = function(frm) {
-	let doc = frm.doc;
-	frappe.call({
-		method: 'erpnext.healthcare.doctype.patient_appointment.patient_appointment.create_encounter',
-		args: {appointment: doc.name},
-		callback: function(data){
-			if (!data.exc) {
-				let doclist = frappe.model.sync(data.message);
-				frappe.set_route('Form', doclist[0].doctype, doclist[0].name);
-			}
-		}
-	});
 };
 
 let create_vital_signs = function(frm) {
