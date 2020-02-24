@@ -31,7 +31,7 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 			{
 				file_type: frm.doc.file_type
 			}
-		)
+		);
 	},
 
 	import_file: function (frm) {
@@ -93,7 +93,6 @@ var create_import_button = function(frm) {
 			freeze: true,
 			freeze_message: __("Creating Accounts..."),
 			callback: function(r) {
-				console.log(r, '###########');
 				if(!r.exc) {
 					clearInterval(frm.page["interval"]);
 					frm.page.set_indicator(__('Import Successfull'), 'blue');
