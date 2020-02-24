@@ -146,34 +146,6 @@ class PurchaseInvoice(BuyingController):
 		if update:
 			self.db_set('status', status, update_modified = update_modified)
 
-def get_status(*args):
-	purchase_invoice, outstanding_amount, is_return, due_date, docstatus, precision = args[0]
-
-	outstanding_amount = flt(outstanding_amount, precision)
-	due_date = getdate(due_date)
-	now_date = getdate()
-
-	if docstatus == 2:
-		status = "Cancelled"
-	elif docstatus == 1:
-		if outstanding_amount > 0 and due_date < now_date:
-			status = "Overdue"
-		elif outstanding_amount > 0 and due_date >= now_date:
-			status = "Unpaid"
-		#Check if outstanding amount is 0 due to debit note issued against invoice
-		elif outstanding_amount <= 0 and is_return == 0 and frappe.db.get_value('Purchase Invoice', {'is_return': 1, 'return_against': purchase_invoice, 'docstatus': 1}):
-			status = "Debit Note Issued"
-		elif is_return == 1:
-			status = "Return"
-		elif outstanding_amount <=0:
-			status = "Paid"
-		else:
-			status = "Submitted"
-	else:
-		status = "Draft"
-	
-	return status
-
 	def set_missing_values(self, for_validate=False):
 		if not self.credit_to:
 			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
@@ -1012,6 +984,34 @@ def get_status(*args):
 
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
+
+def get_status(*args):
+	purchase_invoice, outstanding_amount, is_return, due_date, docstatus, precision = args[0]
+
+	outstanding_amount = flt(outstanding_amount, precision)
+	due_date = getdate(due_date)
+	now_date = getdate()
+
+	if docstatus == 2:
+		status = "Cancelled"
+	elif docstatus == 1:
+		if outstanding_amount > 0 and due_date < now_date:
+			status = "Overdue"
+		elif outstanding_amount > 0 and due_date >= now_date:
+			status = "Unpaid"
+		#Check if outstanding amount is 0 due to debit note issued against invoice
+		elif outstanding_amount <= 0 and is_return == 0 and frappe.db.get_value('Purchase Invoice', {'is_return': 1, 'return_against': purchase_invoice, 'docstatus': 1}):
+			status = "Debit Note Issued"
+		elif is_return == 1:
+			status = "Return"
+		elif outstanding_amount <=0:
+			status = "Paid"
+		else:
+			status = "Submitted"
+	else:
+		status = "Draft"
+	
+	return status
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
