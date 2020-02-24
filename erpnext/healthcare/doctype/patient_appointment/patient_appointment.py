@@ -18,6 +18,7 @@ from erpnext.healthcare.utils import check_validity_exists, get_service_item_and
 class PatientAppointment(Document):
 	def validate(self):
 		self.validate_overlaps()
+		self.set_appointment_datetime()
 
 	def after_insert(self):
 		invoice_appointment(self)
@@ -58,6 +59,9 @@ class PatientAppointment(Document):
 			overlapping_details += _('{0} has appointment scheduled with {1} at {2} having {3} minute(s) duration.').format(
 				overlaps[0][1], overlaps[0][2], overlaps[0][3], overlaps[0][4])
 			frappe.throw(_(overlapping_details))
+
+	def set_appointment_datetime(self):
+		self.appointment_datetime = "%s %s" % (self.appointment_date, self.appointment_time or "00:00:00")
 
 	def update_prescription_details(self):
 		if self.procedure_prescription:
@@ -151,6 +155,7 @@ def cancel_appointment(appointment_id):
 	else:
 		frappe.msgprint(_('Appointment Cancelled'))
 
+
 def validate_appointment_in_fee_validity(appointment, valid_end_date, ref_invoice):
 	valid_days = frappe.db.get_single_value('Healthcare Settings', 'valid_days')
 	max_visit = frappe.db.get_single_value('Healthcare Settings', 'max_visit')
@@ -172,12 +177,14 @@ def validate_appointment_in_fee_validity(appointment, valid_end_date, ref_invoic
 			return True
 	return False
 
+
 def cancel_sales_invoice(sales_invoice):
 	if frappe.db.get_single_value('Healthcare Settings', 'automate_appointment_invoicing'):
 		if len(sales_invoice.items) == 1:
 			sales_invoice.cancel()
 			return True
 	return False
+
 
 def check_si_item_exists(appointment):
 	return frappe.db.exists(
@@ -188,12 +195,14 @@ def check_si_item_exists(appointment):
 		}
 	)
 
+
 def check_sales_invoice_exists(appointment):
 	si_item = check_si_item_exists(appointment)
 	if si_item:
 		sales_invoice = frappe.get_doc('Sales Invoice', frappe.db.get_value('Sales Invoice Item', si_item, 'parent'))
 		return sales_invoice
 	return False
+
 
 @frappe.whitelist()
 def get_availability_data(date, practitioner):
@@ -223,6 +232,7 @@ def get_availability_data(date, practitioner):
 
 	return {'slot_details': slot_details}
 
+
 def check_employee_wise_availability(date, practitioner_doc):
 	employee = None
 	if practitioner_doc.employee:
@@ -244,6 +254,7 @@ def check_employee_wise_availability(date, practitioner_doc):
 				frappe.throw(_('{0} is on a Half day Leave on {1}').format(practitioner_doc.name, date))
 			else:
 				frappe.throw(_('{0} is on Leave on {1}').format(practitioner_doc.name, date))
+
 
 def get_available_slots(practitioner_schedules, date):
 	available_slots = []
@@ -315,6 +326,7 @@ def send_confirmation_msg(doc):
 		message = frappe.db.get_single_value('Healthcare Settings', 'appointment_confirmation_msg')
 		send_message(doc, message)
 
+
 @frappe.whitelist()
 def make_encounter(source_name, target_doc=None):
 	doc = get_mapped_doc('Patient Appointment', source_name, {
@@ -331,25 +343,26 @@ def make_encounter(source_name, target_doc=None):
 			]
 		}
 	}, target_doc)
-
 	return doc
 
-def remind_appointment():
+
+def send_appointment_reminder():
 	if frappe.db.get_single_value('Healthcare Settings', 'send_appointment_reminder'):
-		remind_before = datetime.datetime.strptime(frappe.get_single_value('Healthcare Settings', 'remind_before'), '%H:%M:%S')
+		remind_before = datetime.datetime.strptime(frappe.db.get_single_value('Healthcare Settings', 'remind_before'), '%H:%M:%S')
 		reminder_dt = datetime.datetime.now() + datetime.timedelta(
 			hours=remind_before.hour, minutes=remind_before.minute, seconds=remind_before.second)
 
-		appointment_list = frappe.db.sql(
-			'select name from `tabPatient Appointment` where start_dt between %s and %s and reminded = 0 ',
-			(datetime.datetime.now(), reminder_dt)
-		)
+		appointment_list = frappe.db.get_all('Patient Appointment', {
+			'appointment_datetime': ['between', (datetime.datetime.now(), reminder_dt)],
+			'reminded': 0,
+			'status': ['!=', 'Cancelled']
+		})
 
-		for i in range(0, len(appointment_list)):
-			doc = frappe.get_doc('Patient Appointment', appointment_list[i][0])
+		for appointment in appointment_list:
+			doc = frappe.get_doc('Patient Appointment', appointment.name)
 			message = frappe.db.get_single_value('Healthcare Settings', 'appointment_reminder_msg')
 			send_message(doc, message)
-			frappe.db.set_value('Patient Appointment', doc.name, 'reminded',1)
+			frappe.db.set_value('Patient Appointment', doc.name, 'reminded', 1)
 
 def send_message(doc, message):
 	patient = frappe.get_doc('Patient', doc.patient)
@@ -363,6 +376,7 @@ def send_message(doc, message):
 		number = [patient.mobile]
 		send_sms(number, message)
 
+
 @frappe.whitelist()
 def get_events(start, end, filters=None):
 	"""Returns events for Gantt / Calendar view rendering.
@@ -372,7 +386,7 @@ def get_events(start, end, filters=None):
 	:param filters: Filters (JSON).
 	"""
 	from frappe.desk.calendar import get_event_conditions
-	conditions = get_event_conditions("Patient Appointment", filters)
+	conditions = get_event_conditions('Patient Appointment', filters)
 
 	data = frappe.db.sql("""
 		select
@@ -393,6 +407,7 @@ def get_events(start, end, filters=None):
 		item.end = item.start + datetime.timedelta(minutes = item.duration)
 
 	return data
+
 
 @frappe.whitelist()
 def get_procedure_prescribed(patient):
