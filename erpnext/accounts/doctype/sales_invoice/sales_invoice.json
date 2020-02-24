@@ -11,40 +11,52 @@
   "customer",
   "customer_name",
   "tax_id",
+  "tax_cnic",
+  "tax_strn",
+  "po_no",
+  "po_date",
+  "stin",
+  "has_stin",
+  "column_break_21",
+  "remarks",
+  "is_return",
+  "return_against",
+  "reopen_order",
   "is_pos",
   "pos_profile",
   "offline_pos_name",
-  "is_return",
   "column_break1",
+  "amended_from",
   "company",
   "posting_date",
   "posting_time",
   "set_posting_time",
   "due_date",
-  "amended_from",
-  "returns",
-  "return_against",
-  "column_break_21",
-  "update_billed_amount_in_sales_order",
+  "more_information",
+  "transaction_type",
+  "order_type",
+  "col_break23",
+  "source",
+  "campaign",
+  "inter_company_invoice_reference",
+  "customer_group",
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
   "cost_center",
-  "customer_po_details",
-  "po_no",
-  "column_break_23",
-  "po_date",
   "address_and_contact",
   "customer_address",
   "address_display",
+  "territory",
+  "column_break_57",
   "contact_person",
   "contact_display",
   "contact_mobile",
   "contact_email",
-  "territory",
   "col_break4",
   "shipping_address_name",
   "shipping_address",
+  "column_break_65",
   "company_address",
   "company_address_display",
   "currency_and_price_list",
@@ -54,42 +66,73 @@
   "selling_price_list",
   "price_list_currency",
   "plc_conversion_rate",
+  "column_break_75",
   "ignore_pricing_rule",
+  "get_latest_price",
   "sec_warehouse",
+  "update_stock",
+  "column_break_79",
   "set_warehouse",
   "items_section",
-  "update_stock",
   "scan_barcode",
   "items",
-  "pricing_rule_details",
-  "pricing_rules",
   "packing_list",
   "packed_items",
   "product_bundle_help",
+  "pricing_rule_details",
+  "pricing_rules",
   "time_sheet_list",
   "timesheets",
   "total_billing_amount",
   "section_break_30",
   "total_qty",
-  "base_total",
-  "base_net_total",
-  "column_break_32",
-  "total",
-  "net_total",
+  "col_break_86",
+  "total_alt_uom_qty",
+  "column_break_88",
   "total_net_weight",
+  "section_break_90",
+  "total",
+  "base_total",
+  "column_break_32",
+  "total_before_discount",
+  "base_total_before_discount",
+  "column_break_96",
+  "total_discount",
+  "base_total_discount",
   "taxes_section",
   "taxes_and_charges",
   "column_break_38",
-  "shipping_rule",
   "tax_category",
+  "column_break_109",
+  "shipping_rule",
   "section_break_40",
   "taxes",
   "sec_tax_breakup",
   "other_charges_calculation",
+  "tax_exclusive_totals_section",
+  "tax_exclusive_total",
+  "base_tax_exclusive_total",
+  "column_break_108",
+  "tax_exclusive_total_before_discount",
+  "base_tax_exclusive_total_before_discount",
+  "column_break_111",
+  "tax_exclusive_total_discount",
+  "base_tax_exclusive_total_discount",
+  "net_totals_section",
+  "net_total",
+  "base_net_total",
+  "column_break_117",
+  "taxable_total",
+  "base_taxable_total",
   "section_break_43",
+  "total_taxes_and_charges",
   "base_total_taxes_and_charges",
   "column_break_47",
-  "total_taxes_and_charges",
+  "total_after_taxes",
+  "base_total_after_taxes",
+  "column_break_124",
+  "total_discount_after_taxes",
+  "base_total_discount_after_taxes",
   "loyalty_points_redemption",
   "loyalty_points",
   "loyalty_amount",
@@ -105,17 +148,21 @@
   "additional_discount_percentage",
   "discount_amount",
   "totals",
-  "base_grand_total",
-  "base_rounding_adjustment",
-  "base_rounded_total",
-  "base_in_words",
-  "column_break5",
   "grand_total",
-  "rounding_adjustment",
+  "base_grand_total",
+  "column_break5",
   "rounded_total",
-  "in_words",
+  "base_rounded_total",
+  "column_break_149",
   "total_advance",
   "outstanding_amount",
+  "section_break_152",
+  "in_words",
+  "base_in_words",
+  "column_break_155",
+  "rounding_adjustment",
+  "base_rounding_adjustment",
+  "disable_rounded_total",
   "advances_section",
   "allocate_advances_automatically",
   "get_advances",
@@ -127,14 +174,13 @@
   "cash_bank_account",
   "payments",
   "section_break_84",
+  "paid_amount",
   "base_paid_amount",
   "column_break_86",
-  "paid_amount",
-  "section_break_88",
-  "base_change_amount",
+  "account_for_change_amount",
   "column_break_90",
   "change_amount",
-  "account_for_change_amount",
+  "base_change_amount",
   "column_break4",
   "write_off_amount",
   "base_write_off_amount",
@@ -151,14 +197,6 @@
   "language",
   "column_break_84",
   "select_print_heading",
-  "more_information",
-  "inter_company_invoice_reference",
-  "customer_group",
-  "campaign",
-  "is_discounted",
-  "col_break23",
-  "status",
-  "source",
   "more_info",
   "debit_to",
   "party_account_currency",
@@ -166,7 +204,8 @@
   "c_form_applicable",
   "c_form_no",
   "column_break8",
-  "remarks",
+  "is_discounted",
+  "status",
   "sales_team_section_break",
   "sales_partner",
   "column_break10",
@@ -200,16 +239,15 @@
    "print_hide": 1
   },
   {
-   "bold": 1,
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "ACC-SINV-.YYYY.-",
+   "options": "SINV-",
    "print_hide": 1,
-   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -360,12 +398,6 @@
   },
   {
    "depends_on": "return_against",
-   "fieldname": "returns",
-   "fieldtype": "Section Break",
-   "label": "Returns"
-  },
-  {
-   "depends_on": "return_against",
    "fieldname": "return_against",
    "fieldtype": "Link",
    "label": "Return Against Sales Invoice",
@@ -379,20 +411,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "depends_on": "eval: doc.is_return && doc.return_against",
-   "fieldname": "update_billed_amount_in_sales_order",
-   "fieldtype": "Check",
-   "label": "Update Billed Amount in Sales Order"
-  },
-  {
-   "collapsible": 1,
-   "collapsible_depends_on": "po_no",
-   "fieldname": "customer_po_details",
-   "fieldtype": "Section Break",
-   "label": "Customer PO Details"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "po_no",
    "fieldtype": "Data",
@@ -401,11 +419,8 @@
    "print_hide": 1
   },
   {
-   "fieldname": "column_break_23",
-   "fieldtype": "Column Break"
-  },
-  {
    "allow_on_submit": 1,
+   "depends_on": "po_no",
    "fieldname": "po_date",
    "fieldtype": "Date",
    "label": "Customer's Purchase Order Date"
@@ -426,7 +441,7 @@
   {
    "fieldname": "address_display",
    "fieldtype": "Small Text",
-   "label": "Address",
+   "label": "Customer Address",
    "read_only": 1
   },
   {
@@ -473,7 +488,7 @@
   {
    "fieldname": "shipping_address_name",
    "fieldtype": "Link",
-   "label": "Shipping Address Name",
+   "label": "Shipping Address",
    "options": "Address",
    "print_hide": 1
   },
@@ -487,7 +502,7 @@
   {
    "fieldname": "company_address",
    "fieldtype": "Link",
-   "label": "Company Address Name",
+   "label": "Company Address",
    "options": "Address",
    "print_hide": 1
   },
@@ -1058,7 +1073,6 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "eval:(!doc.is_pos && !doc.is_return)",
    "fieldname": "payment_schedule_section",
    "fieldtype": "Section Break",
    "label": "Payment Terms"
@@ -1112,6 +1126,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "depends_on": "eval: doc.is_pos || doc.redeem_loyalty_points",
    "fieldname": "base_paid_amount",
    "fieldtype": "Currency",
    "label": "Paid Amount (Company Currency)",
@@ -1137,14 +1152,10 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_88",
-   "fieldtype": "Section Break"
-  },
-  {
    "depends_on": "is_pos",
    "fieldname": "base_change_amount",
    "fieldtype": "Currency",
-   "label": "Base Change Amount (Company Currency)",
+   "label": "Change Amount (Company Currency)",
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -1485,7 +1496,7 @@
    "allow_on_submit": 1,
    "fieldname": "sales_team",
    "fieldtype": "Table",
-   "label": "Sales Team1",
+   "label": "Sales Team",
    "oldfieldname": "sales_team",
    "oldfieldtype": "Table",
    "options": "Sales Team",
@@ -1562,12 +1573,312 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "total_discount_after_taxes",
+   "fieldname": "total_after_taxes",
+   "fieldtype": "Currency",
+   "label": "Total After Taxes",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "total_discount_after_taxes",
+   "fieldname": "total_discount_after_taxes",
+   "fieldtype": "Currency",
+   "label": "Total Discount After Taxes",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "total_discount_after_taxes",
+   "fieldname": "base_total_after_taxes",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Total After Taxes (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "total_discount_after_taxes",
+   "fieldname": "base_total_discount_after_taxes",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Total Discount After Taxes (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_alt_uom_qty",
+   "fieldtype": "Float",
+   "label": "Total Contents Quantity",
+   "read_only": 1
+  },
+  {
+   "depends_on": "total_discount",
+   "fieldname": "total_before_discount",
+   "fieldtype": "Currency",
+   "label": "Total Before Discount",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "total_discount",
+   "fieldname": "tax_exclusive_total_before_discount",
+   "fieldtype": "Currency",
+   "label": "Tax Exclusive Total Before Discount",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "total_discount",
+   "fieldname": "total_discount",
+   "fieldtype": "Currency",
+   "label": "Total Discount",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "total_discount",
+   "fieldname": "tax_exclusive_total_discount",
+   "fieldtype": "Currency",
+   "label": "Tax Exclusive Total Discount",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "total_discount",
+   "fieldname": "base_total_before_discount",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Total Before Discount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "total_discount",
+   "fieldname": "base_tax_exclusive_total_before_discount",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Tax Exclusive Total Before Discount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "total_discount",
+   "fieldname": "base_total_discount",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Total Discount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "total_discount",
+   "fieldname": "base_tax_exclusive_total_discount",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Tax Exclusive Total Discount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "transaction_type",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Transaction Type",
+   "options": "Transaction Type"
+  },
+  {
+   "fetch_from": "customer.tax_cnic",
+   "fieldname": "tax_cnic",
+   "fieldtype": "Data",
+   "label": "CNIC",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.tax_strn",
+   "fieldname": "tax_strn",
+   "fieldtype": "Data",
+   "label": "STRN",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.is_return && doc.return_against",
+   "fieldname": "reopen_order",
+   "fieldtype": "Check",
+   "label": "Reopen Sales Order"
+  },
+  {
+   "depends_on": "has_stin",
+   "fieldname": "stin",
+   "fieldtype": "Int",
+   "label": "Tax Invoice Number",
+   "no_copy": 1,
+   "set_only_once": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.has_stin || doc.__islocal",
+   "fieldname": "has_stin",
+   "fieldtype": "Check",
+   "label": "Is Tax Invoice",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "get_latest_price",
+   "fieldtype": "Button",
+   "label": "Get Latest Price"
+  },
+  {
+   "depends_on": "eval:doc.tax_exclusive_total != doc.total",
+   "fieldname": "base_tax_exclusive_total",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Tax Exclusive Total (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.taxable_total != doc.net_total",
+   "fieldname": "base_taxable_total",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Net Taxable Total (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.tax_exclusive_total != doc.total",
+   "fieldname": "tax_exclusive_total",
+   "fieldtype": "Currency",
+   "label": "Tax Exclusive Total",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.taxable_total != doc.net_total",
+   "fieldname": "taxable_total",
+   "fieldtype": "Currency",
+   "label": "Net Taxable Total",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.is_opening == \"Yes\"",
+   "fieldname": "disable_rounded_total",
+   "fieldtype": "Check",
+   "label": "Disable Rounded Total"
+  },
+  {
+   "default": "Sales",
+   "fetch_from": "transaction_type.order_type",
+   "fieldname": "order_type",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Order Type",
+   "options": "\nSales\nMaintenance\nShopping Cart",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_57",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_65",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_79",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_75",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_109",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col_break_86",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_88",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_90",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_96",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "tax_exclusive_totals_section",
+   "fieldtype": "Section Break",
+   "label": "Tax Exclusive Totals"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "net_totals_section",
+   "fieldtype": "Section Break",
+   "label": "Net Totals"
+  },
+  {
+   "fieldname": "column_break_124",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_108",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_111",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_117",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_149",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_152",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_155",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-02-09 04:22:05.343759",
+ "modified": "2020-02-16 15:51:52.049124",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
