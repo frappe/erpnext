@@ -1194,8 +1194,8 @@ def get_advance_journal_entries(party_type, party, party_account, order_doctype,
 	# JVs against order documents
 	if order_list or against_all_orders:
 		if order_list:
-			order_condition = "and ifnull(jea.reference_name, '') in ('{0}')" \
-				.format("', '".join([frappe.db.escape(d) for d in order_list]))
+			order_condition = "and ifnull(jea.reference_name, '') in ({0})" \
+				.format(", ".join([frappe.db.escape(d) for d in order_list]))
 		else:
 			order_condition = "and ifnull(jea.reference_name, '') != ''"
 
