@@ -48,10 +48,12 @@ frappe.ui.form.on("Instructor", {
 				frappe.set_route("List", "Assessment Plan");
 			}, __("Assessment Plan"));
 		}
+		frm.set_query("employee", function(doc) {
+			return {
+				"filters": {
+					"department": doc.department,
+				}
+			};
+		});
 	}
 });
-cur_frm.fields_dict['employee'].get_query = function(doc) {
-	if(doc.department) {
-		return { filters: [['Department','=', doc.department]] };
-	}
-}
