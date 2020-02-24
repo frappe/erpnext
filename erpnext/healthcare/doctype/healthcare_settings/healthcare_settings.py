@@ -46,12 +46,12 @@ def get_sms_text(doc):
 	return sms_text
 
 def send_registration_sms(doc):
-	if frappe.db.get_single_value('Healthcare Settings', 'reg_sms'):
+	if frappe.db.get_single_value('Healthcare Settings', 'send_registration_msg'):
 		if doc.mobile:
 			context = {'doc': doc, 'alert': doc, 'comments': None}
 			if doc.get('_comments'):
 				context['comments'] = json.loads(doc.get('_comments'))
-			messages = frappe.db.get_single_value('Healthcare Settings', 'reg_msg')
+			messages = frappe.db.get_single_value('Healthcare Settings', 'registration_msg')
 			messages = frappe.render_template(messages, context)
 			number = [doc.mobile]
 			send_sms(number,messages)

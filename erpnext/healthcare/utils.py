@@ -47,7 +47,7 @@ def get_healthcare_services_to_invoice(patient):
 						if not practitioner_exist_in_list:
 							valid_till = patient_appointment_obj.appointment_date + datetime.timedelta(days=int(valid_days))
 							visits = 0
-							validity_exist = validity_exists(patient_appointment_obj.practitioner, patient_appointment_obj.patient)
+							validity_exist = check_validity_exists(patient_appointment_obj.practitioner, patient_appointment_obj.patient)
 							if validity_exist:
 								fee_validity = frappe.get_doc("Fee Validity", validity_exist[0][0])
 								valid_till = fee_validity.valid_till
@@ -60,7 +60,7 @@ def get_healthcare_services_to_invoice(patient):
 							income_account = None
 							service_item = None
 							if patient_appointment_obj.practitioner:
-								service_item, practitioner_charge = service_item_and_practitioner_charge(patient_appointment_obj)
+								service_item, practitioner_charge = get_service_item_and_practitioner_charge(patient_appointment_obj)
 								income_account = get_income_account(patient_appointment_obj.practitioner, patient_appointment_obj.company)
 							item_to_invoice.append({'reference_type': 'Patient Appointment', 'reference_name': patient_appointment_obj.name,
 							'service': service_item, 'rate': practitioner_charge,
@@ -75,7 +75,7 @@ def get_healthcare_services_to_invoice(patient):
 						income_account = None
 						service_item = None
 						if encounter_obj.practitioner:
-							service_item, practitioner_charge = service_item_and_practitioner_charge(encounter_obj)
+							service_item, practitioner_charge = get_service_item_and_practitioner_charge(encounter_obj)
 							income_account = get_income_account(encounter_obj.practitioner, encounter_obj.company)
 
 						item_to_invoice.append({'reference_type': 'Patient Encounter', 'reference_name': encounter_obj.name,
@@ -159,9 +159,9 @@ def get_healthcare_services_to_invoice(patient):
 		else:
 			frappe.throw(_("The Patient {0} do not have customer refrence to invoice").format(patient.name))
 
-def service_item_and_practitioner_charge(doc):
-	is_ip = doc_is_ip(doc)
-	if is_ip:
+def get_service_item_and_practitioner_charge(doc):
+	is_inpatient = doc_is_inpatient(doc)
+	if is_inpatient:
 		service_item = get_practitioner_service_item(doc.practitioner, "inpatient_visit_charge_item")
 		if not service_item:
 			service_item = get_healthcare_service_item("inpatient_visit_charge_item")
@@ -170,26 +170,26 @@ def service_item_and_practitioner_charge(doc):
 		if not service_item:
 			service_item = get_healthcare_service_item("op_consulting_charge_item")
 	if not service_item:
-		throw_config_service_item(is_ip)
+		throw_config_service_item(is_inpatient)
 
-	practitioner_charge = get_practitioner_charge(doc.practitioner, is_ip)
+	practitioner_charge = get_practitioner_charge(doc.practitioner, is_inpatient)
 	if not practitioner_charge:
-		throw_config_practitioner_charge(is_ip, doc.practitioner)
+		throw_config_practitioner_charge(is_inpatient, doc.practitioner)
 
 	return service_item, practitioner_charge
 
-def throw_config_service_item(is_ip):
+def throw_config_service_item(is_inpatient):
 	service_item_lable = "Out Patient Consulting Charge Item"
-	if is_ip:
+	if is_inpatient:
 		service_item_lable = "Inpatient Visit Charge Item"
 
 	msg = _(("Please Configure {0} in ").format(service_item_lable) \
 		+ """<b><a href="#Form/Healthcare Settings">Healthcare Settings</a></b>""")
 	frappe.throw(msg)
 
-def throw_config_practitioner_charge(is_ip, practitioner):
+def throw_config_practitioner_charge(is_inpatient, practitioner):
 	charge_name = "OP Consulting Charge"
-	if is_ip:
+	if is_inpatient:
 		charge_name = "Inpatient Visit Charge"
 
 	msg = _(("Please Configure {0} for Healthcare Practitioner").format(charge_name) \
@@ -202,14 +202,14 @@ def get_practitioner_service_item(practitioner, service_item_field):
 def get_healthcare_service_item(service_item_field):
 	return frappe.db.get_value("Healthcare Settings", None, service_item_field)
 
-def doc_is_ip(doc):
-	is_ip = False
+def doc_is_inpatient(doc):
+	is_inpatient = False
 	if doc.inpatient_record:
-		is_ip = True
-	return is_ip
+		is_inpatient = True
+	return is_inpatient
 
-def get_practitioner_charge(practitioner, is_ip):
-	if is_ip:
+def get_practitioner_charge(practitioner, is_inpatient):
+	if is_inpatient:
 		practitioner_charge = frappe.db.get_value("Healthcare Practitioner", practitioner, "inpatient_visit_charge")
 	else:
 		practitioner_charge = frappe.db.get_value("Healthcare Practitioner", practitioner, "op_consulting_charge")
@@ -271,7 +271,7 @@ def manage_prescriptions(invoiced, ref_dt, ref_dn, dt, created_check_field):
 		doc_created = frappe.db.get_value(dt, {'prescription': ref_dn})
 		frappe.db.set_value(dt, doc_created, 'invoiced', invoiced)
 
-def validity_exists(practitioner, patient):
+def check_validity_exists(practitioner, patient):
 	return frappe.db.exists({
 			"doctype": "Fee Validity",
 			"practitioner": practitioner,
@@ -279,7 +279,7 @@ def validity_exists(practitioner, patient):
 
 def manage_fee_validity(appointment_name, method, ref_invoice=None):
 	appointment_doc = frappe.get_doc("Patient Appointment", appointment_name)
-	validity_exist = validity_exists(appointment_doc.practitioner, appointment_doc.patient)
+	validity_exist = check_validity_exists(appointment_doc.practitioner, appointment_doc.patient)
 	do_not_update = False
 	visited = 0
 	if validity_exist:
