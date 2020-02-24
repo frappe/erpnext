@@ -273,7 +273,8 @@ auto_cancel_exempted_doctypes= [
 
 scheduler_events = {
 	"all": [
-		"erpnext.projects.doctype.project.project.project_status_update_reminder"
+		"erpnext.projects.doctype.project.project.project_status_update_reminder",
+		"erpnext.healthcare_healthcare.doctype.patient_appointment.patient_appointment.send_appointment_reminder"
 	],
 	"hourly": [
 		'erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails',

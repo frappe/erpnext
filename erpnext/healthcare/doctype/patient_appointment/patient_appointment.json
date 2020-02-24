@@ -30,12 +30,12 @@
   "appointment_datetime",
   "duration",
   "section_break_16",
-  "invoiced",
-  "ref_sales_invoice",
-  "column_break_2",
   "mode_of_payment",
   "paid_amount",
   "company",
+  "column_break_2",
+  "invoiced",
+  "ref_sales_invoice",
   "section_break_3",
   "notes",
   "referring_practitioner",
@@ -83,7 +83,6 @@
    "read_only": 1
   },
   {
-   "default": "Scheduled",
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -202,9 +201,9 @@
   {
    "fieldname": "appointment_datetime",
    "fieldtype": "Datetime",
-   "hidden": 1,
-   "label": "Date TIme",
+   "label": "Appointment Datetime",
    "print_hide": 1,
+   "read_only": 1,
    "report_hide": 1,
    "search_index": 1
   },
@@ -227,6 +226,7 @@
    "default": "0",
    "fieldname": "invoiced",
    "fieldtype": "Check",
+   "in_filter": 1,
    "label": "Invoiced",
    "read_only": 1,
    "search_index": 1
@@ -279,7 +279,7 @@
   }
  ],
  "links": [],
- "modified": "2020-02-10 22:38:55.401247",
+ "modified": "2020-02-24 21:29:28.374886",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",
