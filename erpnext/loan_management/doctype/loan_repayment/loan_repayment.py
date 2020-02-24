@@ -52,8 +52,11 @@ class LoanRepayment(AccountsController):
 		if not self.payable_amount:
 			self.payable_amount = amounts['payable_amount']
 
-		if amounts.get("paid_accrual_entries"):
-			self.paid_accrual_entries = frappe.as_json(amounts.get("paid_accrual_entries"))
+		if amounts.get('paid_accrual_entries'):
+			self.paid_accrual_entries = frappe.as_json(amounts.get('paid_accrual_entries'))
+
+		if amounts.get('due_date'):
+			self.due_date = amounts.get('due_date')
 
 	def mark_as_paid(self):
 		paid_entries = []
@@ -251,6 +254,7 @@ def get_amounts(amounts, against_loan, posting_date, payment_type):
 	total_pending_interest = 0
 	penalty_amount = 0
 	payable_principal_amount = 0
+	final_due_date = ''
 
 	for entry in accrued_interest_entries:
 		# Loan repayment due date is one day after the loan interest is accrued
@@ -268,6 +272,7 @@ def get_amounts(amounts, against_loan, posting_date, payment_type):
 		payable_principal_amount += entry.payable_principal_amount
 
 		pending_accrual_entries.setdefault(entry.name, entry.interest_amount)
+		final_due_date = due_date
 
 	pending_principal_amount = against_loan_doc.total_payment - against_loan_doc.total_principal_paid - against_loan_doc.total_interest_payable
 
@@ -282,8 +287,11 @@ def get_amounts(amounts, against_loan, posting_date, payment_type):
 	amounts["interest_amount"] = total_pending_interest
 	amounts["penalty_amount"] = penalty_amount
 	amounts["payable_amount"] = payable_principal_amount + total_pending_interest + penalty_amount
-
 	amounts["paid_accrual_entries"] = pending_accrual_entries
+
+	if final_due_date:
+		amounts["due_date"] = final_due_date
+
 	return amounts
 
 @frappe.whitelist()
@@ -294,7 +302,8 @@ def calculate_amounts(against_loan, posting_date, payment_type):
 		'interest_amount': 0.0,
 		'pending_principal_amount': 0.0,
 		'payable_principal_amount': 0.0,
-		'payable_amount': 0.0
+		'payable_amount': 0.0,
+		'due_date': ''
 	}
 
 	amounts = get_amounts(amounts, against_loan, posting_date, payment_type)

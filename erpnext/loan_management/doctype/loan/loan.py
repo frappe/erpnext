@@ -198,7 +198,7 @@ def close_loan(loan, total_amount_paid):
 	frappe.db.set_value("Loan", loan, "status", "Closed")
 
 @frappe.whitelist()
-def make_loan_disbursement(loan, company, applicant_type, applicant, loan_amount, disbursed_amount):
+def make_loan_disbursement(loan, company, applicant_type, applicant, loan_amount, disbursed_amount, as_dict=0):
 	disbursement_entry = frappe.new_doc("Loan Disbursement")
 	disbursement_entry.against_loan = loan
 	disbursement_entry.applicant_type = applicant_type
@@ -207,10 +207,13 @@ def make_loan_disbursement(loan, company, applicant_type, applicant, loan_amount
 	disbursement_entry.disbursement_date = nowdate()
 	disbursement_entry.pending_amount_for_disbursal = flt(loan_amount) - flt(disbursed_amount)
 
-	return disbursement_entry.as_dict()
+	if as_dict:
+		return disbursement_entry.as_dict()
+	else:
+		return disbursement_entry
 
 @frappe.whitelist()
-def make_repayment_entry(loan, applicant_type, applicant, loan_type, company):
+def make_repayment_entry(loan, applicant_type, applicant, loan_type, company, as_dict=0):
 	repayment_entry = frappe.new_doc("Loan Repayment")
 	repayment_entry.against_loan = loan
 	repayment_entry.applicant_type = applicant_type
@@ -219,7 +222,10 @@ def make_repayment_entry(loan, applicant_type, applicant, loan_type, company):
 	repayment_entry.loan_type = loan_type
 	repayment_entry.posting_date = nowdate()
 
-	return repayment_entry.as_dict()
+	if as_dict:
+		return repayment_entry.as_dict()
+	else:
+		return repayment_entry
 
 @frappe.whitelist()
 def create_loan_security_unpledge(loan, applicant_type, applicant, company):
