@@ -2,12 +2,6 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 	onload: function (frm) {
 		frm.set_value("company", "");
 		frm.set_value("import_file", "");
-
-		frappe.db.get_value('File', {'attached_to_doctype': 'Chart of Accounts Importer'}, 'file_url', (r) => {
-			if (r) {
-				frm.set_value('import_file', r.file_url);
-			}
-		});
 	},
 	refresh: function (frm) {
 		// disable default save
