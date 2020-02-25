@@ -108,15 +108,6 @@ frappe.ui.form.on('Patient Appointment', {
 			}, __('Create'));
 		}
 
-		if (frm.doc.status == 'Pending') {
-			frm.add_custom_button(__('Set Open'), function() {
-				update_status(frm, 'Open');
-			});
-			frm.add_custom_button(__('Cancel'), function() {
-				update_status(frm, 'Cancelled');
-			});
-		}
-
 		frappe.db.get_value('Healthcare Settings', {name: 'Healthcare Settings'}, 'automate_appointment_invoicing', (settings) => {
 			if (settings.automate_appointment_invoicing) {
 				frm.set_df_property('mode_of_payment', 'hidden', 0);

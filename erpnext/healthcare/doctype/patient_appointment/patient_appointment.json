@@ -89,7 +89,7 @@
    "in_filter": 1,
    "in_list_view": 1,
    "label": "Status",
-   "options": "\nScheduled\nOpen\nClosed\nPending\nCancelled",
+   "options": "\nScheduled\nOpen\nClosed\nCancelled",
    "read_only": 1,
    "search_index": 1
   },
@@ -257,8 +257,7 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Referring Practitioner",
-   "options": "Healthcare Practitioner",
-   "set_only_once": 1
+   "options": "Healthcare Practitioner"
   },
   {
    "default": "0",
@@ -278,7 +277,7 @@
   }
  ],
  "links": [],
- "modified": "2020-02-25 11:29:26.988952",
+ "modified": "2020-02-25 13:09:50.055119",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",
