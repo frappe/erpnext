@@ -19,6 +19,7 @@ class PatientAppointment(Document):
 	def validate(self):
 		self.validate_overlaps()
 		self.set_appointment_datetime()
+		self.validate_customer_created()
 
 	def after_insert(self):
 		invoice_appointment(self)
@@ -58,10 +59,17 @@ class PatientAppointment(Document):
 			overlapping_details += '<br>'
 			overlapping_details += _('{0} has appointment scheduled with {1} at {2} having {3} minute(s) duration.').format(
 				overlaps[0][1], overlaps[0][2], overlaps[0][3], overlaps[0][4])
-			frappe.throw(_(overlapping_details))
+			frappe.throw(overlapping_details, title=_('Appointments Overlapping'))
 
 	def set_appointment_datetime(self):
 		self.appointment_datetime = "%s %s" % (self.appointment_date, self.appointment_time or "00:00:00")
+
+	def validate_customer_created(self):
+		if frappe.db.get_single_value('Healthcare Settings', 'automate_appointment_invoicing'):
+			if not frappe.db.get_value('Patient', self.patient, 'customer'):
+				msg = _("Please create a Customer linked to the Patient")
+				msg +=  " <b><a href='#Form/Patient/'>{0}</a></b>".format(self.patient)
+				frappe.throw(msg, title=_('Customer Not Found'))
 
 	def update_prescription_details(self):
 		if self.procedure_prescription:
@@ -84,6 +92,7 @@ class PatientAppointment(Document):
 				frappe.db.set_value('Fee Validity', fee_validity.name, 'visited', visited)
 				if fee_validity.ref_invoice:
 					frappe.db.set_value('Patient Appointment', self.name, 'invoiced', True)
+					frappe.db.set_value('Patient Appointment', self.name, 'ref_sales_invoice', fee_validity.ref_invoice)
 				frappe.msgprint(_('{0} has fee validity till {1}').format(self.patient, fee_validity.valid_till))
 
 
@@ -105,14 +114,15 @@ def invoice_appointment(appointment_doc):
 		item = get_appointment_item(appointment_doc, item)
 
 		payment = sales_invoice.append('payments', {})
-		payments_line.mode_of_payment = appointment_doc.mode_of_payment
-		payments_line.amount = appointment_doc.paid_amount
+		payment.mode_of_payment = appointment_doc.mode_of_payment
+		payment.amount = appointment_doc.paid_amount
 
 		sales_invoice.set_missing_values(for_validate=True)
-
+		frappe.as_json('Sales Invoice')
 		sales_invoice.save(ignore_permissions=True)
 		sales_invoice.submit()
 		frappe.msgprint(_('Sales Invoice {0} created as paid'.format(sales_invoice.name)), alert=True)
+		frappe.db.set_value('Patient Appointment', appointment_doc.name, 'invoiced', True)
 		frappe.db.set_value('Patient Appointment', appointment_doc.name, 'ref_sales_invoice', sales_invoice.name)
 
 
@@ -223,12 +233,13 @@ def get_availability_data(date, practitioner):
 	if practitioner_doc.practitioner_schedules:
 		slot_details = get_available_slots(practitioner_doc.practitioner_schedules, date)
 	else:
-		frappe.throw(_('{0} does not have a Healthcare Practitioner Schedule. Add it in Healthcare Practitioner master'.format(practitioner)))
+		frappe.throw(_('{0} does not have a Healthcare Practitioner Schedule. Add it in Healthcare Practitioner master').format(
+			practitioner), title=_('Practitioner Schedule Not Found'))
 
 
 	if not slot_details:
 		# TODO: return available slots in nearby dates
-		frappe.throw(_('Healthcare Practitioner not available on {0}').format(weekday))
+		frappe.throw(_('Healthcare Practitioner not available on {0}').format(weekday), title=_('Not Available'))
 
 	return {'slot_details': slot_details}
 
@@ -243,7 +254,7 @@ def check_employee_wise_availability(date, practitioner_doc):
 	if employee:
 		# check holiday
 		if is_holiday(employee, date):
-			frappe.throw(_('{0} is a company holiday'.format(date)))
+			frappe.throw(_('{0} is a holiday'.format(date)), title=_('Not Available'))
 
 		# check leave status
 		leave_record = frappe.db.sql("""select half_day from `tabLeave Application`
@@ -251,9 +262,9 @@ def check_employee_wise_availability(date, practitioner_doc):
 			and docstatus = 1""", (employee, date), as_dict=True)
 		if leave_record:
 			if leave_record[0].half_day:
-				frappe.throw(_('{0} is on a Half day Leave on {1}').format(practitioner_doc.name, date))
+				frappe.throw(_('{0} is on a Half day Leave on {1}').format(practitioner_doc.name, date), title=_('Not Available'))
 			else:
-				frappe.throw(_('{0} is on Leave on {1}').format(practitioner_doc.name, date))
+				frappe.throw(_('{0} is on Leave on {1}').format(practitioner_doc.name, date), title=_('Not Available'))
 
 
 def get_available_slots(practitioner_schedules, date):
@@ -267,7 +278,7 @@ def get_available_slots(practitioner_schedules, date):
 			practitioner_schedule = frappe.get_doc('Practitioner Schedule', schedule_entry.schedule)
 		else:
 			frappe.throw(_('{0} does not have a Healthcare Practitioner Schedule. Add it in Healthcare Practitioner').format(
-				frappe.bold(practitioner)))
+				frappe.bold(practitioner)), title=_('Practitioner Schedule Not Found'))
 
 		if practitioner_schedule:
 			available_slots = []
