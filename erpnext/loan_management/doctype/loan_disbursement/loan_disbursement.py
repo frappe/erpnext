@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe.model.document import Document
-from frappe.utils import nowdate, getdate, add_days
+from frappe.utils import nowdate, getdate, add_days, flt
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual
@@ -14,6 +14,7 @@ class LoanDisbursement(AccountsController):
 
 	def validate(self):
 		self.set_missing_values()
+		self.set_pending_amount_for_disbursal()
 
 	def before_submit(self):
 		self.set_status_and_amounts()
@@ -37,6 +38,12 @@ class LoanDisbursement(AccountsController):
 		if not self.bank_account and self.applicant_type == "Customer":
 			self.bank_account = frappe.db.get_value("Customer", self.applicant, "default_bank_account")
 
+	def set_pending_amount_for_disbursal(self):
+		loan_amount, disbursed_amount = frappe.db.get_value('Loan',
+			{'name': self.against_loan}, ['loan_amount', 'disbursed_amount'])
+
+		self.pending_amount_for_disbursal = loan_amount - disbursed_amount
+
 	def set_status_and_amounts(self):
 
 		loan_details = frappe.get_all("Loan",
@@ -50,14 +57,14 @@ class LoanDisbursement(AccountsController):
 
 		disbursed_amount = self.disbursed_amount + loan_details.disbursed_amount
 
-		if disbursed_amount - loan_details.total_principal_paid > loan_details.loan_amount:
+		if flt(disbursed_amount) - flt(loan_details.total_principal_paid) > flt(loan_details.loan_amount):
 			frappe.throw("Disbursed Amount cannot be greater than loan amount")
 
-		if disbursed_amount > loan_details.loan_amount:
+		if flt(disbursed_amount) > flt(loan_details.loan_amount):
 			total_principal_paid = loan_details.total_principal_paid - (disbursed_amount - loan_details.loan_amount)
 			frappe.db.set_value("Loan", self.against_loan, "total_principal_paid", total_principal_paid)
 
-		if loan_details.loan_amount == disbursed_amount:
+		if flt(loan_details.loan_amount) == flt(disbursed_amount):
 			frappe.db.set_value("Loan", self.against_loan, "status", "Disbursed")
 		else:
 			frappe.db.set_value("Loan", self.against_loan, "status", "Partially Disbursed")
