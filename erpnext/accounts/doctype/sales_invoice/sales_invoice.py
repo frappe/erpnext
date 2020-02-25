@@ -420,7 +420,7 @@ class SalesInvoice(SellingController):
 
 		if pos:
 			self.allow_print_before_pay = pos.allow_print_before_pay
-			
+
 			if not for_validate:
 				self.tax_category = pos.get("tax_category")
 
