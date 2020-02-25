@@ -4,7 +4,7 @@ frappe.treeview_settings["Quality Procedure"] = {
 	add_tree_node: 'erpnext.quality_management.doctype.quality_procedure.quality_procedure.add_node',
 	filters: [
 		{
-			fieldname: "quality_procedure",
+			fieldname: "parent_quality_procedure",
 			fieldtype: "Link",
 			options: "Quality Procedure",
 			label: __("Quality Procedure"),

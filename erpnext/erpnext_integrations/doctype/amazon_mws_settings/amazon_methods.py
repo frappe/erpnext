@@ -165,6 +165,9 @@ def create_item_code(amazon_item_json, sku):
 	return item.name
 
 def create_manufacturer(amazon_item_json):
+	if not amazon_item_json.Product.AttributeSets.ItemAttributes.Manufacturer:
+		return None
+
 	existing_manufacturer = frappe.db.get_value("Manufacturer",
 		filters={"short_name":amazon_item_json.Product.AttributeSets.ItemAttributes.Manufacturer})
 
@@ -177,6 +180,9 @@ def create_manufacturer(amazon_item_json):
 		return existing_manufacturer
 
 def create_brand(amazon_item_json):
+	if not amazon_item_json.Product.AttributeSets.ItemAttributes.Brand:
+		return None
+
 	existing_brand = frappe.db.get_value("Brand",
 		filters={"brand":amazon_item_json.Product.AttributeSets.ItemAttributes.Brand})
 	if not existing_brand:
