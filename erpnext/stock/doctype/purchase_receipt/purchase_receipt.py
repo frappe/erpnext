@@ -195,6 +195,7 @@ class PurchaseReceipt(BuyingController):
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
+		self.delete_auto_created_batches()
 
 	def get_current_stock(self):
 		for d in self.get('supplied_items'):
@@ -348,7 +349,7 @@ class PurchaseReceipt(BuyingController):
 		if warehouse_with_no_account:
 			frappe.msgprint(_("No accounting entries for the following warehouses") + ": \n" +
 				"\n".join(warehouse_with_no_account))
-
+		
 		return process_gl_map(gl_entries)
 
 	def get_asset_gl_entry(self, gl_entries):
@@ -615,23 +616,16 @@ def get_item_account_wise_additional_cost(purchase_document):
 
 	if not landed_cost_vouchers:
 		return
-
-	total_item_cost = 0
+	
 	item_account_wise_cost = {}
-	item_cost_allocated = []
 
 	for lcv in landed_cost_vouchers:
-		landed_cost_voucher_doc = frappe.get_cached_doc("Landed Cost Voucher", lcv.parent)
+		landed_cost_voucher_doc = frappe.get_doc("Landed Cost Voucher", lcv.parent)
 		based_on_field = frappe.scrub(landed_cost_voucher_doc.distribute_charges_based_on)
+		total_item_cost = 0
 
 		for item in landed_cost_voucher_doc.items:
-			if item.purchase_receipt_item not in item_cost_allocated:
-				total_item_cost += item.get(based_on_field)
-				item_cost_allocated.append(item.purchase_receipt_item)
-
-	for lcv in landed_cost_vouchers:
-		landed_cost_voucher_doc = frappe.get_cached_doc("Landed Cost Voucher", lcv.parent)
-		based_on_field = frappe.scrub(landed_cost_voucher_doc.distribute_charges_based_on)
+			total_item_cost += item.get(based_on_field)
 
 		for item in landed_cost_voucher_doc.items:
 			if item.receipt_document == purchase_document:

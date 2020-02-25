@@ -412,6 +412,9 @@ class SalesInvoice(SellingController):
 
 		if pos:
 			self.allow_print_before_pay = pos.allow_print_before_pay
+			
+			if not for_validate:
+				self.tax_category = pos.get("tax_category")
 
 			if not for_validate and not self.customer:
 				self.customer = pos.customer
@@ -1232,24 +1235,27 @@ class SalesInvoice(SellingController):
 				self.status = 'Draft'
 			return
 
+		precision = self.precision("outstanding_amount")
+		outstanding_amount = flt(self.outstanding_amount, precision)
+
 		if not status:
 			if self.docstatus == 2:
 				status = "Cancelled"
 			elif self.docstatus == 1:
-				if flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
+				if outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
 					self.status = "Overdue and Discounted"
-				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) < getdate(nowdate()):
+				elif outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()):
 					self.status = "Overdue"
-				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
+				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
 					self.status = "Unpaid and Discounted"
-				elif flt(self.outstanding_amount) > 0 and getdate(self.due_date) >= getdate(nowdate()):
+				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()):
 					self.status = "Unpaid"
 				#Check if outstanding amount is 0 due to credit note issued against invoice
-				elif flt(self.outstanding_amount) <= 0 and self.is_return == 0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+				elif outstanding_amount <= 0 and self.is_return == 0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
 					self.status = "Credit Note Issued"
 				elif self.is_return == 1:
 					self.status = "Return"
-				elif flt(self.outstanding_amount)<=0:
+				elif outstanding_amount <=0:
 					self.status = "Paid"
 				else:
 					self.status = "Submitted"
