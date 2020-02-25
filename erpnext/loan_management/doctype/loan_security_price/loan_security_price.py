@@ -23,7 +23,7 @@ class LoanSecurityPrice(Document):
 			(self.loan_security, self.name, self.valid_from, self.valid_upto, self.valid_from, self.valid_upto))
 
 		if existing_loan_security:
-			frappe.throw("Loan Security Price overlapping with {0}".format(existing_loan_security[0][0]))
+			frappe.throw(_("Loan Security Price overlapping with {0}").format(existing_loan_security[0][0]))
 
 @frappe.whitelist()
 def get_loan_security_price(loan_security, valid_time=None):
@@ -37,7 +37,7 @@ def get_loan_security_price(loan_security, valid_time=None):
 	}, 'loan_security_price')
 
 	if not loan_security_price:
-		frappe.throw("No valid <b>Loan Security Price</b> found for <b>{0}</b>".format(loan_security))
+		frappe.throw(_("No valid <b>Loan Security Price</b> found for {0}").format(frappe.bold(loan_security)))
 	else:
 		return loan_security_price
 

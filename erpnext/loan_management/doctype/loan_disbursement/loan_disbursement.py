@@ -58,7 +58,7 @@ class LoanDisbursement(AccountsController):
 		disbursed_amount = self.disbursed_amount + loan_details.disbursed_amount
 
 		if flt(disbursed_amount) - flt(loan_details.total_principal_paid) > flt(loan_details.loan_amount):
-			frappe.throw("Disbursed Amount cannot be greater than loan amount")
+			frappe.throw(_("Disbursed Amount cannot be greater than loan amount"))
 
 		if flt(disbursed_amount) > flt(loan_details.loan_amount):
 			total_principal_paid = loan_details.total_principal_paid - (disbursed_amount - loan_details.loan_amount)
@@ -69,8 +69,10 @@ class LoanDisbursement(AccountsController):
 		else:
 			frappe.db.set_value("Loan", self.against_loan, "status", "Partially Disbursed")
 
-		frappe.db.set_value("Loan", self.against_loan, "disbursement_date", self.disbursement_date)
-		frappe.db.set_value("Loan", self.against_loan, "disbursed_amount", disbursed_amount)
+		frappe.db.set_value("Loan", self.against_loan, {
+			"disbursement_date": self.disbursement_date,
+			"disbursed_amount": disbursed_amount
+		})
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gle_map = []

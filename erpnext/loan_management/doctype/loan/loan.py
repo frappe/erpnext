@@ -80,7 +80,7 @@ class Loan(AccountsController):
 	def make_repayment_schedule(self):
 
 		if not self.repayment_start_date:
-			frappe.throw("Repayment Start Date is mandatory for term loans")
+			frappe.throw(_("Repayment Start Date is mandatory for term loans"))
 
 		self.repayment_schedule = []
 		payment_date = self.repayment_start_date
@@ -130,11 +130,11 @@ class Loan(AccountsController):
 
 	def validate_loan_amount(self):
 		if self.is_secured_loan and self.loan_amount > self.maximum_loan_value:
-			msg = _("Loan amount cannot be greater than {0}".format(self.maximum_loan_value))
+			msg = _("Loan amount cannot be greater than {0}").format(self.maximum_loan_value))
 			frappe.throw(msg)
 
 		if not self.loan_amount:
-			frappe.throw("Loan amount is mandatory")
+			frappe.throw(_("Loan amount is mandatory"))
 
 	def link_loan_security_pledge(self):
 		frappe.db.sql("""UPDATE `tabLoan Security Pledge` SET

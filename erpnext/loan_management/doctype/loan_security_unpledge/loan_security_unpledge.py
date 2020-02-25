@@ -36,7 +36,7 @@ class LoanSecurityUnpledge(Document):
 			security_price = security.qty * get_loan_security_price(security.loan_security)
 
 			if unpledge_qty < 0:
-				frappe.throw("Cannot unpledge more than {0} qty of {0}".format(frappe.bold(pledged_qty),
+				frappe.throw(_("Cannot unpledge more than {0} qty of {0}").format(frappe.bold(pledged_qty),
 					frappe.bold(security.loan_security)))
 
 			remaining_qty += unpledge_qty

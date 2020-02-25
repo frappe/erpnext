@@ -143,37 +143,38 @@ class LoanRepayment(AccountsController):
 		gle_map = []
 		loan_details = frappe.get_doc("Loan", self.against_loan)
 
-		gle_map.append(
-			self.get_gl_dict({
-				"account": loan_details.loan_account,
-				"against": loan_details.payment_account,
-				"debit": self.penalty_amount,
-				"debit_in_account_currency": self.penalty_amount,
-				"against_voucher_type": "Loan",
-				"against_voucher": self.against_loan,
-				"remarks": "Against Loan:" + self.against_loan,
-				"cost_center": self.cost_center,
-				"party_type": self.applicant_type,
-				"party": self.applicant,
-				"posting_date": getdate(self.posting_date)
-			})
-		)
+		if self.penalty_amount:
+			gle_map.append(
+				self.get_gl_dict({
+					"account": loan_details.loan_account,
+					"against": loan_details.payment_account,
+					"debit": self.penalty_amount,
+					"debit_in_account_currency": self.penalty_amount,
+					"against_voucher_type": "Loan",
+					"against_voucher": self.against_loan,
+					"remarks": _("Against Loan:") + self.against_loan,
+					"cost_center": self.cost_center,
+					"party_type": self.applicant_type,
+					"party": self.applicant,
+					"posting_date": getdate(self.posting_date)
+				})
+			)
 
-		gle_map.append(
-			self.get_gl_dict({
-				"account": loan_details.penalty_income_account,
-				"against": loan_details.payment_account,
-				"credit": self.penalty_amount,
-				"credit_in_account_currency": self.penalty_amount,
-				"against_voucher_type": "Loan",
-				"against_voucher": self.against_loan,
-				"remarks": "Against Loan:" + self.against_loan,
-				"cost_center": self.cost_center,
-				"party_type": self.applicant_type,
-				"party": self.applicant,
-				"posting_date": getdate(self.posting_date)
-			})
-		)
+			gle_map.append(
+				self.get_gl_dict({
+					"account": loan_details.penalty_income_account,
+					"against": loan_details.payment_account,
+					"credit": self.penalty_amount,
+					"credit_in_account_currency": self.penalty_amount,
+					"against_voucher_type": "Loan",
+					"against_voucher": self.against_loan,
+					"remarks": _("Against Loan:") + self.against_loan,
+					"cost_center": self.cost_center,
+					"party_type": self.applicant_type,
+					"party": self.applicant,
+					"posting_date": getdate(self.posting_date)
+				})
+			)
 
 		gle_map.append(
 			self.get_gl_dict({
@@ -184,7 +185,7 @@ class LoanRepayment(AccountsController):
 				"debit_in_account_currency": self.amount_paid ,
 				"against_voucher_type": "Loan",
 				"against_voucher": self.against_loan,
-				"remarks": "Against Loan:" + self.against_loan,
+				"remarks": _("Against Loan:") + self.against_loan,
 				"cost_center": self.cost_center,
 				"party_type": self.applicant_type,
 				"party": self.applicant,
@@ -202,7 +203,7 @@ class LoanRepayment(AccountsController):
 				"credit_in_account_currency": self.amount_paid,
 				"against_voucher_type": "Loan",
 				"against_voucher": self.against_loan,
-				"remarks": "Against Loan:" + self.against_loan,
+				"remarks": _("Against Loan:") + self.against_loan,
 				"cost_center": self.cost_center,
 				"posting_date": getdate(self.posting_date)
 			})

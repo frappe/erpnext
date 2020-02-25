@@ -42,7 +42,7 @@ class LoanInterestAccrual(AccountsController):
 				"debit_in_account_currency": self.interest_amount,
 				"against_voucher_type": "Loan",
 				"against_voucher": self.loan,
-				"remarks": "Against Loan:" + self.loan,
+				"remarks": _("Against Loan:") + self.loan,
 				"cost_center": erpnext.get_default_cost_center(self.company),
 				"posting_date": self.posting_date
 			})
@@ -58,7 +58,7 @@ class LoanInterestAccrual(AccountsController):
 				"credit_in_account_currency":  self.interest_amount,
 				"against_voucher_type": "Loan",
 				"against_voucher": self.loan,
-				"remarks": "Against Loan:" + self.loan,
+				"remarks": _("Against Loan:") + self.loan,
 				"cost_center": erpnext.get_default_cost_center(self.company),
 				"posting_date": self.posting_date
 			})

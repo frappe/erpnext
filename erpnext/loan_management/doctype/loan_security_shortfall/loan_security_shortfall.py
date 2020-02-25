@@ -81,19 +81,14 @@ def create_loan_security_shortfall(loan, value, process_loan_security_shortfall)
 
 	if existing_shortfall:
 		ltv_shortfall = frappe.get_doc("Loan Security Shortfall", existing_shortfall)
-		ltv_shortfall.shortfall_time = get_datetime()
-		ltv_shortfall.loan_amount = value["loan_amount"]
-		ltv_shortfall.security_value = value["security_value"]
-		ltv_shortfall.shortfall_amount = value["loan_amount"] - value["security_value"]
-		ltv_shortfall.process_loan_security_shortfall = process_loan_security_shortfall
-		ltv_shortfall.save()
 	else:
 		ltv_shortfall = frappe.new_doc("Loan Security Shortfall")
 		ltv_shortfall.loan = loan
-		ltv_shortfall.shortfall_time = get_datetime()
-		ltv_shortfall.loan_amount = value["loan_amount"]
-		ltv_shortfall.security_value = value["security_value"]
-		ltv_shortfall.shortfall_amount = value["loan_amount"] - value["security_value"]
-		ltv_shortfall.process_loan_security_shortfall = process_loan_security_shortfall
-		ltv_shortfall.save()
+
+	ltv_shortfall.shortfall_time = get_datetime()
+	ltv_shortfall.loan_amount = value["loan_amount"]
+	ltv_shortfall.security_value = value["security_value"]
+	ltv_shortfall.shortfall_amount = value["loan_amount"] - value["security_value"]
+	ltv_shortfall.process_loan_security_shortfall = process_loan_security_shortfall
+	ltv_shortfall.save()
 
