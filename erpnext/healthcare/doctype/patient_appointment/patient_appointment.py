@@ -20,6 +20,7 @@ class PatientAppointment(Document):
 		self.validate_overlaps()
 		self.set_appointment_datetime()
 		self.validate_customer_created()
+		self.set_status()
 
 	def after_insert(self):
 		invoice_appointment(self)
@@ -27,14 +28,17 @@ class PatientAppointment(Document):
 		self.check_fee_validity()
 		send_confirmation_msg(self)
 
-	def on_update(self):
+	def set_status(self):
 		today = getdate()
 		appointment_date = getdate(self.appointment_date)
 
-		# If appointment is created for today set status as Open
-		if today == appointment_date:
-			frappe.db.set_value('Patient Appointment', self.name, 'status', 'Open')
-			self.reload()
+		# If appointment is created for today set status as Open else Scheduled
+		if appointment_date == today:
+			self.status = 'Open'
+		elif appointment_date > today:
+			self.status = 'Scheduled'
+		elif appointment_date < today:
+			self.status = 'Expired'
 
 	def validate_overlaps(self):
 		end_time = datetime.datetime.combine(getdate(self.appointment_date), get_time(self.appointment_time)) \
@@ -427,3 +431,12 @@ def get_procedure_prescribed(patient):
 	from `tabPatient Encounter` ct, `tabProcedure Prescription` pp
 	where ct.patient='{0}' and pp.parent=ct.name and pp.appointment_booked=0
 	order by ct.creation desc""".format(patient))
+
+def update_appointment_status():
+	# update the status of appointments daily
+
+	frappe.db.sql("""update `tabPatient Appointment` set status = 'Open'
+		where appointment_date = CURDATE() and status = 'Scheduled'""")
+
+	frappe.db.sql("""update `tabPatient Appointment` set status = 'Expired'
+		where appointment_date < CURDATE() and status NOT IN ('Closed', 'Cancelled')""")
