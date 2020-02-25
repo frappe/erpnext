@@ -204,22 +204,10 @@ def build_response_as_excel(writer):
 	frappe.response['type'] = 'binary'
 
 @frappe.whitelist()
-def download_template(file_type):
+def download_template(file_type, template_type):
 	data = frappe._dict(frappe.local.form_dict)
 
-	fields = ["Account Name", "Parent Account", "Account Number", "Is Group", "Account Type", "Root Type"]
-	writer = UnicodeWriter()
-
-	writer.writerow(fields)
-
-	for root_type in  get_root_types():
-		writer.writerow(['', '', '', 1, '', root_type])
-
-	for account in get_mandatory_group_accounts():
-		writer.writerow(['', '', '', 1, account, 'Asset'])
-
-	for account_type in get_mandatory_account_types():
-		writer.writerow(['', '', '', 0, account_type.get('account_type'), account_type.get('root_type')])
+	writer = get_template(template_type)
 
 	if file_type == 'CSV':
 		# download csv file
@@ -228,6 +216,54 @@ def download_template(file_type):
 		frappe.response['doctype'] = 'Chart of Accounts Importer'
 	else:
 		build_response_as_excel(writer)
+
+def get_template(template_type):
+
+	fields = ["Account Name", "Parent Account", "Account Number", "Is Group", "Account Type", "Root Type"]
+	writer = UnicodeWriter()
+	writer.writerow(fields)
+
+	if template_type == 'Blank Template':
+		for root_type in  get_root_types():
+			writer.writerow(['', '', '', 1, '', root_type])
+
+		for account in get_mandatory_group_accounts():
+			writer.writerow(['', '', '', 1, account, 'Asset'])
+
+		for account_type in get_mandatory_account_types():
+			writer.writerow(['', '', '', 0, account_type.get('account_type'), account_type.get('root_type')])
+	else:
+		writer = get_sample_template(writer)
+
+	return writer
+
+def get_sample_template(writer):
+	template = [
+		['Account Name', 'Parent Account', 'Account Number', 'Is Group', 'Account Type', 'Root Type'],
+		['Application Of Funds(Assets)', '', '', 1, '', 'Asset'],
+		['Sources Of Funds(Liabilities)', '', '', 1, '', 'Liability'],
+		['Equity', '', '', 1, '', 'Equity'],
+		['Expenses', '', '', 1, '', 'Expense'],
+		['Income', '', '', 1, '', 'Income'],
+		['Bank Accounts', 'Application Of Funds(Assets)', '', 1, 'Bank', 'Asset'],
+		['Cash In Hand', 'Application Of Funds(Assets)', '', 1, 'Cash', 'Asset'],
+		['Stock Assets', 'Application Of Funds(Assets)', '', 1, 'Stock', 'Asset'],
+		['Cost Of Goods Sold', 'Expenses', '', 0, 'Cost of Goods Sold', 'Expense'],
+		['Asset Depreciation', 'Expenses', '', 0, 'Depreciation', 'Expense'],
+		['Fixed Assets', 'Application Of Funds(Assets)', '', 0, 'Fixed Asset', 'Asset'],
+		['Accounts Payable', 'Sources Of Funds(Liabilities)', '', 0, 'Payable', 'Liability'],
+		['Accounts Receivable', 'Application Of Funds(Assets)', '', 1, 'Receivable', 'Asset'],
+		['Stock Expenses', 'Expenses', '', 0, 'Stock Adjustment', 'Expense'],
+		['Sample Bank', 'Bank Accounts', '', 0, 'Bank', 'Asset'],
+		['Cash', 'Cash In Hand', '', 0, 'Cash', 'Asset'],
+		['Stores', 'Stock Asset', '', 0, 'Stock', 'Asset'],
+	]
+
+	for row in template:
+		writer.writerow(row)
+
+	return writer
+
 
 @frappe.whitelist()
 def validate_accounts(file_name):
