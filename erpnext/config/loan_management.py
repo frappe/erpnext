@@ -16,7 +16,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Loan Application",
-					"description": _("Loans provided to customers and employees."),
+					"description": _("Loan Applications from customers and employees."),
 				},
 				{
 					"type": "doctype",

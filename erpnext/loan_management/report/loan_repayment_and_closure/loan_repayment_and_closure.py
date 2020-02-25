@@ -107,6 +107,8 @@ def get_data(filters):
 			"pending_principal_amount", "interest_payable", "penalty_amount", "amount_paid"]
 	)
 
+	default_currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
+
 	for repayment in loan_repayments:
 		row = {
 			"posting_date": repayment.posting_date,
@@ -119,7 +121,7 @@ def get_data(filters):
 			"penalty": repayment.penalty_amount,
 			"payable_amount": repayment.payable_amount,
 			"paid_amount": repayment.amount_paid,
-			"currency": frappe.get_cached_value("Company", filters.get("company"), "default_currency")
+			"currency": default_currency
 		}
 
 		data.append(row)

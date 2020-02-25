@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2019-09-03 16:54:55.616593",
+ "modified": "2020-02-25 07:16:47.696994",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment and Closure",
@@ -19,6 +19,9 @@
  "roles": [
   {
    "role": "System Manager"
+  },
+  {
+   "role": "Loan Manager"
   }
  ]
 }

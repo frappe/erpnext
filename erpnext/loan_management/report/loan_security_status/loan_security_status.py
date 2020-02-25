@@ -104,6 +104,8 @@ def get_data(filters):
 			{conditions}
 	""".format(conditions = conditions), (filters), as_dict=1) #nosec
 
+	default_currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
+
 	for pledge in loan_security_pledges:
 		row = {}
 		row["loan_security_pledge"] = pledge.name
@@ -115,7 +117,7 @@ def get_data(filters):
 		row["qty"] = pledge.qty
 		row["loan_security_price"] = loan_security_price_map.get(pledge.loan_security)
 		row["loan_security_value"] = row["loan_security_price"] * pledge.qty
-		row["currency"] = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
+		row["currency"] = default_currency
 
 		data.append(row)
 

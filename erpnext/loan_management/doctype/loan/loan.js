@@ -81,13 +81,13 @@ frappe.ui.form.on('Loan', {
 	},
 
 	loan_type: function(frm) {
-		frm.set_df_property("repayment_method", 'reqd', frm.doc.is_term_loan);
-		frm.set_df_property("repayment_method", 'hidden', 1 - frm.doc.is_term_loan);
-		frm.set_df_property("repayment_periods", 'hidden', 1 - frm.doc.is_term_loan);
+		frm.toggle_reqd("repayment_method", frm.doc.is_term_loan);
+		frm.toggle_display("repayment_method", 1 - frm.doc.is_term_loan);
+		frm.toggle_display("repayment_periods", s1 - frm.doc.is_term_loan);
 	},
 
 	is_secured_loan: function(frm) {
-		frm.set_df_property("loan_security_pledge", 'reqd', frm.doc.is_secured_loan);
+		frm.toggle_reqd("loan_security_pledge", frm.doc.is_secured_loan);
 	},
 
 	make_loan_disbursement: function (frm) {
@@ -153,13 +153,13 @@ frappe.ui.form.on('Loan', {
                 },
                 callback: function (r) {
                     if (!r.exc && r.message) {
-                        frm.set_value("loan_type", r.message.loan_type);
-                        frm.set_value("loan_amount", r.message.loan_amount);
-                        frm.set_value("repayment_method", r.message.repayment_method);
-                        frm.set_value("monthly_repayment_amount", r.message.repayment_amount);
-                        frm.set_value("repayment_periods", r.message.repayment_periods);
-						frm.set_value("rate_of_interest", r.message.rate_of_interest);
-						frm.set_value("is_secured_loan", r.message.is_secured_loan);
+
+						let loan_fields = ["loan_type", "loan_amount", "repayment_method",
+							"monthly_repayment_amount", "repayment_periods", "rate_of_interest", "is_secured_loan"]
+
+						loan_fields.forEach(field => {
+							frm.set_value(field, r.message[field]);
+						});
 
 						if (frm.doc.is_secured_loan) {
 							$.each(r.message.proposed_pledges, function(i, d) {
