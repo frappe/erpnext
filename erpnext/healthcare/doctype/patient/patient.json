@@ -157,8 +157,7 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Customer",
-   "options": "Customer",
-   "set_only_once": 1
+   "options": "Customer"
   },
   {
    "fieldname": "report_preference",
@@ -363,7 +362,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2020-01-31 17:50:59.797789",
+ "modified": "2020-02-25 12:07:41.751539",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
