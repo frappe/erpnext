@@ -152,7 +152,7 @@ class TestLoan(unittest.TestCase):
 
 		penalty_amount = (accrued_interest_amount * 5 * 25) / (100 * days_in_year(get_datetime(first_date).year))
 
-		self.assertEquals(flt(repayment_entry.interest_payable, 4), flt(accrued_interest_amount, 4))
+		self.assertEquals(flt(repayment_entry.interest_payable, 2), flt(accrued_interest_amount, 2))
 		self.assertEquals(flt(repayment_entry.penalty_amount, 2), flt(penalty_amount, 2))
 
 		repayment_entry.submit()
@@ -177,6 +177,11 @@ class TestLoan(unittest.TestCase):
 
 		no_of_days = date_diff(last_date, first_date) + 1
 
+		# Adding 6 since repayment is made 5 days late after due date
+		# and since payment type is loan closure so interest should be considered for those
+		# 6 days as well though in grace period
+		no_of_days += 6
+
 		accrued_interest_amount = (loan.loan_amount * loan.rate_of_interest * no_of_days) \
 			/ (days_in_year(get_datetime(first_date).year) * 100)
 
@@ -184,12 +189,12 @@ class TestLoan(unittest.TestCase):
 		process_loan_interest_accrual(posting_date = last_date)
 
 		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(last_date, 5),
-			"Loan Closure", 1011095.890411)
+			"Loan Closure", 13315.0681)
 		repayment_entry.save()
 
 		repayment_entry.amount_paid = repayment_entry.payable_amount
 
-		self.assertEquals(flt(repayment_entry.interest_payable, 4), flt(accrued_interest_amount, 4))
+		self.assertEquals(flt(repayment_entry.interest_payable, 3), flt(accrued_interest_amount, 3))
 		self.assertEquals(flt(repayment_entry.penalty_amount, 5), 0)
 
 		repayment_entry.submit()

@@ -130,7 +130,7 @@ class Loan(AccountsController):
 
 	def validate_loan_amount(self):
 		if self.is_secured_loan and self.loan_amount > self.maximum_loan_value:
-			msg = _("Loan amount cannot be greater than {0}").format(self.maximum_loan_value))
+			msg = _("Loan amount cannot be greater than {0}").format(self.maximum_loan_value)
 			frappe.throw(msg)
 
 		if not self.loan_amount:

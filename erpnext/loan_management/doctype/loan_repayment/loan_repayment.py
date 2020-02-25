@@ -106,7 +106,7 @@ class LoanRepayment(AccountsController):
 				SET is_paid = 1 where name in (%s)""" #nosec
 				% ", ".join(['%s']*len(paid_entries)), tuple(paid_entries))
 
-		if flt(loan.total_principal_paid + self.principal_amount_paid, 2) == flt(loan.total_payment, 2):
+		if flt(loan.total_principal_paid + self.principal_amount_paid, 2) >= flt(loan.total_payment, 2):
 			frappe.db.set_value("Loan", self.against_loan, "status", "Loan Closure Requested")
 
 		frappe.db.sql(""" UPDATE `tabLoan` SET total_amount_paid = %s, total_principal_paid = %s
