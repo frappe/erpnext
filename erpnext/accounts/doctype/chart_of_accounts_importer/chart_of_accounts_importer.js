@@ -20,12 +20,30 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 	},
 
 	download_template: function(frm) {
+
+		if (!frm.doc.template_type) {
+			frappe.throw(__('Please select <b>Template Type</b> to download template'));
+		}
+
 		open_url_post(
 			'/api/method/erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.download_template',
 			{
-				file_type: frm.doc.file_type
+				file_type: frm.doc.file_type,
+				template_type: frm.doc.template_type
 			}
 		);
+	},
+
+	template_type: function(frm) {
+		if (frm.doc.template_type == 'Sample Template') {
+			frm.set_df_property('template_type', 'description',
+				`The Sample Template contains all the required accounts pre filled in the  template.
+				You can add more accounts or change existing accounts in the template as per your choice.`)
+		} else {
+			frm.set_df_property('template_type', 'description',
+				`The Blank Template contains just the account type and root type required to build the Chart
+				of Accounts. Please enter the account names and add more rows as per your requirement.`)
+		}
 	},
 
 	import_file: function (frm) {
@@ -49,7 +67,8 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 				callback: function(r) {
 					if(r.message===false) {
 						frm.set_value("company", "");
-						frappe.throw(__("Transactions against the company already exist! "));
+						frappe.throw(__(`Transactions against the company already exist!
+							Chart Of accounts can be imported for company with no transactions`));
 					} else {
 						frm.trigger("refresh");
 					}
