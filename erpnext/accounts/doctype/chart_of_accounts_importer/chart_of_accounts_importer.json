@@ -10,6 +10,7 @@
  "field_order": [
   "company",
   "file_type",
+  "template_type",
   "download_template",
   "import_file_section",
   "import_file",
@@ -57,13 +58,21 @@
    "fieldtype": "Select",
    "label": "File Type",
    "options": "CSV\nExcel"
+  },
+  {
+   "depends_on": "company",
+   "fieldname": "template_type",
+   "fieldtype": "Select",
+   "label": "Template Type",
+   "options": "\nBlank Template\nSample Template",
+   "reqd": 1
   }
  ],
  "hide_toolbar": 1,
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-02-22 19:32:33.349075",
+ "modified": "2020-02-24 19:07:52.670868",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Chart of Accounts Importer",
