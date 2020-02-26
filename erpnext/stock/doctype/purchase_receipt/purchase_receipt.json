@@ -106,6 +106,8 @@
   "range",
   "column_break4",
   "per_billed",
+  "is_internal_supplier",
+  "inter_company_reference",
   "subscription_detail",
   "auto_repeat",
   "printing_settings",
@@ -1053,6 +1055,21 @@
    "oldfieldtype": "Date",
    "print_width": "100px",
    "width": "100px"
+  },
+  {
+   "default": "0",
+   "fetch_from": "supplier.is_internal_supplier",
+   "fieldname": "is_internal_supplier",
+   "fieldtype": "Check",
+   "label": "Is Internal Supplier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "inter_company_reference",
+   "fieldtype": "Link",
+   "label": "Inter Company Reference",
+   "options": "Delivery Note",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
