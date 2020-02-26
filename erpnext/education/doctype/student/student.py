@@ -22,8 +22,15 @@ class Student(Document):
 			self.update_student_name_in_linked_doctype()
 
 	def validate_dates(self):
+		for sibling in self.siblings:
+			if sibling.date_of_birth and getdate(sibling.date_of_birth) > getdate():
+				frappe.throw(_("Row {0}:Sibling Date of Birth cannot be greater than today.").format(sibling.idx))
+				
 		if self.date_of_birth and getdate(self.date_of_birth) >= getdate(today()):
 			frappe.throw(_("Date of Birth cannot be greater than today."))
+
+		if self.date_of_birth and getdate(self.date_of_birth) >= getdate(self.joining_date):
+			frappe.throw(_("Date of Birth cannot be greater than Joining Date."))
 
 		if self.joining_date and self.date_of_leaving and getdate(self.joining_date) > getdate(self.date_of_leaving):
 			frappe.throw(_("Joining Date can not be greater than Leaving Date"))

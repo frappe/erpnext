@@ -43,6 +43,7 @@ class BuyingController(StockController):
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()
+		self.validate_from_warehouse()
 		self.set_supplier_address()
 
 		if self.doctype=="Purchase Invoice":
@@ -114,6 +115,14 @@ class BuyingController(StockController):
 			d.landed_cost_voucher_amount = lc_voucher_data[0][0] if lc_voucher_data else 0.0
 			if not d.cost_center and lc_voucher_data and lc_voucher_data[0][1]:
 				d.db_set('cost_center', lc_voucher_data[0][1])
+
+	def validate_from_warehouse(self):
+		for item in self.get('items'):
+			if item.get('from_warehouse') and (item.get('from_warehouse') == item.get('warehouse')):
+				frappe.throw(_("Row #{0}: Accepted Warehouse and Supplier Warehouse cannot be same").format(item.idx))
+
+			if item.get('from_warehouse') and self.get('is_subcontracted') == 'Yes':
+				frappe.throw(_("Row #{0}: Cannot select Supplier Warehouse while suppling raw materials to subcontractor").format(item.idx))
 
 	def set_supplier_address(self):
 		address_dict = {
@@ -521,6 +530,16 @@ class BuyingController(StockController):
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
 
 				if pr_qty:
+
+					if d.from_warehouse and ((not cint(self.is_return) and self.docstatus==1)
+						or (cint(self.is_return) and self.docstatus==2)):
+						from_warehouse_sle = self.get_sl_entries(d, {
+							"actual_qty": -1 * pr_qty,
+							"warehouse": d.from_warehouse
+						})
+
+						sl_entries.append(from_warehouse_sle)
+
 					sle = self.get_sl_entries(d, {
 						"actual_qty": flt(pr_qty),
 						"serial_no": cstr(d.serial_no).strip()
@@ -540,6 +559,15 @@ class BuyingController(StockController):
 							"incoming_rate": incoming_rate
 						})
 					sl_entries.append(sle)
+
+					if d.from_warehouse and ((not cint(self.is_return) and self.docstatus==2)
+						or (cint(self.is_return) and self.docstatus==1)):
+						from_warehouse_sle = self.get_sl_entries(d, {
+							"actual_qty": -1 * pr_qty,
+							"warehouse": d.from_warehouse
+						})
+
+						sl_entries.append(from_warehouse_sle)
 
 				if flt(d.rejected_qty) != 0:
 					sl_entries.append(self.get_sl_entries(d, {
