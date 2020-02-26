@@ -2,13 +2,14 @@
  "actions": [],
  "allow_copy": 1,
  "allow_import": 1,
- "autoname": "OP-.######",
+ "autoname": "naming_series:",
  "beta": 1,
  "creation": "2017-05-04 11:52:40.941507",
  "doctype": "DocType",
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "patient",
   "patient_name",
   "patient_sex",
@@ -89,7 +90,7 @@
    "in_filter": 1,
    "in_list_view": 1,
    "label": "Status",
-   "options": "\nScheduled\nOpen\nClosed\nCancelled",
+   "options": "\nScheduled\nOpen\nClosed\nExpired\nCancelled",
    "read_only": 1,
    "search_index": 1
   },
@@ -185,9 +186,10 @@
   {
    "fetch_from": "patient.sex",
    "fieldname": "patient_sex",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Gender",
    "no_copy": 1,
+   "options": "Gender",
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
@@ -274,10 +276,17 @@
    "label": "Reference Sales Invoice",
    "options": "Sales Invoice",
    "read_only": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "HLC-APP-.YYYY.-",
+   "set_only_once": 1
   }
  ],
  "links": [],
- "modified": "2020-02-25 13:09:50.055119",
+ "modified": "2020-02-25 17:57:56.971064",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",

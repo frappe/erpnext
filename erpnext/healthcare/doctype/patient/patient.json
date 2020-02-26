@@ -100,9 +100,9 @@
   },
   {
    "fieldname": "sex",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Gender",
-   "options": "\nMale\nFemale\nOther",
+   "options": "Gender",
    "reqd": 1
   },
   {
@@ -362,7 +362,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2020-02-25 12:07:41.751539",
+ "modified": "2020-02-25 17:56:46.351080",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
