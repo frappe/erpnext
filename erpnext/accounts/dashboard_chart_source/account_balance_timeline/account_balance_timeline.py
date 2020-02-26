@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe import _
-from frappe.utils import add_to_date, date_diff, getdate, nowdate, get_last_day, formatdate
+from frappe.utils import add_to_date, date_diff, getdate, nowdate, get_last_day, formatdate, get_link_to_form
 from erpnext.accounts.report.general_ledger.general_ledger import execute
 from frappe.core.page.dashboard.dashboard import cache_source, get_from_date_from_timespan
 from frappe.desk.doctype.dashboard_chart.dashboard_chart import get_period_ending
@@ -30,8 +30,13 @@ def get(chart_name = None, chart = None, no_cache = None, from_date = None, to_d
 	account = filters.get("account")
 	company = filters.get("company")
 
-	if not account and chart:
-		frappe.throw(_("Account is not set for the dashboard chart {0}").format(chart))
+	if not account and chart_name:
+		frappe.throw(_("Account is not set for the dashboard chart {0}")
+			.format(get_link_to_form("Dashboard Chart", chart_name)))
+
+	if not frappe.db.exists("Account", account) and chart_name:
+		frappe.throw(_("Account {0} does not exists in the dashboard chart {1}")
+			.format(account, get_link_to_form("Dashboard Chart", chart_name)))
 
 	if not to_date:
 		to_date = nowdate()
