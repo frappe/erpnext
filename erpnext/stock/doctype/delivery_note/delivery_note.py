@@ -14,6 +14,7 @@ from frappe.desk.notifications import clear_doctype_notifications
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.utils import cint, flt
+from erpnext.controllers.accounts_controller import get_taxes_and_charges
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -587,3 +588,77 @@ def make_sales_return(source_name, target_doc=None):
 def update_delivery_note_status(docname, status):
 	dn = frappe.get_doc("Delivery Note", docname)
 	dn.update_status(status)
+
+@frappe.whitelist()
+def make_inter_company_purchase_receipt(source_name, target_doc=None):
+	return make_inter_company_transaction("Delivery Note", source_name, target_doc)
+
+def make_inter_company_transaction(doctype, source_name, target_doc=None):
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_transaction, get_inter_company_details
+
+	if doctype == 'Delivery Note':
+		source_doc = frappe.get_doc(doctype, source_name)
+		target_doctype = "Purchase Receipt"
+		source_document_warehouse_field = 'target_warehouse'
+		target_document_warehouse_field = 'from_warehouse'
+	else:
+		source_doc = frappe.get_doc(doctype, source_name)
+		target_doctype = 'Delivery Note'
+		source_document_warehouse_field = 'from_warehouse'
+		target_document_warehouse_field = 'target_warehouse'
+
+	validate_inter_company_transaction(source_doc, doctype)
+	details = get_inter_company_details(source_doc, doctype)
+
+	def set_missing_values(source, target):
+		target.run_method("set_missing_values")
+
+		if target.doctype == 'Purchase Receipt':
+			master_doctype = 'Purchase Taxes and Charges Template'
+		else:
+			master_doctype = 'Sales Taxes and Charges Template'
+
+		if not target.get('taxes') and target.get('taxes_and_charges'):
+			for tax in get_taxes_and_charges(master_doctype, target.get('taxes_and_charges')):
+				target.append('taxes', tax)
+
+	def update_details(source_doc, target_doc, source_parent):
+		target_doc.inter_company_invoice_reference = source_doc.name
+		if target_doc.doctype == 'Purchase Receipt':
+			target_doc.company = details.get("company")
+			target_doc.supplier = details.get("party")
+			target_doc.supplier_address = source_doc.company_address
+			target_doc.shipping_address = source_doc.shipping_address_name or source_doc.customer_address
+			target_doc.buying_price_list = source_doc.selling_price_list
+			target_doc.is_internal_supplier = 1
+			target_doc.inter_company_reference = source_doc.name
+		else:
+			target_doc.company = details.get("company")
+			target_doc.customer = details.get("party")
+			target_doc.company_address = source_doc.supplier_address
+			target_doc.shipping_address_name = source_doc.shipping_address
+			target_doc.selling_price_list = source_doc.buying_price_list
+			target_doc.is_internal_customer = 1
+			target_doc.inter_company_reference = source_doc.name
+
+	doclist = get_mapped_doc(doctype, source_name,	{
+		doctype: {
+			"doctype": target_doctype,
+			"postprocess": update_details,
+			"field_no_map": [
+				"taxes_and_charges"
+			]
+		},
+		doctype +" Item": {
+			"doctype": target_doctype + " Item",
+			"field_map": {
+				source_document_warehouse_field: target_document_warehouse_field
+			},
+			"field_no_map": [
+				"warehouse"
+			]
+		}
+
+	}, target_doc, set_missing_values)
+
+	return doclist

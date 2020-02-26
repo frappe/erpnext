@@ -86,16 +86,17 @@ class TestSalaryStructure(unittest.TestCase):
 		self.assertEqual(salary_structure_assignment.base, 5000)
 		self.assertEqual(salary_structure_assignment.variable, 200)
 
-def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None, test_tax=False):
+def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None,
+	test_tax=False, company=None):
 	if test_tax:
 		frappe.db.sql("""delete from `tabSalary Structure` where name=%s""",(salary_structure))
 	if not frappe.db.exists('Salary Structure', salary_structure):
 		details = {
 			"doctype": "Salary Structure",
 			"name": salary_structure,
-			"company": erpnext.get_default_company(),
-			"earnings": make_earning_salary_component(test_tax=test_tax),
-			"deductions": make_deduction_salary_component(test_tax=test_tax),
+			"company": company or erpnext.get_default_company(),
+			"earnings": make_earning_salary_component(test_tax=test_tax, company_list=["_Test Company"]),
+			"deductions": make_deduction_salary_component(test_tax=test_tax, company_list=["_Test Company"]),
 			"payroll_frequency": payroll_frequency,
 			"payment_account": get_random("Account")
 		}
@@ -109,11 +110,11 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None, do
 
 	if employee and not frappe.db.get_value("Salary Structure Assignment",
 		{'employee':employee, 'docstatus': 1}) and salary_structure_doc.docstatus==1:
-			create_salary_structure_assignment(employee, salary_structure)
+			create_salary_structure_assignment(employee, salary_structure, company=company)
 
 	return salary_structure_doc
 
-def create_salary_structure_assignment(employee, salary_structure, from_date=None):
+def create_salary_structure_assignment(employee, salary_structure, from_date=None, company=None):
 	if frappe.db.exists("Salary Structure Assignment", {"employee": employee}):
 		frappe.db.sql("""delete from `tabSalary Structure Assignment` where employee=%s""",(employee))
 	salary_structure_assignment = frappe.new_doc("Salary Structure Assignment")
@@ -122,7 +123,7 @@ def create_salary_structure_assignment(employee, salary_structure, from_date=Non
 	salary_structure_assignment.variable = 5000
 	salary_structure_assignment.from_date = from_date or add_months(nowdate(), -1)
 	salary_structure_assignment.salary_structure = salary_structure
-	salary_structure_assignment.company = erpnext.get_default_company()
+	salary_structure_assignment.company = company or erpnext.get_default_company()
 	salary_structure_assignment.save(ignore_permissions=True)
 	salary_structure_assignment.submit()
 	return salary_structure_assignment

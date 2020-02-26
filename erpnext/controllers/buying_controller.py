@@ -43,6 +43,7 @@ class BuyingController(StockController):
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()
+		self.validate_from_warehouse()
 		self.set_supplier_address()
 
 		if self.doctype=="Purchase Invoice":
@@ -115,6 +116,14 @@ class BuyingController(StockController):
 			if not d.cost_center and lc_voucher_data and lc_voucher_data[0][1]:
 				d.db_set('cost_center', lc_voucher_data[0][1])
 
+	def validate_from_warehouse(self):
+		for item in self.get('items'):
+			if item.get('from_warehouse') and (item.get('from_warehouse') == item.get('warehouse')):
+				frappe.throw(_("Row #{0}: Accepted Warehouse and Supplier Warehouse cannot be same").format(item.idx))
+
+			if item.get('from_warehouse') and self.get('is_subcontracted') == 'Yes':
+				frappe.throw(_("Row #{0}: Cannot select Supplier Warehouse while suppling raw materials to subcontractor").format(item.idx))
+
 	def set_supplier_address(self):
 		address_dict = {
 			'supplier_address': 'address_display',
@@ -168,7 +177,7 @@ class BuyingController(StockController):
 			if item.item_code and item.qty and item.item_code in stock_and_asset_items:
 				item_proportion = flt(item.base_net_amount) / stock_and_asset_items_amount if stock_and_asset_items_amount \
 					else flt(item.qty) / stock_and_asset_items_qty
-				
+
 				if i == (last_item_idx - 1):
 					item.item_tax_amount = flt(valuation_amount_adjustment,
 						self.precision("item_tax_amount", item))
@@ -500,8 +509,8 @@ class BuyingController(StockController):
 		item_row = item_row.as_dict()
 		for fieldname in field_list:
 			if flt(item_row[fieldname]) < 0:
-				frappe.throw(_("Row #{0}: {1} can not be negative for item {2}".format(item_row['idx'],
-					frappe.get_meta(item_row.doctype).get_label(fieldname), item_row['item_code'])))
+				frappe.throw(_("Row #{0}: {1} can not be negative for item {2}").format(item_row['idx'],
+					frappe.get_meta(item_row.doctype).get_label(fieldname), item_row['item_code']))
 
 	def check_for_on_hold_or_closed_status(self, ref_doctype, ref_fieldname):
 		for d in self.get("items"):
@@ -521,6 +530,16 @@ class BuyingController(StockController):
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
 
 				if pr_qty:
+
+					if d.from_warehouse and ((not cint(self.is_return) and self.docstatus==1)
+						or (cint(self.is_return) and self.docstatus==2)):
+						from_warehouse_sle = self.get_sl_entries(d, {
+							"actual_qty": -1 * pr_qty,
+							"warehouse": d.from_warehouse
+						})
+
+						sl_entries.append(from_warehouse_sle)
+
 					sle = self.get_sl_entries(d, {
 						"actual_qty": flt(pr_qty),
 						"serial_no": cstr(d.serial_no).strip()
@@ -540,6 +559,15 @@ class BuyingController(StockController):
 							"incoming_rate": incoming_rate
 						})
 					sl_entries.append(sle)
+
+					if d.from_warehouse and ((not cint(self.is_return) and self.docstatus==2)
+						or (cint(self.is_return) and self.docstatus==1)):
+						from_warehouse_sle = self.get_sl_entries(d, {
+							"actual_qty": -1 * pr_qty,
+							"warehouse": d.from_warehouse
+						})
+
+						sl_entries.append(from_warehouse_sle)
 
 				if flt(d.rejected_qty) != 0:
 					sl_entries.append(self.get_sl_entries(d, {
@@ -699,7 +727,7 @@ class BuyingController(StockController):
 					if delete_asset and is_auto_create_enabled:
 						# need to delete movements to delete assets otherwise throws link exists error
 						movements = frappe.db.sql(
-							"""SELECT asm.name 
+							"""SELECT asm.name
 							FROM `tabAsset Movement` asm, `tabAsset Movement Item` asm_item
 							WHERE asm_item.parent=asm.name and asm_item.asset=%s""", asset.name, as_dict=1)
 						for movement in movements:
@@ -872,9 +900,9 @@ def validate_item_type(doc, fieldname, message):
 		items = ", ".join([d for d in invalid_items])
 
 		if len(invalid_items) > 1:
-			error_message = _("Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master".format(items, message))
+			error_message = _("Following items {0} are not marked as {1} item. You can enable them as {1} item from its Item master").format(items, message)
 		else:
-			error_message = _("Following item {0} is not marked as {1} item. You can enable them as {1} item from its Item master".format(items, message))
+			error_message = _("Following item {0} is not marked as {1} item. You can enable them as {1} item from its Item master").format(items, message)
 
 		frappe.throw(error_message)
 

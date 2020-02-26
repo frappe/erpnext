@@ -152,6 +152,7 @@ def create_purchase_invoices():
 			currency = 'INR',
 			warehouse = 'Finished Goods - _GST',
 			cost_center = 'Main - _GST',
+			expense_account = 'Cost of Goods Sold - _GST',
 			do_not_save=1,
 		)
 
@@ -181,6 +182,7 @@ def create_purchase_invoices():
 			currency = 'INR',
 			warehouse = 'Finished Goods - _GST',
 			cost_center = 'Main - _GST',
+			expense_account = 'Cost of Goods Sold - _GST',
 			item = "Milk",
 			do_not_save=1
 		)
