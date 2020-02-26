@@ -1011,15 +1011,13 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	purchase_receipt_date = getdate(last_purchase_receipt and
 								 last_purchase_receipt[0].posting_date or "1900-01-01")
 
-	if last_purchase_order and (purchase_order_date >= purchase_receipt_date) or \
-				(last_purchase_order and not last_purchase_receipt):
+	if last_purchase_order and (purchase_order_date >= purchase_receipt_date or not last_purchase_receipt):
 		# use purchase order
 		
 		last_purchase = last_purchase_order[0]
 		purchase_date = purchase_order_date
 
-	elif (purchase_receipt_date > purchase_order_date) or \
-				(last_purchase_receipt and not last_purchase_order):
+	elif last_purchase_receipt and (purchase_receipt_date > purchase_order_date or not last_purchase_order):
 		# use purchase receipt
 		last_purchase = last_purchase_receipt[0]
 		purchase_date = purchase_receipt_date
