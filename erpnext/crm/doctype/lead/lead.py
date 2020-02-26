@@ -129,6 +129,8 @@ class Lead(SellingController):
 			self.title = self.lead_name
 
 	def create_address(self):
+		if self.flags.ignore_address_fields: return
+
 		address_fields = ["address_title", "address_line1", "address_line2",
 			"city", "county", "state", "country", "pincode"]
 		info_fields = ["email_id", "phone", "fax"]
@@ -146,6 +148,8 @@ class Lead(SellingController):
 		return address
 
 	def create_contact(self):
+		if self.flags.ignore_contact_fields: return
+
 		if not self.lead_name:
 			self.set_lead_name()
 
