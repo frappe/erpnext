@@ -252,7 +252,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 				if pricing_rule.price_or_product_discount == "Price":
 					apply_price_discount_rule(pricing_rule, item_details, args)
 				else:
-					get_product_discount_rule(pricing_rule, item_details, doc)
+					get_product_discount_rule(pricing_rule, item_details, args, doc)
 
 		item_details.has_pricing_rule = 1
 
