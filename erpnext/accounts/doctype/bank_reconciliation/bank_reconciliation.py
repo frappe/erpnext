@@ -39,6 +39,11 @@ class BankReconciliation(Document):
 			order by t1.posting_date ASC, t1.name DESC
 		""", {"condition":condition, "account": self.account, "from": self.from_date, "to": self.to_date}, as_dict=1)
 
+		condition = ''
+
+		if self.bank_account:
+			condition += 'and bank_account = %(bank_account)s'
+
 		payment_entries = frappe.db.sql("""
 			select
 				"Payment Entry" as payment_document, name as payment_entry,
@@ -51,10 +56,10 @@ class BankReconciliation(Document):
 			where
 				(paid_from=%(account)s or paid_to=%(account)s) and docstatus=1
 				and posting_date >= %(from)s and posting_date <= %(to)s
-				and bank_account = %(bank_account)s
+				{condition}
 			order by
 				posting_date ASC, name DESC
-		""", {"account": self.account, "from":self.from_date,
+		""".format(condition=condition), {"account": self.account, "from":self.from_date,
 				"to": self.to_date, "bank_account": self.bank_account}, as_dict=1)
 
 		pos_entries = []
