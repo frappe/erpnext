@@ -420,7 +420,7 @@ class SalesInvoice(SellingController):
 
 		if pos:
 			self.allow_print_before_pay = pos.allow_print_before_pay
-			
+
 			if not for_validate:
 				self.tax_category = pos.get("tax_category")
 
@@ -1547,6 +1547,9 @@ def get_loyalty_programs(customer):
 		return []
 	else:
 		return lp_details
+
+def on_doctype_update():
+	frappe.db.add_index("Sales Invoice", ["customer", "is_return", "return_against"])
 
 @frappe.whitelist()
 def create_invoice_discounting(source_name, target_doc=None):

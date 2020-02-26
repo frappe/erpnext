@@ -17,6 +17,7 @@ from erpnext.hr.doctype.additional_salary.additional_salary import get_additiona
 from erpnext.hr.doctype.payroll_period.payroll_period import get_period_factor, get_payroll_period
 from erpnext.hr.doctype.employee_benefit_application.employee_benefit_application import get_benefit_component_amount
 from erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim import get_benefit_claim_amount, get_last_payroll_period_benefits
+from erpnext.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts, create_repayment_entry
 
 class SalarySlip(TransactionBase):
 	def __init__(self, *args, **kwargs):
@@ -66,6 +67,7 @@ class SalarySlip(TransactionBase):
 			self.set_status()
 			self.update_status(self.name)
 			self.update_salary_slip_in_additional_salary()
+			self.make_loan_repayment_entry()
 			if (frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee")) and not frappe.flags.via_payroll_entry:
 				self.email_salary_slip()
 
@@ -73,6 +75,7 @@ class SalarySlip(TransactionBase):
 		self.set_status()
 		self.update_status()
 		self.update_salary_slip_in_additional_salary()
+		self.cancel_loan_repayment_entry()
 
 	def on_trash(self):
 		from frappe.model.naming import revert_series_if_last
@@ -754,28 +757,35 @@ class SalarySlip(TransactionBase):
 		self.total_principal_amount = 0
 
 		for loan in self.get_loan_details():
-			self.append('loans', {
-				'loan': loan.name,
-				'total_payment': loan.total_payment,
-				'interest_amount': loan.interest_amount,
-				'principal_amount': loan.principal_amount,
-				'loan_account': loan.loan_account,
-				'interest_income_account': loan.interest_income_account
-			})
 
-			self.total_loan_repayment += loan.total_payment
-			self.total_interest_amount += loan.interest_amount
-			self.total_principal_amount += loan.principal_amount
+			amounts = calculate_amounts(loan.name, self.posting_date, "Regular Payment")
+
+			total_payment = amounts['interest_amount'] + amounts['payable_principal_amount']
+
+			if total_payment:
+				self.append('loans', {
+					'loan': loan.name,
+					'total_payment': total_payment,
+					'interest_amount': amounts['interest_amount'],
+					'principal_amount': amounts['payable_principal_amount'],
+					'loan_account': loan.loan_account,
+					'interest_income_account': loan.interest_income_account
+				})
+
+			self.total_loan_repayment += total_payment
+			self.total_interest_amount += amounts['interest_amount']
+			self.total_principal_amount += amounts['payable_principal_amount']
 
 	def get_loan_details(self):
-		return frappe.db.sql("""select rps.principal_amount, rps.interest_amount, l.name,
-				rps.total_payment, l.loan_account, l.interest_income_account
-			from
-				`tabRepayment Schedule` as rps, `tabLoan` as l
-			where
-				l.name = rps.parent and rps.payment_date between %s and %s and
-				l.repay_from_salary = 1 and l.docstatus = 1 and l.applicant = %s""",
-			(self.start_date, self.end_date, self.employee), as_dict=True) or []
+
+		return frappe.get_all("Loan",
+			fields=["name", "interest_income_account", "loan_account", "loan_type"],
+			filters = {
+				"applicant": self.employee,
+				"docstatus": 1,
+				"repay_from_salary": 1,
+			})
+
 
 	def update_salary_slip_in_additional_salary(self):
 		salary_slip = self.name if self.docstatus==1 else None
@@ -783,6 +793,23 @@ class SalarySlip(TransactionBase):
 			update `tabAdditional Salary` set salary_slip=%s
 			where employee=%s and payroll_date between %s and %s and docstatus=1
 		""", (salary_slip, self.employee, self.start_date, self.end_date))
+
+	def make_loan_repayment_entry(self):
+		for loan in self.loans:
+			repayment_entry = create_repayment_entry(loan.loan, self.employee,
+				self.company, self.posting_date, loan.loan_type, "Regular Payment", loan.interest_amount,
+				loan.principal_amount, loan.total_payment)
+
+			repayment_entry.save()
+			repayment_entry.submit()
+
+			loan.loan_repayment_entry = repayment_entry.name
+
+	def cancel_loan_repayment_entry(self):
+		for loan in self.loans:
+			if loan.loan_repayment_entry:
+				repayment_entry = frappe.get_doc("Loan Repayment", loan.loan_repayment_entry)
+				repayment_entry.cancel()
 
 	def email_salary_slip(self):
 		receiver = frappe.db.get_value("Employee", self.employee, "prefered_email")

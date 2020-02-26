@@ -145,6 +145,7 @@ frappe.ui.form.on('Material Request', {
 	},
 
 	get_item_data: function(frm, item) {
+		if (!item.item_code) return;
 		frm.call({
 			method: "erpnext.stock.get_item_details.get_item_details",
 			child: item,
