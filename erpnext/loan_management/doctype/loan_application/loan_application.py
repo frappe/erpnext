@@ -147,7 +147,7 @@ def create_loan(source_name, target_doc=None, submit=0):
 	return doclist
 
 @frappe.whitelist()
-def create_pledge(loan_application):
+def create_pledge(loan_application, loan=None):
 	loan_application_doc = frappe.get_doc("Loan Application", loan_application)
 
 	lsp = frappe.new_doc("Loan Security Pledge")
@@ -155,6 +155,9 @@ def create_pledge(loan_application):
 	lsp.applicant = loan_application_doc.applicant
 	lsp.loan_application = loan_application_doc.name
 	lsp.company = loan_application_doc.company
+
+	if loan:
+		lsp.loan = loan
 
 	for pledge in loan_application_doc.proposed_pledges:
 
