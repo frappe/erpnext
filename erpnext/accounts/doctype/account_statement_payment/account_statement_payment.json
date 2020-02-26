@@ -1,0 +1,214 @@
+{
+ "actions": [],
+ "autoname": "ACC-STA-PAY-.YYYY.-.#####",
+ "creation": "2020-02-24 14:11:40.425150",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "biling",
+  "cashier",
+  "cai",
+  "numeration",
+  "authorized_range",
+  "amended_from",
+  "company_logo",
+  "general_data",
+  "patient_statement",
+  "type_document",
+  "customer",
+  "rtn",
+  "columna_general",
+  "company",
+  "date",
+  "due_date",
+  "reason_for_sale",
+  "products_section",
+  "products_table",
+  "totals_section",
+  "total",
+  "isv15",
+  "net_total",
+  "contact_section",
+  "customer_address",
+  "phone_number"
+ ],
+ "fields": [
+  {
+   "fieldname": "patient_statement",
+   "fieldtype": "Link",
+   "label": "Patient Statement",
+   "options": "Patient statement"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Account Statement Payment",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "biling",
+   "fieldtype": "Section Break",
+   "label": "BIlling"
+  },
+  {
+   "fieldname": "cashier",
+   "fieldtype": "Read Only",
+   "label": "Cashier"
+  },
+  {
+   "fieldname": "cai",
+   "fieldtype": "Link",
+   "label": "CAI",
+   "options": "GCAI",
+   "read_only": 1
+  },
+  {
+   "fieldname": "numeration",
+   "fieldtype": "Read Only",
+   "label": "Numeration"
+  },
+  {
+   "fieldname": "authorized_range",
+   "fieldtype": "Read Only",
+   "label": "Authorized Range"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fetch_from": "Company.company_logo",
+   "fieldname": "company_logo",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Image Company"
+  },
+  {
+   "fieldname": "general_data",
+   "fieldtype": "Section Break",
+   "label": "General Data"
+  },
+  {
+   "fieldname": "type_document",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Type Document",
+   "options": "GType Document",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "rtn",
+   "fieldtype": "Data",
+   "label": "RTN"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Payment Due Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reason_for_sale",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Reason for sale",
+   "options": "Reason for sale",
+   "reqd": 1
+  },
+  {
+   "fieldname": "products_section",
+   "fieldtype": "Section Break",
+   "label": "Products"
+  },
+  {
+   "fieldname": "products_table",
+   "fieldtype": "Table",
+   "label": "Products Table",
+   "options": "Acount Statement Payment Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "totals_section",
+   "fieldtype": "Section Break",
+   "label": "Totals"
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "label": "Total"
+  },
+  {
+   "fieldname": "isv15",
+   "fieldtype": "Currency",
+   "label": "ISV 15%"
+  },
+  {
+   "fieldname": "net_total",
+   "fieldtype": "Currency",
+   "label": "Net Total"
+  },
+  {
+   "fieldname": "contact_section",
+   "fieldtype": "Section Break",
+   "label": "Address and Contact"
+  },
+  {
+   "fieldname": "customer_address",
+   "fieldtype": "Data",
+   "label": "Customer Address"
+  },
+  {
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number"
+  },
+  {
+   "fieldname": "columna_general",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-02-26 15:40:19.759397",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Account Statement Payment",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
