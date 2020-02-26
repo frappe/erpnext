@@ -510,7 +510,6 @@ erpnext.patches.v10_0.repost_requested_qty_for_non_stock_uom_items
 erpnext.patches.v11_0.merge_land_unit_with_location
 erpnext.patches.v11_0.add_index_on_nestedset_doctypes
 erpnext.patches.v11_0.remove_modules_setup_page
-erpnext.patches.v11_0.rename_employee_loan_to_loan
 erpnext.patches.v11_0.move_leave_approvers_from_employee #13-06-2018
 erpnext.patches.v11_0.update_department_lft_rgt
 erpnext.patches.v11_0.add_default_email_template_for_leave
@@ -634,6 +633,7 @@ execute:frappe.reload_doc('desk', 'doctype','dashboard_chart')
 erpnext.patches.v12_0.add_default_dashboards
 erpnext.patches.v12_0.remove_bank_remittance_custom_fields
 erpnext.patches.v12_0.generate_leave_ledger_entries
+execute:frappe.delete_doc_if_exists("Report", "Loan Repayment")
 erpnext.patches.v12_0.move_credit_limit_to_customer_credit_limit
 erpnext.patches.v12_0.add_variant_of_in_item_attribute_table
 erpnext.patches.v12_0.rename_bank_account_field_in_journal_entry_account
@@ -652,9 +652,11 @@ erpnext.patches.v12_0.set_production_capacity_in_workstation
 erpnext.patches.v12_0.set_employee_preferred_emails
 erpnext.patches.v12_0.set_against_blanket_order_in_sales_and_purchase_order
 erpnext.patches.v12_0.set_cost_center_in_child_table_of_expense_claim
+erpnext.patches.v12_0.add_eway_bill_in_delivery_note
 erpnext.patches.v12_0.set_lead_title_field
 erpnext.patches.v12_0.set_permission_einvoicing
 erpnext.patches.v12_0.set_published_in_hub_tracked_item
 erpnext.patches.v12_0.set_job_offer_applicant_email
 erpnext.patches.v12_0.create_irs_1099_field_united_states
 erpnext.patches.v12_0.move_bank_account_swift_number_to_bank
+erpnext.patches.v12_0.rename_bank_reconciliation_fields # 2020-01-22
