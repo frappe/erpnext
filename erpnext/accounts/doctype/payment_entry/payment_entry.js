@@ -253,6 +253,19 @@ frappe.ui.form.on('Payment Entry', {
 			frappe.throw(__("Party can only be one of "+ party_types.join(", ")));
 		}
 
+		frm.set_query("party", function() {
+			if(frm.doc.party_type == 'Employee'){
+				return {
+					query: "erpnext.controllers.queries.employee_query"
+				}
+			}
+			else if(frm.doc.party_type == 'Customer'){
+				return {
+					query: "erpnext.controllers.queries.customer_query"
+				}
+			}
+		});
+
 		if(frm.doc.party) {
 			$.each(["party", "party_balance", "paid_from", "paid_to",
 				"paid_from_account_currency", "paid_from_account_balance",
