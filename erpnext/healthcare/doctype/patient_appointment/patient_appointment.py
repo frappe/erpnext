@@ -72,7 +72,7 @@ class PatientAppointment(Document):
 		if frappe.db.get_single_value('Healthcare Settings', 'automate_appointment_invoicing'):
 			if not frappe.db.get_value('Patient', self.patient, 'customer'):
 				msg = _("Please create a Customer linked to the Patient")
-				msg +=  " <b><a href='#Form/Patient/'>{0}</a></b>".format(self.patient)
+				msg +=  " <b><a href='#Form/Patient/{0}'>{0}</a></b>".format(self.patient)
 				frappe.throw(msg, title=_('Customer Not Found'))
 
 	def update_prescription_details(self):
@@ -351,7 +351,7 @@ def make_encounter(source_name, target_doc=None):
 				['appointment', 'name'],
 				['patient', 'patient'],
 				['practitioner', 'practitioner'],
-				['visit_department', 'department'],
+				['medical_department', 'department'],
 				['patient_sex', 'patient_sex'],
 				['encounter_date', 'appointment_date'],
 				['invoiced', 'invoiced']
