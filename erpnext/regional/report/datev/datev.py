@@ -72,17 +72,16 @@ def get_transactions(filters, as_dict=1):
 			case gl.debit when 0 then 'H' else 'S' end as 'Soll/Haben-Kennzeichen',
 
 			/* account number or, if empty, party account number */
-			coalesce(acc.account_number, acc_pa.account_number) as 'Kontonummer',
+			coalesce(acc.account_number, acc_pa.account_number) as 'Konto',
 
 			/* against number or, if empty, party against number */
 			coalesce(acc_against.account_number, acc_against_pa.account_number) as 'Gegenkonto (ohne BU-Schlüssel)',
 			
 			gl.posting_date as 'Belegdatum',
+			gl.voucher_no as 'Belegfeld 1',
 			gl.remarks as 'Buchungstext',
-			gl.voucher_type as 'Beleginfo - Art 1',
-			gl.voucher_no as 'Beleginfo - Inhalt 1',
-			gl.against_voucher_type as 'Beleginfo - Art 2',
-			gl.against_voucher as 'Beleginfo - Inhalt 2'
+			gl.against_voucher_type as 'Beleginfo - Art 1',
+			gl.against_voucher as 'Beleginfo - Inhalt 1'
 
 		FROM `tabGL Entry` gl
 
@@ -240,8 +239,6 @@ def get_datev_csv(data, filters, csv_class):
 	filters -- dict
 	csv_class -- defines DATA_CATEGORY, FORMAT_NAME and COLUMNS
 	"""
-	header = get_header(filters, csv_class)
-
 	empty_df = pd.DataFrame(columns=csv_class.COLUMNS)
 	data_df = pd.DataFrame.from_records(data)
 
@@ -253,7 +250,6 @@ def get_datev_csv(data, filters, csv_class):
 	if csv_class.DATA_CATEGORY == DataCategory.ACCOUNT_NAMES:
 		result['Sprach-ID'] = 'de-DE'
 
-	header = ';'.join(header).encode('latin_1')
 	data = result.to_csv(
 		# Reason for str(';'): https://github.com/pandas-dev/pandas/issues/6035
 		sep=str(';'),
@@ -274,66 +270,91 @@ def get_datev_csv(data, filters, csv_class):
 	if not six.PY2:
 		data = data.encode('latin_1')
 
+	header = get_header(filters, csv_class)
+	header = ';'.join(header).encode('latin_1')
+
+	# 1st Row: Header with meta data
+	# 2nd Row: Data heading (Überschrift der Nutzdaten), included in `data` here.
+	# 3rd - nth Row: Data (Nutzdaten)
 	return header + b'\r\n' + data
 
 
 def get_header(filters, csv_class):
+	coa = frappe.get_value("Company", filters.get("company"), "chart_of_accounts")
+	coa_used = "SKR04" if "SKR04" in coa else ("SKR03" if "SKR03" in coa else "")
+
 	header = [
-		# A = DATEV format
-		#   DTVF = created by DATEV software,
-		#   EXTF = created by other software
-		"EXTF",
-		# B = version of the DATEV format
+		# DATEV format
+		#   "DTVF" = created by DATEV software,
+		#   "EXTF" = created by other software
+		'"EXTF"',
+		# version of the DATEV format
 		#   141 = 1.41, 
 		#   510 = 5.10,
 		#   720 = 7.20
-		"510",
+		'700',
 		csv_class.DATA_CATEGORY,
-		csv_class.FORMAT_NAME,
-		# E = Format version (regarding format name)
-		"",
-		# F = Generated on
-		datetime.datetime.now().strftime("%Y%m%d"),
-		# G = Imported on -- stays empty
-		"",
-		# H = Origin (SV = other (?), RE = KARE)
-		"SV",
+		'"%s"' % csv_class.FORMAT_NAME,
+		# Format version (regarding format name)
+		csv_class.FORMAT_VERSION,
+		# Generated on
+		datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+		# Imported on -- stays empty
+		'',
+		# Origin. Any two symbols, will be replaced by "SV" on import.
+		'"EN"',
 		# I = Exported by
-		frappe.session.user,
+		'"%s"' % frappe.session.user,
 		# J = Imported by -- stays empty
-		"",
+		'',
 		# K = Tax consultant number (Beraternummer)
-		frappe.get_value("DATEV Settings", filters.get("company"), "consultant_number") or "",
-		"",
+		frappe.get_value("DATEV Settings", filters.get("company"), "consultant_number"),
 		# L = Tax client number (Mandantennummer)
-		frappe.get_value("DATEV Settings", filters.get("company"), "client_number") or "",
-		"",
+		frappe.get_value("DATEV Settings", filters.get("company"), "client_number"),
 		# M = Start of the fiscal year (Wirtschaftsjahresbeginn)
 		frappe.utils.formatdate(frappe.defaults.get_user_default("year_start_date"), "yyyyMMdd"),
 		# N = Length of account numbers (Sachkontenlänge)
-		"4",
+		'4',
 		# O = Transaction batch start date (YYYYMMDD)
 		frappe.utils.formatdate(filters.get('from_date'), "yyyyMMdd"),
 		# P = Transaction batch end date (YYYYMMDD)
 		frappe.utils.formatdate(filters.get('to_date'), "yyyyMMdd"),
 		# Q = Description (for example, "January - February 2019 Transactions")
-		"{} - {} {}".format(
+		'"{} - {} {}"'.format(
 				frappe.utils.formatdate(filters.get('from_date'), "MMMM yyyy"),
 				frappe.utils.formatdate(filters.get('to_date'), "MMMM yyyy"),
 				csv_class.FORMAT_NAME
 		),
 		# R = Diktatkürzel
-		"",
+		'',
 		# S = Buchungstyp
-		#   1 = Transaction batch (Buchungsstapel),
+		#   1 = Transaction batch (Finanzbuchführung),
 		#   2 = Annual financial statement (Jahresabschluss)
-		"1" if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else "",
+		'1' if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
 		# T = Rechnungslegungszweck
-		"",
+		'',
 		# U = Festschreibung
-		"",
-		# V = Kontoführungs-Währungskennzeichen des Geldkontos
-		frappe.get_value("Company", filters.get("company"), "default_currency")
+		'',
+		# V = Default currency, for example, "EUR"
+		'"%s"' % frappe.get_value("Company", filters.get("company"), "default_currency"),
+		# reserviert
+		'',
+		# Derivatskennzeichen
+		'',
+		# reserviert
+		'',
+		# reserviert
+		'',
+		# SKR
+		'"%s"' % coa_used,
+		# Branchen-Lösungs-ID
+		'',
+		# reserviert
+		'',
+		# reserviert
+		'',
+		# Anwendungsinformation (Verarbeitungskennzeichen der abgebenden Anwendung)
+		''
 	]
 	return header
 

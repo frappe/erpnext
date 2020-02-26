@@ -316,7 +316,9 @@ def allocate_earned_leaves():
 
 				allocation = frappe.get_doc('Leave Allocation', allocation.name)
 				new_allocation = flt(allocation.total_leaves_allocated) + flt(earned_leaves)
-				new_allocation = new_allocation if new_allocation <= e_leave_type.max_leaves_allowed else e_leave_type.max_leaves_allowed
+
+				if new_allocation > e_leave_type.max_leaves_allowed and e_leave_type.max_leaves_allowed > 0:
+					new_allocation = e_leave_type.max_leaves_allowed
 
 				if new_allocation == allocation.total_leaves_allocated:
 					continue

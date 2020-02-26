@@ -420,7 +420,7 @@ class SalesInvoice(SellingController):
 
 		if pos:
 			self.allow_print_before_pay = pos.allow_print_before_pay
-			
+
 			if not for_validate:
 				self.tax_category = pos.get("tax_category")
 
@@ -1243,25 +1243,28 @@ class SalesInvoice(SellingController):
 
 		precision = self.precision("outstanding_amount")
 		outstanding_amount = flt(self.outstanding_amount, precision)
+		due_date = getdate(self.due_date)
+		nowdate = getdate()
+		discountng_status = self.get_discounting_status()
 
 		if not status:
 			if self.docstatus == 2:
 				status = "Cancelled"
 			elif self.docstatus == 1:
-				if outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
+				if outstanding_amount > 0 and due_date < nowdate and self.is_discounted and discountng_status=='Disbursed':
 					self.status = "Overdue and Discounted"
-				elif outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()):
+				elif outstanding_amount > 0 and due_date < nowdate:
 					self.status = "Overdue"
-				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.is_discounted and self.get_discounting_status()=='Disbursed':
+				elif outstanding_amount > 0 and due_date >= nowdate and self.is_discounted and discountng_status=='Disbursed':
 					self.status = "Unpaid and Discounted"
-				elif outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()):
+				elif outstanding_amount > 0 and due_date >= nowdate:
 					self.status = "Unpaid"
 				#Check if outstanding amount is 0 due to credit note issued against invoice
 				elif outstanding_amount <= 0 and self.is_return == 0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
 					self.status = "Credit Note Issued"
 				elif self.is_return == 1:
 					self.status = "Return"
-				elif outstanding_amount <=0:
+				elif outstanding_amount<=0:
 					self.status = "Paid"
 				else:
 					self.status = "Submitted"
@@ -1426,23 +1429,42 @@ def set_account_for_mode_of_payment(self):
 			data.account = get_bank_cash_account(data.mode_of_payment, self.company).get("account")
 
 def get_inter_company_details(doc, doctype):
-	if doctype in ["Sales Invoice", "Sales Order"]:
-		party = frappe.db.get_value("Supplier", {"disabled": 0, "is_internal_supplier": 1, "represents_company": doc.company}, "name")
+	if doctype in ["Sales Invoice", "Sales Order", "Delivery Note"]:
+		parties = frappe.db.get_all("Supplier", fields=["name"], filters={"disabled": 0, "is_internal_supplier": 1, "represents_company": doc.company})
 		company = frappe.get_cached_value("Customer", doc.customer, "represents_company")
+
+		party = get_internal_party(parties, "Supplier", doc)
 	else:
-		party = frappe.db.get_value("Customer", {"disabled": 0, "is_internal_customer": 1, "represents_company": doc.company}, "name")
+		parties = frappe.db.get_all("Customer", fields=["name"], filters={"disabled": 0, "is_internal_customer": 1, "represents_company": doc.company})
 		company = frappe.get_cached_value("Supplier", doc.supplier, "represents_company")
+
+		party = get_internal_party(parties, "Customer", doc)
 
 	return {
 		"party": party,
 		"company": company
 	}
 
+def get_internal_party(parties, link_doctype, doc):
+	if len(parties) == 1:
+			party = parties[0].name
+	else:
+		# If more than one Internal Supplier/Customer, get supplier/customer on basis of address
+		if doc.get('company_address') or doc.get('shipping_address'):
+			party = frappe.db.get_value("Dynamic Link", {"parent": doc.get('company_address') or doc.get('shipping_address'),
+			"parenttype": "Address", "link_doctype": link_doctype}, "link_name")
+
+			if not party:
+				party = parties[0].name
+		else:
+			party = parties[0].name
+
+	return party
 
 def validate_inter_company_transaction(doc, doctype):
 
 	details = get_inter_company_details(doc, doctype)
-	price_list = doc.selling_price_list if doctype in ["Sales Invoice", "Sales Order"] else doc.buying_price_list
+	price_list = doc.selling_price_list if doctype in ["Sales Invoice", "Sales Order", "Delivery Note"] else doc.buying_price_list
 	valid_price_list = frappe.db.get_value("Price List", {"name": price_list, "buying": 1, "selling": 1})
 	if not valid_price_list:
 		frappe.throw(_("Selected Price List should have buying and selling fields checked."))
@@ -1525,6 +1547,9 @@ def get_loyalty_programs(customer):
 		return []
 	else:
 		return lp_details
+
+def on_doctype_update():
+	frappe.db.add_index("Sales Invoice", ["customer", "is_return", "return_against"])
 
 @frappe.whitelist()
 def create_invoice_discounting(source_name, target_doc=None):
