@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "autoname": "ACC-STA-PAY-.YYYY.-.#####",
  "creation": "2020-02-24 14:11:40.425150",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -143,7 +144,7 @@
    "fieldname": "products_table",
    "fieldtype": "Table",
    "label": "Products Table",
-   "options": "Sales Invoice Item",
+   "options": "Acount Statement Payment Item",
    "reqd": 1
   },
   {
@@ -188,7 +189,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-25 15:59:05.166151",
+ "modified": "2020-02-26 15:40:19.759397",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment",
