@@ -348,40 +348,42 @@ def set_gl_entries_by_account(
 	additional_conditions = get_additional_conditions(from_date, ignore_closing_entries, filters)
 
 	accounts = frappe.db.sql_list("""select name from `tabAccount`
-		where lft >= %s and rgt <= %s""", (root_lft, root_rgt))
-	additional_conditions += " and account in ({})"\
-		.format(", ".join([frappe.db.escape(d) for d in accounts]))
+		where lft >= %s and rgt <= %s and company = %s""", (root_lft, root_rgt, company))
 
-	gl_filters = {
-		"company": company,
-		"from_date": from_date,
-		"to_date": to_date,
-		"finance_book": cstr(filters.get("finance_book"))
-	}
+	if accounts:
+		additional_conditions += " and account in ({})"\
+			.format(", ".join([frappe.db.escape(d) for d in accounts]))
 
-	if filters.get("include_default_book_entries"):
-		gl_filters["company_fb"] = frappe.db.get_value("Company",
-			company, 'default_finance_book')
+		gl_filters = {
+			"company": company,
+			"from_date": from_date,
+			"to_date": to_date,
+			"finance_book": cstr(filters.get("finance_book"))
+		}
 
-	for key, value in filters.items():
-		if value:
-			gl_filters.update({
-				key: value
-			})
+		if filters.get("include_default_book_entries"):
+			gl_filters["company_fb"] = frappe.db.get_value("Company",
+				company, 'default_finance_book')
 
-	gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
-		where company=%(company)s
-		{additional_conditions}
-		and posting_date <= %(to_date)s
-		order by account, posting_date""".format(additional_conditions=additional_conditions), gl_filters, as_dict=True) #nosec
+		for key, value in filters.items():
+			if value:
+				gl_filters.update({
+					key: value
+				})
 
-	if filters and filters.get('presentation_currency'):
-		convert_to_presentation_currency(gl_entries, get_currency(filters))
+		gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
+			where company=%(company)s
+			{additional_conditions}
+			and posting_date <= %(to_date)s
+			order by account, posting_date""".format(additional_conditions=additional_conditions), gl_filters, as_dict=True) #nosec
 
-	for entry in gl_entries:
-		gl_entries_by_account.setdefault(entry.account, []).append(entry)
+		if filters and filters.get('presentation_currency'):
+			convert_to_presentation_currency(gl_entries, get_currency(filters))
 
-	return gl_entries_by_account
+		for entry in gl_entries:
+			gl_entries_by_account.setdefault(entry.account, []).append(entry)
+
+		return gl_entries_by_account
 
 
 def get_additional_conditions(from_date, ignore_closing_entries, filters):

@@ -34,6 +34,20 @@ frappe.query_reports["Item-wise Purchase Register"] = {
 			"label": __("Mode of Payment"),
 			"fieldtype": "Link",
 			"options": "Mode of Payment"
+		},
+		{
+			"label": __("Group By"),
+			"fieldname": "group_by",
+			"fieldtype": "Select",
+			"options": ["Supplier", "Item Group", "Item", "Invoice"]
 		}
-	]
+	],
+	"formatter": function(value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+		if (data && data.bold) {
+			value = value.bold();
+
+		}
+		return value;
+	}
 }

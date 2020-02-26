@@ -149,6 +149,7 @@
   "column_break_63",
   "status",
   "inter_company_invoice_reference",
+  "is_internal_supplier",
   "remarks",
   "subscription_section",
   "from_date",
@@ -418,7 +419,6 @@
    "fieldname": "contact_email",
    "fieldtype": "Small Text",
    "label": "Contact Email",
-   "options": "Email",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1284,6 +1284,14 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fetch_from": "supplier.is_internal_supplier",
+   "fieldname": "is_internal_supplier",
+   "fieldtype": "Check",
+   "label": "Is Internal Supplier",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",

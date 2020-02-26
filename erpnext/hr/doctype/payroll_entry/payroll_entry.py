@@ -157,19 +157,6 @@ class PayrollEntry(Document):
 			for ss in submitted_ss:
 				ss.email_salary_slip()
 
-	def get_loan_details(self):
-		"""
-			Get loan details from submitted salary slip based on selected criteria
-		"""
-		cond = self.get_filter_condition()
-		return frappe.db.sql(""" select eld.loan_account, eld.loan,
-				eld.interest_income_account, eld.principal_amount, eld.interest_amount, eld.total_payment,t1.employee
-			from
-				`tabSalary Slip` t1, `tabSalary Slip Loan` eld
-			where
-				t1.docstatus = 1 and t1.name = eld.parent and start_date >= %s and end_date <= %s %s
-			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_dict=True) or []
-
 	def get_salary_component_account(self, salary_component):
 		account = frappe.db.get_value("Salary Component Account",
 			{"parent": salary_component, "company": self.company}, "default_account")
@@ -225,7 +212,6 @@ class PayrollEntry(Document):
 		earnings = self.get_salary_component_total(component_type = "earnings") or {}
 		deductions = self.get_salary_component_total(component_type = "deductions") or {}
 		default_payroll_payable_account = self.get_default_payroll_payable_account()
-		loan_details = self.get_loan_details()
 		jv_name = ""
 		precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
 
@@ -261,29 +247,6 @@ class PayrollEntry(Document):
 						"party_type": '',
 						"project": self.project
 					})
-
-			# Loan
-			for data in loan_details:
-				accounts.append({
-						"account": data.loan_account,
-						"credit_in_account_currency": data.principal_amount,
-						"party_type": "Employee",
-						"party": data.employee
-					})
-
-				if data.interest_amount and not data.interest_income_account:
-					frappe.throw(_("Select interest income account in loan {0}").format(data.loan))
-
-				if data.interest_income_account and data.interest_amount:
-					accounts.append({
-						"account": data.interest_income_account,
-						"credit_in_account_currency": data.interest_amount,
-						"cost_center": self.cost_center,
-						"project": self.project,
-						"party_type": "Employee",
-						"party": data.employee
-					})
-				payable_amount -= flt(data.total_payment, precision)
 
 			# Payable amount
 			accounts.append({
