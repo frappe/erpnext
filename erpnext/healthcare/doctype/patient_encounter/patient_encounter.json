@@ -29,11 +29,9 @@
   "column_break_17",
   "inpatient_status",
   "sb_symptoms",
-  "symptoms_select",
   "symptoms",
   "symptoms_in_print",
   "physical_examination",
-  "diagnosis_select",
   "diagnosis",
   "diagnosis_in_print",
   "codification",
@@ -158,20 +156,12 @@
    "label": "Encounter Impression"
   },
   {
-   "fieldname": "symptoms_select",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Complaints",
-   "no_copy": 1,
-   "options": "Complaint",
-   "print_hide": 1,
-   "report_hide": 1
-  },
-  {
    "fieldname": "symptoms",
-   "fieldtype": "Small Text",
+   "fieldtype": "Table MultiSelect",
    "ignore_xss_filter": 1,
-   "no_copy": 1
+   "label": "Symptoms",
+   "no_copy": 1,
+   "options": "Patient Encounter Symptom"
   },
   {
    "default": "0",
@@ -187,20 +177,12 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "diagnosis_select",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
+   "fieldname": "diagnosis",
+   "fieldtype": "Table MultiSelect",
+   "ignore_xss_filter": 1,
    "label": "Diagnosis",
    "no_copy": 1,
-   "options": "Diagnosis",
-   "print_hide": 1,
-   "report_hide": 1
-  },
-  {
-   "fieldname": "diagnosis",
-   "fieldtype": "Small Text",
-   "ignore_xss_filter": 1,
-   "no_copy": 1
+   "options": "Patient Encounter Diagnosis"
   },
   {
    "default": "1",
@@ -308,7 +290,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-26 15:10:33.240817",
+ "modified": "2020-02-26 16:50:52.141816",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",
