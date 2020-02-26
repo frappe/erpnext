@@ -6,20 +6,22 @@ import erpnext
 import frappe
 from dateutil.relativedelta import relativedelta
 from erpnext.accounts.utils import get_fiscal_year, getdate, nowdate
+from frappe.utils import add_months
 from erpnext.hr.doctype.payroll_entry.payroll_entry import get_start_end_dates, get_end_date
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.salary_slip.test_salary_slip import get_salary_component_account, \
 		make_earning_salary_component, make_deduction_salary_component
 from erpnext.hr.doctype.salary_structure.test_salary_structure import make_salary_structure
-from erpnext.hr.doctype.loan.test_loan import create_loan
+from erpnext.loan_management.doctype.loan.test_loan import create_loan, make_loan_disbursement_entry
+from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import make_accrual_interest_entry_for_term_loans
 
 class TestPayrollEntry(unittest.TestCase):
 	def setUp(self):
-		for dt in ["Salary Slip", "Salary Component", "Salary Component Account", "Payroll Entry", "Loan"]:
+		for dt in ["Salary Slip", "Salary Component", "Salary Component Account", "Payroll Entry"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
 
-		make_earning_salary_component(setup=True)
-		make_deduction_salary_component(setup=True)
+		make_earning_salary_component(setup=True, company_list=["_Test Company"])
+		make_deduction_salary_component(setup=True, company_list=["_Test Company"])
 
 		frappe.db.set_value("HR Settings", None, "email_salary_slip_to_employee", 0)
 
@@ -49,8 +51,8 @@ class TestPayrollEntry(unittest.TestCase):
 	def test_loan(self):
 
 		branch = "Test Employee Branch"
-		applicant = make_employee("test_employee@loan.com")
-		company = erpnext.get_default_company()
+		applicant = make_employee("test_employee@loan.com", company="_Test Company")
+		company = "_Test Company"
 		holiday_list = make_holiday("test holiday for loan")
 
 		company_doc = frappe.get_doc('Company', company)
@@ -70,16 +72,21 @@ class TestPayrollEntry(unittest.TestCase):
 		employee_doc.holiday_list = holiday_list
 		employee_doc.save()
 
-		loan = create_loan(applicant,
-			"Personal Loan", 280000, "Repay Over Number of Periods", 20)
+		salary_structure = "Test Salary Structure for Loan"
+		make_salary_structure(salary_structure, "Monthly", employee=employee_doc.name, company="_Test Company")
+
+		loan = create_loan(applicant, "Car Loan", 280000, "Repay Over Number of Periods", 20, posting_date=add_months(nowdate(), -1))
 		loan.repay_from_salary = 1
 		loan.submit()
-		salary_structure = "Test Salary Structure for Loan"
-		make_salary_structure(salary_structure, "Monthly", employee_doc.name)
+
+		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=add_months(nowdate(), -1))
+
+		make_accrual_interest_entry_for_term_loans(posting_date=nowdate())
+
 
 		dates = get_start_end_dates('Monthly', nowdate())
-		make_payroll_entry(start_date=dates.start_date,
-			end_date=dates.end_date, branch=branch)
+		make_payroll_entry(company="_Test Company", start_date=dates.start_date,
+			end_date=dates.end_date, branch=branch, cost_center="Main - _TC", payment_account="Cash - _TC")
 
 		name = frappe.db.get_value('Salary Slip',
 			{'posting_date': nowdate(), 'employee': applicant}, 'name')
@@ -109,6 +116,13 @@ def make_payroll_entry(**args):
 	payroll_entry.posting_date = nowdate()
 	payroll_entry.payroll_frequency = "Monthly"
 	payroll_entry.branch = args.branch or None
+
+	if args.cost_center:
+		payroll_entry.cost_center = args.cost_center
+
+	if args.payment_account:
+		payroll_entry.payment_account = args.payment_account
+
 	payroll_entry.save()
 	payroll_entry.create_salary_slips()
 	payroll_entry.submit_salary_slips()
