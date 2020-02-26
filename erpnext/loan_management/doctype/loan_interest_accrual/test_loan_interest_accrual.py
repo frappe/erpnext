@@ -58,4 +58,4 @@ class TestLoanInterestAccrual(unittest.TestCase):
 
 		loan_interest_accural = frappe.get_doc("Loan Interest Accrual", {'loan': loan.name})
 
-		self.assertEquals(flt(loan_interest_accural.interest_amount, 5), flt(accrued_interest_amount, 5))
+		self.assertEquals(flt(loan_interest_accural.interest_amount, 2), flt(accrued_interest_amount, 2))
