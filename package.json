@@ -12,7 +12,7 @@
     "url": "https://github.com/frappe/erpnext/issues"
   },
   "devDependencies": {
-    "snyk": "^1.290.1"
+    "snyk": "^1.297.2"
   },
   "dependencies": {
   },
