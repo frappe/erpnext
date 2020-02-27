@@ -9,6 +9,8 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.stock.get_item_details import get_item_details
 from frappe import MandatoryError
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.healthcare.doctype.lab_test_template.lab_test_template import make_item_price
 
 class TestPricingRule(unittest.TestCase):
 	def setUp(self):
@@ -145,6 +147,52 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEquals(details.get("margin_type"), "Percentage")
 		self.assertEquals(details.get("margin_rate_or_amount"), 10)
 
+	def test_mixed_conditions_for_item_group(self):
+		for item in ["Mixed Cond Item 1", "Mixed Cond Item 2"]:
+			make_item(item, {"item_group": "Products"})
+			make_item_price(item, "_Test Price List", 100)
+
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule for Item Group",
+			"apply_on": "Item Group",
+			"item_groups": [
+				{
+					"item_group": "Products",
+				},
+				{
+					"item_group": "Seed",
+				},
+			],
+			"selling": 1,
+			"mixed_conditions": 1,
+			"currency": "USD",
+			"rate_or_discount": "Discount Percentage",
+			"discount_percentage": 10,
+			"applicable_for": "Customer Group",
+			"customer_group": "All Customer Groups",
+			"company": "_Test Company"
+		}
+		frappe.get_doc(test_record.copy()).insert()
+
+		args = frappe._dict({
+			"item_code": "Mixed Cond Item 1",
+			"item_group": "Products",
+			"company": "_Test Company",
+			"price_list": "_Test Price List",
+			"currency": "_Test Currency",
+			"doctype": "Sales Order",
+			"conversion_rate": 1,
+			"price_list_currency": "_Test Currency",
+			"plc_conversion_rate": 1,
+			"order_type": "Sales",
+			"customer": "_Test Customer",
+			"customer_group": "_Test Customer Group",
+			"name": None
+		})
+		details = get_item_details(args)
+		self.assertEquals(details.get("discount_percentage"), 10)
+
 	def test_pricing_rule_for_variants(self):
 		from erpnext.stock.get_item_details import get_item_details
 		from frappe import MandatoryError
@@ -277,6 +325,66 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEqual(item.discount_percentage, 10)
 		self.assertEquals(item.discount_amount, 110)
 		self.assertEquals(item.rate, 990)
+
+	def test_pricing_rule_for_product_discount_on_same_item(self):
+		frappe.delete_doc_if_exists('Pricing Rule', '_Test Pricing Rule')
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule",
+			"apply_on": "Item Code",
+			"currency": "USD",
+			"items": [{
+				"item_code": "_Test Item",
+			}],
+			"selling": 1,
+			"rate_or_discount": "Discount Percentage",
+			"rate": 0,
+			"min_qty": 0,
+			"max_qty": 7,
+			"discount_percentage": 17.5,
+			"price_or_product_discount": "Product",
+			"same_item": 1,
+			"free_qty": 1,
+			"company": "_Test Company"
+		}
+		frappe.get_doc(test_record.copy()).insert()
+
+		# With pricing rule
+		so = make_sales_order(item_code="_Test Item", qty=1)
+		so.load_from_db()
+		self.assertEqual(so.items[1].is_free_item, 1)
+		self.assertEqual(so.items[1].item_code, "_Test Item")
+
+
+	def test_pricing_rule_for_product_discount_on_different_item(self):
+		frappe.delete_doc_if_exists('Pricing Rule', '_Test Pricing Rule')
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule",
+			"apply_on": "Item Code",
+			"currency": "USD",
+			"items": [{
+				"item_code": "_Test Item",
+			}],
+			"selling": 1,
+			"rate_or_discount": "Discount Percentage",
+			"rate": 0,
+			"min_qty": 0,
+			"max_qty": 7,
+			"discount_percentage": 17.5,
+			"price_or_product_discount": "Product",
+			"same_item": 0,
+			"free_item": "_Test Item 2",
+			"free_qty": 1,
+			"company": "_Test Company"
+		}
+		frappe.get_doc(test_record.copy()).insert()
+
+		# With pricing rule
+		so = make_sales_order(item_code="_Test Item", qty=1)
+		so.load_from_db()
+		self.assertEqual(so.items[1].is_free_item, 1)
+		self.assertEqual(so.items[1].item_code, "_Test Item 2")
 
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
