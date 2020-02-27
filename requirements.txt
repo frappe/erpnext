@@ -5,6 +5,6 @@ googlemaps==3.1.1
 pandas==0.24.2
 plaid-python==3.4.0
 PyGithub==1.44.1
-python-stdnum==1.12
+python-stdnum==1.13
 Unidecode==1.1.1
 WooCommerce==2.1.1
