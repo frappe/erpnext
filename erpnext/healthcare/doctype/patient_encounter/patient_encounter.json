@@ -150,7 +150,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "sb_symptoms",
    "fieldtype": "Section Break",
    "label": "Encounter Impression"
@@ -165,6 +164,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval: doc.symptoms != ''",
    "fieldname": "symptoms_in_print",
    "fieldtype": "Check",
    "label": "In print",
@@ -186,6 +186,7 @@
   },
   {
    "default": "1",
+   "depends_on": "eval: doc.diagnosis != ''",
    "fieldname": "diagnosis_in_print",
    "fieldtype": "Check",
    "label": "In print",
@@ -290,7 +291,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-26 16:50:52.141816",
+ "modified": "2020-02-27 12:42:21.751964",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",

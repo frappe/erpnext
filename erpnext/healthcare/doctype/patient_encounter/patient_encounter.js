@@ -22,16 +22,14 @@ frappe.ui.form.on('Patient Encounter', {
 
 		if (!frm.doc.__islocal) {
 
-			if (frm.doc.inpatient_record) {
-				if (frm.doc.inpatient_status == 'Admission Scheduled' || data.message.inpatient_status == 'Admitted') {
-					frm.add_custom_button(__('Schedule Discharge'), function() {
-						schedule_discharge(frm);
-					});
-				} else if (frm.doc.inpatient_status != 'Discharge Scheduled') {
-					frm.add_custom_button(__('Schedule Admission'), function() {
-						schedule_inpatient(frm);
-					});
-				}
+			if (frm.doc.inpatient_status == 'Admission Scheduled' || frm.doc.inpatient_status == 'Admitted') {
+				frm.add_custom_button(__('Schedule Discharge'), function() {
+					schedule_discharge(frm);
+				});
+			} else if (frm.doc.inpatient_status != 'Discharge Scheduled') {
+				frm.add_custom_button(__('Schedule Admission'), function() {
+					schedule_inpatient(frm);
+				});
 			}
 
 			frm.add_custom_button(__('Patient History'), function() {
