@@ -12,17 +12,17 @@
  "engine": "InnoDB",
  "field_order": [
   "template",
+  "item",
   "item_code",
   "item_group",
-  "medical_department",
+  "description",
   "column_break_5",
   "disabled",
   "is_billable",
   "rate",
-  "description",
-  "section_break_9",
-  "consume_stock",
+  "medical_department",
   "consumables",
+  "consume_stock",
   "items",
   "sample_collection",
   "sample",
@@ -30,8 +30,7 @@
   "sample_qty",
   "column_break_21",
   "sample_details",
-  "change_in_item",
-  "item"
+  "change_in_item"
  ],
  "fields": [
   {
@@ -45,11 +44,10 @@
   },
   {
    "fieldname": "item_code",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "Item Code",
-   "no_copy": 1,
    "options": "Item",
-   "read_only": 1
+   "reqd": 1
   },
   {
    "fieldname": "item_group",
@@ -81,7 +79,8 @@
    "depends_on": "is_billable",
    "fieldname": "rate",
    "fieldtype": "Float",
-   "label": "Rate"
+   "label": "Rate",
+   "mandatory_depends_on": "is_billable"
   },
   {
    "fieldname": "description",
@@ -92,10 +91,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "section_break_9",
-   "fieldtype": "Section Break"
-  },
-  {
    "default": "0",
    "fieldname": "consume_stock",
    "fieldtype": "Check",
@@ -103,12 +98,12 @@
    "search_index": 1
   },
   {
-   "depends_on": "eval:doc.consume_stock == 1",
    "fieldname": "consumables",
    "fieldtype": "Section Break",
    "label": "Consumables"
   },
   {
+   "depends_on": "eval:doc.consume_stock == 1",
    "fieldname": "items",
    "fieldtype": "Table",
    "ignore_user_permissions": 1,
@@ -168,16 +163,14 @@
   {
    "fieldname": "item",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Item",
    "no_copy": 1,
    "options": "Item",
-   "print_hide": 1,
-   "report_hide": 1
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2020-02-27 13:37:10.143609",
+ "modified": "2020-02-27 16:32:55.780893",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure Template",
