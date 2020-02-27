@@ -125,7 +125,7 @@ class PurchaseInvoice(BuyingController):
 			else:
 				self.remarks = _("No Remarks")
 
-	def set_status(self):
+	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
 			if self.get('amended_from'):
 				self.status = 'Draft'
