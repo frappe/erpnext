@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, date
 
 class AccountStatementPayment(Document):
 	def validate(self):
-		if self.numeration is None:
+		if self.docstatus == 1:
 			self.assign_cai()
 	
 	def initial_number(self, number):
