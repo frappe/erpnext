@@ -435,7 +435,7 @@ def apply_pricing_rule_on_transaction(doc):
 				doc.calculate_taxes_and_totals()
 			elif d.price_or_product_discount == 'Product':
 				item_details = frappe._dict({'parenttype': doc.doctype})
-				get_product_discount_rule(d, item_details, doc)
+				get_product_discount_rule(d, item_details, doc=doc)
 				apply_pricing_rule_for_free_items(doc, item_details.free_item_data)
 				doc.set_missing_values()
 
@@ -443,9 +443,10 @@ def get_applied_pricing_rules(item_row):
 	return (item_row.get("pricing_rules").split(',')
 		if item_row.get("pricing_rules") else [])
 
-def get_product_discount_rule(pricing_rule, item_details, doc=None):
-	free_item = (pricing_rule.free_item
-		if not pricing_rule.same_item or pricing_rule.apply_on == 'Transaction' else item_details.item_code)
+def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
+	free_item = pricing_rule.free_item
+	if pricing_rule.same_item:
+		free_item = item_details.item_code or args.item_code
 
 	if not free_item:
 		frappe.throw(_("Free item not set in the pricing rule {0}")
@@ -489,7 +490,7 @@ def get_pricing_rule_items(pr_doc):
 
 	for d in pr_doc.get(pricing_rule_apply_on):
 		if apply_on == 'item_group':
-			get_child_item_groups(d.get(apply_on))
+			apply_on_data.extend(get_child_item_groups(d.get(apply_on)))
 		else:
 			apply_on_data.append(d.get(apply_on))
 

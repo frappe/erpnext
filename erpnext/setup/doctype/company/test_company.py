@@ -81,7 +81,7 @@ class TestCompany(unittest.TestCase):
 							filters["is_group"] = 1
 
 						has_matching_accounts = frappe.get_all("Account", filters)
-						error_message = _("No Account matched these filters: {}".format(json.dumps(filters)))
+						error_message = _("No Account matched these filters: {}").format(json.dumps(filters))
 
 						self.assertTrue(has_matching_accounts, msg=error_message)
 				finally:
@@ -124,7 +124,7 @@ def create_child_company():
 		child_company.insert()
 	else:
 		child_company = frappe.get_doc("Company", child_company)
-	
+
 	return child_company.name
 
 def create_test_lead_in_company(company):

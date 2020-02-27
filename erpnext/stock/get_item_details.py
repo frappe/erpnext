@@ -973,6 +973,7 @@ def get_default_bom(item_code=None):
 		if bom:
 			return bom
 
+@frappe.whitelist()
 def get_valuation_rate(item_code, company, warehouse=None):
 	item = get_item_defaults(item_code, company)
 	item_group = get_item_group_defaults(item_code, company)

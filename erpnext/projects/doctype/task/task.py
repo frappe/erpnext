@@ -56,8 +56,8 @@ class Task(NestedSet):
 	def validate_status(self):
 		if self.status!=self.get_db_value("status") and self.status == "Completed":
 			for d in self.depends_on:
-				if frappe.db.get_value("Task", d.task, "status") != "Completed":
-					frappe.throw(_("Cannot close task {0} as its dependant task {1} is not closed.").format(frappe.bold(self.name), frappe.bold(d.task)))
+				if frappe.db.get_value("Task", d.task, "status") not in ("Completed", "Cancelled"):
+					frappe.throw(_("Cannot complete task {0} as its dependant task {1} are not ccompleted / cancelled.").format(frappe.bold(self.name), frappe.bold(d.task)))
 
 			close_all_assignments(self.doctype, self.name)
 
@@ -212,10 +212,10 @@ def set_multiple_status(names, status):
 		task.save()
 
 def set_tasks_as_overdue():
-	tasks = frappe.get_all("Task", filters={'status':['not in',['Cancelled', 'Closed']]})
+	tasks = frappe.get_all("Task", filters={"status": ["not in", ["Cancelled", "Completed"]]}, fields=["name", "status", "review_date"])
 	for task in tasks:
-		if frappe.db.get_value("Task", task.name, "status") in 'Pending Review':
-			if getdate(frappe.db.get_value("Task", task.name, "review_date")) < getdate(today()):
+		if task.status == "Pending Review":
+			if getdate(task.review_date) > getdate(today()):
 				continue
 		frappe.get_doc("Task", task.name).update_status()
 
