@@ -21,7 +21,7 @@ class BankReconciliation(Document):
 
 		condition = ""
 		if not self.include_reconciled_entries:
-			condition = "and clearance_date IS NULL or clearance_date='0000-00-00'"
+			condition = "and (clearance_date IS NULL or clearance_date='0000-00-00')"
 
 		journal_entries = frappe.db.sql("""
 			select
@@ -37,7 +37,7 @@ class BankReconciliation(Document):
 				and ifnull(t1.is_opening, 'No') = 'No' {condition}
 			group by t2.account, t1.name
 			order by t1.posting_date ASC, t1.name DESC
-		""".format(condition=condition), {"account": self.account, "from": self.from_date, "to": self.to_date}, as_dict=1, debug=1)
+		""".format(condition=condition), {"account": self.account, "from": self.from_date, "to": self.to_date}, as_dict=1)
 		condition = ''
 
 		if self.bank_account:
