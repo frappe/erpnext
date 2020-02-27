@@ -232,7 +232,8 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 		if bal < 0 and not on_cancel:
 			frappe.throw(_("Outstanding for {0} cannot be less than zero ({1})").format(against_voucher, fmt_money(bal)))
 
-	update_outstanding_amt_in_ref(against_voucher, against_voucher_type, bal)
+	if against_voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
+		update_outstanding_amt_in_ref(against_voucher, against_voucher_type, bal)
 
 def update_outstanding_amt_in_ref(against_voucher, against_voucher_type, bal):
 	data = []
