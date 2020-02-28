@@ -127,6 +127,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			events: {
 				on_customer_change: (customer) => {
 					this.frm.set_value('customer', customer);
+					this.items && customer && this.items.search_field.set_focus();
 				},
 				on_field_change: (item_code, field, value, batch_no) => {
 					this.update_item_in_cart(item_code, field, value, batch_no);
@@ -203,8 +204,8 @@ erpnext.pos.PointOfSale = class PointOfSale {
 							label: 'Loyalty Program',
 							fieldname: 'loyalty_program',
 							options: 'Loyalty Program',
-							reqd: for_selection ? 1 : 0,
-							read_only: for_selection ? 0 : 1,
+							reqd: 0,
+							read_only: 0,
 							get_query() {
 								return query
 							},
@@ -797,6 +798,7 @@ class POSCart {
 		this.make_pos_fields();
 		this.make_loyalty_points();
 		this.make_numpad();
+		this.make_shortcuts();
 	}
 
 	make_dom() {
@@ -1196,6 +1198,21 @@ class POSCart {
 		});
 	}
 
+	make_shortcuts() {
+		for (let row of this.numpad.button_array) {
+			for (let col of row) {
+				let shortcut_key = frappe.scrub(String(col))[0];
+				if (col === 'Del') shortcut_key = 'backspace';
+				if (col === '.') shortcut_key = '>';
+				frappe.ui.keys.on(`ctrl+${shortcut_key}`, () => {
+					if (this.selected_item) {
+						this.wrapper.find(`.num-col[data-value="${col}"]`).click();
+					} 
+				})
+			}
+		}
+	}
+
 	set_input_active(btn_value) {
 		this.selected_item.removeClass('qty disc rate');
 
@@ -1222,6 +1239,7 @@ class POSCart {
 			// add to cart
 			const $item = $(this.get_item_html(item));
 			$item.appendTo(this.$cart_items);
+			$item.click()
 		}
 		this.highlight_item(item.item_code);
 	}
