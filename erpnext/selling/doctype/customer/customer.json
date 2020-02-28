@@ -30,6 +30,10 @@
   "represents_company",
   "allowed_to_transact_section",
   "companies",
+  "delivery_window",
+  "delivery_start_time",
+  "column_break_22",
+  "delivery_end_time",
   "currency_and_price_list",
   "default_currency",
   "default_price_list",
@@ -466,13 +470,33 @@
    "fieldtype": "Table",
    "label": "Credit Limit",
    "options": "Customer Credit Limit"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "delivery_end_time",
+   "fieldtype": "Time",
+   "label": "Delivery End Time"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "delivery_window",
+   "fieldtype": "Section Break",
+   "label": "Delivery Window"
+  },
+  {
+   "fieldname": "delivery_start_time",
+   "fieldtype": "Time",
+   "label": "Delivery Start Time"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
  "links": [],
- "modified": "2020-01-29 20:36:37.879581",
+ "modified": "2020-02-27 18:59:51.009449",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
