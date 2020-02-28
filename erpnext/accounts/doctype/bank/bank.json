@@ -14,6 +14,11 @@
   "swift_number",
   "column_break_1",
   "branch_code",
+  "address_and_contact",
+  "address_html",
+  "website",
+  "column_break_13",
+  "contact_html",
   "data_import_configuration_section",
   "bank_transaction_mapping",
   "section_break_4",
@@ -33,6 +38,7 @@
    "label": "Bank Details"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "swift_number",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -47,6 +53,7 @@
    "search_index": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "branch_code",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -54,6 +61,31 @@
    "label": "Branch Code",
    "reqd": 0,
    "unique": 1
+  },
+  {
+   "fieldname": "address_and_contact",
+   "fieldtype": "Section Break",
+   "label": "Address and Contact",
+   "options": "fa fa-map-marker"
+  },
+  {
+   "fieldname": "address_html",
+   "fieldtype": "HTML",
+   "label": "Address HTML"
+  },
+  {
+   "fieldname": "website",
+   "fieldtype": "Data",
+   "label": "Website"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contact_html",
+   "fieldtype": "HTML",
+   "label": "Contact HTML"
   },
   {
    "collapsible": 1,
