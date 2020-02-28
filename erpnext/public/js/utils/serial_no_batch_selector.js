@@ -39,6 +39,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				fieldname: 'warehouse',
 				fieldtype:'Link',
 				options: 'Warehouse',
+				reqd: me.has_batch && !me.has_serial_no ? 0 : 1,
 				label: __(me.warehouse_details.type),
 				default: typeof me.warehouse_details.name == "string" ? me.warehouse_details.name : '',
 				onchange: function(e) {
@@ -151,7 +152,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				this.dialog.set_value('serial_no', d.serial_no);
 			}
 
-			if (d.has_batch_no && d.batch_no) {
+			if (d.has_batch && !d.has_serial_no && d.batch_no) š{
 				this.frm.doc.items.forEach(data => {
 					if(data.item_code == d.item_code) {
 						this.dialog.fields_dict.batches.df.data.push({
@@ -204,11 +205,9 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		} else {
 			let serial_nos = values.serial_no || '';
 			if (!serial_nos || !serial_nos.replace(/\s/g, '').length) {
-				if (!this.show_dialog) {
-					frappe.throw(__("Please enter serial numbers for serialized item "
-						+ values.item_code));
-					return false;
-				}
+				frappe.throw(__("Please enter serial numbers for serialized item "
+					+ values.item_code));
+				return false;
 			}
 			return true;
 		}
@@ -489,7 +488,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			{
 				fieldname: 'serial_no',
 				fieldtype: 'Small Text',
-				label: __(me.has_batch ? 'Selected Batch Numbers' : 'Selected Serial Numbers'),
+				label: __(me.has_batch && !me.has_serial_no ? 'Selected Batch Numbers' : 'Selected Serial Numbers'),
 				onchange: function() {
 					me.serial_list = this.get_value()
 						.replace(/\n/g, ' ').match(/\S+/g) || [];
