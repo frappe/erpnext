@@ -233,3 +233,30 @@ class POSInvoice(SalesInvoice):
 def make_sales_return(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 	return make_return_doc("POS Invoice", source_name, target_doc)
+
+@frappe.whitelist()
+def make_merge_log(invoices):
+	import json
+	from six import string_types
+
+	if isinstance(invoices, string_types):
+		invoices = json.loads(invoices)
+
+	if len(invoices) == 0:
+		frappe.throw(_('Atleast one invoice has to be selected.'))
+
+	merge_log = frappe.new_doc("POS Invoice Merge Log")
+	merge_log.posting_date = getdate(nowdate())
+	for inv in invoices:
+		inv_data = frappe.db.get_values("POS Invoice", inv.get('name'), 
+			["customer", "posting_date", "grand_total"], as_dict=1)[0]
+		merge_log.customer = inv_data.customer
+		merge_log.append("pos_invoices", {
+			'pos_invoice': inv.get('name'),
+			'customer': inv_data.customer,
+			'posting_date': inv_data.posting_date,
+			'grand_total': inv_data.grand_total 
+		})
+
+	if merge_log.get('pos_invoices'):
+		return merge_log.as_dict()

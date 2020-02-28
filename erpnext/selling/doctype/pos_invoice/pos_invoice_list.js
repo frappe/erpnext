@@ -20,5 +20,23 @@ frappe.listview_settings['POS Invoice'] = {
 		};
 		return [__(doc.status), status_color[doc.status], "status,=,"+doc.status];
 	},
-	right_column: "grand_total"
+	right_column: "grand_total",
+	onload: function(me) {
+		me.page.add_action_item('Make Merge Log', function() {
+			const invoices = me.get_checked_items();
+			frappe.call({
+				method: "erpnext.selling.doctype.pos_invoice.pos_invoice.make_merge_log",
+				freeze: true,
+				args:{
+					"invoices": invoices
+				},
+				callback: function (r) {
+					if (r.message) {
+						var doc = frappe.model.sync(r.message)[0];
+						frappe.set_route("Form", doc.doctype, doc.name);
+					}
+				}
+			});
+		});
+	},
 };
