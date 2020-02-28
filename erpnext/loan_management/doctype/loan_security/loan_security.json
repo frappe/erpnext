@@ -1,0 +1,95 @@
+{
+ "autoname": "field:loan_security_name",
+ "creation": "2019-09-02 15:07:08.885593",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "loan_security_type",
+  "loan_security_code",
+  "loan_security_name",
+  "unit_of_measure",
+  "column_break_3",
+  "haircut",
+  "disabled"
+ ],
+ "fields": [
+  {
+   "fieldname": "loan_security_name",
+   "fieldtype": "Data",
+   "label": "Loan Security Name",
+   "unique": 1
+  },
+  {
+   "fetch_from": "loan_security_type.haircut",
+   "fieldname": "haircut",
+   "fieldtype": "Percent",
+   "label": "Haircut %"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "loan_security_type",
+   "fieldtype": "Link",
+   "label": "Loan Security Type",
+   "options": "Loan Security Type"
+  },
+  {
+   "fieldname": "loan_security_code",
+   "fieldtype": "Data",
+   "label": "Loan Security Code",
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "fetch_from": "loan_security_type.unit_of_measure",
+   "fieldname": "unit_of_measure",
+   "fieldtype": "Link",
+   "label": "Unit Of Measure",
+   "options": "UOM"
+  }
+ ],
+ "modified": "2019-11-16 11:36:37.901656",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Loan Security",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "search_fields": "loan_security_code",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
