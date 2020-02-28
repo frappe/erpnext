@@ -113,7 +113,7 @@ def get_item_groups(pos_profile):
 
 @frappe.whitelist()
 def get_series():
-	return frappe.get_meta("Sales Invoice").get_field("naming_series").options or ""
+	return frappe.get_meta("POS Invoice").get_field("naming_series").options or "s"
 
 def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 	user = frappe.session['user']

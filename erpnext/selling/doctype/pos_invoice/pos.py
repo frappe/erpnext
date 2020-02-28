@@ -112,7 +112,7 @@ def update_pos_profile_data(doc, pos_profile, company_data):
 
 	doc.selling_price_list = pos_profile.get('selling_price_list') or \
 		frappe.db.get_value('Selling Settings', None, 'selling_price_list')
-	doc.naming_series = pos_profile.get('naming_series') or 'SINV-'
+	doc.naming_series = pos_profile.get('naming_series') or 'PSINV-'
 	doc.letter_head = pos_profile.get('letter_head') or company_data.default_letter_head
 	doc.ignore_pricing_rule = pos_profile.get('ignore_pricing_rule') or 0
 	doc.apply_discount_on = pos_profile.get('apply_discount_on') or 'Grand Total'
