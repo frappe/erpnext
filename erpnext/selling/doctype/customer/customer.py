@@ -54,6 +54,7 @@ class Customer(TransactionBase):
 		self.validate_credit_limit_on_change()
 		self.set_loyalty_program()
 		self.check_customer_group_change()
+		self.validate_delivery_window_times()
 
 		# set loyalty program tier
 		if frappe.db.exists('Customer', self.name):
@@ -71,6 +72,11 @@ class Customer(TransactionBase):
 		if not self.get('__islocal'):
 			if self.customer_group != frappe.db.get_value('Customer', self.name, 'customer_group'):
 				frappe.flags.customer_group_changed = True
+
+	def validate_delivery_window_times(self):
+		if self.delivery_start_time and self.delivery_end_time:
+			if self.delivery_start_time > self.delivery_end_time:
+				return frappe.throw(_('Delivery start window should be before closing window'))
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
