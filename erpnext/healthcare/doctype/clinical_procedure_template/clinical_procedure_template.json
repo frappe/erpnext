@@ -47,6 +47,7 @@
    "fieldtype": "Data",
    "label": "Item Code",
    "options": "Item",
+   "read_only_depends_on": "eval: !doc.__islocal ",
    "reqd": 1
   },
   {
@@ -175,7 +176,7 @@
   }
  ],
  "links": [],
- "modified": "2020-02-28 13:20:23.692613",
+ "modified": "2020-02-28 14:16:13.184981",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure Template",
