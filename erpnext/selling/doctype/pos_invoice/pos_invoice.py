@@ -33,7 +33,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_write_off_account()
 		self.validate_account_for_change_amount()
 		self.validate_item_cost_centers()
-		self.set_status(update=True)
+		self.set_status()
 		if cint(self.is_pos):
 			self.validate_pos()
 			if not self.is_return:
@@ -62,6 +62,7 @@ class POSInvoice(SalesInvoice):
 			against_psi_doc.make_loyalty_point_entry()
 		if self.redeem_loyalty_points and self.loyalty_points:
 			self.apply_loyalty_points()
+		self.set_status(update=True)
 	
 	def on_cancel(self):
 		# run on cancel method of selling controller
@@ -160,6 +161,8 @@ class POSInvoice(SalesInvoice):
 			self.ignore_pricing_rule = pos.ignore_pricing_rule
 			if pos.get('account_for_change_amount'):
 				self.account_for_change_amount = pos.get('account_for_change_amount')
+			if pos.get('warehouse'):
+				self.set_warehouse = pos.get('warehouse')
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'letter_head', 'tc_name',
 				'company', 'select_print_heading', 'cash_bank_account', 'write_off_account', 'taxes_and_charges',
@@ -205,7 +208,7 @@ class POSInvoice(SalesInvoice):
 		if not self.due_date and self.customer:
 			self.due_date = get_due_date(self.posting_date, "Customer", self.customer, self.company)
 
-		super(POSInvoice, self).set_missing_values(for_validate)
+		super(SalesInvoice, self).set_missing_values(for_validate)
 
 		print_format = pos.get("print_format_for_online") if pos else None
 		if not print_format and not cint(frappe.db.get_value('Print Format', 'POS Invoice', 'disabled')):

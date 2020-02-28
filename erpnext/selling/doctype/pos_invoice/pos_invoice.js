@@ -9,7 +9,18 @@ erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend(
 		this._super(doc);
 	},
 
+	onload() {
+		this._super();
+		if(this.frm.doc.__islocal && this.frm.doc.is_pos) {
+			//Load pos profile data on the invoice if the default value of Is POS is 1
+
+			me.frm.script_manager.trigger("is_pos");
+			me.frm.refresh_fields();
+		}
+	},
+
 	refresh(doc) {
+		this._super();
 		if (doc.docstatus == 1 && !doc.is_return) {
 			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
 				cur_frm.add_custom_button(__('Return'),
