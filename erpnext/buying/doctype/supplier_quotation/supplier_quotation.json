@@ -6,33 +6,28 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
-  "total_after_taxes",
-  "total_discount_after_taxes",
-  "base_total_after_taxes",
-  "base_total_discount_after_taxes",
-  "total_alt_uom_qty",
-  "total_before_discount",
-  "tax_exclusive_total_before_discount",
-  "total_discount",
-  "tax_exclusive_total_discount",
-  "base_total_before_discount",
-  "base_tax_exclusive_total_before_discount",
-  "base_total_discount",
-  "base_tax_exclusive_total_discount",
   "supplier_section",
   "title",
-  "naming_series",
+  "company",
   "supplier",
   "supplier_name",
-  "set_project",
   "column_break1",
+  "remarks",
+  "column_break_21",
   "transaction_date",
   "amended_from",
-  "company",
+  "naming_series",
+  "more_info",
+  "set_project",
+  "is_subcontracted",
+  "column_break_57",
+  "status",
+  "opportunity",
   "address_section",
   "supplier_address",
-  "contact_person",
   "address_display",
+  "column_break_15",
+  "contact_person",
   "contact_display",
   "contact_mobile",
   "contact_email",
@@ -43,6 +38,7 @@
   "buying_price_list",
   "price_list_currency",
   "plc_conversion_rate",
+  "column_break_27",
   "ignore_pricing_rule",
   "items_section",
   "items",
@@ -51,68 +47,88 @@
   "pricing_rules",
   "section_break_22",
   "total_qty",
-  "base_total",
-  "base_tax_exclusive_total",
-  "base_taxable_total",
-  "base_net_total",
   "column_break_24",
-  "total",
-  "tax_exclusive_total",
-  "taxable_total",
-  "net_total",
+  "total_alt_uom_qty",
+  "column_break_38",
   "total_net_weight",
+  "section_break_40",
+  "total",
+  "base_total",
+  "col_break_43",
+  "total_before_discount",
+  "base_total_before_discount",
+  "column_break_46",
+  "total_discount",
+  "base_total_discount",
   "taxes_section",
-  "tax_category",
+  "taxes_and_charges",
   "column_break_36",
+  "tax_category",
+  "column_break_53",
   "shipping_rule",
   "section_break_38",
-  "taxes_and_charges",
   "taxes",
   "tax_breakup",
   "other_charges_calculation",
+  "tax_exclusive_totals_section",
+  "tax_exclusive_total",
+  "base_tax_exclusive_total",
+  "column_break_62",
+  "tax_exclusive_total_before_discount",
+  "base_tax_exclusive_total_before_discount",
+  "column_break_65",
+  "tax_exclusive_total_discount",
+  "base_tax_exclusive_total_discount",
   "totals",
-  "base_taxes_and_charges_added",
-  "base_taxes_and_charges_deducted",
-  "base_total_taxes_and_charges",
-  "column_break_37",
-  "taxes_and_charges_added",
-  "taxes_and_charges_deducted",
+  "net_total",
+  "base_net_total",
+  "column_break_71",
+  "taxable_total",
+  "base_taxable_total",
+  "section_break_74",
   "total_taxes_and_charges",
+  "base_total_taxes_and_charges",
+  "taxes_and_charges_added",
+  "base_taxes_and_charges_added",
+  "taxes_and_charges_deducted",
+  "base_taxes_and_charges_deducted",
+  "column_break_37",
+  "total_after_taxes",
+  "base_total_after_taxes",
+  "column_break_84",
+  "total_discount_after_taxes",
+  "base_total_discount_after_taxes",
   "section_break_41",
   "apply_discount_on",
-  "base_discount_amount",
-  "column_break_43",
   "additional_discount_percentage",
+  "column_break_43",
   "discount_amount",
+  "base_discount_amount",
   "section_break_46",
-  "base_grand_total",
-  "base_rounding_adjustment",
-  "base_in_words",
-  "base_rounded_total",
-  "column_break4",
   "grand_total",
-  "rounding_adjustment",
+  "base_grand_total",
+  "column_break_96",
   "rounded_total",
+  "base_rounded_total",
+  "section_break_99",
   "in_words",
+  "base_in_words",
+  "column_break4",
+  "rounding_adjustment",
+  "base_rounding_adjustment",
   "disable_rounded_total",
   "terms_section_break",
   "tc_name",
   "terms",
   "printing_settings",
-  "select_print_heading",
-  "group_same_items",
-  "column_break_72",
   "letter_head",
+  "select_print_heading",
+  "column_break_72",
   "language",
+  "group_same_items",
   "subscription_section",
   "auto_repeat",
-  "update_auto_repeat_reference",
-  "more_info",
-  "status",
-  "column_break_57",
-  "is_subcontracted",
-  "reference",
-  "opportunity"
+  "update_auto_repeat_reference"
  ],
  "fields": [
   {
@@ -133,13 +149,13 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "PUR-SQTN-.YYYY.-",
+   "options": "SQTN-.",
    "print_hide": 1,
-   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -473,12 +489,15 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "totals",
    "fieldtype": "Section Break",
+   "label": "Net Totals",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money"
   },
   {
+   "depends_on": "taxes_and_charges_deducted",
    "fieldname": "base_taxes_and_charges_added",
    "fieldtype": "Currency",
    "label": "Taxes and Charges Added (Company Currency)",
@@ -489,6 +508,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "taxes_and_charges_deducted",
    "fieldname": "base_taxes_and_charges_deducted",
    "fieldtype": "Currency",
    "label": "Taxes and Charges Deducted (Company Currency)",
@@ -514,6 +534,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "taxes_and_charges_deducted",
    "fieldname": "taxes_and_charges_added",
    "fieldtype": "Currency",
    "label": "Taxes and Charges Added",
@@ -524,6 +545,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "taxes_and_charges_deducted",
    "fieldname": "taxes_and_charges_deducted",
    "fieldtype": "Currency",
    "label": "Taxes and Charges Deducted",
@@ -796,11 +818,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "reference",
-   "fieldtype": "Section Break",
-   "label": "Reference"
-  },
-  {
    "fieldname": "opportunity",
    "fieldtype": "Link",
    "label": "Opportunity",
@@ -848,7 +865,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.total_qty != doc.total_alt_uom_qty",
    "fieldname": "total_alt_uom_qty",
    "fieldtype": "Float",
    "label": "Total Contents Quantity",
@@ -938,6 +954,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "eval:doc.tax_exclusive_total != doc.total",
    "fieldname": "base_tax_exclusive_total",
    "fieldtype": "Currency",
    "force_currency_symbol": 1,
@@ -957,7 +974,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.tax_exclusive_total != doc.net_total",
+   "depends_on": "eval:doc.tax_exclusive_total != doc.total",
    "fieldname": "tax_exclusive_total",
    "fieldtype": "Currency",
    "label": "Tax Exclusive Total",
@@ -973,12 +990,85 @@
    "options": "currency",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "in_global_search": 1,
+   "in_standard_filter": 1,
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_38",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_40",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_break_43",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_46",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_53",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "tax_exclusive_totals_section",
+   "fieldtype": "Section Break",
+   "label": "Tax Exclusive Totals"
+  },
+  {
+   "fieldname": "column_break_62",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_65",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_71",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_74",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_84",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_96",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_99",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 29,
  "is_submittable": 1,
- "modified": "2020-02-09 16:20:24.068263",
+ "modified": "2020-02-26 15:02:04.637436",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",

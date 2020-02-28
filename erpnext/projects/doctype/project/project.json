@@ -13,6 +13,7 @@
   "is_active",
   "percent_complete_method",
   "percent_complete",
+  "item_code",
   "column_break_5",
   "project_template",
   "expected_start_date",
@@ -439,12 +440,18 @@
    "fieldname": "message",
    "fieldtype": "Text",
    "label": "Message"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "max_attachments": 4,
- "modified": "2019-09-24 15:02:50.208301",
+ "modified": "2020-02-28 11:55:10.163065",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

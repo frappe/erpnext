@@ -6,24 +6,6 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "base_item_taxes_and_charges",
-  "base_tax_inclusive_rate",
-  "base_tax_inclusive_amount",
-  "item_taxes_and_charges",
-  "tax_inclusive_rate",
-  "tax_inclusive_amount",
-  "base_taxable_rate",
-  "base_amount_before_discount",
-  "base_tax_exclusive_amount_before_discount",
-  "base_total_discount",
-  "base_tax_exclusive_total_discount",
-  "amount_before_discount",
-  "tax_exclusive_amount_before_discount",
-  "total_discount",
-  "tax_exclusive_total_discount",
-  "alt_uom_size",
-  "alt_uom_qty",
-  "alt_uom",
   "item_code",
   "col_break1",
   "item_name",
@@ -39,68 +21,101 @@
   "manufacturer",
   "column_break_13",
   "manufacturer_part_no",
-  "quantity_and_rate",
+  "section_break_16",
   "received_qty",
+  "column_break_18",
   "qty",
+  "column_break_20",
   "rejected_qty",
-  "stock_uom",
-  "col_break2",
+  "quantity_and_rate",
   "uom",
+  "col_break2",
   "conversion_factor",
   "stock_qty",
+  "stock_uom",
+  "column_break_28",
+  "alt_uom_size",
+  "alt_uom_qty",
+  "alt_uom",
+  "column_break_32",
+  "weight_per_unit",
+  "total_weight",
+  "weight_uom",
   "sec_break1",
   "price_list_rate",
-  "tax_exclusive_price_list_rate",
-  "discount_percentage",
-  "apply_discount_after_taxes",
-  "discount_amount",
-  "tax_exclusive_discount_amount",
-  "col_break3",
   "base_price_list_rate",
-  "base_tax_exclusive_price_list_rate",
-  "sec_break2",
-  "rate",
-  "tax_exclusive_rate",
-  "amount",
-  "tax_exclusive_amount",
-  "item_tax_template",
-  "col_break4",
-  "base_rate",
-  "base_tax_exclusive_rate",
-  "base_amount",
-  "base_tax_exclusive_amount",
+  "column_break_39",
+  "discount_percentage",
+  "discount_amount",
+  "apply_discount_after_taxes",
   "pricing_rules",
   "is_free_item",
+  "is_fixed_asset",
+  "sec_break2",
+  "rate",
+  "base_rate",
+  "column_break_49",
+  "amount",
+  "base_amount",
+  "column_break_52",
+  "amount_before_discount",
+  "base_amount_before_discount",
+  "column_break_55",
+  "total_discount",
+  "base_total_discount",
+  "tax_exclusive_amounts_section",
+  "tax_exclusive_price_list_rate",
+  "base_tax_exclusive_price_list_rate",
+  "column_break_61",
+  "tax_exclusive_discount_amount",
+  "column_break_63",
+  "tax_exclusive_rate",
+  "base_tax_exclusive_rate",
+  "col_break4",
+  "tax_exclusive_amount",
+  "base_tax_exclusive_amount",
+  "column_break_69",
+  "tax_exclusive_amount_before_discount",
+  "base_tax_exclusive_amount_before_discount",
+  "column_break_72",
+  "tax_exclusive_total_discount",
+  "base_tax_exclusive_total_discount",
   "section_break_22",
-  "taxable_rate",
+  "item_taxes_and_charges",
+  "base_item_taxes_and_charges",
+  "column_break_79",
+  "tax_inclusive_rate",
+  "base_tax_inclusive_rate",
+  "column_break_82",
+  "tax_inclusive_amount",
+  "base_tax_inclusive_amount",
+  "net_amounts_section",
   "net_rate",
-  "taxable_amount",
-  "net_amount",
-  "column_break_25",
   "base_net_rate",
-  "base_taxable_amount",
+  "column_break_88",
+  "net_amount",
   "base_net_amount",
+  "column_break_25",
+  "taxable_rate",
+  "base_taxable_rate",
+  "column_break_94",
+  "taxable_amount",
+  "base_taxable_amount",
   "valuation_rate",
   "item_tax_amount",
   "landed_cost_voucher_amount",
   "rm_supp_cost",
-  "item_weight_details",
-  "weight_per_unit",
-  "total_weight",
-  "column_break_38",
-  "weight_uom",
   "warehouse_section",
   "warehouse",
   "rejected_warehouse",
+  "serial_no",
+  "col_br_wh",
   "quality_inspection",
   "batch_no",
-  "col_br_wh",
-  "serial_no",
   "rejected_serial_no",
   "accounting",
   "expense_account",
   "col_break5",
-  "is_fixed_asset",
   "asset_location",
   "asset_category",
   "deferred_expense_section",
@@ -111,11 +126,12 @@
   "service_start_date",
   "service_end_date",
   "reference",
+  "bom",
   "allow_zero_valuation_rate",
   "item_tax_rate",
-  "bom",
   "include_exploded_items",
   "col_break6",
+  "item_tax_template",
   "purchase_order",
   "po_detail",
   "purchase_receipt",
@@ -271,10 +287,6 @@
    "options": "currency"
   },
   {
-   "fieldname": "col_break3",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "base_price_list_rate",
    "fieldtype": "Currency",
    "label": "Price List Rate (Company Currency)",
@@ -353,8 +365,10 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "section_break_22",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Tax Inclusive Amounts"
   },
   {
    "fieldname": "net_rate",
@@ -393,12 +407,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "item_weight_details",
-   "fieldtype": "Section Break",
-   "label": "Item Weight Details"
-  },
-  {
    "fieldname": "weight_per_unit",
    "fieldtype": "Float",
    "label": "Weight Per Unit"
@@ -410,16 +418,13 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_38",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "weight_uom",
    "fieldtype": "Link",
    "label": "Weight UOM",
    "options": "UOM"
   },
   {
+   "collapsible": 1,
    "fieldname": "warehouse_section",
    "fieldtype": "Section Break",
    "label": "Warehouse"
@@ -565,6 +570,7 @@
    "no_copy": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "reference",
    "fieldtype": "Section Break",
    "label": "Reference"
@@ -1056,11 +1062,91 @@
    "options": "Company:company:default_currency",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_16",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_32",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_39",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_49",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_52",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_55",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "tax_exclusive_amounts_section",
+   "fieldtype": "Section Break",
+   "label": "Tax Exclusive Amounts"
+  },
+  {
+   "fieldname": "column_break_61",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_63",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_69",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_72",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_79",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_82",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "net_amounts_section",
+   "fieldtype": "Section Break",
+   "label": "Net Amounts"
+  },
+  {
+   "fieldname": "column_break_88",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_94",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-02-09 16:10:06.427338",
+ "modified": "2020-02-26 17:57:32.187298",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
