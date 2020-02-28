@@ -142,7 +142,7 @@
    "fieldname": "products_table",
    "fieldtype": "Table",
    "label": "Products Table",
-   "options": "Acount Statement Payment Item"
+   "options": "Account Statement Payment Item"
   },
   {
    "fieldname": "totals_section",
@@ -186,7 +186,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-27 15:44:52.977486",
+ "modified": "2020-02-28 14:06:01.849484",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment",
