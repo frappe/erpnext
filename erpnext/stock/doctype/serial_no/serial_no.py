@@ -482,7 +482,6 @@ def auto_fetch_serial_number(qty, item_code, warehouse, batch_nos=None):
 	filters = {
 		"item_code": item_code,
 		"warehouse": warehouse,
-		"batch_no": batch_no,
 		"delivery_document_no": "",
 		"sales_invoice": ""
 	}
