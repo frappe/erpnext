@@ -34,7 +34,7 @@ class StockController(AccountsController):
 					gl_entries = self.get_gl_entries(warehouse_account)
 				make_gl_entries(gl_entries, from_repost=from_repost)
 
-			if repost_future_gle:
+			if (repost_future_gle or self.flags.repost_future_gle):
 				items, warehouses = self.get_items_and_warehouses()
 				update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items,
 					warehouse_account, company=self.company)
