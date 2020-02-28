@@ -239,6 +239,9 @@ class StockController(AccountsController):
 		for d in self.items:
 			if not d.batch_no: continue
 
+			for serial_no in frappe.get_all("Serial No", {'batch_no': d.batch_no}):
+				serial_no.db_set("batch_no", None)
+
 			d.batch_no = None
 			d.db_set("batch_no", None)
 
