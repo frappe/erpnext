@@ -138,7 +138,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 					() => {
 						refresh_field("items");
 						if (me.callback) {
-							return me.callback(this.item);
+							return me.callback(me.item);
 						}
 					},
 					() => me.dialog.hide()
