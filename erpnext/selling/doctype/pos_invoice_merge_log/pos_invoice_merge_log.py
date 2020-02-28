@@ -30,23 +30,66 @@ class POSInvoiceMergeLog(Document):
 				frappe.throw(_("Row #{}: POS Invoice {} has been {}").format(d.idx, d.pos_invoice, status))
 
 	def on_submit(self):
-		self.process_merging_into_sales_invoice()
-		self.process_merging_into_credit_note()
+		pos_invoices_name = [d.pos_invoice for d in self.pos_invoices]
+		pos_invoices_data = frappe.db.get_all('POS Invoice', 
+			filters={ "name": ["in", pos_invoices_name]}, fields=[
+				"name", "is_return", "redeem_loyalty_points", "loyalty_redemption_account", 
+				"loyalty_redemption_cost_center", "loyalty_points", "loyalty_amount"
+			])
+		
 
-	def process_merging_into_sales_invoice(self):
-		sales_invoice = self.create_sales_invoice()
-		self.consolidated_invoice = sales_invoice
-		self.save()
-	
-	def process_merging_into_credit_note(self):
-		self.create_credit_notes()
+		sales_invoice = self.process_merging_into_sales_invoice(pos_invoices_data)
 
-	def create_credit_notes(self):
+		has_pos_credit_note = any([d.is_return == 1 for d in pos_invoices_data])
+		if has_pos_credit_note:
+			credit_note = self.process_merging_into_credit_note(pos_invoices_data)
+		else:
+			credit_note = ""
+
+		self.save() # save consolidated_sales_invoice & consolidated_credit_note
+
+		self.update_pos_invoices(sales_invoice, credit_note)
+
+	def process_merging_into_sales_invoice(self, data):
+		sales_invoice = self.get_new_sales_invoice()
+
+		for doc in data:
+			if not doc.is_return:
+				loyalty_points_redeemed = 0
+				loyalty_amount = 0
+				if doc.redeem_loyalty_points:
+					sales_invoice.redeem_loyalty_points = True
+					sales_invoice.loyalty_redemption_account = doc.loyalty_redemption_account
+					sales_invoice.loyalty_redemption_cost_center = doc.loyalty_redemption_cost_center
+					loyalty_points_redeemed += doc.loyalty_points
+					loyalty_amount += doc.loyalty_amount
+
+				sales_invoice = get_mapped_doc("POS Invoice", doc.name, {
+					"POS Invoice": {
+						"doctype": "Sales Invoice",
+						"validation": {
+							"docstatus": ["=", 1]
+						}
+					},
+					"POS Invoice Item": {
+						"doctype": "Sales Invoice Item",
+					}
+				}, sales_invoice)
+		if sales_invoice.redeem_loyalty_points:
+			sales_invoice.loyalty_points = loyalty_points_redeemed
+			sales_invoice.loyalty_amount = loyalty_amount
+
+		sales_invoice.save()
+		sales_invoice.submit()
+		self.consolidated_invoice = sales_invoice.name
+
+		return sales_invoice.name
+
+	def process_merging_into_credit_note(self, data):
 		credit_note = self.get_new_sales_invoice()
 		credit_note.is_return = 1
 
-		for d in self.pos_invoices:
-			doc = frappe.get_doc('POS Invoice', d.pos_invoice)
+		for doc in data:
 			if doc.is_return:
 				loyalty_points_redeemed = 0
 				loyalty_amount = 0
@@ -57,7 +100,7 @@ class POSInvoiceMergeLog(Document):
 					loyalty_points_redeemed += doc.loyalty_points
 					loyalty_amount += doc.loyalty_amount
 
-				credit_note = get_mapped_doc("POS Invoice", d.pos_invoice, {
+				credit_note = get_mapped_doc("POS Invoice", doc.name, {
 					"POS Invoice": {
 						"doctype": "Sales Invoice",
 						"validation": {
@@ -68,7 +111,6 @@ class POSInvoiceMergeLog(Document):
 						"doctype": "Sales Invoice Item",
 					}
 				}, credit_note)
-
 		if credit_note.redeem_loyalty_points:
 			credit_note.loyalty_points = loyalty_points_redeemed
 			credit_note.loyalty_amount = loyalty_amount
@@ -76,13 +118,7 @@ class POSInvoiceMergeLog(Document):
 		credit_note.return_against = self.consolidated_invoice
 		credit_note.save()
 		credit_note.submit()
-
-		for d in self.pos_invoices:
-			doc = frappe.get_doc('POS Invoice', d.pos_invoice)
-			if doc.is_return:
-				doc.update({'consolidated_invoice': credit_note.name})
-				doc.set_status(update=True)
-				doc.save()
+		self.consolidated_credit_note = credit_note.name
 
 		return credit_note.name
 	
@@ -94,49 +130,16 @@ class POSInvoiceMergeLog(Document):
 		sales_invoice.posting_date = getdate(nowdate())
 
 		return sales_invoice
-
-	def create_sales_invoice(self):
-		sales_invoice = self.get_new_sales_invoice()
-
+	
+	def update_pos_invoices(self, sales_invoice, credit_note):
 		for d in self.pos_invoices:
 			doc = frappe.get_doc('POS Invoice', d.pos_invoice)
 			if not doc.is_return:
-				loyalty_points_redeemed = 0
-				loyalty_amount = 0
-				if doc.redeem_loyalty_points:
-					sales_invoice.redeem_loyalty_points = True
-					sales_invoice.loyalty_redemption_account = doc.loyalty_redemption_account
-					sales_invoice.loyalty_redemption_cost_center = doc.loyalty_redemption_cost_center
-					loyalty_points_redeemed += doc.loyalty_points
-					loyalty_amount += doc.loyalty_amount
-
-				sales_invoice = get_mapped_doc("POS Invoice", d.pos_invoice, {
-					"POS Invoice": {
-						"doctype": "Sales Invoice",
-						"validation": {
-							"docstatus": ["=", 1]
-						}
-					},
-					"POS Invoice Item": {
-						"doctype": "Sales Invoice Item",
-					}
-				}, sales_invoice)
-
-		if sales_invoice.redeem_loyalty_points:
-			sales_invoice.loyalty_points = loyalty_points_redeemed
-			sales_invoice.loyalty_amount = loyalty_amount
-
-		sales_invoice.save()
-		sales_invoice.submit()
-
-		for d in self.pos_invoices:
-			doc = frappe.get_doc('POS Invoice', d.pos_invoice)
-			if not doc.is_return:
-				doc.update({'consolidated_invoice': sales_invoice.name})
-				doc.set_status(update=True)
-				doc.save()
-
-		return sales_invoice.name
+				doc.update({'consolidated_invoice': sales_invoice})
+			else:
+				doc.update({'consolidated_invoice': credit_note})
+			doc.set_status(update=True)
+			doc.save()
 
 def get_all_invoices():
 	filters = {

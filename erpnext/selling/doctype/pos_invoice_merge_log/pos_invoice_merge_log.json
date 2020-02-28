@@ -10,6 +10,8 @@
   "pos_invoices",
   "references_section",
   "consolidated_invoice",
+  "column_break_7",
+  "consolidated_credit_note",
   "amended_from"
  ],
  "fields": [
@@ -61,10 +63,21 @@
    "label": "Consolidated Sales Invoice",
    "options": "Sales Invoice",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "consolidated_credit_note",
+   "fieldtype": "Link",
+   "label": "Consolidated Credit Note",
+   "options": "Sales Invoice",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2020-02-03 21:24:03.029437",
+ "modified": "2020-02-18 14:41:45.938992",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "POS Invoice Merge Log",
