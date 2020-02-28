@@ -17,16 +17,8 @@ class ClinicalProcedureTemplate(Document):
 		create_item_from_template(self)
 
 	def on_update(self):
-		#Item and Price List update --> if (change_in_item)
-		if self.change_in_item and self.is_billable == 1 and self.item:
-			updating_item(self)
-			if self.rate != 0.0:
-				updating_rate(self)
-		elif self.is_billable == 0 and self.item:
-			frappe.db.set_value('Item',self.item,'disabled',1)
-
-		frappe.db.set_value(self.doctype,self.name,'change_in_item',0)
-		self.reload()
+		if self.change_in_item:
+			self.update_item_and_item_price()
 
 	def enable_disable_item(self):
 		if self.is_billable:
@@ -35,26 +27,26 @@ class ClinicalProcedureTemplate(Document):
 			else:
 				frappe.db.set_value('Item', self.item, 'disabled', 0)
 
-	#Call before delete the template
 	def on_trash(self):
-		if(self.item):
+		if self.item:
 			try:
-				frappe.delete_doc('Item',self.item)
+				frappe.delete_doc('Item', self.item)
 			except Exception:
-				frappe.throw(_("""Not permitted. Please disable the Procedure Template"""))
+				frappe.throw(_('Not permitted. Please disable the Procedure Template'), title='Not Permitted')
 
 	def get_item_details(self, args=None):
-		item = frappe.db.sql("""select stock_uom, item_name
-			from `tabItem`
-			where name = %s
-				and disabled=0
-				and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %s)""",
-			(args.get('item_code'), nowdate()), as_dict = 1)
+		item = frappe.db.get_all('Item',
+			filters={
+				'disabled': 0,
+				'name': args.get('item_code')
+			},
+			fields=['stock_uom', 'item_name']
+		)
+
 		if not item:
-			frappe.throw(_('Item {0} is not active or end of life has been reached').format(args.get('item_code')))
+			frappe.throw(_('Item {0} is not active').format(args.get('item_code')))
 
 		item = item[0]
-
 		ret = {
 			'uom'			      	: item.stock_uom,
 			'stock_uom'			  	: item.stock_uom,
@@ -65,22 +57,34 @@ class ClinicalProcedureTemplate(Document):
 		}
 		return ret
 
-def updating_item(self):
-	frappe.db.sql("""update `tabItem` set item_name=%s, item_group=%s, disabled=0,
-		description=%s, modified=NOW() where item_code=%s""",
-		(self.template, self.item_group , self.description, self.item))
-def updating_rate(self):
-	frappe.db.sql("""update `tabItem Price` set item_name=%s, price_list_rate=%s, modified=NOW() where
-	 item_code=%s""",(self.template, self.rate, self.item))
+	def update_item_and_item_price(self):
+		if self.is_billable and self.item:
+			item_doc = frappe.get_doc('Item', {'item_code': self.item})
+			item_doc.item_name = self.template
+			item_doc.item_group = self.item_group
+			item_doc.description = self.description
+			item_doc.disabled = 0
+			item_doc.save(ignore_permissions=True)
+
+			if self.rate:
+				item_price = frappe.get_doc('Item Price', {'item_code': self.item})
+				item_price.item_name = self.template
+				item_price.price_list_name = self.rate
+				item_price.save()
+
+		elif not self.is_billable and self.item:
+			frappe.db.set_value('Item', self.item, 'disabled', 1)
+
+		frappe.db.set_value(self.doctype, self.name, 'change_in_item', 0)
+		self.reload()
+
 
 def create_item_from_template(doc):
-	disabled = 1
-
-	if doc.is_billable == 1:
+	disabled = doc.disabled
+	if doc.is_billable and not doc.disabled:
 		disabled = 0
 
-	#insert item
-	item =  frappe.get_doc({
+	item = frappe.get_doc({
 		'doctype': 'Item',
 		'item_code': doc.template,
 		'item_name':doc.template,
@@ -96,20 +100,13 @@ def create_item_from_template(doc):
 		'stock_uom': 'Unit'
 	}).insert(ignore_permissions=True)
 
-	#insert item price
-	#get item price list to insert item price
-	if(doc.rate != 0.0):
-		price_list_name = frappe.db.get_value('Price List', {'selling': 1})
-		if(doc.rate):
-			make_item_price(item.name, price_list_name, doc.rate)
-		else:
-			make_item_price(item.name, price_list_name, 0.0)
-	#Set item to the template
+	make_item_price(item.name, doc.rate)
+
 	frappe.db.set_value('Clinical Procedure Template', doc.name, 'item', item.name)
+	doc.reload()
 
-	doc.reload() #refresh the doc after insert.
-
-def make_item_price(item, price_list_name, item_price):
+def make_item_price(item, item_price):
+	price_list_name = frappe.db.get_value('Price List', {'selling': 1})
 	frappe.get_doc({
 		'doctype': 'Item Price',
 		'price_list': price_list_name,
@@ -119,13 +116,10 @@ def make_item_price(item, price_list_name, item_price):
 
 @frappe.whitelist()
 def change_item_code_from_template(item_code, doc):
-	args = json.loads(doc)
-	doc = frappe._dict(args)
+	doc = frappe._dict(json.loads(doc))
 
-	if(frappe.db.exists({
-		'doctype': 'Item',
-		'item_code': item_code})):
-		frappe.throw(_('Code {0} already exist').format(item_code))
+	if frappe.db.exists('Item', {'item_code': item_code}):
+		frappe.throw(_('Item with Item Code {0} already exists').format(item_code))
 	else:
 		rename_doc('Item', doc.item_code, item_code, ignore_permissions=True)
 		frappe.db.set_value('Clinical Procedure Template', doc.name, 'item_code', item_code)

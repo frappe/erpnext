@@ -79,6 +79,8 @@
    "depends_on": "is_billable",
    "fieldname": "rate",
    "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Rate",
    "mandatory_depends_on": "is_billable"
   },
@@ -127,7 +129,8 @@
    "fetch_from": "sample.sample_uom",
    "fieldname": "sample_uom",
    "fieldtype": "Data",
-   "label": "UOM"
+   "label": "Sample UOM",
+   "read_only": 1
   },
   {
    "fieldname": "sample_qty",
@@ -163,6 +166,8 @@
   {
    "fieldname": "item",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Item",
    "no_copy": 1,
    "options": "Item",
@@ -170,7 +175,7 @@
   }
  ],
  "links": [],
- "modified": "2020-02-27 16:32:55.780893",
+ "modified": "2020-02-28 13:20:23.692613",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure Template",
