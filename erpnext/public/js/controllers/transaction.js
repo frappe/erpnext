@@ -535,7 +535,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 										});
 
 										erpnext.show_serial_batch_selector(me.frm, d, (item) => {
-											return me.frm.script_manager.trigger('qty', item.doctype, item.name);
+											me.frm.script_manager.trigger('qty', item.doctype, item.name);
+											if (!me.frm.doc.set_warehouse)
+												me.frm.script_manager.trigger('warehouse', item.doctype, item.name);
 										}, undefined, !frappe.flags.hide_serial_batch_dialog);
 									}
 								},
