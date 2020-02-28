@@ -55,6 +55,7 @@ class Customer(TransactionBase):
 		self.set_loyalty_program()
 		self.check_customer_group_change()
 		self.validate_default_bank_account()
+		self.validate_delivery_window_times()
 
 		# set loyalty program tier
 		if frappe.db.exists('Customer', self.name):
@@ -77,6 +78,10 @@ class Customer(TransactionBase):
 		if self.default_bank_account:
 			is_company_account = frappe.db.get_value('Bank Account', self.default_bank_account, 'is_company_account')
 			frappe.throw(_("{0} is not a company bank account").format(frappe.bold(self.default_bank_account)))
+	def validate_delivery_window_times(self):
+		if self.delivery_start_time and self.delivery_end_time:
+			if self.delivery_start_time > self.delivery_end_time:
+				return frappe.throw(_('Delivery start window should be before closing window'))
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
