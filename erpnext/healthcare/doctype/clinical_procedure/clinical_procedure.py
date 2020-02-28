@@ -14,6 +14,7 @@ from erpnext.stock.get_item_details import get_item_details
 
 class ClinicalProcedure(Document):
 	def validate(self):
+		self.set_status()
 		if self.consume_stock and not self.status == 'Draft':
 			if not self.warehouse:
 				frappe.throw(_("Set warehouse for Procedure {0} ").format(self.name))
@@ -41,6 +42,15 @@ class ClinicalProcedure(Document):
 			sample_collection = create_sample_doc(template, patient, None)
 			frappe.db.set_value("Clinical Procedure", self.name, "sample", sample_collection.name)
 		self.reload()
+
+	def set_status(self):
+		if self.docstatus == 0:
+			self.status = 'Draft'
+		elif self.docstatus == 1:
+			if self.status not in ['In Progress', 'Completed']:
+				self.status = 'Pending'
+		elif self.docstatus == 2:
+			self.status = 'Cancelled'
 
 	def complete(self):
 		if self.consume_stock and self.items:
@@ -83,7 +93,7 @@ class ClinicalProcedure(Document):
 			self.status = 'In Progress'
 			insert_clinical_procedure_to_medical_record(self)
 		else:
-			self.status = 'Draft'
+			self.status = 'Pending'
 		self.save()
 
 	def set_actual_qty(self):
