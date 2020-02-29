@@ -22,9 +22,9 @@ def validate_company(company):
 		'allow_account_creation_against_child_company'])
 
 	if parent_company and (not allow_account_creation_against_child_company):
-		frappe.throw(_("""{0} is child company. Please import accounts in parent company
+		frappe.throw(_("""{0} is a child company. Please import accounts against parent company
 			or enable {1} in company master""").format(frappe.bold(company),
-			frappe.bold('Allow Account Creation Against Child Company')))
+			frappe.bold('Allow Account Creation Against Child Company')), title='Wrong Company')
 
 	if frappe.db.get_all('GL Entry', {"company": company}, "name", limit=1):
 		return False
@@ -102,7 +102,7 @@ def generate_data_from_excel(file_doc, extension, as_dict=False):
 	return data
 
 @frappe.whitelist()
-def get_coa(doctype, parent, file_type, is_root=False, file_name=None):
+def get_coa(doctype, parent, is_root=False, file_name=None):
 	''' called by tree view (to fetch node's children) '''
 
 	file_doc, extension = get_file(file_name)
@@ -144,15 +144,18 @@ def build_forest(data):
 
 	# returns the path of any node in list format
 	def return_parent(data, child):
+		from frappe import _
+
 		for row in data:
 			account_name, parent_account = row[0:2]
 			if parent_account == account_name == child:
 				return [parent_account]
 			elif account_name == child:
 				parent_account_list = return_parent(data, parent_account)
-				if not parent_account_list and parent_account:
-					frappe.throw(_("The parent account {0} does not exists")
-						.format(parent_account))
+				if not parent_account_list:
+					frappe.throw(_("The parent account {0} does not exists in the uploaded template").format(
+						frappe.bold(parent_account)))
+
 				return [child] + parent_account_list
 
 	charts_map, paths = {}, []
@@ -228,7 +231,7 @@ def get_template(template_type):
 			writer.writerow(['', '', '', 1, '', root_type])
 
 		for account in get_mandatory_group_accounts():
-			writer.writerow(['', '', '', 1, account, 'Asset'])
+			writer.writerow(['', '', '', 1, account, "Asset"])
 
 		for account_type in get_mandatory_account_types():
 			writer.writerow(['', '', '', 0, account_type.get('account_type'), account_type.get('root_type')])
@@ -239,24 +242,23 @@ def get_template(template_type):
 
 def get_sample_template(writer):
 	template = [
-		['Account Name', 'Parent Account', 'Account Number', 'Is Group', 'Account Type', 'Root Type'],
-		['Application Of Funds(Assets)', '', '', 1, '', 'Asset'],
-		['Sources Of Funds(Liabilities)', '', '', 1, '', 'Liability'],
-		['Equity', '', '', 1, '', 'Equity'],
-		['Expenses', '', '', 1, '', 'Expense'],
-		['Income', '', '', 1, '', 'Income'],
-		['Bank Accounts', 'Application Of Funds(Assets)', '', 1, 'Bank', 'Asset'],
-		['Cash In Hand', 'Application Of Funds(Assets)', '', 1, 'Cash', 'Asset'],
-		['Stock Assets', 'Application Of Funds(Assets)', '', 1, 'Stock', 'Asset'],
-		['Cost Of Goods Sold', 'Expenses', '', 0, 'Cost of Goods Sold', 'Expense'],
-		['Asset Depreciation', 'Expenses', '', 0, 'Depreciation', 'Expense'],
-		['Fixed Assets', 'Application Of Funds(Assets)', '', 0, 'Fixed Asset', 'Asset'],
-		['Accounts Payable', 'Sources Of Funds(Liabilities)', '', 0, 'Payable', 'Liability'],
-		['Accounts Receivable', 'Application Of Funds(Assets)', '', 1, 'Receivable', 'Asset'],
-		['Stock Expenses', 'Expenses', '', 0, 'Stock Adjustment', 'Expense'],
-		['Sample Bank', 'Bank Accounts', '', 0, 'Bank', 'Asset'],
-		['Cash', 'Cash In Hand', '', 0, 'Cash', 'Asset'],
-		['Stores', 'Stock Asset', '', 0, 'Stock', 'Asset'],
+		["Application Of Funds(Assets)", "", "", 1, "", "Asset"],
+		["Sources Of Funds(Liabilities)", "", "", 1, "", "Liability"],
+		["Equity", "", "", 1, "", "Equity"],
+		["Expenses", "", "", 1, "", "Expense"],
+		["Income", "", "", 1, "", "Income"],
+		["Bank Accounts", "Application Of Funds(Assets)", "", 1, "Bank", "Asset"],
+		["Cash In Hand", "Application Of Funds(Assets)", "", 1, "Cash", "Asset"],
+		["Stock Assets", "Application Of Funds(Assets)", "", 1, "Stock", "Asset"],
+		["Cost Of Goods Sold", "Expenses", "", 0, "Cost of Goods Sold", "Expense"],
+		["Asset Depreciation", "Expenses", "", 0, "Depreciation", "Expense"],
+		["Fixed Assets", "Application Of Funds(Assets)", "", 0, "Fixed Asset", "Asset"],
+		["Accounts Payable", "Sources Of Funds(Liabilities)", "", 0, "Payable", "Liability"],
+		["Accounts Receivable", "Application Of Funds(Assets)", "", 1, "Receivable", "Asset"],
+		["Stock Expenses", "Expenses", "", 0, "Stock Adjustment", "Expense"],
+		["Sample Bank", "Bank Accounts", "", 0, "Bank", "Asset"],
+		["Cash", "Cash In Hand", "", 0, "Cash", "Asset"],
+		["Stores", "Stock Assets", "", 0, "Stock", "Asset"],
 	]
 
 	for row in template:
