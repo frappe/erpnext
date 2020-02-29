@@ -580,8 +580,10 @@ class Item(WebsiteGenerator):
 		for d in to_remove:
 			self.remove(d)
 
+		existing_uoms = [d.uom for d in self.uoms]
 		for uom, conversion_factor in iteritems(uom_conversion_factors):
-			self.append('uoms', {'uom': uom, 'conversion_factor': conversion_factor})
+			if uom not in existing_uoms:
+				self.append('uoms', {'uom': uom, 'conversion_factor': conversion_factor})
 
 	def add_alt_uom_in_conversion_table(self):
 		uom_conv_list = [(d.from_uom, d.to_uom) for d in self.get("uom_conversion_graph")]

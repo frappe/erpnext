@@ -437,7 +437,8 @@
    "label": "UOMs",
    "oldfieldname": "uom_conversion_details",
    "oldfieldtype": "Table",
-   "options": "UOM Conversion Detail"
+   "options": "UOM Conversion Detail",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -1143,7 +1144,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-02-09 16:28:17.283512",
+ "modified": "2020-02-28 12:25:32.326899",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
