@@ -317,101 +317,113 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		});
 	}
 
-	update_item_in_cart(item_code, field='qty', value=1, batch_no) {
+	update_item_in_cart(item_code, field='qty', value=1, batch_no, check_stock=true) {
 		frappe.dom.freeze();
-		if(this.cart.exists(item_code, batch_no)) {
+		const me = this;
+		let item = undefined;
+		if (this.cart.exists(item_code, batch_no)) {
+			// existing item
 			const search_field = batch_no ? 'batch_no' : 'item_code';
 			const search_value = batch_no || item_code;
-			const item = this.frm.doc.items.find(i => i[search_field] === search_value);
-			frappe.flags.hide_serial_batch_dialog = false;
+			item = this.frm.doc.items.find(i => i[search_field] === search_value);
+			// value can be of type '+1' or '-1'
+			if (typeof value === 'string' && !in_list(['serial_no', 'batch_no'], field)) value = item[field] + flt(value);
+			if(field === 'serial_no') value = item.serial_no + '\n'+ value;
 
-			if (typeof value === 'string' && !in_list(['serial_no', 'batch_no'], field)) {
-				// value can be of type '+1' or '-1'
-				value = item[field] + flt(value);
+			frappe.run_serially([
+				check_stock_availability,
+				() => check_dialog_condition() ? show_serial_batch_selector() : trigger_post_insertion_events(item, true)
+			]);
+		} else {
+			// new item
+			let args = { item_code: item_code };
+			if (in_list(['serial_no', 'batch_no'], field)) {
+				args[field] = value;
 			}
+			// add to cur_frm
+			item = this.frm.add_child('items', args);
+			if (typeof value === 'string' && !in_list(['serial_no', 'batch_no'], field)) value = flt(value);
+			frappe.run_serially([
+				check_stock_availability,
+				trigger_new_item_events,
+				() => check_dialog_condition() ? show_serial_batch_selector() : trigger_post_insertion_events(item, true)
+			]);
+		}
 
-			if(field === 'serial_no') {
-				value = item.serial_no + '\n'+ value;
+		async function check_stock_availability() {
+			if (field == 'qty' && check_stock) {
+				value = await me.check_stock_availability(item_code, me.frm.doc.set_warehouse, value);
 			}
+		}
 
-			// if actual_batch_qty and actual_qty if there is only one batch. In such
-			// a case, no point showing the dialog
+		async function trigger_new_item_events() {
+			await me.frm.script_manager.trigger('item_code', item.doctype, item.name)
+			await me.frm.script_manager.trigger('qty', item.doctype, item.name)
+		}
+
+		function trigger_post_insertion_events(item, not_from_callback=false) {
+			// in case of serial_batch_selector: frm item has updated qty
+			if (!not_from_callback) {
+				// from serial_batch_selector callback
+				// to handle multiple batches of same item, loop over new cloned item and add them in cart
+				me.frm.doc.items.forEach(row => {
+					if (item.item_code === row.item_code) {
+						frappe.run_serially([
+							() => me.update_item_in_frm(row, field, row[field]),
+							() => me.on_qty_change(row),
+							() => me.post_qty_change(row)
+						]);		
+					}
+				})
+			} else {
+				frappe.run_serially([
+					() => me.update_item_in_frm(item, field, value),
+					() => me.on_qty_change(item),
+					() => me.post_qty_change(item)
+				]);
+			}
+		}
+
+		function check_dialog_condition() {
+			if (field == 'qty' && value == 0) return false;
+
 			const show_dialog = item.has_serial_no || item.has_batch_no;
-
+			// if actual_batch_qty and actual_qty if then there is only one batch. In such
+			// a case, no point showing the dialog
 			if (show_dialog && field == 'qty' && ((!item.batch_no && item.has_batch_no) ||
 				(item.has_serial_no) || (item.actual_batch_qty != item.actual_qty)) ) {
-				this.select_batch_and_serial_no(item);
-			} else {
-				this.update_item_in_frm(item, field, value)
-					.then(() => {
-						frappe.dom.unfreeze();
-						frappe.run_serially([
-							() => {
-								let items = this.frm.doc.items.map(item => item.name);
-								if (items && items.length > 0 && items.includes(item.name)) {
-									this.frm.doc.items.forEach(item_row => {
-										// update cart
-										this.on_qty_change(item_row);
-									});
-								} else {
-									this.on_qty_change(item);
-								}
-							},
-							() => this.post_qty_change(item)
-						]);
-					});
+				return true;
 			}
-			return;
+			return false;
 		}
 
-		let args = { item_code: item_code };
-		if (in_list(['serial_no', 'batch_no'], field)) {
-			args[field] = value;
+		function show_serial_batch_selector() {
+			me.select_batch_and_serial_no(item, trigger_post_insertion_events);
 		}
-		
-		// add to cur_frm
-		const item = this.frm.add_child('items', args);
-		frappe.flags.hide_serial_batch_dialog = true;
+	}
 
-		frappe.run_serially([
-			() => {
-				return this.frm.script_manager.trigger('item_code', item.doctype, item.name)
-					.then(() => {
-						this.frm.script_manager.trigger('qty', item.doctype, item.name)
-							.then(() => {
-								frappe.run_serially([
-									() => {
-										let items = this.frm.doc.items.map(i => i.name);
-										if (items && items.length > 0 && items.includes(item.name)) {
-											this.frm.doc.items.forEach(item_row => {
-												// update cart
-												this.on_qty_change(item_row);
-											});
-										} else {
-											this.on_qty_change(item);
-										}
-									},
-									() => this.post_qty_change(item)
-								]);
-							});
-					});
-			},
-			() => {
-				const show_dialog = item.has_serial_no || item.has_batch_no;
-
-				// if actual_batch_qty and actual_qty if then there is only one batch. In such
-				// a case, no point showing the dialog
-				if (show_dialog && field == 'qty' && ((!item.batch_no && item.has_batch_no) ||
-					(item.has_serial_no) || (item.actual_batch_qty != item.actual_qty)) ) {
-					// check has serial no/batch no and update cart
-					this.select_batch_and_serial_no(item);
-				}
+	async check_stock_availability(item_code, warehouse, qty) {
+		const res = await frappe.call({
+			method: "erpnext.selling.doctype.pos_invoice.pos_invoice.get_stock_availability",
+			args: {
+				'item_code': item_code,
+				'warehouse': warehouse,
 			}
-		]);
+		})
+		frappe.dom.unfreeze();
+		if (!(res.message > 0)) {
+			frappe.throw(frappe._(`Item Code: ${item_code.bold()} is not available under warehouse ${warehouse.bold()}.`))
+		} else if (res.message < qty) {
+			frappe.msgprint(frappe._(`Stock quantity not enough for Item Code: ${item_code.bold()} under warehouse ${warehouse.bold()}. 
+				Available quantity ${res.message.toString().bold()}.`))
+			return res.message;
+		}
+		frappe.dom.freeze();
+		return qty
 	}
 
 	on_qty_change(item) {
-		frappe.run_serially([
+		return frappe.run_serially([
 			() => this.update_cart_data(item),
 		]);
 	}
@@ -424,26 +436,9 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.set_form_action();
 	}
 
-	select_batch_and_serial_no(row) {
+	select_batch_and_serial_no(row, callback) {
 		frappe.dom.unfreeze();
-
-		erpnext.show_serial_batch_selector(this.frm, row, () => {
-			this.frm.doc.items.forEach(item => {
-				this.update_item_in_frm(item, 'qty', item.qty)
-					.then(() => {
-						// update cart
-						frappe.run_serially([
-							() => {
-								if (item.qty === 0) {
-									frappe.model.clear_doc(item.doctype, item.name);
-								}
-							},
-							() => this.update_cart_data(item),
-							() => this.post_qty_change(item)
-						]);
-					});
-			})
-		}, () => {
+		erpnext.show_serial_batch_selector(this.frm, row, callback, () => {
 			this.on_close(row);
 		}, true);
 	}
@@ -476,15 +471,12 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				return frappe.model.set_value(item.doctype, item.name, field, value);
 			}
 		}
-
 		return this.frm.script_manager.trigger('qty', item.doctype, item.name)
 			.then(() => {
 				if (field === 'qty' && item.qty === 0) {
 					frappe.model.clear_doc(item.doctype, item.name);
 				}
 			})
-
-		return Promise.resolve();
 	}
 
 	make_payment_modal() {
@@ -1346,12 +1338,13 @@ class POSCart {
 				const $btn = $(this);
 				const $item = $btn.closest('.list-item[data-item-code]');
 				const item_code = unescape($item.attr('data-item-code'));
+				const batch_no = $item.attr('data-batch-no');
 				const action = $btn.attr('data-action');
 
 				if(action === 'increment') {
-					events.on_field_change(item_code, 'qty', '+1');
+					events.on_field_change(item_code, 'qty', '+1', batch_no);
 				} else if(action === 'decrement') {
-					events.on_field_change(item_code, 'qty', '-1');
+					events.on_field_change(item_code, 'qty', '-1', batch_no);
 				}
 			});
 

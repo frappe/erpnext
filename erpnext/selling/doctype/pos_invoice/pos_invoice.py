@@ -33,6 +33,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_write_off_account()
 		self.validate_account_for_change_amount()
 		self.validate_item_cost_centers()
+		self.validate_stock_availablility()
 		self.set_status()
 		if cint(self.is_pos):
 			self.validate_pos()
@@ -73,6 +74,16 @@ class POSInvoice(SalesInvoice):
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
 			against_psi_doc.delete_loyalty_point_entry()
 			against_psi_doc.make_loyalty_point_entry()
+		
+	def validate_stock_availablility(self):
+		for d in self.get('items'):
+			available_stock = get_stock_availability(d.item_code, d.warehouse)
+			if not (flt(available_stock) > 0):
+				frappe.throw(_('Row #{}: Item Code: {} is not available under warehouse {}.'
+					.format(d.idx, frappe.bold(d.item_code), frappe.bold(d.warehouse))))
+			elif flt(available_stock) < flt(d.qty):
+				frappe.msgprint(_('Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. \
+					Available quantity {}.'.format(d.idx, frappe.bold(d.item_code), frappe.bold(d.warehouse), frappe.bold(d.qty))))
 
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
@@ -228,6 +239,34 @@ class POSInvoice(SalesInvoice):
 			if not data.account:
 				data.account = get_bank_cash_account(data.mode_of_payment, self.company).get("account")
 
+@frappe.whitelist()
+def get_stock_availability(item_code, warehouse):
+	latest_sle = frappe.db.sql("""select qty_after_transaction 
+		from `tabStock Ledger Entry` 
+		where item_code = %s and warehouse = %s
+		order by posting_date desc, posting_time desc
+		limit 1""", (item_code, warehouse), as_dict=1)
+	
+	pos_sales_qty = frappe.db.sql("""select sum(p_item.qty) as qty
+		from `tabPOS Invoice` p, `tabPOS Invoice Item` p_item
+		where p.name = p_item.parent 
+		and p.consolidated_invoice is NULL 
+		and p.docstatus = 1
+		and p_item.docstatus = 1
+		and p_item.item_code = %s
+		and p_item.warehouse = %s
+		order by posting_date desc, posting_time desc
+		""", (item_code, warehouse), as_dict=1)
+	
+	sle_qty = latest_sle[0].qty_after_transaction if (len(latest_sle) and latest_sle[0].qty_after_transaction) else 0
+	pos_sales_qty = pos_sales_qty[0].qty if (len(pos_sales_qty) and pos_sales_qty[0].qty ) else 0
+	
+	if sle_qty and pos_sales_qty and sle_qty > pos_sales_qty:
+		return sle_qty - pos_sales_qty
+	else:
+		# when sle_qty is 0
+		# when sle_qty > 0 and pos_sales_qty is 0
+		return sle_qty
 
 @frappe.whitelist()
 def make_sales_return(source_name, target_doc=None):
