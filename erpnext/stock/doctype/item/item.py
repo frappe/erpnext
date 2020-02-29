@@ -981,6 +981,7 @@ def _msgprint(msg, verbose):
 def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	"""returns last purchase details in stock uom"""
 	# get last purchase order item details
+
 	last_purchase_order = frappe.db.sql("""\
 		select po.name, po.transaction_date, po.conversion_rate,
 			po_item.conversion_factor, po_item.base_price_list_rate,
@@ -990,6 +991,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 			po.name = po_item.parent
 		order by po.transaction_date desc, po.name desc
 		limit 1""", (item_code, cstr(doc_name)), as_dict=1)
+
 
 	# get last purchase receipt item details
 	last_purchase_receipt = frappe.db.sql("""\
@@ -1002,19 +1004,20 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 		order by pr.posting_date desc, pr.posting_time desc, pr.name desc
 		limit 1""", (item_code, cstr(doc_name)), as_dict=1)
 
+	
+	
 	purchase_order_date = getdate(last_purchase_order and last_purchase_order[0].transaction_date
 							   or "1900-01-01")
 	purchase_receipt_date = getdate(last_purchase_receipt and
 								 last_purchase_receipt[0].posting_date or "1900-01-01")
 
-	if (purchase_order_date > purchase_receipt_date) or \
-				(last_purchase_order and not last_purchase_receipt):
+	if last_purchase_order and (purchase_order_date >= purchase_receipt_date or not last_purchase_receipt):
 		# use purchase order
+		
 		last_purchase = last_purchase_order[0]
 		purchase_date = purchase_order_date
 
-	elif (purchase_receipt_date > purchase_order_date) or \
-				(last_purchase_receipt and not last_purchase_order):
+	elif last_purchase_receipt and (purchase_receipt_date > purchase_order_date or not last_purchase_order):
 		# use purchase receipt
 		last_purchase = last_purchase_receipt[0]
 		purchase_date = purchase_receipt_date
@@ -1026,10 +1029,11 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 	out = frappe._dict({
 		"base_price_list_rate": flt(last_purchase.base_price_list_rate) / conversion_factor,
 		"base_rate": flt(last_purchase.base_rate) / conversion_factor,
-		"base_net_rate": flt(last_purchase.net_rate) / conversion_factor,
+		"base_net_rate": flt(last_purchase.base_net_rate) / conversion_factor,
 		"discount_percentage": flt(last_purchase.discount_percentage),
 		"purchase_date": purchase_date
 	})
+	
 
 	conversion_rate = flt(conversion_rate) or 1.0
 	out.update({
