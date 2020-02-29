@@ -124,10 +124,6 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			fields: fields
 		});
 
-		if (this.item.serial_no) {
-			this.dialog.fields_dict.serial_no.set_value(this.item.serial_no);
-		}
-
 		this.dialog.set_primary_action(__('Insert'), function() {
 			me.values = me.dialog.get_values();
 			if(me.validate()) {
@@ -148,11 +144,11 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 		if(this.show_dialog) {
 			let d = this.item;
-			if (d.has_serial_no && d.serial_no) {
-				this.dialog.set_value('serial_no', d.serial_no);
+			if (this.item.serial_no) {
+				this.dialog.fields_dict.serial_no.set_value(this.item.serial_no);
 			}
-
-			if (d.has_batch && !d.has_serial_no && d.batch_no) {
+			
+			if (this.has_batch && !this.has_serial_no && d.batch_no) {
 				this.frm.doc.items.forEach(data => {
 					if(data.item_code == d.item_code) {
 						this.dialog.fields_dict.batches.df.data.push({
