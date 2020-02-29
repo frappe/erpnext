@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "field:loan_security_type",
  "creation": "2019-08-29 18:46:07.322056",
  "doctype": "DocType",
@@ -8,7 +9,9 @@
   "loan_security_type",
   "unit_of_measure",
   "haircut",
-  "disabled"
+  "disabled",
+  "column_break_5",
+  "loan_to_value_ratio"
  ],
  "fields": [
   {
@@ -33,9 +36,19 @@
    "fieldtype": "Link",
    "label": "Unit Of Measure",
    "options": "UOM"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "loan_to_value_ratio",
+   "fieldtype": "Percent",
+   "label": "Loan To Value Ratio"
   }
  ],
- "modified": "2019-10-10 03:05:37.912866",
+ "links": [],
+ "modified": "2020-02-28 12:43:20.364447",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Type",
