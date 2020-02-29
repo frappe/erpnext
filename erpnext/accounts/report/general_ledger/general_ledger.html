@@ -1,8 +1,6 @@
 <h2 class="text-center">{%= __("Statement of Account") %}</h2>
 <h4 class="text-center">
-	{% if (filters.party_name) { %}
-		{%= filters.party_name %}
-	{% } else if (filters.party && filters.show_name) { %}
+	{% if (filters.party) { %}
 		{%= filters.party %}
 	{% } else if (filters.account) { %}
 		{%= filters.account %}
