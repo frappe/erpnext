@@ -20,30 +20,57 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 	},
 
 	download_template: function(frm) {
+		var d = new frappe.ui.Dialog({
+			title: __("Download Template"),
+			fields: [
+				{
+					label : "File Type",
+					fieldname: "file_type",
+					fieldtype: "Select",
+					reqd: 1,
+					options: ["Excel", "CSV"]
+				},
+				{
+					label: "Template Type",
+					fieldname: "template_type",
+					fieldtype: "Select",
+					reqd: 1,
+					options: ["Sample Template", "Blank Template"],
+					change: () => {
+						let template_type = d.get_value('template_type');
 
-		if (!frm.doc.template_type) {
-			frappe.throw(__('Please select <b>Template Type</b> to download template'));
-		}
+						if (template_type === "Sample Template") {
+							d.set_df_property('template_type', 'description',
+								`The Sample Template contains all the required accounts pre filled in the  template.
+								You can add more accounts or change existing accounts in the template as per your choice.`);
+						} else {
+							d.set_df_property('template_type', 'description',
+								`The Blank Template contains just the account type and root type required to build the Chart
+								of Accounts. Please enter the account names and add more rows as per your requirement.`);
+						}
+					}
+				}
+			],
+			primary_action: function() {
+				var data = d.get_values();
 
-		open_url_post(
-			'/api/method/erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.download_template',
-			{
-				file_type: frm.doc.file_type,
-				template_type: frm.doc.template_type
-			}
-		);
-	},
+				if (!data.template_type) {
+					frappe.throw(__('Please select <b>Template Type</b> to download template'));
+				}
 
-	template_type: function(frm) {
-		if (frm.doc.template_type == 'Sample Template') {
-			frm.set_df_property('template_type', 'description',
-				`The Sample Template contains all the required accounts pre filled in the  template.
-				You can add more accounts or change existing accounts in the template as per your choice.`);
-		} else {
-			frm.set_df_property('template_type', 'description',
-				`The Blank Template contains just the account type and root type required to build the Chart
-				of Accounts. Please enter the account names and add more rows as per your requirement.`);
-		}
+				open_url_post(
+					'/api/method/erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.download_template',
+					{
+						file_type: data.file_type,
+						template_type: data.template_type
+					}
+				);
+
+				d.hide();
+			},
+			primary_action_label: __('Download')
+		});
+		d.show();
 	},
 
 	import_file: function (frm) {
@@ -96,7 +123,7 @@ var validate_csv_data = function(frm) {
 };
 
 var create_import_button = function(frm) {
-	frm.page.set_primary_action(__("Start Import"), function () {
+	frm.page.set_primary_action(__("Import"), function () {
 		frappe.call({
 			method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.import_coa",
 			args: {
