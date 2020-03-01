@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "ACC-LOAP-.YYYY.-.#####",
  "creation": "2019-08-29 17:46:49.201740",
  "doctype": "DocType",
@@ -122,7 +123,6 @@
   },
   {
    "depends_on": "eval: doc.is_term_loan == 1",
-   "fetch_from": "loan_type.repayment_method",
    "fetch_if_empty": 1,
    "fieldname": "repayment_method",
    "fieldtype": "Select",
@@ -213,7 +213,8 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-10-24 10:32:03.740558",
+ "links": [],
+ "modified": "2020-03-01 10:21:44.413353",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Application",
