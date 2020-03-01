@@ -337,7 +337,7 @@ apps/erpnext/erpnext/config/manufacturing.py,Time Sheet for manufacturing.,זמ�
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py,Opening (Cr),פתיחה (Cr)
 DocType: Tally Migration,Round Off Account,לעגל את החשבון
 DocType: Payment Reconciliation Payment,Reference Row,הפניה Row
-DocType: Employee,Job Applicant,עבודת מבקש
+DocType: Appointment Letter,Job Applicant,עבודת מבקש
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Entertainment & Leisure,בידור ופנאי
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py,Opening,פתיחה
 DocType: Bank Account,Party Type,סוג המפלגה
@@ -662,7 +662,7 @@ DocType: Sales Invoice Item,References,אזכור
 DocType: Item,Synced With Hub,סונכרן עם רכזת
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py,Sales Order {0} is not valid,להזמין מכירות {0} אינו חוקי
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py,Warehouse not found in the system,מחסן לא נמצא במערכת
-apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py,Total Tax,"מס סה""כ"
+apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py,Total Tax,"מס סה""כ"
 apps/erpnext/erpnext/accounts/report/payment_period_based_on_invoice_date/payment_period_based_on_invoice_date.py,{0} payment entries can not be filtered by {1},לא יכולים להיות מסוננים {0} ערכי תשלום על ידי {1}
 DocType: Period Closing Voucher,Closing Account Head,סגירת חשבון ראש
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Stock Options,אופציות
@@ -1044,7 +1044,7 @@ apps/erpnext/erpnext/controllers/buying_controller.py,Specified BOM {0} does not
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js,{0} items produced,{0} פריטים המיוצרים
 DocType: Communication Medium,Communication Medium,תקשורת בינונית
 DocType: Department Approver,Approver,מאשר
-DocType: Job Applicant,Applicant Name,שם מבקש
+DocType: Appointment Letter,Applicant Name,שם מבקש
 DocType: Stock Entry,Including items for sub assemblies,כולל פריטים למכלולים תת
 DocType: Employee,Permanent Address Is,כתובת קבע
 DocType: Share Transfer,Issue,נושא
@@ -1774,7 +1774,7 @@ DocType: Item,Is Sales Item,האם פריט מכירות
 ,Purchase Order Items To Be Received,פריטים הזמנת רכש שיתקבלו
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py,Closing (Cr),סגירה (Cr)
 DocType: Account,Cash,מזומנים
-DocType: Certification Application,Payment Details,פרטי תשלום
+DocType: Loan Repayment,Payment Details,פרטי תשלום
 DocType: Fee Schedule,In Process,בתהליך
 apps/erpnext/erpnext/setup/doctype/company/company.js,Wrong Password,סיסמא שגויה
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Please click on 'Generate Schedule' to fetch Serial No added for Item {0},אנא לחץ על 'צור לוח זמנים' כדי להביא מספר סידורי הוסיפה לפריט {0}
@@ -1882,7 +1882,7 @@ apps/erpnext/erpnext/controllers/buying_controller.py,From {0} | {1} {2},מ {0} 
 DocType: Naming Series,Current Value,ערך נוכחי
 apps/erpnext/erpnext/public/js/account_tree_grid.js,Select Fiscal Year...,בחר שנת כספים ...
 apps/erpnext/erpnext/controllers/trends.py,Amt,AMT
-,Requested,ביקשתי
+DocType: Loan Security Pledge,Requested,ביקשתי
 DocType: BOM Update Tool,Current BOM,BOM הנוכחי
 DocType: Purchase Invoice,Advance Payments,תשלומים מראש
 DocType: Asset Maintenance,Manufacturing User,משתמש ייצור
@@ -1974,6 +1974,7 @@ DocType: Purchase Invoice,Select Supplier Address,כתובת ספק בחר
 DocType: SMS Center,SMS Center,SMS מרכז
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py,Cash Flow from Investing,תזרים מזומנים מהשקעות
 DocType: Stock Entry Detail,Basic Amount,סכום בסיסי
+DocType: Loan Repayment,Amount Paid,הסכום ששולם
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Investments,השקעות
 DocType: Serial No,Under Warranty,במסגרת אחריות
 DocType: Price List,Price List Name,שם מחיר המחירון
@@ -2475,7 +2476,6 @@ DocType: Job Applicant,Applicant for a Job,מועמד לעבודה
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Reference No and Reference Date is mandatory for Bank transaction,אסמכתא ותאריך ההפניה הוא חובה עבור עסקת הבנק
 DocType: Cheque Print Template,Signatory Position,תפקיד החותם
 ,Item-wise Sales Register,פריט חכם מכירות הרשמה
-DocType: Bank Reconciliation,Select account head of the bank where cheque was deposited.,ראש בחר חשבון של הבנק שבו הופקד שיק.
 DocType: Pricing Rule,Margin,Margin
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js,Qty To Manufacture,כמות לייצור
 DocType: Bank Statement Transaction Settings Item,Transaction,עסקה
@@ -2658,7 +2658,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js,Debit Accou
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py,Serial No {0} has already been received,מספר סידורי {0} כבר קיבל
 ,To Produce,כדי לייצר
 DocType: Item Price,Multiple Item prices.,מחירי פריט מרובים.
-DocType: Job Card,Production,הפקה
+DocType: Plaid Settings,Production,הפקה
 DocType: Appointment Booking Settings,Holiday List,רשימת החג
 apps/erpnext/erpnext/accounts/doctype/account/account_tree.js,"Optional. Sets company's default currency, if not specified.","אופציונאלי. סטי ברירת מחדל המטבע של החברה, אם לא צוין."
 apps/erpnext/erpnext/public/js/setup_wizard.js,The name of the institute for which you are setting up this system.,שמו של המכון אשר אתה מגדיר מערכת זו.
@@ -3173,6 +3173,7 @@ DocType: Monthly Distribution,Name of the Monthly Distribution,שמו של הח�
 ,Item Shortage Report,דווח מחסור פריט
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py,Item {0} is not setup for Serial Nos. Check Item master,פריט {0} הוא לא התקנה למס סידורי. בדוק אדון פריט
 apps/erpnext/erpnext/accounts/doctype/cheque_print_template/cheque_print_template.js,Print settings updated in respective print format,הגדרות הדפסה עודכנו מודפסות בהתאמה
+apps/erpnext/erpnext/loan_management/doctype/loan_type/loan_type.py,Account {0} does not belong to Company {1},חשבון {0} אינו שייך לחברת {1}
 apps/erpnext/erpnext/public/js/setup_wizard.js,The name of your company for which you are setting up this system.,שמה של החברה שלך שאתה מגדיר את המערכת הזאת.
 apps/erpnext/erpnext/education/doctype/student_applicant/student_applicant.js,Approve,לְאַשֵׁר
 apps/erpnext/erpnext/hr/doctype/holiday_list/holiday_list.py,The holiday on {0} is not between From Date and To Date,החג על {0} הוא לא בין מתאריך ו עד תאריך
