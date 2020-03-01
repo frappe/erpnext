@@ -7,60 +7,56 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "total_after_taxes",
-  "total_discount_after_taxes",
-  "base_total_after_taxes",
-  "base_total_discount_after_taxes",
-  "total_alt_uom_qty",
-  "total_before_discount",
-  "tax_exclusive_total_before_discount",
-  "total_discount",
-  "tax_exclusive_total_discount",
-  "base_total_before_discount",
-  "base_tax_exclusive_total_before_discount",
-  "base_total_discount",
-  "base_tax_exclusive_total_discount",
-  "pol_address",
-  "pol_address_display",
-  "poa_address",
-  "poa_address_display",
-  "set_project",
   "supplier_section",
   "column_break0",
   "title",
-  "naming_series",
+  "company",
   "supplier",
   "supplier_name",
-  "letter_of_credit",
-  "incoterms",
   "supplier_delivery_note",
+  "naming_series",
+  "letter_of_credit",
+  "column_break_10",
+  "remarks",
   "column_break1",
   "posting_date",
   "posting_time",
   "set_posting_time",
-  "company",
   "is_return",
   "reopen_order",
   "return_against",
+  "more_info",
+  "set_project",
+  "column_break4",
+  "incoterms",
+  "range",
+  "amended_from",
+  "section_break_14",
+  "pol_address",
+  "pol_address_display",
+  "poa_address",
+  "poa_address_display",
   "section_addresses",
   "supplier_address",
-  "contact_person",
   "address_display",
+  "col_break_address",
+  "contact_person",
   "contact_display",
   "contact_mobile",
   "contact_email",
-  "col_break_address",
+  "column_break_29",
   "shipping_address",
   "shipping_address_display",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
-  "calculate_tax_on_company_currency",
   "column_break2",
   "buying_price_list",
   "price_list_currency",
   "plc_conversion_rate",
+  "col_break_44",
   "ignore_pricing_rule",
+  "calculate_tax_on_company_currency",
   "get_latest_price",
   "sec_warehouse",
   "set_warehouse",
@@ -70,86 +66,112 @@
   "supplier_warehouse",
   "items_section",
   "items",
+  "get_current_stock",
   "pricing_rule_details",
   "pricing_rules",
-  "get_current_stock",
   "raw_material_details",
   "supplied_items",
   "section_break0",
   "total_qty",
-  "base_total",
-  "base_tax_exclusive_total",
-  "base_taxable_total",
-  "base_net_total",
-  "column_break_27",
-  "total",
-  "tax_exclusive_total",
-  "taxable_total",
-  "net_total",
+  "column_break_63",
+  "total_alt_uom_qty",
+  "column_break_65",
   "total_net_weight",
+  "section_break_67",
+  "total",
+  "base_total",
+  "column_break_70",
+  "total_before_discount",
+  "base_total_before_discount",
+  "column_break_73",
+  "total_discount",
+  "base_total_discount",
   "taxes_charges_section",
+  "taxes_and_charges",
+  "column_break_78",
   "tax_category",
-  "shipping_col",
+  "column_break_80",
   "shipping_rule",
   "taxes_section",
-  "taxes_and_charges",
   "taxes",
   "sec_tax_breakup",
   "other_charges_calculation",
+  "tax_exclusive_totals_section",
+  "tax_exclusive_total",
+  "base_tax_exclusive_total",
+  "column_break_89",
+  "tax_exclusive_total_before_discount",
+  "base_tax_exclusive_total_before_discount",
+  "column_break_92",
+  "tax_exclusive_total_discount",
+  "base_tax_exclusive_total_discount",
   "totals",
-  "base_taxes_and_charges_added",
-  "base_taxes_and_charges_deducted",
-  "base_total_taxes_and_charges",
-  "column_break3",
-  "taxes_and_charges_added",
-  "taxes_and_charges_deducted",
+  "net_total",
+  "base_net_total",
+  "column_break_27",
+  "taxable_total",
+  "base_taxable_total",
+  "section_break_97",
   "total_taxes_and_charges",
+  "base_total_taxes_and_charges",
+  "taxes_and_charges_added",
+  "base_taxes_and_charges_added",
+  "taxes_and_charges_deducted",
+  "base_taxes_and_charges_deducted",
+  "shipping_col",
+  "total_after_taxes",
+  "base_total_after_taxes",
+  "column_break3",
+  "total_discount_after_taxes",
+  "base_total_discount_after_taxes",
   "section_break_42",
   "apply_discount_on",
-  "base_discount_amount",
-  "column_break_44",
   "additional_discount_percentage",
+  "column_break_44",
   "discount_amount",
+  "base_discount_amount",
   "section_break_46",
-  "base_grand_total",
-  "base_rounding_adjustment",
-  "base_in_words",
-  "base_rounded_total",
-  "column_break_50",
   "grand_total",
-  "rounding_adjustment",
+  "base_grand_total",
+  "column_break_119",
   "rounded_total",
+  "base_rounded_total",
+  "section_break_122",
   "in_words",
+  "base_in_words",
+  "column_break_50",
+  "rounding_adjustment",
+  "base_rounding_adjustment",
   "disable_rounded_total",
   "terms_section_break",
   "tc_name",
   "terms",
   "bill_no",
   "bill_date",
-  "more_info",
+  "billing_and_receiving_status_section",
   "status",
-  "amended_from",
-  "range",
-  "column_break4",
+  "column_break_136",
   "per_completed",
+  "column_break_138",
   "per_billed",
   "per_returned",
-  "subscription_detail",
-  "auto_repeat",
   "printing_settings",
   "letter_head",
   "select_print_heading",
+  "other_details",
+  "column_break_152",
+  "instructions",
+  "column_break_155",
   "language",
   "group_same_items",
-  "column_break_97",
-  "other_details",
-  "instructions",
-  "remarks",
   "transporter_info",
   "transporter_name",
   "column_break5",
   "lr_no",
-  "lr_date"
+  "column_break_160",
+  "lr_date",
+  "subscription_detail",
+  "auto_repeat"
  ],
  "fields": [
   {
@@ -177,13 +199,13 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "MAT-PRE-.YYYY.-",
+   "options": "PREC-",
    "print_hide": 1,
-   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -595,6 +617,7 @@
    "description": "Add / Edit Taxes and Charges",
    "fieldname": "taxes_charges_section",
    "fieldtype": "Section Break",
+   "label": "Tax and Charges",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money"
   },
@@ -652,12 +675,15 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "totals",
    "fieldtype": "Section Break",
+   "label": "Net Totals",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money"
   },
   {
+   "depends_on": "taxes_and_charges_deducted",
    "fieldname": "base_taxes_and_charges_added",
    "fieldtype": "Currency",
    "label": "Taxes and Charges Added (Company Currency)",
@@ -668,6 +694,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "taxes_and_charges_deducted",
    "fieldname": "base_taxes_and_charges_deducted",
    "fieldtype": "Currency",
    "label": "Taxes and Charges Deducted (Company Currency)",
@@ -694,6 +721,7 @@
    "width": "50%"
   },
   {
+   "depends_on": "taxes_and_charges_deducted",
    "fieldname": "taxes_and_charges_added",
    "fieldtype": "Currency",
    "label": "Taxes and Charges Added",
@@ -704,6 +732,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "taxes_and_charges_deducted",
    "fieldname": "taxes_and_charges_deducted",
    "fieldtype": "Currency",
    "label": "Taxes and Charges Deducted",
@@ -1014,10 +1043,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "column_break_97",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "other_details",
    "fieldtype": "HTML",
    "hidden": 1,
@@ -1121,7 +1146,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.total_qty != doc.total_alt_uom_qty",
    "fieldname": "total_alt_uom_qty",
    "fieldtype": "Float",
    "label": "Total Contents Quantity",
@@ -1232,7 +1256,6 @@
   {
    "fieldname": "set_project",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Set Project",
    "options": "Project",
    "print_hide": 1
@@ -1274,6 +1297,7 @@
    "label": "Get Latest Price"
   },
   {
+   "depends_on": "eval:doc.tax_exclusive_total != doc.total",
    "fieldname": "base_tax_exclusive_total",
    "fieldtype": "Currency",
    "force_currency_symbol": 1,
@@ -1293,7 +1317,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.tax_exclusive_total != doc.net_total",
+   "depends_on": "eval:doc.tax_exclusive_total != doc.total",
    "fieldname": "tax_exclusive_total",
    "fieldtype": "Currency",
    "label": "Tax Exclusive Total",
@@ -1325,12 +1349,109 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break",
+   "hidden": 1
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col_break_44",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_63",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_65",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_67",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_70",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_73",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_78",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_80",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "tax_exclusive_totals_section",
+   "fieldtype": "Section Break",
+   "label": "Tax Exclusive Totals"
+  },
+  {
+   "fieldname": "column_break_89",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_92",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_97",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_119",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_122",
+   "fieldtype": "Section Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "billing_and_receiving_status_section",
+   "fieldtype": "Section Break",
+   "label": "Billing and Receiving Status"
+  },
+  {
+   "fieldname": "column_break_136",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_138",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_152",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_160",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_155",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
- "modified": "2020-02-09 16:28:43.404389",
+ "modified": "2020-02-27 20:50:47.544701",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
