@@ -229,13 +229,14 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-24 07:35:47.168123",
+ "modified": "2020-02-26 06:18:54.934538",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",
  "owner": "Administrator",
  "permissions": [
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -245,9 +246,11 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -257,6 +260,7 @@
    "report": 1,
    "role": "Loan Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

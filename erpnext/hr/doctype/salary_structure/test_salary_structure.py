@@ -25,7 +25,6 @@ class TestSalaryStructure(unittest.TestCase):
 		make_employee("test_employee@salary.com")
 		make_employee("test_employee_2@salary.com")
 
-
 	def make_holiday_list(self):
 		if not frappe.db.get_value("Holiday List", "Salary Structure Test Holiday List"):
 			holiday_list = frappe.get_doc({
@@ -37,6 +36,29 @@ class TestSalaryStructure(unittest.TestCase):
 			}).insert()
 			holiday_list.get_weekly_off_dates()
 			holiday_list.save()
+
+	def test_salary_structure_deduction_based_on_gross_pay(self):
+
+		emp = make_employee("test_employee_3@salary.com")
+
+		sal_struct = make_salary_structure("Salary Structure 2", "Monthly", dont_submit = True)
+
+		sal_struct.earnings = [sal_struct.earnings[0]]
+		sal_struct.earnings[0].amount_based_on_formula = 1
+		sal_struct.earnings[0].formula =  "base"
+
+		sal_struct.deductions = [sal_struct.deductions[0]]
+
+		sal_struct.deductions[0].amount_based_on_formula = 1
+		sal_struct.deductions[0].condition = "gross_pay > 100"
+		sal_struct.deductions[0].formula =  "gross_pay * 0.2"
+
+		sal_struct.submit()
+
+		assignment = create_salary_structure_assignment(emp, "Salary Structure 2")
+		ss = make_salary_slip(sal_struct.name, employee = emp)
+
+		self.assertEqual(assignment.base * 0.2, ss.deductions[0].amount)
 
 	def test_amount_totals(self):
 		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
