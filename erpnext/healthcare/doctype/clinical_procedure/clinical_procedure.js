@@ -8,17 +8,13 @@ frappe.ui.form.on('Clinical Procedure', {
 			if (!item.item_code) {
 				frappe.throw(__('Please enter Item Code to get Batch Number'));
 			} else {
+				let filters = {'item_code': item.item_code};
+
 				if (frm.doc.status == 'In Progress') {
-					let filters = {
-						'item_code': item.item_code,
-						'posting_date': frm.doc.start_date || frappe.datetime.nowdate()
-					};
+					filters['posting_date'] = frm.doc.start_date || frappe.datetime.nowdate();
 					if (frm.doc.warehouse) filters['warehouse'] = frm.doc.warehouse;
-				} else {
-					filters = {
-						'item_code': item.item_code
-					};
 				}
+
 				return {
 					query : 'erpnext.controllers.queries.get_batch_no',
 					filters: filters
@@ -64,80 +60,78 @@ frappe.ui.form.on('Clinical Procedure', {
 				function(doc) { return (doc.qty<=doc.actual_qty) ? 'green' : 'orange' ; });
 		}
 
-		if (frm.doc.docstatus == 2 && frm.doc.status == 'In Progress') {
-			let btn_label = '';
-			let msg = '';
-			if (frm.doc.consume_stock) {
-				btn_label = 'Complete and Consume';
-				msg = 'Complete '+ frm.doc.name +' and Consume Stock?';
-			} else {
-				btn_label = 'Complete';
-				msg = 'Complete '+ frm.doc.name +'?';
-			}
+		if (frm.doc.docstatus == 2) {
+			if (frm.doc.status == 'In Progress') {
+				let btn_label = '';
+				let msg = '';
+				if (frm.doc.consume_stock) {
+					btn_label = __('Complete and Consume');
+					msg = __('Complete {0} and Consume Stock?', [frm.doc.name]);
+				} else {
+					btn_label = 'Complete';
+					msg = __('Complete {0}?', [frm.doc.name]);
+				}
 
-			frm.add_custom_button(__(btn_label), function () {
-				frappe.confirm(
-					__(msg),
-					function() {
-						frappe.call({
-							doc: frm.doc,
-							method: 'complete',
-							callback: function(r) {
-								if (!r.exc) {
+				frm.add_custom_button(__(btn_label), function () {
+					frappe.confirm(
+						msg,
+						function() {
+							frappe.call({
+								doc: frm.doc,
+								method: 'complete_procedure',
+								callback: function(r) {
+									if (!r.exc) {
+										cur_frm.reload_doc();
+									}
+								}
+							});
+						}
+					);
+				});
+
+			} else if (frm.doc.status == 'Pending') {
+				frm.add_custom_button(__('Start'), function() {
+					frappe.call({
+						doc: frm.doc,
+						method: 'start_procedure',
+						callback: function(r) {
+							if (!r.exc) {
+								if (r.data.message == 'insufficient stock') {
+									frappe.confirm(
+										__('Stock quantity to start the procedure is not available in the warehouse. Do you want to record a Stock Transfer?'),
+										function() {
+											frappe.call({
+												doc: frm.doc,
+												method: 'make_material_transfer',
+												callback: function(r) {
+													if (!r.exc) {
+														cur_frm.reload_doc();
+														let doclist = frappe.model.sync(r.message);
+														frappe.set_route('Form', doclist[0].doctype, doclist[0].name);
+													}
+												}
+											});
+										}
+									);
+								} else {
 									cur_frm.reload_doc();
 								}
 							}
-						});
-					}
-				);
-			});
-		} else if (frm.doc.docstatus == 2 && frm.doc.status == 'Pending') {
-			frm.add_custom_button(__('Start'), function () {
-				frappe.call({
-					doc: frm.doc,
-					method: 'start',
-					callback: function(r) {
-						if (!r.exc) {
-							if (frm.doc.status == 'Draft') {
-								frappe.confirm(
-									__('Stock quantity to start procedure is not available in the warehouse. Do you want to record a Stock Transfer'),
-									function() {
-										frappe.call({
-											doc: frm.doc,
-											method: 'make_material_transfer',
-											callback: function(r) {
-												if (!r.exc) {
-													cur_frm.reload_doc();
-													let doclist = frappe.model.sync(r.message);
-													frappe.set_route('Form', doclist[0].doctype, doclist[0].name);
-												}
-											}
-										});
-									}
-								);
-							} else {
-								cur_frm.reload_doc();
-							}
 						}
-					}
+					});
 				});
-			});
+			}
 		}
-		if (frm.doc.__islocal) {
-			frm.set_df_property('consumables', 'hidden', 1);
-		} else {
-			frm.set_df_property('consumables', 'hidden', 0);
-		}
+
 	},
+
 	onload: function(frm) {
-		if (frm.doc.status == 'Completed') {
-			frm.set_df_property('items', 'read_only', 1);
-		}
 		if (frm.is_new()) {
 			frm.add_fetch('procedure_template', 'medical_department', 'medical_department');
 			frm.set_value('start_time', null);
 		}
 	},
+
 	patient: function(frm) {
 		if (frm.doc.patient) {
 			frappe.call({
@@ -149,10 +143,10 @@ frappe.ui.form.on('Clinical Procedure', {
 					let age = '';
 					if (data.message.dob) {
 						age = calculate_age(data.message.dob);
-					}else if (data.message.age) {
+					} else if (data.message.age) {
 						age = data.message.age;
 						if (data.message.age_as_on) {
-							age = age+' as on '+data.message.age_as_on;
+							age = __('{0} as on {1}', [age, data.message.age_as_on]);
 						}
 					}
 					frm.set_value('patient_age', age);
@@ -164,6 +158,7 @@ frappe.ui.form.on('Clinical Procedure', {
 			frm.set_value('patient_sex', '');
 		}
 	},
+
 	appointment: function(frm) {
 		if (frm.doc.appointment) {
 			frappe.call({
@@ -184,6 +179,7 @@ frappe.ui.form.on('Clinical Procedure', {
 			});
 		}
 	},
+
 	procedure_template: function(frm) {
 		if (frm.doc.procedure_template) {
 			frappe.call({
@@ -213,6 +209,7 @@ frappe.ui.form.on('Clinical Procedure', {
 			frm.set_value('consume_stock', 0);
 		}
 	},
+
 	service_unit: function(frm) {
 		if (frm.doc.service_unit) {
 			frappe.call({
@@ -230,6 +227,7 @@ frappe.ui.form.on('Clinical Procedure', {
 			});
 		}
 	},
+
 	practitioner: function(frm) {
 		if (frm.doc.practitioner) {
 			frappe.call({
@@ -250,14 +248,6 @@ cur_frm.set_query('procedure_template', function(doc) {
 	return {
 		filters: {
 			'medical_department': doc.medical_department
-		}
-	};
-});
-
-cur_frm.set_query('appointment', function() {
-	return {
-		filters: {
-			status:['in',['Open']]
 		}
 	};
 });
