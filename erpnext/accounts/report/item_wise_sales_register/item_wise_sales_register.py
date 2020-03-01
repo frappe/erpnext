@@ -119,7 +119,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		add_sub_total_row(total_row, total_row_map, 'total_row', tax_columns)
 		data.append(total_row_map.get('total_row'))
 		skip_total_row = 1
-	
+
 	return columns, data, None, None, None, skip_total_row
 
 def get_columns(additional_table_columns, filters):
@@ -370,10 +370,6 @@ def get_group_by_conditions(filters, doctype):
 
 def get_items(filters, additional_query_columns):
 	conditions = get_conditions(filters)
-	match_conditions = frappe.build_match_conditions("Sales Invoice")
-
-	if match_conditions:
-		match_conditions = " and {0} ".format(match_conditions)
 
 	if additional_query_columns:
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
@@ -394,8 +390,8 @@ def get_items(filters, additional_query_columns):
 			`tabSales Invoice`.update_stock, `tabSales Invoice Item`.uom, `tabSales Invoice Item`.qty {0}
 		from `tabSales Invoice`, `tabSales Invoice Item`
 		where `tabSales Invoice`.name = `tabSales Invoice Item`.parent
-			and `tabSales Invoice`.docstatus = 1 {1} {2}
-		""".format(additional_query_columns or '', conditions, match_conditions), filters, as_dict=1) #nosec
+			and `tabSales Invoice`.docstatus = 1 {1}
+		""".format(additional_query_columns or '', conditions), filters, as_dict=1) #nosec
 
 def get_delivery_notes_against_sales_order(item_list):
 	so_dn_map = frappe._dict()
