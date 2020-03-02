@@ -94,16 +94,24 @@ frappe.query_reports["Purchase Analytics"] = {
 			options: "Brand"
 		},
 		{
-			fieldname: "cost_center",
-			label: __("Cost Center"),
-			fieldtype: "Link",
-			options: "Cost Center"
+			"fieldname":"cost_center",
+			"label": __("Cost Center"),
+			"fieldtype": "MultiSelectList",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Cost Center', txt, {
+					company: frappe.query_report.get_filter_value("company")
+				});
+			}
 		},
 		{
-			fieldname: "project",
-			label: __("Project"),
-			fieldtype: "Link",
-			options: "Project"
+			"fieldname":"project",
+			"label": __("Project"),
+			"fieldtype": "MultiSelectList",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Project', txt, {
+					company: frappe.query_report.get_filter_value("company")
+				});
+			}
 		},
 	],
 	after_datatable_render: function(datatable_obj) {
