@@ -50,7 +50,7 @@ class AdditionalSalary(Document):
 @frappe.whitelist()
 def get_additional_salary_component(employee, start_date, end_date, component_type):
 	additional_components = frappe.db.sql("""
-		select salary_component, sum(amount) as amount, overwrite_salary_structure_amount, deduct_full_tax_on_selected_payroll_date
+		select name, salary_component, amount, overwrite_salary_structure_amount, deduct_full_tax_on_selected_payroll_date
 		from `tabAdditional Salary`
 		where employee=%(employee)s
 			and docstatus = 1
@@ -60,7 +60,6 @@ def get_additional_salary_component(employee, start_date, end_date, component_ty
 					from_date <= %(to_date)s and to_date >= %(to_date)s
 				)
 		and type = %(component_type)s
-		group by salary_component, overwrite_salary_structure_amount
 		order by salary_component, overwrite_salary_structure_amount
 	""", {
 		'employee': employee,
@@ -70,8 +69,11 @@ def get_additional_salary_component(employee, start_date, end_date, component_ty
 	}, as_dict=1)
 
 	additional_components_list = []
+	existing_salary_components = []
 	component_fields = ["depends_on_payment_days", "salary_component_abbr", "is_tax_applicable", "variable_based_on_taxable_salary", 'type']
 	for d in additional_components:
+		if d.salary_component in existing_salary_components:
+			frappe.throw(_('Multiple additional Salary is created for Salary Component {0}'.format(d.salary_component)))
 		struct_row = frappe._dict({'salary_component': d.salary_component})
 		component = frappe.get_all("Salary Component", filters={'name': d.salary_component}, fields=component_fields)
 		if component:
@@ -79,6 +81,7 @@ def get_additional_salary_component(employee, start_date, end_date, component_ty
 
 		struct_row['deduct_full_tax_on_selected_payroll_date'] = d.deduct_full_tax_on_selected_payroll_date
 		struct_row['is_additional_component'] = 1
+		struct_row['additional_salary'] = d.name
 
 		additional_components_list.append(frappe._dict({
 			'amount': d.amount,
@@ -86,4 +89,5 @@ def get_additional_salary_component(employee, start_date, end_date, component_ty
 			'struct_row': struct_row,
 			'overwrite': d.overwrite_salary_structure_amount,
 		}))
+		existing_salary_components.append(d.salary_component)
 	return additional_components_list
