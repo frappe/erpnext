@@ -461,6 +461,9 @@ class SalesInvoice(SellingController):
 
 		if pos:
 			self.allow_print_before_pay = pos.allow_print_before_pay
+			
+			if not for_validate:
+				self.tax_category = pos.get("tax_category")
 
 			if not for_validate and not self.customer:
 				self.customer = pos.customer
@@ -1288,6 +1291,9 @@ class SalesInvoice(SellingController):
 			if self.get('amended_from'):
 				self.status = 'Draft'
 			return
+
+		precision = self.precision("outstanding_amount")
+		outstanding_amount = flt(self.outstanding_amount, precision)
 
 		if not status:
 			if self.docstatus == 2:

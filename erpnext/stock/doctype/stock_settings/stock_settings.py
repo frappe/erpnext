@@ -29,8 +29,16 @@ class StockSettings(Document):
 		frappe.make_property_setter({'doctype': 'Item', 'fieldname': 'item_naming_by', 'property': 'default',
 			'value': self.item_naming_by})
 
+		self.validate_warehouses()
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()
+
+	def validate_warehouses(self):
+		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
+		for field in warehouse_fields:
+			if frappe.db.get_value("Warehouse", self.get(field), "is_group"):
+				frappe.throw(_("Group Warehouses cannot be used in transactions. Please change the value of {0}") \
+					.format(frappe.bold(self.meta.get_field(field).label)), title =_("Incorrect Warehouse"))
 
 	def cant_change_valuation_method(self):
 		db_valuation_method = frappe.db.get_single_value("Stock Settings", "valuation_method")

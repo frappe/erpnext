@@ -13,17 +13,15 @@ form_grid_templates = {
 
 class BankReconciliation(Document):
 	def get_payment_entries(self):
-		if not (self.bank_account and self.from_date and self.to_date):
-			msgprint(_("Bank Account, From Date and To Date are Mandatory"))
-			return
+		if not (self.from_date and self.to_date):
+			frappe.throw(_("From Date and To Date are Mandatory"))
+
+		if not self.account:
+			frappe.throw(_("Account is mandatory to get payment entries"))
 
 		condition = ""
 		if not self.include_reconciled_entries:
 			condition = "and ({0}clearance_date is null or {0}clearance_date='0000-00-00')"
-
-		account_cond = ""
-		if self.bank_account_no:
-			account_cond = " and t2.bank_account_no = {0}".format(frappe.db.escape(self.bank_account_no))
 
 		journal_entries = frappe.db.sql("""
 			select 
@@ -35,14 +33,15 @@ class BankReconciliation(Document):
 			from
 				`tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where
-				t2.parent = t1.name and t2.account = %s and t1.docstatus=1
-				and t1.posting_date >= %s and t1.posting_date <= %s
+				t2.parent = t1.name and t2.account = %(account)s and t1.docstatus=1
+				and t1.posting_date >= %(from)s and t1.posting_date <= %(to)s
 				and ifnull(t1.is_opening, 'No') = 'No' {0}
 			order by t1.posting_date ASC, t1.name DESC
-		""".format(condition.format("t2.")), (self.bank_account, self.from_date, self.to_date), as_dict=1)
+		""".format(condition.format("t2.")), {"account": self.account, "from": self.from_date, "to": self.to_date},
+			as_dict=1)
 
-		if self.bank_account_no:
-			condition += " and bank_account = %(bank_account_no)s"
+		if self.bank_account:
+			condition += " and bank_account = %(bank_account)s"
 
 		payment_entries = frappe.db.sql("""
 			select
@@ -59,8 +58,8 @@ class BankReconciliation(Document):
 			order by
 				posting_date ASC, name DESC
 		""".format(condition.format("")),
-		        {"account":self.bank_account, "from":self.from_date,
-				"to":self.to_date, "bank_account_no": self.bank_account_no}, as_dict=1)
+			{"account": self.account, "from": self.from_date, "to": self.to_date},
+			as_dict=1)
 
 		pos_entries = []
 		if self.include_pos_transactions:
@@ -76,7 +75,7 @@ class BankReconciliation(Document):
 				order by
 					si.posting_date ASC, si.name DESC
 			""".format(condition.format("sip.")),
-			        {"account":self.bank_account, "from":self.from_date, "to":self.to_date}, as_dict=1)
+			        {"account":self.account, "from":self.from_date, "to":self.to_date}, as_dict=1)
 
 		entries = sorted(list(payment_entries)+list(journal_entries+list(pos_entries)),
 			key=lambda k: k['posting_date'] or getdate(nowdate()))

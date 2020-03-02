@@ -994,6 +994,7 @@ class PurchaseInvoice(BuyingController):
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		if self.update_stock == 1:
 			self.update_stock_ledger()
+			self.delete_auto_created_batches()
 
 		if not self.is_return or not self.update_stock:
 			self.update_receipts_valuation()
@@ -1055,9 +1056,10 @@ class PurchaseInvoice(BuyingController):
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.due_date = None
 
-	def block_invoice(self, hold_comment=None):
+	def block_invoice(self, hold_comment=None, release_date=None):
 		self.db_set('on_hold', 1)
 		self.db_set('hold_comment', cstr(hold_comment))
+		self.db_set('release_date', release_date)
 
 	def unblock_invoice(self):
 		self.db_set('on_hold', 0)
@@ -1219,10 +1221,10 @@ def unblock_invoice(name):
 
 
 @frappe.whitelist()
-def block_invoice(name, hold_comment):
+def block_invoice(name, release_date, hold_comment=None):
 	if frappe.db.exists('Purchase Invoice', name):
 		pi = frappe.get_doc('Purchase Invoice', name)
-		pi.block_invoice(hold_comment)
+		pi.block_invoice(hold_comment, release_date)
 
 @frappe.whitelist()
 def make_inter_company_sales_invoice(source_name, target_doc=None):

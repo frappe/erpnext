@@ -147,6 +147,10 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			fields: fields
 		});
 
+		if (this.item.serial_no) {
+			this.dialog.fields_dict.serial_no.set_value(this.item.serial_no);
+		}
+
 		this.dialog.set_primary_action(__('Insert'), function() {
 			me.values = me.dialog.get_values();
 			if(me.validate()) {
@@ -359,7 +363,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 								frappe.call({
 									method: 'erpnext.stock.doctype.batch.batch.get_batch_qty',
 									args: {
-										batch_no: this.doc.batch_no,
+										batch_no: me.item.batch_no,
 										warehouse: me.warehouse_details.name,
 										item_code: me.item_code
 									},
@@ -433,6 +437,10 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		let serial_no_filters = {
 			item_code: me.item_code,
 			delivery_document_no: ""
+		}
+
+		if (this.item.batch_no) {
+			serial_no_filters["batch_no"] = this.item.batch_no;
 		}
 
 		if (me.warehouse_details.name) {

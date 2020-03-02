@@ -138,7 +138,8 @@
    "label": "Against Voucher Type",
    "oldfieldname": "against_voucher_type",
    "oldfieldtype": "Data",
-   "options": "DocType"
+   "options": "DocType",
+   "search_index": 1
   },
   {
    "fieldname": "against_voucher",
@@ -157,7 +158,8 @@
    "label": "Voucher Type",
    "oldfieldname": "voucher_type",
    "oldfieldtype": "Select",
-   "options": "DocType"
+   "options": "DocType",
+   "search_index": 1
   },
   {
    "fieldname": "voucher_no",
@@ -262,7 +264,7 @@
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
- "modified": "2020-02-09 16:03:30.714001",
+ "modified": "2020-02-10 04:54:57.777905",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "GL Entry",
