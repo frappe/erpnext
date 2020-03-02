@@ -117,17 +117,15 @@ frappe.ui.form.on('Clinical Procedure Item', {
 			let args = {
 				'item_code'			: d.item_code,
 				'transfer_qty'		: d.transfer_qty,
-				'company'			: frm.doc.company,
 				'quantity'			: d.qty
 			};
 			return frappe.call({
-				doc: frm.doc,
-				method: 'get_item_details',
-				args: args,
+				method: 'erpnext.healthcare.doctype.clinical_procedure_template.clinical_procedure_template.get_item_details',
+				args: {args: args},
 				callback: function(r) {
 					if (r.message) {
 						let d = locals[cdt][cdn];
-						$.each(r.message, function(k, v){
+						$.each(r.message, function(k, v) {
 							d[k] = v;
 						});
 						refresh_field('items');

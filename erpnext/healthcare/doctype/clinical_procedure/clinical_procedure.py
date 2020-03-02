@@ -11,19 +11,18 @@ from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import g
 from erpnext.healthcare.doctype.lab_test.lab_test import create_sample_doc
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.get_item_details import get_item_details
+from frappe.model.mapper import get_mapped_doc
 
 class ClinicalProcedure(Document):
 	def validate(self):
 		self.set_status()
 		if self.consume_stock:
-			if not self.warehouse:
-				frappe.throw(_('Set warehouse for Procedure {0} ').format(self.name))
 			self.set_actual_qty()
 
 		if self.items:
 			self.invoice_separately_as_consumables = False
 			for item in self.items:
-				if item.invoice_separately_as_consumables == 1:
+				if item.invoice_separately_as_consumables:
 					self.invoice_separately_as_consumables = True
 
 	def before_insert(self):
@@ -90,7 +89,7 @@ class ClinicalProcedure(Document):
 
 		frappe.db.set_value('Clinical Procedure', self.name, 'status', 'Completed')
 		if self.consume_stock and self.items:
-			return stock_entry.name
+			return stock_entry
 
 	def start_procedure(self):
 		allow_start = self.set_actual_qty()
@@ -101,7 +100,7 @@ class ClinicalProcedure(Document):
 		return 'insufficient stock'
 
 	def set_actual_qty(self):
-		allow_negative_stock = cint(frappe.db.get_value('Stock Settings', None, 'allow_negative_stock'))
+		allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
 
 		allow_start = True
 		for d in self.get('items'):
@@ -109,10 +108,11 @@ class ClinicalProcedure(Document):
 			# validate qty
 			if not allow_negative_stock and d.actual_qty < d.qty:
 				allow_start = False
+				break
 
 		return allow_start
 
-	def make_material_transfer(self):
+	def make_material_receipt(self):
 		stock_entry = frappe.new_doc('Stock Entry')
 
 		stock_entry.stock_entry_type = 'Material Receipt'
@@ -125,7 +125,7 @@ class ClinicalProcedure(Document):
 				se_child.item_name = item.item_name
 				se_child.uom = item.uom
 				se_child.stock_uom = item.stock_uom
-				se_child.qty = flt(item.qty-item.actual_qty)
+				se_child.qty = flt(item.qty - item.actual_qty)
 				se_child.t_warehouse = self.warehouse
 				# in stock uom
 				se_child.transfer_qty = flt(item.transfer_qty)
@@ -154,21 +154,23 @@ def get_procedure_consumables(procedure_template):
 def set_stock_items(doc, stock_detail_parent, parenttype):
 	items = get_items('Clinical Procedure Item', stock_detail_parent, parenttype)
 
-	for d in items:
+	for item in items:
 		se_child = doc.append('items')
-		se_child.item_code = d['item_code']
-		se_child.item_name = d['item_name']
-		se_child.uom = d['uom']
-		se_child.stock_uom = d['stock_uom']
-		se_child.qty = flt(d['qty'])
+		se_child.item_code = item.item_code
+		se_child.item_name = item.item_name
+		se_child.uom = item.uom
+		se_child.stock_uom = item.stock_uom
+		se_child.qty = flt(item.qty)
 		# in stock uom
-		se_child.transfer_qty = flt(d['transfer_qty'])
-		se_child.conversion_factor = flt(d['conversion_factor'])
-		if d['batch_no']:
-			se_child.batch_no = d['batch_no']
+		se_child.transfer_qty = flt(item.transfer_qty)
+		se_child.conversion_factor = flt(item.conversion_factor)
+		if item.batch_no:
+			se_child.batch_no = item.batch_no
 		if parenttype == 'Clinical Procedure Template':
-			se_child.invoice_separately_as_consumables = d['invoice_separately_as_consumables']
+			se_child.invoice_separately_as_consumables = item.invoice_separately_as_consumables
+
 	return doc
+
 
 def get_items(table, parent, parenttype):
 	items = frappe.db.get_all(table, filters={
@@ -177,6 +179,7 @@ def get_items(table, parent, parenttype):
 	}, fields=['*'])
 
 	return items
+
 
 @frappe.whitelist()
 def make_stock_entry(doc):
@@ -194,8 +197,10 @@ def make_stock_entry(doc):
 
 	stock_entry.save(ignore_permissions=True)
 	stock_entry.submit()
-	return stock_entry
+	return stock_entry.name
 
+
+@frappe.whitelist()
 def make_procedure(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		consume_stock = frappe.db.get_value('Clinical Procedure Template', source.procedure_template, 'consume_stock')
@@ -208,6 +213,8 @@ def make_procedure(source_name, target_doc=None):
 				warehouse = frappe.db.get_value('Stock Settings', None, 'default_warehouse')
 			if warehouse:
 				target.warehouse = warehouse
+
+			set_stock_items(target, source.procedure_template, 'Clinical Procedure Template')
 
 	doc = get_mapped_doc('Patient Appointment', source_name, {
 			'Patient Appointment': {
@@ -233,12 +240,13 @@ def make_procedure(source_name, target_doc=None):
 
 	return doc
 
+
 def insert_clinical_procedure_to_medical_record(doc):
 	subject = cstr(doc.procedure_template)
 	if doc.practitioner:
-		subject += ' '+doc.practitioner
+		subject += ' ' + doc.practitioner
 	if subject and doc.notes:
-		subject += '<br/>'+doc.notes
+		subject += '<br/>' + doc.notes
 
 	medical_record = frappe.new_doc('Patient Medical Record')
 	medical_record.patient = doc.patient
