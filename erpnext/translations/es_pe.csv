@@ -544,7 +544,7 @@ DocType: Journal Entry,Excise Entry,Entrada Impuestos Especiales
 DocType: Attendance,Leave Type,Tipo de Vacaciones
 DocType: Account,Round Off,Redondear
 DocType: BOM Item,Scrap %,Chatarra %
-,Requested,Requerido
+DocType: Loan Security Pledge,Requested,Requerido
 DocType: Account,Stock Received But Not Billed,Inventario Recibido pero no facturados
 DocType: Monthly Distribution,Distribution Name,Nombre del Distribución
 apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Material Request No,Nº de Solicitud de Material
