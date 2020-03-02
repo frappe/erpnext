@@ -470,7 +470,7 @@ class JournalEntry(AccountsController):
 				bank_account_currency = d.account_currency
 
 		if pay_to_recd_from:
-			self.pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
+			self.pay_to_recd_from = frappe.db.get_value(d.party_type, pay_to_recd_from,
 				"customer_name" if d.party_type=="Customer" else "supplier_name")
 			if bank_amount:
 				total_amount = bank_amount
