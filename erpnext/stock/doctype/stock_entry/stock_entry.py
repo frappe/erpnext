@@ -405,10 +405,16 @@ class StockEntry(StockController):
 		for d in self.get('items'):
 			transferred_serial_no = frappe.db.get_value("Stock Entry Detail",{"parent": previous_se,
 				"item_code": d.item_code}, "serial_no")
+			
+			transferred_batch_no = frappe.db.get_value("Stock Entry Detail",{"parent": previous_se,
+				"item_code": d.item_code}, "batch_no")
 
 			if transferred_serial_no:
 				d.serial_no = transferred_serial_no
-
+			
+			if transferred_batch_no:
+				d.batch_no = transferred_batch_no
+			
 	def get_stock_and_rate(self):
 		self.set_work_order_details()
 		self.set_transfer_qty()
