@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from erpnext.controllers.selling_controller import SellingController
 from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
@@ -14,6 +15,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 from erpnext.selling.doctype.pos_invoice.pos import update_multi_mode_option
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, set_account_for_mode_of_payment
+from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos
 
 from six import iteritems
 
@@ -77,13 +79,29 @@ class POSInvoice(SalesInvoice):
 		
 	def validate_stock_availablility(self):
 		for d in self.get('items'):
-			available_stock = get_stock_availability(d.item_code, d.warehouse)
-			if not (flt(available_stock) > 0):
-				frappe.throw(_('Row #{}: Item Code: {} is not available under warehouse {}.'
-					.format(d.idx, frappe.bold(d.item_code), frappe.bold(d.warehouse))))
-			elif flt(available_stock) < flt(d.qty):
-				frappe.msgprint(_('Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. \
-					Available quantity {}.'.format(d.idx, frappe.bold(d.item_code), frappe.bold(d.warehouse), frappe.bold(d.qty))))
+			if d.serial_no:
+				reserved_serial_nos, unreserved_serial_nos = get_pos_reserved_serial_nos(d.item_code, d.warehouse)
+				serial_nos = d.serial_no.split("\n")
+				serial_nos = ' '.join(serial_nos).split() # remove whitespaces
+				invalid_serial_nos = []
+				for s in serial_nos:
+					if s in reserved_serial_nos:
+						invalid_serial_nos.append(s)
+				
+				if len(invalid_serial_nos):
+					multiple_nos = 's' if len(invalid_serial_nos) > 1 else ''
+					frappe.throw(_("Row #{}: Serial No{}. {} has already been transacted into another POS Invoice. \
+						Please select valid serial nos.".format(d.idx, multiple_nos, 
+						frappe.bold(', '.join(invalid_serial_nos)))), title="Not Available")
+			else:
+				available_stock = get_stock_availability(d.item_code, d.warehouse)
+				if not (flt(available_stock) > 0):
+					frappe.throw(_('Row #{}: Item Code: {} is not available under warehouse {}.'
+						.format(d.idx, frappe.bold(d.item_code), frappe.bold(d.warehouse))), title="Not Available")
+				elif flt(available_stock) < flt(d.qty):
+					frappe.msgprint(_('Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. \
+						Available quantity {}.'.format(d.idx, frappe.bold(d.item_code), 
+						frappe.bold(d.warehouse), frappe.bold(d.qty))), title="Not Available")
 
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:

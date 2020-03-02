@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
 
 from frappe.model.naming import make_autoname
 from frappe.utils import cint, cstr, flt, add_days, nowdate, getdate
@@ -523,15 +524,53 @@ def get_delivery_note_serial_no(item_code, qty, delivery_note):
 	return serial_nos
 
 @frappe.whitelist()
-def auto_fetch_serial_number(qty, item_code, warehouse, batch_nos=None):
-	import json
+def auto_fetch_serial_number(qty, item_code, warehouse, batch_nos=None, for_doctype=None):
 	filters = {
 		"item_code": item_code,
 		"warehouse": warehouse,
 		"delivery_document_no": "",
 		"sales_invoice": ""
 	}
-	if batch_nos: filters["batch_no"] = ["in", json.loads(batch_nos)]
+	if batch_nos: 
+		filters["batch_no"] = ["in", json.loads(batch_nos)]
+
+	if for_doctype == 'POS Invoice':
+		reserved_serial_nos, unreserved_serial_nos = get_pos_reserved_serial_nos(item_code, warehouse, qty)
+		filters["name"] = ["not in", reserved_serial_nos]
+		return unreserved_serial_nos
 
 	serial_numbers = frappe.get_list("Serial No", filters=filters, limit=qty, order_by="creation")
 	return [item['name'] for item in serial_numbers]
+
+@frappe.whitelist()
+def get_pos_reserved_serial_nos(item_code, warehouse, qty=None):
+	filters = {
+		"item_code": item_code,
+		"warehouse": warehouse,
+		"delivery_document_no": "",
+		"sales_invoice": ""
+	}
+
+	reserved_serial_nos_str = [d.serial_no for d in frappe.db.sql("""select item.serial_no as serial_no
+		from `tabPOS Invoice` p, `tabPOS Invoice Item` item
+		where p.name = item.parent 
+		and p.consolidated_invoice is NULL 
+		and p.docstatus = 1
+		and item.docstatus = 1
+		and item.item_code = %s
+		and item.warehouse = %s
+		""", [item_code, warehouse], as_dict=1)]
+
+	reserved_serial_nos = []
+	for s in reserved_serial_nos_str:
+		if not s: continue
+
+		serial_nos = s.split("\n")
+		serial_nos = ' '.join(serial_nos).split() # remove whitespaces
+		if len(serial_nos): reserved_serial_nos += serial_nos
+
+	filters["name"] = ["not in", reserved_serial_nos]
+	serial_numbers = frappe.get_list("Serial No", filters=filters, limit=qty, order_by="creation")
+	unreserved_serial_nos = [item['name'] for item in serial_numbers]
+
+	return reserved_serial_nos, unreserved_serial_nos
