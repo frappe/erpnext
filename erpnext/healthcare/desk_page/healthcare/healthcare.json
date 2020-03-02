@@ -1,0 +1,41 @@
+{
+ "cards": [
+  {
+   "icon": "icon-cog",
+   "links": "[\n    {\n        \"label\": \"Healthcare Settings\",\n        \"name\": \"Healthcare Settings\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Medical Department\",\n        \"name\": \"Medical Department\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Appointment Type\",\n        \"name\": \"Appointment Type\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Prescription Dosage\",\n        \"name\": \"Prescription Dosage\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Prescription Duration\",\n        \"name\": \"Prescription Duration\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Complaint\",\n        \"name\": \"Complaint\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Diagnosis\",\n        \"name\": \"Diagnosis\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Lab Test Sample\",\n        \"name\": \"Lab Test Sample\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Lab Test UOM\",\n        \"name\": \"Lab Test UOM\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Antibiotic\",\n        \"name\": \"Antibiotic\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Sensitivity\",\n        \"name\": \"Sensitivity\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Lab Test Template\",\n        \"name\": \"Lab Test Template\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Clinical Procedure Template\",\n        \"name\": \"Clinical Procedure Template\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Healthcare Service Unit Type\",\n        \"name\": \"Healthcare Service Unit Type\",\n        \"type\": \"doctype\"\n    }\n]",
+   "title": "Settings"
+  },
+  {
+   "icon": "icon-list",
+   "links": "[\n    {\n        \"label\": \"Lab Test\",\n        \"name\": \"Lab Test\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Sample Collection\",\n        \"name\": \"Sample Collection\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Lab Test Report\",\n        \"name\": \"Lab Test Report\",\n        \"type\": \"report\"\n    }\n]",
+   "title": "Laboratory"
+  },
+  {
+   "icon": "icon-list",
+   "links": "[\n    {\n        \"label\": \"Patient\",\n        \"name\": \"Patient\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Healthcare Practitioner\",\n        \"name\": \"Healthcare Practitioner\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Practitioner Schedule\",\n        \"name\": \"Practitioner Schedule\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Medical Code Standard\",\n        \"name\": \"Medical Code Standard\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Medical Code\",\n        \"name\": \"Medical Code\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Healthcare Service Unit\",\n        \"name\": \"Healthcare Service Unit\",\n        \"type\": \"doctype\"\n    }\n]",
+   "title": "Masters"
+  },
+  {
+   "icon": "icon-star",
+   "links": "[\n    {\n        \"label\": \"Patient Appointment\",\n        \"name\": \"Patient Appointment\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Patient Encounter\",\n        \"name\": \"Patient Encounter\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Record Patient Vitals\",\n        \"label\": \"Vital Signs\",\n        \"name\": \"Vital Signs\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Patient History\",\n        \"name\": \"patient_history\",\n        \"type\": \"page\"\n    },\n    {\n        \"label\": \"Appointment Analytics\",\n        \"name\": \"appointment-analytic\",\n        \"type\": \"page\"\n    },\n    {\n        \"label\": \"Clinical Procedure\",\n        \"name\": \"Clinical Procedure\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Inpatient Record\",\n        \"name\": \"Inpatient Record\",\n        \"type\": \"doctype\"\n    }\n]",
+   "title": "Consultation"
+  }
+ ],
+ "category": "Domains",
+ "charts": [],
+ "creation": "2020-03-02 17:23:17.919682",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "docstatus": 0,
+ "doctype": "Desk Page",
+ "idx": 0,
+ "label": "Healthcare",
+ "modified": "2020-03-02 17:24:38.427732",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Healthcare",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": []
+}
