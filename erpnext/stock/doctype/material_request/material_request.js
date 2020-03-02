@@ -12,7 +12,8 @@ frappe.ui.form.on('Material Request', {
 			'Purchase Order': 'Purchase Order',
 			'Request for Quotation': 'Request for Quotation',
 			'Supplier Quotation': 'Supplier Quotation',
-			'Work Order': 'Work Order'
+			'Work Order': 'Work Order',
+			'Purchase Receipt': 'Purchase Receipt'
 		};
 
 		// formatter for material request item
@@ -32,11 +33,20 @@ frappe.ui.form.on('Material Request', {
 
 		// set schedule_date
 		set_schedule_date(frm);
-		frm.fields_dict["items"].grid.get_field("warehouse").get_query = function(doc) {
+
+		let filters = {'company': frm.doc.company}
+
+		frm.set_query("warehouse", "items", function() {
 			return {
-				filters: {'company': doc.company}
+				filters: filters
 			};
-		};
+		});
+
+		frm.set_query("set_warehouse", function(){
+			return {
+				filters: filters
+			};
+		});
 	},
 
 	onload_post_render: function(frm) {
@@ -252,7 +262,8 @@ frappe.ui.form.on('Material Request', {
 					run_link_triggers: true
 				});
 			},
-			__('Enter Supplier')
+			__('Enter Supplier'),
+			__('Create')
 		)
 	},
 
