@@ -19,7 +19,6 @@
   "from_date",
   "to_date",
   "payroll_date",
-  "salary_slip",
   "type",
   "department",
   "amount",
@@ -110,13 +109,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "salary_slip",
-   "fieldtype": "Link",
-   "label": "Salary Slip",
-   "options": "Salary Slip",
-   "read_only": 1
-  },
-  {
    "fetch_from": "salary_component.type",
    "fieldname": "type",
    "fieldtype": "Data",
@@ -155,7 +147,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-20 12:36:00.087629",
+ "modified": "2020-03-02 18:06:29.170878",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Additional Salary",

@@ -442,6 +442,7 @@ class SalarySlip(TransactionBase):
 			if amount:
 				self.append(key, {
 					'amount': amount,
+					'additional_salary': '' if not struct_row.get("additional_salary") else struct_row.get("additional_salary"),
 					'default_amount': amount if not struct_row.get("is_additional_component") else 0,
 					'depends_on_payment_days' : struct_row.depends_on_payment_days,
 					'salary_component' : struct_row.salary_component,
@@ -789,14 +790,6 @@ class SalarySlip(TransactionBase):
 				"docstatus": 1,
 				"repay_from_salary": 1,
 			})
-
-
-	def update_salary_slip_in_additional_salary(self):
-		salary_slip = self.name if self.docstatus==1 else None
-		frappe.db.sql("""
-			update `tabAdditional Salary` set salary_slip=%s
-			where employee=%s and payroll_date between %s and %s and docstatus=1
-		""", (salary_slip, self.employee, self.start_date, self.end_date))
 
 	def make_loan_repayment_entry(self):
 		for loan in self.loans:
