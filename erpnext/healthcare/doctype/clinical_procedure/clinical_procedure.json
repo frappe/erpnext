@@ -27,13 +27,15 @@
   "invoiced",
   "notes",
   "company",
+  "consumables_section",
   "consume_stock",
-  "consumables",
   "items",
+  "section_break_24",
   "invoice_separately_as_consumables",
-  "consumable_total_amount",
-  "consumption_details",
   "consumption_invoiced",
+  "consumable_total_amount",
+  "column_break_27",
+  "consumption_details",
   "amended_from"
  ],
  "fields": [
@@ -65,8 +67,7 @@
    "in_list_view": 1,
    "label": "Patient",
    "options": "Patient",
-   "reqd": 1,
-   "set_only_once": 1
+   "reqd": 1
   },
   {
    "fieldname": "patient_age",
@@ -124,28 +125,25 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "label": "Warehouse",
-   "options": "Warehouse",
-   "set_only_once": 1
+   "mandatory_depends_on": "eval: doc.consume_stock == 1",
+   "options": "Warehouse"
   },
   {
    "default": "Today",
    "fieldname": "start_date",
    "fieldtype": "Date",
-   "label": "Start Date",
-   "set_only_once": 1
+   "label": "Start Date"
   },
   {
    "fieldname": "start_time",
    "fieldtype": "Time",
-   "label": "Time",
-   "read_only": 1
+   "label": "Start Time"
   },
   {
    "fieldname": "sample",
    "fieldtype": "Link",
    "label": "Sample",
-   "options": "Sample Collection",
-   "read_only": 1
+   "options": "Sample Collection"
   },
   {
    "default": "0",
@@ -164,7 +162,6 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Company",
    "options": "Company"
   },
@@ -172,14 +169,7 @@
    "default": "0",
    "fieldname": "consume_stock",
    "fieldtype": "Check",
-   "hidden": 1,
    "label": "Consume Stock"
-  },
-  {
-   "depends_on": "eval:doc.consume_stock == 1",
-   "fieldname": "consumables",
-   "fieldtype": "Section Break",
-   "label": "Consumables"
   },
   {
    "fieldname": "items",
@@ -191,7 +181,8 @@
    "default": "0",
    "fieldname": "invoice_separately_as_consumables",
    "fieldtype": "Check",
-   "label": "Consumables Invoice Separately",
+   "hidden": 1,
+   "label": "Invoice Consumables Separately",
    "read_only": 1
   },
   {
@@ -212,6 +203,7 @@
    "depends_on": "invoice_separately_as_consumables",
    "fieldname": "consumption_invoiced",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Consumption Invoiced",
    "read_only": 1
   },
@@ -232,11 +224,24 @@
    "options": "Clinical Procedure",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "consumables_section",
+   "fieldtype": "Section Break",
+   "label": "Consumables"
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_24",
+   "fieldtype": "Section Break"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-28 15:02:09.344548",
+ "modified": "2020-03-02 11:44:27.970651",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure",

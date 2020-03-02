@@ -34,29 +34,6 @@ class ClinicalProcedureTemplate(Document):
 			except Exception:
 				frappe.throw(_('Not permitted. Please disable the Procedure Template'), title='Not Permitted')
 
-	def get_item_details(self, args=None):
-		item = frappe.db.get_all('Item',
-			filters={
-				'disabled': 0,
-				'name': args.get('item_code')
-			},
-			fields=['stock_uom', 'item_name']
-		)
-
-		if not item:
-			frappe.throw(_('Item {0} is not active').format(args.get('item_code')))
-
-		item = item[0]
-		ret = {
-			'uom'			      	: item.stock_uom,
-			'stock_uom'			  	: item.stock_uom,
-			'item_name' 		  	: item.item_name,
-			'quantity'				: 0,
-			'transfer_qty'			: 0,
-			'conversion_factor'		: 1
-		}
-		return ret
-
 	def update_item_and_item_price(self):
 		if self.is_billable and self.item:
 			item_doc = frappe.get_doc('Item', {'item_code': self.item})
@@ -78,6 +55,33 @@ class ClinicalProcedureTemplate(Document):
 		frappe.db.set_value(self.doctype, self.name, 'change_in_item', 0)
 		self.reload()
 
+
+@frappe.whitelist()
+def get_item_details(args=None):
+	if not isinstance(args, dict):
+		args = json.loads(args)
+
+	item = frappe.db.get_all('Item',
+		filters={
+			'disabled': 0,
+			'name': args.get('item_code')
+		},
+		fields=['stock_uom', 'item_name']
+	)
+
+	if not item:
+		frappe.throw(_('Item {0} is not active').format(args.get('item_code')))
+
+	item = item[0]
+	ret = {
+		'uom': item.stock_uom,
+		'stock_uom': item.stock_uom,
+		'item_name': item.item_name,
+		'qty': 1,
+		'transfer_qty': 0,
+		'conversion_factor': 1
+	}
+	return ret
 
 def create_item_from_template(doc):
 	disabled = doc.disabled

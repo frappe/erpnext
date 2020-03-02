@@ -90,7 +90,7 @@ frappe.ui.form.on('Patient Appointment', {
 			if (frm.doc.procedure_template) {
 				frm.add_custom_button(__('Clinical Procedure'), function(){
 					frappe.model.open_mapped_doc({
-						method: 'erpnext.healthcare.doctype.clinical_procedure.clinical_procedure.create_procedure',
+						method: 'erpnext.healthcare.doctype.clinical_procedure.clinical_procedure.make_procedure',
 						frm: frm,
 					});
 				}, __('Create'));

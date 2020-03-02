@@ -110,7 +110,7 @@ frappe.ui.form.on('Clinical Procedure', {
 										function() {
 											frappe.call({
 												doc: frm.doc,
-												method: 'make_material_transfer',
+												method: 'make_material_receipt',
 												callback: function(r) {
 													if (!r.exc) {
 														cur_frm.reload_doc();
