@@ -401,7 +401,7 @@ class PurchaseInvoice(BuyingController):
 				update_outstanding_amt(self.credit_to, "Supplier", self.supplier,
 					self.doctype, self.return_against if cint(self.is_return) and self.return_against else self.name)
 
-			if repost_future_gle and cint(self.update_stock) and self.auto_accounting_for_stock:
+			if (repost_future_gle or self.flags.repost_future_gle) and cint(self.update_stock) and self.auto_accounting_for_stock:
 				from erpnext.controllers.stock_controller import update_gl_entries_after
 				items, warehouses = self.get_items_and_warehouses()
 				update_gl_entries_after(self.posting_date, self.posting_time,
