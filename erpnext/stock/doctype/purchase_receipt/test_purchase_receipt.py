@@ -7,6 +7,7 @@ import frappe, erpnext
 import frappe.defaults
 from frappe.utils import cint, flt, cstr, today, random_string
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
+from erpnext.stock.doctype.item.test_item import create_item
 from erpnext import set_perpetual_inventory
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
@@ -50,6 +51,28 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEqual(current_bin_stock_value, existing_bin_stock_value + 250)
 
 		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
+	
+	def test_batched_serial_no_purchase(self):
+		item = frappe.get_doc("Item", { 'item_name': 'Batched Serialized Item' })
+		if not item:
+			item = create_item("Batched Serialized Item")
+			item.has_batch_no = 1
+			item.create_new_batch = 1
+			item.has_serial_no = 1
+			item.batch_number_series = "BS-BATCH-.##"
+			item.serial_no_series = "BS-.####"
+			item.save()
+
+		pr = make_purchase_receipt(item_code=item.name, qty=5, rate=500)
+
+		self.assertTrue(frappe.db.get_value('Batch', {'item': item.name, 'reference_name': pr.name}))
+		
+		pr.load_from_db()
+		batch_no = pr.items[0].batch_no
+		pr.cancel()
+
+		self.assertFalse(frappe.db.get_value('Batch', {'item': item.name, 'reference_name': pr.name}))
+		self.assertFalse(frappe.db.get_all('Serial No', {'batch_no': batch_no}))
 
 	def test_purchase_receipt_gl_entry(self):
 		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", get_multiple_items = True, get_taxes_and_charges = True)
