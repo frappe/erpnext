@@ -13,7 +13,6 @@ class ReceivablePayableReport(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 		self.filters.report_date = getdate(self.filters.report_date or nowdate())
-		self.aging_column_count = 5
 		self.age_as_on = getdate(nowdate()) \
 			if self.filters.report_date > getdate(nowdate()) \
 			else self.filters.report_date
@@ -21,6 +20,9 @@ class ReceivablePayableReport(object):
 	def run(self, args):
 		self.filters.party_type = args.get('party_type')
 		self.party_naming_by = frappe.db.get_value(args.get("naming_by")[0], None, args.get("naming_by")[1])
+		self.ageing_range = [cint(r.strip()) for r in self.filters.get('ageing_range', "").split(",") if r]
+		self.ageing_range = sorted(list(set(self.ageing_range)))
+		self.ageing_column_count = len(self.ageing_range) + 1
 
 		columns = self.get_columns()
 		data = self.get_data()
@@ -199,29 +201,27 @@ class ReceivablePayableReport(object):
 			"width": 200
 		})
 
-		if not "range1" in self.filters:
-			self.filters["range1"] = "30"
-		if not "range2" in self.filters:
-			self.filters["range2"] = "60"
-		if not "range3" in self.filters:
-			self.filters["range3"] = "90"
-		if not "range4" in self.filters:
-			self.filters["range4"] = "120"
+		self.ageing_columns = []
+		lower_limit = 0
+		for i, upper_limit in enumerate(self.ageing_range):
+			self.ageing_columns.append({
+				"label": "{0}-{1}".format(lower_limit, upper_limit),
+				"fieldname": "range{}".format(i+1),
+				"fieldtype": "Currency",
+				"options": "currency",
+				"width": 120
+			})
+			lower_limit = upper_limit + 1
 
-		self.aging_columns = []
-		for i, label in enumerate(["0-{range1}".format(range1=self.filters["range1"]),
-			"{range1}-{range2}".format(range1=cint(self.filters["range1"])+ 1, range2=self.filters["range2"]),
-			"{range2}-{range3}".format(range2=cint(self.filters["range2"])+ 1, range3=self.filters["range3"]),
-			"{range3}-{range4}".format(range3=cint(self.filters["range3"])+ 1, range4=self.filters["range4"]),
-			"{range4}-{above}".format(range4=cint(self.filters["range4"])+ 1, above=_("Above"))]):
-				self.aging_columns.append({
-					"label": label,
-					"fieldname": "range{}".format(i+1),
-					"fieldtype": "Currency",
-					"options": "currency",
-					"width": 120
-				})
-		columns += self.aging_columns
+		self.ageing_columns.append({
+			"label": "{0}-Above".format(lower_limit),
+			"fieldname": "range{}".format(self.ageing_column_count),
+			"fieldtype": "Currency",
+			"options": "currency",
+			"width": 120
+		})
+
+		columns += self.ageing_columns
 
 		columns += [
 		{
@@ -616,21 +616,19 @@ class ReceivablePayableReport(object):
 		else:
 			entry_date = gle.posting_date
 
-		ageing_data = get_ageing_data(cint(self.filters.range1), cint(self.filters.range2),
-			cint(self.filters.range3), cint(self.filters.range4), cint(self.filters.range5), self.age_as_on, entry_date, outstanding_amount)
-		row["age"] = ageing_data[0]
-		for i in range(self.aging_column_count):
-			row["range{}".format(i+1)] = ageing_data[i+1]
+		row["age"], ageing_data = get_ageing_data(self.ageing_range, self.age_as_on, entry_date, outstanding_amount)
+		for i, age_range_value in enumerate(ageing_data):
+			row["range{0}".format(i+1)] = age_range_value
 
 		# issue 6371-Ageing buckets should not have amounts if due date is not reached
 		if self.filters.ageing_based_on == "Due Date" \
 				and getdate(due_date) > getdate(self.filters.report_date):
-			for i in range(self.aging_column_count):
+			for i in range(self.ageing_column_count):
 				row["range{}".format(i+1)] = 0
 
 		if self.filters.ageing_based_on == "Supplier Invoice Date" \
 				and getdate(bill_date) > getdate(self.filters.report_date):
-			for i in range(self.aging_column_count):
+			for i in range(self.ageing_column_count):
 				row["range{}".format(i+1)] = 0
 
 		if self.filters.get(scrub(self.filters.get("party_type"))) or self.filters.get("account"):
@@ -789,7 +787,7 @@ class ReceivablePayableReport(object):
 					select
 						p.name, p.customer_name, p.territory, p.customer_group, p.customer_primary_contact,
 						GROUP_CONCAT(steam.sales_person SEPARATOR ', ') as sales_person,
-						p.payment_terms, p.credit_limit, p.tax_id
+						p.payment_terms, p.tax_id
 					from `tabCustomer` p
 					left join `tabSales Team` steam on steam.parent = p.name and steam.parenttype = 'Customer'
 					group by p.name
@@ -973,13 +971,13 @@ class ReceivablePayableReport(object):
 		for d in data:
 			rows.append(
 				{
-					'values': [d["range{}".format(i+1)] for i in range(self.aging_column_count)]
+					'values': [d["range{}".format(i+1)] for i in range(self.ageing_column_count)]
 				}
 			)
 
 		return {
 			"data": {
-				'labels': [col.get('label') for col in self.aging_columns],
+				'labels': [col.get('label') for col in self.ageing_columns],
 				'datasets': rows
 			},
 			"colors": ['light-blue', 'blue', 'purple', 'orange', 'red'],
@@ -995,24 +993,25 @@ def execute(filters=None):
 	}
 	return ReceivablePayableReport(filters).run(args)
 
-def get_ageing_data(first_range, second_range, third_range, fourth_range, fifth_range, age_as_on, entry_date, outstanding_amount):
-	# [0-30, 30-60, 60-90, 90-120, 120-above]
-	outstanding_range = [0.0, 0.0, 0.0, 0.0, 0.0]
+def get_ageing_data(ageing_range, age_as_on, entry_date, outstanding_amount):
+	outstanding_range = [0.0] * (len(ageing_range) + 1)
 
 	if not (age_as_on and entry_date):
 		return [0] + outstanding_range
 
 	age = (getdate(age_as_on) - getdate(entry_date)).days or 0
 	index = None
-	for i, days in enumerate([first_range, second_range, third_range, fourth_range, fifth_range]):
+	for i, days in enumerate(ageing_range):
 		if age <= days:
 			index = i
 			break
 
-	if index is None: index = 4
+	if index is None:
+		index = len(ageing_range)
+
 	outstanding_range[index] = outstanding_amount
 
-	return [age] + outstanding_range
+	return age, outstanding_range
 
 def get_pdc_details(party_type, report_date):
 	pdc_details = frappe._dict()
