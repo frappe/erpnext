@@ -141,13 +141,13 @@ def get_conditions(filters):
 	conditions = ""
 
 	if filters.get("company"):
-		conditions += " AND company='%s'"% filters.get('company')
+		conditions += " AND company=%s"% frappe.db.escape(filters.get('company'))
 
 	if filters.get("cost_center") or filters.get("project"):
 		conditions += """
-			AND (cost_center='%s'
-			OR project='%s')
-			"""% (filters.get('cost_center'), filters.get('project'))
+			AND (cost_center=%s
+			OR project=%s)
+			"""% (frappe.db.escape(filters.get('cost_center')), frappe.db.escape(filters.get('project')))
 
 	if filters.get("from_date"):
 		conditions += " AND transaction_date>=%s"% filters.get('from_date')

@@ -1135,6 +1135,7 @@ def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname,
 	child_item.reqd_by_date = p_doctype.delivery_date
 	child_item.uom = item.stock_uom
 	child_item.conversion_factor = get_conversion_factor(item_code, item.stock_uom).get("conversion_factor") or 1.0
+	child_item.warehouse = p_doctype.set_warehouse or p_doctype.items[0].warehouse
 	return child_item
 
 
@@ -1199,6 +1200,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 				child_item = set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, d.get("item_code"))
 		else:
 			child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
+			if flt(child_item.get("rate")) == flt(d.get("rate")) and flt(child_item.get("qty")) == flt(d.get("qty")):
+				continue
 
 		if parent_doctype == "Sales Order" and flt(d.get("qty")) < flt(child_item.delivered_qty):
 			frappe.throw(_("Cannot set quantity less than delivered quantity"))
