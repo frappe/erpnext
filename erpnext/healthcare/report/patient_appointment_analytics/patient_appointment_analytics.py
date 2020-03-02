@@ -22,7 +22,6 @@ class Analytics(object):
 		self.get_data()
 		self.get_chart_data()
 
-		self.chart = ''
 		return self.columns, self.data, None, self.chart
 
 	def get_period_date_ranges(self):
@@ -105,9 +104,6 @@ class Analytics(object):
 			self.get_appointments_based_on_medical_department()
 			self.get_rows()
 
-	def get_chart_data(self):
-		pass
-
 	def get_period(self, appointment_date):
 		if self.filters.range == 'Weekly':
 			period = 'Week ' + str(appointment_date.isocalendar()[1]) + ' ' + str(appointment_date.year)
@@ -181,3 +177,14 @@ class Analytics(object):
 			elif self.filters.tree_type == 'Medical Department':
 				self.appointment_periodic_data.setdefault(d.department, frappe._dict()).setdefault(period, 0.0)
 				self.appointment_periodic_data[d.department][period] += 1
+
+	def get_chart_data(self):
+		length = len(self.columns)
+		labels = [d.get("label") for d in self.columns[3:length - 1]]
+		self.chart = {
+			"data": {
+				'labels': labels,
+				'datasets': []
+			},
+			"type": "line"
+		}
