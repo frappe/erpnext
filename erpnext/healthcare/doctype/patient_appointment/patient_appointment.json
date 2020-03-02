@@ -228,7 +228,6 @@
    "default": "0",
    "fieldname": "invoiced",
    "fieldtype": "Check",
-   "in_list_view": 1,
    "label": "Invoiced",
    "read_only": 1
   },
@@ -286,7 +285,7 @@
   }
  ],
  "links": [],
- "modified": "2020-02-25 17:57:56.971064",
+ "modified": "2020-03-02 14:35:54.040428",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",
