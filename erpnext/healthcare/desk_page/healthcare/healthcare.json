@@ -30,12 +30,13 @@
  "doctype": "Desk Page",
  "idx": 0,
  "label": "Healthcare",
- "modified": "2020-03-02 17:24:38.427732",
+ "modified": "2020-03-02 19:35:47.928024",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 0,
+ "restrict_to_domain": "Healthcare",
  "shortcuts": []
 }

@@ -22,12 +22,13 @@
  "doctype": "Desk Page",
  "idx": 0,
  "label": "Agriculture",
- "modified": "2020-03-02 17:24:38.382409",
+ "modified": "2020-03-02 19:35:38.366516",
  "modified_by": "Administrator",
  "module": "Agriculture",
  "name": "Agriculture",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 0,
+ "restrict_to_domain": "Agriculture",
  "shortcuts": []
 }

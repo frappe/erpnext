@@ -62,12 +62,13 @@
  "doctype": "Desk Page",
  "idx": 0,
  "label": "Education",
- "modified": "2020-03-02 17:24:38.478926",
+ "modified": "2020-03-02 19:35:43.857903",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Education",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 0,
+ "restrict_to_domain": "Education",
  "shortcuts": []
 }
