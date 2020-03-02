@@ -22,6 +22,7 @@ frappe.ui.form.on('Clinical Procedure', {
 			}
 		});
 	},
+
 	refresh: function(frm) {
 		frm.set_query('patient', function () {
 			return {
@@ -60,7 +61,7 @@ frappe.ui.form.on('Clinical Procedure', {
 				function(doc) { return (doc.qty<=doc.actual_qty) ? 'green' : 'orange' ; });
 		}
 
-		if (frm.doc.docstatus == 2) {
+		if (frm.doc.docstatus == 1) {
 			if (frm.doc.status == 'In Progress') {
 				let btn_label = '';
 				let msg = '';
@@ -77,17 +78,22 @@ frappe.ui.form.on('Clinical Procedure', {
 						msg,
 						function() {
 							frappe.call({
-								doc: frm.doc,
 								method: 'complete_procedure',
+								doc: frm.doc,
 								callback: function(r) {
-									if (!r.exc) {
-										cur_frm.reload_doc();
+									if (r.message) {
+										frappe.show_alert({
+											message:  __('Stock Entry {0} created',
+											['<a class="bold" href="#Form/Stock Entry/'+ r.message + '">' + r.message + '</a>']),
+											indicator: 'green'
+										});
+										frm.reload_doc();
 									}
 								}
 							});
 						}
 					);
-				});
+				}).addClass("btn-primary");
 
 			} else if (frm.doc.status == 'Pending') {
 				frm.add_custom_button(__('Start'), function() {
@@ -96,9 +102,11 @@ frappe.ui.form.on('Clinical Procedure', {
 						method: 'start_procedure',
 						callback: function(r) {
 							if (!r.exc) {
-								if (r.data.message == 'insufficient stock') {
+								if (r.message == 'insufficient stock') {
+									let msg = __('Stock quantity to start the Procedure is not available in the Warehouse {0}. Do you want to record a Stock Entry?',
+										[frm.doc.warehouse.bold()]);
 									frappe.confirm(
-										__('Stock quantity to start the procedure is not available in the warehouse. Do you want to record a Stock Transfer?'),
+										msg,
 										function() {
 											frappe.call({
 												doc: frm.doc,
@@ -119,10 +127,9 @@ frappe.ui.form.on('Clinical Procedure', {
 							}
 						}
 					});
-				});
+				}).addClass("btn-primary");
 			}
 		}
-
 	},
 
 	onload: function(frm) {
@@ -257,6 +264,7 @@ frappe.ui.form.on('Clinical Procedure Item', {
 		let d = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, 'transfer_qty', d.qty*d.conversion_factor);
 	},
+
 	uom: function(doc, cdt, cdn) {
 		let d = locals[cdt][cdn];
 		if (d.uom && d.item_code) {
@@ -275,6 +283,7 @@ frappe.ui.form.on('Clinical Procedure Item', {
 			});
 		}
 	},
+
 	item_code: function(frm, cdt, cdn) {
 		let d = locals[cdt][cdn];
 		let args = null;
@@ -286,14 +295,14 @@ frappe.ui.form.on('Clinical Procedure Item', {
 				'warehouse': frm.doc.warehouse
 			};
 			return frappe.call({
-				method: 'erpnext.stock.get_item_details.get_item_details',
+				method: 'erpnext.healthcare.doctype.clinical_procedure_template.clinical_procedure_template.get_item_details',
 				args: {args: args},
 				callback: function(r) {
 					if (r.message) {
-						frappe.model.set_value(cdt, cdn, 'item_name', r.message.item_name);
-						frappe.model.set_value(cdt, cdn, 'stock_uom', r.message.stock_uom);
-						frappe.model.set_value(cdt, cdn, 'conversion_factor', r.message.conversion_factor);
-						frappe.model.set_value(cdt, cdn, 'actual_qty', r.message.actual_qty);
+						let d = locals[cdt][cdn];
+						$.each(r.message, function(k, v) {
+							d[k] = v;
+						});
 						refresh_field('items');
 					}
 				}
