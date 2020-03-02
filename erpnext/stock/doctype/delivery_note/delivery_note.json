@@ -19,9 +19,12 @@
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "return_section_break",
   "is_return",
   "issue_credit_note",
   "return_against",
+  "return_column_break",
+  "reason_for_return",
   "customer_po_details",
   "po_no",
   "section_break_18",
@@ -1250,13 +1253,29 @@
    "fieldtype": "Link",
    "label": "Inter Company Reference",
    "options": "Purchase Receipt"
+  },
+  {
+   "depends_on": "is_return",
+   "fieldname": "return_section_break",
+   "fieldtype": "Section Break",
+   "label": "Return Details"
+  },
+  {
+   "fieldname": "return_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "is_return",
+   "fieldname": "reason_for_return",
+   "fieldtype": "Small Text",
+   "label": "Reason for Return/Rejection"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-31 19:17:13.122644",
+ "modified": "2020-03-02 05:15:24.629038",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
