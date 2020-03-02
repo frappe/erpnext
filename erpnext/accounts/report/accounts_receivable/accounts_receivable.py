@@ -447,19 +447,26 @@ class ReceivablePayableReport(object):
 			group_by_labels=group_by_labels)
 
 	def group_aggregate_age(self, data, columns, grouped_by=None):
-		if not self.filters.from_age and not self.filters.to_age:
+		if not self.filters.from_date and not self.filters.to_date:
 			return data
 
 		within_limit = []
 		below_limit = []
 		above_limit = []
 
+		if self.filters.ageing_based_on == "Due Date":
+			date_field = "due_date"
+		elif self.filters.ageing_based_on == "Supplier Invoice Date":
+			date_field = "bill_date"
+		else:
+			date_field = "posting_date"
+
 		for d in data:
 			if d._isGroupTotal or d._isGroup:
 				within_limit.append(d)
-			elif self.filters.from_age and d.age < cint(self.filters.from_age):
+			elif self.filters.from_date and d[date_field] < getdate(self.filters.from_date):
 				below_limit.append(d)
-			elif self.filters.to_age and d.age > cint(self.filters.to_age):
+			elif self.filters.to_date and d[date_field] > getdate(self.filters.to_date):
 				above_limit.append(d)
 			else:
 				within_limit.append(d)
@@ -485,33 +492,33 @@ class ReceivablePayableReport(object):
 			within_limit_total.update(grouped_by)
 			above_limit_total.update(grouped_by)
 
-		below_limit_total['party'] = _("'Age < {0} Total'").format(self.filters.from_age)
-		above_limit_total['party'] = _("'Age > {0} Total'").format(self.filters.to_age)
+		below_limit_total['party'] = _("'Before {0} Total'").format(formatdate(self.filters.from_date))
+		above_limit_total['party'] = _("'After {0} Total'").format(formatdate(self.filters.to_date))
 
 		within_limit_total['_excludeFromTotal'] = True
 		within_limit_total['_bold'] = True
-		if self.filters.from_age and self.filters.to_age:
-			within_limit_total['party'] = _("'Total of Age between {0} and {1}'").format(self.filters.from_age, self.filters.to_age)
-		elif self.filters.from_age:
-			within_limit_total['party'] = _("'Total of Age >= {0}'").format(self.filters.from_age)
-		elif self.filters.to_age:
-			within_limit_total['party'] = _("'Total of Age <= {0}'").format(self.filters.to_age)
+		if self.filters.from_date and self.filters.to_date:
+			within_limit_total['party'] = _("'Total Between {0} and {1}'").format(formatdate(self.filters.from_date), formatdate(self.filters.to_date))
+		elif self.filters.from_date:
+			within_limit_total['party'] = _("'Total of {0} and Above'").format(formatdate(self.filters.from_date))
+		elif self.filters.to_date:
+			within_limit_total['party'] = _("'Total of {0} and Below'").format(formatdate(self.filters.to_date))
 
 		out = []
-		if self.filters.to_age:
+		if self.filters.to_date:
 			out.append(above_limit_total)
 
 		if within_limit:
-			if self.filters.to_age:
+			if self.filters.to_date:
 				out.append({})
 
 			out += within_limit
 			out.append(within_limit_total)
 
-			if self.filters.from_age:
+			if self.filters.from_date:
 				out.append({})
 
-		if self.filters.from_age:
+		if self.filters.from_date:
 			out.append(below_limit_total)
 
 		return out
