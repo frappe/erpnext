@@ -14,12 +14,13 @@
  "doctype": "Desk Page",
  "idx": 0,
  "label": "Retail",
- "modified": "2020-03-02 17:24:38.534530",
+ "modified": "2020-03-02 19:36:03.915954",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Retail",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 0,
+ "restrict_to_domain": "Retail",
  "shortcuts": []
 }
