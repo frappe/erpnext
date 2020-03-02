@@ -136,15 +136,15 @@ class PurchaseInvoice(BuyingController):
 			args = [
 				self.name,
 				self.outstanding_amount,
-				self.is_return, 
-				self.due_date, 
+				self.is_return,
+				self.due_date,
 				self.docstatus,
 				precision
 			]
-			status = get_status(args)
+			self.status = get_status(args)
 
 		if update:
-			self.db_set('status', status, update_modified = update_modified)
+			self.db_set('status', self.status, update_modified = update_modified)
 
 	def set_missing_values(self, for_validate=False):
 		if not self.credit_to:
@@ -1053,7 +1053,7 @@ def get_status(*args):
 			status = "Submitted"
 	else:
 		status = "Draft"
-	
+
 	return status
 
 def get_list_context(context=None):

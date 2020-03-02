@@ -1228,16 +1228,16 @@ class SalesInvoice(SellingController):
 			args = [
 				self.name,
 				self.outstanding_amount,
-				self.is_discounted, 
-				self.is_return, 
-				self.due_date, 
+				self.is_discounted,
+				self.is_return,
+				self.due_date,
 				self.docstatus,
 				precision,
 			]
-			status = get_status(args)
+			self.status = get_status(args)
 
 		if update:
-			self.db_set('status', status, update_modified = update_modified)
+			self.db_set('status', self.status, update_modified = update_modified)
 
 def get_discounting_status(sales_invoice):
 	status = None
@@ -1261,7 +1261,7 @@ def get_discounting_status(sales_invoice):
 
 def get_status(*args):
 	sales_invoice, outstanding_amount, is_discounted, is_return, due_date, docstatus, precision = args[0]
-	
+
 	discounting_status = None
 	if is_discounted:
 		discounting_status = get_discounting_status(sales_invoice)
@@ -1292,7 +1292,7 @@ def get_status(*args):
 			status = "Submitted"
 	else:
 		status = "Draft"
-	
+
 	return status
 
 def validate_inter_company_party(doctype, party, company, inter_company_reference):
@@ -1465,7 +1465,7 @@ def get_inter_company_details(doc, doctype):
 		"party": party,
 		"company": company
 	}
-  
+
 def get_internal_party(parties, link_doctype, doc):
 	if len(parties) == 1:
 			party = parties[0].name
