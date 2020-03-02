@@ -198,22 +198,10 @@ frappe.ui.form.on('Clinical Procedure', {
 				callback: function (data) {
 					frm.set_value('medical_department', data.message.medical_department);
 					frm.set_value('consume_stock', data.message.consume_stock);
-					if (!frm.doc.warehouse) {
-						frappe.call({
-							method: 'frappe.client.get_value',
-							args: {
-								doctype: 'Stock Settings',
-								fieldname: 'default_warehouse'
-							},
-							callback: function (data) {
-								frm.set_value('warehouse', data.message.default_warehouse);
-							}
-						});
-					}
+					frm.events.set_warehouse(frm);
+					frm.events.set_procedure_consumables(frm);
 				}
 			});
-		} else {
-			frm.set_value('consume_stock', 0);
 		}
 	},
 
@@ -248,7 +236,50 @@ frappe.ui.form.on('Clinical Procedure', {
 				}
 			});
 		}
+	},
+
+	set_warehouse: function(frm) {
+		if (!frm.doc.warehouse) {
+			frappe.call({
+				method: 'frappe.client.get_value',
+				args: {
+					doctype: 'Stock Settings',
+					fieldname: 'default_warehouse'
+				},
+				callback: function (data) {
+					frm.set_value('warehouse', data.message.default_warehouse);
+				}
+			});
+		}
+	},
+
+	set_procedure_consumables: function(frm) {
+		frappe.call({
+			method: 'erpnext.healthcare.doctype.clinical_procedure.clinical_procedure.get_procedure_consumables',
+			args: {
+				procedure_template: frm.doc.procedure_template
+			},
+			callback: function(data) {
+				if (data.message) {
+					frm.doc.items = []
+					$.each(data.message, function(i, v) {
+						let item = frm.add_child('items');
+						item.item_code = v.item_code;
+						item.item_name = v.item_name;
+						item.uom = v.uom;
+						item.stock_uom = v.stock_uom;
+						item.qty = flt(v.qty);
+						item.transfer_qty = v.transfer_qty;
+						item.conversion_factor = v.conversion_factor;
+						item.invoice_separately_as_consumables = v.invoice_separately_as_consumables;
+						item.batch_no = v.batch_no;
+					});
+					refresh_field('items');
+				}
+			}
+		});
 	}
+
 });
 
 cur_frm.set_query('procedure_template', function(doc) {

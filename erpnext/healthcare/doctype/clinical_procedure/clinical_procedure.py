@@ -15,7 +15,7 @@ from erpnext.stock.get_item_details import get_item_details
 class ClinicalProcedure(Document):
 	def validate(self):
 		self.set_status()
-		if self.consume_stock and not self.status == 'Draft':
+		if self.consume_stock:
 			if not self.warehouse:
 				frappe.throw(_('Set warehouse for Procedure {0} ').format(self.name))
 			self.set_actual_qty()
@@ -28,7 +28,6 @@ class ClinicalProcedure(Document):
 
 	def before_insert(self):
 		if self.consume_stock:
-			set_stock_items(self, self.procedure_template, 'Clinical Procedure Template')
 			self.set_actual_qty()
 
 	def after_insert(self):
@@ -145,11 +144,17 @@ def get_stock_qty(item_code, warehouse):
 		'posting_time': nowtime()
 	}).get('qty_after_transaction') or 0
 
+
+@frappe.whitelist()
+def get_procedure_consumables(procedure_template):
+	return get_items('Clinical Procedure Item', procedure_template, 'Clinical Procedure Template')
+
+
 @frappe.whitelist()
 def set_stock_items(doc, stock_detail_parent, parenttype):
-	item_dict = get_item_dict('Clinical Procedure Item', stock_detail_parent, parenttype)
+	items = get_items('Clinical Procedure Item', stock_detail_parent, parenttype)
 
-	for d in item_dict:
+	for d in items:
 		se_child = doc.append('items')
 		se_child.item_code = d['item_code']
 		se_child.item_name = d['item_name']
@@ -165,10 +170,13 @@ def set_stock_items(doc, stock_detail_parent, parenttype):
 			se_child.invoice_separately_as_consumables = d['invoice_separately_as_consumables']
 	return doc
 
-def get_item_dict(table, parent, parenttype):
-	query = '''select * from `tab{table}` where parent = '{parent}' and parenttype = '{parenttype}' '''
+def get_items(table, parent, parenttype):
+	items = frappe.db.get_all(table, filters={
+		'parent': parent,
+		'parenttype': parenttype
+	}, fields=['*'])
 
-	return frappe.db.sql(query.format(table=table, parent=parent, parenttype=parenttype), as_dict=True)
+	return items
 
 @frappe.whitelist()
 def make_stock_entry(doc):
