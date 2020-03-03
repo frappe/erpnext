@@ -81,7 +81,7 @@ class ExchangeRateRevaluation(Document):
 					sum(debit) - sum(credit) as balance
 				from `tabGL Entry`
 				where account in (%s)
-				group by account, party_type, party
+				group by account, IFNULL(party_type, ''), IFNULL(party, '')
 				having sum(debit) != sum(credit)
 				order by account
 			""" % ', '.join(['%s']*len(accounts)), tuple(accounts), as_dict=1)
