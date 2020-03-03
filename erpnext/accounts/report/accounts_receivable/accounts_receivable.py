@@ -20,9 +20,8 @@ class ReceivablePayableReport(object):
 	def run(self, args):
 		self.filters.party_type = args.get('party_type')
 		self.party_naming_by = frappe.db.get_value(args.get("naming_by")[0], None, args.get("naming_by")[1])
-		self.ageing_range = [cint(r.strip()) for r in self.filters.get('ageing_range', "").split(",") if r]
-		self.ageing_range = sorted(list(set(self.ageing_range)))
-		self.ageing_column_count = len(self.ageing_range) + 1
+
+		self.validate_filters()
 
 		columns = self.get_columns()
 		data = self.get_data()
@@ -30,6 +29,21 @@ class ReceivablePayableReport(object):
 		chart = self.get_chart_data(columns, data)
 
 		return columns, data_out, None, chart
+
+	def validate_ageing_filter(self):
+		self.ageing_range = [cint(r.strip()) for r in self.filters.get('ageing_range', "").split(",") if r]
+		self.ageing_range = sorted(list(set(self.ageing_range)))
+		self.ageing_column_count = len(self.ageing_range) + 1
+
+	def validate_filters(self):
+		self.validate_ageing_filter()
+
+		if self.filters.get('cost_center'):
+			self.filters.cost_center = get_cost_centers_with_children(self.filters.get("cost_center"))
+
+		if self.filters.get("project"):
+			if not isinstance(self.filters.get("project"), list):
+				self.filters.project = [d.strip() for d in cstr(self.filters.project).strip().split(',') if d]
 
 	def get_columns(self):
 		columns = [
@@ -700,16 +714,13 @@ class ReceivablePayableReport(object):
 
 	def is_in_cost_center(self, gle):
 		if self.filters.get("cost_center"):
-			self.filters.cost_center = get_cost_centers_with_children(self.filters.get("cost_center"))
 			return gle.cost_center and gle.cost_center in self.filters.cost_center
 		else:
 			return True
 
 	def is_in_project(self, gle):
 		if self.filters.get("project"):
-			if not isinstance(self.filters.get("project"), list):
-				self.filters.project = [d.strip() for d in cstr(self.filters.project).strip().split(',') if d]
-			return gle.project and gle.project in self.filters.cost_center
+			return gle.project and gle.project in self.filters.project
 		else:
 			return True
 
