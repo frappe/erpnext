@@ -25,32 +25,11 @@ frappe.query_reports["Accounts Receivable"] = {
 			"default": frappe.datetime.get_today()
 		},
 		{
-			"fieldname":"range1",
-			"label": __("Ageing Range 1"),
-			"fieldtype": "Int",
-			"default": "30",
-			"reqd": 1
-		},
-		{
-			"fieldname":"range2",
-			"label": __("Ageing Range 2"),
-			"fieldtype": "Int",
-			"default": "60",
-			"reqd": 1
-		},
-		{
-			"fieldname":"range3",
-			"label": __("Ageing Range 3"),
-			"fieldtype": "Int",
-			"default": "90",
-			"reqd": 1
-		},
-		{
-			"fieldname":"range4",
-			"label": __("Ageing Range 4"),
-			"fieldtype": "Int",
-			"default": "120",
-			"reqd": 1
+			"fieldname":"ageing_range",
+			"label": __("Ageing Range"),
+			"fieldtype": "Data",
+			"default": "30, 60, 90, 120",
+			"reqd": 0
 		},
 		{
 			"fieldname":"customer",
@@ -131,62 +110,21 @@ frappe.query_reports["Accounts Receivable"] = {
 		{
 			"fieldname":"cost_center",
 			"label": __("Cost Center"),
-			"fieldtype": "MultiSelect",
-			get_data: function() {
-				var cost_centers = frappe.query_report.get_filter_value("cost_center") || "";
-
-				const values = cost_centers.split(/\s*,\s*/).filter(d => d);
-				const txt = cost_centers.match(/[^,\s*]*$/)[0] || '';
-				let data = [];
-
-				frappe.call({
-					type: "GET",
-					method:'frappe.desk.search.search_link',
-					async: false,
-					no_spinner: true,
-					args: {
-						doctype: "Cost Center",
-						txt: txt,
-						filters: {
-							"company": frappe.query_report.get_filter_value("company"),
-							"name": ["not in", values]
-						}
-					},
-					callback: function(r) {
-						data = r.results;
-					}
+			"fieldtype": "MultiSelectList",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Cost Center', txt, {
+					company: frappe.query_report.get_filter_value("company")
 				});
-				return data;
 			}
 		},
 		{
 			"fieldname":"project",
 			"label": __("Project"),
-			"fieldtype": "MultiSelect",
-			get_data: function() {
-				var projects = frappe.query_report.get_filter_value("project") || "";
-
-				const values = projects.split(/\s*,\s*/).filter(d => d);
-				const txt = projects.match(/[^,\s*]*$/)[0] || '';
-				let data = [];
-
-				frappe.call({
-					type: "GET",
-					method:'frappe.desk.search.search_link',
-					async: false,
-					no_spinner: true,
-					args: {
-						doctype: "Project",
-						txt: txt,
-						filters: {
-							"name": ["not in", values]
-						}
-					},
-					callback: function(r) {
-						data = r.results;
-					}
+			"fieldtype": "MultiSelectList",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Project', txt, {
+					company: frappe.query_report.get_filter_value("company")
 				});
-				return data;
 			}
 		},
 		{
@@ -210,14 +148,14 @@ frappe.query_reports["Accounts Receivable"] = {
 			"default": "Ungrouped"
 		},
 		{
-			"fieldname":"from_age",
-			"label": __("Hide Invoices With Age Below"),
-			"fieldtype": "Int"
+			"fieldname":"from_date",
+			"label": __("Show Invoices of Date Above"),
+			"fieldtype": "Date"
 		},
 		{
-			"fieldname":"to_age",
-			"label": __("Hide Invoices With Age Above"),
-			"fieldtype": "Int"
+			"fieldname":"to_date",
+			"label": __("Show Invoices of Date Below"),
+			"fieldtype": "Date"
 		},
 		{
 			"fieldname":"based_on_payment_terms",

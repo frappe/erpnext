@@ -25,32 +25,11 @@ frappe.query_reports["Accounts Payable"] = {
 			"default": frappe.datetime.get_today()
 		},
 		{
-			"fieldname":"range1",
-			"label": __("Ageing Range 1"),
-			"fieldtype": "Int",
-			"default": "30",
-			"reqd": 1
-		},
-		{
-			"fieldname":"range2",
-			"label": __("Ageing Range 2"),
-			"fieldtype": "Int",
-			"default": "60",
-			"reqd": 1
-		},
-		{
-			"fieldname":"range3",
-			"label": __("Ageing Range 3"),
-			"fieldtype": "Int",
-			"default": "90",
-			"reqd": 1
-		},
-		{
-			"fieldname":"range4",
-			"label": __("Ageing Range 4"),
-			"fieldtype": "Int",
-			"default": "120",
-			"reqd": 1
+			"fieldname":"ageing_range",
+			"label": __("Ageing Range"),
+			"fieldtype": "Data",
+			"default": "30, 60, 90, 120",
+			"reqd": 0
 		},
 		{
 			"fieldname":"supplier",
@@ -100,29 +79,21 @@ frappe.query_reports["Accounts Payable"] = {
 		{
 			"fieldname":"cost_center",
 			"label": __("Cost Center"),
-			"fieldtype": "Link",
-			"options": "Cost Center",
-			get_query: () => {
-				var company = frappe.query_report.get_filter_value('company');
-				return {
-					filters: {
-						'company': company
-					}
-				}
+			"fieldtype": "MultiSelectList",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Cost Center', txt, {
+					company: frappe.query_report.get_filter_value("company")
+				});
 			}
 		},
 		{
 			"fieldname":"project",
 			"label": __("Project"),
-			"fieldtype": "Link",
-			"options": "Project",
-			get_query: () => {
-				var company = frappe.query_report.get_filter_value('company');
-				return {
-					filters: {
-						'company': company
-					}
-				}
+			"fieldtype": "MultiSelectList",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Project', txt, {
+					company: frappe.query_report.get_filter_value("company")
+				});
 			}
 		},
 		{

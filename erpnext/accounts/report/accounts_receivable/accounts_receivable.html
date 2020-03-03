@@ -16,6 +16,10 @@
 {% function print_group(data, group) { %}
 <h2 class="text-center" style="margin-top:0">{%= __(report.report_name) %}</h2>
 
+{%
+	var ageing_columns = report.columns.filter(d => d.ageing_column);
+%}
+
 {% if (filters.customer_name || filters.supplier_name || group.party_name || filters.customer || filters.supplier || group.party) { %}
 	<h4 class="text-center">
 	{% if (filters.customer_name || filters.supplier_name || group.party_name) { %}
@@ -164,19 +168,11 @@
 					<th style="width: 10%">{%= __("Remaining Balance") %}</th>
 				{% } %}
 			{% } else { %}
-				{%
-					var range1 = report.columns.find(d => d.fieldname == "range1").label;
-					var range2 = report.columns.find(d => d.fieldname == "range2").label;
-					var range3 = report.columns.find(d => d.fieldname == "range3").label;
-					var range4 = report.columns.find(d => d.fieldname == "range4").label;
-					var range5 = report.columns.find(d => d.fieldname == "range5").label;
-				%}
-				<th style="width: 40%">{%= (filters.customer || filters.supplier) ? __("Remarks"): __("Party") %}</th>
-				<th style="width: 10%">{%= __(range1) %}</th>
-				<th style="width: 10%">{%= __(range2) %}</th>
-				<th style="width: 10%">{%= __(range3) %}</th>
-				<th style="width: 10%">{%= __(range4) %}</th>
-				<th style="width: 10%">{%= __(range5) %}</th>
+				<th style="width: 35%">{%= (filters.customer || filters.supplier) ? __("Remarks"): __("Party") %}</th>
+				{% var ageing_column_width = 55 / ageing_columns.length %}
+				{% for (var r = 0; r < ageing_columns.length; ++r) { %}
+					<th style="width: {%= flt(ageing_column_width, 6) %}%">{%= ageing_columns[r].label %}</th>
+				{% } %}
 				<th style="width: 10%">{%= __("Outstanding Amount") %}</th>
 			{% } %}
 		</tr>
@@ -295,11 +291,9 @@
 				{% } else { %}
 					<td class="text-right"><b>{%= __("Total") %}</b></td>
 				{% } %}
-				<td style="text-align: right">{%= format_currency(data[i]["range1"], data[i]["currency"]) %}</td>
-				<td style="text-align: right">{%= format_currency(data[i]["range2"], data[i]["currency"]) %}</td>
-				<td style="text-align: right">{%= format_currency(data[i]["range3"], data[i]["currency"]) %}</td>
-				<td style="text-align: right">{%= format_currency(data[i]["range4"], data[i]["currency"]) %}</td>
-				<td style="text-align: right">{%= format_currency(data[i]["range5"], data[i]["currency"]) %}</td>
+				{% for (var r = 0; r < ageing_columns.length; ++r) { %}
+					<td style="text-align: right">{%= format_currency(data[i][ageing_columns[r].fieldname], data[i]["currency"]) %}</td>
+				{% } %}
 				<td style="text-align: right">{%= format_currency(data[i]["outstanding_amount"], data[i]["currency"]) %}</td>
 			{% } %}
 			</tr>

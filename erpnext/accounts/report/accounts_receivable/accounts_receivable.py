@@ -13,7 +13,6 @@ class ReceivablePayableReport(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 		self.filters.report_date = getdate(self.filters.report_date or nowdate())
-		self.aging_column_count = 5
 		self.age_as_on = getdate(nowdate()) \
 			if self.filters.report_date > getdate(nowdate()) \
 			else self.filters.report_date
@@ -22,12 +21,29 @@ class ReceivablePayableReport(object):
 		self.filters.party_type = args.get('party_type')
 		self.party_naming_by = frappe.db.get_value(args.get("naming_by")[0], None, args.get("naming_by")[1])
 
+		self.validate_filters()
+
 		columns = self.get_columns()
 		data = self.get_data()
 		data_out = self.get_grouped_data(columns, data)
 		chart = self.get_chart_data(columns, data)
 
 		return columns, data_out, None, chart
+
+	def validate_ageing_filter(self):
+		self.ageing_range = [cint(r.strip()) for r in self.filters.get('ageing_range', "").split(",") if r]
+		self.ageing_range = sorted(list(set(self.ageing_range)))
+		self.ageing_column_count = len(self.ageing_range) + 1
+
+	def validate_filters(self):
+		self.validate_ageing_filter()
+
+		if self.filters.get('cost_center'):
+			self.filters.cost_center = get_cost_centers_with_children(self.filters.get("cost_center"))
+
+		if self.filters.get("project"):
+			if not isinstance(self.filters.get("project"), list):
+				self.filters.project = [d.strip() for d in cstr(self.filters.project).strip().split(',') if d]
 
 	def get_columns(self):
 		columns = [
@@ -199,29 +215,8 @@ class ReceivablePayableReport(object):
 			"width": 200
 		})
 
-		if not "range1" in self.filters:
-			self.filters["range1"] = "30"
-		if not "range2" in self.filters:
-			self.filters["range2"] = "60"
-		if not "range3" in self.filters:
-			self.filters["range3"] = "90"
-		if not "range4" in self.filters:
-			self.filters["range4"] = "120"
-
-		self.aging_columns = []
-		for i, label in enumerate(["0-{range1}".format(range1=self.filters["range1"]),
-			"{range1}-{range2}".format(range1=cint(self.filters["range1"])+ 1, range2=self.filters["range2"]),
-			"{range2}-{range3}".format(range2=cint(self.filters["range2"])+ 1, range3=self.filters["range3"]),
-			"{range3}-{range4}".format(range3=cint(self.filters["range3"])+ 1, range4=self.filters["range4"]),
-			"{range4}-{above}".format(range4=cint(self.filters["range4"])+ 1, above=_("Above"))]):
-				self.aging_columns.append({
-					"label": label,
-					"fieldname": "range{}".format(i+1),
-					"fieldtype": "Currency",
-					"options": "currency",
-					"width": 120
-				})
-		columns += self.aging_columns
+		self.ageing_columns = self.get_ageing_columns()
+		columns += self.ageing_columns
 
 		columns += [
 		{
@@ -307,6 +302,30 @@ class ReceivablePayableReport(object):
 			]
 
 		return columns
+
+	def get_ageing_columns(self):
+		ageing_columns = []
+		lower_limit = 0
+		for i, upper_limit in enumerate(self.ageing_range):
+			ageing_columns.append({
+				"label": "{0}-{1}".format(lower_limit, upper_limit),
+				"fieldname": "range{}".format(i+1),
+				"fieldtype": "Currency",
+				"options": "currency",
+				"ageing_column": 1,
+				"width": 120
+			})
+			lower_limit = upper_limit + 1
+
+		ageing_columns.append({
+			"label": "{0}-Above".format(lower_limit),
+			"fieldname": "range{}".format(self.ageing_column_count),
+			"fieldtype": "Currency",
+			"options": "currency",
+			"ageing_column": 1,
+			"width": 120
+		})
+		return ageing_columns
 
 	def get_data(self):
 		from erpnext.accounts.utils import get_currency_precision
@@ -447,19 +466,26 @@ class ReceivablePayableReport(object):
 			group_by_labels=group_by_labels)
 
 	def group_aggregate_age(self, data, columns, grouped_by=None):
-		if not self.filters.from_age and not self.filters.to_age:
+		if not self.filters.from_date and not self.filters.to_date:
 			return data
 
 		within_limit = []
 		below_limit = []
 		above_limit = []
 
+		if self.filters.ageing_based_on == "Due Date":
+			date_field = "due_date"
+		elif self.filters.ageing_based_on == "Supplier Invoice Date":
+			date_field = "bill_date"
+		else:
+			date_field = "posting_date"
+
 		for d in data:
 			if d._isGroupTotal or d._isGroup:
 				within_limit.append(d)
-			elif self.filters.from_age and d.age < cint(self.filters.from_age):
+			elif self.filters.from_date and d[date_field] < getdate(self.filters.from_date):
 				below_limit.append(d)
-			elif self.filters.to_age and d.age > cint(self.filters.to_age):
+			elif self.filters.to_date and d[date_field] > getdate(self.filters.to_date):
 				above_limit.append(d)
 			else:
 				within_limit.append(d)
@@ -485,33 +511,33 @@ class ReceivablePayableReport(object):
 			within_limit_total.update(grouped_by)
 			above_limit_total.update(grouped_by)
 
-		below_limit_total['party'] = _("'Age < {0} Total'").format(self.filters.from_age)
-		above_limit_total['party'] = _("'Age > {0} Total'").format(self.filters.to_age)
+		below_limit_total['party'] = _("'Before {0} Total'").format(formatdate(self.filters.from_date))
+		above_limit_total['party'] = _("'After {0} Total'").format(formatdate(self.filters.to_date))
 
 		within_limit_total['_excludeFromTotal'] = True
 		within_limit_total['_bold'] = True
-		if self.filters.from_age and self.filters.to_age:
-			within_limit_total['party'] = _("'Total of Age between {0} and {1}'").format(self.filters.from_age, self.filters.to_age)
-		elif self.filters.from_age:
-			within_limit_total['party'] = _("'Total of Age >= {0}'").format(self.filters.from_age)
-		elif self.filters.to_age:
-			within_limit_total['party'] = _("'Total of Age <= {0}'").format(self.filters.to_age)
+		if self.filters.from_date and self.filters.to_date:
+			within_limit_total['party'] = _("'Total Between {0} and {1}'").format(formatdate(self.filters.from_date), formatdate(self.filters.to_date))
+		elif self.filters.from_date:
+			within_limit_total['party'] = _("'Total of {0} and Above'").format(formatdate(self.filters.from_date))
+		elif self.filters.to_date:
+			within_limit_total['party'] = _("'Total of {0} and Below'").format(formatdate(self.filters.to_date))
 
 		out = []
-		if self.filters.to_age:
+		if self.filters.to_date:
 			out.append(above_limit_total)
 
 		if within_limit:
-			if self.filters.to_age:
+			if self.filters.to_date:
 				out.append({})
 
 			out += within_limit
 			out.append(within_limit_total)
 
-			if self.filters.from_age:
+			if self.filters.from_date:
 				out.append({})
 
-		if self.filters.from_age:
+		if self.filters.from_date:
 			out.append(below_limit_total)
 
 		return out
@@ -616,21 +642,19 @@ class ReceivablePayableReport(object):
 		else:
 			entry_date = gle.posting_date
 
-		ageing_data = get_ageing_data(cint(self.filters.range1), cint(self.filters.range2),
-			cint(self.filters.range3), cint(self.filters.range4), cint(self.filters.range5), self.age_as_on, entry_date, outstanding_amount)
-		row["age"] = ageing_data[0]
-		for i in range(self.aging_column_count):
-			row["range{}".format(i+1)] = ageing_data[i+1]
+		row["age"], ageing_data = get_ageing_data(self.ageing_range, self.age_as_on, entry_date, outstanding_amount)
+		for i, age_range_value in enumerate(ageing_data):
+			row["range{0}".format(i+1)] = age_range_value
 
 		# issue 6371-Ageing buckets should not have amounts if due date is not reached
 		if self.filters.ageing_based_on == "Due Date" \
 				and getdate(due_date) > getdate(self.filters.report_date):
-			for i in range(self.aging_column_count):
+			for i in range(self.ageing_column_count):
 				row["range{}".format(i+1)] = 0
 
 		if self.filters.ageing_based_on == "Supplier Invoice Date" \
 				and getdate(bill_date) > getdate(self.filters.report_date):
-			for i in range(self.aging_column_count):
+			for i in range(self.ageing_column_count):
 				row["range{}".format(i+1)] = 0
 
 		if self.filters.get(scrub(self.filters.get("party_type"))) or self.filters.get("account"):
@@ -695,16 +719,13 @@ class ReceivablePayableReport(object):
 
 	def is_in_cost_center(self, gle):
 		if self.filters.get("cost_center"):
-			self.filters.cost_center = get_cost_centers_with_children(self.filters.get("cost_center"))
 			return gle.cost_center and gle.cost_center in self.filters.cost_center
 		else:
 			return True
 
 	def is_in_project(self, gle):
 		if self.filters.get("project"):
-			if not isinstance(self.filters.get("project"), list):
-				self.filters.project = [d.strip() for d in cstr(self.filters.project).strip().split(',') if d]
-			return gle.project and gle.project in self.filters.cost_center
+			return gle.project and gle.project in self.filters.project
 		else:
 			return True
 
@@ -789,7 +810,7 @@ class ReceivablePayableReport(object):
 					select
 						p.name, p.customer_name, p.territory, p.customer_group, p.customer_primary_contact,
 						GROUP_CONCAT(steam.sales_person SEPARATOR ', ') as sales_person,
-						p.payment_terms, p.credit_limit, p.tax_id
+						p.payment_terms, p.tax_id
 					from `tabCustomer` p
 					left join `tabSales Team` steam on steam.parent = p.name and steam.parenttype = 'Customer'
 					group by p.name
@@ -973,13 +994,13 @@ class ReceivablePayableReport(object):
 		for d in data:
 			rows.append(
 				{
-					'values': [d["range{}".format(i+1)] for i in range(self.aging_column_count)]
+					'values': [d["range{}".format(i+1)] for i in range(self.ageing_column_count)]
 				}
 			)
 
 		return {
 			"data": {
-				'labels': [col.get('label') for col in self.aging_columns],
+				'labels': [col.get('label') for col in self.ageing_columns],
 				'datasets': rows
 			},
 			"colors": ['light-blue', 'blue', 'purple', 'orange', 'red'],
@@ -995,24 +1016,25 @@ def execute(filters=None):
 	}
 	return ReceivablePayableReport(filters).run(args)
 
-def get_ageing_data(first_range, second_range, third_range, fourth_range, fifth_range, age_as_on, entry_date, outstanding_amount):
-	# [0-30, 30-60, 60-90, 90-120, 120-above]
-	outstanding_range = [0.0, 0.0, 0.0, 0.0, 0.0]
+def get_ageing_data(ageing_range, age_as_on, entry_date, outstanding_amount):
+	outstanding_range = [0.0] * (len(ageing_range) + 1)
 
 	if not (age_as_on and entry_date):
 		return [0] + outstanding_range
 
 	age = (getdate(age_as_on) - getdate(entry_date)).days or 0
 	index = None
-	for i, days in enumerate([first_range, second_range, third_range, fourth_range, fifth_range]):
+	for i, days in enumerate(ageing_range):
 		if age <= days:
 			index = i
 			break
 
-	if index is None: index = 4
+	if index is None:
+		index = len(ageing_range)
+
 	outstanding_range[index] = outstanding_amount
 
-	return [age] + outstanding_range
+	return age, outstanding_range
 
 def get_pdc_details(party_type, report_date):
 	pdc_details = frappe._dict()

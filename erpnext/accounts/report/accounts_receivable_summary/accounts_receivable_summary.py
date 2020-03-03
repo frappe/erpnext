@@ -12,6 +12,8 @@ from six import iteritems
 
 class AccountsReceivableSummary(ReceivablePayableReport):
 	def run(self, args):
+		self.validate_ageing_filter()
+
 		party_naming_by = frappe.db.get_value(args.get("naming_by")[0], None, args.get("naming_by")[1])
 		return self.get_columns(party_naming_by, args), self.get_data(party_naming_by, args)
 
@@ -90,18 +92,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			}
 		]
 
-		for i, label in enumerate(["0-{range1}".format(range1=self.filters["range1"]),
-			"{range1}-{range2}".format(range1=cint(self.filters["range1"]) + 1, range2=self.filters["range2"]),
-			"{range2}-{range3}".format(range2=cint(self.filters["range2"]) + 1, range3=self.filters["range3"]),
-			"{range3}-{range4}".format(range3=cint(self.filters["range3"]) + 1, range4=self.filters["range4"]),
-			"{range4}-{above}".format(range4=cint(self.filters["range4"]) + 1, above=_("Above"))]):
-				columns.append({
-					"label": label,
-					"fieldname": "range{}".format(i + 1),
-					"fieldtype": "Currency",
-					"options": "currency",
-					"width": 120
-				})
+		self.ageing_columns = self.get_ageing_columns()
+		columns += self.ageing_columns
 
 		if args.get("party_type") == "Customer":
 			columns += [{
@@ -166,8 +158,8 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			row["return_amount"] = party_dict.return_amount
 			row["outstanding_amount"] = party_dict.outstanding_amount
 
-			for i in range(5):
-				row["range{}".format(i+1)] = party_dict.get("range{}".format(i+1))
+			for i in range(self.ageing_column_count):
+				row["range{0}".format(i+1)] = party_dict.get("range{0}".format(i+1))
 
 			if args.get("party_type") == "Customer":
 				row["territory"] = self.get_territory(party)
@@ -183,21 +175,20 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 
 	def get_partywise_total(self, party_naming_by, args):
 		party_total = frappe._dict()
+
+		template = frappe._dict({
+			"invoiced_amount": 0,
+			"paid_amount": 0,
+			"return_amount": 0,
+			"outstanding_amount": 0,
+			"sales_person": []
+		})
+		for r in range(self.ageing_column_count):
+			template['range{0}'.format(r+1)] = 0
+
 		for d in self.get_voucherwise_data(party_naming_by, args):
-			party_total.setdefault(d.party,
-				frappe._dict({
-					"invoiced_amount": 0,
-					"paid_amount": 0,
-					"return_amount": 0,
-					"outstanding_amount": 0,
-					"range1": 0,
-					"range2": 0,
-					"range3": 0,
-					"range4": 0,
-					"range5": 0,
-					"sales_person": []
-				})
-			)
+			party_total.setdefault(d.party, template.copy())
+			
 			for k in list(party_total[d.party]):
 				if k not in ["currency", "sales_person"]:
 					party_total[d.party][k] += flt(d.get(k, 0))
