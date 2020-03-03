@@ -154,7 +154,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "SQTN-.",
+   "options": "SQTN-",
    "print_hide": 1,
    "set_only_once": 1
   },
@@ -1077,7 +1077,7 @@
  "icon": "fa fa-shopping-cart",
  "idx": 29,
  "is_submittable": 1,
- "modified": "2020-03-03 15:50:33.440803",
+ "modified": "2020-03-03 15:55:05.303594",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
@@ -1139,7 +1139,7 @@
  ],
  "search_fields": "status, transaction_date, supplier,grand_total",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "transaction_date",
  "sort_order": "DESC",
  "timeline_field": "supplier",
  "title_field": "title"

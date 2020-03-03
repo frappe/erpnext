@@ -232,7 +232,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:36:34.459951",
+ "modified": "2020-03-03 15:58:06.891105",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Advance",
@@ -276,7 +276,7 @@
   }
  ],
  "search_fields": "employee,employee_name,advance_amount,status,balance_amount",
- "sort_field": "modified",
+ "sort_field": "posting_date",
  "sort_order": "DESC",
  "title_field": "title",
  "track_changes": 1

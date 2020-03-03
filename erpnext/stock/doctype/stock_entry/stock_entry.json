@@ -635,7 +635,7 @@
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-03-03 15:35:05.499261",
+ "modified": "2020-03-03 15:59:52.723574",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
@@ -703,7 +703,7 @@
  ],
  "search_fields": "posting_date, from_warehouse, to_warehouse, purpose, remarks",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "posting_date",
  "sort_order": "DESC",
  "title_field": "title",
  "track_changes": 1

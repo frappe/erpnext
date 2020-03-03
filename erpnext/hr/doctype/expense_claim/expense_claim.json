@@ -288,7 +288,7 @@
  "icon": "fa fa-money",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-03-03 15:36:37.081432",
+ "modified": "2020-03-03 15:57:39.506946",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",
@@ -351,7 +351,7 @@
  ],
  "search_fields": "employee,employee_name, outstanding_amount",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "posting_date",
  "sort_order": "DESC",
  "timeline_field": "employee",
  "title_field": "title"

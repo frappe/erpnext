@@ -1242,7 +1242,7 @@
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2020-03-03 15:50:32.812482",
+ "modified": "2020-03-03 15:54:34.535423",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
@@ -1334,7 +1334,7 @@
  ],
  "search_fields": "status,transaction_date,party_name,order_type",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "transaction_date",
  "sort_order": "DESC",
  "timeline_field": "party_name",
  "title_field": "title"

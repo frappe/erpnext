@@ -1467,7 +1467,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-03-03 15:50:35.086837",
+ "modified": "2020-03-03 15:55:21.067877",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
@@ -1515,7 +1515,7 @@
  ],
  "search_fields": "status, transaction_date, supplier,grand_total",
  "show_name_in_global_search": 1,
- "sort_field": "modified",
+ "sort_field": "transaction_date",
  "sort_order": "DESC",
  "timeline_field": "supplier",
  "title_field": "title"
