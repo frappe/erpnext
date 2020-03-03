@@ -235,6 +235,7 @@
   {
    "fieldname": "base_total_taxes_and_charges",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Total Taxes and Charges (Company Currency)",
    "options": "Company:company:default_currency",
    "read_only": 1
@@ -242,6 +243,7 @@
   {
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "hidden": 1,
    "label": "Grand Total (Company Currency)",
    "options": "Company:company:default_currency",
@@ -385,7 +387,7 @@
  ],
  "icon": "icon-usd",
  "is_submittable": 1,
- "modified": "2020-03-03 15:35:04.991317",
+ "modified": "2020-03-03 15:48:08.294986",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Voucher",

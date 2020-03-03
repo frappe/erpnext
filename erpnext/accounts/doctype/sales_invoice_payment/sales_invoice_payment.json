@@ -61,6 +61,7 @@
   {
    "fieldname": "base_amount",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Base Amount (Company Currency)",
    "no_copy": 1,
    "options": "Company:company:default_currency",
@@ -76,7 +77,7 @@
   }
  ],
  "istable": 1,
- "modified": "2020-03-03 15:35:04.665913",
+ "modified": "2020-03-03 15:47:58.990209",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Payment",

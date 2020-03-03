@@ -71,13 +71,14 @@
   {
    "fieldname": "base_amount",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Amount (Company Currency)",
    "options": "Company:company:default_currency",
    "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2020-03-03 15:35:06.026040",
+ "modified": "2020-03-03 15:47:58.847262",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Taxes and Charges",

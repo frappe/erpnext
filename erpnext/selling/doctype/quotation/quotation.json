@@ -480,6 +480,7 @@
   {
    "fieldname": "base_total",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Total (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -488,6 +489,7 @@
   {
    "fieldname": "base_net_total",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Net Total (Company Currency)",
    "oldfieldname": "net_total",
    "oldfieldtype": "Currency",
@@ -583,6 +585,7 @@
   {
    "fieldname": "base_total_taxes_and_charges",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Total Taxes and Charges (Company Currency)",
    "oldfieldname": "other_charges_total",
    "oldfieldtype": "Currency",
@@ -628,6 +631,7 @@
   {
    "fieldname": "base_discount_amount",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Additional Discount Amount (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -660,6 +664,7 @@
   {
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Grand Total (Company Currency)",
    "oldfieldname": "grand_total",
    "oldfieldtype": "Currency",
@@ -671,6 +676,7 @@
   {
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Rounding Adjustment (Company Currency)",
    "no_copy": 1,
    "options": "Company:company:default_currency",
@@ -690,6 +696,7 @@
   {
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Rounded Total (Company Currency)",
    "oldfieldname": "rounded_total",
    "oldfieldtype": "Currency",
@@ -1235,7 +1242,7 @@
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2020-03-03 15:34:54.704354",
+ "modified": "2020-03-03 15:48:03.005363",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

@@ -289,6 +289,7 @@
   {
    "fieldname": "base_price_list_rate",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Price List Rate (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -329,6 +330,7 @@
   {
    "fieldname": "base_rate",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Rate (Company Currency)",
    "oldfieldname": "rate",
    "oldfieldtype": "Currency",
@@ -340,6 +342,7 @@
   {
    "fieldname": "base_amount",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Amount (Company Currency)",
    "oldfieldname": "amount",
    "oldfieldtype": "Currency",
@@ -393,6 +396,7 @@
   {
    "fieldname": "base_net_rate",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Net Rate (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -401,6 +405,7 @@
   {
    "fieldname": "base_net_amount",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Net Amount (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -1146,7 +1151,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:35:03.684141",
+ "modified": "2020-03-03 15:47:59.198237",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

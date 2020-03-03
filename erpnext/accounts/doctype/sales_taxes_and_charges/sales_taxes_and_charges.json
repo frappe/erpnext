@@ -143,6 +143,7 @@
   {
    "fieldname": "base_tax_amount",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Amount (Company Currency)",
    "oldfieldname": "tax_amount",
    "oldfieldtype": "Currency",
@@ -152,6 +153,7 @@
   {
    "fieldname": "base_total",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Total (Company Currency)",
    "oldfieldname": "total",
    "oldfieldtype": "Currency",
@@ -162,6 +164,7 @@
    "depends_on": "eval:parent.discount_amount",
    "fieldname": "base_tax_amount_after_discount_amount",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Tax Amount After Discount Amount (Company Currency)",
    "options": "Company:company:default_currency",
    "read_only": 1
@@ -204,7 +207,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:34:58.018998",
+ "modified": "2020-03-03 15:48:09.543133",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Taxes and Charges",

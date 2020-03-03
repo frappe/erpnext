@@ -183,6 +183,7 @@
   {
    "fieldname": "base_rate",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Basic Rate (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -207,6 +208,7 @@
   {
    "fieldname": "base_amount",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Amount (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -263,7 +265,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:35:08.315072",
+ "modified": "2020-03-03 15:47:57.617434",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",

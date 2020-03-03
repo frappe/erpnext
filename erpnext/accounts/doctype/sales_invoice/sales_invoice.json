@@ -694,6 +694,7 @@
   {
    "fieldname": "base_total",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Total (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -702,6 +703,7 @@
   {
    "fieldname": "base_net_total",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Net Total (Company Currency)",
    "oldfieldname": "net_total",
    "oldfieldtype": "Currency",
@@ -804,6 +806,7 @@
   {
    "fieldname": "base_total_taxes_and_charges",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Total Taxes and Charges (Company Currency)",
    "oldfieldname": "other_charges_total",
    "oldfieldtype": "Currency",
@@ -903,6 +906,7 @@
   {
    "fieldname": "base_discount_amount",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Additional Discount Amount (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -935,6 +939,7 @@
   {
    "fieldname": "base_grand_total",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Grand Total (Company Currency)",
    "oldfieldname": "grand_total",
    "oldfieldtype": "Currency",
@@ -946,6 +951,7 @@
   {
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Rounding Adjustment (Company Currency)",
    "no_copy": 1,
    "options": "Company:company:default_currency",
@@ -955,6 +961,7 @@
   {
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Rounded Total (Company Currency)",
    "oldfieldname": "rounded_total",
    "oldfieldtype": "Currency",
@@ -1130,6 +1137,7 @@
    "depends_on": "eval: doc.is_pos || doc.redeem_loyalty_points",
    "fieldname": "base_paid_amount",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Paid Amount (Company Currency)",
    "no_copy": 1,
    "options": "Company:company:default_currency",
@@ -1156,6 +1164,7 @@
    "depends_on": "is_pos",
    "fieldname": "base_change_amount",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Change Amount (Company Currency)",
    "no_copy": 1,
    "options": "Company:company:default_currency",
@@ -1203,6 +1212,7 @@
   {
    "fieldname": "base_write_off_amount",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Write Off Amount (Company Currency)",
    "no_copy": 1,
    "options": "Company:company:default_currency",
@@ -1879,7 +1889,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-03-03 15:34:57.225269",
+ "modified": "2020-03-03 15:48:02.179312",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

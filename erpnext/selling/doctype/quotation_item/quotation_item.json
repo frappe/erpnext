@@ -257,6 +257,7 @@
   {
    "fieldname": "base_price_list_rate",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Price List Rate (Company Currency)",
    "oldfieldname": "base_ref_rate",
    "oldfieldtype": "Currency",
@@ -312,6 +313,7 @@
    "depends_on": "eval:doc.margin_type && doc.price_list_rate && doc.margin_rate_or_amount",
    "fieldname": "base_rate_with_margin",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Rate With Margin (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -370,6 +372,7 @@
   {
    "fieldname": "base_rate",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Rate (Company Currency)",
    "oldfieldname": "basic_rate",
    "oldfieldtype": "Currency",
@@ -389,6 +392,7 @@
   {
    "fieldname": "base_amount",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Amount (Company Currency)",
    "oldfieldname": "amount",
    "oldfieldtype": "Currency",
@@ -401,6 +405,7 @@
   {
    "fieldname": "base_net_amount",
    "fieldtype": "Currency",
+   "force_currency_symbol": 1,
    "label": "Net Amount (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
@@ -963,7 +968,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:35:01.461772",
+ "modified": "2020-03-03 15:48:01.137818",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation Item",
