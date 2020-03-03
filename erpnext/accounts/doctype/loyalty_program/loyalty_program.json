@@ -96,7 +96,8 @@
    "description": "1 Loyalty Points = How much base currency?",
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
-   "label": "Conversion Factor"
+   "label": "Conversion Factor",
+   "precision": "9"
   },
   {
    "fieldname": "expiry_duration",
@@ -145,7 +146,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2020-03-03 15:37:22.306736",
+ "modified": "2020-03-03 15:50:24.586771",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Loyalty Program",

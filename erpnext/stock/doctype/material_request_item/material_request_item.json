@@ -141,6 +141,7 @@
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "UOM Conversion Factor",
+   "precision": "9",
    "print_hide": 1,
    "reqd": 1
   },
@@ -407,7 +408,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:37:17.310806",
+ "modified": "2020-03-03 15:50:26.516367",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",
