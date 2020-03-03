@@ -80,7 +80,7 @@ class Quotation(SellingController):
 				if reason.get('lost_reason') in lost_reasons_lst:
 					self.append('lost_reasons', reason)
 				else:
-					frappe.throw(_("Invalid lost reason <b>{0}</b>, please create a new lost reason".format(reason.get('lost_reason'))))
+					frappe.throw(_("Invalid lost reason {0}, please create a new lost reason".format(frappe.bold(reason.get('lost_reason')))))
 
 			self.update_opportunity()
 			self.update_lead()
