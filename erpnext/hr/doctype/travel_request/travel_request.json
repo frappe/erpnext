@@ -33,7 +33,8 @@
   "event_details",
   "name_of_organizer",
   "address_of_organizer",
-  "other_details"
+  "other_details",
+  "amended_from"
  ],
  "fields": [
   {
@@ -213,7 +214,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-25 23:15:00.609186",
+ "modified": "2020-03-03 15:37:23.577823",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Travel Request",

@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "HR-SSA-.YY.-.MM.-.#####",
  "creation": "2018-04-13 16:38:41.769237",
@@ -116,8 +115,7 @@
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2019-12-31 17:05:28.637510",
+ "modified": "2020-03-03 15:34:53.272346",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Structure Assignment",

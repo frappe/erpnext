@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_copy": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -238,9 +237,8 @@
    "label": "Disabled"
   }
  ],
- "links": [],
- "modified": "2020-01-21 21:02:16.108347",
- "modified_by": "ruchamahabal2@gmail.com",
+ "modified": "2020-03-03 15:35:25.433935",
+ "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",
  "owner": "Administrator",

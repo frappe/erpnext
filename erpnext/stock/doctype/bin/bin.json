@@ -166,7 +166,7 @@
  "hide_toolbar": 1,
  "idx": 1,
  "in_create": 1,
- "modified": "2019-11-18 18:34:59.456882",
+ "modified": "2020-03-03 15:34:45.778855",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Bin",
@@ -196,5 +196,6 @@
  ],
  "quick_entry": 1,
  "search_fields": "item_code,warehouse",
+ "sort_field": "modified",
  "sort_order": "ASC"
 }

@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:item_group_name",
@@ -206,9 +205,8 @@
  "icon": "fa fa-sitemap",
  "idx": 1,
  "image_field": "image",
- "links": [],
  "max_attachments": 3,
- "modified": "2020-01-28 13:51:05.456014",
+ "modified": "2020-03-03 15:34:51.966900",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",

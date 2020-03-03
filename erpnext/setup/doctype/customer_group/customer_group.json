@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:customer_group_name",
@@ -137,8 +136,7 @@
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
- "links": [],
- "modified": "2020-01-28 13:49:23.961708",
+ "modified": "2020-03-03 15:35:23.483249",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Customer Group",

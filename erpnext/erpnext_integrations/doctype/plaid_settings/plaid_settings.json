@@ -1,5 +1,4 @@
 {
- "actions": [],
  "creation": "2018-10-25 10:02:48.656165",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -69,8 +68,7 @@
   }
  ],
  "issingle": 1,
- "links": [],
- "modified": "2020-02-07 15:21:11.616231",
+ "modified": "2020-03-03 15:35:19.890524",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Plaid Settings",

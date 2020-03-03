@@ -1,5 +1,4 @@
 {
- "_comments": "[]",
  "allow_copy": 1,
  "creation": "2019-09-06 12:01:33.933063",
  "doctype": "DocType",
@@ -98,7 +97,7 @@
  ],
  "hide_toolbar": 1,
  "issingle": 1,
- "modified": "2019-10-04 21:59:48.597497",
+ "modified": "2020-03-03 15:36:37.402843",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quick Stock Balance",

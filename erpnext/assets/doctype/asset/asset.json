@@ -64,7 +64,6 @@
   "status",
   "booked_fixed_asset",
   "column_break_51",
-
   "purchase_receipt_amount",
   "default_finance_book",
   "amended_from"
@@ -461,7 +460,7 @@
  "idx": 72,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2019-10-22 15:47:36.050828",
+ "modified": "2020-03-03 15:36:29.534747",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

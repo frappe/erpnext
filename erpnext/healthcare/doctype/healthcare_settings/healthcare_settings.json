@@ -1,5 +1,4 @@
 {
- "actions": [],
  "beta": 1,
  "creation": "2017-05-09 11:26:22.337760",
  "doctype": "DocType",
@@ -87,7 +86,6 @@
    "fieldname": "registration_fee",
    "fieldtype": "Currency",
    "label": "Registration Fee",
-   "mandatory_depends_on": "eval:doc.collect_registration_fee == 1",
    "options": "Currency"
   },
   {
@@ -294,8 +292,7 @@
   }
  ],
  "issingle": 1,
- "links": [],
- "modified": "2020-01-23 13:39:06.078738",
+ "modified": "2020-03-03 15:35:24.375637",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",

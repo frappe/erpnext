@@ -155,24 +155,28 @@
    "options": "Cost Center"
   },
   {
+   "default": "0",
    "fieldname": "is_master_data_processed",
    "fieldtype": "Check",
    "label": "Is Master Data Processed",
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "is_day_book_data_processed",
    "fieldtype": "Check",
    "label": "Is Day Book Data Processed",
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "is_day_book_data_imported",
    "fieldtype": "Check",
    "label": "Is Day Book Data Imported",
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "is_master_data_imported",
    "fieldtype": "Check",
    "label": "Is Master Data Imported",
@@ -194,7 +198,7 @@
    "label": "Day Book Data"
   }
  ],
- "modified": "2019-04-29 05:46:54.394967",
+ "modified": "2020-03-03 15:37:30.930303",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Tally Migration",

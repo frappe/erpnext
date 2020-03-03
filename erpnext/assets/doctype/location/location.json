@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:location_name",
@@ -139,8 +138,7 @@
    "read_only": 1
   }
  ],
- "links": [],
- "modified": "2020-01-28 13:52:22.513425",
+ "modified": "2020-03-03 15:35:21.703232",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Location",

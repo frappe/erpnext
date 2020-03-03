@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "ACC-LOAN-.YYYY.-.#####",
  "creation": "2016-12-02 10:11:49.673604",
@@ -265,8 +264,7 @@
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2019-12-25 17:59:58.122823",
+ "modified": "2020-03-03 15:34:50.584451",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Loan",

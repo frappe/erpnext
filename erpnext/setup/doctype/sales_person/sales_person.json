@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:sales_person_name",
@@ -143,8 +142,7 @@
  ],
  "icon": "icon-user",
  "idx": 1,
- "links": [],
- "modified": "2020-01-28 13:50:31.891050",
+ "modified": "2020-03-03 15:35:22.401530",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Person",

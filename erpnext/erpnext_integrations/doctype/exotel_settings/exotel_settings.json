@@ -11,6 +11,7 @@
  ],
  "fields": [
   {
+   "default": "0",
    "fieldname": "enabled",
    "fieldtype": "Check",
    "label": "Enabled"
@@ -37,7 +38,7 @@
   }
  ],
  "issingle": 1,
- "modified": "2019-05-22 06:25:18.026997",
+ "modified": "2020-03-03 15:37:25.516370",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Exotel Settings",

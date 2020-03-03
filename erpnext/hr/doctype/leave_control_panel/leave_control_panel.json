@@ -2,6 +2,7 @@
  "allow_copy": 1,
  "creation": "2013-01-10 16:34:15",
  "doctype": "DocType",
+ "engine": "InnoDB",
  "field_order": [
   "select_employees_section",
   "company",
@@ -131,7 +132,7 @@
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2019-05-24 09:41:34.105741",
+ "modified": "2020-03-03 15:37:25.253235",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Control Panel",

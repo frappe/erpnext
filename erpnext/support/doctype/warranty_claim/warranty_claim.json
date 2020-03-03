@@ -4,6 +4,7 @@
  "creation": "2013-01-10 16:34:30",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "naming_series",
   "status",
@@ -361,7 +362,7 @@
  ],
  "icon": "fa fa-bug",
  "idx": 1,
- "modified": "2019-05-24 10:56:30.626200",
+ "modified": "2020-03-03 15:37:24.841203",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Warranty Claim",

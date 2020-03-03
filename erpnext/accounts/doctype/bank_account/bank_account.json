@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "creation": "2017-05-29 21:35:13.136357",
@@ -212,8 +211,7 @@
    "read_only": 1
   }
  ],
- "links": [],
- "modified": "2020-01-29 20:42:26.458316",
+ "modified": "2020-03-03 15:35:20.816832",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",
