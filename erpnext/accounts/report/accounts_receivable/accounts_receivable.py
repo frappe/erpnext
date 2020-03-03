@@ -215,26 +215,7 @@ class ReceivablePayableReport(object):
 			"width": 200
 		})
 
-		self.ageing_columns = []
-		lower_limit = 0
-		for i, upper_limit in enumerate(self.ageing_range):
-			self.ageing_columns.append({
-				"label": "{0}-{1}".format(lower_limit, upper_limit),
-				"fieldname": "range{}".format(i+1),
-				"fieldtype": "Currency",
-				"options": "currency",
-				"width": 120
-			})
-			lower_limit = upper_limit + 1
-
-		self.ageing_columns.append({
-			"label": "{0}-Above".format(lower_limit),
-			"fieldname": "range{}".format(self.ageing_column_count),
-			"fieldtype": "Currency",
-			"options": "currency",
-			"width": 120
-		})
-
+		self.ageing_columns = self.get_ageing_columns()
 		columns += self.ageing_columns
 
 		columns += [
@@ -321,6 +302,30 @@ class ReceivablePayableReport(object):
 			]
 
 		return columns
+
+	def get_ageing_columns(self):
+		ageing_columns = []
+		lower_limit = 0
+		for i, upper_limit in enumerate(self.ageing_range):
+			ageing_columns.append({
+				"label": "{0}-{1}".format(lower_limit, upper_limit),
+				"fieldname": "range{}".format(i+1),
+				"fieldtype": "Currency",
+				"options": "currency",
+				"ageing_column": 1,
+				"width": 120
+			})
+			lower_limit = upper_limit + 1
+
+		ageing_columns.append({
+			"label": "{0}-Above".format(lower_limit),
+			"fieldname": "range{}".format(self.ageing_column_count),
+			"fieldtype": "Currency",
+			"options": "currency",
+			"ageing_column": 1,
+			"width": 120
+		})
+		return ageing_columns
 
 	def get_data(self):
 		from erpnext.accounts.utils import get_currency_precision

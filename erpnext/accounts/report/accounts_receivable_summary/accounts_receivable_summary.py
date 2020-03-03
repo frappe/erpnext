@@ -12,9 +12,7 @@ from six import iteritems
 
 class AccountsReceivableSummary(ReceivablePayableReport):
 	def run(self, args):
-		self.ageing_range = [cint(r.strip()) for r in self.filters.get('ageing_range', "").split(",") if r]
-		self.ageing_range = sorted(list(set(self.ageing_range)))
-		self.ageing_column_count = len(self.ageing_range) + 1
+		self.validate_ageing_filter()
 
 		party_naming_by = frappe.db.get_value(args.get("naming_by")[0], None, args.get("naming_by")[1])
 		return self.get_columns(party_naming_by, args), self.get_data(party_naming_by, args)
@@ -94,26 +92,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 			}
 		]
 
-		self.ageing_columns = []
-		lower_limit = 0
-		for i, upper_limit in enumerate(self.ageing_range):
-			self.ageing_columns.append({
-				"label": "{0}-{1}".format(lower_limit, upper_limit),
-				"fieldname": "range{0}".format(i+1),
-				"fieldtype": "Currency",
-				"options": "currency",
-				"width": 120
-			})
-			lower_limit = upper_limit + 1
-
-		self.ageing_columns.append({
-			"label": "{0}-Above".format(lower_limit),
-			"fieldname": "range{0}".format(self.ageing_column_count),
-			"fieldtype": "Currency",
-			"options": "currency",
-			"width": 120
-		})
-
+		self.ageing_columns = self.get_ageing_columns()
 		columns += self.ageing_columns
 
 		if args.get("party_type") == "Customer":
