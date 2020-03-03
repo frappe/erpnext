@@ -34,8 +34,9 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Naming Series",
-   "options": "SAL-CAM-.YYYY.-",
+   "options": "SAL-CAM-",
    "set_only_once": 1
   },
   {
@@ -65,7 +66,7 @@
  ],
  "icon": "fa fa-bullhorn",
  "idx": 1,
- "modified": "2020-03-03 15:37:01.297073",
+ "modified": "2020-03-03 16:14:10.387706",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Campaign",

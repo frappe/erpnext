@@ -36,14 +36,14 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "in_list_view": 1,
    "label": "Series",
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "PUR-RFQ-.YYYY.-",
+   "options": "RFQ-",
    "print_hide": 1,
-   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -245,7 +245,7 @@
  ],
  "icon": "fa fa-shopping-cart",
  "is_submittable": 1,
- "modified": "2020-03-03 15:35:18.794294",
+ "modified": "2020-03-03 16:14:06.362471",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",

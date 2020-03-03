@@ -41,9 +41,9 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
-   "options": "ACC-ASR-.YYYY.-",
-   "reqd": 1
+   "options": "ACC-ASR-"
   },
   {
    "fieldname": "column_break_2",
@@ -159,7 +159,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:41:56.656963",
+ "modified": "2020-03-03 16:14:08.312341",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",

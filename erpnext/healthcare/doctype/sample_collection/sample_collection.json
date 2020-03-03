@@ -41,11 +41,11 @@
    "bold": 1,
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
-   "options": "HLC-SC-.YYYY.-",
-   "print_hide": 1,
-   "reqd": 1
+   "options": "HLC-SC-",
+   "print_hide": 1
   },
   {
    "default": "0",
@@ -165,7 +165,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:41:21.537148",
+ "modified": "2020-03-03 16:15:03.929623",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Sample Collection",

@@ -92,9 +92,10 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Naming Series",
    "no_copy": 1,
-   "options": "EDU-APP-.YYYY.-",
+   "options": "EDU-APP-",
    "set_only_once": 1
   },
   {
@@ -260,7 +261,7 @@
  ],
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2020-03-03 15:41:04.143531",
+ "modified": "2020-03-03 16:14:03.867805",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Student Applicant",

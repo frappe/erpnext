@@ -91,9 +91,10 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Naming Series",
    "no_copy": 1,
-   "options": "EDU-STU-.YYYY.-",
+   "options": "EDU-STU-",
    "set_only_once": 1
   },
   {
@@ -253,7 +254,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2020-03-03 15:37:35.959770",
+ "modified": "2020-03-03 16:13:59.733525",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Student",

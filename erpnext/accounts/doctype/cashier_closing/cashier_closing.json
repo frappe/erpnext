@@ -23,6 +23,7 @@
    "default": "POS-CLO-",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "in_filter": 1,
    "in_global_search": 1,
    "in_standard_filter": 1,
@@ -123,7 +124,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:37:47.800514",
+ "modified": "2020-03-03 16:14:01.339514",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cashier Closing",

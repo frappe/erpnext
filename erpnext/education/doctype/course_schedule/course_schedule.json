@@ -54,8 +54,9 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Naming Series",
-   "options": "EDU-CSH-.YYYY.-",
+   "options": "EDU-CSH-",
    "set_only_once": 1
   },
   {
@@ -114,7 +115,7 @@
    "label": "Title"
   }
  ],
- "modified": "2020-03-03 15:41:20.804274",
+ "modified": "2020-03-03 16:15:08.542473",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Course Schedule",

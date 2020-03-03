@@ -61,9 +61,10 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Naming Series",
    "no_copy": 1,
-   "options": "EDU-FSH-.YYYY.-"
+   "options": "EDU-FSH-"
   },
   {
    "fieldname": "fee_creation_status",
@@ -262,7 +263,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:37:22.739050",
+ "modified": "2020-03-03 16:14:04.802283",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Fee Schedule",

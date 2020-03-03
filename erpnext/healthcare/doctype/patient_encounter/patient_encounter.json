@@ -62,7 +62,7 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Series",
-   "options": "HLC-ENC-.YYYY.-",
+   "options": "HLC-ENC-",
    "print_hide": 1,
    "report_hide": 1
   },
@@ -295,7 +295,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:41:03.613242",
+ "modified": "2020-03-03 16:06:58.647514",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",

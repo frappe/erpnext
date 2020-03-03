@@ -37,8 +37,9 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Naming Series",
-   "options": "EDU-INS-.YYYY.-",
+   "options": "EDU-INS-",
    "set_only_once": 1
   },
   {
@@ -69,7 +70,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2020-03-03 15:37:52.688578",
+ "modified": "2020-03-03 16:15:05.922401",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Instructor",

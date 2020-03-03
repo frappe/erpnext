@@ -30,9 +30,9 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Naming Series",
-   "options": "PU-SSP-.YYYY.-",
-   "reqd": 1
+   "options": "PU-SSP-"
   },
   {
    "fieldname": "total_score",
@@ -102,7 +102,7 @@
  ],
  "in_create": 1,
  "is_submittable": 1,
- "modified": "2020-03-03 15:37:54.979700",
+ "modified": "2020-03-03 16:13:56.606066",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Scorecard Period",

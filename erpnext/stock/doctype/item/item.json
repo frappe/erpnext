@@ -159,8 +159,9 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
-   "options": "STO-ITEM-.YYYY.-",
+   "options": "I-",
    "set_only_once": 1
   },
   {
@@ -1144,7 +1145,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-03-03 15:34:51.429222",
+ "modified": "2020-03-03 16:13:55.586474",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

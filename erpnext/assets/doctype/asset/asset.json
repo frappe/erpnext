@@ -72,8 +72,9 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Naming Series",
-   "options": "ACC-ASS-.YYYY.-"
+   "options": "ACC-ASS-"
   },
   {
    "fieldname": "asset_name",
@@ -460,7 +461,7 @@
  "idx": 72,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2020-03-03 15:36:29.534747",
+ "modified": "2020-03-03 16:13:56.176034",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

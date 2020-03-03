@@ -29,8 +29,9 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
-   "options": "HR-DRI-.YYYY.-"
+   "options": "HR-DRI-"
   },
   {
    "fieldname": "full_name",
@@ -118,7 +119,7 @@
   }
  ],
  "icon": "fa fa-user",
- "modified": "2020-03-03 15:37:03.621386",
+ "modified": "2020-03-03 16:14:08.088305",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Driver",

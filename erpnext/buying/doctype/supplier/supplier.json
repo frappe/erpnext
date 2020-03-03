@@ -69,11 +69,12 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "SUP-.YYYY.-",
+   "options": "S-",
    "set_only_once": 1
   },
   {
@@ -391,7 +392,7 @@
  "icon": "fa fa-user",
  "idx": 370,
  "image_field": "image",
- "modified": "2020-03-03 15:36:36.313435",
+ "modified": "2020-03-03 16:14:05.599481",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

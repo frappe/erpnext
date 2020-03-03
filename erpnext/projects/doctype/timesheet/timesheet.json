@@ -52,9 +52,9 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
-   "options": "TS-.YYYY.-",
-   "reqd": 1,
+   "options": "TS-",
    "set_only_once": 1
   },
   {
@@ -262,7 +262,7 @@
  "icon": "fa fa-clock-o",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-03-03 15:37:45.780550",
+ "modified": "2020-03-03 16:14:02.106472",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet",

@@ -36,11 +36,11 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
-   "options": "HR-VLOG-.YYYY.-",
+   "options": "VLOG-",
    "print_hide": 1,
-   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -150,7 +150,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:41:21.290495",
+ "modified": "2020-03-03 16:14:01.014846",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Vehicle Log",

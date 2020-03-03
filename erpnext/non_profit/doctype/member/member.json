@@ -27,9 +27,9 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
-   "options": "NPO-MEM-.YYYY.-",
-   "reqd": 1
+   "options": "NPO-MEM-"
   },
   {
    "fieldname": "member_name",
@@ -124,7 +124,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2020-03-03 15:41:56.895857",
+ "modified": "2020-03-03 16:15:08.724140",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Member",

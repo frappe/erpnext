@@ -21,7 +21,7 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Series",
-   "options": "PROJ-UPD-.YYYY.-"
+   "options": "PROJ-UPD-"
   },
   {
    "fieldname": "project",
@@ -75,7 +75,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:35:09.653424",
+ "modified": "2020-03-03 16:10:56.992434",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Update",

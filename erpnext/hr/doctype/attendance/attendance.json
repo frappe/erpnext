@@ -34,12 +34,12 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "HR-ATT-.YYYY.-",
-   "reqd": 1,
+   "options": "HR-ATT-",
    "set_only_once": 1
   },
   {
@@ -173,7 +173,7 @@
  "icon": "fa fa-ok",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-03-03 15:37:00.387683",
+ "modified": "2020-03-03 16:14:02.688583",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",

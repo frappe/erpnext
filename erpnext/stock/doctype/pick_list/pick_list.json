@@ -104,14 +104,14 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
-   "options": "STO-PICK-.YYYY.-",
-   "reqd": 1,
+   "options": "PICK-",
    "set_only_once": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:36:51.195590",
+ "modified": "2020-03-03 16:13:57.491726",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

@@ -65,11 +65,12 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "CRM-LEAD-.YYYY.-",
+   "options": "CRM-LEAD-",
    "set_only_once": 1
   },
   {
@@ -366,7 +367,7 @@
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
- "modified": "2020-03-03 15:36:41.392049",
+ "modified": "2020-03-03 16:14:04.506253",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",

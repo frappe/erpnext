@@ -53,8 +53,9 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Naming Series",
-   "options": "EDU-FEE-.YYYY.-",
+   "options": "EDU-FEE-",
    "print_hide": 1,
    "set_only_once": 1
   },
@@ -336,7 +337,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:37:24.337162",
+ "modified": "2020-03-03 16:14:05.305097",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Fees",

@@ -25,8 +25,9 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
-   "options": "HLC-PMR-.YYYY.-",
+   "options": "HLC-PMR-",
    "print_hide": 1,
    "report_hide": 1
   },
@@ -115,7 +116,7 @@
   }
  ],
  "in_create": 1,
- "modified": "2020-03-03 15:41:21.804766",
+ "modified": "2020-03-03 16:14:00.570911",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Medical Record",

@@ -60,9 +60,10 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
-   "options": "ISS-.YYYY.-",
+   "options": "ISS-",
    "print_hide": 1,
    "set_only_once": 1
   },
@@ -363,7 +364,7 @@
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "modified": "2020-03-03 15:36:43.049201",
+ "modified": "2020-03-03 16:13:57.213526",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",

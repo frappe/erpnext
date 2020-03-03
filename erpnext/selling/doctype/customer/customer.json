@@ -80,9 +80,10 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
-   "options": "CUST-.YYYY.-",
+   "options": "C-",
    "set_only_once": 1
   },
   {
@@ -486,7 +487,7 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2020-03-03 15:35:21.179239",
+ "modified": "2020-03-03 16:14:07.051891",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

@@ -49,8 +49,9 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
-   "options": "HR-EAD-.YYYY.-"
+   "options": "EAD-"
   },
   {
    "fieldname": "employee",
@@ -232,7 +233,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:58:06.891105",
+ "modified": "2020-03-03 16:14:04.175386",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Advance",

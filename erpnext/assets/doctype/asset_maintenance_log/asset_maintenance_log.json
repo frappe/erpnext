@@ -40,9 +40,9 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
-   "options": "ACC-AML-.YYYY.-",
-   "reqd": 1
+   "options": "ACC-AML-"
   },
   {
    "fetch_from": "asset_maintenance.asset_name",
@@ -170,7 +170,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:41:21.012098",
+ "modified": "2020-03-03 16:15:04.625237",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Maintenance Log",

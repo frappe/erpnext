@@ -49,12 +49,12 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "SER-WRN-.YYYY.-",
-   "reqd": 1,
+   "options": "SER-WRN-",
    "set_only_once": 1
   },
   {
@@ -362,7 +362,7 @@
  ],
  "icon": "fa fa-bug",
  "idx": 1,
- "modified": "2020-03-03 15:37:24.841203",
+ "modified": "2020-03-03 16:15:08.019696",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Warranty Claim",

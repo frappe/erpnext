@@ -96,13 +96,13 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "MAT-STE-.YYYY.-",
+   "options": "STE-",
    "print_hide": 1,
-   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -635,7 +635,7 @@
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-03-03 15:59:52.723574",
+ "modified": "2020-03-03 16:13:57.904275",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

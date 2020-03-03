@@ -211,13 +211,13 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
    "options": "DN-",
    "print_hide": 1,
-   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -1576,7 +1576,7 @@
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2020-03-03 15:53:49.816841",
+ "modified": "2020-03-03 16:15:06.282362",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
