@@ -224,6 +224,25 @@ frappe.ui.form.on('Delivery Stop', {
 					}
 				}
 			});
+
+
+			frappe.call({
+				method: "erpnext.stock.doctype.delivery_trip.delivery_trip.get_delivery_window",
+				args: { customer : row.customer },
+				callback: function (r) {
+					if(r.message && (r.message.delivery_start_time || r.message.delivery_end_time) ){
+						frappe.model.set_value(cdt, cdn, "delivery_start_time", r.message.delivery_start_time);
+						frappe.model.set_value(cdt, cdn, "delivery_end_time", r.message.delivery_end_time);
+						frappe.show_alert({
+							indicator: 'blue',
+							message: __(r.message.default_window
+								? "Delivery window set to global default"
+								: "Delivery window set to customer default"
+							)
+						});
+					}
+				}
+			});
 		}
 	},
 
