@@ -10,7 +10,11 @@
   "dispatch_attachment",
   "send_with_attachment",
   "cb_delivery",
-  "stop_delay"
+  "stop_delay",
+  "delivery_window",
+  "delivery_start_time",
+  "column_break_9",
+  "delivery_end_time"
  ],
  "fields": [
   {
@@ -47,11 +51,31 @@
    "fieldname": "stop_delay",
    "fieldtype": "Int",
    "label": "Delay between Delivery Stops"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "delivery_window",
+   "fieldtype": "Section Break",
+   "label": "Delivery Window"
+  },
+  {
+   "fieldname": "delivery_start_time",
+   "fieldtype": "Time",
+   "label": "Delivery Start Time"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "delivery_end_time",
+   "fieldtype": "Time",
+   "label": "Delivery End Time"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2019-12-30 04:16:55.592215",
+ "modified": "2020-03-03 23:26:03.032693",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Settings",
@@ -68,7 +92,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1
