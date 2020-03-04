@@ -183,14 +183,20 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"label": _("Invoice Discounting"),
+					"name": "Invoice Discounting",
+				},
+				{
+					"type": "doctype",
 					"label": _("Update Bank Transaction Dates"),
 					"name": "Bank Reconciliation",
 					"description": _("Update bank payment dates with journals.")
 				},
 				{
 					"type": "doctype",
-					"label": _("Invoice Discounting"),
-					"name": "Invoice Discounting",
+					"label": _("Bank Transaction"),
+					"name": "Bank Transaction",
+					"doctype": "Bank Transaction"
 				},
 				{
 					"type": "report",
