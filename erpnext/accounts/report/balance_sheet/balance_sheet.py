@@ -58,7 +58,11 @@ def execute(filters=None):
 
 	chart = get_chart_data(filters, columns, asset, liability, equity)
 
-	return columns, data, message, chart
+	if data:
+		report_summary = get_report_summary(asset[-2], liability[-2], equity[-2], provisional_profit_loss,
+			total_credit, columns[-1].get('fieldname'))
+
+	return columns, data, message, chart, report_summary
 
 def get_provisional_profit_loss(asset, liability, equity, period_list, company, currency=None, consolidated=False):
 	provisional_profit_loss = {}
@@ -119,6 +123,38 @@ def check_opening_balance(asset, liability, equity):
 	if opening_balance:
 		return _("Previous Financial Year is not closed"),opening_balance
 	return None,None
+
+def get_report_summary(asset, liability, equity, provisional_profit_loss, total_credit, key):
+	return [
+		{
+			"value": asset.get(key),
+			"label": "Total Asset",
+			"indicator": "Green",
+			"datatype": "Currency",
+			"currency": asset.get('currency')
+		},
+		{
+			"value": liability.get(key),
+			"label": "Total Liability",
+			"datatype": "Currency",
+			"indicator": "Red",
+			"currency": liability.get('currency')
+		},
+		{
+			"value": equity.get(key),
+			"label": "Total Equity",
+			"datatype": "Currency",
+			"indicator": "Blue",
+			"currency": equity.get('currency')
+		},
+		{
+			"value": provisional_profit_loss.get(key),
+			"label": "Provisional Profit / Loss (Credit)",
+			"indicator": "Green" if provisional_profit_loss.get(key) > 0 else "Red",
+			"datatype": "Currency",
+			"currency": provisional_profit_loss.get('currency')
+		}
+	]
 
 def get_chart_data(filters, columns, asset, liability, equity):
 	labels = [d.get("label") for d in columns[2:]]
