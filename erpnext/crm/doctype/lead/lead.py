@@ -135,10 +135,14 @@ class Lead(SellingController):
 
 		# do not create an address if no fields are available,
 		# skipping country since the system auto-sets it from system defaults
-		if not any([self.get(field) for field in address_fields if field != "country"]):
+		address = frappe.new_doc("Address")
+
+		mandatory_fields = get_mandatory_fields(address)
+
+		if not all([self.get(field) for field in mandatory_fields]):
+			frappe.msgprint(_('Missing mandatory fields in address.'), alert=True, indicator='yellow')
 			return
 
-		address = frappe.new_doc("Address")
 		address.update({addr_field: self.get(addr_field) for addr_field in address_fields})
 		address.update({info_field: self.get(info_field) for info_field in info_fields})
 		address.insert()
@@ -370,3 +374,10 @@ def get_lead_with_phone_number(number):
 	lead = leads[0].name if leads else None
 
 	return lead
+
+def get_mandatory_fields(doc):
+	return [
+		df.fieldname
+		for df in doc.meta.fields
+		if df.reqd
+	]
