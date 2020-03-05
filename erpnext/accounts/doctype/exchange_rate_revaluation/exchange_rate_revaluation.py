@@ -80,11 +80,12 @@ class ExchangeRateRevaluation(Document):
 					sum(debit_in_account_currency) - sum(credit_in_account_currency) as balance_in_account_currency,
 					sum(debit) - sum(credit) as balance
 				from `tabGL Entry`
-				where account in (%s)
+				where posting_date <= %s and account in ({0})
 				group by account, IFNULL(party_type, ''), IFNULL(party, '')
 				having sum(debit) != sum(credit)
-				order by account
-			""" % ', '.join(['%s']*len(accounts)), tuple(accounts), as_dict=1)
+				order by account"""
+				.format(", ".join(["%s"] * len(accounts))), [self.posting_date] + accounts, as_dict=1)
+			# """ % ', '.join(['%s']*len(accounts)), tuple([self.posting_date] + [accounts]), as_dict=1)
 
 		return account_details
 
