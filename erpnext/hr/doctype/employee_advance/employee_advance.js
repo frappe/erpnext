@@ -74,6 +74,11 @@ frappe.ui.form.on('Employee Advance', {
 			method: "erpnext.hr.doctype.employee_advance.employee_advance.create_return_through_additional_salary",
 			args: {
 				doc: frm.doc
+			},
+			callback: function (r){
+				console.log("Helloxs")
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
 		});
 	},

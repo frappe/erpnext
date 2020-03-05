@@ -10,11 +10,13 @@ class EmployeeIncentive(Document):
 	def on_submit(self):
 		company = frappe.db.get_value('Employee', self.employee, 'company')
 		additional_salary = frappe.db.exists('Additional Salary', {
-				'employee': self.employee, 
+				'employee': self.employee,
+				'ref_doctype': self.doctype,
+				'ref_docname': self.name,
 				'salary_component': self.salary_component,
-				'payroll_date': self.payroll_date, 
+				'payroll_date': self.payroll_date,
 				'company': company,
-				'docstatus': 1
+				'docstatus': ["!=", 2]
 			})
 
 		if not additional_salary:
@@ -24,22 +26,10 @@ class EmployeeIncentive(Document):
 			additional_salary.amount = self.incentive_amount
 			additional_salary.payroll_date = self.payroll_date
 			additional_salary.company = company
+			additional_salary.ref_doctype = self.doctype
+			additional_salary.ref_docname = self.name
 			additional_salary.submit()
-			self.db_set('additional_salary', additional_salary.name)
-
 		else:
 			incentive_added = frappe.db.get_value('Additional Salary', additional_salary, 'amount') + self.incentive_amount
-			frappe.db.set_value('Additional Salary', additional_salary, 'amount', incentive_added)
-			self.db_set('additional_salary', additional_salary)
+			frappe.db.set_value('Additional Salary', additional_salary, {'amount', incentive_added})
 
-	def on_cancel(self):
-		if self.additional_salary:
-			incentive_removed = frappe.db.get_value('Additional Salary', self.additional_salary, 'amount') - self.incentive_amount
-			if incentive_removed == 0:
-				frappe.get_doc('Additional Salary', self.additional_salary).cancel()
-			else:
-				frappe.db.set_value('Additional Salary', self.additional_salary, 'amount', incentive_removed)
-
-			self.db_set('additional_salary', '')
-
-		
