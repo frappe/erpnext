@@ -116,7 +116,7 @@
    "label": "Allow Cost Center In Entry of Balance Sheet Account"
   },
   {
-   "default": "1",
+   "default": "0",
    "fieldname": "add_taxes_from_item_tax_template",
    "fieldtype": "Check",
    "label": "Automatically Add Taxes and Charges from Item Tax Template"
