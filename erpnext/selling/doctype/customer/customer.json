@@ -127,7 +127,7 @@
   {
    "fieldname": "default_bank_account",
    "fieldtype": "Link",
-   "label": "Default Bank Account",
+   "label": "Default Company Bank Account",
    "options": "Bank Account"
   },
   {
@@ -327,8 +327,9 @@
   },
   {
    "fieldname": "primary_address",
-   "fieldtype": "Read Only",
-   "label": "Primary Address"
+   "fieldtype": "Text",
+   "label": "Primary Address",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -495,7 +496,7 @@
  "idx": 363,
  "image_field": "image",
  "links": [],
- "modified": "2020-02-27 18:59:51.009449",
+ "modified": "2020-01-29 20:36:37.879581",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

@@ -9,8 +9,8 @@ from frappe.utils import cint
 test_records = frappe.get_test_records('Currency Exchange')
 
 
-def save_new_records(test_records):
-	for record in test_records:
+def save_new_records(test_exchange_records):
+	for record in test_exchange_records:
 		# If both selling and buying enabled
 		purpose = "Selling-Buying"
 
@@ -62,7 +62,7 @@ class TestCurrencyExchange(unittest.TestCase):
 
 		exchange_rate = get_exchange_rate("USD", "INR", "2016-01-30", "for_selling")
 		self.assertEqual(exchange_rate, 62.9)
-		
+
 		# Exchange rate as on 15th Dec, 2015, should be fetched from fixer.io
 		self.clear_cache()
 		exchange_rate = get_exchange_rate("USD", "INR", "2015-12-15", "for_selling")

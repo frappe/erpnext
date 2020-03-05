@@ -119,7 +119,7 @@ def get_gl_entries(filters):
 	select_fields = """, debit, credit, debit_in_account_currency,
 		credit_in_account_currency """
 
-	order_by_statement = "order by posting_date, account"
+	order_by_statement = "order by posting_date, account, creation"
 
 	if filters.get("group_by") == _("Group by Voucher"):
 		order_by_statement = "order by posting_date, voucher_type, voucher_no"
@@ -184,7 +184,7 @@ def get_conditions(filters):
 
 	if filters.get("finance_book"):
 		if filters.get("include_default_book_entries"):
-			conditions.append("finance_book in (%(finance_book)s, %(company_fb)s)")
+			conditions.append("(finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)")
 		else:
 			conditions.append("finance_book in (%(finance_book)s)")
 
