@@ -253,6 +253,19 @@ class DeliveryTrip(Document):
 
 
 @frappe.whitelist()
+def get_delivery_window(customer=None):
+	delivery_window = frappe.db.get_value("Customer", customer, ["delivery_start_time", "delivery_end_time"], as_dict=1)
+	delivery_window.default_window = False
+
+	if delivery_window and (delivery_window.delivery_start_time or delivery_window.delivery_end_time):
+		return delivery_window
+
+	default_window = frappe.db.get_value("Delivery Settings", "Delivery Settings", ["delivery_start_time", "delivery_end_time"], as_dict=1)
+	default_window.default_window = True
+	return default_window
+
+
+@frappe.whitelist()
 def get_contact_and_address(name):
 	out = frappe._dict()
 

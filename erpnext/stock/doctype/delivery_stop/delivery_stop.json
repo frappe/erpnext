@@ -20,6 +20,10 @@
   "email_sent_to",
   "column_break_7",
   "customer_contact",
+  "delivery_window",
+  "delivery_start_time",
+  "column_break_18",
+  "delivery_end_time",
   "section_break_9",
   "distance",
   "estimated_arrival",
@@ -179,17 +183,37 @@
    "fieldname": "details",
    "fieldtype": "Text Editor",
    "label": "Details"
+  },
+  {
+   "fieldname": "delivery_window",
+   "fieldtype": "Section Break",
+   "label": "Delivery Window"
+  },
+  {
+   "fetch_from": "customer.delivery_start_time",
+   "fieldname": "delivery_start_time",
+   "fieldtype": "Time",
+   "label": "Delivery Start Time"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "customer.delivery_end_time",
+   "fieldname": "delivery_end_time",
+   "fieldtype": "Time",
+   "label": "Delivery End Time"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2019-12-26 00:05:16.756756",
+ "modified": "2020-03-02 19:43:49.243259",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Stop",
  "owner": "Administrator",
  "permissions": [],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1
