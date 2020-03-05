@@ -5,7 +5,7 @@
    "title": "Tools"
   },
   {
-   "links": "[\n    {\n        \"dependencies\": [\n            \"Program Enrollment\"\n        ],\n        \"doctype\": \"Program Enrollment\",\n        \"incomplete_dependencies\": [\n            \"Program Enrollment\"\n        ],\n        \"is_query_report\": true,\n        \"label\": \"Student and Guardian Contact Details\",\n        \"name\": \"Student and Guardian Contact Details\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Student Attendance\"\n        ],\n        \"doctype\": \"Student Attendance\",\n        \"incomplete_dependencies\": [\n            \"Student Attendance\"\n        ],\n        \"is_query_report\": true,\n        \"label\": \"Student Monthly Attendance Sheet\",\n        \"name\": \"Student Monthly Attendance Sheet\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Fees\"\n        ],\n        \"doctype\": \"Fees\",\n        \"incomplete_dependencies\": [\n            \"Fees\"\n        ],\n        \"is_query_report\": true,\n        \"label\": \"Student Fee Collection\",\n        \"name\": \"Student Fee Collection\",\n        \"type\": \"report\"\n    }\n]",
+   "links": "[\n    {\n        \"dependencies\": [\n            \"Program Enrollment\"\n        ],\n        \"doctype\": \"Program Enrollment\",\n        \"is_query_report\": true,\n        \"label\": \"Student and Guardian Contact Details\",\n        \"name\": \"Student and Guardian Contact Details\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Student Attendance\"\n        ],\n        \"doctype\": \"Student Attendance\",\n        \"is_query_report\": true,\n        \"label\": \"Student Monthly Attendance Sheet\",\n        \"name\": \"Student Monthly Attendance Sheet\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Fees\"\n        ],\n        \"doctype\": \"Fees\",\n        \"is_query_report\": true,\n        \"label\": \"Student Fee Collection\",\n        \"name\": \"Student Fee Collection\",\n        \"type\": \"report\"\n    }\n]",
    "title": "Other Reports"
   },
   {
@@ -17,7 +17,7 @@
    "title": "Content Masters"
   },
   {
-   "links": "[\n    {\n        \"label\": \"Student Attendance\",\n        \"name\": \"Student Attendance\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Student Leave Application\",\n        \"name\": \"Student Leave Application\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Student Attendance\"\n        ],\n        \"doctype\": \"Student Attendance\",\n        \"incomplete_dependencies\": [\n            \"Student Attendance\"\n        ],\n        \"is_query_report\": true,\n        \"label\": \"Absent Student Report\",\n        \"name\": \"Absent Student Report\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Student Attendance\"\n        ],\n        \"doctype\": \"Student Attendance\",\n        \"incomplete_dependencies\": [\n            \"Student Attendance\"\n        ],\n        \"is_query_report\": true,\n        \"label\": \"Student Batch-Wise Attendance\",\n        \"name\": \"Student Batch-Wise Attendance\",\n        \"type\": \"report\"\n    }\n]",
+   "links": "[\n    {\n        \"label\": \"Student Attendance\",\n        \"name\": \"Student Attendance\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Student Leave Application\",\n        \"name\": \"Student Leave Application\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Student Attendance\"\n        ],\n        \"doctype\": \"Student Attendance\",\n        \"is_query_report\": true,\n        \"label\": \"Absent Student Report\",\n        \"name\": \"Absent Student Report\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Student Attendance\"\n        ],\n        \"doctype\": \"Student Attendance\",\n        \"is_query_report\": true,\n        \"label\": \"Student Batch-Wise Attendance\",\n        \"name\": \"Student Batch-Wise Attendance\",\n        \"type\": \"report\"\n    }\n]",
    "title": "Attendance"
   },
   {
@@ -49,7 +49,7 @@
    "title": "Fees"
   },
   {
-   "links": "[\n    {\n        \"dependencies\": [\n            \"Assessment Result\"\n        ],\n        \"doctype\": \"Assessment Result\",\n        \"incomplete_dependencies\": [\n            \"Assessment Result\"\n        ],\n        \"is_query_report\": true,\n        \"label\": \"Course wise Assessment Report\",\n        \"name\": \"Course wise Assessment Report\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Assessment Result\"\n        ],\n        \"doctype\": \"Assessment Result\",\n        \"incomplete_dependencies\": [\n            \"Assessment Result\"\n        ],\n        \"is_query_report\": true,\n        \"label\": \"Final Assessment Grades\",\n        \"name\": \"Final Assessment Grades\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Assessment Plan\"\n        ],\n        \"doctype\": \"Assessment Plan\",\n        \"incomplete_dependencies\": [\n            \"Assessment Plan\"\n        ],\n        \"is_query_report\": true,\n        \"label\": \"Assessment Plan Status\",\n        \"name\": \"Assessment Plan Status\",\n        \"type\": \"report\"\n    },\n    {\n        \"label\": \"Student Report Generation Tool\",\n        \"name\": \"Student Report Generation Tool\",\n        \"type\": \"doctype\"\n    }\n]",
+   "links": "[\n    {\n        \"dependencies\": [\n            \"Assessment Result\"\n        ],\n        \"doctype\": \"Assessment Result\",\n        \"is_query_report\": true,\n        \"label\": \"Course wise Assessment Report\",\n        \"name\": \"Course wise Assessment Report\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Assessment Result\"\n        ],\n        \"doctype\": \"Assessment Result\",\n        \"is_query_report\": true,\n        \"label\": \"Final Assessment Grades\",\n        \"name\": \"Final Assessment Grades\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Assessment Plan\"\n        ],\n        \"doctype\": \"Assessment Plan\",\n        \"is_query_report\": true,\n        \"label\": \"Assessment Plan Status\",\n        \"name\": \"Assessment Plan Status\",\n        \"type\": \"report\"\n    },\n    {\n        \"label\": \"Student Report Generation Tool\",\n        \"name\": \"Student Report Generation Tool\",\n        \"type\": \"doctype\"\n    }\n]",
    "title": "Assessment Reports"
   }
  ],
@@ -62,7 +62,7 @@
  "doctype": "Desk Page",
  "idx": 0,
  "label": "Education",
- "modified": "2020-03-02 19:35:43.857903",
+ "modified": "2020-03-05 11:27:25.706693",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Education",

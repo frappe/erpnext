@@ -13,7 +13,7 @@
    "title": "Stock"
   },
   {
-   "links": "[\n    {\n        \"label\": \"Employee\",\n        \"name\": \"Employee\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Employee\"\n        ],\n        \"hide_count\": true,\n        \"incomplete_dependencies\": [\n            \"Employee\"\n        ],\n        \"label\": \"Employee Attendance Tool\",\n        \"name\": \"Employee Attendance Tool\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Salary Structure\",\n        \"name\": \"Salary Structure\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    }\n]",
+   "links": "[\n    {\n        \"label\": \"Employee\",\n        \"name\": \"Employee\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Employee\"\n        ],\n        \"hide_count\": true,\n        \"label\": \"Employee Attendance Tool\",\n        \"name\": \"Employee Attendance Tool\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Salary Structure\",\n        \"name\": \"Salary Structure\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    }\n]",
    "title": "Human Resources"
   },
   {
@@ -53,7 +53,7 @@
  "icon": "",
  "idx": 0,
  "label": "Getting Started",
- "modified": "2020-03-02 16:56:09.869293",
+ "modified": "2020-03-05 11:27:25.800189",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Getting Started",
