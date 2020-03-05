@@ -110,6 +110,8 @@ def execute(filters=None):
 			if filters.get('show_stock_ageing_data'):
 				fifo_queue = item_wise_fifo_queue[(item, warehouse)].get('fifo_queue')
 
+			data.append(report_data)
+
 	if filters.get('show_variant_attributes', 0) == 1:
 		for i, v in enumerate(get_variants_attributes()):
 			columns.append({"label": v, "fieldname": "variant_{}".format(i), "fieldtype": "Data", "width": 100, "is_variant_attribute": True}),
@@ -325,8 +327,8 @@ def get_item_details(items, sle, filters):
 			`tabItem` item
 			{cf_join}
 		where
-			item.name in ({item_codes}) and ifnull(item.disabled, 0) = 0
-	""".format(cf_field=cf_field, cf_join=cf_join, item_codes=item_codes), as_dict=1)
+			item.name in %s and ifnull(item.disabled, 0) = 0
+	""".format(cf_field=cf_field, cf_join=cf_join), [items], as_dict=1)
 
 	for item in res:
 		item_details.setdefault(item.name, item)
