@@ -23,7 +23,7 @@
   },
   {
    "icon": "fa fa-list",
-   "links": "[\n    {\n        \"dependencies\": [\n            \"Issue\"\n        ],\n        \"doctype\": \"Issue\",\n        \"incomplete_dependencies\": [\n            \"Issue\"\n        ],\n        \"is_query_report\": true,\n        \"label\": \"Minutes to First Response for Issues\",\n        \"name\": \"Minutes to First Response for Issues\",\n        \"type\": \"report\"\n    }\n]",
+   "links": "[\n    {\n        \"dependencies\": [\n            \"Issue\"\n        ],\n        \"doctype\": \"Issue\",\n        \"is_query_report\": true,\n        \"label\": \"Minutes to First Response for Issues\",\n        \"name\": \"Minutes to First Response for Issues\",\n        \"type\": \"report\"\n    }\n]",
    "title": "Reports"
   }
  ],
@@ -37,7 +37,7 @@
  "icon": "",
  "idx": 0,
  "label": "Support",
- "modified": "2020-03-02 16:56:05.618042",
+ "modified": "2020-03-05 11:27:25.917497",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support",

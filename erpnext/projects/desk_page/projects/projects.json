@@ -2,7 +2,7 @@
  "cards": [
   {
    "icon": "fa fa-star",
-   "links": "[\n    {\n        \"description\": \"Project master.\",\n        \"label\": \"Project\",\n        \"name\": \"Project\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Project activity / task.\",\n        \"label\": \"Task\",\n        \"name\": \"Task\",\n        \"onboard\": 1,\n        \"route\": \"#List/Task\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Make project from a template.\",\n        \"label\": \"Project Template\",\n        \"name\": \"Project Template\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Define Project type.\",\n        \"label\": \"Project Type\",\n        \"name\": \"Project Type\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Project\"\n        ],\n        \"description\": \"Project Update.\",\n        \"incomplete_dependencies\": [\n            \"Project\"\n        ],\n        \"label\": \"Project Update\",\n        \"name\": \"Project Update\",\n        \"type\": \"doctype\"\n    }\n]",
+   "links": "[\n    {\n        \"description\": \"Project master.\",\n        \"label\": \"Project\",\n        \"name\": \"Project\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Project activity / task.\",\n        \"label\": \"Task\",\n        \"name\": \"Task\",\n        \"onboard\": 1,\n        \"route\": \"#List/Task\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Make project from a template.\",\n        \"label\": \"Project Template\",\n        \"name\": \"Project Template\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Define Project type.\",\n        \"label\": \"Project Type\",\n        \"name\": \"Project Type\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Project\"\n        ],\n        \"description\": \"Project Update.\",\n        \"label\": \"Project Update\",\n        \"name\": \"Project Update\",\n        \"type\": \"doctype\"\n    }\n]",
    "title": "Projects"
   },
   {
@@ -11,7 +11,7 @@
   },
   {
    "icon": "fa fa-list",
-   "links": "[\n    {\n        \"dependencies\": [\n            \"Timesheet\"\n        ],\n        \"doctype\": \"Timesheet\",\n        \"incomplete_dependencies\": [\n            \"Timesheet\"\n        ],\n        \"is_query_report\": true,\n        \"label\": \"Daily Timesheet Summary\",\n        \"name\": \"Daily Timesheet Summary\",\n        \"onboard\": 1,\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Project\"\n        ],\n        \"doctype\": \"Project\",\n        \"incomplete_dependencies\": [\n            \"Project\"\n        ],\n        \"is_query_report\": true,\n        \"label\": \"Project wise Stock Tracking\",\n        \"name\": \"Project wise Stock Tracking\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Project\"\n        ],\n        \"doctype\": \"Project\",\n        \"incomplete_dependencies\": [\n            \"Project\"\n        ],\n        \"is_query_report\": true,\n        \"label\": \"Project Billing Summary\",\n        \"name\": \"Project Billing Summary\",\n        \"type\": \"report\"\n    }\n]",
+   "links": "[\n    {\n        \"dependencies\": [\n            \"Timesheet\"\n        ],\n        \"doctype\": \"Timesheet\",\n        \"is_query_report\": true,\n        \"label\": \"Daily Timesheet Summary\",\n        \"name\": \"Daily Timesheet Summary\",\n        \"onboard\": 1,\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Project\"\n        ],\n        \"doctype\": \"Project\",\n        \"is_query_report\": true,\n        \"label\": \"Project wise Stock Tracking\",\n        \"name\": \"Project wise Stock Tracking\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Project\"\n        ],\n        \"doctype\": \"Project\",\n        \"is_query_report\": true,\n        \"label\": \"Project Billing Summary\",\n        \"name\": \"Project Billing Summary\",\n        \"type\": \"report\"\n    }\n]",
    "title": "Reports"
   }
  ],
@@ -25,7 +25,7 @@
  "icon": "",
  "idx": 0,
  "label": "Projects",
- "modified": "2020-03-02 16:55:36.635979",
+ "modified": "2020-03-05 11:27:26.076716",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects",
