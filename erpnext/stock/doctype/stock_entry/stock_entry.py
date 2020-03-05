@@ -1297,6 +1297,7 @@ class StockEntry(StockController):
 
 	def update_transferred_qty(self):
 		if self.purpose == 'Receive at Warehouse':
+			stock_entry_names = []
 			stock_entries = {}
 			stock_entries_child_list = []
 			for d in self.items:
@@ -1310,6 +1311,9 @@ class StockEntry(StockController):
 
 				stock_entries[(d.against_stock_entry, d.ste_detail)] = (transferred_qty[0].qty
 					if transferred_qty and transferred_qty[0] else 0.0) or 0.0
+
+				if d.against_stock_entry not in stock_entry_names:
+					stock_entry_names.append(d.against_stock_entry)
 
 			if not stock_entries: return None
 
@@ -1339,7 +1343,7 @@ class StockEntry(StockController):
 				'percent_join_field': 'against_stock_entry'
 			}
 
-			self._update_percent_field_in_targets(args, update_modified=True)
+			self._update_percent_field_in_targets(args, stock_entry_names, update_modified=True)
 
 	def update_quality_inspection(self):
 		if self.inspection_required:
