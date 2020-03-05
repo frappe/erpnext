@@ -41,7 +41,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Item Naming By",
-   "options": "Item Code\nNaming Series"
+   "options": "Item Code\nItem Name\nNaming Series"
   },
   {
    "fieldname": "item_group",
@@ -208,7 +208,7 @@
  "icon": "icon-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2020-03-03 15:35:11.038416",
+ "modified": "2020-03-05 12:59:45.409233",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
