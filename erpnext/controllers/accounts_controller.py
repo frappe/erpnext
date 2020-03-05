@@ -984,8 +984,8 @@ class AccountsController(TransactionBase):
 
 			d.against_voucher = ", ".join(d.against_voucher or [])
 
-		debit_gles = filter(lambda d: d.debit - d.credit > 0, grouped_gles.values())
-		credit_gles = filter(lambda d: d.debit - d.credit < 0, grouped_gles.values())
+		debit_gles = list(filter(lambda d: d.debit - d.credit > 0, grouped_gles.values()))
+		credit_gles = list(filter(lambda d: d.debit - d.credit < 0, grouped_gles.values()))
 
 		self.gl_entries = debit_gles + credit_gles
 		self.total_debit = sum([d.debit for d in self.gl_entries])
