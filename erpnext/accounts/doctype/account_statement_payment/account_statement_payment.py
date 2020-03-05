@@ -13,6 +13,9 @@ class AccountStatementPayment(Document):
 		if self.docstatus == 1:
 			self.assign_cai()
 	
+	def on_update(self):
+		self.sum_total()
+	
 	def initial_number(self, number):
 
 		if number >= 1 and number < 10:
@@ -108,3 +111,26 @@ class AccountStatementPayment(Document):
 		doc_duedate = frappe.get_doc("GCAI", name)
 		doc_duedate.state = "{}".format("Expired")
 		doc_duedate.save()
+	
+	def apply_changes(self, total_price):		
+		doc = frappe.get_doc("Patient statement", self.patient_statement)
+		doc.cumulative_total = total_price
+		doc.outstanding_balance = total_price
+		doc.save()
+	
+	def sum_total(self):
+		total_price = 0
+		account_statement = frappe.get_all("Account Statement Payment Item", ["name", "price", "quantity", "net_pay"], filters = {"parent": self.name})
+
+		for item in account_statement:
+			price = item.net_pay			
+			total_price += price
+		
+		isv = total_price * (15/100)
+		
+		self.total = total_price
+		self.isv15 = isv
+		self.net_total = total_price + isv
+		
+		self.apply_changes(total_price)
+		

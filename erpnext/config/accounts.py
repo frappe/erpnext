@@ -16,6 +16,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Account Statement Payment",
+					"description": _("Bills raised to Patient Statement."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
 					"name": "Reason for sale",
 					"onboard": 1,
 				},
