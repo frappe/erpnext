@@ -6,5 +6,5 @@ from __future__ import unicode_literals
 # import frappe
 from frappe.model.document import Document
 
-class AcountStatementPaymentItem(Document):
+class AccountStatementPaymentItem(Document):
 	pass

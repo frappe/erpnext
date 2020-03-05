@@ -37,6 +37,7 @@
   {
    "fieldname": "patient_statement",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Patient Statement",
    "options": "Patient statement"
   },
@@ -100,7 +101,7 @@
    "in_list_view": 1,
    "label": "Type Document",
    "options": "GType Document",
-   "reqd": 1
+   "unique": 1
   },
   {
    "fieldname": "customer",
@@ -117,23 +118,20 @@
    "fieldname": "date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Date",
-   "reqd": 1
+   "label": "Date"
   },
   {
    "fieldname": "due_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Payment Due Date",
-   "reqd": 1
+   "label": "Payment Due Date"
   },
   {
    "fieldname": "reason_for_sale",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Reason for sale",
-   "options": "Reason for sale",
-   "reqd": 1
+   "options": "Reason for sale"
   },
   {
    "fieldname": "products_section",
@@ -144,8 +142,7 @@
    "fieldname": "products_table",
    "fieldtype": "Table",
    "label": "Products Table",
-   "options": "Acount Statement Payment Item",
-   "reqd": 1
+   "options": "Account Statement Payment Item"
   },
   {
    "fieldname": "totals_section",
@@ -189,7 +186,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-26 15:40:19.759397",
+ "modified": "2020-02-28 14:06:01.849484",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment",
