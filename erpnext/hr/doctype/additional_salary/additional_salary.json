@@ -13,6 +13,8 @@
   "salary_component",
   "overwrite_salary_structure_amount",
   "deduct_full_tax_on_selected_payroll_date",
+  "ref_doctype",
+  "ref_docname",
   "column_break_5",
   "company",
   "payroll_date",
@@ -127,11 +129,25 @@
    "options": "Additional Salary",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "ref_doctype",
+   "fieldtype": "Link",
+   "label": "Reference Document Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "ref_docname",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Document",
+   "options": "ref_doctype",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-12 19:07:23.635901",
+ "modified": "2020-03-05 18:54:17.763244",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Additional Salary",

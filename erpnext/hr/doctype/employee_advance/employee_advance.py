@@ -138,16 +138,12 @@ def create_return_through_additional_salary(doc):
 	doc = frappe._dict(json.loads(doc))
 	additional_salary = frappe.new_doc('Additional Salary')
 	additional_salary.employee = doc.employee
-	additional_salary.salary_component = doc.salary_component
 	additional_salary.amount = doc.paid_amount - doc.claimed_amount
-	additional_salary.payroll_date = doc.payroll_date
 	additional_salary.company = doc.company
+	additional_salary.ref_doctype = doc.doctype
+	additional_salary.ref_docname = doc.name
 
-	additional_salary.submit()
-
-	frappe.db.set_value("Employee Advance", doc.name, "return_amount", additional_salary.amount)
-
-	return additional_salary.name
+	return additional_salary
 
 @frappe.whitelist()
 def make_return_entry(employee_name, company, employee_advance_name, return_amount, mode_of_payment, advance_account):

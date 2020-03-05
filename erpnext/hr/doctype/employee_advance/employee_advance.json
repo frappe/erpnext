@@ -14,8 +14,6 @@
   "column_break_4",
   "posting_date",
   "repay_unclaimed_amount_from_salary",
-  "payroll_date",
-  "salary_component",
   "section_break_8",
   "purpose",
   "column_break_11",
@@ -178,24 +176,11 @@
    "fieldname": "repay_unclaimed_amount_from_salary",
    "fieldtype": "Check",
    "label": "Repay unclaimed amount from salary"
-  },
-  {
-   "depends_on": "eval:doc.repay_unclaimed_amount_from_salary == 1",
-   "fieldname": "payroll_date",
-   "fieldtype": "Date",
-   "label": "Payroll date"
-  },
-  {
-   "depends_on": "eval:doc.repay_unclaimed_amount_from_salary == 1",
-   "fieldname": "salary_component",
-   "fieldtype": "Link",
-   "label": "Salary Component",
-   "options": "Salary Component"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-01-03 13:02:32.094099",
+ "modified": "2020-03-05 16:31:50.417539",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Advance",
