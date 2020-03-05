@@ -142,6 +142,6 @@ def insert_record(records):
 				raise
 
 def welcome_email():
-	site_name = get_default_company()
+	site_name = get_default_company() or "ERPNext"
 	title = _("Welcome to {0}").format(site_name)
 	return title
