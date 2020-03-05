@@ -17,58 +17,65 @@
   "variant_of",
   "item_name",
   "item_group",
-  "is_item_from_hub",
-  "stock_uom",
-  "alt_uom",
-  "alt_uom_size",
-  "column_break0",
-  "disabled",
-  "allow_alternative_item",
-  "hide_in_price_list",
-  "is_stock_item",
-  "include_item_in_manufacturing",
-  "opening_stock",
-  "valuation_rate",
-  "standard_rate",
-  "is_fixed_asset",
-  "auto_create_assets",
-  "asset_category",
-  "asset_naming_series",
-  "over_delivery_receipt_allowance",
-  "over_billing_allowance",
-  "image",
-  "section_break_11",
   "brand",
   "item_source",
   "default_supplier",
   "hs_code",
-  "description",
-  "sb_barcodes",
-  "barcodes",
-  "inventory_section",
-  "shelf_life_in_days",
-  "end_of_life",
-  "default_material_request_type",
-  "valuation_method",
-  "column_break1",
+  "column_break0",
+  "stock_uom",
+  "alt_uom",
+  "alt_uom_size",
+  "standard_rate",
+  "opening_stock",
+  "valuation_rate",
+  "disabled",
+  "is_stock_item",
+  "has_serial_no",
+  "serial_no_series",
   "warranty_period",
-  "weight_per_unit",
-  "weight_uom",
-  "reorder_section",
-  "reorder_levels",
-  "unit_of_measure_conversion",
-  "uom_conversion_graph",
-  "uoms",
-  "serial_nos_and_batches",
   "has_batch_no",
   "create_new_batch",
   "batch_number_series",
   "has_expiry_date",
+  "shelf_life_in_days",
+  "is_fixed_asset",
+  "auto_create_assets",
+  "asset_category",
+  "asset_naming_series",
+  "section_break_31",
+  "purchase_uom",
+  "sales_uom",
+  "column_break_34",
+  "weight_uom",
+  "weight_per_unit",
+  "col_break_37",
+  "max_discount",
+  "over_delivery_receipt_allowance",
+  "over_billing_allowance",
+  "column_break_41",
+  "is_sales_item",
+  "is_purchase_item",
+  "include_item_in_manufacturing",
+  "allow_alternative_item",
+  "hide_in_price_list",
+  "section_break_11",
+  "image",
+  "description",
+  "sb_barcodes",
+  "barcodes",
+  "unit_of_measure_conversion",
+  "uom_conversion_graph",
+  "uoms",
+  "inventory_section",
+  "valuation_method",
+  "end_of_life",
+  "column_break1",
+  "default_material_request_type",
+  "reorder_section",
+  "reorder_levels",
+  "serial_nos_and_batches",
   "retain_sample",
   "sample_quantity",
-  "column_break_37",
-  "has_serial_no",
-  "serial_no_series",
   "variants_section",
   "has_variants",
   "variant_based_on",
@@ -77,8 +84,6 @@
   "show_item_code",
   "item_defaults",
   "purchase_details",
-  "is_purchase_item",
-  "purchase_uom",
   "min_order_qty",
   "safety_stock",
   "purchase_details_cb",
@@ -97,11 +102,6 @@
   "country_of_origin",
   "column_break_59",
   "customs_tariff_number",
-  "sales_details",
-  "sales_uom",
-  "is_sales_item",
-  "column_break3",
-  "max_discount",
   "deferred_revenue",
   "deferred_revenue_account",
   "enable_deferred_revenue",
@@ -144,6 +144,7 @@
   "website_content",
   "total_projected_qty",
   "hub_publishing_sb",
+  "is_item_from_hub",
   "publish_in_hub",
   "hub_category_to_publish",
   "hub_warehouse",
@@ -157,15 +158,16 @@
    "options": "fa fa-flag"
   },
   {
+   "depends_on": "eval:doc.item_naming_by == \"Naming Series\" && doc.__islocal && !doc.variant_of",
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "hidden": 1,
    "label": "Series",
    "options": "I-",
    "set_only_once": 1
   },
   {
    "bold": 1,
+   "depends_on": "eval:doc.item_naming_by == \"Item Code\" && doc.__islocal",
    "fieldname": "item_code",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -190,6 +192,7 @@
   },
   {
    "bold": 1,
+   "depends_on": "eval:doc.__islocal || doc.item_naming_by != 'Item Name'",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -315,6 +318,7 @@
    "label": "Description"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "brand",
    "fieldtype": "Link",
    "label": "Brand",
@@ -353,12 +357,12 @@
    "options": "fa fa-truck"
   },
   {
+   "depends_on": "has_expiry_date",
    "fieldname": "shelf_life_in_days",
    "fieldtype": "Int",
    "label": "Shelf Life In Days"
   },
   {
-   "default": "2099-12-31",
    "depends_on": "is_stock_item",
    "fieldname": "end_of_life",
    "fieldtype": "Date",
@@ -389,10 +393,10 @@
    "width": "50%"
   },
   {
-   "depends_on": "eval:doc.is_stock_item",
+   "depends_on": "eval:doc.is_stock_item && doc.has_serial_no",
    "fieldname": "warranty_period",
-   "fieldtype": "Data",
-   "label": "Warranty Period (in days)",
+   "fieldtype": "Int",
+   "label": "Warranty Period (in Days)",
    "oldfieldname": "warranty_period",
    "oldfieldtype": "Data"
   },
@@ -415,14 +419,14 @@
    "depends_on": "is_stock_item",
    "fieldname": "reorder_section",
    "fieldtype": "Section Break",
-   "label": "Auto re-order",
+   "label": "Auto Re-Order",
    "options": "fa fa-rss"
   },
   {
    "description": "Will also apply for variants unless overrridden",
    "fieldname": "reorder_levels",
    "fieldtype": "Table",
-   "label": "Reorder level based on Warehouse",
+   "label": "Reorder Level Based on Warehouse",
    "options": "Item Reorder"
   },
   {
@@ -447,7 +451,7 @@
    "depends_on": "eval:doc.is_stock_item || doc.is_fixed_asset",
    "fieldname": "serial_nos_and_batches",
    "fieldtype": "Section Break",
-   "label": "Serial Nos and Batches"
+   "label": "Sample Retention"
   },
   {
    "default": "0",
@@ -467,7 +471,7 @@
    "label": "Automatically Create New Batch"
   },
   {
-   "depends_on": "eval:doc.has_batch_no==1 && doc.create_new_batch==1",
+   "depends_on": "eval:doc.has_batch_no && doc.create_new_batch",
    "description": "Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.",
    "fieldname": "batch_number_series",
    "fieldtype": "Data",
@@ -483,6 +487,7 @@
   },
   {
    "default": "0",
+   "depends_on": "has_batch_no",
    "fieldname": "retain_sample",
    "fieldtype": "Check",
    "label": "Retain Sample"
@@ -495,10 +500,6 @@
    "label": "Max Sample Quantity"
   },
   {
-   "fieldname": "column_break_37",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
    "depends_on": "eval:doc.is_stock_item || doc.is_fixed_asset",
    "fieldname": "has_serial_no",
@@ -509,7 +510,7 @@
    "oldfieldtype": "Select"
   },
   {
-   "depends_on": "eval:doc.is_stock_item || doc.is_fixed_asset",
+   "depends_on": "eval:(doc.is_stock_item || doc.is_fixed_asset) && doc.has_serial_no",
    "description": "Example: ABCD.#####\nIf series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",
    "fieldname": "serial_no_series",
    "fieldtype": "Data",
@@ -677,14 +678,6 @@
    "options": "Customs Tariff Number"
   },
   {
-   "collapsible": 1,
-   "fieldname": "sales_details",
-   "fieldtype": "Section Break",
-   "label": "Sales Details",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-tag"
-  },
-  {
    "fieldname": "sales_uom",
    "fieldtype": "Link",
    "label": "Default Sales Unit of Measure",
@@ -697,14 +690,8 @@
    "label": "Is Sales Item"
   },
   {
-   "fieldname": "column_break3",
-   "fieldtype": "Column Break",
-   "oldfieldtype": "Column Break",
-   "width": "50%"
-  },
-  {
    "fieldname": "max_discount",
-   "fieldtype": "Float",
+   "fieldtype": "Percent",
    "label": "Max Discount (%)",
    "oldfieldname": "max_discount",
    "oldfieldtype": "Currency"
@@ -997,9 +984,11 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "depends_on": "eval:(!doc.is_item_from_hub)",
    "fieldname": "hub_publishing_sb",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Hub Publishing Details"
   },
   {
@@ -1031,17 +1020,15 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:!doc.__islocal",
    "fieldname": "over_delivery_receipt_allowance",
-   "fieldtype": "Float",
+   "fieldtype": "Percent",
    "label": "Over Delivery/Receipt Allowance (%)",
    "oldfieldname": "tolerance",
    "oldfieldtype": "Currency"
   },
   {
-   "depends_on": "eval:!doc.__islocal",
    "fieldname": "over_billing_allowance",
-   "fieldtype": "Float",
+   "fieldtype": "Percent",
    "label": "Over Billing Allowance (%)"
   },
   {
@@ -1081,7 +1068,6 @@
    "default": "0",
    "fieldname": "hide_in_price_list",
    "fieldtype": "Check",
-   "hidden": 1,
    "label": "Hide In Price List",
    "no_copy": 1
   },
@@ -1095,7 +1081,6 @@
    "options": "Local\nImported"
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "default_supplier",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -1103,7 +1088,6 @@
    "options": "Supplier"
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "hs_code",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -1138,6 +1122,22 @@
    "fieldname": "manufacturer_part_no",
    "fieldtype": "Data",
    "label": "Manufacturer Part Number"
+  },
+  {
+   "fieldname": "section_break_31",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_34",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col_break_37",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_41",
+   "fieldtype": "Column Break"
   }
  ],
  "has_web_view": 1,
@@ -1145,7 +1145,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-03-03 16:13:55.586474",
+ "modified": "2020-03-05 11:46:04.426415",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
