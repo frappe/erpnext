@@ -1,8 +1,3 @@
-{%- set quote_docs = doc.items|map(attribute='prevdoc_docname')|unique|list if doc.doctype == "Sales Order" else [] -%}
-{%- set supp_quote_docs = doc.items|map(attribute='supplier_quotation')|unique|list if doc.doctype == "Purchase Order" else [] -%}
-{%- set po_docs = doc.items|map(attribute='purchase_order')|unique|list if doc.doctype in ["Purchase Receipt", "Purchase Invoice"] else [] -%}
-{%- set prec_docs = doc.items|map(attribute='purchase_receipt')|unique|list if doc.doctype == "Purchase Invoice" else [] -%}
-
 {%- set show_amounts = doc.doctype not in ["Delivery Note", "Purchase Receipt", "Stock Entry"] -%}
 {%- set show_discount = doc.doctype not in ["Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"] -%}
 
@@ -69,17 +64,17 @@
 					{{ row('Driver', doc.driver_name) }}
 					{{ row('Proforma Bill #', doc.proforma_bill_no) }}
 					{{ row('Bill #', doc.bill_no) }}
-					{% if quote_docs and quote_docs != [None] and quote_docs != [''] -%}
-						{{ row('Quotation', frappe.list_original_names("Quotation", quote_docs)|join('<br />')) }}
+					{% if doc.quotations -%}
+						{{ row('Quotation', frappe.list_original_names("Quotation", doc.quotations)|join('<br />')) }}
 					{%- endif %}
-					{% if supp_quote_docs and supp_quote_docs != [None] and supp_quote_docs != [''] -%}
-						{{ row('Quotation', frappe.list_original_names("Supplier Quotation", supp_quote_docs)|join('<br />')) }}
+					{% if doc.supplier_quotations -%}
+						{{ row('Quotation', frappe.list_original_names("Supplier Quotation", doc.supplier_quotations)|join('<br />')) }}
 					{%- endif %}
-					{% if po_docs and po_docs != [None] and po_docs != [''] -%}
-						{{ row('PO #', po_docs|join('<br />')) }}
+					{% if doc.purchase_orders -%}
+						{{ row('PO #', doc.purchase_orders|join('<br />')) }}
 					{%- endif %}
-					{% if prec_docs and prec_docs != [None] and prec_docs != [''] -%}
-						{{ row('GRN #', prec_docs|join('<br />')) }}
+					{% if doc.purchase_receipts -%}
+						{{ row('GRN #', doc.purchase_receipts|join('<br />')) }}
 					{%- endif %}
 				</div>
 			</div>

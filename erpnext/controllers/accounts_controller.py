@@ -149,6 +149,19 @@ class AccountsController(TransactionBase):
 			self.validate_non_invoice_documents_schedule()
 
 	def before_print(self):
+		if self.doctype == "Sales Invoice":
+			self.delivery_notes = list(set(item.delivery_note for item in self.items if item.get("delivery_note")))
+		if self.doctype == "Purchase Invoice":
+			self.purchase_receipts = list(set(item.purchase_receipt for item in self.items if item.get("purchase_receipt")))
+		if self.doctype in ["Sales Invoice", "Delivery Note"]:
+			self.sales_orders = list(set(item.sales_order for item in self.items if item.get('sales_order')))
+		if self.doctype in ["Purchase Invoice", "Purchase Receipt"]:
+			self.purchase_orders = list(set(item.purchase_order for item in self.items if item.get('purchase_order')))
+		if self.doctype == "Sales Order":
+			self.quotations = list(set(item.prevdoc_docname for item in self.items if item.get("prevdoc_docname")))
+		if self.doctype == "Purchase Order":
+			self.supplier_quotations = list(set(item.supplier_quotation for item in self.items if item.get("supplier_quotation")))
+
 		if self.doctype in ['Purchase Order', 'Sales Order', 'Sales Invoice', 'Purchase Invoice',
 							'Supplier Quotation', 'Purchase Receipt', 'Delivery Note', 'Quotation']:
 			if self.get("group_same_items"):
