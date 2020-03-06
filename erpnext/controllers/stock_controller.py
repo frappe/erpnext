@@ -34,7 +34,7 @@ class StockController(AccountsController):
 					gl_entries = self.get_gl_entries(warehouse_account)
 				make_gl_entries(gl_entries, from_repost=from_repost)
 
-			if repost_future_gle:
+			if (repost_future_gle or self.flags.repost_future_gle):
 				items, warehouses = self.get_items_and_warehouses()
 				update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items,
 					warehouse_account, company=self.company)
@@ -237,6 +237,10 @@ class StockController(AccountsController):
 	def delete_auto_created_batches(self):
 		for d in self.items:
 			if not d.batch_no: continue
+
+			serial_nos = [d.name for d in frappe.get_all("Serial No", {'batch_no': d.batch_no})]
+			if serial_nos:
+				frappe.db.set_value("Serial No", { 'name': ['in', serial_nos] }, "batch_no", None)
 
 			d.batch_no = None
 			d.db_set("batch_no", None)
