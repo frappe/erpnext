@@ -1,5 +1,3 @@
-{%- set delivery_docs = doc.items|map(attribute='delivery_note')|unique|list -%}
-
 {%- set show_amounts = doc.doctype not in ["Delivery Note", "Purchase Receipt"] -%}
 {%- set show_discount = doc.doctype not in ["Supplier Quotation", "Purchase Order", "Purchase Receipt", "Purchase Invoice"] -%}
 
@@ -62,8 +60,8 @@
 					{{ row('Port Of Loading', doc.pol_address_display, style="line-height:1.3;") }}
 					{{ row('Port Of Arrival', doc.poa_address_display, style="line-height:1.3;") }}
 					{{ row('Description', doc.remarks, empty_value="No Remarks") }}
-					{% if delivery_docs and delivery_docs != [None] and delivery_docs != [''] -%}
-						{{ row('Delivery', frappe.list_original_names("Delivery Note", delivery_docs)|join(', ')) }}
+					{% if doc.delivery_notes -%}
+						{{ row('Delivery', frappe.list_original_names("Delivery Note", doc.delivery_notes)|join(', ')) }}
 					{%- endif %}
 				</div>
 				<div class="doc">
