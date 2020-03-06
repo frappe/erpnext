@@ -911,17 +911,31 @@
                 "is_group": 1,
                 "I - Gezeichnetes Kapital": {
                     "account_type": "Equity",
-                    "is_group": 1
+					"is_group": 1,
+					"Gezeichnetes Kapital": {
+						"account_type": "Equity",
+						"account_number": "2900"
+					},
+					"Ausstehende Einlagen auf das gezeichnete Kapital": {
+						"account_number": "2910",
+						"is_group": 1
+					}
                 },
                 "II - Kapitalr\u00fccklage": {
                     "account_type": "Equity",
-                    "is_group": 1
+					"is_group": 1,
+					"Kapitalr\u00fccklage": {
+						"account_number": "2920"
+					}
                 },
                 "III - Gewinnr\u00fccklagen": {
                     "account_type": "Equity",
                     "1 - gesetzliche R\u00fccklage": {
                         "account_type": "Equity",
-                        "is_group": 1
+						"is_group": 1,
+						"Gesetzliche R\u00fccklage": {
+							"account_number": "2930"
+						}
                     },
                     "2 - R\u00fccklage f. Anteile an einem herrschenden oder mehrheitlich beteiligten Unternehmen": {
                         "account_type": "Equity",
@@ -929,7 +943,10 @@
                     },
                     "3 - satzungsm\u00e4\u00dfige R\u00fccklagen": {
                         "account_type": "Equity",
-                        "is_group": 1
+						"is_group": 1,
+						"Satzungsm\u00e4\u00dfige R\u00fccklagen": {
+							"account_number": "2950"
+						}
                     },
                     "4 - andere Gewinnr\u00fccklagen": {
                         "account_type": "Equity",
@@ -963,7 +980,13 @@
                 },
                 "IV - Gewinnvortrag/Verlustvortrag": {
                     "account_type": "Equity",
-                    "is_group": 1
+                    "is_group": 1,
+					"Gewinnvortrag vor Verwendung": {
+						"account_number": "2970"
+					},
+					"Verlustvortrag vor Verwendung": {
+						"account_number": "2978"
+					}
                 },
                 "V - Jahres\u00fcberschu\u00df/Jahresfehlbetrag": {
                     "account_type": "Equity",
