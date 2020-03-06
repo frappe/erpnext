@@ -363,7 +363,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	return out
 
 def update_barcode_value(out):
-	from erpnext.selling.doctype.pos_invoice.pos import get_barcode_data
+	from erpnext.accounts.page.pos.pos import get_barcode_data
 	barcode_data = get_barcode_data([out])
 
 	# If item has one barcode then update the value of the barcode field

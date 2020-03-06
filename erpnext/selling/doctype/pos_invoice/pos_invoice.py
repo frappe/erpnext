@@ -12,7 +12,7 @@ from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 	get_loyalty_program_details_with_points, validate_loyalty_points
-from erpnext.selling.doctype.pos_invoice.pos import update_multi_mode_option
+from erpnext.accounts.page.pos.pos import update_multi_mode_option
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, set_account_for_mode_of_payment
 from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos

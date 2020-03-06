@@ -281,7 +281,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	get_data_from_server: function (callback) {
 		var me = this;
 		frappe.call({
-			method: "erpnext.selling.doctype.pos_invoice.pos.get_pos_data",
+			method: "erpnext.accounts.page.pos.pos.get_pos_data",
 			freeze: true,
 			freeze_message: __("Master data syncing, it might take some time"),
 			callback: function (r) {
@@ -1766,7 +1766,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		if (this.si_docs.length || this.email_queue_list || this.customers_list) {
 			frappe.call({
-				method: "erpnext.selling.doctype.pos_invoice.pos.make_invoice",
+				method: "erpnext.accounts.page.pos.pos.make_invoice",
 				freeze: true,
 				args: {
 					doc_list: me.si_docs,
