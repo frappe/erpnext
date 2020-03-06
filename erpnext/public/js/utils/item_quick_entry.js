@@ -28,9 +28,10 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 	init_for_item_naming_by_trigger: function() {
 		var me = this;
 		me.dialog.fields_dict["item_naming_by"].df.onchange = () => {
-			me.dialog.set_df_property("item_code", "reqd", me.dialog.doc.item_naming_by == "Item Code" ? 1 : 0);
-			me.dialog.set_df_property("item_name", "reqd", me.dialog.doc.item_naming_by == "Item Name" ? 1 : 0);
-			me.dialog.set_df_property("naming_series", "reqd", me.dialog.doc.item_naming_by == "Naming Series" ? 1 : 0);
+			var item_naming_by = me.dialog.get_value('item_naming_by');
+			me.dialog.set_df_property("item_code", "reqd", item_naming_by === "Item Code" ? 1 : 0);
+			me.dialog.set_df_property("item_name", "reqd", item_naming_by === "Item Name" ? 1 : 0);
+			me.dialog.set_df_property("naming_series", "reqd", item_naming_by === "Naming Series" ? 1 : 0);
 		};
 		me.dialog.fields_dict["item_naming_by"].df.onchange();
 
