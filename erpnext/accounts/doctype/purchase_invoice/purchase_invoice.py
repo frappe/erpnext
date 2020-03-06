@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate
+from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate, get_link_to_form
 from frappe import _, throw
 import frappe.defaults
 
@@ -288,16 +288,26 @@ class PurchaseInvoice(BuyingController):
 
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
+
+			if frappe.get_value('Supplier', self.supplier, 'allow_purchase_invoice_creation_without_purchase_order'):
+				return
+
 			for d in self.get('items'):
 				if not d.purchase_order:
-					throw(_("As per the Buying Settings if Purchase Order Required == 'YES', then for creating Purchase Invoice, user need to create Purchase Order first for item {0}").format(d.item_code))
+					throw(_("""Purchase Order Required for item {0}
+						To submit the invoice without purchase order please set
+						{1} as {2} in {3}""").format(frappe.bold(d.item_code), frappe.bold('Purchase Order Required'),
+						frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings')))
 
 	def pr_required(self):
 		stock_items = self.get_stock_items()
 		if frappe.db.get_value("Buying Settings", None, "pr_required") == 'Yes':
 			for d in self.get('items'):
 				if not d.purchase_receipt and d.item_code in stock_items:
-					throw(_("As per the Buying Settings if Purchase Reciept Required == 'YES', then for creating Purchase Invoice, user need to create Purchase Receipt first for item {0}").format(d.item_code))
+					throw(_("""Purchase Receipt Required for item {0}
+						To submit the invoice without purchase receipt please set
+						{1} as {2} in {3}""").format(frappe.bold(d.item_code), frappe.bold('Purchase Receipt Required'),
+						frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings')))
 
 	def validate_write_off_account(self):
 		if self.write_off_amount and not self.write_off_account:
