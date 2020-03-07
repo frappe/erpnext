@@ -12,8 +12,11 @@ from erpnext.accounts.utils import get_fiscal_year
 class TaxWithholdingCategory(Document):
 	pass
 
-def get_party_tax_withholding_details(ref_doc):
-	tax_withholding_category = frappe.db.get_value('Supplier', ref_doc.supplier, 'tax_withholding_category')
+def get_party_tax_withholding_details(ref_doc, tax_withholding_category=None):
+
+	if not tax_withholding_category:
+		tax_withholding_category = frappe.db.get_value('Supplier', ref_doc.supplier, 'tax_withholding_category')
+
 	if not tax_withholding_category:
 		return
 
