@@ -14,17 +14,10 @@
   "supplier_type",
   "supplier_name",
   "supplier_group",
-  "country",
   "column_break_7",
-  "tax_id",
-  "tax_cnic",
-  "tax_strn",
-  "tax_category",
-  "column_break_13",
-  "default_price_list",
   "default_currency",
-  "default_bank_account",
-  "language",
+  "default_price_list",
+  "country",
   "image",
   "column_break0",
   "disabled",
@@ -37,26 +30,32 @@
   "prevent_pos",
   "allowed_to_transact_section",
   "companies",
-  "section_credit_limit",
+  "column_break2",
+  "supplier_details",
+  "column_break_13",
+  "tax_id",
+  "tax_cnic",
+  "tax_strn",
+  "pan",
+  "column_break_30",
   "payment_terms",
-  "cb_21",
-  "on_hold",
-  "hold_type",
-  "release_date",
+  "language",
+  "website",
   "address_contacts",
   "address_html",
   "column_break1",
   "contact_html",
   "default_payable_accounts",
-  "accounts",
-  "default_tax_withholding_config",
-  "column_break2",
-  "website",
-  "supplier_details",
-  "pan",
-  "column_break_30",
+  "tax_category",
   "tax_withholding_category",
-  "is_frozen"
+  "default_bank_account",
+  "is_frozen",
+  "on_hold",
+  "hold_type",
+  "release_date",
+  "column_break_47",
+  "accounts",
+  "default_tax_withholding_config"
  ],
  "fields": [
   {
@@ -263,20 +262,10 @@
    "options": "Allowed To Transact With"
   },
   {
-   "collapsible": 1,
-   "fieldname": "section_credit_limit",
-   "fieldtype": "Section Break",
-   "label": "Credit Limit"
-  },
-  {
    "fieldname": "payment_terms",
    "fieldtype": "Link",
    "label": "Default Payment Terms Template",
    "options": "Payment Terms Template"
-  },
-  {
-   "fieldname": "cb_21",
-   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -328,7 +317,7 @@
    "collapsible_depends_on": "accounts",
    "fieldname": "default_payable_accounts",
    "fieldtype": "Section Break",
-   "label": "Default Payable Accounts"
+   "label": "Accounting"
   },
   {
    "description": "Mention if non-standard payable account",
@@ -387,12 +376,16 @@
    "fieldname": "is_frozen",
    "fieldtype": "Check",
    "label": "Is Frozen"
+  },
+  {
+   "fieldname": "column_break_47",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
  "idx": 370,
  "image_field": "image",
- "modified": "2020-03-03 16:14:05.599481",
+ "modified": "2020-03-08 00:21:57.985819",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

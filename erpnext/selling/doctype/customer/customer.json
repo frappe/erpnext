@@ -11,36 +11,43 @@
  "field_order": [
   "basic_info",
   "naming_series",
-  "salutation",
-  "customer_name",
-  "gender",
   "customer_type",
-  "default_bank_account",
-  "lead_name",
-  "image",
+  "customer_name",
   "column_break0",
-  "account_manager",
   "customer_group",
   "territory",
-  "tax_id",
-  "tax_cnic",
-  "tax_strn",
-  "tax_category",
+  "image",
+  "column_break_9",
+  "default_currency",
+  "default_price_list",
   "disabled",
   "is_internal_customer",
   "represents_company",
   "allowed_to_transact_section",
   "companies",
-  "currency_and_price_list",
-  "default_currency",
-  "default_price_list",
-  "column_break_14",
+  "more_info",
+  "customer_details",
+  "column_break_45",
+  "tax_id",
+  "tax_cnic",
+  "tax_strn",
+  "column_break_13",
   "language",
+  "website",
+  "salutation",
+  "gender",
+  "column_break_24",
+  "lead_name",
+  "industry",
+  "market_segment",
   "address_contacts",
   "address_html",
-  "website",
   "column_break1",
   "contact_html",
+  "sales_team_section",
+  "account_manager",
+  "sales_team",
+  "customer_pos_id",
   "primary_address_and_contact_detail",
   "customer_primary_contact",
   "mobile_no",
@@ -49,25 +56,22 @@
   "customer_primary_address",
   "primary_address",
   "default_receivable_accounts",
+  "default_bank_account",
+  "tax_category",
+  "is_frozen",
+  "column_break_41",
   "accounts",
   "credit_limit_section",
   "payment_terms",
   "credit_limits",
-  "more_info",
-  "customer_details",
-  "column_break_45",
-  "market_segment",
-  "industry",
-  "is_frozen",
-  "column_break_38",
-  "loyalty_program",
-  "loyalty_program_tier",
   "sales_team_section_break",
   "default_sales_partner",
+  "column_break_60",
   "default_commission_rate",
-  "sales_team_section",
-  "sales_team",
-  "customer_pos_id"
+  "column_break_38",
+  "loyalty_program",
+  "column_break_61",
+  "loyalty_program_tier"
  ],
  "fields": [
   {
@@ -227,12 +231,6 @@
    "options": "Allowed To Transact With"
   },
   {
-   "collapsible": 1,
-   "fieldname": "currency_and_price_list",
-   "fieldtype": "Section Break",
-   "label": "Currency and Price List"
-  },
-  {
    "fieldname": "default_currency",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -246,10 +244,6 @@
    "ignore_user_permissions": 1,
    "label": "Default Price List",
    "options": "Price List"
-  },
-  {
-   "fieldname": "column_break_14",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "language",
@@ -291,6 +285,7 @@
    "description": "Select, to make the customer searchable with these fields",
    "fieldname": "primary_address_and_contact_detail",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Primary Address and Contact Detail"
   },
   {
@@ -482,12 +477,36 @@
    "fieldtype": "Data",
    "in_standard_filter": 1,
    "label": "STRN"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_60",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_41",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_61",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2020-03-03 16:14:07.051891",
+ "modified": "2020-03-08 00:30:19.128288",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
