@@ -260,7 +260,6 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				price_list: this.frm.doc.buying_price_list
 			}, function() {
 				me.apply_pricing_rule();
-				console.log(me.frm.supplier_tds);
 				me.frm.doc.apply_tds = me.frm.supplier_tds ? 1 : 0;
 				me.frm.doc.tax_withholding_category = me.frm.supplier_tds;
 				me.frm.set_df_property("apply_tds", "read_only", me.frm.supplier_tds ? 0 : 1);
