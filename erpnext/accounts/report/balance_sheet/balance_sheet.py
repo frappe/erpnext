@@ -59,8 +59,12 @@ def execute(filters=None):
 	chart = get_chart_data(filters, columns, asset, liability, equity)
 
 	if data:
-		report_summary = get_report_summary(asset[-2], liability[-2], equity[-2], provisional_profit_loss,
-			total_credit, columns[-1].get('fieldname'))
+		if filters.get('accumulated_values'):
+			report_summary = get_report_summary([period_list[-1]], asset, liability, equity, provisional_profit_loss,
+				total_credit, currency)
+		else:
+			report_summary = get_report_summary(period_list, asset, liability, equity, provisional_profit_loss,
+				total_credit, currency)
 
 	return columns, data, message, chart, report_summary
 
@@ -124,35 +128,49 @@ def check_opening_balance(asset, liability, equity):
 		return _("Previous Financial Year is not closed"),opening_balance
 	return None,None
 
-def get_report_summary(asset, liability, equity, provisional_profit_loss, total_credit, key):
+def get_report_summary(period_list, asset, liability, equity, provisional_profit_loss, total_credit, currency, consolidated=False):
+
+	net_asset, net_liability, net_equity, net_provisional_profit_loss = 0.0, 0.0, 0.0, 0.0
+
+	for period in period_list:
+		key = period if consolidated else period.key
+		if asset:
+			net_asset += asset[-2].get(key)
+		if liability:
+			net_liability += liability[-2].get(key)
+		if equity:
+			net_equity += equity[-2].get(key)
+		if provisional_profit_loss:
+			net_provisional_profit_loss += provisional_profit_loss.get(key)
+
 	return [
 		{
-			"value": asset.get(key),
+			"value": net_asset,
 			"label": "Total Asset",
 			"indicator": "Green",
 			"datatype": "Currency",
-			"currency": asset.get('currency')
+			"currency": currency
 		},
 		{
-			"value": liability.get(key),
+			"value": net_liability,
 			"label": "Total Liability",
 			"datatype": "Currency",
 			"indicator": "Red",
-			"currency": liability.get('currency')
+			"currency": currency
 		},
 		{
-			"value": equity.get(key),
+			"value": net_equity,
 			"label": "Total Equity",
 			"datatype": "Currency",
 			"indicator": "Blue",
-			"currency": equity.get('currency')
+			"currency": currency
 		},
 		{
-			"value": provisional_profit_loss.get(key),
+			"value": net_provisional_profit_loss,
 			"label": "Provisional Profit / Loss (Credit)",
-			"indicator": "Green" if provisional_profit_loss.get(key) > 0 else "Red",
+			"indicator": "Green" if net_provisional_profit_loss > 0 else "Red",
 			"datatype": "Currency",
-			"currency": provisional_profit_loss.get('currency')
+			"currency": currency
 		}
 	]
 

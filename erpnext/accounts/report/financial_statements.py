@@ -151,7 +151,7 @@ def get_data(
 
 	calculate_values(
 		accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy)
-	accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values)
+	accumulate_values_into_parents(accounts, accounts_by_name, period_list)
 	out = prepare_data(accounts, balance_must_be, period_list, company_currency)
 	out = filter_out_zero_value_rows(out, parent_children_map)
 
@@ -191,7 +191,7 @@ def calculate_values(
 				d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
 
 
-def accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values):
+def accumulate_values_into_parents(accounts, accounts_by_name, period_list):
 	"""accumulate children's values in parent accounts"""
 	for d in reversed(accounts):
 		if d.parent_account:
@@ -412,7 +412,7 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 			additional_conditions.append("(finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)")
 		else:
 			additional_conditions.append("(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)")
-		
+
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
 			if filters.get(dimension):
