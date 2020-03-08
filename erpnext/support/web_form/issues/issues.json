@@ -1,7 +1,7 @@
 {
  "accept_payment": 0,
  "allow_comments": 1,
- "allow_delete": 1,
+ "allow_delete": 0,
  "allow_edit": 1,
  "allow_incomplete": 0,
  "allow_multiple": 1,
@@ -18,7 +18,7 @@
  "is_standard": 1,
  "login_required": 1,
  "max_attachment_size": 0,
- "modified": "2020-03-06 05:24:05.749664",
+ "modified": "2020-03-07 21:38:25.221162",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "issues",
@@ -62,19 +62,6 @@
   },
   {
    "allow_read_on_all_link_options": 0,
-   "fieldname": "customer",
-   "fieldtype": "Data",
-   "hidden": 0,
-   "label": "Customer",
-   "max_length": 0,
-   "max_value": 0,
-   "options": "Customer",
-   "read_only": 1,
-   "reqd": 0,
-   "show_in_filter": 0
-  },
-  {
-   "allow_read_on_all_link_options": 0,
    "fieldname": "description",
    "fieldtype": "Text",
    "hidden": 0,
@@ -94,33 +81,6 @@
    "max_length": 0,
    "max_value": 0,
    "read_only": 0,
-   "reqd": 0,
-   "show_in_filter": 0
-  },
-  {
-   "allow_read_on_all_link_options": 0,
-   "default": "Medium",
-   "fieldname": "priority",
-   "fieldtype": "Link",
-   "hidden": 0,
-   "label": "Priority",
-   "max_length": 0,
-   "max_value": 0,
-   "options": "Issue Priority",
-   "read_only": 0,
-   "reqd": 1,
-   "show_in_filter": 0
-  },
-  {
-   "allow_read_on_all_link_options": 0,
-   "default": "1",
-   "fieldname": "via_customer_portal",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Via Customer Portal",
-   "max_length": 0,
-   "max_value": 0,
-   "read_only": 1,
    "reqd": 0,
    "show_in_filter": 0
   }
