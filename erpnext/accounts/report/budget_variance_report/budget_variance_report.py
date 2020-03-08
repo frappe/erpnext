@@ -46,9 +46,11 @@ def execute(filters=None):
 						if(filters.get("show_cumulative")):
 							last_total = period_data[0] - period_data[1]
 
-						period_data[2] = period_data[0] - period_data[1]
+						# period_data[2] = period_data[0] - period_data[1] 
+						period_data[2] = period_data[1] - period_data[0] # flip the variance, using actual - budget
 						row += period_data
-				totals[2] = totals[0] - totals[1]
+				# totals[2] = totals[0] - totals[1] # flip the variance, using actual - budget
+				totals[2] = totals[1] - totals[0]
 				if filters["period"] != "Yearly" :
 					row += totals
 				data.append(row)
@@ -175,6 +177,9 @@ def get_dimension_account_month_map(filters):
 
 			for ad in actual_details.get(ccd.account, []):
 				if ad.month_name == month:
+					if 1000 <= int(ad.account[:4]) <= 1500: # Customization: For income account, the actually should be positive
+						tav_dict.actual += flt(ad.credit) - flt(ad.debit)
+					else:
 						tav_dict.actual += flt(ad.debit) - flt(ad.credit)
 
 	return cam_map
