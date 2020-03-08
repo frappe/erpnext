@@ -1514,6 +1514,8 @@
    "print_hide": 1
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "auto_repeat",
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
    "label": "Subscription Section"
@@ -1889,7 +1891,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-03-03 16:03:53.966219",
+ "modified": "2020-03-08 00:33:39.729060",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
