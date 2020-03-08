@@ -58,13 +58,8 @@ def execute(filters=None):
 
 	chart = get_chart_data(filters, columns, asset, liability, equity)
 
-	if data:
-		if filters.get('accumulated_values'):
-			report_summary = get_report_summary([period_list[-1]], asset, liability, equity, provisional_profit_loss,
-				total_credit, currency)
-		else:
-			report_summary = get_report_summary(period_list, asset, liability, equity, provisional_profit_loss,
-				total_credit, currency)
+	report_summary = get_report_summary(period_list, asset, liability, equity, provisional_profit_loss,
+		total_credit, currency, filters)
 
 	return columns, data, message, chart, report_summary
 
@@ -128,9 +123,13 @@ def check_opening_balance(asset, liability, equity):
 		return _("Previous Financial Year is not closed"),opening_balance
 	return None,None
 
-def get_report_summary(period_list, asset, liability, equity, provisional_profit_loss, total_credit, currency, consolidated=False):
+def get_report_summary(period_list, asset, liability, equity, provisional_profit_loss, total_credit, currency,
+	filters, consolidated=False):
 
 	net_asset, net_liability, net_equity, net_provisional_profit_loss = 0.0, 0.0, 0.0, 0.0
+
+	if filters.get('accumulated_values'):
+		period_list = [period_list[-1]]
 
 	for period in period_list:
 		key = period if consolidated else period.key
