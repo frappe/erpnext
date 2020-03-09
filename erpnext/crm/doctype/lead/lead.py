@@ -137,10 +137,13 @@ class Lead(SellingController):
 		# skipping country since the system auto-sets it from system defaults
 		address = frappe.new_doc("Address")
 
-		mandatory_fields = get_mandatory_fields(address)
+		mandatory_fields = [ df.fieldname for df in doc.meta.fields if df.reqd ]
 
 		if not all([self.get(field) for field in mandatory_fields]):
-			frappe.msgprint(_('Missing mandatory fields in address.'), alert=True, indicator='yellow')
+			frappe.msgprint(_('Missing mandatory fields in address. \
+				{0} to create address' ).format("<a href='desk#Form/Address/New Address 1' \
+				> Click here </a>"),
+				alert=True, indicator='yellow')
 			return
 
 		address.update({addr_field: self.get(addr_field) for addr_field in address_fields})
@@ -374,10 +377,3 @@ def get_lead_with_phone_number(number):
 	lead = leads[0].name if leads else None
 
 	return lead
-
-def get_mandatory_fields(doc):
-	return [
-		df.fieldname
-		for df in doc.meta.fields
-		if df.reqd
-	]
