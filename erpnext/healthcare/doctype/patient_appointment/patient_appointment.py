@@ -85,13 +85,13 @@ class PatientAppointment(Document):
 
 	def check_fee_validity(self):
 		# Check fee validity exists
-		validity_exists = check_validity_exists(self.practitioner, self.patient)
-		if validity_exists:
-			fee_validity = frappe.get_doc('Fee Validity', validity_exists.name)
+		validity = check_validity_exists(self.practitioner, self.patient)
+		if validity:
+			fee_validity = frappe.get_doc('Fee Validity', validity)
 
 			# Check if the validity is valid
 			appointment_date = getdate(self.appointment_date)
-			if (fee_validity.valid_till >= appointment_date) and (fee_validity.visited < fee_validity.max_visit):
+			if (fee_validity.valid_till >= appointment_date) and (fee_validity.visited < fee_validity.max_visits):
 				visited = fee_validity.visited + 1
 				frappe.db.set_value('Fee Validity', fee_validity.name, 'visited', visited)
 				if fee_validity.ref_invoice:
@@ -172,7 +172,7 @@ def cancel_appointment(appointment_id):
 
 def validate_appointment_in_fee_validity(appointment, valid_end_date, ref_invoice):
 	valid_days = frappe.db.get_single_value('Healthcare Settings', 'valid_days')
-	max_visit = frappe.db.get_single_value('Healthcare Settings', 'max_visit')
+	max_visits = frappe.db.get_single_value('Healthcare Settings', 'max_visits')
 	valid_start_date = add_days(getdate(valid_end_date), -int(valid_days))
 
 	# Appointments which have same fee validity range with the appointment
@@ -182,7 +182,7 @@ def validate_appointment_in_fee_validity(appointment, valid_end_date, ref_invoic
 		'appointment_date': ('<=', getdate(valid_end_date)),
 		'appointment_date':('>=', getdate(valid_start_date)),
 		'practitioner': appointment.practitioner
-		}, order_by='appointment_date desc', limit=int(max_visit))
+		}, order_by='appointment_date desc', limit=int(max_visits))
 
 	if appointments and len(appointments) > 0:
 		appointment_obj = appointments[len(appointments)-1]
