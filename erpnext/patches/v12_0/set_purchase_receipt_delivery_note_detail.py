@@ -10,22 +10,23 @@ def execute():
 		detail_field = "purchase_receipt_item" if doctype=="Purchase Receipt" else "dn_detail"
 
 		def make_return_document_map(doctype, return_document_map):
-			'''Returns a map of the format:
-			{ 'document' : ['return_document_1','return_document_2'] }'''
+			'''Returns a map of documents and it's return documents.
+			Format => { 'document' : ['return_document_1','return_document_2'] }'''
 
-			return_againts_documents = frappe._dict(frappe.db.sql("""
+			return_against_documents = frappe._dict(frappe.db.sql("""
 				SELECT
 					return_against as document, name as return_document
 				FROM `tab{0}`
 				WHERE
 					is_return = 1 and docstatus = 1""".format(doctype),as_dict=1))
 
-			for entry in return_againts_documents:
+			for entry in return_against_documents:
 				return_document_map[entry.document].append(entry.return_document)
 
 			return return_document_map
 
 		def row_is_mappable(doc_row, return_doc_row, detail_field):
+			''' Checks if two rows are similar enough to be mapped '''
 			if doc_row.item_code == return_doc_row.item_code and not return_doc_row.get(detail_field):
 				if doc_row.get('batch_no') and return_doc_row.get('batch_no') and doc_row.batch_no == return_doc_row.batch_no:
 					return True
@@ -33,6 +34,7 @@ def execute():
 				elif doc_row.get('serial_no') and return_doc_row.get('serial_no'):
 					doc_sn, return_doc_sn = doc_row.serial_no.split('\n'), return_doc_row.serial_no.split('\n')
 					if set(doc_sn) & set(return_doc_sn):
+						# if two rows have serial nos in common, map them
 						return True
 
 				elif doc_row.rate == return_doc_row.rate:
