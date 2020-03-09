@@ -54,8 +54,8 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			'description': d.description,
 			'invoice': d.parent,
 			'posting_date': d.posting_date,
-			'customer': d.supplier,
-			'customer_name': d.supplier_name
+			'supplier': d.supplier,
+			'supplier_name': d.supplier_name
 		}
 
 		if additional_query_columns:
