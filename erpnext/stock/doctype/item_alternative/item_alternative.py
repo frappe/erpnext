@@ -29,17 +29,13 @@ class ItemAlternative(Document):
 
 		for field in fields:
 			if  item_data[0].get(field) != alternative_item_data[0].get(field):
-				if field == "is_stock_item":
-					frappe.throw(_("The field {0} in Item {1} must have the same value as Item {2}") \
-						.format(frappe.bold(item_meta.get_label(field)),
-								frappe.bold(self.alternative_item_code),
-								frappe.bold(self.item_code)))
-				else:
-					frappe.msgprint(_("The value of {0} differs between Items {1} and {2}") \
-						.format(frappe.bold(item_meta.get_label(field)),
-								frappe.bold(self.alternative_item_code),
-								frappe.bold(self.item_code)),
-						alert=True)
+				raise_exception, alert = [1, False] if field == "is_stock_item" else [0, True]
+
+				frappe.msgprint(_("The value of {0} differs between Items {1} and {2}") \
+					.format(frappe.bold(item_meta.get_label(field)),
+							frappe.bold(self.alternative_item_code),
+							frappe.bold(self.item_code)),
+					alert=alert, raise_exception=raise_exception)
 
 	def validate_duplicate(self):
 		if frappe.db.get_value("Item Alternative", {'item_code': self.item_code,
