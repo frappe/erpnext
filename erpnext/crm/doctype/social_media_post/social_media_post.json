@@ -10,30 +10,25 @@
   "sheduled_time",
   "column_break_3",
   "status",
-  "content",
-  "text",
-  "image",
-  "post_to",
+  "share_on",
   "twitter",
   "column_break_9",
   "linkedin",
+  "content",
+  "text",
+  "image",
   "amended_from"
  ],
  "fields": [
   {
    "fieldname": "text",
-   "fieldtype": "Long Text",
+   "fieldtype": "Text",
    "label": "Text Content"
   },
   {
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "label": "Image"
-  },
-  {
-   "fieldname": "post_to",
-   "fieldtype": "Section Break",
-   "label": "Post to"
   },
   {
    "default": "0",
@@ -86,11 +81,16 @@
    "fieldname": "content",
    "fieldtype": "Section Break",
    "label": "Content"
+  },
+  {
+   "fieldname": "share_on",
+   "fieldtype": "Section Break",
+   "label": "Share On"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-01-31 11:00:46.778657",
+ "modified": "2020-03-09 15:51:20.366278",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Social Media Post",
