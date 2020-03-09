@@ -414,11 +414,6 @@ def get_columns(filters):
 			"hide_if_filtered": 1
 		},
 		{
-			"label": _("Remarks"),
-			"fieldname": "remarks",
-			"width": 200
-		},
-		{
 			"label": _("Debit ({0})".format(filters.ledger_currency)),
 			"fieldname": "debit",
 			"fieldtype": "Currency",
@@ -438,6 +433,11 @@ def get_columns(filters):
 			"fieldtype": "Currency",
 			"options": "currency",
 			"width": 120
+		},
+		{
+			"label": _("Remarks"),
+			"fieldname": "remarks",
+			"width": 200
 		},
 		{
 			"label": _("Against Account"),
