@@ -71,7 +71,7 @@ class PatientAppointment(Document):
 	def validate_customer_created(self):
 		if frappe.db.get_single_value('Healthcare Settings', 'automate_appointment_invoicing'):
 			if not frappe.db.get_value('Patient', self.patient, 'customer'):
-				msg = _("Please create a Customer linked to the Patient")
+				msg = _("Please set a Customer linked to the Patient")
 				msg +=  " <b><a href='#Form/Patient/{0}'>{0}</a></b>".format(self.patient)
 				frappe.throw(msg, title=_('Customer Not Found'))
 
@@ -87,7 +87,7 @@ class PatientAppointment(Document):
 		# Check fee validity exists
 		validity_exists = check_validity_exists(self.practitioner, self.patient)
 		if validity_exists:
-			fee_validity = frappe.get_doc('Fee Validity', validity_exists[0][0])
+			fee_validity = frappe.get_doc('Fee Validity', validity_exists.name)
 
 			# Check if the validity is valid
 			appointment_date = getdate(self.appointment_date)
