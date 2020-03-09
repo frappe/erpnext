@@ -9,18 +9,31 @@ from frappe.utils import getdate
 import datetime
 
 class FeeValidity(Document):
-	pass
+	def validate(self):
+		self.update_status()
+
+	def update_status(self):
+		valid_till = getdate(self.valid_till)
+		today  = getdate()
+		if self.visited >= self.max_visits:
+			self.status = 'Completed'
+		elif self.visited < self.max_visits:
+			if valid_till >= today:
+				self.status = 'Ongoing'
+			elif valid_till < today:
+				self.status = 'Expired'
+
 
 def update_fee_validity(fee_validity, date, ref_invoice=None):
-	max_visit = frappe.db.get_value("Healthcare Settings", None, "max_visit")
-	valid_days = frappe.db.get_value("Healthcare Settings", None, "valid_days")
+	max_visits = frappe.db.get_single_value("Healthcare Settings", "max_visits")
+	valid_days = frappe.db.get_single_value("Healthcare Settings", "valid_days")
 	if not valid_days:
 		valid_days = 1
-	if not max_visit:
-		max_visit = 1
+	if not max_visits:
+		max_visits = 1
 	date = getdate(date)
 	valid_till = date + datetime.timedelta(days=int(valid_days))
-	fee_validity.max_visit = max_visit
+	fee_validity.max_visits = max_visits
 	fee_validity.visited = 1
 	fee_validity.valid_till = valid_till
 	fee_validity.ref_invoice = ref_invoice
@@ -34,3 +47,9 @@ def create_fee_validity(practitioner, patient, date, ref_invoice=None):
 	fee_validity.patient = patient
 	fee_validity = update_fee_validity(fee_validity, date, ref_invoice)
 	return fee_validity
+
+
+def update_validity_status():
+	docs = frappe.get_all('Fee Validity', filters={'status': ['not in', ['Completed', 'Expired']]})
+	for doc in docs:
+		frappe.get_doc("Task", doc.name).update_status()

@@ -14,7 +14,7 @@
   "collect_registration_fee",
   "registration_fee",
   "automate_appointment_invoicing",
-  "max_visit",
+  "max_visits",
   "valid_days",
   "healthcare_service_items",
   "inpatient_visit_charge_item",
@@ -76,12 +76,6 @@
    "label": "Registration Fee",
    "mandatory_depends_on": "eval:doc.collect_registration_fee == 1",
    "options": "Currency"
-  },
-  {
-   "description": "The number of free follow ups (Patient Encounters in valid days) allowed",
-   "fieldname": "max_visit",
-   "fieldtype": "Int",
-   "label": "Patient Encounters in valid days"
   },
   {
    "description": "Time period (Valid number of days) for free consultations",
@@ -291,11 +285,17 @@
    "fieldname": "remind_before",
    "fieldtype": "Time",
    "label": "Remind Before"
+  },
+  {
+   "description": "The number of free follow ups (Patient Encounters in valid days) allowed",
+   "fieldname": "max_visits",
+   "fieldtype": "Int",
+   "label": "Number of Patient Encounters in valid days"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-02-24 10:51:23.015896",
+ "modified": "2020-03-09 17:43:23.251559",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",
