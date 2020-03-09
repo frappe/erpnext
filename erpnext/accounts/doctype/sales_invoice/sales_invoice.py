@@ -596,10 +596,11 @@ class SalesInvoice(SellingController):
 		for i in dic:
 			if frappe.db.get_single_value('Selling Settings', dic[i][0]) == 'Yes':
 				for d in self.get('items'):
-					is_stock_item = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
-					if  (d.item_code and is_stock_item == 1\
-						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1])):
-						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
+					if d.item_code:
+						is_stock_item = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
+						if (is_stock_item == 1\
+							and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1])):
+							msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
 
 
 	def validate_proj_cust(self):
@@ -642,10 +643,11 @@ class SalesInvoice(SellingController):
 				packed_items.append(p.parent_detail_docname)
 
 			for d in self.items:
-				is_stock_item = frappe.get_cached_value("Item", d.item_code, "is_stock_item")\
-					or self.is_product_bundle_with_stock_item(d.item_code)
-				if d.item_code and not d.delivery_note and is_stock_item:
-					frappe.throw(_("'Update Stock' must be enabled for stock items if Sales Invoice is not made from Delivery Note."))
+				if d.item_code:
+					is_stock_item = frappe.get_cached_value("Item", d.item_code, "is_stock_item")\
+						or self.is_product_bundle_with_stock_item(d.item_code)
+					if d.item_code and not d.delivery_note and is_stock_item:
+						frappe.throw(_("'Update Stock' must be enabled for stock items if Sales Invoice is not made from Delivery Note."))
 
 	def validate_write_off_account(self):
 		if flt(self.write_off_amount) and not self.write_off_account:

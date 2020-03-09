@@ -441,13 +441,14 @@ class SellingController(StockController):
 	def validate_target_warehouse(self):
 		if frappe.get_meta(self.doctype + " Item").has_field("target_warehouse"):
 			for d in self.items:
-				target_warehouse_validation = get_target_warehouse_validation(d.item_code, self.transaction_type, self.company)
+				if d.item_code:
+					target_warehouse_validation = get_target_warehouse_validation(d.item_code, self.transaction_type, self.company)
 
-				if target_warehouse_validation:
-					if target_warehouse_validation == "Mandatory" and not d.target_warehouse:
-						frappe.throw(_("Row #{0}: Target Warehouse must be set for Item {1}").format(d.idx, d.item_code))
-					if target_warehouse_validation == "Not Allowed" and d.target_warehouse:
-						frappe.throw(_("Row #{0}: Target Warehouse must be not set for Item {1}").format(d.idx, d.item_code))
+					if target_warehouse_validation:
+						if target_warehouse_validation == "Mandatory" and not d.target_warehouse:
+							frappe.throw(_("Row #{0}: Target Warehouse must be set for Item {1}").format(d.idx, d.item_code))
+						if target_warehouse_validation == "Not Allowed" and d.target_warehouse:
+							frappe.throw(_("Row #{0}: Target Warehouse must be not set for Item {1}").format(d.idx, d.item_code))
 
 def set_default_income_account_for_item(obj):
 	for d in obj.get("items"):

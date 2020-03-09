@@ -177,7 +177,6 @@ class OpeningInvoiceCreationTool(Document):
 			"is_opening": "Yes",
 			"set_posting_time": 1,
 			"company": self.company,
-			"cost_center": self.cost_center,
 			"due_date": row.due_date,
 			"posting_date": row.posting_date,
 			frappe.scrub(party_type): row.party,

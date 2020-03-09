@@ -4,19 +4,26 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "qty",
-  "item_name",
-  "outstanding_amount",
+  "posting_date",
+  "due_date",
+  "column_break_3",
   "party_type",
   "party",
+  "old_name",
+  "section_break_6",
+  "item_name",
+  "qty",
+  "column_break_10",
+  "outstanding_amount",
+  "section_break_12",
   "temporary_opening_account",
+  "column_break_14",
   "cost_center",
-  "remarks",
+  "section_break_16",
   "sales_person",
   "transaction_type",
-  "old_name",
-  "posting_date",
-  "due_date"
+  "column_break_19",
+  "remarks"
  ],
  "fields": [
   {
@@ -50,7 +57,7 @@
   {
    "default": "1",
    "fieldname": "qty",
-   "fieldtype": "Data",
+   "fieldtype": "Float",
    "label": "Quantity"
   },
   {
@@ -110,10 +117,38 @@
    "fieldname": "due_date",
    "fieldtype": "Date",
    "label": "Due Date"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_12",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_16",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
   }
  ],
  "istable": 1,
- "modified": "2020-03-03 15:35:13.613286",
+ "modified": "2020-03-09 12:38:46.363629",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool Item",

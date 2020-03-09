@@ -6,10 +6,12 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "invoices",
   "company",
   "invoice_type",
-  "item_code"
+  "column_break_3",
+  "item_code",
+  "section_break_5",
+  "invoices"
  ],
  "fields": [
   {
@@ -40,11 +42,19 @@
    "label": "Invoice Type",
    "options": "Sales\nPurchase",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
   }
  ],
  "hide_toolbar": 1,
  "issingle": 1,
- "modified": "2020-03-03 15:35:13.378217",
+ "modified": "2020-03-09 12:29:49.262259",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool",
