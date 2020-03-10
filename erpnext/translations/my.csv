@@ -3873,7 +3873,7 @@ Parent Company must be a group company,မိခင်ကုမ္ပဏီသ�
 Passing Score value should be between 0 and 100,Passing Score တန်ဖိုးသည် ၀ မှ ၁၀၀ အတွင်းဖြစ်သင့်သည်,
 Password policy cannot contain spaces or simultaneous hyphens. The format will be restructured automatically,စကားဝှက်မူဝါဒတွင်နေရာများသို့မဟုတ်တပြိုင်နက်တည်းတုံးတိုများမပါ ၀ င်ပါ။ ပုံစံကိုအလိုအလျောက်ပြန်လည်ဖွဲ့စည်းလိမ့်မည်,
 Patient History,လူနာသမိုင်း,
-Pause,ခေတ္တရပ်နားသည်,
+Pause,ခေတ္တရပ်ဆိုင်း,
 Pay,ပေးဆောင်,
 Payment Document Type,ငွေပေးချေမှုစာရွက်စာတမ်းအမျိုးအစား,
 Payment Name,ငွေပေးချေမှုအမည်,
