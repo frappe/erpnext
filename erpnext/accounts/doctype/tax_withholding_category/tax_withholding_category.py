@@ -14,8 +14,24 @@ class TaxWithholdingCategory(Document):
 
 def get_party_tax_withholding_details(ref_doc, tax_withholding_category=None):
 
+	pan_no = ''
+	suppliers = []
+
 	if not tax_withholding_category:
-		tax_withholding_category = frappe.db.get_value('Supplier', ref_doc.supplier, 'tax_withholding_category')
+		tax_withholding_category, pan_no = frappe.db.get_value('Supplier', ref_doc.supplier, ['tax_withholding_category', 'pan'])
+
+	if not pan_no:
+		pan_no = frappe.db.get_value('Supplier', ref_doc.supplier, 'pan')
+
+	# Get others suppliers with the same PAN No
+	if pan_no:
+		suppliers = [d.name for d in  frappe.get_all('Supplier', fields=['name'], filters={'pan': pan_no})]
+
+	if not suppliers or len(suppliers) == 1:
+		if not suppliers:
+			suppliers = [ref_doc.supplier, ref_doc.supplier]
+		else:
+			suppliers.append(ref_doc.supplier)
 
 	if not tax_withholding_category:
 		return
@@ -25,7 +41,7 @@ def get_party_tax_withholding_details(ref_doc, tax_withholding_category=None):
 	if not tax_details:
 		frappe.throw(_('Please set associated account in Tax Withholding Category {0} against Company {1}')
 			.format(tax_withholding_category, ref_doc.company))
-	tds_amount = get_tds_amount(ref_doc, tax_details, fy)
+	tds_amount = get_tds_amount(suppliers, ref_doc.net_total, tax_details, fy)
 	tax_row = get_tax_row(tax_details, tds_amount)
 
 	return tax_row
@@ -63,7 +79,7 @@ def get_tax_row(tax_details, tds_amount):
 		"tax_amount": tds_amount
 	}
 
-def get_tds_amount(ref_doc, tax_details, fiscal_year_details):
+def get_tds_amount(suppliers, net_total, tax_details, fiscal_year_details):
 	fiscal_year, year_start_date, year_end_date = fiscal_year_details
 	tds_amount = 0
 	tds_deducted = 0
@@ -77,11 +93,11 @@ def get_tds_amount(ref_doc, tax_details, fiscal_year_details):
 	entries = frappe.db.sql("""
 			select voucher_no, credit
 			from `tabGL Entry`
-			where party=%s and fiscal_year=%s and credit > 0
-		""", (ref_doc.supplier, fiscal_year), as_dict=1)
+			where party in %s and fiscal_year=%s and credit > 0
+		""", (tuple(suppliers), fiscal_year), as_dict=1)
 
 	vouchers = [d.voucher_no for d in entries]
-	advance_vouchers = get_advance_vouchers(ref_doc.supplier, fiscal_year)
+	advance_vouchers = get_advance_vouchers(suppliers, fiscal_year)
 
 	tds_vouchers = vouchers + advance_vouchers
 
@@ -96,7 +112,7 @@ def get_tds_amount(ref_doc, tax_details, fiscal_year_details):
 		tds_deducted = tds_deducted[0][0] if tds_deducted and tds_deducted[0][0] else 0
 
 	if tds_deducted:
-		tds_amount = _get_tds(ref_doc.net_total)
+		tds_amount = _get_tds(net_total)
 	else:
 		supplier_credit_amount = frappe.get_all('Purchase Invoice Item',
 			fields = ['sum(net_amount)'],
@@ -109,16 +125,16 @@ def get_tds_amount(ref_doc, tax_details, fiscal_year_details):
 			fields = ['sum(credit_in_account_currency)'],
 			filters = {
 				'parent': ('in', vouchers), 'docstatus': 1,
-				'party': ref_doc.supplier,
+				'party': ('in', suppliers),
 				'reference_type': ('not in', ['Purchase Invoice'])
 			}, as_list=1)
 
 		supplier_credit_amount += (jv_supplier_credit_amt[0][0]
 			if jv_supplier_credit_amt and jv_supplier_credit_amt[0][0] else 0)
 
-		supplier_credit_amount += ref_doc.net_total
+		supplier_credit_amount += net_total
 
-		debit_note_amount = get_debit_note_amount(ref_doc.supplier, year_start_date, year_end_date)
+		debit_note_amount = get_debit_note_amount(suppliers, year_start_date, year_end_date)
 		supplier_credit_amount -= debit_note_amount
 
 		if ((tax_details.get('threshold', 0) and supplier_credit_amount >= tax_details.threshold)
@@ -127,7 +143,7 @@ def get_tds_amount(ref_doc, tax_details, fiscal_year_details):
 
 	return tds_amount
 
-def get_advance_vouchers(supplier, fiscal_year=None, company=None, from_date=None, to_date=None):
+def get_advance_vouchers(suppliers, fiscal_year=None, company=None, from_date=None, to_date=None):
 	condition = "fiscal_year=%s" % fiscal_year
 	if from_date and to_date:
 		condition = "company=%s and posting_date between %s and %s" % (company, from_date, to_date)
@@ -135,17 +151,17 @@ def get_advance_vouchers(supplier, fiscal_year=None, company=None, from_date=Non
 	return frappe.db.sql_list("""
 		select distinct voucher_no
 		from `tabGL Entry`
-		where party=%s and %s and debit > 0
-	""", (supplier, condition)) or []
+		where party in %s and %s and debit > 0
+	""", (tuple(suppliers), condition)) or []
 
-def get_debit_note_amount(supplier, year_start_date, year_end_date, company=None):
-	condition = ""
+def get_debit_note_amount(suppliers, year_start_date, year_end_date, company=None):
+	condition = "and 1=1"
 	if company:
 		condition = " and company=%s " % company
 
 	return flt(frappe.db.sql("""
 		select abs(sum(net_total))
 		from `tabPurchase Invoice`
-		where supplier=%s %s and is_return=1 and docstatus=1
-			and posting_date between %s and %s
-	""", (supplier, condition, year_start_date, year_end_date)))
+		where supplier in %s and is_return=1 and docstatus=1
+			and posting_date between %s and %s %s
+	""", (tuple(suppliers), year_start_date, year_end_date, condition)))
