@@ -986,7 +986,7 @@ class StockEntry(StockController):
 				if (flt(item.consumed_qty) != 0):
 					remaining_qty = flt(item.consumed_qty) - (flt(wo.produced_qty) * req_qty_each)
 					exhaust_qty = req_qty_each * wo.produced_qty
-					if remaining_qty > exhaust_qty :
+					if remaining_qty > exhaust_qty or remaining_qty == 0:
 						if (remaining_qty/(req_qty_each * flt(self.fg_completed_qty))) >= 1:
 							qty =0
 						else:
