@@ -302,6 +302,7 @@ apps/erpnext/erpnext/hr/doctype/compensatory_leave_request/compensatory_leave_re
 DocType: Shopping Cart Settings,Enable Shopping Cart,Omogući korpu
 DocType: Purchase Invoice Item,Is Fixed Asset,Artikal je osnovno sredstvo
 ,POS,POS
+DocType: Loan Repayment,Amount Paid,Plaćeni iznos
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,Timesheet {0} is already completed or cancelled,Potrošeno vrijeme {0} je već potvrđeno ili otkazano
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py, (Half Day),(Pola dana)
 DocType: Shipping Rule,Net Weight,Neto težina
@@ -589,6 +590,7 @@ apps/erpnext/erpnext/stock/doctype/material_request/material_request_dashboard.p
 DocType: Warehouse,Warehouse Name,Naziv skladišta
 DocType: Authorization Rule,Customer / Item Name,Kupac / Naziv proizvoda
 DocType: Timesheet,Total Billed Amount,Ukupno fakturisano
+DocType: Student,Home Address,Kućna adresa
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,In Value,Prijem vrije.
 DocType: Expense Claim,Employees Email Id,ID email Zaposlenih
 apps/erpnext/erpnext/healthcare/page/appointment_analytic/appointment_analytic.js,Tree Type,Tip stabla
@@ -789,7 +791,7 @@ DocType: Production Plan,For Warehouse,Za skladište
 apps/erpnext/erpnext/stock/report/item_prices/item_prices.py,Purchase Price List,Nabavni cjenovnik
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js,Accounts Payable Summary,Pregled obaveze prema dobavljačima
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Delivery Notes {0} must be cancelled before cancelling this Sales Order,Otpremnice {0} moraju biti otkazane prije otkazivanja prodajnog naloga
-DocType: Loan,Total Payment,Ukupno plaćeno
+DocType: Repayment Schedule,Total Payment,Ukupno plaćeno
 DocType: POS Settings,POS Settings,POS podešavanja
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py,Buying Amount,Iznos nabavke
 DocType: Purchase Invoice Item,Valuation Rate,Prosječna nab. cijena
@@ -916,7 +918,7 @@ DocType: Pick List,Material Transfer for Manufacture,Пренос robe za proizv
 apps/erpnext/erpnext/public/js/utils/customer_quick_entry.js,Primary Contact Details,Detalji o primarnom kontaktu
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.html,Ref,Vezni dokument
 DocType: Account,Accounts,Računi
-,Requested,Tražena
+DocType: Loan Security Pledge,Requested,Tražena
 apps/erpnext/erpnext/controllers/selling_controller.py,{0} {1} is cancelled or closed,{0} {1} je otkazan ili zatvoren
 DocType: Request for Quotation Item,Request for Quotation Item,Zahtjev za stavku sa ponude
 DocType: Homepage,Products,Proizvodi

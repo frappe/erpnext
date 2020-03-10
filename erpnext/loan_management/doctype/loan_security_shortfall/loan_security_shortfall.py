@@ -55,7 +55,10 @@ def check_for_ltv_shortfall(process_loan_security_shortfall=None):
 			"valid_upto": (">=", update_time)
 		}, as_list=1))
 
-	loans = frappe.db.sql(""" SELECT l.name, l.loan_amount, l.total_principal_paid, lp.loan_security, lp.haircut, lp.qty
+	ltv_ratio_map = frappe._dict(frappe.get_all("Loan Security Type",
+		fields=["name", "loan_to_value_ratio"], as_list=1))
+
+	loans = frappe.db.sql(""" SELECT l.name, l.loan_amount, l.total_principal_paid, lp.loan_security, lp.haircut, lp.qty, lp.loan_security_type
 		FROM `tabLoan` l, `tabPledge` lp , `tabLoan Security Pledge`p WHERE lp.parent = p.name and p.loan = l.name and l.docstatus = 1
 		and l.is_secured_loan and l.status = 'Disbursed' and p.status in ('Pledged', 'Partially Unpledged')""", as_dict=1)
 
@@ -68,11 +71,12 @@ def check_for_ltv_shortfall(process_loan_security_shortfall=None):
 		})
 
 		current_loan_security_amount = loan_security_price_map.get(loan.loan_security, 0) * loan.qty
+		ltv_ratio = ltv_ratio_map.get(loan.loan_security_type)
 
 		loan_security_map[loan.name]['security_value'] += current_loan_security_amount - (current_loan_security_amount * loan.haircut/100)
 
 	for loan, value in iteritems(loan_security_map):
-		if value["security_value"] < value["loan_amount"]:
+		if (value["security_value"]/value["loan_amount"]) < ltv_ratio:
 			create_loan_security_shortfall(loan, value, process_loan_security_shortfall)
 
 def create_loan_security_shortfall(loan, value, process_loan_security_shortfall):

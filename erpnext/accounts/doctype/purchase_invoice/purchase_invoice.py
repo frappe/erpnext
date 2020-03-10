@@ -136,15 +136,15 @@ class PurchaseInvoice(BuyingController):
 			args = [
 				self.name,
 				self.outstanding_amount,
-				self.is_return, 
-				self.due_date, 
+				self.is_return,
+				self.due_date,
 				self.docstatus,
 				precision
 			]
-			status = get_status(args)
+			self.status = get_status(args)
 
 		if update:
-			self.db_set('status', status, update_modified = update_modified)
+			self.db_set('status', self.status, update_modified = update_modified)
 
 	def set_missing_values(self, for_validate=False):
 		if not self.credit_to:
@@ -401,7 +401,7 @@ class PurchaseInvoice(BuyingController):
 				update_outstanding_amt(self.credit_to, "Supplier", self.supplier,
 					self.doctype, self.return_against if cint(self.is_return) and self.return_against else self.name)
 
-			if repost_future_gle and cint(self.update_stock) and self.auto_accounting_for_stock:
+			if (repost_future_gle or self.flags.repost_future_gle) and cint(self.update_stock) and self.auto_accounting_for_stock:
 				from erpnext.controllers.stock_controller import update_gl_entries_after
 				items, warehouses = self.get_items_and_warehouses()
 				update_gl_entries_after(self.posting_date, self.posting_time,
@@ -1053,7 +1053,7 @@ def get_status(*args):
 			status = "Submitted"
 	else:
 		status = "Draft"
-	
+
 	return status
 
 def get_list_context(context=None):
