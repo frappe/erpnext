@@ -31,7 +31,52 @@ def execute(filters=None):
 
 	chart = get_chart_data(filters, columns, income, expense, net_profit_loss)
 
-	return columns, data, None, chart
+	report_summary = get_report_summary(columns, income, expense, net_profit_loss, filters.periodicity, period_list)
+
+	return columns, data, None, chart, report_summary
+
+def get_report_summary(columns, income, expense, net_profit_loss, period_list, periodicity):
+	income_data, expense_data, net_profit = [], [], []
+
+	for p in columns[2:]:
+		if income:
+			income_data.append(income[-2].get(p.get("fieldname")))
+		if expense:
+			expense_data.append(expense[-2].get(p.get("fieldname")))
+		if net_profit_loss:
+			net_profit.append(net_profit_loss.get(p.get("fieldname")))
+
+	if (len(period_list) == 1 and periodicity== 'Yearly'):
+			profit_label = _("Profit This Year")
+			income_label = _("Total Income This Year")
+			expense_label = _("Total Expense This Year")
+	else:
+		profit_label = _("Net Profit")
+		income_label = _("Total Income")
+		expense_label = _("Total Expense")
+
+	return [
+		{
+			"value": net_profit[-1],
+			"indicator": "Green" if net_profit[-1] > 0 else "Red",
+			"label": profit_label,
+			"datatype": "Currency",
+			"currency": net_profit_loss.get("currency")
+		},
+		{
+			"value": income_data[-1],
+			"label": income_label,
+			"datatype": "Currency",
+			"currency": income[-1].get('currency')
+		},
+		{
+			"value": expense_data[-1],
+			"label": expense_label,
+			"datatype": "Currency",
+			"currency": expense[-1].get('currency')
+		}
+	]
+
 
 def get_net_profit_loss(income, expense, period_list, company, currency=None, consolidated=False):
 	total = 0
