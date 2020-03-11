@@ -251,7 +251,7 @@ DocType: Employee,Health Details,Detalhes sobre a Saúde
 DocType: Accounts Settings,"Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.","Registros contábeis congelados até a presente data, ninguém pode criar/modificar registros com exceção do perfil especificado abaixo."
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py,Total advance amount cannot be greater than total sanctioned amount,O montante do adiantamento total não pode ser maior do que o montante liberado total
 ,Payment Period Based On Invoice Date,Prazo Médio de Pagamento Baseado na Emissão da Nota
-apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py,Total Tax,Total de Impostos
+apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py,Total Tax,Total de Impostos
 DocType: Delivery Note,Return Against Delivery Note,Devolução contra Guia de Remessa
 apps/erpnext/erpnext/accounts/utils.py,Payment Entries {0} are un-linked,Os Registos de Pagamento {0} não estão relacionados
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note_list.js,Cannot create a Delivery Trip from Draft documents.,Você não pode criar uma Viagem de Entrega para documentos em rascunho.
@@ -553,6 +553,7 @@ apps/erpnext/erpnext/controllers/selling_controller.py,Sales Order {0} is {1},Pe
 DocType: Patient,Married,Casado
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Executive Search,Executive Search
 ,Itemwise Recommended Reorder Level,Níves de Reposição Recomendados por Item
+DocType: Loan Repayment,Amount Paid,Valor pago
 DocType: Guardian,Guardian Of ,Responsável por
 DocType: Bank Statement Transaction Entry,Receivable Account,Contas a Receber
 DocType: Job Offer,Printing Details,Imprimir detalhes
@@ -651,7 +652,7 @@ apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,"R
 DocType: Authorization Rule,Applicable To (User),Aplicável Para (Usuário)
 apps/erpnext/erpnext/controllers/trends.py,Total(Amt),Total (Quantia)
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py,Item {0} is not a serialized Item,Item {0} não é um item serializado
-apps/erpnext/erpnext/hr/doctype/loan/loan.js,Principal Amount,Valor Principal
+DocType: Repayment Schedule,Principal Amount,Valor Principal
 apps/erpnext/erpnext/config/projects.py,Timesheet for tasks.,Registros de Tempo para tarefas.
 apps/erpnext/erpnext/selling/doctype/installation_note/installation_note.py,Installation date cannot be before delivery date for Item {0},Data de instalação não pode ser anterior à data de entrega de item {0}
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,{0} is mandatory for Item {1},{0} é obrigatório para o item {1}
@@ -757,7 +758,6 @@ DocType: Asset,Straight Line,Linha reta
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,You cannot credit and debit same account at the same time,Você não pode ter débito e crédito na mesma conta
 apps/erpnext/erpnext/projects/report/daily_timesheet_summary/daily_timesheet_summary.py,To Datetime,Até a Data e Hora
 DocType: Course Topic,Topic,Tópico
-DocType: Expense Claim,Approval Status,Estado da Aprovação
 DocType: BOM Update Tool,The new BOM after replacement,A nova LDM após substituição
 apps/erpnext/erpnext/hr/doctype/employee/employee_tree.js,New Employee,Novo Colaborador
 apps/erpnext/erpnext/public/js/controllers/transaction.js,Please set 'Apply Additional Discount On',"Por favor, defina &quot;Aplicar desconto adicional em &#39;"
@@ -772,7 +772,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js,Send SMS,Envie SMS
 apps/erpnext/erpnext/education/doctype/student_admission/templates/student_admission.html,Apply Now,Aplique agora
 apps/erpnext/erpnext/config/buying.py,Request for quotation.,Solicitação de orçamento.
-DocType: Loan,Total Payment,Pagamento Total
+DocType: Repayment Schedule,Total Payment,Pagamento Total
 DocType: Work Order,Manufactured Qty,Qtde Fabricada
 DocType: Leave Application,Leave Approver Name,Nome do Aprovador de Licenças
 DocType: Employee Attendance Tool,Employees HTML,Colaboradores HTML
@@ -843,7 +843,6 @@ DocType: Clinical Procedure,Inpatient Record,Registro de Internação
 DocType: Fee Schedule Program,Student Batch,Série de Alunos
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js,Fetch exploded BOM (including sub-assemblies),Buscar LDM explodida (incluindo sub-conjuntos )
 DocType: Lead,Lead is an Organization,Cliente em Potencial  é uma Empresa
-DocType: Loan Application,Required by Date,Necessário até a data
 DocType: Purchase Taxes and Charges,Reference Row #,Referência Linha #
 DocType: Payroll Entry,Employee Details,Detalhes do Funcionário
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,Customer {0} does not belong to project {1},Cliente {0} não pertence ao projeto {1}
@@ -1651,7 +1650,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,Total Debit
 apps/erpnext/erpnext/crm/report/prospects_engaged_but_not_converted/prospects_engaged_but_not_converted.py,Last Communication Date,Data do Último Contato
 DocType: Work Order,Manufacture against Material Request,Fabricação Vinculada a uma Requisição de Material
 DocType: Email Digest,Payables,Contas a Pagar
-DocType: Vehicle Log,Odometer,Odômetro
+apps/erpnext/erpnext/hr/report/vehicle_expenses/vehicle_expenses.py,Odometer,Odômetro
 DocType: Employee Attendance Tool,Marked Attendance HTML,Presença marcante HTML
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Department Stores,Lojas de Departamento
 DocType: Issue,First Responded On,Primeira Resposta em
@@ -1762,7 +1761,7 @@ apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js,POS Profile is 
 DocType: Manufacturing Settings,Capacity Planning,Planejamento de capacidade
 apps/erpnext/erpnext/hr/doctype/employee_tax_exemption_declaration/employee_tax_exemption_declaration.js,Please select {0},Por favor selecione {0}
 DocType: Employee Tax Exemption Declaration Category,Employee Tax Exemption Declaration Category,Categoria de Declaração de Isenção de Imposto do Colaborador
-DocType: Loan Application,Total Payable Amount,Total a Pagar
+DocType: Loan,Total Payable Amount,Total a Pagar
 apps/erpnext/erpnext/controllers/accounts_controller.py,Charge of type 'Actual' in row {0} cannot be included in Item Rate,Charge do tipo ' real ' na linha {0} não pode ser incluído no item Taxa
 DocType: Work Order,Work-in-Progress Warehouse,Armazén de Trabalho em Andamento
 apps/erpnext/erpnext/education/doctype/student/student.py,Date of Birth cannot be greater than today.,Data de nascimento não pode ser maior do que hoje.
@@ -2528,7 +2527,7 @@ DocType: Pick List,Parent Warehouse,Armazén Pai
 apps/erpnext/erpnext/portal/doctype/homepage/homepage.py,This is an example website auto-generated from ERPNext,Este é um exemplo website auto- gerada a partir ERPNext
 DocType: Chapter Member,Leave Reason,Motivo da Saída
 DocType: Item Group,Show this slideshow at the top of the page,Mostrar esta apresentação de slides no topo da página
-DocType: Loan Type,Maximum Loan Amount,Valor Máximo de Empréstimo
+DocType: Loan Application,Maximum Loan Amount,Valor Máximo de Empréstimo
 DocType: Serial No,Creation Time,Horário de Criação
 DocType: Employee Incentive,Employee Incentive,Incentivo ao Colaborador
 DocType: Leave Allocation,Total Leaves Allocated,Total de licenças alocadas
@@ -3007,11 +3006,10 @@ apps/erpnext/erpnext/controllers/accounts_controller.py,Due Date is mandatory,A 
 DocType: Manufacturing Settings,Material Transferred for Manufacture,Material Transferido para Fabricação
 ,Employee Information,Informações do Colaborador
 DocType: Purchase Invoice,Start date of current invoice's period,Data de início do período de fatura atual
-DocType: Bank Reconciliation,Select account head of the bank where cheque was deposited.,Selecione a conta bancária onde o valor foi depositado.
 DocType: Production Plan Item,Product Bundle Item,Item do Pacote de Produtos
 apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.js,Please enter Purchase Receipt first,Digite Recibo de compra primeiro
 DocType: Opportunity,Contact Info,Informações para Contato
-DocType: Employee,Job Applicant,Candidato à Vaga
+DocType: Appointment Letter,Job Applicant,Candidato à Vaga
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Newspaper Publishers,Editor de Newsletter
 DocType: Sales Order Item,Supplier delivers to Customer,O fornecedor entrega diretamente ao cliente
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Extra Small,Muito Pequeno

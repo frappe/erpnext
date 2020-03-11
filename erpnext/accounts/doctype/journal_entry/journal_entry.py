@@ -9,7 +9,6 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_account_currency
 from erpnext.accounts.party import get_party_account
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
-from erpnext.hr.doctype.loan.loan import update_disbursement_status, update_total_amount_paid
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import get_party_account_based_on_invoice_discounting
 
 from six import string_types, iteritems
@@ -50,7 +49,6 @@ class JournalEntry(AccountsController):
 		self.make_gl_entries()
 		self.update_advance_paid()
 		self.update_expense_claim()
-		self.update_loan()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
 
@@ -62,7 +60,6 @@ class JournalEntry(AccountsController):
 		self.make_gl_entries(1)
 		self.update_advance_paid()
 		self.update_expense_claim()
-		self.update_loan()
 		self.unlink_advance_entry_reference()
 		self.unlink_asset_reference()
 		self.unlink_inter_company_jv()
@@ -460,8 +457,7 @@ class JournalEntry(AccountsController):
 		for d in self.get('accounts'):
 			if d.party_type in ['Customer', 'Supplier'] and d.party:
 				if not pay_to_recd_from:
-					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
-						"customer_name" if d.party_type=="Customer" else "supplier_name")
+					pay_to_recd_from = d.party
 
 				if pay_to_recd_from and pay_to_recd_from == d.party:
 					party_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
@@ -472,7 +468,8 @@ class JournalEntry(AccountsController):
 				bank_account_currency = d.account_currency
 
 		if pay_to_recd_from:
-			self.pay_to_recd_from = pay_to_recd_from
+			self.pay_to_recd_from = frappe.db.get_value(d.party_type, pay_to_recd_from,
+				"customer_name" if d.party_type=="Customer" else "supplier_name")
 			if bank_amount:
 				total_amount = bank_amount
 				currency = bank_account_currency
@@ -597,17 +594,6 @@ class JournalEntry(AccountsController):
 				doc = frappe.get_doc("Expense Claim", d.reference_name)
 				update_reimbursed_amount(doc)
 
-	def update_loan(self):
-		if self.paid_loan:
-			paid_loan = json.loads(self.paid_loan)
-			value = 1 if self.docstatus < 2 else 0
-			for name in paid_loan:
-				frappe.db.set_value("Repayment Schedule", name, "paid", value)
-		for d in self.accounts:
-			if d.reference_type=="Loan" and flt(d.debit) > 0:
-				doc = frappe.get_doc("Loan", d.reference_name)
-				update_disbursement_status(doc)
-				update_total_amount_paid(doc)
 
 	def validate_expense_claim(self):
 		for d in self.accounts:
@@ -616,7 +602,7 @@ class JournalEntry(AccountsController):
 					d.reference_name, ("total_sanctioned_amount", "total_amount_reimbursed"))
 				pending_amount = flt(sanctioned_amount) - flt(reimbursed_amount)
 				if d.debit > pending_amount:
-					frappe.throw(_("Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. Pending Amount is {2}".format(d.idx, d.reference_name, pending_amount)))
+					frappe.throw(_("Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. Pending Amount is {2}").format(d.idx, d.reference_name, pending_amount))
 
 	def validate_credit_debit_note(self):
 		if self.stock_entry:
@@ -624,7 +610,7 @@ class JournalEntry(AccountsController):
 				frappe.throw(_("Stock Entry {0} is not submitted").format(self.stock_entry))
 
 			if frappe.db.exists({"doctype": "Journal Entry", "stock_entry": self.stock_entry, "docstatus":1}):
-				frappe.msgprint(_("Warning: Another {0} # {1} exists against stock entry {2}".format(self.voucher_type, self.name, self.stock_entry)))
+				frappe.msgprint(_("Warning: Another {0} # {1} exists against stock entry {2}").format(self.voucher_type, self.name, self.stock_entry))
 
 	def validate_empty_accounts_table(self):
 		if not self.get('accounts'):
