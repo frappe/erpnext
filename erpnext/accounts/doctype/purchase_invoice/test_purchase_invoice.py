@@ -791,11 +791,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi_doc = frappe.get_doc('Purchase Invoice', pi.name)
 		self.assertEqual(pi_doc.outstanding_amount, 0)
 
-	def test_purchase_invoice_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+	def test_purchase_invoice_with_cost_center(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
-		accounts_settings.save()
 		cost_center = "_Test Cost Center for BS Account - _TC"
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
 
@@ -821,13 +818,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
-
-	def test_purchase_invoice_for_disable_allow_cost_center_in_entry_of_bs_account(self):
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
+	def test_purchase_invoice_without_cost_center(self):
 		cost_center = "_Test Cost Center - _TC"
 		pi =  make_purchase_invoice(credit_to="Creditors - _TC")
 
