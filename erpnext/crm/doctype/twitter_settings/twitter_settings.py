@@ -6,8 +6,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-import requests
-from requests_oauthlib import OAuth1
 from frappe.utils.file_manager import get_file_path
 import os
 from frappe.utils import get_url_to_form
