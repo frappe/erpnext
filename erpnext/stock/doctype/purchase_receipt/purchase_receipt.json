@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -105,6 +104,7 @@
   "amended_from",
   "range",
   "column_break4",
+  "project",
   "per_billed",
   "is_internal_supplier",
   "inter_company_reference",
@@ -926,6 +926,12 @@
    "width": "50%"
   },
   {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
    "fieldname": "per_billed",
    "fieldtype": "Percent",
    "label": "% Amount Billed",
@@ -1076,7 +1082,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-30 19:12:49.709711",
+ "modified": "2020-03-11 12:58:46.515404",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
