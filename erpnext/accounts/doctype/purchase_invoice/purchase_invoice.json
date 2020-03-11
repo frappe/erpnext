@@ -25,6 +25,7 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+  "project",
   "sb_14",
   "on_hold",
   "release_date",
@@ -1292,13 +1293,19 @@
    "fieldtype": "Check",
    "label": "Is Internal Supplier",
    "read_only": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-30 19:13:49.610538",
+ "modified": "2020-03-11 12:28:45.711416",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
