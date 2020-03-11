@@ -1633,11 +1633,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si_doc = frappe.get_doc('Sales Invoice', si.name)
 		self.assertEqual(si_doc.outstanding_amount, 0)
 
-	def test_sales_invoice_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+	def test_sales_invoice_with_cost_center(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
-		accounts_settings.save()
 		cost_center = "_Test Cost Center for BS Account - _TC"
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
 
@@ -1663,13 +1660,7 @@ class TestSalesInvoice(unittest.TestCase):
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
-
-	def test_sales_invoice_for_disable_allow_cost_center_in_entry_of_bs_account(self):
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
-		accounts_settings.save()
+	def test_sales_invoice_without_cost_center(self):
 		cost_center = "_Test Cost Center - _TC"
 		si =  create_sales_invoice(debit_to="Debtors - _TC")
 
@@ -1691,9 +1682,6 @@ class TestSalesInvoice(unittest.TestCase):
 
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
-
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
 
 	def test_deferred_revenue(self):
 		deferred_account = create_account(account_name="Deferred Revenue",
