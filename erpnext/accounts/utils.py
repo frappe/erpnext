@@ -124,14 +124,12 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 			# hence, assuming balance as 0.0
 			return 0.0
 
-	allow_cost_center_in_entry_of_bs_account = get_allow_cost_center_in_entry_of_bs_account()
-
 	if account:
 		report_type = acc.report_type
 	else:
 		report_type = ""
 
-	if cost_center and (allow_cost_center_in_entry_of_bs_account or report_type =='Profit and Loss'):
+	if cost_center and report_type == 'Profit and Loss':
 		cc = frappe.get_doc("Cost Center", cost_center)
 		if cc.is_group:
 			cond.append(""" exists (
@@ -887,11 +885,6 @@ def get_coa(doctype, parent, is_root, chart=None):
 	accounts = [d for d in accounts if d['parent_account']==parent]
 
 	return accounts
-
-def get_allow_cost_center_in_entry_of_bs_account():
-	def generator():
-		return cint(frappe.db.get_value('Accounts Settings', None, 'allow_cost_center_in_entry_of_bs_account'))
-	return frappe.local_cache("get_allow_cost_center_in_entry_of_bs_account", (), generator, regenerate_if_none=True)
 
 def get_stock_accounts(company):
 	return frappe.get_all("Account", filters = {
