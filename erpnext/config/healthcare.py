@@ -183,5 +183,26 @@ def get_data():
 					"label": _("Healthcare Service Unit Type")
 				}
 			]
+		},
+		{
+			"label": _("Rehabilitation"),
+			"icon": "icon-cog",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Therapy Type Template",
+					"label": _("Therapy Type Template")
+				},
+				{
+					"type": "doctype",
+					"name": "Therapy",
+					"label": _("Therapy")
+				},
+				{
+					"type": "doctype",
+					"name": "Exercise Type",
+					"label": _("Exercise Type")
+				}
+			]
 		}
 	]

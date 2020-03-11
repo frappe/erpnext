@@ -1,0 +1,81 @@
+{
+ "actions": [],
+ "creation": "2020-03-11 09:16:31.198238",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "exercise",
+  "exercise_image",
+  "exercise_video",
+  "column_break_4",
+  "service_unit",
+  "section_break_6",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "exercise",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Exercise Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "exercise_image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Exercise Image"
+  },
+  {
+   "fieldname": "exercise_video",
+   "fieldtype": "Link",
+   "label": "Exercise Video",
+   "options": "Video"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "service_unit",
+   "fieldtype": "Link",
+   "label": "Healthcare Service Unit",
+   "options": "Healthcare Service Unit"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Description"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "image_field": "exercise_image",
+ "links": [],
+ "modified": "2020-03-11 09:20:11.082000",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Exercise Type",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

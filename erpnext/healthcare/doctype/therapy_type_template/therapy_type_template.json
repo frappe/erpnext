@@ -1,0 +1,77 @@
+{
+ "actions": [],
+ "autoname": "field:therapy_type",
+ "creation": "2020-03-11 08:26:47.001683",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "therapy_type",
+  "default_duration",
+  "credits",
+  "column_break_4",
+  "is_billable",
+  "rate"
+ ],
+ "fields": [
+  {
+   "fieldname": "therapy_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Therapy Type",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "default_duration",
+   "fieldtype": "Int",
+   "label": "Default Duration (In Mins)"
+  },
+  {
+   "fieldname": "credits",
+   "fieldtype": "Data",
+   "label": "Credits"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_billable",
+   "fieldtype": "Check",
+   "label": "Is Billable"
+  },
+  {
+   "depends_on": "eval:doc.is_billable==1",
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "label": "Rate",
+   "mandatory_depends_on": "eval:doc.is_billable==1"
+  }
+ ],
+ "links": [],
+ "modified": "2020-03-11 12:24:47.154509",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Therapy Type Template",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
