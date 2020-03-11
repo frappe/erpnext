@@ -4,17 +4,19 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 import requests
 from requests_oauthlib import OAuth1
 from frappe.utils.file_manager import get_file, get_file_path
 import os
 import mimetypes
+import json
+from frappe.utils import get_url_to_form
 
 MEDIA_ENDPOINT_URL = "https://upload.twitter.com/1.1/media/upload.json"
 
 class TwitterSettings(Document):
-	@frappe.whitelist()
 	def get_authorize_url(self):
 		callback_uri = "{0}/?cmd=erpnext.crm.doctype.twitter_settings.twitter_settings.callback".format(frappe.utils.get_url())
 		consumer_secret = self.get_password(fieldname="consumer_secret")
@@ -25,8 +27,13 @@ class TwitterSettings(Document):
 			frappe.throw(e)
 			return
 		if r.status_code == 200:
-			from urllib.parse import parse_qs
+			try:
+				from urllib.parse import parse_qs
+			except:
+				from urlparse import parse_qs 
+			print(r)
 			response = parse_qs(r.content.decode())
+			print(response)
 			response = frappe._dict(response)
 			self.oauth_token = response.get("oauth_token")[0]
 			self.oauth_secret = response.get("oauth_token_secret")[0]
@@ -46,7 +53,10 @@ class TwitterSettings(Document):
 			frappe.throw(e)
 
 		if r.status_code == 200:
-			from urllib.parse import parse_qs
+			try:
+				from urllib.parse import parse_qs
+			except:
+				from urlparse import parse_qs 
 			response = parse_qs(r.content.decode())
 			response = frappe._dict(response)
 			self.oauth_token = response.get("oauth_token")[0]
@@ -55,7 +65,7 @@ class TwitterSettings(Document):
 			self.save()
 			
 			frappe.local.response["type"] = "redirect"
-			frappe.local.response["location"] = "/desk#Form/{0}".format(quote("Twitter Settings"))
+			frappe.local.response["location"] = get_url_to_form("Twitter Settings","Twitter Settings")
 
 			frappe.msgprint(_("Twitter Integration has been configured."))
 		else:
@@ -145,23 +155,43 @@ class TwitterSettings(Document):
 
 	def get_oauth(self):
 		if self.oauth_token and self.oauth_secret:
-			return  OAuth1(self.consumer_key, client_secret=self.get_password(fieldname="consumer_secret"), resource_owner_key=self.oauth_token, resource_owner_secret=self.get_password(fieldname="oauth_secret"))
+			return  OAuth1(
+				client_key = self.consumer_key,
+				client_secret = self.get_password(fieldname="consumer_secret"),
+				resource_owner_key = self.oauth_token,
+				resource_owner_secret = self.get_password(fieldname="oauth_secret"),
+				signature_method = "HMAC-SHA1"
+			)
 
 
 	def send_tweet(self, text, media_id=None):
-		from urllib.parse import urlencode
+		try:
+			from urllib.parse import urlencode
+		except:
+			from urllib import urlencode
 		url = "https://api.twitter.com/1.1/statuses/update.json"
+ 
 		oauth = self.get_oauth()
 		params = {
 			"status": text,
-			"media_ids": media_id
+			"media_ids" : media_id
 		}
-		try :
-			r = requests.post(url, auth=oauth, params=params)
-			r.raise_for_status()
+		r = self.http_post(url=url, params=params, auth=oauth)
+		return r.json()["id_str"]
+	
+	def http_post(self, url, params=None, auth=None, data=None):
+		try:
+			response = requests.post(
+				url = url,
+				params = params,
+				auth = auth,
+				data = data
+			)
+			response.raise_for_status()
+
 		except Exception as e:
 			frappe.throw(e)
-		return r.json()["id_str"]
+		return response
 
 @frappe.whitelist()
 def callback(oauth_token, oauth_verifier):
