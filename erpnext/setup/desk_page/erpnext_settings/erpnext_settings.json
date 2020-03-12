@@ -12,7 +12,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "ERPNext Settings",
- "modified": "2020-03-12 16:38:25.114355",
+ "modified": "2020-03-12 18:03:17.126782",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "ERPNext Settings",
@@ -66,12 +66,6 @@
    "icon": "fa fa-shopping-cart",
    "is_query_report": 0,
    "link_to": "Shopping Cart Settings",
-   "type": "DocType"
-  },
-  {
-   "icon": "fa fa-globe",
-   "is_query_report": 0,
-   "link_to": "Website Settings",
    "type": "DocType"
   },
   {
