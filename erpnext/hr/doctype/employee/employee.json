@@ -229,8 +229,7 @@
    "label": "Gender",
    "oldfieldname": "gender",
    "oldfieldtype": "Select",
-   "options": "Gender",
-   "reqd": 1
+   "options": "Gender"
   },
   {
    "description": "You can enter any date manually",
@@ -238,16 +237,14 @@
    "fieldtype": "Date",
    "label": "Date of Birth",
    "oldfieldname": "date_of_birth",
-   "oldfieldtype": "Date",
-   "reqd": 1
+   "oldfieldtype": "Date"
   },
   {
    "fieldname": "date_of_joining",
    "fieldtype": "Date",
    "label": "Date of Joining",
    "oldfieldname": "date_of_joining",
-   "oldfieldtype": "Date",
-   "reqd": 1
+   "oldfieldtype": "Date"
   },
   {
    "allow_in_quick_entry": 1,
@@ -783,7 +780,7 @@
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2020-03-03 16:14:09.649210",
+ "modified": "2020-03-12 16:28:28.926930",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
