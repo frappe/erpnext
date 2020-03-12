@@ -84,6 +84,11 @@ def add_permissions():
 			update_permission_property(doctype, role, 0, 'write', 1)
 			update_permission_property(doctype, role, 0, 'create', 1)
 
+	for role in ('Accounts Manager', 'System Manager'):
+		add_permission("Lower Deduction Certificate", role, 0)
+		update_permission_property("Lower Deduction Certificate", role, 0, 'write', 1)
+		update_permission_property("Lower Deduction Certificate", role, 0, 'create', 1)
+
 def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
 	frappe.reload_doc("accounts", "print_format", "gst_pos_invoice")
