@@ -1659,6 +1659,45 @@ class TestSalesInvoice(unittest.TestCase):
 
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+	
+	def test_sales_invoice_with_project_link(self):
+		from erpnext.projects.doctype.project.test_project import make_project
+
+		project = make_project({
+			'project_name': 'Sales Invoice Project',
+			'project_template_name': 'Test Project Template',
+			'start_date': '2020-01-01'
+		})
+		item_project = make_project({
+			'project_name': 'Sales Invoice Item Project',
+			'project_template_name': 'Test Project Template',
+			'start_date': '2019-06-01'
+		})
+
+		sales_invoice = create_sales_invoice(do_not_save=1)
+		sales_invoice.items[0].project = item_project.project_name
+		sales_invoice.project = project.project_name
+
+		sales_invoice.submit()
+
+		expected_values = {
+			"Debtors - _TC": {
+				"project": project.project_name
+			},
+			"Sales - _TC": {
+				"project": item_project.project_name
+			}
+		}
+
+		gl_entries = frappe.db.sql("""select account, cost_center, project, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", sales_invoice.name, as_dict=1)
+		
+		self.assertTrue(gl_entries)
+		
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account]["project"], gle.project)
 
 	def test_sales_invoice_without_cost_center(self):
 		cost_center = "_Test Cost Center - _TC"

@@ -7,7 +7,7 @@ import frappe, unittest
 test_records = frappe.get_test_records('Project')
 test_ignore = ["Sales Order"]
 
-from erpnext.projects.doctype.project_template.test_project_template import get_project_template
+from erpnext.projects.doctype.project_template.test_project_template import get_project_template, make_project_template
 from erpnext.projects.doctype.project.project import set_project_status
 
 from frappe.utils import getdate
@@ -42,5 +42,25 @@ def get_project(name):
 		project_template = template.name,
 		expected_start_date = '2019-01-01'
 	)).insert()
+
+	return project
+
+def make_project(args):
+	args = frappe._dict(args)
+	if args.project_template_name:
+		template = make_project_template(args.project_template_name)
+	else:
+		template = get_project_template()
+
+	project = frappe.get_doc(dict(
+		doctype = 'Project',
+		project_name = args.project_name,
+		status = 'Open',
+		project_template = template.name,
+		expected_start_date = args.start_date
+	))
+
+	if not frappe.db.exists("Project", args.project_name):
+		project.insert()
 
 	return project
