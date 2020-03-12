@@ -65,7 +65,7 @@ def place_order():
 		frappe.defaults.set_user_default("company", quotation.company)
 
 	if not (quotation.shipping_address_name or quotation.customer_address):
-			frappe.throw(_("Set Shipping Address or Billing Address"))
+		frappe.throw(_("Set Shipping Address or Billing Address"))
 
 	from erpnext.selling.doctype.quotation.quotation import _make_sales_order
 	sales_order = frappe.get_doc(_make_sales_order(quotation.name, ignore_permissions=True))
@@ -204,9 +204,11 @@ def update_cart_address(address_type, address_name):
 	if address_type.lower() == "billing":
 		quotation.customer_address = address_name
 		quotation.address_display = address_display
+		quotation.shipping_address_name == quotation.shipping_address_name or address_name
 	elif address_type.lower() == "shipping":
 		quotation.shipping_address_name = address_name
 		quotation.shipping_address = address_display
+		quotation.customer_address == quotation.customer_address or address_name
 
 	apply_cart_settings(quotation=quotation)
 
