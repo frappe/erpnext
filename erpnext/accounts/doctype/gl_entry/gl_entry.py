@@ -256,6 +256,7 @@ def update_outstanding_amt_in_ref(against_voucher, against_voucher_type, bal):
 
 	precision = frappe.get_precision(against_voucher_type, "outstanding_amount")
 	data = list(data)
+	data[1] = bal #update outstanding amount to get correct status
 	data.append(precision)
 	status = get_status(data)
 	frappe.db.set_value(against_voucher_type, against_voucher, {
