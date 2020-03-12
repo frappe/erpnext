@@ -320,7 +320,7 @@ def set_invoiced(item, method, ref_invoice=None):
 		else:
 			manage_fee_validity(item.reference_dn, method, ref_invoice)
 			dt_from_appointment = 'Patient Encounter'
-		manage_doc_for_appoitnment(dt_from_appointment, item.reference_dn, invoiced)
+		manage_doc_for_appointment(dt_from_appointment, item.reference_dn, invoiced)
 
 	elif item.reference_dt == 'Lab Prescription':
 		manage_prescriptions(invoiced, item.reference_dt, item.reference_dn, 'Lab Test', 'lab_test_created')
@@ -331,7 +331,7 @@ def set_invoiced(item, method, ref_invoice=None):
 
 def validate_invoiced_on_submit(item):
 	if item.reference_dt == 'Clinical Procedure' and get_healthcare_service_item('clinical_procedure_consumable_item') == item.item_code:
-			is_invoiced = frappe.db.get_value(item.reference_dt, item.reference_dn, 'consumption_invoiced')
+		is_invoiced = frappe.db.get_value(item.reference_dt, item.reference_dn, 'consumption_invoiced')
 	else:
 		is_invoiced = frappe.db.get_value(item.reference_dt, item.reference_dn, 'invoiced')
 	if is_invoiced:
@@ -380,7 +380,7 @@ def manage_fee_validity(appointment_name, method, ref_invoice=None):
 		fee_validity = create_fee_validity(appointment_doc.practitioner, appointment_doc.patient, appointment_doc.appointment_date, ref_invoice)
 
 	visited = fee_validity.visited
-	mark_appointments_as_invoiced(fee_validity, ref_invoice, method, appointment_doc)
+	mark_appointments_as_invoiced(fee_validity, ref_invoice, method, appointment_doc, visited)
 
 	if method == 'on_cancel':
 		ref_invoice_in_fee_validity = frappe.db.get_value('Fee Validity', fee_validity.name, 'ref_invoice')
@@ -388,7 +388,7 @@ def manage_fee_validity(appointment_name, method, ref_invoice=None):
 			frappe.delete_doc('Fee Validity', fee_validity.name)
 
 
-def mark_appointments_as_invoiced(fee_validity, ref_invoice, method, appointment_doc):
+def mark_appointments_as_invoiced(fee_validity, ref_invoice, method, appointment_doc, visited):
 	if method == 'on_cancel':
 		invoiced = True
 	else:
@@ -405,13 +405,13 @@ def mark_appointments_as_invoiced(fee_validity, ref_invoice, method, appointment
 						visited = 0
 					frappe.db.set_value('Fee Validity', fee_validity.name, 'visited', visited)
 				frappe.db.set_value('Patient Appointment', appointment.name, 'invoiced', False)
-				manage_doc_for_appoitnment('Patient Encounter', appointment.name, False)
+				manage_doc_for_appointment('Patient Encounter', appointment.name, False)
 			elif method == 'on_submit' and int(fee_validity.max_visits) > visit:
 				if ref_invoice == fee_validity.ref_invoice:
 					visited += 1
 					frappe.db.set_value('Fee Validity', fee_validity.name, 'visited', visited)
 				frappe.db.set_value('Patient Appointment', appointment.name, 'invoiced', True)
-				manage_doc_for_appoitnment('Patient Encounter', appointment.name, True)
+				manage_doc_for_appointment('Patient Encounter', appointment.name, True)
 			if ref_invoice == fee_validity.ref_invoice:
 				visit = visit + 1
 
@@ -432,7 +432,7 @@ def appointments_valid_in_fee_validity(appointment, invoiced):
 	}, order_by='appointment_date', limit=int(max_visits)-1)
 
 
-def manage_doc_for_appoitnment(dt_from_appointment, appointment, invoiced):
+def manage_doc_for_appointment(dt_from_appointment, appointment, invoiced):
 	dn_from_appointment = frappe.db.get_value(
 		dt_from_appointment,
 		filters={'appointment': appointment}
@@ -525,7 +525,7 @@ def get_patient_vitals(patient, from_date=None, to_date=None):
 	vitals = frappe.db.get_all('Vital Signs', {
 			'docstatus': 1,
 			'patient': patient
-		}, order_by='signs_date signs_time')
+		}, order_by='signs_date, signs_time')
 
 	if len(vitals):
 		return vitals

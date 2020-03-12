@@ -108,8 +108,8 @@ frappe.ui.form.on('Patient Appointment', {
 			}, __('Create'));
 		}
 
-		frappe.db.get_value('Healthcare Settings', {name: 'Healthcare Settings'}, 'automate_appointment_invoicing', (settings) => {
-			if (settings.automate_appointment_invoicing) {
+		frappe.db.get_value('Healthcare Settings', {name: 'Healthcare Settings'}, ['automate_appointment_invoicing'], (settings) => {
+			if (settings.automate_appointment_invoicing == 1) {
 				frm.set_df_property('mode_of_payment', 'hidden', 0);
 				frm.set_df_property('paid_amount', 'hidden', 0);
 				frm.set_df_property('mode_of_payment', 'reqd', 1);
