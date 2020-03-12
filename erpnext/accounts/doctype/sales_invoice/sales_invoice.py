@@ -1230,7 +1230,7 @@ class SalesInvoice(SellingController):
 
 		discounting_status = None
 		if self.is_discounted:
-			discountng_status = self.get_discounting_status()
+			discountng_status = get_discounting_status()
 
 		if not status:
 			if self.docstatus == 2:
