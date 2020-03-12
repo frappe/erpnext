@@ -432,11 +432,12 @@ def get_procedure_prescribed(patient):
 	where ct.patient='{0}' and pp.parent=ct.name and pp.appointment_booked=0
 	order by ct.creation desc""".format(patient))
 
+
 def update_appointment_status():
 	# update the status of appointments daily
+	appointments = frappe.get_all('Patient Appointment', {
+		'status': ('not in', ['Closed', 'Cancelled'])
+	}, as_dict=1)
 
-	frappe.db.sql("""update `tabPatient Appointment` set status = 'Open'
-		where appointment_date = CURDATE() and status = 'Scheduled'""")
-
-	frappe.db.sql("""update `tabPatient Appointment` set status = 'Expired'
-		where appointment_date < CURDATE() and status NOT IN ('Closed', 'Cancelled')""")
+	for appointment in appointments:
+		frappe.get_doc('Patient Appointment', appointment.name).set_status()
