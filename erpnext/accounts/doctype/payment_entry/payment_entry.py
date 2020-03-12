@@ -195,10 +195,10 @@ class PaymentEntry(AccountsController):
 
 	def validate_bank_accounts(self):
 		if self.payment_type in ("Pay", "Internal Transfer"):
-			self.validate_account_type(self.paid_from, ["Bank", "Cash", "Loan"], raise_exception=False)
+			self.validate_account_type(self.paid_from, ["Bank", "Cash", "Loan", "Equity"], raise_exception=False)
 
 		if self.payment_type in ("Receive", "Internal Transfer"):
-			self.validate_account_type(self.paid_to, ["Bank", "Cash", "Loan"], raise_exception=False)
+			self.validate_account_type(self.paid_to, ["Bank", "Cash", "Loan", "Equity"], raise_exception=False)
 
 	def validate_account_type(self, account, account_types, raise_exception=True):
 		account_type = frappe.db.get_value("Account", account, "account_type")

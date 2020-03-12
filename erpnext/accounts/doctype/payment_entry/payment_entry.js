@@ -13,7 +13,7 @@ frappe.ui.form.on('Payment Entry', {
 	setup: function(frm) {
 		frm.set_query("paid_from", function() {
 			var account_types = in_list(["Pay", "Internal Transfer"], frm.doc.payment_type) ?
-				["Bank", "Cash", "Loan"] : [frappe.boot.party_account_types[frm.doc.party_type]];
+				["Bank", "Cash", "Loan", "Equity"] : [frappe.boot.party_account_types[frm.doc.party_type]];
 
 			return {
 				filters: {
@@ -57,7 +57,7 @@ frappe.ui.form.on('Payment Entry', {
 		});
 		frm.set_query("paid_to", function() {
 			var account_types = in_list(["Receive", "Internal Transfer"], frm.doc.payment_type) ?
-				["Bank", "Cash", "Loan"] : [frappe.boot.party_account_types[frm.doc.party_type]];
+				["Bank", "Cash", "Loan", "Equity"] : [frappe.boot.party_account_types[frm.doc.party_type]];
 
 			return {
 				filters: {
