@@ -74,6 +74,7 @@
   {
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Status",
    "options": "Scheduled\nPosted"
   },
@@ -90,7 +91,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-09 15:51:20.366278",
+ "modified": "2020-03-11 17:37:03.758672",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Social Media Post",

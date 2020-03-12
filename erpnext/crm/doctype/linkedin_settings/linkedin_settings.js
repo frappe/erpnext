@@ -11,7 +11,7 @@ frappe.ui.form.on('LinkedIn Settings', {
 			doc: frm.doc,
 			method: "get_authorization_url",
 			callback : function(r) {
-				window.open(r.message).focus();
+				window.location.href = r.message;
 			}
 		});
 	}
