@@ -234,6 +234,42 @@ class TestJournalEntry(unittest.TestCase):
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
+	def test_jv_with_project(self):
+		from erpnext.projects.doctype.project.test_project import make_project
+		project = make_project({
+			'project_name': 'Journal Entry Project',
+			'project_template_name': 'Test Project Template',
+			'start_date': '2020-01-01'
+		})
+
+		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, save=False)
+		for d in jv.accounts:
+			d.project = project.project_name
+		jv.voucher_type = "Bank Entry"
+		jv.multi_currency = 0
+		jv.cheque_no = "112233"
+		jv.cheque_date = nowdate()
+		jv.insert()
+		jv.submit()
+
+		expected_values = {
+			"_Test Cash - _TC": {
+				"project": project.project_name
+			},
+			"_Test Bank - _TC": {
+				"project": project.project_name
+			}
+		}
+
+		gl_entries = frappe.db.sql("""select account, project, debit, credit
+			from `tabGL Entry` where voucher_type='Journal Entry' and voucher_no=%s
+			order by account asc""", jv.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account]["project"], gle.project)
+
 	def test_jv_account_and_party_balance_with_cost_centre(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.utils import get_balance_on
