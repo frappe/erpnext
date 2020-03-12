@@ -68,6 +68,7 @@
   "warehouse_and_reference",
   "warehouse",
   "rejected_warehouse",
+  "from_warehouse",
   "purchase_order",
   "material_request",
   "column_break_40",
@@ -815,10 +816,17 @@
    "fetch_from": "item_code.asset_category",
    "fieldname": "asset_category",
    "fieldtype": "Link",
-   "in_preview": 1,
    "label": "Asset Category",
    "options": "Asset Category",
    "read_only": 1
+  },
+  {
+   "fieldname": "from_warehouse",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "ignore_user_permissions": 1,
+   "label": "Supplier Warehouse",
+   "options": "Warehouse"
   }
  ],
  "idx": 1,
