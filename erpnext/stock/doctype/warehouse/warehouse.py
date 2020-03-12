@@ -177,10 +177,10 @@ def convert_to_group_or_ledger():
 	return frappe.get_doc("Warehouse", args.docname).convert_to_group_or_ledger()
 
 def get_child_warehouses(warehouse):
-	lft, rgt = frappe.get_cached_value("Warehouse", warehouse, [lft, rgt])
+	lft, rgt = frappe.get_cached_value("Warehouse", warehouse, ["lft", "rgt"])
 
 	return frappe.db.sql_list("""select name from `tabWarehouse`
-		where lft >= %s and rgt =< %s""", (lft, rgt))
+		where lft >= %s and rgt <= %s""", (lft, rgt))
 
 def get_warehouses_based_on_account(account, company=None):
 	warehouses = []

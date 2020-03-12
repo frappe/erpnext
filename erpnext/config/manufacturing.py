@@ -120,6 +120,12 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Production Planning Report",
+					"doctype": "Work Order"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Open Work Orders",
 					"doctype": "Work Order"
 				},

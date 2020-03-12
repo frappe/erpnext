@@ -49,6 +49,8 @@
   "dimension_col_break",
   "cost_center",
   "section_break_37",
+  "bom_no",
+  "section_break_46",
   "page_break"
  ],
  "fields": [
@@ -367,8 +369,10 @@
    "label": "Image"
   },
   {
+   "depends_on": "eval:parent.material_request_type == \"Manufacture\"",
    "fieldname": "section_break_37",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Manufacturing"
   },
   {
    "fieldname": "received_qty",
@@ -407,6 +411,18 @@
    "fieldname": "manufacturer_part_no",
    "fieldtype": "Data",
    "label": "Manufacturer Part Number"
+  },
+  {
+   "fieldname": "bom_no",
+   "fieldtype": "Link",
+   "label": "BOM No",
+   "no_copy": 1,
+   "options": "BOM",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "section_break_46",
+   "fieldtype": "Section Break"
   }
  ],
  "idx": 1,
