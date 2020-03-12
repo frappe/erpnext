@@ -840,7 +840,45 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+	
+	def test_purchase_invoice_with_project_link(self):
+		from erpnext.projects.doctype.project.test_project import make_project
 
+		project = make_project({
+			'project_name': 'Purchase Invoice Project',
+			'project_template_name': 'Test Project Template',
+			'start_date': '2020-01-01'
+		})
+		item_project = make_project({
+			'project_name': 'Purchase Invoice Item Project',
+			'project_template_name': 'Test Project Template',
+			'start_date': '2019-06-01'
+		})
+
+		pi = make_purchase_invoice(credit_to="Creditors - _TC" ,do_not_save=1)
+		pi.items[0].project = item_project.project_name
+		pi.project = project.project_name
+
+		pi.submit()
+
+		expected_values = {
+			"Creditors - _TC": {
+				"project": project.project_name
+			},
+			"_Test Account Cost for Goods Sold - _TC": {
+				"project": item_project.project_name
+			}
+		}
+
+		gl_entries = frappe.db.sql("""select account, cost_center, project, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
+			order by account asc""", pi.name, as_dict=1)
+		
+		self.assertTrue(gl_entries)
+		
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account]["project"], gle.project)
 
 def unlink_payment_on_cancel_of_invoice(enable=1):
 	accounts_settings = frappe.get_doc("Accounts Settings")
