@@ -63,7 +63,10 @@ class TwitterSettings(Document):
 
 	def send_tweet(self, text, media_id=None):
 		api = self.get_api() 
-		r = api.update_status(status = text, media_ids = [media_id])
+		if media_id:
+			r = api.update_status(status = text, media_ids = [media_id])
+		else:
+			r = api.update_status(status = text)
 
 @frappe.whitelist()
 def callback(oauth_token, oauth_verifier):

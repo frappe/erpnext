@@ -18,20 +18,32 @@ class SocialMediaPost(Document):
 	def post(self):
 		if self.twitter:
 			twitter = frappe.get_doc("Twitter Settings")
-			twitter.post(self.text, self.image)
+			try:
+				twitter.post(self.text, self.image)
+			except:
+				title = _("Error while sharing {0}").format(self.name)
+				traceback = frappe.get_traceback()
+				frappe.log_error(message=traceback , title=title)
 
 		if self.linkedin:
 			linkedin = frappe.get_doc("LinkedIn Settings")
-			linkedin.post(self.text, self.image)
+			try:
+				linkedin.post(self.text, self.image)
+			except:
+				title = _("Error while tweet {0}").format(self.name)
+				traceback = frappe.get_traceback()
+				frappe.log_error(message=traceback , title=title)
+
 		
 		self.status = "Posted"
 
 def process_scheduled_social_media_posts():
 	import datetime
-	posts = frappe.get_list("Social Media Post", filters={"status": "Scheduled"}, fields= ["name", "scheduled_time"])
+	posts = frappe.get_list("Social Media Post", filters={"status": "Scheduled"}, fields= ["name", "sheduled_time"])
 	start = frappe.utils.now_datetime()
 	end = start + datetime.timedelta(minutes=59)
 	for post in posts:
 		post_time = frappe.utils.get_datetime(post.scheduled_time)
 		if post_time > start and post_time <= end:
+			post = frappe.get_doc('Social Media Post',post['name'])
 			post.post()

@@ -11,7 +11,7 @@ import requests
 import json
 from frappe.utils.file_manager import get_file, get_file_path
 import urllib
-
+from frappe.utils import get_url_to_form
 class LinkedInSettings(Document):
 	def get_authorization_url(self):
 		try:
@@ -22,8 +22,8 @@ class LinkedInSettings(Document):
 			"response_type":"code",
 			"client_id": self.consumer_key,
 			"redirect_uri": get_site_url(frappe.local.site) + "/?cmd=erpnext.crm.doctype.linkedin_settings.linkedin_settings.callback",
-			"scope": "w_member_social r_liteprofile r_emailaddress"
-		},)
+			"scope": "r_liteprofile r_emailaddress w_member_social"
+		})
 
 		url = "https://www.linkedin.com/oauth/v2/authorization?{}".format(params)
 
@@ -53,7 +53,6 @@ class LinkedInSettings(Document):
 		self.get_member_profile()
 
 	def get_member_profile(self):
-
 		headers = {
 			"Authorization": "Bearer {}".format(self.access_token)
 		}
@@ -63,9 +62,8 @@ class LinkedInSettings(Document):
 		self.person_urn = response["id"]
 		self.save()
 		frappe.local.response["type"] = "redirect"
-		frappe.local.response["location"] = "/desk#Form/{0}".format("LinkedIn Settings")
-
-		frappe.msgprint(_("LinkedIn Settings has been configured."))
+		frappe.local.response["location"] = get_url_to_form("LinkedIn Settings","LinkedIn Settings")
+		frappe.local.response["message"] = "LinkedIn Settings has been configured."
 
 	def post(self, text, media=None):
 		if not media:
@@ -158,8 +156,7 @@ class LinkedInSettings(Document):
 					"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
 				}
 			}
-
-		response = self.http_post(url, headers, body)
+		response = self.http_post(url=url, headers=headers, body=body)
 		return response
 
 	def http_post(self, url, headers=None, body=None, data=None):
@@ -171,7 +168,6 @@ class LinkedInSettings(Document):
 				headers = headers
 			)
 			response.raise_for_status()
-
 		except Exception as e:
 			frappe.throw(e)
 		return response
@@ -183,4 +179,7 @@ def callback(code=None, error=None, error_description=None):
 		linkedin_settings.oauth_code = code
 		linkedin_settings.save()
 		linkedin_settings.get_access_token()
-		frappe.db.commit()
+	else:
+		frappe.local.response["message"] = error
+		frappe.local.response["type"] = "redirect"
+		frappe.local.response["location"] = get_url_to_form("LinkedIn Settings","LinkedIn Settings")
