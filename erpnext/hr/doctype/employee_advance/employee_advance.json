@@ -165,6 +165,7 @@
    "options": "Mode of Payment"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "return_amount",
    "fieldtype": "Currency",
    "label": "Returned Amount",
@@ -180,7 +181,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-05 16:31:50.417539",
+ "modified": "2020-03-06 15:11:33.747535",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Advance",

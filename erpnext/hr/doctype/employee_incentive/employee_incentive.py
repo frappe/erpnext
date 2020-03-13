@@ -9,27 +9,13 @@ from frappe.model.document import Document
 class EmployeeIncentive(Document):
 	def on_submit(self):
 		company = frappe.db.get_value('Employee', self.employee, 'company')
-		additional_salary = frappe.db.exists('Additional Salary', {
-				'employee': self.employee,
-				'ref_doctype': self.doctype,
-				'ref_docname': self.name,
-				'salary_component': self.salary_component,
-				'payroll_date': self.payroll_date,
-				'company': company,
-				'docstatus': ["!=", 2]
-			})
 
-		if not additional_salary:
-			additional_salary = frappe.new_doc('Additional Salary')
-			additional_salary.employee = self.employee
-			additional_salary.salary_component = self.salary_component
-			additional_salary.amount = self.incentive_amount
-			additional_salary.payroll_date = self.payroll_date
-			additional_salary.company = company
-			additional_salary.ref_doctype = self.doctype
-			additional_salary.ref_docname = self.name
-			additional_salary.submit()
-		else:
-			incentive_added = frappe.db.get_value('Additional Salary', additional_salary, 'amount') + self.incentive_amount
-			frappe.db.set_value('Additional Salary', additional_salary, {'amount', incentive_added})
-
+		additional_salary = frappe.new_doc('Additional Salary')
+		additional_salary.employee = self.employee
+		additional_salary.salary_component = self.salary_component
+		additional_salary.amount = self.incentive_amount
+		additional_salary.payroll_date = self.payroll_date
+		additional_salary.company = company
+		additional_salary.ref_doctype = self.doctype
+		additional_salary.ref_docname = self.name
+		additional_salary.submit()
