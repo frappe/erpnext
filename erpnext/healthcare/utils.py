@@ -72,13 +72,12 @@ def get_fee_validity(patient_appointments):
 			if not practitioner_exist_in_list:
 				valid_till = appointment.appointment_date + datetime.timedelta(days=int(valid_days))
 				visits = 0
-				validity = check_validity_exists(appointment.practitioner, appointment.patient)
-				if validity:
-					fee_validity = frappe.get_doc('Fee Validity', validity)
+				fee_validity = check_fee_validity(appointment)
+				if fee_validity:
 					valid_till = fee_validity.valid_till
 					visits = fee_validity.visited
-				fee_validity_details.append({'practitioner': appointment.practitioner,
-				'valid_till': valid_till, 'visits': visits})
+					fee_validity_details.append({'practitioner': appointment.practitioner,
+					'valid_till': valid_till, 'visits': visits})
 
 			if not skip_invoice:
 				practitioner_charge = 0
@@ -347,32 +346,39 @@ def manage_prescriptions(invoiced, ref_dt, ref_dn, dt, created_check_field):
 		frappe.db.set_value(dt, doc_created, 'invoiced', invoiced)
 
 
-def check_validity_exists(practitioner, patient):
-	return frappe.db.get_value('Fee Validity', {'practitioner': practitioner, 'patient': patient}, 'name')
+def check_fee_validity(appointment):
+	validity = frappe.db.exists('Fee Validity', {
+		'practitioner': appointment.practitioner,
+		'patient': appointment.patient
+	})
+	if not validity:
+		return
+
+	fee_validity = frappe.get_doc('Fee Validity', validity)
+	appointment_date = getdate(appointment.appointment_date)
+	if fee_validity.valid_till >= appointment_date and fee_validity.visited < fee_validity.max_visits:
+		return fee_validity
 
 
 def manage_fee_validity(appointment_name, method, ref_invoice=None):
 	appointment_doc = frappe.get_doc('Patient Appointment', appointment_name)
-	validity = check_validity_exists(appointment_doc.practitioner, appointment_doc.patient)
+	fee_validity = check_fee_validity(appointment_doc)
 	do_not_update = False
 	visited = 0
-	if validity:
-		fee_validity = frappe.get_doc('Fee Validity', validity)
-		# Check if the validity is valid
-		if fee_validity.valid_till >= appointment_doc.appointment_date:
-			if method == 'on_cancel' and appointment_doc.status != 'Closed':
-				if ref_invoice == fee_validity.ref_invoice:
-					visited = fee_validity.visited - 1
-					if visited < 0:
-						visited = 0
-					frappe.db.set_value('Fee Validity', fee_validity.name, 'visited', visited)
-				do_not_update = True
-			elif method == 'on_submit' and fee_validity.visited < fee_validity.max_visits:
-				visited = fee_validity.visited + 1
+	if fee_validity:
+		if method == 'on_cancel' and appointment_doc.status != 'Closed':
+			if ref_invoice == fee_validity.ref_invoice:
+				visited = fee_validity.visited - 1
+				if visited < 0:
+					visited = 0
 				frappe.db.set_value('Fee Validity', fee_validity.name, 'visited', visited)
-				do_not_update = True
-			else:
-				do_not_update = False
+			do_not_update = True
+		elif method == 'on_submit' and fee_validity.visited < fee_validity.max_visits:
+			visited = fee_validity.visited + 1
+			frappe.db.set_value('Fee Validity', fee_validity.name, 'visited', visited)
+			do_not_update = True
+		else:
+			do_not_update = False
 
 		if not do_not_update:
 			fee_validity = update_fee_validity(fee_validity, appointment_doc.appointment_date, ref_invoice)

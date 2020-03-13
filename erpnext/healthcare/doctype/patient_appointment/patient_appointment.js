@@ -108,6 +108,14 @@ frappe.ui.form.on('Patient Appointment', {
 			}, __('Create'));
 		}
 
+		frm.events.toggle_payment_fields(frm);
+	},
+
+	get_procedure_from_encounter: function(frm) {
+		get_prescribed_procedure(frm);
+	},
+
+	toggle_payment_fields: function(frm) {
 		frappe.db.get_value('Healthcare Settings', {name: 'Healthcare Settings'}, ['automate_appointment_invoicing'], (settings) => {
 			if (settings.automate_appointment_invoicing == 1) {
 				frm.set_df_property('mode_of_payment', 'hidden', 0);
@@ -121,10 +129,6 @@ frappe.ui.form.on('Patient Appointment', {
 				frm.set_df_property('paid_amount', 'reqd', 0);
 			}
 		});
-	},
-
-	get_procedure_from_encounter: function(frm) {
-		get_prescribed_procedure(frm);
 	}
 });
 
