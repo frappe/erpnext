@@ -75,7 +75,7 @@ class ShiftType(Document):
 		for date in dates:
 			shift_details = get_employee_shift(employee, date, True)
 			if shift_details and shift_details.shift_type.name == self.name:
-				mark_attendance(employee, date, self.name, 'Absent')
+				mark_attendance(employee, date, 'Absent', self.name)
 
 	def get_assigned_employee(self, from_date=None, consider_default_shift=False):
 		filters = {'date':('>=', from_date), 'shift_type': self.name, 'docstatus': '1'}
