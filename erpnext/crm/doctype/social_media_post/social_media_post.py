@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe import _
 
 class SocialMediaPost(Document):
 	def submit(self):
@@ -35,7 +36,8 @@ class SocialMediaPost(Document):
 				frappe.log_error(message=traceback , title=title)
 
 		
-		self.status = "Posted"
+		self.post_status = "Posted"
+		self.save()
 
 def process_scheduled_social_media_posts():
 	import datetime
