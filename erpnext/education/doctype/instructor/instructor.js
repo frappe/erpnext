@@ -12,7 +12,6 @@ frappe.ui.form.on("Instructor", {
 					}
 				};
 			});
-
 			frm.set_query("department", "instructor_log", function() {
 				return {
 					"filters": {
@@ -49,5 +48,12 @@ frappe.ui.form.on("Instructor", {
 				frappe.set_route("List", "Assessment Plan");
 			}, __("Assessment Plan"));
 		}
+		frm.set_query("employee", function(doc) {
+			return {
+				"filters": {
+					"department": doc.department,
+				}
+			};
+		});
 	}
 });

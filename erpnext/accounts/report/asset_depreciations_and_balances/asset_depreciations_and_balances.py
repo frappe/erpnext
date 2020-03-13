@@ -29,7 +29,7 @@ def get_data(filters):
 
 		row.update(next(asset for asset in assets if asset["asset_category"] == asset_category.get("asset_category", "")))
 		row.accumulated_depreciation_as_on_to_date = (flt(row.accumulated_depreciation_as_on_from_date) +
-				flt(row.depreciation_amount_during_the_period) - flt(row.depreciation_eliminated))
+				flt(row.depreciation_amount_during_the_period) - flt(row.depreciation_eliminated_during_the_period))
 
 		row.net_asset_value_as_on_from_date = (flt(row.cost_as_on_from_date) -
 				flt(row.accumulated_depreciation_as_on_from_date))
@@ -86,7 +86,6 @@ def get_asset_categories(filters):
 		group by asset_category
 	""", {"to_date": filters.to_date, "from_date": filters.from_date, "company": filters.company}, as_dict=1)
 
-
 def get_assets(filters):
 	return frappe.db.sql("""
 		SELECT results.asset_category,
@@ -94,9 +93,7 @@ def get_assets(filters):
 			   sum(results.depreciation_eliminated_during_the_period) as depreciation_eliminated_during_the_period,
 			   sum(results.depreciation_amount_during_the_period) as depreciation_amount_during_the_period
 		from (SELECT a.asset_category,
-				   ifnull(sum(a.opening_accumulated_depreciation +
-							  case when ds.schedule_date < %(from_date)s and
-										(ifnull(a.disposal_date, 0) = 0 or a.disposal_date >= %(from_date)s) then
+				   ifnull(sum(case when ds.schedule_date < %(from_date)s then
 								   ds.depreciation_amount
 							  else
 								   0
@@ -107,7 +104,6 @@ def get_assets(filters):
 							  else
 								   0
 							  end), 0) as depreciation_eliminated_during_the_period,
-
 				   ifnull(sum(case when ds.schedule_date >= %(from_date)s and ds.schedule_date <= %(to_date)s
 										and (ifnull(a.disposal_date, 0) = 0 or ds.schedule_date <= a.disposal_date) then
 								   ds.depreciation_amount
@@ -120,7 +116,8 @@ def get_assets(filters):
 			union
 			SELECT a.asset_category,
 				   ifnull(sum(case when ifnull(a.disposal_date, 0) != 0
-										and (a.disposal_date < %(from_date)s or a.disposal_date > %(to_date)s) then
+										and (a.disposal_date < %(from_date)s or a.disposal_date > %(to_date)s) 
+										then
 									0
 							   else
 									a.opening_accumulated_depreciation
@@ -133,7 +130,6 @@ def get_assets(filters):
 				   0 as depreciation_amount_during_the_period
 			from `tabAsset` a
 			where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s
-			and not exists(select * from `tabDepreciation Schedule` ds where a.name = ds.parent)
 			group by a.asset_category) as results
 		group by results.asset_category
 		""", {"to_date": filters.to_date, "from_date": filters.from_date, "company": filters.company}, as_dict=1)

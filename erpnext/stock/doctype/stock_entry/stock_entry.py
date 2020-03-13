@@ -110,6 +110,7 @@ class StockEntry(StockController):
 		self.update_cost_in_project()
 		self.update_transferred_qty()
 		self.update_quality_inspection()
+		self.delete_auto_created_batches()
 
 	def set_job_card_data(self):
 		if self.job_card and not self.work_order:
@@ -484,7 +485,7 @@ class StockEntry(StockController):
 					if self.work_order \
 						and frappe.db.get_single_value("Manufacturing Settings", "material_consumption"):
 						bom_items = self.get_bom_raw_materials(d.transfer_qty)
-						raw_material_cost = sum([flt(d.qty)*flt(d.rate) for d in bom_items.values()])
+						raw_material_cost = sum([flt(row.qty)*flt(row.rate) for row in bom_items.values()])
 
 					if raw_material_cost:
 						d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
@@ -614,7 +615,7 @@ class StockEntry(StockController):
 		if self.work_order and self.purpose == "Manufacture":
 			allowed_qty = wo_qty + (allowance_percentage/100 * wo_qty)
 			if self.fg_completed_qty > allowed_qty:
-				frappe.throw(_("For quantity {0} should not be grater than work order quantity {1}")
+				frappe.throw(_("For quantity {0} should not be greater than work order quantity {1}")
 					.format(flt(self.fg_completed_qty), wo_qty))
 
 			if production_item not in items_with_target_warehouse:
@@ -682,6 +683,8 @@ class StockEntry(StockController):
 		if item_account_wise_additional_cost:
 			for d in self.get("items"):
 				for account, amount in iteritems(item_account_wise_additional_cost.get((d.item_code, d.name), {})):
+					if not amount: continue
+
 					gl_entries.append(self.get_gl_dict({
 						"account": account,
 						"against": d.expense_account,
@@ -754,7 +757,8 @@ class StockEntry(StockController):
 			'serial_no'				: '',
 			'has_serial_no'			: item.has_serial_no,
 			'has_batch_no'			: item.has_batch_no,
-			'sample_quantity'		: item.sample_quantity
+			'sample_quantity'		: item.sample_quantity,
+			'expense_account'		: item.expense_account
 		})
 
 		# update uom
@@ -1051,7 +1055,7 @@ class StockEntry(StockController):
 			req_qty_each = flt(req_qty / manufacturing_qty)
 			consumed_qty = flt(req_items[0].consumed_qty)
 
-			if trans_qty and manufacturing_qty >= (produced_qty + flt(self.fg_completed_qty)):
+			if trans_qty and manufacturing_qty > (produced_qty + flt(self.fg_completed_qty)):
 				if qty >= req_qty:
 					qty = (req_qty/trans_qty) * flt(self.fg_completed_qty)
 				else:
@@ -1401,8 +1405,7 @@ def get_work_order_details(work_order, company):
 		"use_multi_level_bom": work_order.use_multi_level_bom,
 		"wip_warehouse": work_order.wip_warehouse,
 		"fg_warehouse": work_order.fg_warehouse,
-		"fg_completed_qty": pending_qty_to_produce,
-		"additional_costs": get_additional_costs(work_order, fg_qty=pending_qty_to_produce, company=company)
+		"fg_completed_qty": pending_qty_to_produce
 	}
 
 def get_operating_cost_per_unit(work_order=None, bom_no=None):

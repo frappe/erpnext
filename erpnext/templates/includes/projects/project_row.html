@@ -1,6 +1,6 @@
 {% if doc.status=="Open" %}
 <div class="web-list-item">
-	<a class="no-decoration" href="/projects?project={{ doc.name }}">
+	<a class="no-decoration" href="/projects?project={{ doc.name | urlencode }}">
 		<div class="row">
 			<div class="col-xs-6">
 

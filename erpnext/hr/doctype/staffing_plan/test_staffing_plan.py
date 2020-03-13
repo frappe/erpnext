@@ -14,7 +14,7 @@ test_dependencies = ["Designation"]
 class TestStaffingPlan(unittest.TestCase):
 	def test_staffing_plan(self):
 		_set_up()
-		frappe.db.set_value("Company", "_Test Company", "is_group", 1)
+		frappe.db.set_value("Company", "_Test Company 3", "is_group", 1)
 		if frappe.db.exists("Staffing Plan", "Test"):
 			return
 		staffing_plan = frappe.new_doc("Staffing Plan")
@@ -36,7 +36,7 @@ class TestStaffingPlan(unittest.TestCase):
 		if frappe.db.exists("Staffing Plan", "Test 1"):
 			return
 		staffing_plan = frappe.new_doc("Staffing Plan")
-		staffing_plan.company = "_Test Company"
+		staffing_plan.company = "_Test Company 3"
 		staffing_plan.name = "Test 1"
 		staffing_plan.from_date = nowdate()
 		staffing_plan.to_date = add_days(nowdate(), 10)
@@ -52,7 +52,7 @@ class TestStaffingPlan(unittest.TestCase):
 		if frappe.db.exists("Staffing Plan", "Test"):
 			return
 		staffing_plan = frappe.new_doc("Staffing Plan")
-		staffing_plan.company = "_Test Company"
+		staffing_plan.company = "_Test Company 3"
 		staffing_plan.name = "Test"
 		staffing_plan.from_date = nowdate()
 		staffing_plan.to_date = add_days(nowdate(), 10)
@@ -87,10 +87,11 @@ def _set_up():
 def make_company():
 	if frappe.db.exists("Company", "_Test Company 10"):
 		return
+
 	company = frappe.new_doc("Company")
 	company.company_name = "_Test Company 10"
 	company.abbr = "_TC10"
-	company.parent_company = "_Test Company"
+	company.parent_company = "_Test Company 3"
 	company.default_currency = "INR"
 	company.country = "Pakistan"
 	company.insert()
