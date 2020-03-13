@@ -54,8 +54,8 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			'description': d.description,
 			'invoice': d.parent,
 			'posting_date': d.posting_date,
-			'customer': d.supplier,
-			'customer_name': d.supplier_name
+			'supplier': d.supplier,
+			'supplier_name': d.supplier_name
 		}
 
 		if additional_query_columns:
@@ -306,10 +306,6 @@ def get_conditions(filters):
 
 def get_items(filters, additional_query_columns):
 	conditions = get_conditions(filters)
-	match_conditions = frappe.build_match_conditions("Purchase Invoice")
-
-	if match_conditions:
-		match_conditions = " and {0} ".format(match_conditions)
 
 	if additional_query_columns:
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
@@ -327,8 +323,8 @@ def get_items(filters, additional_query_columns):
 			`tabPurchase Invoice`.supplier_name, `tabPurchase Invoice`.mode_of_payment {0}
 		from `tabPurchase Invoice`, `tabPurchase Invoice Item`
 		where `tabPurchase Invoice`.name = `tabPurchase Invoice Item`.`parent` and
-		`tabPurchase Invoice`.docstatus = 1 %s %s
-	""".format(additional_query_columns) % (conditions, match_conditions), filters, as_dict=1)
+		`tabPurchase Invoice`.docstatus = 1 %s
+	""".format(additional_query_columns) % (conditions), filters, as_dict=1)
 
 def get_aii_accounts():
 	return dict(frappe.db.sql("select name, stock_received_but_not_billed from tabCompany"))

@@ -1,0 +1,56 @@
+{
+ "cards": [
+  {
+   "links": "[\n    {\n        \"description\": \"Quality Goal.\",\n        \"label\": \"Quality Goal\",\n        \"name\": \"Quality Goal\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Quality Procedure.\",\n        \"label\": \"Quality Procedure\",\n        \"name\": \"Quality Procedure\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Tree of Quality Procedures.\",\n        \"icon\": \"fa fa-sitemap\",\n        \"label\": \"Tree of Procedures\",\n        \"name\": \"Quality Procedure\",\n        \"route\": \"#Tree/Quality Procedure\",\n        \"type\": \"doctype\"\n    }\n]",
+   "title": "Goal and Procedure"
+  },
+  {
+   "links": "[\n    {\n        \"description\": \"Quality Feedback\",\n        \"label\": \"Quality Feedback\",\n        \"name\": \"Quality Feedback\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Quality Feedback Template\",\n        \"label\": \"Quality Feedback Template\",\n        \"name\": \"Quality Feedback Template\",\n        \"type\": \"doctype\"\n    }\n]",
+   "title": "Feedback"
+  },
+  {
+   "links": "[\n    {\n        \"description\": \"Quality Meeting\",\n        \"label\": \"Quality Meeting\",\n        \"name\": \"Quality Meeting\",\n        \"type\": \"doctype\"\n    }\n]",
+   "title": "Meeting"
+  },
+  {
+   "links": "[\n    {\n        \"description\": \"Quality Review\",\n        \"label\": \"Quality Review\",\n        \"name\": \"Quality Review\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Quality Action\",\n        \"label\": \"Quality Action\",\n        \"name\": \"Quality Action\",\n        \"type\": \"doctype\"\n    }\n]",
+   "title": "Review and Action"
+  }
+ ],
+ "category": "Modules",
+ "charts": [],
+ "creation": "2020-03-02 15:49:28.632014",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "docstatus": 0,
+ "doctype": "Desk Page",
+ "extends_another_page": 0,
+ "icon": "",
+ "idx": 0,
+ "is_standard": 1,
+ "label": "Quality",
+ "modified": "2020-03-12 16:30:39.093081",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": [
+  {
+   "is_query_report": 0,
+   "link_to": "Quality Goal",
+   "type": "DocType"
+  },
+  {
+   "is_query_report": 0,
+   "link_to": "Quality Procedure",
+   "type": "DocType"
+  },
+  {
+   "is_query_report": 0,
+   "link_to": "Quality Inspection",
+   "type": "DocType"
+  }
+ ]
+}

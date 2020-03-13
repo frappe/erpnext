@@ -76,7 +76,7 @@ def get_data(filters, leave_types):
 				opening = get_leave_balance_on(employee.name, leave_type, filters.from_date)
 
 				# closing balance
-				closing = get_leave_balance_on(employee.name, leave_type, filters.to_date)
+				closing = max(opening - leaves_taken, 0)
 
 				row += [opening, leaves_taken, closing]
 
