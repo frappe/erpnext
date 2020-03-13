@@ -58,7 +58,7 @@ class AccountsController(TransactionBase):
 					(is_supplier_payment and supplier.hold_type in ['All', 'Payments']):
 				if not supplier.release_date or getdate(nowdate()) <= supplier.release_date:
 					frappe.msgprint(
-						_('{0} is blocked so this transaction cannot proceed'.format(supplier_name)), raise_exception=1)
+						_('{0} is blocked so this transaction cannot proceed').format(supplier_name), raise_exception=1)
 
 	def validate(self):
 		if not self.get('is_return'):
@@ -926,7 +926,7 @@ def validate_taxes_and_charges(tax):
 			frappe.throw(
 				_("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"))
 		elif not tax.row_id:
-			frappe.throw(_("Please specify a valid Row ID for row {0} in table {1}".format(tax.idx, _(tax.doctype))))
+			frappe.throw(_("Please specify a valid Row ID for row {0} in table {1}").format(tax.idx, _(tax.doctype)))
 		elif tax.row_id and cint(tax.row_id) >= cint(tax.idx):
 			frappe.throw(_("Cannot refer row number greater than or equal to current row number for this Charge type"))
 
@@ -1135,6 +1135,7 @@ def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname,
 	child_item.reqd_by_date = p_doctype.delivery_date
 	child_item.uom = item.stock_uom
 	child_item.conversion_factor = get_conversion_factor(item_code, item.stock_uom).get("conversion_factor") or 1.0
+	child_item.warehouse = p_doctype.set_warehouse or p_doctype.items[0].warehouse
 	return child_item
 
 
@@ -1173,7 +1174,7 @@ def check_and_delete_children(parent, data):
 
 		if parent.doctype == "Purchase Order" and flt(d.received_qty):
 			frappe.throw(_("Row #{0}: Cannot delete item {1} which has already been received").format(d.idx, d.item_code))
-		
+
 		if flt(d.billed_amt):
 			frappe.throw(_("Row #{0}: Cannot delete item {1} which has already been billed.").format(d.idx, d.item_code))
 
@@ -1199,6 +1200,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 				child_item = set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, d.get("item_code"))
 		else:
 			child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
+			if flt(child_item.get("rate")) == flt(d.get("rate")) and flt(child_item.get("qty")) == flt(d.get("qty")):
+				continue
 
 		if parent_doctype == "Sales Order" and flt(d.get("qty")) < flt(child_item.delivered_qty):
 			frappe.throw(_("Cannot set quantity less than delivered quantity"))

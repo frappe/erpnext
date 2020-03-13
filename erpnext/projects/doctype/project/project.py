@@ -188,7 +188,7 @@ class Project(Document):
 	def send_welcome_email(self):
 		url = get_url("/project/?name={0}".format(self.name))
 		messages = (
-			_("You have been invited to collaborate on the project: {0}".format(self.name)),
+			_("You have been invited to collaborate on the project: {0}").format(self.name),
 			url,
 			_("Join")
 		)

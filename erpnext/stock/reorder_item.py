@@ -116,6 +116,8 @@ def create_material_request(material_requests):
 		else:
 			exceptions_list.append(frappe.get_traceback())
 
+		frappe.log_error(frappe.get_traceback())
+
 	for request_type in material_requests:
 		for company in material_requests[request_type]:
 			try:
@@ -158,6 +160,7 @@ def create_material_request(material_requests):
 
 				schedule_dates = [d.schedule_date for d in mr.items]
 				mr.schedule_date = max(schedule_dates or [nowdate()])
+				mr.flags.ignore_mandatory = True
 				mr.insert()
 				mr.submit()
 				mr_list.append(mr)

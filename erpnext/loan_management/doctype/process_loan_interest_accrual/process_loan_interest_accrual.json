@@ -1,0 +1,81 @@
+{
+ "actions": [],
+ "autoname": "LM-PLA-.#####",
+ "creation": "2019-09-19 06:08:12.363640",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "posting_date",
+  "loan_type",
+  "loan",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Process Loan Interest Accrual",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "loan_type",
+   "fieldtype": "Link",
+   "label": "Loan Type",
+   "options": "Loan Type"
+  },
+  {
+   "fieldname": "loan",
+   "fieldtype": "Link",
+   "label": "Loan ",
+   "options": "Loan"
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-02-01 08:14:33.978636",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Process Loan Interest Accrual",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

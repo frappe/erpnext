@@ -25,7 +25,6 @@ class TestSalaryStructure(unittest.TestCase):
 		make_employee("test_employee@salary.com")
 		make_employee("test_employee_2@salary.com")
 
-
 	def make_holiday_list(self):
 		if not frappe.db.get_value("Holiday List", "Salary Structure Test Holiday List"):
 			holiday_list = frappe.get_doc({
@@ -37,6 +36,29 @@ class TestSalaryStructure(unittest.TestCase):
 			}).insert()
 			holiday_list.get_weekly_off_dates()
 			holiday_list.save()
+
+	def test_salary_structure_deduction_based_on_gross_pay(self):
+
+		emp = make_employee("test_employee_3@salary.com")
+
+		sal_struct = make_salary_structure("Salary Structure 2", "Monthly", dont_submit = True)
+
+		sal_struct.earnings = [sal_struct.earnings[0]]
+		sal_struct.earnings[0].amount_based_on_formula = 1
+		sal_struct.earnings[0].formula =  "base"
+
+		sal_struct.deductions = [sal_struct.deductions[0]]
+
+		sal_struct.deductions[0].amount_based_on_formula = 1
+		sal_struct.deductions[0].condition = "gross_pay > 100"
+		sal_struct.deductions[0].formula =  "gross_pay * 0.2"
+
+		sal_struct.submit()
+
+		assignment = create_salary_structure_assignment(emp, "Salary Structure 2")
+		ss = make_salary_slip(sal_struct.name, employee = emp)
+
+		self.assertEqual(assignment.base * 0.2, ss.deductions[0].amount)
 
 	def test_amount_totals(self):
 		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
@@ -86,16 +108,17 @@ class TestSalaryStructure(unittest.TestCase):
 		self.assertEqual(salary_structure_assignment.base, 5000)
 		self.assertEqual(salary_structure_assignment.variable, 200)
 
-def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None, test_tax=False):
+def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None,
+	test_tax=False, company=None):
 	if test_tax:
 		frappe.db.sql("""delete from `tabSalary Structure` where name=%s""",(salary_structure))
 	if not frappe.db.exists('Salary Structure', salary_structure):
 		details = {
 			"doctype": "Salary Structure",
 			"name": salary_structure,
-			"company": erpnext.get_default_company(),
-			"earnings": make_earning_salary_component(test_tax=test_tax),
-			"deductions": make_deduction_salary_component(test_tax=test_tax),
+			"company": company or erpnext.get_default_company(),
+			"earnings": make_earning_salary_component(test_tax=test_tax, company_list=["_Test Company"]),
+			"deductions": make_deduction_salary_component(test_tax=test_tax, company_list=["_Test Company"]),
 			"payroll_frequency": payroll_frequency,
 			"payment_account": get_random("Account")
 		}
@@ -109,11 +132,11 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None, do
 
 	if employee and not frappe.db.get_value("Salary Structure Assignment",
 		{'employee':employee, 'docstatus': 1}) and salary_structure_doc.docstatus==1:
-			create_salary_structure_assignment(employee, salary_structure)
+			create_salary_structure_assignment(employee, salary_structure, company=company)
 
 	return salary_structure_doc
 
-def create_salary_structure_assignment(employee, salary_structure, from_date=None):
+def create_salary_structure_assignment(employee, salary_structure, from_date=None, company=None):
 	if frappe.db.exists("Salary Structure Assignment", {"employee": employee}):
 		frappe.db.sql("""delete from `tabSalary Structure Assignment` where employee=%s""",(employee))
 	salary_structure_assignment = frappe.new_doc("Salary Structure Assignment")
@@ -122,7 +145,7 @@ def create_salary_structure_assignment(employee, salary_structure, from_date=Non
 	salary_structure_assignment.variable = 5000
 	salary_structure_assignment.from_date = from_date or add_months(nowdate(), -1)
 	salary_structure_assignment.salary_structure = salary_structure
-	salary_structure_assignment.company = erpnext.get_default_company()
+	salary_structure_assignment.company = company or erpnext.get_default_company()
 	salary_structure_assignment.save(ignore_permissions=True)
 	salary_structure_assignment.submit()
 	return salary_structure_assignment

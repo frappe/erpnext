@@ -102,7 +102,9 @@ class PaymentEntry(AccountsController):
 
 			self.bank = bank_data.bank
 			self.bank_account_no = bank_data.bank_account_no
-			self.set(field, bank_data.account)
+
+			if not self.get(field):
+				self.set(field, bank_data.account)
 
 	def validate_allocated_amount(self):
 		for d in self.get("references"):
@@ -1003,7 +1005,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 
 	# only Purchase Invoice can be blocked individually
 	if doc.doctype == "Purchase Invoice" and doc.invoice_is_blocked():
-		frappe.msgprint(_('{0} is on hold till {1}'.format(doc.name, doc.release_date)))
+		frappe.msgprint(_('{0} is on hold till {1}').format(doc.name, doc.release_date))
 	else:
 		pe.append("references", {
 			'reference_doctype': dt,

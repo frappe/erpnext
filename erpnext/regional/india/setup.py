@@ -79,9 +79,10 @@ def add_custom_roles_for_reports():
 def add_permissions():
 	for doctype in ('GST HSN Code', 'GST Settings'):
 		add_permission(doctype, 'All', 0)
-		add_permission(doctype, 'Accounts Manager', 0)
-		update_permission_property(doctype, 'Accounts Manager', 0, 'write', 1)
-		update_permission_property(doctype, 'Accounts Manager', 0, 'create', 1)
+		for role in ('Accounts Manager', 'System Manager', 'Item Manager', 'Stock Manager'):
+			add_permission(doctype, role, 0)
+			update_permission_property(doctype, role, 0, 'write', 1)
+			update_permission_property(doctype, role, 0, 'create', 1)
 
 def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
@@ -244,7 +245,16 @@ def make_custom_fields(update=True):
 			'insert_after': 'lr_date',
 			'print_hide': 1,
 			'translatable': 0
-		}
+		},
+		{
+			'fieldname': 'ewaybill',
+			'label': 'E-Way Bill No.',
+			'fieldtype': 'Data',
+			'depends_on': 'eval:(doc.docstatus === 1)',
+			'allow_on_submit': 1,
+			'insert_after': 'customer_name_in_arabic',
+			'translatable': 0,
+    	}
 	]
 
 	si_ewaybill_fields = [
@@ -360,7 +370,7 @@ def make_custom_fields(update=True):
 		},
 		{
 			'fieldname': 'ewaybill',
-			'label': 'e-Way Bill No.',
+			'label': 'E-Way Bill No.',
 			'fieldtype': 'Data',
 			'depends_on': 'eval:(doc.docstatus === 1)',
 			'allow_on_submit': 1,

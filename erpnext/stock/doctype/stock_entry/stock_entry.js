@@ -840,18 +840,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 					if (me.frm.doc.purpose == "Manufacture" || me.frm.doc.purpose == "Material Consumption for Manufacture" ) {
 						if (me.frm.doc.purpose == "Manufacture") {
 							if (!me.frm.doc.to_warehouse) me.frm.set_value("to_warehouse", r.message["fg_warehouse"]);
-							if (r.message["additional_costs"].length) {
-								me.frm.clear_table("additional_costs");
-
-								$.each(r.message["additional_costs"], function(i, row) {
-									me.frm.add_child("additional_costs", row);
-								})
-								refresh_field("additional_costs");
-							}
 						}
 						if (!me.frm.doc.from_warehouse) me.frm.set_value("from_warehouse", r.message["wip_warehouse"]);
 					}
-					me.get_items()
+					me.get_items();
 				}
 			}
 		});

@@ -8,7 +8,7 @@ import datetime
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
-from frappe.utils import (flt, cint, time_diff_in_hours, get_datetime, getdate, 
+from frappe.utils import (flt, cint, time_diff_in_hours, get_datetime, getdate,
 	get_time, add_to_date, time_diff, add_days, get_datetime_str)
 
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
@@ -43,7 +43,7 @@ class JobCard(Document):
 
 	def get_overlap_for(self, args, check_next_available_slot=False):
 		production_capacity = 1
-	
+
 		if self.workstation:
 			production_capacity = frappe.get_cached_value("Workstation",
 				self.workstation, 'production_capacity') or 1
@@ -195,8 +195,8 @@ class JobCard(Document):
 			frappe.throw(_("Total completed qty must be greater than zero"))
 
 		if self.total_completed_qty != self.for_quantity:
-			frappe.throw(_("The total completed qty({0}) must be equal to qty to manufacture({1})"
-				.format(frappe.bold(self.total_completed_qty),frappe.bold(self.for_quantity))))
+			frappe.throw(_("The total completed qty({0}) must be equal to qty to manufacture({1})")
+				.format(frappe.bold(self.total_completed_qty),frappe.bold(self.for_quantity)))
 
 	def update_work_order(self):
 		if not self.work_order:
@@ -372,7 +372,7 @@ def get_job_details(start, end, filters=None):
 	conditions = get_filters_cond("Job Card", filters, [])
 
 	job_cards = frappe.db.sql(""" SELECT `tabJob Card`.name, `tabJob Card`.work_order,
-			`tabJob Card`.employee_name, `tabJob Card`.status, ifnull(`tabJob Card`.remarks, ''), 
+			`tabJob Card`.employee_name, `tabJob Card`.status, ifnull(`tabJob Card`.remarks, ''),
 			min(`tabJob Card Time Log`.from_time) as from_time,
 			max(`tabJob Card Time Log`.to_time) as to_time
 		FROM `tabJob Card` , `tabJob Card Time Log`

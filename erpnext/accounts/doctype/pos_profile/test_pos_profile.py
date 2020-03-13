@@ -29,27 +29,29 @@ class TestPOSProfile(unittest.TestCase):
 
 		frappe.db.sql("delete from `tabPOS Profile`")
 
-def make_pos_profile():
+def make_pos_profile(**args):
 	frappe.db.sql("delete from `tabPOS Profile`")
 
+	args = frappe._dict(args)
+
 	pos_profile = frappe.get_doc({
-		"company": "_Test Company",
-		"cost_center": "_Test Cost Center - _TC",
-		"currency": "INR",
+		"company": args.company or "_Test Company",
+		"cost_center": args.cost_center or "_Test Cost Center - _TC",
+		"currency": args.currency or "INR",
 		"doctype": "POS Profile",
-		"expense_account": "_Test Account Cost for Goods Sold - _TC",
-		"income_account": "Sales - _TC",
-		"name": "_Test POS Profile",
+		"expense_account": args.expense_account or "_Test Account Cost for Goods Sold - _TC",
+		"income_account":  args.income_account or "Sales - _TC",
+		"name":  args.name or "_Test POS Profile",
 		"naming_series": "_T-POS Profile-",
-		"selling_price_list": "_Test Price List",
-		"territory": "_Test Territory",
+		"selling_price_list":  args.selling_price_list or "_Test Price List",
+		"territory": args.territory or  "_Test Territory",
 		"customer_group": frappe.db.get_value('Customer Group', {'is_group': 0}, 'name'),
-		"warehouse": "_Test Warehouse - _TC",
-		"write_off_account": "_Test Write Off - _TC",
-		"write_off_cost_center": "_Test Write Off Cost Center - _TC"
+		"warehouse":  args.warehouse or "_Test Warehouse - _TC",
+		"write_off_account":  args.write_off_account or "_Test Write Off - _TC",
+		"write_off_cost_center":  args.write_off_cost_center or "_Test Write Off Cost Center - _TC"
 	})
 
-	if not frappe.db.exists("POS Profile", "_Test POS Profile"):
+	if not frappe.db.exists("POS Profile", args.name or "_Test POS Profile"):
 		pos_profile.insert()
 
 	return pos_profile

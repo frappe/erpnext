@@ -18,8 +18,8 @@ from erpnext.hr.doctype.employee_tax_exemption_declaration.test_employee_tax_exe
 
 class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
-		make_earning_salary_component(setup=True)
-		make_deduction_salary_component(setup=True)
+		make_earning_salary_component(setup=True, company_list=["_Test Company"])
+		make_deduction_salary_component(setup=True, company_list=["_Test Company"])
 
 		for dt in ["Leave Application", "Leave Allocation", "Salary Slip"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
@@ -50,7 +50,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.deductions[0].amount, 5000)
 		self.assertEqual(ss.deductions[1].amount, 5000)
 		self.assertEqual(ss.gross_pay, 78000)
-		self.assertEqual(ss.net_pay, 67418.0)
+		self.assertEqual(ss.net_pay, 68000.0)
 
 	def test_salary_slip_with_holidays_excluded(self):
 		no_of_days = self.get_no_of_days()
@@ -70,7 +70,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.deductions[0].amount, 5000)
 		self.assertEqual(ss.deductions[1].amount, 5000)
 		self.assertEqual(ss.gross_pay, 78000)
-		self.assertEqual(ss.net_pay, 67418.0)
+		self.assertEqual(ss.net_pay, 68000.0)
 
 	def test_payment_days(self):
 		no_of_days = self.get_no_of_days()
@@ -137,21 +137,41 @@ class TestSalarySlip(unittest.TestCase):
 
 		make_employee("test_employee@salary.com")
 		ss = make_employee_salary_slip("test_employee@salary.com", "Monthly")
+		ss.company = "_Test Company"
+		ss.save()
 		ss.submit()
 
 		email_queue = frappe.db.sql("""select name from `tabEmail Queue`""")
 		self.assertTrue(email_queue)
 
 	def test_loan_repayment_salary_slip(self):
-		from erpnext.hr.doctype.loan.test_loan import create_loan_type, create_loan
-		applicant = make_employee("test_employee@salary.com")
-		create_loan_type("Car Loan", 500000, 6.4)
-		loan = create_loan(applicant, "Car Loan", 11000, "Repay Over Number of Periods", 20)
+		from erpnext.loan_management.doctype.loan.test_loan import create_loan_type, create_loan, make_loan_disbursement_entry, create_loan_accounts
+		from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import make_accrual_interest_entry_for_term_loans
+
+		applicant = make_employee("test_loanemployee@salary.com", company="_Test Company")
+
+		create_loan_accounts()
+
+		create_loan_type("Car Loan", 500000, 8.4,
+			is_term_loan=1,
+			mode_of_payment='Cash',
+			payment_account='Payment Account - _TC',
+			loan_account='Loan Account - _TC',
+			interest_income_account='Interest Income Account - _TC',
+			penalty_income_account='Penalty Income Account - _TC')
+
+		loan = create_loan(applicant, "Car Loan", 11000, "Repay Over Number of Periods", 20, posting_date=add_months(nowdate(), -1))
 		loan.repay_from_salary = 1
 		loan.submit()
-		ss = make_employee_salary_slip("test_employee@salary.com", "Monthly")
+
+		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=add_months(nowdate(), -1))
+
+		make_accrual_interest_entry_for_term_loans(posting_date=nowdate())
+
+		ss = make_employee_salary_slip("test_loanemployee@salary.com", "Monthly")
 		ss.submit()
-		self.assertEqual(ss.total_loan_repayment, 582)
+
+		self.assertEqual(ss.total_loan_repayment, 592)
 		self.assertEqual(ss.net_pay, (flt(ss.gross_pay) - (flt(ss.total_deduction) + flt(ss.total_loan_repayment))))
 
 	def test_payroll_frequency(self):
@@ -321,7 +341,7 @@ def make_employee_salary_slip(user, payroll_frequency, salary_structure=None):
 
 	return salary_slip
 
-def make_salary_component(salary_components, test_tax):
+def make_salary_component(salary_components, test_tax, company_list=None):
 	for salary_component in salary_components:
 		if not frappe.db.exists('Salary Component', salary_component["salary_component"]):
 			if test_tax:
@@ -336,17 +356,22 @@ def make_salary_component(salary_components, test_tax):
 			salary_component["doctype"] = "Salary Component"
 			salary_component["salary_component_abbr"] = salary_component["abbr"]
 			frappe.get_doc(salary_component).insert()
-		get_salary_component_account(salary_component["salary_component"])
+		get_salary_component_account(salary_component["salary_component"], company_list)
 
-def get_salary_component_account(sal_comp):
+def get_salary_component_account(sal_comp, company_list=None):
 	company = erpnext.get_default_company()
+
+	if company_list and company not in company_list:
+		company_list.append(company)
+
 	sal_comp = frappe.get_doc("Salary Component", sal_comp)
 	if not sal_comp.get("accounts"):
-		sal_comp.append("accounts", {
-			"company": company,
-			"default_account": create_account(company)
-		})
-		sal_comp.save()
+		for d in company_list:
+			sal_comp.append("accounts", {
+				"company": d,
+				"default_account": create_account(d)
+			})
+			sal_comp.save()
 
 def create_account(company):
 	salary_account = frappe.db.get_value("Account", "Salary - " + frappe.get_cached_value('Company',  company,  'abbr'))
@@ -359,7 +384,7 @@ def create_account(company):
 		}).insert()
 	return salary_account
 
-def make_earning_salary_component(setup=False, test_tax=False):
+def make_earning_salary_component(setup=False, test_tax=False, company_list=None):
 	data = [
 		{
 			"salary_component": 'Basic Salary',
@@ -415,7 +440,7 @@ def make_earning_salary_component(setup=False, test_tax=False):
 			}
 		])
 	if setup or test_tax:
-		make_salary_component(data, test_tax)
+		make_salary_component(data, test_tax, company_list)
 	data.append({
 		"salary_component": 'Basic Salary',
 		"abbr":'BS',
@@ -426,7 +451,7 @@ def make_earning_salary_component(setup=False, test_tax=False):
 	})
 	return data
 
-def make_deduction_salary_component(setup=False, test_tax=False):
+def make_deduction_salary_component(setup=False, test_tax=False, company_list=None):
 	data =  [
 		{
 			"salary_component": 'Professional Tax',
@@ -458,7 +483,7 @@ def make_deduction_salary_component(setup=False, test_tax=False):
 			"round_to_the_nearest_integer": 1
 		})
 	if setup or test_tax:
-		make_salary_component(data, test_tax)
+		make_salary_component(data, test_tax, company_list)
 
 	return data
 
