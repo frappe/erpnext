@@ -12,32 +12,25 @@ class SocialMediaPost(Document):
 		if not self.is_scheduled:
 			self.post()
 		else:
-			self.status = "Scheduled"
+			self.post_status = "Scheduled"
 
 		super(SocialMediaPost, self).submit()
 
 	def post(self):
-		if self.twitter:
-			twitter = frappe.get_doc("Twitter Settings")
-			try:
+		try:
+			if self.twitter:
+				twitter = frappe.get_doc("Twitter Settings")
 				twitter.post(self.text, self.image)
-			except:
-				title = _("Error while sharing {0}").format(self.name)
-				traceback = frappe.get_traceback()
-				frappe.log_error(message=traceback , title=title)
-
-		if self.linkedin:
-			linkedin = frappe.get_doc("LinkedIn Settings")
-			try:
+			if self.linkedin:
+				linkedin = frappe.get_doc("LinkedIn Settings")
 				linkedin.post(self.text, self.image)
-			except:
-				title = _("Error while tweet {0}").format(self.name)
-				traceback = frappe.get_traceback()
-				frappe.log_error(message=traceback , title=title)
+			self.post_status = "Posted"
+			self.save()
 
-		
-		self.post_status = "Posted"
-		self.save()
+		except:
+			title = _("Error while POSTING {0}").format(self.name)
+			traceback = frappe.get_traceback()
+			frappe.log_error(message=traceback , title=title)
 
 def process_scheduled_social_media_posts():
 	import datetime

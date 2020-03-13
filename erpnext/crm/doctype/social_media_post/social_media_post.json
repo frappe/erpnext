@@ -9,7 +9,7 @@
   "is_scheduled",
   "sheduled_time",
   "column_break_3",
-  "status",
+  "post_status",
   "share_on",
   "twitter",
   "column_break_9",
@@ -72,13 +72,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Status",
-   "options": "Scheduled\nPosted"
-  },
-  {
    "fieldname": "content",
    "fieldtype": "Section Break",
    "label": "Content"
@@ -87,11 +80,18 @@
    "fieldname": "share_on",
    "fieldtype": "Section Break",
    "label": "Share On"
+  },
+  {
+   "fieldname": "post_status",
+   "fieldtype": "Select",
+   "label": "Post Status",
+   "options": "Scheduled\nPosted",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-11 17:37:03.758672",
+ "modified": "2020-03-13 12:15:00.504432",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Social Media Post",
