@@ -74,7 +74,6 @@ class SalarySlip(TransactionBase):
 	def on_cancel(self):
 		self.set_status()
 		self.update_status()
-		self.update_salary_slip_in_additional_salary()
 		self.cancel_loan_repayment_entry()
 
 	def on_trash(self):
@@ -405,14 +404,15 @@ class SalarySlip(TransactionBase):
 						self.update_component_row(frappe._dict(last_benefit.struct_row), amount, "earnings")
 
 	def add_additional_salary_components(self, component_type):
-		additional_components = get_additional_salary_component(self.employee,
+		salary_components_details, additional_salary_details = get_additional_salary_component(self.employee,
 			self.start_date, self.end_date, component_type)
-		if additional_components:
-			for additional_component in additional_components:
-				amount = additional_component.amount
-				overwrite = additional_component.overwrite
-				self.update_component_row(frappe._dict(additional_component.struct_row), amount,
-					component_type, overwrite=overwrite)
+		if salary_components_details and additional_salary_details:
+			for additional_salary in additional_salary_details:
+				additional_salary =frappe._dict(additional_salary)
+				amount = additional_salary.amount
+				overwrite = additional_salary.overwrite
+				self.update_component_row(frappe._dict(salary_components_details[additional_salary.component]), amount,
+					component_type, overwrite=overwrite, additional_salary=additional_salary.name)
 
 	def add_tax_components(self, payroll_period):
 		# Calculate variable_based_on_taxable_salary after all components updated in salary slip
@@ -432,21 +432,20 @@ class SalarySlip(TransactionBase):
 			tax_row = self.get_salary_slip_row(d)
 			self.update_component_row(tax_row, tax_amount, "deductions")
 
-	def update_component_row(self, struct_row, amount, key, overwrite=1):
+	def update_component_row(self, struct_row, amount, key, overwrite=1, additional_salary = ''):
 		component_row = None
 		for d in self.get(key):
 			if d.salary_component == struct_row.salary_component:
 				component_row = d
-
-		if not component_row:
+		if not component_row or (struct_row.get("is_additional_component") and not overwrite):
 			if amount:
 				self.append(key, {
 					'amount': amount,
-					'additional_salary': '' if not struct_row.get("additional_salary") else struct_row.get("additional_salary"),
 					'default_amount': amount if not struct_row.get("is_additional_component") else 0,
 					'depends_on_payment_days' : struct_row.depends_on_payment_days,
 					'salary_component' : struct_row.salary_component,
 					'abbr' : struct_row.abbr,
+					'additional_salary': additional_salary,
 					'do_not_include_in_total' : struct_row.do_not_include_in_total,
 					'is_tax_applicable': struct_row.is_tax_applicable,
 					'is_flexible_benefit': struct_row.is_flexible_benefit,
@@ -458,6 +457,7 @@ class SalarySlip(TransactionBase):
 			if struct_row.get("is_additional_component"):
 				if overwrite:
 					component_row.additional_amount = amount - component_row.get("default_amount", 0)
+					component_row.additional_salary = additional_salary
 				else:
 					component_row.additional_amount = amount
 
