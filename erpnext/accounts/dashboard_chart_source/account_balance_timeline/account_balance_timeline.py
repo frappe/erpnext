@@ -13,7 +13,8 @@ from frappe.utils.nestedset import get_descendants_of
 
 @frappe.whitelist()
 @cache_source
-def get(chart_name = None, chart = None, no_cache = None, from_date = None, to_date = None):
+def get(chart_name = None, chart = None, no_cache = None, filters = None, from_date = None,
+	to_date = None, timespan = None, time_interval = None):
 	if chart_name:
 		chart = frappe.get_doc('Dashboard Chart', chart_name)
 	else:
