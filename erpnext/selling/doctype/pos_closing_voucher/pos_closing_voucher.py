@@ -4,11 +4,13 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import getdate, get_datetime
 from collections import defaultdict
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
-import json
+from erpnext.selling.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
 
 class POSClosingVoucher(Document):
 	def get_closing_voucher_details(self):
@@ -40,18 +42,25 @@ class POSClosingVoucher(Document):
 
 	def validate(self):
 		user = frappe.get_all('POS Closing Voucher',
-			filters = {
-				'user': self.user,
-				'docstatus': 1
-			},
+			filters = { 'user': self.user, 'docstatus': 1 },
 			or_filters = {
 					'period_start_date': ('between', [self.period_start_date, self.period_end_date]),
 					'period_end_date': ('between', [self.period_start_date, self.period_end_date])
 			})
 
 		if user:
-			frappe.throw(_("POS Closing Voucher alreday exists for {0} between date {1} and {2}"
-				.format(self.user, self.period_start_date, self.period_end_date)))
+			frappe.throw(_("POS Closing Voucher {} for {} between selected period"
+				.format(frappe.bold("already exists"), self.user)), title=_("Invalid Period"))
+		
+		if frappe.db.get_value("POS Opening Voucher", self.pos_opening_voucher, "status") != "Open":
+			frappe.throw(_("Selected POS Opening Voucher should be open."), title=_("Invalid Opening Voucher"))
+
+	def on_submit(self):
+		merge_pos_invoices(self.pos_transactions)
+		opening_voucher = frappe.get_doc("POS Opening Voucher", self.pos_opening_voucher)
+		opening_voucher.pos_closing_voucher = self.name
+		opening_voucher.set_status()
+		opening_voucher.save()
 
 	def set_invoice_list(self, invoice_list):
 		self.sales_invoices_summary = []
@@ -93,6 +102,24 @@ def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
 	cashiers_list = frappe.get_all("POS Profile User", filters=filters, fields=['user'])
 	cashiers = [cashier for cashier in set(c['user'] for c in cashiers_list)]
 	return [[c] for c in cashiers]
+
+@frappe.whitelist()
+def get_pos_invoices(start, end, user):
+		data = frappe.db.sql("""
+		select 
+			name, timestamp(posting_date, posting_time) as "timestamp"
+		from 
+			`tabPOS Invoice`
+		where 
+			owner = %s and docstatus = 1 and 
+			(consolidated_invoice is NULL or consolidated_invoice = '')
+		""", (user), as_dict=1)
+
+		data = list(filter(lambda d: get_datetime(start) <= get_datetime(d.timestamp) <= get_datetime(end), data))
+		# need to get taxes and payments so can't avoid get_doc
+		data = [frappe.get_doc("POS Invoice", d.name).as_dict() for d in data]
+
+		return data
 
 def get_mode_of_payment_details(invoice_list):
 	mode_of_payment_details = []
