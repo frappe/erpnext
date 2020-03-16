@@ -50,6 +50,7 @@ class Membership(Document):
 			self.load_from_db()
 			self.db_set('paid', 1)
 
+@frappe.whitelist()
 def create_membership(name, email, membership_type, from_date, to_date, currency, amount, paid):
 	member = get_or_create_member_using_email(email, name, membership_type)
 
