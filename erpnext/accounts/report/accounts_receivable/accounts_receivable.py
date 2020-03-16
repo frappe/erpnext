@@ -603,7 +603,6 @@ class ReceivablePayableReport(object):
 			self.add_supplier_filters(conditions, values)
 
 		self.add_accounting_dimensions_filters(conditions, values)
-		print(values)
 		return " and ".join(conditions), values
 
 	def get_order_by_condition(self):
