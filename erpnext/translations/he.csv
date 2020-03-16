@@ -2207,7 +2207,7 @@ DocType: Packing Slip,The gross weight of the package. Usually net weight + pack
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Please select Start Date and End Date for Item {0},אנא בחר תאריך התחלה ותאריך סיום לפריט {0}
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py,"Leave cannot be allocated before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}","לעזוב לא יכול להיות מוקצה לפני {0}, כאיזון חופשה כבר היה בשיא הקצאת חופשת העתיד יועבר לשאת {1}"
 DocType: Pricing Rule,"Higher the number, higher the priority","ככל שהמספר גבוה, גבוה בראש סדר העדיפויות"
-apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js,As on Date,כבתאריך
+apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.js,As on Date,כבתאריך
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,Stock Entry {0} is not submitted,מניית כניסת {0} לא הוגשה
 DocType: POS Profile,Write Off Cost Center,לכתוב את מרכז עלות
 DocType: Leave Control Panel,Allocate,להקצות
@@ -2770,7 +2770,6 @@ DocType: Purchase Invoice,Additional Discount Amount,סכום הנחה נוסף
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py,Quantity for Item {0} must be less than {1},כמות לפריט {0} חייבת להיות פחות מ {1}
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py,None of the items have any change in quantity or value.,אף אחד מהפריטים יש שינוי בכמות או ערך.
 DocType: Sales Invoice,Total Commission,"הוועדה סה""כ"
-DocType: Pricing Rule,Percentage,אֲחוּזִים
 DocType: Payment Request,Make Sales Invoice,הפוך מכירות חשבונית
 DocType: Quality Inspection Reading,Reading 9,קריאת 9
 DocType: Target Detail,Target Detail,פרט היעד
