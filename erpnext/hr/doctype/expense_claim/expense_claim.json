@@ -279,6 +279,7 @@
    "label": "More Details"
   },
   {
+   "allow_on_submit": 1,
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -368,7 +369,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-14 23:52:05.388458",
+ "modified": "2020-03-16 18:11:07.861985",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",
