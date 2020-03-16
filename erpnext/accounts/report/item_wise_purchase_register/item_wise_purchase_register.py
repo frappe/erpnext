@@ -201,7 +201,8 @@ def get_columns(additional_table_columns, filters):
 		{
 			'label': _('Mode Of Payment'),
 			'fieldname': 'mode_of_payment',
-			'fieldtype': 'Data',
+			'fieldtype': 'Link',
+			'options': 'Mode of Payment',
 			'width': 120
 		},
 		{
@@ -309,6 +310,8 @@ def get_items(filters, additional_query_columns):
 
 	if additional_query_columns:
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
+	else:
+		additional_query_columns = ''
 
 	return frappe.db.sql("""
 		select
@@ -320,7 +323,7 @@ def get_items(filters, additional_query_columns):
 			`tabPurchase Invoice Item`.`purchase_receipt`, `tabPurchase Invoice Item`.`po_detail`,
 			`tabPurchase Invoice Item`.`expense_account`, `tabPurchase Invoice Item`.`stock_qty`,
 			`tabPurchase Invoice Item`.`stock_uom`, `tabPurchase Invoice Item`.`base_net_amount`,
-			`tabPurchase Invoice`.supplier_name, `tabPurchase Invoice`.mode_of_payment {0}
+			`tabPurchase Invoice`.`supplier_name`, `tabPurchase Invoice`.`mode_of_payment` {0}
 		from `tabPurchase Invoice`, `tabPurchase Invoice Item`
 		where `tabPurchase Invoice`.name = `tabPurchase Invoice Item`.`parent` and
 		`tabPurchase Invoice`.docstatus = 1 %s
