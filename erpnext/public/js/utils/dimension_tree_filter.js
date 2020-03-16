@@ -35,11 +35,13 @@ erpnext.doctypes_with_dimensions.forEach((doctype) => {
 							}
 						}
 
-						if (frm.doc.items && frm.doc.items.length) {
+						if (frm.doc.items && frm.doc.items.length && frm.doc.docstatus === 0
+							&& (!frm.doc.items[0][dimension['fieldname']])) {
 							frm.doc.items[0][dimension['fieldname']] = erpnext.default_dimensions[frm.doc.company][dimension['document_type']];
 						}
 
-						if (frm.doc.accounts && frm.doc.accounts.length) {
+						if (frm.doc.accounts && frm.doc.accounts.length && frm.doc.docstatus === 0
+							&& (!frm.doc.items[0][dimension['fieldname']])) {
 							frm.doc.accounts[0][dimension['fieldname']] = erpnext.default_dimensions[frm.doc.company][dimension['document_type']];
 						}
 					}
