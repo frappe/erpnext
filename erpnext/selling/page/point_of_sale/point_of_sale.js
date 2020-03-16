@@ -43,8 +43,23 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		];
 
 		frappe.require(assets, () => {
-			this.make();
+			this.check_opening_voucher();
 		});
+	}
+
+	check_opening_voucher() {
+		return frappe.call("erpnext.selling.page.point_of_sale.point_of_sale.check_opening_voucher", 
+			{ "user": frappe.session.user })
+			.then((r) => {
+				if(r.message && r.message.length === 1) {
+					this.pos_opening = r.message[0].name;
+					this.company = r.message[0].company;
+					this.pos_profile = r.message[0].pos_profile;
+					this.make();
+				} else {
+					this.create_opening_voucher();
+				}
+			})
 	}
 
 	make() {
@@ -56,36 +71,51 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				this.set_online_status();
 			},
 			() => this.make_new_invoice(),
-			() => {
-				if(!this.frm.doc.company) {
-					this.setup_company()
-						.then((company) => {
-							this.frm.doc.company = company;
-							this.get_pos_profile();
-						});
-				}
-			},
-			() => {
-				frappe.dom.unfreeze();
-			},
+			() => frappe.dom.unfreeze(),
 			() => this.page.set_title(__('Point of Sale'))
 		]);
 	}
 
-	get_pos_profile() {
-		return frappe.xcall("erpnext.stock.get_item_details.get_pos_profile",
-			{'company': this.frm.doc.company})
-			.then((r) => {
-				if(r) {
-					this.frm.doc.pos_profile = r.name;
-					this.set_pos_profile_data()
-						.then(() => {
-							this.on_change_pos_profile();
-						});
-				} else {
-					this.raise_exception_for_pos_profile();
-				}
-		});
+	create_opening_voucher() {
+		const on_submit = ({ company, pos_profile, custody_amount }) => {
+			frappe.dom.freeze()
+			return frappe.call("erpnext.selling.page.point_of_sale.point_of_sale.create_opening_voucher", 
+				{
+					pos_profile,
+					company,
+					custody_amount,
+				})
+				.then((r) => {
+					frappe.dom.unfreeze()
+					if(r.message) {
+						this.pos_opening = r.message.name;
+						this.pos_profile = pos_profile;
+						this.company = company;
+						this.make();
+					}
+				})
+				.catch(e => {
+					frappe.dom.unfreeze();
+				})
+		}
+
+		frappe.prompt([
+			{
+				fieldtype: 'Link', label: __('Company'),
+				options: 'Company', fieldname: 'company', reqd: 1
+			},
+			{
+				fieldtype: 'Link', label: __('POS Profile'),
+				options: 'POS Profile', fieldname: 'pos_profile', reqd: 1
+			},
+			{
+				fieldtype: 'Currency', options: 'company:company_currency',
+				label: __('Amount in custody'), fieldname: 'custody_amount', reqd: 1
+			}
+		],
+		on_submit,
+		__('Create POS Opening Voucher')
+		);
 	}
 
 	set_online_status() {
@@ -162,6 +192,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 							},
 							callback: (r) => {
 								if (r.message) {
+									if (!r.message.length) return
 									if (r.message.length == 1) {
 										// set the only loyalty_program found
 										this.frm.set_value('loyalty_program', r.message[0])
@@ -319,7 +350,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	update_item_in_cart(item_code, field='qty', value=1, batch_no, check_stock=true) {
 		frappe.dom.freeze();
-		const me = this;
 		let item = undefined;
 		if (this.cart.exists(item_code, batch_no)) {
 			// existing item
@@ -349,7 +379,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				() => check_dialog_condition() ? show_serial_batch_selector() : trigger_post_insertion_events(item, true)
 			]);
 		}
-
+		const me = this;
 		async function check_stock_availability() {
 			if (field == 'qty' && check_stock) {
 				value = await me.check_stock_availability(item_code, me.frm.doc.set_warehouse, value);
@@ -607,20 +637,6 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			{'company': company})
 	}
 
-	setup_company() {
-		return new Promise(resolve => {
-			if(!this.frm.doc.company) {
-				frappe.prompt({fieldname:"company", options: "Company", fieldtype:"Link",
-					label: __("Select Company"), reqd: 1}, (data) => {
-						this.company = data.company;
-						resolve(this.company);
-				}, __("Select Company"));
-			} else {
-				resolve();
-			}
-		})
-	}
-
 	make_new_invoice() {
 		return frappe.run_serially([
 			() => this.make_sales_invoice_frm(),
@@ -679,6 +695,9 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		if (this.company) {
 			this.frm.doc.company = this.company;
 		}
+		if (this.pos_profile) {
+			this.frm.doc.pos_profile = this.pos_profile;
+		}
 
 		if (!this.frm.doc.company) {
 			return;
@@ -736,14 +755,14 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.page.add_menu_item(__('Change POS Profile'), function() {
 			me.change_pos_profile();
 		});
-		this.page.add_menu_item(__('Close the POS'), function() {
+		this.page.add_menu_item(__('Close the POS'), () => {
 			var voucher = frappe.model.get_new_doc('POS Closing Voucher');
 			voucher.pos_profile = me.frm.doc.pos_profile;
 			voucher.user = frappe.session.user;
 			voucher.company = me.frm.doc.company;
-			voucher.period_start_date = me.frm.doc.posting_date;
-			voucher.period_end_date = me.frm.doc.posting_date;
-			voucher.posting_date = me.frm.doc.posting_date;
+			voucher.pos_opening_voucher = this.pos_opening;
+			voucher.period_end_date = frappe.datetime.now_datetime();
+			voucher.posting_date = frappe.datetime.now_date();
 			frappe.set_route('Form', 'POS Closing Voucher', voucher.name);
 		});
 	}

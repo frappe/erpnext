@@ -40,8 +40,8 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 
 	result = []
 
-	items_data = frappe.db.sql(""" SELECT name as item_code,
-			item_name, image as item_image, idx as idx,is_stock_item
+	items_data = frappe.db.sql(""" SELECT name as item_code, description,
+			item_name, image as item_image, idx as idx, is_stock_item
 		FROM
 			`tabItem`
 		WHERE
@@ -128,6 +128,30 @@ def search_serial_or_batch_or_barcode_number(search_value):
 		return batch_no_data
 
 	return {}
+
+@frappe.whitelist()
+def check_opening_voucher(user):
+	return [
+		{'name': d.name, 'company': d.company, 'pos_profile': d.pos_profile} 
+		for d in frappe.db.get_all("POS Opening Voucher", 
+					{ "user": user, "pos_closing_voucher": ["in", ["", None]], "docstatus": 1 }, 
+					["name", "company", "pos_profile"])
+	]
+
+@frappe.whitelist()
+def create_opening_voucher(pos_profile, company, custody_amount):
+	new_pos_opening = frappe.get_doc({
+		'doctype': 'POS Opening Voucher',
+		"period_start_date": frappe.utils.get_datetime(),
+		"posting_date": frappe.utils.getdate(),
+		"user": frappe.session.user,
+		"pos_profile": pos_profile,
+		"company": company,
+		"custody_amount": custody_amount
+	})
+	new_pos_opening.submit()
+
+	return new_pos_opening.as_dict()
 
 def get_conditions(item_code, serial_no, batch_no, barcode):
 	if serial_no or batch_no or barcode:
