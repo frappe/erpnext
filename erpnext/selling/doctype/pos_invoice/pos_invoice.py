@@ -65,7 +65,7 @@ class POSInvoice(SalesInvoice):
 			against_psi_doc.make_loyalty_point_entry()
 		if self.redeem_loyalty_points and self.loyalty_points:
 			self.apply_loyalty_points()
-		self.set_status(update=True)
+		self.set_status()
 	
 	def on_cancel(self):
 		# run on cancel method of selling controller
@@ -171,49 +171,49 @@ class POSInvoice(SalesInvoice):
 			pos_profile = get_pos_profile(self.company) or {}
 			self.pos_profile = pos_profile.get('name')
 
-		pos = {}
+		pos_profile = {}
 		if self.pos_profile:
-			pos = frappe.get_doc('POS Profile', self.pos_profile)
+			pos_profile = frappe.get_doc('POS Profile', self.pos_profile)
 
 		if not self.get('payments') and not for_validate:
-			update_multi_mode_option(self, pos)
+			update_multi_mode_option(self, pos_profile)
 
 		if not self.account_for_change_amount:
 			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
-		if pos:
-			self.allow_print_before_pay = pos.allow_print_before_pay
+		if pos_profile:
+			self.allow_print_before_pay = pos_profile.allow_print_before_pay
 
 			if not for_validate and not self.customer:
-				self.customer = pos.customer
+				self.customer = pos_profile.customer
 
-			self.ignore_pricing_rule = pos.ignore_pricing_rule
-			if pos.get('account_for_change_amount'):
-				self.account_for_change_amount = pos.get('account_for_change_amount')
-			if pos.get('warehouse'):
-				self.set_warehouse = pos.get('warehouse')
+			self.ignore_pricing_rule = pos_profile.ignore_pricing_rule
+			if pos_profile.get('account_for_change_amount'):
+				self.account_for_change_amount = pos_profile.get('account_for_change_amount')
+			if pos_profile.get('warehouse'):
+				self.set_warehouse = pos_profile.get('warehouse')
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'letter_head', 'tc_name',
 				'company', 'select_print_heading', 'cash_bank_account', 'write_off_account', 'taxes_and_charges',
 				'write_off_cost_center', 'apply_discount_on', 'cost_center'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
-						self.set(fieldname, pos.get(fieldname))
+						self.set(fieldname, pos_profile.get(fieldname))
 
 			customer_price_list = frappe.get_value("Customer", self.customer, 'default_price_list')
 
-			if pos.get("company_address"):
-				self.company_address = pos.get("company_address")
+			if pos_profile.get("company_address"):
+				self.company_address = pos_profile.get("company_address")
 
 			if not customer_price_list:
-				self.set('selling_price_list', pos.get('selling_price_list'))
+				self.set('selling_price_list', pos_profile.get('selling_price_list'))
 
 			if not for_validate:
-				self.update_stock = cint(pos.get("update_stock"))
+				self.update_stock = cint(pos_profile.get("update_stock"))
 
 			# set pos values in items
 			for item in self.get("items"):
 				if item.get('item_code'):
-					profile_details = get_pos_profile_item_details(pos, frappe._dict(item.as_dict()), pos)
+					profile_details = get_pos_profile_item_details(pos_profile, frappe._dict(item.as_dict()), pos_profile)
 					for fname, val in iteritems(profile_details):
 						if (not for_validate) or (for_validate and not item.get(fname)):
 							item.set(fname, val)
@@ -226,7 +226,7 @@ class POSInvoice(SalesInvoice):
 			if self.taxes_and_charges and not len(self.get("taxes")):
 				self.set_taxes()
 
-		return pos
+		return pos_profile
 
 	def set_missing_values(self, for_validate=False):
 		pos = self.set_pos_fields(for_validate)
