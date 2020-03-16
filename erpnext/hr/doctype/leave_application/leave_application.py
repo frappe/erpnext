@@ -28,7 +28,6 @@ class LeaveApplication(Document):
 		self.validate_dates()
 		self.validate_balance_leaves()
 		self.validate_leave_overlap()
-		self.validate_leave_approver()
 		self.validate_max_days()
 		self.show_block_day_warning()
 		self.validate_block_days()
@@ -37,6 +36,7 @@ class LeaveApplication(Document):
 		if frappe.db.get_value("Leave Type", self.leave_type, 'is_optional_leave'):
 			self.validate_optional_leave()
 		self.validate_applicable_after()
+		self.validate_leave_approver()
 
 	def on_update(self):
 		if self.status == "Open" and self.docstatus < 1:
@@ -79,7 +79,6 @@ class LeaveApplication(Document):
 
 	def validate_leave_approver(self):
 		leave_approvers = get_leave_approver(self.employee, get_all_approvers=1)
-
 		user_id = frappe.db.get_value("Employee",
 		self.employee, ["user_id"])
 
@@ -800,8 +799,6 @@ def get_leave_approver(employee, get_all_approvers=0):
 	if (not leave_approver and department) or get_all_approvers:
 		leave_approvers_for_department = frappe.get_all('Department Approver', filters={'parent': department,
 			'parentfield': 'leave_approvers'}, fields=['approver', 'idx'])
-
-		print(leave_approvers_for_department)
 
 		leave_approver = [approver.approver for approver in leave_approvers_for_department if approver.idx ==1][0]
 		approvers = list(set([approver.approver for approver in leave_approvers_for_department] + approvers))
