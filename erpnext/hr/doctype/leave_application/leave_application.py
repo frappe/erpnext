@@ -78,6 +78,26 @@ class LeaveApplication(Document):
 					if number_of_days < leave_type.applicable_after:
 						frappe.throw(_("{0} applicable after {1} working days").format(self.leave_type, leave_type.applicable_after))
 
+	def validate_leave_approver(self):
+		leave_approvers = get_leave_approver(self.employee, get_all_approvers=1)
+		user_id = frappe.db.get_value("Employee",
+		self.employee, ["user_id"])
+
+		if user_id and self.leave_approver == user_id:
+			frappe.throw(_("{0}: {1} can not approve his own Leave Application").format(self.employee, user_id))
+
+		if len(leave_approvers) and self.leave_approver not in leave_approvers:
+			approver_string = comma_or(leave_approvers) if len(leave_approvers) > 1 else leave_approvers[0]
+
+			if len(leave_approvers) > 1:
+				msg = _("Leave approver must be one of {0}").format(approver_string)
+			else:
+				msg = _("Leave approver must be {0}").format(approver_string)
+
+			frappe.throw(msg)
+		elif self.docstatus==1 and len(leave_approvers) and self.leave_approver != frappe.session.user:
+			frappe.throw(_("Only the selected Leave Approver can submit this Leave Application"))
+
 	def validate_dates(self):
 		if frappe.db.get_single_value("HR Settings", "restrict_backdated_leave_application"):
 			if self.from_date and self.from_date < frappe.utils.today():
@@ -778,8 +798,17 @@ def get_leave_approver(employee):
 	leave_approver, department = frappe.db.get_value("Employee",
 		employee, ["leave_approver", "department"])
 
-	if not leave_approver and department:
-		leave_approver = frappe.db.get_value('Department Approver', {'parent': department,
-			'parentfield': 'leave_approvers', 'idx': 1}, 'approver')
+	approvers.append(leave_approver)
+
+	if (not leave_approver and department) or get_all_approvers:
+		leave_approvers_for_department = frappe.get_all('Department Approver', filters={'parent': department,
+			'parentfield': 'leave_approvers'}, fields=['approver', 'idx'])
+
+		leave_approver = [approver.approver for approver in leave_approvers_for_department if approver.idx ==1][0]
+		approvers = list(set([approver.approver for approver in leave_approvers_for_department] + approvers))
+
+
+	if get_all_approvers:
+		return approvers
 
 	return leave_approver
