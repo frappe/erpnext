@@ -27,7 +27,6 @@ apps/erpnext/erpnext/stock/doctype/material_request/material_request.py,{0} {1} 
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py,Packing Slip(s) cancelled,Packing Slip(s) canceled
 DocType: Payment Entry,Cheque/Reference No,Check/Reference No
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,"Asset cannot be cancelled, as it is already {0}","Asset cannot be canceled, as it is already {0}"
-DocType: Bank Reconciliation,Select account head of the bank where cheque was deposited.,Select account head of the bank where check was deposited.
 DocType: Cheque Print Template,Cheque Print Template,Check Print Template
 apps/erpnext/erpnext/controllers/selling_controller.py,{0} {1} is cancelled or closed,{0} {1} is canceled or closed
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Quotation {0} is cancelled,Quotation {0} is canceled
