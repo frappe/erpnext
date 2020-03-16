@@ -6,18 +6,12 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "biling",
-  "cashier",
-  "cai",
-  "numeration",
-  "authorized_range",
   "amended_from",
   "company_logo",
   "general_data",
   "patient_statement",
   "type_document",
   "customer",
-  "rtn",
   "columna_general",
   "company",
   "date",
@@ -27,8 +21,6 @@
   "products_table",
   "totals_section",
   "total",
-  "isv15",
-  "net_total",
   "contact_section",
   "customer_address",
   "phone_number"
@@ -49,33 +41,6 @@
    "options": "Account Statement Payment",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "biling",
-   "fieldtype": "Section Break",
-   "label": "BIlling"
-  },
-  {
-   "fieldname": "cashier",
-   "fieldtype": "Read Only",
-   "label": "Cashier"
-  },
-  {
-   "fieldname": "cai",
-   "fieldtype": "Link",
-   "label": "CAI",
-   "options": "GCAI",
-   "read_only": 1
-  },
-  {
-   "fieldname": "numeration",
-   "fieldtype": "Read Only",
-   "label": "Numeration"
-  },
-  {
-   "fieldname": "authorized_range",
-   "fieldtype": "Read Only",
-   "label": "Authorized Range"
   },
   {
    "fieldname": "company",
@@ -108,11 +73,6 @@
    "fieldtype": "Link",
    "label": "Customer",
    "options": "Customer"
-  },
-  {
-   "fieldname": "rtn",
-   "fieldtype": "Data",
-   "label": "RTN"
   },
   {
    "fieldname": "date",
@@ -155,16 +115,6 @@
    "label": "Total"
   },
   {
-   "fieldname": "isv15",
-   "fieldtype": "Currency",
-   "label": "ISV 15%"
-  },
-  {
-   "fieldname": "net_total",
-   "fieldtype": "Currency",
-   "label": "Net Total"
-  },
-  {
    "fieldname": "contact_section",
    "fieldtype": "Section Break",
    "label": "Address and Contact"
@@ -186,7 +136,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-28 14:06:01.849484",
+ "modified": "2020-03-16 12:39:53.435111",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment",
