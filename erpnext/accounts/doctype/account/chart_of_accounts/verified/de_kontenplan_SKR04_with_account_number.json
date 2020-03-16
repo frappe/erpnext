@@ -406,11 +406,11 @@
                         "is_group": 1,
                         "Bewertungskorrektur zu Forderungen aus Lieferungen und Leistungen": {
                             "account_number": "9960"
-						},
-						"Debitoren": {
-							"is_group": 1,
-							"account_number": "10000"
-						},
+                        },
+                        "Debitoren": {
+                            "is_group": 1,
+                            "account_number": "10000"
+                        },
                         "Forderungen aus Lieferungen und Leistungen": {
                             "account_number": "1200",
                             "account_type": "Receivable"
@@ -663,16 +663,22 @@
                                 "account_number": "1400"
                             },
                             "Abziehbare Vorsteuer 7 %": {
-                                "account_number": "1401"
+                                "account_number": "1401",
+                                "account_type": "Tax",
+                                "tax_rate": 7.0
                             },
                             "Abziehbare Vorsteuer aus innergem. Erwerb": {
                                 "account_number": "1402"
                             },
                             "Abziehbare Vorsteuer aus innergem. Erwerb 19%": {
-                                "account_number": "1404"
+                                "account_number": "1404",
+                                "account_type": "Tax",
+                                "tax_rate": 19.0
                             },
                             "Abziehbare Vorsteuer 19 %": {
-                                "account_number": "1406"
+                                "account_number": "1406",
+                                "account_type": "Tax",
+                                "tax_rate": 19.0
                             },
                             "Abziehbare Vorsteuer nach \u00a7 13b UStG 19 %": {
                                 "account_number": "1407"
@@ -1197,15 +1203,15 @@
                     "is_group": 1,
                     "Bewertungskorrektur zu Verb. aus Lieferungen und Leistungen": {
                         "account_number": "9964"
-					},
-					"Kreditoren": {
-						"account_number": "70000",
-						"is_group": 1,
-						"Wareneingangs-­Verrechnungskonto" : {
-							"account_number": "70001",
-							"account_type": "Stock Received But Not Billed"
-						}
-					},
+                    },
+                    "Kreditoren": {
+                        "account_number": "70000",
+                        "is_group": 1,
+                        "Wareneingangs-­Verrechnungskonto" : {
+                            "account_number": "70001",
+                            "account_type": "Stock Received But Not Billed"
+                        }
+                    },
                     "Verb. aus Lieferungen und Leistungen": {
                         "account_number": "3300",
                         "account_type": "Payable"
@@ -1488,17 +1494,21 @@
                         },
                         "Umsatzsteuer 7 %": {
                             "account_number": "3801",
-                            "account_type": "Tax"
+                            "account_type": "Tax",
+                            "tax_rate": 7.0
                         },
                         "Umsatzsteuer aus innergem. Erwerb": {
                             "account_number": "3802"
                         },
                         "Umsatzsteuer aus innergem. Erwerb 19 %": {
-                            "account_number": "3804"
+                            "account_number": "3804",
+                            "account_type": "Tax",
+                            "tax_rate": 19.0
                         },
                         "Umsatzsteuer 19 %": {
                             "account_number": "3806",
-                            "account_type": "Tax"
+                            "account_type": "Tax",
+                            "tax_rate": 19.0
                         },
                         "Umsatzsteuer aus im Inland steuerpfl. EU-Lieferungen": {
                             "account_number": "3807"
@@ -2295,49 +2305,49 @@
         },
         "6 - sonstige betriebliche Ertr\u00e4ge": {
             "root_type": "Income",
-			"is_group": 1,
-			"Erhaltene Boni (Gruppe)": {
-				"is_group": 1,
-				"Erhaltene Boni 7 % Vorsteuer": {
-					"account_number": "5750"
-				},
-				"Erhaltene Boni aus Einkauf Roh-, Hilfs- und Betriebsstoffe": {
-					"account_number": "5753"
-				},
-				"Erhaltene Boni aus Einkauf Roh-, Hilfs- und Betriebsstoffe 7% Vorsteuer": {
-					"account_number": "5754"
-				},
-				"Erhaltene Boni aus Einkauf Roh-, Hilfs- und Betriebsstoffe 19% Vorsteuer": {
-					"account_number": "5755"
-				},
-				"Erhaltene Boni 19 % Vorsteuer": {
-					"account_number": "5760"
-				},
-				"Erhaltene Boni": {
-					"account_number": "5769"
-				}
-			},
-			"Erhaltene Rabatte (Gruppe)": {
-				"is_group": 1,
-				"Erhaltene Rabatte": {
-					"account_number": "5770"
-				},
-				"Erhaltene Rabatte 7 % Vorsteuer": {
-					"account_number": "5780"
-				},
-				"Erhaltene Rabatte aus Einkauf Roh-, Hilfs- und Betriebsstoffe": {
-					"account_number": "5783"
-				},
-				"Erhaltene Rabatte aus Einkauf Roh-, Hilfs- und Betriebsstoffe 7% Vorsteuer": {
-					"account_number": "5784"
-				},
-				"Erhaltene Rabatte aus Einkauf Roh-, Hilfs- und Betriebsstoffe 19% Vorsteuer": {
-					"account_number": "5785"
-				},
-				"Erhaltene Rabatte 19 % Vorsteuer": {
-					"account_number": "5790"
-				}
-			},
+            "is_group": 1,
+            "Erhaltene Boni (Gruppe)": {
+                "is_group": 1,
+                "Erhaltene Boni 7 % Vorsteuer": {
+                    "account_number": "5750"
+                },
+                "Erhaltene Boni aus Einkauf Roh-, Hilfs- und Betriebsstoffe": {
+                    "account_number": "5753"
+                },
+                "Erhaltene Boni aus Einkauf Roh-, Hilfs- und Betriebsstoffe 7% Vorsteuer": {
+                    "account_number": "5754"
+                },
+                "Erhaltene Boni aus Einkauf Roh-, Hilfs- und Betriebsstoffe 19% Vorsteuer": {
+                    "account_number": "5755"
+                },
+                "Erhaltene Boni 19 % Vorsteuer": {
+                    "account_number": "5760"
+                },
+                "Erhaltene Boni": {
+                    "account_number": "5769"
+                }
+            },
+            "Erhaltene Rabatte (Gruppe)": {
+                "is_group": 1,
+                "Erhaltene Rabatte": {
+                    "account_number": "5770"
+                },
+                "Erhaltene Rabatte 7 % Vorsteuer": {
+                    "account_number": "5780"
+                },
+                "Erhaltene Rabatte aus Einkauf Roh-, Hilfs- und Betriebsstoffe": {
+                    "account_number": "5783"
+                },
+                "Erhaltene Rabatte aus Einkauf Roh-, Hilfs- und Betriebsstoffe 7% Vorsteuer": {
+                    "account_number": "5784"
+                },
+                "Erhaltene Rabatte aus Einkauf Roh-, Hilfs- und Betriebsstoffe 19% Vorsteuer": {
+                    "account_number": "5785"
+                },
+                "Erhaltene Rabatte 19 % Vorsteuer": {
+                    "account_number": "5790"
+                }
+            },
             "Andere aktivierte Eigenleistungen": {
                 "account_number": "4820"
             },
@@ -2660,8 +2670,8 @@
         },
         "7 - sonstige betriebliche Aufwendungen": {
             "root_type": "Expense",
-			"is_group": 1,
-			"Erl\u00f6sschm\u00e4lerungen (Gruppe)": {
+            "is_group": 1,
+            "Erl\u00f6sschm\u00e4lerungen (Gruppe)": {
                 "is_group": 1,
                 "Erl\u00f6sschm\u00e4lerungen": {
                     "account_number": "4700"
@@ -2744,7 +2754,7 @@
                 "Gew\u00e4hrte Rabatte 19 % USt": {
                     "account_number": "4790"
                 }
-			},
+            },
             "Sonstige betriebliche Aufwendungen": {
                 "account_number": "6300"
             },
