@@ -168,12 +168,11 @@ DocType: Appointment Booking Slots,Appointment Booking Slots,予約予約スロ�
 DocType: Work Order Operation,Work In Progress,進行中の作業
 DocType: Leave Control Panel,Branch (optional),分岐（オプション）
 apps/erpnext/erpnext/education/report/absent_student_report/absent_student_report.py,Please select date,日付を選択してください
-DocType: Item Price,Minimum Qty ,最小数量
+apps/erpnext/erpnext/stock/report/product_bundle_balance/product_bundle_balance.py,Minimum Qty ,最小数量
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,BOM recursion: {0} cannot be child of {1},BOM再帰：{0}は{1}の子にはできません
 DocType: Finance Book,Finance Book,ファイナンスブック
 DocType: Patient Encounter,HLC-ENC-.YYYY.-,HLC-ENC-.YYYY.-
 DocType: Appointment Booking Settings,Holiday List,休日のリスト
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,The parent account {0} does not exists,親アカウント{0}は存在しません
 apps/erpnext/erpnext/config/quality_management.py,Review and Action,レビューと対処
 apps/erpnext/erpnext/hr/doctype/employee_checkin/employee_checkin.py,This employee already has a log with the same timestamp.{0},この従業員はすでに同じタイムスタンプのログを持っています。{0}
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Accountant,会計士
@@ -245,7 +244,6 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Pension Funds,年�
 DocType: Exchange Rate Revaluation Account,Gain/Loss,損益
 DocType: Crop,Perennial,多年生
 DocType: Program,Is Published,公開されています
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js,Show Delivery Notes,納品書を表示
 apps/erpnext/erpnext/controllers/status_updater.py,"To allow over billing, update ""Over Billing Allowance"" in Accounts Settings or the Item.",超過請求を許可するには、[アカウント設定]または[アイテム]の[超過料金]を更新します。
 DocType: Patient Appointment,Procedure,手順
 DocType: Accounts Settings,Use Custom Cash Flow Format,カスタムキャッシュフローフォーマットの使用
@@ -982,7 +980,6 @@ apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js,"Not permitted, con
 DocType: Patient,Risk Factors,危険因子
 DocType: Patient,Occupational Hazards and Environmental Factors,職業上の危険と環境要因
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Stock Entries already created for Work Order ,作業オーダー用にすでに登録されている在庫エントリ
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,商品コード&gt;商品グループ&gt;ブランド
 apps/erpnext/erpnext/templates/pages/cart.html,See past orders,過去の注文を見る
 apps/erpnext/erpnext/public/js/hub/pages/Selling.vue,{0} conversations,{0}の会話
 DocType: Vital Signs,Respiratory rate,呼吸数
@@ -1140,7 +1137,6 @@ apps/erpnext/erpnext/utilities/activation.py,"Create Employee records to manage 
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,An error occurred during the update process,更新処理中にエラーが発生しました
 DocType: Restaurant Reservation,Restaurant Reservation,レストラン予約
 apps/erpnext/erpnext/public/js/hub/Sidebar.vue,Your Items,あなたのアイテム
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,サプライヤ&gt;サプライヤタイプ
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Proposal Writing,提案の作成
 DocType: Payment Entry Deduction,Payment Entry Deduction,支払エントリ控除
 DocType: Service Level Priority,Service Level Priority,サービスレベル優先度
@@ -1439,7 +1435,6 @@ apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,Cannot deactivate or cance
 apps/erpnext/erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js,Please select Company and Posting Date to getting entries,エントリを取得するには、会社と転記日付を選択してください
 DocType: Asset,Maintenance,保守
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js,Get from Patient Encounter,患者の出会いから得る
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},アイテムのUOM換算係数（{0}-&gt; {1}）が見つかりません：{2}
 DocType: Subscriber,Subscriber,加入者
 DocType: Item Attribute Value,Item Attribute Value,アイテムの属性値
 apps/erpnext/erpnext/setup/doctype/currency_exchange/currency_exchange.py,Currency Exchange must be applicable for Buying or for Selling.,通貨交換は、購入または販売に適用する必要があります。
@@ -1963,7 +1958,6 @@ DocType: Sales Invoice Item,Rate With Margin,利益率
 DocType: Purchase Invoice,Is Return (Debit Note),返品（デビットノート）
 DocType: Workstation,Wages,賃金
 DocType: Asset Maintenance,Maintenance Manager Name,保守マネージャ名
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js,Transactions against the company already exist! ,会社に対する取引はすでに存在します。
 apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Requesting Site,依頼サイト
 DocType: Agriculture Task,Urgent,緊急
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Fetching records......,レコードを取得しています......
@@ -2661,7 +2655,6 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Source warehouse i
 apps/erpnext/erpnext/accounts/doctype/payment_terms_template/payment_terms_template.py,The Payment Term at row {0} is possibly a duplicate.,行{0}の支払い期間は重複している可能性があります。
 apps/erpnext/erpnext/public/js/setup_wizard.js,Agriculture (beta),農業（ベータ版）
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js,Packing Slip,梱包伝票
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,[設定]&gt; [設定]&gt; [命名シリーズ]で{0}の命名シリーズを設定してください
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Office Rent,事務所賃料
 apps/erpnext/erpnext/config/settings.py,Setup SMS gateway settings,SMSゲートウェイの設定
 DocType: Disease,Common Name,一般名
@@ -2828,7 +2821,6 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,{0} must app
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py,Leaves Allocated Successfully for {0},休暇は{0}に正常に割り当てられました
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py,No Items to pack,梱包するアイテムはありません
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Only .csv and .xlsx files are supported currently,現在サポートされているのは.csvファイルと.xlsxファイルのみです。
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,人事管理&gt; HR設定で従業員命名システムを設定してください
 DocType: Shipping Rule Condition,From Value,値から
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Manufacturing Quantity is mandatory,製造数量は必須です
 DocType: Loan,Repayment Method,返済方法
@@ -4077,7 +4069,6 @@ apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py,Please set defaul
 apps/erpnext/erpnext/templates/form_grid/material_request_grid.html,Required On,必要な箇所
 DocType: HR Settings,"If checked, hides and disables Rounded Total field in Salary Slips",チェックした場合、給与明細の四捨五入合計フィールドを非表示にして無効にします
 DocType: Woocommerce Settings,This is the default offset (days) for the Delivery Date in Sales Orders. The fallback offset is 7 days from the order placement date.,これは、受注の納入日のデフォルトのオフセット（日）です。フォールバックオフセットは、発注日から7日間です。
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,[設定]&gt; [番号シリーズ]を使用して、出席の番号シリーズを設定してください
 DocType: Rename Tool,File to Rename,名前を変更するファイル
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,Please select BOM for Item in Row {0},行 {0} 内のアイテムの部品表（BOM）を選択してください
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.js,Fetch Subscription Updates,購読の更新を取得する
@@ -4718,7 +4709,6 @@ DocType: Healthcare Service Unit Type,Item Details,アイテム詳細
 DocType: Cash Flow Mapping,Is Finance Cost,財務コスト
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py,Attendance for employee {0} is already marked,従業員{0}の出勤はすでにマークされています
 DocType: Packing Slip,If more than one package of the same type (for print),同じタイプで複数パッケージの場合（印刷用）
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,[教育]&gt; [教育の設定]でインストラクターの命名システムを設定してください
 apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.py,Please set default customer in Restaurant Settings,レストランの設定でデフォルトの顧客を設定してください
 ,Salary Register,給与登録
 DocType: Company,Default warehouse for Sales Return,返品のデフォルト倉庫
@@ -4989,7 +4979,6 @@ DocType: Item,Inspection Required before Purchase,購入する前に必要な検
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html,Pending Activities,保留中の活動
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test_list.js,Create Lab Test,ラボテストの作成
 DocType: Patient Appointment,Reminded,思い出した
-DocType: Homepage Section,Cards,カード
 apps/erpnext/erpnext/public/js/setup_wizard.js,View Chart of Accounts,アカウントのチャートを表示する
 DocType: Chapter Member,Chapter Member,チャプターメンバー
 DocType: Material Request Plan Item,Minimum Order Quantity,最小注文数量
@@ -5007,7 +4996,7 @@ apps/erpnext/erpnext/loan_management/doctype/loan_security_price/loan_security_p
 apps/erpnext/erpnext/hr/utils.py,Future dates not allowed,将来の日付は許可されません
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Expected Delivery Date should be after Sales Order Date,予定納期は受注日の後でなければなりません
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py,Reorder Level,再注文レベル
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Chart Of Accounts Template,アカウントテンプレートのチャート
+DocType: Company,Chart Of Accounts Template,アカウントテンプレートのチャート
 DocType: Attendance,Attendance Date,出勤日
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Update stock must be enable for the purchase invoice {0},購買請求書{0}の在庫を更新する必要があります。
 apps/erpnext/erpnext/stock/get_item_details.py,Item Price updated for {0} in Price List {1},アイテムの価格は価格表{1}で{0}の更新します
@@ -5572,8 +5561,6 @@ DocType: Installation Note,Installation Date,設置日
 apps/erpnext/erpnext/accounts/doctype/shareholder/shareholder.js,Share Ledger,株主
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Sales Invoice {0} created,販売請求書{0}が作成されました
 DocType: Employee,Confirmation Date,確定日
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","このドキュメントをキャンセルするには、従業員<a href=""#Form/Employee/{0}"">{0}</a> \を削除してください"
 DocType: Inpatient Occupancy,Check Out,チェックアウト
 DocType: C-Form,Total Invoiced Amount,請求額合計
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Min Qty can not be greater than Max Qty,最小個数は最大個数を超えることはできません
@@ -5780,7 +5767,6 @@ DocType: Employee,Prefered Contact Email,優先連絡先メールアドレス
 DocType: Cheque Print Template,Cheque Width,小切手幅
 DocType: Selling Settings,Validate Selling Price for Item against Purchase Rate or Valuation Rate,購入料金や評価レートに対するアイテムの販売価格を検証します
 DocType: Fee Schedule,Fee Schedule,料金表
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Column Labels : ,列ラベル
 DocType: Bank Transaction,Settled,定住
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Cess,セス
 DocType: Quality Feedback,Parameters,パラメーター
@@ -6454,6 +6440,7 @@ apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,�
 DocType: Salary Component,Formula,式
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,Serial #,シリアル番号
 DocType: Material Request Plan Item,Required Quantity,必要数量
+DocType: Cash Flow Mapping Template,Template Name,テンプレート名
 DocType: Lab Test Template,Lab Test Template,ラボテストテンプレート
 apps/erpnext/erpnext/accounts/doctype/accounting_period/accounting_period.py,Accounting Period overlaps with {0},会計期間が{0}と重複しています
 apps/erpnext/erpnext/setup/doctype/company/company.py,Sales Account,セールスアカウント
@@ -6514,7 +6501,7 @@ DocType: Supplier,SUP-.YYYY.-,SUP -YYYY.-
 DocType: Bank Reconciliation Detail,Cheque Date,小切手日
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account {0}: Parent account {1} does not belong to company: {2},アカウント{0}：親アカウント{1}は会社{2}に属していません
 apps/erpnext/erpnext/setup/doctype/company/company.js,Successfully deleted all transactions related to this company!,この会社に関連するすべての取引を正常に削除しました！
-apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js,As on Date,基準日
+apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.js,As on Date,基準日
 DocType: Additional Salary,HR,HR
 DocType: Course Enrollment,Enrollment Date,登録日
 DocType: Healthcare Settings,Out Patient SMS Alerts,アウト患者のSMSアラート
@@ -6580,7 +6567,6 @@ apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Payment
 DocType: Course Content,Quiz,クイズ
 DocType: Subscription,Trial Period End Date,試用期間終了日
 apps/erpnext/erpnext/setup/doctype/authorization_control/authorization_control.py,Not authroized since {0} exceeds limits,{0}の限界を超えているので認証されません
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Start entering data from here : ,ここからデータの入力を始めます。
 DocType: Serial No,Asset Status,資産状況
 DocType: Sales Invoice,Over Dimensional Cargo (ODC),オーバー・ディメンション・カーゴ（ODC）
 DocType: Restaurant Order Entry,Restaurant Table,レストラン表
@@ -6807,7 +6793,6 @@ apps/erpnext/erpnext/public/js/hub/components/ReviewArea.vue,Submit Review,レ�
 DocType: Contract,Party User,パーティーユーザー
 apps/erpnext/erpnext/controllers/buying_controller.py,Assets not created for <b>{0}</b>. You will have to create asset manually.,<b>{0}</b>用に作成されていないアセット。アセットを手動で作成する必要があります。
 apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py,Please set Company filter blank if Group By is 'Company',Group Byが &#39;Company&#39;の場合、Companyフィルターを空白に設定してください
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,顧客&gt;顧客グループ&gt;テリトリー
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py,Posting Date cannot be future date,転記日付は将来の日付にすることはできません
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py,Row # {0}: Serial No {1} does not match with {2} {3},行＃{0}：シリアル番号 {1} が {2} {3}と一致しません
 DocType: Loan Repayment,Interest Payable,支払利息
@@ -7040,7 +7025,6 @@ apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py,Both Trial Pe
 apps/erpnext/erpnext/accounts/report/share_balance/share_balance.py,Average Rate,平均レート
 DocType: Appointment,Appointment With,予定
 apps/erpnext/erpnext/controllers/accounts_controller.py,Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total,支払スケジュールの総支払額は、総額/丸め合計と等しくなければなりません
-apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,出席にマークを付ける<b></b>
 apps/erpnext/erpnext/stock/doctype/item/item.py,"""Customer Provided Item"" cannot have Valuation Rate",顧客提供のアイテムに評価率を設定することはできません。
 DocType: Subscription Plan Detail,Plan,計画
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,総勘定元帳ごとの銀行取引明細残高
@@ -7733,7 +7717,6 @@ DocType: Item Customer Detail,Item Customer Detail,アイテム顧客詳細
 apps/erpnext/erpnext/hr/doctype/employee_benefit_claim/employee_benefit_claim.py,Maximum benefit amount of employee {0} exceeds {1},従業員{0}の最大便益額が{1}を超えています
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py,Total allocated leaves are more than days in the period,総割り当てられた葉は期間中の日数以上のもの
 DocType: Linked Soil Analysis,Linked Soil Analysis,リンクされた土壌分析
-DocType: Pricing Rule,Percentage,パーセンテージ
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Item {0} must be a stock Item,アイテム{0}は在庫アイテムでなければなりません
 DocType: Manufacturing Settings,Default Work In Progress Warehouse,デフォルト作業中倉庫
 apps/erpnext/erpnext/healthcare/doctype/practitioner_schedule/practitioner_schedule.js,"Schedules for {0} overlaps, do you want to proceed after skiping overlaped slots ?",{0}のスケジュールが重複しています。重複スロットをスキップした後に進めますか？
