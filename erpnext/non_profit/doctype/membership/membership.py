@@ -50,4 +50,32 @@ class Membership(Document):
 			self.load_from_db()
 			self.db_set('paid', 1)
 
+def create_membership(name, email, membership_type, from_date, to_date, currency, amount, paid):
+	member = get_or_create_member_using_email(email, name, membership_type)
+
+	membership = frappe.new_doc("Membership")
+	membership.membership_type = membership_type
+	membership.from_date = from_date
+	membership.to_date = to_date
+	membership.currency = currency
+	membership.amount = amount
+	membership.paid = paid
+
+	membership.insert()
+
+	return membership.as_json()
+
+def get_or_create_member_using_email(email, name, membership_type):
+	member_list = frappe.get_all("Member", filters={'email': email})
+	if len(member_list):
+		return member_list[0]['name']
+	else:
+		new_member = frappe.new_doc('Member')
+		new_member.member_name = name
+		new_member.membership_type = membership_type
+		new_member.email = email
+		new_member.insert()
+		new_member.load_from_db()
+
+		return new_member.name
 
