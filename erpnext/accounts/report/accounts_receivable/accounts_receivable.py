@@ -344,26 +344,28 @@ class ReceivablePayableReport(object):
 	def allocate_outstanding_based_on_payment_terms(self, row):
 		self.get_payment_terms(row)
 		for term in row.payment_terms:
-			term.outstanding = term.invoiced
 
 			# update "paid" and "oustanding" for this term
-			self.allocate_closing_to_term(row, term, 'paid')
+			if not term.paid:
+				self.allocate_closing_to_term(row, term, 'paid')
 
 			# update "credit_note" and "oustanding" for this term
 			if term.outstanding:
 				self.allocate_closing_to_term(row, term, 'credit_note')
+
+		row.payment_terms = sorted(row.payment_terms, key=lambda x: x['due_date'])
 
 	def get_payment_terms(self, row):
 		# build payment_terms for row
 		payment_terms_details = frappe.db.sql("""
 			select
 				si.name, si.party_account_currency, si.currency, si.conversion_rate,
-				ps.due_date, ps.payment_amount, ps.description
+				ps.due_date, ps.payment_amount, ps.description, ps.paid_amount
 			from `tab{0}` si, `tabPayment Schedule` ps
 			where
 				si.name = ps.parent and
 				si.name = %s
-			order by ps.due_date
+			order by ps.paid_amount desc, due_date
 		""".format(row.voucher_type), row.voucher_no, as_dict = 1)
 
 
@@ -389,10 +391,13 @@ class ReceivablePayableReport(object):
 			"invoiced": invoiced,
 			"invoice_grand_total": row.invoiced,
 			"payment_term": d.description,
-			"paid": 0.0,
+			"paid": d.paid_amount,
 			"credit_note": 0.0,
-			"outstanding": 0.0
+			"outstanding": invoiced - d.paid_amount
 		}))
+
+		if d.paid_amount:
+			row['paid'] -= d.paid_amount
 
 	def allocate_closing_to_term(self, row, term, key):
 		if row[key]:
