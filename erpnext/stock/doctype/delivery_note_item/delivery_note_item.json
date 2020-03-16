@@ -83,7 +83,6 @@
   "dimension_col_break",
   "reason_for_return_section_break",
   "reason_for_return",
-  "reason_for_reaturn_column_break",
   "section_break_72",
   "page_break"
  ],
@@ -704,7 +703,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:parent.is_return==1;",
+   "depends_on": "eval:parent.is_return==1",
    "fieldname": "reason_for_return",
    "fieldtype": "Small Text",
    "label": "Reason for Return",
@@ -712,16 +711,10 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:parent.is_return==1;",
+   "depends_on": "eval:parent.is_return==1",
    "fieldname": "reason_for_return_section_break",
    "fieldtype": "Section Break",
    "label": "Reason For Return"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:parent.is_return==1;",
-   "fieldname": "reason_for_reaturn_column_break",
-   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
