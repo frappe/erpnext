@@ -27,6 +27,6 @@ frappe.ui.form.on('LinkedIn Settings', {
 					window.location.href = r.message;
 				}
 			});
-		});
+		}).removeClass("btn-xs").addClass("btn-primary");
 	}
 });
