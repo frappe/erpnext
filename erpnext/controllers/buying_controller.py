@@ -112,10 +112,8 @@ class BuyingController(StockController):
 			"docstatus": 1
 		})]
 		if self.is_return and len(not_cancelled_asset):
-			if len(not_cancelled_asset) < 4:
-				frappe.throw(_("You need to cancel Asset: {} to create purchase return.".format(frappe.bold(', '.join(not_cancelled_asset)))))
-			else:
-				frappe.throw(_("You need to cancel assets linked to this document to create purchase return."))
+			frappe.throw(_("{} has submitted assets linked to it. You need to cancel the assets to create purchase return.".format(self.return_against)),
+				title=_("Not Allowed"))
 
 	def get_asset_items(self):
 		if self.doctype not in ['Purchase Order', 'Purchase Invoice', 'Purchase Receipt']:
