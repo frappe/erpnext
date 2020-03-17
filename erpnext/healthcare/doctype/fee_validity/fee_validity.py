@@ -30,6 +30,9 @@ class FeeValidity(Document):
 
 
 def create_fee_validity(appointment):
+	if not check_is_new_patient(appointment):
+		return
+
 	fee_validity = frappe.new_doc('Fee Validity')
 	fee_validity.practitioner = appointment.practitioner
 	fee_validity.patient = appointment.patient
@@ -42,3 +45,19 @@ def create_fee_validity(appointment):
 	})
 	fee_validity.save(ignore_permissions=True)
 	return fee_validity
+
+def check_is_new_patient(appointment):
+	validity_exists = frappe.db.exists('Fee Validity', {
+		'practitioner': appointment.practitioner,
+		'patient': appointment.patient
+	})
+	if validity_exists:
+		return False
+
+	appointment_exists = frappe.db.get_all('Patient Appointment', {
+		'name': ('!=', appointment.name),
+		'status': ('!=', 'Cancelled')
+	})
+	if len(appointment_exists) and appointment_exists[0]:
+		return False
+	return True
