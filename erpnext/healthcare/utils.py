@@ -42,6 +42,9 @@ def validate_customer_created(patient):
 		frappe.throw(msg, title=_('Customer Not Found'))
 
 def get_fee_validity(patient_appointments):
+	if not frappe.db.get_single_value('Healthcare Settings', 'enable_free_follow_ups'):
+		return
+
 	fee_validity_details = []
 	items_to_invoice = []
 	valid_days = frappe.db.get_single_value('Healthcare Settings', 'valid_days')
@@ -346,18 +349,21 @@ def manage_prescriptions(invoiced, ref_dt, ref_dn, dt, created_check_field):
 
 
 def check_fee_validity(appointment):
+	if not frappe.db.get_single_value('Healthcare Settings', 'enable_free_follow_ups'):
+		return
+
 	validity = frappe.db.exists('Fee Validity', {
 		'practitioner': appointment.practitioner,
 		'patient': appointment.patient,
-		'status': 'Ongoing'
+		'status': 'Pending',
+		'valid_till': ('>=', appointment.appointment_date)
 	})
 	if not validity:
 		return
 
-	fee_validity = frappe.get_doc('Fee Validity', validity)
-	appointment_date = getdate(appointment.appointment_date)
-	if fee_validity.valid_till >= appointment_date and fee_validity.visited < fee_validity.max_visits:
-		return fee_validity
+	validity = frappe.get_doc('Fee Validity', validity)
+	return validity
+
 
 def manage_fee_validity(appointment):
 	fee_validity = check_fee_validity(appointment)

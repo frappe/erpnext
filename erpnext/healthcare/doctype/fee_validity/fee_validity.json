@@ -75,7 +75,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Ongoing\nCompleted\nExpired",
+   "options": "Completed\nPending",
    "read_only": 1
   },
   {
@@ -98,7 +98,7 @@
   }
  ],
  "links": [],
- "modified": "2020-03-14 21:42:40.766973",
+ "modified": "2020-03-17 18:29:01.163961",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Fee Validity",
