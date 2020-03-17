@@ -13,7 +13,7 @@ def setup(company=None, patch=True):
 
 
 def make_custom_fields():
-    	custom_fields = {
+	custom_fields = {
 		'Supplier': [
 			dict(fieldname='irs_1099', fieldtype='Check', insert_after='tax_id',
 				label='Is IRS 1099 reporting required for supplier?')
