@@ -29,6 +29,7 @@
    "in_list_view": 1,
    "label": "Healthcare Practitioner",
    "options": "Healthcare Practitioner",
+   "read_only": 1,
    "reqd": 1,
    "search_index": 1
   },
@@ -38,23 +39,27 @@
    "in_list_view": 1,
    "label": "Patient",
    "options": "Patient",
+   "read_only": 1,
    "reqd": 1,
    "search_index": 1
   },
   {
    "fieldname": "visited",
    "fieldtype": "Int",
-   "label": "Visited yet"
+   "label": "Visited yet",
+   "read_only": 1
   },
   {
    "fieldname": "valid_till",
    "fieldtype": "Date",
-   "label": "Valid till"
+   "label": "Valid till",
+   "read_only": 1
   },
   {
    "fieldname": "section_break_3",
    "fieldtype": "Section Break",
-   "label": "Validity"
+   "label": "Validity",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_6",
@@ -63,7 +68,8 @@
   {
    "fieldname": "max_visits",
    "fieldtype": "Int",
-   "label": "Max number of visit"
+   "label": "Max number of visit",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_3",
@@ -89,7 +95,8 @@
    "fieldname": "ref_appointments",
    "fieldtype": "Table MultiSelect",
    "label": "Reference Appointments",
-   "options": "Fee Validity Reference"
+   "options": "Fee Validity Reference",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -97,8 +104,9 @@
    "fieldtype": "Section Break"
   }
  ],
+ "in_create": 1,
  "links": [],
- "modified": "2020-03-17 18:29:01.163961",
+ "modified": "2020-03-17 20:25:06.487418",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Fee Validity",
