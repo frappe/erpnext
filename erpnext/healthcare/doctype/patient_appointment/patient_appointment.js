@@ -40,24 +40,6 @@ frappe.ui.form.on('Patient Appointment', {
 
 		if (frm.is_new()) {
 			frm.page.set_primary_action(__('Check Availability'), function() {
-				frappe.db.get_value('Healthcare Settings', {name: 'Healthcare Settings'}, 'automate_appointment_invoicing', (settings) => {
-					if (settings.automate_appointment_invoicing) {
-						if (!frm.doc.mode_of_payment) {
-							frappe.msgprint({
-								title: __('Not Allowed'),
-								message: __('Please select a Mode of Payment first'),
-								indicator: 'red'
-							});
-						}
-						if (!frm.doc.paid_amount) {
-							frappe.msgprint({
-								title: __('Not Allowed'),
-								message: __('Please set the Paid Amount first'),
-								indicator: 'red'
-							});
-						}
-					}
-				});
 				if (!frm.doc.patient) {
 					frappe.msgprint({
 						title: __('Not Allowed'),
@@ -65,7 +47,33 @@ frappe.ui.form.on('Patient Appointment', {
 						indicator: 'red'
 					});
 				} else {
-					check_and_set_availability(frm);
+					frappe.call({
+						method: 'erpnext.healthcare.doctype.patient_appointment.patient_appointment.check_payment_fields_reqd',
+						args: {'patient': frm.doc.patient},
+						callback: function(data) {
+							if (data.message == true) {
+								if (frm.doc.mode_of_payment && frm.doc.paid_amount) {
+									check_and_set_availability(frm);
+								}
+								if (!frm.doc.mode_of_payment) {
+									frappe.msgprint({
+										title: __('Not Allowed'),
+										message: __('Please select a Mode of Payment first'),
+										indicator: 'red'
+									});
+								}
+								if (!frm.doc.paid_amount) {
+									frappe.msgprint({
+										title: __('Not Allowed'),
+										message: __('Please set the Paid Amount first'),
+										indicator: 'red'
+									});
+								}
+							} else {
+								check_and_set_availability(frm);
+							}
+						}
+					});
 				}
 			});
 		} else {
@@ -107,8 +115,12 @@ frappe.ui.form.on('Patient Appointment', {
 				create_vital_signs(frm);
 			}, __('Create'));
 		}
+	},
 
-		frm.events.toggle_payment_fields(frm);
+	patient: function(frm) {
+		if (frm.doc.patient) {
+			frm.trigger('toggle_payment_fields');
+		}
 	},
 
 	get_procedure_from_encounter: function(frm) {
@@ -116,17 +128,24 @@ frappe.ui.form.on('Patient Appointment', {
 	},
 
 	toggle_payment_fields: function(frm) {
-		frappe.db.get_value('Healthcare Settings', {name: 'Healthcare Settings'}, ['automate_appointment_invoicing'], (settings) => {
-			if (settings.automate_appointment_invoicing == 1) {
-				frm.set_df_property('mode_of_payment', 'hidden', 0);
-				frm.set_df_property('paid_amount', 'hidden', 0);
-				frm.set_df_property('mode_of_payment', 'reqd', 1);
-				frm.set_df_property('paid_amount', 'reqd', 1);
-			} else {
-				frm.set_df_property('mode_of_payment', 'hidden', 1);
-				frm.set_df_property('paid_amount', 'hidden', 1);
-				frm.set_df_property('mode_of_payment', 'reqd', 0);
-				frm.set_df_property('paid_amount', 'reqd', 0);
+		frappe.call({
+			method: 'erpnext.healthcare.doctype.patient_appointment.patient_appointment.check_payment_fields_reqd',
+			args: {'patient': frm.doc.patient},
+			callback: function(data) {
+				if (data.message.fee_validity) {
+					// if fee validity exists and automated appointment invoicing is enabled,
+					// show payment fields as non-mandatory
+					frm.set_df_property('mode_of_payment', 'hidden', 0);
+					frm.set_df_property('paid_amount', 'hidden', 0);
+					frm.set_df_property('mode_of_payment', 'reqd', 0);
+					frm.set_df_property('paid_amount', 'reqd', 0);
+				} else {
+					// if automated appointment invoicing is disabled, hide fields
+					frm.toggle_display('mode_of_payment', data.message ? 1 : 0);
+					frm.toggle_display('paid_amount', data.message ? 1 : 0);
+					frm.toggle_reqd('mode_of_payment', data.message ? 1 : 0);
+					frm.toggle_reqd('paid_amount', data.message ? 1 :0);
+				}
 			}
 		});
 	}

@@ -13,7 +13,7 @@ import datetime
 from frappe.core.doctype.sms_settings.sms_settings import send_sms
 from erpnext.hr.doctype.employee.employee import is_holiday
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account, get_income_account
-from erpnext.healthcare.utils import check_fee_validity, get_service_item_and_practitioner_charge
+from erpnext.healthcare.utils import check_fee_validity, get_service_item_and_practitioner_charge, manage_fee_validity
 
 class PatientAppointment(Document):
 	def validate(self):
@@ -84,19 +84,28 @@ class PatientAppointment(Document):
 					frappe.db.set_value('Patient Appointment', self.name, 'notes', comments)
 
 	def update_fee_validity(self):
-		fee_validity = check_fee_validity(self)
+		fee_validity = manage_fee_validity(self)
 		if fee_validity:
-			visited = fee_validity.visited + 1
-			frappe.db.set_value('Fee Validity', fee_validity.name, 'visited', visited)
-			if fee_validity.ref_invoice:
-				frappe.db.set_value('Patient Appointment', self.name, 'invoiced', True)
-				frappe.db.set_value('Patient Appointment', self.name, 'ref_sales_invoice', fee_validity.ref_invoice)
 			frappe.msgprint(_('{0} has fee validity till {1}').format(self.patient, fee_validity.valid_till))
 
 
+@frappe.whitelist()
+def check_payment_fields_reqd(patient):
+	automate_invoicing = frappe.db.get_single_value('Healthcare Settings', 'automate_appointment_invoicing')
+	free_follow_ups = frappe.db.get_single_value('Healthcare Settings', 'enable_free_follow_ups')
+	if automate_invoicing:
+		if free_follow_ups:
+			fee_validity = frappe.db.exists('Fee Validity', {'patient': patient, 'status': 'Ongoing'})
+			if fee_validity:
+				return {'fee_validity': fee_validity}
+		return True
+	return False
+
 def invoice_appointment(appointment_doc):
-	if frappe.db.get_single_value('Healthcare Settings', 'automate_appointment_invoicing') and \
-			not frappe.db.get_value('Patient Appointment', appointment_doc.name, 'invoiced'):
+	automate_invoicing = frappe.db.get_single_value('Healthcare Settings', 'automate_appointment_invoicing')
+	appointment_invoiced = frappe.db.get_value('Patient Appointment', appointment_doc.name, 'invoiced')
+	fee_validity = check_fee_validity(appointment_doc)
+	if automate_invoicing and not appointment_invoiced and not fee_validity:
 		sales_invoice = frappe.new_doc('Sales Invoice')
 		sales_invoice.customer = frappe.get_value('Patient', appointment_doc.patient, 'customer')
 		sales_invoice.appointment = appointment_doc.name
@@ -136,51 +145,19 @@ def get_appointment_item(appointment_doc, item):
 
 def cancel_appointment(appointment_id):
 	appointment = frappe.get_doc('Patient Appointment', appointment_id)
-	# If invoiced --> fee_validity update visit as -1
 	if appointment.invoiced:
 		sales_invoice = check_sales_invoice_exists(appointment)
 		if sales_invoice and cancel_sales_invoice(sales_invoice):
-			frappe.msgprint(
-				_('Appointment {0} and Sales Invoice {1} cancelled'.format(appointment.name, sales_invoice.name))
-			)
+			msg = _('Appointment {0} and Sales Invoice {1} cancelled').format(appointment.name, sales_invoice.name)
 		else:
-			validity = check_fee_validity(appointment.practitioner, appointment.patient)
-			if validity:
-				fee_validity = frappe.get_doc('Fee Validity', validity)
-				if validate_appointment_in_fee_validity(appointment, fee_validity.valid_till, fee_validity.ref_invoice):
-					visited = fee_validity.visited - 1
-					frappe.db.set_value('Fee Validity', fee_validity.name, 'visited', visited)
-					frappe.msgprint(
-						_('Appointment cancelled. Please review and cancel the invoice {0}'.format(fee_validity.ref_invoice))
-					)
-				else:
-					frappe.msgprint(_('Appointment Cancelled'))
-			else:
-				frappe.msgprint(_('Appointment Cancelled'))
+			msg = _('Appointment Cancelled. Please review and cancel the invoice {0}').format(fee_validity.ref_invoice)
 	else:
-		frappe.msgprint(_('Appointment Cancelled'))
+		fee_validity = manage_fee_validity(appointment)
+		msg = _('Appointment Cancelled.')
+		if fee_validity:
+			msg += _('Fee Validity {0} updated.').format(fee_validity.name)
 
-
-def validate_appointment_in_fee_validity(appointment, valid_end_date, ref_invoice):
-	valid_days = frappe.db.get_single_value('Healthcare Settings', 'valid_days')
-	max_visits = frappe.db.get_single_value('Healthcare Settings', 'max_visits')
-	valid_start_date = add_days(getdate(valid_end_date), -int(valid_days))
-
-	# Appointments which have same fee validity range with the appointment
-	appointments = frappe.get_list('Patient Appointment', {
-		'patient': appointment.patient,
-		'invoiced': True,
-		'appointment_date': ('<=', getdate(valid_end_date)),
-		'appointment_date':('>=', getdate(valid_start_date)),
-		'practitioner': appointment.practitioner
-		}, order_by='appointment_date desc', limit=int(max_visits))
-
-	if appointments and len(appointments) > 0:
-		appointment_obj = appointments[len(appointments)-1]
-		sales_invoice = check_sales_invoice_exists(appointment_obj)
-		if sales_invoice.name == ref_invoice:
-			return True
-	return False
+	frappe.msgprint(msg)
 
 
 def cancel_sales_invoice(sales_invoice):

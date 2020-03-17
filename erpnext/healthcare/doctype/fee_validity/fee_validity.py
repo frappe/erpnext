@@ -23,31 +23,19 @@ class FeeValidity(Document):
 			elif valid_till < today:
 				self.status = 'Expired'
 
-
-def update_fee_validity(fee_validity, date, ref_invoice=None):
-	max_visits = frappe.db.get_single_value("Healthcare Settings", "max_visits")
-	valid_days = frappe.db.get_single_value("Healthcare Settings", "valid_days")
-	if not valid_days:
-		valid_days = 1
-	if not max_visits:
-		max_visits = 1
-	date = getdate(date)
-	valid_till = date + datetime.timedelta(days=int(valid_days))
-	fee_validity.max_visits = max_visits
+def create_fee_validity(appointment):
+	fee_validity = frappe.new_doc('Fee Validity')
+	fee_validity.practitioner = appointment.practitioner
+	fee_validity.patient = appointment.patient
+	fee_validity.max_visits = frappe.db.get_single_value('Healthcare Settings', 'max_visits') or 1
+	valid_days = frappe.db.get_single_value('Healthcare Settings', 'valid_days') or 1
 	fee_validity.visited = 1
-	fee_validity.valid_till = valid_till
-	fee_validity.ref_invoice = ref_invoice
+	fee_validity.valid_till = getdate(appointment.appointment_date) + datetime.timedelta(days=int(valid_days))
+	fee_validity.append('ref_appointments', {
+		'appointment': appointment.name
+	})
 	fee_validity.save(ignore_permissions=True)
 	return fee_validity
-
-
-def create_fee_validity(practitioner, patient, date, ref_invoice=None):
-	fee_validity = frappe.new_doc("Fee Validity")
-	fee_validity.practitioner = practitioner
-	fee_validity.patient = patient
-	fee_validity = update_fee_validity(fee_validity, date, ref_invoice)
-	return fee_validity
-
 
 def update_validity_status():
 	docs = frappe.get_all('Fee Validity', filters={'status': ['not in', ['Completed', 'Expired']]})

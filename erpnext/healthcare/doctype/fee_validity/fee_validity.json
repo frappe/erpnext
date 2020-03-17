@@ -13,13 +13,14 @@
   "patient",
   "column_break_3",
   "status",
+  "section_break_5",
   "section_break_3",
   "max_visits",
   "visited",
-  "valid_till",
+  "ref_appointments",
   "column_break_6",
-  "ref_invoice",
-  "start_date"
+  "start_date",
+  "valid_till"
  ],
  "fields": [
   {
@@ -51,12 +52,6 @@
    "label": "Valid till"
   },
   {
-   "fieldname": "ref_invoice",
-   "fieldtype": "Link",
-   "label": "Reference Invoice",
-   "options": "Sales Invoice"
-  },
-  {
    "fieldname": "section_break_3",
    "fieldtype": "Section Break",
    "label": "Validity"
@@ -84,15 +79,26 @@
    "read_only": 1
   },
   {
-   "fetch_from": "ref_invoice.posting_date",
+   "fetch_from": "ref_appointment.appointment_date",
    "fieldname": "start_date",
    "fieldtype": "Date",
    "label": "Start Date",
    "read_only": 1
+  },
+  {
+   "fieldname": "ref_appointments",
+   "fieldtype": "Table MultiSelect",
+   "label": "Reference Appointments",
+   "options": "Fee Validity Reference"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
   }
  ],
  "links": [],
- "modified": "2020-03-09 23:14:08.581821",
+ "modified": "2020-03-14 21:42:40.766973",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Fee Validity",

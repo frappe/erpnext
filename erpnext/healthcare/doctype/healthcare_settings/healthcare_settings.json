@@ -14,6 +14,7 @@
   "collect_registration_fee",
   "registration_fee",
   "automate_appointment_invoicing",
+  "enable_free_follow_ups",
   "max_visits",
   "valid_days",
   "healthcare_service_items",
@@ -78,10 +79,12 @@
    "options": "Currency"
   },
   {
+   "depends_on": "eval:doc.enable_free_follow_ups == 1",
    "description": "Time period (Valid number of days) for free consultations",
    "fieldname": "valid_days",
    "fieldtype": "Int",
-   "label": "Valid number of days"
+   "label": "Valid number of days",
+   "mandatory_depends_on": "eval:doc.enable_free_follow_ups == 1"
   },
   {
    "collapsible": 1,
@@ -287,15 +290,23 @@
    "label": "Remind Before"
   },
   {
+   "depends_on": "eval:doc.enable_free_follow_ups == 1",
    "description": "The number of free follow ups (Patient Encounters in valid days) allowed",
    "fieldname": "max_visits",
    "fieldtype": "Int",
-   "label": "Number of Patient Encounters in valid days"
+   "label": "Number of Patient Encounters in valid days",
+   "mandatory_depends_on": "eval:doc.enable_free_follow_ups == 1"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_free_follow_ups",
+   "fieldtype": "Check",
+   "label": "Enable Free Follow-ups"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-03-09 17:43:23.251559",
+ "modified": "2020-03-13 14:34:40.962503",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",
