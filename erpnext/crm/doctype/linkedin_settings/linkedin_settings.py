@@ -100,6 +100,7 @@ class LinkedInSettings(Document):
 			headers['Content-Type']='image/jpeg'
 			response = self.http_post(upload_url, headers=headers, data=open(media,"rb"))
 			if response.status_code < 200 and response.status_code > 299:
+				frappe.throw("Error While Uploading Image", title="{0} {1}".format(response.status_code, response.reason))
 				return None
 			return asset
 		return None
