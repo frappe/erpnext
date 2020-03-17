@@ -498,6 +498,14 @@ class BOM(WebsiteGenerator):
 		self.scrap_material_cost = total_sm_cost
 		self.base_scrap_material_cost = base_total_sm_cost
 
+	def update_new_bom(self, old_bom, new_bom, rate):
+		for d in self.get("items"):
+			if d.bom_no != old_bom: continue
+
+			d.bom_no = new_bom
+			d.rate = rate
+			d.amount = (d.stock_qty or d.qty) * rate
+
 	def update_exploded_items(self):
 		""" Update Flat BOM, following will be correct data"""
 		self.get_exploded_items()
