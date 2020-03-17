@@ -74,13 +74,15 @@
   },
   {
    "fieldname": "profile_pic",
-   "fieldtype": "Attach Image"
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "read_only": 1
   }
  ],
  "image_field": "profile_pic",
  "issingle": 1,
  "links": [],
- "modified": "2020-03-17 15:23:47.760113",
+ "modified": "2020-03-17 16:49:36.019168",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Twitter Settings",
