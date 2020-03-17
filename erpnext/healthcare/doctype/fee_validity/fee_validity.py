@@ -11,17 +11,23 @@ import datetime
 class FeeValidity(Document):
 	def validate(self):
 		self.update_status()
+		self.set_start_date()
 
 	def update_status(self):
 		valid_till = getdate(self.valid_till)
-		today  = getdate()
+		start_date = getdate(self.start_date)
 		if self.visited >= self.max_visits:
 			self.status = 'Completed'
-		elif self.visited < self.max_visits:
-			if valid_till >= today:
-				self.status = 'Ongoing'
-			elif valid_till < today:
-				self.status = 'Expired'
+		else:
+			self.status = 'Pending'
+
+	def set_start_date(self):
+		self.start_date = getdate()
+		for appointment in self.ref_appointments:
+			appointment_date = frappe.db.get_value('Patient Appointment', appointment.appointment, 'appointment_date')
+			if getdate(appointment_date) < self.start_date:
+				self.start_date = getdate(appointment_date)
+
 
 def create_fee_validity(appointment):
 	fee_validity = frappe.new_doc('Fee Validity')
@@ -36,8 +42,3 @@ def create_fee_validity(appointment):
 	})
 	fee_validity.save(ignore_permissions=True)
 	return fee_validity
-
-def update_validity_status():
-	docs = frappe.get_all('Fee Validity', filters={'status': ['not in', ['Completed', 'Expired']]})
-	for doc in docs:
-		frappe.get_doc("Task", doc.name).update_status()

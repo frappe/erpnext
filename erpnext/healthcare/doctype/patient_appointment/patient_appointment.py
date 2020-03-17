@@ -95,7 +95,7 @@ def check_payment_fields_reqd(patient):
 	free_follow_ups = frappe.db.get_single_value('Healthcare Settings', 'enable_free_follow_ups')
 	if automate_invoicing:
 		if free_follow_ups:
-			fee_validity = frappe.db.exists('Fee Validity', {'patient': patient, 'status': 'Ongoing'})
+			fee_validity = frappe.db.exists('Fee Validity', {'patient': patient, 'status': 'Pending'})
 			if fee_validity:
 				return {'fee_validity': fee_validity}
 		return True
