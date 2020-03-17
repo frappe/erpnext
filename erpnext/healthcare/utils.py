@@ -21,7 +21,7 @@ def get_healthcare_services_to_invoice(patient):
 		patient_appointments = frappe.get_list(
 			'Patient Appointment',
 			fields='*',
-			filters={'patient': patient.name, 'invoiced': False},
+			filters={'patient': patient.name, 'invoiced': 0},
 			order_by='appointment_date'
 		)
 		if patient_appointments:
@@ -32,7 +32,7 @@ def get_healthcare_services_to_invoice(patient):
 		clinical_procedures = get_clinical_procedures_to_invoice(patient)
 		inpatient_services = get_inpatient_services_to_invoice(patient)
 
-		items_to_invoice = encounters + lab_tests + clinical_procedures + inpatient_services
+		items_to_invoice += encounters + lab_tests + clinical_procedures + inpatient_services
 		return items_to_invoice
 
 def validate_customer_created(patient):
@@ -45,10 +45,7 @@ def get_fee_validity(patient_appointments):
 	if not frappe.db.get_single_value('Healthcare Settings', 'enable_free_follow_ups'):
 		return
 
-	fee_validity_details = []
 	items_to_invoice = []
-	valid_days = frappe.db.get_single_value('Healthcare Settings', 'valid_days')
-	max_visits = frappe.db.get_single_value('Healthcare Settings', 'max_visits')
 	for appointment in patient_appointments:
 		if appointment.procedure_template:
 			if frappe.db.get_value('Clinical Procedure Template', appointment.procedure_template, 'is_billable'):
@@ -58,40 +55,21 @@ def get_fee_validity(patient_appointments):
 					'service': appointment.procedure_template
 				})
 		else:
-			practitioner_exist_in_list = False
-			skip_invoice = False
-			if fee_validity_details:
-				for validity in fee_validity_details:
-					if validity['practitioner'] == appointment.practitioner:
-						practitioner_exist_in_list = True
-						if validity['valid_till'] >= appointment.appointment_date:
-							validity['visits'] = validity['visits'] + 1
-							if int(max_visits) > validity['visits']:
-								skip_invoice = True
-						if not skip_invoice:
-							validity['visits'] = 1
-							validity['valid_till'] = appointment.appointment_date + datetime.timedelta(days=int(valid_days))
-
-			if not practitioner_exist_in_list:
-				valid_till = appointment.appointment_date + datetime.timedelta(days=int(valid_days))
-				visits = 0
-				fee_validity = check_fee_validity(appointment)
-				if fee_validity:
-					valid_till = fee_validity.valid_till
-					visits = fee_validity.visited
-					fee_validity_details.append({'practitioner': appointment.practitioner,
-					'valid_till': valid_till, 'visits': visits})
-
-			if not skip_invoice:
+			fee_validity = frappe.db.exists('Fee Validity Reference', {'appointment': appointment.name})
+			if not fee_validity:
 				practitioner_charge = 0
 				income_account = None
 				service_item = None
 				if appointment.practitioner:
 					service_item, practitioner_charge = get_service_item_and_practitioner_charge(appointment)
 					income_account = get_income_account(appointment.practitioner, appointment.company)
-				items_to_invoice.append({'reference_type': 'Patient Appointment', 'reference_name': appointment.name,
-				'service': service_item, 'rate': practitioner_charge,
-				'income_account': income_account})
+				items_to_invoice.append({
+					'reference_type': 'Patient Appointment',
+					'reference_name': appointment.name,
+					'service': service_item,
+					'rate': practitioner_charge,
+					'income_account': income_account
+				})
 
 	return items_to_invoice
 
