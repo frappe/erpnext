@@ -18,11 +18,11 @@ class SocialMediaPost(Document):
 
 	def post(self):
 		try:
-			if self.twitter:
+			if self.twitter and not self.twitter_post_id:
 				twitter = frappe.get_doc("Twitter Settings")
 				twitter_post = twitter.post(self.text, self.image)
 				self.twitter_post_id = twitter_post.id
-			if self.linkedin:
+			if self.linkedin and not self.linkedin_post_id:
 				linkedin = frappe.get_doc("LinkedIn Settings")
 				linkedin_post = linkedin.post(self.text, self.image)
 				self.linkedin_post_id = linkedin_post.headers['X-RestLi-Id'].split(":")[-1]
