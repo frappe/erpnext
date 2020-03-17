@@ -173,6 +173,5 @@ def callback(code=None, error=None, error_description=None):
 		linkedin_settings.get_member_profile()
 		frappe.db.commit()
 	else:
-		frappe.local.response["message"] = error
 		frappe.local.response["type"] = "redirect"
 		frappe.local.response["location"] = get_url_to_form("LinkedIn Settings","LinkedIn Settings")
