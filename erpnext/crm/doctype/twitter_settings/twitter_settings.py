@@ -72,11 +72,10 @@ class TwitterSettings(Document):
 		try:
 			if media_id:
 				response = api.update_status(status = text, media_ids = [media_id])
-				
 			else:
 				response = api.update_status(status = text)
 			return response
-			
+
 		except TweepError as e:
 			content = json.loads(e.response.content)
 			content = content["errors"][0]
