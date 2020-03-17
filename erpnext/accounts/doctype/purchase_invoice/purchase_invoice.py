@@ -1024,3 +1024,6 @@ def block_invoice(name, release_date, hold_comment=None):
 def make_inter_company_sales_invoice(source_name, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 	return make_inter_company_transaction("Purchase Invoice", source_name, target_doc)
+
+def on_doctype_update():
+	frappe.db.add_index("Purchase Invoice", ["supplier", "is_return", "return_against"])
