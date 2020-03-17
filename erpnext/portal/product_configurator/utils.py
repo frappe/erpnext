@@ -188,7 +188,9 @@ def get_attributes_and_values(item_code):
 
 def get_numeric_values():
 	attribute_values_list = []
-	numeric_attributes = frappe.get_list("Item Attribute", fields=['name', 'from_range', 'to_range', 'increment'], filters={"numeric_values": 1})
+	numeric_attributes = frappe.db.get_all("Item Attribute",
+		fields=['name', 'from_range', 'to_range', 'increment'],
+		filters={"numeric_values": 1})
 	for attribute in numeric_attributes:
 		from_range = attribute["from_range"]
 		to_range = attribute['to_range'] + attribute['increment']

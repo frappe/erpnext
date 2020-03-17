@@ -64,6 +64,9 @@ class LeaveEncashment(Document):
 
 		allocation = self.get_leave_allocation()
 
+		if not allocation:
+			frappe.throw(_("No Leaves Allocated to Employee: {0} for Leave Type: {1}").format(self.employee, self.leave_type))
+
 		self.leave_balance = allocation.total_leaves_allocated - allocation.carry_forwarded_leaves_count\
 			- get_unused_leaves(self.employee, self.leave_type, allocation.from_date, self.encashment_date)
 

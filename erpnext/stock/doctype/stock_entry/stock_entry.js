@@ -878,10 +878,8 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 		}
 	}
 
-	if(item && item.has_serial_no
-		&& frm.doc.purpose === 'Material Receipt') {
-		return;
-	}
+	if(item && !item.has_serial_no && item.has_batch_no) return;
+	if (frm.doc.purpose === 'Material Receipt') return;
 
 	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
 		new erpnext.SerialNoBatchSelector({

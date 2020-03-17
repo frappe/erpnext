@@ -183,12 +183,17 @@ class Item(WebsiteGenerator):
 		# default warehouse, or Stores
 		for default in self.item_defaults or [frappe._dict({'company': frappe.defaults.get_defaults().company})]:
 			default_warehouse = (default.default_warehouse
-					or frappe.db.get_single_value('Stock Settings', 'default_warehouse')
-					or frappe.db.get_value('Warehouse', {'warehouse_name': _('Stores')}))
+					or frappe.db.get_single_value('Stock Settings', 'default_warehouse'))
+			if default_warehouse:
+				warehouse_company = frappe.db.get_value("Warehouse", default_warehouse, "company")
+			
+			if not default_warehouse or warehouse_company != default.company:
+				default_warehouse = frappe.db.get_value('Warehouse',
+					{'warehouse_name': _('Stores'), 'company': default.company})
 
 			if default_warehouse:
 				stock_entry = make_stock_entry(item_code=self.name, target=default_warehouse, qty=self.opening_stock,
-												rate=self.valuation_rate, company=default.company)
+					rate=self.valuation_rate, company=default.company)
 
 				stock_entry.add_comment("Comment", _("Opening Stock"))
 
