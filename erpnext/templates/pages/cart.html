@@ -50,9 +50,11 @@
 	<p class="text-muted">{{ _('Your cart is Empty') }}</p>
 	{% endif %}
 	{% if doc.items and cart_settings.enable_checkout %}
-		<button class="btn btn-primary btn-place-order" type="button" style="float:right">
+	<div class="place-order-container">
+		<button class="btn btn-primary btn-place-order" type="button">
 			{{ _("Place Order") }}
 		</button>
+	</div>
 	{% endif %}
 
 	{% if doc.items %}
