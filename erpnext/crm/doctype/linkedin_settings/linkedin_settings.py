@@ -129,18 +129,16 @@ class LinkedInSettings(Document):
 			}
 		}
 		if media_id:
-			body["specificContent"]["com.linkedin.ugc.ShareContent"]["media"] = [
-				{
-					"status": "READY",
-					"description": {
-						"text": ""
-					},
-					"media": media_id,
-					"title": {
-						"text":""
-					}
+			body["specificContent"]["com.linkedin.ugc.ShareContent"]["media"] = [{
+				"status": "READY",
+				"description": {
+					"text": ""
+				},
+				"media": media_id,
+				"title": {
+					"text":""
 				}
-			]
+			}]
 		response = self.http_post(url=url, headers=headers, body=body)
 		return response
 

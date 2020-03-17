@@ -29,10 +29,6 @@ class SocialMediaPost(Document):
 			self.db_set("post_status", "Posted")
 
 		except Exception as e:
-			print("==========COOL==========")
-			print(e)
-			print(e.__dict__)
-			print("==========COOL==========")
 			self.db_set("post_status", "Error")
 			title = _("Error while POSTING {0}").format(self.name)
 			traceback = frappe.get_traceback()
