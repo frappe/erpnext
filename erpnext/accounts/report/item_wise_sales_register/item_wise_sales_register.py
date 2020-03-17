@@ -373,6 +373,8 @@ def get_items(filters, additional_query_columns):
 
 	if additional_query_columns:
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
+	else:
+		additional_query_columns = ''
 
 	return frappe.db.sql("""
 		select

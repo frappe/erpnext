@@ -140,7 +140,7 @@
   }
  ],
  "links": [],
- "modified": "2020-01-28 13:52:22.513425",
+ "modified": "2020-03-02 19:34:28.362267",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Location",
@@ -218,6 +218,8 @@
    "write": 1
   }
  ],
+ "quick_entry": 1,
+ "restrict_to_domain": "Agriculture",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
