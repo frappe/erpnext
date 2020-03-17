@@ -296,17 +296,21 @@ class PurchaseInvoice(BuyingController):
 				if not d.purchase_order:
 					throw(_("""Purchase Order Required for item {0}
 						To submit the invoice without purchase order please set
-						{1} as {2} in {3}""").format(frappe.bold(d.item_code), frappe.bold('Purchase Order Required'),
+						{1} as {2} in {3}""").format(frappe.bold(d.item_code), frappe.bold(_('Purchase Order Required')),
 						frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings')))
 
 	def pr_required(self):
 		stock_items = self.get_stock_items()
 		if frappe.db.get_value("Buying Settings", None, "pr_required") == 'Yes':
+
+			if frappe.get_value('Supplier', self.supplier, 'allow_purchase_invoice_creation_without_purchase_receipt'):
+				return
+
 			for d in self.get('items'):
 				if not d.purchase_receipt and d.item_code in stock_items:
 					throw(_("""Purchase Receipt Required for item {0}
 						To submit the invoice without purchase receipt please set
-						{1} as {2} in {3}""").format(frappe.bold(d.item_code), frappe.bold('Purchase Receipt Required'),
+						{1} as {2} in {3}""").format(frappe.bold(d.item_code), frappe.bold(_('Purchase Receipt Required')),
 						frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings')))
 
 	def validate_write_off_account(self):
