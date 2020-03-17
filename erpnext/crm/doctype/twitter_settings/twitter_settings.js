@@ -2,17 +2,31 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Twitter Settings', {
-	login_button: function(frm){
-		if(!(frm.doc.consumer_key && frm.doc.consumer_secret)){
-			frappe.msgprint("Please set Consumer Key and Consumer Key Secret to Proceed");
-			return;
-		}
-		frappe.call({
-			doc: frm.doc,
-			method: "get_authorize_url",
-			callback : function(r) {
-				window.location.href = r.message;
+	onload: function(frm){
+		let url = window.location.href
+		let hashes = (url.split("?")[1])
+		if(hashes){
+			let hash = hashes.split("=")
+			if(hash[0] == "status"){
+				if(hash[1] == 1){
+					frappe.msgprint("Login Success")
+				}
 			}
+		}
+	},
+	refresh: function(frm){
+		frm.add_custom_button(('SignIn With Twitter'), function(){
+			if(!(frm.doc.consumer_key && frm.doc.consumer_secret)){
+				frappe.msgprint("Please set Consumer Key and Consumer Key Secret to Proceed");
+				return;
+			}
+			frappe.call({
+				doc: frm.doc,
+				method: "get_authorize_url",
+				callback : function(r) {
+					window.location.href = r.message;
+				}
+			});
 		});
 	}
 });

@@ -6,11 +6,11 @@
  "engine": "InnoDB",
  "field_order": [
   "account_name",
+  "profile_pic",
   "oauth_details",
   "consumer_key",
-  "consumer_secret",
   "column_break_5",
-  "login_button",
+  "consumer_secret",
   "user_details",
   "oauth_token",
   "oauth_secret",
@@ -20,7 +20,8 @@
   {
    "fieldname": "account_name",
    "fieldtype": "Data",
-   "label": "Account Name"
+   "label": "Account Name",
+   "read_only": 1
   },
   {
    "fieldname": "oauth_details",
@@ -30,33 +31,35 @@
   {
    "fieldname": "consumer_key",
    "fieldtype": "Data",
-   "label": "Consumer Key"
+   "in_list_view": 1,
+   "label": "Consumer Key",
+   "reqd": 1
   },
   {
    "fieldname": "consumer_secret",
    "fieldtype": "Password",
-   "label": "Consumer Key Secret"
+   "in_list_view": 1,
+   "label": "Consumer Key Secret",
+   "reqd": 1
   },
   {
    "fieldname": "oauth_token",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "OAuth Token",
    "read_only": 1
   },
   {
    "fieldname": "oauth_secret",
    "fieldtype": "Password",
+   "hidden": 1,
    "label": "OAuth Token Secret",
    "read_only": 1
   },
   {
-   "fieldname": "login_button",
-   "fieldtype": "Button",
-   "label": "Login Via OAuth"
-  },
-  {
    "fieldname": "oauth_verifier",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "OAuth Verifier",
    "read_only": 1
   },
@@ -68,11 +71,16 @@
    "fieldname": "user_details",
    "fieldtype": "Section Break",
    "label": "User Details"
+  },
+  {
+   "fieldname": "profile_pic",
+   "fieldtype": "Attach Image"
   }
  ],
+ "image_field": "profile_pic",
  "issingle": 1,
  "links": [],
- "modified": "2020-01-31 11:03:48.449352",
+ "modified": "2020-03-17 15:23:47.760113",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Twitter Settings",

@@ -11,7 +11,7 @@ import requests
 import json
 from frappe.utils.file_manager import get_file, get_file_path
 import urllib
-from frappe.utils import get_url_to_form
+from frappe.utils import get_url_to_form, get_link_to_form
 class LinkedInSettings(Document):
 	def get_authorization_url(self):
 		try:
@@ -29,7 +29,7 @@ class LinkedInSettings(Document):
 
 		return url
 
-	def get_access_token(self):
+	def get_access_token(self, code):
 		url = "https://www.linkedin.com/oauth/v2/accessToken"
 		try:
 			from urllib.parse import urlencode
@@ -37,7 +37,7 @@ class LinkedInSettings(Document):
 			from urllib import urlencode
 		body = {
 			"grant_type": "authorization_code",
-			"code": self.oauth_code,
+			"code": code,
 			"client_id": self.consumer_key,
 			"client_secret": self.get_password(fieldname="consumer_secret"),
 			"redirect_uri": get_site_url(frappe.local.site) + "/?cmd=erpnext.crm.doctype.linkedin_settings.linkedin_settings.callback",
@@ -48,9 +48,7 @@ class LinkedInSettings(Document):
 		
 		response = self.http_post(url=url, data=body, headers=headers)
 		response = frappe.parse_json(response.content.decode())
-		self.access_token = response["access_token"]
-		self.save()
-		self.get_member_profile()
+		self.db_set("access_token", response["access_token"])
 
 	def get_member_profile(self):
 		headers = {
@@ -59,21 +57,22 @@ class LinkedInSettings(Document):
 		url = "https://api.linkedin.com/v2/me"
 		response = requests.get(url=url, headers=headers)
 		response = frappe.parse_json(response.content.decode())
-		self.person_urn = response["id"]
-		self.save()
+		# self.db_set("person_urn", response["id"],notify=True, commit=True)
+		print(response)
+		self.db_set("person_urn", response["id"])
 		frappe.local.response["type"] = "redirect"
-		frappe.local.response["location"] = get_url_to_form("LinkedIn Settings","LinkedIn Settings")
-		frappe.local.response["message"] = "LinkedIn Settings has been configured."
+		location = get_url_to_form("LinkedIn Settings","LinkedIn Settings") + "?status=1"
+		frappe.local.response["location"] = location
 
 	def post(self, text, media=None):
 		if not media:
-			self.post_text(text)
+			return self.post_text(text)
 		else:
 			media_id = self.upload_image(media)
 			if media_id:
-				self.post_text(text, media_id=media_id)
+				return self.post_text(text, media_id=media_id)
 			else:
-				frappe.msgprint("Image upload to linkedin failed")
+				frappe.log_error("Failed to upload media.","LinkedIn Upload Error")
 
 
 	def upload_image(self, media):
@@ -81,27 +80,29 @@ class LinkedInSettings(Document):
 		register_url = "https://api.linkedin.com/v2/assets?action=registerUpload"
 
 		body = {
-				"registerUploadRequest": {
-					"recipes": ["urn:li:digitalmediaRecipe:feedshare-image"],
-					"owner": "urn:li:person:{0}".format(self.person_urn),
-					"serviceRelationships": [{
-						"relationshipType": "OWNER",
-						"identifier": "urn:li:userGeneratedContent"
-					}]
-				}
+			"registerUploadRequest": {
+				"recipes": ["urn:li:digitalmediaRecipe:feedshare-image"],
+				"owner": "urn:li:person:{0}".format(self.person_urn),
+				"serviceRelationships": [{
+					"relationshipType": "OWNER",
+					"identifier": "urn:li:userGeneratedContent"
+				}]
 			}
+		}
 		headers = {
 			"Authorization": "Bearer {}".format(self.access_token)
 		}
 		response = self.http_post(url=register_url, body=body, headers=headers)
-		response = response.json()
-		asset = response["value"]["asset"]
-		upload_url = response["value"]["uploadMechanism"]["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"]["uploadUrl"]
-		headers['Content-Type']='image/jpeg'
-		response = self.http_post(upload_url, headers=headers, data=open(media,"rb"))
-		if response.status_code < 200 and rresponse.status_code > 299:
-			return None
-		return asset
+		if response.status_code == 200:
+			response = response.json()
+			asset = response["value"]["asset"]
+			upload_url = response["value"]["uploadMechanism"]["com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"]["uploadUrl"]
+			headers['Content-Type']='image/jpeg'
+			response = self.http_post(upload_url, headers=headers, data=open(media,"rb"))
+			if response.status_code < 200 and response.status_code > 299:
+				return None
+			return asset
+		return None
 
 
 	def post_text(self, text, media_id=None):
@@ -111,51 +112,34 @@ class LinkedInSettings(Document):
 			"Authorization": "Bearer {}".format(self.access_token),
 			"Content-Type": "application/json; charset=UTF-8"
 		}
-		body = dict
+		body = {
+			"author": "urn:li:person:{0}".format(self.person_urn),
+			"lifecycleState": "PUBLISHED",
+			"specificContent": {
+				"com.linkedin.ugc.ShareContent": {
+					"shareCommentary": {
+						"text": text
+					},
+					"shareMediaCategory": "IMAGE" if media_id else "NONE"
+				}
+			},
+			"visibility": {
+				"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
+			}
+		}
 		if media_id:
-			body = {
-				"author": "urn:li:person:{0}".format(self.person_urn),
-				"lifecycleState": "PUBLISHED",
-				"specificContent": {
-					"com.linkedin.ugc.ShareContent": {
-						"shareCommentary": {
-							"text": text
-						},
-						"shareMediaCategory": "IMAGE",
-						"media": [
-							{
-								"status": "READY",
-								"description": {
-									"text": ""
-								},
-								"media": media_id,
-								"title": {
-									"text":""
-								}
-							}
-						]
+			body["specificContent"]["com.linkedin.ugc.ShareContent"]["media"] = [
+				{
+					"status": "READY",
+					"description": {
+						"text": ""
+					},
+					"media": media_id,
+					"title": {
+						"text":""
 					}
-				},
-				"visibility": {
-					"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
 				}
-			}
-		else:
-			body = {
-				"author": "urn:li:person:{0}".format(self.person_urn),
-				"lifecycleState": "PUBLISHED",
-				"specificContent": {
-					"com.linkedin.ugc.ShareContent": {
-						"shareCommentary": {
-							"text": text
-						},
-						"shareMediaCategory": "NONE"
-					}
-				},
-				"visibility": {
-					"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
-				}
-			}
+			]
 		response = self.http_post(url=url, headers=headers, body=body)
 		return response
 
@@ -167,18 +151,28 @@ class LinkedInSettings(Document):
 				data = data,
 				headers = headers
 			)
-			response.raise_for_status()
+			if response.status_code not in [201,200]:
+				raise
 		except Exception as e:
-			frappe.throw(e)
+			content = json.loads(response.content)
+			if response.status_code == 401:
+				frappe.msgprint("{0} With LinkedIn to Continue".format(get_link_to_form("LinkedIn Settings","LinkedIn Settings","Login")))
+ 				frappe.throw(content["message"], title="LinkedIn Error - Unauthorized")
+			elif response.status_code == 403:
+				frappe.msgprint("You Didn't have permission to access this API")
+				frappe.throw(content["message"], title="LinkedIn Error - Access Denied")
+			else:
+				frappe.throw(response.reason, title=response.status_code)
+
 		return response
 
 @frappe.whitelist()
 def callback(code=None, error=None, error_description=None):
 	if not error:
 		linkedin_settings = frappe.get_doc("LinkedIn Settings")
-		linkedin_settings.oauth_code = code
-		linkedin_settings.save()
-		linkedin_settings.get_access_token()
+		linkedin_settings.get_access_token(code)
+		linkedin_settings.get_member_profile()
+		frappe.db.commit()
 	else:
 		frappe.local.response["message"] = error
 		frappe.local.response["type"] = "redirect"

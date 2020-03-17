@@ -8,11 +8,9 @@
   "account_name",
   "oauth_details",
   "consumer_key",
-  "consumer_secret",
   "column_break_5",
-  "login_button",
+  "consumer_secret",
   "user_details_section",
-  "oauth_code",
   "access_token",
   "person_urn"
  ],
@@ -38,25 +36,16 @@
    "label": "Consumer Secret"
   },
   {
-   "fieldname": "oauth_code",
-   "fieldtype": "Code",
-   "label": "OAuth Code",
-   "read_only": 1
-  },
-  {
    "fieldname": "access_token",
-   "fieldtype": "Code",
+   "fieldtype": "Data",
+   "hidden": 1,
    "label": "Access Token",
    "read_only": 1
   },
   {
-   "fieldname": "login_button",
-   "fieldtype": "Button",
-   "label": "Login Via OAuth"
-  },
-  {
    "fieldname": "person_urn",
-   "fieldtype": "Code",
+   "fieldtype": "Data",
+   "hidden": 1,
    "label": "Person URN",
    "read_only": 1
   },
@@ -72,7 +61,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-03-09 17:20:17.094163",
+ "modified": "2020-03-17 13:42:28.082452",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "LinkedIn Settings",

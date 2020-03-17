@@ -3,7 +3,8 @@ frappe.listview_settings['Social Media Post'] = {
     get_indicator: function(doc) {
         return [__(doc.post_status), {
             "Scheduled": "orange",
-            "Posted": "green"
+            "Posted": "green",
+            "Error": "red"
             }[doc.post_status]];
         }
 }

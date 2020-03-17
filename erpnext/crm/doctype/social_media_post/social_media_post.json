@@ -12,8 +12,10 @@
   "post_status",
   "share_on",
   "twitter",
+  "twitter_post_id",
   "column_break_9",
   "linkedin",
+  "linkedin_post_id",
   "content",
   "text",
   "image",
@@ -85,13 +87,25 @@
    "fieldname": "post_status",
    "fieldtype": "Select",
    "label": "Post Status",
-   "options": "Scheduled\nPosted",
+   "options": "Scheduled\nPosted\nError",
+   "read_only": 1
+  },
+  {
+   "fieldname": "twitter_post_id",
+   "fieldtype": "Data",
+   "label": "Twitter Post Id",
+   "read_only": 1
+  },
+  {
+   "fieldname": "linkedin_post_id",
+   "fieldtype": "Data",
+   "label": "LinkedIn Post Id",
    "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-13 12:15:00.504432",
+ "modified": "2020-03-16 12:35:17.357116",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Social Media Post",

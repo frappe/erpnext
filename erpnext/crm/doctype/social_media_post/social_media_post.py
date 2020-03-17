@@ -20,14 +20,20 @@ class SocialMediaPost(Document):
 		try:
 			if self.twitter:
 				twitter = frappe.get_doc("Twitter Settings")
-				twitter.post(self.text, self.image)
+				twitter_post = twitter.post(self.text, self.image)
+				self.twitter_post_id = twitter_post.id
 			if self.linkedin:
 				linkedin = frappe.get_doc("LinkedIn Settings")
-				linkedin.post(self.text, self.image)
-			self.post_status = "Posted"
-			self.save()
+				linkedin_post = linkedin.post(self.text, self.image)
+				self.linkedin_post_id = linkedin_post.headers['X-RestLi-Id'].split(":")[-1]
+			self.db_set("post_status", "Posted")
 
-		except:
+		except Exception as e:
+			print("==========COOL==========")
+			print(e)
+			print(e.__dict__)
+			print("==========COOL==========")
+			self.db_set("post_status", "Error")
 			title = _("Error while POSTING {0}").format(self.name)
 			traceback = frappe.get_traceback()
 			frappe.log_error(message=traceback , title=title)

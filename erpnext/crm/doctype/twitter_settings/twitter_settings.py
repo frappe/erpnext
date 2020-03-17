@@ -8,8 +8,10 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils.file_manager import get_file_path
 import os
-from frappe.utils import get_url_to_form
+from frappe.utils import get_url_to_form, get_link_to_form
 import tweepy
+from tweepy.error import TweepError
+import json
 
 class TwitterSettings(Document):
 	def get_authorize_url(self):
@@ -30,12 +32,16 @@ class TwitterSettings(Document):
 							}
 		try:
 			auth.get_access_token(self.oauth_verifier)
-			self.oauth_token = auth.access_token
-			self.oauth_secret = auth.access_token_secret
-			self.save()
+			self.db_set("oauth_token", auth.access_token)
+			self.db_set("oauth_secret", auth.access_token_secret)
+			api = self.get_api()
+			user = api.me()
+			self.db_set("account_name", user._json["screen_name"])
+			self.db_set("profile_pic", user._json["profile_image_url"])
 			frappe.local.response["type"] = "redirect"
-			frappe.local.response["location"] = get_url_to_form("Twitter Settings","Twitter Settings")
-		except tweepy.TweepError:
+			location = get_url_to_form("Twitter Settings","Twitter Settings") + "?status=1"
+			frappe.local.response["location"] = location
+		except:
 			frappe.throw('Error! Failed to get access token.')
 
 	def get_api(self):
@@ -62,16 +68,26 @@ class TwitterSettings(Document):
 		return media.media_id
 
 	def send_tweet(self, text, media_id=None):
-		api = self.get_api() 
-		if media_id:
-			r = api.update_status(status = text, media_ids = [media_id])
-		else:
-			r = api.update_status(status = text)
+		api = self.get_api()
+		try:
+			if media_id:
+				response = api.update_status(status = text, media_ids = [media_id])
+				
+			else:
+				response = api.update_status(status = text)
+			return response
+			
+		except TweepError as e:
+			content = json.loads(e.response.content)
+			content = content["errors"][0]
+			if e.response.status_code == 401:
+				frappe.msgprint("{0} With Twitter to Continue".format(get_link_to_form("Twitter Settings","Twitter Settings","Login")))
+			frappe.throw(content["message"],title="Twitter Error {0} {1}".format(e.response.status_code, e.response.reason))
 
 @frappe.whitelist()
 def callback(oauth_token, oauth_verifier):
 	twitter_settings = frappe.get_single("Twitter Settings")
-	twitter_settings.oauth_token = oauth_token
-	twitter_settings.oauth_verifier = oauth_verifier
-	twitter_settings.save()
+	twitter_settings.db_set("oauth_token", oauth_token)
+	twitter_settings.db_set("oauth_verifier", oauth_verifier)
 	twitter_settings.get_access_token()
+ 	frappe.db.commit()
