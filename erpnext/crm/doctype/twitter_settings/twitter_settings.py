@@ -27,9 +27,9 @@ class TwitterSettings(Document):
 	def get_access_token(self):
 		auth = tweepy.OAuthHandler(self.consumer_key, self.get_password(fieldname="consumer_secret"))
 		auth.request_token = { 
-								'oauth_token' : self.oauth_token,
-                         		'oauth_token_secret' : self.oauth_verifier 
-							}
+			'oauth_token' : self.oauth_token,
+			'oauth_token_secret' : self.oauth_verifier 
+		}
 		try:
 			auth.get_access_token(self.oauth_verifier)
 			self.db_set("oauth_token", auth.access_token)
