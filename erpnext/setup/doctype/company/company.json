@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:company_name",
@@ -725,10 +726,13 @@
  "icon": "fa fa-building",
  "idx": 1,
  "image_field": "company_logo",
- "modified": "2019-11-22 13:04:47.470768",
+ "is_tree": 1,
+ "links": [],
+ "modified": "2020-03-18 18:35:44.745792",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
+ "nsm_parent_field": "parent_company",
  "owner": "Administrator",
  "permissions": [
   {
