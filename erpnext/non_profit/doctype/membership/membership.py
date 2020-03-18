@@ -51,15 +51,17 @@ class Membership(Document):
 			self.db_set('paid', 1)
 
 @frappe.whitelist()
-def create_membership(name, email, membership_type, from_date, to_date, currency, amount, paid):
+def create_membership(name, email, membership_type, from_date, to_date, currency=None, amount=None, paid=True):
 	member = get_or_create_member_using_email(email, name, membership_type)
 
 	membership = frappe.new_doc("Membership")
 	membership.membership_type = membership_type
 	membership.from_date = from_date
 	membership.to_date = to_date
-	membership.currency = currency
-	membership.amount = amount
+	if currency:
+		membership.currency = currency
+	if amount:
+		membership.amount = amount
 	membership.paid = paid
 
 	membership.insert()
