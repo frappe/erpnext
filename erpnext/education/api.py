@@ -218,8 +218,12 @@ def get_assessment_students(assessment_plan, student_group):
 		result = get_result(student.student, assessment_plan)
 		if result:
 			student_result = {}
-			for d in result.details:
-				student_result.update({d.assessment_criteria: [cstr(d.score), d.grade]})
+			for d in result.details
+				if d.quiz_result:
+					score = frappe.db.get_value('Quiz Activity', {"quiz": c.quiz_result, "student": student}, 'score')
+				else:
+					score = score = d.score
+				student_result.update({d.assessment_criteria: [cstr(score), d.grade]})
 			student_result.update({
 				"total_score": [cstr(result.total_score), result.grade],
 				"comment": result.comment
@@ -241,7 +245,7 @@ def get_assessment_details(assessment_plan):
 	:param Assessment Plan: Assessment Plan
 	"""
 	return frappe.get_list("Assessment Plan Criteria", \
-		fields=["assessment_criteria", "maximum_score", "docstatus"], filters={"parent": assessment_plan}, order_by= "idx")
+		fields=["assessment_criteria", "maximum_score", "docstatus", "auto_result"], filters={"parent": assessment_plan}, order_by= "idx")
 
 
 @frappe.whitelist()
@@ -257,7 +261,6 @@ def get_result(student, assessment_plan):
 		return frappe.get_doc("Assessment Result", results[0])
 	else:
 		return None
-
 
 @frappe.whitelist()
 def get_grade(grading_scale, percentage):
