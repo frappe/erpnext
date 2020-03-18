@@ -1,0 +1,127 @@
+{
+ "actions": [],
+ "creation": "2018-02-22 15:33:14.335573",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "public_api_key",
+  "private_api_key",
+  "promo_code",
+  "cb_header",
+  "is_sandbox",
+  "sb_settings",
+  "live_checkout_url",
+  "live_api_url",
+  "cb_urls",
+  "sandbox_checkout_url",
+  "sandbox_api_url",
+  "shipping_sb",
+  "pickup_address"
+ ],
+ "fields": [
+  {
+   "fieldname": "public_api_key",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Public API Key",
+   "reqd": 1
+  },
+  {
+   "fieldname": "private_api_key",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Private API Key",
+   "reqd": 1
+  },
+  {
+   "fieldname": "promo_code",
+   "fieldtype": "Data",
+   "label": "Promo Code"
+  },
+  {
+   "fieldname": "cb_header",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_sandbox",
+   "fieldtype": "Check",
+   "label": "Sandbox Mode"
+  },
+  {
+   "fieldname": "sb_settings",
+   "fieldtype": "Section Break",
+   "label": "URLS"
+  },
+  {
+   "default": "https://cdn1.affirm.com/js/v2/affirm.js",
+   "fieldname": "live_checkout_url",
+   "fieldtype": "Data",
+   "label": "Live Checkout Url",
+   "reqd": 1
+  },
+  {
+   "default": "https://api.affirm.com/api/v2",
+   "fieldname": "live_api_url",
+   "fieldtype": "Data",
+   "label": "Live API Url",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_urls",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "https://cdn1-sandbox.affirm.com/js/v2/affirm.js",
+   "fieldname": "sandbox_checkout_url",
+   "fieldtype": "Data",
+   "label": "Sandbox Checkout Url",
+   "reqd": 1
+  },
+  {
+   "default": "https://sandbox.affirm.com/api/v2",
+   "fieldname": "sandbox_api_url",
+   "fieldtype": "Data",
+   "label": "SandBox API Url",
+   "reqd": 1
+  },
+  {
+   "fieldname": "shipping_sb",
+   "fieldtype": "Section Break",
+   "label": "Shipping Info"
+  },
+  {
+   "fieldname": "pickup_address",
+   "fieldtype": "Link",
+   "label": "Pick Up Address",
+   "options": "Address"
+  }
+ ],
+ "in_create": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2020-03-17 18:21:52.528392",
+ "modified_by": "Administrator",
+ "module": "ERPNext Integrations",
+ "name": "Affirm Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "read_only": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
