@@ -31,11 +31,12 @@ def execute(filters=None):
 
 	chart = get_chart_data(filters, columns, income, expense, net_profit_loss)
 
-	report_summary = get_report_summary(period_list, filters.periodicity, income, expense, net_profit_loss)
+	default_currency = frappe.get_cached_value('Company', filters.company, "default_currency")
+	report_summary = get_report_summary(period_list, filters.periodicity, income, expense, net_profit_loss, default_currency)
 
 	return columns, data, None, chart, report_summary
 
-def get_report_summary(period_list, periodicity, income, expense, net_profit_loss, consolidated=False):
+def get_report_summary(period_list, periodicity, income, expense, net_profit_loss, default_currency, consolidated=False):
 	net_income, net_expense, net_profit = 0.0, 0.0, 0.0
 
 	for period in period_list:
@@ -62,19 +63,19 @@ def get_report_summary(period_list, periodicity, income, expense, net_profit_los
 			"indicator": "Green" if net_profit > 0 else "Red",
 			"label": profit_label,
 			"datatype": "Currency",
-			"currency": net_profit_loss.get("currency")
+			"currency": net_profit_loss.get("currency") if net_profit_loss else default_currency
 		},
 		{
 			"value": net_income,
 			"label": income_label,
 			"datatype": "Currency",
-			"currency": income[-1].get('currency')
+			"currency": income[-1].get('currency') if income else default_currency
 		},
 		{
 			"value": net_expense,
 			"label": expense_label,
 			"datatype": "Currency",
-			"currency": expense[-1].get('currency')
+			"currency": expense[-1].get('currency') if expense else default_currency
 		}
 	]
 
