@@ -57,8 +57,6 @@ class LinkedInSettings(Document):
 		url = "https://api.linkedin.com/v2/me"
 		response = requests.get(url=url, headers=headers)
 		response = frappe.parse_json(response.content.decode())
-		# self.db_set("person_urn", response["id"],notify=True, commit=True)
-		print(response)
 		self.db_set("person_urn", response["id"])
 		frappe.local.response["type"] = "redirect"
 		location = get_url_to_form("LinkedIn Settings","LinkedIn Settings") + "?status=1"
