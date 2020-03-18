@@ -547,7 +547,8 @@
    "fieldname": "item_defaults",
    "fieldtype": "Table",
    "label": "Item Defaults",
-   "options": "Item Default"
+   "options": "Item Default",
+   "reqd": 1
   },
   {
    "collapsible": 1,
@@ -1058,7 +1059,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 1,
- "modified": "2020-01-30 15:15:44.332309",
+ "modified": "2020-03-18 01:48:53.333625",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -1112,7 +1113,6 @@
    "role": "Manufacturing User"
   }
  ],
- "quick_entry": 1,
  "search_fields": "item_name,description,item_group,customer_code",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
