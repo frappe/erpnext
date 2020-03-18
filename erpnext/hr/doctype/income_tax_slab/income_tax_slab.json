@@ -1,0 +1,131 @@
+{
+ "actions": [],
+ "autoname": "Prompt",
+ "creation": "2020-03-17 16:50:35.564915",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "effective_from",
+  "column_break_3",
+  "allow_tax_exemption",
+  "tax_exemption_amount",
+  "taxable_salary_slabs_section",
+  "slabs",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "effective_from",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Effective from",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_tax_exemption",
+   "fieldtype": "Check",
+   "label": "Allow Tax Exemption"
+  },
+  {
+   "depends_on": "eval:(doc.allow_tax_exemption == 1)",
+   "fieldname": "tax_exemption_amount",
+   "fieldtype": "Currency",
+   "label": "Tax Exemption Amount",
+   "mandatory_depends_on": "eval:(doc.allow_tax_exemption == 1)",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "taxable_salary_slabs_section",
+   "fieldtype": "Section Break",
+   "label": "Taxable Salary Slabs"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Income Tax Slab",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "slabs",
+   "fieldtype": "Table",
+   "label": "Taxable Salary Slabs",
+   "options": "Taxable Salary Slab",
+   "reqd": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-03-18 14:53:09.466690",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Income Tax Slab",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
