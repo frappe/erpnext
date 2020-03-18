@@ -485,7 +485,6 @@ class SalarySlip(TransactionBase):
 		# get remaining numbers of sub-period (period for which one salary is processed)
 		remaining_sub_periods = get_period_factor(self.employee,
 			self.start_date, self.end_date, self.payroll_frequency, payroll_period)[1]
-
 		# get taxable_earnings, paid_taxes for previous period
 		previous_taxable_earnings = self.get_taxable_earnings_for_prev_period(payroll_period.start_date, self.start_date)
 		previous_total_paid_taxes = self.get_tax_paid_in_period(payroll_period.start_date, self.start_date, tax_component)
@@ -506,8 +505,15 @@ class SalarySlip(TransactionBase):
 			unclaimed_taxable_benefits = self.calculate_unclaimed_taxable_benefits(payroll_period)
 			unclaimed_taxable_benefits += current_taxable_earnings_for_payment_days.flexi_benefits
 
+		slabs_info = self.get_income_tax_slabs(payroll_period)
+
 		# Total exemption amount based on tax exemption declaration
-		total_exemption_amount, other_incomes = self.get_total_exemption_amount_and_other_incomes(payroll_period)
+		total_exemption_amount=0
+		if slabs_info.allow_tax_exemption:
+			total_exemption_amount = self.get_total_exemption_amount(payroll_period)
+
+		#Employee Other Incomes
+		other_incomes = self.get_income_form_other_sources(payroll_period)
 
 		# Total taxable earnings including additional and other incomes
 		total_taxable_earnings = previous_taxable_earnings + current_structured_taxable_earnings + future_structured_taxable_earnings \
@@ -517,13 +523,15 @@ class SalarySlip(TransactionBase):
 		total_taxable_earnings_without_full_tax_addl_components = total_taxable_earnings - current_additional_earnings_with_full_tax
 
 		# Structured tax amount
-		total_structured_tax_amount = self.calculate_tax_by_tax_slab(payroll_period, total_taxable_earnings_without_full_tax_addl_components)
+		print(total_taxable_earnings_without_full_tax_addl_components)
+		total_structured_tax_amount = self.calculate_tax_by_tax_slab(payroll_period, total_taxable_earnings_without_full_tax_addl_components, tax_slab=slabs_info )
 		current_structured_tax_amount = (total_structured_tax_amount - previous_total_paid_taxes) / remaining_sub_periods
 
 		# Total taxable earnings with additional earnings with full tax
 		full_tax_on_additional_earnings = 0.0
 		if current_additional_earnings_with_full_tax:
-			total_tax_amount = self.calculate_tax_by_tax_slab(payroll_period, total_taxable_earnings)
+			print(total_taxable_earnings)
+			total_tax_amount = self.calculate_tax_by_tax_slab(payroll_period, total_taxable_earnings, tax_slab=slabs_info)
 			full_tax_on_additional_earnings = total_tax_amount - total_structured_tax_amount
 
 		current_tax_amount = current_structured_tax_amount + full_tax_on_additional_earnings
@@ -531,6 +539,24 @@ class SalarySlip(TransactionBase):
 			current_tax_amount = 0
 
 		return current_tax_amount
+
+	def get_income_tax_slabs(self, payroll_period):
+		income_tax_slab, name = frappe.db.get_value("Salary Structure Assignment",
+		{"employee": self.employee, "salary_structure": self.salary_structure, "docstatus": 1}, ["income_tax_slab", 'name'])
+
+		income_tax_slab_doc = frappe.get_doc(
+			"Income Tax Slab", income_tax_slab
+		)
+
+		if not (payroll_period.start_date < income_tax_slab_doc.effective_from < payroll_period.end_date):
+			frappe.throw(_("Income Tax Slab:{0} Should be effective within Payroll Period: {1}").format(income_tax_slab, payroll_period.name))
+
+
+		if income_tax_slab_doc.effective_from >= self.end_date:
+			frappe.throw(_("Selected Income Tax Slab: {0} in Salary Salary Assignment: {1} is effective from {2}").format(income_tax_slab, name, income_tax_slab_doc.effective_from))
+
+		return income_tax_slab_doc
+
 
 	def get_taxable_earnings_for_prev_period(self, start_date, end_date):
 		taxable_earnings = frappe.db.sql("""
@@ -672,30 +698,43 @@ class SalarySlip(TransactionBase):
 
 		return total_benefits_paid - total_benefits_claimed
 
-	def get_total_exemption_amount_and_other_incomes(self, payroll_period):
+	def get_total_exemption_amount(self, payroll_period):
 		total_exemption_amount, other_incomes = 0, 0
 		if self.deduct_tax_for_unsubmitted_tax_exemption_proof:
 			exemption_proof = frappe.db.get_value("Employee Tax Exemption Proof Submission",
 				{"employee": self.employee, "payroll_period": payroll_period.name, "docstatus": 1},
-				["exemption_amount", "income_from_other_sources"])
+				["exemption_amount"])
 			if exemption_proof:
-				total_exemption_amount, other_incomes = exemption_proof
+				total_exemption_amount = exemption_proof
 		else:
 			declaration = frappe.db.get_value("Employee Tax Exemption Declaration",
 				{"employee": self.employee, "payroll_period": payroll_period.name, "docstatus": 1},
-				["total_exemption_amount", "income_from_other_sources"])
+				["total_exemption_amount"])
 			if declaration:
-				total_exemption_amount, other_incomes = declaration
+				total_exemption_amount = declaration
 
-		return total_exemption_amount, other_incomes
+		return total_exemption_amount
 
-	def calculate_tax_by_tax_slab(self, payroll_period, annual_taxable_earning):
-		payroll_period_obj = frappe.get_doc("Payroll Period", payroll_period)
-		annual_taxable_earning -= flt(payroll_period_obj.standard_tax_exemption_amount)
+	def get_income_form_other_sources(self, payroll_period):
+		return frappe.get_all(
+			"Other Income",
+			filters={
+				"employee":self.employee, "payroll_period": payroll_period.name,
+				 "company":self.company, "docstatus": 1
+			},
+			fields=["SUM(amount) as total_amount"]
+		)[0].total_amount
+
+
+	def calculate_tax_by_tax_slab(self, payroll_period, annual_taxable_earning, tax_slab = None):
+		# payroll_period_obj = frappe.get_doc("Payroll Period", payroll_period)
+		if tax_slab.allow_tax_exemption:
+			annual_taxable_earning -= flt(tax_slab.standard_tax_exemption_amount)
+
 		data = self.get_data_for_eval()
 		data.update({"annual_taxable_earning": annual_taxable_earning})
 		taxable_amount = 0
-		for slab in payroll_period_obj.taxable_salary_slabs:
+		for slab in tax_slab.slabs:
 			if slab.condition and not self.eval_tax_slab_condition(slab.condition, data):
 				continue
 			if not slab.to_amount and annual_taxable_earning > slab.from_amount:
