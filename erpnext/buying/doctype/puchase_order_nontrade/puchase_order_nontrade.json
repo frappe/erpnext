@@ -1,0 +1,99 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2020-03-17 18:43:40.857888",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "supplier_section",
+  "title",
+  "naming_series",
+  "supplier",
+  "supplier_name",
+  "column_break1",
+  "transaction_date",
+  "schedule_date",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "supplier_section",
+   "fieldtype": "Section Break",
+   "options": "fa fa-user"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Series",
+   "options": "NTPO-.YYYY.-",
+   "reqd": 1
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supplier",
+   "options": "Supplier",
+   "reqd": 1
+  },
+  {
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name"
+  },
+  {
+   "fieldname": "column_break1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "PO Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "schedule_date",
+   "fieldtype": "Data",
+   "label": "Delivery Date"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Puchase Order NonTrade",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2020-03-17 18:43:40.857888",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Puchase Order NonTrade",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}
