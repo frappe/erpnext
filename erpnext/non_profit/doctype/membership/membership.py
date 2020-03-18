@@ -76,7 +76,6 @@ def get_or_create_member_using_email(email, name, membership_type):
 		new_member.membership_type = membership_type
 		new_member.email = email
 		new_member.insert()
-		new_member.load_from_db()
 
 		return new_member.name
 
