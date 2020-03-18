@@ -1,0 +1,55 @@
+{% extends "templates/web.html" %}
+
+{% block title %} Payment {% endblock %}
+
+{%- block header -%}{% endblock %}
+
+{%- block page_content -%}
+<div class="affirm-container">
+    <h1>Please wait while we redirect you to Affirm <span class="loader__dot">.</span><span class="loader__dot">.</span><span class="loader__dot">.</span></h1>
+</div>
+{% endblock %}
+
+{% block style %}
+<style>
+    @keyframes blink {
+        50% {
+            color: transparent
+        }
+    }
+
+    .loader__dot {
+        animation: 1s blink infinite
+    }
+
+    .loader__dot:nth-child(2) {
+        animation-delay: 250ms
+    }
+
+    .loader__dot:nth-child(3) {
+        animation-delay: 500ms
+    }
+
+    .affirm-container {
+        margin: 50px auto;
+        width: 50%;
+    }
+</style>
+{% endblock %}
+
+{% block script %}
+<!-- BOF - AFFIRM -->
+<script>
+  _affirm_config = {
+    public_api_key:  "{{ affirm_api_config.public_api_key }}",
+    script:          "{{ affirm_api_config.checkout_url }}"
+  };
+  (function(l,g,m,e,a,f,b){var d,c=l[m]||{},h=document.createElement(f),n=document.getElementsByTagName(f)[0],k=function(a,b,c){return function(){a[b]._.push([c,arguments])}};c[e]=k(c,e,"set");d=c[e];c[a]={};c[a]._=[];d._=[];c[a][b]=k(c,a,b);a=0;for(b="set add save post open empty reset on off trigger ready setProduct".split(" ");a<b.length;a++)d[b[a]]=k(c,e,b[a]);a=0;for(b=["get","token","url","items"];a<b.length;a++)d[b[a]]=function(){};h.async=!0;h.src=g[f];n.parentNode.insertBefore(h,n);delete g[f];d(g);l[m]=c})(window,_affirm_config,"affirm","checkout","ui","script","ready");
+</script>
+<!-- EOF - AFFIRM -->
+
+<script>
+	affirm.checkout({{ checkout_data|json }});
+	affirm.checkout.open();
+</script>
+{% endblock %}
