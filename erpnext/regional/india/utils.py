@@ -306,11 +306,11 @@ def get_annual_component_pay(frequency, amount):
 		return amount * 365
 	elif frequency == "Weekly":
 		return amount * 52
-	elif frequency == "Fortnightly":
+	elif frequency == "every two weeks":
 		return amount * 26
 	elif frequency == "Monthly":
 		return amount * 12
-	elif frequency == "Bimonthly":
+	elif frequency == "every two months":
 		return amount * 6
 
 def validate_house_rent_dates(doc):
@@ -641,3 +641,4 @@ def get_gst_accounts(company, account_wise=False):
 
 
 	return gst_accounts
+11

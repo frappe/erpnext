@@ -159,18 +159,18 @@ class TestSalarySlip(unittest.TestCase):
 		month = "%02d" % getdate(nowdate()).month
 		m = get_month_details(fiscal_year, month)
 
-		for payroll_frequency in ["Monthly", "Bimonthly", "Fortnightly", "Weekly", "Daily"]:
+		for payroll_frequency in ["Monthly", "every two months", "every two weeks", "Weekly", "Daily"]:
 			make_employee(payroll_frequency + "_test_employee@salary.com")
 			ss = make_employee_salary_slip(payroll_frequency + "_test_employee@salary.com", payroll_frequency)
 			if payroll_frequency == "Monthly":
 				self.assertEqual(ss.end_date, m['month_end_date'])
-			elif payroll_frequency == "Bimonthly":
+			elif payroll_frequency == "every two months":
 				if getdate(ss.start_date).day <= 15:
 					self.assertEqual(ss.end_date, m['month_mid_end_date'])
 				else:
 					self.assertEqual(ss.end_date, m['month_end_date'])
-			elif payroll_frequency == "Fortnightly":
-				self.assertEqual(ss.end_date, add_days(nowdate(),13))
+			elif payroll_frequency == "every two weeks":
+				self.assertEqual(ss.end_date, add_days(nowdate(),every two weeks))
 			elif payroll_frequency == "Weekly":
 				self.assertEqual(ss.end_date, add_days(nowdate(),6))
 			elif payroll_frequency == "Daily":
