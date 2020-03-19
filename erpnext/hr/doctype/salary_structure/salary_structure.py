@@ -16,6 +16,7 @@ class SalaryStructure(Document):
 		self.validate_amount()
 		self.strip_condition_and_formula_fields()
 		self.validate_max_benefits_with_flexi()
+		self.validate_component_based_on_tax_slab()
 
 	def set_missing_values(self):
 		overwritten_fields = ["depends_on_payment_days", "variable_based_on_taxable_salary", "is_tax_applicable", "is_flexible_benefit"]
@@ -33,6 +34,12 @@ class SalaryStructure(Document):
 					if not (d.get("amount") or d.get("formula")):
 						for fieldname in overwritten_fields_if_missing:
 							d.set(fieldname, component_default_value.get(fieldname))
+
+	def validate_component_based_on_tax_slab(self):
+		for row in self.deductions:
+			if row.variable_based_on_taxable_salary and (row.amount or row.formula):
+				frappe.throw(_("Row #{0}: Cannot set amount or formula for Salary Component {0} with Variable Based On Taxable Salary")
+					.format(row.idx, row.salary_component))
 
 	def validate_amount(self):
 		if flt(self.net_pay) < 0 and self.salary_slip_based_on_timesheet:

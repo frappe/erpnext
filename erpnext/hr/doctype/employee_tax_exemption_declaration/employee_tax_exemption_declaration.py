@@ -8,13 +8,14 @@ from frappe.model.document import Document
 from frappe import _
 from frappe.utils import flt
 from frappe.model.mapper import get_mapped_doc
-from erpnext.hr.utils import validate_tax_declaration, get_total_exemption_amount, calculate_annual_eligible_hra_exemption
+from erpnext.hr.utils import validate_tax_declaration, get_total_exemption_amount, calculate_annual_eligible_hra_exemption, validate_single_exemption_for_single_payroll_period
 
 class DuplicateDeclarationError(frappe.ValidationError): pass
 
 class EmployeeTaxExemptionDeclaration(Document):
 	def validate(self):
 		validate_tax_declaration(self.declarations)
+		validate_single_exemption_for_single_payroll_period(self.doctype, self.payroll_period)
 		self.validate_duplicate()
 		self.set_total_declared_amount()
 		self.set_total_exemption_amount()
