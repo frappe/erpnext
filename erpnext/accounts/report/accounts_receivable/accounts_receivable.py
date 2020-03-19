@@ -7,7 +7,7 @@ from frappe import _, scrub
 from frappe.utils import getdate, nowdate, flt, cint, formatdate, cstr, now, time_diff_in_seconds
 from collections import OrderedDict
 from erpnext.accounts.utils import get_currency_precision
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
 #  This report gives a summary of all Outstanding Invoices considering the following
 
@@ -603,7 +603,6 @@ class ReceivablePayableReport(object):
 			self.add_supplier_filters(conditions, values)
 
 		self.add_accounting_dimensions_filters(conditions, values)
-
 		return " and ".join(conditions), values
 
 	def get_order_by_condition(self):
@@ -666,13 +665,16 @@ class ReceivablePayableReport(object):
 					doctype=doctype, lft=lft, rgt=rgt, key=key)
 
 	def add_accounting_dimensions_filters(self, conditions, values):
-		accounting_dimensions = get_accounting_dimensions()
+		accounting_dimensions = get_accounting_dimensions(as_list=False)
 
 		if accounting_dimensions:
 			for dimension in accounting_dimensions:
-				if self.filters.get(dimension):
-					conditions.append("{0} = %s".format(dimension))
-					values.append(self.filters.get(dimension))
+				if self.filters.get(dimension.fieldname):
+					if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
+						self.filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
+							self.filters.get(dimension.fieldname))
+					conditions.append("{0} in %s".format(dimension.fieldname))
+					values.append(tuple(self.filters.get(dimension.fieldname)))
 
 	def get_gle_balance(self, gle):
 		# get the balance of the GL (debit - credit) or reverse balance based on report type
