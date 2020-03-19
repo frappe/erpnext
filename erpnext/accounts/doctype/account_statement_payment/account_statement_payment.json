@@ -31,7 +31,8 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Patient Statement",
-   "options": "Patient statement"
+   "options": "Patient statement",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -46,7 +47,8 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "fetch_from": "Company.company_logo",
@@ -72,7 +74,8 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
-   "options": "Customer"
+   "options": "Customer",
+   "reqd": 1
   },
   {
    "fieldname": "date",
@@ -102,7 +105,8 @@
    "fieldname": "products_table",
    "fieldtype": "Table",
    "label": "Products Table",
-   "options": "Account Statement Payment Item"
+   "options": "Account Statement Payment Item",
+   "read_only": 1
   },
   {
    "fieldname": "totals_section",
@@ -112,7 +116,8 @@
   {
    "fieldname": "total",
    "fieldtype": "Currency",
-   "label": "Total"
+   "label": "Total",
+   "read_only": 1
   },
   {
    "fieldname": "contact_section",
@@ -136,7 +141,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-16 12:39:53.435111",
+ "modified": "2020-03-19 03:39:19.207384",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account Statement Payment",
