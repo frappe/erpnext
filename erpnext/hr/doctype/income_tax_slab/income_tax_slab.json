@@ -8,8 +8,9 @@
  "field_order": [
   "effective_from",
   "column_break_3",
+  "disabled",
   "allow_tax_exemption",
-  "tax_exemption_amount",
+  "standard_tax_exemption_amount",
   "taxable_salary_slabs_section",
   "slabs",
   "amended_from"
@@ -33,14 +34,6 @@
    "label": "Allow Tax Exemption"
   },
   {
-   "depends_on": "eval:(doc.allow_tax_exemption == 1)",
-   "fieldname": "tax_exemption_amount",
-   "fieldtype": "Currency",
-   "label": "Tax Exemption Amount",
-   "mandatory_depends_on": "eval:(doc.allow_tax_exemption == 1)",
-   "options": "Company:company:default_currency"
-  },
-  {
    "fieldname": "taxable_salary_slabs_section",
    "fieldtype": "Section Break",
    "label": "Taxable Salary Slabs"
@@ -60,11 +53,25 @@
    "label": "Taxable Salary Slabs",
    "options": "Taxable Salary Slab",
    "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "depends_on": "allow_tax_exemption",
+   "fieldname": "standard_tax_exemption_amount",
+   "fieldtype": "Currency",
+   "label": "Standard Tax Exemption Amount",
+   "options": "Company:company:default_currency"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-18 14:53:09.466690",
+ "modified": "2020-03-19 15:15:54.429415",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Income Tax Slab",

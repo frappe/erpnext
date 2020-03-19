@@ -119,13 +119,12 @@
    "fieldname": "income_tax_slab",
    "fieldtype": "Link",
    "label": "Income Tax Slab",
-   "options": "Income Tax Slab",
-   "reqd": 1
+   "options": "Income Tax Slab"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-19 14:22:08.756076",
+ "modified": "2020-03-19 16:31:58.308024",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Structure Assignment",
