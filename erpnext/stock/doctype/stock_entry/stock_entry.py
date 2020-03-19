@@ -294,13 +294,8 @@ class StockEntry(StockController):
 				if validate_for_manufacture:
 					if d.bom_no:
 						d.s_warehouse = None
-
 						if not d.t_warehouse:
 							frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
-
-						elif self.pro_doc and (cstr(d.t_warehouse) != self.pro_doc.fg_warehouse and cstr(d.t_warehouse) != self.pro_doc.scrap_warehouse):
-							frappe.throw(_("Target warehouse in row {0} must be same as Work Order").format(d.idx))
-
 					else:
 						d.t_warehouse = None
 						if not d.s_warehouse:
