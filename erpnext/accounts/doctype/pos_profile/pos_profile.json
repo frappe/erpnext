@@ -1,11 +1,15 @@
 {
+ "actions": [],
  "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2013-05-24 12:15:51",
  "doctype": "DocType",
+ "engine": "InnoDB",
  "field_order": [
   "disabled",
   "section_break_2",
+  "cai",
+  "number",
   "naming_series",
   "customer",
   "company",
@@ -75,7 +79,7 @@
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
    "options": "[Select]",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "customer",
@@ -315,15 +319,13 @@
    "fieldname": "write_off_account",
    "fieldtype": "Link",
    "label": "Write Off Account",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
   },
   {
    "fieldname": "write_off_cost_center",
    "fieldtype": "Link",
    "label": "Write Off Cost Center",
-   "options": "Cost Center",
-   "reqd": 1
+   "options": "Cost Center"
   },
   {
    "fieldname": "account_for_change_amount",
@@ -381,11 +383,24 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cai",
+   "fieldtype": "Data",
+   "label": "CAI",
+   "read_only": 1
+  },
+  {
+   "fieldname": "number",
+   "fieldtype": "Data",
+   "label": "Numeration CAI",
+   "read_only": 1
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
- "modified": "2019-05-25 22:56:30.352693",
+ "links": [],
+ "modified": "2020-03-18 22:07:06.907982",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
@@ -410,6 +425,7 @@
    "role": "Accounts User"
   }
  ],
+ "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC"
 }
