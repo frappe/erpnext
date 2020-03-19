@@ -26,8 +26,8 @@ def get_report_data(last_pur_price, reqd_qty, row, manufacture_details):
 	to_build = row.to_build if row.to_build > 0 else 0
 	diff_qty = to_build - reqd_qty
 	return [row.item_code, row.description,
-		comma_and(manufacture_details.get(row.item_code, {}).get('manufacturer', []), add_quotes=False),
-		comma_and(manufacture_details.get(row.item_code, {}).get('manufacturer_part', []), add_quotes=False),
+		comma_and(manufacture_details.get(row.item_code, {}).get('manufacturer', [])),
+		comma_and(manufacture_details.get(row.item_code, {}).get('manufacturer_part', [])),
 		row.actual_qty, str(to_build),
 		reqd_qty, diff_qty, last_pur_price]
 
