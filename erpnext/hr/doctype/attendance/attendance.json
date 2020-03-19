@@ -57,11 +57,12 @@
   {
    "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
-   "fieldtype": "Read Only",
+   "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Employee Name",
    "oldfieldname": "employee_name",
-   "oldfieldtype": "Data"
+   "oldfieldtype": "Data",
+   "read_only": 1
   },
   {
    "default": "Present",
@@ -173,7 +174,7 @@
  "icon": "fa fa-ok",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2019-07-29 20:35:40.845422",
+ "modified": "2020-02-19 14:25:32.945842",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",

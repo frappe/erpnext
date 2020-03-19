@@ -429,15 +429,15 @@ class WorkOrder(Document):
 		update bin reserved_qty_for_production
 		called from Stock Entry for production, after submit, cancel
 		'''
+		# calculate consumed qty based on submitted stock entries
+		self.update_consumed_qty_for_required_items()
+
 		if self.docstatus==1:
 			# calculate transferred qty based on submitted stock entries
 			self.update_transaferred_qty_for_required_items()
 
 			# update in bin
 			self.update_reserved_qty_for_production()
-
-		# calculate consumed qty based on submitted stock entries
-		self.update_consumed_qty_for_required_items()
 
 	def update_reserved_qty_for_production(self, items=None):
 		'''update reserved_qty_for_production in bins'''

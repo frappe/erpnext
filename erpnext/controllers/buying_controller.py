@@ -44,6 +44,7 @@ class BuyingController(StockController):
 		self.validate_stock_or_nonstock_items()
 		self.validate_warehouse()
 		self.set_supplier_address()
+		self.validate_asset_return()
 
 		if self.doctype=="Purchase Invoice":
 			self.validate_purchase_receipt_if_update_stock()
@@ -99,6 +100,19 @@ class BuyingController(StockController):
 				for d in tax_for_valuation:
 					d.category = 'Total'
 				msgprint(_('Tax Category has been changed to "Total" because all the Items are non-stock items'))
+	
+	def validate_asset_return(self):
+		if self.doctype not in ['Purchase Receipt', 'Purchase Invoice'] or not self.is_return:
+			return
+
+		purchase_doc_field = 'purchase_receipt' if self.doctype == 'Purchase Receipt' else 'purchase_invoice'
+		not_cancelled_asset = [d.name for d in frappe.db.get_all("Asset", {
+			purchase_doc_field: self.return_against,
+			"docstatus": 1
+		})]
+		if self.is_return and len(not_cancelled_asset):
+			frappe.throw(_("{} has submitted assets linked to it. You need to cancel the assets to create purchase return.".format(self.return_against)),
+				title=_("Not Allowed"))
 
 	def get_asset_items(self):
 		if self.doctype not in ['Purchase Order', 'Purchase Invoice', 'Purchase Receipt']:

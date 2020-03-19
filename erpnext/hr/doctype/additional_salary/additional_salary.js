@@ -8,7 +8,8 @@ frappe.ui.form.on('Additional Salary', {
 		frm.set_query("employee", function() {
 			return {
 				filters: {
-					company: frm.doc.company
+					company: frm.doc.company,
+					status:  "Active"
 				}
 			};
 		});
