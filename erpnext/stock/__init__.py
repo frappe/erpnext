@@ -13,7 +13,7 @@ install_docs = [
 ]
 
 def get_warehouse_account_map(company=None):
-	if not frappe.flags.warehouse_account_map or frappe.flags.in_test:
+	if not (frappe.flags.warehouse_account_map and frappe.flags.warehouse_account_map.get(company)) or frappe.flags.in_test:
 		warehouse_account = frappe._dict()
 
 		filters = {}
@@ -31,9 +31,10 @@ def get_warehouse_account_map(company=None):
 				d.account_currency = frappe.db.get_value('Account', d.account, 'account_currency', cache=True)
 				warehouse_account.setdefault(d.name, d)
 
-		frappe.flags.warehouse_account_map = warehouse_account
+		frappe.flags.warehouse_account_map.setdefault(company, {})
+		frappe.flags.warehouse_account_map[company] = warehouse_account_map
 
-	return frappe.flags.warehouse_account_map
+	return frappe.flags.warehouse_account_map[company]
 
 def get_warehouse_account(warehouse, warehouse_account=None):
 	account = warehouse.account
