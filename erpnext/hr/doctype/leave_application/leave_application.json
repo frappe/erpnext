@@ -193,6 +193,7 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
+   "read_only": 1,
    "remember_last_selected_value": 1,
    "reqd": 1
   },
@@ -247,7 +248,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2019-12-24 02:58:11.752149",
+ "modified": "2020-03-10 22:40:43.487721",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Application",
