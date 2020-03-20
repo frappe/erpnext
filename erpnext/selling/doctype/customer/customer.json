@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -23,6 +24,7 @@
   "customer_group",
   "territory",
   "tax_id",
+  "rtn",
   "tax_category",
   "disabled",
   "is_internal_customer",
@@ -181,7 +183,8 @@
   {
    "fieldname": "tax_id",
    "fieldtype": "Data",
-   "label": "Tax ID"
+   "label": "Tax ID",
+   "reqd": 1
   },
   {
    "fieldname": "tax_category",
@@ -464,12 +467,19 @@
    "fieldtype": "Table",
    "label": "Credit Limit",
    "options": "Customer Credit Limit"
+  },
+  {
+   "fieldname": "rtn",
+   "fieldtype": "Data",
+   "label": "RTN",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2019-09-06 12:40:31.801424",
+ "links": [],
+ "modified": "2020-03-18 19:17:34.932576",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
