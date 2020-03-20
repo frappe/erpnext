@@ -192,12 +192,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Employee Incentive",
 					"dependencies": ["Employee"]
-				},				
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Salary Register",
-					"doctype": "Salary Slip"
 				},
 			]
 		},
@@ -457,6 +451,18 @@ def get_data():
 					"is_query_report": True,
 					"name": "Department Analytics",
 					"doctype": "Employee"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Salary Register",
+					"doctype": "Salary Slip"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Salary Register Detail",
+					"doctype": "Salary Slip"
 				},
 			]
 		},
