@@ -66,7 +66,6 @@
    "default": "1",
    "fieldname": "min_qty",
    "fieldtype": "Int",
-   "in_list_view": 1,
    "label": "Minimum Qty "
   },
   {
@@ -76,6 +75,7 @@
   {
    "fieldname": "item_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Item Name",
    "read_only": 1
   },
@@ -83,7 +83,6 @@
    "fetch_from": "item_code.brand",
    "fieldname": "brand",
    "fieldtype": "Read Only",
-   "in_list_view": 1,
    "label": "Brand",
    "read_only": 1
   },
@@ -207,14 +206,13 @@
   {
    "fieldname": "reference",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Reference"
   }
  ],
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2020-02-10 15:02:12.651478",
+ "modified": "2020-03-18 19:13:55.340253",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",

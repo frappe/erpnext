@@ -137,7 +137,7 @@ class SalesInvoice(SellingController):
 		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points:
 			validate_loyalty_points(self, self.loyalty_points)
 
-		if self.numeration is None:
+		if self.docstatus == 1:
 			self.assign_cai()
 	
 	def initial_number(self, number):
