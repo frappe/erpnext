@@ -15,6 +15,27 @@ frappe.ui.form.on('LinkedIn Settings', {
 		}
 	},
 	refresh: function(frm){
+		let msg,color = null;
+		if(!frm.doc.person_urn){
+			msg = "SignIn First With LinkedIn.";
+			color = "yellow";
+		}
+		else{
+			let d = new Date(frm.doc.modified)
+			d.setDate(d.getDate()+60);
+			let dn = new Date()
+			let days = d.getTime() - dn.getTime();
+			days = Math.floor(days/(1000 * 3600 * 24));
+			if(days>0){
+				msg = "Your Session will be expire in " + days + " days.";
+			}
+			else{
+				msg = "Session is expired, SignIn with LinkedIn to continue.";
+				color = "yellow";
+			}
+		}
+		frm.dashboard.add_comment(msg, color, true);
+
 		frm.add_custom_button(('SignIn With LinkedIn'), function(){
 			if(!(frm.doc.consumer_key && frm.doc.consumer_secret)){
 				frappe.msgprint("Please set Consumer Key and Consumer Key Secret to Proceed");
