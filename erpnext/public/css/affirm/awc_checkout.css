@@ -1,0 +1,16 @@
+#gateway-selector-continue.affirm {
+	display: inline-block !important;
+	background: url('https://cdn-assets.affirm.com/images/buttons/checkout/42x205-blue.png') !important;
+	background-repeat: no-repeat !important;
+	background-position: center center !important;
+	background-size: cover !important;
+	width: 205px !important;
+	height: 42px !important;
+	text-indent: -10000000em !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}
+
+#gateway-selector-continue.affirm:hover {
+	background: url('https://cdn-assets.affirm.com/images/buttons/checkout/42x205-white.png') !important;
+}
