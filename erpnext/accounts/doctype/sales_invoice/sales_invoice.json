@@ -11,6 +11,7 @@
   "naming_series",
   "customer",
   "customer_name",
+  "rtn",
   "tax_id",
   "type_document",
   "is_pos",
@@ -431,7 +432,8 @@
    "fieldtype": "Link",
    "label": "Customer Address",
    "options": "Address",
-   "print_hide": 1
+   "print_hide": 1,
+   "reqd": 1
   },
   {
    "fieldname": "address_display",
@@ -1627,13 +1629,20 @@
    "fieldtype": "Link",
    "label": "Patient Statement",
    "options": "Patient statement"
+  },
+  {
+   "fetch_from": "customer.rtn",
+   "fieldname": "rtn",
+   "fieldtype": "Data",
+   "label": "RTN",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-20 15:38:05.092046",
+ "modified": "2020-03-18 19:19:39.733481",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
