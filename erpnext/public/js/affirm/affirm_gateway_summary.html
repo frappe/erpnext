@@ -1,0 +1,18 @@
+{% if ( billing_info && billing_info.country ) { %}
+<div class="row">
+    <address class="col-sm-12">
+        {% if ( billing_info.address_1 ) { %} {% if ( billing_info.title ) { %} {%= billing_info.title %} 
+        <br> {% } %} {%= billing_info.address_1 %}
+        <br> {% if ( billing_info.address_2 ) { %} {%= billing_info.address_2 %}
+        <br> {% } %} {%= billing_info.city %}, {%= billing_info.state %} {%= billing_info.postal_code %}
+        <br> {%= billing_info.country %} {% } else { %} Address is incomplete. {% } %}
+    </address>
+    <div>You will be redirected to Affirm to complete checkout.</div>
+</div>
+{% } else { %}
+<div class="row">
+    <div class="col-sm-12">
+        <p class="error">Missing Billing Address</p>
+    </div>
+</div>
+{% } %}
