@@ -167,9 +167,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 
 			if (doc.docstatus==1) {
 				this.frm.add_custom_button(__('Sales Return'), function() {
-					me.reason_popup(),
-					me.make_sales_return() 
-				}, __('Create'));
+					me.show_rejection_prompt()}, __('Create'));
 			}
 
 			if (doc.docstatus==1) {
@@ -240,57 +238,77 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			frm: this.frm
 		});
 	},
-	reason_popup: function(){
-		this.data = cur_frm.doc.items||[];
-			const dialog = new frappe.ui.Dialog({
-				title: __("Select Difference Account"),
-				fields: [
-					{
-						fieldname: "items", fieldtype: "Table",cannot_add_rows: true, label: __("ITEMS"),
-						data: this.data, in_place_edit: true,
-						get_data: () => {this.data=map(
-							item=>{
-								console.log("asdcvgfdxvgfdxgfdxcvfd");
-								item_name=item.item_name;
-								reason_for_return=item.reason_for_return;
-							}
-						)
 
-							return this.data;
-						},
-						fields: [{
-							fieldtype:'Data',
-							fieldname:"docname",
-							in_list_view: 1,
+	show_rejection_prompt: function () {
+		const me = this;
+		this.data = [];
+
+		for (let row of this.frm.doc.items) {
+			this.data.push({
+				"name": row.name,
+				"item_code": row.item_code,
+				"item_name": row.item_name
+			})
+		}
+
+		const dialog = new frappe.ui.Dialog({
+			title: __("Select Reasons for Rejection"),
+			fields: [
+				{
+					label: __("Items"),
+					fieldname: "items",
+					fieldtype: "Table",
+					cannot_add_rows: true,
+					data: this.data,
+					in_place_edit: true,
+					fields: [
+						{
+							fieldtype: 'Data',
+							fieldname: "name",
 							hidden: 1
-						}, {
-							fieldtype:'Data',
-							fieldname:"item_name",
-							label: __("ITEM NAME"),
+						},
+						{
+							label: __("Item Code"),
+							fieldtype: 'Link',
+							fieldname: "item_code",
+							options: "Item",
 							in_list_view: 1,
-							read_only: 0
-						}, {
-							fieldtype:'Small Text',
+							disabled: 0
+						},
+						{
+							label: __("Item Name"),
+							fieldtype: 'Data',
+							fieldname: "item_name",
 							in_list_view: 1,
-							label: __("REASON FOR RETURN"),
+							disabled: 0
+						},
+						{
+							label: __("Reason for Return"),
+							fieldtype: 'Data',
 							fieldname: 'reason_for_return',
-						}]
-					},
-				],
-				primary_action: function() {
-					const args = dialog.get_values()["payments"];
-
-					args.forEach(d => {
-						frappe.model.set_value("Delivery Note Item", d.item_name,
-							"reason_for_return", d.reason_for_return);
-					});
-					dialog.hide();
+							in_list_view: 1
+						}
+					],
+					get_data: () => {
+						return this.data;
+					}
 				},
-				primary_action_label: __('Save')
-			});
-			dialog.show();
+			],
+			primary_action: function () {
+				const values = dialog.get_values().items;
+
+				values.forEach(d => {
+					frappe.model.set_value("Delivery Note Item", d.name, "reason_for_return", d.reason_for_return);
+				});
+
+				dialog.hide();
+				me.make_sales_return()
+			},
+			primary_action_label: __('Save')
+		});
+		dialog.show();
 	},
-	
+
 	make_sales_return: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_return",
