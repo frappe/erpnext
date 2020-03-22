@@ -151,7 +151,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "PUR-ORD-.YYYY.-",
+   "options": "TPO-.YYYY.\nNTPO-.YYYY.",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -1053,7 +1053,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-01-14 18:54:39.694448",
+ "modified": "2020-03-18 17:04:18.807560",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
