@@ -81,6 +81,7 @@ def get_patient():
 		patient = frappe.new_doc("Patient")
 		patient.first_name = "_Test Patient"
 		patient.sex = "Male"
+		patient.mobile = 9876345675
 		patient.save(ignore_permissions=True)
 		return patient.name
 	return patient
