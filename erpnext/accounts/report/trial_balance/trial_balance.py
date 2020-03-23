@@ -7,7 +7,7 @@ from frappe import _
 from frappe.utils import flt, getdate, formatdate, cstr
 from erpnext.accounts.report.financial_statements \
 	import filter_accounts, set_gl_entries_by_account, filter_out_zero_value_rows
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
 value_fields = ("opening_debit", "opening_credit", "debit", "credit", "closing_debit", "closing_credit")
 
@@ -109,7 +109,7 @@ def get_rootwise_opening_balances(filters, report_type):
 
 		additional_conditions += fb_conditions
 
-	accounting_dimensions = get_accounting_dimensions()
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
 	query_filters = {
 		"company": filters.company,
@@ -122,11 +122,14 @@ def get_rootwise_opening_balances(filters, report_type):
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
-			if filters.get(dimension):
-				additional_conditions += """ and {0} in (%({0})s) """.format(dimension)
+			if filters.get(dimension.fieldname):
+				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
+					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
+						filters.get(dimension.fieldname))
+				additional_conditions += "and {0} in %({0})s".format(dimension.fieldname)
 
 				query_filters.update({
-					dimension: filters.get(dimension)
+					dimension.fieldname: filters.get(dimension.fieldname)
 				})
 
 	gle = frappe.db.sql("""

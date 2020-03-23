@@ -104,7 +104,6 @@ class LandedCostVoucher(Document):
 	def update_landed_cost(self):
 		for d in self.get("purchase_receipts"):
 			doc = frappe.get_doc(d.receipt_document_type, d.receipt_document)
-			
 			# check if there are {qty} assets created and linked to this receipt document
 			self.validate_asset_qty_and_status(d.receipt_document_type, doc)
 
@@ -123,6 +122,8 @@ class LandedCostVoucher(Document):
 			# update latest valuation rate in serial no
 			self.update_rate_in_serial_no_for_non_asset_items(doc)
 
+		for d in self.get("purchase_receipts"):
+			doc = frappe.get_doc(d.receipt_document_type, d.receipt_document)
 			# update stock & gl entries for cancelled state of PR
 			doc.docstatus = 2
 			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
