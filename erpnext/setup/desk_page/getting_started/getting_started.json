@@ -54,7 +54,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Getting Started",
- "modified": "2020-03-23 11:19:22.584148",
+ "modified": "2020-03-23 11:20:49.161823",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Getting Started",
@@ -81,6 +81,16 @@
    "is_query_report": 0,
    "link_to": "Sales Invoice",
    "type": "DocType"
+  },
+  {
+   "is_query_report": 0,
+   "link_to": "dashboard",
+   "type": "Page"
+  },
+  {
+   "is_query_report": 0,
+   "link_to": "leaderboard",
+   "type": "Page"
   }
  ]
 }
