@@ -704,11 +704,13 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:parent.is_return==1",
    "default": "0",
-   "depends_on": "eval:parent.is_return==1;",
+   "depends_on": "eval:parent.is_return==1",
    "fieldname": "sb_return",
    "fieldtype": "Section Break",
-   "label": "Reason for Return"
+   "label": "Returns"
   },
   {
    "default": "0",
@@ -727,7 +729,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-03-17 22:50:59.687494",
+ "modified": "2020-03-22 22:21:21.117822",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
