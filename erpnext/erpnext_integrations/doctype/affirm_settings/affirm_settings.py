@@ -247,7 +247,7 @@ def build_checkout_data(**kwargs):
 		"merchant": {
 			"user_confirmation_url": get_url(
 				(
-					"/api/method/erpnext_affirm.erpnext_affirm_integration"
+					"/api/method/erpnext.erpnext_integration"
 					".doctype.affirm_settings.affirm_settings.affirm_callback"
 					"?reference_doctype={0}&reference_docname={1}"
 				).format(ref_doc.doctype, ref_doc.name)
