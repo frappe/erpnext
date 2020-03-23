@@ -44,7 +44,10 @@ class HealthcarePractitioner(Document):
 			frappe.permissions.add_user_permission('Healthcare Practitioner', self.name, self.user_id)
 
 	def set_full_name(self):
-		self.practitioner_name = ' '.join(filter(None, [self.first_name, self.last_name]))
+		if self.last_name:
+			self.practitioner_name = ' '.join(filter(None, [self.first_name, self.last_name]))
+		else:
+			self.practitioner_name = self.first_name
 
 	def validate_user_id(self):
 		if not frappe.db.exists('User', self.user_id):

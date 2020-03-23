@@ -79,7 +79,7 @@ def get_patient():
 	patient = get_random("Patient")
 	if not patient:
 		patient = frappe.new_doc("Patient")
-		patient.patient_name = "Test Patient"
+		patient.first_name = "_Test Patient"
 		patient.sex = "Male"
 		patient.save(ignore_permissions=True)
 		return patient.name
