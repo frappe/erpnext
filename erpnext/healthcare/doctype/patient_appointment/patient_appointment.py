@@ -23,9 +23,9 @@ class PatientAppointment(Document):
 		self.set_status()
 
 	def after_insert(self):
-		invoice_appointment(self)
 		self.update_prescription_details()
 		self.update_fee_validity()
+		invoice_appointment(self)
 		send_confirmation_msg(self)
 
 	def set_status(self):
@@ -105,6 +105,10 @@ def invoice_appointment(appointment_doc):
 	automate_invoicing = frappe.db.get_single_value('Healthcare Settings', 'automate_appointment_invoicing')
 	appointment_invoiced = frappe.db.get_value('Patient Appointment', appointment_doc.name, 'invoiced')
 	fee_validity = check_fee_validity(appointment_doc)
+	if not fee_validity:
+		if frappe.db.exists('Fee Validity Reference', {'appointment': appointment_doc.name}):
+			return
+
 	if automate_invoicing and not appointment_invoiced and not fee_validity:
 		sales_invoice = frappe.new_doc('Sales Invoice')
 		sales_invoice.customer = frappe.get_value('Patient', appointment_doc.patient, 'customer')

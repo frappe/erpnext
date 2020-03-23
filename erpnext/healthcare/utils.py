@@ -232,11 +232,11 @@ def get_service_item_and_practitioner_charge(doc):
 
 
 def throw_config_service_item(is_inpatient):
-	service_item_lable = 'Out Patient Consulting Charge Item'
+	service_item_label = 'Out Patient Consulting Charge Item'
 	if is_inpatient:
-		service_item_lable = 'Inpatient Visit Charge Item'
+		service_item_label = 'Inpatient Visit Charge Item'
 
-	msg = _(('Please Configure {0} in ').format(service_item_lable) \
+	msg = _(('Please Configure {0} in ').format(service_item_label) \
 		+ '''<b><a href='#Form/Healthcare Settings'>Healthcare Settings</a></b>''')
 	frappe.throw(msg, title=_('Missing Configuration'))
 

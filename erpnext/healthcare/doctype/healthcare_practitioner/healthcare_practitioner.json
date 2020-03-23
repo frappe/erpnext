@@ -61,8 +61,7 @@
   {
    "fieldname": "last_name",
    "fieldtype": "Data",
-   "label": "Last Name",
-   "reqd": 1
+   "label": "Last Name"
   },
   {
    "fieldname": "image",
@@ -278,7 +277,7 @@
  ],
  "image_field": "image",
  "links": [],
- "modified": "2020-02-01 00:39:49.455988",
+ "modified": "2020-03-20 15:13:13.382212",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Practitioner",

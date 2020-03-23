@@ -27,7 +27,10 @@ class Patient(Document):
 		self.reload()
 
 	def set_full_name(self):
-		self.patient_name = ' '.join(filter(None, [self.first_name, self.last_name]))
+		if self.last_name:
+			self.patient_name = ' '.join(filter(None, [self.first_name, self.last_name]))
+		else:
+			self.patient_name = self.first_name
 
 	def add_as_website_user(self):
 		if self.email:

@@ -342,8 +342,7 @@
   {
    "fieldname": "last_name",
    "fieldtype": "Data",
-   "label": "Last Name",
-   "reqd": 1
+   "label": "Last Name"
   },
   {
    "fieldname": "first_name",
@@ -362,7 +361,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2020-02-25 17:56:46.351080",
+ "modified": "2020-03-20 14:59:53.945849",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
