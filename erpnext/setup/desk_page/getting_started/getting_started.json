@@ -41,8 +41,7 @@
  "charts": [
   {
    "chart_name": "Bank Balance",
-   "label": "All Your Money",
-   "size": "Full"
+   "label": "Bank Balance"
   }
  ],
  "creation": "2020-01-23 13:46:38.833076",
@@ -55,7 +54,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Getting Started",
- "modified": "2020-03-12 16:30:37.821762",
+ "modified": "2020-03-23 11:19:22.584148",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Getting Started",
