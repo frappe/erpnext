@@ -240,8 +240,15 @@ doc_events = {
 		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
 	},
 	"Sales Invoice": {
-		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.regional.italy.utils.sales_invoice_on_submit"],
-		"on_cancel": "erpnext.regional.italy.utils.sales_invoice_on_cancel",
+		"on_submit": [
+			"erpnext.regional.create_transaction_log",
+			"erpnext.regional.italy.utils.sales_invoice_on_submit",
+			"erpnext.erpnext_integrations.taxjar_integration.create_transaction"
+		],
+		"on_cancel": [
+			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
+			"erpnext.erpnext_integrations.taxjar_integration.delete_transaction"
+		],
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	"Payment Entry": {
@@ -263,6 +270,9 @@ doc_events = {
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
+	},
+	('Quotation', 'Sales Order', 'Sales Invoice'): {
+		'validate': ["erpnext.erpnext_integrations.taxjar_integration.set_sales_tax"]
 	}
 }
 

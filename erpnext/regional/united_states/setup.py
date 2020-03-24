@@ -22,7 +22,21 @@ def make_custom_fields():
 			dict(fieldname='affirm_id', fieldtype="Data", insert_after='po_date', 
 				label="Affirm ID", read_only=1, allow_on_submit=1),
 			dict(fieldname='affirm_status', fieldtype="Data", insert_after='affirm_id', 
-				label="Affirm Capture Status", read_only=1, allow_on_submit=1)
+				label="Affirm Capture Status", read_only=1, allow_on_submit=1),
+			dict(fieldname='exempt_from_sales_tax', fieldtype='Check', insert_after='taxes_and_charges',
+				label='Is customer exempted from sales tax?')
+		],
+		'Sales Invoice': [
+			dict(fieldname='exempt_from_sales_tax', fieldtype='Check', insert_after='taxes_section',
+				label='Is customer exempted from sales tax?')
+		],
+		'Customer': [
+			dict(fieldname='exempt_from_sales_tax', fieldtype='Check', insert_after='represents_company',
+				label='Is customer exempted from sales tax?')
+		],
+		'Quotation': [
+			dict(fieldname='exempt_from_sales_tax', fieldtype='Check', insert_after='taxes_and_charges',
+				label='Is customer exempted from sales tax?')
 		]
 	}
 	create_custom_fields(custom_fields)
