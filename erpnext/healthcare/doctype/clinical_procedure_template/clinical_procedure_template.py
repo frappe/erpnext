@@ -27,13 +27,6 @@ class ClinicalProcedureTemplate(Document):
 			else:
 				frappe.db.set_value('Item', self.item, 'disabled', 0)
 
-	def on_trash(self):
-		if self.item:
-			try:
-				frappe.delete_doc('Item', self.item)
-			except Exception:
-				frappe.throw(_('Not permitted. Please disable the Procedure Template'), title='Not Permitted')
-
 	def update_item_and_item_price(self):
 		if self.is_billable and self.item:
 			item_doc = frappe.get_doc('Item', {'item_code': self.item})
