@@ -99,6 +99,10 @@
   "advance_paid",
   "packing_list",
   "packed_items",
+  "delivery_window",
+  "delivery_start_time",
+  "column_break_19",
+  "delivery_end_time",
   "payment_schedule_section",
   "payment_terms_template",
   "payment_schedule",
@@ -1201,13 +1205,34 @@
    "hidden": 1,
    "label": "Is Completed",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "customer",
+   "fieldname": "delivery_window",
+   "fieldtype": "Section Break",
+   "label": "Delivery Window"
+  },
+  {
+   "fieldname": "delivery_start_time",
+   "fieldtype": "Time",
+   "label": "Delivery Start Time"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "delivery_end_time",
+   "fieldtype": "Time",
+   "label": "Delivery End time"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-30 19:15:28.605085",
+ "modified": "2020-04-02 23:12:33.920545",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

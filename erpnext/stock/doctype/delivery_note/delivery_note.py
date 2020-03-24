@@ -12,6 +12,7 @@ import frappe.defaults
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_delivery_note_serial_no
+from erpnext.stock.doctype.delivery_trip.delivery_trip import get_delivery_window
 from frappe import _
 from frappe.contacts.doctype.address.address import get_company_address
 from frappe.desk.notifications import clear_doctype_notifications
@@ -552,6 +553,9 @@ def make_delivery_trip(source_name, target_doc=None):
 		target.package_total = sum([stop.grand_total for stop in target.delivery_stops if stop.grand_total])
 
 	def update_stop_details(source_doc, target_doc, source_parent):
+		delivery_window = get_delivery_window(source_parent.doctype, source_parent.name)
+		target_doc.delivery_start_time = delivery_window.delivery_start_time
+		target_doc.delivery_end_time = delivery_window.delivery_end_time
 		target_doc.customer = source_parent.customer
 		target_doc.address = source_parent.shipping_address_name
 		target_doc.customer_address = source_parent.shipping_address
