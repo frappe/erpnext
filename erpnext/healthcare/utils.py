@@ -333,7 +333,6 @@ def check_fee_validity(appointment):
 	validity = frappe.db.exists('Fee Validity', {
 		'practitioner': appointment.practitioner,
 		'patient': appointment.patient,
-		'status': 'Pending',
 		'valid_till': ('>=', appointment.appointment_date)
 	})
 	if not validity:

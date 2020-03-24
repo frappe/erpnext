@@ -105,7 +105,7 @@
    "description": "If unchecked, the item wont be appear in Sales Invoice, but can be used in group test creation. ",
    "fieldname": "is_billable",
    "fieldtype": "Check",
-   "label": "Is billable",
+   "label": "Is Billable",
    "search_index": 1
   },
   {
@@ -114,7 +114,8 @@
    "fieldname": "lab_test_rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Standard Selling Rate"
+   "label": "Rate",
+   "mandatory_depends_on": "eval:doc.is_billable == 1"
   },
   {
    "depends_on": "eval:doc.lab_test_template_type == 'Single'",
@@ -239,8 +240,8 @@
   }
  ],
  "links": [],
- "modified": "2020-01-21 21:02:16.108347",
- "modified_by": "ruchamahabal2@gmail.com",
+ "modified": "2020-03-23 19:43:11.606254",
+ "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",
  "owner": "Administrator",
