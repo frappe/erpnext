@@ -835,6 +835,10 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 def get_bom_diff(bom1, bom2):
 	from frappe.model import table_fields
 
+	if bom1 == bom2:
+		frappe.throw(_("BOM 1 {0} and BOM 2 {1} should not be same")
+			.format(frappe.bold(bom1), frappe.bold(bom2)))
+
 	doc1 = frappe.get_doc('BOM', bom1)
 	doc2 = frappe.get_doc('BOM', bom2)
 
