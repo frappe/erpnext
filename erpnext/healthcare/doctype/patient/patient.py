@@ -53,6 +53,7 @@ class Patient(Document):
 			set_name_by_naming_series(self)
 
 	def get_patient_name(self):
+		self.set_full_name()
 		name = self.patient_name
 		if frappe.db.get_value('Patient', name):
 			count = frappe.db.sql("""select ifnull(MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)), 0) from tabPatient
