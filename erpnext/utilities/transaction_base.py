@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.share
 from frappe import _
-from frappe.utils import cstr, now_datetime, cint, flt, get_time
+from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_link_to_form
 from erpnext.controllers.status_updater import StatusUpdater
 
 from six import string_types
@@ -126,7 +126,7 @@ class TransactionBase(StatusUpdater):
 						frappe.msgprint(_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4}) ")
 							.format(d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate))
 						frappe.throw(_("To allow different rates, disable the {0} checkbox in {1}.")
-							.format"<b>Maintain Same Rate Throughout Sales Cycle</b>",(get_link_to_form("Selling Settings","Selling Settings","<b>Selling Settings</b>")))
+							.format("<b>Maintain Same Rate Throughout Sales Cycle</b>", get_link_to_form("Selling Settings","Selling Settings","<b>Selling Settings</b>")))
 
 	def get_link_filters(self, for_doctype):
 		if hasattr(self, "prev_link_mapper") and self.prev_link_mapper.get(for_doctype):
