@@ -184,6 +184,7 @@
    "oldfieldname": "stock_uom",
    "oldfieldtype": "Data",
    "options": "UOM",
+   "print_hide": 1,
    "print_width": "50px",
    "read_only": 1,
    "reqd": 1,
@@ -199,7 +200,6 @@
    "in_list_view": 1,
    "label": "UOM",
    "options": "UOM",
-   "print_hide": 1,
    "reqd": 1
   },
   {

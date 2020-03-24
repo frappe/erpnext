@@ -207,7 +207,7 @@ def get_customers_list(pos_profile={}):
 	if pos_profile.get('customer_groups'):
 		# Get customers based on the customer groups defined in the POS profile
 		for d in pos_profile.get('customer_groups'):
-			customer_groups.extend([d.name for d in get_child_nodes('Customer Group', d.customer_group)])
+			customer_groups.extend([d.get('name') for d in get_child_nodes('Customer Group', d.get('customer_group'))])
 		cond = "customer_group in (%s)" % (', '.join(['%s'] * len(customer_groups)))
 
 	return frappe.db.sql(""" select name, customer_name, customer_group,
@@ -387,7 +387,9 @@ def get_pricing_rule_data(doc):
 
 
 @frappe.whitelist()
-def make_invoice(doc_list={}, email_queue_list={}, customers_list={}):
+def make_invoice(pos_profile, doc_list={}, email_queue_list={}, customers_list={}):
+	import json
+
 	if isinstance(doc_list, string_types):
 		doc_list = json.loads(doc_list)
 
@@ -421,7 +423,11 @@ def make_invoice(doc_list={}, email_queue_list={}, customers_list={}):
 				name_list.append(name)
 
 	email_queue = make_email_queue(email_queue_list)
-	customers = get_customers_list()
+
+	if isinstance(pos_profile, string_types):
+		pos_profile = json.loads(pos_profile)
+
+	customers = get_customers_list(pos_profile)
 	return {
 		'invoice': name_list,
 		'email_queue': email_queue,
