@@ -175,6 +175,17 @@ frappe.ui.form.on('Delivery Stop', {
 					}
 				}
 			});
+
+			frappe.call({
+				method: "erpnext.stock.doctype.delivery_trip.delivery_trip.get_delivery_window",
+				args: { doctype : "Delivery Note" , docname : row.delivery_note, customer : row.customer },
+				callback: function (r) {
+					if(r.message && (r.message.delivery_start_time || r.message.delivery_end_time) ){
+						frappe.model.set_value(cdt, cdn, "delivery_start_time", r.message.delivery_start_time);
+						frappe.model.set_value(cdt, cdn, "delivery_end_time", r.message.delivery_end_time);
+					}
+				}
+			});
 		}
 	},
 

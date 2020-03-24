@@ -243,6 +243,43 @@ class DeliveryTrip(Document):
 		return directions[0] if directions else False
 
 
+@frappe.whitelist()
+def get_delivery_window(doctype=None, docname=None, customer=None):
+	"""
+	Fetch the set delivery window times for a Customer, or
+	fallback to global defaults in Delivery Settings
+
+	Args:
+		doctype (str, optional): The transaction DocType in which the delivery window is set. Defaults to None.
+		docname (str, optional): The transaction record in which the delivery window is set. Defaults to None.
+		customer (str, optional): The name of the Customer. Defaults to None.
+
+	Returns:
+		frappe._dict: The dict object containing the window times,
+			and a flag if the global defaults were picked up instead
+	"""
+
+	delivery_start_time = delivery_end_time = None
+	default_window = False
+
+	if doctype and docname:
+		delivery_start_time, delivery_end_time = frappe.db.get_value(doctype, docname,
+			["delivery_start_time", "delivery_end_time"])
+	elif customer:
+		delivery_start_time, delivery_end_time = frappe.db.get_value("Customer", customer,
+			["delivery_start_time", "delivery_end_time"])
+
+	if not (delivery_start_time and delivery_end_time):
+		delivery_start_time = frappe.db.get_single_value("Delivery Settings", "delivery_start_time")
+		delivery_end_time = frappe.db.get_single_value("Delivery Settings", "delivery_end_time")
+		default_window = True
+
+	return frappe._dict({
+		"delivery_start_time": delivery_start_time,
+		"delivery_end_time": delivery_end_time,
+		"default_window": default_window
+	})
+
 
 @frappe.whitelist()
 def get_contact_and_address(name):

@@ -54,11 +54,8 @@ class Customer(TransactionBase):
 		self.validate_credit_limit_on_change()
 		self.set_loyalty_program()
 		self.check_customer_group_change()
-<<<<<<< HEAD
 		self.validate_default_bank_account()
-=======
 		self.validate_delivery_window_times()
->>>>>>> 1c757b2dab... feat(selling): added delivery-window to customer
 
 		# set loyalty program tier
 		if frappe.db.exists('Customer', self.name):

@@ -40,6 +40,7 @@ class SalesOrder(SellingController):
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_for_items()
+		self.validate_delivery_window_times()
 		self.validate_warehouse()
 		self.validate_drop_ship()
 		self.validate_serial_no_based_delivery()
@@ -83,6 +84,11 @@ class SalesOrder(SellingController):
 			tot_avail_qty = frappe.db.sql("select projected_qty from `tabBin` \
 				where item_code = %s and warehouse = %s", (d.item_code, d.warehouse))
 			d.projected_qty = tot_avail_qty and flt(tot_avail_qty[0][0]) or 0
+	
+	def validate_delivery_window_times(self):
+		if self.delivery_start_time and self.delivery_end_time:
+			if self.delivery_start_time > self.delivery_end_time:
+				return frappe.throw(_('Delivery start window should be before closing window'))
 
 	def product_bundle_has_stock_item(self, product_bundle):
 		"""Returns true if product bundle has stock item"""

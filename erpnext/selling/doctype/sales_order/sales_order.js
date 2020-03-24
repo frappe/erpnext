@@ -35,6 +35,25 @@ frappe.ui.form.on("Sales Order", {
 			};
 		})
 	},
+	customer: function (frm) {
+		frappe.call({
+			method: "erpnext.stock.doctype.delivery_trip.delivery_trip.get_delivery_window",
+			args: { customer: frm.doc.customer },
+			callback: function (r) {
+				if (r.message && (r.message.delivery_start_time || r.message.delivery_end_time)) {
+					frm.set_value("delivery_start_time", r.message.delivery_start_time);
+					frm.set_value("delivery_end_time", r.message.delivery_end_time);
+					frappe.show_alert({
+						indicator: 'blue',
+						message: __(r.message.default_window
+							? "Delivery window set to global default"
+							: "Delivery window set to customer default"
+						)
+					});
+				}
+			}
+		});
+	},
 	refresh: function(frm) {
 		if(frm.doc.docstatus === 1 && frm.doc.status !== 'Closed'
 			&& flt(frm.doc.per_delivered, 6) < 100 && flt(frm.doc.per_billed, 6) < 100) {
