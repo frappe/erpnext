@@ -104,10 +104,14 @@ def check_payment_fields_reqd(patient):
 def invoice_appointment(appointment_doc):
 	automate_invoicing = frappe.db.get_single_value('Healthcare Settings', 'automate_appointment_invoicing')
 	appointment_invoiced = frappe.db.get_value('Patient Appointment', appointment_doc.name, 'invoiced')
-	fee_validity = check_fee_validity(appointment_doc)
-	if not fee_validity:
-		if frappe.db.exists('Fee Validity Reference', {'appointment': appointment_doc.name}):
-			return
+	enable_free_follow_ups = frappe.db.get_single_value('Healthcare Settings', 'enable_free_follow_ups')
+	if enable_free_follow_ups:
+		fee_validity = check_fee_validity(appointment_doc)
+		if not fee_validity:
+			if frappe.db.exists('Fee Validity Reference', {'appointment': appointment_doc.name}):
+				return
+	else:
+		fee_validity = None
 
 	if automate_invoicing and not appointment_invoiced and not fee_validity:
 		sales_invoice = frappe.new_doc('Sales Invoice')
@@ -126,11 +130,10 @@ def invoice_appointment(appointment_doc):
 		payment.amount = appointment_doc.paid_amount
 
 		sales_invoice.set_missing_values(for_validate=True)
-		frappe.as_json('Sales Invoice')
 		sales_invoice.save(ignore_permissions=True)
 		sales_invoice.submit()
 		frappe.msgprint(_('Sales Invoice {0} created as paid'.format(sales_invoice.name)), alert=True)
-		frappe.db.set_value('Patient Appointment', appointment_doc.name, 'invoiced', True)
+		frappe.db.set_value('Patient Appointment', appointment_doc.name, 'invoiced', 1)
 		frappe.db.set_value('Patient Appointment', appointment_doc.name, 'ref_sales_invoice', sales_invoice.name)
 
 

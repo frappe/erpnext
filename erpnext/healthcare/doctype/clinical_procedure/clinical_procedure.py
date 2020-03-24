@@ -112,7 +112,7 @@ class ClinicalProcedure(Document):
 
 		return allow_start
 
-	def make_material_receipt(self):
+	def make_material_receipt(self, submit=False):
 		stock_entry = frappe.new_doc('Stock Entry')
 
 		stock_entry.stock_entry_type = 'Material Receipt'
@@ -133,6 +133,9 @@ class ClinicalProcedure(Document):
 				cost_center = frappe.get_cached_value('Company',  self.company,  'cost_center')
 				se_child.cost_center = cost_center
 				se_child.expense_account = expense_account
+		if submit:
+			stock_entry.submit()
+			return stock_entry
 		return stock_entry.as_dict()
 
 
