@@ -21,10 +21,10 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 			"reqd": 1,
 			on_change: function() {
 				let filter_based_on = frappe.query_report.get_filter_value('filter_based_on');
-				frappe.query_report.toggle_filter('from_fiscal_year', filter_based_on === 'Date Range');
-				frappe.query_report.toggle_filter('to_fiscal_year', filter_based_on === 'Date Range');
-				frappe.query_report.toggle_filter('period_start_date', filter_based_on === 'Fiscal Year');
-				frappe.query_report.toggle_filter('period_end_date', filter_based_on === 'Fiscal Year');
+				frappe.query_report.toggle_filter_display('from_fiscal_year', filter_based_on === 'Date Range');
+				frappe.query_report.toggle_filter_display('to_fiscal_year', filter_based_on === 'Date Range');
+				frappe.query_report.toggle_filter_display('period_start_date', filter_based_on === 'Fiscal Year');
+				frappe.query_report.toggle_filter_display('period_end_date', filter_based_on === 'Fiscal Year');
 
 				frappe.query_report.refresh();
 			}
