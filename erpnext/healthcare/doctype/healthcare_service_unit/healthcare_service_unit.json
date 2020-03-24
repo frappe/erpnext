@@ -9,7 +9,6 @@
  "doctype": "DocType",
  "document_type": "Setup",
  "editable_grid": 1,
- "engine": "InnoDB",
  "field_order": [
   "healthcare_service_unit_name",
   "parent_healthcare_service_unit",
@@ -105,6 +104,10 @@
    "read_only": 1
   },
   {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
    "bold": 1,
    "depends_on": "eval:doc.is_group != 1",
    "fieldname": "warehouse",
@@ -153,17 +156,15 @@
    "options": "Healthcare Service Unit",
    "print_hide": 1,
    "report_hide": 1
-  },
-  {
-   "fieldname": "column_break_9",
-   "fieldtype": "Column Break"
   }
  ],
+ "is_tree": 1,
  "links": [],
  "modified": "2020-01-30 18:03:29.031351",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Unit",
+ "nsm_parent_field": "parent_healthcare_service_unit",
  "owner": "Administrator",
  "permissions": [
   {
