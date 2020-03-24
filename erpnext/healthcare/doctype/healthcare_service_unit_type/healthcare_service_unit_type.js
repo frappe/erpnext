@@ -4,7 +4,7 @@
 frappe.ui.form.on('Healthcare Service Unit Type', {
 	refresh: function(frm) {
 		frm.set_df_property('item_code', 'read_only', frm.doc.__islocal ? 0 : 1);
-		if (!frm.doc.__islocal) {
+		if (!frm.doc.__islocal && frm.doc.is_billable) {
 			frm.add_custom_button(__('Change Item Code'), function() {
 				change_item_code(cur_frm, frm.doc);
 			});
@@ -59,7 +59,8 @@ let change_item_code = function(frm, doc) {
 				'fieldtype': 'Data',
 				'label': 'Item Code',
 				'fieldname': 'item_code',
-				reqd: 1
+				'default': doc.item_code,
+				reqd: 1,
 			}
 		],
 		primary_action: function() {

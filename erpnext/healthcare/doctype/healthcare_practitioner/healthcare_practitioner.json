@@ -38,13 +38,13 @@
   "column_break_18",
   "inpatient_visit_charge_item",
   "inpatient_visit_charge",
+  "account_details",
+  "default_currency",
+  "accounts",
   "address_and_contacts_section",
   "address_html",
   "column_break_19",
-  "contact_html",
-  "account_details",
-  "accounts",
-  "default_currency"
+  "contact_html"
  ],
  "fields": [
   {
@@ -277,7 +277,7 @@
  ],
  "image_field": "image",
  "links": [],
- "modified": "2020-03-20 15:13:13.382212",
+ "modified": "2020-03-24 17:25:55.128808",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Practitioner",
