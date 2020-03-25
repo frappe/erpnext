@@ -33,9 +33,11 @@
   "update_billed_amount_in_sales_order",
   "billing",
   "cashier",
-  "cai",
-  "numeration",
   "pos",
+  "cai",
+  "column_numeration",
+  "due_date_cai",
+  "numeration",
   "authorized_range",
   "accounting_dimensions_section",
   "deadline_for_authorization",
@@ -440,6 +442,7 @@
    "fieldname": "address_display",
    "fieldtype": "Small Text",
    "label": "Address",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -686,6 +689,7 @@
    "fieldname": "total_qty",
    "fieldtype": "Float",
    "label": "Total Quantity",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -1581,12 +1585,14 @@
    "fieldtype": "Link",
    "label": "Reason for sale",
    "options": "Reason for sale",
+   "print_hide": 1,
    "reqd": 1
   },
   {
    "fieldname": "cashier",
    "fieldtype": "Data",
    "label": "Cashier",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -1623,7 +1629,8 @@
    "fieldname": "type_document",
    "fieldtype": "Link",
    "label": "Type Document",
-   "options": "GType Document"
+   "options": "GType Document",
+   "print_hide": 1
   },
   {
    "fieldname": "patient_statement",
@@ -1644,13 +1651,22 @@
    "label": "Pos",
    "options": "GPos",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_numeration",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "due_date_cai",
+   "fieldtype": "Date",
+   "label": "Due Date Cai"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-24 22:47:10.140484",
+ "modified": "2020-03-25 14:23:37.487908",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
