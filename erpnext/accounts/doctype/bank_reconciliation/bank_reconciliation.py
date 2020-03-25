@@ -38,7 +38,6 @@ class BankReconciliation(Document):
 			group by t2.account, t1.name
 			order by t1.posting_date ASC, t1.name DESC
 		""".format(condition=condition), {"account": self.account, "from": self.from_date, "to": self.to_date}, as_dict=1)
-		condition = ''
 
 		if self.bank_account:
 			condition += 'and bank_account = %(bank_account)s'

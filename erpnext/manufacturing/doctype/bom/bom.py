@@ -498,6 +498,14 @@ class BOM(WebsiteGenerator):
 		self.scrap_material_cost = total_sm_cost
 		self.base_scrap_material_cost = base_total_sm_cost
 
+	def update_new_bom(self, old_bom, new_bom, rate):
+		for d in self.get("items"):
+			if d.bom_no != old_bom: continue
+
+			d.bom_no = new_bom
+			d.rate = rate
+			d.amount = (d.stock_qty or d.qty) * rate
+
 	def update_exploded_items(self):
 		""" Update Flat BOM, following will be correct data"""
 		self.get_exploded_items()
@@ -826,6 +834,10 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 @frappe.whitelist()
 def get_bom_diff(bom1, bom2):
 	from frappe.model import table_fields
+
+	if bom1 == bom2:
+		frappe.throw(_("BOM 1 {0} and BOM 2 {1} should not be same")
+			.format(frappe.bold(bom1), frappe.bold(bom2)))
 
 	doc1 = frappe.get_doc('BOM', bom1)
 	doc2 = frappe.get_doc('BOM', bom2)

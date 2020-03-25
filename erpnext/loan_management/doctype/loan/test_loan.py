@@ -294,17 +294,20 @@ class TestLoan(unittest.TestCase):
 
 		make_loan_disbursement_entry(loan.name, loan.loan_amount)
 
-		frappe.db.sql(""" UPDATE `tabLoan Security Price` SET loan_security_price = %s
-		where loan_security=%s""", (100, 'Test Security 2'))
+		frappe.db.sql(""" UPDATE `tabLoan Security Price` SET loan_security_price = 100
+			where loan_security='Test Security 2'""")
 
 		check_for_ltv_shortfall()
 		loan_security_shortfall = frappe.get_doc("Loan Security Shortfall", {"loan": loan.name})
-
 		self.assertTrue(loan_security_shortfall)
 
 		self.assertEquals(loan_security_shortfall.loan_amount, 1000000.00)
 		self.assertEquals(loan_security_shortfall.security_value, 400000.00)
 		self.assertEquals(loan_security_shortfall.shortfall_amount, 600000.00)
+
+		frappe.db.sql(""" UPDATE `tabLoan Security Price` SET loan_security_price = 250
+			where loan_security='Test Security 2'""")
+
 
 def create_loan_accounts():
 	if not frappe.db.exists("Account", "Loans and Advances (Assets) - _TC"):
@@ -399,7 +402,8 @@ def create_loan_security_type():
 			"doctype": "Loan Security Type",
 			"loan_security_type": "Stock",
 			"unit_of_measure": "Nos",
-			"haircut": 50.00
+			"haircut": 50.00,
+			"loan_to_value_ratio": 50
 		}).insert(ignore_permissions=True)
 
 def create_loan_security():
