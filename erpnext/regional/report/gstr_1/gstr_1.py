@@ -142,7 +142,7 @@ class Gstr1Report(object):
 			where docstatus = 1 {where_conditions}
 			order by posting_date desc
 			""".format(select_columns=self.select_columns, doctype=self.doctype,
-				where_conditions=conditions), self.filters, as_dict=1, debug=1)
+				where_conditions=conditions), self.filters, as_dict=1)
 
 		for d in invoice_data:
 			self.invoices.setdefault(d.invoice_number, d)
