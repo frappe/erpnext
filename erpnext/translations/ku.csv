@@ -51,7 +51,7 @@ apps/erpnext/erpnext/stock/doctype/quick_stock_balance/quick_stock_balance.js,Pl
 DocType: Lost Reason Detail,Opportunity Lost Reason,Sedema winda ya Derfet
 DocType: Patient Appointment,Check availability,Peyda bikin
 DocType: Retention Bonus,Bonus Payment Date,Daxistina Bonus Bonus
-DocType: Employee,Job Applicant,Applicant Job
+DocType: Appointment Letter,Job Applicant,Applicant Job
 DocType: Job Card,Total Time in Mins,Demjimêra Total li Mins
 apps/erpnext/erpnext/buying/doctype/supplier/supplier_dashboard.py,This is based on transactions against this Supplier. See timeline below for details,Ev li ser danûstandinên li dijî vê Supplier bingeha. Dîtina cedwela li jêr bo hûragahiyan
 DocType: Manufacturing Settings,Overproduction Percentage For Work Order,Percentiya zêdebûna% ji bo Karê Karkerê
@@ -165,11 +165,10 @@ DocType: Appointment Booking Slots,Appointment Booking Slots,Slots Danûstendina
 DocType: Work Order Operation,Work In Progress,Kar berdewam e
 DocType: Leave Control Panel,Branch (optional),Chaxê (vebijarkî)
 apps/erpnext/erpnext/education/report/absent_student_report/absent_student_report.py,Please select date,Ji kerema xwe ve date hilbijêre
-DocType: Item Price,Minimum Qty ,Min Qty
+apps/erpnext/erpnext/stock/report/product_bundle_balance/product_bundle_balance.py,Minimum Qty ,Min Qty
 DocType: Finance Book,Finance Book,Book Book
 DocType: Patient Encounter,HLC-ENC-.YYYY.-,HLC-ENC-YYYY-
 DocType: Appointment Booking Settings,Holiday List,Lîsteya Holiday
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,The parent account {0} does not exists,Hesabê dêûbavê {0} tune
 apps/erpnext/erpnext/config/quality_management.py,Review and Action,Review û Action
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Accountant,Hesabdar
 apps/erpnext/erpnext/stock/report/item_price_stock/item_price_stock.py,Selling Price List,Lîsteya bihayê bihayê
@@ -180,6 +179,7 @@ DocType: Soil Analysis,(Ca+Mg)/K,(Ca + Mg) / K
 DocType: Delivery Stop,Contact Information,Agahiya Têkilî
 apps/erpnext/erpnext/public/js/hub/pages/Category.vue,Search for anything ...,Li her tiştî digerin ...
 ,Stock and Account Value Comparison,Berhevoka Nirxên Stock û Hesabê
+apps/erpnext/erpnext/loan_management/doctype/loan_disbursement/loan_disbursement.py,Disbursed Amount cannot be greater than loan amount,Mûçeya dravkirî nikare ji heqê krediyê mezintir be
 DocType: Company,Phone No,Phone No
 DocType: Delivery Trip,Initial Email Notification Sent,Şandina Îmêlê Şîfreya Yekem şandin
 DocType: Bank Statement Settings,Statement Header Mapping,Mapping Header Mapping
@@ -238,7 +238,6 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Pension Funds,kal�
 DocType: Exchange Rate Revaluation Account,Gain/Loss,Pawlos / Gelek
 DocType: Crop,Perennial,Perennial
 DocType: Program,Is Published,Weşandin e
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js,Show Delivery Notes,Nîşeyên Delivery nîşan bidin
 apps/erpnext/erpnext/controllers/status_updater.py,"To allow over billing, update ""Over Billing Allowance"" in Accounts Settings or the Item.","Ji bo destûrdayîna zêdekirina billing, di Settings Hesaban an Tiştê de &quot;Over Allowance Billing&quot; nûve bike."
 DocType: Patient Appointment,Procedure,Doz
 DocType: Accounts Settings,Use Custom Cash Flow Format,Forma Qanûna Kredê Custom Use
@@ -283,6 +282,7 @@ apps/erpnext/erpnext/config/buying.py,Templates of supplier standings.,Templates
 DocType: Lead,Interested,bala
 apps/erpnext/erpnext/hr/report/employee_leave_balance/employee_leave_balance.py,Opening,Dergeh
 apps/erpnext/erpnext/education/doctype/student_report_generation_tool/student_report_generation_tool.html,Program: ,Bername:
+apps/erpnext/erpnext/loan_management/doctype/loan_security_price/loan_security_price.py,Valid From Time must be lesser than Valid Upto Time.,Divê Bawer Ji Ser Qedrê idltî ya Valid Pêdivî bimîne.
 DocType: Item,Copy From Item Group,Copy Ji babetî Pula
 DocType: Journal Entry,Opening Entry,Peyam di roja vekirina
 apps/erpnext/erpnext/accounts/doctype/cheque_print_template/cheque_print_template.js,Account Pay Only,Account Pay Tenê
@@ -330,6 +330,7 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Consumabl
 DocType: Student,B-,B-
 DocType: Assessment Result,Grade,Sinif
 DocType: Restaurant Table,No of Seats,No Seats
+DocType: Loan Type,Grace Period in Days,Di Rojan de Grace Period
 DocType: Sales Invoice,Overdue and Discounted,Zêde û bêhêz kirin
 apps/erpnext/erpnext/public/js/call_popup/call_popup.js,Call Disconnected,Gazî veqetandin
 DocType: Sales Invoice Item,Delivered By Supplier,Teslîmî By Supplier
@@ -380,7 +381,6 @@ DocType: BOM Update Tool,New BOM,New BOM
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Prescribed Procedures,Pêvajûkirinên Qeydkirî
 apps/erpnext/erpnext/accounts/report/sales_payment_summary/sales_payment_summary.js,Show only POS,POS tenê nîşan bide
 DocType: Supplier Group,Supplier Group Name,Navê Giştî
-apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,Mark beşdarbûn wek <b></b>
 DocType: Driver,Driving License Categories,Kategorî
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please enter Delivery Date,"Ji kerema xwe, Dîroka Deliveryê bike"
 DocType: Depreciation Schedule,Make Depreciation Entry,Make Peyam Farhad.
@@ -397,10 +397,12 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Execution
 apps/erpnext/erpnext/config/manufacturing.py,Details of the operations carried out.,Details ji operasyonên hatiye lidarxistin.
 DocType: Asset Maintenance Log,Maintenance Status,Rewş Maintenance
 DocType: Purchase Invoice Item,Item Tax Amount Included in Value,Mîqdara Bacê Baca Di Nirxê de
+apps/erpnext/erpnext/loan_management/doctype/loan/loan.js,Loan Security Unpledge,Yekbûnek Ewlekariya Krediyê
 apps/erpnext/erpnext/non_profit/doctype/member/member_dashboard.py,Membership Details,Agahdariya Agahdariyê
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py,{0} {1}: Supplier is required against Payable account {2},{0} {1}: Supplier dijî account cîhde pêwîst e {2}
 apps/erpnext/erpnext/config/buying.py,Items and Pricing,Nawy û Pricing
 apps/erpnext/erpnext/projects/doctype/project/project_dashboard.html,Total hours: {0},Total saetan: {0}
+DocType: Loan,Loan Manager,Gerînendeyê deyn
 apps/erpnext/erpnext/accounts/report/trial_balance/trial_balance.py,From Date should be within the Fiscal Year. Assuming From Date = {0},Ji Date divê di nava sala diravî be. Bihesibînin Ji Date = {0}
 DocType: Patient Medical Record,HLC-PMR-.YYYY.-,HLC-PMR-YYYY.-
 DocType: Drug Prescription,Interval,Navber
@@ -459,6 +461,7 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Television,Televî
 DocType: Work Order Operation,Updated via 'Time Log',Demê via &#39;Time Têkeve&#39;
 apps/erpnext/erpnext/accounts/doctype/bank_guarantee/bank_guarantee.py,Select the customer or supplier.,Hilbijêre yan xerîdarê hilbijêrin.
 apps/erpnext/erpnext/regional/doctype/import_supplier_invoice/import_supplier_invoice.py,Country Code in File does not match with country code set up in the system,Kodê Welatê di Pelê de bi kodê welêt ya ku di pergalê de hatî danîn nabe
+apps/erpnext/erpnext/loan_management/doctype/loan_type/loan_type.py,Account {0} does not belong to Company {1},Account {0} nayê to Company girêdayî ne {1}
 apps/erpnext/erpnext/support/doctype/service_level/service_level.py,Select only one Priority as Default.,Tenê Pêşniyar wekî Yek Pêşek hilbijêrin.
 apps/erpnext/erpnext/controllers/taxes_and_totals.py,Advance amount cannot be greater than {0} {1},mîqdara Advance ne dikarin bibin mezintir {0} {1}
 apps/erpnext/erpnext/healthcare/doctype/practitioner_schedule/practitioner_schedule.js,"Time slot skiped, the slot {0} to {1} overlap exisiting slot {2} to {3}","Demjimêrk veşartî, slot {0} heta {1} serlêdana berbi {2} ji {3}"
@@ -536,7 +539,7 @@ DocType: Item Website Specification,Item Website Specification,Specification bab
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,Leave Blocked,Dev ji astengkirin
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item {0} has reached its end of life on {1},Babetê {0} dawiya wê ya jiyanê li ser gihîşt {1}
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.js,Bank Entries,Arşîva Bank
-DocType: Customer,Is Internal Customer,Mişteriyek Navxweyî ye
+DocType: Sales Invoice,Is Internal Customer,Mişteriyek Navxweyî ye
 apps/erpnext/erpnext/accounts/doctype/loyalty_program/loyalty_program.js,"If Auto Opt In is checked, then the customers will be automatically linked with the concerned Loyalty Program (on save)","Heke Opt Opt In kontrol kirin, dê paşê dê mişterî bi otomatîkê têkildarî têkildarî têkildarî têkildarî têkildarî têkevin (li ser parastinê)"
 DocType: Stock Reconciliation Item,Stock Reconciliation Item,Babetê Stock Lihevkirinê
 DocType: Stock Entry,Sales Invoice No,Sales bi fatûreyên No
@@ -560,6 +563,7 @@ DocType: Contract Template,Fulfilment Terms and Conditions,Şert û mercên xurt
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js,Material Request,Daxwaza maddî
 DocType: Bank Reconciliation,Update Clearance Date,Update Date Clearance
 apps/erpnext/erpnext/stock/report/product_bundle_balance/product_bundle_balance.py,Bundle Qty,Bundle Qty
+apps/erpnext/erpnext/loan_management/doctype/loan_application/loan_application.js,Cannot create loan until application is approved,Heta ku serlêdan pesend nekirin nekarîn
 ,GSTR-2,GSTR-2
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Item {0} not found in 'Raw Materials Supplied' table in Purchase Order {1},Babetê {0} di &#39;Delîlên Raw Supplied&#39; sifrê li Purchase Kom nehate dîtin {1}
 DocType: Salary Slip,Total Principal Amount,Giştî ya Serûpel
@@ -567,6 +571,7 @@ DocType: Student Guardian,Relation,Meriv
 DocType: Quiz Result,Correct,Serrast
 DocType: Student Guardian,Mother,Dê
 DocType: Restaurant Reservation,Reservation End Time,Demjimêra Niştecîhê
+DocType: Salary Slip Loan,Loan Repayment Entry,Navnîşa Veberhênana Deynê
 DocType: Crop,Biennial,Biennial
 ,BOM Variance Report,Raporta BOM Variance
 apps/erpnext/erpnext/config/selling.py,Confirmed orders from Customers.,emir Confirmed ji muşteriyan.
@@ -587,6 +592,7 @@ DocType: Healthcare Settings,Create documents for sample collection,Daxuyaniya j
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,Payment against {0} {1} cannot be greater than Outstanding Amount {2},Payment dijî {0} {1} nikare were mezintir Outstanding Mîqdar {2}
 apps/erpnext/erpnext/patches/v11_0/add_healthcare_service_unit_tree_root.py,All Healthcare Service Units,Hemû Yekîneyên Xizmeta Xizmetiyê
 apps/erpnext/erpnext/setup/default_energy_point_rules.py,On Converting Opportunity,Li ser Veguhêrîna Derfetê
+DocType: Loan,Total Principal Paid,Tevahiya Sereke Bêserûber
 DocType: Bank Account,Address HTML,Navnîşana IP
 DocType: Lead,Mobile No.,No. Mobile
 apps/erpnext/erpnext/selling/doctype/pos_closing_voucher/closing_voucher_details.html,Mode of Payments,Mode Serê
@@ -605,12 +611,14 @@ DocType: Leave Allocation,HR-LAL-.YYYY.-,HR-LAL-.YYYY-
 DocType: Exchange Rate Revaluation Account,Balance In Base Currency,Balance In Base Currency
 DocType: Supplier Scorecard Scoring Standing,Max Grade,Max Grade
 DocType: Email Digest,New Quotations,Quotations New
+DocType: Loan Interest Accrual,Loan Interest Accrual,Qertê Drav erîf
 apps/erpnext/erpnext/hr/doctype/attendance_request/attendance_request.py,Attendance not submitted for {0} as {1} on leave.,Tevlêbûnê ji bo derketina {0} wekî {1} nayê pêşkêş kirin.
 DocType: Journal Entry,Payment Order,Biryara Payê
 apps/erpnext/erpnext/www/book_appointment/verify/index.html,Verify Email,Emailê rast bikin
 DocType: Employee Tax Exemption Declaration,Income From Other Sources,Dahata ji Savkaniyên din
 DocType: Warehouse,"If blank, parent Warehouse Account or company default will be considered","Heke vala be, dê Hesabê Warehouse Hesabê yan jî şirketa pêşîn dê were hesibandin"
 DocType: HR Settings,Emails salary slip to employee based on preferred email selected in Employee,slip Emails meaş ji bo karker li ser epeyamê yê xwestî di karkirinê yên hilbijartî
+DocType: Work Order,This is a location where operations are executed.,Ev cîhek e ku karûbarên li dar têne.
 DocType: Tax Rule,Shipping County,Shipping County
 DocType: Currency Exchange,For Selling,Ji bo firotanê
 apps/erpnext/erpnext/config/desktop.py,Learn,Fêrbûn
@@ -619,6 +627,7 @@ DocType: Purchase Invoice Item,Enable Deferred Expense,Expansed Deferred Enabled
 apps/erpnext/erpnext/templates/includes/order/order_taxes.html,Applied Coupon Code,Koda kodê ya sepandî
 DocType: Asset,Next Depreciation Date,Next Date Farhad.
 apps/erpnext/erpnext/projects/doctype/activity_type/activity_type.js,Activity Cost per Employee,Cost Activity per Employee
+DocType: Loan Security,Haircut %,Rêzika%
 DocType: Accounts Settings,Settings for Accounts,Mîhengên ji bo Accounts
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Supplier Invoice No exists in Purchase Invoice {0},Supplier bi fatûreyên No li Purchase bi fatûreyên heye {0}
 apps/erpnext/erpnext/config/crm.py,Manage Sales Person Tree.,Manage Sales Person Tree.
@@ -657,6 +666,7 @@ apps/erpnext/erpnext/healthcare/setup.py,Resistant,Berxwedana
 apps/erpnext/erpnext/hotels/doctype/hotel_room_reservation/hotel_room_reservation.py,Please set Hotel Room Rate on {},Ji kerema xwe ji odeya otêlê li ser xuyakirinê {}
 DocType: Journal Entry,Multi Currency,Multi Exchange
 DocType: Bank Statement Transaction Invoice Item,Invoice Type,bi fatûreyên Type
+DocType: Loan,Loan Security Details,Nîşaneyên ewlehiyê yên deyn
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Valid from date must be less than valid upto date,Ji mêjûya derbasdar divê ji roja têde derbasdar kêmtir be
 DocType: Purchase Invoice,Set Accepted Warehouse,Wargeha Hatî Damezrandin
 DocType: Employee Benefit Claim,Expense Proof,Proof Proof
@@ -779,6 +789,7 @@ apps/erpnext/erpnext/support/doctype/service_level/service_level.py,Response Tim
 DocType: Purchase Receipt,Vehicle Date,Date Vehicle
 DocType: Campaign Email Schedule,Campaign Email Schedule,Bernameya E-nameya Kampanyayê
 DocType: Student Log,Medical,Pizişkî
+DocType: Work Order,This is a location where scraped materials are stored.,Ev cîhek e ku materyalên scraped têne hilanîn.
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js,Please select Drug,Ji kerema xwe vexwarinê hilbijêre
 apps/erpnext/erpnext/crm/doctype/lead/lead.py,Lead Owner cannot be same as the Lead,Xwedîyê Lead nikare bibe wek beşa Komedî de
 DocType: Announcement,Receiver,Receiver
@@ -873,7 +884,7 @@ DocType: Salary Structure,Salary Component for timesheet based payroll.,Componen
 DocType: Driver,Applicable for external driver,Ji bo ajokerek derve
 DocType: Sales Order Item,Used for Production Plan,Tê bikaranîn ji bo Plan Production
 DocType: BOM,Total Cost (Company Currency),Mesrefa Total (Pargîdaniya Pargîdanî)
-DocType: Loan,Total Payment,Total Payment
+DocType: Repayment Schedule,Total Payment,Total Payment
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Cannot cancel transaction for Completed Work Order.,Ji bo Birêvebirina Karûbarê Karûbarê Karûbar qedexe nekin.
 DocType: Manufacturing Settings,Time Between Operations (in mins),Time di navbera Operasyonên (li mins)
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,PO already created for all sales order items,PO ji bo tiştên ku ji bo hemû firotina firotanê firotin hate afirandin
@@ -898,6 +909,7 @@ DocType: Training Event,Workshop,Kargeh
 DocType: Supplier Scorecard Scoring Standing,Warn Purchase Orders,Biryarên kirînê bikujin
 DocType: Employee Tax Exemption Proof Submission,Rented From Date,Ji Berê Rented
 apps/erpnext/erpnext/manufacturing/report/bom_stock_report/bom_stock_report.py,Enough Parts to Build,Parts bes ji bo Build
+DocType: Loan Security,Loan Security Code,Koda ewlehiya deyn
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.js,Please save first,Ji kerema xwe pêşî hilînin
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,Items are required to pull the raw materials which is associated with it.,Pêdivî ye ku pêdivî ye ku materyalên xav ên ku bi wê re têkildar bikişînin.
 DocType: POS Profile User,POS Profile User,POS Profîl User
@@ -987,7 +999,6 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,Increment ca
 DocType: Company,Delete Company Transactions,Vemirandina Transactions Company
 DocType: Production Plan Item,Quantity and Description,Quantity and Description
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.py,Reference No and Reference Date is mandatory for Bank transaction,Çavkanî No û Date: Çavkanî ji bo muameleyan Bank wêneke e
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Ji kerema xwe Sêwirandina Navên foran ji bo {0} bi hêla Setup&gt; Mîhengên&gt; Navên Pîroz bikin
 DocType: Purchase Receipt,Add / Edit Taxes and Charges,Lê zêde bike Baca / Edit û doz li
 DocType: Payment Entry Reference,Supplier Invoice No,Supplier bi fatûreyên No
 DocType: Territory,For reference,ji bo referansa
@@ -1018,6 +1029,8 @@ DocType: Sales Invoice,Total Commission,Total Komîsyona
 DocType: Tax Withholding Account,Tax Withholding Account,Hesabê Bacê
 DocType: Pricing Rule,Sales Partner,Partner Sales
 apps/erpnext/erpnext/config/buying.py,All Supplier scorecards.,All Supplier Scorecards.
+apps/erpnext/erpnext/selling/report/territory_wise_sales/territory_wise_sales.py,Order Amount,Bihayê Order
+DocType: Loan,Disbursed Amount,Bihayek hat belav kirin
 DocType: Buying Settings,Purchase Receipt Required,Meqbûz kirînê pêwîst
 DocType: Sales Invoice,Rail,Hesinê tirêne
 apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Actual Cost,Mesrefa rastîn
@@ -1054,6 +1067,7 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,Receive at Warehou
 apps/erpnext/erpnext/templates/pages/material_request_info.html,Delivered: {0},Teslîmî: {0}
 DocType: QuickBooks Migrator,Connected to QuickBooks,Girêdanên QuickBooks ve girêdayî ye
 DocType: Bank Statement Transaction Entry,Payable Account,Account cîhde
+apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py,Account is mandatory to get payment entries,Hesab mecbûr e ku meriv şîfreyên dayînê bistîne
 DocType: Payment Entry,Type of Payment,Type of Payment
 apps/erpnext/erpnext/hr/doctype/compensatory_leave_request/compensatory_leave_request.py,Half Day Date is mandatory,Dîroka Nîv Dîv e
 DocType: Sales Order,Billing and Delivery Status,Billing û Delivery Rewş
@@ -1092,7 +1106,7 @@ apps/erpnext/erpnext/projects/doctype/task/task_list.js,Set as Completed,Wekî B
 DocType: Purchase Order Item,Billed Amt,billed Amt
 DocType: Training Result Employee,Training Result Employee,Xebatkarê Training Encam
 DocType: Warehouse,A logical Warehouse against which stock entries are made.,A Warehouse mantiqî li dijî ku entries stock made bi.
-apps/erpnext/erpnext/hr/doctype/loan/loan.js,Principal Amount,Şêwaz sereke
+DocType: Repayment Schedule,Principal Amount,Şêwaz sereke
 DocType: Loan Application,Total Payable Interest,Total sûdî
 apps/erpnext/erpnext/education/doctype/fee_schedule/fee_schedule.js,Total Outstanding: {0},Total Outstanding: {0}
 apps/erpnext/erpnext/public/js/call_popup/call_popup.js,Open Contact,Têkiliyek vekirî
@@ -1261,7 +1275,6 @@ DocType: BOM Item,Basic Rate (Company Currency),Rate bingehîn (Company Exchange
 apps/erpnext/erpnext/accounts/doctype/account/account.py,"While creating account for child Company {0}, parent account {1} not found. Please create the parent account in corresponding COA","Dema ku hesab ji bo Companyirketa zarokan {0} çê kir, hesabê dêûbavê {1} nehat dîtin. Ji kerema xwe hesabê dêûbav di COA-yê ya têkildar de biafirînin"
 apps/erpnext/erpnext/support/doctype/issue/issue.js,Split Issue,Issue Issue
 DocType: Student Attendance,Student Attendance,Beşdariyê Student
-apps/erpnext/erpnext/regional/report/electronic_invoice_register/electronic_invoice_register.js,No data to export,Danasîna hinardekirinê tune
 DocType: Sales Invoice Timesheet,Time Sheet,Bîlançoya Time
 DocType: Manufacturing Settings,Backflush Raw Materials Based On,Backflush madeyên xav ser
 DocType: Sales Invoice,Port Code,Koda Portê
@@ -1274,6 +1287,7 @@ DocType: Instructor Log,Other Details,din Details
 apps/erpnext/erpnext/accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py,Suplier,Suplier
 apps/erpnext/erpnext/stock/report/delayed_item_report/delayed_item_report.py,Actual Delivery Date,Dîroka Daxuyaniya rastîn
 DocType: Lab Test,Test Template,Template Template
+DocType: Loan Security Pledge,Securities,Ertên ewlehiyê
 DocType: Restaurant Order Entry Item,Served,Served
 apps/erpnext/erpnext/config/non_profit.py,Chapter information.,Şahidiya agahdariyê
 DocType: Account,Accounts,bikarhênerên
@@ -1367,6 +1381,7 @@ apps/erpnext/erpnext/hr/doctype/holiday_list/holiday_list.py,Please select weekl
 DocType: Inpatient Record,O Negative,O Negative
 DocType: Work Order Operation,Planned End Time,Bi plan Time End
 DocType: POS Profile,Only show Items from these Item Groups,Tenê Ji Van Grûpên Dabeşan Tiştan nîşan bikin
+DocType: Loan,Is Secured Loan,Krediyek Ewlehî ye
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account with existing transaction cannot be converted to ledger,Account bi mêjera heyî nikare bê guhartina ji bo ledger
 apps/erpnext/erpnext/config/non_profit.py,Memebership Type Details,Agahdariyên Şertên Memêkirinê
 DocType: Delivery Note,Customer's Purchase Order No,Buy Mişterî ya Order No
@@ -1481,6 +1496,7 @@ DocType: Item,Max Sample Quantity,Hêjeya Berbi Sample
 apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.py,No Permission,No Destûr
 DocType: Contract Fulfilment Checklist,Contract Fulfilment Checklist,Peymana Felsefeya Peymanê
 DocType: Vital Signs,Heart Rate / Pulse,Dilê Dil / Pulse
+DocType: Customer,Default Company Bank Account,Hesabê Bankeya Pargîdaniya Pargîdanî
 DocType: Supplier,Default Bank Account,Account Bank Default
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,"To filter based on Party, select Party Type first","Fîltre li ser bingeha Partîya, Partîya select yekem Type"
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py,'Update Stock' can not be checked because items are not delivered via {0},"&#39;Update Stock&#39; nikarin werin kontrolkirin, ji ber tumar bi via teslîmî ne {0}"
@@ -1597,7 +1613,6 @@ DocType: Production Plan Item,"If enabled, system will create the work order for
 DocType: Sales Team,Incentives,aborîve
 apps/erpnext/erpnext/accounts/general_ledger.py,Values Out Of Sync,Nirxên Ji Hevpeymaniyê derketin
 apps/erpnext/erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py,Difference Value,Nirxa Cûdahî
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Ji kerema xwe ji hêla Tevlêbûnê&gt; Pêjeya Hejmarbûnê ve ji bo Pêvekêşandinê hejmarên hejmaran bikin
 DocType: SMS Log,Requested Numbers,Numbers xwestin
 DocType: Volunteer,Evening,Êvar
 DocType: Quiz,Quiz Configuration,Confiz Configuration
@@ -1617,6 +1632,7 @@ DocType: Shopify Settings,Default Warehouse to to create Sales Order and Deliver
 DocType: Purchase Taxes and Charges,On Previous Row Total,Li ser Previous Row Total
 DocType: Purchase Invoice Item,Rejected Qty,red Qty
 DocType: Setup Progress Action,Action Field,Karkerên Çalakî
+apps/erpnext/erpnext/config/loan_management.py,Loan Type for interest and penalty rates,Tîpa deyn ji bo rêjeyên rêjeyê û cezayê
 DocType: Healthcare Settings,Manage Customer,Rêveberiyê bistînin
 DocType: Amazon MWS Settings,Always synch your products from Amazon MWS before synching the Orders details,Ji berî vekirina agahdariya navendên ji berî herdu berhemên xwe ji Amazon MWS re herdem herdem bişînin
 DocType: Delivery Trip,Delivery Stops,Rawestandin
@@ -1628,6 +1644,7 @@ DocType: Leave Type,Encashment Threshold Days,Rojên Têkiliya Têkilî
 ,Final Assessment Grades,Nirxandina Bingeha Dawîn
 apps/erpnext/erpnext/public/js/setup_wizard.js,The name of your company for which you are setting up this system.,The name of şirketa we ji bo ku hûn bi avakirina vê sîstemê.
 DocType: HR Settings,Include holidays in Total no. of Working Days,Usa jî cejnên li Bi tevahî tune. ji rojên xebatê
+apps/erpnext/erpnext/accounts/report/item_wise_purchase_register/item_wise_purchase_register.py,% Of Grand Total,% Of Total Total
 apps/erpnext/erpnext/setup/setup_wizard/operations/sample_data.py,Setup your Institute in ERPNext,Enstîtuya xwe ya di ERPNext de saz bike
 DocType: Agriculture Analysis Criteria,Plant Analysis,Analysis Plant
 DocType: Task,Timeline,Timeline
@@ -1635,9 +1652,11 @@ apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js,Hold,Rawest
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js,Alternate Item,Peldanka alternatîf
 DocType: Shopify Log,Request Data,Daneyên Daxwazî
 DocType: Employee,Date of Joining,Date of bizaveka
+DocType: Delivery Note,Inter Company Reference,Referansa irketa Inter
 DocType: Naming Series,Update Series,update Series
 DocType: Supplier Quotation,Is Subcontracted,Ma Subcontracted
 DocType: Restaurant Table,Minimum Seating,Min kêm rûniştinê
+apps/erpnext/erpnext/education/doctype/quiz/quiz.js,The question cannot be duplicate,Pirs nikare dubare bibe
 DocType: Item Attribute,Item Attribute Values,Nirxên Pêşbîr babetî
 DocType: Examination Result,Examination Result,Encam muayene
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,Purchase Receipt,Meqbûz kirîn
@@ -1738,6 +1757,7 @@ apps/erpnext/erpnext/public/js/hub/Sidebar.vue,Categories,Kategorî
 apps/erpnext/erpnext/accounts/page/pos/pos.js,Sync Offline Invoices,Syncê girêdayî hisab
 DocType: Payment Request,Paid,tê dayin
 DocType: Service Level,Default Priority,Pêşeroja Pêşeng
+DocType: Pledge,Pledge,Berdêl
 DocType: Program Fee,Program Fee,Fee Program
 DocType: BOM Update Tool,"Replace a particular BOM in all other BOMs where it is used. It will replace the old BOM link, update cost and regenerate ""BOM Explosion Item"" table as per new BOM.
 It also updates latest price in all the BOMs.","Li Bûrsên din ên BOM-ê ku derê tê bikaranîn. Ew ê di binê BOM&#39;ê de, buhayê nûvekirina nûjen û nûjenkirina &quot;BOM Explosion Item&quot; ya ku BOM ya nû ye. Ew jî di hemî BOM-ê de bihayên nûtirîn nûjen dike."
@@ -1751,6 +1771,7 @@ DocType: Asset,Available-for-use Date,Dîrok-ji-bikaranîn-Dîrok
 DocType: Guardian,Guardian Name,Navê Guardian
 DocType: Cheque Print Template,Has Print Format,Has Print Format
 DocType: Support Settings,Get Started Sections,Beşên Destpêk Bike
+,Loan Repayment and Closure,Deyn û Ragihandin
 DocType: Lead,CRM-LEAD-.YYYY.-,CRM-LEAD -YYYY-
 DocType: Invoice Discounting,Sanctioned,belê
 ,Base Amount,Bêjeya Base
@@ -1764,7 +1785,6 @@ apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,From Place,Ji Cihê
 DocType: Student Admission,Publish on website,Weşana li ser malpera
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Supplier Invoice Date cannot be greater than Posting Date,Date Supplier bi fatûreyên ne dikarin bibin mezintir Mesaj Date
 DocType: Installation Note,MAT-INS-.YYYY.-,MAT-INS -YYYY-
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Koda Babetê&gt; Koma Rêzan&gt; Brand
 DocType: Subscription,Cancelation Date,Dîroka Cancelkirinê
 DocType: Purchase Invoice Item,Purchase Order Item,Bikirin Order babetî
 DocType: Agriculture Task,Agriculture Task,Taskariya Çandiniyê
@@ -1783,7 +1803,6 @@ DocType: Item Variant Settings,Rename Attribute Value in Item Attribute.,Rename 
 DocType: Purchase Invoice,Additional Discount Percentage,Rêjeya Discount Additional
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html,View a list of all the help videos,View lîsteya hemû videos alîkarî
 DocType: Agriculture Analysis Criteria,Soil Texture,Paqijê maqûl
-DocType: Bank Reconciliation,Select account head of the bank where cheque was deposited.,serê account Hilbijêre ji bank ku check danenîye bû.
 DocType: Selling Settings,Allow user to edit Price List Rate in transactions,Destûrê bide bikarhêneran ji bo weşînertiya Price List Rate li muamele
 DocType: Pricing Rule,Max Qty,Max Qty
 apps/erpnext/erpnext/education/doctype/student_report_generation_tool/student_report_generation_tool.js,Print Report Card,Karta Raporta Print
@@ -1895,7 +1914,6 @@ DocType: Sales Invoice Item,Rate With Margin,Rate Bi Kenarê
 DocType: Purchase Invoice,Is Return (Debit Note),Vegerîn (Debit Note)
 DocType: Workstation,Wages,Yomî
 DocType: Asset Maintenance,Maintenance Manager Name,Navê Mersûmê Navend
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js,Transactions against the company already exist! ,Danûstandinên li dijî pargîdanî jixwe hene!
 apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Requesting Site,Daxwaza Malperê
 DocType: Agriculture Task,Urgent,Acîl
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Fetching records......,Fetching records ......
@@ -1918,7 +1936,7 @@ DocType: Company,Exception Budget Approver Role,Tevgeriya Derfeta Reza Tevgerî
 DocType: Purchase Invoice,"Once set, this invoice will be on hold till the set date","Dema ku careke din, ev bargav wê heta roja danîn"
 DocType: Cashier Closing,POS-CLO-,POS-CLO-
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py,Selling Amount,Şêwaz firotin
-DocType: Repayment Schedule,Interest Amount,Şêwaz Interest
+DocType: Loan Interest Accrual,Interest Amount,Şêwaz Interest
 DocType: Job Card,Time Logs,Logs Time
 DocType: Sales Invoice,Loyalty Amount,Amûdê
 DocType: Employee Transfer,Employee Transfer Detail,Xwendekarê Transfer Detail
@@ -1958,7 +1976,6 @@ apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Pu
 DocType: Email Digest,Purchase Orders Items Overdue,Pirtûka Birêvebirina Peldankan
 apps/erpnext/erpnext/accounts/page/pos/pos.js,ZIP Code,Kode ya postî
 apps/erpnext/erpnext/controllers/selling_controller.py,Sales Order {0} is {1},Sales Order {0} e {1}
-apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py,Select interest income account in loan {0},Hesabê dahatina hesabê li lênerê {3}
 DocType: Opportunity,Contact Info,Têkilî
 apps/erpnext/erpnext/config/help.py,Making Stock Entries,Making Stock Arşîva
 apps/erpnext/erpnext/hr/doctype/employee_promotion/employee_promotion.py,Cannot promote Employee with status Left,Kes nikare karûbarê çepê ya Çep bigirin
@@ -2041,7 +2058,6 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Project Collaboration I
 DocType: Salary Slip,Deductions,bi dabirînê
 DocType: Setup Progress Action,Action Name,Navekî Çalak
 apps/erpnext/erpnext/accounts/report/consolidated_financial_statement/consolidated_financial_statement.js,Start Year,Serî Sal
-apps/erpnext/erpnext/hr/doctype/loan_application/loan_application.js,Create Loan,Kredî biafirînin
 DocType: Purchase Invoice,Start date of current invoice's period,date ji dema fatûra niha ve dest bi
 DocType: Shift Type,Process Attendance After,Pêvajoya Tevlêbûnê piştî
 ,IRS 1099,IRS 1099
@@ -2062,6 +2078,7 @@ DocType: Sales Invoice Advance,Sales Invoice Advance,Sales bi fatûreyên Advanc
 apps/erpnext/erpnext/public/js/setup_wizard.js,Select your Domains,Domainên xwe hilbijêrin
 apps/erpnext/erpnext/erpnext_integrations/doctype/shopify_settings/sync_product.py,Shopify Supplier,Shopify Supplier
 DocType: Bank Statement Transaction Entry,Payment Invoice Items,Payment Invoice Items
+DocType: Repayment Schedule,Is Accrued,Qebûlkirin e
 DocType: Payroll Entry,Employee Details,Agahdarî
 apps/erpnext/erpnext/regional/doctype/import_supplier_invoice/import_supplier_invoice.py,Processing XML Files,Pelên XML-ê pêşve kirin
 DocType: Amazon MWS Settings,CN,CN
@@ -2093,6 +2110,7 @@ apps/erpnext/erpnext/healthcare/doctype/clinical_procedure/clinical_procedure.js
 DocType: Loyalty Point Entry,Loyalty Point Entry,Entity Entity Entry
 DocType: Employee Checkin,Shift End,Endamê Shift
 DocType: Stock Settings,Default Item Group,Default babetî Pula
+DocType: Loan,Partially Disbursed,Qismen dandin de
 DocType: Job Card Time Log,Time In Mins,Time In Mins
 apps/erpnext/erpnext/config/non_profit.py,Grant information.,Agahdariyê bide
 apps/erpnext/erpnext/accounts/doctype/bank_account/bank_account.js,This action will unlink this account from any external service integrating ERPNext with your bank accounts. It cannot be undone. Are you certain ?,Ev çalakî dê ev hesabê ji karûbarê derveyî yê ku ERPNext bi hesabên banka we re têkildar dike vebike. Ew nema dikare were paşguh kirin. Tu bi xwe ewle yî?
@@ -2108,6 +2126,7 @@ DocType: Student Report Generation Tool,Total Parents Teacher Meeting,Civînek M
 apps/erpnext/erpnext/accounts/page/pos/pos.js,"Payment Mode is not configured. Please check, whether account has been set on Mode of Payments or on POS Profile.","Mode tezmînatê nehatiye mîhenkirin. Ji kerema xwe, gelo account hatiye dîtin li ser Mode of Payments an li ser POS Profile danîn."
 apps/erpnext/erpnext/buying/utils.py,Same item cannot be entered multiple times.,babete eynî ne dikarin ketin bê çend caran.
 apps/erpnext/erpnext/accounts/doctype/account/account_tree.js,"Further accounts can be made under Groups, but entries can be made against non-Groups","bikarhênerên berfireh dikarin di bin Groups kirin, di heman demê de entries dikare li dijî non-Groups kirin"
+DocType: Loan Repayment,Loan Closure,Girtina deyn
 DocType: Call Log,Lead,Gûlle
 DocType: Email Digest,Payables,Payables
 DocType: Amazon MWS Settings,MWS Auth Token,MWS Nivîskar Token
@@ -2139,6 +2158,7 @@ apps/erpnext/erpnext/accounts/doctype/sales_invoice/regional/india_list.js,e-Way
 apps/erpnext/erpnext/config/hr.py,Employee Tax and Benefits,Baca karmend û qezencan
 DocType: Bank Guarantee,Validity in Days,Validity li Rojan
 DocType: Bank Guarantee,Validity in Days,Validity li Rojan
+DocType: Unpledge,Haircut,Porjêkirî
 apps/erpnext/erpnext/accounts/doctype/c_form/c_form.py,C-form is not applicable for Invoice: {0},"C-form e pêkanîn, ji bo bi fatûreyên: {0}"
 DocType: Certified Consultant,Name of Consultant,Navenda Şêwirmendê
 DocType: Payment Reconciliation,Unreconciled Payment Details,Unreconciled Details Payment
@@ -2191,7 +2211,9 @@ apps/erpnext/erpnext/education/report/absent_student_report/absent_student_repor
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Rest Of The World,Din ên cîhanê
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,The Item {0} cannot have Batch,The babet {0} ne dikarin Batch hene
 DocType: Crop,Yield UOM,UOM
+DocType: Loan Security Pledge,Partially Pledged,Beşdarî soz dan
 ,Budget Variance Report,Budceya Report Variance
+DocType: Sanctioned Loan Amount,Sanctioned Loan Amount,Mîqdara deynek sincirî
 DocType: Salary Slip,Gross Pay,Pay Gross
 DocType: Item,Is Item from Hub,Gelek ji Hubê ye
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js,Get Items from Healthcare Services,Xizmetên ji Xizmetên Tenduristiyê Bistînin
@@ -2226,6 +2248,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/quality_management/doctype/quality_procedure/quality_procedure_tree.js,New Quality Procedure,Procedura nû ya kalîteyê
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py,Balance for Account {0} must always be {1},Balance bo Account {0} tim divê {1}
 DocType: Patient Appointment,More Info,Agahî
+apps/erpnext/erpnext/education/doctype/student/student.py,Date of Birth cannot be greater than Joining Date.,Dîroka Zayînê ji Dîroka Tevlêbûnê nikare mezintir be.
 DocType: Supplier Scorecard,Scorecard Actions,Actions Card
 apps/erpnext/erpnext/buying/doctype/supplier_quotation/supplier_quotation.py,Supplier {0} not found in {1},Supplier {0} ne di nav {1}
 DocType: Purchase Invoice,Rejected Warehouse,Warehouse red
@@ -2375,6 +2398,7 @@ DocType: Inpatient Record,Discharge Note,Têkiliya Discharge
 DocType: Appointment Booking Settings,Number of Concurrent Appointments,Hejmara Navdêrên Tevhev
 apps/erpnext/erpnext/config/desktop.py,Getting Started,Destpêkirin
 DocType: Purchase Invoice,Taxes and Charges Calculation,Bac û doz li hesaba
+DocType: Loan Interest Accrual,Payable Principal Amount,Dravê Mîrê Sêwasê
 DocType: Accounts Settings,Book Asset Depreciation Entry Automatically,Book Asset Peyam Farhad otomatîk
 DocType: Accounts Settings,Book Asset Depreciation Entry Automatically,Book Asset Peyam Farhad otomatîk
 DocType: BOM Operation,Workstation,Workstation
@@ -2411,7 +2435,6 @@ apps/erpnext/erpnext/selling/report/inactive_customers/inactive_customers.py,Tot
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Food,Xûrek
 apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js,Ageing Range 3,Range Ageing 3
 DocType: POS Closing Voucher Details,POS Closing Voucher Details,Daxuyaniyên POS Vebijêrk
-DocType: Bank Account,Is the Default Account,Hesabê Bindest e
 DocType: Shopify Log,Shopify Log,Shopify Log
 apps/erpnext/erpnext/public/js/call_popup/call_popup.js,No communication found.,Têkiliyek nehat dîtin.
 DocType: Inpatient Occupancy,Check In,Çek kirin
@@ -2465,12 +2488,14 @@ DocType: Holiday List,Holidays,Holidays
 DocType: Sales Order Item,Planned Quantity,Quantity plankirin
 DocType: Water Analysis,Water Analysis Criteria,Critîteya Water Analysis
 DocType: Item,Maintain Stock,Pêkanîna Stock
+DocType: Loan Security Unpledge,Unpledge Time,Wextê Unpledge
 DocType: Terms and Conditions,Applicable Modules,Modulên sepandî
 DocType: Employee,Prefered Email,prefered Email
 DocType: Student Admission,Eligibility and Details,Nirx û Agahdariyê
 apps/erpnext/erpnext/accounts/report/gross_and_net_profit_report/gross_and_net_profit_report.py,Included in Gross Profit,Di Profitiya Mezin de tête kirin
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py,Net Change in Fixed Asset,Change Net di Asset Fixed
 apps/erpnext/erpnext/manufacturing/report/bom_stock_calculated/bom_stock_calculated.py,Reqd Qty,Reqd Qty
+DocType: Work Order,This is a location where final product stored.,Ev cîhek e ku hilbera dawîn tê hilanîn.
 apps/erpnext/erpnext/controllers/accounts_controller.py,Charge of type 'Actual' in row {0} cannot be included in Item Rate,Pere ji type &#39;Actual&#39; li row {0} ne bi were di Rate babetî di nav de
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js,Max: {0},Max: {0}
 apps/erpnext/erpnext/projects/report/daily_timesheet_summary/daily_timesheet_summary.py,From Datetime,ji DateTime
@@ -2511,8 +2536,10 @@ apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js,Select POS Prof
 DocType: Warranty Claim,Warranty / AMC Status,Mîsoger / AMC Rewş
 ,Accounts Browser,bikarhênerên Browser
 DocType: Procedure Prescription,Referral,Referral
+,Territory-wise Sales,Firotên xerîdar
 DocType: Payment Entry Reference,Payment Entry Reference,Payment Reference Peyam
 DocType: GL Entry,GL Entry,Peyam GL
+apps/erpnext/erpnext/controllers/buying_controller.py,Row #{0}: Accepted Warehouse and Supplier Warehouse cannot be same,Row # {0}: Warehouse Pêşkêşker û Pêşkêşkêşker nayê pejirandin yek
 DocType: Support Search Source,Response Options,Options Options
 DocType: Pricing Rule,Apply Multiple Pricing Rules,Rêziknameyên Pirjimarî bicîh bînin
 DocType: HR Settings,Employee Settings,Settings karker
@@ -2586,6 +2613,7 @@ apps/erpnext/erpnext/regional/report/gstr_1/gstr_1.js,Download as Json,Wekî Jso
 DocType: Item,Sales Details,Details Sales
 DocType: Coupon Code,Used,Bikaranîn
 DocType: Opportunity,With Items,bi babetî
+DocType: Vehicle Log,last Odometer Value ,Nirxê Odometer ya paşîn
 apps/erpnext/erpnext/crm/doctype/email_campaign/email_campaign.py,The Campaign '{0}' already exists for the {1} '{2}',Kampanya &#39;{0}&#39; jixwe ji bo {1} &#39;{2}&#39; heye
 DocType: Asset Maintenance,Maintenance Team,Tîmên Parastinê
 DocType: Homepage Section,"Order in which sections should appear. 0 is first, 1 is second and so on.","Fermana ku di kîjan parçeyan de divê xuya bibe. 0 yekem e, 1 duyem e û hwd."
@@ -2596,7 +2624,7 @@ apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Governmen
 apps/erpnext/erpnext/hr/doctype/vehicle_log/vehicle_log.py,Expense Claim {0} already exists for the Vehicle Log,Expense Îdîaya {0} berê ji bo Têkeve Vehicle heye
 DocType: Asset Movement Item,Source Location,Çavkaniya Çavkaniyê
 apps/erpnext/erpnext/public/js/setup_wizard.js,Institute Name,Navê Enstîtuya
-apps/erpnext/erpnext/hr/doctype/loan/loan.py,Please enter repayment Amount,"Ji kerema xwe ve Mîqdar dayinê, binivîse"
+apps/erpnext/erpnext/loan_management/doctype/loan/loan.py,Please enter repayment Amount,"Ji kerema xwe ve Mîqdar dayinê, binivîse"
 DocType: Shift Type,Working Hours Threshold for Absent,Demjimêra Demjimêrên Kar ji bo Absent
 apps/erpnext/erpnext/accounts/doctype/loyalty_program/loyalty_program.js,There can be multiple tiered collection factor based on the total spent. But the conversion factor for redemption will always be same for all the tier.,Dibe ku faktorê kolektîfên pirrjimarte li ser tevahiya mesrefê de dibe. Lê belê faktorê guherîna ji bo rizgarbûna her timî ji her timî be.
 apps/erpnext/erpnext/config/help.py,Item Variants,Variants babetî
@@ -2619,6 +2647,7 @@ DocType: Fee Validity,Fee Validity,Valahiyê
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py,No records found in the Payment table,No records dîtin li ser sifrê (DGD)
 apps/erpnext/erpnext/education/utils.py,This {0} conflicts with {1} for {2} {3},Ev {0} pevçûnên bi {1} ji bo {2} {3}
 DocType: Student Attendance Tool,Students HTML,xwendekarên HTML
+apps/erpnext/erpnext/loan_management/report/loan_repayment_and_closure/loan_repayment_and_closure.js,Please select Applicant Type first,Ji kerema xwe Type Type Applicant yekem hilbijêrin
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js,"Select BOM, Qty and For Warehouse","BOM, Qty û Ji bo Warehouse hilbijêrin"
 DocType: GST HSN Code,GST HSN Code,Gst Code HSN
 DocType: Employee External Work History,Total Experience,Total ezmûna
@@ -2705,7 +2734,7 @@ DocType: Production Plan Sales Order,Production Plan Sales Order,Plan Production
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,"No active BOM found for item {0}. Delivery by \
 						Serial No cannot be ensured",BOM-ê çalak nabe BİXWÎNE {0}. Beriya \ \ Serial Na Nabe ku misoger nekin
 DocType: Sales Partner,Sales Partner Target,Sales Partner Target
-DocType: Loan Type,Maximum Loan Amount,Maximum Mîqdar Loan
+DocType: Loan Application,Maximum Loan Amount,Maximum Mîqdar Loan
 DocType: Coupon Code,Pricing Rule,Rule Pricing
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py,Duplicate roll number for student {0},hejmara roll Pekana ji bo xwendekarê {0}
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py,Duplicate roll number for student {0},hejmara roll Pekana ji bo xwendekarê {0}
@@ -2874,6 +2903,7 @@ DocType: Purchase Order,Order Confirmation No,Daxuyaniya Biryara No Na
 apps/erpnext/erpnext/accounts/report/gross_and_net_profit_report/gross_and_net_profit_report.py,Net Profit,Profitiya Netewe
 DocType: Purchase Invoice,Eligibility For ITC,Ji bo ITC
 DocType: Student Applicant,EDU-APP-.YYYY.-,EDU-APP-.YYYY-
+DocType: Loan Security Pledge,Unpledged,Nexşandî
 DocType: Journal Entry,Entry Type,Type entry
 ,Customer Credit Balance,Balance Credit Mişterî
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py,Net Change in Accounts Payable,Change Net di Accounts cîhde
@@ -2885,6 +2915,7 @@ apps/erpnext/erpnext/stock/doctype/item/item_dashboard.py,Pricing,Pricing
 DocType: Employee,Attendance Device ID (Biometric/RF tag ID),ID Nasnameya Beşdariyê (Nasnameya biyometrîkî / RF)
 DocType: Quotation,Term Details,Details term
 DocType: Item,Over Delivery/Receipt Allowance (%),Destûrdayîna Serkeftinê / Pêşwazî (%)
+DocType: Appointment Letter,Appointment Letter Template,Letablonê Destnivîsînê
 DocType: Employee Incentive,Employee Incentive,Karkerê Têkilî
 apps/erpnext/erpnext/education/doctype/student_group/student_group.py,Cannot enroll more than {0} students for this student group.,ne dikarin zêdetir ji {0} xwendekar ji bo vê koma xwendekaran kul.
 apps/erpnext/erpnext/templates/print_formats/includes/total.html,Total (Without Tax),Tiştek Bacê
@@ -2909,6 +2940,7 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,"Cannot ensure d
 					Item {0} is added with and without Ensure Delivery by \
 					Serial No.",Nabe ku Serial No ji hêla \ \ Şîfre {0} ve tê veşartin bête û bêyî dagirkirina hilbijêrî ji hêla \ Nîma Serial
 DocType: Accounts Settings,Unlink Payment on Cancellation of Invoice,Unlink Payment li ser komcivîna me ya bi fatûreyên
+DocType: Loan Interest Accrual,Process Loan Interest Accrual,Nerazîbûna Sererkaniyê Qerase
 apps/erpnext/erpnext/hr/doctype/vehicle_log/vehicle_log.py,Current Odometer reading entered should be greater than initial Vehicle Odometer {0},xwendina Green niha ketin divê mezintir destpêkê Vehicle Green be {0}
 ,Purchase Order Items To Be Received or Billed,Tiştên Fermana Kirînê Ku bêne stendin an bezandin
 DocType: Restaurant Reservation,No Show,Pêşanî tune
@@ -2992,6 +3024,7 @@ DocType: Email Digest,Bank Credit Balance,Balansa krediyê ya Bank
 apps/erpnext/erpnext/accounts/doctype/gl_entry/gl_entry.py,{0} {1}: Cost Center is required for 'Profit and Loss' account {2}. Please set up a default Cost Center for the Company.,{0} {1}: Navenda Cost ji bo &#39;Profit û wendakirin&#39; account pêwîst e {2}. Ji kerema xwe ve set up a Navenda Cost default ji bo Company.
 DocType: Payment Schedule,Payment Term,Termê dayîn
 apps/erpnext/erpnext/selling/doctype/customer/customer.py,A Customer Group exists with same name please change the Customer name or rename the Customer Group,A Pol Mişterî ya bi heman navî heye ji kerema xwe biguherînin navê Mişterî li an rename Pol Mişterî ya
+apps/erpnext/erpnext/education/doctype/student_admission/student_admission.js,Admission End Date should be greater than Admission Start Date.,Divê Dîroka Dawîniya Serlêdanê ji Dîroka Destpêkê Admission mezintir be.
 DocType: Location,Area,Dewer
 apps/erpnext/erpnext/public/js/templates/contact_list.html,New Contact,New Contact
 DocType: Company,Company Description,Şirovek Company
@@ -3064,6 +3097,7 @@ apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py,You can only 
 DocType: Bank Statement Transaction Settings Item,Mapped Data,Data Data
 DocType: Purchase Order Item,Warehouse and Reference,Warehouse û Reference
 DocType: Payroll Period Date,Payroll Period Date,Dîroka Payrollê
+DocType: Loan Disbursement,Against Loan,Li dijî deyn
 DocType: Supplier,Statutory info and other general information about your Supplier,"info ya zagonî û din, agahiyên giştî li ser Supplier te"
 DocType: Item,Serial Nos and Batches,Serial Nos û lekerên
 DocType: Item,Serial Nos and Batches,Serial Nos û lekerên
@@ -3276,6 +3310,7 @@ apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Vehicle Type,Tîpa V
 DocType: Sales Invoice Payment,Base Amount (Company Currency),Şêwaz Base (Company Exchange)
 DocType: Purchase Invoice,Registered Regular,Bi Regular hatî tomarkirin
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js,Raw Materials,Raw Materials
+DocType: Plaid Settings,sandbox,sandbox
 DocType: Payment Reconciliation Payment,Reference Row,Çavkanî Row
 DocType: Installation Note,Installation Time,installation Time
 DocType: Sales Invoice,Accounting Details,Details Accounting
@@ -3288,12 +3323,11 @@ DocType: Issue,Resolution Details,Resolution Details
 DocType: Leave Ledger Entry,Transaction Type,Tîrmehê
 DocType: Item Quality Inspection Parameter,Acceptance Criteria,Şertên qebûlkirinê
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,Please enter Material Requests in the above table,Ji kerema xwe ve Requests Material li ser sifrê li jor binivîse
-apps/erpnext/erpnext/hr/doctype/loan/loan.py,No repayments available for Journal Entry,Ne vegerandin ji bo Journal Entry
 DocType: Hub Tracked Item,Image List,Lîsteya wêneya wêneyê
 DocType: Item Attribute,Attribute Name,Pêşbîr Name
 DocType: Subscription,Generate Invoice At Beginning Of Period,Destpêk Ji Destpêka Destpêkirina Pevçûnê
 DocType: BOM,Show In Website,Show Li Website
-DocType: Loan Application,Total Payable Amount,Temamê meblaxa cîhde
+DocType: Loan,Total Payable Amount,Temamê meblaxa cîhde
 DocType: Task,Expected Time (in hours),Time a bende (di saet)
 DocType: Item Reorder,Check in (group),Check in (koma)
 DocType: Soil Texture,Silt,Silt
@@ -3325,6 +3359,7 @@ DocType: Bank Transaction,Transaction ID,ID ya muameleyan
 DocType: Payroll Entry,Deduct Tax For Unsubmitted Tax Exemption Proof,Ji bo Daxistina Bacê ya Paqijkirina Bacê ya Unsubmitted Tax
 DocType: Volunteer,Anytime,Herdem
 DocType: Bank Account,Bank Account No,Hesabê Bankê Na
+apps/erpnext/erpnext/config/loan_management.py,Disbursement and Repayment,Dabeşkirin û paşve xistin
 DocType: Employee Tax Exemption Proof Submission,Employee Tax Exemption Proof Submission,Xweseriya Xweseriya Xweseriya Hilbijartinê
 DocType: Patient,Surgical History,Dîroka Surgical
 DocType: Bank Statement Settings Item,Mapped Header,Mapped Header
@@ -3385,6 +3420,7 @@ DocType: Purchase Order,Delivered,teslîmî
 DocType: Healthcare Settings,Create Lab Test(s) on Sales Invoice Submit,Li Têbaza Bazirganiyê ya Lab Labê çêbikin Submit Submit
 DocType: Serial No,Invoice Details,Details bi fatûreyên
 apps/erpnext/erpnext/regional/india/utils.py,Salary Structure must be submitted before submission of Tax Ememption Declaration,Pêdivî ye ku Pêvek Navdêr berî danasandina Daxuyaniya Mezinahiya Bacê were şandin
+DocType: Loan Application,Proposed Pledges,Sozên pêşniyaz
 DocType: Grant Application,Show on Website,Li ser Malperê nîşan bide
 apps/erpnext/erpnext/education/doctype/student_admission/templates/student_admission.html,Start on,Destpê bike
 DocType: Hub Tracked Item,Hub Category,Kategorî
@@ -3396,7 +3432,6 @@ DocType: Program Enrollment,Self-Driving Vehicle,Vehicle Self-Driving
 DocType: Supplier Scorecard Standing,Supplier Scorecard Standing,Supplier Scorecard Standing
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py,Row {0}: Bill of Materials not found for the Item {1},Row {0}: Bill of material ji bo babet dîtin ne {1}
 DocType: Contract Fulfilment Checklist,Requirement,Pêwistî
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,Ji kerema xwe di Resavkaniya Mirovan de&gt; Sîstema Navkirin a Karmendiyê Saz bikin&gt; Mîhengên HR
 DocType: Journal Entry,Accounts Receivable,hesabê hilgirtinê
 DocType: Quality Goal,Objectives,Armanc
 DocType: HR Settings,Role Allowed to Create Backdated Leave Application,Role Hiştin ku Serîlêdana Piştgiriya Vegere ya Zindî Afirîne
@@ -3594,7 +3629,6 @@ apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,Please set GST Accou
 apps/erpnext/erpnext/regional/report/gstr_1/gstr_1.js,Type of Business,Tîpa Business
 DocType: Sales Invoice,Consumer,Mezêxer
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py,"Please select Allocated Amount, Invoice Type and Invoice Number in atleast one row","Ji kerema xwe ve butçe, Type bi fatûreyên û Number bi fatûreyên li Hindîstan û yek row hilbijêre"
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Ji kerema xwe Sêwirandina Navên foran ji bo {0} bi hêla Setup&gt; Mîhengên&gt; Navên Pîroz bikin
 apps/erpnext/erpnext/accounts/report/asset_depreciations_and_balances/asset_depreciations_and_balances.py,Cost of New Purchase,Cost ji Buy New
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py,Sales Order required for Item {0},Sales Order pêwîst ji bo vî babetî {0}
 DocType: Grant Application,Grant Description,Agahdariya Grant
@@ -3653,6 +3687,7 @@ DocType: Bank Statement Transaction Entry,Receivable Account,Account teleb
 apps/erpnext/erpnext/stock/doctype/item_price/item_price.py,Valid From Date must be lesser than Valid Upto Date.,Dîrok Ji Dest Pêdivî ye Dîroka Dîroka Neteweyek Dîroka Dîrok.
 DocType: Employee Skill,Evaluation Date,Dîroka Nirxandinê
 DocType: Quotation Item,Stock Balance,Balance Stock
+DocType: Loan Security Pledge,Total Security Value,Nirxa ewlehiya tevahî
 apps/erpnext/erpnext/config/help.py,Sales Order to Payment,Firotina ji bo Payment
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,CEO,CEO
 DocType: Purchase Invoice,With Payment of Tax,Bi Payment Taxê
@@ -3744,6 +3779,7 @@ apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py,{0} Serial Numbers req
 DocType: Stock Reconciliation Item,Current Valuation Rate,Rate Valuation niha:
 apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Number of root accounts cannot be less than 4,Hejmara hesabên root nikare ji 4 kêmtir be
 DocType: Training Event,Advance,Pêşveçûn
+apps/erpnext/erpnext/loan_management/doctype/loan_repayment/loan_repayment.py,Against Loan:,Li hember deyn:
 apps/erpnext/erpnext/config/integrations.py,GoCardless payment gateway settings,Mîhengên gateway ya GoCardless
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Exchange Gain/Loss,Exchange Gain / Loss
 DocType: Opportunity,Lost Reason,ji dest Sedem
@@ -3828,8 +3864,10 @@ DocType: Company,For Reference Only.,For Reference Only.
 apps/erpnext/erpnext/accounts/page/pos/pos.js,Select Batch No,Hilbijêre Batch No
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,Invalid {0}: {1},Invalid {0}: {1}
 ,GSTR-1,GSTR-1
+apps/erpnext/erpnext/education/doctype/student/student.py,Row {0}:Sibling Date of Birth cannot be greater than today.,Row {0}: Dîroka ibemiyê ya Zêdanê ji îro nikare mezintir be.
 DocType: Fee Validity,Reference Inv,Reference Inv
 DocType: Sales Invoice Advance,Advance Amount,Advance Mîqdar
+DocType: Loan Type,Penalty Interest Rate (%) Per Day,Rêjeya restertê Cezayê (%) Rojê
 DocType: Manufacturing Settings,Capacity Planning,Planning kapasîteya
 DocType: Supplier Quotation,Rounding Adjustment (Company Currency,Pargîdûna Rounding
 DocType: Asset,Policy number,Numreya polîtîkayê
@@ -3844,7 +3882,9 @@ apps/erpnext/erpnext/stock/get_item_details.py,No Item with Barcode {0},No babet
 DocType: Normal Test Items,Require Result Value,Pêwîste Result Value
 DocType: Purchase Invoice,Pricing Rules,Rêzikên bihayê
 DocType: Item,Show a slideshow at the top of the page,Nîşan a slideshow li jor li ser vê rûpelê
+DocType: Appointment Letter,Body,Beden
 DocType: Tax Withholding Rate,Tax Withholding Rate,Rêjeya Harmendê Bacê
+apps/erpnext/erpnext/loan_management/doctype/loan/loan.py,Repayment Start Date is mandatory for term loans,Dîroka Ragihandina Dravê ji bo deynên termîn mecbûrî ye
 DocType: Pricing Rule,Max Amt,Max Amt
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,Boms,dikeye
 apps/erpnext/erpnext/stock/doctype/item/item.py,Stores,dikanên
@@ -3864,7 +3904,7 @@ DocType: Leave Type,Calculated in days,Di rojan de têne hesibandin
 DocType: Call Log,Received By,Ji hêla xwe ve hatî wergirtin
 DocType: Appointment Booking Settings,Appointment Duration (In Minutes),Demjimêrê Serlêdanê (Di çend hûrdeman de)
 DocType: Cash Flow Mapping Template Details,Cash Flow Mapping Template Details,Şablonên kredî yên mapping
-apps/erpnext/erpnext/config/non_profit.py,Loan Management,Rêveberiya Lînan
+DocType: Loan,Loan Management,Rêveberiya Lînan
 DocType: Cost Center,Track separate Income and Expense for product verticals or divisions.,Track Dahata cuda de û hisabê bo bixemilînî berhem an jî parçebûyî.
 DocType: Rename Tool,Rename Tool,Rename Tool
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.js,Update Cost,update Cost
@@ -3872,6 +3912,7 @@ DocType: Item Reorder,Item Reorder,Babetê DIRTYHERTZ
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,GSTR3B-Form,GSTR3B-Form
 DocType: Sales Invoice,Mode of Transport,Modeya veguherînê
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js,Show Salary Slip,Slip Show Salary
+DocType: Loan,Is Term Loan,Termertê deyn e
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.js,Transfer Material,transfer Material
 DocType: Fees,Send Payment Request,Request Payment Send
 DocType: Travel Request,Any other details,Ji ber agahiyên din
@@ -3889,6 +3930,7 @@ DocType: Course Topic,Topic,Mijar
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py,Cash Flow from Financing,Flow Cash ji Fînansa
 DocType: Budget Account,Budget Account,Account budceya
 DocType: Quality Inspection,Verified By,Sîîrtê By
+apps/erpnext/erpnext/loan_management/doctype/loan_security_shortfall/loan_security_shortfall.js,Add Loan Security,Ewlehiya deyn zêde bikin
 DocType: Travel Request,Name of Organizer,Navenda Organizer
 apps/erpnext/erpnext/setup/doctype/company/company.py,"Cannot change company's default currency, because there are existing transactions. Transactions must be cancelled to change the default currency.","Can currency default şîrketê nayê guhertin, ji ber ku muamele heyî heye. Transactions bên îptal kirin, ji bo guhertina pereyan default."
 DocType: Cash Flow Mapping,Is Income Tax Liability,Ya Qanûna Bacê ye
@@ -3950,6 +3992,7 @@ apps/erpnext/erpnext/education/doctype/student/student_dashboard.py,Student LMS 
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py,Serial Numbers Created,Hejmarên Serialî Afirandin
 DocType: POS Profile,Applicable for Users,Ji bo Bikaranîna bikarhêneran
 DocType: Supplier Quotation,PUR-SQTN-.YYYY.-,PUR-SQTN -YYYY-
+apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py,From Date and To Date are Mandatory,Ji Dîrok û heta Rojan Fermandar in
 DocType: Purchase Invoice,Set Advances and Allocate (FIFO),Pêşveçûn û Tevlêbûnê (FIFO)
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,No Work Orders created,Naveroka Karkeran nehat afirandin
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py,Salary Slip of employee {0} already created for this period,Slip meaşê karmendekî {0} berê ve ji bo vê pêvajoyê de tên
@@ -4054,11 +4097,12 @@ DocType: BOM,Show Operations,Show Operasyonên
 ,Minutes to First Response for Opportunity,Minutes ji bo First Response bo Opportunity
 apps/erpnext/erpnext/hr/report/monthly_attendance_sheet/monthly_attendance_sheet.py,Total Absent,Total Absent
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Item or Warehouse for row {0} does not match Material Request,Babetê an Warehouse bo row {0} nayê nagirin Daxwaza Material
-apps/erpnext/erpnext/hr/report/loan_repayment/loan_repayment.py,Payable Amount,Mîqdara mestir
+DocType: Loan Repayment,Payable Amount,Mîqdara mestir
 apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Unit of Measure,Unit ji Measure
 DocType: Fiscal Year,Year End Date,Sal Date End
 DocType: Task Depends On,Task Depends On,Task Dimîne li ser
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.js,Opportunity,Fersend
+apps/erpnext/erpnext/education/doctype/student_group/student_group.py,Max strength cannot be less than zero.,Hêza Max nikare kêmî ji zorê be.
 DocType: Options,Option,Dibe
 DocType: Operation,Default Workstation,Default Workstation
 DocType: Payment Entry,Deductions or Loss,Daşikandinên an Loss
@@ -4099,6 +4143,7 @@ DocType: Item Reorder,Request for,Daxwaza ji bo
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py,Approving User cannot be same as user the rule is Applicable To,Erêkirina User nikare bibe eynî wek user bi serweriya To evin e
 DocType: Stock Entry Detail,Basic Rate (as per Stock UOM),Rate bingehîn (wek per Stock UOM)
 DocType: SMS Log,No of Requested SMS,No yên SMS Wîkîpediyayê
+apps/erpnext/erpnext/loan_management/doctype/loan_interest_accrual/loan_interest_accrual.py,Interest Amount is mandatory,Dravê Mîqdara mecbûrî ye
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py,Leave Without Pay does not match with approved Leave Application records,Leave bê pere nayê bi erêkirin records Leave Application hev nagirin
 apps/erpnext/erpnext/setup/page/welcome_to_erpnext/welcome_to_erpnext.html,Next Steps,Steps Next
 apps/erpnext/erpnext/public/js/hub/Sidebar.vue,Saved Items,Tiştên hatine tomarkirin
@@ -4181,6 +4226,8 @@ apps/erpnext/erpnext/erpnext_integrations/doctype/tally_migration/tally_migratio
 DocType: Asset Maintenance Task,Calibration,Vebijêrk
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.py,{0} is a company holiday,{0} şîrketek şirket e
 apps/erpnext/erpnext/projects/report/billing_summary.py,Billable Hours,Demjimêrên billable
+DocType: Loan Type,Penalty Interest Rate is levied on the pending interest amount on a daily basis in case of delayed repayment ,Rêjeya Tezmînatê ya Cezayê li ser mîqdara benda li ser mehê rojane di rewşek dereng paşketina deyn deyn dide
+DocType: Appointment Letter content,Appointment Letter content,Naveroka nameya Ragihandinê
 apps/erpnext/erpnext/patches/v11_0/add_default_email_template_for_leave.py,Leave Status Notification,Şerta Rewşa Çepê
 DocType: Patient Appointment,Procedure Prescription,Procedure Prescription
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Furnitures and Fixtures,Navmal û Fixtures
@@ -4199,7 +4246,7 @@ apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedu
 DocType: Opportunity,Customer / Lead Name,Mişterî / Name Lead
 apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py,Clearance Date not mentioned,Date Clearance behsa ne
 DocType: Payroll Period,Taxable Salary Slabs,Slabs
-DocType: Job Card,Production,Çêkerî
+DocType: Plaid Settings,Production,Çêkerî
 apps/erpnext/erpnext/regional/india/utils.py,Invalid GSTIN! The input you've entered doesn't match the format of GSTIN.,GSTIN nederbasdar e! Vîzyona ku we têkevî bi formata GSTIN re hevber nabe.
 apps/erpnext/erpnext/stock/report/stock_and_account_value_comparison/stock_and_account_value_comparison.py,Account Value,Nirxa Hesabê
 DocType: Guardian,Occupation,Sinet
@@ -4342,6 +4389,7 @@ DocType: Healthcare Settings,Registration Fee,Fee-Registration
 DocType: Loyalty Program Collection,Loyalty Program Collection,Daxuyaniya Bernameyê
 DocType: Stock Entry Detail,Subcontracted Item,Subcontracted Item
 apps/erpnext/erpnext/education/__init__.py,Student {0} does not belong to group {1},Xwendekar {0} ne girêdayî grûp {1}
+DocType: Appointment Letter,Appointment Date,Dîroka Serdanê
 DocType: Budget,Cost Center,Navenda cost
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,Voucher #,fîşeke #
 DocType: Tax Rule,Shipping Country,Shipping Country
@@ -4411,6 +4459,7 @@ DocType: Patient Encounter,In print,Di çapkirinê de
 DocType: Accounting Dimension,Accounting Dimension,Dirêjbûna hesaban
 ,Profit and Loss Statement,Qezenc û Loss Statement
 DocType: Bank Reconciliation Detail,Cheque Number,Hejmara Cheque
+apps/erpnext/erpnext/loan_management/doctype/loan_repayment/loan_repayment.py,Amount paid cannot be zero,Dravê drav nikare zer be
 apps/erpnext/erpnext/healthcare/utils.py,The item referenced by {0} - {1} is already invoiced,Ev mijara ku ji hêla {0} - {1} ve hatibû vegotin
 ,Sales Browser,Browser Sales
 DocType: Journal Entry,Total Credit,Total Credit
@@ -4515,6 +4564,7 @@ DocType: Agriculture Task,Ignore holidays,Betlaneyê bibînin
 apps/erpnext/erpnext/accounts/doctype/coupon_code/coupon_code.js,Add/Edit Coupon Conditions,Addertên Kuponê zêde bikin / biguherînin
 apps/erpnext/erpnext/controllers/stock_controller.py,Expense / Difference account ({0}) must be a 'Profit or Loss' account,"account Expense / Cudahiya ({0}), divê hesabekî &#39;Profit an Loss&#39; be"
 DocType: Stock Entry Detail,Stock Entry Child,Zarok ketina Stock
+apps/erpnext/erpnext/loan_management/doctype/loan/loan.py,Loan Security Pledge Company and Loan Company must be same,Pargîdaniya Ewlekariya Kredî û Pargîdaniya Krediyê divê yek bin
 DocType: Project,Copied From,Kopiyek ji From
 DocType: Project,Copied From,Kopiyek ji From
 apps/erpnext/erpnext/projects/doctype/timesheet/timesheet.py,Invoice already created for all billing hours,Daxistina ji bo hemû demjimêrên hemî damezrandin
@@ -4567,7 +4617,7 @@ DocType: Promotional Scheme,Price Discount Slabs,Slabayên zeviyê berbiçav
 DocType: Stock Reconciliation Item,Current Serial No,No Serra Naha
 DocType: Employee,Attendance and Leave Details,Beşdarî û Danûstendinên Derketinê
 ,BOM Comparison Tool,Amûra BOM Comparison
-,Requested,xwestin
+DocType: Loan Security Pledge,Requested,xwestin
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,No Remarks,No têbînî
 DocType: Asset,In Maintenance,Di Tenduristiyê de
 DocType: Amazon MWS Settings,Click this button to pull your Sales Order data from Amazon MWS.,Vebijêrk vê pêvekê hilbijêre da ku daneyên firotina firotanê ji M Amazon-MWS re vekin
@@ -4579,7 +4629,6 @@ apps/erpnext/erpnext/accounts/doctype/account/account.py,Root Account must be a 
 DocType: Drug Prescription,Drug Prescription,Drug Prescription
 DocType: Service Level,Support and Resolution,Piştgirî û Resolution
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Free item code is not selected,Koda belaş belaş nayê hilbijartin
-DocType: Loan,Repaid/Closed,De bergîdana / Girtî
 DocType: Amazon MWS Settings,CA,CA
 DocType: Item,Total Projected Qty,Bi tevahî projeya Qty
 DocType: Monthly Distribution,Distribution Name,Navê Belavkariya
@@ -4612,6 +4661,7 @@ apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Discount Perc
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Accounting Entry for Stock,Peyam Accounting bo Stock
 DocType: Lab Test,LabTest Approver,LabTest nêzî
 apps/erpnext/erpnext/education/doctype/assessment_plan/assessment_plan.py,You have already assessed for the assessment criteria {}.,Tu niha ji bo nirxandina nirxandin {}.
+DocType: Loan Security Shortfall,Shortfall Amount,Kêmasiya Kêmasî
 DocType: Vehicle Service,Engine Oil,Oil engine
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js,Work Orders Created: {0},Karên Karkirina Karan afirandin: {0}
 DocType: Sales Invoice,Sales Team1,Team1 Sales
@@ -4628,6 +4678,7 @@ apps/erpnext/erpnext/config/buying.py,Supplier Group master.,Master master Suppl
 DocType: Healthcare Service Unit,Occupancy Status,Rewşa Occupasyon
 DocType: Purchase Invoice,Apply Additional Discount On,Apply Additional li ser navnîshana
 apps/erpnext/erpnext/healthcare/page/appointment_analytic/appointment_analytic.js,Select Type...,Tîpa Hilbijêre ...
+DocType: Loan Interest Accrual,Amounts,Mîqdar
 apps/erpnext/erpnext/templates/pages/help.html,Your tickets,Bilêtên te
 DocType: Account,Root Type,Type root
 DocType: Item,FIFO,FIFOScheduler
@@ -4635,6 +4686,7 @@ apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js,Close the POS,P
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py,Row # {0}: Cannot return more than {1} for Item {2},Row # {0}: Nikare zêdetir vegerin {1} ji bo babet {2}
 DocType: Item Group,Show this slideshow at the top of the page,Nîşan bide vî slideshow li jor li ser vê rûpelê
 DocType: BOM,Item UOM,Babetê UOM
+DocType: Loan Security Price,Loan Security Price,Bihayê ewlehiya deyn
 DocType: Sales Taxes and Charges,Tax Amount After Discount Amount (Company Currency),Şêwaz Bacê Piştî Mîqdar Discount (Company Exchange)
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Target warehouse is mandatory for row {0},warehouse Target bo row wêneke e {0}
 apps/erpnext/erpnext/config/retail.py,Retail Operations,Operasyonên Retail
@@ -4771,6 +4823,7 @@ DocType: Coupon Code,Coupon Description,Danasîna Cupon
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py,Batch is mandatory in row {0},Batch li row wêneke e {0}
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py,Batch is mandatory in row {0},Batch li row wêneke e {0}
 DocType: Company,Default Buying Terms,Mercên Kirînê yên Default
+apps/erpnext/erpnext/loan_management/doctype/loan/loan.js,Loan Disbursement,Dabeşkirina deyn
 DocType: Purchase Receipt Item Supplied,Purchase Receipt Item Supplied,Buy Meqbûz babet Supplied
 DocType: Amazon MWS Settings,Enable Scheduled Synch,Synchronized Synch
 apps/erpnext/erpnext/projects/report/daily_timesheet_summary/daily_timesheet_summary.py,To Datetime,to DateTime
@@ -4785,7 +4838,6 @@ DocType: Item,Inspection Required before Purchase,Serperiştiya pêwîst berî P
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html,Pending Activities,Çalakî hîn
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test_list.js,Create Lab Test,Test Lab test
 DocType: Patient Appointment,Reminded,Reminded
-DocType: Homepage Section,Cards,Kartên
 apps/erpnext/erpnext/public/js/setup_wizard.js,View Chart of Accounts,Dîteya Kartê bibînin
 DocType: Chapter Member,Chapter Member,Endamê Endamê
 DocType: Material Request Plan Item,Minimum Order Quantity,Hejmarê herî kêmîn
@@ -4801,7 +4853,7 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Newspaper Publishe
 apps/erpnext/erpnext/hr/utils.py,Future dates not allowed,Rojên pêşeroj nayê destûr kirin
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Expected Delivery Date should be after Sales Order Date,Divê Dîroka Daxuyaniya Dîrokê Divê piştî Sermarkirina Darmendê
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py,Reorder Level,Level DIRTYHERTZ
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Chart Of Accounts Template,Chart bikarhênerên Şablon
+DocType: Company,Chart Of Accounts Template,Chart bikarhênerên Şablon
 DocType: Attendance,Attendance Date,Date amadebûnê
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Update stock must be enable for the purchase invoice {0},Divê belgeya nûvekirina belgeyê ji bo veberhênana kirînê ve bikaribe {0}
 apps/erpnext/erpnext/stock/get_item_details.py,Item Price updated for {0} in Price List {1},Babetê Price ve ji bo {0} li List Price {1}
@@ -4862,6 +4914,7 @@ DocType: Landed Cost Item,Receipt Document Type,Meqbûza Corî dokumênt
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Proposal/Price Quote,Proposal / Quote Quote
 DocType: Antibiotic,Healthcare,Parastina saxlemîyê
 DocType: Target Detail,Target Detail,Detail target
+apps/erpnext/erpnext/config/loan_management.py,Loan Processes,Pêvajoyên deyn
 apps/erpnext/erpnext/stock/doctype/item/item.js,Single Variant,Yekem variant
 apps/erpnext/erpnext/hr/doctype/job_opening/job_opening.py,All Jobs,Hemû Jobs
 DocType: Sales Order,% of materials billed against this Sales Order,% Ji materyalên li dijî vê Sales Order billed
@@ -4922,7 +4975,7 @@ DocType: Asset Finance Book,Expected Value After Useful Life,Nirx a bende Pişt�
 DocType: Item,Reorder level based on Warehouse,asta DIRTYHERTZ li ser Warehouse
 DocType: Activity Cost,Billing Rate,Rate Billing
 ,Qty to Deliver,Qty ji bo azad
-apps/erpnext/erpnext/hr/doctype/loan/loan.js,Create Disbursement Entry,Destpêkirina Veqetandinê Damezirînin
+apps/erpnext/erpnext/hr/doctype/employee_loan/employee_loan.js,Create Disbursement Entry,Destpêkirina Veqetandinê Damezirînin
 DocType: Amazon MWS Settings,Amazon will synch data updated after this date,Amazon dê piştî vê roja piştî danûstendina danûstendinê de
 ,Stock Analytics,Stock Analytics
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,Operations cannot be left blank,Operasyonên bi vala neyê hiştin
@@ -4955,6 +5008,7 @@ apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.js,Show Openi
 apps/erpnext/erpnext/accounts/doctype/bank_account/bank_account.js,Unlink external integrations,Yekbûnên derveyî vekişînin
 apps/erpnext/erpnext/accounts/page/bank_reconciliation/bank_reconciliation.js,Choose a corresponding payment,Hilbijarkek dravî hilbijêrin
 DocType: Pricing Rule,Item Code,Code babetî
+DocType: Loan Disbursement,Pending Amount For Disbursal,Li benda Dravê Dravdankirinê
 DocType: Student,EDU-STU-.YYYY.-,EDU-STU-.YYYY-
 DocType: Serial No,Warranty / AMC Details,Mîsoger / Details AMC
 apps/erpnext/erpnext/education/doctype/student_group/student_group.js,Select students manually for the Activity based Group,xwendekarên bi destan ji bo Activity bingeha Pol Hilbijêre
@@ -4980,6 +5034,7 @@ DocType: Asset,Number of Depreciations Booked,Hejmara Depreciations civanan
 apps/erpnext/erpnext/public/js/pos/pos.html,Qty Total,Qty Jim
 DocType: Landed Cost Item,Receipt Document,Dokumentê wergirtina
 DocType: Employee Education,School/University,School / Zanîngeha
+DocType: Loan Security Pledge,Loan  Details,Hûrguliyên krediyê
 DocType: Sales Invoice Item,Available Qty at Warehouse,Available Qty li Warehouse
 apps/erpnext/erpnext/accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py,Billed Amount,Şêwaz billed
 DocType: Share Transfer,(including),(giştî)
@@ -5003,6 +5058,7 @@ apps/erpnext/erpnext/config/help.py,Leave Management,Dev ji Management
 apps/erpnext/erpnext/stock/doctype/item/item_dashboard.py,Groups,Groups
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,Group by Account,Pol destê Account
 DocType: Purchase Invoice,Hold Invoice,Rêbaza bisekinin
+apps/erpnext/erpnext/loan_management/report/loan_security_status/loan_security_status.js,Pledge Status,Rewşa sozê
 apps/erpnext/erpnext/hr/doctype/employee_promotion/employee_promotion.js,Please select Employee,Ji kerema xwe karker hilbijêrin
 DocType: Sales Order,Fully Delivered,bi temamî Çiyan
 DocType: Promotional Scheme Price Discount,Min Amount,Mîqdara Min
@@ -5012,7 +5068,6 @@ DocType: Delivery Trip,Driver Address,Navnîşa Driver
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Source and target warehouse cannot be same for row {0},Source û warehouse hedef ne dikarin heman tiştî ji bo row {0}
 DocType: Account,Asset Received But Not Billed,Bêguman Received But Billed Not
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py,"Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry","Account Cudahiya, divê hesabekî type Asset / mesulîyetê be, ji ber ku ev Stock Lihevkirinê an Peyam Opening e"
-apps/erpnext/erpnext/hr/doctype/loan/loan.py,Disbursed Amount cannot be greater than Loan Amount {0},Şêwaz dandin de ne dikarin bibin mezintir Loan Mîqdar {0}
 apps/erpnext/erpnext/hr/doctype/expense_claim/expense_claim.py,Row {0}# Allocated amount {1} cannot be greater than unclaimed amount {2},Row {0} # Hejmara nirxên vekirî {1} ji bila hejmarê nerazîkirî {2}
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py,Purchase Order number required for Item {0},Bikirin siparîşê pêwîst ji bo vî babetî {0}
 DocType: Leave Allocation,Carry Forwarded Leaves,Carry Leaves Forwarded
@@ -5040,6 +5095,7 @@ DocType: Location,Check if it is a hydroponic unit,"Heke ku ew yekîneyeke hîdr
 DocType: Pick List Item,Serial No and Batch,Serial No û Batch
 DocType: Warranty Claim,From Company,ji Company
 DocType: GSTR 3B Report,January,Rêbendan
+DocType: Loan Repayment,Principal Amount Paid,Mîqdara Parzûnê Pêdivî ye
 apps/erpnext/erpnext/education/doctype/assessment_plan/assessment_plan.py,Sum of Scores of Assessment Criteria needs to be {0}.,Sum ji Jimareke Krîterên Nirxandina divê {0} be.
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Please set Number of Depreciations Booked,Ji kerema xwe ve set Hejmara Depreciations civanan
 DocType: Supplier Scorecard Period,Calculations,Pawlos
@@ -5065,6 +5121,7 @@ DocType: Travel Itinerary,Rented Car,Car Hire
 apps/erpnext/erpnext/public/js/hub/components/profile_dialog.js,About your Company,Der barê şirketa we
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.js,Show Stock Ageing Data,Daneyên Agirkujiyê Stock destnîşan bikin
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Credit To account must be a Balance Sheet account,"Credit To account, divê hesabekî Bîlançoya be"
+DocType: Loan Repayment,Penalty Amount,Hêjeya Cezayê
 DocType: Donor,Donor,Donor
 apps/erpnext/erpnext/regional/doctype/gst_hsn_code/gst_hsn_code.js,Update Taxes for Items,Bacan ji bo tiştên nûve bikin
 DocType: Global Defaults,Disable In Words,Disable Li Words
@@ -5094,6 +5151,7 @@ DocType: Loyalty Point Entry Redemption,Loyalty Point Entry Redemption,Redeeming
 apps/erpnext/erpnext/config/accounts.py,Cost Center and Budgeting,Mesrefa Navenda û Budcekirina
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Opening Balance Equity,Opening Sebra Balance
 DocType: Appointment,CRM,CRM
+DocType: Loan Repayment,Partial Paid Entry,Beşdarî ketî Paş
 apps/erpnext/erpnext/regional/italy/utils.py,Please set the Payment Schedule,Ji kerema xwe Bernameya Xizmetkirinê bidin
 DocType: Pick List,Items under this warehouse will be suggested,Tiştên di binê vê stargehê de têne pêşniyar kirin
 DocType: Purchase Invoice,N,N
@@ -5127,7 +5185,6 @@ apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,{0} not found for Item {1},{0} ji bo Peldanka {1} nehat dîtin.
 apps/erpnext/erpnext/templates/generators/item/item_configure.js,Value must be between {0} and {1},Nirx divê di navbera {0} û {1} de be
 DocType: Accounts Settings,Show Inclusive Tax In Print,Di Print Inclusive Tax Print
-apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py,"Bank Account, From Date and To Date are Mandatory","Hesabê Bank, Dîrok û Dîroka Navîn ne"
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.js,Message Sent,Peyam nehat şandin
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account with child nodes cannot be set as ledger,Account bi hucûma zarok dikare wek ledger ne bê danîn
 DocType: C-Form,II,II
@@ -5141,6 +5198,7 @@ DocType: Salary Slip,Hour Rate,Saet Rate
 apps/erpnext/erpnext/stock/doctype/item/item.py,Enable Auto Re-Order,Re-Fermandariya Otomatê çalak bikin
 DocType: Stock Settings,Item Naming By,Babetê Bidin By
 apps/erpnext/erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py,Another Period Closing Entry {0} has been made after {1},"Din jî dema despêka Girtina {0} hatiye dîtin, piştî {1}"
+DocType: Proposed Pledge,Proposed Pledge,Sozdar pêşniyar
 DocType: Work Order,Material Transferred for Manufacturing,Maddî Transferred bo Manufacturing
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,Account {0} does not exists,Account {0} nayê heye ne
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.js,Select Loyalty Program,Bername Bernameya Hilbijartinê hilbijêre
@@ -5151,7 +5209,6 @@ apps/erpnext/erpnext/config/projects.py,Cost of various activities,Cost ji çala
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,"Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}","Bikin Events {0}, ji ber ku Employee girêdayî jêr Persons Sales nade a ID&#39;ya bikarhêner heye ne {1}"
 DocType: Timesheet,Billing Details,Details Billing
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js,Source and target warehouse must be different,Source û warehouse target divê cuda bê
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,Ji kerema xwe di Resavkaniya Mirovan de&gt; Sîstema Navkirin a Karmendiyê Saz bikin&gt; Mîhengên HR
 apps/erpnext/erpnext/erpnext_integrations/doctype/gocardless_settings/gocardless_settings.py,Payment Failed. Please check your GoCardless Account for more details,Payment failed. Ji kerema xwe ji berfirehtir ji bo Agahdariya GoCardless binihêre
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Not allowed to update stock transactions older than {0},destûra te ya rojanekirina muameleyên borsayê yên kevintir ji {0}
 DocType: Stock Entry,Inspection Required,Serperiştiya Required
@@ -5164,6 +5221,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Delivery warehouse required for stock item {0},warehouse Delivery pêwîst bo em babete stock {0}
 DocType: Packing Slip,The gross weight of the package. Usually net weight + packaging material weight. (for print),Giraniya derewîn û ji pakêta. Bi piranî weight net + pakêta weight maddî. (Ji bo print)
 DocType: Assessment Plan,Program,Bername
+DocType: Unpledge,Against Pledge,Li dijî sozê
 DocType: Accounts Settings,Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts,"Bikarhêner li ser bi vê rola bi destûr ji bo bikarhênerên frozen biafirînin û / ya xeyrandin di entries, hesabgirê dijî bikarhênerên bêhest"
 DocType: Plaid Settings,Plaid Environment,Hawîrdora Plaid
 ,Project Billing Summary,Danasîna Bilindkirina Projeyê
@@ -5216,6 +5274,7 @@ DocType: Employee Tax Exemption Declaration,Declarations,Danezan
 apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js,Batches,lekerên
 DocType: Appointment Booking Settings,Number of days appointments can be booked in advance,Hejmara rojên hevdîtinan dikarin di pêşîn de bêne tomar kirin
 DocType: Article,LMS User,Bikarhênera LMS
+apps/erpnext/erpnext/loan_management/doctype/loan/loan.py,Loan Security Pledge is mandatory for secured loan,Soza Ewlekariya Krediyê ji bo krediya pêbawer mecbûrî ye
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Place Of Supply (State/UT),Cihê plyêkirinê (Dewlet / UT)
 DocType: Purchase Order Item Supplied,Stock UOM,Stock UOM
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.py,Purchase Order {0} is not submitted,Bikirin Order {0} tê şandin ne
@@ -5288,6 +5347,7 @@ apps/erpnext/erpnext/accounts/doctype/journal_entry/journal_entry.js,Reverse Jou
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.js,Create Job Card,Karta Xebatê biafirînin
 DocType: Quotation,Referral Sales Partner,Partner Firotan Referral
 DocType: Quality Procedure Process,Process Description,Danasîna pêvajoyê
+apps/erpnext/erpnext/loan_management/doctype/loan_security_unpledge/loan_security_unpledge.py,"Cannot Unpledge, loan security value is greater than the repaid amount","Nabe ku Unleedgege, nirxa ewlehiya kredî ji mîqdara vegerandî mezintir e"
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.py,Customer {0} is created.,Têkilî {0} hatiye afirandin.
 apps/erpnext/erpnext/stock/dashboard/item_dashboard.js, Currently no stock available in any warehouse,Niha tu firotek li her wareyê heye
 ,Payment Period Based On Invoice Date,Period tezmînat li ser Date bi fatûreyên
@@ -5307,7 +5367,7 @@ DocType: Clinical Procedure Template,Allow Stock Consumption,Destûra Barkirina 
 DocType: Asset,Insurance Details,Details sîgorta
 DocType: Account,Payable,Erzan
 DocType: Share Balance,Share Type,Tîpa Share
-apps/erpnext/erpnext/hr/doctype/loan/loan.py,Please enter Repayment Periods,Ji kerema xwe ve Maweya vegerandinê binivîse
+apps/erpnext/erpnext/loan_management/doctype/loan/loan.py,Please enter Repayment Periods,Ji kerema xwe ve Maweya vegerandinê binivîse
 apps/erpnext/erpnext/shopping_cart/cart.py,Debtors ({0}),Deyndarên ({0})
 DocType: Pricing Rule,Margin,margin
 apps/erpnext/erpnext/selling/report/customer_acquisition_and_loyalty/customer_acquisition_and_loyalty.py,New Customers,muşteriyan New
@@ -5316,6 +5376,7 @@ apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.
 apps/erpnext/erpnext/selling/page/sales_funnel/sales_funnel.js,Opportunities by lead source,Opportunities by lead source
 DocType: Appraisal Goal,Weightage (%),Weightage (%)
 apps/erpnext/erpnext/selling/page/point_of_sale/point_of_sale.js,Change POS Profile,Guhertina POS Profîla
+apps/erpnext/erpnext/loan_management/doctype/loan_security_pledge/loan_security_pledge.py,Qty or Amount is mandatroy for loan security,Qty an Amount ji bo ewlehiya krediyê mandatroy e
 DocType: Bank Reconciliation Detail,Clearance Date,Date clearance
 DocType: Delivery Settings,Dispatch Notification Template,Gotûbêja Dispatchê
 apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.html,Assessment Report,Rapora Nirxandinê
@@ -5362,7 +5423,6 @@ DocType: Asset Value Adjustment,Current Asset Value,Current Asset Value
 DocType: QuickBooks Migrator,Quickbooks Company ID,Nasnameya şîrketên Quickbooks
 DocType: Travel Request,Travel Funding,Fona Rêwîtiyê
 DocType: Employee Skill,Proficiency,Qehrebûn
-DocType: Loan Application,Required by Date,Pêwîst ji aliyê Date
 DocType: Purchase Invoice Item,Purchase Receipt Detail,Detail Receipt Buy
 DocType: Crop Cycle,A link to all the Locations in which the Crop is growing,Pirtûka tevahiya cihên ku di Crop de zêde dibe
 DocType: Lead,Lead Owner,Xwedîyê Lead
@@ -5381,7 +5441,6 @@ DocType: Bank Account,IBAN,IBAN
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,Current BOM and New BOM can not be same,BOM û niha New BOM ne dikarin heman
 apps/erpnext/erpnext/hr/report/salary_register/salary_register.py,Salary Slip ID,Meaş ID Slip
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Date Of Retirement must be greater than Date of Joining,"Date Of Teqawîdiyê, divê mezintir Date of bizaveka be"
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Hilberîner&gt; Tîpa pêşkêşkar
 apps/erpnext/erpnext/stock/doctype/item/item.js,Multiple Variants,Pirrjimar Pirrjimar
 DocType: Sales Invoice,Against Income Account,Li dijî Account da-
 apps/erpnext/erpnext/controllers/website_list_for_contact.py,{0}% Delivered,{0}% Çiyan
@@ -5413,7 +5472,7 @@ apps/erpnext/erpnext/quality_management/doctype/quality_review/quality_review_li
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js,Valuation type charges can not marked as Inclusive,doz type Valuation ne dikarin weke berfireh nîşankirin
 DocType: POS Profile,Update Stock,update Stock
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.js,Different UOM for items will lead to incorrect (Total) Net Weight value. Make sure that Net Weight of each item is in the same UOM.,UOM cuda ji bo tomar dê ji bo Şaşî (Total) nirxa Loss Net rê. Bawer bî ku Loss Net ji hev babete di UOM heman e.
-DocType: Certification Application,Payment Details,Agahdarî
+DocType: Loan Repayment,Payment Details,Agahdarî
 apps/erpnext/erpnext/stock/report/item_prices/item_prices.py,BOM Rate,BOM Rate
 apps/erpnext/erpnext/erpnext_integrations/doctype/tally_migration/tally_migration.py,Reading Uploaded File,Pelê Uploaded-ê xwendin
 apps/erpnext/erpnext/manufacturing/doctype/work_order/work_order.py,"Stopped Work Order cannot be cancelled, Unstop it first to cancel","Karta Karûbarê Rawestandin Tête qedexekirin, yekemîn betal bike ku ji bo betal bike"
@@ -5445,6 +5504,7 @@ apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Batc
 apps/erpnext/erpnext/setup/doctype/sales_person/sales_person.js,This is a root sales person and cannot be edited.,Ev kesê ku firotina root e û ne jî dikarim di dahatûyê de were.
 DocType: Salary Component,"If selected, the value specified or calculated in this component will not contribute to the earnings or deductions. However, it's value can be referenced by other components that can be added or deducted. ","Heke hatibe hilbijartin, bi nirxê xwe dişinî an hesabkirin di vê hêmana ne, wê ji bo karên an bi dabirînê piştgirî bidin. Lê belê, ev nirx dikare ji aliyê pêkhateyên dî ku dikare added an dabirîn referans."
 DocType: Salary Component,"If selected, the value specified or calculated in this component will not contribute to the earnings or deductions. However, it's value can be referenced by other components that can be added or deducted. ","Heke hatibe hilbijartin, bi nirxê xwe dişinî an hesabkirin di vê hêmana ne, wê ji bo karên an bi dabirînê piştgirî bidin. Lê belê, ev nirx dikare ji aliyê pêkhateyên dî ku dikare added an dabirîn referans."
+DocType: Loan,Maximum Loan Value,Nirxa deynê pirtirkêmtirîn
 ,Stock Ledger,Stock Ledger
 DocType: Company,Exchange Gain / Loss Account,Exchange Gain / Account Loss
 DocType: Amazon MWS Settings,MWS Credentials,MWS kredî
@@ -5550,9 +5610,7 @@ DocType: Employee,Prefered Contact Email,Prefered Contact Email
 DocType: Cheque Print Template,Cheque Width,Firehiya Cheque
 DocType: Selling Settings,Validate Selling Price for Item against Purchase Rate or Valuation Rate,Validate Selling Beha bo Babetê dijî Rate Purchase an Rate Valuation
 DocType: Fee Schedule,Fee Schedule,Cedwela Fee
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Column Labels : ,Labels Column:
 DocType: Bank Transaction,Settled,Bi cî kirin
-apps/erpnext/erpnext/hr/doctype/loan/loan.py,Disbursement Date cannot be after Loan Repayment Start Date,Dîroka Veqetandinê Dikare Dîroka Destpêkirina Têgihiştinê de ne be
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Cess,Cess
 DocType: Quality Feedback,Parameters,Parametreyên
 DocType: Company,Create Chart Of Accounts Based On,Create Chart bikarhênerên li ser
@@ -5572,6 +5630,7 @@ DocType: Timesheet,Total Billable Amount,Temamê meblaxa Billable
 DocType: Customer,Credit Limit and Payment Terms,Şertên Bredî û Payment
 DocType: Loyalty Program,Collection Rules,Qanûna Hilbijartinê
 apps/erpnext/erpnext/stock/report/bom_search/bom_search.js,Item 3,Babetê 3
+DocType: Loan Security Shortfall,Shortfall Time,Demjimara kêmbûnê
 apps/erpnext/erpnext/restaurant/doctype/restaurant/restaurant.js,Order Entry,Entry Order
 DocType: Purchase Order,Customer Contact Email,Mişterî Contact Email
 DocType: Warranty Claim,Item and Warranty Details,Babetê û Warranty Details
@@ -5591,12 +5650,14 @@ DocType: Accounts Settings,Allow Stale Exchange Rates,Allow Stale Exchange Rates
 DocType: Sales Person,Sales Person Name,Sales Name Person
 apps/erpnext/erpnext/accounts/doctype/c_form/c_form.py,Please enter atleast 1 invoice in the table,Ji kerema xwe ve Hindîstan û 1 fatûra li ser sifrê binivîse
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.py,No Lab Test created,Testê Tebûr tune
+DocType: Loan Security Shortfall,Security Value ,Nirxa ewlehiyê
 DocType: POS Item Group,Item Group,Babetê Group
 apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.html,Student Group: ,Koma Xwendekaran:
 DocType: Depreciation Schedule,Finance Book Id,Fînansî ya Îngilîzî
 DocType: Item,Safety Stock,Stock Safety
 DocType: Healthcare Settings,Healthcare Settings,Mîhengên tenduristiyê
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html,Total Allocated Leaves,Niştecîhên Teva Allocated
+DocType: Appointment Letter,Appointment Letter,Nameya Ragihandinê
 apps/erpnext/erpnext/projects/doctype/task/task.py,Progress % for a task cannot be more than 100.,Terakkî% ji bo karekî ne dikarin zêdetir ji 100.
 DocType: Stock Reconciliation Item,Before reconciliation,berî ku lihevhatina
 apps/erpnext/erpnext/maintenance/doctype/maintenance_visit/maintenance_visit.py,To {0},{0}
@@ -5651,6 +5712,7 @@ DocType: Delivery Stop,Address Name,Address Name
 DocType: Stock Entry,From BOM,ji BOM
 DocType: Assessment Code,Assessment Code,Code nirxandina
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Basic,Bingehîn
+apps/erpnext/erpnext/config/loan_management.py,Loan Applications from customers and employees.,Serlêdanên deyn ji kirrûbir û karmendan.
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Stock transactions before {0} are frozen,muamele Stock berî {0} sar bi
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Please click on 'Generate Schedule',Ji kerema xwe re li ser &#39;Çêneke Cedwela&#39; klîk bike
 DocType: Job Card,Current Time,Wexta heyî
@@ -5677,7 +5739,7 @@ DocType: Account,Include in gross,Tevlî navgîniyê bike
 apps/erpnext/erpnext/hr/doctype/leave_period/leave_period.js,Grant,Pişgirî
 apps/erpnext/erpnext/education/doctype/student_group_creation_tool/student_group_creation_tool.py,No Student Groups created.,No komên xwendekaran tên afirandin.
 DocType: Purchase Invoice Item,Serial No,Serial No
-apps/erpnext/erpnext/hr/doctype/loan/loan.py,Monthly Repayment Amount cannot be greater than Loan Amount,Şêwaz vegerandinê mehane ne dikarin bibin mezintir Loan Mîqdar
+apps/erpnext/erpnext/loan_management/doctype/loan/loan.py,Monthly Repayment Amount cannot be greater than Loan Amount,Şêwaz vegerandinê mehane ne dikarin bibin mezintir Loan Mîqdar
 apps/erpnext/erpnext/maintenance/doctype/maintenance_schedule/maintenance_schedule.py,Please enter Maintaince Details first,Ji kerema xwe ve yekem Maintaince Details binivîse
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Row #{0}: Expected Delivery Date cannot be before Purchase Order Date,Row # {0}: Dîroka Dabeşkirina Expired Berî Berê Daxuyaniya Kirîna Dîroka
 DocType: Purchase Invoice,Print Language,Print Ziman
@@ -5690,6 +5752,7 @@ apps/erpnext/erpnext/accounts/page/pos/pos.js,Enter value must be positive,Enter
 DocType: Asset,Finance Books,Fînansên Fînansî
 DocType: Employee Tax Exemption Declaration Category,Employee Tax Exemption Declaration Category,Daxuyaniya Danûstandina Bacê ya Xebatê
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/pos.py,All Territories,Hemû Territories
+DocType: Plaid Settings,development,pêşveçûnî
 DocType: Lost Reason Detail,Lost Reason Detail,Sedema winda kirin
 apps/erpnext/erpnext/hr/utils.py,Please set leave policy for employee {0} in Employee / Grade record,Ji kerema xwe re polîtîkayê ji bo karmendê {0} di karker / qeydeya karker de bisekinin
 apps/erpnext/erpnext/public/js/controllers/transaction.js,Invalid Blanket Order for the selected Customer and Item,Biryareke çewt ya ji bo kirrûbirr û hilberê hilbijartî
@@ -5754,12 +5817,14 @@ DocType: Sales Invoice,Ship,Gemî
 DocType: Staffing Plan Detail,Current Openings,Open Openings
 apps/erpnext/erpnext/accounts/report/cash_flow/cash_flow.py,Cash Flow from Operations,Flow Cash ji operasyonên
 apps/erpnext/erpnext/regional/report/eway_bill/eway_bill.py,CGST Amount,Ameya CGST
+DocType: Vehicle Log,Current Odometer value ,Nirxa Odometer ya heyî
 apps/erpnext/erpnext/utilities/activation.py,Create Student,Xwendekar biafirînin
 DocType: Asset Movement Item,Asset Movement Item,Bûyera Tevgera Axê
 DocType: Purchase Invoice,Shipping Rule,Rule Shipping
 DocType: Patient Relation,Spouse,Jin
 DocType: Lab Test Groups,Add Test,Test Add
 DocType: Manufacturer,Limited to 12 characters,Bi sînor ji 12 tîpan
+DocType: Appointment Letter,Closing Notes,Nîşaneyên Bişopandinê
 DocType: Journal Entry,Print Heading,Print Hawara
 DocType: Quality Action Table,Quality Action Table,Table Action Action Quality
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py,Total cannot be zero,Total nikare bibe sifir
@@ -5826,6 +5891,7 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/selling/doctype/pos_closing_voucher/closing_voucher_details.html,Sales Summary,Kurteya Bazirganiyê
 apps/erpnext/erpnext/controllers/trends.py,Total(Amt),Total (Amt)
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Entertainment & Leisure,Music &amp; Leisure
+DocType: Loan Security,Loan Security,Ewlekariya deyn
 ,Item Variant Details,Vebijêrk Variant
 DocType: Quality Inspection,Item Serial No,Babetê No Serial
 DocType: Payment Request,Is a Subscription,Pêdivî ye
@@ -5838,7 +5904,6 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Please select Qt
 apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Latest Age,Serdema Dawîn
 apps/erpnext/erpnext/healthcare/doctype/inpatient_record/inpatient_record.py,Scheduled and Admitted dates can not be less than today,Dîrokên diyarkirî û pejirandî nekarin ji îro kêmtir bin
 apps/erpnext/erpnext/buying/doctype/purchase_order/purchase_order.js,Transfer Material to Supplier,Materyalê ji Pêşkêşker re veguhestin
-apps/erpnext/erpnext/hr/report/loan_repayment/loan_repayment.py,EMI,EMI
 apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py,New Serial No cannot have Warehouse. Warehouse must be set by Stock Entry or Purchase Receipt,"No New Serial ne dikarin Warehouse hene. Warehouse kirin, divê ji aliyê Stock Peyam an Meqbûz Purchase danîn"
 DocType: Lead,Lead Type,Lead Type
 apps/erpnext/erpnext/utilities/activation.py,Create Quotation,Quotation Afirandin
@@ -5855,7 +5920,6 @@ DocType: Issue,Resolution By Variance,Resolution By Variance
 DocType: Leave Allocation,Leave Period,Dema bihêlin
 DocType: Item,Default Material Request Type,Default Material request type
 DocType: Supplier Scorecard,Evaluation Period,Dema Nirxandinê
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Mişterî&gt; Koma Xerîdar&gt; Herêm
 apps/erpnext/erpnext/buying/doctype/supplier_scorecard/supplier_scorecard_list.js,Unknown,Nenas
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js,Work Order not created,Fermana kar nehatiye afirandin
 apps/erpnext/erpnext/hr/doctype/employee_benefit_application/employee_benefit_application.py,"An amount of {0} already claimed for the component {1},\
@@ -5940,7 +6004,8 @@ DocType: Healthcare Service Unit,Healthcare Service Unit,Yekîneya Xizmetiya Ten
 ,Customer-wise Item Price,Buhayê Kêrhatî ya Xerîdar
 apps/erpnext/erpnext/public/js/financial_statements.js,Cash Flow Statement,Daxûyanîya Flow Cash
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,No material request created,Naveroka maddî tune ne
-apps/erpnext/erpnext/hr/doctype/loan_application/loan_application.py,Loan Amount cannot exceed Maximum Loan Amount of {0},Deyn Mîqdar dikarin Maximum Mîqdar deyn ji mideyeka ne bêtir ji {0}
+apps/erpnext/erpnext/loan_management/doctype/loan_application/loan_application.py,Loan Amount cannot exceed Maximum Loan Amount of {0},Deyn Mîqdar dikarin Maximum Mîqdar deyn ji mideyeka ne bêtir ji {0}
+DocType: Loan,Loan Security Pledge,Soza Ewlekariya Krediyê
 apps/erpnext/erpnext/hr/report/vehicle_expenses/vehicle_expenses.py,License,Îcaze
 apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,Please remove this Invoice {0} from C-Form {1},Ji kerema xwe re vê bi fatûreyên {0} ji C-Form jê {1}
 DocType: Leave Control Panel,Please select Carry Forward if you also want to include previous fiscal year's balance leaves to this fiscal year,"Ji kerema xwe ve çêşît Forward hilbijêre, eger hûn jî dixwazin ku di nav hevsengiyê sala diravî ya berî bernadin ji bo vê sala diravî ya"
@@ -5957,6 +6022,7 @@ DocType: Inpatient Record,B Negative,B Negative
 DocType: Pricing Rule,Price Discount Scheme,Scheme ya Discount Discount
 apps/erpnext/erpnext/assets/doctype/asset_maintenance_log/asset_maintenance_log.py,Maintenance Status has to be Cancelled or Completed to Submit,Rewşa Tenduristiyê divê betal bike an qedexekirinê
 DocType: Amazon MWS Settings,US,ME
+DocType: Loan Security Pledge,Pledged,Soz dan
 DocType: Holiday List,Add Weekly Holidays,Holidays Weekly
 apps/erpnext/erpnext/public/js/hub/pages/Item.vue,Report Item,Report Babetê
 DocType: Staffing Plan Detail,Vacancies,Xwezî
@@ -5974,7 +6040,6 @@ DocType: Payment Entry,Initiated,destpêkirin
 DocType: Production Plan Item,Planned Start Date,Plankirin Date Start
 apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,Please select a BOM,Ji kerema xwe BOM hilbijêre
 DocType: Purchase Invoice,Availed ITC Integrated Tax,Girtîgeha Înternetê ya Înternetê
-apps/erpnext/erpnext/hr/doctype/loan/loan.js,Create Repayment Entry,Navnîşa Veberhênanê Afirînin
 DocType: Purchase Order Item,Blanket Order Rate,Pirtûka Pelê ya Blanket
 ,Customer Ledger Summary,Kurteya Mişterî Ledger
 apps/erpnext/erpnext/hooks.py,Certification,Şehadet
@@ -5995,6 +6060,7 @@ DocType: Tally Migration,Is Day Book Data Processed,Daneyên Pirtûka Rojê têt
 DocType: Appraisal Template,Appraisal Template Title,Appraisal Şablon Title
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Commercial,Commercial
 DocType: Patient,Alcohol Current Use,Bikaranîna Niha Alkol
+DocType: Loan,Loan Closure Requested,Daxwaza Girtina Krediyê
 DocType: Employee Tax Exemption Proof Submission,House Rent Payment Amount,Kirê Kirê Kirê Kirê
 DocType: Student Admission Program,Student Admission Program,Bername Bernameya Xwendekarên
 DocType: Employee Tax Exemption Sub Category,Tax Exemption Category,Category Disemption
@@ -6018,6 +6084,7 @@ apps/erpnext/erpnext/config/projects.py,Types of activities for Time Logs,Curey�
 DocType: Opening Invoice Creation Tool,Sales,Sales
 DocType: Stock Entry Detail,Basic Amount,Şêwaz bingehîn
 DocType: Training Event,Exam,Bilbilên
+DocType: Loan Security Shortfall,Process Loan Security Shortfall,Pêvajoya Ewlekariya Krediya Qedrê
 DocType: Email Campaign,Email Campaign,Kampanyaya E-nameyê
 apps/erpnext/erpnext/public/js/hub/hub_call.js,Marketplace Error,Çewtiya Marketplace
 DocType: Complaint,Complaint,Gilî
@@ -6119,6 +6186,7 @@ apps/erpnext/erpnext/templates/pages/order.html,Make Purchase Invoice,Pêşnûme
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application_dashboard.html,Used Leaves,Leaves Used
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.js,Do you want to submit the material request,Ma hûn dixwazin daxwaziya materyalê bişînin
 DocType: Job Offer,Awaiting Response,li benda Response
+apps/erpnext/erpnext/loan_management/doctype/loan_interest_accrual/loan_interest_accrual.py,Loan is mandatory,Kredî mecbûrî ye
 DocType: Course Schedule,EDU-CSH-.YYYY.-,EDU-CSH-YYYY.-
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.py,Above,Ser
 DocType: Support Search Source,Link Options,Vebijêrkên Girêdanê
@@ -6131,6 +6199,7 @@ apps/erpnext/erpnext/stock/doctype/landed_cost_voucher/landed_cost_voucher.py,Ro
 DocType: Training Event Employee,Optional,Bixwe
 DocType: Salary Slip,Earning & Deduction,Maaş &amp; dabirîna
 DocType: Agriculture Analysis Criteria,Water Analysis,Analysis
+DocType: Pledge,Post Haircut Amount,Mûçeya Pêkanîna Porê Porê
 DocType: Sales Order,Skip Delivery Note,Derketinê Têbînî
 DocType: Price List,Price Not UOM Dependent,Buhayê Ne girêdayî UOM
 apps/erpnext/erpnext/stock/doctype/item/item.js,{0} variants created.,Guhertin {0}.
@@ -6157,6 +6226,7 @@ DocType: Employee Checkin,OUT,DERVE
 apps/erpnext/erpnext/controllers/stock_controller.py,{0} {1}: Cost Center is mandatory for Item {2},{0} {1}: Navenda Cost ji bo babet wêneke e {2}
 DocType: Vehicle,Policy No,siyaseta No
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,Get Items from Product Bundle,Get Nawy ji Bundle Product
+apps/erpnext/erpnext/loan_management/doctype/loan/loan.py,Repayment Method is mandatory for term loans,Rêbaza vegerandina ji bo deynên termîn mecbûrî ye
 DocType: Asset,Straight Line,Line Straight
 DocType: Project User,Project User,Project Bikarhêner
 apps/erpnext/erpnext/stock/doctype/batch/batch.js,Split,Qelişandin
@@ -6209,8 +6279,8 @@ apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,N
 DocType: Salary Component,Formula,Formîl
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,Serial #,Serial #
 DocType: Material Request Plan Item,Required Quantity,Quantity pêwîst
+DocType: Cash Flow Mapping Template,Template Name,Navê Şablon
 DocType: Lab Test Template,Lab Test Template,Template Test Lab
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Hilberîner&gt; Tîpa pêşkêşkar
 apps/erpnext/erpnext/setup/doctype/company/company.py,Sales Account,Hesabê firotanê
 DocType: Purchase Invoice Item,Total Weight,Total Weight
 DocType: Pick List Item,Pick List Item,Lîsteya lîsteyê hilbijêrin
@@ -6258,6 +6328,7 @@ DocType: Travel Itinerary,Vegetarian,Vegetarian
 DocType: Patient Encounter,Encounter Date,Dîrok Dike
 DocType: Work Order,Update Consumed Material Cost In Project,Di Projeyê de Mesrefa Materyalên Xandî Nûjen kirin
 apps/erpnext/erpnext/controllers/accounts_controller.py,Account: {0} with currency: {1} can not be selected,Account: {0} bi currency: {1} ne bên hilbijartin
+apps/erpnext/erpnext/config/loan_management.py,Loans provided to customers and employees.,Kredî ji bo mişterî û karmendan peyda kirin.
 DocType: Bank Statement Transaction Settings Item,Bank Data,Data Data
 DocType: Purchase Receipt Item,Sample Quantity,Hêjeya nimûne
 DocType: Bank Guarantee,Name of Beneficiary,Navevaniya Niştimanî
@@ -6267,7 +6338,7 @@ DocType: Supplier,SUP-.YYYY.-,SUP-YYYY.-
 DocType: Bank Reconciliation Detail,Cheque Date,Date Cheque
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account {0}: Parent account {1} does not belong to company: {2},Account {0}: account Parent {1} ne aîdî ji şîrketa: {2}
 apps/erpnext/erpnext/setup/doctype/company/company.js,Successfully deleted all transactions related to this company!,Bi serkeftin hat hemû muameleyên girêdayî vê şîrketê!
-apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js,As on Date,Wekî ku li ser Date
+apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.js,As on Date,Wekî ku li ser Date
 DocType: Additional Salary,HR,HR
 DocType: Course Enrollment,Enrollment Date,Date nivîsînî
 DocType: Healthcare Settings,Out Patient SMS Alerts,Alerts Alîkariya Nexweş
@@ -6325,7 +6396,6 @@ apps/erpnext/erpnext/setup/doctype/company/company.js,Date of Commencement shoul
 DocType: Contract,Signed On,Şandin
 DocType: Bank Account,Party Type,Type Partiya
 DocType: Discounted Invoice,Discounted Invoice,Pêşkêşiya vekirî
-apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,Mark beşdarbûn wek <b></b>
 DocType: Payment Schedule,Payment Schedule,Schedule Payment
 apps/erpnext/erpnext/hr/doctype/employee_checkin/employee_checkin.py,No Employee found for the given employee field value. '{}': {},Ji bo nirxa qada qada karker nehat dayîn karmend nehat dîtin. &#39;{}&#39;: {
 DocType: Item Attribute Value,Abbreviation,Kinkirî
@@ -6333,7 +6403,6 @@ apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Payment
 DocType: Course Content,Quiz,Pirsok
 DocType: Subscription,Trial Period End Date,Dîroka Doza Têkoşînê
 apps/erpnext/erpnext/setup/doctype/authorization_control/authorization_control.py,Not authroized since {0} exceeds limits,authroized ne ji ber ku {0} dibuhure ji sînorên
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Start entering data from here : ,Danasîna daneyên ji vir dest pê bikin:
 DocType: Serial No,Asset Status,Status Status
 DocType: Sales Invoice,Over Dimensional Cargo (ODC),Di Karûbarên Dimensî de (ODC)
 DocType: Restaurant Order Entry,Restaurant Table,Restaurant Table
@@ -6419,7 +6488,6 @@ DocType: Lab Test,Result Date,Result Date
 DocType: Purchase Order,To Receive,Hildan
 DocType: Leave Period,Holiday List for Optional Leave,Lîsteya Bersîvê Ji bo Bijareya Bijartinê
 DocType: Item Tax Template,Tax Rates,Rêjeyên bacan
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Koda Babetê&gt; Koma Rêzan&gt; Brand
 DocType: Asset,Asset Owner,Xwedêkariya xwedan
 DocType: Item,Website Content,Naveroka malperê
 DocType: Bank Account,Integration ID,Nasnameya yekbûnê
@@ -6462,6 +6530,7 @@ apps/erpnext/erpnext/regional/italy/utils.py,Please set the Customer Address,Ji 
 DocType: Customer,Mention if non-standard receivable account,"Behs, eger ne-standard account teleb"
 DocType: Bank,Plaid Access Token,Plaid Access Token
 apps/erpnext/erpnext/hr/doctype/employee_benefit_application/employee_benefit_application.py,Please add the remaining benefits {0} to any of the existing component,Ji kerema xwe ji berjewendiyên mayîn {0} ji her yek ji beşên heyî yên nû ve zêde bikin
+DocType: Bank Account,Is Default Account,Hesabê Bindest e
 DocType: Journal Entry Account,If Income or Expense,Ger Hatinê an jî Expense
 DocType: Course Topic,Course Topic,Mijara qursê
 DocType: Bank Statement Transaction Entry,Matching Invoices,Berbihevkirinê
@@ -6473,7 +6542,7 @@ DocType: Payment Reconciliation Payment,Payment Reconciliation Payment,Lihevhati
 DocType: Disease,Treatment Task,Tediya Tedawî
 DocType: Payment Order Reference,Bank Account Details,Agahiya Hesabê Bankê
 DocType: Purchase Order Item,Blanket Order,Fermana Blanket
-apps/erpnext/erpnext/hr/doctype/loan_application/loan_application.py,Repayment Amount must be greater than ,Pêdivî ye ku dravê dravê ji mezintir be
+apps/erpnext/erpnext/loan_management/doctype/loan_application/loan_application.py,Repayment Amount must be greater than ,Pêdivî ye ku dravê dravê ji mezintir be
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Tax Assets,Maldarî bacê
 DocType: BOM Item,BOM No,BOM No
 apps/erpnext/erpnext/public/js/hub/components/edit_details_dialog.js,Update Details,Daxuyaniyên Nûve bikin
@@ -6529,6 +6598,7 @@ DocType: Inpatient Occupancy,Invoiced,Invoiced
 apps/erpnext/erpnext/erpnext_integrations/doctype/woocommerce_settings/woocommerce_settings.py,WooCommerce Products,Berhemên WooCommerce
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py,Syntax error in formula or condition: {0},Çewtiya Hevoksaziyê li formula an rewşa: {0}
 apps/erpnext/erpnext/stock/utils.py,Item {0} ignored since it is not a stock item,Babetê {0} hesibandin ji ber ku ew e ku em babete stock ne
+,Loan Security Status,Rewşa ewlehiya deyn
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,"To not apply Pricing Rule in a particular transaction, all applicable Pricing Rules should be disabled.","To Rule Pricing di danûstandina bi taybetî jî derbas nabe, hemû Rules Pricing pêkanîn, divê neçalak bibin."
 DocType: Payment Term,Day(s) after the end of the invoice month,Roja dawiyê ya mehê
 DocType: Assessment Group,Parent Assessment Group,Dê û bav Nirxandina Group
@@ -6543,7 +6613,6 @@ apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.
 DocType: Stock Entry Detail,Additional Cost,Cost Additional
 apps/erpnext/erpnext/accounts/report/general_ledger/general_ledger.py,"Can not filter based on Voucher No, if grouped by Voucher","Can filter li ser Voucher No bingeha ne, eger ji aliyê Vienna kom"
 DocType: Quality Inspection,Incoming,Incoming
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Ji kerema xwe ji hêla Tevlêbûnê&gt; Pêjeya Hejmarbûnê ve ji bo Pêvekêşandinê hejmarên hejmaran bikin
 apps/erpnext/erpnext/setup/doctype/company/company.js,Default tax templates for sales and purchase are created.,Saziyên bacê yên ji bo firotin û kirînê ji nû ve tên afirandin.
 apps/erpnext/erpnext/education/doctype/assessment_result/assessment_result.py,Assessment Result record {0} already exists.,Nirxandina encamê {0} jixwe heye.
 DocType: Item,"Example: ABCD.#####. If series is set and Batch No is not mentioned in transactions, then automatic batch number will be created based on this series. If you always want to explicitly mention Batch No for this item, leave this blank. Note: this setting will take priority over the Naming Series Prefix in Stock Settings.","Nimûne: ABCD. #####. Heke ku rêzikek vekirî ye û Batch Na ne di nav veguhestinê de nirxandin, hingê hejmarek navnîşa otobusê otomatîk li ser vê pirtûkê hatiye afirandin. Heke hûn herdem herdem ji bo vê yekê tiştek balkêş binivîsin, ji vê derê vekin. Têbînî: ev sazkirinê dê li ser Sîsteyên Sûkê li ser Nameya Cîhanê ya Sermaseyê pêşniyar bibin."
@@ -6555,6 +6624,7 @@ DocType: Contract,Party User,Partiya Bikarhêner
 apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py,Please set Company filter blank if Group By is 'Company',Xêra xwe Company wêr&#39;a vala eger Pol By e &#39;Company&#39;
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py,Posting Date cannot be future date,Deaktîv bike Date nikare bibe dîroka pêşerojê de
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py,Row # {0}: Serial No {1} does not match with {2} {3},Row # {0}: Serial No {1} nayê bi hev nagirin {2} {3}
+DocType: Loan Repayment,Interest Payable,Dravê Bacê
 DocType: Stock Entry,Target Warehouse Address,Navnîşana Navnîşana Warehouse
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Casual Leave,Leave Casual
 DocType: Shift Type,The time before the shift start time during which Employee Check-in is considered for attendance.,Wexta dema destpêkê ya guhartinê de dema ku Navnîşa Karmendê ji bo beşdarbûnê tête hesibandin.
@@ -6682,6 +6752,7 @@ DocType: Healthcare Practitioner,Mobile,Hejî
 DocType: Issue,Reset Service Level Agreement,Reset Peymana asta karûbarê resen
 ,Sales Person-wise Transaction Summary,Nasname Transaction firotina Person-şehreza
 DocType: Training Event,Contact Number,Hejmara Contact
+apps/erpnext/erpnext/loan_management/doctype/loan/loan.py,Loan Amount is mandatory,Mîqdara mûçeyê mecbûrî ye
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py,Warehouse {0} does not exist,Warehouse {0} tune
 DocType: Cashier Closing,Custody,Lênerînî
 DocType: Employee Tax Exemption Proof Submission Detail,Employee Tax Exemption Proof Submission Detail,Xweseriya Xweseriya Xweseriya Serkeftinê
@@ -6728,6 +6799,7 @@ DocType: Opening Invoice Creation Tool,Purchase,Kirrîn
 apps/erpnext/erpnext/stock/report/batch_wise_balance_history/batch_wise_balance_history.py,Balance Qty,Balance Qty
 DocType: Pricing Rule,Conditions will be applied on all the selected items combined. ,Condert dê li ser hemî tiştên hilbijartî bi hev re bêne bicîh kirin.
 apps/erpnext/erpnext/hr/doctype/appraisal/appraisal.py,Goals cannot be empty,Armancên ne vala be
+apps/erpnext/erpnext/stock/doctype/stock_settings/stock_settings.py,Incorrect Warehouse,Wareya çewt
 apps/erpnext/erpnext/education/doctype/program_enrollment_tool/program_enrollment_tool.js,Enrolling students,Xwendekar xwendin
 DocType: Item Group,Parent Item Group,Dê û bav babetî Pula
 DocType: Appointment Type,Appointment Type,Tîpa rûniştinê
@@ -6786,7 +6858,7 @@ apps/erpnext/erpnext/controllers/accounts_controller.py,Total Payment Amount in 
 apps/erpnext/erpnext/stock/doctype/item/item.py,"""Customer Provided Item"" cannot have Valuation Rate",&quot;Tişta peydakirî ya xerîdar&quot; nikare Rêjeya Valasyonê tune
 DocType: Subscription Plan Detail,Plan,Pîlan
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,balance Statement Bank wek per General Ledger
-DocType: Job Applicant,Applicant Name,Navê Applicant
+DocType: Appointment Letter,Applicant Name,Navê Applicant
 DocType: Authorization Rule,Customer / Item Name,Mişterî / Navê babetî
 DocType: Product Bundle,"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
 
@@ -6830,11 +6902,13 @@ DocType: Education Settings,"For Batch based Student Group, the Student Batch wi
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py,Warehouse can not be deleted as stock ledger entry exists for this warehouse.,Warehouse ne jêbirin wek entry stock ledger ji bo vê warehouse heye.
 apps/erpnext/erpnext/public/js/setup_wizard.js,Distribution,Belavkirinî
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Employee status cannot be set to 'Left' as following employees are currently reporting to this employee:&nbsp;,Rewşa karmend nikare bi &#39;areep&#39; were binavkirin ji ber ku karmendên jêrîn vê carê ji vî karmend re ragihandine:
-DocType: Journal Entry Account,Loan,Sened
+DocType: Loan Repayment,Amount Paid,Şêwaz: Destkeftiyên
+DocType: Loan Security Shortfall,Loan,Sened
 DocType: Expense Claim Advance,Expense Claim Advance,Serdanek Pêşveçûn
 DocType: Lab Test,Report Preference,Rapora Raporta
 apps/erpnext/erpnext/config/non_profit.py,Volunteer information.,Agahdariya dilxwaz
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Project Manager,Project Manager
+apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js,Group By Customer,Koma Ji hêla Xerîdar
 ,Quoted Item Comparison,Babetê têbinî eyna
 apps/erpnext/erpnext/buying/doctype/supplier_scorecard/supplier_scorecard.py,Overlap in scoring between {0} and {1},Overlap di navbera {0} û {1}
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Dispatch,Dispatch
@@ -6853,6 +6927,7 @@ DocType: Delivery Stop,Delivery Stop,Stop Delivery
 apps/erpnext/erpnext/accounts/page/pos/pos.js,"Master data syncing, it might take some time","Master senkronîzekirina welat, bibe hinek dem bigire"
 DocType: Material Request Plan Item,Material Issue,Doza maddî
 DocType: Employee Education,Qualification,Zanyarî
+DocType: Loan Security Shortfall,Loan Security Shortfall,Kêmasiya ewlehiya deyn
 DocType: Item Price,Item Price,Babetê Price
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Soap & Detergent,Sabûn &amp; Detergent
 DocType: BOM,Show Items,Show babetî
@@ -6874,13 +6949,13 @@ apps/erpnext/erpnext/assets/doctype/asset/asset.py,Opening Accumulated Depreciat
 DocType: Appointment Booking Settings,Appointment Details,Kîtekîtên Ragihandinê
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,Finished Product,Hilbera qedandî
 DocType: Warehouse,Warehouse Name,Navê warehouse
+DocType: Loan Security Pledge,Pledge Time,Wexta Sersalê
 DocType: Naming Series,Select Transaction,Hilbijêre Transaction
 apps/erpnext/erpnext/setup/doctype/authorization_rule/authorization_rule.py,Please enter Approving Role or Approving User,Ji kerema xwe re têkevin Erêkirina Role an Erêkirina Bikarhêner
 DocType: Journal Entry,Write Off Entry,Hewe Off Peyam
 DocType: BOM,Rate Of Materials Based On,Rate ji materyalên li ser bingeha
 DocType: Education Settings,"If enabled, field Academic Term will be Mandatory in Program Enrollment Tool.","Heke çalak, zeviya Termê akademîk dê di navendên Bernameya Enrollmentê de nerast be."
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,"Values of exempt, nil rated and non-GST inward supplies","Nirxên amûrên xwerû, jêkûpêkkirî û ne-GST navxweyî"
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Mişterî&gt; Koma Xerîdar&gt; Herêm
 apps/erpnext/erpnext/regional/report/datev/datev.py,<b>Company</b> is a mandatory filter.,<b>Pargîdan</b> fîlterkerek domdar e.
 apps/erpnext/erpnext/education/doctype/student_attendance_tool/student_attendance_tool.js,Uncheck all,menuya hemû
 DocType: Purchase Taxes and Charges,On Item Quantity,Li ser qumarê tişt
@@ -6926,7 +7001,6 @@ apps/erpnext/erpnext/projects/doctype/project/project.py,Join,Bihevgirêdan
 apps/erpnext/erpnext/stock/report/stock_projected_qty/stock_projected_qty.py,Shortage Qty,kêmbûna Qty
 DocType: Purchase Invoice,Input Service Distributor,Belavkarê Karûbarê Input
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item variant {0} exists with same attributes,variant babete {0} bi taybetmendiyên xwe heman heye
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Ji kerema xwe Li Perwerde&gt; Mîhengên Perwerdehiyê Sîstema Navkirin a Sêwiran saz bikin
 DocType: Loan,Repay from Salary,H&#39;eyfê ji Salary
 DocType: Exotel Settings,API Token,API Token
 apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Requesting payment against {0} {1} for amount {2},Ku daxwaz dikin tezmînat li dijî {0} {1} ji bo mîktarê {2}
@@ -6945,6 +7019,7 @@ DocType: Payroll Entry,Deduct Tax For Unclaimed Employee Benefits,Ji bo Xercên 
 DocType: Salary Slip,Total Interest Amount,Gelek balkêş
 apps/erpnext/erpnext/stock/doctype/warehouse/warehouse.py,Warehouses with child nodes cannot be converted to ledger,Wargehan de bi hucûma zarok nikare bê guhartina ji bo ledger
 DocType: BOM,Manage cost of operations,Manage mesrefa ji operasyonên
+DocType: Unpledge,Unpledge,Jêderketin
 DocType: Accounts Settings,Stale Days,Rojên Stale
 DocType: Travel Itinerary,Arrival Datetime,Datetime Arrival
 DocType: Tax Rule,Billing Zipcode,Zipcode Zipcode
@@ -7128,6 +7203,7 @@ DocType: Hotel Room Package,Hotel Room Package,Pakêtê odeya xaniyê
 DocType: Employee Transfer,Employee Transfer,Transfera karmendê
 apps/erpnext/erpnext/projects/doctype/project/project_dashboard.html,Hours,saetan
 DocType: Project,Expected Start Date,Hêvîkirin Date Start
+DocType: Work Order,This is a location where raw materials are available.,Ev cîhek e ku deverên xav tê de.
 DocType: Purchase Invoice,04-Correction in Invoice,04-ڕاستکردنەوە لە پسوولە
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.js,Work Order already created for all items with BOM,Karê Birêvebirê ji bo hemî tiştên ku BOM bi kar tîne hatiye afirandin
 DocType: Bank Account,Party Details,Partiya Partiyê
@@ -7146,6 +7222,7 @@ apps/erpnext/erpnext/regional/italy/utils.py,Please set either the Tax ID or Fis
 apps/erpnext/erpnext/templates/pages/rfq.html,Quotations: ,Çavkanî:
 DocType: Contract,Partially Fulfilled,Bi awayek dagirtî
 DocType: Maintenance Visit,Fully Completed,bi temamî Qediya
+DocType: Loan Security,Loan Security Name,Navê ewlehiya deyn
 apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,"Special Characters except ""-"", ""#"", ""."", ""/"", ""{"" and ""}"" not allowed in naming series","Di tîpa navnasî de ji bilî &quot;-&quot;, &quot;#&quot;, &quot;.&quot;, &quot;/&quot;, &quot;{&quot; Û &quot;}&quot; tîpên Taybet"
 DocType: Purchase Invoice Item,Is nil rated or exempted,Nil nîsk an jibîrkirî ye
 DocType: Employee,Educational Qualification,Qualification perwerdeyî
@@ -7202,6 +7279,7 @@ DocType: Purchase Invoice Item,Amount (Company Currency),Şêwaz (Company Exchan
 DocType: Program,Is Featured,Pêşkêş e
 apps/erpnext/erpnext/manufacturing/page/bom_comparison_tool/bom_comparison_tool.js,Fetching...,Fetching ...
 DocType: Agriculture Analysis Criteria,Agriculture User,Çandinî bikarhêner
+DocType: Loan Security Shortfall,America/New_York,Amerîka / New_York
 apps/erpnext/erpnext/selling/doctype/quotation/quotation.py,Valid till date cannot be before transaction date,Dîroka rastîn nikare beriya danûstandinê berî ne
 apps/erpnext/erpnext/stock/stock_ledger.py,{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction.,{0} yekîneyên {1} pêwîst in {2} li {3} {4} ji bo {5} ji bo temamkirina vê de mêjera.
 DocType: Fee Schedule,Student Category,Xwendekarên Kategorî
@@ -7278,8 +7356,8 @@ apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,Item: {0} does not exist i
 apps/erpnext/erpnext/accounts/doctype/account/account.py,You are not authorized to set Frozen value,Tu bi destûr ne ji bo danîna nirxa Frozen
 DocType: Payment Reconciliation,Get Unreconciled Entries,Get Unreconciled Arşîva
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py,Employee {0} is on Leave on {1},Xebatkar {0} li Niştecîh {1} ye
-apps/erpnext/erpnext/hr/doctype/loan/loan.py,No repayments selected for Journal Entry,Ne vegerandin ji bo Journal Entry hilbijartin
 DocType: Purchase Invoice,GST Category,Kategoriya GST
+apps/erpnext/erpnext/loan_management/doctype/loan_application/loan_application.py,Proposed Pledges are mandatory for secured Loans,Sozên pêşniyar ji bo deynên pêbawer mecbûr in
 DocType: Payment Reconciliation,From Invoice Date,Ji fatûreyên Date
 apps/erpnext/erpnext/accounts/doctype/fiscal_year/fiscal_year_dashboard.py,Budgets,Budçe
 DocType: Invoice Discounting,Disbursed,Vexwendin
@@ -7334,14 +7412,13 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 DocType: Restaurant,Active Menu,Menu menu
 DocType: Accounting Dimension Detail,Default Dimension,Mezinahiya Default
 DocType: Target Detail,Target Qty,Qty target
-apps/erpnext/erpnext/hr/doctype/loan/loan.py,Against Loan: {0},Li Bexdayê: {0}
 DocType: Shopping Cart Settings,Checkout Settings,Settings Checkout
 DocType: Student Attendance,Present,Amade
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py,Delivery Note {0} must not be submitted,Delivery Têbînî {0} divê şandin ne bê
 DocType: HR Settings,"The salary slip emailed to the employee will be password protected, the password will be generated based on the password policy.","Dê dirûşmeya mûçeyê ku ji karmend re were şandin were şîfre were parastin, dê şîfreya li ser bingeha polîtîkaya şîfreyê were hilberandin."
 apps/erpnext/erpnext/accounts/doctype/period_closing_voucher/period_closing_voucher.py,Closing Account {0} must be of type Liability / Equity,Girtina Account {0} de divê ji type mesulîyetê / Sebra min be
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py,Salary Slip of employee {0} already created for time sheet {1},Slip meaşê karmendekî {0} berê ji bo kaxeza dem tên afirandin {1}
-DocType: Vehicle Log,Odometer,Green
+apps/erpnext/erpnext/hr/report/vehicle_expenses/vehicle_expenses.py,Odometer,Green
 DocType: Production Plan Item,Ordered Qty,emir kir Qty
 apps/erpnext/erpnext/stock/doctype/item/item.py,Item {0} is disabled,Babetê {0} neçalak e
 DocType: Stock Settings,Stock Frozen Upto,Stock Upto Frozen
@@ -7397,7 +7474,6 @@ DocType: Employee External Work History,Salary,Meaş
 DocType: Serial No,Delivery Document Type,Delivery Corî dokumênt
 DocType: Sales Order,Partly Delivered,hinekî Çiyan
 DocType: Item Variant Settings,Do not update variants on save,Variants on save save
-apps/erpnext/erpnext/accounts/report/sales_register/sales_register.py,Custmer Group,Koma Paşgiran
 DocType: Email Digest,Receivables,telebê
 DocType: Lead Source,Lead Source,Source Lead
 DocType: Customer,Additional information regarding the customer.,agahiyên zêdetir di derbarê mişterî.
@@ -7455,7 +7531,6 @@ DocType: Item Customer Detail,Item Customer Detail,Babetê Detail Mişterî
 apps/erpnext/erpnext/hr/doctype/employee_benefit_claim/employee_benefit_claim.py,Maximum benefit amount of employee {0} exceeds {1},Gelek xercê karmendê {0} zêde dike {1}
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py,Total allocated leaves are more than days in the period,Hemû pelên bi rêk û zêdetir in ji rojan di dema
 DocType: Linked Soil Analysis,Linked Soil Analysis,Analyzed Soil Analysis
-DocType: Pricing Rule,Percentage,Rêza sedikê
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Item {0} must be a stock Item,Babetê {0} divê stock babete be
 DocType: Manufacturing Settings,Default Work In Progress Warehouse,Default Kar In Warehouse Progress
 apps/erpnext/erpnext/healthcare/doctype/practitioner_schedule/practitioner_schedule.js,"Schedules for {0} overlaps, do you want to proceed after skiping overlaped slots ?","Schedule ji bo {0} overlaps, tu dixwazî piştî ku paqijkirina slotên bêhtir diçin?"
@@ -7491,6 +7566,7 @@ DocType: Sales Partner,Partner Type,Type partner
 apps/erpnext/erpnext/accounts/report/budget_variance_report/budget_variance_report.py,Actual,Rast
 DocType: Appointment,Skype ID,Skype ID
 DocType: Restaurant Menu,Restaurant Manager,Rêveberê Restaurant
+DocType: Loan,Penalty Income Account,Hesabê hatiniya darayî
 DocType: Call Log,Call Log,Log Têkeve
 DocType: Authorization Rule,Customerwise Discount,Customerwise Discount
 apps/erpnext/erpnext/config/projects.py,Timesheet for tasks.,Timesheet ji bo karên.
@@ -7576,6 +7652,7 @@ DocType: Purchase Taxes and Charges,On Net Total,Li ser Net Total
 apps/erpnext/erpnext/controllers/item_variant.py,Value for Attribute {0} must be within the range of {1} to {2} in the increments of {3} for Item {4},Nirx ji bo Pêşbîr {0} de divê di nava cûrbecûr yên bê {1} ji bo {2} di çend qonaxan ji {3} ji bo babet {4}
 DocType: Pricing Rule,Product Discount Scheme,Sermaseya Hilberîna Hilberê
 apps/erpnext/erpnext/public/js/call_popup/call_popup.js,No issue has been raised by the caller.,Ti pirsgirêk ji hêla bangker ve nehatiye bilind kirin.
+apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js,Group By Supplier,Koma Ji hêla Pêşkêşker
 DocType: Restaurant Reservation,Waitlisted,Waitlisted
 DocType: Employee Tax Exemption Declaration Category,Exemption Category,Kategorî
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Currency can not be changed after making entries using some other currency,Exchange dikarin piştî çêkirina entries bikaranîna hinek dî ne bê guhertin
@@ -7586,7 +7663,6 @@ apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standar
 apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Consulting,Consulting
 DocType: Subscription Plan,Based on price list,Li ser lîsteya bihayê bihayê
 DocType: Customer Group,Parent Customer Group,Dê û bav Mişterî Group
-apps/erpnext/erpnext/regional/india/utils.py,e-Way Bill JSON can only be generated from Sales Invoice,e-Way Bill JSON tenê ji Pêşkêşiya Firotanê were hilberandin
 apps/erpnext/erpnext/education/doctype/quiz/quiz.py,Maximum attempts for this quiz reached!,Ji bo vê quizê hewildanên herî zêde gihîştin!
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,Subscription,Abonetî
 apps/erpnext/erpnext/education/doctype/fee_schedule/fee_schedule_list.js,Fee Creation Pending,Pending Creation Pending
@@ -7603,6 +7679,7 @@ DocType: Travel Itinerary,Travel From,Travel From
 DocType: Asset Maintenance Task,Preventive Maintenance,Parastina Parastinê
 DocType: Delivery Note Item,Against Sales Invoice,Li dijî bi fatûreyên Sales
 DocType: Purchase Invoice,07-Others,07-ئەوانی دیکە
+apps/erpnext/erpnext/selling/report/territory_wise_sales/territory_wise_sales.py,Quotation Amount,Mîqdara Quotation
 apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js,Please enter serial numbers for serialized item ,Tikaye hejmara serial bo em babete weşandin diyar binvêse!
 DocType: Bin,Reserved Qty for Production,Qty Reserved bo Production
 DocType: Student Group Creation Tool,Leave unchecked if you don't want to consider batch while making course based groups. ,Dev ji zilma eger tu dixwazî ji bo ku li hevîrê di dema çêkirina komên Helbet bingeha.
@@ -7711,6 +7788,7 @@ DocType: Employee Benefit Application Detail,Employee Benefit Application Detail
 apps/erpnext/erpnext/accounts/print_format/payment_receipt_voucher/payment_receipt_voucher.html,Payment Receipt Note,Payment Meqbûz Note
 apps/erpnext/erpnext/selling/doctype/customer/customer_dashboard.py,This is based on transactions against this Customer. See timeline below for details,Ev li ser danûstandinên li dijî vê Mişterî bingeha. Dîtina cedwela li jêr bo hûragahiyan
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.js,Create Material Request,Daxwaza Materyalê biafirînin
+DocType: Loan Interest Accrual,Pending Principal Amount,Li benda Dravê Sereke
 apps/erpnext/erpnext/accounts/doctype/payment_reconciliation/payment_reconciliation.py,Row {0}: Allocated amount {1} must be less than or equals to Payment Entry amount {2},Row {0}: veqetandin mîqdara {1} gerek kêmtir be an jî li beramberî bi mîqdara Peyam Payment {2}
 DocType: Program Enrollment Tool,New Academic Term,Termê nû ya akademîk
 ,Course wise Assessment Report,Rapora Nirxandin Kurs zana
@@ -7752,6 +7830,7 @@ apps/erpnext/erpnext/stock/doctype/serial_no/serial_no.py,"Cannot deliver Serial
 											to fullfill Sales Order {2}",Nikarî Serial No {0} ya {1} ji ber ku ew rakêş e \ n tije razdariya firotanê {2}
 DocType: Quotation,SAL-QTN-.YYYY.-,SAL-QTN-YYYY-
 apps/erpnext/erpnext/buying/doctype/request_for_quotation/request_for_quotation.py,Supplier Quotation {0} created,Supplier Quotation {0} tên afirandin
+DocType: Loan Security Unpledge,Unpledge Type,Tîpa Unpledge
 apps/erpnext/erpnext/accounts/report/financial_statements.py,End Year cannot be before Start Year,End Sal nikarim li ber Serî Sal be
 DocType: Employee Benefit Application,Employee Benefits,Qezenca kardarîyê
 apps/erpnext/erpnext/projects/report/billing_summary.py,Employee ID,Nasnameya kardêr
@@ -7834,6 +7913,7 @@ DocType: Agriculture Analysis Criteria,Soil Analysis,Analysis
 apps/erpnext/erpnext/education/report/course_wise_assessment_report/course_wise_assessment_report.html,Course Code: ,Koda kursê
 apps/erpnext/erpnext/stock/doctype/stock_reconciliation/stock_reconciliation.py,Please enter Expense Account,Ji kerema xwe ve Expense Account binivîse
 DocType: Quality Action Resolution,Problem,Pirsegirêk
+DocType: Loan Security Type,Loan To Value Ratio,Rêjeya nirxê deyn
 DocType: Account,Stock,Embar
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js,"Row #{0}: Reference Document Type must be one of Purchase Order, Purchase Invoice or Journal Entry","Row # {0}: World: Kurdî: Corî dokumênt, divê yek ji Purchase Order, Buy bi fatûreyên an Peyam Journal be"
 DocType: Employee,Current Address,niha Address
@@ -7851,6 +7931,7 @@ DocType: Sales Order,Track this Sales Order against any Project,Track ev Sales O
 DocType: Bank Statement Transaction Entry,Bank Statement Transaction Entry,Navnîşa Transferê ya Bexdayê Entry
 DocType: Sales Invoice Item,Discount and Margin,Discount û Kenarê
 DocType: Lab Test,Prescription,Reçete
+DocType: Process Loan Security Shortfall,Update Time,Wexta nûvekirinê
 DocType: Import Supplier Invoice,Upload XML Invoices,Faturayên XML-yê barkirin
 DocType: Company,Default Deferred Revenue Account,Account Revenue Deferred Default
 DocType: Project,Second Email,Duyemîn Email
@@ -7864,7 +7945,7 @@ DocType: Project Template Task,Begin On (Days),Destpêkirin (Rojan)
 DocType: Quality Action,Preventive,Tedbîr
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Supplies made to Unregistered Persons,Amûrên ku ji Kesên Kêmkirî re hatî amadekirin
 DocType: Company,Date of Incorporation,Dîroka Hevkariyê
-apps/erpnext/erpnext/accounts/report/purchase_register/purchase_register.py,Total Tax,Total Bacê
+apps/erpnext/erpnext/accounts/report/item_wise_sales_register/item_wise_sales_register.py,Total Tax,Total Bacê
 DocType: Manufacturing Settings,Default Scrap Warehouse,Wargeha Pêşkêş a Pêşkêşkerê
 apps/erpnext/erpnext/manufacturing/report/bom_stock_calculated/bom_stock_calculated.py,Last Purchase Price,Bargêrîna Dawîn
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,For Quantity (Manufactured Qty) is mandatory,Ji bo Diravan (Manufactured Qty) wêneke e
@@ -7883,6 +7964,7 @@ apps/erpnext/erpnext/config/manufacturing.py,Generate Material Requests (MRP) an
 apps/erpnext/erpnext/accounts/doctype/pos_profile/pos_profile.py,Set default mode of payment,Modela default default of payment set
 DocType: Stock Entry Detail,Against Stock Entry,Li hember Tevlêbûna Stock
 DocType: Grant Application,Withdrawn,vekişandiye
+DocType: Loan Repayment,Regular Payment,Dravdana birêkûpêk
 DocType: Support Search Source,Support Search Source,Çavkaniya Çavkaniya Lêgerîna
 apps/erpnext/erpnext/accounts/report/account_balance/account_balance.js,Chargeble,Argearkbarî
 DocType: Project,Gross Margin %,Kenarê% Gross
@@ -7896,8 +7978,11 @@ DocType: Warranty Claim,If different than customer address,Eger cuda ji adresa m
 DocType: Purchase Invoice,Without Payment of Tax,Bêyî Bacê Bacê
 DocType: BOM Operation,BOM Operation,BOM Operation
 DocType: Purchase Taxes and Charges,On Previous Row Amount,Li ser Previous Mîqdar Row
+DocType: Student,Home Address,Navnîşana malê
 DocType: Options,Is Correct,Rast e
 DocType: Item,Has Expiry Date,Dîroka Pîrozbahiyê ye
+DocType: Loan Repayment,Paid Accrual Entries,Beşdariyên Bawerdar ên Pêxember dane
+DocType: Loan Security,Loan Security Type,Tîpa ewlehiya deyn
 apps/erpnext/erpnext/config/support.py,Issue Type.,Cureya pirsgirêkê.
 DocType: POS Profile,POS Profile,Profile POS
 DocType: Training Event,Event Name,Navê Event
@@ -7909,6 +7994,7 @@ DocType: Shift Type,Last Known Successful Sync of Employee Checkin. Reset this o
 apps/erpnext/erpnext/config/accounts.py,"Seasonality for setting budgets, targets etc.","Seasonality ji bo avakirin, budceyên, armancên hwd."
 apps/erpnext/erpnext/www/all-products/index.html,No values,Nirxên
 DocType: Supplier Scorecard Scoring Variable,Variable Name,Navekî Navîn
+DocType: Bank Reconciliation,Select the Bank Account to reconcile.,Ji bo lihevhatinê hesabê Bankê hilbijêrin.
 apps/erpnext/erpnext/stock/get_item_details.py,"Item {0} is a template, please select one of its variants","Babetê {0} a şablonê ye, ji kerema xwe ve yek ji Guhertoyên xwe hilbijêre"
 DocType: Purchase Invoice Item,Deferred Expense,Expense Expense
 apps/erpnext/erpnext/public/js/hub/pages/Messages.vue,Back to Messages,Vegere Mesajan
@@ -7960,7 +8046,6 @@ DocType: Taxable Salary Slab,Percent Deduction,Perçûna Perê
 DocType: GL Entry,To Rename,Navnav kirin
 DocType: Stock Entry,Repack,Repack
 apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js,Select to add Serial Number.,Hilbijêrin ku Hejmara Serialê zêde bikin.
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Ji kerema xwe Li Perwerde&gt; Mîhengên Perwerdehiyê Sîstema Navkirin a Sêwiran saz bikin
 apps/erpnext/erpnext/regional/italy/utils.py,Please set Fiscal Code for the customer '%s',Ji kerema xwe kodê Faşsalê ji bo xerîdar &#39;% s&#39; bicîh bikin
 apps/erpnext/erpnext/accounts/doctype/payment_entry/payment_entry.js,Please select the Company first,Ji kerema xwe re yekem şirket hilbijêre
 DocType: Item Attribute,Numeric Values,Nirxên hejmar
@@ -7984,6 +8069,7 @@ DocType: Payment Entry,Cheque/Reference No,Cheque / Çavkanî No
 apps/erpnext/erpnext/public/js/utils/serial_no_batch_selector.js,Fetch based on FIFO,Fetch bingeha FIFO-yê ye
 DocType: Soil Texture,Clay Loam,Clay Loam
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Root cannot be edited.,Root bi dikarin di dahatûyê de were.
+apps/erpnext/erpnext/loan_management/report/loan_security_status/loan_security_status.py,Loan Security Value,Nirxa ewlehiya deyn
 DocType: Item,Units of Measure,Yekîneyên Measure
 DocType: Employee Tax Exemption Declaration,Rented in Metro City,Li Metro City kir
 DocType: Supplier,Default Tax Withholding Config,Destûra Bacê ya Bacgiran
@@ -8030,6 +8116,7 @@ apps/erpnext/erpnext/config/buying.py,Supplier Addresses and Contacts,Navnîşan
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,Please select Category first,Ji kerema xwe ve yekem Kategorî hilbijêre
 apps/erpnext/erpnext/config/projects.py,Project master.,master Project.
 DocType: Contract,Contract Terms,Şertên Peymana
+DocType: Sanctioned Loan Amount,Sanctioned Amount Limit,Sînorê Rêjeya Sanctioned
 apps/erpnext/erpnext/templates/generators/item/item_configure.js,Continue Configuration,Confapkirin berdewam bikin
 DocType: Global Defaults,Do not show any symbol like $ etc next to currencies.,Nîşan nede ti sembola wek $ etc next to currencies.
 apps/erpnext/erpnext/hr/doctype/employee_benefit_application/employee_benefit_application.py,Maximum benefit amount of component {0} exceeds {1},Gelek mûçeya nirxê {0} zêdeyî {1}
@@ -8073,3 +8160,4 @@ DocType: Training Event,Training Program,Bernameya Perwerdehiyê
 DocType: Account,Cash,Perê pêşîn
 DocType: Sales Invoice,Unpaid and Discounted,Baca û Nehfkirî
 DocType: Employee,Short biography for website and other publications.,biography kurt de ji bo malpera û belavokên din.
+apps/erpnext/erpnext/controllers/buying_controller.py,Row #{0}: Cannot select Supplier Warehouse while suppling raw materials to subcontractor,Row # {0}: Dema ku hûn peywirdarên xav didan berhevdanê
