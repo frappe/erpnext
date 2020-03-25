@@ -195,6 +195,8 @@ class SalesInvoice(SellingController):
 
 				self.pos = item.pos
 
+				self.due_date_cai = cai.due_date
+
 				self.cai = cai.cai
 
 				self.authorized_range = "{} - {}".format(initial_range, final_range)
