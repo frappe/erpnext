@@ -80,7 +80,15 @@ class POSInvoice(SalesInvoice):
 	def validate_stock_availablility(self):
 		for d in self.get('items'):
 			if d.serial_no:
-				reserved_serial_nos, unreserved_serial_nos = get_pos_reserved_serial_nos(d.item_code, d.warehouse)
+				filters = {
+					"item_code": d.item_code,
+					"warehouse": d.warehouse,
+					"delivery_document_no": "",
+					"sales_invoice": ""
+				}
+				if d.batch_no:
+					filters["batch_no"] = d.batch_no
+				reserved_serial_nos, unreserved_serial_nos = get_pos_reserved_serial_nos(filters)
 				serial_nos = d.serial_no.split("\n")
 				serial_nos = ' '.join(serial_nos).split() # remove whitespaces
 				invalid_serial_nos = []

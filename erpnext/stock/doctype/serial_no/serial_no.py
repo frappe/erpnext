@@ -531,25 +531,24 @@ def auto_fetch_serial_number(qty, item_code, warehouse, batch_nos=None, for_doct
 		"delivery_document_no": "",
 		"sales_invoice": ""
 	}
-	if batch_nos: 
-		filters["batch_no"] = ["in", json.loads(batch_nos)]
+	if batch_nos:
+		try:
+			filters["batch_no"] = ["in", json.loads(batch_nos)]
+		except:
+			filters["batch_no"] = ["in", [batch_nos]]
 
 	if for_doctype == 'POS Invoice':
-		reserved_serial_nos, unreserved_serial_nos = get_pos_reserved_serial_nos(item_code, warehouse, qty)
-		filters["name"] = ["not in", reserved_serial_nos]
+		reserved_serial_nos, unreserved_serial_nos = get_pos_reserved_serial_nos(filters, qty)
 		return unreserved_serial_nos
 
 	serial_numbers = frappe.get_list("Serial No", filters=filters, limit=qty, order_by="creation")
 	return [item['name'] for item in serial_numbers]
 
 @frappe.whitelist()
-def get_pos_reserved_serial_nos(item_code, warehouse, qty=None):
-	filters = {
-		"item_code": item_code,
-		"warehouse": warehouse,
-		"delivery_document_no": "",
-		"sales_invoice": ""
-	}
+def get_pos_reserved_serial_nos(filters, qty=None):
+	batch_no_cond = ""
+	if filters.get("batch_no"):
+		batch_no_cond = "and item.batch_no = {}".format(frappe.db.escape(filters.get('batch_no')))
 
 	reserved_serial_nos_str = [d.serial_no for d in frappe.db.sql("""select item.serial_no as serial_no
 		from `tabPOS Invoice` p, `tabPOS Invoice Item` item
@@ -559,7 +558,8 @@ def get_pos_reserved_serial_nos(item_code, warehouse, qty=None):
 		and item.docstatus = 1
 		and item.item_code = %s
 		and item.warehouse = %s
-		""", [item_code, warehouse], as_dict=1)]
+		{}
+		""".format(batch_no_cond), [filters.get('item_code'), filters.get('warehouse')], as_dict=1)]
 
 	reserved_serial_nos = []
 	for s in reserved_serial_nos_str:
