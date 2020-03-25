@@ -62,6 +62,7 @@ def get_transactions(filters, as_dict=1):
 	filters -- dict of filters to be passed to the sql query
 	as_dict -- return as list of dicts [0,1]
 	"""
+	filter_by_voucher = 'AND gl.voucher_type = %(voucher_type)s' if filters.get('voucher_type') else ''
 	gl_entries = frappe.db.sql("""
 		SELECT
 
@@ -80,8 +81,10 @@ def get_transactions(filters, as_dict=1):
 			gl.posting_date as 'Belegdatum',
 			gl.voucher_no as 'Belegfeld 1',
 			gl.remarks as 'Buchungstext',
-			gl.against_voucher_type as 'Beleginfo - Art 1',
-			gl.against_voucher as 'Beleginfo - Inhalt 1'
+			gl.voucher_type as 'Beleginfo - Art 1',
+			gl.voucher_no as 'Beleginfo - Inhalt 1',
+			gl.against_voucher_type as 'Beleginfo - Art 2',
+			gl.against_voucher as 'Beleginfo - Inhalt 2'
 
 		FROM `tabGL Entry` gl
 
@@ -109,7 +112,8 @@ def get_transactions(filters, as_dict=1):
 		WHERE gl.company = %(company)s 
 		AND DATE(gl.posting_date) >= %(from_date)s
 		AND DATE(gl.posting_date) <= %(to_date)s
-		ORDER BY 'Belegdatum', gl.voucher_no""", filters, as_dict=as_dict)
+        {}
+		ORDER BY 'Belegdatum', gl.voucher_no""".format(filter_by_voucher), filters, as_dict=as_dict)
 
 	return gl_entries
 
