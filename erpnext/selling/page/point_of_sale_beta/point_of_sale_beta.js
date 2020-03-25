@@ -109,6 +109,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			() => frappe.dom.freeze(),
 			() => {
 				this.prepare_dom();
+				this.prepare_menu();
 			},
 			() => this.make_new_invoice(),
 			() => frappe.dom.unfreeze(),
@@ -127,6 +128,16 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		this.make_item_selector();
 		this.make_cart();
 		this.make_item_details_section();
+	}
+
+	prepare_menu() {
+		var me = this;
+		this.page.clear_menu();
+
+		this.page.add_menu_item(__("Form View"), function () {
+			frappe.model.sync(me.frm.doc);
+			frappe.set_route("Form", me.frm.doc.doctype, me.frm.doc.name);
+		});
 	}
 
 	make_item_selector() {
@@ -149,16 +160,20 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			wrapper: this.wrapper.find('.item-details'),
 			events: {
 				form_updated: async (cdt, cdn, fieldname, value) => {
-					const item_row_value = frappe.model.get_value(cdt, cdn, fieldname);
-					if (item_row_value != value) {
+					const item_row = frappe.model.get_doc(cdt, cdn);
+					if (item_row[fieldname] !== value) {
 						await frappe.model.set_value(cdt, cdn, fieldname, value);
-
+						const { item_code, batch_no } = item_row;
 						const event = {
 							field: fieldname,
 							value,
-							item: { ...this.item_details.current_item }
+							item: { item_code, batch_no }
 						}
 						this.on_cart_update(event)
+					}
+					if (fieldname === 'qty') {
+						this.frm.script_manager.trigger(fieldname, cdt, cdn)
+							.then(() => value === 0 ? frappe.model.clear_doc(cdt, cdn) : '' )
 					}
 				},
 				adjust_selector_size: (compress) => {
@@ -303,33 +318,31 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	async on_cart_update(event) {
 		frappe.dom.freeze();
 		let { field, value, item } = event;
-		let { item_code, batch_no } = item;
-		let item_row;
+		const { item_code, batch_no } = item;
 
 		if (this.cart.exists(item_code, batch_no)) {
 			const search_field = batch_no ? 'batch_no' : 'item_code';
 			const search_value = batch_no || item_code;
 
-			item_row = this.frm.doc.items.find(i => i[search_field] === search_value);
-			value = flt(value);
-			
-			if (field === 'qty') await this.check_stock_availability(item_code, this.frm.doc.set_warehouse, value);
+			const item_row = this.frm.doc.items.find(i => i[search_field] === search_value);
+			field === 'qty' && (value = flt(value));
+
+			if (field === 'qty' && value !== 0) await this.check_stock_availability(item_code, this.frm.doc.set_warehouse, value);
 
 			// check for serialized batched item
 			this.check_dialog_condition(item_row) ? 
 				this.show_serial_batch_selector(item_row) : 
 				await frappe.run_serially([
-					// () => this.update_item_row_in_frm(item_row, field, value),
 					() => this.cart.update_item_html(item_row),
 					() => this.cart.update_totals_section(this.frm)
 				])
 		} else {
-			let args = { item_code: item_code, batch_no, [field]: value };
+			const args = { item_code: item_code, batch_no, [field]: value };
 			if (field === 'serial_no') args['qty'] = value.split('\n').length || 0;
 
-			item_row = this.frm.add_child('items', args);
+			const item_row = this.frm.add_child('items', args);
 
-			if (field === 'qty') await this.check_stock_availability(item_code, this.frm.doc.set_warehouse, value);
+			if (field === 'qty' && value !== 0) await this.check_stock_availability(item_code, this.frm.doc.set_warehouse, value);
 
 			await this.trigger_new_item_events(item_row);
 
@@ -419,6 +432,9 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	on_numpad_clicked(value, action) {
 		if (action === 'done') {
+			this.on_item_details_toggle();
+		} else if (action === 'remove') {
+			this.item_details.qty_control.set_value(0);
 			this.on_item_details_toggle();
 		} else if (action !== 'disc') {
 			const field_control = this.item_details[`${action}_control`];
@@ -611,17 +627,25 @@ class Cart {
 			highlight_numpad_btn($(this), current_action);
 
 			if (action_is_field_edit) {
-				if (!me.prev_action || (me.prev_action && me.prev_action != current_action))
+				if (!me.prev_action || (me.prev_action && me.prev_action != current_action)) {
 					me.prev_action = current_action;
-				else if 
-					(me.prev_action === current_action) me.prev_action = undefined;
+					show_del_btn();
+				} else if (me.prev_action === current_action) {
+					show_remove_btn();
+					me.prev_action = undefined;
+				}
 
 				me.numpad_value = '';
 			} else if (current_action === 'done') {
 				me.prev_action = undefined;
 				me.events.numpad_clicked(undefined, current_action);
+				return;
+			} else if (current_action === 'remove') {
+				me.prev_action = undefined;
+				me.events.numpad_clicked(undefined, current_action);
+				return;
 			} else {
-				me.numpad_value = current_action === 'Del' ? me.numpad_value.slice(0, -1) : me.numpad_value + current_action;
+				me.numpad_value = current_action === 'del' ? me.numpad_value.slice(0, -1) : me.numpad_value + current_action;
 			}
 
 			if (current_action && current_action !== 'done' && !action_is_field_edit && !me.prev_action) {
@@ -634,6 +658,20 @@ class Cart {
 
 			me.events.numpad_clicked(me.numpad_value, me.prev_action);
 		})
+
+		function show_remove_btn() {
+			const $btn = me.$numpad_section.find("[data-button-value='del']");
+			$btn.html('Remove');
+			$btn.attr('data-button-value', 'remove');
+			$btn.addClass('text-danger');
+		}
+
+		function show_del_btn() {
+			const $btn = me.$numpad_section.find("[data-button-value='remove']");
+			$btn.html('Del');
+			$btn.attr('data-button-value', 'del');
+			$btn.removeClass('text-danger');
+		}
 
 		function highlight_numpad_btn($btn, curr_action) {
 			const curr_action_is_highlighted = $btn.hasClass('shadow-inner');
@@ -793,13 +831,13 @@ class Cart {
 			[ 1, 2, 3, 'Qty' ],
 			[ 4, 5, 6, 'Disc' ],
 			[ 7, 8, 9, 'Rate' ],
-			[ '.', 0, 'Del', 'Done' ]
+			[ '.', 0, 'Remove', 'Done' ]
 		]
 
 		function get_number_buttons() {
 			return buttons.reduce((a, row, i) => {
 				return a + row.reduce((a2, n, j) => {
-					const primary = i === 3 && j === 3 ? 'text-primary text-bold' : '';
+					const primary = i === 3 && j === 3 ? 'text-primary text-bold' : i === 3 && j === 2 ? 'text-danger text-bold' : '';
 					const fieldname = typeof n === 'string' ? frappe.scrub(n) : n;
 					return a2 + `<div class="numpad-btn pointer no-select rounded shadow-sm ${primary}
 										flex items-center justify-center h-18 text-md border-grey-300 border" data-button-value="${fieldname}">${n}</div>`
@@ -927,13 +965,24 @@ class Cart {
 		const { qty, item_code, batch_no } = item_row;
 		const item_selector = batch_no ? 
 			`.cart-item-wrapper[data-batch-no="${escape(batch_no)}"]` : `.cart-item-wrapper[data-item-code="${escape(item_code)}"]`;
-		debugger;
 		const $cart_item = this.$cart_items_wrapper.find(item_selector);
 		const no_of_cart_items = this.$cart_items_wrapper.children().length;
 		
-		if (cint(qty) <= 0) { $cart_item.remove(); return; }
+		if (cint(qty) <= 0) { 
+			const { item_code, batch_no } = item_row;
+			const search_field = batch_no ? 'batch_no' : 'item_code';
+			const search_value = batch_no || item_code;
 
-		// remove the item and re-render the item
+			$cart_item && $cart_item.remove();
+
+			return this.cart_items.some((i, idx) => {
+				if (i[search_field] === search_value) {
+					return this.cart_items.splice(idx, 1);
+				}
+			});
+		}
+
+		// remove the item to re-render the item
 		$cart_item.length && $cart_item.remove();
 
 		no_of_cart_items > 0 && this.highlight_checkout_btn(no_of_cart_items > 0);
@@ -965,6 +1014,7 @@ class Cart {
 
 	make() {
 		this.make_dom();
+		this.bind_dom_events();
 	}
 
 	make_dom() {
@@ -994,6 +1044,11 @@ class Cart {
 		this.$item_price = this.wrapper.find('.item-price');
 		this.$form_container = this.wrapper.find('.form-container');
 		this.$dicount_section = this.wrapper.find('.discount-section');
+	}
+
+	bind_dom_events() {
+		this.bind_auto_serial_fetch_event();
+		this.bind_fields_to_numpad_fields();
 	}
 
 	render_discount_dom(item) {
@@ -1043,9 +1098,7 @@ class Cart {
 			this[`${fieldname}_control`].set_value(item[fieldname]);
 		})
 
-		this.make_auto_serial_selection_field();
-
-		this.bind_fields_to_numpad_fields();
+		this.make_auto_serial_selection_btn();
 
 		this.bind_custom_control_change_event();
 	}
@@ -1109,7 +1162,7 @@ class Cart {
 		return fields;
 	}
 
-	make_auto_serial_selection_field() {
+	make_auto_serial_selection_btn() {
 		const me = this;
 		if (this.serial_no_control) {
 			this.$form_container.append(
@@ -1123,13 +1176,11 @@ class Cart {
 			)
 			this.$form_container.find('.serial_no-control').find('textarea').css('height', '9rem');
 			this.$form_container.find('.serial_no-control').parent().addClass('row-span-2');
-			this.bind_auto_serial_fetch_event();
 		}
 	}
 
 	bind_auto_serial_fetch_event() {
 		this.$form_container.on('click', '.auto-fetch-btn', () => {
-			debugger;
 			this.batch_no_control.set_value('');
 			let qty = this.qty_control.get_value();
 			let numbers = frappe.call({
@@ -1152,11 +1203,10 @@ class Cart {
 						under warehouse ${warehouse}. Please try changing warehouse.`));
 				} else if (records_length < qty) {
 					frappe.msgprint(`Fetched only ${records_length} available serial numbers.`);
+					this.qty_control.set_value(records_length);
 				}
-				let serial_no_list_field = this.serial_no_control;
 				numbers = auto_fetched_serial_numbers.join('\n');
-				debugger;
-				serial_no_list_field.set_value(numbers);
+				this.serial_no_control.set_value(numbers);
 			});
 		})
 	}
@@ -1211,7 +1261,6 @@ class Cart {
 			this.item_meta = frappe.get_meta('POS Invoice Item');
 			this.doctype = item.doctype;
 			this.name = item.name;
-			console.log(frappe.model.get_value(this.doctype, this.name, 'qty'));
 			this.current_item = { item_code: item.item_code, batch_no: item.batch_no };
 			this.render_dom(item);
 			this.render_discount_dom(item);
