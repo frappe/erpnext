@@ -14,6 +14,7 @@ from frappe.integrations.utils import get_payment_gateway_controller
 from frappe.utils.background_jobs import enqueue
 from erpnext.erpnext_integrations.stripe_integration import create_stripe_subscription
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
+from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import get_default_payment_gateway_account
 
 class PaymentRequest(Document):
 	def validate(self):
@@ -303,6 +304,9 @@ def make_payment_request(**args):
 
 	if existing_payment_request:
 		frappe.db.set_value("Payment Request", existing_payment_request, "grand_total", grand_total, update_modified=False)
+		frappe.db.set_value("Payment Request", existing_payment_request, "payment_gateway", gateway_account.payment_gateway, update_modified=False)
+		frappe.db.set_value("Payment Request", existing_payment_request, "payment_gateway_account", gateway_account.name, update_modified=False)
+		frappe.db.set_value("Payment Request", existing_payment_request, "payment_account", gateway_account.payment_account, update_modified=False)
 		pr = frappe.get_doc("Payment Request", existing_payment_request)
 	else:
 		if args.order_type != "Shopping Cart":
@@ -386,7 +390,7 @@ def get_gateway_details(args):
 		return get_payment_gateway_account(args.get("payment_gateway"))
 
 	if args.order_type == "Shopping Cart":
-		payment_gateway_account = frappe.get_doc("Shopping Cart Settings").payment_gateway_account
+		payment_gateway_account = get_default_payment_gateway_account(args)
 		return get_payment_gateway_account(payment_gateway_account)
 
 	gateway_account = get_payment_gateway_account({"is_default": 1})

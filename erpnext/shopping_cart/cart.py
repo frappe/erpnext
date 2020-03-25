@@ -7,7 +7,7 @@ from frappe import throw, _
 import frappe.defaults
 from frappe.utils import cint, flt, get_fullname, cstr
 from frappe.contacts.doctype.address.address import get_address_display
-from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import get_shopping_cart_settings
+from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import get_shopping_cart_settings, get_default_payment_gateway_account
 from frappe.utils.nestedset import get_root_of
 from erpnext.accounts.utils import get_account_name
 from erpnext.utilities.product import get_qty_in_stock
@@ -428,8 +428,8 @@ def get_party(user=None):
 		return customer
 
 def get_debtors_account(cart_settings):
-	payment_gateway_account_currency = \
-		frappe.get_doc("Payment Gateway Account", cart_settings.payment_gateway_account).currency
+	payment_gateway_account = get_default_payment_gateway_account(cart_settings)
+	payment_gateway_account_currency = frappe.get_doc("Payment Gateway Account", payment_gateway_account).currency
 
 	account_name = _("Debtors ({0})").format(payment_gateway_account_currency)
 

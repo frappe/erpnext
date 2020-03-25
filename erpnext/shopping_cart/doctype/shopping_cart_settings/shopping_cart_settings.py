@@ -4,11 +4,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+
 import frappe
 from frappe import _, msgprint
-from frappe.utils import comma_and
+from frappe.core.utils import find
 from frappe.model.document import Document
-from frappe.utils import get_datetime, get_datetime_str, now_datetime
+from frappe.utils import comma_and, get_datetime, get_datetime_str, now_datetime
+
 
 class ShoppingCartSetupError(frappe.ValidationError): pass
 
@@ -18,6 +20,10 @@ class ShoppingCartSettings(Document):
 
 	def validate(self):
 		if self.enabled:
+			if self.enable_checkout:
+				self.validate_checkout_gateways()
+				self.set_payment_gateway()
+
 			self.validate_exchange_rates_exist()
 
 	def validate_exchange_rates_exist(self):
@@ -31,7 +37,7 @@ class ShoppingCartSettings(Document):
 			[self.price_list], "currency")
 
 		price_list_currency_map = dict(price_list_currency_map)
-		
+
 		# check if all price lists have a currency
 		for price_list, currency in price_list_currency_map.items():
 			if not currency:
@@ -71,6 +77,17 @@ class ShoppingCartSettings(Document):
 	def get_shipping_rules(self, shipping_territory):
 		return self.get_name_from_territory(shipping_territory, "shipping_rules", "shipping_rule")
 
+	def validate_checkout_gateways(self):
+		default_gateways = [gateway for gateway in self.gateways if gateway.is_default]
+
+		if len(default_gateways) != 1:
+			frappe.throw(_("There can be only 1 default gateway, found {0}").format(len(default_gateways)))
+
+	def set_payment_gateway(self):
+		for gateway in self.gateways:
+			if gateway.payment_gateway_account and not gateway.payment_gateway:
+				gateway.payment_gateway = frappe.db.get_value("Payment Gateway Account", gateway.payment_gateway_account, "payment_gateway")
+
 def validate_cart_settings(doc, method):
 	frappe.get_doc("Shopping Cart Settings", "Shopping Cart Settings").run_method("validate")
 
@@ -79,6 +96,18 @@ def get_shopping_cart_settings():
 		frappe.local.shopping_cart_settings = frappe.get_doc("Shopping Cart Settings", "Shopping Cart Settings")
 
 	return frappe.local.shopping_cart_settings
+
+def get_default_payment_gateway_account(cart_settings):
+	gateways = cart_settings.get("gateways")
+	if not gateways:
+		gateways = get_shopping_cart_settings().gateways
+
+	default_payment_gateway_account = find(gateways, lambda gateway: gateway.get("is_default")) or ''
+
+	if default_payment_gateway_account:
+		default_payment_gateway_account = default_payment_gateway_account.get("payment_gateway_account")
+
+	return default_payment_gateway_account
 
 def is_cart_enabled():
 	return get_shopping_cart_settings().enabled
