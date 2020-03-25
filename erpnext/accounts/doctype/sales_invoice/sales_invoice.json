@@ -35,6 +35,7 @@
   "cashier",
   "cai",
   "numeration",
+  "pos",
   "authorized_range",
   "accounting_dimensions_section",
   "deadline_for_authorization",
@@ -1636,13 +1637,20 @@
    "fieldtype": "Data",
    "label": "RTN",
    "read_only": 1
+  },
+  {
+   "fieldname": "pos",
+   "fieldtype": "Link",
+   "label": "Pos",
+   "options": "GPos",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-18 19:19:39.733481",
+ "modified": "2020-03-24 22:47:10.140484",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
