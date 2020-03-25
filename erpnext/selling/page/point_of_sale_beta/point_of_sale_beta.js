@@ -118,13 +118,15 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	prepare_dom() {
 		this.wrapper.append(`
-			<div class="flex pt-8">
-				<section class="flex flex-1 f-grow-3 shadow rounded items-selector mx-h-70 h-100"></section>
-				<section class="flex flex-1 f-grow-2 cart shadow rounded ml-6 mx-h-70 h-100"></section>
+			<div class="grid grid-cols-10 pt-8 gap-6">
+				<section class="col-span-6 flex shadow rounded items-selector bg-white mx-h-70 h-100"></section>
+				<section class="col-span-4 flex shadow rounded item-details bg-white mx-h-70 h-100 d-none"></section>
+				<section class="col-span-4 flex shadow rounded cart bg-white mx-h-70 h-100"></section>
 			</div>
 		`);
 		this.make_item_selector();
 		this.make_cart();
+		this.make_item_details_section();
 	}
 
 	make_item_selector() {
@@ -142,13 +144,86 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		})
 	}
 
+	make_item_details_section() {
+		this.item_details = new ItemDetails({
+			wrapper: this.wrapper.find('.item-details'),
+			events: {
+				form_updated: async (cdt, cdn, fieldname, value) => {
+					const item_row_value = frappe.model.get_value(cdt, cdn, fieldname);
+					if (item_row_value != value) {
+						await frappe.model.set_value(cdt, cdn, fieldname, value);
+
+						const event = {
+							field: fieldname,
+							value,
+							item: { ...this.item_details.current_item }
+						}
+						this.on_cart_update(event)
+					}
+				},
+				adjust_selector_size: (compress) => {
+					compress ?
+					this.item_selector.wrapper.removeClass('col-span-6').addClass('col-span-2') :
+					this.item_selector.wrapper.removeClass('col-span-2').addClass('col-span-6')
+
+					compress ?
+					this.item_selector.$items_container.removeClass('grid-cols-4').addClass('grid-cols-1') :
+					this.item_selector.$items_container.removeClass('grid-cols-1').addClass('grid-cols-4')
+
+					this.item_selector.adjust_elements(compress);
+					this.cart.render_numpad(compress);
+				},
+				toggle_field_edit: (fieldname) => {
+					this.cart.toggle_numpad_field_edit(fieldname);
+				},
+				set_batch_in_current_cart_item: (batch_no) => {
+					const current_item_code = this.item_details.current_item.item_code;
+					const current_item_batch_no = this.item_details.current_item.batch_no;
+
+					if (current_item_batch_no != batch_no) {
+						const current_item_in_cart = this.cart.exists(current_item_code, current_item_batch_no);
+						current_item_in_cart.batch_no = batch_no;
+					}
+				},
+				clone_new_batch_item_in_frm: (batch_serial_map, current_item) => {
+					Object.keys(batch_serial_map).forEach(batch => {
+						const { item_code, batch_no } = current_item;
+						const item_to_clone = this.frm.doc.items.find(i => i.item_code === item_code && i.batch_no === batch_no);
+						const new_row = this.frm.add_child("items", { ...item_to_clone });
+						// update new serialno and batch
+						new_row.batch_no = batch;
+						new_row.serial_no = batch_serial_map[batch].join('\n');
+						new_row.qty = batch_serial_map[batch].length;
+						this.frm.doc.items.forEach(row => {
+							if (item_code === row.item_code) {
+								frappe.run_serially([
+									() => this.cart.update_item_html(row),
+									() => this.cart.update_totals_section(this.frm)
+								]);		
+							}
+						});
+						this.cart.cart_items.push(new_row);
+					})
+				}
+			}
+		});
+	}
+
 	make_cart() {
 		this.cart = new Cart({
 			wrapper: this.wrapper.find('.cart'),
 			events: {
-				get_item_list: () => {
-					return this.item_list || {};
-				}
+				toggle_item_details_section: (...args) => {
+					this.on_item_details_toggle(...args);
+				},
+
+				numpad_clicked: (...args) => {
+					this.on_numpad_clicked(...args);
+				},
+
+				get_item_list: () => this.item_list || {},
+
+				get_frm: () => this.frm
 			}
 		})
 	}
@@ -156,6 +231,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	async make_new_invoice() {
 		await this.make_sales_invoice_frm();
 		await this.set_pos_profile_data();
+		this.cart.update_customer_section(this.frm);
 		this.cart.update_totals_section(this.frm);
 	}
 
@@ -226,49 +302,61 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	async on_cart_update(event) {
 		frappe.dom.freeze();
-		// field can be rate, discount, qty
-		const { action, field, value, item } = event;
-		const { item_code, batch_no } = item;
+		let { field, value, item } = event;
+		let { item_code, batch_no } = item;
 		let item_row;
+
 		if (this.cart.exists(item_code, batch_no)) {
 			const search_field = batch_no ? 'batch_no' : 'item_code';
 			const search_value = batch_no || item_code;
 
 			item_row = this.frm.doc.items.find(i => i[search_field] === search_value);
-			value = item_row[field] + flt(value);
+			value = flt(value);
 			
 			if (field === 'qty') await this.check_stock_availability(item_code, this.frm.doc.set_warehouse, value);
+
 			// check for serialized batched item
 			this.check_dialog_condition(item_row) ? 
-				this.show_serial_batch_selector() : 
+				this.show_serial_batch_selector(item_row) : 
 				await frappe.run_serially([
-					() => this.update_item_row_in_frm(item_row, field, value),
+					// () => this.update_item_row_in_frm(item_row, field, value),
 					() => this.cart.update_item_html(item_row),
 					() => this.cart.update_totals_section(this.frm)
 				])
 		} else {
-			let args = { item_code: item_code, [field]: value };
+			let args = { item_code: item_code, batch_no, [field]: value };
+			if (field === 'serial_no') args['qty'] = value.split('\n').length || 0;
+
 			item_row = this.frm.add_child('items', args);
 
-			// field always will be qty
-			await this.check_stock_availability(item_code, this.frm.doc.set_warehouse, value);
+			if (field === 'qty') await this.check_stock_availability(item_code, this.frm.doc.set_warehouse, value);
+
 			await this.trigger_new_item_events(item_row);
 
 			this.check_dialog_condition(item_row) ? 
-				this.show_serial_batch_selector() : 
+				this.show_serial_batch_selector(item_row) : 
 				await frappe.run_serially([
 					() => this.cart.update_item_html(item_row),
 					() => this.cart.update_totals_section(this.frm),
 				])
+			this.cart.cart_items.push(item_row);
 		}
 		frappe.dom.unfreeze();
 	}
 
 	check_dialog_condition(item_row) {
-		const show_dialog = item_row.has_serial_no || item_row.has_batch_no;
+		const serialized = item_row.has_serial_no;
+		const batched = item_row.has_batch_no;
 		// if actual_batch_qty and actual_qty is same then there's only one batch. So no point showing the dialog
-		if (show_dialog && ((!item_row.batch_no && item_row.has_batch_no) ||
-			(item_row.has_serial_no) || (item_row.actual_batch_qty != item_row.actual_qty)) ) {
+		// if (show_dialog && ((!item_row.batch_no && item_row.has_batch_no) ||
+		// 	(item_row.has_serial_no) || (item_row.actual_batch_qty != item_row.actual_qty)) ) {
+		// 	return true;
+		// }
+		const no_serial_selected = item_row.has_serial_no && !item_row.serial_no;
+		const no_batch_selected = item_row.has_batch_no && !item_row.batch_no;
+
+		if ((serialized && no_serial_selected) || (batched && no_batch_selected) || 
+			(serialized && batched && (no_batch_selected || no_serial_selected))) {
 			return true;
 		}
 		return false;
@@ -293,33 +381,20 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		} else if (res.message < qty) {
 			frappe.msgprint(frappe._(`Stock quantity not enough for Item Code: ${item_code.bold()} under warehouse ${warehouse.bold()}. 
 				Available quantity ${res.message.toString().bold()}.`))
+			this.item_details.qty_control.set_value(res.message);
 			return res.message;
 		}
 		frappe.dom.freeze();
 		return qty
 	}
 
-	serial_batch_selector_callback(item_row) {
-		// in case of serial_batch_selector: frm item row has updated qty so just need to update the cart html
-		// to handle multiple batches of same item, loop over new cloned item and add them in cart html
-		me.frm.doc.items.forEach(row => {
-			if (item_row.item_code === row.item_code) {
-				frappe.run_serially([
-					() => this.cart.update_item_html(row),
-					() => this.cart.update_totals_section(this.frm)
-				]);		
-			}
-		})
-	}
-
 	show_serial_batch_selector(item_row) {
-		frappe.dom.unfreeze();
-		erpnext.show_serial_batch_selector(this.frm, item_row, this.serial_batch_selector_callback, () => {
-			// on cancel / close of dialog
-			if (!this.cart.exists(item_row.item_code, item_row.batch_no) && item_row.qty) {
-				frappe.model.clear_doc(item_row.doctype, item_row.name);
-			}	
-		}, true);
+		const me = this;
+		if (!this.item_details.in_serial_batch_selector) {
+			item_row.qty = '0';
+			this.item_details.render_item_details_section(item_row);
+			this.item_details.in_serial_batch_selector = true;
+		}
 	}
 
 	update_item_row_in_frm(item_row, field, value) {
@@ -335,6 +410,21 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	on_item_list_update(event) {
 		this.item_list = event.item_list;
+	}
+
+	on_item_details_toggle(item_code, batch_no) {
+		const item_row = this.frm.doc.items.find(row => row.item_code === item_code && (!batch_no || (batch_no && row.batch_no === batch_no)));
+		this.item_details.render_item_details_section(item_row);
+	}
+
+	on_numpad_clicked(value, action) {
+		if (action === 'done') {
+			this.on_item_details_toggle();
+		} else if (action !== 'disc') {
+			const field_control = this.item_details[`${action}_control`];
+			if (!field_control) return;
+			value && field_control.set_value(value);
+		}
 	}
 };
 
@@ -356,13 +446,13 @@ class ItemSelector {
 	make_dom() {
 		this.wrapper.append(
 			`<div class="flex flex-col rounded w-full scroll">
-				<div class="flex p-8 pb-2 bg-white sticky">
+				<div class="filter-section flex p-8 pb-2 bg-white sticky z-100">
 					<div class="search-field flex f-grow-3 mr-8 items-center text-grey"></div>
 					<div class="item-group-field flex f-grow-1 items-center text-grey text-bold"></div>
 				</div>
 				<div class="flex flex-1 flex-col p-8 pt-2">
 					<div class="text-grey mb-6">ALL ITEMS</div>
-					<div class="items-container flex flex-wrap justify-between">
+					<div class="items-container grid grid-cols-4 gap-8">
 					</div>					
 				</div>
 			</div>`
@@ -397,39 +487,23 @@ class ItemSelector {
 
 	get_item_html(item) {
 		return `
-			<div class="item-wrapper rounded shadow mb-6 w-46" data-item-code="${escape(item.item_code)}">
-				<div class="flex items-center justify-center h-32 bg-light-grey text-6xl text-light-grey">${frappe.get_abbr(item.item_name)}</div>
+			<div class="item-wrapper rounded shadow pointer no-select" data-item-code="${escape(item.item_code)}">
+				<div class="flex items-center justify-center h-32 bg-light-grey text-6xl text-grey-100">${frappe.get_abbr(item.item_name)}</div>
 				<div class="flex items-center pr-4 pl-4 h-10 justify-between">
-					<div class="text-dark-grey">${item.short_item_name || item.item_name}</div>
-					<div class="text-dark-grey text-bold">₹${item.price_list_rate || 0}</div>
+					<div class="f-shrink-1 text-dark-grey overflow-hidden whitespace-nowrap">${item.item_name}</div>
+					<div class="f-shrink-0 text-dark-grey text-bold ml-4">${format_currency(item.price_list_rate, item.currency, 0) || 0}</div>
 				</div>
 			</div>
 		`
 	}
 
-	get_filler_item_html() {
-		return `
-			<div class="mb-6 w-46">
-				<div class="h-32"></div>
-				<div class="h-10"></div>
-			</div>
-		`
-	}
-
 	render_list_items(items_list) {
-		const items_container = this.wrapper.find('.items-container');
+		this.$items_container = this.wrapper.find('.items-container');
 		items_list.forEach(item => {
 			if (item.item_name.length > 14) item.short_item_name = item.item_name.substr(0, 14) + '...';
 			const item_html = this.get_item_html(item);
-			items_container.append(item_html);
+			this.$items_container.append(item_html);
 		})
-		const filler_items = 4 - (items_list.length % 4);
-		if (filler_items < 4) {
-			for (let i = 0; i < filler_items; i++) {
-				const filler_html = this.get_filler_item_html();
-				items_container.append(filler_html);
-			}
-		}
 	}
 
 	bind_events() {
@@ -439,7 +513,8 @@ class ItemSelector {
 			const item_code = unescape($item.attr('data-item-code'));
 			const batch_no = unescape($item.attr('data-batch-no'));
 			me.events.cart_updated({
-				qty: 1,
+				field: 'qty',
+				value: 1,
 				item: { item_code, batch_no }
 			});
 		})
@@ -468,6 +543,16 @@ class ItemSelector {
 		});
 		this.item_group_field.toggle_label(false);
 	}
+
+	adjust_elements(compress) {
+		compress ? 
+		this.wrapper.find('.search-field').removeClass('mr-8').addClass('mb-4') : 
+		this.wrapper.find('.search-field').addClass('mr-8').removeClass('mb-4');
+
+		compress ? 
+		this.wrapper.find('.filter-section').addClass('flex-col') : 
+		this.wrapper.find('.filter-section').removeClass('flex-col');
+	}
 }
 
 class Cart {
@@ -475,59 +560,202 @@ class Cart {
 		this.wrapper = wrapper;
 		this.events = events;
 		this.cart_items = [];
+		this.customer_list = [];
 		this.make();
 	}
 
 	make() {
 		this.make_dom();
 		this.highlight_checkout_btn(false);
+		this.bind_events();
 	}
 
 	make_dom() {
 		this.wrapper.append(
-			`<div class="cart-container flex flex-col p-8 rounded w-full">
+			`<div class="cart-container flex flex-col items-center p-8 rounded w-full">
 				<div class="customer-section rounded flex flex-col w-full"></div>
-				<div class="cart-items-section flex flex-col mt-8 rounded shadow-sm"></div>
-				<div class="cart-totals-section flex flex-col mt-auto shadow-sm rounded"></div>
+				<div class="cart-items-section flex flex-col mt-8 rounded shadow-sm w-full"></div>
+				<div class="cart-totals-section flex flex-col mt-auto shadow-sm rounded w-full"></div>
+				<div class="numpad-section flex flex-col mt-auto d-none w-full"></div>
 			</div>`
 		)
+		this.$cart_items_wrapper = this.wrapper.find('.cart-items-section');
+		this.$customer_section = this.wrapper.find('.customer-section');
+		this.$totals_section = this.wrapper.find('.cart-totals-section');
+		this.$numpad_section = this.wrapper.find('.numpad-section');
 		this.make_customer_section();
 		this.make_cart_totals_section();
 		this.make_cart_items_section();
+		this.make_numpad_section();
+	}
+
+	bind_events() {
+		const me = this;
+		this.$customer_section.on('click', '.add-remove-customer', () => {
+			const frm = this.events.get_frm();
+			frm.set_value('customer', '');
+			this.show_customer_selector();
+		});
+
+		this.$cart_items_wrapper.on('click', '.cart-item-wrapper', function() {
+			const $cart_item = $(this);
+			const item_code = unescape($cart_item.attr('data-item-code'));
+			const batch_no = unescape($cart_item.attr('data-batch-no'));
+			me.events.toggle_item_details_section(item_code, batch_no);
+		});
+
+		this.$numpad_section.on('click', '.numpad-btn', function() {
+			const current_action = $(this).attr('data-button-value');
+			const action_is_field_edit = ['qty', 'disc', 'rate'].includes(current_action);
+
+			highlight_numpad_btn($(this), current_action);
+
+			if (action_is_field_edit) {
+				if (!me.prev_action || (me.prev_action && me.prev_action != current_action))
+					me.prev_action = current_action;
+				else if 
+					(me.prev_action === current_action) me.prev_action = undefined;
+
+				me.numpad_value = '';
+			} else if (current_action === 'done') {
+				me.prev_action = undefined;
+				me.events.numpad_clicked(undefined, current_action);
+			} else {
+				me.numpad_value = current_action === 'Del' ? me.numpad_value.slice(0, -1) : me.numpad_value + current_action;
+			}
+
+			if (current_action && current_action !== 'done' && !action_is_field_edit && !me.prev_action) {
+				frappe.show_alert({
+					indicator: 'red',
+					message: __('Please select a field to edit from numpad')
+				});
+				return;
+			}
+
+			me.events.numpad_clicked(me.numpad_value, me.prev_action);
+		})
+
+		function highlight_numpad_btn($btn, curr_action) {
+			const curr_action_is_highlighted = $btn.hasClass('shadow-inner');
+			const curr_action_is_action = ['qty', 'disc', 'rate', 'done'].includes(curr_action);
+			if (!curr_action_is_highlighted) {
+				$btn.addClass('shadow-inner bg-selected');
+			}
+			if (me.prev_action === curr_action && curr_action_is_highlighted) {
+				// if Qty is pressed twice
+				$btn.removeClass('shadow-inner bg-selected');
+			}
+			if (me.prev_action && me.prev_action !== curr_action && curr_action_is_action) {
+				// Order: Qty -> Rate then remove Qty highlight
+				const prev_btn = $(`[data-button-value='${me.prev_action}']`);
+				prev_btn.removeClass('shadow-inner bg-selected');
+			}
+			if (!curr_action_is_action || curr_action === 'done') {
+				// if numbers are clicked
+				setTimeout(() => {
+					$btn.removeClass('shadow-inner bg-selected');
+				}, 100);
+			}
+		}
 	}
 
 	make_cart_items_section() {
-		this.$cart_items = this.wrapper.find('.cart-items-section');
 		this.make_no_items_section();
 	}
 
 	make_no_items_section() {
-		this.$cart_items.html(
-			`<div class="no-item-wrapper cart-item-wrapper flex items-center h-18 pr-4 pl-4">
+		this.$cart_items_wrapper.html(
+			`<div class="no-item-wrapper flex items-center h-18 pr-4 pl-4">
 				<div class="flex-1 text-center text-grey">No items in cart</div>
 			</div>`
 		)
-		this.$cart_items.removeClass('shadow-sm');
-		this.$cart_items.addClass('border-grey border-dashed');
+		this.$cart_items_wrapper.removeClass('shadow-sm').addClass('border-grey border-dashed');
 	}
 
 	make_customer_section() {
-		this.$customer_section = this.wrapper.find('.customer-section');
-		this.$customer_section.append(
-			`<div class="flex items-center rounded shadow-sm h-16 pr-6 pl-6 bg-grey-100">
+		this.$customer_section.html(
+			`<div class="add-remove-customer flex items-center rounded border-grey border-dashed h-18 pr-6 pl-6 bg-grey-100" data-customer="">
 				<div class="text-grey bg-grey-100">ADD CUSTOMER</div>
+				<div class="ml-auto mr-2">
+					<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+						<circle cx="7" cy="7" r="6.5" stroke="#8D99A6"/>
+						<path d="M7.00004 4.08331V6.99998M7.00004 9.91665V6.99998M7.00004 6.99998H4.08337H9.91671" stroke="#8D99A6"/>
+					</svg>
+				</div>
 			</div>`
 		)
-		
+	}
+
+	update_customer_section(frm) {
+		const { customer_name=frm.doc.customer, email='', phone='' } = this.customer_list.find(c => c.customer_name === frm.doc.customer) || {};
+
+		function get_customer_description() {
+			if (!email && !phone) {
+				return ``
+			} else if (email && !phone) {
+				return `<div class="text-grey">${email}</div>`
+			} else if (phone && !email) {
+				return `<div class="text-grey">${phone}</div>`
+			} else {
+				return `<div class="text-grey">${email} | ${phone}</div>`
+			}
+		}
+
+		if (customer_name) {
+			this.$customer_section.html(
+				`<div class="flex items-center rounded shadow-sm h-18 pr-4 pl-4">
+					<div class="icon w-10 h-10 rounded bg-light-grey mr-4"></div>
+					<div class="flex flex-col">
+						<div class="text-md text-dark-grey text-bold">${customer_name}</div>
+						${get_customer_description()}
+					</div>
+					<div class="add-remove-customer ml-auto mr-2" data-customer="${escape(customer_name)}">
+						<svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<circle cx="7" cy="7" r="6.5" stroke="#8D99A6"/>
+							<path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
+						</svg>
+					</div>
+				</div>`
+			);
+		} else {
+			this.make_customer_section();
+		}
+	}
+
+	show_customer_selector() {
+		this.$customer_section.html(`<div class="customer-search-field flex flex-1 items-center"></div>`);
+		this.customer_field = frappe.ui.form.make_control({
+			df: {
+				label: 'Customer',
+				fieldtype: 'Link',
+				options: 'Customer',
+				reqd: 1,
+				placeholder: __('Search by customer name, phone, email.'),
+				onchange: () => {
+					const customer = this.customer_field.get_value();
+					if (customer) {
+						const frm = this.events.get_frm();
+						frm.doc.customer = customer;
+						frm.set_value('customer', customer);
+						this.update_customer_section(frm);
+					}
+				},
+			},
+			parent: this.$customer_section.find('.customer-search-field'),
+			render_input: true,
+		});
+		this.customer_field.toggle_label(false);
+		this.customer_field.set_focus();
 	}
 
 	render_cart_item(item_data) {
+		const currency = cur_frm.doc.currency;
 		function get_rate_discount_html() {
 			if (item_data.rate && item_data.price_list_rate && item_data.rate !== item_data.price_list_rate) {
-				return `<div class="text-md text-dark-grey text-bold">₹${item_data.rate}</div>
-						<div class="text-grey line-through">₹${item_data.price_list_rate}</div>`
+				return `<div class="text-md text-dark-grey text-bold">${format_currency(item_data.rate, currency)}</div>
+						<div class="text-grey line-through">${format_currency(item_data.price_list_rate, currency)}</div>`
 			} else {
-				return `<div class="text-md text-dark-grey text-bold">₹${item_data.price_list_rate}</div>`
+				return `<div class="text-md text-dark-grey text-bold">${format_currency(item_data.price_list_rate, currency)}</div>`
 			}
 		}
 
@@ -535,34 +763,82 @@ class Cart {
 			if (item_data.description) {
 				item_data.description = $(item_data.description).text();
 				item_data.description = item_data.description.length > 35 ? item_data.description.substr(0, 40) + '...' : item_data.description;
-				return `<div class="text-grey">${item_data.description}</div>`
+				return `<div class="text-grey overflow-hidden whitespace-nowrap">${item_data.description}</div>`
 			}
+			return ``;
 		}
 
-		this.$cart_items.append(
-			`<div class="cart-item-wrapper flex items-center h-18 pr-4 pl-4 border-b-grey" data-item-code="${escape(item_data.item_code)}">
+		this.$cart_items_wrapper.append(
+			`<div class="cart-item-wrapper flex items-center justify-between h-18 pr-4 pl-4 border-b-grey pointer no-select" 
+					data-item-code="${escape(item_data.item_code)}" data-batch-no="${escape(item_data.batch_no || '')}">
 				<div class="icon w-10 h-10 rounded bg-light-grey mr-4"></div>
-				<div class="flex flex-col">
-					<div class="text-md text-dark-grey text-bold">${item_data.item_name}</div>
+				<div class="flex flex-col f-shrink-1">
+					<div class="text-md text-dark-grey text-bold overflow-hidden whitespace-nowrap">
+						${item_data.item_name}
+					</div>
 					${get_item_description_html()}
 				</div>
-				<div class="flex ml-auto border-grey p-1 pl-3 pr-3 rounded">
-					<span>${item_data.qty}</span>
+				<div class="flex ml-4 f-shrink-0 border-grey p-1 pl-3 pr-3 rounded">
+					<span>${item_data.qty || 0}</span>
 				</div>
-				<div class="flex flex-col ml-6 text-right w-24">
+				<div class="flex flex-col f-shrink-0 ml-4 text-right">
 					${get_rate_discount_html()}
 				</div>
 			</div>`
 		)
 	}
 
+	make_numpad_section() {
+		const buttons = [
+			[ 1, 2, 3, 'Qty' ],
+			[ 4, 5, 6, 'Disc' ],
+			[ 7, 8, 9, 'Rate' ],
+			[ '.', 0, 'Del', 'Done' ]
+		]
+
+		function get_number_buttons() {
+			return buttons.reduce((a, row, i) => {
+				return a + row.reduce((a2, n, j) => {
+					const primary = i === 3 && j === 3 ? 'text-primary text-bold' : '';
+					const fieldname = typeof n === 'string' ? frappe.scrub(n) : n;
+					return a2 + `<div class="numpad-btn pointer no-select rounded shadow-sm ${primary}
+										flex items-center justify-center h-18 text-md border-grey-300 border" data-button-value="${fieldname}">${n}</div>`
+				}, '')
+			}, '');
+		}
+
+		this.$numpad_section.html(
+			`<div class="grid grid-cols-4 gap-4 rounded p-8 pb-0">
+				${get_number_buttons()}
+			</div>
+			`
+		)
+
+		this.numpad_value = '';
+	}
+
+	render_numpad(show) {
+		if (show) {
+			this.$totals_section.addClass('d-none');
+			this.$numpad_section.removeClass('d-none');
+		} else {
+			this.$totals_section.removeClass('d-none');
+			this.$numpad_section.addClass('d-none');
+		}
+	}
+
+	toggle_numpad_field_edit(fieldname) {
+		if (['qty', 'rate'].includes(fieldname)) {
+			this.$numpad_section.find(`[data-button-value="${fieldname}"]`).click();
+		}
+	}
+
 	make_cart_totals_section() {
-		this.$totals_section = this.wrapper.find('.cart-totals-section')
 		this.$totals_section.append(
 			`<div>
-				<div class="net-total flex items-center h-18 pr-8 pl-8 border-b-grey"></div>
+				<div class="net-total flex justify-between items-center h-18 pr-8 pl-8 border-b-grey"></div>
 				<div class="taxes"></div>
-				<div class="grand-total flex items-center h-18 pr-8 pl-8 border-b-grey"></div>
+				<div class="grand-total flex justify-between items-center h-18 pr-8 pl-8 border-b-grey"></div>
 				<div class="checkout-btn flex items-center h-18 pr-8 pl-8 text-center text-grey">
 					<div class="text-lg flex-1 text-bold">Checkout</div>
 				</div>
@@ -580,44 +856,47 @@ class Cart {
 	}
 
 	render_net_total(value) {
+		const currency = cur_frm.doc.currency;
 		this.$totals_section.find('.net-total').html(
 			`<div class="flex flex-col">
 				<div class="text-md text-dark-grey text-bold">Net Total</div>
 			</div>
-			<div class="flex flex-col text-right w-24 ml-auto">
-				<div class="text-md text-dark-grey text-bold">₹${value}</div>
+			<div class="flex flex-col text-right">
+				<div class="text-md text-dark-grey text-bold">${format_currency(value, currency)}</div>
 			</div>`
 		)
 	}
 
 	render_grand_total(value) {
+		const currency = cur_frm.doc.currency;
 		this.$totals_section.find('.grand-total').html(
 			`<div class="flex flex-col">
 				<div class="text-md text-dark-grey text-bold">Grand Total</div>
 			</div>
-			<div class="flex flex-col text-right w-24 ml-auto">
-				<div class="text-md text-dark-grey text-bold">₹${value}</div>
+			<div class="flex flex-col text-right">
+				<div class="text-md text-dark-grey text-bold">${format_currency(value, currency)}</div>
 			</div>`
 		)
 	}
 
 	render_taxes(value, taxes) {
+		const currency = cur_frm.doc.currency;
 		this.$totals_section.find('.taxes').html(
-			`<div class="flex items-center h-18 pr-8 pl-8 border-b-grey">
-				<div class="flex flex-col">
-					<div class="text-md text-dark-grey text-bold">Tax Charges</div>
+			`<div class="flex items-center justify-between h-18 pr-8 pl-8 border-b-grey">
+				<div class="flex">
+					<div class="text-md text-dark-grey text-bold w-fit">Tax Charges</div>
+					<div class="flex ml-6 text-dark-grey">
+					${	
+						taxes.map((t, i) => {
+							let margin_left = '';
+							if (i !== 0) margin_left = 'ml-2';
+							return `<span class="border-grey p-1 pl-2 pr-2 rounded ${margin_left}">${t.description} @${t.rate}%</span>`
+						}).join('')
+					}
+					</div>
 				</div>
-				<div class="flex ml-6 text-dark-grey">
-				${	
-					taxes.map((t, i) => {
-						let margin_left = '';
-						if (i !== 0) margin_left = 'ml-2';
-						return `<span class="border-grey p-1 pl-2 pr-2 rounded ${margin_left}">${t.description} @${t.rate}%</span>`
-					}).join('')
-				}
-				</div>
-				<div class="flex flex-col text-right w-24 ml-auto">
-					<div class="text-md text-dark-grey text-bold">₹${value}</div>
+				<div class="flex flex-col text-right">
+					<div class="text-md text-dark-grey text-bold">${format_currency(value, currency)}</div>
 				</div>
 			</div>`
 		)
@@ -630,28 +909,27 @@ class Cart {
 	add_item_to_cart(item_row) {
 		const { item_code, item_name, batch_no, description, qty, rate, price_list_rate } = item_row;
 		const item_to_add = { item_code, item_name, batch_no, description, qty, rate, price_list_rate };
-		this.cart_items.push(item_to_add);
 		this.render_cart_item(item_to_add);
-		// this.wrapper.find('.cart-items-section').children().last().removeClass('border-b-grey');
 	}
 
 	add_remove_no_items_section() {
-		const $no_item_element = this.$cart_items.find('.no-item-wrapper');
-		const no_of_cart_items = this.$cart_items.children().length;
+		const $no_item_element = this.$cart_items_wrapper.find('.no-item-wrapper');
+		const no_of_cart_items = this.$cart_items_wrapper.children().length;
 
 		// if cart has items and no item is present
-		no_of_cart_items > 0 && $no_item_element && $no_item_element.remove() && this.$cart_items.addClass('shadow-sm') && 
-			this.$cart_items.removeClass('border-grey border-dashed');
+		no_of_cart_items > 0 && $no_item_element && $no_item_element.remove() && 
+			this.$cart_items_wrapper.removeClass('border-grey border-dashed').addClass('shadow-sm');
 
-		no_of_cart_items === 0 && !$no_item_element && this.make_cart_items_section();
+		no_of_cart_items === 0 && !$no_item_element && this.make_no_items_section();
 	}
 
 	update_item_html(item_row) {
 		const { qty, item_code, batch_no } = item_row;
 		const item_selector = batch_no ? 
 			`.cart-item-wrapper[data-batch-no="${escape(batch_no)}"]` : `.cart-item-wrapper[data-item-code="${escape(item_code)}"]`;
-		const $cart_item = this.$cart_items.find(item_selector);
-		const no_of_cart_items = this.$cart_items.children().length;
+		debugger;
+		const $cart_item = this.$cart_items_wrapper.find(item_selector);
+		const no_of_cart_items = this.$cart_items_wrapper.children().length;
 		
 		if (cint(qty) <= 0) { $cart_item.remove(); return; }
 
@@ -673,4 +951,274 @@ class Cart {
 			this.render_taxes(frm.doc.base_total_taxes_and_charges, taxes);
 		}
 	}
+ }
+
+ class ItemDetails {
+	constructor({ wrapper, events }) {
+		this.wrapper = wrapper;
+		this.events = events;
+		this.show = false;
+		this.current_item = {};
+
+		this.make();
+	}
+
+	make() {
+		this.make_dom();
+	}
+
+	make_dom() {
+		this.wrapper.html(
+			`<div class="details-container flex flex-col p-8 rounded w-full">
+				<div class="item-defaults flex">
+					<div class="flex-1 flex flex-col justify-end mr-4">
+						<div class="text-grey mb-auto">ITEM DETAILS</div>
+						<div class="item-name text-2xl"></div>
+						<div class="item-description text-md-0 text-grey-200"></div>
+						<div class="item-price text-xl font-bold"></div>
+					</div>
+					<div class="w-46 h-46 bg-light-grey rounded ml-4"></div>
+				</div>
+				<div class="discount-section flex items-center mb-2">
+					<div class="discount-btn bg-grey-100 shadow-sm text-bold rounded w-fit pt-3 pb-3 pl-6 pr-8 text-grey mb-2 mt-4">
+						Add Discount
+					</div>
+				</div>
+				<div class="bg-grey-100 shadow-sm text-bold rounded w-fit pt-3 pb-3 pl-6 pr-8 text-grey">Select Different Variant</div>
+				<div class="text-grey mt-6 mb-6">STOCK DETAILS</div>
+				<div class="form-container grid grid-cols-2 row-gap-2 col-gap-4 grid-auto-row"></div>
+			</div>`
+		)
+		this.$item_name = this.wrapper.find('.item-name');
+		this.$item_description = this.wrapper.find('.item-description');
+		this.$item_price = this.wrapper.find('.item-price');
+		this.$form_container = this.wrapper.find('.form-container');
+		this.$dicount_section = this.wrapper.find('.discount-section');
+	}
+
+	render_discount_dom(item) {
+		if (item.discount_percentage) {
+			this.$dicount_section.html(
+				`<div class="text-grey line-through mr-4 text-md">
+					${format_currency(item.price_list_rate, cur_frm.doc.currency)}
+				</div>
+				<div class="p-1 pr-3 pl-3 rounded w-fit text-bold bg-green-200">
+					${item.discount_percentage}% off
+				</div>`
+			)
+			this.$item_price.html(format_currency(item.rate, cur_frm.doc.currency));
+		} else {
+			this.$dicount_section.html(
+				`<div class="discount-btn bg-grey-100 shadow-sm text-bold rounded w-fit pt-3 pb-3 pl-6 pr-8 text-grey mb-2 mt-4">
+					Add Discount
+				</div>`
+			)
+		}
+	}
+
+	render_form(item) {
+		const fields_to_display = this.get_form_fields(item);
+		this.$form_container.html('');
+
+		fields_to_display.forEach((fieldname, idx) => {
+			this.$form_container.append(
+				`<div class="">
+					<div class="item_detail_field ${fieldname}-control" data-fieldname="${fieldname}"></div>
+				</div>`
+			)
+
+			const field_meta = this.item_meta.fields.find(df => df.fieldname === fieldname);
+			const me = this;
+
+			this[`${fieldname}_control`] = frappe.ui.form.make_control({
+				df: { 
+					...field_meta, 
+					onchange: function() {
+						me.events.form_updated(me.doctype, me.name, fieldname, this.value);
+					}
+				},
+				parent: this.wrapper.find(`.${fieldname}-control`),
+				render_input: true,
+			})
+			this[`${fieldname}_control`].set_value(item[fieldname]);
+		})
+
+		this.make_auto_serial_selection_field();
+
+		this.bind_fields_to_numpad_fields();
+
+		this.bind_custom_control_change_event();
+	}
+
+	bind_custom_control_change_event() {
+		const me = this;
+		if (this.serial_no_control) {
+			this.serial_no_control.df.reqd = 1;
+			this.serial_no_control.df.onchange = async function() {
+				!me.current_item.batch_no && await me.auto_update_batch_no();
+				me.events.form_updated(me.doctype, me.name, 'serial_no', this.value);
+			}
+		}
+
+		if (this.batch_no_control) {
+			this.batch_no_control.df.reqd = 1;
+			this.batch_no_control.df.onchange = function() {
+				me.events.set_batch_in_current_cart_item(this.value);
+				me.current_item.batch_no = this.value;
+				me.events.form_updated(me.doctype, me.name, 'batch_no', this.value);
+			}
+		}
+
+		frappe.ui.form.on('POS Invoice Item', 'rate', (frm, cdt, cdn) => {
+			this.render_discount_dom(locals[cdt][cdn]);
+		})
+	}
+
+	bind_fields_to_numpad_fields() {
+		const me = this;
+		this.$form_container.on('focusin', '.input-with-feedback', function() {
+			const fieldname = $(this).attr('data-fieldname');
+			me.events.toggle_field_edit(fieldname);
+		});
+		this.$form_container.on('focusout', '.input-with-feedback', function() {
+			const fieldname = $(this).attr('data-fieldname');
+			me.events.toggle_field_edit(fieldname);
+		});
+	}
+
+	render_dom(item) {
+		let { item_name, description, price_list_rate } = item;
+
+		function get_item_description_html() {
+			if (description) {
+				description = $(description).text();
+				description = description.length > 75 ? description.substr(0, 73) + '...' : description;
+				return description;
+			}
+			return ``;
+		}
+		this.$item_name.html(item_name);
+		this.$item_description.html(get_item_description_html());
+		this.$item_price.html(format_currency(price_list_rate, cur_frm.doc.currency));
+	}
+
+	get_form_fields(item) {
+		const fields = ['qty', 'rate', 'price_list_rate', 'warehouse', 'actual_qty'];
+		if (item.has_serial_no) fields.push('serial_no');
+		if (item.has_batch_no) fields.push('batch_no');
+		return fields;
+	}
+
+	make_auto_serial_selection_field() {
+		const me = this;
+		if (this.serial_no_control) {
+			this.$form_container.append(
+				`<div class="grid-filler no-select"></div>`
+			)
+			this.$form_container.append(
+				`<div class="auto-fetch-btn bg-grey-100 shadow-sm text-bold rounded pt-3 pb-3 pl-6 pr-8 text-grey pointer no-select mt-2"
+						style="height: 3.3rem">
+					Auto Fetch Serial Numbers
+				</div>`
+			)
+			this.$form_container.find('.serial_no-control').find('textarea').css('height', '9rem');
+			this.$form_container.find('.serial_no-control').parent().addClass('row-span-2');
+			this.bind_auto_serial_fetch_event();
+		}
+	}
+
+	bind_auto_serial_fetch_event() {
+		this.$form_container.on('click', '.auto-fetch-btn', () => {
+			debugger;
+			this.batch_no_control.set_value('');
+			let qty = this.qty_control.get_value();
+			let numbers = frappe.call({
+				method: "erpnext.stock.doctype.serial_no.serial_no.auto_fetch_serial_number",
+				args: {
+					qty,
+					item_code: this.current_item.item_code,
+					warehouse: this.warehouse_control.get_value() || '',
+					batch_nos: this.current_item.batch_no || '',
+					for_doctype: 'POS Invoice'
+				}
+			});
+
+			numbers.then((data) => {
+				let auto_fetched_serial_numbers = data.message;
+				let records_length = auto_fetched_serial_numbers.length;
+				if (!records_length) {
+					const warehouse = this.warehouse_control.get_value().bold();
+					frappe.msgprint(__(`Serial numbers unavailable for Item ${this.current_item.item_code.bold()} 
+						under warehouse ${warehouse}. Please try changing warehouse.`));
+				} else if (records_length < qty) {
+					frappe.msgprint(`Fetched only ${records_length} available serial numbers.`);
+				}
+				let serial_no_list_field = this.serial_no_control;
+				numbers = auto_fetched_serial_numbers.join('\n');
+				debugger;
+				serial_no_list_field.set_value(numbers);
+			});
+		})
+	}
+
+	async auto_update_batch_no() {
+		if (this.serial_no_control && this.batch_no_control) {
+			// find batch nos of the selected serial no 
+			const selected_serial_nos = this.serial_no_control.get_value().split(/\n/g).filter(s => s);
+
+			if (!selected_serial_nos.length) return;
+
+			const response = await frappe.db.get_list("Serial No", {
+				filters: { 'name': ["in", selected_serial_nos]},
+				fields: ["batch_no", "name"]
+			});
+			const batch_serial_map = response.reduce((acc, r) => {
+				acc[r.batch_no] || (acc[r.batch_no] = []);
+				acc[r.batch_no] = [...acc[r.batch_no], r.name];
+				return acc;
+			}, {});
+			// set current item's batch no and serial no
+			const batch_no = Object.keys(batch_serial_map)[0];
+			const batch_serial_nos = batch_serial_map[batch_no].join('\n');
+			// eg. 10 selected serial no. 5 belongs to first batch other 5 belongs to second batch
+			const serial_nos_belongs_to_other_batch = selected_serial_nos.length !== batch_serial_map[batch_no].length;
+			await this.batch_no_control.set_value(batch_no);
+			
+			if (serial_nos_belongs_to_other_batch) {
+				this.serial_no_control.set_value(batch_serial_nos);
+				this.qty_control.set_value(batch_serial_map[batch_no].length);
+			}
+
+			delete batch_serial_map[batch_no];
+
+			if (serial_nos_belongs_to_other_batch)
+				this.events.clone_new_batch_item_in_frm(batch_serial_map, this.current_item);
+		}
+	}
+
+	toggle_item_selector() {
+		this.events.adjust_selector_size(this.show);
+		this.show ?
+		this.wrapper.removeClass('d-none') :
+		this.wrapper.addClass('d-none');
+	}
+
+	render_item_details_section(item) {
+		const { item_code, batch_no } = this.current_item;
+		this.show = !item ? false : item_code === item.item_code && batch_no === item.batch_no ? false : true;
+		this.toggle_item_selector();
+		if (this.show) {
+			this.item_meta = frappe.get_meta('POS Invoice Item');
+			this.doctype = item.doctype;
+			this.name = item.name;
+			console.log(frappe.model.get_value(this.doctype, this.name, 'qty'));
+			this.current_item = { item_code: item.item_code, batch_no: item.batch_no };
+			this.render_dom(item);
+			this.render_discount_dom(item);
+			this.render_form(item);
+		} else {
+			this.current_item = {};
+		}
+	}
+
  }
