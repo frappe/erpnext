@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 import frappe, base64, hashlib, hmac, json
 from frappe import _
+import pdb
 
 def verify_request():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
@@ -23,6 +24,7 @@ def verify_request():
 def order(*args, **kwargs):
 	try:
 		_order(*args, **kwargs)
+		print ("success")
 	except Exception:
 		error_message = frappe.get_traceback()+"\n\n Request Data: \n"+json.loads(frappe.request.data).__str__()
 		frappe.log_error(error_message, "WooCommerce Error")
@@ -30,10 +32,11 @@ def order(*args, **kwargs):
 
 def _order(*args, **kwargs):
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
+
+	
 	if frappe.flags.woocomm_test_order_data:
 		order = frappe.flags.woocomm_test_order_data
 		event = "created"
-
 	elif frappe.request and frappe.request.data:
 		verify_request()
 		try:
@@ -44,16 +47,30 @@ def _order(*args, **kwargs):
 		event = frappe.get_request_header("X-Wc-Webhook-Event")
 
 	else:
+		
 		return "success"
 
 	if event == "created":
 		raw_billing_data = order.get("billing")
 		customer_name = raw_billing_data.get("first_name") + " " + raw_billing_data.get("last_name")
-		link_customer_and_address(raw_billing_data, customer_name)
-		link_items(order.get("line_items"), woocommerce_settings)
-		create_sales_order(order, woocommerce_settings, customer_name)
+		metaDataList = order.get("meta_data")
+		for metaData in metaDataList:
+			if metaData['key'] == "customer_code":
+				customerCode = metaData['value']
+
+		if not customerCode:
+			frappe.log_error("Unknown customer code. Data: " + json.dumps(order))
+			return
+		
+		
+		#link_customer_and_address(raw_billing_data, customerName, customerCode)
+		#link_items(order.get("line_items"), woocommerce_settings)
+		#create_sales_order(order, woocommerce_settings, customer_name)
+
+		createSalesInvoice(order,customerCode,woocommerce_settings)		
 
 def link_customer_and_address(raw_billing_data, customer_name):
+
 	customer_woo_com_email = raw_billing_data.get("email")
 	customer_exists = frappe.get_value("Customer", {"woocommerce_email": customer_woo_com_email})
 	if not customer_exists:
@@ -169,6 +186,136 @@ def set_items_in_sales_order(new_sales_order, woocommerce_settings, order):
 			
 def add_tax_details(sales_order, price, desc, tax_account_head):
 	sales_order.append("taxes", {
+		"charge_type":"Actual",
+		"account_head": tax_account_head,
+		"tax_amount": price,
+		"description": desc
+	})
+
+def createSalesInvoice(order,customerCode, woocommerce_settings):
+	newSalesInvoice = frappe.new_doc("Sales Invoice")
+
+	newSalesInvoice.customer = customerCode
+	newSalesInvoice.woocommerce_order = True
+	newSalesInvoice.po_no = newSalesInvoice.woocommerce_id = order.get("id")
+	newSalesInvoice.naming_series = "ACC-SINV-.YYYY.-"
+
+	#For Now - Use Primary Shipping Address - Maybe this will auto fill?
+	# addressSQL = frappe.db.sql("""SELECT 
+	# 	a.name,
+	# 	a.address_line1,
+	# 	a.address_line2,
+	# 	a.city,
+	# 	a.county,
+	# 	a.state,
+	# 	a.pincode
+	# FROM
+	# 	`tabAddress` a
+	# WHERE
+	# 	a.name IN (
+	# SELECT 
+	# 	dl.parent
+	# FROM
+	# 	`tabDynamic Link` dl
+	# INNER JOIN
+	# 	`tabCustomer` c
+	# ON
+	# 	c.name = dl.link_name AND
+	# 	c.name = '""" + customerCode + """' AND
+	# 	dl.link_doctype = "Customer" AND
+	# 	dl.parenttype = "Address")
+	# AND
+	# 	a.is_shipping_address = 1
+	# AND 
+	# 	a.disabled = 0""")
+	# pdb.set_trace()
+	# address = frappe.get_doc("Address", addressSQL[0][0])
+
+
+	#Collect Shipping Information
+	# shippingAddress = order.get("shipping")
+	# shippingName = shippingAddress.get("first_name") + " " +  shippingAddress.get("last_name")
+	# shippingLine1 = shippingAddress.get("address_1") + ", " + shippingAddress.get("address_2")
+	# shippingLine2 = shippingAddress.get("city") + ", " + shippingAddress.get("state") + ", " + shippingAddress.get("postcode") + ", " + shippingAddress.get("country")
+	# billingAddress = order.get("billing")
+	# billingPhone = billingAddress.get("phone")
+	# billingEmail = billingAddress.get("email")
+	# newSalesInvoice.temporary_delivery_address_line_1 = shippingName
+	# newSalesInvoice.temporary_delivery_address_line_2 = shippingLine1
+	# newSalesInvoice.temporary_delivery_address_line_3 = shippingLine2
+	# newSalesInvoice.temporary_delivery_address_line_4 = billingPhone
+	# newSalesInvoice.temporary_delivery_address_line_5 = billingEmail
+	
+	created_date = order.get("date_created").split("T")
+	newSalesInvoice.transaction_date = created_date[0]
+	delivery_after = woocommerce_settings.delivery_after_days or 7
+	newSalesInvoice.delivery_date = frappe.utils.add_days(created_date[0], delivery_after)
+
+	newSalesInvoice.company = woocommerce_settings.company
+
+	setItemsInSalesInvoice(newSalesInvoice, woocommerce_settings, order)
+	newSalesInvoice.flags.ignore_mandatory = True
+	newSalesInvoice.insert()
+	#newSalesInvoice.submit()
+
+	frappe.db.commit()
+
+def setItemsInSalesInvoice(newSalesInvoice,woocommerce_settings, order):
+	company_abbr = frappe.db.get_value('Company', woocommerce_settings.company, 'abbr')
+
+	for item in order.get("line_items"):
+		SKU = item.get("sku")
+		#woocomm_item_id = item.get("product_id")
+		foundItem = frappe.get_doc("Item", {"name": SKU})
+
+		itemTax = item.get("total_tax")
+
+		newSalesInvoice.append("items",{
+			"item_code": foundItem.item_code,
+			"item_name": foundItem.item_name,
+			"description": foundItem.item_name,
+			"delivery_date": newSalesInvoice.delivery_date,
+			"uom": woocommerce_settings.uom or _("Nos"),
+			"qty": item.get("quantity"),
+			"rate": item.get("price"),
+			"warehouse": woocommerce_settings.warehouse or _("Stores - {0}").format(company_abbr)
+			})
+
+		addTaxDetails(newSalesInvoice, itemTax, "Ordered Item tax", woocommerce_settings.tax_account)
+
+	SKU = ""
+
+	for item in order.get("shipping_lines"):
+		shippingTotal = item.get("total")
+
+		if shippingTotal != 0:
+			if shippingTotal == "10.00":
+				SKU = "SHIP1"
+			elif shippingTotal == "20.00":
+				SKU = "SHIP2"
+			elif shippingTotal == "30.00":
+				SKU = "SHIP3"
+
+			foundItem = frappe.get_doc("Item", {"name": SKU})
+			itemTax = item.get("total_tax")
+			newSalesInvoice.append("items",{
+				"item_code": foundItem.item_code,
+				"item_name": foundItem.item_name,
+				"description": foundItem.item_name,
+				"delivery_date": newSalesInvoice.delivery_date,
+				"uom": woocommerce_settings.uom or _("Nos"),
+				"qty": 1,
+				"rate": item.get("total"),
+				"warehouse": woocommerce_settings.warehouse or _("Stores - {0}").format(company_abbr)
+				})
+			addTaxDetails(newSalesInvoice, itemTax, "Ordered Item tax", woocommerce_settings.tax_account)
+	# shipping_details = order.get("shipping_lines") # used for detailed order
+
+	addTaxDetails(newSalesInvoice, order.get("shipping_tax"), "Shipping Tax", woocommerce_settings.f_n_f_account)
+	addTaxDetails(newSalesInvoice, order.get("shipping_total"), "Shipping Total", woocommerce_settings.f_n_f_account)
+
+def addTaxDetails(salesInvoice, price, desc, tax_account_head):
+	salesInvoice.append("taxes", {
 		"charge_type":"Actual",
 		"account_head": tax_account_head,
 		"tax_amount": price,
