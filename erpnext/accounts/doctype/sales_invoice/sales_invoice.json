@@ -35,6 +35,7 @@
   "cai",
   "numeration",
   "authorized_range",
+  "pos",
   "accounting_dimensions_section",
   "deadline_for_authorization",
   "project",
@@ -1627,13 +1628,20 @@
    "fieldtype": "Link",
    "label": "Patient Statement",
    "options": "Patient statement"
+  },
+  {
+   "fieldname": "pos",
+   "fieldtype": "Select",
+   "label": "Pos",
+   "options": "GPos",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-20 15:38:05.092046",
+ "modified": "2020-03-24 22:10:33.925547",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
