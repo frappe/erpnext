@@ -172,6 +172,13 @@ def get_data():
 					"dependencies": ["Payroll Entry"]
 				},
 				{
+    				"type": "report",
+    				"is_query_report": True,
+    				"name": "Salary Assignment Report",
+    				"doctype": "Salary Assignment Report",
+    				"dependencies": ["Assignment Salary Component"],
+				},
+				{
 					"type": "doctype",
 					"name": "Payroll Period",
 				},
