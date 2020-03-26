@@ -396,6 +396,11 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Accounts Settings",
+					"description": _("Setup accounts module.")
+				},
+				{
+					"type": "doctype",
 					"name": "Payment Gateway Account",
 					"description": _("Setup Gateway accounts.")
 				},
