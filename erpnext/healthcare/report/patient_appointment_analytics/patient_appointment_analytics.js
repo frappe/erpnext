@@ -85,7 +85,6 @@ frappe.query_reports['Patient Appointment Analytics'] = {
 						return column.content;
 					})
 
-
 					entry = {
 						'name': row_name,
 						'values': row_values
@@ -95,8 +94,7 @@ frappe.query_reports['Patient Appointment Analytics'] = {
 					let new_datasets = raw_data.datasets;
 
 					let found = false;
-
-					for(let i=0; i < new_datasets.length;i++) {
+					for (let i=0; i < new_datasets.length;i++) {
 						if (new_datasets[i].name == row_name) {
 							found = true;
 							new_datasets.splice(i,1);
