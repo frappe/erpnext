@@ -98,6 +98,8 @@ def check_payment_fields_reqd(patient):
 			fee_validity = frappe.db.exists('Fee Validity', {'patient': patient, 'status': 'Pending'})
 			if fee_validity:
 				return {'fee_validity': fee_validity}
+			if check_is_new_patient(patient):
+				return False
 		return True
 	return False
 
@@ -107,8 +109,12 @@ def invoice_appointment(appointment_doc):
 	enable_free_follow_ups = frappe.db.get_single_value('Healthcare Settings', 'enable_free_follow_ups')
 	if enable_free_follow_ups:
 		fee_validity = check_fee_validity(appointment_doc)
-		if not fee_validity:
+		if fee_validity.status == 'Completed':
+			fee_validity = None
+		elif not fee_validity:
 			if frappe.db.exists('Fee Validity Reference', {'appointment': appointment_doc.name}):
+				return
+			if check_is_new_patient(appointment_doc.patient, appointment_doc.name):
 				return
 	else:
 		fee_validity = None
@@ -135,6 +141,17 @@ def invoice_appointment(appointment_doc):
 		frappe.msgprint(_('Sales Invoice {0} created as paid'.format(sales_invoice.name)), alert=True)
 		frappe.db.set_value('Patient Appointment', appointment_doc.name, 'invoiced', 1)
 		frappe.db.set_value('Patient Appointment', appointment_doc.name, 'ref_sales_invoice', sales_invoice.name)
+
+
+def check_is_new_patient(patient, name=None):
+	filters = {'patient': patient, 'status': ('!=','Cancelled')}
+	if name:
+		filters['name'] = ('!=', name)
+
+	has_previous_appointment = frappe.db.exists('Patient Appointment', filters)
+	if has_previous_appointment:
+		return False
+	return True
 
 
 def get_appointment_item(appointment_doc, item):

@@ -35,8 +35,8 @@
   "sb_sample_collection",
   "sample",
   "sample_uom",
-  "sample_quantity",
-  "sample_collection_details",
+  "sample_qty",
+  "sample_details",
   "change_in_item"
  ],
  "fields": [
@@ -212,18 +212,6 @@
   },
   {
    "default": "0",
-   "fieldname": "sample_quantity",
-   "fieldtype": "Float",
-   "label": "Quantity"
-  },
-  {
-   "fieldname": "sample_collection_details",
-   "fieldtype": "Text",
-   "ignore_xss_filter": 1,
-   "label": "Collection Details"
-  },
-  {
-   "default": "0",
    "fieldname": "change_in_item",
    "fieldtype": "Check",
    "hidden": 1,
@@ -237,10 +225,22 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "default": "0",
+   "fieldname": "sample_qty",
+   "fieldtype": "Float",
+   "label": "Quantity"
+  },
+  {
+   "fieldname": "sample_details",
+   "fieldtype": "Text",
+   "ignore_xss_filter": 1,
+   "label": "Collection Details"
   }
  ],
  "links": [],
- "modified": "2020-03-23 19:43:11.606254",
+ "modified": "2020-03-25 16:53:01.740103",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",
