@@ -56,7 +56,9 @@ def check_is_new_patient(appointment):
 
 	appointment_exists = frappe.db.get_all('Patient Appointment', {
 		'name': ('!=', appointment.name),
-		'status': ('!=', 'Cancelled')
+		'status': ('!=', 'Cancelled'),
+		'patient': appointment.patient,
+		'practitioner': appointment.practitioner
 	})
 	if len(appointment_exists) and appointment_exists[0]:
 		return False
