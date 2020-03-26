@@ -84,14 +84,14 @@ class Analytics(object):
 			self.columns.append({
 				'label': _(period),
 				'fieldname': scrub(period),
-				'fieldtype': 'Float',
+				'fieldtype': 'Int',
 				'width': 120
 			})
 
 		self.columns.append({
 			'label': _('Total'),
 			'fieldname': 'total',
-			'fieldtype': 'Float',
+			'fieldtype': 'Int',
 			'width': 120
 		})
 
@@ -106,14 +106,17 @@ class Analytics(object):
 
 	def get_period(self, appointment_date):
 		if self.filters.range == 'Weekly':
-			period = 'Week ' + str(appointment_date.isocalendar()[1]) + ' ' + str(appointment_date.year)
+			period = 'Week ' + str(appointment_date.isocalendar()[1])
 		elif self.filters.range == 'Monthly':
-			period = str(self.months[appointment_date.month - 1]) + ' ' + str(appointment_date.year)
+			period = str(self.months[appointment_date.month - 1])
 		elif self.filters.range == 'Quarterly':
-			period = 'Quarter ' + str(((appointment_date.month - 1) // 3) + 1) + ' ' + str(appointment_date.year)
+			period = 'Quarter ' + str(((appointment_date.month - 1) // 3) + 1)
 		else:
 			year = get_fiscal_year(appointment_date, company=self.filters.company)
 			period = str(year[0])
+
+		if getdate(self.filters.from_date).year != getdate(self.filters.to_date).year:
+			period += ' ' + str(appointment_date.year)
 
 		return period
 
@@ -180,7 +183,7 @@ class Analytics(object):
 
 	def get_chart_data(self):
 		length = len(self.columns)
-		labels = [d.get("label") for d in self.columns[3:length - 1]]
+		labels = [d.get("label") for d in self.columns[1:length - 1]]
 		self.chart = {
 			"data": {
 				'labels': labels,
