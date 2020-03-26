@@ -10,8 +10,10 @@ def execute():
 			AND docstatus=1
 		""",as_dict=1)
 
+	purchase_receipts = set([d.parent for d in purchase_receipts])
+
 	for pr in purchase_receipts:
-		doc = frappe.get_doc("Purchase Receipt", pr.get("parent"))
+		doc = frappe.get_doc("Purchase Receipt", pr)
 		doc.status_updater = [
 			{
 			'source_dt': 'Purchase Receipt Item',
