@@ -2417,29 +2417,26 @@
             "Erl\u00f6se aus Verk\u00e4ufen Sachanlageverm\u00f6gen (bei Buchgewinn)": {
                 "account_number": "4849"
             },
-            "Erl\u00f6se aus Verk\u00e4ufen immaterieller VG (bei Buchgewinn) (Gruppe)": {
-                "is_group": 1,
-                "Erl\u00f6se aus Verk\u00e4ufen immaterieller VG (bei Buchgewinn)": {
-                    "account_number": "4850"
-                },
-                "Erl\u00f6se aus Verk\u00e4ufen Finanzanlagen (bei Buchgewinn)": {
-                    "account_number": "4851"
-                },
-                "Erl\u00f6se aus Verk\u00e4ufen Finanzanlagen (inl\u00e4ndische Kap.Ges., bei Buchgewinn)": {
-                    "account_number": "4852"
-                },
-                "Anlagenabg\u00e4nge Sachanlagen (Restbuchwert bei Buchvergewinn)": {
-                    "account_number": "4855"
-                },
-                "Anlagenabg\u00e4nge immaterielle VG (Restbuchwert bei Buchgewinn)": {
-                    "account_number": "4856"
-                },
-                "Anlagenabg\u00e4nge Finanzanlagen (Restbuchwert bei Buchgewinn)": {
-                    "account_number": "4857"
-                },
-                "Anlagenabg\u00e4nge Finanzanlagen (inl\u00e4ndische Kap.Ges., Restbuchwert bei Buchgewinn)": {
-                    "account_number": "4858"
-                }
+            "Erl\u00f6se aus Verk\u00e4ufen immaterieller VG (bei Buchgewinn)": {
+                "account_number": "4850"
+            },
+            "Erl\u00f6se aus Verk\u00e4ufen Finanzanlagen (bei Buchgewinn)": {
+                "account_number": "4851"
+            },
+            "Erl\u00f6se aus Verk\u00e4ufen Finanzanlagen (inl\u00e4ndische Kap.Ges., bei Buchgewinn)": {
+                "account_number": "4852"
+            },
+            "Anlagenabg\u00e4nge Sachanlagen (Restbuchwert bei Buchvergewinn)": {
+                "account_number": "4855"
+            },
+            "Anlagenabg\u00e4nge immaterielle VG (Restbuchwert bei Buchgewinn)": {
+                "account_number": "4856"
+            },
+            "Anlagenabg\u00e4nge Finanzanlagen (Restbuchwert bei Buchgewinn)": {
+                "account_number": "4857"
+            },
+            "Anlagenabg\u00e4nge Finanzanlagen (inl\u00e4ndische Kap.Ges., Restbuchwert bei Buchgewinn)": {
+                "account_number": "4858"
             },
             "Ertr\u00e4ge aus Zuschreibungen des Sachanlageverm\u00f6gens": {
                 "account_number": "4910",
@@ -2562,20 +2559,17 @@
             "Entnahme von Gegenst\u00e4nden ohne USt": {
                 "account_number": "4605"
             },
-            "Verwendung von Gegenst\u00e4nden f. Zwecke au\u00dferhalb des Unternehmens 7 % USt (Gruppe)": {
-                "is_group": 1,
-                "Verwendung von Gegenst\u00e4nden f. Zwecke au\u00dferhalb des Unternehmens 7 % USt": {
-                    "account_number": "4630"
-                },
-                "Verwendung von Gegenst\u00e4nden f. Zwecke au\u00dferhalb des Unternehmens ohne USt": {
-                    "account_number": "4637"
-                },
-                "Verwendung von Gegenst\u00e4nden f. Zwecke au\u00dferhalb des Unternnehmens ohne USt (Telefon-Nutzung)": {
-                    "account_number": "4638"
-                },
-                "Verwendung von Gegenst\u00e4nden f. Zwecke au\u00dferhalb des Unternehmens ohne USt (Kfz-Nutzung)": {
-                    "account_number": "4639"
-                }
+            "Verwendung von Gegenst\u00e4nden f. Zwecke au\u00dferhalb des Unternehmens 7 % USt": {
+                "account_number": "4630"
+            },
+            "Verwendung von Gegenst\u00e4nden f. Zwecke au\u00dferhalb des Unternehmens ohne USt": {
+                "account_number": "4637"
+            },
+            "Verwendung von Gegenst\u00e4nden f. Zwecke au\u00dferhalb des Unternnehmens ohne USt (Telefon-Nutzung)": {
+                "account_number": "4638"
+            },
+            "Verwendung von Gegenst\u00e4nden f. Zwecke au\u00dferhalb des Unternehmens ohne USt (Kfz-Nutzung)": {
+                "account_number": "4639"
             },
             "Verwendung von Gegenst\u00e4nden f. Zwecke au\u00dferhalb des Unternehmens 19 % USt (Gruppe)": {
                 "is_group": 1,
@@ -2613,14 +2607,11 @@
             "Unentgeltliche Zuwendung von Gegenst\u00e4nden ohne USt": {
                 "account_number": "4689"
             },
-            "Nicht steuerbare Ums\u00e4tze (Innenums\u00e4tze) (Gruppe)": {
-                "is_group": 1,
-                "Nicht steuerbare Ums\u00e4tze (Innenums\u00e4tze)": {
-                    "account_number": "4690"
-                },
-                "Umsatzsteuerverg\u00fctungen, z.B. nach \u00a7 24 UStG": {
-                    "account_number": "4695"
-                }
+            "Nicht steuerbare Ums\u00e4tze (Innenums\u00e4tze)": {
+                "account_number": "4690"
+            },
+            "Umsatzsteuerverg\u00fctungen, z.B. nach \u00a7 24 UStG": {
+                "account_number": "4695"
             },
             "Au\u00dferordentliche Ertr\u00e4ge (Gruppe)": {
                 "is_group": 1,
@@ -2630,41 +2621,35 @@
                 "Au\u00dferordentliche Ertr\u00e4ge finanzwirksam": {
                     "account_number": "7401"
                 },
-                "Au\u00dferordentliche Ertr\u00e4ge nicht finanzwirksam (Gruppe)": {
-                    "is_group": 1,
-                    "Au\u00dferordentliche Ertr\u00e4ge nicht finanzwirksam": {
-                        "account_number": "7450"
-                    },
-                    "Ertr\u00e4ge durch Verschmelzung und Umwandlung": {
-                        "account_number": "7451"
-                    },
-                    "Ertr\u00e4ge durch den Verkauf von bedeutenden Beteiligungen": {
-                        "account_number": "7452"
-                    },
-                    "Ert\u00e4ge durch den Verkauf von bedeutenden Grundst\u00fccken": {
-                        "account_number": "7453"
-                    },
-                    "Gewinn aus der Ver\u00e4u\u00dferung oder der Aufgabe von Gesch\u00e4ftsaktivit\u00e4ten nach Steuern": {
-                        "account_number": "7454"
-                    }
+                "Au\u00dferordentliche Ertr\u00e4ge nicht finanzwirksam": {
+                    "account_number": "7450"
                 },
-                "Au\u00dferordentliche Ertr\u00e4ge aus der Anwendung von \u00dcbergangsvorschriften (Gruppe)": {
-                    "is_group": 1,
-                    "Au\u00dferordentliche Ertr\u00e4ge aus der Anwendung von \u00dcbergangsvorschriften": {
-                        "account_number": "7460"
-                    },
-                    "Au\u00dferordentliche Ertr\u00e4ge: Zuschreibung f. Sachanlageverm\u00f6gen": {
-                        "account_number": "7461"
-                    },
-                    "Au\u00dferordentliche Ertr\u00e4ge: Zuschreibung f. Finanzanlageverm\u00f6gen": {
-                        "account_number": "7462"
-                    },
-                    "Au\u00dferordentliche Ertr\u00e4ge: Wertpapiere im Umlaufverm\u00f6gen": {
-                        "account_number": "7463"
-                    },
-                    "Au\u00dferordentliche Ertr\u00e4ge: latente Steuern": {
-                        "account_number": "7464"
-                    }
+                "Ertr\u00e4ge durch Verschmelzung und Umwandlung": {
+                    "account_number": "7451"
+                },
+                "Ertr\u00e4ge durch den Verkauf von bedeutenden Beteiligungen": {
+                    "account_number": "7452"
+                },
+                "Ert\u00e4ge durch den Verkauf von bedeutenden Grundst\u00fccken": {
+                    "account_number": "7453"
+                },
+                "Gewinn aus der Ver\u00e4u\u00dferung oder der Aufgabe von Gesch\u00e4ftsaktivit\u00e4ten nach Steuern": {
+                    "account_number": "7454"
+                },
+                "Au\u00dferordentliche Ertr\u00e4ge aus der Anwendung von \u00dcbergangsvorschriften": {
+                    "account_number": "7460"
+                },
+                "Au\u00dferordentliche Ertr\u00e4ge: Zuschreibung f. Sachanlageverm\u00f6gen": {
+                    "account_number": "7461"
+                },
+                "Au\u00dferordentliche Ertr\u00e4ge: Zuschreibung f. Finanzanlageverm\u00f6gen": {
+                    "account_number": "7462"
+                },
+                "Au\u00dferordentliche Ertr\u00e4ge: Wertpapiere im Umlaufverm\u00f6gen": {
+                    "account_number": "7463"
+                },
+                "Au\u00dferordentliche Ertr\u00e4ge: latente Steuern": {
+                    "account_number": "7464"
                 }
             }
         },
@@ -2702,40 +2687,43 @@
                 },
                 "Erl\u00f6sschm\u00e4lerungen aus im Inland steuerpfl. EU-Lieferungen 16 % USt": {
                     "account_number": "4729"
+                }
+            },
+            "Gew\u00e4hrte Skonti (Gruppe)": {
+                "is_group": 1,
+                "Gew. Skonti": {
+                    "account_number": "4730"
                 },
-                "Gew\u00e4hrte Skonti (Gruppe)": {
-                    "is_group": 1,
-                    "Gew. Skonti": {
-                        "account_number": "4730"
-                    },
-                    "Gew. Skonti 7 % USt": {
-                        "account_number": "4731"
-                    },
-                    "Gew. Skonti 19 % USt": {
-                        "account_number": "4736"
-                    },
-                    "Gew. Skonti aus Lieferungen von Mobilfunkger./Schaltkr., f. die der Leistungsempf. die Ust. schuldet": {
-                        "account_number": "4738"
-                    },
-                    "Gew. Skonti aus Leistungen, f. die der Leistungsempf. die Umsatzsteuer nach \u00a7 13b UStG schuldet": {
-                        "account_number": "4741"
-                    },
-                    "Gew. Skonti aus Erl\u00f6sen aus im anderen EU-Land steuerpfl. Leistungen, f. die der Leistungsempf. die Ust. schuldet": {
-                        "account_number": "4742"
-                    },
-                    "Gew. Skonti aus steuerfreien innergem. Lieferungen \u00a7 4 Nr. 1b UStG": {
-                        "account_number": "4743"
-                    },
-                    "Gew. Skonti aus im Inland steuerpfl. EU-Lieferungen": {
-                        "account_number": "4745"
-                    },
-                    "Gew. Skonti aus im Inland steuerpfl. EU-Lieferungen 7% USt": {
-                        "account_number": "4746"
-                    },
-                    "Gew. Skonti aus im Inland steuerpfl. EU-Lieferungen 19% USt": {
-                        "account_number": "4748"
-                    }
+                "Gew. Skonti 7 % USt": {
+                    "account_number": "4731"
                 },
+                "Gew. Skonti 19 % USt": {
+                    "account_number": "4736"
+                },
+                "Gew. Skonti aus Lieferungen von Mobilfunkger./Schaltkr., f. die der Leistungsempf. die Ust. schuldet": {
+                    "account_number": "4738"
+                },
+                "Gew. Skonti aus Leistungen, f. die der Leistungsempf. die Umsatzsteuer nach \u00a7 13b UStG schuldet": {
+                    "account_number": "4741"
+                },
+                "Gew. Skonti aus Erl\u00f6sen aus im anderen EU-Land steuerpfl. Leistungen, f. die der Leistungsempf. die Ust. schuldet": {
+                    "account_number": "4742"
+                },
+                "Gew. Skonti aus steuerfreien innergem. Lieferungen \u00a7 4 Nr. 1b UStG": {
+                    "account_number": "4743"
+                },
+                "Gew. Skonti aus im Inland steuerpfl. EU-Lieferungen": {
+                    "account_number": "4745"
+                },
+                "Gew. Skonti aus im Inland steuerpfl. EU-Lieferungen 7% USt": {
+                    "account_number": "4746"
+                },
+                "Gew. Skonti aus im Inland steuerpfl. EU-Lieferungen 19% USt": {
+                    "account_number": "4748"
+                }
+            },
+            "Gew\u00e4hrte Boni (Gruppe)": {
+                "is_group": 1,
                 "Gew\u00e4hrte Boni 7 % USt": {
                     "account_number": "4750"
                 },
@@ -2848,103 +2836,79 @@
                     "account_number": "6398"
                 }
             },
-            "Versicherungen (Gruppe)": {
-                "is_group": 1,
-                "Versicherungen": {
-                    "account_number": "6400"
-                },
-                "Versicherungen f. Geb\u00e4ude, die zum Betriebsverm\u00f6gen geh\u00f6ren": {
-                    "account_number": "6405"
-                },
-                "Netto-Pr\u00e4mie f. R\u00fcckdeckung k\u00fcnftiger Versorgungsleistungen": {
-                    "account_number": "6410"
-                },
-                "Beitr\u00e4ge": {
-                    "account_number": "6420"
-                },
-                "Sonstige Abgaben": {
-                    "account_number": "6430"
-                },
-                "Steuerlich abzugsf\u00e4hige Versp\u00e4tungszuschl\u00e4ge und Zwangsgelder": {
-                    "account_number": "6436"
-                },
-                "Steuerlich nicht abzugsf\u00e4hige Versp\u00e4tungszuschl\u00e4ge und Zwangsgelder": {
-                    "account_number": "6437"
-                },
-                "Ausgleichsabgabe i. S. d. Schwerbehindertengesetzes": {
-                    "account_number": "6440"
-                },
-                "Reparaturen und Instandhaltung von Bauten": {
-                    "account_number": "6450"
-                },
-                "Reparaturen und Instandhaltung von technischenAnlagen und Maschinen": {
-                    "account_number": "6460"
-                },
-                "Reparaturen und Instandhaltung von anderen Anlagen und Betriebs- und Gesch\u00e4ftsausstattung": {
-                    "account_number": "6470"
-                },
-                "Zuf\u00fchrung zu Aufwandsr\u00fcckstellungen": {
-                    "account_number": "6475"
-                },
-                "Reparaturen und Instandhaltung von anderen Anlagen": {
-                    "account_number": "6485"
-                },
-                "Sonstige Reparaturen und Instandhaltungen": {
-                    "account_number": "6490"
-                },
-                "Wartungskosten f. Hard- und Software": {
-                    "account_number": "6495"
-                },
-                "Mietleasing (bewegliche Wirtschaftsg\u00fcter)": {
-                    "account_number": "6498"
-                }
+            "Versicherungen": {
+                "account_number": "6400"
+            },
+            "Versicherungen f. Geb\u00e4ude, die zum Betriebsverm\u00f6gen geh\u00f6ren": {
+                "account_number": "6405"
+            },
+            "Netto-Pr\u00e4mie f. R\u00fcckdeckung k\u00fcnftiger Versorgungsleistungen": {
+                "account_number": "6410"
+            },
+            "Beitr\u00e4ge": {
+                "account_number": "6420"
+            },
+            "Sonstige Abgaben": {
+                "account_number": "6430"
+            },
+            "Steuerlich abzugsf\u00e4hige Versp\u00e4tungszuschl\u00e4ge und Zwangsgelder": {
+                "account_number": "6436"
+            },
+            "Steuerlich nicht abzugsf\u00e4hige Versp\u00e4tungszuschl\u00e4ge und Zwangsgelder": {
+                "account_number": "6437"
+            },
+            "Ausgleichsabgabe i. S. d. Schwerbehindertengesetzes": {
+                "account_number": "6440"
+            },
+            "Reparaturen und Instandhaltung von Bauten": {
+                "account_number": "6450"
+            },
+            "Reparaturen und Instandhaltung von technischenAnlagen und Maschinen": {
+                "account_number": "6460"
+            },
+            "Reparaturen und Instandhaltung von anderen Anlagen und Betriebs- und Gesch\u00e4ftsausstattung": {
+                "account_number": "6470"
+            },
+            "Zuf\u00fchrung zu Aufwandsr\u00fcckstellungen": {
+                "account_number": "6475"
+            },
+            "Reparaturen und Instandhaltung von anderen Anlagen": {
+                "account_number": "6485"
+            },
+            "Sonstige Reparaturen und Instandhaltungen": {
+                "account_number": "6490"
+            },
+            "Wartungskosten f. Hard- und Software": {
+                "account_number": "6495"
+            },
+            "Mietleasing (bewegliche Wirtschaftsg\u00fcter)": {
+                "account_number": "6498"
             },
             "Fahrzeugkosten (Gruppe)": {
                 "is_group": 1,
                 "Fahrzeugkosten": {
                     "account_number": "6500"
                 },
-                "Kfz-Versicherungen (Gruppe)": {
-                    "is_group": 1,
-                    "Kfz-Versicherungen": {
-                        "account_number": "6520"
-                    }
+                "Kfz-Versicherungen": {
+                    "account_number": "6520"
                 },
-                "Laufende Kfz-Betriebskosten (Gruppe)": {
-                    "is_group": 1,
-                    "Laufende Kfz-Betriebskosten": {
-                        "account_number": "6530"
-                    }
+                "Laufende Kfz-Betriebskosten": {
+                    "account_number": "6530"
                 },
-                "Kfz-Reparaturen (Gruppe)": {
-                    "is_group": 1,
-                    "Kfz-Reparaturen": {
-                        "account_number": "6540"
-                    }
+                "Kfz-Reparaturen": {
+                    "account_number": "6540"
                 },
-                "Garagenmiete (Gruppe)": {
-                    "is_group": 1,
-                    "Garagenmiete": {
-                        "account_number": "6550"
-                    }
+                "Garagenmiete": {
+                    "account_number": "6550"
                 },
-                "Mietleasing Kfz (Gruppe)": {
-                    "is_group": 1,
-                    "Mietleasing Kfz": {
-                        "account_number": "6560"
-                    }
+                "Mietleasing Kfz": {
+                    "account_number": "6560"
                 },
-                "Sonstige Kfz-Kosten (Gruppe)": {
-                    "is_group": 1,
-                    "Sonstige Kfz-Kosten": {
-                        "account_number": "6570"
-                    }
+                "Sonstige Kfz-Kosten": {
+                    "account_number": "6570"
                 },
-                "Mautgeb\u00fchren (Gruppe)": {
-                    "is_group": 1,
-                    "Mautgeb\u00fchren": {
-                        "account_number": "6580"
-                    }
+                "Mautgeb\u00fchren": {
+                    "account_number": "6580"
                 },
                 "Kfz-Kosten f. betrieblich genutzte zum Privatverm\u00f6gen geh\u00f6rende Kraftfahrzeuge": {
                     "account_number": "6590"
@@ -3006,20 +2970,23 @@
                 "Nicht abzugsf\u00e4hige Betriebsausgaben aus Werbe- und Repr\u00e4sentationskosten": {
                     "account_number": "6645"
                 },
-                "Reisekosten Arbeitnehmer": {
-                    "account_number": "6650"
-                },
-                "Reisekosten Arbeitnehmer \u00dcbernachtungsaufwand": {
-                    "account_number": "6660"
-                },
-                "Reisekosten Arbeitnehmer Fahrtkosten": {
-                    "account_number": "6663"
-                },
-                "Reisekosten Arbeitnehmer Verpflegungsmehraufwand": {
-                    "account_number": "6664"
-                },
-                "Kilometergelderstattung Arbeitnehmer": {
-                    "account_number": "6668"
+                "Reisekosten Arbeitnehmer (Gruppe)": {
+                    "is_group": 1,
+                    "Reisekosten Arbeitnehmer": {
+                        "account_number": "6650"
+                    },
+                    "Reisekosten Arbeitnehmer \u00dcbernachtungsaufwand": {
+                        "account_number": "6660"
+                    },
+                    "Reisekosten Arbeitnehmer Fahrtkosten": {
+                        "account_number": "6663"
+                    },
+                    "Reisekosten Arbeitnehmer Verpflegungsmehraufwand": {
+                        "account_number": "6664"
+                    },
+                    "Kilometergelderstattung Arbeitnehmer": {
+                        "account_number": "6668"
+                    }
                 },
                 "Reisekosten Unternehmer (Gruppe)": {
                     "is_group": 1,
