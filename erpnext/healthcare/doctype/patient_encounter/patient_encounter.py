@@ -14,14 +14,14 @@ class PatientEncounter(Document):
 		update_encounter_medical_record(self)
 
 	def after_insert(self):
-		insert_encounter_medical_record(self)
+		insert_encounter_to_medical_record(self)
 
 	def on_cancel(self):
 		if self.appointment:
 			frappe.db.set_value('Patient Appointment', self.appointment, 'status', 'Open')
 		delete_medical_record(self)
 
-def insert_encounter_medical_record(doc):
+def insert_encounter_to_medical_record(doc):
 	subject = set_subject_field(doc)
 	medical_record = frappe.new_doc('Patient Medical Record')
 	medical_record.patient = doc.patient

@@ -5,8 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe import throw, _
-from frappe.utils import cstr
+from frappe import _
 from erpnext.accounts.party import validate_party_accounts
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
 from frappe.model.naming import append_number_if_name_exists

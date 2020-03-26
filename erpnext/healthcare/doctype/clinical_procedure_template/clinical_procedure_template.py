@@ -7,7 +7,6 @@ import frappe, json
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.rename_doc import rename_doc
-from frappe.utils import nowdate
 
 class ClinicalProcedureTemplate(Document):
 	def validate(self):

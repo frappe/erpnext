@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import unittest
 import frappe
-from frappe.utils import nowdate
 from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_healthcare_docs, create_clinical_procedure_template
 
 class TestClinicalProcedure(unittest.TestCase):
@@ -33,7 +32,7 @@ class TestClinicalProcedure(unittest.TestCase):
 		procedure = create_procedure(procedure_template, patient, practitioner)
 		result = procedure.start_procedure()
 		if result == 'insufficient stock':
-			material_receipt = procedure.make_material_receipt(submit=True)
+			procedure.make_material_receipt(submit=True)
 			result = procedure.start_procedure()
 		self.assertEqual(procedure.status, 'In Progress')
 		result = procedure.complete_procedure()

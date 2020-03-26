@@ -49,7 +49,8 @@ class HealthcareServiceUnitType(Document):
 
 
 def item_price_exists(doc):
-	if frappe.db.exists({'doctype': 'Item Price', 'item_code': doc.item_code}):
+	item_price = frappe.db.exists({'doctype': 'Item Price', 'item_code': doc.item_code})
+	if len(item_price):
 		return item_price[0][0]
 	return False
 
