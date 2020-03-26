@@ -281,8 +281,9 @@ def validate_party_gle_currency(party_type, party, company, party_account_curren
 	existing_gle_currency = get_party_gle_currency(party_type, party, company)
 
 	if existing_gle_currency and party_account_currency != existing_gle_currency:
-		frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
-			.format(party_type, party, existing_gle_currency), InvalidAccountCurrency)
+		frappe.throw(_("{0} : {1} has accounting entries in currency {2} for company {3}. Please select a receivable or payable account with currency {2}.")
+			.format(frappe.bold(party_type), frappe.bold(party), frappe.bold(existing_gle_currency), frappe.bold(company)))
+		
 
 def validate_party_accounts(doc):
 	companies = []
@@ -302,14 +303,12 @@ def validate_party_accounts(doc):
 		else:
 			company_default_currency = frappe.db.get_value('Company', account.company, "default_currency")
 
-		if existing_gle_currency and party_account_currency != existing_gle_currency:
-			if doc.doctype == 'Customer':
-				error_msg = _("Customer {0} has Accounting entries in currency {1} for company {2}. Please select a receivable or payable account with currency {1}.").format(frappe.bold(doc.customer_name), frappe.bold(existing_gle_currency), frappe.bold(account.company))
-			elif doc.doctype == 'Supplier':
-				error_msg = _("Supplier {0} has Accounting entries in currency {1} for company {2}. Please select a receivable or payable account with currency {1}.").format(frappe.bold(doc.supplier_name), frappe.bold(existing_gle_currency), frappe.bold(account.company))
-			else:
-				error_msg = _("{0} has Accounting entries in currency {1} for company {2}. Please select a receivable or payable account with currency {1}.").format(frappe.bold(doc.name), frappe.bold(existing_gle_currency), frappe.bold(account.company))
-			frappe.throw(error_msg)
+		if doc.doctype == 'Customer':
+			validate_party_gle_currency(doc.doctype, doc.customer_name, account.company,party_account_currency)
+		elif doc.doctype == 'Supplier':
+			validate_party_gle_currency(doc.doctype, doc.supplier_name, account.company,party_account_currency)
+		else:
+			validate_party_gle_currency(doc.doctype, doc.name, account.company,party_account_currency)
 
 		if doc.get("default_currency") and party_account_currency and company_default_currency:
 			if doc.default_currency != party_account_currency and doc.default_currency != company_default_currency:
