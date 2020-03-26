@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, flt, nowdate, nowtime, cstr
+from frappe.utils import flt, nowdate, nowtime, cstr
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_account
 from erpnext.healthcare.doctype.lab_test.lab_test import create_sample_doc
 from erpnext.stock.stock_ledger import get_previous_sle

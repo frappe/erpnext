@@ -40,8 +40,7 @@
  "charts": [
   {
    "chart_name": "Patient Appointments",
-   "label": "Patient Appointments",
-   "size": "Full"
+   "label": "Patient Appointments"
   }
  ],
  "charts_label": "",
@@ -54,7 +53,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Healthcare",
- "modified": "2020-03-12 16:30:36.952979",
+ "modified": "2020-03-26 16:10:44.629795",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
@@ -81,7 +80,7 @@
    "format": "{} Vacant",
    "is_query_report": 0,
    "link_to": "Healthcare Service Unit",
-   "stats_filter": "{\n    \"occupancy_status\": \"Vacant\"\n}",
+   "stats_filter": "{\n    \"occupancy_status\": \"Vacant\",\n    \"is_group\": 0\n}",
    "type": "DocType"
   },
   {

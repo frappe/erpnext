@@ -4,10 +4,9 @@
 
 from __future__ import unicode_literals
 import frappe
-import datetime
 from frappe import _
 import math
-from frappe.utils import time_diff_in_hours, rounded, getdate, add_days
+from frappe.utils import time_diff_in_hours, rounded
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_income_account
 from erpnext.healthcare.doctype.fee_validity.fee_validity import create_fee_validity
 from erpnext.healthcare.doctype.lab_test.lab_test import create_multiple
@@ -171,7 +170,7 @@ def get_clinical_procedures_to_invoice(patient):
 
 	for prescription in procedure_prescriptions:
 		if frappe.db.get_value('Clinical Procedure Template', prescription.procedure, 'is_billable'):
-			items_to_invoice.append({
+			clinical_procedures_to_invoice.append({
 				'reference_type': 'Procedure Prescription',
 				'reference_name': prescription.name,
 				'service': frappe.db.get_value('Clinical Procedure Template', prescription.procedure, 'item')

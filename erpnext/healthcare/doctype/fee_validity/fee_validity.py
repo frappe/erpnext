@@ -14,8 +14,6 @@ class FeeValidity(Document):
 		self.set_start_date()
 
 	def update_status(self):
-		valid_till = getdate(self.valid_till)
-		start_date = getdate(self.start_date)
 		if self.visited >= self.max_visits:
 			self.status = 'Completed'
 		else:

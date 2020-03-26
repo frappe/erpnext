@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status
-from frappe.utils import nowdate, add_days, getdate
+from frappe.utils import nowdate, add_days
 from frappe.utils.make_random import get_random
 
 class TestPatientAppointment(unittest.TestCase):
@@ -72,13 +72,13 @@ def create_healthcare_docs():
 		medical_department = frappe.new_doc('Medical Department')
 		medical_department.department = '_Test Medical Department'
 		medical_department.save(ignore_permissions=True)
-		department = medical_department.name
+		medical_department = medical_department.name
 
 	if not practitioner:
 		practitioner = frappe.new_doc('Healthcare Practitioner')
 		practitioner.first_name = '_Test Healthcare Practitioner'
 		practitioner.gender = 'Female'
-		practitioner.department = department
+		practitioner.department = medical_department
 		practitioner.op_consulting_charge = 500
 		practitioner.save(ignore_permissions=True)
 		practitioner = practitioner.name

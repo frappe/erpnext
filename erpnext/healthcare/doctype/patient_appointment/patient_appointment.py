@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import json
-from frappe.utils import getdate, add_days, get_time
+from frappe.utils import getdate, get_time
 from frappe.model.mapper import get_mapped_doc
 from frappe import _
 import datetime
@@ -174,7 +174,7 @@ def cancel_appointment(appointment_id):
 		if sales_invoice and cancel_sales_invoice(sales_invoice):
 			msg = _('Appointment {0} and Sales Invoice {1} cancelled').format(appointment.name, sales_invoice.name)
 		else:
-			msg = _('Appointment Cancelled. Please review and cancel the invoice {0}').format(fee_validity.ref_invoice)
+			msg = _('Appointment Cancelled. Please review and cancel the invoice {0}').format(sales_invoice.name)
 	else:
 		fee_validity = manage_fee_validity(appointment)
 		msg = _('Appointment Cancelled.')

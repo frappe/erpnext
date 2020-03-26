@@ -84,7 +84,7 @@ frappe.ui.form.on('Clinical Procedure', {
 									if (r.message) {
 										frappe.show_alert({
 											message:  __('Stock Entry {0} created',
-											['<a class="bold" href="#Form/Stock Entry/'+ r.message + '">' + r.message + '</a>']),
+												['<a class="bold" href="#Form/Stock Entry/'+ r.message + '">' + r.message + '</a>']),
 											indicator: 'green'
 										});
 										frm.reload_doc();
@@ -261,7 +261,7 @@ frappe.ui.form.on('Clinical Procedure', {
 			},
 			callback: function(data) {
 				if (data.message) {
-					frm.doc.items = []
+					frm.doc.items = [];
 					$.each(data.message, function(i, v) {
 						let item = frm.add_child('items');
 						item.item_code = v.item_code;
