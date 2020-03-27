@@ -37,8 +37,6 @@ class PatientAppointment(Document):
 			self.status = 'Open'
 		elif appointment_date > today:
 			self.status = 'Scheduled'
-		elif appointment_date < today:
-			self.status = 'Expired'
 
 	def validate_overlaps(self):
 		end_time = datetime.datetime.combine(getdate(self.appointment_date), get_time(self.appointment_time)) \
@@ -421,8 +419,8 @@ def get_procedure_prescribed(patient):
 	return frappe.db.sql("""select pp.name, pp.procedure, pp.parent, ct.practitioner,
 	ct.encounter_date, pp.practitioner, pp.date, pp.department
 	from `tabPatient Encounter` ct, `tabProcedure Prescription` pp
-	where ct.patient='{0}' and pp.parent=ct.name and pp.appointment_booked=0
-	order by ct.creation desc""".format(patient))
+	where ct.patient=%(patient)s and pp.parent=ct.name and pp.appointment_booked=0
+	order by ct.creation desc""", {'patient': patient})
 
 
 def update_appointment_status():
