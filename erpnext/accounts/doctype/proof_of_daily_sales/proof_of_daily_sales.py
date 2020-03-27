@@ -74,13 +74,10 @@ class Proofofdailysales(Document):
 					grand_total += total_payment
 					exempt += total_payment
 					total_exempt += total_payment				
-					
-					frappe.msgprint("registers_totals:{}".format(arrmode))
 
 					if len(arrmode) > 0:
 						cont = 0
 						for arr in arrmode:
-							frappe.msgprint("arr:{}".format(arr))
 							cont += 1
 							if arr[0] == mode.name:
 								arr[1] += total_payment
@@ -97,11 +94,9 @@ class Proofofdailysales(Document):
 					sale_total += total_payment
 				
 				if sale_total < sales.total:
-					frappe.msgprint("{} {}".format(total_credit, sale_total))
 					total_credit += sales.total - sale_total
 			
 			for ar in arrmode:
-				frappe.msgprint("total:{} modo de pago: {}".format(ar[1], ar[0]))
 				row = self.append("totals_table", {})
 				row.mode_of_payment = ar[0]
 				row.total = ar[1]
@@ -120,8 +115,6 @@ class Proofofdailysales(Document):
 				rowcredit = self.append("totals_table", {})
 				rowcredit.mode_of_payment = "Credit"
 				rowcredit.total = total_credit
-				
-			frappe.msgprint("total_credit:{} ".format(total_credit))
 		
 		total_other_pay = 0
 		payments_entry = frappe.get_all("Payment Entry", ["name", "paid_amount"], filters = {"posting_date": self.billing_date, "docstatus": 1})
@@ -146,6 +139,10 @@ class Proofofdailysales(Document):
 			rowother= self.append("totals_table", {})
 			rowother.mode_of_payment = "Other Payments"
 			rowother.total = total_other_pay
+		
+		grand_total += total_other_pay
+		exempt += total_other_pay
+		total_exempt += total_other_pay
 		
 		self.create_date = create_date
 		self.rtn = rtn
