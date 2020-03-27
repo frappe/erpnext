@@ -10,11 +10,21 @@ frappe.ui.form.on("Contract", {
 		// Populate the fulfilment terms table from a contract template, if any
 		if (frm.doc.contract_template) {
 			frappe.model.with_doc("Contract Template", frm.doc.contract_template, function () {
-				var tabletransfer = frappe.model.get_doc("Contract Template", frm.doc.contract_template);
+				let tabletransfer = frappe.model.get_doc("Contract Template", frm.doc.contract_template);
 
+				// populate contract sections table
+				frm.doc.contract_sections = [];
+				$.each(tabletransfer.contract_sections, function (index, row) {
+					let d = frm.add_child("contract_sections");
+					d.section = row.section;
+					d.description = row.description;
+					frm.refresh_field("contract_sections");
+				});
+
+				// populate fulfilment terms table
 				frm.doc.fulfilment_terms = [];
 				$.each(tabletransfer.fulfilment_terms, function (index, row) {
-					var d = frm.add_child("fulfilment_terms");
+					let d = frm.add_child("fulfilment_terms");
 					d.requirement = row.requirement;
 					frm.refresh_field("fulfilment_terms");
 				});
