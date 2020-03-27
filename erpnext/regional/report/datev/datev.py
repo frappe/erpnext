@@ -109,7 +109,7 @@ def get_transactions(filters, as_dict=1):
 		WHERE gl.company = %(company)s 
 		AND DATE(gl.posting_date) >= %(from_date)s
 		AND DATE(gl.posting_date) <= %(to_date)s
-		ORDER BY 'Belegdatum', gl.voucher_no""", filters, as_dict=as_dict, as_utf8=1)
+		ORDER BY 'Belegdatum', gl.voucher_no""", filters, as_dict=as_dict)
 
 	return gl_entries
 
@@ -160,7 +160,7 @@ def get_customers(filters):
 			and ccl.company = par.company
 
 		WHERE par.company = %(company)s
-		AND par.parenttype = 'Customer'""", filters, as_dict=1, as_utf8=1)
+		AND par.parenttype = 'Customer'""", filters, as_dict=1)
 
 
 def get_suppliers(filters):
@@ -217,7 +217,7 @@ def get_suppliers(filters):
 			and con.is_primary_contact = '1'
 
 		WHERE par.company = %(company)s
-		AND par.parenttype = 'Supplier'""", filters, as_dict=1, as_utf8=1)
+		AND par.parenttype = 'Supplier'""", filters, as_dict=1)
 
 
 def get_account_names(filters):
