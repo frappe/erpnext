@@ -11,6 +11,7 @@
   "billing_date",
   "pos",
   "document_type",
+  "general_column",
   "create_date",
   "rtn",
   "billing_series",
@@ -27,17 +28,14 @@
   "isv_exempt",
   "isv_exonerated",
   "detail_totals",
-  "total_cash",
-  "total_cards",
-  "other_payments",
-  "credits",
-  "details_column_totals",
+  "totals_table",
   "total_base_isv15",
   "total_base_isv18",
   "total_exempt",
   "total_isv15",
   "total_isv18",
-  "grand_total"
+  "grand_total",
+  "company_logo"
  ],
  "fields": [
   {
@@ -173,34 +171,6 @@
    "label": "Details Totals"
   },
   {
-   "fieldname": "total_cash",
-   "fieldtype": "Currency",
-   "label": "Total Cash",
-   "read_only": 1
-  },
-  {
-   "fieldname": "total_cards",
-   "fieldtype": "Currency",
-   "label": "Total Cards",
-   "read_only": 1
-  },
-  {
-   "fieldname": "other_payments",
-   "fieldtype": "Currency",
-   "label": "Other Payments",
-   "read_only": 1
-  },
-  {
-   "fieldname": "credits",
-   "fieldtype": "Currency",
-   "label": "Credits",
-   "read_only": 1
-  },
-  {
-   "fieldname": "details_column_totals",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "total_base_isv15",
    "fieldtype": "Currency",
    "label": "Total Base ISV 15%",
@@ -235,10 +205,28 @@
    "fieldtype": "Currency",
    "label": "Grand Total",
    "read_only": 1
+  },
+  {
+   "fieldname": "totals_table",
+   "fieldtype": "Table",
+   "label": "Totals table",
+   "options": "Details totals proof of daily sales",
+   "read_only": 1
+  },
+  {
+   "fieldname": "general_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "company.company_logo",
+   "fieldname": "company_logo",
+   "fieldtype": "Data",
+   "label": "image",
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2020-03-24 22:45:01.197126",
+ "modified": "2020-03-27 02:00:51.533546",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Proof of daily sales",
