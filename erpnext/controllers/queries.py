@@ -147,7 +147,7 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 	if not tax_accounts:
 		tax_accounts = frappe.db.sql("""select name, parent_account	from tabAccount
 			where tabAccount.docstatus!=2 and is_group = 0
-				and company = %s and account_currency = %s and `%s` LIKE %s limit %s, %s"""
+				and company = %s and account_currency = %s and `%s` LIKE %s limit %s, %s""" #nosec
 			% ("%s", "%s", searchfield, "%s", "%s", "%s"),
 			(filters.get("company"), company_currency, "%%%s%%" % txt, start, page_len))
 

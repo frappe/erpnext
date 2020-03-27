@@ -9,7 +9,6 @@ from frappe.model.meta import get_field_precision
 from frappe.model.document import Document
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.accounts.doctype.account.account import get_account_currency
-from erpnext.exceptions import InvalidAccountCurrency
 
 class LandedCostVoucher(Document):
 	def get_items_from_purchase_receipts(self):
