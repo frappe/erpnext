@@ -235,7 +235,17 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	if item.variant_of:
 		item.update_template_tables()
 
-	warehouse = get_item_warehouse(item, args, overwrite_warehouse)
+	item_defaults = get_item_defaults(item.name, args.company)
+	item_group_defaults = get_item_group_defaults(item.name, args.company)
+	brand_defaults = get_brand_defaults(item.name, args.company)
+
+	defaults = {
+		'item_defaults': item_defaults,
+		'item_group_defaults': item_group_defaults,
+		'brand_defaults': brand_defaults
+	}
+	
+	warehouse = get_item_warehouse(item, args, overwrite_warehouse, defaults)
 
 	if args.get('doctype') == "Material Request" and not args.get('material_request_type'):
 		args['material_request_type'] = frappe.db.get_value('Material Request',
@@ -337,17 +347,20 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 
 	return out
 
-def get_item_warehouse(item, args, overwrite_warehouse):
-	item_defaults = get_item_defaults(item.name, args.company)
-	item_group_defaults = get_item_group_defaults(item.name, args.company)
-	brand_defaults = get_brand_defaults(item.name, args.company)
+def get_item_warehouse(item, args, overwrite_warehouse, defaults={}):
+	if not defaults:
+		defaults = {
+			'item_defaults' : get_item_defaults(item.name, args.company),
+			'item_group_defaults' : get_item_group_defaults(item.name, args.company),
+			'brand_defaults' : get_brand_defaults(item.name, args.company)
+		}
 
 	if overwrite_warehouse or not args.warehouse:
 		warehouse = (
 			args.get("set_warehouse") or
-			item_defaults.get("default_warehouse") or
-			item_group_defaults.get("default_warehouse") or
-			brand_defaults.get("default_warehouse") or
+			defaults.item_defaults.get("default_warehouse") or
+			defaults.item_group_defaults.get("default_warehouse") or
+			defaults.brand_defaults.get("default_warehouse") or
 			args.get('warehouse')
 		)
 
