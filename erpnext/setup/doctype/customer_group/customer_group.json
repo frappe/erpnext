@@ -137,11 +137,13 @@
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
+ "is_tree": 1,
  "links": [],
- "modified": "2020-01-28 13:49:23.961708",
+ "modified": "2020-03-18 18:10:13.048492",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Customer Group",
+ "nsm_parent_field": "parent_customer_group",
  "owner": "Administrator",
  "permissions": [
   {
