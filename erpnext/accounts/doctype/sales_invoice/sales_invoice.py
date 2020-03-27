@@ -193,6 +193,10 @@ class SalesInvoice(SellingController):
 				final_range = self.initial_number(cai.final_range)
 				number = self.initial_number(cai.current_numbering)
 
+				self.pos = item.pos
+
+				self.due_date_cai = cai.due_date
+
 				self.cai = cai.cai
 
 				self.authorized_range = "{} - {}".format(initial_range, final_range)
