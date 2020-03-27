@@ -9,6 +9,9 @@ from frappe.model.document import Document
 from frappe.utils import nowdate
 
 class ClinicalProcedureTemplate(Document):
+	def validate(self):
+		self.enable_disable_item()
+
 	def on_update(self):
 		#Item and Price List update --> if (change_in_item)
 		if(self.change_in_item and self.is_billable == 1 and self.item):
@@ -23,6 +26,13 @@ class ClinicalProcedureTemplate(Document):
 
 	def after_insert(self):
 		create_item_from_template(self)
+
+	def enable_disable_item(self):
+		if self.is_billable:
+			if self.disabled:
+				frappe.db.set_value('Item', self.item, 'disabled', 1)
+			else:
+				frappe.db.set_value('Item', self.item, 'disabled', 0)
 
 	#Call before delete the template
 	def on_trash(self):
@@ -63,10 +73,11 @@ def updating_rate(self):
 	 item_code=%s""",(self.template, self.rate, self.item))
 
 def create_item_from_template(doc):
-	if(doc.is_billable == 1):
+	disabled = 1
+
+	if doc.is_billable:
 		disabled = 0
-	else:
-		disabled = 1
+
 	#insert item
 	item =  frappe.get_doc({
 	"doctype": "Item",
@@ -119,12 +130,3 @@ def change_item_code_from_template(item_code, doc):
 		frappe.db.set_value("Clinical Procedure Template", doc.name, "item_code", item_code)
 	return
 
-@frappe.whitelist()
-def disable_enable_template(status, name, item_code):
-	frappe.db.set_value("Clinical Procedure Template", name, "disabled", status)
-	if (frappe.db.exists({ #set Item's disabled field to status
-		"doctype": "Item",
-		"item_code": item_code})):
-			frappe.db.set_value("Item", item_code, "disabled", status)
-
-	return
