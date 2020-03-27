@@ -265,7 +265,7 @@ def update_status(name, status):
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
-
+	
 	def postprocess(source, target_doc):
 		if frappe.flags.args and frappe.flags.args.default_supplier:
 			# items only for given default supplier

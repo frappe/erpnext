@@ -1279,8 +1279,8 @@ class POSItems {
 				</div>
 				<div class="item-group-field">
 				</div>
-			</div>
-			<div class="items-wrapper">
+				</div>
+				<div class="items-wrapper">
 			</div>
 		`);
 
@@ -1478,7 +1478,7 @@ class POSItems {
 					</div>
 				</div>
 				<div class="image-view-body">
-					<a	data-item-code="${item_code}"
+				<a	data-item-code="${item_code}"
 						title="${item_title}"
 					>
 						<div class="image-field"
@@ -1564,7 +1564,7 @@ class NumberPad {
 		}
 
 		function get_col(col) {
-			return `<div class="num-col" data-value="${col}"><div>${col}</div></div>`;
+			return `<div class="num-col" style="padding:10px" data-value="${col}"><div>${col}</div></div>`;
 		}
 
 		this.set_class();
