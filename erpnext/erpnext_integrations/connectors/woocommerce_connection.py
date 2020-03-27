@@ -54,6 +54,7 @@ def _order(*args, **kwargs):
 		raw_billing_data = order.get("billing")
 		customer_name = raw_billing_data.get("first_name") + " " + raw_billing_data.get("last_name")
 		metaDataList = order.get("meta_data")
+		customerCode = ''
 		for metaData in metaDataList:
 			if metaData['key'] == "customer_code":
 				customerCode = metaData['value']
