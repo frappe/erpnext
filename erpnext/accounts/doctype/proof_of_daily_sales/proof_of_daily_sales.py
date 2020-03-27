@@ -42,30 +42,17 @@ class Proofofdailysales(Document):
 
 		mode_pay = frappe.get_all("Mode of Payment", ["name"])
 
-		# for mode in mode_pay:
-		# 	total_payment = 0
-		# 	payments_entry = frappe.get_all("Payment Entry", ["paid_amount"], filters = {"posting_date": self.billing_date, "mode_of_payment": mode.name, "docstatus": 1})
-
-		# 	for payment in payments_entry:
-		# 		total_payment += payment.paid_amount
-			
-		# 	grand_total += total_payment
-		# 	exempt += total_payment
-		# 	total_exempt += total_payment
-
-		# 	registers_totals = frappe.get_all("Details totals proof of daily sales", ["name"], filters = {"mode_of_payment": mode.name, "parent": self.name})
-
-		# 	if len(registers_totals) > 0:
-		# 		doc = frappe.get_doc("Details totals proof of daily sales", registers_totals[0].name)
-		# 		doc.total = total_payment
-		# 		doc.save()
-		# 	else:
-		# 		row = self.append("totals_table", {})
-		# 		row.mode_of_payment = mode.name
-		# 		row.total = total_payment
-
 		payments_entry = frappe.get_all("Payment Entry", ["paid_amount"], filters = {"posting_date": self.billing_date, "docstatus": 1})
 		
+		arrmode = []
+
+		registers_total = frappe.get_all("Details totals proof of daily sales", ["mode_of_payment"], filters = {"parent": self.name})
+
+		if len(registers_total) > 0:
+			for reg in registers_total:
+				reg_pay = [reg.mode_of_payment, 0]
+				arrmode.append(reg_pay)
+
 		if len(sales_invoice) > 0 or  len(payments_entry) > 0:
 			billing_series = sales_invoice[0].numeration[0:10]
 			final_document = sales_invoice[0].numeration[11:19]
@@ -86,27 +73,38 @@ class Proofofdailysales(Document):
 						
 					grand_total += total_payment
 					exempt += total_payment
-					total_exempt += total_payment			
+					total_exempt += total_payment				
 					
-							
-					registers_totals = frappe.get_all("Details totals proof of daily sales", ["name"], filters = {"mode_of_payment": mode.name, "parent": self.name})
+					frappe.msgprint("registers_totals:{}".format(arrmode))
 
-					if len(registers_totals) > 0:
-						frappe.msgprint("total:{}".format(total_payment))
-						doc = frappe.get_doc("Details totals proof of daily sales", registers_totals[0].name)
-						doc.total = total_payment
-						doc.save()						
+					if len(arrmode) > 0:
+						cont = 0
+						for arr in arrmode:
+							frappe.msgprint("arr:{}".format(arr))
+							cont += 1
+							if arr[0] == mode.name:
+								arr[1] += total_payment
+								cont -= 1
+							
+							if cont == len(arrmode):
+								pay = [mode.name, total_payment]
+								arrmode.append(pay)
+								break
 					else:
-						frappe.msgprint("total:{} modo de pago: {}".format(total_payment, mode.name))
-						row = self.append("totals_table", {})
-						row.mode_of_payment = mode.name
-						row.total = total_payment
+						pay = [mode.name, total_payment]
+						arrmode.append(pay)
 
 					sale_total += total_payment
 				
 				if sale_total < sales.total:
 					frappe.msgprint("{} {}".format(total_credit, sale_total))
 					total_credit += sales.total - sale_total
+			
+			for ar in arrmode:
+				frappe.msgprint("total:{} modo de pago: {}".format(ar[1], ar[0]))
+				row = self.append("totals_table", {})
+				row.mode_of_payment = ar[0]
+				row.total = ar[1]
 
 			grand_total += total_credit
 			exempt += total_credit
@@ -116,14 +114,38 @@ class Proofofdailysales(Document):
 
 			if len(credit_register) > 0:
 				doccredit = frappe.get_doc("Details totals proof of daily sales", credit_register[0].name)
-				doc.total = total_credit
-				doc.save()
+				doccredit.total = total_credit
+				doccredit.save()
 			else:
 				rowcredit = self.append("totals_table", {})
 				rowcredit.mode_of_payment = "Credit"
 				rowcredit.total = total_credit
 				
 			frappe.msgprint("total_credit:{} ".format(total_credit))
+		
+		total_other_pay = 0
+		payments_entry = frappe.get_all("Payment Entry", ["name", "paid_amount"], filters = {"posting_date": self.billing_date, "docstatus": 1})
+
+		for pay_r in payments_entry:
+			references = frappe.get_all("Payment Entry Reference", ["reference_name"], filters = {"parent": pay_r.name})
+			
+			for ref in references:
+				sales_invoice = frappe.get_all("Sales Invoice", ["posting_date"], filters = {"name": ref.reference_name})
+
+				for sa_in in sales_invoice:
+					if str(sa_in.posting_date) < str(self.billing_date):
+						total_other_pay += pay_r.paid_amount
+		
+		other_register = frappe.get_all("Details totals proof of daily sales", ["name"], filters = {"mode_of_payment": "Other Payments", "parent": self.name})
+
+		if len(credit_register) > 0:
+			docother = frappe.get_doc("Details totals proof of daily sales", credit_register[0].name)
+			docother.total = total_other_pay
+			docother.save()
+		else:
+			rowother= self.append("totals_table", {})
+			rowother.mode_of_payment = "Other Payments"
+			rowother.total = total_other_pay
 		
 		self.create_date = create_date
 		self.rtn = rtn
