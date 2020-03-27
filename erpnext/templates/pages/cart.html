@@ -56,6 +56,13 @@
 		</button>
 	</div>
 	{% endif %}
+	{% if doc.items and not cart_settings.enable_checkout %}
+	<div class="place-order-container"></div>
+		<button class="btn btn-primary btn-request-for-quotation" type="button">
+			{{ _("Request for Quotation") }}
+		</button>
+	</div>
+	{% endif %}
 
 	{% if doc.items %}
 	{% if doc.tc_name %}
