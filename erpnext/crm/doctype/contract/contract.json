@@ -25,12 +25,14 @@
   "ip_address",
   "sb_contract",
   "contract_template",
-  "contract_sections",
   "contract_terms",
   "sb_fulfilment",
   "requires_fulfilment",
   "fulfilment_deadline",
   "fulfilment_terms",
+  "authorised_by_section",
+  "signee_company",
+  "signed_by_company",
   "sb_references",
   "document_type",
   "cb_links",
@@ -228,16 +230,26 @@
    "read_only": 1
   },
   {
-   "description": "The contract terms will be generated as per the sequence defined in the table",
-   "fieldname": "contract_sections",
-   "fieldtype": "Table",
-   "label": "Contract Sections",
-   "options": "Contract Template Section"
+   "fieldname": "signee_company",
+   "fieldtype": "Signature",
+   "label": "Signee (Company)"
+  },
+  {
+   "fieldname": "signed_by_company",
+   "fieldtype": "Link",
+   "label": "Signed By (Company)",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "authorised_by_section",
+   "fieldtype": "Section Break",
+   "label": "Authorised By"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-27 04:38:49.583558",
+ "modified": "2020-03-30 06:56:07.257932",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Contract",

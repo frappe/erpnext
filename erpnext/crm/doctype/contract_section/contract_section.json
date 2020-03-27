@@ -20,12 +20,11 @@
   {
    "fieldname": "description",
    "fieldtype": "Text Editor",
-   "in_list_view": 1,
    "label": "Description"
   }
  ],
  "links": [],
- "modified": "2020-03-27 04:54:25.056187",
+ "modified": "2020-03-27 08:58:37.920812",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Contract Section",
