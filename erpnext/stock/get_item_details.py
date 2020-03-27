@@ -239,11 +239,11 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	item_group_defaults = get_item_group_defaults(item.name, args.company)
 	brand_defaults = get_brand_defaults(item.name, args.company)
 
-	defaults = {
+	defaults = frappe._dict({
 		'item_defaults': item_defaults,
 		'item_group_defaults': item_group_defaults,
 		'brand_defaults': brand_defaults
-	}
+	})
 	
 	warehouse = get_item_warehouse(item, args, overwrite_warehouse, defaults)
 
@@ -349,11 +349,11 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 
 def get_item_warehouse(item, args, overwrite_warehouse, defaults={}):
 	if not defaults:
-		defaults = {
+		defaults = frappe._dict({
 			'item_defaults' : get_item_defaults(item.name, args.company),
 			'item_group_defaults' : get_item_group_defaults(item.name, args.company),
 			'brand_defaults' : get_brand_defaults(item.name, args.company)
-		}
+		})
 
 	if overwrite_warehouse or not args.warehouse:
 		warehouse = (
