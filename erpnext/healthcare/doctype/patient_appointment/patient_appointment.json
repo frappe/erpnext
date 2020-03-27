@@ -90,7 +90,7 @@
    "in_filter": 1,
    "in_list_view": 1,
    "label": "Status",
-   "options": "\nScheduled\nOpen\nClosed\nExpired\nCancelled",
+   "options": "\nScheduled\nOpen\nClosed\nCancelled",
    "read_only": 1,
    "search_index": 1
   },
@@ -285,7 +285,7 @@
   }
  ],
  "links": [],
- "modified": "2020-03-02 14:35:54.040428",
+ "modified": "2020-03-27 11:27:33.773195",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",

@@ -13,7 +13,7 @@ def execute(filters=None):
 
 class Analytics(object):
 	def __init__(self, filters=None):
-		"""Patient Appointment Analytics Report"""
+		"""Patient Appointment Analytics Report."""
 		self.filters = frappe._dict(filters or {})
 		self.months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 		self.get_period_date_ranges()
