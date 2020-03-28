@@ -285,7 +285,7 @@ def get_datev_csv(data, filters, csv_class):
 
 def get_header(filters, csv_class):
 	coa = frappe.get_value("Company", filters.get("company"), "chart_of_accounts")
-	coa_used = "SKR04" if "SKR04" in coa else ("SKR03" if "SKR03" in coa else "")
+	coa_used = "04" if "SKR04" in coa else ("03" if "SKR03" in coa else "")
 
 	header = [
 		# DATEV format
@@ -302,7 +302,7 @@ def get_header(filters, csv_class):
 		# Format version (regarding format name)
 		csv_class.FORMAT_VERSION,
 		# Generated on
-		datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+		datetime.datetime.now().strftime("%Y%m%d%H%M%S") + '000',
 		# Imported on -- stays empty
 		'',
 		# Origin. Any two symbols, will be replaced by "SV" on import.
@@ -336,9 +336,17 @@ def get_header(filters, csv_class):
 		#   2 = Annual financial statement (Jahresabschluss)
 		'1' if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
 		# T = Rechnungslegungszweck
-		'',
+        #   0 oder leer = vom Rechnungslegungszweck unabhängig
+        #   50 = Handelsrecht
+        #   30 = Steuerrecht
+        #   64 = IFRS
+        #   40 = Kalkulatorik
+        #   11 = Reserviert
+        #   12 = Reserviert
+		'0',
 		# U = Festschreibung
-		'',
+        # TODO: Filter by Accounting Period. In export for closed Accounting Period, this will be "1"
+		'0',
 		# V = Default currency, for example, "EUR"
 		'"%s"' % frappe.get_value("Company", filters.get("company"), "default_currency"),
 		# reserviert
