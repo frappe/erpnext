@@ -11,12 +11,29 @@ from frappe.model.document import Document
 class AssetCategory(Document):
 	def validate(self):
 		self.validate_finance_books()
+		self.validate_accounts()
 
 	def validate_finance_books(self):
 		for d in self.finance_books:
 			for field in ("Total Number of Depreciations", "Frequency of Depreciation"):
 				if cint(d.get(frappe.scrub(field)))<1:
 					frappe.throw(_("Row {0}: {1} must be greater than 0").format(d.idx, field), frappe.MandatoryError)
+	
+	def validate_accounts(self):
+		account_type_map = {
+			'fixed_asset_account': { 'account_type': 'Fixed Asset' },
+			'accumulated_depreciation_account': { 'account_type': 'Accumulated Depreciation' },
+			'depreciation_expense_account': { 'account_type': 'Expense' },
+			'capital_work_in_progress_account': { 'account_type': 'Capital Work in Progress' }
+		}
+		for d in self.accounts:
+			for account in account_type_map.keys():
+				if d.get(account):
+					account_type = frappe.db.get_value('Account', d.get(account), 'account_type')
+					if account_type != account_type_map[account]['account_type']:
+						frappe.throw(_("Row {}: Account Type of {} should be {} account".format(d.idx, frappe.bold(frappe.unscrub(account)),
+							frappe.bold(account_type_map[account]['account_type']))), title=_("Invalid Account"))
+
 
 @frappe.whitelist()
 def get_asset_category_account(fieldname, item=None, asset=None, account=None, asset_category = None, company = None):
