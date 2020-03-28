@@ -31,7 +31,7 @@ class AssetCategory(Document):
 				if d.get(account):
 					account_type = frappe.db.get_value('Account', d.get(account), 'account_type')
 					if account_type != account_type_map[account]['account_type']:
-						frappe.throw(_("Row {}: {} should be a {} account".format(d.idx, frappe.bold(frappe.unscrub(account)),
+						frappe.throw(_("Row {}: Account Type of {} should be {} account".format(d.idx, frappe.bold(frappe.unscrub(account)),
 							frappe.bold(account_type_map[account]['account_type']))), title=_("Invalid Account"))
 
 
