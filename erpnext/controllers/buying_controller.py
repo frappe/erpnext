@@ -745,7 +745,7 @@ class BuyingController(StockController):
 							asset.supplier = None
 						if asset.docstatus == 1 and delete_asset:
 							frappe.throw(_('Cannot cancel this document as it is linked with submitted asset {0}.\
-								Please cancel the it to continue.').format(asset.name))
+								Please cancel the it to continue.').format(frappe.utils.get_link_to_form('Asset', asset.name)))
 
 					asset.flags.ignore_validate_update_after_submit = True
 					asset.flags.ignore_mandatory = True
