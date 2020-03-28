@@ -281,7 +281,7 @@ def validate_party_gle_currency(party_type, party, company, party_account_curren
 	existing_gle_currency = get_party_gle_currency(party_type, party, company)
 
 	if existing_gle_currency and party_account_currency != existing_gle_currency:
-		frappe.throw(_("{0} : {1} has accounting entries in currency {2} for company {3}. Please select a receivable or payable account with currency {2}.")
+		frappe.throw(_("{0} {1} has accounting entries in currency {2} for company {3}. Please select a receivable or payable account with currency {2}.")
 			.format(frappe.bold(party_type), frappe.bold(party), frappe.bold(existing_gle_currency), frappe.bold(company)))
 		
 
