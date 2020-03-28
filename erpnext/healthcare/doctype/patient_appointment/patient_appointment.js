@@ -288,12 +288,19 @@ var check_and_set_availability = function(frm) {
 };
 
 var get_procedure_prescribed = function(frm){
-	if(frm.doc.patient){
+	if (frm.doc.patient) {
 		frappe.call({
 			method:"erpnext.healthcare.doctype.patient_appointment.patient_appointment.get_procedure_prescribed",
 			args: {patient: frm.doc.patient},
-			callback: function(r){
-				show_procedure_templates(frm, r.message);
+			callback: function(r) {
+				if (r.message && r.message.length) {
+					show_procedure_templates(frm, r.message);
+				} else {
+					frappe.msgprint({
+						title: __('Not Found'),
+						message: __('No Prescribed Procedures found for the selected Patient')
+					});
+				}
 			}
 		});
 	}
