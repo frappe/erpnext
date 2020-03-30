@@ -279,7 +279,7 @@ class WorkOrder(Document):
 			if enable_capacity_planning and job_card_doc:
 				row.planned_start_time = job_card_doc.time_logs[-1].from_time
 				row.planned_end_time = job_card_doc.time_logs[-1].to_time
-
+				print(row.planned_start_time, original_start_time, plan_days)
 				if date_diff(row.planned_start_time, original_start_time) > plan_days:
 					frappe.message_log.pop()
 					frappe.throw(_("Unable to find the time slot in the next {0} days for the operation {1}.")
@@ -314,7 +314,7 @@ class WorkOrder(Document):
 		stock_entry = frappe.db.sql("""select name from `tabStock Entry`
 			where work_order = %s and docstatus = 1""", self.name)
 		if stock_entry:
-			frappe.throw(_("Cannot cancel because submitted Stock Entry {0} exists").format(stock_entry[0][0]))
+			frappe.throw(_("Cannot cancel because submitted Stock Entry {0} exists").format(frappe.utils.get_link_to_form('Stock Entry', stock_entry[0][0])))
 
 	def update_planned_qty(self):
 		update_bin_qty(self.production_item, self.fg_warehouse, {
@@ -468,15 +468,15 @@ class WorkOrder(Document):
 		update bin reserved_qty_for_production
 		called from Stock Entry for production, after submit, cancel
 		'''
+		# calculate consumed qty based on submitted stock entries
+		self.update_consumed_qty_for_required_items()
+
 		if self.docstatus==1:
 			# calculate transferred qty based on submitted stock entries
 			self.update_transaferred_qty_for_required_items()
 
 			# update in bin
 			self.update_reserved_qty_for_production()
-
-		# calculate consumed qty based on submitted stock entries
-		self.update_consumed_qty_for_required_items()
 
 	def update_reserved_qty_for_production(self, items=None):
 		'''update reserved_qty_for_production in bins'''

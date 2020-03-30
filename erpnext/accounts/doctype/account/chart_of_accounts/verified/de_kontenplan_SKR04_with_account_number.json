@@ -917,17 +917,31 @@
                 "is_group": 1,
                 "I - Gezeichnetes Kapital": {
                     "account_type": "Equity",
-                    "is_group": 1
+					"is_group": 1,
+					"Gezeichnetes Kapital": {
+						"account_type": "Equity",
+						"account_number": "2900"
+					},
+					"Ausstehende Einlagen auf das gezeichnete Kapital": {
+						"account_number": "2910",
+						"is_group": 1
+					}
                 },
                 "II - Kapitalr\u00fccklage": {
                     "account_type": "Equity",
-                    "is_group": 1
+					"is_group": 1,
+					"Kapitalr\u00fccklage": {
+						"account_number": "2920"
+					}
                 },
                 "III - Gewinnr\u00fccklagen": {
                     "account_type": "Equity",
                     "1 - gesetzliche R\u00fccklage": {
                         "account_type": "Equity",
-                        "is_group": 1
+						"is_group": 1,
+						"Gesetzliche R\u00fccklage": {
+							"account_number": "2930"
+						}
                     },
                     "2 - R\u00fccklage f. Anteile an einem herrschenden oder mehrheitlich beteiligten Unternehmen": {
                         "account_type": "Equity",
@@ -935,7 +949,10 @@
                     },
                     "3 - satzungsm\u00e4\u00dfige R\u00fccklagen": {
                         "account_type": "Equity",
-                        "is_group": 1
+						"is_group": 1,
+						"Satzungsm\u00e4\u00dfige R\u00fccklagen": {
+							"account_number": "2950"
+						}
                     },
                     "4 - andere Gewinnr\u00fccklagen": {
                         "account_type": "Equity",
@@ -969,7 +986,13 @@
                 },
                 "IV - Gewinnvortrag/Verlustvortrag": {
                     "account_type": "Equity",
-                    "is_group": 1
+                    "is_group": 1,
+					"Gewinnvortrag vor Verwendung": {
+						"account_number": "2970"
+					},
+					"Verlustvortrag vor Verwendung": {
+						"account_number": "2978"
+					}
                 },
                 "V - Jahres\u00fcberschu\u00df/Jahresfehlbetrag": {
                     "account_type": "Equity",
@@ -1663,7 +1686,15 @@
             "Erl\u00f6se 7 % USt": {
                 "account_number": "4300",
                 "account_type": "Income Account"
-            },
+			},
+			"Erl\u00f6se 16 % USt": {
+				"account_number": "4340",
+                "account_type": "Income Account"
+			},
+			"Erl\u00f6se 19 % USt": {
+				"account_number": "4400",
+				"account_type": "Income Account"
+			},
             "Erl\u00f6se aus im Inland steuerpfl. EU-Lieferungen 7 % USt": {
                 "account_number": "4310"
             },
@@ -1690,19 +1721,6 @@
             },
             "Erl\u00f6se aus im anderen EU-Land steuerbaren Leistungen, im Inland nicht steuerbare Ums\u00e4tze": {
                 "account_number": "4339"
-            },
-            "Erl\u00f6se 16 % USt (Gruppe)": {
-                "is_group": 1,
-                "Erl\u00f6se 16 % USt": {
-                    "account_number": "4340"
-                }
-            },
-            "Erl\u00f6se 19 % USt (Gruppe)": {
-                "is_group": 1,
-                "Erl\u00f6se 19 % USt": {
-                    "account_number": "4400",
-                    "account_type": "Income Account"
-                }
             },
             "Grundst\u00fccksertr\u00e4ge (Gruppe)": {
                 "is_group": 1,
@@ -1762,14 +1780,12 @@
         "2 - Herstellungskosten der zur Erzielung der Umsatzerl\u00f6se erbrachten Leistungen": {
             "root_type": "Expense",
             "is_group": 1,
-            "Herstellungskosten (Gruppe)": {
-                "Herstellungskosten": {
-                    "account_number": "6990",
-                    "account_type": "Cost of Goods Sold"
-                },
-                "Herstellungskosten: Schwund": {
-                    "account_type": "Stock Adjustment"
-                }
+			"Herstellungskosten": {
+				"account_number": "6990",
+				"account_type": "Cost of Goods Sold"
+			},
+			"Herstellungskosten: Schwund": {
+				"account_type": "Stock Adjustment"
             },
             "Aufwendungen f. Roh-, Hilfs- und Betriebsstoffe und f. bezogene Waren": {
                 "account_number": "5000",
@@ -1819,10 +1835,10 @@
                     "Energiestoffe (Fertigung)": {
                         "account_number": "5190"
                     },
-                    "Energiestoffe (Fertigung)7% Vorsteuer": {
+                    "Energiestoffe (Fertigung) 7% Vorsteuer": {
                         "account_number": "5191"
                     },
-                    "Energiestoffe (Fertigung)19% Vorsteuer": {
+                    "Energiestoffe (Fertigung) 19% Vorsteuer": {
                         "account_number": "5192"
                     }
                 }
@@ -1945,49 +1961,49 @@
                 },
                 "Nachl\u00e4sse aus innergem. Erwerb 15 % Vorsteuer und 15 % Umsatzsteuer": {
                     "account_number": "5727"
-                },
-                "Erhaltene Skonti (Gruppe)": {
-                    "is_group": 1,
-                    "Erh. Skonti": {
-                        "account_number": "5730"
-                    },
-                    "Erh. Skonti 7 % Vorsteuer": {
-                        "account_number": "5731"
-                    },
-                    "Erh. Skonti aus Einkauf Roh-, Hilfs- und Betriebsstoffe": {
-                        "account_number": "5733"
-                    },
-                    "Erh. Skonti aus Einkauf Roh-, Hilfs- und Betriebsstoffe 7% Vorsteuer": {
-                        "account_number": "5734"
-                    },
-                    "Erh. Skonti 19 % Vorsteuer": {
-                        "account_number": "5736"
-                    },
-                    "Erh. Skonti aus Einkauf Roh-, Hilfs- und Betriebsstoffe 19% Vorsteuer": {
-                        "account_number": "5738"
-                    },
-                    "Erh. Skonti aus Einkauf Roh-, Hilfs- und Betriebsstoffe aus steuerpfl. innergem. Erwerb 19% Vorst. u. 19% Ust.": {
-                        "account_number": "5741"
-                    },
-                    "Erh. Skonti aus Einkauf Roh-, Hilfs- und Betriebsstoffe aus steuerpfl. innergem. Erwerb 7% Vorst. u. 7% Ust.": {
-                        "account_number": "5743"
-                    },
-                    "Erh. Skonti aus steuerpflichtigem innergem. Erwerb": {
-                        "account_number": "5745"
-                    },
-                    "Erh. Skonti aus steuerpflichtigem innergem. Erwerb 7% Vorst. u. 7% Ust.": {
-                        "account_number": "5746"
-                    },
-                    "Erh. Skonti aus steuerpflichtigem innergem. Erwerb 19% Vorst. u. 19% Ust.": {
-                        "account_number": "5748"
-                    },
-                    "Erh. Skonti aus Erwerb Roh-,Hilfs-,Betriebsstoff letzter Abn.innerh.Dreiecksg. 19% Vorst. und 19% Ust.": {
-                        "account_number": "5792"
-                    },
-                    "Erh. Skonti aus Erwerb Waren als letzter Abnehmer innerh. Dreiecksgesch. 19% Vorst. u. 19% Ust.": {
-                        "account_number": "5793"
-                    }
-                }
+				}
+			},
+			"Erhaltene Skonti (Gruppe)": {
+				"is_group": 1,
+				"Erh. Skonti": {
+					"account_number": "5730"
+				},
+				"Erh. Skonti 7 % Vorsteuer": {
+					"account_number": "5731"
+				},
+				"Erh. Skonti aus Einkauf Roh-, Hilfs- und Betriebsstoffe": {
+					"account_number": "5733"
+				},
+				"Erh. Skonti aus Einkauf Roh-, Hilfs- und Betriebsstoffe 7% Vorsteuer": {
+					"account_number": "5734"
+				},
+				"Erh. Skonti 19 % Vorsteuer": {
+					"account_number": "5736"
+				},
+				"Erh. Skonti aus Einkauf Roh-, Hilfs- und Betriebsstoffe 19% Vorsteuer": {
+					"account_number": "5738"
+				},
+				"Erh. Skonti aus Einkauf Roh-, Hilfs- und Betriebsstoffe aus steuerpfl. innergem. Erwerb 19% Vorst. u. 19% Ust.": {
+					"account_number": "5741"
+				},
+				"Erh. Skonti aus Einkauf Roh-, Hilfs- und Betriebsstoffe aus steuerpfl. innergem. Erwerb 7% Vorst. u. 7% Ust.": {
+					"account_number": "5743"
+				},
+				"Erh. Skonti aus steuerpflichtigem innergem. Erwerb": {
+					"account_number": "5745"
+				},
+				"Erh. Skonti aus steuerpflichtigem innergem. Erwerb 7% Vorst. u. 7% Ust.": {
+					"account_number": "5746"
+				},
+				"Erh. Skonti aus steuerpflichtigem innergem. Erwerb 19% Vorst. u. 19% Ust.": {
+					"account_number": "5748"
+				},
+				"Erh. Skonti aus Erwerb Roh-,Hilfs-,Betriebsstoff letzter Abn.innerh.Dreiecksg. 19% Vorst. und 19% Ust.": {
+					"account_number": "5792"
+				},
+				"Erh. Skonti aus Erwerb Waren als letzter Abnehmer innerh. Dreiecksgesch. 19% Vorst. u. 19% Ust.": {
+					"account_number": "5793"
+				}
             },
             "Bezugsnebenkosten (Gruppe)": {
                 "is_group": 1,
