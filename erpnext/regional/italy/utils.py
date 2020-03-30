@@ -13,6 +13,8 @@ from erpnext.regional.italy import state_codes
 def update_itemised_tax_data(doc):
 	if not doc.taxes: return
 
+	if doc.doctype == "Purchase Invoice": return
+
 	itemised_tax = get_itemised_tax(doc.taxes)
 
 	for row in doc.items:
