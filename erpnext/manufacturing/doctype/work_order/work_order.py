@@ -314,7 +314,7 @@ class WorkOrder(Document):
 		stock_entry = frappe.db.sql("""select name from `tabStock Entry`
 			where work_order = %s and docstatus = 1""", self.name)
 		if stock_entry:
-			frappe.throw(_("Cannot cancel because submitted Stock Entry {0} exists").format(stock_entry[0][0]))
+			frappe.throw(_("Cannot cancel because submitted Stock Entry {0} exists").format(frappe.utils.get_link_to_form('Stock Entry', stock_entry[0][0])))
 
 	def update_planned_qty(self):
 		update_bin_qty(self.production_item, self.fg_warehouse, {
