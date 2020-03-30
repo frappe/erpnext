@@ -7,13 +7,23 @@
  "engine": "InnoDB",
  "field_order": [
   "disabled",
+  "section_break_2",
   "therapy_type",
   "default_duration",
+  "medical_department",
   "column_break_3",
   "is_billable",
   "rate",
+  "item_details_section",
+  "item",
+  "item_code",
+  "item_name",
+  "item_group",
+  "column_break_12",
+  "description",
   "section_break_6",
-  "exercises"
+  "exercises",
+  "change_in_item"
  ],
  "fields": [
   {
@@ -43,7 +53,8 @@
   },
   {
    "fieldname": "section_break_6",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Exercises"
   },
   {
    "fieldname": "exercises",
@@ -61,10 +72,71 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "fieldname": "item_details_section",
+   "fieldtype": "Section Break",
+   "label": "Item Details"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Data",
+   "label": "Item Code",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "medical_department",
+   "fieldtype": "Link",
+   "label": "Medical Department",
+   "options": "Medical Department"
+  },
+  {
+   "default": "0",
+   "fieldname": "change_in_item",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Change In Item",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
   }
  ],
  "links": [],
- "modified": "2020-03-30 22:11:39.764500",
+ "modified": "2020-03-30 23:29:45.412288",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Type",

@@ -11,7 +11,7 @@ frappe.ui.form.on('Therapy Plan', {
 	},
 
 	refresh: function(frm) {
-		if (!frm.doc.__islocal) {
+		if (!frm.doc.__islocal && frm.doc.status != 'Completed') {
 			let therapy_types = (frm.doc.therapy_plan_details || []).map(function(d){ return d.therapy_type });
 			const fields = [{
 				fieldtype: 'Link',
