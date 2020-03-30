@@ -289,13 +289,13 @@ def get_header(filters, csv_class):
 
 	header = [
 		# DATEV format
-		#   "DTVF" = created by DATEV software,
-		#   "EXTF" = created by other software
+		#	"DTVF" = created by DATEV software,
+		#	"EXTF" = created by other software
 		'"EXTF"',
 		# version of the DATEV format
-		#   141 = 1.41, 
-		#   510 = 5.10,
-		#   720 = 7.20
+		#	141 = 1.41, 
+		#	510 = 5.10,
+		#	720 = 7.20
 		'700',
 		csv_class.DATA_CATEGORY,
 		'"%s"' % csv_class.FORMAT_NAME,
@@ -332,20 +332,20 @@ def get_header(filters, csv_class):
 		# R = Diktatkürzel
 		'',
 		# S = Buchungstyp
-		#   1 = Transaction batch (Finanzbuchführung),
-		#   2 = Annual financial statement (Jahresabschluss)
+		#	1 = Transaction batch (Finanzbuchführung),
+		#	2 = Annual financial statement (Jahresabschluss)
 		'1' if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
 		# T = Rechnungslegungszweck
-        #   0 oder leer = vom Rechnungslegungszweck unabhängig
-        #   50 = Handelsrecht
-        #   30 = Steuerrecht
-        #   64 = IFRS
-        #   40 = Kalkulatorik
-        #   11 = Reserviert
-        #   12 = Reserviert
+		#	0 oder leer = vom Rechnungslegungszweck unabhängig
+		#	50 = Handelsrecht
+		#	30 = Steuerrecht
+		#	64 = IFRS
+		#	40 = Kalkulatorik
+		#	11 = Reserviert
+		#	12 = Reserviert
 		'0',
 		# U = Festschreibung
-        # TODO: Filter by Accounting Period. In export for closed Accounting Period, this will be "1"
+		# TODO: Filter by Accounting Period. In export for closed Accounting Period, this will be "1"
 		'0',
 		# V = Default currency, for example, "EUR"
 		'"%s"' % frappe.get_value("Company", filters.get("company"), "default_currency"),
