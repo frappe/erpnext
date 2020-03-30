@@ -112,7 +112,7 @@ def get_transactions(filters, as_dict=1):
 		WHERE gl.company = %(company)s 
 		AND DATE(gl.posting_date) >= %(from_date)s
 		AND DATE(gl.posting_date) <= %(to_date)s
-        {}
+		{}
 		ORDER BY 'Belegdatum', gl.voucher_no""".format(filter_by_voucher), filters, as_dict=as_dict)
 
 	return gl_entries
