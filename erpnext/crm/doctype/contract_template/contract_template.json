@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_rename": 1,
  "autoname": "field:title",
  "creation": "2018-04-16 06:44:48.791312",
  "doctype": "DocType",
@@ -7,7 +8,6 @@
  "engine": "InnoDB",
  "field_order": [
   "title",
-  "sb_terms",
   "contract_sections",
   "contract_terms",
   "sb_fulfilment",
@@ -22,14 +22,10 @@
    "unique": 1
   },
   {
-   "fieldname": "sb_terms",
-   "fieldtype": "Section Break",
-   "label": "Contract Terms"
-  },
-  {
    "fieldname": "contract_terms",
    "fieldtype": "Text Editor",
-   "label": "Contract Terms and Conditions"
+   "label": "Contract Terms and Conditions",
+   "read_only": 1
   },
   {
    "fieldname": "sb_fulfilment",
@@ -57,7 +53,7 @@
   }
  ],
  "links": [],
- "modified": "2020-03-27 04:37:07.186235",
+ "modified": "2020-03-27 09:02:33.364693",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Contract Template",
