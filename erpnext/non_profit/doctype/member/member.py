@@ -14,7 +14,10 @@ class Member(Document):
 
 
 	def validate(self):
-		self.validate_email_type(self.email)
+		if self.email:
+			self.validate_email_type(self.email)
+		if self.email_id:
+			self.validate_email_type(self.email_id)
 
 	def validate_email_type(self, email):
 		from frappe.utils import validate_email_address

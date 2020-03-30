@@ -5,7 +5,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import add_days, add_years, nowdate, getdate
+from frappe.utils import add_days, add_years, nowdate, getdate, add_months, cint
+from frappe.integrations.utils import get_payment_gateway_controller
 from frappe import _
 import erpnext
 
@@ -43,11 +44,109 @@ class Membership(Document):
 		else:
 			self.from_date = nowdate()
 
-		self.to_date = add_years(self.from_date, 1)
+		if frappe.db.get_single_value("Membership Settings", "billing_cycle") == "Yearly":
+			self.to_date = add_years(self.from_date, 1)
+		else:
+			self.to_date = add_months(self.from_date, 1)
 
 	def on_payment_authorized(self, status_changed_to=None):
 		if status_changed_to in ("Completed", "Authorized"):
 			self.load_from_db()
 			self.db_set('paid', 1)
 
+	def setup_subscription(self):
+		membership_settings = frappe.get_doc("Membership Settings")
+		if not membership_settings.enable_razorpay:
+			frappe.throw("Please enable Razorpay to setup subscription")
 
+		controller = get_payment_gateway_controller("Razorpay")
+		settings = controller.get_settings({})
+
+		plan_id = frappe.get_value("Membership Type", self.membership_type, "razorpay_plan_id")
+
+		if not plan_id:
+			frappe.throw(_("Please setup Razorpay Plan ID"))
+
+		subscription_details = {
+			"plan_id": plan_id,
+			"billing_frequency": cint(membership_settings.billing_frequency),
+			"customer_notify": 1
+		}
+
+		args = {
+			'subscription_details': subscription_details
+		}
+
+		subscription = controller.setup_subscription(settings, **args)
+
+		return subscription
+
+
+def get_member_if_exists(email, plan):
+	member_list = frappe.get_all("Member", filters={'email': email, 'membership_type': plan})
+	if member_list and member_list[0]:
+		return member_list[0]['name']
+	else:
+		return None
+
+def create_member(user_details):
+	member = frappe.new_doc("Member")
+	member.update({
+		"member_name": user_details.fullname,
+		"email_id": user_details.email,
+		"pan_number": user_details.pan,
+		"membership_type": user_details.plan_id,
+		"customer": create_customer(user_details)
+	})
+
+	member.insert(ignore_permissions=True)
+	return member
+
+def create_customer(user_details):
+	customer = frappe.new_doc("Customer")
+	customer.customer_name = user_details.fullname
+	customer.customer_type = "Individual"
+	customer.insert(ignore_permissions=True)
+
+	try:
+		contact = frappe.new_doc("Contact")
+		contact.first_name = user_details.fullname
+		contact.add_phone(user_details.mobile, is_primary_phone=1, is_primary_mobile_no=1)
+		contact.add_email(user_details.email, is_primary=1)
+		contact.insert(ignore_permissions=True)
+
+		contact.append("links", {
+			"link_doctype": "Customer",
+			"link_name": customer.name
+		})
+
+		contact.insert()
+	except Exception:
+		error_log = frappe.log_error(frappe.get_traceback(), _("Contact Creation Failed"))
+
+	return customer.name
+
+def create_membership(member):
+	membership = frappe.new_doc("Membership")
+	membership.update({
+		"member": member.name,
+		"membership_status": "New",
+		"membership_type": member.membership_type,
+		"currency": "INR",
+		"amount": plan.amount
+	})
+
+	membership.insert(ignore_permissions=True)
+
+@frappe.whitelist(allow_guest=True)
+def create_membership_subscription(user_details):
+	# {"plan_id":"IFF Starter","fullname":"Shivam Mishra","mobile":"7506056962","email":"shivam@shivam.dev","pan":"Testing123"}
+	user_details = frappe._dict(user_details)
+	member = get_member_if_exists(user_details.email, user_details.plan_id)
+	plan = frappe.get_doc("Membership Type", user_details.plan_id)
+	if not member:
+		member = create_member(user_details)
+
+	membership = create_membership(member, plan)
+
+	return membership.setup_subscription()
