@@ -523,12 +523,15 @@ def get_delivery_note_serial_no(item_code, qty, delivery_note):
 	return serial_nos
 
 @frappe.whitelist()
-def auto_fetch_serial_number(qty, item_code, warehouse, batch_no=None):
-	serial_numbers = frappe.get_list("Serial No", filters={
+def auto_fetch_serial_number(qty, item_code, warehouse, batch_nos=None):
+	import json
+	filters = {
 		"item_code": item_code,
 		"warehouse": warehouse,
-		"batch_no": batch_no,
 		"delivery_document_no": "",
 		"sales_invoice": ""
-	}, limit=qty, order_by="creation")
+	}
+	if batch_nos: filters["batch_no"] = ["in", json.loads(batch_nos)]
+
+	serial_numbers = frappe.get_list("Serial No", filters=filters, limit=qty, order_by="creation")
 	return [item['name'] for item in serial_numbers]

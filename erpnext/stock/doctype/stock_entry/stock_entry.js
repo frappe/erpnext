@@ -60,7 +60,8 @@ frappe.ui.form.on('Stock Entry', {
 					}
 				}
 
-				if(item.s_warehouse) filters["warehouse"] = item.s_warehouse;
+				filters["warehouse"] = item.s_warehouse || item.t_warehouse;
+
 				return {
 					query : "erpnext.controllers.queries.get_batch_no",
 					filters: filters
@@ -964,7 +965,7 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 		}
 	}
 
-	if(item && !item.has_serial_no && item.has_batch_no) return;
+	if(item && !item.has_serial_no && !item.has_batch_no) return;
 	if (frm.doc.purpose === 'Material Receipt') return;
 
 	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
