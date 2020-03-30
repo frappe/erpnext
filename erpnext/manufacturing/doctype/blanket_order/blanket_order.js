@@ -14,27 +14,37 @@ frappe.ui.form.on('Blanket Order', {
 	refresh: function(frm) {
 		erpnext.hide_company();
 		if (frm.doc.customer && frm.doc.docstatus === 1) {
-			frm.add_custom_button(__('View Orders'), function() {
-				frappe.set_route('List', 'Sales Order', {blanket_order: frm.doc.name});
-			});
-			frm.add_custom_button(__("Create Sales Order"), function(){
+			frm.add_custom_button(__("Sales Order"), function() {
 				frappe.model.open_mapped_doc({
-					method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.make_sales_order",
-					frm: frm
+					method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.make_order",
+					frm: frm,
+					args: {
+						doctype: 'Sales Order'
+					}
 				});
-			}).addClass("btn-primary");
+			}, __('Create'));
+
+			frm.add_custom_button(__("Quotation"), function() {
+				frappe.model.open_mapped_doc({
+					method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.make_order",
+					frm: frm,
+					args: {
+						doctype: 'Quotation'
+					}
+				});
+			}, __('Create'));
 		}
 
 		if (frm.doc.supplier && frm.doc.docstatus === 1) {
-			frm.add_custom_button(__('View Orders'), function() {
-				frappe.set_route('List', 'Purchase Order', {blanket_order: frm.doc.name});
-			});
-			frm.add_custom_button(__("Create Purchase Order"), function(){
+			frm.add_custom_button(__("Purchase Order"), function(){
 				frappe.model.open_mapped_doc({
-					method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.make_purchase_order",
-					frm: frm
+					method: "erpnext.manufacturing.doctype.blanket_order.blanket_order.make_order",
+					frm: frm,
+					args: {
+						doctype: 'Purchase Order'
+					}
 				});
-			}).addClass("btn-primary");
+			}, __('Create'));
 		}
 	},
 
