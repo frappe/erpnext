@@ -1,0 +1,22 @@
+{
+ "cards": [],
+ "charts": [],
+ "creation": "2020-01-28 11:49:55.003637",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "docstatus": 0,
+ "doctype": "Desk Page",
+ "extends_another_page": 0,
+ "icon": "",
+ "idx": 0,
+ "is_standard": 1,
+ "label": "Communication",
+ "modified": "2020-03-12 16:30:40.534226",
+ "modified_by": "Administrator",
+ "module": "Communication",
+ "name": "Communication",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": []
+}

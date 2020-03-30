@@ -129,11 +129,13 @@
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
+ "is_tree": 1,
  "links": [],
- "modified": "2019-12-12 14:48:35.254308",
+ "modified": "2020-03-18 18:03:27.784362",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Department",
+ "nsm_parent_field": "parent_department",
  "owner": "Administrator",
  "permissions": [
   {
