@@ -507,6 +507,14 @@ def make_custom_fields(update=True):
 				'depends_on':'eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
 				'options': '\nWith Payment of Tax\nWithout Payment of Tax'
 			}
+		],
+		"Member": [
+			{
+				'fieldname': 'pan_number',
+				'label': 'PAN Details',
+				'fieldtype': 'Data',
+				'insert_after': 'email'
+			}
 		]
 	}
 	create_custom_fields(custom_fields, update=update)
