@@ -424,8 +424,13 @@ def install_country_fixtures(company):
 	company_doc = frappe.get_doc("Company", company)
 	path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(company_doc.country))
 	if os.path.exists(path.encode("utf-8")):
-		frappe.get_attr("erpnext.regional.{0}.setup.setup"
-			.format(frappe.scrub(company_doc.country)))(company_doc, False)
+		try:
+			module_name = "erpnext.regional.{0}.setup.setup".format(frappe.scrub(company_doc.country))
+			frappe.get_attr(module_name)(company_doc, False)
+		except Exception as e:
+			frappe.log_error(str(e), frappe.get_traceback())
+			frappe.throw(_("Failed to setup defaults for country {0}. Please contact support@erpnext.com").format(frappe.bold(company_doc.country)))
+
 
 def update_company_current_month_sales(company):
 	current_month_year = formatdate(today(), "MM-yyyy")

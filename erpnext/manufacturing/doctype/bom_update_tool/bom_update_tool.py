@@ -14,10 +14,13 @@ import click
 class BOMUpdateTool(Document):
 	def replace_bom(self):
 		self.validate_bom()
-		self.update_new_bom()
+
+		unit_cost = get_new_bom_unit_cost(self.new_bom)
+		self.update_new_bom(unit_cost)
+
 		frappe.cache().delete_key('bom_children')
 		bom_list = self.get_parent_boms(self.new_bom)
-		updated_bom = []
+
 		with click.progressbar(bom_list) as bom_list:
 			pass
 		for bom in bom_list:
@@ -26,7 +29,9 @@ class BOMUpdateTool(Document):
 				# this is only used for versioning and we do not want
 				# to make separate db calls by using load_doc_before_save
 				# which proves to be expensive while doing bulk replace
-				bom_obj._doc_before_save = bom_obj.as_dict()
+				bom_obj._doc_before_save = bom_obj
+				bom_obj.update_new_bom(self.current_bom, self.new_bom, unit_cost)
+				bom_obj.update_exploded_items()
 				bom_obj.calculate_cost()
 				bom_obj.update_parent_cost()
 				bom_obj.db_update()
@@ -43,14 +48,10 @@ class BOMUpdateTool(Document):
 			!= frappe.db.get_value("BOM", self.new_bom, "item"):
 				frappe.throw(_("The selected BOMs are not for the same item"))
 
-	def update_new_bom(self):
-		new_bom_unitcost = frappe.db.sql("""SELECT `total_cost`/`quantity`
-			FROM `tabBOM` WHERE name = %s""", self.new_bom)
-		new_bom_unitcost = flt(new_bom_unitcost[0][0]) if new_bom_unitcost else 0
-
+	def update_new_bom(self, unit_cost):
 		frappe.db.sql("""update `tabBOM Item` set bom_no=%s,
 			rate=%s, amount=stock_qty*%s where bom_no = %s and docstatus < 2 and parenttype='BOM'""",
-			(self.new_bom, new_bom_unitcost, new_bom_unitcost, self.current_bom))
+			(self.new_bom, unit_cost, unit_cost, self.current_bom))
 
 	def get_parent_boms(self, bom, bom_list=[]):
 		data = frappe.db.sql("""SELECT DISTINCT parent FROM `tabBOM Item`
@@ -65,12 +66,18 @@ class BOMUpdateTool(Document):
 
 		return list(set(bom_list))
 
+def get_new_bom_unit_cost(bom):
+	new_bom_unitcost = frappe.db.sql("""SELECT `total_cost`/`quantity`
+		FROM `tabBOM` WHERE name = %s""", bom)
+
+	return flt(new_bom_unitcost[0][0]) if new_bom_unitcost else 0
+
 @frappe.whitelist()
 def enqueue_replace_bom(args):
 	if isinstance(args, string_types):
 		args = json.loads(args)
 
-	frappe.enqueue("erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.replace_bom", args=args, timeout=4000)
+	frappe.enqueue("erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.replace_bom", args=args, timeout=40000)
 	frappe.msgprint(_("Queued for replacing the BOM. It may take a few minutes."))
 
 @frappe.whitelist()

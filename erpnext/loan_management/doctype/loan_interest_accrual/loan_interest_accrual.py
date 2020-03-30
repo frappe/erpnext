@@ -130,9 +130,10 @@ def make_accrual_interest_entry_for_term_loans(posting_date=None):
 			loan.loan_account, loan.principal_amount + loan.balance_loan_amount, loan.interest_amount,
 			payable_principal = loan.principal_amount , posting_date=posting_date)
 
-	frappe.db.sql("""UPDATE `tabRepayment Schedule`
-		SET is_accrued = 1 where name in (%s)""" #nosec
-		% ", ".join(['%s']*len(accrued_entries)), tuple(accrued_entries))
+	if accrued_entries:
+		frappe.db.sql("""UPDATE `tabRepayment Schedule`
+			SET is_accrued = 1 where name in (%s)""" #nosec
+			% ", ".join(['%s']*len(accrued_entries)), tuple(accrued_entries))
 
 def make_loan_interest_accrual_entry(loan, applicant_type, applicant, interest_income_account, loan_account,
 	pending_principal_amount, interest_amount, payable_principal=None, process_loan_interest=None, posting_date=None):
