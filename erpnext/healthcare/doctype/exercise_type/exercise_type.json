@@ -1,40 +1,37 @@
 {
  "actions": [],
- "creation": "2020-03-11 09:16:31.198238",
+ "creation": "2020-03-29 21:37:03.366344",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "exercise",
-  "exercise_image",
-  "exercise_video",
-  "column_break_4",
+  "exercise_name",
+  "difficulty_level",
+  "column_break_3",
   "service_unit",
-  "section_break_6",
-  "description"
+  "section_break_5",
+  "description",
+  "section_break_7",
+  "exercise_steps",
+  "column_break_9",
+  "exercise_video"
  ],
  "fields": [
   {
-   "fieldname": "exercise",
+   "fieldname": "exercise_name",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Exercise Name",
    "reqd": 1
   },
   {
-   "fieldname": "exercise_image",
-   "fieldtype": "Attach Image",
-   "hidden": 1,
-   "label": "Exercise Image"
-  },
-  {
-   "fieldname": "exercise_video",
+   "fieldname": "difficulty_level",
    "fieldtype": "Link",
-   "label": "Exercise Video",
-   "options": "Video"
+   "label": "Difficulty Level",
+   "options": "Exercise Difficulty Level"
   },
   {
-   "fieldname": "column_break_4",
+   "fieldname": "column_break_3",
    "fieldtype": "Column Break"
   },
   {
@@ -44,18 +41,36 @@
    "options": "Healthcare Service Unit"
   },
   {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
    "fieldname": "description",
-   "fieldtype": "Text Editor",
+   "fieldtype": "Long Text",
    "label": "Description"
   },
   {
-   "fieldname": "section_break_6",
+   "fieldname": "section_break_7",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "exercise_steps",
+   "fieldtype": "Attach",
+   "label": "Exercise Steps"
+  },
+  {
+   "fieldname": "exercise_video",
+   "fieldtype": "Link",
+   "label": "Exercise Video",
+   "options": "Video"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
   }
  ],
- "image_field": "exercise_image",
  "links": [],
- "modified": "2020-03-11 09:20:11.082000",
+ "modified": "2020-03-30 14:17:37.459059",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Exercise Type",

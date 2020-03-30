@@ -1,17 +1,19 @@
 {
  "actions": [],
  "autoname": "field:therapy_type",
- "creation": "2020-03-11 08:26:47.001683",
+ "creation": "2020-03-29 20:48:31.715063",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "disabled",
   "therapy_type",
   "default_duration",
-  "credits",
-  "column_break_4",
+  "column_break_3",
   "is_billable",
-  "rate"
+  "rate",
+  "section_break_6",
+  "exercises"
  ],
  "fields": [
   {
@@ -23,17 +25,7 @@
    "unique": 1
   },
   {
-   "fieldname": "default_duration",
-   "fieldtype": "Int",
-   "label": "Default Duration (In Mins)"
-  },
-  {
-   "fieldname": "credits",
-   "fieldtype": "Data",
-   "label": "Credits"
-  },
-  {
-   "fieldname": "column_break_4",
+   "fieldname": "column_break_3",
    "fieldtype": "Column Break"
   },
   {
@@ -43,18 +35,39 @@
    "label": "Is Billable"
   },
   {
-   "depends_on": "eval:doc.is_billable==1",
+   "depends_on": "eval:doc.is_billable;",
    "fieldname": "rate",
    "fieldtype": "Currency",
    "label": "Rate",
-   "mandatory_depends_on": "eval:doc.is_billable==1"
+   "mandatory_depends_on": "eval:doc.is_billable;"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "exercises",
+   "fieldtype": "Table",
+   "label": "Exercises",
+   "options": "Exercise"
+  },
+  {
+   "fieldname": "default_duration",
+   "fieldtype": "Int",
+   "label": "Default Duration (In Minutes)"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   }
  ],
  "links": [],
- "modified": "2020-03-11 12:24:47.154509",
+ "modified": "2020-03-30 22:11:39.764500",
  "modified_by": "Administrator",
  "module": "Healthcare",
- "name": "Therapy Type Template",
+ "name": "Therapy Type",
  "owner": "Administrator",
  "permissions": [
   {

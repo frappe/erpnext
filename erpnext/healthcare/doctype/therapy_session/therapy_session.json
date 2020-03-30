@@ -11,16 +11,18 @@
   "patient",
   "gender",
   "column_break_5",
-  "therapy_template",
+  "therapy_plan",
+  "therapy_type",
   "practitioner",
   "department",
   "details_section",
-  "location",
-  "column_break_12",
   "duration",
   "rate",
+  "column_break_12",
+  "location",
   "exercises_section",
-  "exercises"
+  "exercises",
+  "amended_from"
  ],
  "fields": [
   {
@@ -56,14 +58,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "therapy_template",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Therapy Type Template",
-   "options": "Therapy Type Template",
-   "reqd": 1
-  },
-  {
    "fieldname": "practitioner",
    "fieldtype": "Link",
    "label": "Healthcare Practitioner",
@@ -90,7 +84,7 @@
    "fieldname": "location",
    "fieldtype": "Select",
    "label": "Location",
-   "options": "Center\nHome\nTele"
+   "options": "\nCenter\nHome\nTele"
   },
   {
    "fieldname": "column_break_12",
@@ -112,13 +106,39 @@
    "fieldtype": "Table",
    "label": "Exercises",
    "options": "Exercise"
+  },
+  {
+   "depends_on": "eval: doc.therapy_plan",
+   "fieldname": "therapy_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Therapy Type",
+   "options": "Therapy Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "therapy_plan",
+   "fieldtype": "Link",
+   "label": "Therapy Plan",
+   "options": "Therapy Plan",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Therapy Session",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
+ "is_submittable": 1,
  "links": [],
- "modified": "2020-03-11 12:18:32.500313",
+ "modified": "2020-03-30 22:08:43.540990",
  "modified_by": "Administrator",
  "module": "Healthcare",
- "name": "Therapy",
+ "name": "Therapy Session",
  "owner": "Administrator",
  "permissions": [
   {
