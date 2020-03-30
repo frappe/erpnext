@@ -1,28 +1,34 @@
 {
  "cards": [
   {
+   "hidden": 0,
    "icon": "icon-list",
    "links": "[\n    {\n        \"description\": \"Define various loan types\",\n        \"label\": \"Loan Type\",\n        \"name\": \"Loan Type\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Loan Application\",\n        \"label\": \"Loan Application\",\n        \"name\": \"Loan Application\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Loan\",\n        \"name\": \"Loan\",\n        \"type\": \"doctype\"\n    }\n]",
    "title": "Loan Management"
   },
   {
+   "hidden": 0,
    "links": "[\n    {\n        \"description\": \"Grant information.\",\n        \"label\": \"Grant Application\",\n        \"name\": \"Grant Application\",\n        \"type\": \"doctype\"\n    }\n]",
    "title": "Grant Application"
   },
   {
-   "links": "[\n    {\n        \"description\": \"Member information.\",\n        \"label\": \"Member\",\n        \"name\": \"Member\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Memebership Details\",\n        \"label\": \"Membership\",\n        \"name\": \"Membership\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Memebership Type Details\",\n        \"label\": \"Membership Type\",\n        \"name\": \"Membership Type\",\n        \"type\": \"doctype\"\n    }\n]",
+   "hidden": 0,
+   "links": "[\n    {\n        \"description\": \"Member information.\",\n        \"label\": \"Member\",\n        \"name\": \"Member\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Membership Details\",\n        \"label\": \"Membership\",\n        \"name\": \"Membership\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Membership Type Details\",\n        \"label\": \"Membership Type\",\n        \"name\": \"Membership Type\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Billing and Gateway Settings\",\n        \"label\": \"Membership Settings\",\n        \"name\": \"Membership Settings\",\n        \"type\": \"doctype\"\n    }\n]",
    "title": "Membership"
   },
   {
+   "hidden": 0,
    "links": "[\n    {\n        \"description\": \"Volunteer information.\",\n        \"label\": \"Volunteer\",\n        \"name\": \"Volunteer\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Volunteer Type information.\",\n        \"label\": \"Volunteer Type\",\n        \"name\": \"Volunteer Type\",\n        \"type\": \"doctype\"\n    }\n]",
    "title": "Volunteer"
   },
   {
+   "hidden": 0,
    "icon": "fa fa-star",
    "links": "[\n    {\n        \"description\": \"Chapter information.\",\n        \"label\": \"Chapter\",\n        \"name\": \"Chapter\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    }\n]",
    "title": "Chapter"
   },
   {
+   "hidden": 0,
    "links": "[\n    {\n        \"description\": \"Donor information.\",\n        \"label\": \"Donor\",\n        \"name\": \"Donor\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Donor Type information.\",\n        \"label\": \"Donor Type\",\n        \"name\": \"Donor Type\",\n        \"type\": \"doctype\"\n    }\n]",
    "title": "Donor"
   }
@@ -38,7 +44,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Non Profit",
- "modified": "2020-03-12 16:30:36.683012",
+ "modified": "2020-03-29 13:06:18.070131",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Non Profit",
