@@ -69,32 +69,3 @@ def make_order(source_name):
 		}
 	})
 	return target_doc
-
-# @frappe.whitelist()
-# def make_purchase_order(source_name):
-# 	def update_item(source, target, source_parent):
-# 		target_qty = source.get("qty") - source.get("ordered_qty")
-# 		target.qty = target_qty if not flt(target_qty) < 0 else 0
-# 		item = get_item_defaults(target.item_code, source_parent.company)
-# 		if item:
-# 			target.item_name = item.get("item_name")
-# 			target.description = item.get("description")
-# 			target.uom = item.get("stock_uom")
-# 			target.warehouse = item.get("default_warehouse")
-# 			target.against_blanket_order = 1
-# 			target.blanket_order = source_name
-
-# 	target_doc = get_mapped_doc("Blanket Order", source_name, {
-# 		"Blanket Order": {
-# 			"doctype": "Purchase Order"
-# 		},
-# 		"Blanket Order Item": {
-# 			"doctype": "Purchase Order Item",
-# 			"field_map": {
-# 				"rate": "blanket_order_rate",
-# 				"parent": "blanket_order"
-# 			},
-# 			"postprocess": update_item
-# 		}
-# 	})
-# 	return target_doc
