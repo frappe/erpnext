@@ -672,19 +672,32 @@ class BuyingController(StockController):
 					# If asset has to be auto created
 					# Check for asset naming series
 					if item_data.get('asset_naming_series'):
+						created_assets = []
+
 						for qty in range(cint(d.qty)):
-							self.make_asset(d)
-						is_plural = 's' if cint(d.qty) != 1 else ''
-						messages.append(_('{0} Asset{2} Created for <b>{1}</b>').format(cint(d.qty), d.item_code, is_plural))
+							asset = self.make_asset(d)
+							created_assets.append(asset)
+						
+						if len(created_assets) > 5:
+							# dont show asset form links if more than 5 assets are created
+							messages.append(_('{} Asset{} created for {}').format(len(created_assets), is_plural, frappe.bold(d.item_code)))
+						else:
+							assets_link = list(map(lambda d: frappe.utils.get_link_to_form('Asset', d), created_assets))
+							assets_link = frappe.bold(','.join(assets_link))
+
+							is_plural = 's' if len(created_assets) != 1 else ''
+							messages.append(
+								_('Asset{} {assets_link} created for {}').format(is_plural, frappe.bold(d.item_code), assets_link=assets_link)
+							)
 					else:
-						frappe.throw(_("Row {1}: Asset Naming Series is mandatory for the auto creation for item {0}")
-							.format(d.item_code, d.idx))
+						frappe.throw(_("Row {}: Asset Naming Series is mandatory for the auto creation for item {}")
+							.format(d.idx, frappe.bold(d.item_code)))
 				else:
-					messages.append(_("Assets not created for <b>{0}</b>. You will have to create asset manually.")
-						.format(d.item_code))
+					messages.append(_("Assets not created for {0}. You will have to create asset manually.")
+						.format(frappe.bold(d.item_code)))
 
 		for message in messages:
-			frappe.msgprint(message, title="Success")
+			frappe.msgprint(message, title="Success", indicator="green")
 
 	def make_asset(self, row):
 		if not row.asset_location:
@@ -715,6 +728,8 @@ class BuyingController(StockController):
 		asset.flags.ignore_mandatory = True
 		asset.set_missing_values()
 		asset.insert()
+
+		return asset.name
 
 	def update_fixed_asset(self, field, delete_asset = False):
 		for d in self.get("items"):
