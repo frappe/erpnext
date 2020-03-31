@@ -33,7 +33,9 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_query("party_bank_account", function() {
 			return {
 				filters: {
-					"is_company_account":0
+					"is_company_account":0,
+					party_type: frm.doc.party_type,
+					party: frm.doc.party
 				}
 			}
 		});

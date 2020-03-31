@@ -613,7 +613,7 @@ DocType: Purchase Invoice,Edit Posting Date and Time,Izmijeni datum i vrijeme do
 DocType: Stock Entry Detail,Stock Entry Detail,Detalji unosa zaliha
 DocType: Sales Invoice,Accounting Details,Računovodstveni detalji
 DocType: Asset Movement,Stock Manager,Menadžer zaliha
-apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js,As on Date,Na datum
+apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.js,As on Date,Na datum
 DocType: Serial No,Is Cancelled,Je otkazan
 DocType: Naming Series,Setup Series,Podešavanje tipa dokumenta
 ,Point of Sale,Kasa
@@ -908,7 +908,7 @@ DocType: Purchase Invoice,Supplier Invoice Details,Detalji sa fakture dobavljač
 DocType: Purchase Order,To Bill,Za fakturisanje
 apps/erpnext/erpnext/projects/doctype/project/project.js,Gantt Chart,Gant dijagram
 DocType: Bin,Requested Quantity,Tražena količina
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Chart Of Accounts Template,Templejt za kontni plan
+DocType: Company,Chart Of Accounts Template,Templejt za kontni plan
 DocType: Employee Attendance Tool,Marked Attendance,Označeno prisustvo
 apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please set a default Holiday List for Employee {0} or Company {1},Molimo podesite podrazumjevanu listu praznika za Zaposlenog {0} ili Preduzeće {1}
 apps/erpnext/erpnext/accounts/report/delivered_items_to_be_billed/delivered_items_to_be_billed.py,Pending Amount,Iznos na čekanju

@@ -21,6 +21,12 @@ frappe.query_reports["DATEV"] = {
 			"default": frappe.datetime.now_date(),
 			"fieldtype": "Date",
 			"reqd": 1
+		},
+		{
+			"fieldname": "voucher_type",
+			"label": __("Voucher Type"),
+			"fieldtype": "Select",
+			"options": "\nSales Invoice\nPurchase Invoice\nPayment Entry\nExpense Claim\nPayroll Entry\nBank Reconciliation\nAsset\nStock Entry"
 		}
 	],
 	onload: function(query_report) {
