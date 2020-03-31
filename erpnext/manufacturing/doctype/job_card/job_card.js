@@ -20,7 +20,7 @@ frappe.ui.form.on('Job Card', {
 			}
 		}
 
-		if (frm.doc.docstatus == 0 && frm.doc.for_quantity > frm.doc.total_completed_qty
+		if (frm.doc.docstatus == 0 && (frm.doc.for_quantity > frm.doc.total_completed_qty || !frm.doc.for_quantity)
 			&& (!frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)) {
 			frm.trigger("prepare_timer_buttons");
 		}
@@ -59,10 +59,14 @@ frappe.ui.form.on('Job Card', {
 				let completed_time = frappe.datetime.now_datetime();
 				frm.trigger("hide_timer");
 
-				frappe.prompt({fieldtype: 'Float', label: __('Completed Quantity'),
-					fieldname: 'qty', reqd: 1, default: frm.doc.for_quantity}, data => {
-					frm.events.complete_job(frm, completed_time, data.qty);
-				}, __("Enter Value"), __("Complete"));
+				if (frm.doc.for_quantity) {
+					frappe.prompt({fieldtype: 'Float', label: __('Completed Quantity'),
+						fieldname: 'qty', reqd: 1, default: frm.doc.for_quantity}, data => {
+							frm.events.complete_job(frm, completed_time, data.qty);
+						}, __("Enter Value"), __("Complete"));
+				} else {
+					frm.events.complete_job(frm, completed_time, 0);
+				}
 			}).addClass("btn-primary");
 		}
 	},
