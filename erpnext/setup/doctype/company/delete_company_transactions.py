@@ -108,8 +108,8 @@ def delete_lead_addresses(company_name):
 def delete_communications(doctype, company_name, company_fieldname):
 		reference_docs = frappe.get_all(doctype, filters={company_fieldname:company_name})
 		reference_doc_names = [r.name for r in reference_docs]
-		
+
 		communications = frappe.get_all("Communication", filters={"reference_doctype":doctype,"reference_name":["in", reference_doc_names]})
 		communication_names = [c.name for c in communications]
 
-		frappe.delete_doc("Communication", communication_names)
+		frappe.delete_doc("Communication", communication_names, ignore_permissions=True)
