@@ -786,7 +786,7 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_make_pos_invoice(self):
 		from erpnext.accounts.doctype.sales_invoice.pos import make_invoice
 
-		make_pos_profile()
+		pos_profile = make_pos_profile()
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
 		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
 
@@ -802,7 +802,7 @@ class TestSalesInvoice(unittest.TestCase):
 			pos.append("taxes", tax)
 
 		invoice_data = [{'09052016142': pos}]
-		si = make_invoice(invoice_data).get('invoice')
+		si = make_invoice(pos_profile, invoice_data).get('invoice')
 		self.assertEqual(si[0], '09052016142')
 
 		sales_invoice = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': '09052016142', 'docstatus': 1})
@@ -820,7 +820,7 @@ class TestSalesInvoice(unittest.TestCase):
 		if allow_negative_stock:
 			frappe.db.set_value('Stock Settings', None, 'allow_negative_stock', 0)
 
-		make_pos_profile()
+		pos_profile = make_pos_profile()
 		timestamp = cint(time.time())
 
 		item = make_item("_Test POS Item")
@@ -834,7 +834,7 @@ class TestSalesInvoice(unittest.TestCase):
 							{'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 330}]
 
 		invoice_data = [{timestamp: pos}]
-		si = make_invoice(invoice_data).get('invoice')
+		si = make_invoice(pos_profile, invoice_data).get('invoice')
 		self.assertEqual(si[0], timestamp)
 
 		sales_invoice = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': timestamp})
@@ -843,7 +843,7 @@ class TestSalesInvoice(unittest.TestCase):
 		timestamp = cint(time.time())
 		pos["offline_pos_name"] = timestamp
 		invoice_data = [{timestamp: pos}]
-		si1 = make_invoice(invoice_data).get('invoice')
+		si1 = make_invoice(pos_profile, invoice_data).get('invoice')
 		self.assertEqual(si1[0], timestamp)
 
 		sales_invoice1 = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': timestamp})
