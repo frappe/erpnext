@@ -58,8 +58,10 @@
   "leave_approver",
   "salary_information",
   "salary_mode",
+  "column_break_50",
   "bank_name",
   "bank_ac_no",
+  "ifsc_code",
   "health_insurance_section",
   "health_insurance_provider",
   "health_insurance_no",
@@ -777,12 +779,22 @@
    "fieldtype": "Link",
    "label": "Leave Approver",
    "options": "User"
+  },
+  {
+   "fieldname": "column_break_50",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.salary_mode == 'Bank'",
+   "fieldname": "ifsc_code",
+   "fieldtype": "Data",
+   "label": "IFSC Code"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2020-01-09 04:23:55.611366",
+ "modified": "2020-03-31 18:50:58.327614",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

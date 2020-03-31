@@ -70,7 +70,7 @@ def execute(filters=None):
 	]
 	data = []
 
-	accounts = get_bank_accounts()
+	accounts = get_bank_accounts(filters)
 	payroll_entries = get_payroll_entries(accounts, filters)
 	salary_slips = get_salary_slips(payroll_entries)
 	get_emp_bank_ifsc_code(salary_slips)
@@ -91,8 +91,10 @@ def execute(filters=None):
 			data.append(row)
 	return columns, data
 
-def get_bank_accounts():
-	accounts = [d.name for d in get_all("Account", filters={"account_type": "Bank"})]
+def get_bank_accounts(filters):
+	accounts = [d.name for d in get_all("Account",
+		filters={"account_type": "Bank", "company": filters.get("company")})]
+
 	return accounts
 
 def get_payroll_entries(accounts, filters):
@@ -102,10 +104,10 @@ def get_payroll_entries(accounts, filters):
 		('Company', '=', filters.company)
 	]
 	if filters.to_date:
-		payroll_filter.append(('posting_date', '<', filters.to_date))
+		payroll_filter.append(('posting_date', '<=', filters.to_date))
 
 	if filters.from_date:
-		payroll_filter.append(('posting_date', '>', filters.from_date))
+		payroll_filter.append(('posting_date', '>=', filters.from_date))
 
 	entries = get_all("Payroll Entry", payroll_filter, ["name", "payment_account"])
 
@@ -149,6 +151,7 @@ def set_company_account(payment_accounts, payroll_entries):
 		company_accounts_map[acc.account] = acc
 
 	for entry in payroll_entries:
-		entry["company_account"] = company_accounts_map[entry.payment_account]['bank_account_no']
+		if company_accounts_map.get(entry.payment_account):
+			entry["company_account"] = company_accounts_map[entry.payment_account]['bank_account_no']
 
 	return payroll_entries
