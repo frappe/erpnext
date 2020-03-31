@@ -501,7 +501,7 @@ def raise_work_orders(material_request):
 				wo_order = frappe.new_doc("Work Order")
 				wo_order.update({
 					"production_item": d.item_code,
-					"qty": d.qty - d.ordered_qty,
+					"qty": d.stock_qty - d.ordered_qty,
 					"fg_warehouse": d.warehouse,
 					"wip_warehouse": default_wip_warehouse,
 					"description": d.description,

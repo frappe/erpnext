@@ -281,8 +281,8 @@ def validate_party_gle_currency(party_type, party, company, party_account_curren
 	existing_gle_currency = get_party_gle_currency(party_type, party, company)
 
 	if existing_gle_currency and party_account_currency != existing_gle_currency:
-		frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
-			.format(party_type, party, existing_gle_currency), InvalidAccountCurrency)
+		frappe.throw(_("{0} {1} has accounting entries in currency {2} for company {3}. Please select a receivable or payable account with currency {2}.")
+			.format(frappe.bold(party_type), frappe.bold(party), frappe.bold(existing_gle_currency), frappe.bold(company)), InvalidAccountCurrency)
 
 def validate_party_accounts(doc):
 	companies = []
@@ -295,15 +295,13 @@ def validate_party_accounts(doc):
 			companies.append(account.company)
 
 		party_account_currency = frappe.db.get_value("Account", account.account, "account_currency", cache=True)
-		existing_gle_currency = get_party_gle_currency(doc.doctype, doc.name, account.company)
 		if frappe.db.get_default("Company"):
 			company_default_currency = frappe.get_cached_value('Company',
 				frappe.db.get_default("Company"),  "default_currency")
 		else:
 			company_default_currency = frappe.db.get_value('Company', account.company, "default_currency")
 
-		if existing_gle_currency and party_account_currency != existing_gle_currency:
-			frappe.throw(_("Accounting entries have already been made in currency {0} for company {1}. Please select a receivable or payable account with currency {0}.").format(existing_gle_currency, account.company))
+		validate_party_gle_currency(doc.doctype, doc.name, account.company, party_account_currency)
 
 		if doc.get("default_currency") and party_account_currency and company_default_currency:
 			if doc.default_currency != party_account_currency and doc.default_currency != company_default_currency:
