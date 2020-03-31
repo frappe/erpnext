@@ -155,9 +155,33 @@ def get_healthcare_services_to_invoice(patient):
 						item_to_invoice.append({'reference_type': 'Inpatient Occupancy', 'reference_name': inpatient_occupancy.name,
 						'service': service_unit_type.item, 'qty': qty})
 
+			therapy_sessions = get_therapy_sessions_to_invoice(patient)
+			if therapy_sessions:
+				item_to_invoice += therapy_sessions
+
 			return item_to_invoice
 		else:
 			frappe.throw(_("The Patient {0} do not have customer refrence to invoice").format(patient.name))
+
+
+def get_therapy_sessions_to_invoice(patient):
+	therapy_sessions_to_invoice = []
+	therapy_sessions = frappe.get_list(
+		'Therapy Session',
+		fields='*',
+		filters={'patient': patient.name, 'invoiced': False}
+	)
+	for therapy in therapy_sessions:
+		if not therapy.appointment:
+			if therapy.therapy_type and frappe.db.get_value('Therapy Type', therapy.therapy_type, 'is_billable'):
+				therapy_sessions_to_invoice.append({
+					'reference_type': 'Therapy Session',
+					'reference_name': therapy.name,
+					'service': frappe.db.get_value('Therapy Type', therapy.therapy_type, 'item')
+				})
+
+	return therapy_sessions_to_invoice
+
 
 def service_item_and_practitioner_charge(doc):
 	is_ip = doc_is_ip(doc)
