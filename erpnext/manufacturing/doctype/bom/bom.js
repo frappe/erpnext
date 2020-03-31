@@ -6,7 +6,6 @@ frappe.provide("erpnext.bom");
 frappe.ui.form.on("BOM", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'BOM': 'Duplicate BOM',
 			'Work Order': 'Work Order',
 			'Quality Inspection': 'Quality Inspection'
 		};
@@ -91,10 +90,6 @@ frappe.ui.form.on("BOM", {
 		}
 
 		if(frm.doc.docstatus!=0) {
-			frm.add_custom_button(__("Duplicate BOM"), function() {
-				frm.copy_doc();
-			}, __("Create"));
-
 			frm.add_custom_button(__("Work Order"), function() {
 				frm.trigger("make_work_order");
 			}, __("Create"));
