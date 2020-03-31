@@ -2377,7 +2377,7 @@ DocType: Cheque Print Template,Cheque Size,Tamanho da Folha de Cheque
 apps/erpnext/erpnext/accounts/party.py,Accounting entries have already been made in currency {0} for company {1}. Please select a receivable or payable account with currency {0}.,"Lançamentos contábeis já foram feitas em moeda {0} para {1} empresa. Por favor, selecione uma conta a receber ou a pagar com a moeda {0}."
 apps/erpnext/erpnext/accounts/report/gross_profit/gross_profit.py,Avg. Selling Rate,Valor Médio de Venda
 apps/erpnext/erpnext/selling/report/sales_partner_target_variance_based_on_item_group/item_group_wise_sales_target_variance.py,Total Target,Meta Total
-apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js,As on Date,Como na Data
+apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.js,As on Date,Como na Data
 apps/erpnext/erpnext/config/accounts.py,Setup Gateway accounts.,Configuração contas Gateway.
 DocType: Sales Team,Contact No.,Nº Contato.
 apps/erpnext/erpnext/buying/utils.py,Warehouse is mandatory for stock Item {0} in row {1},Armazém é obrigatória para stock o item {0} na linha {1}
