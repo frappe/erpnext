@@ -741,14 +741,12 @@ class Item(WebsiteGenerator):
 				defaults = frappe.defaults.get_defaults() or {}
 
 				# To check default warehouse is belong to the default company
-				if defaults.get("default_warehouse") and frappe.db.exists("Warehouse",
+				if defaults.get("default_warehouse") and defaults.company and frappe.db.exists("Warehouse",
 					{'name': defaults.default_warehouse, 'company': defaults.company}):
-					warehouse = defaults.default_warehouse
-
-				self.append("item_defaults", {
-					"company": defaults.get("company"),
-					"default_warehouse": warehouse
-				})
+						self.append("item_defaults", {
+							"company": defaults.get("company"),
+							"default_warehouse": defaults.default_warehouse
+						})
 
 	def update_variants(self):
 		if self.flags.dont_update_variants or \
