@@ -124,11 +124,13 @@
  ],
  "icon": "fa fa-money",
  "idx": 1,
+ "is_tree": 1,
  "links": [],
- "modified": "2020-01-28 13:50:23.430434",
+ "modified": "2020-03-18 17:59:04.321637",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cost Center",
+ "nsm_parent_field": "parent_cost_center",
  "owner": "Administrator",
  "permissions": [
   {

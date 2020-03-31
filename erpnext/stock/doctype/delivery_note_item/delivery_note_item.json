@@ -182,6 +182,7 @@
    "oldfieldname": "stock_uom",
    "oldfieldtype": "Data",
    "options": "UOM",
+   "print_hide": 1,
    "print_width": "50px",
    "read_only": 1,
    "reqd": 1,
@@ -197,7 +198,6 @@
    "in_list_view": 1,
    "label": "UOM",
    "options": "UOM",
-   "print_hide": 1,
    "reqd": 1
   },
   {
@@ -714,7 +714,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-02-27 13:37:07.656006",
+ "modified": "2020-03-05 14:18:33.131672",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

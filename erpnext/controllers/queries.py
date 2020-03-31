@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import erpnext
 from frappe.desk.reportview import get_match_cond, get_filters_cond
 from frappe.utils import nowdate, getdate
 from collections import defaultdict
@@ -129,23 +130,26 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 		})
 
 def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
+	company_currency = erpnext.get_company_currency(filters.get('company'))
+
 	tax_accounts = frappe.db.sql("""select name, parent_account	from tabAccount
 		where tabAccount.docstatus!=2
 			and account_type in (%s)
 			and is_group = 0
 			and company = %s
+			and account_currency = %s
 			and `%s` LIKE %s
 		order by idx desc, name
 		limit %s, %s""" %
-		(", ".join(['%s']*len(filters.get("account_type"))), "%s", searchfield, "%s", "%s", "%s"),
-		tuple(filters.get("account_type") + [filters.get("company"), "%%%s%%" % txt,
+		(", ".join(['%s']*len(filters.get("account_type"))), "%s", "%s", searchfield, "%s", "%s", "%s"),
+		tuple(filters.get("account_type") + [filters.get("company"), company_currency, "%%%s%%" % txt,
 			start, page_len]))
 	if not tax_accounts:
 		tax_accounts = frappe.db.sql("""select name, parent_account	from tabAccount
 			where tabAccount.docstatus!=2 and is_group = 0
-				and company = %s and `%s` LIKE %s limit %s, %s"""
-			% ("%s", searchfield, "%s", "%s", "%s"),
-			(filters.get("company"), "%%%s%%" % txt, start, page_len))
+				and company = %s and account_currency = %s and `%s` LIKE %s limit %s, %s""" #nosec
+			% ("%s", "%s", searchfield, "%s", "%s", "%s"),
+			(filters.get("company"), company_currency, "%%%s%%" % txt, start, page_len))
 
 	return tax_accounts
 
