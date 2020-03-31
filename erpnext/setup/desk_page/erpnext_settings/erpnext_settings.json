@@ -1,0 +1,112 @@
+{
+ "cards": [],
+ "category": "Modules",
+ "charts": [],
+ "creation": "2020-03-12 14:47:51.166455",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "docstatus": 0,
+ "doctype": "Desk Page",
+ "extends": "Settings",
+ "extends_another_page": 1,
+ "idx": 0,
+ "is_standard": 1,
+ "label": "ERPNext Settings",
+ "modified": "2020-03-12 18:03:17.126782",
+ "modified_by": "Administrator",
+ "module": "Setup",
+ "name": "ERPNext Settings",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": [
+  {
+   "icon": "octicon octicon-rocket",
+   "is_query_report": 0,
+   "link_to": "Projects Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "octicon octicon-repo",
+   "is_query_report": 0,
+   "link_to": "Accounts Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "octicon octicon-package",
+   "is_query_report": 0,
+   "link_to": "Stock Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "octicon octicon-organization",
+   "is_query_report": 0,
+   "link_to": "HR Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "octicon octicon-tag",
+   "is_query_report": 0,
+   "link_to": "Selling Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "octicon octicon-briefcase",
+   "is_query_report": 0,
+   "link_to": "Buying Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "fa fa-life-ring",
+   "is_query_report": 0,
+   "link_to": "Support Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "fa fa-shopping-cart",
+   "is_query_report": 0,
+   "link_to": "Shopping Cart Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "fa fa-globe",
+   "is_query_report": 0,
+   "link_to": "Portal Settings",
+   "type": "DocType"
+  },
+  {
+   "icon": "octicon octicon-tools",
+   "is_query_report": 0,
+   "link_to": "Manufacturing Settings",
+   "restrict_to_domain": "Manufacturing",
+   "type": "DocType"
+  },
+  {
+   "icon": "octicon octicon-mortar-board",
+   "is_query_report": 0,
+   "link_to": "Education Settings",
+   "restrict_to_domain": "Education",
+   "type": "DocType"
+  },
+  {
+   "icon": "fa fa-bed",
+   "is_query_report": 0,
+   "link_to": "Hotel Settings",
+   "restrict_to_domain": "Hospitality",
+   "type": "DocType"
+  },
+  {
+   "icon": "fa fa-heartbeat",
+   "is_query_report": 0,
+   "link_to": "Healthcare Settings",
+   "restrict_to_domain": "Healthcare",
+   "type": "DocType"
+  },
+  {
+   "icon": "fa fa-cog",
+   "is_query_report": 0,
+   "link_to": "Domain Settings",
+   "type": "DocType"
+  }
+ ]
+}

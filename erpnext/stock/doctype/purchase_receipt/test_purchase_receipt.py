@@ -53,7 +53,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
 	
 	def test_batched_serial_no_purchase(self):
-		item = frappe.get_doc("Item", { 'item_name': 'Batched Serialized Item' })
+		item = frappe.db.exists("Item", {'item_name': 'Batched Serialized Item'})
 		if not item:
 			item = create_item("Batched Serialized Item")
 			item.has_batch_no = 1
@@ -62,6 +62,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 			item.batch_number_series = "BS-BATCH-.##"
 			item.serial_no_series = "BS-.####"
 			item.save()
+		else:
+			item = frappe.get_doc("Item", {'item_name': 'Batched Serialized Item'})
 
 		pr = make_purchase_receipt(item_code=item.name, qty=5, rate=500)
 
@@ -302,6 +304,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEqual(serial_no, frappe.db.get_value("Serial No",
 			{"purchase_document_type": "Purchase Receipt", "purchase_document_no": pr_doc.name}, "name"))
 
+		pr_doc.cancel()
+
 		#check for the auto created serial nos
 		item_code = "Test Auto Created Serial No"
 		if not frappe.db.exists("Item", item_code):
@@ -317,9 +321,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
 
-		item_code = frappe.db.get_value('Item', {'has_serial_no': 1, 'is_fixed_asset': 0})
+		item_code = frappe.db.get_value('Item', {'has_serial_no': 1, 'is_fixed_asset': 0, "has_batch_no": 0})
 		if not item_code:
-			item = make_item("Test Serial Item 1", dict(has_serial_no=1))
+			item = make_item("Test Serial Item 1", dict(has_serial_no=1, has_batch_no=0))
 			item_code = item.name
 
 		serial_no = random_string(5)

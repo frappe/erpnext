@@ -143,11 +143,13 @@
  ],
  "icon": "icon-user",
  "idx": 1,
+ "is_tree": 1,
  "links": [],
- "modified": "2020-01-28 13:50:31.891050",
+ "modified": "2020-03-18 18:11:13.968024",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Person",
+ "nsm_parent_field": "parent_sales_person",
  "owner": "Administrator",
  "permissions": [
   {
