@@ -43,6 +43,7 @@
   "sb_procedures",
   "procedure_prescription",
   "rehabilitation_section",
+  "therapy_plan",
   "therapies",
   "section_break_33",
   "encounter_comment",
@@ -311,11 +312,19 @@
   {
    "fieldname": "section_break_33",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "therapy_plan",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Therapy Plan",
+   "options": "Therapy Plan",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-30 14:06:20.751801",
+ "modified": "2020-03-31 16:18:08.180457",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",

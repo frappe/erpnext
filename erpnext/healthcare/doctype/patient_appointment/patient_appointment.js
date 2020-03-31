@@ -42,11 +42,22 @@ frappe.ui.form.on('Patient Appointment', {
 			frm.add_custom_button(__('Reschedule'), function() {
 				check_and_set_availability(frm);
 			});
-			if(frm.doc.procedure_template){
+
+			if (frm.doc.therapy_type) {
+				frm.add_custom_button(__('Therapy Session'),function(){
+					frappe.model.open_mapped_doc({
+						method: 'erpnext.healthcare.doctype.therapy_session.therapy_session.create_therapy_session',
+						frm: frm,
+					})
+				}, 'Create');
+			}
+
+			else if(frm.doc.procedure_template){
 				frm.add_custom_button(__("Procedure"),function(){
 					btn_create_procedure(frm);
 				},"Create");
 			}
+
 			else{
 				frm.add_custom_button(__("Patient Encounter"),function(){
 					btn_create_encounter(frm);
@@ -64,11 +75,22 @@ frappe.ui.form.on('Patient Appointment', {
 			frm.add_custom_button(__('Reschedule'), function() {
 				check_and_set_availability(frm);
 			});
-			if(frm.doc.procedure_template){
+
+			if (frm.doc.therapy_type) {
+				frm.add_custom_button(__('Therapy Session'),function(){
+					frappe.model.open_mapped_doc({
+						method: 'erpnext.healthcare.doctype.therapy_session.therapy_session.create_therapy_session',
+						frm: frm,
+					})
+				}, 'Create');
+			}
+
+			else if(frm.doc.procedure_template){
 				frm.add_custom_button(__("Procedure"),function(){
 					btn_create_procedure(frm);
 				},"Create");
 			}
+
 			else{
 				frm.add_custom_button(__("Patient Encounter"),function(){
 					btn_create_encounter(frm);
@@ -114,6 +136,26 @@ frappe.ui.form.on('Patient Appointment', {
 	},
 	get_procedure_from_encounter: function(frm) {
 		get_procedure_prescribed(frm);
+	},
+
+	get_prescribed_therapies: function(frm) {
+		if (frm.doc.patient) {
+			frappe.call({
+				method: "erpnext.healthcare.doctype.patient_appointment.patient_appointment.get_prescribed_therapies",
+				args: {patient: frm.doc.patient},
+				callback: function(r) {
+					if (r.message) {
+						show_therapy_types(frm, r.message);
+					} else {
+						frappe.msgprint({
+							title: __('Not Therapies Prescribed'),
+							message: __('There are no Therapies prescribed for Patient {0}', [frm.doc.patient.bold()]),
+							indicator: 'blue'
+						});
+					}
+				}
+			});
+		}
 	}
 });
 
@@ -346,6 +388,45 @@ var show_procedure_templates = function(frm, result){
 	}
 	d.show();
 };
+
+let show_therapy_types = function(frm, result) {
+	var d = new frappe.ui.Dialog({
+		title: __('Prescribed Therapies'),
+		fields: [
+			{
+				fieldtype: 'HTML', fieldname: 'therapy_type'
+			}
+		]
+	});
+	var html_field = d.fields_dict.therapy_type.$wrapper;
+	$.each(result, function(x, y){
+		var row = $(repl('<div class="col-xs-12" style="padding-top:12px; text-align:center;" >\
+		<div class="col-xs-5"> %(encounter)s <br> %(practitioner)s <br> %(date)s </div>\
+		<div class="col-xs-5"> %(therapy)s </div>\
+		<div class="col-xs-2">\
+		<a data-therapy="%(therapy)s" data-therapy-plan="%(therapy_plan)s" data-name="%(name)s"\
+		data-encounter="%(encounter)s" data-practitioner="%(practitioner)s"\
+		data-date="%(date)s"  data-department="%(department)s">\
+		<button class="btn btn-default btn-xs">Add\
+		</button></a></div></div><div class="col-xs-12"><hr/><div/>', {therapy:y[0],
+		name: y[1], encounter:y[2], practitioner:y[3], date:y[4],
+		department:y[6]? y[6]:'', therapy_plan:y[5]})).appendTo(html_field);
+
+		row.find("a").click(function() {
+			frm.doc.therapy_type = $(this).attr("data-therapy");
+			frm.doc.practitioner = $(this).attr("data-practitioner");
+			frm.doc.department = $(this).attr("data-department");
+			frm.doc.therapy_plan = $(this).attr("data-therapy-plan");
+			refresh_field("therapy_type");
+			refresh_field("practitioner");
+			refresh_field("department");
+			refresh_field("therapy-plan");
+			d.hide();
+			return false;
+		});
+	});
+	d.show();
+}
 
 var btn_create_procedure = function(frm){
 	var doc = frm.doc;

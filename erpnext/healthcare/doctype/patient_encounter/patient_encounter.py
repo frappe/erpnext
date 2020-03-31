@@ -37,6 +37,7 @@ def create_therapy_plan(encounter):
 			})
 		doc.save(ignore_permissions=True)
 		if doc.get('name'):
+			encounter.db_set('therapy_plan', doc.name)
 			frappe.msgprint(_('Therapy Plan {0} created successfully.').format(frappe.bold(doc.name)), alert=True)
 
 def insert_encounter_to_medical_record(doc):

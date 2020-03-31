@@ -9,6 +9,7 @@
   "naming_series",
   "appointment",
   "patient",
+  "patient_age",
   "gender",
   "column_break_5",
   "therapy_plan",
@@ -18,8 +19,13 @@
   "details_section",
   "duration",
   "rate",
-  "column_break_12",
   "location",
+  "company",
+  "column_break_12",
+  "service_unit",
+  "start_date",
+  "start_time",
+  "invoiced",
   "exercises_section",
   "exercises",
   "amended_from"
@@ -121,7 +127,8 @@
    "fieldtype": "Link",
    "label": "Therapy Plan",
    "options": "Therapy Plan",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "amended_from",
@@ -131,11 +138,46 @@
    "options": "Therapy Session",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "service_unit",
+   "fieldtype": "Link",
+   "label": "Healthcare Service Unit",
+   "options": "Healthcare Service Unit"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "start_time",
+   "fieldtype": "Time",
+   "label": "Start Time"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "default": "0",
+   "fieldname": "invoiced",
+   "fieldtype": "Check",
+   "label": "Invoiced",
+   "read_only": 1
+  },
+  {
+   "fieldname": "patient_age",
+   "fieldtype": "Data",
+   "label": "Patient Age",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-30 22:08:43.540990",
+ "modified": "2020-03-31 16:15:11.528965",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Session",

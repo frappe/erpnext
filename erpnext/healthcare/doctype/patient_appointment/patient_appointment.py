@@ -388,3 +388,11 @@ def get_procedure_prescribed(patient):
 	from `tabPatient Encounter` ct, `tabProcedure Prescription` pp
 	where ct.patient=%(patient)s and pp.parent=ct.name and pp.appointment_booked=0
 	order by ct.creation desc""", {"patient": patient})
+
+
+@frappe.whitelist()
+def get_prescribed_therapies(patient):
+	return frappe.db.sql("""select t.therapy_type, t.name, t.parent, e.practitioner,
+	e.encounter_date, e.therapy_plan, e.visit_department from `tabPatient Encounter` e,
+	`tabTherapy Plan Detail` t where e.patient=%(patient)s and t.parent=e.name
+	order by e.creation desc""", {'patient': patient})
