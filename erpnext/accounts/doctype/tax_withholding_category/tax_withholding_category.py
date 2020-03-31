@@ -41,7 +41,10 @@ def get_party_tax_withholding_details(ref_doc, tax_withholding_category=None):
 	if not tax_details:
 		frappe.throw(_('Please set associated account in Tax Withholding Category {0} against Company {1}')
 			.format(tax_withholding_category, ref_doc.company))
-	tds_amount = get_tds_amount(suppliers, ref_doc.net_total, tax_details, fy,  ref_doc.posting_date, pan_no)
+
+	tds_amount = get_tds_amount(suppliers, ref_doc.net_total, ref_doc.company,
+		tax_details, fy,  ref_doc.posting_date, pan_no)
+
 	tax_row = get_tax_row(tax_details, tds_amount)
 
 	return tax_row
@@ -80,7 +83,7 @@ def get_tax_row(tax_details, tds_amount):
 		"tax_amount": tds_amount
 	}
 
-def get_tds_amount(suppliers, net_total, tax_details, fiscal_year_details, posting_date, pan_no=None):
+def get_tds_amount(suppliers, net_total, company, tax_details, fiscal_year_details, posting_date, pan_no=None):
 	fiscal_year, year_start_date, year_end_date = fiscal_year_details
 	tds_amount = 0
 	tds_deducted = 0
@@ -104,11 +107,12 @@ def get_tds_amount(suppliers, net_total, tax_details, fiscal_year_details, posti
 	entries = frappe.db.sql("""
 			select voucher_no, credit
 			from `tabGL Entry`
-			where party in %s and fiscal_year=%s and credit > 0
-		""", (tuple(suppliers), fiscal_year), as_dict=1)
+			where company = %s and
+			party in %s and fiscal_year=%s and credit > 0
+		""", (company, tuple(suppliers), fiscal_year), as_dict=1)
 
 	vouchers = [d.voucher_no for d in entries]
-	advance_vouchers = get_advance_vouchers(suppliers, fiscal_year)
+	advance_vouchers = get_advance_vouchers(suppliers, fiscal_year=fiscal_year, company=company)
 
 	tds_vouchers = vouchers + advance_vouchers
 
@@ -175,8 +179,11 @@ def get_tds_amount(suppliers, net_total, tax_details, fiscal_year_details, posti
 
 def get_advance_vouchers(suppliers, fiscal_year=None, company=None, from_date=None, to_date=None):
 	condition = "fiscal_year=%s" % fiscal_year
+
+	if company:
+		condition += "and company =%s" % (company)
 	if from_date and to_date:
-		condition = "company=%s and posting_date between %s and %s" % (company, from_date, to_date)
+		condition += "and posting_date between %s and %s" % (company, from_date, to_date)
 
 	return frappe.db.sql_list("""
 		select distinct voucher_no
