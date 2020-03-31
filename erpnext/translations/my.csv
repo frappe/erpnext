@@ -168,12 +168,11 @@ DocType: Appointment Booking Slots,Appointment Booking Slots,ရက်ချိ�
 DocType: Work Order Operation,Work In Progress,တိုးတက်မှုများတွင်အလုပ်
 DocType: Leave Control Panel,Branch (optional),branch (optional)
 apps/erpnext/erpnext/education/report/absent_student_report/absent_student_report.py,Please select date,ရက်စွဲကို select လုပ်ပါကျေးဇူးပြုပြီး
-DocType: Item Price,Minimum Qty ,နိမ့်ဆုံးအရည်အတွက်
+apps/erpnext/erpnext/stock/report/product_bundle_balance/product_bundle_balance.py,Minimum Qty ,နိမ့်ဆုံးအရည်အတွက်
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,BOM recursion: {0} cannot be child of {1},BOM မှပြန်လည်လုပ်ဆောင်ခြင်း - {0} {1} ၏ကလေးမဖြစ်နိုင်ပါ
 DocType: Finance Book,Finance Book,ဘဏ္ဍာရေးစာအုပ်
 DocType: Patient Encounter,HLC-ENC-.YYYY.-,ဆဆ-ENC-.YYYY.-
 DocType: Appointment Booking Settings,Holiday List,အားလပ်ရက်များစာရင်း
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,The parent account {0} does not exists,မိဘအကောင့် {0} မရှိပါ
 apps/erpnext/erpnext/config/quality_management.py,Review and Action,ဆန်းစစ်ခြင်းနှင့်လှုပ်ရှားမှု
 apps/erpnext/erpnext/hr/doctype/employee_checkin/employee_checkin.py,This employee already has a log with the same timestamp.{0},ဒီအလုပျသမားပြီးသားအတူတူ Timestamp ကိုအတူမှတ်တမ်းရှိပါတယ်။ {0}
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Accountant,စာရင်းကိုင်
@@ -245,7 +244,6 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Pension Funds,ပ�
 DocType: Exchange Rate Revaluation Account,Gain/Loss,အမြတ် / ပျောက်ဆုံးခြင်း
 DocType: Crop,Perennial,နှစ်ရှည်
 DocType: Program,Is Published,Published ဖြစ်ပါတယ်
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js,Show Delivery Notes,Show ကို Delivery မှတ်စုများ
 apps/erpnext/erpnext/controllers/status_updater.py,"To allow over billing, update ""Over Billing Allowance"" in Accounts Settings or the Item.","ငွေတောင်းခံကျော်ခွင့်ပြုပါရန်, Accounts ကိုချိန်ညှိမှုများ, သို့မဟုတ်အရာဝတ္ထုများတွင် &quot;Allow ငွေတောင်းခံခြင်းကျော်&quot; ကို update ။"
 DocType: Patient Appointment,Procedure,လုပ်ထုံးလုပ်နည်း
 DocType: Accounts Settings,Use Custom Cash Flow Format,စိတ်တိုင်းကျငွေ Flow Format ကိုသုံးပါ
@@ -989,7 +987,6 @@ apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js,"Not permitted, con
 DocType: Patient,Risk Factors,စွန့်စားမှုအချက်များ
 DocType: Patient,Occupational Hazards and Environmental Factors,အလုပ်အကိုင်ဘေးအန္တရာယ်နှင့်သဘာဝပတ်ဝန်းကျင်အချက်များ
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Stock Entries already created for Work Order ,ပြီးသားသူ Work Order များအတွက် created စတော့အိတ် Entries
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,ပစ္စည်းကုဒ်&gt; ပစ္စည်းအုပ်စု&gt; ကုန်အမှတ်တံဆိပ်
 apps/erpnext/erpnext/templates/pages/cart.html,See past orders,အတိတ်အမိန့်ကိုကြည့်ပါ
 apps/erpnext/erpnext/public/js/hub/pages/Selling.vue,{0} conversations,{0} စကားစမြည်
 DocType: Vital Signs,Respiratory rate,အသက်ရှူလမ်းကြောင်းဆိုင်ရာမှုနှုန်း
@@ -1148,7 +1145,6 @@ apps/erpnext/erpnext/utilities/activation.py,"Create Employee records to manage 
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,An error occurred during the update process,အမှား Update လုပ်တဲ့လုပ်ငန်းစဉ်အတွင်းဖြစ်ပွားခဲ့သည်
 DocType: Restaurant Reservation,Restaurant Reservation,စားသောက်ဆိုင် Reservation များ
 apps/erpnext/erpnext/public/js/hub/Sidebar.vue,Your Items,သင့်ရဲ့ပစ္စည်းများ
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,ပေးသွင်းသူ&gt; ပေးသွင်းသူအမျိုးအစား
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Proposal Writing,အဆိုပြုချက်ကို Writing
 DocType: Payment Entry Deduction,Payment Entry Deduction,ငွေပေးချေမှုရမည့် Entry ထုတ်ယူ
 DocType: Service Level Priority,Service Level Priority,ဝန်ဆောင်မှုအဆင့်ဦးစားပေး
@@ -1451,7 +1447,6 @@ apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,Cannot deactivate or cance
 apps/erpnext/erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js,Please select Company and Posting Date to getting entries,posts များလာပြီမှကုမ္ပဏီနှင့် Post date ကို select ပေးပါ
 DocType: Asset,Maintenance,ပြုပြင်ထိန်းသိမ်းမှု
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js,Get from Patient Encounter,လူနာတှေ့ဆုံထံမှ Get
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},UOM ပြောင်းလဲခြင်းအချက် ({0} -&gt; {1}) ကိုရှာမတွေ့ပါ။ {2}
 DocType: Subscriber,Subscriber,စာရင်းပေးသွင်းသူ
 DocType: Item Attribute Value,Item Attribute Value,item Attribute Value တစ်ခု
 apps/erpnext/erpnext/setup/doctype/currency_exchange/currency_exchange.py,Currency Exchange must be applicable for Buying or for Selling.,ငွေကြေးလဲလှယ်ရေးဝယ်ယူဘို့သို့မဟုတ်ရောင်းအားများအတွက်သက်ဆိုင်ဖြစ်ရမည်။
@@ -1953,7 +1948,6 @@ DocType: Sales Invoice Item,Rate With Margin,Margin အတူ rate
 DocType: Purchase Invoice,Is Return (Debit Note),သို့ပြန်သွားသည် (မြီစားမှတ်ချက်) ဖြစ်ပါသည်
 DocType: Workstation,Wages,လုပ်ခလစာ
 DocType: Asset Maintenance,Maintenance Manager Name,ကို Maintenance Manager ကိုအမည်
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js,Transactions against the company already exist! ,ကုမ္ပဏီဆန့်ကျင်အရောင်းအပြီးသားတည်ရှိ!
 apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Requesting Site,တောင်းခံဆိုက်ကို
 DocType: Agriculture Task,Urgent,အမြန်လိုသော
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Fetching records......,မှတ်တမ်းများကိုရယူနေ ......
@@ -2654,7 +2648,6 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Source warehouse i
 apps/erpnext/erpnext/accounts/doctype/payment_terms_template/payment_terms_template.py,The Payment Term at row {0} is possibly a duplicate.,အတန်းမှာငွေပေးချေ Term {0} ဖြစ်နိုင်သည်တစ်ထပ်ဖြစ်ပါတယ်။
 apps/erpnext/erpnext/public/js/setup_wizard.js,Agriculture (beta),စိုက်ပျိုးရေး (beta ကို)
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js,Packing Slip,ထုပ်ပိုးစလစ်ဖြတ်ပိုင်းပုံစံ
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,ကျေးဇူးပြု၍ Setup&gt; Settings&gt; Naming Series မှ {0} အတွက် Naming Series ကိုသတ်မှတ်ပေးပါ
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Office Rent,Office ကိုငှား
 apps/erpnext/erpnext/config/settings.py,Setup SMS gateway settings,Setup ကို SMS ကို gateway ဟာ setting များ
 DocType: Disease,Common Name,လူအသုံးအများဆုံးအမည်
@@ -2821,7 +2814,6 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,{0} must app
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py,Leaves Allocated Successfully for {0},{0} သည်အောင်မြင်စွာကျင်းပပြီးစီးခွဲဝေရွက်
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py,No Items to pack,သိမ်းဆည်းရန်ပစ္စည်းများမရှိပါ
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Only .csv and .xlsx files are supported currently,သာ .csv နဲ့ .xlsx ဖိုင်တွေလက်ရှိထောက်ခံနေကြတယ်
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,ကျေးဇူးပြု၍ လူ့စွမ်းအားအရင်းအမြစ်&gt; HR ဆက်တင်တွင် Employee Naming System ကိုထည့်သွင်းပါ
 DocType: Shipping Rule Condition,From Value,Value တစ်ခုကနေ
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Manufacturing Quantity is mandatory,ကုန်ထုတ်လုပ်မှုပမာဏမသင်မနေရ
 DocType: Loan,Repayment Method,ပြန်ဆပ် Method ကို
@@ -4076,7 +4068,6 @@ apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py,Please set defaul
 apps/erpnext/erpnext/templates/form_grid/material_request_grid.html,Required On,တွင်လိုအပ်သော
 DocType: HR Settings,"If checked, hides and disables Rounded Total field in Salary Slips",Check လုပ်ပြီးပါကလစာဖြတ်ပိုင်းရှိ Rounded Total နေရာကိုဖုံးကွယ်ထားပါ
 DocType: Woocommerce Settings,This is the default offset (days) for the Delivery Date in Sales Orders. The fallback offset is 7 days from the order placement date.,ဤသည်အရောင်းအမှာစာအတွက်ပေးပို့သည့်ရက်အတွက် default offset (days) ဖြစ်သည်။ အရံကျသည့် offset သည်အမှာစာချသည့်နေ့မှ ၇ ရက်ဖြစ်သည်။
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,ကျေးဇူးပြု၍ Setup&gt; Numbering Series မှတက်ရောက်လိုသူများအတွက်နံပါတ်စဉ်ဆက်တင်များကိုပြင်ဆင်ပါ
 DocType: Rename Tool,File to Rename,Rename မှ File
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,Please select BOM for Item in Row {0},Row {0} အတွက် Item ဘို့ BOM ကို select လုပ်ပါကျေးဇူးပြုပြီး
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.js,Fetch Subscription Updates,Subscription အပ်ဒိတ်များဆွဲယူ
@@ -4683,7 +4674,6 @@ DocType: Healthcare Service Unit Type,Item Details,item အသေးစိတ်
 DocType: Cash Flow Mapping,Is Finance Cost,ဘဏ္ဍာရေးကုန်ကျစရိတ်ဖြစ်ပါသည်
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py,Attendance for employee {0} is already marked,ဝန်ထမ်း {0} သည်တက်ရောက်သူပြီးသားမှတ်သားသည်
 DocType: Packing Slip,If more than one package of the same type (for print),(ပုံနှိပ်သည်) တူညီသောအမျိုးအစားတစ်ခုထက် ပို. package ကို အကယ်.
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,ကျေးဇူးပြုပြီးပညာရေး&gt; ပညာရေးချိန်ညှိချက်များတွင်နည်းပြအမည်ပေးခြင်းစနစ်ကိုထည့်သွင်းပါ
 apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.py,Please set default customer in Restaurant Settings,စားသောက်ဆိုင်က Settings ထဲမှာ default အနေနဲ့ဖောက်သည်သတ်မှတ်ပေးပါ
 ,Salary Register,လစာမှတ်ပုံတင်မည်
 DocType: Company,Default warehouse for Sales Return,အရောင်းပြန်သွားဘို့ default ဂိုဒေါင်
@@ -4956,7 +4946,6 @@ DocType: Item,Inspection Required before Purchase,အရစ်ကျမီကတ
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html,Pending Activities,ဆိုင်းငံ့ထားလှုပ်ရှားမှုများ
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test_list.js,Create Lab Test,Lab ကစမ်းသပ် Create
 DocType: Patient Appointment,Reminded,သတိပေး
-DocType: Homepage Section,Cards,ကတ်များ
 apps/erpnext/erpnext/public/js/setup_wizard.js,View Chart of Accounts,ငွေစာရင်းကြည့်ရန်ဇယား
 DocType: Chapter Member,Chapter Member,အခန်းကြီးအဖွဲ့ဝင်
 DocType: Material Request Plan Item,Minimum Order Quantity,အနိမ့်အမိန့်အရေအတွက်
@@ -4974,7 +4963,7 @@ apps/erpnext/erpnext/loan_management/doctype/loan_security_price/loan_security_p
 apps/erpnext/erpnext/hr/utils.py,Future dates not allowed,အနာဂတ်ရက်စွဲများခွင့်မပြု
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Expected Delivery Date should be after Sales Order Date,မျှော်လင့်ထားသည့် Delivery နေ့စွဲအရောင်းအမိန့်နေ့စွဲနောက်မှာဖြစ်သင့်ပါတယ်
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py,Reorder Level,Reorder အဆင့်
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Chart Of Accounts Template,Accounts ကို Template ၏ဇယား
+DocType: Company,Chart Of Accounts Template,Accounts ကို Template ၏ဇယား
 DocType: Attendance,Attendance Date,တက်ရောက်သူနေ့စွဲ
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Update stock must be enable for the purchase invoice {0},စတော့ရှယ်ယာကိုအပ်ဒိတ်လုပ်ဝယ်ယူငွေတောင်းခံလွှာ {0} အဘို့ကို enable ရမည်ဖြစ်သည်
 apps/erpnext/erpnext/stock/get_item_details.py,Item Price updated for {0} in Price List {1},item စျေးစျေးစာရင်း {1} အတွက် {0} ဘို့ updated
@@ -5752,7 +5741,6 @@ DocType: Employee,Prefered Contact Email,Preferences ဆက်သွယ်ရန
 DocType: Cheque Print Template,Cheque Width,Cheque တစ်စောင်လျှင်အကျယ်
 DocType: Selling Settings,Validate Selling Price for Item against Purchase Rate or Valuation Rate,အရစ်ကျနှုန်းသို့မဟုတ်အကောက်ခွန်တန်ဖိုးသတ်မှတ်မည်နှုန်းဆန့်ကျင်ပစ္စည်းများအတွက်ရောင်းအားစျေးကိုအတည်ပြုပြီး
 DocType: Fee Schedule,Fee Schedule,အခကြေးငွေဇယား
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Column Labels : ,ကော်လံ Labels: ကဗျာ
 DocType: Bank Transaction,Settled,အခြေချ
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Cess,အခွန်
 DocType: Quality Feedback,Parameters,parameters
@@ -6437,6 +6425,7 @@ apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,�
 DocType: Salary Component,Formula,နည်း
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,Serial #,serial #
 DocType: Material Request Plan Item,Required Quantity,လိုအပ်သောပမာဏ
+DocType: Cash Flow Mapping Template,Template Name,template အမည်
 DocType: Lab Test Template,Lab Test Template,Lab ကစမ်းသပ် Template ကို
 apps/erpnext/erpnext/accounts/doctype/accounting_period/accounting_period.py,Accounting Period overlaps with {0},စာရင်းကိုင်ကာလ {0} နှင့်ထပ်
 apps/erpnext/erpnext/setup/doctype/company/company.py,Sales Account,အရောင်းအကောင့်
@@ -6497,7 +6486,7 @@ DocType: Supplier,SUP-.YYYY.-,sup-.YYYY.-
 DocType: Bank Reconciliation Detail,Cheque Date,Cheques နေ့စွဲ
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account {0}: Parent account {1} does not belong to company: {2},အကောင့်ကို {0}: မိဘအကောင့်ကို {1} ကုမ္ပဏီပိုင်ပါဘူး: {2}
 apps/erpnext/erpnext/setup/doctype/company/company.js,Successfully deleted all transactions related to this company!,အောင်မြင်စွာဒီကုမ္ပဏီနှင့်ဆက်စပ်သောအားလုံးအရောင်းအဖျက်ပြီး!
-apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js,As on Date,နေ့စွဲအပေါ်အဖြစ်
+apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.js,As on Date,နေ့စွဲအပေါ်အဖြစ်
 DocType: Additional Salary,HR,HR
 DocType: Course Enrollment,Enrollment Date,ကျောင်းအပ်နေ့စွဲ
 DocType: Healthcare Settings,Out Patient SMS Alerts,လူနာ SMS ကိုသတိပေးချက်ထွက်
@@ -6563,7 +6552,6 @@ apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Payment
 DocType: Course Content,Quiz,စစ်ဆေးမေးမြန်းခြင်း
 DocType: Subscription,Trial Period End Date,စမ်းသပ်မှုကာလပြီးဆုံးရက်စွဲ
 apps/erpnext/erpnext/setup/doctype/authorization_control/authorization_control.py,Not authroized since {0} exceeds limits,{0} ကန့်သတ်ထက်ကျော်လွန်ပြီးကတည်းက authroized မဟုတ်
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Start entering data from here : ,ဒီကနေဒေတာတွေကိုဝင် Start:
 DocType: Serial No,Asset Status,ပိုင်ဆိုင်မှုအခြေအနေ
 DocType: Sales Invoice,Over Dimensional Cargo (ODC),ကျော် Dimensional Cargo (ODC)
 DocType: Restaurant Order Entry,Restaurant Table,စားသောက်ဆိုင်ဇယား
@@ -6791,7 +6779,6 @@ apps/erpnext/erpnext/public/js/hub/components/ReviewArea.vue,Submit Review,ဆ�
 DocType: Contract,Party User,ပါတီအသုံးပြုသူ
 apps/erpnext/erpnext/controllers/buying_controller.py,Assets not created for <b>{0}</b>. You will have to create asset manually.,<b>{0}</b> အတွက်ဖန်တီးမထားသည့်ပိုင်ဆိုင်မှုများ။ သငျသညျကို manually ပိုင်ဆိုင်မှုဖန်တီးရန်ရှိသည်လိမ့်မယ်။
 apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py,Please set Company filter blank if Group By is 'Company',အုပ်စုအားဖြင့် &#39;&#39; ကုမ္ပဏီ &#39;&#39; လျှင်အလွတ် filter ကုမ္ပဏီသတ်မှတ်ပေးပါ
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,ဖောက်သည်&gt; ဖောက်သည်အုပ်စု&gt; နယ်မြေ
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py,Posting Date cannot be future date,Post date အနာဂတ်နေ့စွဲမဖွစျနိုငျ
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py,Row # {0}: Serial No {1} does not match with {2} {3},row # {0}: Serial မရှိပါ {1} {2} {3} နှင့်ကိုက်ညီမပါဘူး
 DocType: Loan Repayment,Interest Payable,ပေးဆောင်ရမည့်အတိုး
@@ -7028,7 +7015,6 @@ apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py,Both Trial Pe
 apps/erpnext/erpnext/accounts/report/share_balance/share_balance.py,Average Rate,ပျမ်းမျှနှုန်း
 DocType: Appointment,Appointment With,ရက်ချိန်းယူ
 apps/erpnext/erpnext/controllers/accounts_controller.py,Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total,ငွေပေးချေမှုရမည့်ဇယားများတွင်စုစုပေါင်းငွေပေးချေမှုရမည့်ငွေပမာဏက Grand / Rounded စုစုပေါင်းညီမျှရှိရမည်
-apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,အဖြစ်တက်ရောက်သူမှတ်သားပါ <b></b>
 apps/erpnext/erpnext/stock/doctype/item/item.py,"""Customer Provided Item"" cannot have Valuation Rate",&quot;ဖောက်သည်ပေး Item&quot; အကောက်ခွန်တန်ဖိုးသတ်မှတ်မည်နှုန်းရှိသည်မဟုတ်နိုင်ပါတယ်
 DocType: Subscription Plan Detail,Plan,စီမံကိန်း
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,အထွေထွေလယ်ဂျာနှုန်းအဖြစ် Bank မှဖော်ပြချက်ချိန်ခွင်လျှာ
@@ -7724,7 +7710,6 @@ DocType: Item Customer Detail,Item Customer Detail,item ဖောက်သည်
 apps/erpnext/erpnext/hr/doctype/employee_benefit_claim/employee_benefit_claim.py,Maximum benefit amount of employee {0} exceeds {1},ဝန်ထမ်းအများဆုံးအကျိုးရှိငွေပမာဏ {0} {1} ထက်ကျော်လွန်
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py,Total allocated leaves are more than days in the period,Total ကုမ္ပဏီခွဲဝေအရွက်ကာလအတွက်ရက်ထက်ပိုပါတယ်
 DocType: Linked Soil Analysis,Linked Soil Analysis,လင့်ခ်လုပ်ထားသောမြေဆီလွှာအားသုံးသပ်ခြင်း
-DocType: Pricing Rule,Percentage,ရာခိုင်နှုန်း
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Item {0} must be a stock Item,item {0} တစ်စတော့ရှယ်ယာ Item ဖြစ်ရမည်
 DocType: Manufacturing Settings,Default Work In Progress Warehouse,တိုးတက်ရေးပါတီဂိုဒေါင်ခုနှစ်တွင် Default အနေနဲ့သူ Work
 apps/erpnext/erpnext/healthcare/doctype/practitioner_schedule/practitioner_schedule.js,"Schedules for {0} overlaps, do you want to proceed after skiping overlaped slots ?","{0} အတွက်အချိန်ဇယားထပ်နေသည်, သင်ထပ် slot နှစ်ခု skiping ပြီးနောက်ဆက်လက်ဆောင်ရွက်ရန်လိုသလဲ"

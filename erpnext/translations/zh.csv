@@ -168,12 +168,11 @@ DocType: Appointment Booking Slots,Appointment Booking Slots,预约订位
 DocType: Work Order Operation,Work In Progress,在制品
 DocType: Leave Control Panel,Branch (optional),分支（可选）
 apps/erpnext/erpnext/education/report/absent_student_report/absent_student_report.py,Please select date,请选择日期
-DocType: Item Price,Minimum Qty ,最低数量
+apps/erpnext/erpnext/stock/report/product_bundle_balance/product_bundle_balance.py,Minimum Qty ,最低数量
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,BOM recursion: {0} cannot be child of {1},BOM递归：{0}不能是{1}的子代
 DocType: Finance Book,Finance Book,账簿
 DocType: Patient Encounter,HLC-ENC-.YYYY.-,HLC-ENC-.YYYY.-
 DocType: Appointment Booking Settings,Holiday List,假期列表
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,The parent account {0} does not exists,上级帐户{0}不存在
 apps/erpnext/erpnext/config/quality_management.py,Review and Action,审查和行动
 apps/erpnext/erpnext/hr/doctype/employee_checkin/employee_checkin.py,This employee already has a log with the same timestamp.{0},此员工已有一个具有相同时间戳的日志。{0}
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Accountant,会计
@@ -245,7 +244,6 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Pension Funds,养�
 DocType: Exchange Rate Revaluation Account,Gain/Loss,收益/损失
 DocType: Crop,Perennial,多年生
 DocType: Program,Is Published,已发布
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js,Show Delivery Notes,显示送货单
 apps/erpnext/erpnext/controllers/status_updater.py,"To allow over billing, update ""Over Billing Allowance"" in Accounts Settings or the Item.",要允许超额结算，请在“帐户设置”或“项目”中更新“超额结算限额”。
 DocType: Patient Appointment,Procedure,程序
 DocType: Accounts Settings,Use Custom Cash Flow Format,使用自定义现金流量格式
@@ -989,7 +987,6 @@ apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js,"Not permitted, con
 DocType: Patient,Risk Factors,风险因素
 DocType: Patient,Occupational Hazards and Environmental Factors,职业危害与环境因素
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Stock Entries already created for Work Order ,已为工单创建的库存条目
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,物料代码&gt;物料组&gt;品牌
 apps/erpnext/erpnext/templates/pages/cart.html,See past orders,查看过去的订单
 apps/erpnext/erpnext/public/js/hub/pages/Selling.vue,{0} conversations,{0}次对话
 DocType: Vital Signs,Respiratory rate,呼吸频率
@@ -1148,7 +1145,6 @@ apps/erpnext/erpnext/utilities/activation.py,"Create Employee records to manage 
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,An error occurred during the update process,更新过程中发生错误
 DocType: Restaurant Reservation,Restaurant Reservation,餐厅预订
 apps/erpnext/erpnext/public/js/hub/Sidebar.vue,Your Items,你的物品
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,供应商&gt;供应商类型
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Proposal Writing,提案写作
 DocType: Payment Entry Deduction,Payment Entry Deduction,输入付款扣除
 DocType: Service Level Priority,Service Level Priority,服务水平优先
@@ -1449,7 +1445,6 @@ apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,Cannot deactivate or cance
 apps/erpnext/erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js,Please select Company and Posting Date to getting entries,请选择公司和发布日期以获取条目
 DocType: Asset,Maintenance,维护
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js,Get from Patient Encounter,从患者遭遇中获取
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},找不到项目{2}的UOM转换因子（{0}-&gt; {1}）
 DocType: Subscriber,Subscriber,订户
 DocType: Item Attribute Value,Item Attribute Value,物料属性值
 apps/erpnext/erpnext/setup/doctype/currency_exchange/currency_exchange.py,Currency Exchange must be applicable for Buying or for Selling.,外币汇率必须适用于买入或卖出。
@@ -1961,7 +1956,6 @@ DocType: Sales Invoice Item,Rate With Margin,利率保证金
 DocType: Purchase Invoice,Is Return (Debit Note),是退货（借记卡）
 DocType: Workstation,Wages,工资
 DocType: Asset Maintenance,Maintenance Manager Name,维护经理姓名
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js,Transactions against the company already exist! ,针对公司的交易已经存在！
 apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Requesting Site,请求网站
 DocType: Agriculture Task,Urgent,加急
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Fetching records......,获取记录中......
@@ -2663,7 +2657,6 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Source warehouse i
 apps/erpnext/erpnext/accounts/doctype/payment_terms_template/payment_terms_template.py,The Payment Term at row {0} is possibly a duplicate.,第{0}行的支付条款可能是重复的。
 apps/erpnext/erpnext/public/js/setup_wizard.js,Agriculture (beta),农业（测试版）
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js,Packing Slip,装箱单
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,请通过设置&gt;设置&gt;命名系列为{0}设置命名系列
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Office Rent,办公室租金
 apps/erpnext/erpnext/config/settings.py,Setup SMS gateway settings,短信网关的设置
 DocType: Disease,Common Name,通用名称
@@ -2830,7 +2823,6 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,{0} must app
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py,Leaves Allocated Successfully for {0},已成功为{0}分配假期
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py,No Items to pack,未选择需打包物料
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Only .csv and .xlsx files are supported currently,目前仅支持.csv和.xlsx文件
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,请在人力资源&gt;人力资源设置中设置员工命名系统
 DocType: Shipping Rule Condition,From Value,起始值
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Manufacturing Quantity is mandatory,生产数量为必须项
 DocType: Loan,Repayment Method,还款方式
@@ -4089,7 +4081,6 @@ apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py,Please set defaul
 apps/erpnext/erpnext/templates/form_grid/material_request_grid.html,Required On,要求在
 DocType: HR Settings,"If checked, hides and disables Rounded Total field in Salary Slips",如果选中，则隐藏并禁用“工资单”中的“舍入总计”字段
 DocType: Woocommerce Settings,This is the default offset (days) for the Delivery Date in Sales Orders. The fallback offset is 7 days from the order placement date.,这是销售订单中交货日期的默认偏移量（天）。后备偏移量是从下单日期算起的7天。
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,请通过“设置”&gt;“编号序列”为出勤设置编号序列
 DocType: Rename Tool,File to Rename,文件重命名
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,Please select BOM for Item in Row {0},请为第{0}行的物料指定物料清单
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.js,Fetch Subscription Updates,获取订阅更新
@@ -4707,7 +4698,6 @@ DocType: Healthcare Service Unit Type,Item Details,品目详细信息
 DocType: Cash Flow Mapping,Is Finance Cost,财务成本
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py,Attendance for employee {0} is already marked,员工{0}的考勤已标记
 DocType: Packing Slip,If more than one package of the same type (for print),如果有多个同样类型的打包（用于打印）
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,请在“教育”&gt;“教育设置”中设置教师命名系统
 apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.py,Please set default customer in Restaurant Settings,请在“餐厅设置”中设置默认客户
 ,Salary Register,工资台账
 DocType: Company,Default warehouse for Sales Return,销售退货的默认仓库
@@ -4980,7 +4970,6 @@ DocType: Item,Inspection Required before Purchase,需进行来料检验
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html,Pending Activities,待活动
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test_list.js,Create Lab Test,创建实验室测试
 DocType: Patient Appointment,Reminded,已提醒
-DocType: Homepage Section,Cards,牌
 apps/erpnext/erpnext/public/js/setup_wizard.js,View Chart of Accounts,查看会计科目表
 DocType: Chapter Member,Chapter Member,章会员
 DocType: Material Request Plan Item,Minimum Order Quantity,最小起订量
@@ -4998,7 +4987,7 @@ apps/erpnext/erpnext/loan_management/doctype/loan_security_price/loan_security_p
 apps/erpnext/erpnext/hr/utils.py,Future dates not allowed,未来的日期不允许
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Expected Delivery Date should be after Sales Order Date,预计交货日期应在销售订单日期之后
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py,Reorder Level,重订货水平
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Chart Of Accounts Template,科目表模板
+DocType: Company,Chart Of Accounts Template,科目表模板
 DocType: Attendance,Attendance Date,考勤日期
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Update stock must be enable for the purchase invoice {0},必须为采购费用清单{0}启用更新库存
 apps/erpnext/erpnext/stock/get_item_details.py,Item Price updated for {0} in Price List {1},物料价格{0}更新到价格清单{1}中了，之后的订单会使用新价格
@@ -5567,8 +5556,6 @@ DocType: Installation Note,Installation Date,安装日期
 apps/erpnext/erpnext/accounts/doctype/shareholder/shareholder.js,Share Ledger,Share Ledger
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Sales Invoice {0} created,已创建销售费用清单{0}
 DocType: Employee,Confirmation Date,确认日期
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","请删除员工<a href=""#Form/Employee/{0}"">{0}</a> \以取消此文档"
 DocType: Inpatient Occupancy,Check Out,退出
 DocType: C-Form,Total Invoiced Amount,发票金额
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Min Qty can not be greater than Max Qty,最小数量不能大于最大数量
@@ -5777,7 +5764,6 @@ DocType: Employee,Prefered Contact Email,首选联系邮箱
 DocType: Cheque Print Template,Cheque Width,支票宽度
 DocType: Selling Settings,Validate Selling Price for Item against Purchase Rate or Valuation Rate,比对物料采购价或库存评估价以验证物料的销售价格
 DocType: Fee Schedule,Fee Schedule,收费表
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Column Labels : ,列标签：
 DocType: Bank Transaction,Settled,安定
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Cess,塞斯
 DocType: Quality Feedback,Parameters,参数
@@ -6461,6 +6447,7 @@ apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,�
 DocType: Salary Component,Formula,公式
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,Serial #,序列号
 DocType: Material Request Plan Item,Required Quantity,所需数量
+DocType: Cash Flow Mapping Template,Template Name,模板名称
 DocType: Lab Test Template,Lab Test Template,实验室测试模板
 apps/erpnext/erpnext/accounts/doctype/accounting_period/accounting_period.py,Accounting Period overlaps with {0},会计期间与{0}重叠
 apps/erpnext/erpnext/setup/doctype/company/company.py,Sales Account,销售科目
@@ -6521,7 +6508,7 @@ DocType: Supplier,SUP-.YYYY.-,SUP-.YYYY.-
 DocType: Bank Reconciliation Detail,Cheque Date,支票日期
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account {0}: Parent account {1} does not belong to company: {2},科目{0}的上级科目{1}不属于公司{2}
 apps/erpnext/erpnext/setup/doctype/company/company.js,Successfully deleted all transactions related to this company!,成功删除与该公司相关的所有交易！
-apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js,As on Date,截至日期
+apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.js,As on Date,截至日期
 DocType: Additional Salary,HR,HR
 DocType: Course Enrollment,Enrollment Date,报名日期
 DocType: Healthcare Settings,Out Patient SMS Alerts,不住院病人短信
@@ -6587,7 +6574,6 @@ apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Payment
 DocType: Course Content,Quiz,测验
 DocType: Subscription,Trial Period End Date,试用期结束日期
 apps/erpnext/erpnext/setup/doctype/authorization_control/authorization_control.py,Not authroized since {0} exceeds limits,不允许，因为{0}超出范围
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Start entering data from here : ,从这里开始输入数据：
 DocType: Serial No,Asset Status,资产状态
 DocType: Sales Invoice,Over Dimensional Cargo (ODC),超尺寸货物（ODC）
 DocType: Restaurant Order Entry,Restaurant Table,餐桌
@@ -6815,7 +6801,6 @@ apps/erpnext/erpnext/public/js/hub/components/ReviewArea.vue,Submit Review,提�
 DocType: Contract,Party User,往来单位用户
 apps/erpnext/erpnext/controllers/buying_controller.py,Assets not created for <b>{0}</b>. You will have to create asset manually.,未为<b>{0}</b>创建资产。您将必须手动创建资产。
 apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py,Please set Company filter blank if Group By is 'Company',如果按什么分组是“Company”，请设置公司过滤器空白
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,客户&gt;客户组&gt;地区
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py,Posting Date cannot be future date,记帐日期不能是未来的日期
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py,Row # {0}: Serial No {1} does not match with {2} {3},行＃{0}：序列号{1}不相匹配{2} {3}
 DocType: Loan Repayment,Interest Payable,应付利息
@@ -7052,7 +7037,6 @@ apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py,Both Trial Pe
 apps/erpnext/erpnext/accounts/report/share_balance/share_balance.py,Average Rate,平均率
 DocType: Appointment,Appointment With,预约
 apps/erpnext/erpnext/controllers/accounts_controller.py,Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total,支付计划中的总付款金额必须等于总计/圆整的总计
-apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,将出席人数标记为<b></b>
 apps/erpnext/erpnext/stock/doctype/item/item.py,"""Customer Provided Item"" cannot have Valuation Rate","""Customer Provided Item（客户提供的物品）"" 不允许拥有 Valuation Rate（估值比率）"
 DocType: Subscription Plan Detail,Plan,计划
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,基于总帐的银行对账单余额
@@ -7748,7 +7732,6 @@ DocType: Item Customer Detail,Item Customer Detail,物料客户信息
 apps/erpnext/erpnext/hr/doctype/employee_benefit_claim/employee_benefit_claim.py,Maximum benefit amount of employee {0} exceeds {1},员工{0}的最高福利金额超过{1}
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py,Total allocated leaves are more than days in the period,总已分配休假天数大于此期间天数
 DocType: Linked Soil Analysis,Linked Soil Analysis,连接的土壤分析
-DocType: Pricing Rule,Percentage,百分比
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Item {0} must be a stock Item,物料{0}必须是库存物料
 DocType: Manufacturing Settings,Default Work In Progress Warehouse,默认运行中的仓库
 apps/erpnext/erpnext/healthcare/doctype/practitioner_schedule/practitioner_schedule.js,"Schedules for {0} overlaps, do you want to proceed after skiping overlaped slots ?",{0}计划任务重叠，是否要在滑动重叠的插槽后继续？
