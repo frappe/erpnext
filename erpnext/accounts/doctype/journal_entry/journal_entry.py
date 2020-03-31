@@ -456,11 +456,12 @@ class JournalEntry(AccountsController):
 	def set_print_format_fields(self):
 		bank_amount = party_amount = total_amount = 0.0
 		currency = bank_account_currency = party_account_currency = pay_to_recd_from= None
+		party_type = None
 		for d in self.get('accounts'):
 			if d.party_type in ['Customer', 'Supplier'] and d.party:
+				party_type = d.party_type
 				if not pay_to_recd_from:
-					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
-						"customer_name" if d.party_type=="Customer" else "supplier_name")
+					pay_to_recd_from = d.party
 
 				if pay_to_recd_from and pay_to_recd_from == d.party:
 					party_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
@@ -470,8 +471,9 @@ class JournalEntry(AccountsController):
 				bank_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
 				bank_account_currency = d.account_currency
 
-		if pay_to_recd_from:
-			self.pay_to_recd_from = pay_to_recd_from
+		if party_type and pay_to_recd_from:
+			self.pay_to_recd_from = frappe.db.get_value(party_type, pay_to_recd_from,
+				"customer_name" if party_type=="Customer" else "supplier_name")
 			if bank_amount:
 				total_amount = bank_amount
 				currency = bank_account_currency

@@ -298,9 +298,11 @@ class SalarySlip(TransactionBase):
 
 	def calculate_net_pay(self):
 		if self.salary_structure:
-			self.calculate_component_amounts()
-
+			self.calculate_component_amounts("earnings")
 		self.gross_pay = self.get_component_totals("earnings")
+
+		if self.salary_structure:
+			self.calculate_component_amounts("deductions")
 		self.total_deduction = self.get_component_totals("deductions")
 
 		self.set_loan_repayment()
@@ -308,25 +310,27 @@ class SalarySlip(TransactionBase):
 		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
 		self.rounded_total = rounded(self.net_pay)
 
-	def calculate_component_amounts(self):
+	def calculate_component_amounts(self, component_type):
 		if not getattr(self, '_salary_structure_doc', None):
 			self._salary_structure_doc = frappe.get_doc('Salary Structure', self.salary_structure)
 
 		payroll_period = get_payroll_period(self.start_date, self.end_date, self.company)
 
-		self.add_structure_components()
-		self.add_employee_benefits(payroll_period)
-		self.add_additional_salary_components()
-		self.add_tax_components(payroll_period)
-		self.set_component_amounts_based_on_payment_days()
+		self.add_structure_components(component_type)
+		self.add_additional_salary_components(component_type)
+		if component_type == "earnings":
+			self.add_employee_benefits(payroll_period)
+		else:
+			self.add_tax_components(payroll_period)
 
-	def add_structure_components(self):
+		self.set_component_amounts_based_on_payment_days(component_type)
+
+	def add_structure_components(self, component_type):
 		data = self.get_data_for_eval()
-		for key in ('earnings', 'deductions'):
-			for struct_row in self._salary_structure_doc.get(key):
-				amount = self.eval_condition_and_formula(struct_row, data)
-				if amount and struct_row.statistical_component == 0:
-					self.update_component_row(struct_row, amount, key)
+		for struct_row in self._salary_structure_doc.get(component_type):
+			amount = self.eval_condition_and_formula(struct_row, data)
+			if amount and struct_row.statistical_component == 0:
+				self.update_component_row(struct_row, amount, component_type)
 
 	def get_data_for_eval(self):
 		'''Returns data for evaluating formula'''
@@ -399,14 +403,15 @@ class SalarySlip(TransactionBase):
 						amount = last_benefit.amount
 						self.update_component_row(frappe._dict(last_benefit.struct_row), amount, "earnings")
 
-	def add_additional_salary_components(self):
-		additional_components = get_additional_salary_component(self.employee, self.start_date, self.end_date)
+	def add_additional_salary_components(self, component_type):
+		additional_components = get_additional_salary_component(self.employee,
+			self.start_date, self.end_date, component_type)
 		if additional_components:
 			for additional_component in additional_components:
 				amount = additional_component.amount
 				overwrite = additional_component.overwrite
-				key = "earnings" if additional_component.type == "Earning" else "deductions"
-				self.update_component_row(frappe._dict(additional_component.struct_row), amount, key, overwrite=overwrite)
+				self.update_component_row(frappe._dict(additional_component.struct_row), amount,
+					component_type, overwrite=overwrite)
 
 	def add_tax_components(self, payroll_period):
 		# Calculate variable_based_on_taxable_salary after all components updated in salary slip
@@ -735,7 +740,7 @@ class SalarySlip(TransactionBase):
 				total += d.amount
 		return total
 
-	def set_component_amounts_based_on_payment_days(self):
+	def set_component_amounts_based_on_payment_days(self, component_type):
 		joining_date, relieving_date = frappe.get_cached_value("Employee", self.employee,
 			["date_of_joining", "relieving_date"])
 
@@ -745,9 +750,8 @@ class SalarySlip(TransactionBase):
 		if not joining_date:
 			frappe.throw(_("Please set the Date Of Joining for employee {0}").format(frappe.bold(self.employee_name)))
 
-		for component_type in ("earnings", "deductions"):
-			for d in self.get(component_type):
-				d.amount = self.get_amount_based_on_payment_days(d, joining_date, relieving_date)[0]
+		for d in self.get(component_type):
+			d.amount = self.get_amount_based_on_payment_days(d, joining_date, relieving_date)[0]
 
 	def set_loan_repayment(self):
 		self.set('loans', [])

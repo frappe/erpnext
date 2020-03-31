@@ -4,7 +4,7 @@
 erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	setup: function() {
 		this._super();
-		frappe.flags.hide_serial_batch_dialog = false;
+		frappe.flags.hide_serial_batch_dialog = true;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
 			var has_margin_field = frappe.meta.has_field(cdt, 'margin_type');
@@ -165,6 +165,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				return (doc.rule_applied) ? "green" : "red";
 			});
 		}
+
+		let batch_no_field = this.frm.get_docfield("items", "batch_no");
+		if (batch_no_field) {
+			batch_no_field.get_route_options_for_new_doc = function(row) {
+				return {
+					"item": row.doc.item_code
+				}
+			};
+		}
+
 	},
 	onload: function() {
 		var me = this;
@@ -352,12 +362,17 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 				['serial_no', 'batch_no', 'barcode'].forEach(field => {
 					if (data[field] && frappe.meta.has_field(row_to_modify.doctype, field)) {
+
+						let value = (row_to_modify[field] && field === "serial_no")
+							? row_to_modify[field] + '\n' + data[field] : data[field];
+
 						frappe.model.set_value(row_to_modify.doctype,
-							row_to_modify.name, field, data[field]);
+							row_to_modify.name, field, value);
 					}
 				});
 
 				scan_barcode_field.set_value('');
+				refresh_field("items");
 			});
 		}
 		return false;
@@ -507,6 +522,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 								() => me.frm.script_manager.trigger("price_list_rate", cdt, cdn),
 								() => me.toggle_conversion_factor(item),
 								() => {
+									if (show_batch_dialog)
+										return frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"])
+											.then((r) => {
+												if(r.message.has_batch_no || r.message.has_serial_no) {
+													frappe.flags.hide_serial_batch_dialog = false;
+												}
+											});
+								},
+								() => {
 									if(show_batch_dialog && !frappe.flags.hide_serial_batch_dialog) {
 										var d = locals[cdt][cdn];
 										$.each(r.message, function(k, v) {
@@ -515,7 +539,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 										erpnext.show_serial_batch_selector(me.frm, d, (item) => {
 											me.frm.script_manager.trigger('qty', item.doctype, item.name);
-										});
+											if (!me.frm.doc.set_warehouse)
+												me.frm.script_manager.trigger('warehouse', item.doctype, item.name);
+										}, undefined, !frappe.flags.hide_serial_batch_dialog);
 									}
 								},
 								() => me.conversion_factor(doc, cdt, cdn, true),
@@ -941,15 +967,19 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	conversion_factor: function(doc, cdt, cdn, dont_fetch_price_list_rate) {
-		if(doc.doctype != 'Material Request' && frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
+		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
 			var item = frappe.get_doc(cdt, cdn);
 			frappe.model.round_floats_in(item, ["qty", "conversion_factor"]);
 			item.stock_qty = flt(item.qty * item.conversion_factor, precision("stock_qty", item));
-			item.total_weight = flt(item.stock_qty * item.weight_per_unit);
 			refresh_field("stock_qty", item.name, item.parentfield);
-			refresh_field("total_weight", item.name, item.parentfield);
 			this.toggle_conversion_factor(item);
-			this.calculate_net_weight();
+
+			if(doc.doctype != "Material Request") {
+				item.total_weight = flt(item.stock_qty * item.weight_per_unit);
+				refresh_field("total_weight", item.name, item.parentfield);
+				this.calculate_net_weight();
+			}
+
 			if (!dont_fetch_price_list_rate &&
 				frappe.meta.has_field(doc.doctype, "price_list_currency")) {
 				this.apply_price_list(item, true);
