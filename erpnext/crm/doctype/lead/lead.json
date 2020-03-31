@@ -171,7 +171,6 @@
    "options": "Customer"
   },
   {
-   "depends_on": "eval: doc.source==\"Campaign\"",
    "fieldname": "campaign_name",
    "fieldtype": "Link",
    "label": "Campaign Name",
