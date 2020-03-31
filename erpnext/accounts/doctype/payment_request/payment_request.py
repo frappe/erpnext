@@ -317,13 +317,13 @@ def make_payment_request(**args):
 			"payment_request_type": args.get("payment_request_type"),
 			"currency": ref_doc.currency,
 			"grand_total": grand_total,
-			"email_to": args.recipient_id or "",
+			"email_to": args.recipient_id or ref_doc.owner,
 			"subject": _("Payment Request for {0}").format(args.dn),
 			"message": gateway_account.get("message") or get_dummy_message(ref_doc),
 			"reference_doctype": args.dt,
 			"reference_name": args.dn,
-			"party_type": args.get("party_type"),
-			"party": args.get("party"),
+			"party_type": args.get("party_type") or "Customer",
+			"party": args.get("party") or ref_doc.customer,
 			"bank_account": bank_account
 		})
 

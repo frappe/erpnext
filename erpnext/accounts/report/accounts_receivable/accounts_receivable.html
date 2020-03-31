@@ -218,15 +218,15 @@
 						<td></td>
 						<td style="text-align: right"><b>{%= __("Total") %}</b></td>
 						<td style="text-align: right">
-							{%= format_currency(data[i]["invoiced"], data[i]["currency"] ) %}</td>
+							{%= format_currency(data[i]["invoiced"], data[0]["currency"] ) %}</td>
 
 						{% if(!filters.show_future_payments) { %}
 							<td style="text-align: right">
-								{%= format_currency(data[i]["paid"], data[i]["currency"]) %}</td>
-							<td style="text-align: right">{%= format_currency(data[i]["credit_note"], data[i]["currency"]) %} </td>
+								{%= format_currency(data[i]["paid"], data[0]["currency"]) %}</td>
+							<td style="text-align: right">{%= format_currency(data[i]["credit_note"], data[0]["currency"]) %} </td>
 						{% } %}
 						<td style="text-align: right">
-							{%= format_currency(data[i]["outstanding"], data[i]["currency"]) %}</td>
+							{%= format_currency(data[i]["outstanding"], data[0]["currency"]) %}</td>
 
 						{% if(filters.show_future_payments) { %}
 							{% if(report.report_name === "Accounts Receivable") { %}
@@ -234,8 +234,8 @@
 									{%= data[i]["po_no"] %}</td>
 							{% } %}
 							<td style="text-align: right">{%= data[i]["future_ref"] %}</td>
-							<td style="text-align: right">{%= format_currency(data[i]["future_amount"], data[i]["currency"]) %}</td>
-							<td style="text-align: right">{%= format_currency(data[i]["remaining_balance"], data[i]["currency"]) %}</td>
+							<td style="text-align: right">{%= format_currency(data[i]["future_amount"], data[0]["currency"]) %}</td>
+							<td style="text-align: right">{%= format_currency(data[i]["remaining_balance"], data[0]["currency"]) %}</td>
 						{% } %}
 					{% } %}
 				{% } else { %}
@@ -256,10 +256,10 @@
 						{% } else { %}
 							<td><b>{%= __("Total") %}</b></td>
 						{% } %}
-						<td style="text-align: right">{%= format_currency(data[i]["invoiced"], data[i]["currency"]) %}</td>
-						<td style="text-align: right">{%= format_currency(data[i]["paid"], data[i]["currency"]) %}</td>
-						<td style="text-align: right">{%= format_currency(data[i]["credit_note"], data[i]["currency"]) %}</td>
-						<td style="text-align: right">{%= format_currency(data[i]["outstanding"], data[i]["currency"]) %}</td>
+						<td style="text-align: right">{%= format_currency(data[i]["invoiced"], data[0]["currency"]) %}</td>
+						<td style="text-align: right">{%= format_currency(data[i]["paid"], data[0]["currency"]) %}</td>
+						<td style="text-align: right">{%= format_currency(data[i]["credit_note"], data[0]["currency"]) %}</td>
+						<td style="text-align: right">{%= format_currency(data[i]["outstanding"], data[0]["currency"]) %}</td>
 					{% } %}
 				{% } %}
 				</tr>
