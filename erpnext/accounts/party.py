@@ -11,7 +11,7 @@ from frappe.utils import (add_days, getdate, formatdate, date_diff,
 	add_years, get_timestamp, nowdate, flt, cstr, add_months, get_last_day)
 from frappe.contacts.doctype.address.address import (get_address_display,
 	get_default_address, get_company_address)
-from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
+from frappe.contacts.doctype.contact.contact import get_contact_details
 from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrency
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext import get_company_currency
@@ -46,7 +46,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	currency = party.default_currency if party.get("default_currency") else get_company_currency(company)
 
 	party_address, shipping_address = set_address_details(party_details, party, party_type, doctype, company, party_address, company_address, shipping_address)
-	set_contact_details(party_details, party, party_type, doctype)
+	set_contact_details(party_details, party, party_type)
 	set_other_values(party_details, party, party_type)
 	set_price_list(party_details, party, party_type, price_list, pos_profile)
 
@@ -115,11 +115,8 @@ def set_address_details(party_details, party, party_type, doctype=None, company=
 def get_regional_address_details(party_details, doctype, company):
 	pass
 
-def set_contact_details(party_details, party, party_type, doctype=None):
-	if doctype == 'Sales Invoice':
-		party_details.contact_person = get_default_billing_contact(doctype, party.name)
-	else:
-		party_details.contact_person = get_default_contact(party_type, party.name)
+def set_contact_details(party_details, party, party_type):
+	party_details.contact_person = get_default_contact(party_type, party.name)
 
 	if not party_details.contact_person:
 		party_details.update({
@@ -617,8 +614,8 @@ def get_partywise_advanced_payment_amount(party_type, posting_date = None):
 	if data:
 		return frappe._dict(data)
 
-def get_default_billing_contact(doctype, name):
-	""" 
+def get_default_contact(doctype, name):
+	"""
 		Returns default contact for the given doctype and name.
 		Can be ordered by `contact_type` to either is_primary_contact or is_billing_contact.
 	"""
@@ -626,11 +623,11 @@ def get_default_billing_contact(doctype, name):
 			SELECT dl.parent, c.is_primary_contact, c.is_billing_contact
 			FROM `tabDynamic Link` dl
 			INNER JOIN tabContact c ON c.name = dl.parent
-			WHERE 
+			WHERE
 				dl.link_doctype=%s AND
 				dl.link_name=%s AND
 				dl.parenttype = "Contact"
-			ORDER BY is_billing_contact DESC, is_primary_contact DESC
+			ORDER BY is_primary_contact DESC, is_billing_contact DESC
 		""", (doctype, name))
 	if out:
 		try:
