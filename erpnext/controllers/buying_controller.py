@@ -680,7 +680,7 @@ class BuyingController(StockController):
 						
 						if len(created_assets) > 5:
 							# dont show asset form links if more than 5 assets are created
-							messages.append(_('{} Assets created for {}').format(len(created_assets), is_plural, frappe.bold(d.item_code)))
+							messages.append(_('{} Asset{} created for {}').format(len(created_assets), is_plural, frappe.bold(d.item_code)))
 						else:
 							assets_link = list(map(lambda d: frappe.utils.get_link_to_form('Asset', d), created_assets))
 							assets_link = frappe.bold(','.join(assets_link))
