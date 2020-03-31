@@ -424,12 +424,11 @@ def make_status_as_paid(doc, method):
 			"docstatus": 1})
 
 		if payment_request_name:
-			outstanding_amt = frappe.get_value(ref.reference_doctype, ref.reference_name, 'outstanding_amount')
 			doc = frappe.get_doc("Payment Request", payment_request_name)
-			if doc.status != "Paid" and outstanding_amt <= 0:
+			if doc.status != "Paid" and ref.outstanding_amount <= ref.allocated_amount:
 				doc.db_set('status', 'Paid')
 				frappe.db.commit()
-			elif doc.status != "Partially Paid" and outstanding_amt != doc.grand_total:
+			elif doc.status != "Partially Paid" and ref.outstanding_amount != ref.allocated_amount:
 				doc.db_set('status', 'Partially Paid')
 				frappe.db.commit()
 
