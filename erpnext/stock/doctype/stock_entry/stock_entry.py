@@ -238,7 +238,7 @@ class StockEntry(StockController):
 		if self.purpose == "Manufacture" and self.work_order:
 			production_item = frappe.get_value('Work Order', self.work_order, 'production_item')
 			for item in self.items:
-				if item.item_code == production_item and item.qty != self.fg_completed_qty:
+				if item.item_code == production_item and item.t_warehouse and item.qty != self.fg_completed_qty:
 					frappe.throw(_("Finished product quantity <b>{0}</b> and For Quantity <b>{1}</b> cannot be different")
 						.format(item.qty, self.fg_completed_qty))
 
