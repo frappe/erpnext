@@ -11,6 +11,10 @@ frappe.ui.form.on('Therapy Plan', {
 	},
 
 	refresh: function(frm) {
+		if (!frm.doc.__islocal) {
+			frm.trigger('show_progress_for_therapies');
+		}
+
 		if (!frm.doc.__islocal && frm.doc.status != 'Completed') {
 			let therapy_types = (frm.doc.therapy_plan_details || []).map(function(d){ return d.therapy_type });
 			const fields = [{
@@ -46,7 +50,31 @@ frappe.ui.form.on('Therapy Plan', {
 				}, __('Select Therapy Type'), __('Create'));
 			}, __('Create'))
 		}
-	}
+	},
+
+	show_progress_for_therapies: function(frm) {
+		let bars = [];
+		let message = '';
+		let added_min = false;
+
+		// completed sessions
+		let title = __('{0} sessions completed', [frm.doc.total_sessions_completed]);
+		if (frm.doc.total_sessions_completed == 1) {
+			title = __('{0} session completed', [frm.doc.total_sessions_completed]);
+		}
+
+		bars.push({
+			'title': title,
+			'width': (frm.doc.total_sessions_completed / frm.doc.total_sessions * 100) + '%',
+			'progress_class': 'progress-bar-success'
+		});
+		if (bars[0].width == '0%') {
+			bars[0].width = '0.5%';
+			added_min = 0.5;
+		}
+		message = title;
+		frm.dashboard.add_progress(__('Status'), bars, message);
+	},
 });
 
 frappe.ui.form.on('Therapy Plan Detail', {
