@@ -6,6 +6,7 @@
  "description": "Distinct unit of an Item",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "details",
   "column_break0",
@@ -104,10 +105,11 @@
   },
   {
    "fieldname": "batch_no",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Batch No",
+   "options": "Batch",
    "read_only": 1
   },
   {
@@ -425,7 +427,7 @@
  ],
  "icon": "fa fa-barcode",
  "idx": 1,
- "modified": "2019-08-07 17:28:32.243280",
+ "modified": "2020-02-28 19:31:09.357323",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",

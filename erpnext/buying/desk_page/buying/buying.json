@@ -1,0 +1,92 @@
+{
+ "cards": [
+  {
+   "links": "[\n    {\n        \"description\": \"Supplier database.\",\n        \"label\": \"Supplier\",\n        \"name\": \"Supplier\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Supplier Group master.\",\n        \"label\": \"Supplier Group\",\n        \"name\": \"Supplier Group\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"All Contacts.\",\n        \"label\": \"Contact\",\n        \"name\": \"Contact\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"All Addresses.\",\n        \"label\": \"Address\",\n        \"name\": \"Address\",\n        \"type\": \"doctype\"\n    }\n]",
+   "title": "Supplier"
+  },
+  {
+   "icon": "fa fa-star",
+   "links": "[\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"Supplier\"\n        ],\n        \"description\": \"Purchase Orders given to Suppliers.\",\n        \"label\": \"Purchase Order\",\n        \"name\": \"Purchase Order\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"Supplier\"\n        ],\n        \"label\": \"Purchase Invoice\",\n        \"name\": \"Purchase Invoice\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\"\n        ],\n        \"description\": \"Request for purchase.\",\n        \"label\": \"Material Request\",\n        \"name\": \"Material Request\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"Supplier\"\n        ],\n        \"description\": \"Request for quotation.\",\n        \"label\": \"Request for Quotation\",\n        \"name\": \"Request for Quotation\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"Supplier\"\n        ],\n        \"description\": \"Quotations received from Suppliers.\",\n        \"label\": \"Supplier Quotation\",\n        \"name\": \"Supplier Quotation\",\n        \"type\": \"doctype\"\n    }\n]",
+   "title": "Purchasing"
+  },
+  {
+   "links": "[\n    {\n        \"description\": \"All Products or Services.\",\n        \"label\": \"Item\",\n        \"name\": \"Item\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Multiple Item prices.\",\n        \"label\": \"Item Price\",\n        \"name\": \"Item Price\",\n        \"onboard\": 1,\n        \"route\": \"#Report/Item Price\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Price List master.\",\n        \"label\": \"Price List\",\n        \"name\": \"Price List\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Bundle items at time of sale.\",\n        \"label\": \"Product Bundle\",\n        \"name\": \"Product Bundle\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Tree of Item Groups.\",\n        \"icon\": \"fa fa-sitemap\",\n        \"label\": \"Item Group\",\n        \"link\": \"Tree/Item Group\",\n        \"name\": \"Item Group\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Rules for applying different promotional schemes.\",\n        \"label\": \"Promotional Scheme\",\n        \"name\": \"Promotional Scheme\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Rules for applying pricing and discount.\",\n        \"label\": \"Pricing Rule\",\n        \"name\": \"Pricing Rule\",\n        \"type\": \"doctype\"\n    }\n]",
+   "title": "Items and Pricing"
+  },
+  {
+   "icon": "fa fa-cog",
+   "links": "[\n    {\n        \"description\": \"Default settings for buying transactions.\",\n        \"label\": \"Buying Settings\",\n        \"name\": \"Buying Settings\",\n        \"settings\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Tax template for buying transactions.\",\n        \"label\": \"Purchase Taxes and Charges Template\",\n        \"name\": \"Purchase Taxes and Charges Template\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Template of terms or contract.\",\n        \"label\": \"Terms and Conditions Template\",\n        \"name\": \"Terms and Conditions\",\n        \"type\": \"doctype\"\n    }\n]",
+   "title": "Settings"
+  },
+  {
+   "links": "[\n    {\n        \"description\": \"All Supplier scorecards.\",\n        \"label\": \"Supplier Scorecard\",\n        \"name\": \"Supplier Scorecard\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Templates of supplier scorecard variables.\",\n        \"label\": \"Supplier Scorecard Variable\",\n        \"name\": \"Supplier Scorecard Variable\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Templates of supplier scorecard criteria.\",\n        \"label\": \"Supplier Scorecard Criteria\",\n        \"name\": \"Supplier Scorecard Criteria\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Templates of supplier standings.\",\n        \"label\": \"Supplier Scorecard Standing\",\n        \"name\": \"Supplier Scorecard Standing\",\n        \"type\": \"doctype\"\n    }\n]",
+   "title": "Supplier Scorecard"
+  },
+  {
+   "icon": "fa fa-table",
+   "links": "[\n    {\n        \"is_query_report\": true,\n        \"label\": \"Purchase Analytics\",\n        \"name\": \"Purchase Analytics\",\n        \"onboard\": 1,\n        \"reference_doctype\": \"Purchase Order\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Supplier-Wise Sales Analytics\",\n        \"name\": \"Supplier-Wise Sales Analytics\",\n        \"onboard\": 1,\n        \"reference_doctype\": \"Stock Ledger Entry\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Purchase Order Trends\",\n        \"name\": \"Purchase Order Trends\",\n        \"onboard\": 1,\n        \"reference_doctype\": \"Purchase Order\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Procurement Tracker\",\n        \"name\": \"Procurement Tracker\",\n        \"onboard\": 1,\n        \"reference_doctype\": \"Purchase Order\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Requested Items To Be Ordered\",\n        \"name\": \"Requested Items To Be Ordered\",\n        \"onboard\": 1,\n        \"reference_doctype\": \"Material Request\",\n        \"type\": \"report\"\n    }\n]",
+   "title": "Key Reports"
+  },
+  {
+   "icon": "fa fa-list",
+   "links": "[\n    {\n        \"is_query_report\": true,\n        \"label\": \"Items To Be Requested\",\n        \"name\": \"Items To Be Requested\",\n        \"onboard\": 1,\n        \"reference_doctype\": \"Item\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Item-wise Purchase History\",\n        \"name\": \"Item-wise Purchase History\",\n        \"onboard\": 1,\n        \"reference_doctype\": \"Item\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Material Requests for which Supplier Quotations are not created\",\n        \"name\": \"Material Requests for which Supplier Quotations are not created\",\n        \"reference_doctype\": \"Material Request\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Supplier Addresses And Contacts\",\n        \"name\": \"Address And Contacts\",\n        \"reference_doctype\": \"Address\",\n        \"route_options\": {\n            \"party_type\": \"Supplier\"\n        },\n        \"type\": \"report\"\n    }\n]",
+   "title": "Other Reports"
+  }
+ ],
+ "category": "Modules",
+ "charts": [
+  {
+   "chart_name": "Expenses",
+   "label": "Expenses",
+   "size": "Full"
+  }
+ ],
+ "creation": "2020-01-28 11:50:26.195467",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "docstatus": 0,
+ "doctype": "Desk Page",
+ "extends_another_page": 0,
+ "icon": "",
+ "idx": 0,
+ "is_standard": 1,
+ "label": "Buying",
+ "modified": "2020-03-12 16:30:40.779078",
+ "modified_by": "Administrator",
+ "module": "Buying",
+ "name": "Buying",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": [
+  {
+   "format": "{} Unpaid",
+   "is_query_report": 0,
+   "link_to": "Purchase Invoice",
+   "stats_filter": "{\n    \"company\": [\"like\", '%' + frappe.defaults.get_global_default(\"company\") + '%'],\n    \"status\": \"Unpaid\"\n}",
+   "type": "DocType"
+  },
+  {
+   "format": "{} to receive",
+   "is_query_report": 0,
+   "link_to": "Purchase Order",
+   "stats_filter": "{\n    \"company\": [\"like\", '%' + frappe.defaults.get_global_default(\"company\") + '%'],\n    \"status\": \"To Receive\"\n}",
+   "type": "DocType"
+  },
+  {
+   "is_query_report": 0,
+   "link_to": "Supplier Quotation",
+   "type": "DocType"
+  },
+  {
+   "is_query_report": 0,
+   "link_to": "Accounts Payable",
+   "type": "Report"
+  },
+  {
+   "is_query_report": 0,
+   "link_to": "Purchase Register",
+   "type": "Report"
+  }
+ ]
+}
