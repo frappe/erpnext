@@ -314,7 +314,7 @@ class WorkOrder(Document):
 		stock_entry = frappe.db.sql("""select name from `tabStock Entry`
 			where work_order = %s and docstatus = 1""", self.name)
 		if stock_entry:
-			frappe.throw(_("Cannot cancel because submitted Stock Entry {0} exists").format(stock_entry[0][0]))
+			frappe.throw(_("Cannot cancel because submitted Stock Entry {0} exists").format(frappe.utils.get_link_to_form('Stock Entry', stock_entry[0][0])))
 
 	def update_planned_qty(self):
 		update_bin_qty(self.production_item, self.fg_warehouse, {
@@ -648,7 +648,7 @@ def get_item_details(item, project = None):
 	return res
 
 @frappe.whitelist()
-def make_work_order(item, qty=0, project=None):
+def make_work_order(bom_no, item, qty=0, project=None):
 	if not frappe.has_permission("Work Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
@@ -657,6 +657,7 @@ def make_work_order(item, qty=0, project=None):
 	wo_doc = frappe.new_doc("Work Order")
 	wo_doc.production_item = item
 	wo_doc.update(item_details)
+	wo_doc.bom_no = bom_no
 
 	if flt(qty) > 0:
 		wo_doc.qty = flt(qty)
