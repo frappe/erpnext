@@ -168,12 +168,11 @@ DocType: Appointment Booking Slots,Appointment Booking Slots,ສະລັອດ�
 DocType: Work Order Operation,Work In Progress,ກໍາລັງດໍາເນີນການ
 DocType: Leave Control Panel,Branch (optional),ສາຂາ (ເປັນທາງເລືອກ)
 apps/erpnext/erpnext/education/report/absent_student_report/absent_student_report.py,Please select date,ກະລຸນາເລືອກເອົາວັນທີ
-DocType: Item Price,Minimum Qty ,Minimum Qty
+apps/erpnext/erpnext/stock/report/product_bundle_balance/product_bundle_balance.py,Minimum Qty ,Minimum Qty
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,BOM recursion: {0} cannot be child of {1},ການເອີ້ນຄືນ BOM: {0} ບໍ່ສາມາດເປັນລູກຂອງ {1}
 DocType: Finance Book,Finance Book,Book Finance
 DocType: Patient Encounter,HLC-ENC-.YYYY.-,HLC-ENC-YYYY.-
 DocType: Appointment Booking Settings,Holiday List,ຊີວັນພັກ
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,The parent account {0} does not exists,ບັນຊີຜູ້ປົກຄອງ {0} ບໍ່ມີ
 apps/erpnext/erpnext/config/quality_management.py,Review and Action,ການທົບທວນແລະການກະ ທຳ
 apps/erpnext/erpnext/hr/doctype/employee_checkin/employee_checkin.py,This employee already has a log with the same timestamp.{0},ພະນັກງານຄົນນີ້ມີບັນທຶກທີ່ມີເວລາດຽວກັນແລ້ວ. {0}
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Accountant,ບັນຊີ
@@ -245,7 +244,6 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Pension Funds,ກ�
 DocType: Exchange Rate Revaluation Account,Gain/Loss,Gain / Loss
 DocType: Crop,Perennial,ອາຍຸຫລາຍປີ
 DocType: Program,Is Published,ຖືກຈັດພີມມາ
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js,Show Delivery Notes,ສະແດງບັນທຶກການສົ່ງ
 apps/erpnext/erpnext/controllers/status_updater.py,"To allow over billing, update ""Over Billing Allowance"" in Accounts Settings or the Item.","ເພື່ອອະນຸຍາດການເອີ້ນເກັບເງິນ, ໃຫ້ອັບເດດ &quot;Over Billing Allowance&quot; ໃນການຕັ້ງຄ່າບັນຊີຫລືລາຍການ."
 DocType: Patient Appointment,Procedure,Procedure
 DocType: Accounts Settings,Use Custom Cash Flow Format,ໃຊ້ Custom Flow Format Format
@@ -989,7 +987,6 @@ apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js,"Not permitted, con
 DocType: Patient,Risk Factors,ປັດໄຈຄວາມສ່ຽງ
 DocType: Patient,Occupational Hazards and Environmental Factors,ອັນຕະລາຍດ້ານອາຊີບແລະສິ່ງແວດລ້ອມ
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Stock Entries already created for Work Order ,ບັນດາຜະລິດຕະພັນທີ່ສ້າງແລ້ວສໍາລັບຄໍາສັ່ງເຮັດວຽກ
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,ລະຫັດສິນຄ້າ&gt; ກຸ່ມລາຍການ&gt; ຍີ່ຫໍ້
 apps/erpnext/erpnext/templates/pages/cart.html,See past orders,ເບິ່ງການສັ່ງຊື້ທີ່ຜ່ານມາ
 apps/erpnext/erpnext/public/js/hub/pages/Selling.vue,{0} conversations,{0} ການສົນທະນາ
 DocType: Vital Signs,Respiratory rate,ອັດຕາການຫາຍໃຈ
@@ -1148,7 +1145,6 @@ apps/erpnext/erpnext/utilities/activation.py,"Create Employee records to manage 
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,An error occurred during the update process,ເກີດຄວາມຜິດພາດໃນຂະບວນການປັບປຸງ
 DocType: Restaurant Reservation,Restaurant Reservation,ຮ້ານອາຫານການຈອງ
 apps/erpnext/erpnext/public/js/hub/Sidebar.vue,Your Items,ລາຍການຂອງທ່ານ
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,ຜູ້ສະ ໜອງ ສິນຄ້າ&gt; ປະເພດຜູ້ສະ ໜອງ ສິນຄ້າ
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Proposal Writing,ຂຽນບົດສະເຫນີ
 DocType: Payment Entry Deduction,Payment Entry Deduction,ການຫັກ Entry ການຊໍາລະເງິນ
 DocType: Service Level Priority,Service Level Priority,ບູລິມະສິດໃນລະດັບການບໍລິການ
@@ -1451,7 +1447,6 @@ apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,Cannot deactivate or cance
 apps/erpnext/erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js,Please select Company and Posting Date to getting entries,ກະລຸນາເລືອກບໍລິສັດແລະວັນທີການລົງທືນເພື່ອຮັບເອົາລາຍການ
 DocType: Asset,Maintenance,ບໍາລຸງຮັກສາ
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js,Get from Patient Encounter,ມາຈາກການພົບປະກັບຜູ້ປ່ວຍ
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},ປັດໄຈການປ່ຽນ UOM ({0} -&gt; {1}) ບໍ່ພົບ ສຳ ລັບລາຍການ: {2}
 DocType: Subscriber,Subscriber,Subscriber
 DocType: Item Attribute Value,Item Attribute Value,ລາຍການສະແດງທີ່ມູນຄ່າ
 apps/erpnext/erpnext/setup/doctype/currency_exchange/currency_exchange.py,Currency Exchange must be applicable for Buying or for Selling.,ການແລກປ່ຽນເງິນຕາຕ້ອງໃຊ້ສໍາລັບການຊື້ຫຼືຂາຍ.
@@ -1953,7 +1948,6 @@ DocType: Sales Invoice Item,Rate With Margin,ອັດຕາດ້ວຍ Margin
 DocType: Purchase Invoice,Is Return (Debit Note),ແມ່ນການກັບຄືນມາ (Note Note)
 DocType: Workstation,Wages,ຄ່າແຮງງານ
 DocType: Asset Maintenance,Maintenance Manager Name,Maintenance Manager Name
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js,Transactions against the company already exist! ,ທຸລະ ກຳ ກັບບໍລິສັດມີຢູ່ແລ້ວ!
 apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Requesting Site,ເວັບໄຊທ໌ຂໍ
 DocType: Agriculture Task,Urgent,ການອັນຮີບດ່ວນ
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Fetching records......,ບັນທຶກຂໍ້ມູນບັນທຶກ ......
@@ -2656,7 +2650,6 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Source warehouse i
 apps/erpnext/erpnext/accounts/doctype/payment_terms_template/payment_terms_template.py,The Payment Term at row {0} is possibly a duplicate.,ໄລຍະເວລາການຊໍາລະເງິນທີ່ແຖວ {0} ແມ່ນເປັນການຊ້ໍາກັນ.
 apps/erpnext/erpnext/public/js/setup_wizard.js,Agriculture (beta),ການກະສິກໍາ (beta)
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js,Packing Slip,ບັນຈຸ
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,ກະລຸນາຕັ້ງຄ່າການໃສ່ຊື່ ສຳ ລັບ {0} ຜ່ານການຕັ້ງຄ່າ&gt; ການຕັ້ງຄ່າ&gt; ຊຸດການຕັ້ງຊື່
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Office Rent,ຫ້ອງການໃຫ້ເຊົ່າ
 apps/erpnext/erpnext/config/settings.py,Setup SMS gateway settings,ການຕັ້ງຄ່າປະຕູການຕິດຕັ້ງ SMS
 DocType: Disease,Common Name,ຊື່ທົ່ວໄປ
@@ -2823,7 +2816,6 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,{0} must app
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py,Leaves Allocated Successfully for {0},ໃບຈັດສັນສົບຜົນສໍາເລັດສໍາລັບການ {0}
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py,No Items to pack,ບໍ່ມີສິນຄ້າທີ່ຈະຊອງ
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Only .csv and .xlsx files are supported currently,ປະຈຸບັນມີພຽງແຕ່ໄຟລ໌ .csv ແລະ .xlsx ເທົ່ານັ້ນທີ່ຮອງຮັບ
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,ກະລຸນາຕິດຕັ້ງລະບົບການຕັ້ງຊື່ພະນັກງານໃນຊັບພະຍາກອນມະນຸດ&gt; ການຕັ້ງຄ່າ HR
 DocType: Shipping Rule Condition,From Value,ຈາກມູນຄ່າ
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Manufacturing Quantity is mandatory,ປະລິມານການຜະລິດເປັນການບັງຄັບ
 DocType: Loan,Repayment Method,ວິທີການຊໍາລະ
@@ -4083,7 +4075,6 @@ apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py,Please set defaul
 apps/erpnext/erpnext/templates/form_grid/material_request_grid.html,Required On,ຄວາມຕ້ອງການໃນ
 DocType: HR Settings,"If checked, hides and disables Rounded Total field in Salary Slips","ຖ້າມີການກວດກາ, ເຊື່ອງແລະປິດບ່ອນທີ່ຢູ່ໃນຕາຕະລາງລວມທັງ ໝົດ ໃນໃບເງິນເດືອນ"
 DocType: Woocommerce Settings,This is the default offset (days) for the Delivery Date in Sales Orders. The fallback offset is 7 days from the order placement date.,ນີ້ແມ່ນການຊົດເຊີຍໃນຕອນຕົ້ນ (ວັນ) ສຳ ລັບວັນທີສົ່ງສິນຄ້າໃນ ຄຳ ສັ່ງຂາຍ. ການຊົດເຊີຍການຫຼຸດລົງແມ່ນ 7 ວັນນັບແຕ່ວັນທີ່ລົງບັນຊີ.
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,ກະລຸນາຕິດຕັ້ງຊຸດ ໝາຍ ເລກ ສຳ ລັບການເຂົ້າຮຽນຜ່ານການຕັ້ງຄ່າ&gt; ເລກ ລຳ ດັບ
 DocType: Rename Tool,File to Rename,ເອກະສານການປ່ຽນຊື່
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,Please select BOM for Item in Row {0},ກະລຸນາເລືອກ BOM ສໍາລັບລາຍການໃນແຖວ {0}
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.js,Fetch Subscription Updates,Fetch Subscription Updates
@@ -4691,7 +4682,6 @@ DocType: Healthcare Service Unit Type,Item Details,ລາຍະລະອຽດ�
 DocType: Cash Flow Mapping,Is Finance Cost,ແມ່ນຄ່າໃຊ້ຈ່າຍດ້ານການເງິນ
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py,Attendance for employee {0} is already marked,ຜູ້ເຂົ້າຮ່ວມສໍາລັບພະນັກງານ {0} ແມ່ນຫມາຍແລ້ວ
 DocType: Packing Slip,If more than one package of the same type (for print),ຖ້າຫາກວ່າຫຼາຍກ່ວາຫນຶ່ງຊຸດຂອງປະເພດດຽວກັນ (ສໍາລັບການພິມ)
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,ກະລຸນາຕັ້ງລະບົບການຕັ້ງຊື່ຜູ້ສອນໃນການສຶກສາ&gt; ການຕັ້ງຄ່າການສຶກສາ
 apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.py,Please set default customer in Restaurant Settings,ກະລຸນາຕັ້ງຄ່າລູກຄ້າເລີ່ມຕົ້ນໃນການຕັ້ງຮ້ານອາຫານ
 ,Salary Register,ເງິນເດືອນຫມັກສະມາຊິກ
 DocType: Company,Default warehouse for Sales Return,ຄັງສິນຄ້າເລີ່ມຕົ້ນ ສຳ ລັບການສົ່ງຄືນການຂາຍ
@@ -4964,7 +4954,6 @@ DocType: Item,Inspection Required before Purchase,ການກວດກາທີ
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html,Pending Activities,ກິດຈະກໍາທີ່ຍັງຄ້າງ
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test_list.js,Create Lab Test,ສ້າງທົດລອງທົດລອງ
 DocType: Patient Appointment,Reminded,ເຕືອນ
-DocType: Homepage Section,Cards,ບັດ
 apps/erpnext/erpnext/public/js/setup_wizard.js,View Chart of Accounts,ເບິ່ງຕາຕະລາງບັນຊີ
 DocType: Chapter Member,Chapter Member,Chapter Member
 DocType: Material Request Plan Item,Minimum Order Quantity,ຈໍານວນສັ່ງຊື້ຂັ້ນຕ່ໍາ
@@ -4982,7 +4971,7 @@ apps/erpnext/erpnext/loan_management/doctype/loan_security_price/loan_security_p
 apps/erpnext/erpnext/hr/utils.py,Future dates not allowed,ວັນທີອະນາຄົດບໍ່ອະນຸຍາດ
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Expected Delivery Date should be after Sales Order Date,ວັນທີຄາດວ່າສົ່ງຄວນຈະຕາມລະບຽບ Sales ວັນທີ່
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py,Reorder Level,ລະດັບລໍາດັບ
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Chart Of Accounts Template,ຕາຕະລາງຂອງບັນຊີແມ່ແບບ
+DocType: Company,Chart Of Accounts Template,ຕາຕະລາງຂອງບັນຊີແມ່ແບບ
 DocType: Attendance,Attendance Date,ວັນທີ່ສະຫມັກຜູ້ເຂົ້າຮ່ວມ
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Update stock must be enable for the purchase invoice {0},ການປັບປຸງຫຼັກຊັບຕ້ອງໄດ້ຮັບການເປີດໃຊ້ສໍາລັບການຊື້ໃບແຈ້ງຫນີ້ {0}
 apps/erpnext/erpnext/stock/get_item_details.py,Item Price updated for {0} in Price List {1},ລາຍການລາຄາການປັບປຸງສໍາລັບ {0} ໃນລາຄາ {1}
@@ -5553,8 +5542,6 @@ DocType: Installation Note,Installation Date,ວັນທີ່ສະຫມັ�
 apps/erpnext/erpnext/accounts/doctype/shareholder/shareholder.js,Share Ledger,Share Ledger
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Sales Invoice {0} created,ໃບແຈ້ງຍອດຂາຍສ້າງ {0}
 DocType: Employee,Confirmation Date,ວັນທີ່ສະຫມັກການຢັ້ງຢືນ
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","ກະລຸນາລຶບພະນັກງານ <a href=""#Form/Employee/{0}"">{0}</a> \ ເພື່ອຍົກເລີກເອກະສານນີ້"
 DocType: Inpatient Occupancy,Check Out,ເຊັກເອົາ
 DocType: C-Form,Total Invoiced Amount,ຈໍານວນອະນຸທັງຫມົດ
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Min Qty can not be greater than Max Qty,Min ຈໍານວນບໍ່ສາມາດຈະຫຼາຍກ່ວານ້ໍາຈໍານວນ
@@ -5763,7 +5750,6 @@ DocType: Employee,Prefered Contact Email,ຕ້ອງການຕິດຕໍ່
 DocType: Cheque Print Template,Cheque Width,Width Cheque
 DocType: Selling Settings,Validate Selling Price for Item against Purchase Rate or Valuation Rate,ກວດສອບລາຄາຂາຍສໍາລັບລາຍການຕໍ່ອັດຕາການຊື້ຫຼືອັດຕາປະເມີນມູນຄ່າ
 DocType: Fee Schedule,Fee Schedule,ຕາຕະລາງຄ່າທໍານຽມ
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Column Labels : ,ປ້າຍ ກຳ ກັບຄໍ ລຳ:
 DocType: Bank Transaction,Settled,ຕົກລົງ
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Cess,Cess
 DocType: Quality Feedback,Parameters,ພາລາມິເຕີ
@@ -6448,6 +6434,7 @@ apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,�
 DocType: Salary Component,Formula,ສູດ
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,Serial #,Serial:
 DocType: Material Request Plan Item,Required Quantity,ຈຳ ນວນທີ່ ຈຳ ເປັນ
+DocType: Cash Flow Mapping Template,Template Name,ຊື່ສິນຄ້າ
 DocType: Lab Test Template,Lab Test Template,Lab Test Template
 apps/erpnext/erpnext/accounts/doctype/accounting_period/accounting_period.py,Accounting Period overlaps with {0},ໄລຍະເວລາການບັນຊີຊ້ອນກັນກັບ {0}
 apps/erpnext/erpnext/setup/doctype/company/company.py,Sales Account,ບັນຊີການຂາຍ
@@ -6508,7 +6495,7 @@ DocType: Supplier,SUP-.YYYY.-,SUP -YYYY.-
 DocType: Bank Reconciliation Detail,Cheque Date,ວັນທີ່ສະຫມັກ Cheque
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account {0}: Parent account {1} does not belong to company: {2},ບັນຊີ {0}: ບັນຊີຂອງພໍ່ແມ່ {1} ບໍ່ໄດ້ຂຶ້ນກັບບໍລິສັດ: {2}
 apps/erpnext/erpnext/setup/doctype/company/company.js,Successfully deleted all transactions related to this company!,ສົບຜົນສໍາເລັດການລຶບເຮັດທຸລະກໍາທັງຫມົດທີ່ກ່ຽວຂ້ອງກັບບໍລິສັດນີ້!
-apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js,As on Date,ໃນຖານະເປັນວັນທີ
+apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.js,As on Date,ໃນຖານະເປັນວັນທີ
 DocType: Additional Salary,HR,HR
 DocType: Course Enrollment,Enrollment Date,ວັນທີ່ສະຫມັກການລົງທະບຽນ
 DocType: Healthcare Settings,Out Patient SMS Alerts,ອອກແຈ້ງເຕືອນ SMS ຂອງຄົນເຈັບ
@@ -6574,7 +6561,6 @@ apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Payment
 DocType: Course Content,Quiz,ສອບຖາມ
 DocType: Subscription,Trial Period End Date,ວັນສິ້ນສຸດການທົດລອງ
 apps/erpnext/erpnext/setup/doctype/authorization_control/authorization_control.py,Not authroized since {0} exceeds limits,ບໍ່ authroized ນັບຕັ້ງແຕ່ {0} ເກີນຈໍາກັດ
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Start entering data from here : ,ເລີ່ມຕົ້ນໃສ່ຂໍ້ມູນຈາກບ່ອນນີ້:
 DocType: Serial No,Asset Status,ສະຖານະຊັບສິນ
 DocType: Sales Invoice,Over Dimensional Cargo (ODC),Over Dimensional Cargo (ODC)
 DocType: Restaurant Order Entry,Restaurant Table,Restaurant Table
@@ -6802,7 +6788,6 @@ apps/erpnext/erpnext/public/js/hub/components/ReviewArea.vue,Submit Review,Submi
 DocType: Contract,Party User,ພັກຜູ້ໃຊ້
 apps/erpnext/erpnext/controllers/buying_controller.py,Assets not created for <b>{0}</b>. You will have to create asset manually.,ຊັບສິນທີ່ບໍ່ໄດ້ຖືກສ້າງຂື້ນ ສຳ ລັບ <b>{0}</b> . ທ່ານຈະຕ້ອງສ້າງຊັບສິນດ້ວຍຕົນເອງ.
 apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py,Please set Company filter blank if Group By is 'Company',ກະລຸນາຕັ້ງບໍລິສັດກັ່ນຕອງ blank ຖ້າ Group By ແມ່ນ &#39;Company&#39;
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,ລູກຄ້າ&gt; ກຸ່ມລູກຄ້າ&gt; ອານາເຂດ
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py,Posting Date cannot be future date,ວັນທີ່ບໍ່ສາມາດເປັນວັນໃນອະນາຄົດ
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py,Row # {0}: Serial No {1} does not match with {2} {3},"ຕິດຕໍ່ກັນ, {0}: ບໍ່ມີ Serial {1} ບໍ່ກົງກັບ {2} {3}"
 DocType: Loan Repayment,Interest Payable,ດອກເບ້ຍທີ່ຈ່າຍໄດ້
@@ -7039,7 +7024,6 @@ apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py,Both Trial Pe
 apps/erpnext/erpnext/accounts/report/share_balance/share_balance.py,Average Rate,ອັດຕາເສລີ່ຍ
 DocType: Appointment,Appointment With,ນັດພົບກັບ
 apps/erpnext/erpnext/controllers/accounts_controller.py,Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total,ຈໍານວນເງິນຈ່າຍທັງຫມົດໃນຕາຕະລາງການຊໍາລະເງິນຕ້ອງເທົ່າກັບ Grand / Total Rounded
-apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,ໝາຍ ເອົາການເຂົ້າຮຽນເປັນ <b></b>
 apps/erpnext/erpnext/stock/doctype/item/item.py,"""Customer Provided Item"" cannot have Valuation Rate",&quot;ສິນຄ້າທີ່ໃຫ້ກັບລູກຄ້າ&quot; ບໍ່ສາມາດມີອັດຕາການປະເມີນມູນຄ່າໄດ້
 DocType: Subscription Plan Detail,Plan,ແຜນການ
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,ທະນາຄານການດຸ່ນດ່ຽງງົບເປັນຕໍ່ຊີແຍກປະເພດທົ່ວໄປ
@@ -7735,7 +7719,6 @@ DocType: Item Customer Detail,Item Customer Detail,ລາຍການຂໍ້�
 apps/erpnext/erpnext/hr/doctype/employee_benefit_claim/employee_benefit_claim.py,Maximum benefit amount of employee {0} exceeds {1},ຈໍານວນເງິນປະກັນໄພສູງສຸດຂອງພະນັກງານ {0} ແມ່ນສູງກວ່າ {1}
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py,Total allocated leaves are more than days in the period,ໃບຈັດສັນທັງຫມົດແມ່ນມີຫຼາຍກ່ວາມື້ໃນໄລຍະເວລາ
 DocType: Linked Soil Analysis,Linked Soil Analysis,Linked Soil Analysis
-DocType: Pricing Rule,Percentage,ອັດຕາສ່ວນ
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Item {0} must be a stock Item,ລາຍການ {0} ຈະຕ້ອງເປັນລາຍການຫຼັກຊັບ
 DocType: Manufacturing Settings,Default Work In Progress Warehouse,ເຮັດໃນຕອນຕົ້ນໃນ Warehouse Progress
 apps/erpnext/erpnext/healthcare/doctype/practitioner_schedule/practitioner_schedule.js,"Schedules for {0} overlaps, do you want to proceed after skiping overlaped slots ?","ຕາຕະລາງສໍາລັບ {0} overlaps, ທ່ານຕ້ອງການດໍາເນີນການຫຼັງຈາກ skiping slots overlaped?"
