@@ -446,7 +446,8 @@ class SalesInvoice(SellingController):
 
 			selling_price_list = customer_price_list or customer_group_price_list or pos.get('selling_price_list')
 
-			self.set('selling_price_list', selling_price_list)
+			if selling_price_list:
+				self.set('selling_price_list', selling_price_list)
 
 			if not for_validate:
 				self.update_stock = cint(pos.get("update_stock"))
