@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "TASK-.YYYY.-.#####",
  "creation": "2013-01-29 19:25:50",
@@ -200,7 +201,6 @@
   {
    "fieldname": "description",
    "fieldtype": "Text Editor",
-   "in_preview": 1,
    "label": "Task Description",
    "oldfieldname": "description",
    "oldfieldtype": "Text Editor",
@@ -361,11 +361,14 @@
  ],
  "icon": "fa fa-check",
  "idx": 1,
+ "is_tree": 1,
+ "links": [],
  "max_attachments": 5,
- "modified": "2019-09-10 13:46:24.631754",
+ "modified": "2020-03-18 18:08:44.153211",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
+ "nsm_parent_field": "parent_task",
  "owner": "Administrator",
  "permissions": [
   {
