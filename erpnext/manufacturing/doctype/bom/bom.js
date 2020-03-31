@@ -43,8 +43,7 @@ frappe.ui.form.on("BOM", {
 
 		frm.set_query("item_code", "items", function() {
 			return {
-				query: "erpnext.controllers.queries.item_query",
-				filters: [["Item", "name", "!=", cur_frm.doc.item]]
+				query: "erpnext.controllers.queries.item_query"
 			};
 		});
 
@@ -135,6 +134,7 @@ frappe.ui.form.on("BOM", {
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.work_order.work_order.make_work_order",
 				args: {
+					bom_no: frm.doc.name,
 					item: frm.doc.item,
 					qty: data.qty || 0.0,
 					project: frm.doc.project
