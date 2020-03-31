@@ -70,7 +70,7 @@
    "label": "Amount",
    "oldfieldname": "tax_amount",
    "oldfieldtype": "Currency",
-   "options": "currency"
+   "options": "Company:company:default_currency"
   },
   {
    "columns": 2,
@@ -80,7 +80,7 @@
    "label": "Total",
    "oldfieldname": "total",
    "oldfieldtype": "Currency",
-   "options": "currency",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
