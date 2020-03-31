@@ -43,8 +43,7 @@ frappe.ui.form.on("BOM", {
 
 		frm.set_query("item_code", "items", function() {
 			return {
-				query: "erpnext.controllers.queries.item_query",
-				filters: [["Item", "name", "!=", cur_frm.doc.item]]
+				query: "erpnext.controllers.queries.item_query"
 			};
 		});
 
