@@ -177,6 +177,10 @@ class StockEntry(StockController):
 		stock_items = self.get_stock_items()
 		serialized_items = self.get_serialized_items()
 		for item in self.get("items"):
+			if item.qty and item.qty < 0:
+				frappe.throw(_("Row {0}: The item {1}, quantity must be positive number")
+					.format(item.idx, frappe.bold(item.item_code)))
+
 			if item.item_code not in stock_items:
 				frappe.throw(_("{0} is not a stock Item").format(item.item_code))
 
@@ -294,13 +298,8 @@ class StockEntry(StockController):
 				if validate_for_manufacture:
 					if d.bom_no:
 						d.s_warehouse = None
-
 						if not d.t_warehouse:
 							frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
-
-						elif self.pro_doc and (cstr(d.t_warehouse) != self.pro_doc.fg_warehouse and cstr(d.t_warehouse) != self.pro_doc.scrap_warehouse):
-							frappe.throw(_("Target warehouse in row {0} must be same as Work Order").format(d.idx))
-
 					else:
 						d.t_warehouse = None
 						if not d.s_warehouse:
