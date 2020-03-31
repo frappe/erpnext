@@ -343,7 +343,8 @@
   {
    "fieldname": "shelf_life_in_days",
    "fieldtype": "Int",
-   "label": "Shelf Life In Days"
+   "label": "Shelf Life In Days",
+   "mandatory_depends_on": "eval:doc.has_batch_no && doc.has_expiry_date"
   },
   {
    "default": "2099-12-31",
@@ -1045,7 +1046,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 1,
- "modified": "2020-01-02 19:13:59.295963",
+ "modified": "2020-03-24 16:14:36.950677",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
