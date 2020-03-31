@@ -139,12 +139,14 @@
    "read_only": 1
   }
  ],
+ "is_tree": 1,
  "links": [],
- "modified": "2020-03-02 19:34:28.362267",
+ "modified": "2020-03-18 18:00:08.885805",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Location",
  "name_case": "Title Case",
+ "nsm_parent_field": "parent_location",
  "owner": "Administrator",
  "permissions": [
   {

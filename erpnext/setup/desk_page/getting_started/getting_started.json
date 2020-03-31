@@ -41,8 +41,7 @@
  "charts": [
   {
    "chart_name": "Bank Balance",
-   "label": "All Your Money",
-   "size": "Full"
+   "label": "Bank Balance"
   }
  ],
  "creation": "2020-01-23 13:46:38.833076",
@@ -50,10 +49,12 @@
  "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Desk Page",
+ "extends_another_page": 0,
  "icon": "",
  "idx": 0,
+ "is_standard": 1,
  "label": "Getting Started",
- "modified": "2020-03-05 11:27:25.800189",
+ "modified": "2020-03-23 11:20:49.161823",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Getting Started",
@@ -80,6 +81,16 @@
    "is_query_report": 0,
    "link_to": "Sales Invoice",
    "type": "DocType"
+  },
+  {
+   "is_query_report": 0,
+   "link_to": "dashboard",
+   "type": "Page"
+  },
+  {
+   "is_query_report": 0,
+   "link_to": "leaderboard",
+   "type": "Page"
   }
  ]
 }

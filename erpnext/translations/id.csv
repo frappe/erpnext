@@ -168,12 +168,11 @@ DocType: Appointment Booking Slots,Appointment Booking Slots,Slot Pemesanan Janj
 DocType: Work Order Operation,Work In Progress,Pekerjaan dalam proses
 DocType: Leave Control Panel,Branch (optional),Cabang (opsional)
 apps/erpnext/erpnext/education/report/absent_student_report/absent_student_report.py,Please select date,Silakan pilih tanggal
-DocType: Item Price,Minimum Qty ,Minimum Qty
+apps/erpnext/erpnext/stock/report/product_bundle_balance/product_bundle_balance.py,Minimum Qty ,Minimum Qty
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,BOM recursion: {0} cannot be child of {1},Rekursi BOM: {0} tidak boleh anak dari {1}
 DocType: Finance Book,Finance Book,Buku Keuangan
 DocType: Patient Encounter,HLC-ENC-.YYYY.-,HLC-ENC-.YYYY.-
 DocType: Appointment Booking Settings,Holiday List,Daftar Hari Libur
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,The parent account {0} does not exists,Akun induk {0} tidak ada
 apps/erpnext/erpnext/config/quality_management.py,Review and Action,Ulasan dan Aksi
 apps/erpnext/erpnext/hr/doctype/employee_checkin/employee_checkin.py,This employee already has a log with the same timestamp.{0},Karyawan ini sudah memiliki log dengan stempel waktu yang sama. {0}
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Accountant,Akuntan
@@ -245,7 +244,6 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Pension Funds,Dana
 DocType: Exchange Rate Revaluation Account,Gain/Loss,Merugi
 DocType: Crop,Perennial,Abadi
 DocType: Program,Is Published,Diterbitkan
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js,Show Delivery Notes,Tampilkan Catatan Pengiriman
 apps/erpnext/erpnext/controllers/status_updater.py,"To allow over billing, update ""Over Billing Allowance"" in Accounts Settings or the Item.","Untuk memungkinkan tagihan berlebih, perbarui &quot;Kelebihan Tagihan Penagihan&quot; di Pengaturan Akun atau Item."
 DocType: Patient Appointment,Procedure,Prosedur
 DocType: Accounts Settings,Use Custom Cash Flow Format,Gunakan Format Arus Kas Khusus
@@ -981,7 +979,6 @@ apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js,"Not permitted, con
 DocType: Patient,Risk Factors,Faktor risiko
 DocType: Patient,Occupational Hazards and Environmental Factors,Bahaya Kerja dan Faktor Lingkungan
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Stock Entries already created for Work Order ,Entri Saham sudah dibuat untuk Perintah Kerja
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Kode Barang&gt; Grup Barang&gt; Merek
 apps/erpnext/erpnext/templates/pages/cart.html,See past orders,Lihat pesanan sebelumnya
 apps/erpnext/erpnext/public/js/hub/pages/Selling.vue,{0} conversations,{0} percakapan
 DocType: Vital Signs,Respiratory rate,Tingkat pernapasan
@@ -1139,7 +1136,6 @@ apps/erpnext/erpnext/utilities/activation.py,"Create Employee records to manage 
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,An error occurred during the update process,Kesalahan terjadi selama proses pembaruan
 DocType: Restaurant Reservation,Restaurant Reservation,Reservasi Restoran
 apps/erpnext/erpnext/public/js/hub/Sidebar.vue,Your Items,Barang Anda
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Pemasok&gt; Jenis Pemasok
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Proposal Writing,Penulisan Proposal
 DocType: Payment Entry Deduction,Payment Entry Deduction,Pembayaran Masuk Pengurangan
 DocType: Service Level Priority,Service Level Priority,Prioritas Tingkat Layanan
@@ -1438,7 +1434,6 @@ apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,Cannot deactivate or cance
 apps/erpnext/erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js,Please select Company and Posting Date to getting entries,Silakan pilih Perusahaan dan Tanggal Posting untuk mendapatkan entri
 DocType: Asset,Maintenance,Pemeliharaan
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js,Get from Patient Encounter,Dapatkan dari Pertemuan Pasien
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},Faktor Konversi UOM ({0} -&gt; {1}) tidak ditemukan untuk item: {2}
 DocType: Subscriber,Subscriber,Subscriber
 DocType: Item Attribute Value,Item Attribute Value,Nilai Item Atribut
 apps/erpnext/erpnext/setup/doctype/currency_exchange/currency_exchange.py,Currency Exchange must be applicable for Buying or for Selling.,Pertukaran Mata Uang harus berlaku untuk Membeli atau untuk Penjualan.
@@ -1936,7 +1931,6 @@ DocType: Sales Invoice Item,Rate With Margin,Tingkat Dengan Margin
 DocType: Purchase Invoice,Is Return (Debit Note),Is Return (Debit Note)
 DocType: Workstation,Wages,Upah
 DocType: Asset Maintenance,Maintenance Manager Name,Nama Manajer Pemeliharaan
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js,Transactions against the company already exist! ,Transaksi terhadap perusahaan sudah ada!
 apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Requesting Site,Situs yang Meminta
 DocType: Agriculture Task,Urgent,Mendesak
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Fetching records......,Mengambil catatan ......
@@ -2634,7 +2628,6 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Source warehouse i
 apps/erpnext/erpnext/accounts/doctype/payment_terms_template/payment_terms_template.py,The Payment Term at row {0} is possibly a duplicate.,Syarat Pembayaran di baris {0} mungkin merupakan duplikat.
 apps/erpnext/erpnext/public/js/setup_wizard.js,Agriculture (beta),Pertanian (beta)
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js,Packing Slip,Slip Packing
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Silakan tentukan Seri Penamaan untuk {0} melalui Pengaturan&gt; Pengaturan&gt; Seri Penamaan
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Office Rent,Sewa Kantor
 apps/erpnext/erpnext/config/settings.py,Setup SMS gateway settings,Pengaturan gerbang Pengaturan SMS
 DocType: Disease,Common Name,Nama yang umum
@@ -2800,7 +2793,6 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,{0} must app
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py,Leaves Allocated Successfully for {0},cuti Dialokasikan Berhasil untuk {0}
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py,No Items to pack,Tidak ada item untuk dikemas
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Only .csv and .xlsx files are supported currently,Hanya file .csv dan .xlsx yang didukung saat ini
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,Silakan atur Sistem Penamaan Karyawan di Sumber Daya Manusia&gt; Pengaturan SDM
 DocType: Shipping Rule Condition,From Value,Dari Nilai
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Manufacturing Quantity is mandatory,Qty Manufaktur  wajib diisi
 DocType: Loan,Repayment Method,Metode pembayaran
@@ -4048,7 +4040,6 @@ apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py,Please set defaul
 apps/erpnext/erpnext/templates/form_grid/material_request_grid.html,Required On,Diperlukan pada
 DocType: HR Settings,"If checked, hides and disables Rounded Total field in Salary Slips","Jika dicentang, sembunyikan dan nonaktifkan bidang Rounded Total dalam Slip Gaji"
 DocType: Woocommerce Settings,This is the default offset (days) for the Delivery Date in Sales Orders. The fallback offset is 7 days from the order placement date.,Ini adalah offset default (hari) untuk Tanggal Pengiriman dalam Pesanan Penjualan. Pengganti mundur adalah 7 hari dari tanggal penempatan pesanan.
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Silakan atur seri penomoran untuk Kehadiran melalui Pengaturan&gt; Seri Penomoran
 DocType: Rename Tool,File to Rename,Nama File untuk Diganti
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,Please select BOM for Item in Row {0},Silakan pilih BOM untuk Item di Row {0}
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.js,Fetch Subscription Updates,Ambil Pembaruan Berlangganan
@@ -4671,7 +4662,6 @@ DocType: Healthcare Service Unit Type,Item Details,Item detail
 DocType: Cash Flow Mapping,Is Finance Cost,Apakah Biaya Keuangan?
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py,Attendance for employee {0} is already marked,Kehadiran bagi karyawan {0} sudah ditandai
 DocType: Packing Slip,If more than one package of the same type (for print),Jika lebih dari satu paket dari jenis yang sama (untuk mencetak)
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Silakan siapkan Sistem Penamaan Instruktur di Pendidikan&gt; Pengaturan Pendidikan
 apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.py,Please set default customer in Restaurant Settings,Harap tetapkan pelanggan default di Pengaturan Restoran
 ,Salary Register,Register Gaji
 DocType: Company,Default warehouse for Sales Return,Gudang default untuk Pengembalian Penjualan
@@ -4942,7 +4932,6 @@ DocType: Item,Inspection Required before Purchase,Inspeksi Diperlukan sebelum Pe
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html,Pending Activities,Kegiatan Tertunda
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test_list.js,Create Lab Test,Buat Uji Lab
 DocType: Patient Appointment,Reminded,Mengingatkan
-DocType: Homepage Section,Cards,Kartu-kartu
 apps/erpnext/erpnext/public/js/setup_wizard.js,View Chart of Accounts,Lihat Bagan Akun
 DocType: Chapter Member,Chapter Member,Bab Anggota
 DocType: Material Request Plan Item,Minimum Order Quantity,Jumlah Pesanan Minimum
@@ -4960,7 +4949,7 @@ apps/erpnext/erpnext/loan_management/doctype/loan_security_price/loan_security_p
 apps/erpnext/erpnext/hr/utils.py,Future dates not allowed,Tanggal mendatang tidak diizinkan
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Expected Delivery Date should be after Sales Order Date,Tanggal Pengiriman yang Diharapkan harus setelah Tanggal Pesanan Penjualan
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py,Reorder Level,Tingkat Re-Order
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Chart Of Accounts Template,Pola Bagan Akun
+DocType: Company,Chart Of Accounts Template,Pola Bagan Akun
 DocType: Attendance,Attendance Date,Tanggal Kehadiran
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Update stock must be enable for the purchase invoice {0},Perbarui stok harus diaktifkan untuk faktur pembelian {0}
 apps/erpnext/erpnext/stock/get_item_details.py,Item Price updated for {0} in Price List {1},Harga Barang diperbarui untuk {0} di Daftar Harga {1}
@@ -5525,8 +5514,6 @@ DocType: Installation Note,Installation Date,Instalasi Tanggal
 apps/erpnext/erpnext/accounts/doctype/shareholder/shareholder.js,Share Ledger,Berbagi Ledger
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Sales Invoice {0} created,Faktur Penjualan {0} dibuat
 DocType: Employee,Confirmation Date,Konfirmasi Tanggal
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","Hapus Karyawan <a href=""#Form/Employee/{0}"">{0}</a> \ untuk membatalkan dokumen ini"
 DocType: Inpatient Occupancy,Check Out,Periksa
 DocType: C-Form,Total Invoiced Amount,Jumlah Total Tagihan
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Min Qty can not be greater than Max Qty,Min Qty tidak dapat lebih besar dari Max Qty
@@ -5733,7 +5720,6 @@ DocType: Employee,Prefered Contact Email,Email Kontak Utama
 DocType: Cheque Print Template,Cheque Width,Lebar Cek
 DocType: Selling Settings,Validate Selling Price for Item against Purchase Rate or Valuation Rate,Memvalidasi Harga Jual untuk Item terhadap Purchase Rate atau Tingkat Penilaian
 DocType: Fee Schedule,Fee Schedule,Jadwal biaya
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Column Labels : ,Label Kolom:
 DocType: Bank Transaction,Settled,Diselesaikan
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Cess,Cess
 DocType: Quality Feedback,Parameters,Parameter
@@ -6407,6 +6393,7 @@ apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,N
 DocType: Salary Component,Formula,Rumus
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,Serial #,Serial #
 DocType: Material Request Plan Item,Required Quantity,Kuantitas yang Diperlukan
+DocType: Cash Flow Mapping Template,Template Name,Nama template
 DocType: Lab Test Template,Lab Test Template,Lab Test Template
 apps/erpnext/erpnext/accounts/doctype/accounting_period/accounting_period.py,Accounting Period overlaps with {0},Periode Akuntansi tumpang tindih dengan {0}
 apps/erpnext/erpnext/setup/doctype/company/company.py,Sales Account,Akun penjualan
@@ -6467,7 +6454,7 @@ DocType: Supplier,SUP-.YYYY.-,SUP-.YYYY.-
 DocType: Bank Reconciliation Detail,Cheque Date,Cek Tanggal
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account {0}: Parent account {1} does not belong to company: {2},Akun {0}: akun Induk {1} bukan milik perusahaan: {2}
 apps/erpnext/erpnext/setup/doctype/company/company.js,Successfully deleted all transactions related to this company!,Berhasil dihapus semua transaksi yang terkait dengan perusahaan ini!
-apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js,As on Date,Seperti pada Tanggal
+apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.js,As on Date,Seperti pada Tanggal
 DocType: Additional Salary,HR,HR
 DocType: Course Enrollment,Enrollment Date,tanggal pendaftaran
 DocType: Healthcare Settings,Out Patient SMS Alerts,SMS Pemberitahuan Pasien Luar
@@ -6533,7 +6520,6 @@ apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Payment
 DocType: Course Content,Quiz,Ulangan
 DocType: Subscription,Trial Period End Date,Tanggal Akhir Periode Uji Coba
 apps/erpnext/erpnext/setup/doctype/authorization_control/authorization_control.py,Not authroized since {0} exceeds limits,Tidak Authroized sejak {0} melebihi batas
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Start entering data from here : ,Mulai memasukkan data dari sini:
 DocType: Serial No,Asset Status,Status Aset
 DocType: Sales Invoice,Over Dimensional Cargo (ODC),Over Dimensional Cargo (ODC)
 DocType: Restaurant Order Entry,Restaurant Table,Meja restoran
@@ -6759,7 +6745,6 @@ apps/erpnext/erpnext/public/js/hub/components/ReviewArea.vue,Submit Review,Kirim
 DocType: Contract,Party User,Pengguna Partai
 apps/erpnext/erpnext/controllers/buying_controller.py,Assets not created for <b>{0}</b>. You will have to create asset manually.,Aset tidak dibuat untuk <b>{0}</b> . Anda harus membuat aset secara manual.
 apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py,Please set Company filter blank if Group By is 'Company',Harap tentukan filter Perusahaan jika Group By &#39;Company&#39;
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Pelanggan&gt; Grup Pelanggan&gt; Wilayah
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py,Posting Date cannot be future date,Posting Tanggal tidak bisa tanggal di masa depan
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py,Row # {0}: Serial No {1} does not match with {2} {3},Row # {0}: Serial No {1} tidak sesuai dengan {2} {3}
 DocType: Loan Repayment,Interest Payable,Hutang bunga
@@ -6994,7 +6979,6 @@ apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py,Both Trial Pe
 apps/erpnext/erpnext/accounts/report/share_balance/share_balance.py,Average Rate,Harga rata-rata
 DocType: Appointment,Appointment With,Janji dengan
 apps/erpnext/erpnext/controllers/accounts_controller.py,Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total,Jumlah Pembayaran Total dalam Jadwal Pembayaran harus sama dengan Grand / Rounded Total
-apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,Tandai kehadiran sebagai <b></b>
 apps/erpnext/erpnext/stock/doctype/item/item.py,"""Customer Provided Item"" cannot have Valuation Rate","""Barang Dari Pelanggan"" tidak bisa mempunyai Tarif Valuasi"
 DocType: Subscription Plan Detail,Plan,Rencana
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,Saldo Laporan Bank sesuai Buku Besar
@@ -7686,7 +7670,6 @@ DocType: Item Customer Detail,Item Customer Detail,Rincian Barang Pelanggan
 apps/erpnext/erpnext/hr/doctype/employee_benefit_claim/employee_benefit_claim.py,Maximum benefit amount of employee {0} exceeds {1},Jumlah tunjangan maksimum karyawan {0} melebihi {1}
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py,Total allocated leaves are more than days in the period,Jumlah cuti dialokasikan lebih dari hari pada periode
 DocType: Linked Soil Analysis,Linked Soil Analysis,Analisis Tanah Terkait
-DocType: Pricing Rule,Percentage,Persentase
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Item {0} must be a stock Item,Barang {0} harus barang persediaan
 DocType: Manufacturing Settings,Default Work In Progress Warehouse,Standar Gudang Work In Progress
 apps/erpnext/erpnext/healthcare/doctype/practitioner_schedule/practitioner_schedule.js,"Schedules for {0} overlaps, do you want to proceed after skiping overlaped slots ?","Jadwal untuk {0} tumpang tindih, apakah Anda ingin melanjutkan setelah melewati slot yang tumpang tindih?"
