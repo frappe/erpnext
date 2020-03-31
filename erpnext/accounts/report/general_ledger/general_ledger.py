@@ -131,7 +131,7 @@ def get_gl_entries(filters):
 	gl_entries = frappe.db.sql(
 		"""
 		select
-			posting_date, account, party_type, party,
+			name as gl_entry, posting_date, account, party_type, party,
 			voucher_type, voucher_no, cost_center, project,
 			against_voucher_type, against_voucher, account_currency,
 			remarks, against, is_opening {select_fields}
@@ -362,6 +362,12 @@ def get_columns(filters):
 			currency = get_company_currency(company)
 
 	columns = [
+		{
+			"fieldname": "gl_entry",
+			"fieldtype": "Link",
+			"options": "GL Entry",
+			"hidden": 1
+		},
 		{
 			"label": _("Posting Date"),
 			"fieldname": "posting_date",
