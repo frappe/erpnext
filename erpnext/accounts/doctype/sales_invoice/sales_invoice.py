@@ -437,13 +437,17 @@ class SalesInvoice(SellingController):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
 
-			customer_price_list = frappe.get_value("Customer", self.customer, 'default_price_list')
-
 			if pos.get("company_address"):
 				self.company_address = pos.get("company_address")
 
-			if not customer_price_list:
-				self.set('selling_price_list', pos.get('selling_price_list'))
+			customer_price_list, customer_group = frappe.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
+
+			customer_group_price_list = frappe.get_value("Customer Group", customer_group, 'default_price_list')
+
+			selling_price_list = customer_price_list or customer_group_price_list or pos.get('selling_price_list')
+
+			if selling_price_list:
+				self.set('selling_price_list', selling_price_list)
 
 			if not for_validate:
 				self.update_stock = cint(pos.get("update_stock"))
