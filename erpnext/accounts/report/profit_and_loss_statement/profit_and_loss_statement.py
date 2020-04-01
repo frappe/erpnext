@@ -55,6 +55,9 @@ def get_report_summary(columns, income, expense, net_profit_loss, period_list, p
 		income_label = _("Total Income")
 		expense_label = _("Total Expense")
 
+	if not (len(net_profit) and len(income_data) and len(expense_data)):
+		return None
+
 	return [
 		{
 			"value": net_profit[-1],
