@@ -48,7 +48,7 @@ def execute(filters=None):
 			new = new_customers_in.get(key, [0,0.0])
 			repeat = repeat_customers_in.get(key, [0,0.0])
 
-			out.append([year, calendar.month_name[month],
+			out.append([str(year), calendar.month_name[month],
 				new[0], repeat[0], new[0] + repeat[0],
 				new[1], repeat[1], new[1] + repeat[1]])
 
