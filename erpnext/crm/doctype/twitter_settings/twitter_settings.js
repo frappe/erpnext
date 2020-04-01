@@ -9,7 +9,7 @@ frappe.ui.form.on('Twitter Settings', {
 			let hash = hashes.split("=")
 			if(hash[0] == "status"){
 				if(hash[1] == 1){
-					frappe.msgprint("Login Success")
+					frappe.msgprint(__("Login Success"))
 				}
 			}
 		}
@@ -17,7 +17,7 @@ frappe.ui.form.on('Twitter Settings', {
 	refresh: function(frm){
 		frm.add_custom_button(('SignIn With Twitter'), function(){
 			if(!(frm.doc.consumer_key && frm.doc.consumer_secret)){
-				frappe.msgprint("Please set Consumer Key and Consumer Key Secret to Proceed");
+				frappe.msgprint(__("Please set Consumer Key and Consumer Key Secret to Proceed"));
 				return;
 			}
 			frappe.call({

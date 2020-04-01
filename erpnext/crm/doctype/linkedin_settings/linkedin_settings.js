@@ -9,7 +9,7 @@ frappe.ui.form.on('LinkedIn Settings', {
 			let hash = hashes.split("=")
 			if(hash[0] == "status"){
 				if(hash[1] == 1){
-					frappe.msgprint("Login Success")
+					frappe.msgprint(__("Login Success"))
 				}
 			}
 		}
@@ -38,7 +38,7 @@ frappe.ui.form.on('LinkedIn Settings', {
 
 		frm.add_custom_button(('SignIn With LinkedIn'), function(){
 			if(!(frm.doc.consumer_key && frm.doc.consumer_secret)){
-				frappe.msgprint("Please set Consumer Key and Consumer Key Secret to Proceed");
+				frappe.msgprint(__("Please set Consumer Key and Consumer Key Secret to Proceed"));
 				return;
 			}
 			frappe.call({

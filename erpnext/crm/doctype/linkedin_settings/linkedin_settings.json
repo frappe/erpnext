@@ -28,12 +28,16 @@
   {
    "fieldname": "consumer_key",
    "fieldtype": "Data",
-   "label": "Consumer Key"
+   "in_list_view": 1,
+   "label": "Consumer Key",
+   "reqd": 1
   },
   {
    "fieldname": "consumer_secret",
    "fieldtype": "Password",
-   "label": "Consumer Secret"
+   "in_list_view": 1,
+   "label": "Consumer Secret",
+   "reqd": 1
   },
   {
    "fieldname": "access_token",
@@ -61,7 +65,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-03-17 13:42:28.082452",
+ "modified": "2020-04-02 00:22:31.614374",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "LinkedIn Settings",

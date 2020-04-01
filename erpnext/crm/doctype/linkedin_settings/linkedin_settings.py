@@ -3,21 +3,14 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, requests, json
 from frappe import _
-from frappe.utils import get_site_url,get_absolute_url
+from frappe.utils import get_site_url, get_url_to_form, get_link_to_form
 from frappe.model.document import Document
-import requests
-import json
 from frappe.utils.file_manager import get_file, get_file_path
-import urllib
-from frappe.utils import get_url_to_form, get_link_to_form
+from six.moves.urllib.parse import urlencode
 class LinkedInSettings(Document):
-	def get_authorization_url(self):
-		try:
-			from urllib.parse import urlencode
-		except:
-			from urllib import urlencode
+	def get_authorization_url(self):	
 		params = urlencode({
 			"response_type":"code",
 			"client_id": self.consumer_key,
@@ -31,10 +24,6 @@ class LinkedInSettings(Document):
 
 	def get_access_token(self, code):
 		url = "https://www.linkedin.com/oauth/v2/accessToken"
-		try:
-			from urllib.parse import urlencode
-		except:
-			from urllib import urlencode
 		body = {
 			"grant_type": "authorization_code",
 			"code": code,
@@ -98,7 +87,7 @@ class LinkedInSettings(Document):
 			headers['Content-Type']='image/jpeg'
 			response = self.http_post(upload_url, headers=headers, data=open(media,"rb"))
 			if response.status_code < 200 and response.status_code > 299:
-				frappe.throw("Error While Uploading Image", title="{0} {1}".format(response.status_code, response.reason))
+				frappe.throw(_("Error While Uploading Image"), title="{0} {1}".format(response.status_code, response.reason))
 				return None
 			return asset
 		return None
@@ -153,10 +142,10 @@ class LinkedInSettings(Document):
 		except Exception as e:
 			content = json.loads(response.content)
 			if response.status_code == 401:
-				frappe.msgprint("{0} With LinkedIn to Continue".format(get_link_to_form("LinkedIn Settings","LinkedIn Settings","Login")))
+				frappe.msgprint(_("{0} With LinkedIn to Continue").format(get_link_to_form("LinkedIn Settings","LinkedIn Settings","Login")))
  				frappe.throw(content["message"], title="LinkedIn Error - Unauthorized")
 			elif response.status_code == 403:
-				frappe.msgprint("You Didn't have permission to access this API")
+				frappe.msgprint(_("You Didn't have permission to access this API"))
 				frappe.throw(content["message"], title="LinkedIn Error - Access Denied")
 			else:
 				frappe.throw(response.reason, title=response.status_code)

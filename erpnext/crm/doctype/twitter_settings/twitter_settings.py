@@ -3,15 +3,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, os, tweepy, json
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils.file_manager import get_file_path
-import os
 from frappe.utils import get_url_to_form, get_link_to_form
-import tweepy
 from tweepy.error import TweepError
-import json
 
 class TwitterSettings(Document):
 	def get_authorize_url(self):
@@ -21,7 +18,7 @@ class TwitterSettings(Document):
 			redirect_url = auth.get_authorization_url()
 			return redirect_url
 		except tweepy.TweepError:
-			frappe.throw('Error! Failed to get request token.')
+			frappe.throw(_("Error! Failed to get request token."))
 
 	
 	def get_access_token(self):
@@ -42,7 +39,7 @@ class TwitterSettings(Document):
 			location = get_url_to_form("Twitter Settings","Twitter Settings") + "?status=1"
 			frappe.local.response["location"] = location
 		except:
-			frappe.throw('Error! Failed to get access token.')
+			frappe.throw(_("Error! Failed to get access token."))
 
 	def get_api(self):
 		# authentication of consumer key and secret 
@@ -80,7 +77,7 @@ class TwitterSettings(Document):
 			content = json.loads(e.response.content)
 			content = content["errors"][0]
 			if e.response.status_code == 401:
-				frappe.msgprint("{0} With Twitter to Continue".format(get_link_to_form("Twitter Settings","Twitter Settings","Login")))
+				frappe.msgprint(_("{0} With Twitter to Continue").format(get_link_to_form("Twitter Settings","Twitter Settings","Login")))
 			frappe.throw(content["message"],title="Twitter Error {0} {1}".format(e.response.status_code, e.response.reason))
 
 @frappe.whitelist()

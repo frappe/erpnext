@@ -87,7 +87,7 @@
    "fieldname": "post_status",
    "fieldtype": "Select",
    "label": "Post Status",
-   "options": "Scheduled\nPosted\nError",
+   "options": "\nScheduled\nPosted\nError",
    "read_only": 1
   },
   {
@@ -105,7 +105,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-16 12:35:17.357116",
+ "modified": "2020-04-01 16:00:27.323282",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Social Media Post",
