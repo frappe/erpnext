@@ -10,7 +10,6 @@
  "field_order": [
   "template_name",
   "allocate_payment_based_on_payment_terms",
-  "section_break_4",
   "terms"
  ],
  "fields": [
@@ -29,17 +28,14 @@
   },
   {
    "default": "0",
+   "description": "If this checkbox is checked, paid amount will be splitted and allocated as per the amounts in payment schedule against each payment term",
    "fieldname": "allocate_payment_based_on_payment_terms",
    "fieldtype": "Check",
    "label": "Allocate Payment Based On Payment Terms"
-  },
-  {
-   "fieldname": "section_break_4",
-   "fieldtype": "Section Break"
   }
  ],
  "links": [],
- "modified": "2020-03-14 19:46:40.932416",
+ "modified": "2020-04-01 15:35:18.112619",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Terms Template",

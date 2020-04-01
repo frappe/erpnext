@@ -1038,8 +1038,10 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	if doc.doctype == "Purchase Invoice" and doc.invoice_is_blocked():
 		frappe.msgprint(_('{0} is on hold till {1}'.format(doc.name, doc.release_date)))
 	else:
-		if frappe.get_value('Payment Terms Template', {'name': doc.payment_terms_template},
-			'allocate_payment_based_on_payment_terms'):
+		if (doc.doctype in ('Sales Invoice', 'Purchase Invoice')
+			and frappe.get_value('Payment Terms Template',
+			{'name': doc.payment_terms_template}, 'allocate_payment_based_on_payment_terms')):
+
 			for reference in get_reference_as_per_payment_terms(doc.payment_schedule, dt, dn, doc, grand_total, outstanding_amount):
 				pe.append('references', reference)
 		else:
