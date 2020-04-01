@@ -25,7 +25,9 @@
   {
    "fieldname": "text",
    "fieldtype": "Text",
-   "label": "Text Content"
+   "in_list_view": 1,
+   "label": "Text Content",
+   "reqd": 1
   },
   {
    "fieldname": "image",
@@ -105,7 +107,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-01 16:00:27.323282",
+ "modified": "2020-04-02 00:36:22.674056",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Social Media Post",
