@@ -19,6 +19,18 @@ class CostCenter(NestedSet):
 	def validate(self):
 		self.validate_mandatory()
 		self.validate_parent_cost_center()
+		if self.enable_distributed_cost_center:
+			self.validate_distributed_cost_center()
+
+	def validate_distributed_cost_center(self):
+		total_percentage = 0
+		if self.distributed_cost_center:
+			for cost_center in self.distributed_cost_center:
+				total_percentage += cost_center.percentage_allocation
+			if total_percentage != float(100):
+				frappe.throw(_("Total percentage allocation should be equal to 100"))
+		else:
+			frappe.throw(_("Please enter distributed cost center"))
 
 	def validate_mandatory(self):
 		if self.cost_center_name != self.company and not self.parent_cost_center:
@@ -46,9 +58,12 @@ class CostCenter(NestedSet):
 		if self.check_gle_exists():
 			frappe.throw(_("Cost Center with existing transactions can not be converted to group"))
 		else:
-			self.is_group = 1
-			self.save()
-			return 1
+			if self.enable_distributed_cost_center:
+				frappe.throw(_("Cost Center with enabled distributed cost center can not be converted to group"))
+			else:
+				self.is_group = 1
+				self.save()
+				return 1
 
 	def check_gle_exists(self):
 		return frappe.db.get_value("GL Entry", {"cost_center": self.name})

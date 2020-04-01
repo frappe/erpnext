@@ -14,7 +14,16 @@ frappe.ui.form.on('Cost Center', {
 					is_group: 1
 				}
 			}
-		})
+		});
+
+		frm.set_query("cost_center", "distributed_cost_center", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0
+				}
+			};
+		});
 	},
 	refresh: function(frm) {
 		if (!frm.is_new()) {

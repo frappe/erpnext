@@ -392,6 +392,9 @@ def set_gl_entries_by_account(
 			and posting_date <= %(to_date)s
 			order by account, posting_date""".format(additional_conditions=additional_conditions), gl_filters, as_dict=True) #nosec
 
+		if filters['cost_center']:
+			gl_entries.extend(get_distributed_cost_center_gl_entries(filters['cost_center'], gl_filters, company, to_date, additional_conditions, 'cost_center'))
+
 		if filters and filters.get('presentation_currency'):
 			convert_to_presentation_currency(gl_entries, get_currency(filters))
 
@@ -399,6 +402,30 @@ def set_gl_entries_by_account(
 			gl_entries_by_account.setdefault(entry.account, []).append(entry)
 
 		return gl_entries_by_account
+
+
+def get_distributed_cost_center_gl_entries(value, gl_filters, company, to_date, additional_conditions, key):
+	final_gl_entries = []
+	cost_center_with_percentage = frappe.db.sql('''select parent,percentage_allocation from `tabDistributed Cost Center` where cost_center in ({0}) '''.format(', '.join(['"{0}"'.format(val) for val in value])),as_dict = 1)
+	if cost_center_with_percentage:
+		for cost_center in cost_center_with_percentage:
+			gl_filters.update({
+			key: [cost_center['parent']]
+			})
+			final_gl_entry = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
+				where company=%(company)s
+				{additional_conditions}
+				and posting_date <= %(to_date)s
+				order by account, posting_date""".format(additional_conditions = additional_conditions), gl_filters, as_dict = True) #nosec
+			for gl_entries in final_gl_entry:
+				if gl_entries['debit'] and gl_entries['debit_in_account_currency']:
+					gl_entries['debit']*= (cost_center['percentage_allocation'] / 100)
+					gl_entries['debit_in_account_currency']*= (cost_center['percentage_allocation'] / 100)
+				if gl_entries['credit'] and gl_entries['credit_in_account_currency']:
+					gl_entries['credit']*= (cost_center['percentage_allocation'] / 100)
+					gl_entries['credit_in_account_currency']*= (cost_center['percentage_allocation'] / 100)
+			final_gl_entries.extend(final_gl_entry)
+	return final_gl_entries
 
 
 def get_additional_conditions(from_date, ignore_closing_entries, filters):
