@@ -273,11 +273,11 @@ class TestLoan(unittest.TestCase):
 
 		penalty_amount = (accrued_interest_amount * 4 * 25) / (100 * days_in_year(get_datetime(first_date).year))
 
-		lia = frappe.get_all("Loan Interest Accrual", fields=["is_paid"],
-			filters={"loan": loan.name}, order_by="posting_date")
+		lia1 = frappe.get_value("Loan Interest Accrual", {"loan": loan.name, "is_paid": 1}, 'name')
+		lia2 = frappe.get_value("Loan Interest Accrual", {"loan": loan.name, "is_paid": 0}, 'name')
 
-		self.assertTrue(lia[0].get('is_paid'))
-		self.assertFalse(lia[1].get('is_paid'))
+		self.assertTrue(lia1)
+		self.assertTrue(lia2)
 
 	def test_security_shortfall(self):
 		pledges = []
