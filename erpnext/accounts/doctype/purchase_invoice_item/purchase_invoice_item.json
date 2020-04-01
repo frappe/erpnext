@@ -63,6 +63,7 @@
   "warehouse_section",
   "warehouse",
   "rejected_warehouse",
+  "from_warehouse",
   "quality_inspection",
   "batch_no",
   "col_br_wh",
@@ -761,16 +762,22 @@
    "fetch_from": "item_code.asset_category",
    "fieldname": "asset_category",
    "fieldtype": "Data",
-   "in_preview": 1,
    "label": "Asset Category",
    "options": "Asset Category",
    "read_only": 1
+  },
+  {
+   "fieldname": "from_warehouse",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Supplier Warehouse",
+   "options": "Warehouse"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-03-05 14:20:17.297284",
+ "modified": "2020-03-11 14:20:17.297284",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
