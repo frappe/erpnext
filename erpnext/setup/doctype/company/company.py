@@ -420,7 +420,7 @@ def install_country_fixtures(company):
 			module_name = "erpnext.regional.{0}.setup.setup".format(frappe.scrub(company_doc.country))
 			frappe.get_attr(module_name)(company_doc, False)
 		except Exception as e:
-			frappe.log_error(str(e), frappe.get_traceback())
+			frappe.log_error(title=str(e), message=frappe.get_traceback())
 			frappe.throw(_("Failed to setup defaults for country {0}. Please contact support@erpnext.com").format(frappe.bold(company_doc.country)))
 
 
