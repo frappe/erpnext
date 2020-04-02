@@ -90,6 +90,10 @@ class PickList(Document):
 		return item_map.values()
 
 
+def validate_item_locations(pick_list):
+	if not pick_list.locations:
+		frappe.throw(_("Add items in the Item Locations table"))
+
 def get_items_with_location_and_quantity(item_doc, item_location_map):
 	available_locations = item_location_map.get(item_doc.item_code)
 	locations = []
@@ -241,6 +245,8 @@ def get_available_item_locations_for_other_item(item_code, from_warehouses, requ
 @frappe.whitelist()
 def create_delivery_note(source_name, target_doc=None):
 	pick_list = frappe.get_doc('Pick List', source_name)
+	validate_item_locations(pick_list)
+
 	sales_orders = [d.sales_order for d in pick_list.locations if d.sales_order]
 	sales_orders = set(sales_orders)
 
@@ -300,6 +306,7 @@ def create_delivery_note(source_name, target_doc=None):
 @frappe.whitelist()
 def create_stock_entry(pick_list):
 	pick_list = frappe.get_doc(json.loads(pick_list))
+	validate_item_locations(pick_list)
 
 	if stock_entry_exists(pick_list.get('name')):
 		return frappe.msgprint(_('Stock Entry has been already created against this Pick List'))

@@ -38,12 +38,16 @@ frappe.ui.form.on('Pick List', {
 			};
 		});
 	},
-	get_item_locations: (frm, save=false) => {
+	set_item_locations:(frm, save) => {
 		if (!(frm.doc.locations && frm.doc.locations.length)) {
 			frappe.msgprint(__('Add items in the Item Locations table'));
 		} else {
 			frm.call('set_item_locations', {save: save});
 		}
+	},
+	get_item_locations: (frm) => {
+		// Button on the form
+		frm.events.set_item_locations(frm, false);
 	},
 	refresh: (frm) => {
 		frm.trigger('add_get_items_button');
@@ -106,30 +110,22 @@ frappe.ui.form.on('Pick List', {
 		frm.trigger('add_get_items_button');
 	},
 	create_delivery_note: (frm) => {
-		if (!(frm.doc.locations && frm.doc.locations.length)) {
-			frappe.msgprint(__('Add items in the Item Locations table'));
-		} else {
-			frappe.model.open_mapped_doc({
-				method: 'erpnext.stock.doctype.pick_list.pick_list.create_delivery_note',
-				frm: frm
-			});
-		}
+		frappe.model.open_mapped_doc({
+			method: 'erpnext.stock.doctype.pick_list.pick_list.create_delivery_note',
+			frm: frm
+		});
 
 	},
 	create_stock_entry: (frm) => {
-		if (!(frm.doc.locations && frm.doc.locations.length)) {
-			frappe.msgprint(__('Add items in the Item Locations table'));
-		} else {
-			frappe.xcall('erpnext.stock.doctype.pick_list.pick_list.create_stock_entry', {
-				'pick_list': frm.doc,
-			}).then(stock_entry => {
-				frappe.model.sync(stock_entry);
-				frappe.set_route("Form", 'Stock Entry', stock_entry.name);
-			});
-		}
+		frappe.xcall('erpnext.stock.doctype.pick_list.pick_list.create_stock_entry', {
+			'pick_list': frm.doc,
+		}).then(stock_entry => {
+			frappe.model.sync(stock_entry);
+			frappe.set_route("Form", 'Stock Entry', stock_entry.name);
+		});
 	},
 	update_pick_list_stock: (frm) => {
-		frm.events.get_item_locations(frm, true);
+		frm.events.set_item_locations(frm, true);
 	},
 	add_get_items_button: (frm) => {
 		let purpose = frm.doc.purpose;
