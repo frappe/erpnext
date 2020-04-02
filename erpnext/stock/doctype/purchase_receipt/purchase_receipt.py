@@ -50,7 +50,7 @@ class PurchaseReceipt(BuyingController):
 			'target_field': 'received_qty',
 			'target_parent_dt': 'Material Request',
 			'target_parent_field': 'per_received',
-			'target_ref_field': 'qty',
+			'target_ref_field': 'stock_qty',
 			'source_field': 'stock_qty',
 			'percent_join_field': 'material_request'
 		}]
