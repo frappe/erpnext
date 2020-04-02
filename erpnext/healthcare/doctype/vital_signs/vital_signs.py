@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils import cstr
+from frappe import _
 
 class VitalSigns(Document):
 	def on_submit(self):
@@ -24,7 +25,7 @@ def insert_vital_signs_to_medical_record(doc):
 	medical_record.reference_doctype = 'Vital Signs'
 	medical_record.reference_name = doc.name
 	medical_record.reference_owner = doc.owner
-	medical_record.save(ignore_permissions=True)
+	medical_record.save(ignore_permissions=True, ignore_mandatory=True)
 
 def delete_vital_signs_from_medical_record(doc):
 	medical_record = frappe.db.get_value('Patient Medical Record', {'reference_name': doc.name})
@@ -34,16 +35,16 @@ def delete_vital_signs_from_medical_record(doc):
 def set_subject_field(doc):
 	subject = ''
 	if(doc.temperature):
-		subject += 'Temperature: \n'+ cstr(doc.temperature)+'. '
+		subject += _('Temperature: ') + '\n'+ cstr(doc.temperature) + '. '
 	if(doc.pulse):
-		subject += 'Pulse: \n'+ cstr(doc.pulse)+'. '
+		subject += _('Pulse: ') + '\n' + cstr(doc.pulse) + '. '
 	if(doc.respiratory_rate):
-		subject += 'Respiratory Rate: \n'+ cstr(doc.respiratory_rate)+'. '
+		subject += _('Respiratory Rate: ') + '\n' + cstr(doc.respiratory_rate) + '. '
 	if(doc.bp):
-		subject += 'BP: \n'+ cstr(doc.bp)+'. '
+		subject += _('BP: ') + '\n' + cstr(doc.bp) + '. '
 	if(doc.bmi):
-		subject += 'BMI: \n'+ cstr(doc.bmi)+'. '
+		subject += _('BMI: ') + '\n' + cstr(doc.bmi) + '. '
 	if(doc.nutrition_note):
-		subject += 'Note: \n'+ cstr(doc.nutrition_note)+'. '
+		subject += _('Note: ') + '\n' + cstr(doc.nutrition_note) + '. '
 
 	return subject

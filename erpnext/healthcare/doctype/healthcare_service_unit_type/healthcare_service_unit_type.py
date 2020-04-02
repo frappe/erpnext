@@ -70,7 +70,7 @@ def create_item(doc):
 		'is_pro_applicable': 0,
 		'disabled': 0,
 		'stock_uom': doc.uom
-	}).insert(ignore_permissions=True)
+	}).insert(ignore_permissions=True, ignore_mandatory=True)
 
 	# insert item price
 	# get item price list to insert item price
@@ -83,10 +83,9 @@ def create_item(doc):
 		item.standard_rate = 0.0
 
 	item.save(ignore_permissions=True)
-	# Set item in the doc
-	frappe.db.set_value('Healthcare Service Unit Type', doc.name, 'item', item.name)
 
-	doc.reload()
+	# Set item in the doc
+	doc.db_set('item', item.name)
 
 def make_item_price(item, price_list_name, item_price):
 	frappe.get_doc({
@@ -94,7 +93,7 @@ def make_item_price(item, price_list_name, item_price):
 		'price_list': price_list_name,
 		'item_code': item,
 		'price_list_rate': item_price
-	}).insert(ignore_permissions=True)
+	}).insert(ignore_permissions=True, ignore_mandatory=True)
 
 def update_item(doc):
 	item = frappe.get_doc("Item", doc.item)
@@ -106,7 +105,7 @@ def update_item(doc):
 			"standard_rate": doc.rate,
 			"description": doc.description
 		})
-		item.save()
+		item.db_update()
 
 @frappe.whitelist()
 def change_item_code(item, item_code, doc_name):

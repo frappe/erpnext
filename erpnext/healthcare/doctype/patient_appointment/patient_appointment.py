@@ -122,7 +122,7 @@ def invoice_appointment(appointment_doc):
 		sales_invoice.customer = frappe.get_value('Patient', appointment_doc.patient, 'customer')
 		sales_invoice.appointment = appointment_doc.name
 		sales_invoice.due_date = getdate()
-		sales_invoice.is_pos = True
+		sales_invoice.is_pos = 1
 		sales_invoice.company = appointment_doc.company
 		sales_invoice.debit_to = get_receivable_account(appointment_doc.company)
 
@@ -134,7 +134,7 @@ def invoice_appointment(appointment_doc):
 		payment.amount = appointment_doc.paid_amount
 
 		sales_invoice.set_missing_values(for_validate=True)
-		sales_invoice.save(ignore_permissions=True)
+		sales_invoice.save(ignore_permissions=True, ignore_mandatory=True)
 		sales_invoice.submit()
 		frappe.msgprint(_('Sales Invoice {0} created as paid'.format(sales_invoice.name)), alert=True)
 		frappe.db.set_value('Patient Appointment', appointment_doc.name, 'invoiced', 1)
@@ -157,6 +157,7 @@ def get_appointment_item(appointment_doc, item):
 	item.item_code = service_item
 	item.description = _('Consulting Charges: {0}').format(appointment_doc.practitioner)
 	item.income_account = get_income_account(appointment_doc.practitioner, appointment_doc.company)
+	item.cost_center = frappe.get_cached_value('Company', appointment_doc.company, 'cost_center')
 	item.rate = practitioner_charge
 	item.amount = practitioner_charge
 	item.qty = 1
@@ -190,20 +191,14 @@ def cancel_sales_invoice(sales_invoice):
 	return False
 
 
-def check_si_item_exists(appointment):
-	return frappe.db.exists(
-		'Sales Invoice Item',
-		{
-			'reference_dt': 'Patient Appointment',
-			'reference_dn': appointment.name
-		}
-	)
-
-
 def check_sales_invoice_exists(appointment):
-	si_item = check_si_item_exists(appointment)
-	if si_item:
-		sales_invoice = frappe.get_doc('Sales Invoice', frappe.db.get_value('Sales Invoice Item', si_item, 'parent'))
+	sales_invoice = frappe.db.get_value('Sales Invoice Item', {
+		'reference_dt': 'Patient Appointment',
+		'reference_dn': appointment.name
+	}, 'parent')
+
+	if sales_invoice:
+		sales_invoice = frappe.get_doc('Sales Invoice', sales_invoice)
 		return sales_invoice
 	return False
 

@@ -38,14 +38,13 @@ class ClinicalProcedureTemplate(Document):
 			if self.rate:
 				item_price = frappe.get_doc('Item Price', {'item_code': self.item})
 				item_price.item_name = self.template
-				item_price.price_list_name = self.rate
+				item_price.price_list_rate = self.rate
 				item_price.save()
 
 		elif not self.is_billable and self.item:
 			frappe.db.set_value('Item', self.item, 'disabled', 1)
 
-		frappe.db.set_value(self.doctype, self.name, 'change_in_item', 0)
-		self.reload()
+		self.db_set('change_in_item', 0)
 
 
 @frappe.whitelist()
@@ -94,12 +93,10 @@ def create_item_from_template(doc):
 		'is_pro_applicable': 0,
 		'disabled': disabled,
 		'stock_uom': 'Unit'
-	}).insert(ignore_permissions=True)
+	}).insert(ignore_permissions=True, ignore_mandatory=True)
 
 	make_item_price(item.name, doc.rate)
-
-	frappe.db.set_value('Clinical Procedure Template', doc.name, 'item', item.name)
-	doc.reload()
+	doc.db_set('item', item.name)
 
 def make_item_price(item, item_price):
 	price_list_name = frappe.db.get_value('Price List', {'selling': 1})
@@ -108,7 +105,7 @@ def make_item_price(item, item_price):
 		'price_list': price_list_name,
 		'item_code': item,
 		'price_list_rate': item_price
-	}).insert(ignore_permissions=True)
+	}).insert(ignore_permissions=True, ignore_mandatory=True)
 
 @frappe.whitelist()
 def change_item_code_from_template(item_code, doc):
