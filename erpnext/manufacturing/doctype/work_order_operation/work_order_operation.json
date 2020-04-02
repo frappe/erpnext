@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2014-10-16 14:35:41.950175",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -68,6 +69,7 @@
    "description": "Operation completed for how many finished goods?",
    "fieldname": "completed_qty",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Completed Qty",
    "no_copy": 1,
    "read_only": 1
@@ -188,8 +190,9 @@
   }
  ],
  "istable": 1,
- "modified": "2019-07-16 23:01:07.720337",
- "modified_by": "govindsmenokee@gmail.com",
+ "links": [],
+ "modified": "2019-12-03 19:24:29.594189",
+ "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Operation",
  "owner": "Administrator",

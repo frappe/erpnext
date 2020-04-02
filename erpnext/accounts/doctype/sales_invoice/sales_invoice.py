@@ -429,13 +429,17 @@ class SalesInvoice(SellingController):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
 
-			customer_price_list = frappe.get_value("Customer", self.customer, 'default_price_list')
-
 			if pos.get("company_address"):
 				self.company_address = pos.get("company_address")
 
-			if not customer_price_list:
-				self.set('selling_price_list', pos.get('selling_price_list'))
+			customer_price_list, customer_group = frappe.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
+
+			customer_group_price_list = frappe.get_value("Customer Group", customer_group, 'default_price_list')
+
+			selling_price_list = customer_price_list or customer_group_price_list or pos.get('selling_price_list')
+
+			if selling_price_list:
+				self.set('selling_price_list', selling_price_list)
 
 			if not for_validate:
 				self.update_stock = cint(pos.get("update_stock"))
@@ -721,7 +725,7 @@ class SalesInvoice(SellingController):
 				update_outstanding_amt(self.debit_to, "Customer", self.customer,
 					self.doctype, self.return_against if cint(self.is_return) and self.return_against else self.name)
 
-			if repost_future_gle and cint(self.update_stock) \
+			if (repost_future_gle or self.flags.repost_future_gle) and cint(self.update_stock) \
 				and cint(auto_accounting_for_stock):
 					items, warehouses = self.get_items_and_warehouses()
 					update_gl_entries_after(self.posting_date, self.posting_time,
@@ -1215,24 +1219,6 @@ class SalesInvoice(SellingController):
 
 		self.set_missing_values(for_validate = True)
 
-	def get_discounting_status(self):
-		status = None
-		if self.is_discounted:
-			invoice_discounting_list = frappe.db.sql("""
-				select status
-				from `tabInvoice Discounting` id, `tabDiscounted Invoice` d
-				where
-					id.name = d.parent
-					and d.sales_invoice=%s
-					and id.docstatus=1
-					and status in ('Disbursed', 'Settled')
-			""", self.name)
-			for d in invoice_discounting_list:
-				status = d[0]
-				if status == "Disbursed":
-					break
-		return status
-
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
 			if self.get('amended_from'):
@@ -1243,7 +1229,10 @@ class SalesInvoice(SellingController):
 		outstanding_amount = flt(self.outstanding_amount, precision)
 		due_date = getdate(self.due_date)
 		nowdate = getdate()
-		discountng_status = self.get_discounting_status()
+
+		discounting_status = None
+		if self.is_discounted:
+			discountng_status = get_discounting_status(self.name)
 
 		if not status:
 			if self.docstatus == 2:
@@ -1271,6 +1260,26 @@ class SalesInvoice(SellingController):
 
 		if update:
 			self.db_set('status', self.status, update_modified = update_modified)
+
+def get_discounting_status(sales_invoice):
+	status = None
+
+	invoice_discounting_list = frappe.db.sql("""
+		select status
+		from `tabInvoice Discounting` id, `tabDiscounted Invoice` d
+		where
+			id.name = d.parent
+			and d.sales_invoice=%s
+			and id.docstatus=1
+			and status in ('Disbursed', 'Settled')
+	""", sales_invoice)
+
+	for d in invoice_discounting_list:
+		status = d[0]
+		if status == "Disbursed":
+			break
+
+	return status
 
 def validate_inter_company_party(doctype, party, company, inter_company_reference):
 	if not party:
@@ -1439,6 +1448,21 @@ def get_inter_company_details(doc, doctype):
 		"company": company
 	}
 
+def get_internal_party(parties, link_doctype, doc):
+	if len(parties) == 1:
+			party = parties[0].name
+	else:
+		# If more than one Internal Supplier/Customer, get supplier/customer on basis of address
+		if doc.get('company_address') or doc.get('shipping_address'):
+			party = frappe.db.get_value("Dynamic Link", {"parent": doc.get('company_address') or doc.get('shipping_address'),
+			"parenttype": "Address", "link_doctype": link_doctype}, "link_name")
+
+			if not party:
+				party = parties[0].name
+		else:
+			party = parties[0].name
+
+	return party
 
 def validate_inter_company_transaction(doc, doctype):
 
