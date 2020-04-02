@@ -27,12 +27,16 @@ class AssetCategory(Document):
 			'capital_work_in_progress_account': { 'account_type': 'Capital Work in Progress' }
 		}
 		for d in self.accounts:
-			for account in account_type_map.keys():
-				if d.get(account):
-					account_type = frappe.db.get_value('Account', d.get(account), 'account_type')
-					if account_type != account_type_map[account]['account_type']:
-						frappe.throw(_("Row {}: Account Type of {} should be {} account".format(d.idx, frappe.bold(frappe.unscrub(account)),
-							frappe.bold(account_type_map[account]['account_type']))), title=_("Invalid Account"))
+			for fieldname in account_type_map.keys():
+				if d.get(fieldname):
+					selected_account = d.get(fieldname)
+					selected_account_type = frappe.db.get_value('Account', selected_account, 'account_type')
+					expected_account_type = account_type_map[fieldname]['account_type']
+
+					if selected_account_type != expected_account_type:
+						frappe.throw(_("Row #{}: Account Type of {} should be {}. Please modify the account type or select a different account."
+							.format(d.idx, frappe.bold(selected_account), frappe.bold(expected_account_type))),
+							title=_("Invalid Account"))
 
 
 @frappe.whitelist()
