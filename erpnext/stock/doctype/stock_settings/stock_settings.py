@@ -8,6 +8,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils.html_utils import clean_html
+from frappe.utils import cint
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 class StockSettings(Document):
@@ -66,10 +67,10 @@ class StockSettings(Document):
 		self.toggle_warehouse_field_for_inter_warehouse_transfer()
 
 	def toggle_warehouse_field_for_inter_warehouse_transfer(self):
-		make_property_setter("Sales Invoice Item", "target_warehouse", "hidden", 1 - self.allow_from_dn, "Check")
-		make_property_setter("Delivery Note Item", "target_warehouse", "hidden", 1 - self.allow_from_dn, "Check")
-		make_property_setter("Purchase Invoice Item", "from_warehouse", "hidden", 1 - self.allow_from_pr, "Check")
-		make_property_setter("Purchase Receipt Item", "from_warehouse", "hidden", 1 - self.allow_from_pr, "Check")
+		make_property_setter("Sales Invoice Item", "target_warehouse", "hidden", 1 - cint(self.allow_from_dn), "Check")
+		make_property_setter("Delivery Note Item", "target_warehouse", "hidden", 1 - cint(self.allow_from_dn), "Check")
+		make_property_setter("Purchase Invoice Item", "from_warehouse", "hidden", 1 - cint(self.allow_from_pr), "Check")
+		make_property_setter("Purchase Receipt Item", "from_warehouse", "hidden", 1 - cint(self.allow_from_pr), "Check")
 
 
 def clean_all_descriptions():
