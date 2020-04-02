@@ -14,12 +14,11 @@ from erpnext.stock.doctype.item.item import get_item_defaults
 class BlanketOrder(Document):
 	def validate(self):
 		self.validate_dates()
+		self.validate_duplicate_items()
 
 	def validate_dates(self):
 		if getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("From date cannot be greater than To date"))
-
-		self.validate_duplicate_items()
 
 	def validate_duplicate_items(self):
 		item_list = []
