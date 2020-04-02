@@ -19,6 +19,15 @@ class BlanketOrder(Document):
 		if getdate(self.from_date) > getdate(self.to_date):
 			frappe.throw(_("From date cannot be greater than To date"))
 
+		self.validate_duplicate_items()
+
+	def validate_duplicate_items(self):
+		item_list = []
+		for item in self.items:
+			if item.item_code in item_list:
+				frappe.throw(_("Note: Item {0} added multiple times").format(frappe.bold(item.item_code)))
+			item_list.append(item.item_code)
+
 	def update_ordered_qty(self):
 		ref_doctype = "Sales Order" if self.blanket_order_type == "Selling" else "Purchase Order"
 		item_ordered_qty = frappe._dict(frappe.db.sql("""
