@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate, cint
+from frappe.utils import getdate, cint, cstr
 import calendar
 
 def execute(filters=None):
@@ -48,7 +48,7 @@ def execute(filters=None):
 			new = new_customers_in.get(key, [0,0.0])
 			repeat = repeat_customers_in.get(key, [0,0.0])
 
-			out.append([str(year), calendar.month_name[month],
+			out.append([cstr(year), calendar.month_name[month],
 				new[0], repeat[0], new[0] + repeat[0],
 				new[1], repeat[1], new[1] + repeat[1]])
 
