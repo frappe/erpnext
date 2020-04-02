@@ -17,7 +17,7 @@ frappe.ui.form.on('LinkedIn Settings', {
 	refresh: function(frm){
 		let msg,color = null;
 		if(!frm.doc.person_urn){
-			msg = "SignIn First With LinkedIn.";
+			msg = "Sign In First With LinkedIn.";
 			color = "yellow";
 		}
 		else{

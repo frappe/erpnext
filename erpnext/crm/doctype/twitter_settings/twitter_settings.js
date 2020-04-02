@@ -15,7 +15,7 @@ frappe.ui.form.on('Twitter Settings', {
 		}
 	},
 	refresh: function(frm){
-		frm.add_custom_button(('SignIn With Twitter'), function(){
+		frm.add_custom_button(('Sign In With Twitter'), function(){
 			if(!(frm.doc.consumer_key && frm.doc.consumer_secret)){
 				frappe.msgprint(__("Please set Consumer Key and Consumer Key Secret to Proceed"));
 				return;
