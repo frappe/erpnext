@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils import cstr
+from frappe import _
 
 class PatientEncounter(Document):
 	def on_update(self):
@@ -48,20 +49,20 @@ def delete_medical_record(encounter):
 def set_subject_field(encounter):
 	subject = encounter.practitioner + '\n'
 	if encounter.symptoms:
-		subject += 'Symptoms: '+ cstr(encounter.symptoms) + '\n'
+		subject += _('Symptoms: ') + cstr(encounter.symptoms) + '\n'
 	else:
-		subject += 'No Symptoms \n'
+		subject +=  _('No Symptoms') + '\n'
 
 	if encounter.diagnosis:
-		subject += 'Diagnosis: '+ cstr(encounter.diagnosis) + '\n'
+		subject += _('Diagnosis: ') + cstr(encounter.diagnosis) + '\n'
 	else:
-		subject += 'No Diagnosis \n'
+		subject += _('No Diagnosis') + '\n'
 
 	if encounter.drug_prescription:
-		subject += '\nDrug(s) Prescribed.'
+		subject += '\n' + _('Drug(s) Prescribed.')
 	if encounter.lab_test_prescription:
-		subject += '\nTest(s) Prescribed.'
+		subject += '\n' + _('Test(s) Prescribed.')
 	if encounter.procedure_prescription:
-		subject += '\nProcedure(s) Prescribed.'
+		subject += '\n' + _('Procedure(s) Prescribed.')
 
 	return subject

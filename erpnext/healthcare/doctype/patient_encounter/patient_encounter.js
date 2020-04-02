@@ -106,22 +106,29 @@ frappe.ui.form.on('Patient Encounter', {
 					name: frm.doc.appointment
 				},
 				callback: function(data) {
-					frappe.model.set_value(frm.doctype, frm.docname, 'patient', data.message.patient);
-					frappe.model.set_value(frm.doctype, frm.docname, 'type', data.message.appointment_type);
-					frappe.model.set_value(frm.doctype, frm.docname, 'practitioner', data.message.practitioner);
-					frappe.model.set_value(frm.doctype, frm.docname, 'invoiced', data.message.invoiced);
+					let values = {
+						'patient':data.message.patient,
+						'type': data.message.appointment_type,
+						'practitioner': data.message.practitioner,
+						'invoiced': data.message.invoiced
+					};
+					frm.set_value(values);
 				}
 			});
 		}
 		else {
-			frappe.model.set_value(frm.doctype, frm.docname, 'patient', '');
-			frappe.model.set_value(frm.doctype, frm.docname, 'type', '');
-			frappe.model.set_value(frm.doctype, frm.docname, 'practitioner', '');
-			frappe.model.set_value(frm.doctype, frm.docname, 'invoiced', 0);
-			frappe.model.set_value(frm.doctype, frm.docname, 'patient_sex', '');
-			frappe.model.set_value(frm.doctype, frm.docname, 'patient_age', '');
-			frappe.model.set_value(frm.doctype, frm.docname, 'inpatient_record', '');
-			frappe.model.set_value(frm.doctype, frm.docname, 'inpatient_status', '');
+			let values = {
+				'patient': '',
+				'patient_name': '',
+				'type': '',
+				'practitioner': '',
+				'invoiced': 0,
+				'patient_sex': '',
+				'patient_age': '',
+				'inpatient_record': '',
+				'inpatient_status': ''
+			};
+			frm.set_value(values);
 		}
 	},
 
@@ -164,7 +171,7 @@ let schedule_inpatient = function(frm) {
 			}
 		},
 		freeze: true,
-		freeze_message: 'Process Inpatient Scheduling'
+		freeze_message: __('Process Inpatient Scheduling')
 	});
 };
 

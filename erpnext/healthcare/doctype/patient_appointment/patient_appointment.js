@@ -135,10 +135,10 @@ frappe.ui.form.on('Patient Appointment', {
 				if (data.message.fee_validity) {
 					// if fee validity exists and automated appointment invoicing is enabled,
 					// show payment fields as non-mandatory
-					frm.set_df_property('mode_of_payment', 'hidden', 0);
-					frm.set_df_property('paid_amount', 'hidden', 0);
-					frm.set_df_property('mode_of_payment', 'reqd', 0);
-					frm.set_df_property('paid_amount', 'reqd', 0);
+					frm.toggle_display('mode_of_payment', 0);
+					frm.toggle_display('paid_amount', 0);
+					frm.toggle_reqd('mode_of_payment', 0);
+					frm.toggle_reqd('paid_amount', 0);
 				} else {
 					// if automated appointment invoicing is disabled, hide fields
 					frm.toggle_display('mode_of_payment', data.message ? 1 : 0);
@@ -319,7 +319,7 @@ let check_and_set_availability = function(frm) {
 				freeze_message: __('Fetching records......')
 			});
 		} else {
-			fd.available_slots.html('Appointment date and Healthcare Practitioner are Mandatory'.bold());
+			fd.available_slots.html(__('Appointment date and Healthcare Practitioner are Mandatory').bold());
 		}
 	}
 };
@@ -387,7 +387,7 @@ let show_procedure_templates = function(frm, result){
 		});
 	});
 	if (!result) {
-		let msg = 'There are no procedure prescribed for '+frm.doc.patient;
+		let msg = __('There are no procedure prescribed for ') + frm.doc.patient;
 		$(repl('<div class="col-xs-12" style="padding-top:20px;" >%(msg)s</div></div>', {msg: msg})).appendTo(html_field);
 	}
 	d.show();

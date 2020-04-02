@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from frappe.utils import cint, cstr, getdate
 import dateutil
 from frappe.model.naming import set_name_by_naming_series
+from frappe.utils.nestedset import get_root_of
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account, get_income_account, send_registration_sms
 
 class Patient(Document):
@@ -17,14 +18,14 @@ class Patient(Document):
 		self.add_as_website_user()
 
 	def after_insert(self):
-		if frappe.db.get_value('Healthcare Settings', None, 'link_customer_to_patient') and not self.customer:
+		self.add_as_website_user()
+		self.reload()
+		if frappe.db.get_single_value('Healthcare Settings', 'link_customer_to_patient') and not self.customer:
 			create_customer(self)
 		if frappe.db.get_single_value('Healthcare Settings', 'collect_registration_fee'):
 			frappe.db.set_value('Patient', self.name, 'status', 'Disabled')
 		else:
 			send_registration_sms(self)
-		self.add_as_website_user()
-		self.reload()
 
 	def set_full_name(self):
 		if self.last_name:
@@ -88,22 +89,25 @@ def create_customer(doc):
 	customer_group = frappe.db.get_single_value('Selling Settings', 'customer_group')
 	territory = frappe.db.get_single_value('Selling Settings', 'territory')
 	if not (customer_group and territory):
-		customer_group = 'All Customer Groups'
-		territory = 'All Territories'
+		customer_group = get_root_of('Customer Group')
+		territory = get_root_of('Territory')
 		frappe.msgprint(_('Please set default customer group and territory in Selling Settings'), alert=True)
+
 	customer = frappe.get_doc({
 		'doctype': 'Customer',
 		'customer_name': doc.patient_name,
 		'customer_group': customer_group,
 		'territory' : territory,
 		'customer_type': 'Individual'
-	}).insert(ignore_permissions=True)
+	}).insert(ignore_permissions=True, ignore_mandatory=True)
+
 	frappe.db.set_value('Patient', doc.name, 'customer', customer.name)
 	frappe.msgprint(_('Customer {0} is created.').format(customer.name), alert=True)
 
 def make_invoice(patient, company):
+	uom = frappe.db.exists('UOM', 'Nos') or frappe.db.get_single_value('Stock Settings', 'stock_uom')
 	sales_invoice = frappe.new_doc('Sales Invoice')
-	sales_invoice.customer = frappe.get_value('Patient', patient, 'customer')
+	sales_invoice.customer = frappe.db.get_value('Patient', patient, 'customer')
 	sales_invoice.due_date = getdate()
 	sales_invoice.company = company
 	sales_invoice.is_pos = 0
@@ -113,7 +117,7 @@ def make_invoice(patient, company):
 	item_line.item_name = 'Registeration Fee'
 	item_line.description = 'Registeration Fee'
 	item_line.qty = 1
-	item_line.uom = 'Nos'
+	item_line.uom = uom
 	item_line.conversion_factor = 1
 	item_line.income_account = get_income_account(None, company)
 	item_line.rate = frappe.db.get_single_value('Healthcare Settings', 'registration_fee')

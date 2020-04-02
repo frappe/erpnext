@@ -109,22 +109,34 @@ def get_lab_tests_to_invoice(patient):
 		filters={'patient': patient.name, 'invoiced': False, 'docstatus': 1}
 	)
 	for lab_test in lab_tests:
-		if frappe.db.get_value('Lab Test Template', lab_test.template, 'is_billable'):
+		item, is_billable = frappe.get_cached_value('Lab Test Template', lab_test.lab_test_code, ['item', 'is_billable'])
+		if is_billable:
 			lab_tests_to_invoice.append({
 				'reference_type': 'Lab Test',
 				'reference_name': lab_test.name,
-				'service': frappe.db.get_value('Lab Test Template', lab_test.template, 'item')
+				'service': item
 			})
 
-	lab_prescriptions = frappe.db.sql('''select lp.name, lp.lab_test_code from `tabPatient Encounter` et, `tabLab Prescription` lp
-	where et.patient=%s and lp.parent=et.name and lp.lab_test_created=0 and lp.invoiced=0''', (patient.name), as_dict=1)
+	lab_prescriptions = frappe.db.sql(
+		'''
+			SELECT
+				lp.name, lp.lab_test_code
+			FROM
+				`tabPatient Encounter` et, `tabLab Prescription` lp
+			WHERE
+				et.patient=%s
+				and lp.parent=et.name
+				and lp.lab_test_created=0
+				and lp.invoiced=0
+		''', (patient.name), as_dict=1)
 
 	for prescription in lab_prescriptions:
-		if prescription.lab_test_code and frappe.db.get_value('Lab Test Template', prescription.lab_test_code, 'is_billable'):
+		item, is_billable = frappe.get_cached_value('Lab Test Template', prescription.lab_test_code, ['item', 'is_billable'])
+		if prescription.lab_test_code and is_billable:
 			lab_tests_to_invoice.append({
 				'reference_type': 'Lab Prescription',
 				'reference_name': prescription.name,
-				'service': frappe.db.get_value('Lab Test Template', prescription.lab_test_code, 'item')
+				'service': item
 			})
 
 	return lab_tests_to_invoice
@@ -139,11 +151,12 @@ def get_clinical_procedures_to_invoice(patient):
 	)
 	for procedure in procedures:
 		if not procedure.appointment:
-			if procedure.procedure_template and frappe.db.get_value('Clinical Procedure Template', procedure.procedure_template, 'is_billable'):
+			item, is_billable = frappe.get_cached_value('Clinical Procedure Template', procedure.procedure_template, ['item', 'is_billable'])
+			if procedure.procedure_template and is_billable:
 				clinical_procedures_to_invoice.append({
 					'reference_type': 'Clinical Procedure',
 					'reference_name': procedure.name,
-					'service': frappe.db.get_value('Clinical Procedure Template', procedure.procedure_template, 'item')
+					'service': item
 				})
 
 		# consumables
@@ -164,16 +177,27 @@ def get_clinical_procedures_to_invoice(patient):
 				'description': procedure.consumption_details
 			})
 
-	procedure_prescriptions = frappe.db.sql('''select pp.name, pp.procedure from `tabPatient Encounter` et,
-	`tabProcedure Prescription` pp where et.patient=%s and pp.parent=et.name and
-	pp.procedure_created=0 and pp.invoiced=0 and pp.appointment_booked=0''', (patient.name), as_dict=1)
+	procedure_prescriptions = frappe.db.sql(
+		'''
+			SELECT
+				pp.name, pp.procedure
+			FROM
+				`tabPatient Encounter` et, `tabProcedure Prescription` pp
+			WHERE
+				et.patient=%s
+				and pp.parent=et.name
+				and pp.procedure_created=0
+				and pp.invoiced=0
+				and pp.appointment_booked=0
+		''', (patient.name), as_dict=1)
 
 	for prescription in procedure_prescriptions:
-		if frappe.db.get_value('Clinical Procedure Template', prescription.procedure, 'is_billable'):
+		item, is_billable = frappe.get_cached_value('Clinical Procedure Template', prescription.procedure, ['item', 'is_billable'])
+		if is_billable:
 			clinical_procedures_to_invoice.append({
 				'reference_type': 'Procedure Prescription',
 				'reference_name': prescription.name,
-				'service': frappe.db.get_value('Clinical Procedure Template', prescription.procedure, 'item')
+				'service': item
 			})
 
 	return clinical_procedures_to_invoice
@@ -181,13 +205,22 @@ def get_clinical_procedures_to_invoice(patient):
 
 def get_inpatient_services_to_invoice(patient):
 	services_to_invoice = []
-	inpatient_services = frappe.db.sql('''select io.* from `tabInpatient Record` ip,
-	`tabInpatient Occupancy` io where ip.patient=%s and io.parent=ip.name and
-	io.left=1 and io.invoiced=0''', (patient.name), as_dict=1)
+	inpatient_services = frappe.db.sql(
+		'''
+			SELECT
+				io.*
+			FROM
+				`tabInpatient Record` ip, `tabInpatient Occupancy` io
+			WHERE
+				ip.patient=%s
+				and io.parent=ip.name
+				and io.left=1
+				and io.invoiced=0
+		''', (patient.name), as_dict=1)
 
 	for inpatient_occupancy in inpatient_services:
 		service_unit_type = frappe.db.get_value('Healthcare Service Unit', inpatient_occupancy.service_unit, 'service_unit_type')
-		service_unit_type = frappe.get_doc('Healthcare Service Unit Type', service_unit_type)
+		service_unit_type = frappe.get_cached_doc('Healthcare Service Unit Type', service_unit_type)
 		if service_unit_type and service_unit_type.is_billable:
 			hours_occupied = time_diff_in_hours(inpatient_occupancy.check_out, inpatient_occupancy.check_in)
 			qty = 0.5
@@ -231,9 +264,9 @@ def get_service_item_and_practitioner_charge(doc):
 
 
 def throw_config_service_item(is_inpatient):
-	service_item_label = 'Out Patient Consulting Charge Item'
+	service_item_label = _('Out Patient Consulting Charge Item')
 	if is_inpatient:
-		service_item_label = 'Inpatient Visit Charge Item'
+		service_item_label = _('Inpatient Visit Charge Item')
 
 	msg = _(('Please Configure {0} in ').format(service_item_label) \
 		+ '''<b><a href='#Form/Healthcare Settings'>Healthcare Settings</a></b>''')
@@ -241,9 +274,9 @@ def throw_config_service_item(is_inpatient):
 
 
 def throw_config_practitioner_charge(is_inpatient, practitioner):
-	charge_name = 'OP Consulting Charge'
+	charge_name = _('OP Consulting Charge')
 	if is_inpatient:
-		charge_name = 'Inpatient Visit Charge'
+		charge_name = _('Inpatient Visit Charge')
 
 	msg = _(('Please Configure {0} for Healthcare Practitioner').format(charge_name) \
 		+ ''' <b><a href='#Form/Healthcare Practitioner/{0}'>{0}</a></b>'''.format(practitioner))
@@ -425,11 +458,17 @@ def get_children(doctype, parent, company, is_root=False):
 			if each["expandable"] == 1:
 				occupied = False
 				vacant = False
-				child_list = frappe.db.sql("""
-					select name, occupancy_status from `tabHealthcare Service Unit`
-					where inpatient_occupancy = 1 and
-					lft > %s and rgt < %s""",
-					(each["lft"], each["rgt"]))
+				child_list = frappe.db.sql(
+					'''
+						SELECT
+							name, occupancy_status
+						FROM
+							`tabHealthcare Service Unit`
+						WHERE
+							inpatient_occupancy = 1
+							and lft > %s and rgt < %s
+					''', (each['lft'], each['rgt']))
+
 				for child in child_list:
 					if not occupied:
 						occupied = 0
