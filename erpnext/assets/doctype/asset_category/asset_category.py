@@ -23,16 +23,21 @@ class AssetCategory(Document):
 		account_type_map = {
 			'fixed_asset_account': { 'account_type': 'Fixed Asset' },
 			'accumulated_depreciation_account': { 'account_type': 'Accumulated Depreciation' },
-			'depreciation_expense_account': { 'account_type': 'Expense' },
+			'depreciation_expense_account': { 'root_type': 'Expense' },
 			'capital_work_in_progress_account': { 'account_type': 'Capital Work in Progress' }
 		}
 		for d in self.accounts:
-			for account in account_type_map.keys():
-				if d.get(account):
-					account_type = frappe.db.get_value('Account', d.get(account), 'account_type')
-					if account_type != account_type_map[account]['account_type']:
-						frappe.throw(_("Row {}: Account Type of {} should be {} account".format(d.idx, frappe.bold(frappe.unscrub(account)),
-							frappe.bold(account_type_map[account]['account_type']))), title=_("Invalid Account"))
+			for fieldname in account_type_map.keys():
+				if d.get(fieldname):
+					selected_account = d.get(fieldname)
+					key_to_match = account_type_map[fieldname].keys()[0]
+					selected_key_type = frappe.db.get_value('Account', selected_account, key_to_match)
+					expected_key_type = account_type_map[fieldname][key_to_match]
+
+					if selected_key_type != expected_key_type:
+						frappe.throw(_("Row #{}: {} of {} should be {}. Please modify the account or select a different account."
+							.format(d.idx, frappe.unscrub(key_to_match), frappe.bold(selected_account), frappe.bold(expected_key_type))),
+							title=_("Invalid Account"))
 
 
 @frappe.whitelist()
