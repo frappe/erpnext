@@ -10,7 +10,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import g
 
 def post_depreciation_entries(date=None):
 	# Return if automatic booking of asset depreciation is disabled
-	if not cint(frappe.db.get_single_value("Accounts Settings", "book_asset_depreciation_entry_automatically")):
+	if not cint(frappe.db.get_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically")):
 		return
 
 	if not date:
@@ -58,7 +58,8 @@ def make_depreciation_entry(asset_name, date=None):
 				"account": accumulated_depreciation_account,
 				"credit_in_account_currency": d.depreciation_amount,
 				"reference_type": "Asset",
-				"reference_name": asset.name
+				"reference_name": asset.name,
+				"cost_center": ""
 			}
 
 			debit_entry = {
