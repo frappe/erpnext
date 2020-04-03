@@ -1871,6 +1871,8 @@ def create_sales_invoice(**args):
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"qty": args.qty or 1,
 		"rate": args.rate or 100,
+		"discount_reason": args.discount_reason or "Third age",
+		"discount_percentage": args.discount_percentage or 5,
 		"income_account": args.income_account or "Sales - _TC",
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
