@@ -77,8 +77,8 @@ class Company(NestedSet):
 			["Default Bank Account", "default_bank_account"], ["Default Cash  Account", "default_cash_account"],
 			["Default Receivable Account", "default_receivable_account"], ["Default Payable Account", "default_payable_account"],
 			["Default Expense Account", "default_expense_account"], ["Default Income Account", "default_income_account"],
-			["Stock Received But Not Billed", "stock_received_but_not_billed"], ["Stock Adjustment Account", "stock_adjustment_account"],
-			["Expense Included In Valuation", "expenses_included_in_valuation"], ["Default Payroll Payable Account", "default_payroll_payable_account"]
+			["Stock Received But Not Billed Account", "stock_received_but_not_billed"], ["Stock Adjustment Account", "stock_adjustment_account"],
+			["Expense Included In Valuation Account", "expenses_included_in_valuation"], ["Default Payroll Payable Account", "default_payroll_payable_account"]
 		]
 
 		for account in accounts:
