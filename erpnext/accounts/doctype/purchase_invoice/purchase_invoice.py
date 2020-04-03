@@ -146,10 +146,14 @@ class PurchaseInvoice(BuyingController):
 			["account_type", "report_type", "account_currency"], as_dict=True)
 
 		if account.report_type != "Balance Sheet":
-			frappe.throw(_("Credit To account must be a Balance Sheet account"))
+			frappe.throw(_("Please ensure {} account is a Balance Sheet account. \
+					You can change the parent account to a Balance Sheet account or select a different account.")
+				.format(frappe.bold("Credit To")), title=_("Invalid Account"))
 
 		if self.supplier and account.account_type != "Payable":
-			frappe.throw(_("Credit To account must be a Payable account"))
+			frappe.throw(_("Please ensure {} account is a Payable account. \
+					Change the account type to Payable or select a different account.")
+				.format(frappe.bold("Credit To")), title=_("Invalid Account"))
 
 		self.party_account_currency = account.account_currency
 
