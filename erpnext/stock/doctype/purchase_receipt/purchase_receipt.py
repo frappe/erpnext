@@ -357,7 +357,7 @@ class PurchaseReceipt(BuyingController):
 		if warehouse_with_no_account:
 			frappe.msgprint(_("No accounting entries for the following warehouses") + ": \n" +
 				"\n".join(warehouse_with_no_account))
-		
+
 		return process_gl_map(gl_entries)
 
 	def get_asset_gl_entry(self, gl_entries):
@@ -628,7 +628,7 @@ def get_item_account_wise_additional_cost(purchase_document):
 
 	if not landed_cost_vouchers:
 		return
-	
+
 	item_account_wise_cost = {}
 
 	for lcv in landed_cost_vouchers:
