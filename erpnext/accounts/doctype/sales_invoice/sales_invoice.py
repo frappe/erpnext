@@ -74,6 +74,7 @@ class SalesInvoice(SellingController):
 	def validate(self):
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
+		self.discount_product()
 
 		if not self.is_pos:
 			self.so_dn_required()
@@ -139,6 +140,12 @@ class SalesInvoice(SellingController):
 
 		if self.docstatus == 1:
 			self.assign_cai()
+
+	def discount_product(self):
+		total_discount = 0
+		for d in self.get('items'):
+			total_discount += d.qty * d.discount_amount
+			self.partial_discount = total_discount
 	
 	def initial_number(self, number):
 
