@@ -11,13 +11,13 @@ frappe.query_reports["Material Request Details"] = {
 			options: "Material Request",
 			reqd: 1,
 			get_query: () => {
-			var company = frappe.query_report.get_filter_value('docstatus');
-			return {
-			filters: {
-			'docstatus': 1
+				var company = frappe.query_report.get_filter_value('docstatus');
+				return {
+					filters: {
+						'docstatus': 1
+					}
+				}
 			}
-			}
-			}
-			},
+		},
 	]
 };

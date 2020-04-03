@@ -164,6 +164,12 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"label": _("Reason For Discount"),
+					"name": "Reason For Discount",
+					"description": _("Discount reason for invoices")
+				},
+				{
+					"type": "doctype",
 					"label": _("Customer Group"),
 					"name": "Customer Group",
 					"icon": "fa fa-sitemap",
