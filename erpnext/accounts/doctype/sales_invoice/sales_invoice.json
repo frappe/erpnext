@@ -104,6 +104,10 @@
   "base_total_taxes_and_charges",
   "column_break_47",
   "total_taxes_and_charges",
+  "product_discount",
+  "empty",
+  "column_break_141",
+  "partial_discount",
   "loyalty_points_redemption",
   "loyalty_points",
   "loyalty_amount",
@@ -1659,14 +1663,38 @@
   {
    "fieldname": "due_date_cai",
    "fieldtype": "Date",
-   "label": "Due Date Cai"
+   "label": "Due Date Cai",
+   "read_only": 1
+  },
+  {
+   "fieldname": "partial_discount",
+   "fieldtype": "Currency",
+   "label": "Partial Discount",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "product_discount",
+   "fieldtype": "Section Break",
+   "label": "Product Discount"
+  },
+  {
+   "fieldname": "column_break_141",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "empty",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Empty"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-27 13:32:53.380960",
+ "modified": "2020-04-03 11:18:11.025881",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
