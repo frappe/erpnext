@@ -190,25 +190,27 @@
    "label": "Delivery Window"
   },
   {
-   "fetch_from": "customer.delivery_start_time",
+   "fetch_from": "delivery_note.delivery_start_time",
    "fieldname": "delivery_start_time",
    "fieldtype": "Time",
-   "label": "Delivery Start Time"
+   "label": "Delivery Start Time",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_18",
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "customer.delivery_end_time",
+   "fetch_from": "delivery_note.delivery_end_time",
    "fieldname": "delivery_end_time",
    "fieldtype": "Time",
-   "label": "Delivery End Time"
+   "label": "Delivery End Time",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-03-02 19:43:49.243259",
+ "modified": "2020-03-24 01:27:18.124556",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Stop",

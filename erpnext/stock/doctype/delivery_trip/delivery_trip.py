@@ -253,16 +253,41 @@ class DeliveryTrip(Document):
 
 
 @frappe.whitelist()
-def get_delivery_window(customer=None):
-	delivery_window = frappe.db.get_value("Customer", customer, ["delivery_start_time", "delivery_end_time"], as_dict=1)
-	delivery_window.default_window = False
+def get_delivery_window(doctype=None, docname=None, customer=None):
+	"""
+	Fetch the set delivery window times for a Customer, or
+	fallback to global defaults in Delivery Settings
 
-	if delivery_window and (delivery_window.delivery_start_time or delivery_window.delivery_end_time):
-		return delivery_window
+	Args:
+		doctype (str, optional): The transaction DocType in which the delivery window is set. Defaults to None.
+		docname (str, optional): The transaction record in which the delivery window is set. Defaults to None.
+		customer (str, optional): The name of the Customer. Defaults to None.
 
-	default_window = frappe.db.get_value("Delivery Settings", "Delivery Settings", ["delivery_start_time", "delivery_end_time"], as_dict=1)
-	default_window.default_window = True
-	return default_window
+	Returns:
+		frappe._dict: The dict object containing the window times,
+			and a flag if the global defaults were picked up instead
+	"""
+
+	delivery_start_time = delivery_end_time = None
+	default_window = False
+
+	if doctype and docname:
+		delivery_start_time, delivery_end_time = frappe.db.get_value(doctype, docname,
+			["delivery_start_time", "delivery_end_time"])
+	elif customer:
+		delivery_start_time, delivery_end_time = frappe.db.get_value("Customer", customer,
+			["delivery_start_time", "delivery_end_time"])
+
+	if not (delivery_start_time and delivery_end_time):
+		delivery_start_time = frappe.db.get_single_value("Delivery Settings", "delivery_start_time")
+		delivery_end_time = frappe.db.get_single_value("Delivery Settings", "delivery_end_time")
+		default_window = True
+
+	return frappe._dict({
+		"delivery_start_time": delivery_start_time,
+		"delivery_end_time": delivery_end_time,
+		"default_window": default_window
+	})
 
 
 @frappe.whitelist()
