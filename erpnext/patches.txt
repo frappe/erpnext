@@ -581,7 +581,7 @@ erpnext.patches.v11_0.rename_bom_wo_fields
 erpnext.patches.v12_0.set_default_homepage_type
 erpnext.patches.v11_0.rename_additional_salary_component_additional_salary
 erpnext.patches.v11_0.renamed_from_to_fields_in_project
-erpnext.patches.v11_0.add_permissions_in_gst_settings
+erpnext.patches.v11_0.add_permissions_in_gst_settings #2020-04-04
 erpnext.patches.v11_1.setup_guardian_role
 execute:frappe.delete_doc('DocType', 'Notification Control')
 erpnext.patches.v12_0.set_gst_category
