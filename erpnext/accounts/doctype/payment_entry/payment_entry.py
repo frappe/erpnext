@@ -199,8 +199,8 @@ class PaymentEntry(AccountsController):
 
 	def validate_account_type(self, account, account_types):
 		account_type = frappe.db.get_value("Account", account, "account_type")
-		if account_type not in account_types:
-			frappe.throw(_("Account Type for {0} must be {1}").format(account, comma_or(account_types)))
+		# if account_type not in account_types:
+		# 	frappe.throw(_("Account Type for {0} must be {1}").format(account, comma_or(account_types)))
 
 	def set_exchange_rate(self):
 		if self.paid_from and not self.source_exchange_rate:
@@ -223,7 +223,7 @@ class PaymentEntry(AccountsController):
 		if self.party_type == "Student":
 			valid_reference_doctypes = ("Fees")
 		elif self.party_type == "Customer":
-			valid_reference_doctypes = ("Sales Order", "Sales Invoice", "Journal Entry")
+			valid_reference_doctypes = ("Sales Order", "Sales Invoice", "Journal Entry", "Dunning")
 		elif self.party_type == "Supplier":
 			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Journal Entry")
 		elif self.party_type == "Employee":
@@ -897,6 +897,10 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		total_amount = ref_doc.get("grand_total")
 		exchange_rate = 1
 		outstanding_amount = ref_doc.get("outstanding_amount")
+	if reference_doctype == "Dunning":
+		total_amount = ref_doc.get("dunning_amount")
+		exchange_rate = 1
+		outstanding_amount = ref_doc.get("dunning_amount")
 	elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
 		total_amount = ref_doc.get("total_amount")
 		if ref_doc.multi_currency:
@@ -951,7 +955,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) > 0:
 		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
 
-	if dt in ("Sales Invoice", "Sales Order"):
+	if dt in ("Sales Invoice", "Sales Order", "Dunning"):
 		party_type = "Customer"
 	elif dt in ("Purchase Invoice", "Purchase Order"):
 		party_type = "Supplier"
@@ -980,7 +984,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		party_account_currency = doc.get("party_account_currency") or get_account_currency(party_account)
 
 	# payment type
-	if (dt == "Sales Order" or (dt in ("Sales Invoice", "Fees") and doc.outstanding_amount > 0)) \
+	if (dt == "Sales Order" or (dt in ("Sales Invoice", "Fees", "Dunning") and doc.outstanding_amount > 0)) \
 		or (dt=="Purchase Invoice" and doc.outstanding_amount < 0):
 			payment_type = "Receive"
 	else:
@@ -1006,6 +1010,9 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	elif dt == "Fees":
 		grand_total = doc.grand_total
 		outstanding_amount = doc.outstanding_amount
+	elif dt == "Dunning":
+		grand_total = doc.grand_total
+		outstanding_amount = doc.grand_total
 	else:
 		if party_account_currency == doc.company_currency:
 			grand_total = flt(doc.get("base_rounded_total") or doc.base_grand_total)
@@ -1075,15 +1082,35 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 			for reference in get_reference_as_per_payment_terms(doc.payment_schedule, dt, dn, doc, grand_total, outstanding_amount):
 				pe.append('references', reference)
 		else:
-			pe.append("references", {
-				'reference_doctype': dt,
-				'reference_name': dn,
-				"bill_no": doc.get("bill_no"),
-				"due_date": doc.get("due_date"),
-				'total_amount': grand_total,
-				'outstanding_amount': outstanding_amount,
-				'allocated_amount': outstanding_amount
-			})
+			if dt == "Dunning":
+				pe.append("references", {
+					'reference_doctype': 'Sales Invoice',
+					'reference_name': doc.get('sales_invoice'),
+					"bill_no": doc.get("bill_no"),
+					"due_date": doc.get("due_date"),
+					'total_amount': doc.get('outstanding_amount'),
+					'outstanding_amount': doc.get('outstanding_amount'),
+					'allocated_amount': doc.get('outstanding_amount')
+				})
+				pe.append("references", {
+					'reference_doctype': dt,
+					'reference_name': dn,
+					"bill_no": doc.get("bill_no"),
+					"due_date": doc.get("due_date"),
+					'total_amount': doc.get('dunning_amount'),
+					'outstanding_amount': doc.get('dunning_amount'),
+					'allocated_amount': doc.get('dunning_amount')
+				})
+			else:	
+				pe.append("references", {
+					'reference_doctype': dt,
+					'reference_name': dn,
+					"bill_no": doc.get("bill_no"),
+					"due_date": doc.get("due_date"),
+					'total_amount': grand_total,
+					'outstanding_amount': outstanding_amount,
+					'allocated_amount': outstanding_amount
+				})
 
 	pe.setup_party_account_field()
 	pe.set_missing_values()

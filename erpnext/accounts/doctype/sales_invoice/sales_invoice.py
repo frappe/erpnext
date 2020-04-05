@@ -1599,3 +1599,37 @@ def create_invoice_discounting(source_name, target_doc=None):
 	})
 
 	return invoice_discounting
+
+@frappe.whitelist()
+def create_dunning(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
+	from erpnext.accounts.doctype.dunning.dunning import get_dunning_letter_text, calculate_interest_and_amount
+	def set_missing_values(source, target):
+		target.sales_invoice = source_name
+		target.outstanding_amount = source.outstanding_amount
+		overdue_days = (getdate(target.posting_date) - getdate(source.due_date)).days
+		target.overdue_days = overdue_days
+		if frappe.db.exists('Dunning Type', {'start_day': [
+	                                '<', overdue_days], 'end_day': ['>=', overdue_days]}):
+			dunning_type = frappe.get_doc('Dunning Type', {'start_day': [
+	                                '<', overdue_days], 'end_day': ['>=', overdue_days]})
+			target.dunning_type = dunning_type.name
+			target.rate_of_interest = dunning_type.rate_of_interest
+			target.dunning_fee = dunning_type.dunning_fee
+			letter_text = get_dunning_letter_text(dunning_type = dunning_type.name, doc = target.as_dict())
+			if letter_text:
+				target.body_text = letter_text.get('body_text')
+				target.closing_text = letter_text.get('closing_text')
+				target.language = letter_text.get('language')
+			amounts = calculate_interest_and_amount(target.posting_date, target.outstanding_amount,
+				target.rate_of_interest, target.dunning_fee, target.overdue_days)
+			target.interest_amount = amounts.get('interest_amount')
+			target.dunning_amount = amounts.get('dunning_amount')
+			target.grand_total = amounts.get('grand_total')
+
+	doclist = get_mapped_doc("Sales Invoice", source_name,	{
+		"Sales Invoice": {
+			"doctype": "Dunning",
+		}
+	}, target_doc, set_missing_values)
+	return doclist
