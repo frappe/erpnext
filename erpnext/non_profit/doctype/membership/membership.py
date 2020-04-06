@@ -126,20 +126,39 @@ def create_customer(user_details):
 
 	return customer.name
 
-def create_membership(member):
+def create_membership(member, plan):
 	membership = frappe.new_doc("Membership")
 	membership.update({
 		"member": member.name,
 		"membership_status": "New",
 		"membership_type": member.membership_type,
 		"currency": "INR",
-		"amount": plan.amount
+		"amount": plan.amount,
+		"from_date": getdate()
 	})
 
 	membership.insert(ignore_permissions=True)
 
+	return membership
+
 @frappe.whitelist(allow_guest=True)
 def create_membership_subscription(user_details):
+	"""Summary
+
+	Args:
+	    user_details (TYPE): Description
+
+	Returns:
+	    Dictionary: Dictionary with subscription details
+	    {
+	    	'subscription_details': {
+	    								'plan_id': 'plan_EXwyxDYDCj3X4v',
+							  			'billing_frequency': 24,
+							  			'customer_notify': 1
+							  		},
+			'subscription_id': 'sub_EZycCvXFvqnC6p'
+		}
+	"""
 	# {"plan_id":"IFF Starter","fullname":"Shivam Mishra","mobile":"7506056962","email":"shivam@shivam.dev","pan":"Testing123"}
 	user_details = frappe._dict(user_details)
 	member = get_member_if_exists(user_details.email, user_details.plan_id)
@@ -150,3 +169,39 @@ def create_membership_subscription(user_details):
 	membership = create_membership(member, plan)
 
 	return membership.setup_subscription()
+
+@frappe.whitelist(allow_guest=True)
+def razorpay_subscription_started(data={}):
+	data = {
+			"entity": "event",
+			"event": "subscription.activated",
+			"payload": {
+				"subscription": {
+					"entity": {
+						"id": "sub_EZZsbKwt5xRYH6",
+						"entity": "subscription",
+						"plan_id": "plan_EXwyxDYDCj3X4v",
+						"customer_id": "cust_EZZw80dUQgID8C",
+						"current_start": 1585822073,
+						"current_end": 1588357800,
+						"start_at": 1585822073,
+						"end_at": 1646159400,
+						"auth_attempts": 0,
+						"total_count": 24,
+						"paid_count": 1,
+					}
+				},
+				"payment": {
+					"entity": {
+						"id": "pay_EZZw7v9NEUFCVJ",
+						"amount": 10000,
+						"currency": "INR",
+						"method": "card",
+					}
+				}
+			},
+			"created_at": 1585822079
+		}
+	data = frappe._dict(data)
+
+	pass
