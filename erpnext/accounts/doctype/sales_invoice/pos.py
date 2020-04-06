@@ -423,7 +423,10 @@ def make_invoice(pos_profile, doc_list={}, email_queue_list={}, customers_list={
 				name_list.append(name)
 
 	email_queue = make_email_queue(email_queue_list)
-	pos_profile = json.loads(pos_profile)
+
+	if isinstance(pos_profile, string_types):
+		pos_profile = json.loads(pos_profile)
+
 	customers = get_customers_list(pos_profile)
 	return {
 		'invoice': name_list,

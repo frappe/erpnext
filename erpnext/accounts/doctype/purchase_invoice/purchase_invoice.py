@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate
+from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate, get_link_to_form
 from frappe import _, throw
 import frappe.defaults
 
@@ -125,27 +125,6 @@ class PurchaseInvoice(BuyingController):
 			else:
 				self.remarks = _("No Remarks")
 
-	def set_status(self, update=False, status=None, update_modified=True):
-		if self.is_new():
-			if self.get('amended_from'):
-				self.status = 'Draft'
-			return
-
-		if not status:
-			precision = self.precision("outstanding_amount")
-			args = [
-				self.name,
-				self.outstanding_amount,
-				self.is_return,
-				self.due_date,
-				self.docstatus,
-				precision
-			]
-			self.status = get_status(args)
-
-		if update:
-			self.db_set('status', self.status, update_modified = update_modified)
-
 	def set_missing_values(self, for_validate=False):
 		if not self.credit_to:
 			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
@@ -167,10 +146,14 @@ class PurchaseInvoice(BuyingController):
 			["account_type", "report_type", "account_currency"], as_dict=True)
 
 		if account.report_type != "Balance Sheet":
-			frappe.throw(_("Credit To account must be a Balance Sheet account"))
+			frappe.throw(_("Please ensure {} account is a Balance Sheet account. \
+					You can change the parent account to a Balance Sheet account or select a different account.")
+				.format(frappe.bold("Credit To")), title=_("Invalid Account"))
 
 		if self.supplier and account.account_type != "Payable":
-			frappe.throw(_("Credit To account must be a Payable account"))
+			frappe.throw(_("Please ensure {} account is a Payable account. \
+					Change the account type to Payable or select a different account.")
+				.format(frappe.bold("Credit To")), title=_("Invalid Account"))
 
 		self.party_account_currency = account.account_currency
 
@@ -288,16 +271,30 @@ class PurchaseInvoice(BuyingController):
 
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
+
+			if frappe.get_value('Supplier', self.supplier, 'allow_purchase_invoice_creation_without_purchase_order'):
+				return
+
 			for d in self.get('items'):
 				if not d.purchase_order:
-					throw(_("As per the Buying Settings if Purchase Order Required == 'YES', then for creating Purchase Invoice, user need to create Purchase Order first for item {0}").format(d.item_code))
+					throw(_("""Purchase Order Required for item {0}
+						To submit the invoice without purchase order please set
+						{1} as {2} in {3}""").format(frappe.bold(d.item_code), frappe.bold(_('Purchase Order Required')),
+						frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings')))
 
 	def pr_required(self):
 		stock_items = self.get_stock_items()
 		if frappe.db.get_value("Buying Settings", None, "pr_required") == 'Yes':
+
+			if frappe.get_value('Supplier', self.supplier, 'allow_purchase_invoice_creation_without_purchase_receipt'):
+				return
+
 			for d in self.get('items'):
 				if not d.purchase_receipt and d.item_code in stock_items:
-					throw(_("As per the Buying Settings if Purchase Reciept Required == 'YES', then for creating Purchase Invoice, user need to create Purchase Receipt first for item {0}").format(d.item_code))
+					throw(_("""Purchase Receipt Required for item {0}
+						To submit the invoice without purchase receipt please set
+						{1} as {2} in {3}""").format(frappe.bold(d.item_code), frappe.bold(_('Purchase Receipt Required')),
+						frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings')))
 
 	def validate_write_off_account(self):
 		if self.write_off_amount and not self.write_off_account:
@@ -1028,34 +1025,6 @@ class PurchaseInvoice(BuyingController):
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
 
-def get_status(*args):
-	purchase_invoice, outstanding_amount, is_return, due_date, docstatus, precision = args[0]
-
-	outstanding_amount = flt(outstanding_amount, precision)
-	due_date = getdate(due_date)
-	now_date = getdate()
-
-	if docstatus == 2:
-		status = "Cancelled"
-	elif docstatus == 1:
-		if outstanding_amount > 0 and due_date < now_date:
-			status = "Overdue"
-		elif outstanding_amount > 0 and due_date >= now_date:
-			status = "Unpaid"
-		#Check if outstanding amount is 0 due to debit note issued against invoice
-		elif outstanding_amount <= 0 and is_return == 0 and frappe.db.get_value('Purchase Invoice', {'is_return': 1, 'return_against': purchase_invoice, 'docstatus': 1}):
-			status = "Debit Note Issued"
-		elif is_return == 1:
-			status = "Return"
-		elif outstanding_amount <=0:
-			status = "Paid"
-		else:
-			status = "Submitted"
-	else:
-		status = "Draft"
-
-	return status
-
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
@@ -1116,3 +1085,6 @@ def block_invoice(name, release_date, hold_comment=None):
 def make_inter_company_sales_invoice(source_name, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_inter_company_transaction
 	return make_inter_company_transaction("Purchase Invoice", source_name, target_doc)
+
+def on_doctype_update():
+	frappe.db.add_index("Purchase Invoice", ["supplier", "is_return", "return_against"])
