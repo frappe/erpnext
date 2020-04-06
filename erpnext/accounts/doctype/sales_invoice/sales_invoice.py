@@ -429,13 +429,17 @@ class SalesInvoice(SellingController):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
 
-			customer_price_list = frappe.get_value("Customer", self.customer, 'default_price_list')
-
 			if pos.get("company_address"):
 				self.company_address = pos.get("company_address")
 
-			if not customer_price_list:
-				self.set('selling_price_list', pos.get('selling_price_list'))
+			customer_price_list, customer_group = frappe.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
+
+			customer_group_price_list = frappe.get_value("Customer Group", customer_group, 'default_price_list')
+
+			selling_price_list = customer_price_list or customer_group_price_list or pos.get('selling_price_list')
+
+			if selling_price_list:
+				self.set('selling_price_list', selling_price_list)
 
 			if not for_validate:
 				self.update_stock = cint(pos.get("update_stock"))
@@ -466,13 +470,17 @@ class SalesInvoice(SellingController):
 			["account_type", "report_type", "account_currency"], as_dict=True)
 
 		if not account:
-			frappe.throw(_("Debit To is required"))
+			frappe.throw(_("Debit To is required"), title=_("Account Missing"))
 
 		if account.report_type != "Balance Sheet":
-			frappe.throw(_("Debit To account must be a Balance Sheet account"))
+			frappe.throw(_("Please ensure {} account is a Balance Sheet account. \
+					You can change the parent account to a Balance Sheet account or select a different account.")
+				.format(frappe.bold("Debit To")), title=_("Invalid Account"))
 
 		if self.customer and account.account_type != "Receivable":
-			frappe.throw(_("Debit To account must be a Receivable account"))
+			frappe.throw(_("Please ensure {} account is a Receivable account. \
+					Change the account type to Receivable or select a different account.")
+				.format(frappe.bold("Debit To")), title=_("Invalid Account"))
 
 		self.party_account_currency = account.account_currency
 

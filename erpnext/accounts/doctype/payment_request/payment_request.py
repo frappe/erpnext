@@ -126,12 +126,12 @@ class PaymentRequest(Document):
 
 		return controller.get_payment_url(**{
 			"amount": flt(self.grand_total, self.precision("grand_total")),
-			"title": data.company.encode("utf-8"),
-			"description": self.subject.encode("utf-8"),
+			"title": frappe.as_unicode(data.company),
+			"description": frappe.as_unicode(self.subject),
 			"reference_doctype": "Payment Request",
 			"reference_docname": self.name,
 			"payer_email": self.email_to or frappe.session.user,
-			"payer_name": frappe.safe_encode(data.customer_name),
+			"payer_name": frappe.as_unicode(data.customer_name),
 			"order_id": self.name,
 			"currency": self.currency
 		})
@@ -317,13 +317,13 @@ def make_payment_request(**args):
 			"payment_request_type": args.get("payment_request_type"),
 			"currency": ref_doc.currency,
 			"grand_total": grand_total,
-			"email_to": args.recipient_id or "",
+			"email_to": args.recipient_id or ref_doc.owner,
 			"subject": _("Payment Request for {0}").format(args.dn),
 			"message": gateway_account.get("message") or get_dummy_message(ref_doc),
 			"reference_doctype": args.dt,
 			"reference_name": args.dn,
-			"party_type": args.get("party_type"),
-			"party": args.get("party"),
+			"party_type": args.get("party_type") or "Customer",
+			"party": args.get("party") or ref_doc.customer,
 			"bank_account": bank_account
 		})
 

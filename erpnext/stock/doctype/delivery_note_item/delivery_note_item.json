@@ -81,6 +81,8 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+  "reason_for_return_section_break",
+  "reason_for_return",
   "section_break_72",
   "page_break"
  ],
@@ -699,12 +701,26 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:parent.is_return==1",
+   "fieldname": "reason_for_return",
+   "fieldtype": "Small Text",
+   "label": "Reason for Return",
+   "no_copy": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:parent.is_return==1",
+   "fieldname": "reason_for_return_section_break",
+   "fieldtype": "Section Break",
+   "label": "Reason For Return"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-03-05 14:18:33.131672",
+ "modified": "2020-03-06 14:18:33.131672",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
