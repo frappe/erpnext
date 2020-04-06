@@ -6,5 +6,6 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
+    frappe.reload_doctype("Pick List")
     frappe.db.sql("""UPDATE `tabPick List` set purpose = 'Delivery'
         WHERE docstatus = 1  and purpose = 'Delivery against Sales Order' """)
