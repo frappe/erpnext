@@ -172,7 +172,7 @@ def get_doctypes_with_dimensions():
 	return doclist
 
 def get_accounting_dimensions(as_list=True):
-	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["label", "fieldname", "disabled"])
+	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["label", "fieldname", "disabled", "document_type"])
 
 	if as_list:
 		return [d.fieldname for d in accounting_dimensions]
@@ -185,6 +185,18 @@ def get_checks_for_pl_and_bs_accounts():
 		WHERE p.name = c.parent""", as_dict=1)
 
 	return dimensions
+
+def get_dimension_with_children(doctype, dimension):
+
+	if isinstance(dimension, list):
+		dimension = dimension[0]
+
+	all_dimensions = []
+	lft, rgt = frappe.db.get_value(doctype, dimension, ["lft", "rgt"])
+	children = frappe.get_all(doctype, filters={"lft": [">=", lft], "rgt": ["<=", rgt]})
+	all_dimensions += [c.name for c in children]
+
+	return all_dimensions
 
 @frappe.whitelist()
 def get_dimension_filters():

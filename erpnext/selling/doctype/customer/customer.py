@@ -76,7 +76,8 @@ class Customer(TransactionBase):
 	def validate_default_bank_account(self):
 		if self.default_bank_account:
 			is_company_account = frappe.db.get_value('Bank Account', self.default_bank_account, 'is_company_account')
-			frappe.throw(_("{0} is not a company bank account").format(frappe.bold(self.default_bank_account)))
+			if not is_company_account:
+				frappe.throw(_("{0} is not a company bank account").format(frappe.bold(self.default_bank_account)))
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
@@ -267,9 +268,11 @@ def make_quotation(source_name, target_doc=None):
 	target_doc.run_method("set_other_charges")
 	target_doc.run_method("calculate_taxes_and_totals")
 
-	price_list = frappe.get_value("Customer", source_name, 'default_price_list')
+	price_list, currency = frappe.db.get_value("Customer", {'name': source_name}, ['default_price_list', 'default_currency'])
 	if price_list:
 		target_doc.selling_price_list = price_list
+	if currency:
+		target_doc.currency = currency
 
 	return target_doc
 
