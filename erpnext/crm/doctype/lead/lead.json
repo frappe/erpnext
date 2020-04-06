@@ -6,6 +6,7 @@
  "creation": "2013-04-10 11:45:37",
  "doctype": "DocType",
  "document_type": "Document",
+ "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
   "organization_lead",
@@ -171,7 +172,6 @@
    "options": "Customer"
   },
   {
-   "depends_on": "eval: doc.source==\"Campaign\"",
    "fieldname": "campaign_name",
    "fieldtype": "Link",
    "label": "Campaign Name",
@@ -439,7 +439,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2019-12-24 16:00:44.239168",
+ "modified": "2020-01-13 16:16:48.885228",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -508,6 +508,7 @@
   }
  ],
  "search_fields": "lead_name,lead_owner,status",
+ "sender_field": "email_id",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
