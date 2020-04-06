@@ -453,7 +453,8 @@ erpnext.utils.update_child_items = function(opts) {
 				fields: [{
 					fieldtype:'Data',
 					fieldname:"docname",
-					hidden: 0,
+					read_only: 1,
+					hidden: 1,
 				}, {
 					fieldtype:'Link',
 					fieldname:"item_code",
