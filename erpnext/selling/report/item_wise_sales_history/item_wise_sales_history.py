@@ -121,8 +121,8 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Billed Amount"),
-			"fieldname": "rate",
-			"options": "billed_amount",
+			"fieldtype": "currency",
+			"fieldname": "billed_amount",
 			"width": 120
 		},
 		{

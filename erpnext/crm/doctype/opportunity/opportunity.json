@@ -216,7 +216,8 @@
   {
    "fieldname": "opportunity_amount",
    "fieldtype": "Currency",
-   "label": "Opportunity Amount"
+   "label": "Opportunity Amount",
+   "options": "currency"
   },
   {
    "default": "0",
@@ -422,7 +423,7 @@
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2020-01-13 16:18:44.477818",
+ "modified": "2020-03-20 12:28:45.228994",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
