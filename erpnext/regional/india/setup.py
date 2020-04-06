@@ -77,12 +77,18 @@ def add_custom_roles_for_reports():
 			)).insert()
 
 def add_permissions():
-	for doctype in ('GST HSN Code', 'GST Settings'):
+	for doctype in ('GST HSN Code', 'GST Settings', 'GSTR 3B Report'):
 		add_permission(doctype, 'All', 0)
-		for role in ('Accounts Manager', 'System Manager', 'Item Manager', 'Stock Manager'):
+		for role in ('Accounts Manager', 'Accounts User', 'System Manager'):
 			add_permission(doctype, role, 0)
 			update_permission_property(doctype, role, 0, 'write', 1)
 			update_permission_property(doctype, role, 0, 'create', 1)
+
+		if doctype == 'GST HSN Code':
+			for role in ('Item Manager', 'Stock Manager'):
+				add_permission(doctype, role, 0)
+				update_permission_property(doctype, role, 0, 'write', 1)
+				update_permission_property(doctype, role, 0, 'create', 1)
 
 def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
