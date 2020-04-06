@@ -3,6 +3,8 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+import json
+from datetime import datetime
 import frappe
 from frappe.model.document import Document
 from frappe.utils import add_days, add_years, nowdate, getdate, add_months, cint
@@ -168,40 +170,91 @@ def create_membership_subscription(user_details):
 
 	membership = create_membership(member, plan)
 
-	return membership.setup_subscription()
+	subscription = membership.setup_subscription()
+
+	membership.subscription_id = subscription.get('subscription_id')
+	membership.save(ignore_permissions=True)
+
+	return subscription
+
+def get_membership_based_on_subscription(subscription_id, custom_filters={}):
+	filters = {'subscription_id': subscription.id}
+	filters.update(custom_filters)
+
+	memberships = frappe.get_all("Membership", filters=filters, order_by="creation")
+	if not memberships:
+		return None
+
+	return frappe.get_doc("Membership", memberships[0]['name'])
+
 
 @frappe.whitelist(allow_guest=True)
-def razorpay_subscription_started(data={}):
-	data = {
-			"entity": "event",
-			"event": "subscription.activated",
-			"payload": {
-				"subscription": {
-					"entity": {
-						"id": "sub_EZZsbKwt5xRYH6",
-						"entity": "subscription",
-						"plan_id": "plan_EXwyxDYDCj3X4v",
-						"customer_id": "cust_EZZw80dUQgID8C",
-						"current_start": 1585822073,
-						"current_end": 1588357800,
-						"start_at": 1585822073,
-						"end_at": 1646159400,
-						"auth_attempts": 0,
-						"total_count": 24,
-						"paid_count": 1,
-					}
-				},
-				"payment": {
-					"entity": {
-						"id": "pay_EZZw7v9NEUFCVJ",
-						"amount": 10000,
-						"currency": "INR",
-						"method": "card",
-					}
-				}
-			},
-			"created_at": 1585822079
-		}
+def trigger_razorpay_subscription(data):
+	if isinstance(data, six.string_types):
+		data = json.loads(data)
 	data = frappe._dict(data)
 
-	pass
+	subscription = data.payload.get("subscription", {}).get('entity', {})
+	subscription = frappe._dict(subscription)
+
+	payment = data.payload.get("payment", {}).get('entity', {})
+	payment = frappe._dict(payment)
+
+	if data.event == "subscription.activated":
+		membership = get_membership_based_on_subscription(subscription.id, {"membership_status": "New"})
+	else
+		prev_membership = get_membership_based_on_subscription(subscription.id, {"payment_id": payment.id, "paid": 1})
+		if prev_membership:
+			print("payment already done")
+			return
+		prev_membership = get_membership_based_on_subscription(subscription.id)
+		membership = frappe.new_doc("Membership")
+		membership.update({
+			"member": prev_membership.member,
+			"membership_status": "Current",
+			"membership_type": prev_membership.membership_type,
+			"currency": "INR",
+		})
+
+	subscription_charged(subscription, payment, membership)
+
+def subscription_charged(subscription, payment, membership=None):
+	data = {
+		"subscription": subscription,
+		"payment": payment,
+	}
+	membership.paid = 1
+	membership.payment_id = payment.id
+	membership.webhook_payload = json.dumps(data, indent=4, sort_keys=True)
+	membership.from_date = datetime.fromtimestamp(subscription.current_start)
+	membership.to_date = datetime.fromtimestamp(subscription.current_end)
+	membership.amount = payment.amount / 100 # Convert to rupees from paise
+
+	if membership.is_new():
+		membership.insert()
+	else:
+		membership.save()
+
+	return True
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
