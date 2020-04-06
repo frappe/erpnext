@@ -241,8 +241,7 @@
    "fieldname": "gender",
    "fieldtype": "Link",
    "label": "Gender",
-   "options": "Gender",
-   "reqd": 1
+   "options": "Gender"
   },
   {
    "fieldname": "employee_and_user_details_section",
@@ -277,7 +276,7 @@
  ],
  "image_field": "image",
  "links": [],
- "modified": "2020-03-24 17:25:55.128808",
+ "modified": "2020-04-06 13:44:24.759623",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Practitioner",
