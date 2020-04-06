@@ -22,7 +22,14 @@ erpnext.BOMComparisonTool = class BOMComparisonTool {
 					fieldname: 'name1',
 					fieldtype: 'Link',
 					options: 'BOM',
-					change: () => this.fetch_and_render()
+					change: () => this.fetch_and_render(),
+					get_query: () => {
+						return {
+							filters: {
+								"name": ["not in", [this.form.get_value("name2") || ""]]
+							}
+						}
+					}
 				},
 				{
 					fieldtype: 'Column Break'
@@ -32,7 +39,14 @@ erpnext.BOMComparisonTool = class BOMComparisonTool {
 					fieldname: 'name2',
 					fieldtype: 'Link',
 					options: 'BOM',
-					change: () => this.fetch_and_render()
+					change: () => this.fetch_and_render(),
+					get_query: () => {
+						return {
+							filters: {
+								"name": ["not in", [this.form.get_value("name1") || ""]]
+							}
+						}
+					}
 				},
 				{
 					fieldtype: 'Section Break'
