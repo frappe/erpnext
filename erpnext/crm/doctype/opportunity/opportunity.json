@@ -8,6 +8,7 @@
  "doctype": "DocType",
  "document_type": "Document",
  "editable_grid": 1,
+ "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
   "from_section",
@@ -328,6 +329,7 @@
    "fieldname": "contact_email",
    "fieldtype": "Data",
    "label": "Contact Email",
+   "options": "Email",
    "read_only": 1
   },
   {
@@ -453,9 +455,11 @@
   }
  ],
  "search_fields": "status,transaction_date,party_name,opportunity_type,territory,company",
+ "sender_field": "contact_email",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "subject_field": "title",
  "timeline_field": "party_name",
  "title_field": "title",
  "track_seen": 1,
