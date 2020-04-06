@@ -16,7 +16,7 @@ from frappe import _
 from frappe.utils import (flt, getdate, get_first_day, add_months, add_days, formatdate, cstr)
 
 from six import itervalues
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
 def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_values=False,
 	company=None, reset_period_on_fy_change=True):
@@ -389,7 +389,7 @@ def set_gl_entries_by_account(
 def get_additional_conditions(from_date, ignore_closing_entries, filters):
 	additional_conditions = []
 
-	accounting_dimensions = get_accounting_dimensions()
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
 	if ignore_closing_entries:
 		additional_conditions.append("ifnull(voucher_type, '')!='Period Closing Voucher'")
@@ -412,11 +412,14 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 			additional_conditions.append("(finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)")
 		else:
 			additional_conditions.append("(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)")
-		
+
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
-			if filters.get(dimension):
-				additional_conditions.append("{0} in (%({0})s)".format(dimension))
+			if filters.get(dimension.fieldname):
+				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
+					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
+						filters.get(dimension.fieldname))
+				additional_conditions.append("{0} in %({0})s".format(dimension.fieldname))
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 
