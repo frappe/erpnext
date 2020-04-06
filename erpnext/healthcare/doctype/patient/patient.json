@@ -266,31 +266,27 @@
   },
   {
    "fieldname": "tobacco_past_use",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "ignore_xss_filter": 1,
-   "label": "Tobacco Consumption (Past)",
-   "options": "\nYes\nNo"
+   "label": "Tobacco Consumption Habbits (Past)"
   },
   {
    "fieldname": "tobacco_current_use",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "ignore_xss_filter": 1,
-   "label": "Tobacco Consumption (Present)",
-   "options": "\nYes\nNo"
+   "label": "Tobacco Consumption Habbits (Present)"
   },
   {
    "fieldname": "alcohol_past_use",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "ignore_xss_filter": 1,
-   "label": "Alcohol Consumption (Past)",
-   "options": "\nYes\nNo"
+   "label": "Alcohol Consumption Habbits (Past)"
   },
   {
    "fieldname": "alcohol_current_use",
-   "fieldtype": "Select",
+   "fieldtype": "Data",
    "ignore_user_permissions": 1,
-   "label": "Alcohol Consumption (Present)",
-   "options": "\nYes\nNo"
+   "label": "Alcohol Consumption Habbits (Present)"
   },
   {
    "fieldname": "column_break_32",
@@ -361,7 +357,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2020-03-20 14:59:53.945849",
+ "modified": "2020-04-06 12:55:30.807744",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
