@@ -219,7 +219,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 				"_txt": txt.replace("%", ""),
 				"start": start,
 				"page_len": page_len
-			}, as_dict=as_dict, debug=1)
+			}, as_dict=as_dict)
 
 def bom(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
