@@ -268,7 +268,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "price_list_rate",
+   "depends_on": "eval:doc.margin_type == \"Percentage\" && doc.price_list_rate",
    "fieldname": "discount_percentage",
    "fieldtype": "Percent",
    "label": "Discount (%) on Price List Rate with Margin",
@@ -278,12 +278,11 @@
    "print_hide": 1
   },
   {
-   "depends_on": "price_list_rate",
+   "depends_on": "eval:doc.margin_type == \"Amount\" && doc.price_list_rate || doc.discount_percentage",
    "fieldname": "discount_amount",
    "fieldtype": "Currency",
    "label": "Discount Amount",
-   "options": "currency",
-   "read_only": 1
+   "options": "currency"
   },
   {
    "depends_on": "eval:doc.margin_type && doc.price_list_rate && doc.margin_rate_or_amount",
@@ -796,7 +795,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-04-03 13:07:58.013635",
+ "modified": "2020-04-06 09:38:36.544234",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
