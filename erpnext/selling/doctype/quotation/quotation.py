@@ -26,7 +26,6 @@ class Quotation(SellingController):
 		super(Quotation, self).validate()
 		self.set_status()
 		self.update_opportunity()
-		self.validate_order_type()
 		self.validate_uom_is_integer("stock_uom", "qty")
 		self.validate_valid_till()
 		self.set_customer_name()
@@ -39,9 +38,6 @@ class Quotation(SellingController):
 
 	def has_sales_order(self):
 		return frappe.db.get_value("Sales Order Item", {"prevdoc_docname": self.name, "docstatus": 1})
-
-	def validate_order_type(self):
-		super(Quotation, self).validate_order_type()
 
 	def update_lead(self):
 		if self.quotation_to == "Lead" and self.party_name:
@@ -72,13 +68,19 @@ class Quotation(SellingController):
 
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_sales_order():
+			get_lost_reasons = frappe.get_list('Opportunity Lost Reason',
+			fields = ["name"])
+			lost_reasons_lst = [reason.get('name') for reason in get_lost_reasons]
 			frappe.db.set(self, 'status', 'Lost')
 
 			if detailed_reason:
 				frappe.db.set(self, 'order_lost_reason', detailed_reason)
 
 			for reason in lost_reasons_list:
-				self.append('lost_reasons', reason)
+				if reason.get('lost_reason') in lost_reasons_lst:
+					self.append('lost_reasons', reason)
+				else:
+					frappe.throw(_("Invalid lost reason {0}, please create a new lost reason").format(frappe.bold(reason.get('lost_reason'))))
 
 			self.update_opportunity()
 			self.update_lead()
@@ -153,6 +155,11 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	def update_item(obj, target, source_parent):
 		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
 
+		if obj.against_blanket_order:
+			target.against_blanket_order = obj.against_blanket_order
+			target.blanket_order = obj.blanket_order
+			target.blanket_order_rate = obj.blanket_order_rate
+
 	doclist = get_mapped_doc("Quotation", source_name, {
 			"Quotation": {
 				"doctype": "Sales Order",
@@ -186,8 +193,12 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	return doclist
 
 def set_expired_status():
-	frappe.db.sql("""UPDATE `tabQuotation` SET `status` = 'Expired'
-		WHERE `status` != "Expired" AND `valid_till` < %s""", (nowdate()))
+	frappe.db.sql("""
+		UPDATE
+			`tabQuotation` SET `status` = 'Expired'
+		WHERE
+			`status` not in ('Ordered', 'Expired', 'Lost', 'Cancelled') AND `valid_till` < %s
+		""", (nowdate()))
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):

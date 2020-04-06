@@ -84,6 +84,13 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				return me.set_query_for_batch(doc, cdt, cdn)
 			});
 		}
+
+		if(this.frm.fields_dict["items"].grid.get_field('item_code')) {
+			this.frm.set_query("item_tax_template", "items", function(doc, cdt, cdn) {
+				return me.set_query_for_item_tax_template(doc, cdt, cdn)
+			});
+		}
+
 	},
 
 	refresh: function() {
@@ -406,15 +413,20 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	*/
 	set_batch_number: function(cdt, cdn) {
 		const doc = frappe.get_doc(cdt, cdn);
-		if (doc && doc.has_batch_no) {
+		if (doc && doc.has_batch_no && doc.warehouse) {
 			this._set_batch_number(doc);
 		}
 	},
 
 	_set_batch_number: function(doc) {
+		let args = {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': flt(doc.qty) * flt(doc.conversion_factor)};
+		if (doc.has_serial_no && doc.serial_no) {
+			args['serial_no'] = doc.serial_no
+		}
+		
 		return frappe.call({
 			method: 'erpnext.stock.doctype.batch.batch.get_batch_no',
-			args: {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': flt(doc.qty) * flt(doc.conversion_factor)},
+			args: args,
 			callback: function(r) {
 				if(r.message) {
 					frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);

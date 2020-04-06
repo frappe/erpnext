@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "HR-SHA-.YY.-.MM.-.#####",
  "creation": "2018-04-13 16:25:04.562730",
@@ -8,12 +9,12 @@
  "field_order": [
   "employee",
   "employee_name",
-  "department",
   "shift_type",
   "column_break_3",
   "company",
   "date",
   "shift_request",
+  "department",
   "amended_from"
  ],
  "fields": [
@@ -82,7 +83,8 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-30 15:40:54.418427",
+ "links": [],
+ "modified": "2019-12-12 15:49:06.956901",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Assignment",

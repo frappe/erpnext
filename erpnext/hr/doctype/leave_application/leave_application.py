@@ -54,9 +54,11 @@ class LeaveApplication(Document):
 		self.create_leave_ledger_entry()
 		self.reload()
 
+	def before_cancel(self):
+		self.status = "Cancelled"
+
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
-		self.status = "Cancelled"
 		# notify leave applier about cancellation
 		self.notify_employee()
 		self.cancel_attendance()
@@ -77,6 +79,12 @@ class LeaveApplication(Document):
 						frappe.throw(_("{0} applicable after {1} working days").format(self.leave_type, leave_type.applicable_after))
 
 	def validate_dates(self):
+		if frappe.db.get_single_value("HR Settings", "restrict_backdated_leave_application"):
+			if self.from_date and self.from_date < frappe.utils.today():
+				allowed_role = frappe.db.get_single_value("HR Settings", "role_allowed_to_create_backdated_leave_application")
+				if allowed_role not in frappe.get_roles():
+					frappe.throw(_("Only users with the {0} role can create backdated leave applications").format(allowed_role))
+
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):
 			frappe.throw(_("To date cannot be before from date"))
 
@@ -122,7 +130,7 @@ class LeaveApplication(Document):
 		if self.status == "Approved":
 			for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 				date = dt.strftime("%Y-%m-%d")
-				status = "Half Day" if date == self.half_day_date else "On Leave"
+				status = "Half Day" if getdate(date) == getdate(self.half_day_date) else "On Leave"
 
 				attendance_name = frappe.db.exists('Attendance', dict(employee = self.employee,
 					attendance_date = date, docstatus = ('!=', 2)))
@@ -520,8 +528,7 @@ def get_pending_leaves_for_period(employee, leave_type, from_date, to_date):
 
 def get_remaining_leaves(allocation, leaves_taken, date, expiry):
 	''' Returns minimum leaves remaining after comparing with remaining days for allocation expiry '''
-	def _get_remaining_leaves(allocated_leaves, end_date):
-		remaining_leaves = flt(allocated_leaves) + flt(leaves_taken)
+	def _get_remaining_leaves(remaining_leaves, end_date):
 
 		if remaining_leaves > 0:
 			remaining_days = date_diff(end_date, date) + 1
@@ -529,10 +536,11 @@ def get_remaining_leaves(allocation, leaves_taken, date, expiry):
 
 		return remaining_leaves
 
-	total_leaves = allocation.total_leaves_allocated
+	total_leaves = flt(allocation.total_leaves_allocated) + flt(leaves_taken)
 
 	if expiry and allocation.unused_leaves:
-		remaining_leaves = _get_remaining_leaves(allocation.unused_leaves, expiry)
+		remaining_leaves = flt(allocation.unused_leaves) + flt(leaves_taken)
+		remaining_leaves = _get_remaining_leaves(remaining_leaves, expiry)
 
 		total_leaves = flt(allocation.new_leaves_allocated) + flt(remaining_leaves)
 

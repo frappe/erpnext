@@ -134,7 +134,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				if (doc.status != "On Hold") {
 					if(flt(doc.per_received, 2) < 100 && allow_receipt) {
 						cur_frm.add_custom_button(__('Receipt'), this.make_purchase_receipt, __('Create'));
-						if(doc.is_subcontracted==="Yes") {
+						if(doc.is_subcontracted==="Yes" && me.has_unsupplied_items()) {
 							cur_frm.add_custom_button(__('Material to Supplier'),
 								function() { me.make_stock_entry(); }, __("Transfer"));
 						}
@@ -180,15 +180,29 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	get_items_from_open_material_requests: function() {
 		erpnext.utils.map_current_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order_based_on_supplier",
+			args: {
+				supplier: this.frm.doc.supplier
+			},
+			source_doctype: "Material Request",
 			source_name: this.frm.doc.supplier,
+			target: this.frm,
+			setters: {
+				company: me.frm.doc.company
+			},
 			get_query_filters: {
 				docstatus: ["!=", 2],
-			}
+				supplier: this.frm.doc.supplier
+			},
+			get_query_method: "erpnext.stock.doctype.material_request.material_request.get_material_requests_based_on_supplier"
 		});
 	},
 
 	validate: function() {
 		set_schedule_date(this.frm);
+	},
+
+	has_unsupplied_items: function() {
+		return this.frm.doc['supplied_items'].some(item => item.required_qty != item.supplied_qty)
 	},
 
 	make_stock_entry: function() {
@@ -267,7 +281,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 		if (me.frm.doc['supplied_items']) {
 			me.frm.doc['supplied_items'].forEach((item, index) => {
-			if (item.rm_item_code && item.main_item_code) {
+			if (item.rm_item_code && item.main_item_code && item.required_qty - item.supplied_qty != 0) {
 					me.raw_material_data.push ({
 						'name':item.name,
 						'item_code': item.main_item_code,
@@ -485,7 +499,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						reference_doctype: me.frm.doctype,
 						reference_name: me.frm.docname,
 						content: __('Reason for hold: ')+data.reason_for_hold,
-						comment_email: frappe.session.user
+						comment_email: frappe.session.user,
+						comment_by: frappe.session.user_fullname
 					},
 					callback: function(r) {
 						if(!r.exc) {

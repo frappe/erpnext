@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "creation": "2017-05-29 21:35:13.136357",
@@ -23,8 +24,6 @@
   "iban",
   "column_break_12",
   "bank_account_no",
-  "branch_code",
-  "swift_number",
   "address_and_contact",
   "address_html",
   "website",
@@ -82,7 +81,7 @@
    "default": "0",
    "fieldname": "is_default",
    "fieldtype": "Check",
-   "label": "Is the Default Account"
+   "label": "Is Default Account"
   },
   {
    "default": "0",
@@ -145,17 +144,6 @@
    "length": 30
   },
   {
-   "fieldname": "branch_code",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Branch Code"
-  },
-  {
-   "fieldname": "swift_number",
-   "fieldtype": "Data",
-   "label": "SWIFT number"
-  },
-  {
    "fieldname": "address_and_contact",
    "fieldtype": "Section Break",
    "label": "Address and Contact",
@@ -211,7 +199,8 @@
    "read_only": 1
   }
  ],
- "modified": "2019-10-02 01:34:12.417601",
+ "links": [],
+ "modified": "2020-01-30 20:42:26.458316",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",

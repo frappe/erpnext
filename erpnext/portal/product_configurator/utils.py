@@ -52,7 +52,6 @@ def get_attribute_filter_data():
 
 
 def get_products_for_website(field_filters=None, attribute_filters=None, search=None):
-
 	if attribute_filters:
 		item_codes = get_item_codes_by_attributes(attribute_filters)
 		items_by_attributes = get_items([['name', 'in', item_codes]])
@@ -302,6 +301,8 @@ def get_items(filters=None, search=None):
 	if isinstance(filters, dict):
 		filters = [['Item', fieldname, '=', value] for fieldname, value in filters.items()]
 
+	enabled_items_filter = get_conditions({ 'disabled': 0 }, 'and')
+
 	show_in_website_condition = ''
 	if products_settings.hide_variants:
 		show_in_website_condition = get_conditions({'show_in_website': 1 }, 'and')
@@ -337,7 +338,8 @@ def get_items(filters=None, search=None):
 	filter_condition = get_conditions(filters, 'and')
 
 	where_conditions = ' and '.join(
-		[condition for condition in [show_in_website_condition, search_condition, filter_condition] if condition]
+		[condition for condition in [enabled_items_filter, show_in_website_condition, \
+			search_condition, filter_condition] if condition]
 	)
 
 	left_joins = []

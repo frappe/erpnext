@@ -439,12 +439,13 @@ erpnext.utils.update_child_items = function(opts) {
 	const dialog = new frappe.ui.Dialog({
 		title: __("Update Items"),
 		fields: [
-			{fieldtype:'Section Break', label: __('Items')},
 			{
 				fieldname: "trans_items",
 				fieldtype: "Table",
+				label: "Items",
 				cannot_add_rows: cannot_add_row,
 				in_place_edit: true,
+				reqd: 1,
 				data: this.data,
 				get_data: () => {
 					return this.data;
@@ -452,13 +453,15 @@ erpnext.utils.update_child_items = function(opts) {
 				fields: [{
 					fieldtype:'Data',
 					fieldname:"docname",
-					hidden: 0,
+					read_only: 1,
+					hidden: 1,
 				}, {
 					fieldtype:'Link',
 					fieldname:"item_code",
 					options: 'Item',
 					in_list_view: 1,
-					read_only: 1,
+					read_only: 0,
+					disabled: 0,
 					label: __('Item Code')
 				}, {
 					fieldtype:'Float',
@@ -501,6 +504,7 @@ erpnext.utils.update_child_items = function(opts) {
 	frm.doc[opts.child_docname].forEach(d => {
 		dialog.fields_dict.trans_items.df.data.push({
 			"docname": d.name,
+			"name": d.name,
 			"item_code": d.item_code,
 			"qty": d.qty,
 			"rate": d.rate,
@@ -512,9 +516,18 @@ erpnext.utils.update_child_items = function(opts) {
 }
 
 erpnext.utils.map_current_doc = function(opts) {
-	if(opts.get_query_filters) {
-		opts.get_query = function() {
-			return {filters: opts.get_query_filters};
+	let query_args = {};
+	if (opts.get_query_filters) {
+		query_args.filters = opts.get_query_filters;
+	}
+
+	if (opts.get_query_method) {
+		query_args.query = opts.get_query_method;
+	}
+
+	if (query_args.filters || query_args.query) {
+		opts.get_query = () => {
+			return query_args;
 		}
 	}
 	var _map = function() {
@@ -580,7 +593,7 @@ erpnext.utils.map_current_doc = function(opts) {
 				"method": opts.method,
 				"source_names": opts.source_name,
 				"target_doc": cur_frm.doc,
-				'args': opts.args
+				"args": opts.args
 			},
 			callback: function(r) {
 				if(!r.exc) {

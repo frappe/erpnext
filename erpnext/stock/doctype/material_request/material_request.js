@@ -145,6 +145,7 @@ frappe.ui.form.on('Material Request', {
 	},
 
 	get_item_data: function(frm, item) {
+		if (!item.item_code) return;
 		frm.call({
 			method: "erpnext.stock.get_item_details.get_item_details",
 			child: item,
@@ -230,7 +231,19 @@ frappe.ui.form.on('Material Request', {
 
 	make_purchase_order: function(frm) {
 		frappe.prompt(
-			{fieldname:'default_supplier', label: __('For Default Supplier (optional)'), fieldtype: 'Link', options: 'Supplier'},
+			{
+				label: __('For Default Supplier (Optional)'),
+				fieldname:'default_supplier',
+				fieldtype: 'Link',
+				options: 'Supplier',
+				description: __('Select a Supplier from the Default Supplier List of the items below.'),
+				get_query: () => {
+					return{
+						query: "erpnext.stock.doctype.material_request.material_request.get_default_supplier_query",
+						filters: {'doc': frm.doc.name}
+					}
+				}
+			},
 			(values) => {
 				frappe.model.open_mapped_doc({
 					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
@@ -238,7 +251,8 @@ frappe.ui.form.on('Material Request', {
 					args: { default_supplier: values.default_supplier },
 					run_link_triggers: true
 				});
-			}
+			},
+			__('Enter Supplier')
 		)
 	},
 

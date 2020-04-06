@@ -39,8 +39,8 @@ class PaymentRequest(Document):
 				ref_amount = get_amount(ref_doc)
 
 				if existing_payment_request_amount + flt(self.grand_total)> ref_amount:
-					frappe.throw(_("Total Payment Request amount cannot be greater than {0} amount"
-						.format(self.reference_doctype)))
+					frappe.throw(_("Total Payment Request amount cannot be greater than {0} amount")
+						.format(self.reference_doctype))
 
 	def validate_currency(self):
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
@@ -53,14 +53,14 @@ class PaymentRequest(Document):
 			for subscription_plan in self.subscription_plans:
 				payment_gateway = frappe.db.get_value("Subscription Plan", subscription_plan.plan, "payment_gateway")
 				if payment_gateway != self.payment_gateway_account:
-					frappe.throw(_('The payment gateway account in plan {0} is different from the payment gateway account in this payment request'.format(subscription_plan.name)))
+					frappe.throw(_('The payment gateway account in plan {0} is different from the payment gateway account in this payment request').format(subscription_plan.name))
 
 				rate = get_plan_rate(subscription_plan.plan, quantity=subscription_plan.qty)
 
 				amount += rate
 
 			if amount != self.grand_total:
-				frappe.msgprint(_("The amount of {0} set in this payment request is different from the calculated amount of all payment plans: {1}. Make sure this is correct before submitting the document.".format(self.grand_total, amount)))
+				frappe.msgprint(_("The amount of {0} set in this payment request is different from the calculated amount of all payment plans: {1}. Make sure this is correct before submitting the document.").format(self.grand_total, amount))
 
 	def on_submit(self):
 		if self.payment_request_type == 'Outward':
@@ -317,13 +317,13 @@ def make_payment_request(**args):
 			"payment_request_type": args.get("payment_request_type"),
 			"currency": ref_doc.currency,
 			"grand_total": grand_total,
-			"email_to": args.recipient_id or "",
+			"email_to": args.recipient_id or ref_doc.owner,
 			"subject": _("Payment Request for {0}").format(args.dn),
 			"message": gateway_account.get("message") or get_dummy_message(ref_doc),
 			"reference_doctype": args.dt,
 			"reference_name": args.dn,
-			"party_type": args.get("party_type"),
-			"party": args.get("party"),
+			"party_type": args.get("party_type") or "Customer",
+			"party": args.get("party") or ref_doc.customer,
 			"bank_account": bank_account
 		})
 
@@ -373,6 +373,7 @@ def get_existing_payment_request_amount(ref_dt, ref_dn):
 			reference_doctype = %s
 			and reference_name = %s
 			and docstatus = 1
+			and status != 'Paid'
 	""", (ref_dt, ref_dn))
 	return flt(existing_payment_request_amount[0][0]) if existing_payment_request_amount else 0
 

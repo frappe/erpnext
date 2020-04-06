@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -105,6 +106,8 @@
   "range",
   "column_break4",
   "per_billed",
+  "is_internal_supplier",
+  "inter_company_reference",
   "subscription_detail",
   "auto_repeat",
   "printing_settings",
@@ -305,6 +308,7 @@
    "fieldname": "contact_email",
    "fieldtype": "Small Text",
    "label": "Contact Email",
+   "options": "Email",
    "print_hide": 1,
    "read_only": 1
   },
@@ -614,7 +618,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Text",
+   "fieldtype": "Long Text",
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -1051,12 +1055,28 @@
    "oldfieldtype": "Date",
    "print_width": "100px",
    "width": "100px"
+  },
+  {
+   "default": "0",
+   "fetch_from": "supplier.is_internal_supplier",
+   "fieldname": "is_internal_supplier",
+   "fieldtype": "Check",
+   "label": "Is Internal Supplier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "inter_company_reference",
+   "fieldtype": "Link",
+   "label": "Inter Company Reference",
+   "options": "Delivery Note",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
- "modified": "2019-09-27 14:24:49.044505",
+ "links": [],
+ "modified": "2019-12-30 19:12:49.709711",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

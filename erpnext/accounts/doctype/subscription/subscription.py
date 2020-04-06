@@ -195,7 +195,7 @@ class Subscription(Document):
 				doc = frappe.get_doc('Sales Invoice', current.invoice)
 				return doc
 			else:
-				frappe.throw(_('Invoice {0} no longer exists'.format(current.invoice)))
+				frappe.throw(_('Invoice {0} no longer exists').format(current.invoice))
 
 	def is_new_subscription(self):
 		"""
@@ -280,7 +280,7 @@ class Subscription(Document):
 
 		if self.additional_discount_percentage or self.additional_discount_amount:
 			discount_on = self.apply_additional_discount
-			invoice.apply_additional_discount = discount_on if discount_on else 'Grand Total'
+			invoice.apply_discount_on = discount_on if discount_on else 'Grand Total'
 
 		# Subscription period
 		invoice.from_date = self.current_invoice_start
@@ -339,6 +339,16 @@ class Subscription(Document):
 		# Check invoice dates and make sure it doesn't have outstanding invoices
 		return getdate(nowdate()) >= getdate(self.current_invoice_start) and not self.has_outstanding_invoice()
 
+	def is_current_invoice_paid(self):
+		if self.is_new_subscription():
+			return False
+
+		last_invoice = frappe.get_doc('Sales Invoice', self.invoices[-1].invoice)
+		if getdate(last_invoice.posting_date) == getdate(self.current_invoice_start) and last_invoice.status == 'Paid':
+			return True
+
+		return False
+
 	def process_for_active(self):
 		"""
 		Called by `process` if the status of the `Subscription` is 'Active'.
@@ -348,7 +358,7 @@ class Subscription(Document):
 		2. Change the `Subscription` status to 'Past Due Date'
 		3. Change the `Subscription` status to 'Cancelled'
 		"""
-		if self.is_postpaid_to_invoice() or self.is_prepaid_to_invoice():
+		if not self.is_current_invoice_paid() and (self.is_postpaid_to_invoice() or self.is_prepaid_to_invoice()):
 			self.generate_invoice()
 			if self.current_invoice_is_past_due():
 				self.status = 'Past Due Date'
@@ -378,7 +388,7 @@ class Subscription(Document):
 		"""
 		current_invoice = self.get_current_invoice()
 		if not current_invoice:
-			frappe.throw(_('Current invoice {0} is missing'.format(current_invoice.invoice)))
+			frappe.throw(_('Current invoice {0} is missing').format(current_invoice.invoice))
 		else:
 			if self.is_not_outstanding(current_invoice):
 				self.status = 'Active'

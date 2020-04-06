@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe, json
 from frappe import _
 from frappe.model.document import Document
+from frappe.model.rename_doc import rename_doc
 from frappe.utils import nowdate
 
 class ClinicalProcedureTemplate(Document):
@@ -116,7 +117,7 @@ def change_item_code_from_template(item_code, doc):
 		"item_code": item_code})):
 		frappe.throw(_("Code {0} already exist").format(item_code))
 	else:
-		frappe.rename_doc("Item", doc.item_code, item_code, ignore_permissions = True)
+		rename_doc("Item", doc.item_code, item_code, ignore_permissions=True)
 		frappe.db.set_value("Clinical Procedure Template", doc.name, "item_code", item_code)
 	return
 

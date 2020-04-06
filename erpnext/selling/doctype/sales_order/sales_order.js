@@ -6,13 +6,14 @@
 frappe.ui.form.on("Sales Order", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'Delivery Note': 'Delivery',
+			'Delivery Note': 'Delivery Note',
 			'Pick List': 'Pick List',
 			'Sales Invoice': 'Invoice',
 			'Material Request': 'Material Request',
 			'Purchase Order': 'Purchase Order',
 			'Project': 'Project',
-			'Payment Entry': "Payment"
+			'Payment Entry': "Payment",
+			'Work Order': "Work Order"
 		}
 		frm.add_fetch('customer', 'tax_id', 'tax_id');
 
@@ -134,7 +135,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			}
 			if(doc.status !== 'Closed') {
 				if(doc.status !== 'On Hold') {
-
 					allow_delivery = this.frm.doc.items.some(item => item.delivered_by_supplier === 0 && item.qty > flt(item.delivered_qty))
 						&& !this.frm.doc.skip_delivery_note
 
@@ -664,7 +664,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						reference_doctype: me.frm.doctype,
 						reference_name: me.frm.docname,
 						content: __('Reason for hold: ')+data.reason_for_hold,
-						comment_email: frappe.session.user
+						comment_email: frappe.session.user,
+						comment_by: frappe.session.user_fullname
 					},
 					callback: function(r) {
 						if(!r.exc) {

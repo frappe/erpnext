@@ -20,6 +20,7 @@ class StockController(AccountsController):
 	def validate(self):
 		super(StockController, self).validate()
 		self.validate_inspection()
+		self.validate_serialized_batch()
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if self.docstatus == 2:
@@ -38,6 +39,17 @@ class StockController(AccountsController):
 			gl_entries = self.get_asset_gl_entry(gl_entries)
 			make_gl_entries(gl_entries, from_repost=from_repost)
 
+	def validate_serialized_batch(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		for d in self.get("items"):
+			if hasattr(d, 'serial_no') and hasattr(d, 'batch_no') and d.serial_no and d.batch_no:
+				serial_nos = get_serial_nos(d.serial_no)
+				for serial_no_data in frappe.get_all("Serial No",
+					filters={"name": ("in", serial_nos)}, fields=["batch_no", "name"]):
+					if serial_no_data.batch_no != d.batch_no:
+						frappe.throw(_("Row #{0}: Serial No {1} does not belong to Batch {2}")
+							.format(d.idx, serial_no_data.name, d.batch_no))
+
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
 
@@ -50,12 +62,13 @@ class StockController(AccountsController):
 		gl_list = []
 		warehouse_with_no_account = []
 
+		precision = frappe.get_precision("GL Entry", "debit_in_account_currency")
 		for item_row in voucher_details:
 			sle_list = sle_map.get(item_row.name)
 			if sle_list:
 				for sle in sle_list:
 					if warehouse_account.get(sle.warehouse):
-						# from warehouse account
+						# from warehouse account/ target warehouse account
 
 						self.check_expense_account(item_row)
 
@@ -75,17 +88,17 @@ class StockController(AccountsController):
 							"against": item_row.expense_account,
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"debit": flt(sle.stock_value_difference, 2),
+							"debit": flt(sle.stock_value_difference, precision),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
 						}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
 
-						# to target warehouse / expense account
+						# expense account
 						gl_list.append(self.get_gl_dict({
 							"account": item_row.expense_account,
 							"against": warehouse_account[sle.warehouse]["account"],
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"credit": flt(sle.stock_value_difference, 2),
+							"credit": flt(sle.stock_value_difference, precision),
 							"project": item_row.get("project") or self.get("project"),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No"
 						}, item=item_row))
@@ -217,6 +230,21 @@ class StockController(AccountsController):
 				frappe.throw(_("{0} {1}: Cost Center is mandatory for Item {2}").format(
 					_(self.doctype), self.name, item.get("item_code")))
 
+	def delete_auto_created_batches(self):
+		for d in self.items:
+			if not d.batch_no: continue
+
+			serial_nos = [sr.name for sr in frappe.get_all("Serial No", {'batch_no': d.batch_no})]
+			if serial_nos:
+				frappe.db.set_value("Serial No", { 'name': ['in', serial_nos] }, "batch_no", None)
+
+			d.batch_no = None
+			d.db_set("batch_no", None)
+
+		for data in frappe.get_all("Batch",
+			{'reference_name': self.name, 'reference_doctype': self.doctype}):
+			frappe.delete_doc("Batch", data.name)
+
 	def get_sl_entries(self, d, args):
 		sl_dict = frappe._dict({
 			"item_code": d.get("item_code", None),
@@ -260,7 +288,7 @@ class StockController(AccountsController):
 
 		return serialized_items
 
-	def get_incoming_rate_for_sales_return(self, item_code, against_document):
+	def get_incoming_rate_for_return(self, item_code, against_document):
 		incoming_rate = 0.0
 		if against_document and item_code:
 			incoming_rate = frappe.db.sql("""select abs(stock_value_difference / actual_qty)
@@ -277,6 +305,16 @@ class StockController(AccountsController):
 
 		warehouses = list(set([d.warehouse for d in
 			self.get("items") if getattr(d, "warehouse", None)]))
+
+		target_warehouses = list(set([d.target_warehouse for d in
+			self.get("items") if getattr(d, "target_warehouse", None)]))
+
+		warehouses.extend(target_warehouses)
+
+		from_warehouse = list(set([d.from_warehouse for d in
+			self.get("items") if getattr(d, "from_warehouse", None)]))
+
+		warehouses.extend(from_warehouse)
 
 		for w in warehouses:
 			validate_warehouse_company(w, self.company)
@@ -335,4 +373,75 @@ class StockController(AccountsController):
 		for blanket_order in blanket_orders:
 			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
 
+def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
+		warehouse_account=None, company=None):
+	def _delete_gl_entries(voucher_type, voucher_no):
+		frappe.db.sql("""delete from `tabGL Entry`
+			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 
+	if not warehouse_account:
+		warehouse_account = get_warehouse_account_map(company)
+
+	future_stock_vouchers = get_future_stock_vouchers(posting_date, posting_time, for_warehouses, for_items)
+	gle = get_voucherwise_gl_entries(future_stock_vouchers, posting_date)
+
+	for voucher_type, voucher_no in future_stock_vouchers:
+		existing_gle = gle.get((voucher_type, voucher_no), [])
+		voucher_obj = frappe.get_doc(voucher_type, voucher_no)
+		expected_gle = voucher_obj.get_gl_entries(warehouse_account)
+		if expected_gle:
+			if not existing_gle or not compare_existing_and_expected_gle(existing_gle, expected_gle):
+				_delete_gl_entries(voucher_type, voucher_no)
+				voucher_obj.make_gl_entries(gl_entries=expected_gle, repost_future_gle=False, from_repost=True)
+		else:
+			_delete_gl_entries(voucher_type, voucher_no)
+
+def compare_existing_and_expected_gle(existing_gle, expected_gle):
+	matched = True
+	for entry in expected_gle:
+		account_existed = False
+		for e in existing_gle:
+			if entry.account == e.account:
+				account_existed = True
+			if entry.account == e.account and entry.against_account == e.against_account \
+					and (not entry.cost_center or not e.cost_center or entry.cost_center == e.cost_center) \
+					and (entry.debit != e.debit or entry.credit != e.credit):
+				matched = False
+				break
+		if not account_existed:
+			matched = False
+			break
+	return matched
+
+def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None):
+	future_stock_vouchers = []
+
+	values = []
+	condition = ""
+	if for_items:
+		condition += " and item_code in ({})".format(", ".join(["%s"] * len(for_items)))
+		values += for_items
+
+	if for_warehouses:
+		condition += " and warehouse in ({})".format(", ".join(["%s"] * len(for_warehouses)))
+		values += for_warehouses
+
+	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
+		from `tabStock Ledger Entry` sle
+		where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) {condition}
+		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc for update""".format(condition=condition),
+		tuple([posting_date, posting_time] + values), as_dict=True):
+			future_stock_vouchers.append([d.voucher_type, d.voucher_no])
+
+	return future_stock_vouchers
+
+def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
+	gl_entries = {}
+	if future_stock_vouchers:
+		for d in frappe.db.sql("""select * from `tabGL Entry`
+			where posting_date >= %s and voucher_no in (%s)""" %
+			('%s', ', '.join(['%s']*len(future_stock_vouchers))),
+			tuple([posting_date] + [d[1] for d in future_stock_vouchers]), as_dict=1):
+				gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
+
+	return gl_entries

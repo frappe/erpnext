@@ -12,17 +12,17 @@ frappe.query_reports["Accounts Receivable"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
+			"fieldname":"report_date",
+			"label": __("Posting Date"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.get_today()
+		},
+		{
 			"fieldname":"ageing_based_on",
 			"label": __("Ageing Based On"),
 			"fieldtype": "Select",
 			"options": 'Posting Date\nDue Date',
-			"default": "Posting Date"
-		},
-		{
-			"fieldname":"report_date",
-			"label": __("As on Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.get_today()
+			"default": "Due Date"
 		},
 		{
 			"fieldname":"range1",
@@ -87,7 +87,7 @@ frappe.query_reports["Accounts Receivable"] = {
 						frappe.query_report.set_filter_value('payment_terms', value["payment_terms"]);
 					});
 
-					frappe.db.get_value('Customer Credit Limit', {'parent': customer, 'company': company}, 
+					frappe.db.get_value('Customer Credit Limit', {'parent': customer, 'company': company},
 						["credit_limit"], function(value) {
 						if (value) {
 							frappe.query_report.set_filter_value('credit_limit', value["credit_limit"]);
@@ -132,6 +132,11 @@ frappe.query_reports["Accounts Receivable"] = {
 			"options": "Sales Person"
 		},
 		{
+			"fieldname": "group_by_party",
+			"label": __("Group By Customer"),
+			"fieldtype": "Check"
+		},
+		{
 			"fieldname":"based_on_payment_terms",
 			"label": __("Based On Payment Terms"),
 			"fieldtype": "Check",
@@ -143,7 +148,7 @@ frappe.query_reports["Accounts Receivable"] = {
 		},
 		{
 			"fieldname":"show_delivery_notes",
-			"label": __("Show Delivery Notes"),
+			"label": __("Show Linked Delivery Notes"),
 			"fieldtype": "Check",
 		},
 		{
@@ -176,6 +181,15 @@ frappe.query_reports["Accounts Receivable"] = {
 			"hidden": 1
 		}
 	],
+
+	"formatter": function(value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+		if (data && data.bold) {
+			value = value.bold();
+
+		}
+		return value;
+	},
 
 	onload: function(report) {
 		report.page.add_inner_button(__("Accounts Receivable Summary"), function() {

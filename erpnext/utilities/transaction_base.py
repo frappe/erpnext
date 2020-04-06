@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.share
 from frappe import _
-from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_datetime
+from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_datetime, get_link_to_form
 from erpnext.controllers.status_updater import StatusUpdater
 
 from six import string_types
@@ -125,8 +125,11 @@ class TransactionBase(StatusUpdater):
 					ref_rate = frappe.db.get_value(ref_dt + " Item", d.get(ref_link_field), "rate")
 
 					if abs(flt(d.rate - ref_rate, d.precision("rate"))) >= .01:
-						frappe.throw(_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4}) ")
+						frappe.msgprint(_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4}) ")
 							.format(d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate))
+						frappe.throw(_("To allow different rates, disable the {0} checkbox in {1}.")
+							.format(frappe.bold("Maintain Same Rate Throughout Sales Cycle"),
+							get_link_to_form("Selling Settings", "Selling Settings", frappe.bold("Selling Settings"))))
 
 	def get_link_filters(self, for_doctype):
 		if hasattr(self, "prev_link_mapper") and self.prev_link_mapper.get(for_doctype):
@@ -188,8 +191,8 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 		qty_fields = [qty_fields]
 
 	distinct_uoms = list(set([d.get(uom_field) for d in doc.get_all_children()]))
-	integer_uoms = filter(lambda uom: frappe.db.get_value("UOM", uom,
-		"must_be_whole_number", cache=True) or None, distinct_uoms)
+	integer_uoms = list(filter(lambda uom: frappe.db.get_value("UOM", uom,
+		"must_be_whole_number", cache=True) or None, distinct_uoms))
 
 	if not integer_uoms:
 		return

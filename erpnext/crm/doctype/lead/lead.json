@@ -1,10 +1,12 @@
 {
+ "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-04-10 11:45:37",
  "doctype": "DocType",
  "document_type": "Document",
+ "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
   "organization_lead",
@@ -16,6 +18,8 @@
   "col_break123",
   "lead_owner",
   "status",
+  "salutation",
+  "designation",
   "gender",
   "source",
   "customer",
@@ -28,17 +32,22 @@
   "ends_on",
   "notes_section",
   "notes",
-  "contact_info",
-  "address_desc",
+  "address_info",
   "address_html",
+  "address_title",
+  "address_line1",
+  "address_line2",
+  "city",
+  "county",
   "column_break2",
   "contact_html",
+  "state",
+  "country",
+  "pincode",
+  "contact_section",
   "phone",
-  "salutation",
   "mobile_no",
   "fax",
-  "website",
-  "territory",
   "more_info",
   "type",
   "market_segment",
@@ -46,8 +55,11 @@
   "request_type",
   "column_break3",
   "company",
+  "website",
+  "territory",
   "unsubscribed",
-  "blog_subscriber"
+  "blog_subscriber",
+  "title"
  ],
  "fields": [
   {
@@ -73,7 +85,6 @@
    "set_only_once": 1
   },
   {
-   "depends_on": "eval:!doc.organization_lead",
    "fieldname": "lead_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -130,7 +141,13 @@
    "search_index": 1
   },
   {
-   "depends_on": "eval:!doc.organization_lead",
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "salutation",
+   "fieldtype": "Link",
+   "label": "Salutation",
+   "options": "Salutation"
+  },
+  {
    "fieldname": "gender",
    "fieldtype": "Link",
    "label": "Gender",
@@ -155,7 +172,6 @@
    "options": "Customer"
   },
   {
-   "depends_on": "eval: doc.source==\"Campaign\"",
    "fieldname": "campaign_name",
    "fieldtype": "Link",
    "label": "Campaign Name",
@@ -217,39 +233,73 @@
    "label": "Notes"
   },
   {
-   "collapsible": 1,
-   "fieldname": "contact_info",
-   "fieldtype": "Section Break",
-   "label": "Address & Contact",
-   "oldfieldtype": "Column Break",
-   "options": "fa fa-map-marker"
-  },
-  {
-   "depends_on": "eval:doc.__islocal",
-   "fieldname": "address_desc",
-   "fieldtype": "HTML",
-   "label": "Address Desc",
-   "print_hide": 1
-  },
-  {
    "fieldname": "address_html",
    "fieldtype": "HTML",
    "label": "Address HTML",
    "read_only": 1
   },
   {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "address_title",
+   "fieldtype": "Data",
+   "label": "Address Title"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "address_line1",
+   "fieldtype": "Data",
+   "label": "Address Line 1"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "address_line2",
+   "fieldtype": "Data",
+   "label": "Address Line 2"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City/Town"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "county",
+   "fieldtype": "Data",
+   "label": "County"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "state",
+   "fieldtype": "Data",
+   "label": "State"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "pincode",
+   "fieldtype": "Data",
+   "label": "Postal Code",
+   "options": "Country"
+  },
+  {
    "fieldname": "column_break2",
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.organization_lead",
    "fieldname": "contact_html",
    "fieldtype": "HTML",
    "label": "Contact HTML",
    "read_only": 1
   },
   {
-   "depends_on": "eval:!doc.organization_lead",
+   "depends_on": "eval: doc.__islocal",
    "fieldname": "phone",
    "fieldtype": "Data",
    "label": "Phone",
@@ -257,14 +307,7 @@
    "oldfieldtype": "Data"
   },
   {
-   "depends_on": "eval:!doc.organization_lead",
-   "fieldname": "salutation",
-   "fieldtype": "Link",
-   "label": "Salutation",
-   "options": "Salutation"
-  },
-  {
-   "depends_on": "eval:!doc.organization_lead",
+   "depends_on": "eval: doc.__islocal",
    "fieldname": "mobile_no",
    "fieldtype": "Data",
    "label": "Mobile No.",
@@ -272,28 +315,12 @@
    "oldfieldtype": "Data"
   },
   {
-   "depends_on": "eval:!doc.organization_lead",
+   "depends_on": "eval: doc.__islocal",
    "fieldname": "fax",
    "fieldtype": "Data",
    "label": "Fax",
    "oldfieldname": "fax",
    "oldfieldtype": "Data"
-  },
-  {
-   "fieldname": "website",
-   "fieldtype": "Data",
-   "label": "Website",
-   "oldfieldname": "website",
-   "oldfieldtype": "Data"
-  },
-  {
-   "fieldname": "territory",
-   "fieldtype": "Link",
-   "label": "Territory",
-   "oldfieldname": "territory",
-   "oldfieldtype": "Link",
-   "options": "Territory",
-   "print_hide": 1
   },
   {
    "collapsible": 1,
@@ -351,6 +378,22 @@
    "remember_last_selected_value": 1
   },
   {
+   "fieldname": "website",
+   "fieldtype": "Data",
+   "label": "Website",
+   "oldfieldname": "website",
+   "oldfieldtype": "Data"
+  },
+  {
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "label": "Territory",
+   "oldfieldname": "territory",
+   "oldfieldtype": "Link",
+   "options": "Territory",
+   "print_hide": 1
+  },
+  {
    "default": "0",
    "fieldname": "unsubscribed",
    "fieldtype": "Check",
@@ -361,12 +404,42 @@
    "fieldname": "blog_subscriber",
    "fieldtype": "Check",
    "label": "Blog Subscriber"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.__islocal",
+   "fieldname": "address_info",
+   "fieldtype": "Section Break",
+   "label": "Address & Contact",
+   "oldfieldtype": "Column Break",
+   "options": "fa fa-map-marker"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.__islocal",
+   "fieldname": "contact_section",
+   "fieldtype": "Section Break",
+   "label": "Contact"
   }
  ],
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
- "modified": "2019-09-19 12:49:02.536647",
+ "links": [],
+ "modified": "2020-01-13 16:16:48.885228",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -435,8 +508,9 @@
   }
  ],
  "search_fields": "lead_name,lead_owner,status",
+ "sender_field": "email_id",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "lead_name"
+ "title_field": "title"
 }

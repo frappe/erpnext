@@ -210,10 +210,10 @@ def get_requested_amount(args, budget):
 	item_code = args.get('item_code')
 	condition = get_other_condition(args, budget, 'Material Request')
 
-	data = frappe.db.sql(""" select ifnull((sum(mri.stock_qty - mri.ordered_qty) * rate), 0) as amount
-		from `tabMaterial Request Item` mri, `tabMaterial Request` mr where mr.name = mri.parent and
-		mri.item_code = %s and mr.docstatus = 1 and mri.stock_qty > mri.ordered_qty and {0} and
-		mr.material_request_type = 'Purchase' and mr.status != 'Stopped'""".format(condition), item_code, as_list=1)
+	data = frappe.db.sql(""" select ifnull((sum(child.stock_qty - child.ordered_qty) * rate), 0) as amount
+		from `tabMaterial Request Item` child, `tabMaterial Request` parent where parent.name = child.parent and
+		child.item_code = %s and parent.docstatus = 1 and child.stock_qty > child.ordered_qty and {0} and
+		parent.material_request_type = 'Purchase' and parent.status != 'Stopped'""".format(condition), item_code, as_list=1)
 
 	return data[0][0] if data else 0
 
@@ -221,10 +221,10 @@ def get_ordered_amount(args, budget):
 	item_code = args.get('item_code')
 	condition = get_other_condition(args, budget, 'Purchase Order')
 
-	data = frappe.db.sql(""" select ifnull(sum(poi.amount - poi.billed_amt), 0) as amount
-		from `tabPurchase Order Item` poi, `tabPurchase Order` po where
-		po.name = poi.parent and poi.item_code = %s and po.docstatus = 1 and poi.amount > poi.billed_amt
-		and po.status != 'Closed' and {0}""".format(condition), item_code, as_list=1)
+	data = frappe.db.sql(""" select ifnull(sum(child.amount - child.billed_amt), 0) as amount
+		from `tabPurchase Order Item` child, `tabPurchase Order` parent where
+		parent.name = child.parent and child.item_code = %s and parent.docstatus = 1 and child.amount > child.billed_amt
+		and parent.status != 'Closed' and {0}""".format(condition), item_code, as_list=1)
 
 	return data[0][0] if data else 0
 
@@ -233,16 +233,15 @@ def get_other_condition(args, budget, for_doc):
 	budget_against_field = frappe.scrub(args.get("budget_against_field"))
 
 	if budget_against_field and args.get(budget_against_field):
-		condition += " and %s = '%s'" %(budget_against_field, args.get(budget_against_field))
+		condition += " and child.%s = '%s'" %(budget_against_field, args.get(budget_against_field))
 
 	if args.get('fiscal_year'):
 		date_field = 'schedule_date' if for_doc == 'Material Request' else 'transaction_date'
 		start_date, end_date = frappe.db.get_value('Fiscal Year', args.get('fiscal_year'),
 			['year_start_date', 'year_end_date'])
 
-		alias = 'mr' if for_doc == 'Material Request' else 'po'
-		condition += """ and %s.%s
-			between '%s' and '%s' """ %(alias, date_field, start_date, end_date)
+		condition += """ and parent.%s
+			between '%s' and '%s' """ %(date_field, start_date, end_date)
 
 	return condition
 

@@ -33,7 +33,9 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_query("party_bank_account", function() {
 			return {
 				filters: {
-					"is_company_account":0
+					"is_company_account":0,
+					party_type: frm.doc.party_type,
+					party: frm.doc.party
 				}
 			}
 		});
@@ -252,6 +254,19 @@ frappe.ui.form.on('Payment Entry', {
 			frm.set_value("party_type", "");
 			frappe.throw(__("Party can only be one of "+ party_types.join(", ")));
 		}
+
+		frm.set_query("party", function() {
+			if(frm.doc.party_type == 'Employee'){
+				return {
+					query: "erpnext.controllers.queries.employee_query"
+				}
+			}
+			else if(frm.doc.party_type == 'Customer'){
+				return {
+					query: "erpnext.controllers.queries.customer_query"
+				}
+			}
+		});
 
 		if(frm.doc.party) {
 			$.each(["party", "party_balance", "paid_from", "paid_to",
@@ -652,14 +667,16 @@ frappe.ui.form.on('Payment Entry', {
 						(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Student")
 					) {
 						if(total_positive_outstanding > total_negative_outstanding)
-							frm.set_value("paid_amount",
-								total_positive_outstanding - total_negative_outstanding);
+							if (!frm.doc.paid_amount)
+								frm.set_value("paid_amount",
+									total_positive_outstanding - total_negative_outstanding);
 					} else if (
 						total_negative_outstanding &&
 						total_positive_outstanding < total_negative_outstanding
 					) {
-						frm.set_value("received_amount",
-							total_negative_outstanding - total_positive_outstanding);
+						if (!frm.doc.received_amount)
+							frm.set_value("received_amount",
+								total_negative_outstanding - total_positive_outstanding);
 					}
 				}
 

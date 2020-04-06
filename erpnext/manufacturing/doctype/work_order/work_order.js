@@ -77,8 +77,7 @@ frappe.ui.form.on("Work Order", {
 			return {
 				query: "erpnext.controllers.queries.item_query",
 				filters:[
-					['is_stock_item', '=',1],
-					['default_bom', '!=', '']
+					['is_stock_item', '=',1]
 				]
 			};
 		});
@@ -119,6 +118,15 @@ frappe.ui.form.on("Work Order", {
 				"actual_end_date": ""
 			});
 			erpnext.work_order.set_default_warehouse(frm);
+		}
+	},
+
+	source_warehouse: function(frm) {
+		if (frm.doc.source_warehouse) {
+			frm.doc.required_items.forEach(d => {
+				frappe.model.set_value(d.doctype, d.name,
+					"source_warehouse", frm.doc.source_warehouse);
+			});
 		}
 	},
 
@@ -605,6 +613,8 @@ erpnext.work_order = {
 				description: __('Max: {0}', [max]),
 				default: max
 			}, data => {
+				max += (max * (frm.doc.__onload.overproduction_percentage || 0.0)) / 100;
+
 				if (data.qty > max) {
 					frappe.msgprint(__('Quantity must not be more than {0}', [max]));
 					reject();

@@ -21,16 +21,31 @@ frappe.query_reports["Fixed Asset Register"] = {
 			reqd: 1
 		},
 		{
+			fieldname:"purchase_date",
+			label: __("Purchase Date"),
+			fieldtype: "Date"
+		},
+		{
+			fieldname:"available_for_use_date",
+			label: __("Available For Use Date"),
+			fieldtype: "Date"
+		},
+		{
 			fieldname:"finance_book",
 			label: __("Finance Book"),
 			fieldtype: "Link",
 			options: "Finance Book"
 		},
 		{
-			fieldname:"date",
-			label: __("Date"),
-			fieldtype: "Date",
-			default: frappe.datetime.get_today()
+			fieldname:"asset_category",
+			label: __("Asset Category"),
+			fieldtype: "Link",
+			options: "Asset Category"
+		},
+		{
+			fieldname:"is_existing_asset",
+			label: __("Is Existing Asset"),
+			fieldtype: "Check"
 		},
 	]
 };

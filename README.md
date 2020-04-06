@@ -13,9 +13,26 @@
 
 </div>
 
-Includes: Accounting, Inventory, Manufacturing, CRM, Sales, Purchase, Project Management, HRMS. Requires MariaDB.
+ERPNext as a monolith includes the following areas for managing businesses:
 
-ERPNext is built on the [Frappe](https://github.com/frappe/frappe) Framework, a full-stack web app framework in Python & JavaScript.
+1. [Accounting](https://erpnext.com/open-source-accounting)
+1. [Inventory](https://erpnext.com/distribution/inventory-management-system)
+1. [CRM](https://erpnext.com/open-source-crm)
+1. [Sales](https://erpnext.com/open-source-sales-purchase)
+1. [Purchase](https://erpnext.com/open-source-sales-purchase)
+1. [HRMS](https://erpnext.com/open-source-hrms)
+1. [Project Management](https://erpnext.com/open-source-projects)
+1. [Support](https://erpnext.com/open-source-help-desk-software)
+1. [Asset Management](https://erpnext.com/open-source-asset-management-software)
+1. [Quality Management](https://erpnext.com/docs/user/manual/en/quality-management)
+1. [Manufacturing](https://erpnext.com/open-source-manufacturing-erp-software)
+1. [Website Management](https://erpnext.com/open-source-website-builder-software)
+1. [Customize ERPNext](https://erpnext.com/docs/user/manual/en/customize-erpnext)
+1. [And More](https://erpnext.com/docs/user/manual/en/)
+
+ERPNext requires MariaDB.
+
+ERPNext is built on the [Frappe Framework](https://github.com/frappe/frappe), a full-stack web app framework built with Python & JavaScript.
 
 - [User Guide](https://erpnext.com/docs/user)
 - [Discussion Forum](https://discuss.erpnext.com/)

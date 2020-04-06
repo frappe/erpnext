@@ -1,0 +1,53 @@
+{
+ "cards": [
+  {
+   "links": "[\n    {\n        \"label\": \"Asset\",\n        \"name\": \"Asset\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Location\",\n        \"name\": \"Location\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Asset Category\",\n        \"name\": \"Asset Category\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Transfer an asset from one warehouse to another\",\n        \"label\": \"Asset Movement\",\n        \"name\": \"Asset Movement\",\n        \"type\": \"doctype\"\n    }\n]",
+   "title": "Assets"
+  },
+  {
+   "links": "[\n    {\n        \"label\": \"Asset Maintenance Team\",\n        \"name\": \"Asset Maintenance Team\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Asset Maintenance Team\"\n        ],\n        \"label\": \"Asset Maintenance\",\n        \"name\": \"Asset Maintenance\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Asset Maintenance\"\n        ],\n        \"label\": \"Asset Maintenance Log\",\n        \"name\": \"Asset Maintenance Log\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Asset\"\n        ],\n        \"label\": \"Asset Value Adjustment\",\n        \"name\": \"Asset Value Adjustment\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Asset\"\n        ],\n        \"label\": \"Asset Repair\",\n        \"name\": \"Asset Repair\",\n        \"type\": \"doctype\"\n    }\n]",
+   "title": "Maintenance"
+  },
+  {
+   "icon": "fa fa-table",
+   "links": "[\n    {\n        \"dependencies\": [\n            \"Asset\"\n        ],\n        \"doctype\": \"Asset\",\n        \"is_query_report\": true,\n        \"label\": \"Asset Depreciation Ledger\",\n        \"name\": \"Asset Depreciation Ledger\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Asset\"\n        ],\n        \"doctype\": \"Asset\",\n        \"is_query_report\": true,\n        \"label\": \"Asset Depreciations and Balances\",\n        \"name\": \"Asset Depreciations and Balances\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Asset Maintenance\"\n        ],\n        \"doctype\": \"Asset Maintenance\",\n        \"label\": \"Asset Maintenance\",\n        \"name\": \"Asset Maintenance\",\n        \"type\": \"report\"\n    }\n]",
+   "title": "Reports"
+  }
+ ],
+ "category": "Modules",
+ "charts": [],
+ "creation": "2020-03-02 15:43:27.634865",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "docstatus": 0,
+ "doctype": "Desk Page",
+ "extends_another_page": 0,
+ "icon": "",
+ "idx": 0,
+ "is_standard": 1,
+ "label": "Assets",
+ "modified": "2020-03-12 16:30:38.651019",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Assets",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": [
+  {
+   "is_query_report": 0,
+   "link_to": "Asset",
+   "type": "DocType"
+  },
+  {
+   "is_query_report": 0,
+   "link_to": "Asset Movement",
+   "type": "DocType"
+  },
+  {
+   "is_query_report": 0,
+   "link_to": "Fixed Asset Register",
+   "type": "Report"
+  }
+ ]
+}

@@ -70,6 +70,16 @@ frappe.ui.form.on("Student Group", {
 	group_based_on: function(frm) {
 		if (frm.doc.group_based_on == "Batch") {
 			frm.doc.course = null;
+			frm.set_df_property('program', 'reqd', 1);
+			frm.set_df_property('course', 'reqd', 0);
+		}
+		else if (frm.doc.group_based_on == "Course") {
+			frm.set_df_property('program', 'reqd', 0);
+			frm.set_df_property('course', 'reqd', 1);
+		}
+		else if (frm.doc.group_based_on == "Activity") {
+			frm.set_df_property('program', 'reqd', 0);
+			frm.set_df_property('course', 'reqd', 0);
 		}
 	},
 
@@ -120,5 +130,17 @@ frappe.ui.form.on("Student Group", {
 		} else {
 			frappe.msgprint(__("Select students manually for the Activity based Group"));
 		}
+	}
+});
+
+frappe.ui.form.on('Student Group Instructor', {
+	instructors_add: function(frm){
+		frm.fields_dict['instructors'].grid.get_field('instructor').get_query = function(doc){
+			let instructor_list = [];
+			$.each(doc.instructors, function(idx, val){
+				instructor_list.push(val.instructor);
+			});
+			return { filters: [['Instructor', 'name', 'not in', instructor_list]] };
+		};
 	}
 });
