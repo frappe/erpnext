@@ -32,7 +32,7 @@ frappe.query_reports["Stock Ledger"] = {
 			"options": "Warehouse",
 			"get_query": function() {
 				const company = frappe.query_report.get_filter_value('company');
-				return { 
+				return {
 					filters: { 'company': company }
 				}
 			}
@@ -84,8 +84,8 @@ frappe.query_reports["Stock Ledger"] = {
 			"options": "UOM"
 		},
 		{
-			"fieldname": "dont_show_cancelled_doc_entries",
-			"label": __("Don't Show Cancelled Document Entries"),
+			"fieldname": "show_cancelled_entries",
+			"label": __("Show Cancelled Entries"),
 			"fieldtype": "Check",
 			"default": 1
 		}

@@ -170,7 +170,8 @@ class TransactionBase(StatusUpdater):
 
 		if last_transaction_time and get_datetime(cur_doc_posting_datetime) < get_datetime(last_transaction_time):
 			frappe.throw(_("""Posting timestamp of current transaction
-				must be after last Stock transaction's timestamp {0}""".format(last_transaction_time)))
+				must be after last Stock transaction's timestamp which is {0}""").format(frappe.bold(last_transaction_time)),
+				title=_("Backdated Stock Entry"))
 
 def delete_events(ref_type, ref_name):
 	events = frappe.db.sql_list(""" SELECT
