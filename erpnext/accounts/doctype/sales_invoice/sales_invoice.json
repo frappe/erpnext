@@ -117,6 +117,7 @@
   "loyalty_redemption_account",
   "loyalty_redemption_cost_center",
   "section_break_49",
+  "discount_reason",
   "apply_discount_on",
   "base_discount_amount",
   "column_break_51",
@@ -1688,13 +1689,19 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Empty"
+  },
+  {
+   "fieldname": "discount_reason",
+   "fieldtype": "Link",
+   "label": "Discount Reason",
+   "options": "Reason For Discount"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-03 11:18:11.025881",
+ "modified": "2020-04-05 20:37:12.608239",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
