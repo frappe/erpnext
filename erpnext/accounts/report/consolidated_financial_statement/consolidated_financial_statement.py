@@ -8,11 +8,11 @@ from frappe.utils import flt, cint
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
 from erpnext.accounts.report.financial_statements import get_fiscal_year_data, sort_accounts
 from erpnext.accounts.report.balance_sheet.balance_sheet import (get_provisional_profit_loss,
-	check_opening_balance, get_chart_data)
+	check_opening_balance, get_chart_data, get_report_summary as get_bs_summary)
 from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import (get_net_profit_loss,
-	get_chart_data as get_pl_chart_data)
+	get_chart_data as get_pl_chart_data, get_report_summary as get_pl_summary)
 from erpnext.accounts.report.cash_flow.cash_flow import (get_cash_flow_accounts, get_account_type_based_gl_data,
-	add_total_row_account)
+	add_total_row_account, get_report_summary as get_cash_flow_summary)
 
 def execute(filters=None):
 	columns, data, message, chart = [], [], [], []
@@ -25,17 +25,17 @@ def execute(filters=None):
 	columns = get_columns(companies_column)
 
 	if filters.get('report') == "Balance Sheet":
-		data, message, chart = get_balance_sheet_data(fiscal_year, companies, columns, filters)
+		data, message, chart, report_summary = get_balance_sheet_data(fiscal_year, companies, columns, filters)
 	elif filters.get('report') == "Profit and Loss Statement":
-		data, message, chart = get_profit_loss_data(fiscal_year, companies, columns, filters)
+		data, message, chart, report_summary = get_profit_loss_data(fiscal_year, companies, columns, filters)
 	else:
 		if cint(frappe.db.get_single_value('Accounts Settings', 'use_custom_cash_flow')):
 			from erpnext.accounts.report.cash_flow.custom_cash_flow import execute as execute_custom
 			return execute_custom(filters=filters)
 
-		data = get_cash_flow_data(fiscal_year, companies, filters)
+		data, report_summary = get_cash_flow_data(fiscal_year, companies, filters)
 
-	return columns, data, message, chart
+	return columns, data, message, chart, report_summary
 
 def get_balance_sheet_data(fiscal_year, companies, columns, filters):
 	asset = get_data(companies, "Asset", "Debit", fiscal_year, filters=filters)
@@ -75,9 +75,12 @@ def get_balance_sheet_data(fiscal_year, companies, columns, filters):
 	if total_credit:
 		data.append(total_credit)
 
+	report_summary = get_bs_summary(companies, asset, liability, equity, provisional_profit_loss, total_credit,
+		company_currency, filters, True)
+
 	chart = get_chart_data(filters, columns, asset, liability, equity)
 
-	return data, message, chart
+	return data, message, chart, report_summary
 
 def get_profit_loss_data(fiscal_year, companies, columns, filters):
 	income, expense, net_profit_loss = get_income_expense_data(companies, fiscal_year, filters)
@@ -90,7 +93,9 @@ def get_profit_loss_data(fiscal_year, companies, columns, filters):
 
 	chart = get_pl_chart_data(filters, columns, income, expense, net_profit_loss)
 
-	return data, None, chart
+	report_summary = get_pl_summary(companies, '', income, expense, net_profit_loss, True)
+
+	return data, None, chart, report_summary
 
 def get_income_expense_data(companies, fiscal_year, filters):
 	company_currency = get_company_currency(filters)
@@ -108,6 +113,7 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 	income, expense, net_profit_loss = get_income_expense_data(companies, fiscal_year, filters)
 
 	data = []
+	summary_data = {}
 	company_currency = get_company_currency(filters)
 
 	for cash_flow_account in cash_flow_accounts:
@@ -142,11 +148,13 @@ def get_cash_flow_data(fiscal_year, companies, filters):
 			section_data.append(account_data)
 
 		add_total_row_account(data, section_data, cash_flow_account['section_footer'],
-			companies, company_currency, True)
+			companies, company_currency, summary_data, True)
 
-	add_total_row_account(data, data, _("Net Change in Cash"), companies, company_currency, True)
+	add_total_row_account(data, data, _("Net Change in Cash"), companies, company_currency, summary_data, True)
 
-	return data
+	report_summary = get_cash_flow_summary(summary_data, company_currency)
+
+	return data, report_summary
 
 def get_account_type_based_data(account_type, companies, fiscal_year, filters):
 	data = {}
