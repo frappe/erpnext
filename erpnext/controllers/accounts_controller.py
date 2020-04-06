@@ -19,6 +19,7 @@ from erpnext.accounts.doctype.pricing_rule.utils import (apply_pricing_rule_on_t
 from erpnext.exceptions import InvalidCurrency
 from six import text_type
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from erpnext.stock.get_item_details import get_item_warehouse
 
 force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules")
 
@@ -1126,16 +1127,16 @@ def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname,
 	"""
 	Returns a Sales Order Item child item containing the default values
 	"""
-	p_doctype = frappe.get_doc(parent_doctype, parent_doctype_name)
-	child_item = frappe.new_doc('Sales Order Item', p_doctype, child_docname)
+	p_doc = frappe.get_doc(parent_doctype, parent_doctype_name)
+	child_item = frappe.new_doc('Sales Order Item', p_doc, child_docname)
 	item = frappe.get_doc("Item", item_code)
 	child_item.item_code = item.item_code
 	child_item.item_name = item.item_name
 	child_item.description = item.description
-	child_item.reqd_by_date = p_doctype.delivery_date
+	child_item.reqd_by_date = p_doc.delivery_date
 	child_item.uom = item.stock_uom
 	child_item.conversion_factor = get_conversion_factor(item_code, item.stock_uom).get("conversion_factor") or 1.0
-	child_item.warehouse = p_doctype.set_warehouse or p_doctype.items[0].warehouse
+	child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
 	return child_item
 
 
@@ -1143,13 +1144,13 @@ def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docna
 	"""
 	Returns a Purchase Order Item child item containing the default values
 	"""
-	p_doctype = frappe.get_doc(parent_doctype, parent_doctype_name)
-	child_item = frappe.new_doc('Purchase Order Item', p_doctype, child_docname)
+	p_doc = frappe.get_doc(parent_doctype, parent_doctype_name)
+	child_item = frappe.new_doc('Purchase Order Item', p_doc, child_docname)
 	item = frappe.get_doc("Item", item_code)
 	child_item.item_code = item.item_code
 	child_item.item_name = item.item_name
 	child_item.description = item.description
-	child_item.schedule_date = p_doctype.schedule_date
+	child_item.schedule_date = p_doc.schedule_date
 	child_item.uom = item.stock_uom
 	child_item.conversion_factor = get_conversion_factor(item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.base_rate = 1 # Initiallize value will update in parent validation

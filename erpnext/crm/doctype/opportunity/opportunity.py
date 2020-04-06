@@ -11,9 +11,6 @@ from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import get_party_account_currency
 from frappe.email.inbox import link_communication_to_document
 
-subject_field = "title"
-sender_field = "contact_email"
-
 class Opportunity(TransactionBase):
 	def after_insert(self):
 		if self.opportunity_from == "Lead":
