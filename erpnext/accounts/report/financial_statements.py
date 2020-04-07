@@ -419,7 +419,9 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
 					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
 						filters.get(dimension.fieldname))
-				additional_conditions.append("{0} in %({0})s".format(dimension.fieldname))
+					additional_conditions.append("{0} in %({0})s".format(dimension.fieldname))
+				else:
+					additional_conditions.append("{0} in (%({0})s)".format(dimension.fieldname))
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 
