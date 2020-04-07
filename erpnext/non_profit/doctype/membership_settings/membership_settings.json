@@ -8,11 +8,7 @@
   "enable_razorpay",
   "razorpay_settings_section",
   "billing_cycle",
-  "billing_frequency",
-  "column_break_2",
-  "auto_capture_payment",
-  "create_subscription",
-  "auto_create_invoice"
+  "billing_frequency"
  ],
  "fields": [
   {
@@ -22,33 +18,10 @@
    "options": "Monthly\nYearly"
   },
   {
-   "fieldname": "column_break_2",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
    "fieldname": "enable_razorpay",
    "fieldtype": "Check",
    "label": "Enable RazorPay For Memberships"
-  },
-  {
-   "default": "0",
-   "fieldname": "create_subscription",
-   "fieldtype": "Check",
-   "label": "Create Subscription"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:doc.enable_razorpay",
-   "fieldname": "auto_capture_payment",
-   "fieldtype": "Check",
-   "label": "Auto Capture Payment"
-  },
-  {
-   "default": "0",
-   "fieldname": "auto_create_invoice",
-   "fieldtype": "Check",
-   "label": "Auto Create Invoice"
   },
   {
    "depends_on": "eval:doc.enable_razorpay",
@@ -65,7 +38,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-03-30 16:02:00.060583",
+ "modified": "2020-04-07 18:42:51.496807",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership Settings",
