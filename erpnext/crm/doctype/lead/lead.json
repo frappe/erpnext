@@ -1,12 +1,10 @@
 {
- "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-04-10 11:45:37",
  "doctype": "DocType",
  "document_type": "Document",
- "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
   "organization_lead",
@@ -34,6 +32,7 @@
   "notes",
   "address_info",
   "address_html",
+  "address_type",
   "address_title",
   "address_line1",
   "address_line2",
@@ -433,13 +432,20 @@
    "fieldname": "contact_section",
    "fieldtype": "Section Break",
    "label": "Contact"
+  },
+  {
+   "default": "Billing",
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "address_type",
+   "fieldtype": "Select",
+   "label": "Address Type",
+   "options": "Billing\nShipping\nOffice\nPersonal\nPlant\nPostal\nShop\nSubsidiary\nWarehouse\nCurrent\nPermanent\nOther"
   }
  ],
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
- "links": [],
- "modified": "2020-01-13 16:16:48.885228",
+ "modified": "2020-04-06 20:26:11.687110",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -508,7 +514,6 @@
   }
  ],
  "search_fields": "lead_name,lead_owner,status",
- "sender_field": "email_id",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

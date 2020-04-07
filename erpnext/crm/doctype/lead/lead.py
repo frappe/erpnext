@@ -126,7 +126,7 @@ class Lead(SellingController):
 			self.title = self.lead_name
 
 	def create_address(self):
-		address_fields = ["address_title", "address_line1", "address_line2",
+		address_fields = ["address_type", "address_title", "address_line1", "address_line2",
 			"city", "county", "state", "country", "pincode"]
 		info_fields = ["email_id", "phone", "fax"]
 
@@ -209,7 +209,7 @@ class Lead(SellingController):
 			self.contact_doc.save()
 
 	def flush_address_and_contact_fields(self):
-		fields = ['address_line1', 'address_line2', 'address_title',
+		fields = ['address_type', 'address_line1', 'address_line2', 'address_title',
 			'city', 'county', 'country', 'fax', 'pincode', 'state']
 
 		for field in fields:
