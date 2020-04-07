@@ -86,8 +86,7 @@ frappe.query_reports["Stock Ledger"] = {
 		{
 			"fieldname": "show_cancelled_entries",
 			"label": __("Show Cancelled Entries"),
-			"fieldtype": "Check",
-			"default": 1
+			"fieldtype": "Check"
 		}
 	],
 	"formatter": function (value, row, column, data, default_formatter) {

@@ -159,8 +159,7 @@ frappe.query_reports["General Ledger"] = {
 		{
 			"fieldname": "show_cancelled_entries",
 			"label": __("Show Cancelled Entries"),
-			"fieldtype": "Check",
-			"default": 1
+			"fieldtype": "Check"
 		}
 	]
 }

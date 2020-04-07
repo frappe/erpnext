@@ -142,7 +142,7 @@ class SerialNo(StockController):
 			FROM
 				`tabStock Ledger Entry`
 			WHERE
-				item_code=%s AND company = %s AND ifnull(is_cancelled, 'No')='No'
+				item_code=%s AND company = %s AND is_cancelled=0
 				AND (serial_no = %s
 					OR serial_no like %s
 					OR serial_no like %s
