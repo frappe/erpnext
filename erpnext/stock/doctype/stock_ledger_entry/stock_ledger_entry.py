@@ -43,12 +43,11 @@ class StockLedgerEntry(Document):
 			from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
 			process_serial_no(self)
 
-	def on_cancel(self):
-		self.calculate_batch_qty()
-
 	def calculate_batch_qty(self):
 		if self.batch_no:
-			batch_qty = frappe.db.get_value("Stock Ledger Entry", {"docstatus": 1, "batch_no": self.batch_no}, "sum(actual_qty)")
+			batch_qty = frappe.db.get_value("Stock Ledger Entry", 
+				{"docstatus": 1, "batch_no": self.batch_no, "is_cancelled": "No"},
+				"sum(actual_qty)") or 0
 			frappe.db.set_value("Batch", self.batch_no, "batch_qty", batch_qty)
 
 	#check for item quantity available in stock
