@@ -348,14 +348,6 @@ class StockReconciliation(StockController):
 			allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
 
-		# repost future entries for selected item_code, warehouse
-		for entries in existing_entries:
-			update_entries_after({
-				"item_code": entries.item_code,
-				"warehouse": entries.warehouse,
-				"posting_date": self.posting_date,
-				"posting_time": self.posting_time
-			})
 
 	def merge_similar_item_serial_nos(self, sl_entries):
 		# If user has put the same item in multiple row with different serial no

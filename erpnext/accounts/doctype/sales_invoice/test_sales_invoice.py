@@ -893,9 +893,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertTrue(gle)
 
-
 		frappe.db.sql("delete from `tabPOS Profile`")
-		si.delete()
 
 	def test_pos_si_without_payment(self):
 		set_perpetual_inventory()

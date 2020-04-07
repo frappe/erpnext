@@ -310,7 +310,7 @@ def make_reverse_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 
 		for entry in gl_entries:
-
+			entry['name'] = None
 			debit = entry.get('debit', 0)
 			credit = entry.get('credit', 0)
 

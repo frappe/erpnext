@@ -51,7 +51,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEqual(current_bin_stock_value, existing_bin_stock_value + 250)
 
 		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
-	
+
 	def test_batched_serial_no_purchase(self):
 		item = frappe.db.exists("Item", {'item_name': 'Batched Serialized Item'})
 		if not item:
@@ -68,7 +68,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr = make_purchase_receipt(item_code=item.name, qty=5, rate=500)
 
 		self.assertTrue(frappe.db.get_value('Batch', {'item': item.name, 'reference_name': pr.name}))
-		
+
 		pr.load_from_db()
 		batch_no = pr.items[0].batch_no
 		pr.cancel()
@@ -375,15 +375,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		location = frappe.db.get_value('Asset', assets[0].name, 'location')
 		self.assertEquals(location, "Test Location")
-
-		frappe.db.set_value("Asset", asset, "purchase_receipt", "")
-		frappe.db.set_value("Purchase Receipt Item", pr.items[0].name, "asset", "")
-
-		pr.load_from_db()
-		pr.cancel()
-		serial_nos = frappe.get_all('Serial No', {'asset': asset}, 'name') or []
-		self.assertEquals(len(serial_nos), 0)
-		frappe.db.sql("delete from `tabAsset`")
 
 	def test_purchase_receipt_for_enable_allow_cost_center_in_entry_of_bs_account(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
