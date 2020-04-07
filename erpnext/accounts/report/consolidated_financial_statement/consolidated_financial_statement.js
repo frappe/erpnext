@@ -61,5 +61,17 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 			"fieldtype": "Check",
 			"default": 1
 		}
-	]
+	],
+	"formatter": function(value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+
+		if (!data.parent_account) {
+			value = $(`<span>${value}</span>`);
+
+			var $value = $(value).css("font-weight", "bold");
+
+			value = $value.wrap("<p></p>").parent().html();
+		}
+		return value;
+	}
 }
