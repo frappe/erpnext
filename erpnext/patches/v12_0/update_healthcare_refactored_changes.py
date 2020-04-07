@@ -55,77 +55,82 @@ def execute():
 					rename_field(dt, field[0], field[1])
 
 	# first name mandatory in Patient
-	patients = frappe.get_all('Patient', fields=['name', 'patient_name'])
-	frappe.reload_doctype('Patient')
-	for entry in patients:
-		name = entry.patient_name.split(' ')
-		frappe.db.set_value('Patient', entry.name, 'first_name', name[0])
+	if frappe.db.exists('DocType', 'Patient'):
+		patients = frappe.db.sql("select name, patient_name from `tabPatient`", as_dict=1)
+		frappe.reload_doc('healthcare', 'doctype', 'patient')
+		for entry in patients:
+			name = entry.patient_name.split(' ')
+			frappe.db.set_value('Patient', entry.name, 'first_name', name[0])
 
 	# mark Healthcare Practitioner status as Disabled
-	practitioners = frappe.db.sql("select name from `tabHealthcare Practitioner` where 'active'= 0", as_dict=1)
-	practitioners_lst = [p.name for p in practitioners]
-	frappe.reload_doctype('Healthcare Practitioner')
-	frappe.db.sql("update `tabHealthcare Practitioner` set status = 'Disabled' where name IN %(practitioners)s""", {"practitioners": practitioners_lst})
+	if frappe.db.exists('DocType', 'Healthcare Practitioner'):
+		practitioners = frappe.db.sql("select name from `tabHealthcare Practitioner` where 'active'= 0", as_dict=1)
+		practitioners_lst = [p.name for p in practitioners]
+		frappe.reload_doc('healthcare', 'doctype', 'healthcare_practitioner')
+		frappe.db.sql("update `tabHealthcare Practitioner` set status = 'Disabled' where name IN %(practitioners)s""", {"practitioners": practitioners_lst})
 
 	# set Clinical Procedure status
-	frappe.reload_doctype('Clinical Procedure')
-	frappe.db.sql("""
-		UPDATE
-			`tabClinical Procedure`
-		SET
-			docstatus = (CASE WHEN status = 'Cancelled' THEN 2
-							WHEN status = 'Draft' THEN 0
-							ELSE 1
-						END)
-	""")
+	if frappe.db.exists('DocType', 'Clinical Procedure'):
+		frappe.reload_doc('healthcare', 'doctype', 'clinical_procedure')
+		frappe.db.sql("""
+			UPDATE
+				`tabClinical Procedure`
+			SET
+				docstatus = (CASE WHEN status = 'Cancelled' THEN 2
+								WHEN status = 'Draft' THEN 0
+								ELSE 1
+							END)
+		""")
 
 	# set complaints and diagnosis in table multiselect in Patient Encounter
-	field_list = [
-		['visit_department', 'medical_department'],
-		['type', 'appointment_type']
-	]
-	encounter_details = frappe.db.sql("""select symptoms, diagnosis, name from `tabPatient Encounter`""", as_dict=True)
-	frappe.reload_doc('healthcare', 'doctype', 'patient_encounter')
-	frappe.reload_doc('healthcare', 'doctype', 'patient_encounter_symptom')
-	frappe.reload_doc('healthcare', 'doctype', 'patient_encounter_diagnosis')
+	if frappe.db.exists('DocType', 'Patient Encounter'):
+		field_list = [
+			['visit_department', 'medical_department'],
+			['type', 'appointment_type']
+		]
+		encounter_details = frappe.db.sql("""select symptoms, diagnosis, name from `tabPatient Encounter`""", as_dict=True)
+		frappe.reload_doc('healthcare', 'doctype', 'patient_encounter')
+		frappe.reload_doc('healthcare', 'doctype', 'patient_encounter_symptom')
+		frappe.reload_doc('healthcare', 'doctype', 'patient_encounter_diagnosis')
 
-	for field in field_list:
-		if frappe.db.has_column(dt, field[0]):
-			rename_field(dt, field[0], field[1])
+		for field in field_list:
+			if frappe.db.has_column(dt, field[0]):
+				rename_field(dt, field[0], field[1])
 
-	for entry in encounter_details:
-		doc = frappe.get_doc('Patient Encounter', entry.name)
-		symptoms = entry.symptoms.split('\n')
-		for symptom in symptoms:
-			if not frappe.db.exists('Complaint', symptom):
-				frappe.get_doc({
-					'doctype': 'Complaint',
-					'complaints': symptom
-				}).insert()
-			row = doc.append('symptoms', {
-				'complaint': symptom
-			})
-			row.db_update()
+		for entry in encounter_details:
+			doc = frappe.get_doc('Patient Encounter', entry.name)
+			symptoms = entry.symptoms.split('\n')
+			for symptom in symptoms:
+				if not frappe.db.exists('Complaint', symptom):
+					frappe.get_doc({
+						'doctype': 'Complaint',
+						'complaints': symptom
+					}).insert()
+				row = doc.append('symptoms', {
+					'complaint': symptom
+				})
+				row.db_update()
 
-		diagnosis = entry.diagnosis.split('\n')
-		for d in diagnosis:
-			if not frappe.db.exists('Diagnosis', d):
-				frappe.get_doc({
-					'doctype': 'Diagnosis',
+			diagnosis = entry.diagnosis.split('\n')
+			for d in diagnosis:
+				if not frappe.db.exists('Diagnosis', d):
+					frappe.get_doc({
+						'doctype': 'Diagnosis',
+						'diagnosis': d
+					}).insert()
+				row = doc.append('diagnosis', {
 					'diagnosis': d
-				}).insert()
-			row = doc.append('diagnosis', {
-				'diagnosis': d
-			})
-			row.db_update()
-		doc.db_update()
+				})
+				row.db_update()
+			doc.db_update()
 
-	# update fee validity status
-	frappe.db.sql("""
-		UPDATE
-			`tabFee Validity`
-		SET
-			status = (CASE WHEN visited >= max_visits THEN 'Completed'
-							ELSE 'Pending'
-						END)
-	""")
+	if frappe.db.exists('DocType', 'Fee Validity'):
+		# update fee validity status
+		frappe.db.sql("""
+			UPDATE
+				`tabFee Validity`
+			SET
+				status = (CASE WHEN visited >= max_visits THEN 'Completed'
+								ELSE 'Pending'
+							END)
+		""")
