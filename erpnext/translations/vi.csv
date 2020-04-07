@@ -168,12 +168,11 @@ DocType: Appointment Booking Slots,Appointment Booking Slots,Cuộc hẹn đặt
 DocType: Work Order Operation,Work In Progress,Đang trong tiến độ hoàn thành
 DocType: Leave Control Panel,Branch (optional),Chi nhánh (tùy chọn)
 apps/erpnext/erpnext/education/report/absent_student_report/absent_student_report.py,Please select date,Vui lòng chọn ngày
-DocType: Item Price,Minimum Qty ,Số lượng tối thiểu
+apps/erpnext/erpnext/stock/report/product_bundle_balance/product_bundle_balance.py,Minimum Qty ,Số lượng tối thiểu
 apps/erpnext/erpnext/manufacturing/doctype/bom_update_tool/bom_update_tool.py,BOM recursion: {0} cannot be child of {1},Đệ quy BOM: {0} không thể là con của {1}
 DocType: Finance Book,Finance Book,Sách Tài chính
 DocType: Patient Encounter,HLC-ENC-.YYYY.-,HLC-ENC-.YYYY.-
 DocType: Appointment Booking Settings,Holiday List,Danh sách kỳ nghỉ
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,The parent account {0} does not exists,Tài khoản mẹ {0} không tồn tại
 apps/erpnext/erpnext/config/quality_management.py,Review and Action,Đánh giá và hành động
 apps/erpnext/erpnext/hr/doctype/employee_checkin/employee_checkin.py,This employee already has a log with the same timestamp.{0},Nhân viên này đã có một nhật ký với cùng dấu thời gian. {0}
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Accountant,Kế toán viên
@@ -245,7 +244,6 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Pension Funds,Qu�
 DocType: Exchange Rate Revaluation Account,Gain/Loss,Mất lợi
 DocType: Crop,Perennial,Lâu năm
 DocType: Program,Is Published,Được công bố
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js,Show Delivery Notes,Hiển thị ghi chú giao hàng
 apps/erpnext/erpnext/controllers/status_updater.py,"To allow over billing, update ""Over Billing Allowance"" in Accounts Settings or the Item.","Để cho phép thanh toán quá mức, hãy cập nhật &quot;Trợ cấp thanh toán quá mức&quot; trong Cài đặt tài khoản hoặc Mục."
 DocType: Patient Appointment,Procedure,Thủ tục
 DocType: Accounts Settings,Use Custom Cash Flow Format,Sử dụng Định dạng Tiền mặt Tuỳ chỉnh
@@ -988,7 +986,6 @@ apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js,"Not permitted, con
 DocType: Patient,Risk Factors,Các yếu tố rủi ro
 DocType: Patient,Occupational Hazards and Environmental Factors,Các nguy cơ nghề nghiệp và các yếu tố môi trường
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Stock Entries already created for Work Order ,Mục hàng đã được tạo cho Đơn hàng công việc
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,Mã hàng&gt; Nhóm vật phẩm&gt; Thương hiệu
 apps/erpnext/erpnext/templates/pages/cart.html,See past orders,Xem đơn đặt hàng trước
 apps/erpnext/erpnext/public/js/hub/pages/Selling.vue,{0} conversations,{0} cuộc hội thoại
 DocType: Vital Signs,Respiratory rate,Tỉ lệ hô hấp
@@ -1147,7 +1144,6 @@ apps/erpnext/erpnext/utilities/activation.py,"Create Employee records to manage 
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,An error occurred during the update process,Đã xảy ra lỗi trong quá trình cập nhật
 DocType: Restaurant Reservation,Restaurant Reservation,Đặt phòng khách sạn
 apps/erpnext/erpnext/public/js/hub/Sidebar.vue,Your Items,Những hạng mục của bạn
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,Nhà cung cấp&gt; Loại nhà cung cấp
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Proposal Writing,Đề nghị Viết
 DocType: Payment Entry Deduction,Payment Entry Deduction,Bút toán thanh toán khấu trừ
 DocType: Service Level Priority,Service Level Priority,Ưu tiên cấp độ dịch vụ
@@ -1450,7 +1446,6 @@ apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,Cannot deactivate or cance
 apps/erpnext/erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js,Please select Company and Posting Date to getting entries,Vui lòng chọn Công ty và Ngày đăng để nhận các mục nhập
 DocType: Asset,Maintenance,Bảo trì
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js,Get from Patient Encounter,Nhận từ Bệnh nhân gặp
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},Không tìm thấy yếu tố chuyển đổi UOM ({0} -&gt; {1}) cho mục: {2}
 DocType: Subscriber,Subscriber,Người đăng kí
 DocType: Item Attribute Value,Item Attribute Value,GIá trị thuộc tính mẫu hàng
 apps/erpnext/erpnext/setup/doctype/currency_exchange/currency_exchange.py,Currency Exchange must be applicable for Buying or for Selling.,Trao đổi tiền tệ phải được áp dụng cho việc mua hoặc bán.
@@ -1952,7 +1947,6 @@ DocType: Sales Invoice Item,Rate With Margin,Tỷ lệ Giãn
 DocType: Purchase Invoice,Is Return (Debit Note),Trả lại (Ghi nợ)
 DocType: Workstation,Wages,Tiền lương
 DocType: Asset Maintenance,Maintenance Manager Name,Tên quản lý bảo trì
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js,Transactions against the company already exist! ,Giao dịch chống lại công ty đã tồn tại!
 apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Requesting Site,Trang web yêu cầu
 DocType: Agriculture Task,Urgent,Khẩn cấp
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Fetching records......,Lấy hồ sơ ......
@@ -2655,7 +2649,6 @@ apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Source warehouse i
 apps/erpnext/erpnext/accounts/doctype/payment_terms_template/payment_terms_template.py,The Payment Term at row {0} is possibly a duplicate.,Thời hạn thanh toán ở hàng {0} có thể trùng lặp.
 apps/erpnext/erpnext/public/js/setup_wizard.js,Agriculture (beta),Nông nghiệp (beta)
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.js,Packing Slip,Bảng đóng gói
-apps/erpnext/erpnext/setup/doctype/naming_series/naming_series.py,Please set Naming Series for {0} via Setup &gt; Settings &gt; Naming Series,Vui lòng đặt Sê-ri đặt tên cho {0} qua Cài đặt&gt; Cài đặt&gt; Sê-ri đặt tên
 apps/erpnext/erpnext/accounts/doctype/account/chart_of_accounts/verified/standard_chart_of_accounts_with_account_number.py,Office Rent,Thuê văn phòng
 apps/erpnext/erpnext/config/settings.py,Setup SMS gateway settings,Cài đặt thiết lập cổng SMS
 DocType: Disease,Common Name,Tên gọi chung
@@ -2825,7 +2818,6 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,{0} must app
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py,Leaves Allocated Successfully for {0},Các di dời  được phân bổ thành công cho {0}
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py,No Items to pack,Không có mẫu hàng để đóng gói
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Only .csv and .xlsx files are supported currently,Hiện tại chỉ có các tệp .csv và .xlsx được hỗ trợ
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,Vui lòng thiết lập Hệ thống đặt tên nhân viên trong Nhân sự&gt; Cài đặt nhân sự
 DocType: Shipping Rule Condition,From Value,Từ giá trị gia tăng
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Manufacturing Quantity is mandatory,Số lượng sản xuất là bắt buộc
 DocType: Loan,Repayment Method,Phương pháp trả nợ
@@ -4086,7 +4078,6 @@ apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py,Please set defaul
 apps/erpnext/erpnext/templates/form_grid/material_request_grid.html,Required On,Đã yêu cầu với
 DocType: HR Settings,"If checked, hides and disables Rounded Total field in Salary Slips","Nếu được chọn, ẩn và vô hiệu hóa trường Tổng số được làm tròn trong Bảng lương"
 DocType: Woocommerce Settings,This is the default offset (days) for the Delivery Date in Sales Orders. The fallback offset is 7 days from the order placement date.,Đây là phần bù mặc định (ngày) cho Ngày giao hàng trong Đơn đặt hàng. Thời gian bù dự phòng là 7 ngày kể từ ngày đặt hàng.
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,Vui lòng thiết lập chuỗi đánh số cho Tham dự thông qua Cài đặt&gt; Sê-ri đánh số
 DocType: Rename Tool,File to Rename,Đổi tên tệp tin
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,Please select BOM for Item in Row {0},Vui lòng chọn BOM cho Item trong Row {0}
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.js,Fetch Subscription Updates,Tìm nạp cập nhật đăng ký
@@ -4706,7 +4697,6 @@ DocType: Healthcare Service Unit Type,Item Details,Chi Tiết Sản Phẩm
 DocType: Cash Flow Mapping,Is Finance Cost,Chi phí Tài chính
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py,Attendance for employee {0} is already marked,Tại nhà cho nhân viên {0} đã được đánh dấu
 DocType: Packing Slip,If more than one package of the same type (for print),Nếu có nhiều hơn một gói cùng loại (đối với in)
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,Vui lòng thiết lập Hệ thống đặt tên giảng viên trong giáo dục&gt; Cài đặt giáo dục
 apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.py,Please set default customer in Restaurant Settings,Vui lòng đặt khách hàng mặc định trong Cài đặt nhà hàng
 ,Salary Register,Mức lương Đăng ký
 DocType: Company,Default warehouse for Sales Return,Kho mặc định cho doanh thu bán hàng
@@ -4979,7 +4969,6 @@ DocType: Item,Inspection Required before Purchase,Kiểm tra bắt buộc trư�
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html,Pending Activities,Các hoạt động cấp phát
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test_list.js,Create Lab Test,Tạo thử nghiệm Lab
 DocType: Patient Appointment,Reminded,Được nhắc nhở
-DocType: Homepage Section,Cards,thẻ
 apps/erpnext/erpnext/public/js/setup_wizard.js,View Chart of Accounts,Xem biểu đồ tài khoản
 DocType: Chapter Member,Chapter Member,Thành viên của Chương
 DocType: Material Request Plan Item,Minimum Order Quantity,Số lượng đặt hàng tối thiểu
@@ -4997,7 +4986,7 @@ apps/erpnext/erpnext/loan_management/doctype/loan_security_price/loan_security_p
 apps/erpnext/erpnext/hr/utils.py,Future dates not allowed,Các ngày trong tương lai không được phép
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Expected Delivery Date should be after Sales Order Date,Ngày giao hàng dự kiến sẽ là sau Ngày đặt hàng bán hàng
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py,Reorder Level,Sắp xếp lại Cấp
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Chart Of Accounts Template,Chart of Accounts Template
+DocType: Company,Chart Of Accounts Template,Chart of Accounts Template
 DocType: Attendance,Attendance Date,Ngày có mặt
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Update stock must be enable for the purchase invoice {0},Cập nhật chứng khoán phải được bật cho hóa đơn mua hàng {0}
 apps/erpnext/erpnext/stock/get_item_details.py,Item Price updated for {0} in Price List {1},Giá mẫu hàng cập nhật cho {0} trong Danh sách  {1}
@@ -5568,8 +5557,6 @@ DocType: Installation Note,Installation Date,Cài đặt ngày
 apps/erpnext/erpnext/accounts/doctype/shareholder/shareholder.js,Share Ledger,Chia sẻ sổ cái
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Sales Invoice {0} created,Hóa đơn bán hàng {0} đã được tạo
 DocType: Employee,Confirmation Date,Ngày Xác nhận
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","Vui lòng xóa Nhân viên <a href=""#Form/Employee/{0}"">{0}</a> \ để hủy tài liệu này"
 DocType: Inpatient Occupancy,Check Out,Kiểm tra
 DocType: C-Form,Total Invoiced Amount,Tổng số tiền đã lập Hoá đơn
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Min Qty can not be greater than Max Qty,Số lượng tối thiểu không thể lớn hơn Số lượng tối đa
@@ -5778,7 +5765,6 @@ DocType: Employee,Prefered Contact Email,Email Liên hệ Đề xuất
 DocType: Cheque Print Template,Cheque Width,Chiều rộng Séc
 DocType: Selling Settings,Validate Selling Price for Item against Purchase Rate or Valuation Rate,Hợp thức hóa giá bán hàng cho mẫu hàng với tỷ giá mua bán hoặc tỷ giá định giá
 DocType: Fee Schedule,Fee Schedule,Biểu phí
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Column Labels : ,Nhãn cột:
 DocType: Bank Transaction,Settled,Định cư
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Cess,Tạm dừng
 DocType: Quality Feedback,Parameters,Thông số
@@ -6462,6 +6448,7 @@ apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,G
 DocType: Salary Component,Formula,Công thức
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,Serial #,Serial #
 DocType: Material Request Plan Item,Required Quantity,Số lượng yêu cầu
+DocType: Cash Flow Mapping Template,Template Name,Tên mẫu
 DocType: Lab Test Template,Lab Test Template,Mẫu thử nghiệm Lab
 apps/erpnext/erpnext/accounts/doctype/accounting_period/accounting_period.py,Accounting Period overlaps with {0},Kỳ kế toán trùng lặp với {0}
 apps/erpnext/erpnext/setup/doctype/company/company.py,Sales Account,Tài khoản bán hàng
@@ -6522,7 +6509,7 @@ DocType: Supplier,SUP-.YYYY.-,SUP-.YYYY.-
 DocType: Bank Reconciliation Detail,Cheque Date,Séc ngày
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account {0}: Parent account {1} does not belong to company: {2},Tài khoản {0}: tài khoản mẹ {1} không thuộc về công ty: {2}
 apps/erpnext/erpnext/setup/doctype/company/company.js,Successfully deleted all transactions related to this company!,Xóa thành công tất cả các giao dịch liên quan đến công ty này!
-apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js,As on Date,vào ngày
+apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.js,As on Date,vào ngày
 DocType: Additional Salary,HR,nhân sự
 DocType: Course Enrollment,Enrollment Date,ngày đăng ký
 DocType: Healthcare Settings,Out Patient SMS Alerts,Thông báo qua SMS của bệnh nhân
@@ -6588,7 +6575,6 @@ apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Payment
 DocType: Course Content,Quiz,Đố
 DocType: Subscription,Trial Period End Date,Ngày kết thúc giai đoạn dùng thử
 apps/erpnext/erpnext/setup/doctype/authorization_control/authorization_control.py,Not authroized since {0} exceeds limits,Không được phép từ {0} vượt qua các giới hạn
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Start entering data from here : ,Bắt đầu nhập dữ liệu từ đây:
 DocType: Serial No,Asset Status,Trạng thái nội dung
 DocType: Sales Invoice,Over Dimensional Cargo (ODC),Hàng hóa theo chiều (ODC)
 DocType: Restaurant Order Entry,Restaurant Table,Bàn ăn
@@ -6816,7 +6802,6 @@ apps/erpnext/erpnext/public/js/hub/components/ReviewArea.vue,Submit Review,Gửi
 DocType: Contract,Party User,Người dùng bên
 apps/erpnext/erpnext/controllers/buying_controller.py,Assets not created for <b>{0}</b>. You will have to create asset manually.,Tài sản không được tạo cho <b>{0}</b> . Bạn sẽ phải tạo tài sản bằng tay.
 apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py,Please set Company filter blank if Group By is 'Company',Vui lòng đặt Bộ lọc của Công ty trống nếu Nhóm theo là &#39;Công ty&#39;
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,Khách hàng&gt; Nhóm khách hàng&gt; Lãnh thổ
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py,Posting Date cannot be future date,Viết bài ngày không thể ngày trong tương lai
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py,Row # {0}: Serial No {1} does not match with {2} {3},Hàng # {0}: Số sê ri{1} không phù hợp với {2} {3}
 DocType: Loan Repayment,Interest Payable,Phải trả lãi
@@ -7053,7 +7038,6 @@ apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py,Both Trial Pe
 apps/erpnext/erpnext/accounts/report/share_balance/share_balance.py,Average Rate,Tỷ lệ trung bình
 DocType: Appointment,Appointment With,Bổ nhiệm với
 apps/erpnext/erpnext/controllers/accounts_controller.py,Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total,Tổng số tiền thanh toán trong lịch thanh toán phải bằng tổng số tiền lớn / tròn
-apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,Đánh dấu tham dự như <b></b>
 apps/erpnext/erpnext/stock/doctype/item/item.py,"""Customer Provided Item"" cannot have Valuation Rate",&quot;Mục khách hàng cung cấp&quot; không thể có Tỷ lệ định giá
 DocType: Subscription Plan Detail,Plan,Kế hoạch
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,Báo cáo số dư ngân hàng theo Sổ cái tổng
@@ -7750,7 +7734,6 @@ DocType: Item Customer Detail,Item Customer Detail,Mục chi tiết khách hàng
 apps/erpnext/erpnext/hr/doctype/employee_benefit_claim/employee_benefit_claim.py,Maximum benefit amount of employee {0} exceeds {1},Số tiền lợi ích tối đa của nhân viên {0} vượt quá {1}
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py,Total allocated leaves are more than days in the period,Tổng số di dời được giao rất nhiều so với những ngày trong kỳ
 DocType: Linked Soil Analysis,Linked Soil Analysis,Phân tích đất kết hợp
-DocType: Pricing Rule,Percentage,Tỷ lệ phần trăm
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Item {0} must be a stock Item,Mục {0} phải là một hàng tồn kho
 DocType: Manufacturing Settings,Default Work In Progress Warehouse,Kho SP dở dang mặc định
 apps/erpnext/erpnext/healthcare/doctype/practitioner_schedule/practitioner_schedule.js,"Schedules for {0} overlaps, do you want to proceed after skiping overlaped slots ?","Lịch biểu cho {0} trùng lặp, bạn có muốn tiếp tục sau khi bỏ qua các vùng chồng chéo không?"

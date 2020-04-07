@@ -7,7 +7,20 @@ frappe.ui.form.on('Bank', {
 	},
 	refresh: function(frm) {
 		add_fields_to_mapping_table(frm);
-	}
+
+		frappe.dynamic_link = { doc: frm.doc, fieldname: 'name', doctype: 'Bank' };
+
+		frm.toggle_display(['address_html','contact_html'], !frm.doc.__islocal);
+
+		if (frm.doc.__islocal) {
+			frm.set_df_property('address_and_contact', 'hidden', 1);
+			frappe.contacts.clear_address_and_contact(frm);
+		}
+		else {
+			frm.set_df_property('address_and_contact', 'hidden', 0);
+			frappe.contacts.render_address_and_contact(frm);
+		}
+	},
 });
 
 
