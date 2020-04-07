@@ -11,7 +11,7 @@ from frappe.utils import (add_days, getdate, formatdate, date_diff,
 	add_years, get_timestamp, nowdate, flt, cstr, add_months, get_last_day)
 from frappe.contacts.doctype.address.address import (get_address_display,
 	get_default_address, get_company_address)
-from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
+from frappe.contacts.doctype.contact.contact import get_contact_details
 from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrency
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext import get_company_currency
@@ -613,3 +613,26 @@ def get_partywise_advanced_payment_amount(party_type, posting_date = None):
 
 	if data:
 		return frappe._dict(data)
+
+def get_default_contact(doctype, name):
+	"""
+		Returns default contact for the given doctype and name.
+		Can be ordered by `contact_type` to either is_primary_contact or is_billing_contact.
+	"""
+	out = frappe.db.sql("""
+			SELECT dl.parent, c.is_primary_contact, c.is_billing_contact
+			FROM `tabDynamic Link` dl
+			INNER JOIN tabContact c ON c.name = dl.parent
+			WHERE
+				dl.link_doctype=%s AND
+				dl.link_name=%s AND
+				dl.parenttype = "Contact"
+			ORDER BY is_primary_contact DESC, is_billing_contact DESC
+		""", (doctype, name))
+	if out:
+		try:
+			return out[0][0]
+		except:
+			return None
+	else:
+		return None
