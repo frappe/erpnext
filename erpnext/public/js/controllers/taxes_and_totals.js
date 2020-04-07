@@ -6,7 +6,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 	apply_pricing_rule_on_item: function(item){
 		let effective_item_rate = item.price_list_rate;
-		if (item.parenttype === "Sales Order" && item.blanket_order_rate) {
+		if (in_list(["Sales Order", "Quotation"], item.parenttype) && item.blanket_order_rate) {
 			effective_item_rate = item.blanket_order_rate;
 		}
 		if(item.margin_type == "Percentage"){
