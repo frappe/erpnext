@@ -17,7 +17,8 @@ def execute(filters=None):
 		return execute_custom(filters=filters)
 
 	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year,
-		filters.periodicity, filters.accumulated_values, filters.company)
+		filters.period_start_date, filters.period_end_date, filters.filter_based_on,
+		filters.periodicity, company=filters.company)
 
 	cash_flow_accounts = get_cash_flow_accounts()
 
