@@ -23,7 +23,14 @@
   "address_contacts",
   "address_html",
   "column_break_9",
-  "contact_html"
+  "contact_html",
+  "razorpay_details_section",
+  "subscription_id",
+  "customer_id",
+  "subscription_activated",
+  "column_break_21",
+  "subscription_start",
+  "subscription_end"
  ],
  "fields": [
   {
@@ -127,11 +134,49 @@
    "fieldname": "email_id",
    "fieldtype": "Data",
    "label": "Email Address"
+  },
+  {
+   "fieldname": "subscription_id",
+   "fieldtype": "Data",
+   "label": "Subscription ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "customer_id",
+   "fieldtype": "Data",
+   "label": "Customer ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "razorpay_details_section",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Razorpay Details"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "subscription_activated",
+   "fieldtype": "Check",
+   "label": "Subscription Activated"
+  },
+  {
+   "fieldname": "subscription_start",
+   "fieldtype": "Date",
+   "label": "Subscription Start "
+  },
+  {
+   "fieldname": "subscription_end",
+   "fieldtype": "Date",
+   "label": "Subscription End"
   }
  ],
  "image_field": "image",
  "links": [],
- "modified": "2020-03-30 13:42:06.488851",
+ "modified": "2020-04-07 14:20:33.215700",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Member",
