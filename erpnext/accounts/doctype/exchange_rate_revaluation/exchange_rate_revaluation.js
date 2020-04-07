@@ -30,18 +30,10 @@ frappe.ui.form.on('Exchange Rate Revaluation', {
 				frm.doc.accounts.forEach(d=> {
 					total_amt = total_amt + d['new_balance_in_base_currency'];
 				});
-				if(total_amt === r.sum) {
-					frm.add_custom_button(__("Journal Entry"), function(){
-						frappe.route_options = {
-							'reference_type': 'Exchange Rate Revaluation',
-							'reference_name': frm.doc.name
-						};
-						frappe.set_route("List", "Journal Entry");
-					}, __("View"));
-				} else {
-					frm.add_custom_button(__('Create Journal Entry'), function() {
+				if(total_amt !== r.sum) {
+					frm.add_custom_button(__('Journal Entry'), function() {
 						return frm.events.make_jv(frm);
-					});
+					}, __('Create'));
 				}
 			}, 'Journal Entry');
 		}
