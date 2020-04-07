@@ -39,7 +39,6 @@ class GLEntry(Document):
 		if not from_repost:
 			self.validate_account_details(adv_adj)
 			self.validate_dimensions_for_pl_and_bs()
-			check_freezing_date(self.posting_date, adv_adj)
 
 		validate_frozen_account(self.account, adv_adj)
 		validate_balance_type(self.account, adv_adj)
