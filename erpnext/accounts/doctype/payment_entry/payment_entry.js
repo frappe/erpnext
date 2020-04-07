@@ -489,6 +489,7 @@ frappe.ui.form.on('Payment Entry', {
 	paid_amount: function(frm) {
 		frm.set_value("base_paid_amount", flt(frm.doc.paid_amount) * flt(frm.doc.source_exchange_rate));
 		frm.trigger("reset_received_amount");
+		frm.events.hide_unhide_fields(frm);
 	},
 
 	received_amount: function(frm) {
@@ -512,6 +513,7 @@ frappe.ui.form.on('Payment Entry', {
 			frm.events.set_unallocated_amount(frm);
 
 		frm.set_paid_amount_based_on_received_amount = false;
+		frm.events.hide_unhide_fields(frm);
 	},
 
 	reset_received_amount: function(frm) {
