@@ -525,7 +525,8 @@ class Item(WebsiteGenerator):
 
 	def validate_naming_series(self):
 		for field in ["serial_no_series", "batch_number_series"]:
-			if self.get(field) and "." not in self.get(field):
+			series = self.get(field)
+			if series and "#" in series and "." not in series:
 				frappe.throw(_("Invalid naming series (. missing) for {0}")
 					.format(frappe.bold(self.meta.get_field(field).label)))
 
