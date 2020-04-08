@@ -20,7 +20,9 @@ frappe.ui.form.on('Cost Center', {
 			return {
 				filters: {
 					company: frm.doc.company,
-					is_group: 0
+					is_group: 0,
+					enable_distributed_cost_center: 0,
+					name: ['!=', frm.doc.name]
 				}
 			};
 		});
