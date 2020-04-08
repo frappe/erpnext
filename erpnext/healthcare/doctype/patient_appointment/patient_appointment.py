@@ -134,7 +134,8 @@ def invoice_appointment(appointment_doc):
 		payment.amount = appointment_doc.paid_amount
 
 		sales_invoice.set_missing_values(for_validate=True)
-		sales_invoice.save(ignore_permissions=True, ignore_mandatory=True)
+		sales_invoice.flags.ignore_mandatory = True
+		sales_invoice.save(ignore_permissions=True)
 		sales_invoice.submit()
 		frappe.msgprint(_('Sales Invoice {0} created as paid'.format(sales_invoice.name)), alert=True)
 		frappe.db.set_value('Patient Appointment', appointment_doc.name, 'invoiced', 1)

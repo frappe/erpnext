@@ -25,7 +25,8 @@ def insert_vital_signs_to_medical_record(doc):
 	medical_record.reference_doctype = 'Vital Signs'
 	medical_record.reference_name = doc.name
 	medical_record.reference_owner = doc.owner
-	medical_record.save(ignore_permissions=True, ignore_mandatory=True)
+	medical_record.flags.ignore_mandatory = True
+	medical_record.save(ignore_permissions=True)
 
 def delete_vital_signs_from_medical_record(doc):
 	medical_record = frappe.db.get_value('Patient Medical Record', {'reference_name': doc.name})
