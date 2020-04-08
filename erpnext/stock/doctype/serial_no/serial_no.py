@@ -314,7 +314,7 @@ def validate_material_transfer_entry(sle_doc):
 		"skip_serial_no_validaiton": False
 	})
 
-	if (sle_doc.voucher_type == "Stock Entry" and sle_doc.is_cancelled == "No" and
+	if (sle_doc.voucher_type == "Stock Entry" and not sle_doc.is_cancelled and
 		frappe.get_cached_value("Stock Entry", sle_doc.voucher_no, "purpose") == "Material Transfer"):
 		if sle_doc.actual_qty < 0:
 			sle_doc.skip_update_serial_no = True

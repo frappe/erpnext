@@ -27,7 +27,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 		for sle in sl_entries:
 			sle_id = None
 			if cancel:
-				sle['actual_qty'] = -flt(sle['actual_qty'])
+				sle['actual_qty'] = -flt(sle.get('actual_qty'), 0)
 				sle['posting_date'] = now_datetime().strftime('%Y-%m-%d')
 				sle['posting_time'] = now_datetime().strftime('%H:%M:%S.%f')
 

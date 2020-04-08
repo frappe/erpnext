@@ -69,7 +69,7 @@ class TestStockReconciliation(unittest.TestCase):
 					self.assertFalse(sle)
 			else:
 				self.assertEqual(sle[0].qty_after_transaction, qty_after_transaction)
-				self.assertEqual(sle[0].stock_value, qty_after_transaction * valuation_rate)
+				self.assertEqual(sle[0].stock_value, flt(qty_after_transaction * valuation_rate,1))
 
 				# no gl entries
 				self.assertTrue(frappe.db.get_value("Stock Ledger Entry",
@@ -80,12 +80,6 @@ class TestStockReconciliation(unittest.TestCase):
 				self.assertEqual(acc_bal, stock_bal)
 
 				stock_reco.cancel()
-
-				self.assertFalse(frappe.db.get_value("Stock Ledger Entry",
-					{"voucher_type": "Stock Reconciliation", "voucher_no": stock_reco.name}))
-
-				self.assertFalse(frappe.db.get_value("GL Entry",
-					{"voucher_type": "Stock Reconciliation", "voucher_no": stock_reco.name}))
 
 	def test_get_items(self):
 		create_warehouse("_Test Warehouse Group 1", {"is_group": 1})

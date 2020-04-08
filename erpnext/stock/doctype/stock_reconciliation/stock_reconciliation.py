@@ -194,6 +194,7 @@ class StockReconciliation(StockController):
 				if row.serial_no or row.batch_no:
 					frappe.throw(_("Row #{0}: Item {1} is not a Serialized/Batched Item. It cannot have a Serial No/Batch No against it.") \
 						.format(row.idx, frappe.bold(row.item_code)))
+
 				previous_sle = get_previous_sle({
 					"item_code": row.item_code,
 					"warehouse": row.warehouse,
@@ -329,6 +330,12 @@ class StockReconciliation(StockController):
 		if not row.batch_no:
 			data.qty_after_transaction = flt(row.qty, row.precision("qty"))
 
+		if self.docstatus == 2 and not row.batch_no:
+			data.qty_after_transaction = flt(row.current_qty, row.precision("current_qty"))
+			data.valuation_rate = flt(row.current_valuation_rate, row.precision("current_valuation_rate"))
+			data.stock_value = data.qty_after_transaction * data.valuation_rate
+			data.stock_value_difference = -1 * flt(row.amount_difference, row.precision('amount_difference'))
+
 		return data
 
 	def make_sle_on_cancel(self):
@@ -339,6 +346,8 @@ class StockReconciliation(StockController):
 			if row.serial_no or row.batch_no or row.current_serial_no:
 				has_serial_no = True
 				self.get_sle_for_serialized_items(row, sl_entries)
+			else:
+				sl_entries.append(self.get_sle_for_items(row))
 
 		if sl_entries:
 			if has_serial_no:
