@@ -1,7 +1,7 @@
 frappe.provide("frappe.treeview_settings")
 
 frappe.treeview_settings["Account"] = {
-	breadcrumbs: "Accounts",
+	breadcrumb: "Accounts",
 	title: __("Chart Of Accounts"),
 	get_tree_root: false,
 	filters: [
