@@ -478,13 +478,17 @@ class SalesInvoice(SellingController):
 			["account_type", "report_type", "account_currency"], as_dict=True)
 
 		if not account:
-			frappe.throw(_("Debit To is required"))
+			frappe.throw(_("Debit To is required"), title=_("Account Missing"))
 
 		if account.report_type != "Balance Sheet":
-			frappe.throw(_("Debit To account must be a Balance Sheet account"))
+			frappe.throw(_("Please ensure {} account is a Balance Sheet account. \
+					You can change the parent account to a Balance Sheet account or select a different account.")
+				.format(frappe.bold("Debit To")), title=_("Invalid Account"))
 
 		if self.customer and account.account_type != "Receivable":
-			frappe.throw(_("Debit To account must be a Receivable account"))
+			frappe.throw(_("Please ensure {} account is a Receivable account. \
+					Change the account type to Receivable or select a different account.")
+				.format(frappe.bold("Debit To")), title=_("Invalid Account"))
 
 		self.party_account_currency = account.account_currency
 
@@ -546,12 +550,17 @@ class SalesInvoice(SellingController):
 		"""check in manage account if sales order / delivery note required or not."""
 		if self.is_return:
 			return
-		dic = {'Sales Order':['so_required', 'is_pos'],'Delivery Note':['dn_required', 'update_stock']}
-		for i in dic:
-			if frappe.db.get_single_value('Selling Settings', dic[i][0]) == 'Yes':
+
+		prev_doc_field_map = {'Sales Order': ['so_required', 'is_pos'],'Delivery Note': ['dn_required', 'update_stock']}
+		for key, value in iteritems(prev_doc_field_map):
+			if frappe.db.get_single_value('Selling Settings', value[0]) == 'Yes':
+
+				if frappe.get_value('Customer', self.customer, value[0]):
+					continue
+
 				for d in self.get('items'):
-					if (d.item_code and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1])):
-						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
+					if (d.item_code and not d.get(key.lower().replace(' ', '_')) and not self.get(value[1])):
+						msgprint(_("{0} is mandatory for Item {1}").format(key, d.item_code), raise_exception=1)
 
 
 	def validate_proj_cust(self):

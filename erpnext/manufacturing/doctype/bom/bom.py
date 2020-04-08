@@ -59,6 +59,10 @@ class BOM(WebsiteGenerator):
 
 		self.name = name
 
+	def onload(self):
+		super(BOM, self).onload()
+		if self.get("item") and cint(frappe.db.get_value("Item", self.item, "has_variants")):
+			self.set_onload("has_variants", True)
 
 	def validate(self):
 		self.route = frappe.scrub(self.name).replace('_', '-')
