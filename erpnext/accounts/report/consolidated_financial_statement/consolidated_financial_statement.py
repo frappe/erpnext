@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
-from frappe.utils import flt, cint
+from frappe.utils import flt, cint, getdate
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
 from erpnext.accounts.report.financial_statements import get_fiscal_year_data, sort_accounts
 from erpnext.accounts.report.balance_sheet.balance_sheet import (get_provisional_profit_loss,
@@ -208,17 +208,24 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 
 	company_currency = get_company_currency(filters)
 
+	if filters.filter_based_on == 'Fiscal Year':
+		start_date = fiscal_year.year_start_date
+		end_date = fiscal_year.year_end_date
+	else:
+		start_date = filters.period_start_date
+		end_date = filters.period_end_date
+
 	gl_entries_by_account = {}
 	for root in frappe.db.sql("""select lft, rgt from tabAccount
 			where root_type=%s and ifnull(parent_account, '') = ''""", root_type, as_dict=1):
 
-		set_gl_entries_by_account(fiscal_year.year_start_date,
-			fiscal_year.year_end_date, root.lft, root.rgt, filters,
+		set_gl_entries_by_account(start_date,
+			end_date, root.lft, root.rgt, filters,
 			gl_entries_by_account, accounts_by_name, ignore_closing_entries=False)
 
-	calculate_values(accounts_by_name, gl_entries_by_account, companies, fiscal_year, filters)
+	calculate_values(accounts_by_name, gl_entries_by_account, companies, start_date, filters)
 	accumulate_values_into_parents(accounts, accounts_by_name, companies)
-	out = prepare_data(accounts, fiscal_year, balance_must_be, companies, company_currency)
+	out = prepare_data(accounts, start_date, end_date, balance_must_be, companies, company_currency)
 
 	if out:
 		add_total_row(out, root_type, balance_must_be, companies, company_currency)
@@ -229,7 +236,7 @@ def get_company_currency(filters=None):
 	return (filters.get('presentation_currency')
 		or frappe.get_cached_value('Company',  filters.company,  "default_currency"))
 
-def calculate_values(accounts_by_name, gl_entries_by_account, companies, fiscal_year, filters):
+def calculate_values(accounts_by_name, gl_entries_by_account, companies, start_date, filters):
 	for entries in gl_entries_by_account.values():
 		for entry in entries:
 			key = entry.account_number or entry.account_name
@@ -241,7 +248,7 @@ def calculate_values(accounts_by_name, gl_entries_by_account, companies, fiscal_
 						and entry.company in companies.get(company)):
 						d[company] = d.get(company, 0.0) + flt(entry.debit) - flt(entry.credit)
 
-				if entry.posting_date < fiscal_year.year_start_date:
+				if entry.posting_date < getdate(start_date):
 					d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
 
 def accumulate_values_into_parents(accounts, accounts_by_name, companies):
@@ -295,10 +302,8 @@ def get_accounts(root_type, filters):
 			`tabAccount` where company = %s and root_type = %s
 		""" , (filters.get('company'), root_type), as_dict=1)
 
-def prepare_data(accounts, fiscal_year, balance_must_be, companies, company_currency):
+def prepare_data(accounts, start_date, end_date, balance_must_be, companies, company_currency):
 	data = []
-	year_start_date = fiscal_year.year_start_date
-	year_end_date = fiscal_year.year_end_date
 
 	for d in accounts:
 		# add to output
@@ -309,8 +314,8 @@ def prepare_data(accounts, fiscal_year, balance_must_be, companies, company_curr
 			"account": _(d.account_name),
 			"parent_account": _(d.parent_account),
 			"indent": flt(d.indent),
-			"year_start_date": year_start_date,
-			"year_end_date": year_end_date,
+			"year_start_date": start_date,
+			"year_end_date": end_date,
 			"currency": company_currency,
 			"opening_balance": d.get("opening_balance", 0.0) * (1 if balance_must_be == "Debit" else -1)
 		})
