@@ -613,11 +613,9 @@ def get_item_price(args, item_code, ignore_party=False):
 
 	if not ignore_party:
 		if args.get("customer"):
-			conditions += " and customer=%(customer)s"
+			conditions += " and (customer=%(customer)s or customer is null or customer = '')"
 		elif args.get("supplier"):
-			conditions += " and supplier=%(supplier)s"
-		else:
-			conditions += " and (customer is null or customer = '') and (supplier is null or supplier = '')"
+			conditions += " and (supplier=%(supplier)s or supplier is null or supplier = '')"
 
 	if args.get('transaction_date'):
 		conditions += """ and %(transaction_date)s between
@@ -625,7 +623,7 @@ def get_item_price(args, item_code, ignore_party=False):
 
 	return frappe.db.sql(""" select name, price_list_rate, uom
 		from `tabItem Price` {conditions}
-		order by valid_from desc, uom desc """.format(conditions=conditions), args)
+		order by valid_from desc, uom desc, customer desc""".format(conditions=conditions), args)
 
 def get_price_list_rate_for(args, item_code):
 	"""
