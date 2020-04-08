@@ -120,6 +120,10 @@ frappe.ui.form.on("Journal Entry", {
 				}
 			}
 		});
+	},
+	voucher_type: function(frm) {
+		frm.fields_dict.accounts.frm.clear_table('accounts');
+		frm.fields_dict.accounts.frm.refresh_fields();
 	}
 });
 
