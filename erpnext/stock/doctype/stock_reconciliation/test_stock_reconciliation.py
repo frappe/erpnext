@@ -69,7 +69,7 @@ class TestStockReconciliation(unittest.TestCase):
 					self.assertFalse(sle)
 			else:
 				self.assertEqual(sle[0].qty_after_transaction, qty_after_transaction)
-				self.assertEqual(sle[0].stock_value, flt(qty_after_transaction * valuation_rate,1))
+				self.assertEqual(sle[0].stock_value, qty_after_transaction * valuation_rate)
 
 				# no gl entries
 				self.assertTrue(frappe.db.get_value("Stock Ledger Entry",
@@ -107,7 +107,6 @@ class TestStockReconciliation(unittest.TestCase):
 		sr = create_stock_reconciliation(item_code=serial_item_code,
 			warehouse = serial_warehouse, qty=5, rate=200)
 
-		print(sr.name, sr.items[0].serial_no)
 		serial_nos = get_serial_nos(sr.items[0].serial_no)
 		self.assertEqual(len(serial_nos), 5)
 
@@ -127,7 +126,6 @@ class TestStockReconciliation(unittest.TestCase):
 		sr = create_stock_reconciliation(item_code=serial_item_code,
 			warehouse = serial_warehouse, qty=5, rate=300, serial_no = '\n'.join(serial_nos))
 
-		# print(sr.name)
 		serial_nos1 = get_serial_nos(sr.items[0].serial_no)
 		self.assertEqual(len(serial_nos1), 5)
 
