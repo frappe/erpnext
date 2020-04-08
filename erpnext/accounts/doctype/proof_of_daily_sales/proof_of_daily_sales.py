@@ -129,7 +129,6 @@ class Proofofdailysales(Document):
 				sales_invoice = frappe.get_all("Sales Invoice", ["posting_date"], filters = {"name": ref.reference_name})
 				
 				for sa_in in sales_invoice:
-					frappe.msgprint("paid amount: {}, posting date {}, billing date {}".format(pay_r.paid_amount,sa_in.posting_date,self.billing_date))
 					if str(sa_in.posting_date) < str(self.billing_date):
 						total_other_pay += pay_r.paid_amount
 		
