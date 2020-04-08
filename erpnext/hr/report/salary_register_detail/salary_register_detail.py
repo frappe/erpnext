@@ -8,7 +8,7 @@ from frappe import _
 
 def execute(filters=None):
 	if not filters: filters = {}
-	columns, salary_components = get_columns()
+	columns, salary_components_Earning, salary_components_deduction = get_columns()
 	data = []
 
 	conditions = get_conditions(filters)
@@ -22,7 +22,19 @@ def execute(filters=None):
 		
 		row = [ss.employee_name, ss.payment_days, Employee[0].base]
 
-		for coldata in salary_components:			
+		for sc in salary_components_Earning:
+			salarydetail = frappe.get_all("Salary Detail", ["name", "salary_component", "amount"], filters = {"salary_component":sc.name})
+			if len(salarydetail) > 0:
+				value_component = 0
+				for sdd in salary_detail:
+					if sc.name == sdd.salary_component:
+						value_component = sdd.amount
+				
+				row += [value_component]
+
+		row += [ss.gross_pay]
+
+		for coldata in salary_components_deduction:			
 			salarydetail = frappe.get_all("Salary Detail", ["name", "salary_component", "amount"], filters = {"salary_component":coldata.name})
 			if len(salarydetail) > 0:
 				value_component = 0
@@ -32,7 +44,7 @@ def execute(filters=None):
 				
 				row += [value_component]		
 
-		row += [ss.gross_pay, ss.total_deduction, ss.net_pay]
+		row += [ss.total_deduction, ss.net_pay]
 
 		data.append(row)
 
@@ -41,21 +53,30 @@ def execute(filters=None):
 def get_columns():
 	dat = []
 	column = [
-		_("Employee Name") + "::140", _("Payment Days") + ":Float:120", _("Salary Base") + ":Currency:120"		
+		_("Employee Name") + "::140", _("Payment Days") + ":Float:120", _("Salary Base") + ":Currency:120",		
 	]
-	salary_components =frappe.get_all("Salary Component", ["name"], filters = {"type": "Deduction"})
+	salary_components_Earning = frappe.get_all("Salary Component", ["name"], filters = {"type": "Earning"})
 
-	for sd in salary_components:
+	for sc in salary_components_Earning:
+		salarydetail = frappe.get_all("Salary Detail", ["name", "salary_component", "amount"], filters = {"salary_component":sc.name})
+		if len(salarydetail) > 0:
+			component = str(sc.name)
+			column.append(_(component) + ":Currency:120")
+	
+	column.append(_("Gross Pay") + ":Currency:120")
+
+	salary_components_deduction = frappe.get_all("Salary Component", ["name"], filters = {"type": "Deduction"})
+
+	for sd in salary_components_deduction:
 		salarydetail = frappe.get_all("Salary Detail", ["name", "salary_component", "amount"], filters = {"salary_component":sd.name})
 		if len(salarydetail) > 0:
 			component = str(sd.name)
 			column.append(_(component) + ":Currency:120")
 
-	column.append(_("Gross Pay") + ":Currency:120")
 	column.append(_("Total Deduction") + ":Currency:120")
 	column.append(_("Net Pay") + ":Currency:120")	
 
-	return column, salary_components
+	return column, salary_components_Earning, salary_components_deduction
 
 def get_conditions(filters):
 	conditions = ''

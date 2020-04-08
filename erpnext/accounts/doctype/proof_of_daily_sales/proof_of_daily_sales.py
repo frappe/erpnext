@@ -54,8 +54,11 @@ class Proofofdailysales(Document):
 				arrmode.append(reg_pay)
 
 		if len(sales_invoice) > 0 or  len(payments_entry) > 0:
-			billing_series = sales_invoice[0].numeration[0:10]
-			final_document = sales_invoice[0].numeration[11:19]
+
+			if len(sales_invoice) > 0:
+				billing_series = sales_invoice[0].numeration[0:10]
+				final_document = sales_invoice[0].numeration[11:19]
+
 			total_credit = 0
 
 			for sales in sales_invoice:
@@ -124,15 +127,16 @@ class Proofofdailysales(Document):
 			
 			for ref in references:
 				sales_invoice = frappe.get_all("Sales Invoice", ["posting_date"], filters = {"name": ref.reference_name})
-
+				
 				for sa_in in sales_invoice:
+					frappe.msgprint("paid amount: {}, posting date {}, billing date {}".format(pay_r.paid_amount,sa_in.posting_date,self.billing_date))
 					if str(sa_in.posting_date) < str(self.billing_date):
 						total_other_pay += pay_r.paid_amount
 		
 		other_register = frappe.get_all("Details totals proof of daily sales", ["name"], filters = {"mode_of_payment": "Other Payments", "parent": self.name})
 
-		if len(credit_register) > 0:
-			docother = frappe.get_doc("Details totals proof of daily sales", credit_register[0].name)
+		if len(other_register) > 0:
+			docother = frappe.get_doc("Details totals proof of daily sales", other_register[0].name)
 			docother.total = total_other_pay
 			docother.save()
 		else:
