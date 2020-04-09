@@ -245,7 +245,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		'item_group_defaults': item_group_defaults,
 		'brand_defaults': brand_defaults
 	})
-	
+
 	warehouse = get_item_warehouse(item, args, overwrite_warehouse, defaults)
 
 	if args.get('doctype') == "Material Request" and not args.get('material_request_type'):
@@ -279,7 +279,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"cost_center": get_default_cost_center(args, item_defaults, item_group_defaults, brand_defaults),
 		'has_serial_no': item.has_serial_no,
 		'has_batch_no': item.has_batch_no,
-		"batch_no": None,
+		"batch_no": args.get("batch_no"),
 		"uom": args.uom,
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
 		"qty": flt(args.qty) or 1.0,
@@ -377,7 +377,7 @@ def get_item_warehouse(item, args, overwrite_warehouse, defaults={}):
 
 	else:
 		warehouse = args.get('warehouse')
-	
+
 	return warehouse
 
 def update_barcode_value(out):
