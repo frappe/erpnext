@@ -356,13 +356,13 @@ class SalarySlip(TransactionBase):
 
 	def eval_condition_and_formula(self, d, data):
 		try:
-			condition = d.condition.strip() if d.condition else None
+			condition = d.condition.strip().replace("\n", " ") if d.condition else None
 			if condition:
 				if not frappe.safe_eval(condition, self.whitelisted_globals, data):
 					return None
 			amount = d.amount
 			if d.amount_based_on_formula:
-				formula = d.formula.strip() if d.formula else None
+				formula = d.formula.strip().replace("\n", " ") if d.formula else None
 				if formula:
 					amount = flt(frappe.safe_eval(formula, self.whitelisted_globals, data), d.precision("amount"))
 			if amount:
