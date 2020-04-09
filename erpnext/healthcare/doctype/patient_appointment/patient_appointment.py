@@ -24,8 +24,8 @@ class PatientAppointment(Document):
 
 	def after_insert(self):
 		self.update_prescription_details()
-		self.update_fee_validity()
 		invoice_appointment(self)
+		self.update_fee_validity()
 		send_confirmation_msg(self)
 
 	def set_status(self):
@@ -107,7 +107,7 @@ def invoice_appointment(appointment_doc):
 	enable_free_follow_ups = frappe.db.get_single_value('Healthcare Settings', 'enable_free_follow_ups')
 	if enable_free_follow_ups:
 		fee_validity = check_fee_validity(appointment_doc)
-		if fee_validity.status == 'Completed':
+		if fee_validity and fee_validity.status == 'Completed':
 			fee_validity = None
 		elif not fee_validity:
 			if frappe.db.exists('Fee Validity Reference', {'appointment': appointment_doc.name}):
