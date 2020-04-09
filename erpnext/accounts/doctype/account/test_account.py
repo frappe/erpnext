@@ -151,7 +151,7 @@ def _make_test_records(verbose):
 		# fixed asset depreciation
 		["_Test Fixed Asset", "Current Assets", 0, "Fixed Asset", None],
 		["_Test Accumulated Depreciations", "Current Assets", 0, "Accumulated Depreciation", None],
-		["_Test Depreciations", "Expenses", 0, "Expense", None],
+		["_Test Depreciations", "Expenses", 0, None, None],
 		["_Test Gain/Loss on Asset Disposal", "Expenses", 0, None, None],
 
 		# Receivable / Payable Account
