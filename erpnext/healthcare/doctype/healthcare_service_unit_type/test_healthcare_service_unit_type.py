@@ -6,10 +6,6 @@ import unittest
 import frappe
 
 class TestHealthcareServiceUnitType(unittest.TestCase):
-	def setUp(self):
-		frappe.db.sql("""delete from `tabHealthcare Service Unit Type`""")
-		frappe.db.sql("""delete from `tabItem`""")
-
 	def test_item_creation(self):
 		unit_type = get_unit_type()
 		self.assertTrue(frappe.db.exists('Item', unit_type.item))

@@ -58,16 +58,9 @@ class TestPatientAppointment(unittest.TestCase):
 
 
 def create_healthcare_docs():
-	patient = get_random('Patient')
+	patient = create_patient()
 	practitioner = frappe.db.exists('Healthcare Practitioner', '_Test Healthcare Practitioner')
 	medical_department = frappe.db.exists('Medical Department', '_Test Medical Department')
-
-	if not patient:
-		patient = frappe.new_doc('Patient')
-		patient.first_name = '_Test Patient'
-		patient.sex = 'Female'
-		patient.save(ignore_permissions=True)
-		patient = patient.name
 
 	if not medical_department:
 		medical_department = frappe.new_doc('Medical Department')
@@ -86,6 +79,16 @@ def create_healthcare_docs():
 		practitioner = practitioner.name
 
 	return patient, medical_department, practitioner
+
+def create_patient():
+	patient = frappe.db.exists('Patient', '_Test Patient')
+	if not patient:
+		patient = frappe.new_doc('Patient')
+		patient.first_name = '_Test Patient'
+		patient.sex = 'Female'
+		patient.save(ignore_permissions=True)
+		patient = patient.name
+	return patient
 
 def create_encounter(appointment=None):
 	encounter = frappe.new_doc('Patient Encounter')
