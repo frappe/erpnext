@@ -19,6 +19,10 @@
    "icon": "icon-star",
    "links": "[\n    {\n        \"label\": \"Patient Appointment\",\n        \"name\": \"Patient Appointment\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Patient Encounter\",\n        \"name\": \"Patient Encounter\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Record Patient Vitals\",\n        \"label\": \"Vital Signs\",\n        \"name\": \"Vital Signs\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Patient History\",\n        \"name\": \"patient_history\",\n        \"type\": \"page\"\n    },\n    {\n        \"label\": \"Appointment Analytics\",\n        \"name\": \"appointment-analytic\",\n        \"type\": \"page\"\n    },\n    {\n        \"label\": \"Clinical Procedure\",\n        \"name\": \"Clinical Procedure\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Inpatient Record\",\n        \"name\": \"Inpatient Record\",\n        \"type\": \"doctype\"\n    }\n]",
    "title": "Consultation"
+  },
+  {
+   "links": "[\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Exercise Type\",\n\t\t\"label\": \"Exercise Type\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Therapy Type\",\n\t\t\"label\": \"Therapy Type\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Therapy Plan\",\n\t\t\"label\": \"Therapy Plan\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Therapy Session\",\n\t\t\"label\": \"Therapy Session\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Motor Assessment Scale\",\n\t\t\"label\": \"Motor Assessment Scale\"\n\t}\n]",
+   "title": "Rehabilitation"
   }
  ],
  "category": "Domains",
@@ -32,7 +36,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Healthcare",
- "modified": "2020-03-12 16:30:36.952979",
+ "modified": "2020-04-09 12:23:37.661427",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
