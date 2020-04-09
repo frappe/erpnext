@@ -5,13 +5,13 @@ from __future__ import unicode_literals
 
 import unittest
 import frappe
-from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import get_patient
+from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_patient
 
 class TestPatient(unittest.TestCase):
 	def test_customer_created(self):
 		frappe.db.sql("""delete from `tabPatient`""")
 		frappe.db.set_value('Healthcare Settings', None, 'link_customer_to_patient', 1)
-		patient = get_patient()
+		patient = create_patient()
 		self.assertTrue(frappe.db.get_value('Patient', patient, 'customer'))
 
 	def test_patient_registration(self):
@@ -21,7 +21,7 @@ class TestPatient(unittest.TestCase):
 		settings.registration_fee = 500
 		settings.save()
 
-		patient = get_patient()
+		patient = create_patient()
 		patient = frappe.get_doc('Patient', patient)
 		self.assertEqual(patient.status, 'Disabled')
 
