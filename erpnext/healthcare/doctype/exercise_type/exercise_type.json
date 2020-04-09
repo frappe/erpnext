@@ -14,7 +14,11 @@
   "section_break_7",
   "exercise_steps",
   "column_break_9",
-  "exercise_video"
+  "exercise_video",
+  "section_break_11",
+  "steps_html",
+  "section_break_13",
+  "steps_table"
  ],
  "fields": [
   {
@@ -27,6 +31,7 @@
   {
    "fieldname": "difficulty_level",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Difficulty Level",
    "options": "Exercise Difficulty Level"
   },
@@ -67,10 +72,31 @@
   {
    "fieldname": "column_break_9",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "steps_html",
+   "fieldtype": "HTML",
+   "label": "Steps"
+  },
+  {
+   "fieldname": "steps_table",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Steps Table",
+   "options": "Exercise Type Step"
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break",
+   "label": "Exercise Steps"
+  },
+  {
+   "fieldname": "section_break_13",
+   "fieldtype": "Section Break"
   }
  ],
  "links": [],
- "modified": "2020-03-30 14:17:37.459059",
+ "modified": "2020-04-09 11:49:29.289451",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Exercise Type",
