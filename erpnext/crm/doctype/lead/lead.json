@@ -284,8 +284,7 @@
    "depends_on": "eval: doc.__islocal",
    "fieldname": "pincode",
    "fieldtype": "Data",
-   "label": "Postal Code",
-   "options": "Country"
+   "label": "Postal Code"
   },
   {
    "fieldname": "column_break2",
@@ -303,7 +302,8 @@
    "fieldtype": "Data",
    "label": "Phone",
    "oldfieldname": "contact_no",
-   "oldfieldtype": "Data"
+   "oldfieldtype": "Data",
+   "options": "Phone"
   },
   {
    "depends_on": "eval: doc.__islocal",
@@ -311,7 +311,8 @@
    "fieldtype": "Data",
    "label": "Mobile No.",
    "oldfieldname": "mobile_no",
-   "oldfieldtype": "Data"
+   "oldfieldtype": "Data",
+   "options": "Phone"
   },
   {
    "depends_on": "eval: doc.__islocal",
@@ -445,7 +446,8 @@
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
- "modified": "2020-04-06 20:26:11.687110",
+ "links": [],
+ "modified": "2020-04-08 22:26:11.687110",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
