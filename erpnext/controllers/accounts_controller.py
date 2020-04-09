@@ -682,9 +682,6 @@ class AccountsController(TransactionBase):
 		if advance:
 			advance = advance[0]
 
-			if self.doctype == "Sales Order":
-				advance['amount'] = - advance['amount']
-
 			advance_paid = flt(advance.amount, self.precision("advance_paid"))
 			formatted_advance_paid = fmt_money(advance_paid, precision=self.precision("advance_paid"),
 											   currency=advance.account_currency)

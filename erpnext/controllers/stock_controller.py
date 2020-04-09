@@ -373,12 +373,6 @@ class StockController(AccountsController):
 		for blanket_order in blanket_orders:
 			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
 
-def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
-		warehouse_account=None, company=None):
-	def _delete_gl_entries(voucher_type, voucher_no):
-		frappe.db.sql("""delete from `tabGL Entry`
-			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
-
 	if not warehouse_account:
 		warehouse_account = get_warehouse_account_map(company)
 

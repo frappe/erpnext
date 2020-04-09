@@ -6,7 +6,6 @@ import frappe
 from frappe.utils import flt, cstr, nowdate, nowtime
 from erpnext.stock.utils import update_bin
 from erpnext.stock.stock_ledger import update_entries_after
-from erpnext.controllers.stock_controller import update_gl_entries_after
 
 def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False, only_bin=False):
 	"""
@@ -238,50 +237,3 @@ def reset_serial_no_status_and_warehouse(serial_nos=None):
 				sr.save()
 			except:
 				pass
-
-def repost_all_stock_vouchers():
-	warehouses_with_account = frappe.db.sql_list("""select warehouse from tabAccount
-		where ifnull(account_type, '') = 'Stock' and (warehouse is not null and warehouse != '')
-		and is_group=0""")
-
-	vouchers = frappe.db.sql("""select distinct voucher_type, voucher_no
-		from `tabStock Ledger Entry` sle
-		where voucher_type != "Serial No" and sle.warehouse in (%s)
-		order by posting_date, posting_time, creation""" %
-		', '.join(['%s']*len(warehouses_with_account)), tuple(warehouses_with_account))
-
-	rejected = []
-	i = 0
-	for voucher_type, voucher_no in vouchers:
-		i+=1
-		print(i, "/", len(vouchers), voucher_type, voucher_no)
-		try:
-			for dt in ["Stock Ledger Entry", "GL Entry"]:
-				frappe.db.sql("""delete from `tab%s` where voucher_type=%s and voucher_no=%s"""%
-					(dt, '%s', '%s'), (voucher_type, voucher_no))
-
-			doc = frappe.get_doc(voucher_type, voucher_no)
-			if voucher_type=="Stock Entry" and doc.purpose in ["Manufacture", "Repack"]:
-				doc.calculate_rate_and_amount(force=1)
-			elif voucher_type=="Purchase Receipt" and doc.is_subcontracted == "Yes":
-				doc.validate()
-
-			doc.update_stock_ledger()
-			doc.make_gl_entries()
-			frappe.db.commit()
-		except Exception:
-			print(frappe.get_traceback())
-			rejected.append([voucher_type, voucher_no])
-			frappe.db.rollback()
-			
-def repost_gle_for_stock_transactions(posting_date=None, posting_time=None, for_warehouses=None):
-	frappe.db.auto_commit_on_many_writes = 1
-
-	if not posting_date:
-		posting_date = "1900-01-01"
-	if not posting_time:
-		posting_time = "00:00"
-
-	update_gl_entries_after(posting_date, posting_time, for_warehouses=for_warehouses)
-
-	frappe.db.auto_commit_on_many_writes = 0

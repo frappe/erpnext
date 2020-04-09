@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils import nowdate, nowtime, now_datetime
+from frappe.utils import nowdate, now_datetime
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 from erpnext.accounts.doctype.budget.budget import get_actual_expense, BudgetError

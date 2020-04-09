@@ -316,7 +316,6 @@ erpnext.patches.v7_0.set_material_request_type_in_item
 erpnext.patches.v7_0.rename_examination_to_assessment
 erpnext.patches.v7_0.set_portal_settings
 erpnext.patches.v7_0.update_change_amount_account
-erpnext.patches.v7_0.repost_future_gle_for_purchase_invoice
 erpnext.patches.v7_0.fix_duplicate_icons
 erpnext.patches.v7_0.repost_gle_for_pos_sales_return
 erpnext.patches.v7_1.update_total_billing_hours
