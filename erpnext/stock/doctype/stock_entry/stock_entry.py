@@ -213,7 +213,6 @@ class StockEntry(StockController):
 	def validate_item(self):
 		stock_items = self.get_stock_items()
 		serialized_items = self.get_serialized_items()
-		batch_items = self.get_batch_items()
 		for item in self.get("items"):
 			if item.item_code not in stock_items:
 				frappe.throw(_("{0} is not a stock Item").format(item.item_code))
@@ -231,14 +230,10 @@ class StockEntry(StockController):
 			if not item.transfer_qty and item.qty:
 				item.transfer_qty = item.qty * item.conversion_factor
 
-
-			if self.purpose in ("Material Transfer", "Material Transfer for Manufacture"):
-				if not item.serial_no and item.item_code in serialized_items:
-					frappe.throw(_("Row #{0}: Please specify Serial No for Item {1}:{2}").format(item.idx, item.item_code, item.item_name),
-						frappe.MandatoryError)
-
-				if not item.batch_no and item.item_code in batch_items:
-					frappe.throw(_("Row #{0}: Please specify Batch No for Item {1}:{2}").format(item.idx, item.item_code, item.item_name),
+			if (self.purpose in ("Material Transfer", "Material Transfer for Manufacture")
+				and not item.serial_no
+				and item.item_code in serialized_items):
+				frappe.throw(_("Row #{0}: Please specify Serial No for Item {1}").format(item.idx, item.item_code),
 					frappe.MandatoryError)
 
 			#Customer Provided parts will have zero valuation rate

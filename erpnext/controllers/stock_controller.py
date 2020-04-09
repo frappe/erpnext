@@ -288,16 +288,6 @@ class StockController(AccountsController):
 				tuple(item_codes))
 
 		return serialized_items
-	
-	def get_batch_items(self):
-		batch_items = []
-		item_codes = list(set([d.item_code for d in self.get("items")]))
-		if item_codes:
-			batch_items = frappe.db.sql_list("""select name from `tabItem`
-				where has_batch_no=1 and name in ({})""".format(", ".join(["%s"]*len(item_codes))),
-				tuple(item_codes))
-
-		return batch_items
 
 	def get_incoming_rate_for_sales_return(self, item_code, against_document):
 		incoming_rate = 0.0
