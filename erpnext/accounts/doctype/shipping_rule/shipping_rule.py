@@ -82,7 +82,7 @@ class ShippingRule(Document):
 			if not shipping_country:
 				frappe.throw(_('Shipping Address does not have country, which is required for this Shipping Rule'))
 			if shipping_country not in [d.country for d in self.countries]:
-				frappe.throw(_('Shipping rule not applicable for country {0}'.format(shipping_country)))
+				frappe.throw(_('Shipping rule not applicable for country {0} in Shipping Address').format(shipping_country))
 
 	def add_shipping_rule_to_tax_table(self, doc, shipping_amount):
 		shipping_charge = {
