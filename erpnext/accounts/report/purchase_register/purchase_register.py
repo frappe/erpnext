@@ -67,7 +67,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 				total_tax += tax_amount
 				row.append(tax_amount)
 
-		# total tax, grand total, rounded total & outstanding amount 
+		# total tax, grand total, rounded total & outstanding amount
 		row += [total_tax, inv.base_grand_total, flt(inv.base_grand_total, 0), inv.outstanding_amount]
 		data.append(row)
 
@@ -153,15 +153,19 @@ def get_conditions(filters):
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
 	if accounting_dimensions:
+		common_condition = """
+			and exists(select name from `tabPurchase Invoice Item`
+				where parent=`tabPurchase Invoice`.name
+			"""
 		for dimension in accounting_dimensions:
 			if filters.get(dimension.fieldname):
 				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
 					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
 						filters.get(dimension.fieldname))
 
-				conditions += """ and exists(select name from `tabPurchase Invoice Item`
-					where parent=`tabPurchase Invoice`.name
-						and ifnull(`tabPurchase Invoice Item`.{0}, '') in %({0})s)""".format(dimension.fieldname)
+					conditions += common_condition + "and ifnull(`tabPurchase Invoice Item`.{0}, '') in %({0})s)".format(dimension.fieldname)
+				else:
+					conditions += common_condition + "and ifnull(`tabPurchase Invoice Item`.{0}, '') in (%({0})s))".format(dimension.fieldname)
 
 	return conditions
 
