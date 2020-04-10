@@ -167,11 +167,10 @@ DocType: Appointment Booking Slots,Appointment Booking Slots,नियुक्�
 DocType: Work Order Operation,Work In Progress,कार्य प्रगती मध्ये आहे
 DocType: Leave Control Panel,Branch (optional),शाखा (पर्यायी)
 apps/erpnext/erpnext/education/report/absent_student_report/absent_student_report.py,Please select date,कृपया तारीख निवडा
-DocType: Item Price,Minimum Qty ,किमान प्रमाण
+apps/erpnext/erpnext/stock/report/product_bundle_balance/product_bundle_balance.py,Minimum Qty ,किमान प्रमाण
 DocType: Finance Book,Finance Book,वित्त पुस्तक
 DocType: Patient Encounter,HLC-ENC-.YYYY.-,HLC-ENC-.YYYY.-
 DocType: Appointment Booking Settings,Holiday List,सुट्टी यादी
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,The parent account {0} does not exists,मूळ खाते {0} विद्यमान नाही
 apps/erpnext/erpnext/config/quality_management.py,Review and Action,पुनरावलोकन आणि क्रिया
 apps/erpnext/erpnext/hr/doctype/employee_checkin/employee_checkin.py,This employee already has a log with the same timestamp.{0},या कर्मचार्‍यावर आधीपासूनच समान टाइमस्टॅम्पसह लॉग आहे. {0}
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Accountant,लेखापाल
@@ -243,7 +242,6 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Pension Funds,प�
 DocType: Exchange Rate Revaluation Account,Gain/Loss,वाढणे / नुकसान
 DocType: Crop,Perennial,बारमाही
 DocType: Program,Is Published,प्रकाशित झाले आहे
-apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.js,Show Delivery Notes,वितरण नोट्स दर्शवा
 apps/erpnext/erpnext/controllers/status_updater.py,"To allow over billing, update ""Over Billing Allowance"" in Accounts Settings or the Item.",ओव्हर बिलिंगला परवानगी देण्यासाठी लेखा सेटिंग्ज किंवा आयटममध्ये &quot;ओव्हर बिलिंग अलाउन्स&quot; अद्यतनित करा.
 DocType: Patient Appointment,Procedure,कार्यपद्धती
 DocType: Accounts Settings,Use Custom Cash Flow Format,कस्टम कॅश फ्लो स्वरूप वापरा
@@ -974,7 +972,6 @@ apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js,"Not permitted, con
 DocType: Patient,Risk Factors,धोका कारक
 DocType: Patient,Occupational Hazards and Environmental Factors,व्यावसायिक धोका आणि पर्यावरणीय घटक
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Stock Entries already created for Work Order ,कार्य मागणीसाठी आधीपासून तयार केलेल्या स्टॉक प्रविष्ट्या
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Item Code &gt; Item Group &gt; Brand,आयटम कोड&gt; आयटम गट&gt; ब्रँड
 apps/erpnext/erpnext/templates/pages/cart.html,See past orders,मागील मागण्या पहा
 apps/erpnext/erpnext/public/js/hub/pages/Selling.vue,{0} conversations,{0} संभाषणे
 DocType: Vital Signs,Respiratory rate,श्वसन दर
@@ -1129,7 +1126,6 @@ apps/erpnext/erpnext/utilities/activation.py,"Create Employee records to manage 
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js,An error occurred during the update process,अद्यतन प्रक्रियेदरम्यान एक त्रुटी आली
 DocType: Restaurant Reservation,Restaurant Reservation,रेस्टॉरन्ट आरक्षण
 apps/erpnext/erpnext/public/js/hub/Sidebar.vue,Your Items,आपले आयटम
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Supplier &gt; Supplier Type,पुरवठादार&gt; पुरवठादार प्रकार
 apps/erpnext/erpnext/setup/setup_wizard/operations/install_fixtures.py,Proposal Writing,प्रस्ताव लेखन
 DocType: Payment Entry Deduction,Payment Entry Deduction,भरणा प्रवेश कापून
 DocType: Service Level Priority,Service Level Priority,सेवा स्तर प्राधान्य
@@ -1427,7 +1423,6 @@ apps/erpnext/erpnext/manufacturing/doctype/bom/bom.py,Cannot deactivate or cance
 apps/erpnext/erpnext/accounts/doctype/exchange_rate_revaluation/exchange_rate_revaluation.js,Please select Company and Posting Date to getting entries,कृपया नोंदणीसाठी कंपनी आणि पोस्टिंग तारीख निवडा
 DocType: Asset,Maintenance,देखभाल
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test.js,Get from Patient Encounter,रुग्णांच्या चकमकीतुन मिळवा
-apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,UOM Conversion factor ({0} -&gt; {1}) not found for item: {2},आयटमसाठी यूओएम रूपांतरण घटक ({0} -&gt; {1}) आढळला नाही: {2}
 DocType: Subscriber,Subscriber,सदस्य
 DocType: Item Attribute Value,Item Attribute Value,आयटम मूल्य विशेषता
 apps/erpnext/erpnext/setup/doctype/currency_exchange/currency_exchange.py,Currency Exchange must be applicable for Buying or for Selling.,चलन विनिमय खरेदी किंवा विक्रीसाठी लागू असणे आवश्यक आहे.
@@ -1926,7 +1921,6 @@ DocType: Sales Invoice Item,Rate With Margin,मार्जिन दर
 DocType: Purchase Invoice,Is Return (Debit Note),रिटर्न (डेबिट नोट) आहे
 DocType: Workstation,Wages,पगार
 DocType: Asset Maintenance,Maintenance Manager Name,देखभाल व्यवस्थापक नाव
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.js,Transactions against the company already exist! ,कंपनीविरूद्ध व्यवहार आधीपासूनच अस्तित्वात आहेत!
 apps/erpnext/erpnext/buying/report/procurement_tracker/procurement_tracker.py,Requesting Site,विनंती साइट
 DocType: Agriculture Task,Urgent,त्वरित
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.js,Fetching records......,रेकॉर्ड आणत आहे ......
@@ -2774,7 +2768,6 @@ apps/erpnext/erpnext/stock/doctype/item_attribute/item_attribute.py,{0} must app
 apps/erpnext/erpnext/hr/doctype/leave_control_panel/leave_control_panel.py,Leaves Allocated Successfully for {0},रजा यशस्वीरित्या  {0} साठी वाटप केली
 apps/erpnext/erpnext/stock/doctype/packing_slip/packing_slip.py,No Items to pack,पॅक करण्यासाठी आयटम नाहीत
 apps/erpnext/erpnext/accounts/doctype/bank_statement_transaction_entry/bank_statement_transaction_entry.py,Only .csv and .xlsx files are supported currently,सध्या केवळ .csv आणि .xlsx फायली समर्थित आहेत
-apps/erpnext/erpnext/hr/doctype/employee/employee.py,Please setup Employee Naming System in Human Resource &gt; HR Settings,मानव संसाधन&gt; एचआर सेटिंग्जमध्ये कर्मचारी नेमिंग सिस्टम सेट करा
 DocType: Shipping Rule Condition,From Value,मूल्य
 apps/erpnext/erpnext/stock/doctype/stock_entry/stock_entry.py,Manufacturing Quantity is mandatory,उत्पादन प्रमाण अनिवार्य आहे
 DocType: Loan,Repayment Method,परतफेड पद्धत
@@ -4008,7 +4001,6 @@ apps/erpnext/erpnext/hr/doctype/payroll_entry/payroll_entry.py,Please set defaul
 apps/erpnext/erpnext/templates/form_grid/material_request_grid.html,Required On,रोजी आवश्यक
 DocType: HR Settings,"If checked, hides and disables Rounded Total field in Salary Slips","तपासल्यास, पगार स्लिपमधील राउंड एकूण फील्ड लपविला आणि अक्षम करते"
 DocType: Woocommerce Settings,This is the default offset (days) for the Delivery Date in Sales Orders. The fallback offset is 7 days from the order placement date.,विक्री ऑर्डरमधील वितरण तारखेसाठी हे डीफॉल्ट ऑफसेट (दिवस) आहे. ऑर्डर प्लेसमेंट तारखेपासून फॉलबॅक ऑफसेट 7 दिवस आहे.
-apps/erpnext/erpnext/hr/doctype/upload_attendance/upload_attendance.py,Please setup numbering series for Attendance via Setup &gt; Numbering Series,कृपया सेटअप&gt; क्रमांकिंग सीरिजद्वारे उपस्थितीसाठी क्रमांकन मालिका सेट करा
 DocType: Rename Tool,File to Rename,फाइल पुनर्नामित करा
 apps/erpnext/erpnext/manufacturing/doctype/production_plan/production_plan.py,Please select BOM for Item in Row {0},कृपया सलग {0} मधे  आयटम साठी BOM निवडा
 apps/erpnext/erpnext/accounts/doctype/subscription/subscription.js,Fetch Subscription Updates,सदस्यता अद्यतने प्राप्त करा
@@ -4607,7 +4599,6 @@ DocType: Healthcare Service Unit Type,Item Details,आयटम तपशील
 DocType: Cash Flow Mapping,Is Finance Cost,वित्त खर्च आहे
 apps/erpnext/erpnext/hr/doctype/attendance/attendance.py,Attendance for employee {0} is already marked,कर्मचारी {0} हजेरी आधीच खूण आहे
 DocType: Packing Slip,If more than one package of the same type (for print),तर समान प्रकारच्या एकापेक्षा जास्त पॅकेज (मुद्रण)
-apps/erpnext/erpnext/education/doctype/instructor/instructor.py,Please setup Instructor Naming System in Education &gt; Education Settings,कृपया शिक्षण&gt; शिक्षण सेटिंग्ज मधील इन्स्ट्रक्टर नामांकन प्रणाली सेट करा
 apps/erpnext/erpnext/restaurant/doctype/restaurant_order_entry/restaurant_order_entry.py,Please set default customer in Restaurant Settings,कृपया रेस्टॉरंट सेटिंग्जमध्ये डीफॉल्ट ग्राहक सेट करा
 ,Salary Register,पगार नोंदणी
 DocType: Company,Default warehouse for Sales Return,सेल्स रिटर्नसाठी डीफॉल्ट वेअरहाउस
@@ -4875,7 +4866,6 @@ DocType: Item,Inspection Required before Purchase,तपासणी खरे�
 apps/erpnext/erpnext/setup/doctype/email_digest/templates/default.html,Pending Activities,प्रलंबित उपक्रम
 apps/erpnext/erpnext/healthcare/doctype/lab_test/lab_test_list.js,Create Lab Test,लॅब टेस्ट तयार करा
 DocType: Patient Appointment,Reminded,स्मरण करून दिले
-DocType: Homepage Section,Cards,कार्डे
 apps/erpnext/erpnext/public/js/setup_wizard.js,View Chart of Accounts,लेखाचे चार्ट पहा
 DocType: Chapter Member,Chapter Member,अध्याय सदस्य
 DocType: Material Request Plan Item,Minimum Order Quantity,किमान मागणी प्रमाण
@@ -4892,7 +4882,7 @@ apps/erpnext/erpnext/setup/setup_wizard/data/industry_type.py,Newspaper Publishe
 apps/erpnext/erpnext/hr/utils.py,Future dates not allowed,भविष्यातील तारखांना अनुमती नाही
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Expected Delivery Date should be after Sales Order Date,अपेक्षित वितरण तारीख ही विक्री आदेश तारीख नंतर असावी
 apps/erpnext/erpnext/stock/report/itemwise_recommended_reorder_level/itemwise_recommended_reorder_level.py,Reorder Level,स्तर पुनर्क्रमित करा
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Chart Of Accounts Template,खाती साचा चार्ट
+DocType: Company,Chart Of Accounts Template,खाती साचा चार्ट
 DocType: Attendance,Attendance Date,उपस्थिती दिनांक
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,Update stock must be enable for the purchase invoice {0},खरेदी चलन {0} साठी स्टॉक अद्यतन सक्षम करणे आवश्यक आहे
 apps/erpnext/erpnext/stock/get_item_details.py,Item Price updated for {0} in Price List {1},आयटम किंमत {0} मध्ये दर सूची अद्ययावत {1}
@@ -5455,8 +5445,6 @@ DocType: Installation Note,Installation Date,प्रतिष्ठापन �
 apps/erpnext/erpnext/accounts/doctype/shareholder/shareholder.js,Share Ledger,लेजर सामायिक करा
 apps/erpnext/erpnext/healthcare/doctype/patient/patient.js,Sales Invoice {0} created,विक्री चालान {0} तयार केले
 DocType: Employee,Confirmation Date,पुष्टीकरण तारीख
-apps/erpnext/erpnext/hr/doctype/employee_transfer/employee_transfer.py,"Please delete the Employee <a href=""#Form/Employee/{0}"">{0}</a>\
-					to cancel this document","कृपया हा कागदजत्र रद्द करण्यासाठी कर्मचारी <a href=""#Form/Employee/{0}"">{0}.</a> हटवा"
 DocType: Inpatient Occupancy,Check Out,चेक आउट
 DocType: C-Form,Total Invoiced Amount,एकूण Invoiced रक्कम
 apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.py,Min Qty can not be greater than Max Qty,किमान Qty कमाल Qty पेक्षा जास्त असू शकत नाही
@@ -5658,7 +5646,6 @@ DocType: Employee,Prefered Contact Email,Prefered संपर्क ईमे�
 DocType: Cheque Print Template,Cheque Width,धनादेश रूंदी
 DocType: Selling Settings,Validate Selling Price for Item against Purchase Rate or Valuation Rate,दर किंवा मूल्यांकन दर खरेदी विरुद्ध आयटम विक्री किंमत सत्यापित
 DocType: Fee Schedule,Fee Schedule,शुल्क वेळापत्रक
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Column Labels : ,स्तंभ लेबले:
 DocType: Bank Transaction,Settled,सेटल केले
 apps/erpnext/erpnext/regional/doctype/gstr_3b_report/gstr_3b_report.html,Cess,उपकर
 DocType: Quality Feedback,Parameters,मापदंड
@@ -6332,6 +6319,7 @@ apps/erpnext/erpnext/stock/report/stock_balance/stock_balance.py,Opening Value,�
 DocType: Salary Component,Formula,सुत्र
 apps/erpnext/erpnext/stock/report/stock_ledger/stock_ledger.py,Serial #,सिरियल #
 DocType: Material Request Plan Item,Required Quantity,आवश्यक प्रमाणात
+DocType: Cash Flow Mapping Template,Template Name,साचा नाव
 DocType: Lab Test Template,Lab Test Template,लॅब टेस्ट टेम्पलेट
 apps/erpnext/erpnext/setup/doctype/company/company.py,Sales Account,विक्री खाते
 DocType: Purchase Invoice Item,Total Weight,एकूण वजन
@@ -6391,7 +6379,7 @@ DocType: Supplier,SUP-.YYYY.-,एसयूपी- YYYY.-
 DocType: Bank Reconciliation Detail,Cheque Date,धनादेश तारीख
 apps/erpnext/erpnext/accounts/doctype/account/account.py,Account {0}: Parent account {1} does not belong to company: {2},खाते {0}: पालक खाते {1} कंपनी {2} ला संबंधित नाही:
 apps/erpnext/erpnext/setup/doctype/company/company.js,Successfully deleted all transactions related to this company!,यशस्वीरित्या या  कंपनी संबंधित सर्व व्यवहार हटवला!
-apps/erpnext/erpnext/accounts/report/accounts_payable/accounts_payable.js,As on Date,तारखेला
+apps/erpnext/erpnext/stock/report/stock_ageing/stock_ageing.js,As on Date,तारखेला
 DocType: Additional Salary,HR,एचआर
 DocType: Course Enrollment,Enrollment Date,नोंदणी दिनांक
 DocType: Healthcare Settings,Out Patient SMS Alerts,आउट रुग्ण एसएमएस अलर्ट
@@ -6456,7 +6444,6 @@ apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py,Payment
 DocType: Course Content,Quiz,प्रश्नोत्तरी
 DocType: Subscription,Trial Period End Date,चाचणी कालावधी समाप्ती तारीख
 apps/erpnext/erpnext/setup/doctype/authorization_control/authorization_control.py,Not authroized since {0} exceeds limits,{0} ने मर्यादा ओलांडल्यापासून authroized नाही
-apps/erpnext/erpnext/accounts/doctype/chart_of_accounts_importer/chart_of_accounts_importer.py,Start entering data from here : ,येथून डेटा प्रविष्ट करणे सुरू करा:
 DocType: Serial No,Asset Status,मालमत्ता स्थिती
 DocType: Sales Invoice,Over Dimensional Cargo (ODC),प्रतीकात्मक कार्गो (ओडीसी)
 DocType: Restaurant Order Entry,Restaurant Table,रेस्टॉरन्ट टेबल
@@ -6677,7 +6664,6 @@ apps/erpnext/erpnext/buying/report/purchase_analytics/purchase_analytics.js,base
 apps/erpnext/erpnext/public/js/hub/components/ReviewArea.vue,Submit Review,पुनरावलोकन सबमिट करा
 DocType: Contract,Party User,पार्टी यूजर
 apps/erpnext/erpnext/stock/report/total_stock_summary/total_stock_summary.py,Please set Company filter blank if Group By is 'Company',गट करून &#39;कंपनी&#39; आहे तर कंपनी रिक्त फिल्टर सेट करा
-apps/erpnext/erpnext/accounts/doctype/pricing_rule/pricing_rule.js,Customer &gt; Customer Group &gt; Territory,ग्राहक&gt; ग्राहक गट&gt; प्रदेश
 apps/erpnext/erpnext/stock/doctype/purchase_receipt/purchase_receipt.py,Posting Date cannot be future date,पोस्टिंग तारीख भविष्यातील तारीख असू शकत नाही
 apps/erpnext/erpnext/controllers/sales_and_purchase_return.py,Row # {0}: Serial No {1} does not match with {2} {3},रो # {0}: सिरियल क्रमांक  {1} हा {2} {3}सोबत  जुळत नाही
 DocType: Loan Repayment,Interest Payable,व्याज देय
@@ -6911,7 +6897,6 @@ apps/erpnext/erpnext/accounts/doctype/subscription/subscription.py,Both Trial Pe
 apps/erpnext/erpnext/accounts/report/share_balance/share_balance.py,Average Rate,सरासरी दर
 DocType: Appointment,Appointment With,नेमणूक
 apps/erpnext/erpnext/controllers/accounts_controller.py,Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total,पेमेंट शेड्यूल मध्ये एकूण देयक रकमेच्या रुंदीच्या एकूण / उरलेली रक्कम
-apps/erpnext/erpnext/hr/doctype/attendance/attendance_list.js,Mark attendance as <b></b>,म्हणून हजेरी लावा <b></b>
 apps/erpnext/erpnext/stock/doctype/item/item.py,"""Customer Provided Item"" cannot have Valuation Rate",&quot;ग्राहक प्रदान आयटम&quot; मध्ये मूल्य दर असू शकत नाही
 DocType: Subscription Plan Detail,Plan,योजना
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Bank Statement balance as per General Ledger,सामान्य लेजर नुसार बँक स्टेटमेंट शिल्लक
@@ -7592,7 +7577,6 @@ DocType: Item Customer Detail,Item Customer Detail,आयटम ग्राह�
 apps/erpnext/erpnext/hr/doctype/employee_benefit_claim/employee_benefit_claim.py,Maximum benefit amount of employee {0} exceeds {1},कर्मचारी {0} पेक्षा जास्तीत जास्त लाभ रक्कम {1}
 apps/erpnext/erpnext/hr/doctype/leave_allocation/leave_allocation.py,Total allocated leaves are more than days in the period,एकूण वाटप पाने कालावधीत दिवस जास्त आहे
 DocType: Linked Soil Analysis,Linked Soil Analysis,लिंक्ड मातीचे विश्लेषण
-DocType: Pricing Rule,Percentage,टक्केवारी
 apps/erpnext/erpnext/stock/doctype/stock_ledger_entry/stock_ledger_entry.py,Item {0} must be a stock Item,आयटम {0} एक स्टॉक आयटम असणे आवश्यक आहे
 DocType: Manufacturing Settings,Default Work In Progress Warehouse,प्रगती वखार मध्ये डीफॉल्ट कार्य
 apps/erpnext/erpnext/healthcare/doctype/practitioner_schedule/practitioner_schedule.js,"Schedules for {0} overlaps, do you want to proceed after skiping overlaped slots ?","{0} ओव्हरलॅप्सकरिता वेळापत्रक, आपण ओव्हरलॅप केलेले स्लॉट्स वगळल्यानंतर पुढे जायचे आहे का?"

@@ -16,19 +16,22 @@ from frappe import _
 from frappe.utils import (flt, getdate, get_first_day, add_months, add_days, formatdate, cstr)
 
 from six import itervalues
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
-def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_values=False,
+def get_period_list(from_fiscal_year, to_fiscal_year, period_start_date, period_end_date, filter_based_on, periodicity, accumulated_values=False,
 	company=None, reset_period_on_fy_change=True):
 	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
 		Periodicity can be (Yearly, Quarterly, Monthly)"""
 
-	fiscal_year = get_fiscal_year_data(from_fiscal_year, to_fiscal_year)
-	validate_fiscal_year(fiscal_year, from_fiscal_year, to_fiscal_year)
-
-	# start with first day, so as to avoid year to_dates like 2-April if ever they occur]
-	year_start_date = getdate(fiscal_year.year_start_date)
-	year_end_date = getdate(fiscal_year.year_end_date)
+	if filter_based_on == 'Fiscal Year':
+		fiscal_year = get_fiscal_year_data(from_fiscal_year, to_fiscal_year)
+		validate_fiscal_year(fiscal_year, from_fiscal_year, to_fiscal_year)
+		year_start_date = getdate(fiscal_year.year_start_date)
+		year_end_date = getdate(fiscal_year.year_end_date)
+	else:
+		validate_dates(period_start_date, period_end_date)
+		year_start_date = getdate(period_start_date)
+		year_end_date = getdate(period_end_date)
 
 	months_to_add = {
 		"Yearly": 12,
@@ -41,6 +44,9 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_v
 
 	start_date = year_start_date
 	months = get_months(year_start_date, year_end_date)
+
+	if (months // months_to_add) != (months / months_to_add):
+		months += months_to_add
 
 	for i in range(months // months_to_add):
 		period = frappe._dict({
@@ -103,9 +109,18 @@ def get_fiscal_year_data(from_fiscal_year, to_fiscal_year):
 
 
 def validate_fiscal_year(fiscal_year, from_fiscal_year, to_fiscal_year):
-	if not fiscal_year.get('year_start_date') and not fiscal_year.get('year_end_date'):
+	if not fiscal_year.get('year_start_date') or not fiscal_year.get('year_end_date'):
+		frappe.throw(_("Start Year and End Year are mandatory"))
+
+	if getdate(fiscal_year.get('year_end_date')) < getdate(fiscal_year.get('year_start_date')):
 		frappe.throw(_("End Year cannot be before Start Year"))
 
+def validate_dates(from_date, to_date):
+	if not from_date or not to_date:
+		frappe.throw("From Date and To Date are mandatory")
+
+	if to_date < from_date:
+		frappe.throw("To Date cannot be less than From Date")
 
 def get_months(start_date, end_date):
 	diff = (12 * end_date.year + end_date.month) - (12 * start_date.year + start_date.month)
@@ -151,7 +166,7 @@ def get_data(
 
 	calculate_values(
 		accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy)
-	accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values)
+	accumulate_values_into_parents(accounts, accounts_by_name, period_list)
 	out = prepare_data(accounts, balance_must_be, period_list, company_currency)
 	out = filter_out_zero_value_rows(out, parent_children_map)
 
@@ -191,7 +206,7 @@ def calculate_values(
 				d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
 
 
-def accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values):
+def accumulate_values_into_parents(accounts, accounts_by_name, period_list):
 	"""accumulate children's values in parent accounts"""
 	for d in reversed(accounts):
 		if d.parent_account:
@@ -389,7 +404,7 @@ def set_gl_entries_by_account(
 def get_additional_conditions(from_date, ignore_closing_entries, filters):
 	additional_conditions = []
 
-	accounting_dimensions = get_accounting_dimensions()
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
 	if ignore_closing_entries:
 		additional_conditions.append("ifnull(voucher_type, '')!='Period Closing Voucher'")
@@ -412,11 +427,16 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 			additional_conditions.append("(finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)")
 		else:
 			additional_conditions.append("(finance_book in (%(finance_book)s, '') OR finance_book IS NULL)")
-		
+
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
-			if filters.get(dimension):
-				additional_conditions.append("{0} in (%({0})s)".format(dimension))
+			if filters.get(dimension.fieldname):
+				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
+					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
+						filters.get(dimension.fieldname))
+					additional_conditions.append("{0} in %({0})s".format(dimension.fieldname))
+				else:
+					additional_conditions.append("{0} in (%({0})s)".format(dimension.fieldname))
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 

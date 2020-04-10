@@ -228,11 +228,13 @@
  ],
  "icon": "fa fa-building",
  "idx": 1,
+ "is_tree": 1,
  "links": [],
- "modified": "2020-01-28 13:50:59.368846",
+ "modified": "2020-03-18 18:11:53.282358",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",
+ "nsm_parent_field": "parent_warehouse",
  "owner": "Administrator",
  "permissions": [
   {

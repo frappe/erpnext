@@ -161,15 +161,15 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.insert()
 		pe.submit()
 
-		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
-		self.assertEqual(outstanding_amount, 0)
-		self.assertEqual(si.status, 'Paid')
+		outstanding_amount, status = frappe.db.get_value("Sales Invoice", si.name, ["outstanding_amount", "status"])
+		self.assertEqual(flt(outstanding_amount), 0)
+		self.assertEqual(status, 'Paid')
 
 		pe.cancel()
 
-		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
-		self.assertEqual(outstanding_amount, 100)
-		self.assertEqual(si.status, 'Unpaid')
+		outstanding_amount, status = frappe.db.get_value("Sales Invoice", si.name, ["outstanding_amount", "status"])
+		self.assertEqual(flt(outstanding_amount), 100)
+		self.assertEqual(status, 'Unpaid')
 
 	def test_payment_against_purchase_invoice_to_check_status(self):
 		pi = make_purchase_invoice(supplier="_Test Supplier USD", debit_to="_Test Payable USD - _TC",
@@ -182,15 +182,15 @@ class TestPaymentEntry(unittest.TestCase):
 		pe.insert()
 		pe.submit()
 
-		outstanding_amount = flt(frappe.db.get_value("Purchase Invoice", pi.name, "outstanding_amount"))
-		self.assertEqual(outstanding_amount, 0)
-		self.assertEqual(pi.status, 'Paid')
+		outstanding_amount, status = frappe.db.get_value("Purchase Invoice", pi.name, ["outstanding_amount", "status"])
+		self.assertEqual(flt(outstanding_amount), 0)
+		self.assertEqual(status, 'Paid')
 
 		pe.cancel()
 
-		outstanding_amount = flt(frappe.db.get_value("Purchase Invoice", pi.name, "outstanding_amount"))
-		self.assertEqual(outstanding_amount, 100)
-		self.assertEqual(pi.status, 'Unpaid')
+		outstanding_amount, status = frappe.db.get_value("Purchase Invoice", pi.name, ["outstanding_amount", "status"])
+		self.assertEqual(flt(outstanding_amount), 250)
+		self.assertEqual(status, 'Unpaid')
 
 	def test_payment_entry_against_ec(self):
 
