@@ -34,13 +34,13 @@ def execute(filters=None):
 					for rate in tax_rate:
 						result_tax = rate.tax_rate
 
-			# Calculate data
+				# Calculate data
 				rate_purchase = invoice_item.qty * invoice_item.purchase_rate
 				taxes_calculate = result_tax * invoice_item.amount / 100
 				total_sale = invoice_item.amount + taxes_calculate 
 				discount = invoice_item.discount_amount * invoice_item.qty
 				utility = invoice_item.amount - rate_purchase
-			# utility = invoice_item.amount - utility_initial
+				# utility = invoice_item.amount - utility_initial
 				percentage = utility / invoice_item.amount * 100
 				percentage_round = round(percentage)
 
@@ -56,7 +56,7 @@ def execute(filters=None):
 							select[6] += taxes_calculate
 							select[7] += rate_purchase
 							select[8] += utility
-							select[9] = percentage_round
+							select[9] += percentage_round
 							acc -= 1
 					
 						if acc == len(registers):
@@ -99,7 +99,7 @@ def return_filters(filters):
 	conditions = ''
 
 	conditions += "{"
-	if filters.get("from_date") and filters.get("to_date"):conditions += '"posting_date": [">=", "{}", "<=", "{}"]'.format(filters.get("from_date"), filters.get("to_date"))
+	if filters.get("from_date") and filters.get("to_date"):conditions += '"posting_date": [">=", "{}"], "posting_date": ["<=", "{}"]'.format(filters.get("from_date"), filters.get("to_date"))
 	if filters.get("company"): conditions += ', "company": "{}"'.format(filters.get("company"))
 	conditions += '}'
 
