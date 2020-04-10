@@ -534,7 +534,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Proof of daily sales",
+					"name": "Cash Report",
 				}
 			]
 		},

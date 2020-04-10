@@ -1,0 +1,251 @@
+{
+ "actions": [],
+ "autoname": "CAS-REP-.YYYY.-.#####",
+ "creation": "2020-04-10 01:38:57.492999",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "general_data",
+  "company",
+  "billing_date",
+  "pos",
+  "document_type",
+  "general_column",
+  "create_date",
+  "rtn",
+  "billing_series",
+  "initial_document",
+  "final_document",
+  "taxes",
+  "taxed15",
+  "taxed18",
+  "exempt",
+  "exonerated",
+  "sc1",
+  "isv_taxed15",
+  "isv_taxed18",
+  "isv_exempt",
+  "isv_exonerated",
+  "detail_totals",
+  "totals_table",
+  "total_base_isv15",
+  "total_base_isv18",
+  "total_exempt",
+  "total_isv15",
+  "total_isv18",
+  "grand_total",
+  "company_logo"
+ ],
+ "fields": [
+  {
+   "fieldname": "general_data",
+   "fieldtype": "Section Break",
+   "label": "General Data"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "billing_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Billing Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pos",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Pos",
+   "options": "GPos",
+   "reqd": 1
+  },
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Document Type",
+   "options": "GType Document",
+   "reqd": 1
+  },
+  {
+   "fieldname": "general_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "create_date",
+   "fieldtype": "Date",
+   "label": "Create Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rtn",
+   "fieldtype": "Data",
+   "label": "RTN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "billing_series",
+   "fieldtype": "Data",
+   "label": "Billing series",
+   "read_only": 1
+  },
+  {
+   "fieldname": "initial_document",
+   "fieldtype": "Data",
+   "label": "Initial Document",
+   "read_only": 1
+  },
+  {
+   "fieldname": "final_document",
+   "fieldtype": "Data",
+   "label": "Final Document",
+   "read_only": 1
+  },
+  {
+   "fieldname": "taxes",
+   "fieldtype": "Section Break",
+   "label": "Taxes"
+  },
+  {
+   "fieldname": "taxed15",
+   "fieldtype": "Currency",
+   "label": "Taxed 15%",
+   "read_only": 1
+  },
+  {
+   "fieldname": "taxed18",
+   "fieldtype": "Currency",
+   "label": "Taxed 18%",
+   "read_only": 1
+  },
+  {
+   "fieldname": "exempt",
+   "fieldtype": "Currency",
+   "label": "Exempt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "exonerated",
+   "fieldtype": "Currency",
+   "label": "Exonerated",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sc1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "isv_taxed15",
+   "fieldtype": "Currency",
+   "label": "ISV Taxed 15%",
+   "read_only": 1
+  },
+  {
+   "fieldname": "isv_taxed18",
+   "fieldtype": "Currency",
+   "label": "ISV Taxed 18%",
+   "read_only": 1
+  },
+  {
+   "fieldname": "isv_exempt",
+   "fieldtype": "Currency",
+   "label": "ISV Exempt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "isv_exonerated",
+   "fieldtype": "Currency",
+   "label": "ISV Exonerated",
+   "read_only": 1
+  },
+  {
+   "fieldname": "detail_totals",
+   "fieldtype": "Section Break",
+   "label": "Details Totals"
+  },
+  {
+   "fieldname": "totals_table",
+   "fieldtype": "Table",
+   "label": "Totals table",
+   "options": "Details totals proof of daily sales",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_base_isv15",
+   "fieldtype": "Currency",
+   "label": "Total Base ISV 15%",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_base_isv18",
+   "fieldtype": "Currency",
+   "label": "Total Base ISV 18%",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_exempt",
+   "fieldtype": "Currency",
+   "label": "Total Exempt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_isv15",
+   "fieldtype": "Currency",
+   "label": "Total ISV 15%",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_isv18",
+   "fieldtype": "Currency",
+   "label": "Total ISV 18%",
+   "read_only": 1
+  },
+  {
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.company_logo",
+   "fieldname": "company_logo",
+   "fieldtype": "Data",
+   "label": "image",
+   "read_only": 1
+  }
+ ],
+ "links": [],
+ "modified": "2020-04-10 01:38:57.492999",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Cash Report",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
