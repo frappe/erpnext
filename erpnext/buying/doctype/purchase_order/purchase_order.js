@@ -365,9 +365,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
 					source_doctype: "Material Request",
 					target: me.frm,
-					setters: {
-						company: me.frm.doc.company
-					},
+					setters: {},
 					get_query_filters: {
 						material_request_type: "Purchase",
 						docstatus: 1,
@@ -384,7 +382,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					source_doctype: "Supplier Quotation",
 					target: me.frm,
 					setters: {
-						company: me.frm.doc.company
+						supplier: me.frm.doc.supplier
 					},
 					get_query_filters: {
 						docstatus: 1,
