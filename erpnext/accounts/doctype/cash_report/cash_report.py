@@ -7,7 +7,7 @@ import frappe
 from datetime import date
 from frappe.model.document import Document
 
-class Proofofdailysales(Document):
+class CashReport(Document):
 	def validate(self):
 		self.calculate_totals()
 	

@@ -531,6 +531,10 @@ def get_data():
 					"is_query_report": True,
 					"name": "Address And Contacts",
 					"doctype": "Address"
+				},
+				{
+					"type": "doctype",
+					"name": "Cash Report",
 				}
 			]
 		},
