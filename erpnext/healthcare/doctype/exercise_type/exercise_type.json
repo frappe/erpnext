@@ -55,7 +55,7 @@
   {
    "fieldname": "exercise_steps",
    "fieldtype": "Attach",
-   "label": "Exercise Steps"
+   "label": "Exercise Instructions"
   },
   {
    "fieldname": "exercise_video",
@@ -96,7 +96,7 @@
   }
  ],
  "links": [],
- "modified": "2020-04-10 21:31:04.944070",
+ "modified": "2020-04-10 22:57:22.024574",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Exercise Type",
