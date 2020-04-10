@@ -45,7 +45,7 @@ class StockLedgerEntry(Document):
 
 	def calculate_batch_qty(self):
 		if self.batch_no:
-			batch_qty = frappe.db.get_value("Stock Ledger Entry", 
+			batch_qty = frappe.db.get_value("Stock Ledger Entry",
 				{"docstatus": 1, "batch_no": self.batch_no, "is_cancelled": "No"},
 				"sum(actual_qty)") or 0
 			frappe.db.set_value("Batch", self.batch_no, "batch_qty", batch_qty)
