@@ -99,7 +99,7 @@ def return_filters(filters):
 	conditions = ''
 
 	conditions += "{"
-	if filters.get("from_date") and filters.get("to_date"):conditions += '"posting_date": [">=", "{}", "<=", "{}"]'.format(filters.get("from_date"), filters.get("to_date"))
+	if filters.get("from_date") and filters.get("to_date"):conditions += '"posting_date": [">=", "{}"], "posting_date": ["<=", "{}"]'.format(filters.get("from_date"), filters.get("to_date"))
 	if filters.get("company"): conditions += ', "company": "{}"'.format(filters.get("company"))
 	conditions += '}'
 
