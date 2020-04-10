@@ -6,9 +6,9 @@
  "engine": "InnoDB",
  "field_order": [
   "exercise_name",
-  "difficulty_level",
+  "body_parts",
   "column_break_3",
-  "service_unit",
+  "difficulty_level",
   "section_break_5",
   "description",
   "section_break_7",
@@ -38,12 +38,6 @@
   {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "service_unit",
-   "fieldtype": "Link",
-   "label": "Healthcare Service Unit",
-   "options": "Healthcare Service Unit"
   },
   {
    "fieldname": "section_break_5",
@@ -93,10 +87,16 @@
   {
    "fieldname": "section_break_13",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "body_parts",
+   "fieldtype": "Table MultiSelect",
+   "label": "Body Parts",
+   "options": "Body Part Link"
   }
  ],
  "links": [],
- "modified": "2020-04-10 11:54:23.261078",
+ "modified": "2020-04-10 21:31:04.944070",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Exercise Type",

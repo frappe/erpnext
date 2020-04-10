@@ -9,8 +9,6 @@
   "naming_series",
   "patient",
   "patient_name",
-  "therapy_for",
-  "add_therapy_types",
   "column_break_4",
   "status",
   "start_date",
@@ -100,23 +98,10 @@
    "label": "Status",
    "options": "Not Started\nIn Progress\nCompleted\nCancelled",
    "read_only": 1
-  },
-  {
-   "fieldname": "therapy_for",
-   "fieldtype": "Table MultiSelect",
-   "label": "Therapy For",
-   "options": "Therapy For"
-  },
-  {
-   "depends_on": "eval:doc.therapy_for;",
-   "fieldname": "add_therapy_types",
-   "fieldtype": "Button",
-   "label": "Add Therapy Types",
-   "options": "add_therapy_types"
   }
  ],
  "links": [],
- "modified": "2020-04-10 17:48:31.587689",
+ "modified": "2020-04-10 22:16:51.917514",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Plan",

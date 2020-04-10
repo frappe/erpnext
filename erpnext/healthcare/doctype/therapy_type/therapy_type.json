@@ -11,10 +11,10 @@
   "therapy_type",
   "default_duration",
   "medical_department",
-  "therapy_for",
   "column_break_3",
   "is_billable",
   "rate",
+  "healthcare_service_unit",
   "item_details_section",
   "item",
   "item_code",
@@ -22,6 +22,9 @@
   "item_group",
   "column_break_12",
   "description",
+  "section_break_18",
+  "therapy_for",
+  "add_exercises",
   "section_break_6",
   "exercises",
   "change_in_item"
@@ -139,11 +142,28 @@
    "fieldname": "therapy_for",
    "fieldtype": "Table MultiSelect",
    "label": "Therapy For",
-   "options": "Therapy For"
+   "options": "Body Part Link"
+  },
+  {
+   "fieldname": "healthcare_service_unit",
+   "fieldtype": "Link",
+   "label": "Healthcare Service Unit",
+   "options": "Healthcare Service Unit"
+  },
+  {
+   "depends_on": "eval: doc.therapy_for",
+   "fieldname": "add_exercises",
+   "fieldtype": "Button",
+   "label": "Add Exercises",
+   "options": "add_exercises"
+  },
+  {
+   "fieldname": "section_break_18",
+   "fieldtype": "Section Break"
   }
  ],
  "links": [],
- "modified": "2020-04-10 12:24:54.469394",
+ "modified": "2020-04-10 21:56:58.220446",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Type",

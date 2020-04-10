@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 from frappe import _
+from frappe.utils import cint
 from frappe.model.document import Document
 from frappe.model.rename_doc import rename_doc
 
@@ -49,6 +50,30 @@ class TherapyType(Document):
 
 		frappe.db.set_value(self.doctype, self.name, 'change_in_item', 0)
 		self.reload()
+
+	def add_exercises(self):
+		exercises = self.get_exercises_for_body_parts()
+		last_idx = max([cint(d.idx) for d in self.get('exercises')] or [0,])
+		for i, d in enumerate(exercises):
+			ch = self.append('exercises', {})
+			ch.exercise_type = d.parent
+			ch.idx = last_idx + i + 1
+
+	def get_exercises_for_body_parts(self):
+		body_parts = [entry.body_part for entry in self.therapy_for]
+
+		exercises = frappe.db.sql(
+			"""
+				SELECT DISTINCT
+					b.parent, e.name, e.difficulty_level
+				FROM
+				 	`tabExercise Type` e, `tabBody Part Link` b
+				WHERE
+					b.body_part IN %(body_parts)s AND b.parent=e.name
+			""", {'body_parts': body_parts}, as_dict=1)
+
+		return exercises
+
 
 def create_item_from_therapy(doc):
 	disabled = doc.disabled
