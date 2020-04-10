@@ -20,7 +20,10 @@ def get_context(context):
 		for key in expected_keys:
 			checkout[key] = frappe.form_dict[key]
 
-		checkout['amount'] = flt(checkout['amount'])
+		# checkout['amount'] = flt(context=checkout['amount'])
+		
+		print("=======================checkout=============================",  build_checkout_data(**checkout) )
+		# checkout['amount'] = context[flt(checkout['amount'])]
 		context['checkout_data'] = build_checkout_data(**checkout)
 		return context
 

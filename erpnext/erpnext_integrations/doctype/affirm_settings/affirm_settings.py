@@ -80,20 +80,6 @@ class AffirmSettings(Document):
 
 
 
-	def is_available(self, context=None, is_backend=0):
-		'''AWC Specific API contract'''
-
-		# never available to backend
-		return not is_backend
-
-	def get_embed_form(self, context=None):
-		return {
-			"form": "<div class=\"checkout-affirm-redirect-message\">You will be redirected to Affirm on checkout.</div>",
-			"style_url": "/assets/css/affirm_gateway_embed.css",
-			"script_url": "/assets/js/affirm_gateway_embed.js"
-		}
-
-
 @frappe.whitelist(allow_guest=1)
 def affirm_callback(checkout_token, reference_doctype, reference_docname):
 
@@ -114,6 +100,7 @@ def affirm_callback(checkout_token, reference_doctype, reference_docname):
 		json={"checkout_token": checkout_token})
 
 	affirm_data = authorization_response.json()
+	print("========================affirm_data=============================", affirm_data)
 	frappe.log("	Response: {}".format(json.dumps(affirm_data)))
 
 	if affirm_data:
@@ -195,7 +182,7 @@ def build_checkout_data(**kwargs):
 	ref_doc = frappe.get_doc(kwargs['reference_doctype'], kwargs['reference_docname'])
 
 	# fetch the actual doctype use for this transaction. Could be Quotation, Sales Order or Invoice
-	order_doc = frappe.get_doc(ref_doc.reference_doctype, kwargs["order_id"])
+	order_doc = frappe.get_doc(ref_doc.reference_doctype, ref_doc.reference_name)
 
 	items = []
 	discounts = {}
@@ -247,7 +234,7 @@ def build_checkout_data(**kwargs):
 		"merchant": {
 			"user_confirmation_url": get_url(
 				(
-					"/api/method/erpnext.erpnext_integration"
+					"/api/method/erpnext.erpnext_integrations"
 					".doctype.affirm_settings.affirm_settings.affirm_callback"
 					"?reference_doctype={0}&reference_docname={1}"
 				).format(ref_doc.doctype, ref_doc.name)
@@ -295,6 +282,7 @@ def build_checkout_data(**kwargs):
 		}
 
 	create_request_log(checkout_data, "Host", "Affirm")
+	print("==================================checkout_data==============================",checkout_data)
 	return checkout_data
 
 @frappe.whitelist()
