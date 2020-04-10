@@ -473,6 +473,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							item_code: item.item_code,
 							barcode: item.barcode,
 							serial_no: item.serial_no,
+							batch_no: item.batch_no,
 							set_warehouse: me.frm.doc.set_warehouse,
 							warehouse: item.warehouse,
 							customer: me.frm.doc.customer || me.frm.doc.party_name,
@@ -637,6 +638,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 				// Add the new list to the serial no. field in grid with each in new line
 				item.serial_no = valid_serial_nos.join('\n');
+				item.conversion_factor = item.conversion_factor || 1;
 
 				refresh_field("serial_no", item.name, item.parentfield);
 				if(!doc.is_return && cint(user_defaults.set_qty_in_transactions_based_on_serial_no_input)) {
@@ -892,7 +894,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	shipping_rule: function() {
 		var me = this;
-		if(this.frm.doc.shipping_rule) {
+		if(this.frm.doc.shipping_rule && this.frm.doc.shipping_address) {
 			return this.frm.call({
 				doc: this.frm.doc,
 				method: "apply_shipping_rule",
