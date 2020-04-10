@@ -13,9 +13,7 @@ erpnext.ExerciseEditor = Class.extend({
 	init: function(frm, wrapper) {
 		this.wrapper = wrapper;
 		this.frm = frm;
-		if (frm.doc.steps_table.length > 0) {
-			this.make(frm, wrapper);
-		}
+		this.make(frm, wrapper);
 	},
 
 	make: function(frm, wrapper) {
@@ -73,7 +71,9 @@ erpnext.ExerciseEditor = Class.extend({
 			$('#card-'+id).addClass("zoomOutDelete");
 
 			setTimeout(() => {
-				frm.fields_dict['steps_table'].grid.grid_rows[id].remove();
+				// not using grid_rows[id].remove because
+				// grid_rows is not defined when the table is hidden
+				frm.doc.steps_table.pop(id);
 				frm.refresh_field('steps_table');
 				$('#col-'+id).remove();
 			}, 300);

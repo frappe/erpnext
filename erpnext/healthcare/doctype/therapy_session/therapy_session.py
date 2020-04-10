@@ -11,11 +11,17 @@ class TherapySession(Document):
 	def on_submit(self):
 		self.update_sessions_count_in_therapy_plan()
 
-	def update_sessions_count_in_therapy_plan(self):
+	def on_cancel(self):
+		self.update_sessions_count_in_therapy_plan(on_cancel=True)
+
+	def update_sessions_count_in_therapy_plan(self, on_cancel=False):
 		therapy_plan = frappe.get_doc('Therapy Plan', self.therapy_plan)
 		for entry in therapy_plan.therapy_plan_details:
 			if entry.therapy_type == self.therapy_type:
-				entry.sessions_completed += 1
+				if on_cancel:
+					entry.sessions_completed -= 1
+				else:
+					entry.sessions_completed += 1
 		therapy_plan.save()
 
 
