@@ -98,7 +98,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Not Started\nIn Progress\nCompleted\nStopped\nCancelled",
+   "options": "Not Started\nIn Progress\nCompleted\nCancelled",
    "read_only": 1
   },
   {
@@ -116,7 +116,7 @@
   }
  ],
  "links": [],
- "modified": "2020-04-10 13:20:23.875564",
+ "modified": "2020-04-10 17:48:31.587689",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Plan",
