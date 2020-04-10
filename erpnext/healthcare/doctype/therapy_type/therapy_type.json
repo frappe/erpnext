@@ -11,6 +11,7 @@
   "therapy_type",
   "default_duration",
   "medical_department",
+  "therapy_for",
   "column_break_3",
   "is_billable",
   "rate",
@@ -133,10 +134,16 @@
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "therapy_for",
+   "fieldtype": "Table MultiSelect",
+   "label": "Therapy For",
+   "options": "Therapy For"
   }
  ],
  "links": [],
- "modified": "2020-03-30 23:29:45.412288",
+ "modified": "2020-04-10 12:24:54.469394",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Type",

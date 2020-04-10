@@ -30,16 +30,18 @@ class TherapyType(Document):
 	def update_item_and_item_price(self):
 		if self.is_billable and self.item:
 			item_doc = frappe.get_doc('Item', {'item_code': self.item})
-			item_doc.item_name = self.template
+			item_doc.item_name = self.item_name
 			item_doc.item_group = self.item_group
 			item_doc.description = self.description
 			item_doc.disabled = 0
+			item_doc.ignore_mandatory=True
 			item_doc.save(ignore_permissions=True)
 
 			if self.rate:
 				item_price = frappe.get_doc('Item Price', {'item_code': self.item})
-				item_price.item_name = self.template
+				item_price.item_name = self.item_name
 				item_price.price_list_name = self.rate
+				item_price.ignore_mandatory=True
 				item_price.save()
 
 		elif not self.is_billable and self.item:
@@ -67,7 +69,7 @@ def create_item_from_therapy(doc):
 		'is_pro_applicable': 0,
 		'disabled': disabled,
 		'stock_uom': 'Unit'
-	}).insert(ignore_permissions=True)
+	}).insert(ignore_permissions=True, ignore_mandatory=True)
 
 	make_item_price(item.name, doc.rate)
 
@@ -81,7 +83,7 @@ def make_item_price(item, item_price):
 		'price_list': price_list_name,
 		'item_code': item,
 		'price_list_rate': item_price
-	}).insert(ignore_permissions=True)
+	}).insert(ignore_permissions=True, ignore_mandatory=True)
 
 @frappe.whitelist()
 def change_item_code_from_therapy(item_code, doc):

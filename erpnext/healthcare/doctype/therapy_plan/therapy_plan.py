@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils import cint
 
 class TherapyPlan(Document):
 	def validate(self):
@@ -26,8 +27,22 @@ class TherapyPlan(Document):
 		self.db_set('total_sessions', total_sessions)
 		self.db_set('total_sessions_completed', total_sessions_completed)
 
-	def cancel_plan(self):
-		pass
+	def add_therapy_types(self):
+		therapy_list = self.get_therapy_types_for_body_parts()
+		last_idx = max([cint(d.idx) for d in self.get('therapy_plan_details')] or [0,])
+		for i, d in enumerate(therapy_list):
+			ch = self.append('therapy_plan_details', {})
+			ch.therapy_type = d.parent
+			ch.idx = last_idx + i + 1
+
+	def get_therapy_types_for_body_parts(self):
+		body_parts = [entry.body_part for entry in self.therapy_for]
+		therapy_types = frappe.db.get_all('Therapy For', filters={
+			'parenttype': 'Therapy Type',
+			'body_part': ('in', body_parts)
+		}, fields="parent", distinct=1)
+
+		return therapy_types
 
 
 @frappe.whitelist()

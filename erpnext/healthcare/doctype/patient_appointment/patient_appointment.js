@@ -125,6 +125,17 @@ frappe.ui.form.on('Patient Appointment', {
 			}
 		});
 	},
+
+	therapy_type: function(frm) {
+		if (frm.doc.therapy_type) {
+			frappe.db.get_value('Therapy Type', frm.doc.therapy_type, 'default_duration', (r) => {
+				if (r.default_duration) {
+					frm.set_value('duration', r.default_duration)
+				}
+			});
+		}
+	},
+
 	check_availability: function(frm) {
 		check_and_set_availability(frm);
 	},
@@ -417,10 +428,15 @@ let show_therapy_types = function(frm, result) {
 			frm.doc.practitioner = $(this).attr("data-practitioner");
 			frm.doc.department = $(this).attr("data-department");
 			frm.doc.therapy_plan = $(this).attr("data-therapy-plan");
-			refresh_field("therapy_type");
-			refresh_field("practitioner");
-			refresh_field("department");
-			refresh_field("therapy-plan");
+			frm.refresh_field("therapy_type");
+			frm.refresh_field("practitioner");
+			frm.refresh_field("department");
+			frm.refresh_field("therapy-plan");
+			frappe.db.get_value('Therapy Type', frm.doc.therapy_type, 'default_duration', (r) => {
+				if (r.default_duration) {
+					frm.set_value('duration', r.default_duration)
+				}
+			});
 			d.hide();
 			return false;
 		});
