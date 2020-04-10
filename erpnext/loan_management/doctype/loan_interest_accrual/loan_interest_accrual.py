@@ -27,7 +27,13 @@ class LoanInterestAccrual(AccountsController):
 		self.make_gl_entries()
 
 	def on_cancel(self):
+		if self.repayment_schedule_name:
+			self.update_is_accrued()
+
 		self.make_gl_entries(cancel=1)
+
+	def update_is_accrued(self):
+		frappe.db.set_value('Repayment Schedule', self.repayment_schedule_name, 'is_accrued', 0)
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gle_map = []
@@ -83,9 +89,19 @@ def calculate_accrual_amount_for_demand_loans(loan, posting_date, process_loan_i
 	interest_per_day = (pending_principal_amount * loan.rate_of_interest) / (days_in_year(get_datetime(posting_date).year) * 100)
 	payable_interest = interest_per_day * no_of_days
 
-	make_loan_interest_accrual_entry(loan.name, loan.applicant_type, loan.applicant,loan.interest_income_account,
-		loan.loan_account, pending_principal_amount, payable_interest, process_loan_interest = process_loan_interest,
-		 posting_date=posting_date)
+	args = frappe._dict({
+		'loan': loan.name,
+		'applicant_type': loan.applicant_type,
+		'applicant': loan.applicant,
+		'interest_income_account': loan.interest_income_account,
+		'loan_account': loan.loan_acccount,
+		'pending_principal_amount': pending_principal_amount,
+		'interest_amount': payable_interest,
+		'process_loan_interest': process_loan_interest,
+		'posting_date': posting_date
+	})
+
+	make_loan_interest_accrual_entry(args)
 
 def make_accrual_interest_entry_for_demand_loans(posting_date, process_loan_interest, open_loans=None, loan_type=None):
 	query_filters = {
@@ -107,49 +123,71 @@ def make_accrual_interest_entry_for_demand_loans(posting_date, process_loan_inte
 	for loan in open_loans:
 		calculate_accrual_amount_for_demand_loans(loan, posting_date, process_loan_interest)
 
-def make_accrual_interest_entry_for_term_loans(posting_date=None):
+def make_accrual_interest_entry_for_term_loans(posting_date, process_loan_interest, term_loan=None, loan_type=None):
 	curr_date = posting_date or add_days(nowdate(), 1)
 
-	term_loans = frappe.db.sql("""SELECT l.name, l.total_payment, l.total_amount_paid, l.loan_account,
-		l.interest_income_account, l.is_term_loan, l.disbursement_date, l.applicant_type, l.applicant,
-		l.rate_of_interest, l.total_interest_payable, l.repayment_start_date, rs.name as payment_entry,
-		rs.payment_date, rs.principal_amount, rs.interest_amount, rs.is_accrued , rs.balance_loan_amount
-		FROM `tabLoan` l, `tabRepayment Schedule` rs
-		WHERE rs.parent = l.name
-		AND l.docstatus=1
-		AND l.is_term_loan =1
-		AND rs.payment_date <= %s
-		AND rs.is_accrued=0
-		AND l.status = 'Disbursed'""", (curr_date), as_dict=1)
+	term_loans = get_term_loans(curr_date, term_loan, loan_type)
 
 	accrued_entries = []
 
 	for loan in term_loans:
 		accrued_entries.append(loan.payment_entry)
-		make_loan_interest_accrual_entry(loan.name, loan.applicant_type, loan.applicant,loan.interest_income_account,
-			loan.loan_account, loan.principal_amount + loan.balance_loan_amount, loan.interest_amount,
-			payable_principal = loan.principal_amount , posting_date=posting_date)
+		args = frappe._dict({
+			'loan': loan.name,
+			'applicant_type': loan.applicant_type,
+			'applicant': loan.applicant,
+			'interest_income_account': loan.interest_income_account,
+			'loan_account': loan.loan_acccount,
+			'interest_amount': loan.interest_amount,
+			'payable_principal': loan.principal_amount,
+			'process_loan_interest': process_loan_interest,
+			'repayment_schedule_name': loan.payment_entry,
+			'posting_date': posting_date
+		})
+
+		make_loan_interest_accrual_entry(args)
 
 	if accrued_entries:
 		frappe.db.sql("""UPDATE `tabRepayment Schedule`
 			SET is_accrued = 1 where name in (%s)""" #nosec
 			% ", ".join(['%s']*len(accrued_entries)), tuple(accrued_entries))
 
-def make_loan_interest_accrual_entry(loan, applicant_type, applicant, interest_income_account, loan_account,
-	pending_principal_amount, interest_amount, payable_principal=None, process_loan_interest=None, posting_date=None):
-		loan_interest_accrual = frappe.new_doc("Loan Interest Accrual")
-		loan_interest_accrual.loan = loan
-		loan_interest_accrual.applicant_type = applicant_type
-		loan_interest_accrual.applicant = applicant
-		loan_interest_accrual.interest_income_account = interest_income_account
-		loan_interest_accrual.loan_account = loan_account
-		loan_interest_accrual.pending_principal_amount = flt(pending_principal_amount, 2)
-		loan_interest_accrual.interest_amount = flt(interest_amount, 2)
-		loan_interest_accrual.posting_date = posting_date or nowdate()
-		loan_interest_accrual.process_loan_interest_accrual = process_loan_interest
+def get_term_loans(date, term_loan=None, loan_type=None):
+	condition = ''
 
-		if payable_principal:
-			loan_interest_accrual.payable_principal_amount = payable_principal
+	if term_loan:
+		condition +=' AND l.name = %s' % frappe.db.escape(term_loan)
+
+	if loan_type:
+		condition += ' AND l.loan_type = %s' % frappe.db.escape(loan_type)
+
+	term_loans = frappe.db.sql("""SELECT l.name, l.total_payment, l.total_amount_paid, l.loan_account,
+			l.interest_income_account, l.is_term_loan, l.disbursement_date, l.applicant_type, l.applicant,
+			l.rate_of_interest, l.total_interest_payable, l.repayment_start_date, rs.name as payment_entry,
+			rs.payment_date, rs.principal_amount, rs.interest_amount, rs.is_accrued , rs.balance_loan_amount
+			FROM `tabLoan` l, `tabRepayment Schedule` rs
+			WHERE rs.parent = l.name
+			AND l.docstatus=1
+			AND l.is_term_loan =1
+			AND rs.payment_date <= %s
+			AND rs.is_accrued=0 {0}
+			AND l.status = 'Disbursed'""".format(condition), (getdate(date)), as_dict=1)
+
+	return term_loans
+
+def make_loan_interest_accrual_entry(args):
+		loan_interest_accrual = frappe.new_doc("Loan Interest Accrual")
+		loan_interest_accrual.loan = args.loan
+		loan_interest_accrual.applicant_type = args.applicant_type
+		loan_interest_accrual.applicant = args.applicant
+		loan_interest_accrual.interest_income_account = args.interest_income_account
+		loan_interest_accrual.loan_account = args.loan_account
+		loan_interest_accrual.pending_principal_amount = flt(args.pending_principal_amount, 2)
+		loan_interest_accrual.interest_amount = flt(args.interest_amount, 2)
+		loan_interest_accrual.posting_date = args.posting_date or nowdate()
+		loan_interest_accrual.process_loan_interest_accrual = args.process_loan_interest
+		loan_interest_accrual.repayment_schedule_name = args.repayment_schedule_name
+		loan_interest_accrual.payable_principal_amount = args.payable_principal
 
 		loan_interest_accrual.save()
 		loan_interest_accrual.submit()
