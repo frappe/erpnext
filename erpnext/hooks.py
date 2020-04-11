@@ -245,7 +245,7 @@ doc_events = {
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	"Payment Entry": {
-		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"],
+		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.update_payment_req_status"],
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	'Address': {
@@ -268,7 +268,9 @@ doc_events = {
 
 scheduler_events = {
 	"all": [
-		"erpnext.projects.doctype.project.project.project_status_update_reminder"
+		"erpnext.projects.doctype.project.project.project_status_update_reminder",
+		"erpnext.healthcare_healthcare.doctype.patient_appointment.patient_appointment.send_appointment_reminder"
+
 	],
 	"hourly": [
 		'erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails',

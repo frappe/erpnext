@@ -25,6 +25,8 @@
   "territory",
   "tax_id",
   "tax_category",
+  "so_required",
+  "dn_required",
   "disabled",
   "is_internal_customer",
   "represents_company",
@@ -466,13 +468,25 @@
    "fieldtype": "Table",
    "label": "Credit Limit",
    "options": "Customer Credit Limit"
+  },
+  {
+   "default": "0",
+   "fieldname": "so_required",
+   "fieldtype": "Check",
+   "label": "Allow Sales Invoice Creation Without Sales Order"
+  },
+  {
+   "default": "0",
+   "fieldname": "dn_required",
+   "fieldtype": "Check",
+   "label": "Allow Sales Invoice Creation Without Delivery Note"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
  "links": [],
- "modified": "2020-01-29 20:36:37.879581",
+ "modified": "2020-03-17 11:03:42.706907",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

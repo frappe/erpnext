@@ -5,20 +5,16 @@ frappe.ui.form.on('Clinical Procedure', {
 	setup: function(frm) {
 		frm.set_query('batch_no', 'items', function(doc, cdt, cdn) {
 			var item = locals[cdt][cdn];
-			if(!item.item_code) {
-				frappe.throw(__("Please enter Item Code to get Batch Number"));
+			if (!item.item_code) {
+				frappe.throw(__('Please enter Item Code to get Batch Number'));
 			} else {
+				let filters = {'item_code': item.item_code};
+
 				if (frm.doc.status == 'In Progress') {
-					var filters = {
-						'item_code': item.item_code,
-						'posting_date': frm.doc.start_date || frappe.datetime.nowdate()
-					};
-					if(frm.doc.warehouse) filters["warehouse"] = frm.doc.warehouse;
-				} else {
-					filters = {
-						'item_code': item.item_code
-					};
+					filters['posting_date'] = frm.doc.start_date || frappe.datetime.nowdate();
+					if (frm.doc.warehouse) filters['warehouse'] = frm.doc.warehouse;
 				}
+
 				return {
 					query : "erpnext.controllers.queries.get_batch_no",
 					filters: filters
@@ -29,7 +25,7 @@ frappe.ui.form.on('Clinical Procedure', {
 	refresh: function(frm) {
 		frm.set_query("patient", function () {
 			return {
-				filters: {"disabled": 0}
+				filters: {"status": "Active"}
 			};
 		});
 		frm.set_query("appointment", function () {
