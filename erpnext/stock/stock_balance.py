@@ -60,7 +60,7 @@ def repost_actual_qty(item_code, warehouse, allow_zero_rate=False, allow_negativ
 
 def get_balance_qty_from_sle(item_code, warehouse):
 	balance_qty = frappe.db.sql("""select qty_after_transaction from `tabStock Ledger Entry`
-		where item_code=%s and warehouse=%s and is_cancelled=0
+		where item_code=%s and warehouse=%s
 		order by posting_date desc, posting_time desc, creation desc
 		limit 1""", (item_code, warehouse))
 
@@ -184,7 +184,7 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 			print(d[0], d[1], d[2], serial_nos[0][0])
 
 		sle = frappe.db.sql("""select valuation_rate, company from `tabStock Ledger Entry`
-			where item_code = %s and warehouse = %s and is_cancelled = 0
+			where item_code = %s and warehouse = %s
 			order by posting_date desc limit 1""", (d[0], d[1]))
 
 		sle_dict = {

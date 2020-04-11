@@ -24,8 +24,9 @@ class Bin(Document):
 				args["posting_date"] = nowdate()
 
 			# update valuation and qty after transaction for post dated entry
-			if args.get("is_cancelled") and via_landed_cost_voucher:
+			if via_landed_cost_voucher:
 				return
+
 			update_entries_after({
 				"item_code": self.item_code,
 				"warehouse": self.warehouse,
@@ -37,8 +38,7 @@ class Bin(Document):
 	def update_qty(self, args):
 		# update the stock values (for current quantities)
 		if args.get("voucher_type")=="Stock Reconciliation":
-			if not args.get('is_cancelled'):
-				self.actual_qty = args.get("qty_after_transaction")
+			self.actual_qty = args.get("qty_after_transaction")
 		else:
 			self.actual_qty = flt(self.actual_qty) + flt(args.get("actual_qty"))
 
