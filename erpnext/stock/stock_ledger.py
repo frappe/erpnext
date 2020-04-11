@@ -405,7 +405,7 @@ class update_entries_after(object):
 		"""get Stock Ledger Entries after a particular datetime, for reposting"""
 		return get_stock_ledger_entries(self.previous_sle or frappe._dict({
 				"item_code": self.args.get("item_code"), "warehouse": self.args.get("warehouse") }),
-			">", "asc", for_update=True, check_serial_no=False)
+			">", "asc", "limit 1", for_update=True, check_serial_no=False)
 
 	def raise_exceptions(self):
 		deficiency = min(e["diff"] for e in self.exceptions)
@@ -470,7 +470,6 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 		select *, timestamp(posting_date, posting_time) as "timestamp"
 		from `tabStock Ledger Entry`
 		where item_code = %%(item_code)s
-		and is_cancelled=0
 		%(conditions)s
 		order by timestamp(posting_date, posting_time) %(order)s, creation %(order)s
 		%(limit)s %(for_update)s""" % {
