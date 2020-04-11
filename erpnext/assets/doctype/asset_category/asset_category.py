@@ -30,7 +30,7 @@ class AssetCategory(Document):
 			for fieldname in account_type_map.keys():
 				if d.get(fieldname):
 					selected_account = d.get(fieldname)
-					key_to_match = account_type_map.get(fieldname).keys()[0] # acount_type or root_type
+					key_to_match = next(iter(account_type_map.get(fieldname))) # acount_type or root_type
 					selected_key_type = frappe.db.get_value('Account', selected_account, key_to_match)
 					expected_key_type = account_type_map[fieldname][key_to_match]
 
