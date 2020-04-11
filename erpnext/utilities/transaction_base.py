@@ -7,6 +7,7 @@ import frappe.share
 from frappe import _
 from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_datetime, get_link_to_form
 from erpnext.controllers.status_updater import StatusUpdater
+from erpnext.accounts.utils import get_fiscal_year
 
 from six import string_types
 
@@ -160,11 +161,12 @@ class TransactionBase(StatusUpdater):
 			if not (self.get("update_stock") or self.get("is_pos")):
 				return
 
+		fiscal_year = get_fiscal_year(self.get('posting_date'), as_dict=True).name
+
 		last_transaction_time = frappe.db.sql("""
 			select MAX(timestamp(posting_date, posting_time)) as posting_time
 			from `tabStock Ledger Entry`
-			where docstatus = 1 and is_cancelled = 0""" #nosec
-			.format(doctype=self.doctype))[0][0]
+			where docstatus = 1 and fiscal_year = %s""", (fiscal_year))[0][0]
 
 		cur_doc_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")
 
