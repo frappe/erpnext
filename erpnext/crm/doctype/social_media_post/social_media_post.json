@@ -6,27 +6,29 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "is_scheduled",
+  "campaign_name",
   "sheduled_time",
-  "column_break_3",
   "post_status",
-  "share_on",
+  "column_break_6",
   "twitter",
-  "twitter_post_id",
-  "column_break_9",
   "linkedin",
+  "twitter_post_id",
   "linkedin_post_id",
   "content",
   "text",
+  "column_break_14",
+  "tweet_preview",
+  "linkedin_section",
+  "linkedin_post",
+  "attachments_section",
   "image",
   "amended_from"
  ],
  "fields": [
   {
    "fieldname": "text",
-   "fieldtype": "Text",
-   "in_list_view": 1,
-   "label": "Text Content",
+   "fieldtype": "Small Text",
+   "label": "Tweet",
    "reqd": 1
   },
   {
@@ -56,36 +58,18 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "is_scheduled",
-   "fieldtype": "Check",
-   "label": "Scheduled Post"
-  },
-  {
-   "depends_on": "eval: doc.is_scheduled===1",
+   "allow_on_submit": 1,
    "fieldname": "sheduled_time",
    "fieldtype": "Datetime",
    "label": "Scheduled Time"
   },
   {
-   "fieldname": "column_break_9",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "content",
    "fieldtype": "Section Break",
-   "label": "Content"
+   "label": "Twitter"
   },
   {
-   "fieldname": "share_on",
-   "fieldtype": "Section Break",
-   "label": "Share On"
-  },
-  {
+   "allow_on_submit": 1,
    "fieldname": "post_status",
    "fieldtype": "Select",
    "label": "Post Status",
@@ -93,21 +77,62 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "twitter_post_id",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Twitter Post Id",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "linkedin_post_id",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "LinkedIn Post Id",
    "read_only": 1
+  },
+  {
+   "fieldname": "campaign_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Campaign",
+   "options": "Campaign"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break",
+   "label": "Share On"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tweet_preview",
+   "fieldtype": "HTML"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "linkedin_section",
+   "fieldtype": "Section Break",
+   "label": "LinkedIn"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "attachments_section",
+   "fieldtype": "Section Break",
+   "label": "Attachments"
+  },
+  {
+   "fieldname": "linkedin_post",
+   "fieldtype": "Text",
+   "label": "Post"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-02 00:36:22.674056",
+ "modified": "2020-04-09 22:35:23.821991",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Social Media Post",
@@ -126,7 +151,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

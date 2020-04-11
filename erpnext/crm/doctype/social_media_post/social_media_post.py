@@ -9,11 +9,8 @@ from frappe import _
 
 class SocialMediaPost(Document):
 	def submit(self):
-		if not self.is_scheduled:
-			self.post()
-		else:
+		if self.sheduled_time:
 			self.post_status = "Scheduled"
-
 		super(SocialMediaPost, self).submit()
 
 	def post(self):
@@ -21,11 +18,11 @@ class SocialMediaPost(Document):
 			if self.twitter and not self.twitter_post_id:
 				twitter = frappe.get_doc("Twitter Settings")
 				twitter_post = twitter.post(self.text, self.image)
-				self.twitter_post_id = twitter_post.id
+				self.db_set("twitter_post_id", twitter_post.id)
 			if self.linkedin and not self.linkedin_post_id:
 				linkedin = frappe.get_doc("LinkedIn Settings")
 				linkedin_post = linkedin.post(self.text, self.image)
-				self.linkedin_post_id = linkedin_post.headers['X-RestLi-Id'].split(":")[-1]
+				self.db_set("linkedin_post_id", linkedin_post.headers['X-RestLi-Id'].split(":")[-1])
 			self.db_set("post_status", "Posted")
 
 		except Exception as e:
@@ -44,3 +41,9 @@ def process_scheduled_social_media_posts():
 		if post_time > start and post_time <= end:
 			post = frappe.get_doc('Social Media Post',post['name'])
 			post.post()
+
+@frappe.whitelist()
+def publish(doctype, name):
+	sm_post = frappe.get_doc(doctype, name)
+	sm_post.post()
+	frappe.db.commit()

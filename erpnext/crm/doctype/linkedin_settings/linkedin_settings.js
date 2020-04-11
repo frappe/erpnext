@@ -3,44 +3,54 @@
 
 frappe.ui.form.on('LinkedIn Settings', {
 	onload: function(frm){
-		let url = window.location.href
-		let hashes = (url.split("?")[1])
-		if(hashes){
-			let hash = hashes.split("=")
-			if(hash[0] == "status"){
-				if(hash[1] == 1){
-					frappe.msgprint(__("Login Success"))
+		if(frm.doc.session_status == 'Expired' && frm.doc.consumer_key && frm.doc.consumer_secret){
+			frappe.confirm(
+				'Session not valid, Do you want to login?',
+				function(){
+					frm.trigger("login");
+				},
+				function(){
+					window.close();
 				}
-			}
+			)
 		}
 	},
 	refresh: function(frm){
-		let msg,color = null;
-		if(!frm.doc.person_urn){
-			msg = "Sign In First With LinkedIn.";
-			color = "yellow";
+		if(frm.doc.session_status=="Expired"){
+			frm.dashboard.set_headline_alert(
+				'<div class="row">' +
+					'<div class="col-xs-12">' +
+						'<span class="indicator whitespace-nowrap red'+ '' +'"><span class="hidden-xs">Session Not Active. Save doc to login.</span></span> ' +
+					'</div>' +
+				'</div>'
+			);
 		}
-		else{
+		if(frm.doc.session_status=="Active"){
 			let d = new Date(frm.doc.modified)
 			d.setDate(d.getDate()+60);
 			let dn = new Date()
 			let days = d.getTime() - dn.getTime();
 			days = Math.floor(days/(1000 * 3600 * 24));
+			let msg,color;
 			if(days>0){
 				msg = "Your Session will be expire in " + days + " days.";
+				color = "green";
 			}
 			else{
-				msg = "Session is expired, SignIn with LinkedIn to continue.";
-				color = "yellow";
+				msg = "Session is expired. Save doc to login.";
+				color = "red";
 			}
+			frm.dashboard.set_headline_alert(
+				'<div class="row">' +
+					'<div class="col-xs-12">' +
+						'<span class="indicator whitespace-nowrap '+ color +'"><span class="hidden-xs">' + msg + ' </span></span> ' +
+					'</div>' +
+				'</div>'
+			);
 		}
-		frm.dashboard.add_comment(msg, color, true);
-
-		frm.add_custom_button(('SignIn With LinkedIn'), function(){
-			if(!(frm.doc.consumer_key && frm.doc.consumer_secret)){
-				frappe.msgprint(__("Please set Consumer Key and Consumer Key Secret to Proceed"));
-				return;
-			}
+	},
+	login: function(frm){
+		if(frm.doc.consumer_key && frm.doc.consumer_secret){
 			frappe.call({
 				doc: frm.doc,
 				method: "get_authorization_url",
@@ -48,6 +58,9 @@ frappe.ui.form.on('LinkedIn Settings', {
 					window.location.href = r.message;
 				}
 			});
-		}).removeClass("btn-xs").addClass("btn-primary");
+		}
+	},
+	after_save: function(frm){
+		frm.trigger("login");
 	}
 });

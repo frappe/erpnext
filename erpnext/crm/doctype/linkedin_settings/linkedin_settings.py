@@ -37,6 +37,7 @@ class LinkedInSettings(Document):
 		
 		response = self.http_post(url=url, data=body, headers=headers)
 		response = frappe.parse_json(response.content.decode())
+		print(response)
 		self.db_set("access_token", response["access_token"])
 
 	def get_member_profile(self):
@@ -46,10 +47,11 @@ class LinkedInSettings(Document):
 		url = "https://api.linkedin.com/v2/me"
 		response = requests.get(url=url, headers=headers)
 		response = frappe.parse_json(response.content.decode())
+		print(response)
 		self.db_set("person_urn", response["id"])
+		self.db_set("session_status", "Active")
 		frappe.local.response["type"] = "redirect"
-		location = get_url_to_form("LinkedIn Settings","LinkedIn Settings") + "?status=1"
-		frappe.local.response["location"] = location
+		frappe.local.response["location"] = get_url_to_form("LinkedIn Settings","LinkedIn Settings")
 
 	def post(self, text, media=None):
 		if not media:
@@ -94,38 +96,50 @@ class LinkedInSettings(Document):
 
 
 	def post_text(self, text, media_id=None):
-		url = "https://api.linkedin.com/v2/ugcPosts"
+		# url = "https://api.linkedin.com/v2/ugcPosts"
+		url = "https://api.linkedin.com/v2/shares"
 		headers = {
 			"X-Restli-Protocol-Version": "2.0.0",
 			"Authorization": "Bearer {}".format(self.access_token),
 			"Content-Type": "application/json; charset=UTF-8"
 		}
+		# body = {
+		# 	"author": "urn:li:person:{0}".format(self.person_urn),
+		# 	"lifecycleState": "PUBLISHED",
+		# 	"specificContent": {
+		# 		"com.linkedin.ugc.ShareContent": {
+		# 			"shareCommentary": {
+		# 				"text": text
+		# 			},
+		# 			"shareMediaCategory": "IMAGE" if media_id else "NONE"
+		# 		}
+		# 	},
+		# 	"visibility": {
+		# 		"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
+		# 	}
+		# }
+		# if media_id:
+			# body["specificContent"]["com.linkedin.ugc.ShareContent"]["media"] = [{
+			# 	"status": "READY",
+			# 	"description": {
+			# 		"text": ""
+			# 	},
+			# 	"media": media_id,
+			# 	"title": {
+			# 		"text":""
+			# 	}
+			# }]
 		body = {
-			"author": "urn:li:person:{0}".format(self.person_urn),
-			"lifecycleState": "PUBLISHED",
-			"specificContent": {
-				"com.linkedin.ugc.ShareContent": {
-					"shareCommentary": {
-						"text": text
-					},
-					"shareMediaCategory": "IMAGE" if media_id else "NONE"
-				}
+			"distribution": {
+				"linkedInDistributionTarget": {}
 			},
-			"visibility": {
-				"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
-			}
+			"owner": "urn:li:person:{0}".format(self.person_urn),
+			"subject": "Test Share Subject",
+			"text": {
+				"text": text
+			};
 		}
-		if media_id:
-			body["specificContent"]["com.linkedin.ugc.ShareContent"]["media"] = [{
-				"status": "READY",
-				"description": {
-					"text": ""
-				},
-				"media": media_id,
-				"title": {
-					"text":""
-				}
-			}]
+		
 		response = self.http_post(url=url, headers=headers, body=body)
 		return response
 
@@ -142,6 +156,8 @@ class LinkedInSettings(Document):
 		except Exception as e:
 			content = json.loads(response.content)
 			if response.status_code == 401:
+				self.db_set("session_status", "Expired")
+				frappe.db.commit()
 				frappe.msgprint(_("{0} With LinkedIn to Continue").format(get_link_to_form("LinkedIn Settings","LinkedIn Settings","Login")))
  				frappe.throw(content["message"], title="LinkedIn Error - Unauthorized")
 			elif response.status_code == 403:

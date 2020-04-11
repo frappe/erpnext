@@ -3,23 +3,40 @@
 
 frappe.ui.form.on('Twitter Settings', {
 	onload: function(frm){
-		let url = window.location.href
-		let hashes = (url.split("?")[1])
-		if(hashes){
-			let hash = hashes.split("=")
-			if(hash[0] == "status"){
-				if(hash[1] == 1){
-					frappe.msgprint(__("Login Success"))
+		if(frm.doc.session_status == 'Expired' && frm.doc.consumer_key && frm.doc.consumer_secret){
+			frappe.confirm(
+				'Session not valid, Do you want to login?',
+				function(){
+					frm.trigger("login");
+				},
+				function(){
+					window.close();
 				}
-			}
+			)
 		}
 	},
 	refresh: function(frm){
-		frm.add_custom_button(('Sign In With Twitter'), function(){
-			if(!(frm.doc.consumer_key && frm.doc.consumer_secret)){
-				frappe.msgprint(__("Please set Consumer Key and Consumer Key Secret to Proceed"));
-				return;
-			}
+		if(frm.doc.session_status=="Active"){
+			frm.dashboard.set_headline_alert(
+				'<div class="row">' +
+					'<div class="col-xs-12">' +
+						'<span class="indicator whitespace-nowrap green'+ '' +'"><span class="hidden-xs">Session Active</span></span> ' +
+					'</div>' +
+				'</div>'
+			);
+		}
+		else if(frm.doc.session_status=="Expired"){
+			frm.dashboard.set_headline_alert(
+				'<div class="row">' +
+					'<div class="col-xs-12">' +
+						'<span class="indicator whitespace-nowrap red'+ '' +'"><span class="hidden-xs">Session Not Active. Save doc to login.</span></span> ' +
+					'</div>' +
+				'</div>'
+			);
+		}
+	},
+	login: function(frm){
+		if(frm.doc.consumer_key && frm.doc.consumer_secret){
 			frappe.call({
 				doc: frm.doc,
 				method: "get_authorize_url",
@@ -27,6 +44,9 @@ frappe.ui.form.on('Twitter Settings', {
 					window.location.href = r.message;
 				}
 			});
-		}).removeClass("btn-xs").addClass("btn-primary");
+		}
+	},
+	after_save: function(frm){
+		frm.trigger("login");
 	}
 });

@@ -17,29 +17,32 @@ class TwitterSettings(Document):
 		try:
 			redirect_url = auth.get_authorization_url()
 			return redirect_url
-		except tweepy.TweepError:
-			frappe.throw(_("Error! Failed to get request token."))
+		except:
+			frappe.msgprint(_("Error! Failed to get request token."))
+			frappe.throw(_('Invalid {0} or {1}').format(frappe.bold("Consumer Key"), frappe.bold("Consumer Secret Key")))
 
 	
-	def get_access_token(self):
+	def get_access_token(self, oauth_token, oauth_verifier):
 		auth = tweepy.OAuthHandler(self.consumer_key, self.get_password(fieldname="consumer_secret"))
 		auth.request_token = { 
-			'oauth_token' : self.oauth_token,
-			'oauth_token_secret' : self.oauth_verifier 
+			'oauth_token' : oauth_token,
+			'oauth_token_secret' : oauth_verifier 
 		}
 		try:
-			auth.get_access_token(self.oauth_verifier)
+			auth.get_access_token(oauth_verifier)
 			self.db_set("oauth_token", auth.access_token)
 			self.db_set("oauth_secret", auth.access_token_secret)
 			api = self.get_api()
 			user = api.me()
 			self.db_set("account_name", user._json["screen_name"])
-			self.db_set("profile_pic", user._json["profile_image_url"])
+			profile_pic = (user._json["profile_image_url"]).replace("_normal","")
+			self.db_set("profile_pic", profile_pic)
+			self.db_set("session_status", "Active")
 			frappe.local.response["type"] = "redirect"
-			location = get_url_to_form("Twitter Settings","Twitter Settings") + "?status=1"
-			frappe.local.response["location"] = location
-		except:
-			frappe.throw(_("Error! Failed to get access token."))
+			frappe.local.response["location"] = get_url_to_form("Twitter Settings","Twitter Settings")
+		except TweepError as e:
+			frappe.msgprint(_("Error! Failed to get access token."))
+			frappe.throw(_('Invalid Consumer Key or Consumer Secret Key'))
 
 	def get_api(self):
 		# authentication of consumer key and secret 
@@ -59,7 +62,6 @@ class TwitterSettings(Document):
 	
 	def upload_image(self, media):
 		media = get_file_path(media)
-
 		api = self.get_api()
 		media = api.media_upload(media)
 		return media.media_id
@@ -77,13 +79,12 @@ class TwitterSettings(Document):
 			content = json.loads(e.response.content)
 			content = content["errors"][0]
 			if e.response.status_code == 401:
-				frappe.msgprint(_("{0} With Twitter to Continue").format(get_link_to_form("Twitter Settings","Twitter Settings","Login")))
+				self.db_set("session_status", "Expired")
+				frappe.db.commit()
 			frappe.throw(content["message"],title="Twitter Error {0} {1}".format(e.response.status_code, e.response.reason))
 
 @frappe.whitelist()
 def callback(oauth_token, oauth_verifier):
 	twitter_settings = frappe.get_single("Twitter Settings")
-	twitter_settings.db_set("oauth_token", oauth_token)
-	twitter_settings.db_set("oauth_verifier", oauth_verifier)
-	twitter_settings.get_access_token()
+	twitter_settings.get_access_token(oauth_token,oauth_verifier)
  	frappe.db.commit()

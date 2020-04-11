@@ -12,7 +12,8 @@
   "consumer_secret",
   "user_details_section",
   "access_token",
-  "person_urn"
+  "person_urn",
+  "session_status"
  ],
  "fields": [
   {
@@ -61,11 +62,19 @@
    "fieldname": "user_details_section",
    "fieldtype": "Section Break",
    "label": "User Details"
+  },
+  {
+   "fieldname": "session_status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Session Status",
+   "options": "Expired\nActive",
+   "read_only": 1
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-04-02 00:22:31.614374",
+ "modified": "2020-04-09 00:49:29.269242",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "LinkedIn Settings",
