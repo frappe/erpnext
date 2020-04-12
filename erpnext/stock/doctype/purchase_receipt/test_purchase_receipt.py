@@ -375,6 +375,33 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		location = frappe.db.get_value('Asset', assets[0].name, 'location')
 		self.assertEquals(location, "Test Location")
+	
+	def test_purchase_return_with_submitted_asset(self):
+		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
+
+		pr = make_purchase_receipt(item_code="Test Asset Item", qty=1)
+
+		asset = frappe.get_doc("Asset", {
+			'purchase_receipt': pr.name
+		})
+		asset.available_for_use_date = frappe.utils.nowdate()
+		asset.gross_purchase_amount = 50.0
+		asset.append("finance_books", {
+			"expected_value_after_useful_life": 10,
+			"depreciation_method": "Straight Line",
+			"total_number_of_depreciations": 3,
+			"frequency_of_depreciation": 1,
+			"depreciation_start_date": frappe.utils.nowdate()
+		})
+		asset.submit()
+
+		pr_return = make_purchase_return(pr.name)
+		self.assertRaises(frappe.exceptions.ValidationError, pr_return.submit)
+		
+		asset.load_from_db()
+		asset.cancel()
+		
+		pr_return.submit()
 
 	def test_purchase_receipt_for_enable_allow_cost_center_in_entry_of_bs_account(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
