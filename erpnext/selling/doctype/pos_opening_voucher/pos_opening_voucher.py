@@ -20,3 +20,6 @@ class POSOpeningVoucher(StatusUpdater):
 
 		if not cint(frappe.db.get_value("User", self.user, "enabled")):
 			frappe.throw(_("User {} has been disabled. Please select valid user/cashier".format(self.user)))
+
+	def on_submit(self):
+		self.set_status(update=True)

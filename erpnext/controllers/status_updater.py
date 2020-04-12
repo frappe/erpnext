@@ -99,8 +99,8 @@ status_map = {
 	],
 	"POS Opening Voucher": [
 		["Draft", None],
-		["Open", "eval:self.docstatus == 1 and self.pos_closing_voucher in ['', None]"],
-		["Closed", "eval:self.docstatus == 1 and self.pos_closing_voucher not in ['', None]"],
+		["Open", "eval:self.docstatus == 1 and not self.pos_closing_voucher"],
+		["Closed", "eval:self.docstatus == 1 and self.pos_closing_voucher"],
 		["Cancelled", "eval:self.docstatus == 2"],
 	]
 }
