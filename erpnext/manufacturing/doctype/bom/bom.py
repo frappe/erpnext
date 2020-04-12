@@ -59,6 +59,10 @@ class BOM(WebsiteGenerator):
 
 		self.name = name
 
+	def onload(self):
+		super(BOM, self).onload()
+		if self.get("item") and cint(frappe.db.get_value("Item", self.item, "has_variants")):
+			self.set_onload("has_variants", True)
 
 	def validate(self):
 		self.route = frappe.scrub(self.name).replace('_', '-')
@@ -114,10 +118,6 @@ class BOM(WebsiteGenerator):
 				child = self.append('operations', d)
 				child.hour_rate = flt(d.hour_rate / self.conversion_rate, 2)
 
-	def validate_rm_item(self, item):
-		if (item[0]['name'] in [it.item_code for it in self.items]) and item[0]['name'] == self.item:
-			frappe.throw(_("BOM #{0}: Raw material cannot be same as main Item").format(self.name))
-
 	def set_bom_material_details(self):
 		for item in self.get("items"):
 			self.validate_bom_currecny(item)
@@ -147,7 +147,6 @@ class BOM(WebsiteGenerator):
 			args = json.loads(args)
 
 		item = self.get_item_det(args['item_code'])
-		self.validate_rm_item(item)
 
 		args['bom_no'] = args['bom_no'] or item and cstr(item[0]['default_bom']) or ''
 		args['transfer_for_manufacture'] = (cstr(args.get('include_item_in_manufacturing', '')) or
