@@ -47,6 +47,7 @@
   "is_subcontracted",
   "supplier_warehouse",
   "items_section",
+  "scan_barcode",
   "items",
   "pricing_rule_details",
   "pricing_rules",
@@ -106,6 +107,8 @@
   "range",
   "column_break4",
   "per_billed",
+  "is_internal_supplier",
+  "inter_company_reference",
   "subscription_detail",
   "auto_repeat",
   "printing_settings",
@@ -1053,13 +1056,33 @@
    "oldfieldtype": "Date",
    "print_width": "100px",
    "width": "100px"
+  },
+  {
+   "default": "0",
+   "fetch_from": "supplier.is_internal_supplier",
+   "fieldname": "is_internal_supplier",
+   "fieldtype": "Check",
+   "label": "Is Internal Supplier",
+   "read_only": 1
+  },
+  {
+   "fieldname": "inter_company_reference",
+   "fieldtype": "Link",
+   "label": "Inter Company Reference",
+   "options": "Delivery Note",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scan_barcode",
+   "fieldtype": "Data",
+   "label": "Scan Barcode"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-30 19:12:49.709711",
+ "modified": "2020-04-06 16:31:37.444891",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

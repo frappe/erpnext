@@ -14,9 +14,6 @@ from frappe.utils.user import is_website_user
 from erpnext.support.doctype.service_level_agreement.service_level_agreement import get_active_service_level_agreement_for
 from frappe.email.inbox import link_communication_to_document
 
-sender_field = "raised_by"
-
-
 class Issue(Document):
 	def get_feed(self):
 		return "{0}: {1}".format(_(self.status), self.subject)
@@ -167,11 +164,11 @@ class Issue(Document):
 
 		if not service_level_agreement:
 			if frappe.db.get_value("Issue", self.name, "service_level_agreement"):
-				frappe.throw(_("Couldn't Set Service Level Agreement {0}.".format(self.service_level_agreement)))
+				frappe.throw(_("Couldn't Set Service Level Agreement {0}.").format(self.service_level_agreement))
 			return
 
 		if (service_level_agreement.customer and self.customer) and not (service_level_agreement.customer == self.customer):
-			frappe.throw(_("This Service Level Agreement is specific to Customer {0}".format(service_level_agreement.customer)))
+			frappe.throw(_("This Service Level Agreement is specific to Customer {0}").format(service_level_agreement.customer))
 
 		self.service_level_agreement = service_level_agreement.name
 		self.priority = service_level_agreement.default_priority if not priority else priority
@@ -238,7 +235,7 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 		allotted_days = service_level.get("resolution_time")
 		time_period = service_level.get("resolution_time_period")
 	else:
-		frappe.throw(_("{0} parameter is invalid".format(parameter)))
+		frappe.throw(_("{0} parameter is invalid").format(parameter))
 
 	allotted_hours = 0
 	if time_period == 'Hour':

@@ -277,7 +277,7 @@ class GSTR3BReport(Document):
 	def get_itc_details(self, reverse_charge='N'):
 
 		itc_amount = frappe.db.sql("""
-			select s.gst_category, sum(t.tax_amount) as tax_amount, t.account_head, s.eligibility_for_itc, s.reverse_charge
+			select s.gst_category, sum(t.tax_amount_after_discount_amount) as tax_amount, t.account_head, s.eligibility_for_itc, s.reverse_charge
 			from `tabPurchase Invoice` s , `tabPurchase Taxes and Charges` t
 			where s.docstatus = 1 and t.parent = s.name and s.reverse_charge = %s
 			and month(s.posting_date) = %s and year(s.posting_date) = %s and s.company = %s
@@ -312,7 +312,7 @@ class GSTR3BReport(Document):
 			and s.company = %s and s.company_gstin = %s and s.gst_category in ('Unregistered', 'Registered Composition', 'UIN Holders')
 			group by s.gst_category, s.place_of_supply""", (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
 
-		inter_state_supply_tax = frappe.db.sql(""" select sum(t.tax_amount) as tax_amount, s.place_of_supply, s.gst_category
+		inter_state_supply_tax = frappe.db.sql(""" select sum(t.tax_amount_after_discount_amount) as tax_amount, s.place_of_supply, s.gst_category
 			from `tabSales Invoice` s, `tabSales Taxes and Charges` t
 			where t.parent = s.name and s.docstatus = 1 and month(s.posting_date) = %s and year(s.posting_date) = %s
 			and s.company = %s and s.company_gstin = %s and s.gst_category in ('Unregistered', 'Registered Composition', 'UIN Holders')
@@ -385,7 +385,7 @@ class GSTR3BReport(Document):
 			tax_template = 'Purchase Taxes and Charges'
 
 		tax_amounts = frappe.db.sql("""
-			select s.gst_category, sum(t.tax_amount) as tax_amount, t.account_head
+			select s.gst_category, sum(t.tax_amount_after_discount_amount) as tax_amount, t.account_head
 			from `tab{doctype}` s , `tab{template}` t
 			where s.docstatus = 1 and t.parent = s.name and s.reverse_charge = %s
 			and month(s.posting_date) = %s and year(s.posting_date) = %s and s.company = %s
@@ -417,7 +417,7 @@ class GSTR3BReport(Document):
 		if gst_details:
 			return gst_details[0]
 		else:
-			frappe.throw(_("Please enter GSTIN and state for the Company Address {0}".format(self.company_address)))
+			frappe.throw(_("Please enter GSTIN and state for the Company Address {0}").format(self.company_address))
 
 	def get_account_heads(self):
 
@@ -430,7 +430,7 @@ class GSTR3BReport(Document):
 		if account_heads:
 			return account_heads
 		else:
-			frappe.throw(_("Please set account heads in GST Settings for Compnay {0}".format(self.company)))
+			frappe.throw(_("Please set account heads in GST Settings for Compnay {0}").format(self.company))
 
 	def get_missing_field_invoices(self):
 

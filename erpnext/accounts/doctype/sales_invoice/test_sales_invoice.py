@@ -705,6 +705,64 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.pos_gl_entry(si, pos, 50)
 
+	def test_pos_returns_without_repayment(self):
+		pos_profile = make_pos_profile()
+
+		pos = create_sales_invoice(qty = 10, do_not_save=True)
+		pos.is_pos = 1
+		pos.pos_profile = pos_profile.name
+
+		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 500})
+		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 500})
+		pos.insert()
+		pos.submit()
+
+		pos_return = create_sales_invoice(is_return=1,
+			return_against=pos.name, qty=-5, do_not_save=True)
+
+		pos_return.is_pos = 1
+		pos_return.pos_profile = pos_profile.name
+
+		pos_return.insert()
+		pos_return.submit()
+
+		self.assertFalse(pos_return.is_pos)
+		self.assertFalse(pos_return.get('payments'))
+
+	def test_pos_returns_with_repayment(self):
+		pos_profile = make_pos_profile()
+
+		pos_profile.append('payments', {
+			'default': 1,
+			'mode_of_payment': 'Cash',
+			'amount': 0.0
+		})
+
+		pos_profile.save()
+
+		pos = create_sales_invoice(qty = 10, do_not_save=True)
+
+		pos.is_pos = 1
+		pos.pos_profile = pos_profile.name
+
+		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 500})
+		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 500})
+		pos.insert()
+		pos.submit()
+
+		pos_return = create_sales_invoice(is_return=1,
+			return_against=pos.name, qty=-5, do_not_save=True)
+
+		pos_return.is_pos = 1
+		pos_return.pos_profile = pos_profile.name
+		pos_return.insert()
+		pos_return.submit()
+
+		self.assertEqual(pos_return.get('payments')[0].amount, -500)
+		pos_profile.payments = []
+		pos_profile.save()
+
+
 	def test_pos_change_amount(self):
 		make_pos_profile()
 
@@ -728,7 +786,7 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_make_pos_invoice(self):
 		from erpnext.accounts.page.pos.pos import make_invoice
 
-		make_pos_profile()
+		pos_profile = make_pos_profile()
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
 		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
 
@@ -744,7 +802,7 @@ class TestSalesInvoice(unittest.TestCase):
 			pos.append("taxes", tax)
 
 		invoice_data = [{'09052016142': pos}]
-		si = make_invoice(invoice_data).get('invoice')
+		si = make_invoice(pos_profile, invoice_data).get('invoice')
 		self.assertEqual(si[0], '09052016142')
 
 		sales_invoice = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': '09052016142', 'docstatus': 1})
@@ -762,7 +820,7 @@ class TestSalesInvoice(unittest.TestCase):
 		if allow_negative_stock:
 			frappe.db.set_value('Stock Settings', None, 'allow_negative_stock', 0)
 
-		make_pos_profile()
+		pos_profile = make_pos_profile()
 		timestamp = cint(time.time())
 
 		item = make_item("_Test POS Item")
@@ -776,7 +834,7 @@ class TestSalesInvoice(unittest.TestCase):
 							{'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 330}]
 
 		invoice_data = [{timestamp: pos}]
-		si = make_invoice(invoice_data).get('invoice')
+		si = make_invoice(pos_profile, invoice_data).get('invoice')
 		self.assertEqual(si[0], timestamp)
 
 		sales_invoice = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': timestamp})
@@ -785,7 +843,7 @@ class TestSalesInvoice(unittest.TestCase):
 		timestamp = cint(time.time())
 		pos["offline_pos_name"] = timestamp
 		invoice_data = [{timestamp: pos}]
-		si1 = make_invoice(invoice_data).get('invoice')
+		si1 = make_invoice(pos_profile, invoice_data).get('invoice')
 		self.assertEqual(si1[0], timestamp)
 
 		sales_invoice1 = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': timestamp})
@@ -1868,6 +1926,16 @@ class TestSalesInvoice(unittest.TestCase):
 		item.taxes = []
 		item.save()
 
+	def test_customer_provided_parts_si(self):
+		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
+		si = create_sales_invoice(item_code='CUST-0987', rate=0)
+		self.assertEqual(si.get("items")[0].allow_zero_valuation_rate, 1)
+		self.assertEqual(si.get("items")[0].amount, 0)
+
+		# test if Sales Invoice with rate is allowed
+		si2 = create_sales_invoice(item_code='CUST-0987', do_not_save=True)
+		self.assertRaises(frappe.ValidationError, si2.save)
+
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
 	args = frappe._dict(args)
@@ -1890,7 +1958,7 @@ def create_sales_invoice(**args):
 		"gst_hsn_code": "999800",
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"qty": args.qty or 1,
-		"rate": args.rate or 100,
+		"rate": args.rate if args.get("rate") is not None else 100,
 		"income_account": args.income_account or "Sales - _TC",
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",

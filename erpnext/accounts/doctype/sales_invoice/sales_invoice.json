@@ -154,6 +154,7 @@
   "select_print_heading",
   "more_information",
   "inter_company_invoice_reference",
+  "is_internal_customer",
   "customer_group",
   "campaign",
   "is_discounted",
@@ -373,7 +374,8 @@
    "no_copy": 1,
    "options": "Sales Invoice",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "column_break_21",
@@ -1570,13 +1572,19 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Is Consolidated",
+  },
+  {
+   "fetch_from": "customer.is_internal_customer",
+   "fieldname": "is_internal_customer",
+   "fieldtype": "Check",
+   "label": "Is Internal Customer",
    "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-02-03 12:15:41.414709",
+ "modified": "2020-02-10 04:57:11.221180",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

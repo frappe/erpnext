@@ -9,7 +9,7 @@ from frappe import _
 from frappe.utils import random_string
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import get_charts_for_country
 
-test_ignore = ["Account", "Cost Center", "Payment Terms Template", "Salary Component"]
+test_ignore = ["Account", "Cost Center", "Payment Terms Template", "Salary Component", "Warehouse"]
 test_dependencies = ["Fiscal Year"]
 test_records = frappe.get_test_records('Company')
 
@@ -81,7 +81,7 @@ class TestCompany(unittest.TestCase):
 							filters["is_group"] = 1
 
 						has_matching_accounts = frappe.get_all("Account", filters)
-						error_message = _("No Account matched these filters: {}".format(json.dumps(filters)))
+						error_message = _("No Account matched these filters: {}").format(json.dumps(filters))
 
 						self.assertTrue(has_matching_accounts, msg=error_message)
 				finally:
@@ -124,7 +124,7 @@ def create_child_company():
 		child_company.insert()
 	else:
 		child_company = frappe.get_doc("Company", child_company)
-	
+
 	return child_company.name
 
 def create_test_lead_in_company(company):

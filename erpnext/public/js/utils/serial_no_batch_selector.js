@@ -91,8 +91,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 							qty: qty,
 							item_code: me.item_code,
 							warehouse: typeof me.warehouse_details.name == "string" ? me.warehouse_details.name : '',
-							batch_no: me.item.batch_no || null,
-							for_doctype: me.frm.doc.doctype
+							batch_no: me.item.batch_no || null
 						}
 					});
 
@@ -359,11 +358,15 @@ erpnext.SerialNoBatchSelector = Class.extend({
 								frappe.throw(__(`Batch ${val} already selected.`));
 								return;
 							}
+
+							let batch_number = me.item.batch_no ||
+								this.grid_row.on_grid_fields_dict.batch_no.get_value();
+
 							if (me.warehouse_details.name) {
 								frappe.call({
 									method: 'erpnext.stock.doctype.batch.batch.get_batch_qty',
 									args: {
-										batch_no: me.item.batch_no,
+										batch_no: batch_number,
 										warehouse: me.warehouse_details.name,
 										item_code: me.item_code
 									},

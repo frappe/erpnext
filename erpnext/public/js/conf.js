@@ -29,19 +29,6 @@ $(document).bind('toolbar_setup', function() {
 
 });
 
-
-
-// doctypes created via tree
-$.extend(frappe.create_routes, {
-	"Customer Group": "Tree/Customer Group",
-	"Territory": "Tree/Territory",
-	"Item Group": "Tree/Item Group",
-	"Sales Person": "Tree/Sales Person",
-	"Account": "Tree/Account",
-	"Cost Center": "Tree/Cost Center",
-	"Department": "Tree/Department",
-});
-
 // preferred modules for breadcrumbs
 $.extend(frappe.breadcrumbs.preferred, {
 	"Item Group": "Stock",
@@ -50,13 +37,12 @@ $.extend(frappe.breadcrumbs.preferred, {
 	"Territory": "Selling",
 	"Sales Person": "Selling",
 	"Sales Partner": "Selling",
-	"Brand": "Selling"
+	"Brand": "Stock"
 });
 
 $.extend(frappe.breadcrumbs.module_map, {
 	'ERPNext Integrations': 'Integrations',
 	'Geo': 'Settings',
-	'Accounts': 'Accounting',
 	'Portal': 'Website',
 	'Utilities': 'Settings',
 	'Shopping Cart': 'Website',

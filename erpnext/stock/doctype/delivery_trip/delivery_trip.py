@@ -88,7 +88,7 @@ class DeliveryTrip(Document):
 			note_doc.save()
 
 		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
-		frappe.msgprint(_("Delivery Notes {0} updated".format(", ".join(delivery_notes))))
+		frappe.msgprint(_("Delivery Notes {0} updated").format(", ".join(delivery_notes)))
 
 	def process_route(self, optimize):
 		"""
@@ -238,7 +238,7 @@ class DeliveryTrip(Document):
 		try:
 			directions = maps_client.directions(**directions_data)
 		except Exception as e:
-			frappe.throw(_(e))
+			frappe.throw(_(str(e)))
 
 		return directions[0] if directions else False
 

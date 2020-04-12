@@ -50,6 +50,7 @@ class StockEntry(StockController):
 		self.validate_posting_time()
 		self.validate_purpose()
 		self.validate_item()
+		self.validate_customer_provided_item()
 		self.validate_qty()
 		self.set_transfer_qty()
 		self.validate_uom_is_integer("uom", "qty")
@@ -110,6 +111,7 @@ class StockEntry(StockController):
 		self.update_cost_in_project()
 		self.update_transferred_qty()
 		self.update_quality_inspection()
+		self.delete_auto_created_batches()
 
 	def set_job_card_data(self):
 		if self.job_card and not self.work_order:
@@ -176,6 +178,10 @@ class StockEntry(StockController):
 		stock_items = self.get_stock_items()
 		serialized_items = self.get_serialized_items()
 		for item in self.get("items"):
+			if item.qty and item.qty < 0:
+				frappe.throw(_("Row {0}: The item {1}, quantity must be positive number")
+					.format(item.idx, frappe.bold(item.item_code)))
+
 			if item.item_code not in stock_items:
 				frappe.throw(_("{0} is not a stock Item").format(item.item_code))
 
@@ -197,10 +203,6 @@ class StockEntry(StockController):
 				and item.item_code in serialized_items):
 				frappe.throw(_("Row #{0}: Please specify Serial No for Item {1}").format(item.idx, item.item_code),
 					frappe.MandatoryError)
-
-			#Customer Provided parts will have zero valuation rate
-			if frappe.db.get_value('Item', item.item_code, 'is_customer_provided_item'):
-				item.allow_zero_valuation_rate = 1
 
 	def validate_qty(self):
 		manufacture_purpose = ["Manufacture", "Material Consumption for Manufacture"]
@@ -233,7 +235,7 @@ class StockEntry(StockController):
 		if self.purpose == "Manufacture" and self.work_order:
 			production_item = frappe.get_value('Work Order', self.work_order, 'production_item')
 			for item in self.items:
-				if item.item_code == production_item and item.qty != self.fg_completed_qty:
+				if item.item_code == production_item and item.t_warehouse and item.qty != self.fg_completed_qty:
 					frappe.throw(_("Finished product quantity <b>{0}</b> and For Quantity <b>{1}</b> cannot be different")
 						.format(item.qty, self.fg_completed_qty))
 
@@ -293,13 +295,8 @@ class StockEntry(StockController):
 				if validate_for_manufacture:
 					if d.bom_no:
 						d.s_warehouse = None
-
 						if not d.t_warehouse:
 							frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
-
-						elif self.pro_doc and (cstr(d.t_warehouse) != self.pro_doc.fg_warehouse and cstr(d.t_warehouse) != self.pro_doc.scrap_warehouse):
-							frappe.throw(_("Target warehouse in row {0} must be same as Work Order").format(d.idx))
-
 					else:
 						d.t_warehouse = None
 						if not d.s_warehouse:
@@ -484,7 +481,7 @@ class StockEntry(StockController):
 					if self.work_order \
 						and frappe.db.get_single_value("Manufacturing Settings", "material_consumption"):
 						bom_items = self.get_bom_raw_materials(d.transfer_qty)
-						raw_material_cost = sum([flt(d.qty)*flt(d.rate) for d in bom_items.values()])
+						raw_material_cost = sum([flt(row.qty)*flt(row.rate) for row in bom_items.values()])
 
 					if raw_material_cost:
 						d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
@@ -614,7 +611,7 @@ class StockEntry(StockController):
 		if self.work_order and self.purpose == "Manufacture":
 			allowed_qty = wo_qty + (allowance_percentage/100 * wo_qty)
 			if self.fg_completed_qty > allowed_qty:
-				frappe.throw(_("For quantity {0} should not be grater than work order quantity {1}")
+				frappe.throw(_("For quantity {0} should not be greater than work order quantity {1}")
 					.format(flt(self.fg_completed_qty), wo_qty))
 
 			if production_item not in items_with_target_warehouse:
@@ -756,7 +753,8 @@ class StockEntry(StockController):
 			'serial_no'				: '',
 			'has_serial_no'			: item.has_serial_no,
 			'has_batch_no'			: item.has_batch_no,
-			'sample_quantity'		: item.sample_quantity
+			'sample_quantity'		: item.sample_quantity,
+			'expense_account'		: item.expense_account
 		})
 
 		# update uom
@@ -1053,7 +1051,7 @@ class StockEntry(StockController):
 			req_qty_each = flt(req_qty / manufacturing_qty)
 			consumed_qty = flt(req_items[0].consumed_qty)
 
-			if trans_qty and manufacturing_qty >= (produced_qty + flt(self.fg_completed_qty)):
+			if trans_qty and manufacturing_qty > (produced_qty + flt(self.fg_completed_qty)):
 				if qty >= req_qty:
 					qty = (req_qty/trans_qty) * flt(self.fg_completed_qty)
 				else:

@@ -14,7 +14,7 @@ class Attendance(Document):
 	def validate_duplicate_record(self):
 		res = frappe.db.sql("""select name from `tabAttendance` where employee = %s and attendance_date = %s
 			and name != %s and docstatus != 2""",
-			(self.employee, self.attendance_date, self.name))
+			(self.employee, getdate(self.attendance_date), self.name))
 		if res:
 			frappe.throw(_("Attendance for employee {0} is already marked").format(self.employee))
 
@@ -52,7 +52,7 @@ class Attendance(Document):
 
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
-		validate_status(self.status, ["Present", "Absent", "On Leave", "Half Day"])
+		validate_status(self.status, ["Present", "Absent", "On Leave", "Half Day", "Work From Home"])
 		self.validate_attendance_date()
 		self.validate_duplicate_record()
 		self.check_leave_record()

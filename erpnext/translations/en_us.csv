@@ -1,6 +1,5 @@
 apps/erpnext/erpnext/accounts/report/accounts_receivable/accounts_receivable.html,Cheques Required,Checks Required
 apps/erpnext/erpnext/accounts/doctype/bank_reconciliation/bank_reconciliation.py,Row #{0}: Clearance date {1} cannot be before Cheque Date {2},Row #{0}: Clearance date {1} cannot be before Check Date {2}
-apps/erpnext/erpnext/utilities/user_progress.py,People who teach at your organisation,People who teach at your organization
 apps/erpnext/erpnext/hr/doctype/leave_application/leave_application.py,"Leave cannot be applied/cancelled before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}","Leave cannot be applied/canceled before {0}, as leave balance has already been carry-forwarded in the future leave allocation record {1}"
 apps/erpnext/erpnext/support/doctype/warranty_claim/warranty_claim.py,Cancel Material Visit {0} before cancelling this Warranty Claim,Cancel Material Visit {0} before canceling this Warranty Claim
 apps/erpnext/erpnext/healthcare/doctype/patient_appointment/patient_appointment.py,"Appointment cancelled, Please review and cancel the invoice {0}","Appointment canceled, Please review and cancel the invoice {0}"
@@ -22,13 +21,12 @@ apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Maintenance Sche
 DocType: Accounts Settings,Unlink Payment on Cancellation of Invoice,Unlink Payment on Cancelation of Invoice
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Delivery Notes {0} must be cancelled before cancelling this Sales Order,Delivery Notes {0} must be canceled before cancelling this Sales Order
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Work Order {0} must be cancelled before cancelling this Sales Order,Work Order {0} must be canceled before cancelling this Sales Order
-apps/erpnext/erpnext/config/accounting.py,Setup cheque dimensions for printing,Setup check dimensions for printing
+apps/erpnext/erpnext/config/accounts.py,Setup cheque dimensions for printing,Setup check dimensions for printing
 apps/erpnext/erpnext/accounts/report/bank_reconciliation_statement/bank_reconciliation_statement.py,Cheques and Deposits incorrectly cleared,Checks and Deposits incorrectly cleared
 apps/erpnext/erpnext/stock/doctype/material_request/material_request.py,{0} {1} is cancelled so the action cannot be completed,{0} {1} is canceled so the action cannot be completed
 apps/erpnext/erpnext/stock/doctype/delivery_note/delivery_note.py,Packing Slip(s) cancelled,Packing Slip(s) canceled
 DocType: Payment Entry,Cheque/Reference No,Check/Reference No
 apps/erpnext/erpnext/assets/doctype/asset/asset.py,"Asset cannot be cancelled, as it is already {0}","Asset cannot be canceled, as it is already {0}"
-DocType: Bank Reconciliation,Select account head of the bank where cheque was deposited.,Select account head of the bank where check was deposited.
 DocType: Cheque Print Template,Cheque Print Template,Check Print Template
 apps/erpnext/erpnext/controllers/selling_controller.py,{0} {1} is cancelled or closed,{0} {1} is canceled or closed
 apps/erpnext/erpnext/selling/doctype/sales_order/sales_order.py,Quotation {0} is cancelled,Quotation {0} is canceled

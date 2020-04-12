@@ -97,9 +97,9 @@ class DailyWorkSummary(Document):
 
 		return dict(replies=replies,
 			original_message=dws_group.message,
-			title=_('Work Summary for {0}'.format(
+			title=_('Work Summary for {0}').format(
 				global_date_format(self.creation)
-			)),
+			),
 			did_not_reply=', '.join(did_not_reply) or '',
 			did_not_reply_title=_('No replies from'))
 
