@@ -12,9 +12,8 @@ from erpnext.selling.doctype.customer.test_customer import get_customer_dict
 from erpnext.hr.doctype.salary_structure.test_salary_structure import make_employee
 from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (process_loan_interest_accrual_for_demand_loans,
 	process_loan_interest_accrual_for_term_loans)
-from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import (make_accrual_interest_entry_for_term_loans, days_in_year)
-
-from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import check_for_ltv_shortfall
+from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import days_in_year
+from erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall import create_process_loan_security_shortfall
 
 class TestLoan(unittest.TestCase):
 	def setUp(self):
@@ -298,7 +297,7 @@ class TestLoan(unittest.TestCase):
 		frappe.db.sql(""" UPDATE `tabLoan Security Price` SET loan_security_price = 100
 			where loan_security='Test Security 2'""")
 
-		check_for_ltv_shortfall()
+		create_process_loan_security_shortfall()
 		loan_security_shortfall = frappe.get_doc("Loan Security Shortfall", {"loan": loan.name})
 		self.assertTrue(loan_security_shortfall)
 

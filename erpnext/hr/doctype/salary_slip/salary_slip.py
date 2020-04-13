@@ -755,30 +755,43 @@ class SalarySlip(TransactionBase):
 			d.amount = self.get_amount_based_on_payment_days(d, joining_date, relieving_date)[0]
 
 	def set_loan_repayment(self):
-		self.set('loans', [])
 		self.total_loan_repayment = 0
 		self.total_interest_amount = 0
 		self.total_principal_amount = 0
 
-		for loan in self.get_loan_details():
+		if not self.get('loans'):
+			for loan in self.get_loan_details():
 
-			amounts = calculate_amounts(loan.name, self.posting_date, "Regular Payment")
+				amounts = calculate_amounts(loan.name, self.posting_date, "Regular Payment")
 
-			total_payment = amounts['interest_amount'] + amounts['payable_principal_amount']
+				if amounts['interest_amount'] or amounts['payable_principal_amount']:
+					self.append('loans', {
+						'loan': loan.name,
+						'total_payment': amounts['interest_amount'] + amounts['payable_principal_amount'],
+						'interest_amount': amounts['interest_amount'],
+						'principal_amount': amounts['payable_principal_amount'],
+						'loan_account': loan.loan_account,
+						'interest_income_account': loan.interest_income_account
+					})
 
-			if total_payment:
-				self.append('loans', {
-					'loan': loan.name,
-					'total_payment': total_payment,
-					'interest_amount': amounts['interest_amount'],
-					'principal_amount': amounts['payable_principal_amount'],
-					'loan_account': loan.loan_account,
-					'interest_income_account': loan.interest_income_account
-				})
+		for payment in self.get('loans'):
+			amounts = calculate_amounts(payment.loan, self.posting_date, "Regular Payment")
 
-			self.total_loan_repayment += total_payment
-			self.total_interest_amount += amounts['interest_amount']
-			self.total_principal_amount += amounts['payable_principal_amount']
+			if payment.interest_amount > amounts['interest_amount']:
+				frappe.throw(_("""Row {0}: Paid Interest amount {1} is greater than pending interest amount {2}
+					against loan {3}""").format(payment.idx, frappe.bold(payment.interest_amount),
+					frappe.bold(amounts['interest_amount']), frappe.bold(payment.loan)))
+
+			if payment.principal_amount > amounts['payable_principal_amount']:
+				frappe.throw(_("""Row {0}: Paid Principal amount {1} is greater than pending principal amount {2}
+					against loan {3}""").format(payment.idx, frappe.bold(payment.principal_amount),
+					frappe.bold(amounts['payable_principal_amount']), frappe.bold(payment.loan)))
+
+			payment.total_payment = payment.interest_amount + payment.principal_amount
+			self.total_interest_amount += payment.interest_amount
+			self.total_principal_amount += payment.principal_amount
+
+		self.total_loan_repayment = self.total_interest_amount + self.total_principal_amount
 
 	def get_loan_details(self):
 
