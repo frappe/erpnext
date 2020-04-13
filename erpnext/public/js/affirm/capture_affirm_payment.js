@@ -1,6 +1,6 @@
 frappe.ui.form.on('Sales Order', {
     refresh: function(frm) {
-        if (!frm.doc.__islocal && frm.doc.affirm_id) {
+        if (!frm.doc.__islocal && frm.doc.affirm_id && frm.doc.billing_status == "Not Billed") {
             frm.add_custom_button(__("Capture Affirm Payment"), function() {
                 frappe.call({
                     method: "erpnext.erpnext_integrations.doctype.affirm_settings.affirm_settings.capture_payment",
