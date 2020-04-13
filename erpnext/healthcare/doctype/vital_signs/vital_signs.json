@@ -8,11 +8,8 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "inpatient_record",
   "patient",
   "patient_name",
-  "appointment",
-  "encounter",
   "column_break_2",
   "signs_date",
   "signs_time",
@@ -34,6 +31,11 @@
   "bmi",
   "column_break_14",
   "nutrition_note",
+  "sb_references",
+  "inpatient_record",
+  "appointment",
+  "encounter",
+  "column_break_28",
   "company",
   "amended_from"
  ],
@@ -217,7 +219,6 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Company",
    "options": "Company"
   },
@@ -229,11 +230,20 @@
    "options": "Vital Signs",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_references",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-04 17:19:29.549889",
+ "modified": "2020-04-03 23:06:29.786184",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Vital Signs",
