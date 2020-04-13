@@ -80,8 +80,8 @@ class TestSalarySlip(unittest.TestCase):
 		# set joinng date in the same month
 		make_employee("test_employee@salary.com")
 		if getdate(nowdate()).day >= 15:
-			date_of_joining = getdate(add_days(nowdate(),-10))
 			relieving_date = getdate(add_days(nowdate(),-10))
+			date_of_joining = getdate(add_days(nowdate(),-10))
 		elif getdate(nowdate()).day < 15 and getdate(nowdate()).day >= 5:
 			date_of_joining = getdate(add_days(nowdate(),-3))
 			relieving_date = getdate(add_days(nowdate(),-3))
@@ -92,6 +92,8 @@ class TestSalarySlip(unittest.TestCase):
 			date_of_joining = getdate(nowdate())
 			relieving_date = getdate(nowdate())
 
+		print("--------------->>>>>>>")
+		print(date_of_joining)
 		frappe.db.set_value("Employee", frappe.get_value("Employee",
 			{"employee_name":"test_employee@salary.com"}, "name"), "date_of_joining", date_of_joining)
 		frappe.db.set_value("Employee", frappe.get_value("Employee",
@@ -204,7 +206,7 @@ class TestSalarySlip(unittest.TestCase):
 		frappe.db.sql("""delete from `tabPayroll Period`""")
 		frappe.db.sql("""delete from `tabSalary Component`""")
 		payroll_period = create_payroll_period()
-		create_tax_slab(payroll_period)
+		create_tax_slab(payroll_period ,allow_tax_exemption=True)
 		employee = make_employee("test_tax@salary.slip")
 		delete_docs = [
 			"Salary Slip",
@@ -230,7 +232,6 @@ class TestSalarySlip(unittest.TestCase):
 			payroll_period, deduct_random=False)
 		tax_paid = get_tax_paid_in_period(employee)
 
-		# total taxable income 586000, 250000 @ 5%, 86000 @ 20% ie. 12500 + 17200
 		annual_tax = 113568
 		try:
 			self.assertEqual(tax_paid, annual_tax)
@@ -255,8 +256,8 @@ class TestSalarySlip(unittest.TestCase):
 			raise
 
 		# Submit proof for total 120000
-		data["proof-1"] = create_proof_submission(employee, payroll_period, 50000)
-		data["proof-2"] = create_proof_submission(employee, payroll_period, 70000)
+		data["proof"] = create_proof_submission(employee, payroll_period, 120000)
+		#data["proof"] = create_proof_submission(employee, payroll_period, 70000)
 
 		# Submit benefit claim for total 50000
 		data["benefit-1"] = create_benefit_claim(employee, payroll_period, 15000, "Medical Allowance")
@@ -270,7 +271,7 @@ class TestSalarySlip(unittest.TestCase):
 
 		# total taxable income 416000, 166000 @ 5% ie. 8300
 		try:
-			self.assertEqual(tax_paid, 88608)
+			self.assertEqual(tax_paid, 82368)
 		except AssertionError:
 			print("\nSalary Slip - Tax calculation failed on following case\n", data, "\n")
 			raise
@@ -285,7 +286,7 @@ class TestSalarySlip(unittest.TestCase):
 		# total taxable income 566000, 250000 @ 5%, 66000 @ 20%, 12500 + 13200
 		tax_paid = get_tax_paid_in_period(employee)
 		try:
-			self.assertEqual(tax_paid, 121211)
+			self.assertEqual(tax_paid, 113568)
 		except AssertionError:
 			print("\nSalary Slip - Tax calculation failed on following case\n", data, "\n")
 			raise
@@ -464,9 +465,7 @@ def make_deduction_salary_component(setup=False, test_tax=False, company_list=No
 		{
 			"salary_component": 'TDS',
 			"abbr":'T',
-			"formula": 'base*.1',
 			"type": "Deduction",
-			"amount_based_on_formula": 1,
 			"depends_on_payment_days": 0,
 			"variable_based_on_taxable_salary": 1,
 			"round_to_the_nearest_integer": 1
@@ -477,9 +476,7 @@ def make_deduction_salary_component(setup=False, test_tax=False, company_list=No
 			"salary_component": 'TDS',
 			"abbr":'T',
 			"condition": 'employment_type=="Intern"',
-			"formula": 'base*.1',
 			"type": "Deduction",
-			"amount_based_on_formula": 1,
 			"round_to_the_nearest_integer": 1
 		})
 	if setup or test_tax:
@@ -535,8 +532,11 @@ def create_benefit_claim(employee, payroll_period, amount, component):
 	}).submit()
 	return claim_date
 
-def create_tax_slab(payroll_period):
-	data = [
+def create_tax_slab(payroll_period, effective_date = None, allow_tax_exemption = False, dont_submit = False):
+	if frappe.db.exists("Income Tax Slab", "Tax Slab: " + payroll_period.name):
+		return
+
+	slabs = [
 		{
 			"from_amount": 250000,
 			"to_amount": 500000,
@@ -553,11 +553,24 @@ def create_tax_slab(payroll_period):
 			"percent_deduction": 31.2
 		}
 	]
-	payroll_period.taxable_salary_slabs = []
-	for item in data:
-		payroll_period.append("taxable_salary_slabs", item)
-	payroll_period.standard_tax_exemption_amount = 52500
-	payroll_period.save()
+
+	income_tax_slab = frappe.new_doc("Income Tax Slab")
+	income_tax_slab.name = "Tax Slab: " + payroll_period.name
+	income_tax_slab.effective_from = effective_date or add_days(payroll_period.start_date, -2)
+
+	if allow_tax_exemption:
+		income_tax_slab.allow_tax_exemption = 1
+		income_tax_slab.standard_tax_exemption_amount = 52500
+
+	income_tax_slab.slabs = slabs
+
+
+	income_tax_slab.slabs = []
+	for item in slabs:
+		income_tax_slab.append("slabs", item)
+	income_tax_slab.save()
+	if not dont_submit:
+		income_tax_slab.submit()
 
 def create_salary_slips_for_payroll_period(employee, salary_structure, payroll_period, deduct_random=True):
 	deducted_dates = []

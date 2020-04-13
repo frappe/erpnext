@@ -124,7 +124,8 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None, do
 		}
 		if other_details and isinstance(other_details, dict):
 			details.update(other_details)
-		salary_structure_doc = frappe.get_doc(details).insert()
+		salary_structure_doc = frappe.get_doc(details)
+		salary_structure_doc.insert()
 		if not dont_submit:
 			salary_structure_doc.submit()
 	else:
@@ -143,9 +144,10 @@ def create_salary_structure_assignment(employee, salary_structure, from_date=Non
 	salary_structure_assignment.employee = employee
 	salary_structure_assignment.base = 50000
 	salary_structure_assignment.variable = 5000
-	salary_structure_assignment.from_date = from_date or add_months(nowdate(), -1)
+	salary_structure_assignment.from_date = from_date or add_days(nowdate(), -1)
 	salary_structure_assignment.salary_structure = salary_structure
 	salary_structure_assignment.company = company or erpnext.get_default_company()
 	salary_structure_assignment.save(ignore_permissions=True)
+	salary_structure_assignment.income_tax_slab = "Tax Slab: _Test Payroll Period"
 	salary_structure_assignment.submit()
 	return salary_structure_assignment
