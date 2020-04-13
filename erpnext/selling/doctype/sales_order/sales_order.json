@@ -1196,7 +1196,8 @@
    "allow_on_submit": 1,
    "fieldname": "affirm_id",
    "fieldtype": "Data",
-   "label": "Affirm ID"
+   "label": "Affirm ID",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
