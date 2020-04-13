@@ -137,7 +137,7 @@ var get_lab_test_prescribed = function(frm){
 		});
 	}
 	else{
-		frappe.msgprint(__("Please select Patient to get Lab Tests"));
+		frappe.msgprint(__("Please select a Patient to get Lab Orders"));
 	}
 };
 
@@ -180,9 +180,10 @@ var show_lab_tests = function(frm, result){
 			return false;
 		});
 	});
-	if(!result){
-		var msg = "There are no Lab Test prescribed for "+frm.doc.patient;
-		$(repl('<div class="col-xs-12" style="padding-top:20px;" >%(msg)s</div></div>', {msg: msg})).appendTo(html_field);
+	if(!result.length){
+		var msg = "No Lab Orders found for patient <b>" + frm.doc.patient_name + "</b>";
+		html_field.empty();
+		$(repl('<div class="col-xs-12" style="padding-top:0px;" >%(msg)s</div>', {msg: msg})).appendTo(html_field);
 	}
 	d.show();
 };
