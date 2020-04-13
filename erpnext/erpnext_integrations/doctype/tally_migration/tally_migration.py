@@ -4,20 +4,25 @@
 
 from __future__ import unicode_literals
 
-from decimal import Decimal
 import json
+import sys
 import re
 import traceback
 import zipfile
+from decimal import Decimal
+
+from bs4 import BeautifulSoup as bs
+
 import frappe
+from erpnext import encode_company_abbr
+from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+from frappe.desk.doctype.notification_log.notification_log import enqueue_create_notification
 from frappe.model.document import Document
 from frappe.model.naming import getseries, revert_series_if_last
 from frappe.utils.data import format_datetime
-from bs4 import BeautifulSoup as bs
-from erpnext import encode_company_abbr
-from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
+
 
 PRIMARY_ACCOUNT = "Primary"
 VOUCHER_CHUNK_SIZE = 500
@@ -39,13 +44,15 @@ class TallyMigration(Document):
 			return string
 
 		master_file = frappe.get_doc("File", {"file_url": data_file})
+		master_file_path = master_file.get_full_path()
 
-		with zipfile.ZipFile(master_file.get_full_path()) as zf:
-			encoded_content = zf.read(zf.namelist()[0])
-			try:
-				content = encoded_content.decode("utf-8-sig")
-			except UnicodeDecodeError:
-				content = encoded_content.decode("utf-16")
+		if zipfile.is_zipfile(master_file_path):
+			with zipfile.ZipFile(master_file_path) as zf:
+				encoded_content = zf.read(zf.namelist()[0])
+				try:
+					content = encoded_content.decode("utf-8-sig")
+				except UnicodeDecodeError:
+					content = encoded_content.decode("utf-16")
 
 		master = bs(sanitize(emptify(content)), "xml")
 		collection = master.BODY.IMPORTDATA.REQUESTDATA
@@ -58,7 +65,8 @@ class TallyMigration(Document):
 				"file_name":  key + ".json",
 				"attached_to_doctype": self.doctype,
 				"attached_to_name": self.name,
-				"content": json.dumps(value)
+				"content": json.dumps(value),
+				"is_private": True
 			}).insert()
 			setattr(self, key, f.file_url)
 
@@ -168,8 +176,8 @@ class TallyMigration(Document):
 					address = "\n".join([a.string for a in account.find_all("ADDRESS")])
 					addresses.append({
 						"doctype": "Address",
-						"address_line1": address[:140].strip(),
-						"address_line2": address[140:].strip(),
+						"address_line1": address[:140],
+						"address_line2": address[140:],
 						"country": account.COUNTRYNAME.string if account.COUNTRYNAME else None,
 						"state": account.LEDSTATENAME.string if account.LEDSTATENAME else None,
 						"gst_state": account.LEDSTATENAME.string if account.LEDSTATENAME else None,
@@ -188,37 +196,46 @@ class TallyMigration(Document):
 
 			items = []
 			for item in collection.find_all("STOCKITEM"):
+				stock_uom = item.BASEUNITS.string if item.BASEUNITS else "Unit" #self.default_uom
 				items.append({
 					"doctype": "Item",
 					"item_code" : item.NAME.string,
-					"stock_uom": item.BASEUNITS.string,
+					"stock_uom": stock_uom,
 					"is_stock_item": 0,
 					"item_group": "All Item Groups",
 					"item_defaults": [{"company": self.erpnext_company}]
 				})
+
 			return items, uoms
 
+		try:
+			self.publish("Process Master Data", _("Reading Uploaded File"), 1, 5)
+			collection = self.get_collection(self.master_data)
+			company = get_company_name(collection)
+			self.tally_company = company
+			self.erpnext_company = company
 
-		self.publish("Process Master Data", _("Reading Uploaded File"), 1, 5)
-		collection = self.get_collection(self.master_data)
+			self.publish("Process Master Data", _("Processing Chart of Accounts and Parties"), 2, 5)
+			chart_of_accounts, customers, suppliers = get_coa_customers_suppliers(collection)
 
-		company = get_company_name(collection)
-		self.tally_company = company
-		self.erpnext_company = company
+			self.publish("Process Master Data", _("Processing Party Addresses"), 3, 5)
+			parties, addresses = get_parties_addresses(collection, customers, suppliers)
 
-		self.publish("Process Master Data", _("Processing Chart of Accounts and Parties"), 2, 5)
-		chart_of_accounts, customers, suppliers = get_coa_customers_suppliers(collection)
-		self.publish("Process Master Data", _("Processing Party Addresses"), 3, 5)
-		parties, addresses = get_parties_addresses(collection, customers, suppliers)
-		self.publish("Process Master Data", _("Processing Items and UOMs"), 4, 5)
-		items, uoms = get_stock_items_uoms(collection)
-		data = {"chart_of_accounts": chart_of_accounts, "parties": parties, "addresses": addresses, "items": items, "uoms": uoms}
-		self.publish("Process Master Data", _("Done"), 5, 5)
+			self.publish("Process Master Data", _("Processing Items and UOMs"), 4, 5)
+			items, uoms = get_stock_items_uoms(collection)
+			data = {"chart_of_accounts": chart_of_accounts, "parties": parties, "addresses": addresses, "items": items, "uoms": uoms}
 
-		self.dump_processed_data(data)
-		self.is_master_data_processed = 1
-		self.status = ""
-		self.save()
+			self.publish("Process Master Data", _("Done"), 5, 5)
+			self.dump_processed_data(data)
+
+			self.is_master_data_processed = 1
+
+		except:
+			self.publish("Process Master Data", _("Process Failed"), -1, 5)
+			self.log()
+
+		finally:
+			self.set_status()
 
 	def publish(self, title, message, count, total):
 		frappe.publish_realtime("tally_migration_progress_update", {"title": title, "message": message, "count": count, "total": total})
@@ -256,7 +273,6 @@ class TallyMigration(Document):
 					except:
 						self.log(address)
 
-
 		def create_items_uoms(items_file_url, uoms_file_url):
 			uoms_file = frappe.get_doc("File", {"file_url": uoms_file_url})
 			for uom in json.loads(uoms_file.get_content()):
@@ -273,16 +289,26 @@ class TallyMigration(Document):
 				except:
 					self.log(item)
 
-		self.publish("Import Master Data", _("Creating Company and Importing Chart of Accounts"), 1, 4)
-		create_company_and_coa(self.chart_of_accounts)
-		self.publish("Import Master Data", _("Importing Parties and Addresses"), 2, 4)
-		create_parties_and_addresses(self.parties, self.addresses)
-		self.publish("Import Master Data", _("Importing Items and UOMs"), 3, 4)
-		create_items_uoms(self.items, self.uoms)
-		self.publish("Import Master Data", _("Done"), 4, 4)
-		self.status = ""
-		self.is_master_data_imported = 1
-		self.save()
+		try:
+			self.publish("Import Master Data", _("Creating Company and Importing Chart of Accounts"), 1, 4)
+			create_company_and_coa(self.chart_of_accounts)
+
+			self.publish("Import Master Data", _("Importing Parties and Addresses"), 2, 4)
+			create_parties_and_addresses(self.parties, self.addresses)
+
+			self.publish("Import Master Data", _("Importing Items and UOMs"), 3, 4)
+			create_items_uoms(self.items, self.uoms)
+
+			self.publish("Import Master Data", _("Done"), 4, 4)
+
+			self.is_master_data_imported = 1
+
+		except:
+			self.publish("Import Master Data", _("Process Failed"), -1, 5)
+			self.log()
+
+		finally:
+			self.set_status()
 
 	def _process_day_book_data(self):
 		def get_vouchers(collection):
@@ -373,12 +399,12 @@ class TallyMigration(Document):
 				account_field = "expense_account"
 			items = []
 			for entry in inventory_entries:
-				qty, uom = entry.ACTUALQTY.string.strip().split()
+				qty, uom = entry.ACTUALQTY.string.split()
 				items.append({
 					"item_code": entry.STOCKITEMNAME.string,
 					"description": entry.STOCKITEMNAME.string,
-					"qty": qty.strip(),
-					"uom": uom.strip(),
+					"qty": qty,
+					"uom": uom,
 					"conversion_factor": 1,
 					"price_list_rate": entry.RATE.string.split("/")[0],
 					"cost_center": self.default_cost_center,
@@ -408,15 +434,24 @@ class TallyMigration(Document):
 			elif frappe.db.exists({"doctype": "Customer", "customer_name": party}):
 				return "Customer", encode_company_abbr(self.tally_debtors_account, self.erpnext_company)
 
-		self.publish("Process Day Book Data", _("Reading Uploaded File"), 1, 3)
-		collection = self.get_collection(self.day_book_data)
-		self.publish("Process Day Book Data", _("Processing Vouchers"), 2, 3)
-		vouchers = get_vouchers(collection)
-		self.publish("Process Day Book Data", _("Done"), 3, 3)
-		self.dump_processed_data({"vouchers": vouchers})
-		self.status = ""
-		self.is_day_book_data_processed = 1
-		self.save()
+		try:
+			self.publish("Process Day Book Data", _("Reading Uploaded File"), 1, 3)
+			collection = self.get_collection(self.day_book_data)
+
+			self.publish("Process Day Book Data", _("Processing Vouchers"), 2, 3)
+			vouchers = get_vouchers(collection)
+
+			self.publish("Process Day Book Data", _("Done"), 3, 3)
+			self.dump_processed_data({"vouchers": vouchers})
+
+			self.is_day_book_data_processed = 1
+
+		except:
+			self.publish("Process Day Book Data", _("Process Failed"), -1, 5)
+			self.log()
+
+		finally:
+			self.set_status()
 
 	def _import_day_book_data(self):
 		def create_fiscal_years(vouchers):
@@ -454,23 +489,31 @@ class TallyMigration(Document):
 				"currency": "INR"
 			}).insert()
 
-		frappe.db.set_value("Account", encode_company_abbr(self.tally_creditors_account, self.erpnext_company), "account_type", "Payable")
-		frappe.db.set_value("Account", encode_company_abbr(self.tally_debtors_account, self.erpnext_company), "account_type", "Receivable")
-		frappe.db.set_value("Company", self.erpnext_company, "round_off_account", self.round_off_account)
+		try:
+			frappe.db.set_value("Account", encode_company_abbr(self.tally_creditors_account, self.erpnext_company), "account_type", "Payable")
+			frappe.db.set_value("Account", encode_company_abbr(self.tally_debtors_account, self.erpnext_company), "account_type", "Receivable")
+			frappe.db.set_value("Company", self.erpnext_company, "round_off_account", self.round_off_account)
 
-		vouchers_file = frappe.get_doc("File", {"file_url": self.vouchers})
-		vouchers = json.loads(vouchers_file.get_content())
+			vouchers_file = frappe.get_doc("File", {"file_url": self.vouchers})
+			vouchers = json.loads(vouchers_file.get_content())
 
-		create_fiscal_years(vouchers)
-		create_price_list()
-		create_custom_fields(["Journal Entry", "Purchase Invoice", "Sales Invoice"])
+			create_fiscal_years(vouchers)
+			create_price_list()
+			create_custom_fields(["Journal Entry", "Purchase Invoice", "Sales Invoice"])
 
-		total = len(vouchers)
-		is_last = False
-		for index in range(0, total, VOUCHER_CHUNK_SIZE):
-			if index + VOUCHER_CHUNK_SIZE >= total:
-				is_last = True
-			frappe.enqueue_doc(self.doctype, self.name, "_import_vouchers", queue="long", timeout=3600, start=index+1, total=total, is_last=is_last)
+			total = len(vouchers)
+			is_last = False
+
+			for index in range(0, total, VOUCHER_CHUNK_SIZE):
+				if index + VOUCHER_CHUNK_SIZE >= total:
+					is_last = True
+				frappe.enqueue_doc(self.doctype, self.name, "_import_vouchers", queue="long", timeout=3600, start=index+1, total=total, is_last=is_last)
+
+		except:
+			self.log()
+
+		finally:
+			self.set_status()
 
 	def _import_vouchers(self, start, total, is_last=False):
 		frappe.flags.in_migrate = True
@@ -494,25 +537,26 @@ class TallyMigration(Document):
 		frappe.flags.in_migrate = False
 
 	def process_master_data(self):
-		self.status = "Processing Master Data"
-		self.save()
+		self.set_status("Processing Master Data")
 		frappe.enqueue_doc(self.doctype, self.name, "_process_master_data", queue="long", timeout=3600)
 
 	def import_master_data(self):
-		self.status = "Importing Master Data"
-		self.save()
+		self.set_status("Importing Master Data")
 		frappe.enqueue_doc(self.doctype, self.name, "_import_master_data", queue="long", timeout=3600)
 
 	def process_day_book_data(self):
-		self.status = "Processing Day Book Data"
-		self.save()
+		self.set_status("Processing Day Book Data")
 		frappe.enqueue_doc(self.doctype, self.name, "_process_day_book_data", queue="long", timeout=3600)
 
 	def import_day_book_data(self):
-		self.status = "Importing Day Book Data"
-		self.save()
+		self.set_status("Importing Day Book Data")
 		frappe.enqueue_doc(self.doctype, self.name, "_import_day_book_data", queue="long", timeout=3600)
 
 	def log(self, data=None):
-		message = "\n".join(["Data", json.dumps(data, default=str, indent=4), "Exception", traceback.format_exc()])
+		data = data or self.status
+		message = "\n".join(["Data:", json.dumps(data, default=str, indent=4), "--" * 50, "\nException:", traceback.format_exc()])
 		return frappe.log_error(title="Tally Migration Error", message=message)
+
+	def set_status(self, status=""):
+		self.status = status
+		self.save()
