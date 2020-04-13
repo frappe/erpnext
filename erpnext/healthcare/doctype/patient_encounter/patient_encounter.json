@@ -17,9 +17,9 @@
   "patient_name",
   "patient_sex",
   "patient_age",
-  "company",
   "column_break_6",
   "practitioner",
+  "practitioner_name",
   "medical_department",
   "encounter_date",
   "encounter_time",
@@ -43,6 +43,8 @@
   "sb_procedures",
   "procedure_prescription",
   "encounter_comment",
+  "sb_refs",
+  "company",
   "amended_from"
  ],
  "fields": [
@@ -80,7 +82,6 @@
    "fieldname": "patient",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Patient",
    "options": "Patient",
@@ -110,7 +111,6 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Company",
    "options": "Company"
   },
@@ -121,7 +121,6 @@
   {
    "fieldname": "practitioner",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Healthcare Practitioner",
    "options": "Healthcare Practitioner",
@@ -272,7 +271,6 @@
    "fieldname": "medical_department",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Department",
    "options": "Medical Department",
@@ -287,11 +285,23 @@
   {
    "fieldname": "column_break_17",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sb_refs",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "practitioner.practitioner_name",
+   "fieldname": "practitioner_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Practitioner Name",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-27 12:42:21.751964",
+ "modified": "2020-04-03 23:06:16.348846",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",
@@ -318,7 +328,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "patient",
+ "title_field": "patient_name",
  "track_changes": 1,
  "track_seen": 1
 }

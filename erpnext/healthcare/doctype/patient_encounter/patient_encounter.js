@@ -110,7 +110,8 @@ frappe.ui.form.on('Patient Encounter', {
 						'patient':data.message.patient,
 						'type': data.message.appointment_type,
 						'practitioner': data.message.practitioner,
-						'invoiced': data.message.invoiced
+						'invoiced': data.message.invoiced,
+						'company': data.message.company
 					};
 					frm.set_value(values);
 				}
@@ -209,7 +210,8 @@ let create_vital_signs = function (frm) {
 	frappe.route_options = {
 		'patient': frm.doc.patient,
 		'appointment': frm.doc.appointment,
-		'encounter': frm.doc.name
+		'encounter': frm.doc.name,
+		'company': frm.doc.company
 	};
 	frappe.new_doc('Vital Signs');
 };
@@ -220,7 +222,8 @@ let create_procedure = function (frm) {
 	}
 	frappe.route_options = {
 		'patient': frm.doc.patient,
-		'medical_department': frm.doc.medical_department
+		'medical_department': frm.doc.medical_department,
+		'company': frm.doc.company
 	};
 	frappe.new_doc('Clinical Procedure');
 };
