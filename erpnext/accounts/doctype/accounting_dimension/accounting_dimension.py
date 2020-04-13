@@ -193,7 +193,7 @@ def get_dimension_with_children(doctype, dimension):
 
 	all_dimensions = []
 	lft, rgt = frappe.db.get_value(doctype, dimension, ["lft", "rgt"])
-	children = frappe.get_all(doctype, filters={"lft": [">=", lft], "rgt": ["<=", rgt]})
+	children = frappe.get_all(doctype, filters={"lft": [">=", lft], "rgt": ["<=", rgt]}, order_by="lft")
 	all_dimensions += [c.name for c in children]
 
 	return all_dimensions
