@@ -340,7 +340,8 @@ def make_encounter(source_name, target_doc=None):
 				['medical_department', 'department'],
 				['patient_sex', 'patient_sex'],
 				['encounter_date', 'appointment_date'],
-				['invoiced', 'invoiced']
+				['invoiced', 'invoiced'],
+				['company', 'company']
 			]
 		}
 	}, target_doc)
