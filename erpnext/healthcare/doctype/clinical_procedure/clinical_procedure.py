@@ -37,7 +37,7 @@ class ClinicalProcedure(Document):
 		template = frappe.get_doc('Clinical Procedure Template', self.procedure_template)
 		if template.sample:
 			patient = frappe.get_doc('Patient', self.patient)
-			sample_collection = create_sample_doc(template, patient, None)
+			sample_collection = create_sample_doc(template, patient, None, self.company)
 			frappe.db.set_value('Clinical Procedure', self.name, 'sample', sample_collection.name)
 		self.reload()
 
