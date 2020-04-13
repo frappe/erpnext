@@ -130,13 +130,17 @@ class SerialNo(StockController):
 		sle_dict = self.get_stock_ledger_entries(serial_no)
 		if sle_dict:
 			if sle_dict.get("incoming", []):
-				entries["purchase_sle"] = [sle for sle in sle_dict["incoming"] if sle.is_cancelled == 0][0]
+				sle_list = [sle for sle in sle_dict["incoming"] if sle.is_cancelled == 0]
+				if sle_list:
+					entries["purchase_sle"] = sle_list[0]
 
 			if len(sle_dict.get("incoming", [])) - len(sle_dict.get("outgoing", [])) > 0:
 				entries["last_sle"] = sle_dict["incoming"][0]
 			else:
 				entries["last_sle"] = sle_dict["outgoing"][0]
-				entries["delivery_sle"] = [sle for sle in sle_dict["outgoing"] if sle.is_cancelled == 0][0]
+				sle_list = [sle for sle in sle_dict["incoming"] if sle.is_cancelled == 0]
+				if sle_list:
+					entries["delivery_sle"] = sle_list[0]
 
 		return entries
 
