@@ -10,8 +10,8 @@ erpnext.PointOfSale.ItemSelector = class {
     
     intialize_component() {
         this.prepare_dom();
-		this.render_item_list();
         this.make_search_bar();
+        this.load_items_data();
         this.bind_events();
     }
 
@@ -35,38 +35,34 @@ erpnext.PointOfSale.ItemSelector = class {
         this.$component = this.wrapper.find('.items-selector');
     }
 
-    async get_items({start = 0, page_length = 40, search_value='', item_group={}}) {
-        const price_list = "Standard Selling";
-        
-        if (!item_group) item_group = "All Items Group";
+    async load_items_data() {
+        if (!this.item_group) this.item_group = await frappe.db.get_value("Item Group", {lft: 1, is_group: 1}, "name");
+        this.get_items({}).then((res) => {
+            this.render_item_list(res.items);
+        });
+    }
+
+    async get_items({start = 0, page_length = 40, search_value=''}) {
+        const price_list = this.events.get_frm().doc?.selling_price_list || 'Standard Selling';
+        const { item_group, pos_profile } = this;
         
 		const response = await frappe.call({
 			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
 			freeze: true,
-			args: {
-				start,
-				page_length,
-				price_list,
-				item_group,
-				search_value,
-				pos_profile: this.pos_profile
-			}
+			args: { start, page_length, price_list, item_group, search_value, pos_profile }
         });
-		// this.events.item_list_updated({ item_list: response.message.items });
-		return response.message.items;
+		return response.message;
 	}
 
 
-	async render_item_list() {
+	async render_item_list(items) {
         this.$items_container = this.$component.find('.items-container');
         this.$items_container.html('');
-        
-        this.get_items({}).then((items_list) => {
-            items_list.forEach(item => {
-                const item_html = this.get_item_html(item);
-                this.$items_container.append(item_html);
-            })
-        });
+
+        items.forEach(item => {
+            const item_html = this.get_item_html(item);
+            this.$items_container.append(item_html);
+        })
     }
 
     get_item_html(item) {
@@ -98,7 +94,19 @@ erpnext.PointOfSale.ItemSelector = class {
 				options: 'Item Group',
 				placeholder: __('Select item group')
 			},
-			parent: this.$component.find('.item-group-field'),
+            parent: this.$component.find('.item-group-field'),
+            onchange: () => {
+                this.item_group = this.item_group_field.get_value();
+                this.filter_items();
+            },
+            get_query: () => {
+                return {
+                    query: 'erpnext.selling.page.point_of_sale.point_of_sale.item_group_query',
+                    filters: {
+                        pos_profile: this.events.get_frm().doc?.pos_profile
+                    }
+                };
+            },
 			render_input: true,
         });
         this.search_field.toggle_label(false);
@@ -114,7 +122,39 @@ erpnext.PointOfSale.ItemSelector = class {
             batch_no = batch_no === "undefined" ? undefined : batch_no;
 
             me.events.item_selected({ field: 'qty', value: 1, item: { item_code, batch_no }});
-		})
+        })
+
+        this.search_field.$input.on('input', (e) => {
+			clearTimeout(this.last_search);
+			this.last_search = setTimeout(() => {
+				const search_term = e.target.value;
+				this.filter_items({ search_term });
+			}, 300);
+		});
+    }
+    
+    filter_items({ search_term='' }={}) {
+		if (search_term) {
+			search_term = search_term.toLowerCase();
+
+			// memoize
+			this.search_index = this.search_index || {};
+			if (this.search_index[search_term]) {
+				const items = this.search_index[search_term];
+				this.items = items;
+				this.render_item_list(items);
+				return;
+            }
+		}
+
+		this.get_items({search_value: search_term })
+            .then(({ items, serial_no, batch_no, barcode }) => {
+				if (search_term && !barcode) {
+					this.search_index[search_term] = items;
+				}
+				this.items = items;
+				this.render_item_list(items);
+			});
 	}
     
     resize_selector(minimize) {

@@ -129,9 +129,7 @@ erpnext.PointOfSale.Controller = class {
 			events: {
 				item_selected: args => this.on_cart_update(args),
 
-				get_frm: () => this.frm,
-
-				// item_list_updated: event => this.on_item_list_update(event)
+				get_frm: () => this.frm || {},
 			}
 		})
 	}
