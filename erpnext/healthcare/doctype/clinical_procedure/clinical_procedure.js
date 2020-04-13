@@ -175,15 +175,36 @@ frappe.ui.form.on('Clinical Procedure', {
 					name: frm.doc.appointment
 				},
 				callback: function(data) {
-					frm.set_value('patient', data.message.patient);
-					frm.set_value('procedure_template', data.message.procedure_template);
-					frm.set_value('medical_department', data.message.department);
-					frm.set_value('start_date', data.message.appointment_date);
-					frm.set_value('start_time', data.message.appointment_time);
-					frm.set_value('notes', data.message.notes);
-					frm.set_value('service_unit', data.message.service_unit);
+					let values = {
+						'patient':data.message.patient,
+						'procedure_template': data.message.procedure_template,
+						'medical_department': data.message.department,
+						'start_date': data.message.appointment_date,
+						'start_time': data.message.appointment_time,
+						'notes': data.message.notes,
+						'service_unit': data.message.service_unit,
+						'company': data.message.company
+					}
+					frm.set_value(values);
 				}
 			});
+		}
+		else{
+			let values = {
+				'patient': '',
+				'patient_name': '',
+				'patient_sex': '',
+				'patient_age': '',
+				'medical_department': '',
+				'procedure_template': '',
+				'start_date': '',
+				'start_time': '',
+				'notes': '',
+				'service_unit': '',
+				'inpatient_record': ''
+				// 'inpatient_status': ''
+			};
+			frm.set_value(values);
 		}
 	},
 
