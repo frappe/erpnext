@@ -138,7 +138,7 @@ class SerialNo(StockController):
 				entries["last_sle"] = sle_dict["incoming"][0]
 			else:
 				entries["last_sle"] = sle_dict["outgoing"][0]
-				sle_list = [sle for sle in sle_dict["incoming"] if sle.is_cancelled == 0]
+				sle_list = [sle for sle in sle_dict["outgoing"] if sle.is_cancelled == 0]
 				if sle_list:
 					entries["delivery_sle"] = sle_list[0]
 
