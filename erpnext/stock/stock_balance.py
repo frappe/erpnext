@@ -55,7 +55,8 @@ def repost_stock(item_code, warehouse, allow_zero_rate=False,
 
 		update_bin_qty(item_code, warehouse, qty_dict)
 
-def repost_actual_qty(item_code, warehouse, allow_zero_rate=False, allow_negative_stock=False):		update_entries_after({ "item_code": item_code, "warehouse": warehouse },
+def repost_actual_qty(item_code, warehouse, allow_zero_rate=False, allow_negative_stock=False):
+	update_entries_after({ "item_code": item_code, "warehouse": warehouse },
 		allow_zero_rate=allow_zero_rate, allow_negative_stock=allow_negative_stock)
 
 def get_balance_qty_from_sle(item_code, warehouse):

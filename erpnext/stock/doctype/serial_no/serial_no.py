@@ -130,13 +130,13 @@ class SerialNo(StockController):
 		sle_dict = self.get_stock_ledger_entries(serial_no)
 		if sle_dict:
 			if sle_dict.get("incoming", []):
-				entries["purchase_sle"] = sle_dict["incoming"][0]
+				entries["purchase_sle"] = [sle for sle in sle_dict["incoming"] if sle.is_cancelled == 0][0]
 
 			if len(sle_dict.get("incoming", [])) - len(sle_dict.get("outgoing", [])) > 0:
 				entries["last_sle"] = sle_dict["incoming"][0]
 			else:
 				entries["last_sle"] = sle_dict["outgoing"][0]
-				entries["delivery_sle"] = sle_dict["outgoing"][0]
+				entries["delivery_sle"] = [sle for sle in sle_dict["outgoing"] if sle.is_cancelled == 0][0]
 
 		return entries
 
@@ -147,7 +147,7 @@ class SerialNo(StockController):
 
 		for sle in frappe.db.sql("""
 			SELECT voucher_type, voucher_no,
-				posting_date, posting_time, incoming_rate, actual_qty, serial_no
+				posting_date, posting_time, incoming_rate, actual_qty, serial_no, is_cancelled
 			FROM
 				`tabStock Ledger Entry`
 			WHERE
@@ -241,7 +241,7 @@ def validate_serial_no(sle, item_det):
 
 					if sr and cint(sle.actual_qty) < 0 and sr.warehouse != sle.warehouse:
 						frappe.throw(_("Cannot cancel {0} {1} because Serial No {2} does not belong to the warehouse {3}")
-							.format(sle.voucher_type, sle.voucher_no, serial_no, sle.warehouse))
+							.format(sle.voucher_type, sle.voucher_no, serial_no, sle.warehouse), SerialNoWarehouseError)
 
 					if sr.item_code!=sle.item_code:
 						if not allow_serial_nos_with_different_item(serial_no, sle):

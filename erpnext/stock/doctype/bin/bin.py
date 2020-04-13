@@ -23,16 +23,13 @@ class Bin(Document):
 			if not args.get("posting_date"):
 				args["posting_date"] = nowdate()
 
-			# update valuation and qty after transaction for post dated entry
-			if via_landed_cost_voucher:
-				return
-
 			update_entries_after({
 				"item_code": self.item_code,
 				"warehouse": self.warehouse,
 				"posting_date": args.get("posting_date"),
 				"posting_time": args.get("posting_time"),
-				"voucher_no": args.get("voucher_no")
+				"voucher_no": args.get("voucher_no"),
+				"sle_id": args.sle_id
 			}, allow_negative_stock=allow_negative_stock, via_landed_cost_voucher=via_landed_cost_voucher)
 
 	def update_qty(self, args):

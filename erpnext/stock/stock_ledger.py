@@ -102,14 +102,17 @@ class update_entries_after(object):
 		self.stock_queue = json.loads(self.previous_sle.stock_queue or "[]")
 		self.valuation_method = get_valuation_method(self.item_code)
 		self.stock_value_difference = 0.0
-		self.build()
+		self.build(args.get('sle_id'))
 
-	def build(self):
-		# includes current entry!
-		entries_to_fix = self.get_sle_after_datetime()
-
-		for sle in entries_to_fix:
+	def build(self, sle_id):
+		if sle_id:
+			sle = get_sle_by_id(sle_id)
 			self.process_sle(sle)
+		else:
+			# includes current entry!
+			entries_to_fix = self.get_sle_after_datetime()
+			for sle in entries_to_fix:
+				self.process_sle(sle)
 
 		if self.exceptions:
 			self.raise_exceptions()
@@ -405,7 +408,7 @@ class update_entries_after(object):
 		"""get Stock Ledger Entries after a particular datetime, for reposting"""
 		return get_stock_ledger_entries(self.previous_sle or frappe._dict({
 				"item_code": self.args.get("item_code"), "warehouse": self.args.get("warehouse") }),
-			">", "asc", "limit 1", for_update=True, check_serial_no=False)
+			">", "asc", for_update=True, check_serial_no=False)
 
 	def raise_exceptions(self):
 		deficiency = min(e["diff"] for e in self.exceptions)
@@ -478,6 +481,11 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 			"for_update": for_update and "for update" or "",
 			"order": order
 		}, previous_sle, as_dict=1, debug=debug)
+
+def get_sle_by_id(sle_id):
+	return frappe.db.get_all('Stock Ledger Entry',
+		fields=['*', 'timestamp(posting_date, posting_time) as timestamp'],
+		filters={'name': sle_id})[0]
 
 def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	allow_zero_rate=False, currency=None, company=None, raise_error_if_no_rate=True):
