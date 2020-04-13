@@ -40,6 +40,7 @@ frappe.ui.form.on('Patient', {
 			frm.add_custom_button(__('Patient Encounter'), function () {
 				create_encounter(frm);
 			}, 'Create');
+			frm.toggle_enable(['customer'], 0); // ToDo, allow change only if no transactions booked or better, add merge option
 		}
 	},
 	onload: function (frm) {
