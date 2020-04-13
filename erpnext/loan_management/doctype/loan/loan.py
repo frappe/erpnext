@@ -19,6 +19,7 @@ class Loan(AccountsController):
 		self.validate_loan_security_pledge()
 		self.validate_loan_amount()
 		self.check_sanctioned_amount_limit()
+		self.validate_repay_from_salary()
 
 		if self.is_term_loan:
 			validate_repayment_method(self.repayment_method, self.loan_amount, self.monthly_repayment_amount,
@@ -76,6 +77,10 @@ class Loan(AccountsController):
 
 		if sanctioned_amount_limit and flt(self.loan_amount) + flt(total_loan_amount) > flt(sanctioned_amount_limit):
 			frappe.throw(_("Sanctioned Amount limit crossed for {0} {1}").format(self.applicant_type, frappe.bold(self.applicant)))
+
+	def validate_repay_from_salary(self):
+		if not self.is_term_loan and self.repay_from_salary:
+			frappe.throw(_("Repay From Salary can be selected only for term loans"))
 
 	def make_repayment_schedule(self):
 
