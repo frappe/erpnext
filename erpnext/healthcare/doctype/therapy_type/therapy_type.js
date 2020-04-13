@@ -19,8 +19,6 @@ frappe.ui.form.on('Therapy Type', {
 		}
 	},
 
-
-
 	therapy_type: function(frm) {
 		if (!frm.doc.item_code)
 			frm.set_value('item_code', frm.doc.therapy_type);

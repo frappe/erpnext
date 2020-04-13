@@ -62,6 +62,7 @@ frappe.ui.form.on('Therapy Plan', {
 		if (frm.doc.total_sessions_completed == 1) {
 			title = __('{0} session completed', [frm.doc.total_sessions_completed]);
 		}
+		title += __(' out of {0}', [frm.doc.total_sessions]);
 
 		bars.push({
 			'title': title,
