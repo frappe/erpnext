@@ -5,10 +5,10 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe import throw, _
-from frappe.utils import cstr
+from frappe import _
 from erpnext.accounts.party import validate_party_accounts
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
+from frappe.model.naming import append_number_if_name_exists
 from frappe.desk.reportview import build_match_conditions, get_filters_cond
 
 class HealthcarePractitioner(Document):
@@ -16,63 +16,66 @@ class HealthcarePractitioner(Document):
 		load_address_and_contact(self)
 
 	def autoname(self):
-		# practitioner first_name and last_name
-		self.name = " ".join(filter(None,
-			[cstr(self.get(f)).strip() for f in ["first_name","middle_name","last_name"]]))
+		# concat first and last name
+		self.name = self.practitioner_name
+
+		if frappe.db.exists('Healthcare Practitioner', self.name):
+			self.name = append_number_if_name_exists('Contact', self.name)
 
 	def validate(self):
+		self.set_full_name()
 		validate_party_accounts(self)
 		if self.inpatient_visit_charge_item:
-			validate_service_item(self.inpatient_visit_charge_item, "Configure a service Item for Inpatient Visit Charge Item")
+			validate_service_item(self.inpatient_visit_charge_item, 'Configure a service Item for Inpatient Consulting Charge Item')
 		if self.op_consulting_charge_item:
-			validate_service_item(self.op_consulting_charge_item, "Configure a service Item for Out Patient Consulting Charge Item")
+			validate_service_item(self.op_consulting_charge_item, 'Configure a service Item for Out Patient Consulting Charge Item')
 
 		if self.user_id:
-			self.validate_for_enabled_user_id()
-			self.validate_duplicate_user_id()
-			existing_user_id = frappe.db.get_value("Healthcare Practitioner", self.name, "user_id")
-			if self.user_id != existing_user_id:
-				frappe.permissions.remove_user_permission(
-					"Healthcare Practitioner", self.name, existing_user_id)
-
+			self.validate_user_id()
 		else:
-			existing_user_id = frappe.db.get_value("Healthcare Practitioner", self.name, "user_id")
+			existing_user_id = frappe.db.get_value('Healthcare Practitioner', self.name, 'user_id')
 			if existing_user_id:
 				frappe.permissions.remove_user_permission(
-					"Healthcare Practitioner", self.name, existing_user_id)
+					'Healthcare Practitioner', self.name, existing_user_id)
 
 	def on_update(self):
 		if self.user_id:
-			frappe.permissions.add_user_permission("Healthcare Practitioner", self.name, self.user_id)
+			frappe.permissions.add_user_permission('Healthcare Practitioner', self.name, self.user_id)
 
+	def set_full_name(self):
+		if self.last_name:
+			self.practitioner_name = ' '.join(filter(None, [self.first_name, self.last_name]))
+		else:
+			self.practitioner_name = self.first_name
 
-	def validate_for_enabled_user_id(self):
-		enabled = frappe.db.get_value("User", self.user_id, "enabled")
-		if enabled is None:
-			frappe.throw(_("User {0} does not exist").format(self.user_id))
-		if enabled == 0:
-			frappe.throw(_("User {0} is disabled").format(self.user_id))
+	def validate_user_id(self):
+		if not frappe.db.exists('User', self.user_id):
+			frappe.throw(_('User {0} does not exist').format(self.user_id))
+		elif not frappe.db.exists('User', self.user_id, 'enabled'):
+			frappe.throw(_('User {0} is disabled').format(self.user_id))
 
-	def validate_duplicate_user_id(self):
-		practitioner = frappe.db.sql_list("""select name from `tabHealthcare Practitioner` where
-			user_id=%s and name!=%s""", (self.user_id, self.name))
+		# check duplicate
+		practitioner = frappe.db.exists('Healthcare Practitioner', {
+			'user_id': self.user_id,
+			'name': ('!=', self.name)
+		})
 		if practitioner:
-			throw(_("User {0} is already assigned to Healthcare Practitioner {1}").format(
-				self.user_id, practitioner[0]), frappe.DuplicateEntryError)
+			frappe.throw(_('User {0} is already assigned to Healthcare Practitioner {1}').format(
+				self.user_id, practitioner))
 
 	def on_trash(self):
 		delete_contact_and_address('Healthcare Practitioner', self.name)
 
 def validate_service_item(item, msg):
-	if frappe.db.get_value("Item", item, "is_stock_item") == 1:
+	if frappe.db.get_value('Item', item, 'is_stock_item'):
 		frappe.throw(_(msg))
 
 def get_practitioner_list(doctype, txt, searchfield, start, page_len, filters=None):
-	fields = ["name", "first_name", "mobile_phone"]
+	fields = ['name', 'practitioner_name', 'mobile_phone']
 
 	filters = {
-		'name': ("like", "%%%s%%" % txt)
+		'name': ('like', '%%%s%%' % txt)
 	}
 
-	return frappe.get_all("Healthcare Practitioner", fields = fields,
-		filters = filters, start=start, page_length=page_len, order_by="name, first_name", as_list=1)
+	return frappe.get_all('Healthcare Practitioner', fields = fields,
+		filters = filters, start=start, page_length=page_len, order_by='name, practitioner_name', as_list=1)
