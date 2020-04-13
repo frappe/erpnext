@@ -27,7 +27,6 @@
   "payroll_frequency",
   "total_working_days",
   "leave_without_pay",
-  "absent_days",
   "payment_days",
   "hourly_wages",
   "timesheets",
@@ -460,11 +459,6 @@
    "options": "Salary Slip",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "absent_days",
-   "fieldtype": "Float",
-   "label": "Absent Days"
   }
  ],
  "icon": "fa fa-file-text",

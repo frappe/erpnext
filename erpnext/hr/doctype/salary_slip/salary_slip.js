@@ -101,9 +101,8 @@ frappe.ui.form.on("Salary Slip", {
 	leave_without_pay: function(frm){
 		if (frm.doc.employee && frm.doc.start_date && frm.doc.end_date) {
 			return frappe.call({
-				method: 'process_salary_based_on_leave',
+				method: 'process_salary_based_on_working_days',
 				doc: frm.doc,
-				args: {"lwp": frm.doc.leave_without_pay},
 				callback: function(r, rt) {
 					frm.refresh();
 				}
@@ -114,27 +113,8 @@ frappe.ui.form.on("Salary Slip", {
 	toggle_fields: function(frm) {
 		frm.toggle_display(['hourly_wages', 'timesheets'], cint(frm.doc.salary_slip_based_on_timesheet)===1);
 
-		frm.toggle_display(['payment_days', 'total_working_days'],
-			frm.doc.payroll_frequency!="");
-
-		frappe.db.get_value("HR Settings", "HR Settings", "payroll_based_on", (r)=>{
-
-			// if payroll is based on Leave
-			if (r.payroll_based_on == "Leave" && frm.doc.payroll_frequency!=""){
-				frm.toggle_display('leave_without_pay', 1);
-			}else{
-				frm.toggle_display('leave_without_pay', 0);
-			}
-
-			// if payroll is based on attendance
-			if (r.payroll_based_on == "Attendance" && frm.doc.payroll_frequency!=""){
-				frm.toggle_display('absent_days', 1);
-			}else{
-				frm.toggle_display('absent_days', 0);
-			}
-
-
-		});
+		frm.toggle_display(['payment_days', 'total_working_days', 'leave_without_pay'],
+			frm.doc.payroll_frequency != "");
 	},
 
 	get_emp_and_working_day_details: function(frm) {
