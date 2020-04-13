@@ -276,8 +276,8 @@ class TestMaterialRequest(unittest.TestCase):
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
 
-		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1 + 54.0)
-		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 + 3.0)
+		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1 - 54.0)
+		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 - 3.0)
 
 		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 
@@ -331,8 +331,8 @@ class TestMaterialRequest(unittest.TestCase):
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
 
-		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1 + 27.0)
-		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 + 1.5)
+		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1 - 27.0)
+		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 - 1.5)
 
 		# check if per complete is as expected for Stock Entry cancelled
 		se.cancel()
@@ -344,8 +344,8 @@ class TestMaterialRequest(unittest.TestCase):
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
 
-		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1 + 54.0)
-		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 + 3.0)
+		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1 - 54.0)
+		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 - 3.0)
 
 	def test_completed_qty_for_over_transfer(self):
 		existing_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
@@ -425,8 +425,8 @@ class TestMaterialRequest(unittest.TestCase):
 		current_requested_qty_item1 = self._get_requested_qty("_Test Item Home Desktop 100", "_Test Warehouse - _TC")
 		current_requested_qty_item2 = self._get_requested_qty("_Test Item Home Desktop 200", "_Test Warehouse - _TC")
 
-		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1 + 54.0)
-		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 + 3.0)
+		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1 - 54.0)
+		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 - 3.0)
 
 	def test_incorrect_mapping_of_stock_entry(self):
 		# submit material request of type Transfer
@@ -512,7 +512,7 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 
 		#testing bin value after material request is submitted
-		self.assertEqual(_get_requested_qty(), existing_requested_qty + 54.0)
+		self.assertEqual(_get_requested_qty(), existing_requested_qty - 54.0)
 
 		# receive items to allow issue
 		self._insert_stock_entry(60, 6, "_Test Warehouse - _TC")
@@ -609,6 +609,8 @@ class TestMaterialRequest(unittest.TestCase):
 	def test_customer_provided_parts_mr(self):
 		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
+		existing_requested_qty = self._get_requested_qty("_Test Customer", "_Test Warehouse - _TC")
+
 		mr = make_material_request(item_code='CUST-0987', material_request_type='Customer Provided')
 		se = make_stock_entry(mr.name)
 		se.insert()
@@ -617,7 +619,10 @@ class TestMaterialRequest(unittest.TestCase):
 		self.assertEqual(se.get("items")[0].material_request, mr.name)
 		mr = frappe.get_doc("Material Request", mr.name)
 		mr.submit()
+		current_requested_qty = self._get_requested_qty("_Test Customer", "_Test Warehouse - _TC")
+
 		self.assertEqual(mr.per_ordered, 100)
+		self.assertEqual(existing_requested_qty, current_requested_qty)
 
 def make_material_request(**args):
 	args = frappe._dict(args)
