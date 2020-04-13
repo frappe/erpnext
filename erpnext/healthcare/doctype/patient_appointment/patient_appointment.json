@@ -14,13 +14,16 @@
   "patient_name",
   "patient_sex",
   "patient_age",
-  "inpatient_record",
   "column_break_1",
-  "status",
-  "procedure_template",
-  "get_procedure_from_encounter",
-  "procedure_prescription",
+  "inpatient_record",
+  "company",
   "service_unit",
+  "status",
+  "section_break_11",
+  "get_procedure_from_encounter",
+  "column_break_13",
+  "procedure_template",
+  "procedure_prescription",
   "section_break_12",
   "practitioner",
   "department",
@@ -32,9 +35,9 @@
   "duration",
   "section_break_16",
   "mode_of_payment",
-  "paid_amount",
-  "company",
+  "billing_item",
   "column_break_2",
+  "paid_amount",
   "invoiced",
   "ref_sales_invoice",
   "section_break_3",
@@ -114,7 +117,8 @@
    "label": "Procedure Prescription",
    "no_copy": 1,
    "options": "Procedure Prescription",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "service_unit",
@@ -140,6 +144,7 @@
    "set_only_once": 1
   },
   {
+   "fetch_from": "practitioner.department",
    "fieldname": "department",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -234,12 +239,9 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Company",
    "no_copy": 1,
-   "options": "Company",
-   "print_hide": 1,
-   "report_hide": 1
+   "options": "Company"
   },
   {
    "collapsible": 1,
@@ -282,10 +284,25 @@
    "label": "Series",
    "options": "HLC-APP-.YYYY.-",
    "set_only_once": 1
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "billing_item",
+   "fieldtype": "Link",
+   "label": "Billing Item",
+   "options": "Item",
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2020-03-27 11:27:33.773195",
+ "modified": "2020-04-07 11:16:34.981240",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",
