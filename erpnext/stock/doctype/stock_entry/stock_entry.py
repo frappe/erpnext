@@ -50,6 +50,7 @@ class StockEntry(StockController):
 		self.validate_posting_time()
 		self.validate_purpose()
 		self.validate_item()
+		self.validate_customer_provided_item()
 		self.validate_qty()
 		self.set_transfer_qty()
 		self.validate_uom_is_integer("uom", "qty")
@@ -203,10 +204,6 @@ class StockEntry(StockController):
 				frappe.throw(_("Row #{0}: Please specify Serial No for Item {1}").format(item.idx, item.item_code),
 					frappe.MandatoryError)
 
-			#Customer Provided parts will have zero valuation rate
-			if frappe.db.get_value('Item', item.item_code, 'is_customer_provided_item'):
-				item.allow_zero_valuation_rate = 1
-
 	def validate_qty(self):
 		manufacture_purpose = ["Manufacture", "Material Consumption for Manufacture"]
 
@@ -238,7 +235,7 @@ class StockEntry(StockController):
 		if self.purpose == "Manufacture" and self.work_order:
 			production_item = frappe.get_value('Work Order', self.work_order, 'production_item')
 			for item in self.items:
-				if item.item_code == production_item and item.qty != self.fg_completed_qty:
+				if item.item_code == production_item and item.t_warehouse and item.qty != self.fg_completed_qty:
 					frappe.throw(_("Finished product quantity <b>{0}</b> and For Quantity <b>{1}</b> cannot be different")
 						.format(item.qty, self.fg_completed_qty))
 
@@ -298,13 +295,8 @@ class StockEntry(StockController):
 				if validate_for_manufacture:
 					if d.bom_no:
 						d.s_warehouse = None
-
 						if not d.t_warehouse:
 							frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
-
-						elif self.pro_doc and (cstr(d.t_warehouse) != self.pro_doc.fg_warehouse and cstr(d.t_warehouse) != self.pro_doc.scrap_warehouse):
-							frappe.throw(_("Target warehouse in row {0} must be same as Work Order").format(d.idx))
-
 					else:
 						d.t_warehouse = None
 						if not d.s_warehouse:

@@ -13,7 +13,6 @@ from frappe.utils import today
 def setup(company=None, patch=True):
 	setup_company_independent_fixtures()
 	if not patch:
-		update_address_template()
 		make_fixtures(company)
 
 # TODO: for all countries
@@ -23,21 +22,6 @@ def setup_company_independent_fixtures():
 	add_custom_roles_for_reports()
 	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes', now=frappe.flags.in_test)
 	add_print_formats()
-
-def update_address_template():
-	with open(os.path.join(os.path.dirname(__file__), 'address_template.html'), 'r') as f:
-		html = f.read()
-
-	address_template = frappe.db.get_value('Address Template', 'India')
-	if address_template:
-		frappe.db.set_value('Address Template', 'India', 'template', html)
-	else:
-		# make new html template for India
-		frappe.get_doc(dict(
-			doctype='Address Template',
-			country='India',
-			template=html
-		)).insert()
 
 def add_hsn_sac_codes():
 	# HSN codes
@@ -77,12 +61,18 @@ def add_custom_roles_for_reports():
 			)).insert()
 
 def add_permissions():
-	for doctype in ('GST HSN Code', 'GST Settings'):
+	for doctype in ('GST HSN Code', 'GST Settings', 'GSTR 3B Report'):
 		add_permission(doctype, 'All', 0)
-		for role in ('Accounts Manager', 'System Manager', 'Item Manager', 'Stock Manager'):
+		for role in ('Accounts Manager', 'Accounts User', 'System Manager'):
 			add_permission(doctype, role, 0)
 			update_permission_property(doctype, role, 0, 'write', 1)
 			update_permission_property(doctype, role, 0, 'create', 1)
+
+		if doctype == 'GST HSN Code':
+			for role in ('Item Manager', 'Stock Manager'):
+				add_permission(doctype, role, 0)
+				update_permission_property(doctype, role, 0, 'write', 1)
+				update_permission_property(doctype, role, 0, 'create', 1)
 
 def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")

@@ -454,6 +454,9 @@ def make_stock_entry(source_name, target_doc=None):
 		else:
 			target.s_warehouse = obj.warehouse
 
+		if source_parent.material_request_type == "Customer Provided":
+			target.allow_zero_valuation_rate = 1
+
 	def set_missing_values(source, target):
 		target.purpose = source.material_request_type
 		if source.job_card:
@@ -471,7 +474,7 @@ def make_stock_entry(source_name, target_doc=None):
 			"doctype": "Stock Entry",
 			"validation": {
 				"docstatus": ["=", 1],
-				"material_request_type": ["in", ["Material Transfer", "Material Issue"]]
+				"material_request_type": ["in", ["Material Transfer", "Material Issue", "Customer Provided"]]
 			}
 		},
 		"Material Request Item": {
@@ -501,7 +504,7 @@ def raise_work_orders(material_request):
 				wo_order = frappe.new_doc("Work Order")
 				wo_order.update({
 					"production_item": d.item_code,
-					"qty": d.qty - d.ordered_qty,
+					"qty": d.stock_qty - d.ordered_qty,
 					"fg_warehouse": d.warehouse,
 					"wip_warehouse": default_wip_warehouse,
 					"description": d.description,

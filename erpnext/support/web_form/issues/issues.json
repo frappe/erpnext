@@ -18,7 +18,7 @@
  "is_standard": 1,
  "login_required": 1,
  "max_attachment_size": 0,
- "modified": "2019-12-10 13:48:19.894186",
+ "modified": "2020-03-06 05:24:05.749664",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "issues",
@@ -58,7 +58,7 @@
    "options": "Open\nReplied\nHold\nClosed",
    "read_only": 1,
    "reqd": 0,
-   "show_in_filter": 0
+   "show_in_filter": 1
   },
   {
    "allow_read_on_all_link_options": 0,
