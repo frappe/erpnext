@@ -513,7 +513,7 @@ class SalarySlip(TransactionBase):
 		total_exemption_amount = self.get_total_exemption_amount(payroll_period, tax_slab)
 
 		#Employee Other Incomes
-		other_incomes = self.get_income_form_other_sources(payroll_period)
+		other_incomes = self.get_income_form_other_sources(payroll_period) or 0.0
 
 		# Total taxable earnings including additional and other incomes
 		total_taxable_earnings = previous_taxable_earnings + current_structured_taxable_earnings + future_structured_taxable_earnings \
@@ -713,7 +713,7 @@ class SalarySlip(TransactionBase):
 				if declaration:
 					total_exemption_amount = declaration
 
-				total_exemption_amount += flt(tax_slab.standard_tax_exemption_amount)
+			total_exemption_amount += flt(tax_slab.standard_tax_exemption_amount)
 
 		return total_exemption_amount
 
