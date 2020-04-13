@@ -100,7 +100,6 @@ def affirm_callback(checkout_token, reference_doctype, reference_docname):
 		json={"checkout_token": checkout_token})
 
 	affirm_data = authorization_response.json()
-	print("========================affirm_data=============================", affirm_data)
 	frappe.log("	Response: {}".format(json.dumps(affirm_data)))
 
 	if affirm_data:
@@ -282,7 +281,6 @@ def build_checkout_data(**kwargs):
 		}
 
 	create_request_log(checkout_data, "Host", "Affirm")
-	print("==================================checkout_data==============================",checkout_data)
 	return checkout_data
 
 @frappe.whitelist()

@@ -23,6 +23,7 @@
   "delivery_date",
   "po_no",
   "po_date",
+  "affirm_id",
   "tax_id",
   "contact_info",
   "customer_address",
@@ -1190,6 +1191,12 @@
    "hidden": 1,
    "label": "Skip Delivery Note",
    "print_hide": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "affirm_id",
+   "fieldtype": "Data",
+   "label": "Affirm ID"
   }
  ],
  "icon": "fa fa-file-text",
