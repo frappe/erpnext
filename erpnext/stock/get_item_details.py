@@ -158,6 +158,8 @@ def process_args(args):
 		args.item_code = get_item_code(barcode=args.barcode)
 	elif not args.item_code and args.serial_no:
 		args.item_code = get_item_code(serial_no=args.serial_no)
+	elif not flt(args.qty):
+		args.qty = 1.0
 
 	set_transaction_type(args)
 	return args

@@ -4,8 +4,7 @@
   "item_code": "_Test Item",
   "price_list": "_Test Price List",
   "price_list_rate": 100,
-  "valid_from": "2017-04-18",
-  "valid_upto": "2017-04-26"
+  "valid_from": "2017-04-18"
  },
  {
   "doctype": "Item Price",
