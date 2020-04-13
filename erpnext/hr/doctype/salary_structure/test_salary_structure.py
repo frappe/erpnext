@@ -9,8 +9,10 @@ from frappe.utils.make_random import get_random
 from frappe.utils import nowdate, add_days, add_years, getdate, add_months
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.hr.doctype.salary_slip.test_salary_slip import make_earning_salary_component,\
-	make_deduction_salary_component, make_employee_salary_slip
+	make_deduction_salary_component, make_employee_salary_slip, create_tax_slab
 from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.employee_tax_exemption_declaration.test_employee_tax_exemption_declaration \
+	import create_payroll_period
 
 
 test_dependencies = ["Fiscal Year"]
@@ -124,7 +126,8 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None, do
 		}
 		if other_details and isinstance(other_details, dict):
 			details.update(other_details)
-		salary_structure_doc = frappe.get_doc(details).insert()
+		salary_structure_doc = frappe.get_doc(details)
+		salary_structure_doc.insert()
 		if not dont_submit:
 			salary_structure_doc.submit()
 	else:
@@ -143,9 +146,11 @@ def create_salary_structure_assignment(employee, salary_structure, from_date=Non
 	salary_structure_assignment.employee = employee
 	salary_structure_assignment.base = 50000
 	salary_structure_assignment.variable = 5000
-	salary_structure_assignment.from_date = from_date or add_months(nowdate(), -1)
+	salary_structure_assignment.from_date = from_date or add_days(nowdate(), -1)
 	salary_structure_assignment.salary_structure = salary_structure
 	salary_structure_assignment.company = company or erpnext.get_default_company()
 	salary_structure_assignment.save(ignore_permissions=True)
+	create_tax_slab("Tax Slab: _Test Payroll Period")
+	salary_structure_assignment.income_tax_slab = "Tax Slab: _Test Payroll Period"
 	salary_structure_assignment.submit()
 	return salary_structure_assignment

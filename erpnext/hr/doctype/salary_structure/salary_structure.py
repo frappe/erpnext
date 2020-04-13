@@ -38,7 +38,7 @@ class SalaryStructure(Document):
 	def validate_component_based_on_tax_slab(self):
 		for row in self.deductions:
 			if row.variable_based_on_taxable_salary and (row.amount or row.formula):
-				frappe.throw(_("Row #{0}: Cannot set amount or formula for Salary Component {0} with Variable Based On Taxable Salary")
+				frappe.throw(_("Row #{0}: Cannot set amount or formula for Salary Component {1} with Variable Based On Taxable Salary")
 					.format(row.idx, row.salary_component))
 
 	def validate_amount(self):
