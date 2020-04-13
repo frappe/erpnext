@@ -439,12 +439,13 @@ erpnext.utils.update_child_items = function(opts) {
 	const dialog = new frappe.ui.Dialog({
 		title: __("Update Items"),
 		fields: [
-			{fieldtype:'Section Break', label: __('Items')},
 			{
 				fieldname: "trans_items",
 				fieldtype: "Table",
+				label: "Items",
 				cannot_add_rows: cannot_add_row,
 				in_place_edit: true,
+				reqd: 1,
 				data: this.data,
 				get_data: () => {
 					return this.data;
@@ -452,7 +453,8 @@ erpnext.utils.update_child_items = function(opts) {
 				fields: [{
 					fieldtype:'Data',
 					fieldname:"docname",
-					hidden: 0,
+					read_only: 1,
+					hidden: 1,
 				}, {
 					fieldtype:'Link',
 					fieldname:"item_code",

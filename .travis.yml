@@ -63,6 +63,7 @@ install:
   - tar -xf /tmp/wkhtmltox.tar.xz -C /tmp
   - sudo mv /tmp/wkhtmltox/bin/wkhtmltopdf /usr/local/bin/wkhtmltopdf
   - sudo chmod o+x /usr/local/bin/wkhtmltopdf
+  - sudo apt-get install libcups2-dev
 
   - cd ~/frappe-bench
 
@@ -76,5 +77,6 @@ install:
   - bench --site test_site reinstall --yes
 
 after_script:
+  - pip install coverage==4.5.4
   - pip install python-coveralls
   - coveralls -b apps/erpnext -d ../../sites/.coverage

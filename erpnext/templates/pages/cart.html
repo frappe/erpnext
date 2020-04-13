@@ -12,16 +12,6 @@
 
 
 {% block header_actions %}
-{% if doc.items and cart_settings.enable_checkout %}
-<button class="btn btn-primary btn-place-order" type="button">
-	{{ _("Place Order") }}
-</button>
-{% endif %}
-{% if doc.items and not cart_settings.enable_checkout %}
-<button class="btn btn-primary btn-request-for-quotation" type="button">
-	{{ _("Request for Quotation") }}
-</button>
-{% endif %}
 {% endblock %}
 
 {% block page_content %}
@@ -53,6 +43,20 @@
 	</table>
 	{% else %}
 	<p class="text-muted">{{ _('Your cart is Empty') }}</p>
+	{% endif %}
+
+	{% if doc.items %}
+		<div class="place-order-container">
+			{% if cart_settings.enable_checkout %}
+				<button class="btn btn-primary btn-place-order" type="button">
+					{{ _("Place Order") }}
+				</button>
+			{% else %}
+				<button class="btn btn-primary btn-request-for-quotation" type="button">
+					{{ _("Request for Quotation") }}
+				</button>
+			{% endif %}
+		</div>
 	{% endif %}
 
 	{% if doc.items %}

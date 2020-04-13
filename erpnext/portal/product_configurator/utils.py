@@ -1,4 +1,5 @@
 import frappe
+import numpy as np
 from erpnext.portal.product_configurator.item_variants_cache import ItemVariantsCacheManager
 
 def get_field_filter_data():
@@ -172,6 +173,7 @@ def get_attributes_and_values(item_code):
 
 	item_attribute_values = frappe.db.get_all('Item Attribute Value',
 		['parent', 'attribute_value', 'idx'], order_by='parent asc, idx asc')
+	item_attribute_values += get_numeric_values()
 	ordered_attribute_value_map = frappe._dict()
 	for iv in item_attribute_values:
 		ordered_attribute_value_map.setdefault(iv.parent, []).append(iv.attribute_value)
@@ -183,6 +185,25 @@ def get_attributes_and_values(item_code):
 		attr['values'] = [v for v in ordered_values if v in valid_attribute_values]
 
 	return attributes
+
+def get_numeric_values():
+	attribute_values_list = []
+	numeric_attributes = frappe.db.get_all("Item Attribute",
+		fields=['name', 'from_range', 'to_range', 'increment'],
+		filters={"numeric_values": 1})
+	for attribute in numeric_attributes:
+		from_range = attribute["from_range"]
+		to_range = attribute['to_range'] + attribute['increment']
+		increment = attribute['increment']
+		values = list(np.arange(from_range, to_range, increment))
+
+		for idx, val in enumerate(values):
+			attribute_values_list.append(frappe._dict({
+					"parent": attribute.get("name"),
+					"attribute_value": str(int(val)) if val.is_integer() else str(val),
+					"idx": idx
+				}))
+	return attribute_values_list
 
 
 @frappe.whitelist(allow_guest=True)
