@@ -26,6 +26,7 @@ class Patient(Document):
 			frappe.db.set_value('Patient', self.name, 'status', 'Disabled')
 		else:
 			send_registration_sms(self)
+		self.reload() # self.notify_update()
 
 	def set_full_name(self):
 		if self.last_name:
@@ -86,8 +87,8 @@ class Patient(Document):
 			return {'invoice': sales_invoice.name}
 
 def create_customer(doc):
-	customer_group = frappe.db.get_single_value('Selling Settings', 'customer_group')
-	territory = frappe.db.get_single_value('Selling Settings', 'territory')
+	customer_group = doc.customer_group or frappe.db.get_single_value('Selling Settings', 'customer_group')
+	territory = doc.territory or frappe.db.get_single_value('Selling Settings', 'territory')
 	if not (customer_group and territory):
 		customer_group = get_root_of('Customer Group')
 		territory = get_root_of('Territory')
@@ -98,7 +99,10 @@ def create_customer(doc):
 		'customer_name': doc.patient_name,
 		'customer_group': customer_group,
 		'territory' : territory,
-		'customer_type': 'Individual'
+		'customer_type': 'Individual',
+		'default_currency': doc.default_currency,
+		'default_price_ist': doc.default_price_list,
+		'language': doc.language
 	}).insert(ignore_permissions=True, ignore_mandatory=True)
 
 	frappe.db.set_value('Patient', doc.name, 'customer', customer.name)
