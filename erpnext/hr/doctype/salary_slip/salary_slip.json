@@ -372,8 +372,7 @@
    "fieldtype": "Table",
    "label": "Employee Loan",
    "options": "Salary Slip Loan",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "section_break_43",
@@ -464,7 +463,7 @@
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-31 17:13:45.146271",
+ "modified": "2020-04-09 20:02:53.159827",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Slip",

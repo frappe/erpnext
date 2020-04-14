@@ -99,13 +99,10 @@ def create_item_from_template(doc):
 	# get item price list to insert item price
 	if doc.lab_test_rate != 0.0:
 		price_list_name = frappe.db.get_value("Price List", {"selling": 1})
-		if(doc.lab_test_rate):
+		if doc.lab_test_rate:
 			make_item_price(item.name, price_list_name, doc.lab_test_rate)
-			item.standard_rate = doc.lab_test_rate
 		else:
 			make_item_price(item.name, price_list_name, 0.0)
-			item.standard_rate = 0.0
-	item.save(ignore_permissions = True)
 	# Set item in the template
 	frappe.db.set_value("Lab Test Template", doc.name, "item", item.name)
 

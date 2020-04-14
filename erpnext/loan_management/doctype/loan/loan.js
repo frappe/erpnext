@@ -97,6 +97,8 @@ frappe.ui.form.on('Loan', {
 				"company": frm.doc.company,
 				"applicant_type": frm.doc.applicant_type,
 				"applicant": frm.doc.applicant,
+				"pending_amount": frm.doc.loan_amount - frm.doc.disbursed_amount > 0 ?
+					frm.doc.loan_amount - frm.doc.disbursed_amount : 0,
 				"as_dict": 1
 			},
 			method: "erpnext.loan_management.doctype.loan.loan.make_loan_disbursement",
@@ -149,10 +151,10 @@ frappe.ui.form.on('Loan', {
 			return frappe.call({
 				method: "erpnext.loan_management.doctype.loan.loan.get_loan_application",
 				args: {
-                    "loan_application": frm.doc.loan_application
-                },
-                callback: function (r) {
-                    if (!r.exc && r.message) {
+					"loan_application": frm.doc.loan_application
+				},
+				callback: function (r) {
+					if (!r.exc && r.message) {
 
 						let loan_fields = ["loan_type", "loan_amount", "repayment_method",
 							"monthly_repayment_amount", "repayment_periods", "rate_of_interest", "is_secured_loan"]
