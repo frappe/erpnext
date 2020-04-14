@@ -156,8 +156,11 @@ frappe.ui.form.on('Payment Entry', {
 
 		frm.toggle_display("base_paid_amount", frm.doc.paid_from_account_currency != company_currency);
 
-		frm.toggle_display("base_received_amount", (frm.doc.paid_to_account_currency != company_currency &&
-			frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency));
+		frm.toggle_display("base_received_amount", (
+			frm.doc.paid_to_account_currency != company_currency 
+			&& frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency 
+			&& frm.doc.base_paid_amount != frm.doc.base_received_amount
+		));
 
 		frm.toggle_display("received_amount", (frm.doc.payment_type=="Internal Transfer" ||
 			frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency))
@@ -501,6 +504,7 @@ frappe.ui.form.on('Payment Entry', {
 	paid_amount: function(frm) {
 		frm.set_value("base_paid_amount", flt(frm.doc.paid_amount) * flt(frm.doc.source_exchange_rate));
 		frm.trigger("reset_received_amount");
+		frm.events.hide_unhide_fields(frm);
 	},
 
 	received_amount: function(frm) {
@@ -524,6 +528,7 @@ frappe.ui.form.on('Payment Entry', {
 			frm.events.set_unallocated_amount(frm);
 
 		frm.set_paid_amount_based_on_received_amount = false;
+		frm.events.hide_unhide_fields(frm);
 	},
 
 	reset_received_amount: function(frm) {
