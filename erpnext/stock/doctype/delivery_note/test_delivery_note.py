@@ -21,6 +21,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation \
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order, create_dn_against_so
 from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
 from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
+from erpnext.stock.doctype.item.test_item import create_item
 
 class TestDeliveryNote(unittest.TestCase):
 	def setUp(self):
@@ -433,6 +434,15 @@ class TestDeliveryNote(unittest.TestCase):
 		update_delivery_note_status(dn.name, "Closed")
 		self.assertEqual(frappe.db.get_value("Delivery Note", dn.name, "Status"), "Closed")
 
+	def test_customer_provided_parts_dn(self):
+		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
+		dn = create_delivery_note(item_code='CUST-0987', rate=0)
+		self.assertEqual(dn.get("items")[0].allow_zero_valuation_rate, 1)
+
+		# test if Delivery Note with rate is allowed against Customer Provided Item
+		dn2 = create_delivery_note(item_code='CUST-0987', do_not_save=True)
+		self.assertRaises(frappe.ValidationError, dn2.save)
+
 	def test_dn_billing_status_case1(self):
 		# SO -> DN -> SI
 		so = make_sales_order()
@@ -663,7 +673,7 @@ def create_delivery_note(**args):
 		"item_code": args.item or args.item_code or "_Test Item",
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"qty": args.qty or 1,
-		"rate": args.rate or 100,
+		"rate": args.rate if args.get("rate") is not None else 100,
 		"conversion_factor": 1.0,
 		"allow_zero_valuation_rate": args.allow_zero_valuation_rate or 1,
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",

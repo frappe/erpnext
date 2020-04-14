@@ -46,6 +46,7 @@
   "is_subcontracted",
   "supplier_warehouse",
   "items_section",
+  "scan_barcode",
   "items",
   "pricing_rule_details",
   "pricing_rules",
@@ -1076,13 +1077,18 @@
    "label": "Inter Company Reference",
    "options": "Delivery Note",
    "read_only": 1
+  },
+  {
+   "fieldname": "scan_barcode",
+   "fieldtype": "Data",
+   "label": "Scan Barcode"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-11 12:58:46.515404",
+ "modified": "2020-04-06 16:31:37.444891",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
