@@ -95,7 +95,8 @@ erpnext.PointOfSale.Payment = class {
 			// reset and hide all control fields
 			$(`.mode-of-payment-control`).addClass('d-none');
 			$(`.shortcuts`).addClass('d-none');
-			me.$payment_modes.find(`.${mode}-amount`).addClass('d-none');
+			me.$payment_modes.find(`.${mode}-amount`).removeClass('d-none');
+			me.$payment_modes.find(`.loyalty-program-name`).addClass('d-none');
 
 			// remove highlight from all mode-of-payments except the clicked one
 			$('.mode-of-payment').not(this).removeClass('border-primary');
@@ -106,6 +107,7 @@ erpnext.PointOfSale.Payment = class {
 				clicked_mode.find('.mode-of-payment-control').addClass('d-none');
 				clicked_mode.find('.shortcuts').addClass('d-none');
 				me.$payment_modes.find(`.${mode}-amount`).removeClass('d-none');
+				me.$payment_modes.find(`.loyalty-program-name`).addClass('d-none');
 				me.selected_mode = '';
 				me.toggle_numpad(false);
 			} else {
@@ -114,6 +116,7 @@ erpnext.PointOfSale.Payment = class {
 				clicked_mode.find('.mode-of-payment-control').removeClass('d-none');
 				clicked_mode.find('.shortcuts').removeClass('d-none');
 				me.$payment_modes.find(`.${mode}-amount`).addClass('d-none');
+				me.$payment_modes.find(`.loyalty-program-name`).removeClass('d-none');
 				me.toggle_numpad(true);
 				me.selected_mode = me[`${mode}_control`];
 				me.selected_mode?.$input.get(0).focus();
@@ -135,6 +138,11 @@ erpnext.PointOfSale.Payment = class {
 
 		frappe.ui.form.on('POS Invoice', 'paid_amount', (frm, cdt, cdn) => {
 			this.show_totals(frm.doc);
+		})
+
+		frappe.ui.form.on('POS Invoice', 'loyalty_amount', (frm) => {
+			const formatted_currency = format_currency(frm.doc.loyalty_amount, frm.doc.currency);
+			this.$payment_modes.find(`.loyalty-points-amount`).html(formatted_currency);
 		})
 	}
 
@@ -199,14 +207,17 @@ erpnext.PointOfSale.Payment = class {
 				const mode = p.mode_of_payment.replace(' ', '_').toLowerCase();
 				const payment_type = p.type;
 				const margin = i % 2 === 0 ? 'pr-2' : 'pl-2';
+				const amount = p.amount > 0 ? format_currency(p.amount, currency) : '';
+
 				return (
-				`<div class="w-half ${margin}">
-					<div class="mode-of-payment rounded border border-grey text-grey text-md
-							mb-4 p-8 pt-4 pb-4 no-select pointer" data-mode="${mode}" data-payment-type="${payment_type}">
-						${p.mode_of_payment}
-						<div class="${mode} mode-of-payment-control mt-4 flex flex-1 items-center d-none"></div>
-					</div>
-				</div>`
+					`<div class="w-half ${margin}">
+						<div class="mode-of-payment rounded border border-grey text-grey text-md
+								mb-4 p-8 pt-4 pb-4 no-select pointer" data-mode="${mode}" data-payment-type="${payment_type}">
+							${p.mode_of_payment}
+							<div class="${mode}-amount inline float-right text-bold">${amount}</div>
+							<div class="${mode} mode-of-payment-control mt-4 flex flex-1 items-center d-none"></div>
+						</div>
+					</div>`
 				)
 			   }).join('')
 		   }`
@@ -223,6 +234,9 @@ erpnext.PointOfSale.Payment = class {
 					onchange: function() {
 						frappe.model.set_value(p.doctype, p.name, 'amount', flt(this.value))
 							.then(() => me.show_totals());
+
+						const formatted_currency = format_currency(this.value, currency);
+						me.$payment_modes.find(`.${mode}-amount`).html(formatted_currency);
 					}
 				},
 				parent: this.$payment_modes.find(`.${mode}.mode-of-payment-control`),
@@ -258,6 +272,9 @@ erpnext.PointOfSale.Payment = class {
 		const me = this;
 
 		frappe.db.get_value('Customer', doc.customer, 'loyalty_program', ({ loyalty_program }) => {
+			if (!loyalty_program) {
+				return this.render_add_payment_method_dom();
+			}
 
 			const lp_details_promise = this.get_loyalty_program_details(doc.customer, loyalty_program, doc.posting_date, doc.company);
 
@@ -272,11 +289,14 @@ erpnext.PointOfSale.Payment = class {
 				}
 
 				const margin = this.$payment_modes.children().length % 2 === 0 ? 'pr-2' : 'pl-2';
+				const amount = doc.loyalty_amount > 0 ? format_currency(doc.loyalty_amount, doc.currency) : '';
 				this.$payment_modes.append(
 					`<div class="w-half ${margin}">
 						<div class="mode-of-payment rounded border border-grey text-grey text-md
 								mb-4 p-8 pt-4 pb-4 no-select pointer" data-mode="loyalty-points" data-payment-type="loyalty-points">
 							Loyalty Points
+							<div class="loyalty-points-amount inline float-right text-bold">${amount}</div>
+							<div class="loyalty-program-name inline float-right text-bold text-md-0 d-none">${loyalty_program}</div>
 							<div class="loyalty-points mode-of-payment-control mt-4 flex flex-1 items-center d-none"></div>
 						</div>
 					</div>`
@@ -289,20 +309,17 @@ erpnext.PointOfSale.Payment = class {
 						placeholder: __(`Enter loyalty points to be redeemed.`),
 						read_only,
 						onchange: async function() {
-							if (this.value > 0) {
-								!doc.redeem_loyalty_points && await frappe.model.set_value(doc.doctype, doc.name, 'redeem_loyalty_points', 1);
+							const redeem_loyalty_points = this.value > 0 ? 1 : 0;
+							await frappe.model.set_value(doc.doctype, doc.name, 'redeem_loyalty_points', redeem_loyalty_points);
 
-								frappe.model.set_value(doc.doctype, doc.name, 'loyalty_points', flt(this.value))
-							} else {
-								doc.redeem_loyalty_points && frappe.model.set_value(doc.doctype, doc.name, 'redeem_loyalty_points', 0);
-							}
+							frappe.model.set_value(doc.doctype, doc.name, 'loyalty_points', flt(this.value));
 						},
 						description
 					},
 					parent: this.$payment_modes.find(`.loyalty-points.mode-of-payment-control`),
 					render_input: true,
 				});
-				this.loyalty_points_control.toggle_label(false);	
+				this.loyalty_points_control.toggle_label(false);
 
 				this.render_add_payment_method_dom();
 			})
