@@ -32,7 +32,7 @@
   {
    "description": "The number of billing cycles for which the customer should be charged. For example, if a customer is buying a 1-year membership that should be billed on a monthly basis, this value should be 12.",
    "fieldname": "billing_frequency",
-   "fieldtype": "Data",
+   "fieldtype": "Int",
    "label": "Billing Frequency"
   }
  ],
