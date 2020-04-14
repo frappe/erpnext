@@ -666,3 +666,4 @@ erpnext.patches.v12_0.recalculate_requested_qty_in_bin
 erpnext.patches.v12_0.set_total_batch_quantity
 erpnext.patches.v12_0.rename_mws_settings_fields
 erpnext.patches.v12_0.set_updated_purpose_in_pick_list
+erpnext.patches.v12_0.set_valid_till_date_in_supplier_quotation
