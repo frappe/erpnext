@@ -259,13 +259,14 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		expense_account = get_asset_category_account(fieldname = "fixed_asset_account", item = args.item_code, company= args.company)
 
 	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
-	if args.get('doctype') in sales_doctypes:
-		args.uom = item.sales_uom if item.sales_uom else item.stock_uom
-	elif (args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']) or \
-		(args.get('doctype') == 'Material Request' and args.get('material_request_type') == 'Purchase'):
-		args.uom = item.purchase_uom if item.purchase_uom else item.stock_uom
-	else:
-		args.uom = item.stock_uom
+	if not args.get('uom'):
+		if args.get('doctype') in sales_doctypes:
+			args.uom = item.sales_uom if item.sales_uom else item.stock_uom
+		elif (args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']) or \
+			(args.get('doctype') == 'Material Request' and args.get('material_request_type') == 'Purchase'):
+			args.uom = item.purchase_uom if item.purchase_uom else item.stock_uom
+		else:
+			args.uom = item.stock_uom
 
 	out = frappe._dict({
 		"item_code": item.name,
