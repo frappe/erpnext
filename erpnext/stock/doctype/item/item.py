@@ -101,6 +101,7 @@ class Item(WebsiteGenerator):
 		self.add_default_uom_in_conversion_factor_table()
 		self.validate_conversion_factor()
 		self.validate_item_type()
+		self.validate_naming_series()
 		self.check_for_active_boms()
 		self.fill_customer_code()
 		self.check_item_tax()
@@ -186,7 +187,7 @@ class Item(WebsiteGenerator):
 					or frappe.db.get_single_value('Stock Settings', 'default_warehouse'))
 			if default_warehouse:
 				warehouse_company = frappe.db.get_value("Warehouse", default_warehouse, "company")
-			
+
 			if not default_warehouse or warehouse_company != default.company:
 				default_warehouse = frappe.db.get_value('Warehouse',
 					{'warehouse_name': _('Stores'), 'company': default.company})
@@ -521,6 +522,13 @@ class Item(WebsiteGenerator):
 
 		if self.has_serial_no == 0 and self.serial_no_series:
 			self.serial_no_series = None
+
+	def validate_naming_series(self):
+		for field in ["serial_no_series", "batch_number_series"]:
+			series = self.get(field)
+			if series and "#" in series and "." not in series:
+				frappe.throw(_("Invalid naming series (. missing) for {0}")
+					.format(frappe.bold(self.meta.get_field(field).label)))
 
 	def check_for_active_boms(self):
 		if self.default_bom:

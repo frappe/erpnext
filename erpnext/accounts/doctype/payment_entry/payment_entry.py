@@ -81,7 +81,12 @@ class PaymentEntry(AccountsController):
 		self.update_advance_paid()
 		self.update_expense_claim()
 		self.delink_advance_entry_references()
+		self.set_payment_req_status()
 		self.set_status()
+	
+	def set_payment_req_status(self):
+		from erpnext.accounts.doctype.payment_request.payment_request import update_payment_req_status
+		update_payment_req_status(self, None)
 
 	def update_outstanding_amounts(self):
 		self.set_missing_ref_details(force=True)

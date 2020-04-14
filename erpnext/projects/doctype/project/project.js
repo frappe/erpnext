@@ -118,6 +118,11 @@ frappe.ui.form.on("Project", {
 		});
 	},
 
+	collect_progress: function(frm) {
+		if (frm.doc.collect_progress) {
+			frm.set_df_property("message", "reqd", 1);
+		}
+	}
 });
 
 function open_form(frm, doctype, child_doctype, parentfield) {
