@@ -1571,7 +1571,7 @@
    "fieldname": "is_consolidated",
    "fieldtype": "Check",
    "hidden": 1,
-   "label": "Is Consolidated",
+   "label": "Is Consolidated"
   },
   {
    "fetch_from": "customer.is_internal_customer",

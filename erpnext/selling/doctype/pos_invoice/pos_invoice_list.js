@@ -7,7 +7,7 @@ frappe.listview_settings['POS Invoice'] = {
 		"currency", "is_return"],
 	get_indicator: function(doc) {
 		var status_color = {
-			"Draft": "grey",
+			"Draft": "red",
 			"Unpaid": "orange",
 			"Paid": "green",
 			"Submitted": "blue",

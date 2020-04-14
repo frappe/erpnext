@@ -238,6 +238,7 @@ erpnext.PointOfSale.Controller = class {
 	async make_new_invoice() {
 		await this.make_sales_invoice_frm();
 		await this.set_pos_profile_data();
+		this.set_invoice_status();
 		this.cart.update_customer_section(this.frm);
 		this.cart.update_totals_section(this.frm);
 	}
@@ -304,6 +305,11 @@ erpnext.PointOfSale.Controller = class {
 	raise_exception_for_pos_profile() {
 		setTimeout(() => frappe.set_route('List', 'POS Profile'), 2000);
 		frappe.throw(__("POS Profile is required to use Point-of-Sale"));
+	}
+
+	set_invoice_status() {
+		const [status, indicator] = frappe.listview_settings["POS Invoice"].get_indicator(this.frm.doc);
+		this.page.set_indicator(__(`${status}`), indicator);
 	}
 
 	async on_cart_update(args) {
