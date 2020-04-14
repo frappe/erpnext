@@ -211,7 +211,7 @@ erpnext.PointOfSale.Controller = class {
 		this.payment = new erpnext.PointOfSale.Payment({
 			wrapper: this.$component_wrapper,
 			events: {
-				get_doc: () => this.frm.doc,
+				get_frm: () => this.frm || {},
 
 				toggle_other_sections: (show) => {
 					if (show) {

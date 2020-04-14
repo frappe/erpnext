@@ -106,6 +106,13 @@ erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend(
 		this.frm.refresh_fields();
 	},
 
+	loyalty_amount: function(){
+		this.calculate_outstanding_amount();
+		this.frm.refresh_field("outstanding_amount");
+		this.frm.refresh_field("paid_amount");
+		this.frm.refresh_field("base_paid_amount");
+	},
+
 	write_off_outstanding_amount_automatically: function() {
 		if(cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
 			frappe.model.round_floats_in(this.frm.doc, ["grand_total", "paid_amount"]);
@@ -188,5 +195,5 @@ frappe.ui.form.on('POS Invoice', {
 			}
 			frm.set_value("loyalty_amount", loyalty_amount);
 		}
-	},
+	}
 });

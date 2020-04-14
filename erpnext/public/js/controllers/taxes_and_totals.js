@@ -709,8 +709,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			paid_amount += flt(this.frm.doc.loyalty_amount / me.frm.doc.conversion_rate, precision("paid_amount"));
 		}
 
-		this.frm.doc.paid_amount = flt(paid_amount, precision("paid_amount"));
-		this.frm.doc.base_paid_amount = flt(base_paid_amount, precision("base_paid_amount"));
+		this.frm.set_value('paid_amount', flt(paid_amount, precision("paid_amount")));
+		this.frm.set_value('base_paid_amount', flt(base_paid_amount, precision("base_paid_amount")));
 	},
 
 	calculate_change_amount: function(){
