@@ -432,30 +432,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
-	def test_purchase_receipt_without_cost_center(self):
-		if not frappe.db.exists('Location', 'Test Location'):
-			frappe.get_doc({
-				'doctype': 'Location',
-				'location_name': 'Test Location'
-			}).insert()
-		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1")
-
-		stock_in_hand_account = get_inventory_account(pr.company, pr.get("items")[0].warehouse)
-		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
-
-		self.assertTrue(gl_entries)
-
-		expected_values = {
-			"Stock Received But Not Billed - TCP1": {
-				"cost_center": None
-			},
-			stock_in_hand_account: {
-				"cost_center": None
-			}
-		}
-		for i, gle in enumerate(gl_entries):
-			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
-
 	def test_make_purchase_invoice_from_pr_for_returned_qty(self):
 		from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order, create_pr_against_po
 

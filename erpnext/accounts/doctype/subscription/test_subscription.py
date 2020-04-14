@@ -101,6 +101,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.delete()
 
 	def test_invoice_is_generated_at_end_of_billing_period(self):
+		frappe.db.set_value("Global Defaults", None, "default_company", "_Test Company")
 		subscription = frappe.new_doc('Subscription')
 		subscription.customer = '_Test Customer'
 		subscription.start = '2018-01-01'
@@ -116,8 +117,10 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(subscription.current_invoice_start, '2018-01-01')
 		self.assertEqual(subscription.status, 'Past Due Date')
 		subscription.delete()
+		frappe.db.set_value("Global Defaults", None, "default_company", None)
 
 	def test_status_goes_back_to_active_after_invoice_is_paid(self):
+		frappe.db.set_value("Global Defaults", None, "default_company", "_Test Company")
 		subscription = frappe.new_doc('Subscription')
 		subscription.customer = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
@@ -141,8 +144,10 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(len(subscription.invoices), 1)
 
 		subscription.delete()
+		frappe.db.set_value("Global Defaults", None, "default_company", None)
 
 	def test_subscription_cancel_after_grace_period(self):
+		frappe.db.set_value("Global Defaults", None, "default_company", "_Test Company")
 		settings = frappe.get_single('Subscription Settings')
 		default_grace_period_action = settings.cancel_after_grace
 		settings.cancel_after_grace = 1
@@ -164,8 +169,11 @@ class TestSubscription(unittest.TestCase):
 		settings.cancel_after_grace = default_grace_period_action
 		settings.save()
 		subscription.delete()
+		frappe.db.set_value("Global Defaults", None, "default_company", None)
 
 	def test_subscription_unpaid_after_grace_period(self):
+		frappe.db.set_value("Global Defaults", None, "default_company", "_Test Company")
+
 		settings = frappe.get_single('Subscription Settings')
 		default_grace_period_action = settings.cancel_after_grace
 		settings.cancel_after_grace = 0
@@ -187,8 +195,11 @@ class TestSubscription(unittest.TestCase):
 		settings.cancel_after_grace = default_grace_period_action
 		settings.save()
 		subscription.delete()
+		frappe.db.set_value("Global Defaults", None, "default_company", None)
 
 	def test_subscription_invoice_days_until_due(self):
+		frappe.db.set_value("Global Defaults", None, "default_company", "_Test Company")
+
 		subscription = frappe.new_doc('Subscription')
 		subscription.customer = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
@@ -200,8 +211,11 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(subscription.status, 'Active')
 
 		subscription.delete()
+		frappe.db.set_value("Global Defaults", None, "default_company", None)
 
 	def test_subscription_is_past_due_doesnt_change_within_grace_period(self):
+		frappe.db.set_value("Global Defaults", None, "default_company", "_Test Company")
+
 		settings = frappe.get_single('Subscription Settings')
 		grace_period = settings.grace_period
 		settings.grace_period = 1000
@@ -229,6 +243,7 @@ class TestSubscription(unittest.TestCase):
 		settings.grace_period = grace_period
 		settings.save()
 		subscription.delete()
+		frappe.db.set_value("Global Defaults", None, "default_company", None)
 
 	def test_subscription_remains_active_during_invoice_period(self):
 		subscription = frappe.new_doc('Subscription')
@@ -257,6 +272,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.delete()
 
 	def test_subscription_cancelation(self):
+		frappe.db.set_value("Global Defaults", None, "default_company", "_Test Company")
 		subscription = frappe.new_doc('Subscription')
 		subscription.customer = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
@@ -266,8 +282,10 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(subscription.status, 'Cancelled')
 
 		subscription.delete()
+		frappe.db.set_value("Global Defaults", None, "default_company", None)
 
 	def test_subscription_cancellation_invoices(self):
+		frappe.db.set_value("Global Defaults", None, "default_company", "_Test Company")
 		settings = frappe.get_single('Subscription Settings')
 		to_prorate = settings.prorate
 		settings.prorate = 1
@@ -301,8 +319,11 @@ class TestSubscription(unittest.TestCase):
 		subscription.delete()
 		settings.prorate = to_prorate
 		settings.save()
+		frappe.db.set_value("Global Defaults", None, "default_company", None)
 
 	def test_subscription_cancellation_invoices_with_prorata_false(self):
+		frappe.db.set_value("Global Defaults", None, "default_company", "_Test Company")
+
 		settings = frappe.get_single('Subscription Settings')
 		to_prorate = settings.prorate
 		settings.prorate = 0
@@ -321,8 +342,11 @@ class TestSubscription(unittest.TestCase):
 		settings.save()
 
 		subscription.delete()
+		frappe.db.set_value("Global Defaults", None, "default_company", None)
 
 	def test_subscription_cancellation_invoices_with_prorata_true(self):
+		frappe.db.set_value("Global Defaults", None, "default_company", "_Test Company")
+
 		settings = frappe.get_single('Subscription Settings')
 		to_prorate = settings.prorate
 		settings.prorate = 1
@@ -345,8 +369,10 @@ class TestSubscription(unittest.TestCase):
 		settings.save()
 
 		subscription.delete()
+		frappe.db.set_value("Global Defaults", None, "default_company", None)
 
 	def test_subcription_cancellation_and_process(self):
+		frappe.db.set_value("Global Defaults", None, "default_company", "_Test Company")
 		settings = frappe.get_single('Subscription Settings')
 		default_grace_period_action = settings.cancel_after_grace
 		settings.cancel_after_grace = 1
@@ -378,8 +404,11 @@ class TestSubscription(unittest.TestCase):
 		settings.cancel_after_grace = default_grace_period_action
 		settings.save()
 		subscription.delete()
+		frappe.db.set_value("Global Defaults", None, "default_company", None)
 
 	def test_subscription_restart_and_process(self):
+		frappe.db.set_value("Global Defaults", None, "default_company", "_Test Company")
+
 		settings = frappe.get_single('Subscription Settings')
 		default_grace_period_action = settings.cancel_after_grace
 		settings.grace_period = 0
@@ -416,8 +445,11 @@ class TestSubscription(unittest.TestCase):
 		settings.cancel_after_grace = default_grace_period_action
 		settings.save()
 		subscription.delete()
+		frappe.db.set_value("Global Defaults", None, "default_company", None)
 
 	def test_subscription_unpaid_back_to_active(self):
+		frappe.db.set_value("Global Defaults", None, "default_company", "_Test Company")
+
 		settings = frappe.get_single('Subscription Settings')
 		default_grace_period_action = settings.cancel_after_grace
 		settings.cancel_after_grace = 0
@@ -450,6 +482,7 @@ class TestSubscription(unittest.TestCase):
 		settings.cancel_after_grace = default_grace_period_action
 		settings.save()
 		subscription.delete()
+		frappe.db.set_value("Global Defaults", None, "default_company", None)
 
 	def test_restart_active_subscription(self):
 		subscription = frappe.new_doc('Subscription')
@@ -462,6 +495,8 @@ class TestSubscription(unittest.TestCase):
 		subscription.delete()
 
 	def test_subscription_invoice_discount_percentage(self):
+		frappe.db.set_value("Global Defaults", None, "default_company", "_Test Company")
+
 		subscription = frappe.new_doc('Subscription')
 		subscription.customer = '_Test Customer'
 		subscription.additional_discount_percentage = 10
@@ -475,8 +510,11 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(invoice.apply_discount_on, 'Grand Total')
 
 		subscription.delete()
+		frappe.db.set_value("Global Defaults", None, "default_company", None)
 
 	def test_subscription_invoice_discount_amount(self):
+		frappe.db.set_value("Global Defaults", None, "default_company", "_Test Company")
+
 		subscription = frappe.new_doc('Subscription')
 		subscription.customer = '_Test Customer'
 		subscription.additional_discount_amount = 11
@@ -490,10 +528,12 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(invoice.apply_discount_on, 'Grand Total')
 
 		subscription.delete()
+		frappe.db.set_value("Global Defaults", None, "default_company", None)
 
 	def test_prepaid_subscriptions(self):
 		# Create a non pre-billed subscription, processing should not create
 		# invoices.
+		frappe.db.set_value("Global Defaults", None, "default_company", "_Test Company")
 		subscription = frappe.new_doc('Subscription')
 		subscription.customer = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
@@ -509,8 +549,10 @@ class TestSubscription(unittest.TestCase):
 		subscription.process()
 
 		self.assertEqual(len(subscription.invoices), 1)
+		frappe.db.set_value("Global Defaults", None, "default_company", None)
 
 	def test_prepaid_subscriptions_with_prorate_true(self):
+		frappe.db.set_value("Global Defaults", None, "default_company", "_Test Company")
 		settings = frappe.get_single('Subscription Settings')
 		to_prorate = settings.prorate
 		settings.prorate = 1
@@ -538,3 +580,4 @@ class TestSubscription(unittest.TestCase):
 		settings.save()
 
 		subscription.delete()
+		frappe.db.set_value("Global Defaults", None, "default_company", None)

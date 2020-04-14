@@ -108,7 +108,7 @@ class TestPlaidSettings(unittest.TestCase):
 		}
 
 		bank = json.dumps(frappe.get_doc("Bank", "Citi").as_dict(), default=json_handler)
-		company = frappe.db.get_single_value('Global Defaults', 'default_company')
+		company = frappe.db.get_single_value('Global Defaults', 'default_company') or '_Test Company'
 
 		if frappe.db.get_value("Company", company, "default_bank_account") is None:
 			frappe.db.set_value("Company", company, "default_bank_account", get_default_bank_cash_account(company, "Cash").get("account"))

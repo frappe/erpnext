@@ -36,16 +36,18 @@ class TestProcurementTracker(unittest.TestCase):
 		mr = make_material_request(company="_Test Procurement Company", warehouse=warehouse)
 		po = make_purchase_order(mr.name)
 		po.supplier = "_Test Supplier"
-		po.get("items")[0].cost_center = "_Test Cost Center - _TC"
+		po.company = "_Test Procurement Company"
+		po.get("items")[0].cost_center = "_Test Cost Center - _TPC"
 		po.submit()
 		pr = make_purchase_receipt(po.name)
+		pr.company = "_Test Procurement Company"
 		pr.submit()
 		frappe.db.commit()
 		date_obj = datetime.date(datetime.now())
 
 		expected_data = {
 			"material_request_date": date_obj,
-			"cost_center": "_Test Cost Center - _TC",
+			"cost_center": "_Test Cost Center - _TPC",
 			"project": None,
 			"requesting_site": "_Test Procurement Warehouse - _TPC",
 			"requestor": "Administrator",

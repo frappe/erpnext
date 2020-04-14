@@ -104,7 +104,8 @@ def mark_attendance(employee, date=today(), status='Present'):
 				"doctype": "Attendance",
 				"employee": employee.name,
 				"attendance_date": date,
-				"status": status
+				"status": status,
+				"company": "_Test Company"
 		})
 		attendance.save()
 		attendance.submit()
