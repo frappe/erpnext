@@ -210,7 +210,7 @@ class LoanRepayment(AccountsController):
 		)
 
 		if gle_map:
-			make_gl_entries(gle_map, cancel=cancel, adv_adj=adv_adj)
+			make_gl_entries(gle_map, cancel=cancel, adv_adj=adv_adj, merge_entries=False)
 
 def create_repayment_entry(loan, applicant, company, posting_date, loan_type,
 	payment_type, interest_payable, payable_principal_amount, amount_paid, penalty_amount=None):
@@ -223,7 +223,7 @@ def create_repayment_entry(loan, applicant, company, posting_date, loan_type,
 		"posting_date": posting_date,
 		"applicant": applicant,
 		"penalty_amount": penalty_amount,
-		"interets_payable": interest_payable,
+		"interst_payable": interest_payable,
 		"payable_principal_amount": payable_principal_amount,
 		"amount_paid": amount_paid,
 		"loan_type": loan_type
@@ -236,7 +236,8 @@ def get_accrued_interest_entries(against_loan):
 		fields=["name", "interest_amount", "posting_date", "payable_principal_amount"],
 		filters = {
 			"loan": against_loan,
-			"is_paid": 0
+			"is_paid": 0,
+			"docstatus": 1
 		}, order_by="posting_date")
 
 	return accrued_interest_entries
@@ -272,7 +273,9 @@ def get_amounts(amounts, against_loan, posting_date, payment_type):
 		total_pending_interest += entry.interest_amount
 		payable_principal_amount += entry.payable_principal_amount
 
-		pending_accrual_entries.setdefault(entry.name, entry.interest_amount)
+		pending_accrual_entries.setdefault(entry.name,
+			flt(entry.interest_amount) + flt(entry.payable_principal_amount))
+
 		final_due_date = due_date
 
 	pending_principal_amount = against_loan_doc.total_payment - against_loan_doc.total_principal_paid - against_loan_doc.total_interest_payable

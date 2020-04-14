@@ -164,7 +164,7 @@ def build_forest(data):
 	error_messages = []
 
 	for i in data:
-		account_name, _, account_number, is_group, account_type, root_type = i
+		account_name, dummy, account_number, is_group, account_type, root_type = i
 
 		if not account_name:
 			error_messages.append("Row {0}: Please enter Account Name".format(line_no))
