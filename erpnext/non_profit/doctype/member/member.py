@@ -102,16 +102,16 @@ def create_member_subscription_order(user_details):
 	"""Summary
 
 	Args:
-	    user_details (TYPE): Description
+		user_details (TYPE): Description
 
 	Returns:
-	    Dictionary: Dictionary with subscription details
-	    {
-	    	'subscription_details': {
-	    								'plan_id': 'plan_EXwyxDYDCj3X4v',
-							  			'billing_frequency': 24,
-							  			'customer_notify': 1
-							  		},
+		Dictionary: Dictionary with subscription details
+		{
+			'subscription_details': {
+										'plan_id': 'plan_EXwyxDYDCj3X4v',
+										'billing_frequency': 24,
+										'customer_notify': 1
+									},
 			'subscription_id': 'sub_EZycCvXFvqnC6p'
 		}
 	"""

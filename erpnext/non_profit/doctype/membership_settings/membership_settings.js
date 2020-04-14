@@ -3,10 +3,6 @@
 
 frappe.ui.form.on('Membership Settings', {
 	refresh: function(frm) {
-		// if (frm.doc.enable_razorpay) {
-		// 	frm.add_custom_button(__("Fetch Plans from RazorPay"), () => {
-		// 		frm.trigger("fetch_razorpay_plans")
-		// 	});
-		// }
+
 	}
 });
