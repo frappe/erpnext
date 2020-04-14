@@ -15,7 +15,6 @@ from erpnext.hr.doctype.payroll_entry.payroll_entry import get_month_details
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.employee_tax_exemption_declaration.test_employee_tax_exemption_declaration \
 	import create_payroll_period, create_exemption_category
-from erpnext.hr.doctype.leave_application.test_leave_application import set_leave_approver
 
 class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
@@ -83,7 +82,6 @@ class TestSalarySlip(unittest.TestCase):
 		frappe.db.set_value("HR Settings", None, "payroll_based_on", "Leave")
 
 	def test_payment_days_based_on_leave_application(self):
-		from erpnext.hr.doctype.attendance.attendance import mark_attendance
 		no_of_days = self.get_no_of_days()
 
 		# Payroll based on attendance
