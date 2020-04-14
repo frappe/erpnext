@@ -435,7 +435,6 @@ def install_defaults(args=None):
 	global_defaults.update({
 		'current_fiscal_year': current_fiscal_year.name,
 		'default_currency': args.get('currency'),
-		'default_company':args.get('company_name')	,
 		"country": args.get("country"),
 	})
 

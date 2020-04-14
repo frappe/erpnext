@@ -2,6 +2,7 @@
 	{
 		"doctype": "Opportunity",
 		"name": "_Test Opportunity 1",
+		"company": "Wind Power LLC",
 		"opportunity_from": "Lead",
 		"enquiry_type": "Sales",
 		"party_name": "_T-Lead-00001",
