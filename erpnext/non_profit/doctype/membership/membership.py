@@ -124,18 +124,3 @@ Administrator""".format(get_link_to_form("Error Log", log.name))
 		sendmail_to_system_managers("[Important] [ERPNext] Razorpay membership webhook failed , please check.", content)
 	except:
 		pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
