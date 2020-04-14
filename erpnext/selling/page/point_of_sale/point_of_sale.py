@@ -37,20 +37,33 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 	lft, rgt = frappe.db.get_value('Item Group', item_group, ['lft', 'rgt'])
 	# locate function is used to sort by closest match from the beginning of the value
 
-
 	result = []
 
-	items_data = frappe.db.sql(""" SELECT name as item_code,
-			item_name, image as item_image, idx as idx,is_stock_item
+	items_data = frappe.db.sql("""
+		SELECT
+			name AS item_code,
+			item_name,
+			stock_uom,
+			image AS item_image,
+			idx AS idx,
+			is_stock_item
 		FROM
 			`tabItem`
 		WHERE
-			disabled = 0 and has_variants = 0 and is_sales_item = 1
-			and item_group in (select name from `tabItem Group` where lft >= {lft} and rgt <= {rgt})
-			and {condition} order by idx desc limit {start}, {page_length}"""
+			disabled = 0
+				AND has_variants = 0
+				AND is_sales_item = 1
+				AND item_group in (SELECT name FROM `tabItem Group` WHERE lft >= {lft} AND rgt <= {rgt})
+				AND {condition}
+		ORDER BY
+			idx desc
+		LIMIT
+			{start}, {page_length}"""
 		.format(
-			start=start, page_length=page_length,
-			lft=lft, rgt=rgt,
+			start=start,
+			page_length=page_length,
+			lft=lft,
+			rgt=rgt,
 			condition=condition
 		), as_dict=1)
 
@@ -64,30 +77,40 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 		for d in item_prices_data:
 			item_prices[d.item_code] = d
 
-
+		# prepare filter for bin query
+		bin_filters = {'item_code': ['in', items]}
+		if warehouse:
+			bin_filters['warehouse'] = warehouse
 		if display_items_in_stock:
-			filters = {'actual_qty': [">", 0], 'item_code': ['in', items]}
+			bin_filters['actual_qty'] = [">", 0]
 
-			if warehouse:
-				filters['warehouse'] = warehouse
+		# query item bin
+		bin_data = frappe.get_all(
+			'Bin', fields=['item_code', 'sum(actual_qty) as actual_qty'],
+			filters=bin_filters, group_by='item_code'
+		)
 
-			bin_data = frappe._dict(
-				frappe.get_all("Bin", fields = ["item_code", "sum(actual_qty) as actual_qty"],
-				filters = filters, group_by = "item_code")
-			)
+		# convert list of dict into dict as {item_code: actual_qty}
+		bin_dict = {}
+		for b in bin_data:
+			bin_dict[b.get('item_code')] = b.get('actual_qty')
 
 		for item in items_data:
-			row = {}
+			item_code = item.item_code
+			item_price = item_prices.get(item_code) or {}
+			item_stock_qty = bin_dict.get(item_code)
 
-			row.update(item)
-			item_price = item_prices.get(item.item_code) or {}
-			row.update({
-				'price_list_rate': item_price.get('price_list_rate'),
-				'currency': item_price.get('currency'),
-				'actual_qty': bin_data.get('actual_qty')
-			})
-
-			result.append(row)
+			if display_items_in_stock and not item_stock_qty:
+				pass
+			else:
+				row = {}
+				row.update(item)
+				row.update({
+					'price_list_rate': item_price.get('price_list_rate'),
+					'currency': item_price.get('currency'),
+					'actual_qty': item_stock_qty,
+				})
+				result.append(row)
 
 	res = {
 		'items': result

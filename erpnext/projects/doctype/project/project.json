@@ -435,7 +435,7 @@
   },
   {
    "depends_on": "collect_progress",
-   "description": "Message will sent to users to get their status on the project",
+   "description": "Message will be sent to the users to get their status on the Project",
    "fieldname": "message",
    "fieldtype": "Text",
    "label": "Message"
@@ -444,7 +444,7 @@
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "max_attachments": 4,
- "modified": "2019-09-24 15:02:50.208301",
+ "modified": "2020-04-09 14:17:15.524529",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

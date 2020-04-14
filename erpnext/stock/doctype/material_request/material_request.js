@@ -19,11 +19,6 @@ frappe.ui.form.on('Material Request', {
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.ordered_qty) ? "green" : "orange"; });
 
-		frm.set_query("item_code", "items", function() {
-			return {
-				query: "erpnext.controllers.queries.item_query"
-			};
-		});
 	},
 
 	onload: function(frm) {
@@ -145,6 +140,8 @@ frappe.ui.form.on('Material Request', {
 	},
 
 	get_item_data: function(frm, item) {
+		if (item && !item.item_code) { return; }
+
 		frm.call({
 			method: "erpnext.stock.get_item_details.get_item_details",
 			child: item,
@@ -357,6 +354,22 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 
 	validate: function() {
 		set_schedule_date(this.frm);
+	},
+
+	onload: function(doc, cdt, cdn) {
+		this.frm.set_query("item_code", "items", function() {
+			if (doc.material_request_type == "Customer Provided") {
+				return{
+					query: "erpnext.controllers.queries.item_query",
+					filters:{ 'customer': me.frm.doc.customer }
+				}
+			} else if (doc.material_request_type != "Manufacture") {
+				return{
+					query: "erpnext.controllers.queries.item_query",
+					filters: {'is_purchase_item': 1}
+				}
+			}
+		});
 	},
 
 	items_add: function(doc, cdt, cdn) {
