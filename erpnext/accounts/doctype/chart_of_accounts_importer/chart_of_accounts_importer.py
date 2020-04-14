@@ -97,7 +97,7 @@ def build_forest(data):
 				return [parent_account]
 			elif account_name == child:
 				parent_account_list = return_parent(data, parent_account)
-				if not parent_account_list:
+				if not parent_account_list and parent_account:
 					frappe.throw(_("The parent account {0} does not exists")
 						.format(parent_account))
 				return [child] + parent_account_list
