@@ -198,7 +198,8 @@ def add_healthcare_service_unit_tree_root():
 	 {
 	  "doctype": "Healthcare Service Unit",
 	  "healthcare_service_unit_name": "All Healthcare Service Units",
-	  "is_group": 1
+	  "is_group": 1,
+	  "company": "Wind Power LLC"
 	 }
 	]
 	insert_record(record)
