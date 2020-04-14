@@ -141,6 +141,7 @@ def expire_allocation(allocation, expiry_date=None):
 	leaves = get_remaining_leaves(allocation)
 	expiry_date = expiry_date if expiry_date else allocation.to_date
 
+	# allows expired leaves entry to be created/reverted
 	if leaves:
 		args = dict(
 			leaves=flt(leaves) * -1,
@@ -160,6 +161,8 @@ def expire_carried_forward_allocation(allocation):
 	from erpnext.hr.doctype.leave_application.leave_application import get_leaves_for_period
 	leaves_taken = get_leaves_for_period(allocation.employee, allocation.leave_type, allocation.from_date, allocation.to_date)
 	leaves = flt(allocation.leaves) + flt(leaves_taken)
+
+	# allow expired leaves entry to be created
 	if leaves > 0:
 		args = frappe._dict(
 			transaction_name=allocation.name,
