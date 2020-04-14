@@ -88,7 +88,7 @@ def create_payroll_period():
 		payroll_period = frappe.get_doc(dict(
 			doctype = 'Payroll Period',
 			name = "_Test Payroll Period",
-			company =  erpnext.get_default_company(),
+			company =  erpnext.get_default_company() or 'Wind Power LLC',
 			start_date = date(date.today().year, 1, 1),
 			end_date = date(date.today().year, 12, 31)
 		)).insert()

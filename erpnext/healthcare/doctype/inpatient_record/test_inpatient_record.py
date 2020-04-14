@@ -84,7 +84,8 @@ def get_healthcare_service_unit():
 		service_unit.service_unit_type = get_service_unit_type()
 		service_unit.inpatient_occupancy = 1
 		service_unit.occupancy_status = "Vacant"
-		service_unit.is_group = 0
+		service_unit.is_group = 0,
+		service_unit.company = "_Test Company"
 		service_unit_parent_name = frappe.db.exists({
 				"doctype": "Healthcare Service Unit",
 				"healthcare_service_unit_name": "All Healthcare Service Units",

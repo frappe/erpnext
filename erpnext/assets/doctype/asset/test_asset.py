@@ -78,6 +78,7 @@ class TestAsset(unittest.TestCase):
 			'qty': 1,
 			'asset': asset.name
 		})
+		doc.company = 'Wind Power LLC'
 
 		doc.set_missing_values()
 		self.assertEquals(doc.items[0].is_fixed_asset, 1)
@@ -595,7 +596,7 @@ def create_asset(**args):
 		"asset_name": args.asset_name or "Macbook Pro 1",
 		"asset_category": "Computers",
 		"item_code": args.item_code or "Macbook Pro",
-		"company": args.company or"_Test Company",
+		"company": args.company or "_Test Company",
 		"purchase_date": "2015-01-01",
 		"calculate_depreciation": 0,
 		"gross_purchase_amount": 100000,

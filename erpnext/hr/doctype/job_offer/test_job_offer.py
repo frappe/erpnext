@@ -55,7 +55,8 @@ def create_job_offer(**args):
 		"job_applicant": args.job_applicant or job_applicant.name,
 		"offer_date": args.offer_date or nowdate(),
 		"designation": args.designation or "Researcher",
-		"status": args.status or "Accepted"
+		"status": args.status or "Accepted",
+		"company": "_Test Company"
 	})
 	return job_offer
 
@@ -68,6 +69,7 @@ def create_staffing_plan(**args):
 	staffing_plan = frappe.get_doc({
 		"doctype": "Staffing Plan",
 		"name": args.name or "Test",
+		"company": "_Test Company",
 		"from_date": args.from_date or nowdate(),
 		"to_date": args.to_date or add_days(nowdate(), 10),
 		"staffing_details": args.staffing_details or [{
