@@ -582,7 +582,7 @@ erpnext.patches.v11_0.rename_bom_wo_fields
 erpnext.patches.v12_0.set_default_homepage_type
 erpnext.patches.v11_0.rename_additional_salary_component_additional_salary
 erpnext.patches.v11_0.renamed_from_to_fields_in_project
-erpnext.patches.v11_0.add_permissions_in_gst_settings
+erpnext.patches.v11_0.add_permissions_in_gst_settings #2020-04-04
 erpnext.patches.v11_1.setup_guardian_role
 execute:frappe.delete_doc('DocType', 'Notification Control')
 erpnext.patches.v12_0.set_gst_category
@@ -652,5 +652,5 @@ erpnext.patches.v12_0.add_export_type_field_in_party_master
 erpnext.patches.v12_0.rename_bank_reconciliation_fields # 2020-01-22
 erpnext.patches.v12_0.create_irs_1099_field_united_states
 erpnext.patches.v12_0.set_permission_einvoicing
-erpnext.patches.v12_0.set_received_qty_in_material_request_as_per_stock_uom
 erpnext.patches.v12_0.set_correct_status_for_expense_claim
+erpnext.patches.v12_0.set_received_qty_in_material_request_as_per_stock_uom

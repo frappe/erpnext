@@ -4,4 +4,8 @@
 import frappe
 
 def execute():
-    frappe.db.sql("update `tabExpense Claim` set status = 'Paid' where (total_advance_amount + total_amount_reimbursed ) = total_sanctioned_amount")
+    frappe.db.sql("""
+        update `tabExpense Claim`
+        set status = 'Paid'
+        where total_advance_amount + total_amount_reimbursed = total_sanctioned_amount + total_taxes_and_charges
+    """)
