@@ -67,7 +67,8 @@ def execute():
 		practitioners = frappe.db.sql("select name from `tabHealthcare Practitioner` where 'active'= 0", as_dict=1)
 		practitioners_lst = [p.name for p in practitioners]
 		frappe.reload_doc('healthcare', 'doctype', 'healthcare_practitioner')
-		frappe.db.sql("update `tabHealthcare Practitioner` set status = 'Disabled' where name IN %(practitioners)s""", {"practitioners": practitioners_lst})
+		if practitioners_lst:
+			frappe.db.sql("update `tabHealthcare Practitioner` set status = 'Disabled' where name IN %(practitioners)s""", {"practitioners": practitioners_lst})
 
 	# set Clinical Procedure status
 	if frappe.db.exists('DocType', 'Clinical Procedure'):
