@@ -13,6 +13,7 @@ class TestPatientMedicalRecord(unittest.TestCase):
 		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
 
 	def test_medical_record(self):
+		frappe.db.set_value('Global Defaults', None, 'default_company', '_Test Company')
 		patient, medical_department, practitioner = create_healthcare_docs()
 		appointment = create_appointment(patient, practitioner, nowdate(), invoice=1)
 		encounter = create_encounter(appointment)
@@ -38,6 +39,7 @@ class TestPatientMedicalRecord(unittest.TestCase):
 		# check for lab test
 		medical_rec = frappe.db.exists('Patient Medical Record', {'status': 'Open', 'reference_name': lab_test.name})
 		self.assertTrue(medical_rec)
+		frappe.db.set_value('Global Defaults', None, 'default_company', None)
 
 
 def create_procedure(appointment):

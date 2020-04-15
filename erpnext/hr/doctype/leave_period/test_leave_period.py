@@ -45,7 +45,7 @@ class TestLeavePeriod(unittest.TestCase):
 
 def create_leave_period(from_date, to_date, company=None):
 	leave_period = frappe.db.get_value('Leave Period',
-		dict(company=company or erpnext.get_default_company(),
+		dict(company=company or erpnext.get_default_company()  or 'Wind Power LLC',
 			from_date=from_date,
 			to_date=to_date,
 			is_active=1), 'name')
@@ -54,7 +54,7 @@ def create_leave_period(from_date, to_date, company=None):
 
 	leave_period = frappe.get_doc({
 		"doctype": "Leave Period",
-		"company": company or erpnext.get_default_company(),
+		"company": company or erpnext.get_default_company() or 'Wind Power LLC',
 		"from_date": from_date,
 		"to_date": to_date,
 		"is_active": 1

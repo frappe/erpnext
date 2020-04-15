@@ -26,7 +26,7 @@ class TestSalarySlip(unittest.TestCase):
 
 		self.make_holiday_list()
 
-		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Slip Test Holiday List")
+		frappe.db.set_value("Company", erpnext.get_default_company() or 'Wind Power LLC', "default_holiday_list", "Salary Slip Test Holiday List")
 		frappe.db.set_value("HR Settings", None, "email_salary_slip_to_employee", 0)
 
 	def tearDown(self):
@@ -175,7 +175,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.net_pay, (flt(ss.gross_pay) - (flt(ss.total_deduction) + flt(ss.total_loan_repayment))))
 
 	def test_payroll_frequency(self):
-		fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company())[0]
+		fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company() or 'Wind Power LLC')[0]
 		month = "%02d" % getdate(nowdate()).month
 		m = get_month_details(fiscal_year, month)
 
@@ -295,7 +295,7 @@ class TestSalarySlip(unittest.TestCase):
 		frappe.db.rollback()
 
 	def make_holiday_list(self):
-		fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company())
+		fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company() or 'Wind Power LLC')
 		if not frappe.db.get_value("Holiday List", "Salary Slip Test Holiday List"):
 			holiday_list = frappe.get_doc({
 				"doctype": "Holiday List",
@@ -499,7 +499,7 @@ def create_exemption_declaration(employee, payroll_period):
 		"doctype": "Employee Tax Exemption Declaration",
 		"employee": employee,
 		"payroll_period": payroll_period,
-		"company": erpnext.get_default_company()
+		"company": erpnext.get_default_company() or 'Wind Power LLC'
 	})
 	declaration.append("declarations", {
 		"exemption_sub_category": "_Test Sub Category",
@@ -588,7 +588,7 @@ def create_additional_salary(employee, payroll_period, amount):
 	frappe.get_doc({
 		"doctype": "Additional Salary",
 		"employee": employee,
-		"company": erpnext.get_default_company(),
+		"company": erpnext.get_default_company() or 'Wind Power LLC',
 		"salary_component": "Performance Bonus",
 		"payroll_date": salary_date,
 		"amount": amount,
