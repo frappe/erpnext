@@ -846,8 +846,7 @@ class SalesInvoice(SellingController):
 
 			if self.exonerated == 1:
 				gl_entries.pop(1)
-			
-			frappe.msgprint("{}".format(gl_entries))
+				
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
 				update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)
 
