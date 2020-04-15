@@ -379,7 +379,31 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				}
 			});
 		}
-	}
+	},
+
+	manufacturer_part_no: function(doc, cdt, cdn) {
+		const row = locals[cdt][cdn];
+
+		if (row.manufacturer_part_no) {
+			frappe.model.get_value('Item Manufacturer',
+				{
+					'item_code': row.item_code,
+					'manufacturer': row.manufacturer,
+					'manufacturer_part_no': row.manufacturer_part_no
+				},
+				'name',
+				function(data) {
+					if (!data) {
+						let msg = {
+							message: __("Manufacturer Part Number <b>{0}</b> is invalid", [row.manufacturer_part_no]),
+							title: __("Invalid Part Number")
+						}
+						frappe.throw(msg);
+					}
+				});
+
+			}
+		}
 });
 
 cur_frm.add_fetch('project', 'cost_center', 'cost_center');
