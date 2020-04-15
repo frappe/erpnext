@@ -10,10 +10,10 @@ from frappe.utils import (nowdate, add_days, getdate, now_datetime, add_to_date,
 	add_months, get_first_day, get_last_day, flt, date_diff)
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
 from erpnext.hr.doctype.salary_structure.test_salary_structure import make_employee
-from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual
-from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import (make_accrual_interest_entry_for_term_loans, days_in_year)
-
-from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import check_for_ltv_shortfall
+from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (process_loan_interest_accrual_for_demand_loans,
+	process_loan_interest_accrual_for_term_loans)
+from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import days_in_year
+from erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall import create_process_loan_security_shortfall
 
 class TestLoan(unittest.TestCase):
 	def setUp(self):
@@ -145,7 +145,7 @@ class TestLoan(unittest.TestCase):
 
 		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=first_date)
 
-		process_loan_interest_accrual(posting_date = last_date)
+		process_loan_interest_accrual_for_demand_loans(posting_date = last_date)
 
 		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(last_date, 10), "Regular Payment", 111118.68)
 		repayment_entry.save()
@@ -186,7 +186,7 @@ class TestLoan(unittest.TestCase):
 			/ (days_in_year(get_datetime(first_date).year) * 100)
 
 		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=first_date)
-		process_loan_interest_accrual(posting_date = last_date)
+		process_loan_interest_accrual_for_demand_loans(posting_date = last_date)
 
 		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(last_date, 5),
 			"Loan Closure", 13315.0681)
@@ -224,7 +224,7 @@ class TestLoan(unittest.TestCase):
 
 		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=add_months(nowdate(), -1))
 
-		make_accrual_interest_entry_for_term_loans(posting_date=nowdate())
+		process_loan_interest_accrual_for_term_loans(posting_date=nowdate())
 
 		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(get_last_day(nowdate()), 5),
 			"Regular Payment", 89768.7534247)
@@ -264,8 +264,8 @@ class TestLoan(unittest.TestCase):
 
 		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=first_date)
 
-		process_loan_interest_accrual(posting_date = add_days(first_date, 15))
-		process_loan_interest_accrual(posting_date = add_days(first_date, 30))
+		process_loan_interest_accrual_for_demand_loans(posting_date = add_days(first_date, 15))
+		process_loan_interest_accrual_for_demand_loans(posting_date = add_days(first_date, 30))
 
 		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(last_date, 1), "Regular Payment", 6500)
 		repayment_entry.save()
@@ -297,7 +297,7 @@ class TestLoan(unittest.TestCase):
 		frappe.db.sql(""" UPDATE `tabLoan Security Price` SET loan_security_price = 100
 			where loan_security='Test Security 2'""")
 
-		check_for_ltv_shortfall()
+		create_process_loan_security_shortfall()
 		loan_security_shortfall = frappe.get_doc("Loan Security Shortfall", {"loan": loan.name})
 		self.assertTrue(loan_security_shortfall)
 

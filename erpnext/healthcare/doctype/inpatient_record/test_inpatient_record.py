@@ -8,11 +8,12 @@ import unittest
 from frappe.utils import now_datetime, today
 from frappe.utils.make_random import get_random
 from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
+from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_patient
 
 class TestInpatientRecord(unittest.TestCase):
 	def test_admit_and_discharge(self):
 		frappe.db.sql("""delete from `tabInpatient Record`""")
-		patient = get_patient()
+		patient = create_patient()
 		# Schedule Admission
 		ip_record = create_inpatient(patient)
 		ip_record.save(ignore_permissions = True)
@@ -41,7 +42,7 @@ class TestInpatientRecord(unittest.TestCase):
 
 	def test_validate_overlap_admission(self):
 		frappe.db.sql("""delete from `tabInpatient Record`""")
-		patient = get_patient()
+		patient = create_patient()
 
 		ip_record = create_inpatient(patient)
 		ip_record.save(ignore_permissions = True)
@@ -74,17 +75,6 @@ def create_inpatient(patient):
 	inpatient_record.inpatient = "Scheduled"
 	inpatient_record.scheduled_date = today()
 	return inpatient_record
-
-def get_patient():
-	patient = get_random("Patient")
-	if not patient:
-		patient = frappe.new_doc("Patient")
-		patient.patient_name = "Test Patient"
-		patient.sex = "Male"
-		patient.save(ignore_permissions=True)
-		return patient.name
-	return patient
-
 
 def get_healthcare_service_unit():
 	service_unit = get_random("Healthcare Service Unit", filters={"inpatient_occupancy": 1})

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2019-08-29 18:11:36.829526",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -49,16 +50,14 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Principal Amount",
-   "options": "Company:company:default_currency",
-   "read_only": 1
+   "options": "Company:company:default_currency"
   },
   {
    "fieldname": "interest_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Interest Amount",
-   "options": "Company:company:default_currency",
-   "read_only": 1
+   "options": "Company:company:default_currency"
   },
   {
    "fieldname": "total_payment",
@@ -79,11 +78,13 @@
    "fieldname": "loan_type",
    "fieldtype": "Link",
    "label": "Loan Type",
-   "options": "Loan Type"
+   "options": "Loan Type",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2019-10-28 09:15:31.174244",
+ "links": [],
+ "modified": "2020-04-09 20:01:53.546364",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Salary Slip Loan",
