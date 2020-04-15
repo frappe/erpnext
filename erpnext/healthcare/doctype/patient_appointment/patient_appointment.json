@@ -2,17 +2,19 @@
  "actions": [],
  "allow_copy": 1,
  "allow_import": 1,
- "autoname": "OP-.######",
+ "autoname": "naming_series:",
  "beta": 1,
  "creation": "2017-05-04 11:52:40.941507",
  "doctype": "DocType",
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
-  "inpatient_record",
+  "naming_series",
   "patient",
-  "appointment_type",
-  "duration",
+  "patient_name",
+  "patient_sex",
+  "patient_age",
+  "inpatient_record",
   "column_break_1",
   "status",
   "procedure_template",
@@ -22,25 +24,22 @@
   "get_prescribed_therapies",
   "therapy_plan",
   "service_unit",
-  "check_availability",
   "section_break_12",
   "practitioner",
   "department",
+  "appointment_type",
   "column_break_17",
   "appointment_date",
   "appointment_time",
-  "section_break_16",
-  "patient_name",
-  "patient_sex",
-  "column_break_21",
-  "patient_age",
-  "section_break_1",
   "appointment_datetime",
+  "duration",
+  "section_break_16",
   "mode_of_payment",
   "paid_amount",
+  "company",
   "column_break_2",
   "invoiced",
-  "company",
+  "ref_sales_invoice",
   "section_break_3",
   "notes",
   "referring_practitioner",
@@ -77,11 +76,10 @@
    "set_only_once": 1
   },
   {
-   "description": "In Minutes",
    "fieldname": "duration",
    "fieldtype": "Int",
    "in_filter": 1,
-   "label": "Duration"
+   "label": "Duration (In Minutes)"
   },
   {
    "fieldname": "column_break_1",
@@ -89,27 +87,28 @@
    "read_only": 1
   },
   {
-   "default": "Scheduled",
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_filter": 1,
+   "in_list_view": 1,
    "label": "Status",
-   "options": "\nScheduled\nOpen\nClosed\nPending\nCancelled",
+   "options": "\nScheduled\nOpen\nClosed\nCancelled",
    "read_only": 1,
    "search_index": 1
   },
   {
    "fieldname": "procedure_template",
    "fieldtype": "Link",
-   "label": "Procedure",
+   "label": "Clinical Procedure Template",
    "options": "Clinical Procedure Template",
    "set_only_once": 1
   },
   {
+   "depends_on": "eval:doc.__islocal && doc.patient",
    "fieldname": "get_procedure_from_encounter",
    "fieldtype": "Button",
-   "label": "Get prescribed procedures"
+   "label": "Get Prescribed Clinical Procedures"
   },
   {
    "fieldname": "procedure_prescription",
@@ -126,12 +125,6 @@
    "label": "Service Unit",
    "options": "Healthcare Service Unit",
    "set_only_once": 1
-  },
-  {
-   "depends_on": "eval:doc.__islocal",
-   "fieldname": "check_availability",
-   "fieldtype": "Button",
-   "label": "Check availability"
   },
   {
    "fieldname": "section_break_12",
@@ -196,16 +189,13 @@
   {
    "fetch_from": "patient.sex",
    "fieldname": "patient_sex",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Gender",
    "no_copy": 1,
+   "options": "Gender",
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
-  },
-  {
-   "fieldname": "column_break_21",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "patient_age",
@@ -214,16 +204,11 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_1",
-   "fieldtype": "Section Break",
-   "set_only_once": 1
-  },
-  {
    "fieldname": "appointment_datetime",
    "fieldtype": "Datetime",
-   "hidden": 1,
-   "label": "Date TIme",
+   "label": "Appointment Datetime",
    "print_hide": 1,
+   "read_only": 1,
    "report_hide": 1,
    "search_index": 1
   },
@@ -247,8 +232,7 @@
    "fieldname": "invoiced",
    "fieldtype": "Check",
    "label": "Invoiced",
-   "read_only": 1,
-   "search_index": 1
+   "read_only": 1
   },
   {
    "fieldname": "company",
@@ -277,8 +261,7 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Referring Practitioner",
-   "options": "Healthcare Practitioner",
-   "set_only_once": 1
+   "options": "Healthcare Practitioner"
   },
   {
    "default": "0",
@@ -309,7 +292,20 @@
    "fieldtype": "Link",
    "label": "Therapy Plan",
    "mandatory_depends_on": "eval: doc.patient && doc.therapy_type",
-   "options": "Therapy Plan",
+   "options": "Therapy Plan"
+  },
+  {
+   "fieldname": "ref_sales_invoice",
+   "fieldtype": "Link",
+   "label": "Reference Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "HLC-APP-.YYYY.-",
    "set_only_once": 1
   }
  ],
