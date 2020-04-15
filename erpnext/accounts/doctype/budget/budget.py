@@ -111,7 +111,7 @@ def validate_expense_against_budget(args):
 			if frappe.get_cached_value('DocType', doctype, 'is_tree'):
 				lft, rgt = frappe.db.get_value(doctype, args.get(budget_against), ["lft", "rgt"])
 				condition = """and exists(select name from `tab%s`
-					where lft<=%s and rgt>=%s and name=b.%s)""" % (doctype, lft, rgt, budget_against)
+					where lft<=%s and rgt>=%s and name=b.%s)""" % (doctype, lft, rgt, budget_against) #nosec
 				args.is_tree = True
 			else:
 				condition = "and b.%s=%s" % (budget_against, frappe.db.escape(args.get(budget_against)))
@@ -135,7 +135,7 @@ def validate_expense_against_budget(args):
 					b.name=ba.parent and b.fiscal_year=%s
 					and ba.account=%s and b.docstatus=1
 					{condition}
-			""".format(condition=condition, budget_against_field=budget_against), (args.fiscal_year, args.account), as_dict=True)
+			""".format(condition=condition, budget_against_field=budget_against), (args.fiscal_year, args.account), as_dict=True) #nosec
 
 			if budget_records:
 				validate_budget_records(args, budget_records)
@@ -262,7 +262,7 @@ def get_actual_expense(args):
 
 		condition2 = """and exists(select name from `tab{doctype}`
 			where lft>=%(lft)s and rgt<=%(rgt)s
-			and name=gle.{budget_against_field})""".format(doctype=args.budget_against_doctype,
+			and name=gle.{budget_against_field})""".format(doctype=args.budget_against_doctype, #nosec
 			budget_against_field=budget_against_field)
 	else:
 		condition2 = """and exists(select name from `tab{doctype}`
