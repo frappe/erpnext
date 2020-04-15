@@ -23,6 +23,7 @@
   "interest_amount",
   "section_break_15",
   "process_loan_interest_accrual",
+  "repayment_schedule_name",
   "amended_from"
  ],
  "fields": [
@@ -135,12 +136,19 @@
   {
    "fieldname": "column_break_14",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "repayment_schedule_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Repayment Schedule Name",
+   "read_only": 1
   }
  ],
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-07 01:22:06.924125",
+ "modified": "2020-04-10 18:31:02.369857",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Interest Accrual",

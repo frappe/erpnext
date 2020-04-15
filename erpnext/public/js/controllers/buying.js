@@ -85,12 +85,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 					filters:{ 'is_sub_contracted_item': 1 }
 				}
 			}
-			else if (me.frm.doc.material_request_type == "Customer Provided") {
-				return{
-					query: "erpnext.controllers.queries.item_query",
-					filters:{ 'customer': me.frm.doc.customer }
-				}
-			}
 			else {
 				return{
 					query: "erpnext.controllers.queries.item_query",
