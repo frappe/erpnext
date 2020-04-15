@@ -92,6 +92,7 @@
   "net_total",
   "total_net_weight",
   "taxes_section",
+  "exonerated",
   "taxes_and_charges",
   "column_break_38",
   "shipping_rule",
@@ -755,7 +756,8 @@
    "oldfieldname": "charge",
    "oldfieldtype": "Link",
    "options": "Sales Taxes and Charges Template",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval:doc.exonerated==1"
   },
   {
    "fieldname": "column_break_38",
@@ -767,14 +769,16 @@
    "label": "Shipping Rule",
    "oldfieldtype": "Button",
    "options": "Shipping Rule",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval:doc.exonerated==1"
   },
   {
    "fieldname": "tax_category",
    "fieldtype": "Link",
    "label": "Tax Category",
    "options": "Tax Category",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval:doc.exonerated==1"
   },
   {
    "fieldname": "section_break_40",
@@ -786,7 +790,8 @@
    "label": "Sales Taxes and Charges",
    "oldfieldname": "other_charges",
    "oldfieldtype": "Table",
-   "options": "Sales Taxes and Charges"
+   "options": "Sales Taxes and Charges",
+   "read_only_depends_on": "eval:doc.exonerated==1"
   },
   {
    "collapsible": 1,
@@ -1695,13 +1700,20 @@
    "fieldtype": "Link",
    "label": "Discount Reason",
    "options": "Reason For Discount"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.docstatus==0",
+   "fieldname": "exonerated",
+   "fieldtype": "Check",
+   "label": "Exonerated"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-09 13:55:41.612853",
+ "modified": "2020-04-14 16:23:02.317449",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

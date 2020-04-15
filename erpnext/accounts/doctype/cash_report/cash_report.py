@@ -12,7 +12,7 @@ class CashReport(Document):
 		self.calculate_totals()
 	
 	def calculate_totals(self):
-		sales_invoice = frappe.get_all("Sales Invoice", ["grand_total","total", "numeration", "total_taxes_and_charges", "name", "taxes_and_charges"], filters = {"is_pos": 0, "company": self.company, "due_date": self.billing_date, "pos": self.pos, "type_document": self.document_type, "docstatus": 1})
+		sales_invoice = frappe.get_all("Sales Invoice", ["exonerated", "grand_total", "total", "numeration", "total_taxes_and_charges", "name", "taxes_and_charges"], filters = {"is_pos": 0, "company": self.company, "due_date": self.billing_date, "pos": self.pos, "type_document": self.document_type, "docstatus": 1})
 		#sales_cards = frappe.get_all("Sales Invoice", ["total"], filters = {"is_pos": 1, "company": self.company, "due_date": self.billing_date, "pos": self.pos, "type_document": self.document_type, "docstatus": 1})
 		
 		#variables general data
@@ -96,43 +96,48 @@ class CashReport(Document):
 				if sale_total < sales.grand_total:
 					total_credit += sales.grand_total - sale_total
 				
-				if sales.taxes_and_charges:
-					taxes_charges = frappe.get_all("Sales Taxes and Charges Template", ["name"], filters = {"name": sales.taxes_and_charges})
+				if sales.exonerated == 1:
+					exonerated = sales.total_taxes_and_charges
+				else:				
+					if sales.taxes_and_charges:
+						# taxes_charges = frappe.get_all("Sales Taxes and Charges Template", ["name"], filters = {"name": sales.taxes_and_charges})
 
-					table_taxes = frappe.get_all("Sales Taxes and Charges", filters = {"parent": taxes_charges[0].name})
-
-					if len(table_taxes) == 0:
-						exonerated += sales.total_taxes_and_charges
-					else:
+						# table_taxes = frappe.get_all("Sales Taxes and Charges", filters = {"parent": taxes_charges[0].name})
+					
 						invoice_table_taxes = frappe.get_all("Sales Taxes and Charges", ["name", "rate", "tax_amount"], filters = {"parent": sales.name})
 
 						for invoice_tax in invoice_table_taxes:
 
 							if invoice_tax.rate == 15:
-								taxed15 += invoice_tax.tax_amount							
+								taxed15 = sales.total
+								isv_taxed15 += invoice_tax.tax_amount							
 							
 							if invoice_tax.rate == 18:
-								taxed18 += invoice_tax.tax_amount
-				else:
-					items = frappe.get_all("Sales Invoice Item", ["item_code", "amount"], filters = {"parent": sales.name})
+								taxed18 = sales.total
+								isv_taxed18 += invoice_tax.tax_amount
+					else:
+						items = frappe.get_all("Sales Invoice Item", ["item_code", "amount"], filters = {"parent": sales.name})
 
-					for item in items:
-						item_taxes = frappe.get_all("Item Tax", ['name', "item_tax_template"], filters = {"parent": item.item_code})
+						for item in items:
+							item_taxes = frappe.get_all("Item Tax", ['name', "item_tax_template"], filters = {"parent": item.item_code})
 						
-						for item_tax in item_taxes:
-							tax_tamplates = frappe.get_all("Item Tax Template", ["name"], filters = {"name": item_tax.item_tax_template})
+							for item_tax in item_taxes:
+								tax_tamplates = frappe.get_all("Item Tax Template", ["name"], filters = {"name": item_tax.item_tax_template})
 							
-							for tax_tamplate in tax_tamplates:
+								for tax_tamplate in tax_tamplates:
 
-								tax_details = frappe.get_all("Item Tax Template Detail", ["name", "tax_rate"], filters = {"parent": tax_tamplate.name})
+									tax_details = frappe.get_all("Item Tax Template Detail", ["name", "tax_rate"], filters = {"parent": tax_tamplate.name})
 								
-								for tax_detail in tax_details:
+									for tax_detail in tax_details:
 
-									if tax_detail.tax_rate == 15:
-										taxed15 += item.amount * (15/100)
+										if tax_detail.tax_rate == 15:
+											taxed15 += item.amount
 								
-									if tax_detail.tax_rate == 18:
-										taxed18 += item.amount * (18/100)
+										if tax_detail.tax_rate == 18:
+											taxed18 += item.amount
+						
+						isv_taxed15 = taxed15 * (15/100)
+						isv_taxed18 = taxed18 * (18/100)
 			
 			for ar in arrmode:
 				row = self.append("totals_table", {})
@@ -178,8 +183,6 @@ class CashReport(Document):
 		
 		grand_total += total_other_pay
 
-		isv_taxed15 = taxed15 * (15/100)
-		isv_taxed18 = taxed18 * (18/100)
 		total_taxes = taxed15 + taxed18 + isv_taxed15 + isv_taxed18
 		exempt = grand_total - total_taxes
 		

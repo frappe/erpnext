@@ -138,8 +138,34 @@ class SalesInvoice(SellingController):
 		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points:
 			validate_loyalty_points(self, self.loyalty_points)
 
+		self.exonerated_value()
+
 		if self.docstatus == 1:
 			self.assign_cai()
+	
+	def exonerated_value(self):
+		if self.exonerated == 1:
+			if self.grand_total > self.total:
+				self.grand_total -= self.total_taxes_and_charges
+				self.outstanding_amount -= self.total_taxes_and_charges
+
+				payment_schedule = frappe.get_all("Payment Schedule", ["name", "payment_amount"], filters = {"parent": self.name})
+				
+				for payment in payment_schedule:
+					doc = frappe.get_doc("Payment Schedule", payment.name)
+					doc.payment_amount -= self.total_taxes_and_charges
+					doc.save()
+		else:
+			if self.grand_total == self.total: 
+				self.grand_total += self.total_taxes_and_charges
+				self.outstanding_amount += self.total_taxes_and_charges
+
+				payment_schedule = frappe.get_all("Payment Schedule", ["name"], filters = {"parent": self.name})
+
+				for payment in payment_schedule:
+					doc = frappe.get_doc("Payment Schedule", payment.name)
+					doc.payment_amount += self.total_taxes_and_charges
+					doc.save()
 
 	def discount_product(self):
 		total_discount = 0
@@ -482,6 +508,7 @@ class SalesInvoice(SellingController):
 
 	def on_update(self):
 		self.set_paid_amount()
+		self.exonerated_value()
 
 	def set_paid_amount(self):
 		paid_amount = 0.0
@@ -817,6 +844,11 @@ class SalesInvoice(SellingController):
 			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account or
 				cint(self.redeem_loyalty_points)) else "Yes"
 
+			if self.exonerated == 1:
+				gl_entries.pop(1)
+				frappe.msgprint("{}".format(gl_entries[1].credit))
+			
+			frappe.msgprint("{}".format(gl_entries))
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
 				update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)
 
