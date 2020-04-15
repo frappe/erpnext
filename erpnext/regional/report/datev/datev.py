@@ -12,6 +12,7 @@ import datetime
 import json
 import six
 from six import string_types
+from csv import QUOTE_NONNUMERIC
 
 import frappe
 from frappe import _
@@ -178,10 +179,10 @@ def get_datev_csv(data, filters):
 	filters -- dict
 	"""
 	header = [
-		# A = DATEV format
+		# A = DATEV-Format-KZ
 		#   DTVF = created by DATEV software,
 		#   EXTF = created by other software
-		"EXTF",
+		'"EXTF"',
 		# B = version of the DATEV format
 		#   141 = 1.41, 
 		#   510 = 5.10,
@@ -205,10 +206,11 @@ def get_datev_csv(data, filters):
 		datetime.datetime.now().strftime("%Y%m%d"),
 		# G = Imported on -- stays empty
 		"",
-		# H = Origin (SV = other (?), RE = KARE)
-		"SV",
+		# H = Herkunfts-Kennzeichen (Origin)
+		# Any two letters
+		'"EN"',
 		# I = Exported by
-		frappe.session.user,
+		'"%s"' % frappe.session.user,
 		# J = Imported by -- stays empty
 		"",
 		# K = Tax consultant number (Beraternummer)
@@ -419,7 +421,9 @@ def get_datev_csv(data, filters):
 		# Do not number rows
 		index=False,
 		# Use all columns defined above
-		columns=columns
+		columns=columns,
+		# Quote most fields, even currency values with "," separator
+		quoting=QUOTE_NONNUMERIC
 	)
 
 	if not six.PY2:
