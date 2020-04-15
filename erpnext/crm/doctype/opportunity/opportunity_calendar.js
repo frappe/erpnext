@@ -7,6 +7,13 @@ frappe.views.calendar["Opportunity"] = {
 		"id": "name",
 		"title": "customer_name",
 		"allDay": "allDay"
-	},
-    get_events_method: 'frappe.desk.doctype.event.event.get_events'
+    },
+	options: {
+		header: {
+			left: 'prev,next today',
+			center: 'title',
+			right: 'month'
+		}
+    },
+    get_events_method: 'erpnext.crm.doctype.opportunity.opportunity.get_events'
 }
