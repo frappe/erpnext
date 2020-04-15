@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt, cint
+from frappe import _
 from collections import defaultdict
 from erpnext.setup.utils import get_exchange_rate
 
@@ -50,6 +51,7 @@ def get_data(filters, conditions):
 			"quotation": data.get("parent"),
 			"qty": data.get("qty"),
 			"price": flt(data.get("rate") * exchange_rate, float_precision),
+			"uom": data.get("uom"),
 			"request_for_quotation": data.get("request_for_quotation"),
 			"supplier": data.get("supplier") # used for chart generation
 		}
@@ -78,34 +80,41 @@ def get_conditions(filters):
 def get_columns():
 	columns = [{
 		"fieldname": "supplier_name",
-		"label": "Supplier",
+		"label": _("Supplier"),
 		"fieldtype": "Link",
 		"options": "Supplier",
 		"width": 200
 	},
 	{
 		"fieldname": "quotation",
-		"label": "Supplier Quotation",
+		"label": _("Supplier Quotation"),
 		"fieldtype": "Link",
 		"options": "Supplier Quotation",
 		"width": 200
 	},
 	{
 		"fieldname": "qty",
-		"label": "Quantity",
+		"label": _("Quantity"),
 		"fieldtype": "Float",
 		"width": 80
 	},
 	{
 		"fieldname": "price",
-		"label": "Price",
+		"label": _("Price"),
 		"fieldtype": "Currency",
 		"options": "Company:company:default_currency",
 		"width": 110
 	},
 	{
+		"fieldname": "uom",
+		"label": _("UOM"),
+		"fieldtype": "Link",
+		"options": "UOM",
+		"width": 90
+	},
+	{
 		"fieldname": "request_for_quotation",
-		"label": "Request for Quotation",
+		"label": _("Request for Quotation"),
 		"fieldtype": "Link",
 		"options": "Request for Quotation",
 		"width": 200
