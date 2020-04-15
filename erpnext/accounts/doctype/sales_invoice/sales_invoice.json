@@ -1703,7 +1703,6 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.docstatus==0",
    "fieldname": "exonerated",
    "fieldtype": "Check",
    "label": "Exonerated"
@@ -1713,8 +1712,8 @@
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-14 16:23:02.317449",
- "modified_by": "Administrator",
+ "modified": "2020-04-14 23:59:07.905082",
+ "modified_by": "gerson.caballero@grintsys.com",
  "module": "Accounts",
  "name": "Sales Invoice",
  "name_case": "Title Case",
