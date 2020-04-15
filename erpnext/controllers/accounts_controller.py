@@ -1123,36 +1123,39 @@ def get_supplier_block_status(party_name):
 	}
 	return info
 
-def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, item_code):
+def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, trans_item):
 	"""
 	Returns a Sales Order Item child item containing the default values
 	"""
 	p_doc = frappe.get_doc(parent_doctype, parent_doctype_name)
 	child_item = frappe.new_doc('Sales Order Item', p_doc, child_docname)
-	item = frappe.get_doc("Item", item_code)
+	item = frappe.get_doc("Item", trans_item.get('item_code'))
 	child_item.item_code = item.item_code
 	child_item.item_name = item.item_name
 	child_item.description = item.description
-	child_item.reqd_by_date = p_doc.delivery_date
+	child_item.delivery_date = trans_item.get('delivery_date') or p_doc.delivery_date
 	child_item.uom = item.stock_uom
-	child_item.conversion_factor = get_conversion_factor(item_code, item.stock_uom).get("conversion_factor") or 1.0
+	child_item.conversion_factor = get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
+	if not child_item.warehouse:
+		frappe.throw(_("Cannot find {} for item {}. Please set the same in Item Master or Stock Settings.")
+			.format(frappe.bold("default warehouse"), frappe.bold(item.item_code)))
 	return child_item
 
 
-def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, item_code):
+def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, trans_item):
 	"""
 	Returns a Purchase Order Item child item containing the default values
 	"""
 	p_doc = frappe.get_doc(parent_doctype, parent_doctype_name)
 	child_item = frappe.new_doc('Purchase Order Item', p_doc, child_docname)
-	item = frappe.get_doc("Item", item_code)
+	item = frappe.get_doc("Item", trans_item.get('item_code'))
 	child_item.item_code = item.item_code
 	child_item.item_name = item.item_name
 	child_item.description = item.description
-	child_item.schedule_date = p_doc.schedule_date
+	child_item.schedule_date = trans_item.get('schedule_date') or p_doc.schedule_date
 	child_item.uom = item.stock_uom
-	child_item.conversion_factor = get_conversion_factor(item_code, item.stock_uom).get("conversion_factor") or 1.0
+	child_item.conversion_factor = get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.base_rate = 1 # Initiallize value will update in parent validation
 	child_item.base_amount = 1 # Initiallize value will update in parent validation
 	return child_item
@@ -1196,9 +1199,9 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		if not d.get("docname"):
 			new_child_flag = True
 			if parent_doctype == "Sales Order":
-				child_item  = set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, d.get("item_code"))
+				child_item  = set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, d)
 			if parent_doctype == "Purchase Order":
-				child_item = set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, d.get("item_code"))
+				child_item = set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, d)
 		else:
 			child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
 			if flt(child_item.get("rate")) == flt(d.get("rate")) and flt(child_item.get("qty")) == flt(d.get("qty")):
@@ -1243,6 +1246,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 		child_item.flags.ignore_validate_update_after_submit = True
 		if new_child_flag:
+			parent.load_from_db()
 			child_item.idx = len(parent.items) + 1
 			child_item.insert()
 		else:
