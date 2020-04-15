@@ -220,8 +220,8 @@ frappe.ui.form.on('Stock Entry', {
 					},
 					get_query_filters: {
 						docstatus: 1,
-						material_request_type: "Material Transfer",
-						status: ['!=', 'Transferred']
+						material_request_type: ["in", ["Material Transfer", "Material Issue"]],
+						status: ["not in", ["Transferred", "Issued"]]
 					}
 				})
 			}, __("Get items from"));
