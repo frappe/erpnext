@@ -139,7 +139,7 @@ def get_gl_entries(filters, as_dict):
 			
 			gl.posting_date as 'Belegdatum',
 			gl.voucher_no as 'Belegfeld 1',
-			gl.remarks as 'Buchungstext',
+			LEFT(gl.remarks, 60) as 'Buchungstext',
 			gl.voucher_type as 'Beleginfo - Art 1',
 			gl.voucher_no as 'Beleginfo - Inhalt 1',
 			gl.against_voucher_type as 'Beleginfo - Art 2',
