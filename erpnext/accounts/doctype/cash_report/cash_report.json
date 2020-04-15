@@ -25,8 +25,6 @@
   "sc1",
   "isv_taxed15",
   "isv_taxed18",
-  "isv_exempt",
-  "isv_exonerated",
   "detail_totals",
   "totals_table",
   "total_base_isv15",
@@ -158,18 +156,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "isv_exempt",
-   "fieldtype": "Currency",
-   "label": "ISV Exempt",
-   "read_only": 1
-  },
-  {
-   "fieldname": "isv_exonerated",
-   "fieldtype": "Currency",
-   "label": "ISV Exonerated",
-   "read_only": 1
-  },
-  {
    "fieldname": "detail_totals",
    "fieldtype": "Section Break",
    "label": "Details Totals"
@@ -226,7 +212,7 @@
   }
  ],
  "links": [],
- "modified": "2020-04-10 01:38:57.492999",
+ "modified": "2020-04-15 00:52:42.146229",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cash Report",
