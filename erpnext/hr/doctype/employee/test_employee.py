@@ -55,7 +55,7 @@ def make_employee(user, company=None):
 			"roles": [{"doctype": "Has Role", "role": "Employee"}]
 		}).insert()
 
-	if not frappe.db.get_value("Employee", { "user_id": user, "company": company or erpnext.get_default_company() }):
+	if not frappe.db.get_value("Employee", { "user_id": user, "company": company or erpnext.get_default_company() or 'Wind Power LLC' }):
 		employee = frappe.get_doc({
 			"doctype": "Employee",
 			"naming_series": "EMP-",
