@@ -188,6 +188,9 @@ def get_datev_csv(data, filters):
 	data -- array of dictionaries
 	filters -- dict
 	"""
+	coa = frappe.get_value("Company", filters.get("company"), "chart_of_accounts")
+	coa_used = "04" if "SKR04" in coa else ("03" if "SKR03" in coa else "")
+
 	header = [
 		# A = DATEV-Format-KZ
 		#   DTVF = created by DATEV software,
@@ -197,7 +200,7 @@ def get_datev_csv(data, filters):
 		#   141 = 1.41, 
 		#   510 = 5.10,
 		#   720 = 7.20
-		"510",
+		"700",
 		# C = Data category
 		#   21 = Transaction batch (Buchungsstapel),
 		#   67 = Buchungstextkonstanten,
@@ -211,9 +214,9 @@ def get_datev_csv(data, filters):
 		#   Kontenbeschriftungen
 		"Buchungsstapel",
 		# E = Format version (regarding format name)
-		"",
+		"9",
 		# F = Generated on
-		datetime.datetime.now().strftime("%Y%m%d"),
+		datetime.datetime.now().strftime("%Y%m%d%H%M%S") + '000',
 		# G = Imported on -- stays empty
 		"",
 		# H = Herkunfts-Kennzeichen (Origin)
@@ -225,10 +228,8 @@ def get_datev_csv(data, filters):
 		"",
 		# K = Tax consultant number (Beraternummer)
 		frappe.get_value("DATEV Settings", filters.get("company"), "consultant_number") or "",
-		"",
 		# L = Tax client number (Mandantennummer)
 		frappe.get_value("DATEV Settings", filters.get("company"), "client_number") or "",
-		"",
 		# M = Start of the fiscal year (Wirtschaftsjahresbeginn)
 		frappe.utils.formatdate(frappe.defaults.get_user_default("year_start_date"), "yyyyMMdd"),
 		# N = Length of account numbers (Sachkontenlänge)
@@ -238,10 +239,7 @@ def get_datev_csv(data, filters):
 		# P = Transaction batch end date (YYYYMMDD)
 		frappe.utils.formatdate(filters.get('to_date'), "yyyyMMdd"),
 		# Q = Description (for example, "January - February 2019 Transactions")
-		"{} - {} Buchungsstapel".format(
-			frappe.utils.formatdate(filters.get('from_date'), "MMMM yyyy"),
-			frappe.utils.formatdate(filters.get('to_date'), "MMMM yyyy")
-		),
+		"Buchungsstapel",
 		# R = Diktatkürzel
 		"",
 		# S = Buchungstyp
@@ -249,11 +247,29 @@ def get_datev_csv(data, filters):
 		#   2 = Annual financial statement (Jahresabschluss)
 		"1",
 		# T = Rechnungslegungszweck
-		"",
+		"0", # vom Rechnungslegungszweck unabhängig
 		# U = Festschreibung
-		"",
+		"0", # keine Festschreibung
 		# V = Kontoführungs-Währungskennzeichen des Geldkontos
-		frappe.get_value("Company", filters.get("company"), "default_currency")
+		frappe.get_value("Company", filters.get("company"), "default_currency"),
+		# reserviert
+		'',
+		# Derivatskennzeichen
+		'',
+		# reserviert
+		'',
+		# reserviert
+		'',
+		# SKR
+		'"%s"' % coa_used,
+		# Branchen-Lösungs-ID
+		'',
+		# reserviert
+		'',
+		# reserviert
+		'',
+		# Anwendungsinformation (Verarbeitungskennzeichen der abgebenden Anwendung)
+		''
 	]
 	columns = [
 		# All possible columns must tbe listed here, because DATEV requires them to
