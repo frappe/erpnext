@@ -30,6 +30,8 @@ def get_columns(leave_types):
 		columns.append(_(leave_type) + " " + _("Opening") + ":Float:160")
 		columns.append(_(leave_type) + " " + _("Taken") + ":Float:160")
 		columns.append(_(leave_type) + " " + _("Balance") + ":Float:160")
+		columns.append(_(leave_type) + " " + _("Allocated") + ":Float:160")
+		columns.append(_(leave_type) + " " + _("Expired") + ":Float:160")
 
 	return columns
 
@@ -78,8 +80,42 @@ def get_data(filters, leave_types):
 				# closing balance
 				closing = max(opening - leaves_taken, 0)
 
-				row += [opening, leaves_taken, closing]
+				new_allocation , expired_leaves = get_allocated_and_expired_leaves(filters.from_date, filters.to_date, employee.name, leave_type)
+
+				row += [opening, leaves_taken, closing, new_allocation, expired_leaves]
 
 			data.append(row)
-
 	return data
+
+def get_allocated_and_expired_leaves(from_date, to_date, employee, leave_type):
+
+	from frappe.utils import getdate
+
+	new_allocation = 0
+	expired_leaves = 0
+
+	records= frappe.db.sql("""
+		SELECT
+			employee, leave_type, from_date, to_date, leaves, transaction_name,
+			is_carry_forward, is_expired
+		FROM `tabLeave Ledger Entry`
+		WHERE employee=%(employee)s AND leave_type=%(leave_type)s
+			AND docstatus=1 AND leaves>0
+			AND (from_date between %(from_date)s AND %(to_date)s
+				OR to_date between %(from_date)s AND %(to_date)s
+				OR (from_date < %(from_date)s AND to_date > %(to_date)s))
+	""", {
+		"from_date": from_date,
+		"to_date": to_date,
+		"employee": employee,
+		"leave_type": leave_type
+	}, as_dict=1)
+
+	for record in records:
+		if record.to_date <= getdate(to_date):
+			expired_leaves += record.leaves
+
+		if record.from_date >= getdate(from_date):
+			new_allocation += record.leaves
+
+	return new_allocation, expired_leaves
