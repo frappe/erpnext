@@ -70,9 +70,6 @@ class GLEntry(Document):
 		if not (flt(self.debit, self.precision("debit")) or flt(self.credit, self.precision("credit"))):
 			frappe.throw(_("{0} {1}: Either debit or credit amount is required for {2}")
 				.format(self.voucher_type, self.voucher_no, self.account))
-		else:
-			frappe.msgprint("debit {}".format(flt(self.debit, self.precision("debit"))))
-			frappe.msgprint("credit {}".format(flt(self.credit, self.precision("credit"))))
 
 	def pl_must_have_cost_center(self):
 		if frappe.db.get_value("Account", self.account, "report_type") == "Profit and Loss":
