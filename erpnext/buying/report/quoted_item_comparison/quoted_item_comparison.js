@@ -60,28 +60,29 @@ frappe.query_reports["Quoted Item Comparison"] = {
 
 	prepare_chart_data: (result) => {
 		let supplier_wise_map = {}, data_points_map = {};
-		let qty_list = result.map(res=> res.qty);
+		let qty_list = result.map(res => res.qty);
+		qty_list.sort();
 		qty_list = new Set(qty_list);
 
 		// create supplier wise map like in Report
-		for(let res of result){
-			if(!(res.supplier in supplier_wise_map)){
-				supplier_wise_map[res.supplier]= {};
+		for (let res of result) {
+			if (!(res.supplier in supplier_wise_map)) {
+				supplier_wise_map[res.supplier] = {};
 			}
 			supplier_wise_map[res.supplier][res.qty] = res.price;
 		}
 
 		// create  datapoints for each qty
-		for(let supplier of Object.keys(supplier_wise_map)) {
+		for (let supplier of Object.keys(supplier_wise_map)) {
 			let row = supplier_wise_map[supplier];
-			for(let qty of qty_list){
-				if(!data_points_map[qty]){
-					data_points_map[qty] = []
+			for (let qty of qty_list) {
+				if (!data_points_map[qty]) {
+					data_points_map[qty] = [];
 				}
-				if(row[qty]){
+				if (row[qty]) {
 					data_points_map[qty].push(row[qty]);
 				}
-				else{
+				else {
 					data_points_map[qty].push(null);
 				}
 			}
@@ -90,11 +91,10 @@ frappe.query_reports["Quoted Item Comparison"] = {
 		let dataset = [];
 		qty_list.forEach((qty) => {
 			let datapoints = {
-				'name': 'Price for Qty ' + qty,
+				'name': __('Price for Qty ') + qty,
 				'values': data_points_map[qty]
 			}
 			dataset.push(datapoints);
-
 		});
 		return dataset;
 	},

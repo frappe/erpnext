@@ -796,15 +796,14 @@
   {
    "fieldname": "valid_till",
    "fieldtype": "Date",
-   "label": "Valid Till",
-   "reqd": 1
+   "label": "Valid Till"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 29,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-14 22:43:32.248415",
+ "modified": "2020-04-15 11:44:52.958022",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
