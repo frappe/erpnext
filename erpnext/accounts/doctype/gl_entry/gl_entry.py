@@ -142,7 +142,11 @@ class GLEntry(Document):
 				.format(self.voucher_type, self.voucher_no, self.cost_center, self.company))
 
 	def validate_party(self):
-		validate_party_frozen_disabled(self.party_type, self.party)
+		# Allow staff to create payment entry for frozen customer
+		if self.voucher_type == "Payment Entry":
+			pass
+		else:
+			validate_party_frozen_disabled(self.party_type, self.party)
 
 	def validate_currency(self):
 		company_currency = erpnext.get_company_currency(self.company)
