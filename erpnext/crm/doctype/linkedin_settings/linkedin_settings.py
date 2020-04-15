@@ -137,7 +137,7 @@ class LinkedInSettings(Document):
 			"subject": "Test Share Subject",
 			"text": {
 				"text": text
-			};
+			}
 		}
 		
 		response = self.http_post(url=url, headers=headers, body=body)
