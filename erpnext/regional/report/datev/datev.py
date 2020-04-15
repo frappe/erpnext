@@ -73,6 +73,11 @@ def get_columns():
 			"fieldtype": "Date",
 		},
 		{
+			"label": "Belegfeld 1",
+			"fieldname": "Belegfeld 1",
+			"fieldtype": "Data",
+		},
+		{
 			"label": "Buchungstext",
 			"fieldname": "Buchungstext",
 			"fieldtype": "Text",
@@ -133,6 +138,7 @@ def get_gl_entries(filters, as_dict):
 			coalesce(acc_against.account_number, acc_against_pa.account_number) as 'Gegenkonto (ohne BU-Schlüssel)',
 			
 			gl.posting_date as 'Belegdatum',
+			gl.voucher_no as 'Belegfeld 1',
 			gl.remarks as 'Buchungstext',
 			gl.voucher_type as 'Beleginfo - Art 1',
 			gl.voucher_no as 'Beleginfo - Inhalt 1',
