@@ -80,22 +80,26 @@ def get_columns():
 		{
 			"label": "Beleginfo - Art 1",
 			"fieldname": "Beleginfo - Art 1",
-			"fieldtype": "Data",
+			"fieldtype": "Link",
+			"options": "DocType"
 		},
 		{
 			"label": "Beleginfo - Inhalt 1",
 			"fieldname": "Beleginfo - Inhalt 1",
-			"fieldtype": "Data",
+			"fieldtype": "Dynamic Link",
+			"options": "Beleginfo - Art 1"
 		},
 		{
 			"label": "Beleginfo - Art 2",
 			"fieldname": "Beleginfo - Art 2",
-			"fieldtype": "Data",
+			"fieldtype": "Link",
+			"options": "DocType"
 		},
 		{
 			"label": "Beleginfo - Inhalt 2",
 			"fieldname": "Beleginfo - Inhalt 2",
-			"fieldtype": "Data",
+			"fieldtype": "Dynamic Link",
+			"options": "Beleginfo - Art 2"
 		}
 	]
 
