@@ -34,12 +34,14 @@ class TestExpenseClaim(unittest.TestCase):
 		task_name = task.name
 		payable_account = get_payable_account(company_name)
 
-		make_expense_claim(payable_account, 300, 200, company_name, "Travel Expenses - _TC4", "_Test Project 1", task_name)
+		make_expense_claim(payable_account, 300, 200, company_name,
+			"Travel Expenses - _TC4", "_Test Project 1", task_name, cost_center="Main - _TC4")
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 200)
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 200)
 
-		expense_claim2 = make_expense_claim(payable_account, 600, 500, company_name, "Travel Expenses - _TC4","_Test Project 1", task_name)
+		expense_claim2 = make_expense_claim(payable_account, 600, 500, company_name,
+			"Travel Expenses - _TC4","_Test Project 1", task_name, cost_center="Main - _TC4")
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 700)
 		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 700)
@@ -51,7 +53,8 @@ class TestExpenseClaim(unittest.TestCase):
 
 	def test_expense_claim_status(self):
 		payable_account = get_payable_account(company_name)
-		expense_claim = make_expense_claim(payable_account, 300, 200, company_name, "Travel Expenses - _TC4")
+		expense_claim = make_expense_claim(payable_account, 300, 200, company_name,
+			"Travel Expenses - _TC4", cost_center="Main - _TC4")
 
 		je_dict = make_bank_entry("Expense Claim", expense_claim.name)
 		je = frappe.get_doc(je_dict)
@@ -70,7 +73,8 @@ class TestExpenseClaim(unittest.TestCase):
 	def test_expense_claim_gl_entry(self):
 		payable_account = get_payable_account(company_name)
 		taxes = generate_taxes()
-		expense_claim = make_expense_claim(payable_account, 300, 200, company_name, "Travel Expenses - _TC4", do_not_submit=True, taxes=taxes)
+		expense_claim = make_expense_claim(payable_account, 300, 200, company_name,
+			"Travel Expenses - _TC4", do_not_submit=True, taxes=taxes, cost_center="Main - _TC4")
 		expense_claim.submit()
 
 		gl_entries = frappe.db.sql("""select account, debit, credit
@@ -124,9 +128,10 @@ def generate_taxes():
 		"total": 210
 	}]}
 
-def make_expense_claim(payable_account, amount, sanctioned_amount, company, account, project=None, task_name=None, do_not_submit=False, taxes=None):
+def make_expense_claim(payable_account, amount, sanctioned_amount, company, account, 
+		project=None, task_name=None, do_not_submit=False, taxes=None, cost_center=None):
 	employee = frappe.db.get_value("Employee", {"status": "Active"})
-	currency = frappe.db.get_value('Company', company, 'default_currency')
+	currency, company_cost_center = frappe.db.get_value('Company', company, ['default_currency', 'cost_center'])
 	expense_claim = {
 		 "doctype": "Expense Claim",
 		 "employee": employee,
@@ -134,12 +139,15 @@ def make_expense_claim(payable_account, amount, sanctioned_amount, company, acco
 		 "approval_status": "Approved",
 		 "company": company,
 		'currency': currency,
-		 "expenses":
-			[{"expense_type": "Travel",
+		 "expenses": [{
+			"expense_type": "Travel",
 			"default_account": account,
 			'currency': currency,
 			"amount": amount,
-			"sanctioned_amount": sanctioned_amount}]}
+			"sanctioned_amount": sanctioned_amount,
+			"cost_center": cost_center or company_cost_center
+		}]
+	}
 	if taxes:
 		expense_claim.update(taxes)
 
