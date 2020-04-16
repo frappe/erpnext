@@ -563,6 +563,36 @@ class TestMaterialRequest(unittest.TestCase):
 			item_code= %s and warehouse= %s """, (mr.items[0].item_code, mr.items[0].warehouse))[0][0]
 		self.assertEqual(requested_qty, new_requested_qty)
 
+	def test_requested_qty_multi_uom(self):
+		existing_requested_qty = self._get_requested_qty('_Test FG Item', '_Test Warehouse - _TC')
+
+		mr = make_material_request(item_code='_Test FG Item', material_request_type='Manufacture',
+			uom="_Test UOM 1", conversion_factor=12)
+		
+		requested_qty = self._get_requested_qty('_Test FG Item', '_Test Warehouse - _TC')
+
+		self.assertEqual(requested_qty, existing_requested_qty + 120)
+
+		work_order = raise_work_orders(mr.name)
+		wo = frappe.get_doc("Work Order", work_order[0])
+		wo.qty = 50
+		wo.wip_warehouse = "_Test Warehouse 1 - _TC"
+		wo.submit()
+
+		requested_qty = self._get_requested_qty('_Test FG Item', '_Test Warehouse - _TC')
+		self.assertEqual(requested_qty, existing_requested_qty + 70)
+
+		wo.cancel()
+
+		requested_qty = self._get_requested_qty('_Test FG Item', '_Test Warehouse - _TC')
+		self.assertEqual(requested_qty, existing_requested_qty + 120)
+
+		mr.reload()
+		mr.cancel()
+		requested_qty = self._get_requested_qty('_Test FG Item', '_Test Warehouse - _TC')
+		self.assertEqual(requested_qty, existing_requested_qty)
+
+
 	def test_multi_uom_for_purchase(self):
 		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 
@@ -633,6 +663,8 @@ def make_material_request(**args):
 	mr.append("items", {
 		"item_code": args.item_code or "_Test Item",
 		"qty": args.qty or 10,
+		"uom": args.uom or "_Test UOM",
+		"conversion_factor": args.conversion_factor or 1,
 		"schedule_date": args.schedule_date or today(),
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"cost_center": args.cost_center or "_Test Cost Center - _TC"
