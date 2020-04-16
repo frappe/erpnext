@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, time_diff_in_hours, get_datetime, time_diff
+from frappe.utils import flt, time_diff_in_hours, get_datetime, time_diff, get_link_to_form
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 
@@ -90,11 +90,15 @@ class JobCard(Document):
 
 	def validate_job_card(self):
 		if not self.time_logs:
-			frappe.throw(_("Time logs are required for job card {0}").format(self.name))
+			frappe.throw(_("Time logs are required for {0} {1}")
+				.format(frappe.bold("Job Card"), get_link_to_form("Job Card", self.name)))
 
 		if self.for_quantity and self.total_completed_qty != self.for_quantity:
-			frappe.throw(_("The total completed qty({0}) must be equal to qty to manufacture({1})"
-				.format(frappe.bold(self.total_completed_qty),frappe.bold(self.for_quantity))))
+			total_completed_qty = frappe.bold(_("Total Completed Qty"))
+			qty_to_manufacture = frappe.bold(_("Qty to Manufacture"))
+
+			frappe.throw(_("The {0} ({1}) must be equal to {2} ({3})"
+				.format(total_completed_qty, frappe.bold(self.total_completed_qty), qty_to_manufacture,frappe.bold(self.for_quantity))))
 
 	def update_work_order(self):
 		if not self.work_order:
