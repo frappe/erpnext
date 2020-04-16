@@ -123,22 +123,24 @@ def invoice_appointment(appointment_doc):
 		sales_invoice.customer = frappe.get_value('Patient', appointment_doc.patient, 'customer')
 		sales_invoice.appointment = appointment_doc.name
 		sales_invoice.due_date = getdate()
-		sales_invoice.is_pos = 1
 		sales_invoice.company = appointment_doc.company
 		sales_invoice.debit_to = get_receivable_account(appointment_doc.company)
 
 		item = sales_invoice.append('items', {})
 		item = get_appointment_item(appointment_doc, item)
 
-		payment = sales_invoice.append('payments', {})
-		payment.mode_of_payment = appointment_doc.mode_of_payment
-		payment.amount = appointment_doc.paid_amount
+		# Add payments if payment details are supplied else proceed to create invoice as Unpaid
+		if appointment_doc.mode_of_payment and appointment_doc.paid_amount:
+			sales_invoice.is_pos = 1
+			payment = sales_invoice.append('payments', {})
+			payment.mode_of_payment = appointment_doc.mode_of_payment
+			payment.amount = appointment_doc.paid_amount
 
 		sales_invoice.set_missing_values(for_validate=True)
 		sales_invoice.flags.ignore_mandatory = True
 		sales_invoice.save(ignore_permissions=True)
 		sales_invoice.submit()
-		frappe.msgprint(_('Sales Invoice {0} created as paid'.format(sales_invoice.name)), alert=True)
+		frappe.msgprint(_('Sales Invoice {0} created'.format(sales_invoice.name)), alert=True)
 		frappe.db.set_value('Patient Appointment', appointment_doc.name, 'invoiced', 1)
 		frappe.db.set_value('Patient Appointment', appointment_doc.name, 'ref_sales_invoice', sales_invoice.name)
 

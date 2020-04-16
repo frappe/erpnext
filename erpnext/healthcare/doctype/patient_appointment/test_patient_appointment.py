@@ -11,7 +11,8 @@ from frappe.utils.make_random import get_random
 class TestPatientAppointment(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql("""delete from `tabPatient Appointment`""")
-		frappe.db.sql("""delete from `tabFee Validity""")
+		frappe.db.sql("""delete from `tabFee Validity`""")
+		frappe.db.sql("""delete from `tabPatient Encounter`""")
 
 	def test_status(self):
 		patient, medical_department, practitioner = create_healthcare_docs()
@@ -25,11 +26,16 @@ class TestPatientAppointment(unittest.TestCase):
 
 	def test_start_encounter(self):
 		patient, medical_department, practitioner = create_healthcare_docs()
-		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 3))
-		encounter = create_encounter(appointment)
-		self.assertEquals(frappe.db.get_value('Patient Encounter', encounter.name, 'company'), appointment.company)
-		self.assertEquals(frappe.db.get_value('Patient Encounter', encounter.name, 'practitioner'), appointment.practitioner)
-		self.assertEquals(frappe.db.get_value('Patient Encounter', encounter.name, 'patient'), appointment.patient)
+		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
+		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 4), invoice = 1)
+		self.assertEqual(frappe.db.get_value('Patient Appointment', appointment.name, 'invoiced'), 1)
+		encounter = make_encounter(appointment.name)
+		self.assertTrue(encounter)
+		self.assertEqual(encounter.company, appointment.company)
+		self.assertEqual(encounter.practitioner, appointment.practitioner)
+		self.assertEqual(encounter.patient, appointment.patient)
+		# invoiced flag mapped from appointment
+		self.assertEqual(encounter.invoiced, frappe.db.get_value('Patient Appointment', appointment.name, 'invoiced'))
 
 	def test_invoicing(self):
 		patient, medical_department, practitioner = create_healthcare_docs()
@@ -104,7 +110,13 @@ def create_patient():
 
 def create_encounter(appointment):
 	if appointment:
-		encounter = make_encounter(appointment.name)
+		encounter = frappe.new_doc('Patient Encounter')
+		encounter.appointment = appointment.name
+		encounter.patient = appointment.patient
+		encounter.practitioner = appointment.practitioner
+		encounter.encounter_date = appointment.appointment_date
+		encounter.encounter_time = appointment.appointment_time
+		encounter.company = appointment.company
 		encounter.save()
 		encounter.submit()
 		return encounter
