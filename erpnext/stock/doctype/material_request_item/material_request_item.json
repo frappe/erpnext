@@ -404,14 +404,13 @@
   {
    "fieldname": "manufacturer_part_no",
    "fieldtype": "Data",
-   "label": "Manufacturer Part Number",
-   "read_only": 1
+   "label": "Manufacturer Part Number"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-02-25 03:09:10.698967",
+ "modified": "2020-04-07 18:37:54.495112",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",
