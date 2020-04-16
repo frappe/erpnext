@@ -35,8 +35,8 @@ class AssetCategory(Document):
 					expected_key_type = account_type_map[fieldname][key_to_match]
 
 					if selected_key_type != expected_key_type:
-						frappe.throw(_("Row #{}: {} of {} should be {}. Please modify the account or select a different account."
-							.format(d.idx, frappe.unscrub(key_to_match), frappe.bold(selected_account), frappe.bold(expected_key_type))),
+						frappe.throw(_("Row #{}: {} of {} should be {}. Please modify the account or select a different account.")
+							.format(d.idx, frappe.unscrub(key_to_match), frappe.bold(selected_account), frappe.bold(expected_key_type)),
 							title=_("Invalid Account"))
 
 
