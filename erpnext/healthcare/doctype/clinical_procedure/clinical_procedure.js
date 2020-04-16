@@ -184,7 +184,7 @@ frappe.ui.form.on('Clinical Procedure', {
 						'notes': data.message.notes,
 						'service_unit': data.message.service_unit,
 						'company': data.message.company
-					}
+					};
 					frm.set_value(values);
 				}
 			});
@@ -202,7 +202,6 @@ frappe.ui.form.on('Clinical Procedure', {
 				'notes': '',
 				'service_unit': '',
 				'inpatient_record': ''
-				// 'inpatient_status': ''
 			};
 			frm.set_value(values);
 		}
