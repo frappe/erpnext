@@ -4,7 +4,6 @@
 
 from __future__ import unicode_literals
 import math
-import json
 import frappe
 from frappe import _
 from frappe.utils import time_diff_in_hours, rounded
