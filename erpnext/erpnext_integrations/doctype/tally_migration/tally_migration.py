@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 
 import json
-import sys
 import re
 import traceback
 import zipfile
@@ -18,7 +17,6 @@ from erpnext import encode_company_abbr
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
-from frappe.desk.doctype.notification_log.notification_log import enqueue_create_notification
 from frappe.model.document import Document
 from frappe.model.naming import getseries, revert_series_if_last
 from frappe.utils.data import format_datetime
