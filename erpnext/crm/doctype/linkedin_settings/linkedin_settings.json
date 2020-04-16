@@ -6,6 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "account_name",
+  "column_break_2",
+  "company_id",
   "oauth_details",
   "consumer_key",
   "column_break_5",
@@ -19,7 +21,8 @@
   {
    "fieldname": "account_name",
    "fieldtype": "Data",
-   "label": "Account Name"
+   "label": "Account Name",
+   "read_only": 1
   },
   {
    "fieldname": "oauth_details",
@@ -70,11 +73,21 @@
    "label": "Session Status",
    "options": "Expired\nActive",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company_id",
+   "fieldtype": "Data",
+   "label": "Company ID",
+   "reqd": 1
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-04-09 00:49:29.269242",
+ "modified": "2020-04-16 23:22:51.966397",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "LinkedIn Settings",

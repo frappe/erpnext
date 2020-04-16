@@ -15,7 +15,7 @@ class LinkedInSettings(Document):
 			"response_type":"code",
 			"client_id": self.consumer_key,
 			"redirect_uri": get_site_url(frappe.local.site) + "/?cmd=erpnext.crm.doctype.linkedin_settings.linkedin_settings.callback",
-			"scope": "r_liteprofile r_emailaddress w_member_social"
+			"scope": "r_emailaddress w_organization_social r_basicprofile r_liteprofile r_organization_social rw_organization_admin w_member_social"
 		})
 
 		url = "https://www.linkedin.com/oauth/v2/authorization?{}".format(params)
@@ -37,7 +37,6 @@ class LinkedInSettings(Document):
 		
 		response = self.http_post(url=url, data=body, headers=headers)
 		response = frappe.parse_json(response.content.decode())
-		print(response)
 		self.db_set("access_token", response["access_token"])
 
 	def get_member_profile(self):
@@ -47,8 +46,8 @@ class LinkedInSettings(Document):
 		url = "https://api.linkedin.com/v2/me"
 		response = requests.get(url=url, headers=headers)
 		response = frappe.parse_json(response.content.decode())
-		print(response)
 		self.db_set("person_urn", response["id"])
+		self.db_set("account_name", response["vanityName"])
 		self.db_set("session_status", "Active")
 		frappe.local.response["type"] = "redirect"
 		frappe.local.response["location"] = get_url_to_form("LinkedIn Settings","LinkedIn Settings")
@@ -71,7 +70,7 @@ class LinkedInSettings(Document):
 		body = {
 			"registerUploadRequest": {
 				"recipes": ["urn:li:digitalmediaRecipe:feedshare-image"],
-				"owner": "urn:li:person:{0}".format(self.person_urn),
+				"owner": "urn:li:organization:{0}".format(self.company_id),
 				"serviceRelationships": [{
 					"relationshipType": "OWNER",
 					"identifier": "urn:li:userGeneratedContent"
@@ -103,43 +102,23 @@ class LinkedInSettings(Document):
 			"Authorization": "Bearer {}".format(self.access_token),
 			"Content-Type": "application/json; charset=UTF-8"
 		}
-		# body = {
-		# 	"author": "urn:li:person:{0}".format(self.person_urn),
-		# 	"lifecycleState": "PUBLISHED",
-		# 	"specificContent": {
-		# 		"com.linkedin.ugc.ShareContent": {
-		# 			"shareCommentary": {
-		# 				"text": text
-		# 			},
-		# 			"shareMediaCategory": "IMAGE" if media_id else "NONE"
-		# 		}
-		# 	},
-		# 	"visibility": {
-		# 		"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
-		# 	}
-		# }
-		# if media_id:
-			# body["specificContent"]["com.linkedin.ugc.ShareContent"]["media"] = [{
-			# 	"status": "READY",
-			# 	"description": {
-			# 		"text": ""
-			# 	},
-			# 	"media": media_id,
-			# 	"title": {
-			# 		"text":""
-			# 	}
-			# }]
 		body = {
 			"distribution": {
 				"linkedInDistributionTarget": {}
 			},
-			"owner": "urn:li:person:{0}".format(self.person_urn),
+			"owner":"urn:li:organization:{0}".format(self.company_id),
 			"subject": "Test Share Subject",
 			"text": {
 				"text": text
 			}
 		}
-		
+		if media_id:
+			body["content"]= {
+				"contentEntities": [{
+					"entity": media_id
+				}],
+				"shareMediaCategory": "IMAGE"
+			}
 		response = self.http_post(url=url, headers=headers, body=body)
 		return response
 
@@ -158,14 +137,12 @@ class LinkedInSettings(Document):
 			if response.status_code == 401:
 				self.db_set("session_status", "Expired")
 				frappe.db.commit()
-				frappe.msgprint(_("{0} With LinkedIn to Continue").format(get_link_to_form("LinkedIn Settings","LinkedIn Settings","Login")))
  				frappe.throw(content["message"], title="LinkedIn Error - Unauthorized")
 			elif response.status_code == 403:
 				frappe.msgprint(_("You Didn't have permission to access this API"))
 				frappe.throw(content["message"], title="LinkedIn Error - Access Denied")
 			else:
 				frappe.throw(response.reason, title=response.status_code)
-
 		return response
 
 @frappe.whitelist()
