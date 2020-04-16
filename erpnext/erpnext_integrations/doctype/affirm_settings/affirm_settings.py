@@ -47,6 +47,7 @@ Example:
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 import requests
 import json
 
@@ -82,7 +83,6 @@ class AffirmSettings(Document):
 
 @frappe.whitelist(allow_guest=1)
 def affirm_callback(checkout_token, reference_doctype, reference_docname):
-
 	frappe.log("""[AFFIRM] Affirm callback request: 
 		checkout_token: {0}
 		reference_doctype: {1}
@@ -100,7 +100,7 @@ def affirm_callback(checkout_token, reference_doctype, reference_docname):
 		json={"checkout_token": checkout_token})
 
 	affirm_data = authorization_response.json()
-	frappe.log("	Response: {}".format(json.dumps(affirm_data)))
+	frappe.log("Response: {}".format(json.dumps(affirm_data)))
 
 	if affirm_data:
 		charge_id = affirm_data.get('id')
@@ -147,24 +147,23 @@ def get_public_config():
 
 def get_api_config():
 	settings = frappe.get_doc("Affirm Settings", "Affirm Settings")
-	values = dict(
-		public_api_key = settings.public_api_key,
-		private_api_key = settings.private_api_key,
-		promo_code = settings.promo_code
-	)
 
 	if settings.is_sandbox:
-		values.update(dict(
+		values = dict(
+			public_api_key = settings.public_sandbox_api_key,
+			private_api_key = settings.private_sandbox_api_key,
 			checkout_url = settings.sandbox_checkout_url,
 			api_url = settings.sandbox_api_url
-		))
+		)
+		return values
 	else:
-		values.update(dict(
+		values = dict(
+			public_api_key = settings.public_api_key,
+			private_api_key = settings.private_api_key,
 			checkout_url = settings.live_checkout_url,
 			api_url = settings.live_api_url
-		))
-
-	return values
+		)
+		return values
 
 def build_checkout_data(**kwargs):
 
@@ -195,7 +194,7 @@ def build_checkout_data(**kwargs):
 		shipping_address = frappe.get_doc("Address", order_doc.shipping_address_name)
 
 	if not shipping_address:
-		shipping_address = frappe.get_doc("Address", frappe.get_value("Affirm Settings", "Affirm Settings", "pickup_address"))
+		shipping_address = frappe.get_doc("Address", order_doc.customer_address)
 
 	# deduce shipping from taxes table
 	shipping_fee = 0
@@ -240,7 +239,7 @@ def build_checkout_data(**kwargs):
 			),
 			"user_cancel_url": get_url("/cart"),
 			"user_confirmation_url_action": "GET",
-			"name": "JH Audio"
+			"name": frappe.defaults.get_user_default("company")
 		},
 		"items": items,
 		"discounts": discounts,

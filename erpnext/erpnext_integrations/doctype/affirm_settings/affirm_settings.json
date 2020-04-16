@@ -6,19 +6,20 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "public_api_key",
-  "private_api_key",
-  "promo_code",
-  "cb_header",
   "is_sandbox",
   "sb_settings",
+  "public_api_key",
+  "private_api_key",
+  "cb_header",
   "live_checkout_url",
   "live_api_url",
-  "cb_urls",
+  "sb_sandbox_setting",
+  "public_sandbox_api_key",
+  "private_sandbox_api_key",
+  "cb_sandbox",
   "sandbox_checkout_url",
   "sandbox_api_url",
-  "shipping_sb",
-  "pickup_address"
+  "shipping_sb"
  ],
  "fields": [
   {
@@ -34,11 +35,6 @@
    "in_list_view": 1,
    "label": "Private API Key",
    "reqd": 1
-  },
-  {
-   "fieldname": "promo_code",
-   "fieldtype": "Data",
-   "label": "Promo Code"
   },
   {
    "fieldname": "cb_header",
@@ -70,10 +66,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "cb_urls",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "https://cdn1-sandbox.affirm.com/js/v2/affirm.js",
    "fieldname": "sandbox_checkout_url",
    "fieldtype": "Data",
@@ -93,16 +85,28 @@
    "label": "Shipping Info"
   },
   {
-   "fieldname": "pickup_address",
-   "fieldtype": "Link",
-   "label": "Pick Up Address",
-   "options": "Address"
+   "fieldname": "sb_sandbox_setting",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "public_sandbox_api_key",
+   "fieldtype": "Data",
+   "label": "Public Sandbox API Key"
+  },
+  {
+   "fieldname": "private_sandbox_api_key",
+   "fieldtype": "Data",
+   "label": "Private Sandbox API Key"
+  },
+  {
+   "fieldname": "cb_sandbox",
+   "fieldtype": "Column Break"
   }
  ],
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-03-17 18:21:52.528392",
+ "modified": "2020-04-16 05:09:41.385413",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Affirm Settings",
