@@ -15,7 +15,7 @@ frappe.ui.form.on('Tally Migration', {
 			let error_occurred = data.count === -1;
 			if (data.count == data.total || error_occurred) {
 				window.setTimeout((title) => {
-					frm.dashboard.hide_progress(title)
+					frm.dashboard.hide_progress(title);
 					frm.reload_doc();
 					if (error_occurred) {
 						frappe.msgprint({
