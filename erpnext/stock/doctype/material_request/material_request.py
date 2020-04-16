@@ -513,7 +513,7 @@ def raise_work_orders(material_request):
 		msgprint(_("The following Work Orders were created:") + '\n' + new_line_sep(message))
 
 	if errors:
-		frappe.throw(_("Productions Orders cannot be raised for:") + '\n' + new_line_sep(errors))
+		frappe.throw(_("Work Order cannot be created for following reason:") + '\n' + new_line_sep(errors))
 
 	return work_orders
 
