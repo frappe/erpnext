@@ -196,7 +196,7 @@ class TallyMigration(Document):
 
 			items = []
 			for item in collection.find_all("STOCKITEM"):
-				stock_uom = item.BASEUNITS.string if item.BASEUNITS else "Unit" #self.default_uom
+				stock_uom = item.BASEUNITS.string if item.BASEUNITS else self.default_uom
 				items.append({
 					"doctype": "Item",
 					"item_code" : item.NAME.string,
