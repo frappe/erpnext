@@ -147,8 +147,8 @@ class Item(WebsiteGenerator):
 
 	def validate_customer_provided_part(self):
 		if self.is_customer_provided_item:
-			if self.is_purchase_item:
-				frappe.throw(_('"Customer Provided Item" cannot be Purchase Item also'))
+			if self.is_purchase_item or self.is_sales_item:
+				frappe.throw(_('"Customer Provided Item" cannot be Purchase or Sales Item'))
 			if self.valuation_rate:
 				frappe.throw(_('"Customer Provided Item" cannot have Valuation Rate'))
 			self.default_material_request_type = "Customer Provided"
