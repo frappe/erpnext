@@ -406,12 +406,12 @@
   {
    "fieldname": "manufacturer_part_no",
    "fieldtype": "Data",
-   "label": "Manufacturer Part Number",
-   "read_only": 1
+   "label": "Manufacturer Part Number"
   }
  ],
  "idx": 1,
  "istable": 1,
+ "links": [],
  "modified": "2020-04-16 09:00:00.992835",
  "modified_by": "Administrator",
  "module": "Stock",

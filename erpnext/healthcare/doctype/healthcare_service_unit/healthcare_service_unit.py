@@ -23,9 +23,9 @@ class HealthcareServiceUnit(NestedSet):
 		self.validate_one_root()
 
 	def validate(self):
-		if self.is_group == 1:
+		if self.is_group:
 			self.allow_appointments = 0
 			self.overlap_appointments = 0
 			self.inpatient_occupancy = 0
-		elif self.allow_appointments != 1:
+		elif not self.allow_appointments:
 			self.overlap_appointments = 0
