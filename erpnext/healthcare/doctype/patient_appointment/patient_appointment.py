@@ -119,6 +119,7 @@ def invoice_appointment(appointment_doc):
 
 	if automate_invoicing and not appointment_invoiced and not fee_validity:
 		sales_invoice = frappe.new_doc('Sales Invoice')
+		sales_invoice.patient = appointment_doc.patient
 		sales_invoice.customer = frappe.get_value('Patient', appointment_doc.patient, 'customer')
 		sales_invoice.appointment = appointment_doc.name
 		sales_invoice.due_date = getdate()
@@ -339,7 +340,6 @@ def make_encounter(source_name, target_doc=None):
 				['practitioner', 'practitioner'],
 				['medical_department', 'department'],
 				['patient_sex', 'patient_sex'],
-				['encounter_date', 'appointment_date'],
 				['invoiced', 'invoiced'],
 				['company', 'company']
 			]
