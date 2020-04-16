@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status
+from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status, make_encounter
 from frappe.utils import nowdate, add_days
 from frappe.utils.make_random import get_random
 
@@ -23,6 +23,14 @@ class TestPatientAppointment(unittest.TestCase):
 		create_encounter(appointment)
 		self.assertEquals(frappe.db.get_value('Patient Appointment', appointment.name, 'status'), 'Closed')
 
+	def test_start_encounter(self):
+		patient, medical_department, practitioner = create_healthcare_docs()
+		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 3))
+		encounter = create_encounter(appointment)
+		self.assertEquals(frappe.db.get_value('Patient Encounter', encounter.name, 'company'), appointment.company)
+		self.assertEquals(frappe.db.get_value('Patient Encounter', encounter.name, 'practitioner'), appointment.practitioner)
+		self.assertEquals(frappe.db.get_value('Patient Encounter', encounter.name, 'patient'), appointment.patient)
+
 	def test_invoicing(self):
 		patient, medical_department, practitioner = create_healthcare_docs()
 		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 0)
@@ -33,7 +41,11 @@ class TestPatientAppointment(unittest.TestCase):
 		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
 		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 2), invoice=1)
 		self.assertEqual(frappe.db.get_value('Patient Appointment', appointment.name, 'invoiced'), 1)
-		self.assertTrue(frappe.db.get_value('Patient Appointment', appointment.name, 'ref_sales_invoice'))
+		sales_invoice_name = frappe.db.get_value('Sales Invoice Item', {'reference_dn': appointment.name}, 'parent')
+		self.assertTrue(sales_invoice_name)
+		self.assertEqual(frappe.db.get_value('Sales Invoice', sales_invoice_name, 'company'), appointment.company)
+		self.assertEqual(frappe.db.get_value('Sales Invoice', sales_invoice_name, 'patient'), appointment.patient)
+		self.assertEqual(frappe.db.get_value('Sales Invoice', sales_invoice_name, 'paid_amount'), appointment.paid_amount)
 
 	def test_appointment_cancel(self):
 		patient, medical_department, practitioner = create_healthcare_docs()
@@ -53,8 +65,8 @@ class TestPatientAppointment(unittest.TestCase):
 		appointment = create_appointment(patient, practitioner, nowdate(), invoice=1)
 		update_status(appointment.name, 'Cancelled')
 		# check invoice cancelled
-		sales_invoice = frappe.db.get_value('Patient Appointment', appointment.name, 'ref_sales_invoice')
-		self.assertEqual(frappe.db.get_value('Sales Invoice', sales_invoice, 'status'), 'Cancelled')
+		sales_invoice_name = frappe.db.get_value('Sales Invoice Item', {'reference_dn': appointment.name}, 'parent')
+		self.assertEqual(frappe.db.get_value('Sales Invoice', sales_invoice_name, 'status'), 'Cancelled')
 
 
 def create_healthcare_docs():
@@ -90,14 +102,9 @@ def create_patient():
 		patient = patient.name
 	return patient
 
-def create_encounter(appointment=None):
-	encounter = frappe.new_doc('Patient Encounter')
+def create_encounter(appointment):
 	if appointment:
-		encounter.appointment = appointment.name
-		encounter.patient = appointment.patient
-		encounter.practitioner = appointment.practitioner
-		encounter.encounter_date = appointment.appointment_date
-		encounter.encounter_time = appointment.appointment_time
+		encounter = make_encounter(appointment.name)
 		encounter.save()
 		encounter.submit()
 		return encounter
