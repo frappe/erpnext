@@ -72,7 +72,7 @@ class TallyMigration(Document):
 
 	def _process_master_data(self):
 		def get_company_name(collection):
-			return collection.find_all("REMOTECMPINFO.LIST")[0].REMOTECMPNAME.string
+			return collection.find_all("REMOTECMPINFO.LIST")[0].REMOTECMPNAME.string.strip()
 
 		def get_coa_customers_suppliers(collection):
 			root_type_map = {
@@ -105,17 +105,17 @@ class TallyMigration(Document):
 				# If Ledger doesn't have PARENT field then don't create Account
 				# For example "Profit & Loss A/c"
 				if account.PARENT:
-					yield account.PARENT.string, account["NAME"], 0
+					yield account.PARENT.string.strip(), account["NAME"], 0
 
 		def get_parent(account):
 			if account.PARENT:
-				return account.PARENT.string
+				return account.PARENT.string.strip()
 			return {
 				("Yes", "No"): "Application of Funds (Assets)",
 				("Yes", "Yes"): "Expenses",
 				("No", "Yes"): "Income",
 				("No", "No"): "Source of Funds (Liabilities)",
-			}[(account.ISDEEMEDPOSITIVE.string, account.ISREVENUE.string)]
+			}[(account.ISDEEMEDPOSITIVE.string.strip(), account.ISREVENUE.string.strip())]
 
 		def get_children_and_parent_dict(accounts):
 			children, parents = {}, {}
@@ -153,38 +153,38 @@ class TallyMigration(Document):
 			parties, addresses = [], []
 			for account in collection.find_all("LEDGER"):
 				party_type = None
-				if account.NAME.string in customers:
+				if account.NAME.string.strip() in customers:
 					party_type = "Customer"
 					parties.append({
 						"doctype": party_type,
-						"customer_name": account.NAME.string,
-						"tax_id": account.INCOMETAXNUMBER.string if account.INCOMETAXNUMBER else None,
+						"customer_name": account.NAME.string.strip(),
+						"tax_id": account.INCOMETAXNUMBER.string.strip() if account.INCOMETAXNUMBER else None,
 						"customer_group": "All Customer Groups",
 						"territory": "All Territories",
 						"customer_type": "Individual",
 					})
-				elif account.NAME.string in suppliers:
+				elif account.NAME.string.strip() in suppliers:
 					party_type = "Supplier"
 					parties.append({
 						"doctype": party_type,
-						"supplier_name": account.NAME.string,
-						"pan": account.INCOMETAXNUMBER.string if account.INCOMETAXNUMBER else None,
+						"supplier_name": account.NAME.string.strip(),
+						"pan": account.INCOMETAXNUMBER.string.strip() if account.INCOMETAXNUMBER else None,
 						"supplier_group": "All Supplier Groups",
 						"supplier_type": "Individual",
 					})
 				if party_type:
-					address = "\n".join([a.string for a in account.find_all("ADDRESS")])
+					address = "\n".join([a.string.strip() for a in account.find_all("ADDRESS")])
 					addresses.append({
 						"doctype": "Address",
-						"address_line1": address[:140],
-						"address_line2": address[140:],
-						"country": account.COUNTRYNAME.string if account.COUNTRYNAME else None,
-						"state": account.LEDSTATENAME.string if account.LEDSTATENAME else None,
-						"gst_state": account.LEDSTATENAME.string if account.LEDSTATENAME else None,
-						"pin_code": account.PINCODE.string if account.PINCODE else None,
-						"mobile": account.LEDGERPHONE.string if account.LEDGERPHONE else None,
-						"phone": account.LEDGERPHONE.string if account.LEDGERPHONE else None,
-						"gstin": account.PARTYGSTIN.string if account.PARTYGSTIN else None,
+						"address_line1": address[:140].strip(),
+						"address_line2": address[140:].strip(),
+						"country": account.COUNTRYNAME.string.strip() if account.COUNTRYNAME else None,
+						"state": account.LEDSTATENAME.string.strip() if account.LEDSTATENAME else None,
+						"gst_state": account.LEDSTATENAME.string.strip() if account.LEDSTATENAME else None,
+						"pin_code": account.PINCODE.string.strip() if account.PINCODE else None,
+						"mobile": account.LEDGERPHONE.string.strip() if account.LEDGERPHONE else None,
+						"phone": account.LEDGERPHONE.string.strip() if account.LEDGERPHONE else None,
+						"gstin": account.PARTYGSTIN.string.strip() if account.PARTYGSTIN else None,
 						"links": [{"link_doctype": party_type, "link_name": account["NAME"]}],
 					})
 			return parties, addresses
@@ -192,15 +192,15 @@ class TallyMigration(Document):
 		def get_stock_items_uoms(collection):
 			uoms = []
 			for uom in collection.find_all("UNIT"):
-				uoms.append({"doctype": "UOM", "uom_name": uom.NAME.string})
+				uoms.append({"doctype": "UOM", "uom_name": uom.NAME.string.strip()})
 
 			items = []
 			for item in collection.find_all("STOCKITEM"):
-				stock_uom = item.BASEUNITS.string if item.BASEUNITS else self.default_uom
+				stock_uom = item.BASEUNITS.string.strip() if item.BASEUNITS else self.default_uom
 				items.append({
 					"doctype": "Item",
-					"item_code" : item.NAME.string,
-					"stock_uom": stock_uom,
+					"item_code" : item.NAME.string.strip(),
+					"stock_uom": stock_uom.strip(),
 					"is_stock_item": 0,
 					"item_group": "All Item Groups",
 					"item_defaults": [{"company": self.erpnext_company}]
@@ -314,10 +314,10 @@ class TallyMigration(Document):
 		def get_vouchers(collection):
 			vouchers = []
 			for voucher in collection.find_all("VOUCHER"):
-				if voucher.ISCANCELLED.string == "Yes":
+				if voucher.ISCANCELLED.string.strip() == "Yes":
 					continue
 				inventory_entries = voucher.find_all("INVENTORYENTRIES.LIST") + voucher.find_all("ALLINVENTORYENTRIES.LIST") + voucher.find_all("INVENTORYENTRIESIN.LIST") + voucher.find_all("INVENTORYENTRIESOUT.LIST")
-				if voucher.VOUCHERTYPENAME.string not in ["Journal", "Receipt", "Payment", "Contra"] and inventory_entries:
+				if voucher.VOUCHERTYPENAME.string.strip() not in ["Journal", "Receipt", "Payment", "Contra"] and inventory_entries:
 					function = voucher_to_invoice
 				else:
 					function = voucher_to_journal_entry
@@ -333,15 +333,15 @@ class TallyMigration(Document):
 			accounts = []
 			ledger_entries = voucher.find_all("ALLLEDGERENTRIES.LIST") + voucher.find_all("LEDGERENTRIES.LIST")
 			for entry in ledger_entries:
-				account = {"account": encode_company_abbr(entry.LEDGERNAME.string, self.erpnext_company), "cost_center": self.default_cost_center}
-				if entry.ISPARTYLEDGER.string == "Yes":
-					party_details = get_party(entry.LEDGERNAME.string)
+				account = {"account": encode_company_abbr(entry.LEDGERNAME.string.strip(), self.erpnext_company), "cost_center": self.default_cost_center}
+				if entry.ISPARTYLEDGER.string.strip() == "Yes":
+					party_details = get_party(entry.LEDGERNAME.string.strip())
 					if party_details:
 						party_type, party_account = party_details
 						account["party_type"] = party_type
 						account["account"] = party_account
-						account["party"] = entry.LEDGERNAME.string
-				amount = Decimal(entry.AMOUNT.string)
+						account["party"] = entry.LEDGERNAME.string.strip()
+				amount = Decimal(entry.AMOUNT.string.strip())
 				if amount > 0:
 					account["credit_in_account_currency"] = str(abs(amount))
 				else:
@@ -350,21 +350,21 @@ class TallyMigration(Document):
 
 			journal_entry = {
 				"doctype": "Journal Entry",
-				"tally_guid": voucher.GUID.string,
-				"posting_date": voucher.DATE.string,
+				"tally_guid": voucher.GUID.string.strip(),
+				"posting_date": voucher.DATE.string.strip(),
 				"company": self.erpnext_company,
 				"accounts": accounts,
 			}
 			return journal_entry
 
 		def voucher_to_invoice(voucher):
-			if voucher.VOUCHERTYPENAME.string in ["Sales", "Credit Note"]:
+			if voucher.VOUCHERTYPENAME.string.strip() in ["Sales", "Credit Note"]:
 				doctype = "Sales Invoice"
 				party_field = "customer"
 				account_field = "debit_to"
 				account_name = encode_company_abbr(self.tally_debtors_account, self.erpnext_company)
 				price_list_field = "selling_price_list"
-			elif voucher.VOUCHERTYPENAME.string in ["Purchase", "Debit Note"]:
+			elif voucher.VOUCHERTYPENAME.string.strip() in ["Purchase", "Debit Note"]:
 				doctype = "Purchase Invoice"
 				party_field = "supplier"
 				account_field = "credit_to"
@@ -377,10 +377,10 @@ class TallyMigration(Document):
 
 			invoice = {
 				"doctype": doctype,
-				party_field: voucher.PARTYNAME.string,
-				"tally_guid": voucher.GUID.string,
-				"posting_date": voucher.DATE.string,
-				"due_date": voucher.DATE.string,
+				party_field: voucher.PARTYNAME.string.strip(),
+				"tally_guid": voucher.GUID.string.strip(),
+				"posting_date": voucher.DATE.string.strip(),
+				"due_date": voucher.DATE.string.strip(),
 				"items": get_voucher_items(voucher, doctype),
 				"taxes": get_voucher_taxes(voucher),
 				account_field: account_name,
@@ -399,17 +399,17 @@ class TallyMigration(Document):
 				account_field = "expense_account"
 			items = []
 			for entry in inventory_entries:
-				qty, uom = entry.ACTUALQTY.string.split()
+				qty, uom = entry.ACTUALQTY.string.strip().split()
 				items.append({
-					"item_code": entry.STOCKITEMNAME.string,
-					"description": entry.STOCKITEMNAME.string,
-					"qty": qty,
-					"uom": uom,
+					"item_code": entry.STOCKITEMNAME.string.strip(),
+					"description": entry.STOCKITEMNAME.string.strip(),
+					"qty": qty.strip(),
+					"uom": uom.strip(),
 					"conversion_factor": 1,
-					"price_list_rate": entry.RATE.string.split("/")[0],
+					"price_list_rate": entry.RATE.string.strip().split("/")[0],
 					"cost_center": self.default_cost_center,
 					"warehouse": self.default_warehouse,
-					account_field: encode_company_abbr(entry.find_all("ACCOUNTINGALLOCATIONS.LIST")[0].LEDGERNAME.string, self.erpnext_company),
+					account_field: encode_company_abbr(entry.find_all("ACCOUNTINGALLOCATIONS.LIST")[0].LEDGERNAME.string.strip(), self.erpnext_company),
 				})
 			return items
 
@@ -417,13 +417,13 @@ class TallyMigration(Document):
 			ledger_entries = voucher.find_all("ALLLEDGERENTRIES.LIST") + voucher.find_all("LEDGERENTRIES.LIST")
 			taxes = []
 			for entry in ledger_entries:
-				if entry.ISPARTYLEDGER.string == "No":
-					tax_account = encode_company_abbr(entry.LEDGERNAME.string, self.erpnext_company)
+				if entry.ISPARTYLEDGER.string.strip() == "No":
+					tax_account = encode_company_abbr(entry.LEDGERNAME.string.strip(), self.erpnext_company)
 					taxes.append({
 						"charge_type": "Actual",
 						"account_head": tax_account,
 						"description": tax_account,
-						"tax_amount": entry.AMOUNT.string,
+						"tax_amount": entry.AMOUNT.string.strip(),
 						"cost_center": self.default_cost_center,
 					})
 			return taxes
