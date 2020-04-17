@@ -3,7 +3,7 @@
 frappe.ui.form.on('Social Media Post', {
     validate: function(frm){
         if(frm.doc.text.length > 280){
-            frappe.throw("Length Must be less than 280.")
+            frappe.throw(__("Length Must be less than 280."))
         }
     },
 	refresh: function(frm){

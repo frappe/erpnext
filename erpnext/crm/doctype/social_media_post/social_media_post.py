@@ -21,7 +21,7 @@ class SocialMediaPost(Document):
 				self.db_set("twitter_post_id", twitter_post.id)
 			if self.linkedin and not self.linkedin_post_id:
 				linkedin = frappe.get_doc("LinkedIn Settings")
-				linkedin_post = linkedin.post(self.text, self.image)
+				linkedin_post = linkedin.post(self.linkedin_post, self.image)
 				self.db_set("linkedin_post_id", linkedin_post.headers['X-RestLi-Id'].split(":")[-1])
 			self.db_set("post_status", "Posted")
 
