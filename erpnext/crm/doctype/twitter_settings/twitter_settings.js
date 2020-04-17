@@ -5,7 +5,7 @@ frappe.ui.form.on('Twitter Settings', {
 	onload: function(frm){
 		if(frm.doc.session_status == 'Expired' && frm.doc.consumer_key && frm.doc.consumer_secret){
 			frappe.confirm(
-				'Session not valid, Do you want to login?',
+				__('Session not valid, Do you want to login?'),
 				function(){
 					frm.trigger("login");
 				},
@@ -20,7 +20,7 @@ frappe.ui.form.on('Twitter Settings', {
 			frm.dashboard.set_headline_alert(
 				'<div class="row">' +
 					'<div class="col-xs-12">' +
-						'<span class="indicator whitespace-nowrap green'+ '' +'"><span class="hidden-xs">Session Active</span></span> ' +
+						'<span class="indicator whitespace-nowrap green"><span class="hidden-xs">'+ __("Session Active") +'</span></span> ' +
 					'</div>' +
 				'</div>'
 			);
@@ -29,7 +29,7 @@ frappe.ui.form.on('Twitter Settings', {
 			frm.dashboard.set_headline_alert(
 				'<div class="row">' +
 					'<div class="col-xs-12">' +
-						'<span class="indicator whitespace-nowrap red'+ '' +'"><span class="hidden-xs">Session Not Active. Save doc to login.</span></span> ' +
+						'<span class="indicator whitespace-nowrap red"><span class="hidden-xs">'+ __("Session Not Active. Save doc to login.") +'</span></span> ' +
 					'</div>' +
 				'</div>'
 			);
