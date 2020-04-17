@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -11,6 +12,7 @@
   "supplier",
   "supplier_name",
   "tax_id",
+  "rtn_supplier",
   "due_date",
   "is_paid",
   "is_return",
@@ -31,6 +33,7 @@
   "hold_comment",
   "supplier_invoice_details",
   "bill_no",
+  "cai",
   "column_break_15",
   "bill_date",
   "returns",
@@ -344,7 +347,8 @@
    "label": "Supplier Invoice No",
    "oldfieldname": "bill_no",
    "oldfieldtype": "Data",
-   "print_hide": 1
+   "print_hide": 1,
+   "reqd": 1
   },
   {
    "fieldname": "column_break_15",
@@ -1282,12 +1286,26 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cai",
+   "fieldtype": "Data",
+   "label": "Cai",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "supplier.rtn",
+   "fieldname": "rtn_supplier",
+   "fieldtype": "Data",
+   "label": "RTN",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2019-09-17 22:31:42.666601",
+ "links": [],
+ "modified": "2020-04-14 23:03:51.540813",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

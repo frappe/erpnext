@@ -34,6 +34,7 @@
   "billing",
   "cashier",
   "pos",
+  "branch_office",
   "cai",
   "column_numeration",
   "due_date_cai",
@@ -1706,14 +1707,20 @@
    "fieldname": "exonerated",
    "fieldtype": "Check",
    "label": "Exonerated"
+  },
+  {
+   "fieldname": "branch_office",
+   "fieldtype": "Data",
+   "label": "Branch Office",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-14 23:59:07.905082",
- "modified_by": "gerson.caballero@grintsys.com",
+ "modified": "2020-04-16 16:09:00.434463",
+ "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
  "name_case": "Title Case",

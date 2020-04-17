@@ -236,6 +236,13 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Sales Book",
+					"doctype": "Sales Book",
+                    "dependencies": ["Sales Invoice"]
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Inactive Customers",
 					"doctype": "Sales Order"
 				},

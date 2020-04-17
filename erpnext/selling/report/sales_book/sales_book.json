@@ -1,0 +1,28 @@
+{
+ "add_total_row": 1,
+ "creation": "2020-04-10 15:31:07.006630",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": "H&C Ferrari",
+ "modified": "2020-04-14 16:27:32.906826",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Sales Book",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Sales Invoice",
+ "report_name": "Sales Book",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ]
+}
