@@ -21,6 +21,7 @@ class StockController(AccountsController):
 		super(StockController, self).validate()
 		self.validate_inspection()
 		self.validate_serialized_batch()
+		self.validate_customer_provided_item()
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if self.docstatus == 2:
@@ -367,6 +368,12 @@ class StockController(AccountsController):
 		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
 		for blanket_order in blanket_orders:
 			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
+
+	def validate_customer_provided_item(self):
+		for d in self.get('items'):
+			# Customer Provided parts will have zero valuation rate
+			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
+				d.allow_zero_valuation_rate = 1
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None, company=None):

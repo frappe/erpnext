@@ -157,6 +157,7 @@
   {
    "fieldname": "parent_company",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Parent Company",
    "options": "Company"
@@ -277,6 +278,7 @@
    "depends_on": "eval:doc.create_chart_of_accounts_based_on===\"Existing Company\"",
    "fieldname": "existing_company",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Existing Company ",
    "no_copy": 1,
    "options": "Company"
@@ -728,7 +730,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2020-03-18 18:35:44.745792",
+ "modified": "2020-03-22 18:26:03.145312",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
