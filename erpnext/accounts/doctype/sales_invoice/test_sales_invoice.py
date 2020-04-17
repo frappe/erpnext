@@ -1926,16 +1926,6 @@ class TestSalesInvoice(unittest.TestCase):
 		item.taxes = []
 		item.save()
 
-	def test_customer_provided_parts_si(self):
-		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
-		si = create_sales_invoice(item_code='CUST-0987', rate=0)
-		self.assertEqual(si.get("items")[0].allow_zero_valuation_rate, 1)
-		self.assertEqual(si.get("items")[0].amount, 0)
-
-		# test if Sales Invoice with rate is allowed
-		si2 = create_sales_invoice(item_code='CUST-0987', do_not_save=True)
-		self.assertRaises(frappe.ValidationError, si2.save)
-
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
 	args = frappe._dict(args)
