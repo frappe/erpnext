@@ -200,7 +200,7 @@ class SalesInvoice(SellingController):
 			frappe.throw(_("The user {} does not have an assigned CAI".format(user)))
 
 		for item in gcai_allocation:
-			cais = frappe.get_all("GCAI", ["codedocument", "codebranch", "codepos","initial_range", "final_range", "current_numbering", "name", "cai", "due_date"], filters = {"company": self.company, "sucursal": item.branch, "pos_name": item.pos, "state": "Valid", "type_document": self.type_document})
+			cais = frappe.get_all("GCAI", ["codedocument", "codebranch", "codepos","initial_range", "final_range", "current_numbering", "name", "cai", "due_date", "sucursal"], filters = {"company": self.company, "sucursal": item.branch, "pos_name": item.pos, "state": "Valid", "type_document": self.type_document})
 			
 			if not cais:
 				frappe.throw(_("There is no CAI available to generate this invoice."))
@@ -231,6 +231,8 @@ class SalesInvoice(SellingController):
 				self.due_date_cai = cai.due_date
 
 				self.cai = cai.cai
+
+				self.branch_office = cai.sucursal
 
 				self.authorized_range = "{} - {}".format(initial_range, final_range)
 
