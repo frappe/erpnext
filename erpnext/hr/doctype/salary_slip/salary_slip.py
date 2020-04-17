@@ -776,22 +776,16 @@ class SalarySlip(TransactionBase):
 
 		for payment in self.get('loans'):
 			amounts = calculate_amounts(payment.loan, self.posting_date, "Regular Payment")
+			total_amount = amounts['interest_amount'] + amounts['payable_principal_amount']
+			if payment.total_payment > total_amount:
+				frappe.throw(_("""Row {0}: Paid amount {1} is greater than pending accrued amount {2}
+					against loan {3}""").format(payment.idx, frappe.bold(payment.total_payment),
+					frappe.bold(total_amount), frappe.bold(payment.loan)))
 
-			if payment.interest_amount > amounts['interest_amount']:
-				frappe.throw(_("""Row {0}: Paid Interest amount {1} is greater than pending interest amount {2}
-					against loan {3}""").format(payment.idx, frappe.bold(payment.interest_amount),
-					frappe.bold(amounts['interest_amount']), frappe.bold(payment.loan)))
-
-			if payment.principal_amount > amounts['payable_principal_amount']:
-				frappe.throw(_("""Row {0}: Paid Principal amount {1} is greater than pending principal amount {2}
-					against loan {3}""").format(payment.idx, frappe.bold(payment.principal_amount),
-					frappe.bold(amounts['payable_principal_amount']), frappe.bold(payment.loan)))
-
-			payment.total_payment = payment.interest_amount + payment.principal_amount
 			self.total_interest_amount += payment.interest_amount
 			self.total_principal_amount += payment.principal_amount
 
-		self.total_loan_repayment = self.total_interest_amount + self.total_principal_amount
+			self.total_loan_repayment += payment.total_payment
 
 	def get_loan_details(self):
 
