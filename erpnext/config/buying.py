@@ -177,6 +177,13 @@ def get_data():
 					"reference_doctype": "Material Request",
 					"onboard": 1,
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Shopping Book",
+					"doctype": "Shopping Book",
+                    "dependencies": ["Sales Invoice"]
+				},
 			]
 		},
 		{

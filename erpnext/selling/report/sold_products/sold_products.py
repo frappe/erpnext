@@ -92,14 +92,14 @@ def execute(filters=None):
 	for reg in registers:
 		percentage = "{}%".format(reg[9])
 		row = [reg[0], reg[1], reg[2], reg[3], reg[4], reg[5], reg[6], reg[7], reg[8], percentage]
-		data.append(row)
+		data.append(row)	
 	return columns, data
 
 def return_filters(filters):
 	conditions = ''
 
 	conditions += "{"
-	if filters.get("from_date") and filters.get("to_date"):conditions += '"posting_date": [">=", "{}"], "posting_date": ["<=", "{}"]'.format(filters.get("from_date"), filters.get("to_date"))
+	if filters.get("from_date") and filters.get("to_date"):conditions += '"posting_date": [">=", "{}"], "modified": ["<=", "{}"]'.format(filters.get("from_date"), filters.get("to_date"))
 	if filters.get("company"): conditions += ', "company": "{}"'.format(filters.get("company"))
 	conditions += '}'
 

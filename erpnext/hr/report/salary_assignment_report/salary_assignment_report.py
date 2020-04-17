@@ -16,17 +16,18 @@ def execute(filters=None):
 	conditions = return_filters(filters)
 	data = []
 	total = 0
-	salary_component = frappe.get_all("Assignment Salary Component", ["name", "payroll_entry", "salary_component"], filters = conditions)
+	salary_component = frappe.get_all("Assignment Salary Component", ["name", "payroll_entry", "salary_component", "status"], filters = conditions)
 	for item in salary_component:
-		filters_item = get_item(filters, item.name)
-		employee_detail = frappe.get_all("Employee Detail Salary Component", ["employee_name", "moneda"], filters = filters_item)
-		for item_employee in employee_detail:
-			employee = item_employee.employee_name
-			filters_employee = get_employee(filters, employee)
-			employee = frappe.get_all("Employee", ["department", "company"], filters = filters_employee)
-			for verificate in employee:
-				row = [verificate.company, item_employee.employee_name, verificate.department, item.payroll_entry, item.salary_component, item_employee.moneda]
-				data.append(row)
+		if item.status == "Finished":
+			filters_item = get_item(filters, item.name)
+			employee_detail = frappe.get_all("Employee Detail Salary Component", ["employee_name", "moneda"], filters = filters_item)
+			for item_employee in employee_detail:
+				employee = item_employee.employee_name
+				filters_employee = get_employee(filters, employee)
+				employee = frappe.get_all("Employee", ["department", "company"], filters = filters_employee)
+				for verificate in employee:
+					row = [verificate.company, item_employee.employee_name, verificate.department, item.payroll_entry, item.salary_component, item_employee.moneda]
+					data.append(row)
 	
 	return columns, data
 
