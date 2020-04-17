@@ -113,24 +113,30 @@ def get_reserved_qty(item_code, warehouse):
 	return flt(reserved_qty[0][0]) if reserved_qty else 0
 
 def get_indented_qty(item_code, warehouse):
-	inward_qty = frappe.db.sql("""select sum((mr_item.qty - mr_item.ordered_qty) * mr_item.conversion_factor)
-			from `tabMaterial Request Item` mr_item, `tabMaterial Request` mr
-			where mr_item.item_code=%s and mr_item.warehouse=%s
-			and mr.material_request_type in ('Purchase', 'Manufacture')
-			and mr_item.qty > mr_item.ordered_qty and mr_item.parent=mr.name
-			and mr.status!='Stopped' and mr.docstatus=1""", (item_code, warehouse))
-
-	outward_qty = frappe.db.sql("""select sum((mr_item.qty - mr_item.ordered_qty) * mr_item.conversion_factor)
+	# Ordered Qty is always maintained in stock UOM
+	inward_qty = frappe.db.sql("""
+		select sum(mr_item.stock_qty - mr_item.ordered_qty)
 		from `tabMaterial Request Item` mr_item, `tabMaterial Request` mr
 		where mr_item.item_code=%s and mr_item.warehouse=%s
-		and mr.material_request_type in ('Material Issue', 'Material Transfer')
-		and mr_item.qty > mr_item.ordered_qty and mr_item.parent=mr.name
-		and mr.status!='Stopped' and mr.docstatus=1""", (item_code, warehouse))
+			and mr.material_request_type in ('Purchase', 'Manufacture', 'Customer Provided', 'Material Transfer')
+			and mr_item.stock_qty > mr_item.ordered_qty and mr_item.parent=mr.name
+			and mr.status!='Stopped' and mr.docstatus=1
+	""", (item_code, warehouse))
+	inward_qty = flt(inward_qty[0][0]) if inward_qty else 0
 
-	inward_qty, outward_qty = flt(inward_qty[0][0]) if inward_qty else 0, flt(outward_qty[0][0]) if outward_qty else 0
-	indented_qty = inward_qty - outward_qty
+	outward_qty = frappe.db.sql("""
+		select sum(mr_item.stock_qty - mr_item.ordered_qty)
+		from `tabMaterial Request Item` mr_item, `tabMaterial Request` mr
+		where mr_item.item_code=%s and mr_item.warehouse=%s
+			and mr.material_request_type = 'Material Issue'
+			and mr_item.stock_qty > mr_item.ordered_qty and mr_item.parent=mr.name
+			and mr.status!='Stopped' and mr.docstatus=1
+	""", (item_code, warehouse))
+	outward_qty = flt(outward_qty[0][0]) if outward_qty else 0
 
-	return indented_qty
+	requested_qty = inward_qty - outward_qty
+
+	return requested_qty
 
 def get_ordered_qty(item_code, warehouse):
 	ordered_qty = frappe.db.sql("""
