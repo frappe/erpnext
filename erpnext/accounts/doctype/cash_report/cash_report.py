@@ -97,7 +97,7 @@ class CashReport(Document):
 					total_credit += sales.grand_total - sale_total
 				
 				if sales.exonerated == 1:
-					exonerated += sales.total_taxes_and_charges
+					exonerated += sales.total
 				else:				
 					if sales.taxes_and_charges:
 						# taxes_charges = frappe.get_all("Sales Taxes and Charges Template", ["name"], filters = {"name": sales.taxes_and_charges})
@@ -109,10 +109,10 @@ class CashReport(Document):
 						for invoice_tax in invoice_table_taxes:
 
 							if invoice_tax.rate == 15:
-								taxed15 = sales.total							
+								taxed15 += sales.total							
 							
 							if invoice_tax.rate == 18:
-								taxed18 = sales.total
+								taxed18 += sales.total
 					else:
 						items = frappe.get_all("Sales Invoice Item", ["item_code", "amount"], filters = {"parent": sales.name})
 
@@ -134,7 +134,7 @@ class CashReport(Document):
 											if tax_detail.tax_rate == 18:
 												taxed18 += item.amount
 							else:
-								exonerated += item.amount
+								exempt += item.amount
 			
 			for ar in arrmode:
 				row = self.append("totals_table", {})
@@ -182,8 +182,8 @@ class CashReport(Document):
 
 		isv_taxed15 += taxed15 * (15/100)
 		isv_taxed18 += taxed18 * (18/100)
-		total_taxes = taxed15 + taxed18 + isv_taxed15 + isv_taxed18
-		exempt = grand_total - total_taxes
+		# total_taxes = taxed15 + taxed18 + isv_taxed15 + isv_taxed18
+		# exempt = grand_total - total_taxes
 		
 		self.create_date = create_date
 		self.rtn = rtn
