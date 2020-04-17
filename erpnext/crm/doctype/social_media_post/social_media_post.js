@@ -2,7 +2,17 @@
 // For license information, please see license.txt
 frappe.ui.form.on('Social Media Post', {
     validate: function(frm){
-        if(frm.doc.text.length > 280){
+        if(frm.doc.twitter==0 && frm.doc.linkedin==0){
+            frappe.throw(__("Select atleast one Social Media from Share on."))
+        }
+        if(frm.doc.scheduled_time) {
+            let scheduled_time = new Date(frm.doc.scheduled_time);
+            let date_time = new Date();
+            if(scheduled_time.getTime() < date_time.getTime()){
+                frappe.throw(__("Invalid Scheduled Time"));
+            }
+        }
+        if(frm.doc.text?.length > 280){
             frappe.throw(__("Length Must be less than 280."))
         }
     },

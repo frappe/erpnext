@@ -5,7 +5,7 @@ frappe.ui.form.on('LinkedIn Settings', {
 	onload: function(frm){
 		if(frm.doc.session_status == 'Expired' && frm.doc.consumer_key && frm.doc.consumer_secret){
 			frappe.confirm(
-				'Session not valid, Do you want to login?',
+				__('Session not valid, Do you want to login?'),
 				function(){
 					frm.trigger("login");
 				},
@@ -20,7 +20,7 @@ frappe.ui.form.on('LinkedIn Settings', {
 			frm.dashboard.set_headline_alert(
 				'<div class="row">' +
 					'<div class="col-xs-12">' +
-						'<span class="indicator whitespace-nowrap red'+ '' +'"><span class="hidden-xs">Session Not Active. Save doc to login.</span></span> ' +
+						'<span class="indicator whitespace-nowrap red"><span class="hidden-xs">'+ __("Session Not Active. Save doc to login.") +'</span></span> ' +
 					'</div>' +
 				'</div>'
 			);
@@ -33,11 +33,11 @@ frappe.ui.form.on('LinkedIn Settings', {
 			days = Math.floor(days/(1000 * 3600 * 24));
 			let msg,color;
 			if(days>0){
-				msg = "Your Session will be expire in " + days + " days.";
+				msg = __("Your Session will be expire in ") + days + __(" days.");
 				color = "green";
 			}
 			else{
-				msg = "Session is expired. Save doc to login.";
+				msg = __("Session is expired. Save doc to login.");
 				color = "red";
 			}
 			frm.dashboard.set_headline_alert(

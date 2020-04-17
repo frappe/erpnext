@@ -6,10 +6,18 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
+import datetime
 
 class SocialMediaPost(Document):
+	def validate(self):
+		if self.scheduled_time:
+			current_time = frappe.utils.now_datetime()
+			scheduled_time = frappe.utils.get_datetime(self.scheduled_time)
+			if scheduled_time < current_time:
+				frappe.throw(_("Invalid Scheduled Time"))
+
 	def submit(self):
-		if self.sheduled_time:
+		if self.scheduled_time:
 			self.post_status = "Scheduled"
 		super(SocialMediaPost, self).submit()
 
@@ -32,15 +40,14 @@ class SocialMediaPost(Document):
 			frappe.log_error(message=traceback , title=title)
 
 def process_scheduled_social_media_posts():
-	import datetime
-	posts = frappe.get_list("Social Media Post", filters={"status": "Scheduled"}, fields= ["name", "sheduled_time"])
+	posts = frappe.get_list("Social Media Post", filters={"post_status": "Scheduled", "docstatus":1}, fields= ["name", "scheduled_time","post_status"])
 	start = frappe.utils.now_datetime()
-	end = start + datetime.timedelta(minutes=59)
+	end = start + datetime.timedelta(minutes=10)
 	for post in posts:
-		post_time = frappe.utils.get_datetime(post.scheduled_time)
-		if post_time > start and post_time <= end:
-			post = frappe.get_doc('Social Media Post',post['name'])
-			post.post()
+		if post.scheduled_time:
+			post_time = frappe.utils.get_datetime(post.scheduled_time)
+			if post_time > start and post_time <= end:
+				publish('Social Media Post', post.name)
 
 @frappe.whitelist()
 def publish(doctype, name):

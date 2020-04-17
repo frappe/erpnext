@@ -7,7 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "campaign_name",
-  "sheduled_time",
+  "scheduled_time",
   "post_status",
   "column_break_6",
   "twitter",
@@ -57,12 +57,6 @@
    "options": "Social Media Post",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "sheduled_time",
-   "fieldtype": "Datetime",
-   "label": "Scheduled Time"
   },
   {
    "depends_on": "eval:doc.twitter ==1",
@@ -136,11 +130,18 @@
   {
    "fieldname": "column_break_15",
    "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "scheduled_time",
+   "fieldtype": "Datetime",
+   "label": "Scheduled Time",
+   "read_only_depends_on": "eval:doc.post_status == \"Posted\""
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-18 01:28:35.995490",
+ "modified": "2020-04-21 15:10:04.953713",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Social Media Post",
