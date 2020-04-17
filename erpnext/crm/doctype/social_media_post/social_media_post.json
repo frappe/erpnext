@@ -20,6 +20,7 @@
   "tweet_preview",
   "linkedin_section",
   "linkedin_post",
+  "column_break_15",
   "attachments_section",
   "image",
   "amended_from"
@@ -29,7 +30,7 @@
    "fieldname": "text",
    "fieldtype": "Small Text",
    "label": "Tweet",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.twitter ==1"
   },
   {
    "fieldname": "image",
@@ -64,6 +65,7 @@
    "label": "Scheduled Time"
   },
   {
+   "depends_on": "eval:doc.twitter ==1",
    "fieldname": "content",
    "fieldtype": "Section Break",
    "label": "Twitter"
@@ -114,6 +116,7 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval:doc.linkedin==1",
    "fieldname": "linkedin_section",
    "fieldtype": "Section Break",
    "label": "LinkedIn"
@@ -127,12 +130,17 @@
   {
    "fieldname": "linkedin_post",
    "fieldtype": "Text",
-   "label": "Post"
+   "label": "Post",
+   "mandatory_depends_on": "eval:doc.linkedin ==1"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-09 22:35:23.821991",
+ "modified": "2020-04-18 01:28:35.995490",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Social Media Post",
