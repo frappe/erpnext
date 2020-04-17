@@ -140,8 +140,15 @@ class SalesInvoice(SellingController):
 
 		self.exonerated_value()
 
+		if self.docstatus == 0:
+			self.validate_camps()
+
 		if self.docstatus == 1:
 			self.assign_cai()
+	
+	def validate_camps(self):
+		if not self.type_document:
+			frappe.throw(_("Type Document is required."))
 	
 	def exonerated_value(self):
 		if self.exonerated == 1:
