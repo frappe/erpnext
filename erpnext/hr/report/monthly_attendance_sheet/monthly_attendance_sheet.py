@@ -10,7 +10,8 @@ from calendar import monthrange
 status_map = {
 	"Absent": "A",
 	"Half Day": "HD",
-	"Holiday":"<b>H</b>",
+	"Holiday": "<b>H</b>",
+	"Weekly Off": "<b>WO</b>",
 	"On Leave": "L",
 	"Present": "P",
 	"Work From Home": "WFH"
@@ -90,9 +91,24 @@ def add_data(employee_map, att_map, filters, holiday_map, conditions, leave_list
 
 			if status is None and holiday_map:
 				emp_holiday_list = emp_det.holiday_list if emp_det.holiday_list else default_holiday_list
-				if emp_holiday_list in holiday_map and (day+1) in holiday_map[emp_holiday_list]:
-					status = "Holiday"
-					total_h += 1
+
+				if emp_holiday_list in holiday_map:
+					for idx, ele in enumerate(holiday_map[emp_holiday_list]):
+						if day+1 == holiday_map[emp_holiday_list][idx][0]:
+							if holiday_map[emp_holiday_list][idx][1]:
+								status = "Weekly Off"
+							else:
+								status = "Holiday"
+							total_h += 1
+
+
+				# if emp_holiday_list in holiday_map and (day+1) in holiday_map[emp_holiday_list][0]:
+				# 	if holiday_map[emp_holiday_list][1]:
+				# 		status= "Weekly Off"
+				# 	else:
+				# 		status = "Holiday"
+
+				# 	 += 1
 
 			if not filters.summarized_view:
 				row.append(status_map.get(status, ""))
@@ -232,7 +248,7 @@ def get_holiday(holiday_list, month):
 	holiday_map = frappe._dict()
 	for d in holiday_list:
 		if d:
-			holiday_map.setdefault(d, frappe.db.sql_list('''select day(holiday_date) from `tabHoliday`
+			holiday_map.setdefault(d, frappe.db.sql('''select day(holiday_date), weekly_off from `tabHoliday`
 				where parent=%s and month(holiday_date)=%s''', (d, month)))
 
 	return holiday_map
