@@ -33,7 +33,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.initialize_items_summary();
         this.initialize_totals_summary();
         this.initialize_payments_summary();
-        this.initialize_return_button();
+        this.initialize_summary_buttons();
     }
 
     initialize_upper_section() {
@@ -77,16 +77,20 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.$payment_summary_container = this.$summary_container.find('.payments-summary-container');
     }
 
-    initialize_return_button() {
+    initialize_summary_buttons() {
         this.$summary_container.append(
-            `<div class="return-btn flex flex-col mt-4 w-66 no-select pointer">
-                <div class="border rounded flex w-full h-14 flex items-center justify-center text-md text-bold">
+            `<div class="flex w-66">
+                <div class="return-btn border rounded flex w-full mt-4 h-14 flex items-center justify-center text-md text-bold no-select pointer">
                     Process Return
+                </div>
+                <div class="edit-btn border rounded flex w-full mt-4 h-14 flex items-center justify-center text-md text-bold no-select pointer d-none">
+                    Edit Order
                 </div>
             </div>`
         )
 
         this.$return_btn = this.$summary_container.find('.return-btn');
+        this.$edit_btn = this.$summary_container.find('.edit-btn');
     }
 
 
@@ -217,7 +221,11 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.$summary_container.on('click', '.return-btn', () => {
             this.events.process_return(this.doc.name);
             this.toggle_component(false);
-        })
+        });
+        this.$summary_container.on('click', '.edit-btn', () => {
+            this.events.edit_order(this.doc.name);
+            this.toggle_component(false);
+        });
     }
     
     toggle_component(show) {
@@ -258,6 +266,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
             }
         });
 
-        doc.is_return ? this.$return_btn.addClass('d-none') : this.$return_btn.removeClass('d-none');
+        doc.is_return || doc.docstatus === 0 ? this.$return_btn.addClass('d-none') : this.$return_btn.removeClass('d-none');
+        doc.docstatus !== 0 ? this.$edit_btn.addClass('d-none') : this.$edit_btn.removeClass('d-none');
     }
 }

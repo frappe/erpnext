@@ -186,7 +186,7 @@ erpnext.PointOfSale.Controller = class {
 					this.cart.toggle_numpad(minimize);
 				},
 
-				form_updated: (cdt, cdn, fieldname, value) => {
+				form_updated: async (cdt, cdn, fieldname, value) => {
 					const item_row = frappe.model.get_doc(cdt, cdn);
 					if (item_row && item_row[fieldname] != value) {
 
@@ -201,7 +201,7 @@ erpnext.PointOfSale.Controller = class {
 							value,
 							item: { item_code, batch_no }
 						}
-						this.on_cart_update(event)
+						return this.on_cart_update(event)
 					}
 				},
 
@@ -282,6 +282,17 @@ erpnext.PointOfSale.Controller = class {
 					frappe.db.get_doc('POS Invoice', name).then((doc) => {
 						frappe.run_serially([
 							() => this.make_return_invoice(doc),
+							() => this.cart.load_cart_data_from_invoice(),
+							() => this.cart.$component.removeClass('d-none'),
+							() => this.item_selector.$component.removeClass('d-none')
+						]);
+					});
+				},
+				edit_order: (name) => {
+					this.past_order_list.toggle_component(false);
+					frappe.db.get_doc('POS Invoice', name).then((doc) => {
+						frappe.run_serially([
+							() => (this.frm.doc = doc),
 							() => this.cart.load_cart_data_from_invoice(),
 							() => this.cart.$component.removeClass('d-none'),
 							() => this.item_selector.$component.removeClass('d-none')
@@ -504,12 +515,12 @@ erpnext.PointOfSale.Controller = class {
 		this.item_details.toggle_item_details_section(item_row || undefined);
 	}
 
-	async update_item_field(value, field_or_action) {
+	update_item_field(value, field_or_action) {
 		if (field_or_action === 'done') {
 			this.toggle_item_details();
 		} else if (field_or_action === 'remove') {
 			this.remove_item_from_cart();
-		} else if (field_or_action !== 'disc') {
+		} else {
 			const field_control = this.item_details[`${field_or_action}_control`];
 			if (!field_control) return;
 			value && field_control.set_value(value);

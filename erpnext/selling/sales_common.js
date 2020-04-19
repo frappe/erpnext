@@ -142,7 +142,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 
 		// check if child doctype is Sales Order Item/Qutation Item and calculate the rate
-		if(in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item"]), cdt)
+		if(in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item", "POS Invoice Item"]), cdt)
 			this.apply_pricing_rule_on_item(item);
 		else
 			item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),

@@ -115,6 +115,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			)
 
 			const field_meta = this.item_meta.fields.find(df => df.fieldname === fieldname);
+			fieldname === 'discount_percentage' ? (field_meta.label = __('Discount (%)')) : '';
 			const me = this;
             
 			this[`${fieldname}_control`] = frappe.ui.form.make_control({
@@ -130,21 +131,20 @@ erpnext.PointOfSale.ItemDetails = class {
 			this[`${fieldname}_control`].set_value(item[fieldname]);
 		})
 
-		this.make_auto_serial_selection_btn();
+		this.make_auto_serial_selection_btn(item);
 
 		this.bind_custom_control_change_event();
     }
 
     get_form_fields(item) {
-		const fields = ['qty', 'rate', 'price_list_rate', 'warehouse', 'actual_qty'];
+		const fields = ['qty', 'rate', 'discount_percentage', 'price_list_rate', 'warehouse', 'actual_qty'];
 		if (item.has_serial_no) fields.push('serial_no');
 		if (item.has_batch_no) fields.push('batch_no');
 		return fields;
 	}
 
-    make_auto_serial_selection_btn() {
-		const me = this;
-		if (this.serial_no_control) {
+    make_auto_serial_selection_btn(item) {
+		if (item.has_serial_no) {
 			this.$form_container.append(
 				`<div class="grid-filler no-select"></div>`
 			)
@@ -161,6 +161,31 @@ erpnext.PointOfSale.ItemDetails = class {
     
     bind_custom_control_change_event() {
 		const me = this;
+		if (this.rate_control) {
+			this.rate_control.df.onchange = function() {
+				if (this.value) {
+					me.events.form_updated(me.doctype, me.name, 'rate', this.value).then(() => {
+						const item_row = frappe.get_doc(me.doctype, me.name);
+						const doc = me.events.get_frm().doc;
+
+						me.$item_price.html(format_currency(item_row.rate, doc.currency));
+						me.render_discount_dom(item_row);
+					});
+				}
+			}
+		}
+
+		if (this.discount_percentage_control) {
+			this.discount_percentage_control.df.onchange = function() {
+				if (this.value) {
+					me.events.form_updated(me.doctype, me.name, 'discount_percentage', this.value).then(() => {
+						const item_row = frappe.get_doc(me.doctype, me.name);
+						me.rate_control.set_value(item_row.rate);
+					});
+				}
+			}
+		}
+
 		if (this.serial_no_control) {
 			this.serial_no_control.df.reqd = 1;
 			this.serial_no_control.df.onchange = async function() {
@@ -179,9 +204,6 @@ erpnext.PointOfSale.ItemDetails = class {
 		}
 
 		frappe.ui.form.on('POS Invoice Item', 'rate', (frm, cdt, cdn) => {
-			const item_row = locals[cdt][cdn];
-			this.$item_price.html(format_currency(item_row.rate, frm.doc.currency));
-			this.render_discount_dom(item_row);
 		})
     }
     

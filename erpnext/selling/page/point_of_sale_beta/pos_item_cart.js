@@ -31,22 +31,12 @@ erpnext.PointOfSale.ItemCart = class {
             `<div class="customer-section rounded flex flex-col p-8 pb-0"></div>`
         )
 		this.$customer_section = this.$component.find('.customer-section');
-		
-		this.reset_customer_selector();
 	}
 	
 	reset_customer_selector() {
-		this.$customer_section.html(
-			`<div class="add-remove-customer flex items-center rounded border-grey border-dashed h-18 pr-6 pl-6 bg-grey-100" data-customer="">
-				<div class="text-grey bg-grey-100">Add Customer</div>
-				<div class="ml-auto mr-2">
-					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 14 14" fill="none">
-						<circle cx="7" cy="7" r="6.5" stroke="#8D99A6"/>
-						<path d="M7.00004 4.08331V6.99998M7.00004 9.91665V6.99998M7.00004 6.99998H4.08337H9.91671" stroke="#8D99A6"/>
-					</svg>
-				</div>
-			</div>`
-		)
+		const frm = this.events.get_frm();
+		frm.set_value('customer', '');
+		this.show_customer_selector();
 	}
     
     initialize_cart_components() {
@@ -139,7 +129,7 @@ erpnext.PointOfSale.ItemCart = class {
 				[ '', '', '', 'col-span-2' ],
 				[ '', '', '', 'col-span-2 text-danger' ]
 			],
-			fieldnames_map: { 'Quantity': 'qty' }
+			fieldnames_map: { 'Quantity': 'qty', 'Discount': 'discount_percentage' }
 		})
 
 		this.$numpad_section.append(
@@ -153,9 +143,7 @@ erpnext.PointOfSale.ItemCart = class {
     bind_events() {
 		const me = this;
 		this.$customer_section.on('click', '.add-remove-customer', async () => {
-			const frm = this.events.get_frm();
-			await frm.set_value('customer', '');
-			this.show_customer_selector();
+			this.reset_customer_selector();
 		});
 
 		this.$cart_items_wrapper.on('click', '.cart-item-wrapper', function() {
@@ -190,10 +178,9 @@ erpnext.PointOfSale.ItemCart = class {
 		const me = this;
 		this.customer_field = frappe.ui.form.make_control({
 			df: {
-				label: 'Customer',
+				label: __('Customer'),
 				fieldtype: 'Link',
 				options: 'Customer',
-				reqd: 1,
 				placeholder: __('Search by customer name, phone, email.'),
 				onchange: function() {
 					if (this.value) {
@@ -210,7 +197,7 @@ erpnext.PointOfSale.ItemCart = class {
 			render_input: true,
 		});
 		this.customer_field.toggle_label(false);
-		this.customer_field.set_focus();
+		// this.customer_field.set_focus();
     }
     
     update_customer_section(frm) {
@@ -236,9 +223,8 @@ erpnext.PointOfSale.ItemCart = class {
 						<div class="text-md text-dark-grey text-bold">${customer_name}</div>
 						${get_customer_description()}
 					</div>
-					<div class="add-remove-customer ml-auto mr-2" data-customer="${escape(customer_name)}">
-						<svg width="16" height="16" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<circle cx="7" cy="7" r="6.5" stroke="#8D99A6"/>
+					<div class="add-remove-customer ml-auto flex items-center" data-customer="${escape(customer_name)}">
+						<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
 							<path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
 						</svg>
 					</div>
@@ -415,7 +401,7 @@ erpnext.PointOfSale.ItemCart = class {
     
     on_numpad_event($btn) {
 		const current_action = $btn.attr('data-button-value');
-		const action_is_field_edit = ['qty', 'discount', 'rate'].includes(current_action);
+		const action_is_field_edit = ['qty', 'discount_percentage', 'rate'].includes(current_action);
 
 		this.highlight_numpad_btn($btn, current_action);
 
@@ -459,7 +445,7 @@ erpnext.PointOfSale.ItemCart = class {
     
     highlight_numpad_btn($btn, curr_action) {
         const curr_action_is_highlighted = $btn.hasClass('shadow-inner');
-        const curr_action_is_action = ['qty', 'discount', 'rate', 'done'].includes(curr_action);
+        const curr_action_is_action = ['qty', 'discount_percentage', 'rate', 'done'].includes(curr_action);
 
         if (!curr_action_is_highlighted) {
             $btn.addClass('shadow-inner bg-selected');

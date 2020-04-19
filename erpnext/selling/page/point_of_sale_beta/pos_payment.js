@@ -182,12 +182,9 @@ erpnext.PointOfSale.Payment = class {
 			this.$remarks.html('');
 			this[`remark_control`] = frappe.ui.form.make_control({
 				df: {
-					label: 'Remark',
+					label: __('Remark'),
 					fieldtype: 'Text',
-					onchange: function() {
-						// frappe.model.set_value(p.doctype, p.name, 'amount', flt(this.value)).then(() => me.update_totals_section());
-						// me.$payment_modes.find(`.${mode}-amount`).html(`${format_currency(this.value, currency)}`);
-					}
+					onchange: function() {}
 				},
 				parent: this.$totals_remarks.find(`.remarks`),
 				render_input: true,
@@ -233,8 +230,7 @@ erpnext.PointOfSale.Payment = class {
 					fieldtype: 'Currency',
 					placeholder: __(`Enter ${p.mode_of_payment} amount.`),
 					onchange: function() {
-						debugger;
-						frappe.model.set_value(p.doctype, p.name, 'amount', flt(this.value))
+						frappe.model.set_value(p.doctype, p.name, 'amount', this.value)
 							.then(() => me.update_totals_section());
 
 						const formatted_currency = format_currency(this.value, currency);
@@ -314,7 +310,7 @@ erpnext.PointOfSale.Payment = class {
 							const redeem_loyalty_points = this.value > 0 ? 1 : 0;
 							await frappe.model.set_value(doc.doctype, doc.name, 'redeem_loyalty_points', redeem_loyalty_points);
 
-							frappe.model.set_value(doc.doctype, doc.name, 'loyalty_points', flt(this.value));
+							frappe.model.set_value(doc.doctype, doc.name, 'loyalty_points', this.value);
 						},
 						description
 					},
@@ -349,7 +345,7 @@ erpnext.PointOfSale.Payment = class {
 		if (!doc) doc = this.events.get_frm().doc;
 		const paid_amount = doc.paid_amount;
 		const remaining = doc.grand_total - doc.paid_amount;
-		const change = doc.change_amount;
+		const change = doc.change_amount || remaining <= 0 ? -1 * remaining : undefined;
 		const currency = doc.currency
 		const label = change ? __('Change') : __('To Be Paid');
 

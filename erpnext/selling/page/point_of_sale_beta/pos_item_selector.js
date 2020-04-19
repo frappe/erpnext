@@ -78,7 +78,7 @@ erpnext.PointOfSale.ItemSelector = class {
     make_search_bar() {
 		this.search_field = frappe.ui.form.make_control({
 			df: {
-				label: 'Search',
+				label: __('Search'),
 				fieldtype: 'Data',
 				placeholder: __('Search by item code, serial number, batch no or barcode')
 			},
@@ -87,7 +87,7 @@ erpnext.PointOfSale.ItemSelector = class {
         });
 		this.item_group_field = frappe.ui.form.make_control({
 			df: {
-				label: 'Item Group',
+				label: __('Item Group'),
 				fieldtype: 'Link',
 				options: 'Item Group',
                 placeholder: __('Select item group'),
