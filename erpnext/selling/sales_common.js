@@ -306,6 +306,11 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	batch_no: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
+
+		if (item.serial_no) {
+			return;
+		}
+
 		item.serial_no = null;
 		var has_serial_no;
 		frappe.db.get_value('Item', {'item_code': item.item_code}, 'has_serial_no', (r) => {

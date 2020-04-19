@@ -433,6 +433,12 @@ erpnext.PointOfSale.Controller = class {
 			}
 
 		} else {
+			if (!this.frm.doc.customer) {
+				frappe.dom.unfreeze();
+				frappe.throw(__('You must select a customer before adding an item.'));
+				return;
+			}
+
 			const args = { item_code: item_code, batch_no, [field]: value };
 			if (field === 'serial_no') args['qty'] = value.split(`\n`).length || 0;
 
