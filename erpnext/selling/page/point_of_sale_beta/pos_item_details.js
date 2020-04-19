@@ -271,6 +271,8 @@ erpnext.PointOfSale.ItemDetails = class {
 		})
 	}
 
-	
+	disable_item_details() {
+        this.$component.addClass('d-none');
+    }	
     
 }

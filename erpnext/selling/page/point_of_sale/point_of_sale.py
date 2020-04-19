@@ -166,6 +166,31 @@ def create_opening_voucher(pos_profile, company, custody_amount):
 
 	return new_pos_opening.as_dict()
 
+@frappe.whitelist()
+def get_past_order_list(search_term, status, limit=20):
+
+	fields = ['name', 'grand_total', 'currency', 'customer']
+	invoice_list = []
+
+	if search_term and status:
+		invoices_by_customer = frappe.db.get_all('POS Invoice', filters={
+			'customer': ['like', '%{}%'.format(search_term)],
+			'status': status
+		}, fields=fields)
+		invoices_by_name = frappe.db.get_all('POS Invoice', filters={
+			'name': ['like', '%{}%'.format(search_term)],
+			'status': status
+		}, fields=fields)
+
+		invoice_list = invoices_by_customer + invoices_by_name
+	elif status:
+		invoice_list = frappe.db.get_all('POS Invoice', filters={
+			'status': status
+		}, fields=fields)
+	
+	return invoice_list
+
+
 def get_conditions(item_code, serial_no, batch_no, barcode):
 	if serial_no or batch_no or barcode:
 		return "name = {0}".format(frappe.db.escape(item_code))

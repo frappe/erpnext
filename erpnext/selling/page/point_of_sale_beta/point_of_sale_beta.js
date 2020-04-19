@@ -22,13 +22,3 @@ frappe.pages['point-of-sale-beta'].on_page_load = function(wrapper) {
 		}
 	});
 };
-
-frappe.pages['point-of-sale-beta'].refresh = function(wrapper) {
-	if (wrapper.pos) {
-		wrapper.pos.make_new_invoice();
-	}
-
-	if (frappe.flags.is_offline) {
-		frappe.set_route('pos');
-	}
-}

@@ -594,7 +594,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		// NOTE:
 		// paid_amount and write_off_amount is only for POS/Loyalty Point Redemption Invoice
 		// total_advance is only for non POS Invoice
-		if(this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.is_return){
+		if(in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype) && this.frm.doc.is_return){
 			this.calculate_paid_amount();
 		}
 

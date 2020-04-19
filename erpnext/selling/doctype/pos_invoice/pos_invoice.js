@@ -52,16 +52,22 @@ erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend(
 					method: "set_missing_values",
 					callback: function(r) {
 						if(!r.exc) {
-							if(r.message && r.message.print_format) {
-								me.frm.pos_print_format = r.message.print_format;
+							if(r.message) {
+								me.frm.pos_print_format = r.message.print_format || "";
+								me.frm.meta.default_print_format = r.message.print_format || "";
+								me.frm.allow_edit_rate = r.message.allow_edit_rate;
+								me.frm.allow_edit_discount = r.message.allow_edit_discount;
+								me.frm.doc.campaign = r.message.campaign;
+								me.frm.allow_print_before_pay = r.message.allow_print_before_pay;
 							}
 							me.frm.script_manager.trigger("update_stock");
+							me.calculate_taxes_and_totals();
 							if(me.frm.doc.taxes_and_charges) {
 								me.frm.script_manager.trigger("taxes_and_charges");
 							}
 							frappe.model.set_default_values(me.frm.doc);
 							me.set_dynamic_labels();
-							me.calculate_taxes_and_totals();
+							
 						}
 					}
 				});

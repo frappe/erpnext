@@ -3,6 +3,8 @@
 {% include "erpnext/selling/page/point_of_sale_beta/pos_item_details.js" %}
 {% include "erpnext/selling/page/point_of_sale_beta/pos_payment.js" %}
 {% include "erpnext/selling/page/point_of_sale_beta/pos_number_pad.js" %}
+{% include "erpnext/selling/page/point_of_sale_beta/pos_past_order_list.js" %}
+{% include "erpnext/selling/page/point_of_sale_beta/pos_past_order_summary.js" %}
 
 erpnext.PointOfSale.Controller = class {
     constructor(wrapper) {
@@ -91,7 +93,7 @@ erpnext.PointOfSale.Controller = class {
 			<div class="app grid grid-cols-10 pt-8 gap-6"></div>`
 		);
 
-		this.$component_wrapper = this.wrapper.find('.app');
+		this.$components_wrapper = this.wrapper.find('.app');
 	}
 
 	initialize_components() {
@@ -99,6 +101,8 @@ erpnext.PointOfSale.Controller = class {
 		this.initialize_item_details();
 		this.initialize_item_cart();
 		this.initialize_payments();
+		this.initialize_past_order_list();
+		this.initialize_past_order_summary();
 	}
 
 	prepare_menu() {
@@ -108,6 +112,26 @@ erpnext.PointOfSale.Controller = class {
 		this.page.add_menu_item(__("Form View"), function () {
 			frappe.model.sync(me.frm.doc);
 			frappe.set_route("Form", me.frm.doc.doctype, me.frm.doc.name);
+		});
+
+		this.page.add_menu_item(__("Past Orders"), () => {
+			const show = this.past_order_summary.$component.hasClass('d-none');
+			this.toggle_past_order_list(show);
+		});
+
+		this.page.add_menu_item(__("Save as Draft"), () => {
+			this.frm.save(undefined, undefined, undefined, () => {
+				frappe.show_alert({
+					message:__("There was an error saving the document."), 
+					indicator:'red'
+				});
+
+			}).then(() => {
+				frappe.run_serially([
+					() => this.make_new_invoice(),
+					() => this.cart.load_cart_data_from_invoice()
+				]);
+			})
 		});
 
 		this.page.add_menu_item(__('Close the POS'), () => {
@@ -124,7 +148,7 @@ erpnext.PointOfSale.Controller = class {
 
 	initialize_item_selector() {
 		this.item_selector = new erpnext.PointOfSale.ItemSelector({
-			wrapper: this.$component_wrapper,
+			wrapper: this.$components_wrapper,
 			pos_profile: this.pos_profile,
 			events: {
 				item_selected: args => this.on_cart_update(args),
@@ -136,7 +160,7 @@ erpnext.PointOfSale.Controller = class {
 
 	initialize_item_cart() {
 		this.cart = new erpnext.PointOfSale.ItemCart({
-			wrapper: this.$component_wrapper,
+			wrapper: this.$components_wrapper,
 			events: {
 				get_frm: () => this.frm,
 
@@ -153,12 +177,12 @@ erpnext.PointOfSale.Controller = class {
 
 	initialize_item_details() {
 		this.item_details = new erpnext.PointOfSale.ItemDetails({
-			wrapper: this.$component_wrapper,
+			wrapper: this.$components_wrapper,
 			events: {
 				get_frm: () => this.frm,
 
 				toggle_item_selector: (minimize) => {
-					this.item_selector.resize_selector(minimize)
+					this.item_selector.resize_selector(minimize, 'item_details');
 					this.cart.toggle_numpad(minimize);
 				},
 
@@ -209,7 +233,7 @@ erpnext.PointOfSale.Controller = class {
 
 	initialize_payments() {
 		this.payment = new erpnext.PointOfSale.Payment({
-			wrapper: this.$component_wrapper,
+			wrapper: this.$components_wrapper,
 			events: {
 				get_frm: () => this.frm || {},
 
@@ -225,6 +249,7 @@ erpnext.PointOfSale.Controller = class {
 				submit_invoice: () => {
 					this.frm.savesubmit()
 						.then((r) => {
+							this.set_invoice_status();
 							frappe.show_alert({
 								indicator: 'green',
 								message: __(`POS invoice ${r.doc.name} created succesfully`)
@@ -233,6 +258,56 @@ erpnext.PointOfSale.Controller = class {
 				}
 			}
 		});
+	}
+
+	initialize_past_order_list() {
+		this.past_order_list = new erpnext.PointOfSale.PastOrderList({
+			wrapper: this.$components_wrapper,
+			events: {
+				open_invoice_data: (name) => {
+					frappe.db.get_doc('POS Invoice', name).then((doc) => {
+						this.past_order_summary.load_invoice_summary_of(doc);
+					});
+				}
+			}
+		})
+	}
+
+	initialize_past_order_summary() {
+		this.past_order_summary = new erpnext.PointOfSale.PastOrderSummary({
+			wrapper: this.$components_wrapper,
+			events: {
+				process_return: (name) => {
+					this.past_order_list.toggle_component(false);
+					frappe.db.get_doc('POS Invoice', name).then((doc) => {
+						frappe.run_serially([
+							() => this.make_return_invoice(doc),
+							() => this.cart.load_cart_data_from_invoice(),
+							() => this.cart.$component.removeClass('d-none'),
+							() => this.item_selector.$component.removeClass('d-none')
+						]);
+					});
+				}
+			}
+		})
+	}
+
+	toggle_past_order_list(show) {
+		if (show) {
+			this.item_selector.disable_selector();
+			this.cart.disable_cart();
+			this.item_details.disable_item_details();
+			this.payment.disable_payments();
+
+			this.past_order_list.toggle_component(true);
+			this.past_order_summary.toggle_component(true);
+		} else {
+			this.cart.$component.removeClass('d-none');
+			this.item_selector.$component.removeClass('d-none');
+
+			this.past_order_list.toggle_component(false);
+			this.past_order_summary.toggle_component(false);
+		}
 	}
 
 	async make_new_invoice() {
@@ -247,31 +322,48 @@ erpnext.PointOfSale.Controller = class {
 		const doctype = 'POS Invoice';
 		return new Promise(resolve => {
 			if (this.frm) {
-				this.frm = get_frm(this.frm);
+				this.frm = this.get_new_frm(this.frm);
+				this.frm.doc.items = [];
+				this.frm.doc.is_pos = 1
 				resolve();
 			} else {
 				frappe.model.with_doctype(doctype, () => {
-					this.frm = get_frm();
+					this.frm = this.get_new_frm();
+					this.frm.doc.items = [];
+					this.frm.doc.is_pos = 1
 					resolve();
 				});
 			}
 		});
+	}
 
-		function get_frm(_frm) {
-			const page = $('<div>');
-			const frm = _frm || new frappe.ui.form.Form(doctype, page, false);
-			const name = frappe.model.make_new_doc_and_get_name(doctype, true);
-			frm.refresh(name);
-			frm.doc.items = [];
-			frm.doc.is_pos = 1
+	get_new_frm(_frm) {
+		const doctype = 'POS Invoice';
+		const page = $('<div>');
+		const frm = _frm || new frappe.ui.form.Form(doctype, page, false);
+		const name = frappe.model.make_new_doc_and_get_name(doctype, true);
+		frm.refresh(name);
 
-			return frm;
-		}
+		return frm;
+	}
+
+	async make_return_invoice(doc) {
+		this.frm = this.get_new_frm(this.frm);
+		this.frm.doc.items = [];
+		const res = await frappe.call({
+			method: "erpnext.selling.doctype.pos_invoice.pos_invoice.make_sales_return",
+			args: {
+				'source_name': doc.name,
+				'target_doc': this.frm.doc
+			}
+		});
+		frappe.model.sync(res.message);
+		await this.set_pos_profile_data();
 	}
 
 	set_pos_profile_data() {
-		if (this.company) this.frm.doc.company = this.company;
-		if (this.pos_profile) this.frm.doc.pos_profile = this.pos_profile;
+		if (this.company && !this.frm.doc.company) this.frm.doc.company = this.company;
+		if (this.pos_profile && !this.frm.doc.pos_profile) this.frm.doc.pos_profile = this.pos_profile;
 		if (!this.frm.doc.company) return;
 
 		return new Promise(resolve => {

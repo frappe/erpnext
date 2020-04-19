@@ -22,16 +22,17 @@ erpnext.PointOfSale.Payment = class {
                     <div class="payment-modes flex flex-wrap"></div>
                     <div class="flex mt-auto justify-center w-full">
                         <div class="flex flex-col justify-center flex-1 ml-4">
-                            <div class="flex w-full mb-4">
+                            <div class="flex w-full">
                                 <div class="totals-remarks items-end justify-end flex flex-1">
-                                    <div class="remarks mr-4 text-md text-grey mr-auto">+ Add Remark</div>
+                                    <div class="remarks mr-4 text-md-0 text-grey mr-auto">+ Add Remark</div>
                                     <div class="totals flex justify-end pt-4"></div>
                                 </div>
                                 <div class="number-pad w-40 mb-4 ml-8 d-none"></div>
                             </div>
-                            <div class="flex items-center justify-center submit-order h-16 w-full rounded bg-primary text-md text-white no-select pointer text-bold">
+                            <div class="flex items-center justify-center mt-4 submit-order h-16 w-full rounded bg-primary text-md text-white no-select pointer text-bold">
                                 Complete Order
-                            </div>
+							</div>
+							<div class="order-time flex items-center justify-end mt-2 pt-2 pb-2 w-full text-md-0 text-grey no-select pointer d-none"></div>
                         </div>
                     </div>
                 </div>
@@ -137,7 +138,7 @@ erpnext.PointOfSale.Payment = class {
 		})
 
 		frappe.ui.form.on('POS Invoice', 'paid_amount', (frm, cdt, cdn) => {
-			this.show_totals(frm.doc);
+			this.update_totals_section(frm.doc);
 		})
 
 		frappe.ui.form.on('POS Invoice', 'loyalty_amount', (frm) => {
@@ -161,7 +162,7 @@ erpnext.PointOfSale.Payment = class {
 	render_payment_section() {
 		this.show_payment_section();
 		this.render_payment_mode_dom();
-		this.show_totals();
+		this.update_totals_section();
 	}
 
 	hide_payment_section() {
@@ -184,7 +185,7 @@ erpnext.PointOfSale.Payment = class {
 					label: 'Remark',
 					fieldtype: 'Text',
 					onchange: function() {
-						// frappe.model.set_value(p.doctype, p.name, 'amount', flt(this.value)).then(() => me.show_totals());
+						// frappe.model.set_value(p.doctype, p.name, 'amount', flt(this.value)).then(() => me.update_totals_section());
 						// me.$payment_modes.find(`.${mode}-amount`).html(`${format_currency(this.value, currency)}`);
 					}
 				},
@@ -232,8 +233,9 @@ erpnext.PointOfSale.Payment = class {
 					fieldtype: 'Currency',
 					placeholder: __(`Enter ${p.mode_of_payment} amount.`),
 					onchange: function() {
+						debugger;
 						frappe.model.set_value(p.doctype, p.name, 'amount', flt(this.value))
-							.then(() => me.show_totals());
+							.then(() => me.update_totals_section());
 
 						const formatted_currency = format_currency(this.value, currency);
 						me.$payment_modes.find(`.${mode}-amount`).html(formatted_currency);
@@ -334,14 +336,16 @@ erpnext.PointOfSale.Payment = class {
 	}
 
 	render_add_payment_method_dom() {
-		this.$payment_modes.append(
-			`<div class="w-full pr-2">
-				<div class="add-mode-of-payment w-half text-grey mb-4 no-select pointer">+ Add Payment Method</div>
-			</div>`
-		)
+		const docstatus = this.events.get_frm().doc.docstatus;
+		if (docstatus === 0)
+			this.$payment_modes.append(
+				`<div class="w-full pr-2">
+					<div class="add-mode-of-payment w-half text-grey mb-4 no-select pointer">+ Add Payment Method</div>
+				</div>`
+			)
 	}
 
-	show_totals(doc) {
+	update_totals_section(doc) {
 		if (!doc) doc = this.events.get_frm().doc;
 		const paid_amount = doc.paid_amount;
 		const remaining = doc.grand_total - doc.paid_amount;
@@ -360,4 +364,29 @@ erpnext.PointOfSale.Payment = class {
 			</div>`
 		)
 	}
+
+	load_payment_data_from_invoice() {
+		const doc = this.events.get_frm().doc
+
+		if (doc.docstatus != 0) {
+			this.show_payment_section();
+			this.render_payment_mode_dom();
+			this.update_totals_section();
+			this.$component.find('.submit-order').addClass('d-none');
+
+			const remarks = doc.remarks;
+			const order_completed_on = frappe.datetime.global_date_format(doc.posting_date +" "+ doc.posting_time);
+
+			!remarks && this.$remarks.html('No Remarks.');
+			this.$component.find('.order-time').removeClass('d-none').html(`Order Completed on ${order_completed_on}`);
+		} else {
+			this.$component.find('.submit-order').removeClass('d-none');
+			this.$remarks.html('+ Add Remark');
+			this.$component.find('.order-time').addClass('d-none');
+		}
+	}
+
+	disable_payments() {
+        this.$component.addClass('d-none');
+    }
  }

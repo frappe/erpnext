@@ -2,7 +2,6 @@ erpnext.PointOfSale.ItemSelector = class {
     constructor({ frm, wrapper, events, pos_profile }) {
 		this.wrapper = wrapper;
 		this.events = events;
-        this.frm = frm;
         this.pos_profile = pos_profile;
         
         this.intialize_component();
@@ -37,25 +36,24 @@ erpnext.PointOfSale.ItemSelector = class {
 
     async load_items_data() {
         if (!this.item_group) this.item_group = await frappe.db.get_value("Item Group", {lft: 1, is_group: 1}, "name");
-        this.get_items({}).then((res) => {
-            this.render_item_list(res.items);
+        this.get_items({}).then(({message}) => {
+            this.render_item_list(message.items);
         });
     }
 
-    async get_items({start = 0, page_length = 40, search_value=''}) {
+    get_items({start = 0, page_length = 40, search_value=''}) {
         const price_list = this.events.get_frm().doc?.selling_price_list || 'Standard Selling';
         const { item_group, pos_profile } = this;
         
-		const response = await frappe.call({
+		return frappe.call({
 			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
 			freeze: true,
-			args: { start, page_length, price_list, item_group, search_value, pos_profile }
+            args: { start, page_length, price_list, item_group, search_value, pos_profile },
         });
-		return response.message;
 	}
 
 
-	async render_item_list(items) {
+	render_item_list(items) {
         this.$items_container = this.$component.find('.items-container');
         this.$items_container.html('');
 
@@ -92,21 +90,21 @@ erpnext.PointOfSale.ItemSelector = class {
 				label: 'Item Group',
 				fieldtype: 'Link',
 				options: 'Item Group',
-				placeholder: __('Select item group')
+                placeholder: __('Select item group'),
+                onchange: () => {
+                    this.item_group = this.item_group_field.get_value();
+                    this.filter_items();
+                },
+                get_query: () => {
+                    return {
+                        query: 'erpnext.selling.page.point_of_sale.point_of_sale.item_group_query',
+                        filters: {
+                            pos_profile: this.events.get_frm().doc?.pos_profile
+                        }
+                    };
+                },
 			},
             parent: this.$component.find('.item-group-field'),
-            onchange: () => {
-                this.item_group = this.item_group_field.get_value();
-                this.filter_items();
-            },
-            get_query: () => {
-                return {
-                    query: 'erpnext.selling.page.point_of_sale.point_of_sale.item_group_query',
-                    filters: {
-                        pos_profile: this.events.get_frm().doc?.pos_profile
-                    }
-                };
-            },
 			render_input: true,
         });
         this.search_field.toggle_label(false);
@@ -158,14 +156,14 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
     
     resize_selector(minimize) {
-		minimize ? 
-		this.$component.find('.search-field').removeClass('mr-8').addClass('mb-2') : 
-		this.$component.find('.search-field').addClass('mr-8').removeClass('mb-2');
+        minimize ? 
+        this.$component.find('.search-field').removeClass('mr-8') : 
+        this.$component.find('.search-field').addClass('mr-8');
 
-		minimize ? 
-		this.$component.find('.filter-section').addClass('flex-col') : 
+        minimize ? 
+        this.$component.find('.filter-section').addClass('flex-col') : 
         this.$component.find('.filter-section').removeClass('flex-col');
-        
+
         minimize ?
         this.$component.removeClass('col-span-6').addClass('col-span-2') :
         this.$component.removeClass('col-span-2').addClass('col-span-6')
@@ -173,5 +171,9 @@ erpnext.PointOfSale.ItemSelector = class {
         minimize ?
         this.$items_container.removeClass('grid-cols-4').addClass('grid-cols-1') :
         this.$items_container.removeClass('grid-cols-1').addClass('grid-cols-4')
-	}
+    }
+
+    disable_selector() {
+        this.$component.addClass('d-none');
+    }
 }

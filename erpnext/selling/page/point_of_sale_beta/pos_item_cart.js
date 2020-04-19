@@ -27,21 +27,27 @@ erpnext.PointOfSale.ItemCart = class {
     }
 
     initialize_customer_selector() {
-		this.$component.html(
-            `<div class="customer-section rounded flex flex-col p-8 pb-0">
-                <div class="add-remove-customer flex items-center rounded border-grey border-dashed h-18 pr-6 pl-6 bg-grey-100" data-customer="">
-                    <div class="text-grey bg-grey-100">Add Customer</div>
-                    <div class="ml-auto mr-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 14 14" fill="none">
-                            <circle cx="7" cy="7" r="6.5" stroke="#8D99A6"/>
-                            <path d="M7.00004 4.08331V6.99998M7.00004 9.91665V6.99998M7.00004 6.99998H4.08337H9.91671" stroke="#8D99A6"/>
-                        </svg>
-                    </div>
-                </div>
-			</div>`
+		this.$component.append(
+            `<div class="customer-section rounded flex flex-col p-8 pb-0"></div>`
         )
-        this.$customer_section = this.$component.find('.customer-section');
-    }
+		this.$customer_section = this.$component.find('.customer-section');
+		
+		this.reset_customer_selector();
+	}
+	
+	reset_customer_selector() {
+		this.$customer_section.html(
+			`<div class="add-remove-customer flex items-center rounded border-grey border-dashed h-18 pr-6 pl-6 bg-grey-100" data-customer="">
+				<div class="text-grey bg-grey-100">Add Customer</div>
+				<div class="ml-auto mr-2">
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 14 14" fill="none">
+						<circle cx="7" cy="7" r="6.5" stroke="#8D99A6"/>
+						<path d="M7.00004 4.08331V6.99998M7.00004 9.91665V6.99998M7.00004 6.99998H4.08337H9.91671" stroke="#8D99A6"/>
+					</svg>
+				</div>
+			</div>`
+		)
+	}
     
     initialize_cart_components() {
         this.$component.append(
@@ -240,7 +246,7 @@ erpnext.PointOfSale.ItemCart = class {
 			);
 		} else {
             // reset customer selector
-			this.initialize_customer_selector();
+			this.reset_customer_selector();
 		}
     }
     
@@ -490,5 +496,29 @@ erpnext.PointOfSale.ItemCart = class {
 			this.$numpad_section.find(`[data-button-value="${fieldname}"]`).click();
 		}
 	}
+
+	load_cart_data_from_invoice() {
+		const frm = this.events.get_frm();
+		this.update_customer_section(frm);
+
+		this.$cart_items_wrapper.html('');
+		frm.doc.items.forEach(item => {
+			this.update_item_html(item);
+		})
+		this.update_totals_section(frm);
+
+		if(frm.doc.docstatus === 1) {
+			this.$totals_section.find('.checkout-btn').addClass('d-none');
+			this.$totals_section.find('.edit-cart-btn').addClass('d-none');
+			this.$totals_section.find('.grand-total').removeClass('border-b-grey');
+		} else {
+			this.$totals_section.find('.checkout-btn').removeClass('d-none');
+			this.$totals_section.find('.grand-total').addClass('border-b-grey');
+		}
+	}
+
+	disable_cart() {
+        this.$component.addClass('d-none');
+    }
     
 }

@@ -65,7 +65,7 @@ class POSInvoice(SalesInvoice):
 			against_psi_doc.make_loyalty_point_entry()
 		if self.redeem_loyalty_points and self.loyalty_points:
 			self.apply_loyalty_points()
-		self.set_status()
+		self.set_status(update=True)
 	
 	def on_cancel(self):
 		# run on cancel method of selling controller
