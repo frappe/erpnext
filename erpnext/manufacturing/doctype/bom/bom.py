@@ -246,12 +246,13 @@ class BOM(WebsiteGenerator):
 			if rate:
 				d.rate = rate
 			d.amount = flt(d.rate) * flt(d.qty)
+			d.db_update()
 
 		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True
 			self.calculate_cost()
 		if save:
-			self.save()
+			self.db_update()
 		self.update_exploded_items()
 
 		# update parent BOMs
