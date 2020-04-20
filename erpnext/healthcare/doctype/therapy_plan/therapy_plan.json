@@ -101,7 +101,7 @@
   }
  ],
  "links": [],
- "modified": "2020-04-10 22:16:51.917514",
+ "modified": "2020-04-20 10:09:33.911786",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Plan",
@@ -121,8 +121,9 @@
   }
  ],
  "quick_entry": 1,
+ "search_fields": "patient",
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "title",
+ "title_field": "patient",
  "track_changes": 1
 }

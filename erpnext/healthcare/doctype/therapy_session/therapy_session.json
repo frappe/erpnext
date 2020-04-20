@@ -177,7 +177,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-31 16:15:11.528965",
+ "modified": "2020-04-20 10:08:02.306695",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Session",
@@ -197,7 +197,9 @@
   }
  ],
  "quick_entry": 1,
+ "search_fields": "patient,appointment,therapy_plan,therapy_type",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "patient",
  "track_changes": 1
 }
