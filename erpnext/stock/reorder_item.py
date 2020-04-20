@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import erpnext
+import json
 from frappe.utils import flt, nowdate, add_days, cint
 from frappe import _
 
@@ -199,18 +200,16 @@ def send_email_notification(mr_list):
 
 def notify_errors(exceptions_list):
 	subject = "[Important] [ERPNext] Auto Reorder Errors"
-	content = """Dear System Manager,
+	content = """Dear System Manager, <br> An error occured for certain Items while creating Material Requests based on Re-order level.
+		Please rectify these issues : """
 
-An error occured for certain Items while creating Material Requests based on Re-order level.
+	for exception in exceptions_list:
+		exception = json.loads(exception)
+		error_message = """<br>
+			<div class='small text-muted'>{0}</div>""".format(exception.get("message"))
+		content += error_message
 
-Please rectify these issues:
----
-<pre>
-%s
-</pre>
----
-Regards,
-Administrator""" % ("\n\n".join(exceptions_list),)
+	content += """<br> Regards,<br> Administrator"""
 
 	from frappe.email import sendmail_to_system_managers
 	sendmail_to_system_managers(subject, content)
