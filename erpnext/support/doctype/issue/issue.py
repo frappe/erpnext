@@ -338,8 +338,13 @@ def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, ord
 
 	ignore_permissions = False
 	if is_website_user():
-		if not filters: filters = []
-		filters.append(("Issue", "customer", "=", customer)) if customer else filters.append(("Issue", "raised_by", "=", user))
+		if not filters: filters = {}
+
+		if customer:
+			filters["customer"] = customer
+		else:
+			filters["raised_by"] = user
+
 		ignore_permissions = True
 
 	return get_list(doctype, txt, filters, limit_start, limit_page_length, ignore_permissions=ignore_permissions)
