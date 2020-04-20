@@ -48,7 +48,7 @@ frappe.ui.form.on('Therapy Plan', {
 						}
 					});
 				}, __('Select Therapy Type'), __('Create'));
-			}, __('Create'))
+			}, __('Create'));
 		}
 	},
 
@@ -59,7 +59,7 @@ frappe.ui.form.on('Therapy Plan', {
 
 		// completed sessions
 		let title = __('{0} sessions completed', [frm.doc.total_sessions_completed]);
-		if (frm.doc.total_sessions_completed == 1) {
+		if (frm.doc.total_sessions_completed === 1) {
 			title = __('{0} session completed', [frm.doc.total_sessions_completed]);
 		}
 		title += __(' out of {0}', [frm.doc.total_sessions]);

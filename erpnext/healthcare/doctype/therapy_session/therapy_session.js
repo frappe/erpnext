@@ -17,7 +17,7 @@ frappe.ui.form.on('Therapy Session', {
 			let completed = 0;
 			$.each(frm.doc.exercises, function(_i, e) {
 				target += e.counts_target;
-				completed += e.counts_completed
+				completed += e.counts_completed;
 			});
 			frm.dashboard.add_indicator(__('Counts Targetted: {0}', [target]), 'blue');
 			frm.dashboard.add_indicator(__('Counts Completed: {0}', [completed]), (completed < target) ? 'orange' : 'green');

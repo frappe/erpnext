@@ -8,6 +8,7 @@ import unittest
 from frappe.utils import getdate
 from erpnext.healthcare.doctype.therapy_type.test_therapy_type import create_therapy_type
 from erpnext.healthcare.doctype.therapy_plan.therapy_plan import make_therapy_session
+from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_healthcare_docs, create_patient
 
 class TestTherapyPlan(unittest.TestCase):
 	def test_creation_on_encounter_submission(self):
@@ -54,36 +55,3 @@ def create_encounter(patient, medical_department, practitioner):
 	encounter.save()
 	encounter.submit()
 	return encounter
-
-def create_healthcare_docs():
-	patient = create_patient()
-	practitioner = frappe.db.exists('Healthcare Practitioner', '_Test Healthcare Practitioner')
-	medical_department = frappe.db.exists('Medical Department', '_Test Medical Department')
-
-	if not medical_department:
-		medical_department = frappe.new_doc('Medical Department')
-		medical_department.department = '_Test Medical Department'
-		medical_department.save(ignore_permissions=True)
-		medical_department = medical_department.name
-
-	if not practitioner:
-		practitioner = frappe.new_doc('Healthcare Practitioner')
-		practitioner.first_name = '_Test Healthcare Practitioner'
-		practitioner.gender = 'Female'
-		practitioner.department = medical_department
-		practitioner.op_consulting_charge = 500
-		practitioner.inpatient_visit_charge = 500
-		practitioner.save(ignore_permissions=True)
-		practitioner = practitioner.name
-
-	return patient, medical_department, practitioner
-
-def create_patient():
-	patient = frappe.db.exists('Patient', '_Test Patient')
-	if not patient:
-		patient = frappe.new_doc('Patient')
-		patient.patient_name = '_Test Patient'
-		patient.sex = 'Female'
-		patient.save(ignore_permissions=True)
-		patient = patient.name
-	return patient

@@ -32,7 +32,7 @@ def get_healthcare_services_to_invoice(patient):
 		inpatient_services = get_inpatient_services_to_invoice(patient)
 		therapy_sessions = get_therapy_sessions_to_invoice(patient)
 
-		items_to_invoice += encounters + lab_tests + clinical_procedures + inpatient_services
+		items_to_invoice += encounters + lab_tests + clinical_procedures + inpatient_services + therapy_sessions
 		return items_to_invoice
 
 def validate_customer_created(patient):
