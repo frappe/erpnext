@@ -191,20 +191,24 @@ def create_specials(template, lab_test):
 		special.template = template.name
 
 def create_sample_doc(template, patient, invoice):
-	if(template.sample):
-		sample_exist = frappe.db.exists({
+	if template.sample:
+		sample_exists = frappe.db.exists({
 			"doctype": "Sample Collection",
 			"patient": patient.name,
 			"docstatus": 0,
-			"sample": template.sample})
-		if sample_exist :
-			#Update Sample Collection by adding quantity
-			sample_collection = frappe.get_doc("Sample Collection",sample_exist[0][0])
-			quantity = int(sample_collection.sample_quantity)+int(template.sample_quantity)
-			if(template.sample_collection_details):
-				sample_collection_details = sample_collection.sample_collection_details+"\n==============\n"+"Test :"+template.lab_test_name+"\n"+"Collection Detials:\n\t"+template.sample_collection_details
-				frappe.db.set_value("Sample Collection", sample_collection.name, "sample_collection_details",sample_collection_details)
-			frappe.db.set_value("Sample Collection", sample_collection.name, "sample_quantity",quantity)
+			"sample": template.sample
+		})
+		if sample_exists:
+			# update Sample Collection by adding quantity
+			sample_collection = frappe.get_doc("Sample Collection", sample_exists[0][0])
+			quantity = int(sample_collection.sample_qty) + int(template.sample_qty)
+			if template.sample_details:
+				sample_details = sample_collection.sample_details + "\n==============\n" + _("Test: ")
+				sample_details += (template.get("lab_test_name") or template.get("template")) +	"\n"
+				sample_details += _("Collection Details: ") + "\n\t" + template.sample_details
+
+				frappe.db.set_value("Sample Collection", sample_collection.name, "sample_details", sample_details)
+			frappe.db.set_value("Sample Collection", sample_collection.name, "sample_qty", quantity)
 
 		else:
 			#create Sample Collection for template, copy vals from Invoice
@@ -216,15 +220,15 @@ def create_sample_doc(template, patient, invoice):
 			sample_collection.patient_sex = patient.sex
 			sample_collection.sample = template.sample
 			sample_collection.sample_uom = template.sample_uom
-			sample_collection.sample_quantity = template.sample_quantity
-			if(template.sample_collection_details):
-				sample_collection.sample_collection_details = "Test :"+template.lab_test_name+"\n"+"Collection Detials:\n\t"+template.sample_collection_details
+			sample_collection.sample_qty = template.sample_qty
+			if(template.sample_details):
+				sample_collection.sample_details = "Test :" + (template.get("lab_test_name") or template.get("template")) +"\n"+"Collection Detials:\n\t"+template.sample_details
 			sample_collection.save(ignore_permissions=True)
 
 		return sample_collection
 
 def create_sample_collection(lab_test, template, patient, invoice):
-	if(frappe.db.get_value("Healthcare Settings", None, "require_sample_collection") == "1"):
+	if(frappe.db.get_value("Healthcare Settings", None, "create_sample_collection_for_lab_test") == "1"):
 		sample_collection = create_sample_doc(template, patient, invoice)
 		if(sample_collection):
 			lab_test.sample = sample_collection.name
@@ -290,10 +294,14 @@ def insert_lab_test_to_medical_record(doc):
 		comment = ""
 		if item.lab_test_comment:
 			comment = str(item.lab_test_comment)
-		event = ""
+		table_row = item.lab_test_name
+
 		if item.lab_test_event:
-			event = item.lab_test_event
-		table_row = item.lab_test_name +" "+ event +" "+ item.result_value
+			table_row += " " + item.lab_test_event
+
+		if item.result_value:
+			table_row += " " + item.result_value
+
 		if item.normal_range:
 			table_row += " normal_range("+item.normal_range+")"
 		table_row += " "+comment
