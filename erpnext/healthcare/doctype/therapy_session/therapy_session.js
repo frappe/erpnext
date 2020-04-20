@@ -22,6 +22,15 @@ frappe.ui.form.on('Therapy Session', {
 			frm.dashboard.add_indicator(__('Counts Targetted: {0}', [target]), 'blue');
 			frm.dashboard.add_indicator(__('Counts Completed: {0}', [completed]), (completed < target) ? 'orange' : 'green');
 		}
+
+		if (frm.doc.docstatus === 1) {
+			frm.add_custom_button(__('Patient Assessment'),function() {
+				frappe.model.open_mapped_doc({
+					method: 'erpnext.healthcare.doctype.patient_assessment.patient_assessment.create_patient_assessment',
+					frm: frm,
+				})
+			}, 'Create');
+		}
 	},
 
 	therapy_type: function(frm) {

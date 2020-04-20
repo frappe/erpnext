@@ -6,8 +6,8 @@ def get_data():
 		'fieldname': 'therapy_session',
 		'transactions': [
 			{
-				'label': _('Evaluations'),
-				'items': ['Motor Assessment Scale']
+				'label': _('Assessments'),
+				'items': ['Patient Assessment']
 			}
 		]
 	}

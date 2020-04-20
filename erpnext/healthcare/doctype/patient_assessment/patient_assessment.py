@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
 
 class PatientAssessment(Document):
 	def validate(self):
@@ -15,6 +16,21 @@ class PatientAssessment(Document):
 		for entry in self.assessment_sheet:
 			total_score += int(entry.score)
 		self.total_score_obtained = total_score
+
+@frappe.whitelist()
+def create_patient_assessment(source_name, target_doc=None):
+	doc = get_mapped_doc('Therapy Session', source_name, {
+			'Therapy Session': {
+				'doctype': 'Patient Assessment',
+				'field_map': [
+					['therapy_session', 'name'],
+					['patient', 'patient'],
+					['practitioner', 'practitioner']
+				]
+			}
+		}, target_doc)
+
+	return doc
 
 
 
