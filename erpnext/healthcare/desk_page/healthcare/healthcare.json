@@ -33,7 +33,7 @@
   {
    "hidden": 0,
    "label": "Rehabilitation and Physiotherapy",
-   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Exercise Type\",\n\t\t\"label\": \"Exercise Type\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Therapy Type\",\n\t\t\"label\": \"Therapy Type\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Therapy Plan\",\n\t\t\"label\": \"Therapy Plan\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Therapy Session\",\n\t\t\"label\": \"Therapy Session\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Motor Assessment Scale\",\n\t\t\"label\": \"Motor Assessment Scale\"\n\t}\n]"
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Exercise Type\",\n\t\t\"label\": \"Exercise Type\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Therapy Type\",\n\t\t\"label\": \"Therapy Type\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Therapy Plan\",\n\t\t\"label\": \"Therapy Plan\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Therapy Session\",\n\t\t\"label\": \"Therapy Session\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Patient Assessment Template\",\n\t\t\"label\": \"Patient Assessment Template\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Patient Assessment\",\n\t\t\"label\": \"Patient Assessment\"\n\t}\n]"
   },
   {
    "hidden": 0,
@@ -58,7 +58,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Healthcare",
- "modified": "2020-04-15 13:07:10.569007",
+ "modified": "2020-04-20 11:42:43.889576",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
