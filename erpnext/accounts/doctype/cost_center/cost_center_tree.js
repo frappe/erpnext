@@ -1,5 +1,5 @@
 frappe.treeview_settings["Cost Center"] = {
-	breadcrumbs: "Accounts",
+	breadcrumb: "Accounts",
 	get_tree_root: false,
 	filters: [{
 		fieldname: "company",

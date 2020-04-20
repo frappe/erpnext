@@ -240,6 +240,8 @@ frappe.ui.form.on("Work Order", {
 			});
 		}, __("Job Card"), __("Create"));
 
+		dialog.fields_dict["operations"].grid.wrapper.find('.grid-add-row').hide();
+
 		var pending_qty = 0;
 		frm.doc.operations.forEach(data => {
 			if(data.completed_qty != frm.doc.qty) {
