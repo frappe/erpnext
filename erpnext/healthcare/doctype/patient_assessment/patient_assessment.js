@@ -29,6 +29,7 @@ frappe.ui.form.on('Patient Assessment', {
 
 					frm.set_value('scale_min', data.message.scale_min);
 					frm.set_value('scale_max', data.message.scale_max);
+					frm.set_value('assessment_description', data.message.assessment_description);
 					frm.set_value('total_score', data.message.scale_max * data.message.parameters.length);
 					frm.trigger('set_score_range');
 					refresh_field('assessment_sheet');

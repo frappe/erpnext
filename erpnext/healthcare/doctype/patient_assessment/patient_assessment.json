@@ -11,8 +11,9 @@
   "patient",
   "assessment_template",
   "column_break_4",
-  "assessment_datetime",
   "healthcare_practitioner",
+  "assessment_datetime",
+  "assessment_description",
   "section_break_7",
   "assessment_sheet",
   "section_break_9",
@@ -121,11 +122,16 @@
    "options": "Patient Assessment",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "assessment_description",
+   "fieldtype": "Small Text",
+   "label": "Assessment Description"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-20 10:31:24.451170",
+ "modified": "2020-04-20 11:05:24.726863",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Assessment",

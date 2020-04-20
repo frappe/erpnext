@@ -13,7 +13,7 @@
   "scale_min",
   "scale_max",
   "column_break_8",
-  "scale_description"
+  "assessment_description"
  ],
  "fields": [
   {
@@ -55,13 +55,13 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "scale_description",
+   "fieldname": "assessment_description",
    "fieldtype": "Small Text",
-   "label": "Scale Description"
+   "label": "Assessment Description"
   }
  ],
  "links": [],
- "modified": "2020-04-20 10:31:19.267183",
+ "modified": "2020-04-20 11:03:13.637272",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Assessment Template",
