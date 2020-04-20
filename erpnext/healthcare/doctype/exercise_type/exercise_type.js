@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Exercise Type', {
-	onload: function(frm) {
+	refresh: function(frm) {
 		let wrapper = frm.fields_dict.steps_html.wrapper;
 
 		frm.ExerciseEditor = new erpnext.ExerciseEditor(frm, wrapper);
@@ -17,8 +17,10 @@ erpnext.ExerciseEditor = Class.extend({
 	},
 
 	make: function(frm, wrapper) {
+		$(this.wrapper).empty();
+
 		this.exercise_toolbar = $('<p>\
-		<button class="btn btn-default btn-add btn-xs" style="margin-left: 10px;"></button>').appendTo(wrapper);
+		<button class="btn btn-default btn-add btn-xs" style="margin-left: 10px;"></button>').appendTo(this.wrapper);
 
 		this.exercise_cards = $('<div class="exercise-cards"></div>').appendTo(this.wrapper);
 
