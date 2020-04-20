@@ -175,12 +175,11 @@ class MaterialRequest(BuyingController):
 
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 
-		target_ref_field = 'qty' if self.material_request_type == "Manufacture" else 'stock_qty'
 		self._update_percent_field({
 			"target_dt": "Material Request Item",
 			"target_parent_dt": self.doctype,
 			"target_parent_field": "per_ordered",
-			"target_ref_field": target_ref_field,
+			"target_ref_field": "stock_qty",
 			"target_field": "ordered_qty",
 			"name": self.name,
 		}, update_modified)
@@ -499,7 +498,7 @@ def raise_work_orders(material_request):
 	default_wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 
 	for d in mr.items:
-		if (d.qty - d.ordered_qty) >0:
+		if (d.stock_qty - d.ordered_qty) > 0:
 			if frappe.db.exists("BOM", {"item": d.item_code, "is_default": 1}):
 				wo_order = frappe.new_doc("Work Order")
 				wo_order.update({
@@ -531,7 +530,7 @@ def raise_work_orders(material_request):
 		msgprint(_("The following Work Orders were created:") + '\n' + new_line_sep(message))
 
 	if errors:
-		frappe.throw(_("Productions Orders cannot be raised for:") + '\n' + new_line_sep(errors))
+		frappe.throw(_("Work Order cannot be created for following reason:") + '\n' + new_line_sep(errors))
 
 	return work_orders
 
