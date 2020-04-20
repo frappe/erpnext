@@ -551,6 +551,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 											if(!d[k]) d[k] = v;
 										});
 
+										if (d.has_batch_no && d.has_serial_no) {
+											d.batch_no = undefined;
+										}
+
 										erpnext.show_serial_batch_selector(me.frm, d, (item) => {
 											me.frm.script_manager.trigger('qty', item.doctype, item.name);
 											if (!me.frm.doc.set_warehouse)
@@ -559,7 +563,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 									}
 								},
 								() => me.conversion_factor(doc, cdt, cdn, true),
-								() => me.remove_pricing_rule(item)
+								() => me.remove_pricing_rule(item),
+								() => {
+									if (item.apply_rule_on_other_items) {
+										let key = item.name;
+										me.apply_rule_on_other_items({key: item});
+									}
+								}
 							]);
 						}
 					}
@@ -1394,20 +1404,22 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	apply_rule_on_other_items: function(args) {
 		const me = this;
-		const fields = ["discount_percentage", "discount_amount", "rate"];
+		const fields = ["discount_percentage", "pricing_rules", "discount_amount", "rate"];
 
 		for(var k in args) {
 			let data = args[k];
 
-			me.frm.doc.items.forEach(d => {
-				if (in_list(data.apply_rule_on_other_items, d[data.apply_rule_on])) {
-					for(var k in data) {
-						if (in_list(fields, k)) {
-							frappe.model.set_value(d.doctype, d.name, k, data[k]);
+			if (data && data.apply_rule_on_other_items) {
+				me.frm.doc.items.forEach(d => {
+					if (in_list(data.apply_rule_on_other_items, d[data.apply_rule_on])) {
+						for(var k in data) {
+							if (in_list(fields, k) && data[k]) {
+								frappe.model.set_value(d.doctype, d.name, k, data[k]);
+							}
 						}
 					}
-				}
-			});
+				});
+			}
 		}
 	},
 

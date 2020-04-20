@@ -37,20 +37,33 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 	lft, rgt = frappe.db.get_value('Item Group', item_group, ['lft', 'rgt'])
 	# locate function is used to sort by closest match from the beginning of the value
 
-
 	result = []
 
-	items_data = frappe.db.sql(""" SELECT name as item_code,
-			item_name, image as item_image, idx as idx,is_stock_item
+	items_data = frappe.db.sql("""
+		SELECT
+			name AS item_code,
+			item_name,
+			stock_uom,
+			image AS item_image,
+			idx AS idx,
+			is_stock_item
 		FROM
 			`tabItem`
 		WHERE
-			disabled = 0 and has_variants = 0 and is_sales_item = 1
-			and item_group in (select name from `tabItem Group` where lft >= {lft} and rgt <= {rgt})
-			and {condition} order by idx desc limit {start}, {page_length}"""
+			disabled = 0
+				AND has_variants = 0
+				AND is_sales_item = 1
+				AND item_group in (SELECT name FROM `tabItem Group` WHERE lft >= {lft} AND rgt <= {rgt})
+				AND {condition}
+		ORDER BY
+			idx desc
+		LIMIT
+			{start}, {page_length}"""
 		.format(
-			start=start, page_length=page_length,
-			lft=lft, rgt=rgt,
+			start=start,
+			page_length=page_length,
+			lft=lft,
+			rgt=rgt,
 			condition=condition
 		), as_dict=1)
 
