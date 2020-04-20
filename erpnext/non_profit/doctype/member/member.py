@@ -92,14 +92,15 @@ def create_customer(user_details):
 		})
 
 		contact.insert()
-	except Exception:
-		error_log = frappe.log_error(frappe.get_traceback(), _("Contact Creation Failed"))
+	except Exception as e:
+		frappe.log_error(frappe.get_traceback(), _("Contact Creation Failed"))
+		pass
 
 	return customer.name
 
 @frappe.whitelist(allow_guest=True)
 def create_member_subscription_order(user_details):
-	"""Summary
+	"""Create Member subscription and order for payment
 
 	Args:
 		user_details (TYPE): Description
@@ -117,7 +118,6 @@ def create_member_subscription_order(user_details):
 	"""
 	# {"plan_id":"IFF Starter","fullname":"Shivam Mishra","mobile":"7506056962","email":"shivam@shivam.dev","pan":"Testing123"}
 	user_details = frappe._dict(user_details)
-	plan = frappe.get_doc("Membership Type", user_details.plan_id)
 	member = get_or_create_member(user_details)
 	if not member:
 		member = create_member(user_details)

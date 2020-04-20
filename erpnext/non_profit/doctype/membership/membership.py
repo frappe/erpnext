@@ -9,7 +9,7 @@ import six
 from datetime import datetime
 from frappe.model.document import Document
 from frappe.email import sendmail_to_system_managers
-from frappe.utils import add_days, add_years, nowdate, getdate, add_months, cint
+from frappe.utils import add_days, add_years, nowdate, getdate, add_months, get_link_to_form
 from frappe import _
 import erpnext
 
@@ -83,7 +83,7 @@ def trigger_razorpay_subscription(data):
 		member = get_member_based_on_subscription(subscription.id, payment.email)
 	except Exception as e:
 		error_log = frappe.log_error(frappe.get_traceback() + '\n' + data_json , _("Membership Webhook Failed"))
-		notify_failure(log)
+		notify_failure(error_log)
 		raise e
 
 	if data.event == "subscription.activated":
