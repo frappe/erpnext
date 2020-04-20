@@ -111,6 +111,7 @@ class TestPickList(unittest.TestCase):
 
 		stock_reconciliation = frappe.get_doc({
 			'doctype': 'Stock Reconciliation',
+			'purpose': 'Stock Reconciliation',
 			'company': '_Test Company',
 			'items': [{
 				'item_code': '_Test Serialized Item',
