@@ -1430,6 +1430,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			for (let key in free_item_data) {
 				row_to_modify[key] = free_item_data[key];
 			}
+		} if (items && items.length && free_item_data) {
+			items[0].qty = free_item_data.qty
 		}
 	},
 
