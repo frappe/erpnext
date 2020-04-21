@@ -19,3 +19,6 @@ class LoanType(Document):
 				frappe.throw(_("Account {0} does not belong to company {1}").format(frappe.bold(self.get(fieldname)),
 					frappe.bold(self.company)))
 
+		if self.get('loan_account') == self.get('payment_account'):
+			frappe.throw(_('Loan Account and Payment Account cannot be same'))
+
