@@ -199,17 +199,16 @@ def send_email_notification(mr_list):
 		subject=_('Auto Material Requests Generated'), message = msg)
 
 def notify_errors(exceptions_list):
-	subject = "[Important] [ERPNext] Auto Reorder Errors"
-	content = """Dear System Manager, <br> An error occured for certain Items while creating Material Requests based on Re-order level.
-		Please rectify these issues : """
+	subject = _("[Important] [ERPNext] Auto Reorder Errors")
+	content = _("Dear System Manager,") + "<br>" + _("An error occured for certain Items while creating Material Requests based on Re-order level. \
+		Please rectify these issues :") + "<br>"
 
 	for exception in exceptions_list:
 		exception = json.loads(exception)
-		error_message = """<br>
-			<div class='small text-muted'>{0}</div>""".format(exception.get("message"))
+		error_message = """<div class='small text-muted'>{0}</div><br>""".format(_(exception.get("message")))
 		content += error_message
 
-	content += """<br> Regards,<br> Administrator"""
+	content += _("Regards,") + "<br>" + _("Administrator")
 
 	from frappe.email import sendmail_to_system_managers
 	sendmail_to_system_managers(subject, content)
