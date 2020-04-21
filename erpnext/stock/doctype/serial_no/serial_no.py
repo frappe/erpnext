@@ -210,6 +210,7 @@ class SerialNo(StockController):
 		self.set_status()
 
 def process_serial_no(sle):
+	item_det = get_item_details(sle.item_code)
 	validate_serial_no(sle, item_det)
 	update_serial_nos(sle, item_det)
 
