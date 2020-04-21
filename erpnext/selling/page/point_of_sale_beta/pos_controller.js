@@ -116,7 +116,7 @@ erpnext.PointOfSale.Controller = class {
 			frappe.set_route("Form", me.frm.doc.doctype, me.frm.doc.name);
 		});
 
-		this.page.add_menu_item(__("Past Orders"), () => {
+		this.page.add_menu_item(__("Show Recent Orders"), () => {
 			const show = this.order_summary.$component.hasClass('d-none');
 			this.toggle_past_order_list(show);
 		});

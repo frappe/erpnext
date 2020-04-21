@@ -118,17 +118,21 @@ erpnext.PointOfSale.PastOrderSummary = class {
     }
 
     get_discount_html(doc) {
-        return `<div class="total-summary-wrapper flex items-center h-12 pr-4 pl-4 pointer border-b-grey no-select">
+        if (doc.discount_amount) {
+            return `<div class="total-summary-wrapper flex items-center h-12 pr-4 pl-4 pointer border-b-grey no-select">
                     <div class="flex f-shrink-1 items-center">
                         <div class="text-md-0 text-dark-grey text-bold overflow-hidden whitespace-nowrap  mr-2">
                             Discount
                         </div>
-                        <span class="text-grey">(10 %)</span>
+                        <span class="text-grey">(${doc.additional_discount_percentage} %)</span>
                     </div>
                     <div class="flex flex-col f-shrink-0 ml-auto text-right">
-                        <div class="text-md-0 text-dark-grey text-bold">₹ 56</div>
+                        <div class="text-md-0 text-dark-grey text-bold">${format_currency(doc.discount_amount, doc.currency)}</div>
                     </div>
-                </div>`
+                </div>`;
+        } else {
+            return ``;
+        }
     }
 
     get_net_total_html(doc) {
@@ -246,6 +250,10 @@ erpnext.PointOfSale.PastOrderSummary = class {
             this.$component.find('.no-summary-placeholder').removeClass('d-none');
             this.$summary_container.addClass('d-none');
         });
+
+        this.$summary_container.on('click', '.print-email-btn', () => {
+
+        });
     }
     
     toggle_component(show) {
@@ -272,7 +280,31 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
         this.attach_payments_info(doc);
 
-        this.refresh_summary_btns(doc);
+        const doc_is_a_draft = doc.docstatus === 0;
+        doc_is_a_draft ? this.$edit_btn.removeClass('d-none') : this.$edit_btn.addClass('d-none');
+        doc.is_return || doc_is_a_draft ? this.$return_btn.addClass('d-none') : this.$return_btn.removeClass('d-none');
+        this.$new_btn.addClass('d-none');
+    }
+
+    show_post_submit_summary_of(doc) {
+        this.$component.removeClass('col-span-6').addClass('col-span-10');
+        this.$summary_container.removeClass('w-66').addClass('w-40');
+
+        // switch place holder with summary container
+        this.$component.find('.no-summary-placeholder').addClass('d-none');
+        this.$summary_container.removeClass('d-none');
+
+        this.attach_basic_info(doc);
+
+        this.attach_items_info(doc);
+
+        this.attach_totals_info(doc);
+
+        this.attach_payments_info(doc);
+
+        this.$new_btn.removeClass('d-none');
+        this.$print_email_btn.removeClass('d-none');
+        this.$return_btn.addClass('d-none');
     }
 
     attach_basic_info(doc) {
@@ -310,31 +342,4 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.$totals_summary_container.append(grand_total_dom);
     }
 
-    refresh_summary_btns(doc) {
-        const doc_is_a_draft = doc.docstatus === 0;
-
-        doc_is_a_draft ? this.$edit_btn.removeClass('d-none') : this.$edit_btn.addClass('d-none');
-        doc.is_return || doc_is_a_draft ? this.$return_btn.addClass('d-none') : this.$return_btn.removeClass('d-none');
-    }
-
-    show_post_submit_summary_of(doc) {
-        this.$component.removeClass('col-span-6').addClass('col-span-10');
-        this.$summary_container.removeClass('w-66').addClass('w-40');
-
-        // switch place holder with summary container
-        this.$component.find('.no-summary-placeholder').addClass('d-none');
-        this.$summary_container.removeClass('d-none');
-
-        this.attach_basic_info(doc);
-
-        this.attach_items_info(doc);
-
-        this.attach_totals_info(doc);
-
-        this.attach_payments_info(doc);
-
-        this.$new_btn.removeClass('d-none');
-        this.$print_email_btn.removeClass('d-none');
-        this.$return_btn.addClass('d-none');
-    }
 }
