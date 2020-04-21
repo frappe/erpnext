@@ -74,9 +74,23 @@ erpnext.PointOfSale.ItemSelector = class {
     }
 
     get_item_html(item) {
+        const { item_image } = item;
+
+        function get_item_image_html() {
+            if (item_image) {
+                return `<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
+                            <img class="h-full" src="${item_image}" alt="${item_image}" style="object-fit: cover;">
+                        </div>`
+            } else {
+                return `<div class="flex items-center justify-center h-32 bg-light-grey text-6xl text-grey-100">
+                            ${frappe.get_abbr(item.item_name)}
+                        </div>`
+            }
+        }
+
 		return (
             `<div class="item-wrapper rounded shadow pointer no-select" data-item-code="${escape(item.item_code)}">
-                <div class="flex items-center justify-center h-32 bg-light-grey text-6xl text-grey-100">${frappe.get_abbr(item.item_name)}</div>
+                ${get_item_image_html()}
                 <div class="flex items-center pr-4 pl-4 h-10 justify-between">
                     <div class="f-shrink-1 text-dark-grey overflow-hidden whitespace-nowrap">${frappe.ellipsis(item.item_name, 18)}</div>
                     <div class="f-shrink-0 text-dark-grey text-bold ml-4">${format_currency(item.price_list_rate, item.currency, 0) || 0}</div>

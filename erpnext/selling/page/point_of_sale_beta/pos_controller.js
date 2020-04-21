@@ -23,20 +23,6 @@ erpnext.PointOfSale.Controller = class {
 		frappe.require(assets, this.check_opening_voucher.bind(this));
 	}
 
-	initialize_app(data) {
-		this.pos_opening = data.name;
-		this.company = data.company;
-		this.pos_profile = data.pos_profile;
-
-		this.page.set_title_sub(
-			`<span class="indicator orange">
-				<a class="text-muted" href="#Form/POS%20Opening%20Voucher/${this.pos_opening}">Opened at ${moment(data.period_start_date).format("Do MMMM, h:mma")}</a>
-			</span>`);
-		this.page.$sub_title_area.addClass('mb-0');
-
-		this.make_app();
-	}
-
 	check_opening_voucher() {
 		return frappe.call("erpnext.selling.page.point_of_sale.point_of_sale.check_opening_voucher", { "user": frappe.session.user })
 			.then((r) => {
@@ -78,6 +64,22 @@ erpnext.PointOfSale.Controller = class {
 			}
 		],
 		on_submit, __('Create POS Opening Voucher'));
+	}
+
+	initialize_app(data) {
+		this.pos_opening = data.name;
+		this.company = data.company;
+		this.pos_profile = data.pos_profile;
+
+		this.page.set_title_sub(
+			`<span class="indicator orange">
+				<a class="text-muted" href="#Form/POS%20Opening%20Voucher/${this.pos_opening}">
+					Opened at ${moment(data.period_start_date).format("Do MMMM, h:mma")}
+				</a>
+			</span>`);
+		this.page.$sub_title_area.addClass('mb-0');
+
+		this.make_app();
 	}
 
 	make_app() {
@@ -349,6 +351,7 @@ erpnext.PointOfSale.Controller = class {
 			() => this.make_sales_invoice_frm(),
 			() => this.set_pos_profile_data(),
 			() => this.set_invoice_status(),
+			() => this.cart.fetch_customer_details(this.frm.doc.customer),
 			() => this.cart.update_customer_section(this.frm),
 			() => this.cart.update_totals_section(this.frm)
 		]);

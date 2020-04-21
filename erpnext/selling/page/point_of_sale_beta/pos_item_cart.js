@@ -2,7 +2,7 @@ erpnext.PointOfSale.ItemCart = class {
     constructor({ wrapper, events }) {
 		this.wrapper = wrapper;
 		this.events = events;
-        this.customer_list = [];
+        this.customer_info = [];
         
         this.intialize_component();
     }
@@ -37,6 +37,7 @@ erpnext.PointOfSale.ItemCart = class {
 		const frm = this.events.get_frm();
 		frm.set_value('customer', '');
 		this.show_customer_selector();
+		this.customer_field.set_focus();
 	}
     
     initialize_cart_components() {
@@ -185,10 +186,15 @@ erpnext.PointOfSale.ItemCart = class {
 				onchange: function() {
 					if (this.value) {
 						const frm = me.events.get_frm();
+						frappe.dom.freeze();
 						frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'customer', this.value);
 						frm.script_manager.trigger('customer', frm.doc.doctype, frm.doc.name).then(() => {
-							me.update_customer_section(frm);
-							me.update_totals_section(frm);
+							frappe.run_serially([
+								() => me.fetch_customer_details(this.value),
+								() => me.update_customer_section(frm),
+								() => me.update_totals_section(frm),
+								() => frappe.dom.unfreeze()
+							]);
 						})
 					}
 				},
@@ -197,33 +203,53 @@ erpnext.PointOfSale.ItemCart = class {
 			render_input: true,
 		});
 		this.customer_field.toggle_label(false);
-		// this.customer_field.set_focus();
-    }
+	}
+	
+	fetch_customer_details(customer) {
+		return new Promise((resolve) => {
+			frappe.db.get_value('Customer', customer, ["email_id", "mobile_no", "image"]).then(({ message }) => {
+				this.customer_info.push({ ...message, customer });
+				resolve();
+			});
+		});
+	}
     
     update_customer_section(frm) {
-		const { customer_name=frm.doc.customer, email='', phone='' } = this.customer_list.find(c => c.customer_name === frm.doc.customer) || {};
+		const { customer, email_id='', mobile_no='', image } = this.customer_info.find(c => c.customer === frm.doc.customer) || {};
 
 		function get_customer_description() {
-			if (!email && !phone) {
-				return `<div class="text-grey-200 italic">Click to add email or phone</div>`
-			} else if (email && !phone) {
-				return `<div class="text-grey">${email}</div>`
-			} else if (phone && !email) {
-				return `<div class="text-grey">${phone}</div>`
+			if (!email_id && !mobile_no) {
+				return `<div class="text-grey-200 italic">Click to add email / phone</div>`
+			} else if (email_id && !mobile_no) {
+				return `<div class="text-grey">${email_id}</div>`
+			} else if (mobile_no && !email_id) {
+				return `<div class="text-grey">${mobile_no}</div>`
 			} else {
-				return `<div class="text-grey">${email} | ${phone}</div>`
+				return `<div class="text-grey">${email_id} | ${mobile_no}</div>`
 			}
 		}
 
-		if (customer_name) {
+		function get_customer_image() {
+			if (image) {
+				return `<div class="icon flex items-center justify-center w-10 h-10 rounded bg-light-grey mr-4 text-grey-200">
+							<img class="h-full" src="${image}" alt="${image}" style="object-fit: cover;">
+						</div>`
+			} else {
+				return `<div class="icon flex items-center justify-center w-10 h-10 rounded bg-light-grey mr-4 text-grey-200">
+							${frappe.get_abbr(customer)}
+						</div>`
+			}
+		}
+
+		if (customer) {
 			this.$customer_section.html(
 				`<div class="flex items-center rounded border border-grey h-18 pr-4 pl-4">
-					<div class="icon w-10 h-10 rounded bg-light-grey mr-4"></div>
+					${get_customer_image()}
 					<div class="flex flex-col">
-						<div class="text-md text-dark-grey text-bold">${customer_name}</div>
+						<div class="text-md text-dark-grey text-bold">${customer}</div>
 						${get_customer_description()}
 					</div>
-					<div class="add-remove-customer ml-auto flex items-center" data-customer="${escape(customer_name)}">
+					<div class="add-remove-customer ml-auto flex items-center" data-customer="${escape(customer)}">
 						<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
 							<path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
 						</svg>

@@ -111,6 +111,7 @@
 [data-route="point-of-sale-beta"] .pt-16 { padding-top: 4rem; }
 [data-route="point-of-sale-beta"] .pb-16 { padding-bottom: 4rem; }
 [data-route="point-of-sale-beta"] .w-full { width: 100%; }
+[data-route="point-of-sale-beta"] .h-full { height: 100%; }
 [data-route="point-of-sale-beta"] .w-quarter { width: 25%; }
 [data-route="point-of-sale-beta"] .w-half { width: 50%; }
 [data-route="point-of-sale-beta"] .w-66 { width: 66.66%; }
