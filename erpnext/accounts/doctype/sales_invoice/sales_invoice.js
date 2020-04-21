@@ -794,7 +794,7 @@ frappe.ui.form.on('Sales Invoice', {
 	},
 
 	refresh: function(frm) {
-		if (frappe.boot.active_domains.includes("Healthcare")){
+		if (frappe.boot.active_domains.includes("Healthcare")) {
 			frm.set_df_property("patient", "hidden", 0);
 			frm.set_df_property("patient_name", "hidden", 0);
 			frm.set_df_property("ref_practitioner", "hidden", 0);
@@ -807,7 +807,7 @@ frappe.ui.form.on('Sales Invoice', {
 				},"Get items from");
 			}
 		}
-		else{
+		else {
 			frm.set_df_property("patient", "hidden", 1);
 			frm.set_df_property("patient_name", "hidden", 1);
 			frm.set_df_property("ref_practitioner", "hidden", 1);

@@ -440,11 +440,12 @@ class SalesInvoice(SellingController):
 			if pos.get("company_address"):
 				self.company_address = pos.get("company_address")
 
-			customer_price_list, customer_group = frappe.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
-
-			customer_group_price_list = frappe.get_value("Customer Group", customer_group, 'default_price_list')
-
-			selling_price_list = customer_price_list or customer_group_price_list or pos.get('selling_price_list')
+			if self.customer:
+				customer_price_list, customer_group = frappe.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
+				customer_group_price_list = frappe.get_value("Customer Group", customer_group, 'default_price_list')
+				selling_price_list = customer_price_list or customer_group_price_list or pos.get('selling_price_list')
+			else:
+				selling_price_list = pos.get('selling_price_list')
 
 			if selling_price_list:
 				self.set('selling_price_list', selling_price_list)
