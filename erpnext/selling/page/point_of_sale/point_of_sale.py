@@ -161,10 +161,10 @@ def check_opening_voucher(user):
 			"user": user, 
 			"pos_closing_voucher": ["in", ["", None]], "docstatus": 1 
 		}, 
-		fields = ["name", "company", "pos_profile"]
+		fields = ["name", "company", "pos_profile", "period_start_date"]
 	)
 
-	return [{'name': d.name, 'company': d.company, 'pos_profile': d.pos_profile} for d in open_vouchers]
+	return open_vouchers
 
 @frappe.whitelist()
 def create_opening_voucher(pos_profile, company, custody_amount):

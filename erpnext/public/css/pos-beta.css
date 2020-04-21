@@ -58,6 +58,10 @@
 [data-route="point-of-sale-beta"] .pl-0 { padding-left: 0rem; }
 [data-route="point-of-sale-beta"] .pt-0 { padding-top: 0rem; }
 [data-route="point-of-sale-beta"] .pb-0 { padding-bottom: 0rem; }
+[data-route="point-of-sale-beta"] .mr-0 { margin-right: 0rem; }
+[data-route="point-of-sale-beta"] .ml-0 { margin-left: 0rem; }
+[data-route="point-of-sale-beta"] .mt-0 { margin-top: 0rem; }
+[data-route="point-of-sale-beta"] .mb-0 { margin-bottom: 0rem; }
 [data-route="point-of-sale-beta"] .pr-2 { padding-right: 0.5rem; }
 [data-route="point-of-sale-beta"] .pl-2 { padding-left: 0.5rem; }
 [data-route="point-of-sale-beta"] .pt-2 { padding-top: 0.5rem; }

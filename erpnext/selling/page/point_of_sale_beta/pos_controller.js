@@ -28,6 +28,12 @@ erpnext.PointOfSale.Controller = class {
 		this.company = data.company;
 		this.pos_profile = data.pos_profile;
 
+		this.page.set_title_sub(
+			`<span class="indicator orange">
+				<a class="text-muted" href="#Form/POS%20Opening%20Voucher/${this.pos_opening}">Opened at ${moment(data.period_start_date).format("Do MMMM, h:mma")}</a>
+			</span>`);
+		this.page.$sub_title_area.addClass('mb-0');
+
 		this.make_app();
 	}
 

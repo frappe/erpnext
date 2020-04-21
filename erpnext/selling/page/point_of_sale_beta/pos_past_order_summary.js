@@ -15,7 +15,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.wrapper.append(
             `<section class="col-span-6 flex flex-col items-center shadow rounded past-order-summary bg-white mx-h-70 h-100 d-none">
                 <div class="no-summary-placeholder flex flex-1 items-center justify-center p-16">
-                    <div class="no-item-wrapper flex items-center h-18 pr-4 pl-4 border-grey border-dashed">
+                    <div class="no-item-wrapper flex items-center h-18 pr-4 pl-4">
                         <div class="flex-1 text-center text-grey">Select an invoice to load summary data</div>
                     </div>
                 </div>
