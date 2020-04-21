@@ -131,13 +131,14 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-20 11:05:24.726863",
+ "modified": "2020-04-21 13:23:09.815007",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Assessment",
  "owner": "Administrator",
  "permissions": [
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -147,6 +148,20 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Physician",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

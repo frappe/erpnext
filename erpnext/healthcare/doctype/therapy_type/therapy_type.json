@@ -163,7 +163,7 @@
   }
  ],
  "links": [],
- "modified": "2020-04-10 21:56:58.220446",
+ "modified": "2020-04-21 13:09:04.006289",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Type",
@@ -178,6 +178,28 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Healthcare Administrator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Physician",
    "share": 1,
    "write": 1
   }

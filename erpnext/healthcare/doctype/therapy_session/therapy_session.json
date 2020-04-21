@@ -177,7 +177,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-20 10:08:02.306695",
+ "modified": "2020-04-21 13:16:46.378798",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Session",
@@ -193,6 +193,19 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Physician",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

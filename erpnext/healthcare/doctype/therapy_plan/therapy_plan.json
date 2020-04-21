@@ -101,7 +101,7 @@
   }
  ],
  "links": [],
- "modified": "2020-04-20 10:09:33.911786",
+ "modified": "2020-04-21 13:13:43.956014",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Plan",
@@ -116,6 +116,28 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Healthcare Administrator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Physician",
    "share": 1,
    "write": 1
   }
