@@ -47,41 +47,6 @@ frappe.listview_settings['Sales Order'] = {
 		listview.page.add_menu_item(__("Re-open"), function() {
 			listview.call_for_selected_items(method, {"status": "Submitted"});
 		});
-	},
 
-	onload: function(doclist) {
-		const action = () => {
-			const selected_docs = doclist.get_checked_items();
-			const docnames = doclist.get_checked_items(true);
-
-			if (selected_docs.length > 0) {
-				for (let doc of selected_docs) {
-					if (!doc.docstatus) {
-						frappe.throw(__("Cannot create a Pick List from Draft documents."));
-					}
-				};
-
-				frappe.new_doc("Pick List")
-					.then(() => {
-						frappe.call({
-							type: "POST",
-							method: "frappe.model.mapper.map_docs",
-							args: {
-								"method": "erpnext.selling.doctype.sales_order.sales_order.create_pick_list",
-								"source_names": docnames,
-								"target_doc": cur_frm.doc
-							},
-							callback: function (r) {
-								if (!r.exc) {
-									frappe.model.sync(r.message);
-									cur_frm.dirty();
-									cur_frm.refresh();
-								}
-							}
-						});
-					})
-			};
-		};
-		doclist.page.add_actions_menu_item(__('Create Pick List'), action, false);
 	}
 };
