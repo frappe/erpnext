@@ -9,6 +9,7 @@
   "posting_date",
   "loan_type",
   "loan",
+  "process_type",
   "amended_from"
  ],
  "fields": [
@@ -39,11 +40,18 @@
    "fieldtype": "Link",
    "label": "Loan ",
    "options": "Loan"
+  },
+  {
+   "fieldname": "process_type",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Process Type",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-01 08:14:33.978636",
+ "modified": "2020-04-09 22:52:53.911416",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Process Loan Interest Accrual",
@@ -74,7 +82,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

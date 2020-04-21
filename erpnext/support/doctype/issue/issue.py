@@ -14,9 +14,6 @@ from frappe.utils.user import is_website_user
 from erpnext.support.doctype.service_level_agreement.service_level_agreement import get_active_service_level_agreement_for
 from frappe.email.inbox import link_communication_to_document
 
-sender_field = "raised_by"
-
-
 class Issue(Document):
 	def get_feed(self):
 		return "{0}: {1}".format(_(self.status), self.subject)
@@ -338,8 +335,13 @@ def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, ord
 
 	ignore_permissions = False
 	if is_website_user():
-		if not filters: filters = []
-		filters.append(("Issue", "customer", "=", customer)) if customer else filters.append(("Issue", "raised_by", "=", user))
+		if not filters: filters = {}
+
+		if customer:
+			filters["customer"] = customer
+		else:
+			filters["raised_by"] = user
+
 		ignore_permissions = True
 
 	return get_list(doctype, txt, filters, limit_start, limit_page_length, ignore_permissions=ignore_permissions)

@@ -581,7 +581,7 @@ erpnext.patches.v11_0.rename_bom_wo_fields
 erpnext.patches.v12_0.set_default_homepage_type
 erpnext.patches.v11_0.rename_additional_salary_component_additional_salary
 erpnext.patches.v11_0.renamed_from_to_fields_in_project
-erpnext.patches.v11_0.add_permissions_in_gst_settings
+erpnext.patches.v11_0.add_permissions_in_gst_settings #2020-04-04
 erpnext.patches.v11_1.setup_guardian_role
 execute:frappe.delete_doc('DocType', 'Notification Control')
 erpnext.patches.v12_0.set_gst_category
@@ -626,10 +626,11 @@ erpnext.patches.v12_0.update_ewaybill_field_position
 erpnext.patches.v12_0.create_accounting_dimensions_in_missing_doctypes
 erpnext.patches.v11_1.set_status_for_material_request_type_manufacture
 erpnext.patches.v12_0.move_plaid_settings_to_doctype
-execute:frappe.reload_doc('desk', 'doctype','dashboard_chart_link')
-execute:frappe.reload_doc('desk', 'doctype','dashboard')
-execute:frappe.reload_doc('desk', 'doctype','dashboard_chart_source')
-execute:frappe.reload_doc('desk', 'doctype','dashboard_chart')
+execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart_link')
+execute:frappe.reload_doc('desk', 'doctype', 'dashboard')
+execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart_source')
+execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart')
+execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart_field')
 erpnext.patches.v12_0.add_default_dashboards
 erpnext.patches.v12_0.remove_bank_remittance_custom_fields
 erpnext.patches.v12_0.generate_leave_ledger_entries
@@ -660,3 +661,9 @@ erpnext.patches.v12_0.set_job_offer_applicant_email
 erpnext.patches.v12_0.create_irs_1099_field_united_states
 erpnext.patches.v12_0.move_bank_account_swift_number_to_bank
 erpnext.patches.v12_0.rename_bank_reconciliation_fields # 2020-01-22
+erpnext.patches.v12_0.set_received_qty_in_material_request_as_per_stock_uom
+erpnext.patches.v12_0.recalculate_requested_qty_in_bin
+erpnext.patches.v12_0.update_healthcare_refactored_changes
+erpnext.patches.v12_0.set_total_batch_quantity
+erpnext.patches.v12_0.rename_mws_settings_fields
+erpnext.patches.v12_0.set_updated_purpose_in_pick_list

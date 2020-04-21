@@ -121,7 +121,7 @@ def call_mws_method(mws_method, *args, **kwargs):
 			time.sleep(delay)
 			continue
 
-	mws_settings.enable_synch = 0
+	mws_settings.enable_sync = 0
 	mws_settings.save()
 
 	frappe.throw(_("Sync has been temporarily disabled because maximum retries have been exceeded"))
