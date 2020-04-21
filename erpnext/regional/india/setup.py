@@ -13,7 +13,6 @@ from frappe.utils import today
 def setup(company=None, patch=True):
 	setup_company_independent_fixtures()
 	if not patch:
-		update_address_template()
 		make_fixtures(company)
 
 # TODO: for all countries
@@ -23,21 +22,6 @@ def setup_company_independent_fixtures():
 	add_custom_roles_for_reports()
 	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes', now=frappe.flags.in_test)
 	add_print_formats()
-
-def update_address_template():
-	with open(os.path.join(os.path.dirname(__file__), 'address_template.html'), 'r') as f:
-		html = f.read()
-
-	address_template = frappe.db.get_value('Address Template', 'India')
-	if address_template:
-		frappe.db.set_value('Address Template', 'India', 'template', html)
-	else:
-		# make new html template for India
-		frappe.get_doc(dict(
-			doctype='Address Template',
-			country='India',
-			template=html
-		)).insert()
 
 def add_hsn_sac_codes():
 	# HSN codes
@@ -101,7 +85,7 @@ def make_custom_fields(update=True):
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
 		fieldtype='Data', fetch_from='item_code.gst_hsn_code', insert_after='description',
 		allow_on_submit=1, print_hide=1, fetch_if_empty=1)
-	nil_rated_exempt = dict(fieldname='is_nil_exempt', label='Is nil rated or exempted',
+	nil_rated_exempt = dict(fieldname='is_nil_exempt', label='Is Nil Rated or Exempted',
 		fieldtype='Check', fetch_from='item_code.is_nil_exempt', insert_after='gst_hsn_code',
 		print_hide=1)
 	is_non_gst = dict(fieldname='is_non_gst', label='Is Non GST',
@@ -404,7 +388,7 @@ def make_custom_fields(update=True):
 		'Item': [
 			dict(fieldname='gst_hsn_code', label='HSN/SAC',
 				fieldtype='Link', options='GST HSN Code', insert_after='item_group'),
-			dict(fieldname='is_nil_exempt', label='Is nil rated or exempted',
+			dict(fieldname='is_nil_exempt', label='Is Nil Rated or Exempted',
 				fieldtype='Check', insert_after='gst_hsn_code'),
 			dict(fieldname='is_non_gst', label='Is Non GST ',
 				fieldtype='Check', insert_after='is_nil_exempt')
@@ -512,6 +496,14 @@ def make_custom_fields(update=True):
 				'default': 'Without Payment of Tax',
 				'depends_on':'eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
 				'options': '\nWith Payment of Tax\nWithout Payment of Tax'
+			}
+		],
+		"Member": [
+			{
+				'fieldname': 'pan_number',
+				'label': 'PAN Details',
+				'fieldtype': 'Data',
+				'insert_after': 'email'
 			}
 		]
 	}
