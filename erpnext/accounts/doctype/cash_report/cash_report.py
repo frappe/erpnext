@@ -96,14 +96,11 @@ class CashReport(Document):
 				if sale_total < sales.grand_total:
 					total_credit += sales.grand_total - sale_total
 				
-				if sales.exonerated == 1:
-					exonerated += sales.total
-				else:				
-					if sales.taxes_and_charges:
-						# taxes_charges = frappe.get_all("Sales Taxes and Charges Template", ["name"], filters = {"name": sales.taxes_and_charges})
-
-						# table_taxes = frappe.get_all("Sales Taxes and Charges", filters = {"parent": taxes_charges[0].name})
-					
+								
+				if sales.taxes_and_charges:
+					if sales.exonerated == 1:
+						exonerated += sales.total
+					else:
 						invoice_table_taxes = frappe.get_all("Sales Taxes and Charges", ["name", "rate", "tax_amount"], filters = {"parent": sales.name})
 
 						for invoice_tax in invoice_table_taxes:
@@ -113,28 +110,34 @@ class CashReport(Document):
 							
 							if invoice_tax.rate == 18:
 								taxed18 += sales.total
-					else:
-						items = frappe.get_all("Sales Invoice Item", ["item_code", "amount"], filters = {"parent": sales.name})
+				else:
+					items = frappe.get_all("Sales Invoice Item", ["item_code", "amount"], filters = {"parent": sales.name})
 
-						for item in items:
-							item_taxes = frappe.get_all("Item Tax", ['name', "item_tax_template"], filters = {"parent": item.item_code})
-							if len(item_taxes) >0:
-								for item_tax in item_taxes:
-									tax_tamplates = frappe.get_all("Item Tax Template", ["name"], filters = {"name": item_tax.item_tax_template})
+					for item in items:
+						item_taxes = frappe.get_all("Item Tax", ['name', "item_tax_template"], filters = {"parent": item.item_code})
+						if len(item_taxes) >0:
+							for item_tax in item_taxes:
+								tax_tamplates = frappe.get_all("Item Tax Template", ["name"], filters = {"name": item_tax.item_tax_template})
 							
-									for tax_tamplate in tax_tamplates:
+								for tax_tamplate in tax_tamplates:
 
-										tax_details = frappe.get_all("Item Tax Template Detail", ["name", "tax_rate"], filters = {"parent": tax_tamplate.name})
+									tax_details = frappe.get_all("Item Tax Template Detail", ["name", "tax_rate"], filters = {"parent": tax_tamplate.name})
 								
-										for tax_detail in tax_details:
+									for tax_detail in tax_details:
 
-											if tax_detail.tax_rate == 15:
+										if tax_detail.tax_rate == 15:
+											if sales.exonerated == 1:
+												exonerated += item.amount
+											else:
 												taxed15 += item.amount
 								
-											if tax_detail.tax_rate == 18:
+										if tax_detail.tax_rate == 18:
+											if sales.exonerated == 1:
+												exonerated += item.amount
+											else:
 												taxed18 += item.amount
-							else:
-								exempt += item.amount
+						else:
+							exempt += item.amount
 			
 			for ar in arrmode:
 				row = self.append("totals_table", {})
@@ -205,4 +208,5 @@ class CashReport(Document):
 		self.total_exempt = exempt
 		self.total_isv15 = isv_taxed15
 		self.total_isv18 = isv_taxed18
+		self.total_exonerated = exonerated
 		self.grand_total = grand_total

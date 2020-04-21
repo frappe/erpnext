@@ -32,6 +32,7 @@
   "total_exempt",
   "total_isv15",
   "total_isv18",
+  "total_exonerated",
   "grand_total",
   "company_logo"
  ],
@@ -209,11 +210,17 @@
    "fieldtype": "Data",
    "label": "image",
    "read_only": 1
+  },
+  {
+   "fieldname": "total_exonerated",
+   "fieldtype": "Currency",
+   "label": "Total Exonerated",
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2020-04-15 00:52:42.146229",
- "modified_by": "Administrator",
+ "modified": "2020-04-20 23:41:23.494535",
+ "modified_by": "gerson.caballero@grintsys.com",
  "module": "Accounts",
  "name": "Cash Report",
  "owner": "Administrator",
