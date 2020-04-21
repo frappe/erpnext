@@ -24,7 +24,7 @@ erpnext.PointOfSale.Payment = class {
                         <div class="flex flex-col justify-center flex-1 ml-4">
                             <div class="flex w-full">
                                 <div class="totals-remarks items-end justify-end flex flex-1">
-                                    <div class="remarks mr-4 text-md-0 text-grey mr-auto">+ Add Remark</div>
+                                    <div class="remarks text-md-0 text-grey mr-auto">+ Add Remark</div>
                                     <div class="totals flex justify-end pt-4"></div>
                                 </div>
                                 <div class="number-pad w-40 mb-4 ml-8 d-none"></div>
@@ -183,7 +183,7 @@ erpnext.PointOfSale.Payment = class {
 			this[`remark_control`] = frappe.ui.form.make_control({
 				df: {
 					label: __('Remark'),
-					fieldtype: 'Text',
+					fieldtype: 'Data',
 					onchange: function() {}
 				},
 				parent: this.$totals_remarks.find(`.remarks`),
@@ -230,11 +230,13 @@ erpnext.PointOfSale.Payment = class {
 					fieldtype: 'Currency',
 					placeholder: __(`Enter ${p.mode_of_payment} amount.`),
 					onchange: function() {
-						frappe.model.set_value(p.doctype, p.name, 'amount', this.value)
-							.then(() => me.update_totals_section());
+						if (this.value) {
+							frappe.model.set_value(p.doctype, p.name, 'amount', flt(this.value))
+								.then(() => me.update_totals_section());
 
-						const formatted_currency = format_currency(this.value, currency);
-						me.$payment_modes.find(`.${mode}-amount`).html(formatted_currency);
+							const formatted_currency = format_currency(this.value, currency);
+							me.$payment_modes.find(`.${mode}-amount`).html(formatted_currency);
+						}
 					}
 				},
 				parent: this.$payment_modes.find(`.${mode}.mode-of-payment-control`),

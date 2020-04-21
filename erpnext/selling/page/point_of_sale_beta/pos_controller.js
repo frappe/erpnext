@@ -82,9 +82,11 @@ erpnext.PointOfSale.Controller = class {
 				this.initialize_components();
 				this.prepare_menu();
 			},
+			() => console.time('invoice'),
 			() => this.make_new_invoice(),
+			() => console.timeEnd('invoice'),
 			() => frappe.dom.unfreeze(),
-			() => this.page.set_title(__('Point of Sale Beta'))
+			() => this.page.set_title(__('Point of Sale Beta')),
 		]);
 	}
 
@@ -115,7 +117,7 @@ erpnext.PointOfSale.Controller = class {
 		});
 
 		this.page.add_menu_item(__("Past Orders"), () => {
-			const show = this.past_order_summary.$component.hasClass('d-none');
+			const show = this.order_summary.$component.hasClass('d-none');
 			this.toggle_past_order_list(show);
 		});
 
@@ -128,8 +130,10 @@ erpnext.PointOfSale.Controller = class {
 
 			}).then(() => {
 				frappe.run_serially([
+					() => frappe.dom.freeze(),
 					() => this.make_new_invoice(),
-					() => this.cart.load_cart_data_from_invoice()
+					() => this.cart.load_cart_data_from_invoice(),
+					() => frappe.dom.unfreeze(),
 				]);
 			})
 		});
@@ -250,6 +254,9 @@ erpnext.PointOfSale.Controller = class {
 					this.frm.savesubmit()
 						.then((r) => {
 							this.set_invoice_status();
+							this.enable_disable_components(true);
+							this.order_summary.toggle_component(true);
+							this.order_summary.show_post_submit_summary_of(this.frm.doc);	
 							frappe.show_alert({
 								indicator: 'green',
 								message: __(`POS invoice ${r.doc.name} created succesfully`)
@@ -266,7 +273,7 @@ erpnext.PointOfSale.Controller = class {
 			events: {
 				open_invoice_data: (name) => {
 					frappe.db.get_doc('POS Invoice', name).then((doc) => {
-						this.past_order_summary.load_invoice_summary_of(doc);
+						this.order_summary.load_invoice_summary_of(doc);
 					});
 				}
 			}
@@ -274,7 +281,7 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	initialize_past_order_summary() {
-		this.past_order_summary = new erpnext.PointOfSale.PastOrderSummary({
+		this.order_summary = new erpnext.PointOfSale.PastOrderSummary({
 			wrapper: this.$components_wrapper,
 			events: {
 				process_return: (name) => {
@@ -298,35 +305,47 @@ erpnext.PointOfSale.Controller = class {
 							() => this.item_selector.$component.removeClass('d-none')
 						]);
 					});
+				},
+				new_order: () => {
+					frappe.run_serially([
+						() => frappe.dom.freeze(),
+						() => this.cart.$component.removeClass('d-none'),
+						() => this.item_selector.$component.removeClass('d-none'),
+						() => this.make_new_invoice(),
+						() => this.cart.load_cart_data_from_invoice(),
+						() => frappe.dom.unfreeze(),
+					]);
 				}
 			}
 		})
 	}
 
 	toggle_past_order_list(show) {
-		if (show) {
+		this.enable_disable_components(show);
+		this.past_order_list.toggle_component(show);
+		this.order_summary.toggle_component(show);
+	}
+
+	enable_disable_components(disable) {
+		if (disable) {
 			this.item_selector.disable_selector();
 			this.cart.disable_cart();
 			this.item_details.disable_item_details();
 			this.payment.disable_payments();
-
-			this.past_order_list.toggle_component(true);
-			this.past_order_summary.toggle_component(true);
 		} else {
 			this.cart.$component.removeClass('d-none');
 			this.item_selector.$component.removeClass('d-none');
-
-			this.past_order_list.toggle_component(false);
-			this.past_order_summary.toggle_component(false);
 		}
 	}
 
-	async make_new_invoice() {
-		await this.make_sales_invoice_frm();
-		await this.set_pos_profile_data();
-		this.set_invoice_status();
-		this.cart.update_customer_section(this.frm);
-		this.cart.update_totals_section(this.frm);
+	make_new_invoice() {
+		return frappe.run_serially([
+			() => this.make_sales_invoice_frm(),
+			() => this.set_pos_profile_data(),
+			() => this.set_invoice_status(),
+			() => this.cart.update_customer_section(this.frm),
+			() => this.cart.update_totals_section(this.frm)
+		]);
 	}
 
 	make_sales_invoice_frm() {

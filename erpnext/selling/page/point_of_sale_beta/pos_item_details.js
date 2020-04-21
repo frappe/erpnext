@@ -177,6 +177,13 @@ erpnext.PointOfSale.ItemDetails = class {
 
 		if (this.discount_percentage_control) {
 			this.discount_percentage_control.df.onchange = function() {
+				if (this.value > 100) {
+					frappe.show_alert({
+						message: __('Discount cannot be greater than 100%'),
+						indicator: 'orange'
+					});
+					return me.discount_percentage_control.set_value(0);
+				}
 				if (this.value) {
 					me.events.form_updated(me.doctype, me.name, 'discount_percentage', this.value).then(() => {
 						const item_row = frappe.get_doc(me.doctype, me.name);

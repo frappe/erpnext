@@ -35,7 +35,11 @@ erpnext.PointOfSale.ItemSelector = class {
     }
 
     async load_items_data() {
-        if (!this.item_group) this.item_group = await frappe.db.get_value("Item Group", {lft: 1, is_group: 1}, "name");
+        if (!this.item_group) {
+            const res = await frappe.db.get_value("Item Group", {lft: 1, is_group: 1}, "name")
+            this.item_group = res.message.name;
+        };
+
         this.get_items({}).then(({message}) => {
             this.render_item_list(message.items);
         });
@@ -76,6 +80,7 @@ erpnext.PointOfSale.ItemSelector = class {
     }
 
     make_search_bar() {
+        const me = this;
 		this.search_field = frappe.ui.form.make_control({
 			df: {
 				label: __('Search'),
@@ -91,9 +96,9 @@ erpnext.PointOfSale.ItemSelector = class {
 				fieldtype: 'Link',
 				options: 'Item Group',
                 placeholder: __('Select item group'),
-                onchange: () => {
-                    this.item_group = this.item_group_field.get_value();
-                    this.filter_items();
+                onchange: function() {
+                    me.item_group = this.value;
+                    me.filter_items();
                 },
                 get_query: () => {
                     return {
@@ -145,8 +150,9 @@ erpnext.PointOfSale.ItemSelector = class {
             }
 		}
 
-		this.get_items({search_value: search_term })
-            .then(({ items, serial_no, batch_no, barcode }) => {
+		this.get_items({ search_value: search_term })
+            .then(({ message }) => {
+                const { items, serial_no, batch_no, barcode } = message;
 				if (search_term && !barcode) {
 					this.search_index[search_term] = items;
 				}

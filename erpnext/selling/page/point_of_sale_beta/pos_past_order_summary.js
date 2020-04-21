@@ -13,13 +13,13 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
     prepare_dom() {
         this.wrapper.append(
-            `<section class="col-span-6 flex flex-col shadow rounded past-order-summary bg-white mx-h-70 h-100 d-none">
+            `<section class="col-span-6 flex flex-col items-center shadow rounded past-order-summary bg-white mx-h-70 h-100 d-none">
                 <div class="no-summary-placeholder flex flex-1 items-center justify-center p-16">
                     <div class="no-item-wrapper flex items-center h-18 pr-4 pl-4 border-grey border-dashed">
                         <div class="flex-1 text-center text-grey">Select an invoice to load summary data</div>
                     </div>
                 </div>
-                <div class="summary-container flex flex-1 flex-col items-center pt-16 pb-16 d-none"></div>
+                <div class="summary-container flex flex-1 flex-col items-center pt-16 pb-16 d-none w-66 pr-8 pl-8 text-dark-grey"></div>
             </section>`
         )
 
@@ -38,7 +38,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
     initialize_upper_section() {
         this.$summary_container.append(
-            `<div class="flex upper-section justify-between w-66 h-24"></div>`
+            `<div class="flex upper-section justify-between w-full h-24"></div>`
         );
 
         this.$upper_section = this.$summary_container.find('.upper-section');
@@ -46,7 +46,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
     initialize_items_summary() {
         this.$summary_container.append(
-            `<div class="flex flex-col mt-8 w-66">
+            `<div class="flex flex-col mt-8 w-full">
                 <div class="text-grey mb-4">ITEMS</div>
                 <div class="items-summary-container border rounded flex flex-col w-full"></div>
             </div>`
@@ -57,7 +57,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
     initialize_totals_summary() {
         this.$summary_container.append(
-            `<div class="flex flex-col mt-8 w-66">
+            `<div class="flex flex-col mt-8 w-full">
                 <div class="text-grey mb-4">TOTALS</div>
                 <div class="summary-totals-container border rounded flex flex-col w-full"></div>
             </div>`
@@ -68,9 +68,9 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
     initialize_payments_summary() {
         this.$summary_container.append(
-            `<div class="flex flex-col mt-8 w-66">
+            `<div class="flex flex-col mt-8 w-full">
                 <div class="text-grey mb-4">PAYMENTS</div>
-                <div class="payments-summary-container border rounded flex flex-col w-full"></div>
+                <div class="payments-summary-container border rounded flex flex-col w-full mb-4"></div>
             </div>`
         )
 
@@ -79,18 +79,26 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
     initialize_summary_buttons() {
         this.$summary_container.append(
-            `<div class="flex w-66">
-                <div class="return-btn border rounded flex w-full mt-4 h-14 flex items-center justify-center text-md text-bold no-select pointer">
+            `<div class="grid grid-cols-2 gap-4 w-full">
+                <div class="print-email-btn border rounded flex h-14 flex items-center justify-center text-md text-bold no-select pointer">
+                    Print / Email Receipt
+                </div>
+                <div class="return-btn border rounded flex h-14 flex items-center justify-center text-md text-bold no-select pointer d-none">
                     Process Return
                 </div>
-                <div class="edit-btn border rounded flex w-full mt-4 h-14 flex items-center justify-center text-md text-bold no-select pointer d-none">
+                <div class="edit-btn border rounded flex h-14 flex items-center justify-center text-md text-bold no-select pointer d-none">
                     Edit Order
+                </div>
+                <div class="new-btn border rounded flex h-14 flex items-center justify-center text-md text-bold no-select pointer d-none">
+                    New Order
                 </div>
             </div>`
         )
 
         this.$return_btn = this.$summary_container.find('.return-btn');
         this.$edit_btn = this.$summary_container.find('.edit-btn');
+        this.$print_email_btn = this.$summary_container.find('.print-email-btn');
+        this.$new_btn = this.$summary_container.find('.new-btn');
     }
 
 
@@ -112,13 +120,13 @@ erpnext.PointOfSale.PastOrderSummary = class {
     get_discount_html(doc) {
         return `<div class="total-summary-wrapper flex items-center h-12 pr-4 pl-4 pointer border-b-grey no-select">
                     <div class="flex f-shrink-1 items-center">
-                        <div class="text-md text-dark-grey text-bold overflow-hidden whitespace-nowrap  mr-2">
+                        <div class="text-md-0 text-dark-grey text-bold overflow-hidden whitespace-nowrap  mr-2">
                             Discount
                         </div>
                         <span class="text-grey">(10 %)</span>
                     </div>
                     <div class="flex flex-col f-shrink-0 ml-auto text-right">
-                        <div class="text-md text-dark-grey text-bold">₹ 56</div>
+                        <div class="text-md-0 text-dark-grey text-bold">₹ 56</div>
                     </div>
                 </div>`
     }
@@ -126,12 +134,12 @@ erpnext.PointOfSale.PastOrderSummary = class {
     get_net_total_html(doc) {
         return `<div class="total-summary-wrapper flex items-center h-12 pr-4 pl-4 pointer border-b-grey no-select">
                     <div class="flex f-shrink-1 items-center">
-                        <div class="text-md text-dark-grey text-bold overflow-hidden whitespace-nowrap">
+                        <div class="text-md-0 text-dark-grey text-bold overflow-hidden whitespace-nowrap">
                             Net Total
                         </div>
                     </div>
                     <div class="flex flex-col f-shrink-0 ml-auto text-right">
-                        <div class="text-md text-dark-grey text-bold">${format_currency(doc.net_total, doc.currency)}</div>
+                        <div class="text-md-0 text-dark-grey text-bold">${format_currency(doc.net_total, doc.currency)}</div>
                     </div>
                 </div>`
     }
@@ -139,7 +147,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
     get_taxes_html(doc) {
         return `<div class="total-summary-wrapper flex items-center justify-between h-12 pr-4 pl-4 border-b-grey">
                     <div class="flex">
-                        <div class="text-md text-dark-grey text-bold w-fit">Tax Charges</div>
+                        <div class="text-md-0 text-dark-grey text-bold w-fit">Tax Charges</div>
                         <div class="flex ml-6 text-dark-grey">
                         ${	
                             doc.taxes.map((t, i) => {
@@ -151,7 +159,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
                         </div>
                     </div>
                     <div class="flex flex-col text-right">
-                        <div class="text-md text-dark-grey text-bold">${format_currency(doc.base_total_taxes_and_charges, doc.currency)}</div>
+                        <div class="text-md-0 text-dark-grey text-bold">${format_currency(doc.base_total_taxes_and_charges, doc.currency)}</div>
                     </div>
                 </div>`
     }
@@ -159,12 +167,12 @@ erpnext.PointOfSale.PastOrderSummary = class {
     get_grand_total_html(doc) {
         return `<div class="total-summary-wrapper flex items-center h-12 pr-4 pl-4 pointer border-b-grey no-select">
                     <div class="flex f-shrink-1 items-center">
-                        <div class="text-md text-dark-grey text-bold overflow-hidden whitespace-nowrap">
+                        <div class="text-md-0 text-dark-grey text-bold overflow-hidden whitespace-nowrap">
                             Grand Total
                         </div>
                     </div>
                     <div class="flex flex-col f-shrink-0 ml-auto text-right">
-                        <div class="text-md text-dark-grey text-bold">${format_currency(doc.grand_total, doc.currency)}</div>
+                        <div class="text-md-0 text-dark-grey text-bold">${format_currency(doc.grand_total, doc.currency)}</div>
                     </div>
                 </div>`
     }
@@ -187,10 +195,10 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
         function get_rate_discount_html() {
             if (item_data.rate && item_data.price_list_rate && item_data.rate !== item_data.price_list_rate) {
-                return `<div class="text-md text-dark-grey text-bold">${format_currency(item_data.rate, doc.currency)}</div>
+                return `<div class="text-md-0 text-dark-grey text-bold">${format_currency(item_data.rate, doc.currency)}</div>
                         <div class="text-grey line-through">${format_currency(item_data.price_list_rate, doc.currency)}</div>`
             } else {
-                return `<div class="text-md text-dark-grey text-bold">${format_currency(item_data.price_list_rate || item_data.rate, doc.currency)}</div>`
+                return `<div class="text-md-0 text-dark-grey text-bold">${format_currency(item_data.price_list_rate || item_data.rate, doc.currency)}</div>`
             }
         }
 
@@ -207,12 +215,12 @@ erpnext.PointOfSale.PastOrderSummary = class {
     get_payment_html(doc, payment) {
         return `<div class="payment-summary-wrapper flex items-center h-12 pr-4 pl-4 pointer border-b-grey no-select">
                     <div class="flex f-shrink-1 items-center">
-                        <div class="text-md text-dark-grey text-bold overflow-hidden whitespace-nowrap">
+                        <div class="text-md-0 text-dark-grey text-bold overflow-hidden whitespace-nowrap">
                             ${payment.mode_of_payment}
                         </div>
                     </div>
                     <div class="flex flex-col f-shrink-0 ml-auto text-right">
-                        <div class="text-md text-dark-grey text-bold">${format_currency(payment.amount, doc.currency)}</div>
+                        <div class="text-md-0 text-dark-grey text-bold">${format_currency(payment.amount, doc.currency)}</div>
                     </div>
                 </div>`
     }
@@ -221,10 +229,22 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.$summary_container.on('click', '.return-btn', () => {
             this.events.process_return(this.doc.name);
             this.toggle_component(false);
+            this.$component.find('.no-summary-placeholder').removeClass('d-none');
+            this.$summary_container.addClass('d-none');
         });
+
         this.$summary_container.on('click', '.edit-btn', () => {
             this.events.edit_order(this.doc.name);
             this.toggle_component(false);
+            this.$component.find('.no-summary-placeholder').removeClass('d-none');
+            this.$summary_container.addClass('d-none');
+        });
+
+        this.$summary_container.on('click', '.new-btn', () => {
+            this.events.new_order();
+            this.toggle_component(false);
+            this.$component.find('.no-summary-placeholder').removeClass('d-none');
+            this.$summary_container.addClass('d-none');
         });
     }
     
@@ -236,18 +256,49 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
     load_invoice_summary_of(doc) {
         this.doc = doc;
+
+        this.$component.removeClass('col-span-10').addClass('col-span-6');
+        this.$summary_container.removeClass('w-40').addClass('w-66');
+
+        // switch place holder with summary container
         this.$component.find('.no-summary-placeholder').addClass('d-none');
         this.$summary_container.removeClass('d-none');
 
+        this.attach_basic_info(doc);
+
+        this.attach_items_info(doc);
+
+        this.attach_totals_info(doc);
+
+        this.attach_payments_info(doc);
+
+        this.refresh_summary_btns(doc);
+    }
+
+    attach_basic_info(doc) {
         const upper_section_dom = this.get_upper_section_html(doc);
         this.$upper_section.html(upper_section_dom);
+    }
 
+    attach_items_info(doc) {
         this.$items_summary_container.html('');
         doc.items.forEach(item => {
             const item_dom = this.get_item_html(doc, item);
             this.$items_summary_container.append(item_dom);
         });
+    }
 
+    attach_payments_info(doc) {
+        this.$payment_summary_container.html('');
+        doc.payments.forEach(p => {
+            if (p.amount) {
+                const payment_dom = this.get_payment_html(doc, p);
+                this.$payment_summary_container.append(payment_dom);
+            }
+        });
+    }
+
+    attach_totals_info(doc) {
         const discount_dom = this.get_discount_html(doc);
         const net_total_dom = this.get_net_total_html(doc);
         const taxes_dom = this.get_taxes_html(doc);
@@ -257,16 +308,33 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.$totals_summary_container.append(net_total_dom);
         this.$totals_summary_container.append(taxes_dom);
         this.$totals_summary_container.append(grand_total_dom);
+    }
 
-        this.$payment_summary_container.html('');
-        doc.payments.forEach(p => {
-            if (p.amount) {
-                const payment_dom = this.get_payment_html(doc, p);
-                this.$payment_summary_container.append(payment_dom);
-            }
-        });
+    refresh_summary_btns(doc) {
+        const doc_is_a_draft = doc.docstatus === 0;
 
-        doc.is_return || doc.docstatus === 0 ? this.$return_btn.addClass('d-none') : this.$return_btn.removeClass('d-none');
-        doc.docstatus !== 0 ? this.$edit_btn.addClass('d-none') : this.$edit_btn.removeClass('d-none');
+        doc_is_a_draft ? this.$edit_btn.removeClass('d-none') : this.$edit_btn.addClass('d-none');
+        doc.is_return || doc_is_a_draft ? this.$return_btn.addClass('d-none') : this.$return_btn.removeClass('d-none');
+    }
+
+    show_post_submit_summary_of(doc) {
+        this.$component.removeClass('col-span-6').addClass('col-span-10');
+        this.$summary_container.removeClass('w-66').addClass('w-40');
+
+        // switch place holder with summary container
+        this.$component.find('.no-summary-placeholder').addClass('d-none');
+        this.$summary_container.removeClass('d-none');
+
+        this.attach_basic_info(doc);
+
+        this.attach_items_info(doc);
+
+        this.attach_totals_info(doc);
+
+        this.attach_payments_info(doc);
+
+        this.$new_btn.removeClass('d-none');
+        this.$print_email_btn.removeClass('d-none');
+        this.$return_btn.addClass('d-none');
     }
 }

@@ -239,10 +239,9 @@ erpnext.PointOfSale.ItemCart = class {
     update_totals_section(frm) {
 		this.render_net_total(frm.doc.base_net_total);
 		this.render_grand_total(frm.doc.base_grand_total);
-		if (frm.doc.taxes.length) {
-			const taxes = frm.doc.taxes.map(t => { return { description: t.description, rate: t.rate }})
-			this.render_taxes(frm.doc.base_total_taxes_and_charges, taxes);
-		}
+
+		const taxes = frm.doc.taxes.map(t => { return { description: t.description, rate: t.rate }})
+		this.render_taxes(frm.doc.base_total_taxes_and_charges, taxes);
     }
     
     render_net_total(value) {
@@ -270,26 +269,30 @@ erpnext.PointOfSale.ItemCart = class {
 	}
 
 	render_taxes(value, taxes) {
-		const currency = this.events.get_frm().doc.currency;
-		this.$totals_section.find('.taxes').html(
-			`<div class="flex items-center justify-between h-16 pr-8 pl-8 border-b-grey">
-				<div class="flex">
-					<div class="text-md text-dark-grey text-bold w-fit">Tax Charges</div>
-					<div class="flex ml-6 text-dark-grey">
-					${	
-						taxes.map((t, i) => {
-							let margin_left = '';
-							if (i !== 0) margin_left = 'ml-2';
-							return `<span class="border-grey p-1 pl-2 pr-2 rounded ${margin_left}">${t.description} @${t.rate}%</span>`
-						}).join('')
-					}
+		if (taxes.length) {
+			const currency = this.events.get_frm().doc.currency;
+			this.$totals_section.find('.taxes').html(
+				`<div class="flex items-center justify-between h-16 pr-8 pl-8 border-b-grey">
+					<div class="flex">
+						<div class="text-md text-dark-grey text-bold w-fit">Tax Charges</div>
+						<div class="flex ml-6 text-dark-grey">
+						${	
+							taxes.map((t, i) => {
+								let margin_left = '';
+								if (i !== 0) margin_left = 'ml-2';
+								return `<span class="border-grey p-1 pl-2 pr-2 rounded ${margin_left}">${t.description} @${t.rate}%</span>`
+							}).join('')
+						}
+						</div>
 					</div>
-				</div>
-				<div class="flex flex-col text-right">
-					<div class="text-md text-dark-grey text-bold">${format_currency(value, currency)}</div>
-				</div>
-			</div>`
-		)
+					<div class="flex flex-col text-right">
+						<div class="text-md text-dark-grey text-bold">${format_currency(value, currency)}</div>
+					</div>
+				</div>`
+			)
+		} else {
+			this.$totals_section.find('.taxes').html('')
+		}
     }
 
     get_cart_item({ item_code, batch_no }) {
@@ -381,11 +384,11 @@ erpnext.PointOfSale.ItemCart = class {
 	}
 
     highlight_checkout_btn(toggle) {
-		const has_primary_class = this.$totals_section.find('.checkout-btn').hasClass('text-primary');
+		const has_primary_class = this.$totals_section.find('.checkout-btn').hasClass('bg-primary');
 		if (toggle && !has_primary_class) {
 			this.$totals_section.find('.checkout-btn').addClass('bg-primary text-white text-lg');
 		} else if (!toggle && has_primary_class) {
-			this.$totals_section.find('.checkout-btn').removeClass('bg-primary text-white tex-lg');
+			this.$totals_section.find('.checkout-btn').removeClass('bg-primary text-white text-lg');
 		}
 	}
     
@@ -478,7 +481,7 @@ erpnext.PointOfSale.ItemCart = class {
 	}
 
 	toggle_numpad_field_edit(fieldname) {
-		if (['qty', 'rate'].includes(fieldname)) {
+		if (['qty', 'discount_percentage', 'rate'].includes(fieldname)) {
 			this.$numpad_section.find(`[data-button-value="${fieldname}"]`).click();
 		}
 	}
@@ -486,11 +489,17 @@ erpnext.PointOfSale.ItemCart = class {
 	load_cart_data_from_invoice() {
 		const frm = this.events.get_frm();
 		this.update_customer_section(frm);
-
+		
 		this.$cart_items_wrapper.html('');
-		frm.doc.items.forEach(item => {
-			this.update_item_html(item);
-		})
+		if (frm.doc.items.length) {
+			frm.doc.items.forEach(item => {
+				this.update_item_html(item);
+			});
+		} else {
+			this.make_no_items_placeholder();
+			this.highlight_checkout_btn(false);
+		}
+
 		this.update_totals_section(frm);
 
 		if(frm.doc.docstatus === 1) {
@@ -499,6 +508,7 @@ erpnext.PointOfSale.ItemCart = class {
 			this.$totals_section.find('.grand-total').removeClass('border-b-grey');
 		} else {
 			this.$totals_section.find('.checkout-btn').removeClass('d-none');
+			this.$totals_section.find('.edit-cart-btn').addClass('d-none');
 			this.$totals_section.find('.grand-total').addClass('border-b-grey');
 		}
 	}
