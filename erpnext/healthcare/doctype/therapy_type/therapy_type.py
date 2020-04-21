@@ -35,21 +35,20 @@ class TherapyType(Document):
 			item_doc.item_group = self.item_group
 			item_doc.description = self.description
 			item_doc.disabled = 0
-			item_doc.ignore_mandatory=True
+			item_doc.ignore_mandatory = True
 			item_doc.save(ignore_permissions=True)
 
 			if self.rate:
 				item_price = frappe.get_doc('Item Price', {'item_code': self.item})
 				item_price.item_name = self.item_name
 				item_price.price_list_name = self.rate
-				item_price.ignore_mandatory=True
+				item_price.ignore_mandatory = True
 				item_price.save()
 
 		elif not self.is_billable and self.item:
 			frappe.db.set_value('Item', self.item, 'disabled', 1)
 
-		frappe.db.set_value(self.doctype, self.name, 'change_in_item', 0)
-		self.reload()
+		self.db_set('change_in_item', 0)
 
 	def add_exercises(self):
 		exercises = self.get_exercises_for_body_parts()
@@ -80,6 +79,8 @@ def create_item_from_therapy(doc):
 	if doc.is_billable and not doc.disabled:
 		disabled = 0
 
+	uom = frappe.db.exists('UOM', 'Unit') or frappe.db.get_single_value('Stock Settings', 'stock_uom')
+
 	item = frappe.get_doc({
 		'doctype': 'Item',
 		'item_code': doc.item_code,
@@ -93,13 +94,12 @@ def create_item_from_therapy(doc):
 		'show_in_website': 0,
 		'is_pro_applicable': 0,
 		'disabled': disabled,
-		'stock_uom': 'Unit'
+		'stock_uom': uom
 	}).insert(ignore_permissions=True, ignore_mandatory=True)
 
 	make_item_price(item.name, doc.rate)
+	doc.db_set('item', item.name)
 
-	frappe.db.set_value('Therapy Type', doc.name, 'item', item.name)
-	doc.reload()
 
 def make_item_price(item, item_price):
 	price_list_name = frappe.db.get_value('Price List', {'selling': 1})
