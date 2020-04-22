@@ -240,6 +240,7 @@ def create_batch_or_serial_no_items():
 def create_stock_reconciliation(**args):
 	args = frappe._dict(args)
 	sr = frappe.new_doc("Stock Reconciliation")
+	sr.purpose = args.purpose or "Stock Reconciliation"
 	sr.posting_date = args.posting_date or nowdate()
 	sr.posting_time = args.posting_time or nowtime()
 	sr.set_posting_time = 1

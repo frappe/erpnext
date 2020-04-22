@@ -24,6 +24,10 @@
   "column_break_13",
   "procedure_template",
   "procedure_prescription",
+  "therapy_type",
+  "get_prescribed_therapies",
+  "therapy_plan",
+  "service_unit",
   "section_break_12",
   "practitioner",
   "department",
@@ -270,6 +274,28 @@
    "label": "Reminded",
    "print_hide": 1,
    "report_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.patient;",
+   "fieldname": "therapy_type",
+   "fieldtype": "Link",
+   "label": "Therapy",
+   "options": "Therapy Type",
+   "set_only_once": 1
+  },
+  {
+   "depends_on": "eval:doc.patient && doc.__islocal;",
+   "fieldname": "get_prescribed_therapies",
+   "fieldtype": "Button",
+   "label": "Get Prescribed Therapies"
+  },
+  {
+   "depends_on": "eval: doc.patient && doc.therapy_type",
+   "fieldname": "therapy_plan",
+   "fieldtype": "Link",
+   "label": "Therapy Plan",
+   "mandatory_depends_on": "eval: doc.patient && doc.therapy_type",
+   "options": "Therapy Plan"
   },
   {
    "fieldname": "ref_sales_invoice",

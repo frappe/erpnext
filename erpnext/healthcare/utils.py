@@ -23,6 +23,8 @@ def get_healthcare_services_to_invoice(patient, company):
 		items_to_invoice += get_lab_tests_to_invoice(patient, company)
 		items_to_invoice += get_clinical_procedures_to_invoice(patient, company)
 		items_to_invoice += get_inpatient_services_to_invoice(patient, company)
+		items_to_invoice += get_therapy_sessions_to_invoice(patient, company)
+
 
 		return items_to_invoice
 
@@ -243,6 +245,25 @@ def get_inpatient_services_to_invoice(patient, company):
 			})
 
 	return services_to_invoice
+
+
+def get_therapy_sessions_to_invoice(patient, company):
+	therapy_sessions_to_invoice = []
+	therapy_sessions = frappe.get_list(
+		'Therapy Session',
+		fields='*',
+		filters={'patient': patient.name, 'invoiced': 0, 'company': company}
+	)
+	for therapy in therapy_sessions:
+		if not therapy.appointment:
+			if therapy.therapy_type and frappe.db.get_value('Therapy Type', therapy.therapy_type, 'is_billable'):
+				therapy_sessions_to_invoice.append({
+					'reference_type': 'Therapy Session',
+					'reference_name': therapy.name,
+					'service': frappe.db.get_value('Therapy Type', therapy.therapy_type, 'item')
+				})
+
+	return therapy_sessions_to_invoice
 
 
 def get_service_item_and_practitioner_charge(doc):
