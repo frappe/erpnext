@@ -32,7 +32,7 @@ def install(country=None):
 		{ 'doctype': 'Domain', 'domain': 'Agriculture'},
 		{ 'doctype': 'Domain', 'domain': 'Non Profit'},
 
-		# ensure at least an empty Address Template exists for this Country	
+		# ensure at least an empty Address Template exists for this Country
 		{'doctype':"Address Template", "country": country},
 
 		# item group
@@ -271,7 +271,7 @@ def install(country=None):
 
 	# Records for the Supplier Scorecard
 	from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_default_records
-	
+
 	make_default_records()
 	make_records(records)
 	set_up_address_templates(default_country=country)
