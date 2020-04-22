@@ -1,24 +1,31 @@
 {
+ "actions": [],
  "creation": "2013-02-22 01:27:42",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "main_item_code",
-  "rm_item_code",
   "description",
-  "batch_no",
-  "serial_no",
+  "bom_detail_no",
   "col_break1",
-  "required_qty",
-  "consumed_qty",
+  "rm_item_code",
   "stock_uom",
-  "rate",
-  "amount",
   "conversion_factor",
-  "current_stock",
   "reference_name",
-  "bom_detail_no"
+  "secbreak_1",
+  "rate",
+  "col_break2",
+  "amount",
+  "secbreak_2",
+  "required_qty",
+  "col_break3",
+  "consumed_qty",
+  "current_stock",
+  "secbreak_3",
+  "batch_no",
+  "col_break4",
+  "serial_no"
  ],
  "fields": [
   {
@@ -152,11 +159,36 @@
    "oldfieldname": "bom_detail_no",
    "oldfieldtype": "Data",
    "read_only": 1
+  },
+  {
+   "fieldname": "secbreak_1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_break2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "secbreak_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_break3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "secbreak_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_break4",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-11-21 16:25:29.909112",
+ "links": [],
+ "modified": "2020-04-10 18:09:33.997618",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Receipt Item Supplied",

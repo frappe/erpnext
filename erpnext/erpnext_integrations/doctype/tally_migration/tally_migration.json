@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "beta": 1,
  "creation": "2019-02-01 14:27:09.485238",
  "doctype": "DocType",
@@ -14,6 +15,7 @@
   "tally_debtors_account",
   "company_section",
   "tally_company",
+  "default_uom",
   "column_break_8",
   "erpnext_company",
   "processed_files_section",
@@ -43,6 +45,7 @@
    "label": "Status"
   },
   {
+   "description": "Data exported from Tally that consists of the Chart of Accounts, Customers, Suppliers, Addresses, Items and UOMs",
    "fieldname": "master_data",
    "fieldtype": "Attach",
    "in_list_view": 1,
@@ -50,6 +53,7 @@
   },
   {
    "default": "Sundry Creditors",
+   "description": "Creditors Account set in Tally",
    "fieldname": "tally_creditors_account",
    "fieldtype": "Data",
    "label": "Tally Creditors Account",
@@ -61,6 +65,7 @@
   },
   {
    "default": "Sundry Debtors",
+   "description": "Debtors Account set in Tally",
    "fieldname": "tally_debtors_account",
    "fieldtype": "Data",
    "label": "Tally Debtors Account",
@@ -72,6 +77,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "description": "Company Name as per Imported Tally Data",
    "fieldname": "tally_company",
    "fieldtype": "Data",
    "label": "Tally Company",
@@ -82,9 +88,11 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Your Company set in ERPNext",
    "fieldname": "erpnext_company",
    "fieldtype": "Data",
-   "label": "ERPNext Company"
+   "label": "ERPNext Company",
+   "read_only_depends_on": "eval:doc.is_master_data_processed == 1"
   },
   {
    "fieldname": "processed_files_section",
@@ -155,24 +163,28 @@
    "options": "Cost Center"
   },
   {
+   "default": "0",
    "fieldname": "is_master_data_processed",
    "fieldtype": "Check",
    "label": "Is Master Data Processed",
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "is_day_book_data_processed",
    "fieldtype": "Check",
    "label": "Is Day Book Data Processed",
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "is_day_book_data_imported",
    "fieldtype": "Check",
    "label": "Is Day Book Data Imported",
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "is_master_data_imported",
    "fieldtype": "Check",
    "label": "Is Master Data Imported",
@@ -188,13 +200,23 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Day Book Data exported from Tally that consists of all historic transactions",
    "fieldname": "day_book_data",
    "fieldtype": "Attach",
    "in_list_view": 1,
    "label": "Day Book Data"
+  },
+  {
+   "default": "Unit",
+   "description": "UOM in case unspecified in imported data",
+   "fieldname": "default_uom",
+   "fieldtype": "Link",
+   "label": "Default UOM",
+   "options": "UOM"
   }
  ],
- "modified": "2019-04-29 05:46:54.394967",
+ "links": [],
+ "modified": "2020-04-16 13:03:28.894919",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Tally Migration",

@@ -9,28 +9,55 @@ from frappe.utils import getdate
 import datetime
 
 class FeeValidity(Document):
-	pass
+	def validate(self):
+		self.update_status()
+		self.set_start_date()
 
-def update_fee_validity(fee_validity, date, ref_invoice=None):
-	max_visit = frappe.db.get_value("Healthcare Settings", None, "max_visit")
-	valid_days = frappe.db.get_value("Healthcare Settings", None, "valid_days")
-	if not valid_days:
-		valid_days = 1
-	if not max_visit:
-		max_visit = 1
-	date = getdate(date)
-	valid_till = date + datetime.timedelta(days=int(valid_days))
-	fee_validity.max_visit = max_visit
+	def update_status(self):
+		if self.visited >= self.max_visits:
+			self.status = 'Completed'
+		else:
+			self.status = 'Pending'
+
+	def set_start_date(self):
+		self.start_date = getdate()
+		for appointment in self.ref_appointments:
+			appointment_date = frappe.db.get_value('Patient Appointment', appointment.appointment, 'appointment_date')
+			if getdate(appointment_date) < self.start_date:
+				self.start_date = getdate(appointment_date)
+
+
+def create_fee_validity(appointment):
+	if not check_is_new_patient(appointment):
+		return
+
+	fee_validity = frappe.new_doc('Fee Validity')
+	fee_validity.practitioner = appointment.practitioner
+	fee_validity.patient = appointment.patient
+	fee_validity.max_visits = frappe.db.get_single_value('Healthcare Settings', 'max_visits') or 1
+	valid_days = frappe.db.get_single_value('Healthcare Settings', 'valid_days') or 1
 	fee_validity.visited = 1
-	fee_validity.valid_till = valid_till
-	fee_validity.ref_invoice = ref_invoice
+	fee_validity.valid_till = getdate(appointment.appointment_date) + datetime.timedelta(days=int(valid_days))
+	fee_validity.append('ref_appointments', {
+		'appointment': appointment.name
+	})
 	fee_validity.save(ignore_permissions=True)
 	return fee_validity
 
+def check_is_new_patient(appointment):
+	validity_exists = frappe.db.exists('Fee Validity', {
+		'practitioner': appointment.practitioner,
+		'patient': appointment.patient
+	})
+	if validity_exists:
+		return False
 
-def create_fee_validity(practitioner, patient, date, ref_invoice=None):
-	fee_validity = frappe.new_doc("Fee Validity")
-	fee_validity.practitioner = practitioner
-	fee_validity.patient = patient
-	fee_validity = update_fee_validity(fee_validity, date, ref_invoice)
-	return fee_validity
+	appointment_exists = frappe.db.get_all('Patient Appointment', {
+		'name': ('!=', appointment.name),
+		'status': ('!=', 'Cancelled'),
+		'patient': appointment.patient,
+		'practitioner': appointment.practitioner
+	})
+	if len(appointment_exists) and appointment_exists[0]:
+		return False
+	return True
