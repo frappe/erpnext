@@ -4,6 +4,9 @@
 :root { --border-color: #d1d8dd;  --text-color: #8d99a6;  --primary: #5e64ff; }
 [data-route="point-of-sale-beta"] .flex { display: flex; }
 [data-route="point-of-sale-beta"] .grid { display: grid; }
+[data-route="point-of-sale-beta"] .absolute { position: absolute; }
+[data-route="point-of-sale-beta"] .relative { position: relative; }
+[data-route="point-of-sale-beta"] .abs-center { top: 50%; left: 50%; transform: translate(-50%, -50%); }
 [data-route="point-of-sale-beta"] .inline { display: inline; }
 [data-route="point-of-sale-beta"] .float-right { float: right; }
 [data-route="point-of-sale-beta"] .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
@@ -197,4 +200,7 @@
 [data-route="point-of-sale-beta"] .item-summary-wrapper:last-child { border-bottom: none; }
 [data-route="point-of-sale-beta"] .total-summary-wrapper:last-child { border-bottom: none; }
 [data-route="point-of-sale-beta"] .invoice-wrapper:last-child { border-bottom: none; }
+[data-route="point-of-sale-beta"] .summary-btns:last-child { margin-right: 0px; }
 [data-route="point-of-sale-beta"] ::-webkit-scrollbar { width: 0px; }
+
+[data-route="point-of-sale-beta"] .indicator.grey::before { background-color: #8d99a6; }

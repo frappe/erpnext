@@ -21,7 +21,7 @@ erpnext.PointOfSale.ItemCart = class {
         this.$component = this.wrapper.find('.item-cart');
     }
 
-    initialize_child_components() {    
+    initialize_child_components() {
         this.initialize_customer_selector();
         this.initialize_cart_components();
     }

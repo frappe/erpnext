@@ -77,7 +77,6 @@ erpnext.PointOfSale.Controller = class {
 					Opened at ${moment(data.period_start_date).format("Do MMMM, h:mma")}
 				</a>
 			</span>`);
-		this.page.$sub_title_area.addClass('mb-0');
 
 		this.make_app();
 	}
@@ -90,9 +89,7 @@ erpnext.PointOfSale.Controller = class {
 				this.initialize_components();
 				this.prepare_menu();
 			},
-			() => console.time('invoice'),
 			() => this.make_new_invoice(),
-			() => console.timeEnd('invoice'),
 			() => frappe.dom.unfreeze(),
 			() => this.page.set_title(__('Point of Sale Beta')),
 		]);
@@ -264,7 +261,7 @@ erpnext.PointOfSale.Controller = class {
 							this.set_invoice_status();
 							this.enable_disable_components(true);
 							this.order_summary.toggle_component(true);
-							this.order_summary.show_post_submit_summary_of(this.frm.doc);	
+							this.order_summary.show_post_submit_summary_of(this.frm.doc);
 							frappe.show_alert({
 								indicator: 'green',
 								message: __(`POS invoice ${r.doc.name} created succesfully`)
@@ -281,7 +278,7 @@ erpnext.PointOfSale.Controller = class {
 			events: {
 				open_invoice_data: (name) => {
 					frappe.db.get_doc('POS Invoice', name).then((doc) => {
-						this.order_summary.load_invoice_summary_of(doc);
+						this.order_summary.load_summary_of(doc);
 					});
 				}
 			}
@@ -292,6 +289,8 @@ erpnext.PointOfSale.Controller = class {
 		this.order_summary = new erpnext.PointOfSale.PastOrderSummary({
 			wrapper: this.$components_wrapper,
 			events: {
+				get_frm: () => this.frm,
+
 				process_return: (name) => {
 					this.past_order_list.toggle_component(false);
 					frappe.db.get_doc('POS Invoice', name).then((doc) => {

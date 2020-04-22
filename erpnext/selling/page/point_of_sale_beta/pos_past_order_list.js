@@ -105,19 +105,23 @@ erpnext.PointOfSale.PastOrderList = class {
     }
 
     get_invoice_html(invoice) {
+        const posting_datetime = moment(invoice.posting_date+" "+invoice.posting_time).format("Do MMMM, h:mma");
         return (
-            `<div class="invoice-wrapper border-b-grey pointer no-select" data-invoice-name="${escape(invoice.name)}">
-                <div class="flex flex-col p-4 justify-between">
+            `<div class="invoice-wrapper flex p-4 justify-between border-b-grey pointer no-select" data-invoice-name="${escape(invoice.name)}">
+                <div class="flex flex-col justify-end">
                     <div class="text-dark-grey text-bold overflow-hidden whitespace-nowrap mb-2">${invoice.name}</div>
-                    <div class="flex items-center w-full justify-between">
+                    <div class="flex items-center">
                         <div class="flex items-center f-shrink-1 text-dark-grey overflow-hidden whitespace-nowrap">
                             <svg class="mr-2" width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
                             </svg>
                             ${invoice.customer}
                         </div>
-                        <div class="f-shrink-0 text-dark-grey text-bold ml-4">${format_currency(invoice.grand_total, invoice.currency, 0) || 0}</div>
                     </div>
+                </div>
+                <div class="flex flex-col text-right">
+                    <div class="f-shrink-0 text-lg text-dark-grey text-bold ml-4">${format_currency(invoice.grand_total, invoice.currency, 0) || 0}</div>
+                    <div class="f-shrink-0 text-grey ml-4">${posting_datetime}</div>
                 </div>
             </div>`
         )

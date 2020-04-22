@@ -13,7 +13,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
     prepare_dom() {
         this.wrapper.append(
-            `<section class="col-span-6 flex flex-col items-center shadow rounded past-order-summary bg-white mx-h-70 h-100 d-none">
+            `<section class="col-span-6 flex flex-col relative items-center shadow rounded past-order-summary bg-white mx-h-70 h-100 d-none">
                 <div class="no-summary-placeholder flex flex-1 items-center justify-center p-16">
                     <div class="no-item-wrapper flex items-center h-18 pr-4 pl-4">
                         <div class="flex-1 text-center text-grey">Select an invoice to load summary data</div>
@@ -24,7 +24,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
         )
 
         this.$component = this.wrapper.find('.past-order-summary');
-        this.$summary_container = this.wrapper.find('.summary-container');
+        this.$summary_container = this.$component.find('.summary-container');
         this.initialize_child_components();
     }
 
@@ -34,6 +34,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.initialize_totals_summary();
         this.initialize_payments_summary();
         this.initialize_summary_buttons();
+        this.initialize_email_print_dialog();
     }
 
     initialize_upper_section() {
@@ -79,30 +80,46 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
     initialize_summary_buttons() {
         this.$summary_container.append(
-            `<div class="grid grid-cols-2 gap-4 w-full">
-                <div class="print-email-btn border rounded flex h-14 flex items-center justify-center text-md text-bold no-select pointer">
-                    Print / Email Receipt
-                </div>
-                <div class="return-btn border rounded flex h-14 flex items-center justify-center text-md text-bold no-select pointer d-none">
-                    Process Return
-                </div>
-                <div class="edit-btn border rounded flex h-14 flex items-center justify-center text-md text-bold no-select pointer d-none">
-                    Edit Order
-                </div>
-                <div class="new-btn border rounded flex h-14 flex items-center justify-center text-md text-bold no-select pointer d-none">
-                    New Order
-                </div>
-            </div>`
+            `<div class="summary-btns flex summary-btns justify-between w-full"></div>`
         )
-
-        this.$return_btn = this.$summary_container.find('.return-btn');
-        this.$edit_btn = this.$summary_container.find('.edit-btn');
-        this.$print_email_btn = this.$summary_container.find('.print-email-btn');
-        this.$new_btn = this.$summary_container.find('.new-btn');
+        
+        this.$summary_btns = this.$summary_container.find('.summary-btns');
     }
 
+    initialize_email_print_dialog() {
+        const email_dialog = new frappe.ui.Dialog({
+            title: 'Email Receipt',
+            fields: [
+                {fieldname:'email_id', fieldtype:'Data', options: 'Email', label:'Email ID'},
+                {fieldname:'remarks', fieldtype:'Text', label:'Remarks (if any)'}
+            ],
+            primary_action: () => {
+                this.send_email();
+            },
+            primary_action_label: __('Send'),
+        });
+        this.email_dialog = email_dialog;
+
+        const print_dialog = new frappe.ui.Dialog({
+            title: 'Print Receipt',
+            fields: [
+                {fieldname:'print', fieldtype:'Data', label:'Print Preview'}
+            ],
+            primary_action: () => {
+                this.events.get_frm().print_preview.printit(true);
+            },
+            primary_action_label: __('Print'),
+        });
+        this.print_dialog = print_dialog;
+    }
 
     get_upper_section_html(doc) {
+        const { status } = doc; let indicator_color = '';
+
+        in_list(['Paid', 'Consolidated'], status) && (indicator_color = 'green');
+        status === 'Draft' && (indicator_color = 'red');
+        status === 'Return' && (indicator_color = 'grey');
+
         return `<div class="flex flex-col items-start justify-end pr-4">
                     <div class="text-lg text-bold pt-2">${doc.customer}</div>
                     <div class="text-grey">ronalds@erpnext.com</div>
@@ -112,7 +129,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
                     <div class="text-2-5xl text-bold">${format_currency(doc.paid_amount, doc.currency)}</div>
                     <div class="flex justify-between">
                         <div class="text-grey mr-4">${doc.name}</div>
-                        <div class="text-grey text-bold">${doc.status.toUpperCase()}</div>
+                        <div class="text-grey text-bold indicator ${indicator_color}">${doc.status.toUpperCase()}</div>
                     </div>
                 </div>`
     }
@@ -157,7 +174,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
                             doc.taxes.map((t, i) => {
                                 let margin_left = '';
                                 if (i !== 0) margin_left = 'ml-2';
-                                return `<span class="p-1 pl-2 pr-2 ${margin_left}">${t.description} @${t.rate}%</span>`
+                                return `<span class="pl-2 pr-2 ${margin_left}">${t.description} @${t.rate}%</span>`
                             }).join('')
                         }
                         </div>
@@ -251,8 +268,15 @@ erpnext.PointOfSale.PastOrderSummary = class {
             this.$summary_container.addClass('d-none');
         });
 
-        this.$summary_container.on('click', '.print-email-btn', () => {
+        this.$summary_container.on('click', '.email-btn', () => {
+            this.email_dialog.show();
+        });
 
+        this.$summary_container.on('click', '.print-btn', () => {
+            // this.print_dialog.show();
+            const frm = this.events.get_frm();
+            frm.doc = this.doc;
+            frm.print_preview.printit(true);
         });
     }
     
@@ -262,9 +286,65 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.$component.addClass('d-none');
     }
 
-    load_invoice_summary_of(doc) {
+    send_email() {
+        const frm = this.events.get_frm();
+        const recipients = this.email_dialog.get_values().recipients;
+        const doc = this.doc || frm.doc;
+        const print_format = frm.pos_print_format;
+
+        frappe.call({
+            method:"frappe.core.doctype.communication.email.make",
+            args: {
+                recipients: recipients,
+                subject: __(frm.meta.name) + ': ' + doc.name,
+                doctype: doc.doctype,
+                name: doc.name,
+                send_email: 1,
+                print_format,
+                sender_full_name: frappe.user.full_name(),
+                _lang : doc.language
+            },
+            callback: r => {
+                if(!r.exc) {
+                    frappe.utils.play_sound("email");
+                    if(r.message["emails_not_sent_to"]) {
+                        frappe.msgprint(__("Email not sent to {0} (unsubscribed / disabled)",
+                            [ frappe.utils.escape_html(r.message["emails_not_sent_to"]) ]) );
+                    } else {
+                        frappe.show_alert({
+                            message: __('Email sent successfully.'),
+                            indicator: 'green'
+                        });
+                    }
+                    this.email_dialog.hide();
+                } else {
+                    frappe.msgprint(__("There were errors while sending email. Please try again."));
+                }
+            }
+        });
+    }
+
+    add_summary_btns(map) {
+        this.$summary_btns.html('');
+        map.forEach(m => {
+            if (m.condition) {
+                m.visible_btns.forEach(b => {
+                    const class_name = b.split(' ')[0].toLowerCase();
+                    this.$summary_btns.append(
+                        `<div class="${class_name}-btn border rounded h-14 flex flex-1 items-center mr-4 justify-center text-md text-bold no-select pointer">
+                            ${b}
+                        </div>`
+                    )
+                });
+            }
+        });
+        this.$summary_btns.children().last().removeClass('mr-4');
+    }
+
+    load_summary_of(doc) {
         this.doc = doc;
 
+        // switch full width view with 60% view
         this.$component.removeClass('col-span-10').addClass('col-span-6');
         this.$summary_container.removeClass('w-40').addClass('w-66');
 
@@ -280,13 +360,23 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
         this.attach_payments_info(doc);
 
-        const doc_is_a_draft = doc.docstatus === 0;
-        doc_is_a_draft ? this.$edit_btn.removeClass('d-none') : this.$edit_btn.addClass('d-none');
-        doc.is_return || doc_is_a_draft ? this.$return_btn.addClass('d-none') : this.$return_btn.removeClass('d-none');
-        this.$new_btn.addClass('d-none');
+        const condition_btns_map = [{
+                condition: doc.docstatus === 0,
+                visible_btns: ['Edit Order']
+            },{
+                condition: !doc.is_return && doc.docstatus === 1,
+                visible_btns: ['Print Receipt', 'Email Receipt', 'Return']
+            }, {
+                condition: doc.is_return && doc.docstatus === 1,
+                visible_btns: ['Print Receipt', 'Email Receipt']
+            }];
+
+        this.add_summary_btns(condition_btns_map);
     }
 
     show_post_submit_summary_of(doc) {
+        this.doc = doc;
+
         this.$component.removeClass('col-span-6').addClass('col-span-10');
         this.$summary_container.removeClass('w-66').addClass('w-40');
 
@@ -302,9 +392,12 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
         this.attach_payments_info(doc);
 
-        this.$new_btn.removeClass('d-none');
-        this.$print_email_btn.removeClass('d-none');
-        this.$return_btn.addClass('d-none');
+        const condition_btns_map = [{
+            condition: true,
+            visible_btns: ['Print Receipt', 'Email Receipt', 'New Order']
+        }];
+
+        this.add_summary_btns(condition_btns_map);
     }
 
     attach_basic_info(doc) {
@@ -331,11 +424,12 @@ erpnext.PointOfSale.PastOrderSummary = class {
     }
 
     attach_totals_info(doc) {
+        this.$totals_summary_container.html('');
+
         const discount_dom = this.get_discount_html(doc);
         const net_total_dom = this.get_net_total_html(doc);
         const taxes_dom = this.get_taxes_html(doc);
         const grand_total_dom = this.get_grand_total_html(doc);
-        this.$totals_summary_container.html('');
         this.$totals_summary_container.append(discount_dom);
         this.$totals_summary_container.append(net_total_dom);
         this.$totals_summary_container.append(taxes_dom);
