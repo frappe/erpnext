@@ -258,14 +258,14 @@ erpnext.PointOfSale.ItemDetails = class {
 
     bind_fields_to_numpad_fields() {
 		const me = this;
-		this.$form_container.on('focusin', '.input-with-feedback', function() {
+		this.$form_container.on('click', '.input-with-feedback', function() {
 			const fieldname = $(this).attr('data-fieldname');
 			me.events.item_field_focused(fieldname);
 		});
-		this.$form_container.on('focusout', '.input-with-feedback', function() {
-			const fieldname = $(this).attr('data-fieldname');
-			me.events.item_field_focused(fieldname);
-		});
+		// this.$form_container.on('focusout', '.input-with-feedback', function() {
+		// 	const fieldname = $(this).attr('data-fieldname');
+		// 	me.events.item_field_focused(fieldname);
+		// });
 	}
     
     bind_auto_serial_fetch_event() {

@@ -457,14 +457,14 @@ erpnext.PointOfSale.ItemCart = class {
 			return;
 		} else {
 			this.numpad_value = current_action === 'delete' ? this.numpad_value.slice(0, -1) : this.numpad_value + current_action;
-        }
-        
+		}
+
         const first_click_event_is_not_field_edit = !action_is_field_edit && first_click_event;
 
 		if (first_click_event_is_not_field_edit) {
 			frappe.show_alert({
 				indicator: 'red',
-				thisssage: __('Please select a field to edit from numpad')
+				message: __('Please select a field to edit from numpad')
 			});
 			return;
         }
