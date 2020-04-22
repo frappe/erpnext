@@ -23,7 +23,6 @@
   "delivery_date",
   "po_no",
   "po_date",
-  "affirm_id",
   "tax_id",
   "contact_info",
   "customer_address",
