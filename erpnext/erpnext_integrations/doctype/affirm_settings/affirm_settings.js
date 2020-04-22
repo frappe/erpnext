@@ -2,7 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Affirm Settings', {
-	// refresh: function(frm) {
-
-	// }
+	is_sandbox: function(frm) {
+		frm.toggle_reqd("public_sandbox_api_key", frm.doc.is_sandbox? 1: 0);
+		frm.toggle_reqd("private_sandbox_api_key", frm.doc.is_sandbox? 1: 0);
+		frm.toggle_reqd("public_api_key", frm.doc.is_sandbox? 0: 1);
+		frm.toggle_reqd("private_api_key", frm.doc.is_sandbox? 0: 1);
+	}
 });

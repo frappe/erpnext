@@ -24,17 +24,15 @@
  "fields": [
   {
    "fieldname": "public_api_key",
-   "fieldtype": "Data",
+   "fieldtype": "Password",
    "in_list_view": 1,
-   "label": "Public API Key",
-   "reqd": 1
+   "label": "Public API Key"
   },
   {
    "fieldname": "private_api_key",
-   "fieldtype": "Data",
+   "fieldtype": "Password",
    "in_list_view": 1,
-   "label": "Private API Key",
-   "reqd": 1
+   "label": "Private API Key"
   },
   {
    "fieldname": "cb_header",
@@ -90,12 +88,12 @@
   },
   {
    "fieldname": "public_sandbox_api_key",
-   "fieldtype": "Data",
+   "fieldtype": "Password",
    "label": "Public Sandbox API Key"
   },
   {
    "fieldname": "private_sandbox_api_key",
-   "fieldtype": "Data",
+   "fieldtype": "Password",
    "label": "Private Sandbox API Key"
   },
   {
@@ -106,7 +104,7 @@
  "in_create": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-04-16 05:09:41.385413",
+ "modified": "2020-04-22 00:00:10.348583",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Affirm Settings",
