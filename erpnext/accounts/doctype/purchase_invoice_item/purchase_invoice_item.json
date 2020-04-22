@@ -550,21 +550,21 @@
   },
   {
    "fieldname": "brand",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "hidden": 1,
    "label": "Brand",
-   "oldfieldname": "brand",
-   "oldfieldtype": "Data",
-   "print_hide": 1
+   "print_hide": 1,
+   "options": "Brand"
   },
   {
    "fetch_from": "item_code.item_group",
    "fetch_if_empty": 1,
    "fieldname": "item_group",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Item Group",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "options": "Item Group"
   },
   {
    "description": "Tax detail table fetched from item master as a string and stored in this field.\nUsed for Taxes and Charges",
