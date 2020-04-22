@@ -151,7 +151,7 @@ def get_api_config():
 	if settings.is_sandbox:
 		values = dict(
 			public_api_key = settings.public_sandbox_api_key,
-			private_api_key = settings.private_sandbox_api_key,
+			private_api_key = settings.get_password("private_sandbox_api_key"),
 			checkout_url = settings.sandbox_checkout_url,
 			api_url = settings.sandbox_api_url
 		)
@@ -159,7 +159,7 @@ def get_api_config():
 	else:
 		values = dict(
 			public_api_key = settings.public_api_key,
-			private_api_key = settings.private_api_key,
+			private_api_key = settings.get_password("private_api_key"),
 			checkout_url = settings.live_checkout_url,
 			api_url = settings.live_api_url
 		)
