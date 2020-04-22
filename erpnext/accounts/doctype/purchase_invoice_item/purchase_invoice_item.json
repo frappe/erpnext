@@ -12,15 +12,11 @@
   "item_name",
   "description_section",
   "description",
-  "item_group",
   "brand",
-  "image_section",
+  "col_break7",
+  "item_group",
   "image",
   "image_view",
-  "manufacture_details",
-  "manufacturer",
-  "column_break_13",
-  "manufacturer_part_no",
   "quantity_and_rate",
   "received_qty",
   "qty",
@@ -55,20 +51,19 @@
   "item_tax_amount",
   "landed_cost_voucher_amount",
   "rm_supp_cost",
-  "item_weight_details",
-  "weight_per_unit",
-  "total_weight",
-  "column_break_38",
-  "weight_uom",
   "warehouse_section",
   "warehouse",
-  "rejected_warehouse",
   "from_warehouse",
   "quality_inspection",
-  "batch_no",
-  "col_br_wh",
   "serial_no",
+  "col_br_wh",
+  "rejected_warehouse",
+  "batch_no",
   "rejected_serial_no",
+  "manufacture_details",
+  "manufacturer",
+  "column_break_13",
+  "manufacturer_part_no",
   "accounting",
   "expense_account",
   "col_break5",
@@ -92,6 +87,11 @@
   "po_detail",
   "purchase_receipt",
   "pr_detail",
+  "item_weight_details",
+  "weight_per_unit",
+  "total_weight",
+  "column_break_38",
+  "weight_uom",
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
@@ -558,9 +558,10 @@
    "print_hide": 1
   },
   {
+   "fetch_from": "item_code.item_group",
+   "fetch_if_empty": 1,
    "fieldname": "item_group",
-   "fieldtype": "Link",
-   "hidden": 1,
+   "fieldtype": "Data",
    "label": "Item Group",
    "oldfieldname": "item_group",
    "oldfieldtype": "Link",
@@ -722,12 +723,6 @@
   },
   {
    "collapsible": 1,
-   "fieldname": "image_section",
-   "fieldtype": "Section Break",
-   "label": "Image"
-  },
-  {
-   "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -737,6 +732,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "manufacture_details",
    "fieldtype": "Section Break",
    "label": "Manufacture"
@@ -771,6 +767,11 @@
    "ignore_user_permissions": 1,
    "label": "Supplier Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "col_break7",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
