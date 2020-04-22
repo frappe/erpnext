@@ -42,6 +42,10 @@
   "lab_test_prescription",
   "sb_procedures",
   "procedure_prescription",
+  "rehabilitation_section",
+  "therapy_plan",
+  "therapies",
+  "section_break_33",
   "encounter_comment",
   "sb_refs",
   "company",
@@ -253,6 +257,29 @@
    "no_copy": 1,
    "options": "Patient Encounter",
    "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "rehabilitation_section",
+   "fieldtype": "Section Break",
+   "label": "Rehabilitation"
+  },
+  {
+   "fieldname": "therapies",
+   "fieldtype": "Table",
+   "label": "Therapies",
+   "options": "Therapy Plan Detail"
+  },
+  {
+   "fieldname": "section_break_33",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "therapy_plan",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Therapy Plan",
+   "options": "Therapy Plan",
    "read_only": 1
   },
   {

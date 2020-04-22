@@ -383,9 +383,6 @@ class StockController(AccountsController):
 			# Customer Provided parts will have zero valuation rate
 			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
 				d.allow_zero_valuation_rate = 1
-				if d.parenttype in ["Delivery Note", "Sales Invoice"] and d.rate:
-					frappe.throw(_("Row #{0}: {1} cannot have {2} as it is a Customer Provided Item")
-						.format(d.idx, frappe.bold(d.item_code), frappe.bold("Rate")))
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None, company=None):
