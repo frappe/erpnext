@@ -511,9 +511,10 @@ frappe.ui.form.on('Stock Entry', {
 			item.amount = flt(item.basic_amount + flt(item.additional_cost),
 				precision("amount", item));
 
-			item.valuation_rate = flt(flt(item.basic_rate)
-				+ (flt(item.additional_cost) / flt(item.transfer_qty)),
-				precision("valuation_rate", item));
+			if (flt(item.transfer_qty)) {
+				item.valuation_rate = flt(flt(item.basic_rate) + (flt(item.additional_cost) / flt(item.transfer_qty)),
+					precision("valuation_rate", item));
+			}
 		}
 
 		refresh_field('items');
@@ -539,9 +540,8 @@ frappe.ui.form.on('Stock Entry', {
 
 frappe.ui.form.on('Stock Entry Detail', {
 	qty: function(frm, cdt, cdn) {
-		frm.events.set_serial_no(frm, cdt, cdn, () => {
-			frm.events.set_basic_rate(frm, cdt, cdn);
-		});
+		frm.events.set_basic_rate(frm, cdt, cdn);
+ 		frm.events.set_serial_no(frm, cdt, cdn);
 	},
 
 	conversion_factor: function(frm, cdt, cdn) {
