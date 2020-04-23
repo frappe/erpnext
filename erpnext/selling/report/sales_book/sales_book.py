@@ -41,6 +41,12 @@ def execute(filters=None):
 			"width": 140
 		},
 		{
+			"fieldname": "total_final",
+   			"fieldtype": "Currency",
+   			"label": "Total Final",
+			"width": 110
+		},
+		{
 			"fieldname": "total",
    			"fieldtype": "Currency",
    			"label": "Total",
@@ -96,9 +102,11 @@ def execute(filters=None):
 		base_18 = 0
 		total_exepmt = 0
 		amount_exonerated = 0
+		total = 0
 		if sales.status == "Paid" or sales.status == "Unpaid":
 			items = frappe.get_all("Sales Invoice Item", ["item_code", "item_name", "qty", "amount", "discount_amount", "item_tax_template", "purchase_rate"], filters = {"parent": sales.name})
 			for invoice_item in items:
+				total += invoice_item.amount
 				if invoice_item.item_tax_template == None:
 					total_exepmt = sales.grand_total
 				tax_template = frappe.get_all("Item Tax Template", "name", filters = {"name": invoice_item.item_tax_template})
@@ -107,10 +115,10 @@ def execute(filters=None):
 					for rate in tax_rate:
 						if rate.tax_rate == 15:
 							taxes_calculate_15 += rate.tax_rate * invoice_item.amount / 100
-							base_15 = sales.grand_total - taxes_calculate_15
+							base_15 += invoice_item.amount
 						elif rate.tax_rate == 18:
 							taxes_calculate_18 += rate.tax_rate * invoice_item.amount / 100
-							base_18 = sales.grand_total - taxes_calculate_18
+							base_18 += invoice_item.amount
 						if sales.exonerated == 1:
 							amount_exonerated = sales.grand_total
 							taxes_calculate_15 = 0
@@ -128,6 +136,7 @@ def execute(filters=None):
 			sales.type_document,
 			sales.numeration,
 			sales.grand_total,
+			total,
 			total_exepmt,
 			amount_exonerated,
 			base_15,
