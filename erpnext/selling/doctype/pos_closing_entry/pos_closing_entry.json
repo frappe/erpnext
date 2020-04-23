@@ -39,7 +39,7 @@
  ],
  "fields": [
   {
-   "fetch_from": "pos_opening_voucher.period_start_date",
+   "fetch_from": "pos_opening_entry.period_start_date",
    "fieldname": "period_start_date",
    "fieldtype": "Datetime",
    "in_list_view": 1,
@@ -228,7 +228,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-23 21:33:20.096519",
+ "modified": "2020-04-23 22:01:21.640394",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "POS Closing Entry",

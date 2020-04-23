@@ -16,7 +16,7 @@ frappe.ui.form.on('POS Closing Entry', {
 			};
 		});
 
-		frm.set_query("pos_opening_voucher", function(doc) {
+		frm.set_query("pos_opening_entry", function(doc) {
 			return { filters: { 'status': 'Open', 'docstatus': 1 } };
 		});
 		
@@ -24,8 +24,8 @@ frappe.ui.form.on('POS Closing Entry', {
 		if (frm.doc.docstatus === 1) set_html_data(frm);
 	},
 
-	pos_opening_voucher(frm) {
-		if (frm.doc.pos_opening_voucher && frm.doc.period_start_date && frm.doc.period_end_date && frm.doc.user)
+	pos_opening_entry(frm) {
+		if (frm.doc.pos_opening_entry && frm.doc.period_start_date && frm.doc.period_end_date && frm.doc.user)
 			frm.trigger("get_pos_invoices");
 	},
 
@@ -95,7 +95,6 @@ function add_to_payments(d, frm) {
 }
 
 function add_to_taxes(d, frm) {
-	console.log(d.taxes)
 	d.taxes.forEach(t => {
 		const tax = frm.doc.taxes.find(tx => tx.account_head === t.account_head && tx.rate === t.rate);
 		if (tax) {
