@@ -19,6 +19,7 @@ class Loan(AccountsController):
 		self.validate_loan_security_pledge()
 		self.validate_loan_amount()
 		self.check_sanctioned_amount_limit()
+		self.validate_repay_from_salary()
 
 		if self.is_term_loan:
 			validate_repayment_method(self.repayment_method, self.loan_amount, self.monthly_repayment_amount,
@@ -76,6 +77,10 @@ class Loan(AccountsController):
 
 		if sanctioned_amount_limit and flt(self.loan_amount) + flt(total_loan_amount) > flt(sanctioned_amount_limit):
 			frappe.throw(_("Sanctioned Amount limit crossed for {0} {1}").format(self.applicant_type, frappe.bold(self.applicant)))
+
+	def validate_repay_from_salary(self):
+		if not self.is_term_loan and self.repay_from_salary:
+			frappe.throw(_("Repay From Salary can be selected only for term loans"))
 
 	def make_repayment_schedule(self):
 
@@ -198,7 +203,7 @@ def close_loan(loan, total_amount_paid):
 	frappe.db.set_value("Loan", loan, "status", "Closed")
 
 @frappe.whitelist()
-def make_loan_disbursement(loan, company, applicant_type, applicant, disbursed_amount=0, as_dict=0):
+def make_loan_disbursement(loan, company, applicant_type, applicant, pending_amount=0, as_dict=0):
 	disbursement_entry = frappe.new_doc("Loan Disbursement")
 	disbursement_entry.against_loan = loan
 	disbursement_entry.applicant_type = applicant_type
@@ -206,8 +211,7 @@ def make_loan_disbursement(loan, company, applicant_type, applicant, disbursed_a
 	disbursement_entry.company = company
 	disbursement_entry.disbursement_date = nowdate()
 
-	if disbursed_amount:
-		disbursement_entry.disbursed_amount = disbursed_amount
+	disbursement_entry.disbursed_amount = pending_amount
 	if as_dict:
 		return disbursement_entry.as_dict()
 	else:

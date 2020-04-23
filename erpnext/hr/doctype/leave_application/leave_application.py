@@ -580,19 +580,22 @@ def get_leaves_for_period(employee, leave_type, from_date, to_date):
 	return leave_days
 
 def skip_expiry_leaves(leave_entry, date):
-	''' Checks whether the expired leaves coincide with the to_date of leave balance check '''
+	''' Checks whether the expired leaves coincide with the to_date of leave balance check.
+		This allows backdated leave entry creation for non carry forwarded allocation '''
 	end_date = frappe.db.get_value("Leave Allocation", {'name': leave_entry.transaction_name}, ['to_date'])
 	return True if end_date == date and not leave_entry.is_carry_forward else False
 
 def get_leave_entries(employee, leave_type, from_date, to_date):
-	''' Returns leave entries between from_date and to_date '''
+	''' Returns leave entries between from_date and to_date. '''
 	return frappe.db.sql("""
 		SELECT
 			employee, leave_type, from_date, to_date, leaves, transaction_name, transaction_type,
 			is_carry_forward, is_expired
 		FROM `tabLeave Ledger Entry`
 		WHERE employee=%(employee)s AND leave_type=%(leave_type)s
-			AND docstatus=1 AND leaves<0
+			AND docstatus=1 
+			AND (leaves<0
+				OR is_expired=1)
 			AND (from_date between %(from_date)s AND %(to_date)s
 				OR to_date between %(from_date)s AND %(to_date)s
 				OR (from_date < %(from_date)s AND to_date > %(to_date)s))
@@ -687,8 +690,7 @@ def add_leaves(events, start, end, filter_conditions=None):
 			"to_date": d.to_date,
 			"docstatus": d.docstatus,
 			"color": d.color,
-			"title": cstr(d.employee_name) + \
-				(d.half_day and _(" (Half Day)") or ""),
+			"title": cstr(d.employee_name) + (' ' + _('(Half Day)') if d.half_day else ''),
 		}
 		if e not in events:
 			events.append(e)

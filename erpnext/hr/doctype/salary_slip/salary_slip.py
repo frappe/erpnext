@@ -356,13 +356,13 @@ class SalarySlip(TransactionBase):
 
 	def eval_condition_and_formula(self, d, data):
 		try:
-			condition = d.condition.strip() if d.condition else None
+			condition = d.condition.strip().replace("\n", " ") if d.condition else None
 			if condition:
 				if not frappe.safe_eval(condition, self.whitelisted_globals, data):
 					return None
 			amount = d.amount
 			if d.amount_based_on_formula:
-				formula = d.formula.strip() if d.formula else None
+				formula = d.formula.strip().replace("\n", " ") if d.formula else None
 				if formula:
 					amount = flt(frappe.safe_eval(formula, self.whitelisted_globals, data), d.precision("amount"))
 			if amount:
@@ -755,30 +755,37 @@ class SalarySlip(TransactionBase):
 			d.amount = self.get_amount_based_on_payment_days(d, joining_date, relieving_date)[0]
 
 	def set_loan_repayment(self):
-		self.set('loans', [])
 		self.total_loan_repayment = 0
 		self.total_interest_amount = 0
 		self.total_principal_amount = 0
 
-		for loan in self.get_loan_details():
+		if not self.get('loans'):
+			for loan in self.get_loan_details():
 
-			amounts = calculate_amounts(loan.name, self.posting_date, "Regular Payment")
+				amounts = calculate_amounts(loan.name, self.posting_date, "Regular Payment")
 
-			total_payment = amounts['interest_amount'] + amounts['payable_principal_amount']
+				if amounts['interest_amount'] or amounts['payable_principal_amount']:
+					self.append('loans', {
+						'loan': loan.name,
+						'total_payment': amounts['interest_amount'] + amounts['payable_principal_amount'],
+						'interest_amount': amounts['interest_amount'],
+						'principal_amount': amounts['payable_principal_amount'],
+						'loan_account': loan.loan_account,
+						'interest_income_account': loan.interest_income_account
+					})
 
-			if total_payment:
-				self.append('loans', {
-					'loan': loan.name,
-					'total_payment': total_payment,
-					'interest_amount': amounts['interest_amount'],
-					'principal_amount': amounts['payable_principal_amount'],
-					'loan_account': loan.loan_account,
-					'interest_income_account': loan.interest_income_account
-				})
+		for payment in self.get('loans'):
+			amounts = calculate_amounts(payment.loan, self.posting_date, "Regular Payment")
+			total_amount = amounts['interest_amount'] + amounts['payable_principal_amount']
+			if payment.total_payment > total_amount:
+				frappe.throw(_("""Row {0}: Paid amount {1} is greater than pending accrued amount {2}
+					against loan {3}""").format(payment.idx, frappe.bold(payment.total_payment),
+					frappe.bold(total_amount), frappe.bold(payment.loan)))
 
-			self.total_loan_repayment += total_payment
-			self.total_interest_amount += amounts['interest_amount']
-			self.total_principal_amount += amounts['payable_principal_amount']
+			self.total_interest_amount += payment.interest_amount
+			self.total_principal_amount += payment.principal_amount
+
+			self.total_loan_repayment += payment.total_payment
 
 	def get_loan_details(self):
 
