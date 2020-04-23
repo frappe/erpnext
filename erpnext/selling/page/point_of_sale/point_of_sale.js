@@ -114,7 +114,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			}
 		],
 		on_submit,
-		__('Create POS Opening Voucher')
+		__('Create POS Opening Entry')
 		);
 	}
 

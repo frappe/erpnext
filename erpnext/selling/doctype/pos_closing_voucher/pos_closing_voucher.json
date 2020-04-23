@@ -213,8 +213,8 @@
   {
    "fieldname": "pos_opening_voucher",
    "fieldtype": "Link",
-   "label": "POS Opening Voucher",
-   "options": "POS Opening Voucher",
+   "label": "POS Opening Entry",
+   "options": "POS Opening Entry",
    "reqd": 1
   },
   {

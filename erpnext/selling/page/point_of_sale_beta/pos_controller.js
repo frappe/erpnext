@@ -63,7 +63,7 @@ erpnext.PointOfSale.Controller = class {
 				label: __('Amount in custody'), fieldname: 'custody_amount', reqd: 1
 			}
 		],
-		on_submit, __('Create POS Opening Voucher'));
+		on_submit, __('Create POS Opening Entry'));
 	}
 
 	initialize_app(data) {

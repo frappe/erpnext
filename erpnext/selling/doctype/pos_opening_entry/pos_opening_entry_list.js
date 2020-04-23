@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 // render
-frappe.listview_settings['POS Opening Voucher'] = {
+frappe.listview_settings['POS Opening Entry'] = {
 	get_indicator: function(doc) {
 		var status_color = {
 			"Draft": "grey",

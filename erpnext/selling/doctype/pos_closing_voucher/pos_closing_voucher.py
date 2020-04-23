@@ -52,12 +52,12 @@ class POSClosingVoucher(Document):
 			frappe.throw(_("POS Closing Voucher {} for {} between selected period"
 				.format(frappe.bold("already exists"), self.user)), title=_("Invalid Period"))
 		
-		if frappe.db.get_value("POS Opening Voucher", self.pos_opening_voucher, "status") != "Open":
-			frappe.throw(_("Selected POS Opening Voucher should be open."), title=_("Invalid Opening Voucher"))
+		if frappe.db.get_value("POS Opening Entry", self.pos_opening_voucher, "status") != "Open":
+			frappe.throw(_("Selected POS Opening Entry should be open."), title=_("Invalid Opening Entry"))
 
 	def on_submit(self):
 		merge_pos_invoices(self.pos_transactions)
-		opening_voucher = frappe.get_doc("POS Opening Voucher", self.pos_opening_voucher)
+		opening_voucher = frappe.get_doc("POS Opening Entry", self.pos_opening_voucher)
 		opening_voucher.pos_closing_voucher = self.name
 		opening_voucher.set_status()
 		opening_voucher.save()

@@ -95,7 +95,7 @@
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "POS Opening Voucher",
+   "options": "POS Opening Entry",
    "print_hide": 1,
    "read_only": 1
   },
@@ -128,7 +128,7 @@
  "modified": "2020-03-13 12:03:54.169804",
  "modified_by": "Administrator",
  "module": "Selling",
- "name": "POS Opening Voucher",
+ "name": "POS Opening Entry",
  "owner": "Administrator",
  "permissions": [
   {

@@ -9,7 +9,7 @@ from frappe.utils import cint
 from frappe.model.document import Document
 from erpnext.controllers.status_updater import StatusUpdater
 
-class POSOpeningVoucher(StatusUpdater):
+class POSOpeningEntry(StatusUpdater):
 	def validate(self):
 		self.validate_pos_profile_and_cashier()
 		self.set_status()

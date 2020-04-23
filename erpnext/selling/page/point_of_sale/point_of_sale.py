@@ -156,7 +156,7 @@ def search_serial_or_batch_or_barcode_number(search_value):
 
 @frappe.whitelist()
 def check_opening_voucher(user):
-	open_vouchers = frappe.db.get_all("POS Opening Voucher", 
+	open_vouchers = frappe.db.get_all("POS Opening Entry", 
 		filters = { 
 			"user": user, 
 			"pos_closing_voucher": ["in", ["", None]], "docstatus": 1 
@@ -169,7 +169,7 @@ def check_opening_voucher(user):
 @frappe.whitelist()
 def create_opening_voucher(pos_profile, company, custody_amount):
 	new_pos_opening = frappe.get_doc({
-		'doctype': 'POS Opening Voucher',
+		'doctype': 'POS Opening Entry',
 		"period_start_date": frappe.utils.get_datetime(),
 		"posting_date": frappe.utils.getdate(),
 		"user": frappe.session.user,
