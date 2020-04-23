@@ -67,11 +67,11 @@ def add_bank_accounts(response, bank, company):
 		frappe.throw(_("Please setup a default bank account for company {0}").format(company))
 
 	for account in response["accounts"]:
-		acc_type = frappe.db.get_value("Account Type", account["type"])
+		acc_type = frappe.db.get_value("Bank Account Type", account["type"])
 		if not acc_type:
 			add_account_type(account["type"])
 
-		acc_subtype = frappe.db.get_value("Account Subtype", account["subtype"])
+		acc_subtype = frappe.db.get_value("Bank Account Subtype", account["subtype"])
 		if not acc_subtype:
 			add_account_subtype(account["subtype"])
 
@@ -106,7 +106,7 @@ def add_bank_accounts(response, bank, company):
 def add_account_type(account_type):
 	try:
 		frappe.get_doc({
-			"doctype": "Account Type",
+			"doctype": "Bank Account Type",
 			"account_type": account_type
 		}).insert()
 	except Exception:
@@ -116,7 +116,7 @@ def add_account_type(account_type):
 def add_account_subtype(account_subtype):
 	try:
 		frappe.get_doc({
-			"doctype": "Account Subtype",
+			"doctype": "Bank Account Subtype",
 			"account_subtype": account_subtype
 		}).insert()
 	except Exception:
