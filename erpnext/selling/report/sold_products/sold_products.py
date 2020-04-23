@@ -37,7 +37,7 @@ def execute(filters=None):
 				# Calculate data
 				rate_purchase = invoice_item.qty * invoice_item.purchase_rate
 				taxes_calculate = result_tax * invoice_item.amount / 100
-				total_sale = invoice_item.amount + taxes_calculate 
+				total_sale = invoice_item.amount + taxes_calculate  
 				discount = invoice_item.discount_amount * invoice_item.qty
 				utility = invoice_item.amount - rate_purchase
 				# utility = invoice_item.amount - utility_initial
@@ -92,7 +92,7 @@ def execute(filters=None):
 	for reg in registers:
 		percentage = "{}%".format(reg[9])
 		row = [reg[0], reg[1], reg[2], reg[3], reg[4], reg[5], reg[6], reg[7], reg[8], percentage]
-		data.append(row)	
+		data.append(row)
 	return columns, data
 
 def return_filters(filters):
