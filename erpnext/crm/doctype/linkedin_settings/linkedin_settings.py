@@ -9,6 +9,7 @@ from frappe.utils import get_site_url, get_url_to_form, get_link_to_form
 from frappe.model.document import Document
 from frappe.utils.file_manager import get_file, get_file_path
 from six.moves.urllib.parse import urlencode
+
 class LinkedInSettings(Document):
 	def get_authorization_url(self):	
 		params = urlencode({
@@ -46,9 +47,12 @@ class LinkedInSettings(Document):
 		url = "https://api.linkedin.com/v2/me"
 		response = requests.get(url=url, headers=headers)
 		response = frappe.parse_json(response.content.decode())
-		self.db_set("person_urn", response["id"])
-		self.db_set("account_name", response["vanityName"])
-		self.db_set("session_status", "Active")
+
+		frappe.db.set_value(self.doctype, self.name, {
+			"person_urn": response["id"],
+			"account_name": response["vanityName"],
+			"session_status": "Active"
+		})
 		frappe.local.response["type"] = "redirect"
 		frappe.local.response["location"] = get_url_to_form("LinkedIn Settings","LinkedIn Settings")
 
@@ -57,6 +61,7 @@ class LinkedInSettings(Document):
 			return self.post_text(text)
 		else:
 			media_id = self.upload_image(media)
+
 			if media_id:
 				return self.post_text(text, media_id=media_id)
 			else:
@@ -66,7 +71,6 @@ class LinkedInSettings(Document):
 	def upload_image(self, media):
 		media = get_file_path(media)
 		register_url = "https://api.linkedin.com/v2/assets?action=registerUpload"
-
 		body = {
 			"registerUploadRequest": {
 				"recipes": ["urn:li:digitalmediaRecipe:feedshare-image"],
@@ -81,6 +85,7 @@ class LinkedInSettings(Document):
 			"Authorization": "Bearer {}".format(self.access_token)
 		}
 		response = self.http_post(url=register_url, body=body, headers=headers)
+
 		if response.status_code == 200:
 			response = response.json()
 			asset = response["value"]["asset"]
@@ -91,11 +96,10 @@ class LinkedInSettings(Document):
 				frappe.throw(_("Error While Uploading Image"), title="{0} {1}".format(response.status_code, response.reason))
 				return None
 			return asset
+
 		return None
 
-
 	def post_text(self, text, media_id=None):
-		# url = "https://api.linkedin.com/v2/ugcPosts"
 		url = "https://api.linkedin.com/v2/shares"
 		headers = {
 			"X-Restli-Protocol-Version": "2.0.0",
@@ -112,6 +116,7 @@ class LinkedInSettings(Document):
 				"text": text
 			}
 		}
+
 		if media_id:
 			body["content"]= {
 				"contentEntities": [{
@@ -119,6 +124,7 @@ class LinkedInSettings(Document):
 				}],
 				"shareMediaCategory": "IMAGE"
 			}
+
 		response = self.http_post(url=url, headers=headers, body=body)
 		return response
 
@@ -132,17 +138,20 @@ class LinkedInSettings(Document):
 			)
 			if response.status_code not in [201,200]:
 				raise
+
 		except Exception as e:
 			content = json.loads(response.content)
+
 			if response.status_code == 401:
 				self.db_set("session_status", "Expired")
 				frappe.db.commit()
- 				frappe.throw(content["message"], title="LinkedIn Error - Unauthorized")
+				frappe.throw(content["message"], title="LinkedIn Error - Unauthorized")
 			elif response.status_code == 403:
 				frappe.msgprint(_("You Didn't have permission to access this API"))
 				frappe.throw(content["message"], title="LinkedIn Error - Access Denied")
 			else:
 				frappe.throw(response.reason, title=response.status_code)
+
 		return response
 
 @frappe.whitelist()
