@@ -5,5 +5,5 @@ from __future__ import unicode_literals
 
 import unittest
 
-class TestAccountType(unittest.TestCase):
+class TestBankAccountSubtype(unittest.TestCase):
 	pass
