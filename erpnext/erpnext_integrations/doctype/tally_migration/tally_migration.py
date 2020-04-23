@@ -510,7 +510,7 @@ class TallyMigration(Document):
 		try:
 			frappe.db.set_value("Account", encode_company_abbr(self.tally_creditors_account, self.erpnext_company), "account_type", "Payable")
 			frappe.db.set_value("Account", encode_company_abbr(self.tally_debtors_account, self.erpnext_company), "account_type", "Receivable")
-			frappe.db.set_value("Company", self.erpnext_company, "round_off_account", self.round_off_account)
+			frappe.db.set_value("Company", self.erpnext_company, "round_off_account", self.default_round_off_account)
 
 			vouchers_file = frappe.get_doc("File", {"file_url": self.vouchers})
 			vouchers = json.loads(vouchers_file.get_content())
