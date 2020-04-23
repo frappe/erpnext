@@ -36,7 +36,7 @@
  "modified": "2020-03-05 23:22:36.524292",
  "modified_by": "Administrator",
  "module": "Selling",
- "name": "POS Closing Voucher Taxes",
+ "name": "POS Closing Entry Taxes",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,

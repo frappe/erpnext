@@ -756,14 +756,14 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			me.change_pos_profile();
 		});
 		this.page.add_menu_item(__('Close the POS'), () => {
-			var voucher = frappe.model.get_new_doc('POS Closing Voucher');
+			var voucher = frappe.model.get_new_doc('POS Closing Entry');
 			voucher.pos_profile = me.frm.doc.pos_profile;
 			voucher.user = frappe.session.user;
 			voucher.company = me.frm.doc.company;
 			voucher.pos_opening_voucher = this.pos_opening;
 			voucher.period_end_date = frappe.datetime.now_datetime();
 			voucher.posting_date = frappe.datetime.now_date();
-			frappe.set_route('Form', 'POS Closing Voucher', voucher.name);
+			frappe.set_route('Form', 'POS Closing Entry', voucher.name);
 		});
 	}
 

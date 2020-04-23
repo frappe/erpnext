@@ -54,7 +54,7 @@ doctype_series_map = {
 	'Payroll Entry': 'HR-PRUN-.YYYY.-.#####',
 	'Period Closing Voucher': 'ACC-PCV-.YYYY.-.#####',
 	'Plant Analysis': 'AG-PLA-.YYYY.-.#####',
-	'POS Closing Voucher': 'POS-CLO-.YYYY.-.#####',
+	'POS Closing Entry': 'POS-CLO-.YYYY.-.#####',
 	'Prepared Report': 'SYS-PREP-.YYYY.-.#####',
 	'Program Enrollment': 'EDU-ENR-.YYYY.-.#####',
 	'Quotation Item': '',

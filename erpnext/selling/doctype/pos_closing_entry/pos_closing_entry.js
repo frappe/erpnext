@@ -1,7 +1,7 @@
 // Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('POS Closing Voucher', {
+frappe.ui.form.on('POS Closing Entry', {
 	onload: function(frm) {
 		frm.set_query("pos_profile", function(doc) {
 			return {
@@ -11,7 +11,7 @@ frappe.ui.form.on('POS Closing Voucher', {
 
 		frm.set_query("user", function(doc) {
 			return {
-				query: "erpnext.selling.doctype.pos_closing_voucher.pos_closing_voucher.get_cashiers",
+				query: "erpnext.selling.doctype.pos_closing_entry.pos_closing_entry.get_cashiers",
 				filters: { 'parent': doc.pos_profile }
 			};
 		});
@@ -31,7 +31,7 @@ frappe.ui.form.on('POS Closing Voucher', {
 
 	get_pos_invoices(frm) {
 		frappe.call({
-			method: 'erpnext.selling.doctype.pos_closing_voucher.pos_closing_voucher.get_pos_invoices',
+			method: 'erpnext.selling.doctype.pos_closing_entry.pos_closing_entry.get_pos_invoices',
 			args: {
 				start: frappe.datetime.get_datetime_as_string(frm.doc.period_start_date),
 				end: frm.doc.period_end_date,

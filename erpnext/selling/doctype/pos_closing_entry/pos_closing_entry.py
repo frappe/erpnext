@@ -12,7 +12,7 @@ from collections import defaultdict
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
 from erpnext.selling.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
 
-class POSClosingVoucher(Document):
+class POSClosingEntry(Document):
 	def get_closing_voucher_details(self):
 		filters = {
 			'doc': self.name,
@@ -41,7 +41,7 @@ class POSClosingVoucher(Document):
 		return self.get_payment_reconciliation_details()
 
 	def validate(self):
-		user = frappe.get_all('POS Closing Voucher',
+		user = frappe.get_all('POS Closing Entry',
 			filters = { 'user': self.user, 'docstatus': 1 },
 			or_filters = {
 					'period_start_date': ('between', [self.period_start_date, self.period_end_date]),
@@ -49,7 +49,7 @@ class POSClosingVoucher(Document):
 			})
 
 		if user:
-			frappe.throw(_("POS Closing Voucher {} for {} between selected period"
+			frappe.throw(_("POS Closing Entry {} for {} between selected period"
 				.format(frappe.bold("already exists"), self.user)), title=_("Invalid Period"))
 		
 		if frappe.db.get_value("POS Opening Entry", self.pos_opening_voucher, "status") != "Open":
@@ -58,7 +58,7 @@ class POSClosingVoucher(Document):
 	def on_submit(self):
 		merge_pos_invoices(self.pos_transactions)
 		opening_voucher = frappe.get_doc("POS Opening Entry", self.pos_opening_voucher)
-		opening_voucher.pos_closing_voucher = self.name
+		opening_voucher.pos_closing_entry = self.name
 		opening_voucher.set_status()
 		opening_voucher.save()
 
@@ -94,7 +94,7 @@ class POSClosingVoucher(Document):
 
 	def get_payment_reconciliation_details(self):
 		currency = get_company_currency(self)
-		return frappe.render_template("erpnext/selling/doctype/pos_closing_voucher/closing_voucher_details.html",
+		return frappe.render_template("erpnext/selling/doctype/pos_closing_entry/closing_voucher_details.html",
 			{"data": self, "currency": currency})
 
 @frappe.whitelist()

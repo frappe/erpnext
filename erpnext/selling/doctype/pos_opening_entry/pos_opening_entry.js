@@ -11,7 +11,7 @@ frappe.ui.form.on('POS Opening Entry', {
 
 		frm.set_query("user", function(doc) {
 			return {
-				query: "erpnext.selling.doctype.pos_closing_voucher.pos_closing_voucher.get_cashiers",
+				query: "erpnext.selling.doctype.pos_closing_entry.pos_closing_entry.get_cashiers",
 				filters: { 'parent': doc.pos_profile }
 			};
 		});
