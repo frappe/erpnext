@@ -11,7 +11,7 @@ def execute(filters=None):
 
 	columns = [
 		_("Date") + "::100", _("RTN") + "::120", _("Supplier") + "::140", _("Document") + "::140", _("Print Authorization Code") + "::140",
-		_("Total") + ":Currency:110", _("Total Exempt") + ":Currency:110", _("Base ISV 15%") + ":Currency:110", _("ISV 15%") + ":Currency:110", 
+		_("Total Final") + ":Currency:110", _("Total") + ":Currency:110", _("Total Exempt") + ":Currency:110", _("Base ISV 15%") + ":Currency:110", _("ISV 15%") + ":Currency:110", 
 		_("Base ISV 18%") + ":Currency:110", _("ISV 18%") + ":Currency:110"
 	]
 
@@ -25,8 +25,10 @@ def execute(filters=None):
 		base_15 = 0
 		base_18 = 0
 		total_exepmt = 0
+		total_end = 0
 		items = frappe.get_all("Purchase Invoice Item", ["item_tax_template", "amount"], filters = {"parent": item.name})
 		for invoice_item in items:
+			total_end += invoice_item.amount
 			if invoice_item.item_tax_template == None:
 				total_exepmt = item.grand_total
 			tax_template = frappe.get_all("Item Tax Template", "name", filters = {"name": invoice_item.item_tax_template})
@@ -35,10 +37,10 @@ def execute(filters=None):
 				for rate in tax_rate:
 					if rate.tax_rate == 15:
 						taxes_calculate_15 += rate.tax_rate * invoice_item.amount / 100
-						base_15 = item.grand_total - taxes_calculate_15
+						base_15 += invoice_item.amount
 					elif rate.tax_rate == 18:
 						taxes_calculate_18 += rate.tax_rate * invoice_item.amount / 100
-						base_18 = item.grand_total - taxes_calculate_18
+						base_18 += invoice_item.amount
 
 		row = [
 			item.posting_date,
@@ -47,6 +49,7 @@ def execute(filters=None):
 			item.bill_no,
 			item.cai,
 			item.grand_total,
+			total_end,
 			total_exepmt,
 			base_15,
 			taxes_calculate_15,
