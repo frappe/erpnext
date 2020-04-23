@@ -7,7 +7,8 @@
 from __future__ import unicode_literals
 import frappe, unittest, erpnext
 from frappe.utils import flt, today
-from erpnext.stock.doctype.material_request.material_request import raise_work_orders
+from erpnext.stock.doctype.material_request.material_request \
+	import raise_work_orders, make_stock_entry, make_purchase_order, make_supplier_quotation
 from erpnext.stock.doctype.item.test_item import create_item
 
 class TestMaterialRequest(unittest.TestCase):
@@ -15,8 +16,6 @@ class TestMaterialRequest(unittest.TestCase):
 		erpnext.set_perpetual_inventory(0)
 
 	def test_make_purchase_order(self):
-		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
-
 		mr = frappe.copy_doc(test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_purchase_order,
@@ -30,8 +29,6 @@ class TestMaterialRequest(unittest.TestCase):
 		self.assertEqual(len(po.get("items")), len(mr.get("items")))
 
 	def test_make_supplier_quotation(self):
-		from erpnext.stock.doctype.material_request.material_request import make_supplier_quotation
-
 		mr = frappe.copy_doc(test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_supplier_quotation, mr.name)
@@ -45,12 +42,9 @@ class TestMaterialRequest(unittest.TestCase):
 
 
 	def test_make_stock_entry(self):
-		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
-
 		mr = frappe.copy_doc(test_records[0]).insert()
 
-		self.assertRaises(frappe.ValidationError, make_stock_entry,
-			mr.name)
+		self.assertRaises(frappe.ValidationError, make_stock_entry, mr.name)
 
 		mr = frappe.get_doc("Material Request", mr.name)
 		mr.material_request_type = "Material Transfer"
@@ -62,40 +56,40 @@ class TestMaterialRequest(unittest.TestCase):
 
 	def _insert_stock_entry(self, qty1, qty2, warehouse = None ):
 		se = frappe.get_doc({
-				"company": "_Test Company",
-				"doctype": "Stock Entry",
-				"posting_date": "2013-03-01",
-				"posting_time": "00:00:00",
-				"purpose": "Material Receipt",
-				"items": [
-					{
-						"conversion_factor": 1.0,
-						"doctype": "Stock Entry Detail",
-						"item_code": "_Test Item Home Desktop 100",
-						"parentfield": "items",
-						"basic_rate": 100,
-						"qty": qty1,
-						"stock_uom": "_Test UOM 1",
-						"transfer_qty": qty1,
-						"uom": "_Test UOM 1",
-						"t_warehouse": warehouse or "_Test Warehouse 1 - _TC",
-						"cost_center": "_Test Cost Center - _TC"
-					},
-					{
-						"conversion_factor": 1.0,
-						"doctype": "Stock Entry Detail",
-						"item_code": "_Test Item Home Desktop 200",
-						"parentfield": "items",
-						"basic_rate": 100,
-						"qty": qty2,
-						"stock_uom": "_Test UOM 1",
-						"transfer_qty": qty2,
-						"uom": "_Test UOM 1",
-						"t_warehouse": warehouse or "_Test Warehouse 1 - _TC",
-						"cost_center": "_Test Cost Center - _TC"
-					}
-				]
-			})
+			"company": "_Test Company",
+			"doctype": "Stock Entry",
+			"posting_date": "2013-03-01",
+			"posting_time": "00:00:00",
+			"purpose": "Material Receipt",
+			"items": [
+				{
+					"conversion_factor": 1.0,
+					"doctype": "Stock Entry Detail",
+					"item_code": "_Test Item Home Desktop 100",
+					"parentfield": "items",
+					"basic_rate": 100,
+					"qty": qty1,
+					"stock_uom": "_Test UOM 1",
+					"transfer_qty": qty1,
+					"uom": "_Test UOM 1",
+					"t_warehouse": warehouse or "_Test Warehouse 1 - _TC",
+					"cost_center": "_Test Cost Center - _TC"
+				},
+				{
+					"conversion_factor": 1.0,
+					"doctype": "Stock Entry Detail",
+					"item_code": "_Test Item Home Desktop 200",
+					"parentfield": "items",
+					"basic_rate": 100,
+					"qty": qty2,
+					"stock_uom": "_Test UOM 1",
+					"transfer_qty": qty2,
+					"uom": "_Test UOM 1",
+					"t_warehouse": warehouse or "_Test Warehouse 1 - _TC",
+					"cost_center": "_Test Cost Center - _TC"
+				}
+			]
+		})
 
 		se.set_stock_entry_type()
 		se.insert()
@@ -198,14 +192,7 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.insert()
 		mr.submit()
 
-		# check if per complete is None
-		mr.load_from_db()
-		self.assertEqual(mr.per_ordered, 0)
-		self.assertEqual(mr.get("items")[0].ordered_qty, 0)
-		self.assertEqual(mr.get("items")[1].ordered_qty, 0)
-
 		# map a purchase order
-		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
 		po_doc = make_purchase_order(mr.name)
 		po_doc.supplier = "_Test Supplier"
 		po_doc.transaction_date = "2013-07-07"
@@ -278,8 +265,6 @@ class TestMaterialRequest(unittest.TestCase):
 
 		self.assertEqual(current_requested_qty_item1, existing_requested_qty_item1 + 54.0)
 		self.assertEqual(current_requested_qty_item2, existing_requested_qty_item2 + 3.0)
-
-		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 
 		# map a stock entry
 		se_doc = make_stock_entry(mr.name)
@@ -357,14 +342,7 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.insert()
 		mr.submit()
 
-		# check if per complete is None
-		mr.load_from_db()
-		self.assertEqual(mr.per_ordered, 0)
-		self.assertEqual(mr.get("items")[0].ordered_qty, 0)
-		self.assertEqual(mr.get("items")[1].ordered_qty, 0)
-
 		# map a stock entry
-		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 
 		se_doc = make_stock_entry(mr.name)
 		se_doc.update({
@@ -435,9 +413,6 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.insert()
 		mr.submit()
 
-		# map a stock entry
-		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
-
 		se_doc = make_stock_entry(mr.name)
 		se_doc.update({
 			"posting_date": "2013-03-01",
@@ -468,8 +443,6 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.insert()
 		mr.submit()
 
-		# map a stock entry
-		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 		se_doc = make_stock_entry(mr.name)
 		self.assertEqual(se_doc.get("items")[0].s_warehouse, "_Test Warehouse - _TC")
 
@@ -483,8 +456,6 @@ class TestMaterialRequest(unittest.TestCase):
 		return flt(frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse}, "indented_qty"))
 
 	def test_make_stock_entry_for_material_issue(self):
-		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
-
 		mr = frappe.copy_doc(test_records[0]).insert()
 
 		self.assertRaises(frappe.ValidationError, make_stock_entry,
@@ -503,8 +474,6 @@ class TestMaterialRequest(unittest.TestCase):
 			return flt(frappe.db.get_value("Bin", {"item_code": "_Test Item Home Desktop 100",
 				"warehouse": "_Test Warehouse - _TC"}, "indented_qty"))
 
-		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
-
 		existing_requested_qty = _get_requested_qty()
 
 		mr = frappe.copy_doc(test_records[0])
@@ -512,7 +481,7 @@ class TestMaterialRequest(unittest.TestCase):
 		mr.submit()
 
 		#testing bin value after material request is submitted
-		self.assertEqual(_get_requested_qty(), existing_requested_qty + 54.0)
+		self.assertEqual(_get_requested_qty(), existing_requested_qty - 54.0)
 
 		# receive items to allow issue
 		self._insert_stock_entry(60, 6, "_Test Warehouse - _TC")
@@ -563,9 +532,37 @@ class TestMaterialRequest(unittest.TestCase):
 			item_code= %s and warehouse= %s """, (mr.items[0].item_code, mr.items[0].warehouse))[0][0]
 		self.assertEqual(requested_qty, new_requested_qty)
 
-	def test_multi_uom_for_purchase(self):
-		from erpnext.stock.doctype.material_request.material_request import make_purchase_order
+	def test_requested_qty_multi_uom(self):
+		existing_requested_qty = self._get_requested_qty('_Test FG Item', '_Test Warehouse - _TC')
 
+		mr = make_material_request(item_code='_Test FG Item', material_request_type='Manufacture',
+			uom="_Test UOM 1", conversion_factor=12)
+		
+		requested_qty = self._get_requested_qty('_Test FG Item', '_Test Warehouse - _TC')
+
+		self.assertEqual(requested_qty, existing_requested_qty + 120)
+
+		work_order = raise_work_orders(mr.name)
+		wo = frappe.get_doc("Work Order", work_order[0])
+		wo.qty = 50
+		wo.wip_warehouse = "_Test Warehouse 1 - _TC"
+		wo.submit()
+
+		requested_qty = self._get_requested_qty('_Test FG Item', '_Test Warehouse - _TC')
+		self.assertEqual(requested_qty, existing_requested_qty + 70)
+
+		wo.cancel()
+
+		requested_qty = self._get_requested_qty('_Test FG Item', '_Test Warehouse - _TC')
+		self.assertEqual(requested_qty, existing_requested_qty + 120)
+
+		mr.reload()
+		mr.cancel()
+		requested_qty = self._get_requested_qty('_Test FG Item', '_Test Warehouse - _TC')
+		self.assertEqual(requested_qty, existing_requested_qty)
+
+
+	def test_multi_uom_for_purchase(self):
 		mr = frappe.copy_doc(test_records[0])
 		mr.material_request_type = 'Purchase'
 		item = mr.items[0]
@@ -607,8 +604,9 @@ class TestMaterialRequest(unittest.TestCase):
 		self.assertEqual(mr.per_ordered, 100)
 
 	def test_customer_provided_parts_mr(self):
-		from erpnext.stock.doctype.material_request.material_request import make_stock_entry
 		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
+		existing_requested_qty = self._get_requested_qty("_Test Customer", "_Test Warehouse - _TC")
+
 		mr = make_material_request(item_code='CUST-0987', material_request_type='Customer Provided')
 		se = make_stock_entry(mr.name)
 		se.insert()
@@ -617,7 +615,10 @@ class TestMaterialRequest(unittest.TestCase):
 		self.assertEqual(se.get("items")[0].material_request, mr.name)
 		mr = frappe.get_doc("Material Request", mr.name)
 		mr.submit()
+		current_requested_qty = self._get_requested_qty("_Test Customer", "_Test Warehouse - _TC")
+
 		self.assertEqual(mr.per_ordered, 100)
+		self.assertEqual(existing_requested_qty, current_requested_qty)
 
 def make_material_request(**args):
 	args = frappe._dict(args)
@@ -628,6 +629,8 @@ def make_material_request(**args):
 	mr.append("items", {
 		"item_code": args.item_code or "_Test Item",
 		"qty": args.qty or 10,
+		"uom": args.uom or "_Test UOM",
+		"conversion_factor": args.conversion_factor or 1,
 		"schedule_date": args.schedule_date or today(),
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"cost_center": args.cost_center or "_Test Cost Center - _TC"

@@ -355,8 +355,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 					'accounts': [{
 						'company_name': '_Test Company',
 						'fixed_asset_account': '_Test Fixed Asset - _TC',
-						'accumulated_depreciation_account': 'Depreciation - _TC',
-						'depreciation_expense_account': 'Depreciation - _TC'
+						'accumulated_depreciation_account': '_Test Accumulated Depreciations - _TC',
+						'depreciation_expense_account': '_Test Depreciation - _TC'
 					}]
 				}).insert()
 

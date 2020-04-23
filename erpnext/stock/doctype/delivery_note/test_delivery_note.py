@@ -21,6 +21,7 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation \
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order, create_dn_against_so
 from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
 from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
+from erpnext.stock.doctype.item.test_item import create_item
 
 class TestDeliveryNote(unittest.TestCase):
 	def setUp(self):
@@ -671,7 +672,7 @@ def create_delivery_note(**args):
 		"item_code": args.item or args.item_code or "_Test Item",
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"qty": args.qty or 1,
-		"rate": args.rate or 100,
+		"rate": args.rate if args.get("rate") is not None else 100,
 		"conversion_factor": 1.0,
 		"allow_zero_valuation_rate": args.allow_zero_valuation_rate or 1,
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",

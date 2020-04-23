@@ -46,6 +46,7 @@ class SellingController(StockController):
 		set_default_income_account_for_item(self)
 		self.set_customer_address()
 		self.validate_for_duplicate_items()
+		self.validate_target_warehouse()
 
 	def set_missing_values(self, for_validate=False):
 
@@ -147,13 +148,6 @@ class SellingController(StockController):
 
 		if sales_team and total != 100.0:
 			throw(_("Total allocated percentage for sales team should be 100"))
-
-	def validate_order_type(self):
-		valid_types = ["Sales", "Maintenance", "Shopping Cart"]
-		if not self.order_type:
-			self.order_type = "Sales"
-		elif self.order_type not in valid_types:
-			throw(_("Order Type must be one of {0}").format(comma_or(valid_types)))
 
 	def validate_max_discount(self):
 		for d in self.get("items"):
@@ -409,6 +403,14 @@ class SellingController(StockController):
 				else:
 					chk_dupl_itm.append(f)
 
+	def validate_target_warehouse(self):
+		items = self.get("items") + (self.get("packed_items") or [])
+
+		for d in items:
+			if d.get("target_warehouse") and d.get("warehouse") == d.get("target_warehouse"):
+				warehouse = frappe.bold(d.get("target_warehouse"))
+				frappe.throw(_("Row {0}: Delivery Warehouse ({1}) and Customer Warehouse ({2}) can not be same")
+					.format(d.idx, warehouse, warehouse))
 
 	def validate_items(self):
 		# validate items to see if they have is_sales_item enabled
