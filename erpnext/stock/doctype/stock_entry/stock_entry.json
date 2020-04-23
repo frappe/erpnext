@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-04-09 11:43:55",
@@ -12,7 +13,6 @@
   "stock_entry_type",
   "outgoing_stock_entry",
   "purpose",
-  "company",
   "work_order",
   "purchase_order",
   "delivery_note_no",
@@ -20,6 +20,7 @@
   "pick_list",
   "purchase_receipt_no",
   "col2",
+  "company",
   "posting_date",
   "posting_time",
   "set_posting_time",
@@ -65,6 +66,7 @@
   "dimension_col_break",
   "printing_settings",
   "select_print_heading",
+  "print_settings_col_break",
   "letter_head",
   "more_info",
   "is_opening",
@@ -291,6 +293,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "description": "Sets 'Source Warehouse' in each row of the items table.",
    "fieldname": "from_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -320,6 +323,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Sets 'Target Warehouse' in each row of the items table.",
    "fieldname": "to_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -622,12 +626,17 @@
    "label": "Pick List",
    "options": "Pick List",
    "read_only": 1
+  },
+  {
+   "fieldname": "print_settings_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2019-09-27 14:38:20.801420",
+ "links": [],
+ "modified": "2020-04-23 12:56:52.881752",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

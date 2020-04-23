@@ -215,9 +215,7 @@ frappe.ui.form.on('Stock Entry', {
 					source_doctype: "Material Request",
 					target: frm,
 					date_field: "schedule_date",
-					setters: {
-						company: frm.doc.company,
-					},
+					setters: {},
 					get_query_filters: {
 						docstatus: 1,
 						material_request_type: ["in", ["Material Transfer", "Material Issue"]],
