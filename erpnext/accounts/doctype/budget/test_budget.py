@@ -13,7 +13,7 @@ from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journ
 
 class TestBudget(unittest.TestCase):
 	def test_monthly_budget_crossed_ignore(self):
-		set_total_expense_zero("2013-02-28", "Cost Center")
+		set_total_expense_zero("2013-02-28", "cost_center")
 
 		budget = make_budget(budget_against="Cost Center")
 
@@ -26,7 +26,7 @@ class TestBudget(unittest.TestCase):
 		budget.cancel()
 
 	def test_monthly_budget_crossed_stop1(self):
-		set_total_expense_zero("2013-02-28", "Cost Center")
+		set_total_expense_zero("2013-02-28", "cost_center")
 
 		budget = make_budget(budget_against="Cost Center")
 
@@ -41,7 +41,7 @@ class TestBudget(unittest.TestCase):
 		budget.cancel()
 
 	def test_exception_approver_role(self):
-		set_total_expense_zero("2013-02-28", "Cost Center")
+		set_total_expense_zero("2013-02-28", "cost_center")
 
 		budget = make_budget(budget_against="Cost Center")
 
@@ -114,7 +114,7 @@ class TestBudget(unittest.TestCase):
 		budget.cancel()
 
 	def test_monthly_budget_crossed_stop2(self):
-		set_total_expense_zero("2013-02-28", "Project")
+		set_total_expense_zero("2013-02-28", "project")
 
 		budget = make_budget(budget_against="Project")
 
@@ -129,7 +129,7 @@ class TestBudget(unittest.TestCase):
 		budget.cancel()
 
 	def test_yearly_budget_crossed_stop1(self):
-		set_total_expense_zero("2013-02-28", "Cost Center")
+		set_total_expense_zero("2013-02-28", "cost_center")
 
 		budget = make_budget(budget_against="Cost Center")
 
@@ -141,7 +141,7 @@ class TestBudget(unittest.TestCase):
 		budget.cancel()
 
 	def test_yearly_budget_crossed_stop2(self):
-		set_total_expense_zero("2013-02-28", "Project")
+		set_total_expense_zero("2013-02-28", "project")
 
 		budget = make_budget(budget_against="Project")
 
@@ -153,7 +153,7 @@ class TestBudget(unittest.TestCase):
 		budget.cancel()
 
 	def test_monthly_budget_on_cancellation1(self):
-		set_total_expense_zero("2013-02-28", "Cost Center")
+		set_total_expense_zero("2013-02-28", "cost_center")
 
 		budget = make_budget(budget_against="Cost Center")
 
@@ -177,7 +177,7 @@ class TestBudget(unittest.TestCase):
 		budget.cancel()
 
 	def test_monthly_budget_on_cancellation2(self):
-		set_total_expense_zero("2013-02-28", "Project")
+		set_total_expense_zero("2013-02-28", "project")
 
 		budget = make_budget(budget_against="Project")
 
@@ -201,8 +201,8 @@ class TestBudget(unittest.TestCase):
 		budget.cancel()
 
 	def test_monthly_budget_against_group_cost_center(self):
-		set_total_expense_zero("2013-02-28", "Cost Center")
-		set_total_expense_zero("2013-02-28", "Cost Center", "_Test Cost Center 2 - _TC")
+		set_total_expense_zero("2013-02-28", "cost_center")
+		set_total_expense_zero("2013-02-28", "cost_center", "_Test Cost Center 2 - _TC")
 
 		budget = make_budget(budget_against="Cost Center", cost_center="_Test Company - _TC")
 		frappe.db.set_value("Budget", budget.name, "action_if_accumulated_monthly_budget_exceeded", "Stop")
@@ -241,25 +241,30 @@ class TestBudget(unittest.TestCase):
 
 
 def set_total_expense_zero(posting_date, budget_against_field=None, budget_against_CC=None):
-	if budget_against_field == "Project":
+	if budget_against_field == "project":
 		budget_against = "_Test Project"
 	else:
 		budget_against = budget_against_CC or "_Test Cost Center - _TC"
-	existing_expense = get_actual_expense(frappe._dict({
+
+	args = frappe._dict({
 		"account": "_Test Account Cost for Goods Sold - _TC",
 		"cost_center": "_Test Cost Center - _TC",
 		"monthly_end_date": posting_date,
 		"company": "_Test Company",
 		"fiscal_year": "_Test Fiscal Year 2013",
 		"budget_against_field": budget_against_field,
-		"budget_against": budget_against
-	}))
+	})
+
+	if not args.get(budget_against_field):
+		args[budget_against_field] = budget_against
+
+	existing_expense = get_actual_expense(args)
 
 	if existing_expense:
-		if budget_against_field == "Cost Center":
+		if budget_against_field == "cost_center":
 			make_journal_entry("_Test Account Cost for Goods Sold - _TC",
 			"_Test Bank - _TC", -existing_expense, "_Test Cost Center - _TC", posting_date="2013-02-28", submit=True)
-		elif budget_against_field == "Project":
+		elif budget_against_field == "project":
 			make_journal_entry("_Test Account Cost for Goods Sold - _TC",
 			"_Test Bank - _TC", -existing_expense, "_Test Cost Center - _TC", submit=True, project="_Test Project", posting_date="2013-02-28")
 
