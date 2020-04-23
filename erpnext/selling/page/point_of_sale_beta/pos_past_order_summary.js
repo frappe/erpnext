@@ -122,7 +122,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
         return `<div class="flex flex-col items-start justify-end pr-4">
                     <div class="text-lg text-bold pt-2">${doc.customer}</div>
-                    <div class="text-grey">ronalds@erpnext.com</div>
+                    <div class="text-grey">${this.customer_email}</div>
                     <div class="text-grey mt-auto">Sold by: ${doc.owner}</div>
                 </div>
                 <div class="flex flex-col flex-1 items-end justify-between">
@@ -269,6 +269,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
         });
 
         this.$summary_container.on('click', '.email-btn', () => {
+            this.email_dialog.fields_dict.email_id.set_value(this.customer_email);
             this.email_dialog.show();
         });
 
@@ -401,8 +402,11 @@ erpnext.PointOfSale.PastOrderSummary = class {
     }
 
     attach_basic_info(doc) {
-        const upper_section_dom = this.get_upper_section_html(doc);
-        this.$upper_section.html(upper_section_dom);
+        frappe.db.get_value('Customer', this.doc.customer, 'email_id').then(({ message }) => {
+            this.customer_email = message.email_id || '';
+            const upper_section_dom = this.get_upper_section_html(doc);
+            this.$upper_section.html(upper_section_dom);
+        });
     }
 
     attach_items_info(doc) {

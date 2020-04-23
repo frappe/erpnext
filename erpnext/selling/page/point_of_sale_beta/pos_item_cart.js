@@ -111,7 +111,6 @@ erpnext.PointOfSale.ItemCart = class {
     make_cart_numpad() {
 		this.$numpad_section = this.$component.find('.numpad-section');
 
-		const me = this;
 		this.number_pad = new erpnext.PointOfSale.NumberPad({
 			wrapper: this.$numpad_section,
 			events: {
@@ -132,6 +131,13 @@ erpnext.PointOfSale.ItemCart = class {
 			],
 			fieldnames_map: { 'Quantity': 'qty', 'Discount': 'discount_percentage' }
 		})
+
+		this.$numpad_section.prepend(
+			`<div class="flex mb-2 justify-between">
+				<span class="numpad-net-total"></span>
+				<span class="numpad-grand-total"></span>
+			</div>`
+		)
 
 		this.$numpad_section.append(
 			`<div class="numpad-btn flex items-center justify-center h-16 text-center text-md no-select pointer 
@@ -231,11 +237,11 @@ erpnext.PointOfSale.ItemCart = class {
 
 		function get_customer_image() {
 			if (image) {
-				return `<div class="icon flex items-center justify-center w-10 h-10 rounded bg-light-grey mr-4 text-grey-200">
+				return `<div class="icon flex items-center justify-center w-12 h-12 rounded bg-light-grey mr-4 text-grey-200">
 							<img class="h-full" src="${image}" alt="${image}" style="object-fit: cover;">
 						</div>`
 			} else {
-				return `<div class="icon flex items-center justify-center w-10 h-10 rounded bg-light-grey mr-4 text-grey-200">
+				return `<div class="icon flex items-center justify-center w-12 h-12 rounded bg-light-grey mr-4 text-grey-200">
 							${frappe.get_abbr(customer)}
 						</div>`
 			}
@@ -280,6 +286,8 @@ erpnext.PointOfSale.ItemCart = class {
 				<div class="text-md text-dark-grey text-bold">${format_currency(value, currency)}</div>
 			</div>`
 		)
+
+		this.$numpad_section.find('.numpad-net-total').html(`Net Total: <span class="text-bold">${format_currency(value, currency)}</span>`)
     }
     
     render_grand_total(value) {
@@ -292,6 +300,8 @@ erpnext.PointOfSale.ItemCart = class {
 				<div class="text-md text-dark-grey text-bold">${format_currency(value, currency)}</div>
 			</div>`
 		)
+
+		this.$numpad_section.find('.numpad-grand-total').html(`Grand Total: <span class="text-bold">${format_currency(value, currency)}</span>`)
 	}
 
 	render_taxes(value, taxes) {
@@ -457,6 +467,7 @@ erpnext.PointOfSale.ItemCart = class {
 			return;
 		} else {
 			this.numpad_value = current_action === 'delete' ? this.numpad_value.slice(0, -1) : this.numpad_value + current_action;
+			this.numpad_value = this.numpad_value || 0;
 		}
 
         const first_click_event_is_not_field_edit = !action_is_field_edit && first_click_event;
@@ -467,7 +478,15 @@ erpnext.PointOfSale.ItemCart = class {
 				message: __('Please select a field to edit from numpad')
 			});
 			return;
-        }
+		}
+		
+		if (flt(this.numpad_value) > 100 && this.prev_action === 'discount_percentage') {
+			frappe.show_alert({
+				message: __('Discount cannot be greater than 100%'),
+				indicator: 'orange'
+			});
+			this.numpad_value = current_action;
+		}
 
         this.events.numpad_event(this.numpad_value, this.prev_action);
     }

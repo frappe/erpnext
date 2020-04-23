@@ -31,7 +31,7 @@ erpnext.PointOfSale.ItemDetails = class {
 						<div class="item-description text-md-0 text-grey-200"></div>
 						<div class="item-price text-xl font-bold"></div>
 					</div>
-					<div class="w-46 h-46 bg-light-grey rounded ml-4"></div>
+					<div class="item-image w-46 h-46 bg-light-grey rounded ml-4"></div>
 				</div>
 				<div class="discount-section flex items-center"></div>
 				<div class="text-grey mt-4 mb-6">STOCK DETAILS</div>
@@ -41,7 +41,8 @@ erpnext.PointOfSale.ItemDetails = class {
 
 		this.$item_name = this.$component.find('.item-name');
 		this.$item_description = this.$component.find('.item-description');
-        this.$item_price = this.$component.find('.item-price');
+		this.$item_price = this.$component.find('.item-price');
+		this.$item_image = this.$component.find('.item-image');
 		this.$form_container = this.$component.find('.form-container');
 		this.$dicount_section = this.$component.find('.discount-section');
     }
@@ -72,7 +73,7 @@ erpnext.PointOfSale.ItemDetails = class {
     }
     
     render_dom(item) {
-        let { item_name, description, price_list_rate } = item;
+        let { item_name, description, image, price_list_rate } = item;
 
 		function get_description_html() {
 			if (description) {
@@ -85,6 +86,9 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.$item_name.html(item_name);
 		this.$item_description.html(get_description_html());
 		this.$item_price.html(format_currency(price_list_rate, this.currency));
+		this.$item_image.html(
+			`<img class="h-full" src="${image}" alt="${image}" style="object-fit: cover;">`
+		);
     }
     
     render_discount_dom(item) {
@@ -177,13 +181,6 @@ erpnext.PointOfSale.ItemDetails = class {
 
 		if (this.discount_percentage_control) {
 			this.discount_percentage_control.df.onchange = function() {
-				if (this.value > 100) {
-					frappe.show_alert({
-						message: __('Discount cannot be greater than 100%'),
-						indicator: 'orange'
-					});
-					return me.discount_percentage_control.set_value(0);
-				}
 				if (this.value) {
 					me.events.form_updated(me.doctype, me.name, 'discount_percentage', this.value).then(() => {
 						const item_row = frappe.get_doc(me.doctype, me.name);

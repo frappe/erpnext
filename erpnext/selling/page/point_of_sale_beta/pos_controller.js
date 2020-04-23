@@ -444,43 +444,48 @@ erpnext.PointOfSale.Controller = class {
 
 	async on_cart_update(args) {
 		frappe.dom.freeze();
-		let { field, value, item } = args;
-		const { item_code, batch_no } = item;
-		let item_row = this.get_item_from_frm(item_code, batch_no);
+		try {
+			let { field, value, item } = args;
+			const { item_code, batch_no } = item;
+			let item_row = this.get_item_from_frm(item_code, batch_no);
 
-		if (item_row) {
-			field === 'qty' && (value = flt(value));
+			if (item_row) {
+				field === 'qty' && (value = flt(value));
 
-			if (field === 'qty' && value > 0) await this.check_stock_availability(item_row, this.frm.doc.set_warehouse);
-			
-			if (this.is_current_item_being_edited(item_row)) {
-				await frappe.model.set_value(item_row.doctype, item_row.name, field, value);
-				this.update_cart_html(item_row);
+				if (field === 'qty' && value > 0) await this.check_stock_availability(item_row, this.frm.doc.set_warehouse);
+				
+				if (this.is_current_item_being_edited(item_row)) {
+					await frappe.model.set_value(item_row.doctype, item_row.name, field, value);
+					this.update_cart_html(item_row);
+					frappe.dom.unfreeze()
+				}
+
+			} else {
+				if (!this.frm.doc.customer) {
+					frappe.dom.unfreeze();
+					frappe.show_alert({
+						message: __('You must select a customer before adding an item.'),
+						indicator: 'orange'
+					})
+					return;
+				}
+
+				const args = { item_code: item_code, batch_no, [field]: value };
+				if (field === 'serial_no') args['qty'] = value.split(`\n`).length || 0;
+
+				item_row = this.frm.add_child('items', args);
+
+				if (field === 'qty' && value !== 0) await this.check_stock_availability(item_row, this.frm.doc.set_warehouse);
+
+				await this.trigger_new_item_events(item_row);
+
+				this.show_serial_batch_selector(item_row),
+				this.update_cart_html(item_row),
 				frappe.dom.unfreeze()
-			}
-
-		} else {
-			if (!this.frm.doc.customer) {
-				frappe.dom.unfreeze();
-				frappe.show_alert({
-					message: __('You must select a customer before adding an item.'),
-					indicator: 'orange'
-				})
-				return;
-			}
-
-			const args = { item_code: item_code, batch_no, [field]: value };
-			if (field === 'serial_no') args['qty'] = value.split(`\n`).length || 0;
-
-			item_row = this.frm.add_child('items', args);
-
-			if (field === 'qty' && value !== 0) await this.check_stock_availability(item_row, this.frm.doc.set_warehouse);
-
-			await this.trigger_new_item_events(item_row);
-
-			this.show_serial_batch_selector(item_row),
-			this.update_cart_html(item_row),
-			frappe.dom.unfreeze()
+			}	
+		} catch (error) {
+			console.log(error);
+			frappe.dom.unfreeze();
 		}
 	}
 
@@ -559,7 +564,7 @@ erpnext.PointOfSale.Controller = class {
 		} else {
 			const field_control = this.item_details[`${field_or_action}_control`];
 			if (!field_control) return;
-			value && field_control.set_value(value);
+			value != "" && field_control.set_value(value);
 		}
 	}
 
