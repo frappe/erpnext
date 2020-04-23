@@ -174,7 +174,8 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				read_only: 0,
 				fieldtype:'Date',
 				label: __('Release Date'),
-				default: me.frm.doc.release_date
+				default: me.frm.doc.release_date,
+				reqd: 1
 			},
 			{
 				fieldname: 'hold_comment',
