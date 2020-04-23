@@ -1,0 +1,109 @@
+{
+ "actions": [],
+ "autoname": "field:assessment_name",
+ "creation": "2020-04-19 19:33:13.204707",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "assessment_name",
+  "section_break_2",
+  "parameters",
+  "assessment_scale_details_section",
+  "scale_min",
+  "scale_max",
+  "column_break_8",
+  "assessment_description"
+ ],
+ "fields": [
+  {
+   "fieldname": "parameters",
+   "fieldtype": "Table",
+   "label": "Parameters",
+   "options": "Patient Assessment Detail"
+  },
+  {
+   "fieldname": "assessment_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Assessment Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break",
+   "label": "Assessment Parameters"
+  },
+  {
+   "fieldname": "assessment_scale_details_section",
+   "fieldtype": "Section Break",
+   "label": "Assessment Scale"
+  },
+  {
+   "fieldname": "scale_min",
+   "fieldtype": "Int",
+   "label": "Scale Minimum"
+  },
+  {
+   "fieldname": "scale_max",
+   "fieldtype": "Int",
+   "label": "Scale Maximum"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "assessment_description",
+   "fieldtype": "Small Text",
+   "label": "Assessment Description"
+  }
+ ],
+ "links": [],
+ "modified": "2020-04-21 13:14:19.075167",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Patient Assessment Template",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Healthcare Administrator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Physician",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
