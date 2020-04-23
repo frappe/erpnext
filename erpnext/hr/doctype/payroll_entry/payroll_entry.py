@@ -234,7 +234,9 @@ class PayrollEntry(Document):
 						"debit_in_account_currency": flt(amount, precision),
 						"party_type": '',
 						"cost_center": self.cost_center,
-						"project": self.project
+						"project": self.project,
+						"reference_type": self.doctype,
+						"reference_name": self.name
 					})
 
 			# Deductions
@@ -245,7 +247,9 @@ class PayrollEntry(Document):
 						"credit_in_account_currency": flt(amount, precision),
 						"cost_center": self.cost_center,
 						"party_type": '',
-						"project": self.project
+						"project": self.project,
+						"reference_type": self.doctype,
+						"reference_name": self.name
 					})
 
 			# Payable amount
@@ -253,6 +257,8 @@ class PayrollEntry(Document):
 				"account": default_payroll_payable_account,
 				"credit_in_account_currency": flt(payable_amount, precision),
 				"party_type": '',
+				"reference_type": self.doctype,
+				"reference_name": self.name
 			})
 
 			journal_entry.set("accounts", accounts)
