@@ -499,7 +499,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							conversion_factor: item.conversion_factor,
 							weight_per_unit: item.weight_per_unit,
 							weight_uom: item.weight_uom,
-							uom : item.uom,
 							manufacturer: item.manufacturer,
 							stock_uom: item.stock_uom,
 							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
@@ -550,6 +549,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 										$.each(r.message, function(k, v) {
 											if(!d[k]) d[k] = v;
 										});
+
+										if (d.has_batch_no && d.has_serial_no) {
+											d.batch_no = undefined;
+										}
 
 										erpnext.show_serial_batch_selector(me.frm, d, (item) => {
 											me.frm.script_manager.trigger('qty', item.doctype, item.name);
@@ -1430,6 +1433,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			for (let key in free_item_data) {
 				row_to_modify[key] = free_item_data[key];
 			}
+		} if (items && items.length && free_item_data) {
+			items[0].qty = free_item_data.qty
 		}
 	},
 
