@@ -1,5 +1,5 @@
 import frappe
-
+from frappe.utils import nowdate
 
 def execute():
 	# fixes status of quotations which have status 'Expired' despite having valid sales order created
