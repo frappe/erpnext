@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt
-from erpnext.erpnext_integrations.doctype.affirm_settings.affirm_settings import build_checkout_data, get_api_config
+from erpnext.erpnext_integrations.doctype.affirm_settings.affirm_settings import create_order, get_api_config
 
 no_cache = 1
 no_sitemap = 1
@@ -20,7 +20,7 @@ def get_context(context):
 		for key in expected_keys:
 			checkout[key] = frappe.form_dict[key]
 
-		context['checkout_data'] = build_checkout_data(**checkout)
+		context['checkout_data'] = create_order(**checkout)
 		return context
 
 	else:

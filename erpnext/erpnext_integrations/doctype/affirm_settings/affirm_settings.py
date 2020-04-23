@@ -79,97 +79,9 @@ class AffirmSettings(Document):
 		if currency not in self.supported_currencies:
 			frappe.throw(_("Please select another payment method. Affirm does not support transactions in currency '{0}'").format(currency))
 
-
-
-@frappe.whitelist(allow_guest=1)
-def affirm_callback(checkout_token, reference_doctype, reference_docname):
-	frappe.log("""[AFFIRM] Affirm callback request: 
-		checkout_token: {0}
-		reference_doctype: {1}
-		reference_docname: {2}
-	""".format(checkout_token, reference_doctype, reference_docname))
-
-	affirm_settings = get_api_config()
-	redirect_url = "/integrations/payment-failed"
-
-	authorization_response = requests.post(
-		"{api_url}/charges".format(**affirm_settings),
-		auth=HTTPBasicAuth(
-			affirm_settings.get('public_api_key'),
-			affirm_settings.get('private_api_key')),
-		json={"checkout_token": checkout_token})
-
-	affirm_data = authorization_response.json()
-	frappe.log("Response: {}".format(json.dumps(affirm_data)))
-
-	if affirm_data:
-		charge_id = affirm_data.get('id')
-
-		# check if callback already happened
-		if affirm_data.get("status_code") == 400 and affirm_data.get("code") == "checkout-token-used":
-			frappe.log("	SUCCESS via checkout-token-used")
-			charge_id = affirm_data.get('charge_id')
-			redirect_url = '/integrations/payment-success'
-		elif affirm_data.get("status_code") == 400 and affirm_data.get("type") == "invalid_request":
-			frappe.log_error("	ERROR: {}".format(affirm_data.get("message")))
-			frappe.msgprint(affirm_data.get("message"))
-			redirect_url = "/cart"
-		else:
-			pr = frappe.get_doc(reference_doctype, reference_docname)
-
-			frappe.log("Updating Sales Order {}".format(affirm_data.get('order_id')))
-			order_doc = frappe.get_doc(pr.reference_doctype, affirm_data.get('order_id'))
-			order_doc.affirm_id = charge_id
-			order_doc.flags.ignore_permissions = 1
-			order_doc.save()
-
-			# on awc you can skip creating an actual payment request and just
-			# submit the sales order with this flag
-			pr.flags.skip_payment_request = True
-			pr.on_payment_authorized("Authorized")
-
-			frappe.db.commit()
-
-			redirect_url = '/integrations/payment-success'
-	frappe.local.response["type"] = "redirect"
-	frappe.local.response["location"] = get_url(redirect_url)
-
-	frappe.log("	Redirect: {}".format(frappe.local.response["location"]))
-
-	return ""
-
-@frappe.whitelist(allow_guest=1)
-def get_public_config():
-	config = get_api_config()
-	del config['private_api_key'];
-
-	return config
-
-def get_api_config():
-	settings = frappe.get_doc("Affirm Settings", "Affirm Settings")
-
-	if settings.is_sandbox:
-		values = dict(
-			public_api_key = settings.public_sandbox_api_key,
-			private_api_key = settings.get_password("private_sandbox_api_key"),
-			checkout_url = settings.sandbox_checkout_url,
-			api_url = settings.sandbox_api_url
-		)
-		return values
-	else:
-		values = dict(
-			public_api_key = settings.public_api_key,
-			private_api_key = settings.get_password("private_api_key"),
-			checkout_url = settings.live_checkout_url,
-			api_url = settings.live_api_url
-		)
-		return values
-
-def build_checkout_data(**kwargs):
-
+def create_order(**kwargs):
 	full_name = kwargs.get("payer_name")
 
-	# Dirty Hack
 	# Affirm needs Full Name to have atleast 2 words
 	if len(full_name.split()) == 1:
 		full_name = full_name + " ."
@@ -233,7 +145,7 @@ def build_checkout_data(**kwargs):
 			"user_confirmation_url": get_url(
 				(
 					"/api/method/erpnext.erpnext_integrations"
-					".doctype.affirm_settings.affirm_settings.affirm_callback"
+					".doctype.affirm_settings.affirm_settings.process_payment_callback"
 					"?reference_doctype={0}&reference_docname={1}"
 				).format(ref_doc.doctype, ref_doc.name)
 			),
@@ -282,8 +194,78 @@ def build_checkout_data(**kwargs):
 	create_request_log(checkout_data, "Host", "Affirm")
 	return checkout_data
 
+@frappe.whitelist(allow_guest=1)
+def process_payment_callback(checkout_token, reference_doctype, reference_docname):
+	""" Once the payment done it will send response"""
+	data= {
+		"checkout_token":checkout_token,
+		"reference_doctype":reference_doctype,
+		"reference_docname":reference_docname
+	}
+	integration_request = create_request_log(data, "Host", "Affirm")
+
+	affirm_settings = get_api_config()
+	authorization_response = requests.post(
+		"{api_url}/charges".format(**affirm_settings),
+		auth=HTTPBasicAuth(
+			affirm_settings.get('public_api_key'),
+			affirm_settings.get('private_api_key')),
+		json={"checkout_token": checkout_token})
+
+	affirm_data = authorization_response.json()
+	integration_request = frappe.get_doc("Integration Request", integration_request.name)
+	integration_request.update_status(affirm_data, "Authorized")
+	# frappe.log("Response: {}".format(json.dumps(affirm_data)))
+
+	if affirm_data:
+		authorize_payment(affirm_data, reference_doctype, reference_docname, integration_request)
+		
+def authorize_payment(affirm_data, reference_doctype, reference_docname, integration_request):
+	redirect_url = "/integrations/payment-failed"
+
+	# check if callback already happened
+	if affirm_data.get("status_code") == 400 and affirm_data.get("code") == "checkout-token-used":
+		frappe.log("	SUCCESS via checkout-token-used")
+		integration_request.update_status(affirm_data, "Completed")
+		redirect_url = '/integrations/payment-success'
+	elif affirm_data.get("status_code") == 400 and affirm_data.get("type") == "invalid_request":
+		integration_request.update_status(affirm_data, "Failed")
+		frappe.log_error("	ERROR: {}".format(affirm_data.get("message")))
+		frappe.msgprint(affirm_data.get("message"))
+		redirect_url = "/cart"
+	else:
+		payment_successful(affirm_data, reference_doctype, reference_docname, integration_request)
+
+	frappe.local.response["type"] = "redirect"
+	frappe.local.response["location"] = get_url(redirect_url)
+
+	frappe.log("	Redirect: {}".format(frappe.local.response["location"]))
+
+	return "" 
+
+def payment_successful(affirm_data, reference_doctype, reference_docname, integration_request):
+	charge_id = affirm_data.get('id')
+	payment_request = frappe.get_doc(reference_doctype, reference_docname)
+	order_doc = frappe.get_doc(payment_request.reference_doctype, affirm_data.get('order_id'))
+	order_doc.affirm_id = charge_id
+	order_doc.flags.ignore_permissions = 1
+	order_doc.save()
+
+	# on awc you can skip creating an actual payment request and just
+	# submit the sales order with this flag
+	payment_request.flags.skip_payment_request = True
+	payment_request.on_payment_authorized("Authorized")
+
+	frappe.db.commit()
+	integration_request.update_status(affirm_data, "Completed")
+	redirect_url = '/integrations/payment-success'
+	frappe.local.response["type"] = "redirect"
+	frappe.local.response["location"] = get_url(redirect_url)
+
+
 @frappe.whitelist()
 def capture_payment(affirm_id, sales_order):
+	integration_request = create_request_log(affirm_id, "Host", "Affirm")
 	affirm_settings = get_api_config()
 	authorization_response = requests.post(
 		"{0}/charges/{1}/capture".format(affirm_settings.get("api_url"), affirm_id),
@@ -294,12 +276,45 @@ def capture_payment(affirm_id, sales_order):
 	if authorization_response.status_code==200:
 		affirm_data = authorization_response.json()
 		#make payment entry agianst Sales Order
-		payment_entry = get_payment_entry(dt="Sales Order", dn=sales_order, bank_amount=affirm_data.get("amount"))
-		payment_entry.reference_no = affirm_data.get("transaction_id")
-		payment_entry.reference_date = getdate(affirm_data.get("created"))
-		payment_entry.submit()
+		integration_request.update_status(affirm_data, "Authorized")		
+		make_so_payment_entry(affirm_data, sales_order, integration_request)
 	else:
+		integration_request.update_status(affirm_data, "Failed")
 		frappe.throw("Something went wrong.")
+
+def make_so_payment_entry(affirm_data, sales_order, integration_request):
+	payment_entry = get_payment_entry(dt="Sales Order", dn=sales_order, bank_amount=affirm_data.get("amount"))
+	payment_entry.reference_no = affirm_data.get("transaction_id")
+	payment_entry.reference_date = getdate(affirm_data.get("created"))
+	payment_entry.submit()
+	integration_request.update_status(affirm_data, "Completed")
+
+@frappe.whitelist(allow_guest=1)
+def get_public_config():
+	config = get_api_config()
+	del config['private_api_key'];
+
+	return config
+
+def get_api_config():
+	settings = frappe.get_doc("Affirm Settings", "Affirm Settings")
+
+	if settings.is_sandbox:
+		values = dict(
+			public_api_key = settings.public_sandbox_api_key,
+			private_api_key = settings.get_password("private_sandbox_api_key"),
+			checkout_url = settings.sandbox_checkout_url,
+			api_url = settings.sandbox_api_url
+		)
+		return values
+	else:
+		values = dict(
+			public_api_key = settings.public_api_key,
+			private_api_key = settings.get_password("private_api_key"),
+			checkout_url = settings.live_checkout_url,
+			api_url = settings.live_api_url
+		)
+		return values
 
 def convert_to_cents(amount):
 	return cint(amount * 100)
