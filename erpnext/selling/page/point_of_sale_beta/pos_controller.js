@@ -71,9 +71,13 @@ erpnext.PointOfSale.Controller = class {
 		this.company = data.company;
 		this.pos_profile = data.pos_profile;
 
+		frappe.db.get_value('Stock Settings', undefined, 'allow_negative_stock').then(({ message }) => {
+			this.allow_negative_stock = message.allow_negative_stock || false;
+		})
+
 		this.page.set_title_sub(
 			`<span class="indicator orange">
-				<a class="text-muted" href="#Form/POS%20Opening%20Voucher/${this.pos_opening}">
+				<a class="text-muted" href="#Form/POS%20Opening%20Entry/${this.pos_opening}">
 					Opened at ${moment(data.period_start_date).format("Do MMMM, h:mma")}
 				</a>
 			</span>`);
@@ -148,7 +152,7 @@ erpnext.PointOfSale.Controller = class {
 			voucher.pos_profile = me.frm.doc.pos_profile;
 			voucher.user = frappe.session.user;
 			voucher.company = me.frm.doc.company;
-			voucher.pos_opening_voucher = this.pos_opening;
+			voucher.pos_opening_entry = this.pos_opening;
 			voucher.period_end_date = frappe.datetime.now_datetime();
 			voucher.posting_date = frappe.datetime.now_date();
 			frappe.set_route('Form', 'POS Closing Entry', voucher.name);
@@ -452,7 +456,8 @@ erpnext.PointOfSale.Controller = class {
 			if (item_row) {
 				field === 'qty' && (value = flt(value));
 
-				if (field === 'qty' && value > 0) await this.check_stock_availability(item_row, this.frm.doc.set_warehouse);
+				if (field === 'qty' && value > 0 && !this.allow_negative_stock)
+					await this.check_stock_availability(item_row, this.frm.doc.set_warehouse);
 				
 				if (this.is_current_item_being_edited(item_row)) {
 					await frappe.model.set_value(item_row.doctype, item_row.name, field, value);
@@ -475,7 +480,8 @@ erpnext.PointOfSale.Controller = class {
 
 				item_row = this.frm.add_child('items', args);
 
-				if (field === 'qty' && value !== 0) await this.check_stock_availability(item_row, this.frm.doc.set_warehouse);
+				if (field === 'qty' && value !== 0 && !this.allow_negative_stock)
+					await this.check_stock_availability(item_row, this.frm.doc.set_warehouse);
 
 				await this.trigger_new_item_events(item_row);
 

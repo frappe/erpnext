@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2020-01-24 15:29:29.933693",
@@ -245,7 +246,7 @@
    "read_only": 1
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "is_pos",
    "fieldtype": "Check",
    "label": "Include Payment (POS)",
@@ -1576,7 +1577,8 @@
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2020-02-26 19:10:25.758710",
+ "links": [],
+ "modified": "2020-04-23 21:52:18.748022",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "POS Invoice",

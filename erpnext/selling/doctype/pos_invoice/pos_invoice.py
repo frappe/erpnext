@@ -78,6 +78,8 @@ class POSInvoice(SalesInvoice):
 			against_psi_doc.make_loyalty_point_entry()
 		
 	def validate_stock_availablility(self):
+		allow_negative_stock = frappe.db.get_value('Stock Settings', None, 'allow_negative_stock')
+		
 		for d in self.get('items'):
 			if d.serial_no:
 				filters = {
@@ -102,6 +104,9 @@ class POSInvoice(SalesInvoice):
 						Please select valid serial nos.".format(d.idx, multiple_nos, 
 						frappe.bold(', '.join(invalid_serial_nos)))), title="Not Available")
 			else:
+				if allow_negative_stock:
+					return
+
 				available_stock = get_stock_availability(d.item_code, d.warehouse)
 				if not (flt(available_stock) > 0):
 					frappe.throw(_('Row #{}: Item Code: {} is not available under warehouse {}.'
