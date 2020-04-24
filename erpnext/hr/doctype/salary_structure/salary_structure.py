@@ -89,21 +89,23 @@ class SalaryStructure(Document):
 
 	@frappe.whitelist()
 	def assign_salary_structure(self, company=None, grade=None, department=None, designation=None,employee=None,
-			from_date=None, base=None,variable=None):
+			from_date=None, base=None, variable=None, income_tax_slab=None):
 		employees = self.get_employees(company= company, grade= grade,department= department,designation= designation,name=employee)
 
 		if employees:
 			if len(employees) > 20:
 				frappe.enqueue(assign_salary_structure_for_employees, timeout=600,
-					employees=employees, salary_structure=self,from_date=from_date, base=base,variable=variable)
+					employees=employees, salary_structure=self,from_date=from_date,
+					base=base, variable=variable, income_tax_slab=income_tax_slab)
 			else:
-				assign_salary_structure_for_employees(employees, self, from_date=from_date, base=base,variable=variable)
+				assign_salary_structure_for_employees(employees, self, from_date=from_date,
+					base=base, variable=variable, income_tax_slab=income_tax_slab)
 		else:
 			frappe.msgprint(_("No Employee Found"))
 
 
 
-def assign_salary_structure_for_employees(employees, salary_structure, from_date=None, base=None,variable=None):
+def assign_salary_structure_for_employees(employees, salary_structure, from_date=None, base=None, variable=None, income_tax_slab=None):
 	salary_structures_assignments = []
 	existing_assignments_for = get_existing_assignments(employees, salary_structure, from_date)
 	count=0
@@ -112,7 +114,8 @@ def assign_salary_structure_for_employees(employees, salary_structure, from_date
 			continue
 		count +=1
 
-		salary_structures_assignment = create_salary_structures_assignment(employee, salary_structure, from_date, base, variable)
+		salary_structures_assignment = create_salary_structures_assignment(employee,
+			salary_structure, from_date, base, variable, income_tax_slab)
 		salary_structures_assignments.append(salary_structures_assignment)
 		frappe.publish_progress(count*100/len(set(employees) - set(existing_assignments_for)), title = _("Assigning Structures..."))
 
@@ -120,7 +123,7 @@ def assign_salary_structure_for_employees(employees, salary_structure, from_date
 		frappe.msgprint(_("Structures have been assigned successfully"))
 
 
-def create_salary_structures_assignment(employee, salary_structure, from_date, base, variable):
+def create_salary_structures_assignment(employee, salary_structure, from_date, base, variable, income_tax_slab=None):
 	assignment = frappe.new_doc("Salary Structure Assignment")
 	assignment.employee = employee
 	assignment.salary_structure = salary_structure.name
@@ -128,6 +131,7 @@ def create_salary_structures_assignment(employee, salary_structure, from_date, b
 	assignment.from_date = from_date
 	assignment.base = base
 	assignment.variable = variable
+	assignment.income_tax_slab = income_tax_slab
 	assignment.save(ignore_permissions = True)
 	assignment.submit()
 	return assignment.name

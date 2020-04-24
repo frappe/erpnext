@@ -531,12 +531,18 @@ def make_fixtures(company=None):
 
 def set_salary_components(docs):
 	docs.extend([
-		{'doctype': 'Salary Component', 'salary_component': 'Professional Tax', 'description': 'Professional Tax', 'type': 'Deduction'},
-		{'doctype': 'Salary Component', 'salary_component': 'Provident Fund', 'description': 'Provident fund', 'type': 'Deduction'},
-		{'doctype': 'Salary Component', 'salary_component': 'House Rent Allowance', 'description': 'House Rent Allowance', 'type': 'Earning'},
-		{'doctype': 'Salary Component', 'salary_component': 'Basic', 'description': 'Basic', 'type': 'Earning'},
-		{'doctype': 'Salary Component', 'salary_component': 'Arrear', 'description': 'Arrear', 'type': 'Earning'},
-		{'doctype': 'Salary Component', 'salary_component': 'Leave Encashment', 'description': 'Leave Encashment', 'type': 'Earning'}
+		{'doctype': 'Salary Component', 'salary_component': 'Professional Tax',
+			'description': 'Professional Tax', 'type': 'Deduction', 'exempted_from_income_tax': 1},
+		{'doctype': 'Salary Component', 'salary_component': 'Provident Fund',
+			'description': 'Provident fund', 'type': 'Deduction', 'is_tax_applicable': 1},
+		{'doctype': 'Salary Component', 'salary_component': 'House Rent Allowance',
+			'description': 'House Rent Allowance', 'type': 'Earning', 'is_tax_applicable': 1},
+		{'doctype': 'Salary Component', 'salary_component': 'Basic',
+			'description': 'Basic', 'type': 'Earning', 'is_tax_applicable': 1},
+		{'doctype': 'Salary Component', 'salary_component': 'Arrear',
+			'description': 'Arrear', 'type': 'Earning', 'is_tax_applicable': 1},
+		{'doctype': 'Salary Component', 'salary_component': 'Leave Encashment',
+			'description': 'Leave Encashment', 'type': 'Earning', 'is_tax_applicable': 1}
 	])
 
 def set_tax_withholding_category(company):
