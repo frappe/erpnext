@@ -55,6 +55,7 @@ frappe.ui.form.on('LinkedIn Settings', {
 	},
 	login: function(frm){
 		if (frm.doc.consumer_key && frm.doc.consumer_secret){
+			frappe.dom.freeze();
 			frappe.call({
 				doc: frm.doc,
 				method: "get_authorization_url",

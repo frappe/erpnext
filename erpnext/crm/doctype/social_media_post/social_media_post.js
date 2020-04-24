@@ -51,6 +51,7 @@ var add_post_btn = function(frm){
     });
 }
 var post = function(frm){
+    frappe.dom.freeze();
     frappe.call({
         method: "erpnext.crm.doctype.social_media_post.social_media_post.publish",
         args: {
@@ -59,6 +60,7 @@ var post = function(frm){
         },
         callback: function(r) {
             frm.reload_doc();
+            frappe.dom.unfreeze();
         }
     })
     

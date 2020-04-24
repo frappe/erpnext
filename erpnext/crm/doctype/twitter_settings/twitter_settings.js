@@ -36,6 +36,7 @@ frappe.ui.form.on('Twitter Settings', {
 	},
 	login: function(frm){
 		if (frm.doc.consumer_key && frm.doc.consumer_secret){
+			frappe.dom.freeze();
 			frappe.call({
 				doc: frm.doc,
 				method: "get_authorize_url",
