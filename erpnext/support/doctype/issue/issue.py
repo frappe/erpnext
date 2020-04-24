@@ -7,7 +7,7 @@ import json
 from frappe import _
 from frappe import utils
 from frappe.model.document import Document
-from frappe.utils import now, time_diff_in_hours, now_datetime, getdate, get_weekdays, add_to_date, today, get_time, get_datetime
+from frappe.utils import now, time_diff_in_hours, now_datetime, getdate, get_weekdays, add_to_date, today, get_time, get_datetime, time_diff_in_seconds, time_diff
 from datetime import datetime, timedelta
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.user import is_website_user
@@ -63,6 +63,9 @@ class Issue(Document):
 			self.resolution_date = frappe.flags.current_time or now_datetime()
 			if frappe.db.get_value("Issue", self.name, "agreement_fulfilled") == "Ongoing":
 				set_service_level_agreement_variance(issue=self.name)
+				set_average_response_time(issue=self)
+				set_operational_time(issue=self)
+				set_user_operational_time(issue=self)
 				self.update_agreement_status()
 
 		if self.status=="Open" and status !="Open":
@@ -310,6 +313,50 @@ def set_service_level_agreement_variance(issue=None):
 			frappe.db.set_value(dt="Issue", dn=doc.name, field="resolution_by_variance", val=variance, update_modified=False)
 			if variance < 0:
 				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_fulfilled", val="Failed", update_modified=False)
+
+def set_average_response_time(issue):
+	communications = frappe.get_list("Communication", filters={
+			"reference_doctype": issue.doctype,
+			"reference_name": issue.name
+		},
+		fields=["sent_or_received", "name", "creation"],
+		order_by="creation"
+	)
+
+	response_times = []
+	for i in range(len(communications)-1):
+		if communications[i].sent_or_received == "Sent" and communications[i-1].sent_or_received == "Received":
+			response_time = time_diff_in_seconds(communications[i].creation, communications[i-1].creation)
+			if response_time > 0:
+				response_times.append(response_time)
+	avg_response_time = sum(response_times) / len(response_times)
+	avg_response_time = str(timedelta(seconds=avg_response_time)).split(".")[0]
+	issue.db_set('avg_response_time', avg_response_time)
+
+def set_operational_time(issue):
+	operational_time = time_diff(now_datetime(), issue.creation)
+	issue.db_set('operational_time', str(operational_time).split(".")[0])
+
+def set_user_operational_time(issue):
+	communications = frappe.get_list("Communication", filters={
+			"reference_doctype": issue.doctype,
+			"reference_name": issue.name
+		},
+		fields=["sent_or_received", "name", "creation"],
+		order_by="creation"
+	)
+
+	pending_time = []
+	for i in range(len(communications)-1):
+		if communications[i].sent_or_received == "Received" and communications[i-1].sent_or_received == "Sent":
+			wait_time = time_diff_in_seconds(communications[i].creation, communications[i-1].creation)
+			if wait_time > 0:
+				pending_time.append(wait_time)
+	total_pending_time = timedelta(seconds=sum(pending_time))
+	operational_time = frappe.db.get_value('Issue', issue.name, 'operational_time')
+	user_operational_time = time_diff(operational_time, total_pending_time)
+	issue.db_set('user_operational_time', str(user_operational_time))
+
 
 def get_list_context(context=None):
 	return {

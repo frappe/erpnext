@@ -34,6 +34,8 @@
   "response",
   "mins_to_first_response",
   "first_responded_on",
+  "column_break_26",
+  "avg_response_time",
   "additional_info",
   "lead",
   "contact",
@@ -50,7 +52,9 @@
   "resolution_date",
   "content_type",
   "attachment",
-  "via_customer_portal"
+  "via_customer_portal",
+  "operational_time",
+  "user_operational_time"
  ],
  "fields": [
   {
@@ -362,12 +366,35 @@
    "label": "Issue Split From",
    "options": "Issue",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "avg_response_time",
+   "fieldtype": "Time",
+   "label": "Average Response Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "operational_time",
+   "fieldtype": "Time",
+   "label": "Operational Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user_operational_time",
+   "fieldtype": "Time",
+   "label": "User Operational Time",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2020-03-13 02:19:49.477928",
+ "modified": "2020-04-24 09:58:13.499635",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
