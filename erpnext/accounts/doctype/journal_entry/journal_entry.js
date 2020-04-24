@@ -12,8 +12,10 @@ frappe.ui.form.on("Journal Entry", {
 
 	refresh: function(frm) {
 		erpnext.toggle_naming_series();
-		frm.cscript.voucher_type(frm.doc);
-
+		// frm.cscript.voucher_type(frm.doc);
+		cur_frm.set_df_property("cheque_no", "reqd", frm.doc.voucher_type=="Bank Entry");
+		cur_frm.set_df_property("cheque_date", "reqd", frm.doc.voucher_type=="Bank Entry");
+		
 		if(frm.doc.docstatus==1) {
 			frm.add_custom_button(__('Ledger'), function() {
 				frappe.route_options = {
@@ -120,6 +122,32 @@ frappe.ui.form.on("Journal Entry", {
 				}
 			}
 		});
+	},
+
+	from_template: function(frm){
+		var update_jv_details = function(doc, r) {
+			frappe.model.clear_table(frm.doc, "accounts");
+			$.each(r, function(i, d) {
+				var row = frappe.model.add_child(doc, "Journal Entry Account", "accounts");
+				row.account = d.account;
+				row.balance = d.balance;
+			});
+			refresh_field("accounts");
+		}
+		
+		if (frm.doc.from_template){
+			frappe.db.get_doc("Journal Entry Template", frm.doc.from_template)
+			.then((doc) => {
+				frm.set_value("company",doc.company);
+				frm.set_value("voucher_type", doc.voucher_type);
+				frm.set_value("naming_series", doc.je_naming_series);
+				frm.set_value("is_opening", doc.is_opening);
+				update_jv_details(frm.doc, doc.accounts);
+			})
+			.catch((err)=>{
+				console.log(err);
+			})
+		}
 	}
 });
 
