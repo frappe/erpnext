@@ -346,6 +346,7 @@ class ProductionPlan(Document):
 		if not wo.fg_warehouse:
 			wo.fg_warehouse = warehouse.get('fg_warehouse')
 		try:
+			wo.flags.ignore_mandatory = True
 			wo.insert()
 			return wo.name
 		except OverProductionError:
