@@ -1,0 +1,87 @@
+.authorizenet #payment-form {
+    margin-top: 80px;
+}
+
+.authorizenet button {
+    float: right;
+    display: block;
+    background: #5e64ff;
+    color: white;
+    box-shadow: 0 7px 14px 0 rgba(49, 49, 93, 0.10), 0 3px 6px 0 rgba(0, 0, 0, 0.08);
+    border-radius: 4px;
+    border: 0;
+    margin-top: 20px;
+    font-size: 15px;
+    font-weight: 400;
+    max-width: 40%;
+    height: 40px;
+    line-height: 38px;
+    outline: none;
+}
+
+.authorizenet button:hover,
+.authorizenet button:focus {
+    background: #2b33ff;
+    border-color: #0711ff;
+}
+
+.authorizenet button:active {
+    background: #5e64ff;
+}
+
+.authorizenet button:disabled {
+    background: #515e80;
+}
+
+.authorizenet .group {
+    background: white;
+    box-shadow: 2px 7px 14px 2px rgba(49, 49, 93, 0.10), 0 3px 6px 0 rgba(0, 0, 0, 0.08);
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.authorizenet label {
+    position: relative;
+    color: #8898AA;
+    font-weight: 300;
+    height: 40px;
+    line-height: 40px;
+    margin-left: 20px;
+    display: block;
+}
+
+.authorizenet .group label:not(:last-child) {
+    border-bottom: 1px solid #F0F5FA;
+}
+
+.authorizenet label>span {
+    width: 20%;
+    text-align: right;
+    float: left;
+}
+
+.field {
+    background: transparent;
+    font-weight: 300;
+    border: 0;
+    color: #31325F;
+    outline: none;
+    padding-right: 10px;
+    padding-left: 10px;
+    cursor: text;
+    width: 70%;
+    height: 40px;
+    float: right;
+}
+
+.field::-webkit-input-placeholder {
+    color: #CFD7E0;
+}
+
+.field::-moz-placeholder {
+    color: #CFD7E0;
+}
+
+.field:-ms-input-placeholder {
+    color: #CFD7E0;
+}
