@@ -48,9 +48,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.earnings[0].amount, 50000)
 		self.assertEqual(ss.earnings[1].amount, 3000)
 		self.assertEqual(ss.deductions[0].amount, 5000)
-		self.assertEqual(ss.deductions[1].amount, 5000)
 		self.assertEqual(ss.gross_pay, 78000)
-		self.assertEqual(ss.net_pay, 67418.0)
 
 	def test_salary_slip_with_holidays_excluded(self):
 		no_of_days = self.get_no_of_days()
@@ -68,9 +66,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.earnings[0].default_amount, 50000)
 		self.assertEqual(ss.earnings[1].amount, 3000)
 		self.assertEqual(ss.deductions[0].amount, 5000)
-		self.assertEqual(ss.deductions[1].amount, 5000)
 		self.assertEqual(ss.gross_pay, 78000)
-		self.assertEqual(ss.net_pay, 67418.0)
 
 	def test_payment_days(self):
 		no_of_days = self.get_no_of_days()
@@ -92,8 +88,6 @@ class TestSalarySlip(unittest.TestCase):
 			date_of_joining = getdate(nowdate())
 			relieving_date = getdate(nowdate())
 
-		print("--------------->>>>>>>")
-		print(date_of_joining)
 		frappe.db.set_value("Employee", frappe.get_value("Employee",
 			{"employee_name":"test_employee@salary.com"}, "name"), "date_of_joining", date_of_joining)
 		frappe.db.set_value("Employee", frappe.get_value("Employee",
@@ -133,9 +127,7 @@ class TestSalarySlip(unittest.TestCase):
 	def test_email_salary_slip(self):
 		frappe.db.sql("delete from `tabEmail Queue`")
 
-		hr_settings = frappe.get_doc("HR Settings", "HR Settings")
-		hr_settings.email_salary_slip_to_employee = 1
-		hr_settings.save()
+		frappe.db.set_value("HR Settings", None, "email_salary_slip_to_employee", 1)
 
 		make_employee("test_employee@salary.com")
 		ss = make_employee_salary_slip("test_employee@salary.com", "Monthly")
@@ -185,8 +177,11 @@ class TestSalarySlip(unittest.TestCase):
 		# as per assigned salary structure 40500 in monthly salary so 236000*5/100/12
 		frappe.db.sql("""delete from `tabPayroll Period`""")
 		frappe.db.sql("""delete from `tabSalary Component`""")
+	
 		payroll_period = create_payroll_period()
-		create_tax_slab(payroll_period ,allow_tax_exemption=True)
+
+		create_tax_slab(payroll_period, allow_tax_exemption=True)
+
 		employee = make_employee("test_tax@salary.slip")
 		delete_docs = [
 			"Salary Slip",
@@ -212,7 +207,7 @@ class TestSalarySlip(unittest.TestCase):
 			payroll_period, deduct_random=False)
 		tax_paid = get_tax_paid_in_period(employee)
 
-		annual_tax = 113568
+		annual_tax = 113589.0
 		try:
 			self.assertEqual(tax_paid, annual_tax)
 		except AssertionError:
@@ -237,7 +232,6 @@ class TestSalarySlip(unittest.TestCase):
 
 		# Submit proof for total 120000
 		data["proof"] = create_proof_submission(employee, payroll_period, 120000)
-		#data["proof"] = create_proof_submission(employee, payroll_period, 70000)
 
 		# Submit benefit claim for total 50000
 		data["benefit-1"] = create_benefit_claim(employee, payroll_period, 15000, "Medical Allowance")
@@ -251,7 +245,7 @@ class TestSalarySlip(unittest.TestCase):
 
 		# total taxable income 416000, 166000 @ 5% ie. 8300
 		try:
-			self.assertEqual(tax_paid, 82368)
+			self.assertEqual(tax_paid, 82389.0)
 		except AssertionError:
 			print("\nSalary Slip - Tax calculation failed on following case\n", data, "\n")
 			raise
@@ -266,7 +260,7 @@ class TestSalarySlip(unittest.TestCase):
 		# total taxable income 566000, 250000 @ 5%, 66000 @ 20%, 12500 + 13200
 		tax_paid = get_tax_paid_in_period(employee)
 		try:
-			self.assertEqual(tax_paid, 113568)
+			self.assertEqual(tax_paid, annual_tax)
 		except AssertionError:
 			print("\nSalary Slip - Tax calculation failed on following case\n", data, "\n")
 			raise
@@ -308,6 +302,7 @@ def make_employee_salary_slip(user, payroll_frequency, salary_structure=None):
 	from erpnext.hr.doctype.salary_structure.test_salary_structure import make_salary_structure
 	if not salary_structure:
 		salary_structure = payroll_frequency + " Salary Structure Test for Salary Slip"
+
 	employee = frappe.db.get_value("Employee", {"user_id": user})
 	salary_structure_doc = make_salary_structure(salary_structure, payroll_frequency, employee)
 	salary_slip = frappe.db.get_value("Salary Slip", {"employee": frappe.db.get_value("Employee", {"user_id": user})})
@@ -432,10 +427,13 @@ def make_deduction_salary_component(setup=False, test_tax=False):
 		{
 			"salary_component": 'Professional Tax',
 			"abbr":'PT',
-			"condition": 'base > 10000',
-			"formula": 'base*.1',
+			# "condition": 'base > 10000',
+			# "formula": 'base*.1',
 			"type": "Deduction",
-			"amount_based_on_formula": 1
+			"amount_based_on_formula": 1,
+			"amount": 200,
+			"exempted_from_income_tax": 1
+
 		},
 		{
 			"salary_component": 'TDS',
@@ -515,17 +513,17 @@ def create_tax_slab(payroll_period, effective_date = None, allow_tax_exemption =
 		{
 			"from_amount": 250000,
 			"to_amount": 500000,
-			"percent_deduction": 5.2,
+			"percent_deduction": 5,
 			"condition": "annual_taxable_earning > 500000"
 		},
 		{
 			"from_amount": 500001,
 			"to_amount": 1000000,
-			"percent_deduction": 20.8
+			"percent_deduction": 20
 		},
 		{
 			"from_amount": 1000001,
-			"percent_deduction": 31.2
+			"percent_deduction": 30
 		}
 	]
 
@@ -535,14 +533,16 @@ def create_tax_slab(payroll_period, effective_date = None, allow_tax_exemption =
 
 	if allow_tax_exemption:
 		income_tax_slab.allow_tax_exemption = 1
-		income_tax_slab.standard_tax_exemption_amount = 52500
+		income_tax_slab.standard_tax_exemption_amount = 50000
 
-	income_tax_slab.slabs = slabs
-
-
-	income_tax_slab.slabs = []
 	for item in slabs:
 		income_tax_slab.append("slabs", item)
+
+	income_tax_slab.append("other_taxes_and_charges", {
+		"description": "cess",
+		"percent": 4
+	})
+
 	income_tax_slab.save()
 	if not dont_submit:
 		income_tax_slab.submit()
