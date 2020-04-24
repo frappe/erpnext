@@ -1407,7 +1407,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		for(var k in args) {
 			let data = args[k];
-			debugger;
+
 			if (data && data.apply_rule_on_other_items) {
 				me.frm.doc.items.forEach(d => {
 					if (in_list(data.apply_rule_on_other_items, d[data.apply_rule_on])) {
