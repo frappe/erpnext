@@ -17,8 +17,7 @@ def execute():
 		
 	frappe.db.sql(
 		"""UPDATE `tabQuotation` qo SET qo.status = 'Expired' WHERE {cond} and not exists({invalid_so_against_quo})"""
-			.format(cond=cond, invalid_so_against_quo=invalid_so_against_quo),
-			(nowdate())
+			.format(cond=cond, invalid_so_against_quo=invalid_so_against_quo)
 		)
 	
 	valid_so_against_quo = """
@@ -32,6 +31,5 @@ def execute():
 
 	frappe.db.sql(
 		"""UPDATE `tabQuotation` qo SET qo.status = 'Closed' WHERE {cond} and not exists({valid_so_against_quo})"""
-			.format(cond=cond, valid_so_against_quo=valid_so_against_quo),
-			(nowdate())
+			.format(cond=cond, valid_so_against_quo=valid_so_against_quo)
 		)
