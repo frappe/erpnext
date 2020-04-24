@@ -1,0 +1,54 @@
+{% extends "templates/web.html" %}
+
+{% block title %} Payment {% endblock %}
+
+{% block script %}
+<script>{% include "templates/includes/integrations/authorizenet_checkout.js" %}</script>
+<script>
+	context= "{{ payment_context }}"
+</script>
+{% endblock %}
+
+{%- block page_content -%}
+
+<div class="authorizenet" style="min-height: 400px; padding-bottom: 50px; margin-top:100px;margin-left:250px;">
+	<div class="col-sm-10 col-sm-offset-2">
+		<h2 class="text-center">{{ payment_context.description }}</h2>
+		<form id="payment-form">
+			<div class="form-row row">
+				<div class="group col-12">
+					<div>
+						<label>
+							<span>{{ _("Name") }}</span>
+							<input id="cardholder-name" name="cardholder-name" class="field" placeholder="{{ _('John Doe') }}" value="{{ payment_context.payer_name }}"/>
+						</label>
+					</div>
+				</div>
+				<div class="group col-12">
+					<div>
+						<label>
+							<span>{{ _("Email") }}</span>
+							<input id="cardholder-email" name="cardholder-email" class="field" placeholder="{{ _('john@doe.com') }}" value="{{ payment_context.payer_email }}"/>
+						</label>
+					</div>
+				</div>
+				<div class="group col-12">
+					<label>
+						<span>{{ _("Card Number") }}</span>
+						<input type="number" id="card-number" name="card-number" class="field" placeholder="{{ _('XXXX-XXXX-XXXX-XXXX') }}"/>
+
+						<span>{{ _("Card Expiry") }}</span>
+						<input type="text" id="card-expiry" maxlength="7" name="card-expiry" class="field" placeholder="{{ _('YYYY-MM') }}"/>
+
+						<span>{{ _("Card Code") }}</span>
+						<input type="password" id="card-code" maxlength="4" name="card-code" class="field" placeholder="{{ _('****') }}"/>
+					</label>
+				</div>
+			</div>
+			<button type="submit" class="submit" id="submit">{{_('Pay')}} {{ payment_context.amount }}</button>
+		</form>
+	</div>
+</div>
+
+
+{% endblock %}
