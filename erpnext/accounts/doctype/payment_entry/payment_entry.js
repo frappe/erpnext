@@ -106,6 +106,21 @@ frappe.ui.form.on('Payment Entry', {
 			};
 		});
 
+		frm.set_query('payment_term', 'references', function(frm, cdt, cdn) {
+			const child = locals[cdt][cdn];
+			if (in_list(['Purchase Invoice', 'Sales Invoice'], child.reference_doctype) && child.reference_name) {
+				let payment_term_list = frappe.get_list('Payment Schedule', {'parent': child.reference_name});
+
+				payment_term_list = payment_term_list.map(pt => pt.payment_term);
+
+				return {
+					filters: {
+						'name': ['in', payment_term_list]
+					}
+				}
+			}
+		});
+
 		frm.set_query("reference_name", "references", function(doc, cdt, cdn) {
 			const child = locals[cdt][cdn];
 			const filters = {"docstatus": 1, "company": doc.company};
