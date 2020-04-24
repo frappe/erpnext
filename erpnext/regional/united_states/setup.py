@@ -17,7 +17,9 @@ def make_custom_fields():
 		],
 		'Sales Order': [
 			dict(fieldname='affirm_id', fieldtype="Data", insert_after='po_date', 
-				label="Affirm Id", read_only=1, allow_on_submit=1)
+				label="Affirm ID", read_only=1, allow_on_submit=1),
+			dict(fieldname='affirm_status', fieldtype="Data", insert_after='affirm_id', 
+				label="Affirm Capture Status", read_only=1, allow_on_submit=1)
 		]
 	}
 	create_custom_fields(custom_fields)

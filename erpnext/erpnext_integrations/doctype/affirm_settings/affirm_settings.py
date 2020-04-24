@@ -80,15 +80,15 @@ class AffirmSettings(Document):
 			frappe.throw(_("Please select another payment method. Affirm does not support transactions in currency '{0}'").format(currency))
 
 def create_order(**kwargs):
+	"""
+		Read the checkout data and current checkout status for a specific checkout attempt.
+	"""
 	full_name = kwargs.get("payer_name")
 
 	# Affirm needs Full Name to have atleast 2 words
 	if len(full_name.split()) == 1:
 		full_name = full_name + " ."
 
-	# Pick up reference doc from payment request.
-	# This is usually the payment request it self.
-	# On awc its the awc transction proxy to the request.
 	ref_doc = frappe.get_doc(kwargs['reference_doctype'], kwargs['reference_docname'])
 
 	# fetch the actual doctype use for this transaction. Could be Quotation, Sales Order or Invoice
@@ -119,7 +119,7 @@ def create_order(**kwargs):
 
 		if item_discount > 0:
 			discount_percent = 100 - (item.rate * 100 / item.price_list_rate)
-			discount_code = "LINE {} | {} | {}% DISCOUNT ($ -{:,.2f})".format(idx, item.item_code, discount_percent, item_discount)
+			discount_code = _("LINE {0} | {1} | {2}% DISCOUNT ($ -{:,.2f})").format(idx, item.item_code, discount_percent, item_discount)
 			discounts[discount_code] = {
 				"discount_amount": convert_to_cents(item_discount),
 				"discount_display_name": discount_code
@@ -133,12 +133,6 @@ def create_order(**kwargs):
 			"item_image_url": get_url(item.get("image", "")),
 			"item_url": get_url()
 		})
-
-	if order_doc.coupon_code:
-		discounts[order_doc.coupon_code] = {
-			"discount_amount": convert_to_cents(order_doc.discount_amount),
-			"discount_display_name": "Coupon Code {}".format(order_doc.coupon_code)
-		}
 
 	checkout_data = {
 		"merchant": {
@@ -196,14 +190,19 @@ def create_order(**kwargs):
 
 @frappe.whitelist(allow_guest=1)
 def process_payment_callback(checkout_token, reference_doctype, reference_docname):
-	""" Once the payment done it will send response"""
+	"""'
+		Charge authorization occurs after a user completes the Affirm checkout flow and returns to the merchant site. 
+		Authorizing the charge generates a charge ID that will be used to reference it moving forward. 
+		You must authorize a charge to fully create it. A charge is not visible in the Read charge response, 
+		nor in the merchant dashboard until you authorize it.
+	"""
 	data= {
 		"checkout_token":checkout_token,
 		"reference_doctype":reference_doctype,
 		"reference_docname":reference_docname
 	}
 	integration_request = create_request_log(data, "Host", "Affirm")
-
+	redirect_url = "/integrations/payment-failed"
 	affirm_settings = get_api_config()
 	authorization_response = requests.post(
 		"{api_url}/charges".format(**affirm_settings),
@@ -221,51 +220,53 @@ def process_payment_callback(checkout_token, reference_doctype, reference_docnam
 		authorize_payment(affirm_data, reference_doctype, reference_docname, integration_request)
 		
 def authorize_payment(affirm_data, reference_doctype, reference_docname, integration_request):
+	"""
+		once callback return checkout token it will authroized payment status as failed or sucessful
+	"""
 	redirect_url = "/integrations/payment-failed"
 
 	# check if callback already happened
 	if affirm_data.get("status_code") == 400 and affirm_data.get("code") == "checkout-token-used":
-		frappe.log("	SUCCESS via checkout-token-used")
 		integration_request.update_status(affirm_data, "Completed")
 		redirect_url = '/integrations/payment-success'
 	elif affirm_data.get("status_code") == 400 and affirm_data.get("type") == "invalid_request":
 		integration_request.update_status(affirm_data, "Failed")
-		frappe.log_error("	ERROR: {}".format(affirm_data.get("message")))
 		frappe.msgprint(affirm_data.get("message"))
 		redirect_url = "/cart"
 	else:
 		payment_successful(affirm_data, reference_doctype, reference_docname, integration_request)
+		redirect_url = '/integrations/payment-success'
 
 	frappe.local.response["type"] = "redirect"
 	frappe.local.response["location"] = get_url(redirect_url)
-
-	frappe.log("	Redirect: {}".format(frappe.local.response["location"]))
-
 	return "" 
 
 def payment_successful(affirm_data, reference_doctype, reference_docname, integration_request):
+	"""
+		on sucessful payment response it will create payment entry for refernce docname and 
+		update Affirm ID and Affirm status in refrence docname
+	"""
 	charge_id = affirm_data.get('id')
+	affirm_capture_status = affirm_data.get('status')
 	payment_request = frappe.get_doc(reference_doctype, reference_docname)
 	order_doc = frappe.get_doc(payment_request.reference_doctype, affirm_data.get('order_id'))
 	order_doc.affirm_id = charge_id
+	order_doc.affirm_status = affirm_capture_status
 	order_doc.flags.ignore_permissions = 1
 	order_doc.save()
-
-	# on awc you can skip creating an actual payment request and just
-	# submit the sales order with this flag
-	payment_request.flags.skip_payment_request = True
-	payment_request.on_payment_authorized("Authorized")
-
 	frappe.db.commit()
 	integration_request.update_status(affirm_data, "Completed")
-	redirect_url = '/integrations/payment-success'
-	frappe.local.response["type"] = "redirect"
-	frappe.local.response["location"] = get_url(redirect_url)
-
 
 @frappe.whitelist()
 def capture_payment(affirm_id, sales_order):
-	integration_request = create_request_log(affirm_id, "Host", "Affirm")
+	"""
+		Capture the funds of an authorized charge, similar to capturing a credit card transaction.
+	"""
+	affirm_data ={
+		"affirm_id":affirm_id,
+		"sales_order":sales_order
+	}
+	integration_request = create_request_log(affirm_data, "Host", "Affirm")
 	affirm_settings = get_api_config()
 	authorization_response = requests.post(
 		"{0}/charges/{1}/capture".format(affirm_settings.get("api_url"), affirm_id),
@@ -278,6 +279,7 @@ def capture_payment(affirm_id, sales_order):
 		#make payment entry agianst Sales Order
 		integration_request.update_status(affirm_data, "Authorized")		
 		make_so_payment_entry(affirm_data, sales_order, integration_request)
+		return affirm_data
 	else:
 		integration_request.update_status(affirm_data, "Failed")
 		frappe.throw("Something went wrong.")
