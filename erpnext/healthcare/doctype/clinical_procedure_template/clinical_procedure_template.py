@@ -79,6 +79,7 @@ def create_item_from_template(doc):
 	if doc.is_billable and not doc.disabled:
 		disabled = 0
 
+	uom = frappe.db.exists('UOM', 'Unit') or frappe.db.get_single_value('Stock Settings', 'stock_uom')
 	item = frappe.get_doc({
 		'doctype': 'Item',
 		'item_code': doc.template,
@@ -92,7 +93,7 @@ def create_item_from_template(doc):
 		'show_in_website': 0,
 		'is_pro_applicable': 0,
 		'disabled': disabled,
-		'stock_uom': 'Unit'
+		'stock_uom': uom
 	}).insert(ignore_permissions=True, ignore_mandatory=True)
 
 	make_item_price(item.name, doc.rate)

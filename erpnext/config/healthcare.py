@@ -214,5 +214,41 @@ def get_data():
 					"label": _("Lab Test Report")
 				}
 			]
+		},
+		{
+			"label": _("Rehabilitation"),
+			"icon": "icon-cog",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Exercise Type",
+					"label": _("Exercise Type")
+				},
+				{
+					"type": "doctype",
+					"name": "Exercise Difficulty Level",
+					"label": _("Exercise Difficulty Level")
+				},
+				{
+					"type": "doctype",
+					"name": "Therapy Type",
+					"label": _("Therapy Type")
+				},
+				{
+					"type": "doctype",
+					"name": "Therapy Plan",
+					"label": _("Therapy Plan")
+				},
+				{
+					"type": "doctype",
+					"name": "Therapy Session",
+					"label": _("Therapy Session")
+				},
+				{
+					"type": "doctype",
+					"name": "Motor Assessment Scale",
+					"label": _("Motor Assessment Scale")
+				}
+			]
 		}
 	]

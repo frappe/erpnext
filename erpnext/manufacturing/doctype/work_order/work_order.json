@@ -231,6 +231,7 @@
    "fieldname": "wip_warehouse",
    "fieldtype": "Link",
    "label": "Work-in-Progress Warehouse",
+   "mandatory_depends_on": "eval:!doc.skip_transfer || doc.from_wip_warehouse",
    "options": "Warehouse"
   },
   {
@@ -238,7 +239,8 @@
    "fieldname": "fg_warehouse",
    "fieldtype": "Link",
    "label": "Target Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_12",
@@ -481,7 +483,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-01-31 12:46:23.636033",
+ "modified": "2020-04-24 19:32:43.323054",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
