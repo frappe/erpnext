@@ -47,7 +47,12 @@
   }
  ],
  "category": "Domains",
- "charts": [],
+ "charts": [
+  {
+   "chart_name": "Patient Appointments",
+   "label": "Patient Appointments"
+  }
+ ],
  "charts_label": "",
  "creation": "2020-03-02 17:23:17.919682",
  "developer_mode_only": 0,
@@ -58,7 +63,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Healthcare",
- "modified": "2020-04-20 11:42:43.889576",
+ "modified": "2020-04-25 22:31:36.576444",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
