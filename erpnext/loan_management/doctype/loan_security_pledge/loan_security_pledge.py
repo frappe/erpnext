@@ -30,7 +30,8 @@ class LoanSecurityPledge(Document):
 			if not pledge.qty and not pledge.amount:
 				frappe.throw(_("Qty or Amount is mandatroy for loan security"))
 
-			pledge.loan_security_price = get_loan_security_price(pledge.loan_security)
+			if not (self.loan_application and pledge.loan_security_price):
+				pledge.loan_security_price = get_loan_security_price(pledge.loan_security)
 
 			if not pledge.qty:
 				pledge.qty = cint(pledge.amount/pledge.loan_security_price)
