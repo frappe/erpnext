@@ -47,7 +47,6 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.payment_days, no_of_days[0])
 		self.assertEqual(ss.earnings[0].amount, 50000)
 		self.assertEqual(ss.earnings[1].amount, 3000)
-		self.assertEqual(ss.deductions[0].amount, 5000)
 		self.assertEqual(ss.gross_pay, 78000)
 
 	def test_salary_slip_with_holidays_excluded(self):
@@ -65,7 +64,6 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.earnings[0].amount, 50000)
 		self.assertEqual(ss.earnings[0].default_amount, 50000)
 		self.assertEqual(ss.earnings[1].amount, 3000)
-		self.assertEqual(ss.deductions[0].amount, 5000)
 		self.assertEqual(ss.gross_pay, 78000)
 
 	def test_payment_days(self):
@@ -452,10 +450,7 @@ def make_deduction_salary_component(setup=False, test_tax=False, company_list=No
 		{
 			"salary_component": 'Professional Tax',
 			"abbr":'PT',
-			# "condition": 'base > 10000',
-			# "formula": 'base*.1',
 			"type": "Deduction",
-			"amount_based_on_formula": 1,
 			"amount": 200,
 			"exempted_from_income_tax": 1
 

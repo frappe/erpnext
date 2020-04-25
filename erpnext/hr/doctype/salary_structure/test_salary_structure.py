@@ -72,9 +72,7 @@ class TestSalaryStructure(unittest.TestCase):
 			self.assertEqual(sal_slip.get("earnings")[2].amount, 25000)
 			self.assertEqual(sal_slip.get("gross_pay"), 78000)
 			self.assertEqual(sal_slip.get("deductions")[0].amount, 200)
-			self.assertEqual(sal_slip.get("deductions")[1].amount, 5000)
-			self.assertEqual(sal_slip.get("total_deduction"), 5200)
-			self.assertEqual(sal_slip.get("net_pay"), 72800)
+			self.assertEqual(sal_slip.get("net_pay"), 78000 - sal_slip.get("total_deduction"))
 
 	def test_whitespaces_in_formula_conditions_fields(self):
 		salary_structure = make_salary_structure("Salary Structure Sample", "Monthly", dont_submit=True)
