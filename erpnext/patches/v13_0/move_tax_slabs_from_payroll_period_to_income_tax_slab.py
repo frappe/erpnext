@@ -75,7 +75,7 @@ def execute():
 
 			try:
 				employee_other_income.submit()
-				migrated.append([prrof.employee, proof.payroll_period])
+				migrated.append([proof.employee, proof.payroll_period])
 			except:
 				pass
 
