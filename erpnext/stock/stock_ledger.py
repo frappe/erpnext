@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
 from frappe.utils import cint, flt, cstr, now, now_datetime
-from erpnext.stock.utils import get_valuation_method
+from erpnext.stock.utils import get_valuation_method, get_outgoing_rate_for_cancel
 import json
 
 from six import iteritems
@@ -26,10 +26,17 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 
 		for sle in sl_entries:
 			sle_id = None
-			if cancel:
-				sle['actual_qty'] = -flt(sle.get('actual_qty'), 0)
+			if via_landed_cost_voucher or cancel:
 				sle['posting_date'] = now_datetime().strftime('%Y-%m-%d')
 				sle['posting_time'] = now_datetime().strftime('%H:%M:%S.%f')
+
+				if cancel:
+					sle['actual_qty'] = -flt(sle.get('actual_qty'), 0)
+					if sle['actual_qty'] < 0:
+						sle['outgoing_rate'] = get_outgoing_rate_for_cancel(sle.item_code,
+							sle.voucher_type, sle.voucher_no, sle.voucher_detail_no)
+						sle['incoming_rate'] = 0.0
+
 
 			if sle.get("actual_qty") or sle.get("voucher_type")=="Stock Reconciliation":
 				sle_id = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
@@ -44,7 +51,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 def set_as_cancel(voucher_type, voucher_no):
 	frappe.db.sql("""update `tabStock Ledger Entry` set is_cancelled=1,
 		modified=%s, modified_by=%s
-		where voucher_type=%s and voucher_no=%s""",
+		where voucher_type=%s and voucher_no=%s and is_cancelled = 0""",
 		(now(), frappe.session.user, voucher_type, voucher_no))
 
 def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
@@ -402,7 +409,10 @@ class update_entries_after(object):
 
 	def get_sle_before_datetime(self):
 		"""get previous stock ledger entry before current time-bucket"""
-		return get_stock_ledger_entries(self.args, "<", "desc", "limit 1", for_update=False)
+		if self.args.get('sle_id'):
+			self.args['name'] = self.args.get('sle_id')
+
+		return get_stock_ledger_entries(self.args, "<=", "desc", "limit 1", for_update=False)
 
 	def get_sle_after_datetime(self):
 		"""get Stock Ledger Entries after a particular datetime, for reposting"""
