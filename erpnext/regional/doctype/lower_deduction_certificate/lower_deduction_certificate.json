@@ -126,25 +126,12 @@
   }
  ],
  "links": [],
- "modified": "2020-03-12 11:54:33.048100",
+ "modified": "2020-04-23 23:04:41.203721",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Lower Deduction Certificate",
  "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
+ "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1
