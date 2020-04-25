@@ -23,7 +23,7 @@ frappe.ui.form.on("Journal Entry Template", {
 	voucher_type: function(frm) {
 		var add_accounts = function(doc, r) {
 			$.each(r, function(i, d) {
-				var row = frappe.model.add_child(doc, "JE Template Account", "accounts");
+				var row = frappe.model.add_child(doc, "Journal Entry Template Account", "accounts");
 				row.account = d.account;
 			});
 			refresh_field("accounts");

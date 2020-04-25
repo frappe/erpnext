@@ -22,7 +22,7 @@
  "modified": "2020-04-25 01:15:44.879839",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "JE Template Account",
+ "name": "Journal Entry Template Account",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
