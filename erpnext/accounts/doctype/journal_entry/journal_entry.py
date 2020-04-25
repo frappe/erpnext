@@ -580,15 +580,26 @@ class JournalEntry(AccountsController):
 	def get_values(self):
 		cond = " and outstanding_amount <= {0}".format(self.write_off_amount) \
 			if flt(self.write_off_amount) > 0 else ""
-
 		if self.write_off_based_on == 'Accounts Receivable':
-			return frappe.db.sql("""select name, debit_to as account, customer as party, outstanding_amount
+			party_cond = ' and customer Like "%%{}%%"'.format(self.party_id) if self.party_id else ""
+			cond += party_cond
+			sql = """select name, debit_to as account, customer as party, outstanding_amount
 				from `tabSales Invoice` where docstatus = 1 and company = %s
-				and outstanding_amount > 0 %s""" % ('%s', cond), self.company, as_dict=True)
+				and outstanding_amount > 0 %s""" % ('%s', cond)
+			result = frappe.db.sql(sql, self.company, as_dict=True)
+			if len(result) == 0:
+				frappe.msgprint('Cannot find any outstanding invoice with Party ID "{}"'.format(self.party_id))
+			return result
 		elif self.write_off_based_on == 'Accounts Payable':
-			return frappe.db.sql("""select name, credit_to as account, supplier as party, outstanding_amount
+			party_cond = ' and supplier Like "%%{}%%"'.format(self.party_id) if self.party_id else ""
+			cond += party_cond
+			sql = """select name, credit_to as account, supplier as party, outstanding_amount
 				from `tabPurchase Invoice` where docstatus = 1 and company = %s
-				and outstanding_amount > 0 %s""" % ('%s', cond), self.company, as_dict=True)
+				and outstanding_amount > 0 %s""" % ('%s', cond)
+			result = frappe.db.sql(sql, self.company, as_dict=True)
+			if len(result) == 0:
+				frappe.msgprint('Cannot find any outstanding invoice with Party ID "{}"'.format(self.party_id))
+			return result
 
 	def update_expense_claim(self):
 		for d in self.accounts:
