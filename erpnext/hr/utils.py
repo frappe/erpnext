@@ -226,9 +226,16 @@ def get_employee_leave_policy(employee):
 	else:
 		frappe.throw(_("Please set leave policy for employee {0} in Employee / Grade record").format(employee))
 
-def validate_duplicate_exemption_for_payroll_period(doctype, payroll_period):
-	if frappe.db.exists(doctype, {"payroll_period": payroll_period}):
-		frappe.throw(_("{0} Submission already exists for {1}").format(doctype, payroll_period))
+def validate_duplicate_exemption_for_payroll_period(doctype, docname, payroll_period, employee):
+	existing_record = frappe.db.exists(doctype, {
+		"payroll_period": payroll_period,
+		"employee": employee,
+		'docstatus': ['<', 2],
+		'name': ['!=', docname]
+	})
+	if existing_record:
+		frappe.throw(_("{0} already exists for employee {1} and period {2}")
+			.format(doctype, payroll_period, employee))
 
 def validate_tax_declaration(declarations):
 	subcategories = []

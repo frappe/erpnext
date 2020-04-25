@@ -16,7 +16,7 @@ class DuplicateDeclarationError(frappe.ValidationError): pass
 class EmployeeTaxExemptionDeclaration(Document):
 	def validate(self):
 		validate_tax_declaration(self.declarations)
-		validate_duplicate_exemption_for_payroll_period(self.doctype, self.payroll_period)
+		validate_duplicate_exemption_for_payroll_period(self.doctype, self.name, self.payroll_period, self.employee)
 		self.validate_duplicate()
 		self.set_total_declared_amount()
 		self.set_total_exemption_amount()

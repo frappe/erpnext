@@ -16,7 +16,7 @@ class EmployeeTaxExemptionProofSubmission(Document):
 		self.set_total_actual_amount()
 		self.set_total_exemption_amount()
 		self.calculate_hra_exemption()
-		validate_duplicate_exemption_for_payroll_period(self.doctype, self.payroll_period)
+		validate_duplicate_exemption_for_payroll_period(self.doctype, self.name, self.payroll_period, self.employee)
 
 	def set_total_actual_amount(self):
 		self.total_actual_amount = flt(self.get("house_rent_payment_amount"))
