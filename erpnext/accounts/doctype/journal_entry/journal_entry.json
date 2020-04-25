@@ -491,14 +491,17 @@
    "fieldname": "from_template",
    "fieldtype": "Link",
    "label": "From Template",
-   "options": "Journal Entry Template"
+   "no_copy": 1,
+   "options": "Journal Entry Template",
+   "print_hide": 1,
+   "report_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 176,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-25 02:02:04.017198",
+ "modified": "2020-04-26 04:48:31.753820",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",
