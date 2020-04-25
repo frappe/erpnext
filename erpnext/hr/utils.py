@@ -9,6 +9,8 @@ from frappe.model.document import Document
 from frappe.desk.form import assign_to
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
+class DuplicateDeclarationError(frappe.ValidationError): pass
+
 class EmployeeBoardingController(Document):
 	'''
 		Create the project and the task for the boarding process
@@ -235,7 +237,7 @@ def validate_duplicate_exemption_for_payroll_period(doctype, docname, payroll_pe
 	})
 	if existing_record:
 		frappe.throw(_("{0} already exists for employee {1} and period {2}")
-			.format(doctype, payroll_period, employee))
+			.format(doctype, employee, payroll_period), DuplicateDeclarationError)
 
 def validate_tax_declaration(declarations):
 	subcategories = []
