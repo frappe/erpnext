@@ -7,6 +7,9 @@ import frappe
 from frappe.model.utils.rename_field import rename_field
 
 def execute():
+	if not frappe.db.table_exists("Payroll Period"):
+		return
+
 	for doctype in ("income_tax_slab", "salary_structure_assignment", "employee_other_income"):
 		frappe.reload_doc("hr", "doctype", doctype)
 
