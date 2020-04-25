@@ -2,23 +2,26 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Journal Entry Template", {
-	// refresh: function(frm) {
-
-	// }
 	setup: function(frm) {
-		frm.set_query("account" ,"accounts", () => {
-				return {
-					filters: {
-						"company": frm.doc.company==undefined ? null: frm.doc.company,
-					}
+		frappe.model.set_default_values(frm.doc);
+		frm.set_query("account" ,"accounts", function(){
+			return {
+				filters: {
+					"company": frm.doc.company,
 				}
+			}
 		});
-	},
-	onload_post_render: function(frm){
-		// frm.get_field("accounts").grid.set_multiple_add("account");
-	},
-	all_accounts: function(frm) {
-		frm.trigger("clear_child");
+		frappe.call({
+			type: "GET",
+			method: "erpnext.accounts.doctype.journal_entry_template.journal_entry_template.get_naming_series",
+			callback: function(r){
+				if(r.message){
+					frm.set_df_property("naming_series", "options", r.message.split("\n"));
+					frm.set_value("naming_series", r.message.split("\n")[0]);
+					frm.refresh_field("naming_series");
+				}
+			}
+		});
 	},
 	voucher_type: function(frm) {
 		var add_accounts = function(doc, r) {
@@ -28,14 +31,13 @@ frappe.ui.form.on("Journal Entry Template", {
 			});
 			refresh_field("accounts");
 		}
+	
+		if(!frm.doc.company) return;
+	
 		frm.trigger("clear_child");
 		switch(frm.doc.voucher_type){
 			case "Opening Entry":
-				if(frm.doc.company == undefined){
-					frappe.throw("Please select Company!");
-				}
 				frm.set_value("is_opening", "Yes");
-				
 				frappe.call({
 					type:"GET",
 					method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_opening_accounts",
@@ -61,10 +63,13 @@ frappe.ui.form.on("Journal Entry Template", {
 					},
 					callback: function(r) {
 						if(r.message) {
-							add_accounts(frm.doc, [r.message]);
+							// If default company bank account not set
+							if(!$.isEmptyObject(r.message)){
+								add_accounts(frm.doc, [r.message]);
+							}
 						}
 					}
-				})
+				});
 				break;
 			default:
 				frm.trigger("clear_child");
@@ -72,6 +77,6 @@ frappe.ui.form.on("Journal Entry Template", {
 	},
 	clear_child: function(frm){
 		frappe.model.clear_table(frm.doc, "accounts");
-		refresh_field("accounts");
+		frm.refresh_field("accounts");
 	}
 });
