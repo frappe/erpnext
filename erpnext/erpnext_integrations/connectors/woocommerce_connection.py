@@ -144,6 +144,10 @@ def create_sales_order(order, woocommerce_settings, customer_name, sys_lang):
 def set_items_in_sales_order(new_sales_order, woocommerce_settings, order, sys_lang):
 	company_abbr = frappe.db.get_value('Company', woocommerce_settings.company, 'abbr')
 
+	default_warehouse = _("Stores - {0}", sys_lang).format(company_abbr)
+	if not frappe.db.exists("Warehouse", default_warehouse):
+		frappe.throw(_("Please set Warehouse in Woocommerce Settings"))
+
 	for item in order.get("line_items"):
 		woocomm_item_id = item.get("product_id")
 		found_item = frappe.get_doc("Item", {"woocommerce_id": woocomm_item_id})
@@ -158,7 +162,7 @@ def set_items_in_sales_order(new_sales_order, woocommerce_settings, order, sys_l
 			"uom": woocommerce_settings.uom or _("Nos", sys_lang),
 			"qty": item.get("quantity"),
 			"rate": item.get("price"),
-			"warehouse": woocommerce_settings.warehouse or _("Stores - {0}", sys_lang).format(company_abbr)
+			"warehouse": woocommerce_settings.warehouse or default_warehouse
 			})
 
 		add_tax_details(new_sales_order, ordered_items_tax, "Ordered Item tax", woocommerce_settings.tax_account)
