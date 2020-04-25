@@ -199,6 +199,13 @@ class TestPaymentEntry(unittest.TestCase):
 		pi = make_purchase_invoice(supplier="_Test Supplier USD", debit_to="_Test Payable USD - _TC",
 			currency="USD", conversion_rate=50)
 
+		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank USD - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = "2016-01-01"
+		pe.source_exchange_rate = 50
+		pe.insert()
+		pe.submit()
+
 		outstanding_amount, status = frappe.db.get_value("Purchase Invoice", pi.name, ["outstanding_amount", "status"])
 		self.assertEqual(flt(outstanding_amount), 0)
 		self.assertEqual(status, 'Paid')
