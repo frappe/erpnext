@@ -186,7 +186,7 @@ def get_advance_vouchers(suppliers, fiscal_year=None, company=None, from_date=No
 	## since tuple of single element list contains None, For example ('Test Supplier 1', )
 	## and the below query fails
 	if len(suppliers) == 1:
-		suppliers.append(supplier[0])
+		suppliers.append(suppliers[0])
 
 	return frappe.db.sql_list("""
 		select distinct voucher_no
@@ -200,7 +200,7 @@ def get_debit_note_amount(suppliers, year_start_date, year_end_date, company=Non
 		condition = " and company=%s " % company
 
 	if len(suppliers) == 1:
-		suppliers.append(supplier[0])
+		suppliers.append(suppliers[0])
 
 	return flt(frappe.db.sql("""
 		select abs(sum(net_total))
