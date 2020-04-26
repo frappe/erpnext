@@ -77,7 +77,7 @@ class TestStockReconciliation(unittest.TestCase):
 
 				acc_bal, stock_bal, wh_list = get_stock_and_account_balance("Stock In Hand - TCP1",
 					stock_reco.posting_date, stock_reco.company)
-				self.assertEqual(acc_bal, stock_bal)
+				self.assertEqual(flt(acc_bal, 0), flt(stock_bal, 0))
 
 				stock_reco.cancel()
 
