@@ -61,7 +61,7 @@ def add_custom_roles_for_reports():
 			)).insert()
 
 def add_permissions():
-	for doctype in ('GST HSN Code', 'GST Settings', 'GSTR 3B Report'):
+	for doctype in ('GST HSN Code', 'GST Settings', 'GSTR 3B Report', 'Lower Deduction Certificate'):
 		add_permission(doctype, 'All', 0)
 		for role in ('Accounts Manager', 'Accounts User', 'System Manager'):
 			add_permission(doctype, role, 0)
