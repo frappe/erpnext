@@ -87,11 +87,12 @@
    "search_index": 1
   },
   {
-   "depends_on": "eval:doc.status==\"On Leave\"",
+   "depends_on": "eval:in_list([\"On Leave\", \"Half Day\"], doc.status)",
    "fieldname": "leave_type",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Leave Type",
+   "mandatory_depends_on": "eval:in_list([\"On Leave\", \"Half Day\"], doc.status)",
    "oldfieldname": "leave_type",
    "oldfieldtype": "Link",
    "options": "Leave Type"
@@ -100,6 +101,7 @@
    "fieldname": "leave_application",
    "fieldtype": "Link",
    "label": "Leave Application",
+   "no_copy": 1,
    "options": "Leave Application",
    "read_only": 1
   },
@@ -175,7 +177,8 @@
  "icon": "fa fa-ok",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-02-19 14:25:32.945842",
+ "links": [],
+ "modified": "2020-04-11 11:40:14.319496",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",
