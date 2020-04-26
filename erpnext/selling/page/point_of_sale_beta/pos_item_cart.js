@@ -227,27 +227,28 @@ erpnext.PointOfSale.ItemCart = class {
 	}
 	
 	fetch_customer_details(customer) {
-		return new Promise((resolve) => {
-			frappe.db.get_value('Customer', customer, ["email_id", "mobile_no", "image", "loyalty_program"]).then(({ message }) => {
-				const { loyalty_program } = message;
-				if (loyalty_program) {
-					frappe.call({
-						method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points",
-						args: { customer, loyalty_program, "silent": true },
-						callback: (r) => {
-							const { loyalty_points } = r.message;
-							if (!r.exc) {
-								this.customer_info = { ...message, customer, loyalty_points };
-								resolve();
+		if (customer)
+			return new Promise((resolve) => {
+				frappe.db.get_value('Customer', customer, ["email_id", "mobile_no", "image", "loyalty_program"]).then(({ message }) => {
+					const { loyalty_program } = message;
+					if (loyalty_program) {
+						frappe.call({
+							method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points",
+							args: { customer, loyalty_program, "silent": true },
+							callback: (r) => {
+								const { loyalty_points } = r.message;
+								if (!r.exc) {
+									this.customer_info = { ...message, customer, loyalty_points };
+									resolve();
+								}
 							}
-						}
-					});
-				} else {
-					this.customer_info = { ...message, customer };
-					resolve();
-				}
+						});
+					} else {
+						this.customer_info = { ...message, customer };
+						resolve();
+					}
+				});
 			});
-		});
 	}
     
     update_customer_section(frm) {
