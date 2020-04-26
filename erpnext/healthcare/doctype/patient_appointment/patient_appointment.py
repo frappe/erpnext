@@ -352,7 +352,7 @@ def send_message(doc, message):
 
 		# jinja to string convertion happens here
 		message = frappe.render_template(message, context)
-		number = [patient.mobile]
+		number = [patient_mobile]
 		send_sms(number, message)
 
 
