@@ -57,5 +57,5 @@
         "stock/dashboard/item_dashboard.html",
         "stock/dashboard/item_dashboard_list.html",
         "stock/dashboard/item_dashboard.js"
-    ]
+	]
 }

@@ -1,0 +1,129 @@
+{
+ "actions": [],
+ "creation": "2018-02-22 15:33:14.335573",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "is_sandbox",
+  "sb_settings",
+  "public_api_key",
+  "private_api_key",
+  "cb_header",
+  "live_checkout_url",
+  "live_api_url",
+  "sb_sandbox_setting",
+  "public_sandbox_api_key",
+  "private_sandbox_api_key",
+  "cb_sandbox",
+  "sandbox_checkout_url",
+  "sandbox_api_url",
+  "shipping_sb"
+ ],
+ "fields": [
+  {
+   "fieldname": "public_api_key",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Public API Key"
+  },
+  {
+   "fieldname": "private_api_key",
+   "fieldtype": "Password",
+   "in_list_view": 1,
+   "label": "Private API Key"
+  },
+  {
+   "fieldname": "cb_header",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_sandbox",
+   "fieldtype": "Check",
+   "label": "Sandbox Mode"
+  },
+  {
+   "fieldname": "sb_settings",
+   "fieldtype": "Section Break",
+   "label": "URLS"
+  },
+  {
+   "default": "https://cdn1.affirm.com/js/v2/affirm.js",
+   "fieldname": "live_checkout_url",
+   "fieldtype": "Data",
+   "label": "Live Checkout Url",
+   "reqd": 1
+  },
+  {
+   "default": "https://api.affirm.com/api/v2",
+   "fieldname": "live_api_url",
+   "fieldtype": "Data",
+   "label": "Live API Url",
+   "reqd": 1
+  },
+  {
+   "default": "https://cdn1-sandbox.affirm.com/js/v2/affirm.js",
+   "fieldname": "sandbox_checkout_url",
+   "fieldtype": "Data",
+   "label": "Sandbox Checkout Url",
+   "reqd": 1
+  },
+  {
+   "default": "https://sandbox.affirm.com/api/v2",
+   "fieldname": "sandbox_api_url",
+   "fieldtype": "Data",
+   "label": "SandBox API Url",
+   "reqd": 1
+  },
+  {
+   "fieldname": "shipping_sb",
+   "fieldtype": "Section Break",
+   "label": "Shipping Info"
+  },
+  {
+   "fieldname": "sb_sandbox_setting",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "public_sandbox_api_key",
+   "fieldtype": "Data",
+   "label": "Public Sandbox API Key"
+  },
+  {
+   "fieldname": "private_sandbox_api_key",
+   "fieldtype": "Password",
+   "label": "Private Sandbox API Key"
+  },
+  {
+   "fieldname": "cb_sandbox",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "in_create": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2020-04-22 01:19:57.566118",
+ "modified_by": "Administrator",
+ "module": "ERPNext Integrations",
+ "name": "Affirm Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "read_only": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

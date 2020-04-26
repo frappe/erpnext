@@ -16,6 +16,11 @@ def get_data():
 					"type": "doctype",
 					"name": "GoCardless Mandate",
 					"description": _("GoCardless SEPA Mandate"),
+				},
+				{
+					"type": "doctype",
+					"name": "Affirm Settings",
+					"description": _("ERPNext Affirm Integration"),
 				}
 			]
 		},
