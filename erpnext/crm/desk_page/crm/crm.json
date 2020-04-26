@@ -33,7 +33,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "CRM",
- "modified": "2020-04-01 11:28:51.219999",
+ "modified": "2020-04-26 22:31:15.865799",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
@@ -42,7 +42,7 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
-   "format": "Open",
+   "format": "{} Open",
    "label": "Lead",
    "link_to": "Lead",
    "stats_filter": "{\"status\":\"Open\"}",
