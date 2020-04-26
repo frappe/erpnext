@@ -365,11 +365,11 @@ class JournalEntry(AccountsController):
 	def set_total_debit_credit(self):
 		self.total_debit, self.total_credit, self.difference = 0, 0, 0
 		for d in self.get("accounts"):
-			if d.debit and d.credit:
+			if d.debit_in_account_currency and d.credit_in_account_currency:
 				frappe.throw(_("You cannot credit and debit same account at the same time"))
 
-			self.total_debit = flt(self.total_debit) + flt(d.debit, d.precision("debit"))
-			self.total_credit = flt(self.total_credit) + flt(d.credit, d.precision("credit"))
+			self.total_debit = flt(self.total_debit) + flt(d.debit_in_account_currency, d.precision("debit"))
+			self.total_credit = flt(self.total_credit) + flt(d.credit_in_account_currency, d.precision("credit"))
 
 		self.difference = flt(self.total_debit, self.precision("total_debit")) - \
 			flt(self.total_credit, self.precision("total_credit"))
@@ -559,20 +559,20 @@ class JournalEntry(AccountsController):
 
 			if self.write_off_based_on == 'Accounts Receivable':
 				jd1.party_type = "Customer"
-				jd1.credit = flt(d.outstanding_amount, self.precision("credit", "accounts"))
+				jd1.credit_in_account_currency = flt(d.outstanding_amount, self.precision("credit", "accounts"))
 				jd1.reference_type = "Sales Invoice"
 				jd1.reference_name = cstr(d.name)
 			elif self.write_off_based_on == 'Accounts Payable':
 				jd1.party_type = "Supplier"
-				jd1.debit = flt(d.outstanding_amount, self.precision("debit", "accounts"))
+				jd1.debit_in_account_currency = flt(d.outstanding_amount, self.precision("debit", "accounts"))
 				jd1.reference_type = "Purchase Invoice"
 				jd1.reference_name = cstr(d.name)
 
 		jd2 = self.append('accounts', {})
 		if self.write_off_based_on == 'Accounts Receivable':
-			jd2.debit = total
+			jd2.debit_in_account_currency = total
 		elif self.write_off_based_on == 'Accounts Payable':
-			jd2.credit = total
+			jd2.credit_in_account_currency = total
 
 		self.validate_total_debit_and_credit()
 
@@ -580,15 +580,26 @@ class JournalEntry(AccountsController):
 	def get_values(self):
 		cond = " and outstanding_amount <= {0}".format(self.write_off_amount) \
 			if flt(self.write_off_amount) > 0 else ""
-
 		if self.write_off_based_on == 'Accounts Receivable':
-			return frappe.db.sql("""select name, debit_to as account, customer as party, outstanding_amount
+			party_cond = ' and customer Like "%%{}%%"'.format(self.party_id) if self.party_id else ""
+			cond += party_cond
+			sql = """select name, debit_to as account, customer as party, outstanding_amount
 				from `tabSales Invoice` where docstatus = 1 and company = %s
-				and outstanding_amount > 0 %s""" % ('%s', cond), self.company, as_dict=True)
+				and outstanding_amount > 0 %s""" % ('%s', cond)
+			result = frappe.db.sql(sql, self.company, as_dict=True)
+			if len(result) == 0:
+				frappe.msgprint('Cannot find any outstanding invoice with Party ID "{}"'.format(self.party_id))
+			return result
 		elif self.write_off_based_on == 'Accounts Payable':
-			return frappe.db.sql("""select name, credit_to as account, supplier as party, outstanding_amount
+			party_cond = ' and supplier Like "%%{}%%"'.format(self.party_id) if self.party_id else ""
+			cond += party_cond
+			sql = """select name, credit_to as account, supplier as party, outstanding_amount
 				from `tabPurchase Invoice` where docstatus = 1 and company = %s
-				and outstanding_amount > 0 %s""" % ('%s', cond), self.company, as_dict=True)
+				and outstanding_amount > 0 %s""" % ('%s', cond)
+			result = frappe.db.sql(sql, self.company, as_dict=True)
+			if len(result) == 0:
+				frappe.msgprint('Cannot find any outstanding invoice with Party ID "{}"'.format(self.party_id))
+			return result
 
 	def update_expense_claim(self):
 		for d in self.accounts:
