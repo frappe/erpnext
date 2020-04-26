@@ -24,7 +24,7 @@ erpnext.PointOfSale.Payment = class {
                         <div class="flex flex-col justify-center flex-1 ml-4">
                             <div class="flex w-full">
                                 <div class="totals-remarks items-end justify-end flex flex-1">
-                                    <div class="remarks text-md-0 text-grey mr-auto">+ Add Remark</div>
+                                    <div class="remarks text-md-0 text-grey mr-auto"></div>
                                     <div class="totals flex justify-end pt-4"></div>
                                 </div>
                                 <div class="number-pad w-40 mb-4 ml-8 d-none"></div>
@@ -129,9 +129,9 @@ erpnext.PointOfSale.Payment = class {
 			me.selected_mode.set_value(value);
 		})
 
-		this.$totals_remarks.on('click', '.remarks', () => {
-			this.toggle_remarks_control();
-		})
+		// this.$totals_remarks.on('click', '.remarks', () => {
+		// 	this.toggle_remarks_control();
+		// })
 
 		this.$component.on('click', '.submit-order', () => {
 			this.events.submit_invoice();
@@ -273,7 +273,8 @@ erpnext.PointOfSale.Payment = class {
 
 		frappe.db.get_value('Customer', doc.customer, 'loyalty_program', ({ loyalty_program }) => {
 			if (!loyalty_program) {
-				return this.render_add_payment_method_dom();
+				// return this.render_add_payment_method_dom();
+				return;
 			}
 
 			const lp_details_promise = this.get_loyalty_program_details(doc.customer, loyalty_program, doc.posting_date, doc.company);
@@ -321,7 +322,7 @@ erpnext.PointOfSale.Payment = class {
 				});
 				this.loyalty_points_control.toggle_label(false);
 
-				this.render_add_payment_method_dom();
+				// this.render_add_payment_method_dom();
 			})
 		});
 	}
@@ -379,7 +380,7 @@ erpnext.PointOfSale.Payment = class {
 			this.$component.find('.order-time').removeClass('d-none').html(`Order Completed on ${order_completed_on}`);
 		} else {
 			this.$component.find('.submit-order').removeClass('d-none');
-			this.$remarks.html('+ Add Remark');
+			// this.$remarks.html('+ Add Remark');
 			this.$component.find('.order-time').addClass('d-none');
 		}
 	}
