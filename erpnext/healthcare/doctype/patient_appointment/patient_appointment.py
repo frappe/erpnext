@@ -412,11 +412,36 @@ def get_events(start, end, filters=None):
 
 @frappe.whitelist()
 def get_procedure_prescribed(patient):
-	return frappe.db.sql("""select pp.name, pp.procedure, pp.parent, ct.practitioner,
-	ct.encounter_date, pp.practitioner, pp.date, pp.department
-	from `tabPatient Encounter` ct, `tabProcedure Prescription` pp
-	where ct.patient=%(patient)s and pp.parent=ct.name and pp.appointment_booked=0
-	order by ct.creation desc""", {'patient': patient})
+	return frappe.db.sql(
+		"""
+			SELECT
+				pp.name, pp.procedure, pp.parent, ct.practitioner,
+				ct.encounter_date, pp.practitioner, pp.date, pp.department
+			FROM
+				`tabPatient Encounter` ct, `tabProcedure Prescription` pp
+			WHERE
+				ct.patient=%(patient)s and pp.parent=ct.name and pp.appointment_booked=0
+			ORDER BY
+				ct.creation desc
+		""", {'patient': patient}
+	)
+
+
+@frappe.whitelist()
+def get_prescribed_therapies(patient):
+	return frappe.db.sql(
+		"""
+			SELECT
+				t.therapy_type, t.name, t.parent, e.practitioner,
+				e.encounter_date, e.therapy_plan, e.visit_department
+			FROM
+				`tabPatient Encounter` e, `tabTherapy Plan Detail` t
+			WHERE
+				e.patient=%(patient)s and t.parent=e.name
+			ORDER BY
+				e.creation desc
+		""", {'patient': patient}
+	)
 
 
 def update_appointment_status():

@@ -1,0 +1,32 @@
+{
+ "actions": [],
+ "creation": "2020-04-19 19:33:00.115395",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "assessment_parameter"
+ ],
+ "fields": [
+  {
+   "fieldname": "assessment_parameter",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Assessment Parameter",
+   "options": "Patient Assessment Parameter",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-04-19 19:33:00.115395",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Patient Assessment Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

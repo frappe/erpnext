@@ -240,6 +240,8 @@ frappe.ui.form.on("Work Order", {
 			});
 		}, __("Job Card"), __("Create"));
 
+		dialog.fields_dict["operations"].grid.wrapper.find('.grid-add-row').hide();
+
 		var pending_qty = 0;
 		frm.doc.operations.forEach(data => {
 			if(data.completed_qty != frm.doc.qty) {
@@ -311,7 +313,7 @@ frappe.ui.form.on("Work Order", {
 				"Work in Progress": "progress-bar-warning",
 				"Completed": "progress-bar-success"
 			};
-	
+
 			let bars = [];
 			let message = '';
 			let title = '';
@@ -402,7 +404,6 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	before_submit: function(frm) {
-		frm.toggle_reqd(["fg_warehouse", "wip_warehouse"], true);
 		frm.fields_dict.required_items.grid.toggle_reqd("source_warehouse", true);
 		frm.toggle_reqd("transfer_material_against",
 			frm.doc.operations && frm.doc.operations.length > 0);

@@ -12,6 +12,7 @@
   "deduct_full_tax_on_selected_payroll_date",
   "depends_on_payment_days",
   "is_tax_applicable",
+  "exempted_from_income_tax",
   "is_flexible_benefit",
   "variable_based_on_taxable_salary",
   "section_break_2",
@@ -62,6 +63,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.parentfield=='earnings'",
    "fetch_from": "salary_component.is_tax_applicable",
    "fieldname": "is_tax_applicable",
    "fieldtype": "Check",
@@ -71,6 +73,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.parentfield=='earnings'",
    "fetch_from": "salary_component.is_flexible_benefit",
    "fieldname": "is_flexible_benefit",
    "fieldtype": "Check",
@@ -80,6 +83,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.parentfield=='deductions'",
    "fetch_from": "salary_component.variable_based_on_taxable_salary",
    "fieldname": "variable_based_on_taxable_salary",
    "fieldtype": "Check",
@@ -187,11 +191,20 @@
    "fieldtype": "HTML",
    "label": "Condition and Formula Help",
    "options": "<h3>Condition and Formula Help</h3>\n\n<p>Notes:</p>\n\n<ol>\n<li>Use field <code>base</code> for using base salary of the Employee</li>\n<li>Use Salary Component abbreviations in conditions and formulas. <code>BS = Basic Salary</code></li>\n<li>Use field name for employee details in conditions and formulas. <code>Employment Type = employment_type</code><code>Branch = branch</code></li>\n<li>Use field name from Salary Slip in conditions and formulas. <code>Payment Days = payment_days</code><code>Leave without pay = leave_without_pay</code></li>\n<li>Direct Amount can also be entered based on Condtion. See example 3</li></ol>\n\n<h4>Examples</h4>\n<ol>\n<li>Calculating Basic Salary based on <code>base</code>\n<pre><code>Condition: base &lt; 10000</code></pre>\n<pre><code>Formula: base * .2</code></pre></li>\n<li>Calculating HRA based on Basic Salary<code>BS</code> \n<pre><code>Condition: BS &gt; 2000</code></pre>\n<pre><code>Formula: BS * .1</code></pre></li>\n<li>Calculating TDS based on Employment Type<code>employment_type</code> \n<pre><code>Condition: employment_type==\"Intern\"</code></pre>\n<pre><code>Amount: 1000</code></pre></li>\n</ol>"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.parentfield=='deductions'",
+   "fetch_from": "salary_component.exempted_from_income_tax",
+   "fieldname": "exempted_from_income_tax",
+   "fieldtype": "Check",
+   "label": "Exempted from Income Tax",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2019-12-31 17:15:25.646689",
+ "modified": "2020-04-24 20:00:16.475295",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Detail",
