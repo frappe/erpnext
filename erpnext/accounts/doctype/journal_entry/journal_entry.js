@@ -122,12 +122,9 @@ frappe.ui.form.on("Journal Entry", {
 	},
 
 	voucher_type: function(frm){
-		frm.toggle_reqd("cheque_no", frm.doc.voucher_type=="Bank Entry");
-		frm.toggle_reqd("cheque_date", frm.doc.voucher_type=="Bank Entry");
 
 		if(!frm.doc.company) return;
-		if(frm.)
-
+		
 		if((!(frm.doc.accounts || []).length) || ((frm.doc.accounts || []).length==1 && !frm.doc.accounts[0].account)) {
 			if(in_list(["Bank Entry", "Cash Entry"], frm.doc.voucher_type)) {
 				return frappe.call({
