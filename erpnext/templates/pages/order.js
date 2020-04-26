@@ -5,6 +5,7 @@ frappe.ready(function(){
 
 	var loyalty_points_input = document.getElementById("loyalty-point-to-redeem");
 	var loyalty_points_status = document.getElementById("loyalty-points-status");
+	frappe.cart = {}
 	if (loyalty_points_input) {
 		loyalty_points_input.onblur = apply_loyalty_points;
 	}
@@ -39,4 +40,24 @@ frappe.ready(function(){
 			});
 		}
 	}
-})
+
+});
+
+function initiate_payment() {
+	let gateway_url = doc_info.payment_gateway_url;
+
+	if (frappe.cart.selected_payment_gateway) {
+		fetch("/api/resource/Payment%20Gateway%20Account?filters=" + `[["payment_gateway","=","${frappe.cart.selected_payment_gateway}"]]`)
+			.then((resp) => resp.json())
+			.then(response => {
+				gateway_url += `&payment_gateway=${response.data[0].name}`
+				window.location.href = gateway_url;
+			})
+		return;
+	}
+	window.location.href = gateway_url;
+}
+
+function payment_gateway_selected(event) {
+	frappe.cart.selected_payment_gateway = event.target.value;
+}
