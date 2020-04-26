@@ -261,10 +261,23 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				price_list: this.frm.doc.buying_price_list
 			}, function() {
 				me.apply_pricing_rule();
-
 				me.frm.doc.apply_tds = me.frm.supplier_tds ? 1 : 0;
+				me.frm.doc.tax_withholding_category = me.frm.supplier_tds;
 				me.frm.set_df_property("apply_tds", "read_only", me.frm.supplier_tds ? 0 : 1);
+				me.frm.set_df_property("tax_withholding_category", "hidden", me.frm.supplier_tds ? 0 : 1);
 			})
+	},
+
+	apply_tds: function(frm) {
+		var me = this;
+
+		if (!me.frm.doc.apply_tds) {
+			me.frm.set_value("tax_withholding_category", '');
+			me.frm.set_df_property("tax_withholding_category", "hidden", 1);
+		} else {
+			me.frm.set_value("tax_withholding_category", me.frm.supplier_tds);
+			me.frm.set_df_property("tax_withholding_category", "hidden", 0);
+		}
 	},
 
 	credit_to: function() {

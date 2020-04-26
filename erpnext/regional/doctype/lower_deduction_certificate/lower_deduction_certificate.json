@@ -1,0 +1,138 @@
+{
+ "actions": [],
+ "autoname": "field:certificate_no",
+ "creation": "2020-03-10 23:12:10.072631",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "certificate_details_section",
+  "section_code",
+  "fiscal_year",
+  "column_break_3",
+  "certificate_no",
+  "section_break_3",
+  "supplier",
+  "column_break_7",
+  "pan_no",
+  "validity_details_section",
+  "valid_from",
+  "column_break_10",
+  "valid_upto",
+  "section_break_9",
+  "rate",
+  "column_break_14",
+  "certificate_limit"
+ ],
+ "fields": [
+  {
+   "fieldname": "certificate_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Certificate No",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "section_code",
+   "fieldtype": "Select",
+   "label": "Section Code",
+   "options": "192\n193\n194\n194A\n194C\n194D\n194H\n194I\n194J\n194LA\n194LBB\n194LBC\n195",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break",
+   "label": "Deductee Details"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supplier",
+   "options": "Supplier",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "supplier.pan",
+   "fetch_if_empty": 1,
+   "fieldname": "pan_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "PAN No",
+   "reqd": 1
+  },
+  {
+   "fieldname": "validity_details_section",
+   "fieldtype": "Section Break",
+   "label": "Validity Details"
+  },
+  {
+   "fieldname": "valid_upto",
+   "fieldtype": "Date",
+   "label": "Valid Upto",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Percent",
+   "label": "Rate Of TDS As Per Certificate",
+   "reqd": 1
+  },
+  {
+   "fieldname": "certificate_limit",
+   "fieldtype": "Currency",
+   "label": "Certificate Limit",
+   "reqd": 1
+  },
+  {
+   "fieldname": "certificate_details_section",
+   "fieldtype": "Section Break",
+   "label": "Certificate Details"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "valid_from",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Valid From",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "label": "Fiscal Year",
+   "options": "Fiscal Year",
+   "reqd": 1
+  }
+ ],
+ "links": [],
+ "modified": "2020-04-23 23:04:41.203721",
+ "modified_by": "Administrator",
+ "module": "Regional",
+ "name": "Lower Deduction Certificate",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
