@@ -16,6 +16,7 @@
   "is_paid",
   "is_return",
   "apply_tds",
+  "tax_withholding_category",
   "column_break1",
   "company",
   "posting_date",
@@ -1284,13 +1285,21 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tax_withholding_category",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Tax Withholding Category",
+   "options": "Tax Withholding Category",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-17 13:05:25.199832",
+ "modified": "2020-04-18 13:05:25.199832",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
