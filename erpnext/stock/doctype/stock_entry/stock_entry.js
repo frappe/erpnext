@@ -312,10 +312,9 @@ frappe.ui.form.on('Stock Entry', {
 			callback: function(r) {
 				if (!r.exe && r.message){
 					frappe.model.set_value(cdt, cdn, "serial_no", r.message);
-
-					if (callback) {
-						callback();
-					}
+				}
+				if (callback) {
+					callback();
 				}
 			}
 		});
@@ -540,8 +539,9 @@ frappe.ui.form.on('Stock Entry', {
 
 frappe.ui.form.on('Stock Entry Detail', {
 	qty: function(frm, cdt, cdn) {
-		frm.events.set_basic_rate(frm, cdt, cdn);
- 		frm.events.set_serial_no(frm, cdt, cdn);
+		frm.events.set_serial_no(frm, cdt, cdn, () => {
+			frm.events.set_basic_rate(frm, cdt, cdn);
+		});
 	},
 
 	conversion_factor: function(frm, cdt, cdn) {
