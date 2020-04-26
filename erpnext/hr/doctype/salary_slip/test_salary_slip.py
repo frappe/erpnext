@@ -21,17 +21,104 @@ class TestSalarySlip(unittest.TestCase):
 		make_earning_salary_component(setup=True, company_list=["_Test Company"])
 		make_deduction_salary_component(setup=True, company_list=["_Test Company"])
 
-		for dt in ["Leave Application", "Leave Allocation", "Salary Slip"]:
+		for dt in ["Leave Application", "Leave Allocation", "Salary Slip", "Attendance"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
 
 		self.make_holiday_list()
 
 		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Slip Test Holiday List")
 		frappe.db.set_value("HR Settings", None, "email_salary_slip_to_employee", 0)
-
+		frappe.db.set_value('HR Settings', None, 'leave_status_notification_template', None)
+		frappe.db.set_value('HR Settings', None, 'leave_approval_notification_template', None)
+		
 	def tearDown(self):
 		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
 		frappe.set_user("Administrator")
+
+	def test_payment_days_based_on_attendance(self):
+		from erpnext.hr.doctype.attendance.attendance import mark_attendance
+		no_of_days = self.get_no_of_days()
+
+		# Payroll based on attendance
+		frappe.db.set_value("HR Settings", None, "payroll_based_on", "Attendance")
+		frappe.db.set_value("HR Settings", None, "daily_wages_fraction_for_half_day", 0.75)
+
+		emp_id = make_employee("test_for_attendance@salary.com")
+		frappe.db.set_value("Employee", emp_id, {"relieving_date": None, "status": "Active"})
+
+		frappe.db.set_value("Leave Type", "Leave Without Pay", "include_holiday", 0)
+
+		month_start_date = get_first_day(nowdate())
+		month_end_date = get_last_day(nowdate())
+
+		first_sunday = frappe.db.sql("""
+			select holiday_date from `tabHoliday`
+			where parent = 'Salary Slip Test Holiday List'
+				and holiday_date between %s and %s
+			order by holiday_date
+		""", (month_start_date, month_end_date))[0][0]
+
+		mark_attendance(emp_id, first_sunday, 'Absent', ignore_validate=True) # invalid lwp
+		mark_attendance(emp_id, add_days(first_sunday, 1), 'Absent', ignore_validate=True) # valid lwp
+		mark_attendance(emp_id, add_days(first_sunday, 2), 'Half Day', leave_type='Leave Without Pay', ignore_validate=True) # valid 0.75 lwp
+		mark_attendance(emp_id, add_days(first_sunday, 3), 'On Leave', leave_type='Leave Without Pay', ignore_validate=True) # valid lwp
+		mark_attendance(emp_id, add_days(first_sunday, 4), 'On Leave', leave_type='Casual Leave', ignore_validate=True) # invalid lwp
+		mark_attendance(emp_id, add_days(first_sunday, 7), 'On Leave', leave_type='Leave Without Pay', ignore_validate=True) # invalid lwp
+
+		ss = make_employee_salary_slip("test_for_attendance@salary.com", "Monthly")
+
+		self.assertEqual(ss.leave_without_pay, 2.25)
+
+		days_in_month = no_of_days[0]
+		no_of_holidays = no_of_days[1]
+
+		self.assertEqual(ss.payment_days, days_in_month - no_of_holidays - 2.25)
+
+		#Gross pay calculation based on attendances
+		gross_pay = 78000 - ((78000 / (days_in_month - no_of_holidays)) * flt(ss.leave_without_pay))
+
+		self.assertEqual(ss.gross_pay, gross_pay)
+
+		frappe.db.set_value("HR Settings", None, "payroll_based_on", "Leave")
+
+	def test_payment_days_based_on_leave_application(self):
+		no_of_days = self.get_no_of_days()
+
+		# Payroll based on attendance
+		frappe.db.set_value("HR Settings", None, "payroll_based_on", "Leave")
+
+		emp_id = make_employee("test_for_attendance@salary.com")
+		frappe.db.set_value("Employee", emp_id, {"relieving_date": None, "status": "Active"})
+
+		frappe.db.set_value("Leave Type", "Leave Without Pay", "include_holiday", 0)
+
+		month_start_date = get_first_day(nowdate())
+		month_end_date = get_last_day(nowdate())
+
+		first_sunday = frappe.db.sql("""
+			select holiday_date from `tabHoliday`
+			where parent = 'Salary Slip Test Holiday List'
+				and holiday_date between %s and %s
+			order by holiday_date
+		""", (month_start_date, month_end_date))[0][0]
+
+		make_leave_application(emp_id, first_sunday, add_days(first_sunday, 3), "Leave Without Pay")
+
+		ss = make_employee_salary_slip("test_for_attendance@salary.com", "Monthly")
+
+		self.assertEqual(ss.leave_without_pay, 3)
+
+		days_in_month = no_of_days[0]
+		no_of_holidays = no_of_days[1]
+
+		self.assertEqual(ss.payment_days, days_in_month - no_of_holidays - 3)
+
+		#Gross pay calculation based on attendances
+		gross_pay = 78000 - ((78000 / (days_in_month - no_of_holidays)) * flt(ss.leave_without_pay))
+
+		self.assertEqual(ss.gross_pay, gross_pay)
+
+		frappe.db.set_value("HR Settings", None, "payroll_based_on", "Leave")
 
 	def test_salary_slip_with_holidays_included(self):
 		no_of_days = self.get_no_of_days()
@@ -314,7 +401,6 @@ class TestSalarySlip(unittest.TestCase):
 			getdate(nowdate()).month) if i[6] != 0])
 
 		return [no_of_days_in_month[1], no_of_holidays_in_month]
-
 
 def make_employee_salary_slip(user, payroll_frequency, salary_structure=None):
 	from erpnext.hr.doctype.salary_structure.test_salary_structure import make_salary_structure
@@ -603,3 +689,17 @@ def create_additional_salary(employee, payroll_period, amount):
 		"type": "Earning"
 	}).submit()
 	return salary_date
+
+def make_leave_application(employee, from_date, to_date, leave_type, company=None):
+	leave_application = frappe.get_doc(dict(
+		doctype = 'Leave Application',
+		employee = employee,
+		leave_type = leave_type,
+		from_date = from_date,
+		to_date = to_date,
+		company = company or erpnext.get_default_company() or "_Test Company",
+		docstatus = 1,
+		status = "Approved",
+		leave_approver = 'test@example.com'
+	))
+	leave_application.submit()

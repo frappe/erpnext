@@ -15,6 +15,9 @@ class HRSettings(Document):
 		self.set_naming_series()
 		self.validate_password_policy()
 
+		if not self.daily_wages_fraction_for_half_day:
+			self.daily_wages_fraction_for_half_day = 0.5
+
 	def set_naming_series(self):
 		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
 		set_by_naming_series("Employee", "employee_number",
