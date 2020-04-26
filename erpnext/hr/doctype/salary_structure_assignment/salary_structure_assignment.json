@@ -10,11 +10,12 @@
   "employee",
   "employee_name",
   "department",
-  "designation",
+  "company",
   "column_break_6",
+  "designation",
   "salary_structure",
   "from_date",
-  "company",
+  "income_tax_slab",
   "section_break_7",
   "base",
   "column_break_9",
@@ -113,11 +114,17 @@
    "options": "Salary Structure Assignment",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "income_tax_slab",
+   "fieldtype": "Link",
+   "label": "Income Tax Slab",
+   "options": "Income Tax Slab"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-31 17:05:28.637510",
+ "modified": "2020-04-25 18:24:23.617088",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Structure Assignment",
