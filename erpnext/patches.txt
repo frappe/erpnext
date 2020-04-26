@@ -657,3 +657,5 @@ erpnext.patches.v12_0.recalculate_requested_qty_in_bin
 erpnext.patches.v12_0.rename_mws_settings_fields
 erpnext.patches.v12_0.set_correct_status_for_expense_claim
 erpnext.patches.v12_0.repost_stock_ledger_entries_for_target_warehouse
+erpnext.patches.v12_0.update_end_date_and_status_in_email_campaign
+erpnext.patches.v13_0.move_tax_slabs_from_payroll_period_to_income_tax_slab #123
