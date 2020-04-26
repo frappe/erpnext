@@ -375,7 +375,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		location = frappe.db.get_value('Asset', assets[0].name, 'location')
 		self.assertEquals(location, "Test Location")
-	
+
 	def test_purchase_return_with_submitted_asset(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
 
@@ -397,10 +397,10 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		pr_return = make_purchase_return(pr.name)
 		self.assertRaises(frappe.exceptions.ValidationError, pr_return.submit)
-		
+
 		asset.load_from_db()
 		asset.cancel()
-		
+
 		pr_return.submit()
 
 	def test_purchase_receipt_for_enable_allow_cost_center_in_entry_of_bs_account(self):
@@ -506,6 +506,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 	def test_stock_transfer_from_purchase_receipt(self):
 		set_perpetual_inventory(1)
+		pr1 = make_purchase_receipt(warehouse = '_Test Warehouse 2 - _TC')
+
 		pr = make_purchase_receipt(do_not_save=1)
 		pr.supplier_warehouse = ''
 		pr.items[0].from_warehouse = '_Test Warehouse 2 - _TC'
@@ -532,6 +534,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 		warehouse = frappe.get_doc('Warehouse', '_Test Warehouse 2 - _TC')
 		warehouse.account = '_Test Account Stock In Hand - _TC'
 		warehouse.save()
+
+		pr1 = make_purchase_receipt(warehouse = '_Test Warehouse 2 - _TC')
 
 		pr = make_purchase_receipt(do_not_save=1)
 		pr.items[0].from_warehouse = '_Test Warehouse 2 - _TC'

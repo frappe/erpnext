@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
 from frappe.utils import cint, flt, cstr, now, now_datetime
-from erpnext.stock.utils import get_valuation_method, get_outgoing_rate_for_cancel
+from erpnext.stock.utils import get_valuation_method, get_incoming_outgoing_rate_for_cancel
 import json
 
 from six import iteritems
@@ -32,10 +32,16 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 
 				if cancel:
 					sle['actual_qty'] = -flt(sle.get('actual_qty'), 0)
-					if sle['actual_qty'] < 0:
-						sle['outgoing_rate'] = get_outgoing_rate_for_cancel(sle.item_code,
+
+					if sle['actual_qty'] < 0 and not sle.get('outgoing_rate'):
+						sle['outgoing_rate'] = get_incoming_outgoing_rate_for_cancel(sle.item_code,
 							sle.voucher_type, sle.voucher_no, sle.voucher_detail_no)
 						sle['incoming_rate'] = 0.0
+
+					if sle['actual_qty'] > 0 and not sle.get('incoming_rate'):
+						sle['incoming_rate'] = get_incoming_outgoing_rate_for_cancel(sle.item_code,
+							sle.voucher_type, sle.voucher_no, sle.voucher_detail_no)
+						sle['outgoing_rate'] = 0.0
 
 
 			if sle.get("actual_qty") or sle.get("voucher_type")=="Stock Reconciliation":
