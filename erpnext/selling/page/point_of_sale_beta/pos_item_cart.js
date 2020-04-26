@@ -2,7 +2,7 @@ erpnext.PointOfSale.ItemCart = class {
     constructor({ wrapper, events }) {
 		this.wrapper = wrapper;
 		this.events = events;
-        this.customer_info = [];
+        this.customer_info = undefined;
         
         this.intialize_component();
     }
@@ -28,7 +28,7 @@ erpnext.PointOfSale.ItemCart = class {
 
     initialize_customer_selector() {
 		this.$component.append(
-            `<div class="customer-section rounded flex flex-col p-8 pb-0"></div>`
+            `<div class="customer-section rounded border flex flex-col m-8 mb-0 pr-4 pl-4"></div>`
         )
 		this.$customer_section = this.$component.find('.customer-section');
 	}
@@ -36,6 +36,7 @@ erpnext.PointOfSale.ItemCart = class {
 	reset_customer_selector() {
 		const frm = this.events.get_frm();
 		frm.set_value('customer', '');
+		this.$customer_section.removeClass('border pr-4 pl-4');
 		this.show_customer_selector();
 		this.customer_field.set_focus();
 	}
@@ -53,6 +54,7 @@ erpnext.PointOfSale.ItemCart = class {
                 <div class="numpad-section flex flex-col mt-auto d-none w-full p-8 pt-0 pb-0"></div>
             </div>`
         );
+		this.$cart_container = this.$component.find('.cart-container');
 
 		this.make_cart_totals_section();
 		this.make_cart_items_section();
@@ -69,7 +71,7 @@ erpnext.PointOfSale.ItemCart = class {
     make_no_items_placeholder() {
 		this.$cart_header.addClass('d-none');
 		this.$cart_items_wrapper.html(
-			`<div class="no-item-wrapper flex items-center h-18 pr-4 pl-4">
+			`<div class="no-item-wrapper flex items-center h-18">
 				<div class="flex-1 text-center text-grey">No items in cart</div>
 			</div>`
 		)
@@ -149,8 +151,21 @@ erpnext.PointOfSale.ItemCart = class {
     
     bind_events() {
 		const me = this;
-		this.$customer_section.on('click', '.add-remove-customer', async () => {
-			this.reset_customer_selector();
+		this.$customer_section.on('click', '.add-remove-customer', function (e) {
+			const customer_info_is_visible = me.$cart_container.hasClass('d-none');
+			if (customer_info_is_visible) {
+				me.toggle_customer_info(false);
+			} else {
+				me.reset_customer_selector();
+			}
+		});
+
+		this.$customer_section.on('click', '.customer-header', function(e) {
+			// don't run the event if .add-remove-customer btn is clicked which is under .customer-header
+			if ($(e.target).closest('.add-remove-customer').length) return;
+
+			const show = !me.$cart_container.hasClass('d-none');
+			me.toggle_customer_info(show);
 		});
 
 		this.$cart_items_wrapper.on('click', '.cart-item-wrapper', function() {
@@ -213,15 +228,30 @@ erpnext.PointOfSale.ItemCart = class {
 	
 	fetch_customer_details(customer) {
 		return new Promise((resolve) => {
-			frappe.db.get_value('Customer', customer, ["email_id", "mobile_no", "image"]).then(({ message }) => {
-				this.customer_info.push({ ...message, customer });
-				resolve();
+			frappe.db.get_value('Customer', customer, ["email_id", "mobile_no", "image", "loyalty_program"]).then(({ message }) => {
+				const { loyalty_program } = message;
+				if (loyalty_program) {
+					frappe.call({
+						method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points",
+						args: { customer, loyalty_program, "silent": true },
+						callback: (r) => {
+							const { loyalty_points } = r.message;
+							if (!r.exc) {
+								this.customer_info = { ...message, customer, loyalty_points };
+								resolve();
+							}
+						}
+					});
+				} else {
+					this.customer_info = { ...message, customer };
+					resolve();
+				}
 			});
 		});
 	}
     
     update_customer_section(frm) {
-		const { customer, email_id='', mobile_no='', image } = this.customer_info.find(c => c.customer === frm.doc.customer) || {};
+		const { customer, email_id='', mobile_no='', image } = this.customer_info || {};
 
 		function get_customer_description() {
 			if (!email_id && !mobile_no) {
@@ -248,17 +278,19 @@ erpnext.PointOfSale.ItemCart = class {
 		}
 
 		if (customer) {
-			this.$customer_section.html(
-				`<div class="flex items-center rounded border border-grey h-18 pr-4 pl-4">
-					${get_customer_image()}
-					<div class="flex flex-col">
-						<div class="text-md text-dark-grey text-bold">${customer}</div>
-						${get_customer_description()}
-					</div>
-					<div class="add-remove-customer ml-auto flex items-center" data-customer="${escape(customer)}">
-						<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
-							<path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
-						</svg>
+			this.$customer_section.addClass('border pr-4 pl-4').html(
+				`<div class="customer-details flex flex-col">
+					<div class="customer-header flex items-center rounded h-18">
+						${get_customer_image()}
+						<div class="customer-name flex flex-col flex-1">
+							<div class="text-md text-dark-grey text-bold">${customer}</div>
+							${get_customer_description()}
+						</div>
+						<div class="add-remove-customer flex items-center" data-customer="${escape(customer)}">
+							<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
+								<path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
+							</svg>
+						</div>
 					</div>
 				</div>`
 			);
@@ -529,6 +561,158 @@ erpnext.PointOfSale.ItemCart = class {
 		if (['qty', 'discount_percentage', 'rate'].includes(fieldname)) {
 			this.$numpad_section.find(`[data-button-value="${fieldname}"]`).click();
 		}
+	}
+
+	toggle_customer_info(show) {
+		if (show) {
+			this.$cart_container.addClass('d-none')
+			this.$customer_section.addClass('flex-1 scroll').removeClass('mb-0 border pr-4 pl-4')
+			this.$customer_section.find('.icon').addClass('w-24 h-24').removeClass('w-12 h-12')
+			this.$customer_section.find('.customer-header').removeClass('h-18');
+			this.$customer_section.find('.customer-details').addClass('sticky z-100 bg-white');
+
+			this.$customer_section.find('.customer-name').html(
+				`<div class="text-md text-dark-grey text-bold">${this.customer_info.customer}</div>
+				<div class="last-transacted-on text-grey-200"></div>`
+			)
+	
+			this.$customer_section.find('.customer-details').append(
+				`<div class="customer-form">
+					<div class="text-grey mt-4 mb-6">CONTACT DETAILS</div>
+					<div class="grid grid-cols-2 gap-4">
+						<div class="email_id-field"></div>
+						<div class="mobile_no-field"></div>
+						<div class="loyalty_program-field"></div>
+						<div class="loyalty_points-field"></div>
+					</div>
+					<div class="text-grey mt-4 mb-6">RECENT TRANSACTIONS</div>
+				</div>`
+			)
+			// transactions need to be in diff div from sticky elem for scrolling
+			this.$customer_section.append(`<div class="customer-transactions flex-1 border rounded"></div>`)
+
+			this.render_customer_info_form();
+			this.fetch_customer_transactions();
+
+		} else {
+			this.$cart_container.removeClass('d-none');
+			this.$customer_section.removeClass('flex-1 scroll').addClass('mb-0 border pr-4 pl-4');
+			this.$customer_section.find('.icon').addClass('w-12 h-12').removeClass('w-24 h-24');
+			this.$customer_section.find('.customer-header').addClass('h-18')
+			this.$customer_section.find('.customer-details').removeClass('sticky z-100 bg-white');
+
+			this.update_customer_section();
+		}
+	}
+
+	render_customer_info_form() {
+		const $customer_form = this.$customer_section.find('.customer-form');
+
+		const dfs = [{
+			fieldname: 'email_id',
+			label: __('Email'),
+			fieldtype: 'Data',
+			options: 'email',
+			placeholder: __("Enter customer's email")
+		},{
+			fieldname: 'mobile_no',
+			label: __('Phone Number'),
+			fieldtype: 'Data',
+			placeholder: __("Enter customer's phone number")
+		},{
+			fieldname: 'loyalty_program',
+			label: __('Loyalty Program'),
+			fieldtype: 'Link',
+			options: 'Loyalty Program',
+			placeholder: __("Select Loyalty Program")
+		},{
+			fieldname: 'loyalty_points',
+			label: __('Loyalty Points'),
+			fieldtype: 'Int',
+			read_only: 1
+		}];
+
+		const me = this;
+		dfs.forEach(df => {
+			this[`customer_${df.fieldname}_field`] = frappe.ui.form.make_control({
+				df: { ...df,
+					onchange: handle_customer_field_change,
+				},
+				parent: $customer_form.find(`.${df.fieldname}-field`),
+				render_input: true,
+			});
+			this[`customer_${df.fieldname}_field`].set_value(this.customer_info[df.fieldname]);
+		})
+
+		function handle_customer_field_change() {
+			const current_value = me.customer_info[this.df.fieldname];
+			const current_customer = me.customer_info.customer;
+
+			if (this.value && current_value != this.value && this.df.fieldname != 'loyalty_points') {
+				frappe.call({
+					method: 'erpnext.selling.page.point_of_sale.point_of_sale.set_customer_info',
+					args: {
+						fieldname: this.df.fieldname,
+						customer: current_customer,
+						value: this.value
+					},
+					callback: (r) => {
+						if(!r.exc) {
+							me.customer_info[this.df.fieldname] = this.value;
+							frappe.show_alert({
+								message: __("Customer contact updated successfully."),
+								indicator: 'green'
+							})
+						}
+					}
+				});
+			}
+		}
+	}
+
+	fetch_customer_transactions() {
+		frappe.db.get_list('POS Invoice', { 
+			filters: { customer: this.customer_info.customer, docstatus: 1 },
+			fields: ['name', 'grand_total', 'status', 'posting_date', 'posting_time', 'currency'],
+			limit: 20
+		}).then((res) => {
+			const transaction_container = this.$customer_section.find('.customer-transactions');
+
+			if (!res.length) {
+				transaction_container.removeClass('flex-1 border rounded').html(
+					`<div class="text-grey text-center">No recent transactions found</div>`
+				)
+				return;
+			};
+
+			const elapsed_time = moment(res[0].posting_date+" "+res[0].posting_time).fromNow();
+			this.$customer_section.find('.last-transacted-on').html(`Last transacted ${elapsed_time}`);
+
+			res.forEach(invoice => {
+				const posting_datetime = moment(invoice.posting_date+" "+invoice.posting_time).format("Do MMMM, h:mma");
+				let indicator_color = '';
+				in_list(['Paid', 'Consolidated'], invoice.status) && (indicator_color = 'green');
+				invoice.status === 'Draft' && (indicator_color = 'red');
+				invoice.status === 'Return' && (indicator_color = 'grey');
+
+				transaction_container.append(
+					`<div class="invoice-wrapper flex p-3 justify-between border-b-grey pointer no-select" data-invoice-name="${escape(invoice.name)}">
+						<div class="flex flex-col justify-end">
+							<div class="text-dark-grey text-bold overflow-hidden whitespace-nowrap mb-2">${invoice.name}</div>
+							<div class="flex items-center f-shrink-1 text-dark-grey overflow-hidden whitespace-nowrap">
+								${posting_datetime}
+							</div>
+						</div>
+						<div class="flex flex-col text-right">
+							<div class="f-shrink-0 text-md text-dark-grey text-bold ml-4">
+								${format_currency(invoice.grand_total, invoice.currency, 0) || 0}
+							</div>
+							<div class="f-shrink-0 text-grey ml-4 text-bold indicator ${indicator_color}">${invoice.status.toUpperCase()}</div>
+						</div>
+					</div>`
+				)
+			});
+		})
 	}
 
 	load_cart_data_from_invoice() {

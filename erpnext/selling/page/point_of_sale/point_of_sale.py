@@ -205,6 +205,22 @@ def get_past_order_list(search_term, status, limit=20):
 	
 	return invoice_list
 
+@frappe.whitelist()
+def set_customer_info(fieldname, customer, value=""):
+	if fieldname == 'loyalty_program':
+		frappe.db.set_value('Customer', customer, 'loyalty_program', value)
+
+	contact = frappe.get_cached_value('Customer', customer, 'customer_primary_contact')
+
+	if contact:
+		contact_doc = frappe.get_doc('Contact', contact)
+		if fieldname == 'email_id':
+			contact_doc.set('email_ids', [{ 'email_id': value, 'is_primary': 1}])
+			frappe.db.set_value('Customer', customer, 'email_id', value)
+		elif fieldname == 'mobile_no': 
+			contact_doc.set('phone_nos', [{ 'phone': value, 'is_primary_mobile_no': 1}])
+			frappe.db.set_value('Customer', customer, 'mobile_no', value)
+		contact_doc.save()
 
 def get_conditions(item_code, serial_no, batch_no, barcode):
 	if serial_no or batch_no or barcode:

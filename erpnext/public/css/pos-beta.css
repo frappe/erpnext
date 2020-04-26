@@ -55,6 +55,8 @@
 [data-route="point-of-sale-beta"] .p-32 { padding: 8rem; }
 [data-route="point-of-sale-beta"] .p-6 { padding: 1.5rem; }
 [data-route="point-of-sale-beta"] .p-4 { padding: 1rem; }
+[data-route="point-of-sale-beta"] .p-3 { padding: 0.75rem; }
+[data-route="point-of-sale-beta"] .p-2 { padding: 0.5rem; }
 [data-route="point-of-sale-beta"] .m-8 { margin: 2rem; }
 [data-route="point-of-sale-beta"] .p-1 { padding: 0.25rem; }
 [data-route="point-of-sale-beta"] .pr-0 { padding-right: 0rem; }
@@ -166,11 +168,11 @@
 [data-route="point-of-sale-beta"] .text-sm { font-size: 1rem; }
 [data-route="point-of-sale-beta"] .text-md-0 { font-size: 1.25rem; }
 [data-route="point-of-sale-beta"] .text-md { font-size: 1.4rem; }
-[data-route="point-of-sale-beta"] .text-lg { font-size: 1.8rem; }
-[data-route="point-of-sale-beta"] .text-xl { font-size: 2.4rem; }
-[data-route="point-of-sale-beta"] .text-2xl { font-size: 3rem; }
-[data-route="point-of-sale-beta"] .text-2-5xl { font-size: 3.3rem; }
-[data-route="point-of-sale-beta"] .text-3xl { font-size: 4rem; }
+[data-route="point-of-sale-beta"] .text-lg { font-size: 1.6rem; }
+[data-route="point-of-sale-beta"] .text-xl { font-size: 2.2rem; }
+[data-route="point-of-sale-beta"] .text-2xl { font-size: 2.8rem; }
+[data-route="point-of-sale-beta"] .text-2-5xl { font-size: 3rem; }
+[data-route="point-of-sale-beta"] .text-3xl { font-size: 3.8rem; }
 [data-route="point-of-sale-beta"] .text-6xl { font-size: 4.8rem; }
 [data-route="point-of-sale-beta"] .line-through { text-decoration: line-through; }
 [data-route="point-of-sale-beta"] .text-primary { color: #5e64ff; }
