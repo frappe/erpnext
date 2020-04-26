@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import datetime, math
 
-from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, format_date
+from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, formatdate
 from frappe.model.naming import make_autoname
 
 from frappe import msgprint, _
@@ -329,7 +329,7 @@ class SalarySlip(TransactionBase):
 			if d.status in ('Half Day', 'On Leave') and d.leave_type and d.leave_type not in lwp_leave_types:
 				continue
 
-			if format_date(d.attendance_date, "yyyy-mm-dd") in holidays:
+			if formatdate(d.attendance_date, "yyyy-mm-dd") in holidays:
 				if d.status == "Absent" or \
 					(d.leave_type and d.leave_type in lwp_leave_types and not lwp_leave_types[d.leave_type]):
 						continue
