@@ -34,11 +34,11 @@ class TestStockReconciliation(unittest.TestCase):
 		# [[qty, valuation_rate, posting_date,
 		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
 		input_data = [
-			[50, 1000, nowdate(), nowtime()],
-			[25, 900, nowdate(), nowtime()],
-			["", 1000, nowdate(), nowtime()],
-			[20, "", nowdate(), nowtime()],
-			[0, "", nowdate(), nowtime()]
+			[50, 1000],
+			[25, 900],
+			["", 1000],
+			[20, ""],
+			[0, ""]
 		]
 
 		for d in input_data:
@@ -47,13 +47,13 @@ class TestStockReconciliation(unittest.TestCase):
 			last_sle = get_previous_sle({
 				"item_code": "_Test Item",
 				"warehouse": "Stores - TCP1",
-				"posting_date": d[2],
-				"posting_time": d[3]
+				"posting_date": nowdate(),
+				"posting_time": nowtime()
 			})
 
 			# submit stock reconciliation
 			stock_reco = create_stock_reconciliation(qty=d[0], rate=d[1],
-				posting_date=d[2], posting_time=d[3], warehouse="Stores - TCP1",
+				posting_date=nowdate(), posting_time=nowtime(), warehouse="Stores - TCP1",
 				company=company, expense_account = "Stock Adjustment - TCP1")
 
 			# check stock value
@@ -146,10 +146,6 @@ class TestStockReconciliation(unittest.TestCase):
 		for d in to_delete_records:
 			stock_doc = frappe.get_doc("Stock Reconciliation", d)
 			stock_doc.cancel()
-
-		for d in serial_nos + serial_nos1:
-			if frappe.db.exists("Serial No", d):
-				frappe.delete_doc("Serial No", d)
 
 	def test_stock_reco_for_batch_item(self):
 		set_perpetual_inventory()

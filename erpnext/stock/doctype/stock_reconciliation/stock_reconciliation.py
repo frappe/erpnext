@@ -330,10 +330,17 @@ class StockReconciliation(StockController):
 			data.qty_after_transaction = flt(row.qty, row.precision("qty"))
 
 		if self.docstatus == 2 and not row.batch_no:
-			data.qty_after_transaction = flt(row.current_qty, row.precision("current_qty"))
-			data.valuation_rate = flt(row.current_valuation_rate, row.precision("current_valuation_rate"))
-			data.stock_value = data.qty_after_transaction * data.valuation_rate
-			data.stock_value_difference = -1 * flt(row.amount_difference, row.precision('amount_difference'))
+			if row.current_qty:
+				data.actual_qty = -1 * row.current_qty
+				data.qty_after_transaction = flt(row.current_qty, row.precision("current_qty"))
+				data.valuation_rate = flt(row.current_valuation_rate, row.precision("current_valuation_rate"))
+				data.stock_value = data.qty_after_transaction * data.valuation_rate
+				data.stock_value_difference = -1 * flt(row.amount_difference, row.precision('amount_difference'))
+			else:
+				data.actual_qty = row.qty
+				data.qty_after_transaction = 0.0
+				data.valuation_rate = flt(row.valuation_rate, row.precision("valuation_rate"))
+				data.stock_value_difference = -1 * flt(row.amount_difference, row.precision('amount_difference'))
 
 		return data
 
@@ -344,7 +351,11 @@ class StockReconciliation(StockController):
 		for row in self.items:
 			if row.serial_no or row.batch_no or row.current_serial_no:
 				has_serial_no = True
-				self.get_sle_for_serialized_items(row, sl_entries)
+				serial_nos = ''
+				if row.current_serial_no:
+					serial_nos = get_serial_nos(row.current_serial_no)
+
+				sl_entries.append(self.get_sle_for_items(row, serial_nos))
 			else:
 				sl_entries.append(self.get_sle_for_items(row))
 
@@ -423,12 +434,6 @@ class StockReconciliation(StockController):
 			self.queue_action('submit')
 		else:
 			self._submit()
-
-	def cancel(self):
-		if len(self.items) > 100:
-			self.queue_action('cancel')
-		else:
-			self._cancel()
 
 @frappe.whitelist()
 def get_items(warehouse, posting_date, posting_time, company):

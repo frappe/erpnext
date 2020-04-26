@@ -683,9 +683,10 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_pos_gl_entry_with_perpetual_inventory(self):
 		make_pos_profile()
 
-		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
+		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
 
-		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
+		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1",
+			income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
 
 		pos.is_pos = 1
 		pos.update_stock = 1
@@ -766,9 +767,13 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_pos_change_amount(self):
 		make_pos_profile()
 
-		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
+		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",
+			item_code= "_Test FG Item",warehouse= "Stores - TCP1", cost_center= "Main - TCP1")
 
-		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
+		pos = create_sales_invoice(company= "_Test Company with perpetual inventory",
+			debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1",
+			income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1",
+			cost_center = "Main - TCP1", do_not_save=True)
 
 		pos.is_pos = 1
 		pos.update_stock = 1
@@ -787,8 +792,15 @@ class TestSalesInvoice(unittest.TestCase):
 		from erpnext.accounts.doctype.sales_invoice.pos import make_invoice
 
 		pos_profile = make_pos_profile()
-		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
-		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
+
+		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",
+			item_code= "_Test FG Item",
+			warehouse= "Stores - TCP1", cost_center= "Main - TCP1")
+
+		pos = create_sales_invoice(company= "_Test Company with perpetual inventory",
+			debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1",
+			income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1",
+			cost_center = "Main - TCP1", do_not_save=True)
 
 		pos.is_pos = 1
 		pos.update_stock = 1

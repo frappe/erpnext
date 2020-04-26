@@ -505,12 +505,13 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEquals(pi2.items[1].qty, 1)
 
 	def test_stock_transfer_from_purchase_receipt(self):
-		set_perpetual_inventory(1)
-		pr1 = make_purchase_receipt(warehouse = '_Test Warehouse 2 - _TC')
+		pr1 = make_purchase_receipt(warehouse = 'Work In Progress - TCP1', company="_Test Company with perpetual inventory")
 
-		pr = make_purchase_receipt(do_not_save=1)
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory",
+			warehouse = "Stores - TCP1", do_not_save=1)
+
 		pr.supplier_warehouse = ''
-		pr.items[0].from_warehouse = '_Test Warehouse 2 - _TC'
+		pr.items[0].from_warehouse = 'Work In Progress - TCP1'
 
 		pr.submit()
 
@@ -520,33 +521,33 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertFalse(gl_entries)
 
 		expected_sle = {
-			'_Test Warehouse 2 - _TC': -5,
-			'_Test Warehouse - _TC': 5
+			'Work In Progress - TCP1': -5,
+			'Stores - TCP1': 5
 		}
 
 		for sle in sl_entries:
 			self.assertEqual(expected_sle[sle.warehouse], sle.actual_qty)
 
-		set_perpetual_inventory(0)
-
 	def test_stock_transfer_from_purchase_receipt_with_valuation(self):
-		set_perpetual_inventory(1)
-		warehouse = frappe.get_doc('Warehouse', '_Test Warehouse 2 - _TC')
-		warehouse.account = '_Test Account Stock In Hand - _TC'
+		warehouse = frappe.get_doc('Warehouse', 'Work In Progress - TCP1')
+		warehouse.account = '_Test Account Stock In Hand - TCP1'
 		warehouse.save()
 
-		pr1 = make_purchase_receipt(warehouse = '_Test Warehouse 2 - _TC')
+		pr1 = make_purchase_receipt(warehouse = 'Work In Progress - TCP1',
+			company="_Test Company with perpetual inventory")
 
-		pr = make_purchase_receipt(do_not_save=1)
-		pr.items[0].from_warehouse = '_Test Warehouse 2 - _TC'
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory",
+			warehouse = "Stores - TCP1", do_not_save=1)
+
+		pr.items[0].from_warehouse = 'Work In Progress - TCP1'
 		pr.supplier_warehouse = ''
 
 
 		pr.append('taxes', {
 			'charge_type': 'On Net Total',
-			'account_head': '_Test Account Shipping Charges - _TC',
+			'account_head': '_Test Account Shipping Charges - TCP1',
 			'category': 'Valuation and Total',
-			'cost_center': 'Main - _TC',
+			'cost_center': 'Main - TCP1',
 			'description': 'Test',
 			'rate': 9
 		})
@@ -557,14 +558,14 @@ class TestPurchaseReceipt(unittest.TestCase):
 		sl_entries = get_sl_entries('Purchase Receipt', pr.name)
 
 		expected_gle = [
-			['Stock In Hand - _TC', 272.5, 0.0],
-			['_Test Account Stock In Hand - _TC', 0.0, 250.0],
-			['_Test Account Shipping Charges - _TC', 0.0, 22.5]
+			['Stock In Hand - TCP1', 272.5, 0.0],
+			['_Test Account Stock In Hand - TCP1', 0.0, 250.0],
+			['_Test Account Shipping Charges - TCP1', 0.0, 22.5]
 		]
 
 		expected_sle = {
-			'_Test Warehouse 2 - _TC': -5,
-			'_Test Warehouse - _TC': 5
+			'Work In Progress - TCP1': -5,
+			'Stores - TCP1': 5
 		}
 
 		for sle in sl_entries:
@@ -577,8 +578,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		warehouse.account = ''
 		warehouse.save()
-		set_perpetual_inventory(0)
-
 
 def get_sl_entries(voucher_type, voucher_no):
 	return frappe.db.sql(""" select actual_qty, warehouse, stock_value_difference

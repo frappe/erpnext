@@ -23,7 +23,7 @@ class StockController(AccountsController):
 		self.validate_serialized_batch()
 		self.validate_customer_provided_item()
 
-	def make_gl_entries(self, gl_entries=None, from_repost=False):
+	def make_gl_entries(self, gl_entries=None):
 		if self.docstatus == 2:
 			make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
@@ -33,12 +33,12 @@ class StockController(AccountsController):
 			if self.docstatus==1:
 				if not gl_entries:
 					gl_entries = self.get_gl_entries(warehouse_account)
-				make_gl_entries(gl_entries, from_repost=from_repost)
+				make_gl_entries(gl_entries)
 
 		elif self.doctype in ['Purchase Receipt', 'Purchase Invoice'] and self.docstatus == 1:
 			gl_entries = []
 			gl_entries = self.get_asset_gl_entry(gl_entries)
-			make_gl_entries(gl_entries, from_repost=from_repost)
+			make_gl_entries(gl_entries)
 
 	def validate_serialized_batch(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos

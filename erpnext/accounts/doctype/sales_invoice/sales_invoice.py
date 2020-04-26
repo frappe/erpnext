@@ -718,7 +718,9 @@ class SalesInvoice(SellingController):
 			if d.delivery_note and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != 1:
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
-	def make_gl_entries(self, gl_entries=None, from_repost=False):
+	def make_gl_entries(self, gl_entries=None):
+		from erpnext.accounts.general_ledger import make_reverse_gl_entries
+
 		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
@@ -730,8 +732,10 @@ class SalesInvoice(SellingController):
 			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account or
 				cint(self.redeem_loyalty_points)) else "Yes"
 
-			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
-				update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)
+			if self.docstatus == 1:
+				make_gl_entries(gl_entries, update_outstanding=update_outstanding, merge_entries=False)
+			elif self.docstatus == 2:
+				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 			if update_outstanding == "No":
 				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
@@ -740,7 +744,6 @@ class SalesInvoice(SellingController):
 
 		elif self.docstatus == 2 and cint(self.update_stock) \
 			and cint(auto_accounting_for_stock):
-				from erpnext.accounts.general_ledger import make_reverse_gl_entries
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 	def get_gl_entries(self, warehouse_account=None):

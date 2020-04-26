@@ -30,22 +30,20 @@ class GLEntry(Document):
 		self.pl_must_have_cost_center()
 		self.validate_cost_center()
 
-		if not self.flags.from_repost:
-			self.check_pl_account()
-			self.validate_party()
-			self.validate_currency()
+		self.check_pl_account()
+		self.validate_party()
+		self.validate_currency()
 
-	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes', from_repost=False):
-		if not from_repost:
-			self.validate_account_details(adv_adj)
-			self.validate_dimensions_for_pl_and_bs()
+	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes'):
+		self.validate_account_details(adv_adj)
+		self.validate_dimensions_for_pl_and_bs()
 
 		validate_frozen_account(self.account, adv_adj)
 		validate_balance_type(self.account, adv_adj)
 
 		# Update outstanding amt on against voucher
 		if self.against_voucher_type in ['Journal Entry', 'Sales Invoice', 'Purchase Invoice', 'Fees'] \
-			and self.against_voucher and update_outstanding == 'Yes' and not from_repost:
+			and self.against_voucher and update_outstanding == 'Yes':
 				update_outstanding_amt(self.account, self.party_type, self.party, self.against_voucher_type,
 					self.against_voucher)
 
