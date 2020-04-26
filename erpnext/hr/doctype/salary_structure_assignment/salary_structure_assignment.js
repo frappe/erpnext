@@ -20,6 +20,16 @@ frappe.ui.form.on('Salary Structure Assignment', {
 				}
 			}
 		});
+
+		frm.set_query("income_tax_slab", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					docstatus: 1,
+					disabled: 0
+				}
+			}
+		});
 	},
 	employee: function(frm) {
 		if(frm.doc.employee){
