@@ -300,6 +300,8 @@ erpnext.PointOfSale.Controller = class {
 					frappe.db.get_doc('POS Invoice', name).then((doc) => {
 						frappe.run_serially([
 							() => this.make_return_invoice(doc),
+							() => this.cart.fetch_customer_details(this.frm.doc.customer),
+							() => this.cart.update_customer_section(),
 							() => this.cart.load_cart_data_from_invoice(),
 							() => this.cart.$component.removeClass('d-none'),
 							() => this.item_selector.$component.removeClass('d-none')
@@ -320,16 +322,18 @@ erpnext.PointOfSale.Controller = class {
 				new_order: () => {
 					frappe.run_serially([
 						() => frappe.dom.freeze(),
-						() => this.cart.$component.removeClass('d-none'),
-						() => this.item_selector.$component.removeClass('d-none'),
 						() => this.make_new_invoice(),
 						() => this.cart.load_cart_data_from_invoice(),
+						() => this.cart.$component.removeClass('d-none'),
+						() => this.item_selector.$component.removeClass('d-none'),
 						() => frappe.dom.unfreeze(),
 					]);
 				}
 			}
 		})
 	}
+
+	
 
 	toggle_past_order_list(show) {
 		this.enable_disable_components(show);
@@ -355,7 +359,7 @@ erpnext.PointOfSale.Controller = class {
 			() => this.set_pos_profile_data(),
 			() => this.set_invoice_status(),
 			() => this.cart.fetch_customer_details(this.frm.doc.customer),
-			() => this.cart.update_customer_section(this.frm),
+			() => this.cart.update_customer_section(),
 			() => this.cart.update_totals_section(this.frm)
 		]);
 	}
@@ -491,6 +495,7 @@ erpnext.PointOfSale.Controller = class {
 			}	
 		} catch (error) {
 			console.log(error);
+		} finally {
 			frappe.dom.unfreeze();
 		}
 	}

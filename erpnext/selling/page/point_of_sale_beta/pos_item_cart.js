@@ -43,15 +43,17 @@ erpnext.PointOfSale.ItemCart = class {
     
     initialize_cart_components() {
         this.$component.append(
-            `<div class="cart-container flex flex-col items-center p-8 pt-0 rounded flex-1">
-                <div class="flex text-grey cart-header pt-2 pb-2 p-4 mt-2 mb-2 w-full">
-                    <div class="ml-2 mr-6">Qty</div>
-                    <div class="flex-1">Item</div>
-                    <div class="ml-auto mr-1">Rate</div>
-                </div>
-                <div class="cart-items-section flex flex-col rounded border border-grey w-full"></div>
-                <div class="cart-totals-section flex flex-col mt-auto border border-grey rounded w-full"></div>
-                <div class="numpad-section flex flex-col mt-auto d-none w-full p-8 pt-0 pb-0"></div>
+			`<div class="cart-container flex flex-col items-center rounded flex-1 relative">
+				<div class="absolute flex flex-col p-8 pt-0 w-full h-full">
+					<div class="flex text-grey cart-header pt-2 pb-2 p-4 mt-2 mb-2 w-full f-shrink-0">
+						<div class="ml-2 mr-6">Qty</div>
+						<div class="flex-1">Item</div>
+						<div class="ml-auto mr-1">Rate</div>
+					</div>
+					<div class="cart-items-section flex flex-col flex-1 scroll-y rounded w-full"></div>
+					<div class="cart-totals-section flex flex-col mt-4 border border-grey rounded w-full f-shrink-0"></div>
+					<div class="numpad-section flex flex-col mt-4 d-none w-full p-8 pt-0 pb-0 f-shrink-0"></div>
+				</div>		
             </div>`
         );
 		this.$cart_container = this.$component.find('.cart-container');
@@ -75,7 +77,7 @@ erpnext.PointOfSale.ItemCart = class {
 				<div class="flex-1 text-center text-grey">No items in cart</div>
 			</div>`
 		)
-		this.$cart_items_wrapper.removeClass('border border-grey').addClass('mt-4 border-grey border-dashed');
+		this.$cart_items_wrapper.addClass('mt-4 border-grey border-dashed');
 	}
 
     make_cart_totals_section() {
@@ -212,7 +214,7 @@ erpnext.PointOfSale.ItemCart = class {
 						frm.script_manager.trigger('customer', frm.doc.doctype, frm.doc.name).then(() => {
 							frappe.run_serially([
 								() => me.fetch_customer_details(this.value),
-								() => me.update_customer_section(frm),
+								() => me.update_customer_section(),
 								() => me.update_totals_section(frm),
 								() => frappe.dom.unfreeze()
 							]);
@@ -227,10 +229,11 @@ erpnext.PointOfSale.ItemCart = class {
 	}
 	
 	fetch_customer_details(customer) {
-		if (customer)
+		if (customer) {
 			return new Promise((resolve) => {
 				frappe.db.get_value('Customer', customer, ["email_id", "mobile_no", "image", "loyalty_program"]).then(({ message }) => {
 					const { loyalty_program } = message;
+					// if loyalty program then fetch loyalty points too
 					if (loyalty_program) {
 						frappe.call({
 							method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points",
@@ -249,10 +252,35 @@ erpnext.PointOfSale.ItemCart = class {
 					}
 				});
 			});
+		} else {
+			this.customer_info = {}
+		}
 	}
     
-    update_customer_section(frm) {
+    update_customer_section() {
 		const { customer, email_id='', mobile_no='', image } = this.customer_info || {};
+
+		if (customer) {
+			this.$customer_section.addClass('border pr-4 pl-4').html(
+				`<div class="customer-details flex flex-col">
+					<div class="customer-header flex items-center rounded h-18">
+						${get_customer_image()}
+						<div class="customer-name flex flex-col flex-1 f-shrink-1 overflow-hidden whitespace-nowrap">
+							<div class="text-md text-dark-grey text-bold">${customer}</div>
+							${get_customer_description()}
+						</div>
+						<div class="f-shrink-0 add-remove-customer flex items-center" data-customer="${escape(customer)}">
+							<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
+								<path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
+							</svg>
+						</div>
+					</div>
+				</div>`
+			);
+		} else {
+            // reset customer selector
+			this.reset_customer_selector();
+		}
 
 		function get_customer_description() {
 			if (!email_id && !mobile_no) {
@@ -276,28 +304,6 @@ erpnext.PointOfSale.ItemCart = class {
 							${frappe.get_abbr(customer)}
 						</div>`
 			}
-		}
-
-		if (customer) {
-			this.$customer_section.addClass('border pr-4 pl-4').html(
-				`<div class="customer-details flex flex-col">
-					<div class="customer-header flex items-center rounded h-18">
-						${get_customer_image()}
-						<div class="customer-name flex flex-col flex-1">
-							<div class="text-md text-dark-grey text-bold">${customer}</div>
-							${get_customer_description()}
-						</div>
-						<div class="add-remove-customer flex items-center" data-customer="${escape(customer)}">
-							<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
-								<path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
-							</svg>
-						</div>
-					</div>
-				</div>`
-			);
-		} else {
-            // reset customer selector
-			this.reset_customer_selector();
 		}
     }
     
@@ -396,7 +402,7 @@ erpnext.PointOfSale.ItemCart = class {
 		
         if (!$item_to_update.length) {
             this.$cart_items_wrapper.append(
-                `<div class="cart-item-wrapper flex items-center h-18 pr-4 pl-4 border-b-grey pointer no-select" 
+                `<div class="cart-item-wrapper flex items-center h-18 pr-4 pl-4 border-grey pointer no-select" 
                         data-item-code="${escape(item_data.item_code)}" data-batch-no="${escape(item_data.batch_no || '')}">
                 </div>`
             )
@@ -407,16 +413,18 @@ erpnext.PointOfSale.ItemCart = class {
 			`<div class="flex w-10 h-10 rounded bg-light-grey mr-4 items-center justify-center font-bold f-shrink-0">
                 <span>${item_data.qty || 0}</span>
             </div>
-            <div class="flex flex-col f-shrink-1">
-                <div class="text-md text-dark-grey text-bold overflow-hidden whitespace-nowrap">
+            <div class="flex flex-col flex-1 f-shrink-1 overflow-hidden whitespace-nowrap">
+                <div class="text-md text-dark-grey text-bold">
                     ${item_data.item_name}
                 </div>
                 ${get_description_html()}
             </div>
-            <div class="flex flex-col f-shrink-0 ml-auto text-right">
+            <div class="flex flex-col f-shrink-0 ml-4 text-right">
                 ${get_rate_discount_html()}
             </div>`
-        )
+		)
+		
+		this.scroll_to_item($item_to_update);
         
 		function get_rate_discount_html() {
 			if (item_data.rate && item_data.price_list_rate && item_data.rate !== item_data.price_list_rate) {
@@ -431,10 +439,16 @@ erpnext.PointOfSale.ItemCart = class {
 			if (item_data.description) {
 				item_data.description.indexOf('<div>') != -1 && (item_data.description = $(item_data.description).text());
 				item_data.description = frappe.ellipsis(item_data.description, 45);
-				return `<div class="text-grey overflow-hidden whitespace-nowrap">${item_data.description}</div>`
+				return `<div class="text-grey">${item_data.description}</div>`
 			}
 			return ``;
 		}
+	}
+
+	scroll_to_item($item) {
+		if ($item.length === 0) return;
+		const scrollTop = $item.offset().top - this.$cart_items_wrapper.offset().top + this.$cart_items_wrapper.scrollTop();
+		this.$cart_items_wrapper.animate({ scrollTop });
 	}
 	
 	update_batch_in_cart_item(batch_no, item) {
@@ -466,7 +480,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 		// if cart has items and no item is present
 		no_of_cart_items > 0 && $no_item_element && $no_item_element.remove()
-			&& this.$cart_items_wrapper.removeClass('mt-4 border-grey border-dashed').addClass('border border-grey') && this.$cart_header.removeClass('d-none');
+			&& this.$cart_items_wrapper.removeClass('mt-4 border-grey border-dashed') && this.$cart_header.removeClass('d-none');
 
 		no_of_cart_items === 0 && !$no_item_element.length && this.make_no_items_placeholder();
     }
@@ -567,7 +581,7 @@ erpnext.PointOfSale.ItemCart = class {
 	toggle_customer_info(show) {
 		if (show) {
 			this.$cart_container.addClass('d-none')
-			this.$customer_section.addClass('flex-1 scroll').removeClass('mb-0 border pr-4 pl-4')
+			this.$customer_section.addClass('flex-1 scroll-y').removeClass('mb-0 border pr-4 pl-4')
 			this.$customer_section.find('.icon').addClass('w-24 h-24').removeClass('w-12 h-12')
 			this.$customer_section.find('.customer-header').removeClass('h-18');
 			this.$customer_section.find('.customer-details').addClass('sticky z-100 bg-white');
@@ -589,7 +603,7 @@ erpnext.PointOfSale.ItemCart = class {
 					<div class="text-grey mt-4 mb-6">RECENT TRANSACTIONS</div>
 				</div>`
 			)
-			// transactions need to be in diff div from sticky elem for scrolling
+			// transactions need to be in diff div from sticky elem for scroll-ying
 			this.$customer_section.append(`<div class="customer-transactions flex-1 border rounded"></div>`)
 
 			this.render_customer_info_form();
@@ -597,7 +611,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 		} else {
 			this.$cart_container.removeClass('d-none');
-			this.$customer_section.removeClass('flex-1 scroll').addClass('mb-0 border pr-4 pl-4');
+			this.$customer_section.removeClass('flex-1 scroll-y').addClass('mb-0 border pr-4 pl-4');
 			this.$customer_section.find('.icon').addClass('w-12 h-12').removeClass('w-24 h-24');
 			this.$customer_section.find('.customer-header').addClass('h-18')
 			this.$customer_section.find('.customer-details').removeClass('sticky z-100 bg-white');

@@ -13,17 +13,22 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
     prepare_dom() {
         this.wrapper.append(
-            `<section class="col-span-6 flex flex-col relative items-center shadow rounded past-order-summary bg-white mx-h-70 h-100 d-none">
+            `<section class="col-span-6 flex flex-col items-center shadow rounded past-order-summary bg-white mx-h-70 h-100 d-none">
                 <div class="no-summary-placeholder flex flex-1 items-center justify-center p-16">
                     <div class="no-item-wrapper flex items-center h-18 pr-4 pl-4">
                         <div class="flex-1 text-center text-grey">Select an invoice to load summary data</div>
                     </div>
                 </div>
-                <div class="summary-container flex flex-1 flex-col items-center pt-16 pb-16 d-none w-66 pr-8 pl-8 text-dark-grey"></div>
+                <div class="summary-wrapper d-none flex-1 w-66 text-dark-grey relative">
+                    <div class="summary-container absolute flex flex-col pt-16 pb-16 pr-8 pl-8 w-full h-full">
+
+                    </div>
+                </div>
             </section>`
         )
 
         this.$component = this.wrapper.find('.past-order-summary');
+        this.$summary_wrapper = this.$component.find('.summary-wrapper');
         this.$summary_container = this.$component.find('.summary-container');
         this.initialize_child_components();
     }
@@ -47,8 +52,8 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
     initialize_items_summary() {
         this.$summary_container.append(
-            `<div class="flex flex-col mt-8 w-full">
-                <div class="text-grey mb-4">ITEMS</div>
+            `<div class="flex flex-col flex-1 mt-6 w-full scroll-y">
+                <div class="text-grey mb-4 sticky bg-white">ITEMS</div>
                 <div class="items-summary-container border rounded flex flex-col w-full"></div>
             </div>`
         )
@@ -58,7 +63,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
     initialize_totals_summary() {
         this.$summary_container.append(
-            `<div class="flex flex-col mt-8 w-full">
+            `<div class="flex flex-col mt-6 w-full f-shrink-0">
                 <div class="text-grey mb-4">TOTALS</div>
                 <div class="summary-totals-container border rounded flex flex-col w-full"></div>
             </div>`
@@ -69,7 +74,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
     initialize_payments_summary() {
         this.$summary_container.append(
-            `<div class="flex flex-col mt-8 w-full">
+            `<div class="flex flex-col mt-6 w-full f-shrink-0">
                 <div class="text-grey mb-4">PAYMENTS</div>
                 <div class="payments-summary-container border rounded flex flex-col w-full mb-4"></div>
             </div>`
@@ -80,7 +85,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
     initialize_summary_buttons() {
         this.$summary_container.append(
-            `<div class="summary-btns flex summary-btns justify-between w-full"></div>`
+            `<div class="summary-btns flex summary-btns justify-between w-full f-shrink-0"></div>`
         )
         
         this.$summary_btns = this.$summary_container.find('.summary-btns');
@@ -347,11 +352,11 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
         // switch full width view with 60% view
         this.$component.removeClass('col-span-10').addClass('col-span-6');
-        this.$summary_container.removeClass('w-40').addClass('w-66');
+        this.$summary_wrapper.removeClass('w-40').addClass('w-66');
 
         // switch place holder with summary container
         this.$component.find('.no-summary-placeholder').addClass('d-none');
-        this.$summary_container.removeClass('d-none');
+        this.$summary_wrapper.removeClass('d-none');
 
         this.attach_basic_info(doc);
 
@@ -379,11 +384,11 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.doc = doc;
 
         this.$component.removeClass('col-span-6').addClass('col-span-10');
-        this.$summary_container.removeClass('w-66').addClass('w-40');
+        this.$summary_wrapper.removeClass('w-66').addClass('w-40');
 
         // switch place holder with summary container
         this.$component.find('.no-summary-placeholder').addClass('d-none');
-        this.$summary_container.removeClass('d-none');
+        this.$summary_wrapper.removeClass('d-none');
 
         this.attach_basic_info(doc);
 

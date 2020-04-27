@@ -125,19 +125,19 @@
 [data-route="point-of-sale-beta"] .w-40 { width: 40%; }
 [data-route="point-of-sale-beta"] .w-fit { width: fit-content; }
 [data-route="point-of-sale-beta"] .w-10 { width: 3rem; }
-[data-route="point-of-sale-beta"] .h-10 { height: 3rem; }
-[data-route="point-of-sale-beta"] .h-12 { height: 3.3rem; }
+[data-route="point-of-sale-beta"] .h-10 { min-height:3rem; height: 3rem; }
+[data-route="point-of-sale-beta"] .h-12 { min-height: 3.3rem; height: 3.3rem; }
 [data-route="point-of-sale-beta"] .w-12 { width: 3.3rem; }
-[data-route="point-of-sale-beta"] .h-14 { height: 4.2rem; }
-[data-route="point-of-sale-beta"] .h-16 { height: 4.6rem; }
-[data-route="point-of-sale-beta"] .h-18 { height: 5rem; }
+[data-route="point-of-sale-beta"] .h-14 { min-height: 4.2rem; height: 4.2rem; }
+[data-route="point-of-sale-beta"] .h-16 { min-height: 4.6rem; height: 4.6rem; }
+[data-route="point-of-sale-beta"] .h-18 { min-height: 5rem; height: 5rem; }
 [data-route="point-of-sale-beta"] .w-18 { width: 5.4rem; }
 [data-route="point-of-sale-beta"] .w-24 { width: 7.2rem; }
 [data-route="point-of-sale-beta"] .w-26 { width: 8.4rem; }
-[data-route="point-of-sale-beta"] .h-24 { height: 7.2rem; }
-[data-route="point-of-sale-beta"] .h-32 { height: 9.6rem; }
+[data-route="point-of-sale-beta"] .h-24 { min-height: 7.2rem; height: 7.2rem; }
+[data-route="point-of-sale-beta"] .h-32 { min-height: 9.6rem; height: 9.6rem; }
 [data-route="point-of-sale-beta"] .w-46 { width: 15rem; }
-[data-route="point-of-sale-beta"] .h-46 { height: 15rem; }
+[data-route="point-of-sale-beta"] .h-46 { min-height:15rem; height: 15rem; }
 [data-route="point-of-sale-beta"] .h-100 { height: 100vh; }
 [data-route="point-of-sale-beta"] .mx-h-70 { max-height: 67rem; }
 [data-route="point-of-sale-beta"] .border-grey-300 { border-color: #e2e8f0; }
@@ -181,7 +181,8 @@
 [data-route="point-of-sale-beta"] .bg-primary { background-color: #5e64ff; }
 [data-route="point-of-sale-beta"] .border-primary { border-color: #5e64ff; }
 [data-route="point-of-sale-beta"] .text-danger { color: #e53e3e; }
-[data-route="point-of-sale-beta"] .scroll { overflow: scroll; }
+[data-route="point-of-sale-beta"] .scroll-x { overflow-x: scroll;overflow-y: hidden; }
+[data-route="point-of-sale-beta"] .scroll-y { overflow-y: scroll;overflow-x: hidden; }
 [data-route="point-of-sale-beta"] .overflow-hidden { overflow: hidden; }
 [data-route="point-of-sale-beta"] .whitespace-nowrap { white-space: nowrap; }
 [data-route="point-of-sale-beta"] .sticky { position: sticky;  top: -1px; }
@@ -197,13 +198,14 @@
 [data-route="point-of-sale-beta"] .no-select { user-select: none; }
 [data-route="point-of-sale-beta"] .item-wrapper:hover { transform: scale(1.02, 1.02); }
 [data-route="point-of-sale-beta"] .item-wrapper { transition: scale 0.2s ease-in-out; }
-[data-route="point-of-sale-beta"] .cart-items-section .cart-item-wrapper:last-child { border-bottom: none; }
+[data-route="point-of-sale-beta"] .cart-items-section .cart-item-wrapper:not(:first-child) { border-top: none; }
+
 
 [data-route="point-of-sale-beta"] .payment-summary-wrapper:last-child { border-bottom: none; }
 [data-route="point-of-sale-beta"] .item-summary-wrapper:last-child { border-bottom: none; }
 [data-route="point-of-sale-beta"] .total-summary-wrapper:last-child { border-bottom: none; }
 [data-route="point-of-sale-beta"] .invoice-wrapper:last-child { border-bottom: none; }
 [data-route="point-of-sale-beta"] .summary-btns:last-child { margin-right: 0px; }
-[data-route="point-of-sale-beta"] ::-webkit-scrollbar { width: 0px; }
+[data-route="point-of-sale-beta"] ::-webkit-scrollbar { width: 1px }
 
 [data-route="point-of-sale-beta"] .indicator.grey::before { background-color: #8d99a6; }

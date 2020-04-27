@@ -15,7 +15,7 @@ erpnext.PointOfSale.PastOrderList = class {
     prepare_dom() {
         this.wrapper.append(
             `<section class="col-span-4 flex flex-col shadow rounded past-order-list bg-white mx-h-70 h-100 d-none">
-                <div class="flex flex-col rounded w-full scroll">
+                <div class="flex flex-col rounded w-full scroll-y">
                     <div class="filter-section flex flex-col p-8 pb-2 bg-white sticky z-100">
                         <div class="search-field flex items-center text-grey"></div>
                         <div class="status-field flex items-center text-grey text-bold"></div>

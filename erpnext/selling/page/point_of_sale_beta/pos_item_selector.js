@@ -17,7 +17,7 @@ erpnext.PointOfSale.ItemSelector = class {
     prepare_dom() {
 		this.wrapper.append(
             `<section class="col-span-6 flex shadow rounded items-selector bg-white mx-h-70 h-100">
-                <div class="flex flex-col rounded w-full scroll">
+                <div class="flex flex-col rounded w-full scroll-y">
                     <div class="filter-section flex p-8 pb-2 bg-white sticky z-100">
                         <div class="search-field flex f-grow-3 mr-8 items-center text-grey"></div>
                         <div class="item-group-field flex f-grow-1 items-center text-grey text-bold"></div>
