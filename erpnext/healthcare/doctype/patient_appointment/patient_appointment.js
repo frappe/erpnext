@@ -32,8 +32,9 @@ frappe.ui.form.on('Patient Appointment', {
 		frm.set_query('service_unit', function(){
 			return {
 				filters: {
-					'is_group': 0,
-					'allow_appointments': 1
+					'is_group': false,
+					'allow_appointments': true,
+					'company': frm.doc.company
 				}
 			};
 		});
