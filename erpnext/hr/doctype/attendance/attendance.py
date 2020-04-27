@@ -35,13 +35,14 @@ class Attendance(Document):
 				and docstatus != 2
 		""", (self.employee, getdate(self.attendance_date), self.name))
 		if res:
-			frappe.throw(_("Attendance for employee {0} is already marked").format(self.employee))
+			frappe.throw(_("Attendance for employee {0} is already marked for the date {1}").format(
+				frappe.bold(self.employee), frappe.bold(self.attendance_date)))
 
 	def check_leave_record(self):
 		leave_record = frappe.db.sql("""
 			select leave_type, half_day, half_day_date
 			from `tabLeave Application`
-			where employee = %s 
+			where employee = %s
 				and %s between from_date and to_date
 				and status = 'Approved'
 				and docstatus = 1
