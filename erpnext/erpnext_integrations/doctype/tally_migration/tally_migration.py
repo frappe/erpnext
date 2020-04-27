@@ -575,11 +575,14 @@ class TallyMigration(Document):
 		if isinstance(data, frappe.model.document.Document):
 			if sys.exc_info()[1].__class__ != frappe.DuplicateEntryError:
 				failed_import_log = json.loads(self.failed_import_log)
+				doc = data.as_dict()
+				doc_fields = { x.fieldname for x in frappe.get_doc("DocType", doc.doctype).fields }
+				stripped_doc = { k: v for k, v in doc.items() if k in doc_fields }
 				failed_import_log.append({
-					"doc": data.as_dict(),
+					"doc": stripped_doc,
 					"exc": traceback.format_exc()
 				})
-				self.failed_import_log = json.dumps(failed_import_log)
+				self.failed_import_log = json.dumps(failed_import_log, separators=(',', ':'))
 				self.save()
 		else:
 			data = data or self.status
