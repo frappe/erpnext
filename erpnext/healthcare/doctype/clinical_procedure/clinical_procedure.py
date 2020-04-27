@@ -16,6 +16,7 @@ from frappe.model.mapper import get_mapped_doc
 class ClinicalProcedure(Document):
 	def validate(self):
 		self.set_status()
+		self.set_title()
 		if self.consume_stock:
 			self.set_actual_qty()
 
@@ -49,6 +50,9 @@ class ClinicalProcedure(Document):
 				self.status = 'Pending'
 		elif self.docstatus == 2:
 			self.status = 'Cancelled'
+
+	def set_title(self):
+		self.title = _('{0} - {1}').format(self.patient_name or self.patient, self.procedure_template)[:100]
 
 	def complete_procedure(self):
 		if self.consume_stock and self.items:

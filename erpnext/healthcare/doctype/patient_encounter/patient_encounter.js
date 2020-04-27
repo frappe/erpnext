@@ -157,24 +157,25 @@ frappe.ui.form.on('Patient Encounter', {
 					if (data.message.dob) {
 						age = calculate_age(data.message.dob);
 					}
-					frappe.model.set_value(frm.doctype, frm.docname, 'patient_mame', data.message.patient_mame);
-					frappe.model.set_value(frm.doctype, frm.docname, 'patient_age', age);
-					frappe.model.set_value(frm.doctype, frm.docname, 'patient_sex', data.message.sex);
-					if (data.message.inpatient_record) {
-						frappe.model.set_value(frm.doctype, frm.docname, 'inpatient_record', data.message.inpatient_record);
-						frappe.model.set_value(frm.doctype, frm.docname, 'inpatient_status', data.message.inpatient_status);
-					} else {
-						frappe.model.set_value(frm.doctype, frm.docname, 'inpatient_record', '');
-						frappe.model.set_value(frm.doctype, frm.docname, 'inpatient_status', '');
-					}
+					let values = {
+						'patient_age': age,
+						'patient_name':data.message.patient_name,
+						'patient_sex': data.message.sex,
+						'inpatient_record': data.message.inpatient_record,
+						'inpatient_status': data.message.inpatient_status
+					};
+					frm.set_value(values);
 				}
 			});
 		} else {
-			frappe.model.set_value(frm.doctype, frm.docname, 'patient_mame', '');
-			frappe.model.set_value(frm.doctype, frm.docname, 'patient_sex', '');
-			frappe.model.set_value(frm.doctype, frm.docname, 'patient_age', '');
-			frappe.model.set_value(frm.doctype, frm.docname, 'inpatient_record', '');
-			frappe.model.set_value(frm.doctype, frm.docname, 'inpatient_status', '');
+			let values = {
+				'patient_age': '',
+				'patient_name':'',
+				'patient_sex': '',
+				'inpatient_record': '',
+				'inpatient_status': ''
+			};
+			frm.set_value(values);
 		}
 	}
 });
@@ -226,7 +227,6 @@ let create_vital_signs = function (frm) {
 	}
 	frappe.route_options = {
 		'patient': frm.doc.patient,
-		'appointment': frm.doc.appointment,
 		'encounter': frm.doc.name,
 		'company': frm.doc.company
 	};

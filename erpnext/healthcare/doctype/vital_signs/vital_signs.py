@@ -9,11 +9,18 @@ from frappe.utils import cstr
 from frappe import _
 
 class VitalSigns(Document):
+	def validate(self):
+		self.set_title()
+
 	def on_submit(self):
 		insert_vital_signs_to_medical_record(self)
 
 	def on_cancel(self):
 		delete_vital_signs_from_medical_record(self)
+
+	def set_title(self):
+		self.title = _('{0} on {1} {2}').format(self.patient_name or self.patient,
+			frappe.utils.format_date(self.signs_date), frappe.utils.format_time(self.signs_time))[:100]
 
 def insert_vital_signs_to_medical_record(doc):
 	subject = set_subject_field(doc)
