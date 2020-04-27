@@ -43,7 +43,8 @@ frappe.ui.form.on('Clinical Procedure', {
 			return {
 				filters: {
 					'is_group': false,
-					'allow_appointments': true
+					'allow_appointments': true,
+					'company': frm.doc.company
 				}
 			};
 		});
