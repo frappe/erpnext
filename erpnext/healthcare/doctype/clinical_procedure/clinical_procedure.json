@@ -9,27 +9,29 @@
  "field_order": [
   "naming_series",
   "appointment",
-  "column_break_30",
   "procedure_template",
+  "column_break_30",
+  "company",
+  "invoiced",
   "section_break_6",
   "patient",
   "patient_name",
   "patient_sex",
   "patient_age",
-  "medical_department",
-  "practitioner",
-  "practitioner_name",
+  "inpatient_record",
+  "notes",
   "column_break_7",
   "status",
+  "practitioner",
+  "practitioner_name",
+  "medical_department",
   "service_unit",
-  "warehouse",
   "start_date",
   "start_time",
   "sample",
-  "invoiced",
-  "notes",
   "consumables_section",
   "consume_stock",
+  "warehouse",
   "items",
   "section_break_24",
   "invoice_separately_as_consumables",
@@ -38,8 +40,6 @@
   "column_break_27",
   "consumption_details",
   "sb_refs",
-  "inpatient_record",
-  "company",
   "column_break_34",
   "prescription",
   "amended_from"
@@ -64,10 +64,10 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Appointment",
-   "options": "Patient Appointment"
+   "options": "Patient Appointment",
+   "set_only_once": 1
   },
   {
-   "fetch_from": "inpatient_record.patient",
    "fieldname": "patient",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -217,6 +217,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -235,6 +236,8 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "consume_stock",
    "fieldname": "consumables_section",
    "fieldtype": "Section Break",
    "label": "Consumables"
@@ -261,14 +264,12 @@
    "fieldtype": "Section Break"
   },
   {
-   "fetch_from": "patient.patient_name",
    "fieldname": "patient_name",
    "fieldtype": "Data",
    "label": "Patient Name",
    "read_only": 1
   },
   {
-   "fetch_from": "practitioner.practitioner_name",
    "fieldname": "practitioner_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -282,7 +283,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-03 23:06:04.009856",
+ "modified": "2020-04-24 22:53:13.156901",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure",
@@ -298,6 +299,21 @@
    "report": 1,
    "role": "Nursing User",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Physician",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],
