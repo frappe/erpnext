@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import json
 import re
+import sys
 import traceback
 import zipfile
 from decimal import Decimal
@@ -15,12 +16,13 @@ from bs4 import BeautifulSoup as bs
 import frappe
 from erpnext import encode_company_abbr
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
+from erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer import unset_existing_data
+
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe.model.document import Document
 from frappe.model.naming import getseries, revert_series_if_last
 from frappe.utils.data import format_datetime
-
 
 PRIMARY_ACCOUNT = "Primary"
 VOUCHER_CHUNK_SIZE = 500
@@ -65,8 +67,16 @@ class TallyMigration(Document):
 				"attached_to_name": self.name,
 				"content": json.dumps(value),
 				"is_private": True
-			}).insert()
+			})
+			try:
+				f.insert()
+			except frappe.DuplicateEntryError:
+				pass
 			setattr(self, key, f.file_url)
+
+	def set_account_defaults(self):
+		self.default_cost_center, self.default_round_off_account = frappe.db.get_value("Company", self.erpnext_company, ["cost_center", "round_off_account"])
+		self.default_warehouse = frappe.db.get_value("Stock Settings", "Stock Settings", "default_warehouse")
 
 	def _process_master_data(self):
 		def get_company_name(collection):
@@ -84,7 +94,11 @@ class TallyMigration(Document):
 			children, parents = get_children_and_parent_dict(accounts)
 			group_set =  [acc[1] for acc in accounts if acc[2]]
 			children, customers, suppliers = remove_parties(parents, children, group_set)
-			coa = traverse({}, children, roots, roots, group_set)
+
+			try:
+				coa = traverse({}, children, roots, roots, group_set)
+			except RecursionError:
+				self.log()
 
 			for account in coa:
 				coa[account]["root_type"] = root_type_map[account]
@@ -242,12 +256,18 @@ class TallyMigration(Document):
 		def create_company_and_coa(coa_file_url):
 			coa_file = frappe.get_doc("File", {"file_url": coa_file_url})
 			frappe.local.flags.ignore_chart_of_accounts = True
-			company = frappe.get_doc({
-				"doctype": "Company",
-				"company_name": self.erpnext_company,
-				"default_currency": "INR",
-				"enable_perpetual_inventory": 0,
-			}).insert()
+
+			try:
+				company = frappe.get_doc({
+					"doctype": "Company",
+					"company_name": self.erpnext_company,
+					"default_currency": "INR",
+					"enable_perpetual_inventory": 0,
+				}).insert()
+			except frappe.DuplicateEntryError:
+				company = frappe.get_doc("Company", self.erpnext_company)
+				unset_existing_data(self.erpnext_company)
+
 			frappe.local.flags.ignore_chart_of_accounts = False
 			create_charts(company.name, custom_chart=json.loads(coa_file.get_content()))
 			company.create_default_warehouses()
@@ -256,36 +276,35 @@ class TallyMigration(Document):
 			parties_file = frappe.get_doc("File", {"file_url": parties_file_url})
 			for party in json.loads(parties_file.get_content()):
 				try:
-					frappe.get_doc(party).insert()
+					party_doc = frappe.get_doc(party)
+					party_doc.insert()
 				except:
-					self.log(party)
+					self.log(party_doc)
 			addresses_file = frappe.get_doc("File", {"file_url": addresses_file_url})
 			for address in json.loads(addresses_file.get_content()):
 				try:
-					frappe.get_doc(address).insert(ignore_mandatory=True)
+					address_doc = frappe.get_doc(address)
+					address_doc.insert(ignore_mandatory=True)
 				except:
-					try:
-						gstin = address.pop("gstin", None)
-						frappe.get_doc(address).insert(ignore_mandatory=True)
-						self.log({"address": address, "message": "Invalid GSTIN: {}. Address was created without GSTIN".format(gstin)})
-					except:
-						self.log(address)
+					self.log(address_doc)
 
 		def create_items_uoms(items_file_url, uoms_file_url):
 			uoms_file = frappe.get_doc("File", {"file_url": uoms_file_url})
 			for uom in json.loads(uoms_file.get_content()):
 				if not frappe.db.exists(uom):
 					try:
-						frappe.get_doc(uom).insert()
+						uom_doc = frappe.get_doc(uom)
+						uom_doc.insert()
 					except:
-						self.log(uom)
+						self.log(uom_doc)
 
 			items_file = frappe.get_doc("File", {"file_url": items_file_url})
 			for item in json.loads(items_file.get_content()):
 				try:
-					frappe.get_doc(item).insert()
+					item_doc = frappe.get_doc(item)
+					item_doc.insert()
 				except:
-					self.log(item)
+					self.log(item_doc)
 
 		try:
 			self.publish("Import Master Data", _("Creating Company and Importing Chart of Accounts"), 1, 4)
@@ -299,6 +318,7 @@ class TallyMigration(Document):
 
 			self.publish("Import Master Data", _("Done"), 4, 4)
 
+			self.set_account_defaults()
 			self.is_master_data_imported = 1
 
 		except:
@@ -468,13 +488,13 @@ class TallyMigration(Document):
 				oldest_year = new_year
 
 		def create_custom_fields(doctypes):
+			df = {
+				"fieldtype": "Data",
+				"fieldname": "tally_guid",
+				"read_only": 1,
+				"label": "Tally GUID"
+			}
 			for doctype in doctypes:
-				df = {
-					"fieldtype": "Data",
-					"fieldname": "tally_guid",
-					"read_only": 1,
-					"label": "Tally GUID"
-				}
 				create_custom_field(doctype, df)
 
 		def create_price_list():
@@ -521,11 +541,12 @@ class TallyMigration(Document):
 
 		for index, voucher in enumerate(chunk, start=start):
 			try:
-				doc = frappe.get_doc(voucher).insert()
-				doc.submit()
+				voucher_doc = frappe.get_doc(voucher)
+				voucher_doc.insert()
+				voucher_doc.submit()
 				self.publish("Importing Vouchers", _("{} of {}").format(index, total), index, total)
 			except:
-				self.log(voucher)
+				self.log(voucher_doc)
 
 		if is_last:
 			self.status = ""
@@ -551,9 +572,19 @@ class TallyMigration(Document):
 		frappe.enqueue_doc(self.doctype, self.name, "_import_day_book_data", queue="long", timeout=3600)
 
 	def log(self, data=None):
-		data = data or self.status
-		message = "\n".join(["Data:", json.dumps(data, default=str, indent=4), "--" * 50, "\nException:", traceback.format_exc()])
-		return frappe.log_error(title="Tally Migration Error", message=message)
+		if isinstance(data, frappe.model.document.Document):
+			if sys.exc_info()[1].__class__ != frappe.DuplicateEntryError:
+				failed_import_log = json.loads(self.failed_import_log)
+				failed_import_log.append({
+					"doc": data.as_dict(),
+					"exc": traceback.format_exc()
+				})
+				self.failed_import_log = json.dumps(failed_import_log)
+				self.save()
+		else:
+			data = data or self.status
+			message = "\n".join(["Data:", json.dumps(data, default=str, indent=4), "--" * 50, "\nException:", traceback.format_exc()])
+			return frappe.log_error(title="Tally Migration Error", message=message)
 
 	def set_status(self, status=""):
 		self.status = status
