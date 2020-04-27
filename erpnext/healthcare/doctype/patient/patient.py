@@ -40,6 +40,7 @@ class Patient(Document):
 			if self.territory:
 				customer.territory = self.territory
 
+			customer.customer_name = self.patient_name
 			customer.default_price_list = self.default_price_list
 			customer.default_currency = self.default_currency
 			customer.language = self.language
