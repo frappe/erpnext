@@ -173,6 +173,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Customs Tariff Number",
+				},
+				{
+					"type": "doctype",
 					"name": "Item Variant Settings",
 				},
 			]
