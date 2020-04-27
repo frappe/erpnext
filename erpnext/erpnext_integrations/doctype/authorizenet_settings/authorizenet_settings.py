@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 """
-# Integrating AuthorizeNet
+# Integrating Authorizenet
 
 ### 1. Validate Currency Support
 
@@ -74,7 +74,7 @@ class AuthorizenetSettings(Document):
 
 	def validate_transaction_currency(self, currency):
 		if currency not in self.supported_currencies:
-			frappe.throw(_("Please select another payment method. AuthorizeNet does not support transactions in currency '{0}'").format(currency))
+			frappe.throw(_("Please select another payment method. Authorizenet does not support transactions in currency '{0}'").format(currency))
 	
 	def validate(self):
 		create_payment_gateway('Authorizenet')
@@ -93,7 +93,7 @@ def charge_credit_card(data, card_number, expiration_date, card_code):
 	data = frappe._dict(data)
 
 	# Create Integration Request
-	integration_request = create_request_log(data, "Host", "AuthorizeNet")
+	integration_request = create_request_log(data, "Host", "Authorizenet")
 
 	# Authenticate with Authorizenet
 	merchant_auth = apicontractsv1.merchantAuthenticationType()
