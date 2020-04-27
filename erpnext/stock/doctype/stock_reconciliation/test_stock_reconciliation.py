@@ -68,8 +68,8 @@ class TestStockReconciliation(unittest.TestCase):
 				and valuation_rate == last_sle.get("valuation_rate"):
 					self.assertFalse(sle)
 			else:
-				self.assertEqual(sle[0].qty_after_transaction, qty_after_transaction)
-				self.assertEqual(sle[0].stock_value, qty_after_transaction * valuation_rate)
+				self.assertEqual(flt(sle[0].qty_after_transaction, 1), flt(qty_after_transaction, 1))
+				self.assertEqual(flt(sle[0].stock_value, 1), flt(qty_after_transaction * valuation_rate, 1))
 
 				# no gl entries
 				self.assertTrue(frappe.db.get_value("Stock Ledger Entry",
