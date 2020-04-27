@@ -21,12 +21,18 @@ class PatientAppointment(Document):
 		self.set_appointment_datetime()
 		self.validate_customer_created()
 		self.set_status()
+		self.set_title()
 
 	def after_insert(self):
 		self.update_prescription_details()
 		invoice_appointment(self)
 		self.update_fee_validity()
 		send_confirmation_msg(self)
+
+	def set_title(self):
+		self.title = _('{0} with {1} on {2}').format(self.patient_name or self.patient,
+			self.practitioner_name or self.practitioner,
+			frappe.utils.format_datetime(self.appointment_datetime))[:100]
 
 	def set_status(self):
 		today = getdate()

@@ -10,6 +10,7 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "title",
   "status",
   "patient",
   "patient_name",
@@ -26,6 +27,7 @@
   "get_prescribed_therapies",
   "therapy_plan",
   "practitioner",
+  "practitioner_name",
   "department",
   "section_break_12",
   "appointment_type",
@@ -327,10 +329,26 @@
   {
    "fieldname": "column_break_36",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "practitioner.practitioner_name",
+   "fieldname": "practitioner_name",
+   "fieldtype": "Data",
+   "label": "Practitioner Name",
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2020-04-25 17:23:49.841975",
+ "modified": "2020-04-27 21:36:06.404062",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",
@@ -378,7 +396,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "patient",
+ "title_field": "title",
  "track_changes": 1,
  "track_seen": 1
 }
