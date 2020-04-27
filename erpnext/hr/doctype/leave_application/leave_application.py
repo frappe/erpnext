@@ -549,7 +549,7 @@ def get_remaining_leaves(allocation, leaves_taken, date, expiry):
 
 	return _get_remaining_leaves(total_leaves, allocation.to_date)
 
-def get_leaves_for_period(employee, leave_type, from_date, to_date):
+def get_leaves_for_period(employee, leave_type, from_date, to_date, do_not_skip_expired_leaves=False):
 	leave_entries = get_leave_entries(employee, leave_type, from_date, to_date)
 	leave_days = 0
 
@@ -559,8 +559,8 @@ def get_leaves_for_period(employee, leave_type, from_date, to_date):
 		if  inclusive_period and leave_entry.transaction_type == 'Leave Encashment':
 			leave_days += leave_entry.leaves
 
-		elif inclusive_period and leave_entry.transaction_type == 'Leave Allocation' \
-			and leave_entry.is_expired and not skip_expiry_leaves(leave_entry, to_date):
+		elif inclusive_period and leave_entry.transaction_type == 'Leave Allocation' and leave_entry.is_expired \
+			and (do_not_skip_expired_leaves or not skip_expiry_leaves(leave_entry, to_date)):
 			leave_days += leave_entry.leaves
 
 		elif leave_entry.transaction_type == 'Leave Application':
