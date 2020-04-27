@@ -10,6 +10,8 @@ frappe.ui.form.on('Patient', {
 				]
 			};
 		});
+		frm.set_query('customer_group', {'is_group': 0});
+		frm.set_query('default_price_list', { 'selling': 1});
 
 		if (frappe.defaults.get_default('patient_name_by') != 'Naming Series') {
 			frm.toggle_display('naming_series', false);

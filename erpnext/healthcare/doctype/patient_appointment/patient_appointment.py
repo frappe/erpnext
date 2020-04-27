@@ -369,17 +369,19 @@ def send_appointment_reminder():
 			frappe.db.set_value('Patient Appointment', doc.name, 'reminded', 1)
 
 def send_message(doc, message):
-	patient = frappe.get_doc('Patient', doc.patient)
-	if patient.mobile:
+	patient_mobile = frappe.db.get_value("Patient", doc.patient, "mobile")
+	if patient_mobile:
 		context = {'doc': doc, 'alert': doc, 'comments': None}
 		if doc.get('_comments'):
 			context['comments'] = json.loads(doc.get('_comments'))
 
 		# jinja to string convertion happens here
 		message = frappe.render_template(message, context)
-		number = [patient.mobile]
-		send_sms(number, message)
-
+		number = [patient_mobile]
+		try:
+			send_sms(number, message)
+		except Exception as e:
+			frappe.msgprint(_("SMS not sent, please check SMS Settings"), alert=True)
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):

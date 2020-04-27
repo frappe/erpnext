@@ -72,6 +72,7 @@
   {
    "fieldname": "inpatient_status",
    "fieldtype": "Select",
+   "in_preview": 1,
    "label": "Inpatient Status",
    "options": "\nAdmission Scheduled\nAdmitted\nDischarge Scheduled",
    "read_only": 1
@@ -106,6 +107,7 @@
   {
    "fieldname": "sex",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Gender",
    "options": "Gender",
    "reqd": 1
@@ -114,6 +116,7 @@
    "bold": 1,
    "fieldname": "blood_group",
    "fieldtype": "Select",
+   "in_preview": 1,
    "label": "Blood Group",
    "options": "\nA Positive\nA Negative\nAB Positive\nAB Negative\nB Positive\nB Negative\nO Positive\nO Negative"
   },
@@ -121,6 +124,7 @@
    "bold": 1,
    "fieldname": "dob",
    "fieldtype": "Date",
+   "in_preview": 1,
    "label": "Date of birth"
   },
   {
@@ -147,6 +151,7 @@
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
+   "in_preview": 1,
    "label": "Image",
    "no_copy": 1,
    "print_hide": 1,
@@ -161,9 +166,9 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
-   "in_preview": 1,
    "label": "Customer",
-   "options": "Customer"
+   "options": "Customer",
+   "set_only_once": 1
   },
   {
    "fieldname": "report_preference",
@@ -390,7 +395,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2020-04-11 14:53:48.767245",
+ "modified": "2020-04-25 17:24:32.146415",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",

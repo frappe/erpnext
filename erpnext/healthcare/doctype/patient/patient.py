@@ -10,12 +10,16 @@ from frappe.utils import cint, cstr, getdate
 import dateutil
 from frappe.model.naming import set_name_by_naming_series
 from frappe.utils.nestedset import get_root_of
+from erpnext import get_default_currency
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account, get_income_account, send_registration_sms
 
 class Patient(Document):
 	def validate(self):
 		self.set_full_name()
 		self.add_as_website_user()
+
+	def before_insert(self):
+		self.set_missing_customer_details()
 
 	def after_insert(self):
 		self.add_as_website_user()
@@ -28,11 +32,43 @@ class Patient(Document):
 			send_registration_sms(self)
 		self.reload() # self.notify_update()
 
+	def on_update(self):
+		if self.customer:
+			customer = frappe.get_doc('Customer', self.customer)
+			if self.customer_group:
+				customer.customer_group = self.customer_group
+			if self.territory:
+				customer.territory = self.territory
+
+			customer.default_price_list = self.default_price_list
+			customer.default_currency = self.default_currency
+			customer.language = self.language
+			customer.save(ignore_permissions=True)
+		else:
+			if frappe.db.get_single_value('Healthcare Settings', 'link_customer_to_patient'):
+				create_customer(self)
+
 	def set_full_name(self):
 		if self.last_name:
 			self.patient_name = ' '.join(filter(None, [self.first_name, self.last_name]))
 		else:
 			self.patient_name = self.first_name
+
+	def set_missing_customer_details(self):
+		if not self.customer_group:
+			self.customer_group = frappe.db.get_single_value('Selling Settings', 'customer_group') or get_root_of('Customer Group')
+		if not self.territory:
+			self.territory = frappe.db.get_single_value('Selling Settings', 'territory') or get_root_of('Territory')
+		if not self.default_price_list:
+			self.default_price_list = frappe.db.get_single_value('Selling Settings', 'selling_price_list')
+
+		if not self.customer_group or not self.territory or not self.default_price_list:
+			frappe.msgprint(_('Please set defaults for Customer Group, Territory and Selling Price List in Selling Settings'), alert=True)
+
+		if not self.default_currency:
+			self.default_currency = get_default_currency()
+		if not self.language:
+			self.language = frappe.db.get_single_value('System Settings', 'language')
 
 	def add_as_website_user(self):
 		if self.email:
@@ -87,21 +123,14 @@ class Patient(Document):
 			return {'invoice': sales_invoice.name}
 
 def create_customer(doc):
-	customer_group = doc.customer_group or frappe.db.get_single_value('Selling Settings', 'customer_group')
-	territory = doc.territory or frappe.db.get_single_value('Selling Settings', 'territory')
-	if not (customer_group and territory):
-		customer_group = get_root_of('Customer Group')
-		territory = get_root_of('Territory')
-		frappe.msgprint(_('Please set default customer group and territory in Selling Settings'), alert=True)
-
 	customer = frappe.get_doc({
 		'doctype': 'Customer',
 		'customer_name': doc.patient_name,
-		'customer_group': customer_group,
-		'territory' : territory,
+		'customer_group': doc.customer_group or frappe.db.get_single_value('Selling Settings', 'customer_group'),
+		'territory' : doc.territory or frappe.db.get_single_value('Selling Settings', 'territory'),
 		'customer_type': 'Individual',
 		'default_currency': doc.default_currency,
-		'default_price_ist': doc.default_price_list,
+		'default_price_list': doc.default_price_list,
 		'language': doc.language
 	}).insert(ignore_permissions=True, ignore_mandatory=True)
 

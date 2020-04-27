@@ -87,8 +87,8 @@ frappe.ui.form.on('Clinical Procedure', {
 												['<a class="bold" href="#Form/Stock Entry/'+ r.message + '">' + r.message + '</a>']),
 											indicator: 'green'
 										});
-										frm.reload_doc();
 									}
+									frm.reload_doc();
 								}
 							});
 						}
@@ -156,11 +156,13 @@ frappe.ui.form.on('Clinical Procedure', {
 							age = __('{0} as on {1}', [age, data.message.age_as_on]);
 						}
 					}
+					frm.set_value('patient_name', data.message.patient_name);
 					frm.set_value('patient_age', age);
 					frm.set_value('patient_sex', data.message.sex);
 				}
 			});
 		} else {
+			frm.set_value('patient_name', '');
 			frm.set_value('patient_age', '');
 			frm.set_value('patient_sex', '');
 		}
@@ -179,6 +181,7 @@ frappe.ui.form.on('Clinical Procedure', {
 						'patient':data.message.patient,
 						'procedure_template': data.message.procedure_template,
 						'medical_department': data.message.department,
+						'practitioner': data.message.practitioner,
 						'start_date': data.message.appointment_date,
 						'start_time': data.message.appointment_time,
 						'notes': data.message.notes,
@@ -188,8 +191,7 @@ frappe.ui.form.on('Clinical Procedure', {
 					frm.set_value(values);
 				}
 			});
-		}
-		else{
+		} else {
 			let values = {
 				'patient': '',
 				'patient_name': '',
@@ -252,9 +254,11 @@ frappe.ui.form.on('Clinical Procedure', {
 					name: frm.doc.practitioner
 				},
 				callback: function (data) {
-					frappe.model.set_value(frm.doctype,frm.docname, 'medical_department',data.message.department);
+					frappe.model.set_value(frm.doctype,frm.docname, 'practitioner_name', data.message.practitioner_name);
 				}
 			});
+		} else {
+			frappe.model.set_value(frm.doctype,frm.docname, 'practitioner_name', '');
 		}
 	},
 
@@ -300,14 +304,6 @@ frappe.ui.form.on('Clinical Procedure', {
 		});
 	}
 
-});
-
-cur_frm.set_query('procedure_template', function(doc) {
-	return {
-		filters: {
-			'medical_department': doc.medical_department
-		}
-	};
 });
 
 frappe.ui.form.on('Clinical Procedure Item', {

@@ -127,6 +127,11 @@ frappe.ui.form.on('Patient Appointment', {
 	patient: function(frm) {
 		if (frm.doc.patient) {
 			frm.trigger('toggle_payment_fields');
+		} else {
+			frm.set_value('patient_name', '');
+			frm.set_value('patient_sex', '');
+			frm.set_value('patient_age', '');
+			frm.set_value('inpatient_record', '');
 		}
 	},
 

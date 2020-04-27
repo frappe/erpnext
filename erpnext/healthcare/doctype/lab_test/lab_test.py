@@ -69,7 +69,7 @@ def create_multiple(doctype, docname):
 		lab_test_created = create_lab_test_from_encounter(docname)
 
 	if lab_test_created:
-		frappe.msgprint(_("Lab Test(s) " + lab_test_created + " created."))
+		frappe.msgprint(_("Lab Test(s) {0} created".format(lab_test_created)))
 	else:
 		frappe.msgprint(_("No Lab Tests created"))
 
@@ -111,7 +111,7 @@ def create_lab_test_from_invoice(invoice_name):
 			if lab_test_created != 1:
 				template = get_lab_test_template(item.item_code)
 				if template:
-					lab_test = create_lab_test_doc(True, invoice.ref_practitioner, patient, template, company, invoice.company)
+					lab_test = create_lab_test_doc(True, invoice.ref_practitioner, patient, template, invoice.company)
 					if item.reference_dt == "Lab Prescription":
 						lab_test.prescription = item.reference_dn
 					lab_test.save(ignore_permissions = True)
