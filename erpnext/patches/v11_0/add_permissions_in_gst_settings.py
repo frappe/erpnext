@@ -6,4 +6,5 @@ def execute():
 	if not company:
 		return
 
+	frappe.reload_doc("regional", "doctype", "lower_deduction_certificate")
 	add_permissions()
