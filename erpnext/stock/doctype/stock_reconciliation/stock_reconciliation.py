@@ -332,15 +332,15 @@ class StockReconciliation(StockController):
 		if self.docstatus == 2 and not row.batch_no:
 			if row.current_qty:
 				data.actual_qty = -1 * row.current_qty
-				data.qty_after_transaction = flt(row.current_qty, row.precision("current_qty"))
-				data.valuation_rate = flt(row.current_valuation_rate, row.precision("current_valuation_rate"))
+				data.qty_after_transaction = flt(row.current_qty)
+				data.valuation_rate = flt(row.current_valuation_rate)
 				data.stock_value = data.qty_after_transaction * data.valuation_rate
-				data.stock_value_difference = -1 * flt(row.amount_difference, row.precision('amount_difference'))
+				data.stock_value_difference = -1 * flt(row.amount_difference)
 			else:
 				data.actual_qty = row.qty
 				data.qty_after_transaction = 0.0
-				data.valuation_rate = flt(row.valuation_rate, row.precision("valuation_rate"))
-				data.stock_value_difference = -1 * flt(row.amount_difference, row.precision('amount_difference'))
+				data.valuation_rate = flt(row.valuation_rate)
+				data.stock_value_difference = -1 * flt(row.amount_difference)
 
 		return data
 
