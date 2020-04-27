@@ -47,7 +47,7 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
-   "format": "Open",
+   "format": "{} Open",
    "label": "Lead",
    "link_to": "Lead",
    "stats_filter": "{\"status\":\"Open\"}",
