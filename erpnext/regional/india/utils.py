@@ -469,7 +469,7 @@ def download_ewb_json():
 	else:
 		doc_name = data['docname']
 
-	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(data['docname'], frappe.utils.random_string(5))
+	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(doc_name, frappe.utils.random_string(5))
 
 @frappe.whitelist()
 def get_gstins_for_company(company):
