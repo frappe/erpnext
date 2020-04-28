@@ -1002,7 +1002,7 @@ class PurchaseInvoice(BuyingController):
 		if not self.apply_tds:
 			return
 
-		tax_withholding_details = get_party_tax_withholding_details(self)
+		tax_withholding_details = get_party_tax_withholding_details(self, self.tax_withholding_category)
 
 		if not tax_withholding_details:
 			return

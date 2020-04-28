@@ -1892,7 +1892,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si.submit()
 
-		data = get_ewb_data("Sales Invoice", si.name)
+		data = get_ewb_data("Sales Invoice", [si.name])
 
 		self.assertEqual(data['version'], '1.0.1118')
 		self.assertEqual(data['billLists'][0]['fromGstin'], '27AAECE4835E1ZR')

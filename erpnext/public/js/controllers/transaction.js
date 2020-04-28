@@ -288,7 +288,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.setup_sms();
 		this.setup_quality_inspection();
 		let scan_barcode_field = this.frm.get_field('scan_barcode');
-		if (scan_barcode_field) {
+		if (scan_barcode_field && scan_barcode_field.get_value()) {
 			scan_barcode_field.set_value("");
 			scan_barcode_field.set_new_description("");
 
@@ -1412,7 +1412,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				me.frm.doc.items.forEach(d => {
 					if (in_list(data.apply_rule_on_other_items, d[data.apply_rule_on])) {
 						for(var k in data) {
-							if (in_list(fields, k) && data[k]) {
+							if (in_list(fields, k) && data[k] && (data.price_or_product_discount === 'price' || k === 'pricing_rules')) {
 								frappe.model.set_value(d.doctype, d.name, k, data[k]);
 							}
 						}
