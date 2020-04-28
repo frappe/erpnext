@@ -88,32 +88,38 @@ frappe.ui.form.on("Tally Migration", {
 			return
 		}
 		let rows = get_html_rows(shown_logs, field);
-		let rows_head;
+		let rows_head, table_caption;
+
+		let table_footer = (hidden_logs && (hidden_logs.length > 0)) ? `<tr class="text-muted">
+				<td colspan="4">And ${hidden_logs.length} more others</td>
+			</tr>`: "";
 
 		if (field === "fixed_error_log_preview") {
 			rows_head = `<th width="75%">${__("Meta Data")}</th>
 			<th width="10%">${__("Unresolve")}</th>`
+			table_caption = "Resolved Issues"
 		} else {
 			rows_head = `<th width="75%">${__("Error Message")}</th>
 			<th width="10%">${__("Create")}</th>`
+			table_caption = "Error Log"
 		}
+
 		frm.get_field(field).$wrapper.html(`
 			<table class="table table-bordered">
+				<caption>${table_caption}</caption>
 				<tr class="text-muted">
 					<th width="5%">${__("#")}</th>
 					<th width="10%">${__("DocType")}</th>
 					${rows_head}
 				</tr>
 				${rows}
-				<tr class="text-muted">
-					<td colspan="4">And ${hidden_logs.length} more others</td>
-				</tr>
+				${table_footer}
 			</table>
 		`);
 	},
 
-	show_error_summary() {
-		let summary = import_log.reduce((summary, row) => {
+	show_error_summary(frm) {
+		let summary = JSON.parse(frm.doc.failed_import_log).reduce((summary, row) => {
 			if (row.doc) {
 				if (summary[row.doc.doctype]) {
 					summary[row.doc.doctype] += 1;
@@ -280,7 +286,6 @@ const get_html_rows = (logs, field) => {
 							</td>
 							<td>
 								<div>${error_message}</div>
-								<div>${show_traceback}</div>
 								<div>${show_doc}</div>
 							</td>
 							<td>
@@ -302,8 +307,8 @@ const get_html_rows = (logs, field) => {
 								<div>${create_button}</div>
 							</td>
 						</tr>`;
-		}
-	}).join("");
+			}
+		}).join("");
 
 	return rows
 }
