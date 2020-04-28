@@ -61,7 +61,7 @@ def add_custom_roles_for_reports():
 			)).insert()
 
 def add_permissions():
-	for doctype in ('GST HSN Code', 'GST Settings', 'GSTR 3B Report'):
+	for doctype in ('GST HSN Code', 'GST Settings', 'GSTR 3B Report', 'Lower Deduction Certificate'):
 		add_permission(doctype, 'All', 0)
 		for role in ('Accounts Manager', 'Accounts User', 'System Manager'):
 			add_permission(doctype, role, 0)
@@ -85,7 +85,7 @@ def make_custom_fields(update=True):
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
 		fieldtype='Data', fetch_from='item_code.gst_hsn_code', insert_after='description',
 		allow_on_submit=1, print_hide=1, fetch_if_empty=1)
-	nil_rated_exempt = dict(fieldname='is_nil_exempt', label='Is nil rated or exempted',
+	nil_rated_exempt = dict(fieldname='is_nil_exempt', label='Is Nil Rated or Exempted',
 		fieldtype='Check', fetch_from='item_code.is_nil_exempt', insert_after='gst_hsn_code',
 		print_hide=1)
 	is_non_gst = dict(fieldname='is_non_gst', label='Is Non GST',
@@ -388,7 +388,7 @@ def make_custom_fields(update=True):
 		'Item': [
 			dict(fieldname='gst_hsn_code', label='HSN/SAC',
 				fieldtype='Link', options='GST HSN Code', insert_after='item_group'),
-			dict(fieldname='is_nil_exempt', label='Is nil rated or exempted',
+			dict(fieldname='is_nil_exempt', label='Is Nil Rated or Exempted',
 				fieldtype='Check', insert_after='gst_hsn_code'),
 			dict(fieldname='is_non_gst', label='Is Non GST ',
 				fieldtype='Check', insert_after='is_nil_exempt')
@@ -497,6 +497,14 @@ def make_custom_fields(update=True):
 				'depends_on':'eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
 				'options': '\nWith Payment of Tax\nWithout Payment of Tax'
 			}
+		],
+		"Member": [
+			{
+				'fieldname': 'pan_number',
+				'label': 'PAN Details',
+				'fieldtype': 'Data',
+				'insert_after': 'email'
+			}
 		]
 	}
 	create_custom_fields(custom_fields, update=update)
@@ -523,12 +531,18 @@ def make_fixtures(company=None):
 
 def set_salary_components(docs):
 	docs.extend([
-		{'doctype': 'Salary Component', 'salary_component': 'Professional Tax', 'description': 'Professional Tax', 'type': 'Deduction'},
-		{'doctype': 'Salary Component', 'salary_component': 'Provident Fund', 'description': 'Provident fund', 'type': 'Deduction'},
-		{'doctype': 'Salary Component', 'salary_component': 'House Rent Allowance', 'description': 'House Rent Allowance', 'type': 'Earning'},
-		{'doctype': 'Salary Component', 'salary_component': 'Basic', 'description': 'Basic', 'type': 'Earning'},
-		{'doctype': 'Salary Component', 'salary_component': 'Arrear', 'description': 'Arrear', 'type': 'Earning'},
-		{'doctype': 'Salary Component', 'salary_component': 'Leave Encashment', 'description': 'Leave Encashment', 'type': 'Earning'}
+		{'doctype': 'Salary Component', 'salary_component': 'Professional Tax',
+			'description': 'Professional Tax', 'type': 'Deduction', 'exempted_from_income_tax': 1},
+		{'doctype': 'Salary Component', 'salary_component': 'Provident Fund',
+			'description': 'Provident fund', 'type': 'Deduction', 'is_tax_applicable': 1},
+		{'doctype': 'Salary Component', 'salary_component': 'House Rent Allowance',
+			'description': 'House Rent Allowance', 'type': 'Earning', 'is_tax_applicable': 1},
+		{'doctype': 'Salary Component', 'salary_component': 'Basic',
+			'description': 'Basic', 'type': 'Earning', 'is_tax_applicable': 1},
+		{'doctype': 'Salary Component', 'salary_component': 'Arrear',
+			'description': 'Arrear', 'type': 'Earning', 'is_tax_applicable': 1},
+		{'doctype': 'Salary Component', 'salary_component': 'Leave Encashment',
+			'description': 'Leave Encashment', 'type': 'Earning', 'is_tax_applicable': 1}
 	])
 
 def set_tax_withholding_category(company):

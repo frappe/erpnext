@@ -95,8 +95,6 @@ frappe.ui.form.on('Delivery Trip', {
 		};
 	},
 
-	},
-
 	optimize_route: function (frm) {
 		if (!frm.doc.driver_address) {
 			frappe.throw(__("Cannot Optimize Route as Driver Address is Missing."));

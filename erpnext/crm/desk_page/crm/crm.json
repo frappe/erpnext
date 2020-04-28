@@ -12,13 +12,18 @@
   },
   {
    "hidden": 0,
-   "label": "Settings",
-   "links": "[\n    {\n        \"description\": \"Manage Customer Group Tree.\",\n        \"icon\": \"fa fa-sitemap\",\n        \"label\": \"Customer Group\",\n        \"link\": \"Tree/Customer Group\",\n        \"name\": \"Customer Group\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Manage Territory Tree.\",\n        \"icon\": \"fa fa-sitemap\",\n        \"label\": \"Territory\",\n        \"link\": \"Tree/Territory\",\n        \"name\": \"Territory\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Manage Sales Person Tree.\",\n        \"icon\": \"fa fa-sitemap\",\n        \"label\": \"Sales Person\",\n        \"link\": \"Tree/Sales Person\",\n        \"name\": \"Sales Person\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Sales campaigns.\",\n        \"label\": \"Campaign\",\n        \"name\": \"Campaign\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Sends Mails to lead or contact based on a Campaign schedule\",\n        \"label\": \"Email Campaign\",\n        \"name\": \"Email Campaign\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Send mass SMS to your contacts\",\n        \"label\": \"SMS Center\",\n        \"name\": \"SMS Center\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Logs for maintaining sms delivery status\",\n        \"label\": \"SMS Log\",\n        \"name\": \"SMS Log\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Setup SMS gateway settings\",\n        \"label\": \"SMS Settings\",\n        \"name\": \"SMS Settings\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Email Group\",\n        \"name\": \"Email Group\",\n        \"type\": \"doctype\"\n    }\n]"
+   "label": "Maintenance",
+   "links": "[\n    {\n        \"description\": \"Plan for maintenance visits.\",\n        \"label\": \"Maintenance Schedule\",\n        \"name\": \"Maintenance Schedule\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Visit report for maintenance call.\",\n        \"label\": \"Maintenance Visit\",\n        \"name\": \"Maintenance Visit\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Warranty Claim against Serial No.\",\n        \"label\": \"Warranty Claim\",\n        \"name\": \"Warranty Claim\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
    "hidden": 0,
-   "label": "Maintenance",
-   "links": "[\n    {\n        \"description\": \"Plan for maintenance visits.\",\n        \"label\": \"Maintenance Schedule\",\n        \"name\": \"Maintenance Schedule\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Visit report for maintenance call.\",\n        \"label\": \"Maintenance Visit\",\n        \"name\": \"Maintenance Visit\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Warranty Claim against Serial No.\",\n        \"label\": \"Warranty Claim\",\n        \"name\": \"Warranty Claim\",\n        \"type\": \"doctype\"\n    }\n]"
+   "label": "Campaign",
+   "links": "[\n    {\n        \"description\": \"Sales campaigns.\",\n        \"label\": \"Campaign\",\n        \"name\": \"Campaign\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Sends Mails to lead or contact based on a Campaign schedule\",\n        \"label\": \"Email Campaign\",\n        \"name\": \"Email Campaign\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Create and Schedule social media posts\",\n        \"label\": \"Social Media Post\",\n        \"name\": \"Social Media Post\",\n        \"type\": \"doctype\"\n    }\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Settings",
+   "links": "[\n    {\n        \"description\": \"Manage Customer Group Tree.\",\n        \"icon\": \"fa fa-sitemap\",\n        \"label\": \"Customer Group\",\n        \"link\": \"Tree/Customer Group\",\n        \"name\": \"Customer Group\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Manage Territory Tree.\",\n        \"icon\": \"fa fa-sitemap\",\n        \"label\": \"Territory\",\n        \"link\": \"Tree/Territory\",\n        \"name\": \"Territory\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Manage Sales Person Tree.\",\n        \"icon\": \"fa fa-sitemap\",\n        \"label\": \"Sales Person\",\n        \"link\": \"Tree/Sales Person\",\n        \"name\": \"Sales Person\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Send mass SMS to your contacts\",\n        \"label\": \"SMS Center\",\n        \"name\": \"SMS Center\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Logs for maintaining sms delivery status\",\n        \"label\": \"SMS Log\",\n        \"name\": \"SMS Log\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Setup SMS gateway settings\",\n        \"label\": \"SMS Settings\",\n        \"name\": \"SMS Settings\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Email Group\",\n        \"name\": \"Email Group\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Twitter Settings\",\n        \"name\": \"Twitter Settings\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"LinkedIn Settings\",\n        \"name\": \"LinkedIn Settings\",\n        \"type\": \"doctype\"\n    }\n]"
   }
  ],
  "category": "Modules",
@@ -33,7 +38,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "CRM",
- "modified": "2020-04-01 11:28:51.219999",
+ "modified": "2020-04-27 22:32:26.682911",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
@@ -42,7 +47,7 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
-   "format": "Open",
+   "format": "{} Open",
    "label": "Lead",
    "link_to": "Lead",
    "stats_filter": "{\"status\":\"Open\"}",

@@ -5,18 +5,11 @@
 frappe.query_reports['Employee Leave Balance Summary'] = {
 	filters: [
 		{
-			fieldname:'from_date',
-			label: __('From Date'),
+			fieldname:'date',
+			label: __('Date'),
 			fieldtype: 'Date',
 			reqd: 1,
-			default: frappe.defaults.get_default('year_start_date')
-		},
-		{
-			fieldname:'to_date',
-			label: __('To Date'),
-			fieldtype: 'Date',
-			reqd: 1,
-			default: frappe.defaults.get_default('year_end_date')
+			default: frappe.datetime.now_date()
 		},
 		{
 			fieldname:'company',
