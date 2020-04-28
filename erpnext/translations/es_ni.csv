@@ -1,1 +1,8 @@
+'Update Stock' cannot be checked for fixed asset sale,"""Actualización de Existencia' no puede ser escogida para venta de activo fijo",
+Bill,Factura,
+Bill of Materials,Lista de Materiales,
+Opening Accounting Balance,Apertura de Saldos Contables,
+Tax ID,RUC,
+Tax Rate,Tasa de Impuesto,
+Tax Rule Conflicts with {0},Regla Fiscal en conflicto con {0},
 Tax Id,RUC,
