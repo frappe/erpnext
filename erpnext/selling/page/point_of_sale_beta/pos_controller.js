@@ -36,34 +36,78 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	create_opening_voucher() {
-		const on_submit = ({ company, pos_profile, custody_amount }) => {
-			frappe.dom.freeze();
+		const table_fields = [
+			{ fieldname: "mode_of_payment", fieldtype: "Link", in_list_view: 1,
+			label: "Mode of Payment", options: "Mode of Payment", reqd: 1 },
+		   { default: "0", fieldname: "opening_amount", fieldtype: "Currency",
+			in_list_view: 1, label: "Opening Amount", options: "company:company_currency", reqd: 1 }
+		];
 
-			return frappe.call("erpnext.selling.page.point_of_sale.point_of_sale.create_opening_voucher", 
-				{ pos_profile, company, custody_amount })
-				.then((r) => {
-					frappe.dom.unfreeze()
-					if (r.message) {
-						this.initialize_app(r.message);
+		const dialog = new frappe.ui.Dialog({
+			title: __('Create POS Opening Entry'),
+			fields: [
+				{
+					fieldtype: 'Link', label: __('Company'), default: frappe.defaults.get_default('company'),
+					options: 'Company', fieldname: 'company', reqd: 1
+				},
+				{
+					fieldtype: 'Link', label: __('POS Profile'),
+					options: 'POS Profile', fieldname: 'pos_profile', reqd: 1,
+					onchange: () => {
+						const pos_profile = dialog.fields_dict.pos_profile.get_value();
+						const company = dialog.fields_dict.company.get_value();
+						const user = frappe.session.user
+
+						if (!pos_profile || !company || !user) return;
+
+						frappe.db.get_list("POS Closing Entry", {
+							filters: { company, pos_profile, user },
+							limit: 1,
+							order_by: 'period_end_date desc'
+						}).then((res) => {
+							if (!res) return;
+							const pos_closing_entry = res[0];
+							frappe.db.get_doc("POS Closing Entry", pos_closing_entry.name).then(({ payment_reconciliation }) => {
+								dialog.fields_dict.balance_details.df.data = [];
+								payment_reconciliation.forEach(pay => {
+									const { mode_of_payment, opening_amount } = pay;
+									dialog.fields_dict.balance_details.df.data.push({
+										mode_of_payment: mode_of_payment,
+										opening_amount: opening_amount
+									});		
+								});
+								dialog.fields_dict.balance_details.grid.refresh();
+							})
+						});
 					}
-				})
-		}
-
-		frappe.prompt([
-			{
-				fieldtype: 'Link', label: __('Company'), default: frappe.defaults.get_default('company'),
-				options: 'Company', fieldname: 'company', reqd: 1
+				},
+				{
+					fieldname: "balance_details",
+					fieldtype: "Table",
+					label: "Opening Balance Details",
+					cannot_add_rows: false,
+					in_place_edit: true,
+					reqd: 1,
+					data: [],
+					fields: table_fields
+				}
+			],
+			primary_action: ({ company, pos_profile, balance_details }) => {
+				frappe.dom.freeze();
+	
+				return frappe.call("erpnext.selling.page.point_of_sale.point_of_sale.create_opening_voucher", 
+					{ pos_profile, company, balance_details })
+					.then((r) => {
+						frappe.dom.unfreeze()
+						if (r.message) {
+							this.initialize_app(r.message);
+							dialog.hide();
+						}
+					})
 			},
-			{
-				fieldtype: 'Link', label: __('POS Profile'),
-				options: 'POS Profile', fieldname: 'pos_profile', reqd: 1
-			},
-			{
-				fieldtype: 'Currency', options: 'company:company_currency',
-				label: __('Amount in custody'), fieldname: 'custody_amount', reqd: 1
-			}
-		],
-		on_submit, __('Create POS Opening Entry'));
+			primary_action_label: __('Submit')
+		});
+		dialog.show();
 	}
 
 	initialize_app(data) {

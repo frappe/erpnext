@@ -45,7 +45,7 @@
 								{% for d in data.payment_reconciliation %}
 									<tr>
 										<td class="text-left">{{ d.mode_of_payment }}</td>
-										<td class='text-right'>{{ d.collected_amount }} {{ currency.symbol }}</td>
+										<td class='text-right'>{{ d.closing_amount }} {{ currency.symbol }}</td>
 									</tr>
 								{% endfor %}
 							</tbody>

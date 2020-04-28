@@ -18,7 +18,8 @@
   "pos_closing_entry",
   "column_break_7",
   "user",
-  "custody_amount",
+  "opening_balance_details_section",
+  "balance_details",
   "section_break_9",
   "amended_from"
  ],
@@ -80,13 +81,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "custody_amount",
-   "fieldtype": "Currency",
-   "label": "Amount in Custody",
-   "options": "company:company_currency",
-   "reqd": 1
-  },
-  {
    "fieldname": "section_break_9",
    "fieldtype": "Section Break",
    "read_only": 1
@@ -123,11 +117,22 @@
    "label": "POS Closing Entry",
    "options": "POS Closing Entry",
    "read_only": 1
+  },
+  {
+   "fieldname": "opening_balance_details_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "balance_details",
+   "fieldtype": "Table",
+   "label": "Opening Balance Details",
+   "options": "POS Opening Entry Details",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-23 21:02:05.098369",
+ "modified": "2020-04-28 16:53:35.037800",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "POS Opening Entry",

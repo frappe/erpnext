@@ -167,7 +167,10 @@ def check_opening_voucher(user):
 	return open_vouchers
 
 @frappe.whitelist()
-def create_opening_voucher(pos_profile, company, custody_amount):
+def create_opening_voucher(pos_profile, company, balance_details):
+	import json
+	balance_details = json.loads(balance_details)
+
 	new_pos_opening = frappe.get_doc({
 		'doctype': 'POS Opening Entry',
 		"period_start_date": frappe.utils.get_datetime(),
@@ -175,8 +178,8 @@ def create_opening_voucher(pos_profile, company, custody_amount):
 		"user": frappe.session.user,
 		"pos_profile": pos_profile,
 		"company": company,
-		"custody_amount": custody_amount
 	})
+	new_pos_opening.set("balance_details", balance_details)
 	new_pos_opening.submit()
 
 	return new_pos_opening.as_dict()

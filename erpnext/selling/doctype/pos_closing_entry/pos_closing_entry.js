@@ -24,9 +24,34 @@ frappe.ui.form.on('POS Closing Entry', {
 		if (frm.doc.docstatus === 1) set_html_data(frm);
 	},
 
+	before_save(frm) {
+		frm.doc.payment_reconciliation.forEach((pay, idx) => {
+			if (pay.opening_amount === pay.expected_amount) {
+				frm.doc.payment_reconciliation.splice(idx, 1);
+			}
+		})
+		frm.refresh_field("payment_reconciliation")
+	},
+
 	pos_opening_entry(frm) {
-		if (frm.doc.pos_opening_entry && frm.doc.period_start_date && frm.doc.period_end_date && frm.doc.user)
+		if (frm.doc.pos_opening_entry && frm.doc.period_start_date && frm.doc.period_end_date && frm.doc.user) {
+			reset_values(frm);
+			frm.trigger("set_opening_amounts");
 			frm.trigger("get_pos_invoices");
+		}
+	},
+
+	set_opening_amounts(frm) {
+		frappe.db.get_doc("POS Opening Entry", frm.doc.pos_opening_entry)
+			.then(({ balance_details }) => {
+				balance_details.forEach(detail => {
+					frm.add_child("payment_reconciliation", {
+						mode_of_payment: detail.mode_of_payment,
+						opening_amount: detail.opening_amount,
+						expected_amount: detail.opening_amount
+					});
+				})
+			});
 	},
 
 	get_pos_invoices(frm) {
@@ -39,30 +64,24 @@ frappe.ui.form.on('POS Closing Entry', {
 			},
 			callback: (r) => {
 				let pos_docs = r.message;
-				reset_values(frm);
 				set_form_data(pos_docs, frm)
 				refresh_fields(frm)
 				set_html_data(frm)
 			}
 		})
-	},
-
-	total_amount: function(frm) {
-		get_difference_amount(frm);
-	},
-	custody_amount: function(frm){
-		get_difference_amount(frm);
-	},
-	expense_amount: function(frm){
-		get_difference_amount(frm);
-	},
+	}
 });
+
+frappe.ui.form.on('POS Closing Entry Details', {
+	closing_amount: (frm, cdt, cdn) => {
+		const row = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, "difference", flt(row.expected_amount - row.closing_amount))
+	}
+})
 
 function set_form_data(data, frm) {
 	data.forEach(d => {
 		add_to_pos_transaction(d, frm);
-		if (d.is_return) frm.doc.expense_amount -= flt(d.grand_total);
-		if (!d.is_return) frm.doc.total_amount += flt(d.grand_total);
 		frm.doc.grand_total += flt(d.grand_total);
 		frm.doc.net_total += flt(d.net_total);
 		frm.doc.total_quantity += flt(d.total_qty);
@@ -84,11 +103,12 @@ function add_to_payments(d, frm) {
 	d.payments.forEach(p => {
 		const payment = frm.doc.payment_reconciliation.find(pay => pay.mode_of_payment === p.mode_of_payment);
 		if (payment) {
-			payment.collected_amount += flt(p.amount);
+			payment.expected_amount += flt(p.amount);
 		} else {
 			frm.add_child("payment_reconciliation", {
 				mode_of_payment: p.mode_of_payment,
-				collected_amount: p.amount
+				opening_amount: 0,
+				expected_amount: p.amount
 			})
 		}
 	})
@@ -113,7 +133,6 @@ function reset_values(frm) {
 	frm.set_value("pos_transactions", []);
 	frm.set_value("payment_reconciliation", []);
 	frm.set_value("taxes", []);
-	frm.set_value("expense_amount", 0);
 	frm.set_value("grand_total", 0);
 	frm.set_value("net_total", 0);
 	frm.set_value("total_quantity", 0);
@@ -123,7 +142,6 @@ function refresh_fields(frm) {
 	frm.refresh_field("pos_transactions");
 	frm.refresh_field("payment_reconciliation");
 	frm.refresh_field("taxes");
-	frm.refresh_field("expense_amount");
 	frm.refresh_field("grand_total");
 	frm.refresh_field("net_total");
 	frm.refresh_field("total_quantity");
@@ -138,11 +156,6 @@ function set_html_data(frm) {
 		}
 	})
 }
-
-var get_difference_amount = function(frm){
-	frm.doc.difference = frm.doc.total_amount - frm.doc.custody_amount - frm.doc.expense_amount;
-	refresh_field("difference");
-};
 
 var get_closing_voucher_details = function(frm) {
 	if (frm.doc.period_end_date && frm.doc.period_start_date && frm.doc.company && frm.doc.pos_profile && frm.doc.user) {
