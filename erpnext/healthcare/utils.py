@@ -35,7 +35,6 @@ def validate_customer_created(patient):
 		msg +=  " <b><a href='#Form/Patient/{0}'>{0}</a></b>".format(patient.name)
 		frappe.throw(msg, title=_('Customer Not Found'))
 
-
 def get_appointments_to_invoice(patient, company):
 	appointments_to_invoice = []
 	patient_appointments = frappe.get_list(
@@ -112,7 +111,7 @@ def get_lab_tests_to_invoice(patient, company):
 		filters={'patient': patient.name, 'company': company, 'invoiced': False, 'docstatus': 1}
 	)
 	for lab_test in lab_tests:
-		item, is_billable = frappe.get_cached_value('Lab Test Template', lab_test.lab_test_code, ['item', 'is_billable'])
+		item, is_billable = frappe.get_cached_value('Lab Test Template', lab_test.template, ['item', 'is_billable'])
 		if is_billable:
 			lab_tests_to_invoice.append({
 				'reference_type': 'Lab Test',
