@@ -372,7 +372,6 @@ def calculate_hra_exemption_for_period(doc):
 		return exemptions
 
 def get_ewb_data(dt, dn):
-	dn = dn.split(',')
 
 	ewaybills = []
 	for doc_name in dn:
@@ -453,16 +452,22 @@ def get_ewb_data(dt, dn):
 
 @frappe.whitelist()
 def generate_ewb_json(dt, dn):
+	dn = json.loads(dn)
+	return get_ewb_data(dt, dn)
 
-	data = get_ewb_data(dt, dn)
+@frappe.whitelist()
+def download_ewb_json():
+	data = frappe._dict(frappe.local.form_dict)
 
-	frappe.local.response.filecontent = json.dumps(data, indent=4, sort_keys=True)
+	frappe.local.response.filecontent = json.dumps(data['data'], indent=4, sort_keys=True)
 	frappe.local.response.type = 'download'
 
-	if len(data['billLists']) > 1:
+	billList = json.loads(data['data'])['billLists']
+
+	if len(billList) > 1:
 		doc_name = 'Bulk'
 	else:
-		doc_name = dn
+		doc_name = data['docname']
 
 	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(doc_name, frappe.utils.random_string(5))
 
