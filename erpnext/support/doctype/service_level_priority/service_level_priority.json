@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2019-05-04 05:54:03.658991",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -16,7 +17,7 @@
  ],
  "fields": [
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "priority",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -28,14 +29,7 @@
    "fieldtype": "Section Break"
   },
   {
-   "columns": 1,
-   "fieldname": "response_time",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Response Time"
-  },
-  {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "resolution_time",
    "fieldtype": "Int",
    "in_list_view": 1,
@@ -66,15 +60,24 @@
    "fieldtype": "Column Break"
   },
   {
+   "columns": 1,
    "default": "0",
    "fieldname": "default_priority",
    "fieldtype": "Check",
    "in_list_view": 1,
    "label": "Default Priority"
+  },
+  {
+   "columns": 2,
+   "fieldname": "response_time",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "First Response Time"
   }
  ],
  "istable": 1,
- "modified": "2019-05-21 06:54:42.674377",
+ "links": [],
+ "modified": "2020-04-24 14:50:13.774308",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Priority",
