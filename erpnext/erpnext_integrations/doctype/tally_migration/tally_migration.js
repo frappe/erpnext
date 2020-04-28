@@ -35,8 +35,10 @@ frappe.ui.form.on("Tally Migration", {
 			}
 		});
 	},
+
 	refresh: function (frm) {
-		frm.trigger("show_import_log");
+		frm.trigger("show_logs_preview");
+
 		["default_round_off_account", "default_warehouse", "default_cost_center"].forEach(account => {
 			frm.toggle_reqd(account, frm.doc.is_master_data_imported === 1)
 		})
@@ -63,6 +65,7 @@ frappe.ui.form.on("Tally Migration", {
 			}
 		}
 	},
+
 	add_button: function (frm, label, method) {
 		frm.add_custom_button(
 			label,
@@ -76,94 +79,30 @@ frappe.ui.form.on("Tally Migration", {
 			}
 		);
 	},
-	show_import_log(frm) {
-		let index = 0;
-		let import_log = JSON.parse(frm.doc.failed_import_log || "[]");
-		let logs = import_log.slice(0, 20);
-		let hidden_logs = import_log.slice(20);
 
-		frm.toggle_display("import_log_section", logs.length > 0);
-
-
-		const getError = (traceback) => {
-			let exc_error_idx = traceback.trim().lastIndexOf("\n") + 1
-			let error_line = traceback.substr(exc_error_idx)
-			let split_str_idx = (error_line.indexOf(':') > 0) ? error_line.indexOf(':') + 1 : 0;
-
-			return error_line.slice(split_str_idx).trim();
+	render_html_table(frm, shown_logs, hidden_logs, field) {
+		if (shown_logs && shown_logs.length > 0) {
+			frm.toggle_display(field, true);
+		} else {
+			frm.toggle_display(field, false);
+			return
 		}
+		let rows = get_html_rows(shown_logs, field);
+		let rows_head;
 
-		const cleanDoc = (obj) => {
-			let temp = obj;
-			$.each(temp, function(key, value){
-				if (value === "" || value === null){
-					delete obj[key];
-				} else if (Object.prototype.toString.call(value) === '[object Object]') {
-					cleanDoc(value);
-				} else if ($.isArray(value)) {
-					$.each(value, function (k,v) { cleanDoc(v); });
-				}
-			});
-			return temp;
-		};
-
-		let rows = logs
-			.map(({ doc, exc }) => {
-				let id = frappe.dom.get_unique_id();
-				let traceback = exc;
-
-				let error_message = getError(traceback);
-				index++;
-
-				let html = `
-					<button class="btn btn-default btn-xs m-3" type="button" data-toggle="collapse" data-target="#${id}-traceback" aria-expanded="false" aria-controls="${id}-traceback">
-						${__("Show Traceback")}
-					</button>
-					<div class="collapse margin-top" id="${id}-traceback">
-						<div class="well">
-							<pre style="font-size: smaller;">${traceback}</pre>
-						</div>
-					</div>`;
-
-				let show_doc = `
-					<button class='btn btn-default btn-xs m-3' type='button' data-toggle='collapse' data-target='#${id}-doc' aria-expanded='false' aria-controls='${id}-doc'>
-						${__("Show Document")}
-					</button>
-					<div class="collapse margin-top" id="${id}-doc">
-						<div class="well">
-							<pre style="font-size: smaller;">${JSON.stringify(cleanDoc(doc), null, 1)}</pre>
-						</div>
-					</div>`;
-
-				let create_button = `
-					<button class='btn btn-default btn-xs m-3' type='button' onclick='frappe.new_doc("${doc.doctype}", ${JSON.stringify(doc)})'>
-						${__("Create Document")}
-					</button>`
-
-				return `<tr>
-							<td>${index}</td>
-							<td>
-								<div>${doc.doctype}</div>
-							</td>
-							<td>
-								<div>${error_message}</div>
-								<div>${html}</div>
-								<div>${show_doc}</div>
-							</td>
-							<td>
-								<div>${create_button}</div>
-							</td>
-						</tr>`;
-				})
-			.join("");
-
-		frm.get_field("failed_import_preview").$wrapper.html(`
+		if (field === "fixed_error_log_preview") {
+			rows_head = `<th width="75%">${__("Meta Data")}</th>
+			<th width="10%">${__("Unresolve")}</th>`
+		} else {
+			rows_head = `<th width="75%">${__("Error Message")}</th>
+			<th width="10%">${__("Create")}</th>`
+		}
+		frm.get_field(field).$wrapper.html(`
 			<table class="table table-bordered">
 				<tr class="text-muted">
 					<th width="5%">${__("#")}</th>
 					<th width="10%">${__("DocType")}</th>
-					<th width="75%">${__("Error Message")}</th>
-					<th width="10%">${__("Create")}</th>
+					${rows_head}
 				</tr>
 				${rows}
 				<tr class="text-muted">
@@ -171,5 +110,201 @@ frappe.ui.form.on("Tally Migration", {
 				</tr>
 			</table>
 		`);
+	},
+
+	show_error_summary() {
+		let summary = import_log.reduce((summary, row) => {
+			if (row.doc) {
+				if (summary[row.doc.doctype]) {
+					summary[row.doc.doctype] += 1;
+				} else {
+					summary[row.doc.doctype] = 1;
+				}
+			}
+			return summary
+		}, {});
+		console.table(summary);
+	},
+
+	show_logs_preview(frm) {
+		let empty = "[]";
+		let import_log = frm.doc.failed_import_log || empty;
+		let completed_log = frm.doc.fixed_errors_log || empty;
+		let render_section = !(import_log === completed_log && import_log === empty);
+
+		frm.toggle_display("import_log_section", render_section);
+
+		if (render_section) {
+			frm.trigger("show_errored_import_log");
+			frm.trigger("show_fixed_errors_log");
+		}
+	},
+
+	show_errored_import_log(frm) {
+		let import_log = JSON.parse(frm.doc.failed_import_log || "[]");
+
+		let logs = import_log.slice(0, 20);
+		let hidden_logs = import_log.slice(20);
+
+		frm.events.render_html_table(frm, logs, hidden_logs, "failed_import_preview");
+	},
+
+	show_fixed_errors_log(frm) {
+		let completed_log = JSON.parse(frm.doc.fixed_errors_log || "[]");
+		let logs = completed_log.slice(0, 20);
+		let hidden_logs = completed_log.slice(20);
+
+		frm.events.render_html_table(frm, logs, hidden_logs, "fixed_error_log_preview");
 	}
 });
+
+const getError = (traceback) => {
+	/* Extracts the Error Message from the Python Traceback or Solved error */
+	let is_multiline = traceback.trim().indexOf("\n") != -1;
+	let message;
+
+	if (is_multiline) {
+		let exc_error_idx = traceback.trim().lastIndexOf("\n") + 1
+		let error_line = traceback.substr(exc_error_idx)
+		let split_str_idx = (error_line.indexOf(':') > 0) ? error_line.indexOf(':') + 1 : 0;
+		message = error_line.slice(split_str_idx).trim();
+	} else {
+		message = traceback;
+	}
+
+	return message
+}
+
+const cleanDoc = (obj) => {
+	/* Strips all null and empty values of your JSON object */
+	let temp = obj;
+	$.each(temp, function(key, value){
+		if (value === "" || value === null){
+			delete obj[key];
+		} else if (Object.prototype.toString.call(value) === '[object Object]') {
+			cleanDoc(value);
+		} else if ($.isArray(value)) {
+			$.each(value, function (k,v) { cleanDoc(v); });
+		}
+	});
+	return temp;
+}
+
+window.unresolve = (document) => {
+	let frm = cur_frm;
+	let failed_log = JSON.parse(frm.doc.failed_import_log);
+	let fixed_log = JSON.parse(frm.doc.fixed_errors_log);
+
+	let modified_fixed_log = fixed_log.filter(row => {
+		if (!frappe.utils.deep_equal(cleanDoc(row.doc), document)) {
+			return row
+		}
+	});
+
+	failed_log.push({ doc: document, exc: `Marked unresolved on ${Date()}` });
+
+	frm.doc.failed_import_log = JSON.stringify(failed_log);
+	frm.doc.fixed_errors_log = JSON.stringify(modified_fixed_log);
+
+	// frm.trigger('show_logs_preview')
+	frm.dirty();
+	frm.save();
+}
+
+window.create_new_doc = (doctype, document) => {
+	let frm = cur_frm;
+	let failed_log = JSON.parse(frm.doc.failed_import_log);
+	let fixed_log = JSON.parse(frm.doc.fixed_errors_log);
+
+	let modified_failed_log = failed_log.filter(row => {
+		if (!frappe.utils.deep_equal(cleanDoc(row.doc), document)) {
+			return row
+		}
+	});
+	fixed_log.push({ doc: document, exc: `Solved on ${Date()}` });
+
+	frm.doc.failed_import_log = JSON.stringify(modified_failed_log);
+	frm.doc.fixed_errors_log = JSON.stringify(fixed_log);
+
+	// frm.trigger('show_logs_preview')
+	frm.dirty();
+	frm.save();
+	frappe.new_doc(doctype, document);
+}
+
+const get_html_rows = (logs, field) => {
+	let index = 0;
+	let rows = logs
+		.map(({ doc, exc }) => {
+			let id = frappe.dom.get_unique_id();
+			let traceback = exc;
+
+			let error_message = getError(traceback);
+			index++;
+
+			let show_traceback = `
+				<button class="btn btn-default btn-xs m-3" type="button" data-toggle="collapse" data-target="#${id}-traceback" aria-expanded="false" aria-controls="${id}-traceback">
+					${__("Show Traceback")}
+				</button>
+				<div class="collapse margin-top" id="${id}-traceback">
+					<div class="well">
+						<pre style="font-size: smaller;">${traceback}</pre>
+					</div>
+				</div>`;
+
+			let show_doc = `
+				<button class='btn btn-default btn-xs m-3' type='button' data-toggle='collapse' data-target='#${id}-doc' aria-expanded='false' aria-controls='${id}-doc'>
+					${__("Show Document")}
+				</button>
+				<div class="collapse margin-top" id="${id}-doc">
+					<div class="well">
+						<pre style="font-size: smaller;">${JSON.stringify(cleanDoc(doc), null, 1)}</pre>
+					</div>
+				</div>`;
+
+			let create_button = `
+				<button class='btn btn-default btn-xs m-3' type='button' onclick='create_new_doc("${doc.doctype}", ${JSON.stringify(doc)})'>
+					${__("Create Document")}
+				</button>`
+
+			let mark_as_unresolved = `
+				<button class='btn btn-default btn-xs m-3' type='button' onclick='unresolve(${JSON.stringify(doc)})'>
+					${__("Mark as unresolved")}
+				</button>`
+
+			if (field === "fixed_error_log_preview") {
+				return `<tr>
+							<td>${index}</td>
+							<td>
+								<div>${doc.doctype}</div>
+							</td>
+							<td>
+								<div>${error_message}</div>
+								<div>${show_traceback}</div>
+								<div>${show_doc}</div>
+							</td>
+							<td>
+								<div>${mark_as_unresolved}</div>
+							</td>
+						</tr>`;
+			} else {
+				return `<tr>
+							<td>${index}</td>
+							<td>
+								<div>${doc.doctype}</div>
+							</td>
+							<td>
+								<div>${error_message}</div>
+								<div>${show_traceback}</div>
+								<div>${show_doc}</div>
+							</td>
+							<td>
+								<div>${create_button}</div>
+							</td>
+						</tr>`;
+			}
+			})
+		.join("");
+
+	return rows
+}
