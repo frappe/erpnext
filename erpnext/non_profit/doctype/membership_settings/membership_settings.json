@@ -1,0 +1,62 @@
+{
+ "actions": [],
+ "creation": "2020-03-29 12:57:03.005120",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enable_razorpay",
+  "razorpay_settings_section",
+  "billing_cycle",
+  "billing_frequency"
+ ],
+ "fields": [
+  {
+   "fieldname": "billing_cycle",
+   "fieldtype": "Select",
+   "label": "Billing Cycle",
+   "options": "Monthly\nYearly"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_razorpay",
+   "fieldtype": "Check",
+   "label": "Enable RazorPay For Memberships"
+  },
+  {
+   "depends_on": "eval:doc.enable_razorpay",
+   "fieldname": "razorpay_settings_section",
+   "fieldtype": "Section Break",
+   "label": "RazorPay Settings"
+  },
+  {
+   "description": "The number of billing cycles for which the customer should be charged. For example, if a customer is buying a 1-year membership that should be billed on a monthly basis, this value should be 12.",
+   "fieldname": "billing_frequency",
+   "fieldtype": "Int",
+   "label": "Billing Frequency"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2020-04-07 18:42:51.496807",
+ "modified_by": "Administrator",
+ "module": "Non Profit",
+ "name": "Membership Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

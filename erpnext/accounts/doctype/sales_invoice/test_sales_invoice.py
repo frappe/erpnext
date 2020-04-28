@@ -1892,7 +1892,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si.submit()
 
-		data = get_ewb_data("Sales Invoice", si.name)
+		data = get_ewb_data("Sales Invoice", [si.name])
 
 		self.assertEqual(data['version'], '1.0.1118')
 		self.assertEqual(data['billLists'][0]['fromGstin'], '27AAECE4835E1ZR')
@@ -1948,7 +1948,7 @@ def create_sales_invoice(**args):
 		"gst_hsn_code": "999800",
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"qty": args.qty or 1,
-		"rate": args.rate or 100,
+		"rate": args.rate if args.get("rate") is not None else 100,
 		"income_account": args.income_account or "Sales - _TC",
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
