@@ -141,19 +141,18 @@ def get_conditions(filters):
 	conditions = ""
 
 	if filters.get("company"):
-		conditions += " AND company=%s"% frappe.db.escape(filters.get('company'))
+		conditions += " AND par.company=%s" % frappe.db.escape(filters.get('company'))
 
 	if filters.get("cost_center") or filters.get("project"):
 		conditions += """
-			AND (cost_center=%s
-			OR project=%s)
-			"""% (frappe.db.escape(filters.get('cost_center')), frappe.db.escape(filters.get('project')))
+			AND (child.`cost_center`=%s OR child.`project`=%s)
+			""" % (frappe.db.escape(filters.get('cost_center')), frappe.db.escape(filters.get('project')))
 
 	if filters.get("from_date"):
-		conditions += " AND transaction_date>=%s"% filters.get('from_date')
+		conditions += " AND par.transaction_date>='%s'" % filters.get('from_date')
 
 	if filters.get("to_date"):
-		conditions += " AND transaction_date<=%s"% filters.get('to_date')
+		conditions += " AND par.transaction_date<='%s'" % filters.get('to_date')
 	return conditions
 
 def get_data(filters):
@@ -162,7 +161,6 @@ def get_data(filters):
 	mr_records, procurement_record_against_mr = get_mapped_mr_details(conditions)
 	pr_records = get_mapped_pr_records()
 	pi_records = get_mapped_pi_records()
-	print(pi_records)
 
 	procurement_record=[]
 	if procurement_record_against_mr:
@@ -198,16 +196,16 @@ def get_mapped_mr_details(conditions):
 	mr_records = {}
 	mr_details = frappe.db.sql("""
 		SELECT
-			mr.transaction_date,
-			mr.per_ordered,
-			mr_item.name,
-			mr_item.parent,
-			mr_item.amount
-		FROM `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
+			par.transaction_date,
+			par.per_ordered,
+			child.name,
+			child.parent,
+			child.amount
+		FROM `tabMaterial Request` par, `tabMaterial Request Item` child
 		WHERE
-			mr.per_ordered>=0
-			AND mr.name=mr_item.parent
-			AND mr.docstatus=1
+			par.per_ordered>=0
+			AND par.name=child.parent
+			AND par.docstatus=1
 			{conditions}
 		""".format(conditions=conditions), as_dict=1) #nosec
 
@@ -254,29 +252,29 @@ def get_mapped_pr_records():
 def get_po_entries(conditions):
 	return frappe.db.sql("""
 		SELECT
-			po_item.name,
-			po_item.parent,
-			po_item.cost_center,
-			po_item.project,
-			po_item.warehouse,
-			po_item.material_request,
-			po_item.material_request_item,
-			po_item.description,
-			po_item.stock_uom,
-			po_item.qty,
-			po_item.amount,
-			po_item.base_amount,
-			po_item.schedule_date,
-			po.transaction_date,
-			po.supplier,
-			po.status,
-			po.owner
-		FROM `tabPurchase Order` po, `tabPurchase Order Item` po_item
+			child.name,
+			child.parent,
+			child.cost_center,
+			child.project,
+			child.warehouse,
+			child.material_request,
+			child.material_request_item,
+			child.description,
+			child.stock_uom,
+			child.qty,
+			child.amount,
+			child.base_amount,
+			child.schedule_date,
+			par.transaction_date,
+			par.supplier,
+			par.status,
+			par.owner
+		FROM `tabPurchase Order` par, `tabPurchase Order Item` child
 		WHERE
-			po.docstatus = 1
-			AND po.name = po_item.parent
-			AND po.status not in  ("Closed","Completed","Cancelled")
+			par.docstatus = 1
+			AND par.name = child.parent
+			AND par.status not in  ("Closed","Completed","Cancelled")
 			{conditions}
 		GROUP BY
-			po.name,po_item.item_code
+			par.name, child.item_code
 		""".format(conditions=conditions), as_dict=1) #nosec
