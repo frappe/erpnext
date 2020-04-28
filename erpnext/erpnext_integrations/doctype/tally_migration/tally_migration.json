@@ -38,7 +38,9 @@
   "is_day_book_data_imported",
   "import_log_section",
   "failed_import_log",
-  "failed_import_preview"
+  "fixed_errors_log",
+  "failed_import_preview",
+  "fixed_error_log_preview"
  ],
  "fields": [
   {
@@ -220,7 +222,6 @@
    "fieldname": "failed_import_log",
    "fieldtype": "Code",
    "hidden": 1,
-   "label": "Failed Import Log",
    "options": "JSON"
   },
   {
@@ -238,10 +239,22 @@
    "fieldtype": "Link",
    "label": "Default Round Off Account",
    "options": "Account"
+  },
+  {
+   "default": "[]",
+   "fieldname": "fixed_errors_log",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "options": "JSON"
+  },
+  {
+   "fieldname": "fixed_error_log_preview",
+   "fieldtype": "HTML",
+   "label": "Fixed Error Log"
   }
  ],
  "links": [],
- "modified": "2020-04-22 16:01:13.718842",
+ "modified": "2020-04-28 00:29:18.039826",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Tally Migration",
