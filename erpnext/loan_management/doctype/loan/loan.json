@@ -126,7 +126,7 @@
    "depends_on": "eval:doc.applicant_type==\"Employee\"",
    "fieldname": "repay_from_salary",
    "fieldtype": "Check",
-   "label": "Repay from Salary"
+   "label": "Repay From Salary"
   },
   {
    "fieldname": "section_break_8",
@@ -178,6 +178,8 @@
   },
   {
    "depends_on": "is_term_loan",
+   "fetch_from": "loan_application.repayment_amount",
+   "fetch_if_empty": 1,
    "fieldname": "monthly_repayment_amount",
    "fieldtype": "Currency",
    "label": "Monthly Repayment Amount",
@@ -350,7 +352,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-07 01:31:25.172173",
+ "modified": "2020-04-13 13:16:10.192624",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",

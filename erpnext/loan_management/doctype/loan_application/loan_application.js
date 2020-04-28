@@ -31,13 +31,15 @@ frappe.ui.form.on('Loan Application', {
 	add_toolbar_buttons: function(frm) {
 		if (frm.doc.status == "Approved") {
 
-			frappe.db.get_value("Loan Security Pledge", {"loan_application": frm.doc.name, "docstatus": 1}, "name", (r) => {
-				if (!r) {
-					frm.add_custom_button(__('Loan Security Pledge'), function() {
-						frm.trigger('create_loan_security_pledge')
-					},__('Create'))
-				}
-			});
+			if (frm.doc.is_secured_loan) {
+				frappe.db.get_value("Loan Security Pledge", {"loan_application": frm.doc.name, "docstatus": 1}, "name", (r) => {
+					if (!r) {
+						frm.add_custom_button(__('Loan Security Pledge'), function() {
+							frm.trigger('create_loan_security_pledge')
+						},__('Create'))
+					}
+				});
+			}
 
 			frappe.db.get_value("Loan", {"loan_application": frm.doc.name, "docstatus": 1}, "name", (r) => {
 				if (!r) {
@@ -61,6 +63,11 @@ frappe.ui.form.on('Loan Application', {
 		});
 	},
 	create_loan_security_pledge: function(frm) {
+
+		if(!frm.doc.is_secured_loan) {
+			frappe.throw(__("Loan Security Pledge can only be created for secured loans"));
+		}
+
 		frappe.call({
 			method: "erpnext.loan_management.doctype.loan_application.loan_application.create_pledge",
 			args: {

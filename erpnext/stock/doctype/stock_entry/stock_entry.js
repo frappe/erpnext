@@ -220,8 +220,8 @@ frappe.ui.form.on('Stock Entry', {
 					},
 					get_query_filters: {
 						docstatus: 1,
-						material_request_type: "Material Transfer",
-						status: ['!=', 'Transferred']
+						material_request_type: ["in", ["Material Transfer", "Material Issue"]],
+						status: ["not in", ["Transferred", "Issued"]]
 					}
 				})
 			}, __("Get items from"));
@@ -312,10 +312,9 @@ frappe.ui.form.on('Stock Entry', {
 			callback: function(r) {
 				if (!r.exe && r.message){
 					frappe.model.set_value(cdt, cdn, "serial_no", r.message);
-
-					if (callback) {
-						callback();
-					}
+				}
+				if (callback) {
+					callback();
 				}
 			}
 		});
@@ -511,9 +510,10 @@ frappe.ui.form.on('Stock Entry', {
 			item.amount = flt(item.basic_amount + flt(item.additional_cost),
 				precision("amount", item));
 
-			item.valuation_rate = flt(flt(item.basic_rate)
-				+ (flt(item.additional_cost) / flt(item.transfer_qty)),
-				precision("valuation_rate", item));
+			if (flt(item.transfer_qty)) {
+				item.valuation_rate = flt(flt(item.basic_rate) + (flt(item.additional_cost) / flt(item.transfer_qty)),
+					precision("valuation_rate", item));
+			}
 		}
 
 		refresh_field('items');
