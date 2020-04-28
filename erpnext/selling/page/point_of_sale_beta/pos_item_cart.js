@@ -722,7 +722,7 @@ erpnext.PointOfSale.ItemCart = class {
 							<div class="f-shrink-0 text-md text-dark-grey text-bold ml-4">
 								${format_currency(invoice.grand_total, invoice.currency, 0) || 0}
 							</div>
-							<div class="f-shrink-0 text-grey ml-4 text-bold indicator ${indicator_color}">${invoice.status.toUpperCase()}</div>
+							<div class="f-shrink-0 text-grey ml-4 text-bold indicator ${indicator_color}">${invoice.status}</div>
 						</div>
 					</div>`
 				)

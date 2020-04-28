@@ -134,7 +134,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
                     <div class="text-2-5xl text-bold">${format_currency(doc.paid_amount, doc.currency)}</div>
                     <div class="flex justify-between">
                         <div class="text-grey mr-4">${doc.name}</div>
-                        <div class="text-grey text-bold indicator ${indicator_color}">${doc.status.toUpperCase()}</div>
+                        <div class="text-grey text-bold indicator ${indicator_color}">${doc.status}</div>
                     </div>
                 </div>`
     }
