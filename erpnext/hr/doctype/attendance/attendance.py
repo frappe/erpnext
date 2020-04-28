@@ -7,7 +7,7 @@ import frappe
 from frappe.utils import getdate, nowdate
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cstr, get_datetime, format_date
+from frappe.utils import cstr, get_datetime, formatdate
 
 class Attendance(Document):
 	def validate(self):
@@ -52,16 +52,16 @@ class Attendance(Document):
 				if d.half_day_date == getdate(self.attendance_date):
 					self.status = 'Half Day'
 					frappe.msgprint(_("Employee {0} on Half day on {1}")
-						.format(self.employee, format_date(self.attendance_date)))
+						.format(self.employee, formatdate(self.attendance_date)))
 				else:
 					self.status = 'On Leave'
 					frappe.msgprint(_("Employee {0} is on Leave on {1}")
-						.format(self.employee, format_date(self.attendance_date)))
+						.format(self.employee, formatdate(self.attendance_date)))
 
 		if self.status in ("On Leave", "Half Day"):
 			if not leave_record:
 				frappe.msgprint(_("No leave record found for employee {0} on {1}")
-					.format(self.employee, format_date(self.attendance_date)), alert=1)
+					.format(self.employee, formatdate(self.attendance_date)), alert=1)
 		elif self.leave_type:
 			self.leave_type = None
 			self.leave_application = None
