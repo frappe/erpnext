@@ -53,10 +53,11 @@ def execute(filters=None):
 				new[1], repeat[1], new[1] + repeat[1]])
 
 	return [
-		_("Year"), _("Month"),
-		_("New Customers") + ":Int",
-		_("Repeat Customers") + ":Int",
-		_("Total") + ":Int",
+		_("Year") + "::100",
+		_("Month") + "::100",
+		_("New Customers") + ":Int:100",
+		_("Repeat Customers") + ":Int:100",
+		_("Total") + ":Int:100",
 		_("New Customer Revenue") + ":Currency:150",
 		_("Repeat Customer Revenue") + ":Currency:150",
 		_("Total Revenue") + ":Currency:150"

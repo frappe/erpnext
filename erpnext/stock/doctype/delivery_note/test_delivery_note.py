@@ -434,15 +434,6 @@ class TestDeliveryNote(unittest.TestCase):
 		update_delivery_note_status(dn.name, "Closed")
 		self.assertEqual(frappe.db.get_value("Delivery Note", dn.name, "Status"), "Closed")
 
-	def test_customer_provided_parts_dn(self):
-		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
-		dn = create_delivery_note(item_code='CUST-0987', rate=0)
-		self.assertEqual(dn.get("items")[0].allow_zero_valuation_rate, 1)
-
-		# test if Delivery Note with rate is allowed against Customer Provided Item
-		dn2 = create_delivery_note(item_code='CUST-0987', do_not_save=True)
-		self.assertRaises(frappe.ValidationError, dn2.save)
-
 	def test_dn_billing_status_case1(self):
 		# SO -> DN -> SI
 		so = make_sales_order()
