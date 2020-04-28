@@ -59,12 +59,12 @@ class Issue(Document):
 		if self.status!="Open" and status =="Open" and not self.first_responded_on:
 			self.first_responded_on = frappe.flags.current_time or now_datetime()
 
-		if self.status=="Closed" and status !="Closed":
+		if self.status=="Closed":
 			self.resolution_date = frappe.flags.current_time or now_datetime()
 			if frappe.db.get_value("Issue", self.name, "agreement_fulfilled") == "Ongoing":
 				set_service_level_agreement_variance(issue=self.name)
 				set_average_response_time(issue=self)
-				set_operational_time(issue=self)
+				set_resolution_time(issue=self)
 				set_user_operational_time(issue=self)
 				self.update_agreement_status()
 
@@ -323,19 +323,25 @@ def set_average_response_time(issue):
 		order_by="creation"
 	)
 
-	response_times = []
-	for i in range(len(communications)-1):
-		if communications[i].sent_or_received == "Sent" and communications[i-1].sent_or_received == "Received":
-			response_time = time_diff_in_seconds(communications[i].creation, communications[i-1].creation)
-			if response_time > 0:
-				response_times.append(response_time)
-	avg_response_time = sum(response_times) / len(response_times)
-	avg_response_time = str(timedelta(seconds=avg_response_time)).split(".")[0]
-	issue.db_set('avg_response_time', avg_response_time)
+	if len(communications):
+		response_times = []
+		for i in range(len(communications)-1):
+			if communications[i].sent_or_received == "Sent" and communications[i-1].sent_or_received == "Received":
+				response_time = time_diff_in_seconds(communications[i].creation, communications[i-1].creation)
+				if response_time > 0:
+					response_times.append(response_time)
 
-def set_operational_time(issue):
-	operational_time = time_diff(now_datetime(), issue.creation)
-	issue.db_set('operational_time', str(operational_time).split(".")[0])
+		avg_response_time = sum(response_times) / len(response_times)
+		avg_response_time = timedelta(seconds=avg_response_time)
+		duration = get_duration(avg_response_time)
+		issue.db_set('avg_response_time', duration)
+
+
+def set_resolution_time(issue):
+	resolution_time = time_diff(now_datetime(), issue.creation)
+	duration = get_duration(resolution_time)
+	issue.db_set('resolution_time', duration)
+
 
 def set_user_operational_time(issue):
 	communications = frappe.get_list("Communication", filters={
@@ -352,10 +358,31 @@ def set_user_operational_time(issue):
 			wait_time = time_diff_in_seconds(communications[i].creation, communications[i-1].creation)
 			if wait_time > 0:
 				pending_time.append(wait_time)
+
 	total_pending_time = timedelta(seconds=sum(pending_time))
-	operational_time = frappe.db.get_value('Issue', issue.name, 'operational_time')
-	user_operational_time = time_diff(operational_time, total_pending_time)
-	issue.db_set('user_operational_time', str(user_operational_time))
+	resolution_time_in_secs = time_diff_in_seconds(now_datetime(), issue.creation)
+	resolution_time = timedelta(seconds=resolution_time_in_secs)
+	user_operational_time = resolution_time - total_pending_time
+	duration = get_duration(user_operational_time)
+	issue.db_set('user_operational_time', duration)
+
+
+def get_duration(time):
+	days = time.days
+	seconds = time.seconds
+	hours = time.seconds // 3600
+	mins = (time.seconds // 60) % 60
+	duration = ""
+	if days:
+		duration += str(days) + " day"
+		duration += "s " if days > 1 else " "
+	if hours:
+		duration += str(hours) + " hour"
+		duration += "s " if hours > 1 else " "
+	if mins:
+		duration += str(mins) + " min"
+		duration += "s" if mins > 1 else ""
+	return duration
 
 
 def get_list_context(context=None):

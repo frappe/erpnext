@@ -53,7 +53,7 @@
   "content_type",
   "attachment",
   "via_customer_portal",
-  "operational_time",
+  "resolution_time",
   "user_operational_time"
  ],
  "fields": [
@@ -374,27 +374,27 @@
   {
    "bold": 1,
    "fieldname": "avg_response_time",
-   "fieldtype": "Time",
+   "fieldtype": "Data",
    "label": "Average Response Time",
    "read_only": 1
   },
   {
-   "fieldname": "operational_time",
-   "fieldtype": "Time",
-   "label": "Operational Time",
+   "fieldname": "user_operational_time",
+   "fieldtype": "Data",
+   "label": "User Operational Time",
    "read_only": 1
   },
   {
-   "fieldname": "user_operational_time",
-   "fieldtype": "Time",
-   "label": "User Operational Time",
+   "fieldname": "resolution_time",
+   "fieldtype": "Data",
+   "label": "Resolution Time",
    "read_only": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2020-04-24 09:58:13.499635",
+ "modified": "2020-04-28 23:42:28.576580",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
