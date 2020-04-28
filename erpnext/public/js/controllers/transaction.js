@@ -1897,8 +1897,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	autofill_warehouse : function (child_table, warehouse_field, warehouse) {
-		let doctype = child_table[0].doctype;
-		if (warehouse) {
+		if (warehouse && child_table && child_table.length) {
+			let doctype = child_table[0].doctype;
 			$.each(child_table || [], function(i, item) {
 				frappe.model.set_value(doctype, item.name, warehouse_field, warehouse);
 			});
