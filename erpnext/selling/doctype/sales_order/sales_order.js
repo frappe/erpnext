@@ -65,15 +65,6 @@ frappe.ui.form.on("Sales Order", {
 			}
 		});
 
-		frm.set_query("blanket_order", "items", function() {
-			return {
-				filters: {
-					"company": frm.doc.company,
-					"docstatus": 1
-				}
-			}
-		});
-
 		erpnext.queries.setup_warehouse_query(frm);
 	},
 
@@ -148,7 +139,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					}
 
 					this.frm.add_custom_button(__('Pick List'), () => this.create_pick_list(), __('Create'));
-					
+
 					const order_is_a_sale = ["Sales", "Shopping Cart"].indexOf(doc.order_type) !== -1;
 					const order_is_maintenance = ["Maintenance"].indexOf(doc.order_type) !== -1;
 					// order type has been customised then show all the action buttons
