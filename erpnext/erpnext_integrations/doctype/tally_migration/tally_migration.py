@@ -29,6 +29,11 @@ VOUCHER_CHUNK_SIZE = 500
 
 
 class TallyMigration(Document):
+	def validate(self):
+		failed_import_log = json.loads(self.failed_import_log)
+		sorted_failed_import_log = sorted(failed_import_log, key=lambda row: row["doc"]["creation"])
+		self.failed_import_log = json.dumps(sorted_failed_import_log)
+
 	def autoname(self):
 		if not self.name:
 			self.name = "Tally Migration on " + format_datetime(self.creation)
@@ -320,9 +325,11 @@ class TallyMigration(Document):
 
 			self.set_account_defaults()
 			self.is_master_data_imported = 1
+			frappe.db.commit()
 
 		except:
 			self.publish("Import Master Data", _("Process Failed"), -1, 5)
+			frappe.db.rollback()
 			self.log()
 
 		finally:
@@ -343,7 +350,9 @@ class TallyMigration(Document):
 					processed_voucher = function(voucher)
 					if processed_voucher:
 						vouchers.append(processed_voucher)
+					frappe.db.commit()
 				except:
+					frappe.db.rollback()
 					self.log(voucher)
 			return vouchers
 
@@ -545,7 +554,9 @@ class TallyMigration(Document):
 				voucher_doc.insert()
 				voucher_doc.submit()
 				self.publish("Importing Vouchers", _("{} of {}").format(index, total), index, total)
+				frappe.db.commit()
 			except:
+				frappe.db.rollback()
 				self.log(voucher_doc)
 
 		if is_last:
@@ -576,14 +587,14 @@ class TallyMigration(Document):
 			if sys.exc_info()[1].__class__ != frappe.DuplicateEntryError:
 				failed_import_log = json.loads(self.failed_import_log)
 				doc = data.as_dict()
-				doc_fields = { x.fieldname for x in frappe.get_doc("DocType", doc.doctype).fields }
-				stripped_doc = { k: v for k, v in doc.items() if k in doc_fields }
 				failed_import_log.append({
-					"doc": stripped_doc,
+					"doc": doc,
 					"exc": traceback.format_exc()
 				})
 				self.failed_import_log = json.dumps(failed_import_log, separators=(',', ':'))
 				self.save()
+				frappe.db.commit()
+
 		else:
 			data = data or self.status
 			message = "\n".join(["Data:", json.dumps(data, default=str, indent=4), "--" * 50, "\nException:", traceback.format_exc()])
