@@ -35,8 +35,8 @@
   "sb_sample_collection",
   "sample",
   "sample_uom",
-  "sample_quantity",
-  "sample_collection_details",
+  "sample_qty",
+  "sample_details",
   "change_in_item"
  ],
  "fields": [
@@ -105,7 +105,7 @@
    "description": "If unchecked, the item wont be appear in Sales Invoice, but can be used in group test creation. ",
    "fieldname": "is_billable",
    "fieldtype": "Check",
-   "label": "Is billable",
+   "label": "Is Billable",
    "search_index": 1
   },
   {
@@ -114,7 +114,8 @@
    "fieldname": "lab_test_rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Standard Selling Rate"
+   "label": "Rate",
+   "mandatory_depends_on": "eval:doc.is_billable == 1"
   },
   {
    "depends_on": "eval:doc.lab_test_template_type == 'Single'",
@@ -211,18 +212,6 @@
   },
   {
    "default": "0",
-   "fieldname": "sample_quantity",
-   "fieldtype": "Float",
-   "label": "Quantity"
-  },
-  {
-   "fieldname": "sample_collection_details",
-   "fieldtype": "Text",
-   "ignore_xss_filter": 1,
-   "label": "Collection Details"
-  },
-  {
-   "default": "0",
    "fieldname": "change_in_item",
    "fieldtype": "Check",
    "hidden": 1,
@@ -236,11 +225,23 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "default": "0",
+   "fieldname": "sample_qty",
+   "fieldtype": "Float",
+   "label": "Quantity"
+  },
+  {
+   "fieldname": "sample_details",
+   "fieldtype": "Text",
+   "ignore_xss_filter": 1,
+   "label": "Collection Details"
   }
  ],
  "links": [],
- "modified": "2020-01-21 21:02:16.108347",
- "modified_by": "ruchamahabal2@gmail.com",
+ "modified": "2020-03-25 16:53:01.740103",
+ "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",
  "owner": "Administrator",

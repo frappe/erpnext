@@ -488,12 +488,14 @@ def get_stock_balance_for(item_code, warehouse,
 		["has_serial_no", "has_batch_no"], as_dict=1)
 
 	serial_nos = ""
-	if item_dict.get("has_serial_no"):
-		qty, rate, serial_nos = get_qty_rate_for_serial_nos(item_code,
-			warehouse, posting_date, posting_time, item_dict)
+	with_serial_no = True if item_dict.get("has_serial_no") else False
+	data = get_stock_balance(item_code, warehouse, posting_date, posting_time,
+		with_valuation_rate=with_valuation_rate, with_serial_no=with_serial_no)
+
+	if with_serial_no:
+		qty, rate, serial_nos = data
 	else:
-		qty, rate = get_stock_balance(item_code, warehouse,
-			posting_date, posting_time, with_valuation_rate=with_valuation_rate)
+		qty, rate = data
 
 	if item_dict.get("has_batch_no"):
 		qty = get_batch_qty(batch_no, warehouse) or 0
@@ -503,28 +505,6 @@ def get_stock_balance_for(item_code, warehouse,
 		'rate': rate,
 		'serial_nos': serial_nos
 	}
-
-def get_qty_rate_for_serial_nos(item_code, warehouse, posting_date, posting_time, item_dict):
-	args = {
-		"item_code": item_code,
-		"warehouse": warehouse,
-		"posting_date": posting_date,
-		"posting_time": posting_time,
-	}
-
-	serial_nos_list = [serial_no.get("name")
-			for serial_no in get_available_serial_nos(args)]
-
-	qty = len(serial_nos_list)
-	serial_nos = '\n'.join(serial_nos_list)
-	args.update({
-		'qty': qty,
-		"serial_nos": serial_nos
-	})
-
-	rate = get_incoming_rate(args, raise_error_if_no_rate=False) or 0
-
-	return qty, rate, serial_nos
 
 @frappe.whitelist()
 def get_difference_account(purpose, company):

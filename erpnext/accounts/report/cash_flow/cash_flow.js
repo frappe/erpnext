@@ -9,7 +9,7 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 	// filter. It won't be used in cash flow for now so we pop it. Please take
 	// of this if you are working here.
 
-	frappe.query_reports["Cash Flow"]["filters"].splice(5, 1);
+	frappe.query_reports["Cash Flow"]["filters"].splice(8, 1);
 
 	frappe.query_reports["Cash Flow"]["filters"].push(
 		{

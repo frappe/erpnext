@@ -171,6 +171,32 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(flt(outstanding_amount), 100)
 		self.assertEqual(status, 'Unpaid')
 
+	def test_payment_entry_against_payment_terms(self):
+		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
+		create_payment_terms_template()
+		si.payment_terms_template = 'Test Receivable Template'
+
+		si.append('taxes', {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 18
+		})
+		si.save()
+
+		si.submit()
+
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
+		pe.submit()
+		si.load_from_db()
+
+		self.assertEqual(pe.references[0].payment_term, 'Basic Amount Receivable')
+		self.assertEqual(pe.references[1].payment_term, 'Tax Receivable')
+		self.assertEqual(si.payment_schedule[0].paid_amount, 200.0)
+		self.assertEqual(si.payment_schedule[1].paid_amount, 36.0)
+
+
 	def test_payment_against_purchase_invoice_to_check_status(self):
 		pi = make_purchase_invoice(supplier="_Test Supplier USD", debit_to="_Test Payable USD - _TC",
 			currency="USD", conversion_rate=50)
@@ -610,3 +636,37 @@ class TestPaymentEntry(unittest.TestCase):
 
 		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
 		accounts_settings.save()
+
+def create_payment_terms_template():
+
+	create_payment_term('Basic Amount Receivable')
+	create_payment_term('Tax Receivable')
+
+	if not frappe.db.exists('Payment Terms Template', 'Test Receivable Template'):
+		payment_term_template = frappe.get_doc({
+			'doctype': 'Payment Terms Template',
+			'template_name': 'Test Receivable Template',
+			'allocate_payment_based_on_payment_terms': 1,
+			'terms': [{
+				'doctype': 'Payment Terms Template Detail',
+				'payment_term': 'Basic Amount Receivable',
+				'invoice_portion': 84.746,
+				'credit_days_based_on': 'Day(s) after invoice date',
+				'credit_days': 1
+			},
+			{
+				'doctype': 'Payment Terms Template Detail',
+				'payment_term': 'Tax Receivable',
+				'invoice_portion': 15.254,
+				'credit_days_based_on': 'Day(s) after invoice date',
+				'credit_days': 2
+			}]
+		}).insert()
+
+
+def create_payment_term(name):
+	if not frappe.db.exists('Payment Term', name):
+		frappe.get_doc({
+			'doctype': 'Payment Term',
+			'payment_term_name': name
+		}).insert()

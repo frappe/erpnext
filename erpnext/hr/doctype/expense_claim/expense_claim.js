@@ -17,7 +17,7 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 			return;
 		}
 		return frappe.call({
-			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim_account",
+			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim_account_and_cost_center",
 			args: {
 				"expense_claim_type": d.expense_type,
 				"company": doc.company
@@ -25,6 +25,7 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 			callback: function(r) {
 				if (r.message) {
 					d.default_account = r.message.account;
+					d.cost_center = r.message.cost_center;
 				}
 			}
 		});

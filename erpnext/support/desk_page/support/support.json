@@ -1,30 +1,34 @@
 {
  "cards": [
   {
-   "links": "[\n    {\n        \"description\": \"Service Level.\",\n        \"label\": \"Service Level\",\n        \"name\": \"Service Level\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Service Level Agreement.\",\n        \"label\": \"Service Level Agreement\",\n        \"name\": \"Service Level Agreement\",\n        \"type\": \"doctype\"\n    }\n]",
-   "title": "Service Level Agreement"
+   "hidden": 0,
+   "label": "Service Level Agreement",
+   "links": "[\n    {\n        \"description\": \"Service Level.\",\n        \"label\": \"Service Level\",\n        \"name\": \"Service Level\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Service Level Agreement.\",\n        \"label\": \"Service Level Agreement\",\n        \"name\": \"Service Level Agreement\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
-   "links": "[\n    {\n        \"label\": \"Maintenance Schedule\",\n        \"name\": \"Maintenance Schedule\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Maintenance Visit\",\n        \"name\": \"Maintenance Visit\",\n        \"type\": \"doctype\"\n    }\n]",
-   "title": "Maintenance"
+   "hidden": 0,
+   "label": "Maintenance",
+   "links": "[\n    {\n        \"label\": \"Maintenance Schedule\",\n        \"name\": \"Maintenance Schedule\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Maintenance Visit\",\n        \"name\": \"Maintenance Visit\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
-   "links": "[\n    {\n        \"description\": \"Support queries from customers.\",\n        \"label\": \"Issue\",\n        \"name\": \"Issue\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Issue Type.\",\n        \"label\": \"Issue Type\",\n        \"name\": \"Issue Type\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Issue Priority.\",\n        \"label\": \"Issue Priority\",\n        \"name\": \"Issue Priority\",\n        \"type\": \"doctype\"\n    }\n]",
-   "title": "Issues"
+   "hidden": 0,
+   "label": "Issues",
+   "links": "[\n    {\n        \"description\": \"Support queries from customers.\",\n        \"label\": \"Issue\",\n        \"name\": \"Issue\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Issue Type.\",\n        \"label\": \"Issue Type\",\n        \"name\": \"Issue Type\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Issue Priority.\",\n        \"label\": \"Issue Priority\",\n        \"name\": \"Issue Priority\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
-   "links": "[\n    {\n        \"description\": \"Warranty Claim against Serial No.\",\n        \"label\": \"Warranty Claim\",\n        \"name\": \"Warranty Claim\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Single unit of an Item.\",\n        \"label\": \"Serial No\",\n        \"name\": \"Serial No\",\n        \"type\": \"doctype\"\n    }\n]",
-   "title": "Warranty"
+   "hidden": 0,
+   "label": "Warranty",
+   "links": "[\n    {\n        \"description\": \"Warranty Claim against Serial No.\",\n        \"label\": \"Warranty Claim\",\n        \"name\": \"Warranty Claim\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Single unit of an Item.\",\n        \"label\": \"Serial No\",\n        \"name\": \"Serial No\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
-   "icon": "fa fa-list",
-   "links": "[\n    {\n        \"label\": \"Support Settings\",\n        \"name\": \"Support Settings\",\n        \"type\": \"doctype\"\n    }\n]",
-   "title": "Settings"
+   "hidden": 0,
+   "label": "Settings",
+   "links": "[\n    {\n        \"label\": \"Support Settings\",\n        \"name\": \"Support Settings\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
-   "icon": "fa fa-list",
-   "links": "[\n    {\n        \"dependencies\": [\n            \"Issue\"\n        ],\n        \"doctype\": \"Issue\",\n        \"is_query_report\": true,\n        \"label\": \"Minutes to First Response for Issues\",\n        \"name\": \"Minutes to First Response for Issues\",\n        \"type\": \"report\"\n    }\n]",
-   "title": "Reports"
+   "hidden": 0,
+   "label": "Reports",
+   "links": "[\n    {\n        \"dependencies\": [\n            \"Issue\"\n        ],\n        \"doctype\": \"Issue\",\n        \"is_query_report\": true,\n        \"label\": \"Minutes to First Response for Issues\",\n        \"name\": \"Minutes to First Response for Issues\",\n        \"type\": \"report\"\n    }\n]"
   }
  ],
  "category": "Modules",
@@ -39,7 +43,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Support",
- "modified": "2020-03-12 16:30:39.482621",
+ "modified": "2020-04-01 11:28:51.120583",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support",
@@ -48,17 +52,17 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
-   "is_query_report": 0,
+   "label": "Issue",
    "link_to": "Issue",
    "type": "DocType"
   },
   {
-   "is_query_report": 0,
+   "label": "Service Level",
    "link_to": "Service Level",
    "type": "DocType"
   },
   {
-   "is_query_report": 0,
+   "label": "Maintenance Visit",
    "link_to": "Maintenance Visit",
    "type": "DocType"
   }

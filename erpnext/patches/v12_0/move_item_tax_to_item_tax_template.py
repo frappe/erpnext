@@ -118,7 +118,9 @@ def get_item_tax_template(item_tax_templates, item_tax_map, item_code, parenttyp
 					account.insert()
 					tax_type = account.name
 
-		if tax_type:
+		account_type = frappe.get_cached_value("Account", tax_type, "account_type")
+
+		if tax_type and account_type in ('Tax', 'Chargeable', 'Income Account', 'Expense Account', 'Expenses Included In Valuation'):
 			item_tax_template.append("taxes", {"tax_type": tax_type, "tax_rate": tax_rate})
 			item_tax_templates.setdefault(item_tax_template.title, {})
 			item_tax_templates[item_tax_template.title][tax_type] = tax_rate
