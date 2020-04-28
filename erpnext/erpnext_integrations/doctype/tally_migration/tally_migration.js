@@ -133,7 +133,7 @@ frappe.ui.form.on("Tally Migration", {
 		let render_section = !(import_log === completed_log && import_log === empty);
 
 		frm.toggle_display("import_log_section", render_section);
-
+		frm.trigger("show_error_summary");
 		if (render_section) {
 			frm.trigger("show_errored_import_log");
 			frm.trigger("show_fixed_errors_log");
@@ -302,9 +302,8 @@ const get_html_rows = (logs, field) => {
 								<div>${create_button}</div>
 							</td>
 						</tr>`;
-			}
-			})
-		.join("");
+		}
+	}).join("");
 
 	return rows
 }
