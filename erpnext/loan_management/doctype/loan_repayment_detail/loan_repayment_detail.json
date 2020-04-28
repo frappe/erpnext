@@ -1,0 +1,43 @@
+{
+ "actions": [],
+ "creation": "2020-04-15 18:31:54.026923",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "loan_interest_accrual",
+  "paid_principal_amount",
+  "paid_interest_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "loan_interest_accrual",
+   "fieldtype": "Link",
+   "label": "Loan Interest Accrual",
+   "options": "Loan Interest Accrual"
+  },
+  {
+   "fieldname": "paid_principal_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Principal Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "paid_interest_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Interest Amount",
+   "options": "Company:company:default_currency"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-04-15 21:50:03.837019",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Loan Repayment Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

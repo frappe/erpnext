@@ -38,14 +38,14 @@ def get_cart_quotation(doc=None):
 	addresses = get_address_docs(party=party)
 
 	if not doc.customer_address and addresses:
-		update_cart_address("customer_address", addresses[0].name)
+		update_cart_address("billing", addresses[0].name)
 
 	return {
 		"doc": decorate_quotation_doc(doc),
 		"shipping_addresses": [{"name": address.name, "display": address.display}
-			for address in addresses],
+			for address in addresses if address.address_type == "Shipping"],
 		"billing_addresses": [{"name": address.name, "display": address.display}
-			for address in addresses],
+			for address in addresses if address.address_type == "Billing"],
 		"shipping_rules": get_applicable_shipping_rules(party),
 		"cart_settings": frappe.get_cached_doc("Shopping Cart Settings")
 	}
@@ -63,6 +63,9 @@ def place_order():
 	if quotation.quotation_to == 'Lead' and quotation.party_name:
 		# company used to create customer accounts
 		frappe.defaults.set_user_default("company", quotation.company)
+
+	if not (quotation.shipping_address_name or quotation.customer_address):
+		frappe.throw(_("Set Shipping Address or Billing Address"))
 
 	from erpnext.selling.doctype.quotation.quotation import _make_sales_order
 	sales_order = frappe.get_doc(_make_sales_order(quotation.name, ignore_permissions=True))
@@ -194,21 +197,18 @@ def get_terms_and_conditions(terms_name):
 	return frappe.db.get_value('Terms and Conditions', terms_name, 'terms')
 
 @frappe.whitelist()
-def update_cart_address(address_fieldname, address_name):
+def update_cart_address(address_type, address_name):
 	quotation = _get_cart_quotation()
 	address_display = get_address_display(frappe.get_doc("Address", address_name).as_dict())
 
-	if address_fieldname == "shipping_address_name":
-		quotation.shipping_address_name = address_name
-		quotation.shipping_address = address_display
-
-		if not quotation.customer_address:
-			address_fieldname == "customer_address"
-
-	if address_fieldname == "customer_address":
+	if address_type.lower() == "billing":
 		quotation.customer_address = address_name
 		quotation.address_display = address_display
-
+		quotation.shipping_address_name == quotation.shipping_address_name or address_name
+	elif address_type.lower() == "shipping":
+		quotation.shipping_address_name = address_name
+		quotation.shipping_address = address_display
+		quotation.customer_address == quotation.customer_address or address_name
 
 	apply_cart_settings(quotation=quotation)
 

@@ -1,0 +1,33 @@
+{
+ "actions": [],
+ "beta": 1,
+ "creation": "2020-02-26 16:47:00.525657",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "complaint"
+ ],
+ "fields": [
+  {
+   "fieldname": "complaint",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Complaint",
+   "options": "Complaint",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-02-26 16:57:37.997481",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Patient Encounter Symptom",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

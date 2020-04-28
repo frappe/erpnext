@@ -50,6 +50,7 @@ class StockEntry(StockController):
 		self.validate_posting_time()
 		self.validate_purpose()
 		self.validate_item()
+		self.validate_customer_provided_item()
 		self.validate_qty()
 		self.set_transfer_qty()
 		self.validate_uom_is_integer("uom", "qty")
@@ -202,10 +203,6 @@ class StockEntry(StockController):
 				and item.item_code in serialized_items):
 				frappe.throw(_("Row #{0}: Please specify Serial No for Item {1}").format(item.idx, item.item_code),
 					frappe.MandatoryError)
-
-			#Customer Provided parts will have zero valuation rate
-			if frappe.db.get_value('Item', item.item_code, 'is_customer_provided_item'):
-				item.allow_zero_valuation_rate = 1
 
 	def validate_qty(self):
 		manufacture_purpose = ["Manufacture", "Material Consumption for Manufacture"]
@@ -868,14 +865,6 @@ class StockEntry(StockController):
 
 					self.add_to_stock_entry_detail(item_dict)
 
-				if self.purpose != "Send to Subcontractor" and self.purpose in ["Manufacture", "Repack"]:
-					scrap_item_dict = self.get_bom_scrap_material(self.fg_completed_qty)
-					for item in itervalues(scrap_item_dict):
-						if self.pro_doc and self.pro_doc.scrap_warehouse:
-							item["to_warehouse"] = self.pro_doc.scrap_warehouse
-
-					self.add_to_stock_entry_detail(scrap_item_dict, bom_no=self.bom_no)
-
 			# fetch the serial_no of the first stock entry for the second stock entry
 			if self.work_order and self.purpose == "Manufacture":
 				self.set_serial_nos(self.work_order)
@@ -886,8 +875,19 @@ class StockEntry(StockController):
 			if self.purpose in ("Manufacture", "Repack"):
 				self.load_items_from_bom()
 
+		self.set_scrap_items()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount(raise_error_if_no_rate=False)
+
+	def set_scrap_items(self):
+		if self.purpose != "Send to Subcontractor" and self.purpose in ["Manufacture", "Repack"]:
+			scrap_item_dict = self.get_bom_scrap_material(self.fg_completed_qty)
+			for item in itervalues(scrap_item_dict):
+				item.idx = ''
+				if self.pro_doc and self.pro_doc.scrap_warehouse:
+					item["to_warehouse"] = self.pro_doc.scrap_warehouse
+
+			self.add_to_stock_entry_detail(scrap_item_dict, bom_no=self.bom_no)
 
 	def set_work_order_details(self):
 		if not getattr(self, "pro_doc", None):

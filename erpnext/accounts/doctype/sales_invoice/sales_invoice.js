@@ -32,6 +32,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			me.frm.script_manager.trigger("is_pos");
 			me.frm.refresh_fields();
 		}
+		erpnext.queries.setup_warehouse_query(this.frm);
 	},
 
 	refresh: function(doc, dt, dn) {
@@ -586,7 +587,9 @@ frappe.ui.form.on('Sales Invoice', {
 		frm.set_query("account_for_change_amount", function() {
 			return {
 				filters: {
-					account_type: ['in', ["Cash", "Bank"]]
+					account_type: ['in', ["Cash", "Bank"]],
+					company: frm.doc.company,
+					is_group: 0
 				}
 			};
 		});
@@ -667,7 +670,8 @@ frappe.ui.form.on('Sales Invoice', {
 		frm.fields_dict["loyalty_redemption_account"].get_query = function() {
 			return {
 				filters:{
-					"company": frm.doc.company
+					"company": frm.doc.company,
+					"is_group": 0
 				}
 			}
 		};
@@ -676,7 +680,8 @@ frappe.ui.form.on('Sales Invoice', {
 		frm.fields_dict["loyalty_redemption_cost_center"].get_query = function() {
 			return {
 				filters:{
-					"company": frm.doc.company
+					"company": frm.doc.company,
+					"is_group": 0
 				}
 			}
 		};
@@ -794,7 +799,7 @@ frappe.ui.form.on('Sales Invoice', {
 	},
 
 	refresh: function(frm) {
-		if (frappe.boot.active_domains.includes("Healthcare")){
+		if (frappe.boot.active_domains.includes("Healthcare")) {
 			frm.set_df_property("patient", "hidden", 0);
 			frm.set_df_property("patient_name", "hidden", 0);
 			frm.set_df_property("ref_practitioner", "hidden", 0);
@@ -807,7 +812,7 @@ frappe.ui.form.on('Sales Invoice', {
 				},"Get items from");
 			}
 		}
-		else{
+		else {
 			frm.set_df_property("patient", "hidden", 1);
 			frm.set_df_property("patient_name", "hidden", 1);
 			frm.set_df_property("ref_practitioner", "hidden", 1);

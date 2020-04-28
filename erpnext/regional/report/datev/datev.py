@@ -13,6 +13,7 @@ import json
 import zlib
 import zipfile
 import six
+from csv import QUOTE_NONNUMERIC
 from six import BytesIO
 from six import string_types
 import frappe
@@ -80,7 +81,7 @@ def get_transactions(filters, as_dict=1):
 			
 			gl.posting_date as 'Belegdatum',
 			gl.voucher_no as 'Belegfeld 1',
-			gl.remarks as 'Buchungstext',
+			LEFT(gl.remarks, 60) as 'Buchungstext',
 			gl.voucher_type as 'Beleginfo - Art 1',
 			gl.voucher_no as 'Beleginfo - Inhalt 1',
 			gl.against_voucher_type as 'Beleginfo - Art 2',
@@ -268,7 +269,9 @@ def get_datev_csv(data, filters, csv_class):
 		# Do not number rows
 		index=False,
 		# Use all columns defined above
-		columns=csv_class.COLUMNS
+		columns=csv_class.COLUMNS,
+		# Quote most fields, even currency values with "," separator
+		quoting=QUOTE_NONNUMERIC
 	)
 
 	if not six.PY2:
@@ -285,6 +288,7 @@ def get_datev_csv(data, filters, csv_class):
 
 def get_header(filters, csv_class):
 	coa = frappe.get_value("Company", filters.get("company"), "chart_of_accounts")
+	description = filters.get("voucher_type", csv_class.FORMAT_NAME)
 	coa_used = "04" if "SKR04" in coa else ("03" if "SKR03" in coa else "")
 
 	header = [
@@ -323,12 +327,8 @@ def get_header(filters, csv_class):
 		frappe.utils.formatdate(filters.get('from_date'), "yyyyMMdd"),
 		# P = Transaction batch end date (YYYYMMDD)
 		frappe.utils.formatdate(filters.get('to_date'), "yyyyMMdd"),
-		# Q = Description (for example, "January - February 2019 Transactions")
-		'"{} - {} {}"'.format(
-				frappe.utils.formatdate(filters.get('from_date'), "MMMM yyyy"),
-				frappe.utils.formatdate(filters.get('to_date'), "MMMM yyyy"),
-				csv_class.FORMAT_NAME
-		),
+		# Q = Description (for example, "Sales Invoice") Max. 30 chars
+		'"{}"'.format(_(description)),
 		# R = Diktatkürzel
 		'',
 		# S = Buchungstyp

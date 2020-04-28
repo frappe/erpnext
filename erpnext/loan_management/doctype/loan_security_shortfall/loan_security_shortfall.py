@@ -37,16 +37,9 @@ def add_security(loan):
 
 	return loan_security_pledge.as_dict()
 
-def check_for_ltv_shortfall(process_loan_security_shortfall=None):
+def check_for_ltv_shortfall(process_loan_security_shortfall):
 
 	update_time = get_datetime()
-
-	if not process_loan_security_shortfall:
-		process = frappe.new_doc("Process Loan Security Shortfall")
-		process.update_time = update_time
-		process.submit()
-
-		process_loan_security_shortfall = process.name
 
 	loan_security_price_map = frappe._dict(frappe.get_all("Loan Security Price",
 		fields=["loan_security", "loan_security_price"],

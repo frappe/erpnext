@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import cint, flt, cstr
+from frappe.utils import cint, flt, cstr, get_link_to_form, today, getdate
 from frappe import _
 import frappe.defaults
 from erpnext.accounts.utils import get_fiscal_year
@@ -21,6 +21,7 @@ class StockController(AccountsController):
 		super(StockController, self).validate()
 		self.validate_inspection()
 		self.validate_serialized_batch()
+		self.validate_customer_provided_item()
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if self.docstatus == 2:
@@ -53,6 +54,13 @@ class StockController(AccountsController):
 					if serial_no_data.batch_no != d.batch_no:
 						frappe.throw(_("Row #{0}: Serial No {1} does not belong to Batch {2}")
 							.format(d.idx, serial_no_data.name, d.batch_no))
+
+			if d.qty > 0 and d.get("batch_no") and self.get("posting_date") and self.docstatus < 2:
+				expiry_date = frappe.get_cached_value("Batch", d.get("batch_no"), "expiry_date")
+
+				if expiry_date and getdate(expiry_date) < getdate(self.posting_date):
+					frappe.throw(_("Row #{0}: The batch {1} has already expired.")
+						.format(d.idx, get_link_to_form("Batch", d.get("batch_no"))))
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
@@ -376,6 +384,12 @@ class StockController(AccountsController):
 		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
 		for blanket_order in blanket_orders:
 			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
+
+	def validate_customer_provided_item(self):
+		for d in self.get('items'):
+			# Customer Provided parts will have zero valuation rate
+			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
+				d.allow_zero_valuation_rate = 1
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None, company=None):

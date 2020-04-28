@@ -202,7 +202,9 @@ def get_conditions(filters):
 				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
 					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
 						filters.get(dimension.fieldname))
-				conditions.append("{0} in %({0})s".format(dimension.fieldname))
+					conditions.append("{0} in %({0})s".format(dimension.fieldname))
+				else:
+					conditions.append("{0} in (%({0})s)".format(dimension.fieldname))
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
@@ -363,6 +365,7 @@ def get_columns(filters):
 
 	columns = [
 		{
+			"label": _("GL Entry"),
 			"fieldname": "gl_entry",
 			"fieldtype": "Link",
 			"options": "GL Entry",

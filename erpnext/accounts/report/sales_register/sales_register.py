@@ -344,16 +344,19 @@ def get_conditions(filters):
 	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
 	if accounting_dimensions:
+		common_condition = """
+			and exists(select name from `tabSales Invoice Item`
+				where parent=`tabSales Invoice`.name
+			"""
 		for dimension in accounting_dimensions:
 			if filters.get(dimension.fieldname):
 				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
 					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
 						filters.get(dimension.fieldname))
 
-				conditions += """ and exists(select name from `tabSales Invoice Item`
-					where parent=`tabSales Invoice`.name
-						and ifnull(`tabSales Invoice Item`.{0}, '') in %({0})s)""".format(dimension.fieldname)
-
+					conditions += common_condition + "and ifnull(`tabSales Invoice Item`.{0}, '') in %({0})s)".format(dimension.fieldname)
+				else:
+					conditions += common_condition + "and ifnull(`tabSales Invoice Item`.{0}, '') in (%({0})s))".format(dimension.fieldname)
 
 	return conditions
 
