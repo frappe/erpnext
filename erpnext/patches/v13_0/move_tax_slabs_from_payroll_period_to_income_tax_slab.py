@@ -10,7 +10,7 @@ def execute():
 	if not frappe.db.table_exists("Payroll Period"):
 		return
 
-	for doctype in ("income_tax_slab", "salary_structure_assignment", "employee_other_income"):
+	for doctype in ("income_tax_slab", "salary_structure_assignment", "employee_other_income", "income_tax_slab_other_charges"):
 		frappe.reload_doc("hr", "doctype", doctype)
 
 
