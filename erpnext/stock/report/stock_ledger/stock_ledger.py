@@ -46,19 +46,6 @@ def execute(filters=None):
 			"out_qty": min(sle.actual_qty, 0)
 		})
 
-		# get the name of the item that was produced using this item
-		if sle.voucher_type == "Stock Entry":
-			purpose, work_order, fg_completed_qty = frappe.db.get_value(sle.voucher_type, sle.voucher_no, ["purpose", "work_order", "fg_completed_qty"])
-
-			if purpose == "Manufacture" and work_order:
-				finished_product = frappe.db.get_value("Work Order", work_order, "item_name")
-				finished_qty = fg_completed_qty
-
-				sle.update({
-					"finished_product": finished_product,
-					"finished_qty": finished_qty,
-				})
-
 		data.append(sle)
 
 		if include_uom:
@@ -77,8 +64,6 @@ def get_columns():
 		{"label": _("In Qty"), "fieldname": "in_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Out Qty"), "fieldname": "out_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Balance Qty"), "fieldname": "qty_after_transaction", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Finished Product"), "fieldname": "finished_product", "width": 100},
-		{"label": _("Finished Qty"), "fieldname": "finished_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
 		{"label": _("Voucher #"), "fieldname": "voucher_no", "fieldtype": "Dynamic Link", "options": "voucher_type", "width": 150},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 150},
 		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
