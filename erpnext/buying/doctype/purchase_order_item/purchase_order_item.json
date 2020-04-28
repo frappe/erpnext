@@ -18,10 +18,6 @@
   "col_break1",
   "image",
   "image_view",
-  "manufacture_details",
-  "manufacturer",
-  "column_break_14",
-  "manufacturer_part_no",
   "quantity_and_rate",
   "qty",
   "stock_uom",
@@ -44,7 +40,6 @@
   "base_amount",
   "pricing_rules",
   "is_free_item",
-  "is_fixed_asset",
   "section_break_29",
   "net_rate",
   "net_amount",
@@ -52,11 +47,6 @@
   "base_net_rate",
   "base_net_amount",
   "billed_amt",
-  "item_weight_details",
-  "weight_per_unit",
-  "total_weight",
-  "column_break_40",
-  "weight_uom",
   "warehouse_and_reference",
   "warehouse",
   "delivered_by_supplier",
@@ -80,20 +70,31 @@
   "column_break_60",
   "received_qty",
   "returned_qty",
+  "manufacture_details",
+  "manufacturer",
+  "column_break_14",
+  "manufacturer_part_no",
+  "more_info_section_break",
+  "is_fixed_asset",
+  "item_tax_rate",
   "accounting_details",
   "expense_account",
   "column_break_68",
+  "item_weight_details",
+  "weight_per_unit",
+  "total_weight",
+  "column_break_40",
+  "weight_uom",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
   "section_break_72",
-  "page_break",
-  "item_tax_rate"
+  "page_break"
  ],
  "fields": [
   {
    "bold": 1,
-   "columns": 3,
+   "columns": 2,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -133,7 +134,7 @@
    "fieldname": "schedule_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Reqd By Date",
+   "label": "Required By",
    "oldfieldname": "schedule_date",
    "oldfieldtype": "Date",
    "print_hide": 1,
@@ -216,15 +217,16 @@
    "print_hide": 1
   },
   {
+   "columns": 1,
    "fieldname": "uom",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "UOM",
    "oldfieldname": "uom",
    "oldfieldtype": "Link",
    "options": "UOM",
    "print_width": "100px",
-   "reqd": 1,
-   "width": "100px"
+   "reqd": 1
   },
   {
    "fieldname": "conversion_factor",
@@ -685,6 +687,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "manufacture_details",
    "fieldtype": "Section Break",
    "label": "Manufacture"
@@ -702,8 +705,7 @@
   {
    "fieldname": "manufacturer_part_no",
    "fieldtype": "Data",
-   "label": "Manufacturer Part Number",
-   "read_only": 1
+   "label": "Manufacturer Part Number"
   },
   {
    "default": "0",
@@ -718,12 +720,17 @@
    "fieldtype": "Check",
    "label": "Is Fixed Asset",
    "read_only": 1
+  },
+  {
+   "fieldname": "more_info_section_break",
+   "fieldtype": "Section Break",
+   "label": "More Information"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2019-12-06 13:17:12.142799",
+ "modified": "2020-04-21 11:55:58.643393",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
