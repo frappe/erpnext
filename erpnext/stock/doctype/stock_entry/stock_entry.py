@@ -677,7 +677,7 @@ class StockEntry(StockController):
 					multiply_based_on = d.basic_amount if total_basic_amount else d.qty
 
 					item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account] += \
-						(t.amount * multiply_based_on) / divide_based_on
+						flt(t.amount * multiply_based_on) / divide_based_on
 
 		if item_account_wise_additional_cost:
 			for d in self.get("items"):
