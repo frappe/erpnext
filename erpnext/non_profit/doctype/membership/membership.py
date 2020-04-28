@@ -62,9 +62,7 @@ def get_member_based_on_subscription(subscription_id, email):
 					'subscription_id': subscription_id,
 					'email_id': email
 				}, order_by="creation desc")
-
 	return frappe.get_doc("Member", members[0]['name'])
-
 
 @frappe.whitelist()
 def trigger_razorpay_subscription(data):
@@ -88,10 +86,13 @@ def trigger_razorpay_subscription(data):
 
 	if data.event == "subscription.activated":
 		member.customer_id = payment.customer_id
-		member.subscription_start = datetime.fromtimestamp(subscription.start_at)
-		member.subscription_end = datetime.fromtimestamp(subscription.end_at)
-		member.subscription_activated = 1
-		member.save(ignore_permissions=True)
+
+	# Update these values anyway
+	member.subscription_start = datetime.fromtimestamp(subscription.start_at)
+	member.subscription_end = datetime.fromtimestamp(subscription.end_at)
+	member.subscription_activated = 1
+	member.save(ignore_permissions=True)
+
 	elif data.event == "subscription.charged":
 		membership = frappe.new_doc("Membership")
 		membership.update({
