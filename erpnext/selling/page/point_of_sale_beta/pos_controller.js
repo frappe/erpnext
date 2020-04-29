@@ -70,10 +70,10 @@ erpnext.PointOfSale.Controller = class {
 							frappe.db.get_doc("POS Closing Entry", pos_closing_entry.name).then(({ payment_reconciliation }) => {
 								dialog.fields_dict.balance_details.df.data = [];
 								payment_reconciliation.forEach(pay => {
-									const { mode_of_payment, opening_amount } = pay;
+									const { mode_of_payment, closing_amount } = pay;
 									dialog.fields_dict.balance_details.df.data.push({
 										mode_of_payment: mode_of_payment,
-										opening_amount: opening_amount
+										opening_amount: closing_amount
 									});		
 								});
 								dialog.fields_dict.balance_details.grid.refresh();

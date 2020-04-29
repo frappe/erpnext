@@ -199,12 +199,12 @@
 [data-route="point-of-sale-beta"] .item-wrapper:hover { transform: scale(1.02, 1.02); }
 [data-route="point-of-sale-beta"] .item-wrapper { transition: scale 0.2s ease-in-out; }
 [data-route="point-of-sale-beta"] .cart-items-section .cart-item-wrapper:not(:first-child) { border-top: none; }
-
+[data-route="point-of-sale-beta"] .customer-transactions .invoice-wrapper:not(:first-child) { border-top: none; }
 
 [data-route="point-of-sale-beta"] .payment-summary-wrapper:last-child { border-bottom: none; }
 [data-route="point-of-sale-beta"] .item-summary-wrapper:last-child { border-bottom: none; }
 [data-route="point-of-sale-beta"] .total-summary-wrapper:last-child { border-bottom: none; }
-[data-route="point-of-sale-beta"] .invoice-wrapper:last-child { border-bottom: none; }
+[data-route="point-of-sale-beta"] .invoices-container .invoice-wrapper:last-child { border-bottom: none; }
 [data-route="point-of-sale-beta"] .summary-btns:last-child { margin-right: 0px; }
 [data-route="point-of-sale-beta"] ::-webkit-scrollbar { width: 1px }
 

@@ -45,7 +45,7 @@
 								{% for d in data.payment_reconciliation %}
 									<tr>
 										<td class="text-left">{{ d.mode_of_payment }}</td>
-										<td class='text-right'>{{ d.closing_amount }} {{ currency.symbol }}</td>
+										<td class='text-right'>{{ d.expected_amount - d.opening_amount }} {{ currency.symbol }}</td>
 									</tr>
 								{% endfor %}
 							</tbody>
@@ -55,6 +55,7 @@
 				<!-- Section end -->
 
 				<!-- Taxes section -->
+				{% if data.taxes %}
 				<div>
 						<h6 class="text-center uppercase" style="color: #8D99A6">{{ _("Taxes") }}</h6>
 						<div class="tax-break-up" style="overflow-x: auto;">
@@ -78,6 +79,7 @@
 						</table>
 					</div>
 				</div>
+				{% endif %}
 				<!-- Section end -->
 
 			</div>

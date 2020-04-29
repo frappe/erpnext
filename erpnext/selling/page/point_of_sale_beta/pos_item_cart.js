@@ -300,7 +300,7 @@ erpnext.PointOfSale.ItemCart = class {
 							<img class="h-full" src="${image}" alt="${image}" style="object-fit: cover;">
 						</div>`
 			} else {
-				return `<div class="icon flex items-center justify-center w-12 h-12 rounded bg-light-grey mr-4 text-grey-200">
+				return `<div class="icon flex items-center justify-center w-12 h-12 rounded bg-light-grey mr-4 text-grey-200 text-md">
 							${frappe.get_abbr(customer)}
 						</div>`
 			}
@@ -582,7 +582,7 @@ erpnext.PointOfSale.ItemCart = class {
 		if (show) {
 			this.$cart_container.addClass('d-none')
 			this.$customer_section.addClass('flex-1 scroll-y').removeClass('mb-0 border pr-4 pl-4')
-			this.$customer_section.find('.icon').addClass('w-24 h-24').removeClass('w-12 h-12')
+			this.$customer_section.find('.icon').addClass('w-24 h-24 text-2xl').removeClass('w-12 h-12 text-md')
 			this.$customer_section.find('.customer-header').removeClass('h-18');
 			this.$customer_section.find('.customer-details').addClass('sticky z-100 bg-white');
 
@@ -604,7 +604,7 @@ erpnext.PointOfSale.ItemCart = class {
 				</div>`
 			)
 			// transactions need to be in diff div from sticky elem for scroll-ying
-			this.$customer_section.append(`<div class="customer-transactions flex-1 border rounded"></div>`)
+			this.$customer_section.append(`<div class="customer-transactions flex-1 rounded"></div>`)
 
 			this.render_customer_info_form();
 			this.fetch_customer_transactions();
@@ -612,7 +612,7 @@ erpnext.PointOfSale.ItemCart = class {
 		} else {
 			this.$cart_container.removeClass('d-none');
 			this.$customer_section.removeClass('flex-1 scroll-y').addClass('mb-0 border pr-4 pl-4');
-			this.$customer_section.find('.icon').addClass('w-12 h-12').removeClass('w-24 h-24');
+			this.$customer_section.find('.icon').addClass('w-12 h-12 text-md').removeClass('w-24 h-24 text-2xl');
 			this.$customer_section.find('.customer-header').addClass('h-18')
 			this.$customer_section.find('.customer-details').removeClass('sticky z-100 bg-white');
 
@@ -711,7 +711,7 @@ erpnext.PointOfSale.ItemCart = class {
 				invoice.status === 'Return' && (indicator_color = 'grey');
 
 				transaction_container.append(
-					`<div class="invoice-wrapper flex p-3 justify-between border-b-grey pointer no-select" data-invoice-name="${escape(invoice.name)}">
+					`<div class="invoice-wrapper flex p-3 justify-between border-grey pointer no-select" data-invoice-name="${escape(invoice.name)}">
 						<div class="flex flex-col justify-end">
 							<div class="text-dark-grey text-bold overflow-hidden whitespace-nowrap mb-2">${invoice.name}</div>
 							<div class="flex items-center f-shrink-1 text-dark-grey overflow-hidden whitespace-nowrap">
