@@ -45,6 +45,7 @@ frappe.ui.form.on("Tally Migration", {
 
 		["default_round_off_account", "default_warehouse", "default_cost_center"].forEach(account => {
 			frm.toggle_reqd(account, frm.doc.is_master_data_imported === 1)
+			frm.toggle_enable(account, frm.doc.is_day_book_data_processed != 1)
 		})
 
 		if (frm.doc.master_data && !frm.doc.is_master_data_imported) {
@@ -145,8 +146,8 @@ frappe.ui.form.on("Tally Migration", {
 		let render_section = !(import_log === completed_log && import_log === empty);
 
 		frm.toggle_display("import_log_section", render_section);
-		frm.trigger("show_error_summary");
 		if (render_section) {
+			frm.trigger("show_error_summary");
 			frm.trigger("show_errored_import_log");
 			frm.trigger("show_fixed_errors_log");
 		}
@@ -202,6 +203,7 @@ erpnext.tally_migration.cleanDoc = (obj) => {
 }
 
 erpnext.tally_migration.unresolve = (document) => {
+	/* Mark document migration as unresolved ie. move to failed error log */
 	let frm = cur_frm;
 	let failed_log = erpnext.tally_migration.failed_import_log;
 	let fixed_log = erpnext.tally_migration.fixed_errors_log;
@@ -217,12 +219,12 @@ erpnext.tally_migration.unresolve = (document) => {
 	frm.doc.failed_import_log = JSON.stringify(failed_log);
 	frm.doc.fixed_errors_log = JSON.stringify(modified_fixed_log);
 
-	// frm.trigger('show_logs_preview')
 	frm.dirty();
 	frm.save();
 }
 
 erpnext.tally_migration.resolve = (document) => {
+	/* Mark document migration as resolved ie. move to fixed error log */
 	let frm = cur_frm;
 	let failed_log = erpnext.tally_migration.failed_import_log;
 	let fixed_log = erpnext.tally_migration.fixed_errors_log;
@@ -237,12 +239,12 @@ erpnext.tally_migration.resolve = (document) => {
 	frm.doc.failed_import_log = JSON.stringify(modified_failed_log);
 	frm.doc.fixed_errors_log = JSON.stringify(fixed_log);
 
-	// frm.trigger('show_logs_preview')
 	frm.dirty();
 	frm.save();
 }
 
 erpnext.tally_migration.create_new_doc = (doctype, document) => {
+	/* Mark as resolved and create new document */
 	erpnext.tally_migration.resolve(document);
 	frappe.new_doc(doctype, document);
 }
