@@ -87,7 +87,8 @@ class ClinicalProcedure(Document):
 			else:
 				frappe.throw(_('Please set Customer in Patient {0}').format(frappe.bold(self.patient)), title=_('Customer Not Found'))
 
-		frappe.db.set_value('Clinical Procedure', self.name, 'status', 'Completed')
+		self.db_set('status', 'Completed')
+
 		if self.consume_stock and self.items:
 			return stock_entry
 
