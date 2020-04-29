@@ -73,6 +73,16 @@ frappe.ui.form.on("Tally Migration", {
 		}
 	},
 
+	erpnext_company: function (frm) {
+		frappe.db.exists("Company", frm.doc.erpnext_company).then(exists => {
+			if (exists) {
+				frappe.msgprint(
+					__("Company {0} already exists. Continuing will overwrite the Company and Chart of Accounts", [frm.doc.erpnext_company]),
+				);
+			}
+		});
+	},
+
 	add_button: function (frm, label, method) {
 		frm.add_custom_button(
 			label,
