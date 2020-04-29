@@ -30,8 +30,8 @@ frappe.ui.form.on("Journal Entry Template", {
 				row.account = d.account;
 			});
 			refresh_field("accounts");
-		}
-	
+		};
+
 		if(!frm.doc.company) return;
 
 		frm.trigger("clear_child");
