@@ -11,9 +11,10 @@ from erpnext.accounts.doctype.monthly_distribution.monthly_distribution import g
 
 def get_data_column(filters, partner_doctype):
 	data = []
-	period_list = get_period_list(filters.fiscal_year, filters.fiscal_year,
-		filters.period, company=filters.company)
+	period_list = get_period_list(filters.fiscal_year, filters.fiscal_year, '', '',
+		'Fiscal Year', filters.period, company=filters.company)
 
+	print(period_list)
 	rows = get_data(filters, period_list, partner_doctype)
 	columns = get_columns(filters, period_list, partner_doctype)
 
