@@ -326,7 +326,7 @@ def make_payment_request(**args):
 			"reference_doctype": args.dt,
 			"reference_name": args.dn,
 			"party_type": args.get("party_type") or "Customer",
-			"party": args.get("party") or ref_doc.customer,
+			"party": args.get("party") or ref_doc.get("customer"),
 			"bank_account": bank_account
 		})
 
@@ -420,7 +420,7 @@ def make_payment_entry(docname):
 
 def update_payment_req_status(doc, method):
 	from erpnext.accounts.doctype.payment_entry.payment_entry import get_reference_details
-	
+
 	for ref in doc.references:
 		payment_request_name = frappe.db.get_value("Payment Request",
 			{"reference_doctype": ref.reference_doctype, "reference_name": ref.reference_name,
@@ -430,7 +430,7 @@ def update_payment_req_status(doc, method):
 			ref_details = get_reference_details(ref.reference_doctype, ref.reference_name, doc.party_account_currency)
 			pay_req_doc = frappe.get_doc('Payment Request', payment_request_name)
 			status = pay_req_doc.status
-			
+
 			if status != "Paid" and not ref_details.outstanding_amount:
 				status = 'Paid'
 			elif status != "Partially Paid" and ref_details.outstanding_amount != ref_details.total_amount:
