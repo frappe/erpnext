@@ -9,11 +9,10 @@
  "field_order": [
   "section_break_1",
   "template_title",
-  "section_break_2",
-  "company",
   "voucher_type",
-  "column_break_3",
   "naming_series",
+  "column_break_3",
+  "company",
   "is_opening",
   "section_break_3",
   "accounts"
@@ -53,10 +52,6 @@
    "options": "No\nYes"
   },
   {
-   "fieldname": "section_break_2",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "accounts",
    "fieldtype": "Table",
    "label": "Accounting Entries",
@@ -84,7 +79,7 @@
   }
  ],
  "links": [],
- "modified": "2020-04-26 04:29:03.347852",
+ "modified": "2020-04-29 10:52:33.526433",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Template",
