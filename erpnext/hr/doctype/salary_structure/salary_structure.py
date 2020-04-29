@@ -74,39 +74,18 @@ class SalaryStructure(Document):
 			frappe.throw(_("Salary Structure should have flexible benefit component(s) to dispense benefit amount"))
 
 	def get_employees(self, company, filters):
-
 		filters = frappe._dict(filters)
 		filters.company = ["=", company]
-
-		from pprint import pprint
-		pprint(filters)
-
 		employees = frappe.get_all("Employee", filters=filters, as_list=1)
-
 		employees = [ employee[0] for employee in employees ]
-		pprint(employees)
-
-		# conditions, values = [], []
-		# for field, value in kwargs.items():
-		# 	if value:
-		# 		conditions.append("{0}=%s".format(field))
-		# 		values.append(value)
-
-		# condition_str = " and " + " and ".join(conditions) if conditions else ""
-
-		# employees = frappe.db.sql_list("select name from tabEmployee where status='Active' {condition}"
-		# 	.format(condition=condition_str), tuple(values))
-
 		return employees
 
 	@frappe.whitelist()
 	def assign_salary_structure(self, company=None, employees=None, filters=None,
 		from_date=None, base=None,variable=None, assign_to=None):
-		print(company, employees, filters, from_date, base,variable)
 
 		if not employees:
 			employees = self.get_employees(company=company, filters=filters)
-		# employees = self.get_employees(company= company, grade= grade,department= department,designation= designation,name=employee)
 
 		if employees:
 			if len(employees) > 20:

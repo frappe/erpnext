@@ -1,6 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 {% include "erpnext/public/js/controllers/accounts.js" %}
+{% include "erpnext/public/js/hr/common_employee_filter.js" %}
 
 cur_frm.add_fetch('company', 'default_letter_head', 'letter_head');
 
@@ -14,8 +15,6 @@ cur_frm.cscript.onload = function(doc, dt, dn){
 
 frappe.ui.form.on('Salary Structure', {
 	onload: function(frm) {
-
-		frappe.model.with_doctype("Employee")
 
 		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet),
 
@@ -74,98 +73,8 @@ frappe.ui.form.on('Salary Structure', {
 	},
 
 	assign_to_employees:function (frm) {
-		var d = new frappe.ui.Dialog({
-			title: __("Assign to Employees"),
-			fields: [
-				{
-					fieldname: "company",
-					fieldtype: "Link",
-					options: "Company",
-					label: __("Company"),
-					default: frm.doc.company,
-					read_only:1
-				},
-				{
-					fieldname: "assign_to",
-					fieldtype: "Select",
-					options: [
-						{
-							label: __('Select Employees'),
-							value: 'select_emp'
-						},
-						{
-							label: __('Filter Employees'),
-							value: 'filter_emp'
-						},
-					],
-					label: __("Assign To"),
-					default: "Select Employee",
-					onchange: function(){
-						set_filters(d)
-					}
-				},
-				{
-					fieldname:'employees',
-					fieldtype:'MultiSelectList',
-					label: __('Employees'),
-					get_data: function(txt) {
-						return frappe.db.get_link_options('Employee', txt);
-					},
-					depends_on: "eval:doc.assign_to == 'select_emp'",
-				},
-				{
-					fieldtype: 'HTML',
-					fieldname: 'filter_area',
-					depends_on: "eval:doc.assign_to == 'filter_emp'",
-				},
-				{
-					fieldname:'base_variable',
-					fieldtype:'Section Break'
-				},
-				{
-					fieldname:'from_date',
-					fieldtype:'Date',
-					label: __('From Date'),
-					reqd: 1
-				},
-				{
-					fieldname:'base_col_br',
-					fieldtype:'Column Break'
-				},
-				{
-					fieldname:'base',
-					fieldtype:'Currency',
-					label: __('Base')
-				},
-				{
-					fieldname:'variable',
-					fieldtype:'Currency',
-					label: __('Variable')
-				}
-			],
-			primary_action: function() {
-				var data = d.get_values();
-				if (data.assign_to == "filter_emp"){
-					data.employees = []
-					data.filters = get_filters()
-				}
-				frappe.call({
-					doc: frm.doc,
-					method: "assign_salary_structure",
-					args: data,
-					callback: function(r) {
-						if(!r.exc) {
-							d.hide();
-							frm.reload_doc();
-						}
-					}
-				});
-			},
-			primary_action_label: __('Assign')
-		});
-		make_filter_area(d)
-		set_filters(d)
-		d.show();
+		var employee_dialog = new erpnext.hr.EmployeeFilter(frm, "assign_salary_structure", "Assign to Employees", "Assign")
+		employee_dialog.make_dialog()
 	},
 
 	salary_slip_based_on_timesheet: function(frm) {
@@ -338,34 +247,3 @@ frappe.ui.form.on('Salary Detail', {
 		}
 	}
 })
-
-
-function set_filters(d){
-	if (d.fields_dict.assign_to.value == "filter_emp"){
-		frappe.db.count("Employee", {filters: get_filters()}).then(value => {
-			var message = __(cstr(value) + " Employees selected")
-			d.set_df_property("assign_to", 'description', message)
-		});
-	}else{
-		d.set_df_property("assign_to", 'description', " ")
-	}
-}
-
-function make_filter_area(dialog) {
-	window.filter_group = new frappe.ui.FilterGroup({
-		parent: dialog.get_field('filter_area').$wrapper,
-		doctype: "Employee",
-		on_change: () => {
-			set_filters(dialog);
-		}
-	});
-}
-
-function get_filters(){
-	return window.filter_group.get_filters().reduce((acc, filter) => {
-		return Object.assign(acc, {
-			[filter[1]]: [filter[2], filter[3]]
-		});
-	}, {});
-}
-

@@ -35,14 +35,14 @@ class LeavePeriod(Document):
 			frappe.throw(_("To date can not be equal or less than from date"))
 
 
-	def grant_leave_allocation(self, grade=None, department=None, designation=None,
-			employee=None, carry_forward=0):
-		employee_records = self.get_employees({
-			"grade": grade,
-			"department": department,
-			"designation": designation,
-			"name": employee
-		})
+	def grant_leave_allocation(self, company=None, assign_to=None, employees=None,
+			filters=None, carry_forward=0):
+		# employee_records = self.get_employees({
+		# 	"grade": grade,
+		# 	"department": department,
+		# 	"designation": designation,
+		# 	"name": employee
+		# })
 
 		if employee_records:
 			if len(employee_records) > 20:

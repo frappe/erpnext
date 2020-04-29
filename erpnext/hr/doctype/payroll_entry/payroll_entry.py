@@ -33,14 +33,15 @@ class PayrollEntry(Document):
 		frappe.delete_doc("Salary Slip", frappe.db.sql_list("""select name from `tabSalary Slip`
 			where payroll_entry=%s """, (self.name)))
 
-	def get_emp_list(self):
+	def get_emp_list(self, filters):
 		"""
 			Returns list of active employees based on selected criteria
 			and for which salary structure exists
 		"""
-		cond = self.get_filter_condition()
-		cond += self.get_joining_relieving_condition()
 
+		cond = self.get_filter_condition(filters)
+
+		cond += self.get_joining_relieving_condition()
 		condition = ''
 		if self.payroll_frequency:
 			condition = """and payroll_frequency = '%(payroll_frequency)s'"""% {"payroll_frequency": self.payroll_frequency}
@@ -55,7 +56,6 @@ class PayrollEntry(Document):
 					ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s
 					{condition}""".format(condition=condition),
 				{"company": self.company, "salary_slip_based_on_timesheet":self.salary_slip_based_on_timesheet})
-		
 		if sal_struct:
 			cond += "and t2.salary_structure IN %(sal_struct)s "
 			cond += "and %(from_date)s >= t2.from_date"
@@ -68,12 +68,16 @@ class PayrollEntry(Document):
 					t1.name = t2.employee
 					and t2.docstatus = 1
 			%s order by t2.from_date desc
-			""" % cond, {"sal_struct": tuple(sal_struct), "from_date": self.end_date}, as_dict=True)
+			""" % cond, {"sal_struct": tuple(sal_struct), "from_date": self.end_date}, as_dict=True, debug = 1)
+
 			return emp_list
 
-	def fill_employee_details(self):
+	def fill_employee_details(self, company=None, employees=None, filters=None, assign_to=None):
 		self.set('employees', [])
-		employees = self.get_emp_list()
+		if not employees:
+			employees = self.get_emp_list(filters=filters)
+		else:
+			employees = self.get_emp_list(employees=employees)
 		if not employees:
 			frappe.throw(_("No employees for the mentioned criteria"))
 
@@ -84,14 +88,12 @@ class PayrollEntry(Document):
 		if self.validate_attendance:
 			return self.validate_employee_attendance()
 
-	def get_filter_condition(self):
+	def get_filter_condition(self , filters=None, employees=None):
 		self.check_mandatory()
-
-		cond = ''
-		for f in ['company', 'branch', 'department', 'designation']:
-			if self.get(f):
-				cond += " and t1." + f + " = '" + self.get(f).replace("'", "\'") + "'"
-
+		cond = " and t1.company = '" + self.get("company").replace("'", "\'") + "'"
+		if filters:
+			for keys in filters:
+				cond += " and t1." + keys + " "+ filters[keys][0] + " '" + filters[keys][1] + "'"
 		return cond
 
 	def get_joining_relieving_condition(self):
@@ -112,7 +114,7 @@ class PayrollEntry(Document):
 		"""
 		self.check_permission('write')
 		self.created = 1
-		emp_list = [d.employee for d in self.get_emp_list()]
+		emp_list = [d.employee for d in self.get_emp_list()] #remove
 		if emp_list:
 			args = frappe._dict({
 				"salary_slip_based_on_timesheet": self.salary_slip_based_on_timesheet,
@@ -170,7 +172,7 @@ class PayrollEntry(Document):
 
 	def get_salary_components(self, component_type):
 		salary_slips = self.get_sal_slip_list(ss_status = 1, as_dict = True)
-		if salary_slips:			
+		if salary_slips:
 			salary_components = frappe.db.sql("""
 				select ssd.salary_component, ssd.amount, ssd.parentfield, ss.payroll_cost_center
 				from `tabSalary Slip` ss, `tabSalary Detail` ssd
@@ -197,7 +199,7 @@ class PayrollEntry(Document):
 			return account_details
 
 	def get_account(self, component_dict = None):
-		account_dict = {}		
+		account_dict = {}
 		for key, amount in component_dict.items():
 			account = self.get_salary_component_account(key[0])
 			account_dict[(account, key[1])] = account_dict.get((account, key[1]), 0) + amount

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_copy": 1,
  "autoname": "HR-PRUN-.YYYY.-.#####",
  "creation": "2017-10-23 15:22:29.291323",
@@ -12,11 +13,6 @@
   "payroll_frequency",
   "column_break1",
   "company",
-  "section_break_8",
-  "branch",
-  "department",
-  "column_break_10",
-  "designation",
   "number_of_employees",
   "sec_break20",
   "employees",
@@ -82,34 +78,6 @@
    "options": "Company",
    "remember_last_selected_value": 1,
    "reqd": 1
-  },
-  {
-   "fieldname": "section_break_8",
-   "fieldtype": "Section Break",
-   "label": "Employees"
-  },
-  {
-   "fieldname": "branch",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Branch",
-   "options": "Branch"
-  },
-  {
-   "fieldname": "department",
-   "fieldtype": "Link",
-   "label": "Department",
-   "options": "Department"
-  },
-  {
-   "fieldname": "column_break_10",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "designation",
-   "fieldtype": "Link",
-   "label": "Designation",
-   "options": "Designation"
   },
   {
    "fieldname": "number_of_employees",
@@ -260,7 +228,8 @@
  ],
  "icon": "fa fa-cog",
  "is_submittable": 1,
- "modified": "2019-09-12 15:46:31.436381",
+ "links": [],
+ "modified": "2020-04-28 00:21:26.187471",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Payroll Entry",

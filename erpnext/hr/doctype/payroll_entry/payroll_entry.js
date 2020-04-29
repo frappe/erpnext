@@ -3,6 +3,8 @@
 
 var in_progress = false;
 
+{% include "erpnext/public/js/hr/common_employee_filter.js" %}
+
 frappe.ui.form.on('Payroll Entry', {
 	onload: function (frm) {
 		if (!frm.doc.posting_date) {
@@ -46,19 +48,21 @@ frappe.ui.form.on('Payroll Entry', {
 	},
 
 	get_employee_details: function (frm) {
-		return frappe.call({
-			doc: frm.doc,
-			method: 'fill_employee_details',
-			callback: function(r) {
-				if (r.docs[0].employees){
-					frm.save();
-					frm.refresh();
-					if(r.docs[0].validate_attendance){
-						render_employee_attendance(frm, r.message);
-					}
-				}
-			}
-		})
+		var employee_dialog = new erpnext.hr.EmployeeFilter(frm, 'fill_employee_details', "Get Employees", "Submit")
+		employee_dialog.make_dialog()
+		// return frappe.call({
+		// 	doc: frm.doc,
+		// 	method: 'fill_employee_details',
+		// 	callback: function(r) {
+		// 		if (r.docs[0].employees){
+		// 			frm.save();
+		// 			frm.refresh();
+		// 			if(r.docs[0].validate_attendance){
+		// 				render_employee_attendance(frm, r.message);
+		// 			}
+		// 		}
+		// 	}
+		// })
 	},
 
 	create_salary_slips: function(frm) {
