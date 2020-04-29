@@ -9,7 +9,7 @@ frappe.ui.form.on("Journal Entry Template", {
 				filters: {
 					"company": frm.doc.company,
 				}
-			}
+			};
 		});
 		frappe.call({
 			type: "GET",
