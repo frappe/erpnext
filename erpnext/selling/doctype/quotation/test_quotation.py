@@ -115,6 +115,36 @@ class TestQuotation(unittest.TestCase):
 			sales_order.payment_schedule[1].due_date, getdate(add_days(quotation.transaction_date, 30))
 		)
 
+	def test_make_sales_order_with_taxjar_settings(self):
+		from erpnext.selling.doctype.quotation.quotation import make_sales_order
+		taxjar_tax_account_head = frappe.db.get_single_value("TaxJar Settings","tax_account_head")
+
+		quotation = frappe.copy_doc(test_records[0])
+		quotation.transaction_date = nowdate()
+		quotation.valid_till = add_months(quotation.transaction_date, 1)
+		quotation.insert()
+
+		self.assertRaises(frappe.ValidationError, make_sales_order, quotation.name)
+		quotation.save()
+		quotation.submit()
+
+		self.assertEqual(quotation.taxes[0].account_head, taxjar_tax_account_head)
+
+		sales_order = make_sales_order(quotation.name)
+
+		self.assertEqual(sales_order.doctype, "Sales Order")
+		self.assertEqual(len(sales_order.get("items")), 1)
+		self.assertEqual(sales_order.get("items")[0].doctype, "Sales Order Item")
+		self.assertEqual(sales_order.get("items")[0].prevdoc_docname, quotation.name)
+		self.assertEqual(sales_order.customer, "_Test Customer")
+
+		sales_order.delivery_date = "2014-01-01"
+		sales_order.naming_series = "_T-Quotation-"
+		sales_order.transaction_date = nowdate()
+		sales_order.insert()
+
+		self.assertEqual(sales_order.taxes[0].account_head, taxjar_tax_account_head)
+
 	def test_valid_till(self):
 		from erpnext.selling.doctype.quotation.quotation import make_sales_order
 
