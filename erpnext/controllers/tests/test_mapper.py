@@ -13,7 +13,7 @@ class TestMapper(unittest.TestCase):
 		'''Test mapping of multiple source docs on a single target doc'''
 
 		make_test_records("Item")
-		items = frappe.get_all("Item", fields = ["name", "item_code"], filters = {'is_sales_item': 1, 'has_variants': 0})
+		items = frappe.get_all("Item", fields = ["name", "item_code"], filters = {'is_sales_item': 1, 'has_variants': 0, 'disabled': 0})
 		customers = frappe.get_all("Customer")
 		if items and customers:
 			# Make source docs (quotations) and a target doc (sales order)

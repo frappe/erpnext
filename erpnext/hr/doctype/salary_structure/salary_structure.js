@@ -82,6 +82,7 @@ frappe.ui.form.on('Salary Structure', {
                 {fieldname:"employee", fieldtype: "Link", options: "Employee", label: __("Employee")},
 				{fieldname:'base_variable', fieldtype:'Section Break'},
 				{fieldname:'from_date', fieldtype:'Date', label: __('From Date'), "reqd": 1},
+				{fieldname:'income_tax_slab', fieldtype:'Link', label: __('Income Tax Slab'), options: 'Income Tax Slab'},
 				{fieldname:'base_col_br', fieldtype:'Column Break'},
 				{fieldname:'base', fieldtype:'Currency', label: __('Base')},
 				{fieldname:'variable', fieldtype:'Currency', label: __('Variable')}

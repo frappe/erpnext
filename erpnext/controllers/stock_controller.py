@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import cint, flt, cstr
+from frappe.utils import cint, flt, cstr, get_link_to_form, today, getdate
 from frappe import _
 import frappe.defaults
 from erpnext.accounts.utils import get_fiscal_year
@@ -54,6 +54,13 @@ class StockController(AccountsController):
 					if serial_no_data.batch_no != d.batch_no:
 						frappe.throw(_("Row #{0}: Serial No {1} does not belong to Batch {2}")
 							.format(d.idx, serial_no_data.name, d.batch_no))
+
+			if d.qty > 0 and d.get("batch_no") and self.get("posting_date") and self.docstatus < 2:
+				expiry_date = frappe.get_cached_value("Batch", d.get("batch_no"), "expiry_date")
+
+				if expiry_date and getdate(expiry_date) < getdate(self.posting_date):
+					frappe.throw(_("Row #{0}: The batch {1} has already expired.")
+						.format(d.idx, get_link_to_form("Batch", d.get("batch_no"))))
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):

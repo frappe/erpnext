@@ -299,6 +299,7 @@ frappe.ui.form.on('Material Request', {
 			args: {
 				"material_request": frm.doc.name
 			},
+			freeze: true,
 			callback: function(r) {
 				if(r.message.length) {
 					frm.reload_doc();
