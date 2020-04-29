@@ -37,8 +37,10 @@ def execute(filters=None):
 
 
 	# to avoid error eg: gross_income[0] : list index out of range
-	if not len(gross_income): gross_income = [{}]
-	if not len(gross_expense): gross_expense = [{}]
+	if not gross_income:
+		gross_income = [{}]
+	if not gross_expense:
+		gross_expense = [{}]
 
 	data.append({
 		"account_name": "'" + _("Included in Gross Profit") + "'",
