@@ -28,6 +28,10 @@
   "invoiced",
   "exercises_section",
   "exercises",
+  "section_break_23",
+  "total_counts_targeted",
+  "column_break_25",
+  "total_counts_completed",
   "amended_from"
  ],
  "fields": [
@@ -173,11 +177,31 @@
    "fieldtype": "Data",
    "label": "Patient Age",
    "read_only": 1
+  },
+  {
+   "fieldname": "total_counts_targeted",
+   "fieldtype": "Int",
+   "label": "Total Counts Targeted",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_counts_completed",
+   "fieldtype": "Int",
+   "label": "Total Counts Completed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_23",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-21 13:16:46.378798",
+ "modified": "2020-04-29 13:22:13.190353",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Session",

@@ -246,7 +246,7 @@ def make_procedure(source_name, target_doc=None):
 
 
 def insert_clinical_procedure_to_medical_record(doc):
-	subject = cstr(doc.procedure_template)
+	subject = frappe.bold(_("Clinical Procedure conducted: ")) + cstr(doc.procedure_template) + "<br>"
 	if doc.practitioner:
 		subject += frappe.bold(_('Healthcare Practitioner: ')) + doc.practitioner
 	if subject and doc.notes:
