@@ -8,7 +8,7 @@
   {
    "hidden": 0,
    "label": "General Ledger",
-   "links": "[\n    {\n        \"description\": \"Accounting journal entries.\",\n        \"label\": \"Journal Entry\",\n        \"name\": \"Journal Entry\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"GL Entry\"\n        ],\n        \"doctype\": \"GL Entry\",\n        \"is_query_report\": true,\n        \"label\": \"General Ledger\",\n        \"name\": \"General Ledger\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Customer Ledger Summary\",\n        \"name\": \"Customer Ledger Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Supplier Ledger Summary\",\n        \"name\": \"Supplier Ledger Summary\",\n        \"type\": \"report\"\n    }\n]"
+   "links": "[\n    {\n        \"description\": \"Accounting journal entries.\",\n        \"label\": \"Journal Entry\",\n        \"name\": \"Journal Entry\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Make journal entries from a template.\",\n        \"label\": \"Journal Entry Template\",\n        \"name\": \"Journal Entry Template\",\n        \"type\": \"doctype\"\n    },\n    \n    {\n        \"dependencies\": [\n            \"GL Entry\"\n        ],\n        \"doctype\": \"GL Entry\",\n        \"is_query_report\": true,\n        \"label\": \"General Ledger\",\n        \"name\": \"General Ledger\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Customer Ledger Summary\",\n        \"name\": \"Customer Ledger Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Supplier Ledger Summary\",\n        \"name\": \"Supplier Ledger Summary\",\n        \"type\": \"report\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -103,7 +103,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Accounting",
- "modified": "2020-04-01 11:28:50.925719",
+ "modified": "2020-04-29 12:17:34.844397",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
