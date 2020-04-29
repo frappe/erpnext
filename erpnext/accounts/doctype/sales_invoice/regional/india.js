@@ -26,16 +26,24 @@ frappe.ui.form.on("Sales Invoice", {
 			&& !frm.doc.is_return && !frm.doc.ewaybill) {
 
 			frm.add_custom_button('E-Way Bill JSON', () => {
-				var w = window.open(
-					frappe.urllib.get_full_url(
-						"/api/method/erpnext.regional.india.utils.generate_ewb_json?"
-						+ "dt=" + encodeURIComponent(frm.doc.doctype)
-						+ "&dn=" + encodeURIComponent(frm.doc.name)
-					)
-				);
-				if (!w) {
-					frappe.msgprint(__("Please enable pop-ups")); return;
-				}
+				frappe.call({
+					method: 'erpnext.regional.india.utils.generate_ewb_json',
+					args: {
+						'dt': frm.doc.doctype,
+						'dn': [frm.doc.name]
+					},
+					callback: function(r) {
+						if (r.message) {
+							const args = {
+								cmd: 'erpnext.regional.india.utils.download_ewb_json',
+								data: r.message,
+								docname: frm.doc.name
+							};
+							open_url_post(frappe.request.url, args);
+						}
+					}
+				});
+
 			}, __("Create"));
 		}
 	}
