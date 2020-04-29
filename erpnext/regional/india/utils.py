@@ -288,7 +288,7 @@ def calculate_annual_eligible_hra_exemption(doc):
 	})
 
 def get_component_amt_from_salary_slip(employee, salary_structure, basic_component, hra_component):
-	salary_slip = make_salary_slip(salary_structure, employee=employee, for_preview=1)
+	salary_slip = make_salary_slip(salary_structure, employee=employee, for_preview=1, ignore_permissions=True)
 	basic_amt, hra_amt = 0, 0
 	for earning in salary_slip.earnings:
 		if earning.salary_component == basic_component:
