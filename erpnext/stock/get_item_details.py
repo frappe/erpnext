@@ -663,6 +663,9 @@ def get_price_list_rate_for(args, item_code):
 			item_price_args["uom"] = args.get("stock_uom")
 			general_price_list_rate = get_item_price(item_price_args, item_code, ignore_party=args.get("ignore_party"))
 
+		if not general_price_list_rate:
+			general_price_list_rate = get_item_price(item_price_args, item_code, ignore_party=True)
+
 		if general_price_list_rate:
 			item_price_data = general_price_list_rate
 
