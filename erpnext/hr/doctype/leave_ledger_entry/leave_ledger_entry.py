@@ -115,6 +115,7 @@ def process_expired_allocation():
 					transaction_name = l.transaction_name
 					AND transaction_type = 'Leave Allocation'
 					AND name<>l.name
+					AND docstatus = 1
 					AND (
 						is_carry_forward=l.is_carry_forward
 						OR (is_carry_forward = 0 AND leave_type not in %s)
@@ -140,6 +141,7 @@ def get_remaining_leaves(allocation):
 			'employee': allocation.employee,
 			'leave_type': allocation.leave_type,
 			'to_date': ('<=', allocation.to_date),
+			'docstatus': 1
 		}, fieldname=['SUM(leaves)'])
 
 @frappe.whitelist()

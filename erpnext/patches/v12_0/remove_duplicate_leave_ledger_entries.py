@@ -25,8 +25,9 @@ def delete_duplicate_ledger_entries():
 				WHERE
 					transaction_name = l.transaction_name
 					AND transaction_type = 'Leave Allocation'
-					AND name<>l.name
+					AND name <> l.name
 					AND employee = l.employee
+					AND docstatus = 1
 					AND leave_type = l.leave_type
 					AND is_carry_forward=l.is_carry_forward
 					AND to_date = l.to_date
