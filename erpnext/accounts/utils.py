@@ -817,48 +817,37 @@ def create_payment_gateway_account(gateway):
 		pass
 
 @frappe.whitelist()
-def update_number_field(doctype_name, name, field_name, number_value, company):
+def update_cost_center(docname, cost_center_name, cost_center_number, company):
 	'''
-		doctype_name = Name of the DocType
-		name = Docname being referred
-		field_name = Name of the field thats holding the 'number' attribute
-		number_value = Numeric value entered in field_name
-
-		Stores the number entered in the dialog to the DocType's field.
-
 		Renames the document by adding the number as a prefix to the current name and updates
 		all transaction where it was present.
 	'''
-	doc_title = frappe.db.get_value(doctype_name, name, frappe.scrub(doctype_name)+"_name")
+	validate_field_number("Cost Center", docname, cost_center_number, company, "cost_center_number")
 
-	validate_field_number(doctype_name, name, number_value, company, field_name)
+	if cost_center_number:
+		frappe.db.set_value("Cost Center", docname, "cost_center_number", cost_center_number.strip())
+	else:
+		frappe.db.set_value("Cost Center", docname, "cost_center_number", "")
 
-	frappe.db.set_value(doctype_name, name, field_name, number_value)
+	frappe.db.set_value("Cost Center", docname, "cost_center_name", cost_center_name.strip())
 
-	if doc_title[0].isdigit():
-		separator = " - " if " - " in doc_title else " "
-		doc_title = doc_title.split(separator, 1)[1]
-
-	frappe.db.set_value(doctype_name, name, frappe.scrub(doctype_name)+"_name", doc_title)
-
-	new_name = get_autoname_with_number(number_value, doc_title, name, company)
-
-	if name != new_name:
-		frappe.rename_doc(doctype_name, name, new_name)
+	new_name = get_autoname_with_number(cost_center_number, cost_center_name, docname, company)
+	if docname != new_name:
+		frappe.rename_doc("Cost Center", docname, new_name, force=1)
 		return new_name
 
-def validate_field_number(doctype_name, name, number_value, company, field_name):
+def validate_field_number(doctype_name, docname, number_value, company, field_name):
 	''' Validate if the number entered isn't already assigned to some other document. '''
 	if number_value:
+		filters = {field_name: number_value, "name": ["!=", docname]}
 		if company:
-			doctype_with_same_number = frappe.db.get_value(doctype_name,
-				{field_name: number_value, "company": company, "name": ["!=", name]})
-		else:
-			doctype_with_same_number = frappe.db.get_value(doctype_name,
-				{field_name: number_value, "name": ["!=", name]})
+			filters["company"] = company
+
+		doctype_with_same_number = frappe.db.get_value(doctype_name, filters)
+
 		if doctype_with_same_number:
-			frappe.throw(_("{0} Number {1} already used in account {2}")
-				.format(doctype_name, number_value, doctype_with_same_number))
+			frappe.throw(_("{0} Number {1} is already used in {2} {3}")
+				.format(doctype_name, number_value, doctype_name.lower(), doctype_with_same_number))
 
 def get_autoname_with_number(number_value, doc_title, name, company):
 	''' append title with prefix as number and suffix as company's abbreviation separated by '-' '''
