@@ -12,7 +12,7 @@ frappe.ui.form.on("Journal Entry", {
 
 	refresh: function(frm) {
 		erpnext.toggle_naming_series();
-		
+
 		if(frm.doc.docstatus==1) {
 			frm.add_custom_button(__('Ledger'), function() {
 				frappe.route_options = {
@@ -144,7 +144,7 @@ frappe.ui.form.on("Journal Entry", {
 						}
 					}
 				});
-			} 
+			}
 			else if(frm.doc.voucher_type=="Opening Entry") {
 				return frappe.call({
 					type:"GET",
