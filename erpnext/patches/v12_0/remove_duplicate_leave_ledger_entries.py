@@ -9,15 +9,16 @@ def execute():
 	if not frappe.db.a_row_exists("Leave Ledger Entry"):
 		return
 
-	delete_duplicate_ledger_entries()
+	duplicate_records_list = get_duplicate_records()
+	delete_duplicate_ledger_entries(duplicate_records_list)
 
-def delete_duplicate_ledger_entries():
-	''' Delete duplicate ledger entries of transaction type allocation '''
-	frappe.db.sql("""
+def get_duplicate_records():
+	''' fetch all but one duplicate records from the list of expired leave allocation '''
+	return frappe.db.sql_list("""
 		WITH duplicate_records AS
 		(SELECT
 			name, transaction_name, is_carry_forward,
-			ROW_NUMBER() over(partition by transaction_name order by name)as row
+			ROW_NUMBER() over(partition by transaction_name order by creation)as row
 		FROM `tabLeave Ledger Entry` l
 		WHERE (EXISTS
 			(SELECT name
@@ -34,5 +35,9 @@ def delete_duplicate_ledger_entries():
 					AND from_date = l.from_date
 					AND is_expired = 1
 		)))
-		DELETE name, row, transaction_name FROM duplicate_records WHERE row > 1
+		SELECT name FROM duplicate_records WHERE row > 1
 	""")
+
+def delete_duplicate_ledger_entries(duplicate_records_list):
+	''' Delete duplicate leave ledger entries '''
+	frappe.db.sql(''' DELETE FROM `tabLeave Ledger Entry` WHERE name in (%s)''', (duplicate_records_list))
