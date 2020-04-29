@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cstr
 from frappe import _
@@ -21,6 +22,24 @@ class PatientEncounter(Document):
 		if self.appointment:
 			frappe.db.set_value('Patient Appointment', self.appointment, 'status', 'Open')
 		delete_medical_record(self)
+
+	def on_submit(self):
+		create_therapy_plan(self)
+
+def create_therapy_plan(encounter):
+	if len(encounter.therapies):
+		doc = frappe.new_doc('Therapy Plan')
+		doc.patient = encounter.patient
+		doc.start_date = encounter.encounter_date
+		for entry in encounter.therapies:
+			doc.append('therapy_plan_details', {
+				'therapy_type': entry.therapy_type,
+				'no_of_sessions': entry.no_of_sessions
+			})
+		doc.save(ignore_permissions=True)
+		if doc.get('name'):
+			encounter.db_set('therapy_plan', doc.name)
+			frappe.msgprint(_('Therapy Plan {0} created successfully.').format(frappe.bold(doc.name)), alert=True)
 
 def insert_encounter_to_medical_record(doc):
 	subject = set_subject_field(doc)

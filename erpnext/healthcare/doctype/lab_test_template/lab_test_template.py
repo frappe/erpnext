@@ -74,26 +74,27 @@ class LabTestTemplate(Document):
 
 
 def create_item_from_template(doc):
-	if doc.is_billable:
+	disabled = doc.disabled
+	if doc.is_billable and not doc.disabled:
 		disabled = 0
-	else:
-		disabled = 1
+
+	uom = frappe.db.exists('UOM', 'Unit') or frappe.db.get_single_value('Stock Settings', 'stock_uom')
 	# insert item
 	item =  frappe.get_doc({
-	"doctype": "Item",
-	"item_code": doc.lab_test_code,
-	"item_name":doc.lab_test_name,
-	"item_group": doc.lab_test_group,
-	"description":doc.lab_test_description,
-	"is_sales_item": 1,
-	"is_service_item": 1,
-	"is_purchase_item": 0,
-	"is_stock_item": 0,
-	"show_in_website": 0,
-	"is_pro_applicable": 0,
-	"disabled": disabled,
-	"stock_uom": "Unit"
-	}).insert(ignore_permissions=True)
+		"doctype": "Item",
+		"item_code": doc.lab_test_code,
+		"item_name":doc.lab_test_name,
+		"item_group": doc.lab_test_group,
+		"description":doc.lab_test_description,
+		"is_sales_item": 1,
+		"is_service_item": 1,
+		"is_purchase_item": 0,
+		"is_stock_item": 0,
+		"show_in_website": 0,
+		"is_pro_applicable": 0,
+		"disabled": disabled,
+		"stock_uom": uom
+	}).insert(ignore_permissions=True, ignore_mandatory=True)
 
 	# insert item price
 	# get item price list to insert item price
