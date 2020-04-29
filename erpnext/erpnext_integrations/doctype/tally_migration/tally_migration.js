@@ -1,6 +1,8 @@
 // Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
+frappe.provide("erpnext.tally_migration");
+
 frappe.ui.form.on("Tally Migration", {
 	onload: function (frm) {
 		let reload_status = true;
@@ -38,10 +40,13 @@ frappe.ui.form.on("Tally Migration", {
 
 	refresh: function (frm) {
 		frm.trigger("show_logs_preview");
+		erpnext.tally_migration.failed_import_log = JSON.parse(frm.doc.failed_import_log);
+		erpnext.tally_migration.fixed_errors_log = JSON.parse(frm.doc.fixed_errors_log);
 
 		["default_round_off_account", "default_warehouse", "default_cost_center"].forEach(account => {
 			frm.toggle_reqd(account, frm.doc.is_master_data_imported === 1)
 		})
+
 		if (frm.doc.master_data && !frm.doc.is_master_data_imported) {
 			if (frm.doc.is_master_data_processed) {
 				if (frm.doc.status != "Importing Master Data") {
@@ -53,6 +58,7 @@ frappe.ui.form.on("Tally Migration", {
 				}
 			}
 		}
+
 		if (frm.doc.day_book_data && !frm.doc.is_day_book_data_imported) {
 			if (frm.doc.is_day_book_data_processed) {
 				if (frm.doc.status != "Importing Day Book Data") {
@@ -87,7 +93,7 @@ frappe.ui.form.on("Tally Migration", {
 			frm.toggle_display(field, false);
 			return
 		}
-		let rows = get_html_rows(shown_logs, field);
+		let rows = erpnext.tally_migration.get_html_rows(shown_logs, field);
 		let rows_head, table_caption;
 
 		let table_footer = (hidden_logs && (hidden_logs.length > 0)) ? `<tr class="text-muted">
@@ -119,7 +125,7 @@ frappe.ui.form.on("Tally Migration", {
 	},
 
 	show_error_summary(frm) {
-		let summary = JSON.parse(frm.doc.failed_import_log).reduce((summary, row) => {
+		let summary = erpnext.tally_migration.failed_import_log.reduce((summary, row) => {
 			if (row.doc) {
 				if (summary[row.doc.doctype]) {
 					summary[row.doc.doctype] += 1;
@@ -147,8 +153,7 @@ frappe.ui.form.on("Tally Migration", {
 	},
 
 	show_errored_import_log(frm) {
-		let import_log = JSON.parse(frm.doc.failed_import_log || "[]");
-
+		let import_log = erpnext.tally_migration.failed_import_log;
 		let logs = import_log.slice(0, 20);
 		let hidden_logs = import_log.slice(20);
 
@@ -156,7 +161,7 @@ frappe.ui.form.on("Tally Migration", {
 	},
 
 	show_fixed_errors_log(frm) {
-		let completed_log = JSON.parse(frm.doc.fixed_errors_log || "[]");
+		let completed_log = erpnext.tally_migration.fixed_errors_log;
 		let logs = completed_log.slice(0, 20);
 		let hidden_logs = completed_log.slice(20);
 
@@ -164,7 +169,7 @@ frappe.ui.form.on("Tally Migration", {
 	}
 });
 
-const getError = (traceback) => {
+erpnext.tally_migration.getError = (traceback) => {
 	/* Extracts the Error Message from the Python Traceback or Solved error */
 	let is_multiline = traceback.trim().indexOf("\n") != -1;
 	let message;
@@ -181,28 +186,28 @@ const getError = (traceback) => {
 	return message
 }
 
-const cleanDoc = (obj) => {
+erpnext.tally_migration.cleanDoc = (obj) => {
 	/* Strips all null and empty values of your JSON object */
 	let temp = obj;
 	$.each(temp, function(key, value){
 		if (value === "" || value === null){
 			delete obj[key];
 		} else if (Object.prototype.toString.call(value) === '[object Object]') {
-			cleanDoc(value);
+			erpnext.tally_migration.cleanDoc(value);
 		} else if ($.isArray(value)) {
-			$.each(value, function (k,v) { cleanDoc(v); });
+			$.each(value, function (k,v) { erpnext.tally_migration.cleanDoc(v); });
 		}
 	});
 	return temp;
 }
 
-window.unresolve = (document) => {
+erpnext.tally_migration.unresolve = (document) => {
 	let frm = cur_frm;
-	let failed_log = JSON.parse(frm.doc.failed_import_log);
-	let fixed_log = JSON.parse(frm.doc.fixed_errors_log);
+	let failed_log = erpnext.tally_migration.failed_import_log;
+	let fixed_log = erpnext.tally_migration.fixed_errors_log;
 
 	let modified_fixed_log = fixed_log.filter(row => {
-		if (!frappe.utils.deep_equal(cleanDoc(row.doc), document)) {
+		if (!frappe.utils.deep_equal(erpnext.tally_migration.cleanDoc(row.doc), document)) {
 			return row
 		}
 	});
@@ -217,13 +222,13 @@ window.unresolve = (document) => {
 	frm.save();
 }
 
-window.create_new_doc = (doctype, document) => {
+erpnext.tally_migration.resolve = (document) => {
 	let frm = cur_frm;
-	let failed_log = JSON.parse(frm.doc.failed_import_log);
-	let fixed_log = JSON.parse(frm.doc.fixed_errors_log);
+	let failed_log = erpnext.tally_migration.failed_import_log;
+	let fixed_log = erpnext.tally_migration.fixed_errors_log;
 
 	let modified_failed_log = failed_log.filter(row => {
-		if (!frappe.utils.deep_equal(cleanDoc(row.doc), document)) {
+		if (!frappe.utils.deep_equal(erpnext.tally_migration.cleanDoc(row.doc), document)) {
 			return row
 		}
 	});
@@ -235,17 +240,21 @@ window.create_new_doc = (doctype, document) => {
 	// frm.trigger('show_logs_preview')
 	frm.dirty();
 	frm.save();
+}
+
+erpnext.tally_migration.create_new_doc = (doctype, document) => {
+	erpnext.tally_migration.resolve(document);
 	frappe.new_doc(doctype, document);
 }
 
-const get_html_rows = (logs, field) => {
+erpnext.tally_migration.get_html_rows = (logs, field) => {
 	let index = 0;
 	let rows = logs
 		.map(({ doc, exc }) => {
 			let id = frappe.dom.get_unique_id();
 			let traceback = exc;
 
-			let error_message = getError(traceback);
+			let error_message = erpnext.tally_migration.getError(traceback);
 			index++;
 
 			let show_traceback = `
@@ -264,17 +273,17 @@ const get_html_rows = (logs, field) => {
 				</button>
 				<div class="collapse margin-top" id="${id}-doc">
 					<div class="well">
-						<pre style="font-size: smaller;">${JSON.stringify(cleanDoc(doc), null, 1)}</pre>
+						<pre style="font-size: smaller;">${JSON.stringify(erpnext.tally_migration.cleanDoc(doc), null, 1)}</pre>
 					</div>
 				</div>`;
 
 			let create_button = `
-				<button class='btn btn-default btn-xs m-3' type='button' onclick='create_new_doc("${doc.doctype}", ${JSON.stringify(doc)})'>
+				<button class='btn btn-default btn-xs m-3' type='button' onclick='erpnext.tally_migration.create_new_doc("${doc.doctype}", ${JSON.stringify(doc)})'>
 					${__("Create Document")}
 				</button>`
 
 			let mark_as_unresolved = `
-				<button class='btn btn-default btn-xs m-3' type='button' onclick='unresolve(${JSON.stringify(doc)})'>
+				<button class='btn btn-default btn-xs m-3' type='button' onclick='erpnext.tally_migration.unresolve(${JSON.stringify(doc)})'>
 					${__("Mark as unresolved")}
 				</button>`
 
