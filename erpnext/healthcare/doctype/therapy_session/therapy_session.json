@@ -9,9 +9,11 @@
   "naming_series",
   "appointment",
   "patient",
+  "patient_name",
   "patient_age",
   "gender",
   "column_break_5",
+  "company",
   "therapy_plan",
   "therapy_type",
   "practitioner",
@@ -20,7 +22,6 @@
   "duration",
   "rate",
   "location",
-  "company",
   "column_break_12",
   "service_unit",
   "start_date",
@@ -163,7 +164,8 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "default": "0",
@@ -197,11 +199,18 @@
   {
    "fieldname": "column_break_25",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-29 13:22:13.190353",
+ "modified": "2020-04-29 16:49:16.286006",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Session",
