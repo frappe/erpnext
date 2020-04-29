@@ -123,9 +123,9 @@ frappe.ui.form.on("Journal Entry", {
 
 	voucher_type: function(frm){
 
-		if(!frm.doc.company) return;
-		
-		if((!(frm.doc.accounts || []).length) || ((frm.doc.accounts || []).length==1 && !frm.doc.accounts[0].account)) {
+		if(!frm.doc.company) return null;
+
+		if((!(frm.doc.accounts || []).length) || ((frm.doc.accounts || []).length === 1 && !frm.doc.accounts[0].account)) {
 			if(in_list(["Bank Entry", "Cash Entry"], frm.doc.voucher_type)) {
 				return frappe.call({
 					type: "GET",
@@ -143,7 +143,7 @@ frappe.ui.form.on("Journal Entry", {
 							}
 						}
 					}
-				})
+				});
 			} 
 			else if(frm.doc.voucher_type=="Opening Entry") {
 				return frappe.call({
@@ -157,9 +157,9 @@ frappe.ui.form.on("Journal Entry", {
 						if(r.message) {
 							update_jv_details(frm.doc, r.message);
 						}
-						cur_frm.set_value("is_opening", "Yes")
+						cur_frm.set_value("is_opening", "Yes");
 					}
-				})
+				});
 			}
 		}
 	},
@@ -176,10 +176,7 @@ frappe.ui.form.on("Journal Entry", {
 						"is_opening": doc.is_opening
 					})
 					update_jv_details(frm.doc, doc.accounts);
-				})
-				.catch((err)=>{
-					console.log(err);
-				})	
+				});
 		}
 	}
 });

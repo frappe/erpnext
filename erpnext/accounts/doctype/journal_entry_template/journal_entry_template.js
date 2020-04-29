@@ -33,7 +33,7 @@ frappe.ui.form.on("Journal Entry Template", {
 		}
 	
 		if(!frm.doc.company) return;
-	
+
 		frm.trigger("clear_child");
 		switch(frm.doc.voucher_type){
 			case "Opening Entry":
@@ -49,7 +49,7 @@ frappe.ui.form.on("Journal Entry Template", {
 							add_accounts(frm.doc, r.message);
 						}
 					}
-				})
+				});
 				break;
 			case "Bank Entry":
 			case "Cash Entry":
