@@ -24,7 +24,7 @@ erpnext.ExerciseEditor = Class.extend({
 
 		this.exercise_cards = $('<div class="exercise-cards"></div>').appendTo(this.wrapper);
 
-		this.row = $('<div class="exercise-row"></div>').appendTo(this.exercise_cards);
+		this.row = $('<div class="exercise-row"></div>').appendTo(this.wrapper);
 
 		let me = this;
 
