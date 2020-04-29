@@ -71,8 +71,8 @@ class PaymentEntry(AccountsController):
 		self.update_outstanding_amounts()
 		self.update_advance_paid()
 		self.update_expense_claim()
+		self.update_payment_schedule()
 		self.set_status()
-
 
 	def on_cancel(self):
 		self.setup_party_account_field()
@@ -81,6 +81,7 @@ class PaymentEntry(AccountsController):
 		self.update_advance_paid()
 		self.update_expense_claim()
 		self.delink_advance_entry_references()
+		self.update_payment_schedule(cancel=1)
 		self.set_payment_req_status()
 		self.set_status()
 	
@@ -94,10 +95,10 @@ class PaymentEntry(AccountsController):
 	def validate_duplicate_entry(self):
 		reference_names = []
 		for d in self.get("references"):
-			if (d.reference_doctype, d.reference_name) in reference_names:
+			if (d.reference_doctype, d.reference_name, d.payment_term) in reference_names:
 				frappe.throw(_("Row #{0}: Duplicate entry in References {1} {2}")
 					.format(d.idx, d.reference_doctype, d.reference_name))
-			reference_names.append((d.reference_doctype, d.reference_name))
+			reference_names.append((d.reference_doctype, d.reference_name, d.payment_term))
 
 	def set_bank_account_data(self):
 		if self.bank_account:
@@ -284,6 +285,36 @@ class PaymentEntry(AccountsController):
 					if not valid:
 						frappe.throw(_("Against Journal Entry {0} does not have any unmatched {1} entry")
 							.format(d.reference_name, dr_or_cr))
+
+	def update_payment_schedule(self, cancel=0):
+		invoice_payment_amount_map = {}
+		invoice_paid_amount_map = {}
+
+		for reference in self.get('references'):
+			if reference.payment_term and reference.reference_name:
+				key = (reference.payment_term, reference.reference_name)
+				invoice_payment_amount_map.setdefault(key, 0.0)
+				invoice_payment_amount_map[key] += reference.allocated_amount
+
+				if not invoice_paid_amount_map.get(reference.reference_name):
+					payment_schedule = frappe.get_all('Payment Schedule', filters={'parent': reference.reference_name},
+						fields=['paid_amount', 'payment_amount', 'payment_term'])
+					for term in payment_schedule:
+						invoice_key = (term.payment_term, reference.reference_name)
+						invoice_paid_amount_map.setdefault(invoice_key, {})
+						invoice_paid_amount_map[invoice_key]['outstanding'] = term.payment_amount - term.paid_amount
+
+		for key, amount in iteritems(invoice_payment_amount_map):
+			if cancel:
+				frappe.db.sql(""" UPDATE `tabPayment Schedule` SET paid_amount = `paid_amount` - %s
+					WHERE parent = %s and payment_term = %s""", (amount, key[1], key[0]))
+			else:
+				outstanding = invoice_paid_amount_map.get(key)['outstanding']
+				if amount > outstanding:
+					frappe.throw(_('Cannot allocate more than {0} against payment term {1}').format(outstanding, key[0]))
+
+				frappe.db.sql(""" UPDATE `tabPayment Schedule` SET paid_amount = `paid_amount` + %s
+						WHERE parent = %s and payment_term = %s""", (amount, key[1], key[0]))
 
 	def set_status(self):
 		if self.docstatus == 2:
@@ -1012,15 +1043,22 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	if doc.doctype == "Purchase Invoice" and doc.invoice_is_blocked():
 		frappe.msgprint(_('{0} is on hold till {1}').format(doc.name, doc.release_date))
 	else:
-		pe.append("references", {
-			'reference_doctype': dt,
-			'reference_name': dn,
-			"bill_no": doc.get("bill_no"),
-			"due_date": doc.get("due_date"),
-			'total_amount': grand_total,
-			'outstanding_amount': outstanding_amount,
-			'allocated_amount': outstanding_amount
-		})
+		if (doc.doctype in ('Sales Invoice', 'Purchase Invoice')
+			and frappe.get_value('Payment Terms Template',
+			{'name': doc.payment_terms_template}, 'allocate_payment_based_on_payment_terms')):
+
+			for reference in get_reference_as_per_payment_terms(doc.payment_schedule, dt, dn, doc, grand_total, outstanding_amount):
+				pe.append('references', reference)
+		else:
+			pe.append("references", {
+				'reference_doctype': dt,
+				'reference_name': dn,
+				"bill_no": doc.get("bill_no"),
+				"due_date": doc.get("due_date"),
+				'total_amount': grand_total,
+				'outstanding_amount': outstanding_amount,
+				'allocated_amount': outstanding_amount
+			})
 
 	pe.setup_party_account_field()
 	pe.set_missing_values()
@@ -1029,6 +1067,22 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		pe.set_amounts()
 	return pe
 
+def get_reference_as_per_payment_terms(payment_schedule, dt, dn, doc, grand_total, outstanding_amount):
+	references = []
+	for payment_term in payment_schedule:
+		references.append({
+			'reference_doctype': dt,
+			'reference_name': dn,
+			'bill_no': doc.get('bill_no'),
+			'due_date': doc.get('due_date'),
+			'total_amount': grand_total,
+			'outstanding_amount': outstanding_amount,
+			'payment_term': payment_term.payment_term,
+			'allocated_amount': flt(payment_term.payment_amount - payment_term.paid_amount,
+				payment_term.precision('payment_amount'))
+		})
+
+	return references
 
 def get_paid_amount(dt, dn, party_type, party, account, due_date):
 	if party_type=="Customer":
