@@ -43,7 +43,7 @@ def validate_customer_created(patient):
 
 def get_fee_validity(patient_appointments):
 	if not frappe.db.get_single_value('Healthcare Settings', 'enable_free_follow_ups'):
-		return
+		return []
 
 	items_to_invoice = []
 	for appointment in patient_appointments:
@@ -110,7 +110,7 @@ def get_lab_tests_to_invoice(patient):
 		filters={'patient': patient.name, 'invoiced': False, 'docstatus': 1}
 	)
 	for lab_test in lab_tests:
-		item, is_billable = frappe.get_cached_value('Lab Test Template', lab_test.lab_test_code, ['item', 'is_billable'])
+		item, is_billable = frappe.get_cached_value('Lab Test Template', lab_test.template, ['item', 'is_billable'])
 		if is_billable:
 			lab_tests_to_invoice.append({
 				'reference_type': 'Lab Test',

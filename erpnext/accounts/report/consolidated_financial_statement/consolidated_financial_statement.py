@@ -84,6 +84,7 @@ def get_balance_sheet_data(fiscal_year, companies, columns, filters):
 
 def get_profit_loss_data(fiscal_year, companies, columns, filters):
 	income, expense, net_profit_loss = get_income_expense_data(companies, fiscal_year, filters)
+	company_currency = get_company_currency(filters)
 
 	data = []
 	data.extend(income or [])
@@ -93,7 +94,7 @@ def get_profit_loss_data(fiscal_year, companies, columns, filters):
 
 	chart = get_pl_chart_data(filters, columns, income, expense, net_profit_loss)
 
-	report_summary = get_pl_summary(companies, '', income, expense, net_profit_loss, True)
+	report_summary = get_pl_summary(companies, '', income, expense, net_profit_loss, company_currency, True)
 
 	return data, None, chart, report_summary
 
