@@ -675,3 +675,4 @@ erpnext.patches.v12_0.update_end_date_and_status_in_email_campaign
 erpnext.patches.v13_0.move_tax_slabs_from_payroll_period_to_income_tax_slab #123
 erpnext.patches.v12_0.fix_quotation_expired_status
 erpnext.patches.v12_0.update_appointment_reminder_scheduler_entry
+erpnext.patches.v12_0.retain_permission_rules_for_video_doctype
