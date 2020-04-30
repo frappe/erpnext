@@ -227,7 +227,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	},
 
 	refresh: function() {
-		if(this.frm.doc.docstatus==1) {
+		if(this.frm.doc.docstatus > 0) {
 			this.show_stock_ledger();
 			if (erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 				this.show_general_ledger();

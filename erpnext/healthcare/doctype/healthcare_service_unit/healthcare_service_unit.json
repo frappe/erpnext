@@ -9,6 +9,7 @@
  "doctype": "DocType",
  "document_type": "Setup",
  "editable_grid": 1,
+ "engine": "InnoDB",
  "field_order": [
   "healthcare_service_unit_name",
   "parent_healthcare_service_unit",
@@ -18,6 +19,7 @@
   "overlap_appointments",
   "inpatient_occupancy",
   "occupancy_status",
+  "column_break_9",
   "warehouse",
   "company",
   "lft",
@@ -99,8 +101,12 @@
    "fieldtype": "Select",
    "label": "Occupancy Status",
    "no_copy": 1,
-   "options": "Vacant\nOccupied",
+   "options": "\nVacant\nOccupied",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
   },
   {
    "bold": 1,
@@ -153,13 +159,11 @@
    "report_hide": 1
   }
  ],
- "is_tree": 1,
  "links": [],
- "modified": "2020-03-18 18:02:23.713439",
+ "modified": "2020-03-26 16:13:08.675952",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Unit",
- "nsm_parent_field": "parent_healthcare_service_unit",
  "owner": "Administrator",
  "permissions": [
   {

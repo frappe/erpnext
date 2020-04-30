@@ -1,0 +1,19 @@
+# Each line is a file pattern followed by one or more owners.
+
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence,
+
+*                       @nabinhait
+manufacturing/          @rohitwaghchaure
+accounts/               @deepeshgarg007 @nextchamp-saqib
+loan_management/        @deepeshgarg007
+pos*                    @nextchamp-saqib
+assets/                 @nextchamp-saqib
+stock/                  @marination @rohitwaghchaure
+buying/                 @marination @rohitwaghchaure
+hr/                     @Anurag810
+projects/               @hrwX
+support/                @hrwX
+healthcare/             @ruchamahabal
+erpnext_integrations/   @Mangesh-Khairnar 	
+requirements.txt        @gavindsouza

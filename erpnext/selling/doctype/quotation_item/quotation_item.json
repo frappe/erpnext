@@ -55,6 +55,9 @@
   "weight_uom",
   "reference",
   "warehouse",
+  "against_blanket_order",
+  "blanket_order",
+  "blanket_order_rate",
   "column_break_30",
   "prevdoc_doctype",
   "prevdoc_docname",
@@ -573,12 +576,38 @@
    "fieldname": "image_section",
    "fieldtype": "Section Break",
    "label": "Image"
+  },
+  {
+   "depends_on": "eval:doc.against_blanket_order",
+   "fieldname": "blanket_order",
+   "fieldtype": "Link",
+   "label": "Blanket Order",
+   "no_copy": 1,
+   "options": "Blanket Order",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.against_blanket_order",
+   "fieldname": "blanket_order_rate",
+   "fieldtype": "Currency",
+   "label": "Blanket Order Rate",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "against_blanket_order",
+   "fieldtype": "Check",
+   "label": "Against Blanket Order",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-03-05 14:18:58.783751",
+ "modified": "2020-03-30 18:40:28.782720",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation Item",

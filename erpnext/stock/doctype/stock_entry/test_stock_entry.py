@@ -149,10 +149,10 @@ class TestStockEntry(unittest.TestCase):
 
 		mr.cancel()
 
-		self.assertFalse(frappe.db.sql("""select * from `tabStock Ledger Entry`
+		self.assertTrue(frappe.db.sql("""select * from `tabStock Ledger Entry`
 			where voucher_type='Stock Entry' and voucher_no=%s""", mr.name))
 
-		self.assertFalse(frappe.db.sql("""select * from `tabGL Entry`
+		self.assertTrue(frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Stock Entry' and voucher_no=%s""", mr.name))
 
 	def test_material_issue_gl_entry(self):
@@ -177,12 +177,6 @@ class TestStockEntry(unittest.TestCase):
 			])
 		)
 		mi.cancel()
-
-		self.assertFalse(frappe.db.sql("""select name from `tabStock Ledger Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""", mi.name))
-
-		self.assertFalse(frappe.db.sql("""select name from `tabGL Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""", mi.name))
 
 	def test_material_transfer_gl_entry(self):
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
@@ -216,11 +210,6 @@ class TestStockEntry(unittest.TestCase):
 			)
 
 		mtn.cancel()
-		self.assertFalse(frappe.db.sql("""select * from `tabStock Ledger Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""", mtn.name))
-
-		self.assertFalse(frappe.db.sql("""select * from `tabGL Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""", mtn.name))
 
 	def test_repack_no_change_in_valuation(self):
 		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
@@ -544,10 +533,10 @@ class TestStockEntry(unittest.TestCase):
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto", '')
 
 		# test freeze_stocks_upto_days
-		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 7)
+		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", -1)
 		se = frappe.copy_doc(test_records[0])
 		se.set_posting_time = 1
-		se.posting_date = add_days(nowdate(), -15)
+		se.posting_date = nowdate()
 		se.set_stock_entry_type()
 		se.insert()
 		self.assertRaises(StockFreezeError, se.submit)
@@ -744,7 +733,7 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_customer_provided_parts_se(self):
 		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
-		se = make_stock_entry(item_code='CUST-0987', purporse = 'Material Receipt', qty=4, to_warehouse = "_Test Warehouse - _TC")
+		se = make_stock_entry(item_code='CUST-0987', purpose = 'Material Receipt', qty=4, to_warehouse = "_Test Warehouse - _TC")
 		self.assertEqual(se.get("items")[0].allow_zero_valuation_rate, 1)
 		self.assertEqual(se.get("items")[0].amount, 0)
 

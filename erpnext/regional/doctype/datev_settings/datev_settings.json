@@ -28,7 +28,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Client ID",
-   "reqd": 1
+   "reqd": 1,
+   "length": 5
   },
   {
    "fieldname": "consultant",
@@ -42,7 +43,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Consultant ID",
-   "reqd": 1
+   "reqd": 1,
+   "length": 7
   },
   {
    "fieldname": "column_break_2",
