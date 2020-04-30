@@ -274,12 +274,12 @@ class PaymentEntry(AccountsController):
 				continue
 
 			if d.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Fees"):
-				outstanding_amount = frappe.get_cached_value(d.reference_doctype, d.reference_name, "outstanding_amount")
-				if outstanding_amount <= 0:
+				outstanding_amount, is_return = frappe.get_cached_value(d.reference_doctype, d.reference_name, ["outstanding_amount", "is_return"])
+				if outstanding_amount <= 0 and not is_return:
 					no_oustanding_refs.setdefault(d.reference_doctype, []).append(d)
 		
 		for k, v in no_oustanding_refs.items():
-			frappe.msgprint(_("{} - {} now have {} as they had no outstanding amount left before submitting the Payment Entry. \n \
+			frappe.msgprint(_("{} - {} now have {} as they had no outstanding amount left before submitting the Payment Entry.<br><br>\
 					If this is undesirable please cancel the corresponding Payment Entry.")
 				.format(k, frappe.bold(", ".join([d.reference_name for d in v])), frappe.bold("negative outstanding amount")),
 				title=_("Warning"), indicator="orange")
