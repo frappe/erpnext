@@ -21,8 +21,14 @@ class TherapyPlan(Document):
 				self.status = 'Completed'
 
 	def set_totals(self):
-		total_sessions = sum([int(d.no_of_sessions) for d in self.get('therapy_plan_details')])
-		total_sessions_completed = sum([int(d.sessions_completed) for d in self.get('therapy_plan_details')])
+		total_sessions = 0
+		total_sessions_completed = 0
+		for entry in self.therapy_plan_details:
+			if entry.no_of_sessions:
+				total_sessions += entry.no_of_sessions
+			if entry.sessions_completed:
+				total_sessions_completed += entry.sessions_completed
+
 		self.db_set('total_sessions', total_sessions)
 		self.db_set('total_sessions_completed', total_sessions_completed)
 
