@@ -57,7 +57,7 @@
   },
   {
    "fieldname": "subject",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "ignore_xss_filter": 1,
    "label": "Subject"
   },
@@ -125,7 +125,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2020-03-23 19:26:59.308383",
+ "modified": "2020-04-29 12:26:57.679402",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Medical Record",
