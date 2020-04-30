@@ -9,7 +9,6 @@ def execute():
 	frappe.reload_doc("Selling", "doctype", "POS Payment Method")
 	pos_profiles = frappe.get_all("POS Profile")
 
-	print(pos_profiles)
 	for pos_profile in pos_profiles:
 		payments = frappe.db.sql("""
 			select idx, parentfield, parenttype, parent, mode_of_payment, `default` from `tabSales Invoice Payment` where parent=%s

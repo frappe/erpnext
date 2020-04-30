@@ -74,7 +74,7 @@ erpnext.PointOfSale.ItemSelector = class {
     }
 
     get_item_html(item) {
-        const { item_image } = item;
+        const { item_image, serial_no, batch_no, barcode } = item;
 
         function get_item_image_html() {
             if (item_image) {
@@ -89,7 +89,8 @@ erpnext.PointOfSale.ItemSelector = class {
         }
 
 		return (
-            `<div class="item-wrapper rounded shadow pointer no-select" data-item-code="${escape(item.item_code)}">
+            `<div class="item-wrapper rounded shadow pointer no-select"
+                data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}" data-batch-no="${escape(batch_no)}">
                 ${get_item_image_html()}
                 <div class="flex items-center pr-4 pl-4 h-10 justify-between">
                     <div class="f-shrink-1 text-dark-grey overflow-hidden whitespace-nowrap">${frappe.ellipsis(item.item_name, 18)}</div>
@@ -143,9 +144,12 @@ erpnext.PointOfSale.ItemSelector = class {
 			const $item = $(this);
 			const item_code = unescape($item.attr('data-item-code'));
             let batch_no = unescape($item.attr('data-batch-no'));
+            let serial_no = unescape($item.attr('data-serial-no'));
+            
             batch_no = batch_no === "undefined" ? undefined : batch_no;
+            serial_no = serial_no === "undefined" ? undefined : serial_no;
 
-            me.events.item_selected({ field: 'qty', value: 1, item: { item_code, batch_no }});
+            me.events.item_selected({ field: 'qty', value: 1, item: { item_code, batch_no, serial_no }});
         })
 
         this.search_field.$input.on('input', (e) => {

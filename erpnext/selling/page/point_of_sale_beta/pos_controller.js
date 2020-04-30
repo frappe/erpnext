@@ -503,7 +503,7 @@ erpnext.PointOfSale.Controller = class {
 		frappe.dom.freeze();
 		try {
 			let { field, value, item } = args;
-			const { item_code, batch_no } = item;
+			const { item_code, batch_no, serial_no } = item;
 			let item_row = this.get_item_from_frm(item_code, batch_no);
 
 			if (item_row) {
@@ -528,7 +528,10 @@ erpnext.PointOfSale.Controller = class {
 					return;
 				}
 
-				const args = { item_code: item_code, batch_no, [field]: value };
+				const args = { item_code, batch_no, [field]: value };
+
+				if (serial_no) args['serial_no'] = serial_no;
+
 				if (field === 'serial_no') args['qty'] = value.split(`\n`).length || 0;
 
 				item_row = this.frm.add_child('items', args);

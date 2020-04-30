@@ -118,6 +118,13 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 		'items': result
 	}
 
+	if len(result) == 1:
+		result[0].setdefault('serial_no', serial_no)
+		result[0].setdefault('batch_no', batch_no)
+		result[0].setdefault('barcode', barcode)
+
+		return res
+
 	if serial_no:
 		res.update({
 			'serial_no': serial_no

@@ -31,7 +31,7 @@ erpnext.PointOfSale.ItemDetails = class {
 						<div class="item-description text-md-0 text-grey-200"></div>
 						<div class="item-price text-xl font-bold"></div>
 					</div>
-					<div class="item-image w-46 h-46 bg-light-grey rounded ml-4"></div>
+					<div class="item-image flex items-center justify-center w-46 h-46 bg-light-grey rounded ml-4 text-6xl text-grey-100"></div>
 				</div>
 				<div class="discount-section flex items-center"></div>
 				<div class="text-grey mt-4 mb-6">STOCK DETAILS</div>
@@ -73,7 +73,7 @@ erpnext.PointOfSale.ItemDetails = class {
     }
     
     render_dom(item) {
-        let { item_name, description, image, price_list_rate } = item;
+        let { item_code ,item_name, description, image, price_list_rate } = item;
 
 		function get_description_html() {
 			if (description) {
@@ -86,9 +86,14 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.$item_name.html(item_name);
 		this.$item_description.html(get_description_html());
 		this.$item_price.html(format_currency(price_list_rate, this.currency));
-		this.$item_image.html(
-			`<img class="h-full" src="${image}" alt="${image}" style="object-fit: cover;">`
-		);
+		if (image) {
+			this.$item_image.html(
+				`<img class="h-full" src="${image}" alt="${image}" style="object-fit: cover;">`
+			);
+		} else {
+			this.$item_image.html(frappe.get_abbr(item_code));
+		}
+
     }
     
     render_discount_dom(item) {
