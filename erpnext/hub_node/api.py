@@ -157,8 +157,9 @@ def publish_selected_items(items_to_publish):
 	existing_items = map_fields(items_to_update)
 
 	try:
-		item_sync_preprocess(len(items))
-		convert_relative_image_urls_to_absolute(items)
+		item_sync_preprocess(len(new_items+existing_items))
+		convert_relative_image_urls_to_absolute(new_items)
+		convert_relative_image_urls_to_absolute(existing_items)
 
 		# TODO: Publish Progress
 		connection = get_hub_connection()
