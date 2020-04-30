@@ -451,14 +451,28 @@ class Asset(AccountsController):
 	def make_gl_entries(self):
 		gl_entries = []
 
-		if ((self.purchase_receipt \
-			or (self.purchase_invoice and frappe.db.get_value('Purchase Invoice', self.purchase_invoice, 'update_stock')))
-			and self.purchase_receipt_amount and self.available_for_use_date <= nowdate()):
-			fixed_asset_account = get_asset_category_account('fixed_asset_account', asset=self.name,
+		update_stock_invoice = self.purchase_invoice and frappe.db.get_value('Purchase Invoice', self.purchase_invoice, 'update_stock')
+		purchase_document = self.purchase_invoice if update_stock_invoice else self.purchase_receipt
+		fixed_asset_account = get_asset_category_account('fixed_asset_account', asset=self.name,
 					asset_category = self.asset_category, company = self.company)
 
-			cwip_account = get_asset_account("capital_work_in_progress_account",
-				self.name, self.asset_category, self.company)
+		cwip_account = get_asset_account("capital_work_in_progress_account",
+			self.name, self.asset_category, self.company)
+
+		# check if expense already has been booked in case of cwip was enabled after purchasing asset
+		expense_booked = False, cwip_booked = False
+		if update_stock_invoice:
+			expense_booked = frappe.db.sql("""SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s""",
+				(purchase_document, fixed_asset_account), as_dict=1)
+		else:
+			cwip_booked = frappe.db.sql("""SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s""",
+				(purchase_document, cwip_account), as_dict=1)
+
+		if expense_booked or not cwip_booked:
+			# if expense has already booked from invoice or cwip is booked from receipt
+			return
+
+		if ((self.purchase_receipt or update_stock_invoice) and self.purchase_receipt_amount and self.available_for_use_date <= nowdate()):
 
 			gl_entries.append(self.get_gl_dict({
 				"account": cwip_account,
