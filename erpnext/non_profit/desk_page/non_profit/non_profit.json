@@ -42,7 +42,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Non Profit",
- "modified": "2020-04-01 11:28:51.430882",
+ "modified": "2020-04-13 13:41:52.373705",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Non Profit",
@@ -50,5 +50,31 @@
  "pin_to_bottom": 0,
  "pin_to_top": 0,
  "restrict_to_domain": "Non Profit",
- "shortcuts": []
+ "shortcuts": [
+  {
+   "label": "Member",
+   "link_to": "Member",
+   "type": "DocType"
+  },
+  {
+   "label": "Membership Settings",
+   "link_to": "Membership Settings",
+   "type": "DocType"
+  },
+  {
+   "label": "Membership",
+   "link_to": "Membership",
+   "type": "DocType"
+  },
+  {
+   "label": "Chapter",
+   "link_to": "Chapter",
+   "type": "DocType"
+  },
+  {
+   "label": "Chapter Member",
+   "link_to": "Chapter Member",
+   "type": "DocType"
+  }
+ ]
 }
