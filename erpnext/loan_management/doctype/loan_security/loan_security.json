@@ -1,18 +1,17 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "field:loan_security_name",
  "creation": "2019-09-02 15:07:08.885593",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "loan_security_name",
-  "unit_of_measure",
+  "haircut",
   "loan_security_code",
   "column_break_3",
   "loan_security_type",
-  "haircut",
+  "unit_of_measure",
   "disabled"
  ],
  "fields": [
@@ -66,7 +65,7 @@
   }
  ],
  "links": [],
- "modified": "2020-04-28 14:07:54.506896",
+ "modified": "2020-04-29 13:21:26.043492",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security",

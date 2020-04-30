@@ -196,6 +196,7 @@ class PurchaseReceipt(BuyingController):
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
 		self.delete_auto_created_batches()
 
 	def get_current_stock(self):

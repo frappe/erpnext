@@ -1,6 +1,7 @@
 execute:import unidecode # new requirement
 erpnext.patches.v8_0.move_perpetual_inventory_setting
 erpnext.patches.v8_9.set_print_zero_amount_taxes
+erpnext.patches.v12_0.update_is_cancelled_field
 erpnext.patches.v11_0.rename_production_order_to_work_order
 erpnext.patches.v11_0.refactor_naming_series
 erpnext.patches.v11_0.refactor_autoname_naming
@@ -261,7 +262,6 @@ erpnext.patches.v6_19.comment_feed_communication
 erpnext.patches.v6_21.fix_reorder_level
 erpnext.patches.v6_21.rename_material_request_fields
 erpnext.patches.v6_23.update_stopped_status_to_closed
-erpnext.patches.v6_24.repost_valuation_rate_for_serialized_items
 erpnext.patches.v6_24.set_recurring_id
 erpnext.patches.v6_20x.set_compact_print
 execute:frappe.delete_doc_if_exists("Web Form", "contact") #2016-03-10
@@ -315,7 +315,6 @@ erpnext.patches.v7_0.set_material_request_type_in_item
 erpnext.patches.v7_0.rename_examination_to_assessment
 erpnext.patches.v7_0.set_portal_settings
 erpnext.patches.v7_0.update_change_amount_account
-erpnext.patches.v7_0.repost_future_gle_for_purchase_invoice
 erpnext.patches.v7_0.fix_duplicate_icons
 erpnext.patches.v7_0.repost_gle_for_pos_sales_return
 erpnext.patches.v7_1.update_total_billing_hours
@@ -675,3 +674,4 @@ erpnext.patches.v12_0.update_end_date_and_status_in_email_campaign
 erpnext.patches.v13_0.move_tax_slabs_from_payroll_period_to_income_tax_slab #123
 erpnext.patches.v12_0.fix_quotation_expired_status
 erpnext.patches.v12_0.update_appointment_reminder_scheduler_entry
+erpnext.patches.v12_0.retain_permission_rules_for_video_doctype
