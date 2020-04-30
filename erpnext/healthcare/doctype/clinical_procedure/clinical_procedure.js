@@ -80,6 +80,7 @@ frappe.ui.form.on('Clinical Procedure', {
 							frappe.call({
 								method: 'complete_procedure',
 								doc: frm.doc,
+								freeze: true,
 								callback: function(r) {
 									if (r.message) {
 										frappe.show_alert({
@@ -87,8 +88,8 @@ frappe.ui.form.on('Clinical Procedure', {
 												['<a class="bold" href="#Form/Stock Entry/'+ r.message + '">' + r.message + '</a>']),
 											indicator: 'green'
 										});
-										frm.reload_doc();
 									}
+									frm.reload_doc();
 								}
 							});
 						}
@@ -111,9 +112,10 @@ frappe.ui.form.on('Clinical Procedure', {
 											frappe.call({
 												doc: frm.doc,
 												method: 'make_material_receipt',
+												freeze: true,
 												callback: function(r) {
 													if (!r.exc) {
-														cur_frm.reload_doc();
+														frm.reload_doc();
 														let doclist = frappe.model.sync(r.message);
 														frappe.set_route('Form', doclist[0].doctype, doclist[0].name);
 													}
@@ -122,7 +124,7 @@ frappe.ui.form.on('Clinical Procedure', {
 										}
 									);
 								} else {
-									cur_frm.reload_doc();
+									frm.reload_doc();
 								}
 							}
 						}
