@@ -8,7 +8,7 @@ from frappe.utils import flt
 def execute():
 	from erpnext.stock.stock_balance import repost
 	repost(allow_zero_rate=True, only_actual=True)
-	
+
 	frappe.reload_doctype("Account")
 
 	warehouse_account = frappe.db.sql("""select name, master_name from tabAccount
@@ -43,7 +43,7 @@ def execute():
 						where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 
 					voucher = frappe.get_doc(voucher_type, voucher_no)
-					voucher.make_gl_entries(repost_future_gle=False)
+					voucher.make_gl_entries()
 					frappe.db.commit()
 				except Exception as e:
 					print(frappe.get_traceback())

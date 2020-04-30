@@ -10,7 +10,7 @@ from frappe.utils import money_in_words
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from frappe.utils.csvutils import getlink
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.general_ledger import delete_gl_entries
+from erpnext.accounts.general_ledger import make_reverse_gl_entries
 
 
 class Fees(AccountsController):
@@ -81,7 +81,8 @@ class Fees(AccountsController):
 			frappe.msgprint(_("Payment request {0} created").format(getlink("Payment Request", pr.name)))
 
 	def on_cancel(self):
-		delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
+		make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name, cancel=True)
 		# frappe.db.set(self, 'status', 'Cancelled')
 
 
