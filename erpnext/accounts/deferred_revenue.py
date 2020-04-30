@@ -67,7 +67,7 @@ def convert_deferred_expense_to_expense(deferred_process, start_date=None, end_d
 		doc = frappe.get_doc("Purchase Invoice", invoice)
 		book_deferred_income_or_expense(doc, deferred_process, end_date)
 
-	if frappe.flags.deferred_accounting_errors:
+	if frappe.flags.deferred_accounting_error:
 		send_mail(deferred_process)
 
 def convert_deferred_revenue_to_income(deferred_process, start_date=None, end_date=None, conditions=''):
