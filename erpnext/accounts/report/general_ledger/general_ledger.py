@@ -188,6 +188,9 @@ def get_conditions(filters):
 		else:
 			conditions.append("finance_book in (%(finance_book)s)")
 
+	if not filters.get("show_cancelled_entries"):
+		conditions.append("is_cancelled = 0")
+
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
 

@@ -364,7 +364,7 @@ class TestSalesInvoice(unittest.TestCase):
 		gle = frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 
-		self.assertFalse(gle)
+		self.assertTrue(gle)
 
 	def test_tax_calculation_with_multiple_items(self):
 		si = create_sales_invoice(qty=84, rate=4.6, do_not_save=True)
@@ -678,14 +678,15 @@ class TestSalesInvoice(unittest.TestCase):
 		gle = frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 
-		self.assertFalse(gle)
+		self.assertTrue(gle)
 
 	def test_pos_gl_entry_with_perpetual_inventory(self):
 		make_pos_profile()
 
-		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
+		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
 
-		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
+		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1",
+			income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
 
 		pos.is_pos = 1
 		pos.update_stock = 1
@@ -766,9 +767,13 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_pos_change_amount(self):
 		make_pos_profile()
 
-		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
+		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",
+			item_code= "_Test FG Item",warehouse= "Stores - TCP1", cost_center= "Main - TCP1")
 
-		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
+		pos = create_sales_invoice(company= "_Test Company with perpetual inventory",
+			debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1",
+			income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1",
+			cost_center = "Main - TCP1", do_not_save=True)
 
 		pos.is_pos = 1
 		pos.update_stock = 1
@@ -787,8 +792,15 @@ class TestSalesInvoice(unittest.TestCase):
 		from erpnext.accounts.doctype.sales_invoice.pos import make_invoice
 
 		pos_profile = make_pos_profile()
-		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
-		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
+
+		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",
+			item_code= "_Test FG Item",
+			warehouse= "Stores - TCP1", cost_center= "Main - TCP1")
+
+		pos = create_sales_invoice(company= "_Test Company with perpetual inventory",
+			debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1",
+			income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1",
+			cost_center = "Main - TCP1", do_not_save=True)
 
 		pos.is_pos = 1
 		pos.update_stock = 1
@@ -891,11 +903,9 @@ class TestSalesInvoice(unittest.TestCase):
 		gle = frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 
-		self.assertFalse(gle)
-
+		self.assertTrue(gle)
 
 		frappe.db.sql("delete from `tabPOS Profile`")
-		si.delete()
 
 	def test_pos_si_without_payment(self):
 		set_perpetual_inventory()
@@ -1011,9 +1021,6 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(si.outstanding_amount, 262.0)
 
 		si.cancel()
-
-		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Entry Account`
-			where reference_name=%s""", si.name))
 
 	def test_serialized(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
@@ -1230,7 +1237,7 @@ class TestSalesInvoice(unittest.TestCase):
 		gle = frappe.db.sql("""select name from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 
-		self.assertFalse(gle)
+		self.assertTrue(gle)
 
 	def test_invalid_currency(self):
 		# Customer currency = USD
@@ -1892,7 +1899,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si.submit()
 
-		data = get_ewb_data("Sales Invoice", si.name)
+		data = get_ewb_data("Sales Invoice", [si.name])
 
 		self.assertEqual(data['version'], '1.0.1118')
 		self.assertEqual(data['billLists'][0]['fromGstin'], '27AAECE4835E1ZR')

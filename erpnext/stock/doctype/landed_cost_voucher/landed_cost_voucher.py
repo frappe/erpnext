@@ -137,7 +137,7 @@ class LandedCostVoucher(Document):
 			# update stock & gl entries for cancelled state of PR
 			doc.docstatus = 2
 			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
-			doc.make_gl_entries_on_cancel(repost_future_gle=False)
+			doc.make_gl_entries_on_cancel()
 
 			# update stock & gl entries for submit state of PR
 			doc.docstatus = 1
