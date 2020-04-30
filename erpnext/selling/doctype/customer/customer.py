@@ -150,7 +150,7 @@ class Customer(TransactionBase):
 						contact.save()
 
 			else:
-				lead.lead_name = lead.lead_name.split(" ")
+				lead.lead_name = lead.lead_name.lstrip().split(" ")
 				lead.first_name = lead.lead_name[0]
 				lead.last_name = " ".join(lead.lead_name[1:])
 

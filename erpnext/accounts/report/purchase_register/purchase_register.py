@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt
 from frappe import msgprint, _
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
 def execute(filters=None):
 	return _execute(filters)
@@ -66,7 +67,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 				total_tax += tax_amount
 				row.append(tax_amount)
 
-		# total tax, grand total, rounded total & outstanding amount 
+		# total tax, grand total, rounded total & outstanding amount
 		row += [total_tax, inv.base_grand_total, flt(inv.base_grand_total, 0), inv.outstanding_amount]
 		data.append(row)
 
@@ -133,6 +134,38 @@ def get_conditions(filters):
 	if filters.get("to_date"): conditions += " and posting_date<=%(to_date)s"
 
 	if filters.get("mode_of_payment"): conditions += " and ifnull(mode_of_payment, '') = %(mode_of_payment)s"
+
+	if filters.get("cost_center"):
+		conditions +=  """ and exists(select name from `tabPurchase Invoice Item`
+			 where parent=`tabPurchase Invoice`.name
+			 	and ifnull(`tabPurchase Invoice Item`.cost_center, '') = %(cost_center)s)"""
+
+	if filters.get("warehouse"):
+		conditions +=  """ and exists(select name from `tabPurchase Invoice Item`
+			 where parent=`tabPurchase Invoice`.name
+			 	and ifnull(`tabPurchase Invoice Item`.warehouse, '') = %(warehouse)s)"""
+
+	if filters.get("item_group"):
+		conditions +=  """ and exists(select name from `tabPurchase Invoice Item`
+			 where parent=`tabPurchase Invoice`.name
+			 	and ifnull(`tabPurchase Invoice Item`.item_group, '') = %(item_group)s)"""
+
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
+
+	if accounting_dimensions:
+		common_condition = """
+			and exists(select name from `tabPurchase Invoice Item`
+				where parent=`tabPurchase Invoice`.name
+			"""
+		for dimension in accounting_dimensions:
+			if filters.get(dimension.fieldname):
+				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
+					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
+						filters.get(dimension.fieldname))
+
+					conditions += common_condition + "and ifnull(`tabPurchase Invoice Item`.{0}, '') in %({0})s)".format(dimension.fieldname)
+				else:
+					conditions += common_condition + "and ifnull(`tabPurchase Invoice Item`.{0}, '') in (%({0})s))".format(dimension.fieldname)
 
 	return conditions
 

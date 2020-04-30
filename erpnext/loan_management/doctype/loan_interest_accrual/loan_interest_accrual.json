@@ -15,14 +15,16 @@
   "company",
   "posting_date",
   "is_term_loan",
-  "is_paid",
   "section_break_7",
   "pending_principal_amount",
   "payable_principal_amount",
+  "paid_principal_amount",
   "column_break_14",
   "interest_amount",
+  "paid_interest_amount",
   "section_break_15",
   "process_loan_interest_accrual",
+  "repayment_schedule_name",
   "amended_from"
  ],
  "fields": [
@@ -102,13 +104,6 @@
   },
   {
    "default": "0",
-   "fieldname": "is_paid",
-   "fieldtype": "Check",
-   "label": "Is Paid",
-   "read_only": 1
-  },
-  {
-   "default": "0",
    "fetch_from": "loan.is_term_loan",
    "fieldname": "is_term_loan",
    "fieldtype": "Check",
@@ -135,12 +130,31 @@
   {
    "fieldname": "column_break_14",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "repayment_schedule_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Repayment Schedule Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "paid_principal_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Principal Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "paid_interest_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Interest Amount",
+   "options": "Company:company:default_currency"
   }
  ],
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-07 01:22:06.924125",
+ "modified": "2020-04-16 11:24:23.258404",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Interest Accrual",

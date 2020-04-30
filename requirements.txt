@@ -8,3 +8,4 @@ PyGithub==1.44.1
 python-stdnum==1.12
 Unidecode==1.1.1
 WooCommerce==2.1.1
+tweepy==3.8.0

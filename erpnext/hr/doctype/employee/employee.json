@@ -259,7 +259,8 @@
    "bold": 1,
    "fieldname": "emergency_phone_number",
    "fieldtype": "Data",
-   "label": "Emergency Phone"
+   "label": "Emergency Phone",
+   "options": "Phone"
   },
   {
    "bold": 1,
@@ -480,7 +481,8 @@
   {
    "fieldname": "cell_number",
    "fieldtype": "Data",
-   "label": "Mobile"
+   "label": "Mobile",
+   "options": "Phone"
   },
   {
    "fieldname": "prefered_contact_email",
@@ -787,7 +789,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2020-01-09 04:23:55.611366",
+ "modified": "2020-04-08 12:25:34.306695",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
@@ -834,6 +836,5 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "employee_name",
- "track_changes": 1
+ "title_field": "employee_name"
 }

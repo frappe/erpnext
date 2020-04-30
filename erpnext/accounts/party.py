@@ -162,8 +162,9 @@ def get_default_price_list(party):
 def set_price_list(party_details, party, party_type, given_price_list, pos=None):
 	# price list
 	price_list = get_permitted_documents('Price List')
-
-	if price_list:
+	
+	# if there is only one permitted document based on user permissions, set it
+	if price_list and len(price_list) == 1:
 		price_list = price_list[0]
 	elif pos and party_type == 'Customer':
 		customer_price_list = frappe.get_value('Customer', party.name, 'default_price_list')
