@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2013-05-24 12:15:51",
@@ -54,8 +55,7 @@
   "tax_category",
   "apply_discount_on",
   "accounting_dimensions_section",
-  "cost_center",
-  "dimension_col_break"
+  "cost_center"
  ],
  "fields": [
   {
@@ -185,13 +185,13 @@
   {
    "fieldname": "section_break_11",
    "fieldtype": "Section Break",
-   "label": "Mode of Payment"
+   "label": "Payment Methods"
   },
   {
    "fieldname": "payments",
    "fieldtype": "Table",
-   "label": "Sales Invoice Payment",
-   "options": "Sales Invoice Payment"
+   "options": "POS Payment Method",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_14",
@@ -259,6 +259,7 @@
    "options": "Print Heading"
   },
   {
+   "collapsible": 1,
    "fieldname": "offline_pos_section",
    "fieldtype": "Section Break",
    "label": "Offline POS Settings"
@@ -381,10 +382,6 @@
    "label": "Accounting Dimensions"
   },
   {
-   "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "tax_category",
    "fieldtype": "Link",
    "label": "Tax Category",
@@ -393,7 +390,8 @@
  ],
  "icon": "icon-cog",
  "idx": 1,
- "modified": "2020-01-24 15:52:03.797701",
+ "links": [],
+ "modified": "2020-04-30 14:38:43.997545",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

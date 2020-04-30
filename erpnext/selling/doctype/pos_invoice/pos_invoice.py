@@ -12,7 +12,6 @@ from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 	get_loyalty_program_details_with_points, validate_loyalty_points
-from erpnext.accounts.page.pos.pos import update_multi_mode_option
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, set_account_for_mode_of_payment
 from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos
@@ -184,49 +183,57 @@ class POSInvoice(SalesInvoice):
 			pos_profile = get_pos_profile(self.company) or {}
 			self.pos_profile = pos_profile.get('name')
 
-		pos_profile = {}
+		pos = {}
 		if self.pos_profile:
-			pos_profile = frappe.get_doc('POS Profile', self.pos_profile)
+			pos = frappe.get_doc('POS Profile', self.pos_profile)
 
 		if not self.get('payments') and not for_validate:
-			update_multi_mode_option(self, pos_profile)
+			update_multi_mode_option(self, pos)
 
 		if not self.account_for_change_amount:
 			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
-		if pos_profile:
-			self.allow_print_before_pay = pos_profile.allow_print_before_pay
+		if pos:
+			self.allow_print_before_pay = pos.allow_print_before_pay
+
+			if not for_validate:
+				self.tax_category = pos.get("tax_category")
 
 			if not for_validate and not self.customer:
-				self.customer = pos_profile.customer
+				self.customer = pos.customer
 
-			self.ignore_pricing_rule = pos_profile.ignore_pricing_rule
-			if pos_profile.get('account_for_change_amount'):
-				self.account_for_change_amount = pos_profile.get('account_for_change_amount')
-			if pos_profile.get('warehouse'):
-				self.set_warehouse = pos_profile.get('warehouse')
+			self.ignore_pricing_rule = pos.ignore_pricing_rule
+			if pos.get('account_for_change_amount'):
+				self.account_for_change_amount = pos.get('account_for_change_amount')
+			if pos.get('warehouse'):
+				self.set_warehouse = pos.get('warehouse')
 
 			for fieldname in ('territory', 'naming_series', 'currency', 'letter_head', 'tc_name',
 				'company', 'select_print_heading', 'cash_bank_account', 'write_off_account', 'taxes_and_charges',
 				'write_off_cost_center', 'apply_discount_on', 'cost_center'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
-						self.set(fieldname, pos_profile.get(fieldname))
+						self.set(fieldname, pos.get(fieldname))
 
-			customer_price_list = frappe.get_value("Customer", self.customer, 'default_price_list')
+			if pos.get("company_address"):
+				self.company_address = pos.get("company_address")
 
-			if pos_profile.get("company_address"):
-				self.company_address = pos_profile.get("company_address")
+			if self.customer:
+				customer_price_list, customer_group = frappe.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
+				customer_group_price_list = frappe.get_value("Customer Group", customer_group, 'default_price_list')
+				selling_price_list = customer_price_list or customer_group_price_list or pos.get('selling_price_list')
+			else:
+				selling_price_list = pos.get('selling_price_list')
 
-			if not customer_price_list:
-				self.set('selling_price_list', pos_profile.get('selling_price_list'))
+			if selling_price_list:
+				self.set('selling_price_list', selling_price_list)
 
 			if not for_validate:
-				self.update_stock = cint(pos_profile.get("update_stock"))
+				self.update_stock = cint(pos.get("update_stock"))
 
 			# set pos values in items
 			for item in self.get("items"):
 				if item.get('item_code'):
-					profile_details = get_pos_profile_item_details(pos_profile, frappe._dict(item.as_dict()), pos_profile)
+					profile_details = get_pos_profile_item_details(pos, frappe._dict(item.as_dict()), pos)
 					for fname, val in iteritems(profile_details):
 						if (not for_validate) or (for_validate and not item.get(fname)):
 							item.set(fname, val)
@@ -239,7 +246,7 @@ class POSInvoice(SalesInvoice):
 			if self.taxes_and_charges and not len(self.get("taxes")):
 				self.set_taxes()
 
-		return pos_profile
+		return pos
 
 	def set_missing_values(self, for_validate=False):
 		pos = self.set_pos_fields(for_validate)
@@ -330,3 +337,34 @@ def make_merge_log(invoices):
 
 	if merge_log.get('pos_invoices'):
 		return merge_log.as_dict()
+
+def update_multi_mode_option(doc, pos_profile):
+	def append_payment(payment_mode):
+		payment = doc.append('payments', {})
+		payment.mode_of_payment = payment_mode.parent
+		payment.account = payment_mode.default_account
+		payment.type = payment_mode.type
+
+	if not pos_profile or not pos_profile.get('payments'):
+		for payment_mode in get_all_mode_of_payments(doc):
+			append_payment(payment_mode)
+		return
+
+	for pos_payment_method in pos_profile.get('payments'):
+		pos_payment_method = pos_payment_method.as_dict()
+		payment_mode = get_mode_of_payment_info(pos_payment_method.mode_of_payment, doc.company)
+		append_payment(payment_mode[0])
+
+def get_all_mode_of_payments(doc):
+	return frappe.db.sql("""
+		select mpa.default_account, mpa.parent, mp.type as type 
+		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp 
+		where mpa.parent = mp.name and mpa.company = %(company)s and mp.enabled = 1""",
+	{'company': doc.company}, as_dict=1)
+
+def get_mode_of_payment_info(mode_of_payment, company):
+	return frappe.db.sql("""
+		select mpa.default_account, mpa.parent, mp.type as type 
+		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp 
+		where mpa.parent = mp.name and mpa.company = %s and mp.enabled = 1 and mp.name = %s""",
+	(company, mode_of_payment), as_dict=1)

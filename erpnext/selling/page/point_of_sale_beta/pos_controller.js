@@ -93,8 +93,14 @@ erpnext.PointOfSale.Controller = class {
 				}
 			],
 			primary_action: ({ company, pos_profile, balance_details }) => {
+				if (!balance_details.length) {
+					frappe.show_alert({
+						message: __("Please add Mode of Payments and opening balance details."),
+						indicator: 'red'
+					})
+					return;
+				}
 				frappe.dom.freeze();
-	
 				return frappe.call("erpnext.selling.page.point_of_sale.point_of_sale.create_opening_voucher", 
 					{ pos_profile, company, balance_details })
 					.then((r) => {
@@ -476,7 +482,6 @@ erpnext.PointOfSale.Controller = class {
 						this.frm.allow_edit_rate = r.message.allow_edit_rate;
 						this.frm.allow_edit_discount = r.message.allow_edit_discount;
 						this.frm.doc.campaign = r.message.campaign;
-						this.frm.allow_print_before_pay = r.message.allow_print_before_pay;
 					}
 				}
 				resolve();
