@@ -13,23 +13,92 @@ frappe.ui.form.on('Therapy Session', {
 
 	refresh: function(frm) {
 		if (!frm.doc.__islocal) {
-			let target = 0;
-			let completed = 0;
-			$.each(frm.doc.exercises, function(_i, e) {
-				target += e.counts_target;
-				completed += e.counts_completed;
-			});
-			frm.dashboard.add_indicator(__('Counts Targetted: {0}', [target]), 'blue');
-			frm.dashboard.add_indicator(__('Counts Completed: {0}', [completed]), (completed < target) ? 'orange' : 'green');
+			frm.dashboard.add_indicator(__('Counts Targeted: {0}', [frm.doc.total_counts_targeted]), 'blue');
+			frm.dashboard.add_indicator(__('Counts Completed: {0}', [frm.doc.total_counts_completed]),
+				(frm.doc.total_counts_completed < frm.doc.total_counts_targeted) ? 'orange' : 'green');
 		}
 
 		if (frm.doc.docstatus === 1) {
-			frm.add_custom_button(__('Patient Assessment'),function() {
+			frm.add_custom_button(__('Patient Assessment'), function() {
 				frappe.model.open_mapped_doc({
 					method: 'erpnext.healthcare.doctype.patient_assessment.patient_assessment.create_patient_assessment',
 					frm: frm,
 				})
 			}, 'Create');
+
+			frm.add_custom_button(__('Sales Invoice'), function() {
+				frappe.model.open_mapped_doc({
+					method: 'erpnext.healthcare.doctype.therapy_session.therapy_session.invoice_therapy_session',
+					frm: frm,
+				})
+			}, 'Create');
+		}
+	},
+
+	patient: function(frm) {
+		if (frm.doc.patient) {
+			frappe.call({
+				'method': 'erpnext.healthcare.doctype.patient.patient.get_patient_detail',
+				args: {
+					patient: frm.doc.patient
+				},
+				callback: function (data) {
+					let age = '';
+					if (data.message.dob) {
+						age = calculate_age(data.message.dob);
+					} else if (data.message.age) {
+						age = data.message.age;
+						if (data.message.age_as_on) {
+							age = __('{0} as on {1}', [age, data.message.age_as_on]);
+						}
+					}
+					frm.set_value('patient_age', age);
+					frm.set_value('gender', data.message.sex);
+					frm.set_value('patient_name', data.message.patient_name);
+				}
+			});
+		} else {
+			frm.set_value('patient_age', '');
+			frm.set_value('gender', '');
+			frm.set_value('patient_name', '');
+		}
+	},
+
+	appointment: function(frm) {
+		if (frm.doc.appointment) {
+			frappe.call({
+				'method': 'frappe.client.get',
+				args: {
+					doctype: 'Patient Appointment',
+					name: frm.doc.appointment
+				},
+				callback: function(data) {
+					let values = {
+						'patient':data.message.patient,
+						'therapy_type': data.message.therapy_type,
+						'therapy_plan': data.message.therapy_plan,
+						'practitioner': data.message.practitioner,
+						'department': data.message.department,
+						'start_date': data.message.appointment_date,
+						'start_time': data.message.appointment_time,
+						'service_unit': data.message.service_unit,
+						'company': data.message.company
+					};
+					frm.set_value(values);
+				}
+			});
+		} else {
+			let values = {
+				'patient': '',
+				'therapy_type': '',
+				'therapy_plan': '',
+				'practitioner': '',
+				'department': '',
+				'start_date': '',
+				'start_time': '',
+				'service_unit': '',
+			};
+			frm.set_value(values);
 		}
 	},
 
@@ -44,6 +113,8 @@ frappe.ui.form.on('Therapy Session', {
 				callback: function(data) {
 					frm.set_value('duration', data.message.default_duration);
 					frm.set_value('rate', data.message.rate);
+					frm.set_value('service_unit', data.message.healthcare_service_unit);
+					frm.set_value('department', data.message.medical_department);
 					frm.doc.exercises = [];
 					$.each(data.message.exercises, function(_i, e) {
 						let exercise = frm.add_child('exercises');
