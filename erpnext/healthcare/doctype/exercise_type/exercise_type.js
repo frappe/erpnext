@@ -24,6 +24,8 @@ erpnext.ExerciseEditor = Class.extend({
 
 		this.exercise_cards = $('<div class="exercise-cards"></div>').appendTo(this.wrapper);
 
+		this.row = $('<div class="exercise-row"></div>').appendTo(this.wrapper);
+
 		let me = this;
 
 		this.exercise_toolbar.find(".btn-add")
@@ -32,7 +34,7 @@ erpnext.ExerciseEditor = Class.extend({
 				me.show_add_card_dialog(frm);
 			});
 
-		if (frm.doc.steps_table.length > 0) {
+		if (frm.doc.steps_table && frm.doc.steps_table.length > 0) {
 			this.make_cards(frm);
 			this.make_buttons(frm);
 		}
@@ -41,7 +43,6 @@ erpnext.ExerciseEditor = Class.extend({
 	make_cards: function(frm) {
 		var me = this;
 		$(me.exercise_cards).empty();
-		this.row = $('<div class="exercise-row"></div>').appendTo(me.exercise_cards);
 
 		$.each(frm.doc.steps_table, function(i, step) {
 			$(repl(`
@@ -78,6 +79,7 @@ erpnext.ExerciseEditor = Class.extend({
 				frm.doc.steps_table.pop(id);
 				frm.refresh_field('steps_table');
 				$('#col-'+id).remove();
+				frm.dirty();
 			}, 300);
 		});
 	},
@@ -106,7 +108,10 @@ erpnext.ExerciseEditor = Class.extend({
 			],
 			primary_action: function() {
 				let data = d.get_values();
-				let i = frm.doc.steps_table.length;
+				let i = 0;
+				if (frm.doc.steps_table) {
+					i = frm.doc.steps_table.length;
+				}
 				$(repl(`
 					<div class="exercise-col col-sm-4" id="%(col_id)s">
 						<div class="card h-100 exercise-card" id="%(card_id)s">
@@ -165,9 +170,10 @@ erpnext.ExerciseEditor = Class.extend({
 				frm.doc.steps_table[id].image = data.image;
 				frm.doc.steps_table[id].description = data.step_description;
 				refresh_field('steps_table');
+				frm.dirty();
 				new_dialog.hide();
 			},
-			primary_action_label: __("Save"),
+			primary_action_label: __("Edit"),
 		});
 
 		new_dialog.set_values({
