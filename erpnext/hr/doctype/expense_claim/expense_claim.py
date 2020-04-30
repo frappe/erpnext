@@ -76,6 +76,7 @@ class ExpenseClaim(AccountsController):
 
 	def on_cancel(self):
 		self.update_task_and_project()
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
 		if self.payable_account:
 			self.make_gl_entries(cancel=True)
 
@@ -260,10 +261,17 @@ class ExpenseClaim(AccountsController):
 			if not expense.default_account or not validate:
 				expense.default_account = get_expense_claim_account(expense.expense_type, self.company)["account"]
 
-def update_reimbursed_amount(doc):
-	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) as amt
+def update_reimbursed_amount(doc, jv=None):
+
+	condition = ""
+
+	if jv:
+		condition += "and voucher_no = '{0}'".format(jv)
+
+	amt = frappe.db.sql("""select ifnull(sum(debit_in_account_currency), 0) - ifnull(sum(credit_in_account_currency), 0)as amt
 		from `tabGL Entry` where against_voucher_type = 'Expense Claim' and against_voucher = %s
-		and party = %s """, (doc.name, doc.employee) ,as_dict=1)[0].amt
+		and party = %s {condition}""".format(condition=condition), #nosec
+		(doc.name, doc.employee) ,as_dict=1)[0].amt
 
 	doc.total_amount_reimbursed = amt
 	frappe.db.set_value("Expense Claim", doc.name , "total_amount_reimbursed", amt)

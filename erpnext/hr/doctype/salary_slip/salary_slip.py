@@ -549,15 +549,16 @@ class SalarySlip(TransactionBase):
 		remaining_sub_periods = get_period_factor(self.employee,
 			self.start_date, self.end_date, self.payroll_frequency, payroll_period)[1]
 		# get taxable_earnings, paid_taxes for previous period
-		previous_taxable_earnings = self.get_taxable_earnings_for_prev_period(payroll_period.start_date, self.start_date)
+		previous_taxable_earnings = self.get_taxable_earnings_for_prev_period(payroll_period.start_date,
+			self.start_date, tax_slab.allow_tax_exemption)
 		previous_total_paid_taxes = self.get_tax_paid_in_period(payroll_period.start_date, self.start_date, tax_component)
 
 		# get taxable_earnings for current period (all days)
-		current_taxable_earnings = self.get_taxable_earnings()
+		current_taxable_earnings = self.get_taxable_earnings(tax_slab.allow_tax_exemption)
 		future_structured_taxable_earnings = current_taxable_earnings.taxable_earnings * (math.ceil(remaining_sub_periods) - 1)
 
 		# get taxable_earnings, addition_earnings for current actual payment days
-		current_taxable_earnings_for_payment_days = self.get_taxable_earnings(based_on_payment_days=1)
+		current_taxable_earnings_for_payment_days = self.get_taxable_earnings(tax_slab.allow_tax_exemption, based_on_payment_days=1)
 		current_structured_taxable_earnings = current_taxable_earnings_for_payment_days.taxable_earnings
 		current_additional_earnings = current_taxable_earnings_for_payment_days.additional_income
 		current_additional_earnings_with_full_tax = current_taxable_earnings_for_payment_days.additional_income_with_full_tax
@@ -616,7 +617,7 @@ class SalarySlip(TransactionBase):
 		return income_tax_slab_doc
 
 
-	def get_taxable_earnings_for_prev_period(self, start_date, end_date):
+	def get_taxable_earnings_for_prev_period(self, start_date, end_date, allow_tax_exemption=False):
 		taxable_earnings = frappe.db.sql("""
 			select sum(sd.amount)
 			from
@@ -636,24 +637,26 @@ class SalarySlip(TransactionBase):
 			})
 		taxable_earnings = flt(taxable_earnings[0][0]) if taxable_earnings else 0
 
-		exempted_amount = frappe.db.sql("""
-			select sum(sd.amount)
-			from
-				`tabSalary Detail` sd join `tabSalary Slip` ss on sd.parent=ss.name
-			where
-				sd.parentfield='deductions'
-				and sd.exempted_from_income_tax=1
-				and is_flexible_benefit=0
-				and ss.docstatus=1
-				and ss.employee=%(employee)s
-				and ss.start_date between %(from_date)s and %(to_date)s
-				and ss.end_date between %(from_date)s and %(to_date)s
-			""", {
-				"employee": self.employee,
-				"from_date": start_date,
-				"to_date": end_date
-			})
-		exempted_amount = flt(exempted_amount[0][0]) if exempted_amount else 0
+		exempted_amount = 0
+		if allow_tax_exemption:
+			exempted_amount = frappe.db.sql("""
+				select sum(sd.amount)
+				from
+					`tabSalary Detail` sd join `tabSalary Slip` ss on sd.parent=ss.name
+				where
+					sd.parentfield='deductions'
+					and sd.exempted_from_income_tax=1
+					and is_flexible_benefit=0
+					and ss.docstatus=1
+					and ss.employee=%(employee)s
+					and ss.start_date between %(from_date)s and %(to_date)s
+					and ss.end_date between %(from_date)s and %(to_date)s
+				""", {
+					"employee": self.employee,
+					"from_date": start_date,
+					"to_date": end_date
+				})
+			exempted_amount = flt(exempted_amount[0][0]) if exempted_amount else 0
 
 		return taxable_earnings - exempted_amount
 
@@ -681,7 +684,7 @@ class SalarySlip(TransactionBase):
 
 		return total_tax_paid
 
-	def get_taxable_earnings(self, based_on_payment_days=0):
+	def get_taxable_earnings(self, allow_tax_exemption=False, based_on_payment_days=0):
 		joining_date, relieving_date = frappe.get_cached_value("Employee", self.employee,
 			["date_of_joining", "relieving_date"])
 
@@ -715,12 +718,13 @@ class SalarySlip(TransactionBase):
 				else:
 					taxable_earnings += amount
 
-		for ded in self.deductions:
-			if ded.exempted_from_income_tax:
-				amount = ded.amount
-				if based_on_payment_days:
-					amount = self.get_amount_based_on_payment_days(ded, joining_date, relieving_date)[0]
-				taxable_earnings -= flt(amount)
+		if allow_tax_exemption:
+			for ded in self.deductions:
+				if ded.exempted_from_income_tax:
+					amount = ded.amount
+					if based_on_payment_days:
+						amount = self.get_amount_based_on_payment_days(ded, joining_date, relieving_date)[0]
+					taxable_earnings -= flt(amount)
 
 		return frappe._dict({
 			"taxable_earnings": taxable_earnings,
@@ -822,13 +826,13 @@ class SalarySlip(TransactionBase):
 		for slab in tax_slab.slabs:
 			if slab.condition and not self.eval_tax_slab_condition(slab.condition, data):
 				continue
-			if not slab.to_amount and annual_taxable_earning > slab.from_amount:
-				tax_amount += (annual_taxable_earning - slab.from_amount) * slab.percent_deduction *.01
+			if not slab.to_amount and annual_taxable_earning >= slab.from_amount:
+				tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction *.01
 				continue
-			if annual_taxable_earning > slab.from_amount and annual_taxable_earning < slab.to_amount:
-				tax_amount += (annual_taxable_earning - slab.from_amount) * slab.percent_deduction *.01
-			elif annual_taxable_earning > slab.from_amount and annual_taxable_earning > slab.to_amount:
-				tax_amount += (slab.to_amount - slab.from_amount) * slab.percent_deduction * .01
+			if annual_taxable_earning >= slab.from_amount and annual_taxable_earning < slab.to_amount:
+				tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction *.01
+			elif annual_taxable_earning >= slab.from_amount and annual_taxable_earning >= slab.to_amount:
+				tax_amount += (slab.to_amount - slab.from_amount + 1) * slab.percent_deduction * .01
 
 		# other taxes and charges on income tax
 		for d in tax_slab.other_taxes_and_charges:

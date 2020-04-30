@@ -17,8 +17,9 @@ class PeriodClosingVoucher(AccountsController):
 		self.make_gl_entries()
 
 	def on_cancel(self):
-		frappe.db.sql("""delete from `tabGL Entry`
-			where voucher_type = 'Period Closing Voucher' and voucher_no=%s""", self.name)
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
+		from erpnext.accounts.general_ledger import make_reverse_gl_entries
+		make_reverse_gl_entries(voucher_type="Period Closing Voucher", voucher_no=self.name, cancel=True)
 
 	def validate_account_head(self):
 		closing_account_type = frappe.db.get_value("Account", self.closing_account_head, "root_type")
