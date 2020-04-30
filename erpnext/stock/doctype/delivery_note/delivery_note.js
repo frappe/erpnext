@@ -147,7 +147,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 
 			if (doc.docstatus==1) {
 				this.frm.add_custom_button(__('Sales Return'), function() {
-					me.make_sales_return() }, __('Create'));
+					me.make_sales_return()}, __('Create'));
 			}
 
 			if (doc.docstatus==1) {
@@ -203,6 +203,12 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				erpnext.utils.make_subscription(doc.doctype, doc.name)
 			}, __('Create'))
 		}
+
+		if (doc.docstatus == 0 && doc.is_return) {
+			cur_frm.add_custom_button(__('Reason(s) for Return'), function () {
+				me.show_return_reasons_prompt(cur_frm.doc);
+			}, __('Update'))
+		}
 	},
 
 	make_sales_invoice: function() {
@@ -219,10 +225,85 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		});
 	},
 
+	show_return_reasons_prompt: function (doc) {
+		this.data = [];
+
+		for (let row of doc.items) {
+			this.data.push({
+				"docname": row.name,
+				"item_code": row.item_code,
+				"item_name": row.item_name,
+				"reason_for_return": row.reason_for_return
+			})
+		}
+
+		const dialog = new frappe.ui.Dialog({
+			title: __("Set Reason(s) for Return"),
+			fields: [
+				{
+					label: __("Items"),
+					fieldname: "items",
+					fieldtype: "Table",
+					cannot_add_rows: true,
+					data: this.data,
+					in_place_edit: true,
+					get_data: () => {
+						return this.data;
+					},
+					fields: [
+						{
+							fieldtype: 'Data',
+							fieldname: "docname",
+							hidden: 1
+						},
+						{
+							label: __("Item Code"),
+							fieldtype: 'Link',
+							fieldname: "item_code",
+							options: "Item",
+							read_only: 1,
+							in_list_view: 1
+						},
+						{
+							label: __("Item Name"),
+							fieldtype: 'Data',
+							fieldname: "item_name",
+							read_only: 1,
+							in_list_view: 1
+						},
+						{
+							label: __("Reason for Return"),
+							fieldtype: 'Data',
+							fieldname: 'reason_for_return',
+							in_list_view: 1
+						}
+					]
+				},
+			],
+			primary_action: function () {
+				const values = dialog.get_values().items;
+				values.forEach(d => {
+					frappe.model.set_value("Delivery Note Item", d.docname, "reason_for_return", d.reason_for_return);
+				});
+
+				dialog.hide();
+				frappe.show_alert({
+					indicator: 'green',
+					message: __("The reason(s) for return have been successfully set")
+				});
+			},
+			primary_action_label: __('Update')
+		});
+		dialog.show();
+	},
+
 	make_sales_return: function() {
+		const me = this;
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_sales_return",
 			frm: this.frm
+		}).then((note) => {
+			me.show_return_reasons_prompt(note.message);
 		})
 	},
 

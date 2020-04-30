@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-04-22 13:15:44",
  "doctype": "DocType",
@@ -80,6 +81,9 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+  "sb_return",
+  "reason_for_return",
+  "cb_return",
   "section_break_72",
   "page_break"
  ],
@@ -698,11 +702,34 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:parent.is_return==1",
+   "default": "0",
+   "depends_on": "eval:parent.is_return==1",
+   "fieldname": "sb_return",
+   "fieldtype": "Section Break",
+   "label": "Returns"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:parent.is_return==1;",
+   "fieldname": "cb_return",
+   "fieldtype": "Column Break",
+   "in_standard_filter": 1
+  },
+  {
+   "depends_on": "eval:parent.is_return==1;",
+   "fieldname": "reason_for_return",
+   "fieldtype": "Small Text",
+   "label": "Reason For Return"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-25 22:08:27.452734",
+ "links": [],
+ "modified": "2020-03-22 22:21:21.117822",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
