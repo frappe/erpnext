@@ -365,6 +365,7 @@ def get_columns(filters):
 
 	columns = [
 		{
+			"label": _("GL Entry"),
 			"fieldname": "gl_entry",
 			"fieldtype": "Link",
 			"options": "GL Entry",
