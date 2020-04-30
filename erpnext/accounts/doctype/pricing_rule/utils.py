@@ -4,13 +4,19 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, copy, json
-from frappe import throw, _
+
+import copy
+import json
+
 from six import string_types
-from frappe.utils import flt, cint, get_datetime, get_link_to_form, today
+
+import frappe
 from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.get_item_details import get_conversion_factor
+from frappe import _, throw
+from frappe.utils import cint, flt, get_datetime, get_link_to_form, getdate, today
+
 
 class MultiplePricingRuleConflict(frappe.ValidationError): pass
 
@@ -502,18 +508,16 @@ def get_pricing_rule_items(pr_doc):
 	return list(set(apply_on_data))
 
 def validate_coupon_code(coupon_name):
-	from frappe.utils import today,getdate
-	coupon=frappe.get_doc("Coupon Code",coupon_name)
+	coupon = frappe.get_doc("Coupon Code", coupon_name)
+
 	if coupon.valid_from:
-		if coupon.valid_from > getdate(today()) :
-			frappe.throw(_("Sorry,coupon code validity has not started"))
+		if coupon.valid_from > getdate(today()):
+			frappe.throw(_("Sorry, this coupon code's validity has not started"))
 	elif coupon.valid_upto:
-		if coupon.valid_upto < getdate(today()) :
-			frappe.throw(_("Sorry,coupon code validity has expired"))
-	elif coupon.used>=coupon.maximum_use:
-		frappe.throw(_("Sorry,coupon code are exhausted"))
-	else:
-		return
+		if coupon.valid_upto < getdate(today()):
+			frappe.throw(_("Sorry, this coupon code's validity has expired"))
+	elif coupon.used >= coupon.maximum_use:
+		frappe.throw(_("Sorry, this coupon code is no longer valid"))
 
 def update_coupon_code_count(coupon_name,transaction_type):
 	coupon=frappe.get_doc("Coupon Code",coupon_name)
