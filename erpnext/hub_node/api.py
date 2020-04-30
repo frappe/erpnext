@@ -144,27 +144,17 @@ def publish_selected_items(items_to_publish):
 			'hub_category': item.get('hub_category'),
 			'image_list': item.get('image_list')
 		}
-		if frappe.db.exists('Hub Tracked Item', item_code):
-			items_to_update.append(item)
-			hub_tracked_item = frappe.get_doc('Hub Tracked Item', item_code)
-			hub_tracked_item.update(hub_dict)
-			hub_tracked_item.save()
-		else:
-			frappe.get_doc(hub_dict).insert(ignore_if_duplicate=True)
+		frappe.get_doc(hub_dict).insert(ignore_if_duplicate=True)
 
-	items_to_publish = list(filter(lambda x: x not in items_to_update, items_to_publish))
-	new_items = map_fields(items_to_publish)
-	existing_items = map_fields(items_to_update)
+	items = map_fields(items_to_publish)
 
 	try:
-		item_sync_preprocess(len(new_items+existing_items))
-		convert_relative_image_urls_to_absolute(new_items)
-		convert_relative_image_urls_to_absolute(existing_items)
+		item_sync_preprocess(len(items))
+		convert_relative_image_urls_to_absolute(items)
 
 		# TODO: Publish Progress
 		connection = get_hub_connection()
-		connection.insert_many(new_items)
-		connection.bulk_update(existing_items)
+		connection.insert_many(items)
 
 		item_sync_postprocess()
 	except Exception as e:
@@ -180,6 +170,7 @@ def unpublish_item(item_code, hub_item_name):
 
 	if response:
 		frappe.db.set_value('Item', item_code, 'publish_in_hub', 0)
+		frappe.delete_doc('Hub Tracked Item', item_code)
 	else:
 		frappe.throw(_('Unable to update remote activity'))
 
