@@ -826,13 +826,13 @@ class SalarySlip(TransactionBase):
 		for slab in tax_slab.slabs:
 			if slab.condition and not self.eval_tax_slab_condition(slab.condition, data):
 				continue
-			if not slab.to_amount and annual_taxable_earning > slab.from_amount:
-				tax_amount += (annual_taxable_earning - slab.from_amount) * slab.percent_deduction *.01
+			if not slab.to_amount and annual_taxable_earning >= slab.from_amount:
+				tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction *.01
 				continue
-			if annual_taxable_earning > slab.from_amount and annual_taxable_earning < slab.to_amount:
-				tax_amount += (annual_taxable_earning - slab.from_amount) * slab.percent_deduction *.01
-			elif annual_taxable_earning > slab.from_amount and annual_taxable_earning > slab.to_amount:
-				tax_amount += (slab.to_amount - slab.from_amount) * slab.percent_deduction * .01
+			if annual_taxable_earning >= slab.from_amount and annual_taxable_earning < slab.to_amount:
+				tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction *.01
+			elif annual_taxable_earning >= slab.from_amount and annual_taxable_earning >= slab.to_amount:
+				tax_amount += (slab.to_amount - slab.from_amount + 1) * slab.percent_deduction * .01
 
 		# other taxes and charges on income tax
 		for d in tax_slab.other_taxes_and_charges:
