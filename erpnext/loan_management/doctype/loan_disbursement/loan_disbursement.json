@@ -7,17 +7,17 @@
  "engine": "InnoDB",
  "field_order": [
   "against_loan",
-  "disbursement_date",
   "posting_date",
+  "applicant_type",
   "column_break_4",
   "company",
-  "applicant_type",
   "applicant",
   "section_break_7",
+  "disbursement_date",
+  "column_break_8",
   "disbursed_amount",
   "accounting_dimensions_section",
   "cost_center",
-  "section_break_13",
   "customer_details_section",
   "bank_account",
   "amended_from"
@@ -66,6 +66,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -89,12 +90,8 @@
   },
   {
    "fieldname": "section_break_7",
-   "fieldtype": "Section Break"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "section_break_13",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Disbursement Details"
   },
   {
    "fieldname": "customer_details_section",
@@ -114,11 +111,15 @@
    "fieldtype": "Link",
    "label": "Bank Account",
    "options": "Bank Account"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-09 14:44:28.527271",
+ "modified": "2020-04-29 05:20:41.629911",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Disbursement",
