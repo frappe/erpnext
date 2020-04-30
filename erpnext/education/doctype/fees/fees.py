@@ -75,7 +75,8 @@ class Fees(AccountsController):
 		self.make_gl_entries()
 
 		if self.send_payment_request and self.student_email:
-			pr = make_payment_request(dt="Fees", dn=self.name, recipient_id=self.student_email,
+			pr = make_payment_request(party_type="Student", party=self.student, dt="Fees",
+					dn=self.name, recipient_id=self.student_email,
 					submit_doc=True, use_dummy_message=True)
 			frappe.msgprint(_("Payment request {0} created").format(getlink("Payment Request", pr.name)))
 
