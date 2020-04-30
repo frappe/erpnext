@@ -80,6 +80,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "other_taxes_and_charges",
    "fieldname": "taxes_and_charges_on_income_tax_section",
    "fieldtype": "Section Break",
    "label": "Taxes and Charges on Income Tax"
@@ -93,13 +94,15 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-24 12:28:36.805904",
+ "modified": "2020-04-29 15:08:21.436120",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Income Tax Slab",
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -109,9 +112,11 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
@@ -126,6 +131,7 @@
    "write": 1
   },
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
@@ -135,20 +141,6 @@
    "read": 1,
    "report": 1,
    "role": "HR User",
-   "share": 1,
-   "submit": 1,
-   "write": 1
-  },
-  {
-   "cancel": 1,
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Administrator",
    "share": 1,
    "submit": 1,
    "write": 1
