@@ -263,7 +263,7 @@ let make_bank_entry = function (frm) {
 		});
 	} else {
 		frappe.msgprint(__("Payment Account is mandatory"));
-		cur_frm.scroll_to_field('payment_account');
+		frm.scroll_to_field('payment_account');
 	}
 };
 
