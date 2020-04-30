@@ -2,12 +2,10 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe import _
-from frappe.utils import date_diff, add_months, today, getdate, add_days, flt, get_last_day, cint
+from frappe.utils import date_diff, add_months, today, getdate, add_days, flt, get_last_day, cint, get_link_to_form
 from erpnext.accounts.utils import get_account_currency
 from frappe.email import sendmail_to_system_managers
 from frappe.utils.background_jobs import enqueue
-
-failed_invoices = set()
 
 def validate_service_stop_date(doc):
 	''' Validates service_stop_date for Purchase Invoice and Sales Invoice '''
@@ -35,9 +33,19 @@ def validate_service_stop_date(doc):
 		if old_stop_dates and old_stop_dates.get(item.name) and item.service_stop_date!=old_stop_dates.get(item.name):
 			frappe.throw(_("Cannot change Service Stop Date for item in row {0}").format(item.idx))
 
+def build_conditions(process_type, account, company):
+	conditions=''
+	deferred_account = "item.deferred_revenue_account" if process_type=="Income" else "item.deferred_expense_account"
+
+	if account:
+		conditions += "AND %s='%s'"%(deferred_account, account)
+	elif company:
+		conditions += "AND p.company='%s'"%(company)
+
+	return conditions
+
 def convert_deferred_expense_to_expense(deferred_process, start_date=None, end_date=None, conditions=''):
 	# book the expense/income on the last day, but it will be trigger on the 1st of month at 12:00 AM
-	global failed_invoices
 
 	if not start_date:
 		start_date = add_months(today(), -1)
@@ -59,12 +67,11 @@ def convert_deferred_expense_to_expense(deferred_process, start_date=None, end_d
 		doc = frappe.get_doc("Purchase Invoice", invoice)
 		book_deferred_income_or_expense(doc, deferred_process, end_date)
 
-	if failed_invoices:
-		send_mail(deferred_process, failed_invoices)
+	if frappe.flags.deferred_accounting_errors:
+		send_mail(deferred_process)
 
 def convert_deferred_revenue_to_income(deferred_process, start_date=None, end_date=None, conditions=''):
 	# book the expense/income on the last day, but it will be trigger on the 1st of month at 12:00 AM
-	global failed_invoices
 
 	if not start_date:
 		start_date = add_months(today(), -1)
@@ -85,8 +92,8 @@ def convert_deferred_revenue_to_income(deferred_process, start_date=None, end_da
 		doc = frappe.get_doc("Sales Invoice", invoice)
 		book_deferred_income_or_expense(doc, deferred_process, end_date)
 
-	if failed_invoices:
-		send_mail(deferred_process, failed_invoices)
+	if frappe.flags.deferred_accounting_error:
+		send_mail(deferred_process)
 
 def get_booking_dates(doc, item, posting_date=None):
 	if not posting_date:
@@ -180,6 +187,10 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 		make_gl_entries(doc, credit_account, debit_account, against,
 			amount, base_amount, end_date, project, account_currency, item.cost_center, item.name, deferred_process)
 
+		# Returned in case of any errors because it tries to submit the same record again and again in case of errors
+		if frappe.flags.deferred_accounting_error:
+			return
+
 		if getdate(end_date) < getdate(posting_date) and not last_gl_entry:
 			_book_deferred_revenue_or_expense(item)
 
@@ -213,7 +224,6 @@ def process_deferred_accounting(posting_date=today()):
 def make_gl_entries(doc, credit_account, debit_account, against,
 	amount, base_amount, posting_date, project, account_currency, cost_center, voucher_detail_no, deferred_process=None):
 	# GL Entry for crediting the amount in the deferred expense
-	global failed_invoices
 	from erpnext.accounts.general_ledger import make_gl_entries
 
 	if amount == 0: return
@@ -257,12 +267,14 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 			frappe.db.rollback()
 			traceback = frappe.get_traceback()
 			frappe.log_error(message=traceback)
-			failed_invoices.add(doc.name)
 
-def send_mail(deferred_process, failed_invoices):
+			frappe.flags.deferred_accounting_error = True
+
+def send_mail(deferred_process):
 	title = _("Error while processing deferred accounting for {0}".format(deferred_process))
-	content = """
-		Deferred accounting failed for the following invoices:
-		{0}
-	""".format(', '.join(list(failed_invoices)))
+	content = _("""
+		Deferred accounting failed for some invoices:
+		Please check Process Deferred Accounting {0}
+		and submit manually after resolving errors
+	""").format(get_link_to_form('Process Deferred Accounting', deferred_process))
 	sendmail_to_system_managers(title, content)
