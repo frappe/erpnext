@@ -145,14 +145,18 @@ class TallyMigration(Document):
 		def remove_parties(parents, children, group_set):
 			customers, suppliers = set(), set()
 			for account in parents:
+				found = False
 				if self.tally_creditors_account in parents[account]:
-					children.pop(account, None)
+					found = True
 					if account not in group_set:
 						suppliers.add(account)
-				elif self.tally_debtors_account in parents[account]:
-					children.pop(account, None)
+				if self.tally_debtors_account in parents[account]:
+					found = True
 					if account not in group_set:
 						customers.add(account)
+				if found:
+					children.pop(account, None)
+
 			return children, customers, suppliers
 
 		def traverse(tree, children, accounts, roots, group_set):
@@ -170,6 +174,7 @@ class TallyMigration(Document):
 			parties, addresses = [], []
 			for account in collection.find_all("LEDGER"):
 				party_type = None
+				links = []
 				if account.NAME.string.strip() in customers:
 					party_type = "Customer"
 					parties.append({
@@ -180,7 +185,9 @@ class TallyMigration(Document):
 						"territory": "All Territories",
 						"customer_type": "Individual",
 					})
-				elif account.NAME.string.strip() in suppliers:
+					links.append({"link_doctype": party_type, "link_name": account["NAME"]})
+
+				if account.NAME.string.strip() in suppliers:
 					party_type = "Supplier"
 					parties.append({
 						"doctype": party_type,
@@ -189,6 +196,8 @@ class TallyMigration(Document):
 						"supplier_group": "All Supplier Groups",
 						"supplier_type": "Individual",
 					})
+					links.append({"link_doctype": party_type, "link_name": account["NAME"]})
+
 				if party_type:
 					address = "\n".join([a.string.strip() for a in account.find_all("ADDRESS")])
 					addresses.append({
@@ -202,7 +211,7 @@ class TallyMigration(Document):
 						"mobile": account.LEDGERPHONE.string.strip() if account.LEDGERPHONE else None,
 						"phone": account.LEDGERPHONE.string.strip() if account.LEDGERPHONE else None,
 						"gstin": account.PARTYGSTIN.string.strip() if account.PARTYGSTIN else None,
-						"links": [{"link_doctype": party_type, "link_name": account["NAME"]}],
+						"links": links
 					})
 			return parties, addresses
 
@@ -378,6 +387,7 @@ class TallyMigration(Document):
 			journal_entry = {
 				"doctype": "Journal Entry",
 				"tally_guid": voucher.GUID.string.strip(),
+				"tally_voucher_no": voucher.VOUCHERNUMBER.string.strip() if voucher.VOUCHERNUMBER else "",
 				"posting_date": voucher.DATE.string.strip(),
 				"company": self.erpnext_company,
 				"accounts": accounts,
@@ -406,6 +416,7 @@ class TallyMigration(Document):
 				"doctype": doctype,
 				party_field: voucher.PARTYNAME.string.strip(),
 				"tally_guid": voucher.GUID.string.strip(),
+				"tally_voucher_no": voucher.VOUCHERNUMBER.string.strip() if voucher.VOUCHERNUMBER else "",
 				"posting_date": voucher.DATE.string.strip(),
 				"due_date": voucher.DATE.string.strip(),
 				"items": get_voucher_items(voucher, doctype),
@@ -497,14 +508,21 @@ class TallyMigration(Document):
 				oldest_year = new_year
 
 		def create_custom_fields(doctypes):
-			df = {
+			tally_guid_df = {
 				"fieldtype": "Data",
 				"fieldname": "tally_guid",
 				"read_only": 1,
 				"label": "Tally GUID"
 			}
-			for doctype in doctypes:
-				create_custom_field(doctype, df)
+			tally_voucher_no_df = {
+				"fieldtype": "Data",
+				"fieldname": "tally_voucher_no",
+				"read_only": 1,
+				"label": "Tally Voucher Number"
+			}
+			for df in [tally_guid_df, tally_voucher_no_df]:
+				for doctype in doctypes:
+					create_custom_field(doctype, df)
 
 		def create_price_list():
 			frappe.get_doc({
