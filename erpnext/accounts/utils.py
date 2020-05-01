@@ -817,48 +817,37 @@ def create_payment_gateway_account(gateway):
 		pass
 
 @frappe.whitelist()
-def update_number_field(doctype_name, name, field_name, number_value, company):
+def update_cost_center(docname, cost_center_name, cost_center_number, company):
 	'''
-		doctype_name = Name of the DocType
-		name = Docname being referred
-		field_name = Name of the field thats holding the 'number' attribute
-		number_value = Numeric value entered in field_name
-
-		Stores the number entered in the dialog to the DocType's field.
-
 		Renames the document by adding the number as a prefix to the current name and updates
 		all transaction where it was present.
 	'''
-	doc_title = frappe.db.get_value(doctype_name, name, frappe.scrub(doctype_name)+"_name")
+	validate_field_number("Cost Center", docname, cost_center_number, company, "cost_center_number")
 
-	validate_field_number(doctype_name, name, number_value, company, field_name)
+	if cost_center_number:
+		frappe.db.set_value("Cost Center", docname, "cost_center_number", cost_center_number.strip())
+	else:
+		frappe.db.set_value("Cost Center", docname, "cost_center_number", "")
 
-	frappe.db.set_value(doctype_name, name, field_name, number_value)
+	frappe.db.set_value("Cost Center", docname, "cost_center_name", cost_center_name.strip())
 
-	if doc_title[0].isdigit():
-		separator = " - " if " - " in doc_title else " "
-		doc_title = doc_title.split(separator, 1)[1]
-
-	frappe.db.set_value(doctype_name, name, frappe.scrub(doctype_name)+"_name", doc_title)
-
-	new_name = get_autoname_with_number(number_value, doc_title, name, company)
-
-	if name != new_name:
-		frappe.rename_doc(doctype_name, name, new_name)
+	new_name = get_autoname_with_number(cost_center_number, cost_center_name, docname, company)
+	if docname != new_name:
+		frappe.rename_doc("Cost Center", docname, new_name, force=1)
 		return new_name
 
-def validate_field_number(doctype_name, name, number_value, company, field_name):
+def validate_field_number(doctype_name, docname, number_value, company, field_name):
 	''' Validate if the number entered isn't already assigned to some other document. '''
 	if number_value:
+		filters = {field_name: number_value, "name": ["!=", docname]}
 		if company:
-			doctype_with_same_number = frappe.db.get_value(doctype_name,
-				{field_name: number_value, "company": company, "name": ["!=", name]})
-		else:
-			doctype_with_same_number = frappe.db.get_value(doctype_name,
-				{field_name: number_value, "name": ["!=", name]})
+			filters["company"] = company
+
+		doctype_with_same_number = frappe.db.get_value(doctype_name, filters)
+
 		if doctype_with_same_number:
-			frappe.throw(_("{0} Number {1} already used in account {2}")
-				.format(doctype_name, number_value, doctype_with_same_number))
+			frappe.throw(_("{0} Number {1} is already used in {2} {3}")
+				.format(doctype_name, number_value, doctype_name.lower(), doctype_with_same_number))
 
 def get_autoname_with_number(number_value, doc_title, name, company):
 	''' append title with prefix as number and suffix as company's abbreviation separated by '-' '''
@@ -898,3 +887,59 @@ def get_stock_accounts(company):
 		"account_type": "Stock",
 		"company": company
 	})
+
+def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
+		warehouse_account=None, company=None):
+	def _delete_gl_entries(voucher_type, voucher_no):
+		frappe.db.sql("""delete from `tabGL Entry`
+			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
+
+	if not warehouse_account:
+		warehouse_account = get_warehouse_account_map(company)
+
+	future_stock_vouchers = get_future_stock_vouchers(posting_date, posting_time, for_warehouses, for_items)
+	gle = get_voucherwise_gl_entries(future_stock_vouchers, posting_date)
+
+	for voucher_type, voucher_no in future_stock_vouchers:
+		existing_gle = gle.get((voucher_type, voucher_no), [])
+		voucher_obj = frappe.get_doc(voucher_type, voucher_no)
+		expected_gle = voucher_obj.get_gl_entries(warehouse_account)
+		if expected_gle:
+			if not existing_gle or not compare_existing_and_expected_gle(existing_gle, expected_gle):
+				_delete_gl_entries(voucher_type, voucher_no)
+				voucher_obj.make_gl_entries(gl_entries=expected_gle, repost_future_gle=False, from_repost=True)
+		else:
+			_delete_gl_entries(voucher_type, voucher_no)
+
+def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None):
+	future_stock_vouchers = []
+
+	values = []
+	condition = ""
+	if for_items:
+		condition += " and item_code in ({})".format(", ".join(["%s"] * len(for_items)))
+		values += for_items
+
+	if for_warehouses:
+		condition += " and warehouse in ({})".format(", ".join(["%s"] * len(for_warehouses)))
+		values += for_warehouses
+
+	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
+		from `tabStock Ledger Entry` sle
+		where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) {condition}
+		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc for update""".format(condition=condition),
+		tuple([posting_date, posting_time] + values), as_dict=True):
+			future_stock_vouchers.append([d.voucher_type, d.voucher_no])
+
+	return future_stock_vouchers
+
+def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
+	gl_entries = {}
+	if future_stock_vouchers:
+		for d in frappe.db.sql("""select * from `tabGL Entry`
+			where posting_date >= %s and voucher_no in (%s)""" %
+			('%s', ', '.join(['%s']*len(future_stock_vouchers))),
+			tuple([posting_date] + [d[1] for d in future_stock_vouchers]), as_dict=1):
+				gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
+
+	return gl_entries
