@@ -197,7 +197,7 @@
    "fieldname": "additional_salary",
    "fieldtype": "Link",
    "label": "Additional Salary ",
-   "options": "Additional Salary",
+   "options": "Additional Salary"
   },
   {
    "default": "0",
