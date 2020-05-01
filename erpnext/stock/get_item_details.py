@@ -342,8 +342,14 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			out["manufacturer_part_no"] = None
 			out["manufacturer"] = None
 	else:
-		out["manufacturer"], out["manufacturer_part_no"] = frappe.get_value("Item", item.name,
-			["default_item_manufacturer", "default_manufacturer_part_no"] )
+		data = frappe.get_value("Item", item.name,
+			["default_item_manufacturer", "default_manufacturer_part_no"] , as_dict=1)
+
+		if data:
+			out.update({
+				"manufacturer": data.default_item_manufacturer,
+				"manufacturer_part_no": data.default_manufacturer_part_no
+			})
 
 	child_doctype = args.doctype + ' Item'
 	meta = frappe.get_meta(child_doctype)
