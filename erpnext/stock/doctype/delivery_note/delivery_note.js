@@ -188,7 +188,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			}
 		}
 
-		if (doc.docstatus==1) {
+		if (doc.docstatus > 0) {
 			this.show_stock_ledger();
 			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
 				this.show_general_ledger();

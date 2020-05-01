@@ -227,7 +227,7 @@
   {
    "default": "0",
    "depends_on": "eval:doc.type == \"Deduction\" && !doc.variable_based_on_taxable_salary",
-   "description": "If checked, the full amount will be deducted from taxable income before calculating income tax. Otherwise, it can be exempted via Employee Tax Exemption Declaration.",
+   "description": "If checked, the full amount will be deducted from taxable income before calculating income tax without any declaration or proof submission.",
    "fieldname": "exempted_from_income_tax",
    "fieldtype": "Check",
    "label": "Exempted from Income Tax"
@@ -235,7 +235,7 @@
  ],
  "icon": "fa fa-flag",
  "links": [],
- "modified": "2020-04-24 14:50:28.994054",
+ "modified": "2020-04-28 15:46:45.252945",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Component",
