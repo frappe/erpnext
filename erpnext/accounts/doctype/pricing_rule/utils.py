@@ -4,19 +4,13 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-
-import copy
-import json
-
+import frappe, copy, json
+from frappe import throw, _
 from six import string_types
-
-import frappe
+from frappe.utils import flt, cint, get_datetime, get_link_to_form, today
 from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.get_item_details import get_conversion_factor
-from frappe import _, throw
-from frappe.utils import cint, flt, get_datetime, get_link_to_form, getdate, today
-
 
 class MultiplePricingRuleConflict(frappe.ValidationError): pass
 
@@ -470,7 +464,7 @@ def get_product_discount_rule(pricing_rule, item_details, doc=None):
 
 	item_details.free_item_data.update(item_data)
 	item_details.free_item_data['uom'] = pricing_rule.free_item_uom or item_data.stock_uom
-	item_details.free_item_data['conversion_factor'] = get_conversion_factor(free_item,
+	item_details.free_item_data['conversion_factor'] = get_conversion_factor(free_item, 
 		item_details.free_item_data['uom']).get("conversion_factor", 1)
 
 	if item_details.get("parenttype") == 'Purchase Order':
@@ -506,16 +500,18 @@ def get_pricing_rule_items(pr_doc):
 	return list(set(apply_on_data))
 
 def validate_coupon_code(coupon_name):
-	coupon = frappe.get_doc("Coupon Code", coupon_name)
-
+	from frappe.utils import today,getdate
+	coupon=frappe.get_doc("Coupon Code",coupon_name)
 	if coupon.valid_from:
-		if coupon.valid_from > getdate(today()):
-			frappe.throw(_("Sorry, this coupon code's validity has not started"))
+		if coupon.valid_from > getdate(today()) :
+			frappe.throw(_("Sorry,coupon code validity has not started"))
 	elif coupon.valid_upto:
-		if coupon.valid_upto < getdate(today()):
-			frappe.throw(_("Sorry, this coupon code's validity has expired"))
-	elif coupon.used >= coupon.maximum_use:
-		frappe.throw(_("Sorry, this coupon code is no longer valid"))
+		if coupon.valid_upto < getdate(today()) :
+			frappe.throw(_("Sorry,coupon code validity has expired"))	
+	elif coupon.used>=coupon.maximum_use:
+		frappe.throw(_("Sorry,coupon code are exhausted"))
+	else:
+		return
 
 def update_coupon_code_count(coupon_name,transaction_type):
 	coupon=frappe.get_doc("Coupon Code",coupon_name)
