@@ -236,7 +236,7 @@ class TestLoan(unittest.TestCase):
 
 		process_loan_interest_accrual_for_term_loans(posting_date=nowdate())
 
-		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(get_last_day(nowdate()), 5),
+		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(nowdate(), 5),
 			"Regular Payment", 89768.75)
 
 		repayment_entry.submit()
