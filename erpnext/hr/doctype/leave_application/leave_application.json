@@ -195,7 +195,8 @@
    "options": "Company",
    "read_only": 1,
    "remember_last_selected_value": 1,
-   "reqd": 1
+   "reqd": 1,
+   "fetch_from": "employee.company",
   },
   {
    "allow_on_submit": 1,
