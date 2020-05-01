@@ -66,9 +66,6 @@ class TestAsset(unittest.TestCase):
 		pr.cancel()
 		self.assertEqual(asset.docstatus, 2)
 
-		self.assertFalse(frappe.db.get_value("GL Entry",
-			{"voucher_type": "Purchase Invoice", "voucher_no": pi.name}))
-
 	def test_is_fixed_asset_set(self):
 		asset = create_asset(is_existing_asset = 1)
 		doc = frappe.new_doc('Purchase Invoice')
