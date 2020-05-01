@@ -7,16 +7,16 @@
  "engine": "InnoDB",
  "field_order": [
   "is_sandbox",
+  "taxjar_calculate_tax",
+  "taxjar_create_transactions",
   "credentials",
   "api_key",
   "cb_keys",
   "sandbox_api_key",
   "configuration",
   "tax_account_head",
-  "shipping_account_head",
   "configuration_cb",
-  "taxjar_create_transactions",
-  "taxjar_calculate_tax"
+  "shipping_account_head"
  ],
  "fields": [
   {
@@ -77,7 +77,7 @@
    "default": "0",
    "fieldname": "taxjar_calculate_tax",
    "fieldtype": "Check",
-   "label": "Enable Tax Calculation?"
+   "label": "Enable Tax Calculation"
   },
   {
    "fieldname": "cb_keys",
@@ -86,7 +86,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-04-28 02:26:19.909775",
+ "modified": "2020-04-30 04:38:03.311089",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "TaxJar Settings",

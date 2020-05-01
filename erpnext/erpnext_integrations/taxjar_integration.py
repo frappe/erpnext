@@ -27,11 +27,19 @@ def get_client():
 		api_key = taxjar_settings.get_password("sandbox_api_key")
 		api_url = taxjar.SANDBOX_API_URL
 
-	return taxjar.Client(api_key=api_key, api_url=api_url)
+	if api_key and api_url:
+		return taxjar.Client(api_key=api_key, api_url=api_url)
 
 
 def create_transaction(doc, method):
+	"""Create an order transaction in TaxJar"""
+
 	if not TAXJAR_CREATE_TRANSACTIONS:
+		return
+
+	client = get_client()
+
+	if not client:
 		return
 
 	sales_tax = sum([tax.tax_amount for tax in doc.taxes if tax.account_head == TAX_ACCOUNT_HEAD])
@@ -49,8 +57,6 @@ def create_transaction(doc, method):
 	tax_dict['sales_tax'] = sales_tax
 	tax_dict['amount'] = doc.total + tax_dict['shipping']
 
-	client = get_client()
-
 	try:
 		client.create_order(tax_dict)
 	except taxjar.exceptions.TaxJarResponseError as err:
@@ -60,9 +66,16 @@ def create_transaction(doc, method):
 
 
 def delete_transaction(doc, method):
-	"""Deletes an existing order transaction created through the API."""
+	"""Delete an existing TaxJar order transaction"""
+
+	if not TAXJAR_CREATE_TRANSACTIONS:
+		return
 
 	client = get_client()
+
+	if not client:
+		return
+
 	client.delete_order(doc.name)
 
 
@@ -159,6 +172,9 @@ def validate_tax_request(tax_dict):
 	"""Return the sales tax that should be collected for a given order."""
 
 	client = get_client()
+
+	if not client:
+		return
 
 	try:
 		tax_data = client.tax_for_order(tax_dict)
