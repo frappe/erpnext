@@ -249,7 +249,7 @@ const submit_salary_slip = function (frm) {
 
 let make_bank_entry = function (frm) {
 	var doc = frm.doc;
-	if (doc.company && doc.start_date && doc.end_date && doc.payment_account) {
+	if (doc.payment_account) {
 		return frappe.call({
 			doc: cur_frm.doc,
 			method: "make_payment_entry",
@@ -262,7 +262,8 @@ let make_bank_entry = function (frm) {
 			freeze_message: __("Creating Payment Entries......")
 		});
 	} else {
-		frappe.msgprint(__("Company, Payment Account, From Date and To Date is mandatory"));
+		frappe.msgprint(__("Payment Account is mandatory"));
+		frm.scroll_to_field('payment_account');
 	}
 };
 
