@@ -23,11 +23,7 @@ def get_data():
 			},
 			{
 				'label': _('Payments'),
-				'items': ['Payment Entry']
-			},
-			{
-				'label': _('Bank'),
-				'items': ['Bank Account']
+				'items': ['Payment Entry', 'Bank Account']
 			},
 			{
 				'label': _('Pricing'),

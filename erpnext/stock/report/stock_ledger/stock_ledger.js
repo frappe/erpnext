@@ -32,7 +32,7 @@ frappe.query_reports["Stock Ledger"] = {
 			"options": "Warehouse",
 			"get_query": function() {
 				const company = frappe.query_report.get_filter_value('company');
-				return { 
+				return {
 					filters: { 'company': company }
 				}
 			}
@@ -82,6 +82,11 @@ frappe.query_reports["Stock Ledger"] = {
 			"label": __("Include UOM"),
 			"fieldtype": "Link",
 			"options": "UOM"
+		},
+		{
+			"fieldname": "show_cancelled_entries",
+			"label": __("Show Cancelled Entries"),
+			"fieldtype": "Check"
 		}
 	],
 	"formatter": function (value, row, column, data, default_formatter) {
@@ -96,9 +101,3 @@ frappe.query_reports["Stock Ledger"] = {
 		return value;
 	},
 }
-
-// $(function() {
-// 	$(wrapper).bind("show", function() {
-// 		frappe.query_report.load();
-// 	});
-// });

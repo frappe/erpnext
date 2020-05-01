@@ -31,7 +31,7 @@ frappe.ui.form.on('Loan Application', {
 	add_toolbar_buttons: function(frm) {
 		if (frm.doc.status == "Approved") {
 
-			if (frm.doc.is_secured) {
+			if (frm.doc.is_secured_loan) {
 				frappe.db.get_value("Loan Security Pledge", {"loan_application": frm.doc.name, "docstatus": 1}, "name", (r) => {
 					if (!r) {
 						frm.add_custom_button(__('Loan Security Pledge'), function() {
