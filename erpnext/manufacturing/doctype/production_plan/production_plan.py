@@ -614,21 +614,25 @@ def get_items_for_material_requests(doc, warehouses=None):
 	if isinstance(doc, string_types):
 		doc = frappe._dict(json.loads(doc))
 
-	warehouses_list = []
+	warehouse_list = []
 	if warehouses:
 		if isinstance(warehouses, string_types):
 			warehouses = json.loads(warehouses)
 
 		for row in warehouses:
-			warehouses_list.extend(frappe.db.get_descendants('Warehouse', row.get("warehouse")))
+			child_warehouses = frappe.db.get_descendants('Warehouse', row.get("warehouse"))
+			if child_warehouses:
+				warehouse_list.extend(child_warehouses)
+			else:
+				warehouse_list.append(row.get("warehouse"))
 
-	if warehouses_list:
-		warehouses = list(set(warehouses_list))
-
-		if doc.get("for_warehouse"):
+	if warehouse_list:
+		warehouses = list(set(warehouse_list))
+	
+		if doc.get("for_warehouse") and doc.get("for_warehouse") in warehouses:
 			warehouses.remove(doc.get("for_warehouse"))
 
-		warehouses_list = None
+		warehouse_list = None
 
 	doc['mr_items'] = []
 	po_items = doc.get('po_items') if doc.get('po_items') else doc.get('items')
@@ -716,7 +720,7 @@ def get_items_for_material_requests(doc, warehouses=None):
 	if not ignore_existing_ordered_qty and warehouses:
 		new_mr_items = []
 		for item in mr_items:
-			get_materials_from_other_locations(item, warehouses, new_mr_items)
+			get_materials_from_other_locations(item, warehouses, new_mr_items, company)
 
 		mr_items = new_mr_items
 
@@ -728,10 +732,10 @@ def get_items_for_material_requests(doc, warehouses=None):
 
 	return mr_items
 
-def get_materials_from_other_locations(item, warehouses, new_mr_items):
+def get_materials_from_other_locations(item, warehouses, new_mr_items, company):
 	from erpnext.stock.doctype.pick_list.pick_list import get_available_item_locations
 	locations = get_available_item_locations(item.get("item_code"),
-		warehouses, item.get("quantity"), ignore_validation=True)
+		warehouses, item.get("quantity"), company, ignore_validation=True)
 
 	if not locations:
 		new_mr_items.append(item)
