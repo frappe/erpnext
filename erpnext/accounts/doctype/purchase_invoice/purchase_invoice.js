@@ -382,11 +382,6 @@ function hide_fields(doc) {
 	cur_frm.refresh_fields();
 }
 
-cur_frm.cscript.update_stock = function(doc, dt, dn) {
-	hide_fields(doc, dt, dn);
-	this.frm.fields_dict.items.grid.toggle_reqd("item_code", doc.update_stock? true: false)
-}
-
 cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 	return {
 		filters: [
@@ -528,5 +523,10 @@ frappe.ui.form.on("Purchase Invoice", {
 			erpnext.buying.get_default_bom(frm);
 		}
 		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
+	},
+
+	update_stock: function(frm) {
+		hide_fields(frm.doc);
+		frm.fields_dict.items.grid.toggle_reqd("item_code", frm.doc.update_stock? true: false);
 	}
 })

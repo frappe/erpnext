@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.ui.form.on("Bank Reconciliation", {
+frappe.ui.form.on("Bank Clearance", {
 	setup: function(frm) {
 		frm.add_fetch("account", "account_currency", "account_currency");
 	},
