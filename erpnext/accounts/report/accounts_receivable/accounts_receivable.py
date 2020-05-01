@@ -209,7 +209,7 @@ class ReceivablePayableReport(object):
 			row.outstanding = flt(row.invoiced - row.paid - row.credit_note, self.currency_precision)
 			row.invoice_grand_total = row.invoiced
 
-			if abs(row.outstanding) > 1.0/10 ** self.currency_precision:
+			if abs(row.outstanding) >= 1.0/10 ** self.currency_precision:
 				# non-zero oustanding, we must consider this row
 
 				if self.is_invoice(row) and self.filters.based_on_payment_terms:
