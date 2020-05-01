@@ -66,7 +66,6 @@ class SalarySlip(TransactionBase):
 		else:
 			self.set_status()
 			self.update_status(self.name)
-			self.update_salary_slip_in_additional_salary()
 			self.make_loan_repayment_entry()
 			if (frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee")) and not frappe.flags.via_payroll_entry:
 				self.email_salary_slip()
