@@ -382,7 +382,7 @@
   {
    "depends_on": "eval:doc.is_stock_item",
    "fieldname": "warranty_period",
-   "fieldtype": "Data",
+   "fieldtype": "Int",
    "label": "Warranty Period (in days)",
    "oldfieldname": "warranty_period",
    "oldfieldtype": "Data"
@@ -1060,7 +1060,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 1,
- "modified": "2020-04-07 15:56:06.195722",
+ "modified": "2020-04-27 08:46:06.195722",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
