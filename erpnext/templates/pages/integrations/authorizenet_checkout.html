@@ -4,10 +4,7 @@
 
 {% block script %}
 <script>
-	{
-		%
-		include "templates/includes/integrations/authorizenet_checkout.js" %
-	}
+	{% include "templates/includes/integrations/authorizenet_checkout.js" %}
 </script>
 <script>
 	context = "{{ payment_context }}"
@@ -73,8 +70,8 @@
 				</div>
 				<div class="col-md-8 col-sm-12 submit_row">
 					<div class="row">
-					<button type="submit" class="submit" id="submit">{{_('Pay')}} {{ payment_context.amount }}</button>
-				</div>
+						<button type="submit" class="submit" id="submit">{{_('Pay')}} {{ payment_context.amount }}</button>
+					</div>
 				</div>
 			</div>
 		</form>
