@@ -326,7 +326,7 @@
  "modified": "2019-01-07 16:52:07.174687", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
- "name": "Bank Reconciliation Detail", 
+ "name": "Bank Clearance Detail", 
  "owner": "Administrator", 
  "permissions": [], 
  "quick_entry": 1, 
