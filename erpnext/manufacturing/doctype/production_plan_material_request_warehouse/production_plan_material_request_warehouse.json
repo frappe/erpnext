@@ -1,35 +1,25 @@
 {
  "actions": [],
- "autoname": "Prompt",
- "creation": "2019-02-18 17:23:11.708371",
+ "creation": "2020-02-02 10:37:16.650836",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "project_type",
-  "tasks"
+  "warehouse"
  ],
  "fields": [
   {
-   "fieldname": "project_type",
+   "fieldname": "warehouse",
    "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Project Type",
-   "options": "Project Type"
-  },
-  {
-   "fieldname": "tasks",
-   "fieldtype": "Table",
-   "label": "Tasks",
-   "options": "Project Template Task",
-   "reqd": 1
+   "label": "Warehouse",
+   "options": "Warehouse"
   }
  ],
  "links": [],
- "modified": "2020-04-26 02:23:53.990322",
+ "modified": "2020-02-02 10:37:16.650836",
  "modified_by": "Administrator",
- "module": "Projects",
- "name": "Project Template",
+ "module": "Manufacturing",
+ "name": "Production Plan Material Request Warehouse",
  "owner": "Administrator",
  "permissions": [
   {
