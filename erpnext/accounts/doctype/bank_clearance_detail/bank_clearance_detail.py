@@ -5,5 +5,5 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 
-class BankReconciliationDetail(Document):
+class BankClearanceDetail(Document):
 	pass
