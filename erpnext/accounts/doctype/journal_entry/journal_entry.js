@@ -173,7 +173,8 @@ frappe.ui.form.on("Journal Entry", {
 						"company": doc.company,
 						"voucher_type": doc.voucher_type,
 						"naming_series": doc.naming_series,
-						"is_opening": doc.is_opening
+						"is_opening": doc.is_opening,
+						"multi_currency": doc.multi_currency
 					})
 					update_jv_details(frm.doc, doc.accounts);
 				});

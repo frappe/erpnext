@@ -4,13 +4,22 @@
 frappe.ui.form.on("Journal Entry Template", {
 	setup: function(frm) {
 		frappe.model.set_default_values(frm.doc);
+
 		frm.set_query("account" ,"accounts", function(){
-			return {
-				filters: {
-					"company": frm.doc.company,
-				}
+			var filters = {
+				company: frm.doc.company,
+				is_group: 0
 			};
+
+			if(!frm.doc.multi_currency) {
+				$.extend(filters, {
+					account_currency: frappe.get_doc(":Company", frm.doc.company).default_currency
+				});
+			}
+
+			return { filters: filters };
 		});
+
 		frappe.call({
 			type: "GET",
 			method: "erpnext.accounts.doctype.journal_entry_template.journal_entry_template.get_naming_series",
