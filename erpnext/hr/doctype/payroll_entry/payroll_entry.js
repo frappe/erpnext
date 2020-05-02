@@ -3,14 +3,13 @@
 
 var in_progress = false;
 
-{% include "erpnext/public/js/hr/common_employee_filter.js" %}
-
 frappe.ui.form.on('Payroll Entry', {
 	onload: function (frm) {
 		if (!frm.doc.posting_date) {
 			frm.doc.posting_date = frappe.datetime.nowdate();
 		}
 		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet);
+		frm.get_field("applied_filters").$wrapper.append(frm.doc.filters_html)
 
 		frm.set_query("department", function() {
 			return {
@@ -22,20 +21,17 @@ frappe.ui.form.on('Payroll Entry', {
 	},
 
 	refresh: function(frm) {
+
 		if (frm.doc.docstatus == 0) {
-			if(!frm.is_new()) {
-				frm.page.clear_primary_action();
-				frm.add_custom_button(__("Get Employees"),
-					function() {
-						frm.events.get_employee_details(frm);
-					}
-				).toggleClass('btn-primary', !(frm.doc.employees || []).length);
-			}
-			if ((frm.doc.employees || []).length) {
-				frm.page.set_primary_action(__('Create Salary Slips'), () => {
+			frm.add_custom_button(__("Get Employees"),
+				function() {
+					frm.events.get_employee_details(frm);
+				});
+
+			if ((frm.doc.employees || []).length ) {
+				frm.page.set_primary_action(__('Create Salary Slips'), function() {
 					frm.save('Submit').then(()=>{
 						frm.page.clear_primary_action();
-						frm.refresh();
 						frm.events.refresh(frm);
 					});
 				});
@@ -46,25 +42,77 @@ frappe.ui.form.on('Payroll Entry', {
 			frm.events.add_context_buttons(frm);
 		}
 	},
-
 	get_employee_details: function (frm) {
-		var employee_dialog = new erpnext.hr.EmployeeFilter(frm, 'fill_employee_details', "Get Employees", "Submit")
-		employee_dialog.make_dialog()
-		// return frappe.call({
-		// 	doc: frm.doc,
-		// 	method: 'fill_employee_details',
-		// 	callback: function(r) {
-		// 		if (r.docs[0].employees){
-		// 			frm.save();
-		// 			frm.refresh();
-		// 			if(r.docs[0].validate_attendance){
-		// 				render_employee_attendance(frm, r.message);
-		// 			}
-		// 		}
-		// 	}
-		// })
+		var d = new frappe.ui.form.MultiSelectDialog({
+			doctype: "Employee",
+			target: cur_frm,
+			setters: {
+				company: cur_frm.doc.company,
+				department: '',
+				employee_name: '',
+				grade: ''
+			},
+			get_query() {
+				return {
+					filters: { status: ['=', "Active"] }
+				};
+			},
+			add_filters_group: 1,
+			primary_action_label: "Get Employee",
+			action(employees, data, field_filters, standard_filters) {
+				if(employees.length){
+					frappe.call({
+						doc: frm.doc,
+						method: "fill_employee_details",
+						args: {
+							employees: employees,
+							company: data["company"],
+							variable: data["variable"],
+							base: data["base"],
+							from_date: data['from_date']
+						},
+						callback: function(r) {
+							if(r.docs[0].employees.length){
+								frm.save();
+								frm.events.create_applied_filters_html(frm, employees, data, field_filters, standard_filters);
+								frm.refresh();
+								cur_dialog.hide();
+							}
+						}
+					});
+				}else{
+					frappe.msgprint(__("Please Select Employees."));
+				}
+			}
+		});
 	},
+	create_applied_filters_html(frm, employees, data, field_filters, standard_filters){
 
+		frm.get_field("applied_filters").$wrapper.empty();
+		let applied_filters = frm.get_field('applied_filters').$wrapper;
+		let standard_filters_html = " ";
+		for (let filters in standard_filters){
+			standard_filters_html +=`
+			<button type="button" class="btn btn-default btn-xs toggle-filter" disabled>
+				`+ filters +` `+ standard_filters[filters][0]+` `+ standard_filters[filters][1] + `
+			</button>`;
+		}
+
+		for (let filters in field_filters){
+			if(field_filters[filters]){
+				standard_filters_html += `
+					<button type="button" class="btn btn-default btn-xs toggle-filter" disabled>`
+						+ filters +` = ` + field_filters[filters] +`
+					</button>`;
+			}
+		}
+		let div_html = `<div>
+			<span class= "text-muted"> Applied Filters: </span><br> `
+			+ standard_filters_html +
+		`</div>`;
+		frm.doc.filters_html = div_html;
+		applied_filters.append(div_html);
+	},
 	create_salary_slips: function(frm) {
 		frm.call({
 			doc: frm.doc,
@@ -73,7 +121,7 @@ frappe.ui.form.on('Payroll Entry', {
 				frm.refresh();
 				frm.toolbar.refresh();
 			}
-		})
+		});
 	},
 
 	add_context_buttons: function(frm) {

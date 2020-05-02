@@ -15,6 +15,8 @@
   "company",
   "number_of_employees",
   "sec_break20",
+  "applied_filters",
+  "filters_html",
   "employees",
   "section_break_13",
   "validate_attendance",
@@ -76,8 +78,7 @@
    "in_list_view": 1,
    "label": "Company",
    "options": "Company",
-   "remember_last_selected_value": 1,
-   "reqd": 1
+   "remember_last_selected_value": 1
   },
   {
    "fieldname": "number_of_employees",
@@ -93,8 +94,7 @@
    "fieldname": "employees",
    "fieldtype": "Table",
    "label": "Employee Details",
-   "options": "Payroll Employee Detail",
-   "read_only": 1
+   "options": "Payroll Employee Detail"
   },
   {
    "fieldname": "section_break_13",
@@ -224,12 +224,21 @@
   {
    "fieldname": "column_break_33",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "applied_filters",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "filters_html",
+   "fieldtype": "HTML Editor",
+   "hidden": 1
   }
  ],
  "icon": "fa fa-cog",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-28 00:21:26.187471",
+ "modified": "2020-05-01 19:49:59.319023",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Payroll Entry",

@@ -21,6 +21,10 @@ class PayrollEntry(Document):
 		if cint(entries) == len(self.employees):
     			self.set_onload("submitted_ss", True)
 
+	def validate(self):
+		if not self.get("employees"):
+			frappe.throw(_("No Employee Found"))
+
 	def on_submit(self):
 		self.create_salary_slips()
 
@@ -33,13 +37,13 @@ class PayrollEntry(Document):
 		frappe.delete_doc("Salary Slip", frappe.db.sql_list("""select name from `tabSalary Slip`
 			where payroll_entry=%s """, (self.name)))
 
-	def get_emp_list(self, filters):
+	def get_emp_list(self, employees):
 		"""
 			Returns list of active employees based on selected criteria
 			and for which salary structure exists
 		"""
 
-		cond = self.get_filter_condition(filters)
+		cond = self.get_filter_condition(employees)
 
 		cond += self.get_joining_relieving_condition()
 		condition = ''
@@ -68,16 +72,13 @@ class PayrollEntry(Document):
 					t1.name = t2.employee
 					and t2.docstatus = 1
 			%s order by t2.from_date desc
-			""" % cond, {"sal_struct": tuple(sal_struct), "from_date": self.end_date}, as_dict=True, debug = 1)
+			""" % cond, {"sal_struct": tuple(sal_struct), "employees":tuple(employees), "from_date": self.end_date}, as_dict=True)
 
 			return emp_list
 
-	def fill_employee_details(self, company=None, employees=None, filters=None, assign_to=None):
+	def fill_employee_details(self, company=None, employees=None):
 		self.set('employees', [])
-		if not employees:
-			employees = self.get_emp_list(filters=filters)
-		else:
-			employees = self.get_emp_list(employees=employees)
+		employees = self.get_emp_list(employees)
 		if not employees:
 			frappe.throw(_("No employees for the mentioned criteria"))
 
@@ -88,12 +89,11 @@ class PayrollEntry(Document):
 		if self.validate_attendance:
 			return self.validate_employee_attendance()
 
-	def get_filter_condition(self , filters=None, employees=None):
+	def get_filter_condition(self ,employees=None):
 		self.check_mandatory()
 		cond = " and t1.company = '" + self.get("company").replace("'", "\'") + "'"
-		if filters:
-			for keys in filters:
-				cond += " and t1." + keys + " "+ filters[keys][0] + " '" + filters[keys][1] + "'"
+		if len(employees):
+			cond += "and t1.employee IN %(employees)s "
 		return cond
 
 	def get_joining_relieving_condition(self):
@@ -114,7 +114,7 @@ class PayrollEntry(Document):
 		"""
 		self.check_permission('write')
 		self.created = 1
-		emp_list = [d.employee for d in self.get_emp_list()] #remove
+		emp_list = [d.employee for d in self.get("employees")]
 		if emp_list:
 			args = frappe._dict({
 				"salary_slip_based_on_timesheet": self.salary_slip_based_on_timesheet,
@@ -138,13 +138,15 @@ class PayrollEntry(Document):
 		"""
 			Returns list of salary slips based on selected criteria
 		"""
-		cond = self.get_filter_condition()
+
+		# employees = [d.employee for d in self.get("employees")]
+		# cond = self.get_filter_condition(employees)
 
 		ss_list = frappe.db.sql("""
-			select t1.name, t1.salary_structure, t1.payroll_cost_center from `tabSalary Slip` t1
-			where t1.docstatus = %s and t1.start_date >= %s and t1.end_date <= %s
-			and (t1.journal_entry is null or t1.journal_entry = "") and ifnull(salary_slip_based_on_timesheet,0) = %s %s
-		""" % ('%s', '%s', '%s','%s', cond), (ss_status, self.start_date, self.end_date, self.salary_slip_based_on_timesheet), as_dict=as_dict)
+			select t1.name, t1.salary_structure from `tabSalary Slip` t1
+			where t1.docstatus = %s
+			and t1.payroll_entry = %s
+		""" % ('%s', '%s'), (ss_status, self.name), as_dict=as_dict)
 		return ss_list
 
 	def submit_salary_slips(self):
@@ -280,10 +282,9 @@ class PayrollEntry(Document):
 	def make_payment_entry(self):
 		self.check_permission('write')
 
-		cond = self.get_filter_condition()
 		salary_slip_name_list = frappe.db.sql(""" select t1.name from `tabSalary Slip` t1
-			where t1.docstatus = 1 and start_date >= %s and end_date <= %s %s
-			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_list = True)
+			where t1.docstatus = 1 and payroll_entry = %s
+			""" % ('%s',), (self.name), as_list = True)
 
 		if salary_slip_name_list and len(salary_slip_name_list) > 0:
 			salary_slip_total = 0
