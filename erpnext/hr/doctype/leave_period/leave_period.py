@@ -12,20 +12,6 @@ from frappe.utils.background_jobs import enqueue
 from six import iteritems
 
 class LeavePeriod(Document):
-	def get_employees(self, args):
-		conditions, values = [], []
-		for field, value in iteritems(args):
-			if value:
-				conditions.append("{0}=%s".format(field))
-				values.append(value)
-
-		condition_str = " and " + " and ".join(conditions) if len(conditions) else ""
-
-		employees = frappe._dict(frappe.db.sql("select name, date_of_joining from tabEmployee where status='Active' {condition}" #nosec
-			.format(condition=condition_str), tuple(values)))
-
-		return employees
-
 	def validate(self):
 		self.validate_dates()
 		validate_overlap(self, self.from_date, self.to_date, self.company)
@@ -35,8 +21,7 @@ class LeavePeriod(Document):
 			frappe.throw(_("To date can not be equal or less than from date"))
 
 
-	def grant_leave_allocation(self, company=None, assign_to=None, employees=None,
-			filters=None, carry_forward=0):
+	def grant_leave_allocation(self, company=None,  employees=None, carry_forward=0):
 		# employee_records = self.get_employees({
 		# 	"grade": grade,
 		# 	"department": department,
@@ -44,21 +29,21 @@ class LeavePeriod(Document):
 		# 	"name": employee
 		# })
 
-		if employee_records:
-			if len(employee_records) > 20:
+		if employees:
+			if len(employees) > 20:
 				frappe.enqueue(grant_leave_alloc_for_employees, timeout=600,
-					employee_records=employee_records, leave_period=self, carry_forward=carry_forward)
+					employee_records=employees, leave_period=self, carry_forward=carry_forward)
 			else:
-				grant_leave_alloc_for_employees(employee_records, self, carry_forward)
+				grant_leave_alloc_for_employees(employees, self, carry_forward)
 		else:
 			frappe.msgprint(_("No Employee Found"))
 
 def grant_leave_alloc_for_employees(employee_records, leave_period, carry_forward=0):
 	leave_allocations = []
-	existing_allocations_for = get_existing_allocations(list(employee_records.keys()), leave_period.name)
+	existing_allocations_for = get_existing_allocations(employee_records, leave_period.name)
 	leave_type_details = get_leave_type_details()
 	count = 0
-	for employee in employee_records.keys():
+	for employee in employee_records:
 		if employee in existing_allocations_for:
 			continue
 		count +=1
@@ -66,11 +51,12 @@ def grant_leave_alloc_for_employees(employee_records, leave_period, carry_forwar
 		if leave_policy:
 			for leave_policy_detail in leave_policy.leave_policy_details:
 				if not leave_type_details.get(leave_policy_detail.leave_type).is_lwp:
+					date_of_joining = frappe.db.get_value("Employee", employee, "date_of_joining")
 					leave_allocation = create_leave_allocation(employee, leave_policy_detail.leave_type,
-						leave_policy_detail.annual_allocation, leave_type_details, leave_period, carry_forward, employee_records.get(employee))
+						leave_policy_detail.annual_allocation, leave_type_details, leave_period, carry_forward, date_of_joining)
 					leave_allocations.append(leave_allocation)
 		frappe.db.commit()
-		frappe.publish_progress(count*100/len(set(employee_records.keys()) - set(existing_allocations_for)), title = _("Allocating leaves..."))
+		frappe.publish_progress(count*100/len(set(employee_records) - set(existing_allocations_for)), title = _("Allocating leaves..."))
 
 	if leave_allocations:
 		frappe.msgprint(_("Leaves has been granted sucessfully"))

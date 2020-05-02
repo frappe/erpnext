@@ -1,7 +1,6 @@
 // Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-{% include "erpnext/public/js/hr/common_employee_filter.js" %}
 
 frappe.ui.form.on('Leave Period', {
 	refresh: (frm)=>{
@@ -28,8 +27,49 @@ frappe.ui.form.on('Leave Period', {
 		})
 	},
 	grant_leaves: function(frm) {
-		var employee_dialog = new erpnext.hr.EmployeeFilter(frm, 'grant_leave_allocation', "'Grant Leaves'", "Grant");
-		employee_dialog.make_dialog()
+		var d = new frappe.ui.form.MultiSelectDialog({
+			doctype: "Employee",
+			target: cur_frm,
+			setters: {
+				company: cur_frm.doc.company,
+				department: '',
+				employee_name: '',
+				grade: ''
+			},
+			data_fields:[
+				{
+					"label": "Add unused leaves from previous allocations",
+					"fieldname": "carry_forward",
+					"fieldtype": "Check"
+				}
+			],
+			get_query() {
+				return {
+					filters: { status: ['=', "Active"] }
+				};
+			},
+			add_filters_group: 1,
+			primary_action_label: "Get Employee",
+			action(employees, data, field_filters, standard_filters) {
+				if(employees.length){
+					frappe.call({
+						doc: frm.doc,
+						method: "grant_leave_allocation",
+						args: {
+							employees: employees,
+							company: data["company"],
+						},
+						callback: function(r) {
+							if(r.docs[0].employees.length){
+								cur_dialog.hide();
+							}
+						}
+					});
+				}else{
+					frappe.msgprint(__("Please Select Employees."));
+				}
+			}
+		});
 		// var d = new frappe.ui.Dialog({
 		// 	title: __('Grant Leaves'),
 		// 	fields: [
@@ -70,11 +110,7 @@ frappe.ui.form.on('Leave Period', {
 		// 			"fieldname": "sec_break",
 		// 			"fieldtype": "Section Break",
 		// 		},
-		// 		{
-		// 			"label": "Add unused leaves from previous allocations",
-		// 			"fieldname": "carry_forward",
-		// 			"fieldtype": "Check"
-		// 		}
+		//
 		// 	],
 		// 	primary_action: function() {
 		// 		var data = d.get_values();
