@@ -52,9 +52,7 @@ erpnext.PointOfSale.ItemDetails = class {
         this.show_details = !item ? false : item_code === item.item_code && batch_no === item.batch_no ? false : true;
 
         this.events.toggle_item_selector(this.show_details);
-        this.show_details ?
-            this.$component.removeClass('d-none') :
-            this.$component.addClass('d-none');
+		this.toggle_component(this.show_details);
         
 		if (this.show_details) {
             this.doctype = item.doctype;
@@ -302,8 +300,7 @@ erpnext.PointOfSale.ItemDetails = class {
 		})
 	}
 
-	disable_item_details() {
-        this.$component.addClass('d-none');
-    }	
-    
+	toggle_component(show) {
+		show ? this.$component.removeClass('d-none') : this.$component.addClass('d-none');
+    }
 }

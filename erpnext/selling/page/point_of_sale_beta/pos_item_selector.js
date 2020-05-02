@@ -204,7 +204,7 @@ erpnext.PointOfSale.ItemSelector = class {
         this.$items_container.removeClass('grid-cols-1').addClass('grid-cols-4')
     }
 
-    disable_selector() {
-        this.$component.addClass('d-none');
+    toggle_component(show) {
+		show ? this.$component.removeClass('d-none') : this.$component.addClass('d-none');
     }
 }

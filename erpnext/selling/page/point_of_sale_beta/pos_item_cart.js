@@ -214,6 +214,7 @@ erpnext.PointOfSale.ItemCart = class {
 						frm.script_manager.trigger('customer', frm.doc.doctype, frm.doc.name).then(() => {
 							frappe.run_serially([
 								() => me.fetch_customer_details(this.value),
+								() => me.events.customer_details_updated(me.customer_info),
 								() => me.update_customer_section(),
 								() => me.update_totals_section(frm),
 								() => frappe.dom.unfreeze()
@@ -253,7 +254,10 @@ erpnext.PointOfSale.ItemCart = class {
 				});
 			});
 		} else {
-			this.customer_info = {}
+			return new Promise((resolve) => {
+				this.customer_info = {}
+				resolve();
+			});
 		}
 	}
     
@@ -730,9 +734,12 @@ erpnext.PointOfSale.ItemCart = class {
 		})
 	}
 
-	load_cart_data_from_invoice() {
+	load_invoice() {
 		const frm = this.events.get_frm();
-		this.update_customer_section(frm);
+		this.fetch_customer_details(frm.doc.customer).then(() => {
+			this.events.customer_details_updated(this.customer_info);
+			this.update_customer_section();
+		})
 		
 		this.$cart_items_wrapper.html('');
 		if (frm.doc.items.length) {
@@ -755,10 +762,12 @@ erpnext.PointOfSale.ItemCart = class {
 			this.$totals_section.find('.edit-cart-btn').addClass('d-none');
 			this.$totals_section.find('.grand-total').addClass('border-b-grey');
 		}
+
+		this.toggle_component(true);
 	}
 
-	disable_cart() {
-        this.$component.addClass('d-none');
+	toggle_component(show) {
+		show ? this.$component.removeClass('d-none') : this.$component.addClass('d-none');
     }
     
 }

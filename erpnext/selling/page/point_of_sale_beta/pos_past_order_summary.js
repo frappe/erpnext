@@ -347,9 +347,17 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.$summary_btns.children().last().removeClass('mr-4');
     }
 
-    load_summary_of(doc) {
-        this.doc = doc;
+    switch_to_post_submit_summary() {
+        // switch to full width view
+        this.$component.removeClass('col-span-6').addClass('col-span-10');
+        this.$summary_wrapper.removeClass('w-66').addClass('w-40');
 
+        // switch place holder with summary container
+        this.$component.find('.no-summary-placeholder').addClass('d-none');
+        this.$summary_wrapper.removeClass('d-none');
+    }
+
+    switch_to_recent_invoice_summary() {
         // switch full width view with 60% view
         this.$component.removeClass('col-span-10').addClass('col-span-6');
         this.$summary_wrapper.removeClass('w-40').addClass('w-66');
@@ -357,38 +365,24 @@ erpnext.PointOfSale.PastOrderSummary = class {
         // switch place holder with summary container
         this.$component.find('.no-summary-placeholder').addClass('d-none');
         this.$summary_wrapper.removeClass('d-none');
-
-        this.attach_basic_info(doc);
-
-        this.attach_items_info(doc);
-
-        this.attach_totals_info(doc);
-
-        this.attach_payments_info(doc);
-
-        const condition_btns_map = [{
-                condition: doc.docstatus === 0,
-                visible_btns: ['Edit Order']
-            },{
-                condition: !doc.is_return && doc.docstatus === 1,
-                visible_btns: ['Print Receipt', 'Email Receipt', 'Return']
-            }, {
-                condition: doc.is_return && doc.docstatus === 1,
-                visible_btns: ['Print Receipt', 'Email Receipt']
-            }];
-
-        this.add_summary_btns(condition_btns_map);
     }
 
-    show_post_submit_summary_of(doc) {
+    get_condition_btn_map(after_submission) {
+        if (after_submission) 
+            return [{ condition: true, visible_btns: ['Print Receipt', 'Email Receipt', 'New Order'] }];
+        
+        return [
+            { condition: this.doc.docstatus === 0, visible_btns: ['Edit Order'] },
+            { condition: !this.doc.is_return && this.doc.docstatus === 1, visible_btns: ['Print Receipt', 'Email Receipt', 'Return']},
+            { condition: this.doc.is_return && this.doc.docstatus === 1, visible_btns: ['Print Receipt', 'Email Receipt']}
+        ];
+    }
+
+    load_summary_of(doc, after_submission=false) {
+        after_submission ?
+            this.switch_to_post_submit_summary() : this.switch_to_recent_invoice_summary();
+
         this.doc = doc;
-
-        this.$component.removeClass('col-span-6').addClass('col-span-10');
-        this.$summary_wrapper.removeClass('w-66').addClass('w-40');
-
-        // switch place holder with summary container
-        this.$component.find('.no-summary-placeholder').addClass('d-none');
-        this.$summary_wrapper.removeClass('d-none');
 
         this.attach_basic_info(doc);
 
@@ -398,10 +392,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
         this.attach_payments_info(doc);
 
-        const condition_btns_map = [{
-            condition: true,
-            visible_btns: ['Print Receipt', 'Email Receipt', 'New Order']
-        }];
+        const condition_btns_map = this.get_condition_btn_map(after_submission);
 
         this.add_summary_btns(condition_btns_map);
     }

@@ -160,19 +160,20 @@ erpnext.PointOfSale.Payment = class {
 	}
 
 	render_payment_section() {
-		this.show_payment_section();
 		this.render_payment_mode_dom();
 		this.update_totals_section();
 	}
 
-	hide_payment_section() {
+	edit_cart() {
 		this.events.toggle_other_sections(false);
-		this.$component.addClass('d-none');
+		this.toggle_component(false);
 	}
 
-	show_payment_section() {
+	checkout() {
 		this.events.toggle_other_sections(true);
-		this.$component.removeClass('d-none');
+		this.toggle_component(true);
+
+		this.render_payment_section();
 	}
 
 	toggle_remarks_control() {
@@ -247,12 +248,8 @@ erpnext.PointOfSale.Payment = class {
 		})
 
 		this.render_loyalty_points_payment_mode();
-
-		const nearest_10 = Math.ceil((grand_total / 10)) * 10;
-		const nearest_50 = Math.ceil((grand_total / 50)) * 50;
-		const nearest_100 = Math.ceil((grand_total / 100)) * 100;
-
-		const shortcuts = [nearest_10, nearest_50, nearest_100];
+		
+		const shortcuts = this.get_cash_shortcuts(grand_total);
 
 		this.$payment_modes.find('[data-payment-type="Cash"]').find('.mode-of-payment-control').after(
 			`<div class="shortcuts grid grid-cols-3 gap-2 flex-1 text-center text-md-0 mb-2 d-none">
@@ -267,71 +264,73 @@ erpnext.PointOfSale.Payment = class {
 		)
 	}
 
-	render_loyalty_points_payment_mode() {
-		const doc = this.events.get_frm().doc;
-		const me = this;
+	get_cash_shortcuts(grand_total) {
+		let steps = [1, 5, 10];
+		const digits = String(grand_total).length;
 
-		frappe.db.get_value('Customer', doc.customer, 'loyalty_program', ({ loyalty_program }) => {
-			if (!loyalty_program) {
-				// return this.render_add_payment_method_dom();
-				return;
-			}
+		steps = steps.map(x => x * (10 ** (digits - 2)));
 
-			const lp_details_promise = this.get_loyalty_program_details(doc.customer, loyalty_program, doc.posting_date, doc.company);
+		const get_nearest = (amount, x) => {
+			let nearest_x = Math.ceil((amount / x)) * x;
+			return nearest_x === amount ? nearest_x + x : nearest_x;
+		}
 
-			lp_details_promise.then(({ message: details }) => {
-				let description, read_only;
-				if (!details.loyalty_points) {
-					description = __(`You don't have enough points to redeem.`);
-					read_only = true;
-				} else {
-					description = __(`You can redeem upto ${details.loyalty_points} points.`);
-					read_only = false;
-				}
-
-				const margin = this.$payment_modes.children().length % 2 === 0 ? 'pr-2' : 'pl-2';
-				const amount = doc.loyalty_amount > 0 ? format_currency(doc.loyalty_amount, doc.currency) : '';
-				this.$payment_modes.append(
-					`<div class="w-half ${margin}">
-						<div class="mode-of-payment rounded border border-grey text-grey text-md
-								mb-4 p-8 pt-4 pb-4 no-select pointer" data-mode="loyalty-points" data-payment-type="loyalty-points">
-							Loyalty Points
-							<div class="loyalty-points-amount inline float-right text-bold">${amount}</div>
-							<div class="loyalty-program-name inline float-right text-bold text-md-0 d-none">${loyalty_program}</div>
-							<div class="loyalty-points mode-of-payment-control mt-4 flex flex-1 items-center d-none"></div>
-						</div>
-					</div>`
-				)
-
-				this.loyalty_points_control = frappe.ui.form.make_control({
-					df: {
-						label: __('Loyalty Points'),
-						fieldtype: 'Int',
-						placeholder: __(`Enter loyalty points to be redeemed.`),
-						read_only,
-						onchange: async function() {
-							const redeem_loyalty_points = this.value > 0 ? 1 : 0;
-							await frappe.model.set_value(doc.doctype, doc.name, 'redeem_loyalty_points', redeem_loyalty_points);
-
-							frappe.model.set_value(doc.doctype, doc.name, 'loyalty_points', this.value);
-						},
-						description
-					},
-					parent: this.$payment_modes.find(`.loyalty-points.mode-of-payment-control`),
-					render_input: true,
-				});
-				this.loyalty_points_control.toggle_label(false);
-
-				// this.render_add_payment_method_dom();
-			})
-		});
+		return steps.reduce((finalArr, x) => {
+			let nearest_x = get_nearest(grand_total, x);
+			nearest_x = finalArr.indexOf(nearest_x) != -1 ? nearest_x + x : nearest_x;
+			return [...finalArr, nearest_x];
+		}, []);	
 	}
 
-	get_loyalty_program_details(customer, loyalty_program, posting_date, company) {
-		return frappe.call({
-			method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points",
-			args: { customer, loyalty_program, posting_date, company, "silent": true },
+	render_loyalty_points_payment_mode() {
+		const doc = this.events.get_frm().doc;
+		const { loyalty_program, loyalty_points } = this.events.get_customer_details();
+
+		if (!loyalty_program) return;
+
+		let description, read_only;
+		if (!loyalty_points) {
+			description = __(`You don't have enough points to redeem.`);
+			read_only = true;
+		} else {
+			description = __(`You can redeem upto ${details.loyalty_points} points.`);
+			read_only = false;
+		}
+
+		const margin = this.$payment_modes.children().length % 2 === 0 ? 'pr-2' : 'pl-2';
+		const amount = doc.loyalty_amount > 0 ? format_currency(doc.loyalty_amount, doc.currency) : '';
+		this.$payment_modes.append(
+			`<div class="w-half ${margin}">
+				<div class="mode-of-payment rounded border border-grey text-grey text-md
+						mb-4 p-8 pt-4 pb-4 no-select pointer" data-mode="loyalty-points" data-payment-type="loyalty-points">
+					Loyalty Points
+					<div class="loyalty-points-amount inline float-right text-bold">${amount}</div>
+					<div class="loyalty-program-name inline float-right text-bold text-md-0 d-none">${loyalty_program}</div>
+					<div class="loyalty-points mode-of-payment-control mt-4 flex flex-1 items-center d-none"></div>
+				</div>
+			</div>`
+		)
+
+		this.loyalty_points_control = frappe.ui.form.make_control({
+			df: {
+				label: __('Loyalty Points'),
+				fieldtype: 'Int',
+				placeholder: __(`Enter loyalty points to be redeemed.`),
+				read_only,
+				onchange: async function() {
+					const redeem_loyalty_points = this.value > 0 ? 1 : 0;
+					await frappe.model.set_value(doc.doctype, doc.name, 'redeem_loyalty_points', redeem_loyalty_points);
+
+					frappe.model.set_value(doc.doctype, doc.name, 'loyalty_points', this.value);
+				},
+				description
+			},
+			parent: this.$payment_modes.find(`.loyalty-points.mode-of-payment-control`),
+			render_input: true,
 		});
+		this.loyalty_points_control.toggle_label(false);
+
+		// this.render_add_payment_method_dom();
 	}
 
 	render_add_payment_method_dom() {
@@ -364,28 +363,7 @@ erpnext.PointOfSale.Payment = class {
 		)
 	}
 
-	load_payment_data_from_invoice() {
-		const doc = this.events.get_frm().doc
-
-		if (doc.docstatus != 0) {
-			this.show_payment_section();
-			this.render_payment_mode_dom();
-			this.update_totals_section();
-			this.$component.find('.submit-order').addClass('d-none');
-
-			const remarks = doc.remarks;
-			const order_completed_on = frappe.datetime.global_date_format(doc.posting_date +" "+ doc.posting_time);
-
-			!remarks && this.$remarks.html('No Remarks.');
-			this.$component.find('.order-time').removeClass('d-none').html(`Order Completed on ${order_completed_on}`);
-		} else {
-			this.$component.find('.submit-order').removeClass('d-none');
-			// this.$remarks.html('+ Add Remark');
-			this.$component.find('.order-time').addClass('d-none');
-		}
-	}
-
-	disable_payments() {
-        this.$component.addClass('d-none');
+	toggle_component(show) {
+		show ? this.$component.removeClass('d-none') : this.$component.addClass('d-none');
     }
  }

@@ -58,7 +58,7 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 				AND item_group in (SELECT name FROM `tabItem Group` WHERE lft >= {lft} AND rgt <= {rgt})
 				AND {condition}
 		ORDER BY
-			idx desc
+			name asc
 		LIMIT
 			{start}, {page_length}"""
 		.format(
@@ -162,13 +162,14 @@ def search_serial_or_batch_or_barcode_number(search_value):
 	return {}
 
 @frappe.whitelist()
-def check_opening_voucher(user):
+def check_opening_entry(user):
 	open_vouchers = frappe.db.get_all("POS Opening Entry", 
 		filters = { 
 			"user": user, 
 			"pos_closing_entry": ["in", ["", None]], "docstatus": 1 
 		}, 
-		fields = ["name", "company", "pos_profile", "period_start_date"]
+		fields = ["name", "company", "pos_profile", "period_start_date"],
+		order_by = "period_start_date desc"
 	)
 
 	return open_vouchers
