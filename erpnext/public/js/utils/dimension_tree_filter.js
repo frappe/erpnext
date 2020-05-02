@@ -46,9 +46,16 @@ doctypes_with_dimensions.forEach((doctype) => {
 					if (frm.doc.company && Object.keys(default_dimensions || {}).length > 0
 						&& default_dimensions[frm.doc.company]) {
 
-						if (frappe.meta.has_field(doctype, dimension['fieldname'])) {
-							frm.set_value(dimension['fieldname'],
-								default_dimensions[frm.doc.company][dimension['document_type']]);
+						let default_dimension = default_dimensions[frm.doc.company][dimension['fieldname']];
+
+						if(default_dimension) {
+							if (frappe.meta.has_field(doctype, dimension['fieldname'])) {
+								frm.set_value(dimension['fieldname'], default_dimension);
+							}
+
+							$.each(frm.doc.items || frm.doc.accounts || [], function(i, row) {
+								frappe.model.set_value(row.doctype, row.name, dimension['fieldname'], default_dimension);
+							});
 						}
 
 						$.each(frm.doc.items || frm.doc.accounts || [], function(i, row) {
