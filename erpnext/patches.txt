@@ -659,6 +659,7 @@ erpnext.patches.v12_0.set_published_in_hub_tracked_item
 erpnext.patches.v12_0.set_job_offer_applicant_email
 erpnext.patches.v12_0.create_irs_1099_field_united_states
 erpnext.patches.v12_0.move_bank_account_swift_number_to_bank
+erpnext.patches.v12_0.rename_bank_reconciliation
 erpnext.patches.v12_0.rename_bank_reconciliation_fields # 2020-01-22
 erpnext.patches.v12_0.add_permission_in_lower_deduction
 erpnext.patches.v12_0.set_received_qty_in_material_request_as_per_stock_uom
