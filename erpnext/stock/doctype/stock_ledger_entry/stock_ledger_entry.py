@@ -46,7 +46,7 @@ class StockLedgerEntry(Document):
 	def calculate_batch_qty(self):
 		if self.batch_no:
 			batch_qty = frappe.db.get_value("Stock Ledger Entry",
-				{"docstatus": 1, "batch_no": self.batch_no, "is_cancelled": "No"},
+				{"docstatus": 1, "batch_no": self.batch_no},
 				"sum(actual_qty)") or 0
 			frappe.db.set_value("Batch", self.batch_no, "batch_qty", batch_qty)
 
@@ -93,7 +93,7 @@ class StockLedgerEntry(Document):
 				elif not frappe.db.get_value("Batch",{"item": self.item_code, "name": self.batch_no}):
 					frappe.throw(_("{0} is not a valid Batch Number for Item {1}").format(self.batch_no, batch_item))
 
-			elif item_det.has_batch_no ==0 and self.batch_no and self.is_cancelled == "No":
+			elif item_det.has_batch_no ==0 and self.batch_no:
 				frappe.throw(_("The Item {0} cannot have Batch").format(self.item_code))
 
 		if item_det.has_variants:
