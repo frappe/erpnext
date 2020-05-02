@@ -73,21 +73,9 @@ class SalaryStructure(Document):
 		if not have_a_flexi and flt(self.max_benefits) > 0:
 			frappe.throw(_("Salary Structure should have flexible benefit component(s) to dispense benefit amount"))
 
-	def get_employees(self, company, filters):
-		filters = frappe._dict(filters)
-		filters.company = ["=", company]
-		employees = frappe.get_all("Employee", filters=filters, as_list=1)
-		employees = [ employee[0] for employee in employees ]
-		return employees
-
 	@frappe.whitelist()
-	def assign_salary_structure(self, company=None, employees=None, filters=None,
-		from_date=None, base=None,variable=None, assign_to=None):
-
-		if not employees:
-			employees = self.get_employees(company=company, filters=filters)
-
-		if employees:
+	def assign_salary_structure(self, employees, from_date, company ,base=None ,variable=None):
+		if len(employees):
 			if len(employees) > 20:
 				frappe.enqueue(assign_salary_structure_for_employees, timeout=600,
 					employees=employees, salary_structure=self,from_date=from_date,

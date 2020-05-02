@@ -1,7 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 {% include "erpnext/public/js/controllers/accounts.js" %}
-{% include "erpnext/public/js/hr/common_employee_filter.js" %}
 
 cur_frm.add_fetch('company', 'default_letter_head', 'letter_head');
 
@@ -73,8 +72,63 @@ frappe.ui.form.on('Salary Structure', {
 	},
 
 	assign_to_employees:function (frm) {
-		var employee_dialog = new erpnext.hr.EmployeeFilter(frm, "assign_salary_structure", "Assign to Employees", "Assign")
-		employee_dialog.make_dialog()
+		var d = new frappe.ui.form.MultiSelectDialog({
+			doctype: "Employee",
+			target: cur_frm,
+			setters: {
+				company: cur_frm.doc.company,
+				department: '',
+				employee_name: '',
+				grade: ''
+			},
+			data_fields:[
+						{
+							fieldname:'from_date',
+							fieldtype:'Date',
+							reqd: 1,
+							label: __('From Date')
+						},
+						{
+							fieldname:'variable',
+							fieldtype:'Currency',
+							label: __('Variable')
+						},
+						{
+							fieldtype: "Column Break"
+						},
+						{
+							fieldname:'base',
+							fieldtype:'Currency',
+							label: __('Base')
+						},
+						],
+			get_query() {
+				return {
+					filters: { status: ['=', "Active"] }
+				}
+			},
+			add_filters_group: 1,
+			primary_action_label: "Assign",
+			action(employees, data) {
+				frappe.call({
+					doc: frm.doc,
+					method: "assign_salary_structure",
+					args: {
+						employees: employees,
+						company: data["company"],
+						from_date: data["from_date"],
+						variable: data["variable"],
+						base: data['base']
+					},
+					callback: function(r) {
+						if(!r.exc) {
+							frm.refresh()
+							frm.reload_doc()
+						}
+					}
+				});
+			}
+		});
 	},
 
 	salary_slip_based_on_timesheet: function(frm) {

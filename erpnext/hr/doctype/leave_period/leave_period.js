@@ -49,8 +49,8 @@ frappe.ui.form.on('Leave Period', {
 				};
 			},
 			add_filters_group: 1,
-			primary_action_label: "Get Employee",
-			action(employees, data, field_filters, standard_filters) {
+			primary_action_label: "Grant Leaves",
+			action(employees, data) {
 				if(employees.length){
 					frappe.call({
 						doc: frm.doc,
@@ -70,65 +70,5 @@ frappe.ui.form.on('Leave Period', {
 				}
 			}
 		});
-		// var d = new frappe.ui.Dialog({
-		// 	title: __('Grant Leaves'),
-		// 	fields: [
-		// 		{
-		// 			"label": "Filter Employees By (Optional)",
-		// 			"fieldname": "sec_break",
-		// 			"fieldtype": "Section Break",
-		// 		},
-		// 		{
-		// 			"label": "Employee Grade",
-		// 			"fieldname": "grade",
-		// 			"fieldtype": "Link",
-		// 			"options": "Employee Grade"
-		// 		},
-		// 		{
-		// 			"label": "Department",
-		// 			"fieldname": "department",
-		// 			"fieldtype": "Link",
-		// 			"options": "Department"
-		// 		},
-		// 		{
-		// 			"fieldname": "col_break",
-		// 			"fieldtype": "Column Break",
-		// 		},
-		// 		{
-		// 			"label": "Designation",
-		// 			"fieldname": "designation",
-		// 			"fieldtype": "Link",
-		// 			"options": "Designation"
-		// 		},
-		// 		{
-		// 			"label": "Employee",
-		// 			"fieldname": "employee",
-		// 			"fieldtype": "Link",
-		// 			"options": "Employee"
-		// 		},
-		// 		{
-		// 			"fieldname": "sec_break",
-		// 			"fieldtype": "Section Break",
-		// 		},
-		//
-		// 	],
-		// 	primary_action: function() {
-		// 		var data = d.get_values();
-
-		// 		frappe.call({
-		// 			doc: frm.doc,
-		// 			method: "grant_leave_allocation",
-		// 			args: data,
-		// 			callback: function(r) {
-		// 				if(!r.exc) {
-		// 					d.hide();
-		// 					frm.reload_doc();
-		// 				}
-		// 			}
-		// 		});
-		// 	},
-		// 	primary_action_label: __('Grant')
-		// });
-		// d.show();
 	}
 });

@@ -22,13 +22,6 @@ class LeavePeriod(Document):
 
 
 	def grant_leave_allocation(self, company=None,  employees=None, carry_forward=0):
-		# employee_records = self.get_employees({
-		# 	"grade": grade,
-		# 	"department": department,
-		# 	"designation": designation,
-		# 	"name": employee
-		# })
-
 		if employees:
 			if len(employees) > 20:
 				frappe.enqueue(grant_leave_alloc_for_employees, timeout=600,
