@@ -460,7 +460,8 @@ class Asset(AccountsController):
 			self.name, self.asset_category, self.company)
 
 		# check if expense already has been booked in case of cwip was enabled after purchasing asset
-		expense_booked = False, cwip_booked = False
+		expense_booked = False
+		cwip_booked = False
 		if update_stock_invoice:
 			expense_booked = frappe.db.sql("""SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s""",
 				(purchase_document, fixed_asset_account), as_dict=1)
