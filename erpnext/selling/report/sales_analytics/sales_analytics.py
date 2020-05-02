@@ -241,8 +241,6 @@ class Analytics(object):
 					self.entity_periodic_data[d.parent][period] += amount
 				total += amount
 
-				if not total_row.get(scrub(period)): total_row[scrub(period)] = 0
-
 			row["total"] = total
 			out = [row] + out
 
