@@ -28,6 +28,16 @@ PRIMARY_ACCOUNT = "Primary"
 VOUCHER_CHUNK_SIZE = 500
 
 
+@frappe.whitelist()
+def new_doc(document):
+	document = json.loads(document)
+	doctype = document.pop("doctype")
+	document.pop("name", None)
+	doc = frappe.new_doc(doctype)
+	doc.update(document)
+
+	return doc
+
 class TallyMigration(Document):
 	def validate(self):
 		failed_import_log = json.loads(self.failed_import_log)

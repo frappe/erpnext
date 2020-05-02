@@ -253,10 +253,24 @@ erpnext.tally_migration.resolve = (document) => {
 	frm.save();
 }
 
-erpnext.tally_migration.create_new_doc = (doctype, document) => {
+erpnext.tally_migration.create_new_doc = (document) => {
 	/* Mark as resolved and create new document */
 	erpnext.tally_migration.resolve(document);
-	frappe.new_doc(doctype, document);
+	return frappe.call({
+		type: "POST",
+		method: 'erpnext.erpnext_integrations.doctype.tally_migration.tally_migration.new_doc',
+		args: {
+			document
+		},
+		freeze: true,
+		callback: function(r) {
+			if(!r.exc) {
+				frappe.model.sync(r.message);
+				frappe.get_doc(r.message.doctype, r.message.name).__run_link_triggers = true;
+				frappe.set_route("Form", r.message.doctype, r.message.name);
+			}
+		}
+	});
 }
 
 erpnext.tally_migration.get_html_rows = (logs, field) => {
@@ -290,7 +304,7 @@ erpnext.tally_migration.get_html_rows = (logs, field) => {
 				</div>`;
 
 			let create_button = `
-				<button class='btn btn-default btn-xs m-3' type='button' onclick='erpnext.tally_migration.create_new_doc("${doc.doctype}", ${JSON.stringify(doc)})'>
+				<button class='btn btn-default btn-xs m-3' type='button' onclick='erpnext.tally_migration.create_new_doc(${JSON.stringify(doc)})'>
 					${__("Create Document")}
 				</button>`
 
