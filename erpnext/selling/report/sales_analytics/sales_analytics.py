@@ -225,9 +225,6 @@ class Analytics(object):
 	def get_rows_by_group(self):
 		self.get_periodic_data()
 		out = []
-		total_row = {
-				"entity": "Total",
-			}
 
 		for d in reversed(self.group_entries):
 			row = {
@@ -245,12 +242,10 @@ class Analytics(object):
 				total += amount
 
 				if not total_row.get(scrub(period)): total_row[scrub(period)] = 0
-				total_row[scrub(period)] += amount
 
 			row["total"] = total
 			out = [row] + out
 
-		out.append(total_row)
 		self.data = out
 
 	def get_periodic_data(self):
