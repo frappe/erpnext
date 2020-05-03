@@ -630,7 +630,11 @@ def get_item_price(args, item_code, ignore_party=False):
 		elif args.get("supplier"):
 			conditions += " and supplier=%(supplier)s"
 		else:
-			conditions += " and (customer is null or customer = '') and (supplier is null or supplier = '')"
+			conditions += """and case when ifnull(selling, 0) = 1 then 
+								(customer is null or customer = '')	
+							 else
+								(supplier is null or supplier = '')
+							 end"""
 
 	if args.get('transaction_date'):
 		conditions += """ and %(transaction_date)s between
@@ -658,6 +662,15 @@ def get_price_list_rate_for(args, item_code):
 			"transaction_date": args.get('transaction_date'),
 	}
 
+	item_price_args = {
+			"item_code": 'EcoCommander Pro 5.0',
+			"price_list": 'Retail Price USD',
+			"customer": 'Secutronics',
+			"supplier": None,
+			"uom": 'Nos',
+			"transaction_date": frappe.utils.nowdate(),
+	}
+
 	item_price_data = 0
 	price_list_rate = get_item_price(item_price_args, item_code)
 	if price_list_rate:
@@ -674,9 +687,6 @@ def get_price_list_rate_for(args, item_code):
 		if not general_price_list_rate and args.get("uom") != args.get("stock_uom"):
 			item_price_args["uom"] = args.get("stock_uom")
 			general_price_list_rate = get_item_price(item_price_args, item_code, ignore_party=args.get("ignore_party"))
-
-		if not general_price_list_rate:
-			general_price_list_rate = get_item_price(item_price_args, item_code, ignore_party=True)
 
 		if general_price_list_rate:
 			item_price_data = general_price_list_rate
