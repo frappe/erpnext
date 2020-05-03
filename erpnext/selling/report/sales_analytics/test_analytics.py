@@ -83,6 +83,22 @@ class TestAnalytics(unittest.TestCase):
 				"feb_2018": 0.0,
 				"mar_2018": 0.0,
 				"total": 3000.0
+			},
+			{
+				"entity": "Total",
+				"entity_name": "",
+				"apr_2017": 0.0,
+				"may_2017": 0.0,
+				"jun_2017": 2000.0,
+				"jul_2017": 1000.0,
+				"aug_2017": 0.0,
+				"sep_2017": 1500.0,
+				"oct_2017": 1000.0,
+				"nov_2017": 0.0,
+				"dec_2017": 0.0,
+				"jan_2018": 0.0,
+				"feb_2018": 0.0,
+				"mar_2018": 0.0
 			}
 		]
 		result = sorted(report[1], key=lambda k: k['entity'])
