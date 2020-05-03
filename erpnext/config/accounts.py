@@ -245,6 +245,10 @@ def get_data():
 					"name": "Supplier Ledger Summary",
 					"doctype": "Sales Invoice",
 					"is_query_report": True,
+				},
+				{
+					"type": "doctype",
+					"name": "Process Deferred Accounting"
 				}
 			]
 		},
