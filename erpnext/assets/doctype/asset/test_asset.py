@@ -79,7 +79,6 @@ class TestAsset(unittest.TestCase):
 		doc.set_missing_values()
 		self.assertEquals(doc.items[0].is_fixed_asset, 1)
 
-
 	def test_schedule_for_straight_line_method(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=1, rate=100000.0, location="Test Location")
@@ -596,6 +595,7 @@ def create_asset(**args):
 		"purchase_date": "2015-01-01",
 		"calculate_depreciation": 0,
 		"gross_purchase_amount": 100000,
+		"purchase_receipt_amount": 100000,
 		"expected_value_after_useful_life": 10000,
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"available_for_use_date": "2020-06-06",
