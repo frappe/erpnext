@@ -662,15 +662,6 @@ def get_price_list_rate_for(args, item_code):
 			"transaction_date": args.get('transaction_date'),
 	}
 
-	item_price_args = {
-			"item_code": 'EcoCommander Pro 5.0',
-			"price_list": 'Retail Price USD',
-			"customer": 'Secutronics',
-			"supplier": None,
-			"uom": 'Nos',
-			"transaction_date": frappe.utils.nowdate(),
-	}
-
 	item_price_data = 0
 	price_list_rate = get_item_price(item_price_args, item_code)
 	if price_list_rate:
