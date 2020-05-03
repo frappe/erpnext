@@ -178,10 +178,10 @@ class ShareTransfer(Document):
 				frappe.throw(_('The shareholder does not belong to this company'))
 			if not doc.folio_no:
 				doc.folio_no = self.from_folio_no \
-					if (shareholder == 'from_shareholder') else self.to_folio_no
+					if (shareholder_field == 'from_shareholder') else self.to_folio_no
 				doc.save()
 			else:
-				if doc.folio_no and doc.folio_no != (self.from_folio_no if (shareholder == 'from_shareholder') else self.to_folio_no):
+				if doc.folio_no and doc.folio_no != (self.from_folio_no if (shareholder_field == 'from_shareholder') else self.to_folio_no):
 					frappe.throw(_('The folio numbers are not matching'))
 
 	def autoname_folio(self, shareholder, is_company=False):
