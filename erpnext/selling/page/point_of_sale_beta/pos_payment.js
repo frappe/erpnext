@@ -5,10 +5,10 @@ erpnext.PointOfSale.Payment = class {
 		this.wrapper = wrapper;
 		this.events = events;
 
-		this.initialize_app();
+		this.init_component();
 	}
 
-	initialize_app() {
+	init_component() {
         this.prepare_dom();
         this.initialize_numpad();
         this.bind_events();
@@ -88,34 +88,31 @@ erpnext.PointOfSale.Payment = class {
 		const me = this;
 
 		this.$payment_modes.on('click', '.mode-of-payment', function(e) {
-			const clicked_mode = $(this);
-			if (!$(e.target).is(clicked_mode)) return;
+			const mode_clicked = $(this);
+			// if clicked element doesn't have .mode-of-payment class then return
+			if (!$(e.target).is(mode_clicked)) return;
 
-			const mode = clicked_mode.attr('data-mode');
+			const mode = mode_clicked.attr('data-mode');
 
-			// reset and hide all control fields
+			// hide all control fields and shortcuts
 			$(`.mode-of-payment-control`).addClass('d-none');
 			$(`.shortcuts`).addClass('d-none');
 			me.$payment_modes.find(`.${mode}-amount`).removeClass('d-none');
 			me.$payment_modes.find(`.loyalty-program-name`).addClass('d-none');
 
-			// remove highlight from all mode-of-payments except the clicked one
-			$('.mode-of-payment').not(this).removeClass('border-primary');
+			// remove highlight from all mode-of-payments
+			$('.mode-of-payment').removeClass('border-primary');
 
-			if (clicked_mode.hasClass('border-primary')) {
+			if (mode_clicked.hasClass('border-primary')) {
 				// clicked one is selected then unselect it
-				clicked_mode.removeClass('border-primary');
-				clicked_mode.find('.mode-of-payment-control').addClass('d-none');
-				clicked_mode.find('.shortcuts').addClass('d-none');
-				me.$payment_modes.find(`.${mode}-amount`).removeClass('d-none');
-				me.$payment_modes.find(`.loyalty-program-name`).addClass('d-none');
+				mode_clicked.removeClass('border-primary');
 				me.selected_mode = '';
 				me.toggle_numpad(false);
 			} else {
 				// clicked one is not selected then select it
-				clicked_mode.addClass('border-primary');
-				clicked_mode.find('.mode-of-payment-control').removeClass('d-none');
-				clicked_mode.find('.shortcuts').removeClass('d-none');
+				mode_clicked.addClass('border-primary');
+				mode_clicked.find('.mode-of-payment-control').removeClass('d-none');
+				mode_clicked.find('.shortcuts').removeClass('d-none');
 				me.$payment_modes.find(`.${mode}-amount`).addClass('d-none');
 				me.$payment_modes.find(`.loyalty-program-name`).removeClass('d-none');
 				me.toggle_numpad(true);

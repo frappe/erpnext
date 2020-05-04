@@ -59,7 +59,7 @@ frappe.ui.form.on('POS Closing Entry', {
 			method: 'erpnext.selling.doctype.pos_closing_entry.pos_closing_entry.get_pos_invoices',
 			args: {
 				start: frappe.datetime.get_datetime_as_string(frm.doc.period_start_date),
-				end: frm.doc.period_end_date,
+				end: frappe.datetime.get_datetime_as_string(frm.doc.period_end_date),
 				user: frm.doc.user
 			},
 			callback: (r) => {
@@ -156,27 +156,3 @@ function set_html_data(frm) {
 		}
 	})
 }
-
-var get_closing_voucher_details = function(frm) {
-	if (frm.doc.period_end_date && frm.doc.period_start_date && frm.doc.company && frm.doc.pos_profile && frm.doc.user) {
-		frappe.call({
-			method: "get_closing_voucher_details",
-			doc: frm.doc,
-			callback: function(r) {
-				if (r.message) {
-					refresh_field("payment_reconciliation");
-					refresh_field("sales_invoices_summary");
-					refresh_field("taxes");
-
-					refresh_field("grand_total");
-					refresh_field("net_total");
-					refresh_field("total_quantity");
-					refresh_field("total_amount");
-
-					frm.get_field("payment_reconciliation_details").$wrapper.html(r.message);
-				}
-			}
-		});
-	}
-
-};

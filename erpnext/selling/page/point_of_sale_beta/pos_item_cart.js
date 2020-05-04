@@ -4,12 +4,12 @@ erpnext.PointOfSale.ItemCart = class {
 		this.events = events;
         this.customer_info = undefined;
         
-        this.intialize_component();
+        this.init_component();
     }
     
-    intialize_component() {
+    init_component() {
         this.prepare_dom();
-        this.initialize_child_components();
+        this.init_child_components();
 		this.bind_events();
     }
 
@@ -21,12 +21,12 @@ erpnext.PointOfSale.ItemCart = class {
         this.$component = this.wrapper.find('.item-cart');
     }
 
-    initialize_child_components() {
-        this.initialize_customer_selector();
-        this.initialize_cart_components();
+    init_child_components() {
+        this.init_customer_selector();
+        this.init_cart_components();
     }
 
-    initialize_customer_selector() {
+    init_customer_selector() {
 		this.$component.append(
             `<div class="customer-section rounded border flex flex-col m-8 mb-0 pr-4 pl-4"></div>`
         )
@@ -41,7 +41,7 @@ erpnext.PointOfSale.ItemCart = class {
 		this.customer_field.set_focus();
 	}
     
-    initialize_cart_components() {
+    init_cart_components() {
         this.$component.append(
 			`<div class="cart-container flex flex-col items-center rounded flex-1 relative">
 				<div class="absolute flex flex-col p-8 pt-0 w-full h-full">
@@ -155,15 +155,12 @@ erpnext.PointOfSale.ItemCart = class {
 		const me = this;
 		this.$customer_section.on('click', '.add-remove-customer', function (e) {
 			const customer_info_is_visible = me.$cart_container.hasClass('d-none');
-			if (customer_info_is_visible) {
-				me.toggle_customer_info(false);
-			} else {
-				me.reset_customer_selector();
-			}
+			customer_info_is_visible ? 
+				me.toggle_customer_info(false) : me.reset_customer_selector();
 		});
 
 		this.$customer_section.on('click', '.customer-header', function(e) {
-			// don't run the event if .add-remove-customer btn is clicked which is under .customer-header
+			// don't triggger the event if .add-remove-customer btn is clicked which is under .customer-header
 			if ($(e.target).closest('.add-remove-customer').length) return;
 
 			const show = !me.$cart_container.hasClass('d-none');
@@ -607,7 +604,7 @@ erpnext.PointOfSale.ItemCart = class {
 					<div class="text-grey mt-4 mb-6">RECENT TRANSACTIONS</div>
 				</div>`
 			)
-			// transactions need to be in diff div from sticky elem for scroll-ying
+			// transactions need to be in diff div from sticky elem for scrolling
 			this.$customer_section.append(`<div class="customer-transactions flex-1 rounded"></div>`)
 
 			this.render_customer_info_form();

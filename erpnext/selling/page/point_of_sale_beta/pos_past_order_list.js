@@ -3,10 +3,10 @@ erpnext.PointOfSale.PastOrderList = class {
         this.wrapper = wrapper;
         this.events = events;
 
-        this.initialize_component();
+        this.init_component();
     }
 
-    initialize_component() {
+    init_component() {
         this.prepare_dom();
         this.make_filter_section();
         this.bind_events();

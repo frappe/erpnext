@@ -4,12 +4,12 @@ erpnext.PointOfSale.ItemDetails = class {
         this.events = events;
         this.current_item = {};
 
-        this.intialize_component();
+        this.init_component();
     }
 
-    intialize_component() {
+    init_component() {
         this.prepare_dom();
-        this.initialize_child_components();
+        this.init_child_components();
         this.bind_events();
     }
 
@@ -21,7 +21,7 @@ erpnext.PointOfSale.ItemDetails = class {
         this.$component = this.wrapper.find('.item-details');
     }
 
-    initialize_child_components() {
+    init_child_components() {
 		this.$component.html(
 			`<div class="details-container flex flex-col p-8 rounded w-full">
 				<div class="item-defaults flex">
@@ -49,7 +49,7 @@ erpnext.PointOfSale.ItemDetails = class {
 
     toggle_item_details_section(item) {
         const { item_code, batch_no } = this.current_item; // to check if already displaying and item
-        this.show_details = !item ? false : item_code === item.item_code && batch_no === item.batch_no ? false : true;
+        this.show_details = !item ? false : item_code === item.item_code && batch_no == item.batch_no ? false : true;
 
         this.events.toggle_item_selector(this.show_details);
 		this.toggle_component(this.show_details);
@@ -209,23 +209,19 @@ erpnext.PointOfSale.ItemDetails = class {
                 me.current_item.batch_no = this.value;
 			}
 		}
-
-		frappe.ui.form.on('POS Invoice Item', 'rate', (frm, cdt, cdn) => {
-		})
     }
     
     async auto_update_batch_no() {
 		if (this.serial_no_control && this.batch_no_control) {
-			// find batch nos of the selected serial no 
 			const selected_serial_nos = this.serial_no_control.get_value().split(`\n`).filter(s => s);
-
 			if (!selected_serial_nos.length) return;
 
-			const response = await frappe.db.get_list("Serial No", {
+			// find batch nos of the selected serial no 
+			const serials_with_batch_no = await frappe.db.get_list("Serial No", {
 				filters: { 'name': ["in", selected_serial_nos]},
 				fields: ["batch_no", "name"]
 			});
-			const batch_serial_map = response.reduce((acc, r) => {
+			const batch_serial_map = serials_with_batch_no.reduce((acc, r) => {
 				acc[r.batch_no] || (acc[r.batch_no] = []);
 				acc[r.batch_no] = [...acc[r.batch_no], r.name];
 				return acc;
@@ -233,7 +229,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			// set current item's batch no and serial no
 			const batch_no = Object.keys(batch_serial_map)[0];
 			const batch_serial_nos = batch_serial_map[batch_no].join(`\n`);
-			// eg. 10 selected serial no. 5 belongs to first batch other 5 belongs to second batch
+			// eg. 10 selected serial no. -> 5 belongs to first batch other 5 belongs to second batch
             const serial_nos_belongs_to_other_batch = selected_serial_nos.length !== batch_serial_map[batch_no].length;
             
             const current_batch_no = this.batch_no_control.get_value();

@@ -74,9 +74,6 @@ class POSProfile(Document):
 		if not self.customer_group:
 			frappe.throw(_("Customer Group is Required in POS Profile"), title="Mandatory Field")
 
-	def before_save(self):
-		set_account_for_mode_of_payment(self)
-
 	def on_update(self):
 		self.set_defaults()
 

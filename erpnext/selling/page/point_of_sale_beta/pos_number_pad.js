@@ -7,10 +7,10 @@ erpnext.PointOfSale.NumberPad = class {
         this.css_classes = css_classes || [];
         this.fieldnames = fieldnames_map || {};
 
-        this.initialize_component();
+        this.init_component();
     }
 
-    initialize_component() {
+    init_component() {
         this.prepare_dom();
         this.bind_events();
     }

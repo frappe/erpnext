@@ -100,7 +100,7 @@ class POSInvoice(SalesInvoice):
 				if len(invalid_serial_nos):
 					multiple_nos = 's' if len(invalid_serial_nos) > 1 else ''
 					frappe.throw(_("Row #{}: Serial No{}. {} has already been transacted into another POS Invoice. \
-						Please select valid serial nos.".format(d.idx, multiple_nos, 
+						Please select valid serial no.".format(d.idx, multiple_nos, 
 						frappe.bold(', '.join(invalid_serial_nos)))), title="Not Available")
 			else:
 				if allow_negative_stock:

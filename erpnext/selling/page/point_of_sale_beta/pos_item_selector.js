@@ -4,10 +4,10 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.events = events;
         this.pos_profile = pos_profile;
         
-        this.intialize_component();
+        this.inti_component();
     }
     
-    intialize_component() {
+    inti_component() {
         this.prepare_dom();
         this.make_search_bar();
         this.load_items_data();

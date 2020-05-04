@@ -72,7 +72,6 @@ class POSInvoiceMergeLog(Document):
 		return credit_note.name
 	
 	def merge_pos_invoice_into(self, invoice, data):
-		sales_invoice_meta = frappe.get_meta("Sales Invoice")
 		items, payments, taxes = [], [], []
 		loyalty_amount_sum, loyalty_points_sum = 0, 0
 		for doc in data:
@@ -124,6 +123,7 @@ class POSInvoiceMergeLog(Document):
 		sales_invoice.customer = self.customer
 		sales_invoice.is_pos = 1
 		sales_invoice.is_consolidated = 1
+		# date can be pos closing date?
 		sales_invoice.posting_date = getdate(nowdate())
 
 		return sales_invoice
@@ -171,6 +171,6 @@ def create_merge_logs(pos_invoice_customer_map):
 		merge_log.customer = customer
 
 		merge_log.set('pos_invoices', invoices)
-		merge_log.save()
+		merge_log.save(ignore_permissions=True)
 		merge_log.submit()
 

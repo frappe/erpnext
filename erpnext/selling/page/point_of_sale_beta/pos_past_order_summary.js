@@ -3,11 +3,12 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.wrapper = wrapper;
         this.events = events;
 
-        this.initialize_component();
+        this.init_component();
     }
 
-    initialize_component() {
+    init_component() {
         this.prepare_dom();
+        this.init_child_components();
         this.bind_events();
     }
 
@@ -30,19 +31,18 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.$component = this.wrapper.find('.past-order-summary');
         this.$summary_wrapper = this.$component.find('.summary-wrapper');
         this.$summary_container = this.$component.find('.summary-container');
-        this.initialize_child_components();
     }
 
-    initialize_child_components() {
-        this.initialize_upper_section();
-        this.initialize_items_summary();
-        this.initialize_totals_summary();
-        this.initialize_payments_summary();
-        this.initialize_summary_buttons();
-        this.initialize_email_print_dialog();
+    init_child_components() {
+        this.init_upper_section();
+        this.init_items_summary();
+        this.init_totals_summary();
+        this.init_payments_summary();
+        this.init_summary_buttons();
+        this.init_email_print_dialog();
     }
 
-    initialize_upper_section() {
+    init_upper_section() {
         this.$summary_container.append(
             `<div class="flex upper-section justify-between w-full h-24"></div>`
         );
@@ -50,7 +50,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.$upper_section = this.$summary_container.find('.upper-section');
     }
 
-    initialize_items_summary() {
+    init_items_summary() {
         this.$summary_container.append(
             `<div class="flex flex-col flex-1 mt-6 w-full scroll-y">
                 <div class="text-grey mb-4 sticky bg-white">ITEMS</div>
@@ -61,7 +61,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.$items_summary_container = this.$summary_container.find('.items-summary-container');
     }
 
-    initialize_totals_summary() {
+    init_totals_summary() {
         this.$summary_container.append(
             `<div class="flex flex-col mt-6 w-full f-shrink-0">
                 <div class="text-grey mb-4">TOTALS</div>
@@ -72,7 +72,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.$totals_summary_container = this.$summary_container.find('.summary-totals-container');
     }
 
-    initialize_payments_summary() {
+    init_payments_summary() {
         this.$summary_container.append(
             `<div class="flex flex-col mt-6 w-full f-shrink-0">
                 <div class="text-grey mb-4">PAYMENTS</div>
@@ -83,7 +83,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.$payment_summary_container = this.$summary_container.find('.payments-summary-container');
     }
 
-    initialize_summary_buttons() {
+    init_summary_buttons() {
         this.$summary_container.append(
             `<div class="summary-btns flex summary-btns justify-between w-full f-shrink-0"></div>`
         )
@@ -91,7 +91,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.$summary_btns = this.$summary_container.find('.summary-btns');
     }
 
-    initialize_email_print_dialog() {
+    init_email_print_dialog() {
         const email_dialog = new frappe.ui.Dialog({
             title: 'Email Receipt',
             fields: [

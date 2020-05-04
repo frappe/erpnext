@@ -443,6 +443,7 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	async make_return_invoice(doc) {
+		frappe.dom.freeze();
 		this.frm = this.get_new_frm(this.frm);
 		this.frm.doc.items = [];
 		const res = await frappe.call({
@@ -454,6 +455,7 @@ erpnext.PointOfSale.Controller = class {
 		});
 		frappe.model.sync(res.message);
 		await this.set_pos_profile_data();
+		frappe.dom.unfreeze();
 	}
 
 	set_pos_profile_data() {
