@@ -76,7 +76,6 @@ frappe.ui.form.on('Employee Advance', {
 				doc: frm.doc
 			},
 			callback: function (r){
-				console.log("Helloxs")
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
 			}
