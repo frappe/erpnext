@@ -24,8 +24,6 @@
   "iban",
   "column_break_12",
   "bank_account_no",
-  "branch_code",
-  "swift_number",
   "address_and_contact",
   "address_html",
   "website",
@@ -66,13 +64,13 @@
    "fieldname": "account_type",
    "fieldtype": "Link",
    "label": "Account Type",
-   "options": "Account Type"
+   "options": "Bank Account Type"
   },
   {
    "fieldname": "account_subtype",
    "fieldtype": "Link",
    "label": "Account Subtype",
-   "options": "Account Subtype"
+   "options": "Bank Account Subtype"
   },
   {
    "fieldname": "column_break_7",
@@ -146,17 +144,6 @@
    "length": 30
   },
   {
-   "fieldname": "branch_code",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Branch Code"
-  },
-  {
-   "fieldname": "swift_number",
-   "fieldtype": "Data",
-   "label": "SWIFT number"
-  },
-  {
    "fieldname": "address_and_contact",
    "fieldtype": "Section Break",
    "label": "Address and Contact",
@@ -213,7 +200,7 @@
   }
  ],
  "links": [],
- "modified": "2020-01-29 20:42:26.458316",
+ "modified": "2020-04-06 21:00:45.379804",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",

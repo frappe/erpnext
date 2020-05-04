@@ -59,6 +59,10 @@ class BOM(WebsiteGenerator):
 
 		self.name = name
 
+	def onload(self):
+		super(BOM, self).onload()
+		if self.get("item") and cint(frappe.db.get_value("Item", self.item, "has_variants")):
+			self.set_onload("has_variants", True)
 
 	def validate(self):
 		self.route = frappe.scrub(self.name).replace('_', '-')
@@ -114,10 +118,6 @@ class BOM(WebsiteGenerator):
 				child = self.append('operations', d)
 				child.hour_rate = flt(d.hour_rate / self.conversion_rate, 2)
 
-	def validate_rm_item(self, item):
-		if (item[0]['name'] in [it.item_code for it in self.items]) and item[0]['name'] == self.item:
-			frappe.throw(_("BOM #{0}: Raw material cannot be same as main Item").format(self.name))
-
 	def set_bom_material_details(self):
 		for item in self.get("items"):
 			self.validate_bom_currecny(item)
@@ -147,7 +147,6 @@ class BOM(WebsiteGenerator):
 			args = json.loads(args)
 
 		item = self.get_item_det(args['item_code'])
-		self.validate_rm_item(item)
 
 		args['bom_no'] = args['bom_no'] or item and cstr(item[0]['default_bom']) or ''
 		args['transfer_for_manufacture'] = (cstr(args.get('include_item_in_manufacturing', '')) or
@@ -194,7 +193,7 @@ class BOM(WebsiteGenerator):
 					if self.rm_cost_as_per == 'Valuation Rate':
 						rate = self.get_valuation_rate(arg) * (arg.get("conversion_factor") or 1)
 					elif self.rm_cost_as_per == 'Last Purchase Rate':
-						rate = (arg.get('last_purchase_rate') \
+						rate = flt(arg.get('last_purchase_rate') \
 							or frappe.db.get_value("Item", arg['item_code'], "last_purchase_rate")) \
 								* (arg.get("conversion_factor") or 1)
 					elif self.rm_cost_as_per == "Price List":
@@ -247,12 +246,13 @@ class BOM(WebsiteGenerator):
 			if rate:
 				d.rate = rate
 			d.amount = flt(d.rate) * flt(d.qty)
+			d.db_update()
 
 		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True
 			self.calculate_cost()
 		if save:
-			self.save()
+			self.db_update()
 		self.update_exploded_items()
 
 		# update parent BOMs
@@ -497,6 +497,14 @@ class BOM(WebsiteGenerator):
 
 		self.scrap_material_cost = total_sm_cost
 		self.base_scrap_material_cost = base_total_sm_cost
+
+	def update_new_bom(self, old_bom, new_bom, rate):
+		for d in self.get("items"):
+			if d.bom_no != old_bom: continue
+
+			d.bom_no = new_bom
+			d.rate = rate
+			d.amount = (d.stock_qty or d.qty) * rate
 
 	def update_exploded_items(self):
 		""" Update Flat BOM, following will be correct data"""
@@ -826,6 +834,10 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
 @frappe.whitelist()
 def get_bom_diff(bom1, bom2):
 	from frappe.model import table_fields
+
+	if bom1 == bom2:
+		frappe.throw(_("BOM 1 {0} and BOM 2 {1} should not be same")
+			.format(frappe.bold(bom1), frappe.bold(bom2)))
 
 	doc1 = frappe.get_doc('BOM', bom1)
 	doc2 = frappe.get_doc('BOM', bom2)

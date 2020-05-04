@@ -11,7 +11,7 @@ from frappe.utils import (add_days, getdate, formatdate, date_diff,
 	add_years, get_timestamp, nowdate, flt, cstr, add_months, get_last_day)
 from frappe.contacts.doctype.address.address import (get_address_display,
 	get_default_address, get_company_address)
-from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
+from frappe.contacts.doctype.contact.contact import get_contact_details
 from erpnext.exceptions import PartyFrozen, PartyDisabled, InvalidAccountCurrency
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext import get_company_currency
@@ -162,8 +162,9 @@ def get_default_price_list(party):
 def set_price_list(party_details, party, party_type, given_price_list, pos=None):
 	# price list
 	price_list = get_permitted_documents('Price List')
-
-	if price_list:
+	
+	# if there is only one permitted document based on user permissions, set it
+	if price_list and len(price_list) == 1:
 		price_list = price_list[0]
 	elif pos and party_type == 'Customer':
 		customer_price_list = frappe.get_value('Customer', party.name, 'default_price_list')
@@ -281,8 +282,8 @@ def validate_party_gle_currency(party_type, party, company, party_account_curren
 	existing_gle_currency = get_party_gle_currency(party_type, party, company)
 
 	if existing_gle_currency and party_account_currency != existing_gle_currency:
-		frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
-			.format(party_type, party, existing_gle_currency), InvalidAccountCurrency)
+		frappe.throw(_("{0} {1} has accounting entries in currency {2} for company {3}. Please select a receivable or payable account with currency {2}.")
+			.format(frappe.bold(party_type), frappe.bold(party), frappe.bold(existing_gle_currency), frappe.bold(company)), InvalidAccountCurrency)
 
 def validate_party_accounts(doc):
 	companies = []
@@ -295,15 +296,13 @@ def validate_party_accounts(doc):
 			companies.append(account.company)
 
 		party_account_currency = frappe.db.get_value("Account", account.account, "account_currency", cache=True)
-		existing_gle_currency = get_party_gle_currency(doc.doctype, doc.name, account.company)
 		if frappe.db.get_default("Company"):
 			company_default_currency = frappe.get_cached_value('Company',
 				frappe.db.get_default("Company"),  "default_currency")
 		else:
 			company_default_currency = frappe.db.get_value('Company', account.company, "default_currency")
 
-		if existing_gle_currency and party_account_currency != existing_gle_currency:
-			frappe.throw(_("Accounting entries have already been made in currency {0} for company {1}. Please select a receivable or payable account with currency {0}.").format(existing_gle_currency, account.company))
+		validate_party_gle_currency(doc.doctype, doc.name, account.company, party_account_currency)
 
 		if doc.get("default_currency") and party_account_currency and company_default_currency:
 			if doc.default_currency != party_account_currency and doc.default_currency != company_default_currency:
@@ -601,10 +600,12 @@ def get_party_shipping_address(doctype, name):
 	else:
 		return ''
 
-def get_partywise_advanced_payment_amount(party_type, posting_date = None):
+def get_partywise_advanced_payment_amount(party_type, posting_date = None, company=None):
 	cond = "1=1"
 	if posting_date:
 		cond = "posting_date <= '{0}'".format(posting_date)
+	if company:
+		cond += "and company = '{0}'".format(company)
 
 	data = frappe.db.sql(""" SELECT party, sum({0}) as amount
 		FROM `tabGL Entry`
@@ -615,3 +616,26 @@ def get_partywise_advanced_payment_amount(party_type, posting_date = None):
 
 	if data:
 		return frappe._dict(data)
+
+def get_default_contact(doctype, name):
+	"""
+		Returns default contact for the given doctype and name.
+		Can be ordered by `contact_type` to either is_primary_contact or is_billing_contact.
+	"""
+	out = frappe.db.sql("""
+			SELECT dl.parent, c.is_primary_contact, c.is_billing_contact
+			FROM `tabDynamic Link` dl
+			INNER JOIN tabContact c ON c.name = dl.parent
+			WHERE
+				dl.link_doctype=%s AND
+				dl.link_name=%s AND
+				dl.parenttype = "Contact"
+			ORDER BY is_primary_contact DESC, is_billing_contact DESC
+		""", (doctype, name))
+	if out:
+		try:
+			return out[0][0]
+		except:
+			return None
+	else:
+		return None

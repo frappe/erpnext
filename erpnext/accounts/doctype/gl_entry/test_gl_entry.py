@@ -38,6 +38,7 @@ class TestGLEntry(unittest.TestCase):
 			filters={"voucher_type": "Journal Entry", "voucher_no": je.name},
 			order_by="creation"
 		)
+
 		self.assertTrue(all(entry.to_rename == 1 for entry in gl_entries))
 		old_naming_series_current_value = frappe.db.sql("SELECT current from tabSeries where name = %s", naming_series)[0][0]
 

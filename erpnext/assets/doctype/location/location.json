@@ -139,12 +139,14 @@
    "read_only": 1
   }
  ],
+ "is_tree": 1,
  "links": [],
- "modified": "2020-01-28 13:52:22.513425",
+ "modified": "2020-03-18 18:00:08.885805",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Location",
  "name_case": "Title Case",
+ "nsm_parent_field": "parent_location",
  "owner": "Administrator",
  "permissions": [
   {
@@ -218,6 +220,8 @@
    "write": 1
   }
  ],
+ "quick_entry": 1,
+ "restrict_to_domain": "Agriculture",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

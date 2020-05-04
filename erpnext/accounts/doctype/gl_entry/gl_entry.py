@@ -30,23 +30,20 @@ class GLEntry(Document):
 		self.pl_must_have_cost_center()
 		self.validate_cost_center()
 
-		if not self.flags.from_repost:
-			self.check_pl_account()
-			self.validate_party()
-			self.validate_currency()
+		self.check_pl_account()
+		self.validate_party()
+		self.validate_currency()
 
-	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes', from_repost=False):
-		if not from_repost:
-			self.validate_account_details(adv_adj)
-			self.validate_dimensions_for_pl_and_bs()
-			check_freezing_date(self.posting_date, adv_adj)
+	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes'):
+		self.validate_account_details(adv_adj)
+		self.validate_dimensions_for_pl_and_bs()
 
 		validate_frozen_account(self.account, adv_adj)
 		validate_balance_type(self.account, adv_adj)
 
 		# Update outstanding amt on against voucher
 		if self.against_voucher_type in ['Journal Entry', 'Sales Invoice', 'Purchase Invoice', 'Fees'] \
-			and self.against_voucher and update_outstanding == 'Yes' and not from_repost:
+			and self.against_voucher and update_outstanding == 'Yes':
 				update_outstanding_amt(self.account, self.party_type, self.party, self.against_voucher_type,
 					self.against_voucher)
 
@@ -159,7 +156,6 @@ class GLEntry(Document):
 		if self.party_type and self.party:
 			validate_party_gle_currency(self.party_type, self.party, self.company, self.account_currency)
 
-
 	def validate_and_set_fiscal_year(self):
 		if not self.fiscal_year:
 			self.fiscal_year = get_fiscal_year(self.posting_date, company=self.company)[0]
@@ -175,19 +171,6 @@ def validate_balance_type(account, adv_adj=False):
 			if (balance_must_be=="Debit" and flt(balance) < 0) or \
 				(balance_must_be=="Credit" and flt(balance) > 0):
 				frappe.throw(_("Balance for Account {0} must always be {1}").format(account, _(balance_must_be)))
-
-def check_freezing_date(posting_date, adv_adj=False):
-	"""
-		Nobody can do GL Entries where posting date is before freezing date
-		except authorized person
-	"""
-	if not adv_adj:
-		acc_frozen_upto = frappe.db.get_value('Accounts Settings', None, 'acc_frozen_upto')
-		if acc_frozen_upto:
-			frozen_accounts_modifier = frappe.db.get_value( 'Accounts Settings', None,'frozen_accounts_modifier')
-			if getdate(posting_date) <= getdate(acc_frozen_upto) \
-					and not frozen_accounts_modifier in frappe.get_roles():
-				frappe.throw(_("You are not authorized to add or update entries before {0}").format(formatdate(acc_frozen_upto)))
 
 def update_outstanding_amt(account, party_type, party, against_voucher_type, against_voucher, on_cancel=False):
 	if party_type and party:
@@ -233,35 +216,14 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 			frappe.throw(_("Outstanding for {0} cannot be less than zero ({1})").format(against_voucher, fmt_money(bal)))
 
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
-		update_outstanding_amt_in_ref(against_voucher, against_voucher_type, bal)
-
-def update_outstanding_amt_in_ref(against_voucher, against_voucher_type, bal):
-	data = []
-	# Update outstanding amt on against voucher
-	if against_voucher_type == "Fees":
 		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
-		ref_doc.db_set('outstanding_amount', bal)
-		ref_doc.set_status(update=True)
-		return
-	elif against_voucher_type == "Purchase Invoice":
-		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import get_status
-		data = frappe.db.get_value(against_voucher_type, against_voucher, 
-			["name as purchase_invoice", "outstanding_amount", 
-			"is_return", "due_date", "docstatus"])
-	elif against_voucher_type == "Sales Invoice":
-		from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_status
-		data = frappe.db.get_value(against_voucher_type, against_voucher, 
-			["name as sales_invoice", "outstanding_amount", "is_discounted", 
-			"is_return", "due_date", "docstatus"])
 
-	precision = frappe.get_precision(against_voucher_type, "outstanding_amount")
-	data = list(data)
-	data.append(precision)
-	status = get_status(data)
-	frappe.db.set_value(against_voucher_type, against_voucher, {
-		'outstanding_amount': bal,
-		'status': status
-	})
+		# Didn't use db_set for optimisation purpose
+		ref_doc.outstanding_amount = bal
+		frappe.db.set_value(against_voucher_type, against_voucher, 'outstanding_amount', bal)
+
+		ref_doc.set_status(update=True)
+
 
 def validate_frozen_account(account, adv_adj=None):
 	frozen_account = frappe.db.get_value("Account", account, "freeze_account")

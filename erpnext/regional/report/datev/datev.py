@@ -13,6 +13,7 @@ import json
 import zlib
 import zipfile
 import six
+from csv import QUOTE_NONNUMERIC
 from six import BytesIO
 from six import string_types
 import frappe
@@ -62,6 +63,7 @@ def get_transactions(filters, as_dict=1):
 	filters -- dict of filters to be passed to the sql query
 	as_dict -- return as list of dicts [0,1]
 	"""
+	filter_by_voucher = 'AND gl.voucher_type = %(voucher_type)s' if filters.get('voucher_type') else ''
 	gl_entries = frappe.db.sql("""
 		SELECT
 
@@ -79,9 +81,11 @@ def get_transactions(filters, as_dict=1):
 			
 			gl.posting_date as 'Belegdatum',
 			gl.voucher_no as 'Belegfeld 1',
-			gl.remarks as 'Buchungstext',
-			gl.against_voucher_type as 'Beleginfo - Art 1',
-			gl.against_voucher as 'Beleginfo - Inhalt 1'
+			LEFT(gl.remarks, 60) as 'Buchungstext',
+			gl.voucher_type as 'Beleginfo - Art 1',
+			gl.voucher_no as 'Beleginfo - Inhalt 1',
+			gl.against_voucher_type as 'Beleginfo - Art 2',
+			gl.against_voucher as 'Beleginfo - Inhalt 2'
 
 		FROM `tabGL Entry` gl
 
@@ -109,7 +113,8 @@ def get_transactions(filters, as_dict=1):
 		WHERE gl.company = %(company)s 
 		AND DATE(gl.posting_date) >= %(from_date)s
 		AND DATE(gl.posting_date) <= %(to_date)s
-		ORDER BY 'Belegdatum', gl.voucher_no""", filters, as_dict=as_dict, as_utf8=1)
+		{}
+		ORDER BY 'Belegdatum', gl.voucher_no""".format(filter_by_voucher), filters, as_dict=as_dict)
 
 	return gl_entries
 
@@ -160,7 +165,7 @@ def get_customers(filters):
 			and ccl.company = par.company
 
 		WHERE par.company = %(company)s
-		AND par.parenttype = 'Customer'""", filters, as_dict=1, as_utf8=1)
+		AND par.parenttype = 'Customer'""", filters, as_dict=1)
 
 
 def get_suppliers(filters):
@@ -217,7 +222,7 @@ def get_suppliers(filters):
 			and con.is_primary_contact = '1'
 
 		WHERE par.company = %(company)s
-		AND par.parenttype = 'Supplier'""", filters, as_dict=1, as_utf8=1)
+		AND par.parenttype = 'Supplier'""", filters, as_dict=1)
 
 
 def get_account_names(filters):
@@ -264,7 +269,9 @@ def get_datev_csv(data, filters, csv_class):
 		# Do not number rows
 		index=False,
 		# Use all columns defined above
-		columns=csv_class.COLUMNS
+		columns=csv_class.COLUMNS,
+		# Quote most fields, even currency values with "," separator
+		quoting=QUOTE_NONNUMERIC
 	)
 
 	if not six.PY2:
@@ -281,24 +288,25 @@ def get_datev_csv(data, filters, csv_class):
 
 def get_header(filters, csv_class):
 	coa = frappe.get_value("Company", filters.get("company"), "chart_of_accounts")
-	coa_used = "SKR04" if "SKR04" in coa else ("SKR03" if "SKR03" in coa else "")
+	description = filters.get("voucher_type", csv_class.FORMAT_NAME)
+	coa_used = "04" if "SKR04" in coa else ("03" if "SKR03" in coa else "")
 
 	header = [
 		# DATEV format
-		#   "DTVF" = created by DATEV software,
-		#   "EXTF" = created by other software
+		#	"DTVF" = created by DATEV software,
+		#	"EXTF" = created by other software
 		'"EXTF"',
 		# version of the DATEV format
-		#   141 = 1.41, 
-		#   510 = 5.10,
-		#   720 = 7.20
+		#	141 = 1.41, 
+		#	510 = 5.10,
+		#	720 = 7.20
 		'700',
 		csv_class.DATA_CATEGORY,
 		'"%s"' % csv_class.FORMAT_NAME,
 		# Format version (regarding format name)
 		csv_class.FORMAT_VERSION,
 		# Generated on
-		datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+		datetime.datetime.now().strftime("%Y%m%d%H%M%S") + '000',
 		# Imported on -- stays empty
 		'',
 		# Origin. Any two symbols, will be replaced by "SV" on import.
@@ -319,22 +327,26 @@ def get_header(filters, csv_class):
 		frappe.utils.formatdate(filters.get('from_date'), "yyyyMMdd"),
 		# P = Transaction batch end date (YYYYMMDD)
 		frappe.utils.formatdate(filters.get('to_date'), "yyyyMMdd"),
-		# Q = Description (for example, "January - February 2019 Transactions")
-		'"{} - {} {}"'.format(
-				frappe.utils.formatdate(filters.get('from_date'), "MMMM yyyy"),
-				frappe.utils.formatdate(filters.get('to_date'), "MMMM yyyy"),
-				csv_class.FORMAT_NAME
-		),
+		# Q = Description (for example, "Sales Invoice") Max. 30 chars
+		'"{}"'.format(_(description)),
 		# R = Diktatkürzel
 		'',
 		# S = Buchungstyp
-		#   1 = Transaction batch (Finanzbuchführung),
-		#   2 = Annual financial statement (Jahresabschluss)
+		#	1 = Transaction batch (Finanzbuchführung),
+		#	2 = Annual financial statement (Jahresabschluss)
 		'1' if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
 		# T = Rechnungslegungszweck
-		'',
+		#	0 oder leer = vom Rechnungslegungszweck unabhängig
+		#	50 = Handelsrecht
+		#	30 = Steuerrecht
+		#	64 = IFRS
+		#	40 = Kalkulatorik
+		#	11 = Reserviert
+		#	12 = Reserviert
+		'0',
 		# U = Festschreibung
-		'',
+		# TODO: Filter by Accounting Period. In export for closed Accounting Period, this will be "1"
+		'0',
 		# V = Default currency, for example, "EUR"
 		'"%s"' % frappe.get_value("Company", filters.get("company"), "default_currency"),
 		# reserviert

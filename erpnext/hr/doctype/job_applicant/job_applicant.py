@@ -9,8 +9,6 @@ import frappe
 from frappe import _
 from frappe.utils import comma_and, validate_email_address
 
-sender_field = "email_id"
-
 class DuplicationError(frappe.ValidationError): pass
 
 class JobApplicant(Document):

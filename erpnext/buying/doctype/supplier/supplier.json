@@ -27,6 +27,8 @@
   "supplier_type",
   "pan",
   "language",
+  "allow_purchase_invoice_creation_without_purchase_order",
+  "allow_purchase_invoice_creation_without_purchase_receipt",
   "disabled",
   "warn_rfqs",
   "warn_pos",
@@ -364,13 +366,25 @@
    "fieldname": "is_frozen",
    "fieldtype": "Check",
    "label": "Is Frozen"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_purchase_invoice_creation_without_purchase_order",
+   "fieldtype": "Check",
+   "label": "Allow Purchase Invoice Creation Without Purchase Order"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_purchase_invoice_creation_without_purchase_receipt",
+   "fieldtype": "Check",
+   "label": "Allow Purchase Invoice Creation Without Purchase Receipt"
   }
  ],
  "icon": "fa fa-user",
  "idx": 370,
  "image_field": "image",
  "links": [],
- "modified": "2019-12-19 18:17:16.614567",
+ "modified": "2020-03-17 09:48:30.578242",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

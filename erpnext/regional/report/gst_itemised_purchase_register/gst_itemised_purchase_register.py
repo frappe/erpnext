@@ -13,9 +13,9 @@ def execute(filters=None):
 		dict(fieldtype='Data', label='GST Category', fieldname="gst_category", width=120),
 		dict(fieldtype='Data', label='Export Type', fieldname="export_type", width=120),
 		dict(fieldtype='Data', label='E-Commerce GSTIN', fieldname="ecommerce_gstin", width=130),
-		dict(fieldtype='Data', label='HSN Code', fieldname="hsn_code", width=120),
-		dict(fieldtype='Data', label='Supplier Invoice No', fieldname="supplier_invoice_no", width=120),
-		dict(fieldtype='Date', label='Supplier Invoice Date', fieldname="supplier_invoice_date", width=100)
+		dict(fieldtype='Data', label='HSN Code', fieldname="gst_hsn_code", width=120),
+		dict(fieldtype='Data', label='Supplier Invoice No', fieldname="bill_no", width=120),
+		dict(fieldtype='Date', label='Supplier Invoice Date', fieldname="bill_date", width=100)
 	], additional_query_columns=[
 		'supplier_gstin',
 		'company_gstin',
