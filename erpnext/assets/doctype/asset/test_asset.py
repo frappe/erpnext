@@ -634,6 +634,8 @@ class TestAsset(unittest.TestCase):
 			order by account""", asset_doc.name)
 		self.assertEqual(gle, expected_gle)
 
+		frappe.db.set_value("Asset Category", "Computers", "enable_cwip_accounting", 1)
+
 	def test_expense_head(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=2, rate=200000.0, location="Test Location")
