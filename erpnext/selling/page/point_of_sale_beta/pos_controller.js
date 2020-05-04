@@ -229,7 +229,10 @@ erpnext.PointOfSale.Controller = class {
 			events: {
 				get_frm: () => this.frm,
 
-				cart_item_clicked: (item_code, batch_no) => this.toggle_item_details(item_code, batch_no),
+				cart_item_clicked: (item_code, batch_no) => {
+					const item_row = this.frm.doc.items.find(i => i.item_code === item_code && (!batch_no || (batch_no && i.batch_no === batch_no)));
+					this.item_details.toggle_item_details_section(item_row);
+				},
 
 				numpad_event: (value, action) => this.update_item_field(value, action),
 
