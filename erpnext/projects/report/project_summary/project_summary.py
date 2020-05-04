@@ -95,11 +95,11 @@ def get_chart_data(data):
 					"values": total
 				},
 				{
-					"name": "Tasks Completed",
+					"name": "Completed",
 					"values": completed
 				},
 				{
-					"name": "Tasks Overdue",
+					"name": "Overdue",
 					"values": overdue
 				}
 			]
