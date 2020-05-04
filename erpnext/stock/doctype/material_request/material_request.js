@@ -20,6 +20,17 @@ frappe.ui.form.on('Material Request', {
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.ordered_qty) ? "green" : "orange"; });
 
+		frm.set_query("item_code", "items", function() {
+			return {
+				query: "erpnext.controllers.queries.item_query"
+			};
+		});
+
+		frm.set_query("from_warehouse", "items", function(doc) {
+			return {
+				filters: {'company': doc.company}
+			};
+		})
 	},
 
 	onload: function(frm) {
@@ -51,6 +62,16 @@ frappe.ui.form.on('Material Request', {
 	refresh: function(frm) {
 		frm.events.make_custom_buttons(frm);
 		frm.toggle_reqd('customer', frm.doc.material_request_type=="Customer Provided");
+	},
+
+	set_from_warehouse: function(frm) {
+		if (frm.doc.material_request_type == "Material Transfer"
+			&& frm.doc.set_from_warehouse) {
+			frm.doc.items.forEach(d => {
+				frappe.model.set_value(d.doctype, d.name,
+					"from_warehouse", frm.doc.set_from_warehouse);
+			})
+		}
 	},
 
 	make_custom_buttons: function(frm) {
@@ -159,6 +180,7 @@ frappe.ui.form.on('Material Request', {
 			args: {
 				args: {
 					item_code: item.item_code,
+					from_warehouse: item.from_warehouse,
 					warehouse: item.warehouse,
 					doctype: frm.doc.doctype,
 					buying_price_list: frappe.defaults.get_default('buying_price_list'),
@@ -176,9 +198,11 @@ frappe.ui.form.on('Material Request', {
 			},
 			callback: function(r) {
 				const d = item;
+				const qty_fields = ['actual_qty', 'projected_qty', 'min_order_qty'];
+
 				if(!r.exc) {
 					$.each(r.message, function(k, v) {
-						if(!d[k]) d[k] = v;
+						if(!d[k] || in_list(qty_fields, k)) d[k] = v;
 					});
 				}
 			}
@@ -320,6 +344,16 @@ frappe.ui.form.on("Material Request Item", {
 			frappe.msgprint(__("Warning: Material Requested Qty is less than Minimum Order Qty"));
 		}
 
+		const item = locals[doctype][name];
+		frm.events.get_item_data(frm, item);
+	},
+
+	from_warehouse: function(frm, doctype, name) {
+		const item = locals[doctype][name];
+		frm.events.get_item_data(frm, item);
+	},
+
+	warehouse: function(frm, doctype, name) {
 		const item = locals[doctype][name];
 		frm.events.get_item_data(frm, item);
 	},

@@ -11,7 +11,7 @@ from frappe.model.document import Document
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.assets.doctype.asset.depreciation \
 	import get_disposal_account_and_cost_center, get_depreciation_accounts
-from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries
+from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.accounts_controller import AccountsController
 
@@ -22,6 +22,7 @@ class Asset(AccountsController):
 		self.validate_item()
 		self.set_missing_values()
 		self.prepare_depreciation_data()
+		self.validate_gross_and_purchase_amount()
 		if self.get("schedules"):
 			self.validate_expected_value_after_useful_life()
 
@@ -41,7 +42,8 @@ class Asset(AccountsController):
 		self.validate_cancellation()
 		self.delete_depreciation_entries()
 		self.set_status()
-		delete_gl_entries(voucher_type='Asset', voucher_no=self.name)
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
+		make_reverse_gl_entries(voucher_type='Asset', voucher_no=self.name)
 		self.db_set('booked_fixed_asset', 0)
 
 	def validate_asset_and_reference(self):
@@ -123,6 +125,12 @@ class Asset(AccountsController):
 
 		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(self.purchase_date):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
+	
+	def validate_gross_and_purchase_amount(self):
+		if self.gross_purchase_amount and self.gross_purchase_amount != self.purchase_receipt_amount:
+			frappe.throw(_("Gross Purchase Amount should be {} to purchase amount of one single Asset. {}\
+				Please do not book expense of multiple assets against one single Asset.")
+				.format(frappe.bold("equal"), "<br>"), title=_("Invalid Gross Purchase Amount"))
 
 	def cancel_auto_gen_movement(self):
 		movements = frappe.db.sql(
