@@ -461,7 +461,8 @@ class Asset(AccountsController):
 
 		if ((self.purchase_receipt \
 			or (self.purchase_invoice and frappe.db.get_value('Purchase Invoice', self.purchase_invoice, 'update_stock')))
-			and self.purchase_receipt_amount and self.available_for_use_date <= nowdate()):
+			and self.purchase_receipt_amount and self.available_for_use_date 
+			and self.available_for_use_date <= getdate(nowdate())):
 			fixed_asset_account = get_asset_category_account('fixed_asset_account', asset=self.name,
 					asset_category = self.asset_category, company = self.company)
 
@@ -533,7 +534,7 @@ def make_post_gl_entry():
 		if cint(asset_category.enable_cwip_accounting):
 			assets = frappe.db.sql_list(""" select name from `tabAsset`
 				where asset_category = %s and ifnull(booked_fixed_asset, 0) = 0
-				and available_for_use_date = %s""", (asset_category.name, nowdate()))
+				and available_for_use_date <= %s""", (asset_category.name, nowdate()))
 
 			for asset in assets:
 				doc = frappe.get_doc('Asset', asset)
