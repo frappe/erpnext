@@ -43,6 +43,7 @@
   "total_produced_qty",
   "column_break_32",
   "status",
+  "warehouses",
   "amended_from"
  ],
  "fields": [
@@ -219,12 +220,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "for_warehouse",
-   "fieldtype": "Link",
-   "label": "For Warehouse",
-   "options": "Warehouse"
-  },
-  {
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "download_materials_required",
    "fieldtype": "Button",
@@ -292,12 +287,26 @@
    "options": "Production Plan",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "for_warehouse",
+   "fieldtype": "Link",
+   "label": "Material Request Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "warehouses",
+   "fieldtype": "Table MultiSelect",
+   "hidden": 1,
+   "label": "Warehouses",
+   "options": "Production Plan Material Request Warehouse",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-calendar",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-01-21 19:13:10.113854",
+ "modified": "2020-02-03 00:25:25.934202",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

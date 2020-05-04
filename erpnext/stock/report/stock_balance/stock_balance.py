@@ -94,8 +94,6 @@ def get_columns(filters):
 		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 100},
 		{"label": _("Item Name"), "fieldname": "item_name", "width": 150},
 		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
-		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 90},
-		{"label": _("Description"), "fieldname": "description", "width": 140},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
 		{"label": _("Stock UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 90},
 		{"label": _("Balance Qty"), "fieldname": "bal_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
@@ -131,6 +129,9 @@ def get_conditions(filters):
 		conditions += " and sle.posting_date <= %s" % frappe.db.escape(filters.get("to_date"))
 	else:
 		frappe.throw(_("'To Date' is required"))
+
+	if filters.get("company"):
+		conditions += " and sle.company = %s" % frappe.db.escape(filters.get("company"))
 
 	if filters.get("warehouse"):
 		warehouse_details = frappe.db.get_value("Warehouse",
@@ -233,8 +234,6 @@ def get_items(filters):
 	if filters.get("item_code"):
 		conditions.append("item.name=%(item_code)s")
 	else:
-		if filters.get("brand"):
-			conditions.append("item.brand=%(brand)s")
 		if filters.get("item_group"):
 			conditions.append(get_item_group_condition(filters.get("item_group")))
 
