@@ -238,6 +238,7 @@ const submit_salary_slip = function (frm) {
 				freeze: true,
 				freeze_message: 'Submitting Salary Slips and creating Journal Entry...'
 			});
+			frm.refresh();
 		},
 		function() {
 			if(frappe.dom.freeze_count) {

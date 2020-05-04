@@ -229,37 +229,88 @@ class PayrollEntry(Document):
 			# Earnings
 			for acc, amount in earnings.items():
 				payable_amount += flt(amount, precision)
-				accounts.append({
-						"account": acc,
-						"debit_in_account_currency": flt(amount, precision),
-						"party_type": '',
-						"cost_center": self.cost_center,
-						"project": self.project,
-						"reference_type": self.doctype,
-						"reference_name": self.name
-					})
+				if (frappe.db.get_value("Account", acc, "account_type") == "Payable"):
+					slips = frappe.db.get_all("Salary Slip", filters={'payroll_entry': self.name})
+					for slip in slips:
+						slip_doc = frappe.get_doc("Salary Slip", slip)
+						for earning in slip_doc.earnings:
+							slip_account = frappe.db.get_value("Salary Component Account",
+								{"parent": earning.salary_component, "company": self.company}, "default_account")
+							if (acc == slip_account):
+								accounts.append({
+									"account": acc,
+									"debit_in_account_currency": flt(earning.amount, precision),
+									"party_type": 'Employee',
+									"party": slip_doc.employee,
+									"cost_center": self.cost_center,
+									"project": self.project,
+									"reference_type": self.doctype,
+									"reference_name": self.name
+								})
+				else:
+					accounts.append({
+							"account": acc,
+							"debit_in_account_currency": flt(amount, precision),
+							"party_type": '',
+							"cost_center": self.cost_center,
+							"project": self.project,
+							"reference_type": self.doctype,
+							"reference_name": self.name
+						})
 
 			# Deductions
 			for acc, amount in deductions.items():
 				payable_amount -= flt(amount, precision)
-				accounts.append({
-						"account": acc,
-						"credit_in_account_currency": flt(amount, precision),
-						"cost_center": self.cost_center,
-						"party_type": '',
-						"project": self.project,
-						"reference_type": self.doctype,
-						"reference_name": self.name
-					})
+				if (frappe.db.get_value("Account", acc, "account_type") == "Payable"):
+					slips = frappe.db.get_all("Salary Slip", filters={'payroll_entry': self.name})
+					for slip in slips:
+						slip_doc = frappe.get_doc("Salary Slip", slip)
+						for deduction in slip_doc.deductions:
+							slip_account = frappe.db.get_value("Salary Component Account",
+								{"parent": deduction.salary_component, "company": self.company}, "default_account")
+							if (acc == slip_account):
+								accounts.append({
+									"account": acc,
+									"credit_in_account_currency": flt(deduction.amount, precision),
+									"party_type": 'Employee',
+									"party": slip_doc.employee,
+									"project": self.project,
+									#"reference_type": self.doctype,
+									#"reference_name": self.name
+								})
+				else:
+					accounts.append({
+							"account": acc,
+							"credit_in_account_currency": flt(amount, precision),
+							"cost_center": self.cost_center,
+							"party_type": '',
+							"project": self.project,
+							#"reference_type": self.doctype,
+							#"reference_name": self.name
+						})
 
 			# Payable amount
-			accounts.append({
-				"account": default_payroll_payable_account,
-				"credit_in_account_currency": flt(payable_amount, precision),
-				"party_type": '',
-				"reference_type": self.doctype,
-				"reference_name": self.name
-			})
+			if (frappe.db.get_value("Account", default_payroll_payable_account, "account_type") == "Payable"):
+				slips = frappe.db.get_all("Salary Slip", filters={'payroll_entry': self.name})
+				for slip in slips:
+					slip_doc = frappe.get_doc("Salary Slip", slip)
+					accounts.append({
+						"account": default_payroll_payable_account,
+						"credit_in_account_currency": flt(slip_doc.net_pay, precision),
+						"party_type": 'Employee',
+						"party": slip_doc.employee,
+						#"reference_type": self.doctype,
+						#"reference_name": self.name
+					})
+
+			else:
+				accounts.append({
+					"account": default_payroll_payable_account,
+					"credit_in_account_currency": flt(payable_amount, precision),
+					"party_type": '',
+					#"reference_type": self.doctype,
+					#"reference_name": self.name
+				})
 
 			journal_entry.set("accounts", accounts)
 			journal_entry.title = default_payroll_payable_account
