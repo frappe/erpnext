@@ -53,7 +53,10 @@ class TestLeaveEncashment(unittest.TestCase):
 		self.assertEqual(leave_encashment.encashment_amount, 250)
 
 		leave_encashment.submit()
-		self.assertTrue(frappe.db.get_value("Leave Encashment", leave_encashment.name, "additional_salary"))
+
+		# assert links
+		add_sal = frappe.get_all("Additional salary", filters = {"ref_docname": leave_encashment.name})[0]
+		self.assertTrue(add_sal)
 
 	def test_creation_of_leave_ledger_entry_on_submit(self):
 		frappe.db.sql('''delete from `tabLeave Encashment`''')
@@ -75,5 +78,8 @@ class TestLeaveEncashment(unittest.TestCase):
 		self.assertEquals(leave_ledger_entry[0].leaves, leave_encashment.encashable_days *  -1)
 
 		# check if leave ledger entry is deleted on cancellation
+
+		frappe.db.sql("Delete from `tabAdditional Salary` WHERE ref_docname = %s", (leave_encashment.name) )
+
 		leave_encashment.cancel()
 		self.assertFalse(frappe.db.exists("Leave Ledger Entry", {'transaction_name':leave_encashment.name}))
