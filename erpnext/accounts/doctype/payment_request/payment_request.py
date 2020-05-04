@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from urllib.parse import quote
 from frappe.model.document import Document
 from frappe.utils import flt, nowdate, get_url
 from erpnext.accounts.party import get_party_account, get_party_bank_account
@@ -74,9 +75,9 @@ class PaymentRequest(Document):
 		if (hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart") \
 			or self.flags.mute_email:
 			send_mail = False
+		self.set_payment_request_url()
 
 		if send_mail:
-			self.set_payment_request_url()
 			self.send_email()
 			self.make_communication_entry()
 
@@ -104,14 +105,16 @@ class PaymentRequest(Document):
 			return False
 
 	def set_payment_request_url(self):
-		if self.payment_account:
-			self.payment_url = self.get_payment_url()
+		self.payment_url = self.get_gateway_selector_payment_url()
 
 		if self.payment_url:
 			self.db_set('payment_url', self.payment_url)
 
 		if self.payment_url or not self.payment_gateway_account:
 			self.db_set('status', 'Initiated')
+
+	def get_gateway_selector_payment_url(self):
+		return '{0}/accept_payment_request?doctype={1}&name={2}'.format(frappe.utils.get_url(),quote(self.reference_doctype),self.reference_name)
 
 	def get_payment_url(self):
 		if self.reference_doctype != "Fees":
