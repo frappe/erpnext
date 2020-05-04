@@ -60,6 +60,7 @@ class BOM(WebsiteGenerator):
 		self.validate_materials()
 		self.validate_operations()
 		self.calculate_cost()
+		self.update_cost(update_parent=False, from_child_bom=True, save=False)
 
 	def get_context(self, context):
 		context.parents = [{'name': 'boms', 'title': _('All BOMs') }]
@@ -216,7 +217,7 @@ class BOM(WebsiteGenerator):
 							frappe.msgprint(_("{0} not found for item {1}")
 								.format(self.rm_cost_as_per, arg["item_code"]), alert=True)
 
-		return flt(rate) / (self.conversion_rate or 1)
+		return flt(rate) * flt(self.plc_conversion_rate or 1) / (self.conversion_rate or 1)
 
 	def update_cost(self, update_parent=True, from_child_bom=False, save=True):
 		if self.docstatus == 2:
@@ -233,9 +234,12 @@ class BOM(WebsiteGenerator):
 				"stock_uom": d.stock_uom,
 				"conversion_factor": d.conversion_factor
 			})
+
 			if rate:
 				d.rate = rate
 			d.amount = flt(d.rate) * flt(d.qty)
+			d.base_rate = flt(d.rate) * flt(self.conversion_rate)
+			d.base_amount = flt(d.amount) * flt(self.conversion_rate)
 			d.db_update()
 
 		if self.docstatus == 1:
