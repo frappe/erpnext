@@ -12,9 +12,7 @@ class AdditionalSalary(Document):
 
 	def on_submit(self):
 		if self.ref_doctype == "Employee Advance" and self.ref_docname:
-			emp_adv = frappe.get_doc(self.ref_doctype, self.ref_docname)
-			emp_adv.return_amount = self.amount
-			emp_adv.save()
+			frappe.db.set_value("Employee Advance", self.ref_docname, "return_amount", self.amount)
 
 	def before_insert(self):
 		if frappe.db.exists("Additional Salary", {"employee": self.employee, "salary_component": self.salary_component,
