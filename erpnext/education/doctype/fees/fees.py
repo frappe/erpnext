@@ -82,7 +82,7 @@ class Fees(AccountsController):
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
-		make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name, cancel=True)
+		make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 		# frappe.db.set(self, 'status', 'Cancelled')
 
 

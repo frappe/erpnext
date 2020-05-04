@@ -875,39 +875,17 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		if(!row.t_warehouse) row.t_warehouse = this.frm.doc.to_warehouse;
 	},
 
-	source_mandatory: ["Material Issue", "Material Transfer", "Send to Subcontractor",
-		"Material Transfer for Manufacture", "Send to Warehouse", "Receive at Warehouse"],
-	target_mandatory: ["Material Receipt", "Material Transfer", "Send to Subcontractor",
-		"Material Transfer for Manufacture", "Send to Warehouse", "Receive at Warehouse"],
-
 	from_warehouse: function(doc) {
-		var me = this;
-		this.set_warehouse_if_different("s_warehouse", doc.from_warehouse, function(row) {
-			return me.source_mandatory.indexOf(me.frm.doc.purpose)!==-1;
-		});
+		this.set_warehouse_in_children(doc.items, "s_warehouse", doc.from_warehouse);
 	},
 
 	to_warehouse: function(doc) {
-		var me = this;
-		this.set_warehouse_if_different("t_warehouse", doc.to_warehouse, function(row) {
-			return me.target_mandatory.indexOf(me.frm.doc.purpose)!==-1;
-		});
+		this.set_warehouse_in_children(doc.items, "t_warehouse", doc.to_warehouse);
 	},
 
-	set_warehouse_if_different: function(fieldname, value, condition) {
-		var changed = false;
-		for (var i=0, l=(this.frm.doc.items || []).length; i<l; i++) {
-			var row = this.frm.doc.items[i];
-			if (row[fieldname] != value) {
-				if (condition && !condition(row)) {
-					continue;
-				}
-
-				frappe.model.set_value(row.doctype, row.name, fieldname, value, "Link");
-				changed = true;
-			}
-		}
-		refresh_field("items");
+	set_warehouse_in_children: function(child_table, warehouse_field, warehouse) {
+		let transaction_controller = new erpnext.TransactionController();
+		transaction_controller.autofill_warehouse(child_table, warehouse_field, warehouse);
 	},
 
 	items_on_form_rendered: function(doc, grid_row) {

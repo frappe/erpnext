@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 import unittest, copy, time
-from frappe.utils import nowdate, flt, getdate, cint, add_days
+from frappe.utils import nowdate, flt, getdate, cint, add_days, add_months
 from frappe.model.dynamic_links import get_dynamic_link_map
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
@@ -1721,37 +1721,76 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 
 		from erpnext.accounts.deferred_revenue import convert_deferred_revenue_to_income
-		convert_deferred_revenue_to_income(start_date="2019-01-01", end_date="2019-01-31")
+
+		pda1 = frappe.get_doc(dict(
+			doctype='Process Deferred Accounting',
+			posting_date=nowdate(),
+			start_date="2019-01-01",
+			end_date="2019-03-31",
+			type="Income",
+			company="_Test Company"
+		))
+
+		pda1.insert()
+		pda1.submit()
 
 		expected_gle = [
 			[deferred_account, 33.85, 0.0, "2019-01-31"],
-			["Sales - _TC", 0.0, 33.85, "2019-01-31"]
-		]
-
-		self.check_gl_entries(si.name, expected_gle, "2019-01-10")
-
-		convert_deferred_revenue_to_income(start_date="2019-01-01", end_date="2019-03-31")
-
-		expected_gle = [
+			["Sales - _TC", 0.0, 33.85, "2019-01-31"],
 			[deferred_account, 43.08, 0.0, "2019-02-28"],
 			["Sales - _TC", 0.0, 43.08, "2019-02-28"],
 			[deferred_account, 23.07, 0.0, "2019-03-15"],
 			["Sales - _TC", 0.0, 23.07, "2019-03-15"]
 		]
 
-		self.check_gl_entries(si.name, expected_gle, "2019-01-31")
+		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
 
-	def check_gl_entries(self, voucher_no, expected_gle, posting_date):
-		gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
-			from `tabGL Entry`
-			where voucher_type='Sales Invoice' and voucher_no=%s and posting_date > %s
-			order by posting_date asc, account asc""", (voucher_no, posting_date), as_dict=1)
+	def test_deferred_error_email(self):
+		deferred_account = create_account(account_name="Deferred Revenue",
+			parent_account="Current Liabilities - _TC", company="_Test Company")
 
-		for i, gle in enumerate(gl_entries):
-			self.assertEqual(expected_gle[i][0], gle.account)
-			self.assertEqual(expected_gle[i][1], gle.debit)
-			self.assertEqual(expected_gle[i][2], gle.credit)
-			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
+		item = create_item("_Test Item for Deferred Accounting")
+		item.enable_deferred_revenue = 1
+		item.deferred_revenue_account = deferred_account
+		item.no_of_months = 12
+		item.save()
+
+		si = create_sales_invoice(item=item.name, posting_date="2019-01-10", do_not_submit=True)
+		si.items[0].enable_deferred_revenue = 1
+		si.items[0].service_start_date = "2019-01-10"
+		si.items[0].service_end_date = "2019-03-15"
+		si.items[0].deferred_revenue_account = deferred_account
+		si.save()
+		si.submit()
+
+		from erpnext.accounts.deferred_revenue import convert_deferred_revenue_to_income
+
+		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		acc_settings.acc_frozen_upto = '2019-01-31'
+		acc_settings.save()
+
+		pda = frappe.get_doc(dict(
+			doctype='Process Deferred Accounting',
+			posting_date=nowdate(),
+			start_date="2019-01-01",
+			end_date="2019-03-31",
+			type="Income",
+			company="_Test Company"
+		))
+
+		pda.insert()
+		pda.submit()
+
+		email = frappe.db.sql(""" select name from `tabEmail Queue`
+		where message like %(txt)s """, {
+			'txt': "%%%s%%" % "Error while processing deferred accounting for {0}".format(pda.name)
+		})
+
+		self.assertTrue(email)
+
+		acc_settings.load_from_db()
+		acc_settings.acc_frozen_upto = None
+		acc_settings.save()
 
 	def test_inter_company_transaction(self):
 
@@ -1911,6 +1950,18 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(data['billLists'][0]['sgstValue'], 5400)
 		self.assertEqual(data['billLists'][0]['vehicleNo'], 'KA12KA1234')
 		self.assertEqual(data['billLists'][0]['itemList'][0]['taxableAmount'], 60000)
+
+def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
+	gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
+		from `tabGL Entry`
+		where voucher_type='Sales Invoice' and voucher_no=%s and posting_date > %s
+		order by posting_date asc, account asc""", (voucher_no, posting_date), as_dict=1)
+
+	for i, gle in enumerate(gl_entries):
+		doc.assertEqual(expected_gle[i][0], gle.account)
+		doc.assertEqual(expected_gle[i][1], gle.debit)
+		doc.assertEqual(expected_gle[i][2], gle.credit)
+		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
 	def test_item_tax_validity(self):
 		item = frappe.get_doc("Item", "_Test Item 2")
