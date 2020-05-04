@@ -67,7 +67,12 @@ class ItemPrice(Document):
 	def before_save(self):
 		if self.selling:
 			self.reference = self.customer
-			self.supplier = None
 		if self.buying:
 			self.reference = self.supplier
+		
+		if self.selling and not self.buying:
+			# if only selling then remove supplier
+			self.supplier = None
+		if self.buying and not self.selling:
+			# if only buying then remove customer
 			self.customer = None
