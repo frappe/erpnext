@@ -325,7 +325,11 @@ def update_status(appointment_id, status):
 def send_confirmation_msg(doc):
 	if frappe.db.get_single_value('Healthcare Settings', 'send_appointment_confirmation'):
 		message = frappe.db.get_single_value('Healthcare Settings', 'appointment_confirmation_msg')
-		send_message(doc, message)
+		try:
+			send_message(doc, message)
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), _('Appointment Confirmation Message Not Sent'))
+			frappe.msgprint(_('Appointment Confirmation Message Not Sent'), indicator='orange')
 
 
 @frappe.whitelist()
