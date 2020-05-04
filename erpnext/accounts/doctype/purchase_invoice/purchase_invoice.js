@@ -174,7 +174,8 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				read_only: 0,
 				fieldtype:'Date',
 				label: __('Release Date'),
-				default: me.frm.doc.release_date
+				default: me.frm.doc.release_date,
+				reqd: 1
 			},
 			{
 				fieldname: 'hold_comment',
@@ -260,10 +261,23 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				price_list: this.frm.doc.buying_price_list
 			}, function() {
 				me.apply_pricing_rule();
-
 				me.frm.doc.apply_tds = me.frm.supplier_tds ? 1 : 0;
+				me.frm.doc.tax_withholding_category = me.frm.supplier_tds;
 				me.frm.set_df_property("apply_tds", "read_only", me.frm.supplier_tds ? 0 : 1);
+				me.frm.set_df_property("tax_withholding_category", "hidden", me.frm.supplier_tds ? 0 : 1);
 			})
+	},
+
+	apply_tds: function(frm) {
+		var me = this;
+
+		if (!me.frm.doc.apply_tds) {
+			me.frm.set_value("tax_withholding_category", '');
+			me.frm.set_df_property("tax_withholding_category", "hidden", 1);
+		} else {
+			me.frm.set_value("tax_withholding_category", me.frm.supplier_tds);
+			me.frm.set_df_property("tax_withholding_category", "hidden", 0);
+		}
 	},
 
 	credit_to: function() {
@@ -366,11 +380,6 @@ function hide_fields(doc) {
 		(cint(doc.update_stock)==1 || cint(doc.is_return)==1 ? true : false));
 
 	cur_frm.refresh_fields();
-}
-
-cur_frm.cscript.update_stock = function(doc, dt, dn) {
-	hide_fields(doc, dt, dn);
-	this.frm.fields_dict.items.grid.toggle_reqd("item_code", doc.update_stock? true: false)
 }
 
 cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
@@ -514,5 +523,10 @@ frappe.ui.form.on("Purchase Invoice", {
 			erpnext.buying.get_default_bom(frm);
 		}
 		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
+	},
+
+	update_stock: function(frm) {
+		hide_fields(frm.doc);
+		frm.fields_dict.items.grid.toggle_reqd("item_code", frm.doc.update_stock? true: false);
 	}
 })

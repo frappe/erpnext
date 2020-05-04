@@ -29,7 +29,10 @@ frappe.ui.form.on("BOM", {
 
 		frm.set_query("item", function() {
 			return {
-				query: "erpnext.controllers.queries.item_query"
+				query: "erpnext.controllers.queries.item_query",
+				filters: {
+					"doctype": "BOM"
+				}
 			};
 		});
 
@@ -43,8 +46,7 @@ frappe.ui.form.on("BOM", {
 
 		frm.set_query("item_code", "items", function() {
 			return {
-				query: "erpnext.controllers.queries.item_query",
-				filters: [["Item", "name", "!=", cur_frm.doc.item]]
+				query: "erpnext.controllers.queries.item_query"
 			};
 		});
 
@@ -120,22 +122,58 @@ frappe.ui.form.on("BOM", {
 				});
 			}
 		}
+
+
+		if (frm.doc.__onload && frm.doc.__onload["has_variants"]) {
+			frm.set_intro(__('This is a Template BOM and will be used to make the work order for {0} of the item {1}',
+				[
+					`<a class="variants-intro">variants</a>`,
+					`<a href="#Form/Item/${frm.doc.item}">${frm.doc.item}</a>`,
+				]), true);
+
+			frm.$wrapper.find(".variants-intro").on("click", () => {
+				frappe.set_route("List", "Item", {"variant_of": frm.doc.item});
+			});
+		}
 	},
 
 	make_work_order: function(frm) {
-		const fields = [{
+		const fields = [];
+
+		if (frm.doc.__onload && frm.doc.__onload["has_variants"]) {
+			fields.push({
+				fieldtype: 'Link',
+				label: __('Variant Item'),
+				fieldname: 'item',
+				options: "Item",
+				reqd: 1,
+				get_query: function() {
+					return {
+						query: "erpnext.controllers.queries.item_query",
+						filters: {
+							"variant_of": frm.doc.item
+						}
+					};
+				}
+			});
+		}
+
+		fields.push({
 			fieldtype: 'Float',
 			label: __('Qty To Manufacture'),
 			fieldname: 'qty',
 			reqd: 1,
 			default: 1
-		}];
+		});
 
 		frappe.prompt(fields, data => {
+			let item = data.item || frm.doc.item;
+
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.work_order.work_order.make_work_order",
 				args: {
-					item: frm.doc.item,
+					bom_no: frm.doc.name,
+					item: item,
 					qty: data.qty || 0.0,
 					project: frm.doc.project
 				},

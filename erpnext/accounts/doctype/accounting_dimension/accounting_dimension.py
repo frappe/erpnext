@@ -172,7 +172,7 @@ def get_doctypes_with_dimensions():
 	return doclist
 
 def get_accounting_dimensions(as_list=True):
-	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["label", "fieldname", "disabled"])
+	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["label", "fieldname", "disabled", "document_type"])
 
 	if as_list:
 		return [d.fieldname for d in accounting_dimensions]
@@ -186,6 +186,18 @@ def get_checks_for_pl_and_bs_accounts():
 
 	return dimensions
 
+def get_dimension_with_children(doctype, dimension):
+
+	if isinstance(dimension, list):
+		dimension = dimension[0]
+
+	all_dimensions = []
+	lft, rgt = frappe.db.get_value(doctype, dimension, ["lft", "rgt"])
+	children = frappe.get_all(doctype, filters={"lft": [">=", lft], "rgt": ["<=", rgt]}, order_by="lft")
+	all_dimensions += [c.name for c in children]
+
+	return all_dimensions
+
 @frappe.whitelist()
 def get_dimension_filters():
 	dimension_filters = frappe.db.sql("""
@@ -194,12 +206,13 @@ def get_dimension_filters():
 		WHERE disabled = 0
 	""", as_dict=1)
 
-	default_dimensions = frappe.db.sql("""SELECT parent, company, default_dimension
-		FROM `tabAccounting Dimension Detail`""", as_dict=1)
+	default_dimensions = frappe.db.sql("""SELECT p.fieldname, c.company, c.default_dimension
+		FROM `tabAccounting Dimension Detail` c, `tabAccounting Dimension` p
+		WHERE c.parent = p.name""", as_dict=1)
 
 	default_dimensions_map = {}
 	for dimension in default_dimensions:
-		default_dimensions_map.setdefault(dimension['company'], {})
-		default_dimensions_map[dimension['company']][dimension['parent']] = dimension['default_dimension']
+		default_dimensions_map.setdefault(dimension.company, {})
+		default_dimensions_map[dimension.company][dimension.fieldname] = dimension.default_dimension
 
 	return dimension_filters, default_dimensions_map

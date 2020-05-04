@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 import unittest, copy, time
-from frappe.utils import nowdate, flt, getdate, cint, add_days
+from frappe.utils import nowdate, flt, getdate, cint, add_days, add_months
 from frappe.model.dynamic_links import get_dynamic_link_map
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
@@ -364,7 +364,7 @@ class TestSalesInvoice(unittest.TestCase):
 		gle = frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 
-		self.assertFalse(gle)
+		self.assertTrue(gle)
 
 	def test_tax_calculation_with_multiple_items(self):
 		si = create_sales_invoice(qty=84, rate=4.6, do_not_save=True)
@@ -678,14 +678,15 @@ class TestSalesInvoice(unittest.TestCase):
 		gle = frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 
-		self.assertFalse(gle)
+		self.assertTrue(gle)
 
 	def test_pos_gl_entry_with_perpetual_inventory(self):
 		make_pos_profile()
 
-		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
+		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
 
-		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
+		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1",
+			income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
 
 		pos.is_pos = 1
 		pos.update_stock = 1
@@ -766,9 +767,13 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_pos_change_amount(self):
 		make_pos_profile()
 
-		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
+		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",
+			item_code= "_Test FG Item",warehouse= "Stores - TCP1", cost_center= "Main - TCP1")
 
-		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
+		pos = create_sales_invoice(company= "_Test Company with perpetual inventory",
+			debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1",
+			income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1",
+			cost_center = "Main - TCP1", do_not_save=True)
 
 		pos.is_pos = 1
 		pos.update_stock = 1
@@ -786,9 +791,16 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_make_pos_invoice(self):
 		from erpnext.accounts.doctype.sales_invoice.pos import make_invoice
 
-		make_pos_profile()
-		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
-		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
+		pos_profile = make_pos_profile()
+
+		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",
+			item_code= "_Test FG Item",
+			warehouse= "Stores - TCP1", cost_center= "Main - TCP1")
+
+		pos = create_sales_invoice(company= "_Test Company with perpetual inventory",
+			debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1",
+			income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1",
+			cost_center = "Main - TCP1", do_not_save=True)
 
 		pos.is_pos = 1
 		pos.update_stock = 1
@@ -802,7 +814,7 @@ class TestSalesInvoice(unittest.TestCase):
 			pos.append("taxes", tax)
 
 		invoice_data = [{'09052016142': pos}]
-		si = make_invoice(invoice_data).get('invoice')
+		si = make_invoice(pos_profile, invoice_data).get('invoice')
 		self.assertEqual(si[0], '09052016142')
 
 		sales_invoice = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': '09052016142', 'docstatus': 1})
@@ -820,7 +832,7 @@ class TestSalesInvoice(unittest.TestCase):
 		if allow_negative_stock:
 			frappe.db.set_value('Stock Settings', None, 'allow_negative_stock', 0)
 
-		make_pos_profile()
+		pos_profile = make_pos_profile()
 		timestamp = cint(time.time())
 
 		item = make_item("_Test POS Item")
@@ -834,7 +846,7 @@ class TestSalesInvoice(unittest.TestCase):
 							{'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 330}]
 
 		invoice_data = [{timestamp: pos}]
-		si = make_invoice(invoice_data).get('invoice')
+		si = make_invoice(pos_profile, invoice_data).get('invoice')
 		self.assertEqual(si[0], timestamp)
 
 		sales_invoice = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': timestamp})
@@ -843,7 +855,7 @@ class TestSalesInvoice(unittest.TestCase):
 		timestamp = cint(time.time())
 		pos["offline_pos_name"] = timestamp
 		invoice_data = [{timestamp: pos}]
-		si1 = make_invoice(invoice_data).get('invoice')
+		si1 = make_invoice(pos_profile, invoice_data).get('invoice')
 		self.assertEqual(si1[0], timestamp)
 
 		sales_invoice1 = frappe.get_all('Sales Invoice', fields =["*"], filters = {'offline_pos_name': timestamp})
@@ -891,11 +903,9 @@ class TestSalesInvoice(unittest.TestCase):
 		gle = frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 
-		self.assertFalse(gle)
-
+		self.assertTrue(gle)
 
 		frappe.db.sql("delete from `tabPOS Profile`")
-		si.delete()
 
 	def test_pos_si_without_payment(self):
 		set_perpetual_inventory()
@@ -1011,9 +1021,6 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(si.outstanding_amount, 262.0)
 
 		si.cancel()
-
-		self.assertTrue(not frappe.db.sql("""select name from `tabJournal Entry Account`
-			where reference_name=%s""", si.name))
 
 	def test_serialized(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
@@ -1230,7 +1237,7 @@ class TestSalesInvoice(unittest.TestCase):
 		gle = frappe.db.sql("""select name from `tabGL Entry`
 			where voucher_type='Sales Invoice' and voucher_no=%s""", si.name)
 
-		self.assertFalse(gle)
+		self.assertTrue(gle)
 
 	def test_invalid_currency(self):
 		# Customer currency = USD
@@ -1714,37 +1721,76 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 
 		from erpnext.accounts.deferred_revenue import convert_deferred_revenue_to_income
-		convert_deferred_revenue_to_income(start_date="2019-01-01", end_date="2019-01-31")
+
+		pda1 = frappe.get_doc(dict(
+			doctype='Process Deferred Accounting',
+			posting_date=nowdate(),
+			start_date="2019-01-01",
+			end_date="2019-03-31",
+			type="Income",
+			company="_Test Company"
+		))
+
+		pda1.insert()
+		pda1.submit()
 
 		expected_gle = [
 			[deferred_account, 33.85, 0.0, "2019-01-31"],
-			["Sales - _TC", 0.0, 33.85, "2019-01-31"]
-		]
-
-		self.check_gl_entries(si.name, expected_gle, "2019-01-10")
-
-		convert_deferred_revenue_to_income(start_date="2019-01-01", end_date="2019-03-31")
-
-		expected_gle = [
+			["Sales - _TC", 0.0, 33.85, "2019-01-31"],
 			[deferred_account, 43.08, 0.0, "2019-02-28"],
 			["Sales - _TC", 0.0, 43.08, "2019-02-28"],
 			[deferred_account, 23.07, 0.0, "2019-03-15"],
 			["Sales - _TC", 0.0, 23.07, "2019-03-15"]
 		]
 
-		self.check_gl_entries(si.name, expected_gle, "2019-01-31")
+		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
 
-	def check_gl_entries(self, voucher_no, expected_gle, posting_date):
-		gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
-			from `tabGL Entry`
-			where voucher_type='Sales Invoice' and voucher_no=%s and posting_date > %s
-			order by posting_date asc, account asc""", (voucher_no, posting_date), as_dict=1)
+	def test_deferred_error_email(self):
+		deferred_account = create_account(account_name="Deferred Revenue",
+			parent_account="Current Liabilities - _TC", company="_Test Company")
 
-		for i, gle in enumerate(gl_entries):
-			self.assertEqual(expected_gle[i][0], gle.account)
-			self.assertEqual(expected_gle[i][1], gle.debit)
-			self.assertEqual(expected_gle[i][2], gle.credit)
-			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
+		item = create_item("_Test Item for Deferred Accounting")
+		item.enable_deferred_revenue = 1
+		item.deferred_revenue_account = deferred_account
+		item.no_of_months = 12
+		item.save()
+
+		si = create_sales_invoice(item=item.name, posting_date="2019-01-10", do_not_submit=True)
+		si.items[0].enable_deferred_revenue = 1
+		si.items[0].service_start_date = "2019-01-10"
+		si.items[0].service_end_date = "2019-03-15"
+		si.items[0].deferred_revenue_account = deferred_account
+		si.save()
+		si.submit()
+
+		from erpnext.accounts.deferred_revenue import convert_deferred_revenue_to_income
+
+		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		acc_settings.acc_frozen_upto = '2019-01-31'
+		acc_settings.save()
+
+		pda = frappe.get_doc(dict(
+			doctype='Process Deferred Accounting',
+			posting_date=nowdate(),
+			start_date="2019-01-01",
+			end_date="2019-03-31",
+			type="Income",
+			company="_Test Company"
+		))
+
+		pda.insert()
+		pda.submit()
+
+		email = frappe.db.sql(""" select name from `tabEmail Queue`
+		where message like %(txt)s """, {
+			'txt': "%%%s%%" % "Error while processing deferred accounting for {0}".format(pda.name)
+		})
+
+		self.assertTrue(email)
+
+		acc_settings.load_from_db()
+		acc_settings.acc_frozen_upto = None
+		acc_settings.save()
 
 	def test_inter_company_transaction(self):
 
@@ -1892,7 +1938,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		si.submit()
 
-		data = get_ewb_data("Sales Invoice", si.name)
+		data = get_ewb_data("Sales Invoice", [si.name])
 
 		self.assertEqual(data['version'], '1.0.1118')
 		self.assertEqual(data['billLists'][0]['fromGstin'], '27AAECE4835E1ZR')
@@ -1904,6 +1950,18 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(data['billLists'][0]['sgstValue'], 5400)
 		self.assertEqual(data['billLists'][0]['vehicleNo'], 'KA12KA1234')
 		self.assertEqual(data['billLists'][0]['itemList'][0]['taxableAmount'], 60000)
+
+def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
+	gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
+		from `tabGL Entry`
+		where voucher_type='Sales Invoice' and voucher_no=%s and posting_date > %s
+		order by posting_date asc, account asc""", (voucher_no, posting_date), as_dict=1)
+
+	for i, gle in enumerate(gl_entries):
+		doc.assertEqual(expected_gle[i][0], gle.account)
+		doc.assertEqual(expected_gle[i][1], gle.debit)
+		doc.assertEqual(expected_gle[i][2], gle.credit)
+		doc.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
 	def test_item_tax_validity(self):
 		item = frappe.get_doc("Item", "_Test Item 2")
@@ -1948,7 +2006,7 @@ def create_sales_invoice(**args):
 		"gst_hsn_code": "999800",
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"qty": args.qty or 1,
-		"rate": args.rate or 100,
+		"rate": args.rate if args.get("rate") is not None else 100,
 		"income_account": args.income_account or "Sales - _TC",
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",

@@ -6,11 +6,14 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from frappe.utils import nowdate,flt, cstr,random_string
-# test_records = frappe.get_test_records('Vehicle Log')
+
 class TestVehicleLog(unittest.TestCase):
 	def test_make_vehicle_log_and_syncing_of_odometer_value(self):
-		employee_id=frappe.db.sql("""select name from `tabEmployee` order by modified desc limit 1""")[0][0]
+		employee_id = frappe.db.sql("""select name from `tabEmployee` where status='Active' order by modified desc limit 1""")
+		employee_id = employee_id[0][0] if employee_id else None
+
 		license_plate = get_vehicle(employee_id)
+
 		vehicle_log = frappe.get_doc({
 			"doctype": "Vehicle Log",
 			"license_plate": cstr(license_plate),

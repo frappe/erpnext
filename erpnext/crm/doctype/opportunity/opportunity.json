@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
@@ -7,6 +8,7 @@
  "doctype": "DocType",
  "document_type": "Document",
  "editable_grid": 1,
+ "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
   "from_section",
@@ -214,7 +216,8 @@
   {
    "fieldname": "opportunity_amount",
    "fieldtype": "Currency",
-   "label": "Opportunity Amount"
+   "label": "Opportunity Amount",
+   "options": "currency"
   },
   {
    "default": "0",
@@ -326,6 +329,7 @@
    "fieldname": "contact_email",
    "fieldtype": "Data",
    "label": "Contact Email",
+   "options": "Email",
    "read_only": 1
   },
   {
@@ -418,7 +422,8 @@
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
- "modified": "2019-09-30 12:58:37.385400",
+ "links": [],
+ "modified": "2020-04-07 09:05:39.391109",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
@@ -450,9 +455,11 @@
   }
  ],
  "search_fields": "status,transaction_date,party_name,opportunity_type,territory,company",
+ "sender_field": "contact_email",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "subject_field": "title",
  "timeline_field": "party_name",
  "title_field": "title",
  "track_seen": 1,

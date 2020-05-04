@@ -10,7 +10,7 @@ from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from six import iteritems
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 from collections import OrderedDict
 
 def execute(filters=None):
@@ -131,7 +131,7 @@ def get_gl_entries(filters):
 	gl_entries = frappe.db.sql(
 		"""
 		select
-			posting_date, account, party_type, party,
+			name as gl_entry, posting_date, account, party_type, party,
 			voucher_type, voucher_no, cost_center, project,
 			against_voucher_type, against_voucher, account_currency,
 			remarks, against, is_opening {select_fields}
@@ -188,18 +188,26 @@ def get_conditions(filters):
 		else:
 			conditions.append("finance_book in (%(finance_book)s)")
 
+	if not filters.get("show_cancelled_entries"):
+		conditions.append("is_cancelled = 0")
+
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
 
 	if match_conditions:
 		conditions.append(match_conditions)
 
-	accounting_dimensions = get_accounting_dimensions()
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
-			if filters.get(dimension):
-				conditions.append("{0} in (%({0})s)".format(dimension))
+			if filters.get(dimension.fieldname):
+				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
+					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
+						filters.get(dimension.fieldname))
+					conditions.append("{0} in %({0})s".format(dimension.fieldname))
+				else:
+					conditions.append("{0} in (%({0})s)".format(dimension.fieldname))
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
@@ -359,6 +367,13 @@ def get_columns(filters):
 			currency = get_company_currency(company)
 
 	columns = [
+		{
+			"label": _("GL Entry"),
+			"fieldname": "gl_entry",
+			"fieldtype": "Link",
+			"options": "GL Entry",
+			"hidden": 1
+		},
 		{
 			"label": _("Posting Date"),
 			"fieldname": "posting_date",

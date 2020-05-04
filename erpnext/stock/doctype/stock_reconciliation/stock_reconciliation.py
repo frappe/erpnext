@@ -6,7 +6,6 @@ import frappe, erpnext
 import frappe.defaults
 from frappe import msgprint, _
 from frappe.utils import cstr, flt, cint
-from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.controllers.stock_controller import StockController
 from erpnext.accounts.utils import get_company_default
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
@@ -43,7 +42,8 @@ class StockReconciliation(StockController):
 		update_serial_nos_after_submit(self, "items")
 
 	def on_cancel(self):
-		self.delete_and_repost_sle()
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
+		self.make_sle_on_cancel()
 		self.make_gl_entries_on_cancel()
 
 	def remove_items_with_no_change(self):
@@ -190,6 +190,10 @@ class StockReconciliation(StockController):
 				has_serial_no = True
 				self.get_sle_for_serialized_items(row, sl_entries)
 			else:
+				if row.serial_no or row.batch_no:
+					frappe.throw(_("Row #{0}: Item {1} is not a Serialized/Batched Item. It cannot have a Serial No/Batch No against it.") \
+						.format(row.idx, frappe.bold(row.item_code)))
+
 				previous_sle = get_previous_sle({
 					"item_code": row.item_code,
 					"warehouse": row.warehouse,
@@ -316,7 +320,7 @@ class StockReconciliation(StockController):
 			"voucher_detail_no": row.name,
 			"company": self.company,
 			"stock_uom": frappe.db.get_value("Item", row.item_code, "stock_uom"),
-			"is_cancelled": "No" if self.docstatus != 2 else "Yes",
+			"is_cancelled": 1 if self.docstatus == 2 else 0,
 			"serial_no": '\n'.join(serial_nos) if serial_nos else '',
 			"batch_no": row.batch_no,
 			"valuation_rate": flt(row.valuation_rate, row.precision("valuation_rate"))
@@ -325,27 +329,35 @@ class StockReconciliation(StockController):
 		if not row.batch_no:
 			data.qty_after_transaction = flt(row.qty, row.precision("qty"))
 
+		if self.docstatus == 2 and not row.batch_no:
+			if row.current_qty:
+				data.actual_qty = -1 * row.current_qty
+				data.qty_after_transaction = flt(row.current_qty)
+				data.valuation_rate = flt(row.current_valuation_rate)
+				data.stock_value = data.qty_after_transaction * data.valuation_rate
+				data.stock_value_difference = -1 * flt(row.amount_difference)
+			else:
+				data.actual_qty = row.qty
+				data.qty_after_transaction = 0.0
+				data.valuation_rate = flt(row.valuation_rate)
+				data.stock_value_difference = -1 * flt(row.amount_difference)
+
 		return data
 
-	def delete_and_repost_sle(self):
-		"""	Delete Stock Ledger Entries related to this voucher
-			and repost future Stock Ledger Entries"""
-
-		existing_entries = frappe.db.sql("""select distinct item_code, warehouse
-			from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s""",
-			(self.doctype, self.name), as_dict=1)
-
-		# delete entries
-		frappe.db.sql("""delete from `tabStock Ledger Entry`
-			where voucher_type=%s and voucher_no=%s""", (self.doctype, self.name))
-
+	def make_sle_on_cancel(self):
 		sl_entries = []
 
 		has_serial_no = False
 		for row in self.items:
 			if row.serial_no or row.batch_no or row.current_serial_no:
 				has_serial_no = True
-				self.get_sle_for_serialized_items(row, sl_entries)
+				serial_nos = ''
+				if row.current_serial_no:
+					serial_nos = get_serial_nos(row.current_serial_no)
+
+				sl_entries.append(self.get_sle_for_items(row, serial_nos))
+			else:
+				sl_entries.append(self.get_sle_for_items(row))
 
 		if sl_entries:
 			if has_serial_no:
@@ -355,14 +367,6 @@ class StockReconciliation(StockController):
 			allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
 
-		# repost future entries for selected item_code, warehouse
-		for entries in existing_entries:
-			update_entries_after({
-				"item_code": entries.item_code,
-				"warehouse": entries.warehouse,
-				"posting_date": self.posting_date,
-				"posting_time": self.posting_time
-			})
 
 	def merge_similar_item_serial_nos(self, sl_entries):
 		# If user has put the same item in multiple row with different serial no
@@ -431,12 +435,6 @@ class StockReconciliation(StockController):
 		else:
 			self._submit()
 
-	def cancel(self):
-		if len(self.items) > 100:
-			self.queue_action('cancel')
-		else:
-			self._cancel()
-
 @frappe.whitelist()
 def get_items(warehouse, posting_date, posting_time, company):
 	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
@@ -485,12 +483,14 @@ def get_stock_balance_for(item_code, warehouse,
 		["has_serial_no", "has_batch_no"], as_dict=1)
 
 	serial_nos = ""
-	if item_dict.get("has_serial_no"):
-		qty, rate, serial_nos = get_qty_rate_for_serial_nos(item_code,
-			warehouse, posting_date, posting_time, item_dict)
+	with_serial_no = True if item_dict.get("has_serial_no") else False
+	data = get_stock_balance(item_code, warehouse, posting_date, posting_time,
+		with_valuation_rate=with_valuation_rate, with_serial_no=with_serial_no)
+
+	if with_serial_no:
+		qty, rate, serial_nos = data
 	else:
-		qty, rate = get_stock_balance(item_code, warehouse,
-			posting_date, posting_time, with_valuation_rate=with_valuation_rate)
+		qty, rate = data
 
 	if item_dict.get("has_batch_no"):
 		qty = get_batch_qty(batch_no, warehouse) or 0
@@ -500,28 +500,6 @@ def get_stock_balance_for(item_code, warehouse,
 		'rate': rate,
 		'serial_nos': serial_nos
 	}
-
-def get_qty_rate_for_serial_nos(item_code, warehouse, posting_date, posting_time, item_dict):
-	args = {
-		"item_code": item_code,
-		"warehouse": warehouse,
-		"posting_date": posting_date,
-		"posting_time": posting_time,
-	}
-
-	serial_nos_list = [serial_no.get("name")
-			for serial_no in get_available_serial_nos(args)]
-
-	qty = len(serial_nos_list)
-	serial_nos = '\n'.join(serial_nos_list)
-	args.update({
-		'qty': qty,
-		"serial_nos": serial_nos
-	})
-
-	rate = get_incoming_rate(args, raise_error_if_no_rate=False) or 0
-
-	return qty, rate, serial_nos
 
 @frappe.whitelist()
 def get_difference_account(purpose, company):

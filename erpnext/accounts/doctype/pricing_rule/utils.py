@@ -178,7 +178,8 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 
 		if pricing_rules[0].mixed_conditions and doc:
 			stock_qty, amount, items = get_qty_and_rate_for_mixed_conditions(doc, pr_doc, args)
-			pricing_rules[0].apply_rule_on_other_items = items
+			for pricing_rule_args in pricing_rules:
+				pricing_rule_args.apply_rule_on_other_items = items
 
 		elif pricing_rules[0].is_cumulative:
 			items = [args.get(frappe.scrub(pr_doc.get('apply_on')))]
@@ -329,9 +330,9 @@ def get_qty_and_rate_for_mixed_conditions(doc, pr_doc, args):
 			if pr_doc.mixed_conditions:
 				amt = args.get('qty') * args.get("price_list_rate")
 				if args.get("item_code") != row.get("item_code"):
-					amt = row.get('qty') * row.get("price_list_rate")
+					amt = flt(row.get('qty')) * flt(row.get("price_list_rate") or args.get("rate"))
 
-				sum_qty += row.get("stock_qty") or args.get("stock_qty")
+				sum_qty += flt(row.get("stock_qty")) or flt(args.get("stock_qty")) or flt(args.get("qty"))
 				sum_amt += amt
 
 		if pr_doc.is_cumulative:

@@ -85,12 +85,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 					filters:{ 'is_sub_contracted_item': 1 }
 				}
 			}
-			else if (me.frm.doc.material_request_type == "Customer Provided") {
-				return{
-					query: "erpnext.controllers.queries.item_query",
-					filters:{ 'customer': me.frm.doc.customer }
-				}
-			}
 			else {
 				return{
 					query: "erpnext.controllers.queries.item_query",
@@ -259,6 +253,13 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 	},
 
+	rejected_warehouse: function(doc, cdt) {
+		// trigger autofill_warehouse only if parent rejected_warehouse field is triggered
+		if (["Purchase Invoice", "Purchase Receipt"].includes(cdt)) {
+			this.autofill_warehouse(doc.items, "rejected_warehouse", doc.rejected_warehouse);
+		}
+	},
+
 	category: function(doc, cdt, cdn) {
 		// should be the category field of tax table
 		if(cdt != doc.doctype) {
@@ -385,7 +386,31 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				}
 			});
 		}
-	}
+	},
+
+	manufacturer_part_no: function(doc, cdt, cdn) {
+		const row = locals[cdt][cdn];
+
+		if (row.manufacturer_part_no) {
+			frappe.model.get_value('Item Manufacturer',
+				{
+					'item_code': row.item_code,
+					'manufacturer': row.manufacturer,
+					'manufacturer_part_no': row.manufacturer_part_no
+				},
+				'name',
+				function(data) {
+					if (!data) {
+						let msg = {
+							message: __("Manufacturer Part Number <b>{0}</b> is invalid", [row.manufacturer_part_no]),
+							title: __("Invalid Part Number")
+						}
+						frappe.throw(msg);
+					}
+				});
+
+			}
+		}
 });
 
 cur_frm.add_fetch('project', 'cost_center', 'cost_center');
@@ -426,75 +451,69 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 				"fieldname": "quantity",
 				"reqd": 1,
 				"default": 1
-			},
-			{
-				"fieldtype": "Button",
-				"label": __("Get Items"),
-				"fieldname": "get_items",
-				"cssClass": "btn-primary"
 			}
-		]
-	});
-
-	dialog.fields_dict.get_items.$input.click(function() {
-		var args = dialog.get_values();
-		if(!args) return;
-		dialog.hide();
-		return frappe.call({
-			type: "GET",
-			method: "erpnext.stock.doctype.packed_item.packed_item.get_items_from_product_bundle",
-			args: {
+		],
+		primary_action_label: 'Get Items',
+		primary_action(args){
+			if(!args) return;
+			dialog.hide();
+			return frappe.call({
+				type: "GET",
+				method: "erpnext.stock.doctype.packed_item.packed_item.get_items_from_product_bundle",
 				args: {
-					item_code: args.product_bundle,
-					quantity: args.quantity,
-					parenttype: frm.doc.doctype,
-					parent: frm.doc.name,
-					supplier: frm.doc.supplier,
-					currency: frm.doc.currency,
-					conversion_rate: frm.doc.conversion_rate,
-					price_list: frm.doc.buying_price_list,
-					price_list_currency: frm.doc.price_list_currency,
-					plc_conversion_rate: frm.doc.plc_conversion_rate,
-					company: frm.doc.company,
-					is_subcontracted: frm.doc.is_subcontracted,
-					transaction_date: frm.doc.transaction_date || frm.doc.posting_date,
-					ignore_pricing_rule: frm.doc.ignore_pricing_rule,
-					doctype: frm.doc.doctype
-				}
-			},
-			freeze: true,
-			callback: function(r) {
-				const first_row_is_empty = function(child_table){
-					if($.isArray(child_table) && child_table.length > 0) {
-						return !child_table[0].item_code;
+					args: {
+						item_code: args.product_bundle,
+						quantity: args.quantity,
+						parenttype: frm.doc.doctype,
+						parent: frm.doc.name,
+						supplier: frm.doc.supplier,
+						currency: frm.doc.currency,
+						conversion_rate: frm.doc.conversion_rate,
+						price_list: frm.doc.buying_price_list,
+						price_list_currency: frm.doc.price_list_currency,
+						plc_conversion_rate: frm.doc.plc_conversion_rate,
+						company: frm.doc.company,
+						is_subcontracted: frm.doc.is_subcontracted,
+						transaction_date: frm.doc.transaction_date || frm.doc.posting_date,
+						ignore_pricing_rule: frm.doc.ignore_pricing_rule,
+						doctype: frm.doc.doctype
 					}
-					return false;
-				};
+				},
+				freeze: true,
+				callback: function(r) {
+					const first_row_is_empty = function(child_table){
+						if($.isArray(child_table) && child_table.length > 0) {
+							return !child_table[0].item_code;
+						}
+						return false;
+					};
 
-				const remove_empty_first_row = function(frm){
-				if (first_row_is_empty(frm.doc.items)){
-					frm.doc.items = frm.doc.items.splice(1);
-					}
-				};
+					const remove_empty_first_row = function(frm){
+					if (first_row_is_empty(frm.doc.items)){
+						frm.doc.items = frm.doc.items.splice(1);
+						}
+					};
 
-				if(!r.exc && r.message) {
-					remove_empty_first_row(frm);
-					for ( var i=0; i< r.message.length; i++ ) {
-						var d = frm.add_child("items");
-						var item = r.message[i];
-						for ( var key in  item) {
-							if ( !is_null(item[key]) ) {
-								d[key] = item[key];
+					if(!r.exc && r.message) {
+						remove_empty_first_row(frm);
+						for ( var i=0; i< r.message.length; i++ ) {
+							var d = frm.add_child("items");
+							var item = r.message[i];
+							for ( var key in  item) {
+								if ( !is_null(item[key]) ) {
+									d[key] = item[key];
+								}
+							}
+							if(frappe.meta.get_docfield(d.doctype, "price_list_rate", d.name)) {
+								frm.script_manager.trigger("price_list_rate", d.doctype, d.name);
 							}
 						}
-						if(frappe.meta.get_docfield(d.doctype, "price_list_rate", d.name)) {
-							frm.script_manager.trigger("price_list_rate", d.doctype, d.name);
-						}
+						frm.refresh_field("items");
 					}
-					frm.refresh_field("items");
 				}
-			}
-		})
+			})
+		}
 	});
+
 	dialog.show();
 }

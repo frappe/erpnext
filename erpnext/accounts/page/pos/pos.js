@@ -1769,6 +1769,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				method: "erpnext.accounts.doctype.sales_invoice.pos.make_invoice",
 				freeze: true,
 				args: {
+					pos_profile: me.pos_profile_data,
 					doc_list: me.si_docs,
 					email_queue_list: me.email_queue_list,
 					customers_list: me.customers_list

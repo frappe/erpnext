@@ -121,12 +121,14 @@
  ],
  "icon": "fa fa-map-marker",
  "idx": 1,
+ "is_tree": 1,
  "links": [],
- "modified": "2020-01-28 13:49:31.905800",
+ "modified": "2020-03-18 18:11:36.623555",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Territory",
  "name_case": "Title Case",
+ "nsm_parent_field": "parent_territory",
  "owner": "Administrator",
  "permissions": [
   {

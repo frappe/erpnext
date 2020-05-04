@@ -12,6 +12,7 @@
   "deduct_full_tax_on_selected_payroll_date",
   "depends_on_payment_days",
   "is_tax_applicable",
+  "exempted_from_income_tax",
   "is_flexible_benefit",
   "variable_based_on_taxable_salary",
   "section_break_2",
@@ -63,6 +64,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.parentfield=='earnings'",
    "fetch_from": "salary_component.is_tax_applicable",
    "fieldname": "is_tax_applicable",
    "fieldtype": "Check",
@@ -72,6 +74,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.parentfield=='earnings'",
    "fetch_from": "salary_component.is_flexible_benefit",
    "fieldname": "is_flexible_benefit",
    "fieldtype": "Check",
@@ -81,6 +84,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.parentfield=='deductions'",
    "fetch_from": "salary_component.variable_based_on_taxable_salary",
    "fieldname": "variable_based_on_taxable_salary",
    "fieldtype": "Check",
@@ -193,13 +197,21 @@
    "fieldname": "additional_salary",
    "fieldtype": "Link",
    "label": "Additional Salary ",
-   "options": "Additional Salary",
+   "options": "Additional Salary"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.parentfield=='deductions'",
+   "fetch_from": "salary_component.exempted_from_income_tax",
+   "fieldname": "exempted_from_income_tax",
+   "fieldtype": "Check",
+   "label": "Exempted from Income Tax",
    "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-03-02 18:16:38.571005",
+ "modified": "2020-04-24 20:00:16.475295",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Detail",

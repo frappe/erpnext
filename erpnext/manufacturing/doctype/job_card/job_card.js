@@ -20,7 +20,7 @@ frappe.ui.form.on('Job Card', {
 			}
 		}
 
-		if (frm.doc.docstatus == 0 && frm.doc.for_quantity > frm.doc.total_completed_qty
+		if (frm.doc.docstatus == 0 && (frm.doc.for_quantity > frm.doc.total_completed_qty || !frm.doc.for_quantity)
 			&& (!frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)) {
 			frm.trigger("prepare_timer_buttons");
 		}
@@ -59,10 +59,14 @@ frappe.ui.form.on('Job Card', {
 				let completed_time = frappe.datetime.now_datetime();
 				frm.trigger("hide_timer");
 
-				frappe.prompt({fieldtype: 'Float', label: __('Completed Quantity'),
-					fieldname: 'qty', reqd: 1, default: frm.doc.for_quantity}, data => {
-					frm.events.complete_job(frm, completed_time, data.qty);
-				}, __("Enter Value"), __("Complete"));
+				if (frm.doc.for_quantity) {
+					frappe.prompt({fieldtype: 'Float', label: __('Completed Quantity'),
+						fieldname: 'qty', reqd: 1, default: frm.doc.for_quantity}, data => {
+							frm.events.complete_job(frm, completed_time, data.qty);
+						}, __("Enter Value"), __("Complete"));
+				} else {
+					frm.events.complete_job(frm, completed_time, 0);
+				}
 			}).addClass("btn-primary");
 		}
 	},
@@ -78,7 +82,9 @@ frappe.ui.form.on('Job Card', {
 			frm.set_value('current_time' , 0);
 		}
 
-		frm.save();
+		frm.save("Save", () => {}, "", () => {
+			frm.doc.time_logs.pop(-1);
+		});
 	},
 
 	complete_job: function(frm, completed_time, completed_qty) {
@@ -99,6 +105,24 @@ frappe.ui.form.on('Job Card', {
 				frm.save();
 			}
 		});
+	},
+
+	validate: function(frm) {
+		if ((!frm.doc.time_logs || !frm.doc.time_logs.length) && frm.doc.started_time) {
+			frm.trigger("reset_timer");
+		}
+	},
+
+	employee: function(frm) {
+		if (frm.doc.job_started && !frm.doc.current_time) {
+			frm.trigger("reset_timer");
+		}
+	},
+
+	reset_timer: function(frm) {
+		frm.set_value('started_time' , '');
+		frm.set_value('job_started', 0);
+		frm.set_value('current_time' , 0);
 	},
 
 	make_dashboard: function(frm) {
@@ -133,12 +157,12 @@ frappe.ui.form.on('Job Card', {
 					updateStopwatch(current);
 				}, 1000);
 			}
-	
+
 			function updateStopwatch(increment) {
 				var hours = Math.floor(increment / 3600);
 				var minutes = Math.floor((increment - (hours * 3600)) / 60);
 				var seconds = increment - (hours * 3600) - (minutes * 60);
-	
+
 				$(section).find(".hours").text(hours < 10 ? ("0" + hours.toString()) : hours.toString());
 				$(section).find(".minutes").text(minutes < 10 ? ("0" + minutes.toString()) : minutes.toString());
 				$(section).find(".seconds").text(seconds < 10 ? ("0" + seconds.toString()) : seconds.toString());
@@ -201,5 +225,10 @@ frappe.ui.form.on('Job Card', {
 frappe.ui.form.on('Job Card Time Log', {
 	completed_qty: function(frm) {
 		frm.events.set_total_completed_qty(frm);
+	},
+
+	to_time: function(frm) {
+		frm.set_value('job_started', 0);
+		frm.set_value('started_time', '');
 	}
 })

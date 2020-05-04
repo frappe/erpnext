@@ -111,7 +111,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 
 		data.append(row)
 
-	if filters.get('group_by'):
+	if filters.get('group_by') and item_list:
 		total_row = total_row_map.get(prev_group_by_value or d.get('item_name'))
 		total_row['percent_gt'] = flt(total_row['total']/grand_total * 100)
 		data.append(total_row)
@@ -373,6 +373,8 @@ def get_items(filters, additional_query_columns):
 
 	if additional_query_columns:
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
+	else:
+		additional_query_columns = ''
 
 	return frappe.db.sql("""
 		select
