@@ -77,7 +77,7 @@
 		{% if next %}
 			<button id="nextButton" onclick="handle('/lms/content?program={{ program }}&course={{ course }}&topic={{ topic }}&type={{ next.content_type }}&content={{ next.content }}')" class='btn btn-primary' disabled="true">{{_('Next')}}</button>
 		{% else %}
-			<button id="nextButton" onclick="handle('/lms/course?name={{ course }}&program={{ program }}')" class='btn btn-primary' disabled="true">{{_('Finish Topic')}}c</button>
+			<button id="nextButton" onclick="handle('/lms/course?name={{ course }}&program={{ program }}')" class='btn btn-primary' disabled="true">{{_('Finish Topic')}}</button>
 		{% endif %}
 {% endmacro %}
 
