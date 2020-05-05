@@ -388,13 +388,12 @@ def get_invoiced_qty_map(delivery_note):
 
 def get_returned_qty_map(delivery_note):
 	"""returns a map: {so_detail: returned_qty}"""
-	returned_qty_map = frappe._dict(frappe.db.sql("""select dn_item.item_code, sum(abs(dn_item.qty)) as qty
+	returned_qty_map = frappe._dict(frappe.db.sql("""select dn_item.dn_detail, abs(dn_item.qty) as qty
 		from `tabDelivery Note Item` dn_item, `tabDelivery Note` dn
 		where dn.name = dn_item.parent
 			and dn.docstatus = 1
 			and dn.is_return = 1
 			and dn.return_against = %s
-		group by dn_item.item_code
 	""", delivery_note))
 
 	return returned_qty_map
@@ -413,7 +412,7 @@ def make_sales_invoice(source_name, target_doc=None):
 		target.run_method("set_po_nos")
 
 		if len(target.get("items")) == 0:
-			frappe.throw(_("All these items have already been invoiced"))
+			frappe.throw(_("All these items have already been Invoiced/Returned"))
 
 		target.run_method("calculate_taxes_and_totals")
 
@@ -438,9 +437,9 @@ def make_sales_invoice(source_name, target_doc=None):
 		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0)
 
 		returned_qty = 0
-		if returned_qty_map.get(item_row.item_code, 0) > 0:
-			returned_qty = flt(returned_qty_map.get(item_row.item_code, 0))
-			returned_qty_map[item_row.item_code] -= pending_qty
+		if returned_qty_map.get(item_row.name, 0) > 0:
+			returned_qty = flt(returned_qty_map.get(item_row.name, 0))
+			returned_qty_map[item_row.name] -= pending_qty
 
 		if returned_qty:
 			if returned_qty >= pending_qty:

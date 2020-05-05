@@ -6,4 +6,5 @@ from erpnext.setup.setup_wizard.operations.install_fixtures import add_dashboard
 
 def execute():
 	frappe.reload_doc("desk", "doctype", "number_card_link")
+	frappe.reload_doc("healthcare", "doctype", "patient_appointment")
 	add_dashboards()

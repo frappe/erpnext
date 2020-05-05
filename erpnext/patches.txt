@@ -662,6 +662,7 @@ erpnext.patches.v12_0.create_irs_1099_field_united_states
 erpnext.patches.v12_0.move_bank_account_swift_number_to_bank
 erpnext.patches.v12_0.rename_bank_reconciliation
 erpnext.patches.v12_0.rename_bank_reconciliation_fields # 2020-01-22
+erpnext.patches.v12_0.set_purchase_receipt_delivery_note_detail
 erpnext.patches.v12_0.add_permission_in_lower_deduction
 erpnext.patches.v12_0.set_received_qty_in_material_request_as_per_stock_uom
 erpnext.patches.v12_0.rename_account_type_doctype
@@ -677,3 +678,4 @@ erpnext.patches.v13_0.move_tax_slabs_from_payroll_period_to_income_tax_slab #123
 erpnext.patches.v12_0.fix_quotation_expired_status
 erpnext.patches.v12_0.update_appointment_reminder_scheduler_entry
 erpnext.patches.v12_0.retain_permission_rules_for_video_doctype
+erpnext.patches.v13_0.patch_to_fix_reverse_linking_in_additional_salary_encashment_and_incentive
