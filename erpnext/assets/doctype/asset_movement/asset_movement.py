@@ -110,6 +110,7 @@ class AssetMovement(Document):
 				ORDER BY
 					asm.transaction_date asc
 				""", (d.asset, self.company, 'Receipt'), as_dict=1)
+
 			if auto_gen_movement_entry and auto_gen_movement_entry[0].get('name') == self.name:
 				frappe.throw(_('{0} will be cancelled automatically on asset cancellation as it was \
 					auto generated for Asset {1}').format(self.name, d.asset))

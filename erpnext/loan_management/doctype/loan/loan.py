@@ -233,7 +233,7 @@ def make_repayment_entry(loan, applicant_type, applicant, loan_type, company, as
 		return repayment_entry
 
 @frappe.whitelist()
-def create_loan_security_unpledge(loan, applicant_type, applicant, company):
+def create_loan_security_unpledge(loan, applicant_type, applicant, company, as_dict=1):
 	loan_security_pledge_details = frappe.db.sql("""
 		SELECT p.parent, p.loan_security, p.qty as qty FROM `tabLoan Security Pledge` lsp , `tabPledge` p
 		WHERE p.parent = lsp.name AND lsp.loan = %s AND lsp.docstatus = 1
@@ -252,7 +252,10 @@ def create_loan_security_unpledge(loan, applicant_type, applicant, company):
 			"against_pledge": loan_security.parent
 		})
 
-	return unpledge_request.as_dict()
+	if as_dict:
+		return unpledge_request.as_dict()
+	else:
+		return unpledge_request
 
 
 
