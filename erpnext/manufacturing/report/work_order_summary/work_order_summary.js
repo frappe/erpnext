@@ -54,5 +54,12 @@ frappe.query_reports["Work Order Summary"] = {
 			fieldtype: "Int",
 			default: "0"
 		},
+		{
+			label: __("Charts Based On"),
+			fieldname:"charts_based_on",
+			fieldtype: "Select",
+			options: ["Status", "Age", "Quantity"],
+			default: "Status"
+		},
 	]
 };

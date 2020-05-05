@@ -50,8 +50,7 @@ def get_chart_data(periodic_data, columns):
 			'datasets': datasets
 		},
 		"type": "donut",
-		"height": 300,
-		"colors": ["#ff5858", "#98d85b"]
+		"height": 300
 	}
 
 	return chart

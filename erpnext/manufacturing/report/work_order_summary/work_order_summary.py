@@ -3,8 +3,9 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import date_diff, today
+from frappe.utils import date_diff, today, getdate, flt
 from frappe import _
+from erpnext.stock.report.stock_analytics.stock_analytics import (get_period_date_ranges, get_period)
 
 def execute(filters=None):
 	columns, data = [], []
@@ -46,7 +47,15 @@ def get_data(filters):
 
 	return res
 
-def get_chart_data(periodic_data, columns):
+def get_chart_data(data, filters):
+	if filters.get("charts_based_on") == "Status":
+		return get_chart_based_on_status(data)
+	elif filters.get("charts_based_on") == "Age":
+		return get_chart_based_on_age(data)
+	else:
+		return get_chart_based_on_qty(data, filters)
+
+def get_chart_based_on_status(data):
 	labels = ["Not Started", "In Process", "Stopped", "Completed"]
 
 	status_wise_data = {
@@ -56,7 +65,7 @@ def get_chart_data(periodic_data, columns):
 		"Completed": 0
 	}
 
-	for d in periodic_data:
+	for d in data:
 		if d.status == "In Process" and d.produced_qty:
 			status_wise_data["Completed"] += d.produced_qty
 
@@ -71,11 +80,99 @@ def get_chart_data(periodic_data, columns):
 			'datasets': [{'name':'Qty Wise Chart', 'values': values}]
 		},
 		"type": "donut",
-		"height": 300,
-		"colors": ["#ff5858", "#ffa00a", "#5e64ff", "#98d85b"]
+		"height": 300
 	}
 
 	return chart
+
+def get_chart_based_on_age(data):
+	labels = ["0-30 Days", "30-60 Days", "60-90 Days", "90 Above"]
+
+	age_wise_data = {
+		"0-30 Days": 0,
+		"30-60 Days": 0,
+		"60-90 Days": 0,
+		"90 Above": 0
+	}
+
+	for d in data:
+		if d.age > 0 and d.age <= 30:
+			age_wise_data["0-30 Days"] += 1
+		elif d.age > 30 and d.age <= 60:
+			age_wise_data["30-60 Days"] += 1
+		elif d.age > 60 and d.age <= 90:
+			age_wise_data["60-90 Days"] += 1
+		else:
+			age_wise_data["90 Above"] += 1
+
+	values = [age_wise_data["0-30 Days"], age_wise_data["30-60 Days"],
+		age_wise_data["60-90 Days"], age_wise_data["90 Above"]]
+
+	chart = {
+		"data": {
+			'labels': labels,
+			'datasets': [{'name':'Qty Wise Chart', 'values': values}]
+		},
+		"type": "donut",
+		"height": 300
+	}
+
+	return chart
+
+def get_chart_based_on_qty(data, filters):
+	labels, periodic_data = prepare_chart_data(data, filters)
+
+	pending, completed = [], []
+	datasets = []
+
+	for d in labels:
+		pending.append(periodic_data.get("Pending").get(d))
+		completed.append(periodic_data.get("Completed").get(d))
+
+	datasets.append({"name": "Pending", "values": pending})
+	datasets.append({"name": "Completed", "values": completed})
+
+	chart = {
+		"data": {
+			'labels': labels,
+			'datasets': datasets
+		},
+		"type": "bar",
+		"barOptions": {
+			"stacked": 1
+		}
+	}
+
+	return chart
+
+def prepare_chart_data(data, filters):
+	labels = []
+
+	periodic_data = {
+		"Pending": {},
+		"Completed": {}
+	}
+
+	filters.range = "Monthly"
+
+	ranges = get_period_date_ranges(filters)
+	for from_date, end_date in ranges:
+		period = get_period(end_date, filters)
+		if period not in labels:
+			labels.append(period)
+
+		if period not in periodic_data["Pending"]:
+			periodic_data["Pending"][period] = 0
+
+		if period not in periodic_data["Completed"]:
+			periodic_data["Completed"][period] = 0
+
+		for d in data:
+			if getdate(d.planned_start_date) >= from_date and getdate(d.planned_start_date) <= end_date:
+				periodic_data["Pending"][period] += (flt(d.qty) - flt(d.produced_qty))
+				periodic_data["Completed"][period] += flt(d.produced_qty)
+
+	return labels, periodic_data
 
 def get_columns(filters):
 	columns = [

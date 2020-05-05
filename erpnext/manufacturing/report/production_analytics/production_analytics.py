@@ -38,6 +38,7 @@ def get_columns(filters):
 
 def get_periodic_data(filters, entry):
 	periodic_data = {
+		"All Work Orders": {},
 		"Not Started": {},
 		"Overdue": {},
 		"Pending": {},
@@ -50,6 +51,7 @@ def get_periodic_data(filters, entry):
 		period = get_period(end_date, filters)
 		for d in entry:
 			if getdate(d.creation) <= getdate(from_date) or getdate(d.creation) <= getdate(end_date) :
+				periodic_data = update_periodic_data(periodic_data, "All Work Orders", period)
 				if d.status == 'Completed':
 					if getdate(d.actual_end_date) < getdate(from_date) or getdate(d.modified) < getdate(from_date):
 						periodic_data = update_periodic_data(periodic_data, "Completed", period)
@@ -97,7 +99,7 @@ def get_data(filters, columns):
 
 	periodic_data = get_periodic_data(filters,entry)
 
-	labels = ["Not Started", "Overdue", "Pending", "Completed"]
+	labels = ["All Work Orders", "Not Started", "Overdue", "Pending", "Completed"]
 	chart_data = get_chart_data(periodic_data,columns)
 	ranges = get_period_date_ranges(filters)
 
@@ -121,11 +123,13 @@ def get_chart_data(periodic_data, columns):
 	datasets = []
 
 	for d in labels:
+		all_data.append(periodic_data.get("All Work Orders").get(d))
 		not_start.append(periodic_data.get("Not Started").get(d))
 		overdue.append(periodic_data.get("Overdue").get(d))
 		pending.append(periodic_data.get("Pending").get(d))
 		completed.append(periodic_data.get("Completed").get(d))
 
+	datasets.append({'name':'All Work Orders', 'values': all_data})
 	datasets.append({'name':'Not Started', 'values': not_start})
 	datasets.append({'name':'Overdue', 'values': overdue})
 	datasets.append({'name':'Pending', 'values': pending})
@@ -135,13 +139,11 @@ def get_chart_data(periodic_data, columns):
 		"data": {
 			'labels': labels,
 			'datasets': datasets
-		},
-		"type": "bar",
-		"colors": ["#5e64ff", "#ff5858", "#ffa00a", "#98d85b"]
+		}
 	}
+	chart["type"] = "line"
 
 	return chart
-
 
 
 
