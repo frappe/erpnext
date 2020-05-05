@@ -55,7 +55,7 @@ class TestLeaveEncashment(unittest.TestCase):
 		leave_encashment.submit()
 
 		# assert links
-		add_sal = frappe.get_all("Additional salary", filters = {"ref_docname": leave_encashment.name})[0]
+		add_sal = frappe.get_all("Additional Salary", filters = {"ref_docname": leave_encashment.name})[0]
 		self.assertTrue(add_sal)
 
 	def test_creation_of_leave_ledger_entry_on_submit(self):
