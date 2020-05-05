@@ -475,6 +475,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr1 = make_purchase_receipt(is_return=1, return_against=pr.name, qty=-1, do_not_submit=True)
 		pr1.items[0].purchase_order = po.name
 		pr1.items[0].purchase_order_item = po.items[0].name
+		pr1.items[0].purchase_receipt_item = pr.items[0].name
 		pr1.submit()
 
 		pi = make_purchase_invoice(pr.name)
@@ -498,7 +499,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pi1.save()
 		pi1.submit()
 
-		make_purchase_receipt(is_return=1, return_against=pr1.name, qty=-2)
+		pr2 = make_purchase_receipt(is_return=1, return_against=pr1.name, qty=-2, do_not_submit=True)
+		pr2.items[0].purchase_receipt_item = pr1.items[0].name
+		pr2.submit()
 
 		pi2 = make_purchase_invoice(pr1.name)
 		self.assertEquals(pi2.items[0].qty, 2)
