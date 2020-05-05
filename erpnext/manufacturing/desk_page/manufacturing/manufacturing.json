@@ -3,7 +3,7 @@
   {
    "hidden": 0,
    "label": "Production",
-   "links": "[\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"BOM\"\n        ],\n        \"description\": \"Orders released for production.\",\n        \"label\": \"Work Order\",\n        \"name\": \"Work Order\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"BOM\"\n        ],\n        \"description\": \"Generate Material Requests (MRP) and Work Orders.\",\n        \"label\": \"Production Plan\",\n        \"name\": \"Production Plan\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\"\n        ],\n        \"label\": \"Stock Entry\",\n        \"name\": \"Stock Entry\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Job Card\",\n        \"name\": \"Job Card\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Downtime Entry\",\n        \"name\": \"Downtime Entry\",\n        \"type\": \"doctype\"\n    }\n]"
+   "links": "[\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"BOM\"\n        ],\n        \"description\": \"Orders released for production.\",\n        \"label\": \"Work Order\",\n        \"name\": \"Work Order\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"BOM\"\n        ],\n        \"description\": \"Generate Material Requests (MRP) and Work Orders.\",\n        \"label\": \"Production Plan\",\n        \"name\": \"Production Plan\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\"\n        ],\n        \"label\": \"Stock Entry\",\n        \"name\": \"Stock Entry\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Activity Type\"\n        ],\n        \"description\": \"Time Sheet for manufacturing.\",\n        \"label\": \"Timesheet\",\n        \"name\": \"Timesheet\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Job Card\",\n        \"name\": \"Job Card\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -13,7 +13,7 @@
   {
    "hidden": 0,
    "label": "Reports",
-   "links": "[\n    {\n        \"dependencies\": [\n            \"Work Order\"\n        ],\n        \"doctype\": \"Work Order\",\n        \"is_query_report\": true,\n        \"label\": \"Work Order Summary\",\n        \"name\": \"Work Order Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Work Order\"\n        ],\n        \"doctype\": \"Work Order\",\n        \"is_query_report\": true,\n        \"label\": \"Issued Items Against Work Order\",\n        \"name\": \"Issued Items Against Work Order\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Work Order\"\n        ],\n        \"doctype\": \"Work Order\",\n        \"is_query_report\": true,\n        \"label\": \"Production Analytics\",\n        \"name\": \"Production Analytics\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Quality Inspection\"\n        ],\n        \"doctype\": \"Quality Inspection\",\n        \"is_query_report\": true,\n        \"label\": \"Quality Inspection Summary\",\n        \"name\": \"Quality Inspection Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Downtime Entry\"\n        ],\n        \"doctype\": \"Downtime Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Downtime Analysis\",\n        \"name\": \"Downtime Analysis\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Job Card\"\n        ],\n        \"doctype\": \"Job Card\",\n        \"is_query_report\": true,\n        \"label\": \"Job Card Summary\",\n        \"name\": \"Job Card Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"BOM\"\n        ],\n        \"doctype\": \"BOM\",\n        \"is_query_report\": true,\n        \"label\": \"BOM Search\",\n        \"name\": \"BOM Search\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"BOM\"\n        ],\n        \"doctype\": \"BOM\",\n        \"is_query_report\": true,\n        \"label\": \"BOM Stock Report\",\n        \"name\": \"BOM Stock Report\",\n        \"type\": \"report\"\n    }\n]"
+   "links": "[{\n\t\"dependencies\": [\"Work Order\"],\n\t\"name\": \"Work Order Summary\",\n\t\"is_query_report\": true,\n\t\"type\": \"report\",\n\t\"doctype\": \"Work Order\",\n\t\"label\": \"Work Order Summary\"\n}, {\n\t\"dependencies\": [\"Work Order\"],\n\t\"name\": \"Production Analytics\",\n\t\"is_query_report\": true,\n\t\"type\": \"report\",\n\t\"doctype\": \"Work Order\",\n\t\"label\": \"Production Analytics\"\n}, {\n\t\"dependencies\": [\"Quality Inspection\"],\n\t\"name\": \"Quality Inspection Summary\",\n\t\"is_query_report\": true,\n\t\"type\": \"report\",\n\t\"doctype\": \"Quality Inspection\",\n\t\"label\": \"Quality Inspection Summary\"\n}, {\n\t\"dependencies\": [\"Downtime Entry\"],\n\t\"name\": \"Downtime Analysis\",\n\t\"is_query_report\": true,\n\t\"type\": \"report\",\n\t\"doctype\": \"Downtime Entry\",\n\t\"label\": \"Downtime Analysis\"\n}, {\n\t\"dependencies\": [\"Job Card\"],\n\t\"name\": \"Job Card Summary\",\n\t\"is_query_report\": true,\n\t\"type\": \"report\",\n\t\"doctype\": \"Job Card\",\n\t\"label\": \"Job Card Summary\"\n}, {\n\t\"dependencies\": [\"BOM\"],\n\t\"name\": \"BOM Search\",\n\t\"is_query_report\": true,\n\t\"type\": \"report\",\n\t\"doctype\": \"BOM\",\n\t\"label\": \"BOM Search\"\n}, {\n\t\"dependencies\": [\"BOM\"],\n\t\"name\": \"BOM Stock Report\",\n\t\"is_query_report\": true,\n\t\"type\": \"report\",\n\t\"doctype\": \"BOM\",\n\t\"label\": \"BOM Stock Report\"\n}]"
   },
   {
    "hidden": 0,
@@ -32,12 +32,7 @@
   }
  ],
  "category": "Domains",
- "charts": [
-  {
-   "chart_name": "Production Analysis",
-   "label": "Production Analysis"
-  }
- ],
+ "charts": [],
  "creation": "2020-03-02 17:11:37.032604",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
@@ -47,29 +42,59 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Manufacturing",
- "modified": "2020-04-27 00:17:26.323677",
+ "modified": "2020-05-14 15:06:45.963942",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
+ "onboarding": "Manufacturing",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 0,
  "restrict_to_domain": "Manufacturing",
  "shortcuts": [
   {
+   "format": "{} Active",
    "label": "Item",
    "link_to": "Item",
+   "restrict_to_domain": "Manufacturing",
+   "stats_filter": "{\n    \"disabled\": 0\n}",
    "type": "DocType"
   },
   {
+   "format": "{} Active",
    "label": "BOM",
    "link_to": "BOM",
+   "restrict_to_domain": "Manufacturing",
+   "stats_filter": "{\n    \"is_active\": 1\n}",
    "type": "DocType"
   },
   {
+   "format": "{} Open",
    "label": "Work Order",
    "link_to": "Work Order",
+   "restrict_to_domain": "Manufacturing",
+   "stats_filter": "{ \"status\": \n    (\n    \"in\", [\"Draft\", \"Not Started\", \"In Process\"]\n    )\n}",
    "type": "DocType"
+  },
+  {
+   "format": "{} Open",
+   "label": "Production Plan",
+   "link_to": "Production Plan",
+   "restrict_to_domain": "Manufacturing",
+   "stats_filter": "{ \"status\": \n    (\n    \"!=\", \"Completed\"\n    )\n}",
+   "type": "DocType"
+  },
+  {
+   "label": "Work Order Summary",
+   "link_to": "Work Order Summary",
+   "restrict_to_domain": "Manufacturing",
+   "type": "Report"
+  },
+  {
+   "label": "BOM Stock Report",
+   "link_to": "BOM Stock Report",
+   "restrict_to_domain": "Manufacturing",
+   "type": "Report"
   }
  ]
 }

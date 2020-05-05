@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe.utils import add_to_date
+from frappe.utils.dashboard import get_config, make_records
 
 def execute():
 	frappe.reload_doc("manufacturing", "doctype", "work_order")
@@ -33,11 +34,9 @@ def execute():
 				planned_end_date = add_to_date(doc.planned_start_date, minutes=doc.lead_time)
 				doc.db_set("planned_end_date", doc.actual_start_date, update_modified=False)
 
-
 	frappe.db.sql(""" UPDATE `tabJob Card` as jc, `tabWork Order` as wo
 		SET
 			jc.production_item = wo.production_item, jc.item_name = wo.item_name
 		WHERE
 			jc.work_order = wo.name and IFNULL(jc.production_item, "") = ""
 	""")
-

@@ -47,8 +47,7 @@ def get_chart_data(data, columns):
 				{"name": "Dataset 1", "values": datasets}
 			]
 		},
-		"type": "bar",
-		"colors": ["#ff5858"]
+		"type": "bar"
 	}
 
 	return chart

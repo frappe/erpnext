@@ -49,33 +49,22 @@ def get_data(filters):
 def get_chart_data(job_card_details, filters):
 	labels, periodic_data = prepare_chart_data(job_card_details, filters)
 
-	not_start, in_progress, on_hold, completed = [], [], [] , []
+	pending, completed = [], []
 	datasets = []
 
 	for d in labels:
-		not_start.append(periodic_data.get("Open").get(d))
-		in_progress.append(periodic_data.get("Work In Progress").get(d))
-		on_hold.append(periodic_data.get("On Hold").get(d))
+		pending.append(periodic_data.get("Pending").get(d))
 		completed.append(periodic_data.get("Completed").get(d))
 
-	datasets.append({'name':'Open', 'values': not_start})
-	datasets.append({'name':'Work In Progress', 'values': in_progress})
-	datasets.append({'name':'On Hold', 'values': on_hold})
-	datasets.append({'name':'Completed', 'values': completed})
+	datasets.append({"name": "Pending", "values": pending})
+	datasets.append({"name": "Completed", "values": completed})
 
 	chart = {
 		"data": {
 			'labels': labels,
 			'datasets': datasets
 		},
-		"type": "bar",
-		"colors": ["#ff5858", "#ffa00a", "#5e64ff", "#98d85b"],
-		"axisOptions": {
-			"xAxisMode": "tick"
-		},
-		"barOptions": {
-			"stacked": 1
-		}
+		"type": "bar"
 	}
 
 	return chart
@@ -84,9 +73,7 @@ def prepare_chart_data(job_card_details, filters):
 	labels = []
 
 	periodic_data = {
-		"Open": {},
-		"Work In Progress": {},
-		"On Hold": {},
+		"Pending": {},
 		"Completed": {}
 	}
 
@@ -100,10 +87,12 @@ def prepare_chart_data(job_card_details, filters):
 
 		for d in job_card_details:
 			if getdate(d.from_time) >= from_date and getdate(d.to_time) <= end_date:
-				if periodic_data.get(d.status) and periodic_data.get(d.status).get(period):
-					periodic_data[d.status][period] += 1
+				status = "Completed" if d.status == "Completed" else "Pending"
+
+				if periodic_data.get(status) and periodic_data.get(status).get(period):
+					periodic_data[status][period] += 1
 				else:
-					periodic_data[d.status][period] = 1
+					periodic_data[status][period] = 1
 
 	return labels, periodic_data
 
