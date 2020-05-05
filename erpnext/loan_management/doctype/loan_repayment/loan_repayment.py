@@ -78,7 +78,10 @@ class LoanRepayment(AccountsController):
 				(flt(payment.paid_principal_amount), flt(payment.paid_interest_amount), payment.loan_interest_accrual))
 
 		if flt(loan.total_principal_paid + self.principal_amount_paid, 2) >= flt(loan.total_payment, 2):
-			frappe.db.set_value("Loan", self.against_loan, "status", "Loan Closure Requested")
+			if loan.is_secured_loan:
+				frappe.db.set_value("Loan", self.against_loan, "status", "Loan Closure Requested")
+			else:
+				frappe.db.set_value("Loan", self.against_loan, "status", "Closed")
 
 		frappe.db.sql(""" UPDATE `tabLoan` SET total_amount_paid = %s, total_principal_paid = %s
 			WHERE name = %s """, (loan.total_amount_paid + self.amount_paid,
