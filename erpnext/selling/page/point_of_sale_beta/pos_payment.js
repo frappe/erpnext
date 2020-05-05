@@ -97,8 +97,8 @@ erpnext.PointOfSale.Payment = class {
 			// hide all control fields and shortcuts
 			$(`.mode-of-payment-control`).addClass('d-none');
 			$(`.shortcuts`).addClass('d-none');
-			me.$payment_modes.find(`.${mode}-amount`).removeClass('d-none');
-			me.$payment_modes.find(`.loyalty-program-name`).addClass('d-none');
+			me.$payment_modes.find(`.pay-amount`).removeClass('d-none');
+			me.$payment_modes.find(`.loyalty-points-name`).addClass('d-none');
 
 			// remove highlight from all mode-of-payments
 			$('.mode-of-payment').removeClass('border-primary');
@@ -114,7 +114,7 @@ erpnext.PointOfSale.Payment = class {
 				mode_clicked.find('.mode-of-payment-control').removeClass('d-none');
 				mode_clicked.find('.shortcuts').removeClass('d-none');
 				me.$payment_modes.find(`.${mode}-amount`).addClass('d-none');
-				me.$payment_modes.find(`.loyalty-program-name`).removeClass('d-none');
+				me.$payment_modes.find(`.${mode}-name`).removeClass('d-none');
 				me.toggle_numpad(true);
 				me.selected_mode = me[`${mode}_control`];
 				me.selected_mode?.$input.get(0).focus();
@@ -131,6 +131,16 @@ erpnext.PointOfSale.Payment = class {
 		// })
 
 		this.$component.on('click', '.submit-order', () => {
+			const paid_amount = this.events.get_frm().doc.paid_amount;
+
+			if (paid_amount == 0) {
+				frappe.show_alert({
+					message: __("You cannot submit the order without payment."),
+					indicator: "orange"
+				})
+				return;
+			}
+
 			this.events.submit_invoice();
 		})
 
@@ -210,7 +220,7 @@ erpnext.PointOfSale.Payment = class {
 						<div class="mode-of-payment rounded border border-grey text-grey text-md
 								mb-4 p-8 pt-4 pb-4 no-select pointer" data-mode="${mode}" data-payment-type="${payment_type}">
 							${p.mode_of_payment}
-							<div class="${mode}-amount inline float-right text-bold">${amount}</div>
+							<div class="${mode}-amount pay-amount inline float-right text-bold">${amount}</div>
 							<div class="${mode} mode-of-payment-control mt-4 flex flex-1 items-center d-none"></div>
 						</div>
 					</div>`
@@ -242,6 +252,12 @@ erpnext.PointOfSale.Payment = class {
 			});
 			this[`${mode}_control`].toggle_label(false);
 			this[`${mode}_control`].set_value(p.amount);
+
+			if (p.default) {
+				setTimeout(() => {
+					this.$payment_modes.find(`.${mode}.mode-of-payment-control`).parent().click();
+				}, 500);
+			}
 		})
 
 		this.render_loyalty_points_payment_mode();
@@ -280,6 +296,7 @@ erpnext.PointOfSale.Payment = class {
 	}
 
 	render_loyalty_points_payment_mode() {
+		const me = this;
 		const doc = this.events.get_frm().doc;
 		const { loyalty_program, loyalty_points } = this.events.get_customer_details();
 
@@ -290,7 +307,7 @@ erpnext.PointOfSale.Payment = class {
 			description = __(`You don't have enough points to redeem.`);
 			read_only = true;
 		} else {
-			description = __(`You can redeem upto ${details.loyalty_points} points.`);
+			description = __(`You can redeem upto ${loyalty_points} points.`);
 			read_only = false;
 		}
 
@@ -301,8 +318,8 @@ erpnext.PointOfSale.Payment = class {
 				<div class="mode-of-payment rounded border border-grey text-grey text-md
 						mb-4 p-8 pt-4 pb-4 no-select pointer" data-mode="loyalty-points" data-payment-type="loyalty-points">
 					Loyalty Points
-					<div class="loyalty-points-amount inline float-right text-bold">${amount}</div>
-					<div class="loyalty-program-name inline float-right text-bold text-md-0 d-none">${loyalty_program}</div>
+					<div class="loyalty-points-amount pay-amount inline float-right text-bold">${amount}</div>
+					<div class="loyalty-points-name inline float-right text-bold text-md-0 d-none">${loyalty_program}</div>
 					<div class="loyalty-points mode-of-payment-control mt-4 flex flex-1 items-center d-none"></div>
 				</div>
 			</div>`
@@ -315,9 +332,16 @@ erpnext.PointOfSale.Payment = class {
 				placeholder: __(`Enter loyalty points to be redeemed.`),
 				read_only,
 				onchange: async function() {
+					if (this.value > loyalty_points) {
+						frappe.show_alert({
+							message: __(`You cannot redeem more than ${loyalty_points} points`),
+							indicator: "red"
+						})
+						me.loyalty_points_control.set_value(0);
+						return;
+					}
 					const redeem_loyalty_points = this.value > 0 ? 1 : 0;
 					await frappe.model.set_value(doc.doctype, doc.name, 'redeem_loyalty_points', redeem_loyalty_points);
-
 					frappe.model.set_value(doc.doctype, doc.name, 'loyalty_points', this.value);
 				},
 				description

@@ -204,37 +204,27 @@ erpnext.PointOfSale.PastOrderSummary = class {
     }
 
     get_item_html(doc, item_data) {
-        return `<div class="item-summary-wrapper flex items-center h-18 pr-4 pl-4 border-b-grey pointer no-select">
-                    <div class="flex w-10 h-10 rounded bg-light-grey mr-4 items-center justify-center font-bold f-shrink-0">
+        return `<div class="item-summary-wrapper flex items-center h-12 pr-4 pl-4 border-b-grey pointer no-select">
+                    <div class="flex w-6 h-6 rounded bg-light-grey mr-4 items-center justify-center font-bold f-shrink-0">
                         <span>${item_data.qty || 0}</span>
                     </div>
                     <div class="flex flex-col f-shrink-1">
                         <div class="text-md text-dark-grey text-bold overflow-hidden whitespace-nowrap">
                             ${item_data.item_name}
                         </div>
-                        ${get_description_html()}
                     </div>
-                    <div class="flex flex-col f-shrink-0 ml-auto text-right">
+                    <div class="flex f-shrink-0 ml-auto text-right">
                         ${get_rate_discount_html()}
                     </div>
                 </div>`
 
         function get_rate_discount_html() {
             if (item_data.rate && item_data.price_list_rate && item_data.rate !== item_data.price_list_rate) {
-                return `<div class="text-md-0 text-dark-grey text-bold">${format_currency(item_data.rate, doc.currency)}</div>
-                        <div class="text-grey line-through">${format_currency(item_data.price_list_rate, doc.currency)}</div>`
+                return `<span class="text-grey mr-2">(${item_data.discount_percentage}% off)</span>
+                        <div class="text-md-0 text-dark-grey text-bold">${format_currency(item_data.rate, doc.currency)}</div>`
             } else {
                 return `<div class="text-md-0 text-dark-grey text-bold">${format_currency(item_data.price_list_rate || item_data.rate, doc.currency)}</div>`
             }
-        }
-
-        function get_description_html() {
-            if (item_data.description) {
-                item_data.description.indexOf('<div>') != -1 && (item_data.description = $(item_data.description).text());
-                item_data.description = frappe.ellipsis(item_data.description, 45);
-                return `<div class="text-grey overflow-hidden whitespace-nowrap">${item_data.description}</div>`
-            }
-            return ``;
         }
     }
 
@@ -421,6 +411,13 @@ erpnext.PointOfSale.PastOrderSummary = class {
                 this.$payment_summary_container.append(payment_dom);
             }
         });
+        if (doc.redeem_loyalty_points && doc.loyalty_amount) {
+            const payment_dom = this.get_payment_html(doc, {
+                mode_of_payment: 'Loyalty Points',
+                amount: doc.loyalty_amount,
+            });
+            this.$payment_summary_container.append(payment_dom);
+        }
     }
 
     attach_totals_info(doc) {

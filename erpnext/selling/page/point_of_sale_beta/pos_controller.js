@@ -508,12 +508,15 @@ erpnext.PointOfSale.Controller = class {
 			let item_row = this.get_item_from_frm(item_code, batch_no);
 
 			if (item_row) {
+				const item_selected_from_selector = field === 'qty' && value === "+1"
+				item_selected_from_selector && (value = item_row.qty + flt(value))
+
 				field === 'qty' && (value = flt(value));
 
 				if (field === 'qty' && value > 0 && !this.allow_negative_stock)
 					await this.check_stock_availability(item_row, this.frm.doc.set_warehouse);
 				
-				if (this.is_current_item_being_edited(item_row)) {
+				if (this.is_current_item_being_edited(item_row) || item_selected_from_selector) {
 					await frappe.model.set_value(item_row.doctype, item_row.name, field, value);
 					this.update_cart_html(item_row);
 				}
@@ -541,7 +544,7 @@ erpnext.PointOfSale.Controller = class {
 
 				await this.trigger_new_item_events(item_row);
 
-				this.edit_item_details_of(item_row);
+				this.check_serial_batch_selection_needed(item_row) && this.edit_item_details_of(item_row);
 				this.update_cart_html(item_row);
 			}	
 		} catch (error) {
@@ -622,6 +625,7 @@ erpnext.PointOfSale.Controller = class {
 		} else {
 			const field_control = this.item_details[`${field_or_action}_control`];
 			if (!field_control) return;
+			field_control.set_focus();
 			value != "" && field_control.set_value(value);
 		}
 	}

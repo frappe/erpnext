@@ -149,7 +149,7 @@ erpnext.PointOfSale.ItemSelector = class {
             batch_no = batch_no === "undefined" ? undefined : batch_no;
             serial_no = serial_no === "undefined" ? undefined : serial_no;
 
-            me.events.item_selected({ field: 'qty', value: 1, item: { item_code, batch_no, serial_no }});
+            me.events.item_selected({ field: 'qty', value: "+1", item: { item_code, batch_no, serial_no }});
         })
 
         this.search_field.$input.on('input', (e) => {

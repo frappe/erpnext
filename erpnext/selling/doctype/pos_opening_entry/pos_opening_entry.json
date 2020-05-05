@@ -113,9 +113,8 @@
   {
    "allow_on_submit": 1,
    "fieldname": "pos_closing_entry",
-   "fieldtype": "Link",
+   "fieldtype": "Data",
    "label": "POS Closing Entry",
-   "options": "POS Closing Entry",
    "read_only": 1
   },
   {
@@ -132,7 +131,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-28 16:53:35.037800",
+ "modified": "2020-05-05 16:42:13.278888",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "POS Opening Entry",

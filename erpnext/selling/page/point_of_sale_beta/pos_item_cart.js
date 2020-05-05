@@ -182,9 +182,11 @@ erpnext.PointOfSale.ItemCart = class {
 			me.events.cart_item_clicked(item_code, batch_no);
 		});
 
-		this.$totals_section.on('click', '.checkout-btn', () => {
-			this.events.checkout();
-			this.toggle_checkout_btn(false);
+		this.$totals_section.on('click', '.checkout-btn', function() {
+			if (!$(this).hasClass('bg-primary')) return;
+			
+			me.events.checkout();
+			me.toggle_checkout_btn(false);
 		});
 
 		this.$totals_section.on('click', '.edit-cart-btn', () => {

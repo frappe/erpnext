@@ -341,10 +341,12 @@ def make_merge_log(invoices):
 def update_multi_mode_option(doc, pos_profile):
 	def append_payment(payment_mode):
 		payment = doc.append('payments', {})
+		payment.default = payment_mode.default
 		payment.mode_of_payment = payment_mode.parent
 		payment.account = payment_mode.default_account
 		payment.type = payment_mode.type
 
+	doc.set('payments', [])
 	if not pos_profile or not pos_profile.get('payments'):
 		for payment_mode in get_all_mode_of_payments(doc):
 			append_payment(payment_mode)
@@ -352,7 +354,9 @@ def update_multi_mode_option(doc, pos_profile):
 
 	for pos_payment_method in pos_profile.get('payments'):
 		pos_payment_method = pos_payment_method.as_dict()
+		
 		payment_mode = get_mode_of_payment_info(pos_payment_method.mode_of_payment, doc.company)
+		payment_mode[0].default = pos_payment_method.default
 		append_payment(payment_mode[0])
 
 def get_all_mode_of_payments(doc):

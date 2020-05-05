@@ -256,12 +256,11 @@ erpnext.PointOfSale.ItemDetails = class {
 		const me = this;
 		this.$form_container.on('click', '.input-with-feedback', function() {
 			const fieldname = $(this).attr('data-fieldname');
-			me.events.item_field_focused(fieldname);
+			if (this.last_field_focused != fieldname) {
+				me.events.item_field_focused(fieldname);
+				this.last_field_focused = fieldname;
+			}
 		});
-		// this.$form_container.on('focusout', '.input-with-feedback', function() {
-		// 	const fieldname = $(this).attr('data-fieldname');
-		// 	me.events.item_field_focused(fieldname);
-		// });
 	}
     
     bind_auto_serial_fetch_event() {

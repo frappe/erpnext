@@ -5,6 +5,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "default",
   "mode_of_payment",
   "amount",
   "column_break_3",
@@ -65,11 +66,19 @@
    "label": "Clearance Date",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "default",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Default",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-04-30 15:26:38.421385",
+ "modified": "2020-05-05 16:51:20.091441",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Payment",

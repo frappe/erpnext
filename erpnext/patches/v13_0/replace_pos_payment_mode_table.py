@@ -10,6 +10,8 @@ def execute():
 	pos_profiles = frappe.get_all("POS Profile")
 
 	for pos_profile in pos_profiles:
+		if pos_profile.get("payments"): return
+
 		payments = frappe.db.sql("""
 			select idx, parentfield, parenttype, parent, mode_of_payment, `default` from `tabSales Invoice Payment` where parent=%s
 		""", pos_profile.name, as_dict=1)
@@ -24,4 +26,4 @@ def execute():
 				pos_payment_method.parenttype = payment_mode.parenttype
 				pos_payment_method.save()
 		
-		# sales invoice payments can be deleted?
+		frappe.db.sql("""delete from `tabSales Invoice Payment` where parent=%s""", pos_profile.name)

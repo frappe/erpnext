@@ -124,6 +124,8 @@
 [data-route="point-of-sale-beta"] .w-60 { width: 60%; }
 [data-route="point-of-sale-beta"] .w-40 { width: 40%; }
 [data-route="point-of-sale-beta"] .w-fit { width: fit-content; }
+[data-route="point-of-sale-beta"] .w-6 { width: 2rem; }
+[data-route="point-of-sale-beta"] .h-6 { min-height: 2rem; height: 2rem; }
 [data-route="point-of-sale-beta"] .w-10 { width: 3rem; }
 [data-route="point-of-sale-beta"] .h-10 { min-height:3rem; height: 3rem; }
 [data-route="point-of-sale-beta"] .h-12 { min-height: 3.3rem; height: 3.3rem; }
