@@ -13,6 +13,7 @@ from erpnext.loan_management.doctype.loan_security_price.loan_security_price imp
 class LoanSecurityPledge(Document):
 	def validate(self):
 		self.set_pledge_amount()
+		self.validate_duplicate_securities()
 
 	def on_submit(self):
 		if self.loan:
@@ -20,6 +21,15 @@ class LoanSecurityPledge(Document):
 			self.db_set("pledge_time", now_datetime())
 			update_shortfall_status(self.loan, self.total_security_value)
 			update_loan(self.loan, self.maximum_loan_value)
+
+	def validate_duplicate_securities(self):
+		security_list = []
+		for security in self.securities:
+			if security.loan_security not in security_list:
+				security_list.append(security.loan_security)
+			else:
+				frappe.throw(_('Loan Security {0} added multiple times').format(frappe.bold(
+					security.loan_security)))
 
 	def set_pledge_amount(self):
 		total_security_value = 0
