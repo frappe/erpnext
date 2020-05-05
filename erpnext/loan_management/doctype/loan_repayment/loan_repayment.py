@@ -282,7 +282,8 @@ def get_amounts(amounts, against_loan, posting_date, payment_type):
 			'payable_principal_amount': flt(entry.payable_principal_amount)
 		})
 
-		final_due_date = due_date
+		if not final_due_date:
+			final_due_date = add_days(due_date, loan_type_details.grace_period_in_days)
 
 	pending_principal_amount = against_loan_doc.total_payment - against_loan_doc.total_principal_paid - against_loan_doc.total_interest_payable
 
