@@ -59,7 +59,7 @@ class Issue(Document):
 		if self.status!="Open" and status =="Open" and not self.first_responded_on:
 			self.first_responded_on = frappe.flags.current_time or now_datetime()
 
-		if self.status=="Closed":
+		if self.status=="Closed" and status !="Closed":
 			self.resolution_date = frappe.flags.current_time or now_datetime()
 			if frappe.db.get_value("Issue", self.name, "agreement_fulfilled") == "Ongoing":
 				set_service_level_agreement_variance(issue=self.name)
@@ -230,24 +230,14 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 	start_time = None
 	end_time = None
 
-	# lets assume response time is in days by default
 	if parameter == 'response':
-		allotted_days = service_level.get("response_time")
-		time_period = service_level.get("response_time_period")
+		allotted_seconds = service_level.get("response_time")
 	elif parameter == 'resolution':
-		allotted_days = service_level.get("resolution_time")
-		time_period = service_level.get("resolution_time_period")
+		allotted_seconds = service_level.get("resolution_time")
 	else:
 		frappe.throw(_("{0} parameter is invalid").format(parameter))
 
-	allotted_hours = 0
-	if time_period == 'Hour':
-		allotted_hours = allotted_days
-		allotted_days = 0
-	elif time_period == 'Week':
-		allotted_days *= 7
-
-	expected_time_is_set = 1 if allotted_days == 0 and time_period in ['Day', 'Week'] else 0
+	expected_time_is_set = 0
 
 	support_days = {}
 	for service in service_level.get("support_and_resolution"):
@@ -267,25 +257,22 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 				if getdate(current_date_time) == getdate(start_date_time) and get_time_in_timedelta(current_date_time.time()) > support_days[current_weekday].start_time \
 				else support_days[current_weekday].start_time
 			end_time = support_days[current_weekday].end_time
-			time_left_today = time_diff_in_hours(end_time, start_time)
+			time_left_today = time_diff_in_seconds(end_time, start_time)
 
 			# no time left for support today
-			if time_left_today < 0: pass
-			elif time_period == 'Hour':
-				if time_left_today >= allotted_hours:
+			if time_left_today <= 0: pass
+			elif allotted_seconds:
+				if time_left_today >= allotted_seconds:
 					expected_time = datetime.combine(getdate(current_date_time), get_time(start_time))
-					expected_time = add_to_date(expected_time, hours=allotted_hours)
+					expected_time = add_to_date(expected_time, seconds=allotted_seconds)
 					expected_time_is_set = 1
 				else:
-					allotted_hours = allotted_hours - time_left_today
-			else:
-				allotted_days -= 1
-				expected_time_is_set = allotted_days <= 0
+					allotted_seconds = allotted_seconds - time_left_today
 
 		if not expected_time_is_set:
 			current_date_time = add_to_date(current_date_time, days=1)
 
-	if end_time and time_period != 'Hour':
+	if end_time and allotted_seconds >= 86400:
 		current_date_time = datetime.combine(getdate(current_date_time), get_time(end_time))
 	else:
 		current_date_time = expected_time
