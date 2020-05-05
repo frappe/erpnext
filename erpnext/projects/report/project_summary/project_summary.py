@@ -91,12 +91,12 @@ def get_chart_data(data):
 			'labels': labels,
 			'datasets': [
 				{
-					"name": "Completed",
-					"values": completed
-				},
-				{
 					"name": "Overdue",
 					"values": overdue
+				},
+				{
+					"name": "Completed",
+					"values": completed
 				},
 				{
 					"name": "Total Tasks",
@@ -105,7 +105,7 @@ def get_chart_data(data):
 			]
 		},
 		"type": "bar",
-		"colors": ["#98d85b", "#fc4f51", "#7679fc"],
+		"colors": ["#fc4f51", "#78d6ff", "#7575ff"],
 		"barOptions": {
 			"stacked": True
 		}
