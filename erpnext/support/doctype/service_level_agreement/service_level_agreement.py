@@ -30,19 +30,8 @@ class ServiceLevelAgreement(Document):
 			if priority.default_priority:
 				default_priority.append(priority.default_priority)
 
-			if priority.response_time_period == "Hour":
-				response = priority.response_time * 0.0416667
-			elif priority.response_time_period == "Day":
-				response = priority.response_time
-			elif priority.response_time_period == "Week":
-				response = priority.response_time * 7
-
-			if priority.resolution_time_period == "Hour":
-				resolution = priority.resolution_time * 0.0416667
-			elif priority.resolution_time_period == "Day":
-				resolution = priority.resolution_time
-			elif priority.resolution_time_period == "Week":
-				resolution = priority.resolution_time * 7
+			response = priority.response_time
+			resolution = priority.resolution_time
 
 			if response > resolution:
 				frappe.throw(_("Response Time for {0} at index {1} can't be greater than Resolution Time.").format(priority.priority, priority.idx))
@@ -109,9 +98,7 @@ class ServiceLevelAgreement(Document):
 		return frappe._dict({
 			"priority": priority.priority,
 			"response_time": priority.response_time,
-			"response_time_period": priority.response_time_period,
-			"resolution_time": priority.resolution_time,
-			"resolution_time_period": priority.resolution_time_period
+			"resolution_time": priority.resolution_time
 		})
 
 def check_agreement_status():
