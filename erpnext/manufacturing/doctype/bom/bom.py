@@ -162,7 +162,6 @@ class BOM(WebsiteGenerator):
 			 'stock_uom'	: item and args['stock_uom'] or '',
 			 'uom'			: item and args['stock_uom'] or '',
  			 'conversion_factor': 1,
-			 'plc_conversion_rate': 1,
 			 'bom_no'		: args['bom_no'],
 			 'rate'			: rate,
 			 'qty'			: args.get("qty") or args.get("stock_qty") or 1,
@@ -251,7 +250,9 @@ class BOM(WebsiteGenerator):
 			d.amount = flt(d.rate) * flt(d.qty)
 			d.base_rate = flt(d.rate) * flt(self.conversion_rate)
 			d.base_amount = flt(d.amount) * flt(self.conversion_rate)
-			d.db_update()
+
+			if save:
+				d.db_update()
 
 		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True

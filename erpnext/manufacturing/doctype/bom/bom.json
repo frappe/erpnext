@@ -483,12 +483,14 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:doc.rm_cost_as_per=='Price List'",
    "fieldname": "plc_conversion_rate",
    "fieldtype": "Float",
    "label": "Price List Exchange Rate"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "eval:doc.rm_cost_as_per=='Price List'",
    "fieldname": "price_list_currency",
    "fieldtype": "Link",
@@ -503,7 +505,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-04 19:19:19.179298",
+ "modified": "2020-05-05 14:29:32.634952",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
