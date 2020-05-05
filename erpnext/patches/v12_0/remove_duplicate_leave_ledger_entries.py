@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	''' Delete duplicate leave ledger entries of type allocation created '''
+	"""Delete duplicate leave ledger entries of type allocation created."""
 	if not frappe.db.a_row_exists("Leave Ledger Entry"):
 		return
 
@@ -13,7 +13,7 @@ def execute():
 	delete_duplicate_ledger_entries(duplicate_records_list)
 
 def get_duplicate_records():
-	''' fetch all but one duplicate records from the list of expired leave allocation '''
+	"""Fetch all but one duplicate records from the list of expired leave allocation."""
 	return frappe.db.sql_list("""
 		WITH duplicate_records AS
 		(SELECT
@@ -39,6 +39,6 @@ def get_duplicate_records():
 	""")
 
 def delete_duplicate_ledger_entries(duplicate_records_list):
-	''' Delete duplicate leave ledger entries '''
+	"""Delete duplicate leave ledger entries."""
 	if duplicate_records_list:
-		frappe.db.sql(''' DELETE FROM `tabLeave Ledger Entry` WHERE name in {0}'''.format(tuple(duplicate_records_list)))
+		frappe.db.sql(''' DELETE FROM `tabLeave Ledger Entry` WHERE name in {0}'''.format(tuple(duplicate_records_list))) #nosec
