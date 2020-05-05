@@ -106,6 +106,7 @@ class LoanRepayment(AccountsController):
 	def allocate_amounts(self, paid_entries):
 		self.set('repayment_details', [])
 		self.principal_amount_paid = 0
+		interest_paid = 0
 
 		if self.amount_paid - self.penalty_amount > 0 and paid_entries:
 			interest_paid = self.amount_paid - self.penalty_amount
@@ -281,12 +282,17 @@ def get_amounts(amounts, against_loan, posting_date, payment_type):
 			'payable_principal_amount': flt(entry.payable_principal_amount)
 		})
 
-		final_due_date = due_date
+		if not final_due_date:
+			final_due_date = add_days(due_date, loan_type_details.grace_period_in_days)
 
 	pending_principal_amount = against_loan_doc.total_payment - against_loan_doc.total_principal_paid - against_loan_doc.total_interest_payable
 
 	if payment_type == "Loan Closure" and not payable_principal_amount:
-		pending_days = date_diff(posting_date, entry.posting_date) + 1
+		if final_due_date:
+			pending_days = date_diff(posting_date, final_due_date)
+		else:
+			pending_days = date_diff(posting_date, against_loan_doc.disbursement_date) + 1
+
 		payable_principal_amount = pending_principal_amount
 		per_day_interest = (payable_principal_amount * (loan_type_details.rate_of_interest / 100))/365
 		total_pending_interest += (pending_days * per_day_interest)

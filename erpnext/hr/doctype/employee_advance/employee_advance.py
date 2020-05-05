@@ -136,9 +136,18 @@ def make_bank_entry(dt, dn):
 def make_return_entry(employee, company, employee_advance_name,
 		return_amount, advance_account, mode_of_payment=None):
 	return_account = get_default_bank_cash_account(company, account_type='Cash', mode_of_payment = mode_of_payment)
+
+	mode_of_payment_type = ''
+	if mode_of_payment:
+		mode_of_payment_type = frappe.get_cached_value('Mode of Payment', mode_of_payment, 'type')
+		if mode_of_payment_type not in ["Cash", "Bank"]:
+			# if mode of payment is General then it unset the type
+			mode_of_payment_type = None
+
 	je = frappe.new_doc('Journal Entry')
 	je.posting_date = nowdate()
-	je.voucher_type = 'Bank Entry'
+	# if mode of payment is Bank then voucher type is Bank Entry
+	je.voucher_type = '{} Entry'.format(mode_of_payment_type) if mode_of_payment_type else 'Cash Entry'
 	je.company = company
 	je.remark = 'Return against Employee Advance: ' + employee_advance_name
 
