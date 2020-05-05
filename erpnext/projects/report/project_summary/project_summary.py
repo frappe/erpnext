@@ -91,17 +91,17 @@ def get_chart_data(data):
 			'labels': labels,
 			'datasets': [
 				{
-					"name": "Total Tasks",
-					"values": total
-				},
-				{
 					"name": "Completed",
 					"values": completed
 				},
 				{
 					"name": "Overdue",
 					"values": overdue
-				}
+				},
+				{
+					"name": "Total Tasks",
+					"values": total
+				},
 			]
 		},
 		"type": "bar",

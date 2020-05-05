@@ -124,7 +124,7 @@ def get_default_dashboards():
 				'is_public': 1,
 				'filters_json': json.dumps({"company": company.name, "status": "Open"}),
 				'type': 'Bar',
-				'custom_options': '{"type": "bar", "colors": ["#7679fc", "#98d85b", "#fc4f51"], "axisOptions": {"shortenYAxisNumbers": 1}, "tooltipOptions": {}}',
+				'custom_options': '{"type": "bar", "colors": ["#98d85b", "#fc4f51", "#7679fc"], "axisOptions": { "shortenYAxisNumbers": 1}, "barOptions": { "stacked": 1 }}',
 			},
 		]
 	}
