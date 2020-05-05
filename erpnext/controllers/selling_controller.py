@@ -193,7 +193,7 @@ class SellingController(StockController):
 				last_valuation_rate_in_sales_uom = last_valuation_rate[0][0] / (it.conversion_factor or 1)
 				if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate_in_sales_uom) \
 					and not self.get('is_internal_customer'):
-					throw_message(it.name, last_valuation_rate_in_sales_uom, "valuation rate")
+					throw_message(frappe.bold(it.item_name), last_valuation_rate_in_sales_uom, "valuation rate")
 
 
 	def get_item_list(self):
