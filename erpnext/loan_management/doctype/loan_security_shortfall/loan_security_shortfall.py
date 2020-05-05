@@ -53,7 +53,7 @@ def check_for_ltv_shortfall(process_loan_security_shortfall):
 
 	loans = frappe.db.sql(""" SELECT l.name, l.loan_amount, l.total_principal_paid, lp.loan_security, lp.haircut, lp.qty, lp.loan_security_type
 		FROM `tabLoan` l, `tabPledge` lp , `tabLoan Security Pledge`p WHERE lp.parent = p.name and p.loan = l.name and l.docstatus = 1
-		and l.is_secured_loan and l.status = 'Disbursed' and p.status in ('Pledged', 'Partially Unpledged')""", as_dict=1)
+		and l.is_secured_loan and l.status = 'Disbursed' and p.status = 'Pledged'""", as_dict=1)
 
 	loan_security_map = {}
 
