@@ -7,14 +7,13 @@ import frappe, erpnext
 from frappe.utils import nowdate, add_days
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.salary_component.test_salary_component import create_salary_component
-from erpnext.hr.doctype.salary_slip.test_salary_slip import make_employee_salary_slip
+from erpnext.hr.doctype.salary_slip.test_salary_slip import make_employee_salary_slip, setup_test
 
 
 class TestAdditionalSalary(unittest.TestCase):
 
 	def setUp(self):
-		from erpnext.hr.doctype.salary_slip.test_salary_slip import TestSalarySlip
-		TestSalarySlip().setUp()
+		setup_test()
 
 	def test_recurring_additional_salary(self):
 		emp_id = make_employee("test_additional@salary.com")
