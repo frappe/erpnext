@@ -546,10 +546,7 @@ def apply_coupon_code(applied_code, applied_referral_sales_partner):
 	if not applied_code:
 		frappe.throw(_("Please enter a coupon code"))
 
-	coupon_list = frappe.get_all('Coupon Code',
-		filters={"docstatus": ("<", "2"), 'coupon_code': applied_code},
-		fields=['name'])
-
+	coupon_list = frappe.get_all('Coupon Code', filters={'coupon_code': applied_code})
 	if not coupon_list:
 		frappe.throw(_("Please enter a valid coupon code"))
 
@@ -563,10 +560,7 @@ def apply_coupon_code(applied_code, applied_referral_sales_partner):
 	quotation.save()
 
 	if applied_referral_sales_partner:
-		sales_partner_list = frappe.get_all('Sales Partner',
-			filters={'docstatus': 0, 'referral_code': applied_referral_sales_partner},
-			fields=['name'])
-
+		sales_partner_list = frappe.get_all('Sales Partner', filters={'referral_code': applied_referral_sales_partner})
 		if sales_partner_list:
 			sales_partner_name = sales_partner_list[0].name
 			quotation.referral_sales_partner = sales_partner_name
