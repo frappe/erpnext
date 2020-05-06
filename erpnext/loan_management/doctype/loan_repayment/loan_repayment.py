@@ -78,7 +78,10 @@ class LoanRepayment(AccountsController):
 				(flt(payment.paid_principal_amount), flt(payment.paid_interest_amount), payment.loan_interest_accrual))
 
 		if flt(loan.total_principal_paid + self.principal_amount_paid, 2) >= flt(loan.total_payment, 2):
-			frappe.db.set_value("Loan", self.against_loan, "status", "Loan Closure Requested")
+			if loan.is_secured_loan:
+				frappe.db.set_value("Loan", self.against_loan, "status", "Loan Closure Requested")
+			else:
+				frappe.db.set_value("Loan", self.against_loan, "status", "Closed")
 
 		frappe.db.sql(""" UPDATE `tabLoan` SET total_amount_paid = %s, total_principal_paid = %s
 			WHERE name = %s """, (loan.total_amount_paid + self.amount_paid,
@@ -282,7 +285,8 @@ def get_amounts(amounts, against_loan, posting_date, payment_type):
 			'payable_principal_amount': flt(entry.payable_principal_amount)
 		})
 
-		final_due_date = due_date
+		if not final_due_date:
+			final_due_date = add_days(due_date, loan_type_details.grace_period_in_days)
 
 	pending_principal_amount = against_loan_doc.total_payment - against_loan_doc.total_principal_paid - against_loan_doc.total_interest_payable
 
