@@ -154,10 +154,9 @@ def get_default_dashboards():
 				"chart_name": "Purchase Analytics",
 				"custom_options": json.dumps({
 					"x_field": "entity",
-					"chart_type": "Line",
+					"chart_type": "Bar",
 					"y_axis_fields": [{"idx": 1, "__islocal": "true", "y_field": "total"}],
-					"y_fields": ["total"],
-					"lineOptions": {"regionFill": 1}
+					"y_fields": ["total"]
 				})
 			},
 			{
