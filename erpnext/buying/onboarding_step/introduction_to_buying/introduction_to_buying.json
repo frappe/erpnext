@@ -1,0 +1,16 @@
+{
+ "action": "Watch Video",
+ "creation": "2020-05-06 15:37:09.477765",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_skipped": 0,
+ "modified": "2020-05-06 16:47:47.378049",
+ "modified_by": "Administrator",
+ "name": "Introduction to Buying",
+ "owner": "Administrator",
+ "title": "Introduction to Buying",
+ "video_url": "https://youtu.be/efFajTTQBa8"
+}

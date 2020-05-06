@@ -54,10 +54,11 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Buying",
- "modified": "2020-05-05 23:48:25.788598",
+ "modified": "2020-05-06 18:10:12.760321",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",
+ "onboarding": "Buying",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 0,
@@ -107,5 +108,6 @@
    "link_to": "Item-wise Purchase Register",
    "type": "Report"
   }
- ]
+ ],
+ "shortcuts_label": "Quick Access"
 }
