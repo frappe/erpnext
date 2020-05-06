@@ -71,6 +71,7 @@ class Issue(Document):
 		if self.status=="Open" and status !="Open":
 			# if no date, it should be set as None and not a blank string "", as per mysql strict config
 			self.resolution_date = None
+			self.reset_issue_metrics()
 
 	def update_agreement_status(self):
 		if self.service_level_agreement and self.agreement_fulfilled == "Ongoing":
@@ -131,6 +132,7 @@ class Issue(Document):
 			replicated_issue.response_by_variance = None
 			replicated_issue.resolution_by = None
 			replicated_issue.resolution_by_variance = None
+			replicated_issue.reset_issue_metrics()
 
 		frappe.get_doc(replicated_issue).insert()
 
@@ -223,6 +225,12 @@ class Issue(Document):
 		self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
 		self.agreement_fulfilled = "Ongoing"
 		self.save()
+
+	def reset_issue_metrics(self):
+		self.db_set('resolution_time', 0)
+		self.db_set('user_operational_time', 0)
+		self.db_set('avg_response_time',0)
+
 
 def get_expected_time_for(parameter, service_level, start_date_time):
 	current_date_time = start_date_time
