@@ -228,6 +228,8 @@ class PaymentEntry(AccountsController):
 			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Journal Entry")
 		elif self.party_type == "Employee":
 			valid_reference_doctypes = ("Expense Claim", "Journal Entry", "Employee Advance")
+		elif self.party_type == "Shareholder":
+			valid_reference_doctypes = ("Journal Entry")
 
 		for d in self.get("references"):
 			if not d.allocated_amount:

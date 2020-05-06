@@ -7,4 +7,5 @@ def execute():
 		return
 
 	frappe.reload_doc("regional", "doctype", "lower_deduction_certificate")
+	frappe.reload_doc("regional", "doctype", "gstr_3b_report")
 	add_permissions()
