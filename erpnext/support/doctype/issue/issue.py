@@ -302,6 +302,7 @@ def set_service_level_agreement_variance(issue=None):
 				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_fulfilled", val="Failed", update_modified=False)
 
 def set_average_response_time(issue):
+	# avg response time for all the responses
 	communications = frappe.get_list("Communication", filters={
 			"reference_doctype": issue.doctype,
 			"reference_name": issue.name
@@ -319,18 +320,17 @@ def set_average_response_time(issue):
 					response_times.append(response_time)
 
 		avg_response_time = sum(response_times) / len(response_times)
-		avg_response_time = timedelta(seconds=avg_response_time)
-		duration = get_duration(avg_response_time)
-		issue.db_set('avg_response_time', duration)
+		issue.db_set('avg_response_time', avg_response_time)
 
 
 def set_resolution_time(issue):
-	resolution_time = time_diff(now_datetime(), issue.creation)
-	duration = get_duration(resolution_time)
-	issue.db_set('resolution_time', duration)
+	# total time taken from issue creation to closing
+	resolution_time = time_diff_in_seconds(now_datetime(), issue.creation)
+	issue.db_set('resolution_time', resolution_time)
 
 
 def set_user_operational_time(issue):
+	# total time taken by a user to close the issue apart from wait_time
 	communications = frappe.get_list("Communication", filters={
 			"reference_doctype": issue.doctype,
 			"reference_name": issue.name
@@ -346,30 +346,10 @@ def set_user_operational_time(issue):
 			if wait_time > 0:
 				pending_time.append(wait_time)
 
-	total_pending_time = timedelta(seconds=sum(pending_time))
+	total_pending_time = sum(pending_time)
 	resolution_time_in_secs = time_diff_in_seconds(now_datetime(), issue.creation)
-	resolution_time = timedelta(seconds=resolution_time_in_secs)
-	user_operational_time = resolution_time - total_pending_time
-	duration = get_duration(user_operational_time)
-	issue.db_set('user_operational_time', duration)
-
-
-def get_duration(time):
-	days = time.days
-	seconds = time.seconds
-	hours = time.seconds // 3600
-	mins = (time.seconds // 60) % 60
-	duration = ""
-	if days:
-		duration += str(days) + " day"
-		duration += "s " if days > 1 else " "
-	if hours:
-		duration += str(hours) + " hour"
-		duration += "s " if hours > 1 else " "
-	if mins:
-		duration += str(mins) + " min"
-		duration += "s" if mins > 1 else ""
-	return duration
+	user_operational_time = resolution_time_in_secs - total_pending_time
+	issue.db_set('user_operational_time', user_operational_time)
 
 
 def get_list_context(context=None):
