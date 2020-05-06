@@ -25,6 +25,7 @@ def get_charts():
 			{
 				"doctype": "Dashboard Chart",
 				"time_interval": "Daily",
+				"name": "Patient Appointments",
 				"chart_name": "Patient Appointments",
 				"timespan": "Last Month",
 				"color": "#77ecca",
