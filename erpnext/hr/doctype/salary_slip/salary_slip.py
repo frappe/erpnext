@@ -329,7 +329,7 @@ class SalarySlip(TransactionBase):
 		data = self.get_data_for_eval()
 		for struct_row in self._salary_structure_doc.get(component_type):
 			amount = self.eval_condition_and_formula(struct_row, data)
-			if amount and struct_row.statistical_component == 0:
+			if struct_row.statistical_component == 0:
 				self.update_component_row(struct_row, amount, component_type)
 
 	def get_data_for_eval(self):
