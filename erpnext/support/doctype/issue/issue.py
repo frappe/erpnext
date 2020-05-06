@@ -322,14 +322,14 @@ def set_average_response_time(issue):
 
 	if len(communications):
 		response_times = []
-		for i in range(len(communications)-1):
+		for i in range(len(communications)):
 			if communications[i].sent_or_received == "Sent" and communications[i-1].sent_or_received == "Received":
 				response_time = time_diff_in_seconds(communications[i].creation, communications[i-1].creation)
 				if response_time > 0:
 					response_times.append(response_time)
-
-		avg_response_time = sum(response_times) / len(response_times)
-		issue.db_set('avg_response_time', avg_response_time)
+		if response_times:
+			avg_response_time = sum(response_times) / len(response_times)
+			issue.db_set('avg_response_time', avg_response_time)
 
 
 def set_resolution_time(issue):
@@ -349,7 +349,7 @@ def set_user_resolution_time(issue):
 	)
 
 	pending_time = []
-	for i in range(len(communications)-1):
+	for i in range(len(communications)):
 		if communications[i].sent_or_received == "Received" and communications[i-1].sent_or_received == "Sent":
 			wait_time = time_diff_in_seconds(communications[i].creation, communications[i-1].creation)
 			if wait_time > 0:
