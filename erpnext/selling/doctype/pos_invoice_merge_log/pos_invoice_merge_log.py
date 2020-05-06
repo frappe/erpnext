@@ -145,7 +145,9 @@ def get_all_invoices():
 		'docstatus': 1
 	}
 	pos_invoices = frappe.db.get_all('POS Invoice', filters=filters,
-		fields=["'name' as pos_invoice", 'posting_date', 'grand_total', 'customer'])
+		fields=["name as pos_invoice", 'posting_date', 'grand_total', 'customer'])
+	
+	return pos_invoices
 
 def get_invoices_customer_map(pos_invoices):
 	# pos_invoice_customer_map = { 'Customer 1': [{}, {}, {}], 'Custoemr 2' : [{}] }

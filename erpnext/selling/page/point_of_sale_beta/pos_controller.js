@@ -123,7 +123,7 @@ erpnext.PointOfSale.Controller = class {
 		this.pos_opening_time = data.period_start_date;
 
 		frappe.db.get_value('Stock Settings', undefined, 'allow_negative_stock').then(({ message }) => {
-			this.allow_negative_stock = message.allow_negative_stock || false;
+			this.allow_negative_stock = flt(message.allow_negative_stock) || false;
 		})
 
 		this.make_app();
@@ -537,6 +537,7 @@ erpnext.PointOfSale.Controller = class {
 
 				item_row = this.frm.add_child('items', args);
 
+				console.log('asdf');
 				if (field === 'qty' && value !== 0 && !this.allow_negative_stock)
 					await this.check_stock_availability(item_row, this.frm.doc.set_warehouse);
 
