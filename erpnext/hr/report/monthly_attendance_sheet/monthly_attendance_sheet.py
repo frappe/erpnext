@@ -215,7 +215,7 @@ def get_conditions(filters):
 def get_employee_details(group_by, company):
 	emp_map = {}
 	query = """select name, employee_name, designation, department, branch, company,
-		holiday_list from `tabEmployee` where company = '%s' """ % frappe.db.escape(company)
+		holiday_list from `tabEmployee` where company = %s """ % frappe.db.escape(company)
 
 	if group_by:
 		group_by = group_by.lower()
