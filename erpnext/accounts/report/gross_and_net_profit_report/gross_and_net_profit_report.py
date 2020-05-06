@@ -8,7 +8,6 @@ from frappe.utils import flt
 from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
 import copy
 
-
 def execute(filters=None):
 	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year,
 		filters.periodicity, filters.accumulated_values, filters.company)
@@ -27,17 +26,26 @@ def execute(filters=None):
 
 
 	gross_income = get_revenue(income, period_list)
-
 	gross_expense = get_revenue(expense, period_list)
 
 	if(len(gross_income)==0 and len(gross_expense)== 0):
-		data.append({"account_name": "'" + _("Nothing is included in gross") + "'",
-		"account": "'" + _("Nothing is included in gross") + "'"})
-
+		data.append({
+			"account_name": "'" + _("Nothing is included in gross") + "'",
+			"account": "'" + _("Nothing is included in gross") + "'"
+		})
 		return columns, data
 
-	data.append({"account_name": "'" + _("Included in Gross Profit") + "'",
-		"account": "'" + _("Included in Gross Profit") + "'"})
+
+	# to avoid error eg: gross_income[0] : list index out of range
+	if not gross_income:
+		gross_income = [{}]
+	if not gross_expense:
+		gross_expense = [{}]
+
+	data.append({
+		"account_name": "'" + _("Included in Gross Profit") + "'",
+		"account": "'" + _("Included in Gross Profit") + "'"
+	})
 
 	data.append({})
 	data.extend(gross_income or [])
@@ -111,7 +119,6 @@ def set_total(node, value, complete_list, totals):
 
 
 def get_profit(gross_income, gross_expense, period_list, company, profit_type, currency=None, consolidated=False):
-
 	profit_loss = {
 		"account_name": "'" + _(profit_type) + "'",
 		"account": "'" + _(profit_type) + "'",
@@ -123,7 +130,9 @@ def get_profit(gross_income, gross_expense, period_list, company, profit_type, c
 
 	for period in period_list:
 		key = period if consolidated else period.key
-		profit_loss[key] = flt(gross_income[0].get(key, 0)) - flt(gross_expense[0].get(key, 0))
+		gross_income_for_period = flt(gross_income[0].get(key, 0)) if gross_income else 0
+		gross_expense_for_period = flt(gross_expense[0].get(key, 0)) if gross_expense else 0
+		profit_loss[key] = gross_income_for_period - gross_expense_for_period
 
 		if profit_loss[key]:
 			has_value=True
@@ -143,8 +152,14 @@ def get_net_profit(non_gross_income, gross_income, gross_expense, non_gross_expe
 
 	for period in period_list:
 		key = period if consolidated else period.key
-		total_income = flt(gross_income[0].get(key, 0)) + flt(non_gross_income[0].get(key, 0))
-		total_expense = flt(gross_expense[0].get(key, 0)) + flt(non_gross_expense[0].get(key, 0))
+		gross_income_for_period = flt(gross_income[0].get(key, 0)) if gross_income else 0
+		non_gross_income_for_period = flt(non_gross_income[0].get(key, 0)) if non_gross_income else 0
+
+		gross_expense_for_period = flt(gross_expense[0].get(key, 0)) if gross_expense else 0
+		non_gross_expense_for_period = flt(non_gross_expense[0].get(key, 0)) if non_gross_expense else 0
+
+		total_income = gross_income_for_period + non_gross_income_for_period
+		total_expense = gross_expense_for_period + non_gross_expense_for_period
 		profit_loss[key] = flt(total_income) - flt(total_expense)
 
 		if profit_loss[key]:

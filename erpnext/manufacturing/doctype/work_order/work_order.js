@@ -122,6 +122,11 @@ frappe.ui.form.on("Work Order", {
 		}
 	},
 
+	source_warehouse: function(frm) {
+		let transaction_controller = new erpnext.TransactionController();
+		transaction_controller.autofill_warehouse(frm.doc.required_items, "source_warehouse", frm.doc.source_warehouse);
+	},
+
 	refresh: function(frm) {
 		erpnext.toggle_naming_series();
 		erpnext.work_order.set_custom_buttons(frm);
@@ -231,6 +236,8 @@ frappe.ui.form.on("Work Order", {
 				}
 			});
 		}, __("Job Card"), __("Create"));
+
+		dialog.fields_dict["operations"].grid.wrapper.find('.grid-add-row').hide();
 
 		var pending_qty = 0;
 		frm.doc.operations.forEach(data => {
