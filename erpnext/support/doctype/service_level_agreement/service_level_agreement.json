@@ -40,7 +40,8 @@
    "fieldname": "holiday_list",
    "fieldtype": "Link",
    "label": "Holiday List",
-   "options": "Holiday List"
+   "options": "Holiday List",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_2",
@@ -92,13 +93,15 @@
    "fieldname": "support_and_resolution",
    "fieldtype": "Table",
    "label": "Support and Resolution",
-   "options": "Service Day"
+   "options": "Service Day",
+   "reqd": 1
   },
   {
    "fieldname": "priorities",
    "fieldtype": "Table",
    "label": "Priorities",
-   "options": "Service Level Priority"
+   "options": "Service Level Priority",
+   "reqd": 1
   },
   {
    "default": "1",
@@ -150,7 +153,7 @@
   }
  ],
  "links": [],
- "modified": "2020-04-28 14:10:18.767202",
+ "modified": "2020-05-06 11:46:38.834810",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
