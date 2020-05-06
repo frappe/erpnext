@@ -3,6 +3,10 @@ import frappe
 from collections import defaultdict
 
 def execute():
+
+	frappe.reload_doc('stock', 'doctype', 'delivery_note_item', force=True)
+	frappe.reload_doc('stock', 'doctype', 'purchase_receipt_item', force=True)
+
 	def map_rows(doc_row, return_doc_row, detail_field, doctype):
 		"""Map rows after identifying similar ones."""
 
