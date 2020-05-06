@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2020-01-28 11:56:33.945372",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -78,13 +79,15 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-14 15:25:38.813564",
+ "links": [],
+ "modified": "2020-05-05 20:24:00.645484",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "POS Invoice Merge Log",
  "owner": "Administrator",
  "permissions": [
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -94,6 +97,47 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

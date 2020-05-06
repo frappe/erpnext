@@ -7,7 +7,7 @@ import unittest
 from frappe.utils import nowdate
 from erpnext.selling.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
 from erpnext.selling.doctype.pos_closing_entry.pos_closing_entry import make_closing_entry_from_opening
-from erpnext.selling.doctype.pos_opening_entry.pos_opening_entry import create_opening_entry
+from erpnext.selling.doctype.pos_opening_entry.test_pos_opening_entry import create_opening_entry
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 
 class TestPOSClosingEntry(unittest.TestCase):

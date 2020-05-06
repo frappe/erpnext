@@ -131,26 +131,35 @@ erpnext.PointOfSale.Payment = class {
 		// })
 
 		this.$component.on('click', '.submit-order', () => {
-			const paid_amount = this.events.get_frm().doc.paid_amount;
+			const doc = this.events.get_frm().doc;
+			const paid_amount = doc.paid_amount;
+			const items = doc.items;
 
-			if (paid_amount == 0) {
-				frappe.show_alert({
-					message: __("You cannot submit the order without payment."),
-					indicator: "orange"
-				})
+			if (paid_amount == 0 || !items.length) {
+				const message = items.length ? __("You cannot submit the order without payment.") : __("You cannot submit empty order.")
+				frappe.show_alert({ message, indicator: "orange" });
 				return;
 			}
 
 			this.events.submit_invoice();
 		})
 
-		frappe.ui.form.on('POS Invoice', 'paid_amount', (frm, cdt, cdn) => {
+		frappe.ui.form.on('POS Invoice', 'paid_amount', (frm) => {
 			this.update_totals_section(frm.doc);
 		})
 
 		frappe.ui.form.on('POS Invoice', 'loyalty_amount', (frm) => {
 			const formatted_currency = format_currency(frm.doc.loyalty_amount, frm.doc.currency);
 			this.$payment_modes.find(`.loyalty-points-amount`).html(formatted_currency);
+		});
+
+		frappe.ui.form.on("Sales Invoice Payment", "amount", (frm, cdt, cdn) => {
+			// for setting correct amount after loyalty points are redeemed
+			const default_mop = locals[cdt][cdn];
+			const mode = default_mop.mode_of_payment.replace(' ', '_').toLowerCase();
+			if (this[`${mode}_control`] && this[`${mode}_control`].get_value() != default_mop.amount) {
+				this[`${mode}_control`].set_value(default_mop.amount);
+			}
 		})
 	}
 
@@ -238,7 +247,7 @@ erpnext.PointOfSale.Payment = class {
 					fieldtype: 'Currency',
 					placeholder: __(`Enter ${p.mode_of_payment} amount.`),
 					onchange: function() {
-						if (this.value) {
+						if (this.value || this.value == 0) {
 							frappe.model.set_value(p.doctype, p.name, 'amount', flt(this.value))
 								.then(() => me.update_totals_section());
 

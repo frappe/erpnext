@@ -179,8 +179,8 @@ erpnext.PointOfSale.Controller = class {
 			frappe.set_route("Form", me.frm.doc.doctype, me.frm.doc.name);
 		});
 
-		this.page.add_menu_item(__("Show Recent Orders"), () => {
-			const show = this.order_summary.$component.hasClass('d-none');
+		this.page.add_menu_item(__("Toggle Recent Orders"), () => {
+			const show = this.recent_order_list.$component.hasClass('d-none');
 			this.toggle_recent_order_list(show);
 		});
 
@@ -368,13 +368,11 @@ erpnext.PointOfSale.Controller = class {
 				},
 				edit_order: (name) => {
 					this.recent_order_list.toggle_component(false);
-					frappe.db.get_doc('POS Invoice', name).then((doc) => {
-						frappe.run_serially([
-							() => (this.frm.doc = doc),
-							() => this.cart.load_invoice(),
-							() => this.item_selector.toggle_component(true)
-						]);
-					});
+					frappe.run_serially([
+						() => this.frm.refresh(name),
+						() => this.cart.load_invoice(),
+						() => this.item_selector.toggle_component(true)
+					]);
 				},
 				new_order: () => {
 					frappe.run_serially([
