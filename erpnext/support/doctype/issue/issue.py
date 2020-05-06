@@ -63,10 +63,10 @@ class Issue(Document):
 			self.resolution_date = frappe.flags.current_time or now_datetime()
 			if frappe.db.get_value("Issue", self.name, "agreement_fulfilled") == "Ongoing":
 				set_service_level_agreement_variance(issue=self.name)
-				set_average_response_time(issue=self)
-				set_resolution_time(issue=self)
-				set_user_operational_time(issue=self)
 				self.update_agreement_status()
+			set_average_response_time(issue=self)
+			set_resolution_time(issue=self)
+			set_user_resolution_time(issue=self)
 
 		if self.status=="Open" and status !="Open":
 			# if no date, it should be set as None and not a blank string "", as per mysql strict config
@@ -227,9 +227,9 @@ class Issue(Document):
 		self.save()
 
 	def reset_issue_metrics(self):
-		self.db_set('resolution_time', 0)
-		self.db_set('user_operational_time', 0)
-		self.db_set('avg_response_time',0)
+		self.db_set('resolution_time', None)
+		self.db_set('user_resolution_time', None)
+		self.db_set('avg_response_time', None)
 
 
 def get_expected_time_for(parameter, service_level, start_date_time):
@@ -337,7 +337,7 @@ def set_resolution_time(issue):
 	issue.db_set('resolution_time', resolution_time)
 
 
-def set_user_operational_time(issue):
+def set_user_resolution_time(issue):
 	# total time taken by a user to close the issue apart from wait_time
 	communications = frappe.get_list("Communication", filters={
 			"reference_doctype": issue.doctype,
@@ -356,8 +356,8 @@ def set_user_operational_time(issue):
 
 	total_pending_time = sum(pending_time)
 	resolution_time_in_secs = time_diff_in_seconds(now_datetime(), issue.creation)
-	user_operational_time = resolution_time_in_secs - total_pending_time
-	issue.db_set('user_operational_time', user_operational_time)
+	user_resolution_time = resolution_time_in_secs - total_pending_time
+	issue.db_set('user_resolution_time', user_resolution_time)
 
 
 def get_list_context(context=None):
