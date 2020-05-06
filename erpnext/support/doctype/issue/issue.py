@@ -72,6 +72,7 @@ class Issue(Document):
 			# if no date, it should be set as None and not a blank string "", as per mysql strict config
 			self.resolution_date = None
 			self.reset_issue_metrics()
+			self.agreement_fulfilled = "Ongoing"
 
 	def update_agreement_status(self):
 		if self.service_level_agreement and self.agreement_fulfilled == "Ongoing":
