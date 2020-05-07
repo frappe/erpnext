@@ -77,7 +77,11 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args))
 
-	if out.get("warehouse"):
+	if (args.get("doctype") == "Material Request" and
+		args.get("material_request_type") == "Material Transfer"):
+		out.update(get_bin_details(args.item_code, args.get("from_warehouse")))
+
+	elif out.get("warehouse"):
 		out.update(get_bin_details(args.item_code, out.warehouse))
 
 	# update args with out, if key or value not exists

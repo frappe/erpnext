@@ -456,6 +456,9 @@ def make_stock_entry(source_name, target_doc=None):
 		if source_parent.material_request_type == "Customer Provided":
 			target.allow_zero_valuation_rate = 1
 
+		if source_parent.material_request_type == "Material Transfer":
+			target.s_warehouse = obj.from_warehouse
+
 	def set_missing_values(source, target):
 		target.purpose = source.material_request_type
 		if source.job_card:
