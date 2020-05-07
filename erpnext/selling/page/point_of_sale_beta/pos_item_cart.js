@@ -37,7 +37,7 @@ erpnext.PointOfSale.ItemCart = class {
 		const frm = this.events.get_frm();
 		frm.set_value('customer', '');
 		this.$customer_section.removeClass('border pr-4 pl-4');
-		this.show_customer_selector();
+		this.make_customer_selector();
 		this.customer_field.set_focus();
 	}
     
@@ -169,17 +169,20 @@ erpnext.PointOfSale.ItemCart = class {
 
 		this.$cart_items_wrapper.on('click', '.cart-item-wrapper', function() {
 			const $cart_item = $(this);
-			const edit_cart_btn = me.$totals_section.find('.edit-cart-btn');
 
-			if (!edit_cart_btn.hasClass('d-none')) {
+			me.toggle_item_highlight(this);
+
+			const payment_section_hidden = me.$totals_section.find('.edit-cart-btn').hasClass('d-none');
+			if (!payment_section_hidden) {
 				// payment section is visible
-				// edit cart then open item details section
+				// edit cart first and then open item details section
 				edit_cart_btn.click();
 			}
 
 			const item_code = unescape($cart_item.attr('data-item-code'));
 			const batch_no = unescape($cart_item.attr('data-batch-no'));
 			me.events.cart_item_clicked(item_code, batch_no);
+			this.numpad_value = '';
 		});
 
 		this.$totals_section.on('click', '.checkout-btn', function() {
@@ -193,18 +196,41 @@ erpnext.PointOfSale.ItemCart = class {
 			this.events.edit_cart();
 			this.toggle_checkout_btn(true);
 		});
-    }
-    
-    show_customer_selector() {
-        this.$customer_section.html(`<div class="customer-search-field flex flex-1 items-center"></div>`);
-        
+	}
+	
+	toggle_item_highlight(item) {
+		const $cart_item = $(item);
+		const item_is_highlighted = $cart_item.hasClass("shadow");
+
+		if (!item || item_is_highlighted) {
+			this.$cart_container.find('.cart-item-wrapper').removeClass("shadow").css("opacity", "1");
+		} else {
+			$cart_item.addClass("shadow");
+			this.$cart_container.find('.cart-item-wrapper').css("opacity", "1");
+			this.$cart_container.find('.cart-item-wrapper').not(item).removeClass("shadow").css("opacity", "0.65");
+		}
+		// highlight with inner shadow
+		// $cart_item.addClass("shadow-inner bg-selected");
+		// me.$cart_container.find('.cart-item-wrapper').not(this).removeClass("shadow-inner bg-selected");
+	}
+
+	make_customer_selector() {
+		this.$customer_section.html(`<div class="customer-search-field flex flex-1 items-center"></div>`);
 		const me = this;
+		const query = { query: 'erpnext.controllers.queries.customer_query' };
+		const allowed_customer_group = this.events.get_allowed_customer_group() || [];
+		if (allowed_customer_group.length) {
+			query.filters = {
+				customer_group: ['in', allowed_customer_group]
+			}
+		}
 		this.customer_field = frappe.ui.form.make_control({
 			df: {
 				label: __('Customer'),
 				fieldtype: 'Link',
 				options: 'Customer',
 				placeholder: __('Search by customer name, phone, email.'),
+				get_query: () => query,
 				onchange: function() {
 					if (this.value) {
 						const frm = me.events.get_frm();
@@ -266,13 +292,13 @@ erpnext.PointOfSale.ItemCart = class {
 		if (customer) {
 			this.$customer_section.addClass('border pr-4 pl-4').html(
 				`<div class="customer-details flex flex-col">
-					<div class="customer-header flex items-center rounded h-18">
+					<div class="customer-header flex items-center rounded h-18 pointer">
 						${get_customer_image()}
 						<div class="customer-name flex flex-col flex-1 f-shrink-1 overflow-hidden whitespace-nowrap">
 							<div class="text-md text-dark-grey text-bold">${customer}</div>
 							${get_customer_description()}
 						</div>
-						<div class="f-shrink-0 add-remove-customer flex items-center" data-customer="${escape(customer)}">
+						<div class="f-shrink-0 add-remove-customer flex items-center pointer" data-customer="${escape(customer)}">
 							<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
 								<path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
 							</svg>
@@ -405,7 +431,7 @@ erpnext.PointOfSale.ItemCart = class {
 		
         if (!$item_to_update.length) {
             this.$cart_items_wrapper.append(
-                `<div class="cart-item-wrapper flex items-center h-18 pr-4 pl-4 border-grey pointer no-select" 
+                `<div class="cart-item-wrapper flex items-center h-18 pr-4 pl-4 rounded border-grey pointer no-select" 
                         data-item-code="${escape(item_data.item_code)}" data-batch-no="${escape(item_data.batch_no || '')}">
                 </div>`
             )
@@ -509,10 +535,12 @@ erpnext.PointOfSale.ItemCart = class {
             
 		} else if (current_action === 'done') {
 			this.prev_action = undefined;
+			this.toggle_item_highlight();
 			this.events.numpad_event(undefined, current_action);
 			return;
 		} else if (current_action === 'remove') {
 			this.prev_action = undefined;
+			this.toggle_item_highlight();
 			this.events.numpad_event(undefined, current_action);
 			return;
 		} else {
@@ -709,12 +737,13 @@ erpnext.PointOfSale.ItemCart = class {
 			res.forEach(invoice => {
 				const posting_datetime = moment(invoice.posting_date+" "+invoice.posting_time).format("Do MMMM, h:mma");
 				let indicator_color = '';
-				in_list(['Paid', 'Consolidated'], invoice.status) && (indicator_color = 'green');
-				invoice.status === 'Draft' && (indicator_color = 'red');
-				invoice.status === 'Return' && (indicator_color = 'grey');
+
+				if (in_list(['Paid', 'Consolidated'], invoice.status)) (indicator_color = 'green');
+				if (invoice.status === 'Draft') (indicator_color = 'red');
+				if (invoice.status === 'Return') (indicator_color = 'grey');
 
 				transaction_container.append(
-					`<div class="invoice-wrapper flex p-3 justify-between border-grey pointer no-select" data-invoice-name="${escape(invoice.name)}">
+					`<div class="invoice-wrapper flex p-3 justify-between border-grey rounded pointer no-select" data-invoice-name="${escape(invoice.name)}">
 						<div class="flex flex-col justify-end">
 							<div class="text-dark-grey text-bold overflow-hidden whitespace-nowrap mb-2">${invoice.name}</div>
 							<div class="flex items-center f-shrink-1 text-dark-grey overflow-hidden whitespace-nowrap">

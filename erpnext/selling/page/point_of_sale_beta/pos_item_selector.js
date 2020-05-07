@@ -102,6 +102,9 @@ erpnext.PointOfSale.ItemSelector = class {
 
     make_search_bar() {
         const me = this;
+        this.$component.find('.search-field').html('');
+        this.$component.find('.item-group-field').html('');
+
 		this.search_field = frappe.ui.form.make_control({
 			df: {
 				label: __('Search'),
@@ -122,13 +125,13 @@ erpnext.PointOfSale.ItemSelector = class {
                     !me.item_group && (me.item_group = me.parent_item_group);
                     me.filter_items();
                 },
-                get_query: () => {
+                get_query: function () {
                     return {
                         query: 'erpnext.selling.page.point_of_sale.point_of_sale.item_group_query',
                         filters: {
-                            pos_profile: this.events.get_frm().doc?.pos_profile
+                            pos_profile: me.events.get_frm().doc?.pos_profile
                         }
-                    };
+                    }
                 },
 			},
             parent: this.$component.find('.item-group-field'),

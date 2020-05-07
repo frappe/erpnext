@@ -309,6 +309,8 @@ erpnext.PointOfSale.Payment = class {
 		const doc = this.events.get_frm().doc;
 		const { loyalty_program, loyalty_points } = this.events.get_customer_details();
 
+		this.$payment_modes.find(`.mode-of-payment[data-mode="loyalty-points"]`).parent().remove();
+		
 		if (!loyalty_program) return;
 
 		let description, read_only;

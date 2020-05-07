@@ -34,6 +34,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_write_off_account()
 		self.validate_account_for_change_amount()
 		self.validate_item_cost_centers()
+		self.validate_serialised_or_batched_item()
 		self.validate_stock_availablility()
 		self.set_status()
 		if cint(self.is_pos):
@@ -114,6 +115,24 @@ class POSInvoice(SalesInvoice):
 					frappe.msgprint(_('Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. \
 						Available quantity {}.'.format(d.idx, frappe.bold(d.item_code), 
 						frappe.bold(d.warehouse), frappe.bold(d.qty))), title="Not Available")
+	
+	def validate_serialised_or_batched_item(self):
+		for d in self.get("items"):
+			serialized = d.has_serial_no
+			batched = d.has_batch_no
+			no_serial_selected = not d.serial_no
+			no_batch_selected = not d.batch_no
+
+
+			if serialized and batched and (no_batch_selected or no_serial_selected):
+				frappe.throw(_('Row #{}: Please select a serial no and batch against item: {} or remove it to complete transaction.'
+						.format(d.idx, frappe.bold(d.item_code))), title="Invalid Item")
+			if serialized and no_serial_selected:
+				frappe.throw(_('Row #{}: No serial number selected against item: {}. Please select one or remove it to complete transaction.'
+						.format(d.idx, frappe.bold(d.item_code))), title="Invalid Item")
+			if batched and no_batch_selected:
+				frappe.throw(_('Row #{}: No batch selected against item: {}. Please select a batch or remove it to complete transaction.'
+						.format(d.idx, frappe.bold(d.item_code))), title="Invalid Item")
 
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:

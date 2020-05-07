@@ -48,7 +48,7 @@ erpnext.PointOfSale.ItemDetails = class {
     }
 
     toggle_item_details_section(item) {
-        const { item_code, batch_no } = this.current_item; // to check if already displaying and item
+        const { item_code, batch_no } = this.current_item; 
         this.show_details = !item ? false : item_code === item.item_code && batch_no == item.batch_no ? false : true;
 
         this.events.toggle_item_selector(this.show_details);
@@ -66,9 +66,32 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.render_discount_dom(item);
 			this.render_form(item);
 		} else {
+			this.validate_serial_batch_item();
 			this.current_item = {};
 		}
-    }
+	}
+	
+	validate_serial_batch_item() {
+		const doc = this.events.get_frm().doc;
+		const item_row = doc.items.find(item => item.name === this.name);
+
+		if (!item_row) return;
+
+		const serialized = item_row.has_serial_no;
+		const batched = item_row.has_batch_no;
+		const no_serial_selected = !item_row.serial_no;
+		const no_batch_selected = !item_row.batch_no;
+
+		if ((serialized && no_serial_selected) || (batched && no_batch_selected) || 
+			(serialized && batched && (no_batch_selected || no_serial_selected))) {
+
+			frappe.show_alert({
+				message: __("Item will be removed since no serial / batch no selected."),
+				indicator: 'orange'
+			});
+			this.events.remove_item_from_cart();
+		}
+	}
     
     render_dom(item) {
         let { item_code ,item_name, description, image, price_list_rate } = item;
@@ -199,6 +222,7 @@ erpnext.PointOfSale.ItemDetails = class {
 				!me.current_item.batch_no && await me.auto_update_batch_no();
 				me.events.form_updated(me.doctype, me.name, 'serial_no', this.value);
 			}
+			this.serial_no_control.refresh();
 		}
 
 		if (this.batch_no_control) {
@@ -208,6 +232,7 @@ erpnext.PointOfSale.ItemDetails = class {
                 me.events.form_updated(me.doctype, me.name, 'batch_no', this.value);
                 me.current_item.batch_no = this.value;
 			}
+			this.batch_no_control.refresh();
 		}
     }
     
