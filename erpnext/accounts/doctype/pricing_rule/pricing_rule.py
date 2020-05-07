@@ -206,7 +206,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 		"discount_amount_on_rate": []
 	})
 
-	if args.ignore_pricing_rule or not args.item_code:
+	if args.ignore_pricing_rule or args.item_ignore_pricing_rule or not args.item_code:
 		if frappe.db.exists(args.doctype, args.name) and args.get("pricing_rules"):
 			item_details = remove_pricing_rule_for_item(args.get("pricing_rules"),
 				item_details, args.get('item_code'))

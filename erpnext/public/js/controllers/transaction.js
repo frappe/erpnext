@@ -504,7 +504,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							is_pos: cint(me.frm.doc.is_pos),
 							is_subcontracted: me.frm.doc.is_subcontracted,
 							transaction_date: me.frm.doc.transaction_date || me.frm.doc.posting_date,
-							ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,
+							ignore_pricing_rule: item.item_ignore_pricing_rule,
 							doctype: me.frm.doc.doctype,
 							name: me.frm.doc.name,
 							project: item.project || me.frm.doc.project,
@@ -1248,6 +1248,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	ignore_pricing_rule: function() {
+		for (let item of this.frm.doc["items"]) {
+			frappe.model.set_value(item.doctype, item.name, "item_ignore_pricing_rule", this.frm.doc.ignore_pricing_rule);
+		}
+
 		if(this.frm.doc.ignore_pricing_rule) {
 			var me = this;
 			var item_list = [];
@@ -1259,6 +1263,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						"name": d.name,
 						"item_code": d.item_code,
 						"pricing_rules": d.pricing_rules,
+						"ignore_pricing_rule": d.item_ignore_pricing_rule,
 						"parenttype": d.parenttype,
 						"parent": d.parent
 					})
@@ -1278,6 +1283,31 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					}
 				}
 			});
+		} else {
+			this.apply_pricing_rule();
+		}
+	},
+
+	item_ignore_pricing_rule: function() {
+		const me = this;
+		const row = this.frm.selected_doc;
+		if (row.item_ignore_pricing_rule) {
+			if (row.item_code && !row.is_free_item) {
+				return this.frm.call({
+					method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.remove_pricing_rules",
+					args: { item_list: [row] },
+					callback: function (r) {
+						if (!r.exc && r.message) {
+							r.message.forEach(row_item => {
+								me.remove_pricing_rule(row_item);
+							});
+							me._set_values_for_item_list(r.message);
+							me.calculate_taxes_and_totals();
+							if (me.frm.doc.apply_discount_on) me.frm.trigger("apply_discount_on");
+						}
+					}
+				});
+			}
 		} else {
 			this.apply_pricing_rule();
 		}
@@ -1352,6 +1382,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"parenttype": d.parenttype,
 					"parent": d.parent,
 					"pricing_rules": d.pricing_rules,
+					"item_ignore_pricing_rule": d.item_ignore_pricing_rule,
 					"warehouse": d.warehouse,
 					"serial_no": d.serial_no,
 					"price_list_rate": d.price_list_rate,
@@ -1395,10 +1426,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 
 			// if pricing rule set as blank from an existing value, apply price_list
-			if(!me.frm.doc.ignore_pricing_rule && existing_pricing_rule && !d.pricing_rules) {
-				me.apply_price_list(frappe.get_doc(d.doctype, d.name));
-			} else if(!d.pricing_rules) {
-				me.remove_pricing_rule(frappe.get_doc(d.doctype, d.name));
+			if (!d.pricing_rules) {
+				if (!d.item_ignore_pricing_rule && existing_pricing_rule) {
+					me.apply_price_list(frappe.get_doc(d.doctype, d.name));
+				} else {
+					me.remove_pricing_rule(frappe.get_doc(d.doctype, d.name));
+				}
 			}
 
 			if (d.free_item_data) {
@@ -1920,11 +1953,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	coupon_code: function() {
-		var me = this;
+		const me = this;
 		frappe.run_serially([
-			() => this.frm.doc.ignore_pricing_rule=1,
+			() => this.frm.doc.ignore_pricing_rule = 1,
 			() => me.ignore_pricing_rule(),
-			() => this.frm.doc.ignore_pricing_rule=0,
+			() => this.frm.doc.ignore_pricing_rule = 0,
 			() => me.apply_pricing_rule()
 		]);
 	}

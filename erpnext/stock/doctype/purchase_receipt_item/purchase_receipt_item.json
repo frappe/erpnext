@@ -44,6 +44,7 @@
   "base_rate",
   "base_amount",
   "pricing_rules",
+  "item_ignore_pricing_rule",
   "is_free_item",
   "section_break_29",
   "net_rate",
@@ -834,18 +835,23 @@
    "collapsible": 1,
    "fieldname": "image_column",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "item_ignore_pricing_rule",
+   "fieldtype": "Check",
+   "label": "Ignore Pricing Rule"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-04-28 19:01:21.154963",
+ "modified": "2020-05-08 06:10:10.448848",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
  "owner": "Administrator",
  "permissions": [],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC"
 }
