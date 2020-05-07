@@ -225,6 +225,17 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		refresh_field("incentives",row.name,row.parentfield);
 	},
 
+	category: function(doc, cdt, cdn) {
+		// should be the category field of tax table
+		if(cdt != doc.doctype) {
+			this.calculate_taxes_and_totals();
+		}
+	},
+
+	add_deduct_tax: function(doc, cdt, cdn) {
+		this.calculate_taxes_and_totals();
+	},
+
 	warehouse: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
