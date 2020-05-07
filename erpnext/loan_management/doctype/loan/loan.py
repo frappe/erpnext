@@ -248,8 +248,7 @@ def create_loan_security_unpledge(loan, applicant_type, applicant, company, as_d
 	for loan_security in loan_security_pledge_details:
 		unpledge_request.append('securities', {
 			"loan_security": loan_security.loan_security,
-			"qty": loan_security.qty,
-			"against_pledge": loan_security.parent
+			"qty": loan_security.qty
 		})
 
 	if as_dict:
