@@ -16,7 +16,7 @@ frappe.query_reports["Quoted Item Comparison"] = {
 			default: "",
 			options: "Item",
 			label: __("Item"),
-			fieldname: "item",
+			fieldname: "item_code",
 			fieldtype: "Link",
 			get_query: () => {
 				let quote = frappe.query_report.get_filter_value('supplier_quotation');
@@ -34,6 +34,14 @@ frappe.query_reports["Quoted Item Comparison"] = {
 						filters: { "disabled": 0 }
 					}
 				}
+			}
+		},
+		{
+			fieldname: "supplier",
+			label: __("Supplier"),
+			fieldtype: "MultiSelectList",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Supplier', txt);
 			}
 		},
 		{
@@ -57,60 +65,6 @@ frappe.query_reports["Quoted Item Comparison"] = {
 			}
 		}
 	],
-
-	prepare_chart_data: (result) => {
-		let supplier_wise_map = {}, data_points_map = {};
-		let qty_list = result.map(res => res.qty);
-		qty_list.sort();
-		qty_list = new Set(qty_list);
-
-		// create supplier wise map like in Report
-		for (let res of result) {
-			if (!(res.supplier in supplier_wise_map)) {
-				supplier_wise_map[res.supplier] = {};
-			}
-			supplier_wise_map[res.supplier][res.qty] = res.price;
-		}
-
-		// create  datapoints for each qty
-		for (let supplier of Object.keys(supplier_wise_map)) {
-			let row = supplier_wise_map[supplier];
-			for (let qty of qty_list) {
-				if (!data_points_map[qty]) {
-					data_points_map[qty] = [];
-				}
-				if (row[qty]) {
-					data_points_map[qty].push(row[qty]);
-				}
-				else {
-					data_points_map[qty].push(null);
-				}
-			}
-		}
-
-		let dataset = [];
-		qty_list.forEach((qty) => {
-			let datapoints = {
-				'name': __('Price for Qty ') + qty,
-				'values': data_points_map[qty]
-			}
-			dataset.push(datapoints);
-		});
-		return dataset;
-	},
-
-	get_chart_data: function (columns, result) {
-		let suppliers = result.filter(d => d.supplier_name).map(res => res.supplier_name);
-		let dataset = frappe.query_reports["Quoted Item Comparison"].prepare_chart_data(result);
-
-		return {
-			data: {
-				labels: suppliers,
-				datasets: dataset
-			},
-			type: 'bar'
-		}
-	},
 
 	onload: (report) => {
 		// Create a button for setting the default supplier

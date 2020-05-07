@@ -9,20 +9,32 @@ from collections import defaultdict
 from erpnext.setup.utils import get_exchange_rate
 
 def execute(filters=None):
+	if not filters:
+		return [], []
+
 	conditions = get_conditions(filters)
-	data = get_data(filters, conditions)
+	supplier_quotation_data = get_data(filters, conditions)
 	columns = get_columns()
-	return columns, data
+
+	data, chart_data = prepare_data(supplier_quotation_data)
+
+	return columns, data, None, chart_data
+
+def get_conditions(filters):
+	conditions = ""
+	if filters.get("supplier_quotation"):
+		conditions += " AND sqi.parent = %(supplier_quotation)s"
+
+	if filters.get("request_for_quotation"):
+		conditions += " AND sqi.request_for_quotation = %(request_for_quotation)s"
+
+	if filters.get("supplier"):
+		conditions += " AND sq.supplier in %(supplier)s"
+	return conditions
 
 def get_data(filters, conditions):
-	out, suppliers = [], []
-	item = filters.get("item")
-
-	if not item:
+	if not filters.get("item_code"):
 		return []
-
-	company_currency = frappe.db.get_default("currency")
-	float_precision = cint(frappe.db.get_default("float_precision")) or 2
 
 	supplier_quotation_data = frappe.db.sql("""SELECT
 		sqi.parent, sqi.qty, sqi.rate, sqi.uom, sqi.request_for_quotation,
@@ -31,17 +43,27 @@ def get_data(filters, conditions):
 			`tabSupplier Quotation Item` sqi,
 			`tabSupplier Quotation` sq
 		WHERE
-			sqi.item_code = '{0}'
+			sqi.item_code = %(item_code)s
 			AND sqi.parent = sq.name
 			AND sqi.docstatus < 2
-			AND sq.company = '{1}'
+			AND sq.company = %(company)s
 			AND sq.status != 'Expired'
-			{2}""".format(item, filters.get("company"), conditions), as_dict=1)
+			{0}""".format(conditions), filters, as_dict=1)
 
+	return supplier_quotation_data
+
+def prepare_data(supplier_quotation_data):
+	out, suppliers, qty_list = [], [], []
 	supplier_wise_map = defaultdict(list)
+	supplier_qty_price_map = {}
+
+	company_currency = frappe.db.get_default("currency")
+	float_precision = cint(frappe.db.get_default("float_precision")) or 2
 
 	for data in supplier_quotation_data:
+		supplier = data.get("supplier")
 		supplier_currency = frappe.db.get_value("Supplier", data.get("supplier"), "default_currency")
+
 		if supplier_currency:
 			exchange_rate = get_exchange_rate(supplier_currency, company_currency)
 		else:
@@ -53,29 +75,64 @@ def get_data(filters, conditions):
 			"price": flt(data.get("rate") * exchange_rate, float_precision),
 			"uom": data.get("uom"),
 			"request_for_quotation": data.get("request_for_quotation"),
-			"supplier": data.get("supplier") # used for chart generation
 		}
 
-		supplier_wise_map[data.supplier].append(row)
-		suppliers.append(data.supplier)
+		# map for report view of form {'supplier1':[{},{},...]}
+		supplier_wise_map[supplier].append(row)
 
-	suppliers = set(suppliers)
+		# map for chart preparation of the form {'supplier1': {'qty': 'price'}}
+		if not supplier in supplier_qty_price_map:
+			supplier_qty_price_map[supplier] = {}
+		supplier_qty_price_map[supplier][row["qty"]] = row["price"]
 
+		suppliers.append(supplier)
+		qty_list.append(data.get("qty"))
+
+	suppliers = list(set(suppliers))
+	qty_list = list(set(qty_list))
+
+	# final data format for report view
 	for supplier in suppliers:
 		supplier_wise_map[supplier][0].update({"supplier_name": supplier})
 		for entry in supplier_wise_map[supplier]:
 			out.append(entry)
 
-	return out
+	chart_data = prepare_chart_data(suppliers, qty_list, supplier_qty_price_map)
 
-def get_conditions(filters):
-	conditions = ""
+	return out, chart_data
 
-	if filters.get("request_for_quotation"):
-		conditions += " AND sqi.request_for_quotation = '{0}' ".format(filters.get("request_for_quotation"))
+def prepare_chart_data(suppliers, qty_list, supplier_qty_price_map):
+	data_points_map = {}
+	qty_list.sort()
 
-	return conditions
+	# create qty wise values map of the form {'qty1':[value1, value2]}
+	for supplier in suppliers:
+		entry = supplier_qty_price_map[supplier]
+		for qty in qty_list:
+			if not qty in data_points_map:
+				data_points_map[qty] = []
+			if qty in entry:
+				data_points_map[qty].append(entry[qty])
+			else:
+				data_points_map[qty].append(None)
 
+	dataset = []
+	for qty in qty_list:
+		datapoints = {
+			"name": _("Price for Qty ") + str(qty),
+			"values": data_points_map[qty]
+		}
+		dataset.append(datapoints)
+
+	chart_data = {
+		"data": {
+			"labels": suppliers,
+			"datasets": dataset
+		},
+		"type": "bar"
+	}
+
+	return chart_data
 
 def get_columns():
 	columns = [{
