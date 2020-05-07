@@ -69,7 +69,7 @@ def check_for_ltv_shortfall(process_loan_security_shortfall):
 		loan_security_map[loan.name]['security_value'] += current_loan_security_amount - (current_loan_security_amount * loan.haircut/100)
 
 	for loan, value in iteritems(loan_security_map):
-		if (value["security_value"]/value["loan_amount"]) < ltv_ratio:
+		if (value["loan_amount"]/value['security_value'] * 100) > ltv_ratio:
 			create_loan_security_shortfall(loan, value, process_loan_security_shortfall)
 
 def create_loan_security_shortfall(loan, value, process_loan_security_shortfall):
