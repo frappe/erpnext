@@ -287,7 +287,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		if (in_list(['serial_no', 'batch_no'], field)) {
 			args[field] = value;
 		}
-		
+
 		// add to cur_frm
 		const item = this.frm.add_child('items', args);
 		frappe.flags.hide_serial_batch_dialog = true;

@@ -11,12 +11,54 @@ from frappe.model.document import Document
 class AssetCategory(Document):
 	def validate(self):
 		self.validate_finance_books()
+		self.validate_account_types()
+		self.validate_account_currency()
 
 	def validate_finance_books(self):
 		for d in self.finance_books:
 			for field in ("Total Number of Depreciations", "Frequency of Depreciation"):
 				if cint(d.get(frappe.scrub(field)))<1:
 					frappe.throw(_("Row {0}: {1} must be greater than 0").format(d.idx, field), frappe.MandatoryError)
+	
+	def validate_account_currency(self):
+		account_types = [
+			'fixed_asset_account', 'accumulated_depreciation_account', 'depreciation_expense_account', 'capital_work_in_progress_account'
+		]
+		invalid_accounts = []
+		for d in self.accounts:
+			company_currency = frappe.get_value('Company', d.get('company_name'), 'default_currency')
+			for type_of_account in account_types:
+				if d.get(type_of_account):
+					account_currency = frappe.get_value("Account", d.get(type_of_account), "account_currency")
+					if account_currency != company_currency:
+						invalid_accounts.append(frappe._dict({ 'type': type_of_account, 'idx': d.idx, 'account': d.get(type_of_account) }))
+	
+		for d in invalid_accounts:
+			frappe.throw(_("Row #{}: Currency of {} - {} doesn't matches company currency.")
+				.format(d.idx, frappe.bold(frappe.unscrub(d.type)), frappe.bold(d.account)),
+				title=_("Invalid Account"))
+
+	
+	def validate_account_types(self):
+		account_type_map = {
+			'fixed_asset_account': { 'account_type': 'Fixed Asset' },
+			'accumulated_depreciation_account': { 'account_type': 'Accumulated Depreciation' },
+			'depreciation_expense_account': { 'root_type': 'Expense' },
+			'capital_work_in_progress_account': { 'account_type': 'Capital Work in Progress' }
+		}
+		for d in self.accounts:
+			for fieldname in account_type_map.keys():
+				if d.get(fieldname):
+					selected_account = d.get(fieldname)
+					key_to_match = next(iter(account_type_map.get(fieldname))) # acount_type or root_type
+					selected_key_type = frappe.db.get_value('Account', selected_account, key_to_match)
+					expected_key_type = account_type_map[fieldname][key_to_match]
+
+					if selected_key_type != expected_key_type:
+						frappe.throw(_("Row #{}: {} of {} should be {}. Please modify the account or select a different account.")
+							.format(d.idx, frappe.unscrub(key_to_match), frappe.bold(selected_account), frappe.bold(expected_key_type)),
+							title=_("Invalid Account"))
+
 
 @frappe.whitelist()
 def get_asset_category_account(fieldname, item=None, asset=None, account=None, asset_category = None, company = None):

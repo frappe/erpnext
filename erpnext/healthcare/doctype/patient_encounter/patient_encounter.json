@@ -42,6 +42,10 @@
   "lab_test_prescription",
   "sb_procedures",
   "procedure_prescription",
+  "rehabilitation_section",
+  "therapy_plan",
+  "therapies",
+  "section_break_33",
   "encounter_comment",
   "amended_from"
  ],
@@ -257,6 +261,29 @@
    "read_only": 1
   },
   {
+   "fieldname": "rehabilitation_section",
+   "fieldtype": "Section Break",
+   "label": "Rehabilitation"
+  },
+  {
+   "fieldname": "therapies",
+   "fieldtype": "Table",
+   "label": "Therapies",
+   "options": "Therapy Plan Detail"
+  },
+  {
+   "fieldname": "section_break_33",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "therapy_plan",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Therapy Plan",
+   "options": "Therapy Plan",
+   "read_only": 1
+  },
+  {
    "fieldname": "appointment_type",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -291,7 +318,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-27 12:42:21.751964",
+ "modified": "2020-04-14 16:18:08.180457",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",

@@ -64,13 +64,13 @@
    "fieldname": "account_type",
    "fieldtype": "Link",
    "label": "Account Type",
-   "options": "Account Type"
+   "options": "Bank Account Type"
   },
   {
    "fieldname": "account_subtype",
    "fieldtype": "Link",
    "label": "Account Subtype",
-   "options": "Account Subtype"
+   "options": "Bank Account Subtype"
   },
   {
    "fieldname": "column_break_7",
@@ -200,7 +200,7 @@
   }
  ],
  "links": [],
- "modified": "2020-01-30 20:42:26.458316",
+ "modified": "2020-04-06 21:00:45.379804",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",

@@ -193,7 +193,7 @@ class BOM(WebsiteGenerator):
 					if self.rm_cost_as_per == 'Valuation Rate':
 						rate = self.get_valuation_rate(arg) * (arg.get("conversion_factor") or 1)
 					elif self.rm_cost_as_per == 'Last Purchase Rate':
-						rate = (arg.get('last_purchase_rate') \
+						rate = flt(arg.get('last_purchase_rate') \
 							or frappe.db.get_value("Item", arg['item_code'], "last_purchase_rate")) \
 								* (arg.get("conversion_factor") or 1)
 					elif self.rm_cost_as_per == "Price List":
@@ -246,12 +246,13 @@ class BOM(WebsiteGenerator):
 			if rate:
 				d.rate = rate
 			d.amount = flt(d.rate) * flt(d.qty)
+			d.db_update()
 
 		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True
 			self.calculate_cost()
 		if save:
-			self.save()
+			self.db_update()
 		self.update_exploded_items()
 
 		# update parent BOMs
