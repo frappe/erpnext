@@ -370,3 +370,39 @@ body[data-route="pos"] .collapse-btn {
 .leaderboard .list-item_content {
   padding-right: 45px;
 }
+.exercise-card {
+	box-shadow: 0 1px 3px rgba(0,0,0,0.30);
+	border-radius: 2px;
+	padding: 6px 6px 6px 8px;
+	margin-top: 10px;
+	height: 100% !important;
+}
+.exercise-card .card-img-top {
+	width: 100%;
+	height: 15vw;
+	object-fit: cover;
+}
+.exercise-card .btn-edit {
+	position: absolute;
+	bottom: 10px;
+	left: 20px;
+}
+.exercise-card .btn-del {
+	position: absolute;
+	bottom: 10px;
+	left: 50px;
+}
+.exercise-card .card-body {
+		margin-bottom: 10px;
+}
+.exercise-card .card-footer {
+		padding: 10px;
+}
+.exercise-row {
+	height: 100% !important;
+	display: flex;
+	flex-wrap: wrap;
+}
+.exercise-col {
+	padding: 10px;
+}

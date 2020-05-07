@@ -7,7 +7,6 @@ import frappe.defaults
 from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date
-from erpnext.controllers.stock_controller import update_gl_entries_after
 from frappe.model.mapper import get_mapped_doc
 from erpnext.accounts.doctype.sales_invoice.pos import update_multi_mode_option
 
@@ -282,6 +281,8 @@ class SalesInvoice(SellingController):
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_cancel")
 
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
+
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
 			self.status_updater.append({
@@ -440,11 +441,12 @@ class SalesInvoice(SellingController):
 			if pos.get("company_address"):
 				self.company_address = pos.get("company_address")
 
-			customer_price_list, customer_group = frappe.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
-
-			customer_group_price_list = frappe.get_value("Customer Group", customer_group, 'default_price_list')
-
-			selling_price_list = customer_price_list or customer_group_price_list or pos.get('selling_price_list')
+			if self.customer:
+				customer_price_list, customer_group = frappe.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
+				customer_group_price_list = frappe.get_value("Customer Group", customer_group, 'default_price_list')
+				selling_price_list = customer_price_list or customer_group_price_list or pos.get('selling_price_list')
+			else:
+				selling_price_list = pos.get('selling_price_list')
 
 			if selling_price_list:
 				self.set('selling_price_list', selling_price_list)
@@ -716,7 +718,9 @@ class SalesInvoice(SellingController):
 			if d.delivery_note and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != 1:
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
-	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
+	def make_gl_entries(self, gl_entries=None):
+		from erpnext.accounts.general_ledger import make_reverse_gl_entries
+
 		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
@@ -728,23 +732,19 @@ class SalesInvoice(SellingController):
 			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account or
 				cint(self.redeem_loyalty_points)) else "Yes"
 
-			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
-				update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)
+			if self.docstatus == 1:
+				make_gl_entries(gl_entries, update_outstanding=update_outstanding, merge_entries=False)
+			elif self.docstatus == 2:
+				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 			if update_outstanding == "No":
 				from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 				update_outstanding_amt(self.debit_to, "Customer", self.customer,
 					self.doctype, self.return_against if cint(self.is_return) and self.return_against else self.name)
 
-			if (repost_future_gle or self.flags.repost_future_gle) and cint(self.update_stock) \
-				and cint(auto_accounting_for_stock):
-					items, warehouses = self.get_items_and_warehouses()
-					update_gl_entries_after(self.posting_date, self.posting_time,
-						warehouses, items, company = self.company)
 		elif self.docstatus == 2 and cint(self.update_stock) \
 			and cint(auto_accounting_for_stock):
-				from erpnext.accounts.general_ledger import delete_gl_entries
-				delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
 	def get_gl_entries(self, warehouse_account=None):
 		from erpnext.accounts.general_ledger import merge_similar_entries

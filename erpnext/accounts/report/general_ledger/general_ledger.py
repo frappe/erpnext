@@ -188,6 +188,9 @@ def get_conditions(filters):
 		else:
 			conditions.append("finance_book in (%(finance_book)s)")
 
+	if not filters.get("show_cancelled_entries"):
+		conditions.append("is_cancelled = 0")
+
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
 
@@ -293,6 +296,9 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 		data[key].debit_in_account_currency += flt(gle.debit_in_account_currency)
 		data[key].credit_in_account_currency += flt(gle.credit_in_account_currency)
 
+		if data[key].against_voucher:
+			data[key].against_voucher += ', ' + gle.against_voucher
+
 	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
 	for gle in gl_entries:
 		if (gle.posting_date < from_date or
@@ -365,6 +371,7 @@ def get_columns(filters):
 
 	columns = [
 		{
+			"label": _("GL Entry"),
 			"fieldname": "gl_entry",
 			"fieldtype": "Link",
 			"options": "GL Entry",
