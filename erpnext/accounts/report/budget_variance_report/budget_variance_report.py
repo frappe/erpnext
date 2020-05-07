@@ -2,12 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+import datetime
 from six import iteritems
 
 import frappe
 from frappe import _
-from frappe.utils import flt
-from frappe.utils import formatdate
+from frappe.utils import flt, formatdate
 
 from erpnext.controllers.trends import get_period_date_ranges, get_period_month_ranges
 
@@ -126,8 +126,8 @@ def get_cost_centers(filters):
 				from
 					`tab{tab}`
 				where
-					company = %s
-				{order_by};
+					company=%s
+				{order_by}
 			""".format(
                 tab=filters.get("budget_against"), order_by=order_by
             ),
@@ -153,11 +153,11 @@ def get_dimension_target_details(filters):
     cond = ""
     if filters.get("budget_against_filter"):
         cond += """
-			and
-				b.{budget_against} in (
-					%s
-				)
-		""".format(
+				and
+					b.{budget_against} in (
+						%s
+					)
+			""".format(
             budget_against=budget_against
         ) % ", ".join(
             ["%s"] * len(filters.get("budget_against_filter"))
@@ -165,7 +165,7 @@ def get_dimension_target_details(filters):
 
     return frappe.db.sql(
         """
-			select
+			select distinct
 				b.{budget_against} as name
 			from
 				`tabBudget` b
@@ -198,19 +198,19 @@ def get_target_distribution_details(filters):
     target_details = {}
     for d in frappe.db.sql(
         """
-			select
-				md.name,
-				mdp.month,
-				mdp.percentage_allocation
-			from
-				`tabMonthly Distribution Percentage` mdp,
-				`tabMonthly Distribution` md
-			where
-				mdp.parent = md.name
-				and md.fiscal_year between %s
-				and %s
-			order by md.fiscal_year
-		""",
+				select
+					md.name,
+					mdp.month,
+					mdp.percentage_allocation
+				from
+					`tabMonthly Distribution Percentage` mdp,
+					`tabMonthly Distribution` md
+				where
+					mdp.parent = md.name
+					and md.fiscal_year between %s
+					and %s
+				order by md.fiscal_year
+			""",
         (filters.from_fiscal_year, filters.to_fiscal_year),
         as_dict=1,
     ):
@@ -229,8 +229,8 @@ def get_actual_details(name, filters):
     if filters.get("budget_against") == "Cost Center":
         cc_lft, cc_rgt = frappe.db.get_value("Cost Center", name, ["lft", "rgt"])
         cond = """
-				and lft >= '{lft}'
-				and rgt <= '{rgt}'
+				and lft >= \'{lft}\'
+				and rgt <= \'{rgt}\'
 			""".format(
             lft=cc_lft, rgt=cc_rgt
         )
@@ -282,37 +282,44 @@ def get_actual_details(name, filters):
 
 
 def get_dimension_account_month_map(filters):
-    import datetime
-
     dimension_target_details = get_dimension_target_details(filters)
     tdd = get_target_distribution_details(filters)
 
     cam_map = {}
 
     for ccd in dimension_target_details:
-        actual_details = get_actual_details(ccd.budget_against, filters)
+        accounts = get_accounts(ccd.name, filters)
+        actual_details = get_actual_details(ccd.name, filters)
 
-        for month_id in range(1, 13):
-            month = datetime.date(2013, month_id, 1).strftime("%B")
-            cam_map.setdefault(ccd.budget_against, {}).setdefault(
-                ccd.account, {}
-            ).setdefault(ccd.fiscal_year, {}).setdefault(
-                month, frappe._dict({"target": 0.0, "actual": 0.0})
-            )
+        for year in get_fiscal_years(filters):
+            year = year[0]
+            monthly_distribution = get_monthly_distribution(ccd.name, year, filters)
+            for month_id in range(1, 13):
+                month = datetime.date(2013, month_id, 1).strftime(
+                    "%B"
+                )  # Get month string
 
-            tav_dict = cam_map[ccd.budget_against][ccd.account][ccd.fiscal_year][month]
-            month_percentage = (
-                tdd.get(ccd.monthly_distribution, {}).get(month, 0)
-                if ccd.monthly_distribution
-                else 100.0 / 12
-            )
+                for account in accounts:
+                    account = account[0]
+                    cam_map.setdefault(ccd.name, {}).setdefault(account, {}).setdefault(
+                        year, {}
+                    ).setdefault(month, frappe._dict({"target": 0.0, "actual": 0.0}))
 
-            tav_dict.target = flt(ccd.budget_amount) * month_percentage / 100
+                    tav_dict = cam_map[ccd.name][account][year][month]
 
-            for ad in actual_details.get(ccd.account, []):
-                if ad.month_name == month:
-                    tav_dict.actual += flt(ad.debit) - flt(ad.credit)
+                    month_percentage = (
+                        tdd.get(monthly_distribution, {}).get(month, 0)
+                        if monthly_distribution
+                        else 100.0 / 12
+                    )
 
+                    budget_amount = get_budget_amount(ccd.name, year, account, filters)
+
+                    tav_dict.target = flt(budget_amount) * month_percentage / 100
+
+                    for ad in actual_details.get(account, []):
+                        if ad.month_name == month and ad.fiscal_year == year:
+                            tav_dict.actual += flt(ad.debit) - flt(ad.credit)
     return cam_map
 
 
@@ -336,3 +343,78 @@ def get_fiscal_years(filters):
     )
 
     return fiscal_year
+
+
+def get_accounts(name, filters):
+    budget_against = frappe.scrub(filters.get("budget_against"))
+
+    accounts = frappe.db.sql(
+        """
+			select
+				distinct(ba.account)
+			from
+				`tabBudget Account` ba
+			join
+				`tabBudget` b
+					on b.name = ba.parent
+			where
+				b.docstatus = 1
+				and b.fiscal_year between %s and %s
+				and b.{budget_against} = %s
+			order by
+				ba.account
+		""".format(
+            budget_against=budget_against
+        ),
+        (filters.from_fiscal_year, filters.to_fiscal_year, name),
+    )
+
+    return accounts
+
+
+def get_monthly_distribution(name, year, filters):
+    budget_against = frappe.scrub(filters.get("budget_against"))
+
+    monthly_distribution = frappe.db.sql(
+        """
+			select
+				monthly_distribution
+			from
+				`tabBudget`
+			where
+				docstatus = 1
+				and {budget_against} = %s
+				and fiscal_year = %s
+		""".format(
+            budget_against=budget_against
+        ),
+        (name, year),
+    )
+
+    return monthly_distribution[0][0] if monthly_distribution else None
+
+
+def get_budget_amount(name, year, account, filters):
+    budget_against = frappe.scrub(filters.get("budget_against"))
+
+    budget_amount = frappe.db.sql(
+        """
+			select
+				ba.budget_amount
+			from
+				`tabBudget Account` ba
+			join
+				`tabBudget` b
+					on b.name = ba.parent
+			where
+				b.docstatus = 1
+				and b.{budget_against} = %s
+				and b.fiscal_year = %s
+				and ba.account = %s
+		""".format(
+            budget_against=budget_against
+        ),
+        (name, year, account),
+    )
+
+    return budget_amount[0][0] if budget_amount else 0
