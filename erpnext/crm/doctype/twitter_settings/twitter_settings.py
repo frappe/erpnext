@@ -12,13 +12,12 @@ from tweepy.error import TweepError
 
 class TwitterSettings(Document):
 	def get_authorize_url(self):
-		callback_url = "{0}/?cmd=erpnext.crm.doctype.twitter_settings.twitter_settings.callback".format(frappe.utils.get_url())
+		callback_url = "{0}/api/method/erpnext.crm.doctype.twitter_settings.twitter_settings.callback?".format(frappe.utils.get_url())
 		auth = tweepy.OAuthHandler(self.consumer_key, self.get_password(fieldname="consumer_secret"), callback_url)
-
 		try:
 			redirect_url = auth.get_authorization_url()
 			return redirect_url
-		except:
+		except tweepy.TweepError as e:
 			frappe.msgprint(_("Error! Failed to get request token."))
 			frappe.throw(_('Invalid {0} or {1}').format(frappe.bold("Consumer Key"), frappe.bold("Consumer Secret Key")))
 
@@ -91,8 +90,12 @@ class TwitterSettings(Document):
 				frappe.db.commit()
 			frappe.throw(content["message"],title="Twitter Error {0} {1}".format(e.response.status_code, e.response.reason))
 
-@frappe.whitelist()
-def callback(oauth_token, oauth_verifier):
-	twitter_settings = frappe.get_single("Twitter Settings")
-	twitter_settings.get_access_token(oauth_token,oauth_verifier)
-	frappe.db.commit()
+@frappe.whitelist(allow_guest=True)
+def callback(oauth_token = None, oauth_verifier = None):
+	if oauth_token and oauth_verifier:
+		twitter_settings = frappe.get_single("Twitter Settings")
+		twitter_settings.get_access_token(oauth_token,oauth_verifier)
+		frappe.db.commit()
+	else:
+		frappe.local.response["type"] = "redirect"
+		frappe.local.response["location"] = get_url_to_form("Twitter Settings","Twitter Settings")
