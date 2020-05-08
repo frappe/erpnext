@@ -10,13 +10,11 @@ def execute(filters=None):
 	filters = frappe._dict(filters or {})
 	columns = get_columns(filters)
 	data = get_data(filters)
-	chart = prepare_chart_data(data, columns)
 
-	return columns, data, None, chart
+	return columns, data
 
 def get_conditions(filters):
 	conditions = { 'docstatus': 1 }
-	status = filters.status
 
 	if filters.get('company'):
 		conditions["company"] = filters.company
@@ -26,74 +24,40 @@ def get_conditions(filters):
 		conditions["available_for_use_date"] = ('<=', filters.get('available_for_use_date'))
 	if filters.get('is_existing_asset'):
 		conditions["is_existing_asset"] = filters.get('is_existing_asset')
-	if filters.get('asset_category'):
-		conditions["asset_category"] = filters.get('asset_category')
 	if filters.get('cost_center'):
 		conditions["cost_center"] = filters.get('cost_center')
-
-	# In Store assets are those that are not sold or scrapped
-	operand = 'not in'
-	if status not in 'In Location':
-		operand = 'in'
-
-	conditions['status'] = (operand, ['Sold', 'Scrapped'])
 
 	return conditions
 
 def get_data(filters):
 
 	data = []
-
-	conditions = get_conditions(filters)
 	depreciation_amount_map = get_finance_book_value_map(filters)
-	pr_supplier_map = get_purchase_receipt_supplier_map()
-	pi_supplier_map = get_purchase_invoice_supplier_map()
 
 	assets_record = frappe.db.get_all("Asset",
-		filters=conditions,
-		fields=["name", "asset_name", "department", "cost_center", "purchase_receipt",
-			"asset_category", "purchase_date", "gross_purchase_amount", "location",
-			"available_for_use_date", "status", "purchase_invoice", "opening_accumulated_depreciation"])
+		filters=get_conditions(filters),
+		fields=["name", "asset_name", "asset_category", "gross_purchase_amount",
+		"opening_accumulated_depreciation", "available_for_use_date", "purchase_date"],
+		group_by="asset_category")
 
 	for asset in assets_record:
 		asset_value = asset.gross_purchase_amount - flt(asset.opening_accumulated_depreciation) \
 			- flt(depreciation_amount_map.get(asset.name))
 		if asset_value:
 			row = {
+				"asset_category": asset.asset_category,
 				"asset_id": asset.name,
 				"asset_name": asset.asset_name,
-				"status": asset.status,
-				"department": asset.department,
-				"cost_center": asset.cost_center,
-				"vendor_name": pr_supplier_map.get(asset.purchase_receipt) or pi_supplier_map.get(asset.purchase_invoice),
+				"purchase_date": asset.purchase_date,
+				"available_for_use_date": asset.available_for_use_date,
 				"gross_purchase_amount": asset.gross_purchase_amount,
 				"opening_accumulated_depreciation": asset.opening_accumulated_depreciation,
 				"depreciated_amount": depreciation_amount_map.get(asset.name) or 0.0,
-				"available_for_use_date": asset.available_for_use_date,
-				"location": asset.location,
-				"asset_category": asset.asset_category,
-				"purchase_date": asset.purchase_date,
 				"asset_value": asset_value
 			}
 			data.append(row)
 
 	return data
-
-def prepare_chart_data(data, columns):
-	label_values_map = {}
-	for d in data:
-		if not label_values_map.get(d.get('asset_category')):
-			label_values_map[d.get('asset_category')] = 0
-		label_values_map[d.get('asset_category')] += d.get('asset_value')
-
-	return {
-		"data" : {
-			"labels": label_values_map.keys(),
-			"datasets": [{ "values": label_values_map.values() }]
-		},
-		"type": 'donut',
-		"height": 250
-	}
 
 def get_finance_book_value_map(filters):
 	date = filters.get('purchase_date') or filters.get('available_for_use_date') or today()
@@ -108,53 +72,27 @@ def get_finance_book_value_map(filters):
 			AND ifnull(finance_book, '')=%s
 		GROUP BY parent''', (date, cstr(filters.finance_book or ''))))
 
-def get_purchase_receipt_supplier_map():
-	return frappe._dict(frappe.db.sql(''' Select
-		pr.name, pr.supplier
-		FROM `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri
-		WHERE
-			pri.parent = pr.name
-			AND pri.is_fixed_asset=1
-			AND pr.docstatus=1
-			AND pr.is_return=0'''))
-
-def get_purchase_invoice_supplier_map():
-	return frappe._dict(frappe.db.sql(''' Select
-		pi.name, pi.supplier
-		FROM `tabPurchase Invoice` pi, `tabPurchase Invoice Item` pii
-		WHERE
-			pii.parent = pi.name
-			AND pii.is_fixed_asset=1
-			AND pi.docstatus=1
-			AND pi.is_return=0'''))
-
 def get_columns(filters):
 	return [
+		{
+			"label": _("Asset Category"),
+			"fieldtype": "Link",
+			"fieldname": "asset_category",
+			"options": "Asset Category",
+			"width": 120
+		},
 		{
 			"label": _("Asset Id"),
 			"fieldtype": "Link",
 			"fieldname": "asset_id",
 			"options": "Asset",
-			"width": 60
+			"width": 100
 		},
 		{
 			"label": _("Asset Name"),
 			"fieldtype": "Data",
 			"fieldname": "asset_name",
 			"width": 140
-		},
-		{
-			"label": _("Asset Category"),
-			"fieldtype": "Link",
-			"fieldname": "asset_category",
-			"options": "Asset Category",
-			"width": 100
-		},
-		{
-			"label": _("Status"),
-			"fieldtype": "Data",
-			"fieldname": "status",
-			"width": 80
 		},
 		{
 			"label": _("Purchase Date"),
@@ -176,13 +114,6 @@ def get_columns(filters):
 			"width": 100
 		},
 		{
-			"label": _("Asset Value"),
-			"fieldname": "asset_value",
-			"fieldtype": "Currency",
-			"options": "company:currency",
-			"width": 100
-		},
-		{
 			"label": _("Opening Accumulated Depreciation"),
 			"fieldname": "opening_accumulated_depreciation",
 			"fieldtype": "Currency",
@@ -197,30 +128,10 @@ def get_columns(filters):
 			"width": 100
 		},
 		{
-			"label": _("Cost Center"),
-			"fieldtype": "Link",
-			"fieldname": "cost_center",
-			"options": "Cost Center",
+			"label": _("Asset Value"),
+			"fieldname": "asset_value",
+			"fieldtype": "Currency",
+			"options": "company:currency",
 			"width": 100
-		},
-		{
-			"label": _("Department"),
-			"fieldtype": "Link",
-			"fieldname": "department",
-			"options": "Department",
-			"width": 100
-		},
-		{
-			"label": _("Vendor Name"),
-			"fieldtype": "Data",
-			"fieldname": "vendor_name",
-			"width": 100
-		},
-		{
-			"label": _("Location"),
-			"fieldtype": "Link",
-			"fieldname": "location",
-			"options": "Location",
-			"width": 100
-		},
+		}
 	]
