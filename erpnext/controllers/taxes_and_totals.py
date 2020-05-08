@@ -289,7 +289,7 @@ class calculate_taxes_and_totals(object):
 		# if tax/charges is for deduction, multiply by -1
 		if getattr(tax, "category", None):
 			tax_amount = 0.0 if (tax.category == "Valuation") else tax_amount
-			if self.doc.doctype in ["Purchase Order", "Purchase Invoice", "Purchase Receipt", "Supplier Quotation"]:
+			if self.doc.doctype in ["Purchase Order", "Purchase Invoice", "Purchase Receipt", "Supplier Quotation", "Quotation", "Sales Order", "Sales Invoice", "Delivery Note"]:
 				tax_amount *= -1.0 if (tax.add_deduct_tax == "Deduct") else 1.0
 		return tax_amount
 
