@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Fixed Asset Register"] = {
+frappe.query_reports["Location-wise Asset Value"] = {
 	"filters": [
 		{
 			fieldname:"company",
@@ -10,14 +10,6 @@ frappe.query_reports["Fixed Asset Register"] = {
 			fieldtype: "Link",
 			options: "Company",
 			default: frappe.defaults.get_user_default("Company"),
-			reqd: 1
-		},
-		{
-			fieldname:"status",
-			label: __("Status"),
-			fieldtype: "Select",
-			options: "In Location\nDisposed",
-			default: 'In Location',
 			reqd: 1
 		},
 		{
@@ -29,12 +21,6 @@ frappe.query_reports["Fixed Asset Register"] = {
 			fieldname:"available_for_use_date",
 			label: __("Available For Use Date"),
 			fieldtype: "Date"
-		},
-		{
-			fieldname:"asset_category",
-			label: __("Asset Category"),
-			fieldtype: "Link",
-			options: "Asset Category"
 		},
 		{
 			fieldname:"cost_center",
