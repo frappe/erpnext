@@ -164,9 +164,11 @@ class Customer(TransactionBase):
 				contact.phone = lead.phone
 				contact.mobile_no = lead.mobile_no
 				contact.is_primary_contact = 1
-				contact.append('email_ids', dict(email_id=lead.email_id, is_primary=1))
-				contact.append('phone_nos', dict(phone=lead.mobile_no, is_primary_mobile_no=1))
 				contact.append('links', dict(link_doctype='Customer', link_name=self.name))
+				if lead.email_id:
+					contact.append('email_ids', dict(email_id=lead.email_id, is_primary=1))
+				if lead.mobile_no:
+					contact.append('phone_nos', dict(phone=lead.mobile_no, is_primary_mobile_no=1))
 				contact.flags.ignore_permissions = self.flags.ignore_permissions
 				contact.autoname()
 				if not frappe.db.exists("Contact", contact.name):
