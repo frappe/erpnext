@@ -162,7 +162,7 @@ def get_data_by_territory(filters, common_columns):
     return columns, data, None, None, None, 1
 
 def update_groups(node, data, root_node, territory_dict):
-    ''' Adds values of child territories to parent node except root '''
+    ''' Adds values of child territories to parent node except root. '''
     parent_node = territory_dict[node]['parent']
     if parent_node != root_node and parent_node:
         node_data = [x for x in data if x['territory'] == node][0]
@@ -175,7 +175,7 @@ def update_groups(node, data, root_node, territory_dict):
         return data
 
 def get_customer_stats(filters, tree_view=False):
-    ''' Calculates number of new and repeated customers '''
+    ''' Calculates number of new and repeated customers. '''
     company_condition = ''
     if filters.get('company'):
         company_condition = ' and company=%(company)s'
