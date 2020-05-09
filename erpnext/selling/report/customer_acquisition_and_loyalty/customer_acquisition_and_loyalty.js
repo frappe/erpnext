@@ -4,11 +4,12 @@
 frappe.query_reports["Customer Acquisition and Loyalty"] = {
 	"filters": [
 		{
-			"fieldname":"view_type",
+			"fieldname": "view_type",
 			"label": __("View Type"),
 			"fieldtype": "Select",
-			"default": "Time Series",
-			"options": ["Time Series", "Territory Tree"]
+			"options": ["Monthly", "Territory Wise"],
+			"default": "Monthly",
+			"reqd": 1
 		},
 		{
 			"fieldname":"company",
