@@ -109,6 +109,17 @@ def get_booking_dates(doc, item, posting_date=None):
 		order by posting_date desc limit 1
 	''', (doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name), as_dict=True)
 
+	prev_gl_via_je = frappe.db.sql('''
+		SELECT name, posting_date FROM `tabGL Entry` WHERE company=%s and account=%s and
+		voucher_type='Journal Entry' and against_voucher_type=%s and against_voucher=%s
+		and voucher_detail_no=%s order by posting_date desc limit 1
+	''', (doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name), as_dict=True, debug=1)
+
+	if prev_gl_via_je:
+		if (not prev_gl_entry) or (prev_gl_entry and
+			prev_gl_entry[0].posting_date < prev_gl_via_je[0].posting_date):
+			prev_gl_entry = prev_gl_via_je
+
 	if prev_gl_entry:
 		start_date = getdate(add_days(prev_gl_entry[0].posting_date, 1))
 	else:
@@ -166,7 +177,7 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 	enable_check = "enable_deferred_revenue" \
 		if doc.doctype=="Sales Invoice" else "enable_deferred_expense"
 
-	def _book_deferred_revenue_or_expense(item):
+	def _book_deferred_revenue_or_expense(item, via_je, submit_je):
 		start_date, end_date, last_gl_entry = get_booking_dates(doc, item, posting_date=posting_date)
 		if not (start_date and end_date): return
 
@@ -184,20 +195,29 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 		amount, base_amount = calculate_amount(doc, item, last_gl_entry,
 			total_days, total_booking_days, account_currency)
 
-		make_gl_entries(doc, credit_account, debit_account, against,
-			amount, base_amount, end_date, project, account_currency, item.cost_center, item.name, deferred_process)
+		if via_je == 'Yes':
+			book_revenue_via_journal_entry(doc, credit_account, debit_account, against, amount,
+				base_amount, end_date, project, account_currency, item.cost_center, item.name, deferred_process, submit_je)
+		else:
+			make_gl_entries(doc, credit_account, debit_account, against,
+				amount, base_amount, end_date, project, account_currency, item.cost_center, item.name, deferred_process)
 
 		# Returned in case of any errors because it tries to submit the same record again and again in case of errors
 		if frappe.flags.deferred_accounting_error:
 			return
 
+		print(end_date, posting_date, last_gl_entry)
 		if getdate(end_date) < getdate(posting_date) and not last_gl_entry:
-			_book_deferred_revenue_or_expense(item)
+			return
+			_book_deferred_revenue_or_expense(item, via_je, submit_je)
 
+	via_je = frappe.db.get_singles_value('Accounts Settings', 'book_deferred_entries_via_journal_entry')
+	submit_je = frappe.db.get_singles_value('Accounts Settings', 'submit_journal_entries')
+	print("########", via_je, submit_je)
 
 	for item in doc.get('items'):
 		if item.get(enable_check):
-			_book_deferred_revenue_or_expense(item)
+			_book_deferred_revenue_or_expense(item, via_je, submit_je)
 
 def process_deferred_accounting(posting_date=today()):
 	''' Converts deferred income/expense into income/expense
@@ -278,3 +298,69 @@ def send_mail(deferred_process):
 		and submit manually after resolving errors
 	""").format(get_link_to_form('Process Deferred Accounting', deferred_process))
 	sendmail_to_system_managers(title, content)
+
+def book_revenue_via_journal_entry(doc, credit_account, debit_account, against,
+	amount, base_amount, posting_date, project, account_currency, cost_center, voucher_detail_no,
+	deferred_process=None, submit='No'):
+
+	if amount == 0: return
+
+	journal_entry = frappe.new_doc('Journal Entry')
+	journal_entry.posting_date = posting_date
+	journal_entry.company = doc.company
+
+	journal_entry.append('accounts', {
+		'account': credit_account,
+		'credit': base_amount,
+		'credit_in_account_currency': amount,
+		'party_type': 'Customer' if doc.doctype == 'Sales Invoice' else 'Supplier',
+		'party': against,
+		'account_currency': account_currency,
+		'reference_name': doc.name,
+		'reference_type': doc.doctype,
+		'reference_detail_no': voucher_detail_no,
+		'cost_center': cost_center,
+		'project': project,
+	})
+
+	journal_entry.append('accounts', {
+		'account': debit_account,
+		'debit': base_amount,
+		'debit_in_account_currency': amount,
+		'party_type': 'Customer' if doc.doctype == 'Sales Invoice' else 'Supplier',
+		'party': against,
+		'account_currency': account_currency,
+		'reference_name': doc.name,
+		'reference_type': doc.doctype,
+		'reference_detail_no': voucher_detail_no,
+		'cost_center': cost_center,
+		'project': project,
+	})
+
+	try:
+		journal_entry.save()
+
+		if submit == 'Yes':
+			journal_entry.submit()
+	except:
+		frappe.db.rollback()
+		traceback = frappe.get_traceback()
+		frappe.log_error(message=traceback)
+
+		frappe.flags.deferred_accounting_error = True
+
+def get_deferred_booking_accounts(doctype, voucher_detail_no, dr_or_cr):
+
+	if doctype == 'Sales Invoice':
+		credit_account, debit_account = frappe.db.get_value('Sales Invoice Item', {'name': voucher_detail_no},
+			['income_account', 'deferred_revenue_account'])
+	else:
+		credit_account, debit_account = frappe.db.get_value('Purchase Invoice Item', {'name': voucher_detail_no},
+			['deferred_expense_account', 'expense_acccount'])
+
+	if dr_or_cr == 'Debit':
+		return debit_account
+	else:
+		return credit_account
+
+

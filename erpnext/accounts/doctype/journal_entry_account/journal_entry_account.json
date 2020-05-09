@@ -32,6 +32,7 @@
   "reference_type",
   "reference_name",
   "reference_due_date",
+  "reference_detail_no",
   "project",
   "col_break3",
   "is_advance",
@@ -268,12 +269,18 @@
    "fieldtype": "Link",
    "label": "Bank Account",
    "options": "Bank Account"
+  },
+  {
+   "fieldname": "reference_detail_no",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Reference Detail No"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-04-25 01:47:49.060128",
+ "modified": "2020-05-09 13:51:47.102617",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",

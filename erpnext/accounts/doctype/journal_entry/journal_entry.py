@@ -10,6 +10,7 @@ from erpnext.accounts.utils import get_balance_on, get_account_currency
 from erpnext.accounts.party import get_party_account
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import get_party_account_based_on_invoice_discounting
+from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
 
 from six import string_types, iteritems
 
@@ -277,10 +278,16 @@ class JournalEntry(AccountsController):
 
 				# check if party and account match
 				if d.reference_type in ("Sales Invoice", "Purchase Invoice"):
-					if d.reference_type == "Sales Invoice":
-						party_account = get_party_account_based_on_invoice_discounting(d.reference_name) or against_voucher[1]
+					if d.reference_detail_no:
+						debit_or_credit = 'Debit' if d.debit else 'Credit'
+						party_account = get_deferred_booking_accounts(d.reference_type, d.reference_detail_no,
+							debit_or_credit)
 					else:
-						party_account = against_voucher[1]
+						if d.reference_type == "Sales Invoice":
+							party_account = get_party_account_based_on_invoice_discounting(d.reference_name) or against_voucher[1]
+						else:
+							party_account = against_voucher[1]
+
 					if (against_voucher[0] != d.party or party_account != d.account):
 						frappe.throw(_("Row {0}: Party / Account does not match with {1} / {2} in {3} {4}")
 							.format(d.idx, field_dict.get(d.reference_type)[0], field_dict.get(d.reference_type)[1],
@@ -513,6 +520,7 @@ class JournalEntry(AccountsController):
 						"against_voucher_type": d.reference_type,
 						"against_voucher": d.reference_name,
 						"remarks": remarks,
+						"voucher_detail_no": d.reference_detail_no,
 						"cost_center": d.cost_center,
 						"project": d.project,
 						"finance_book": self.finance_book

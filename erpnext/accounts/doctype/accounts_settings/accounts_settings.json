@@ -22,7 +22,11 @@
   "allow_cost_center_in_entry_of_bs_account",
   "add_taxes_from_item_tax_template",
   "automatically_fetch_payment_terms",
+  "deferred_accounting_settings_section",
   "automatically_process_deferred_accounting_entry",
+  "column_break_18",
+  "book_deferred_entries_via_journal_entry",
+  "submit_journal_entries",
   "print_settings",
   "show_inclusive_tax_in_print",
   "column_break_12",
@@ -189,13 +193,40 @@
    "fieldname": "automatically_process_deferred_accounting_entry",
    "fieldtype": "Check",
    "label": "Automatically Process Deferred Accounting Entry"
+  },
+  {
+   "fieldname": "deferred_accounting_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Deferred Accounting Settings"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "No",
+   "depends_on": "automatically_process_deferred_accounting_entry",
+   "description": "If this is set as 'No' direct GL Entries will be created to book Deferred Revenue/Expense",
+   "fieldname": "book_deferred_entries_via_journal_entry",
+   "fieldtype": "Select",
+   "label": "Book Deferred Entries Via Journal Entry",
+   "options": "No\nYes"
+  },
+  {
+   "default": "No",
+   "depends_on": "eval:doc.book_deferred_entries_via_journal_entry == 'Yes'",
+   "description": "If this is set as 'No' Journal Entries will be saved in a Draft state and will have to be submitted manuallly",
+   "fieldname": "submit_journal_entries",
+   "fieldtype": "Select",
+   "label": "Submit Journal Entries",
+   "options": "No\nYes"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2019-12-19 16:58:17.395595",
+ "modified": "2020-05-09 13:15:07.284683",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",
