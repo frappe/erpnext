@@ -3,8 +3,6 @@
 
 from __future__ import unicode_literals
 import frappe
-
-
 from frappe.utils import flt
 from frappe import _
 
@@ -14,6 +12,9 @@ class Territory(NestedSet):
 	nsm_parent_field = 'parent_territory'
 
 	def validate(self):
+		if frappe.db.sql("SELECT COUNT(name) FROM `tabTerritory` WHERE parent IS NULL")[0][0] > 1:
+			frappe.throw('Only one Root Territory is allowed, please select a Parent Territory!')
+
 		for d in self.get('targets') or []:
 			if not flt(d.target_qty) and not flt(d.target_amount):
 				frappe.throw(_("Either target qty or target amount is mandatory"))
