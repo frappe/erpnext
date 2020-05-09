@@ -39,6 +39,6 @@ frappe.query_reports["Customer Acquisition and Loyalty"] = {
 		if (data && data.bold) {
 			value = value.bold();
 		}
-		return value
+		return value;
 	}
 }

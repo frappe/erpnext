@@ -12,8 +12,6 @@ class Territory(NestedSet):
 	nsm_parent_field = 'parent_territory'
 
 	def validate(self):
-		if frappe.db.sql("SELECT COUNT(name) FROM `tabTerritory` WHERE parent IS NULL")[0][0] > 1:
-			frappe.throw('Only one Root Territory is allowed, please select a Parent Territory!')
 
 		for d in self.get('targets') or []:
 			if not flt(d.target_qty) and not flt(d.target_amount):
