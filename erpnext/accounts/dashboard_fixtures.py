@@ -107,6 +107,10 @@ def get_charts():
 			}
 		]
 
+def get_account(account_type, company):
+	accounts = frappe.get_list("Account", filters={"account_type": account_type, "company": company})
+	if accounts:
+		return accounts[0].name
 
 def get_company_for_dashboards():
 	company = frappe.defaults.get_defaults().company
