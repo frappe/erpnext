@@ -143,7 +143,7 @@ def get_data_by_territory(filters, common_columns):
             'new_customer_revenue': new[1],
             'repeat_customer_revenue': repeat[1],
             'total_revenue': new[1] + repeat[1],
-            'bold': 0 if condition else 1
+            'bold': 0 if indent else 1
         }
         data.append(temp)
     node_list = [x for x in territory_dict.keys() if territory_dict[x]['is_group'] == 0]
