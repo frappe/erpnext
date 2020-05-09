@@ -113,7 +113,7 @@ class TallyMigration(Document):
 			try:
 				coa = traverse({}, children, roots, roots, group_set)
 			except RecursionError:
-				self.log()
+				self.log(_("Error occured while parsing Chart of Accounts: Please make sure that no two accounts have the same name"))
 
 			for account in coa:
 				coa[account]["root_type"] = root_type_map[account]
