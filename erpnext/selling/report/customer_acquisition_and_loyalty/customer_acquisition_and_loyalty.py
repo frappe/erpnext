@@ -52,7 +52,7 @@ def execute(filters=None):
             'width': 150
         }
     ]
-    if filters.get('view_type') == 'Territory Tree':
+    if filters.get('view_type') == 'Territory Wise':
         return get_data_by_territory(filters, common_columns)
     else:
         return get_data_by_time(filters, common_columns)
