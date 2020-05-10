@@ -28,7 +28,7 @@ erpnext.PointOfSale.ItemCart = class {
 
     init_customer_selector() {
 		this.$component.append(
-            `<div class="customer-section rounded border flex flex-col m-8 mb-0 pr-4 pl-4"></div>`
+            `<div class="customer-section rounded flex flex-col m-8 mb-0"></div>`
         )
 		this.$customer_section = this.$component.find('.customer-section');
 	}
@@ -46,9 +46,9 @@ erpnext.PointOfSale.ItemCart = class {
 			`<div class="cart-container flex flex-col items-center rounded flex-1 relative">
 				<div class="absolute flex flex-col p-8 pt-0 w-full h-full">
 					<div class="flex text-grey cart-header pt-2 pb-2 p-4 mt-2 mb-2 w-full f-shrink-0">
-						<div class="ml-2 mr-6">Qty</div>
 						<div class="flex-1">Item</div>
-						<div class="ml-auto mr-1">Rate</div>
+						<div class="mr-4">Qty</div>
+						<div class="rate-list-header mr-1 text-right">Amount</div>
 					</div>
 					<div class="cart-items-section flex flex-col flex-1 scroll-y rounded w-full"></div>
 					<div class="cart-totals-section flex flex-col mt-4 border border-grey rounded w-full f-shrink-0"></div>
@@ -131,7 +131,7 @@ erpnext.PointOfSale.ItemCart = class {
 				[ '', '', '', 'col-span-2' ],
 				[ '', '', '', 'col-span-2' ],
 				[ '', '', '', 'col-span-2' ],
-				[ '', '', '', 'col-span-2 text-danger' ]
+				[ '', '', '', 'col-span-2 text-bold text-danger' ]
 			],
 			fieldnames_map: { 'Quantity': 'qty', 'Discount': 'discount_percentage' }
 		})
@@ -144,9 +144,9 @@ erpnext.PointOfSale.ItemCart = class {
 		)
 
 		this.$numpad_section.append(
-			`<div class="numpad-btn flex items-center justify-center h-16 text-center text-md no-select pointer 
-				rounded bg-primary text-white text-bold mt-4" data-button-value="done">
-				Done
+			`<div class="numpad-btn checkout-btn flex items-center justify-center h-16 pr-8 pl-8 bg-primary
+				text-center text-white no-select pointer rounded text-md text-bold mt-4" data-button-value="checkout">
+					Checkout
 			</div>`
 		)
     }
@@ -185,7 +185,7 @@ erpnext.PointOfSale.ItemCart = class {
 			this.numpad_value = '';
 		});
 
-		this.$totals_section.on('click', '.checkout-btn', function() {
+		this.$component.on('click', '.checkout-btn', function() {
 			if (!$(this).hasClass('bg-primary')) return;
 			
 			me.events.checkout();
@@ -428,6 +428,7 @@ erpnext.PointOfSale.ItemCart = class {
     
     render_cart_item(item_data, $item_to_update) {
 		const currency = this.events.get_frm().doc.currency;
+		const me = this;
 		
         if (!$item_to_update.length) {
             this.$cart_items_wrapper.append(
@@ -439,28 +440,54 @@ erpnext.PointOfSale.ItemCart = class {
         }
 
 		$item_to_update.html(
-			`<div class="flex w-10 h-10 rounded bg-light-grey mr-4 items-center justify-center font-bold f-shrink-0">
-                <span>${item_data.qty || 0}</span>
-            </div>
-            <div class="flex flex-col flex-1 f-shrink-1 overflow-hidden whitespace-nowrap">
+			`<div class="flex flex-col flex-1 f-shrink-1 overflow-hidden whitespace-nowrap">
                 <div class="text-md text-dark-grey text-bold">
                     ${item_data.item_name}
                 </div>
                 ${get_description_html()}
             </div>
-            <div class="flex flex-col f-shrink-0 ml-4 text-right">
                 ${get_rate_discount_html()}
             </div>`
 		)
-		
+
+		set_dynamic_rate_header_width();
 		this.scroll_to_item($item_to_update);
+
+		function set_dynamic_rate_header_width() {
+			const rate_cols = Array.from(me.$cart_items_wrapper.find(".rate-col"));
+			me.$cart_header.find(".rate-list-header").css("width", "");
+			me.$cart_items_wrapper.find(".rate-col").css("width", "");
+			const max_width = rate_cols.reduce((max_width, elm) => {
+				if ($(elm).width() > max_width)
+					max_width = $(elm).width();
+				return max_width;
+			}, 0);
+			me.$cart_header.find(".rate-list-header").css("width", max_width + 1);
+			me.$cart_items_wrapper.find(".rate-col").css("width", max_width + 1);
+		}
         
 		function get_rate_discount_html() {
-			if (item_data.rate && item_data.price_list_rate && item_data.rate !== item_data.price_list_rate) {
-				return `<div class="text-md text-dark-grey text-bold">${format_currency(item_data.rate, currency)}</div>
-						<div class="text-grey line-through">${format_currency(item_data.price_list_rate, currency)}</div>`
+			if (item_data.rate && item_data.amount && item_data.rate !== item_data.amount) {
+				return `
+					<div class="flex f-shrink-0 ml-4 items-center">
+						<div class="flex w-8 h-8 rounded bg-light-grey mr-4 items-center justify-center font-bold f-shrink-0">
+							<span>${item_data.qty || 0}</span>
+						</div>
+						<div class="rate-col flex flex-col f-shrink-0 text-right">
+							<div class="text-md text-dark-grey text-bold">${format_currency(item_data.amount, currency)}</div>
+							<div class="text-md-0 text-dark-grey">${format_currency(item_data.rate, currency)}</div>
+						</div>
+					</div>`
 			} else {
-				return `<div class="text-md text-dark-grey text-bold">${format_currency(item_data.price_list_rate || item_data.rate, currency)}</div>`
+				return `
+					<div class="flex f-shrink-0 ml-4 text-right">
+						<div class="flex w-8 h-8 rounded bg-light-grey mr-4 items-center justify-center font-bold f-shrink-0">
+							<span>${item_data.qty || 0}</span>
+						</div>
+						<div class="rate-col flex flex-col f-shrink-0 text-right">
+							<div class="text-md text-dark-grey text-bold">${format_currency(item_data.rate, currency)}</div>
+						</div>
+					</div>`
 			}
 		}
 
@@ -533,7 +560,7 @@ erpnext.PointOfSale.ItemCart = class {
 			}
             this.numpad_value = '';
             
-		} else if (current_action === 'done') {
+		} else if (current_action === 'checkout') {
 			this.prev_action = undefined;
 			this.toggle_item_highlight();
 			this.events.numpad_event(undefined, current_action);

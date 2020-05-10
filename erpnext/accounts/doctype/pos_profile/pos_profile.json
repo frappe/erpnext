@@ -55,7 +55,8 @@
   "tax_category",
   "apply_discount_on",
   "accounting_dimensions_section",
-  "cost_center"
+  "cost_center",
+  "dimension_col_break"
  ],
  "fields": [
   {
@@ -111,7 +112,8 @@
    "label": "Warehouse",
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "reqd": 1
   },
   {
    "fieldname": "campaign",
@@ -185,12 +187,13 @@
   {
    "fieldname": "section_break_11",
    "fieldtype": "Section Break",
-   "label": "Payment Methods"
+   "label": "Mode of Payment"
   },
   {
    "fieldname": "payments",
    "fieldtype": "Table",
-   "options": "POS Payment Method",
+   "label": "Sales Invoice Payment",
+   "options": "Sales Invoice Payment",
    "reqd": 1
   },
   {
@@ -259,7 +262,6 @@
    "options": "Print Heading"
   },
   {
-   "collapsible": 1,
    "fieldname": "offline_pos_section",
    "fieldtype": "Section Break",
    "label": "Offline POS Settings"
@@ -386,12 +388,16 @@
    "fieldtype": "Link",
    "label": "Tax Category",
    "options": "Tax Category"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "links": [],
- "modified": "2020-04-30 14:38:43.997545",
+ "modified": "2020-05-10 14:48:29.583041",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

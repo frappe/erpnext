@@ -179,6 +179,9 @@ erpnext.PointOfSale.ItemSelector = class {
 
             if (this.items.length == 1) {
                 this.$items_container.find(".item-wrapper").click();
+                frappe.utils.play_sound("submit");
+                this.barcode_scanned = false;
+                $(this.search_field.$input[0]).val("").trigger("input");
             } else if (this.items.length == 0 && this.barcode_scanned) {
                 frappe.show_alert({
                     message: __("No items found. Scan barcode again."),

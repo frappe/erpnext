@@ -24,9 +24,12 @@ erpnext.PointOfSale.ItemDetails = class {
     init_child_components() {
 		this.$component.html(
 			`<div class="details-container flex flex-col p-8 rounded w-full">
+				<div class="flex justify-between mb-2">
+					<div class="text-grey">ITEM DETAILS</div>
+					<div class="close-btn text-grey hover-underline pointer no-select">Close</div>
+				</div>
 				<div class="item-defaults flex">
 					<div class="flex-1 flex flex-col justify-end mr-4 mb-2">
-						<div class="text-grey mb-auto">ITEM DETAILS</div>
 						<div class="item-name text-xl font-weight-450"></div>
 						<div class="item-description text-md-0 text-grey-200"></div>
 						<div class="item-price text-xl font-bold"></div>
@@ -160,7 +163,10 @@ erpnext.PointOfSale.ItemDetails = class {
 				render_input: true,
 			})
 			this[`${fieldname}_control`].set_value(item[fieldname]);
-		})
+		});
+
+		this.item_stock_map = this.events.get_item_stock_map();
+		this[`actual_qty_control`].set_value(this.item_stock_map[item.item_code]);
 
 		this.make_auto_serial_selection_btn(item);
 
@@ -276,7 +282,11 @@ erpnext.PointOfSale.ItemDetails = class {
     bind_events() {
 		this.bind_auto_serial_fetch_event();
 		this.bind_fields_to_numpad_fields();
-    }
+
+		this.$component.on('click', '.close-btn', () => {
+			this.events.close_item_details();
+		});
+	}
 
     bind_fields_to_numpad_fields() {
 		const me = this;

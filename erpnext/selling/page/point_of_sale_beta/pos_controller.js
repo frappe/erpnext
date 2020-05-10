@@ -133,6 +133,8 @@ erpnext.PointOfSale.Controller = class {
 			this.cart.make_customer_selector();
 		});
 
+		this.item_stock_map = {};
+
 		this.make_app();
 	}
 
@@ -315,7 +317,13 @@ erpnext.PointOfSale.Controller = class {
 						});
 					})
 				},
-				remove_item_from_cart: () => this.remove_item_from_cart()
+				remove_item_from_cart: () => this.remove_item_from_cart(),
+				get_item_stock_map: () => this.item_stock_map,
+				close_item_details: () => {
+					this.item_details.toggle_item_details_section(undefined);
+					this.cart.prev_action = undefined;
+					this.cart.toggle_item_highlight();
+				}
 			}
 		});
 	}
@@ -631,11 +639,12 @@ erpnext.PointOfSale.Controller = class {
 			// return available_qty;
 		}
 		frappe.dom.freeze();
+		this.item_stock_map[item_row.item_code] = available_qty;
 		// return item_row.qty;
 	}
 
 	update_item_field(value, field_or_action) {
-		if (field_or_action === 'done') {
+		if (field_or_action === 'checkout') {
 			this.item_details.toggle_item_details_section(undefined);
 		} else if (field_or_action === 'remove') {
 			this.remove_item_from_cart();
