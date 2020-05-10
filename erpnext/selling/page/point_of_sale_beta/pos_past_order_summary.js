@@ -21,9 +21,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
                     </div>
                 </div>
                 <div class="summary-wrapper d-none flex-1 w-66 text-dark-grey relative">
-                    <div class="summary-container absolute flex flex-col pt-16 pb-16 pr-8 pl-8 w-full h-full">
-
-                    </div>
+                    <div class="summary-container absolute flex flex-col pt-16 pb-16 pr-8 pl-8 w-full h-full"></div>
                 </div>
             </section>`
         )
@@ -96,7 +94,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
             title: 'Email Receipt',
             fields: [
                 {fieldname:'email_id', fieldtype:'Data', options: 'Email', label:'Email ID'},
-                {fieldname:'remarks', fieldtype:'Text', label:'Remarks (if any)'}
+                // {fieldname:'remarks', fieldtype:'Text', label:'Remarks (if any)'}
             ],
             primary_action: () => {
                 this.send_email();
@@ -246,21 +244,21 @@ erpnext.PointOfSale.PastOrderSummary = class {
             this.events.process_return(this.doc.name);
             this.toggle_component(false);
             this.$component.find('.no-summary-placeholder').removeClass('d-none');
-            this.$summary_container.addClass('d-none');
+            this.$summary_wrapper.addClass('d-none');
         });
 
         this.$summary_container.on('click', '.edit-btn', () => {
             this.events.edit_order(this.doc.name);
             this.toggle_component(false);
             this.$component.find('.no-summary-placeholder').removeClass('d-none');
-            this.$summary_container.addClass('d-none');
+            this.$summary_wrapper.addClass('d-none');
         });
 
         this.$summary_container.on('click', '.new-btn', () => {
             this.events.new_order();
             this.toggle_component(false);
             this.$component.find('.no-summary-placeholder').removeClass('d-none');
-            this.$summary_container.addClass('d-none');
+            this.$summary_wrapper.addClass('d-none');
         });
 
         this.$summary_container.on('click', '.email-btn', () => {
@@ -369,6 +367,8 @@ erpnext.PointOfSale.PastOrderSummary = class {
     }
 
     load_summary_of(doc, after_submission=false) {
+        this.$summary_wrapper.removeClass("d-none");
+        
         after_submission ?
             this.switch_to_post_submit_summary() : this.switch_to_recent_invoice_summary();
 

@@ -272,7 +272,7 @@ erpnext.PointOfSale.Payment = class {
 
 		this.render_loyalty_points_payment_mode();
 		
-		const shortcuts = this.get_cash_shortcuts(grand_total);
+		const shortcuts = this.get_cash_shortcuts(flt(grand_total));
 
 		this.$payment_modes.find('[data-payment-type="Cash"]').find('.mode-of-payment-control').after(
 			`<div class="shortcuts grid grid-cols-3 gap-2 flex-1 text-center text-md-0 mb-2 d-none">
@@ -289,7 +289,7 @@ erpnext.PointOfSale.Payment = class {
 
 	get_cash_shortcuts(grand_total) {
 		let steps = [1, 5, 10];
-		const digits = String(grand_total).length;
+		const digits = String(Math.round(grand_total)).length;
 
 		steps = steps.map(x => x * (10 ** (digits - 2)));
 

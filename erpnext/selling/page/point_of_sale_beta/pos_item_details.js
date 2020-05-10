@@ -60,7 +60,8 @@ erpnext.PointOfSale.ItemDetails = class {
 		if (this.show_details) {
             this.doctype = item.doctype;
 			this.item_meta = frappe.get_meta(this.doctype);
-            this.name = item.name;
+			this.name = item.name;
+			this.item_row = item;
             this.currency = this.events.get_frm().doc.currency;
             
             this.current_item = { item_code: item.item_code, batch_no: item.batch_no };
@@ -185,6 +186,11 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.$form_container.append(
 				`<div class="grid-filler no-select"></div>`
 			)
+			if (!item.has_batch_no) {
+				this.$form_container.append(
+					`<div class="grid-filler no-select"></div>`
+				)	
+			}
 			this.$form_container.append(
 				`<div class="auto-fetch-btn bg-grey-100 border border-grey text-bold rounded pt-3 pb-3 pl-6 pr-8 text-grey pointer no-select mt-2"
 						style="height: 3.3rem">
@@ -234,6 +240,15 @@ erpnext.PointOfSale.ItemDetails = class {
 
 		if (this.batch_no_control) {
 			this.batch_no_control.df.reqd = 1;
+			this.batch_no_control.df.get_query = () => {
+				return {
+					query: 'erpnext.controllers.queries.get_batch_no',
+					filters: {
+						item_code: me.item_row.item_code,
+						warehouse: me.item_row.warehouse
+					}
+				}
+			};
 			this.batch_no_control.df.onchange = function() {
 				me.events.set_batch_in_current_cart_item(this.value);
                 me.events.form_updated(me.doctype, me.name, 'batch_no', this.value);

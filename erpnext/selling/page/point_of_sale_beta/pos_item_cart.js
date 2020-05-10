@@ -176,7 +176,7 @@ erpnext.PointOfSale.ItemCart = class {
 			if (!payment_section_hidden) {
 				// payment section is visible
 				// edit cart first and then open item details section
-				edit_cart_btn.click();
+				me.$totals_section.find(".edit-cart-btn").click();
 			}
 
 			const item_code = unescape($cart_item.attr('data-item-code'));
@@ -457,13 +457,17 @@ erpnext.PointOfSale.ItemCart = class {
 			const rate_cols = Array.from(me.$cart_items_wrapper.find(".rate-col"));
 			me.$cart_header.find(".rate-list-header").css("width", "");
 			me.$cart_items_wrapper.find(".rate-col").css("width", "");
-			const max_width = rate_cols.reduce((max_width, elm) => {
+			let max_width = rate_cols.reduce((max_width, elm) => {
 				if ($(elm).width() > max_width)
 					max_width = $(elm).width();
 				return max_width;
 			}, 0);
-			me.$cart_header.find(".rate-list-header").css("width", max_width + 1);
-			me.$cart_items_wrapper.find(".rate-col").css("width", max_width + 1);
+
+			max_width += 1;
+			if (max_width == 1) max_width = "";
+
+			me.$cart_header.find(".rate-list-header").css("width", max_width);
+			me.$cart_items_wrapper.find(".rate-col").css("width", max_width);
 		}
         
 		function get_rate_discount_html() {

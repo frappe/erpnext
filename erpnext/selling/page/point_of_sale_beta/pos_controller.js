@@ -537,7 +537,7 @@ erpnext.PointOfSale.Controller = class {
 				field === 'qty' && (value = flt(value));
 
 				if (field === 'qty' && value > 0 && !this.allow_negative_stock)
-					await this.check_stock_availability(item_row, this.frm.doc.set_warehouse);
+					await this.check_stock_availability(item_row, value, this.frm.doc.set_warehouse);
 				
 				if (this.is_current_item_being_edited(item_row) || item_selected_from_selector) {
 					await frappe.model.set_value(item_row.doctype, item_row.name, field, value);
@@ -565,7 +565,7 @@ erpnext.PointOfSale.Controller = class {
 				item_row = this.frm.add_child('items', args);
 
 				if (field === 'qty' && value !== 0 && !this.allow_negative_stock)
-					await this.check_stock_availability(item_row, this.frm.doc.set_warehouse);
+					await this.check_stock_availability(item_row, value, this.frm.doc.set_warehouse);
 
 				await this.trigger_new_item_events(item_row);
 
@@ -618,7 +618,7 @@ erpnext.PointOfSale.Controller = class {
 		await this.frm.script_manager.trigger('qty', item_row.doctype, item_row.name)
 	}
 
-	async check_stock_availability(item_row, warehouse) {
+	async check_stock_availability(item_row, qty_needed, warehouse) {
 		const res = await frappe.call({
 			method: "erpnext.selling.doctype.pos_invoice.pos_invoice.get_stock_availability",
 			args: {
@@ -631,16 +631,18 @@ erpnext.PointOfSale.Controller = class {
 		frappe.dom.unfreeze();
 		if (!(available_qty > 0)) {
 			frappe.model.clear_doc(item_row.doctype, item_row.name);
-			frappe.throw(frappe._(`Item Code: ${item_row.item_code.bold()} is not available under warehouse ${warehouse.bold()}.`))
-		} else if (available_qty < item_row.qty) {
-			frappe.msgprint(frappe._(`Stock quantity not enough for Item Code: ${item_row.item_code.bold()} under warehouse ${warehouse.bold()}. 
-				Available quantity ${available_qty.toString().bold()}.`))
-			this.item_details.qty_control.set_value(available_qty);
-			// return available_qty;
+			frappe.throw(__(`Item Code: ${item_row.item_code.bold()} is not available under warehouse ${warehouse.bold()}.`))
+		} else if (available_qty < qty_needed) {
+			frappe.show_alert({
+				message: __(`Stock quantity not enough for Item Code: ${item_row.item_code.bold()} under warehouse ${warehouse.bold()}. 
+					Available quantity ${available_qty.toString().bold()}.`),
+				indicator: 'orange'
+			})
+			frappe.utils.play_sound("error");
+			this.item_details.qty_control.set_value(flt(available_qty));
 		}
 		frappe.dom.freeze();
 		this.item_stock_map[item_row.item_code] = available_qty;
-		// return item_row.qty;
 	}
 
 	update_item_field(value, field_or_action) {

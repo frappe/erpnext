@@ -36,6 +36,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_item_cost_centers()
 		self.validate_serialised_or_batched_item()
 		self.validate_stock_availablility()
+		self.validate_return_items()
 		self.set_status()
 		if cint(self.is_pos):
 			self.validate_pos()
@@ -102,7 +103,7 @@ class POSInvoice(SalesInvoice):
 					multiple_nos = 's' if len(invalid_serial_nos) > 1 else ''
 					frappe.throw(_("Row #{}: Serial No{}. {} has already been transacted into another POS Invoice. \
 						Please select valid serial no.".format(d.idx, multiple_nos, 
-						frappe.bold(', '.join(invalid_serial_nos)))), title="Not Available")
+						frappe.bold(', '.join(invalid_serial_nos)))), title=_("Not Available"))
 			else:
 				if allow_negative_stock:
 					return
@@ -110,29 +111,37 @@ class POSInvoice(SalesInvoice):
 				available_stock = get_stock_availability(d.item_code, d.warehouse)
 				if not (flt(available_stock) > 0):
 					frappe.throw(_('Row #{}: Item Code: {} is not available under warehouse {}.'
-						.format(d.idx, frappe.bold(d.item_code), frappe.bold(d.warehouse))), title="Not Available")
+						.format(d.idx, frappe.bold(d.item_code), frappe.bold(d.warehouse))), title=_("Not Available"))
 				elif flt(available_stock) < flt(d.qty):
 					frappe.msgprint(_('Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. \
 						Available quantity {}.'.format(d.idx, frappe.bold(d.item_code), 
-						frappe.bold(d.warehouse), frappe.bold(d.qty))), title="Not Available")
+						frappe.bold(d.warehouse), frappe.bold(d.qty))), title=_("Not Available"))
 	
 	def validate_serialised_or_batched_item(self):
 		for d in self.get("items"):
-			serialized = d.has_serial_no
-			batched = d.has_batch_no
-			no_serial_selected = not d.serial_no
-			no_batch_selected = not d.batch_no
+			serialized = d.get("has_serial_no")
+			batched = d.get("has_batch_no")
+			no_serial_selected = not d.get("serial_no")
+			no_batch_selected = not d.get("batch_no")
 
 
 			if serialized and batched and (no_batch_selected or no_serial_selected):
 				frappe.throw(_('Row #{}: Please select a serial no and batch against item: {} or remove it to complete transaction.'
-						.format(d.idx, frappe.bold(d.item_code))), title="Invalid Item")
+						.format(d.idx, frappe.bold(d.item_code))), title=_("Invalid Item"))
 			if serialized and no_serial_selected:
 				frappe.throw(_('Row #{}: No serial number selected against item: {}. Please select one or remove it to complete transaction.'
-						.format(d.idx, frappe.bold(d.item_code))), title="Invalid Item")
+						.format(d.idx, frappe.bold(d.item_code))), title=_("Invalid Item"))
 			if batched and no_batch_selected:
 				frappe.throw(_('Row #{}: No batch selected against item: {}. Please select a batch or remove it to complete transaction.'
-						.format(d.idx, frappe.bold(d.item_code))), title="Invalid Item")
+						.format(d.idx, frappe.bold(d.item_code))), title=_("Invalid Item"))
+	
+	def validate_return_items(self):
+		if not self.get("is_return"): return
+
+		for d in self.get("items"):
+			if d.get("qty") > 0:
+				frappe.throw(_("Row #{}: You cannot add postive quantities in a return invoice. Please remove item {} to complete the return.")
+					.format(d.idx, frappe.bold(d.item_code)), title=_("Invalid Item"))
 
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
