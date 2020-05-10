@@ -7,10 +7,16 @@ import json
 
 
 def get_data():
-	return frappe._dict({
-		"dashboards": get_dashboards(),
-		"charts": get_charts(),
+	data = frappe._dict({
+		"dashboards": [],
+		"charts": []
 	})
+	company = get_company_for_dashboards()
+	if company:
+		company_doc = frappe.get_doc("Company", company)
+		data.dashboards = get_dashboards()
+		data.charts = get_charts(company_doc)
+	return data
 
 def get_dashboards():
 	return [{
@@ -25,16 +31,12 @@ def get_dashboards():
 		]
 	}]
 
-def get_charts():
-	charts = []
-	company_name = get_company_for_dashboards()
-	if company_name:
-		company = frappe.get_doc("Company", company_name)
-		income_account = company.default_income_account or get_account("Income Account", company.name)
-		expense_account = company.default_expense_account or get_account("Expense Account", company.name)
-		bank_account = company.default_bank_account or get_account("Bank", company.name)
+def get_charts(company):
+	income_account = company.default_income_account or get_account("Income Account", company.name)
+	expense_account = company.default_expense_account or get_account("Expense Account", company.name)
+	bank_account = company.default_bank_account or get_account("Bank", company.name)
 
-	charts = [
+	return [
 		{
 			"doctype": "Dashboard Chart",
 			"time_interval": "Quarterly",
@@ -110,8 +112,6 @@ def get_charts():
 			"type": "Bar"
 		}
 	]
-
-	return charts
 
 def get_account(account_type, company):
 	accounts = frappe.get_list("Account", filters={"account_type": account_type, "company": company})
