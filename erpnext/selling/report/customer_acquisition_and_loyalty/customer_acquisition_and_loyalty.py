@@ -14,21 +14,21 @@ def execute(filters=None):
             'fieldname': 'new_customers',
             'fieldtype': 'Int',
             'default': 0,
-            'width': 100
+            'width': 150
         },
         {
             'label': _('Repeat Customers'),
             'fieldname': 'repeat_customers',
             'fieldtype': 'Int',
             'default': 0,
-            'width': 100
+            'width': 150
         },
         {
             'label': _('Total'),
             'fieldname': 'total',
             'fieldtype': 'Int',
             'default': 0,
-            'width': 100
+            'width': 150
         },
         {
             'label': _('New Customer Revenue'),
@@ -52,10 +52,10 @@ def execute(filters=None):
             'width': 150
         }
     ]
-    if filters.get('view_type') == 'Territory Wise':
-        return get_data_by_territory(filters, common_columns)
-    else:
+    if filters.get('view_type') == 'Monthly':
         return get_data_by_time(filters, common_columns)
+    else:
+        return get_data_by_territory(filters, common_columns)
 
 def get_data_by_time(filters, common_columns):
     # key yyyy-mm
