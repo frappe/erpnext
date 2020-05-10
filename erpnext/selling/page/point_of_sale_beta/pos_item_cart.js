@@ -555,6 +555,7 @@ erpnext.PointOfSale.ItemCart = class {
 				indicator: 'red',
 				message: __('Please select a field to edit from numpad')
 			});
+			frappe.utils.play_sound("error");
 			return;
 		}
 		
@@ -563,6 +564,7 @@ erpnext.PointOfSale.ItemCart = class {
 				message: __('Discount cannot be greater than 100%'),
 				indicator: 'orange'
 			});
+			frappe.utils.play_sound("error");
 			this.numpad_value = current_action;
 		}
 
@@ -708,7 +710,8 @@ erpnext.PointOfSale.ItemCart = class {
 							frappe.show_alert({
 								message: __("Customer contact updated successfully."),
 								indicator: 'green'
-							})
+							});
+							frappe.utils.play_sound("submit");
 						}
 					}
 				});

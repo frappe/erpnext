@@ -89,6 +89,7 @@ erpnext.PointOfSale.ItemDetails = class {
 				message: __("Item will be removed since no serial / batch no selected."),
 				indicator: 'orange'
 			});
+			frappe.utils.play_sound("cancel");
 			this.events.remove_item_from_cart();
 		}
 	}

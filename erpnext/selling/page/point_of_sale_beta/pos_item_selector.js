@@ -142,7 +142,17 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
     bind_events() {
-		const me = this;
+        const me = this;
+        onScan.attachTo(document, {
+            onScan: (sScancode) => {
+                if (this.search_field && this.$component.is(':visible')) {
+                    this.search_field.set_focus();
+                    $(this.search_field.$input[0]).val(sScancode).trigger("input");
+                    this.barcode_scanned = true;
+                }
+            }
+        });
+
 		this.$component.on('click', '.item-wrapper', function() {
 			const $item = $(this);
 			const item_code = unescape($item.attr('data-item-code'));
@@ -161,7 +171,24 @@ erpnext.PointOfSale.ItemSelector = class {
 				const search_term = e.target.value;
 				this.filter_items({ search_term });
 			}, 300);
-		});
+        });
+        
+        frappe.ui.keys.on("enter", () => {
+            const selector_is_visible = this.$component.is(':visible');
+            if (!selector_is_visible || this.search_field.get_value() === "") return;
+
+            if (this.items.length == 1) {
+                this.$items_container.find(".item-wrapper").click();
+            } else if (this.items.length == 0 && this.barcode_scanned) {
+                frappe.show_alert({
+                    message: __("No items found. Scan barcode again."),
+                    indicator: 'orange'
+                });
+                frappe.utils.play_sound("error");
+                this.barcode_scanned = false;
+                $(this.search_field.$input[0]).val("").trigger("input");
+            }
+        })
     }
     
     filter_items({ search_term='' }={}) {
@@ -185,8 +212,8 @@ erpnext.PointOfSale.ItemSelector = class {
 					this.search_index[search_term] = items;
 				}
 				this.items = items;
-				this.render_item_list(items);
-			});
+                this.render_item_list(items);
+            });
 	}
     
     resize_selector(minimize) {

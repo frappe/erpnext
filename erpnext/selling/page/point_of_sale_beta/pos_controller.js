@@ -1,3 +1,4 @@
+{% include "erpnext/selling/page/point_of_sale_beta/onScan.js" %}
 {% include "erpnext/selling/page/point_of_sale_beta/pos_item_selector.js" %}
 {% include "erpnext/selling/page/point_of_sale_beta/pos_item_cart.js" %}
 {% include "erpnext/selling/page/point_of_sale_beta/pos_item_details.js" %}
@@ -98,6 +99,7 @@ erpnext.PointOfSale.Controller = class {
 						message: __("Please add Mode of payments and opening balance details."),
 						indicator: 'red'
 					})
+					frappe.utils.play_sound("error");
 					return;
 				}
 				frappe.dom.freeze();
@@ -195,6 +197,7 @@ erpnext.PointOfSale.Controller = class {
 					message:__("There was an error saving the document."), 
 					indicator:'red'
 				});
+				frappe.utils.play_sound("error");
 			}).then(() => {
 				frappe.run_serially([
 					() => frappe.dom.freeze(),
@@ -539,7 +542,8 @@ erpnext.PointOfSale.Controller = class {
 					frappe.show_alert({
 						message: __('You must select a customer before adding an item.'),
 						indicator: 'orange'
-					})
+					});
+					frappe.utils.play_sound("error");
 					return;
 				}
 				item_selected_from_selector && (value = flt(value))
