@@ -22,9 +22,7 @@ def execute(filters=None):
 	else:
 		dimensions = get_cost_centers(filters)
 
-	period_month_ranges = get_period_month_ranges(
-		filters["period"], filters["from_fiscal_year"]
-	)
+	period_month_ranges = get_period_month_ranges(filters["period"], filters["from_fiscal_year"])
 	cam_map = get_dimension_account_month_map(filters)
 
 	data = []
@@ -41,9 +39,7 @@ def execute(filters=None):
 						for month in relevant_months:
 							if monthwise_data.get(year[0]):
 								month_data = monthwise_data.get(year[0]).get(month, {})
-								for i, fieldname in enumerate(
-									["target", "actual", "variance"]
-								):
+								for i, fieldname in enumerate(["target", "actual", "variance"]):
 									value = flt(month_data.get(fieldname))
 									period_data[i] += value
 									totals[i] += value
@@ -67,7 +63,7 @@ def get_columns(filters):
 	columns = [
 		_(filters.get("budget_against"))
 		+ ":Link/%s:150" % (filters.get("budget_against")),
-		_("Account") + ":Link/Account:150",
+		_("Account") + ":Link/Account:150"
 	]
 
 	group_months = False if filters["period"] == "Monthly" else True
@@ -80,7 +76,7 @@ def get_columns(filters):
 				labels = [
 					_("Budget") + " " + str(year[0]),
 					_("Actual ") + " " + str(year[0]),
-					_("Variance ") + " " + str(year[0]),
+					_("Variance ") + " " + str(year[0])
 				]
 				for label in labels:
 					columns.append(label + ":Float:150")
@@ -88,7 +84,7 @@ def get_columns(filters):
 				for label in [
 					_("Budget") + " (%s)" + " " + str(year[0]),
 					_("Actual") + " (%s)" + " " + str(year[0]),
-					_("Variance") + " (%s)" + " " + str(year[0]),
+					_("Variance") + " (%s)" + " " + str(year[0])
 				]:
 					if group_months:
 						label = label % (
@@ -105,7 +101,7 @@ def get_columns(filters):
 		return columns + [
 			_("Total Budget") + ":Float:150",
 			_("Total Actual") + ":Float:150",
-			_("Total Variance") + ":Float:150",
+			_("Total Variance") + ":Float:150"
 		]
 	else:
 		return columns
@@ -126,11 +122,8 @@ def get_cost_centers(filters):
 				where
 					company = %s
 				{order_by}
-			""".format(
-				tab=filters.get("budget_against"), order_by=order_by
-			),
-			filters.get("company"),
-		)
+			""".format(tab=filters.get("budget_against"), order_by=order_by),
+			filters.get("company"))
 	else:
 		return frappe.db.sql_list(
 			"""
@@ -138,10 +131,7 @@ def get_cost_centers(filters):
 					name
 				from
 					`tab{tab}`
-			""".format(
-				tab=filters.get("budget_against")
-			)
-		)  # nosec
+			""".format(tab=filters.get("budget_against")))  # nosec
 
 
 # Get dimension & target details
@@ -149,14 +139,8 @@ def get_dimension_target_details(filters):
 	budget_against = frappe.scrub(filters.get("budget_against"))
 	cond = ""
 	if filters.get("budget_against_filter"):
-		cond += """
-			and
-				b.{budget_against} in (
-					%s
-				)
-		""".format(
-			budget_against=budget_against
-		) % ", ".join(["%s"] * len(filters.get("budget_against_filter")))
+		cond += """ and b.{budget_against} in (%s)""".format(
+			budget_against=budget_against) % ", ".join(["%s"] * len(filters.get("budget_against_filter")))
 
 	return frappe.db.sql(
 		"""
@@ -190,9 +174,7 @@ def get_dimension_target_details(filters):
 				filters.company,
 			]
 			+ filters.get("budget_against_filter")
-		),
-		as_dict=True,
-	)
+		), as_dict=True)
 
 
 # Get target distribution details of accounts of cost center
@@ -213,29 +195,24 @@ def get_target_distribution_details(filters):
 			order by
 				md.fiscal_year
 		""",
-		(filters.from_fiscal_year, filters.to_fiscal_year),
-		as_dict=1,
-	):
+		(filters.from_fiscal_year, filters.to_fiscal_year), as_dict=1):
 		target_details.setdefault(d.name, {}).setdefault(
 			d.month, flt(d.percentage_allocation)
 		)
 
 	return target_details
 
-
 # Get actual details from gl entry
 def get_actual_details(name, filters):
 	budget_against = frappe.scrub(filters.get("budget_against"))
-
 	cond = ""
+
 	if filters.get("budget_against") == "Cost Center":
 		cc_lft, cc_rgt = frappe.db.get_value("Cost Center", name, ["lft", "rgt"])
 		cond = """
 				and lft >= "{lft}"
 				and rgt <= "{rgt}"
-			""".format(
-			lft=cc_lft, rgt=cc_rgt
-		)
+			""".format(lft=cc_lft, rgt=cc_rgt)
 
 	ac_details = frappe.db.sql(
 		"""
@@ -269,19 +246,14 @@ def get_actual_details(name, filters):
 				group by
 					gl.name
 				order by gl.fiscal_year
-		""".format(
-			tab=filters.budget_against, budget_against=budget_against, cond=cond
-		),
-		(filters.from_fiscal_year, filters.to_fiscal_year, name),
-		as_dict=1,
-	)
+		""".format(tab=filters.budget_against, budget_against=budget_against, cond=cond),
+		(filters.from_fiscal_year, filters.to_fiscal_year, name), as_dict=1)
 
 	cc_actual_details = {}
 	for d in ac_details:
 		cc_actual_details.setdefault(d.account, []).append(d)
 
 	return cc_actual_details
-
 
 def get_dimension_account_month_map(filters):
 	dimension_target_details = get_dimension_target_details(filters)
@@ -326,13 +298,10 @@ def get_fiscal_years(filters):
 				`tabFiscal Year`
 			where
 				name between %(from_fiscal_year)s and %(to_fiscal_year)s
-			order by
-				year
 		""",
 		{
 			"from_fiscal_year": filters["from_fiscal_year"],
-			"to_fiscal_year": filters["to_fiscal_year"],
-		},
-	)
+			"to_fiscal_year": filters["to_fiscal_year"]
+		})
 
 	return fiscal_year
