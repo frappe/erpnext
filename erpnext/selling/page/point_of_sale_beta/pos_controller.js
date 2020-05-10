@@ -73,9 +73,8 @@ erpnext.PointOfSale.Controller = class {
 								payment_reconciliation.forEach(pay => {
 									const { mode_of_payment, closing_amount } = pay;
 									dialog.fields_dict.balance_details.df.data.push({
-										mode_of_payment: mode_of_payment,
-										opening_amount: closing_amount // set opening amount as last closing amount
-									});		
+										mode_of_payment: mode_of_payment
+									});
 								});
 								dialog.fields_dict.balance_details.grid.refresh();
 							});
@@ -637,7 +636,7 @@ erpnext.PointOfSale.Controller = class {
 				message: __(`Stock quantity not enough for Item Code: ${item_row.item_code.bold()} under warehouse ${warehouse.bold()}. 
 					Available quantity ${available_qty.toString().bold()}.`),
 				indicator: 'orange'
-			})
+			});
 			frappe.utils.play_sound("error");
 			this.item_details.qty_control.set_value(flt(available_qty));
 		}
