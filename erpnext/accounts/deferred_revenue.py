@@ -110,10 +110,11 @@ def get_booking_dates(doc, item, posting_date=None):
 	''', (doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name), as_dict=True)
 
 	prev_gl_via_je = frappe.db.sql('''
-		SELECT name, posting_date FROM `tabGL Entry` WHERE company=%s and account=%s and
-		voucher_type='Journal Entry' and against_voucher_type=%s and against_voucher=%s
-		and voucher_detail_no=%s order by posting_date desc limit 1
-	''', (doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name), as_dict=True, debug=1)
+		SELECT p.name, p.posting_date FROM `tabJournal Entry` p, `tabJournal Entry Account` c
+		WHERE p.name = c.parent and p.company=%s and c.account=%s
+		and c.reference_type=%s and c.reference_name=%s
+		and c.reference_detail_no=%s and c.docstatus < 2 order by posting_date desc limit 1
+	''', (doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name), as_dict=True)
 
 	if prev_gl_via_je:
 		if (not prev_gl_entry) or (prev_gl_entry and
@@ -163,12 +164,24 @@ def calculate_amount(doc, item, last_gl_entry, total_days, total_booking_days, a
 			group by voucher_detail_no
 		'''.format(total_credit_debit, total_credit_debit_currency),
 			(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name), as_dict=True)
+
+		journal_entry_details = frappe.db.sql('''
+			SELECT sum(c.{0}) as total_credit, sum(c.{1}) as total_credit_in_account_currency, reference_detail_no
+			FROM `tabJournal Entry` p , `tabJournal Entry Account` c WHERE p.name = c.parent and
+			p.company = %s and c.account=%s and c.reference_type=%s and c.reference_name=%s and c.reference_detail_no=%s
+			and p.docstatus < 2 group by reference_detail_no
+		'''.format(total_credit_debit, total_credit_debit_currency),
+			(doc.company, item.get(deferred_account), doc.doctype, doc.name, item.name), as_dict=True)
+
 		already_booked_amount = gl_entries_details[0].total_credit if gl_entries_details else 0
+		already_booked_amount += journal_entry_details[0].total_credit if journal_entry_details else 0
+
 		base_amount = flt(item.base_net_amount - already_booked_amount, item.precision("base_net_amount"))
 		if account_currency==doc.company_currency:
 			amount = base_amount
 		else:
 			already_booked_amount_in_account_currency = gl_entries_details[0].total_credit_in_account_currency if gl_entries_details else 0
+			already_booked_amount_in_account_currency += journal_entry_details[0].total_credit_in_account_currency if journal_entry_details else 0
 			amount = flt(item.net_amount - already_booked_amount_in_account_currency, item.precision("net_amount"))
 
 	return amount, base_amount
@@ -206,14 +219,11 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 		if frappe.flags.deferred_accounting_error:
 			return
 
-		print(end_date, posting_date, last_gl_entry)
 		if getdate(end_date) < getdate(posting_date) and not last_gl_entry:
-			return
 			_book_deferred_revenue_or_expense(item, via_je, submit_je)
 
 	via_je = frappe.db.get_singles_value('Accounts Settings', 'book_deferred_entries_via_journal_entry')
 	submit_je = frappe.db.get_singles_value('Accounts Settings', 'submit_journal_entries')
-	print("########", via_je, submit_je)
 
 	for item in doc.get('items'):
 		if item.get(enable_check):
