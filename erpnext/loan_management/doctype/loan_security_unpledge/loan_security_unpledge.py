@@ -8,12 +8,13 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import get_datetime, flt
 import json
+from six import iteritems
 from erpnext.loan_management.doctype.loan_security_price.loan_security_price import get_loan_security_price
 
 class LoanSecurityUnpledge(Document):
 	def validate(self):
-		self.validate_pledges()
 		self.validate_duplicate_securities()
+		self.validate_unpledge_qty()
 
 	def on_cancel(self):
 		self.update_loan_security_pledge(cancel=1)
@@ -23,80 +24,52 @@ class LoanSecurityUnpledge(Document):
 	def validate_duplicate_securities(self):
 		security_list = []
 		for d in self.securities:
-			security = [d.loan_security, d.against_pledge]
-			if security not in security_list:
-				security_list.append(security)
+			if d.loan_security not in security_list:
+				security_list.append(d.loan_security)
 			else:
-				frappe.throw(_("Row {0}: Loan Security {1} against Loan Security Pledge {2} added multiple times").format(
-					d.idx, frappe.bold(d.loan_security), frappe.bold(d.against_pledge)))
+				frappe.throw(_("Row {0}: Loan Security {1} added multiple times").format(
+					d.idx, frappe.bold(d.loan_security)))
 
-	def validate_pledges(self):
-		pledge_qty_map = self.get_pledge_details()
-		loan = frappe.get_doc("Loan", self.loan)
+	def validate_unpledge_qty(self):
+		pledge_qty_map = get_pledged_security_qty(self.loan)
 
-		remaining_qty = 0
-		unpledge_value = 0
+		ltv_ratio_map = frappe._dict(frappe.get_all("Loan Security Type",
+			fields=["name", "loan_to_value_ratio"], as_list=1))
+
+		loan_security_price_map = frappe._dict(frappe.get_all("Loan Security Price",
+			fields=["loan_security", "loan_security_price"],
+			filters = {
+				"valid_from": ("<=", get_datetime()),
+				"valid_upto": (">=", get_datetime())
+			}, as_list=1))
+
+		loan_amount, principal_paid = frappe.get_value("Loan", self.loan, ['loan_amount', 'total_principal_paid'])
+		pending_principal_amount = loan_amount - principal_paid
+		security_value = 0
 
 		for security in self.securities:
-			pledged_qty = pledge_qty_map.get((security.against_pledge, security.loan_security), 0)
-			if not pledged_qty:
-				frappe.throw(_("Zero qty of {0} pledged against loan {1}").format(frappe.bold(security.loan_security),
-					frappe.bold(self.loan)))
+			pledged_qty = pledge_qty_map.get(security.loan_security)
 
-			unpledge_qty = pledged_qty - security.qty
-			security_price = security.qty * get_loan_security_price(security.loan_security)
+			if security.qty > pledged_qty:
+				frappe.throw(_("""Row {0}: {1} {2} of {3} is pledged against Loan {4}.
+					You are trying to unpledge more""").format(security.idx, pledged_qty, security.uom,
+					frappe.bold(security.loan_security), frappe.bold(self.loan)))
 
-			if unpledge_qty < 0:
-				frappe.throw(_("""Row {0}: Cannot unpledge more than {1} qty of {2} against
-					Loan Security Pledge {3}""").format(security.idx, frappe.bold(pledged_qty),
-					frappe.bold(security.loan_security), frappe.bold(security.against_pledge)))
+			qty_after_unpledge = pledged_qty - security.qty
+			ltv_ratio = ltv_ratio_map.get(security.loan_security_type)
 
-			remaining_qty += unpledge_qty
-			unpledge_value += security_price - flt(security_price * security.haircut/100)
+			security_value += qty_after_unpledge * loan_security_price_map.get(security.loan_security)
 
-		if unpledge_value > loan.total_principal_paid:
-			frappe.throw(_("Cannot Unpledge, loan security value is greater than the repaid amount"))
+		if not security_value and pending_principal_amount > 0:
+			frappe.throw("Cannot Unpledge, loan to value ratio is breaching")
 
-	def get_pledge_details(self):
-		pledge_qty_map = {}
-
-		pledge_details = frappe.db.sql("""
-			SELECT p.parent, p.loan_security, p.qty FROM
-				`tabLoan Security Pledge` lsp,
-				`tabPledge` p
-			WHERE
-				p.parent = lsp.name
-				AND lsp.loan = %s
-				AND lsp.docstatus = 1
-				AND lsp.status in ('Pledged', 'Partially Pledged')
-		""", (self.loan), as_dict=1)
-
-		for pledge in pledge_details:
-			pledge_qty_map.setdefault((pledge.parent, pledge.loan_security), pledge.qty)
-
-		return pledge_qty_map
+		if security_value and (pending_principal_amount/security_value) * 100 > ltv_ratio:
+			frappe.throw("Cannot Unpledge, loan to value ratio is breaching")
 
 	def on_update_after_submit(self):
 		if self.status == "Approved":
-			self.update_loan_security_pledge()
 			self.update_loan_status()
-
-	def update_loan_security_pledge(self, cancel=0):
-		if cancel:
-			new_qty = 'p.qty + u.qty'
-		else:
-			new_qty = 'p.qty - u.qty'
-
-		frappe.db.sql("""
-			UPDATE
-				`tabPledge` p, `tabUnpledge` u, `tabLoan Security Pledge` lsp, `tabLoan Security Unpledge` lsu
-					SET p.qty = {new_qty}
-			WHERE
-				lsp.loan = %s
-				AND p.parent = u.against_pledge
-				AND p.parent = lsp.name
-				AND lsp.docstatus = 1
-				AND p.loan_security = u.loan_security""".format(new_qty=new_qty),(self.loan))
+			self.db_set('unpledge_time', get_datetime())
 
 	def update_loan_status(self, cancel=0):
 		if cancel:
@@ -104,10 +77,45 @@ class LoanSecurityUnpledge(Document):
 			if loan_status == 'Closed':
 				frappe.db.set_value('Loan', self.loan, 'status', 'Loan Closure Requested')
 		else:
-			pledge_qty = frappe.db.sql("""SELECT SUM(c.qty)
-				FROM `tabLoan Security Pledge` p, `tabPledge` c
-				WHERE p.loan = %s AND c.parent = p.name""", (self.loan))[0][0]
+			pledged_qty = 0
+			current_pledges = get_pledged_security_qty(self.loan)
 
-			if not pledge_qty:
+			for security, qty in iteritems(current_pledges):
+				pledged_qty += qty
+
+			if not pledged_qty:
 				frappe.db.set_value('Loan', self.loan, 'status', 'Closed')
+
+@frappe.whitelist()
+def get_pledged_security_qty(loan):
+
+	current_pledges = {}
+
+	unpledges = frappe._dict(frappe.db.sql("""
+		SELECT u.loan_security, sum(u.qty) as qty
+		FROM `tabLoan Security Unpledge` up, `tabUnpledge` u
+		WHERE up.loan = %s
+		AND u.parent = up.name
+		AND up.status = 'Approved'
+		GROUP BY u.loan_security
+	""", (loan)))
+
+	pledges = frappe._dict(frappe.db.sql("""
+		SELECT p.loan_security, sum(p.qty) as qty
+		FROM `tabLoan Security Pledge` lp, `tabPledge`p
+		WHERE lp.loan = %s
+		AND p.parent = lp.name
+		AND lp.status = 'Pledged'
+		GROUP BY p.loan_security
+	""", (loan)))
+
+	for security, qty in iteritems(pledges):
+		current_pledges.setdefault(security, qty)
+		current_pledges[security] -= unpledges.get(security, 0.0)
+
+	return current_pledges
+
+
+
+
 

@@ -15,6 +15,7 @@ from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_
 from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import days_in_year
 from erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall import create_process_loan_security_shortfall
 from erpnext.loan_management.doctype.loan.loan import create_loan_security_unpledge
+from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
 
 class TestLoan(unittest.TestCase):
 	def setUp(self):
@@ -152,7 +153,7 @@ class TestLoan(unittest.TestCase):
 		repayment_entry.save()
 		repayment_entry.submit()
 
-		penalty_amount = (accrued_interest_amount * 5 * 25) / (100 * days_in_year(get_datetime(first_date).year))
+		penalty_amount = (accrued_interest_amount * 4 * 25) / (100 * days_in_year(get_datetime(first_date).year))
 		self.assertEquals(flt(repayment_entry.penalty_amount, 2), flt(penalty_amount, 2))
 
 		amounts = frappe.db.get_value('Loan Interest Accrual', {'loan': loan.name}, ['paid_interest_amount',
@@ -305,7 +306,7 @@ class TestLoan(unittest.TestCase):
 		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=first_date)
 		process_loan_interest_accrual_for_demand_loans(posting_date = last_date)
 
-		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(last_date, 5),
+		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(last_date, 6),
 			"Loan Closure", flt(loan.loan_amount + accrued_interest_amount))
 		repayment_entry.submit()
 
@@ -319,13 +320,12 @@ class TestLoan(unittest.TestCase):
 		unpledge_request.submit()
 		unpledge_request.status = 'Approved'
 		unpledge_request.save()
-
-		loan_security_pledge.load_from_db()
 		loan.load_from_db()
 
+		pledged_qty = get_pledged_security_qty(loan.name)
+
 		self.assertEqual(loan.status, 'Closed')
-		for security in loan_security_pledge.securities:
-			self.assertEquals(security.qty, 0)
+		self.assertEquals(sum(pledged_qty.values()), 0)
 
 
 def create_loan_accounts():
