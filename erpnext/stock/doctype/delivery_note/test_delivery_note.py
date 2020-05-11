@@ -612,6 +612,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-1, do_not_submit=True)
 		dn1.items[0].against_sales_order = so.name
 		dn1.items[0].so_detail = so.items[0].name
+		dn1.items[0].dn_detail = dn.items[0].name
 		dn1.submit()
 
 		si = make_sales_invoice(dn.name)
@@ -638,7 +639,9 @@ class TestDeliveryNote(unittest.TestCase):
 		si1.save()
 		si1.submit()
 
-		create_delivery_note(is_return=1, return_against=dn.name, qty=-2)
+		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-2, do_not_submit=True)
+		dn1.items[0].dn_detail = dn.items[0].name
+		dn1.submit()
 
 		si2 = make_sales_invoice(dn.name)
 		self.assertEquals(si2.items[0].qty, 2)

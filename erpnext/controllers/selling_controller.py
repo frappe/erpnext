@@ -165,9 +165,9 @@ class SellingController(StockController):
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
 
 	def validate_selling_price(self):
-		def throw_message(item_name, rate, ref_rate_field):
-			frappe.throw(_("""Selling rate for item {0} is lower than its {1}. Selling rate should be atleast {2}""")
-				.format(item_name, ref_rate_field, rate))
+		def throw_message(idx, item_name, rate, ref_rate_field):
+			frappe.throw(_("""Row #{}: Selling rate for item {} is lower than its {}. Selling rate should be atleast {}""")
+				.format(idx, item_name, ref_rate_field, rate))
 
 		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
 			return
@@ -181,8 +181,8 @@ class SellingController(StockController):
 
 			last_purchase_rate, is_stock_item = frappe.get_cached_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
 			last_purchase_rate_in_sales_uom = last_purchase_rate / (it.conversion_factor or 1)
-			if flt(it.base_rate) < flt(last_purchase_rate_in_sales_uom) and not self.get('is_internal_customer'):
-				throw_message(it.item_name, last_purchase_rate_in_sales_uom, "last purchase rate")
+			if flt(it.base_rate) < flt(last_purchase_rate_in_sales_uom):
+				throw_message(it.idx, frappe.bold(it.item_name), last_purchase_rate_in_sales_uom, "last purchase rate")
 
 			last_valuation_rate = frappe.db.sql("""
 				SELECT valuation_rate FROM `tabStock Ledger Entry` WHERE item_code = %s
@@ -193,7 +193,7 @@ class SellingController(StockController):
 				last_valuation_rate_in_sales_uom = last_valuation_rate[0][0] / (it.conversion_factor or 1)
 				if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate_in_sales_uom) \
 					and not self.get('is_internal_customer'):
-					throw_message(it.name, last_valuation_rate_in_sales_uom, "valuation rate")
+					throw_message(it.idx, frappe.bold(it.item_name), last_valuation_rate_in_sales_uom, "valuation rate")
 
 
 	def get_item_list(self):
