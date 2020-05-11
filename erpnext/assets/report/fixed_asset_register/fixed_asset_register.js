@@ -55,6 +55,13 @@ frappe.query_reports["Fixed Asset Register"] = {
 			options: "Finance Book"
 		},
 		{
+			fieldname:"group_by",
+			label: __("Group By"),
+			fieldtype: "Select",
+			options: " \nAsset Category\nLocation",
+			default: '',
+		},
+		{
 			fieldname:"is_existing_asset",
 			label: __("Is Existing Asset"),
 			fieldtype: "Check"
