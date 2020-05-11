@@ -19,6 +19,5 @@ def update_lead_phone_numbers(contact, method):
 					mobile_no = primary_mobile_nos[0]
 
 			lead = frappe.get_doc("Lead", contact_lead)
-			lead.phone = phone
-			lead.mobile_no = mobile_no
-			lead.save()
+			lead.db_set("phone", phone)
+			lead.db_set("mobile_no", mobile_no)
