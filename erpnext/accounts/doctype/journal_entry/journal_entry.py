@@ -266,7 +266,10 @@ class JournalEntry(AccountsController):
 				# set totals
 				if not d.reference_name in self.reference_totals:
 					self.reference_totals[d.reference_name] = 0.0
-				self.reference_totals[d.reference_name] += flt(d.get(dr_or_cr))
+
+				if not d.reference_detail_no:
+					self.reference_totals[d.reference_name] += flt(d.get(dr_or_cr))
+
 				self.reference_types[d.reference_name] = d.reference_type
 				self.reference_accounts[d.reference_name] = d.account
 
