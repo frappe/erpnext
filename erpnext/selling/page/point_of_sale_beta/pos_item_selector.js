@@ -76,7 +76,7 @@ erpnext.PointOfSale.ItemSelector = class {
 
     get_item_html(item) {
         const { item_image, serial_no, batch_no, barcode, actual_qty } = item;
-        const indicator_color = actual_qty > 10 ? "green" : actual_qty ? "orange" : "red";
+        const indicator_color = actual_qty > 10 ? "green" : actual_qty !== 0 ? "orange" : "red";
 
         function get_item_image_html() {
             if (item_image) {
