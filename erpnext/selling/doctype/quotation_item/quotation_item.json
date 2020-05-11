@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2013-03-07 11:42:57",
  "doctype": "DocType",
  "document_type": "Document",
@@ -46,6 +47,7 @@
   "base_amount",
   "base_net_amount",
   "pricing_rules",
+  "item_ignore_pricing_rule",
   "is_free_item",
   "item_weight_details",
   "weight_per_unit",
@@ -382,6 +384,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "is_free_item",
    "fieldtype": "Check",
    "label": "Is Free Item",
@@ -517,6 +520,7 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "0",
    "fieldname": "page_break",
    "fieldtype": "Check",
    "label": "Page Break",
@@ -570,11 +574,18 @@
    "fieldname": "image_section",
    "fieldtype": "Section Break",
    "label": "Image"
+  },
+  {
+   "default": "0",
+   "fieldname": "item_ignore_pricing_rule",
+   "fieldtype": "Check",
+   "label": "Ignore Pricing Rule"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-01 17:39:14.228141",
+ "links": [],
+ "modified": "2020-05-08 05:10:57.215538",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation Item",

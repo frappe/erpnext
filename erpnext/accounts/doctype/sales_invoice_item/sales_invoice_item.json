@@ -45,6 +45,7 @@
   "base_rate",
   "base_amount",
   "pricing_rules",
+  "item_ignore_pricing_rule",
   "is_free_item",
   "section_break_21",
   "net_rate",
@@ -783,12 +784,18 @@
    "fieldtype": "Link",
    "label": "Finance Book",
    "options": "Finance Book"
+  },
+  {
+   "default": "0",
+   "fieldname": "item_ignore_pricing_rule",
+   "fieldtype": "Check",
+   "label": "Ignore Pricing Rule"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2019-12-04 12:22:38.517710",
+ "modified": "2020-05-08 06:11:38.569638",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
