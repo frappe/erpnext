@@ -7,7 +7,6 @@
  "engine": "InnoDB",
  "field_order": [
   "account_head",
-  "rate",
   "col_break1",
   "rate",
   "description",
