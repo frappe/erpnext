@@ -331,11 +331,11 @@ def get_header(filters, csv_class):
 		# N = Length of account numbers (Sachkontenlänge)
 		'%d' % filters.get('acc_len', 4),
 		# O = Transaction batch start date (YYYYMMDD)
-		frappe.utils.formatdate(filters.get('from_date'), "yyyyMMdd"),
+		frappe.utils.formatdate(filters.get('from_date'), "yyyyMMdd") if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
 		# P = Transaction batch end date (YYYYMMDD)
-		frappe.utils.formatdate(filters.get('to_date'), "yyyyMMdd"),
+		frappe.utils.formatdate(filters.get('to_date'), "yyyyMMdd") if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
 		# Q = Description (for example, "Sales Invoice") Max. 30 chars
-		'"{}"'.format(_(description)),
+		'"{}"'.format(_(description)) if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
 		# R = Diktatkürzel
 		'',
 		# S = Buchungstyp
@@ -350,12 +350,12 @@ def get_header(filters, csv_class):
 		#	40 = Kalkulatorik
 		#	11 = Reserviert
 		#	12 = Reserviert
-		'0',
+		'0' if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
 		# U = Festschreibung
 		# TODO: Filter by Accounting Period. In export for closed Accounting Period, this will be "1"
 		'0',
 		# V = Default currency, for example, "EUR"
-		'"%s"' % filters.get('default_currency', 'EUR'),
+		'"%s"' % filters.get('default_currency', 'EUR') if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
 		# reserviert
 		'',
 		# Derivatskennzeichen
