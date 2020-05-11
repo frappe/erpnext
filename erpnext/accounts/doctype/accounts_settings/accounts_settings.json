@@ -205,7 +205,6 @@
   },
   {
    "default": "No",
-   "depends_on": "automatically_process_deferred_accounting_entry",
    "description": "If this is set as 'No' direct GL Entries will be created to book Deferred Revenue/Expense",
    "fieldname": "book_deferred_entries_via_journal_entry",
    "fieldtype": "Select",
@@ -226,7 +225,7 @@
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-05-09 13:15:07.284683",
+ "modified": "2020-05-11 16:49:50.321251",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

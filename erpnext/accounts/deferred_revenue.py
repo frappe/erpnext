@@ -6,6 +6,7 @@ from frappe.utils import date_diff, add_months, today, getdate, add_days, flt, g
 from erpnext.accounts.utils import get_account_currency
 from frappe.email import sendmail_to_system_managers
 from frappe.utils.background_jobs import enqueue
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
 def validate_service_stop_date(doc):
 	''' Validates service_stop_date for Purchase Invoice and Sales Invoice '''
@@ -210,10 +211,10 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 
 		if via_je == 'Yes':
 			book_revenue_via_journal_entry(doc, credit_account, debit_account, against, amount,
-				base_amount, end_date, project, account_currency, item.cost_center, item.name, deferred_process, submit_je)
+				base_amount, end_date, project, account_currency, item.cost_center, item, deferred_process, submit_je)
 		else:
 			make_gl_entries(doc, credit_account, debit_account, against,
-				amount, base_amount, end_date, project, account_currency, item.cost_center, item.name, deferred_process)
+				amount, base_amount, end_date, project, account_currency, item.cost_center, item, deferred_process)
 
 		# Returned in case of any errors because it tries to submit the same record again and again in case of errors
 		if frappe.flags.deferred_accounting_error:
@@ -252,7 +253,7 @@ def process_deferred_accounting(posting_date=today()):
 		doc.submit()
 
 def make_gl_entries(doc, credit_account, debit_account, against,
-	amount, base_amount, posting_date, project, account_currency, cost_center, voucher_detail_no, deferred_process=None):
+	amount, base_amount, posting_date, project, account_currency, cost_center, item, deferred_process=None):
 	# GL Entry for crediting the amount in the deferred expense
 	from erpnext.accounts.general_ledger import make_gl_entries
 
@@ -266,12 +267,12 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 			"credit": base_amount,
 			"credit_in_account_currency": amount,
 			"cost_center": cost_center,
-			"voucher_detail_no": voucher_detail_no,
+			"voucher_detail_no": item.name,
 			'posting_date': posting_date,
 			'project': project,
 			'against_voucher_type': 'Process Deferred Accounting',
 			'against_voucher': deferred_process
-		}, account_currency)
+		}, account_currency, item=item)
 	)
 	# GL Entry to debit the amount from the expense
 	gl_entries.append(
@@ -281,12 +282,12 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 			"debit": base_amount,
 			"debit_in_account_currency": amount,
 			"cost_center": cost_center,
-			"voucher_detail_no": voucher_detail_no,
+			"voucher_detail_no": item.name,
 			'posting_date': posting_date,
 			'project': project,
 			'against_voucher_type': 'Process Deferred Accounting',
 			'against_voucher': deferred_process
-		}, account_currency)
+		}, account_currency, item=item)
 	)
 
 	if gl_entries:
@@ -310,7 +311,7 @@ def send_mail(deferred_process):
 	sendmail_to_system_managers(title, content)
 
 def book_revenue_via_journal_entry(doc, credit_account, debit_account, against,
-	amount, base_amount, posting_date, project, account_currency, cost_center, voucher_detail_no,
+	amount, base_amount, posting_date, project, account_currency, cost_center, item,
 	deferred_process=None, submit='No'):
 
 	if amount == 0: return
@@ -319,7 +320,7 @@ def book_revenue_via_journal_entry(doc, credit_account, debit_account, against,
 	journal_entry.posting_date = posting_date
 	journal_entry.company = doc.company
 
-	journal_entry.append('accounts', {
+	debit_entry = {
 		'account': credit_account,
 		'credit': base_amount,
 		'credit_in_account_currency': amount,
@@ -328,12 +329,12 @@ def book_revenue_via_journal_entry(doc, credit_account, debit_account, against,
 		'account_currency': account_currency,
 		'reference_name': doc.name,
 		'reference_type': doc.doctype,
-		'reference_detail_no': voucher_detail_no,
+		'reference_detail_no': item.name,
 		'cost_center': cost_center,
 		'project': project,
-	})
+	}
 
-	journal_entry.append('accounts', {
+	credit_entry = {
 		'account': debit_account,
 		'debit': base_amount,
 		'debit_in_account_currency': amount,
@@ -342,10 +343,22 @@ def book_revenue_via_journal_entry(doc, credit_account, debit_account, against,
 		'account_currency': account_currency,
 		'reference_name': doc.name,
 		'reference_type': doc.doctype,
-		'reference_detail_no': voucher_detail_no,
+		'reference_detail_no': item.name,
 		'cost_center': cost_center,
 		'project': project,
-	})
+	}
+
+	for dimension in get_accounting_dimensions():
+		debit_entry.update({
+			dimension: item.get(dimension)
+		})
+
+		credit_entry.update({
+			dimension: item.get(dimension)
+		})
+
+	journal_entry.append('accounts', debit_entry)
+	journal_entry.append('accounts', credit_entry)
 
 	try:
 		journal_entry.save()
