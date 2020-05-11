@@ -1,4 +1,4 @@
-{% include "erpnext/selling/page/point_of_sale_beta/onScan.js" %}
+{% include "erpnext/selling/page/point_of_sale_beta/onscan.js" %}
 {% include "erpnext/selling/page/point_of_sale_beta/pos_item_selector.js" %}
 {% include "erpnext/selling/page/point_of_sale_beta/pos_item_cart.js" %}
 {% include "erpnext/selling/page/point_of_sale_beta/pos_item_details.js" %}
