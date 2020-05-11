@@ -14,42 +14,42 @@ def execute(filters=None):
             'fieldname': 'new_customers',
             'fieldtype': 'Int',
             'default': 0,
-            'width': 150
+            'width': 125
         },
         {
             'label': _('Repeat Customers'),
             'fieldname': 'repeat_customers',
             'fieldtype': 'Int',
             'default': 0,
-            'width': 150
+            'width': 125
         },
         {
             'label': _('Total'),
             'fieldname': 'total',
             'fieldtype': 'Int',
             'default': 0,
-            'width': 150
+            'width': 100
         },
         {
             'label': _('New Customer Revenue'),
             'fieldname': 'new_customer_revenue',
             'fieldtype': 'Currency',
             'default': 0.0,
-            'width': 150
+            'width': 175
         },
         {
             'label': _('Repeat Customer Revenue'),
             'fieldname': 'repeat_customer_revenue',
             'fieldtype': 'Currency',
             'default': 0.0,
-            'width': 150
+            'width': 175
         },
         {
             'label': _('Total Revenue'),
             'fieldname': 'total_revenue',
             'fieldtype': 'Currency',
             'default': 0.0,
-            'width': 150
+            'width': 175
         }
     ]
     if filters.get('view_type') == 'Monthly':
@@ -148,13 +148,13 @@ def get_data_by_territory(filters, common_columns):
         data.append(temp)
     node_list = [x for x in territory_dict.keys() if territory_dict[x]['is_group'] == 0]
     root_node = [x for x in territory_dict.keys() if territory_dict[x]['parent'] is None][0]
+    root_data = [x for x in data if x['territory'] == root_node][0]
 
     for node in node_list:
         data = update_groups(node, data, root_node, territory_dict)
 
     for group in [x for x in territory_dict.keys() if territory_dict[x]['parent'] == root_node]:
         group_data = [x for x in data if x['territory'] == group][0]
-        root_data = [x for x in data if x['territory'] == root_node][0]
         for key in group_data.keys():
             if key not in ['indent', 'territory', 'bold']:
                 root_data[key] += group_data[key]
@@ -162,7 +162,7 @@ def get_data_by_territory(filters, common_columns):
     return columns, data, None, None, None, 1
 
 def update_groups(node, data, root_node, territory_dict):
-    ''' Adds values of child territories to parent node except root. '''
+    """ Adds values of child territories to parent node except root. """
     parent_node = territory_dict[node]['parent']
     if parent_node != root_node and parent_node:
         node_data = [x for x in data if x['territory'] == node][0]
@@ -175,37 +175,28 @@ def update_groups(node, data, root_node, territory_dict):
         return data
 
 def get_customer_stats(filters, tree_view=False):
-    ''' Calculates number of new and repeated customers. '''
+    """ Calculates number of new and repeated customers. """
     company_condition = ''
     if filters.get('company'):
         company_condition = ' and company=%(company)s'
 
     customers = []
     customers_in = {}
-    new_customers_in = {}
-    repeat_customers_in = {}
 
     for si in frappe.db.sql('''select territory, posting_date, customer, base_grand_total from `tabSales Invoice`
         where docstatus=1 and posting_date <= %(to_date)s and posting_date >= %(from_date)s
         {company_condition} order by posting_date'''.format(company_condition=company_condition),
         filters, as_dict=1):
-        if tree_view:
-            key = si.territory
-        else:
-            key = si.posting_date.strftime('%Y-%m')
+
+        key = si.territory if tree_view else si.posting_date.strftime('%Y-%m')
+        customers_in.setdefault(key, {'new': [0, 0.0], 'repeat': [0, 0.0]})
+
         if not si.customer in customers:
-            new_customers_in.setdefault(key, [0, 0.0])
-            new_customers_in[key][0] += 1
-            new_customers_in[key][1] += si.base_grand_total
+            customers_in[key]['new'][0] += 1
+            customers_in[key]['new'][1] += si.base_grand_total
             customers.append(si.customer)
         else:
-            repeat_customers_in.setdefault(key, [0, 0.0])
-            repeat_customers_in[key][0] += 1
-            repeat_customers_in[key][1] += si.base_grand_total
-        customers_in.update({
-            key: {
-                'new': new_customers_in[key] if new_customers_in.get(key) else [0, 0.0],
-                'repeat': repeat_customers_in[key]  if repeat_customers_in.get(key) else [0, 0.0],
-            }
-        })
+            customers_in[key]['repeat'][0] += 1
+            customers_in[key]['repeat'][1] += si.base_grand_total
+
     return customers_in
