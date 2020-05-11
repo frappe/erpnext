@@ -119,7 +119,7 @@ def create_order(**kwargs):
 
 		if item_discount > 0:
 			discount_percent = 100 - (item.rate * 100 / item.price_list_rate)
-			discount_code = _("LINE {0} | {1} | {2}% DISCOUNT ($ -{:,.2f})").format(idx, item.item_code, discount_percent, item_discount)
+			discount_code = _("LINE {0} | {1} | {2}% DISCOUNT ($ -{3:,.2f})").format(idx, item.item_code, discount_percent, item_discount)
 			discounts[discount_code] = {
 				"discount_amount": convert_to_cents(item_discount),
 				"discount_display_name": discount_code
@@ -191,9 +191,9 @@ def create_order(**kwargs):
 @frappe.whitelist(allow_guest=1)
 def process_payment_callback(checkout_token, reference_doctype, reference_docname):
 	"""'
-		Charge authorization occurs after a user completes the Affirm checkout flow and returns to the merchant site. 
-		Authorizing the charge generates a charge ID that will be used to reference it moving forward. 
-		You must authorize a charge to fully create it. A charge is not visible in the Read charge response, 
+		Charge authorization occurs after a user completes the Affirm checkout flow and returns to the merchant site.
+		Authorizing the charge generates a charge ID that will be used to reference it moving forward.
+		You must authorize a charge to fully create it. A charge is not visible in the Read charge response,
 		nor in the merchant dashboard until you authorize it.
 	"""
 	data= {
@@ -218,7 +218,7 @@ def process_payment_callback(checkout_token, reference_doctype, reference_docnam
 
 	if affirm_data:
 		authorize_payment(affirm_data, reference_doctype, reference_docname, integration_request)
-		
+
 def authorize_payment(affirm_data, reference_doctype, reference_docname, integration_request):
 	"""
 		once callback return checkout token it will authroized payment status as failed or sucessful
@@ -239,11 +239,11 @@ def authorize_payment(affirm_data, reference_doctype, reference_docname, integra
 
 	frappe.local.response["type"] = "redirect"
 	frappe.local.response["location"] = get_url(redirect_url)
-	return "" 
+	return ""
 
 def payment_successful(affirm_data, reference_doctype, reference_docname, integration_request):
 	"""
-		on sucessful payment response it will create payment entry for refernce docname and 
+		on sucessful payment response it will create payment entry for refernce docname and
 		update Affirm ID and Affirm status in refrence docname
 	"""
 	charge_id = affirm_data.get('id')
@@ -277,7 +277,7 @@ def capture_payment(affirm_id, sales_order):
 	if authorization_response.status_code==200:
 		affirm_data = authorization_response.json()
 		#make payment entry agianst Sales Order
-		integration_request.update_status(affirm_data, "Authorized")		
+		integration_request.update_status(affirm_data, "Authorized")
 		make_so_payment_entry(affirm_data, sales_order, integration_request)
 		return affirm_data
 	else:
