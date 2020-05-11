@@ -7,7 +7,7 @@ import frappe
 from frappe.model.utils.rename_field import rename_field
 
 def execute():
-	if not frappe.db.table_exists("Payroll Period"):
+	if not (frappe.db.table_exists("Payroll Period") and frappe.db.table_exists("Taxable Salary Slab")):
 		return
 
 	for doctype in ("income_tax_slab", "salary_structure_assignment", "employee_other_income", "income_tax_slab_other_charges"):
@@ -60,6 +60,9 @@ def execute():
 				""", (income_tax_slab.name, company.name, period.start_date))
 
 	# move other incomes to separate document
+	if not frappe.db.table_exists("Employee Tax Exemption Proof Submission"):
+		return
+
 	migrated = []
 	proofs = frappe.get_all("Employee Tax Exemption Proof Submission",
 		filters = {'docstatus': 1},
@@ -78,6 +81,9 @@ def execute():
 				migrated.append([proof.employee, proof.payroll_period])
 			except:
 				pass
+
+	if not frappe.db.table_exists("Employee Tax Exemption Declaration"):
+		return
 
 	declerations = frappe.get_all("Employee Tax Exemption Declaration",
 		filters = {'docstatus': 1},
