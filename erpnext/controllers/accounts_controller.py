@@ -1063,6 +1063,8 @@ def update_invoice_status():
 	frappe.db.sql(""" update `tabPurchase Invoice` set status = 'Overdue'
 		where due_date < CURDATE() and docstatus = 1 and outstanding_amount > 0""")
 
+	frappe.db.sql(""" update `tabSales Order` set status = 'Overdue'
+		where skip_delivery_note=0 and per_delivered<100 and docstatus = 1 and delivery_date < CURDATE()""")
 
 @frappe.whitelist()
 def get_payment_terms(terms_template, posting_date=None, grand_total=None, bill_date=None):

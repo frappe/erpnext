@@ -9,13 +9,13 @@ frappe.listview_settings['Sales Order'] = {
 			// on hold
 			return [__("On Hold"), "orange", "status,=,On Hold"];
 		} else if (doc.status === "Completed") {
+			// Completed
 			return [__("Completed"), "green", "status,=,Completed"];
+		} else if (doc.status === "Overdue") {
+			// Overdue
+			return [__("Overdue"), "red", "status,=,Overdue"];
 		} else if (!doc.skip_delivery_note && flt(doc.per_delivered, 6) < 100) {
-			if (frappe.datetime.get_diff(doc.delivery_date) < 0) {
-			// not delivered & overdue
-				return [__("Overdue"), "red",
-					"per_delivered,<,100|delivery_date,<,Today|status,!=,Closed"];
-			} else if (flt(doc.grand_total) === 0) {
+			if (flt(doc.grand_total) === 0) {
 				// not delivered (zero-amount order)
 				return [__("To Deliver"), "orange",
 					"per_delivered,<,100|grand_total,=,0|status,!=,Closed"];
