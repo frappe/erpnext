@@ -47,6 +47,8 @@ frappe.ui.form.on('Twitter Settings', {
 				callback : function(r) {
 					window.location.href = r.message;
 				}
+			}).fail(function() {
+				frappe.dom.unfreeze();
 			});
 		}
 	},
