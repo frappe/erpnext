@@ -12,6 +12,7 @@ erpnext.PointOfSale.ItemSelector = class {
         this.make_search_bar();
         this.load_items_data();
         this.bind_events();
+        this.attach_shortcuts();
     }
 
     prepare_dom() {
@@ -177,7 +178,20 @@ erpnext.PointOfSale.ItemSelector = class {
 				this.filter_items({ search_term });
 			}, 300);
         });
-        
+    }
+
+    attach_shortcuts() {
+        frappe.ui.keys.on("ctrl+i", () => {
+            const selector_is_visible = this.$component.is(':visible');
+            if (!selector_is_visible) return;
+            this.search_field.set_focus();
+        });
+        frappe.ui.keys.on("ctrl+g", () => {
+            const selector_is_visible = this.$component.is(':visible');
+            if (!selector_is_visible) return;
+            this.item_group_field.set_focus();
+        });
+        // for selecting the last filtered item on search
         frappe.ui.keys.on("enter", () => {
             const selector_is_visible = this.$component.is(':visible');
             if (!selector_is_visible || this.search_field.get_value() === "") return;
@@ -185,9 +199,9 @@ erpnext.PointOfSale.ItemSelector = class {
             if (this.items.length == 1) {
                 this.$items_container.find(".item-wrapper").click();
                 frappe.utils.play_sound("submit");
-                this.barcode_scanned = false;
                 $(this.search_field.$input[0]).val("").trigger("input");
             } else if (this.items.length == 0 && this.barcode_scanned) {
+                // only show alert of barcode is scanned and enter is pressed
                 frappe.show_alert({
                     message: __("No items found. Scan barcode again."),
                     indicator: 'orange'
@@ -196,7 +210,7 @@ erpnext.PointOfSale.ItemSelector = class {
                 this.barcode_scanned = false;
                 $(this.search_field.$input[0]).val("").trigger("input");
             }
-        })
+        });
     }
     
     filter_items({ search_term='' }={}) {

@@ -11,7 +11,9 @@ erpnext.PointOfSale.Payment = class {
 	init_component() {
         this.prepare_dom();
         this.initialize_numpad();
-        this.bind_events();
+		this.bind_events();
+		this.attach_shortcuts();
+		
 	}
 
 	prepare_dom() {
@@ -162,6 +164,33 @@ erpnext.PointOfSale.Payment = class {
 				this[`${mode}_control`].set_value(default_mop.amount);
 			}
 		})
+	}
+
+	attach_shortcuts() {
+		frappe.ui.keys.on("ctrl+enter", () => {
+			const payment_is_visible = this.$component.is(":visible");
+			const active_mode = this.$payment_modes.find(".border-primary");
+			if (payment_is_visible && active_mode.length) {
+				this.$component.find('.submit-order').click();
+			}
+		});
+
+		frappe.ui.keys.on("tab", () => {
+			const payment_is_visible = this.$component.is(":visible");
+			const mode_of_payments = Array.from(this.$payment_modes.find(".mode-of-payment")).map(m => $(m).attr("data-mode"));
+			let active_mode = this.$payment_modes.find(".border-primary");
+			active_mode = active_mode.length ? active_mode.attr("data-mode") : undefined;
+
+			if (!active_mode) return;
+
+			const mode_index = mode_of_payments.indexOf(active_mode);
+			const next_mode_index = (mode_index + 1) % mode_of_payments.length;
+			const next_mode_to_be_clicked = this.$payment_modes.find(`.mode-of-payment[data-mode="${mode_of_payments[next_mode_index]}"]`);
+
+			if (payment_is_visible && mode_index != next_mode_index) {
+				next_mode_to_be_clicked.click();
+			}
+		});
 	}
 
 	toggle_numpad(show) {

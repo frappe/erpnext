@@ -192,32 +192,44 @@ erpnext.PointOfSale.Controller = class {
 			this.toggle_recent_order_list(show);
 		});
 
-		this.page.add_menu_item(__("Save as Draft"), () => {
-			this.frm.save(undefined, undefined, undefined, () => {
-				frappe.show_alert({
-					message:__("There was an error saving the document."), 
-					indicator:'red'
-				});
-				frappe.utils.play_sound("error");
-			}).then(() => {
-				frappe.run_serially([
-					() => frappe.dom.freeze(),
-					() => this.make_new_invoice(),
-					() => frappe.dom.unfreeze(),
-				]);
-			})
-		});
+		this.page.add_menu_item(__("Save as Draft"), this.save_draft_invoice.bind(this));
 
-		this.page.add_menu_item(__('Close the POS'), () => {
-			var voucher = frappe.model.get_new_doc('POS Closing Entry');
-			voucher.pos_profile = me.frm.doc.pos_profile;
-			voucher.user = frappe.session.user;
-			voucher.company = me.frm.doc.company;
-			voucher.pos_opening_entry = this.pos_opening;
-			voucher.period_end_date = frappe.datetime.now_datetime();
-			voucher.posting_date = frappe.datetime.now_date();
-			frappe.set_route('Form', 'POS Closing Entry', voucher.name);
-		});
+		frappe.ui.keys.on("ctrl+s", this.save_draft_invoice.bind(this));
+
+		this.page.add_menu_item(__('Close the POS'), this.close_pos.bind(this));
+
+		frappe.ui.keys.on("shift+ctrl+s", this.close_pos.bind(this));
+	}
+
+	save_draft_invoice() {
+		if (!this.$components_wrapper.is(":visible")) return;
+
+		this.frm.save(undefined, undefined, undefined, () => {
+			frappe.show_alert({
+				message:__("There was an error saving the document."), 
+				indicator:'red'
+			});
+			frappe.utils.play_sound("error");
+		}).then(() => {
+			frappe.run_serially([
+				() => frappe.dom.freeze(),
+				() => this.make_new_invoice(),
+				() => frappe.dom.unfreeze(),
+			]);
+		})
+	}
+
+	close_pos() {
+		if (!this.$components_wrapper.is(":visible")) return;
+
+		let voucher = frappe.model.get_new_doc('POS Closing Entry');
+		voucher.pos_profile = me.frm.doc.pos_profile;
+		voucher.user = frappe.session.user;
+		voucher.company = me.frm.doc.company;
+		voucher.pos_opening_entry = this.pos_opening;
+		voucher.period_end_date = frappe.datetime.now_datetime();
+		voucher.posting_date = frappe.datetime.now_date();
+		frappe.set_route('Form', 'POS Closing Entry', voucher.name);
 	}
 
 	init_item_selector() {

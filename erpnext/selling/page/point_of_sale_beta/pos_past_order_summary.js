@@ -10,6 +10,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.prepare_dom();
         this.init_child_components();
         this.bind_events();
+        this.attach_shortcuts();
     }
 
     prepare_dom() {
@@ -271,6 +272,16 @@ erpnext.PointOfSale.PastOrderSummary = class {
             const frm = this.events.get_frm();
             frm.doc = this.doc;
             frm.print_preview.printit(true);
+        });
+    }
+
+    attach_shortcuts() {
+        frappe.ui.keys.on("ctrl+p", () => {
+            const print_btn_visible = this.$summary_container.find('.print-btn').is(":visible");
+            const summary_visible = this.$component.is(":visible");
+            if (!summary_visible || !print_btn_visible) return;
+
+            this.$summary_container.find('.print-btn').click();
         });
     }
     

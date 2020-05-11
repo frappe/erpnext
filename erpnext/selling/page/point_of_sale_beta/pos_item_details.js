@@ -10,7 +10,8 @@ erpnext.PointOfSale.ItemDetails = class {
     init_component() {
         this.prepare_dom();
         this.init_child_components();
-        this.bind_events();
+		this.bind_events();
+		this.attach_shortcuts();
     }
 
     prepare_dom() {
@@ -300,6 +301,15 @@ erpnext.PointOfSale.ItemDetails = class {
 
 		this.$component.on('click', '.close-btn', () => {
 			this.events.close_item_details();
+		});
+	}
+
+	attach_shortcuts() {
+		frappe.ui.keys.on("escape", () => {
+			const item_details_visible = this.$component.is(":visible");
+			if (item_details_visible) {
+				this.events.close_item_details();
+			}
 		});
 	}
 

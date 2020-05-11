@@ -11,6 +11,7 @@ erpnext.PointOfSale.ItemCart = class {
         this.prepare_dom();
         this.init_child_components();
 		this.bind_events();
+		this.attach_shortcuts();
     }
 
     prepare_dom() {
@@ -197,15 +198,47 @@ erpnext.PointOfSale.ItemCart = class {
 			this.toggle_checkout_btn(true);
 		});
 	}
+
+	attach_shortcuts() {
+		for (let row of this.number_pad.keys) {
+			for (let btn of row) {
+				let shortcut_key = `ctrl+${frappe.scrub(String(btn))[0]}`;
+				if (btn === 'Delete') shortcut_key = 'ctrl+backspace';
+				if (btn === 'Remove') shortcut_key = 'shift+ctrl+backspace'
+				if (btn === '.') shortcut_key = 'ctrl+>';
+
+				// to account for fieldname map
+				const fieldname = this.number_pad.fieldnames[btn] ? this.number_pad.fieldnames[btn] : 
+					typeof btn === 'string' ? frappe.scrub(btn) : btn;
+
+				frappe.ui.keys.on(`${shortcut_key}`, () => {
+					const cart_is_visible = this.$component.is(":visible");
+					if (cart_is_visible && this.item_is_selected && this.$numpad_section.is(":visible")) {
+						this.$numpad_section.find(`.numpad-btn[data-button-value="${fieldname}"]`).click();
+					} 
+				})
+			}
+		}
+
+		frappe.ui.keys.on("ctrl+enter", () => {
+			const cart_is_visible = this.$component.is(":visible");
+			const payment_section_hidden = this.$totals_section.find('.edit-cart-btn').hasClass('d-none');
+			if (cart_is_visible && payment_section_hidden) {
+				this.$component.find(".checkout-btn").click();
+			}
+		});
+	}
 	
 	toggle_item_highlight(item) {
 		const $cart_item = $(item);
 		const item_is_highlighted = $cart_item.hasClass("shadow");
 
 		if (!item || item_is_highlighted) {
+			this.item_is_selected = false;
 			this.$cart_container.find('.cart-item-wrapper').removeClass("shadow").css("opacity", "1");
 		} else {
 			$cart_item.addClass("shadow");
+			this.item_is_selected = true;
 			this.$cart_container.find('.cart-item-wrapper').css("opacity", "1");
 			this.$cart_container.find('.cart-item-wrapper').not(item).removeClass("shadow").css("opacity", "0.65");
 		}
