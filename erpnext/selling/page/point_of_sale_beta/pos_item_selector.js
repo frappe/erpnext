@@ -74,7 +74,8 @@ erpnext.PointOfSale.ItemSelector = class {
     }
 
     get_item_html(item) {
-        const { item_image, serial_no, batch_no, barcode } = item;
+        const { item_image, serial_no, batch_no, barcode, actual_qty } = item;
+        const indicator_color = actual_qty > 10 ? "green" : actual_qty ? "orange" : "red";
 
         function get_item_image_html() {
             if (item_image) {
@@ -90,10 +91,14 @@ erpnext.PointOfSale.ItemSelector = class {
 
 		return (
             `<div class="item-wrapper rounded shadow pointer no-select"
-                data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}" data-batch-no="${escape(batch_no)}">
+                data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}" data-batch-no="${escape(batch_no)}"
+                title="Avaiable Qty: ${actual_qty}">
                 ${get_item_image_html()}
                 <div class="flex items-center pr-4 pl-4 h-10 justify-between">
-                    <div class="f-shrink-1 text-dark-grey overflow-hidden whitespace-nowrap">${frappe.ellipsis(item.item_name, 18)}</div>
+                    <div class="flex items-center f-shrink-1 text-dark-grey overflow-hidden whitespace-nowrap">
+                        <span class="indicator ${indicator_color}"></span>
+                        ${frappe.ellipsis(item.item_name, 18)}
+                    </div>
                     <div class="f-shrink-0 text-dark-grey text-bold ml-4">${format_currency(item.price_list_rate, item.currency, 0) || 0}</div>
                 </div>
             </div>`
