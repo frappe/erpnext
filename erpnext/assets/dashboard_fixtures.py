@@ -53,7 +53,7 @@ def get_charts():
 			"name": "Location-wise Asset Value",
 			"chart_name": "Location-wise Asset Value",
 			"chart_type": "Report",
-			"report_name": "Location-wise Asset Value",
+			"report_name": "Fixed Asset Report",
 			"is_custom": 1,
 			"x_field": "location",
 			"timeseries": 0,
