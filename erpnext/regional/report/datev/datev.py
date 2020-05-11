@@ -227,9 +227,18 @@ def get_suppliers(filters):
 
 
 def get_account_names(filters):
-	return frappe.get_list("Account", 
-		fields=["account_number as Konto", "name as Kontenbeschriftung"], 
-		filters={"company": filters.get("company"), "is_group": "0"})
+	return frappe.db.sql("""
+		SELECT
+
+			account_number as 'Konto',
+			LEFT(account_name, 40) as 'Kontenbeschriftung',
+			'de-DE' as 'Sprach-ID'
+
+		FROM `tabAccount`
+		WHERE company = %(company)s
+		AND is_group = 0
+		AND account_number != ''
+	""", filters, as_dict=1)
 
 
 def get_datev_csv(data, filters, csv_class):
