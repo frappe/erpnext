@@ -159,6 +159,8 @@ def set_sales_tax(doc, method):
 					break
 			else:
 				doc.append("taxes", {
+					"category": "Total",
+					"add_deduct_tax": "Add",
 					"charge_type": "Actual",
 					"description": "Sales Tax",
 					"account_head": TAX_ACCOUNT_HEAD,
