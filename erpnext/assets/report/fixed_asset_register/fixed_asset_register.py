@@ -44,23 +44,33 @@ def get_data(filters):
 
 	data = []
 
-	conditions = get_conditions(filters)
 	depreciation_amount_map = get_finance_book_value_map(filters)
 	pr_supplier_map = get_purchase_receipt_supplier_map()
 	pi_supplier_map = get_purchase_invoice_supplier_map()
 
-	assets_record = frappe.db.get_all("Asset",
-		filters=conditions,
-		fields=["name", "asset_name", "department", "cost_center", "purchase_receipt",
+	conditions = get_conditions(filters)
+	group_by = frappe.scrub(filters.get("group_by") or "")
+
+	if group_by:
+		if group_by == "asset_category":
+			fields = ["asset_category", "gross_purchase_amount", "opening_accumulated_depreciation"]
+		else:
+			fields = ["location", "gross_purchase_amount", "opening_accumulated_depreciation"]
+
+		assets_record = frappe.db.get_all("Asset", filters=conditions, fields=fields, group_by=group_by)
+		print(assets_record)
+	else:
+		fields = ["name as asset_id", "asset_name", "status", "department", "cost_center", "purchase_receipt",
 			"asset_category", "purchase_date", "gross_purchase_amount", "location",
-			"available_for_use_date", "status", "purchase_invoice", "opening_accumulated_depreciation"])
+			"available_for_use_date", "purchase_invoice", "opening_accumulated_depreciation"]
+		assets_record = frappe.db.get_all("Asset", filters=conditions, fields=fields)
 
 	for asset in assets_record:
 		asset_value = asset.gross_purchase_amount - flt(asset.opening_accumulated_depreciation) \
 			- flt(depreciation_amount_map.get(asset.name))
 		if asset_value:
 			row = {
-				"asset_id": asset.name,
+				"asset_id": asset.asset_id,
 				"asset_name": asset.asset_name,
 				"status": asset.status,
 				"department": asset.department,
@@ -129,6 +139,45 @@ def get_purchase_invoice_supplier_map():
 			AND pi.is_return=0'''))
 
 def get_columns(filters):
+	if filters.get("group_by"):
+		return [
+			{
+				"label": _("{}").format(filters.get("group_by")),
+				"fieldtype": "Link",
+				"fieldname": frappe.scrub(filters.get("group_by")),
+				"options": filters.get("group_by"),
+				"width": 120
+			},
+			{
+				"label": _("Gross Purchase Amount"),
+				"fieldname": "gross_purchase_amount",
+				"fieldtype": "Currency",
+				"options": "company:currency",
+				"width": 100
+			},
+			{
+				"label": _("Opening Accumulated Depreciation"),
+				"fieldname": "opening_accumulated_depreciation",
+				"fieldtype": "Currency",
+				"options": "company:currency",
+				"width": 90
+			},
+			{
+				"label": _("Depreciated Amount"),
+				"fieldname": "depreciated_amount",
+				"fieldtype": "Currency",
+				"options": "company:currency",
+				"width": 100
+			},
+			{
+				"label": _("Asset Value"),
+				"fieldname": "asset_value",
+				"fieldtype": "Currency",
+				"options": "company:currency",
+				"width": 100
+			}
+		]
+
 	return [
 		{
 			"label": _("Asset Id"),
