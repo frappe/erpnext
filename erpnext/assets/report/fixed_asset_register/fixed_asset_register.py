@@ -92,9 +92,9 @@ def get_data(filters):
 def prepare_chart_data(data):
 	labels, asset_values, depreciated_amounts = [], [], []
 	for d in data:
-		labels.append(d.asset_id)
-		asset_values.append(d.asset_value)
-		depreciated_amounts.append(d.depreciated_amount)
+		labels.append(d.get("asset_id"))
+		asset_values.append(d.get("asset_value"))
+		depreciated_amounts.append(d.get("depreciated_amount"))
 
 	return {
 		"data" : {
