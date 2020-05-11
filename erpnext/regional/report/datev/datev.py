@@ -131,8 +131,10 @@ def get_customers(filters):
 		SELECT
 
 			acc.account_number as 'Konto',
-			cus.customer_name as 'Name (Adressatentyp Unternehmen)',
-			case cus.customer_type when 'Individual' then 1 when 'Company' then 2 else 0 end as 'Adressatentyp',
+			CASE cus.customer_type WHEN 'Company' THEN cus.customer_name ELSE null END as 'Name (Adressatentyp Unternehmen)',
+			CASE cus.customer_type WHEN 'Individual' THEN con.last_name ELSE null END as 'Name (Adressatentyp natürl. Person)',
+			CASE cus.customer_type WHEN 'Individual' THEN con.first_name ELSE null END as 'Vorname (Adressatentyp natürl. Person)',
+			CASE cus.customer_type WHEN 'Individual' THEN '1' WHEN 'Company' THEN '2' ELSE '0' end as 'Adressatentyp',
 			adr.address_line1 as 'Straße',
 			adr.pincode as 'Postleitzahl',
 			adr.city as 'Ort',
@@ -141,8 +143,7 @@ def get_customers(filters):
 			con.email_id as 'E-Mail',
 			coalesce(con.mobile_no, con.phone) as 'Telefon',
 			cus.website as 'Internet',
-			cus.tax_id as 'Steuernummer',
-			ccl.credit_limit as 'Kreditlimit (Debitor)'
+			cus.tax_id as 'Steuernummer'
 
 		FROM `tabParty Account` par
 
@@ -161,10 +162,6 @@ def get_customers(filters):
 			left join `tabContact` con
 			on con.name = cus.customer_primary_contact
 
-			left join `tabCustomer Credit Limit` ccl
-			on ccl.parent = cus.name
-			and ccl.company = par.company
-
 		WHERE par.company = %(company)s
 		AND par.parenttype = 'Customer'""", filters, as_dict=1)
 
@@ -180,8 +177,10 @@ def get_suppliers(filters):
 		SELECT
 
 			acc.account_number as 'Konto',
-			sup.supplier_name as 'Name (Adressatentyp Unternehmen)',
-			case sup.supplier_type when 'Individual' then '1' when 'Company' then '2' else '0' end as 'Adressatentyp',
+			CASE sup.supplier_type WHEN 'Company' THEN sup.supplier_name ELSE null END as 'Name (Adressatentyp Unternehmen)',
+			CASE sup.supplier_type WHEN 'Individual' THEN con.last_name ELSE null END as 'Name (Adressatentyp natürl. Person)',
+			CASE sup.supplier_type WHEN 'Individual' THEN con.first_name ELSE null END as 'Vorname (Adressatentyp natürl. Person)',
+			CASE sup.supplier_type WHEN 'Individual' THEN '1' WHEN 'Company' THEN '2' ELSE '0' end as 'Adressatentyp',
 			adr.address_line1 as 'Straße',
 			adr.pincode as 'Postleitzahl',
 			adr.city as 'Ort',
