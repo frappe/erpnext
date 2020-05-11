@@ -470,7 +470,7 @@ class StockEntry(StockController):
 			"qty": item.s_warehouse and -1*flt(item.transfer_qty) or flt(item.transfer_qty),
 			"serial_no": item.serial_no,
 			"voucher_type": self.doctype,
-			"voucher_no": item.name,
+			"voucher_no": self.name,
 			"company": self.company,
 			"allow_zero_valuation": item.allow_zero_valuation_rate,
 		})
