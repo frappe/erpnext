@@ -67,7 +67,7 @@ def link_customer_and_address(raw_billing_data, customer_name):
 	customer.customer_name = customer_name
 	customer.woocommerce_email = customer_woo_com_email
 	customer.flags.ignore_mandatory = True
-	customer.save() 
+	customer.save()
 
 	if customer_exists:
 		frappe.rename_doc("Customer", old_name, customer_name)
@@ -110,7 +110,7 @@ def link_items(items_list, woocommerce_settings):
 		else:
 			#Create Item
 			item = frappe.new_doc("Item")
-	
+
 		item.item_name = item_data.get("name")
 		item.item_code = _("woocommerce - {0}").format(item_data.get("product_id"))
 		item.woocommerce_id = item_data.get("product_id")
@@ -119,7 +119,7 @@ def link_items(items_list, woocommerce_settings):
 		item.flags.ignore_mandatory = True
 		item.save()
 
-def create_sales_order(order, woocommerce_settings, customer_name):	
+def create_sales_order(order, woocommerce_settings, customer_name):
 	new_sales_order = frappe.new_doc("Sales Order")
 	new_sales_order.customer = customer_name
 
@@ -166,9 +166,11 @@ def set_items_in_sales_order(new_sales_order, woocommerce_settings, order):
 
 	add_tax_details(new_sales_order, order.get("shipping_tax"), "Shipping Tax", woocommerce_settings.f_n_f_account)
 	add_tax_details(new_sales_order, order.get("shipping_total"), "Shipping Total", woocommerce_settings.f_n_f_account)
-			
+
 def add_tax_details(sales_order, price, desc, tax_account_head):
 	sales_order.append("taxes", {
+		"category": "Total",
+		"add_deduct_tax": "Add",
 		"charge_type":"Actual",
 		"account_head": tax_account_head,
 		"tax_amount": price,
