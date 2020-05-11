@@ -10,7 +10,7 @@ def execute(filters=None):
 	filters = frappe._dict(filters or {})
 	columns = get_columns(filters)
 	data = get_data(filters)
-	chart = prepare_chart_data(data, columns)
+	chart = prepare_chart_data(data) if not filters.get("group_by") else {}
 
 	return columns, data, None, chart
 
@@ -89,20 +89,25 @@ def get_data(filters):
 
 	return data
 
-def prepare_chart_data(data, columns):
-	label_values_map = {}
+def prepare_chart_data(data):
+	labels, asset_values, depreciated_amounts = [], [], []
 	for d in data:
-		if not label_values_map.get(d.get('asset_category')):
-			label_values_map[d.get('asset_category')] = 0
-		label_values_map[d.get('asset_category')] += d.get('asset_value')
+		labels.append(d.asset_id)
+		asset_values.append(d.asset_value)
+		depreciated_amounts.append(d.depreciated_amount)
 
 	return {
 		"data" : {
-			"labels": label_values_map.keys(),
-			"datasets": [{ "values": label_values_map.values() }]
+			"labels": labels,
+			"datasets": [
+				{ 'name': _('Asset Value'), 'values': asset_values },
+				{ 'name': _('Depreciatied Amount'), 'values': depreciated_amounts}
+			]
 		},
-		"type": 'donut',
-		"height": 250
+		"type": "bar",
+		"barOptions": {
+			"stacked": 1
+		},
 	}
 
 def get_finance_book_value_map(filters):
