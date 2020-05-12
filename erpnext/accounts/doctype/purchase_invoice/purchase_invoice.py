@@ -1021,6 +1021,40 @@ class PurchaseInvoice(BuyingController):
 
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
+	
+	def set_status(self, update=False, status=None, update_modified=True):
+		if self.is_new():
+			if self.get('amended_from'):
+				self.status = 'Draft'
+			return
+
+		precision = self.precision("outstanding_amount")
+		outstanding_amount = flt(self.outstanding_amount, precision)
+		due_date = getdate(self.due_date)
+		nowdate = getdate()
+
+		if not status:
+			if self.docstatus == 2:
+				status = "Cancelled"
+			elif self.docstatus == 1:
+				elif outstanding_amount > 0 and due_date < nowdate:
+					self.status = "Overdue"
+				elif outstanding_amount > 0 and due_date >= nowdate:
+					self.status = "Unpaid"
+				#Check if outstanding amount is 0 due to debit note issued against invoice
+				elif outstanding_amount <= 0 and self.is_return == 0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+					self.status = "Debit Note Issued"
+				elif self.is_return == 1:
+					self.status = "Return"
+				elif outstanding_amount<=0:
+					self.status = "Paid"
+				else:
+					self.status = "Submitted"
+			else:
+				self.status = "Draft"
+
+		if update:
+			self.db_set('status', self.status, update_modified = update_modified)
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
