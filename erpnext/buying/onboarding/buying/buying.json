@@ -19,7 +19,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/buying",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-05-06 16:49:17.433261",
+ "modified": "2020-05-12 18:32:05.085967",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",
@@ -32,7 +32,16 @@
    "step": "Create a Supplier"
   },
   {
+   "step": "Create a Warehouse"
+  },
+  {
+   "step": "Create a Product"
+  },
+  {
    "step": "Buying Settings"
+  },
+  {
+   "step": "Create your first Purchase Order"
   }
  ],
  "subtitle": "Products, Purchases, Analysis and more.",
