@@ -329,6 +329,7 @@ def add_uom_data():
 
 	# bootstrap uom conversion factors
 	uom_conversions = json.loads(open(frappe.get_app_path("erpnext", "setup", "setup_wizard", "data", "uom_conversion_data.json")).read())
+	uom_conversion_factor = frappe.db.get_all("UOM Conversion Factor", fields=["*"])
 	for d in uom_conversions:
 		if not frappe.db.exists("UOM Category", _(d.get("category"))):
 			frappe.get_doc({
@@ -336,13 +337,16 @@ def add_uom_data():
 				"category_name": _(d.get("category"))
 			}).insert(ignore_permissions=True)
 
-		uom_conversion = frappe.get_doc({
-			"doctype": "UOM Conversion Factor",
-			"category": _(d.get("category")),
-			"from_uom": _(d.get("from_uom")),
-			"to_uom": _(d.get("to_uom")),
-			"value": d.get("value")
-		}).insert(ignore_permissions=True)
+		existing_uom_conversion_factor = next((data for data in uom_conversion_factor if (data.get("from_uom") == _(d.get("from_uom"))) and\
+			(data.get("to_uom") == _(d.get("to_uom")))), None)
+		if not existing_uom_conversion_factor:
+			uom_conversion = frappe.get_doc({
+				"doctype": "UOM Conversion Factor",
+				"category": _(d.get("category")),
+				"from_uom": _(d.get("from_uom")),
+				"to_uom": _(d.get("to_uom")),
+				"value": d.get("value")
+			}).insert(ignore_permissions=True)
 
 def add_market_segments():
 	records = [

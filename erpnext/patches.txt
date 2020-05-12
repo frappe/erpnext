@@ -514,7 +514,7 @@ erpnext.patches.v11_0.move_leave_approvers_from_employee #13-06-2018
 erpnext.patches.v11_0.update_department_lft_rgt
 erpnext.patches.v11_0.add_default_email_template_for_leave
 erpnext.patches.v11_0.set_default_email_template_in_hr #08-06-2018
-erpnext.patches.v11_0.uom_conversion_data #30-06-2018 #11-05-2020
+erpnext.patches.v11_0.uom_conversion_data #30-06-2018
 erpnext.patches.v10_0.taxes_issue_with_pos
 erpnext.patches.v11_0.update_account_type_in_party_type
 erpnext.patches.v11_0.rename_healthcare_doctype_and_fields
@@ -692,3 +692,4 @@ erpnext.patches.v13_0.set_company_field_in_healthcare_doctypes
 erpnext.patches.v12_0.update_bom_in_so_mr
 execute:frappe.delete_doc("Report", "Department Analytics")
 execute:frappe.rename_doc("Desk Page", "Loan Management", "Loan", force=True)
+erpnext.patches.v12_0.update_uom_converion_factor
