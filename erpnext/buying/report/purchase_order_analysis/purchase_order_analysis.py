@@ -36,25 +36,20 @@ def validate_filters(filters):
 def get_conditions(filters):
 	conditions = ""
 	if filters.get("from_date") and filters.get("to_date"):
-		conditions += " and po.transaction_date between '{0}' and '{1}'".format(filters.get("from_date"),filters.get("to_date"))
+		conditions += " and po.transaction_date between %(from_date)s and %(to_date)s"
 
 	if filters.get("company"):
-		conditions += " and po.company = '{0}'".format(filters.get("company"))
+		conditions += " and po.company = %(company)s"
 
 	if filters.get("purchase_order"):
-		conditions += " and po.name = '{0}'".format(filters.get("purchase_order"))
+		conditions += " and po.name = %(purchase_order)s"
 
 	if filters.get("status"):
-		conditions += " and po.status in (%s)" % ', '.join(['%s']*len(filters.get("status")))
+		conditions += " and po.status in %(status)s"
 
 	return conditions
 
 def get_data(conditions, filters):
-	status = filters.get("status")
-	# temporary fix for dashboard chart
-	if status is None:
-		status = []
-
 	data = frappe.db.sql("""
 		SELECT
 			po.transaction_date as date,
@@ -82,7 +77,7 @@ def get_data(conditions, filters):
 			{0}
 		GROUP BY poi.name
 		ORDER BY po.transaction_date ASC
-	""".format(conditions), tuple(status), as_dict=1)
+	""".format(conditions), filters, as_dict=1)
 
 	return data
 
