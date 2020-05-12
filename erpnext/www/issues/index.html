@@ -1,7 +1,7 @@
 {% extends "templates/base.html" %}
 
 {% block content %}
-<section class="jumbotron bg-light">
+<!-- <section class="jumbotron bg-light">
 	<div class='container'>
 		<h1 class="h1">We're here to help</h1>
 		<p class="mt-4">
@@ -13,25 +13,22 @@
 			</div>
 		</p>
 	</div>
-</section>
-<div class="container mb-5">
+</section> -->
+<!-- <div class="container mb-5">
 	<div class="alert alert-warning">
 		<h6><i class="fa fa-info-circle mr-2" aria-hidden="true"></i>Service Degradation</h6>
 			<p class='mb-2'><b>Holy guacamole!</b> We have noticed minor disruption in ERPNext services. We'll be back soon</p>
 	</div>
-</div>
+</div> -->
 
-<div class='container mb-5'>
+<div class='container mb-5 mt-5'>
 	<div class="row">
-		<!-- <h3 class="h3 pb-3 col-sm-12 col-md-10">View Your Tickets</h3> -->
-		<div class="col-sm-12 col-md-2">
-			<button type="button" class="btn btn-primary" onclick="location.href='/issues'">View Your Tickets</button>
-		</div>
+		<h3 class="h3 pb-3 col-sm-12 col-md-10">Active Tickets</h3>
 		<div class="col-sm-12 col-md-2 text-right">
-			<button type="button" class="btn btn-primary" onclick="location.href='/issues'">New Ticket</button>
+			<button type="button" class="btn btn-primary" onclick="location.href='/support'">Back</button>
 		</div>
 	</div>
-	<!-- <div class="card mb-2 selectable-card">
+	<div class="card mb-2 selectable-card">
 		<div class="card-body">
 			<div class="row">
 				<div class="col-sm-12 col-md-6">
@@ -43,14 +40,14 @@
 				<div class="col-sm-3 col-md-2 text-right">
 					<span class="mb-2 text-muted text-uppercase">ISS-2020-1241</span>
 				</div>
-				<div class="col-sm-3 col-md-2 text-right text-muted"> -->
+				<div class="col-sm-3 col-md-2 text-right text-muted">
 					<!-- Include Octicon Library Here -->
-					<!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" fill="#8d99a6" d="M15 1H6c-.55 0-1 .45-1 1v2H1c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h1v3l3-3h4c.55 0 1-.45 1-1V9h1l3 3V9h1c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zM9 11H4.5L3 12.5V11H1V5h4v3c0 .55.45 1 1 1h3v2zm6-3h-2v1.5L11.5 8H6V2h9v6z"></path></svg> 3
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" fill="#8d99a6" d="M15 1H6c-.55 0-1 .45-1 1v2H1c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h1v3l3-3h4c.55 0 1-.45 1-1V9h1l3 3V9h1c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zM9 11H4.5L3 12.5V11H1V5h4v3c0 .55.45 1 1 1h3v2zm6-3h-2v1.5L11.5 8H6V2h9v6z"></path></svg> 3
 				</div>
 			</div>
 		</div>
-	</div> -->
-	<!-- <div class="card mb-2 selectable-card">
+	</div>
+	<div class="card mb-2 selectable-card">
 		<div class="card-body">
 			<div class="row">
 				<div class="col-sm-12 col-md-6">
@@ -62,14 +59,14 @@
 				<div class="col-sm-3 col-md-2 text-right">
 					<span class="mb-2 text-muted text-uppercase">ISS-2020-1241</span>
 				</div>
-				<div class="col-sm-3 col-md-2 text-right text-muted"> -->
+				<div class="col-sm-3 col-md-2 text-right text-muted">
 					<!-- Include Octicon Library Here -->
-					<!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" fill="#8d99a6" d="M15 1H6c-.55 0-1 .45-1 1v2H1c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h1v3l3-3h4c.55 0 1-.45 1-1V9h1l3 3V9h1c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zM9 11H4.5L3 12.5V11H1V5h4v3c0 .55.45 1 1 1h3v2zm6-3h-2v1.5L11.5 8H6V2h9v6z"></path></svg> 2
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" fill="#8d99a6" d="M15 1H6c-.55 0-1 .45-1 1v2H1c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h1v3l3-3h4c.55 0 1-.45 1-1V9h1l3 3V9h1c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zM9 11H4.5L3 12.5V11H1V5h4v3c0 .55.45 1 1 1h3v2zm6-3h-2v1.5L11.5 8H6V2h9v6z"></path></svg> 2
 				</div>
 			</div>
 		</div>
-	</div> -->
-	<!-- <div class="card mb-2 selectable-card">
+	</div>
+	<div class="card mb-2 selectable-card">
 		<div class="card-body">
 			<div class="row">
 				<div class="col-sm-12 col-md-6">
@@ -81,16 +78,16 @@
 				<div class="col-sm-3 col-md-2 text-right">
 					<span class="mb-2 text-muted text-uppercase">ISS-2020-1241</span>
 				</div>
-				<div class="col-sm-3 col-md-2 text-right text-muted"> -->
+				<div class="col-sm-3 col-md-2 text-right text-muted">
 					<!-- Include Octicon Library Here -->
-					<!-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" fill="#8d99a6" d="M15 1H6c-.55 0-1 .45-1 1v2H1c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h1v3l3-3h4c.55 0 1-.45 1-1V9h1l3 3V9h1c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zM9 11H4.5L3 12.5V11H1V5h4v3c0 .55.45 1 1 1h3v2zm6-3h-2v1.5L11.5 8H6V2h9v6z"></path></svg> 3
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" fill="#8d99a6" d="M15 1H6c-.55 0-1 .45-1 1v2H1c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h1v3l3-3h4c.55 0 1-.45 1-1V9h1l3 3V9h1c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zM9 11H4.5L3 12.5V11H1V5h4v3c0 .55.45 1 1 1h3v2zm6-3h-2v1.5L11.5 8H6V2h9v6z"></path></svg> 3
 				</div>
 			</div>
 		</div>
-	</div> -->
+	</div>
 </div>
 
-<div class='container mb-5'>
+<!-- <div class='container mb-5'>
 	<h3 class="h3 pb-3">Frequently Read Articles</h3>
 	<div class="row row-cols-1 row-cols-md-3">
 		<div class="col mb-4">
@@ -175,7 +172,7 @@
 			</div>
 		</div>
 	</div>
-</div>
+</div> -->
 
 <style>
 	.selectable-card {
