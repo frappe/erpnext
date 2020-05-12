@@ -21,14 +21,61 @@ frappe.query_reports["Fixed Asset Register"] = {
 			reqd: 1
 		},
 		{
-			fieldname:"purchase_date",
-			label: __("Purchase Date"),
-			fieldtype: "Date"
+			"fieldname":"filter_based_on",
+			"label": __("Period Based On"),
+			"fieldtype": "Select",
+			"options": ["Fiscal Year", "Date Range"],
+			"default": ["Fiscal Year"],
+			"reqd": 1,
+			on_change: function() {
+				let filter_based_on = frappe.query_report.get_filter_value('filter_based_on');
+				frappe.query_report.toggle_filter_display('from_fiscal_year', filter_based_on === 'Date Range');
+				frappe.query_report.toggle_filter_display('to_fiscal_year', filter_based_on === 'Date Range');
+				frappe.query_report.toggle_filter_display('from_date', filter_based_on === 'Fiscal Year');
+				frappe.query_report.toggle_filter_display('to_date', filter_based_on === 'Fiscal Year');
+
+				frappe.query_report.refresh();
+			}
 		},
 		{
-			fieldname:"available_for_use_date",
-			label: __("Available For Use Date"),
-			fieldtype: "Date"
+			"fieldname":"from_date",
+			"label": __("Start Date"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.nowdate(),
+			"hidden": 1,
+			"reqd": 1
+		},
+		{
+			"fieldname":"to_date",
+			"label": __("End Date"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.add_months(frappe.datetime.nowdate(), 12),
+			"hidden": 1,
+			"reqd": 1
+		},
+		{
+			"fieldname":"from_fiscal_year",
+			"label": __("Start Year"),
+			"fieldtype": "Link",
+			"options": "Fiscal Year",
+			"default": frappe.defaults.get_user_default("fiscal_year"),
+			"reqd": 1
+		},
+		{
+			"fieldname":"to_fiscal_year",
+			"label": __("End Year"),
+			"fieldtype": "Link",
+			"options": "Fiscal Year",
+			"default": frappe.defaults.get_user_default("fiscal_year"),
+			"reqd": 1
+		},
+		{
+			"fieldname":"date_based_on",
+			"label": __("Date Based On"),
+			"fieldtype": "Select",
+			"options": ["Purchase Date", "Available For Use Date"],
+			"default": "Purchase Date",
+			"reqd": 1
 		},
 		{
 			fieldname:"asset_category",
@@ -49,17 +96,12 @@ frappe.query_reports["Fixed Asset Register"] = {
 			options: "Cost Center"
 		},
 		{
-			fieldname:"finance_book",
-			label: __("Finance Book"),
-			fieldtype: "Link",
-			options: "Finance Book"
-		},
-		{
 			fieldname:"group_by",
 			label: __("Group By"),
 			fieldtype: "Select",
-			options: " \nAsset Category\nLocation",
-			default: '',
+			options: ["--Select a group--", "Asset Category", "Location"],
+			default: "--Select a group--",
+			reqd: 1
 		},
 		{
 			fieldname:"is_existing_asset",

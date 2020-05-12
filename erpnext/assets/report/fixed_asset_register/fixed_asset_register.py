@@ -4,26 +4,33 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cstr, today, flt
+from frappe.utils import cstr, today, flt, add_years, formatdate, getdate
+from erpnext.accounts.report.financial_statements import get_period_list, get_fiscal_year_data, validate_fiscal_year
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
 	columns = get_columns(filters)
 	data = get_data(filters)
-	chart = prepare_chart_data(data) if not filters.get("group_by") else {}
+	chart = prepare_chart_data(data, filters) if filters.get("group_by") not in ("Asset Category", "Location") else {}
 
 	return columns, data, None, chart
 
 def get_conditions(filters):
 	conditions = { 'docstatus': 1 }
 	status = filters.status
+	date_field = frappe.scrub(filters.date_based_on or "Purchase Date")
 
 	if filters.get('company'):
 		conditions["company"] = filters.company
-	if filters.get('purchase_date'):
-		conditions["purchase_date"] = ('<=', filters.get('purchase_date'))
-	if filters.get('available_for_use_date'):
-		conditions["available_for_use_date"] = ('<=', filters.get('available_for_use_date'))
+	if filters.filter_based_on == "Date Range":
+		conditions[date_field] = ["between", [filters.from_date, filters.to_date]]
+	if filters.filter_based_on == "Fiscal Year":
+		fiscal_year = get_fiscal_year_data(filters.from_fiscal_year, filters.to_fiscal_year)
+		validate_fiscal_year(fiscal_year, filters.from_fiscal_year, filters.to_fiscal_year)
+		year_start_date = getdate(fiscal_year.year_start_date)
+		year_end_date = getdate(fiscal_year.year_end_date)
+
+		conditions[date_field] = ["between", [year_start_date, year_end_date]]
 	if filters.get('is_existing_asset'):
 		conditions["is_existing_asset"] = filters.get('is_existing_asset')
 	if filters.get('asset_category'):
@@ -49,16 +56,17 @@ def get_data(filters):
 	pi_supplier_map = get_purchase_invoice_supplier_map()
 
 	conditions = get_conditions(filters)
-	group_by = frappe.scrub(filters.get("group_by") or "")
 
-	if group_by:
-		if group_by == "asset_category":
-			fields = ["asset_category", "gross_purchase_amount", "opening_accumulated_depreciation"]
-		else:
-			fields = ["location", "gross_purchase_amount", "opening_accumulated_depreciation"]
+	group_by = frappe.scrub(filters.get("group_by"))
 
+	if group_by == "asset_category":
+		fields = ["asset_category", "gross_purchase_amount", "opening_accumulated_depreciation"]
 		assets_record = frappe.db.get_all("Asset", filters=conditions, fields=fields, group_by=group_by)
-		print(assets_record)
+
+	elif group_by == "location":
+		fields = ["location", "gross_purchase_amount", "opening_accumulated_depreciation"]
+		assets_record = frappe.db.get_all("Asset", filters=conditions, fields=fields, group_by=group_by)
+
 	else:
 		fields = ["name as asset_id", "asset_name", "status", "department", "cost_center", "purchase_receipt",
 			"asset_category", "purchase_date", "gross_purchase_amount", "location",
@@ -89,19 +97,29 @@ def get_data(filters):
 
 	return data
 
-def prepare_chart_data(data):
-	labels, asset_values, depreciated_amounts = [], [], []
+def prepare_chart_data(data, filters):
+	labels_values_map = {}
+	date_field = frappe.scrub(filters.date_based_on)
+
+	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year, 
+		filters.from_date, filters.to_date, filters.filter_based_on, "Monthly", company=filters.company)
+
+	for d in period_list:
+		labels_values_map.setdefault(d.get('label'), frappe._dict({'asset_value': 0, 'depreciated_amount': 0}))
+
 	for d in data:
-		labels.append(d.get("asset_id"))
-		asset_values.append(d.get("asset_value"))
-		depreciated_amounts.append(d.get("depreciated_amount"))
+		date = d.get(date_field)
+		belongs_to_month = formatdate(date, "MMM YYYY")
+
+		labels_values_map[belongs_to_month].asset_value += d.get("asset_value")
+		labels_values_map[belongs_to_month].depreciated_amount += d.get("depreciated_amount")
 
 	return {
 		"data" : {
-			"labels": labels,
+			"labels": labels_values_map.keys(),
 			"datasets": [
-				{ 'name': _('Asset Value'), 'values': asset_values },
-				{ 'name': _('Depreciatied Amount'), 'values': depreciated_amounts}
+				{ 'name': _('Asset Value'), 'values': [d.get("asset_value") for d in labels_values_map.values()] },
+				{ 'name': _('Depreciatied Amount'), 'values': [d.get("depreciated_amount") for d in labels_values_map.values()] }
 			]
 		},
 		"type": "bar",
@@ -144,7 +162,7 @@ def get_purchase_invoice_supplier_map():
 			AND pi.is_return=0'''))
 
 def get_columns(filters):
-	if filters.get("group_by"):
+	if filters.get("group_by") in ["Asset Category", "Location"]:
 		return [
 			{
 				"label": _("{}").format(filters.get("group_by")),
