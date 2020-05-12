@@ -1581,7 +1581,7 @@
 	},
 	{
 		"category": "Mass",
-		"from_uom": "Grams",
+		"from_uom": "Gram",
 		"to_uom": "Ounce",
 		"abbr": "oz",
 		"value": "0.035274"
