@@ -153,7 +153,7 @@ class Lead(SellingController):
 		if not self.lead_name:
 			self.set_lead_name()
 
-		names = self.lead_name.split(" ")
+		names = self.lead_name.strip().split(" ")
 		if len(names) > 1:
 			first_name, last_name = names[0], " ".join(names[1:])
 		else:
