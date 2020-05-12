@@ -495,6 +495,7 @@ erpnext.patches.v10_0.rename_offer_letter_to_job_offer
 execute:frappe.delete_doc('DocType', 'Production Planning Tool', ignore_missing=True)
 erpnext.patches.v10_0.migrate_daily_work_summary_settings_to_daily_work_summary_group # 24-12-2018
 erpnext.patches.v10_0.add_default_cash_flow_mappers
+erpnext.patches.v11_0.rename_duplicate_item_code_values
 erpnext.patches.v11_0.make_quality_inspection_template
 erpnext.patches.v10_0.update_status_for_multiple_source_in_po
 erpnext.patches.v10_0.set_auto_created_serial_no_in_stock_entry
@@ -630,7 +631,6 @@ execute:frappe.reload_doc('desk', 'doctype', 'dashboard')
 execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart_source')
 execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart')
 execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart_field')
-erpnext.patches.v12_0.add_default_dashboards # 2020-04-05
 erpnext.patches.v12_0.remove_bank_remittance_custom_fields
 erpnext.patches.v12_0.generate_leave_ledger_entries
 execute:frappe.delete_doc_if_exists("Report", "Loan Repayment")
@@ -679,3 +679,5 @@ erpnext.patches.v12_0.fix_quotation_expired_status
 erpnext.patches.v12_0.update_appointment_reminder_scheduler_entry
 erpnext.patches.v12_0.retain_permission_rules_for_video_doctype
 erpnext.patches.v13_0.patch_to_fix_reverse_linking_in_additional_salary_encashment_and_incentive
+execute:frappe.delete_doc_if_exists("Page", "appointment-analytic")
+execute:frappe.rename_doc("Desk Page", "Getting Started", "Home", force=True)
