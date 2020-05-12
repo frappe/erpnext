@@ -334,7 +334,8 @@ erpnext.PointOfSale.Controller = class {
 					this.item_details.toggle_item_details_section(undefined);
 					this.cart.prev_action = undefined;
 					this.cart.toggle_item_highlight();
-				}
+				},
+				get_available_stock: (item_code, warehouse) => this.get_available_stock(item_code, warehouse)
 			}
 		});
 	}
@@ -630,14 +631,7 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	async check_stock_availability(item_row, qty_needed, warehouse) {
-		const res = await frappe.call({
-			method: "erpnext.selling.doctype.pos_invoice.pos_invoice.get_stock_availability",
-			args: {
-				'item_code': item_row.item_code,
-				'warehouse': warehouse,
-			}
-		});
-		const available_qty = res.message;
+		const available_qty = (await this.get_available_stock(item_row.item_code, warehouse)).message;
 
 		frappe.dom.unfreeze();
 		if (!(available_qty > 0)) {
@@ -653,7 +647,22 @@ erpnext.PointOfSale.Controller = class {
 			this.item_details.qty_control.set_value(flt(available_qty));
 		}
 		frappe.dom.freeze();
-		this.item_stock_map[item_row.item_code] = available_qty;
+	}
+
+	get_available_stock(item_code, warehouse) {
+		const me = this;
+		return frappe.call({
+			method: "erpnext.selling.doctype.pos_invoice.pos_invoice.get_stock_availability",
+			args: {
+				'item_code': item_code,
+				'warehouse': warehouse,
+			},
+			callback(res) {
+				if (!me.item_stock_map[item_code])
+					me.item_stock_map[item_code] = {}
+				me.item_stock_map[item_code][warehouse] = res.message;
+			}
+		});
 	}
 
 	update_item_field(value, field_or_action) {

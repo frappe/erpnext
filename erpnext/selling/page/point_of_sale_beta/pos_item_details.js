@@ -167,9 +167,6 @@ erpnext.PointOfSale.ItemDetails = class {
 			this[`${fieldname}_control`].set_value(item[fieldname]);
 		});
 
-		this.item_stock_map = this.events.get_item_stock_map();
-		this[`actual_qty_control`].set_value(this.item_stock_map[item.item_code]);
-
 		this.make_auto_serial_selection_btn(item);
 
 		this.bind_custom_control_change_event();
@@ -217,6 +214,29 @@ erpnext.PointOfSale.ItemDetails = class {
 					});
 				}
 			}
+		}
+
+		if (this.warehouse_control) {
+			this.warehouse_control.df.reqd = 1;
+			this.warehouse_control.df.onchange = function() {
+				if (this.value) {
+					me.events.form_updated(me.doctype, me.name, 'warehouse', this.value).then(() => {
+						me.item_stock_map = me.events.get_item_stock_map();
+
+						if (!me.item_stock_map[me.item_row.item_code][this.value]) {
+							me.events.get_available_stock(me.item_row.item_code, this.value).then((res) => {
+								if(!res.message) {
+									me.warehouse_control.set_value('');
+									frappe.throw(__(`Item Code: ${me.item_row.item_code.bold()} is not available under warehouse ${this.value.bold()}.`));
+								}
+								me.actual_qty_control.set_value(res.message);
+							})
+						}
+						me.actual_qty_control.set_value(me.item_stock_map[me.item_row.item_code][this.value]);
+					});
+				}
+			}
+			this.warehouse_control.refresh();
 		}
 
 		if (this.discount_percentage_control) {
