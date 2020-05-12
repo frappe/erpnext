@@ -297,7 +297,8 @@ def make_reverse_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 			fields = ["*"],
 			filters = {
 				"voucher_type": voucher_type,
-				"voucher_no": voucher_no
+				"voucher_no": voucher_no,
+				"is_cancelled": 0
 			})
 
 	if gl_entries:
