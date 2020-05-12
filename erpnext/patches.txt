@@ -516,7 +516,7 @@ erpnext.patches.v11_0.move_leave_approvers_from_employee #13-06-2018
 erpnext.patches.v11_0.update_department_lft_rgt
 erpnext.patches.v11_0.add_default_email_template_for_leave
 erpnext.patches.v11_0.set_default_email_template_in_hr #08-06-2018
-erpnext.patches.v11_0.uom_conversion_data #30-06-2018 #11-05-2020
+erpnext.patches.v11_0.uom_conversion_data #30-06-2018
 erpnext.patches.v10_0.taxes_issue_with_pos
 erpnext.patches.v11_0.update_account_type_in_party_type
 erpnext.patches.v11_0.rename_healthcare_doctype_and_fields
@@ -667,3 +667,5 @@ execute:frappe.delete_doc_if_exists("Page", "appointment-analytic")
 erpnext.patches.v12_0.unset_customer_supplier_based_on_type_of_item_price
 erpnext.patches.v12_0.set_serial_no_status #2020-05-21
 erpnext.patches.v12_0.update_price_list_currency_in_bom
+execute:frappe.delete_doc_if_exists("Page", "appointment-analytic")
+erpnext.patches.v12_0.update_uom_converion_factor
