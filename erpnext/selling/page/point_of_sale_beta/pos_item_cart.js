@@ -52,7 +52,7 @@ erpnext.PointOfSale.ItemCart = class {
 						<div class="rate-list-header mr-1 text-right">Amount</div>
 					</div>
 					<div class="cart-items-section flex flex-col flex-1 scroll-y rounded w-full"></div>
-					<div class="cart-totals-section flex flex-col mt-4 border border-grey rounded w-full f-shrink-0"></div>
+					<div class="cart-totals-section flex flex-col w-full mt-4 f-shrink-0"></div>
 					<div class="numpad-section flex flex-col mt-4 d-none w-full p-8 pt-0 pb-0 f-shrink-0"></div>
 				</div>		
             </div>`
@@ -85,7 +85,10 @@ erpnext.PointOfSale.ItemCart = class {
         this.$totals_section = this.$component.find('.cart-totals-section');
 
 		this.$totals_section.append(
-			`<div>
+			`<div class="add-discount flex items-center pt-4 pb-4 pr-4 pl-4 text-grey pointer no-select d-none">
+				+ Add Discount
+			</div>
+			<div class="border border-grey rounded">
 				<div class="net-total flex justify-between items-center h-16 pr-8 pl-8 border-b-grey">
 					<div class="flex flex-col">
 						<div class="text-md text-dark-grey text-bold">Net Total</div>
@@ -111,6 +114,8 @@ erpnext.PointOfSale.ItemCart = class {
 				</div>
 			</div>`
 		)
+
+		this.$add_discount_elem = this.$component.find(".add-discount");
     }
     
     make_cart_numpad() {
@@ -191,11 +196,26 @@ erpnext.PointOfSale.ItemCart = class {
 			
 			me.events.checkout();
 			me.toggle_checkout_btn(false);
+
+			me.$add_discount_elem.removeClass("d-none");
 		});
 
 		this.$totals_section.on('click', '.edit-cart-btn', () => {
 			this.events.edit_cart();
 			this.toggle_checkout_btn(true);
+
+			this.$add_discount_elem.addClass("d-none");
+		});
+
+		this.$component.on('click', '.add-discount', () => {
+			const can_edit_discount = this.$add_discount_elem.find('.edit-discount').length;
+
+			if(!this.discount_field || can_edit_discount) this.show_discount_control();
+		});
+
+		frappe.ui.form.on("POS Invoice", "paid_amount", frm => {
+			// called when discount is applied
+			this.update_totals_section(frm);
 		});
 	}
 
@@ -274,7 +294,7 @@ erpnext.PointOfSale.ItemCart = class {
 								() => me.fetch_customer_details(this.value),
 								() => me.events.customer_details_updated(me.customer_info),
 								() => me.update_customer_section(),
-								() => me.update_totals_section(frm),
+								() => me.update_totals_section(),
 								() => frappe.dom.unfreeze()
 							]);
 						})
@@ -317,6 +337,48 @@ erpnext.PointOfSale.ItemCart = class {
 				resolve();
 			});
 		}
+	}
+
+	show_discount_control() {
+		this.$add_discount_elem.removeClass("pr-4 pl-4");
+		this.$add_discount_elem.html(
+			`<div class="add-dicount-field flex flex-1 items-center"></div>
+			<div class="submit-field flex items-center"></div>`
+		);
+		const me = this;
+
+		this.discount_field = frappe.ui.form.make_control({
+			df: {
+				label: __('Discount'),
+				fieldtype: 'Data',
+				placeholder: __('Enter discount percentage.'),
+				onchange: function() {
+					if (this.value || this.value == 0) {
+						const frm = me.events.get_frm();
+						frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', this.value);
+						me.hide_discount_control(this.value);
+					}
+				},
+			},
+			parent: this.$add_discount_elem.find('.add-dicount-field'),
+			render_input: true,
+		});
+		this.discount_field.toggle_label(false);
+		this.discount_field.set_focus();
+	}
+
+	hide_discount_control(discount) {
+		this.$add_discount_elem.addClass('pr-4 pl-4');
+		this.$add_discount_elem.html(
+			`<svg class="mr-2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" 
+				stroke-linecap="round" stroke-linejoin="round">
+				<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+			</svg> 
+			<div class="edit-discount p-1 pr-3 pl-3 text-dark-grey rounded w-fit bg-green-200 mb-2">
+				${String(discount).bold()}% off
+			</div>
+			`
+		);
 	}
     
     update_customer_section() {
@@ -370,6 +432,8 @@ erpnext.PointOfSale.ItemCart = class {
     }
     
     update_totals_section(frm) {
+		if (!frm) frm = this.events.get_frm();
+
 		this.render_net_total(frm.doc.base_net_total);
 		this.render_grand_total(frm.doc.base_grand_total);
 

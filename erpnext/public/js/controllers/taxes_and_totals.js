@@ -39,7 +39,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			this.calculate_total_advance(update_paid_amount);
 		}
 
-		if (this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.is_pos &&
+		if (in_list(["Sales Invoice", "POS Invoice"], this.frm.doc.doctype) && this.frm.doc.is_pos &&
 			this.frm.doc.is_return) {
 			this.update_paid_amount_for_return();
 		}

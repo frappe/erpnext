@@ -98,7 +98,7 @@ erpnext.PointOfSale.Payment = class {
 
 			// hide all control fields and shortcuts
 			$(`.mode-of-payment-control`).addClass('d-none');
-			$(`.shortcuts`).addClass('d-none');
+			$(`.cash-shortcuts`).addClass('d-none');
 			me.$payment_modes.find(`.pay-amount`).removeClass('d-none');
 			me.$payment_modes.find(`.loyalty-points-name`).addClass('d-none');
 
@@ -114,12 +114,15 @@ erpnext.PointOfSale.Payment = class {
 				// clicked one is not selected then select it
 				mode_clicked.addClass('border-primary');
 				mode_clicked.find('.mode-of-payment-control').removeClass('d-none');
-				mode_clicked.find('.shortcuts').removeClass('d-none');
+				mode_clicked.find('.cash-shortcuts').removeClass('d-none');
 				me.$payment_modes.find(`.${mode}-amount`).addClass('d-none');
 				me.$payment_modes.find(`.${mode}-name`).removeClass('d-none');
 				me.toggle_numpad(true);
+
 				me.selected_mode = me[`${mode}_control`];
-				me.selected_mode?.$input.get(0).focus();
+				const doc = me.events.get_frm().doc;
+				me.selected_mode?.$input?.get(0).focus();
+				!me.selected_mode?.get_value() ? me.selected_mode?.set_value(doc.grand_total - doc.paid_amount) : '';
 			}
 		})
 
@@ -149,6 +152,11 @@ erpnext.PointOfSale.Payment = class {
 
 		frappe.ui.form.on('POS Invoice', 'paid_amount', (frm) => {
 			this.update_totals_section(frm.doc);
+
+			// need to re calculate cash shortcuts after discount is applied
+			const is_cash_shortcuts_invisible = this.$payment_modes.find('.cash-shortcuts').hasClass('d-none');
+			this.attach_cash_shortcuts(frm.doc);
+			!is_cash_shortcuts_invisible && this.$payment_modes.find('.cash-shortcuts').removeClass('d-none');
 		})
 
 		frappe.ui.form.on('POS Invoice', 'loyalty_amount', (frm) => {
@@ -243,7 +251,6 @@ erpnext.PointOfSale.Payment = class {
 	render_payment_mode_dom() {
 		const doc = this.events.get_frm().doc;
 		const payments = doc.payments;
-		const grand_total = doc.grand_total;
 		const currency = doc.currency;
 
 		this.$payment_modes.html(
@@ -301,10 +308,18 @@ erpnext.PointOfSale.Payment = class {
 
 		this.render_loyalty_points_payment_mode();
 		
+		this.attach_cash_shortcuts(doc);
+	}
+
+	attach_cash_shortcuts(doc) {
+		const grand_total = doc.grand_total;
+		const currency = doc.currency;
+
 		const shortcuts = this.get_cash_shortcuts(flt(grand_total));
 
+		this.$payment_modes.find('.cash-shortcuts').remove();
 		this.$payment_modes.find('[data-payment-type="Cash"]').find('.mode-of-payment-control').after(
-			`<div class="shortcuts grid grid-cols-3 gap-2 flex-1 text-center text-md-0 mb-2 d-none">
+			`<div class="cash-shortcuts grid grid-cols-3 gap-2 flex-1 text-center text-md-0 mb-2 d-none">
 				${
 					shortcuts.map(s => {
 						return `<div class="shortcut rounded bg-light-grey text-dark-grey pt-2 pb-2 no-select pointer" data-value="${s}">
@@ -366,20 +381,22 @@ erpnext.PointOfSale.Payment = class {
 			</div>`
 		)
 
-		this.loyalty_points_control = frappe.ui.form.make_control({
+		this['loyalty-points_control'] = frappe.ui.form.make_control({
 			df: {
 				label: __('Loyalty Points'),
 				fieldtype: 'Int',
 				placeholder: __(`Enter loyalty points to be redeemed.`),
 				read_only,
 				onchange: async function() {
+					if (!loyalty_points) return;
+
 					if (this.value > loyalty_points) {
 						frappe.show_alert({
 							message: __(`You cannot redeem more than ${loyalty_points} points`),
 							indicator: "red"
 						});
 						frappe.utils.play_sound("submit");
-						me.loyalty_points_control.set_value(0);
+						me['loyalty-points_control'].set_value(0);
 						return;
 					}
 					const redeem_loyalty_points = this.value > 0 ? 1 : 0;
@@ -391,7 +408,7 @@ erpnext.PointOfSale.Payment = class {
 			parent: this.$payment_modes.find(`.loyalty-points.mode-of-payment-control`),
 			render_input: true,
 		});
-		this.loyalty_points_control.toggle_label(false);
+		this['loyalty-points_control'].toggle_label(false);
 
 		// this.render_add_payment_method_dom();
 	}
