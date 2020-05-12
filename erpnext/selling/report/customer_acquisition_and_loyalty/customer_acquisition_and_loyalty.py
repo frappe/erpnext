@@ -61,13 +61,13 @@ def get_data_by_time(filters, common_columns):
     # key yyyy-mm
     columns = [
         {
-            'label': 'Year',
+            'label': _('Year'),
             'fieldname': 'year',
             'fieldtype': 'Data',
             'width': 100
         },
         {
-            'label': 'Month',
+            'label': _('Month'),
             'fieldname': 'month',
             'fieldtype': 'Data',
             'width': 100
@@ -136,6 +136,7 @@ def get_data_by_territory(filters, common_columns):
         repeat = customers_in[name]['repeat'] if condition else [0, 0.0]
         temp = {
             'territory': name,
+            'parent_territory': territory_dict[name]['parent'],
             'indent': indent,
             'new_customers': new[0],
             'repeat_customers': repeat[0],
@@ -146,33 +147,17 @@ def get_data_by_territory(filters, common_columns):
             'bold': 0 if indent else 1
         }
         data.append(temp)
-    node_list = [x for x in territory_dict.keys() if territory_dict[x]['is_group'] == 0]
-    root_node = [x for x in territory_dict.keys() if territory_dict[x]['parent'] is None][0]
-    root_data = [x for x in data if x['territory'] == root_node][0]
 
-    for node in node_list:
-        data = update_groups(node, data, root_node, territory_dict)
+    loop_data = sorted(data, key=lambda k: k['indent'], reverse=True)
 
-    for group in [x for x in territory_dict.keys() if territory_dict[x]['parent'] == root_node]:
-        group_data = [x for x in data if x['territory'] == group][0]
-        for key in group_data.keys():
-            if key not in ['indent', 'territory', 'bold']:
-                root_data[key] += group_data[key]
+    for ld in loop_data:
+        if ld['parent_territory']:
+            parent_data = [x for x in data if x['territory'] == ld['parent_territory']][0]
+            for key in parent_data.keys():
+                if key not in  ['indent', 'territory', 'parent_territory', 'bold']:
+                    parent_data[key] += ld[key]
 
     return columns, data, None, None, None, 1
-
-def update_groups(node, data, root_node, territory_dict):
-    """ Adds values of child territories to parent node except root. """
-    parent_node = territory_dict[node]['parent']
-    if parent_node != root_node and parent_node:
-        node_data = [x for x in data if x['territory'] == node][0]
-        parent_data = [x for x in data if x['territory'] == parent_node][0]
-        for key in parent_data.keys():
-            if key not in ['indent', 'territory', 'bold']:
-                parent_data[key] += node_data[key]
-        return update_groups(parent_node, data, root_node, territory_dict)
-    else:
-        return data
 
 def get_customer_stats(filters, tree_view=False):
     """ Calculates number of new and repeated customers. """
