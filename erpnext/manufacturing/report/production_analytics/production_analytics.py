@@ -61,7 +61,6 @@ def get_periodic_data(filters, entry):
 
 					elif getdate(d.planned_start_date) < getdate(from_date) :
 						periodic_data = update_periodic_data(periodic_data, "Overdue", period)
-						
 					else:
 						periodic_data = update_periodic_data(periodic_data, "Not Started", period)
 
