@@ -14,6 +14,8 @@ from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_
 	process_loan_interest_accrual_for_term_loans)
 from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import days_in_year
 from erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall import create_process_loan_security_shortfall
+from erpnext.loan_management.doctype.loan.loan import create_loan_security_unpledge
+from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
 
 class TestLoan(unittest.TestCase):
 	def setUp(self):
@@ -151,7 +153,7 @@ class TestLoan(unittest.TestCase):
 		repayment_entry.save()
 		repayment_entry.submit()
 
-		penalty_amount = (accrued_interest_amount * 5 * 25) / (100 * days_in_year(get_datetime(first_date).year))
+		penalty_amount = (accrued_interest_amount * 4 * 25) / (100 * days_in_year(get_datetime(first_date).year))
 		self.assertEquals(flt(repayment_entry.penalty_amount, 2), flt(penalty_amount, 2))
 
 		amounts = frappe.db.get_value('Loan Interest Accrual', {'loan': loan.name}, ['paid_interest_amount',
@@ -236,7 +238,7 @@ class TestLoan(unittest.TestCase):
 
 		process_loan_interest_accrual_for_term_loans(posting_date=nowdate())
 
-		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(get_last_day(nowdate()), 5),
+		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(nowdate(), 5),
 			"Regular Payment", 89768.75)
 
 		repayment_entry.submit()
@@ -275,6 +277,55 @@ class TestLoan(unittest.TestCase):
 
 		frappe.db.sql(""" UPDATE `tabLoan Security Price` SET loan_security_price = 250
 			where loan_security='Test Security 2'""")
+
+	def test_loan_security_unpledge(self):
+		pledges = []
+		pledges.append({
+			"loan_security": "Test Security 1",
+			"qty": 4000.00,
+			"haircut": 50
+		})
+
+		loan_security_pledge = create_loan_security_pledge(self.applicant2, pledges)
+		loan = create_demand_loan(self.applicant2, "Demand Loan", loan_security_pledge.name,
+			posting_date=get_first_day(nowdate()))
+		loan.submit()
+
+		self.assertEquals(loan.loan_amount, 1000000)
+
+		first_date = '2019-10-01'
+		last_date = '2019-10-30'
+
+		no_of_days = date_diff(last_date, first_date) + 1
+
+		no_of_days += 6
+
+		accrued_interest_amount = (loan.loan_amount * loan.rate_of_interest * no_of_days) \
+			/ (days_in_year(get_datetime(first_date).year) * 100)
+
+		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=first_date)
+		process_loan_interest_accrual_for_demand_loans(posting_date = last_date)
+
+		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(last_date, 6),
+			"Loan Closure", flt(loan.loan_amount + accrued_interest_amount))
+		repayment_entry.submit()
+
+		amounts = frappe.db.get_value('Loan Interest Accrual', {'loan': loan.name}, ['paid_interest_amount',
+			'paid_principal_amount'])
+
+		loan.load_from_db()
+		self.assertEquals(loan.status, "Loan Closure Requested")
+
+		unpledge_request = create_loan_security_unpledge(loan.name, loan.applicant_type, loan.applicant, loan.company, as_dict=0)
+		unpledge_request.submit()
+		unpledge_request.status = 'Approved'
+		unpledge_request.save()
+		loan.load_from_db()
+
+		pledged_qty = get_pledged_security_qty(loan.name)
+
+		self.assertEqual(loan.status, 'Closed')
+		self.assertEquals(sum(pledged_qty.values()), 0)
 
 
 def create_loan_accounts():

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2017-12-01 12:12:55.048691",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -6,8 +7,9 @@
  "field_order": [
   "item_code",
   "item_name",
-  "warehouse",
   "material_request_type",
+  "from_warehouse",
+  "warehouse",
   "column_break_4",
   "quantity",
   "uom",
@@ -46,6 +48,7 @@
   {
    "fieldname": "material_request_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Material Request Type",
    "options": "\nPurchase\nMaterial Transfer\nMaterial Issue\nManufacture\nCustomer Provided"
   },
@@ -64,11 +67,11 @@
   {
    "fieldname": "projected_qty",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Projected Qty",
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "actual_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -119,10 +122,18 @@
    "label": "UOM",
    "options": "UOM",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.material_request_type == 'Material Transfer'",
+   "fieldname": "from_warehouse",
+   "fieldtype": "Link",
+   "label": "From Warehouse",
+   "options": "Warehouse"
   }
  ],
  "istable": 1,
- "modified": "2019-11-08 15:15:43.979360",
+ "links": [],
+ "modified": "2020-02-03 12:22:29.913302",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Request Plan Item",
