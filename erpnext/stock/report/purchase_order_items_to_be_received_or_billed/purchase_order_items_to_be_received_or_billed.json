@@ -1,5 +1,5 @@
 {
- "add_total_row": 0,
+ "add_total_row": 1,
  "creation": "2019-09-16 14:10:33.102865",
  "disable_prepared_report": 0,
  "disabled": 0,
@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2019-09-21 15:19:55.710578",
+ "modified": "2020-05-13 15:27:45.228418",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Order Items To Be Received or Billed",
