@@ -222,17 +222,17 @@ erpnext.PointOfSale.ItemDetails = class {
 				if (this.value) {
 					me.events.form_updated(me.doctype, me.name, 'warehouse', this.value).then(() => {
 						me.item_stock_map = me.events.get_item_stock_map();
-
-						if (!me.item_stock_map[me.item_row.item_code][this.value]) {
-							me.events.get_available_stock(me.item_row.item_code, this.value).then((res) => {
-								if(!res.message) {
-									me.warehouse_control.set_value('');
-									frappe.throw(__(`Item Code: ${me.item_row.item_code.bold()} is not available under warehouse ${this.value.bold()}.`));
-								}
-								me.actual_qty_control.set_value(res.message);
+						const available_qty = me.item_stock_map[me.item_row.item_code][this.value];
+						if (available_qty === undefined) {
+							me.events.get_available_stock(me.item_row.item_code, this.value).then(() => {
+								// item stock map is updated now reset warehouse
+								me.warehouse_control.set_value(this.value);
 							})
+						} else if (available_qty === 0) {
+							me.warehouse_control.set_value('');
+							frappe.throw(__(`Item Code: ${me.item_row.item_code.bold()} is not available under warehouse ${this.value.bold()}.`));
 						}
-						me.actual_qty_control.set_value(me.item_stock_map[me.item_row.item_code][this.value]);
+						me.actual_qty_control.set_value(available_qty);
 					});
 				}
 			}
