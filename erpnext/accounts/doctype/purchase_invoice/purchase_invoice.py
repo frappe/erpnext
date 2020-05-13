@@ -1037,7 +1037,7 @@ class PurchaseInvoice(BuyingController):
 			if self.docstatus == 2:
 				status = "Cancelled"
 			elif self.docstatus == 1:
-				elif outstanding_amount > 0 and due_date < nowdate:
+				if outstanding_amount > 0 and due_date < nowdate:
 					self.status = "Overdue"
 				elif outstanding_amount > 0 and due_date >= nowdate:
 					self.status = "Unpaid"
