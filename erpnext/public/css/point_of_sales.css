@@ -46,7 +46,7 @@
   .detail-items {
     height: calc(100vh - 230px);
     overflow: auto;
-    border: groove;
+    border: 0.5px solid #8D99A6;
   }
 
   .detail{
@@ -58,7 +58,7 @@
   .cart-items {
     height: calc(100vh - 300px);
     overflow: auto;
-    border: groove;
+    border: 0.5px solid #8D99A6;
   }
   .cart-items .list-item.current-item {
     background-color: #fffce7;
