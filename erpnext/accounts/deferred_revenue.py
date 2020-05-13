@@ -319,6 +319,8 @@ def book_revenue_via_journal_entry(doc, credit_account, debit_account, against,
 	journal_entry = frappe.new_doc('Journal Entry')
 	journal_entry.posting_date = posting_date
 	journal_entry.company = doc.company
+	journal_entry.voucher_type = 'Deferred Revenue Entry' if doc.doctype == 'Sales Invoice' \
+		else 'Deferred Expense Booking'
 
 	debit_entry = {
 		'account': credit_account,
