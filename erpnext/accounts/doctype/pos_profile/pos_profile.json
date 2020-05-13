@@ -187,13 +187,12 @@
   {
    "fieldname": "section_break_11",
    "fieldtype": "Section Break",
-   "label": "Mode of Payment"
+   "label": "Payment Methods"
   },
   {
    "fieldname": "payments",
    "fieldtype": "Table",
-   "label": "Sales Invoice Payment",
-   "options": "Sales Invoice Payment",
+   "options": "POS Payment Method",
    "reqd": 1
   },
   {
@@ -397,7 +396,7 @@
  "icon": "icon-cog",
  "idx": 1,
  "links": [],
- "modified": "2020-05-10 14:48:29.583041",
+ "modified": "2020-05-13 23:58:39.993364",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

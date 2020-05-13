@@ -173,7 +173,7 @@ erpnext.PointOfSale.ItemDetails = class {
     }
 
     get_form_fields(item) {
-		const fields = ['qty', 'rate', 'discount_percentage', 'price_list_rate', 'warehouse', 'actual_qty'];
+		const fields = ['qty', 'uom', 'rate', 'price_list_rate', 'discount_percentage', 'warehouse', 'actual_qty'];
 		if (item.has_serial_no) fields.push('serial_no');
 		if (item.has_batch_no) fields.push('batch_no');
 		return fields;

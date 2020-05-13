@@ -360,7 +360,7 @@ erpnext.PointOfSale.Controller = class {
 				submit_invoice: () => {
 					this.frm.savesubmit()
 						.then((r) => {
-							this.set_invoice_status();
+							// this.set_invoice_status();
 							this.toggle_components(false);
 							this.order_summary.toggle_component(true);
 							this.order_summary.load_summary_of(this.frm.doc, true);
@@ -443,7 +443,7 @@ erpnext.PointOfSale.Controller = class {
 		return frappe.run_serially([
 			() => this.make_sales_invoice_frm(),
 			() => this.set_pos_profile_data(),
-			() => this.set_invoice_status(),
+			() => this.set_pos_profile_status(),
 			() => this.cart.load_invoice(),
 		]);
 	}
@@ -533,6 +533,10 @@ erpnext.PointOfSale.Controller = class {
 	set_invoice_status() {
 		const [status, indicator] = frappe.listview_settings["POS Invoice"].get_indicator(this.frm.doc);
 		this.page.set_indicator(__(`${status}`), indicator);
+	}
+
+	set_pos_profile_status() {
+		this.page.set_indicator(__(`${this.pos_profile}`), "blue");
 	}
 
 	async on_cart_update(args) {
