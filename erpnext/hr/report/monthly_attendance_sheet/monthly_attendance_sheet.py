@@ -30,6 +30,9 @@ day_abbr = [
 def execute(filters=None):
 	if not filters: filters = {}
 
+	if filters.hide_year_field == 1:
+		filters.year = 2020
+
 	conditions, filters = get_conditions(filters)
 	columns, days = get_columns(filters)
 	att_map = get_attendance_list(conditions, filters)
@@ -75,14 +78,11 @@ def execute(filters=None):
 	return columns, data, None, chart_data
 
 def get_chart_data(emp_att_map, days):
-	from pprint import pprint
-	pprint(emp_att_map)
 	labels = []
 	datasets = [
 		{"name": "Absent", "values": []},
 		{"name": "Present", "values": []},
 		{"name": "Leave", "values": []},
-		{"name": "Unmarked", "values": []}
 	]
 	for idx, day in enumerate(days, start=0):
 		p = day.replace("::65", "")
@@ -91,7 +91,6 @@ def get_chart_data(emp_att_map, days):
 		total_leave_on_day = 0
 		total_present_on_day = 0
 		total_holiday = 0
-		total_unmarked_on_day = 0
 		for emp in emp_att_map.keys():
 			if emp_att_map[emp][idx]:
 				if emp_att_map[emp][idx] == "A":
@@ -104,12 +103,10 @@ def get_chart_data(emp_att_map, days):
 				if emp_att_map[emp][idx] == "L":
 					total_leave_on_day += 1
 
-		total_marked = total_absent_on_day + total_present_on_day + total_leave_on_day
 
 		datasets[0]["values"].append(total_absent_on_day)
 		datasets[1]["values"].append(total_present_on_day)
 		datasets[2]["values"].append(total_leave_on_day)
-		datasets[3]["values"].append(frappe.db.count('Employee', {'status':'Active'}) - total_marked)
 
 
 	chart = {
@@ -119,10 +116,11 @@ def get_chart_data(emp_att_map, days):
 		}
 	}
 
-	chart["type"] = "bar"
-	# chart["spaceRatio"] = 0.1
+	chart["type"] = "line"
 
-
+	chart['lineOptions'] = {
+		"dotSize": 6
+	}
 	return chart
 
 

@@ -65,7 +65,7 @@ def get_chart_data(parameters,employees, filters):
 	total_employee = frappe.db.count('Employee', {'status':'Active'})
 	others = total_employee - sum(values)
 
-	label.append(["Others"])
+	label.append(["Not Set"])
 	values.append(others)
 
 	chart = {
