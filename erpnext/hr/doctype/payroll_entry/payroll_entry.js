@@ -78,7 +78,6 @@ frappe.ui.form.on('Payroll Entry', {
 		} else if(frm.doc.salary_slips_created) {
 			frm.add_custom_button(__("Submit Salary Slip"), function() {
 				submit_salary_slip(frm);
-				frm.refresh();
 			}).addClass("btn-primary");
 		}
 	},
@@ -233,12 +232,11 @@ const submit_salary_slip = function (frm) {
 			frappe.call({
 				method: 'submit_salary_slips',
 				args: {},
-				callback: function() {frm.events.refresh(frm);},
+				callback: function() {frm.events.refresh(frm); cur_frm.dashboard.refresh();},
 				doc: frm.doc,
 				freeze: true,
 				freeze_message: 'Submitting Salary Slips and creating Journal Entry...'
 			});
-			frm.refresh();
 		},
 		function() {
 			if(frappe.dom.freeze_count) {
