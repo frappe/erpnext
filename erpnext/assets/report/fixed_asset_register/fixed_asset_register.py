@@ -27,10 +27,10 @@ def get_conditions(filters):
 	if filters.filter_based_on == "Fiscal Year":
 		fiscal_year = get_fiscal_year_data(filters.from_fiscal_year, filters.to_fiscal_year)
 		validate_fiscal_year(fiscal_year, filters.from_fiscal_year, filters.to_fiscal_year)
-		year_start_date = getdate(fiscal_year.year_start_date)
-		year_end_date = getdate(fiscal_year.year_end_date)
+		filters.year_start_date = getdate(fiscal_year.year_start_date)
+		filters.year_end_date = getdate(fiscal_year.year_end_date)
 
-		conditions[date_field] = ["between", [year_start_date, year_end_date]]
+		conditions[date_field] = ["between", [filters.year_start_date, filters.year_end_date]]
 	if filters.get('is_existing_asset'):
 		conditions["is_existing_asset"] = filters.get('is_existing_asset')
 	if filters.get('asset_category'):
@@ -51,11 +51,10 @@ def get_data(filters):
 
 	data = []
 
+	conditions = get_conditions(filters)
 	depreciation_amount_map = get_finance_book_value_map(filters)
 	pr_supplier_map = get_purchase_receipt_supplier_map()
 	pi_supplier_map = get_purchase_invoice_supplier_map()
-
-	conditions = get_conditions(filters)
 
 	group_by = frappe.scrub(filters.get("group_by"))
 
@@ -86,7 +85,7 @@ def get_data(filters):
 				"vendor_name": pr_supplier_map.get(asset.purchase_receipt) or pi_supplier_map.get(asset.purchase_invoice),
 				"gross_purchase_amount": asset.gross_purchase_amount,
 				"opening_accumulated_depreciation": asset.opening_accumulated_depreciation,
-				"depreciated_amount": depreciation_amount_map.get(asset.name) or 0.0,
+				"depreciated_amount": depreciation_amount_map.get(asset.asset_id) or 0.0,
 				"available_for_use_date": asset.available_for_use_date,
 				"location": asset.location,
 				"asset_category": asset.asset_category,
@@ -129,7 +128,7 @@ def prepare_chart_data(data, filters):
 	}
 
 def get_finance_book_value_map(filters):
-	date = filters.get('purchase_date') or filters.get('available_for_use_date') or today()
+	date = filters.to_date if filters.filter_based_on == "Date Range" else filters.year_end_date
 
 	return frappe._dict(frappe.db.sql(''' Select
 		parent, SUM(depreciation_amount)
