@@ -161,6 +161,48 @@
     flex-direction: column;
     padding: 15px 0;
   }
+  .btn-collapse{
+    text-align: left;
+    padding: 0px;
+  }
+
+  .octicon{
+    padding-right: 6px;
+  }
+
+  .total-discount{
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+
+  .btn-add{
+    display: flex;
+    align-items: center;
+    padding-left: 4px;
+    padding-top: 5px;
+  }
+
+  .add{
+    padding: 5px;
+    font-weight: bold;
+    color: slategray;
+    /* background-color: rgb(39, 202, 110);
+    color: white; */
+  }
+
+  /* .add:hover{
+    color: white;
+    background-color: rgb(16, 165, 81);
+  } */
+
+  .grand-total{
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 30px;
+    padding-right: 30px;
+  }
   .discount-amount input:first-child {
     margin-bottom: 10px;
   }
