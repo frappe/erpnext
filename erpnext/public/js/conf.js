@@ -48,3 +48,12 @@ $.extend(frappe.breadcrumbs.module_map, {
 	'Shopping Cart': 'Website',
 	'Contacts': 'CRM'
 });
+
+$.extend(frappe.breadcrumbs.workspace_map, {
+	'Accounts': 'Accounting',
+	'Quality Management': 'Quality',
+	'Selling': 'Retail',
+	'Setup': 'Home'
+});
+
+
