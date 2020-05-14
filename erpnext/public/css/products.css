@@ -1,0 +1,14 @@
+.products-list .card:nth-child(2n+1) {
+  margin-right: 10px;
+}
+
+.products-list .card {
+  max-width: 48%;
+}
+
+@media screen and (max-width:767px) {
+  .products-list.row.no-gutters .card { 
+    max-width: 100%;
+    margin: 0;
+  }
+}
