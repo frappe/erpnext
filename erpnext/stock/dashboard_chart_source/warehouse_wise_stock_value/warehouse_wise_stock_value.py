@@ -10,7 +10,7 @@ from erpnext.stock.utils import get_stock_value_from_bin
 @frappe.whitelist()
 @cache_source
 def get(chart_name = None, chart = None, no_cache = None, filters = None, from_date = None,
-	to_date = None, timespan = None, time_interval = None):
+	to_date = None, timespan = None, time_interval = None, heatmap_year = None):
 	labels, datapoints = [], []
 	filters = frappe.parse_json(filters)
 
