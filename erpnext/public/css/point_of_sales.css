@@ -44,7 +44,7 @@
   }
 
   .detail-items {
-    height: calc(100vh - 230px);
+    height: calc(100vh - 300px);
     overflow: auto;
     border: 0.5px solid #8D99A6;
   }
@@ -73,7 +73,7 @@
   .cart-items .list-item.current-item.rate .rate {
     font-weight: bold;
   }
-  .cart-items .list-item .quantity {
+  .cart-items .list-item {
     flex: 1.5;
   }
   .cart-items input {
@@ -181,15 +181,24 @@
     display: flex;
     align-items: center;
     padding-left: 4px;
-    padding-top: 5px;
+    padding-top: 9px;
   }
 
   .add{
-    padding: 5px;
+    padding: 6px;
     font-weight: bold;
     color: slategray;
     /* background-color: rgb(39, 202, 110);
     color: white; */
+  }
+
+  .register{
+    margin-left: 2px;
+    margin-right: 2px;
+  }
+
+  .input-number{
+    width: 70px;
   }
 
   /* .add:hover{
@@ -198,10 +207,26 @@
   } */
 
   .grand-total{
+    border-bottom: 0.5px solid #8D99A6;
+    border-left: 0.5px solid #8D99A6;
+    border-right: 0.5px solid #8D99A6;
     padding-top: 10px;
     padding-bottom: 10px;
     padding-left: 30px;
     padding-right: 30px;
+  }
+
+  .red{
+    color: rgb(236, 67, 45);
+  }
+
+  .red:hover{
+    color: rgb(236, 67, 45);
+  }
+
+  .total-discount{
+    border-left: 0.5px solid #8D99A6;
+    border-right: 0.5px solid #8D99A6;
   }
   .discount-amount input:first-child {
     margin-bottom: 10px;
@@ -250,5 +275,14 @@
     color: white;
     text-align: center;
     cursor: pointer;
+  }
+
+  .remove-icon, .total, .rate, .discount-percentage, .quantity{
+    justify-content: flex-end;
+    margin-left: 15px;
+  }
+
+  .item-name{
+    flex: 2.0;
   }
   
