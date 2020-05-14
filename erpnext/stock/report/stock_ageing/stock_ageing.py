@@ -246,8 +246,6 @@ def get_chart_data(data, filters):
 		labels.append(row[0])
 		datapoints.append(row[6])
 
-	print(labels)
-	print(datapoints)
 	return {
 		"data" : {
 			"labels": labels,
