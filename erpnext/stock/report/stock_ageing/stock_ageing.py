@@ -37,7 +37,9 @@ def execute(filters=None):
 
 		data.append(row)
 
-	return columns, data
+	chart_data = get_chart_data(data, filters)
+
+	return columns, data, None, chart_data
 
 def get_average_age(fifo_queue, to_date):
 	batch_age = age_qty = total_qty = 0.0
@@ -230,3 +232,31 @@ def get_sle_conditions(filters):
 			where wh.lft >= {0} and rgt <= {1})""".format(lft, rgt))
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
+
+def get_chart_data(data, filters):
+	labels, datapoints = [], []
+
+	if filters.get("show_warehouse_wise_stock"):
+		return {}
+
+	if len(data) > 10:
+		data = data[:10]
+
+	for row in data:
+		labels.append(row[0])
+		datapoints.append(row[6])
+
+	print(labels)
+	print(datapoints)
+	return {
+		"data" : {
+			"labels": labels,
+			"datasets": [
+				{
+					"name": _("Average Age"),
+					"values": datapoints
+				}
+			]
+		},
+		"type" : "bar"
+	}
