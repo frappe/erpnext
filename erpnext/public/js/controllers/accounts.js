@@ -52,6 +52,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 	},
 	taxes_on_form_rendered: function(frm) {
 		erpnext.taxes.set_conditional_mandatory_rate_or_amount(frm.open_grid_row());
+		erpnext.taxes.update_category_and_add_deduct_tax(frm.open_grid_row());
 	},
 
 	allocate_advances_automatically: function(frm) {
@@ -246,6 +247,30 @@ if(!erpnext.taxes.flags[cur_frm.cscript.tax_table]) {
 		cur_frm.cscript.validate_taxes_and_charges(cdt, cdn);
 	});
 
+	frappe.ui.form.on(cur_frm.cscript.tax_table, "category", function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		var open_form = frm.open_grid_row();
+		if(open_form) {
+			erpnext.taxes.update_category_and_add_deduct_tax(open_form);
+		} else {
+			// apply in current row
+			erpnext.taxes.update_category_and_add_deduct_tax(frm.get_field('taxes').grid.get_row(cdn));
+		}
+		refresh_field('add_deduct_tax', row.name, 'taxes');
+	});
+
+	frappe.ui.form.on(cur_frm.cscript.tax_table, "add_deduct_tax", function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		var open_form = frm.open_grid_row();
+		if(open_form) {
+			erpnext.taxes.update_category_and_add_deduct_tax(open_form);
+		} else {
+			// apply in current row
+			erpnext.taxes.update_category_and_add_deduct_tax(frm.get_field('taxes').grid.get_row(cdn));
+		}
+		refresh_field('add_deduct_tax', row.name, 'taxes');
+	});
+
 	frappe.ui.form.on(cur_frm.cscript.tax_table, "charge_type", function(frm, cdt, cdn) {
 		frm.cscript.validate_taxes_and_charges(cdt, cdn);
 		var open_form = frm.open_grid_row();
@@ -282,6 +307,19 @@ erpnext.taxes.set_conditional_mandatory_rate_or_amount = function(grid_row) {
 			grid_row.toggle_reqd("rate", true);
 			grid_row.toggle_editable("tax_amount", false);
 			grid_row.toggle_reqd("tax_amount", false);
+		}
+	}
+}
+
+erpnext.taxes.update_category_and_add_deduct_tax = function(grid_row) {
+	if(grid_row) {
+		if(!grid_row.doc.category && grid_row.doc.add_deduct_tax) {
+			frappe.msgprint(__("Please select Category first"));
+			grid_row.doc.add_deduct_tax = '';
+		}
+		else if(grid_row.doc.category != 'Total' && grid_row.doc.add_deduct_tax == 'Deduct') {
+			frappe.msgprint(__("Cannot deduct when category is for 'Valuation' or 'Valuation and Total'"));
+			grid_row.doc.add_deduct_tax = '';
 		}
 	}
 }
