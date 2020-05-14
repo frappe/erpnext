@@ -661,3 +661,4 @@ erpnext.patches.v12_0.create_irs_1099_field_united_states
 erpnext.patches.v12_0.update_payment_gateway_account_in_shopping_cart_settings
 erpnext.patches.v12_0.add_affirm_integration_field
 erpnext.patches.v12_0.add_taxjar_integration_field
+erpnext.patches.v12_0.update_uom_conversion_factor
