@@ -100,7 +100,7 @@ erpnext.PointOfSale.Payment = class {
 			$(`.mode-of-payment-control`).addClass('d-none');
 			$(`.cash-shortcuts`).addClass('d-none');
 			me.$payment_modes.find(`.pay-amount`).removeClass('d-none');
-			me.$payment_modes.find(`.loyalty-points-name`).addClass('d-none');
+			me.$payment_modes.find(`.loyalty-amount-name`).addClass('d-none');
 
 			// remove highlight from all mode-of-payments
 			$('.mode-of-payment').removeClass('border-primary');
@@ -161,7 +161,7 @@ erpnext.PointOfSale.Payment = class {
 
 		frappe.ui.form.on('POS Invoice', 'loyalty_amount', (frm) => {
 			const formatted_currency = format_currency(frm.doc.loyalty_amount, frm.doc.currency);
-			this.$payment_modes.find(`.loyalty-points-amount`).html(formatted_currency);
+			this.$payment_modes.find(`.loyalty-amount-amount`).html(formatted_currency);
 		});
 
 		frappe.ui.form.on("Sales Invoice Payment", "amount", (frm, cdt, cdn) => {
@@ -352,18 +352,19 @@ erpnext.PointOfSale.Payment = class {
 	render_loyalty_points_payment_mode() {
 		const me = this;
 		const doc = this.events.get_frm().doc;
-		const { loyalty_program, loyalty_points } = this.events.get_customer_details();
+		const { loyalty_program, loyalty_points, conversion_factor } = this.events.get_customer_details();
 
-		this.$payment_modes.find(`.mode-of-payment[data-mode="loyalty-points"]`).parent().remove();
+		this.$payment_modes.find(`.mode-of-payment[data-mode="loyalty-amount"]`).parent().remove();
 		
 		if (!loyalty_program) return;
 
-		let description, read_only;
+		let description, read_only, max_redeemable_amount;
 		if (!loyalty_points) {
 			description = __(`You don't have enough points to redeem.`);
 			read_only = true;
 		} else {
-			description = __(`You can redeem upto ${loyalty_points} points.`);
+			max_redeemable_amount = flt(flt(loyalty_points) * flt(conversion_factor), precision("loyalty_amount", doc))
+			description = __(`You can redeem upto ${format_currency(max_redeemable_amount)}.`);
 			read_only = false;
 		}
 
@@ -372,43 +373,44 @@ erpnext.PointOfSale.Payment = class {
 		this.$payment_modes.append(
 			`<div class="w-half ${margin}">
 				<div class="mode-of-payment rounded border border-grey text-grey text-md
-						mb-4 p-8 pt-4 pb-4 no-select pointer" data-mode="loyalty-points" data-payment-type="loyalty-points">
-					Loyalty Points
-					<div class="loyalty-points-amount pay-amount inline float-right text-bold">${amount}</div>
-					<div class="loyalty-points-name inline float-right text-bold text-md-0 d-none">${loyalty_program}</div>
-					<div class="loyalty-points mode-of-payment-control mt-4 flex flex-1 items-center d-none"></div>
+						mb-4 p-8 pt-4 pb-4 no-select pointer" data-mode="loyalty-amount" data-payment-type="loyalty-amount">
+					Redeem Loyalty Points
+					<div class="loyalty-amount-amount pay-amount inline float-right text-bold">${amount}</div>
+					<div class="loyalty-amount-name inline float-right text-bold text-md-0 d-none">${loyalty_program}</div>
+					<div class="loyalty-amount mode-of-payment-control mt-4 flex flex-1 items-center d-none"></div>
 				</div>
 			</div>`
 		)
 
-		this['loyalty-points_control'] = frappe.ui.form.make_control({
+		this['loyalty-amount_control'] = frappe.ui.form.make_control({
 			df: {
-				label: __('Loyalty Points'),
-				fieldtype: 'Int',
-				placeholder: __(`Enter loyalty points to be redeemed.`),
+				label: __('Redeem Loyalty Points'),
+				fieldtype: 'Currency',
+				placeholder: __(`Enter amount to be redeemed.`),
+				options: 'company:currency',
 				read_only,
 				onchange: async function() {
 					if (!loyalty_points) return;
 
-					if (this.value > loyalty_points) {
+					if (this.value > max_redeemable_amount) {
 						frappe.show_alert({
-							message: __(`You cannot redeem more than ${loyalty_points} points`),
+							message: __(`You cannot redeem more than ${format_currency(max_redeemable_amount)}.`),
 							indicator: "red"
 						});
 						frappe.utils.play_sound("submit");
-						me['loyalty-points_control'].set_value(0);
+						me['loyalty-amount_control'].set_value(0);
 						return;
 					}
 					const redeem_loyalty_points = this.value > 0 ? 1 : 0;
 					await frappe.model.set_value(doc.doctype, doc.name, 'redeem_loyalty_points', redeem_loyalty_points);
-					frappe.model.set_value(doc.doctype, doc.name, 'loyalty_points', this.value);
+					frappe.model.set_value(doc.doctype, doc.name, 'loyalty_points', parseInt(this.value / conversion_factor));
 				},
 				description
 			},
-			parent: this.$payment_modes.find(`.loyalty-points.mode-of-payment-control`),
+			parent: this.$payment_modes.find(`.loyalty-amount.mode-of-payment-control`),
 			render_input: true,
 		});
-		this['loyalty-points_control'].toggle_label(false);
+		this['loyalty-amount_control'].toggle_label(false);
 
 		// this.render_add_payment_method_dom();
 	}

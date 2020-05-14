@@ -319,9 +319,9 @@ erpnext.PointOfSale.ItemCart = class {
 							method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points",
 							args: { customer, loyalty_program, "silent": true },
 							callback: (r) => {
-								const { loyalty_points } = r.message;
+								const { loyalty_points, conversion_factor } = r.message;
 								if (!r.exc) {
-									this.customer_info = { ...message, customer, loyalty_points };
+									this.customer_info = { ...message, customer, loyalty_points, conversion_factor };
 									resolve();
 								}
 							}
