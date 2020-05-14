@@ -82,12 +82,7 @@
   }
  ],
  "category": "Modules",
- "charts": [
-  {
-   "chart_name": "Bank Balance",
-   "label": "Bank Balance"
-  }
- ],
+ "charts": [],
  "creation": "2020-03-02 15:41:59.515192",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
@@ -97,10 +92,11 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Accounting",
- "modified": "2020-05-12 17:20:27.573449",
+ "modified": "2020-05-14 22:28:25.262409",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
+ "onboarding": "Accounts",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 0,
@@ -121,6 +117,11 @@
    "type": "DocType"
   },
   {
+   "label": "Accounts Dashboard",
+   "link_to": "Accounts Dashboard",
+   "type": "Dashboard"
+  },
+  {
    "label": "Journal Entry",
    "link_to": "Journal Entry",
    "type": "DocType"
@@ -138,11 +139,6 @@
   {
    "label": "General Ledger",
    "link_to": "General Ledger",
-   "type": "Report"
-  },
-  {
-   "label": "Profit and Loss Statement",
-   "link_to": "Profit and Loss Statement",
    "type": "Report"
   },
   {

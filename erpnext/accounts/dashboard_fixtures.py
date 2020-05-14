@@ -4,6 +4,8 @@
 import frappe
 import json
 from frappe.utils import nowdate, add_months
+from frappe import _
+from erpnext.accounts.utils import get_fiscal_year
 
 def get_company_for_dashboards():
 	company = frappe.defaults.get_defaults().company
@@ -18,11 +20,11 @@ def get_company_for_dashboards():
 def get_data():
 	return frappe._dict({
 		"dashboards": get_dashboards(),
-		"charts": get_charts()
+		"charts": get_charts(),
+		"number_cards": get_number_cards()
 	})
 
 def get_dashboards():
-
 	return [{
 		"name": "Accounts Dashboard",
 		"dashboard_name": "Accounts",
@@ -33,13 +35,19 @@ def get_dashboards():
 			{ "chart": "Outgoing Bills"},
 			{ "chart": "Accounts Receivable Ageing"},
 			{ "chart": "Accounts Payable Ageing"},
+			{ "chart": "Budget Variance", "width": "Full"},
 			{ "chart": "Bank Balance", "width": "Full"},
+		],
+		"cards": [
+			{"card": "Total Payment Received"}
 		]
 	}]
 
 def get_charts():
 	company = frappe.get_doc("Company", get_company_for_dashboards())
 	bank_account = company.default_bank_account or get_account("Bank", company.name)
+	fiscal_year = get_fiscal_year(date=nowdate())
+	default_cost_center = company.cost_center
 
 	return [
 		{
@@ -58,14 +66,14 @@ def get_charts():
 			"type": "Bar",
 			'timeseries': 0,
 			"chart_type": "Report",
-			"chart_name": "Profit and Loss",
+			"chart_name": _("Profit and Loss"),
 			"is_custom": 1
 		},
 		{
 			"doctype": "Dashboard Chart",
 			"time_interval": "Monthly",
 			"name": "Incoming Bills",
-			"chart_name": "Incoming Bills (Purchase Invoice)",
+			"chart_name": _("Incoming Bills (Purchase Invoice)"),
 			"timespan": "Last Year",
 			"color": "#a83333",
 			"value_based_on": "base_grand_total",
@@ -82,7 +90,7 @@ def get_charts():
 			"doctype": "Dashboard Chart",
 			"name": "Outgoing Bills",
 			"time_interval": "Monthly",
-			"chart_name": "Outgoing Bills (Sales Invoice)",
+			"chart_name": _("Outgoing Bills (Sales Invoice)"),
 			"timespan": "Last Year",
 			"color": "#7b933d",
 			"value_based_on": "base_grand_total",
@@ -112,7 +120,7 @@ def get_charts():
 			"type": "Donut",
 			'timeseries': 0,
 			"chart_type": "Report",
-			"chart_name": "Accounts Receivable Ageing",
+			"chart_name": _("Accounts Receivable Ageing"),
 			"is_custom": 1
 		},
 		{
@@ -128,11 +136,29 @@ def get_charts():
 				"range2": 60,
 				"range3": 90,
 				"range4": 120
-				}),
+			}),
 			"type": "Donut",
 			'timeseries': 0,
 			"chart_type": "Report",
-			"chart_name": "Accounts Payable Ageing",
+			"chart_name": _("Accounts Payable Ageing"),
+			"is_custom": 1
+		},
+		{
+			"doctype": "Dashboard Charts",
+			"name": "Budget Variance",
+			"owner": "Administrator",
+			"report_name": "Budget Variance Report",
+			"filters_json": json.dumps({
+				"company": company.name,
+				"from_fiscal_year": fiscal_year[0],
+				"to_fiscal_year": fiscal_year[0],
+				"period": "Monthly",
+				"budget_against": "Cost Center"
+			}),
+			"type": "Bar",
+			"timeseries": 0,
+			"chart_type": "Report",
+			"chart_name": _("Budget Variance"),
 			"is_custom": 1
 		},
 		{
@@ -149,5 +175,21 @@ def get_charts():
 			"type": "Line",
 			"width": "Half"
 		},
+	]
 
+def get_number_cards():
+	return [
+		{
+			"doctype": "Number Card",
+			"document_type": "Payment Entry",
+			"name": "Total Payment Received",
+			"filters_json": json.dumps([]),
+			"label": _("Total Payment Received"),
+			"function": "Sum",
+			"aggregate_function_based_on": "base_received_amount",
+			"is_public": 1,
+			"is_custom": 1,
+			"show_percentage_stats": 1,
+			"stats_time_interval": "Daily"
+		}
 	]
