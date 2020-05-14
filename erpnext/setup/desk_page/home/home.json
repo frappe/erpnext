@@ -47,26 +47,20 @@
   }
  ],
  "category": "Modules",
- "charts": [
-  {
-   "chart_name": "Bank Balance",
-   "label": "Bank Balance"
-  }
- ],
+ "charts": [],
  "creation": "2020-01-23 13:46:38.833076",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Desk Page",
  "extends_another_page": 0,
- "icon": "",
  "idx": 0,
  "is_standard": 1,
- "label": "Getting Started",
- "modified": "2020-04-01 11:30:19.763099",
+ "label": "Home",
+ "modified": "2020-05-11 10:20:37.358701",
  "modified_by": "Administrator",
  "module": "Setup",
- "name": "Getting Started",
+ "name": "Home",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 1,
