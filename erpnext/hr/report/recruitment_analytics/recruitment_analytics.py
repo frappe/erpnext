@@ -2,7 +2,6 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-from pprint import pprint
 import frappe
 from frappe import _
 
@@ -55,7 +54,7 @@ def get_columns():
 		},
 		{
 			"label": _("Job Offer"),
-			"fieldtype": "link",
+			"fieldtype": "Link",
 			"fieldname": "job_offer",
 			"options": "job Offer",
 			"width": 150
@@ -82,8 +81,6 @@ def get_data(filters):
 	jo_ja_map , ja_list = get_job_applicant(jo_list)
 	ja_joff_map = get_job_offer(ja_list)
 
-	print(ja_joff_map)
-
 	for sp in sp_jo_map.keys():
 		parent_row = get_parent_row(sp_jo_map, sp, jo_ja_map, ja_joff_map)
 		data += parent_row
@@ -105,7 +102,6 @@ def get_parent_row(sp_jo_map, sp, jo_ja_map, ja_joff_map):
 
 def get_child_row(jo, jo_ja_map, ja_joff_map):
 	data = []
-	print(jo)
 	for ja in jo_ja_map[jo]:
 		row = {
 			"indent":1,
@@ -126,11 +122,14 @@ def get_staffing_plan(filters):
 
 	staffing_plan = frappe.db.sql("""
 	select
-		sp.name, sp.department, spd.designation, spd.vacancies, spd.current_count, spd.parent
+		sp.name, sp.department, spd.designation, spd.vacancies, spd.current_count, spd.parent, sp.to_date
 	from
 		`tabStaffing Plan Detail` spd , `tabStaffing Plan` sp
 	where
-		spd.parent = sp.name """, as_dict = 1)
+			spd.parent = sp.name
+		And
+			sp.to_date > '{0}'
+		""".format(filters.on_date), as_dict = 1)
 
 	return staffing_plan
 

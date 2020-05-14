@@ -13,24 +13,11 @@ frappe.query_reports["Recruitment Analytics"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"from_date",
-			"label": __("From Date"),
+			"fieldname":"on_date",
+			"label": __("On Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.add_months(frappe.datetime.month_start(), -1),
+			"default": frappe.datetime.now_date(),
 			"reqd": 1,
-		},
-		{
-			"fieldname":"to_date",
-			"label": __("To Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.add_days(frappe.datetime.month_start(),-1),
-			"reqd": 1
-		},
-		{
-			"fieldname":"Group By",
-			"label": __("group_by"),
-			"fieldtype": "Select",
-			"options": ["Department", "Designation"]
 		},
 	]
 };
