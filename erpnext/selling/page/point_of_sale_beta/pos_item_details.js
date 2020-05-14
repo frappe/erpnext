@@ -52,20 +52,24 @@ erpnext.PointOfSale.ItemDetails = class {
     }
 
     toggle_item_details_section(item) {
-        const { item_code, batch_no } = this.current_item; 
-        this.show_details = !item ? false : item_code === item.item_code && batch_no == item.batch_no ? false : true;
+		const { item_code, batch_no, uom } = this.current_item; 
+		const item_code_is_same = item && item_code === item.item_code;
+		const batch_is_same = item && batch_no == item.batch_no;
+		const uom_is_same = item && uom === item.uom;
 
-        this.events.toggle_item_selector(this.show_details);
-		this.toggle_component(this.show_details);
+        this.item_has_changed = !item ? false : item_code_is_same && batch_is_same && uom_is_same ? false : true;
+
+        this.events.toggle_item_selector(this.item_has_changed);
+		this.toggle_component(this.item_has_changed);
         
-		if (this.show_details) {
+		if (this.item_has_changed) {
             this.doctype = item.doctype;
 			this.item_meta = frappe.get_meta(this.doctype);
 			this.name = item.name;
 			this.item_row = item;
             this.currency = this.events.get_frm().doc.currency;
             
-            this.current_item = { item_code: item.item_code, batch_no: item.batch_no };
+            this.current_item = { item_code: item.item_code, batch_no: item.batch_no, uom: item.uom };
             
 			this.render_dom(item);
 			this.render_discount_dom(item);
@@ -271,11 +275,19 @@ erpnext.PointOfSale.ItemDetails = class {
 				}
 			};
 			this.batch_no_control.df.onchange = function() {
-				me.events.set_batch_in_current_cart_item(this.value);
+				me.events.set_value_in_current_cart_item('batch-no', this.value);
                 me.events.form_updated(me.doctype, me.name, 'batch_no', this.value);
                 me.current_item.batch_no = this.value;
 			}
 			this.batch_no_control.refresh();
+		}
+
+		if (this.uom_control) {
+			this.uom_control.df.onchange = function() {
+				me.events.set_value_in_current_cart_item('uom', this.value);
+				me.events.form_updated(me.doctype, me.name, 'uom', this.value);
+				me.current_item.uom = this.value;
+			}
 		}
     }
     

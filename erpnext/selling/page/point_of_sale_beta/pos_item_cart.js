@@ -187,7 +187,8 @@ erpnext.PointOfSale.ItemCart = class {
 
 			const item_code = unescape($cart_item.attr('data-item-code'));
 			const batch_no = unescape($cart_item.attr('data-batch-no'));
-			me.events.cart_item_clicked(item_code, batch_no);
+			const uom = unescape($cart_item.attr('data-uom'));
+			me.events.cart_item_clicked(item_code, batch_no, uom);
 			this.numpad_value = '';
 		});
 
@@ -496,9 +497,13 @@ erpnext.PointOfSale.ItemCart = class {
 		}
     }
 
-    get_cart_item({ item_code, batch_no }) {
+    get_cart_item({ item_code, batch_no, uom }) {
+		const batch_attr = `[data-batch-no="${escape(batch_no)}"]`;
+		const item_code_attr = `[data-item-code="${escape(item_code)}"]`;
+		const uom_attr = `[data-uom=${escape(uom)}]`;
+
         const item_selector = batch_no ? 
-            `.cart-item-wrapper[data-batch-no="${escape(batch_no)}"]` : `.cart-item-wrapper[data-item-code="${escape(item_code)}"]`;
+            `.cart-item-wrapper${batch_attr}${uom_attr}` : `.cart-item-wrapper${item_code_attr}${uom_attr}`;
             
         return this.$cart_items_wrapper.find(item_selector);
     }
@@ -509,10 +514,10 @@ erpnext.PointOfSale.ItemCart = class {
 		if (remove_item) {
 			$item && $item.remove();
 		} else {
-			const { item_code, batch_no } = item;
+			const { item_code, batch_no, uom } = item;
 			const search_field = batch_no ? 'batch_no' : 'item_code';
 			const search_value = batch_no || item_code;
-			const item_row = this.events.get_frm().doc.items.find(i => i[search_field] === search_value);
+			const item_row = this.events.get_frm().doc.items.find(i => i[search_field] === search_value && i.uom === uom);
 			
 			this.render_cart_item(item_row, $item);
 		}
@@ -530,7 +535,8 @@ erpnext.PointOfSale.ItemCart = class {
         if (!$item_to_update.length) {
             this.$cart_items_wrapper.append(
                 `<div class="cart-item-wrapper flex items-center h-18 pr-4 pl-4 rounded border-grey pointer no-select" 
-                        data-item-code="${escape(item_data.item_code)}" data-batch-no="${escape(item_data.batch_no || '')}">
+						data-item-code="${escape(item_data.item_code)}" data-uom="${escape(item_data.uom)}"
+						data-batch-no="${escape(item_data.batch_no || '')}">
                 </div>`
             )
             $item_to_update = this.get_cart_item(item_data);
@@ -608,9 +614,9 @@ erpnext.PointOfSale.ItemCart = class {
 		this.$cart_items_wrapper.animate({ scrollTop });
 	}
 	
-	update_batch_in_cart_item(batch_no, item) {
+	update_selector_value_in_cart_item(selector, value, item) {
 		const $item_to_update = this.get_cart_item(item);
-		$item_to_update.attr('data-batch-no', batch_no);
+		$item_to_update.attr(`data-${selector}`, value);
 	}
 
     toggle_checkout_btn(show_checkout) {

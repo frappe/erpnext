@@ -75,7 +75,7 @@ erpnext.PointOfSale.ItemSelector = class {
     }
 
     get_item_html(item) {
-        const { item_image, serial_no, batch_no, barcode, actual_qty } = item;
+        const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom } = item;
         const indicator_color = actual_qty > 10 ? "green" : actual_qty !== 0 ? "orange" : "red";
 
         function get_item_image_html() {
@@ -91,8 +91,8 @@ erpnext.PointOfSale.ItemSelector = class {
         }
 
 		return (
-            `<div class="item-wrapper rounded shadow pointer no-select"
-                data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}" data-batch-no="${escape(batch_no)}"
+            `<div class="item-wrapper rounded shadow pointer no-select" data-item-code="${escape(item.item_code)}"
+                data-serial-no="${escape(serial_no)}" data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
                 title="Avaiable Qty: ${actual_qty}">
                 ${get_item_image_html()}
                 <div class="flex items-center pr-4 pl-4 h-10 justify-between">
@@ -164,11 +164,14 @@ erpnext.PointOfSale.ItemSelector = class {
 			const item_code = unescape($item.attr('data-item-code'));
             let batch_no = unescape($item.attr('data-batch-no'));
             let serial_no = unescape($item.attr('data-serial-no'));
+            let uom = unescape($item.attr('data-uom'));
             
+            // escape(undefined) returns "undefined" then unescape returns "undefined"
             batch_no = batch_no === "undefined" ? undefined : batch_no;
             serial_no = serial_no === "undefined" ? undefined : serial_no;
+            uom = uom === "undefined" ? undefined : uom;
 
-            me.events.item_selected({ field: 'qty', value: "+1", item: { item_code, batch_no, serial_no }});
+            me.events.item_selected({ field: 'qty', value: "+1", item: { item_code, batch_no, serial_no, uom }});
         })
 
         this.search_field.$input.on('input', (e) => {

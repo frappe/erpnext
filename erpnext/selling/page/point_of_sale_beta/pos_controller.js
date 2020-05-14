@@ -252,8 +252,12 @@ erpnext.PointOfSale.Controller = class {
 			events: {
 				get_frm: () => this.frm,
 
-				cart_item_clicked: (item_code, batch_no) => {
-					const item_row = this.frm.doc.items.find(i => i.item_code === item_code && (!batch_no || (batch_no && i.batch_no === batch_no)));
+				cart_item_clicked: (item_code, batch_no, uom) => {
+					const item_row = this.frm.doc.items.find(
+						i => i.item_code === item_code 
+							&& i.uom === uom
+							&& (!batch_no || (batch_no && i.batch_no === batch_no))
+					);
 					this.item_details.toggle_item_details_section(item_row);
 				},
 
@@ -294,11 +298,11 @@ erpnext.PointOfSale.Controller = class {
 							return;
 						}
 
-						const { item_code, batch_no } = this.item_details.current_item;
+						const { item_code, batch_no, uom } = this.item_details.current_item;
 						const event = {
 							field: fieldname,
 							value,
-							item: { item_code, batch_no }
+							item: { item_code, batch_no, uom }
 						}
 						return this.on_cart_update(event)
 					}
@@ -307,8 +311,8 @@ erpnext.PointOfSale.Controller = class {
 				item_field_focused: (fieldname) => {
 					this.cart.toggle_numpad_field_edit(fieldname);
 				},
-				set_batch_in_current_cart_item: (batch_no) => {
-					this.cart.update_batch_in_cart_item(batch_no, this.item_details.current_item);
+				set_value_in_current_cart_item: (selector, value) => {
+					this.cart.update_selector_value_in_cart_item(selector, value, this.item_details.current_item);
 				},
 				clone_new_batch_item_in_frm: (batch_serial_map, current_item) => {
 					// called if serial nos are 'auto_selected' and if those serial nos belongs to multiple batches
@@ -543,8 +547,9 @@ erpnext.PointOfSale.Controller = class {
 		frappe.dom.freeze();
 		try {
 			let { field, value, item } = args;
-			const { item_code, batch_no, serial_no } = item;
-			let item_row = this.get_item_from_frm(item_code, batch_no);
+			const { item_code, batch_no, serial_no, uom } = item;
+			let item_row = this.get_item_from_frm(item_code, batch_no, uom);
+
 			const item_selected_from_selector = field === 'qty' && value === "+1"
 
 			if (item_row) {
@@ -595,8 +600,13 @@ erpnext.PointOfSale.Controller = class {
 		}
 	}
 
-	get_item_from_frm(item_code, batch_no) {
-		return this.frm.doc.items.find(i => i.item_code === item_code && i.batch_no == batch_no);
+	get_item_from_frm(item_code, batch_no, uom) {
+		const has_batch_no = batch_no;
+		return this.frm.doc.items.find(
+			i => i.item_code === item_code 
+				&& (!has_batch_no || (has_batch_no && i.batch_no === batch_no))
+				&& (i.uom === uom)
+		);
 	}
 
 	edit_item_details_of(item_row) {
