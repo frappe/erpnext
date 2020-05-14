@@ -5,6 +5,10 @@
 <h1>{{ _('Products') }}</h1>
 {% endblock header %}
 
+{% block style %}
+<link rel="stylesheet" href="/assets/erpnext/css/products.css">
+{% endblock %}
+
 {% block page_content %}
 <div class="row">
 	<div class="col-8">
@@ -31,7 +35,7 @@
 </div>
 
 <div class="row">
-	<div class="col-12 order-2 col-md-8 order-md-1 products-list">
+	<div class="col-12 order-2 col-md-8 order-md-1 products-list row no-gutters">
 		{% if items %}
 			{% for item in items %}
 				{% include "erpnext/www/all-products/item_row.html" %}
