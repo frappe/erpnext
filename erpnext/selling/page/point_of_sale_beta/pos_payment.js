@@ -262,7 +262,7 @@ erpnext.PointOfSale.Payment = class {
 				const amount = p.amount > 0 ? format_currency(p.amount, currency) : '';
 
 				return (
-					`<div class="w-half ${margin}">
+					`<div class="w-half ${margin} bg-white">
 						<div class="mode-of-payment rounded border border-grey text-grey text-md
 								mb-4 p-8 pt-4 pb-4 no-select pointer" data-mode="${mode}" data-payment-type="${payment_type}">
 							${p.mode_of_payment}
@@ -371,7 +371,7 @@ erpnext.PointOfSale.Payment = class {
 		const margin = this.$payment_modes.children().length % 2 === 0 ? 'pr-2' : 'pl-2';
 		const amount = doc.loyalty_amount > 0 ? format_currency(doc.loyalty_amount, doc.currency) : '';
 		this.$payment_modes.append(
-			`<div class="w-half ${margin}">
+			`<div class="w-half ${margin} bg-white">
 				<div class="mode-of-payment rounded border border-grey text-grey text-md
 						mb-4 p-8 pt-4 pb-4 no-select pointer" data-mode="loyalty-amount" data-payment-type="loyalty-amount">
 					Redeem Loyalty Points
