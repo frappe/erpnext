@@ -16,7 +16,7 @@ def execute(filters=None):
 def get_data(filters):
 	query_filters = {}
 
-	fields = ["workstation", "operator", "from_time", "to_time", "downtime", "reason"]
+	fields = ["workstation", "operator", "from_time", "to_time", "downtime", "stop_reason", "more_details"]
 
 	query_filters["from_time"] = (">=", filters.get("from_date"))
 	query_filters["to_time"] = ("<=", filters.get("to_date"))
@@ -88,8 +88,8 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Reason"),
-			"fieldname": "reason",
-			"fieldtype": "Text",
-			"width": 180
+			"fieldname": "stop_reason",
+			"fieldtype": "Data",
+			"width": 220
 		}
 	]

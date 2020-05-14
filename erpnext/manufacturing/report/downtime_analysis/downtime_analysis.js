@@ -7,15 +7,15 @@ frappe.query_reports["Downtime Analysis"] = {
 		{
 			label: __("From Date"),
 			fieldname:"from_date",
-			fieldtype: "Date",
-			default: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
+			fieldtype: "Datetime",
+			default: frappe.datetime.add_months(frappe.datetime.now_datetime(), -1),
 			reqd: 1
 		},
 		{
 			label: __("To Date"),
 			fieldname:"to_date",
-			fieldtype: "Date",
-			default: frappe.datetime.get_today(),
+			fieldtype: "Datetime",
+			default: frappe.datetime.now_datetime(),
 			reqd: 1,
 		},
 		{
