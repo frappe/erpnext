@@ -223,9 +223,9 @@ erpnext.PointOfSale.Controller = class {
 		if (!this.$components_wrapper.is(":visible")) return;
 
 		let voucher = frappe.model.get_new_doc('POS Closing Entry');
-		voucher.pos_profile = me.frm.doc.pos_profile;
+		voucher.pos_profile = this.frm.doc.pos_profile;
 		voucher.user = frappe.session.user;
-		voucher.company = me.frm.doc.company;
+		voucher.company = this.frm.doc.company;
 		voucher.pos_opening_entry = this.pos_opening;
 		voucher.period_end_date = frappe.datetime.now_datetime();
 		voucher.posting_date = frappe.datetime.now_date();

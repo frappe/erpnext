@@ -52,6 +52,7 @@ class POSInvoiceMergeLog(Document):
 		
 		sales_invoice = self.merge_pos_invoice_into(sales_invoice, data)
 
+		sales_invoice.is_consolidated = 1
 		sales_invoice.save()
 		sales_invoice.submit()
 		self.consolidated_invoice = sales_invoice.name
@@ -64,6 +65,8 @@ class POSInvoiceMergeLog(Document):
 
 		credit_note = self.merge_pos_invoice_into(credit_note, data)
 
+		credit_note.is_consolidated = 1
+		# TODO: return could be against multiple sales invoice which could also have been consolidated?
 		credit_note.return_against = self.consolidated_invoice
 		credit_note.save()
 		credit_note.submit()
@@ -122,7 +125,6 @@ class POSInvoiceMergeLog(Document):
 		sales_invoice = frappe.new_doc('Sales Invoice')
 		sales_invoice.customer = self.customer
 		sales_invoice.is_pos = 1
-		sales_invoice.is_consolidated = 1
 		# date can be pos closing date?
 		sales_invoice.posting_date = getdate(nowdate())
 

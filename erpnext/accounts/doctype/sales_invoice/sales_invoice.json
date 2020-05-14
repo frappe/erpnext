@@ -1571,10 +1571,11 @@
    "default": "0",
    "fieldname": "is_consolidated",
    "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Is Consolidated"
+   "label": "Is Consolidated",
+   "read_only": 1
   },
   {
+   "default": "0",
    "fetch_from": "customer.is_internal_customer",
    "fieldname": "is_internal_customer",
    "fieldtype": "Check",
@@ -1586,7 +1587,7 @@
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-29 13:37:09.355300",
+ "modified": "2020-05-14 15:59:58.037878",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
