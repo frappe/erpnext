@@ -26,31 +26,22 @@ frappe.query_reports["Fixed Asset Register"] = {
 			"fieldtype": "Select",
 			"options": ["Fiscal Year", "Date Range"],
 			"default": ["Fiscal Year"],
-			"reqd": 1,
-			on_change: function() {
-				let filter_based_on = frappe.query_report.get_filter_value('filter_based_on');
-				frappe.query_report.toggle_filter_display('from_fiscal_year', filter_based_on === 'Date Range');
-				frappe.query_report.toggle_filter_display('to_fiscal_year', filter_based_on === 'Date Range');
-				frappe.query_report.toggle_filter_display('from_date', filter_based_on === 'Fiscal Year');
-				frappe.query_report.toggle_filter_display('to_date', filter_based_on === 'Fiscal Year');
-
-				frappe.query_report.refresh();
-			}
+			"reqd": 1
 		},
 		{
 			"fieldname":"from_date",
 			"label": __("Start Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.nowdate(),
-			"hidden": 1,
+			"default": frappe.datetime.add_months(frappe.datetime.nowdate(), -12),
+			"depends_on": "eval: doc.filter_based_on == 'Date Range'",
 			"reqd": 1
 		},
 		{
 			"fieldname":"to_date",
 			"label": __("End Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.add_months(frappe.datetime.nowdate(), 12),
-			"hidden": 1,
+			"default": frappe.datetime.nowdate(),
+			"depends_on": "eval: doc.filter_based_on == 'Date Range'",
 			"reqd": 1
 		},
 		{
@@ -59,6 +50,7 @@ frappe.query_reports["Fixed Asset Register"] = {
 			"fieldtype": "Link",
 			"options": "Fiscal Year",
 			"default": frappe.defaults.get_user_default("fiscal_year"),
+			"depends_on": "eval: doc.filter_based_on == 'Fiscal Year'",
 			"reqd": 1
 		},
 		{
@@ -67,6 +59,7 @@ frappe.query_reports["Fixed Asset Register"] = {
 			"fieldtype": "Link",
 			"options": "Fiscal Year",
 			"default": frappe.defaults.get_user_default("fiscal_year"),
+			"depends_on": "eval: doc.filter_based_on == 'Fiscal Year'",
 			"reqd": 1
 		},
 		{
