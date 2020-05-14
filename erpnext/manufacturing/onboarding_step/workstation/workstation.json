@@ -6,10 +6,14 @@
  "idx": 0,
  "is_complete": 0,
  "is_mandatory": 0,
+ "is_single": 0,
  "is_skipped": 0,
- "modified": "2020-05-12 16:16:58.808906",
+ "modified": "2020-05-14 19:10:20.930139",
  "modified_by": "Administrator",
  "name": "Workstation",
  "owner": "Administrator",
- "title": "Create Workstation"
+ "reference_document": "Workstation",
+ "show_full_form": 0,
+ "title": "Create Workstation / Machine",
+ "validate_action": 1
 }

@@ -32,7 +32,11 @@
   }
  ],
  "category": "Domains",
- "charts": [],
+ "charts": [
+  {
+   "chart_name": "Produced Quantity"
+  }
+ ],
  "creation": "2020-03-02 17:11:37.032604",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
@@ -42,7 +46,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Manufacturing",
- "modified": "2020-05-14 15:06:45.963942",
+ "modified": "2020-05-14 18:57:26.810652",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
