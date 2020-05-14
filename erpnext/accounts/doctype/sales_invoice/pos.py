@@ -189,6 +189,7 @@ def get_items_list(pos_profile, company):
 		where
 			i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1
 			{cond}
+		group by i.item_code
 		""".format(cond=cond), tuple([company] + args_list), as_dict=1)
 
 
