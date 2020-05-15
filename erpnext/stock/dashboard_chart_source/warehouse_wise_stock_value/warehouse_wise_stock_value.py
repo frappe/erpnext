@@ -25,6 +25,10 @@ def get(chart_name = None, chart = None, no_cache = None, filters = None, from_d
 		wh["balance"] = balance[0][0]
 
 	warehouses  = [x for x in warehouses if not (x.get('balance') == None)]
+
+	if not warehouses:
+		return []
+
 	sorted_warehouse_map = sorted(warehouses, key = lambda i: i['balance'],reverse=True)
 
 	if len(sorted_warehouse_map) > 10:
