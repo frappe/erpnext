@@ -17,7 +17,7 @@ from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_
 
 class TestPayrollEntry(unittest.TestCase):
 	def setUp(self):
-		for dt in ["Salary Slip", "Salary Component", "Salary Component Account", "Payroll Entry"]:
+		for dt in ["Salary Slip", "Salary Component", "Salary Component Account", "Payroll Entry", "Salary Structure"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
 
 		make_earning_salary_component(setup=True, company_list=["_Test Company"])

@@ -145,7 +145,7 @@ def import_attendances(rows):
 
 	def remove_holidays(rows):
 		rows = [ row for row in rows if row[4] != "Holiday"]
-		return
+		return rows
 
 	from frappe.modules import scrub
 
