@@ -11,4 +11,4 @@ def get_context(context):
     context.reference_doctype = "Issue"
     context.reference_name = issue_name
     context.comment_list = get_comment_list(context.reference_doctype,
-					context.reference_name, reverse=False, get_all_records=True)
+					context.reference_name, reverse=False, fetch_all=True)
