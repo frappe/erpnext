@@ -19,9 +19,12 @@ erpnext.PointOfSale.Payment = class {
 	prepare_dom() {
 		this.wrapper.append(
             `<section class="col-span-6 flex shadow rounded payment-section bg-white mx-h-70 h-100 d-none">
-                <div class="flex flex-col p-16 pt-8 pb-8 w-full">
-                    <div class="text-grey mb-6">PAYMENT METHOD</div>
-                    <div class="payment-modes flex flex-wrap"></div>
+				<div class="flex flex-col p-16 pt-8 pb-8 w-full">
+					<div class="text-grey mb-6 payment-section no-select pointer">
+						PAYMENT METHOD<span class="octicon octicon-chevron-down collapse-indicator"></span>
+					</div>
+					<div class="payment-modes flex flex-wrap"></div>
+					<div class="invoice-details-section"></div>
                     <div class="flex mt-auto justify-center w-full">
                         <div class="flex flex-col justify-center flex-1 ml-4">
                             <div class="flex w-full">
@@ -46,6 +49,41 @@ erpnext.PointOfSale.Payment = class {
 		this.$totals = this.$component.find('.totals');
 		this.$remarks = this.$component.find('.remarks');
 		this.$numpad = this.$component.find('.number-pad');
+		this.$invoice_details_section = this.$component.find('.invoice-details-section');
+	}
+
+	make_invoice_fields_control() {
+		frappe.db.get_doc("POS Settings", undefined).then((doc) => {
+			const fields = doc.invoice_fields;
+			if (!fields.length) return;
+
+			this.$invoice_details_section.html(
+				`<div class="text-grey pb-6 mt-2 pointer no-select">
+					ADDITIONAL INFORMATION<span class="octicon octicon-chevron-down collapse-indicator"></span>
+				</div>
+				<div class="invoice-fields grid grid-cols-2 gap-4 mb-6 d-none"></div>`
+			);
+			this.$invoice_fields = this.$invoice_details_section.find('.invoice-fields');
+			const frm = this.events.get_frm();
+
+			fields.forEach(df => {
+				this.$invoice_fields.append(
+					`<div class="invoice_detail_field ${df.fieldname}-field" data-fieldname="${df.fieldname}"></div>`
+				);
+
+				this[`${df.fieldname}_field`] = frappe.ui.form.make_control({
+					df: { 
+						...df,
+						onchange: function() {
+							frm.set_value(this.df.fieldname, this.value);
+						}
+					},
+					parent: this.$invoice_fields.find(`.${df.fieldname}-field`),
+					render_input: true,
+				});
+				this[`${df.fieldname}_field`].set_value(frm.doc[df.fieldname]);
+			})
+		});
 	}
 
 	initialize_numpad() {
@@ -171,6 +209,19 @@ erpnext.PointOfSale.Payment = class {
 			if (this[`${mode}_control`] && this[`${mode}_control`].get_value() != default_mop.amount) {
 				this[`${mode}_control`].set_value(default_mop.amount);
 			}
+		});
+
+		this.$component.on('click', '.invoice-details-section', function(e) {
+			if ($(e.target).closest('.invoice-fields').length) return;
+
+			me.$payment_modes.addClass('d-none');
+			me.$invoice_fields.toggleClass("d-none");
+			me.toggle_numpad(false);
+		});
+		this.$component.on('click', '.payment-section', () => {
+			this.$invoice_fields.addClass("d-none");
+			this.$payment_modes.toggleClass('d-none');
+			this.toggle_numpad(true);
 		})
 	}
 
@@ -215,6 +266,7 @@ erpnext.PointOfSale.Payment = class {
 
 	render_payment_section() {
 		this.render_payment_mode_dom();
+		this.make_invoice_fields_control();
 		this.update_totals_section();
 	}
 
