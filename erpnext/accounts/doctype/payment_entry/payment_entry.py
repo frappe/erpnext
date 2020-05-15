@@ -85,7 +85,7 @@ class PaymentEntry(AccountsController):
 		self.update_payment_schedule(cancel=1)
 		self.set_payment_req_status()
 		self.set_status()
-	
+
 	def set_payment_req_status(self):
 		from erpnext.accounts.doctype.payment_request.payment_request import update_payment_req_status
 		update_payment_req_status(self, None)
@@ -503,7 +503,7 @@ class PaymentEntry(AccountsController):
 				"against": against_account,
 				"account_currency": self.party_account_currency,
 				"cost_center": self.cost_center
-			})
+			}, item=self)
 
 			dr_or_cr = "credit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit"
 
@@ -547,7 +547,7 @@ class PaymentEntry(AccountsController):
 					"credit_in_account_currency": self.paid_amount,
 					"credit": self.base_paid_amount,
 					"cost_center": self.cost_center
-				})
+				}, item=self)
 			)
 		if self.payment_type in ("Receive", "Internal Transfer"):
 			gl_entries.append(
@@ -558,7 +558,7 @@ class PaymentEntry(AccountsController):
 					"debit_in_account_currency": self.received_amount,
 					"debit": self.base_received_amount,
 					"cost_center": self.cost_center
-				})
+				}, item=self)
 			)
 
 	def add_deductions_gl_entries(self, gl_entries):
