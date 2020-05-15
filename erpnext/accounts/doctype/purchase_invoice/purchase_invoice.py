@@ -1042,7 +1042,7 @@ class PurchaseInvoice(BuyingController):
 				elif outstanding_amount > 0 and due_date >= nowdate:
 					self.status = "Unpaid"
 				#Check if outstanding amount is 0 due to debit note issued against invoice
-				elif outstanding_amount <= 0 and self.is_return == 0 and frappe.db.get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+				elif outstanding_amount <= 0 and self.is_return == 0 and frappe.db.get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
 					self.status = "Debit Note Issued"
 				elif self.is_return == 1:
 					self.status = "Return"
