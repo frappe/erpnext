@@ -19,7 +19,7 @@ def execute(filters=None):
 	data = get_data(conditions, filters)
 
 	if not data:
-		return [], []
+		return [], [], None, []
 
 	data, chart_data = prepare_data(data, filters)
 
