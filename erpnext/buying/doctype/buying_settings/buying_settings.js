@@ -16,7 +16,7 @@ frappe.tour['Buying Settings'] = [
 	{
 		fieldname: "buying_price_list",
 		title: "Default Buying Price List",
-		description: __("Configure the default Price List when creating a new Buying transaction, the default is set as 'Standard Buying'. Item prices will be fetched from this Price List. You can modify the 'Price List' by using the arrow at the right-end of the field to change the currency and country.")
+		description: __("Configure the default Price List when creating a new Buying transaction, the default is set as 'Standard Buying'. Item prices will be fetched from this Price List.")
 	},
 	{
 		fieldname: "po_required",
