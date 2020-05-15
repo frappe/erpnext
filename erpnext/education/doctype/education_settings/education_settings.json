@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2017-04-05 13:33:04.519313",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -42,12 +43,14 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "description": "For Batch based Student Group, the Student Batch will be validated for every Student from the Program Enrollment.",
    "fieldname": "validate_batch",
    "fieldtype": "Check",
    "label": "Validate Batch for Students in Student Group"
   },
   {
+   "default": "0",
    "description": "For Course based Student Group, the Course will be validated for every Student from the enrolled Courses in Program Enrollment.",
    "fieldname": "validate_course",
    "fieldtype": "Check",
@@ -74,13 +77,13 @@
   {
    "fieldname": "web_academy_settings_section",
    "fieldtype": "Section Break",
-   "label": "LMS Settings"
+   "label": "Learning Management System Settings"
   },
   {
    "depends_on": "eval: doc.enable_lms",
    "fieldname": "portal_title",
    "fieldtype": "Data",
-   "label": "LMS Title"
+   "label": "Learning Management System Title"
   },
   {
    "depends_on": "eval: doc.enable_lms",
@@ -89,9 +92,10 @@
    "label": "Description"
   },
   {
+   "default": "0",
    "fieldname": "enable_lms",
    "fieldtype": "Check",
-   "label": "Enable LMS"
+   "label": "Enable Learning Management System"
   },
   {
    "default": "0",
@@ -102,7 +106,8 @@
   }
  ],
  "issingle": 1,
- "modified": "2019-05-13 18:36:13.127563",
+ "links": [],
+ "modified": "2020-05-07 19:50:22.430576",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Education Settings",

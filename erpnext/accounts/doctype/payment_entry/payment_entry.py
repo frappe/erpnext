@@ -60,6 +60,7 @@ class PaymentEntry(AccountsController):
 		self.set_remarks()
 		self.validate_duplicate_entry()
 		self.validate_allocated_amount()
+		self.validate_paid_invoices()
 		self.ensure_supplier_is_not_blocked()
 		self.set_status()
 
@@ -84,7 +85,7 @@ class PaymentEntry(AccountsController):
 		self.update_payment_schedule(cancel=1)
 		self.set_payment_req_status()
 		self.set_status()
-	
+
 	def set_payment_req_status(self):
 		from erpnext.accounts.doctype.payment_request.payment_request import update_payment_req_status
 		update_payment_req_status(self, None)
@@ -264,6 +265,25 @@ class PaymentEntry(AccountsController):
 					if ref_doc.docstatus != 1:
 						frappe.throw(_("{0} {1} must be submitted")
 							.format(d.reference_doctype, d.reference_name))
+
+	def validate_paid_invoices(self):
+		no_oustanding_refs = {}
+
+		for d in self.get("references"):
+			if not d.allocated_amount:
+				continue
+
+			if d.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Fees"):
+				outstanding_amount, is_return = frappe.get_cached_value(d.reference_doctype, d.reference_name, ["outstanding_amount", "is_return"])
+				if outstanding_amount <= 0 and not is_return:
+					no_oustanding_refs.setdefault(d.reference_doctype, []).append(d)
+		
+		for k, v in no_oustanding_refs.items():
+			frappe.msgprint(_("{} - {} now have {} as they had no outstanding amount left before submitting the Payment Entry.<br><br>\
+					If this is undesirable please cancel the corresponding Payment Entry.")
+				.format(k, frappe.bold(", ".join([d.reference_name for d in v])), frappe.bold("negative outstanding amount")),
+				title=_("Warning"), indicator="orange")
+
 
 	def validate_journal_entry(self):
 		for d in self.get("references"):
@@ -483,7 +503,7 @@ class PaymentEntry(AccountsController):
 				"against": against_account,
 				"account_currency": self.party_account_currency,
 				"cost_center": self.cost_center
-			})
+			}, item=self)
 
 			dr_or_cr = "credit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit"
 
@@ -527,7 +547,7 @@ class PaymentEntry(AccountsController):
 					"credit_in_account_currency": self.paid_amount,
 					"credit": self.base_paid_amount,
 					"cost_center": self.cost_center
-				})
+				}, item=self)
 			)
 		if self.payment_type in ("Receive", "Internal Transfer"):
 			gl_entries.append(
@@ -538,7 +558,7 @@ class PaymentEntry(AccountsController):
 					"debit_in_account_currency": self.received_amount,
 					"debit": self.base_received_amount,
 					"cost_center": self.cost_center
-				})
+				}, item=self)
 			)
 
 	def add_deductions_gl_entries(self, gl_entries):

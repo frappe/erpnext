@@ -11,7 +11,8 @@ from frappe.model.document import Document
 class AssetCategory(Document):
 	def validate(self):
 		self.validate_finance_books()
-		self.validate_accounts()
+		self.validate_account_types()
+		self.validate_account_currency()
 
 	def validate_finance_books(self):
 		for d in self.finance_books:
@@ -19,7 +20,26 @@ class AssetCategory(Document):
 				if cint(d.get(frappe.scrub(field)))<1:
 					frappe.throw(_("Row {0}: {1} must be greater than 0").format(d.idx, field), frappe.MandatoryError)
 	
-	def validate_accounts(self):
+	def validate_account_currency(self):
+		account_types = [
+			'fixed_asset_account', 'accumulated_depreciation_account', 'depreciation_expense_account', 'capital_work_in_progress_account'
+		]
+		invalid_accounts = []
+		for d in self.accounts:
+			company_currency = frappe.get_value('Company', d.get('company_name'), 'default_currency')
+			for type_of_account in account_types:
+				if d.get(type_of_account):
+					account_currency = frappe.get_value("Account", d.get(type_of_account), "account_currency")
+					if account_currency != company_currency:
+						invalid_accounts.append(frappe._dict({ 'type': type_of_account, 'idx': d.idx, 'account': d.get(type_of_account) }))
+	
+		for d in invalid_accounts:
+			frappe.throw(_("Row #{}: Currency of {} - {} doesn't matches company currency.")
+				.format(d.idx, frappe.bold(frappe.unscrub(d.type)), frappe.bold(d.account)),
+				title=_("Invalid Account"))
+
+	
+	def validate_account_types(self):
 		account_type_map = {
 			'fixed_asset_account': { 'account_type': 'Fixed Asset' },
 			'accumulated_depreciation_account': { 'account_type': 'Accumulated Depreciation' },

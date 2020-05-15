@@ -496,6 +496,7 @@ erpnext.patches.v10_0.rename_offer_letter_to_job_offer
 execute:frappe.delete_doc('DocType', 'Production Planning Tool', ignore_missing=True)
 erpnext.patches.v10_0.migrate_daily_work_summary_settings_to_daily_work_summary_group # 24-12-2018
 erpnext.patches.v10_0.add_default_cash_flow_mappers
+erpnext.patches.v11_0.rename_duplicate_item_code_values
 erpnext.patches.v11_0.make_quality_inspection_template
 erpnext.patches.v10_0.update_status_for_multiple_source_in_po
 erpnext.patches.v10_0.set_auto_created_serial_no_in_stock_entry
@@ -624,7 +625,7 @@ erpnext.patches.v11_1.update_default_supplier_in_item_defaults
 erpnext.patches.v12_0.update_due_date_in_gle
 erpnext.patches.v12_0.add_default_buying_selling_terms_in_company
 erpnext.patches.v12_0.update_ewaybill_field_position
-erpnext.patches.v12_0.create_accounting_dimensions_in_missing_doctypes
+erpnext.patches.v12_0.create_accounting_dimensions_in_missing_doctypes #2020-05-11
 erpnext.patches.v11_1.set_status_for_material_request_type_manufacture
 erpnext.patches.v12_0.move_plaid_settings_to_doctype
 execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart_link')
@@ -661,3 +662,6 @@ erpnext.patches.v12_0.set_updated_purpose_in_pick_list
 erpnext.patches.v12_0.repost_stock_ledger_entries_for_target_warehouse
 erpnext.patches.v12_0.update_end_date_and_status_in_email_campaign
 erpnext.patches.v13_0.move_tax_slabs_from_payroll_period_to_income_tax_slab #123
+erpnext.patches.v12_0.remove_duplicate_leave_ledger_entries
+execute:frappe.delete_doc_if_exists("Page", "appointment-analytic")
+erpnext.patches.v12_0.unset_customer_supplier_based_on_type_of_item_price
