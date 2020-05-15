@@ -1,44 +1,27 @@
 {% extends "templates/base.html" %}
 
 {% block content %}
-<!-- <section class="jumbotron bg-light">
-	<div class='container'>
-		<h1 class="h1">We're here to help</h1>
-		<p class="mt-4">
-			<div class="input-group shadow-sm" style="width:50%">
-				<input class="form-control py-2 border-right-0 border" type="Text" placeholder="Search for help articles and more">
-				<span class="input-group-append">
-					<div class="border input-group-text bg-white"><i class="fa fa-search text-muted"></i></div>
-				</span>
-			</div>
-		</p>
-	</div>
-</section> -->
-<!-- <div class="container mb-5">
-	<div class="alert alert-warning">
-		<h6><i class="fa fa-info-circle mr-2" aria-hidden="true"></i>Service Degradation</h6>
-			<p class='mb-2'><b>Holy guacamole!</b> We have noticed minor disruption in ERPNext services. We'll be back soon</p>
-	</div>
-</div> -->
-
 <div class='container mb-5 mt-5'>
 	<div class="row">
 		<h3 class="h3 pb-3 col-sm-12 col-md-10">Active Tickets</h3>
 		<div class="col-sm-12 col-md-2 text-right">
-			<button type="button" class="btn btn-primary" onclick="location.href='/support'">Back</button>
+			<!-- <button type="button" class="btn btn-primary" onclick="location.href='/support'">Back</button> -->
+			<button type="button" class="btn btn-primary" onclick="location.href='/customer-issues?new=1'">New Ticket</button>
 		</div>
 	</div>
-	<div class="card mb-2 selectable-card">
+	{% for item in doc_list %}
+	<div class="card mb-2 selectable-card" onclick="location.href='/issues/issue?issue={{ item.name }}'">
+		<!-- <div class="card mb-2 selectable-card" onclick="location.href='/issues?name={{ item.name }}'"> -->
 		<div class="card-body">
 			<div class="row">
 				<div class="col-sm-12 col-md-6">
-					<span class="indicator green">Batch No. In work order</span>
+					<span class="indicator green">{{ item.subject }}</span>
 				</div>
 				<div class="col-sm-3 col-md-2 text-left">
-					<span class="mb-2 text-muted status-pill status-red">Overdue</span>
+					<span class="mb-2 text-muted status-pill">{{ item.status }}</span>
 				</div>
 				<div class="col-sm-3 col-md-2 text-right">
-					<span class="mb-2 text-muted text-uppercase">ISS-2020-1241</span>
+					<span class="mb-2 text-muted text-uppercase">{{ item.name }}</span>
 				</div>
 				<div class="col-sm-3 col-md-2 text-right text-muted">
 					<!-- Include Octicon Library Here -->
@@ -47,132 +30,8 @@
 			</div>
 		</div>
 	</div>
-	<div class="card mb-2 selectable-card">
-		<div class="card-body">
-			<div class="row">
-				<div class="col-sm-12 col-md-6">
-					<span class="indicator green">Batch No. In work order</span>
-				</div>
-				<div class="col-sm-3 col-md-2 text-left">
-					<span class="mb-2 text-muted status-pill status-green">Open</span>
-				</div>
-				<div class="col-sm-3 col-md-2 text-right">
-					<span class="mb-2 text-muted text-uppercase">ISS-2020-1241</span>
-				</div>
-				<div class="col-sm-3 col-md-2 text-right text-muted">
-					<!-- Include Octicon Library Here -->
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" fill="#8d99a6" d="M15 1H6c-.55 0-1 .45-1 1v2H1c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h1v3l3-3h4c.55 0 1-.45 1-1V9h1l3 3V9h1c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zM9 11H4.5L3 12.5V11H1V5h4v3c0 .55.45 1 1 1h3v2zm6-3h-2v1.5L11.5 8H6V2h9v6z"></path></svg> 2
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="card mb-2 selectable-card">
-		<div class="card-body">
-			<div class="row">
-				<div class="col-sm-12 col-md-6">
-					<span class="indicator green">Batch No. In work order</span>
-				</div>
-				<div class="col-sm-3 col-md-2 text-left">
-					<span class="mb-2 text-muted status-pill status-orange">Investigating</span>
-				</div>
-				<div class="col-sm-3 col-md-2 text-right">
-					<span class="mb-2 text-muted text-uppercase">ISS-2020-1241</span>
-				</div>
-				<div class="col-sm-3 col-md-2 text-right text-muted">
-					<!-- Include Octicon Library Here -->
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16"><path fill-rule="evenodd" fill="#8d99a6" d="M15 1H6c-.55 0-1 .45-1 1v2H1c-.55 0-1 .45-1 1v6c0 .55.45 1 1 1h1v3l3-3h4c.55 0 1-.45 1-1V9h1l3 3V9h1c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zM9 11H4.5L3 12.5V11H1V5h4v3c0 .55.45 1 1 1h3v2zm6-3h-2v1.5L11.5 8H6V2h9v6z"></path></svg> 3
-				</div>
-			</div>
-		</div>
-	</div>
+	{% endfor %}
 </div>
-
-<!-- <div class='container mb-5'>
-	<h3 class="h3 pb-3">Frequently Read Articles</h3>
-	<div class="row row-cols-1 row-cols-md-3">
-		<div class="col mb-4">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">Card title</h5>
-					<h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-					<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-					<a href="#" class="card-link">Read More</a>
-				</div>
-			</div>
-		</div>
-		<div class="col mb-4">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">Card title</h5>
-					<h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-					<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-					<a href="#" class="card-link">Read More</a>
-				</div>
-			</div>
-		</div>
-		<div class="col mb-4">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">Card title</h5>
-					<h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-					<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-					<a href="#" class="card-link">Read More</a>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-
-<div class='container mb-5'>
-	<h3 class="h3 pb-3">Help Articles</h3>
-	<div class="row row-cols-1 row-cols-md-3">
-		<div class="col mb-4 text-truncate">
-			<h5>Accounts</h5>
-			<div class="list">
-				<a href="#" class="d-block">Auto Creation Of Material Request</a>
-				<a href="#" class="d-block">Delivery Note Stock Error</a>
-				<a href="#" class="d-block">Stock Entry Purpose</a>
-				<a href="#" class="d-block">Stock Received But Not Billed</a>
-				<a href="#" class="d-block">Stock Received But Not Billed</a>
-			</div>
-		</div>
-		<div class="col mb-4 text-truncate">
-			<h5>Stock</h5>
-			<div class="list">
-				<a href="#" class="d-block">Auto Creation Of Material Request</a>
-				<a href="#" class="d-block">Delivery Note Stock Error</a>
-				<a href="#" class="d-block">Stock Entry Purpose</a>
-			</div>
-		</div>
-		<div class="col mb-4 text-truncate">
-			<h5>CRM</h5>
-			<div class="list">
-				<a href="#" class="d-block">Auto Creation Of Material Request</a>
-				<a href="#" class="d-block">Delivery Note Stock Error</a>
-				<a href="#" class="d-block">Stock Entry Purpose</a>
-				<a href="#" class="d-block">Stock Received But Not Billed</a>
-			</div>
-		</div>
-		<div class="col mb-4 text-truncate">
-			<h5>Selling</h5>
-			<div class="list">
-				<a href="#" class="d-block">Auto Creation Of Material Request</a>
-				<a href="#" class="d-block">Delivery Note Stock Error</a>
-				<a href="#" class="d-block">Stock Entry Purpose</a>
-				<a href="#" class="d-block">Stock Received But Not Billed</a>
-			</div>
-		</div>
-		<div class="col mb-4 text-truncate">
-			<h5>Buying</h5>
-			<div class="list">
-				<a href="#" class="d-block">Auto Creation Of Material Request</a>
-				<a href="#" class="d-block">Delivery Note Stock Error</a>
-				<a href="#" class="d-block">Stock Entry Purpose</a>
-				<a href="#" class="d-block">Stock Received But Not Billed</a>
-			</div>
-		</div>
-	</div>
-</div> -->
 
 <style>
 	.selectable-card {
@@ -189,7 +48,7 @@
 		border-radius: 1000px;
 	}
 
-	.status-green {
+	.Open {
 		background: #C6F6D5;
 		color: #2F855A !important;
 	}

@@ -1,0 +1,65 @@
+{% extends "templates/base.html" %}
+
+{% block content %}
+
+<div class='container mb-5 mt-5'>
+	<div class="row">
+		<h3 class="h3 pb-3 col-sm-12 col-md-10">{{ item.name }}</h3>
+	</div>
+    
+    <div class="card mb-2 selectable-card">
+		<div class="card-body">
+			<div class="col">
+				<div class="">
+					<span class="indicator green">Subject: {{ item.subject }}</span>
+				</div>
+				<div class="">
+					<span class="mb-2 text-muted">Status: {{ item.status }}</span>
+				</div>
+				<div class="">
+					<span class="mb-2 text-muted text-uppercase">Name: {{ item.name }}</span>
+                </div>
+                <div class="">
+					<span class="mb-2 text-muted">Description: {{ frappe.utils.strip_html(item.description) }}</span>
+                </div>
+                <div class="comments">
+					<h3>{{ _("Communication") }}</h3>
+					{% include 'templates/includes/comments/comments.html' %}
+				</div>
+                </div>
+		</div>
+	</div>
+</div>
+
+<style>
+	.selectable-card {
+		cursor: pointer;
+	}
+
+	.selectable-card:hover {
+		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+	}
+
+	.status-pill {
+		padding: 2px 8px;
+		font-size: 85%;
+		border-radius: 1000px;
+	}
+
+	.Open {
+		background: #C6F6D5;
+		color: #2F855A !important;
+	}
+
+	.status-orange {
+		background: #FBD38D;
+		color: #C05621 !important;
+	}
+
+	.status-red {
+		background: #FEB2B2;
+		color: #C53030 !important;
+	}
+
+</style>
+{% endblock %}
