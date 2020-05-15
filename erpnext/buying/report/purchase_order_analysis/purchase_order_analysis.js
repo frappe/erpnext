@@ -59,14 +59,6 @@ frappe.query_reports["Purchase Order Analysis"] = {
 			}
 		},
 		{
-			"fieldname": "chart_based_on",
-			"label": __("Chart Based On"),
-			"fieldtype": "Select",
-			"width": "80",
-			"options": "Quantity\nAmount",
-			"default": "Quantity"
-		},
-		{
 			"fieldname": "group_by_po",
 			"label": __("Group by Purchase Order"),
 			"fieldtype": "Check",

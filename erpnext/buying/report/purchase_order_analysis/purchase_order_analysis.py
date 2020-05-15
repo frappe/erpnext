@@ -82,10 +82,9 @@ def get_data(conditions, filters):
 	return data
 
 def prepare_data(data, filters):
-	completed, pending = 0,0
-	chart_based_on = filters.get("chart_based_on")
-	pending_field = "pending_qty" if chart_based_on == "Quantity" else "pending_amount"
-	completed_field = "received_qty" if chart_based_on == "Quantity" else "billed_amount"
+	completed, pending = 0, 0
+	pending_field =  "pending_amount"
+	completed_field = "billed_amount"
 
 	if filters.get("group_by_po"):
 		purchase_order_map = {}
@@ -116,7 +115,7 @@ def prepare_data(data, filters):
 				for field in fields:
 					po_row[field] = flt(row[field]) + flt(po_row[field])
 
-	chart_data = prepare_chart_data(chart_based_on, pending, completed)
+	chart_data = prepare_chart_data(pending, completed)
 
 	if filters.get("group_by_po"):
 		data = []
@@ -126,8 +125,8 @@ def prepare_data(data, filters):
 
 	return data, chart_data
 
-def prepare_chart_data(chart_based_on, pending, completed):
-	labels = ["Qty to Receive","Received Qty"] if chart_based_on == "Quantity" else ["Amount to Bill","Billed Amount"]
+def prepare_chart_data(pending, completed):
+	labels = ["Amount to Bill", "Billed Amount"]
 
 	return {
 		"data" : {

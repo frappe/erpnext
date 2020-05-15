@@ -3,7 +3,8 @@
 
 import frappe
 import json
-
+from frappe.utils import nowdate
+from erpnext.accounts.utils import get_fiscal_year
 
 def get_data():
 	return frappe._dict({
@@ -23,108 +24,172 @@ def get_company_for_dashboards():
 	return None
 
 company = frappe.get_doc("Company", get_company_for_dashboards())
+fiscal_year = get_fiscal_year(nowdate(), as_dict=1)
+fiscal_year_name = fiscal_year.get("name")
+start_date = str(fiscal_year.get("year_start_date"))
+end_date = str(fiscal_year.get("year_end_date"))
 
 def get_dashboards():
 	return [{
 		"name": "Buying",
 		"dashboard_name": "Buying",
 		"charts": [
-			{ "chart": "Purchase Analytics", "width": "Full"},
-			{ "chart": "Material Request Purchase Analysis", "width": "Half"},
+			{ "chart": "Top Suppliers", "width": "Full"},
+			{ "chart": "Material Request Analysis", "width": "Half"},
 			{ "chart": "Purchase Order Analysis", "width": "Half"},
-			{ "chart": "Requested Items to Order", "width": "Full"}
+			{ "chart": "Purchase Order Trends", "width": "Full"}
+		],
+		"cards": [
+			{ "card": "Purchase Orders to Receive"},
+			{ "card": "Purchase Order Expenses"},
+			{ "card": "Active Suppliers"},
+			{ "card": "Active Supplier Quotations"}
 		]
 	}]
 
 def get_charts():
 	return [
 		{
-			"name": "Purchase Analytics",
-			"doctype": "Dashboard Chart",
-			"owner": "Administrator",
-			"report_name": "Purchase Analytics",
-			"filters_json": json.dumps({
-				"tree_type": "Item",
-				"doc_type": "Purchase Receipt",
-				"value_quantity": "Value",
-				"from_date": "2020-03-01",
-				"to_date": "2020-07-31",
-				"company": company.name,
-				"range": "Weekly"
-				}),
-			"x_field": "entity",
-			"type": "Bar",
-			'timeseries': 0,
-			"chart_type": "Report",
-			"chart_name": "Purchase Analytics",
-			"custom_options": json.dumps({
-				"x_field": "entity",
-				"chart_type": "Bar",
-				"y_axis_fields": [{"idx": 1, "__islocal": "true", "y_field": "total"}],
-				"y_fields": ["total"]
-			})
-		},
-		{
-			"name": "Material Request Purchase Analysis",
-			"doctype": "Dashboard Chart",
-			"owner": "Administrator",
-			"document_type": "Material Request",
-			"filters_json": '[["Material Request","status","not in",["Draft","Cancelled","Stopped",null],false],["Material Request","material_request_type","=","Purchase",false],["Material Request","company","=", "{company}", false]]'.format(company=company.name),
-			"is_custom": 0,
-			"type": "Donut",
-			"timeseries": 0,
-			"chart_type": "Group By",
-			"group_by_based_on": "status",
-			"chart_name": "Material Request Purchase Analysis",
-			"group_by_type": "Count",
-			"custom_options": json.dumps({"height": 300})
-
-		},
-		{
 			"name": "Purchase Order Analysis",
-			"doctype": "Dashboard Chart",
-			"owner": "Administrator",
-			"report_name": "Purchase Order Analysis",
-			"filters_json": json.dumps({
-				"company": company.name,
-				"from_date": "2020-04-04",
-				"to_date": "2020-07-04",
-				"chart_based_on": "Quantity"
-			}),
-			"is_custom": 1,
-			"type": "Donut",
-			"timeseries": 0,
-			"chart_type": "Report",
 			"chart_name": "Purchase Order Analysis",
+			"chart_type": "Report",
 			"custom_options": json.dumps({
 				"type": "donut",
 				"height": 300,
 				"axisOptions": {"shortenYAxisNumbers": 1}
-			})
-		},
-		{
-			"name": "Requested Items to Order",
+			}),
 			"doctype": "Dashboard Chart",
-			"owner": "Administrator",
-			"report_name": "Requested Items to Order",
 			"filters_json": json.dumps({
 				"company": company.name,
-				"from_date": "2020-04-01",
-				"to_date": "2020-07-01",
-				"group_by_mr": 0
+				"from_date": start_date,
+				"to_date": end_date
 			}),
 			"is_custom": 1,
-			"type": "Bar",
-			"timeseries": 0,
+			"is_public": 1,
+			"owner": "Administrator",
+			"report_name": "Purchase Order Analysis",
+			"type": "Donut"
+		},
+		{
+			"name": "Material Request Analysis",
+			"chart_name": "Material Request Analysis",
+			"chart_type": "Group By",
+			"custom_options": json.dumps({"height": 300}),
+			"doctype": "Dashboard Chart",
+			"document_type": "Material Request",
+			"filters_json": json.dumps(
+				[["Material Request", "status", "not in", ["Draft", "Cancelled", "Stopped", None], False],
+				["Material Request", "material_request_type", "=", "Purchase", False],
+				["Material Request", "company", "=", company.name, False]]
+			),
+			"group_by_based_on": "status",
+			"group_by_type": "Count",
+			"is_custom": 0,
+			"is_public": 1,
+			"number_of_groups": 0,
+			"owner": "Administrator",
+			"type": "Donut"
+		},
+		{
+			"name": "Purchase Order Trends",
+			"chart_name": "Purchase Order Trends",
 			"chart_type": "Report",
-			"chart_name": "Requested Items to Order",
 			"custom_options": json.dumps({
-				"type": "bar",
-				"barOptions": {"stacked": 1},
-				"axisOptions": {"shortenYAxisNumbers": 1}
-			})
+				"type": "line",
+				"regionFill": 1,
+				"axisOptions": {"shortenYAxisNumbers": 1},
+				"tooltipOptions": {}
+			}),
+			"doctype": "Dashboard Chart",
+			"filters_json": json.dumps({
+				"company": company.name,
+				"period": "Monthly",
+				"fiscal_year": fiscal_year_name,
+				"period_based_on": "posting_date",
+				"based_on": "Item"
+			}),
+			"is_custom": 1,
+			"is_public": 1,
+			"owner": "Administrator",
+			"report_name": "Purchase Order Trends",
+			"type": "Line"
+		},
+		{
+			"name": "Top Suppliers",
+			"chart_name": "Top Suppliers",
+			"chart_type": "Report",
+			"doctype": "Dashboard Chart",
+			"filters_json": json.dumps({
+				"company": company.name,
+				"period": "Monthly",
+				"fiscal_year": fiscal_year_name,
+				"period_based_on": "posting_date",
+				"based_on": "Supplier"
+			}),
+			"is_custom": 1,
+			"is_public": 1,
+			"owner": "Administrator",
+			"report_name": "Purchase Receipt Trends",
+			"type": "Bar"
 		}
  	]
 
 def get_number_cards():
-	return [{}]
+	return [
+		{
+			"name": "Purchase Order Expenses",
+			"aggregate_function_based_on": "base_grand_total",
+			"doctype": "Number Card",
+			"document_type": "Purchase Order",
+			"filters_json": json.dumps(
+				[["Purchase Order", "transaction_date", "Between", [start_date,end_date], False],
+				["Purchase Order", "status", "not in", ["Draft","On Hold","Cancelled","Closed", None], False],
+				["Purchase Order", "company", "=", company.name, False]]
+			),
+			"function": "Sum",
+			"is_public": 1,
+			"label": "Purchase Order Expenses",
+			"owner": "Administrator",
+			"show_percentage_stats": 1,
+			"stats_time_interval": "Monthly"
+		},
+		{
+			"name": "Purchase Orders to Receive",
+			"doctype": "Number Card",
+			"document_type": "Purchase Order",
+			"filters_json": json.dumps(
+				[["Purchase Order", "status", "in", ["To Receive and Bill", "To Receive", None], False],
+				["Purchase Order", "company", "=", company.name, False]]
+			),
+			"function": "Count",
+			"is_public": 1,
+			"label": "Purchase Orders to Receive",
+			"owner": "Administrator",
+			"show_percentage_stats": 1,
+			"stats_time_interval": "Weekly"
+		},
+		{
+			"name": "Active Suppliers",
+			"doctype": "Number Card",
+			"document_type": "Supplier",
+			"filters_json": json.dumps([["Supplier", "disabled", "=", "0"]]),
+			"function": "Count",
+			"is_public": 1,
+			"label": "Active Suppliers",
+			"owner": "Administrator",
+			"show_percentage_stats": 1,
+			"stats_time_interval": "Monthly"
+		},
+		{
+			"name": "Active Supplier Quotations",
+			"doctype": "Number Card",
+			"document_type": "Supplier Quotation",
+			"filters_json": json.dumps([["Supplier Quotation", "status", "=", "Submitted", False]]),
+			"function": "Count",
+			"is_public": 1,
+			"label": "Active Supplier Quotations",
+			"owner": "Administrator",
+			"show_percentage_stats": 1,
+			"stats_time_interval": "Monthly"
+		}
+	]
