@@ -683,3 +683,4 @@ erpnext.patches.v13_0.patch_to_fix_reverse_linking_in_additional_salary_encashme
 execute:frappe.delete_doc_if_exists("Page", "appointment-analytic")
 execute:frappe.rename_doc("Desk Page", "Getting Started", "Home", force=True)
 erpnext.patches.v12_0.unset_customer_supplier_based_on_type_of_item_price
+erpnext.patches.v12_0.set_valid_till_date_in_supplier_quotation
