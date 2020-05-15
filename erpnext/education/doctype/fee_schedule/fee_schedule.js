@@ -67,6 +67,7 @@ frappe.ui.form.on('Fee Schedule', {
 					method: "create_fees",
 					doc: frm.doc,
 					callback: function() {
+						frm.reload_doc();
 						frm.refresh();
 					}
 				});

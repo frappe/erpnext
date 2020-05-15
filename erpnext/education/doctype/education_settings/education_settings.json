@@ -12,6 +12,7 @@
   "validate_batch",
   "validate_course",
   "academic_term_reqd",
+  "submit_fees",
   "user_creation_skip",
   "section_break_7",
   "instructor_created_by",
@@ -103,11 +104,18 @@
    "fieldname": "user_creation_skip",
    "fieldtype": "Check",
    "label": "Skip User creation for new Student"
+  },
+  {
+   "default": "1",
+   "description": "If checked, Fee Schedule documents will create and submit new Fees. If uncheck, Fees will be created but will need to be submitted individually.",
+   "fieldname": "submit_fees",
+   "fieldtype": "Check",
+   "label": "Submit Fees created by Fee Schedule"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-05-07 19:18:10.639356",
+ "modified": "2020-05-15 09:17:21.721554",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Education Settings",

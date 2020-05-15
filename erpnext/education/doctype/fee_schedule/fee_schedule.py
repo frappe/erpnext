@@ -92,8 +92,11 @@ def generate_fee(fee_schedule):
 				fees_doc.program = student.program
 				fees_doc.student_batch = student.student_batch_name
 				fees_doc.send_payment_request = doc.send_email
+				
 				fees_doc.save()
-				fees_doc.submit()
+				if frappe.get_single('Education Settings').get('submit_fees'):
+					fees_doc.submit()
+
 				created_records += 1
 				frappe.publish_realtime("fee_schedule_progress", {"progress": str(int(created_records * 100/total_records))}, user=frappe.session.user)
 
