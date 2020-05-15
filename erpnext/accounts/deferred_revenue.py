@@ -185,7 +185,7 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 			total_days, total_booking_days, account_currency)
 
 		make_gl_entries(doc, credit_account, debit_account, against,
-			amount, base_amount, end_date, project, account_currency, item.cost_center, item.name, deferred_process)
+			amount, base_amount, end_date, project, account_currency, item.cost_center, item, deferred_process)
 
 		# Returned in case of any errors because it tries to submit the same record again and again in case of errors
 		if frappe.flags.deferred_accounting_error:
@@ -222,7 +222,7 @@ def process_deferred_accounting(posting_date=today()):
 		doc.submit()
 
 def make_gl_entries(doc, credit_account, debit_account, against,
-	amount, base_amount, posting_date, project, account_currency, cost_center, voucher_detail_no, deferred_process=None):
+	amount, base_amount, posting_date, project, account_currency, cost_center, item, deferred_process=None):
 	# GL Entry for crediting the amount in the deferred expense
 	from erpnext.accounts.general_ledger import make_gl_entries
 
@@ -236,12 +236,12 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 			"credit": base_amount,
 			"credit_in_account_currency": amount,
 			"cost_center": cost_center,
-			"voucher_detail_no": voucher_detail_no,
+			"voucher_detail_no": item.name,
 			'posting_date': posting_date,
 			'project': project,
 			'against_voucher_type': 'Process Deferred Accounting',
 			'against_voucher': deferred_process
-		}, account_currency)
+		}, account_currency, item=item)
 	)
 	# GL Entry to debit the amount from the expense
 	gl_entries.append(
@@ -251,12 +251,12 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 			"debit": base_amount,
 			"debit_in_account_currency": amount,
 			"cost_center": cost_center,
-			"voucher_detail_no": voucher_detail_no,
+			"voucher_detail_no": item.name,
 			'posting_date': posting_date,
 			'project': project,
 			'against_voucher_type': 'Process Deferred Accounting',
 			'against_voucher': deferred_process
-		}, account_currency)
+		}, account_currency, item=item)
 	)
 
 	if gl_entries:
