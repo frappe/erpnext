@@ -33,7 +33,7 @@
   {
    "hidden": 0,
    "label": "Other Reports",
-   "links": "[\n    {\n        \"is_query_report\": true,\n        \"label\": \"Items To Be Requested\",\n        \"name\": \"Items To Be Requested\",\n        \"onboard\": 1,\n        \"reference_doctype\": \"Item\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Item-wise Purchase History\",\n        \"name\": \"Item-wise Purchase History\",\n        \"onboard\": 1,\n        \"reference_doctype\": \"Item\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Subcontracted Raw Materials To Be Transferred\",\n        \"name\": \"Subcontracted Raw Materials To Be Transferred\",\n        \"reference_doctype\": \"Purchase Order\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Subcontracted Item To Be Received\",\n        \"name\": \"Subcontracted Item To Be Received\",\n        \"reference_doctype\": \"Purchase Order\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Quoted Item Comparison\",\n        \"name\": \"Quoted Item Comparison\",\n        \"reference_doctype\": \"Supplier Quotation\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Material Requests for which Supplier Quotations are not created\",\n        \"name\": \"Material Requests for which Supplier Quotations are not created\",\n        \"reference_doctype\": \"Material Request\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Supplier Addresses And Contacts\",\n        \"name\": \"Address And Contacts\",\n        \"reference_doctype\": \"Address\",\n        \"route_options\": {\n            \"party_type\": \"Supplier\"\n        },\n        \"type\": \"report\"\n    }\n]"
+   "links": "[\n    {\n        \"is_query_report\": true,\n        \"label\": \"Items To Be Requested\",\n        \"name\": \"Items To Be Requested\",\n        \"onboard\": 1,\n        \"reference_doctype\": \"Item\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Item-wise Purchase History\",\n        \"name\": \"Item-wise Purchase History\",\n        \"onboard\": 1,\n        \"reference_doctype\": \"Item\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Subcontracted Raw Materials To Be Transferred\",\n        \"name\": \"Subcontracted Raw Materials To Be Transferred\",\n        \"reference_doctype\": \"Purchase Order\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Subcontracted Item To Be Received\",\n        \"name\": \"Subcontracted Item To Be Received\",\n        \"reference_doctype\": \"Purchase Order\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Quoted Item Comparison\",\n        \"name\": \"Quoted Item Comparison\",\n         \"onboard\": 1,\n        \"reference_doctype\": \"Supplier Quotation\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Material Requests for which Supplier Quotations are not created\",\n        \"name\": \"Material Requests for which Supplier Quotations are not created\",\n        \"reference_doctype\": \"Material Request\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Supplier Addresses And Contacts\",\n        \"name\": \"Address And Contacts\",\n        \"reference_doctype\": \"Address\",\n        \"route_options\": {\n            \"party_type\": \"Supplier\"\n        },\n        \"type\": \"report\"\n    }\n]"
   }
  ],
  "cards_label": "Masters & Reports ",
@@ -54,7 +54,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Buying",
- "modified": "2020-05-06 18:10:12.760321",
+ "modified": "2020-05-15 14:26:42.505702",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",
@@ -64,11 +64,11 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
-   "color": "#ffe8cd",
-   "format": "{}  to Receive",
-   "label": "Purchase Order",
-   "link_to": "Purchase Order",
-   "stats_filter": "{\n    \"company\": [\"like\", '%' + frappe.defaults.get_global_default(\"company\") + '%'],\n    \"status\":[\"in\", [\"To Receive\", \"To Receive and Bill\"]]\n}",
+   "color": "#cef6d1",
+   "format": "{} available",
+   "label": "Item",
+   "link_to": "Item",
+   "stats_filter": "{\n    \"disabled\": 0\n}",
    "type": "DocType"
   },
   {
@@ -81,31 +81,20 @@
   },
   {
    "color": "#ffe8cd",
-   "format": "{}  to Bill ",
-   "label": "Purchase Receipt",
-   "link_to": "Purchase Receipt",
-   "stats_filter": "{\n    \"company\": [\"like\", '%' + frappe.defaults.get_global_default(\"company\") + '%'],\n    \"status\": \"To Bill\"\n}",
+   "format": "{}  to Receive",
+   "label": "Purchase Order",
+   "link_to": "Purchase Order",
+   "stats_filter": "{\n    \"company\": [\"like\", '%' + frappe.defaults.get_global_default(\"company\") + '%'],\n    \"status\":[\"in\", [\"To Receive\", \"To Receive and Bill\"]]\n}",
    "type": "DocType"
   },
   {
-   "color": "#ffe8cd",
-   "format": "{}  Unpaid / Overdue",
-   "label": "Purchase Invoice",
-   "link_to": "Purchase Invoice",
-   "stats_filter": "{\n    \"company\": [\"like\", '%' + frappe.defaults.get_global_default(\"company\") + '%'],\n    \"status\": [\"in\", [\"Unpaid\", \"Overdue\"]]\n}",
-   "type": "DocType"
+   "label": "Purchase Analytics",
+   "link_to": "Purchase Analytics",
+   "type": "Report"
   },
   {
-   "color": "#cef6d1",
-   "format": "{}  Active",
-   "label": "Supplier Quotation",
-   "link_to": "Supplier Quotation",
-   "stats_filter": "{\n    \"company\": [\"like\", '%' + frappe.defaults.get_global_default(\"company\") + '%'],\n    \"status\":[\"!=\", \"Expired\"]\n}",
-   "type": "DocType"
-  },
-  {
-   "label": "Item-wise Purchase Register",
-   "link_to": "Item-wise Purchase Register",
+   "label": "Purchase Order Analysis",
+   "link_to": "Purchase Order Analysis",
    "type": "Report"
   }
  ],

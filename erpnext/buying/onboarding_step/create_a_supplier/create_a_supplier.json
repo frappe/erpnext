@@ -6,11 +6,14 @@
  "idx": 0,
  "is_complete": 0,
  "is_mandatory": 0,
+ "is_single": 0,
  "is_skipped": 0,
  "modified": "2020-05-12 18:25:29.121647",
  "modified_by": "Administrator",
  "name": "Create a Supplier",
  "owner": "Administrator",
  "reference_document": "Supplier",
- "title": "Create a Supplier"
+ "show_full_form": 0,
+ "title": "Create a Supplier",
+ "validate_action": 1
 }
