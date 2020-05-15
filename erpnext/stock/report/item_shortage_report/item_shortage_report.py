@@ -11,7 +11,7 @@ def execute(filters=None):
 	data = get_data(conditions, filters)
 
 	if not data:
-		return [], []
+		return [], [], None, []
 
 	chart_data = get_chart_data(data)
 

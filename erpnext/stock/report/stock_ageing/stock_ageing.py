@@ -234,6 +234,9 @@ def get_sle_conditions(filters):
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 def get_chart_data(data, filters):
+	if not data:
+		return []
+
 	labels, datapoints = [], []
 
 	if filters.get("show_warehouse_wise_stock"):

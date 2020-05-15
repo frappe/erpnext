@@ -17,6 +17,9 @@ def execute(filters=None):
 	return conditions["columns"], data, None, chart_data
 
 def get_chart_data(data):
+	if not data:
+		return []
+
 	labels, datapoints = [], []
 
 	if len(data) > 10:
