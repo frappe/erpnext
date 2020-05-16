@@ -181,7 +181,7 @@ class StockEntry(StockController):
 		stock_items = self.get_stock_items()
 		serialized_items = self.get_serialized_items()
 		for item in self.get("items"):
-			if item.qty and item.qty < 0:
+			if flt(item.qty) and flt(item.qty) < 0:
 				frappe.throw(_("Row {0}: The item {1}, quantity must be positive number")
 					.format(item.idx, frappe.bold(item.item_code)))
 
@@ -470,7 +470,7 @@ class StockEntry(StockController):
 			"qty": item.s_warehouse and -1*flt(item.transfer_qty) or flt(item.transfer_qty),
 			"serial_no": item.serial_no,
 			"voucher_type": self.doctype,
-			"voucher_no": item.name,
+			"voucher_no": self.name,
 			"company": self.company,
 			"allow_zero_valuation": item.allow_zero_valuation_rate,
 		})
