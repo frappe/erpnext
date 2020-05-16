@@ -105,7 +105,7 @@ def create_contact(data, customer):
 
 	contact.append("links", {
 		"link_doctype": "Customer",
-		"link_name": customer.customer_name
+		"link_name": customer.name
 	})
 
 	contact.flags.ignore_mandatory = True
@@ -128,7 +128,7 @@ def create_address(raw_data, customer, address_type):
 	address.email_id = customer.woocommerce_email
 	address.append("links", {
 		"link_doctype": "Customer",
-		"link_name": customer.customer_name
+		"link_name": customer.name
 	})
 
 	address.flags.ignore_mandatory = True
@@ -138,7 +138,7 @@ def create_address(raw_data, customer, address_type):
 
 def rename_address(address, customer):
 	old_address_title = address.name
-	new_address_title = customer.customer_name + "-" + address.address_type
+	new_address_title = customer.name + "-" + address.address_type
 	address.address_title = customer.customer_name
 	address.save()
 
