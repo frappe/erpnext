@@ -111,6 +111,8 @@ def create_contact(data, customer):
 	contact.flags.ignore_mandatory = True
 	contact.save()
 
+	return contact
+
 def create_address(raw_data, customer, address_type):
 	address = frappe.new_doc("Address")
 
@@ -131,6 +133,8 @@ def create_address(raw_data, customer, address_type):
 
 	address.flags.ignore_mandatory = True
 	address.save()
+
+	return address
 
 def rename_address(address, customer):
 	old_address_title = address.name
