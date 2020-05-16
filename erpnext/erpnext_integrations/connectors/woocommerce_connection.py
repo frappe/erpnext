@@ -78,10 +78,38 @@ def link_customer_and_address(raw_billing_data, raw_shipping_data, customer_name
 	else:
 		billing_address = create_address(raw_billing_data, customer, "Billing")
 		shipping_address = create_address(raw_shipping_data, customer, "Shipping")
+		contact = create_contact(raw_billing_data, customer)
 
 	if customer_exists:
 		rename_address(billing_address, customer)
 		rename_address(shipping_address, customer)
+
+def create_contact(data, customer):
+	email = data.get("email", None)
+	phone = data.get("phone", None)
+
+	if not email and not phone:
+		return
+
+	contact = frappe.new_doc("Contact")
+	contact.first_name = data.get("first_name")
+	contact.last_name = data.get("last_name")
+	contact.is_primary_contact = 1
+	contact.is_billing_contact = 1
+
+	if phone:
+		contact.add_phone(phone, is_primary_mobile_no=1, is_primary_phone=1)
+
+	if email:
+		contact.add_email(email, is_primary=1)
+
+	contact.append("links", {
+		"link_doctype": "Customer",
+		"link_name": customer.customer_name
+	})
+
+	contact.flags.ignore_mandatory = True
+	contact.save()
 
 def create_address(raw_data, customer, address_type):
 	address = frappe.new_doc("Address")
@@ -102,7 +130,7 @@ def create_address(raw_data, customer, address_type):
 	})
 
 	address.flags.ignore_mandatory = True
-	address = address.save()
+	address.save()
 
 def rename_address(address, customer):
 	old_address_title = address.name
