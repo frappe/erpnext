@@ -623,7 +623,7 @@ erpnext.patches.v11_1.update_default_supplier_in_item_defaults
 erpnext.patches.v12_0.update_due_date_in_gle
 erpnext.patches.v12_0.add_default_buying_selling_terms_in_company
 erpnext.patches.v12_0.update_ewaybill_field_position
-erpnext.patches.v12_0.create_accounting_dimensions_in_missing_doctypes
+erpnext.patches.v12_0.create_accounting_dimensions_in_missing_doctypes #2020-05-11
 erpnext.patches.v11_1.set_status_for_material_request_type_manufacture
 erpnext.patches.v12_0.move_plaid_settings_to_doctype
 execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart_link')
@@ -631,7 +631,6 @@ execute:frappe.reload_doc('desk', 'doctype', 'dashboard')
 execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart_source')
 execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart')
 execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart_field')
-erpnext.patches.v12_0.add_default_dashboards # 2020-04-05
 erpnext.patches.v12_0.remove_bank_remittance_custom_fields
 erpnext.patches.v12_0.generate_leave_ledger_entries
 execute:frappe.delete_doc_if_exists("Report", "Loan Repayment")
@@ -679,5 +678,10 @@ erpnext.patches.v13_0.move_tax_slabs_from_payroll_period_to_income_tax_slab #123
 erpnext.patches.v12_0.fix_quotation_expired_status
 erpnext.patches.v12_0.update_appointment_reminder_scheduler_entry
 erpnext.patches.v12_0.retain_permission_rules_for_video_doctype
+erpnext.patches.v12_0.remove_duplicate_leave_ledger_entries
 erpnext.patches.v13_0.patch_to_fix_reverse_linking_in_additional_salary_encashment_and_incentive
+execute:frappe.delete_doc_if_exists("Page", "appointment-analytic")
+execute:frappe.rename_doc("Desk Page", "Getting Started", "Home", force=True)
+erpnext.patches.v12_0.unset_customer_supplier_based_on_type_of_item_price
+erpnext.patches.v12_0.set_valid_till_date_in_supplier_quotation
 erpnext.patches.v13_0.update_old_loans
