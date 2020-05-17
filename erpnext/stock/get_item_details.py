@@ -77,7 +77,11 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args))
 
-	if out.get("warehouse"):
+	if (args.get("doctype") == "Material Request" and
+		args.get("material_request_type") == "Material Transfer"):
+		out.update(get_bin_details(args.item_code, args.get("from_warehouse")))
+
+	elif out.get("warehouse"):
 		out.update(get_bin_details(args.item_code, out.warehouse))
 
 	# update args with out, if key or value not exists
@@ -342,8 +346,14 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 			out["manufacturer_part_no"] = None
 			out["manufacturer"] = None
 	else:
-		out["manufacturer"], out["manufacturer_part_no"] = frappe.get_value("Item", item.name,
-			["default_item_manufacturer", "default_manufacturer_part_no"] )
+		data = frappe.get_value("Item", item.name,
+			["default_item_manufacturer", "default_manufacturer_part_no"] , as_dict=1)
+
+		if data:
+			out.update({
+				"manufacturer": data.default_item_manufacturer,
+				"manufacturer_part_no": data.default_manufacturer_part_no
+			})
 
 	child_doctype = args.doctype + ' Item'
 	meta = frappe.get_meta(child_doctype)
@@ -620,7 +630,7 @@ def get_item_price(args, item_code, ignore_party=False):
 		elif args.get("supplier"):
 			conditions += " and supplier=%(supplier)s"
 		else:
-			conditions += " and (customer is null or customer = '') and (supplier is null or supplier = '')"
+			conditions += "and (customer is null or customer = '') and (supplier is null or supplier = '')"
 
 	if args.get('transaction_date'):
 		conditions += """ and %(transaction_date)s between

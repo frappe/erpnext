@@ -42,17 +42,17 @@ def delete_vital_signs_from_medical_record(doc):
 
 def set_subject_field(doc):
 	subject = ''
-	if(doc.temperature):
-		subject += _('Temperature: ') + '\n'+ cstr(doc.temperature) + '. '
-	if(doc.pulse):
-		subject += _('Pulse: ') + '\n' + cstr(doc.pulse) + '. '
-	if(doc.respiratory_rate):
-		subject += _('Respiratory Rate: ') + '\n' + cstr(doc.respiratory_rate) + '. '
-	if(doc.bp):
-		subject += _('BP: ') + '\n' + cstr(doc.bp) + '. '
-	if(doc.bmi):
-		subject += _('BMI: ') + '\n' + cstr(doc.bmi) + '. '
-	if(doc.nutrition_note):
-		subject += _('Note: ') + '\n' + cstr(doc.nutrition_note) + '. '
+	if doc.temperature:
+		subject += frappe.bold(_('Temperature: ')) + cstr(doc.temperature) + '<br>'
+	if doc.pulse:
+		subject += frappe.bold(_('Pulse: ')) + cstr(doc.pulse) + '<br>'
+	if doc.respiratory_rate:
+		subject += frappe.bold(_('Respiratory Rate: ')) + cstr(doc.respiratory_rate) + '<br>'
+	if doc.bp:
+		subject += frappe.bold(_('BP: ')) + cstr(doc.bp) + '<br>'
+	if doc.bmi:
+		subject += frappe.bold(_('BMI: ')) + cstr(doc.bmi) + '<br>'
+	if doc.nutrition_note:
+		subject += frappe.bold(_('Note: ')) + cstr(doc.nutrition_note) + '<br>'
 
 	return subject

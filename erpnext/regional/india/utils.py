@@ -251,8 +251,7 @@ def get_tax_template_for_sez(party_details, master_doctype, company, party_type)
 
 
 def calculate_annual_eligible_hra_exemption(doc):
-	basic_component = frappe.get_cached_value('Company',  doc.company,  "basic_component")
-	hra_component = frappe.get_cached_value('Company',  doc.company,  "hra_component")
+	basic_component, hra_component = frappe.db.get_value('Company',  doc.company,  ["basic_component", "hra_component"])
 	if not (basic_component and hra_component):
 		frappe.throw(_("Please mention Basic and HRA component in Company"))
 	annual_exemption, monthly_exemption, hra_amount = 0, 0, 0
@@ -288,7 +287,7 @@ def calculate_annual_eligible_hra_exemption(doc):
 	})
 
 def get_component_amt_from_salary_slip(employee, salary_structure, basic_component, hra_component):
-	salary_slip = make_salary_slip(salary_structure, employee=employee, for_preview=1)
+	salary_slip = make_salary_slip(salary_structure, employee=employee, for_preview=1, ignore_permissions=True)
 	basic_amt, hra_amt = 0, 0
 	for earning in salary_slip.earnings:
 		if earning.salary_component == basic_component:

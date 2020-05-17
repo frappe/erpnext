@@ -122,12 +122,8 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	source_warehouse: function(frm) {
-		if (frm.doc.source_warehouse) {
-			frm.doc.required_items.forEach(d => {
-				frappe.model.set_value(d.doctype, d.name,
-					"source_warehouse", frm.doc.source_warehouse);
-			});
-		}
+		let transaction_controller = new erpnext.TransactionController();
+		transaction_controller.autofill_warehouse(frm.doc.required_items, "source_warehouse", frm.doc.source_warehouse);
 	},
 
 	refresh: function(frm) {

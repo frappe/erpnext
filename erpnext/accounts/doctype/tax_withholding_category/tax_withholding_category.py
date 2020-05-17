@@ -58,7 +58,7 @@ def get_tax_withholding_details(tax_withholding_category, fiscal_year, company):
 				"rate": tax_rate_detail.tax_withholding_rate,
 				"threshold": tax_rate_detail.single_threshold,
 				"cumulative_threshold": tax_rate_detail.cumulative_threshold,
-				"description": tax_withholding.category_name
+				"description": tax_withholding.category_name if tax_withholding.category_name else tax_withholding_category
 			})
 
 def get_tax_withholding_rates(tax_withholding, fiscal_year):
@@ -162,8 +162,7 @@ def get_tds_amount(suppliers, net_total, company, tax_details, fiscal_year_detai
 		debit_note_amount = get_debit_note_amount(suppliers, year_start_date, year_end_date)
 		supplier_credit_amount -= debit_note_amount
 
-		if ((tax_details.get('threshold', 0) and supplier_credit_amount >= tax_details.threshold)
-			or (tax_details.get('cumulative_threshold', 0) and supplier_credit_amount >= tax_details.cumulative_threshold)):
+		if supplier_credit_amount >= tax_details.get('threshold', 0) or supplier_credit_amount >= tax_details.get('cumulative_threshold', 0):
 
 			if ldc and is_valid_certificate(ldc.valid_from, ldc.valid_upto, posting_date, tds_deducted, net_total,
 				ldc.certificate_limit):
