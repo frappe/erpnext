@@ -25,7 +25,7 @@ frappe.ui.form.on('Patient Encounter', {
 		refresh_field('lab_test_prescription');
 
 		if (!frm.doc.__islocal) {
-			if (frm.doc.docstatus == 1) {
+			if (frm.doc.docstatus === 1) {
 				if (frm.doc.inpatient_status == 'Admission Scheduled' || frm.doc.inpatient_status == 'Admitted') {
 					frm.add_custom_button(__('Schedule Discharge'), function() {
 						schedule_discharge(frm);
@@ -103,7 +103,7 @@ frappe.ui.form.on('Patient Encounter', {
 	},
 
 	practitioner: function(frm) {
-		if(!frm.doc.practitioner) {
+		if (!frm.doc.practitioner) {
 			frm.set_value('practitioner_name', '');
 		}
 	},
