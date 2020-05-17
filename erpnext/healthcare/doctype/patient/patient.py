@@ -44,6 +44,7 @@ class Patient(Document):
 			customer.default_price_list = self.default_price_list
 			customer.default_currency = self.default_currency
 			customer.language = self.language
+			customer.ignore_mandatory = True
 			customer.save(ignore_permissions=True)
 		else:
 			if frappe.db.get_single_value('Healthcare Settings', 'link_customer_to_patient'):
