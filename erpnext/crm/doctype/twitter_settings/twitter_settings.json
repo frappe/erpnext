@@ -11,8 +11,8 @@
   "consumer_key",
   "column_break_5",
   "consumer_secret",
-  "oauth_token",
-  "oauth_secret",
+  "access_token",
+  "access_token_secret",
   "session_status"
  ],
  "fields": [
@@ -42,20 +42,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "oauth_token",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "OAuth Token",
-   "read_only": 1
-  },
-  {
-   "fieldname": "oauth_secret",
-   "fieldtype": "Password",
-   "hidden": 1,
-   "label": "OAuth Token Secret",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_5",
    "fieldtype": "Column Break"
   },
@@ -72,12 +58,26 @@
    "label": "Session Status",
    "options": "Expired\nActive",
    "read_only": 1
+  },
+  {
+   "fieldname": "access_token",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Access Token",
+   "read_only": 1
+  },
+  {
+   "fieldname": "access_token_secret",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Access Token Secret",
+   "read_only": 1
   }
  ],
  "image_field": "profile_pic",
  "issingle": 1,
  "links": [],
- "modified": "2020-04-21 22:06:43.726798",
+ "modified": "2020-05-13 17:50:47.934776",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Twitter Settings",

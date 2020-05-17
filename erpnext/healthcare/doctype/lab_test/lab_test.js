@@ -137,13 +137,13 @@ var get_lab_test_prescribed = function(frm){
 		});
 	}
 	else{
-		frappe.msgprint(__("Please select Patient to get Lab Tests"));
+		frappe.msgprint(__("Please select a Patient to get Lab Tests"));
 	}
 };
 
 var show_lab_tests = function(frm, result){
 	var d = new frappe.ui.Dialog({
-		title: __("Lab Test Prescriptions"),
+		title: __("Lab Tests"),
 		fields: [
 			{
 				fieldtype: "HTML", fieldname: "lab_test"
@@ -161,7 +161,7 @@ var show_lab_tests = function(frm, result){
 		<div class="col-xs-1">\
 		<a data-name="%(name)s" data-lab-test="%(lab_test)s"\
 		data-encounter="%(encounter)s" data-practitioner="%(practitioner)s"\
-		data-invoiced="%(invoiced)s" href="#"><button class="btn btn-default btn-xs">Get Lab Test\
+		data-invoiced="%(invoiced)s" href="#"><button class="btn btn-default btn-xs">Get Lab Tests\
 		</button></a></div></div>', {name:y[0], lab_test: y[1], encounter:y[2], invoiced:y[3], practitioner:y[4], date:y[5]})).appendTo(html_field);
 		row.find("a").click(function() {
 			frm.doc.template = $(this).attr("data-lab-test");
@@ -180,9 +180,10 @@ var show_lab_tests = function(frm, result){
 			return false;
 		});
 	});
-	if(!result){
-		var msg = "There are no Lab Test prescribed for "+frm.doc.patient;
-		$(repl('<div class="col-xs-12" style="padding-top:20px;" >%(msg)s</div></div>', {msg: msg})).appendTo(html_field);
+	if(!result.length){
+		var msg = __("No Lab Tests found for the Patient {0}", [frm.doc.patient_name.bold()]);
+		html_field.empty();
+		$(repl('<div class="col-xs-12" style="padding-top:0px;" >%(msg)s</div>', {msg: msg})).appendTo(html_field);
 	}
 	d.show();
 };
