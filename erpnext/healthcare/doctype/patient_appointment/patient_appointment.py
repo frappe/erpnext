@@ -30,9 +30,8 @@ class PatientAppointment(Document):
 		send_confirmation_msg(self)
 
 	def set_title(self):
-		self.title = _('{0} with {1} on {2}').format(self.patient_name or self.patient,
-			self.practitioner_name or self.practitioner,
-			frappe.utils.format_datetime(self.appointment_datetime))[:100]
+		self.title = _('{0} with {1}').format(self.patient_name or self.patient,
+			self.practitioner_name or self.practitioner)
 
 	def set_status(self):
 		today = getdate()
@@ -379,7 +378,7 @@ def send_appointment_reminder():
 			frappe.db.set_value('Patient Appointment', doc.name, 'reminded', 1)
 
 def send_message(doc, message):
-	patient_mobile = frappe.db.get_value("Patient", doc.patient, "mobile")
+	patient_mobile = frappe.db.get_value('Patient', doc.patient, 'mobile')
 	if patient_mobile:
 		context = {'doc': doc, 'alert': doc, 'comments': None}
 		if doc.get('_comments'):
@@ -391,7 +390,7 @@ def send_message(doc, message):
 		try:
 			send_sms(number, message)
 		except Exception as e:
-			frappe.msgprint(_("SMS not sent, please check SMS Settings"), alert=True)
+			frappe.msgprint(_('SMS not sent, please check SMS Settings'), alert=True)
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
