@@ -75,6 +75,7 @@
    "reqd": 1
   },
   {
+   "description": "This account is used for booking loan repayments from the borrower and also disbursing loans to the borrower",
    "fieldname": "payment_account",
    "fieldtype": "Link",
    "label": "Payment Account",
@@ -82,6 +83,7 @@
    "reqd": 1
   },
   {
+   "description": "This account is capital account which is used to allocate capital for loan disbursal account ",
    "fieldname": "loan_account",
    "fieldtype": "Link",
    "label": "Loan Account",
@@ -93,6 +95,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "This account will be used for booking loan interest accruals",
    "fieldname": "interest_income_account",
    "fieldtype": "Link",
    "label": "Interest Income Account",
@@ -100,6 +103,7 @@
    "reqd": 1
   },
   {
+   "description": "This account will be used for booking penalties levied due to delayed repayments",
    "fieldname": "penalty_income_account",
    "fieldtype": "Link",
    "label": "Penalty Income Account",
@@ -108,6 +112,7 @@
   },
   {
    "default": "0",
+   "description": "If this is not checked the loan by default will be considered as a Demand Loan",
    "fieldname": "is_term_loan",
    "fieldtype": "Check",
    "label": "Is Term Loan"
@@ -143,7 +148,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-15 00:24:43.259963",
+ "modified": "2020-05-16 09:08:09.029921",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Type",
