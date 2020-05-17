@@ -19,8 +19,8 @@ class LoanInterestAccrual(AccountsController):
 		if not self.posting_date:
 			self.posting_date = nowdate()
 
-		if not self.interest_amount:
-			frappe.throw(_("Interest Amount is mandatory"))
+		if not self.interest_amount and not self.payable_principal_amount:
+			frappe.throw(_("Interest Amount or Principal Amount is mandatory"))
 
 
 	def on_submit(self):
@@ -38,37 +38,38 @@ class LoanInterestAccrual(AccountsController):
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gle_map = []
 
-		gle_map.append(
-			self.get_gl_dict({
-				"account": self.loan_account,
-				"party_type": self.applicant_type,
-				"party": self.applicant,
-				"against": self.interest_income_account,
-				"debit": self.interest_amount,
-				"debit_in_account_currency": self.interest_amount,
-				"against_voucher_type": "Loan",
-				"against_voucher": self.loan,
-				"remarks": _("Against Loan:") + self.loan,
-				"cost_center": erpnext.get_default_cost_center(self.company),
-				"posting_date": self.posting_date
-			})
-		)
+		if self.interest_amount:
+			gle_map.append(
+				self.get_gl_dict({
+					"account": self.loan_account,
+					"party_type": self.applicant_type,
+					"party": self.applicant,
+					"against": self.interest_income_account,
+					"debit": self.interest_amount,
+					"debit_in_account_currency": self.interest_amount,
+					"against_voucher_type": "Loan",
+					"against_voucher": self.loan,
+					"remarks": _("Against Loan:") + self.loan,
+					"cost_center": erpnext.get_default_cost_center(self.company),
+					"posting_date": self.posting_date
+				})
+			)
 
-		gle_map.append(
-			self.get_gl_dict({
-				"account": self.interest_income_account,
-				"party_type": self.applicant_type,
-				"party": self.applicant,
-				"against": self.loan_account,
-				"credit": self.interest_amount,
-				"credit_in_account_currency":  self.interest_amount,
-				"against_voucher_type": "Loan",
-				"against_voucher": self.loan,
-				"remarks": _("Against Loan:") + self.loan,
-				"cost_center": erpnext.get_default_cost_center(self.company),
-				"posting_date": self.posting_date
-			})
-		)
+			gle_map.append(
+				self.get_gl_dict({
+					"account": self.interest_income_account,
+					"party_type": self.applicant_type,
+					"party": self.applicant,
+					"against": self.loan_account,
+					"credit": self.interest_amount,
+					"credit_in_account_currency":  self.interest_amount,
+					"against_voucher_type": "Loan",
+					"against_voucher": self.loan,
+					"remarks": _("Against Loan:") + self.loan,
+					"cost_center": erpnext.get_default_cost_center(self.company),
+					"posting_date": self.posting_date
+				})
+			)
 
 		if gle_map:
 			make_gl_entries(gle_map, cancel=cancel, adv_adj=adv_adj)

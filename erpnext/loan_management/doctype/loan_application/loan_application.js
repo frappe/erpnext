@@ -112,16 +112,19 @@ frappe.ui.form.on('Loan Application', {
 frappe.ui.form.on("Proposed Pledge", {
 	loan_security: function(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
-		frappe.call({
-			method: "erpnext.loan_management.doctype.loan_security_price.loan_security_price.get_loan_security_price",
-			args: {
-				loan_security: row.loan_security
-			},
-			callback: function(r) {
-				frappe.model.set_value(cdt, cdn, 'loan_security_price', r.message);
-				frm.events.calculate_amounts(frm, cdt, cdn);
-			}
-		})
+
+		if (row.loan_security) {
+			frappe.call({
+				method: "erpnext.loan_management.doctype.loan_security_price.loan_security_price.get_loan_security_price",
+				args: {
+					loan_security: row.loan_security
+				},
+				callback: function(r) {
+					frappe.model.set_value(cdt, cdn, 'loan_security_price', r.message);
+					frm.events.calculate_amounts(frm, cdt, cdn);
+				}
+			})
+		}
 	},
 
 	amount: function(frm, cdt, cdn) {

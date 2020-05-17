@@ -173,7 +173,7 @@
   {
    "fieldname": "references_section",
    "fieldtype": "Section Break",
-   "label": "References"
+   "label": "Payment References"
   },
   {
    "fieldname": "reference_number",
@@ -221,7 +221,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-16 18:14:45.166754",
+ "modified": "2020-05-16 09:40:15.581165",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",
