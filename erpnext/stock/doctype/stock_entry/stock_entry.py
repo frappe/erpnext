@@ -107,6 +107,9 @@ class StockEntry(StockController):
 
 		self.update_work_order()
 		self.update_stock_ledger()
+
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
+
 		self.make_gl_entries_on_cancel()
 		self.update_cost_in_project()
 		self.update_transferred_qty()
@@ -178,7 +181,7 @@ class StockEntry(StockController):
 		stock_items = self.get_stock_items()
 		serialized_items = self.get_serialized_items()
 		for item in self.get("items"):
-			if item.qty and item.qty < 0:
+			if flt(item.qty) and flt(item.qty) < 0:
 				frappe.throw(_("Row {0}: The item {1}, quantity must be positive number")
 					.format(item.idx, frappe.bold(item.item_code)))
 
@@ -467,7 +470,7 @@ class StockEntry(StockController):
 			"qty": item.s_warehouse and -1*flt(item.transfer_qty) or flt(item.transfer_qty),
 			"serial_no": item.serial_no,
 			"voucher_type": self.doctype,
-			"voucher_no": item.name,
+			"voucher_no": self.name,
 			"company": self.company,
 			"allow_zero_valuation": item.allow_zero_valuation_rate,
 		})
@@ -651,7 +654,7 @@ class StockEntry(StockController):
 		if self.docstatus == 2:
 			sl_entries.reverse()
 
-		self.make_sl_entries(sl_entries, self.amended_from and 'Yes' or 'No')
+		self.make_sl_entries(sl_entries)
 
 	def get_gl_entries(self, warehouse_account):
 		gl_entries = super(StockEntry, self).get_gl_entries(warehouse_account)
@@ -674,7 +677,7 @@ class StockEntry(StockController):
 					multiply_based_on = d.basic_amount if total_basic_amount else d.qty
 
 					item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account] += \
-						(t.amount * multiply_based_on) / divide_based_on
+						flt(t.amount * multiply_based_on) / divide_based_on
 
 		if item_account_wise_additional_cost:
 			for d in self.get("items"):
@@ -1050,9 +1053,9 @@ class StockEntry(StockController):
 				fields=["required_qty", "consumed_qty"]
 				)
 
-			req_qty = flt(req_items[0].required_qty)
+			req_qty = flt(req_items[0].required_qty) if req_items else flt(4)
 			req_qty_each = flt(req_qty / manufacturing_qty)
-			consumed_qty = flt(req_items[0].consumed_qty)
+			consumed_qty = flt(req_items[0].consumed_qty) if req_items else 0
 
 			if trans_qty and manufacturing_qty > (produced_qty + flt(self.fg_completed_qty)):
 				if qty >= req_qty:

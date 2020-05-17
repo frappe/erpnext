@@ -91,7 +91,8 @@ class ClinicalProcedure(Document):
 			else:
 				frappe.throw(_('Please set Customer in Patient {0}').format(frappe.bold(self.patient)), title=_('Customer Not Found'))
 
-		frappe.db.set_value('Clinical Procedure', self.name, 'status', 'Completed')
+		self.db_set('status', 'Completed')
+
 		if self.consume_stock and self.items:
 			return stock_entry
 
@@ -249,9 +250,9 @@ def make_procedure(source_name, target_doc=None):
 
 
 def insert_clinical_procedure_to_medical_record(doc):
-	subject = cstr(doc.procedure_template)
+	subject = frappe.bold(_("Clinical Procedure conducted: ")) + cstr(doc.procedure_template) + "<br>"
 	if doc.practitioner:
-		subject += ' ' + doc.practitioner
+		subject += frappe.bold(_('Healthcare Practitioner: ')) + doc.practitioner
 	if subject and doc.notes:
 		subject += '<br/>' + doc.notes
 

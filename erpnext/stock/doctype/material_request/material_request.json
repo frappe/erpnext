@@ -18,6 +18,8 @@
   "amended_from",
   "warehouse_section",
   "set_warehouse",
+  "column_break5",
+  "set_from_warehouse",
   "items_section",
   "scan_barcode",
   "items",
@@ -287,13 +289,27 @@
    "fieldtype": "Link",
    "label": "Set Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break5",
+   "fieldtype": "Column Break",
+   "oldfieldtype": "Column Break",
+   "print_width": "50%",
+   "width": "50%"
+  },
+  {
+   "depends_on": "eval:doc.material_request_type == 'Material Transfer'",
+   "fieldname": "set_from_warehouse",
+   "fieldtype": "Link",
+   "label": "Set From Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-02 20:21:09.990867",
+ "modified": "2020-05-01 20:21:09.990867",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",

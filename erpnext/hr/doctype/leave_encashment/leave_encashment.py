@@ -30,12 +30,15 @@ class LeaveEncashment(Document):
 		additional_salary = frappe.new_doc("Additional Salary")
 		additional_salary.company = frappe.get_value("Employee", self.employee, "company")
 		additional_salary.employee = self.employee
-		additional_salary.salary_component = frappe.get_value("Leave Type", self.leave_type, "earning_component")
+		earning_component = frappe.get_value("Leave Type", self.leave_type, "earning_component")
+		if not earning_component:
+			frappe.throw(_("Please set Earning Component for Leave type: {0}.".format(self.leave_type)))
+		additional_salary.salary_component = earning_component
 		additional_salary.payroll_date = self.encashment_date
 		additional_salary.amount = self.encashment_amount
+		additional_salary.ref_doctype = self.doctype
+		additional_salary.ref_docname = self.name
 		additional_salary.submit()
-
-		self.db_set("additional_salary", additional_salary.name)
 
 		# Set encashed leaves in Allocation
 		frappe.db.set_value("Leave Allocation", self.leave_allocation, "total_leaves_encashed",

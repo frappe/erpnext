@@ -291,23 +291,23 @@ def insert_lab_test_to_medical_record(doc):
 	table_row = False
 	subject = cstr(doc.lab_test_name)
 	if doc.practitioner:
-		subject += " "+ doc.practitioner
+		subject += frappe.bold(_("Healthcare Practitioner: "))+ doc.practitioner + "<br>"
 	if doc.normal_test_items:
 		item = doc.normal_test_items[0]
 		comment = ""
 		if item.lab_test_comment:
 			comment = str(item.lab_test_comment)
-		table_row = item.lab_test_name
+		table_row = frappe.bold(_("Lab Test Conducted: ")) + item.lab_test_name
 
 		if item.lab_test_event:
-			table_row += " " + item.lab_test_event
+			table_row += frappe.bold(_("Lab Test Event: ")) + item.lab_test_event
 
 		if item.result_value:
-			table_row += " " + item.result_value
+			table_row += " " + frappe.bold(_("Lab Test Result: ")) + item.result_value
 
 		if item.normal_range:
-			table_row += " normal_range("+item.normal_range+")"
-		table_row += " "+comment
+			table_row += " " + _("Normal Range:") + item.normal_range
+		table_row += " " + comment
 
 	elif doc.special_test_items:
 		item = doc.special_test_items[0]
@@ -319,12 +319,12 @@ def insert_lab_test_to_medical_record(doc):
 		item = doc.sensitivity_test_items[0]
 
 		if item.antibiotic and item.antibiotic_sensitivity:
-			table_row = item.antibiotic +" "+ item.antibiotic_sensitivity
+			table_row = item.antibiotic + " " + item.antibiotic_sensitivity
 
 	if table_row:
-		subject += "<br/>"+table_row
+		subject += "<br>" + table_row
 	if doc.lab_test_comment:
-		subject += "<br/>"+ cstr(doc.lab_test_comment)
+		subject += "<br>" + cstr(doc.lab_test_comment)
 
 	medical_record = frappe.new_doc("Patient Medical Record")
 	medical_record.patient = doc.patient
