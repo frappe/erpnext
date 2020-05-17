@@ -247,6 +247,7 @@
   },
   {
    "allow_on_submit": 1,
+   "columns": 5,
    "fieldname": "title",
    "fieldtype": "Data",
    "hidden": 1,
@@ -258,7 +259,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-27 23:18:08.278064",
+ "modified": "2020-05-17 22:23:24.632286",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Vital Signs",
