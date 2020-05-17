@@ -366,7 +366,7 @@
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
- "modified": "2019-09-19 12:49:02.536647",
+ "modified": "2020-05-11 20:30:02.536647",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -423,15 +423,6 @@
    "read": 1,
    "report": 1,
    "role": "Sales User"
-  },
-  {
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Guest",
-   "share": 1
   }
  ],
  "search_fields": "lead_name,lead_owner,status",
