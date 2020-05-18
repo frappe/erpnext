@@ -589,6 +589,6 @@ def get_fields(doctype, fields=[]):
 	fields.extend(meta.get_search_fields())
 
 	if meta.title_field and not meta.title_field.strip() in fields:
-		fields.insert(meta.title_field.strip(), 1)
+		fields.insert(1, meta.title_field.strip())
 
 	return unique(fields)
