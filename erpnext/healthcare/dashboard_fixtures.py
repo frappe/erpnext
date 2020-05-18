@@ -30,10 +30,11 @@ def get_dashboards():
 			{ "chart": "Patient Appointments", "width": "Full"},
 			{ "chart": "In-Patient Status", "width": "Half"},
 			{ "chart": "Clinical Procedures Status", "width": "Half"},
+			{ "chart": "Lab Tests", "width": "Half"},
+			{ "chart": "Clinical Procedures", "width": "Half"},
 			{ "chart": "Symptoms", "width": "Half"},
 			{ "chart": "Diagnoses", "width": "Half"},
-			{ "chart": "Department wise Patient Appointments", "width": "Full"},
-			{ "chart": "Lab Tests", "width": "Full"},
+			{ "chart": "Department wise Patient Appointments", "width": "Full"}
 		],
 		"cards": [
 			{ "card": "Total Patients" },
@@ -96,9 +97,25 @@ def get_charts():
 				]),
 				'is_public': 1,
 				"owner": "Administrator",
-				"type": "Bar",
-				"width": "Full",
-				"color": "#8548EB"
+				"type": "Percentage",
+				"width": "Half",
+			},
+			{
+				"doctype": "Dashboard Chart",
+				"name": "Clinical Procedures",
+				"chart_name": "Clinical Procedures",
+				"chart_type": "Group By",
+				"document_type": "Clinical Procedure",
+				"group_by_type": "Count",
+				"group_by_based_on": "procedure_template",
+				"filters_json": json.dumps([
+					["Clinical Procedure", "company", "=", company, False],
+					["Clinical Procedure", "docstatus", "=", 1]
+				]),
+				'is_public': 1,
+				"owner": "Administrator",
+				"type": "Percentage",
+				"width": "Half",
 			},
 			{
 				"doctype": "Dashboard Chart",
