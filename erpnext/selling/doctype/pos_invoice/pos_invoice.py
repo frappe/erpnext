@@ -13,7 +13,7 @@ from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 	get_loyalty_program_details_with_points, validate_loyalty_points
 
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, set_account_for_mode_of_payment
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, get_bank_cash_account
 from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos
 
 from six import iteritems
@@ -32,12 +32,13 @@ class POSInvoice(SalesInvoice):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_debit_to_acc()
 		self.validate_write_off_account()
-		self.validate_account_for_change_amount()
+		self.validate_change_amount()
 		self.validate_item_cost_centers()
 		self.validate_serialised_or_batched_item()
 		self.validate_stock_availablility()
 		self.validate_return_items()
 		self.set_status()
+		self.set_account_for_mode_of_payment()
 		if cint(self.is_pos):
 			self.validate_pos()
 			if not self.is_return:
@@ -52,9 +53,6 @@ class POSInvoice(SalesInvoice):
 
 		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points:
 			validate_loyalty_points(self, self.loyalty_points)
-	
-	def before_save(self):
-		set_account_for_mode_of_payment(self)
 
 	def on_submit(self):
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
@@ -147,7 +145,13 @@ class POSInvoice(SalesInvoice):
 		if len(self.payments) == 0 and self.is_pos:
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
 	
-	def validate_account_for_change_amount(self):
+	def validate_change_amount(self):
+		grand_total = flt(self.rounded_total) or flt(self.grand_total)
+		base_grand_total = flt(self.base_rounded_total) or flt(self.base_grand_total)
+		if not flt(self.change_amount) and grand_total < flt(self.paid_amount):
+			self.change_amount = flt(self.paid_amount - grand_total + flt(self.write_off_amount))
+			self.base_change_amount = flt(self.base_paid_amount - base_grand_total + flt(self.base_write_off_amount))
+
 		if flt(self.change_amount) and not self.account_for_change_amount:
 			msgprint(_("Please enter Account for Change Amount"), raise_exception=1)
 
@@ -301,9 +305,10 @@ class POSInvoice(SalesInvoice):
 			}
 
 	def set_account_for_mode_of_payment(self):
-		for data in self.payments:
-			if not data.account:
-				data.account = get_bank_cash_account(data.mode_of_payment, self.company).get("account")
+		self.payments = [d for d in self.payments if d.amount or d.base_amount]
+		for pay in self.payments:
+			if not pay.account:
+				pay.account = get_bank_cash_account(pay.mode_of_payment, self.company).get("account")
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):

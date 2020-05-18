@@ -241,7 +241,8 @@ def make_return_doc(doctype, source_name, target_doc=None):
 						'mode_of_payment': data.mode_of_payment,
 						'type': data.type,
 						'amount': -1 * paid_amount,
-						'base_amount': -1 * base_paid_amount
+						'base_amount': -1 * base_paid_amount,
+						'account': data.account
 					})
 				if doc.is_pos:
 					doc.paid_amount = -1 * source.paid_amount
