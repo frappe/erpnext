@@ -9,7 +9,18 @@ def get_data():
 	return frappe._dict({
 		"dashboards": get_dashboards(),
 		"charts": get_charts(),
+		"number_cards": get_number_cards(),
 	})
+
+def get_company():
+	company = frappe.defaults.get_defaults().company
+	if company:
+		return company
+	else:
+		company = frappe.get_list("Company", limit=1)
+		if company:
+			return company.name
+	return None
 
 def get_dashboards():
 	return [{
@@ -23,6 +34,12 @@ def get_dashboards():
 			{ "chart": "Diagnoses", "width": "Half"},
 			{ "chart": "Department wise Patient Appointments", "width": "Full"},
 			{ "chart": "Lab Tests", "width": "Full"},
+		],
+		"cards": [
+			{ "card": "Total Patients" },
+			{ "card": "Total Patient Admitted" },
+			{ "card": "Open Appointments" },
+			{ "card": "Appointments to Bill" }
 		]
 	}]
 
@@ -124,3 +141,65 @@ def get_charts():
 				"width": "Half",
 			}
 		]
+
+def get_number_cards():
+	return [
+		{
+			"name": "Total Patients",
+			"label": "Total Patients",
+			"function": "Count",
+			"doctype": "Number Card",
+			"document_type": "Patient",
+			"filters_json": json.dumps(
+				[["Patient","status","=","Active",False]]
+			),
+			"is_public": 1,
+			"owner": "Administrator",
+			"show_percentage_stats": 1,
+			"stats_time_interval": "Daily"
+		},
+		{
+			"name": "Total Patients Admitted",
+			"label": "Total Patients Admitted",
+			"function": "Count",
+			"doctype": "Number Card",
+			"document_type": "Patient",
+			"filters_json": json.dumps(
+				[["Patient","inpatient_status","=","Admitted",False]]
+			),
+			"is_public": 1,
+			"owner": "Administrator",
+			"show_percentage_stats": 1,
+			"stats_time_interval": "Daily"
+		},
+		{
+			"name": "Open Appointments",
+			"label": "Open Appointments",
+			"function": "Count",
+			"doctype": "Number Card",
+			"document_type": "Patient Appointment",
+			"filters_json": json.dumps(
+				[["Patient Appointment","company","=",get_company(),False],
+				["Patient Appointment","status","=","Open",False]]
+			),
+			"is_public": 1,
+			"owner": "Administrator",
+			"show_percentage_stats": 1,
+			"stats_time_interval": "Daily"
+		},
+		{
+			"name": "Appointments to Bill",
+			"label": "Appointments to Bill",
+			"function": "Count",
+			"doctype": "Number Card",
+			"document_type": "Patient Appointment",
+			"filters_json": json.dumps(
+				[["Patient Appointment","company","=",get_company(),False],
+				["Patient Appointment","invoiced","=",0,False]]
+			),
+			"is_public": 1,
+			"owner": "Administrator",
+			"show_percentage_stats": 1,
+			"stats_time_interval": "Daily"
+		}
+	]
