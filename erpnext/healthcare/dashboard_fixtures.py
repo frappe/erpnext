@@ -44,6 +44,7 @@ def get_dashboards():
 	}]
 
 def get_charts():
+	company = get_company()
 	return [
 			{
 				"doctype": "Dashboard Chart",
@@ -51,7 +52,10 @@ def get_charts():
 				"name": "Patient Appointments",
 				"chart_name": "Patient Appointments",
 				"timespan": "Last Month",
-				"filters_json": json.dumps({}),
+				"filters_json": json.dumps([
+					["Patient Appointment", "company", "=", company, False],
+					["Patient Appointment", "status", "!=", "Cancelled"]
+				]),
 				"chart_type": "Count",
 				"timeseries": 1,
 				"based_on": "appointment_datetime",
@@ -68,6 +72,10 @@ def get_charts():
 				"document_type": "Patient Appointment",
 				"group_by_type": "Count",
 				"group_by_based_on": "department",
+				"filters_json": json.dumps([
+					["Patient Appointment", "company", "=", company, False],
+					["Patient Appointment", "status", "!=", "Cancelled"]
+				]),
 				'is_public': 1,
 				"owner": "Administrator",
 				"type": "Bar",
@@ -82,6 +90,10 @@ def get_charts():
 				"document_type": "Lab Test",
 				"group_by_type": "Count",
 				"group_by_based_on": "template",
+				"filters_json": json.dumps([
+					["Lab Test", "company", "=", company, False],
+					["Lab Test", "docstatus", "=", 1]
+				]),
 				'is_public': 1,
 				"owner": "Administrator",
 				"type": "Bar",
@@ -96,6 +108,9 @@ def get_charts():
 				"document_type": "Inpatient Record",
 				"group_by_type": "Count",
 				"group_by_based_on": "status",
+				"filters_json": json.dumps([
+					["Inpatient Record", "company", "=", company, False]
+				]),
 				'is_public': 1,
 				"owner": "Administrator",
 				"type": "Bar",
@@ -109,6 +124,10 @@ def get_charts():
 				"document_type": "Clinical Procedure",
 				"group_by_type": "Count",
 				"group_by_based_on": "status",
+				"filters_json": json.dumps([
+					["Clinical Procedure", "company", "=", company, False],
+					["Clinical Procedure", "docstatus", "=", 1]
+				]),
 				'is_public': 1,
 				"owner": "Administrator",
 				"type": "Pie",
@@ -122,6 +141,7 @@ def get_charts():
 				"document_type": "Patient Encounter Symptom",
 				"group_by_type": "Count",
 				"group_by_based_on": "complaint",
+				"filters_json": json.dumps({}),
 				'is_public': 1,
 				"owner": "Administrator",
 				"type": "Percentage",
@@ -135,6 +155,7 @@ def get_charts():
 				"document_type": "Patient Encounter Diagnosis",
 				"group_by_type": "Count",
 				"group_by_based_on": "diagnosis",
+				"filters_json": json.dumps({}),
 				'is_public': 1,
 				"owner": "Administrator",
 				"type": "Percentage",
@@ -143,6 +164,7 @@ def get_charts():
 		]
 
 def get_number_cards():
+	company = get_company()
 	return [
 		{
 			"name": "Total Patients",
@@ -179,7 +201,7 @@ def get_number_cards():
 			"doctype": "Number Card",
 			"document_type": "Patient Appointment",
 			"filters_json": json.dumps(
-				[["Patient Appointment","company","=",get_company(),False],
+				[["Patient Appointment","company","=",company,False],
 				["Patient Appointment","status","=","Open",False]]
 			),
 			"is_public": 1,
@@ -194,7 +216,7 @@ def get_number_cards():
 			"doctype": "Number Card",
 			"document_type": "Patient Appointment",
 			"filters_json": json.dumps(
-				[["Patient Appointment","company","=",get_company(),False],
+				[["Patient Appointment","company","=",company,False],
 				["Patient Appointment","invoiced","=",0,False]]
 			),
 			"is_public": 1,
