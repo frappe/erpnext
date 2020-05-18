@@ -70,6 +70,7 @@ class BOM(WebsiteGenerator):
 		self.validate_main_item()
 		self.validate_currency()
 		self.set_conversion_rate()
+		self.set_plc_conversion_rate()
 		self.validate_uom_is_interger()
 		self.set_bom_material_details()
 		self.validate_materials()
@@ -166,7 +167,7 @@ class BOM(WebsiteGenerator):
 			 'rate'			: rate,
 			 'qty'			: args.get("qty") or args.get("stock_qty") or 1,
 			 'stock_qty'	: args.get("qty") or args.get("stock_qty") or 1,
-			 'base_rate'	: rate,
+			 'base_rate'	: flt(rate) * (flt(self.conversion_rate) or 1),
 			 'include_item_in_manufacturing': cint(args['transfer_for_manufacture']) or 0
 		}
 
@@ -377,6 +378,13 @@ class BOM(WebsiteGenerator):
 			self.conversion_rate = 1
 		elif self.conversion_rate == 1 or flt(self.conversion_rate) <= 0:
 			self.conversion_rate = get_exchange_rate(self.currency, self.company_currency(), args="for_buying")
+
+	def set_plc_conversion_rate(self):
+		if self.rm_cost_as_per in ["Valuation Rate", "Last Purchase Rate"]:
+			self.plc_conversion_rate = 1
+		elif not self.plc_conversion_rate and self.price_list_currency:
+			self.plc_conversion_rate = get_exchange_rate(self.price_list_currency,
+				self.company_currency(), args="for_buying")
 
 	def validate_materials(self):
 		""" Validate raw material entries """
