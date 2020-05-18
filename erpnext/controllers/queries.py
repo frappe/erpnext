@@ -287,7 +287,7 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 	fields = get_fields("Delivery Note", ["name", "customer", "posting_date"])
 
 	return frappe.db.sql("""
-		select {fields}
+		select %(fields)s
 		from `tabDelivery Note`
 		where `tabDelivery Note`.`%(key)s` like %(txt)s and
 			`tabDelivery Note`.docstatus = 1
