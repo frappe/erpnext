@@ -184,9 +184,10 @@
   {
    "default": "0",
    "depends_on": "eval:(doc.report_type == 'Profit and Loss' && !doc.is_group)",
+   "description": "Consider this account for gross and net profit calculation",
    "fieldname": "include_in_gross",
    "fieldtype": "Check",
-   "label": "Include in gross"
+   "label": "Include In Gross"
   },
   {
    "default": "0",
@@ -199,7 +200,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2020-03-18 17:57:52.063233",
+ "modified": "2020-05-15 14:22:13.839586",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",

@@ -45,7 +45,9 @@ def get_dashboards():
 
 def get_charts():
 	company = frappe.get_doc("Company", get_company_for_dashboards())
-	bank_account = company.default_bank_account or get_account("Bank", company.name)
+	bank_account = frappe.db.get_value('Account', {'is_group': 1, 'account_name': 'Bank Accounts',
+		'company': company.name}) or company.default_bank_account
+
 	fiscal_year = get_fiscal_year(date=nowdate())
 	default_cost_center = company.cost_center
 
