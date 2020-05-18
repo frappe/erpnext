@@ -63,7 +63,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Healthcare",
- "modified": "2020-04-25 22:31:36.576444",
+ "modified": "2020-05-18 12:41:04.288871",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
@@ -73,13 +73,15 @@
  "restrict_to_domain": "Healthcare",
  "shortcuts": [
   {
+   "color": "#ffe8cd",
    "format": "{} Open",
    "label": "Patient Appointment",
    "link_to": "Patient Appointment",
-   "stats_filter": "{\n    \"status\": \"Open\"\n}",
+   "stats_filter": "{\n    \"status\": \"Open\",\n    \"company\": [\"like\", '%' + frappe.defaults.get_global_default(\"company\") + '%']\n}",
    "type": "DocType"
   },
   {
+   "color": "#ffe8cd",
    "format": "{} Active",
    "label": "Patient",
    "link_to": "Patient",
@@ -87,10 +89,11 @@
    "type": "DocType"
   },
   {
+   "color": "#cef6d1",
    "format": "{} Vacant",
    "label": "Healthcare Service Unit",
    "link_to": "Healthcare Service Unit",
-   "stats_filter": "{\n    \"occupancy_status\": \"Vacant\",\n    \"is_group\": 0\n}",
+   "stats_filter": "{\n    \"occupancy_status\": \"Vacant\",\n    \"is_group\": 0,\n    \"company\": [\"like\", \"%\" + frappe.defaults.get_global_default(\"company\") + \"%\"]\n}",
    "type": "DocType"
   },
   {

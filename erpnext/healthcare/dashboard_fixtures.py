@@ -28,7 +28,6 @@ def get_charts():
 				"name": "Patient Appointments",
 				"chart_name": "Patient Appointments",
 				"timespan": "Last Month",
-				"color": "#77ecca",
 				"filters_json": json.dumps({}),
 				"chart_type": "Count",
 				"timeseries": 1,
