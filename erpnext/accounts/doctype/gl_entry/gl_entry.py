@@ -115,8 +115,8 @@ class GLEntry(Document):
 			from tabAccount where name=%s""", self.account, as_dict=1)[0]
 
 		if ret.is_group==1:
-			frappe.throw(_("{0} {1}: Account {2} cannot be a Group")
-				.format(self.voucher_type, self.voucher_no, self.account))
+			frappe.throw(_('''{0} {1}: Account {2} is a Group Account and group accounts cannot be used in
+				transactions''').format(self.voucher_type, self.voucher_no, self.account))
 
 		if ret.docstatus==2:
 			frappe.throw(_("{0} {1}: Account {2} is inactive")
