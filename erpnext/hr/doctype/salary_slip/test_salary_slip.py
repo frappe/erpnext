@@ -422,22 +422,32 @@ def get_salary_component_account(sal_comp, company_list=None):
 	sal_comp = frappe.get_doc("Salary Component", sal_comp)
 	if not sal_comp.get("accounts"):
 		for d in company_list:
+			company_abbr = frappe.get_cached_value('Company', d, 'abbr')
+
+			if sal_comp.type == "Earning":
+				account_name = "Salary"
+				parent_account = "Indirect Expenses - " + company_abbr
+			else:
+				account_name = "Salary Deductions"
+				parent_account = "Current Liabilities - " + company_abbr
+
 			sal_comp.append("accounts", {
 				"company": d,
-				"default_account": create_account(d)
+				"default_account": create_account(account_name, d, parent_account)
 			})
 			sal_comp.save()
 
-def create_account(company):
-	salary_account = frappe.db.get_value("Account", "Salary - " + frappe.get_cached_value('Company',  company,  'abbr'))
-	if not salary_account:
+def create_account(account_name, company, parent_account):
+	company_abbr = frappe.get_cached_value('Company',  company,  'abbr')
+	account = frappe.db.get_value("Account", account_name + " - " + company_abbr)
+	if not account:
 		frappe.get_doc({
 			"doctype": "Account",
-			"account_name": "Salary",
-			"parent_account": "Indirect Expenses - " + frappe.get_cached_value('Company',  company,  'abbr'),
+			"account_name": account_name,
+			"parent_account": parent_account,
 			"company": company
 		}).insert()
-	return salary_account
+	return account
 
 def make_earning_salary_component(setup=False, test_tax=False, company_list=None):
 	data = [
@@ -683,7 +693,7 @@ def setup_test():
 	make_earning_salary_component(setup=True, company_list=["_Test Company"])
 	make_deduction_salary_component(setup=True, company_list=["_Test Company"])
 
-	for dt in ["Leave Application", "Leave Allocation", "Salary Slip", "Attendance"]:
+	for dt in ["Leave Application", "Leave Allocation", "Salary Slip", "Attendance", "Additional Salary"]:
 		frappe.db.sql("delete from `tab%s`" % dt)
 
 	make_holiday_list()
