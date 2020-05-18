@@ -126,7 +126,7 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 			idx desc,
 			name, supplier_name
 		limit %(start)s, %(page_len)s """.format(**{
-			'field': fields,
+			'field': ', '.join(fields),
 			'key': searchfield,
 			'mcond':get_match_cond(doctype)
 		}), {
