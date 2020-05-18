@@ -634,7 +634,7 @@ def get_held_invoices(party_type, party):
 
 	return held_invoices
 
-
+import pdb
 def get_outstanding_invoices(party_type, party, account, condition=None, filters=None):
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
@@ -655,15 +655,15 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 
 	held_invoices = get_held_invoices(party_type, party)
 
-	invoice_list = frappe.db.sql("""
+	sql = """
 		select
 			voucher_no, voucher_type, posting_date, due_date,
 			ifnull(sum({dr_or_cr}), 0) as invoice_amount
 		from
 			`tabGL Entry`
 		where
-			party_type = %(party_type)s and party = %(party)s
-			and account = %(account)s and {dr_or_cr} > 0
+			party_type = '{party_type}' and party = '{party}'
+			and account = '{account}' and {dr_or_cr} > 0
 			{condition}
 			and ((voucher_type = 'Journal Entry'
 					and (against_voucher = '' or against_voucher is null))
@@ -671,27 +671,63 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 		group by voucher_type, voucher_no
 		order by posting_date, name""".format(
 			dr_or_cr=dr_or_cr,
-			condition=condition or ""
-		), {
-			"party_type": party_type,
-			"party": party,
-			"account": account,
-		}, as_dict=True)
+			condition=condition or "",
+			party_type=party_type,
+			party=party,
+			account=account
+		)
+		# sql = """
+		# select
+		# 	voucher_no, voucher_type, posting_date, due_date,
+		# 	ifnull(sum({dr_or_cr}), 0) as invoice_amount
+		# from
+		# 	`tabGL Entry`
+		# where
+		# 	party_type = %(party_type)s and party = %(party)s
+		# 	and account = %(account)s and {dr_or_cr} > 0
+		# 	{condition}
+		# 	and ((voucher_type = 'Journal Entry'
+		# 			and (against_voucher = '' or against_voucher is null))
+		# 		or (voucher_type not in ('Journal Entry', 'Payment Entry')))
+		# group by voucher_type, voucher_no
+		# order by posting_date, name""".format(
+		# 	dr_or_cr=dr_or_cr,
+		# 	condition=condition or "",
+		# 	party_type=party_type,
+		# 	party=party,
+		# 	account=account
+		# )
+		# {
+		# 	"party_type": party_type,
+		# 	"party": party,
+		# 	"account": account,
+		# }
+	# frappe.errprint(sql)
+	invoice_list = frappe.db.sql(sql, as_dict=True)
 
-	payment_entries = frappe.db.sql("""
+	# """
+	# 	select against_voucher_type, against_voucher,
+	# 		ifnull(sum({payment_dr_or_cr}), 0) as payment_amount
+	# 	from `tabGL Entry`
+	# 	where party_type = %(party_type)s and party = %(party)s
+	# 		and account = %(account)s
+	# 		and {payment_dr_or_cr} > 0
+	# 		and against_voucher is not null and against_voucher != ''
+	# 	group by against_voucher_type, against_voucher
+	# """
+	payment_sql = """
 		select against_voucher_type, against_voucher,
 			ifnull(sum({payment_dr_or_cr}), 0) as payment_amount
 		from `tabGL Entry`
-		where party_type = %(party_type)s and party = %(party)s
-			and account = %(account)s
+		where party_type = '{party_type}' and party = '{party}'
+			and account = '{account}'
 			and {payment_dr_or_cr} > 0
 			and against_voucher is not null and against_voucher != ''
 		group by against_voucher_type, against_voucher
-	""".format(payment_dr_or_cr=payment_dr_or_cr), {
-		"party_type": party_type,
-		"party": party,
-		"account": account
-	}, as_dict=True)
+	""".format(payment_dr_or_cr=payment_dr_or_cr, party_type=party_type,party=party,account=account)
+	# frappe.errprint(payment_sql)
+	payment_entries = frappe.db.sql(payment_sql, as_dict=True)
+
 
 	pe_map = frappe._dict()
 	for d in payment_entries:
@@ -700,6 +736,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 	for d in invoice_list:
 		payment_amount = pe_map.get((d.voucher_type, d.voucher_no), 0)
 		outstanding_amount = flt(d.invoice_amount - payment_amount, precision)
+		# frappe.errprint(outstanding_amount)
 		if outstanding_amount > 0.5 / (10**precision):
 			if (filters and filters.get("outstanding_amt_greater_than") and
 				not (outstanding_amount >= filters.get("outstanding_amt_greater_than") and
@@ -720,6 +757,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 				)
 
 	outstanding_invoices = sorted(outstanding_invoices, key=lambda k: k['due_date'] or getdate(nowdate()))
+	
 	return outstanding_invoices
 
 
