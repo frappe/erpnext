@@ -337,10 +337,14 @@ def get_loyalty_programs(doc):
 	return lp_details
 
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
+	from erpnext.controllers.queries import get_fields
+
 	if frappe.db.get_default("cust_master_name") == "Customer Name":
 		fields = ["name", "customer_group", "territory"]
 	else:
 		fields = ["name", "customer_name", "customer_group", "territory"]
+
+	fields = get_fields("Customer", fields)
 
 	match_conditions = build_match_conditions("Customer")
 	match_conditions = "and {}".format(match_conditions) if match_conditions else ""
@@ -349,14 +353,17 @@ def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
 		filter_conditions = get_filters_cond(doctype, filters, [])
 		match_conditions += "{}".format(filter_conditions)
 
-	return frappe.db.sql("""select %s from `tabCustomer` where docstatus < 2
-		and (%s like %s or customer_name like %s)
-		{match_conditions}
+	return frappe.db.sql("""
+		select %s
+		from `tabCustomer`
+		where docstatus < 2
+			and (%s like %s or customer_name like %s)
+			{match_conditions}
 		order by
-		case when name like %s then 0 else 1 end,
-		case when customer_name like %s then 0 else 1 end,
-		name, customer_name limit %s, %s""".format(match_conditions=match_conditions) %
-		(", ".join(fields), searchfield, "%s", "%s", "%s", "%s", "%s", "%s"),
+			case when name like %s then 0 else 1 end,
+			case when customer_name like %s then 0 else 1 end,
+			name, customer_name limit %s, %s
+		""".format(match_conditions=match_conditions) % (", ".join(fields), searchfield, "%s", "%s", "%s", "%s", "%s", "%s"),
 		("%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, start, page_len))
 
 
