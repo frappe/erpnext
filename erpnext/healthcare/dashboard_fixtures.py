@@ -69,19 +69,20 @@ def get_charts():
 				"doctype": "Dashboard Chart",
 				"name": "Department wise Patient Appointments",
 				"chart_name": "Department wise Patient Appointments",
-				"chart_type": "Group By",
-				"document_type": "Patient Appointment",
-				"group_by_type": "Count",
-				"group_by_based_on": "department",
-				"filters_json": json.dumps([
-					["Patient Appointment", "company", "=", company, False],
-					["Patient Appointment", "status", "!=", "Cancelled"]
-				]),
+				"chart_type": "Custom",
+				"source": "Department wise Patient Appointments",
+				"filters_json": json.dumps({}),
 				'is_public': 1,
 				"owner": "Administrator",
 				"type": "Bar",
 				"width": "Full",
-				"color": "#5F62F6"
+				"custom_options": json.dumps({
+					"colors": ["#7CD5FA", "#5F62F6", "#7544E2", "#EE5555"],
+					"barOptions":{
+						"stacked":1
+					},
+					"height": 300
+				})
 			},
 			{
 				"doctype": "Dashboard Chart",
