@@ -69,11 +69,12 @@ class PatientAppointment(Document):
 				if fee_validity.ref_invoice:
 					frappe.db.set_value("Patient Appointment", appointment.name, "invoiced", True)
 				frappe.msgprint(_("{0} has fee validity till {1}").format(appointment.patient, fee_validity.valid_till))
-		confirm_sms(self)
 
 		if frappe.db.get_value("Healthcare Settings", None, "manage_appointment_invoice_automatically") == '1' and \
 			frappe.db.get_value("Patient Appointment", self.name, "invoiced") != 1:
 			invoice_appointment(self)
+
+		send_confirmation_msg(self)
 
 @frappe.whitelist()
 def invoice_appointment(appointment_doc):
@@ -303,10 +304,14 @@ def set_pending_appointments():
 		"('Scheduled','Open') and appointment_date < %s", today)
 
 
-def confirm_sms(doc):
-	if frappe.db.get_value("Healthcare Settings", None, "app_con") == '1':
-		message = frappe.db.get_value("Healthcare Settings", None, "app_con_msg")
-		send_message(doc, message)
+def send_confirmation_msg(doc):
+	if frappe.db.get_single_value("Healthcare Settings", "app_con"):
+		message = frappe.db.get_single_value("Healthcare Settings", "app_con_msg")
+		try:
+			send_message(doc, message)
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), _("Appointment Confirmation Message Not Sent"))
+			frappe.msgprint(_("Appointment Confirmation Message Not Sent"), indicator="orange")
 
 @frappe.whitelist()
 def create_encounter(appointment):
@@ -352,7 +357,7 @@ def send_message(doc, message):
 
 		# jinja to string convertion happens here
 		message = frappe.render_template(message, context)
-		number = [patient.mobile]
+		number = [patient_mobile]
 		send_sms(number, message)
 
 

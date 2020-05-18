@@ -32,6 +32,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			me.frm.script_manager.trigger("is_pos");
 			me.frm.refresh_fields();
 		}
+		erpnext.queries.setup_warehouse_query(this.frm);
 	},
 
 	refresh: function(doc, dt, dn) {

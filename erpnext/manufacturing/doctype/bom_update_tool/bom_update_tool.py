@@ -82,7 +82,7 @@ def enqueue_replace_bom(args):
 
 @frappe.whitelist()
 def enqueue_update_cost():
-	frappe.enqueue("erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_cost")
+	frappe.enqueue("erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_cost", timeout=40000)
 	frappe.msgprint(_("Queued for updating latest price in all Bill of Materials. It may take a few minutes."))
 
 def update_latest_price_in_all_boms():
@@ -98,6 +98,9 @@ def replace_bom(args):
 	doc.replace_bom()
 
 def update_cost():
+	frappe.db.auto_commit_on_many_writes = 1
 	bom_list = get_boms_in_bottom_up_order()
 	for bom in bom_list:
 		frappe.get_doc("BOM", bom).update_cost(update_parent=False, from_child_bom=True)
+
+	frappe.db.auto_commit_on_many_writes = 0
