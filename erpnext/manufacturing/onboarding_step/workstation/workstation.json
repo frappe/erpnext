@@ -8,12 +8,12 @@
  "is_mandatory": 0,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2020-05-14 19:10:20.930139",
+ "modified": "2020-05-19 12:50:33.938176",
  "modified_by": "Administrator",
  "name": "Workstation",
  "owner": "Administrator",
  "reference_document": "Workstation",
  "show_full_form": 0,
- "title": "Create Workstation / Machine",
+ "title": "Create a Workstation / Machine",
  "validate_action": 1
 }
