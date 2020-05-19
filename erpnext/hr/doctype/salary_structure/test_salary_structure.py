@@ -128,6 +128,7 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None, do
 		salary_structure_doc.insert()
 		if not dont_submit:
 			salary_structure_doc.submit()
+		
 	else:
 		salary_structure_doc = frappe.get_doc("Salary Structure", salary_structure)
 

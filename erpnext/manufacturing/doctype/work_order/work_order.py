@@ -6,7 +6,7 @@ import frappe
 import json
 import math
 from frappe import _
-from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate, get_link_to_form
+from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate, get_link_to_form, time_diff_in_hours
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_bom_items_as_dict
 from dateutil.relativedelta import relativedelta
@@ -279,7 +279,7 @@ class WorkOrder(Document):
 			if enable_capacity_planning and job_card_doc:
 				row.planned_start_time = job_card_doc.time_logs[-1].from_time
 				row.planned_end_time = job_card_doc.time_logs[-1].to_time
-				print(row.planned_start_time, original_start_time, plan_days)
+
 				if date_diff(row.planned_start_time, original_start_time) > plan_days:
 					frappe.message_log.pop()
 					frappe.throw(_("Unable to find the time slot in the next {0} days for the operation {1}.")
@@ -437,8 +437,6 @@ class WorkOrder(Document):
 				frappe.throw(_("Completed Qty can not be greater than 'Qty to Manufacture'"))
 
 	def set_actual_dates(self):
-		self.actual_start_date = None
-		self.actual_end_date = None
 		if self.get("operations"):
 			actual_start_dates = [d.actual_start_time for d in self.get("operations") if d.actual_start_time]
 			if actual_start_dates:
@@ -447,6 +445,27 @@ class WorkOrder(Document):
 			actual_end_dates = [d.actual_end_time for d in self.get("operations") if d.actual_end_time]
 			if actual_end_dates:
 				self.actual_end_date = max(actual_end_dates)
+		else:
+			data = frappe.get_all("Stock Entry",
+				fields = ["timestamp(posting_date, posting_time) as posting_datetime"],
+				filters = {
+					"work_order": self.name,
+					"purpose": ("in", ["Material Transfer for Manufacture", "Manufacture"])
+				}
+			)
+
+			if data and len(data):
+				dates = [d.posting_datetime for d in data]
+				self.actual_start_date = min(dates)
+
+				if self.status == "Completed":
+					self.actual_end_date = max(dates)
+
+		self.set_lead_time()
+
+	def set_lead_time(self):
+		if self.actual_start_date and self.actual_end_date:
+			self.lead_time = flt(time_diff_in_hours(self.actual_end_date, self.actual_start_date) * 60)
 
 	def delete_job_card(self):
 		for d in frappe.get_all("Job Card", ["name"], {"work_order": self.name}):
