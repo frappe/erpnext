@@ -192,11 +192,26 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "category",
+   "fieldtype": "Select",
+   "label": "Consider Tax or Charge for",
+   "options": "Total",
+   "reqd": 1
+  },
+  {
+   "fieldname": "add_deduct_tax",
+   "fieldtype": "Select",
+   "label": "Add or Deduct",
+   "options": "Add\nDeduct",
+   "reqd": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-25 22:59:38.740883",
+ "links": [],
+ "modified": "2020-05-19 03:31:26.950640",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Taxes and Charges",

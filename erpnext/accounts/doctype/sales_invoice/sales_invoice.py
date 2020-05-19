@@ -798,13 +798,15 @@ class SalesInvoice(SellingController):
 		for tax in self.get("taxes"):
 			if flt(tax.base_tax_amount_after_discount_amount):
 				account_currency = get_account_currency(tax.account_head)
+				dr_or_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
+
 				gl_entries.append(
 					self.get_gl_dict({
 						"account": tax.account_head,
 						"against": self.customer,
-						"credit": flt(tax.base_tax_amount_after_discount_amount,
+						dr_or_cr: flt(tax.base_tax_amount_after_discount_amount,
 							tax.precision("tax_amount_after_discount_amount")),
-						"credit_in_account_currency": (flt(tax.base_tax_amount_after_discount_amount,
+						dr_or_cr + "_in_account_currency": (flt(tax.base_tax_amount_after_discount_amount,
 							tax.precision("base_tax_amount_after_discount_amount")) if account_currency==self.company_currency else
 							flt(tax.tax_amount_after_discount_amount, tax.precision("tax_amount_after_discount_amount"))),
 						"cost_center": tax.cost_center
