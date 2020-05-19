@@ -240,7 +240,7 @@
    "label": "Patient Registration"
   },
   {
-   "default": "Hello {{doc.patient}}, Thank you for registering with  {{doc.company}}. Your ID is {{doc.id}} . Please note this ID for future reference. \nThank You, Get well soon!",
+   "default": "Hello {{doc.patient}}, Thank you for registering with  {{doc.company}}. Your ID is {{doc.name}} . Please note this ID for future reference. \nThank You!",
    "depends_on": "send_registration_msg",
    "fieldname": "registration_msg",
    "fieldtype": "Small Text",
@@ -254,7 +254,7 @@
    "label": "Appointment Confirmation"
   },
   {
-   "default": "Hello {{doc.patient}}, You have scheduled an appointment with {{doc.practitioner}} by {{doc.start_dt}} at  {{doc.company}}.\nThank you, Good day!",
+   "default": "Hello {{doc.patient}}, You have scheduled an appointment with {{doc.practitioner}} on {{doc.appointment_datetime}} at  {{doc.company}}.\nThank you, Good day!",
    "depends_on": "send_appointment_confirmation",
    "fieldname": "appointment_confirmation_msg",
    "fieldtype": "Small Text",
@@ -276,7 +276,7 @@
    "label": "Appointment Reminder"
   },
   {
-   "default": "Hello {{doc.patient}}, You have an appointment with {{doc.practitioner}} by {{doc.appointment_time}} at  {{doc.company}}.\nThank you, Good day!\n",
+   "default": "Hello {{doc.patient}}, You have an appointment with {{doc.practitioner}} by {{doc.appointment_datetime}} at  {{doc.company}}.\nThank you, Good day!\n",
    "depends_on": "send_appointment_reminder",
    "fieldname": "appointment_reminder_msg",
    "fieldtype": "Small Text",

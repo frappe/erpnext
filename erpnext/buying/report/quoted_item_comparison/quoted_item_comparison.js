@@ -5,20 +5,18 @@ frappe.query_reports["Quoted Item Comparison"] = {
 	filters: [
 		{
 			fieldtype: "Link",
-			label: __("Supplier Quotation"),
-			options: "Supplier Quotation",
-			fieldname: "supplier_quotation",
-			default: "",
-			get_query: () => {
-				return { filters: { "docstatus": ["<", 2] } }
-			}
+			label: __("Company"),
+			options: "Company",
+			fieldname: "company",
+			default: frappe.defaults.get_user_default("Company"),
+			"reqd": 1
 		},
 		{
 			reqd: 1,
 			default: "",
 			options: "Item",
 			label: __("Item"),
-			fieldname: "item",
+			fieldname: "item_code",
 			fieldtype: "Link",
 			get_query: () => {
 				let quote = frappe.query_report.get_filter_value('supplier_quotation');
@@ -37,8 +35,37 @@ frappe.query_reports["Quoted Item Comparison"] = {
 					}
 				}
 			}
+		},
+		{
+			fieldname: "supplier",
+			label: __("Supplier"),
+			fieldtype: "MultiSelectList",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Supplier', txt);
+			}
+		},
+		{
+			fieldtype: "Link",
+			label: __("Supplier Quotation"),
+			options: "Supplier Quotation",
+			fieldname: "supplier_quotation",
+			default: "",
+			get_query: () => {
+				return { filters: { "docstatus": ["<", 2] } }
+			}
+		},
+		{
+			fieldtype: "Link",
+			label: __("Request for Quotation"),
+			options: "Request for Quotation",
+			fieldname: "request_for_quotation",
+			default: "",
+			get_query: () => {
+				return { filters: { "docstatus": ["<", 2] } }
+			}
 		}
 	],
+
 	onload: (report) => {
 		// Create a button for setting the default supplier
 		report.page.add_inner_button(__("Select Default Supplier"), () => {
@@ -103,5 +130,3 @@ frappe.query_reports["Quoted Item Comparison"] = {
 		dialog.show();
 	}
 }
-
-
