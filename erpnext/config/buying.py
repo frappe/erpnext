@@ -166,7 +166,7 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Requested Items To Be Ordered",
+					"name": "Requested Items To Order",
 					"reference_doctype": "Material Request",
 					"onboard": 1,
 				},
