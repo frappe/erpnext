@@ -46,10 +46,13 @@ def get_chart_data(data, conditions, filters):
 			"labels" : labels,
 			"datasets" : [
 				{
-					"name" : _("{0}").format(filters.get("period")) + _(" Revenue"),
+					"name" : _("{0}").format(filters.get("period")) + _(" Expenditure"),
 					"values" : datapoints
 				}
 			]
 		},
-		"type" : "line"
+		"type" : "line",
+		"lineOptions": {
+			"regionFill": 1
+		}
 	}

@@ -34,10 +34,10 @@ def get_dashboards():
 		"name": "Buying",
 		"dashboard_name": "Buying",
 		"charts": [
-			{ "chart": "Top Suppliers", "width": "Full"},
+			{ "chart": "Purchase Order Trends", "width": "Full"},
 			{ "chart": "Material Request Analysis", "width": "Half"},
 			{ "chart": "Purchase Order Analysis", "width": "Half"},
-			{ "chart": "Purchase Order Trends", "width": "Full"}
+			{ "chart": "Top Suppliers", "width": "Full"}
 		],
 		"cards": [
 			{ "card": "Purchase Orders to Receive"},
@@ -80,7 +80,8 @@ def get_charts():
 			"filters_json": json.dumps(
 				[["Material Request", "status", "not in", ["Draft", "Cancelled", "Stopped", None], False],
 				["Material Request", "material_request_type", "=", "Purchase", False],
-				["Material Request", "company", "=", company.name, False]]
+				["Material Request", "company", "=", company.name, False],
+				["Material Request", "transaction_date", "Between", [start_date,end_date], False]]
 			),
 			"group_by_based_on": "status",
 			"group_by_type": "Count",
@@ -96,9 +97,11 @@ def get_charts():
 			"chart_type": "Report",
 			"custom_options": json.dumps({
 				"type": "line",
-				"regionFill": 1,
 				"axisOptions": {"shortenYAxisNumbers": 1},
-				"tooltipOptions": {}
+				"tooltipOptions": {},
+				"lineOptions": {
+					"regionFill": 1
+				}
 			}),
 			"doctype": "Dashboard Chart",
 			"filters_json": json.dumps({
@@ -144,7 +147,8 @@ def get_number_cards():
 			"filters_json": json.dumps(
 				[["Purchase Order", "transaction_date", "Between", [start_date,end_date], False],
 				["Purchase Order", "status", "not in", ["Draft","On Hold","Cancelled","Closed", None], False],
-				["Purchase Order", "company", "=", company.name, False]]
+				["Purchase Order", "company", "=", company.name, False],
+				["Purchase Order", "transaction_date", "Between", [start_date,end_date], False]]
 			),
 			"function": "Sum",
 			"is_public": 1,
@@ -159,7 +163,8 @@ def get_number_cards():
 			"document_type": "Purchase Order",
 			"filters_json": json.dumps(
 				[["Purchase Order", "status", "in", ["To Receive and Bill", "To Receive", None], False],
-				["Purchase Order", "company", "=", company.name, False]]
+				["Purchase Order", "company", "=", company.name, False],
+				["Purchase Order", "transaction_date", "Between", [start_date,end_date], False]]
 			),
 			"function": "Count",
 			"is_public": 1,
