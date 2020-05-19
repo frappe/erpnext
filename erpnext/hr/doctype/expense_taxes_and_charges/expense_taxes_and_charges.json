@@ -7,14 +7,16 @@
  "engine": "InnoDB",
  "field_order": [
   "account_head",
-  "cost_center",
   "col_break1",
   "rate",
   "description",
   "section_break_6",
   "tax_amount",
   "column_break_8",
-  "total"
+  "total",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break"
  ],
  "fields": [
   {
@@ -90,10 +92,20 @@
   {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "istable": 1,
- "modified": "2019-06-20 12:01:33.919555",
+ "links": [],
+ "modified": "2020-05-11 19:01:26.611758",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Taxes and Charges",

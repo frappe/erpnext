@@ -17,17 +17,60 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 		if (frm.page && frm.page.show_import_button) {
 			create_import_button(frm);
 		}
+	},
 
-		// show download template button when company is properly selected
-		if(frm.doc.company) {
-			// download the csv template file
-			frm.add_custom_button(__("Download template"), function () {
-				let get_template_url = 'erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.download_template';
-				open_url_post(frappe.request.url, { cmd: get_template_url, doctype: frm.doc.doctype });
-			});
-		} else {
-			frm.set_value("import_file", "");
-		}
+	download_template: function(frm) {
+		var d = new frappe.ui.Dialog({
+			title: __("Download Template"),
+			fields: [
+				{
+					label : "File Type",
+					fieldname: "file_type",
+					fieldtype: "Select",
+					reqd: 1,
+					options: ["Excel", "CSV"]
+				},
+				{
+					label: "Template Type",
+					fieldname: "template_type",
+					fieldtype: "Select",
+					reqd: 1,
+					options: ["Sample Template", "Blank Template"],
+					change: () => {
+						let template_type = d.get_value('template_type');
+
+						if (template_type === "Sample Template") {
+							d.set_df_property('template_type', 'description',
+								`The Sample Template contains all the required accounts pre filled in the  template.
+								You can add more accounts or change existing accounts in the template as per your choice.`);
+						} else {
+							d.set_df_property('template_type', 'description',
+								`The Blank Template contains just the account type and root type required to build the Chart
+								of Accounts. Please enter the account names and add more rows as per your requirement.`);
+						}
+					}
+				}
+			],
+			primary_action: function() {
+				var data = d.get_values();
+
+				if (!data.template_type) {
+					frappe.throw(__('Please select <b>Template Type</b> to download template'));
+				}
+
+				open_url_post(
+					'/api/method/erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.download_template',
+					{
+						file_type: data.file_type,
+						template_type: data.template_type
+					}
+				);
+
+				d.hide();
+			},
+			primary_action_label: __('Download')
+		});
+		d.show();
 	},
 
 	import_file: function (frm) {
@@ -41,21 +84,24 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 	},
 
 	company: function (frm) {
-		// validate that no Gl Entry record for the company exists.
-		frappe.call({
-			method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.validate_company",
-			args: {
-				company: frm.doc.company
-			},
-			callback: function(r) {
-				if(r.message===false) {
-					frm.set_value("company", "");
-					frappe.throw(__("Transactions against the company already exist! "));
-				} else {
-					frm.trigger("refresh");
+		if (frm.doc.company) {
+			// validate that no Gl Entry record for the company exists.
+			frappe.call({
+				method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.validate_company",
+				args: {
+					company: frm.doc.company
+				},
+				callback: function(r) {
+					if(r.message===false) {
+						frm.set_value("company", "");
+						frappe.throw(__(`Transactions against the company already exist!
+							Chart Of accounts can be imported for company with no transactions`));
+					} else {
+						frm.trigger("refresh");
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 });
 
@@ -77,7 +123,7 @@ var validate_csv_data = function(frm) {
 };
 
 var create_import_button = function(frm) {
-	frm.page.set_primary_action(__("Start Import"), function () {
+	frm.page.set_primary_action(__("Import"), function () {
 		frappe.call({
 			method: "erpnext.accounts.doctype.chart_of_accounts_importer.chart_of_accounts_importer.import_coa",
 			args: {
@@ -118,7 +164,8 @@ var generate_tree_preview = function(frm) {
 		args: {
 			file_name: frm.doc.import_file,
 			parent: parent,
-			doctype: 'Chart of Accounts Importer'
+			doctype: 'Chart of Accounts Importer',
+			file_type: frm.doc.file_type
 		},
 		onclick: function(node) {
 			parent = node.value;
