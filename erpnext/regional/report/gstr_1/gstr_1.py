@@ -60,9 +60,6 @@ class Gstr1Report(object):
 			for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
 				invoice_details = self.invoices.get(inv)
 				for rate, items in items_based_on_rate.items():
-					if inv in self.cgst_igst_invoices:
-						rate = rate/2
-
 					row, taxable_value = self.get_row_data_for_invoice(inv, invoice_details, rate, items)
 
 					if self.filters.get("type_of_business") ==  "CDNR":
@@ -120,9 +117,15 @@ class Gstr1Report(object):
 			else:
 				row.append(invoice_details.get(fieldname))
 		taxable_value = 0
+
+		if invoice in self.cgst_igst_invoices:
+			division_factor = 2
+		else:
+			division_factor = 1
+
 		for item_code, net_amount in self.invoice_items.get(invoice).items():
 			if item_code in items:
-				if self.item_tax_rate.get(invoice) and tax_rate in self.item_tax_rate.get(invoice, {}).get(item_code, []):
+				if self.item_tax_rate.get(invoice) and tax_rate/division_factor in self.item_tax_rate.get(invoice, {}).get(item_code, []):
 					taxable_value += abs(net_amount)
 				elif not self.item_tax_rate.get(invoice):
 					taxable_value += abs(net_amount)
