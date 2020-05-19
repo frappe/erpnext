@@ -29,7 +29,7 @@ def get(chart_name = None, chart = None, no_cache = None, filters = None, from_d
 	if not warehouses:
 		return []
 
-	sorted_warehouse_map = sorted(warehouses, key = lambda i: i['balance'],reverse=True)
+	sorted_warehouse_map = sorted(warehouses, key = lambda i: i['balance'], reverse=True)
 
 	if len(sorted_warehouse_map) > 10:
 		sorted_warehouse_map = sorted_warehouse_map[:10]

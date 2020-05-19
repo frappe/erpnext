@@ -54,10 +54,11 @@
  "docstatus": 0,
  "doctype": "Desk Page",
  "extends_another_page": 0,
+ "hide_custom": 0,
  "idx": 0,
  "is_standard": 1,
  "label": "Stock",
- "modified": "2020-05-15 04:11:36.326013",
+ "modified": "2020-05-19 17:36:08.185652",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
@@ -112,6 +113,11 @@
    "label": "Stock Balance",
    "link_to": "Stock Balance",
    "type": "Report"
+  },
+  {
+   "label": "Stock Dashboard",
+   "link_to": "Stock",
+   "type": "Dashboard"
   }
  ],
  "shortcuts_label": "Quick Access"

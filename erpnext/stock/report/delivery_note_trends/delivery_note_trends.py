@@ -40,7 +40,7 @@ def get_chart_data(data, filters):
 			"labels" : labels,
 			"datasets" : [
 				{
-				"name": _("Total Revenue"),
+				"name": _("Total Delivered Amount"),
 				"values": datapoints
 				}
 			]
