@@ -3,7 +3,7 @@
   {
    "hidden": 0,
    "label": "Production",
-   "links": "[\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"BOM\"\n        ],\n        \"description\": \"Orders released for production.\",\n        \"label\": \"Work Order\",\n        \"name\": \"Work Order\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"BOM\"\n        ],\n        \"description\": \"Generate Material Requests (MRP) and Work Orders.\",\n        \"label\": \"Production Plan\",\n        \"name\": \"Production Plan\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\"\n        ],\n        \"label\": \"Stock Entry\",\n        \"name\": \"Stock Entry\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Activity Type\"\n        ],\n        \"description\": \"Time Sheet for manufacturing.\",\n        \"label\": \"Timesheet\",\n        \"name\": \"Timesheet\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Job Card\",\n        \"name\": \"Job Card\",\n        \"type\": \"doctype\"\n    }\n]"
+   "links": "[\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"BOM\"\n        ],\n        \"description\": \"Orders released for production.\",\n        \"label\": \"Work Order\",\n        \"name\": \"Work Order\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"BOM\"\n        ],\n        \"description\": \"Generate Material Requests (MRP) and Work Orders.\",\n        \"label\": \"Production Plan\",\n        \"name\": \"Production Plan\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\"\n        ],\n        \"label\": \"Stock Entry\",\n        \"name\": \"Stock Entry\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Job Card\",\n        \"name\": \"Job Card\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Downtime Entry\",\n        \"name\": \"Downtime Entry\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -43,11 +43,10 @@
  "docstatus": 0,
  "doctype": "Desk Page",
  "extends_another_page": 0,
- "hide_custom": 0,
  "idx": 0,
  "is_standard": 1,
  "label": "Manufacturing",
- "modified": "2020-05-19 12:06:25.047481",
+ "modified": "2020-05-19 12:54:04.104444",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
@@ -78,7 +77,7 @@
    "label": "Work Order",
    "link_to": "Work Order",
    "restrict_to_domain": "Manufacturing",
-   "stats_filter": "{ \"status\": \n    (\n    \"in\", [\"Draft\", \"Not Started\", \"In Process\"]\n    )\n}",
+   "stats_filter": "{ \n    \"status\": [\"in\", \n        [\"Draft\", \"Not Started\", \"In Process\"]\n    ]\n}",
    "type": "DocType"
   },
   {
@@ -86,7 +85,7 @@
    "label": "Production Plan",
    "link_to": "Production Plan",
    "restrict_to_domain": "Manufacturing",
-   "stats_filter": "{ \"status\": \n    (\n    \"!=\", \"Completed\"\n    )\n}",
+   "stats_filter": "{ \n    \"status\": [\"not in\", [\"Completed\"]]\n}",
    "type": "DocType"
   },
   {
