@@ -16,7 +16,6 @@ def get(chart_name = None, chart = None, no_cache = None, filters = None, from_d
 	else:
 		chart = frappe._dict(frappe.parse_json(chart))
 
-	labels, datapoints = [], []
 	filters = frappe.parse_json(filters)
 
 	data = frappe.db.get_list('Medical Department', fields=['name'])
@@ -33,7 +32,7 @@ def get(chart_name = None, chart = None, no_cache = None, filters = None, from_d
 			department[frappe.scrub(entry)] = frappe.db.count('Patient Appointment', filters=filters)
 		filters.pop('status')
 
-	sorted_department_map = sorted(data, key = lambda i: i['total_appointments'],reverse=True)
+	sorted_department_map = sorted(data, key = lambda i: i['total_appointments'], reverse=True)
 
 	if len(sorted_department_map) > 10:
 		sorted_department_map = sorted_department_map[:10]

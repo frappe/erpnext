@@ -59,7 +59,7 @@ frappe.tour['Healthcare Settings'] = [
 	{
 		fieldname: 'healthcare_service_items',
 		title: __('Healthcare Service Items'),
-		description: __('Set up the Healthcare Service Items for billing. Click ') + "<a href='https://docs.erpnext.com/docs/user/manual/en/healthcare/healthcare_settings#2-default-healthcare-service-items'>here</a>" + __(' to know more')
+		description: __('Set up the Healthcare Service Items for billing. Click ') + "<a href='https://docs.erpnext.com/docs/user/manual/en/healthcare/healthcare_settings#2-default-healthcare-service-items' target='_blank'>here</a>" + __(' to know more')
 	},
 	{
 		fieldname: 'sb_in_ac',
@@ -70,6 +70,6 @@ frappe.tour['Healthcare Settings'] = [
 	{
 		fieldname: 'out_patient_sms_alerts',
 		title: __('Out Patient SMS alerts'),
-		description: __('You can set up Out Patient SMS alerts here. Click ') + "<a href='https://docs.erpnext.com/docs/user/manual/en/healthcare/healthcare_settings#4-out-patient-sms-alerts'>here</a>" + __(' to know more')
+		description: __('You can set up Out Patient SMS alerts here. Click ') + "<a href='https://docs.erpnext.com/docs/user/manual/en/healthcare/healthcare_settings#4-out-patient-sms-alerts' target='_blank'>here</a>" + __(' to know more')
 	}
 ];
