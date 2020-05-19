@@ -5,15 +5,15 @@
  "doctype": "Onboarding Step",
  "idx": 0,
  "is_complete": 0,
- "is_mandatory": 0,
+ "is_mandatory": 1,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2020-05-19 10:39:55.728057",
+ "modified": "2020-05-19 12:27:39.851375",
  "modified_by": "Administrator",
  "name": "Create Practitioner",
  "owner": "Administrator",
  "reference_document": "Healthcare Practitioner",
- "show_full_form": 0,
+ "show_full_form": 1,
  "title": "Create Practitioner",
  "validate_action": 1
 }
