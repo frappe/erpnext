@@ -26,9 +26,10 @@ def get_chart_data(data, filters):
 		# consider only consolidated row
 		data = [row for row in data if row[0]]
 
+	data = sorted(data, key = lambda i: i[-1], reverse=True)
+
 	if len(data) > 10:
 		# get top 10 if data too long
-		data = sorted(data, key = lambda i: i[-1],reverse=True)
 		data = data[:10]
 
 	for row in data:
