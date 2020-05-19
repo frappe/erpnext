@@ -144,3 +144,38 @@ cur_frm.set_query('item_code', 'items', function() {
 		}
 	};
 });
+
+frappe.tour['Clinical Procedure Template'] = [
+	{
+		fieldname: 'template',
+		title: __('Template Name'),
+		description: __('Enter a name for the Clinical Procedure Template')
+	},
+	{
+		fieldname: 'item_code',
+		title: __('Item Code'),
+		description: __('Set the Item Code which will be used for billing the Clinical Procedure.')
+	},
+	{
+		fieldname: 'item_group',
+		title: __('Item Group'),
+		description: __('Select an Item Group for the Clinical Procedure Item.')
+	},
+	{
+		fieldname: 'is_billable',
+		title: __('Clinical Procedure Rate'),
+		description: __('Check this if the Clinical Procedure is billable and also set the rate.')
+	},
+	{
+		fieldname: 'consume_stock',
+		title: __('Consume Stock'),
+		description: __('Check this if the Clinical Procedure utilises consumables. Click ') + "<a href='https://docs.erpnext.com/docs/user/manual/en/healthcare/clinical_procedure_template#22-manage-procedure-consumables'>here</a>" + __(' to know more')
+
+	},
+	{
+		fieldname: 'medical_department',
+		title: __('Medical Department'),
+		description: __('You can also set the Medical Department for the template. After saving the document, an Item will automatically be created for billing this Clinical Procedure. You can then use this template while creating Clinical Procedures for Patients. Templates save you from filling up redundant data every single time. You can also create templates for other operations like Lab Tests, Therapy Sessions, etc.')
+	}
+];
+
