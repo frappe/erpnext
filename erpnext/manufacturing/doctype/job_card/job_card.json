@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "naming_series:",
  "creation": "2018-07-09 17:23:29.518745",
  "doctype": "DocType",
@@ -264,8 +265,10 @@
   {
    "fetch_from": "work_order.production_item",
    "fieldname": "production_item",
-   "fieldtype": "Read Only",
-   "label": "Production Item"
+   "fieldtype": "Link",
+   "label": "Production Item",
+   "options": "Item",
+   "read_only": 1
   },
   {
    "fieldname": "barcode",
@@ -274,7 +277,8 @@
    "read_only": 1
   },
   {
-   "fetch_from": "work_order.item_name",
+   "fetch_from": "production_item.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "item_name",
    "fieldtype": "Read Only",
    "label": "Item Name"
@@ -290,7 +294,8 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-27 13:36:35.417502",
+ "links": [],
+ "modified": "2020-04-20 15:14:00.273441",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
