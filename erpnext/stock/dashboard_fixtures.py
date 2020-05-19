@@ -24,7 +24,10 @@ def get_company_for_dashboards():
 	return None
 
 company = frappe.get_doc("Company", get_company_for_dashboards())
-fiscal_year = get_fiscal_year(nowdate(), as_dict=1).get("name")
+fiscal_year = get_fiscal_year(nowdate(), as_dict=1)
+fiscal_year_name = fiscal_year.get("name")
+start_date = str(fiscal_year.get("year_start_date"))
+end_date = str(fiscal_year.get("year_end_date"))
 
 def get_dashboards():
 	return [{
@@ -93,7 +96,7 @@ def get_charts():
 			"filters_json": json.dumps({
 				"period": "Monthly",
 				"based_on": "Item",
-				"fiscal_year": fiscal_year,
+				"fiscal_year": fiscal_year_name,
 				"company": company.name
 			}),
 			"is_custom": 1,
@@ -108,14 +111,13 @@ def get_charts():
 			"chart_type": "Report",
 			"custom_options": json.dumps({
 				"axisOptions": {"shortenYAxisNumbers": 1},
-				"tooltipOptions": {},
-				"colors":["#5e64ff"]
+				"tooltipOptions": {}
 			}),
 			"doctype": "Dashboard Chart",
 			"filters_json": json.dumps({
 				"period": "Monthly",
 				"based_on": "Item",
-				"fiscal_year": fiscal_year,
+				"fiscal_year": fiscal_year_name,
 				"company": company.name,
 				"period_based_on": "posting_date"
 			}),
@@ -151,7 +153,8 @@ def get_number_cards():
 			"document_type": "Purchase Receipt",
 			"filters_json": json.dumps(
 				[["Purchase Receipt","status","=","To Bill",False],
-				["Purchase Receipt","company","=", company.name, False]]
+				["Purchase Receipt","company","=", company.name, False],
+				["Purchase Receipt", "posting_date", "Between", [start_date,end_date], False]]
 			),
 			"is_public": 1,
 			"owner": "Administrator",
@@ -167,7 +170,8 @@ def get_number_cards():
 			"document_type": "Delivery Note",
 			"filters_json": json.dumps(
 				[["Delivery Note","company","=",company.name,False],
-				["Delivery Note","status","=","To Bill",False]]
+				["Delivery Note","status","=","To Bill",False],
+				["Delivery Note", "posting_date", "Between", [start_date,end_date], False]]
 			),
 			"is_public": 1,
 			"owner": "Administrator",
@@ -182,7 +186,8 @@ def get_number_cards():
 			"document_type": "Purchase Receipt",
 			"filters_json": json.dumps(
 				[["Purchase Receipt","status","=","To Bill",False],
-				["Purchase Receipt","company","=", company.name, False]]
+				["Purchase Receipt","company","=", company.name, False],
+				["Purchase Receipt", "posting_date", "Between", [start_date,end_date], False]]
 			),
 			"is_public": 1,
 			"owner": "Administrator",
@@ -197,7 +202,8 @@ def get_number_cards():
 			"document_type": "Delivery Note",
 			"filters_json": json.dumps(
 				[["Delivery Note","company","=",company.name,False],
-				["Delivery Note","status","=","To Bill",False]]
+				["Delivery Note","status","=","To Bill",False],
+				["Delivery Note", "posting_date", "Between", [start_date,end_date], False]]
 			),
 			"is_public": 1,
 			"owner": "Administrator",
