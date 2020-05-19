@@ -70,11 +70,13 @@ class BOM(WebsiteGenerator):
 		self.validate_main_item()
 		self.validate_currency()
 		self.set_conversion_rate()
+		self.set_plc_conversion_rate()
 		self.validate_uom_is_interger()
 		self.set_bom_material_details()
 		self.validate_materials()
 		self.validate_operations()
 		self.calculate_cost()
+		self.update_cost(update_parent=False, from_child_bom=True, save=False)
 
 	def get_context(self, context):
 		context.parents = [{'name': 'boms', 'title': _('All BOMs') }]
@@ -165,7 +167,7 @@ class BOM(WebsiteGenerator):
 			 'rate'			: rate,
 			 'qty'			: args.get("qty") or args.get("stock_qty") or 1,
 			 'stock_qty'	: args.get("qty") or args.get("stock_qty") or 1,
-			 'base_rate'	: rate,
+			 'base_rate'	: flt(rate) * (flt(self.conversion_rate) or 1),
 			 'include_item_in_manufacturing': cint(args['transfer_for_manufacture']) or 0
 		}
 
@@ -226,7 +228,7 @@ class BOM(WebsiteGenerator):
 							frappe.msgprint(_("{0} not found for item {1}")
 								.format(self.rm_cost_as_per, arg["item_code"]), alert=True)
 
-		return flt(rate) / (self.conversion_rate or 1)
+		return flt(rate) * flt(self.plc_conversion_rate or 1) / (self.conversion_rate or 1)
 
 	def update_cost(self, update_parent=True, from_child_bom=False, save=True):
 		if self.docstatus == 2:
@@ -243,10 +245,15 @@ class BOM(WebsiteGenerator):
 				"stock_uom": d.stock_uom,
 				"conversion_factor": d.conversion_factor
 			})
+
 			if rate:
 				d.rate = rate
 			d.amount = flt(d.rate) * flt(d.qty)
-			d.db_update()
+			d.base_rate = flt(d.rate) * flt(self.conversion_rate)
+			d.base_amount = flt(d.amount) * flt(self.conversion_rate)
+
+			if save:
+				d.db_update()
 
 		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True
@@ -371,6 +378,13 @@ class BOM(WebsiteGenerator):
 			self.conversion_rate = 1
 		elif self.conversion_rate == 1 or flt(self.conversion_rate) <= 0:
 			self.conversion_rate = get_exchange_rate(self.currency, self.company_currency(), args="for_buying")
+
+	def set_plc_conversion_rate(self):
+		if self.rm_cost_as_per in ["Valuation Rate", "Last Purchase Rate"]:
+			self.plc_conversion_rate = 1
+		elif not self.plc_conversion_rate and self.price_list_currency:
+			self.plc_conversion_rate = get_exchange_rate(self.price_list_currency,
+				self.company_currency(), args="for_buying")
 
 	def validate_materials(self):
 		""" Validate raw material entries """
