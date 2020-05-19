@@ -30,7 +30,16 @@ frappe.ui.form.on('Material Request', {
 			return {
 				filters: {'company': doc.company}
 			};
-		})
+		});
+
+		frm.set_query("bom_no", "items", function(doc, cdt, cdn) {
+			var row = locals[cdt][cdn];
+			return {
+				filters: {
+					"item": row.item_code
+				}
+			}
+		});
 	},
 
 	onload: function(frm) {
