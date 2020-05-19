@@ -8,12 +8,12 @@
  "is_mandatory": 1,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2020-05-14 19:11:57.153679",
+ "modified": "2020-05-19 12:51:31.315686",
  "modified_by": "Administrator",
  "name": "Create BOM",
  "owner": "Administrator",
  "reference_document": "BOM",
  "show_full_form": 1,
- "title": "Create BOM (Bill of Material)",
+ "title": "Create a BOM (Bill of Material)",
  "validate_action": 1
 }
