@@ -60,10 +60,11 @@
  "docstatus": 0,
  "doctype": "Desk Page",
  "extends_another_page": 0,
+ "hide_custom": 0,
  "idx": 0,
  "is_standard": 1,
  "label": "Healthcare",
- "modified": "2020-05-19 14:05:10.520457",
+ "modified": "2020-05-19 20:57:22.797267",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
@@ -106,6 +107,11 @@
    "label": "Patient History",
    "link_to": "patient_history",
    "type": "Page"
+  },
+  {
+   "label": "Healthcare Dashboard",
+   "link_to": "Healthcare",
+   "type": "Dashboard"
   }
  ]
 }
