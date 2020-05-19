@@ -15,8 +15,8 @@ def get_data():
 
 def get_dashboards():
 	return [{
-		"name": "Manufacturing Dashboard",
-		"dashboard_name": "Manufacturing Dashboard",
+		"name": "Manufacturing",
+		"dashboard_name": "Manufacturing",
 		"charts": [
 			{ "chart": "Produced Quantity", "width": "Half" },
 			{ "chart": "Completed Operation", "width": "Half" },
