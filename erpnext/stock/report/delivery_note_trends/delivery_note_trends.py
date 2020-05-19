@@ -12,17 +12,22 @@ def execute(filters=None):
 	conditions = get_columns(filters, "Delivery Note")
 	data = get_data(filters, conditions)
 
-	chart_data = get_chart_data(data)
+	chart_data = get_chart_data(data, filters)
 
 	return conditions["columns"], data, None, chart_data
 
-def get_chart_data(data):
+def get_chart_data(data, filters):
 	if not data:
 		return []
 
 	labels, datapoints = [], []
 
+	if filters.get("group_by"):
+		# consider only consolidated row
+		data = [row for row in data if row[0]]
+
 	if len(data) > 10:
+		# get top 10 if data too long
 		data = sorted(data, key = lambda i: i[-1],reverse=True)
 		data = data[:10]
 
