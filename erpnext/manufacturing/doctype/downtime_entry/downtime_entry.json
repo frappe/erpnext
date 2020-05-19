@@ -13,7 +13,9 @@
   "to_time",
   "downtime",
   "downtime_reason_section",
-  "reason"
+  "stop_reason",
+  "column_break_9",
+  "remarks"
  ],
  "fields": [
   {
@@ -42,12 +44,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "reason",
-   "fieldtype": "Text",
-   "label": "Reason",
-   "reqd": 1
-  },
-  {
    "fieldname": "operator",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -66,10 +62,26 @@
    "fieldtype": "Float",
    "label": "Downtime",
    "read_only": 1
+  },
+  {
+   "fieldname": "stop_reason",
+   "fieldtype": "Select",
+   "label": "Stop Reason",
+   "options": "\nExcessive machine set up time\nUnplanned machine maintenance\nOn-machine press checks\nMachine operator errors\nMachine malfunction\nElectricity down\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "label": "Remarks"
   }
  ],
  "links": [],
- "modified": "2020-04-20 17:34:51.299607",
+ "modified": "2020-05-19 12:59:37.358483",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Downtime Entry",

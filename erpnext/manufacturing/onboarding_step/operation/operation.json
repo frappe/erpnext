@@ -8,12 +8,12 @@
  "is_mandatory": 0,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2020-05-14 19:10:27.258157",
+ "modified": "2020-05-19 12:50:41.642754",
  "modified_by": "Administrator",
  "name": "Operation",
  "owner": "Administrator",
  "reference_document": "Operation",
  "show_full_form": 0,
- "title": "Create Operation",
+ "title": "Create a Operation",
  "validate_action": 1
 }
