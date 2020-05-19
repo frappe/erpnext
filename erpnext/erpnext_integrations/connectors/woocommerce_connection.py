@@ -49,12 +49,13 @@ def _order(*args, **kwargs):
 	if event == "created":
 		sys_lang = frappe.get_single("System Settings").language or 'en'
 		raw_billing_data = order.get("billing")
+		raw_shipping_data = order.get("shipping")
 		customer_name = raw_billing_data.get("first_name") + " " + raw_billing_data.get("last_name")
-		link_customer_and_address(raw_billing_data, customer_name)
+		link_customer_and_address(raw_billing_data, raw_shipping_data, customer_name)
 		link_items(order.get("line_items"), woocommerce_settings, sys_lang)
 		create_sales_order(order, woocommerce_settings, customer_name, sys_lang)
 
-def link_customer_and_address(raw_billing_data, customer_name):
+def link_customer_and_address(raw_billing_data, raw_shipping_data, customer_name):
 	customer_woo_com_email = raw_billing_data.get("email")
 	customer_exists = frappe.get_value("Customer", {"woocommerce_email": customer_woo_com_email})
 	if not customer_exists:
@@ -68,38 +69,74 @@ def link_customer_and_address(raw_billing_data, customer_name):
 	customer.customer_name = customer_name
 	customer.woocommerce_email = customer_woo_com_email
 	customer.flags.ignore_mandatory = True
-	customer.save() 
+	customer.save()
 
 	if customer_exists:
 		frappe.rename_doc("Customer", old_name, customer_name)
-		address = frappe.get_doc("Address", {"woocommerce_email": customer_woo_com_email})
+		billing_address = frappe.get_doc("Address", {"woocommerce_email": customer_woo_com_email, "address_type": "Billing"})
+		shipping_address = frappe.get_doc("Address", {"woocommerce_email": customer_woo_com_email, "address_type": "Shipping"})
+		rename_address(billing_address, customer)
+		rename_address(shipping_address, customer)
 	else:
-		address = frappe.new_doc("Address")
+		create_address(raw_billing_data, customer, "Billing")
+		create_address(raw_shipping_data, customer, "Shipping")
+		create_contact(raw_billing_data, customer)
 
-	address.address_line1 = raw_billing_data.get("address_1", "Not Provided")
-	address.address_line2 = raw_billing_data.get("address_2", "Not Provided")
-	address.city = raw_billing_data.get("city", "Not Provided")
-	address.woocommerce_email = customer_woo_com_email
-	address.address_type = "Billing"
-	address.country = frappe.get_value("Country", {"code": raw_billing_data.get("country", "IN").lower()})
-	address.state = raw_billing_data.get("state")
-	address.pincode = raw_billing_data.get("postcode")
-	address.phone = raw_billing_data.get("phone")
-	address.email_id = customer_woo_com_email
+def create_contact(data, customer):
+	email = data.get("email", None)
+	phone = data.get("phone", None)
+
+	if not email and not phone:
+		return
+
+	contact = frappe.new_doc("Contact")
+	contact.first_name = data.get("first_name")
+	contact.last_name = data.get("last_name")
+	contact.is_primary_contact = 1
+	contact.is_billing_contact = 1
+
+	if phone:
+		contact.add_phone(phone, is_primary_mobile_no=1, is_primary_phone=1)
+
+	if email:
+		contact.add_email(email, is_primary=1)
+
+	contact.append("links", {
+		"link_doctype": "Customer",
+		"link_name": customer.name
+	})
+
+	contact.flags.ignore_mandatory = True
+	contact.save()
+
+def create_address(raw_data, customer, address_type):
+	address = frappe.new_doc("Address")
+
+	address.address_line1 = raw_data.get("address_1", "Not Provided")
+	address.address_line2 = raw_data.get("address_2", "Not Provided")
+	address.city = raw_data.get("city", "Not Provided")
+	address.woocommerce_email = customer.woocommerce_email
+	address.address_type = address_type
+	address.country = frappe.get_value("Country", {"code": raw_data.get("country", "IN").lower()})
+	address.state = raw_data.get("state")
+	address.pincode = raw_data.get("postcode")
+	address.phone = raw_data.get("phone")
+	address.email_id = customer.woocommerce_email
 	address.append("links", {
 		"link_doctype": "Customer",
-		"link_name": customer.customer_name
+		"link_name": customer.name
 	})
+
 	address.flags.ignore_mandatory = True
-	address = address.save()
+	address.save()
 
-	if customer_exists:
-		old_address_title = address.name
-		new_address_title = customer.customer_name + "-billing"
-		address.address_title = customer.customer_name
-		address.save()
+def rename_address(address, customer):
+	old_address_title = address.name
+	new_address_title = customer.name + "-" + address.address_type
+	address.address_title = customer.customer_name
+	address.save()
 
-		frappe.rename_doc("Address", old_address_title, new_address_title)
+	frappe.rename_doc("Address", old_address_title, new_address_title)
 
 def link_items(items_list, woocommerce_settings, sys_lang):
 	for item_data in items_list:
@@ -111,7 +148,7 @@ def link_items(items_list, woocommerce_settings, sys_lang):
 		else:
 			#Create Item
 			item = frappe.new_doc("Item")
-	
+
 		item.item_name = item_data.get("name")
 		item.item_code = _("woocommerce - {0}", sys_lang).format(item_data.get("product_id"))
 		item.woocommerce_id = item_data.get("product_id")
@@ -171,7 +208,7 @@ def set_items_in_sales_order(new_sales_order, woocommerce_settings, order, sys_l
 
 	add_tax_details(new_sales_order, order.get("shipping_tax"), "Shipping Tax", woocommerce_settings.f_n_f_account)
 	add_tax_details(new_sales_order, order.get("shipping_total"), "Shipping Total", woocommerce_settings.f_n_f_account)
-			
+
 def add_tax_details(sales_order, price, desc, tax_account_head):
 	sales_order.append("taxes", {
 		"charge_type":"Actual",
