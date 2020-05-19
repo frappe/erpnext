@@ -24,6 +24,7 @@ class Quotation(SellingController):
 
 	def validate(self):
 		super(Quotation, self).validate()
+		self.set_valuation_and_gross_profit()
 		self.set_status()
 		self.update_opportunity()
 		self.validate_uom_is_integer("stock_uom", "qty")
@@ -118,6 +119,11 @@ class Quotation(SellingController):
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.valid_till = None
 
+	def set_valuation_and_gross_profit(self):
+		for item in self.items:
+			item.valuation_rate = frappe.get_doc('Item', item.item_code).valuation_rate
+			item.gross_profit = flt(((item.base_rate - item.valuation_rate) * item.stock_qty), self.precision("amount", item))
+
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
 	list_context = get_list_context(context)
@@ -197,9 +203,9 @@ def set_expired_status():
 	cond = "qo.docstatus = 1 and qo.status != 'Expired' and qo.valid_till < %s"
 	# check if those QUO have SO against it
 	so_against_quo = """
-		SELECT 
+		SELECT
 			so.name FROM `tabSales Order` so, `tabSales Order Item` so_item
-		WHERE 
+		WHERE
 			so_item.docstatus = 1 and so.docstatus = 1
 			and so_item.parent = so.name
 			and so_item.prevdoc_docname = qo.name"""
