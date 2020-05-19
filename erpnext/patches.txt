@@ -687,3 +687,4 @@ erpnext.patches.v12_0.set_valid_till_date_in_supplier_quotation
 erpnext.patches.v12_0.set_serial_no_status
 erpnext.patches.v12_0.update_price_list_currency_in_bom
 execute:frappe.delete_doc_if_exists('Dashboard', 'Accounts')
+erpnext.patches.v13_0.update_actual_start_and_end_date_in_wo
