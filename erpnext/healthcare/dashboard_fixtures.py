@@ -3,7 +3,7 @@
 
 import frappe
 import json
-
+from frappe import _
 
 def get_data():
 	return frappe._dict({
@@ -51,7 +51,7 @@ def get_charts():
 				"doctype": "Dashboard Chart",
 				"time_interval": "Daily",
 				"name": "Patient Appointments",
-				"chart_name": "Patient Appointments",
+				"chart_name": _("Patient Appointments"),
 				"timespan": "Last Month",
 				"filters_json": json.dumps([
 					["Patient Appointment", "company", "=", company, False],
@@ -68,7 +68,7 @@ def get_charts():
 			{
 				"doctype": "Dashboard Chart",
 				"name": "Department wise Patient Appointments",
-				"chart_name": "Department wise Patient Appointments",
+				"chart_name": _("Department wise Patient Appointments"),
 				"chart_type": "Custom",
 				"source": "Department wise Patient Appointments",
 				"filters_json": json.dumps({}),
@@ -87,7 +87,7 @@ def get_charts():
 			{
 				"doctype": "Dashboard Chart",
 				"name": "Lab Tests",
-				"chart_name": "Lab Tests",
+				"chart_name": _("Lab Tests"),
 				"chart_type": "Group By",
 				"document_type": "Lab Test",
 				"group_by_type": "Count",
@@ -104,7 +104,7 @@ def get_charts():
 			{
 				"doctype": "Dashboard Chart",
 				"name": "Clinical Procedures",
-				"chart_name": "Clinical Procedures",
+				"chart_name": _("Clinical Procedures"),
 				"chart_type": "Group By",
 				"document_type": "Clinical Procedure",
 				"group_by_type": "Count",
@@ -121,7 +121,7 @@ def get_charts():
 			{
 				"doctype": "Dashboard Chart",
 				"name": "In-Patient Status",
-				"chart_name": "In-Patient Status",
+				"chart_name": _("In-Patient Status"),
 				"chart_type": "Group By",
 				"document_type": "Inpatient Record",
 				"group_by_type": "Count",
@@ -137,7 +137,7 @@ def get_charts():
 			{
 				"doctype": "Dashboard Chart",
 				"name": "Clinical Procedures Status",
-				"chart_name": "Clinical Procedure Status",
+				"chart_name": _("Clinical Procedure Status"),
 				"chart_type": "Group By",
 				"document_type": "Clinical Procedure",
 				"group_by_type": "Count",
@@ -154,7 +154,7 @@ def get_charts():
 			{
 				"doctype": "Dashboard Chart",
 				"name": "Symptoms",
-				"chart_name": "Symptoms",
+				"chart_name": _("Symptoms"),
 				"chart_type": "Group By",
 				"document_type": "Patient Encounter Symptom",
 				"group_by_type": "Count",
@@ -168,7 +168,7 @@ def get_charts():
 			{
 				"doctype": "Dashboard Chart",
 				"name": "Diagnoses",
-				"chart_name": "Diagnoses",
+				"chart_name": _("Diagnoses"),
 				"chart_type": "Group By",
 				"document_type": "Patient Encounter Diagnosis",
 				"group_by_type": "Count",
@@ -186,7 +186,7 @@ def get_number_cards():
 	return [
 		{
 			"name": "Total Patients",
-			"label": "Total Patients",
+			"label": _("Total Patients"),
 			"function": "Count",
 			"doctype": "Number Card",
 			"document_type": "Patient",
@@ -200,7 +200,7 @@ def get_number_cards():
 		},
 		{
 			"name": "Total Patients Admitted",
-			"label": "Total Patients Admitted",
+			"label": _("Total Patients Admitted"),
 			"function": "Count",
 			"doctype": "Number Card",
 			"document_type": "Patient",
@@ -214,7 +214,7 @@ def get_number_cards():
 		},
 		{
 			"name": "Open Appointments",
-			"label": "Open Appointments",
+			"label": _("Open Appointments"),
 			"function": "Count",
 			"doctype": "Number Card",
 			"document_type": "Patient Appointment",
@@ -229,7 +229,7 @@ def get_number_cards():
 		},
 		{
 			"name": "Appointments to Bill",
-			"label": "Appointments to Bill",
+			"label": _("Appointments to Bill"),
 			"function": "Count",
 			"doctype": "Number Card",
 			"document_type": "Patient Appointment",
