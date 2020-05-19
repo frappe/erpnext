@@ -16,7 +16,7 @@ def execute(filters=None):
 def get_data(filters):
 	query_filters = {}
 
-	fields = ["workstation", "operator", "from_time", "to_time", "downtime", "reason"]
+	fields = ["name", "workstation", "operator", "from_time", "to_time", "downtime", "stop_reason", "remarks"]
 
 	query_filters["from_time"] = (">=", filters.get("from_date"))
 	query_filters["to_time"] = ("<=", filters.get("to_date"))
@@ -55,6 +55,13 @@ def get_chart_data(data, columns):
 def get_columns(filters):
 	return [
 		{
+			"label": _("ID"),
+			"fieldname": "name",
+			"fieldtype": "Link",
+			"options": "Downtime Entry",
+			"width": 100
+		},
+		{
 			"label": _("Machine"),
 			"fieldname": "workstation",
 			"fieldtype": "Link",
@@ -87,9 +94,15 @@ def get_columns(filters):
 			"width": 150
 		},
 		{
-			"label": _("Reason"),
-			"fieldname": "reason",
+			"label": _("Stop Reason"),
+			"fieldname": "stop_reason",
+			"fieldtype": "Data",
+			"width": 220
+		},
+		{
+			"label": _("Remarks"),
+			"fieldname": "remarks",
 			"fieldtype": "Text",
-			"width": 180
+			"width": 100
 		}
 	]
