@@ -3,6 +3,7 @@
 
 import frappe
 import json
+from frappe import _
 
 def get_company_for_dashboards():
 	company = frappe.defaults.get_defaults().company
@@ -37,10 +38,11 @@ def get_charts():
 		{
 			'doctype': 'Dashboard Chart',
 			'name': 'Project Summary',
-			'chart_name': 'Project Summary',
+			'chart_name': _('Project Summary'),
 			'chart_type': 'Report',
 			'report_name': 'Project Summary',
 			'is_public': 1,
+			'is_custom': 1,
 			'filters_json': json.dumps({"company": company.name, "status": "Open"}),
 			'type': 'Bar',
 			'custom_options': '{"type": "bar", "colors": ["#fc4f51", "#78d6ff", "#7575ff"], "axisOptions": { "shortenYAxisNumbers": 1}, "barOptions": { "stacked": 1 }}',
