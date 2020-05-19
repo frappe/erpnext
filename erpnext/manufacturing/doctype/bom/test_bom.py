@@ -81,13 +81,13 @@ class TestBOM(unittest.TestCase):
 
 		# test amounts in selected currency
 		self.assertEqual(bom.operating_cost, 100)
-		self.assertEqual(bom.raw_material_cost, 8000)
-		self.assertEqual(bom.total_cost, 8100)
+		self.assertEqual(bom.raw_material_cost, 351.68)
+		self.assertEqual(bom.total_cost, 451.68)
 
 		# test amounts in selected currency
 		self.assertEqual(bom.base_operating_cost, 6000)
-		self.assertEqual(bom.base_raw_material_cost, 480000)
-		self.assertEqual(bom.base_total_cost, 486000)
+		self.assertEqual(bom.base_raw_material_cost, 21100.80)
+		self.assertEqual(bom.base_total_cost, 27100.80)
 
 	def test_bom_cost_multi_uom_multi_currency_based_on_price_list(self):
 		frappe.db.set_value("Price List", "_Test Price List", "price_not_uom_dependent", 1)

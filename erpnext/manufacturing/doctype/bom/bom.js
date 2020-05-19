@@ -212,6 +212,12 @@ frappe.ui.form.on("BOM", {
 		});
 	},
 
+	rm_cost_as_per: function(frm) {
+		if (in_list(["Valuation Rate", "Last Purchase Rate"], frm.doc.rm_cost_as_per)) {
+			frm.set_value("plc_conversion_rate", 1.0);
+		}
+	},
+
 	routing: function(frm) {
 		if (frm.doc.routing) {
 			frappe.call({
@@ -242,7 +248,7 @@ erpnext.bom.BomController = erpnext.TransactionController.extend({
 	item_code: function(doc, cdt, cdn){
 		var scrap_items = false;
 		var child = locals[cdt][cdn];
-		if(child.doctype == 'BOM Scrap Item') {
+		if (child.doctype == 'BOM Scrap Item') {
 			scrap_items = true;
 		}
 
@@ -252,8 +258,19 @@ erpnext.bom.BomController = erpnext.TransactionController.extend({
 
 		get_bom_material_detail(doc, cdt, cdn, scrap_items);
 	},
+
+	buying_price_list: function(doc) {
+		this.apply_price_list();
+	},
+
+	plc_conversion_rate: function(doc) {
+		if (!this.in_apply_price_list) {
+			this.apply_price_list();
+		}
+	},
+
 	conversion_factor: function(doc, cdt, cdn) {
-		if(frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
+		if (frappe.meta.get_docfield(cdt, "stock_qty", cdn)) {
 			var item = frappe.get_doc(cdt, cdn);
 			frappe.model.round_floats_in(item, ["qty", "conversion_factor"]);
 			item.stock_qty = flt(item.qty * item.conversion_factor, precision("stock_qty", item));
