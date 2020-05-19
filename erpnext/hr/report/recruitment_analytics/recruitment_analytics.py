@@ -44,13 +44,13 @@ def get_columns():
 			"label": _("Applicant name"),
 			"fieldtype": "data",
 			"fieldname": "applicant_name",
-			"width": 150
+			"width": 120
 		},
 		{
 			"label": _("Application Status"),
 			"fieldtype": "Data",
 			"fieldname": "application_status",
-			"width": 150
+			"width": 100
 		},
 		{
 			"label": _("Job Offer"),
@@ -58,6 +58,12 @@ def get_columns():
 			"fieldname": "job_offer",
 			"options": "job Offer",
 			"width": 150
+		},
+		{
+			"label": _("Designation"),
+			"fieldtype": "Data",
+			"fieldname": "designation",
+			"width": 100
 		},
 		{
 			"label": _("Offer Date"),
@@ -114,6 +120,7 @@ def get_child_row(jo, jo_ja_map, ja_joff_map):
 			row["job_offer"] = jo_detail.name
 			row["job_offer_status"] = jo_detail.status
 			row["offer_date"]= jo_detail.offer_date.strftime("%d-%m-%Y")
+			row["designation"] = jo_detail.designation
 
 		data.append(row)
 	return data
@@ -170,7 +177,7 @@ def get_job_applicant(jo_list):
 def get_job_offer(ja_list):
 	ja_joff_map = {}
 
-	offers = frappe.get_all("Job offer", filters = [["job_applicant", "IN", ja_list]], fields =["name", "job_applicant", "status", 'offer_date'])
+	offers = frappe.get_all("Job offer", filters = [["job_applicant", "IN", ja_list]], fields =["name", "job_applicant", "status", 'offer_date', 'designation'])
 
 	for offer in offers:
 		if offer.job_applicant not in ja_joff_map.keys():
