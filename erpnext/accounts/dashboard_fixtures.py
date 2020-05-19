@@ -26,8 +26,8 @@ def get_data():
 
 def get_dashboards():
 	return [{
-		"name": "Accounts Dashboard",
-		"dashboard_name": "Accounts Dashboard",
+		"name": "Accounts",
+		"dashboard_name": "Accounts",
 		"doctype": "Dashboard",
 		"charts": [
 			{ "chart": "Profit and Loss" , "width": "Full"},
