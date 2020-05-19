@@ -1,0 +1,19 @@
+{
+ "action": "Watch Video",
+ "creation": "2020-05-15 03:26:01.386069",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-05-15 03:31:01.267728",
+ "modified_by": "Administrator",
+ "name": "Introduction to Price List and Item Price",
+ "owner": "Administrator",
+ "show_full_form": 0,
+ "title": "Let's take a brief look at Price List and Item Price",
+ "validate_action": 1,
+ "video_url": "https://www.youtube.com/watch?v=lY6hAQM1I28"
+}
