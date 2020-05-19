@@ -53,7 +53,7 @@ def get_average_age(fifo_queue, to_date):
 			age_qty += batch_age * 1
 			total_qty += 1
 
-	return (age_qty / total_qty) if total_qty else 0.0
+	return flt(age_qty / total_qty, 2) if total_qty else 0.0
 
 def get_columns(filters):
 	columns = [
@@ -241,6 +241,8 @@ def get_chart_data(data, filters):
 
 	if filters.get("show_warehouse_wise_stock"):
 		return {}
+
+	data.sort(key = lambda row: row[6], reverse=True)
 
 	if len(data) > 10:
 		data = data[:10]

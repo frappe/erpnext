@@ -3,6 +3,7 @@
 
 import frappe
 import json
+from frappe import _
 from frappe.utils import nowdate
 from erpnext.accounts.utils import get_fiscal_year
 
@@ -34,39 +35,72 @@ def get_dashboards():
 		"name": "Stock",
 		"dashboard_name": "Stock",
 		"charts": [
-			{ "chart": "Item Shortage Summary", "width": "Half"},
-			{ "chart": "Stock Ageing", "width": "Half"},
-			{ "chart": "Item Wise Annual Revenue", "width": "Half"},
-			{ "chart": "Item Wise Annual Expenditure", "width": "Half"},
-			{ "chart": "Warehouse wise Stock Value", "width": "Full"}
+			{ "chart": "Warehouse wise Stock Value", "width": "Full"},
+			{ "chart": "Purchase Receipt Trends", "width": "Half"},
+			{ "chart": "Delivery Trends", "width": "Half"},
+			{ "chart": "Oldest Items", "width": "Half"},
+			{ "chart": "Item Shortage Summary", "width": "Half"}
 		],
 		"cards": [
-			{ "card": "Purchase Receipts to Bill"},
-			{ "card": "Amount Payable against Receipt"},
-			{ "card": "Delivery Notes to Bill"},
-			{ "card": "Amount Receivable against Delivery"}
+			{ "card": "Total Active Items"},
+			{ "card": "Total Warehouses"},
+			{ "card": "Total Stock Value"}
 		]
 	}]
 
 def get_charts():
 	return [
 		{
-			"name": "Item Shortage Summary",
-			"chart_name": "Item Shortage Summary",
-			"chart_type": "Report",
 			"doctype": "Dashboard Chart",
-			"filters_json": json.dumps({
-				"company": company.name
-			}),
-			"is_custom": 1,
+			"name": "Purchase Receipt Trends",
+			"time_interval": "Monthly",
+			"chart_name": _("Purchase Receipt Trends"),
+			"timespan": "Last Year",
+			"color": "#7b933d",
+			"value_based_on": "base_net_total",
+			"filters_json": json.dumps([["Purchase Receipt", "docstatus", "=", 1]]),
+			"chart_type": "Sum",
+			"timeseries": 1,
+			"based_on": "posting_date",
+			"owner": "Administrator",
+			"document_type": "Purchase Receipt",
+			"type": "Bar",
+			"width": "Half",
+			"is_public": 1
+		},
+		{
+			"doctype": "Dashboard Chart",
+			"name": "Delivery Trends",
+			"time_interval": "Monthly",
+			"chart_name": _("Delivery Trends"),
+			"timespan": "Last Year",
+			"color": "#7b933d",
+			"value_based_on": "base_net_total",
+			"filters_json": json.dumps([["Delivery Note", "docstatus", "=", 1]]),
+			"chart_type": "Sum",
+			"timeseries": 1,
+			"based_on": "posting_date",
+			"owner": "Administrator",
+			"document_type": "Delivery Note",
+			"type": "Bar",
+			"width": "Half",
+			"is_public": 1
+		},
+		{
+			"name": "Warehouse wise Stock Value",
+			"chart_name": _("Warehouse wise Stock Value"),
+			"chart_type": "Custom",
+			"doctype": "Dashboard Chart",
+			"filters_json": json.dumps({}),
+			"is_custom": 0,
 			"is_public": 1,
 			"owner": "Administrator",
-			"report_name": "Item Shortage Report",
+			"source": "Warehouse wise Stock Value",
 			"type": "Bar"
 		},
 		{
-			"name": "Stock Ageing",
-			"chart_name": "Stock Ageing",
+			"name": "Oldest Items",
+			"chart_name": _("Oldest Items"),
 			"chart_type": "Report",
 			"custom_options": json.dumps({
 				"colors": ["#5e64ff"]
@@ -84,127 +118,55 @@ def get_charts():
 			"type": "Bar"
 		},
 		{
-			"name": "Item Wise Annual Revenue",
-			"chart_name": "Item Wise Annual Revenue",
+			"name": "Item Shortage Summary",
+			"chart_name": _("Item Shortage Summary"),
 			"chart_type": "Report",
-			"custom_options": json.dumps({
-				"axisOptions": {"shortenYAxisNumbers": 1},
-				"tooltipOptions": {},
-				"colors":["#5e64ff"]
-			}),
 			"doctype": "Dashboard Chart",
 			"filters_json": json.dumps({
-				"period": "Monthly",
-				"based_on": "Item",
-				"fiscal_year": fiscal_year_name,
 				"company": company.name
 			}),
 			"is_custom": 1,
 			"is_public": 1,
 			"owner": "Administrator",
-			"report_name": "Delivery Note Trends",
-			"type": "Bar"
-		},
-		{
-			"name": "Item Wise Annual Expenditure",
-			"chart_name": "Item Wise Annual Expenditure",
-			"chart_type": "Report",
-			"custom_options": json.dumps({
-				"axisOptions": {"shortenYAxisNumbers": 1},
-				"tooltipOptions": {}
-			}),
-			"doctype": "Dashboard Chart",
-			"filters_json": json.dumps({
-				"period": "Monthly",
-				"based_on": "Item",
-				"fiscal_year": fiscal_year_name,
-				"company": company.name,
-				"period_based_on": "posting_date"
-			}),
-			"is_custom": 1,
-			"is_public": 1,
-			"owner": "Administrator",
-			"report_name": "Purchase Receipt Trends",
-			"type": "Bar"
-		},
-		{
-			"name": "Warehouse wise Stock Value",
-			"chart_name": "Warehouse wise Stock Value",
-			"chart_type": "Custom",
-			"doctype": "Dashboard Chart",
-			"filters_json": json.dumps({}),
-			"is_custom": 0,
-			"is_public": 1,
-			"owner": "Administrator",
-			"source": "Warehouse wise Stock Value",
+			"report_name": "Item Shortage Report",
 			"type": "Bar"
 		}
-
 	]
 
 def get_number_cards():
 	return [
 		{
-			"name": "Amount Payable against Receipt",
-			"label": "Amount Payable against Receipt",
-			"function": "Sum",
-			"aggregate_function_based_on": "base_grand_total",
-			"doctype": "Number Card",
-			"document_type": "Purchase Receipt",
-			"filters_json": json.dumps(
-				[["Purchase Receipt","status","=","To Bill",False],
-				["Purchase Receipt","company","=", company.name, False],
-				["Purchase Receipt", "posting_date", "Between", [start_date,end_date], False]]
-			),
-			"is_public": 1,
-			"owner": "Administrator",
-			"show_percentage_stats": 1,
-			"stats_time_interval": "Daily"
-		},
-		{
-			"name": "Amount Receivable against Delivery",
-			"label": "Amount Receivable against Delivery",
-			"function": "Sum",
-			"aggregate_function_based_on": "base_grand_total",
-			"doctype": "Number Card",
-			"document_type": "Delivery Note",
-			"filters_json": json.dumps(
-				[["Delivery Note","company","=",company.name,False],
-				["Delivery Note","status","=","To Bill",False],
-				["Delivery Note", "posting_date", "Between", [start_date,end_date], False]]
-			),
-			"is_public": 1,
-			"owner": "Administrator",
-			"show_percentage_stats": 1,
-			"stats_time_interval": "Daily"
-		},
-		{
-			"name": "Purchase Receipts to Bill",
-			"label": "Purchase Receipts to Bill",
+			"name": "Total Active Items",
+			"label": _("Total Active Items"),
 			"function": "Count",
 			"doctype": "Number Card",
-			"document_type": "Purchase Receipt",
-			"filters_json": json.dumps(
-				[["Purchase Receipt","status","=","To Bill",False],
-				["Purchase Receipt","company","=", company.name, False],
-				["Purchase Receipt", "posting_date", "Between", [start_date,end_date], False]]
-			),
+			"document_type": "Item",
+			"filters_json": json.dumps([["Item", "disabled", "=", 0]]),
 			"is_public": 1,
 			"owner": "Administrator",
 			"show_percentage_stats": 1,
-			"stats_time_interval": "Daily"
+			"stats_time_interval": "Monthly"
 		},
 		{
-			"name": "Delivery Notes to Bill",
-			"label": "Delivery Notes to Bill",
+			"name": "Total Warehouses",
+			"label": _("Total Warehouses"),
 			"function": "Count",
 			"doctype": "Number Card",
-			"document_type": "Delivery Note",
-			"filters_json": json.dumps(
-				[["Delivery Note","company","=",company.name,False],
-				["Delivery Note","status","=","To Bill",False],
-				["Delivery Note", "posting_date", "Between", [start_date,end_date], False]]
-			),
+			"document_type": "Warehouse",
+			"filters_json": json.dumps([["Warehouse", "disabled", "=", 0]]),
+			"is_public": 1,
+			"owner": "Administrator",
+			"show_percentage_stats": 1,
+			"stats_time_interval": "Monthly"
+		},
+		{
+			"name": "Total Stock Value",
+			"label": _("Total Stock Value"),
+			"function": "Sum",
+			"aggregate_function_based_on": "stock_value",
+			"doctype": "Number Card",
+			"document_type": "Bin",
+			"filters_json": json.dumps([]),
 			"is_public": 1,
 			"owner": "Administrator",
 			"show_percentage_stats": 1,
