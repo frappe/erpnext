@@ -95,8 +95,8 @@
    "type": "Report"
   },
   {
-   "label": "Manufacturing Dashboard",
-   "link_to": "Manufacturing Dashboard",
+   "label": "Dashboard",
+   "link_to": "Manufacturing",
    "restrict_to_domain": "Manufacturing",
    "type": "Dashboard"
   }

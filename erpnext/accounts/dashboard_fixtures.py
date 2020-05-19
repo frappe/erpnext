@@ -26,8 +26,8 @@ def get_data():
 
 def get_dashboards():
 	return [{
-		"name": "Accounts Dashboard",
-		"dashboard_name": "Accounts Dashboard",
+		"name": "Accounts",
+		"dashboard_name": "Accounts",
 		"doctype": "Dashboard",
 		"charts": [
 			{ "chart": "Profit and Loss" , "width": "Full"},
@@ -81,7 +81,7 @@ def get_charts():
 			"timespan": "Last Year",
 			"color": "#a83333",
 			"value_based_on": "base_net_total",
-			"filters_json": json.dumps({"docstatus": 1}),
+			"filters_json": json.dumps([["Purchase Invoice", "docstatus", "=", 1]]),
 			"chart_type": "Sum",
 			"timeseries": 1,
 			"based_on": "posting_date",
@@ -99,7 +99,7 @@ def get_charts():
 			"timespan": "Last Year",
 			"color": "#7b933d",
 			"value_based_on": "base_net_total",
-			"filters_json": json.dumps({"docstatus": 1}),
+			"filters_json": json.dumps([["Sales Invoice", "docstatus", "=", 1]]),
 			"chart_type": "Sum",
 			"timeseries": 1,
 			"based_on": "posting_date",
