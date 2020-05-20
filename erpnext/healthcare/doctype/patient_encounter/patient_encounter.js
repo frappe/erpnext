@@ -191,8 +191,8 @@ var schedule_inpatient = function(frm) {
 			{fieldtype: 'Date', label: 'Admission Ordered For', fieldname: 'admission_ordered_for', default: 'Today'},
 			{fieldtype: 'Link', label: 'Service Unit Type', fieldname: 'service_unit_type', options: 'Healthcare Service Unit Type'},
 			{fieldtype: 'Int', label: 'Expected Length of Stay', fieldname: 'expected_length_of_stay'},
-			{fieldtype: 'Section Break', label: 'Admission Instructions'},
-			{fieldtype: 'Small Text', fieldname: 'admission_instruction'}
+			{fieldtype: 'Section Break'},
+			{fieldtype: 'Long Text', label: 'Admission Instructions', fieldname: 'admission_instruction'}
 		],
 		primary_action_label: __('Order Admission'),
 		primary_action : function() {
@@ -254,7 +254,7 @@ var schedule_discharge = function(frm) {
 			{fieldtype: 'Column Break'},
 			{fieldtype: 'Small Text', label: 'Discharge Instructions', fieldname: 'discharge_instructions'},
 			{fieldtype: 'Section Break', label:'Discharge Summary'},
-			{fieldtype: 'Text Editor', label: 'Discharge Note', fieldname: 'discharge_note'}
+			{fieldtype: 'Long Text', label: 'Discharge Note', fieldname: 'discharge_note'}
 		],
 		primary_action_label: __('Order Discharge'),
 		primary_action : function() {
