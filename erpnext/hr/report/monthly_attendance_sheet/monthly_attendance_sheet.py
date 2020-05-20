@@ -30,8 +30,11 @@ day_abbr = [
 def execute(filters=None):
 	if not filters: filters = {}
 
+	if filters.hide_year_field == 1:
+		filters.year = 2020
+
 	conditions, filters = get_conditions(filters)
-	columns = get_columns(filters)
+	columns, days = get_columns(filters)
 	att_map = get_attendance_list(conditions, filters)
 
 	if filters.group_by:
@@ -60,20 +63,67 @@ def execute(filters=None):
 		columns.extend([_("Total Late Entries") + ":Float:120", _("Total Early Exits") + ":Float:120"])
 
 	if filters.group_by:
+		emp_att_map = {}
 		for parameter in group_by_parameters:
 			data.append([ "<b>"+ parameter + "</b>"])
-			record = add_data(emp_map[parameter], att_map, filters, holiday_map, conditions, leave_list=leave_list)
+			record, aaa = add_data(emp_map[parameter], att_map, filters, holiday_map, conditions, default_holiday_list, leave_list=leave_list)
+			emp_att_map.update(aaa)
 			data += record
 	else:
-		record = add_data(emp_map, att_map, filters, holiday_map, conditions, leave_list=leave_list)
+		record, emp_att_map = add_data(emp_map, att_map, filters, holiday_map, conditions, default_holiday_list, leave_list=leave_list)
 		data += record
 
-	return columns, data
+	chart_data = get_chart_data(emp_att_map, days)
+
+	return columns, data, None, chart_data
+
+def get_chart_data(emp_att_map, days):
+	labels = []
+	datasets = [
+		{"name": "Absent", "values": []},
+		{"name": "Present", "values": []},
+		{"name": "Leave", "values": []},
+	]
+	for idx, day in enumerate(days, start=0):
+		p = day.replace("::65", "")
+		labels.append(day.replace("::65", ""))
+		total_absent_on_day = 0
+		total_leave_on_day = 0
+		total_present_on_day = 0
+		total_holiday = 0
+		for emp in emp_att_map.keys():
+			if emp_att_map[emp][idx]:
+				if emp_att_map[emp][idx] == "A":
+					total_absent_on_day += 1
+				if emp_att_map[emp][idx] in ["P", "WFH"]:
+					total_present_on_day += 1
+				if emp_att_map[emp][idx] == "HD":
+					total_present_on_day += 0.5
+					total_leave_on_day += 0.5
+				if emp_att_map[emp][idx] == "L":
+					total_leave_on_day += 1
 
 
-def add_data(employee_map, att_map, filters, holiday_map, conditions, leave_list=None):
+		datasets[0]["values"].append(total_absent_on_day)
+		datasets[1]["values"].append(total_present_on_day)
+		datasets[2]["values"].append(total_leave_on_day)
+
+
+	chart = {
+		"data": {
+			'labels': labels,
+			'datasets': datasets
+		}
+	}
+
+	chart["type"] = "line"
+
+	return chart
+
+def add_data(employee_map, att_map, filters, holiday_map, conditions, default_holiday_list, leave_list=None):
 
 	record = []
+	emp_att_map = {}
 	for emp in employee_map:
 		emp_det = employee_map.get(emp)
 		if not emp_det or emp not in att_map:
@@ -85,6 +135,7 @@ def add_data(employee_map, att_map, filters, holiday_map, conditions, leave_list
 		row += [emp, emp_det.employee_name]
 
 		total_p = total_a = total_l = total_h = total_um= 0.0
+		ggg = []
 		for day in range(filters["total_days_in_month"]):
 			status = None
 			status = att_map.get(emp).get(day + 1)
@@ -101,19 +152,12 @@ def add_data(employee_map, att_map, filters, holiday_map, conditions, leave_list
 								status = "Holiday"
 							total_h += 1
 
-
-				# if emp_holiday_list in holiday_map and (day+1) in holiday_map[emp_holiday_list][0]:
-				# 	if holiday_map[emp_holiday_list][1]:
-				# 		status= "Weekly Off"
-				# 	else:
-				# 		status = "Holiday"
-
-				# 	 += 1
+			ggg.append(status_map.get(status, ""))
 
 			if not filters.summarized_view:
-				row.append(status_map.get(status, ""))
+				row += ggg
 			else:
-				if status == "Present":
+				if status == "Present" or status == "Work From Home":
 					total_p += 1
 				elif status == "Absent":
 					total_a += 1
@@ -159,10 +203,10 @@ def add_data(employee_map, att_map, filters, holiday_map, conditions, leave_list
 					row.append("0.0")
 
 			row.extend([time_default_counts[0][0],time_default_counts[0][1]])
+		emp_att_map[emp] = ggg
 		record.append(row)
 
-
-	return record
+	return record, emp_att_map
 
 def get_columns(filters):
 
@@ -174,15 +218,17 @@ def get_columns(filters):
 	columns += [
 		_("Employee") + ":Link/Employee:120", _("Employee Name") + ":Link/Employee:120"
 	]
-
+	days = []
+	for day in range(filters["total_days_in_month"]):
+		date = str(filters.year) + "-" + str(filters.month)+ "-" + str(day+1)
+		day_name = day_abbr[getdate(date).weekday()]
+		days.append(cstr(day+1)+ " " +day_name +"::65")
 	if not filters.summarized_view:
-		for day in range(filters["total_days_in_month"]):
-			date = str(filters.year) + "-" + str(filters.month)+ "-" + str(day+1)
-			day_name = day_abbr[getdate(date).weekday()]
-			columns.append(cstr(day+1)+ " " +day_name +"::65")
-	else:
+		columns += days
+
+	if filters.summarized_view:
 		columns += [_("Total Present") + ":Float:120", _("Total Leaves") + ":Float:120",  _("Total Absent") + ":Float:120", _("Total Holidays") + ":Float:120", _("Unmarked Days")+ ":Float:120"]
-	return columns
+	return columns, days
 
 def get_attendance_list(conditions, filters):
 	attendance_list = frappe.db.sql("""select employee, day(attendance_date) as day_of_month,
