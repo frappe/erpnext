@@ -66,11 +66,11 @@ def execute(filters=None):
 		emp_att_map = {}
 		for parameter in group_by_parameters:
 			data.append([ "<b>"+ parameter + "</b>"])
-			record, aaa = add_data(emp_map[parameter], att_map, filters, holiday_map, conditions, leave_list=leave_list)
+			record, aaa = add_data(emp_map[parameter], att_map, filters, holiday_map, conditions, default_holiday_list, leave_list=leave_list)
 			emp_att_map.update(aaa)
 			data += record
 	else:
-		record, emp_att_map = add_data(emp_map, att_map, filters, holiday_map, conditions, leave_list=leave_list)
+		record, emp_att_map = add_data(emp_map, att_map, filters, holiday_map, conditions, default_holiday_list, leave_list=leave_list)
 		data += record
 
 	chart_data = get_chart_data(emp_att_map, days)
@@ -120,7 +120,7 @@ def get_chart_data(emp_att_map, days):
 
 	return chart
 
-def add_data(employee_map, att_map, filters, holiday_map, conditions,leave_list=None):
+def add_data(employee_map, att_map, filters, holiday_map, conditions, default_holiday_list, leave_list=None):
 
 	record = []
 	emp_att_map = {}
