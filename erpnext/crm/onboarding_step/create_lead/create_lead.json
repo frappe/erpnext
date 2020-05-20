@@ -13,5 +13,7 @@
  "name": "Create Lead",
  "owner": "Administrator",
  "reference_document": "Lead",
- "title": "Create Lead"
+ "show_full_form": 0,
+ "title": "Create Lead",
+ "validate_action": 0
 }

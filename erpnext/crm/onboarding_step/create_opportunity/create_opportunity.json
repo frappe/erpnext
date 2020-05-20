@@ -13,5 +13,7 @@
  "name": "Create Opportunity",
  "owner": "Administrator",
  "reference_document": "Opportunity",
- "title": "Create Opportunity"
+ "show_full_form": 0,
+ "title": "Create Opportunity",
+ "validate_action": 0
 }

@@ -4,10 +4,10 @@
    "role": "Sales Master Manager"
   },
   {
-   "role": "Administrator"
+   "role": "Sales Manager"
   },
   {
-   "role": "Sales Manager"
+   "role": "Sales User"
   }
  ],
  "creation": "2020-05-09 23:42:50.901548",
@@ -16,7 +16,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/CRM",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-05-14 17:41:11.083917",
+ "modified": "2020-05-20 12:53:47.029412",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
@@ -24,9 +24,6 @@
  "steps": [
   {
    "step": "Introduction to CRM"
-  },
-  {
-   "step": "Start Campaign"
   },
   {
    "step": "Create Lead"
@@ -38,7 +35,7 @@
    "step": "Create and Send Quotation"
   }
  ],
- "subtitle": "Campaign, Lead, Opportunity, Customer and more",
+ "subtitle": "Lead, Opportunity, Customer and more",
  "success_message": "CRM Module is all setup!",
  "title": "Let's Setup Your CRM",
  "user_can_dismiss": 1

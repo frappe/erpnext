@@ -38,10 +38,11 @@
  "docstatus": 0,
  "doctype": "Desk Page",
  "extends_another_page": 0,
+ "hide_custom": 0,
  "idx": 0,
  "is_standard": 1,
  "label": "CRM",
- "modified": "2020-05-14 17:20:07.636751",
+ "modified": "2020-05-20 12:11:36.250491",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
@@ -73,6 +74,11 @@
    "label": "Sales Analytics",
    "link_to": "Sales Analytics",
    "type": "Report"
+  },
+  {
+   "label": "CRM Dashboard",
+   "link_to": "CRM",
+   "type": "Dashboard"
   }
  ]
 }
