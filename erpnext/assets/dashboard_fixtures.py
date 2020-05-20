@@ -3,7 +3,10 @@
 
 import frappe
 import json
-from frappe.utils import nowdate, add_months
+from frappe.utils import nowdate, add_months, get_date_str
+from frappe import _
+from erpnext.accounts.utils import get_fiscal_year
+
 
 def get_data():
 	return frappe._dict({
@@ -20,17 +23,25 @@ def get_dashboards():
 			{ "chart": "Asset Value Analytics", "width": "Full" },
             { "chart": "Category-wise Asset Value", "width": "Half" },
             { "chart": "Location-wise Asset Value", "width": "Half" },
-        ]
+        ],
+		"cards": [
+			{"card": "Total Assets"},
+			{"card": "New Assets (This Year)"},
+			{"card": "Asset Value"}
+		]
     }]
+
+fiscal_year = get_fiscal_year(date=nowdate())
+year_start_date = get_date_str(fiscal_year[1])
+year_end_date = get_date_str(fiscal_year[2])
+
 
 def get_charts():
 	company = get_company_for_dashboards()
-	fiscal_year = get_fiscal_year()
-
 	return [
 		{
 			"name": "Asset Value Analytics",
-			"chart_name": "Asset Value Analytics",
+			"chart_name": _("Asset Value Analytics"),
 			"chart_type": "Report",
 			"report_name": "Fixed Asset Register",
 			"is_custom": 1,
@@ -44,10 +55,10 @@ def get_charts():
 				"company": company,
 				"status": "In Location",
 				"filter_based_on": "Fiscal Year",
-				"from_fiscal_year": fiscal_year,
-				"to_fiscal_year": fiscal_year,
-				"period_start_date": add_months(nowdate(), -12),
-				"period_end_date": nowdate(),
+				"from_fiscal_year": fiscal_year[0],
+				"to_fiscal_year": fiscal_year[0],
+				"period_start_date": year_start_date,
+				"period_end_date": year_end_date,
 				"date_based_on": "Purchase Date",
 				"group_by": "--Select a group--"
 			}),
@@ -63,7 +74,7 @@ def get_charts():
 		},
 		{
 			"name": "Category-wise Asset Value",
-			"chart_name": "Category-wise Asset Value",
+			"chart_name": _("Category-wise Asset Value"),
 			"chart_type": "Report",
 			"report_name": "Fixed Asset Register",
 			"x_field": "asset_category",
@@ -126,8 +137,32 @@ def get_charts():
 def get_number_cards():
 	return [
 		{
+			"name": "Total Assets",
+			"label": _("Total Assets"),
+			"function": "Count",
+			"document_type": "Asset",
+			"is_public": 1,
+			"show_percentage_stats": 1,
+			"stats_time_interval": "Monthly",
+			"filters_json": "[]",
+			"doctype": "Number Card",
+		},
+		{
+			"name": "New Assets (This Year)",
+			"label": _("New Assets (This Year)"),
+			"function": "Count",
+			"document_type": "Asset",
+			"is_public": 1,
+			"show_percentage_stats": 1,
+			"stats_time_interval": "Monthly",
+			"filters_json": json.dumps([
+				['Asset', 'creation', 'between', [year_start_date, year_end_date]]
+			]),
+			"doctype": "Number Card",
+		},
+		{
 			"name": "Asset Value",
-			"label": "Asset Value",
+			"label": _("Asset Value"),
 			"function": "Sum",
 			"aggregate_function_based_on": "value_after_depreciation",
 			"document_type": "Asset",
@@ -135,7 +170,7 @@ def get_number_cards():
 			"show_percentage_stats": 1,
 			"stats_time_interval": "Monthly",
 			"filters_json": "[]",
-			"doctype": "Number Card",
+			"doctype": "Number Card"
 		}
 	]
 
@@ -147,14 +182,4 @@ def get_company_for_dashboards():
 		company_list = frappe.get_list("Company")
 		if company_list:
 			return company_list[0].name
-	return None
-
-def get_fiscal_year():
-	fiscal_year = frappe.defaults.get_defaults().fiscal_year
-	if fiscal_year:
-		return fiscal_year
-	else:
-		fiscal_year_list = frappe.get_list("Fiscal Year")
-		if fiscal_year_list:
-			return fiscal_year_list[0].name
 	return None
