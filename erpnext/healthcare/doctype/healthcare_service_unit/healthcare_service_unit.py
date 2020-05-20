@@ -22,7 +22,7 @@ class HealthcareServiceUnit(NestedSet):
 		super(HealthcareServiceUnit, self).on_update()
 		self.validate_one_root()
 
-	def validate(self):
+	def after_insert(self):
 		if self.is_group:
 			self.allow_appointments = 0
 			self.overlap_appointments = 0

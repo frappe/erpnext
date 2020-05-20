@@ -26,12 +26,9 @@ class InpatientRecord(Document):
 			frappe.db.set_value("Patient", self.patient, "inpatient_record", None)
 
 	def validate_dates(self):
-		if (getdate(self.scheduled_date) < getdate(today())) or \
-			(getdate(self.admitted_datetime) < getdate(today())):
-				frappe.throw(_("Scheduled and Admitted dates can not be less than today"))
 		if (getdate(self.expected_discharge) < getdate(self.scheduled_date)) or \
 			(getdate(self.discharge_ordered_date) < getdate(self.scheduled_date)):
-			frappe.throw(_("Expected and Discharge dates cannot be less than Admission Schedule date"))
+			frappe.throw(_('Expected and Discharge dates cannot be less than Admission Schedule date'))
 	
 	def validate_already_scheduled_or_admitted(self):
 		query = """
