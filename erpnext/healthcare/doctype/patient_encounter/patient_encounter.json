@@ -52,6 +52,7 @@
  ],
  "fields": [
   {
+   "allow_on_submit": 1,
    "fieldname": "inpatient_record",
    "fieldtype": "Link",
    "label": "Inpatient Record",
@@ -296,6 +297,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "inpatient_status",
    "fieldtype": "Data",
    "label": "Inpatient Status",
@@ -326,7 +328,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-27 21:58:29.789797",
+ "modified": "2020-05-16 21:00:08.644531",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",
