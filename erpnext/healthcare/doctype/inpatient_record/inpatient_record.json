@@ -229,7 +229,8 @@
    "fieldname": "chief_complaint",
    "fieldtype": "Table MultiSelect",
    "label": "Chief Complaint",
-   "options": "Patient Encounter Symptom"
+   "options": "Patient Encounter Symptom",
+   "permlevel": 1
   },
   {
    "fieldname": "admission_instruction",
@@ -259,34 +260,40 @@
    "collapsible": 1,
    "fieldname": "medication_section",
    "fieldtype": "Section Break",
-   "label": "Medications"
+   "label": "Medications",
+   "permlevel": 1
   },
   {
    "fieldname": "drug_prescription",
    "fieldtype": "Table",
-   "options": "Drug Prescription"
+   "options": "Drug Prescription",
+   "permlevel": 1
   },
   {
    "collapsible": 1,
    "fieldname": "investigations_section",
    "fieldtype": "Section Break",
-   "label": "Investigations"
+   "label": "Investigations",
+   "permlevel": 1
   },
   {
    "fieldname": "lab_test_prescription",
    "fieldtype": "Table",
-   "options": "Lab Prescription"
+   "options": "Lab Prescription",
+   "permlevel": 1
   },
   {
    "collapsible": 1,
    "fieldname": "procedures_section",
    "fieldtype": "Section Break",
-   "label": "Procedures"
+   "label": "Procedures",
+   "permlevel": 1
   },
   {
    "fieldname": "procedure_prescription",
    "fieldtype": "Table",
-   "options": "Procedure Prescription"
+   "options": "Procedure Prescription",
+   "permlevel": 1
   },
   {
    "depends_on": "eval:(doc.status != \"Admission Scheduled\")",
@@ -320,7 +327,8 @@
   },
   {
    "fieldname": "discharge_note",
-   "fieldtype": "Text Editor"
+   "fieldtype": "Text Editor",
+   "permlevel": 1
   },
   {
    "fetch_from": "admission_encounter.company",
@@ -335,7 +343,8 @@
    "collapsible_depends_on": "eval:(doc.status == \"Admitted\")",
    "fieldname": "encounter_details_section",
    "fieldtype": "Section Break",
-   "label": "Encounter Impression"
+   "label": "Encounter Impression",
+   "permlevel": 1
   },
   {
    "fieldname": "column_break_29",
@@ -345,7 +354,8 @@
    "fieldname": "diagnosis",
    "fieldtype": "Table MultiSelect",
    "label": "Diagnosis",
-   "options": "Patient Encounter Diagnosis"
+   "options": "Patient Encounter Diagnosis",
+   "permlevel": 1
   },
   {
    "fieldname": "followup_date",
@@ -375,7 +385,8 @@
    "collapsible": 1,
    "fieldname": "rehabilitation_section",
    "fieldtype": "Section Break",
-   "label": "Rehabilitation"
+   "label": "Rehabilitation",
+   "permlevel": 1
   },
   {
    "fieldname": "therapy_plan",
@@ -383,12 +394,14 @@
    "hidden": 1,
    "label": "Therapy Plan",
    "options": "Therapy Plan",
+   "permlevel": 1,
    "read_only": 1
   },
   {
    "fieldname": "therapies",
    "fieldtype": "Table",
-   "options": "Therapy Plan Detail"
+   "options": "Therapy Plan Detail",
+   "permlevel": 1
   },
   {
    "fieldname": "discharge_date",
@@ -398,7 +411,7 @@
   }
  ],
  "links": [],
- "modified": "2020-05-21 00:37:12.939925",
+ "modified": "2020-05-21 02:26:22.144575",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Record",
@@ -415,6 +428,42 @@
    "role": "Healthcare Administrator",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Physician",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Nursing User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Physician",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Nursing User"
   }
  ],
  "restrict_to_domain": "Healthcare",
