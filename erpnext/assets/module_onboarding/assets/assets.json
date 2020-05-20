@@ -26,10 +26,13 @@
    "step": "Create a Fixed Asset Item"
   },
   {
-   "step": "Purchase the Asset Item"
+   "step": "Create an Asset Category"
+  }, 
+  {
+   "step": "Purchase an Asset Item"
   },
   {
-   "step": "Create the Asset"
+   "step": "Create an Asset"
   }
  ],
  "subtitle": "Assets, Depreciations, Repairs and more",

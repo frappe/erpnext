@@ -29,10 +29,11 @@
  "docstatus": 0,
  "doctype": "Desk Page",
  "extends_another_page": 0,
+ "hide_custom": 0,
  "idx": 0,
  "is_standard": 1,
  "label": "Assets",
- "modified": "2020-05-12 17:35:14.770662",
+ "modified": "2020-05-20 18:05:23.994795",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Assets",
@@ -55,6 +56,11 @@
    "label": "Fixed Asset Register",
    "link_to": "Fixed Asset Register",
    "type": "Report"
+  },
+  {
+   "label": "Assets Dashboard",
+   "link_to": "Asset",
+   "type": "Dashboard"
   }
  ]
 }
