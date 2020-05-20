@@ -21,12 +21,17 @@ class PatientAppointment(Document):
 		self.set_appointment_datetime()
 		self.validate_customer_created()
 		self.set_status()
+		self.set_title()
 
 	def after_insert(self):
 		self.update_prescription_details()
 		invoice_appointment(self)
 		self.update_fee_validity()
 		send_confirmation_msg(self)
+
+	def set_title(self):
+		self.title = _('{0} with {1}').format(self.patient_name or self.patient,
+			self.practitioner_name or self.practitioner)
 
 	def set_status(self):
 		today = getdate()
@@ -119,25 +124,28 @@ def invoice_appointment(appointment_doc):
 
 	if automate_invoicing and not appointment_invoiced and not fee_validity:
 		sales_invoice = frappe.new_doc('Sales Invoice')
+		sales_invoice.patient = appointment_doc.patient
 		sales_invoice.customer = frappe.get_value('Patient', appointment_doc.patient, 'customer')
 		sales_invoice.appointment = appointment_doc.name
 		sales_invoice.due_date = getdate()
-		sales_invoice.is_pos = 1
 		sales_invoice.company = appointment_doc.company
 		sales_invoice.debit_to = get_receivable_account(appointment_doc.company)
 
 		item = sales_invoice.append('items', {})
 		item = get_appointment_item(appointment_doc, item)
 
-		payment = sales_invoice.append('payments', {})
-		payment.mode_of_payment = appointment_doc.mode_of_payment
-		payment.amount = appointment_doc.paid_amount
+		# Add payments if payment details are supplied else proceed to create invoice as Unpaid
+		if appointment_doc.mode_of_payment and appointment_doc.paid_amount:
+			sales_invoice.is_pos = 1
+			payment = sales_invoice.append('payments', {})
+			payment.mode_of_payment = appointment_doc.mode_of_payment
+			payment.amount = appointment_doc.paid_amount
 
 		sales_invoice.set_missing_values(for_validate=True)
 		sales_invoice.flags.ignore_mandatory = True
 		sales_invoice.save(ignore_permissions=True)
 		sales_invoice.submit()
-		frappe.msgprint(_('Sales Invoice {0} created as paid'.format(sales_invoice.name)), alert=True)
+		frappe.msgprint(_('Sales Invoice {0} created'.format(sales_invoice.name)), alert=True)
 		frappe.db.set_value('Patient Appointment', appointment_doc.name, 'invoiced', 1)
 		frappe.db.set_value('Patient Appointment', appointment_doc.name, 'ref_sales_invoice', sales_invoice.name)
 
@@ -325,7 +333,11 @@ def update_status(appointment_id, status):
 def send_confirmation_msg(doc):
 	if frappe.db.get_single_value('Healthcare Settings', 'send_appointment_confirmation'):
 		message = frappe.db.get_single_value('Healthcare Settings', 'appointment_confirmation_msg')
-		send_message(doc, message)
+		try:
+			send_message(doc, message)
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), _('Appointment Confirmation Message Not Sent'))
+			frappe.msgprint(_('Appointment Confirmation Message Not Sent'), indicator='orange')
 
 
 @frappe.whitelist()
@@ -339,8 +351,8 @@ def make_encounter(source_name, target_doc=None):
 				['practitioner', 'practitioner'],
 				['medical_department', 'department'],
 				['patient_sex', 'patient_sex'],
-				['encounter_date', 'appointment_date'],
-				['invoiced', 'invoiced']
+				['invoiced', 'invoiced'],
+				['company', 'company']
 			]
 		}
 	}, target_doc)
@@ -366,17 +378,19 @@ def send_appointment_reminder():
 			frappe.db.set_value('Patient Appointment', doc.name, 'reminded', 1)
 
 def send_message(doc, message):
-	patient = frappe.get_doc('Patient', doc.patient)
-	if patient.mobile:
+	patient_mobile = frappe.db.get_value('Patient', doc.patient, 'mobile')
+	if patient_mobile:
 		context = {'doc': doc, 'alert': doc, 'comments': None}
 		if doc.get('_comments'):
 			context['comments'] = json.loads(doc.get('_comments'))
 
 		# jinja to string convertion happens here
 		message = frappe.render_template(message, context)
-		number = [patient.mobile]
-		send_sms(number, message)
-
+		number = [patient_mobile]
+		try:
+			send_sms(number, message)
+		except Exception as e:
+			frappe.msgprint(_('SMS not sent, please check SMS Settings'), alert=True)
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):

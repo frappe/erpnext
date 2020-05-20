@@ -18,19 +18,7 @@ from erpnext.hr.doctype.employee_tax_exemption_declaration.test_employee_tax_exe
 
 class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
-		make_earning_salary_component(setup=True, company_list=["_Test Company"])
-		make_deduction_salary_component(setup=True, company_list=["_Test Company"])
-
-		for dt in ["Leave Application", "Leave Allocation", "Salary Slip", "Attendance"]:
-			frappe.db.sql("delete from `tab%s`" % dt)
-
-		self.make_holiday_list()
-
-		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Slip Test Holiday List")
-		frappe.db.set_value("HR Settings", None, "email_salary_slip_to_employee", 0)
-		frappe.db.set_value('HR Settings', None, 'leave_status_notification_template', None)
-		frappe.db.set_value('HR Settings', None, 'leave_approval_notification_template', None)
-		
+		setup_test()
 	def tearDown(self):
 		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
 		frappe.set_user("Administrator")
@@ -374,19 +362,6 @@ class TestSalarySlip(unittest.TestCase):
 		# undelete fixture data
 		frappe.db.rollback()
 
-	def make_holiday_list(self):
-		fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company())
-		if not frappe.db.get_value("Holiday List", "Salary Slip Test Holiday List"):
-			holiday_list = frappe.get_doc({
-				"doctype": "Holiday List",
-				"holiday_list_name": "Salary Slip Test Holiday List",
-				"from_date": fiscal_year[1],
-				"to_date": fiscal_year[2],
-				"weekly_off": "Sunday"
-			}).insert()
-			holiday_list.get_weekly_off_dates()
-			holiday_list.save()
-
 	def make_activity_for_employee(self):
 		activity_type = frappe.get_doc("Activity Type", "_Test Activity Type")
 		activity_type.billing_rate = 50
@@ -447,22 +422,32 @@ def get_salary_component_account(sal_comp, company_list=None):
 	sal_comp = frappe.get_doc("Salary Component", sal_comp)
 	if not sal_comp.get("accounts"):
 		for d in company_list:
+			company_abbr = frappe.get_cached_value('Company', d, 'abbr')
+
+			if sal_comp.type == "Earning":
+				account_name = "Salary"
+				parent_account = "Indirect Expenses - " + company_abbr
+			else:
+				account_name = "Salary Deductions"
+				parent_account = "Current Liabilities - " + company_abbr
+
 			sal_comp.append("accounts", {
 				"company": d,
-				"default_account": create_account(d)
+				"default_account": create_account(account_name, d, parent_account)
 			})
 			sal_comp.save()
 
-def create_account(company):
-	salary_account = frappe.db.get_value("Account", "Salary - " + frappe.get_cached_value('Company',  company,  'abbr'))
-	if not salary_account:
+def create_account(account_name, company, parent_account):
+	company_abbr = frappe.get_cached_value('Company',  company,  'abbr')
+	account = frappe.db.get_value("Account", account_name + " - " + company_abbr)
+	if not account:
 		frappe.get_doc({
 			"doctype": "Account",
-			"account_name": "Salary",
-			"parent_account": "Indirect Expenses - " + frappe.get_cached_value('Company',  company,  'abbr'),
+			"account_name": account_name,
+			"parent_account": parent_account,
 			"company": company
 		}).insert()
-	return salary_account
+	return account
 
 def make_earning_salary_component(setup=False, test_tax=False, company_list=None):
 	data = [
@@ -703,3 +688,30 @@ def make_leave_application(employee, from_date, to_date, leave_type, company=Non
 		leave_approver = 'test@example.com'
 	))
 	leave_application.submit()
+
+def setup_test():
+	make_earning_salary_component(setup=True, company_list=["_Test Company"])
+	make_deduction_salary_component(setup=True, company_list=["_Test Company"])
+
+	for dt in ["Leave Application", "Leave Allocation", "Salary Slip", "Attendance", "Additional Salary"]:
+		frappe.db.sql("delete from `tab%s`" % dt)
+
+	make_holiday_list()
+
+	frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Slip Test Holiday List")
+	frappe.db.set_value("HR Settings", None, "email_salary_slip_to_employee", 0)
+	frappe.db.set_value('HR Settings', None, 'leave_status_notification_template', None)
+	frappe.db.set_value('HR Settings', None, 'leave_approval_notification_template', None)
+
+def make_holiday_list():
+	fiscal_year = get_fiscal_year(nowdate(), company=erpnext.get_default_company())
+	if not frappe.db.get_value("Holiday List", "Salary Slip Test Holiday List"):
+		holiday_list = frappe.get_doc({
+			"doctype": "Holiday List",
+			"holiday_list_name": "Salary Slip Test Holiday List",
+			"from_date": fiscal_year[1],
+			"to_date": fiscal_year[2],
+			"weekly_off": "Sunday"
+		}).insert()
+		holiday_list.get_weekly_off_dates()
+		holiday_list.save()

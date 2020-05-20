@@ -250,7 +250,8 @@ doc_events = {
 	},
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
-		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information"
+		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information",
+		"validate": "erpnext.crm.utils.update_lead_phone_numbers"
 	},
 	"Lead": {
 		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information"
@@ -307,7 +308,8 @@ scheduler_events = {
 		"erpnext.crm.doctype.email_campaign.email_campaign.send_email_to_leads_or_contacts",
 		"erpnext.crm.doctype.email_campaign.email_campaign.set_email_campaign_status",
 		"erpnext.selling.doctype.quotation.quotation.set_expired_status",
-		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_appointment_status"
+		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_appointment_status",
+		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status"
 	],
 	"daily_long": [
 		"erpnext.setup.doctype.email_digest.email_digest.send",

@@ -17,18 +17,23 @@
   }
  ],
  "category": "Modules",
- "charts": [],
+ "charts": [
+  {
+   "chart_name": "Project Summary",
+   "label": "Open Projects"
+  }
+ ],
  "creation": "2020-03-02 15:46:04.874669",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Desk Page",
  "extends_another_page": 0,
- "icon": "",
+ "hide_custom": 0,
  "idx": 0,
  "is_standard": 1,
  "label": "Projects",
- "modified": "2020-04-01 11:28:51.245756",
+ "modified": "2020-05-19 21:09:52.031828",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects",
@@ -37,6 +42,7 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
+   "color": "#4d4da8",
    "format": "{} Assigned",
    "label": "Task",
    "link_to": "Task",
@@ -44,8 +50,11 @@
    "type": "DocType"
   },
   {
+   "color": "#4d4da8",
+   "format": "{} Open",
    "label": "Project",
    "link_to": "Project",
+   "stats_filter": "{\n    \"status\": \"Open\"\n}",
    "type": "DocType"
   },
   {
@@ -57,6 +66,11 @@
    "label": "Project Billing Summary",
    "link_to": "Project Billing Summary",
    "type": "Report"
+  },
+  {
+   "label": "Project Dashboard",
+   "link_to": "Project",
+   "type": "Dashboard"
   }
  ]
 }
