@@ -187,8 +187,8 @@ def get_pending_doc(doc, doc_name_list, pending_invoices):
 	return pending_invoices
 
 def get_inpatient_docs_not_invoiced(doc, inpatient_record):
-	return frappe.db.get_list(doc, filters = {"patient": inpatient_record.patient,
-					"inpatient_record": inpatient_record.name, "invoiced": 0})
+	return frappe.db.get_list(doc, filters = {'patient': inpatient_record.patient,
+					'inpatient_record': inpatient_record.name, 'docstatus': 1, 'invoiced': 0})
 
 def admit_patient(inpatient_record, service_unit, check_in, expected_discharge=None):
 	inpatient_record.admitted_datetime = check_in
