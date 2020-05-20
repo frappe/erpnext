@@ -13,5 +13,7 @@
  "name": "Create and Send Quotation",
  "owner": "Administrator",
  "reference_document": "Quotation",
- "title": "Create and Send Quotation"
+ "show_full_form": 0,
+ "title": "Create and Send Quotation",
+ "validate_action": 0
 }

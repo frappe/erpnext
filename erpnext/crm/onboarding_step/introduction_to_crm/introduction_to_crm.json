@@ -12,6 +12,8 @@
  "modified_by": "Administrator",
  "name": "Introduction to CRM",
  "owner": "Administrator",
+ "show_full_form": 0,
  "title": "Introduction to CRM",
+ "validate_action": 0,
  "video_url": "https://www.youtube.com/watch?v=o9XCSZHJfpA"
 }

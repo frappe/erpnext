@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe, erpnext, json
+from frappe import _
 
 def get_data():
 	return frappe._dict({
@@ -16,19 +17,19 @@ def get_dashboards():
             "name": "CRM",
             "dashboard_name": "CRM",
             "charts": [
-                { "chart": "Lead", "width": "Full" },
-                { "chart": "Opportunity", "width": "Full"},
-                { "chart": "Campaign", "width": "Half" },
-                { "chart": "Opportunities Won", "width": "Half" },
-                { "chart": "Territory Wise Opportunity", "width": "Half"},
+                { "chart": "Incoming Leads", "width": "Full" },
+                { "chart": "Opportunity Trends", "width": "Full"},
+                { "chart": "Won Opportunities", "width": "Full" },
+                { "chart": "Territory Wise Opportunity Count", "width": "Half"},
                 { "chart": "Territory Wise Sales", "width": "Half"},
-                { "chart": "Qualified For Call", "width": "Full"},
+                { "chart": "Opportunities via Campaigns", "width": "Half" },
                 { "chart": "Lead Source", "width": "Half"}
             ],
             "cards": [
-                { "card": "New Lead" },
-                { "card": "New Opportunity" },
-                { "card": "Won Opportunity" },
+                { "card": "New Lead (Last 1 Month)" },
+                { "card": "New Opportunity (Last 1 Month)" },
+                { "card": "Won Opportunity (Last 1 Month)" },
+                { "card": "Open Opportunity"},
             ]
         }]
 
@@ -46,11 +47,11 @@ def get_charts():
 	company = get_company_for_dashboards()
 
 	return [{
-        "name": "Lead",
+        "name": "Incoming Leads",
         "doctype": "Dashboard Chart",
         "time_interval": "Yearly",
         "chart_type": "Count",
-        "chart_name": "Lead",
+        "chart_name": _("Incoming Leads"),
         "timespan": "Last Quarter",
         "time_interval": "Weekly",
         "document_type": "Lead",
@@ -62,11 +63,11 @@ def get_charts():
         "type": "Bar"
     },
     {
-        "name": "Opportunity",
+        "name": "Opportunity Trends",
         "doctype": "Dashboard Chart",
         "time_interval": "Yearly",
         "chart_type": "Count",
-        "chart_name": "Opportunity",
+        "chart_name": _("Opportunity Trends"),
         "timespan": "Last Quarter",
         "time_interval": "Weekly",
         "document_type": "Opportunity",
@@ -78,28 +79,25 @@ def get_charts():
         "type": "Bar"
     },
     {
-        "name": "Campaign",
+        "name": "Opportunities via Campaigns",
+        "chart_name": _("Opportunities via Campaigns"),
         "doctype": "Dashboard Chart",
-        "time_interval": "Yearly",
-        "chart_type": "Count",
-        "chart_name": "Campaign",
-        "timespan": "Last Year",
-        "time_interval": "Monthly",
-        "document_type": "Campaign",
-        "based_on": "creation",
+        "chart_type": "Group By",
+        "group_by_type": "Count",
+        "group_by_based_on": "campaign",
+        "document_type": "Opportunity",
         'is_public': 1,
         'timeseries': 1,
         "owner": "Administrator",
         "filters_json": json.dumps([["Opportunity", "company", "=", company, False]]),
-        "type": "Line",
-        "color": "#428b46"
+        "type": "Pie"
     },
     {
-        "name": "Opportunities Won",
+        "name": "Won Opportunities",
         "doctype": "Dashboard Chart",
         "time_interval": "Yearly",
         "chart_type": "Count",
-        "chart_name": "Opportunities Won",
+        "chart_name": _("Won Opportunities"),
         "timespan": "Last Year",
         "time_interval": "Monthly",
         "document_type": "Opportunity",
@@ -107,20 +105,25 @@ def get_charts():
         'is_public': 1,
         'timeseries': 1,
         "owner": "Administrator",
-        "filters_json": json.dumps([["Opportunity", "company", "=", company, False],["Opportunity", "sales_stage", "=", "Converted", False]]),
+        "filters_json": json.dumps([
+            ["Opportunity", "company", "=", company, False],
+            ["Opportunity", "status", "=", "Converted", False]]),
         "type": "Bar"
     },
     {
-        "name": "Territory Wise Opportunity",
+        "name": "Territory Wise Opportunity Count",
         "doctype": "Dashboard Chart",
         "chart_type": "Group By",
         "group_by_type": "Count",
         "group_by_based_on": "territory",
-        "chart_name": "Territory Wise Opportunity",
+        "chart_name": _("Territory Wise Opportunity Count"),
         "document_type": "Opportunity",
         'is_public': 1,
+        "filters_json": json.dumps([
+            ["Opportunity", "company", "=", company, False]
+        ]),
         "owner": "Administrator",
-        "type": "Line"
+        "type": "Donut"
     },
     {
         "name": "Territory Wise Sales",
@@ -128,31 +131,16 @@ def get_charts():
         "chart_type": "Group By",
         "group_by_type": "Sum",
         "group_by_based_on": "territory",
-        "chart_name": "Territory Wise Sales",
+        "chart_name": _("Territory Wise Sales"),
         "aggregate_function_based_on": "opportunity_amount",
         "document_type": "Opportunity",
         'is_public': 1,
         "owner": "Administrator",
-        "filters_json": json.dumps([["Opportunity", "company", "=", company, False],["Opportunity", "sales_stage", "=", "Converted", False]]),
-        "type": "Bar",
-        "color": "#7575ff"
-    },
-    {
-        "name": "Qualified For Call",
-        "doctype": "Dashboard Chart",
-        "time_interval": "Yearly",
-        "chart_type": "Count",
-        "chart_name": "Qualified For Call",
-        "timespan": "Last Quarter",
-        "time_interval": "Weekly",
-        "document_type": "Opportunity",
-        "based_on": "modified",
-        'is_public': 1,
-        'timeseries': 1,
-        "owner": "Administrator",
-        "filters_json": json.dumps([["Opportunity", "company", "=", company, False],["Opportunity", "sales_stage", "=", "Qualification", False]]),
-        "type": "Line",
-        "color": "#fff168"
+        "filters_json": json.dumps([
+            ["Opportunity", "company", "=", company, False],
+            ["Opportunity", "status", "=", "Converted", False]
+        ]),
+        "type": "Donut"
     },
     {
         "name": "Lead Source",
@@ -160,44 +148,55 @@ def get_charts():
         "chart_type": "Group By",
         "group_by_type": "Count",
         "group_by_based_on": "source",
-        "chart_name": "Lead Source",
+        "chart_name": _("Lead Source"),
         "document_type": "Lead",
         'is_public': 1,
         "owner": "Administrator",
-        "type": "Donut"
+        "type": "Pie"
     }]
 
 def get_number_cards():
 	return [{
         "doctype": "Number Card",
         "document_type": "Lead",
-        "name": "New Lead",
-        "filters_json": json.dumps([["Lead","status","=","Lead",False]]),
+        "name": "New Lead (Last 1 Month)",
+        "filters_json": json.dumps([["Lead","creation","Previous","1 month",False]]),
         "function": "Count",
         "is_public": 1,
-        "label": "New Lead",
+        "label": _("New Lead (Last 1 Month)"),
         "show_percentage_stats": 1,
         "stats_time_interval": "Daily"
     },
     {
         "doctype": "Number Card",
         "document_type": "Opportunity",
-        "name": "New Opportunity",
+        "name": "New Opportunity (Last 1 Month)",
+        "filters_json": json.dumps([["Opportunity","creation","Previous","1 month",False]]),
+        "function": "Count",
+        "is_public": 1,
+        "label": _("New Opportunity (Last 1 Month)"),
+        "show_percentage_stats": 1,
+        "stats_time_interval": "Daily"
+    },
+    {
+        "doctype": "Number Card",
+        "document_type": "Opportunity",
+        "name": "Won Opportunity (Last 1 Month)",
+        "filters_json": json.dumps([["Opportunity","creation","Previous","1 month",False]]),
+        "function": "Count",
+        "is_public": 1,
+        "label": _("Won Opportunity (Last 1 Month)"),
+        "show_percentage_stats": 1,
+        "stats_time_interval": "Daily"
+    },
+    {
+        "doctype": "Number Card",
+        "document_type": "Opportunity",
+        "name": "Open Opportunity",
         "filters_json": json.dumps([["Opportunity","status","=","Open",False]]),
         "function": "Count",
         "is_public": 1,
-        "label": "New Opportunity",
-        "show_percentage_stats": 1,
-        "stats_time_interval": "Daily"
-    },
-    {
-        "doctype": "Number Card",
-        "document_type": "Opportunity",
-        "name": "Won Opportunity",
-        "filters_json": json.dumps([["Opportunity","status","=","Converted",False]]),
-        "function": "Count",
-        "is_public": 1,
-        "label": "Won Opportunity",
+        "label": _("Open Opportunity"),
         "show_percentage_stats": 1,
         "stats_time_interval": "Daily"
     }] 
