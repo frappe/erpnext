@@ -10,20 +10,20 @@ def execute():
 
     # update for selling
     frappe.db.sql(
-        """UPDATE `tabItem Price`
-        SET `reference` = `customer`, `supplier` = NULL
-        WHERE `selling` = 1
-        AND `buying` = 0
-        AND (`supplier` IS NOT NULL OR `supplier` = '')
-        AND `price_list` = `tabPrice List`.`name`
-        AND `tabPrice List`.`enabled` = 1""")
+        """UPDATE `tabItem Price` ip, `tabPrice List` pl
+        SET ip.`reference` = ip.`customer`, ip.`supplier` = NULL
+        WHERE ip.`selling` = 1
+        AND ip.`buying` = 0
+        AND (ip.`supplier` IS NOT NULL OR ip.`supplier` = '')
+        AND ip.`price_list` = pl.`name`
+        AND pl.`enabled` = 1""")
 
     # update for buying
     frappe.db.sql(
-        """UPDATE `tabItem Price`
-        SET `reference` = `supplier`, `customer` = NULL
-        WHERE `selling` = 0
-        AND `buying` = 1
-        AND (`supplier` IS NOT NULL OR `supplier` = '')
-        AND `price_list` = `tabPrice List`.`name`
-        AND `tabPrice List`.`enabled` = 1""")
+        """UPDATE `tabItem Price` ip, `tabPrice List` pl
+        SET ip.`reference` = ip.`supplier`, ip.`customer` = NULL
+        WHERE ip.`selling` = 0
+        AND ip.`buying` = 1
+        AND (ip.`customer` IS NOT NULL OR ip.`customer` = '')
+        AND ip.`price_list` = pl.`name`
+        AND pl.`enabled` = 1""")
