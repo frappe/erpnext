@@ -189,7 +189,7 @@
    "fieldname": "category",
    "fieldtype": "Select",
    "label": "Consider Tax or Charge for",
-   "options": "Valuation and Total\nValuation\nTotal",
+   "options": "Total",
    "reqd": 1
   },
   {
@@ -203,7 +203,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-05-06 05:29:01.321515",
+ "modified": "2020-05-19 03:31:26.950640",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Taxes and Charges",
