@@ -29,7 +29,7 @@ class InpatientRecord(Document):
 		if (getdate(self.expected_discharge) < getdate(self.scheduled_date)) or \
 			(getdate(self.discharge_ordered_date) < getdate(self.scheduled_date)):
 			frappe.throw(_('Expected and Discharge dates cannot be less than Admission Schedule date'))
-	
+
 	def validate_already_scheduled_or_admitted(self):
 		query = """
 			select name, status
@@ -168,7 +168,7 @@ def validate_invoiced_inpatient(inpatient_record):
 
 	if pending_invoices:
 		frappe.throw(_("Can not mark Inpatient Record Discharged, there are Unbilled Invoices {0}").format(", "
-			.join(pending_invoices)))
+			.join(pending_invoices)), title=_('Unbilled Invoices'))
 
 def get_pending_doc(doc, doc_name_list, pending_invoices):
 	if doc_name_list:
