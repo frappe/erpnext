@@ -215,7 +215,7 @@ var schedule_inpatient = function(frm) {
 					args: args
 				},
 				callback: function(data) {
-					if(!data.exc){
+					if (!data.exc) {
 						frm.reload_doc();
 					}
 				},
