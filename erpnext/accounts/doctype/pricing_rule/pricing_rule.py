@@ -103,7 +103,7 @@ class PricingRule(Document):
 				self.same_item = 1
 
 	def validate_max_discount(self):
-		if self.rate_or_discount == "Discount Percentage" and self.items:
+		if self.rate_or_discount == "Discount Percentage" and self.get("items"):
 			for d in self.items:
 				max_discount = frappe.get_cached_value("Item", d.item_code, "max_discount")
 				if max_discount and flt(self.discount_percentage) > flt(max_discount):
@@ -241,6 +241,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 			if pricing_rule.mixed_conditions or pricing_rule.apply_rule_on_other:
 				item_details.update({
 					'apply_rule_on_other_items': json.dumps(pricing_rule.apply_rule_on_other_items),
+					'price_or_product_discount': pricing_rule.price_or_product_discount,
 					'apply_rule_on': (frappe.scrub(pricing_rule.apply_rule_on_other)
 						if pricing_rule.apply_rule_on_other else frappe.scrub(pricing_rule.get('apply_on')))
 				})

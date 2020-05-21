@@ -24,10 +24,10 @@
   "return_against",
   "customer_po_details",
   "po_no",
-  "section_break_18",
-  "pick_list",
   "column_break_17",
   "po_date",
+  "section_break_18",
+  "pick_list",
   "contact_info",
   "shipping_address_name",
   "shipping_address",
@@ -66,9 +66,9 @@
   "base_total",
   "base_net_total",
   "column_break_33",
+  "total_net_weight",
   "total",
   "net_total",
-  "total_net_weight",
   "taxes_section",
   "tax_category",
   "column_break_39",
@@ -294,7 +294,6 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "po_no",
    "fieldname": "customer_po_details",
    "fieldtype": "Section Break",
    "label": "Customer PO Details"
@@ -302,7 +301,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "po_no",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "Customer's Purchase Order No",
    "no_copy": 1,
    "oldfieldname": "po_no",
@@ -316,7 +315,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.po_no",
    "fieldname": "po_date",
    "fieldtype": "Date",
    "label": "Customer's Purchase Order Date",
@@ -324,7 +322,6 @@
    "oldfieldtype": "Data",
    "print_hide": 1,
    "print_width": "100px",
-   "read_only": 1,
    "width": "100px"
   },
   {
@@ -1240,7 +1237,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-30 19:17:13.122644",
+ "modified": "2020-05-19 17:03:45.880106",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

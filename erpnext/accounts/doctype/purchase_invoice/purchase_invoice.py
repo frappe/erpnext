@@ -452,7 +452,7 @@ class PurchaseInvoice(BuyingController):
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
 					"cost_center": self.cost_center
-				}, self.party_account_currency)
+				}, self.party_account_currency, item=self)
 			)
 
 	def make_item_gl_entries(self, gl_entries):
@@ -802,7 +802,7 @@ class PurchaseInvoice(BuyingController):
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
 					"cost_center": self.cost_center
-				}, self.party_account_currency)
+				}, self.party_account_currency, item=self)
 			)
 
 			gl_entries.append(
@@ -813,7 +813,7 @@ class PurchaseInvoice(BuyingController):
 					"credit_in_account_currency": self.base_paid_amount \
 						if bank_account_currency==self.company_currency else self.paid_amount,
 					"cost_center": self.cost_center
-				}, bank_account_currency)
+				}, bank_account_currency, item=self)
 			)
 
 	def make_write_off_gl_entry(self, gl_entries):
@@ -834,7 +834,7 @@ class PurchaseInvoice(BuyingController):
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
 					"cost_center": self.cost_center
-				}, self.party_account_currency)
+				}, self.party_account_currency, item=self)
 			)
 			gl_entries.append(
 				self.get_gl_dict({
@@ -844,7 +844,7 @@ class PurchaseInvoice(BuyingController):
 					"credit_in_account_currency": self.base_write_off_amount \
 						if write_off_account_currency==self.company_currency else self.write_off_amount,
 					"cost_center": self.cost_center or self.write_off_cost_center
-				})
+				}, item=self)
 			)
 
 	def make_gle_for_rounding_adjustment(self, gl_entries):
@@ -863,8 +863,7 @@ class PurchaseInvoice(BuyingController):
 					"debit_in_account_currency": self.rounding_adjustment,
 					"debit": self.base_rounding_adjustment,
 					"cost_center": self.cost_center or round_off_cost_center,
-				}
-			))
+				}, item=self))
 
 	def on_cancel(self):
 		super(PurchaseInvoice, self).on_cancel()
@@ -959,7 +958,7 @@ class PurchaseInvoice(BuyingController):
 		if not self.apply_tds:
 			return
 
-		tax_withholding_details = get_party_tax_withholding_details(self)
+		tax_withholding_details = get_party_tax_withholding_details(self, self.tax_withholding_category)
 
 		if not tax_withholding_details:
 			return
@@ -981,6 +980,40 @@ class PurchaseInvoice(BuyingController):
 
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
+	
+	def set_status(self, update=False, status=None, update_modified=True):
+		if self.is_new():
+			if self.get('amended_from'):
+				self.status = 'Draft'
+			return
+
+		precision = self.precision("outstanding_amount")
+		outstanding_amount = flt(self.outstanding_amount, precision)
+		due_date = getdate(self.due_date)
+		nowdate = getdate()
+
+		if not status:
+			if self.docstatus == 2:
+				status = "Cancelled"
+			elif self.docstatus == 1:
+				if outstanding_amount > 0 and due_date < nowdate:
+					self.status = "Overdue"
+				elif outstanding_amount > 0 and due_date >= nowdate:
+					self.status = "Unpaid"
+				#Check if outstanding amount is 0 due to debit note issued against invoice
+				elif outstanding_amount <= 0 and self.is_return == 0 and frappe.db.get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+					self.status = "Debit Note Issued"
+				elif self.is_return == 1:
+					self.status = "Return"
+				elif outstanding_amount<=0:
+					self.status = "Paid"
+				else:
+					self.status = "Submitted"
+			else:
+				self.status = "Draft"
+
+		if update:
+			self.db_set('status', self.status, update_modified = update_modified)
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

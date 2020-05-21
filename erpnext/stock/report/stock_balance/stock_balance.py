@@ -94,8 +94,6 @@ def get_columns(filters):
 		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 100},
 		{"label": _("Item Name"), "fieldname": "item_name", "width": 150},
 		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
-		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 90},
-		{"label": _("Description"), "fieldname": "description", "width": 140},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
 		{"label": _("Stock UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 90},
 		{"label": _("Balance Qty"), "fieldname": "bal_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
@@ -131,6 +129,9 @@ def get_conditions(filters):
 		conditions += " and sle.posting_date <= %s" % frappe.db.escape(filters.get("to_date"))
 	else:
 		frappe.throw(_("'To Date' is required"))
+
+	if filters.get("company"):
+		conditions += " and sle.company = %s" % frappe.db.escape(filters.get("company"))
 
 	if filters.get("warehouse"):
 		warehouse_details = frappe.db.get_value("Warehouse",
@@ -170,6 +171,8 @@ def get_item_warehouse_map(filters, sle):
 	from_date = getdate(filters.get("from_date"))
 	to_date = getdate(filters.get("to_date"))
 
+	float_precision = cint(frappe.db.get_default("float_precision")) or 3
+
 	for d in sle:
 		key = (d.company, d.item_code, d.warehouse)
 		if key not in iwb_map:
@@ -184,7 +187,7 @@ def get_item_warehouse_map(filters, sle):
 		qty_dict = iwb_map[(d.company, d.item_code, d.warehouse)]
 
 		if d.voucher_type == "Stock Reconciliation":
-			qty_diff = flt(d.qty_after_transaction) - qty_dict.bal_qty
+			qty_diff = flt(d.qty_after_transaction) - flt(qty_dict.bal_qty)
 		else:
 			qty_diff = flt(d.actual_qty)
 
@@ -195,7 +198,7 @@ def get_item_warehouse_map(filters, sle):
 			qty_dict.opening_val += value_diff
 
 		elif d.posting_date >= from_date and d.posting_date <= to_date:
-			if qty_diff > 0:
+			if flt(qty_diff, float_precision) >= 0:
 				qty_dict.in_qty += qty_diff
 				qty_dict.in_val += value_diff
 			else:
@@ -206,16 +209,15 @@ def get_item_warehouse_map(filters, sle):
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
 
-	iwb_map = filter_items_with_no_transactions(iwb_map)
+	iwb_map = filter_items_with_no_transactions(iwb_map, float_precision)
 
 	return iwb_map
 
-def filter_items_with_no_transactions(iwb_map):
+def filter_items_with_no_transactions(iwb_map, float_precision):
 	for (company, item, warehouse) in sorted(iwb_map):
 		qty_dict = iwb_map[(company, item, warehouse)]
 
 		no_transactions = True
-		float_precision = cint(frappe.db.get_default("float_precision")) or 3
 		for key, val in iteritems(qty_dict):
 			val = flt(val, float_precision)
 			qty_dict[key] = val
@@ -232,8 +234,6 @@ def get_items(filters):
 	if filters.get("item_code"):
 		conditions.append("item.name=%(item_code)s")
 	else:
-		if filters.get("brand"):
-			conditions.append("item.brand=%(brand)s")
 		if filters.get("item_group"):
 			conditions.append(get_item_group_condition(filters.get("item_group")))
 

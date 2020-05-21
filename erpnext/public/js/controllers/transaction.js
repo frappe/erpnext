@@ -175,6 +175,20 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			};
 		}
 
+		if (this.frm.fields_dict["items"].grid.get_field('blanket_order')) {
+			this.frm.set_query("blanket_order", "items", function(doc, cdt, cdn) {
+				var item = locals[cdt][cdn];
+				return {
+					query: "erpnext.controllers.queries.get_blanket_orders",
+					filters: {
+						"company": doc.company,
+						"blanket_order_type": doc.doctype === "Sales Order" ? "Selling" : "Purchasing",
+						"item": item.item_code
+					}
+				}
+			});
+		}
+
 	},
 	onload: function() {
 		var me = this;
@@ -499,7 +513,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							conversion_factor: item.conversion_factor,
 							weight_per_unit: item.weight_per_unit,
 							weight_uom: item.weight_uom,
-							uom : item.uom,
 							manufacturer: item.manufacturer,
 							stock_uom: item.stock_uom,
 							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
@@ -1375,7 +1388,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				me.frm.doc.items.forEach(d => {
 					if (in_list(data.apply_rule_on_other_items, d[data.apply_rule_on])) {
 						for(var k in data) {
-							if (in_list(fields, k) && data[k]) {
+							if (in_list(fields, k) && data[k] && (data.price_or_product_discount === 'price' || k === 'pricing_rules')) {
 								frappe.model.set_value(d.doctype, d.name, k, data[k]);
 							}
 						}
@@ -1396,6 +1409,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			for (let key in free_item_data) {
 				row_to_modify[key] = free_item_data[key];
 			}
+		} if (items && items.length && free_item_data) {
+			items[0].qty = free_item_data.qty
 		}
 	},
 
@@ -1842,21 +1857,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	set_reserve_warehouse: function() {
-		this.autofill_warehouse("reserve_warehouse");
+		this.autofill_warehouse(this.frm.doc.supplied_items, "reserve_warehouse", this.frm.doc.set_reserve_warehouse);
 	},
 
 	set_warehouse: function() {
-		this.autofill_warehouse("warehouse");
+		this.autofill_warehouse(this.frm.doc.items, "warehouse", this.frm.doc.set_warehouse);
 	},
 
-	autofill_warehouse : function (warehouse_field) {
-		// set warehouse in all child table rows
-		var me = this;
-		let warehouse = (warehouse_field === "warehouse") ? me.frm.doc.set_warehouse : me.frm.doc.set_reserve_warehouse;
-		let child_table = (warehouse_field === "warehouse") ? me.frm.doc.items : me.frm.doc.supplied_items;
-		let doctype = (warehouse_field === "warehouse") ? (me.frm.doctype + " Item") : (me.frm.doctype + " Item Supplied");
-
-		if(warehouse) {
+	autofill_warehouse : function (child_table, warehouse_field, warehouse) {
+		if (warehouse && child_table && child_table.length) {
+			let doctype = child_table[0].doctype;
 			$.each(child_table || [], function(i, item) {
 				frappe.model.set_value(doctype, item.name, warehouse_field, warehouse);
 			});

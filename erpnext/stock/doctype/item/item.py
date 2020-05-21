@@ -467,7 +467,7 @@ class Item(WebsiteGenerator):
 
 	def set_shopping_cart_data(self, context):
 		from erpnext.shopping_cart.product_info import get_product_info_for_website
-		context.shopping_cart = get_product_info_for_website(self.name)
+		context.shopping_cart = get_product_info_for_website(self.name, skip_quotation_creation=True)
 
 	def add_default_uom_in_conversion_factor_table(self):
 		uom_conv_list = [d.uom for d in self.get("uoms")]
@@ -571,6 +571,13 @@ class Item(WebsiteGenerator):
 						if not ean.is_valid(item_barcode.barcode):
 							frappe.throw(_("Barcode {0} is not a valid {1} code").format(
 								item_barcode.barcode, item_barcode.barcode_type), InvalidBarcode)
+
+					if item_barcode.barcode != item_barcode.name:
+						# if barcode is getting updated , the row name has to reset.
+						# Delete previous old row doc and re-enter row as if new to reset name in db.
+						item_barcode.set("__islocal", True)
+						item_barcode.name = None
+						frappe.delete_doc("Item Barcode", item_barcode.name)
 
 	def validate_warehouse_for_reorder(self):
 		'''Validate Reorder level table for duplicate and conditional mandatory'''
