@@ -20,7 +20,7 @@ def execute():
 
     # update for buying
     frappe.db.sql(
-        """UPDATE `tabItem Price``
+        """UPDATE `tabItem Price`
         SET `reference` = `supplier`, `customer` = NULL
         WHERE `selling` = 0
         AND `buying` = 1
