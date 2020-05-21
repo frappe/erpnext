@@ -58,7 +58,7 @@ class ImportSupplierInvoice(Document):
 				"naming_series": self.invoice_series,
 				"document_type": line.TipoDocumento.text,
 				"bill_date": get_datetime_str(line.Data.text),
-				"invoice_no": line.Numero.text,
+				"bill_no": line.Numero.text,
 				"total_discount": 0,
 				"items": [],
 				"buying_price_list": self.default_buying_price_list
@@ -249,7 +249,7 @@ def create_supplier(supplier_group, args):
 
 		return existing_supplier_name
 	else:
-		
+
 		new_supplier = frappe.new_doc("Supplier")
 		new_supplier.supplier_name = re.sub('&amp', '&', args.supplier)
 		new_supplier.supplier_group = supplier_group
