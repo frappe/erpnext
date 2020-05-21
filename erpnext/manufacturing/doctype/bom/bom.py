@@ -3,13 +3,16 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import cint, cstr, flt
+from frappe.utils import cint, cstr, flt, today
 from frappe import _
 from erpnext.setup.utils import get_exchange_rate
 from frappe.website.website_generator import WebsiteGenerator
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.get_item_details import get_price_list_rate
 from frappe.core.doctype.version.version import get_diff
+from erpnext.controllers.queries import get_match_cond
+from erpnext.stock.doctype.item.item import get_item_details
+from frappe.model.mapper import get_mapped_doc
 
 import functools
 
@@ -59,11 +62,6 @@ class BOM(WebsiteGenerator):
 
 		self.name = name
 
-	def onload(self):
-		super(BOM, self).onload()
-		if self.get("item") and cint(frappe.db.get_value("Item", self.item, "has_variants")):
-			self.set_onload("has_variants", True)
-
 	def validate(self):
 		self.route = frappe.scrub(self.name).replace('_', '-')
 		self.clear_operations()
@@ -103,9 +101,7 @@ class BOM(WebsiteGenerator):
 		self.manage_default_bom()
 
 	def get_item_det(self, item_code):
-		item = frappe.db.sql("""select name, item_name, docstatus, description, image,
-			is_sub_contracted_item, stock_uom, default_bom, last_purchase_rate, include_item_in_manufacturing
-			from `tabItem` where name=%s""", item_code, as_dict = 1)
+		item = get_item_details(item_code)
 
 		if not item:
 			frappe.throw(_("Item: {0} does not exist in the system").format(item_code))
@@ -150,10 +146,10 @@ class BOM(WebsiteGenerator):
 
 		item = self.get_item_det(args['item_code'])
 
-		args['bom_no'] = args['bom_no'] or item and cstr(item[0]['default_bom']) or ''
+		args['bom_no'] = args['bom_no'] or item and cstr(item['default_bom']) or ''
 		args['transfer_for_manufacture'] = (cstr(args.get('include_item_in_manufacturing', '')) or
-			item and item[0].include_item_in_manufacturing or 0)
-		args.update(item[0])
+			item and item.include_item_in_manufacturing or 0)
+		args.update(item)
 
 		rate = self.get_rm_rate(args)
 		ret_item = {
@@ -185,40 +181,14 @@ class BOM(WebsiteGenerator):
 			self.rm_cost_as_per = "Valuation Rate"
 
 		if arg.get('scrap_items'):
-			rate = self.get_valuation_rate(arg)
+			rate = get_valuation_rate(arg)
 		elif arg:
 			#Customer Provided parts will have zero rate
 			if not frappe.db.get_value('Item', arg["item_code"], 'is_customer_provided_item'):
 				if arg.get('bom_no') and self.set_rate_of_sub_assembly_item_based_on_bom:
 					rate = flt(self.get_bom_unitcost(arg['bom_no'])) * (arg.get("conversion_factor") or 1)
 				else:
-					if self.rm_cost_as_per == 'Valuation Rate':
-						rate = self.get_valuation_rate(arg) * (arg.get("conversion_factor") or 1)
-					elif self.rm_cost_as_per == 'Last Purchase Rate':
-						rate = flt(arg.get('last_purchase_rate') \
-							or frappe.db.get_value("Item", arg['item_code'], "last_purchase_rate")) \
-								* (arg.get("conversion_factor") or 1)
-					elif self.rm_cost_as_per == "Price List":
-						if not self.buying_price_list:
-							frappe.throw(_("Please select Price List"))
-						args = frappe._dict({
-							"doctype": "BOM",
-							"price_list": self.buying_price_list,
-							"qty": arg.get("qty") or 1,
-							"uom": arg.get("uom") or arg.get("stock_uom"),
-							"stock_uom": arg.get("stock_uom"),
-							"transaction_type": "buying",
-							"company": self.company,
-							"currency": self.currency,
-							"conversion_rate": 1, # Passed conversion rate as 1 purposefully, as conversion rate is applied at the end of the function
-							"conversion_factor": arg.get("conversion_factor") or 1,
-							"plc_conversion_rate": 1,
-							"ignore_party": True
-						})
-						item_doc = frappe.get_doc("Item", arg.get("item_code"))
-						out = frappe._dict()
-						get_price_list_rate(args, item_doc, out)
-						rate = out.price_list_rate
+					rate = get_bom_item_rate(arg, self)
 
 					if not rate:
 						if self.rm_cost_as_per == "Price List":
@@ -285,31 +255,6 @@ class BOM(WebsiteGenerator):
 		bom = frappe.db.sql("""select name, base_total_cost/quantity as unit_cost from `tabBOM`
 			where is_active = 1 and name = %s""", bom_no, as_dict=1)
 		return bom and bom[0]['unit_cost'] or 0
-
-	def get_valuation_rate(self, args):
-		""" Get weighted average of valuation rate from all warehouses """
-
-		total_qty, total_value, valuation_rate = 0.0, 0.0, 0.0
-		for d in frappe.db.sql("""select actual_qty, stock_value from `tabBin`
-			where item_code=%s""", args['item_code'], as_dict=1):
-				total_qty += flt(d.actual_qty)
-				total_value += flt(d.stock_value)
-
-		if total_qty:
-			valuation_rate =  total_value / total_qty
-
-		if valuation_rate <= 0:
-			last_valuation_rate = frappe.db.sql("""select valuation_rate
-				from `tabStock Ledger Entry`
-				where item_code = %s and valuation_rate > 0
-				order by posting_date desc, posting_time desc, creation desc limit 1""", args['item_code'])
-
-			valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
-
-		if not valuation_rate:
-			valuation_rate = frappe.db.get_value("Item", args['item_code'], "valuation_rate")
-
-		return flt(valuation_rate)
 
 	def manage_default_bom(self):
 		""" Uncheck others if current one is selected as default or
@@ -624,6 +569,62 @@ class BOM(WebsiteGenerator):
 				if not d.batch_size or d.batch_size <= 0:
 					d.batch_size = 1
 
+def get_bom_item_rate(args, bom_doc):
+	if bom_doc.rm_cost_as_per == 'Valuation Rate':
+		rate = get_valuation_rate(args) * (args.get("conversion_factor") or 1)
+	elif bom_doc.rm_cost_as_per == 'Last Purchase Rate':
+		rate = ( flt(args.get('last_purchase_rate')) \
+			or frappe.db.get_value("Item", args['item_code'], "last_purchase_rate")) \
+				* (args.get("conversion_factor") or 1)
+	elif bom_doc.rm_cost_as_per == "Price List":
+		if not bom_doc.buying_price_list:
+			frappe.throw(_("Please select Price List"))
+		bom_args = frappe._dict({
+			"doctype": "BOM",
+			"price_list": bom_doc.buying_price_list,
+			"qty": args.get("qty") or 1,
+			"uom": args.get("uom") or args.get("stock_uom"),
+			"stock_uom": args.get("stock_uom"),
+			"transaction_type": "buying",
+			"company": bom_doc.company,
+			"currency": bom_doc.currency,
+			"conversion_rate": 1, # Passed conversion rate as 1 purposefully, as conversion rate is applied at the end of the function
+			"conversion_factor": args.get("conversion_factor") or 1,
+			"plc_conversion_rate": 1,
+			"ignore_party": True
+		})
+		item_doc = frappe.get_cached_doc("Item", args.get("item_code"))
+		out = frappe._dict()
+		get_price_list_rate(bom_args, item_doc, out)
+		rate = out.price_list_rate
+
+	return rate
+
+def get_valuation_rate(args):
+	""" Get weighted average of valuation rate from all warehouses """
+
+	total_qty, total_value, valuation_rate = 0.0, 0.0, 0.0
+	for d in frappe.db.sql("""select actual_qty, stock_value from `tabBin`
+		where item_code=%s""", args['item_code'], as_dict=1):
+			total_qty += flt(d.actual_qty)
+			total_value += flt(d.stock_value)
+
+	if total_qty:
+		valuation_rate =  total_value / total_qty
+
+	if valuation_rate <= 0:
+		last_valuation_rate = frappe.db.sql("""select valuation_rate
+			from `tabStock Ledger Entry`
+			where item_code = %s and valuation_rate > 0
+			order by posting_date desc, posting_time desc, creation desc limit 1""", args['item_code'])
+
+		valuation_rate = flt(last_valuation_rate[0][0]) if last_valuation_rate else 0
+
+	if not valuation_rate:
+		valuation_rate = frappe.db.get_value("Item", args['item_code'], "valuation_rate")
+
+	return flt(valuation_rate)
+
 def get_list_context(context):
 	context.title = _("Bill of Materials")
 	# context.introduction = _('Boms')
@@ -639,6 +640,8 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 				sum(bom_item.{qty_field}/ifnull(bom.quantity, 1)) * %(qty)s as qty,
 				item.image,
 				bom.project,
+				bom_item.rate,
+				bom_item.amount,
 				item.stock_uom,
 				item.item_group,
 				item.allow_alternative_item,
@@ -655,6 +658,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 			where
 				bom_item.docstatus < 2
 				and bom.name = %(bom)s
+				and ifnull(item.has_variants, 0) = 0
 				and item.is_stock_item in (1, {is_stock_item})
 				{where_conditions}
 				group by item_code, stock_uom
@@ -897,3 +901,84 @@ def get_bom_diff(bom1, bom2):
 					out.removed.append([df.fieldname, d.as_dict()])
 
 	return out
+
+def item_query(doctype, txt, searchfield, start, page_len, filters):
+	meta = frappe.get_meta("Item", cached=True)
+	searchfields = meta.get_search_fields()
+
+	order_by = "idx desc, name, item_name"
+
+	fields = ["name", "item_group", "item_name", "description"]
+	fields.extend([field for field in searchfields
+		if not field in ["name", "item_group", "description"]])
+
+	searchfields = searchfields + [field for field in [searchfield or "name", "item_code", "item_group", "item_name"]
+		if not field in searchfields]
+
+	query_filters = {
+		"disabled": 0,
+		"ifnull(end_of_life, '5050-50-50')": (">", today())
+	}
+
+	or_cond_filters = {}
+	if txt:
+		for s_field in searchfields:
+			or_cond_filters[s_field] = ("like", "%{0}%".format(txt))
+
+		barcodes = frappe.get_all("Item Barcode",
+			fields=["distinct parent as item_code"],
+			filters = {"barcode": ("like", "%{0}%".format(txt))})
+
+		barcodes = [d.item_code for d in barcodes]
+		if barcodes:
+			or_cond_filters["name"] = ("in", barcodes)
+
+	for cond in get_match_cond(doctype, as_condition=False):
+		for key, value in cond.items():
+			if key == doctype:
+				key = "name"
+
+			query_filters[key] = ("in", value)
+
+	if filters and filters.get("item_code"):
+		has_variants = frappe.get_cached_value("Item", filters.get("item_code"), "has_variants")
+		if not has_variants:
+			query_filters["has_variants"] = 0
+
+	return frappe.get_all("Item",
+		fields = fields, filters=query_filters,
+		or_filters = or_cond_filters, order_by=order_by,
+		limit_start=start, limit_page_length=page_len, as_list=1)
+
+@frappe.whitelist()
+def make_variant_bom(source_name, bom_no, item, variant_items, target_doc=None):
+	from erpnext.manufacturing.doctype.work_order.work_order import add_variant_item
+
+	def postprocess(source, doc):
+		doc.item = item
+		doc.quantity = 1
+
+		item_data = get_item_details(item)
+		doc.update({
+			"item_name": item_data.item_name,
+			"description": item_data.description,
+			"uom": item_data.stock_uom,
+			"allow_alternative_item": item_data.allow_alternative_item
+		})
+
+		add_variant_item(variant_items, doc, source_name)
+
+	doc = get_mapped_doc('BOM', source_name, {
+		'BOM': {
+			'doctype': 'BOM',
+			'validation': {
+				'docstatus': ['=', 1]
+			}
+		},
+		'BOM Item': {
+			'doctype': 'BOM Item',
+			'condition': lambda doc: doc.has_variants == 0
+		},
+	}, target_doc, postprocess)
+
+	return doc
