@@ -228,7 +228,7 @@ erpnext.bom.BomController = erpnext.TransactionController.extend({
 
 	plc_conversion_rate: function(doc) {
 		if (!this.in_apply_price_list) {
-			this.apply_price_list();
+			this.apply_price_list(null, true);
 		}
 	},
 
