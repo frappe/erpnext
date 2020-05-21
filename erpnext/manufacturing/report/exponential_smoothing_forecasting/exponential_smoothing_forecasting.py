@@ -45,7 +45,7 @@ class ForecastingReport(ExponentialSmoothingForecast):
 	def execute_report(self):
 		self.prepare_periodical_data()
 		self.forecast_future_data()
-		self.data = self.period_wise_data.values()
+		self.prepare_final_data()
 		self.add_total()
 
 		columns = self.get_columns()
@@ -108,7 +108,17 @@ class ForecastingReport(ExponentialSmoothingForecast):
 		""".format(doc=self.doctype, child_doc=self.child_doctype, date_field=date_field, cond=cond),
 			tuple(input_data), as_dict=1)
 
+	def prepare_final_data(self):
+		self.data = []
+
+		if not self.period_wise_data: return
+
+		for key in self.period_wise_data:
+			self.data.append(self.period_wise_data.get(key))
+
 	def add_total(self):
+		if not self.data: return
+
 		total_row = {
 			"item_code": _(frappe.bold("Total Quantity"))
 		}

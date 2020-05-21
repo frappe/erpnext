@@ -40,5 +40,5 @@ def get_duplicate_records():
 
 def delete_duplicate_ledger_entries(duplicate_records_list):
 	"""Delete duplicate leave ledger entries."""
-	if duplicate_records_list:
-		frappe.db.sql(''' DELETE FROM `tabLeave Ledger Entry` WHERE name in {0}'''.format(tuple(duplicate_records_list))) #nosec
+	if not duplicate_records_list: return
+	frappe.db.sql('''DELETE FROM `tabLeave Ledger Entry` WHERE name in %s''', ((tuple(duplicate_records_list)), ))
