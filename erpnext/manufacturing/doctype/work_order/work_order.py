@@ -8,9 +8,9 @@ import math
 from frappe import _
 from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate, get_link_to_form, time_diff_in_hours
 from frappe.model.document import Document
-from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_bom_items_as_dict
+from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_bom_items_as_dict, get_bom_item_rate
 from dateutil.relativedelta import relativedelta
-from erpnext.stock.doctype.item.item import validate_end_of_life
+from erpnext.stock.doctype.item.item import validate_end_of_life, get_item_defaults
 from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
 from erpnext.projects.doctype.timesheet.timesheet import OverlapError
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
@@ -541,6 +541,8 @@ class WorkOrder(Document):
 				# For instance in BOM Explosion Item child table, the items coming from sub assembly items
 				for item in sorted(item_dict.values(), key=lambda d: d['idx'] or 9999):
 					self.append('required_items', {
+						'rate': item.rate,
+						'amount': item.amount,
 						'operation': item.operation,
 						'item_code': item.item_code,
 						'item_name': item.item_name,
@@ -637,9 +639,10 @@ def get_bom_operations(doctype, txt, searchfield, start, page_len, filters):
 		filters = filters, fields = ['operation'], as_list=1)
 
 @frappe.whitelist()
-def get_item_details(item, project = None):
+def get_item_details(item, project = None, skip_bom_info=False):
 	res = frappe.db.sql("""
-		select stock_uom, description
+		select stock_uom, description, item_name, allow_alternative_item,
+			include_item_in_manufacturing
 		from `tabItem`
 		where disabled=0
 			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %s)
@@ -650,6 +653,7 @@ def get_item_details(item, project = None):
 		return {}
 
 	res = res[0]
+	if skip_bom_info: return res
 
 	filters = {"item": item, "is_default": 1}
 
@@ -681,7 +685,7 @@ def get_item_details(item, project = None):
 	return res
 
 @frappe.whitelist()
-def make_work_order(bom_no, item, qty=0, project=None):
+def make_work_order(bom_no, item, qty=0, project=None, variant_items=None):
 	if not frappe.has_permission("Work Order", "write"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
@@ -696,7 +700,43 @@ def make_work_order(bom_no, item, qty=0, project=None):
 		wo_doc.qty = flt(qty)
 		wo_doc.get_items_and_operations_from_bom()
 
+	if variant_items:
+		add_variant_item(variant_items, wo_doc, bom_no, "required_items")
+
 	return wo_doc
+
+def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
+	if isinstance(variant_items, string_types):
+		variant_items = json.loads(variant_items)
+
+	for item in variant_items:
+		args = frappe._dict({
+			"item_code": item.get("varint_item_code"),
+			"required_qty": item.get("qty"),
+			"qty": item.get("qty"), # for bom
+			"source_warehouse": item.get("source_warehouse"),
+			"operation": item.get("operation")
+		})
+
+		bom_doc = frappe.get_cached_doc("BOM", bom_no)
+		item_data = get_item_details(args.item_code, skip_bom_info=True)
+		args.update(item_data)
+
+		args["rate"] = get_bom_item_rate({
+			"item_code": args.get("item_code"),
+			"qty": args.get("required_qty"),
+			"uom": args.get("stock_uom"),
+			"stock_uom": args.get("stock_uom"),
+			"conversion_factor": 1
+		}, bom_doc)
+
+		if not args.source_warehouse:
+			args["source_warehouse"] = get_item_defaults(item.get("varint_item_code"),
+				wo_doc.company).default_warehouse
+
+		args["amount"] = flt(args.get("required_qty")) * flt(args.get("rate"))
+		args["uom"] = item_data.stock_uom
+		wo_doc.append(table_name, args)
 
 @frappe.whitelist()
 def check_if_scrap_warehouse_mandatory(bom_no):
