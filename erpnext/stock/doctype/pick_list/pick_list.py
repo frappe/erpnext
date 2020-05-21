@@ -300,6 +300,7 @@ def create_delivery_note(source_name, target_doc=None):
 	set_delivery_note_missing_values(delivery_note)
 
 	delivery_note.pick_list = pick_list.name
+	delivery_note.customer = pick_list.customer if pick_list.customer else None
 
 	return delivery_note
 
