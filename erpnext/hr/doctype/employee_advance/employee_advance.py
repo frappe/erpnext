@@ -146,7 +146,7 @@ def create_return_through_additional_salary(doc):
 	return additional_salary
 
 @frappe.whitelist()
-def make_return_entry(employee_name, company, employee_advance_name, return_amount, mode_of_payment, advance_account):
+def make_return_entry(employee, company, employee_advance_name, return_amount,  advance_account, mode_of_payment=None):
 	return_account = get_default_bank_cash_account(company, account_type='Cash', mode_of_payment = mode_of_payment)
 
 	mode_of_payment_type = ''
