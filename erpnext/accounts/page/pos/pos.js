@@ -1459,7 +1459,11 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.child.serial_no = (this.item_serial_no[this.child.item_code]
 			? this.item_serial_no[this.child.item_code][0] : '');
 
-		const tax_template_is_valid = frappe.datetime.get_diff(frappe.datetime.now_date(), this.items[0].valid_from) > 0;
+		const tax_template_is_valid = true;
+		if (this.items && this.items[0].valid_from) {
+			tax_template_is_valid = frappe.datetime.get_diff(frappe.datetime.now_date(),
+				this.items[0].valid_from) > 0;
+		}
 
 		this.child.item_tax_template = tax_template_is_valid ? this.items[0].item_tax_template : '';
 		this.child.item_tax_rate = JSON.stringify(this.tax_data[this.child.item_tax_template]);
