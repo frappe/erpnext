@@ -691,3 +691,4 @@ erpnext.patches.v13_0.update_actual_start_and_end_date_in_wo
 erpnext.patches.v13_0.set_company_field_in_healthcare_doctypes
 erpnext.patches.v12_0.update_bom_in_so_mr
 execute:frappe.delete_doc("Report", "Department Analytics")
+execute:frappe.rename_doc("Desk Page", "Loan Management", "Loan", force=True)
