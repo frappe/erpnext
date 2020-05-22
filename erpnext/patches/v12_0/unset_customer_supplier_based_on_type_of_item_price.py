@@ -1,15 +1,29 @@
 from __future__ import unicode_literals
 import frappe
 
+
 def execute():
-    invalid_selling_item_price = frappe.db.sql(
-        """SELECT name FROM `tabItem Price` WHERE selling = 1 and buying = 0 and (supplier IS NOT NULL or supplier = '')"""
-    )
-    invalid_buying_item_price = frappe.db.sql(
-        """SELECT name FROM `tabItem Price` WHERE selling = 0 and buying = 1 and (customer IS NOT NULL or customer = '')"""
-    )
-    docs_to_modify = invalid_buying_item_price + invalid_selling_item_price
-    for d in docs_to_modify:
-        # saving the doc will auto reset invalid customer/supplier field
-        doc = frappe.get_doc("Item Price", d[0])
-        doc.save()
+    """
+    set proper customer and supplier details for item price
+    based on selling and buying values
+    """
+
+    # update for selling
+    frappe.db.sql(
+        """UPDATE `tabItem Price` ip, `tabPrice List` pl
+        SET ip.`reference` = ip.`customer`, ip.`supplier` = NULL
+        WHERE ip.`selling` = 1
+        AND ip.`buying` = 0
+        AND (ip.`supplier` IS NOT NULL OR ip.`supplier` = '')
+        AND ip.`price_list` = pl.`name`
+        AND pl.`enabled` = 1""")
+
+    # update for buying
+    frappe.db.sql(
+        """UPDATE `tabItem Price` ip, `tabPrice List` pl
+        SET ip.`reference` = ip.`supplier`, ip.`customer` = NULL
+        WHERE ip.`selling` = 0
+        AND ip.`buying` = 1
+        AND (ip.`customer` IS NOT NULL OR ip.`customer` = '')
+        AND ip.`price_list` = pl.`name`
+        AND pl.`enabled` = 1""")
