@@ -684,7 +684,7 @@ execute:frappe.delete_doc_if_exists("Page", "appointment-analytic")
 execute:frappe.rename_doc("Desk Page", "Getting Started", "Home", force=True)
 erpnext.patches.v12_0.unset_customer_supplier_based_on_type_of_item_price
 erpnext.patches.v12_0.set_valid_till_date_in_supplier_quotation
-erpnext.patches.v12_0.set_serial_no_status
+erpnext.patches.v12_0.set_serial_no_status #2020-05-21
 erpnext.patches.v12_0.update_price_list_currency_in_bom
 execute:frappe.delete_doc_if_exists('Dashboard', 'Accounts')
 erpnext.patches.v13_0.update_actual_start_and_end_date_in_wo
