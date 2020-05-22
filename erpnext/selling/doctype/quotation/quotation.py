@@ -24,7 +24,6 @@ class Quotation(SellingController):
 
 	def validate(self):
 		super(Quotation, self).validate()
-		self.set_valuation_and_gross_profit()
 		self.set_status()
 		self.update_opportunity()
 		self.validate_uom_is_integer("stock_uom", "qty")
@@ -118,11 +117,6 @@ class Quotation(SellingController):
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.valid_till = None
-
-	def set_valuation_and_gross_profit(self):
-		for item in self.items:
-			item.valuation_rate = frappe.get_doc('Item', item.item_code).valuation_rate
-			item.gross_profit = flt(((item.base_rate - item.valuation_rate) * item.stock_qty), self.precision("amount", item))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
