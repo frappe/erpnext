@@ -57,6 +57,9 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 
 		frappe.cache().hset("fiscal_years", company, fiscal_years)
 
+	if not transaction_date:
+		return fiscal_years
+
 	if transaction_date:
 		transaction_date = getdate(transaction_date)
 
@@ -78,6 +81,23 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 	error_msg = _("""{0} {1} not in any active Fiscal Year.""").format(label, formatdate(transaction_date))
 	if verbose==1: frappe.msgprint(error_msg)
 	raise FiscalYearError(error_msg)
+
+@frappe.whitelist()
+def get_fiscal_year_filter_field(company=None):
+	field = {
+		"fieldtype": "Select",
+		"options": [],
+		"operator": "Between",
+		"query_value": True
+	}
+	fiscal_years = get_fiscal_years(company=company)
+	for fiscal_year in fiscal_years:
+		field["options"].append({
+			"label": fiscal_year.name,
+			"value": fiscal_year.name,
+			"query_value": [fiscal_year.year_start_date.strftime("%Y-%m-%d"), fiscal_year.year_end_date.strftime("%Y-%m-%d")]
+		})
+	return field
 
 def validate_fiscal_year(date, fiscal_year, company, label="Date", doc=None):
 	years = [f[0] for f in get_fiscal_years(date, label=_(label), company=company)]
