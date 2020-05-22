@@ -14,11 +14,9 @@ def execute():
 
 def get_duplicate_records():
 	"""Fetch all but one duplicate records from the list of expired leave allocation."""
-	return frappe.db.sql_list("""
-		WITH duplicate_records AS
-		(SELECT
-			name, transaction_name, is_carry_forward,
-			ROW_NUMBER() over(partition by transaction_name order by creation)as row
+	duplicate_records = frappe.db.sql_list("""
+		SELECT
+			name, transaction_name
 		FROM `tabLeave Ledger Entry` l
 		WHERE (EXISTS
 			(SELECT name
@@ -34,9 +32,20 @@ def get_duplicate_records():
 					AND to_date = l.to_date
 					AND from_date = l.from_date
 					AND is_expired = 1
-		)))
-		SELECT name FROM duplicate_records WHERE row > 1
+		))
+		ORDER BY creation
 	""")
+	new_records = {}
+	repeated_records = []
+	for record in duplicate_records:
+		# generates a new key as transaction name within the new record,
+		# if record is already processed add remaining names in the repeated records
+		if not new_records.get(record.transaction_name):
+			new_records.setdefault(record.transaction_name, []).append(record)
+		else:
+			repeated_records.append(record.name)
+
+	return repeated_records
 
 def delete_duplicate_ledger_entries(duplicate_records_list):
 	"""Delete duplicate leave ledger entries."""
