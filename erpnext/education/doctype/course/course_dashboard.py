@@ -10,12 +10,12 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'label': _('Student'),
-				'items': ['Student Group']
+				'label': _('Course'),
+				'items': ['Course Enrollment', 'Course Schedule']
 			},
 			{
-				'label': _('Fees'),
-				'items': ['Course Schedule']
+				'label': _('Student'),
+				'items': ['Student Group']
 			},
 			{
 				'label': _('Assessment'),

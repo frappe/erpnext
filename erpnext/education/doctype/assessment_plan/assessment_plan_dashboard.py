@@ -10,8 +10,8 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'label': _('Course'),
-				'items': ['Course', 'Student Group', 'Assessment Group', 'Grading Scale']
+				'label': _('Assessment'),
+				'items': ['Assessment Result']
 			}
 		]
 	}
