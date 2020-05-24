@@ -109,6 +109,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 		});
 
+		if(this.frm.fields_dict["items"].grid.get_field('uom')) {
+			this.frm.set_query("uom", "items", function(doc, cdt, cdn) {
+				const row = locals[cdt][cdn];
+				return {
+					query: "erpnext.controllers.queries.uom_query",
+					filters: {'item_code': row.item_code}
+				}
+			});
+		}
+
 		var me = this;
 		if(this.frm.fields_dict["items"].grid.get_field('batch_no')) {
 			this.frm.set_query("batch_no", "items", function(doc, cdt, cdn) {

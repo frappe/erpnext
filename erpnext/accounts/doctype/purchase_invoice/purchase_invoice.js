@@ -398,13 +398,6 @@ cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 	}
 }
 
-cur_frm.fields_dict['items'].grid.get_field("item_code").get_query = function(doc, cdt, cdn) {
-	return {
-		query: "erpnext.controllers.queries.item_query",
-		filters: {'is_purchase_item': 1}
-	}
-}
-
 cur_frm.fields_dict['credit_to'].get_query = function(doc) {
 	// filter on Account
 	return {
