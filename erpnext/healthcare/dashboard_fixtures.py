@@ -19,7 +19,7 @@ def get_company():
 	else:
 		company = frappe.get_list("Company", limit=1)
 		if company:
-			return company.name
+			return company[0].name
 	return None
 
 def get_dashboards():
