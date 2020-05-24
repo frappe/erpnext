@@ -16,9 +16,13 @@ def get_data():
 			'Sales Order': ['items', 'sales_order']
 		},
 		'transactions': [
+			# {
+			# 	'label': _('Payment'),
+			# 	'items': ['Payment Entry', 'Payment Request', 'Journal Entry', 'Invoice Discounting']
+			# },
 			{
 				'label': _('Payment'),
-				'items': ['Payment Entry', 'Payment Request', 'Journal Entry', 'Invoice Discounting']
+				'items': ['Payment Entry', 'Payment Request', 'Journal Entry']
 			},
 			{
 				'label': _('Reference'),
@@ -28,9 +32,9 @@ def get_data():
 				'label': _('Returns'),
 				'items': ['Sales Invoice']
 			},
-			{
-				'label': _('Subscription'),
-				'items': ['Auto Repeat']
-			},
+			# {
+			# 	'label': _('Subscription'),
+			# 	'items': ['Auto Repeat']
+			# },
 		]
 	}
