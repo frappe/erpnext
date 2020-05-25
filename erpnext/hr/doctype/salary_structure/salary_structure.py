@@ -74,7 +74,7 @@ class SalaryStructure(Document):
 			frappe.throw(_("Salary Structure should have flexible benefit component(s) to dispense benefit amount"))
 
 	@frappe.whitelist()
-	def assign_salary_structure(self, employees, from_date, company ,base=None ,variable=None):
+	def assign_salary_structure(self, employees, from_date, company ,base=None ,variable=None, income_tax_slab=None):
 		if len(employees):
 			if len(employees) > 20:
 				frappe.enqueue(assign_salary_structure_for_employees, timeout=600,

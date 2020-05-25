@@ -89,12 +89,18 @@ frappe.ui.form.on('Salary Structure', {
 							label: __('From Date')
 						},
 						{
-							fieldname:'variable',
-							fieldtype:'Currency',
-							label: __('Variable')
+							fieldname:'income_tax_slab',
+							fieldtype:'Link',
+							options: 'Income Tax Slab',
+							label: __('Income Tax Slab')
 						},
 						{
 							fieldtype: "Column Break"
+						},
+						{
+							fieldname:'variable',
+							fieldtype:'Currency',
+							label: __('Variable')
 						},
 						{
 							fieldname:'base',
@@ -118,12 +124,14 @@ frappe.ui.form.on('Salary Structure', {
 						company: data["company"],
 						from_date: data["from_date"],
 						variable: data["variable"],
-						base: data['base']
+						base: data['base'],
+						income_tax_slab: data["income_tax_slab"]
 					},
 					callback: function(r) {
 						if(!r.exc) {
 							frm.refresh()
 							frm.reload_doc()
+							cur_dialog.hide()
 						}
 					}
 				});
