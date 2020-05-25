@@ -40,7 +40,7 @@ class TestLeavePeriod(unittest.TestCase):
 		leave_period = create_leave_period(add_months(today(), -3), add_months(today(), 3))
 
 		# test leave_allocation
-		leave_period.grant_leave_allocation(employee=employee_doc_name)
+		leave_period.grant_leave_allocation(employees=[employee_doc_name])
 		self.assertEqual(get_leave_balance_on(employee_doc_name, leave_type, today()), 20)
 
 def create_leave_period(from_date, to_date, company=None):

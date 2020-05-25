@@ -101,7 +101,7 @@ class TestSalaryStructure(unittest.TestCase):
 		frappe.db.sql('''delete from `tabSalary Structure Assignment` where employee=%s and salary_structure=%s ''',
 					  ("test_assign_stucture@salary.com",salary_structure.name))
 		#test structure_assignment
-		salary_structure.assign_salary_structure(employee=employee_doc_name,from_date='2013-01-01',base=5000,variable=200)
+		salary_structure.assign_salary_structure(employees=[employee_doc_name],from_date='2013-01-01',base=5000,variable=200)
 		salary_structure_assignment = frappe.get_doc("Salary Structure Assignment",{'employee':employee_doc_name, 'from_date':'2013-01-01'})
 		self.assertEqual(salary_structure_assignment.docstatus, 1)
 		self.assertEqual(salary_structure_assignment.base, 5000)
@@ -128,7 +128,7 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None, do
 		salary_structure_doc.insert()
 		if not dont_submit:
 			salary_structure_doc.submit()
-		
+
 	else:
 		salary_structure_doc = frappe.get_doc("Salary Structure", salary_structure)
 

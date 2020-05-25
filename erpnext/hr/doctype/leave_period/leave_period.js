@@ -23,8 +23,8 @@ frappe.ui.form.on('Leave Period', {
 				"filters": {
 					"company": frm.doc.company,
 				}
-			}
-		})
+			};
+		});
 	},
 	grant_leaves: function(frm) {
 		var d = new frappe.ui.form.MultiSelectDialog({
