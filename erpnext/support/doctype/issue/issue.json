@@ -120,7 +120,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Open\nReplied\nHold\nClosed",
+   "options": "Open\nReplied\nClosed",
    "search_index": 1
   },
   {
@@ -167,6 +167,7 @@
    "options": "Service Level Agreement"
   },
   {
+   "depends_on": "eval: doc.status != 'Replied';",
    "fieldname": "response_by",
    "fieldtype": "Datetime",
    "label": "Response By",
@@ -180,6 +181,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval: doc.status != 'Replied';",
    "fieldname": "resolution_by",
    "fieldtype": "Datetime",
    "label": "Resolution By",
@@ -334,7 +336,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval: doc.service_level_agreement",
+   "depends_on": "eval: doc.service_level_agreement && doc.status != 'Replied';",
    "description": "in hours",
    "fieldname": "response_by_variance",
    "fieldtype": "Float",
@@ -342,7 +344,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval: doc.service_level_agreement",
+   "depends_on": "eval: doc.service_level_agreement && doc.status != 'Replied';",
    "description": "in hours",
    "fieldname": "resolution_by_variance",
    "fieldtype": "Float",
@@ -418,7 +420,7 @@
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2020-05-14 23:59:01.172007",
+ "modified": "2020-05-25 22:02:32.974165",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
