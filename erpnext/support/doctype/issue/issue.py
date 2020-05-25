@@ -72,7 +72,36 @@ class Issue(Document):
 			# if no date, it should be set as None and not a blank string "", as per mysql strict config
 			self.resolution_date = None
 			self.reset_issue_metrics()
-			self.agreement_fulfilled = "Ongoing"
+
+		if self.status == "Replied" and status != "Replied":
+			self.on_hold_since = frappe.flags.current_time or now_datetime()
+			if not self.first_responded_on:
+				self.response_by = None
+				self.response_by_variance = None
+			self.resolution_by = None
+			self.resolution_by_variance = None
+
+		if self.status != "Replied" and status == "Replied":
+			hold_time = self.total_hold_time if self.total_hold_time else 0
+			self.total_hold_time = hold_time + time_diff_in_seconds(now_datetime(), self.on_hold_since)
+
+		if self.status == "Open" and status == "Replied":
+			start_date_time = get_datetime(self.service_level_agreement_creation)
+			priority = get_priority(self)
+			hold_time = time_diff_in_seconds(now_datetime(), self.on_hold_since)
+
+			if not self.first_responded_on:
+				response_by = get_expected_time_for(parameter='response', service_level=priority, start_date_time=start_date_time)
+				self.response_by = add_to_date(response_by, seconds=round(hold_time))
+				response_by_variance = round(time_diff_in_hours(self.response_by, now_datetime()))
+				self.response_by_variance = response_by_variance + (hold_time // 3600)
+
+			resolution_by = get_expected_time_for(parameter='resolution', service_level=priority, start_date_time=start_date_time)
+			self.resolution_by = add_to_date(resolution_by, seconds=round(hold_time))
+			resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_datetime()))
+			self.resolution_by_variance = resolution_by_variance + (hold_time // 3600)
+			self.on_hold_since = None
+
 
 	def update_agreement_status(self):
 		if self.service_level_agreement and self.agreement_fulfilled == "Ongoing":
@@ -231,6 +260,16 @@ class Issue(Document):
 		self.db_set('resolution_time', None)
 		self.db_set('user_resolution_time', None)
 		self.db_set('avg_response_time', None)
+
+
+def get_priority(issue):
+	service_level_agreement = frappe.get_doc("Service Level Agreement", issue.service_level_agreement)
+	priority = service_level_agreement.get_service_level_agreement_priority(issue.priority)
+	priority.update({
+		"support_and_resolution": service_level_agreement.support_and_resolution,
+		"holiday_list": service_level_agreement.holiday_list
+	})
+	return priority
 
 
 def get_expected_time_for(parameter, service_level, start_date_time):
