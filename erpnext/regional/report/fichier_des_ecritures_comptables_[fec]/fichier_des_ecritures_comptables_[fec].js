@@ -80,6 +80,7 @@ let downloadify = function(data, roles, title) {
 		a.href = 'data:attachment/csv,' + encodeURIComponent(csv_data);
 		a.download = filename;
 		a.target = "_blank";
+		a.ref = "noopener noreferrer";
 	}
 
 	document.body.appendChild(a);

@@ -15,7 +15,7 @@
 			{%- endif %}
 			<address>
 				{% if partner_website -%}<p><a href="{{ partner_website }}"
-					target="_blank">{{ partner_website }}</a></p>{%- endif %}
+					target="_blank" rel="noopener noreferrer">{{ partner_website }}</a></p>{%- endif %}
 				{% if partner_address -%}<p itemprop="address">{{ partner_address }}</p>{%- endif %}
 				{% if phone -%}<p itemprop="telephone">{{ phone }}</p>{%- endif %}
 				{% if email -%}<p itemprop="email"><span class="fa fa-envelope"></span> {{ email }}</p>{%- endif %}

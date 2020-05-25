@@ -61,7 +61,7 @@ class ProgramEnrollment(Document):
 				fees.submit()
 				fee_list.append(fees.name)
 		if fee_list:
-			fee_list = ["""<a href="#Form/Fees/%s" target="_blank">%s</a>""" % \
+			fee_list = ["""<a href="#Form/Fees/%s" target="_blank" rel="noopener noreferrer">%s</a>""" % \
 				(fee, fee) for fee in fee_list]
 			msgprint(_("Fee Records Created - {0}").format(comma_and(fee_list)))
 
