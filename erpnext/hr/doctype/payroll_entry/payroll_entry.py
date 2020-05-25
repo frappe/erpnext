@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from dateutil.relativedelta import relativedelta
-from frappe.utils import cint, flt, nowdate, add_days, getdate, fmt_money, add_to_date, DATE_FORMAT, date_diff
+from frappe.utils import cint, flt, nowdate, add_days, getdate, fmt_money, add_to_date, DATE_FORMAT, date_diff , comma_and
 from frappe import _
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
@@ -115,6 +115,7 @@ class PayrollEntry(Document):
 		self.check_permission('write')
 		self.created = 1
 		emp_list = [d.employee for d in self.get("employees")]
+		print(emp_list)
 		if emp_list:
 			args = frappe._dict({
 				"salary_slip_based_on_timesheet": self.salary_slip_based_on_timesheet,
@@ -138,9 +139,6 @@ class PayrollEntry(Document):
 		"""
 			Returns list of salary slips based on selected criteria
 		"""
-
-		# employees = [d.employee for d in self.get("employees")]
-		# cond = self.get_filter_condition(employees)
 
 		ss_list = frappe.db.sql("""
 			select t1.name, t1.salary_structure from `tabSalary Slip` t1
@@ -479,7 +477,9 @@ def payroll_entry_has_bank_entries(name):
 
 def create_salary_slips_for_employees(employees, args, publish_progress=True):
 	salary_slips_exists_for = get_existing_salary_slips(employees, args)
+	employee_skiped = []
 	count=0
+	print(employees)
 	for emp in employees:
 		if emp not in salary_slips_exists_for:
 			args.update({
@@ -487,15 +487,26 @@ def create_salary_slips_for_employees(employees, args, publish_progress=True):
 				"employee": emp
 			})
 			ss = frappe.get_doc(args)
+			print("creating")
 			ss.insert()
 			count+=1
 			if publish_progress:
 				frappe.publish_progress(count*100/len(set(employees) - set(salary_slips_exists_for)),
 					title = _("Creating Salary Slips..."))
+		else:
+			employee_skiped.append(emp)
+
 
 	payroll_entry = frappe.get_doc("Payroll Entry", args.payroll_entry)
 	payroll_entry.db_set("salary_slips_created", 1)
 	payroll_entry.notify_update()
+
+	if len(employee_skiped):
+		if employee_skiped == employees:
+			frappe.throw(_("Salary Slip is already created for all Employees"))
+		else:
+			frappe.msgprint(_("Salary Slip is already created for ") + comma_and(employee_skiped))
+
 
 def get_existing_salary_slips(employees, args):
 	return frappe.db.sql_list("""
