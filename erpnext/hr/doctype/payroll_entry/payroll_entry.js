@@ -43,49 +43,55 @@ frappe.ui.form.on('Payroll Entry', {
 		}
 	},
 	get_employee_details: function (frm) {
-		var d = new frappe.ui.form.MultiSelectDialog({
-			doctype: "Employee",
-			target: cur_frm,
-			setters: {
-				company: cur_frm.doc.company,
-				department: '',
-				employee_name: '',
-				grade: ''
-			},
-			get_query() {
-				return {
-					filters: { status: ['=', "Active"] }
-				};
-			},
-			add_filters_group: 1,
-			primary_action_label: "Get Employee",
-			action(employees, data, field_filters, standard_filters) {
-				if(employees.length){
-					frappe.call({
-						doc: frm.doc,
-						method: "fill_employee_details",
-						args: {
-							employees: employees,
-							company: data["company"],
-							variable: data["variable"],
-							base: data["base"],
-							from_date: data['from_date']
-						},
-						callback: function(r) {
-							if(r.docs[0].employees.length){
-								frm.save();
-								frm.events.create_applied_filters_html(frm, employees, data, field_filters, standard_filters);
-								frm.refresh();
-								cur_dialog.hide();
+
+		if (frm.doc.payroll_frequency && frm.doc.company){
+			let d = new frappe.ui.form.MultiSelectDialog({
+				doctype: "Employee",
+				target: cur_frm,
+				setters: {
+					company: cur_frm.doc.company || '',
+					department: '',
+					employee_name: '',
+					grade: ''
+				},
+				get_query() {
+					return {
+						filters: { status: ['=', "Active"] }
+					};
+				},
+				add_filters_group: 1,
+				primary_action_label: "Get Employee",
+				action(employees, data, field_filters, standard_filters) {
+					if(employees.length){
+						frappe.call({
+							doc: frm.doc,
+							method: "fill_employee_details",
+							args: {
+								employees: employees,
+								company: data["company"],
+								variable: data["variable"],
+								base: data["base"],
+								from_date: data['from_date']
+							},
+							callback: function(r) {
+								if(r.docs[0].employees.length){
+									frm.save();
+									frm.events.create_applied_filters_html(frm, employees, data, field_filters, standard_filters);
+									frm.refresh();
+									cur_dialog.hide();
+								}
 							}
-						}
-					});
-				}else{
-					frappe.msgprint(__("Please Select Employees."));
+						});
+					}else{
+						frappe.msgprint(__("Please Select Employees."));
+					}
 				}
-			}
-		});
+			});
+		} else {
+			frappe.msgprint(__("Company or Payroll Frequency missing"));
+		}
 	},
+
 	create_applied_filters_html(frm, employees, data, field_filters, standard_filters){
 
 		frm.get_field("applied_filters").$wrapper.empty();
