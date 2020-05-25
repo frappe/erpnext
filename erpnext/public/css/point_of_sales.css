@@ -188,8 +188,6 @@
     padding: 6px;
     font-weight: bold;
     color: slategray;
-    /* background-color: rgb(39, 202, 110);
-    color: white; */
   }
 
   .register{
@@ -201,10 +199,6 @@
     width: 70px;
   }
 
-  /* .add:hover{
-    color: white;
-    background-color: rgb(16, 165, 81);
-  } */
 
   .grand-total{
     border-bottom: 0.5px solid #8D99A6;
