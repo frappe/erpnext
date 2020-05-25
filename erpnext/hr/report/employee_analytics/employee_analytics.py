@@ -13,12 +13,13 @@ def execute(filters=None):
 
 	columns = get_columns()
 	employees = get_employees(filters)
-	departments_result = get_department(filters)
-	departments = []
-	if departments_result:
-		for department in departments_result:
-			departments.append(department)
-	chart = get_chart_data(departments,employees)
+	parameters_result = get_parameters(filters)
+	parameters = []
+	if parameters_result:
+		for department in parameters_result:
+			parameters.append(department)
+
+	chart = get_chart_data(parameters,employees, filters)
 	return columns, employees, None, chart
 
 def get_columns():
@@ -29,10 +30,8 @@ def get_columns():
 	]
 
 def get_conditions(filters):
-	conditions = ""
-	if filters.get("department"): conditions += " and department = '%s'" % \
-		filters["department"].replace("'", "\\'")
-	
+	conditions = " and "+filters.get("parameter").lower().replace(" ","_")+" IS NOT NULL "
+
 	if filters.get("company"): conditions += " and company = '%s'" % \
 		filters["company"].replace("'", "\\'")
 	return conditions
@@ -43,25 +42,38 @@ def get_employees(filters):
 	branch, department, designation,
 	gender, company from `tabEmployee` where status = 'Active' %s""" % conditions, as_list=1)
 
-def get_department(filters):
-	return frappe.db.sql("""select name from `tabDepartment` where company = %s""", (filters["company"]), as_list=1)
-	
-def get_chart_data(departments,employees):
-	if not departments:
-		departments = []
+def get_parameters(filters):
+	return frappe.db.sql("""select name from `tab"""+filters.get("parameter")+"""` """, as_list=1)
+
+def get_chart_data(parameters,employees, filters):
+	if not parameters:
+		parameters = []
 	datasets = []
-	for department in departments:
-		if department:
-			total_employee = frappe.db.sql("""select count(*) from \
-				`tabEmployee` where \
-				department = %s""" ,(department[0]), as_list=1)
+	parameter_field_name = filters.get("parameter").lower().replace(" ","_")
+	label = []
+	for parameter in parameters:
+		if parameter:
+			total_employee = frappe.db.sql("""select count(*) from
+				`tabEmployee` where """+
+				parameter_field_name + """ = %s and  company = %s""" ,( parameter[0], filters.get("company")), as_list=1)
+			if total_employee[0][0]:
+				label.append(parameter)
 			datasets.append(total_employee[0][0])
+
+	values = [ value for value in datasets if value !=0]
+
+	total_employee = frappe.db.count('Employee', {'status':'Active'})
+	others = total_employee - sum(values)
+
+	label.append(["Not Set"])
+	values.append(others)
+
 	chart = {
 		"data": {
-			'labels': departments,
-			'datasets': [{'name': 'Employees','values': datasets}]
+			'labels': label,
+			'datasets': [{'name': 'Employees','values': values}]
 		}
 	}
-	chart["type"] = "bar"
+	chart["type"] = "donut"
 	return chart
 

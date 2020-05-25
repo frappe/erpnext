@@ -122,8 +122,8 @@
    "type": "DocType"
   },
   {
-   "label": "Accounts Dashboard",
-   "link_to": "Accounts Dashboard",
+   "label": "Dashboard",
+   "link_to": "Accounts",
    "type": "Dashboard"
   },
   {
