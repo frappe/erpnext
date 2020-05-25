@@ -31,6 +31,8 @@
   "resolution_by",
   "resolution_by_variance",
   "service_level_agreement_creation",
+  "on_hold_since",
+  "total_hold_time",
   "response",
   "mins_to_first_response",
   "first_responded_on",
@@ -395,12 +397,28 @@
    "read_only": 1,
    "show_days": 1,
    "show_seconds": 1
+  },
+  {
+   "fieldname": "on_hold_since",
+   "fieldtype": "Datetime",
+   "label": "On Hold Since",
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "total_hold_time",
+   "fieldtype": "Duration",
+   "label": "Total Hold Time",
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2020-05-06 12:28:58.093654",
+ "modified": "2020-05-14 23:59:01.172007",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",

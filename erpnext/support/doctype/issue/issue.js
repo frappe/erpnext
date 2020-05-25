@@ -41,7 +41,19 @@ frappe.ui.form.on("Issue", {
 
 		if (frm.doc.status !== "Closed" && frm.doc.agreement_fulfilled === "Ongoing") {
 			if (frm.doc.service_level_agreement) {
-				set_time_to_resolve_and_response(frm);
+				if (frm.doc.status == "Replied") {
+					frm.dashboard.clear_headline();
+					let message = {"indicator": "orange", "msg": __("Replied {0}", [moment(frm.doc.on_hold_since).fromNow()])};
+					frm.dashboard.set_headline_alert(
+						'<div class="row">' +
+							'<div class="col-xs-12">' +
+								'<span class="indicator whitespace-nowrap '+ message.indicator +'"><span class="hidden-xs">'+ message.msg +'</span></span> ' +
+							'</div>' +
+						'</div>'
+					);
+				} else {
+					set_time_to_resolve_and_response(frm);
+				}
 			}
 
 			frm.add_custom_button(__("Close"), function () {
