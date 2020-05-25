@@ -1,5 +1,4 @@
 {
- "actions": [],
  "creation": "2019-10-15 12:33:21.845329",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -92,13 +91,54 @@
    "label": "Upload XML Invoices"
   }
  ],
- "links": [],
- "modified": "2019-12-10 16:37:26.793398",
+ "modified": "2020-05-25 21:32:49.064579",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Import Supplier Invoice",
  "owner": "Administrator",
- "permissions": [],
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Auditor"
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "write": 1
+  }
+ ],
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1
