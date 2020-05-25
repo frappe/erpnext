@@ -471,17 +471,12 @@ class Item(WebsiteGenerator):
 
 	def add_default_uom_in_conversion_factor_table(self):
 		uom_conv_list = [d.uom for d in self.get("uoms")]
-		if self.stock_uom not in uom_conv_list:
-			ch = self.append('uoms', {})
-			ch.uom = self.stock_uom
-			ch.conversion_factor = 1
-
-		to_remove = []
-		for d in self.get("uoms"):
-			if d.conversion_factor == 1 and d.uom != self.stock_uom:
-				to_remove.append(d)
-
-		[self.remove(d) for d in to_remove]
+		for default_uom in [self.stock_uom, self.purchase_uom, self.sales_uom]:
+			if default_uom and default_uom not in uom_conv_list:
+				ch = self.append('uoms', {})
+				ch.uom = default_uom
+				ch.conversion_factor = 1
+				uom_conv_list.append(default_uom)
 
 	def update_show_in_website(self):
 		if self.disabled:

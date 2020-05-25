@@ -224,6 +224,64 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			}, as_dict=as_dict)
 
 
+def uom_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
+	conditions = []
+	precision = get_field_precision(frappe.get_meta("UOM Conversion Detail").get_field("conversion_factor"))
+
+	return frappe.db.sql("""
+		SELECT DISTINCT
+			results.name,
+			IF(results.name != @stock_uom, CONCAT(TRIM(results.conversion_factor)+0, ' ', @stock_uom), '') AS description
+		FROM
+			(SELECT
+				stock_uom AS name,
+				'1' AS conversion_factor,
+				'0' AS idx,
+				@stock_uom := stock_uom
+			FROM tabItem
+			WHERE
+				item_code = %(item)s
+			UNION ALL
+				SELECT
+					uom AS name,
+					ROUND(conversion_factor, {precision}),
+					'1' AS idx,
+					''
+				FROM `tabUOM Conversion Detail`
+				WHERE
+					parent = %(item)s
+					AND uom != @stock_uom
+			UNION ALL
+				SELECT
+					IF(to_uom = @stock_uom, from_uom, to_uom) AS name,
+					ROUND(IF(to_uom = @stock_uom, value, 1 / value), {precision}) AS conversion_factor,
+					'2' AS idx,
+					''
+				FROM `tabUOM Conversion Factor`
+				WHERE
+					from_uom = @stock_uom
+					OR to_uom = @stock_uom) results
+		WHERE
+			results.name LIKE %(txt)s
+			AND results.conversion_factor != 0
+		ORDER BY
+			IF(LOCATE(%(_txt)s, results.name), LOCATE(%(_txt)s, results.name), 99999),
+			results.idx ASC,
+			results.name ASC
+		LIMIT %(start)s, %(page_len)s """.format(
+			key=searchfield,
+			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
+			mcond=get_match_cond(doctype).replace('%', '%%'),
+			precision=precision),
+			{
+				"txt": "%%%s%%" % txt,
+				"_txt": txt.replace("%", ""),
+				"start": start or 0,
+				"page_len": page_len or 20,
+				"item": filters.get("item_code")
+			}, as_dict=as_dict)
+			
+
 def bom(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
 	fields = get_fields("BOM", ["name", "item"])
