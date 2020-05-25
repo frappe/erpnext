@@ -17,13 +17,16 @@ def get_product_info_for_website(item_code, skip_quotation_creation=False):
 	if not cart_settings.enabled:
 		return frappe._dict()
 
+	selling_price_list = cart_settings.price_list
+
 	cart_quotation = frappe._dict()
 	if not skip_quotation_creation:
 		cart_quotation = _get_cart_quotation()
+		selling_price_list = cart_quotation.selling_price_list
 
 	price = get_price(
 		item_code,
-		cart_quotation.selling_price_list,
+		selling_price_list,
 		cart_settings.default_customer_group,
 		cart_settings.company
 	)
