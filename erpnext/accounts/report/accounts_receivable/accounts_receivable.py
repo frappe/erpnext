@@ -559,6 +559,13 @@ class ReceivablePayableReport(object):
 		conditions, values = self.prepare_conditions()
 		order_by = self.get_order_by_condition()
 
+		future_payment_condition = ''
+		if self.filters.show_future_payments:
+			values.extend([self.party_type, self.filters.report_date, self.filters.report_date])
+
+			future_payment_condition = """ OR (docstatus < 2 and party_type = %s
+			AND against_voucher IS NULL AND posting_date > %s and DATE(creation) <= %s)"""
+
 		if self.filters.get(scrub(self.party_type)):
 			select_fields = "debit_in_account_currency as debit, credit_in_account_currency as credit"
 		else:
@@ -575,28 +582,8 @@ class ReceivablePayableReport(object):
 				and party_type=%s
 				and (party is not null and party != '')
 				and posting_date <= %s
-				{1} {2}"""
-			.format(select_fields, conditions, order_by), values, as_dict=True)
-
-		if self.filters.show_future_payments:
-			values.insert(2, self.filters.report_date)
-
-			future_entries = frappe.db.sql("""
-				select
-					name, posting_date, account, party_type, party, voucher_type, voucher_no,
-					against_voucher_type, against_voucher, account_currency, remarks, {0}
-				from
-					`tabGL Entry`
-				where
-					docstatus < 2
-					and party_type=%s
-					and against_voucher IS NULL
-					and posting_date > %s
-					and DATE(creation) <= %s
-					{1} {2}"""
-				.format(select_fields, conditions, order_by), values, as_dict=True)
-
-			self.gl_entries.extend(future_entries)
+				{1} {2} {3}"""
+			.format(select_fields, conditions, future_payment_condition, order_by), values, as_dict=True, debug=1)
 
 	def get_sales_invoices_or_customers_based_on_sales_person(self):
 		if self.filters.get("sales_person"):
