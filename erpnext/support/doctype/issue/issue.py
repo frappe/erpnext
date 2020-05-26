@@ -72,6 +72,8 @@ class Issue(Document):
 			# if no date, it should be set as None and not a blank string "", as per mysql strict config
 			self.resolution_date = None
 			self.reset_issue_metrics()
+			self.agreement_fulfilled = "Ongoing"
+			set_service_level_agreement_variance(issue=self.name)
 
 		if self.status == "Replied" and status != "Replied":
 			self.on_hold_since = frappe.flags.current_time or now_datetime()
