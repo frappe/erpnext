@@ -578,6 +578,26 @@ class ReceivablePayableReport(object):
 				{1} {2}"""
 			.format(select_fields, conditions, order_by), values, as_dict=True)
 
+		if self.filters.show_future_payments:
+			values.insert(2, self.filters.report_date)
+
+			future_entries = frappe.db.sql("""
+				select
+					name, posting_date, account, party_type, party, voucher_type, voucher_no,
+					against_voucher_type, against_voucher, account_currency, remarks, {0}
+				from
+					`tabGL Entry`
+				where
+					docstatus < 2
+					and party_type=%s
+					and against_voucher IS NULL
+					and posting_date > %s
+					and DATE(creation) <= %s
+					{1} {2}"""
+				.format(select_fields, conditions, order_by), values, as_dict=True)
+
+			self.gl_entries.extend(future_entries)
+
 	def get_sales_invoices_or_customers_based_on_sales_person(self):
 		if self.filters.get("sales_person"):
 			lft, rgt = frappe.db.get_value("Sales Person",
