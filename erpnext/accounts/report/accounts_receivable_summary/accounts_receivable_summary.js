@@ -111,7 +111,12 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			"fieldname":"based_on_payment_terms",
 			"label": __("Based On Payment Terms"),
 			"fieldtype": "Check",
-		}
+		},
+		{
+			"fieldname":"show_future_payments",
+			"label": __("Show Future Payments"),
+			"fieldtype": "Check",
+		},
 	],
 
 	onload: function(report) {
