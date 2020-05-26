@@ -135,7 +135,7 @@ def add_data(employee_map, att_map, filters, holiday_map, conditions, default_ho
 		row += [emp, emp_det.employee_name]
 
 		total_p = total_a = total_l = total_h = total_um= 0.0
-		ggg = []
+		emp_status_map = []
 		for day in range(filters["total_days_in_month"]):
 			status = None
 			status = att_map.get(emp).get(day + 1)
@@ -152,11 +152,10 @@ def add_data(employee_map, att_map, filters, holiday_map, conditions, default_ho
 								status = "Holiday"
 							total_h += 1
 
-			ggg.append(status_map.get(status, ""))
+			abbr = status_map.get(status, "")
+			emp_status_map.append(abbr)
 
-			if not filters.summarized_view:
-				row += ggg
-			else:
+			if  filters.summarized_view:
 				if status == "Present" or status == "Work From Home":
 					total_p += 1
 				elif status == "Absent":
@@ -169,6 +168,9 @@ def add_data(employee_map, att_map, filters, holiday_map, conditions, default_ho
 					total_l += 0.5
 				elif not status:
 					total_um += 1
+
+		if not filters.summarized_view:
+			row += emp_status_map
 
 		if filters.summarized_view:
 			row += [total_p, total_l, total_a, total_h, total_um]
@@ -203,7 +205,7 @@ def add_data(employee_map, att_map, filters, holiday_map, conditions, default_ho
 					row.append("0.0")
 
 			row.extend([time_default_counts[0][0],time_default_counts[0][1]])
-		emp_att_map[emp] = ggg
+		emp_att_map[emp] = emp_status_map
 		record.append(row)
 
 	return record, emp_att_map
@@ -216,7 +218,7 @@ def get_columns(filters):
 		columns = [_(filters.group_by)+ ":Link/Branch:120"]
 
 	columns += [
-		_("Employee") + ":Link/Employee:120", _("Employee Name") + ":Link/Employee:120"
+		_("Employee") + ":Link/Employee:120", _("Employee Name") + ":Data/:120"
 	]
 	days = []
 	for day in range(filters["total_days_in_month"]):
