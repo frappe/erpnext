@@ -16,7 +16,7 @@ frappe.query_reports["Project Summary"] = {
 			"fieldname": "status",
 			"label": __("Status"),
 			"fieldtype": "Select",
-			"options": "Open\nComplete\nCancelled",
+			"options": "Open\nCompleted\nCancelled",
 			"default": "Open"
 		}
 	]
