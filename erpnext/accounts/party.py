@@ -609,7 +609,7 @@ def get_partywise_advanced_payment_amount(party_type, posting_date = None, futur
 	cond = "1=1"
 	if posting_date:
 		if future_payment:
-			cond = "DATE(creation) <= '{0}'".format(posting_date)
+			cond = "posting_date <= '{0}' OR DATE(creation) <= '{0}' """.format(posting_date)
 		else:
 			cond = "posting_date <= '{0}'".format(posting_date)
 
@@ -621,7 +621,7 @@ def get_partywise_advanced_payment_amount(party_type, posting_date = None, futur
 		WHERE
 			party_type = %s and against_voucher is null
 			and {1} GROUP BY party"""
-		.format(("credit") if party_type == "Customer" else "debit", cond) , party_type)
+		.format(("credit") if party_type == "Customer" else "debit", cond) , party_type, debug=1)
 
 	if data:
 		return frappe._dict(data)
