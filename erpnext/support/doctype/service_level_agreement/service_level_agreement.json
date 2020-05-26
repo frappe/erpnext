@@ -9,6 +9,7 @@
   "enable",
   "section_break_2",
   "service_level",
+  "default_priority",
   "default_service_level_agreement",
   "column_break_2",
   "employee_group",
@@ -150,10 +151,19 @@
    "fieldname": "default_service_level_agreement",
    "fieldtype": "Check",
    "label": "Default Service Level Agreement"
+  },
+  {
+   "fieldname": "default_priority",
+   "fieldtype": "Link",
+   "label": "Default Priority",
+   "options": "Issue Priority",
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "links": [],
- "modified": "2020-05-06 11:46:38.834810",
+ "modified": "2020-05-26 16:02:59.859980",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
