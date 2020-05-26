@@ -120,7 +120,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Open\nReplied\nClosed",
+   "options": "Open\nReplied\nResolved\nClosed",
    "search_index": 1
   },
   {
@@ -420,7 +420,7 @@
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2020-05-25 22:02:32.974165",
+ "modified": "2020-05-26 12:12:59.343559",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",

@@ -59,7 +59,7 @@ class Issue(Document):
 		if self.status!="Open" and status =="Open" and not self.first_responded_on:
 			self.first_responded_on = frappe.flags.current_time or now_datetime()
 
-		if self.status=="Closed" and status !="Closed":
+		if self.status in ["Closed", "Resolved"] and status not in ["Resolved", "Closed"]:
 			self.resolution_date = frappe.flags.current_time or now_datetime()
 			if frappe.db.get_value("Issue", self.name, "agreement_fulfilled") == "Ongoing":
 				set_service_level_agreement_variance(issue=self.name)
