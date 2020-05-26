@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.core.doctype.communication.email import update_mins_to_first_communication
+from frappe.core.doctype.communication.communication import update_mins_to_first_communication
 
 def execute():
 	frappe.reload_doctype('Issue')
