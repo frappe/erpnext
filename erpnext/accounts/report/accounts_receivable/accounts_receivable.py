@@ -583,7 +583,7 @@ class ReceivablePayableReport(object):
 				and (party is not null and party != '')
 				and posting_date <= %s
 				{1} {2} {3}"""
-			.format(select_fields, conditions, future_payment_condition, order_by), values, as_dict=True, debug=1)
+			.format(select_fields, conditions, future_payment_condition, order_by), values, as_dict=True)
 
 	def get_sales_invoices_or_customers_based_on_sales_person(self):
 		if self.filters.get("sales_person"):
