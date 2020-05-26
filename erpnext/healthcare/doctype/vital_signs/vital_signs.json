@@ -2,18 +2,22 @@
  "actions": [],
  "allow_copy": 1,
  "allow_import": 1,
+ "autoname": "naming_series:",
  "beta": 1,
  "creation": "2017-02-02 11:00:24.853005",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "inpatient_record",
+  "naming_series",
+  "title",
   "patient",
   "patient_name",
+  "inpatient_record",
   "appointment",
   "encounter",
   "column_break_2",
+  "company",
   "signs_date",
   "signs_time",
   "sb_vs",
@@ -34,7 +38,7 @@
   "bmi",
   "column_break_14",
   "nutrition_note",
-  "company",
+  "sb_references",
   "amended_from"
  ],
  "fields": [
@@ -68,7 +72,8 @@
    "fieldname": "appointment",
    "fieldtype": "Link",
    "in_filter": 1,
-   "label": "Appointment",
+   "label": "Patient Appointment",
+   "no_copy": 1,
    "options": "Patient Appointment",
    "print_hide": 1,
    "read_only": 1
@@ -81,8 +86,7 @@
    "no_copy": 1,
    "options": "Patient Encounter",
    "print_hide": 1,
-   "read_only": 1,
-   "report_hide": 1
+   "read_only": 1
   },
   {
    "fieldname": "column_break_2",
@@ -217,7 +221,6 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Company",
    "options": "Company"
   },
@@ -229,11 +232,34 @@
    "options": "Vital Signs",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_references",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "HLC-VTS-.YYYY.-",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "columns": 5,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-04 17:19:29.549889",
+ "modified": "2020-05-17 22:23:24.632286",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Vital Signs",
@@ -273,7 +299,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "patient",
+ "title_field": "title",
  "track_changes": 1,
  "track_seen": 1
 }

@@ -47,11 +47,6 @@
   },
   {
    "hidden": 0,
-   "links": "[\n    {\n        \"description\": \"Match non-linked Invoices and Payments.\",\n        \"label\": \"Match Payments with Invoices\",\n        \"name\": \"Payment Reconciliation\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Update bank payment dates with journals.\",\n        \"label\": \"Update Bank Clearance Dates\",\n        \"name\": \"Bank Clearance\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Invoice Discounting\",\n        \"name\": \"Invoice Discounting\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Journal Entry\"\n        ],\n        \"doctype\": \"Journal Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Bank Reconciliation Statement\",\n        \"name\": \"Bank Reconciliation Statement\",\n        \"type\": \"report\"\n    },\n    {\n        \"icon\": \"fa fa-bar-chart\",\n        \"label\": \"Bank Reconciliation\",\n        \"name\": \"bank-reconciliation\",\n        \"type\": \"page\"\n    },\n    {\n        \"dependencies\": [\n            \"Journal Entry\"\n        ],\n        \"doctype\": \"Journal Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Bank Clearance Summary\",\n        \"name\": \"Bank Clearance Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"label\": \"Bank Guarantee\",\n        \"name\": \"Bank Guarantee\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Setup cheque dimensions for printing\",\n        \"label\": \"Cheque Print Template\",\n        \"name\": \"Cheque Print Template\",\n        \"type\": \"doctype\"\n    }\n]",
-   "title": "Banking and Payments"
-  },
-  {
-   "hidden": 0,
    "label": "Subscription Management",
    "links": "[\n    {\n        \"label\": \"Subscription Plan\",\n        \"name\": \"Subscription Plan\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Subscription\",\n        \"name\": \"Subscription\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Subscription Settings\",\n        \"name\": \"Subscription Settings\",\n        \"type\": \"doctype\"\n    }\n]"
   },
@@ -89,8 +84,8 @@
  "category": "Modules",
  "charts": [
   {
-   "chart_name": "Bank Balance",
-   "label": "Bank Balance"
+   "chart_name": "Profit and Loss",
+   "label": "Profit and Loss"
   }
  ],
  "creation": "2020-03-02 15:41:59.515192",
@@ -99,22 +94,37 @@
  "docstatus": 0,
  "doctype": "Desk Page",
  "extends_another_page": 0,
- "icon": "",
  "idx": 0,
  "is_standard": 1,
  "label": "Accounting",
- "modified": "2020-04-29 12:17:34.844397",
+ "modified": "2020-05-18 17:27:26.882340",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
+ "onboarding": "Accounts",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 0,
  "shortcuts": [
   {
-   "label": "Account",
+   "label": "Chart Of Accounts",
    "link_to": "Account",
    "type": "DocType"
+  },
+  {
+   "label": "Sales Invoice",
+   "link_to": "Sales Invoice",
+   "type": "DocType"
+  },
+  {
+   "label": "Purchase Invoice",
+   "link_to": "Purchase Invoice",
+   "type": "DocType"
+  },
+  {
+   "label": "Dashboard",
+   "link_to": "Accounts",
+   "type": "Dashboard"
   },
   {
    "label": "Journal Entry",
@@ -134,11 +144,6 @@
   {
    "label": "General Ledger",
    "link_to": "General Ledger",
-   "type": "Report"
-  },
-  {
-   "label": "Profit and Loss Statement",
-   "link_to": "Profit and Loss Statement",
    "type": "Report"
   },
   {

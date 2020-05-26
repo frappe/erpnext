@@ -19,7 +19,7 @@ from six import itervalues
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
 def get_period_list(from_fiscal_year, to_fiscal_year, period_start_date, period_end_date, filter_based_on, periodicity, accumulated_values=False,
-	company=None, reset_period_on_fy_change=True):
+	company=None, reset_period_on_fy_change=True, ignore_fiscal_year=False):
 	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
 		Periodicity can be (Yearly, Quarterly, Monthly)"""
 
@@ -67,8 +67,9 @@ def get_period_list(from_fiscal_year, to_fiscal_year, period_start_date, period_
 			# if a fiscal year ends before a 12 month period
 			period.to_date = year_end_date
 
-		period.to_date_fiscal_year = get_fiscal_year(period.to_date, company=company)[0]
-		period.from_date_fiscal_year_start_date = get_fiscal_year(period.from_date, company=company)[1]
+		if not ignore_fiscal_year:
+			period.to_date_fiscal_year = get_fiscal_year(period.to_date, company=company)[0]
+			period.from_date_fiscal_year_start_date = get_fiscal_year(period.from_date, company=company)[1]
 
 		period_list.append(period)
 

@@ -81,6 +81,7 @@ def get_final_data(dimension, dimension_items, filters, period_month_ranges, dat
 		
 	return data
 
+
 def get_columns(filters):
 	columns = [
 		{
