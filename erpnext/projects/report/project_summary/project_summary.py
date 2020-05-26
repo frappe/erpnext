@@ -95,19 +95,19 @@ def get_chart_data(data):
 
 	return {
 		"data": {
-			'labels': labels,
+			'labels': labels[:30],
 			'datasets': [
 				{
 					"name": "Overdue",
-					"values": overdue
+					"values": overdue[:30]
 				},
 				{
 					"name": "Completed",
-					"values": completed
+					"values": completed[:30]
 				},
 				{
 					"name": "Total Tasks",
-					"values": total
+					"values": total[:30]
 				},
 			]
 		},
