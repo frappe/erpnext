@@ -1,11 +1,13 @@
 {
  "actions": [],
  "allow_import": 1,
+ "autoname": "naming_series:",
  "creation": "2020-04-18 04:50:46.187638",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "workstation",
   "operator",
   "column_break_4",
@@ -78,10 +80,17 @@
    "fieldname": "remarks",
    "fieldtype": "Text",
    "label": "Remarks"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "DT-",
+   "reqd": 1
   }
  ],
  "links": [],
- "modified": "2020-05-19 12:59:37.358483",
+ "modified": "2020-05-26 22:14:54.479831",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Downtime Entry",

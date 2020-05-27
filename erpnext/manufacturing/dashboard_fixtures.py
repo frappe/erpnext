@@ -3,7 +3,7 @@
 
 import frappe, erpnext, json
 from frappe import _
-from frappe.utils import nowdate, get_date_str
+from frappe.utils import nowdate, get_first_day, get_last_day, add_months
 from erpnext.accounts.utils import get_fiscal_year
 
 def get_data():
@@ -28,10 +28,10 @@ def get_dashboards():
 			{ "chart": "Job Card Analysis", "width": "Full" }
 		],
 		"cards": [
-			{ "card": "Total Work Order" },
-			{ "card": "Completed Work Order" },
+			{ "card": "Monthly Total Work Order" },
+			{ "card": "Monthly Completed Work Order" },
 			{ "card": "Ongoing Job Card" },
-			{ "card": "Total Quality Inspection"}
+			{ "card": "Monthly Quality Inspection"}
 		]
 	}]
 
@@ -180,38 +180,37 @@ def get_charts():
 	}]
 
 def get_number_cards():
-	fiscal_year = get_fiscal_year(date=nowdate())
-	year_start_date = get_date_str(fiscal_year[1])
-	year_end_date = get_date_str(fiscal_year[2])
+	start_date = add_months(nowdate(), -1)
+	end_date = nowdate()
 
 	return [{
 		"doctype": "Number Card",
 		"document_type": "Work Order",
-		"name": "Total Work Order",
+		"name": "Monthly Total Work Order",
 		"filters_json": json.dumps([
 			['Work Order', 'docstatus', '=', 1],
-			['Work Order', 'creation', 'between', [year_start_date, year_end_date]]
+			['Work Order', 'creation', 'between', [start_date, end_date]]
 		]),
 		"function": "Count",
 		"is_public": 1,
-		"label": _("Total Work Order"),
+		"label": _("Monthly Total Work Order"),
 		"show_percentage_stats": 1,
-		"stats_time_interval": "Monthly"
+		"stats_time_interval": "Weekly"
 	},
 	{
 		"doctype": "Number Card",
 		"document_type": "Work Order",
-		"name": "Completed Work Order",
+		"name": "Monthly Completed Work Order",
 		"filters_json": json.dumps([
 			['Work Order', 'status', '=', 'Completed'],
 			['Work Order', 'docstatus', '=', 1],
-			['Work Order', 'creation', 'between', [year_start_date, year_end_date]]
+			['Work Order', 'creation', 'between', [start_date, end_date]]
 		]),
 		"function": "Count",
 		"is_public": 1,
-		"label": _("Completed Work Order"),
+		"label": _("Monthly Completed Work Order"),
 		"show_percentage_stats": 1,
-		"stats_time_interval": "Monthly"
+		"stats_time_interval": "Weekly"
 	},
 	{
 		"doctype": "Number Card",
@@ -225,16 +224,19 @@ def get_number_cards():
 		"is_public": 1,
 		"label": _("Ongoing Job Card"),
 		"show_percentage_stats": 1,
-		"stats_time_interval": "Monthly"
+		"stats_time_interval": "Weekly"
 	},
 	{
 		"doctype": "Number Card",
 		"document_type": "Quality Inspection",
-		"name": "Total Quality Inspection",
-		"filters_json": json.dumps([['Quality Inspection', 'docstatus', '=', 1]]),
+		"name": "Monthly Quality Inspection",
+		"filters_json": json.dumps([
+			['Quality Inspection', 'docstatus', '=', 1],
+			['Quality Inspection', 'creation', 'between', [start_date, end_date]]
+		]),
 		"function": "Count",
 		"is_public": 1,
-		"label": _("Total Quality Inspection"),
+		"label": _("Monthly Quality Inspection"),
 		"show_percentage_stats": 1,
-		"stats_time_interval": "Monthly"
+		"stats_time_interval": "Weekly"
 	}]
