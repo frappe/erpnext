@@ -8,12 +8,12 @@
  "is_mandatory": 0,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2020-05-14 17:28:16.448676",
+ "modified": "2020-05-27 11:28:07.452857",
  "modified_by": "Administrator",
  "name": "Introduction to CRM",
  "owner": "Administrator",
  "show_full_form": 0,
  "title": "Introduction to CRM",
- "validate_action": 0,
+ "validate_action": 1,
  "video_url": "https://www.youtube.com/watch?v=o9XCSZHJfpA"
 }
