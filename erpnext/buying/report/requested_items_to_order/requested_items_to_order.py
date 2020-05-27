@@ -44,6 +44,9 @@ def get_conditions(filters):
 	if filters.get("material_request"):
 		conditions += " and mr.name = '{0}'".format(filters.get("material_request"))
 
+	if filters.get("item_code"):
+		conditions += " and mr_item.item_code = '{0}'".format(filters.get("item_code"))
+
 	return conditions
 
 def get_data(filters, conditions):
@@ -74,25 +77,41 @@ def get_data(filters, conditions):
 
 	return data
 
+def update_qty_columns(row_to_update, data_row):
+	fields = ["qty", "ordered_qty", "qty_to_order"]
+	for field in fields:
+		row_to_update[field] += flt(data_row[field])
+
 def prepare_data(data, filters):
 	"""Prepare consolidated Report data and Chart data"""
-	material_request_map = {}
+	material_request_map, item_qty_map = {}, {}
 
 	for row in data:
-		if not row["material_request"] in material_request_map:
-			# create an entry with mr as key
-			row_copy = copy.deepcopy(row)
-			material_request_map[row["material_request"]] = row_copy
+		# item wise map for charts
+		if not row["item_code"] in item_qty_map:
+			item_qty_map[row["item_code"]] = {
+				"qty" : row["qty"],
+				"ordered_qty" : row["ordered_qty"],
+				"qty_to_order" : row["qty_to_order"]
+			}
 		else:
-			mr_row = material_request_map[row["material_request"]]
-			mr_row["required_date"] = min(getdate(mr_row["required_date"]), getdate(row["required_date"]))
+			item_entry = item_qty_map[row["item_code"]]
+			update_qty_columns(item_entry, row)
 
-			#sum numeric rows
-			fields = ["qty", "ordered_qty", "qty_to_order"]
-			for field in fields:
-					mr_row[field] = flt(mr_row[field]) + flt(row[field])
+		if filters.get("group_by_mr"):
+			# consolidated material request map for group by filter
+			if not row["material_request"] in material_request_map:
+				# create an entry with mr as key
+				row_copy = copy.deepcopy(row)
+				material_request_map[row["material_request"]] = row_copy
+			else:
+				mr_row = material_request_map[row["material_request"]]
+				mr_row["required_date"] = min(getdate(mr_row["required_date"]), getdate(row["required_date"]))
 
-	chart_data = prepare_chart_data(material_request_map)
+				#sum numeric columns
+				update_qty_columns(mr_row, row)
+
+	chart_data = prepare_chart_data(item_qty_map)
 
 	if filters.get("group_by_mr"):
 		data =[]
@@ -102,12 +121,15 @@ def prepare_data(data, filters):
 
 	return data, chart_data
 
-def prepare_chart_data(data):
+def prepare_chart_data(item_data):
 	labels, qty_to_order, ordered_qty = [], [], []
 
-	for row in data:
-		mr_row = data[row]
-		labels.append(mr_row["material_request"])
+	if len(item_data) > 30:
+		item_data = dict(list(item_data.items())[:30])
+
+	for row in item_data:
+		mr_row = item_data[row]
+		labels.append(row)
 		qty_to_order.append(mr_row["qty_to_order"])
 		ordered_qty.append(mr_row["ordered_qty"])
 
