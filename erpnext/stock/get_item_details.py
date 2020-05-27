@@ -305,7 +305,8 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"weight_uom":item.weight_uom,
 		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0,
 		"transaction_date": args.get("transaction_date"),
-		"against_blanket_order": args.get("against_blanket_order")
+		"against_blanket_order": args.get("against_blanket_order"),
+		"bom_no": item.get("default_bom")
 	})
 
 	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
@@ -630,7 +631,7 @@ def get_item_price(args, item_code, ignore_party=False):
 		elif args.get("supplier"):
 			conditions += " and supplier=%(supplier)s"
 		else:
-			conditions += " and (customer is null or customer = '') and (supplier is null or supplier = '')"
+			conditions += "and (customer is null or customer = '') and (supplier is null or supplier = '')"
 
 	if args.get('transaction_date'):
 		conditions += """ and %(transaction_date)s between
