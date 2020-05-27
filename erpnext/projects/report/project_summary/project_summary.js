@@ -13,11 +13,30 @@ frappe.query_reports["Project Summary"] = {
 			"reqd": 1
 		},
 		{
+			"fieldname": "is_active",
+			"label": __("Is Active"),
+			"fieldtype": "Select",
+			"options": "\nYes\nNo",
+			"default": "Yes",
+		},
+		{
 			"fieldname": "status",
 			"label": __("Status"),
 			"fieldtype": "Select",
-			"options": "Open\nComplete\nCancelled",
+			"options": "\nOpen\nCompleted\nCancelled",
 			"default": "Open"
+		},
+		{
+			"fieldname": "project_type",
+			"label": __("Project Type"),
+			"fieldtype": "Link",
+			"options": "Project Type"
+		},
+		{
+			"fieldname": "priority",
+			"label": __("Priority"),
+			"fieldtype": "Select",
+			"options": "\nLow\nMedium\nHigh"
 		}
 	]
 };
