@@ -13,10 +13,10 @@
  "is_standard": 1,
  "message": "<p>{{ _(\"Hello\") }},</p>\n\n<p> {{ _(\"Retention Bonus for\") }} {{ doc.employee_name }} {{ _(\"due on\") }} {{ doc.bonus_payment_date }}</p>",
  "modified": "2018-05-15 19:00:24.294418",
- "modified_by": "ranjith@earthianslive.com",
- "module": "HR",
+ "modified_by": "Administrator",
+ "module": "Payroll",
  "name": "Retention Bonus",
- "owner": "ranjith@earthianslive.com",
+ "owner": "Administrator",
  "recipients": [
   {
    "email_by_role": "HR Manager"
