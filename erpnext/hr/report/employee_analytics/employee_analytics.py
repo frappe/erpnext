@@ -26,7 +26,7 @@ def get_columns():
 	return [
 		_("Employee") + ":Link/Employee:120", _("Name") + ":Data:200", _("Date of Birth")+ ":Date:100",
 		_("Branch") + ":Link/Branch:120", _("Department") + ":Link/Department:120",
-		_("Designation") + ":Link/Designation:120", _("Gender") + "::60", _("Company") + ":Link/Company:120"
+		_("Designation") + ":Link/Designation:120", _("Gender") + "::100", _("Company") + ":Link/Company:120"
 	]
 
 def get_conditions(filters):
@@ -43,7 +43,12 @@ def get_employees(filters):
 	gender, company from `tabEmployee` where status = 'Active' %s""" % conditions, as_list=1)
 
 def get_parameters(filters):
-	return frappe.db.sql("""select name from `tab"""+filters.get("parameter")+"""` """, as_list=1)
+	if filters.get("parameter") == "Grade":
+		parameter = "Employee Grade"
+	else:
+		parameter = filters.get("parameter")
+
+	return frappe.db.sql("""select name from `tab"""+ parameter +"""` """, as_list=1)
 
 def get_chart_data(parameters,employees, filters):
 	if not parameters:

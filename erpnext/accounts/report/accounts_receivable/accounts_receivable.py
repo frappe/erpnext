@@ -534,7 +534,7 @@ class ReceivablePayableReport(object):
 
 	def get_ageing_data(self, entry_date, row):
 		# [0-30, 30-60, 60-90, 90-120, 120-above]
-		row.range1 = row.range2 = row.range3 = row.range4 = range5 = 0.0
+		row.range1 = row.range2 = row.range3 = row.range4 = row.range5 = 0.0
 
 		if not (self.age_as_on and entry_date):
 			return
@@ -559,6 +559,14 @@ class ReceivablePayableReport(object):
 		conditions, values = self.prepare_conditions()
 		order_by = self.get_order_by_condition()
 
+		if self.filters.show_future_payments:
+			values.insert(2, self.filters.report_date)
+
+			date_condition = """AND (posting_date <= %s
+				OR (against_voucher IS NULL AND DATE(creation) <= %s))"""
+		else:
+			date_condition = "AND posting_date <=%s"
+
 		if self.filters.get(scrub(self.party_type)):
 			select_fields = "debit_in_account_currency as debit, credit_in_account_currency as credit"
 		else:
@@ -574,9 +582,8 @@ class ReceivablePayableReport(object):
 				docstatus < 2
 				and party_type=%s
 				and (party is not null and party != '')
-				and posting_date <= %s
-				{1} {2}"""
-			.format(select_fields, conditions, order_by), values, as_dict=True)
+				{1} {2} {3}"""
+			.format(select_fields, date_condition, conditions, order_by), values, as_dict=True)
 
 	def get_sales_invoices_or_customers_based_on_sales_person(self):
 		if self.filters.get("sales_person"):
