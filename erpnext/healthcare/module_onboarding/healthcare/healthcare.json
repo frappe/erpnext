@@ -10,7 +10,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/healthcare",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-05-19 12:52:09.757729",
+ "modified": "2020-05-26 23:16:37.603361",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
@@ -20,13 +20,13 @@
    "step": "Create Patient"
   },
   {
-   "step": "Create Practitioner"
-  },
-  {
    "step": "Create Practitioner Schedule"
   },
   {
-   "step": "Setup Schedule and Employee for Healthcare Practitioner"
+   "step": "Introduction to Healthcare Practitioner"
+  },
+  {
+   "step": "Create Healthcare Practitioner"
   },
   {
    "step": "Explore Healthcare Settings"
