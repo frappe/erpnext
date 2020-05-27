@@ -534,7 +534,7 @@ class ReceivablePayableReport(object):
 
 	def get_ageing_data(self, entry_date, row):
 		# [0-30, 30-60, 60-90, 90-120, 120-above]
-		row.range1 = row.range2 = row.range3 = row.range4 = range5 = 0.0
+		row.range1 = row.range2 = row.range3 = row.range4 = row.range5 = 0.0
 
 		if not (self.age_as_on and entry_date):
 			return
