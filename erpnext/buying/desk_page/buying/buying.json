@@ -55,7 +55,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Buying",
- "modified": "2020-05-19 19:44:36.260982",
+ "modified": "2020-05-27 19:15:05.067756",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",
@@ -66,7 +66,7 @@
  "shortcuts": [
   {
    "color": "#cef6d1",
-   "format": "{} available",
+   "format": "{} Available",
    "label": "Item",
    "link_to": "Item",
    "stats_filter": "{\n    \"disabled\": 0\n}",
@@ -82,7 +82,7 @@
   },
   {
    "color": "#ffe8cd",
-   "format": "{}  to Receive",
+   "format": "{}  To Receive",
    "label": "Purchase Order",
    "link_to": "Purchase Order",
    "stats_filter": "{\n    \"company\": [\"like\", '%' + frappe.defaults.get_global_default(\"company\") + '%'],\n    \"status\":[\"in\", [\"To Receive\", \"To Receive and Bill\"]]\n}",
@@ -99,7 +99,7 @@
    "type": "Report"
   },
   {
-   "label": "Buying Dashboard",
+   "label": "Dashboard",
    "link_to": "Buying",
    "type": "Dashboard"
   }
