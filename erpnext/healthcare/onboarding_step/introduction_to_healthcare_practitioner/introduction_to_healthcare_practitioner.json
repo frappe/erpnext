@@ -9,12 +9,12 @@
  "is_mandatory": 1,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2020-05-19 12:26:42.492734",
+ "modified": "2020-05-26 22:07:07.482530",
  "modified_by": "Administrator",
- "name": "Setup Schedule and Employee for Healthcare Practitioner",
+ "name": "Introduction to Healthcare Practitioner",
  "owner": "Administrator",
  "reference_document": "Healthcare Practitioner",
  "show_full_form": 0,
- "title": "Setup Schedule and Employee for Healthcare Practitioner",
+ "title": "Introduction to Healthcare Practitioner",
  "validate_action": 0
 }
