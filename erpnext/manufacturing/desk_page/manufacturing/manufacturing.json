@@ -47,7 +47,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Manufacturing",
- "modified": "2020-05-20 11:50:20.029056",
+ "modified": "2020-05-28 13:54:02.048419",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
@@ -58,6 +58,7 @@
  "restrict_to_domain": "Manufacturing",
  "shortcuts": [
   {
+   "color": "#cef6d1",
    "format": "{} Active",
    "label": "Item",
    "link_to": "Item",
@@ -66,6 +67,7 @@
    "type": "DocType"
   },
   {
+   "color": "#cef6d1",
    "format": "{} Active",
    "label": "BOM",
    "link_to": "BOM",
@@ -74,6 +76,7 @@
    "type": "DocType"
   },
   {
+   "color": "#ffe8cd",
    "format": "{} Open",
    "label": "Work Order",
    "link_to": "Work Order",
@@ -82,6 +85,7 @@
    "type": "DocType"
   },
   {
+   "color": "#ffe8cd",
    "format": "{} Open",
    "label": "Production Plan",
    "link_to": "Production Plan",
