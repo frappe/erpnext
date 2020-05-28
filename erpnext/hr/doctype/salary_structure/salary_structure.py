@@ -149,16 +149,20 @@ def get_existing_assignments(employees, salary_structure, from_date):
 	return salary_structures_assignments
 
 @frappe.whitelist()
-def make_salary_slip(source_name, target_doc = None, employee = None, as_print = False, print_format = None, for_preview=0):
+def make_salary_slip(source_name, target_doc = None, employee = None, as_print = False, print_format = None, for_preview=0, ignore_permissions=False):
 	def postprocess(source, target):
 		if employee:
 			employee_details = frappe.db.get_value("Employee", employee,
-				["employee_name", "branch", "designation", "department"], as_dict=1)
+				["employee_name", "branch", "designation", "department", "payroll_cost_center"], as_dict=1)
 			target.employee = employee
 			target.employee_name = employee_details.employee_name
 			target.branch = employee_details.branch
 			target.designation = employee_details.designation
 			target.department = employee_details.department
+			target.payroll_cost_center = employee_details.payroll_cost_center
+			if not target.payroll_cost_center and target.department:
+				target.payroll_cost_center = frappe.db.get_value("Department", target.department, "payroll_cost_center")
+
 		target.run_method('process_salary_structure', for_preview=for_preview)
 
 	doc = get_mapped_doc("Salary Structure", source_name, {
@@ -169,7 +173,7 @@ def make_salary_slip(source_name, target_doc = None, employee = None, as_print =
 				"name": "salary_structure"
 			}
 		}
-	}, target_doc, postprocess, ignore_child_tables=True)
+	}, target_doc, postprocess, ignore_child_tables=True, ignore_permissions=ignore_permissions)
 
 	if cint(as_print):
 		doc.name = 'Preview for {0}'.format(employee)

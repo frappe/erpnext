@@ -69,9 +69,9 @@ def create_multiple(doctype, docname):
 		lab_test_created = create_lab_test_from_encounter(docname)
 
 	if lab_test_created:
-		frappe.msgprint(_("Lab Test(s) "+lab_test_created+" created."))
+		frappe.msgprint(_("Lab Test(s) {0} created".format(lab_test_created)))
 	else:
-		frappe.msgprint(_("No Lab Test created"))
+		frappe.msgprint(_("No Lab Tests created"))
 
 def create_lab_test_from_encounter(encounter_id):
 	lab_test_created = False
@@ -87,7 +87,7 @@ def create_lab_test_from_encounter(encounter_id):
 		for lab_test_id in lab_test_ids:
 			template = get_lab_test_template(lab_test_id[1])
 			if template:
-				lab_test = create_lab_test_doc(lab_test_id[2], encounter.practitioner, patient, template)
+				lab_test = create_lab_test_doc(lab_test_id[2], encounter.practitioner, patient, template, encounter.company)
 				lab_test.save(ignore_permissions = True)
 				frappe.db.set_value("Lab Prescription", lab_test_id[0], "lab_test_created", 1)
 				if not lab_test_created:
@@ -111,7 +111,7 @@ def create_lab_test_from_invoice(invoice_name):
 			if lab_test_created != 1:
 				template = get_lab_test_template(item.item_code)
 				if template:
-					lab_test = create_lab_test_doc(True, invoice.ref_practitioner, patient, template)
+					lab_test = create_lab_test_doc(True, invoice.ref_practitioner, patient, template, invoice.company)
 					if item.reference_dt == "Lab Prescription":
 						lab_test.prescription = item.reference_dn
 					lab_test.save(ignore_permissions = True)
@@ -121,7 +121,7 @@ def create_lab_test_from_invoice(invoice_name):
 					if not lab_tests_created:
 						lab_tests_created = lab_test.name
 					else:
-						lab_tests_created += ", "+lab_test.name
+						lab_tests_created += ", " + lab_test.name
 	return lab_tests_created
 
 def get_lab_test_template(item):
@@ -141,7 +141,7 @@ def check_template_exists(item):
 		return template_exists
 	return False
 
-def create_lab_test_doc(invoiced, practitioner, patient, template):
+def create_lab_test_doc(invoiced, practitioner, patient, template, company):
 	lab_test = frappe.new_doc("Lab Test")
 	lab_test.invoiced = invoiced
 	lab_test.practitioner = practitioner
@@ -150,11 +150,12 @@ def create_lab_test_doc(invoiced, practitioner, patient, template):
 	lab_test.patient_sex = patient.sex
 	lab_test.email = patient.email
 	lab_test.mobile = patient.mobile
+	lab_test.report_preference = patient.report_preference
 	lab_test.department = template.department
 	lab_test.template = template.name
 	lab_test.lab_test_group = template.lab_test_group
 	lab_test.result_date = getdate()
-	lab_test.report_preference = patient.report_preference
+	lab_test.company = company
 	return lab_test
 
 def create_normals(template, lab_test):
@@ -190,7 +191,7 @@ def create_specials(template, lab_test):
 		special.require_result_value = 1
 		special.template = template.name
 
-def create_sample_doc(template, patient, invoice):
+def create_sample_doc(template, patient, invoice, company = None):
 	if template.sample:
 		sample_exists = frappe.db.exists({
 			"doctype": "Sample Collection",
@@ -221,6 +222,8 @@ def create_sample_doc(template, patient, invoice):
 			sample_collection.sample = template.sample
 			sample_collection.sample_uom = template.sample_uom
 			sample_collection.sample_qty = template.sample_qty
+			sample_collection.company = company
+
 			if(template.sample_details):
 				sample_collection.sample_details = "Test :" + (template.get("lab_test_name") or template.get("template")) +"\n"+"Collection Detials:\n\t"+template.sample_details
 			sample_collection.save(ignore_permissions=True)
@@ -229,7 +232,7 @@ def create_sample_doc(template, patient, invoice):
 
 def create_sample_collection(lab_test, template, patient, invoice):
 	if(frappe.db.get_value("Healthcare Settings", None, "create_sample_collection_for_lab_test") == "1"):
-		sample_collection = create_sample_doc(template, patient, invoice)
+		sample_collection = create_sample_doc(template, patient, invoice, lab_test.company)
 		if(sample_collection):
 			lab_test.sample = sample_collection.name
 	return lab_test
