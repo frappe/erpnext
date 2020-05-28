@@ -395,12 +395,29 @@ def get_item_warehouse(item, args, overwrite_warehouse, defaults={}):
 	return warehouse
 
 def update_barcode_value(out):
-	from erpnext.accounts.page.pos.pos import get_barcode_data
 	barcode_data = get_barcode_data([out])
 
 	# If item has one barcode then update the value of the barcode field
 	if barcode_data and len(barcode_data.get(out.item_code)) == 1:
 		out['barcode'] = barcode_data.get(out.item_code)[0]
+
+def get_barcode_data(items_list):
+	# get itemwise batch no data
+	# exmaple: {'LED-GRE': [Batch001, Batch002]}
+	# where LED-GRE is item code, SN0001 is serial no and Pune is warehouse
+
+	itemwise_barcode = {}
+	for item in items_list:
+		barcodes = frappe.db.sql("""
+			select barcode from `tabItem Barcode` where parent = %s
+		""", item.item_code, as_dict=1)
+
+		for barcode in barcodes:
+			if item.item_code not in itemwise_barcode:
+				itemwise_barcode.setdefault(item.item_code, [])
+			itemwise_barcode[item.item_code].append(barcode.get("barcode"))
+
+	return itemwise_barcode
 
 @frappe.whitelist()
 def get_item_tax_info(company, tax_category, item_codes):

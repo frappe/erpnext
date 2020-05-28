@@ -8,7 +8,7 @@ from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_d
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date
 from frappe.model.mapper import get_mapped_doc
-from erpnext.accounts.page.pos.pos import update_multi_mode_option
+from erpnext.selling.doctype.pos_invoice.pos_invoice import update_multi_mode_option
 
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.accounts.utils import get_account_currency
