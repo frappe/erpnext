@@ -139,7 +139,7 @@ def get_items_with_location_and_quantity(item_doc, item_location_map):
 	item_location_map[item_doc.item_code] = available_locations
 	return locations
 
-def get_available_item_locations(item_code, from_warehouses, required_qty, company):
+def get_available_item_locations(item_code, from_warehouses, required_qty, company, ignore_validation=False):
 	locations = []
 	if frappe.get_cached_value('Item', item_code, 'has_serial_no'):
 		locations = get_available_item_locations_for_serialized_item(item_code, from_warehouses, required_qty, company)
@@ -152,7 +152,7 @@ def get_available_item_locations(item_code, from_warehouses, required_qty, compa
 
 	remaining_qty = required_qty - total_qty_available
 
-	if remaining_qty > 0:
+	if remaining_qty > 0 and not ignore_validation:
 		frappe.msgprint(_('{0} units of {1} is not available.')
 			.format(remaining_qty, frappe.get_desk_link('Item', item_code)))
 
@@ -300,6 +300,7 @@ def create_delivery_note(source_name, target_doc=None):
 	set_delivery_note_missing_values(delivery_note)
 
 	delivery_note.pick_list = pick_list.name
+	delivery_note.customer = pick_list.customer if pick_list.customer else None
 
 	return delivery_note
 

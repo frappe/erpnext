@@ -1652,8 +1652,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					if(!r.exc) {
 						$.each(me.frm.doc.items || [], function(i, item) {
 							if(item.item_code && r.message.hasOwnProperty(item.item_code)) {
-								item.item_tax_template = r.message[item.item_code].item_tax_template;
-								item.item_tax_rate = r.message[item.item_code].item_tax_rate;
+								if (!item.item_tax_template) {
+									item.item_tax_template = r.message[item.item_code].item_tax_template;
+									item.item_tax_rate = r.message[item.item_code].item_tax_rate;
+								}
 								me.add_taxes_from_item_tax_template(item.item_tax_rate);
 							} else {
 								item.item_tax_template = "";
@@ -1903,21 +1905,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	set_reserve_warehouse: function() {
-		this.autofill_warehouse("reserve_warehouse");
+		this.autofill_warehouse(this.frm.doc.supplied_items, "reserve_warehouse", this.frm.doc.set_reserve_warehouse);
 	},
 
 	set_warehouse: function() {
-		this.autofill_warehouse("warehouse");
+		this.autofill_warehouse(this.frm.doc.items, "warehouse", this.frm.doc.set_warehouse);
 	},
 
-	autofill_warehouse : function (warehouse_field) {
-		// set warehouse in all child table rows
-		var me = this;
-		let warehouse = (warehouse_field === "warehouse") ? me.frm.doc.set_warehouse : me.frm.doc.set_reserve_warehouse;
-		let child_table = (warehouse_field === "warehouse") ? me.frm.doc.items : me.frm.doc.supplied_items;
-		let doctype = (warehouse_field === "warehouse") ? (me.frm.doctype + " Item") : (me.frm.doctype + " Item Supplied");
-
-		if(warehouse) {
+	autofill_warehouse : function (child_table, warehouse_field, warehouse) {
+		if (warehouse && child_table && child_table.length) {
+			let doctype = child_table[0].doctype;
 			$.each(child_table || [], function(i, item) {
 				frappe.model.set_value(doctype, item.name, warehouse_field, warehouse);
 			});

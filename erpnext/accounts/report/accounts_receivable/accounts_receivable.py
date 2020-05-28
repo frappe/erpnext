@@ -534,7 +534,7 @@ class ReceivablePayableReport(object):
 
 	def get_ageing_data(self, entry_date, row):
 		# [0-30, 30-60, 60-90, 90-120, 120-above]
-		row.range1 = row.range2 = row.range3 = row.range4 = range5 = 0.0
+		row.range1 = row.range2 = row.range3 = row.range4 = row.range5 = 0.0
 
 		if not (self.age_as_on and entry_date):
 			return
@@ -546,7 +546,7 @@ class ReceivablePayableReport(object):
 			self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4 = 30, 60, 90, 120
 
 		for i, days in enumerate([self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4]):
-			if row.age <= days:
+			if cint(row.age) <= cint(days):
 				index = i
 				break
 

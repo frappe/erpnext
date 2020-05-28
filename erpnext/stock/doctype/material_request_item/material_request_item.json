@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-02-22 01:28:02",
  "doctype": "DocType",
@@ -21,6 +22,7 @@
   "quantity_and_warehouse",
   "qty",
   "stock_uom",
+  "from_warehouse",
   "warehouse",
   "col_break2",
   "uom",
@@ -51,6 +53,8 @@
   "dimension_col_break",
   "cost_center",
   "section_break_37",
+  "bom_no",
+  "section_break_46",
   "page_break"
  ],
  "fields": [
@@ -369,8 +373,10 @@
    "label": "Image"
   },
   {
+   "depends_on": "eval:parent.material_request_type == \"Manufacture\"",
    "fieldname": "section_break_37",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Manufacturing"
   },
   {
    "fieldname": "received_qty",
@@ -419,12 +425,31 @@
   {
    "fieldname": "col_break4",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:parent.material_request_type == \"Material Transfer\"",
+   "fieldname": "from_warehouse",
+   "fieldtype": "Link",
+   "label": "Source Warehouse (Material Transfer)",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "bom_no",
+   "fieldtype": "Link",
+   "label": "BOM No",
+   "no_copy": 1,
+   "options": "BOM",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "section_break_46",
+   "fieldtype": "Section Break"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-04-16 09:00:00.992835",
+ "modified": "2020-05-15 09:00:00.992835",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",

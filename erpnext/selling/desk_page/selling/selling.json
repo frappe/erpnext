@@ -39,11 +39,11 @@
  "docstatus": 0,
  "doctype": "Desk Page",
  "extends_another_page": 0,
- "icon": "",
+ "hide_custom": 1,
  "idx": 0,
  "is_standard": 1,
  "label": "Selling",
- "modified": "2020-04-01 11:28:51.047373",
+ "modified": "2020-05-28 13:46:08.314240",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
@@ -52,18 +52,27 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
+   "color": "#ffe8cd",
+   "format": "{} Draft",
    "label": "Sales Invoice",
    "link_to": "Sales Invoice",
+   "stats_filter": "{ \"status\": \"Draft\" }",
    "type": "DocType"
   },
   {
+   "color": "#ffe8cd",
+   "format": "{} To Deliver",
    "label": "Sales Order",
    "link_to": "Sales Order",
+   "stats_filter": "{\"Status\": \"To Deliver and Bill\"}",
    "type": "DocType"
   },
   {
+   "color": "#cef6d1",
+   "format": "{} Open",
    "label": "Quotation",
    "link_to": "Quotation",
+   "stats_filter": "{ \"Status\": \"Open\" }",
    "type": "DocType"
   },
   {
