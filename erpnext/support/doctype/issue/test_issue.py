@@ -78,9 +78,7 @@ class TestIssue(unittest.TestCase):
 	def test_issue_metrics(self):
 		creation = datetime.datetime(2020, 3, 4, 4, 0)
 
-		# make issue with customer specific SLA
-		customer = create_customer("_Test Customer", "__Test SLA Customer Group", "__Test SLA Territory")
-		issue = make_issue(creation, "_Test Customer", 1)
+		issue = make_issue(creation, index=1)
 		create_communication(issue.name, "test@example.com", "Received", creation)
 
 		creation = datetime.datetime(2020, 3, 4, 4, 15)
@@ -91,9 +89,9 @@ class TestIssue(unittest.TestCase):
 
 		creation = datetime.datetime(2020, 3, 4, 5, 5)
 		create_communication(issue.name, "test@admin.com", "Sent", creation)
-		issue = frappe.get_doc('Issue', issue.name)
 
 		frappe.flags.current_time = datetime.datetime(2020, 3, 4, 5, 5)
+		issue.reload()
 		issue.status = 'Closed'
 		issue.save()
 
@@ -101,9 +99,43 @@ class TestIssue(unittest.TestCase):
 		self.assertEqual(issue.resolution_time, 3900)
 		self.assertEqual(issue.user_resolution_time, 1200)
 
+	def test_hold_time_on_replied(self):
+		creation = datetime.datetime(2020, 3, 4, 4, 0)
+
+		issue = make_issue(creation, index=1)
+		create_communication(issue.name, "test@example.com", "Received", creation)
+
+		creation = datetime.datetime(2020, 3, 4, 4, 15)
+		create_communication(issue.name, "test@admin.com", "Sent", creation)
+
+		frappe.flags.current_time = datetime.datetime(2020, 3, 4, 4, 15)
+		issue.reload()
+		issue.status = 'Replied'
+		issue.save()
+
+		self.assertEqual(issue.on_hold_since, frappe.flags.current_time)
+
+		creation = datetime.datetime(2020, 3, 4, 5, 0)
+		frappe.flags.current_time = datetime.datetime(2020, 3, 4, 5, 0)
+		create_communication(issue.name, "test@example.com", "Received", creation)
+
+		issue.reload()
+		self.assertEqual(issue.total_hold_time, 2700)
+		self.assertEqual(issue.resolution_by, datetime.datetime(2020, 3, 4, 16, 45))
+
+		creation = datetime.datetime(2020, 3, 4, 5, 5)
+		create_communication(issue.name, "test@admin.com", "Sent", creation)
+
+		frappe.flags.current_time = datetime.datetime(2020, 3, 4, 5, 5)
+		issue.reload()
+		issue.status = 'Closed'
+		issue.save()
+
+		issue.reload()
+		self.assertEqual(issue.total_hold_time, 2700)
+
 
 def make_issue(creation=None, customer=None, index=0):
-
 	issue = frappe.get_doc({
 		"doctype": "Issue",
 		"subject": "Service Level Agreement Issue {0}".format(index),
@@ -163,4 +195,5 @@ def create_communication(reference_name, sender, sent_or_received, creation):
 		"reference_doctype": "Issue",
 		"creation": creation,
 		"reference_name": reference_name
-	}).insert(ignore_permissions=True)
+	})
+	issue.save()

@@ -100,7 +100,7 @@ class Issue(Document):
 			start_date_time = get_datetime(self.service_level_agreement_creation)
 			priority = get_priority(self)
 			now_time = frappe.flags.current_time or now_datetime()
-			hold_time = time_diff_in_seconds(now_datetime(), self.on_hold_since)
+			hold_time = time_diff_in_seconds(now_time, self.on_hold_since)
 
 			if not self.first_responded_on:
 				response_by = get_expected_time_for(parameter="response", service_level=priority, start_date_time=start_date_time)
