@@ -124,9 +124,8 @@ def add_account_subtype(account_subtype):
 
 @frappe.whitelist()
 def sync_transactions(bank, bank_account):
-	''' Sync transactions based on the last integration date as the start date, after sync is completed
-		add the transaction date of the oldest transaction as the last integration date '''
-
+	'''Sync transactions based on the last integration date as the start date, after the sync is completed
+		add the transaction date of the oldest transaction as the last integration date'''
 	last_transaction_date = frappe.db.get_value("Bank Account", bank_account, "last_integration_date")
 	if last_transaction_date:
 		start_date = formatdate(last_transaction_date, "YYYY-MM-dd")
