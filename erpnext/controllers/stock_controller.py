@@ -22,6 +22,7 @@ class StockController(AccountsController):
 		self.validate_inspection()
 		self.validate_serialized_batch()
 		self.validate_customer_provided_item()
+		self.validate_document_linking()
 
 	def make_gl_entries(self, gl_entries=None):
 		if self.docstatus == 2:
@@ -376,16 +377,96 @@ class StockController(AccountsController):
 				else:
 					frappe.msgprint(_("Create Quality Inspection for Item {0}").format(frappe.bold(d.item_code)))
 
-	def update_blanket_order(self):
-		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
-		for blanket_order in blanket_orders:
-			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
-
 	def validate_customer_provided_item(self):
 		for d in self.get('items'):
 			# Customer Provided parts will have zero valuation rate
 			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
 				d.allow_zero_valuation_rate = 1
+
+	def validate_document_linking(self):
+		""" Check if row is correctly linked to any previous document """
+		prevdoc_link_map = {
+			"Stock Entry" : {
+				"against_fields" : ["material_request", "against_stock_entry"],
+				"detail_fields" : ["material_request_item", "ste_detail"],
+				"po_field" : "po_detail"
+			},
+			"Delivery Note" : {
+				"against_fields" : ["against_sales_order", "against_sales_invoice"],
+				"detail_fields" : ["so_detail", "si_detail"],
+				"return_detail_field" : "dn_detail"
+			},
+			"Purchase Receipt" : {
+				"against_fields" : ["purchase_order", "material_request"],
+				"detail_fields" : ["purchase_order_item", "material_request_item"],
+				"return_detail_field" : "purchase_receipt_item"
+			},
+			"Purchase Invoice" : {
+				"against_fields" : ["purchase_order", "purchase_receipt"],
+				"detail_fields" : ["po_detail", "pr_detail"]
+			},
+			"Sales Invoice" : {
+				"against_fields" : ["sales_order", "delivery_note"],
+				"detail_fields" : ["so_detail", "dn_detail"]
+			},
+			"Purchase Order" : {
+				"against_fields" : ["material_request", "sales_order", "supplier_quotation"],
+				"detail_fields" : ["material_request_item", "sales_order_item", "supplier_quotation_item"]
+			},
+			"Material Request" : {
+				"against_fields" : ["sales_order", "production_plan"],
+				"detail_fields" : ["sales_order_item", "material_request_plan_item"]
+			},
+			"Request for Quotation" : {
+				"against_fields" : ["material_request"],
+				"detail_fields" : ["material_request_item"]
+			},
+			"Quotation" : {
+				"against_fields" : ["prevdoc_doctype"],
+				"detail_fields" : ["prevdoc_docname"]
+			},
+			"Supplier Quotation" : {
+				"against_fields" : ["material_request", "request_for_quotation"],
+				"detail_fields" : ["material_request_item", "request_for_quotation_item"]
+			}
+		}
+
+		# validation in production plan for PP
+		link_fields = prevdoc_link_map.get(self.doctype)
+		if not link_fields:
+			return
+		against_fields = link_fields.get("against_fields")
+		detail_fields = link_fields.get("detail_fields")
+
+		for item in self.items:
+			link_error = False
+			for index, field in enumerate(against_fields):
+				# check against fields and detail fields
+				if item.get(field) and not item.get(detail_fields[index]):
+					link_error = True
+					break
+
+			if self.doctype in ["Delivery Note", "Purchase Receipt"] and not link_error:
+				return_detail_field = link_fields.get("return_detail_field")
+				if self.return_against and not item.get(return_detail_field):
+					link_error = True
+
+			elif self.doctype == "Stock Entry" and not link_error:
+				po_field = link_fields.get("po_field")
+				if self.purchase_order and not item.get(po_field):
+					link_error = True
+
+			if link_error:
+				msg = _("{0} is incorrectly linked to {1}.").format(self.doctype, frappe.bold(item.get(against_fields[index])))
+				msg += "<br>" + _("Please create a {0} from {1} or use {2} to fetch Items.").format(self.doctype,
+					frappe.bold(item.get(against_fields[index])), frappe.bold("Get Items from"))
+
+				frappe.msgprint(msg=msg, title=_("Incorrect Linking"), raise_exception=1)
+
+	def update_blanket_order(self):
+		blanket_orders = list(set([d.blanket_order for d in self.items if d.blanket_order]))
+		for blanket_order in blanket_orders:
+			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
 
 def compare_existing_and_expected_gle(existing_gle, expected_gle):
 	matched = True

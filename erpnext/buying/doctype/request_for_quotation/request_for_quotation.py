@@ -25,6 +25,7 @@ class RequestforQuotation(BuyingController):
 		self.validate_duplicate_supplier()
 		self.validate_supplier_list()
 		validate_for_items(self)
+		super(BuyingController, self).validate_document_linking()
 		self.update_email_id()
 
 	def validate_duplicate_supplier(self):
