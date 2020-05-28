@@ -13,7 +13,7 @@ from erpnext.accounts.party import get_party_account, get_due_date
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 	get_loyalty_program_details_with_points, validate_loyalty_points
 
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, get_bank_cash_account
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, get_bank_cash_account, update_multi_mode_option
 from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos
 
 from six import iteritems
@@ -305,7 +305,7 @@ class POSInvoice(SalesInvoice):
 			}
 
 	def set_account_for_mode_of_payment(self):
-		self.payments = [d for d in self.payments if d.amount or d.base_amount]
+		self.payments = [d for d in self.payments if d.amount or d.base_amount or d.default]
 		for pay in self.payments:
 			if not pay.account:
 				pay.account = get_bank_cash_account(pay.mode_of_payment, self.company).get("account")
@@ -370,38 +370,3 @@ def make_merge_log(invoices):
 
 	if merge_log.get('pos_invoices'):
 		return merge_log.as_dict()
-
-def update_multi_mode_option(doc, pos_profile):
-	def append_payment(payment_mode):
-		payment = doc.append('payments', {})
-		payment.default = payment_mode.default
-		payment.mode_of_payment = payment_mode.parent
-		payment.account = payment_mode.default_account
-		payment.type = payment_mode.type
-
-	doc.set('payments', [])
-	if not pos_profile or not pos_profile.get('payments'):
-		for payment_mode in get_all_mode_of_payments(doc):
-			append_payment(payment_mode)
-		return
-
-	for pos_payment_method in pos_profile.get('payments'):
-		pos_payment_method = pos_payment_method.as_dict()
-		
-		payment_mode = get_mode_of_payment_info(pos_payment_method.mode_of_payment, doc.company)
-		payment_mode[0].default = pos_payment_method.default
-		append_payment(payment_mode[0])
-
-def get_all_mode_of_payments(doc):
-	return frappe.db.sql("""
-		select mpa.default_account, mpa.parent, mp.type as type 
-		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp 
-		where mpa.parent = mp.name and mpa.company = %(company)s and mp.enabled = 1""",
-	{'company': doc.company}, as_dict=1)
-
-def get_mode_of_payment_info(mode_of_payment, company):
-	return frappe.db.sql("""
-		select mpa.default_account, mpa.parent, mp.type as type 
-		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp 
-		where mpa.parent = mp.name and mpa.company = %s and mp.enabled = 1 and mp.name = %s""",
-	(company, mode_of_payment), as_dict=1)
