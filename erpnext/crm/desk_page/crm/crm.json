@@ -42,7 +42,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "CRM",
- "modified": "2020-05-20 12:11:36.250491",
+ "modified": "2020-05-28 13:29:28.253749",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
@@ -76,7 +76,7 @@
    "type": "Report"
   },
   {
-   "label": "CRM Dashboard",
+   "label": "Dashboard",
    "link_to": "CRM",
    "type": "Dashboard"
   }
