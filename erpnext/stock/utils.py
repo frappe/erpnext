@@ -365,3 +365,15 @@ def add_additional_uom_columns(columns, result, include_uom, conversion_factors)
 				row[data.converted_col] = flt(value_before_conversion) / conversion_factor
 
 		result[row_idx] = row
+
+def get_incoming_outgoing_rate_for_cancel(item_code, voucher_type, voucher_no, voucher_detail_no):
+	outgoing_rate = frappe.db.sql("""SELECT abs(stock_value_difference / actual_qty)
+		FROM `tabStock Ledger Entry`
+		WHERE voucher_type = %s and voucher_no = %s
+			and item_code = %s and voucher_detail_no = %s
+			ORDER BY CREATION DESC limit 1""",
+		(voucher_type, voucher_no, item_code, voucher_detail_no))
+
+	outgoing_rate = outgoing_rate[0][0] if outgoing_rate else 0.0
+
+	return outgoing_rate

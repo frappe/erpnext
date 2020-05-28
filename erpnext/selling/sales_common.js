@@ -429,7 +429,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		if (doc.has_serial_no && doc.serial_no) {
 			args['serial_no'] = doc.serial_no
 		}
-		
+
 		return frappe.call({
 			method: 'erpnext.stock.doctype.batch.batch.get_batch_no',
 			args: args,

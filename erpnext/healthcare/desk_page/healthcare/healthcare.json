@@ -47,7 +47,12 @@
   }
  ],
  "category": "Domains",
- "charts": [],
+ "charts": [
+  {
+   "chart_name": "Patient Appointments",
+   "label": "Patient Appointments"
+  }
+ ],
  "charts_label": "",
  "creation": "2020-03-02 17:23:17.919682",
  "developer_mode_only": 0,
@@ -55,26 +60,30 @@
  "docstatus": 0,
  "doctype": "Desk Page",
  "extends_another_page": 0,
+ "hide_custom": 0,
  "idx": 0,
  "is_standard": 1,
  "label": "Healthcare",
- "modified": "2020-04-20 11:42:43.889576",
+ "modified": "2020-05-19 20:57:22.797267",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
+ "onboarding": "Healthcare",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 0,
  "restrict_to_domain": "Healthcare",
  "shortcuts": [
   {
+   "color": "#ffe8cd",
    "format": "{} Open",
    "label": "Patient Appointment",
    "link_to": "Patient Appointment",
-   "stats_filter": "{\n    \"status\": \"Open\"\n}",
+   "stats_filter": "{\n    \"status\": \"Open\",\n    \"company\": [\"like\", '%' + frappe.defaults.get_global_default(\"company\") + '%']\n}",
    "type": "DocType"
   },
   {
+   "color": "#ffe8cd",
    "format": "{} Active",
    "label": "Patient",
    "link_to": "Patient",
@@ -82,10 +91,11 @@
    "type": "DocType"
   },
   {
+   "color": "#cef6d1",
    "format": "{} Vacant",
    "label": "Healthcare Service Unit",
    "link_to": "Healthcare Service Unit",
-   "stats_filter": "{\n    \"occupancy_status\": \"Vacant\",\n    \"is_group\": 0\n}",
+   "stats_filter": "{\n    \"occupancy_status\": \"Vacant\",\n    \"is_group\": 0,\n    \"company\": [\"like\", \"%\" + frappe.defaults.get_global_default(\"company\") + \"%\"]\n}",
    "type": "DocType"
   },
   {
@@ -97,6 +107,11 @@
    "label": "Patient History",
    "link_to": "patient_history",
    "type": "Page"
+  },
+  {
+   "label": "Healthcare Dashboard",
+   "link_to": "Healthcare",
+   "type": "Dashboard"
   }
  ]
 }

@@ -16,6 +16,7 @@ from frappe.model.mapper import get_mapped_doc
 class ClinicalProcedure(Document):
 	def validate(self):
 		self.set_status()
+		self.set_title()
 		if self.consume_stock:
 			self.set_actual_qty()
 
@@ -37,7 +38,7 @@ class ClinicalProcedure(Document):
 		template = frappe.get_doc('Clinical Procedure Template', self.procedure_template)
 		if template.sample:
 			patient = frappe.get_doc('Patient', self.patient)
-			sample_collection = create_sample_doc(template, patient, None)
+			sample_collection = create_sample_doc(template, patient, None, self.company)
 			frappe.db.set_value('Clinical Procedure', self.name, 'sample', sample_collection.name)
 		self.reload()
 
@@ -49,6 +50,9 @@ class ClinicalProcedure(Document):
 				self.status = 'Pending'
 		elif self.docstatus == 2:
 			self.status = 'Cancelled'
+
+	def set_title(self):
+		self.title = _('{0} - {1}').format(self.patient_name or self.patient, self.procedure_template)[:100]
 
 	def complete_procedure(self):
 		if self.consume_stock and self.items:
@@ -87,7 +91,8 @@ class ClinicalProcedure(Document):
 			else:
 				frappe.throw(_('Please set Customer in Patient {0}').format(frappe.bold(self.patient)), title=_('Customer Not Found'))
 
-		frappe.db.set_value('Clinical Procedure', self.name, 'status', 'Completed')
+		self.db_set('status', 'Completed')
+
 		if self.consume_stock and self.items:
 			return stock_entry
 
@@ -245,9 +250,9 @@ def make_procedure(source_name, target_doc=None):
 
 
 def insert_clinical_procedure_to_medical_record(doc):
-	subject = cstr(doc.procedure_template)
+	subject = frappe.bold(_("Clinical Procedure conducted: ")) + cstr(doc.procedure_template) + "<br>"
 	if doc.practitioner:
-		subject += ' ' + doc.practitioner
+		subject += frappe.bold(_('Healthcare Practitioner: ')) + doc.practitioner
 	if subject and doc.notes:
 		subject += '<br/>' + doc.notes
 
