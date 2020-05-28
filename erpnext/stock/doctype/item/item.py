@@ -467,7 +467,7 @@ class Item(WebsiteGenerator):
 
 	def set_shopping_cart_data(self, context):
 		from erpnext.shopping_cart.product_info import get_product_info_for_website
-		context.shopping_cart = get_product_info_for_website(self.name)
+		context.shopping_cart = get_product_info_for_website(self.name, skip_quotation_creation=True)
 
 	def add_default_uom_in_conversion_factor_table(self):
 		uom_conv_list = [d.uom for d in self.get("uoms")]
@@ -1142,6 +1142,17 @@ def set_item_default(item_code, company, fieldname, value):
 	d = item.append('item_defaults', {fieldname: value, "company": company})
 	d.db_insert()
 	item.clear_cache()
+
+@frappe.whitelist()
+def get_item_details(item_code, company=None):
+	out = frappe._dict()
+	if company:
+		out = get_item_defaults(item_code, company) or frappe._dict()
+
+	doc = frappe.get_cached_doc("Item", item_code)
+	out.update(doc.as_dict())
+
+	return out
 
 @frappe.whitelist()
 def get_uom_conv_factor(uom, stock_uom):

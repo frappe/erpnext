@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
@@ -447,7 +448,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2020-04-08 22:26:11.687110",
+ "modified": "2020-05-11 20:27:45.868960",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -504,15 +505,6 @@
    "read": 1,
    "report": 1,
    "role": "Sales User"
-  },
-  {
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Guest",
-   "share": 1
   }
  ],
  "search_fields": "lead_name,lead_owner,status",
