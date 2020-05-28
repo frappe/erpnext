@@ -267,7 +267,7 @@ class JournalEntry(AccountsController):
 				if not d.reference_name in self.reference_totals:
 					self.reference_totals[d.reference_name] = 0.0
 
-				if self.voucher_type not in ('Deferred Revenue Entry', 'Deferred Expense Entry'):
+				if self.voucher_type not in ('Deferred Revenue', 'Deferred Expense'):
 					self.reference_totals[d.reference_name] += flt(d.get(dr_or_cr))
 
 				self.reference_types[d.reference_name] = d.reference_type
@@ -281,7 +281,7 @@ class JournalEntry(AccountsController):
 
 				# check if party and account match
 				if d.reference_type in ("Sales Invoice", "Purchase Invoice"):
-					if self.voucher_type in ('Deferred Revenue Entry', 'Deferred Expense Entry') and d.reference_detail_no:
+					if self.voucher_type in ('Deferred Revenue', 'Deferred Expense') and d.reference_detail_no:
 						debit_or_credit = 'Debit' if d.debit else 'Credit'
 						party_account = get_deferred_booking_accounts(d.reference_type, d.reference_detail_no,
 							debit_or_credit)
@@ -530,7 +530,7 @@ class JournalEntry(AccountsController):
 					}, item=d)
 				)
 
-		if self.voucher_type in ('Deferred Revenue Entry', 'Deferred Expense Entry'):
+		if self.voucher_type in ('Deferred Revenue', 'Deferred Expense'):
 			update_outstanding = 'No'
 		else:
 			update_outstanding = 'Yes'

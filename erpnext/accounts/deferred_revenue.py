@@ -191,7 +191,7 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 	enable_check = "enable_deferred_revenue" \
 		if doc.doctype=="Sales Invoice" else "enable_deferred_expense"
 
-	def _book_deferred_revenue_or_expense(item, via_je, submit_je):
+	def _book_deferred_revenue_or_expense(item, via_journal_entry, submit_journal_entry):
 		start_date, end_date, last_gl_entry = get_booking_dates(doc, item, posting_date=posting_date)
 		if not (start_date and end_date): return
 
@@ -221,14 +221,14 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 			return
 
 		if getdate(end_date) < getdate(posting_date) and not last_gl_entry:
-			_book_deferred_revenue_or_expense(item, via_je, submit_je)
+			_book_deferred_revenue_or_expense(item, via_journal_entry, submit_journal_entry)
 
-	via_je = frappe.db.get_singles_value('Accounts Settings', 'book_deferred_entries_via_journal_entry')
-	submit_je = frappe.db.get_singles_value('Accounts Settings', 'submit_journal_entries')
+	via_journal_entry = frappe.db.get_singles_value('Accounts Settings', 'book_deferred_entries_via_journal_entry')
+	submit_journal_entry = frappe.db.get_singles_value('Accounts Settings', 'submit_journal_entries')
 
 	for item in doc.get('items'):
 		if item.get(enable_check):
-			_book_deferred_revenue_or_expense(item, via_je, submit_je)
+			_book_deferred_revenue_or_expense(item, via_journal_entry, submit_journal_entry)
 
 def process_deferred_accounting(posting_date=None):
 	''' Converts deferred income/expense into income/expense
