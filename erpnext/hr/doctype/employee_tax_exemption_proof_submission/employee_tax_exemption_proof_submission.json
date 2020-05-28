@@ -21,8 +21,6 @@
   "total_actual_amount",
   "column_break_12",
   "exemption_amount",
-  "other_incomes_section",
-  "income_from_other_sources",
   "attachment_section",
   "attachments",
   "amended_from"
@@ -112,16 +110,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "other_incomes_section",
-   "fieldtype": "Section Break",
-   "label": "Other Incomes"
-  },
-  {
-   "fieldname": "income_from_other_sources",
-   "fieldtype": "Currency",
-   "label": "Income From Other Sources"
-  },
-  {
    "fieldname": "attachment_section",
    "fieldtype": "Section Break"
   },
@@ -142,7 +130,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-02 19:02:15.398486",
+ "modified": "2020-03-18 14:55:51.420016",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Tax Exemption Proof Submission",

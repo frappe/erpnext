@@ -162,7 +162,7 @@ def get_default_price_list(party):
 def set_price_list(party_details, party, party_type, given_price_list, pos=None):
 	# price list
 	price_list = get_permitted_documents('Price List')
-	
+
 	# if there is only one permitted document based on user permissions, set it
 	if price_list and len(price_list) == 1:
 		price_list = price_list[0]
@@ -465,23 +465,25 @@ def get_timeline_data(doctype, name):
 	from frappe.desk.form.load import get_communication_data
 
 	out = {}
-	fields = 'date(creation), count(name)'
+	fields = 'creation, count(*)'
 	after = add_years(None, -1).strftime('%Y-%m-%d')
-	group_by='group by date(creation)'
+	group_by='group by Date(creation)'
 
-	data = get_communication_data(doctype, name, after=after, group_by='group by date(creation)',
-		fields='date(C.creation) as creation, count(C.name)',as_dict=False)
+	data = get_communication_data(doctype, name, after=after, group_by='group by creation',
+		fields='C.creation as creation, count(C.name)',as_dict=False)
 
 	# fetch and append data from Activity Log
 	data += frappe.db.sql("""select {fields}
 		from `tabActivity Log`
-		where (reference_doctype="{doctype}" and reference_name="{name}")
-		or (timeline_doctype in ("{doctype}") and timeline_name="{name}")
-		or (reference_doctype in ("Quotation", "Opportunity") and timeline_name="{name}")
+		where (reference_doctype=%(doctype)s and reference_name=%(name)s)
+		or (timeline_doctype in (%(doctype)s) and timeline_name=%(name)s)
+		or (reference_doctype in ("Quotation", "Opportunity") and timeline_name=%(name)s)
 		and status!='Success' and creation > {after}
 		{group_by} order by creation desc
-		""".format(doctype=frappe.db.escape(doctype), name=frappe.db.escape(name), fields=fields,
-			group_by=group_by, after=after), as_dict=False)
+		""".format(fields=fields, group_by=group_by, after=after), {
+			"doctype": doctype,
+			"name": name
+		}, as_dict=False)
 
 	timeline_items = dict(data)
 
@@ -600,10 +602,16 @@ def get_party_shipping_address(doctype, name):
 	else:
 		return ''
 
-def get_partywise_advanced_payment_amount(party_type, posting_date = None):
+def get_partywise_advanced_payment_amount(party_type, posting_date = None, future_payment=0, company=None):
 	cond = "1=1"
 	if posting_date:
-		cond = "posting_date <= '{0}'".format(posting_date)
+		if future_payment:
+			cond = "posting_date <= '{0}' OR DATE(creation) <= '{0}' """.format(posting_date)
+		else:
+			cond = "posting_date <= '{0}'".format(posting_date)
+
+	if company:
+		cond += "and company = '{0}'".format(company)
 
 	data = frappe.db.sql(""" SELECT party, sum({0}) as amount
 		FROM `tabGL Entry`
