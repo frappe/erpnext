@@ -16,7 +16,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/CRM",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-05-27 11:33:09.941263",
+ "modified": "2020-05-28 13:59:33.693420",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
@@ -37,6 +37,6 @@
  ],
  "subtitle": "Lead, Opportunity, Customer and more",
  "success_message": "CRM Module is all setup!",
- "title": "Let's Setup Your CRM",
+ "title": "Let's Set Up Your CRM",
  "user_can_dismiss": 1
 }
