@@ -76,9 +76,9 @@ class Issue(Document):
 			self.agreement_fulfilled = "Ongoing"
 			set_service_level_agreement_variance(issue=self.name)
 
-		self.handle_hold_time()
+		self.handle_hold_time(status)
 
-	def handle_hold_time(self):
+	def handle_hold_time(self, status):
 		# set response and resolution variance as None as the issue is on Hold for status as Replied
 		if self.status == "Replied" and status != "Replied":
 			self.on_hold_since = frappe.flags.current_time or now_datetime()
@@ -91,24 +91,26 @@ class Issue(Document):
 		# calculate hold time when status is changed from Replied to any other status
 		if self.status != "Replied" and status == "Replied":
 			hold_time = self.total_hold_time if self.total_hold_time else 0
-			self.total_hold_time = hold_time + time_diff_in_seconds(now_datetime(), self.on_hold_since)
+			now_time = frappe.flags.current_time or now_datetime()
+			self.total_hold_time = hold_time + time_diff_in_seconds(now_time, self.on_hold_since)
 
 		# re-calculate SLA variables after issue changes from Replied to Open
 		# add hold time to SLA variables
 		if self.status == "Open" and status == "Replied":
 			start_date_time = get_datetime(self.service_level_agreement_creation)
 			priority = get_priority(self)
+			now_time = frappe.flags.current_time or now_datetime()
 			hold_time = time_diff_in_seconds(now_datetime(), self.on_hold_since)
 
 			if not self.first_responded_on:
 				response_by = get_expected_time_for(parameter="response", service_level=priority, start_date_time=start_date_time)
 				self.response_by = add_to_date(response_by, seconds=round(hold_time))
-				response_by_variance = round(time_diff_in_hours(self.response_by, now_datetime()))
+				response_by_variance = round(time_diff_in_hours(self.response_by, now_time))
 				self.response_by_variance = response_by_variance + (hold_time // 3600)
 
 			resolution_by = get_expected_time_for(parameter="resolution", service_level=priority, start_date_time=start_date_time)
 			self.resolution_by = add_to_date(resolution_by, seconds=round(hold_time))
-			resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_datetime()))
+			resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_time))
 			self.resolution_by_variance = resolution_by_variance + (hold_time // 3600)
 			self.on_hold_since = None
 
@@ -377,7 +379,7 @@ def set_average_response_time(issue):
 
 def set_resolution_time(issue):
 	# total time taken from issue creation to closing
-	resolution_time = time_diff_in_seconds(now_datetime(), issue.creation)
+	resolution_time = time_diff_in_seconds(issue.resolution_date, issue.creation)
 	issue.db_set("resolution_time", resolution_time)
 
 
@@ -399,7 +401,7 @@ def set_user_resolution_time(issue):
 				pending_time.append(wait_time)
 
 	total_pending_time = sum(pending_time)
-	resolution_time_in_secs = time_diff_in_seconds(now_datetime(), issue.creation)
+	resolution_time_in_secs = time_diff_in_seconds(issue.resolution_date, issue.creation)
 	user_resolution_time = resolution_time_in_secs - total_pending_time
 	issue.db_set("user_resolution_time", user_resolution_time)
 
