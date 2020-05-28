@@ -602,10 +602,14 @@ def get_party_shipping_address(doctype, name):
 	else:
 		return ''
 
-def get_partywise_advanced_payment_amount(party_type, posting_date = None, company=None):
+def get_partywise_advanced_payment_amount(party_type, posting_date = None, future_payment=0, company=None):
 	cond = "1=1"
 	if posting_date:
-		cond = "posting_date <= '{0}'".format(posting_date)
+		if future_payment:
+			cond = "posting_date <= '{0}' OR DATE(creation) <= '{0}' """.format(posting_date)
+		else:
+			cond = "posting_date <= '{0}'".format(posting_date)
+
 	if company:
 		cond += "and company = '{0}'".format(company)
 

@@ -24,6 +24,9 @@ class PickList(Document):
 		for item in self.locations:
 			if not frappe.get_cached_value('Item', item.item_code, 'has_serial_no'):
 				continue
+			if not item.serial_no:
+				frappe.throw(_("Row #{0}: {1} does not have any available serial numbers in {2}".format(
+					frappe.bold(item.idx), frappe.bold(item.item_code), frappe.bold(item.warehouse))))
 			if len(item.serial_no.split('\n')) == item.picked_qty:
 				continue
 			frappe.throw(_('For item {0} at row {1}, count of serial numbers does not match with the picked quantity')
@@ -300,6 +303,7 @@ def create_delivery_note(source_name, target_doc=None):
 	set_delivery_note_missing_values(delivery_note)
 
 	delivery_note.pick_list = pick_list.name
+	delivery_note.customer = pick_list.customer if pick_list.customer else None
 
 	return delivery_note
 
