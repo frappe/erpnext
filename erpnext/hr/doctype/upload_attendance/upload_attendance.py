@@ -22,6 +22,9 @@ def get_template():
 
 	args = frappe.local.form_dict
 
+	if getdate(args.from_date) > getdate(args.to_date):
+		frappe.throw(_("To Date should be greater than From Date"))
+
 	w = UnicodeWriter()
 	w = add_header(w)
 
