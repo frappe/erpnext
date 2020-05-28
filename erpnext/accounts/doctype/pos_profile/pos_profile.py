@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
 from frappe.utils import cint, now
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import set_account_for_mode_of_payment
 from six import iteritems
 from frappe.model.document import Document
 
