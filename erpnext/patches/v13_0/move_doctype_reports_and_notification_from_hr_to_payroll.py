@@ -46,3 +46,7 @@ def execute():
     for doctype in doctypes_moved:
         frappe.delete_doc_if_exists("DocType", doctype)
 
+    reports = ["Salary Register", "Bank Remittance"]
+
+    for report in reports:
+        frappe.delete_doc_if_exists("Report", report)
