@@ -9,7 +9,7 @@ def execute(filters=None):
 	columns = get_columns()
 	data = []
 
-	data = frappe.db.get_all("Project", filters=filters, fields=["name", 'status', "percent_complete", "expected_start_date", "expected_end_date"], order_by="expected_end_date")
+	data = frappe.db.get_all("Project", filters=filters, fields=["name", 'status', "percent_complete", "expected_start_date", "expected_end_date", "project_type"], order_by="expected_end_date")
 
 	for project in data:
 		project["total_tasks"] = frappe.db.count("Task", filters={"project": project.name})
@@ -29,6 +29,13 @@ def get_columns():
 			"fieldtype": "Link",
 			"options": "Project",
 			"width": 200
+		},
+		{
+			"fieldname": "project_type",
+			"label": _("Type"),
+			"fieldtype": "Link",
+			"options": "Project Type",
+			"width": 120
 		},
 		{
 			"fieldname": "status",
@@ -88,19 +95,19 @@ def get_chart_data(data):
 
 	return {
 		"data": {
-			'labels': labels,
+			'labels': labels[:30],
 			'datasets': [
 				{
 					"name": "Overdue",
-					"values": overdue
+					"values": overdue[:30]
 				},
 				{
 					"name": "Completed",
-					"values": completed
+					"values": completed[:30]
 				},
 				{
 					"name": "Total Tasks",
-					"values": total
+					"values": total[:30]
 				},
 			]
 		},

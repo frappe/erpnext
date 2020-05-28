@@ -42,6 +42,8 @@ class SerialNo(StockController):
 			self.status = "Delivered"
 		elif self.warranty_expiry_date and getdate(self.warranty_expiry_date) <= getdate(nowdate()):
 			self.status = "Expired"
+		elif not self.warehouse:
+			self.status = "Inactive"
 		else:
 			self.status = "Active"
 

@@ -35,13 +35,25 @@ frappe.query_reports["Requested Items to Order"] = {
 			"fieldtype": "Link",
 			"width": "80",
 			"options": "Material Request",
-			"get_query": () =>{
+			"get_query": () => {
 				return {
 					filters: {
 						"docstatus": 1,
 						"material_request_type": "Purchase",
 						"per_received": ["<", 100]
 					}
+				}
+			}
+		},
+		{
+			"fieldname": "item_code",
+			"label": __("Item"),
+			"fieldtype": "Link",
+			"width": "80",
+			"options": "Item",
+			"get_query": () => {
+				return {
+					query: "erpnext.controllers.queries.item_query"
 				}
 			}
 		},

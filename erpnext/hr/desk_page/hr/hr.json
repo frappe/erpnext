@@ -93,7 +93,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "HR",
- "modified": "2020-05-20 11:20:54.255557",
+ "modified": "2020-05-28 13:36:07.710600",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR",
@@ -103,10 +103,19 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
+   "color": "#cef6d1",
    "format": "{} Active",
    "label": "Employee",
    "link_to": "Employee",
    "stats_filter": "{\"status\":\"Active\"}",
+   "type": "DocType"
+  },
+  {
+   "color": "#ffe8cd",
+   "format": "{} Open",
+   "label": "Leave Application",
+   "link_to": "Leave Application",
+   "stats_filter": "{\"status\":\"Open\"}",
    "type": "DocType"
   },
   {
@@ -116,24 +125,18 @@
    "type": "DocType"
   },
   {
-   "label": "Leave Application",
-   "link_to": "Leave Application",
-   "stats_filter": "{\"status\":\"Open\"}",
-   "type": "DocType"
-  },
-  {
    "label": "Salary Structure",
    "link_to": "Payroll Entry",
    "type": "DocType"
   },
   {
-   "label": "Salary Register",
+   "label": "Monthly Attendance Sheet",
    "link_to": "Monthly Attendance Sheet",
    "type": "Report"
   },
   {
    "format": "{} Open",
-   "label": "HR Dashboard",
+   "label": "Dashboard",
    "link_to": "Human Resource",
    "stats_filter": "{\n    \"status\": \"Open\"\n}",
    "type": "Dashboard"

@@ -220,6 +220,9 @@ class ProductionPlanReport(object):
 				if item_details:
 					warehouses = [item_details["default_warehouse"]]
 
+			if self.filters.raw_material_warehouse:
+				warehouses = get_child_warehouses(self.filters.raw_material_warehouse)
+
 			d.remaining_qty = d.required_qty
 			self.pick_materials_from_warehouses(d, data, warehouses)
 
