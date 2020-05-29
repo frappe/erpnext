@@ -1,0 +1,164 @@
+{
+ "actions": [],
+ "creation": "2020-05-22 16:46:18.712954",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_1",
+  "frequency",
+  "column_break_2",
+  "include_aging",
+  "section_break_11",
+  "from_date",
+  "company",
+  "project",
+  "column_break_14",
+  "to_date",
+  "cost_center",
+  "dimensions",
+  "section_break_3",
+  "customer_collection",
+  "column_break_6",
+  "collection_name",
+  "column_break_17",
+  "amended_from",
+  "customers"
+ ],
+ "fields": [
+  {
+   "fieldname": "frequency",
+   "fieldtype": "Select",
+   "label": "Frequency",
+   "options": "Monthly\nBefore Due Date\nAfter Due Date"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "reqd": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "dimensions",
+   "fieldtype": "Data",
+   "label": "Dimensions"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Bulk Statement Of Accounts",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "customers",
+   "fieldtype": "Table",
+   "label": "Customers",
+   "options": "Bulk Statement Of Accounts Customers",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break",
+   "label": "Autoselect Customers"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break",
+   "label": "General Ledger Filters"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "include_aging",
+   "fieldtype": "Check",
+   "label": "Include Aging"
+  },
+  {
+   "default": "Customer Group",
+   "fieldname": "customer_collection",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Select Customers By",
+   "options": "Customer Group\nTerritory\nSales Partner\nSales Person"
+  },
+  {
+   "fieldname": "collection_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Enter Selection",
+   "options": "customer_collection"
+  },
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break",
+   "label": "Email Settings"
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-05-29 17:02:51.666989",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bulk Statement Of Accounts",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
