@@ -1,8 +1,9 @@
 from __future__ import unicode_literals
+import frappe
 from frappe import _
 
 def get_data():
-	return [
+	config =  [
 		{
 			"label": _("Purchasing"),
 			"icon": "fa fa-star",
@@ -243,3 +244,21 @@ def get_data():
 		},
 
 	]
+
+	regional = {
+			"label": _("Regional"),
+			"items": [
+				{
+				"type": "doctype",
+				"name": "Import Supplier Invoice",
+				"description": _("Import Italian Supplier Invoice."),
+				"onboard": 1,
+				}
+			]
+		}
+
+	countries = frappe.get_all("Company", fields="country")
+	countries = [country["country"] for country in countries]
+	if "Italy" in countries:
+		config.append(regional)
+	return config
