@@ -1,0 +1,25 @@
+{%- extends "frappe/templates/base.html" -%}
+
+{% macro erpnext_stylesheets() %}
+{%- for link in web_include_css %}
+<link type="text/css" rel="stylesheet" href="{{ link|abs_url }}">
+{%- endfor -%}
+{% endmacro %}
+
+{%- block head -%}
+{% if head_html is defined -%}
+{{ head_html or "" }}
+{%- endif %}
+
+{%- if theme.name != 'Standard' -%}
+<!-- if custom theme is generated, allow it to override styles of erpnext -->
+{{ erpnext_stylesheets() }}
+<link type="text/css" rel="stylesheet" href="{{ theme.theme_url }}">
+
+{%- else -%}
+<!-- else put them in standard order -->
+<link type="text/css" rel="stylesheet" href="/assets/css/frappe-web-b4.css">
+{{ erpnext_stylesheets() }}
+
+{%- endif -%}
+{%- endblock -%}
