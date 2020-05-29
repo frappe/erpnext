@@ -15,6 +15,7 @@ from erpnext.controllers.accounts_controller import get_payment_terms
 from erpnext.exceptions import InvalidCurrency
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.projects.doctype.project.test_project import make_project
 
 test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Template"]
 test_ignore = ["Serial No"]
@@ -434,6 +435,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		)
 
 	def test_total_purchase_cost_for_project(self):
+		make_project({'project_name':'_Test Project'})
+
 		existing_purchase_cost = frappe.db.sql("""select sum(base_net_amount)
 			from `tabPurchase Invoice Item` where project = '_Test Project' and docstatus=1""")
 		existing_purchase_cost = existing_purchase_cost and existing_purchase_cost[0][0] or 0
@@ -819,7 +822,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			"Creditors - _TC": {
 				"cost_center": cost_center
 			},
-			"_Test Account Cost for Goods Sold - _TC": {
+			"Cost of Goods Sold - _TC": {
 				"cost_center": cost_center
 			}
 		}
@@ -856,10 +859,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
-	
-	def test_purchase_invoice_with_project_link(self):
-		from erpnext.projects.doctype.project.test_project import make_project
 
+	def test_purchase_invoice_with_project_link(self):
 		project = make_project({
 			'project_name': 'Purchase Invoice Project',
 			'project_template_name': 'Test Project Template',
@@ -890,9 +891,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 			debit_in_account_currency, credit_in_account_currency
 			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
 			order by account asc""", pi.name, as_dict=1)
-		
+
 		self.assertTrue(gl_entries)
-		
+
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["project"], gle.project)
 
