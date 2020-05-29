@@ -46,6 +46,7 @@ class SellingController(StockController):
 		set_default_income_account_for_item(self)
 		self.set_customer_address()
 		self.validate_for_duplicate_items()
+		self.validate_target_warehouse()
 
 	def set_missing_values(self, for_validate=False):
 
@@ -164,9 +165,9 @@ class SellingController(StockController):
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
 
 	def validate_selling_price(self):
-		def throw_message(item_name, rate, ref_rate_field):
-			frappe.throw(_("""Selling rate for item {0} is lower than its {1}. Selling rate should be atleast {2}""")
-				.format(item_name, ref_rate_field, rate))
+		def throw_message(idx, item_name, rate, ref_rate_field):
+			frappe.throw(_("""Row #{}: Selling rate for item {} is lower than its {}. Selling rate should be atleast {}""")
+				.format(idx, item_name, ref_rate_field, rate))
 
 		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
 			return
@@ -180,8 +181,8 @@ class SellingController(StockController):
 
 			last_purchase_rate, is_stock_item = frappe.get_cached_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
 			last_purchase_rate_in_sales_uom = last_purchase_rate / (it.conversion_factor or 1)
-			if flt(it.base_rate) < flt(last_purchase_rate_in_sales_uom) and not self.get('is_internal_customer'):
-				throw_message(it.item_name, last_purchase_rate_in_sales_uom, "last purchase rate")
+			if flt(it.base_rate) < flt(last_purchase_rate_in_sales_uom):
+				throw_message(it.idx, frappe.bold(it.item_name), last_purchase_rate_in_sales_uom, "last purchase rate")
 
 			last_valuation_rate = frappe.db.sql("""
 				SELECT valuation_rate FROM `tabStock Ledger Entry` WHERE item_code = %s
@@ -192,7 +193,7 @@ class SellingController(StockController):
 				last_valuation_rate_in_sales_uom = last_valuation_rate[0][0] / (it.conversion_factor or 1)
 				if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate_in_sales_uom) \
 					and not self.get('is_internal_customer'):
-					throw_message(it.name, last_valuation_rate_in_sales_uom, "valuation rate")
+					throw_message(it.idx, frappe.bold(it.item_name), last_valuation_rate_in_sales_uom, "valuation rate")
 
 
 	def get_item_list(self):
@@ -360,7 +361,7 @@ class SellingController(StockController):
 					self.po_no = ', '.join(list(set([d.po_no for d in po_nos if d.po_no])))
 
 	def set_gross_profit(self):
-		if self.doctype == "Sales Order":
+		if self.doctype in ["Sales Order", "Quotation"]:
 			for item in self.items:
 				item.gross_profit = flt(((item.base_rate - item.valuation_rate) * item.stock_qty), self.precision("amount", item))
 
@@ -403,6 +404,14 @@ class SellingController(StockController):
 				else:
 					chk_dupl_itm.append(f)
 
+	def validate_target_warehouse(self):
+		items = self.get("items") + (self.get("packed_items") or [])
+
+		for d in items:
+			if d.get("target_warehouse") and d.get("warehouse") == d.get("target_warehouse"):
+				warehouse = frappe.bold(d.get("target_warehouse"))
+				frappe.throw(_("Row {0}: Delivery Warehouse ({1}) and Customer Warehouse ({2}) can not be same")
+					.format(d.idx, warehouse, warehouse))
 
 	def validate_items(self):
 		# validate items to see if they have is_sales_item enabled

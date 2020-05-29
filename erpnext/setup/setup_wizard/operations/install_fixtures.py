@@ -32,7 +32,7 @@ def install(country=None):
 		{ 'doctype': 'Domain', 'domain': 'Agriculture'},
 		{ 'doctype': 'Domain', 'domain': 'Non Profit'},
 
-		# ensure at least an empty Address Template exists for this Country	
+		# ensure at least an empty Address Template exists for this Country
 		{'doctype':"Address Template", "country": country},
 
 		# item group
@@ -271,7 +271,7 @@ def install(country=None):
 
 	# Records for the Supplier Scorecard
 	from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_default_records
-	
+
 	make_default_records()
 	make_records(records)
 	set_up_address_templates(default_country=country)
@@ -336,13 +336,14 @@ def add_uom_data():
 				"category_name": _(d.get("category"))
 			}).insert(ignore_permissions=True)
 
-		uom_conversion = frappe.get_doc({
-			"doctype": "UOM Conversion Factor",
-			"category": _(d.get("category")),
-			"from_uom": _(d.get("from_uom")),
-			"to_uom": _(d.get("to_uom")),
-			"value": d.get("value")
-		}).insert(ignore_permissions=True)
+		if not frappe.db.exists("UOM Conversion Factor", {"from_uom": _(d.get("from_uom")), "to_uom": _(d.get("to_uom"))}):
+			uom_conversion = frappe.get_doc({
+				"doctype": "UOM Conversion Factor",
+				"category": _(d.get("category")),
+				"from_uom": _(d.get("from_uom")),
+				"to_uom": _(d.get("to_uom")),
+				"value": d.get("value")
+			}).insert(ignore_permissions=True)
 
 def add_market_segments():
 	records = [
@@ -484,8 +485,6 @@ def install_defaults(args=None):
 				# bank account same as a CoA entry
 				pass
 
-	add_dashboards()
-
 	# Now, with fixtures out of the way, onto concrete stuff
 	records = [
 
@@ -502,27 +501,6 @@ def install_defaults(args=None):
 	]
 
 	make_records(records)
-
-def add_dashboards():
-	from erpnext.setup.setup_wizard.data.dashboard_charts import get_company_for_dashboards
-
-	if not get_company_for_dashboards():
-		return
-
-	from erpnext.setup.setup_wizard.data.dashboard_charts import get_default_dashboards
-	from frappe.modules.import_file import import_file_by_path
-
-	dashboard_data = get_default_dashboards()
-
-	# create account balance timeline before creating dashbaord charts
-	doctype = "dashboard_chart_source"
-	docname = "account_balance_timeline"
-	folder = os.path.dirname(frappe.get_module("erpnext.accounts").__file__)
-	doc_path = os.path.join(folder, doctype, docname, docname) + ".json"
-	import_file_by_path(doc_path, force=0, for_sync=True)
-
-	make_records(dashboard_data["Charts"])
-	make_records(dashboard_data["Dashboards"])
 
 
 def get_fy_details(fy_start_date, fy_end_date):

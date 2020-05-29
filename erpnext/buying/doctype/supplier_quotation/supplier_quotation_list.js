@@ -5,6 +5,8 @@ frappe.listview_settings['Supplier Quotation'] = {
 			return [__("Ordered"), "green", "status,=,Ordered"];
 		} else if(doc.status==="Rejected") {
 			return [__("Lost"), "darkgrey", "status,=,Lost"];
+		} else if(doc.status==="Expired") {
+			return [__("Expired"), "darkgrey", "status,=,Expired"];
 		}
 	}
 };

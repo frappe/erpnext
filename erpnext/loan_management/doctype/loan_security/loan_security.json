@@ -1,23 +1,26 @@
 {
- "autoname": "field:loan_security_name",
+ "actions": [],
+ "allow_rename": 1,
  "creation": "2019-09-02 15:07:08.885593",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "loan_security_type",
-  "loan_security_code",
   "loan_security_name",
-  "unit_of_measure",
-  "column_break_3",
   "haircut",
+  "loan_security_code",
+  "column_break_3",
+  "loan_security_type",
+  "unit_of_measure",
   "disabled"
  ],
  "fields": [
   {
    "fieldname": "loan_security_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Loan Security Name",
+   "reqd": 1,
    "unique": 1
   },
   {
@@ -33,8 +36,10 @@
   {
    "fieldname": "loan_security_type",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Loan Security Type",
-   "options": "Loan Security Type"
+   "options": "Loan Security Type",
+   "reqd": 1
   },
   {
    "fieldname": "loan_security_code",
@@ -52,11 +57,15 @@
    "fetch_from": "loan_security_type.unit_of_measure",
    "fieldname": "unit_of_measure",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Unit Of Measure",
-   "options": "UOM"
+   "options": "UOM",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
- "modified": "2019-11-16 11:36:37.901656",
+ "links": [],
+ "modified": "2020-04-29 13:21:26.043492",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security",
@@ -87,7 +96,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "search_fields": "loan_security_code",
  "sort_field": "modified",
  "sort_order": "DESC",

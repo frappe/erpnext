@@ -7,28 +7,32 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "inpatient_record",
   "naming_series",
-  "procedure_template",
+  "title",
   "appointment",
+  "procedure_template",
+  "column_break_30",
+  "company",
+  "invoiced",
+  "section_break_6",
   "patient",
+  "patient_name",
   "patient_sex",
   "patient_age",
-  "prescription",
-  "medical_department",
-  "practitioner",
+  "inpatient_record",
+  "notes",
   "column_break_7",
   "status",
+  "practitioner",
+  "practitioner_name",
+  "medical_department",
   "service_unit",
-  "warehouse",
   "start_date",
   "start_time",
   "sample",
-  "invoiced",
-  "notes",
-  "company",
   "consumables_section",
   "consume_stock",
+  "warehouse",
   "items",
   "section_break_24",
   "invoice_separately_as_consumables",
@@ -36,6 +40,9 @@
   "consumable_total_amount",
   "column_break_27",
   "consumption_details",
+  "sb_refs",
+  "column_break_34",
+  "prescription",
   "amended_from"
  ],
  "fields": [
@@ -56,15 +63,15 @@
   {
    "fieldname": "appointment",
    "fieldtype": "Link",
-   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Appointment",
-   "options": "Patient Appointment"
+   "options": "Patient Appointment",
+   "set_only_once": 1
   },
   {
-   "fetch_from": "inpatient_record.patient",
    "fieldname": "patient",
    "fieldtype": "Link",
-   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Patient",
    "options": "Patient",
    "reqd": 1
@@ -88,17 +95,20 @@
    "fieldtype": "Link",
    "hidden": 1,
    "label": "Procedure Prescription",
-   "options": "Procedure Prescription"
+   "options": "Procedure Prescription",
+   "read_only": 1
   },
   {
    "fieldname": "medical_department",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Medical Department",
    "options": "Medical Department"
   },
   {
    "fieldname": "practitioner",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Healthcare Practitioner",
    "options": "Healthcare Practitioner"
   },
@@ -208,6 +218,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -226,6 +237,8 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "consume_stock",
    "fieldname": "consumables_section",
    "fieldtype": "Section Break",
    "label": "Consumables"
@@ -237,11 +250,51 @@
   {
    "fieldname": "section_break_24",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_30",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_refs",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "practitioner_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Practitioner Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_34",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-02 11:44:27.970651",
+ "modified": "2020-04-27 21:36:23.796924",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure",
@@ -257,11 +310,27 @@
    "report": 1,
    "role": "Nursing User",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Physician",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],
  "restrict_to_domain": "Healthcare",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "title",
  "track_changes": 1
 }

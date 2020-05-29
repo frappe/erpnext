@@ -10,15 +10,16 @@ from frappe.utils import add_months
 from erpnext.hr.doctype.payroll_entry.payroll_entry import get_start_end_dates, get_end_date
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.hr.doctype.salary_slip.test_salary_slip import get_salary_component_account, \
-		make_earning_salary_component, make_deduction_salary_component
+		make_earning_salary_component, make_deduction_salary_component, create_account
 from erpnext.hr.doctype.salary_structure.test_salary_structure import make_salary_structure
 from erpnext.loan_management.doctype.loan.test_loan import create_loan, make_loan_disbursement_entry
 from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_term_loans
 
 class TestPayrollEntry(unittest.TestCase):
 	def setUp(self):
-		for dt in ["Salary Slip", "Salary Component", "Salary Component Account", "Payroll Entry"]:
-			frappe.db.sql("delete from `tab%s`" % dt)
+		for dt in ["Salary Slip", "Salary Component", "Salary Component Account",
+			"Payroll Entry", "Salary Structure", "Salary Structure Assignment", "Payroll Employee Detail", "Additional Salary"]:
+				frappe.db.sql("delete from `tab%s`" % dt)
 
 		make_earning_salary_component(setup=True, company_list=["_Test Company"])
 		make_deduction_salary_component(setup=True, company_list=["_Test Company"])
@@ -33,10 +34,58 @@ class TestPayrollEntry(unittest.TestCase):
 				get_salary_component_account(data.name)
 
 		employee = frappe.db.get_value("Employee", {'company': company})
-		make_salary_structure("_Test Salary Structure", "Monthly", employee)
+		make_salary_structure("_Test Salary Structure", "Monthly", employee, company=company)
 		dates = get_start_end_dates('Monthly', nowdate())
 		if not frappe.db.get_value("Salary Slip", {"start_date": dates.start_date, "end_date": dates.end_date}):
 			make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date)
+
+	def test_payroll_entry_with_employee_cost_center(self): # pylint: disable=no-self-use
+		for data in frappe.get_all('Salary Component', fields = ["name"]):
+			if not frappe.db.get_value('Salary Component Account',
+				{'parent': data.name, 'company': "_Test Company"}, 'name'):
+				get_salary_component_account(data.name)
+
+		if not frappe.db.exists('Department', "cc - _TC"):
+			frappe.get_doc({
+				'doctype': 'Department',
+				'department_name': "cc",
+				"company": "_Test Company"
+			}).insert()
+
+		employee1 = make_employee("test_employee1@example.com", payroll_cost_center="_Test Cost Center - _TC",
+			department="cc - _TC", company="_Test Company")
+		employee2 = make_employee("test_employee2@example.com", payroll_cost_center="_Test Cost Center 2 - _TC",
+			department="cc - _TC", company="_Test Company")
+
+		make_salary_structure("_Test Salary Structure 1", "Monthly", employee1, company="_Test Company")
+		make_salary_structure("_Test Salary Structure 2", "Monthly", employee2, company="_Test Company")
+
+		if not frappe.db.exists("Account", "_Test Payroll Payable - _TC"):
+			create_account(account_name="_Test Payroll Payable",
+				company="_Test Company", parent_account="Current Liabilities - _TC")
+			frappe.db.set_value("Company", "_Test Company", "default_payroll_payable_account",
+				"_Test Payroll Payable - _TC")
+
+		dates = get_start_end_dates('Monthly', nowdate())
+		if not frappe.db.get_value("Salary Slip", {"start_date": dates.start_date, "end_date": dates.end_date}):
+			pe = make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date,
+				department="cc - _TC", company="_Test Company", payment_account="Cash - _TC", cost_center="Main - _TC")
+			je = frappe.db.get_value("Salary Slip", {"payroll_entry": pe.name}, "journal_entry")
+			je_entries = frappe.db.sql("""
+				select account, cost_center, debit, credit
+				from `tabJournal Entry Account`
+				where parent=%s
+				order by account, cost_center
+			""", je)
+			expected_je = (
+				('_Test Payroll Payable - _TC', 'Main - _TC', 0.0, 155600.0),
+				('Salary - _TC', '_Test Cost Center - _TC', 78000.0, 0.0),
+				('Salary - _TC', '_Test Cost Center 2 - _TC', 78000.0, 0.0),
+				('Salary Deductions - _TC', '_Test Cost Center - _TC', 0.0, 200.0),
+				('Salary Deductions - _TC', '_Test Cost Center 2 - _TC', 0.0, 200.0)
+			)
+
+			self.assertEqual(je_entries, expected_je)
 
 	def test_get_end_date(self):
 		self.assertEqual(get_end_date('2017-01-01', 'monthly'), {'end_date': '2017-01-31'})
@@ -49,7 +98,6 @@ class TestPayrollEntry(unittest.TestCase):
 		self.assertEqual(get_end_date('2017-02-15', 'daily'), {'end_date': '2017-02-15'})
 
 	def test_loan(self):
-
 		branch = "Test Employee Branch"
 		applicant = make_employee("test_employee@loan.com", company="_Test Company")
 		company = "_Test Company"
@@ -116,6 +164,7 @@ def make_payroll_entry(**args):
 	payroll_entry.posting_date = nowdate()
 	payroll_entry.payroll_frequency = "Monthly"
 	payroll_entry.branch = args.branch or None
+	payroll_entry.department = args.department or None
 
 	if args.cost_center:
 		payroll_entry.cost_center = args.cost_center
@@ -123,6 +172,7 @@ def make_payroll_entry(**args):
 	if args.payment_account:
 		payroll_entry.payment_account = args.payment_account
 
+	payroll_entry.fill_employee_details()
 	payroll_entry.save()
 	payroll_entry.create_salary_slips()
 	payroll_entry.submit_salary_slips()

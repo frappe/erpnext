@@ -3,6 +3,10 @@
 
 frappe.ui.form.on('Patient Encounter', {
 	setup: function(frm) {
+		frm.get_field('therapies').grid.editable_fields = [
+			{fieldname: 'therapy_type', columns: 8},
+			{fieldname: 'no_of_sessions', columns: 2}
+		];
 		frm.get_field('drug_prescription').grid.editable_fields = [
 			{fieldname: 'drug_code', columns: 2},
 			{fieldname: 'drug_name', columns: 2},
@@ -21,15 +25,16 @@ frappe.ui.form.on('Patient Encounter', {
 		refresh_field('lab_test_prescription');
 
 		if (!frm.doc.__islocal) {
-
-			if (frm.doc.inpatient_status == 'Admission Scheduled' || frm.doc.inpatient_status == 'Admitted') {
-				frm.add_custom_button(__('Schedule Discharge'), function() {
-					schedule_discharge(frm);
-				});
-			} else if (frm.doc.inpatient_status != 'Discharge Scheduled') {
-				frm.add_custom_button(__('Schedule Admission'), function() {
-					schedule_inpatient(frm);
-				});
+			if (frm.doc.docstatus === 1) {
+				if (frm.doc.inpatient_status == 'Admission Scheduled' || frm.doc.inpatient_status == 'Admitted') {
+					frm.add_custom_button(__('Schedule Discharge'), function() {
+						schedule_discharge(frm);
+					});
+				} else if (frm.doc.inpatient_status != 'Discharge Scheduled') {
+					frm.add_custom_button(__('Schedule Admission'), function() {
+						schedule_inpatient(frm);
+					});
+				}
 			}
 
 			frm.add_custom_button(__('Patient History'), function() {
@@ -97,6 +102,11 @@ frappe.ui.form.on('Patient Encounter', {
 		frm.events.set_patient_info(frm);
 	},
 
+	practitioner: function(frm) {
+		if (!frm.doc.practitioner) {
+			frm.set_value('practitioner_name', '');
+		}
+	},
 	set_appointment_fields: function(frm) {
 		if (frm.doc.appointment) {
 			frappe.call({
@@ -110,9 +120,11 @@ frappe.ui.form.on('Patient Encounter', {
 						'patient':data.message.patient,
 						'type': data.message.appointment_type,
 						'practitioner': data.message.practitioner,
-						'invoiced': data.message.invoiced
+						'invoiced': data.message.invoiced,
+						'company': data.message.company
 					};
 					frm.set_value(values);
+					frm.set_df_property('patient', 'read_only', 1);
 				}
 			});
 		}
@@ -129,6 +141,7 @@ frappe.ui.form.on('Patient Encounter', {
 				'inpatient_status': ''
 			};
 			frm.set_value(values);
+			frm.set_df_property('patient', 'read_only', 0);
 		}
 	},
 
@@ -144,52 +157,137 @@ frappe.ui.form.on('Patient Encounter', {
 					if (data.message.dob) {
 						age = calculate_age(data.message.dob);
 					}
-					frappe.model.set_value(frm.doctype, frm.docname, 'patient_age', age);
-					frappe.model.set_value(frm.doctype, frm.docname, 'patient_sex', data.message.sex);
-					if (data.message.inpatient_record) {
-						frappe.model.set_value(frm.doctype, frm.docname, 'inpatient_record', data.message.inpatient_record);
-						frappe.model.set_value(frm.doctype, frm.docname, 'inpatient_status', data.message.inpatient_status);
-					}
+					let values = {
+						'patient_age': age,
+						'patient_name':data.message.patient_name,
+						'patient_sex': data.message.sex,
+						'inpatient_record': data.message.inpatient_record,
+						'inpatient_status': data.message.inpatient_status
+					};
+					frm.set_value(values);
 				}
 			});
 		} else {
-			frappe.model.set_value(frm.doctype, frm.docname, 'patient_sex', '');
-			frappe.model.set_value(frm.doctype, frm.docname, 'patient_age', '');
-			frappe.model.set_value(frm.doctype, frm.docname, 'inpatient_record', '');
-			frappe.model.set_value(frm.doctype, frm.docname, 'inpatient_status', '');
+			let values = {
+				'patient_age': '',
+				'patient_name':'',
+				'patient_sex': '',
+				'inpatient_record': '',
+				'inpatient_status': ''
+			};
+			frm.set_value(values);
 		}
 	}
 });
 
-let schedule_inpatient = function(frm) {
-	frappe.call({
-		method: 'erpnext.healthcare.doctype.inpatient_record.inpatient_record.schedule_inpatient',
-		args: {patient: frm.doc.patient, encounter_id: frm.doc.name, practitioner: frm.doc.practitioner},
-		callback: function(data) {
-			if (!data.exc) {
-				frm.reload_doc();
+var schedule_inpatient = function(frm) {
+	var dialog = new frappe.ui.Dialog({
+		title: 'Patient Admission',
+		fields: [
+			{fieldtype: 'Link', label: 'Medical Department', fieldname: 'medical_department', options: 'Medical Department', reqd: 1},
+			{fieldtype: 'Link', label: 'Healthcare Practitioner (Primary)', fieldname: 'primary_practitioner', options: 'Healthcare Practitioner', reqd: 1},
+			{fieldtype: 'Link', label: 'Healthcare Practitioner (Secondary)', fieldname: 'secondary_practitioner', options: 'Healthcare Practitioner'},
+			{fieldtype: 'Column Break'},
+			{fieldtype: 'Date', label: 'Admission Ordered For', fieldname: 'admission_ordered_for', default: 'Today'},
+			{fieldtype: 'Link', label: 'Service Unit Type', fieldname: 'service_unit_type', options: 'Healthcare Service Unit Type'},
+			{fieldtype: 'Int', label: 'Expected Length of Stay', fieldname: 'expected_length_of_stay'},
+			{fieldtype: 'Section Break'},
+			{fieldtype: 'Long Text', label: 'Admission Instructions', fieldname: 'admission_instruction'}
+		],
+		primary_action_label: __('Order Admission'),
+		primary_action : function() {
+			var args = {
+				patient: frm.doc.patient,
+				admission_encounter: frm.doc.name,
+				referring_practitioner: frm.doc.practitioner,
+				company: frm.doc.company,
+				medical_department: dialog.get_value('medical_department'),
+				primary_practitioner: dialog.get_value('primary_practitioner'),
+				secondary_practitioner: dialog.get_value('secondary_practitioner'),
+				admission_ordered_for: dialog.get_value('admission_ordered_for'),
+				admission_service_unit_type: dialog.get_value('service_unit_type'),
+				expected_length_of_stay: dialog.get_value('expected_length_of_stay'),
+				admission_instruction: dialog.get_value('admission_instruction')
 			}
-		},
-		freeze: true,
-		freeze_message: __('Process Inpatient Scheduling')
+			frappe.call({
+				method: 'erpnext.healthcare.doctype.inpatient_record.inpatient_record.schedule_inpatient',
+				args: {
+					args: args
+				},
+				callback: function(data) {
+					if (!data.exc) {
+						frm.reload_doc();
+					}
+				},
+				freeze: true,
+				freeze_message: 'Scheduling Patient Admission'
+			});
+			frm.refresh_fields();
+			dialog.hide();
+		}
 	});
+
+	dialog.set_values({
+		'medical_department': frm.doc.medical_department,
+		'primary_practitioner': frm.doc.practitioner,
+	});
+
+	dialog.fields_dict['service_unit_type'].get_query = function() {
+		return {
+			filters: {
+				'inpatient_occupancy': 1,
+				'allow_appointments': 0
+			}
+		};
+	};
+
+	dialog.show();
+	dialog.$wrapper.find('.modal-dialog').css('width', '800px');
 };
 
-let schedule_discharge = function(frm) {
-	frappe.call({
-		method: 'erpnext.healthcare.doctype.inpatient_record.inpatient_record.schedule_discharge',
-		args: {patient: frm.doc.patient, encounter_id: frm.doc.name, practitioner: frm.doc.practitioner},
-		callback: function(data) {
-			if (!data.exc) {
-				frm.reload_doc();
+var schedule_discharge = function(frm) {
+	var dialog = new frappe.ui.Dialog ({
+		title: 'Inpatient Discharge',
+		fields: [
+			{fieldtype: 'Date', label: 'Discharge Ordered Date', fieldname: 'discharge_ordered_date', default: 'Today', read_only: 1},
+			{fieldtype: 'Date', label: 'Followup Date', fieldname: 'followup_date'},
+			{fieldtype: 'Column Break'},
+			{fieldtype: 'Small Text', label: 'Discharge Instructions', fieldname: 'discharge_instructions'},
+			{fieldtype: 'Section Break', label:'Discharge Summary'},
+			{fieldtype: 'Long Text', label: 'Discharge Note', fieldname: 'discharge_note'}
+		],
+		primary_action_label: __('Order Discharge'),
+		primary_action : function() {
+			var args = {
+				patient: frm.doc.patient,
+				discharge_encounter: frm.doc.name,
+				discharge_practitioner: frm.doc.practitioner,
+				discharge_ordered_date: dialog.get_value('discharge_ordered_date'),
+				followup_date: dialog.get_value('followup_date'),
+				discharge_instructions: dialog.get_value('discharge_instructions'),
+				discharge_note: dialog.get_value('discharge_note')
 			}
-		},
-		freeze: true,
-		freeze_message: 'Process Discharge'
+			frappe.call ({
+				method: 'erpnext.healthcare.doctype.inpatient_record.inpatient_record.schedule_discharge',
+				args: {args},
+				callback: function(data) {
+					if(!data.exc){
+						frm.reload_doc();
+					}
+				},
+				freeze: true,
+				freeze_message: 'Scheduling Inpatient Discharge'
+			});
+			frm.refresh_fields();
+			dialog.hide();
+		}
 	});
+
+	dialog.show();
+	dialog.$wrapper.find('.modal-dialog').css('width', '800px');
 };
 
-let create_medical_record = function (frm) {
+let create_medical_record = function(frm) {
 	if (!frm.doc.patient) {
 		frappe.throw(__('Please select patient'));
 	}
@@ -202,25 +300,26 @@ let create_medical_record = function (frm) {
 	frappe.new_doc('Patient Medical Record');
 };
 
-let create_vital_signs = function (frm) {
+let create_vital_signs = function(frm) {
 	if (!frm.doc.patient) {
 		frappe.throw(__('Please select patient'));
 	}
 	frappe.route_options = {
 		'patient': frm.doc.patient,
-		'appointment': frm.doc.appointment,
-		'encounter': frm.doc.name
+		'encounter': frm.doc.name,
+		'company': frm.doc.company
 	};
 	frappe.new_doc('Vital Signs');
 };
 
-let create_procedure = function (frm) {
+let create_procedure = function(frm) {
 	if (!frm.doc.patient) {
 		frappe.throw(__('Please select patient'));
 	}
 	frappe.route_options = {
 		'patient': frm.doc.patient,
-		'medical_department': frm.doc.medical_department
+		'medical_department': frm.doc.medical_department,
+		'company': frm.doc.company
 	};
 	frappe.new_doc('Clinical Procedure');
 };

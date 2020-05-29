@@ -8,36 +8,39 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
-  "col_break1",
   "item_name",
+  "col_break1",
+  "schedule_date",
   "section_break_4",
   "description",
   "item_group",
   "brand",
   "image_section",
   "image",
-  "manufacture_details",
-  "manufacturer",
   "column_break_12",
   "manufacturer_part_no",
   "quantity_and_warehouse",
   "qty",
-  "uom",
-  "conversion_factor",
   "stock_uom",
+  "from_warehouse",
   "warehouse",
   "col_break2",
-  "schedule_date",
-  "rate",
-  "amount",
+  "uom",
+  "conversion_factor",
   "stock_qty",
+  "rate_and_amount_section_break",
+  "rate",
+  "col_break3",
+  "amount",
+  "manufacture_details",
+  "manufacturer",
   "more_info",
   "lead_time_date",
   "sales_order",
   "sales_order_item",
   "production_plan",
   "material_request_plan_item",
-  "col_break3",
+  "col_break4",
   "min_order_qty",
   "projected_qty",
   "actual_qty",
@@ -50,6 +53,8 @@
   "dimension_col_break",
   "cost_center",
   "section_break_37",
+  "bom_no",
+  "section_break_46",
   "page_break"
  ],
  "fields": [
@@ -176,7 +181,7 @@
    "fieldname": "schedule_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Required Date",
+   "label": "Required By",
    "oldfieldname": "schedule_date",
    "oldfieldtype": "Date",
    "print_width": "100px",
@@ -186,14 +191,12 @@
   {
    "fieldname": "rate",
    "fieldtype": "Currency",
-   "label": "Rate",
-   "no_copy": 1
+   "label": "Rate"
   },
   {
    "fieldname": "amount",
    "fieldtype": "Currency",
    "label": "Amount",
-   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -205,6 +208,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
    "label": "More Information"
@@ -332,6 +336,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "accounting_details",
    "fieldtype": "Section Break",
    "label": "Accounting Details"
@@ -368,13 +373,18 @@
    "label": "Image"
   },
   {
+   "depends_on": "eval:parent.material_request_type == \"Manufacture\"",
    "fieldname": "section_break_37",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Manufacturing"
   },
   {
    "fieldname": "received_qty",
    "fieldtype": "Float",
-   "label": "Received Quantity"
+   "label": "Received Quantity",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -387,6 +397,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "manufacture_details",
    "fieldtype": "Section Break",
    "label": "Manufacture"
@@ -406,12 +417,39 @@
    "fieldtype": "Data",
    "label": "Manufacturer Part Number",
    "read_only": 1
+  },
+  {
+   "fieldname": "rate_and_amount_section_break",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_break4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:parent.material_request_type == \"Material Transfer\"",
+   "fieldname": "from_warehouse",
+   "fieldtype": "Link",
+   "label": "Source Warehouse (Material Transfer)",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "bom_no",
+   "fieldtype": "Link",
+   "label": "BOM No",
+   "no_copy": 1,
+   "options": "BOM",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "section_break_46",
+   "fieldtype": "Section Break"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-02-25 03:09:10.698967",
+ "modified": "2020-05-15 09:00:00.992835",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",

@@ -4,24 +4,28 @@
 from __future__ import unicode_literals
 
 import frappe
-from erpnext.shopping_cart.cart import _get_cart_quotation
+from erpnext.shopping_cart.cart import _get_cart_quotation, _set_price_list
 from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings \
 	import get_shopping_cart_settings, show_quantity_in_website
 from erpnext.utilities.product import get_price, get_qty_in_stock, get_non_stock_item_status
 
 @frappe.whitelist(allow_guest=True)
-def get_product_info_for_website(item_code):
+def get_product_info_for_website(item_code, skip_quotation_creation=False):
 	"""get product price / stock info for website"""
 
 	cart_settings = get_shopping_cart_settings()
 	if not cart_settings.enabled:
 		return frappe._dict()
 
-	cart_quotation = _get_cart_quotation()
+	cart_quotation = frappe._dict()
+	if not skip_quotation_creation:
+		cart_quotation = _get_cart_quotation()
+
+	selling_price_list = cart_quotation.get("selling_price_list") if cart_quotation else _set_price_list(cart_settings, None)
 
 	price = get_price(
 		item_code,
-		cart_quotation.selling_price_list,
+		selling_price_list,
 		cart_settings.default_customer_group,
 		cart_settings.company
 	)
@@ -40,7 +44,7 @@ def get_product_info_for_website(item_code):
 
 	if product_info["price"]:
 		if frappe.session.user != "Guest":
-			item = cart_quotation.get({"item_code": item_code})
+			item = cart_quotation.get({"item_code": item_code}) if cart_quotation else None
 			if item:
 				product_info["qty"] = item[0].qty
 
@@ -51,7 +55,7 @@ def get_product_info_for_website(item_code):
 
 def set_product_info_for_website(item):
 	"""set product price uom for website"""
-	product_info = get_product_info_for_website(item.item_code)
+	product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True)
 
 	if product_info:
 		item.update(product_info)

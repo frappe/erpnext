@@ -8,7 +8,6 @@ import unittest
 from frappe.utils import now_datetime, today
 from frappe.utils.make_random import get_random
 from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
-from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_patient
 
 class TestInpatientRecord(unittest.TestCase):
 	def test_admit_and_discharge(self):
@@ -113,3 +112,13 @@ def get_service_unit_type():
 		service_unit_type.save(ignore_permissions = True)
 		return service_unit_type.name
 	return service_unit_type
+
+def create_patient():
+	patient = frappe.db.exists('Patient', '_Test IPD Patient')
+	if not patient:
+		patient = frappe.new_doc('Patient')
+		patient.first_name = '_Test IPD Patient'
+		patient.sex = 'Female'
+		patient.save(ignore_permissions=True)
+		patient = patient.name
+	return patient

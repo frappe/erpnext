@@ -30,9 +30,8 @@
   "reference_number",
   "column_break_21",
   "reference_date",
-  "paid_accrual_entries",
-  "partial_paid_entry",
   "principal_amount_paid",
+  "repayment_details",
   "amended_from"
  ],
  "fields": [
@@ -156,13 +155,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "paid_accrual_entries",
-   "fieldtype": "Text",
-   "hidden": 1,
-   "label": "Paid Accrual Entries",
-   "read_only": 1
-  },
-  {
    "default": "0",
    "fetch_from": "against_loan.is_term_loan",
    "fieldname": "is_term_loan",
@@ -198,13 +190,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "partial_paid_entry",
-   "fieldtype": "Text",
-   "hidden": 1,
-   "label": "Partial Paid Entry",
-   "read_only": 1
-  },
-  {
    "default": "0.0",
    "fieldname": "principal_amount_paid",
    "fieldtype": "Currency",
@@ -225,11 +210,18 @@
    "fieldtype": "Date",
    "label": "Due Date",
    "read_only": 1
+  },
+  {
+   "fieldname": "repayment_details",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Repayment Details",
+   "options": "Loan Repayment Detail"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-26 06:18:54.934538",
+ "modified": "2020-04-16 18:14:45.166754",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",
@@ -264,7 +256,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

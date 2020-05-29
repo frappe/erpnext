@@ -83,7 +83,6 @@
    "oldfieldname": "status",
    "oldfieldtype": "Select",
    "options": "Open\nCompleted\nCancelled",
-   "reqd": 1,
    "search_index": 1
   },
   {

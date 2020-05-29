@@ -7,55 +7,70 @@ import frappe
 from frappe.utils import getdate, nowdate
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cstr, get_datetime, get_datetime_str
-from frappe.utils import update_progress_bar
+from frappe.utils import cstr, get_datetime, formatdate
 
 class Attendance(Document):
-	def validate_duplicate_record(self):
-		res = frappe.db.sql("""select name from `tabAttendance` where employee = %s and attendance_date = %s
-			and name != %s and docstatus != 2""",
-			(self.employee, getdate(self.attendance_date), self.name))
-		if res:
-			frappe.throw(_("Attendance for employee {0} is already marked").format(self.employee))
-
-	def check_leave_record(self):
-		leave_record = frappe.db.sql("""select leave_type, half_day, half_day_date from `tabLeave Application`
-			where employee = %s and %s between from_date and to_date and status = 'Approved'
-			and docstatus = 1""", (self.employee, self.attendance_date), as_dict=True)
-		if leave_record:
-			for d in leave_record:
-				if d.half_day_date == getdate(self.attendance_date):
-					self.status = 'Half Day'
-					frappe.msgprint(_("Employee {0} on Half day on {1}").format(self.employee, self.attendance_date))
-				else:
-					self.status = 'On Leave'
-					self.leave_type = d.leave_type
-					frappe.msgprint(_("Employee {0} is on Leave on {1}").format(self.employee, self.attendance_date))
-
-		if self.status == "On Leave" and not leave_record:
-			frappe.throw(_("No leave record found for employee {0} for {1}").format(self.employee, self.attendance_date))
-
-	def validate_attendance_date(self):
-		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
-
-		# leaves can be marked for future dates
-		if self.status not in ('On Leave', 'Half Day') and getdate(self.attendance_date) > getdate(nowdate()):
-			frappe.throw(_("Attendance can not be marked for future dates"))
-		elif date_of_joining and getdate(self.attendance_date) < getdate(date_of_joining):
-			frappe.throw(_("Attendance date can not be less than employee's joining date"))
-
-	def validate_employee(self):
-		emp = frappe.db.sql("select name from `tabEmployee` where name = %s and status = 'Active'",
-		 	self.employee)
-		if not emp:
-			frappe.throw(_("Employee {0} is not active or does not exist").format(self.employee))
-
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
 		validate_status(self.status, ["Present", "Absent", "On Leave", "Half Day", "Work From Home"])
 		self.validate_attendance_date()
 		self.validate_duplicate_record()
 		self.check_leave_record()
+
+	def validate_attendance_date(self):
+		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
+
+		# leaves can be marked for future dates
+		if self.status != 'On Leave' and not self.leave_application and getdate(self.attendance_date) > getdate(nowdate()):
+			frappe.throw(_("Attendance can not be marked for future dates"))
+		elif date_of_joining and getdate(self.attendance_date) < getdate(date_of_joining):
+			frappe.throw(_("Attendance date can not be less than employee's joining date"))
+
+	def validate_duplicate_record(self):
+		res = frappe.db.sql("""
+			select name from `tabAttendance`
+			where employee = %s
+				and attendance_date = %s
+				and name != %s
+				and docstatus != 2
+		""", (self.employee, getdate(self.attendance_date), self.name))
+		if res:
+			frappe.throw(_("Attendance for employee {0} is already marked").format(self.employee))
+
+	def check_leave_record(self):
+		leave_record = frappe.db.sql("""
+			select leave_type, half_day, half_day_date
+			from `tabLeave Application`
+			where employee = %s
+				and %s between from_date and to_date
+				and status = 'Approved'
+				and docstatus = 1
+		""", (self.employee, self.attendance_date), as_dict=True)
+		if leave_record:
+			for d in leave_record:
+				self.leave_type = d.leave_type
+				if d.half_day_date == getdate(self.attendance_date):
+					self.status = 'Half Day'
+					frappe.msgprint(_("Employee {0} on Half day on {1}")
+						.format(self.employee, formatdate(self.attendance_date)))
+				else:
+					self.status = 'On Leave'
+					frappe.msgprint(_("Employee {0} is on Leave on {1}")
+						.format(self.employee, formatdate(self.attendance_date)))
+
+		if self.status in ("On Leave", "Half Day"):
+			if not leave_record:
+				frappe.msgprint(_("No leave record found for employee {0} on {1}")
+					.format(self.employee, formatdate(self.attendance_date)), alert=1)
+		elif self.leave_type:
+			self.leave_type = None
+			self.leave_application = None
+
+	def validate_employee(self):
+		emp = frappe.db.sql("select name from `tabEmployee` where name = %s and status = 'Active'",
+		 	self.employee)
+		if not emp:
+			frappe.throw(_("Employee {0} is not active or does not exist").format(self.employee))
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
@@ -90,18 +105,20 @@ def add_attendance(events, start, end, conditions=None):
 		if e not in events:
 			events.append(e)
 
-def mark_attendance(employee, attendance_date, status, shift=None):
-	employee_doc = frappe.get_doc('Employee', employee)
+def mark_attendance(employee, attendance_date, status, shift=None, leave_type=None, ignore_validate=False):
 	if not frappe.db.exists('Attendance', {'employee':employee, 'attendance_date':attendance_date, 'docstatus':('!=', '2')}):
-		doc_dict = {
+		company = frappe.db.get_value('Employee', employee, 'company')
+		attendance = frappe.get_doc({
 			'doctype': 'Attendance',
 			'employee': employee,
 			'attendance_date': attendance_date,
 			'status': status,
-			'company': employee_doc.company,
-			'shift': shift
-		}
-		attendance = frappe.get_doc(doc_dict).insert()
+			'company': company,
+			'shift': shift,
+			'leave_type': leave_type
+		})
+		attendance.flags.ignore_validate = ignore_validate
+		attendance.insert()
 		attendance.submit()
 		return attendance.name
 
@@ -155,8 +172,8 @@ def get_unmarked_days(employee, month):
 
 
 	records = frappe.get_all("Attendance", fields = ['attendance_date', 'employee'] , filters = [
-		["attendance_date", ">", month_start],
-		["attendance_date", "<", month_end],
+		["attendance_date", ">=", month_start],
+		["attendance_date", "<=", month_end],
 		["employee", "=", employee],
 		["docstatus", "!=", 2]
 	])
