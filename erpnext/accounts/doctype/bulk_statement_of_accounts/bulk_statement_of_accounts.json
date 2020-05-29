@@ -16,7 +16,6 @@
   "column_break_14",
   "to_date",
   "cost_center",
-  "dimensions",
   "section_break_3",
   "customer_collection",
   "column_break_6",
@@ -63,11 +62,6 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
-  },
-  {
-   "fieldname": "dimensions",
-   "fieldtype": "Data",
-   "label": "Dimensions"
   },
   {
    "fieldname": "amended_from",
@@ -139,7 +133,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-29 17:02:51.666989",
+ "modified": "2020-05-29 18:02:45.621661",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bulk Statement Of Accounts",
