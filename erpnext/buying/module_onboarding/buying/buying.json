@@ -19,7 +19,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/buying",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-05-19 20:03:55.776080",
+ "modified": "2020-05-27 17:17:52.075947",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",
@@ -49,6 +49,6 @@
  ],
  "subtitle": "Products, Purchases, Analysis and more.",
  "success_message": "The Buying Module is all set up!",
- "title": "Let's Setup the Buying Module.",
+ "title": "Let's Set Up the Buying Module.",
  "user_can_dismiss": 1
 }

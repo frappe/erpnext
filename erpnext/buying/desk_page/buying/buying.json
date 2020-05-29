@@ -34,9 +34,14 @@
    "hidden": 0,
    "label": "Other Reports",
    "links": "[\n    {\n        \"is_query_report\": true,\n        \"label\": \"Items To Be Requested\",\n        \"name\": \"Items To Be Requested\",\n        \"onboard\": 1,\n        \"reference_doctype\": \"Item\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Item-wise Purchase History\",\n        \"name\": \"Item-wise Purchase History\",\n        \"onboard\": 1,\n        \"reference_doctype\": \"Item\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Subcontracted Raw Materials To Be Transferred\",\n        \"name\": \"Subcontracted Raw Materials To Be Transferred\",\n        \"reference_doctype\": \"Purchase Order\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Subcontracted Item To Be Received\",\n        \"name\": \"Subcontracted Item To Be Received\",\n        \"reference_doctype\": \"Purchase Order\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Quoted Item Comparison\",\n        \"name\": \"Quoted Item Comparison\",\n         \"onboard\": 1,\n        \"reference_doctype\": \"Supplier Quotation\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Material Requests for which Supplier Quotations are not created\",\n        \"name\": \"Material Requests for which Supplier Quotations are not created\",\n        \"reference_doctype\": \"Material Request\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"Supplier Addresses And Contacts\",\n        \"name\": \"Address And Contacts\",\n        \"reference_doctype\": \"Address\",\n        \"route_options\": {\n            \"party_type\": \"Supplier\"\n        },\n        \"type\": \"report\"\n    }\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Regional",
+   "links": "[\n     {\n        \"description\": \"Import Italian Purchase Invoices\",\n        \"label\": \"Import Supplier Invoice\",\n        \"name\": \"Import Supplier Invoice\",\n        \"type\": \"doctype\"\n    }    \n]"
   }
  ],
- "cards_label": "Masters & Reports ",
+ "cards_label": "",
  "category": "Modules",
  "charts": [
   {
@@ -44,7 +49,7 @@
    "label": "Purchase Order Trends"
   }
  ],
- "charts_label": "Buying Dashboard",
+ "charts_label": "",
  "creation": "2020-01-28 11:50:26.195467",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
@@ -55,7 +60,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Buying",
- "modified": "2020-05-19 19:44:36.260982",
+ "modified": "2020-05-28 13:32:49.960574",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",
@@ -66,7 +71,7 @@
  "shortcuts": [
   {
    "color": "#cef6d1",
-   "format": "{} available",
+   "format": "{} Available",
    "label": "Item",
    "link_to": "Item",
    "stats_filter": "{\n    \"disabled\": 0\n}",
@@ -82,7 +87,7 @@
   },
   {
    "color": "#ffe8cd",
-   "format": "{}  to Receive",
+   "format": "{}  To Receive",
    "label": "Purchase Order",
    "link_to": "Purchase Order",
    "stats_filter": "{\n    \"company\": [\"like\", '%' + frappe.defaults.get_global_default(\"company\") + '%'],\n    \"status\":[\"in\", [\"To Receive\", \"To Receive and Bill\"]]\n}",
@@ -99,10 +104,10 @@
    "type": "Report"
   },
   {
-   "label": "Buying Dashboard",
+   "label": "Dashboard",
    "link_to": "Buying",
    "type": "Dashboard"
   }
  ],
- "shortcuts_label": "Quick Access"
+ "shortcuts_label": ""
 }

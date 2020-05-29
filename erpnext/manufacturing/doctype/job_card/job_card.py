@@ -102,8 +102,11 @@ class JobCard(Document):
 		workstation_doc = frappe.get_cached_doc("Workstation", self.workstation)
 		if (not workstation_doc.working_hours or
 			cint(frappe.db.get_single_value("Manufacturing Settings", "allow_overtime"))):
-			row.remaining_time_in_mins -= time_diff_in_minutes(row.planned_end_time,
-				row.planned_start_time)
+			if get_datetime(row.planned_end_time) < get_datetime(row.planned_start_time):
+				row.planned_end_time = add_to_date(row.planned_start_time, minutes=row.time_in_mins)
+				row.remaining_time_in_mins = 0.0
+			else:
+				row.remaining_time_in_mins -= time_diff_in_minutes(row.planned_end_time, row.planned_start_time)
 
 			self.update_time_logs(row)
 			return

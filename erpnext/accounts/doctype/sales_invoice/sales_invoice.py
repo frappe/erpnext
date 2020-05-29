@@ -1519,13 +1519,21 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	def update_details(source_doc, target_doc, source_parent):
 		target_doc.inter_company_invoice_reference = source_doc.name
 		if target_doc.doctype in ["Purchase Invoice", "Purchase Order"]:
+			currency = frappe.db.get_value('Supplier', details.get('party'), 'default_currency')
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
 			target_doc.buying_price_list = source_doc.selling_price_list
+
+			if currency:
+				target_doc.currency = currency
 		else:
+			currency = frappe.db.get_value('Customer', details.get('party'), 'default_currency')
 			target_doc.company = details.get("company")
 			target_doc.customer = details.get("party")
 			target_doc.selling_price_list = source_doc.buying_price_list
+
+			if currency:
+				target_doc.currency = currency
 
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {
