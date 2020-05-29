@@ -2,8 +2,8 @@
  "cards": [
   {
    "hidden": 0,
-   "label": "Service Level Agreement",
-   "links": "[\n    {\n        \"description\": \"Service Level.\",\n        \"label\": \"Service Level\",\n        \"name\": \"Service Level\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Service Level Agreement.\",\n        \"label\": \"Service Level Agreement\",\n        \"name\": \"Service Level Agreement\",\n        \"type\": \"doctype\"\n    }\n]"
+   "label": "Issues",
+   "links": "[\n    {\n        \"description\": \"Support queries from customers.\",\n        \"label\": \"Issue\",\n        \"name\": \"Issue\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Issue Type.\",\n        \"label\": \"Issue Type\",\n        \"name\": \"Issue Type\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Issue Priority.\",\n        \"label\": \"Issue Priority\",\n        \"name\": \"Issue Priority\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -12,8 +12,8 @@
   },
   {
    "hidden": 0,
-   "label": "Issues",
-   "links": "[\n    {\n        \"description\": \"Support queries from customers.\",\n        \"label\": \"Issue\",\n        \"name\": \"Issue\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Issue Type.\",\n        \"label\": \"Issue Type\",\n        \"name\": \"Issue Type\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Issue Priority.\",\n        \"label\": \"Issue Priority\",\n        \"name\": \"Issue Priority\",\n        \"type\": \"doctype\"\n    }\n]"
+   "label": "Service Level Agreement",
+   "links": "[\n    {\n        \"description\": \"Service Level.\",\n        \"label\": \"Service Level\",\n        \"name\": \"Service Level\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Service Level Agreement.\",\n        \"label\": \"Service Level Agreement\",\n        \"name\": \"Service Level Agreement\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -39,11 +39,11 @@
  "docstatus": 0,
  "doctype": "Desk Page",
  "extends_another_page": 0,
- "icon": "",
+ "hide_custom": 0,
  "idx": 0,
  "is_standard": 1,
  "label": "Support",
- "modified": "2020-04-01 11:28:51.120583",
+ "modified": "2020-05-28 13:51:23.869954",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support",
@@ -52,18 +52,21 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
+   "color": "#ffc4c4",
+   "format": "{} Assigned",
    "label": "Issue",
    "link_to": "Issue",
-   "type": "DocType"
-  },
-  {
-   "label": "Service Level",
-   "link_to": "Service Level",
+   "stats_filter": "{\n    \"_assign\": [\"like\", '%' + frappe.session.user + '%'],\n    \"status\": \"Open\"\n}",
    "type": "DocType"
   },
   {
    "label": "Maintenance Visit",
    "link_to": "Maintenance Visit",
+   "type": "DocType"
+  },
+  {
+   "label": "Service Level",
+   "link_to": "Service Level",
    "type": "DocType"
   }
  ]
