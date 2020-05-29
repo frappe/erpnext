@@ -113,7 +113,13 @@ class BOM(WebsiteGenerator):
 			self.set("operations", [])
 			for d in frappe.get_all("BOM Operation", fields = ["*"],
 				filters = {'parenttype': 'Routing', 'parent': self.routing}):
-				child = self.append('operations', d)
+				child = self.append('operations', {
+					"operation": d.operation,
+					"workstation": d.workstation,
+					"description": d.description,
+					"time_in_mins": d.time_in_mins,
+					"batch_size": d.batch_size
+				})
 				child.hour_rate = flt(d.hour_rate / self.conversion_rate, 2)
 
 	def set_bom_material_details(self):
