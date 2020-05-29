@@ -51,7 +51,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEqual(current_bin_stock_value, existing_bin_stock_value + 250)
 
 		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
-	
+
 	def test_batched_serial_no_purchase(self):
 		item = frappe.db.exists("Item", {'item_name': 'Batched Serialized Item'})
 		if not item:
@@ -68,7 +68,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr = make_purchase_receipt(item_code=item.name, qty=5, rate=500)
 
 		self.assertTrue(frappe.db.get_value('Batch', {'item': item.name, 'reference_name': pr.name}))
-		
+
 		pr.load_from_db()
 		batch_no = pr.items[0].batch_no
 		pr.cancel()
@@ -374,7 +374,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		location = frappe.db.get_value('Asset', assets[0].name, 'location')
 		self.assertEquals(location, "Test Location")
-	
+
 	def test_purchase_return_with_submitted_asset(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
 
@@ -396,10 +396,10 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		pr_return = make_purchase_return(pr.name)
 		self.assertRaises(frappe.exceptions.ValidationError, pr_return.submit)
-		
+
 		asset.load_from_db()
 		asset.cancel()
-		
+
 		pr_return.submit()
 
 	def test_purchase_receipt_cost_center(self):
@@ -431,7 +431,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
-	def test_purchase_receipt_without_cost_center(self):
+	def test_purchase_receipt_cost_center_with_balance_sheet_account(self):
 		if not frappe.db.exists('Location', 'Test Location'):
 			frappe.get_doc({
 				'doctype': 'Location',
@@ -443,13 +443,14 @@ class TestPurchaseReceipt(unittest.TestCase):
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
 
 		self.assertTrue(gl_entries)
+		cost_center = pr.get('items')[0].cost_center
 
 		expected_values = {
 			"Stock Received But Not Billed - TCP1": {
-				"cost_center": None
+				"cost_center": cost_center
 			},
 			stock_in_hand_account: {
-				"cost_center": None
+				"cost_center": cost_center
 			}
 		}
 		for i, gle in enumerate(gl_entries):

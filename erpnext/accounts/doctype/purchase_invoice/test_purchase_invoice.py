@@ -822,7 +822,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			"Creditors - _TC": {
 				"cost_center": cost_center
 			},
-			"Cost of Goods Sold - _TC": {
+			"_Test Account Cost for Goods Sold - _TC": {
 				"cost_center": cost_center
 			}
 		}
