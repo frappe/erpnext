@@ -1227,10 +1227,20 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			check_permissions(parent, 'write')
 			child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
 
-			rate_unchanged = flt(child_item.get("rate")) == flt(d.get("rate"))
-			qty_unchanged = flt(child_item.get("qty")) == flt(d.get("qty"))
-			conversion_factor_unchanged = flt(child_item.get("conversion_factor")) == flt(d.get("conversion_factor"))
-			if rate_unchanged and qty_unchanged and conversion_factor_changed:
+			prev_rate, new_rate = flt(child_item.get("rate")), flt(d.get("rate"))
+			prev_qty, new_qty = flt(child_item.get("qty")), flt(d.get("qty"))
+			prev_con_fac, new_con_fac = flt(child_item.get("conversion_factor")), flt(d.get("conversion_factor"))
+
+			if parent_doctype == 'Sales Order':
+				prev_date, new_date = child_item.get("delivery_date"), d.get("delivery_date")
+			elif parent_doctype == 'Purchase Order':
+				prev_date, new_date = child_item.get("schedule_date") == d.get("schedule_date")
+
+			rate_unchanged = prev_rate == new_rate
+			qty_unchanged = prev_qty == prev_qty
+			conversion_factor_unchanged = prev_con_fac == new_con_fac
+			date_unchanged = prev_date == new_date if prev_date and new_date else False # in case of delivery note etc
+			if rate_unchanged and qty_unchanged and conversion_factor_unchanged and date_unchanged:
 				continue
 
 		validate_quantity(child_item, d)
@@ -1246,6 +1256,12 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		
 		if d.get("conversion_factor"):
 			child_item.conversion_factor = flt(d.get('conversion_factor'))
+
+		if d.get("delivery_date") and parent_doctype == 'Sales Order':
+			child_item.delivery_date = d.get('delivery_date')
+		
+		if d.get("schedule_date") and parent_doctype == 'Purchase Order':
+			child_item.schedule_date = d.get('schedule_date')
 
 		if flt(child_item.price_list_rate):
 			if flt(child_item.rate) > flt(child_item.price_list_rate):

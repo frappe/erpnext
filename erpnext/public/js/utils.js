@@ -470,7 +470,8 @@ erpnext.utils.update_child_items = function(opts) {
 			fieldtype: 'Date',
 			fieldname: frm.doc.doctype == 'Sales Order' ? "delivery_date" : "schedule_date",
 			in_list_view: 1,
-			label: frm.doc.doctype == 'Sales Order' ? __("Delivery Date") : __("Reqd by date")
+			label: frm.doc.doctype == 'Sales Order' ? __("Delivery Date") : __("Reqd by date"),
+			reqd: 1
 		})
 		fields.splice(3, 0, {
 			fieldtype: 'Float',
