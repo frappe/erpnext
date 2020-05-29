@@ -125,13 +125,13 @@
    "fieldname": "balance_details",
    "fieldtype": "Table",
    "label": "Opening Balance Details",
-   "options": "POS Opening Entry Details",
+   "options": "POS Opening Entry Detail",
    "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-05 16:42:13.278888",
+ "modified": "2020-05-29 14:43:31.135264",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "POS Opening Entry",

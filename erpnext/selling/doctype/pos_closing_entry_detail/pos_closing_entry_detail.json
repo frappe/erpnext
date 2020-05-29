@@ -60,7 +60,7 @@
  "modified": "2020-04-28 16:43:11.448881",
  "modified_by": "Administrator",
  "module": "Selling",
- "name": "POS Closing Entry Details",
+ "name": "POS Closing Entry Detail",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,
