@@ -432,7 +432,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
-	def test_purchase_receipt_without_cost_center(self):
+	def test_purchase_receipt_cost_center_with_balance_sheet_account(self):
 		if not frappe.db.exists('Location', 'Test Location'):
 			frappe.get_doc({
 				'doctype': 'Location',
@@ -444,13 +444,14 @@ class TestPurchaseReceipt(unittest.TestCase):
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
 
 		self.assertTrue(gl_entries)
+		cost_center = pr.get('items')[0].cost_center
 
 		expected_values = {
 			"Stock Received But Not Billed - TCP1": {
-				"cost_center": None
+				"cost_center": cost_center
 			},
 			stock_in_hand_account: {
-				"cost_center": None
+				"cost_center": cost_center
 			}
 		}
 		for i, gle in enumerate(gl_entries):
