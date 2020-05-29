@@ -80,9 +80,9 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-05 20:24:00.645484",
+ "modified": "2020-05-29 15:08:41.317100",
  "modified_by": "Administrator",
- "module": "Selling",
+ "module": "Accounts",
  "name": "POS Invoice Merge Log",
  "owner": "Administrator",
  "permissions": [
