@@ -77,12 +77,18 @@ def add_custom_roles_for_reports():
 			)).insert()
 
 def add_permissions():
-	for doctype in ('GST HSN Code', 'GST Settings'):
+	for doctype in ('GST HSN Code', 'GST Settings', 'GSTR 3B Report', 'Lower Deduction Certificate'):
 		add_permission(doctype, 'All', 0)
-		for role in ('Accounts Manager', 'System Manager', 'Item Manager', 'Stock Manager'):
+		for role in ('Accounts Manager', 'Accounts User', 'System Manager'):
 			add_permission(doctype, role, 0)
 			update_permission_property(doctype, role, 0, 'write', 1)
 			update_permission_property(doctype, role, 0, 'create', 1)
+
+		if doctype == 'GST HSN Code':
+			for role in ('Item Manager', 'Stock Manager'):
+				add_permission(doctype, role, 0)
+				update_permission_property(doctype, role, 0, 'write', 1)
+				update_permission_property(doctype, role, 0, 'create', 1)
 
 def add_print_formats():
 	frappe.reload_doc("regional", "print_format", "gst_tax_invoice")
@@ -524,12 +530,18 @@ def make_fixtures(company=None):
 
 def set_salary_components(docs):
 	docs.extend([
-		{'doctype': 'Salary Component', 'salary_component': 'Professional Tax', 'description': 'Professional Tax', 'type': 'Deduction'},
-		{'doctype': 'Salary Component', 'salary_component': 'Provident Fund', 'description': 'Provident fund', 'type': 'Deduction'},
-		{'doctype': 'Salary Component', 'salary_component': 'House Rent Allowance', 'description': 'House Rent Allowance', 'type': 'Earning'},
-		{'doctype': 'Salary Component', 'salary_component': 'Basic', 'description': 'Basic', 'type': 'Earning'},
-		{'doctype': 'Salary Component', 'salary_component': 'Arrear', 'description': 'Arrear', 'type': 'Earning'},
-		{'doctype': 'Salary Component', 'salary_component': 'Leave Encashment', 'description': 'Leave Encashment', 'type': 'Earning'}
+		{'doctype': 'Salary Component', 'salary_component': 'Professional Tax',
+			'description': 'Professional Tax', 'type': 'Deduction', 'exempted_from_income_tax': 1},
+		{'doctype': 'Salary Component', 'salary_component': 'Provident Fund',
+			'description': 'Provident fund', 'type': 'Deduction', 'is_tax_applicable': 1},
+		{'doctype': 'Salary Component', 'salary_component': 'House Rent Allowance',
+			'description': 'House Rent Allowance', 'type': 'Earning', 'is_tax_applicable': 1},
+		{'doctype': 'Salary Component', 'salary_component': 'Basic',
+			'description': 'Basic', 'type': 'Earning', 'is_tax_applicable': 1},
+		{'doctype': 'Salary Component', 'salary_component': 'Arrear',
+			'description': 'Arrear', 'type': 'Earning', 'is_tax_applicable': 1},
+		{'doctype': 'Salary Component', 'salary_component': 'Leave Encashment',
+			'description': 'Leave Encashment', 'type': 'Earning', 'is_tax_applicable': 1}
 	])
 
 def set_tax_withholding_category(company):

@@ -202,7 +202,9 @@ def get_conditions(filters):
 				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
 					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
 						filters.get(dimension.fieldname))
-				conditions.append("{0} in %({0})s".format(dimension.fieldname))
+					conditions.append("{0} in %({0})s".format(dimension.fieldname))
+				else:
+					conditions.append("{0} in (%({0})s)".format(dimension.fieldname))
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
@@ -291,6 +293,9 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 		data[key].debit_in_account_currency += flt(gle.debit_in_account_currency)
 		data[key].credit_in_account_currency += flt(gle.credit_in_account_currency)
 
+		if data[key].against_voucher and gle.against_voucher:
+			data[key].against_voucher += ', ' + gle.against_voucher
+
 	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
 	for gle in gl_entries:
 		if (gle.posting_date < from_date or
@@ -363,6 +368,7 @@ def get_columns(filters):
 
 	columns = [
 		{
+			"label": _("GL Entry"),
 			"fieldname": "gl_entry",
 			"fieldtype": "Link",
 			"options": "GL Entry",

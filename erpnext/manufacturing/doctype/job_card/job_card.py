@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, time_diff_in_hours, get_datetime, time_diff
+from frappe.utils import flt, time_diff_in_hours, get_datetime, time_diff, get_link_to_form
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 
@@ -90,11 +90,15 @@ class JobCard(Document):
 
 	def validate_job_card(self):
 		if not self.time_logs:
-			frappe.throw(_("Time logs are required for job card {0}").format(self.name))
+			frappe.throw(_("Time logs are required for {0} {1}")
+				.format(frappe.bold("Job Card"), get_link_to_form("Job Card", self.name)))
 
 		if self.for_quantity and self.total_completed_qty != self.for_quantity:
-			frappe.throw(_("The total completed qty({0}) must be equal to qty to manufacture({1})"
-				.format(frappe.bold(self.total_completed_qty),frappe.bold(self.for_quantity))))
+			total_completed_qty = frappe.bold(_("Total Completed Qty"))
+			qty_to_manufacture = frappe.bold(_("Qty to Manufacture"))
+
+			frappe.throw(_("The {0} ({1}) must be equal to {2} ({3})"
+				.format(total_completed_qty, frappe.bold(self.total_completed_qty), qty_to_manufacture,frappe.bold(self.for_quantity))))
 
 	def update_work_order(self):
 		if not self.work_order:
@@ -103,30 +107,31 @@ class JobCard(Document):
 		for_quantity, time_in_mins = 0, 0
 		from_time_list, to_time_list = [], []
 
-
+		field = "operation_id" if self.operation_id else "operation"
 		data = frappe.get_all('Job Card',
 			fields = ["sum(total_time_in_mins) as time_in_mins", "sum(total_completed_qty) as completed_qty"],
 			filters = {"docstatus": 1, "work_order": self.work_order,
-				"workstation": self.workstation, "operation": self.operation})
+				"workstation": self.workstation, field: self.get(field)})
 
 		if data and len(data) > 0:
 			for_quantity = data[0].completed_qty
 			time_in_mins = data[0].time_in_mins
 
-		if for_quantity:
+		if self.get(field):
 			time_data = frappe.db.sql("""
 				SELECT
 					min(from_time) as start_time, max(to_time) as end_time
 				FROM `tabJob Card` jc, `tabJob Card Time Log` jctl
 				WHERE
 					jctl.parent = jc.name and jc.work_order = %s
-					and jc.workstation = %s and jc.operation = %s and jc.docstatus = 1
-			""", (self.work_order, self.workstation, self.operation), as_dict=1)
+					and jc.workstation = %s and jc.{0} = %s and jc.docstatus = 1
+			""".format(field), (self.work_order, self.workstation, self.get(field)), as_dict=1)
 
 			wo = frappe.get_doc('Work Order', self.work_order)
 
+			work_order_field = "name" if field == "operation_id" else field
 			for data in wo.operations:
-				if data.workstation == self.workstation and data.operation == self.operation:
+				if data.get(work_order_field) == self.get(field) and data.workstation == self.workstation:
 					data.completed_qty = for_quantity
 					data.actual_operation_time = time_in_mins
 					data.actual_start_time = time_data[0].start_time if time_data else None

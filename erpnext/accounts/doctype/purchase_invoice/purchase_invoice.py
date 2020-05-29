@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate
+from frappe.utils import cint, cstr, formatdate, flt, getdate, nowdate, get_link_to_form
 from frappe import _, throw
 import frappe.defaults
 
@@ -146,10 +146,14 @@ class PurchaseInvoice(BuyingController):
 			["account_type", "report_type", "account_currency"], as_dict=True)
 
 		if account.report_type != "Balance Sheet":
-			frappe.throw(_("Credit To account must be a Balance Sheet account"))
+			frappe.throw(_("Please ensure {} account is a Balance Sheet account. \
+					You can change the parent account to a Balance Sheet account or select a different account.")
+				.format(frappe.bold("Credit To")), title=_("Invalid Account"))
 
 		if self.supplier and account.account_type != "Payable":
-			frappe.throw(_("Credit To account must be a Payable account"))
+			frappe.throw(_("Please ensure {} account is a Payable account. \
+					Change the account type to Payable or select a different account.")
+				.format(frappe.bold("Credit To")), title=_("Invalid Account"))
 
 		self.party_account_currency = account.account_currency
 
@@ -255,16 +259,30 @@ class PurchaseInvoice(BuyingController):
 
 	def po_required(self):
 		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
+
+			if frappe.get_value('Supplier', self.supplier, 'allow_purchase_invoice_creation_without_purchase_order'):
+				return
+
 			for d in self.get('items'):
 				if not d.purchase_order:
-					throw(_("As per the Buying Settings if Purchase Order Required == 'YES', then for creating Purchase Invoice, user need to create Purchase Order first for item {0}").format(d.item_code))
+					throw(_("""Purchase Order Required for item {0}
+						To submit the invoice without purchase order please set
+						{1} as {2} in {3}""").format(frappe.bold(d.item_code), frappe.bold(_('Purchase Order Required')),
+						frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings')))
 
 	def pr_required(self):
 		stock_items = self.get_stock_items()
 		if frappe.db.get_value("Buying Settings", None, "pr_required") == 'Yes':
+
+			if frappe.get_value('Supplier', self.supplier, 'allow_purchase_invoice_creation_without_purchase_receipt'):
+				return
+
 			for d in self.get('items'):
 				if not d.purchase_receipt and d.item_code in stock_items:
-					throw(_("As per the Buying Settings if Purchase Reciept Required == 'YES', then for creating Purchase Invoice, user need to create Purchase Receipt first for item {0}").format(d.item_code))
+					throw(_("""Purchase Receipt Required for item {0}
+						To submit the invoice without purchase receipt please set
+						{1} as {2} in {3}""").format(frappe.bold(d.item_code), frappe.bold(_('Purchase Receipt Required')),
+						frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings')))
 
 	def validate_write_off_account(self):
 		if self.write_off_amount and not self.write_off_account:
@@ -435,7 +453,7 @@ class PurchaseInvoice(BuyingController):
 					"against_voucher_type": self.doctype,
 					"cost_center": self.cost_center,
 					"project": self.project
-				}, self.party_account_currency)
+				}, self.party_account_currency, item=self)
 			)
 
 	def make_item_gl_entries(self, gl_entries):
@@ -792,7 +810,7 @@ class PurchaseInvoice(BuyingController):
 					"against_voucher_type": self.doctype,
 					"cost_center": self.cost_center,
 					"project": self.project
-				}, self.party_account_currency)
+				}, self.party_account_currency, item=self)
 			)
 
 			gl_entries.append(
@@ -803,7 +821,7 @@ class PurchaseInvoice(BuyingController):
 					"credit_in_account_currency": self.base_paid_amount \
 						if bank_account_currency==self.company_currency else self.paid_amount,
 					"cost_center": self.cost_center
-				}, bank_account_currency)
+				}, bank_account_currency, item=self)
 			)
 
 	def make_write_off_gl_entry(self, gl_entries):
@@ -825,7 +843,7 @@ class PurchaseInvoice(BuyingController):
 					"against_voucher_type": self.doctype,
 					"cost_center": self.cost_center,
 					"project": self.project
-				}, self.party_account_currency)
+				}, self.party_account_currency, item=self)
 			)
 			gl_entries.append(
 				self.get_gl_dict({
@@ -835,7 +853,7 @@ class PurchaseInvoice(BuyingController):
 					"credit_in_account_currency": self.base_write_off_amount \
 						if write_off_account_currency==self.company_currency else self.write_off_amount,
 					"cost_center": self.cost_center or self.write_off_cost_center
-				})
+				}, item=self)
 			)
 
 	def make_gle_for_rounding_adjustment(self, gl_entries):
@@ -854,8 +872,7 @@ class PurchaseInvoice(BuyingController):
 					"debit_in_account_currency": self.rounding_adjustment,
 					"debit": self.base_rounding_adjustment,
 					"cost_center": self.cost_center or round_off_cost_center,
-				}
-			))
+				}, item=self))
 
 	def on_cancel(self):
 		super(PurchaseInvoice, self).on_cancel()
@@ -950,7 +967,7 @@ class PurchaseInvoice(BuyingController):
 		if not self.apply_tds:
 			return
 
-		tax_withholding_details = get_party_tax_withholding_details(self)
+		tax_withholding_details = get_party_tax_withholding_details(self, self.tax_withholding_category)
 
 		if not tax_withholding_details:
 			return
@@ -972,6 +989,40 @@ class PurchaseInvoice(BuyingController):
 
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
+
+	def set_status(self, update=False, status=None, update_modified=True):
+		if self.is_new():
+			if self.get('amended_from'):
+				self.status = 'Draft'
+			return
+
+		precision = self.precision("outstanding_amount")
+		outstanding_amount = flt(self.outstanding_amount, precision)
+		due_date = getdate(self.due_date)
+		nowdate = getdate()
+
+		if not status:
+			if self.docstatus == 2:
+				status = "Cancelled"
+			elif self.docstatus == 1:
+				if outstanding_amount > 0 and due_date < nowdate:
+					self.status = "Overdue"
+				elif outstanding_amount > 0 and due_date >= nowdate:
+					self.status = "Unpaid"
+				#Check if outstanding amount is 0 due to debit note issued against invoice
+				elif outstanding_amount <= 0 and self.is_return == 0 and frappe.db.get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+					self.status = "Debit Note Issued"
+				elif self.is_return == 1:
+					self.status = "Return"
+				elif outstanding_amount<=0:
+					self.status = "Paid"
+				else:
+					self.status = "Submitted"
+			else:
+				self.status = "Draft"
+
+		if update:
+			self.db_set('status', self.status, update_modified = update_modified)
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

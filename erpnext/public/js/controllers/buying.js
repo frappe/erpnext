@@ -85,12 +85,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 					filters:{ 'is_sub_contracted_item': 1 }
 				}
 			}
-			else if (me.frm.doc.material_request_type == "Customer Provided") {
-				return{
-					query: "erpnext.controllers.queries.item_query",
-					filters:{ 'customer': me.frm.doc.customer }
-				}
-			}
 			else {
 				return{
 					query: "erpnext.controllers.queries.item_query",
@@ -259,6 +253,13 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 	},
 
+	rejected_warehouse: function(doc, cdt) {
+		// trigger autofill_warehouse only if parent rejected_warehouse field is triggered
+		if (["Purchase Invoice", "Purchase Receipt"].includes(cdt)) {
+			this.autofill_warehouse(doc.items, "rejected_warehouse", doc.rejected_warehouse);
+		}
+	},
+
 	category: function(doc, cdt, cdn) {
 		// should be the category field of tax table
 		if(cdt != doc.doctype) {
@@ -385,7 +386,31 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				}
 			});
 		}
-	}
+	},
+
+	manufacturer_part_no: function(doc, cdt, cdn) {
+		const row = locals[cdt][cdn];
+
+		if (row.manufacturer_part_no) {
+			frappe.model.get_value('Item Manufacturer',
+				{
+					'item_code': row.item_code,
+					'manufacturer': row.manufacturer,
+					'manufacturer_part_no': row.manufacturer_part_no
+				},
+				'name',
+				function(data) {
+					if (!data) {
+						let msg = {
+							message: __("Manufacturer Part Number <b>{0}</b> is invalid", [row.manufacturer_part_no]),
+							title: __("Invalid Part Number")
+						}
+						frappe.throw(msg);
+					}
+				});
+
+			}
+		}
 });
 
 cur_frm.add_fetch('project', 'cost_center', 'cost_center');

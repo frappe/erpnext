@@ -69,17 +69,6 @@ status_map = {
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed'"],
 	],
-	"Purchase Invoice": [	
-		["Draft", None],	
-		["Submitted", "eval:self.docstatus==1"],	
-		["Paid", "eval:self.outstanding_amount==0 and self.docstatus==1"],	
-		["Return", "eval:self.is_return==1 and self.docstatus==1"],	
-		["Debit Note Issued",	
-			"eval:self.outstanding_amount <= 0 and self.docstatus==1 and self.is_return==0 and get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1})"],	
-		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],	
-		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],	
-		["Cancelled", "eval:self.docstatus==2"],	
-	],
 	"Material Request": [
 		["Draft", None],
 		["Stopped", "eval:self.status == 'Stopped'"],

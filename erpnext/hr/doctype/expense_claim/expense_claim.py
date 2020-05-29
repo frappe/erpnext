@@ -45,10 +45,10 @@ class ExpenseClaim(AccountsController):
 		paid_amount = flt(self.total_amount_reimbursed) + flt(self.total_advance_amount)
 		precision = self.precision("grand_total")
 		if (self.is_paid or (flt(self.total_sanctioned_amount) > 0
-			and flt(self.grand_total, precision) ==  flt(paid_amount, precision))) \
+			and flt(flt(self.total_sanctioned_amount) + flt(self.total_taxes_and_charges), precision) ==  flt(paid_amount, precision))) \
 			and self.docstatus == 1 and self.approval_status == 'Approved':
 				self.status = "Paid"
-		elif flt(self.total_sanctioned_amount) > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
+		elif flt(self.grand_total) > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
 			self.status = "Unpaid"
 		elif self.docstatus == 1 and self.approval_status == 'Rejected':
 			self.status = 'Rejected'
@@ -115,8 +115,9 @@ class ExpenseClaim(AccountsController):
 					"party_type": "Employee",
 					"party": self.employee,
 					"against_voucher_type": self.doctype,
-					"against_voucher": self.name
-				})
+					"against_voucher": self.name,
+					"cost_center": self.cost_center
+				}, item=self)
 			)
 
 		# expense entries
@@ -127,8 +128,8 @@ class ExpenseClaim(AccountsController):
 					"debit": data.sanctioned_amount,
 					"debit_in_account_currency": data.sanctioned_amount,
 					"against": self.employee,
-					"cost_center": self.cost_center
-				})
+					"cost_center": data.cost_center
+				}, item=data)
 			)
 
 		for data in self.advances:
@@ -156,7 +157,7 @@ class ExpenseClaim(AccountsController):
 					"credit": self.grand_total,
 					"credit_in_account_currency": self.grand_total,
 					"against": self.employee
-				})
+				}, item=self)
 			)
 
 			gl_entry.append(
@@ -169,7 +170,7 @@ class ExpenseClaim(AccountsController):
 					"debit_in_account_currency": self.grand_total,
 					"against_voucher": self.name,
 					"against_voucher_type": self.doctype,
-				})
+				}, item=self)
 			)
 
 		return gl_entry
@@ -186,7 +187,7 @@ class ExpenseClaim(AccountsController):
 					"cost_center": self.cost_center,
 					"against_voucher_type": self.doctype,
 					"against_voucher": self.name
-				})
+				}, item=tax)
 			)
 
 	def validate_account_details(self):

@@ -9,8 +9,9 @@ from frappe.utils.make_random import get_random
 from frappe.utils import nowdate, add_days, add_years, getdate, add_months
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.hr.doctype.salary_slip.test_salary_slip import make_earning_salary_component,\
-	make_deduction_salary_component, make_employee_salary_slip
+	make_deduction_salary_component, make_employee_salary_slip, create_tax_slab
 from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.employee_tax_exemption_declaration.test_employee_tax_exemption_declaration import create_payroll_period
 
 
 test_dependencies = ["Fiscal Year"]
@@ -70,10 +71,8 @@ class TestSalaryStructure(unittest.TestCase):
 			self.assertEqual(sal_slip.get("earnings")[1].amount, 3000)
 			self.assertEqual(sal_slip.get("earnings")[2].amount, 25000)
 			self.assertEqual(sal_slip.get("gross_pay"), 78000)
-			self.assertEqual(sal_slip.get("deductions")[0].amount, 5000)
-			self.assertEqual(sal_slip.get("deductions")[1].amount, 5000)
-			self.assertEqual(sal_slip.get("total_deduction"), 10000)
-			self.assertEqual(sal_slip.get("net_pay"), 68000)
+			self.assertEqual(sal_slip.get("deductions")[0].amount, 200)
+			self.assertEqual(sal_slip.get("net_pay"), 78000 - sal_slip.get("total_deduction"))
 
 	def test_whitespaces_in_formula_conditions_fields(self):
 		salary_structure = make_salary_structure("Salary Structure Sample", "Monthly", dont_submit=True)
@@ -111,6 +110,7 @@ class TestSalaryStructure(unittest.TestCase):
 def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None, test_tax=False):
 	if test_tax:
 		frappe.db.sql("""delete from `tabSalary Structure` where name=%s""",(salary_structure))
+
 	if not frappe.db.exists('Salary Structure', salary_structure):
 		details = {
 			"doctype": "Salary Structure",
@@ -123,7 +123,8 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None, do
 		}
 		if other_details and isinstance(other_details, dict):
 			details.update(other_details)
-		salary_structure_doc = frappe.get_doc(details).insert()
+		salary_structure_doc = frappe.get_doc(details)
+		salary_structure_doc.insert()
 		if not dont_submit:
 			salary_structure_doc.submit()
 	else:
@@ -138,13 +139,18 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None, do
 def create_salary_structure_assignment(employee, salary_structure, from_date=None):
 	if frappe.db.exists("Salary Structure Assignment", {"employee": employee}):
 		frappe.db.sql("""delete from `tabSalary Structure Assignment` where employee=%s""",(employee))
+
+	payroll_period = create_payroll_period()
+	create_tax_slab(payroll_period, allow_tax_exemption=True)
+
 	salary_structure_assignment = frappe.new_doc("Salary Structure Assignment")
 	salary_structure_assignment.employee = employee
 	salary_structure_assignment.base = 50000
 	salary_structure_assignment.variable = 5000
-	salary_structure_assignment.from_date = from_date or add_months(nowdate(), -1)
+	salary_structure_assignment.from_date = from_date or add_days(nowdate(), -1)
 	salary_structure_assignment.salary_structure = salary_structure
 	salary_structure_assignment.company = erpnext.get_default_company()
 	salary_structure_assignment.save(ignore_permissions=True)
+	salary_structure_assignment.income_tax_slab = "Tax Slab: _Test Payroll Period"
 	salary_structure_assignment.submit()
 	return salary_structure_assignment

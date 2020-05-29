@@ -86,6 +86,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pe.submit()
 
 		pi_doc = frappe.get_doc('Purchase Invoice', pi_doc.name)
+		pi_doc.load_from_db()
+		self.assertTrue(pi_doc.status, "Paid")
 
 		self.assertRaises(frappe.LinkExistsError, pi_doc.cancel)
 		unlink_payment_on_cancel_of_invoice()
@@ -203,7 +205,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi.insert()
 		pi.submit()
+		pi.load_from_db()
 
+		self.assertTrue(pi.status, "Unpaid")
 		self.check_gle_for_pi(pi.name)
 
 	def check_gle_for_pi(self, pi):
@@ -234,6 +238,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi = frappe.copy_doc(test_records[0])
 		pi.insert()
+		pi.load_from_db()
+
+		self.assertTrue(pi.status, "Draft")
 		pi.naming_series = 'TEST-'
 
 		self.assertRaises(frappe.CannotChangeConstantError, pi.save)
@@ -248,6 +255,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.get("taxes").pop(1)
 		pi.insert()
 		pi.submit()
+		pi.load_from_db()
+		self.assertTrue(pi.status, "Unpaid")
 
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
@@ -599,6 +608,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 		# return entry
 		pi1 = make_purchase_invoice(is_return=1, return_against=pi.name, qty=-2, rate=50, update_stock=1)
 
+		pi.load_from_db()
+		self.assertTrue(pi.status, "Debit Note Issued")
+		pi1.load_from_db()
+		self.assertTrue(pi1.status, "Return")
+
 		actual_qty_2 = get_qty_after_transaction()
 		self.assertEqual(actual_qty_1 - 2, actual_qty_2)
 
@@ -771,6 +785,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import get_outstanding_amount
 
 		pi = make_purchase_invoice(item_code = "_Test Item", qty = (5 * -1), rate=500, is_return = 1)
+		pi.load_from_db()
+		self.assertTrue(pi.status, "Return")
 
 		outstanding_amount = get_outstanding_amount(pi.doctype,
 			pi.name, "Creditors - _TC", pi.supplier, "Supplier")

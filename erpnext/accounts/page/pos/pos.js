@@ -1458,7 +1458,40 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.child.batch_no = this.item_batch_no[this.child.item_code];
 		this.child.serial_no = (this.item_serial_no[this.child.item_code]
 			? this.item_serial_no[this.child.item_code][0] : '');
-		this.child.item_tax_rate = JSON.stringify(this.tax_data[this.child.item_code]);
+
+		const tax_template_is_valid = true;
+		if (this.items && this.items[0].valid_from) {
+			tax_template_is_valid = frappe.datetime.get_diff(frappe.datetime.now_date(),
+				this.items[0].valid_from) > 0;
+		}
+
+		this.child.item_tax_template = tax_template_is_valid ? this.items[0].item_tax_template : '';
+		this.child.item_tax_rate = JSON.stringify(this.tax_data[this.child.item_tax_template]);
+
+		if (this.child.item_tax_rate) {
+			this.add_taxes_from_item_tax_template(this.child.item_tax_rate);
+		}
+	},
+
+	add_taxes_from_item_tax_template: function(item_tax_map) {
+		let me = this;
+
+		if(item_tax_map && cint(frappe.defaults.get_default("add_taxes_from_item_tax_template"))) {
+			if(typeof (item_tax_map) == "string") {
+				item_tax_map = JSON.parse(item_tax_map);
+			}
+
+			$.each(item_tax_map, function(tax, rate) {
+				let found = (me.frm.doc.taxes || []).find(d => d.account_head === tax);
+				if(!found) {
+					let child = frappe.model.add_child(me.frm.doc, "taxes");
+					child.charge_type = "On Net Total";
+					child.account_head = tax;
+					child.description = String(tax);
+					child.rate = rate;
+				}
+			});
+		}
 	},
 
 	update_paid_amount_status: function (update_paid_amount) {

@@ -412,7 +412,7 @@ class SalesInvoice(SellingController):
 
 		if pos:
 			self.allow_print_before_pay = pos.allow_print_before_pay
-			
+
 			if not for_validate:
 				self.tax_category = pos.get("tax_category")
 
@@ -429,13 +429,18 @@ class SalesInvoice(SellingController):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
 
-			customer_price_list = frappe.get_value("Customer", self.customer, 'default_price_list')
-
 			if pos.get("company_address"):
 				self.company_address = pos.get("company_address")
 
-			if not customer_price_list:
-				self.set('selling_price_list', pos.get('selling_price_list'))
+			if self.customer:
+				customer_price_list, customer_group = frappe.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
+				customer_group_price_list = frappe.get_value("Customer Group", customer_group, 'default_price_list')
+				selling_price_list = customer_price_list or customer_group_price_list or pos.get('selling_price_list')
+			else:
+				selling_price_list = pos.get('selling_price_list')
+
+			if selling_price_list:
+				self.set('selling_price_list', selling_price_list)
 
 			if not for_validate:
 				self.update_stock = cint(pos.get("update_stock"))
@@ -466,13 +471,17 @@ class SalesInvoice(SellingController):
 			["account_type", "report_type", "account_currency"], as_dict=True)
 
 		if not account:
-			frappe.throw(_("Debit To is required"))
+			frappe.throw(_("Debit To is required"), title=_("Account Missing"))
 
 		if account.report_type != "Balance Sheet":
-			frappe.throw(_("Debit To account must be a Balance Sheet account"))
+			frappe.throw(_("Please ensure {} account is a Balance Sheet account. \
+					You can change the parent account to a Balance Sheet account or select a different account.")
+				.format(frappe.bold("Debit To")), title=_("Invalid Account"))
 
 		if self.customer and account.account_type != "Receivable":
-			frappe.throw(_("Debit To account must be a Receivable account"))
+			frappe.throw(_("Please ensure {} account is a Receivable account. \
+					Change the account type to Receivable or select a different account.")
+				.format(frappe.bold("Debit To")), title=_("Invalid Account"))
 
 		self.party_account_currency = account.account_currency
 
@@ -534,14 +543,18 @@ class SalesInvoice(SellingController):
 		"""check in manage account if sales order / delivery note required or not."""
 		if self.is_return:
 			return
-		dic = {'Sales Order':['so_required', 'is_pos'],'Delivery Note':['dn_required', 'update_stock']}
-		for i in dic:
-			if frappe.db.get_single_value('Selling Settings', dic[i][0]) == 'Yes':
+
+		prev_doc_field_map = {'Sales Order': ['so_required', 'is_pos'],'Delivery Note': ['dn_required', 'update_stock']}
+		for key, value in iteritems(prev_doc_field_map):
+			if frappe.db.get_single_value('Selling Settings', value[0]) == 'Yes':
+
+				if frappe.get_value('Customer', self.customer, value[0]):
+					continue
+
 				for d in self.get('items'):
 					is_stock_item = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
-					if  (d.item_code and is_stock_item == 1\
-						and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1])):
-						msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
+					if (d.item_code and is_stock_item ==1 and not d.get(key.lower().replace(' ', '_')) and not self.get(value[1])):
+						msgprint(_("{0} is mandatory for Item {1}").format(key, d.item_code), raise_exception=1)
 
 
 	def validate_proj_cust(self):
@@ -773,7 +786,7 @@ class SalesInvoice(SellingController):
 					"against_voucher_type": self.doctype,
 					"cost_center": self.cost_center,
 					"project": self.project
-				}, self.party_account_currency)
+				}, self.party_account_currency, item=self)
 			)
 
 	def make_tax_gl_entries(self, gl_entries):
@@ -790,7 +803,7 @@ class SalesInvoice(SellingController):
 							tax.precision("base_tax_amount_after_discount_amount")) if account_currency==self.company_currency else
 							flt(tax.tax_amount_after_discount_amount, tax.precision("tax_amount_after_discount_amount"))),
 						"cost_center": tax.cost_center
-					}, account_currency)
+					}, account_currency, item=tax)
 				)
 
 	def make_item_gl_entries(self, gl_entries):
@@ -810,7 +823,7 @@ class SalesInvoice(SellingController):
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
-						gl_entries.append(self.get_gl_dict(gle))
+						gl_entries.append(self.get_gl_dict(gle, item=item))
 
 					asset.db_set("disposal_date", self.posting_date)
 					asset.set_status("Sold" if self.docstatus==1 else None)
@@ -849,7 +862,7 @@ class SalesInvoice(SellingController):
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
 					"cost_center": self.cost_center
-				})
+				}, item=self)
 			)
 			gl_entries.append(
 				self.get_gl_dict({
@@ -858,7 +871,7 @@ class SalesInvoice(SellingController):
 					"against": self.customer,
 					"debit": self.loyalty_amount,
 					"remark": "Loyalty Points redeemed by the customer"
-				})
+				}, item=self)
 			)
 
 	def make_pos_gl_entries(self, gl_entries):
@@ -879,7 +892,7 @@ class SalesInvoice(SellingController):
 							"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 							"against_voucher_type": self.doctype,
 							"cost_center": self.cost_center
-						}, self.party_account_currency)
+						}, self.party_account_currency, item=self)
 					)
 
 					payment_mode_account_currency = get_account_currency(payment_mode.account)
@@ -892,7 +905,7 @@ class SalesInvoice(SellingController):
 								if payment_mode_account_currency==self.company_currency \
 								else payment_mode.amount,
 							"cost_center": self.cost_center
-						}, payment_mode_account_currency)
+						}, payment_mode_account_currency, item=self)
 					)
 
 	def make_gle_for_change_amount(self, gl_entries):
@@ -911,7 +924,7 @@ class SalesInvoice(SellingController):
 						"against_voucher_type": self.doctype,
 						"cost_center": self.cost_center,
 						"project": self.project
-					}, self.party_account_currency)
+					}, self.party_account_currency, item=self)
 				)
 
 				gl_entries.append(
@@ -920,7 +933,7 @@ class SalesInvoice(SellingController):
 						"against": self.customer,
 						"credit": self.base_change_amount,
 						"cost_center": self.cost_center
-					})
+					}, item=self)
 				)
 			else:
 				frappe.throw(_("Select change amount account"), title="Mandatory Field")
@@ -945,7 +958,7 @@ class SalesInvoice(SellingController):
 					"against_voucher_type": self.doctype,
 					"cost_center": self.cost_center,
 					"project": self.project
-				}, self.party_account_currency)
+				}, self.party_account_currency, item=self)
 			)
 			gl_entries.append(
 				self.get_gl_dict({
@@ -956,7 +969,7 @@ class SalesInvoice(SellingController):
 						self.precision("base_write_off_amount")) if write_off_account_currency==self.company_currency
 						else flt(self.write_off_amount, self.precision("write_off_amount"))),
 					"cost_center": self.cost_center or self.write_off_cost_center or default_cost_center
-				}, write_off_account_currency)
+				}, write_off_account_currency, item=self)
 			)
 
 	def make_gle_for_rounding_adjustment(self, gl_entries):
@@ -973,8 +986,7 @@ class SalesInvoice(SellingController):
 					"credit": flt(self.base_rounding_adjustment,
 						self.precision("base_rounding_adjustment")),
 					"cost_center": self.cost_center or round_off_cost_center,
-				}
-			))
+				}, item=self))
 
 	def update_billing_status_in_dn(self, update_modified=True):
 		updated_delivery_notes = []
