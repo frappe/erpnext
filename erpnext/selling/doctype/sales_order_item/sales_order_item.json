@@ -214,6 +214,7 @@
    "fieldtype": "Link",
    "label": "UOM",
    "options": "UOM",
+   "print_hide": 0,
    "reqd": 1
   },
   {
