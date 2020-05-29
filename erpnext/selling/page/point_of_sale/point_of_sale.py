@@ -76,7 +76,7 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 			fields = ["item_code", "price_list_rate", "currency"],
 			filters = {'price_list': price_list, 'item_code': ['in', items]})
 
-		item_prices, bin_data = {}, {}
+		item_prices = {}
 		for d in item_prices_data:
 			item_prices[d.item_code] = d
 
@@ -101,10 +101,10 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 		'items': result
 	}
 
-	if len(result) == 1:
-		result[0].setdefault('serial_no', serial_no)
-		result[0].setdefault('batch_no', batch_no)
-		result[0].setdefault('barcode', barcode)
+	if len(res['items']) == 1:
+		res['items'][0].setdefault('serial_no', serial_no)
+		res['items'][0].setdefault('batch_no', batch_no)
+		res['items'][0].setdefault('barcode', barcode)
 
 		return res
 
@@ -144,12 +144,45 @@ def search_serial_or_batch_or_barcode_number(search_value):
 
 	return {}
 
+def get_conditions(item_code, serial_no, batch_no, barcode):
+	if serial_no or batch_no or barcode:
+		return "name = {0}".format(frappe.db.escape(item_code))
+
+	return """(name like {item_code}
+		or item_name like {item_code})""".format(item_code = frappe.db.escape('%' + item_code + '%'))
+
+def get_item_group_condition(pos_profile):
+	cond = "and 1=1"
+	item_groups = get_item_groups(pos_profile)
+	if item_groups:
+		cond = "and item_group in (%s)"%(', '.join(['%s']*len(item_groups)))
+
+	return cond % tuple(item_groups)
+
+def item_group_query(doctype, txt, searchfield, start, page_len, filters):
+	item_groups = []
+	cond = "1=1"
+	pos_profile= filters.get('pos_profile')
+
+	if pos_profile:
+		item_groups = get_item_groups(pos_profile)
+
+		if item_groups:
+			cond = "name in (%s)"%(', '.join(['%s']*len(item_groups)))
+			cond = cond % tuple(item_groups)
+
+	return frappe.db.sql(""" select distinct name from `tabItem Group`
+			where {condition} and (name like %(txt)s) limit {start}, {page_len}"""
+		.format(condition = cond, start=start, page_len= page_len),
+			{'txt': '%%%s%%' % txt})
+
 @frappe.whitelist()
 def check_opening_entry(user):
 	open_vouchers = frappe.db.get_all("POS Opening Entry", 
 		filters = { 
 			"user": user, 
-			"pos_closing_entry": ["in", ["", None]], "docstatus": 1 
+			"pos_closing_entry": ["in", ["", None]],
+			"docstatus": 1
 		}, 
 		fields = ["name", "company", "pos_profile", "period_start_date"],
 		order_by = "period_start_date desc"
@@ -177,7 +210,6 @@ def create_opening_voucher(pos_profile, company, balance_details):
 
 @frappe.whitelist()
 def get_past_order_list(search_term, status, limit=20):
-
 	fields = ['name', 'grand_total', 'currency', 'customer', 'posting_time', 'posting_date']
 	invoice_list = []
 
@@ -215,40 +247,3 @@ def set_customer_info(fieldname, customer, value=""):
 			contact_doc.set('phone_nos', [{ 'phone': value, 'is_primary_mobile_no': 1}])
 			frappe.db.set_value('Customer', customer, 'mobile_no', value)
 		contact_doc.save()
-
-def get_conditions(item_code, serial_no, batch_no, barcode):
-	if serial_no or batch_no or barcode:
-		return "name = {0}".format(frappe.db.escape(item_code))
-
-	return """(name like {item_code}
-		or item_name like {item_code})""".format(item_code = frappe.db.escape('%' + item_code + '%'))
-
-def get_item_group_condition(pos_profile):
-	cond = "and 1=1"
-	item_groups = get_item_groups(pos_profile)
-	if item_groups:
-		cond = "and item_group in (%s)"%(', '.join(['%s']*len(item_groups)))
-
-	return cond % tuple(item_groups)
-
-def item_group_query(doctype, txt, searchfield, start, page_len, filters):
-	item_groups = []
-	cond = "1=1"
-	pos_profile= filters.get('pos_profile')
-
-	if pos_profile:
-		item_groups = get_item_groups(pos_profile)
-
-		if item_groups:
-			cond = "name in (%s)"%(', '.join(['%s']*len(item_groups)))
-			cond = cond % tuple(item_groups)
-
-	return frappe.db.sql(""" select distinct name from `tabItem Group`
-			where {condition} and (name like %(txt)s) limit {start}, {page_len}"""
-		.format(condition = cond, start=start, page_len= page_len),
-			{'txt': '%%%s%%' % txt})
-
-@frappe.whitelist()
-def get_pos_fields():
-	return frappe.get_all("POS Field", fields=["label", "fieldname",
-		"fieldtype", "default_value", "reqd", "read_only", "options"])

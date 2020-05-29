@@ -326,11 +326,10 @@ def get_stock_availability(item_code, warehouse):
 		and p_item.docstatus = 1
 		and p_item.item_code = %s
 		and p_item.warehouse = %s
-		order by posting_date desc, posting_time desc
 		""", (item_code, warehouse), as_dict=1)
 	
-	sle_qty = latest_sle[0].qty_after_transaction if (len(latest_sle) and latest_sle[0].qty_after_transaction) else 0
-	pos_sales_qty = pos_sales_qty[0].qty if (len(pos_sales_qty) and pos_sales_qty[0].qty ) else 0
+	sle_qty = latest_sle[0].qty_after_transaction or 0 if latest_sle else 0
+	pos_sales_qty = pos_sales_qty[0].qty or 0 if pos_sales_qty else 0
 	
 	if sle_qty and pos_sales_qty and sle_qty > pos_sales_qty:
 		return sle_qty - pos_sales_qty
