@@ -143,7 +143,7 @@ def get_number_cards():
 
 	number_cards.append(
 		get_number_cards_doc("Employee", "Employees Left (Last year)", filters_json = json.dumps([
-				["Employee", "modified", "Previous", "1 year"],
+				["Employee", "relieving_date", "Previous", "1 year"],
 				["Employee", "status", "=", "Left"]
 			])
 		)
