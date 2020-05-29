@@ -600,7 +600,9 @@ erpnext.PointOfSale.ItemCart = class {
 
 		function get_description_html() {
 			if (item_data.description) {
-				item_data.description.indexOf('<div>') != -1 && (item_data.description = $(item_data.description).text());
+				if (item_data.description.indexOf('<div>') != -1) {
+					item_data.description = item_data.description.replace(/<div>/g, ' ').replace(/<\/div>/g, ' ').replace(/ +/g, ' ');
+				}
 				item_data.description = frappe.ellipsis(item_data.description, 45);
 				return `<div class="text-grey">${item_data.description}</div>`
 			}
