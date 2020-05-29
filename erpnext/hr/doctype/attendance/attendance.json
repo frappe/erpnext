@@ -183,12 +183,14 @@
    "label": "Details"
   },
   {
+   "depends_on": "shift",
    "fieldname": "in_time",
    "fieldtype": "Datetime",
    "label": "In Time",
    "read_only": 1
   },
   {
+   "depends_on": "shift",
    "fieldname": "out_time",
    "fieldtype": "Datetime",
    "label": "Out Time",
@@ -203,7 +205,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-01 12:51:30.403616",
+ "modified": "2020-05-29 13:51:37.177231",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",
