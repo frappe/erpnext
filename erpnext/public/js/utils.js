@@ -476,7 +476,7 @@ erpnext.utils.update_child_items = function(opts) {
 			fieldtype: 'Float',
 			fieldname: "conversion_factor",
 			in_list_view: 1,
-			label: __("UOM Conversion Factor")
+			label: __("Conversion Factor")
 		})
 	}
 
