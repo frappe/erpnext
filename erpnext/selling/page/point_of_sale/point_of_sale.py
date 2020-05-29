@@ -6,7 +6,7 @@ import frappe, json
 from frappe.utils.nestedset import get_root_of
 from frappe.utils import cint
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
-from erpnext.selling.doctype.pos_invoice.pos_invoice import get_stock_availability
+from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
 
 from six import string_types
 

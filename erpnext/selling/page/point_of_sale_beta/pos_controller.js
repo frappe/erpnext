@@ -486,7 +486,7 @@ erpnext.PointOfSale.Controller = class {
 		this.frm = this.get_new_frm(this.frm);
 		this.frm.doc.items = [];
 		const res = await frappe.call({
-			method: "erpnext.selling.doctype.pos_invoice.pos_invoice.make_sales_return",
+			method: "erpnext.accounts.doctype.pos_invoice.pos_invoice.make_sales_return",
 			args: {
 				'source_name': doc.name,
 				'target_doc': this.frm.doc
@@ -666,7 +666,7 @@ erpnext.PointOfSale.Controller = class {
 	get_available_stock(item_code, warehouse) {
 		const me = this;
 		return frappe.call({
-			method: "erpnext.selling.doctype.pos_invoice.pos_invoice.get_stock_availability",
+			method: "erpnext.accounts.doctype.pos_invoice.pos_invoice.get_stock_availability",
 			args: {
 				'item_code': item_code,
 				'warehouse': warehouse,

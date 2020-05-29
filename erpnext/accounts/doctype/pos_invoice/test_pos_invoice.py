@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest, copy, time
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
-from erpnext.selling.doctype.pos_invoice.pos_invoice import make_sales_return
+from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 
 class TestPOSInvoice(unittest.TestCase):
 	def test_timestamp_change(self):

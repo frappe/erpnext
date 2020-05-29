@@ -138,7 +138,7 @@ erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend(
 
 	make_sales_return: function() {
 		frappe.model.open_mapped_doc({
-			method: "erpnext.selling.doctype.pos_invoice.pos_invoice.make_sales_return",
+			method: "erpnext.accounts.doctype.pos_invoice.pos_invoice.make_sales_return",
 			frm: cur_frm
 		})
 	},

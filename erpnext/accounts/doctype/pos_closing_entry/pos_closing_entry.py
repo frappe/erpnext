@@ -10,7 +10,7 @@ from frappe.model.document import Document
 from frappe.utils import getdate, get_datetime, flt
 from collections import defaultdict
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
-from erpnext.selling.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
+from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
 
 class POSClosingEntry(Document):
 	def validate(self):
@@ -47,7 +47,6 @@ def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def get_pos_invoices(start, end, user):
-	print(start, end)
 	data = frappe.db.sql("""
 	select 
 		name, timestamp(posting_date, posting_time) as "timestamp"

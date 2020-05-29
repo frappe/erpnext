@@ -434,7 +434,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 	async check_stock_availability(item_code, warehouse, qty) {
 		const res = await frappe.call({
-			method: "erpnext.selling.doctype.pos_invoice.pos_invoice.get_stock_availability",
+			method: "erpnext.accounts.doctype.pos_invoice.pos_invoice.get_stock_availability",
 			args: {
 				'item_code': item_code,
 				'warehouse': warehouse,
