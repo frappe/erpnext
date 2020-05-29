@@ -9,14 +9,14 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
-  "inpatient_record",
   "naming_series",
-  "invoiced",
   "patient",
-  "column_break_4",
   "patient_age",
   "patient_sex",
+  "column_break_4",
+  "inpatient_record",
   "company",
+  "invoiced",
   "section_break_6",
   "sample",
   "sample_uom",
@@ -85,11 +85,9 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "hidden": 1,
+   "in_standard_filter": 1,
    "label": "Company",
-   "options": "Company",
-   "print_hide": 1,
-   "report_hide": 1
+   "options": "Company"
   },
   {
    "fieldname": "section_break_6",
@@ -167,7 +165,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-25 16:55:52.376834",
+ "modified": "2020-05-25 14:36:46.990469",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Sample Collection",
