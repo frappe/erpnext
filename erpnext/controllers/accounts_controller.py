@@ -1137,8 +1137,8 @@ def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname,
 	child_item.item_name = item.item_name
 	child_item.description = item.description
 	child_item.delivery_date = trans_item.get('delivery_date') or p_doc.delivery_date
+	child_item.conversion_factor = flt(d.get('conversion_factor')) or get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.uom = item.stock_uom
-	child_item.conversion_factor = get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
 	if not child_item.warehouse:
 		frappe.throw(_("Cannot find {} for item {}. Please set the same in Item Master or Stock Settings.")
@@ -1157,8 +1157,8 @@ def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docna
 	child_item.item_name = item.item_name
 	child_item.description = item.description
 	child_item.schedule_date = trans_item.get('schedule_date') or p_doc.schedule_date
+	child_item.conversion_factor = flt(d.get('conversion_factor')) or get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.uom = item.stock_uom
-	child_item.conversion_factor = get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.base_rate = 1 # Initiallize value will update in parent validation
 	child_item.base_amount = 1 # Initiallize value will update in parent validation
 	return child_item
@@ -1190,6 +1190,26 @@ def check_and_delete_children(parent, data):
 
 @frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
+	def check_permissions(doc, perm_type='create'):
+		try:
+			doc.check_permission(perm_type)
+		except:
+			action = "add" if perm_type == 'create' else "update"
+			frappe.throw(_("You do not have permissions to {} items in a Sales Order.").format(action), title=_("Insufficient Permissions"))
+
+	def get_new_child_item():
+		if parent_doctype == "Sales Order":
+			return set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, d)
+		if parent_doctype == "Purchase Order":
+			return set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, d)
+
+	def validate_quantity(child_item, d):
+		if parent_doctype == "Sales Order" and flt(d.get("qty")) < flt(child_item.delivered_qty):
+			frappe.throw(_("Cannot set quantity less than delivered quantity"))
+
+		if parent_doctype == "Purchase Order" and flt(d.get("qty")) < flt(child_item.received_qty):
+			frappe.throw(_("Cannot set quantity less than received quantity"))
+
 	data = json.loads(trans_items)
 
 	sales_doctypes = ['Sales Order', 'Sales Invoice', 'Delivery Note', 'Quotation']
@@ -1201,20 +1221,19 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		new_child_flag = False
 		if not d.get("docname"):
 			new_child_flag = True
-			if parent_doctype == "Sales Order":
-				child_item  = set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, d)
-			if parent_doctype == "Purchase Order":
-				child_item = set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, d)
+			check_permissions(parent, 'create')
+			child_item = get_new_child_item()
 		else:
+			check_permissions(parent, 'write')
 			child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
-			if flt(child_item.get("rate")) == flt(d.get("rate")) and flt(child_item.get("qty")) == flt(d.get("qty")):
+
+			rate_unchanged = flt(child_item.get("rate")) == flt(d.get("rate"))
+			qty_unchanged = flt(child_item.get("qty")) == flt(d.get("qty"))
+			conversion_factor_unchanged = flt(child_item.get("conversion_factor")) == flt(d.get("conversion_factor"))
+			if rate_unchanged and qty_unchanged and conversion_factor_changed:
 				continue
 
-		if parent_doctype == "Sales Order" and flt(d.get("qty")) < flt(child_item.delivered_qty):
-			frappe.throw(_("Cannot set quantity less than delivered quantity"))
-
-		if parent_doctype == "Purchase Order" and flt(d.get("qty")) < flt(child_item.received_qty):
-			frappe.throw(_("Cannot set quantity less than received quantity"))
+		validate_quantity(child_item, d)
 
 		child_item.qty = flt(d.get("qty"))
 		precision = child_item.precision("rate") or 2
@@ -1224,6 +1243,9 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 						 .format(child_item.idx, child_item.item_code))
 		else:
 			child_item.rate = flt(d.get("rate"))
+		
+		if d.get("conversion_factor"):
+			child_item.conversion_factor = flt(d.get('conversion_factor'))
 
 		if flt(child_item.price_list_rate):
 			if flt(child_item.rate) > flt(child_item.price_list_rate):

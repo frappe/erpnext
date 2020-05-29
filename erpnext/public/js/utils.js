@@ -472,6 +472,12 @@ erpnext.utils.update_child_items = function(opts) {
 			in_list_view: 1,
 			label: frm.doc.doctype == 'Sales Order' ? __("Delivery Date") : __("Reqd by date")
 		})
+		fields.splice(3, 0, {
+			fieldtype: 'Float',
+			fieldname: "conversion_factor",
+			in_list_view: 1,
+			label: __("UOM Conversion Factor")
+		})
 	}
 
 	const dialog = new frappe.ui.Dialog({
@@ -519,6 +525,7 @@ erpnext.utils.update_child_items = function(opts) {
 			"item_code": d.item_code,
 			"delivery_date": d.delivery_date,
 			"schedule_date": d.schedule_date,
+			"conversion_factor": d.conversion_factor,
 			"qty": d.qty,
 			"rate": d.rate,
 		});
