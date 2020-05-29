@@ -252,7 +252,9 @@
    "label": "Include Payment (POS)",
    "oldfieldname": "is_pos",
    "oldfieldtype": "Check",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "depends_on": "is_pos",
@@ -1578,7 +1580,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-23 21:52:18.748022",
+ "modified": "2020-05-29 14:56:18.367238",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "POS Invoice",

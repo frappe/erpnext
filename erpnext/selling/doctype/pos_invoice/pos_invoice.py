@@ -23,6 +23,9 @@ class POSInvoice(SalesInvoice):
 		super(POSInvoice, self).__init__(*args, **kwargs)
 	
 	def validate(self):
+		if not cint(self.is_pos):
+			frappe.throw(_("POS Invoice should have {} field checked.").format(frappe.bold("Include Payment")))
+
 		# run on validate method of selling controller
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
@@ -39,20 +42,9 @@ class POSInvoice(SalesInvoice):
 		self.validate_return_items()
 		self.set_status()
 		self.set_account_for_mode_of_payment()
-		if cint(self.is_pos):
-			self.validate_pos()
-			if not self.is_return:
-				self.verify_payment_amount_is_positive()
-			if self.is_return:
-				self.verify_payment_amount_is_negative()
-		
-		if self.redeem_loyalty_points:
-			lp = frappe.get_doc('Loyalty Program', self.loyalty_program)
-			self.loyalty_redemption_account = lp.expense_account if not self.loyalty_redemption_account else self.loyalty_redemption_account
-			self.loyalty_redemption_cost_center = lp.cost_center if not self.loyalty_redemption_cost_center else self.loyalty_redemption_cost_center
-
-		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points:
-			validate_loyalty_points(self, self.loyalty_points)
+		self.validate_pos()
+		self.verify_payment_amount()
+		self.validate_loyalty_transaction()
 
 	def on_submit(self):
 		# create the loyalty point ledger entry if the customer is enrolled in any loyalty program
@@ -155,14 +147,11 @@ class POSInvoice(SalesInvoice):
 		if flt(self.change_amount) and not self.account_for_change_amount:
 			msgprint(_("Please enter Account for Change Amount"), raise_exception=1)
 
-	def verify_payment_amount_is_positive(self):
+	def verify_payment_amount(self):
 		for entry in self.payments:
-			if entry.amount < 0:
+			if not self.is_return and entry.amount < 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be positive").format(entry.idx))
-
-	def verify_payment_amount_is_negative(self):
-		for entry in self.payments:
-			if entry.amount > 0:
+			if self.is_return and entry.amount > 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be negative").format(entry.idx))
 	
 	def validate_pos_return(self):
@@ -173,6 +162,17 @@ class POSInvoice(SalesInvoice):
 			invoice_total = self.rounded_total or self.grand_total
 			if total_amount_in_payments < invoice_total:
 				frappe.throw(_("Total payments amount can't be greater than {}".format(-invoice_total)))
+	
+	def validate_loyalty_transaction(self):
+		if self.redeem_loyalty_points and (not self.loyalty_redemption_account or not self.loyalty_redemption_cost_center):
+			expense_account, cost_center = frappe.db.get_value('Loyalty Program', self.loyalty_program, ["expense_account", "cost_center"])
+			if not self.loyalty_redemption_account:
+				self.loyalty_redemption_account = expense_account 
+			if not self.loyalty_redemption_cost_center:
+				self.loyalty_redemption_cost_center = cost_center
+
+		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points:
+			validate_loyalty_points(self, self.loyalty_points)
 
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
