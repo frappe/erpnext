@@ -60,9 +60,9 @@ def get_charts():
 			"report_name": "Profit and Loss Statement",
 			"filters_json": json.dumps({
 				"company": company.name,
-				"filter_based_on": "Date Range",
-				"period_start_date": get_date_str(fiscal_year[1]),
-				"period_end_date": get_date_str(fiscal_year[2]),
+				"filter_based_on": "Fiscal Year",
+				"from_fiscal_year": fiscal_year[0],
+				"to_fiscal_year": fiscal_year[0],
 				"periodicity": "Monthly",
 				"include_default_book_entries": 1
 			}),

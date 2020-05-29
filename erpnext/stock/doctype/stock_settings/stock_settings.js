@@ -36,7 +36,7 @@ frappe.tour['Stock Settings'] = [
 	{
 		fieldname: "valuation_method",
 		title: __("Valuation Method"),
-		description: __("Choose between FIFO and Moving Average Valuation Methods. Click ") + "<a href='https://docs.erpnext.com/docs/user/manual/en/stock/articles/item-valuation-fifo-and-moving-average'>here</a>" + __(" to know more about them.")
+		description: __("Choose between FIFO and Moving Average Valuation Methods. Click ") + "<a href='https://docs.erpnext.com/docs/user/manual/en/stock/articles/item-valuation-fifo-and-moving-average' target='_blank'>here</a>" + __(" to know more about them.")
 	},
 	{
 		fieldname: "show_barcode_field",
