@@ -188,9 +188,9 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-29 14:42:46.307075",
+ "modified": "2020-05-29 15:03:22.226113",
  "modified_by": "Administrator",
- "module": "Selling",
+ "module": "Accounts",
  "name": "POS Closing Entry",
  "owner": "Administrator",
  "permissions": [
