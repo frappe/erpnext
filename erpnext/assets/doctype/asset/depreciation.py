@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 from frappe.utils import flt, today, getdate, cint
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_checks_for_pl_and_bs_accounts
@@ -197,12 +197,14 @@ def get_gl_entries_on_asset_disposal(asset, selling_amount=0, finance_book=None)
 		{
 			"account": fixed_asset_account,
 			"credit_in_account_currency": asset.gross_purchase_amount,
-			"credit": asset.gross_purchase_amount
+			"credit": asset.gross_purchase_amount,
+			"cost_center": depreciation_cost_center
 		},
 		{
 			"account": accumulated_depr_account,
 			"debit_in_account_currency": accumulated_depr_amount,
-			"debit": accumulated_depr_amount
+			"debit": accumulated_depr_amount,
+			"cost_center": depreciation_cost_center
 		}
 	]
 

@@ -39,6 +39,7 @@ class TestProcurementTracker(unittest.TestCase):
 		po.get("items")[0].cost_center = "_Test Cost Center - _TC"
 		po.submit()
 		pr = make_purchase_receipt(po.name)
+		pr.get("items")[0].cost_center = "_Test Cost Center - _TC"
 		pr.submit()
 		frappe.db.commit()
 		date_obj = datetime.date(datetime.now())
