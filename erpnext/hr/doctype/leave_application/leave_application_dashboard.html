@@ -1,5 +1,5 @@
 
-{% if data %}
+{% if not jQuery.isEmptyObject(data) %}
 <h5 style="margin-top: 20px;"> {{ __("Allocated Leaves") }} </h5>
 <table class="table table-bordered small">
 	<thead>
@@ -11,7 +11,6 @@
 			<th style="width: 16%" class="text-right">{{ __("Pending Leaves") }}</th>
 			<th style="width: 16%" class="text-right">{{ __("Available Leaves") }}</th>
 		</tr>
-
 	</thead>
 	<tbody>
 		{% for(const [key, value] of Object.entries(data)) { %}
@@ -26,6 +25,6 @@
 		{% } %}
 	</tbody>
 </table>
-{% } else { %}
+{% else %}
 <p style="margin-top: 30px;"> No Leaves have been allocated. </p>
-{% } %}
+{% endif %}
