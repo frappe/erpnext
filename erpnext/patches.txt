@@ -695,3 +695,4 @@ execute:frappe.rename_doc("Desk Page", "Loan Management", "Loan", force=True)
 erpnext.patches.v12_0.update_uom_conversion_factor
 erpnext.patches.v13_0.delete_old_purchase_reports
 erpnext.patches.v12_0.set_italian_import_supplier_invoice_permissions
+erpnext.patches.v13_0.update_sla_enhancements
