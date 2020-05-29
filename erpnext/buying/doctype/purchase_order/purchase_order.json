@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -53,19 +54,19 @@
   "items_section",
   "scan_barcode",
   "items",
-  "section_break_48",
-  "pricing_rules",
-  "raw_material_details",
-  "set_reserve_warehouse",
-  "supplied_items",
   "sb_last_purchase",
   "total_qty",
   "base_total",
   "base_net_total",
   "column_break_26",
+  "total_net_weight",
   "total",
   "net_total",
-  "total_net_weight",
+  "section_break_48",
+  "pricing_rules",
+  "raw_material_details",
+  "set_reserve_warehouse",
+  "supplied_items",
   "taxes_section",
   "tax_category",
   "column_break_50",
@@ -104,23 +105,25 @@
   "payment_schedule_section",
   "payment_terms_template",
   "payment_schedule",
+  "tracking_section",
+  "per_billed",
+  "column_break_75",
+  "per_received",
   "terms_section_break",
   "tc_name",
   "terms",
   "more_info",
   "status",
   "ref_sq",
+  "column_break_74",
   "party_account_currency",
   "inter_company_order_reference",
-  "column_break_74",
-  "per_received",
-  "per_billed",
   "column_break5",
   "letter_head",
   "select_print_heading",
   "column_break_86",
-  "group_same_items",
   "language",
+  "group_same_items",
   "subscription_section",
   "from_date",
   "to_date",
@@ -170,8 +173,8 @@
    "search_index": 1
   },
   {
-   "description": "Fetch items based on Default Supplier.",
    "depends_on": "eval:doc.supplier && doc.docstatus===0 && (!(doc.items && doc.items.length) || (doc.items.length==1 && !doc.items[0].item_code))",
+   "description": "Fetch items based on Default Supplier.",
    "fieldname": "get_items_from_open_material_requests",
    "fieldtype": "Button",
    "label": "Get Items from Open Material Requests"
@@ -219,7 +222,7 @@
    "allow_on_submit": 1,
    "fieldname": "schedule_date",
    "fieldtype": "Date",
-   "label": "Reqd By Date"
+   "label": "Required By"
   },
   {
    "allow_on_submit": 1,
@@ -431,6 +434,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "description": "Sets 'Warehouse' in each row of the Items table.",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
    "label": "Set Target Warehouse",
@@ -826,6 +830,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "payment_schedule_section",
    "fieldtype": "Section Break",
    "label": "Payment Terms"
@@ -916,7 +921,8 @@
    "fieldname": "inter_company_order_reference",
    "fieldtype": "Link",
    "label": "Inter Company Order Reference",
-   "options": "Sales Order"
+   "options": "Sales Order",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_74",
@@ -929,8 +935,6 @@
    "in_list_view": 1,
    "label": "% Received",
    "no_copy": 1,
-   "oldfieldname": "per_received",
-   "oldfieldtype": "Currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -941,8 +945,6 @@
    "in_list_view": 1,
    "label": "% Billed",
    "no_copy": 1,
-   "oldfieldname": "per_billed",
-   "oldfieldtype": "Currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -997,6 +999,7 @@
    "print_hide": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
    "label": "Subscription Section"
@@ -1049,12 +1052,23 @@
    "fieldtype": "Link",
    "label": "Set Reserve Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "tracking_section",
+   "fieldtype": "Section Break",
+   "label": "Tracking"
+  },
+  {
+   "fieldname": "column_break_75",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-01-14 18:54:39.694448",
+ "links": [],
+ "modified": "2020-04-24 12:13:14.186280",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

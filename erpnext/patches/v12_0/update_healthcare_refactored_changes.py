@@ -100,7 +100,7 @@ def execute():
 
 		for entry in encounter_details:
 			doc = frappe.get_doc('Patient Encounter', entry.name)
-			symptoms = entry.symptoms.split('\n')
+			symptoms = entry.symptoms.split('\n') if entry.symptoms else []
 			for symptom in symptoms:
 				if not frappe.db.exists('Complaint', symptom):
 					frappe.get_doc({
@@ -112,7 +112,7 @@ def execute():
 				})
 				row.db_update()
 
-			diagnosis = entry.diagnosis.split('\n')
+			diagnosis = entry.diagnosis.split('\n') if entry.diagnosis else []
 			for d in diagnosis:
 				if not frappe.db.exists('Diagnosis', d):
 					frappe.get_doc({

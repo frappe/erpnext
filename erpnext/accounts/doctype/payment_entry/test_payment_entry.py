@@ -35,8 +35,6 @@ class TestPaymentEntry(unittest.TestCase):
 
 		pe.cancel()
 
-		self.assertFalse(self.get_gle(pe.name))
-
 		so_advance_paid = frappe.db.get_value("Sales Order", so.name, "advance_paid")
 		self.assertEqual(so_advance_paid, 0)
 
@@ -124,7 +122,6 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(outstanding_amount, 0)
 
 		pe.cancel()
-		self.assertFalse(self.get_gle(pe.name))
 
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 100)
@@ -170,6 +167,32 @@ class TestPaymentEntry(unittest.TestCase):
 		outstanding_amount, status = frappe.db.get_value("Sales Invoice", si.name, ["outstanding_amount", "status"])
 		self.assertEqual(flt(outstanding_amount), 100)
 		self.assertEqual(status, 'Unpaid')
+
+	def test_payment_entry_against_payment_terms(self):
+		si = create_sales_invoice(do_not_save=1, qty=1, rate=200)
+		create_payment_terms_template()
+		si.payment_terms_template = 'Test Receivable Template'
+
+		si.append('taxes', {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 18
+		})
+		si.save()
+
+		si.submit()
+
+		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Cash - _TC")
+		pe.submit()
+		si.load_from_db()
+
+		self.assertEqual(pe.references[0].payment_term, 'Basic Amount Receivable')
+		self.assertEqual(pe.references[1].payment_term, 'Tax Receivable')
+		self.assertEqual(si.payment_schedule[0].paid_amount, 200.0)
+		self.assertEqual(si.payment_schedule[1].paid_amount, 36.0)
+
 
 	def test_payment_against_purchase_invoice_to_check_status(self):
 		pi = make_purchase_invoice(supplier="_Test Supplier USD", debit_to="_Test Payable USD - _TC",
@@ -355,7 +378,6 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(outstanding_amount, 0)
 
 		pe3.cancel()
-		self.assertFalse(self.get_gle(pe3.name))
 
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si1.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, -100)
@@ -542,3 +564,37 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(expected_account_balance, account_balance)
 		self.assertEqual(expected_party_balance, party_balance)
 		self.assertEqual(expected_party_account_balance, party_account_balance)
+
+def create_payment_terms_template():
+
+	create_payment_term('Basic Amount Receivable')
+	create_payment_term('Tax Receivable')
+
+	if not frappe.db.exists('Payment Terms Template', 'Test Receivable Template'):
+		payment_term_template = frappe.get_doc({
+			'doctype': 'Payment Terms Template',
+			'template_name': 'Test Receivable Template',
+			'allocate_payment_based_on_payment_terms': 1,
+			'terms': [{
+				'doctype': 'Payment Terms Template Detail',
+				'payment_term': 'Basic Amount Receivable',
+				'invoice_portion': 84.746,
+				'credit_days_based_on': 'Day(s) after invoice date',
+				'credit_days': 1
+			},
+			{
+				'doctype': 'Payment Terms Template Detail',
+				'payment_term': 'Tax Receivable',
+				'invoice_portion': 15.254,
+				'credit_days_based_on': 'Day(s) after invoice date',
+				'credit_days': 2
+			}]
+		}).insert()
+
+
+def create_payment_term(name):
+	if not frappe.db.exists('Payment Term', name):
+		frappe.get_doc({
+			'doctype': 'Payment Term',
+			'payment_term_name': name
+		}).insert()

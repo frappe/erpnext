@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 
-from frappe.utils import cstr, flt, getdate, new_line_sep, nowdate, add_days
+from frappe.utils import cstr, flt, getdate, new_line_sep, nowdate, add_days, get_link_to_form
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
@@ -175,12 +175,11 @@ class MaterialRequest(BuyingController):
 
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 
-		target_ref_field = 'qty' if self.material_request_type == "Manufacture" else 'stock_qty'
 		self._update_percent_field({
 			"target_dt": "Material Request Item",
 			"target_parent_dt": self.doctype,
 			"target_parent_field": "per_ordered",
-			"target_ref_field": target_ref_field,
+			"target_ref_field": "stock_qty",
 			"target_field": "ordered_qty",
 			"name": self.name,
 		}, update_modified)
@@ -457,6 +456,9 @@ def make_stock_entry(source_name, target_doc=None):
 		if source_parent.material_request_type == "Customer Provided":
 			target.allow_zero_valuation_rate = 1
 
+		if source_parent.material_request_type == "Material Transfer":
+			target.s_warehouse = obj.from_warehouse
+
 	def set_missing_values(source, target):
 		target.purpose = source.material_request_type
 		if source.job_card:
@@ -499,7 +501,7 @@ def raise_work_orders(material_request):
 	default_wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
 
 	for d in mr.items:
-		if (d.qty - d.ordered_qty) >0:
+		if (d.stock_qty - d.ordered_qty) > 0:
 			if frappe.db.exists("BOM", {"item": d.item_code, "is_default": 1}):
 				wo_order = frappe.new_doc("Work Order")
 				wo_order.update({
@@ -523,15 +525,22 @@ def raise_work_orders(material_request):
 
 				work_orders.append(wo_order.name)
 			else:
-				errors.append(_("Row {0}: Bill of Materials not found for the Item {1}").format(d.idx, d.item_code))
+				errors.append(_("Row {0}: Bill of Materials not found for the Item {1}")
+					.format(d.idx, get_link_to_form("Item", d.item_code)))
 
 	if work_orders:
-		message = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
-			(p, p) for p in work_orders]
-		msgprint(_("The following Work Orders were created:") + '\n' + new_line_sep(message))
+		work_orders_list = [get_link_to_form("Work Order", d) for d in work_orders]
+
+		if len(work_orders) > 1:
+			msgprint(_("The following {0} were created: {1}")
+				.format(frappe.bold(_("Work Orders")), '<br>' + ', '.join(work_orders_list)))
+		else:
+			msgprint(_("The {0} {1} created sucessfully")
+				.format(frappe.bold(_("Work Order")), work_orders_list[0]))
 
 	if errors:
-		frappe.throw(_("Productions Orders cannot be raised for:") + '\n' + new_line_sep(errors))
+		frappe.throw(_("Work Order cannot be created for following reason: <br> {0}")
+			.format(new_line_sep(errors)))
 
 	return work_orders
 

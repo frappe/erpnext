@@ -42,6 +42,8 @@ class SerialNo(StockController):
 			self.status = "Delivered"
 		elif self.warranty_expiry_date and getdate(self.warranty_expiry_date) <= getdate(nowdate()):
 			self.status = "Expired"
+		elif not self.warehouse:
+			self.status = "Inactive"
 		else:
 			self.status = "Active"
 
@@ -130,13 +132,17 @@ class SerialNo(StockController):
 		sle_dict = self.get_stock_ledger_entries(serial_no)
 		if sle_dict:
 			if sle_dict.get("incoming", []):
-				entries["purchase_sle"] = sle_dict["incoming"][0]
+				sle_list = [sle for sle in sle_dict["incoming"] if sle.is_cancelled == 0]
+				if sle_list:
+					entries["purchase_sle"] = sle_list[0]
 
 			if len(sle_dict.get("incoming", [])) - len(sle_dict.get("outgoing", [])) > 0:
 				entries["last_sle"] = sle_dict["incoming"][0]
 			else:
 				entries["last_sle"] = sle_dict["outgoing"][0]
-				entries["delivery_sle"] = sle_dict["outgoing"][0]
+				sle_list = [sle for sle in sle_dict["outgoing"] if sle.is_cancelled == 0]
+				if sle_list:
+					entries["delivery_sle"] = sle_list[0]
 
 		return entries
 
@@ -147,11 +153,11 @@ class SerialNo(StockController):
 
 		for sle in frappe.db.sql("""
 			SELECT voucher_type, voucher_no,
-				posting_date, posting_time, incoming_rate, actual_qty, serial_no
+				posting_date, posting_time, incoming_rate, actual_qty, serial_no, is_cancelled
 			FROM
 				`tabStock Ledger Entry`
 			WHERE
-				item_code=%s AND company = %s AND ifnull(is_cancelled, 'No')='No'
+				item_code=%s AND company = %s
 				AND (serial_no = %s
 					OR serial_no like %s
 					OR serial_no like %s
@@ -171,7 +177,7 @@ class SerialNo(StockController):
 
 	def on_trash(self):
 		sl_entries = frappe.db.sql("""select serial_no from `tabStock Ledger Entry`
-			where serial_no like %s and item_code=%s and ifnull(is_cancelled, 'No')='No'""",
+			where serial_no like %s and item_code=%s""",
 			("%%%s%%" % self.name, self.item_code), as_dict=True)
 
 		# Find the exact match
@@ -221,7 +227,7 @@ def validate_serial_no(sle, item_det):
 		if serial_nos:
 			frappe.throw(_("Item {0} is not setup for Serial Nos. Column must be blank").format(sle.item_code),
 				SerialNoNotRequiredError)
-	elif sle.is_cancelled == "No":
+	else:
 		if serial_nos:
 			if cint(sle.actual_qty) != flt(sle.actual_qty):
 				frappe.throw(_("Serial No {0} quantity {1} cannot be a fraction").format(sle.item_code, sle.actual_qty))
@@ -238,6 +244,10 @@ def validate_serial_no(sle, item_det):
 					sr = frappe.db.get_value("Serial No", serial_no, ["name", "item_code", "batch_no", "sales_order",
 						"delivery_document_no", "delivery_document_type", "warehouse",
 						"purchase_document_no", "company"], as_dict=1)
+
+					if sr and cint(sle.actual_qty) < 0 and sr.warehouse != sle.warehouse:
+						frappe.throw(_("Cannot cancel {0} {1} because Serial No {2} does not belong to the warehouse {3}")
+							.format(sle.voucher_type, sle.voucher_no, serial_no, sle.warehouse), SerialNoWarehouseError)
 
 					if sr.item_code!=sle.item_code:
 						if not allow_serial_nos_with_different_item(serial_no, sle):
@@ -265,7 +275,7 @@ def validate_serial_no(sle, item_det):
 								frappe.throw(_("Serial No {0} does not belong to Batch {1}").format(serial_no,
 									sle.batch_no), SerialNoBatchError)
 
-							if sle.is_cancelled=="No" and not sr.warehouse:
+							if not sr.warehouse:
 								frappe.throw(_("Serial No {0} does not belong to any Warehouse")
 									.format(serial_no), SerialNoWarehouseError)
 
@@ -311,12 +321,6 @@ def validate_serial_no(sle, item_det):
 		elif cint(sle.actual_qty) < 0 or not item_det.serial_no_series:
 			frappe.throw(_("Serial Nos Required for Serialized Item {0}").format(sle.item_code),
 				SerialNoRequiredError)
-	elif serial_nos:
-		for serial_no in serial_nos:
-			sr = frappe.db.get_value("Serial No", serial_no, ["name", "warehouse"], as_dict=1)
-			if sr and cint(sle.actual_qty) < 0 and sr.warehouse != sle.warehouse:
-				frappe.throw(_("Cannot cancel {0} {1} because Serial No {2} does not belong to the warehouse {3}")
-					.format(sle.voucher_type, sle.voucher_no, serial_no, sle.warehouse))
 
 def validate_material_transfer_entry(sle_doc):
 	sle_doc.update({
@@ -324,7 +328,7 @@ def validate_material_transfer_entry(sle_doc):
 		"skip_serial_no_validaiton": False
 	})
 
-	if (sle_doc.voucher_type == "Stock Entry" and sle_doc.is_cancelled == "No" and
+	if (sle_doc.voucher_type == "Stock Entry" and
 		frappe.get_cached_value("Stock Entry", sle_doc.voucher_no, "purpose") == "Material Transfer"):
 		if sle_doc.actual_qty < 0:
 			sle_doc.skip_update_serial_no = True
@@ -367,7 +371,7 @@ def allow_serial_nos_with_different_item(sle_serial_no, sle):
 		stock_entry = frappe.get_cached_doc("Stock Entry", sle.voucher_no)
 		if stock_entry.purpose in ("Repack", "Manufacture"):
 			for d in stock_entry.get("items"):
-				if d.serial_no and (d.s_warehouse if sle.is_cancelled=="No" else d.t_warehouse):
+				if d.serial_no and (d.s_warehouse or d.t_warehouse):
 					serial_nos = get_serial_nos(d.serial_no)
 					if sle_serial_no in serial_nos:
 						allow_serial_nos = True
@@ -376,7 +380,7 @@ def allow_serial_nos_with_different_item(sle_serial_no, sle):
 
 def update_serial_nos(sle, item_det):
 	if sle.skip_update_serial_no: return
-	if sle.is_cancelled == "No" and not sle.serial_no and cint(sle.actual_qty) > 0 \
+	if not sle.serial_no and cint(sle.actual_qty) > 0 \
 			and item_det.has_serial_no == 1 and item_det.serial_no_series:
 		serial_nos = get_auto_serial_nos(item_det.serial_no_series, sle.actual_qty)
 		frappe.db.set(sle, "serial_no", serial_nos)

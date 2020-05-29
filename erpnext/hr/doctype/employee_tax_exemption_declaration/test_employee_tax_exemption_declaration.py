@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import unittest
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.hr.doctype.employee_tax_exemption_declaration.employee_tax_exemption_declaration import DuplicateDeclarationError
+from erpnext.hr.utils import DuplicateDeclarationError
 
 class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 	def setUp(self):

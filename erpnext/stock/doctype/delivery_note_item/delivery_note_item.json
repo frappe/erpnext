@@ -66,6 +66,7 @@
   "so_detail",
   "against_sales_invoice",
   "si_detail",
+  "dn_detail",
   "section_break_40",
   "batch_no",
   "serial_no",
@@ -705,6 +706,15 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "fieldname": "dn_detail",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Against Delivery Note Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,

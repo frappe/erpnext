@@ -58,18 +58,16 @@ class TestLoanDisbursement(unittest.TestCase):
 
 		process_loan_interest_accrual_for_demand_loans(posting_date=add_days(last_date, 1))
 
-		# Paid 511095.89 amount includes 5,00,000 principal amount and 11095.89 interest amount
+		# Should not be able to create loan disbursement entry before repayment
+		self.assertRaises(frappe.ValidationError, make_loan_disbursement_entry, loan.name,
+			500000, first_date)
+
 		repayment_entry = create_repayment_entry(loan.name, self.applicant, add_days(get_last_day(nowdate()), 5),
 			"Regular Payment", 611095.89)
-		repayment_entry.submit()
 
+		repayment_entry.submit()
 		loan.reload()
 
+		# After repayment loan disbursement entry should go through
 		make_loan_disbursement_entry(loan.name, 500000, disbursement_date=add_days(last_date, 16))
 
-		total_principal_paid = loan.total_principal_paid
-
-		loan.reload()
-
-		# Loan Topup will result in decreasing the Total Principal Paid
-		self.assertEqual(flt(loan.total_principal_paid, 2), flt(total_principal_paid - 500000, 2))
