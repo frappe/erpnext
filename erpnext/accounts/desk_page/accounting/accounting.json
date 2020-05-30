@@ -13,7 +13,7 @@
   {
    "hidden": 0,
    "label": "Accounts Receivable",
-   "links": "[\n    {\n        \"description\": \"Bills raised to Customers.\",\n        \"label\": \"Sales Invoice\",\n        \"name\": \"Sales Invoice\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Customer database.\",\n        \"label\": \"Customer\",\n        \"name\": \"Customer\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Bank/Cash transactions against party or for internal transfer\",\n        \"label\": \"Payment Entry\",\n        \"name\": \"Payment Entry\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Payment Request\",\n        \"label\": \"Payment Request\",\n        \"name\": \"Payment Request\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Accounts Receivable\",\n        \"name\": \"Accounts Receivable\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Accounts Receivable Summary\",\n        \"name\": \"Accounts Receivable Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Sales Register\",\n        \"name\": \"Sales Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Item-wise Sales Register\",\n        \"name\": \"Item-wise Sales Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Ordered Items To Be Billed\",\n        \"name\": \"Ordered Items To Be Billed\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Delivered Items To Be Billed\",\n        \"name\": \"Delivered Items To Be Billed\",\n        \"type\": \"report\"\n    }\n]"
+   "links": "[\n    {\n        \"description\": \"Bills raised to Customers.\",\n        \"label\": \"Sales Invoice\",\n        \"name\": \"Sales Invoice\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Customer database.\",\n        \"label\": \"Customer\",\n        \"name\": \"Customer\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Bank/Cash transactions against party or for internal transfer\",\n        \"label\": \"Payment Entry\",\n        \"name\": \"Payment Entry\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Payment Request\",\n        \"label\": \"Payment Request\",\n        \"name\": \"Payment Request\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Accounts Receivable\",\n        \"name\": \"Accounts Receivable\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Accounts Receivable Summary\",\n        \"name\": \"Accounts Receivable Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Sales Register\",\n        \"name\": \"Sales Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Item-wise Sales Register\",\n        \"name\": \"Item-wise Sales Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Order\",\n        \"is_query_report\": true,\n        \"label\": \"Sales Order Analysis\",\n        \"name\": \"Sales Order Analysis\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Delivered Items To Be Billed\",\n        \"name\": \"Delivered Items To Be Billed\",\n        \"type\": \"report\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -98,7 +98,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Accounting",
- "modified": "2020-05-27 20:34:50.949772",
+ "modified": "2020-05-30 17:33:22.965206",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
@@ -123,8 +123,8 @@
    "type": "DocType"
   },
   {
-   "label": "Dashboard",
-   "link_to": "Accounts",
+   "label": "Accounts Dashboard",
+   "link_to": "Accounts Dashboard",
    "type": "Dashboard"
   },
   {
