@@ -16,7 +16,7 @@ def create_department(department_name, parent_department=None):
         'is_group': 0,
         'parent_department': parent_department,
         'department_name': department_name,
-        'company': frappe.defaults.get_defaults().company or 'Wind Power LLC'
+        'company': frappe.defaults.get_defaults().company
     }).insert()
 
     return doc

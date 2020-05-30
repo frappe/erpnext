@@ -1065,7 +1065,6 @@ class TestSalesInvoice(unittest.TestCase):
 		serial_no = frappe.get_doc({
 			"doctype": "Serial No",
 			"item_code": "_Test Serialized Item With Series",
-			"company": "Wind Power LLC",
 			"serial_no": make_autoname("SR", "Serial No")
 		})
 		serial_no.save()

@@ -414,7 +414,7 @@ def make_salary_component(salary_components, test_tax, company_list=None):
 		get_salary_component_account(salary_component["salary_component"], company_list)
 
 def get_salary_component_account(sal_comp, company_list=None):
-	company = erpnext.get_default_company() or 'Wind Power LLC'
+	company = erpnext.get_default_company()
 
 	if company_list and company not in company_list:
 		company_list.append(company)

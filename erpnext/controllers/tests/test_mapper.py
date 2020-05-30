@@ -43,7 +43,6 @@ class TestMapper(unittest.TestCase):
 		qtn = frappe.get_doc({
 			"doctype": "Quotation",
 			"quotation_to": "Customer",
-			"company": "_Test Company",
 			"party_name": customer,
 			"order_type": "Sales",
 			"transaction_date" : nowdate(),
@@ -60,7 +59,6 @@ class TestMapper(unittest.TestCase):
 			"base_amount": 1000.0,
 			"base_rate": 100.0,
 			"description": "CPU",
-			"company": "_Test Company",
 			"doctype": "Sales Order Item",
 			"item_code": "_Test Item Home Desktop 100",
 			"item_name": "CPU",

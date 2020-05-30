@@ -172,7 +172,7 @@ def create_delivery_trip(driver, address, contact=None):
 
 	delivery_trip = frappe.get_doc({
 		"doctype": "Delivery Trip",
-		"company": erpnext.get_default_company() or 'Wind Power LLC',
+		"company": erpnext.get_default_company(),
 		"departure_time": add_days(now_datetime(), 5),
 		"driver": driver.name,
 		"driver_address": address.name,

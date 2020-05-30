@@ -30,7 +30,6 @@ class TestOpportunity(unittest.TestCase):
 		new_lead_email_id = "new{}@example.com".format(random_string(5))
 		args = {
 			"doctype": "Opportunity",
-			"company": "_Test Company",
 			"contact_email": new_lead_email_id,
 			"opportunity_type": "Sales",
 			"with_items": 0,
