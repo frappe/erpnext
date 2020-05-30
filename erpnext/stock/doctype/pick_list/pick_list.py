@@ -122,8 +122,8 @@ def get_items_with_location_and_quantity(item_doc, item_location_map):
 			'qty': qty,
 			'stock_qty': stock_qty,
 			'warehouse': item_location.warehouse,
-			'serial_no': serial_nos if auto_set_serial_no else None,
-			'batch_no': item_location.batch_no if auto_set_batch_no else None
+			'serial_no': serial_nos if auto_set_serial_no else item_doc.serial_no,
+			'batch_no': item_location.batch_no if auto_set_batch_no else item_doc.batch_no
 		}))
 
 		remaining_stock_qty -= stock_qty
@@ -203,6 +203,7 @@ def get_available_item_locations_for_batched_item(item_code, from_warehouses, re
 		WHERE
 			sle.batch_no = batch.name
 			and sle.`item_code`=%(item_code)s
+			and batch.disabled = 0
 			and IFNULL(batch.`expiry_date`, '2200-01-01') > %(today)s
 			{warehouse_condition}
 		GROUP BY
