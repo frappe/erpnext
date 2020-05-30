@@ -15,7 +15,6 @@ class TestPatient(unittest.TestCase):
 		self.assertTrue(frappe.db.get_value('Patient', patient, 'customer'))
 
 	def test_patient_registration(self):
-		frappe.db.set_value('Global Defaults', None, 'default_company', '_Test Company')
 		frappe.db.sql("""delete from `tabPatient`""")
 		settings = frappe.get_single('Healthcare Settings')
 		settings.collect_registration_fee = 1
@@ -33,4 +32,3 @@ class TestPatient(unittest.TestCase):
 
 		settings.collect_registration_fee = 0
 		settings.save()
-		frappe.db.set_value('Global Defaults', None, 'default_company', None)

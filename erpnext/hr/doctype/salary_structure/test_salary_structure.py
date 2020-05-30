@@ -22,7 +22,7 @@ class TestSalaryStructure(unittest.TestCase):
 			frappe.db.sql("delete from `tab%s`" % dt)
 
 		self.make_holiday_list()
-		frappe.db.set_value("Company", erpnext.get_default_company() or 'Wind Power LLC', "default_holiday_list", "Salary Structure Test Holiday List")
+		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Structure Test Holiday List")
 		make_employee("test_employee@salary.com")
 		make_employee("test_employee_2@salary.com")
 
@@ -151,7 +151,7 @@ def create_salary_structure_assignment(employee, salary_structure, from_date=Non
 	salary_structure_assignment.variable = 5000
 	salary_structure_assignment.from_date = from_date or add_days(nowdate(), -1)
 	salary_structure_assignment.salary_structure = salary_structure
-	salary_structure_assignment.company = company or erpnext.get_default_company() or 'Wind Power LLC'
+	salary_structure_assignment.company = company or erpnext.get_default_company()
 	salary_structure_assignment.save(ignore_permissions=True)
 	salary_structure_assignment.income_tax_slab = "Tax Slab: _Test Payroll Period"
 	salary_structure_assignment.submit()

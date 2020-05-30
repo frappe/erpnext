@@ -20,7 +20,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 		declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
-			"company": erpnext.get_default_company() or 'Wind Power LLC',
+			"company": erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
 			"declarations": [
 				dict(exemption_sub_category = "_Test Sub Category",
@@ -37,7 +37,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 		declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
-			"company":  erpnext.get_default_company()  or 'Wind Power LLC',
+			"company":  erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
 			"declarations": [
 				dict(exemption_sub_category = "_Test Sub Category",
@@ -52,7 +52,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 		duplicate_declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
-			"company":  erpnext.get_default_company()  or 'Wind Power LLC',
+			"company":  erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
 			"declarations": [
 				dict(exemption_sub_category = "_Test Sub Category",
@@ -68,7 +68,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 		declaration = frappe.get_doc({
 			"doctype": "Employee Tax Exemption Declaration",
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
-			"company":  erpnext.get_default_company()  or 'Wind Power LLC',
+			"company":  erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
 			"declarations": [
 				dict(exemption_sub_category = "_Test Sub Category",
