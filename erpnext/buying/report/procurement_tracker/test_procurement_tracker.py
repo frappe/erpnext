@@ -15,7 +15,7 @@ class TestProcurementTracker(unittest.TestCase):
 	def test_result_for_procurement_tracker(self):
 		filters = {
 			'company': '_Test Procurement Company',
-			'cost_center': '_Test Cost Center - _TC'
+			'cost_center': 'Main - _TPC'
 		}
 		expected_data = self.generate_expected_data()
 		report = execute(filters)
@@ -33,10 +33,12 @@ class TestProcurementTracker(unittest.TestCase):
 				country="Pakistan"
 				)).insert()
 		warehouse = create_warehouse("_Test Procurement Warehouse", company="_Test Procurement Company")
-		mr = make_material_request(company="_Test Procurement Company", warehouse=warehouse)
+		mr = make_material_request(company="_Test Procurement Company", warehouse=warehouse, cost_center="Main - _TPC")
 		po = make_purchase_order(mr.name)
 		po.supplier = "_Test Supplier"
 		po.get("items")[0].cost_center = "Main - _TPC"
+		po.items[0].rate = 500.0
+		po.save()
 		po.submit()
 		pr = make_purchase_receipt(po.name)
 		pr.get("items")[0].cost_center = "Main - _TPC"
@@ -44,9 +46,11 @@ class TestProcurementTracker(unittest.TestCase):
 		frappe.db.commit()
 		date_obj = datetime.date(datetime.now())
 
+		po.load_from_db()
+
 		expected_data = {
 			"material_request_date": date_obj,
-			"cost_center": "_Test Cost Center - _TC",
+			"cost_center": "Main - _TPC",
 			"project": None,
 			"requesting_site": "_Test Procurement Warehouse - _TPC",
 			"requestor": "Administrator",
@@ -60,9 +64,10 @@ class TestProcurementTracker(unittest.TestCase):
 			"supplier": "_Test Supplier",
 			"estimated_cost": 0.0,
 			"actual_cost": None,
-			"purchase_order_amt": 5000.0,
-			"purchase_order_amt_in_company_currency": 300000.0,
+			"purchase_order_amt": po.net_total,
+			"purchase_order_amt_in_company_currency": po.base_net_total,
 			"expected_delivery_date": date_obj,
 			"actual_delivery_date": date_obj
 		}
+
 		return expected_data
