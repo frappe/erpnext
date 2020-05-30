@@ -67,6 +67,13 @@ frappe.ui.form.on("Leave Application", {
 				})
 			);
 			frm.dashboard.show();
+			frm.set_query('leave_type', function(){
+				return {
+					filters : [
+						['leave_type_name', 'in', Object.keys(leave_details)]
+					]
+				}
+			});
 		}
 	},
 
