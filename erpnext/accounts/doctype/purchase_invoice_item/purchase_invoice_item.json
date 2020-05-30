@@ -753,7 +753,7 @@
    "depends_on": "is_fixed_asset",
    "fetch_from": "item_code.asset_category",
    "fieldname": "asset_category",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Asset Category",
    "options": "Asset Category",
    "read_only": 1
