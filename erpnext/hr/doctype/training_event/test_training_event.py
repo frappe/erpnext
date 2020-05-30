@@ -32,8 +32,7 @@ def create_training_program(training_program):
 		frappe.get_doc({
 			"doctype": "Training Program",
 			"training_program": training_program,
-			"description": training_program,
-			"company": "Wind Power LLC"
+			"description": training_program
 		}).insert()
 
 def get_attendees(employee, employee2):

@@ -94,7 +94,6 @@ class TestExpenseClaim(unittest.TestCase):
 		payable_account = get_payable_account(company_name)
 		expense_claim = frappe.get_doc({
 			 "doctype": "Expense Claim",
-			 "company": "_Test Company",
 			 "employee": "_T-Employee-00001",
 			 "payable_account": payable_account,
 			 "approval_status": "Rejected",

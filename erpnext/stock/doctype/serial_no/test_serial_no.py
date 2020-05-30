@@ -24,7 +24,6 @@ class TestSerialNo(unittest.TestCase):
 		frappe.delete_doc_if_exists("Serial No", "_TCSER0001")
 
 		sr = frappe.new_doc("Serial No")
-		sr.company = '_Test Company'
 		sr.item_code = "_Test Serialized Item"
 		sr.warehouse = "_Test Warehouse - _TC"
 		sr.serial_no = "_TCSER0001"
