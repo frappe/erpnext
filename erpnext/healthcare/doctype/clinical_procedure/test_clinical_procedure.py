@@ -18,7 +18,6 @@ class TestClinicalProcedure(unittest.TestCase):
 		self.assertEquals(frappe.db.get_value('Item', procedure_template.item, 'disabled'), 1)
 
 	def test_consumables(self):
-		frappe.db.set_value('Global Defaults', None, 'default_company', '_Test Company')
 		patient, medical_department, practitioner = create_healthcare_docs()
 		procedure_template = create_clinical_procedure_template()
 		procedure_template.allow_stock_consumption = 1
@@ -39,7 +38,6 @@ class TestClinicalProcedure(unittest.TestCase):
 		result = procedure.complete_procedure()
 		# check consumption
 		self.assertTrue(frappe.db.exists('Stock Entry', result))
-		frappe.db.set_value('Global Defaults', None, 'default_company', None)
 
 
 def create_consumable():

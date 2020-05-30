@@ -27,7 +27,7 @@ class TestPayrollEntry(unittest.TestCase):
 		frappe.db.set_value("HR Settings", None, "email_salary_slip_to_employee", 0)
 
 	def test_payroll_entry(self): # pylint: disable=no-self-use
-		company = erpnext.get_default_company()  or 'Wind Power LLC'
+		company = erpnext.get_default_company()
 		for data in frappe.get_all('Salary Component', fields = ["name"]):
 			if not frappe.db.get_value('Salary Component Account',
 				{'parent': data.name, 'company': company}, 'name'):
@@ -157,7 +157,7 @@ def make_payroll_entry(**args):
 	args = frappe._dict(args)
 
 	payroll_entry = frappe.new_doc("Payroll Entry")
-	payroll_entry.company = args.company or erpnext.get_default_company() or 'Wind Power LLC'
+	payroll_entry.company = args.company or erpnext.get_default_company()
 	payroll_entry.start_date = args.start_date or "2016-11-01"
 	payroll_entry.end_date = args.end_date or "2016-11-30"
 	payroll_entry.payment_account = get_payment_account()
@@ -183,7 +183,7 @@ def make_payroll_entry(**args):
 
 def get_payment_account():
 	return frappe.get_value('Account',
-		{'account_type': 'Cash', 'company': erpnext.get_default_company() or 'Wind Power LLC', 'is_group':0}, "name")
+		{'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
 
 def make_holiday(holiday_list_name):
 	if not frappe.db.exists('Holiday List', holiday_list_name):

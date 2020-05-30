@@ -238,10 +238,6 @@ class Subscription(Document):
 		Creates a `Sales Invoice`, submits it and returns it
 		"""
 		invoice = frappe.new_doc('Sales Invoice')
-		
-		if not invoice.company:
-			invoice.company = frappe.db.get_value('Global Defaults', None, 'default_company')
-
 		invoice.set_posting_time = 1
 		invoice.posting_date = self.current_invoice_start
 		invoice.customer = self.customer
