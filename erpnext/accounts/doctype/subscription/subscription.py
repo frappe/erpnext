@@ -189,10 +189,12 @@ class Subscription(Document):
 		"""
 		Returns the most recent generated invoice.
 		"""
+		doctype = 'Sales Invoice' if self.party_type == 'Customer' else 'Purchase Invoice'
+
 		if len(self.invoices):
 			current = self.invoices[-1]
-			if frappe.db.exists('Sales Invoice', current.invoice):
-				doc = frappe.get_doc('Sales Invoice', current.invoice)
+			if frappe.db.exists(doctype, current.invoice):
+				doc = frappe.get_doc(doctype, current.invoice)
 				return doc
 			else:
 				frappe.throw(_('Invoice {0} no longer exists').format(current.invoice))
@@ -224,7 +226,7 @@ class Subscription(Document):
 
 	def generate_invoice(self, prorate=0):
 		"""
-		Creates a `Sales Invoice` for the `Subscription`, updates `self.invoices` and
+		Creates a `Invoice` for the `Subscription`, updates `self.invoices` and
 		saves the `Subscription`.
 		"""
 		invoice = self.create_invoice(prorate)
@@ -235,14 +237,20 @@ class Subscription(Document):
 
 	def create_invoice(self, prorate):
 		"""
-		Creates a `Sales Invoice`, submits it and returns it
+		Creates a `Invoice`, submits it and returns it
 		"""
-		invoice = frappe.new_doc('Sales Invoice')
+		doctype = 'Sales Invoice' if self.party_type == 'Customer' else 'Purchase Invoice'
+
+		invoice = frappe.new_doc(doctype)
 		invoice.set_posting_time = 1
 		invoice.posting_date = self.current_invoice_start
-		invoice.customer = self.customer
 
-		## Add dimesnions in invoice for subscription:
+		if doctype == 'Sales Invoice':
+			invoice.customer = self.party
+		else:
+			invoice.supplier = self.party
+
+		## Add dimensions in invoice for subscription:
 		accounting_dimensions = get_accounting_dimensions()
 
 		for dimension in accounting_dimensions:
@@ -300,13 +308,13 @@ class Subscription(Document):
 			prorate_factor = get_prorata_factor(self.current_invoice_end, self.current_invoice_start)
 
 		items = []
-		customer = self.customer
+		party = self.party
 		for plan in plans:
 			item_code = frappe.db.get_value("Subscription Plan", plan.plan, "item")
 			if not prorate:
-				items.append({'item_code': item_code, 'qty': plan.qty, 'rate': get_plan_rate(plan.plan, plan.qty, customer)})
+				items.append({'item_code': item_code, 'qty': plan.qty, 'rate': get_plan_rate(plan.plan, plan.qty, party)})
 			else:
-				items.append({'item_code': item_code, 'qty': plan.qty, 'rate': (get_plan_rate(plan.plan, plan.qty, customer) * prorate_factor)})
+				items.append({'item_code': item_code, 'qty': plan.qty, 'rate': (get_plan_rate(plan.plan, plan.qty, party) * prorate_factor)})
 
 		return items
 
@@ -343,7 +351,9 @@ class Subscription(Document):
 		if self.is_new_subscription():
 			return False
 
-		last_invoice = frappe.get_doc('Sales Invoice', self.invoices[-1].invoice)
+		doctype = 'Sales Invoice' if self.party_type == 'Customer' else 'Purchase Invoice'
+
+		last_invoice = frappe.get_doc(doctype, self.invoices[-1].invoice)
 		if getdate(last_invoice.posting_date) == getdate(self.current_invoice_start) and last_invoice.status == 'Paid':
 			return True
 
