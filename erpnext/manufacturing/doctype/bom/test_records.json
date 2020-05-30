@@ -32,8 +32,7 @@
   "is_active": 1,
   "is_default": 1,
   "item": "_Test Item Home Desktop Manufactured",
-  "quantity": 1.0,
-  "company": "_Test Company"
+  "quantity": 1.0
  },
  {
   "scrap_items":[
@@ -79,8 +78,7 @@
   "is_default": 1,
   "currency": "USD",
   "item": "_Test FG Item",
-  "quantity": 1.0,
-  "company":"_Test Company"
+  "quantity": 1.0
  },
  {
   "operations": [
@@ -162,7 +160,6 @@
   "currency": "USD",
   "item": "_Test Variant Item",
   "quantity": 1.0,
-  "with_operations": 1,
-  "company": "_Test Company"
+  "with_operations": 1
  }
 ]
