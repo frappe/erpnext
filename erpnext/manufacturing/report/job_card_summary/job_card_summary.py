@@ -15,9 +15,12 @@ def execute(filters=None):
 	return columns, data, None, chart_data
 
 def get_data(filters):
-	query_filters = {"docstatus": ("<", 2)}
+	query_filters = {
+		"docstatus": ("<", 2),
+		"posting_date": ("between", [filters.from_date, filters.to_date])
+	}
 
-	fields = ["name", "status", "work_order", "production_item", "item_name",
+	fields = ["name", "status", "work_order", "production_item", "item_name", "posting_date",
 		"total_completed_qty", "workstation", "operation", "employee_name", "total_time_in_mins"]
 
 	for field in ["work_order", "workstation", "operation", "company"]:
@@ -30,33 +33,42 @@ def get_data(filters):
 	if not data: return []
 
 	job_cards = [d.name for d in data]
+
+	job_card_time_filter = {
+		"docstatus": ("<", 2),
+		"parent": ("in", job_cards),
+	}
+
 	job_card_time_details = {}
 	for job_card_data in frappe.get_all("Job Card Time Log",
 		fields=["min(from_time) as from_time", "max(to_time) as to_time", "parent"],
-		filters={"docstatus": ("<", 2), "parent": ("in", job_cards)}, group_by="parent"):
+		filters=job_card_time_filter, group_by="parent", debug=1):
 		job_card_time_details[job_card_data.parent] = job_card_data
 
+	res = []
 	for d in data:
-		if d.status == "Material Transferred":
+		if d.status != "Completed":
 			d.status = "Open"
 
 		if job_card_time_details.get(d.name):
 			d.from_time = job_card_time_details.get(d.name).from_time
 			d.to_time = job_card_time_details.get(d.name).to_time
 
-	return data
+		res.append(d)
+
+	return res
 
 def get_chart_data(job_card_details, filters):
 	labels, periodic_data = prepare_chart_data(job_card_details, filters)
 
-	pending, completed = [], []
+	open_job_cards, completed = [], []
 	datasets = []
 
 	for d in labels:
-		pending.append(periodic_data.get("Pending").get(d))
+		open_job_cards.append(periodic_data.get("Open").get(d))
 		completed.append(periodic_data.get("Completed").get(d))
 
-	datasets.append({"name": "Pending", "values": pending})
+	datasets.append({"name": "Open", "values": open_job_cards})
 	datasets.append({"name": "Completed", "values": completed})
 
 	chart = {
@@ -73,7 +85,7 @@ def prepare_chart_data(job_card_details, filters):
 	labels = []
 
 	periodic_data = {
-		"Pending": {},
+		"Open": {},
 		"Completed": {}
 	}
 
@@ -86,10 +98,10 @@ def prepare_chart_data(job_card_details, filters):
 			labels.append(period)
 
 		for d in job_card_details:
-			if getdate(d.from_time) >= from_date and getdate(d.to_time) <= end_date:
-				status = "Completed" if d.status == "Completed" else "Pending"
+			if getdate(d.posting_date) > from_date and getdate(d.posting_date) <= end_date:
+				status = "Completed" if d.status == "Completed" else "Open"
 
-				if periodic_data.get(status) and periodic_data.get(status).get(period):
+				if periodic_data.get(status).get(period):
 					periodic_data[status][period] += 1
 				else:
 					periodic_data[status][period] = 1
@@ -103,6 +115,12 @@ def get_columns(filters):
 			"fieldname": "name",
 			"fieldtype": "Link",
 			"options": "Job Card",
+			"width": 100
+		},
+		{
+			"label": _("Posting Date"),
+			"fieldname": "posting_date",
+			"fieldtype": "Date",
 			"width": 100
 		},
 	]

@@ -56,11 +56,4 @@ frappe.query_reports["Purchase Register"] = {
 	]
 }
 
-erpnext.dimension_filters.forEach((dimension) => {
-	frappe.query_reports["Purchase Register"].filters.splice(7, 0 ,{
-		"fieldname": dimension["fieldname"],
-		"label": __(dimension["label"]),
-		"fieldtype": "Link",
-		"options": dimension["document_type"]
-	});
-});
+erpnext.utils.add_dimensions('Purchase Register', 7);

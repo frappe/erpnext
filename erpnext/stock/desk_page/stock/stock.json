@@ -33,7 +33,7 @@
   {
    "hidden": 0,
    "label": "Key Reports",
-   "links": "[\n    {\n        \"dependencies\": [\n            \"Item Price\"\n        ],\n        \"doctype\": \"Item Price\",\n        \"is_query_report\": false,\n        \"label\": \"Item-wise Price List Rate\",\n        \"name\": \"Item-wise Price List Rate\",\n        \"onboard\": 1,\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Stock Entry\"\n        ],\n        \"doctype\": \"Stock Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Stock Analytics\",\n        \"name\": \"Stock Analytics\",\n        \"onboard\": 1,\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Delivery Note\"\n        ],\n        \"doctype\": \"Delivery Note\",\n        \"is_query_report\": true,\n        \"label\": \"Delivery Note Trends\",\n        \"name\": \"Delivery Note Trends\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Receipt\"\n        ],\n        \"doctype\": \"Purchase Receipt\",\n        \"is_query_report\": true,\n        \"label\": \"Purchase Receipt Trends\",\n        \"name\": \"Purchase Receipt Trends\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Delivery Note\"\n        ],\n        \"doctype\": \"Delivery Note\",\n        \"is_query_report\": true,\n        \"label\": \"Ordered Items To Be Delivered\",\n        \"name\": \"Ordered Items To Be Delivered\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Receipt\"\n        ],\n        \"doctype\": \"Purchase Receipt\",\n        \"is_query_report\": true,\n        \"label\": \"Purchase Order Items To Be Received\",\n        \"name\": \"Purchase Order Items To Be Received\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Bin\"\n        ],\n        \"doctype\": \"Bin\",\n        \"is_query_report\": true,\n        \"label\": \"Item Shortage Report\",\n        \"name\": \"Item Shortage Report\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Batch\"\n        ],\n        \"doctype\": \"Batch\",\n        \"is_query_report\": true,\n        \"label\": \"Batch-Wise Balance History\",\n        \"name\": \"Batch-Wise Balance History\",\n        \"type\": \"report\"\n    }\n]"
+   "links": "[\n    {\n        \"dependencies\": [\n            \"Item Price\"\n        ],\n        \"doctype\": \"Item Price\",\n        \"is_query_report\": false,\n        \"label\": \"Item-wise Price List Rate\",\n        \"name\": \"Item-wise Price List Rate\",\n        \"onboard\": 1,\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Stock Entry\"\n        ],\n        \"doctype\": \"Stock Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Stock Analytics\",\n        \"name\": \"Stock Analytics\",\n        \"onboard\": 1,\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Delivery Note\"\n        ],\n        \"doctype\": \"Delivery Note\",\n        \"is_query_report\": true,\n        \"label\": \"Delivery Note Trends\",\n        \"name\": \"Delivery Note Trends\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Receipt\"\n        ],\n        \"doctype\": \"Purchase Receipt\",\n        \"is_query_report\": true,\n        \"label\": \"Purchase Receipt Trends\",\n        \"name\": \"Purchase Receipt Trends\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Delivery Note\"\n        ],\n        \"doctype\": \"Delivery Note\",\n        \"is_query_report\": true,\n        \"label\": \"Ordered Items To Be Delivered\",\n        \"name\": \"Ordered Items To Be Delivered\",\n        \"type\": \"report\"\n    },\n   {\n         \"dependencies\": [\n            \"Purchase Order\"\n        ],\n        \"doctype\": \"Purchase Order\",\n        \"is_query_report\": true,\n        \"label\": \"Purchase Order Analysis\",\n        \"name\": \"Purchase Order Analysis\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Bin\"\n        ],\n        \"doctype\": \"Bin\",\n        \"is_query_report\": true,\n        \"label\": \"Item Shortage Report\",\n        \"name\": \"Item Shortage Report\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Batch\"\n        ],\n        \"doctype\": \"Batch\",\n        \"is_query_report\": true,\n        \"label\": \"Batch-Wise Balance History\",\n        \"name\": \"Batch-Wise Balance History\",\n        \"type\": \"report\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -58,7 +58,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Stock",
- "modified": "2020-05-19 17:36:08.185652",
+ "modified": "2020-05-27 20:38:25.255323",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
@@ -69,7 +69,7 @@
  "shortcuts": [
   {
    "color": "#cef6d1",
-   "format": "{}  available",
+   "format": "{}  Available",
    "label": "Item",
    "link_to": "Item",
    "stats_filter": "{\n    \"disabled\" : 0\n}",
@@ -90,7 +90,7 @@
   },
   {
    "color": "#ffe8cd",
-   "format": "{} to Bill",
+   "format": "{} To Bill",
    "label": "Purchase Receipt",
    "link_to": "Purchase Receipt",
    "stats_filter": "{\n    \"company\": [\"like\", '%' + frappe.defaults.get_global_default(\"company\") + '%'],\n    \"status\": \"To Bill\"\n}",
@@ -98,7 +98,7 @@
   },
   {
    "color": "#ffe8cd",
-   "format": "{} to Bill",
+   "format": "{} To Bill",
    "label": "Delivery Note",
    "link_to": "Delivery Note",
    "stats_filter": "{\n    \"company\": [\"like\", '%' + frappe.defaults.get_global_default(\"company\") + '%'],\n    \"status\": \"To Bill\"\n}",
@@ -115,7 +115,7 @@
    "type": "Report"
   },
   {
-   "label": "Stock Dashboard",
+   "label": "Dashboard",
    "link_to": "Stock",
    "type": "Dashboard"
   }

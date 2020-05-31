@@ -65,7 +65,9 @@ def get_member_based_on_subscription(subscription_id, email):
 	return frappe.get_doc("Member", members[0]['name'])
 
 @frappe.whitelist(allow_guest=True)
-def trigger_razorpay_subscription(data):
+def trigger_razorpay_subscription(*args, **kwargs):
+	data = frappe.request.get_data()
+
 	if isinstance(data, six.string_types):
 		data = json.loads(data)
 	data = frappe._dict(data)

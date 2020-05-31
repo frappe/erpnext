@@ -41,7 +41,7 @@ def get_dashboards():
 			{ "chart": "Top Suppliers", "width": "Full"}
 		],
 		"cards": [
-			{ "card": "This Year Purchases"},
+			{ "card": "Annual Purchase"},
 			{ "card": "Purchase Orders to Receive"},
 			{ "card": "Purchase Orders to Bill"},
 			{ "card": "Active Suppliers"}
@@ -142,7 +142,7 @@ def get_charts():
 def get_number_cards():
 	return [
 		{
-			"name": "This Year Purchases",
+			"name": "Annual Purchase",
 			"aggregate_function_based_on": "base_net_total",
 			"doctype": "Number Card",
 			"document_type": "Purchase Order",
@@ -155,7 +155,7 @@ def get_number_cards():
 			]),
 			"function": "Sum",
 			"is_public": 1,
-			"label": _("This Year Purchases"),
+			"label": _("Annual Purchase"),
 			"owner": "Administrator",
 			"show_percentage_stats": 1,
 			"stats_time_interval": "Monthly"
