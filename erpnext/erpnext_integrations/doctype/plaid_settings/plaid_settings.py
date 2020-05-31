@@ -141,12 +141,12 @@ def sync_transactions(bank, bank_account):
 			result += new_bank_transaction(transaction)
 
 		if result:
-			end_date = frappe.db.get_value('Bank Transaction', result.pop(), 'date')
+			last_transaction_date = frappe.db.get_value('Bank Transaction', result.pop(), 'date')
 
 			frappe.logger().info("Plaid added {} new Bank Transactions from '{}' between {} and {}".format(
 				len(result), bank_account, start_date, end_date))
 
-		frappe.db.set_value("Bank Account", bank_account, "last_integration_date", end_date)
+			frappe.db.set_value("Bank Account", bank_account, "last_integration_date", last_transaction_date)
 
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), _("Plaid transactions sync error"))
