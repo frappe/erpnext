@@ -189,7 +189,8 @@
    "fieldtype": "Link",
    "label": "Party Type",
    "options": "DocType",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "party",
@@ -216,7 +217,7 @@
   }
  ],
  "links": [],
- "modified": "2020-05-30 19:28:05.777823",
+ "modified": "2020-05-31 19:58:27.210832",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",

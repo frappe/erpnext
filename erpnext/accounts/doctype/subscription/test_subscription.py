@@ -48,7 +48,8 @@ class TestSubscription(unittest.TestCase):
 
 	def test_create_subscription_with_trial_with_correct_period(self):
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.trial_period_start = nowdate()
 		subscription.trial_period_end = add_days(nowdate(), 30)
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
@@ -102,7 +103,8 @@ class TestSubscription(unittest.TestCase):
 
 	def test_invoice_is_generated_at_end_of_billing_period(self):
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.start = '2018-01-01'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.insert()
@@ -115,7 +117,7 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(len(subscription.invoices), 1)
 		self.assertEqual(subscription.current_invoice_start, '2018-01-01')
 		self.assertEqual(subscription.status, 'Past Due Date')
-		subscription.delete()
+		# subscription.delete()
 
 	def test_status_goes_back_to_active_after_invoice_is_paid(self):
 		subscription = frappe.new_doc('Subscription')

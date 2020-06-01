@@ -146,7 +146,7 @@ class Subscription(Document):
 
 	def is_trialling(self):
 		"""
-		Returns `True` if the `Subscription` is trial period.
+		Returns `True` if the `Subscription` is in trial period.
 		"""
 		return not self.period_has_passed(self.trial_period_end) and self.is_new_subscription()
 
@@ -183,7 +183,7 @@ class Subscription(Document):
 		if not current_invoice:
 			return False
 		else:
-			return getdate(nowdate()) > getdate(current_invoice.due_date)
+			return getdate() > getdate(current_invoice.due_date)
 
 	def get_current_invoice(self):
 		"""
@@ -191,13 +191,15 @@ class Subscription(Document):
 		"""
 		doctype = 'Sales Invoice' if self.party_type == 'Customer' else 'Purchase Invoice'
 
+		invoice_field = frappe.scrub(doctype)
+
 		if len(self.invoices):
 			current = self.invoices[-1]
-			if frappe.db.exists(doctype, current.invoice):
-				doc = frappe.get_doc(doctype, current.invoice)
+			if frappe.db.exists(doctype, current.get(invoice_field)):
+				doc = frappe.get_doc(doctype, current.get(invoice_field))
 				return doc
 			else:
-				frappe.throw(_('Invoice {0} no longer exists').format(current.invoice))
+				frappe.throw(_('Invoice {0} no longer exists').format(current.get(invoice_field)))
 
 	def is_new_subscription(self):
 		"""
@@ -217,8 +219,11 @@ class Subscription(Document):
 			if getdate(self.trial_period_end) < getdate(self.trial_period_start):
 				frappe.throw(_('Trial Period End Date Cannot be before Trial Period Start Date'))
 
-		elif self.trial_period_start or self.trial_period_end:
+		if not self.trial_period_start or not self.trial_period_end:
 			frappe.throw(_('Both Trial Period Start Date and Trial Period End Date must be set'))
+
+		if self.trial_period_start > self.start:
+			frappe.throw(_('Trial Period Start date cannot be after Subscription Start Date'))
 
 	def after_insert(self):
 		# todo: deal with users who collect prepayments. Maybe a new Subscription Invoice doctype?
@@ -229,8 +234,12 @@ class Subscription(Document):
 		Creates a `Invoice` for the `Subscription`, updates `self.invoices` and
 		saves the `Subscription`.
 		"""
+
+		doctype = 'Sales Invoice' if self.party_type == 'Customer' else 'Purchase Invoice'
+		invoice_field = frappe.scrub(doctype)
+
 		invoice = self.create_invoice(prorate)
-		self.append('invoices', {'invoice': invoice.name})
+		self.append('invoices', {invoice_field: invoice.name})
 		self.save()
 
 		return invoice
@@ -263,14 +272,23 @@ class Subscription(Document):
 		# for that reason
 		items_list = self.get_items_from_plans(self.plans, prorate)
 		for item in items_list:
-			invoice.append('items',	item)
+			invoice.append('items', item)
 
 		# Taxes
-		if self.tax_template:
-			invoice.taxes_and_charges = self.tax_template
+		tax_template = ''
+
+		if doctype == 'Sales Invoice' and self.sales_tax_template:
+			tax_template = self.sales_tax_template
+		if doctype == 'Purchase Invoice' and self.purchase_tax_template:
+			tax_template = self.purchase_tax_template
+
+		if tax_template:
+			invoice.taxes_and_charges = tax_template
 			invoice.set_taxes()
 
 		# Due date
+		invoice.payment_terms_template = 'Default Payment Term - N20'
+
 		invoice.append(
 			'payment_schedule',
 			{
@@ -306,6 +324,7 @@ class Subscription(Document):
 		"""
 		if prorate:
 			prorate_factor = get_prorata_factor(self.current_invoice_end, self.current_invoice_start)
+			print(prorate_factor, "$$$$$$$$$$$")
 
 		items = []
 		party = self.party
@@ -330,11 +349,13 @@ class Subscription(Document):
 		elif self.status in ['Past Due Date', 'Unpaid']:
 			self.process_for_past_due_date()
 
+		self.set_subscription_status()
+
 		self.save()
 
 	def is_postpaid_to_invoice(self):
-		return getdate(nowdate()) > getdate(self.current_invoice_end) or \
-			(getdate(nowdate()) >= getdate(self.current_invoice_end) and getdate(self.current_invoice_end) == getdate(self.current_invoice_start)) and \
+		return getdate() > getdate(self.current_invoice_end) or \
+			(getdate() >= getdate(self.current_invoice_end) and getdate(self.current_invoice_end) == getdate(self.current_invoice_start)) and \
 			not self.has_outstanding_invoice()
 
 	def is_prepaid_to_invoice(self):
@@ -345,15 +366,16 @@ class Subscription(Document):
 			return True
 
 		# Check invoice dates and make sure it doesn't have outstanding invoices
-		return getdate(nowdate()) >= getdate(self.current_invoice_start) and not self.has_outstanding_invoice()
+		return getdate() >= getdate(self.current_invoice_start) and not self.has_outstanding_invoice()
 
 	def is_current_invoice_paid(self):
 		if self.is_new_subscription():
 			return False
 
 		doctype = 'Sales Invoice' if self.party_type == 'Customer' else 'Purchase Invoice'
+		invoice_field = frappe.scrub(doctype)
 
-		last_invoice = frappe.get_doc(doctype, self.invoices[-1].invoice)
+		last_invoice = frappe.get_doc(doctype, self.invoices[-1].get(invoice_field))
 		if getdate(last_invoice.posting_date) == getdate(self.current_invoice_start) and last_invoice.status == 'Paid':
 			return True
 
@@ -369,14 +391,16 @@ class Subscription(Document):
 		3. Change the `Subscription` status to 'Cancelled'
 		"""
 		if not self.is_current_invoice_paid() and (self.is_postpaid_to_invoice() or self.is_prepaid_to_invoice()):
-			self.generate_invoice()
+			prorate = frappe.db.get_single_value('Subscription Settings', 'prorate')
+			self.generate_invoice(prorate)
+
 			if self.current_invoice_is_past_due():
 				self.status = 'Past Due Date'
 
-		if self.current_invoice_is_past_due() and getdate(nowdate()) > getdate(self.current_invoice_end):
+		if self.current_invoice_is_past_due() and getdate() > getdate(self.current_invoice_end):
 			self.status = 'Past Due Date'
 
-		if self.cancel_at_period_end and getdate(nowdate()) > getdate(self.current_invoice_end):
+		if self.cancel_at_period_end and getdate() > getdate(self.current_invoice_end):
 			self.cancel_subscription_at_period_end()
 
 	def cancel_subscription_at_period_end(self):
@@ -479,10 +503,7 @@ def get_all_subscriptions():
 	"""
 	Returns all `Subscription` documents
 	"""
-	return frappe.db.sql(
-		'select name from `tabSubscription` where status != "Cancelled"',
-		as_dict=1
-	)
+	return frappe.db.get_all('Subscription', {'status': 'Cancelled'})
 
 
 def process(data):
