@@ -402,6 +402,15 @@ def make_custom_fields(update=True):
 		'Purchase Receipt Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Purchase Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Material Request Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Salary Component': [
+			dict(fieldname=  'component_type',
+				label= 'Component Type',
+				fieldtype=  'Select',
+				insert_after= 'description',
+				options= "\nProvident Fund\nAdditional Provident Fund\nProvident Fund Loan\nProfessional Tax",
+				depends_on = 'eval:doc.type == "Deduction"'
+			)
+		],
 		'Employee': [
 			dict(fieldname='ifsc_code',
 				label='IFSC Code',
@@ -422,8 +431,16 @@ def make_custom_fields(update=True):
 				label = 'MICR Code',
 				fieldtype = 'Data',
 				insert_after = 'ifsc_code',
-				print_hide = 1
+				print_hide = 1,
+				depends_on='eval:doc.salary_mode == "Bank"'
+			),
+			dict(
+				fieldname = 'provident_fund_account',
+				label = 'Provident Fund Account',
+				fieldtype = 'Data',
+				insert_after = 'pan_number'
 			)
+
 		],
 		'Company': [
 			dict(fieldname='hra_section', label='HRA Settings',
