@@ -169,8 +169,7 @@ def get_customer_stats(filters, tree_view=False):
     customers_in = {}
 
     for si in frappe.db.sql('''select territory, posting_date, customer, base_grand_total from `tabSales Invoice`
-        where docstatus=1 and posting_date <= %(to_date)s and posting_date >= %(from_date)s
-        {company_condition} order by posting_date'''.format(company_condition=company_condition),
+        where docstatus=1 and posting_date <= %(to_date)s {company_condition} order by posting_date'''.format(company_condition=company_condition),
         filters, as_dict=1):
 
         key = si.territory if tree_view else si.posting_date.strftime('%Y-%m')
