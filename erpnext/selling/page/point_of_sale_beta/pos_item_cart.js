@@ -482,7 +482,7 @@ erpnext.PointOfSale.ItemCart = class {
 							taxes.map((t, i) => {
 								let margin_left = '';
 								if (i !== 0) margin_left = 'ml-2';
-								return `<span class="border-grey p-1 pl-2 pr-2 rounded ${margin_left}">${t.description} @${t.rate}%</span>`
+								return `<span class="border-grey p-1 pl-2 pr-2 rounded ${margin_left}">${t.description}</span>`
 							}).join('')
 						}
 						</div>

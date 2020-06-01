@@ -36,6 +36,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_debit_to_acc()
 		self.validate_write_off_account()
 		self.validate_change_amount()
+		self.validate_change_account()
 		self.validate_item_cost_centers()
 		self.validate_serialised_or_batched_item()
 		self.validate_stock_availablility()
@@ -136,7 +137,11 @@ class POSInvoice(SalesInvoice):
 	def validate_pos_paid_amount(self):
 		if len(self.payments) == 0 and self.is_pos:
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
-	
+
+	def validate_change_account(self):
+		if frappe.db.get_value("Account", self.account_for_change_amount, "company") != self.company:
+			frappe.throw(_("The selected change account {} doesn't belongs to Company {}.").format(self.account_for_change_amount, self.company))
+
 	def validate_change_amount(self):
 		grand_total = flt(self.rounded_total) or flt(self.grand_total)
 		base_grand_total = flt(self.base_rounded_total) or flt(self.base_grand_total)
@@ -250,8 +255,8 @@ class POSInvoice(SalesInvoice):
 				self.company_address = pos.get("company_address")
 
 			if self.customer:
-				customer_price_list, customer_group = frappe.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
-				customer_group_price_list = frappe.get_value("Customer Group", customer_group, 'default_price_list')
+				customer_price_list, customer_group = frappe.db.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
+				customer_group_price_list = frappe.db.get_value("Customer Group", customer_group, 'default_price_list')
 				selling_price_list = customer_price_list or customer_group_price_list or pos.get('selling_price_list')
 			else:
 				selling_price_list = pos.get('selling_price_list')

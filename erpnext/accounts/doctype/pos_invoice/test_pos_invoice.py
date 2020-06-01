@@ -233,6 +233,45 @@ class TestPOSInvoice(unittest.TestCase):
 		pos2.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 1000})
 		
 		self.assertRaises(frappe.ValidationError, pos2.insert)
+	
+	def test_loyalty_points(self):
+		from erpnext.accounts.doctype.loyalty_program.test_loyalty_program import create_records
+		from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_program_details_with_points
+
+		create_records()
+		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty")
+		before_lp_details = get_loyalty_program_details_with_points("Test Loyalty Customer", company="_Test Company", loyalty_program="Test Single Loyalty")
+
+		inv = create_pos_invoice(customer="Test Loyalty Customer", rate=10000)
+
+		lpe = frappe.get_doc('Loyalty Point Entry', {'invoice_type': 'POS Invoice', 'invoice': inv.name, 'customer': inv.customer})
+		after_lp_details = get_loyalty_program_details_with_points(inv.customer, company=inv.company, loyalty_program=inv.loyalty_program)
+
+		self.assertEqual(inv.get('loyalty_program'), "Test Single Loyalty")
+		self.assertEqual(lpe.loyalty_points, 10)
+		self.assertEqual(after_lp_details.loyalty_points, before_lp_details.loyalty_points + 10)
+
+		inv.cancel()
+		after_cancel_lp_details = get_loyalty_program_details_with_points(inv.customer, company=inv.company, loyalty_program=inv.loyalty_program)
+		self.assertEqual(after_cancel_lp_details.loyalty_points, before_lp_details.loyalty_points)
+	
+	def test_loyalty_points_redeemption(self):
+		from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_program_details_with_points
+		# add 10 loyalty points
+		create_pos_invoice(customer="Test Loyalty Customer", rate=10000)
+
+		before_lp_details = get_loyalty_program_details_with_points("Test Loyalty Customer", company="_Test Company", loyalty_program="Test Single Loyalty")
+		
+		inv = create_pos_invoice(customer="Test Loyalty Customer", rate=10000, do_not_save=1)
+		inv.redeem_loyalty_points = 1
+		inv.loyalty_points = before_lp_details.loyalty_points
+		inv.loyalty_amount = inv.loyalty_points * before_lp_details.conversion_factor
+		inv.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 10000 - inv.loyalty_amount})
+		inv.paid_amount = 10000
+		inv.submit()
+
+		after_redeem_lp_details = get_loyalty_program_details_with_points(inv.customer, company=inv.company, loyalty_program=inv.loyalty_program)
+		self.assertEqual(after_redeem_lp_details.loyalty_points, 9)
 
 def create_pos_invoice(**args):
 	args = frappe._dict(args)
@@ -259,6 +298,7 @@ def create_pos_invoice(**args):
 	pos_inv.return_against = args.return_against
 	pos_inv.currency=args.currency or "INR"
 	pos_inv.conversion_rate = args.conversion_rate or 1
+	pos_inv.account_for_change_amount = "Cash - _TC"
 
 	pos_inv.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
