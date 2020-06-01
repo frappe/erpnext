@@ -37,11 +37,6 @@
   "column_break0",
   "tc_name",
   "select_print_heading",
-  "offline_pos_section",
-  "territory",
-  "column_break_31",
-  "print_format",
-  "customer_group",
   "section_break_19",
   "selling_price_list",
   "currency",
@@ -261,39 +256,6 @@
    "options": "Print Heading"
   },
   {
-   "fieldname": "offline_pos_section",
-   "fieldtype": "Section Break",
-   "label": "Offline POS Settings"
-  },
-  {
-   "fieldname": "territory",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Territory",
-   "oldfieldname": "territory",
-   "oldfieldtype": "Link",
-   "options": "Territory",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_31",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "Point of Sale",
-   "fieldname": "print_format",
-   "fieldtype": "Link",
-   "label": "Print Format",
-   "options": "Print Format"
-  },
-  {
-   "fieldname": "customer_group",
-   "fieldtype": "Link",
-   "label": "Customer Group",
-   "options": "Customer Group",
-   "reqd": 1
-  },
-  {
    "fieldname": "section_break_19",
    "fieldtype": "Section Break",
    "label": "Accounting"
@@ -396,7 +358,7 @@
  "icon": "icon-cog",
  "idx": 1,
  "links": [],
- "modified": "2020-05-13 23:58:39.993364",
+ "modified": "2020-06-01 15:46:01.944926",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

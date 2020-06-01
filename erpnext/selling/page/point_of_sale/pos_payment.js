@@ -1,4 +1,4 @@
-{% include "erpnext/selling/page/point_of_sale_beta/pos_number_pad.js" %}
+{% include "erpnext/selling/page/point_of_sale/pos_number_pad.js" %}
 
 erpnext.PointOfSale.Payment = class {
 	constructor({ events, wrapper }) {

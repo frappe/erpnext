@@ -1,11 +1,11 @@
-{% include "erpnext/selling/page/point_of_sale_beta/onscan.js" %}
-{% include "erpnext/selling/page/point_of_sale_beta/pos_item_selector.js" %}
-{% include "erpnext/selling/page/point_of_sale_beta/pos_item_cart.js" %}
-{% include "erpnext/selling/page/point_of_sale_beta/pos_item_details.js" %}
-{% include "erpnext/selling/page/point_of_sale_beta/pos_payment.js" %}
-{% include "erpnext/selling/page/point_of_sale_beta/pos_number_pad.js" %}
-{% include "erpnext/selling/page/point_of_sale_beta/pos_past_order_list.js" %}
-{% include "erpnext/selling/page/point_of_sale_beta/pos_past_order_summary.js" %}
+{% include "erpnext/selling/page/point_of_sale/onscan.js" %}
+{% include "erpnext/selling/page/point_of_sale/pos_item_selector.js" %}
+{% include "erpnext/selling/page/point_of_sale/pos_item_cart.js" %}
+{% include "erpnext/selling/page/point_of_sale/pos_item_details.js" %}
+{% include "erpnext/selling/page/point_of_sale/pos_payment.js" %}
+{% include "erpnext/selling/page/point_of_sale/pos_number_pad.js" %}
+{% include "erpnext/selling/page/point_of_sale/pos_past_order_list.js" %}
+{% include "erpnext/selling/page/point_of_sale/pos_past_order_summary.js" %}
 
 erpnext.PointOfSale.Controller = class {
     constructor(wrapper) {
@@ -16,13 +16,8 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	load_assets() {
-		const assets = [
-			'assets/erpnext/js/pos/clusterize.js',
-			'assets/erpnext/css/pos-beta.css'
-		];
-
 		// after loading assets first check if opening entry has been made
-		frappe.require(assets, this.check_opening_entry.bind(this));
+		frappe.require(['assets/erpnext/css/pos.css'], this.check_opening_entry.bind(this));
 	}
 
 	check_opening_entry() {
