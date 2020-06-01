@@ -151,6 +151,30 @@ class OpeningInvoiceCreationTool(Document):
 				income_expense_account_field: row.temporary_opening_account,
 				"cost_center": cost_center
 			})
+		
+		def get_tax_dict():
+			rate = flt(row.outstanding_amount) / flt(row.qty)
+			return frappe._dict({
+				"account_head": "9962 - GST 10% - RNLab",
+				"base_tax_amount": rate*(1/1.1),
+				"base_tax_amount_after_discount_amount": rate*(1/1.1),
+				"base_total": rate,
+				"charge_type": "On Net Total",
+				"cost_center": "Main - RNLab",
+				"description": "GST 10% @ 10.0",
+				"docstatus": 1,
+				"doctype": "Sales Taxes and Charges",
+				"idx": 1,
+				"included_in_print_rate": 1,
+				"owner": "Administrator",
+				"parentfield": "taxes",
+				"parenttype": "Sales Invoice",
+				"rate": 10,
+				"tax_amount": rate*(1/1.1),
+				"tax_amount_after_discount_amount": rate*(1/1.1),
+				"total": rate
+			})
+			
 
 		if not row:
 			return None
@@ -163,9 +187,14 @@ class OpeningInvoiceCreationTool(Document):
 
 		item = get_item_dict()
 
+		taxes = get_tax_dict();
+
 		args = frappe._dict({
 			"items": [item],
 			"is_opening": "Yes",
+			"selling_price_list": "Aus Retail",
+			"taxes_and_charges": "Australia GST 10% Retail - RNLab",
+			"taxes": [taxes],
 			"set_posting_time": 1,
 			"company": self.company,
 			"cost_center": self.cost_center,
