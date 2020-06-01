@@ -32,27 +32,27 @@ end_date = str(fiscal_year.get("year_end_date"))
 
 def get_dashboards():
 	return [{
-		"name": "Buying",
-		"dashboard_name": "Buying",
+		"name": "Selling",
+		"dashboard_name": "Selling",
 		"charts": [
-			{ "chart": "Purchase Order Trends", "width": "Full"},
-			{ "chart": "Material Request Analysis", "width": "Half"},
-			{ "chart": "Purchase Order Analysis", "width": "Half"},
-			{ "chart": "Top Suppliers", "width": "Full"}
+			{ "chart": "Sales Order Trends", "width": "Full"},
+			{ "chart": "Top Customers", "width": "Half"},
+			{ "chart": "Sales Order Analysis", "width": "Half"},
+			{ "chart": "Item-wise Annual Sales", "width": "Full"}
 		],
 		"cards": [
-			{ "card": "Annual Purchase"},
-			{ "card": "Purchase Orders to Receive"},
-			{ "card": "Purchase Orders to Bill"},
-			{ "card": "Active Suppliers"}
+			{ "card": "Annual Sales"},
+			{ "card": "Sales Orders to Deliver"},
+			{ "card": "Sales Orders to Bill"},
+			{ "card": "Active Customers"}
 		]
 	}]
 
 def get_charts():
 	return [
 		{
-			"name": "Purchase Order Analysis",
-			"chart_name": _("Purchase Order Analysis"),
+			"name": "Sales Order Analysis",
+			"chart_name": _("Sales Order Analysis"),
 			"chart_type": "Report",
 			"custom_options": json.dumps({
 				"type": "donut",
@@ -68,34 +68,28 @@ def get_charts():
 			"is_custom": 1,
 			"is_public": 1,
 			"owner": "Administrator",
-			"report_name": "Purchase Order Analysis",
+			"report_name": "Sales Order Analysis",
 			"type": "Donut"
 		},
 		{
-			"name": "Material Request Analysis",
-			"chart_name": _("Material Request Analysis"),
-			"chart_type": "Group By",
-			"custom_options": json.dumps({"height": 300}),
+			"name": "Item-wise Annual Sales",
+			"chart_name": _("Item-wise Annual Sales"),
+			"chart_type": "Report",
 			"doctype": "Dashboard Chart",
-			"document_type": "Material Request",
-			"filters_json": json.dumps(
-				[["Material Request", "status", "not in", ["Draft", "Cancelled", "Stopped", None], False],
-				["Material Request", "material_request_type", "=", "Purchase", False],
-				["Material Request", "company", "=", company.name, False],
-				["Material Request", "docstatus", "=", 1, False],
-				["Material Request", "transaction_date", "Between", [start_date, end_date], False]]
-			),
-			"group_by_based_on": "status",
-			"group_by_type": "Count",
-			"is_custom": 0,
+			"filters_json": json.dumps({
+				"company": company.name,
+				"from_date": start_date,
+				"to_date": end_date
+			}),
+			"is_custom": 1,
 			"is_public": 1,
-			"number_of_groups": 0,
 			"owner": "Administrator",
-			"type": "Donut"
+			"report_name": "Item-wise Sales History",
+			"type": "Bar"
 		},
 		{
-			"name": "Purchase Order Trends",
-			"chart_name": _("Purchase Order Trends"),
+			"name": "Sales Order Trends",
+			"chart_name": _("Sales Order Trends"),
 			"chart_type": "Report",
 			"custom_options": json.dumps({
 				"type": "line",
@@ -110,31 +104,29 @@ def get_charts():
 				"company": company.name,
 				"period": "Monthly",
 				"fiscal_year": fiscal_year_name,
-				"period_based_on": "posting_date",
 				"based_on": "Item"
 			}),
 			"is_custom": 1,
 			"is_public": 1,
 			"owner": "Administrator",
-			"report_name": "Purchase Order Trends",
+			"report_name": "Sales Order Trends",
 			"type": "Line"
 		},
 		{
-			"name": "Top Suppliers",
-			"chart_name": _("Top Suppliers"),
+			"name": "Top Customers",
+			"chart_name": _("Top Customers"),
 			"chart_type": "Report",
 			"doctype": "Dashboard Chart",
 			"filters_json": json.dumps({
 				"company": company.name,
 				"period": "Monthly",
 				"fiscal_year": fiscal_year_name,
-				"period_based_on": "posting_date",
-				"based_on": "Supplier"
+				"based_on": "Customer"
 			}),
 			"is_custom": 1,
 			"is_public": 1,
 			"owner": "Administrator",
-			"report_name": "Purchase Receipt Trends",
+			"report_name": "Delivery Note Trends",
 			"type": "Bar"
 		}
  	]
@@ -142,63 +134,63 @@ def get_charts():
 def get_number_cards():
 	return [
 		{
-			"name": "Annual Purchase",
+			"name": "Annual Sales",
 			"aggregate_function_based_on": "base_net_total",
 			"doctype": "Number Card",
-			"document_type": "Purchase Order",
+			"document_type": "Sales Order",
 			"filters_json": json.dumps([
-				["Purchase Order", "transaction_date", "Between", [start_date, end_date], False],
-				["Purchase Order", "status", "not in", ["Draft", "Cancelled", "Closed", None], False],
-				["Purchase Order", "docstatus", "=", 1, False],
-				["Purchase Order", "company", "=", company.name, False]
+				["Sales Order", "transaction_date", "Between", [start_date, end_date], False],
+				["Sales Order", "status", "not in", ["Draft", "Cancelled", "Closed", None], False],
+				["Sales Order", "docstatus", "=", 1, False],
+				["Sales Order", "company", "=", company.name, False]
 			]),
 			"function": "Sum",
 			"is_public": 1,
-			"label": _("Annual Purchase"),
+			"label": _("Annual Sales"),
 			"owner": "Administrator",
 			"show_percentage_stats": 1,
 			"stats_time_interval": "Monthly"
 		},
 		{
-			"name": "Purchase Orders to Receive",
+			"name": "Sales Orders to Deliver",
 			"doctype": "Number Card",
-			"document_type": "Purchase Order",
+			"document_type": "Sales Order",
 			"filters_json": json.dumps([
-				["Purchase Order", "status", "in", ["To Receive and Bill", "To Receive", None], False],
-				["Purchase Order", "docstatus", "=", 1, False],
-				["Purchase Order", "company", "=", company.name, False]
+				["Sales Order", "status", "in", ["To Deliver and Bill", "To Deliver", None], False],
+				["Sales Order", "docstatus", "=", 1, False],
+				["Sales Order", "company", "=", company.name, False]
 			]),
 			"function": "Count",
 			"is_public": 1,
-			"label": _("Purchase Orders to Receive"),
+			"label": _("Sales Orders to Deliver"),
 			"owner": "Administrator",
 			"show_percentage_stats": 1,
 			"stats_time_interval": "Weekly"
 		},
 		{
-			"name": "Purchase Orders to Bill",
+			"name": "Sales Orders to Bill",
 			"doctype": "Number Card",
-			"document_type": "Purchase Order",
+			"document_type": "Sales Order",
 			"filters_json": json.dumps([
-				["Purchase Order", "status", "in", ["To Receive and Bill", "To Bill", None], False],
-				["Purchase Order", "docstatus", "=", 1, False],
-				["Purchase Order", "company", "=", company.name, False]
+				["Sales Order", "status", "in", ["To Deliver and Bill", "To Bill", None], False],
+				["Sales Order", "docstatus", "=", 1, False],
+				["Sales Order", "company", "=", company.name, False]
 			]),
 			"function": "Count",
 			"is_public": 1,
-			"label": _("Purchase Orders to Bill"),
+			"label": _("Sales Orders to Bill"),
 			"owner": "Administrator",
 			"show_percentage_stats": 1,
 			"stats_time_interval": "Weekly"
 		},
 		{
-			"name": "Active Suppliers",
+			"name": "Active Customers",
 			"doctype": "Number Card",
-			"document_type": "Supplier",
-			"filters_json": json.dumps([["Supplier", "disabled", "=", "0"]]),
+			"document_type": "Customer",
+			"filters_json": json.dumps([["Customer", "disabled", "=", "0"]]),
 			"function": "Count",
 			"is_public": 1,
-			"label": "Active Suppliers",
+			"label": "Active Customers",
 			"owner": "Administrator",
 			"show_percentage_stats": 1,
 			"stats_time_interval": "Monthly"
