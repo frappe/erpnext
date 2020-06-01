@@ -3,7 +3,7 @@
   {
    "hidden": 0,
    "label": "Selling",
-   "links": "[\n    {\n        \"description\": \"Customer Database.\",\n        \"label\": \"Customer\",\n        \"name\": \"Customer\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"Customer\"\n        ],\n        \"description\": \"Quotes to Leads or Customers.\",\n        \"label\": \"Quotation\",\n        \"name\": \"Quotation\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"Customer\"\n        ],\n        \"description\": \"Confirmed orders from Customers.\",\n        \"label\": \"Sales Order\",\n        \"name\": \"Sales Order\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"Customer\"\n        ],\n        \"description\": \"Blanket Orders from Costumers.\",\n        \"label\": \"Blanket Order\",\n        \"name\": \"Blanket Order\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\"\n        ],\n        \"description\": \"Manage Sales Partners.\",\n        \"label\": \"Sales Partner\",\n        \"name\": \"Sales Partner\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"Customer\"\n        ],\n        \"description\": \"Manage Sales Person Tree.\",\n        \"icon\": \"fa fa-sitemap\",\n        \"label\": \"Sales Person\",\n        \"link\": \"Tree/Sales Person\",\n        \"name\": \"Sales Person\",\n        \"type\": \"doctype\"\n    }\n]"
+   "links": "[\n    {\n        \"description\": \"Customer Database.\",\n        \"label\": \"Customer\",\n        \"name\": \"Customer\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"Customer\"\n        ],\n        \"description\": \"Quotes to Leads or Customers.\",\n        \"label\": \"Quotation\",\n        \"name\": \"Quotation\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"Customer\"\n        ],\n        \"description\": \"Confirmed orders from Customers.\",\n        \"label\": \"Sales Order\",\n        \"name\": \"Sales Order\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n     {\n        \"dependencies\": [\n            \"Item\",\n            \"Customer\"\n        ],\n        \"label\": \"Sales Invoice\",\n        \"name\": \"Sales Invoice\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"Customer\"\n        ],\n        \"description\": \"Blanket Orders from Costumers.\",\n        \"label\": \"Blanket Order\",\n        \"name\": \"Blanket Order\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\"\n        ],\n        \"description\": \"Manage Sales Partners.\",\n        \"label\": \"Sales Partner\",\n        \"name\": \"Sales Partner\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"Customer\"\n        ],\n        \"description\": \"Manage Sales Person Tree.\",\n        \"icon\": \"fa fa-sitemap\",\n        \"label\": \"Sales Person\",\n        \"link\": \"Tree/Sales Person\",\n        \"name\": \"Sales Person\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -44,10 +44,11 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Selling",
- "modified": "2020-05-30 17:19:47.757463",
+ "modified": "2020-06-01 13:04:55.024628",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
+ "onboarding": "Selling",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 0,
