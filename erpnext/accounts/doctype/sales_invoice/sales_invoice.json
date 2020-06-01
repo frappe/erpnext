@@ -434,6 +434,7 @@
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "in_global_search": 1,
+   "in_preview": 1,
    "label": "Contact Person",
    "options": "Contact",
    "print_hide": 1
@@ -441,6 +442,7 @@
   {
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
+   "in_preview": 1,
    "label": "Contact",
    "read_only": 1
   },
@@ -448,6 +450,7 @@
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "hidden": 1,
+   "in_preview": 1,
    "label": "Mobile No",
    "read_only": 1
   },
@@ -1568,7 +1571,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-02-10 04:57:11.221180",
+ "modified": "2020-05-28 22:06:53.691648",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
@@ -1616,6 +1619,7 @@
  "quick_entry": 1,
  "search_fields": "posting_date, due_date, customer, base_grand_total, outstanding_amount",
  "show_name_in_global_search": 1,
+ "show_preview_popup": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "timeline_field": "customer",
