@@ -26,6 +26,8 @@ def get_payroll_dashboard():
 		"is_default": 1,
 		"charts": [
 			{ "chart": "Outgoing Salary", "width": "Full"},
+			{ "chart": "Designation Wise Salary(Last Month)", "width": "Half"},
+			{ "chart": "Department Wise Salary(Last Month)", "width": "Half"},
 		],
 		"cards": [
 			{"card": "Total Declaration Submitted"},
@@ -42,6 +44,30 @@ def get_charts():
 			value_based_on = "rounded_total", time_interval = "Monthly", timeseries = 1,
 			filters_json = json.dumps([["Salary Slip", "docstatus", "=", 1]]))
 	]
+
+	dashboard_charts.append(
+		get_dashboards_chart_doc('Department Wise Salary(Last Month)', "Group By", "Bar",
+			document_type = "Salary Slip", group_by_type="Sum", group_by_based_on="department",
+			time_interval = "Monthly", aggregate_function_based_on = "rounded_total",
+			filters_json = json.dumps([
+				["Salary Slip", "docstatus", "=", 1],
+				["Salary Slip", "start_date", "Previous","1 month"]
+			])
+		)
+	)
+
+	dashboard_charts.append(
+		get_dashboards_chart_doc('Designation Wise Salary(Last Month)', "Group By", "Bar",
+			document_type = "Salary Slip", group_by_type="Sum", group_by_based_on="designation",
+			time_interval = "Monthly", aggregate_function_based_on = "rounded_total",
+			filters_json = json.dumps([
+				["Salary Slip", "docstatus", "=", 1],
+				["Salary Slip", "start_date", "Previous","1 month"]
+			])
+		)
+	)
+
+	return dashboard_charts
 
 def get_number_cards():
 	number_cards = [get_number_cards_doc("Employee Tax Exemption Declaration", "Total Declaration Submitted", filters_json = json.dumps([
