@@ -403,9 +403,18 @@ def make_custom_fields(update=True):
 		'Purchase Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Material Request Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Employee': [
-			dict(fieldname='ifsc_code', label='IFSC Code',
-				fieldtype='Data', insert_after='bank_ac_no', print_hide=1,
-				depends_on='eval:doc.salary_mode == "Bank"')
+			dict(fieldname='ifsc_code',
+				label='IFSC Code',
+				fieldtype='Data',
+				insert_after='bank_ac_no',
+				print_hide=1,
+				depends_on='eval:doc.salary_mode == "Bank"'),
+			dict(
+				fieldname =  'pan_number',
+				label = 'PAN Number',
+				fieldtype = 'Data',
+				insert_after = 'ifsc_code'
+			),
 		],
 		'Company': [
 			dict(fieldname='hra_section', label='HRA Settings',

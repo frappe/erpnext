@@ -16,6 +16,7 @@
   "column_break_4",
   "depends_on_payment_days",
   "is_tax_applicable",
+  "is_income_tax_component",
   "deduct_full_tax_on_selected_payroll_date",
   "variable_based_on_taxable_salary",
   "exempted_from_income_tax",
@@ -231,11 +232,20 @@
    "fieldname": "exempted_from_income_tax",
    "fieldtype": "Check",
    "label": "Exempted from Income Tax"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.type == \"Deduction\"",
+   "fieldname": "is_income_tax_component",
+   "fieldtype": "Check",
+   "label": "Is Income Tax Component",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "icon": "fa fa-flag",
  "links": [],
- "modified": "2020-05-27 23:39:44.519179",
+ "modified": "2020-06-01 15:39:20.826565",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Component",
