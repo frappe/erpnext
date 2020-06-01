@@ -105,7 +105,7 @@ def get_data(filters):
 		and ded.parenttype = 'Salary Slip'
 		and sal.docstatus = 1 %s
 		and ded.salary_component in (%s)
-	""" % (conditions , ", ".join(['%s']*len(component_types))), tuple(component_types), as_dict=1, debug = 1)
+	""" % (conditions , ", ".join(['%s']*len(component_types))), tuple(component_types), as_dict=1)
 
 	for d in entry:
 

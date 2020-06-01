@@ -18,7 +18,7 @@
   {
    "hidden": 0,
    "label": "Reports",
-   "links": "[\n    {\n        \"dependencies\": [\n            \"Salary Slip\"\n        ],\n        \"doctype\": \"Salary Slip\",\n        \"is_query_report\": true,\n        \"label\": \"Salary Register\",\n        \"name\": \"Salary Register\",\n        \"type\": \"report\"\n        \n    },\n    {\n        \"dependencies\": [\n            \"Payroll Entry\"\n        ],\n        \"doctype\": \"Payroll Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Bank Remittance\",\n        \"name\": \"Bank Remittance\",\n        \"type\": \"report\"\n        \n    },\n    {\n        \"dependencies\": [\n            \"Salary Slip\"\n        ],\n        \"doctype\": \"Salary Slip\",\n        \"label\": \"Income Tax Deductions\",\n        \"is_query_report\": true,\n        \"name\": \"Income Tax Deductions\",\n        \"type\": \"report\"\n    }\n]"
+   "links": "[\n    {\n        \"dependencies\": [\n            \"Salary Slip\"\n        ],\n        \"doctype\": \"Salary Slip\",\n        \"is_query_report\": true,\n        \"label\": \"Salary Register\",\n        \"name\": \"Salary Register\",\n        \"type\": \"report\"\n        \n    },\n    {\n        \"dependencies\": [\n            \"Payroll Entry\"\n        ],\n        \"doctype\": \"Payroll Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Bank Remittance\",\n        \"name\": \"Bank Remittance\",\n        \"type\": \"report\"\n        \n    },\n    {\n        \"dependencies\": [\n            \"Salary Slip\"\n        ],\n        \"doctype\": \"Salary Slip\",\n        \"label\": \"Income Tax Deductions\",\n        \"is_query_report\": true,\n        \"name\": \"Income Tax Deductions\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Salary Slip\"\n        ],\n        \"doctype\": \"Salary Slip\",\n        \"label\": \"ECS Checklist\",\n        \"is_query_report\": true,\n        \"name\": \"ECS Checklist\",\n        \"type\": \"report\"\n    }\n]"
   }
  ],
  "category": "Modules",
@@ -38,7 +38,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Payroll",
- "modified": "2020-06-01 17:19:59.912133",
+ "modified": "2020-06-01 18:53:36.248594",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll",

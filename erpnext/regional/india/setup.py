@@ -408,13 +408,22 @@ def make_custom_fields(update=True):
 				fieldtype='Data',
 				insert_after='bank_ac_no',
 				print_hide=1,
-				depends_on='eval:doc.salary_mode == "Bank"'),
+				depends_on='eval:doc.salary_mode == "Bank"'
+				),
 			dict(
 				fieldname =  'pan_number',
 				label = 'PAN Number',
 				fieldtype = 'Data',
-				insert_after = 'ifsc_code'
+				insert_after = 'payroll_cost_center',
+				print_hide = 1
 			),
+			dict(
+				fieldname =  'micr_code',
+				label = 'MICR Code',
+				fieldtype = 'Data',
+				insert_after = 'ifsc_code',
+				print_hide = 1
+			)
 		],
 		'Company': [
 			dict(fieldname='hra_section', label='HRA Settings',
