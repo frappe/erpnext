@@ -1,0 +1,43 @@
+{
+ "cards": [
+  {
+   "hidden": 0,
+   "label": "Goal and Procedure",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Quality Goal\",\n\t\t\"description\":\"Quality Goal.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Quality Procedure\",\n\t\t\"description\":\"Quality Procedure.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Quality Procedure\",\n\t\t\"icon\": \"fa fa-sitemap\",\n\t\t\"label\": \"Tree of Procedures\",\n\t\t\"route\": \"#Tree/Quality Procedure\",\n\t\t\"description\": \"Tree of Quality Procedures.\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Review and Action",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Quality Review\",\n\t\t\"description\": \"Quality Review\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Quality Action\",\n\t\t\"description\": \"Quality Action\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Meeting",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Quality Meeting\",\n\t\t\"description\": \"Quality Meeting\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Feedback",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Quality Feedback\",\n\t\t\"description\": \"Quality Feedback\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Quality Feedback Template\",\n\t\t\"description\": \"Quality Feedback Template\"\n\t}\n]"
+  }
+ ],
+ "category": "Modules",
+ "charts": [],
+ "creation": "2020-05-27 14:59:15.444690",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "docstatus": 0,
+ "doctype": "Desk Page",
+ "extends_another_page": 0,
+ "idx": 0,
+ "is_standard": 1,
+ "label": "Quality Management",
+ "modified": "2020-05-27 15:08:35.095343",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality Management",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": []
+}
