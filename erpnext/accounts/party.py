@@ -55,7 +55,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 		party_address, shipping_address if party_type != "Supplier" else party_address)
 
 	if not party_details.get("taxes_and_charges"):
-		party_details["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company, party_details["selling_price_list"], 
+		party_details["taxes_and_charges"] = set_taxes(party.name, party_type, posting_date, company,
 			customer_group=party_details.customer_group, supplier_group=party_details.supplier_group, tax_category=party_details.tax_category,
 			billing_address=party_address, shipping_address=shipping_address)
 
@@ -386,7 +386,7 @@ def get_address_tax_category(tax_category=None, billing_address=None, shipping_a
 	return cstr(tax_category)
 
 @frappe.whitelist()
-def set_taxes(party, party_type, posting_date, company, price_list=None, customer_group=None, supplier_group=None, tax_category=None,
+def set_taxes(party, party_type, posting_date, company, customer_group=None, supplier_group=None, tax_category=None,
 	billing_address=None, shipping_address=None, use_for_shopping_cart=None):
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
 	args = {
@@ -402,9 +402,6 @@ def set_taxes(party, party_type, posting_date, company, price_list=None, custome
 
 	if supplier_group:
 		args['supplier_group'] = supplier_group
-
-	if price_list:
-		args['default_price_list'] = price_list
 
 	if billing_address or shipping_address:
 		args.update(get_party_details(party, party_type, {"billing_address": billing_address, \
