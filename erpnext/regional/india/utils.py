@@ -615,8 +615,9 @@ def get_transport_details(data, doc):
 		data.transDocDate = frappe.utils.formatdate(doc.lr_date, 'dd/mm/yyyy')
 
 	if doc.gst_transporter_id:
-		validate_gstin_check_digit(doc.gst_transporter_id, label='GST Transporter ID')
-		data.transporterId  = doc.gst_transporter_id
+		if doc.gst_transporter_id[0:2] != "88":
+			validate_gstin_check_digit(doc.gst_transporter_id, label='GST Transporter ID')
+		data.transporterId = doc.gst_transporter_id
 
 	return data
 
