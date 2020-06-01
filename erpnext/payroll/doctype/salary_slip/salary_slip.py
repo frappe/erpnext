@@ -1004,8 +1004,9 @@ class SalarySlip(TransactionBase):
 		self.calculate_net_pay()
 
 	def pull_emp_details(self):
-		emp = frappe.db.get_value("Employee", self.employee, ["bank_name", "bank_ac_no"], as_dict=1)
+		emp = frappe.db.get_value("Employee", self.employee, ["bank_name", "bank_ac_no", "salary_mode"], as_dict=1)
 		if emp:
+			self.mode_of_payment = emp.salary_mode
 			self.bank_name = emp.bank_name
 			self.bank_account_no = emp.bank_ac_no
 
