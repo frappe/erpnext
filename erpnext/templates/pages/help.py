@@ -8,19 +8,20 @@ def get_context(context):
 	settings = frappe.get_doc("Support Settings", "Support Settings")
 	s = settings
 
-	# Get Started sections
-	sections = json.loads(s.get_started_sections)
-	context.get_started_sections = sections
+	# # Get Started sections
+	# sections = json.loads(s.get_started_sections)
+	# context.get_started_sections = sections
 
 	# Forum posts
-	topics_data, post_params = get_forum_posts(s)
-	context.post_params = post_params
-	context.forum_url = s.forum_url
-	context.topics = topics_data[:3]
+	if s.show_latest_forum_posts:
+		topics_data, post_params = get_forum_posts(s)
+		context.post_params = post_params
+		context.forum_url = s.forum_url
+		context.topics = topics_data[:3]
 
 	# Issues
 	if frappe.session.user != "Guest":
-		context.issues = frappe.get_list("Issue", fields=["name", "status", "subject", "modified"])[:3]
+		context.issues = frappe.get_all("Issue", fields=["name", "status", "subject", "modified"])[:3]
 	else:
 		context.issues = []
 

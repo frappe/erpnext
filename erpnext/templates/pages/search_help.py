@@ -28,14 +28,20 @@ def get_help_results_sections(text):
 
 	for api in settings.search_apis:
 		results = []
-		if api.source_type == "API":
+		# if api.source_type == "API":
+		# if api.source_name == "ERPNext Documentation":
+		if api.source_name == "Discuss Forum Posts":
 			response_json = get_response(api, text)
 			topics_data = get_topics_data(api, response_json)
 			results = prepare_api_results(api, topics_data)
-		else:
+		# else:
 			# Source type is Doctype
+		if api.source_name == "Help Articles":
 			doctype = api.source_doctype
+			# print(doctype)
+			# print(text)
 			raw = search(text, 0, 20, doctype)
+			# print(raw)
 			results = prepare_doctype_results(api, raw)
 
 		if results:
@@ -51,8 +57,9 @@ def get_response(api, text):
 	response = requests.get(api.base_url + '/' + api.query_route, data={
 		api.search_term_param_name: text
 	})
+	# print(response.json())
 
-	response.raise_for_status()
+	# response.raise_for_status()
 	return response.json()
 
 def get_topics_data(api, response_json):
@@ -78,7 +85,7 @@ def prepare_api_results(api, topics_data):
 
 		results.append(frappe._dict({
 			'title': topic[api.post_title_key],
-			'preview': html2text(topic[api.post_description_key]),
+			'preview': html2text(topic[api.post_description_key]) if api.post_description_key in topic else None,
 			'route': route
 		}))
 	return results[:5]
@@ -95,7 +102,7 @@ def prepare_doctype_results(api, raw):
 
 		results.append(frappe._dict({
 			'title': prepared_result[api.result_title_field],
-			'preview': prepared_result[api.result_preview_field],
+			'preview': prepared_result[api.result_preview_field] if api.result_preview_field in prepared_result else None,
 			'route': prepared_result[api.result_route_field]
 		}))
 

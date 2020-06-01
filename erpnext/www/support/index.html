@@ -4,120 +4,81 @@
 <section class="jumbotron bg-light">
 	<div class='container'>
 		<h1 class="h1">We're here to help</h1>
-		<p class="mt-4">
+		<!-- <p class="mt-4">
 			<div class="input-group shadow-sm" style="width:50%">
 				<input class="form-control py-2 border-right-0 border" type="Text" placeholder="Search for help articles and more">
 				<span class="input-group-append">
 					<div class="border input-group-text bg-white"><i class="fa fa-search text-muted"></i></div>
 				</span>
 			</div>
-		</p>
+		</p> -->
 	</div>
 </section>
-<div class="container mb-5">
+<!-- <div class="container mb-5">
 	<div class="alert alert-warning">
 		<h6><i class="fa fa-info-circle mr-2" aria-hidden="true"></i>Service Degradation</h6>
 			<p class='mb-2'><b>Holy guacamole!</b> We have noticed minor disruption in ERPNext services. We'll be back soon</p>
 	</div>
+</div> -->
+<!-- {% if frappe.session.user=='Guest' %}
+<div class="container mb-5">
+	<div class="alert alert-warning">
+		<h6><i class="fa fa-info-circle mr-2" aria-hidden="true"></i>You are not logged in</h6>
+			<p class='mb-2'>To view or generate tickets, please <b><span style="cursor: pointer;" onclick="location.href='/login?redirect-to=/issues'">Login</span></b></p>
+	</div>
 </div>
-
+{%endif %}
+{% if frappe.session.user!='Guest' %}
 <div class='container mb-5'>
-	<div class="row">
+	<div class="row"> -->
 		<!-- <h3 class="h3 pb-3 col-sm-12 col-md-10">View Your Tickets</h3> -->
-		<div class="col-sm-12 col-md-2">
+		<!-- <div class="col-sm-12 col-md-2">
 			<button type="button" class="btn btn-primary" onclick="location.href='/issues'">View Your Tickets</button>
 		</div>
-		<div class="col-sm-12 col-md-2 text-right">
+		<div class="col-sm-12 col-md-2 text-right"> -->
 			<!-- <button type="button" class="btn btn-primary" onclick="location.href='/issues/new_issue'">New Ticket</button> -->
-			<button type="button" class="btn btn-primary" onclick="location.href='/customer-issues?new=1'">New Ticket</button>
+			<!-- <button type="button" class="btn btn-primary" onclick="location.href='/customer-issues?new=1'">New Ticket</button>
 		</div>
 	</div>
 </div>
-
+{% endif %} -->
+<div class='container no-padding mb-5 mt-5'>
+	<div class="col-sm-12 col-md-2">
+		<!-- <button type="button" class="btn btn-primary" onclick="location.href='/customer-issues?new=1'">New Ticket</button> -->
+		<button type="button" class="btn btn-primary" onclick="location.href='/issues'">View Your Tickets</button>
+	</div>
+</div>
 <div class='container mb-5'>
 	<h3 class="h3 pb-3">Frequently Read Articles</h3>
 	<div class="row row-cols-1 row-cols-md-3">
+		{% for favorite_article in favorite_article_list %}
 		<div class="col mb-4">
 			<div class="card">
 				<div class="card-body">
-					<h5 class="card-title">Card title</h5>
-					<h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-					<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-					<a href="#" class="card-link">Read More</a>
+					<h5 class="card-title">{{ favorite_article['title'] }}</h5>
+					<h6 class="card-subtitle mb-2 text-muted">{{ favorite_article['category'] }}</h6>
+					<p class="card-text">{{ favorite_article['content'] }}</p>
+					<a href="{{ favorite_article['route'] }}" class="card-link">Read More</a>
 				</div>
 			</div>
 		</div>
-		<div class="col mb-4">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">Card title</h5>
-					<h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-					<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-					<a href="#" class="card-link">Read More</a>
-				</div>
-			</div>
-		</div>
-		<div class="col mb-4">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">Card title</h5>
-					<h6 class="card-subtitle mb-2 text-muted">Card subtitle</h6>
-					<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-					<a href="#" class="card-link">Read More</a>
-				</div>
-			</div>
-		</div>
+		{% endfor %}
 	</div>
 </div>
 
 <div class='container mb-5'>
 	<h3 class="h3 pb-3">Help Articles</h3>
 	<div class="row row-cols-1 row-cols-md-3">
+		{% for item in help_article_list %}
 		<div class="col mb-4 text-truncate">
-			<h5>Accounts</h5>
+			<h5 class="list">{{ item['category'].name }}</h5>
 			<div class="list">
-				<a href="#" class="d-block">Auto Creation Of Material Request</a>
-				<a href="#" class="d-block">Delivery Note Stock Error</a>
-				<a href="#" class="d-block">Stock Entry Purpose</a>
-				<a href="#" class="d-block">Stock Received But Not Billed</a>
-				<a href="#" class="d-block">Stock Received But Not Billed</a>
+				{% for article in item['articles'] %}
+				<a href="{{ article.route }}" class="d-block">{{ article.title }}</a>
+				{% endfor %}
 			</div>
 		</div>
-		<div class="col mb-4 text-truncate">
-			<h5>Stock</h5>
-			<div class="list">
-				<a href="#" class="d-block">Auto Creation Of Material Request</a>
-				<a href="#" class="d-block">Delivery Note Stock Error</a>
-				<a href="#" class="d-block">Stock Entry Purpose</a>
-			</div>
-		</div>
-		<div class="col mb-4 text-truncate">
-			<h5>CRM</h5>
-			<div class="list">
-				<a href="#" class="d-block">Auto Creation Of Material Request</a>
-				<a href="#" class="d-block">Delivery Note Stock Error</a>
-				<a href="#" class="d-block">Stock Entry Purpose</a>
-				<a href="#" class="d-block">Stock Received But Not Billed</a>
-			</div>
-		</div>
-		<div class="col mb-4 text-truncate">
-			<h5>Selling</h5>
-			<div class="list">
-				<a href="#" class="d-block">Auto Creation Of Material Request</a>
-				<a href="#" class="d-block">Delivery Note Stock Error</a>
-				<a href="#" class="d-block">Stock Entry Purpose</a>
-				<a href="#" class="d-block">Stock Received But Not Billed</a>
-			</div>
-		</div>
-		<div class="col mb-4 text-truncate">
-			<h5>Buying</h5>
-			<div class="list">
-				<a href="#" class="d-block">Auto Creation Of Material Request</a>
-				<a href="#" class="d-block">Delivery Note Stock Error</a>
-				<a href="#" class="d-block">Stock Entry Purpose</a>
-				<a href="#" class="d-block">Stock Received But Not Billed</a>
-			</div>
-		</div>
+		{% endfor %}
 	</div>
 </div>
 
@@ -149,6 +110,18 @@
 	.status-red {
 		background: #FEB2B2;
 		color: #C53030 !important;
+	}
+
+	.no-padding {
+		padding: 0;
+	}
+
+	.card-text {
+		height: 80px;
+	}
+
+	.list {
+		padding: 0 10px;
 	}
 
 </style>
