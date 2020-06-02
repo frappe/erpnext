@@ -1,0 +1,65 @@
+{
+ "actions": [],
+ "creation": "2019-02-10 19:39:02.734686",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "content_doctype",
+  "content_document",
+  "col_break_1",
+  "render_as",
+  "route_text"
+ ],
+ "fields": [
+  {
+   "default": "Web Page Card",
+   "description": "The data source document type.",
+   "fieldname": "content_doctype",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Document Type",
+   "options": "Web Page Card\nBlog Post\nItem",
+   "reqd": 1
+  },
+  {
+   "description": "The data source document.",
+   "fieldname": "content_document",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Document",
+   "options": "content_doctype",
+   "reqd": 1
+  },
+  {
+   "fieldname": "col_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Vertical Card",
+   "description": "How the data is displayed.",
+   "fieldname": "render_as",
+   "fieldtype": "Select",
+   "label": "Render As",
+   "options": "Vertical Card\nHorizontal Card"
+  },
+  {
+   "description": "Link anchor text to use instead of 'More Details'.",
+   "fieldname": "route_text",
+   "fieldtype": "Data",
+   "label": "Link Text"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-06-02 06:42:21.924262",
+ "modified_by": "Administrator",
+ "module": "Portal",
+ "name": "Web Page Section Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -7,11 +7,15 @@
 </div>
 {% endmacro %}
 
+
+
 {% macro product_image(website_image, css_class="") %}
     <div class="border text-center rounded h-100 {{ css_class }}" style="overflow: hidden;">
 		<img itemprop="image" class="website-image h-100 w-100" src="{{ frappe.utils.quoted(website_image or 'no-image.jpg') | abs_url }}">
     </div>
 {% endmacro %}
+
+
 
 {% macro media_image(website_image, name, css_class="") %}
 	<div class="product-image sidebar-image-wrapper {{ css_class }}">
@@ -27,34 +31,124 @@
     </div>
 {% endmacro %}
 
-{% macro render_homepage_section(section) %}
 
-{% if section.section_based_on == 'Custom HTML' and section.section_html %}
+
+{% macro render_webpage_section(section) %}
+{% if section.section_based_on == 'Custom HTML' %}
 	{{ section.section_html }}
-{% elif section.section_based_on == 'Cards' %}
+{% else %}
 <section class="container my-5">
-	<h3>{{ section.name }}</h3>
+	{% if section.is_important %}
+	<h1>{{ section.name }}</h1>
+	{% else %}
+	<h2>{{ section.name }}</h2>
+	{% endif %}
 
 	<div class="row">
-		{% for card in section.section_cards %}
+
+	{% if section.section_based_on == 'Card Group' %}
+	<div class="card-group">
+	{% elif section.section_based_on == 'Card Deck' %}
+	<div class="card-deck">
+	{% elif section.section_based_on == 'Card Columns' %}
+	<div class="card-columns">
+	{% endif %}
+
+	{% for item in section.items %}
+		{% if section.section_based_on == 'Grid' %}
 		<div class="col-md-{{ section.column_value }} mb-4">
-			<div class="card h-100 justify-content-between">
-				{% if card.image %}
-				<div class="website-image-lazy" data-class="card-img-top h-100" data-src="{{ card.image }}" data-alt="{{ card.title }}"></div>
-				{% endif %}
-				<div class="card-body">
-					<h5 class="card-title">{{ card.title }}</h5>
-					<p class="card-subtitle mb-2 text-muted">{{ card.subtitle or '' }}</p>
-					<p class="card-text">{{ card.content or '' | truncate(140, True) }}</p>
-				</div>
-				<div class="card-body flex-grow-0">
-					<a href="{{ card.route }}" class="card-link">{{ _('More details') }}</a>
-				</div>
-			</div>
+		{% endif %}
+
+			{% if item.render_as == 'Vertical Card' %}
+			{{ render_vcard(item.title, item.subtitle, item.image, item.content, item.route, item.route_text, item.route_follow) }}
+			{% elif item.render_as == 'Horizontal Card' %}
+			{{ render_hcard(item.title, item.subtitle, item.image, item.content, item.route, item.route_text, item.route_follow) }}
+			{% endif %}
+
+		{% if section.section_based_on == 'Grid' %}
 		</div>
-		{% endfor %}
+		{% endif %}
+	{% endfor %}
+
+	{% if section.section_based_on in ['Card Group', 'Card Deck', 'Card Columns'] %}
 	</div>
+	{% endif %}
+
+	</div> <!-- row -->
 </section>
 {% endif %}
+{% endmacro %}
 
+
+
+{% macro render_vcard(title, subtitle, image, content, route, route_text, route_follow) %}
+<div class="card">
+{% if image %}
+{% if route %}
+	<a class="no-underline" href="{{ route }}"{% if not route_follow %} rel="nofollow"{% endif %}>
+{% endif %}
+	<div class="website-image-lazy" data-class="card-img-top" data-src="{{ image }}" data-alt="{{ title }}"></div>
+{% if route %}
+	</a>
+{% endif %}
+{% endif %}
+	<div class="card-body">
+		<h3 class="card-title">
+		{% if route %}
+			<a class="text-dark" href="{{ route }}"{% if not route_follow %} rel="nofollow"{% endif %}>
+		{% endif %}
+			{{ title }}
+		{% if route %}
+			</a>
+		{% endif %}
+		</h3>
+	{% if subtitle %}
+		<h4 class="card-subtitle mb-2 text-muted">{{ subtitle }}</h4>
+	{% endif %}
+		<p class="card-text">{{ content or '' | truncate(140, True) }}</p>
+	{% if route %}
+		<a href="{{ route }}" class="card-link" {% if not route_follow %}rel="nofollow"{% endif %}>
+			{{ route_text or _('More details') }}</a>
+	{% endif %}
+	</div>
+</div>
+{% endmacro %}
+
+{% macro render_hcard(title, subtitle, image, content, route, route_text, route_follow, image_right=false) %}
+<div class="card">
+	<div class="row no-gutters">
+		<div class="col-md-3{% if image_right %} order-md-12{% endif %}">
+		{% if image %}
+		{% if route %}
+			<a class="no-underline" href="{{ route }}"{% if not route_follow %} rel="nofollow"{% endif %}>
+		{% endif %}
+			<div class="website-image-lazy" data-class="card-img" data-src="{{ image }}" data-alt="{{ title }}"></div>
+		{% if route %}
+			</a>
+		{% endif %}
+		{% endif %}
+		</div>
+		<div class="col-md-9{% if image_right %} order-md-1{% endif %}">
+			<div class="card-body">
+				<h3 class="card-title">
+				{% if route %}
+					<a class="text-dark" href="{{ route }}"{% if not route_follow %} rel="nofollow"{% endif %}>
+				{% endif %}
+					{{ title }}
+				{% if route %}
+					</a>
+				{% endif %}
+				</h3>
+			{% if subtitle %}
+				<h4 class="card-subtitle mb-2 text-muted">{{ subtitle }}</h4>
+			{% endif %}
+				<p class="card-text">{{ content or '' | truncate(140, True) }}</p>
+			{% if route %}
+				<a href="{{ route }}" class="card-link" {% if not route_follow %}rel="nofollow"{% endif %}>
+					{{ route_text or _('More details') }}</a>
+			{% endif %}
+			</div>
+		</div>
+	</div>
+</div>
 {% endmacro %}

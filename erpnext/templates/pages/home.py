@@ -3,23 +3,20 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.utils.html_utils import clean_html
 
 no_cache = 1
 
+
 def get_context(context):
 	homepage = frappe.get_doc('Homepage')
-
-	for item in homepage.products:
-		route = frappe.db.get_value('Item', item.item_code, 'route')
-		if route:
-			item.route = '/' + route
 
 	homepage.title = homepage.title or homepage.company
 	context.title = homepage.title
 	context.homepage = homepage
 
-	if homepage.hero_section_based_on == 'Homepage Section' and homepage.hero_section:
-		homepage.hero_section_doc = frappe.get_doc('Homepage Section', homepage.hero_section)
+	if homepage.hero_section_based_on == 'Web Page Section' and homepage.hero_section:
+		context.hero_section_doc = frappe.get_doc('Web Page Section', homepage.hero_section).map_to_cards()
 
 	if homepage.slideshow:
 		doc = frappe.get_doc('Website Slideshow', homepage.slideshow)
@@ -27,22 +24,13 @@ def get_context(context):
 		context.slideshow_header = doc.header
 		context.slides = doc.slideshow_items
 
-	context.blogs = frappe.get_all('Blog Post',
-		fields=['title', 'blogger', 'blog_intro', 'route'],
-		filters={
-			'published': 1
-		},
-		order_by='modified desc',
-		limit=3
-	)
-
-	# filter out homepage section which is used as hero section
-	homepage_hero_section = homepage.hero_section_based_on == 'Homepage Section' and homepage.hero_section
-	homepage_sections = frappe.get_all('Homepage Section',
-		filters=[['name', '!=', homepage_hero_section]] if homepage_hero_section else None,
-		order_by='section_order asc'
-	)
-	context.homepage_sections = [frappe.get_doc('Homepage Section', name) for name in homepage_sections]
+	# Build the sections
+	context.homepage_sections = []
+	for section in homepage.page_sections:
+		if not (homepage.hero_section_based_on == 'Web Page Section' and section.section_name == homepage.hero_section):
+			wp_section = frappe.get_doc('Web Page Section', section.section_name)
+			section.update(wp_section.map_to_cards().__dict__)
+			context.homepage_sections += [section]
 
 	context.metatags = context.metatags or frappe._dict({})
 	context.metatags.image = homepage.hero_image or None

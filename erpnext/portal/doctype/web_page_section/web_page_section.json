@@ -1,0 +1,100 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "Prompt",
+ "creation": "2019-02-10 19:42:35.809238",
+ "description": "Sections to be included in web pages",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_based_on",
+  "section_items_section",
+  "items",
+  "no_of_columns",
+  "custom_html_section",
+  "section_html"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_based_on",
+   "fieldtype": "Select",
+   "label": "Section Based On",
+   "options": "Grid\nCard Group\nCard Deck\nCard Columns\nCustom HTML"
+  },
+  {
+   "depends_on": "eval:doc.section_based_on !== 'Custom HTML'",
+   "fieldname": "section_items_section",
+   "fieldtype": "Section Break",
+   "label": "Section Items"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Items",
+   "mandatory_depends_on": "eval:doc.section_based_on !== 'Custom HTML'",
+   "options": "Web Page Section Item"
+  },
+  {
+   "default": "3",
+   "depends_on": "eval:doc.section_based_on === 'Grid'",
+   "description": "Number of columns for this section. 3 cards will be shown per row if you select 3 columns.",
+   "fieldname": "no_of_columns",
+   "fieldtype": "Select",
+   "label": "Number of Columns",
+   "options": "1\n2\n3\n4\n6"
+  },
+  {
+   "depends_on": "eval:doc.section_based_on === 'Custom HTML'",
+   "fieldname": "custom_html_section",
+   "fieldtype": "Section Break",
+   "label": "Custom HTML"
+  },
+  {
+   "description": "Use this field to render custom HTML. You should wrap in a section tag with class container.",
+   "fieldname": "section_html",
+   "fieldtype": "Code",
+   "label": "HTML",
+   "mandatory_depends_on": "eval:doc.section_based_on === 'Custom HTML'",
+   "options": "HTML"
+  }
+ ],
+ "icon": "fa fa-bars",
+ "links": [],
+ "modified": "2020-06-02 18:24:21.722527",
+ "modified_by": "Administrator",
+ "module": "Portal",
+ "name": "Web Page Section",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Website Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
