@@ -1,0 +1,43 @@
+{
+ "actions": [],
+ "autoname": "hash",
+ "creation": "2020-05-30 18:02:17.861785",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_name",
+  "is_important"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Section Name",
+   "options": "Web Page Section",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "default": "0",
+   "description": "Puts the section name in an H1 tag for SEO purposes.",
+   "fieldname": "is_important",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Important"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-06-02 06:42:54.858550",
+ "modified_by": "Administrator",
+ "module": "Portal",
+ "name": "Web Page Sections",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
