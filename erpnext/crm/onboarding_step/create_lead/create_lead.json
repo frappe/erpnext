@@ -8,12 +8,12 @@
  "is_mandatory": 0,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2020-05-14 17:28:36.441387",
+ "modified": "2020-05-28 21:07:01.373403",
  "modified_by": "Administrator",
  "name": "Create Lead",
  "owner": "Administrator",
  "reference_document": "Lead",
- "show_full_form": 0,
+ "show_full_form": 1,
  "title": "Create Lead",
- "validate_action": 0
+ "validate_action": 1
 }

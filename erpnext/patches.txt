@@ -678,7 +678,7 @@ erpnext.patches.v13_0.move_tax_slabs_from_payroll_period_to_income_tax_slab #123
 erpnext.patches.v12_0.fix_quotation_expired_status
 erpnext.patches.v12_0.update_appointment_reminder_scheduler_entry
 erpnext.patches.v12_0.retain_permission_rules_for_video_doctype
-erpnext.patches.v12_0.remove_duplicate_leave_ledger_entries
+erpnext.patches.v12_0.remove_duplicate_leave_ledger_entries #2020-05-22
 erpnext.patches.v13_0.patch_to_fix_reverse_linking_in_additional_salary_encashment_and_incentive
 execute:frappe.delete_doc_if_exists("Page", "appointment-analytic")
 execute:frappe.rename_doc("Desk Page", "Getting Started", "Home", force=True)
@@ -688,6 +688,10 @@ erpnext.patches.v12_0.set_serial_no_status #2020-05-21
 erpnext.patches.v12_0.update_price_list_currency_in_bom
 execute:frappe.delete_doc_if_exists('Dashboard', 'Accounts')
 erpnext.patches.v13_0.update_actual_start_and_end_date_in_wo
-erpnext.patches.v13_0.set_company_field_in_healthcare_doctypes
+erpnext.patches.v13_0.set_company_field_in_healthcare_doctypes #2020-05-25
 erpnext.patches.v12_0.update_bom_in_so_mr
 execute:frappe.delete_doc("Report", "Department Analytics")
+execute:frappe.rename_doc("Desk Page", "Loan Management", "Loan", force=True)
+erpnext.patches.v12_0.update_uom_conversion_factor
+erpnext.patches.v13_0.delete_old_purchase_reports
+erpnext.patches.v12_0.set_italian_import_supplier_invoice_permissions

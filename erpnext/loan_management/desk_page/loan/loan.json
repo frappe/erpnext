@@ -34,20 +34,24 @@
  "docstatus": 0,
  "doctype": "Desk Page",
  "extends_another_page": 0,
+ "hide_custom": 0,
  "idx": 0,
  "is_standard": 1,
- "label": "Loan Management",
- "modified": "2020-04-02 11:28:51.380509",
+ "label": "Loan",
+ "modified": "2020-05-28 13:37:42.017709",
  "modified_by": "Administrator",
  "module": "Loan Management",
- "name": "Loan Management",
+ "name": "Loan",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 0,
  "shortcuts": [
   {
+   "color": "#ffe8cd",
+   "format": "{} Open",
    "label": "Loan Application",
    "link_to": "Loan Application",
+   "stats_filter": "{ \"status\": \"Open\" }",
    "type": "DocType"
   },
   {

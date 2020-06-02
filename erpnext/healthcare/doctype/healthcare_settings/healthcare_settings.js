@@ -57,19 +57,19 @@ frappe.tour['Healthcare Settings'] = [
 		description: __('Checking this will automatically create a Sales Invoice whenever an appointment is booked for a Patient.')
 	},
 	{
-		fieldname: 'healthcare_service_items',
+		fieldname: 'inpatient_visit_charge_item',
 		title: __('Healthcare Service Items'),
-		description: __('Set up the Healthcare Service Items for billing. Click ') + "<a href='https://docs.erpnext.com/docs/user/manual/en/healthcare/healthcare_settings#2-default-healthcare-service-items' target='_blank'>here</a>" + __(' to know more')
+		description: __('You can create a service item for Inpatient Visit Charge and set it here. Similarly, you can set up other Healthcare Service Items for billing in this section. Click ') + "<a href='https://docs.erpnext.com/docs/user/manual/en/healthcare/healthcare_settings#2-default-healthcare-service-items' target='_blank'>here</a>" + __(' to know more')
 	},
 	{
-		fieldname: 'sb_in_ac',
+		fieldname: 'income_account',
 		title: __('Set up default Accounts for the Healthcare Facility'),
 		description: __('If you wish to override default accounts settings and configure the Income and Receivable accounts for Healthcare, you can do so here.')
 
 	},
 	{
-		fieldname: 'out_patient_sms_alerts',
+		fieldname: 'send_registration_msg',
 		title: __('Out Patient SMS alerts'),
-		description: __('You can set up Out Patient SMS alerts here. Click ') + "<a href='https://docs.erpnext.com/docs/user/manual/en/healthcare/healthcare_settings#4-out-patient-sms-alerts' target='_blank'>here</a>" + __(' to know more')
+		description: __('If you want to send SMS alert on Patient Registration, you can enable this option. Similary, you can set up Out Patient SMS alerts for other functionalities in this section. Click ') + "<a href='https://docs.erpnext.com/docs/user/manual/en/healthcare/healthcare_settings#4-out-patient-sms-alerts' target='_blank'>here</a>" + __(' to know more')
 	}
 ];

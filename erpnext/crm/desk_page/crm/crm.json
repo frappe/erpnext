@@ -42,7 +42,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "CRM",
- "modified": "2020-05-20 12:11:36.250491",
+ "modified": "2020-05-28 13:33:52.906750",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
@@ -52,6 +52,7 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
+   "color": "#ffe8cd",
    "format": "{} Open",
    "label": "Lead",
    "link_to": "Lead",
@@ -59,6 +60,7 @@
    "type": "DocType"
   },
   {
+   "color": "#cef6d1",
    "format": "{} Assigned",
    "label": "Opportunity",
    "link_to": "Opportunity",
@@ -76,7 +78,7 @@
    "type": "Report"
   },
   {
-   "label": "CRM Dashboard",
+   "label": "Dashboard",
    "link_to": "CRM",
    "type": "Dashboard"
   }
