@@ -85,6 +85,7 @@ erpnext.PointOfSale.PastOrderList = class {
 
     refresh_list() {
         frappe.dom.freeze();
+        this.events.reset_summary();
         const search_term = this.search_field.get_value();
         const status = this.status_field.get_value();
 

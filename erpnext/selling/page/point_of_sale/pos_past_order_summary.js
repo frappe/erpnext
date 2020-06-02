@@ -346,6 +346,11 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.$summary_btns.children().last().removeClass('mr-4');
     }
 
+    show_summary_placeholder() {
+        this.$summary_wrapper.addClass("d-none");
+        this.$component.find('.no-summary-placeholder').removeClass('d-none');
+    }
+
     switch_to_post_submit_summary() {
         // switch to full width view
         this.$component.removeClass('col-span-6').addClass('col-span-10');

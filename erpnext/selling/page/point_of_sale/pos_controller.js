@@ -199,6 +199,15 @@ erpnext.PointOfSale.Controller = class {
 	save_draft_invoice() {
 		if (!this.$components_wrapper.is(":visible")) return;
 
+		if (this.frm.doc.items.length == 0) {
+			frappe.show_alert({
+				message:__("You must add atleast one item to save it as draft."), 
+				indicator:'red'
+			});
+			frappe.utils.play_sound("error");
+			return;
+		}
+
 		this.frm.save(undefined, undefined, undefined, () => {
 			frappe.show_alert({
 				message:__("There was an error saving the document."), 
@@ -381,7 +390,8 @@ erpnext.PointOfSale.Controller = class {
 					frappe.db.get_doc('POS Invoice', name).then((doc) => {
 						this.order_summary.load_summary_of(doc);
 					});
-				}
+				},
+				reset_summary: () => this.order_summary.show_summary_placeholder()
 			}
 		})
 	}
@@ -509,7 +519,7 @@ erpnext.PointOfSale.Controller = class {
 					}
 					this.frm.trigger("update_stock");
 					this.frm.trigger('calculate_taxes_and_totals');
-					if(this.frm.doc.taxes_and_charges) me.frm.script_manager.trigger("taxes_and_charges");
+					if(this.frm.doc.taxes_and_charges) this.frm.script_manager.trigger("taxes_and_charges");
 					frappe.model.set_default_values(this.frm.doc);
 					if (r.message) {
 						this.frm.pos_print_format = r.message.print_format || "";
