@@ -35,7 +35,9 @@ class Subscription(Document):
 		If the `date` parameter is not given , it will be automatically set as today's
 		date.
 		"""
-		if self.trial_period_start and self.is_trialling():
+		if self.new_subscription() and self.trial_period_end and getdate(self.trial_period_end) > getdate(self.start):
+			self.current_invoice_start = add_days(self.trial_period_end, 1)
+		elif self.trial_period_start and self.is_trialling():
 			self.current_invoice_start = self.trial_period_start
 		elif date:
 			self.current_invoice_start = date
@@ -191,15 +193,13 @@ class Subscription(Document):
 		"""
 		doctype = 'Sales Invoice' if self.party_type == 'Customer' else 'Purchase Invoice'
 
-		invoice_field = frappe.scrub(doctype)
-
 		if len(self.invoices):
 			current = self.invoices[-1]
-			if frappe.db.exists(doctype, current.get(invoice_field)):
-				doc = frappe.get_doc(doctype, current.get(invoice_field))
+			if frappe.db.exists(doctype, current.get('invoice')):
+				doc = frappe.get_doc(doctype, current.get('invoice'))
 				return doc
 			else:
-				frappe.throw(_('Invoice {0} no longer exists').format(current.get(invoice_field)))
+				frappe.throw(_('Invoice {0} no longer exists').format(current.get('invoice')))
 
 	def is_new_subscription(self):
 		"""
@@ -236,10 +236,13 @@ class Subscription(Document):
 		"""
 
 		doctype = 'Sales Invoice' if self.party_type == 'Customer' else 'Purchase Invoice'
-		invoice_field = frappe.scrub(doctype)
 
 		invoice = self.create_invoice(prorate)
-		self.append('invoices', {invoice_field: invoice.name})
+		self.append('invoices', {
+			'document_type': doctype,
+			'invoice': invoice.name
+		})
+
 		self.save()
 
 		return invoice
@@ -324,7 +327,6 @@ class Subscription(Document):
 		"""
 		if prorate:
 			prorate_factor = get_prorata_factor(self.current_invoice_end, self.current_invoice_start)
-			print(prorate_factor, "$$$$$$$$$$$")
 
 		items = []
 		party = self.party
@@ -373,9 +375,8 @@ class Subscription(Document):
 			return False
 
 		doctype = 'Sales Invoice' if self.party_type == 'Customer' else 'Purchase Invoice'
-		invoice_field = frappe.scrub(doctype)
 
-		last_invoice = frappe.get_doc(doctype, self.invoices[-1].get(invoice_field))
+		last_invoice = frappe.get_doc(doctype, self.invoices[-1].get('invoice'))
 		if getdate(last_invoice.posting_date) == getdate(self.current_invoice_start) and last_invoice.status == 'Paid':
 			return True
 

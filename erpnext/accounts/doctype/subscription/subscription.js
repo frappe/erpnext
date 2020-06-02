@@ -11,6 +11,7 @@ frappe.ui.form.on('Subscription', {
 			}
 		});
 	},
+
 	refresh: function(frm) {
 		if(!frm.is_new()){
 			if(frm.doc.status !== 'Cancelled'){
