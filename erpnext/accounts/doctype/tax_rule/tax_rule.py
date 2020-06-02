@@ -148,19 +148,26 @@ def get_tax_template(posting_date, args):
 	conditions.append("ifnull(tax_category, '') = {0}".format(frappe.db.escape(cstr(args.get("tax_category")))))
 	if 'tax_category' in args.keys():
 		del args['tax_category']
+	# frappe.errprint(args)
 
 	for key, value in iteritems(args):
 		if key=="use_for_shopping_cart":
 			conditions.append("use_for_shopping_cart = {0}".format(1 if value else 0))
 		elif key == 'customer_group':
-			if not value: value = get_root_of("Customer Group")
-			customer_group_condition = get_customer_group_condition(value)
-			conditions.append("ifnull({0}, '') in ('', {1})".format(key, customer_group_condition))
+			if not value: 
+				# value = get_root_of("Customer Group")
+				pass
+			else:
+				customer_group_condition = get_customer_group_condition(value)
+				conditions.append("ifnull({0}, '') in ('', {1})".format(key, customer_group_condition))
 		else:
 			conditions.append("ifnull({0}, '') in ('', {1})".format(key, frappe.db.escape(cstr(value))))
 
-	tax_rule = frappe.db.sql("""select * from `tabTax Rule`
-		where {0}""".format(" and ".join(conditions)), as_dict = True)
+	sql = """select * from `tabTax Rule`
+		where {0}""".format(" and ".join(conditions))
+	# frappe.errprint(sql)
+	tax_rule = frappe.db.sql(sql, as_dict = True)
+	# frappe.errprint(tax_rule)
 
 	if not tax_rule:
 		return None
