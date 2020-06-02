@@ -68,6 +68,7 @@ def get_final_data(dimension, dimension_items, filters, period_month_ranges, dat
 
 				if DCC_allocation:
 					period_data[0] = period_data[0]*(DCC_allocation/100)
+					period_data[1] = period_data[1]*(DCC_allocation/100)
 
 				if(filters.get("show_cumulative")):
 					last_total = period_data[0] - period_data[1]
@@ -388,7 +389,7 @@ def get_chart_data(filters, columns, data):
 			budget_values[i] += values[index]
 			actual_values[i] += values[index+1]
 			index += 3
-
+			
 	return {
 		'data': {
 			'labels': labels,
