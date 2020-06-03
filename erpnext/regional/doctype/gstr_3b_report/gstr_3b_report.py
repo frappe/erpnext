@@ -158,7 +158,7 @@ class GSTR3BReport(Document):
 
 		self.prepare_data("Sales Invoice", outward_supply_tax_amounts, "sup_details", "osup_det", ["Registered Regular"])
 		self.prepare_data("Sales Invoice", outward_supply_tax_amounts, "sup_details", "osup_zero", ["SEZ", "Deemed Export", "Overseas"])
-		self.prepare_data("Purchase Invoice", inward_supply_tax_amounts, "sup_details", "isup_rev", ["Registered Regular"], reverse_charge="Y")
+		self.prepare_data("Purchase Invoice", inward_supply_tax_amounts, "sup_details", "isup_rev", ["Unregistered"], reverse_charge="Y")
 		self.report_dict["sup_details"]["osup_nil_exmp"]["txval"] = flt(self.get_nil_rated_supply_value(), 2)
 		self.set_itc_details(itc_details)
 
@@ -196,11 +196,12 @@ class GSTR3BReport(Document):
 
 			if d["ty"] == 'ISRC':
 				reverse_charge = "Y"
+				itc_type = 'All Other ITC'
+				gst_category = 'Unregistered'
 			else:
 				reverse_charge = "N"
 
 			for account_head in self.account_heads:
-
 				d["iamt"] += flt(itc_details.get((gst_category, itc_type, reverse_charge, account_head.get('igst_account')), {}).get("amount"), 2)
 				d["camt"] += flt(itc_details.get((gst_category, itc_type, reverse_charge, account_head.get('cgst_account')), {}).get("amount"), 2)
 				d["samt"] += flt(itc_details.get((gst_category, itc_type, reverse_charge, account_head.get('sgst_account')), {}).get("amount"), 2)
@@ -274,17 +275,16 @@ class GSTR3BReport(Document):
 			""" #nosec
 			.format(doctype = doctype), (self.month_no, self.year, reverse_charge, self.company, self.gst_details.get("gstin"))))
 
-	def get_itc_details(self, reverse_charge='N'):
-
+	def get_itc_details(self):
 		itc_amount = frappe.db.sql("""
 			select s.gst_category, sum(t.tax_amount_after_discount_amount) as tax_amount, t.account_head, s.eligibility_for_itc, s.reverse_charge
 			from `tabPurchase Invoice` s , `tabPurchase Taxes and Charges` t
-			where s.docstatus = 1 and t.parent = s.name and s.reverse_charge = %s
+			where s.docstatus = 1 and t.parent = s.name
 			and month(s.posting_date) = %s and year(s.posting_date) = %s and s.company = %s
 			and s.company_gstin = %s
 			group by t.account_head, s.gst_category, s.eligibility_for_itc
 			""",
-			(reverse_charge, self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
+			(self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
 
 		itc_details = {}
 
