@@ -151,6 +151,11 @@
    "label": "Trial Balance",
    "link_to": "Trial Balance",
    "type": "Report"
+  },
+  {
+   "label": "Point of Sale",
+   "link_to": "point-of-sale",
+   "type": "Page"
   }
  ]
 }
