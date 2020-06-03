@@ -72,6 +72,8 @@
   "against_blanket_order",
   "blanket_order",
   "blanket_order_rate",
+  "manufacturing_section_section",
+  "bom_no",
   "planning_section",
   "projected_qty",
   "actual_qty",
@@ -212,6 +214,7 @@
    "fieldtype": "Link",
    "label": "UOM",
    "options": "UOM",
+   "print_hide": 0,
    "reqd": 1
   },
   {
@@ -764,12 +767,24 @@
    "fieldname": "against_blanket_order",
    "fieldtype": "Check",
    "label": "Against Blanket Order"
-  }
+  },
+  {
+    "fieldname": "bom_no",
+    "fieldtype": "Link",
+    "label": "BOM No",
+    "no_copy": 1,
+    "options": "BOM",
+    "print_hide": 1
+   },
+   {
+    "fieldname": "manufacturing_section_section",
+    "fieldtype": "Section Break",
+    "label": "Manufacturing Section"
+   }
  ],
  "idx": 1,
  "istable": 1,
- "links": [],
- "modified": "2020-03-05 14:20:28.085117",
+ "modified": "2020-05-15 18:13:43.006493",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

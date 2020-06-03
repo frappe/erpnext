@@ -251,8 +251,7 @@ def get_tax_template_for_sez(party_details, master_doctype, company, party_type)
 
 
 def calculate_annual_eligible_hra_exemption(doc):
-	basic_component = frappe.get_cached_value('Company',  doc.company,  "basic_component")
-	hra_component = frappe.get_cached_value('Company',  doc.company,  "hra_component")
+	basic_component, hra_component = frappe.db.get_value('Company',  doc.company,  ["basic_component", "hra_component"])
 	if not (basic_component and hra_component):
 		frappe.throw(_("Please mention Basic and HRA component in Company"))
 	annual_exemption, monthly_exemption, hra_amount = 0, 0, 0
@@ -616,8 +615,9 @@ def get_transport_details(data, doc):
 		data.transDocDate = frappe.utils.formatdate(doc.lr_date, 'dd/mm/yyyy')
 
 	if doc.gst_transporter_id:
-		validate_gstin_check_digit(doc.gst_transporter_id, label='GST Transporter ID')
-		data.transporterId  = doc.gst_transporter_id
+		if doc.gst_transporter_id[0:2] != "88":
+			validate_gstin_check_digit(doc.gst_transporter_id, label='GST Transporter ID')
+		data.transporterId = doc.gst_transporter_id
 
 	return data
 

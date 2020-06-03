@@ -55,6 +55,7 @@ class PayrollEntry(Document):
 					ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s
 					{condition}""".format(condition=condition),
 				{"company": self.company, "salary_slip_based_on_timesheet":self.salary_slip_based_on_timesheet})
+		
 		if sal_struct:
 			cond += "and t2.salary_structure IN %(sal_struct)s "
 			cond += "and %(from_date)s >= t2.from_date"
@@ -138,7 +139,7 @@ class PayrollEntry(Document):
 		cond = self.get_filter_condition()
 
 		ss_list = frappe.db.sql("""
-			select t1.name, t1.salary_structure from `tabSalary Slip` t1
+			select t1.name, t1.salary_structure, t1.payroll_cost_center from `tabSalary Slip` t1
 			where t1.docstatus = %s and t1.start_date >= %s and t1.end_date <= %s
 			and (t1.journal_entry is null or t1.journal_entry = "") and ifnull(salary_slip_based_on_timesheet,0) = %s %s
 		""" % ('%s', '%s', '%s','%s', cond), (ss_status, self.start_date, self.end_date, self.salary_slip_based_on_timesheet), as_dict=as_dict)
@@ -169,10 +170,14 @@ class PayrollEntry(Document):
 
 	def get_salary_components(self, component_type):
 		salary_slips = self.get_sal_slip_list(ss_status = 1, as_dict = True)
-		if salary_slips:
-			salary_components = frappe.db.sql("""select salary_component, amount, parentfield
-				from `tabSalary Detail` where parentfield = '%s' and parent in (%s)""" %
-				(component_type, ', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=True)
+		if salary_slips:			
+			salary_components = frappe.db.sql("""
+				select ssd.salary_component, ssd.amount, ssd.parentfield, ss.payroll_cost_center
+				from `tabSalary Slip` ss, `tabSalary Detail` ssd
+				where ss.name = ssd.parent and ssd.parentfield = '%s' and ss.name in (%s)
+			""" % (component_type, ', '.join(['%s']*len(salary_slips))),
+				tuple([d.name for d in salary_slips]), as_dict=True)
+
 			return salary_components
 
 	def get_salary_component_total(self, component_type = None):
@@ -186,15 +191,16 @@ class PayrollEntry(Document):
 					if is_flexible_benefit == 1 and only_tax_impact ==1:
 						add_component_to_accrual_jv_entry = False
 				if add_component_to_accrual_jv_entry:
-					component_dict[item['salary_component']] = component_dict.get(item['salary_component'], 0) + item['amount']
+					component_dict[(item.salary_component, item.payroll_cost_center)] \
+						= component_dict.get((item.salary_component, item.payroll_cost_center), 0) + flt(item.amount)
 			account_details = self.get_account(component_dict = component_dict)
 			return account_details
 
 	def get_account(self, component_dict = None):
-		account_dict = {}
-		for s, a in component_dict.items():
-			account = self.get_salary_component_account(s)
-			account_dict[account] = account_dict.get(account, 0) + a
+		account_dict = {}		
+		for key, amount in component_dict.items():
+			account = self.get_salary_component_account(key[0])
+			account_dict[(account, key[1])] = account_dict.get((account, key[1]), 0) + amount
 		return account_dict
 
 	def get_default_payroll_payable_account(self):
@@ -227,23 +233,23 @@ class PayrollEntry(Document):
 			payable_amount = 0
 
 			# Earnings
-			for acc, amount in earnings.items():
+			for acc_cc, amount in earnings.items():
 				payable_amount += flt(amount, precision)
 				accounts.append({
-						"account": acc,
+						"account": acc_cc[0],
 						"debit_in_account_currency": flt(amount, precision),
 						"party_type": '',
-						"cost_center": self.cost_center,
+						"cost_center": acc_cc[1] or self.cost_center,
 						"project": self.project
 					})
 
 			# Deductions
-			for acc, amount in deductions.items():
+			for acc_cc, amount in deductions.items():
 				payable_amount -= flt(amount, precision)
 				accounts.append({
-						"account": acc,
+						"account": acc_cc[0],
 						"credit_in_account_currency": flt(amount, precision),
-						"cost_center": self.cost_center,
+						"cost_center": acc_cc[1] or self.cost_center,
 						"party_type": '',
 						"project": self.project
 					})
@@ -253,6 +259,7 @@ class PayrollEntry(Document):
 				"account": default_payroll_payable_account,
 				"credit_in_account_currency": flt(payable_amount, precision),
 				"party_type": '',
+				"cost_center": self.cost_center
 			})
 
 			journal_entry.set("accounts", accounts)
