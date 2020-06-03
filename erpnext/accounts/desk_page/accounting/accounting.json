@@ -18,7 +18,7 @@
   {
    "hidden": 0,
    "label": "Accounts Payable",
-   "links": "[\n    {\n        \"description\": \"Bills raised by Suppliers.\",\n        \"label\": \"Purchase Invoice\",\n        \"name\": \"Purchase Invoice\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Supplier database.\",\n        \"label\": \"Supplier\",\n        \"name\": \"Supplier\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Bank/Cash transactions against party or for internal transfer\",\n        \"label\": \"Payment Entry\",\n        \"name\": \"Payment Entry\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Accounts Payable\",\n        \"name\": \"Accounts Payable\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Accounts Payable Summary\",\n        \"name\": \"Accounts Payable Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Purchase Register\",\n        \"name\": \"Purchase Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Item-wise Purchase Register\",\n        \"name\": \"Item-wise Purchase Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Purchase Order Items To Be Billed\",\n        \"name\": \"Purchase Order Items To Be Billed\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Received Items To Be Billed\",\n        \"name\": \"Received Items To Be Billed\",\n        \"type\": \"report\"\n    }\n]"
+   "links": "[\n    {\n        \"description\": \"Bills raised by Suppliers.\",\n        \"label\": \"Purchase Invoice\",\n        \"name\": \"Purchase Invoice\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Supplier database.\",\n        \"label\": \"Supplier\",\n        \"name\": \"Supplier\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Bank/Cash transactions against party or for internal transfer\",\n        \"label\": \"Payment Entry\",\n        \"name\": \"Payment Entry\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Accounts Payable\",\n        \"name\": \"Accounts Payable\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Accounts Payable Summary\",\n        \"name\": \"Accounts Payable Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Purchase Register\",\n        \"name\": \"Purchase Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Item-wise Purchase Register\",\n        \"name\": \"Item-wise Purchase Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Order\"\n        ],\n        \"doctype\": \"Purchase Order\",\n        \"is_query_report\": true,\n        \"label\": \"Purchase Order Analysis\",\n        \"name\": \"Purchase Order Analysis\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Received Items To Be Billed\",\n        \"name\": \"Received Items To Be Billed\",\n        \"type\": \"report\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -44,11 +44,6 @@
    "hidden": 0,
    "label": "Bank Statement",
    "links": "[\n    {\n        \"label\": \"Bank\",\n        \"name\": \"Bank\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Account\",\n        \"name\": \"Bank Account\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Statement Transaction Entry\",\n        \"name\": \"Bank Statement Transaction Entry\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Statement Settings\",\n        \"name\": \"Bank Statement Settings\",\n        \"type\": \"doctype\"\n    }\n]"
-  },
-  {
-   "hidden": 0,
-   "links": "[\n    {\n        \"description\": \"Match non-linked Invoices and Payments.\",\n        \"label\": \"Match Payments with Invoices\",\n        \"name\": \"Payment Reconciliation\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Update bank payment dates with journals.\",\n        \"label\": \"Update Bank Clearance Dates\",\n        \"name\": \"Bank Clearance\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Invoice Discounting\",\n        \"name\": \"Invoice Discounting\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Journal Entry\"\n        ],\n        \"doctype\": \"Journal Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Bank Reconciliation Statement\",\n        \"name\": \"Bank Reconciliation Statement\",\n        \"type\": \"report\"\n    },\n    {\n        \"icon\": \"fa fa-bar-chart\",\n        \"label\": \"Bank Reconciliation\",\n        \"name\": \"bank-reconciliation\",\n        \"type\": \"page\"\n    },\n    {\n        \"dependencies\": [\n            \"Journal Entry\"\n        ],\n        \"doctype\": \"Journal Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Bank Clearance Summary\",\n        \"name\": \"Bank Clearance Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"label\": \"Bank Guarantee\",\n        \"name\": \"Bank Guarantee\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Setup cheque dimensions for printing\",\n        \"label\": \"Cheque Print Template\",\n        \"name\": \"Cheque Print Template\",\n        \"type\": \"doctype\"\n    }\n]",
-   "title": "Banking and Payments"
   },
   {
    "hidden": 0,
@@ -89,8 +84,8 @@
  "category": "Modules",
  "charts": [
   {
-   "chart_name": "Bank Balance",
-   "label": "Bank Balance"
+   "chart_name": "Profit and Loss",
+   "label": "Profit and Loss"
   }
  ],
  "creation": "2020-03-02 15:41:59.515192",
@@ -99,22 +94,38 @@
  "docstatus": 0,
  "doctype": "Desk Page",
  "extends_another_page": 0,
- "icon": "",
+ "hide_custom": 0,
  "idx": 0,
  "is_standard": 1,
  "label": "Accounting",
- "modified": "2020-04-29 12:17:34.844397",
+ "modified": "2020-05-27 20:34:50.949772",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
+ "onboarding": "Accounts",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 0,
  "shortcuts": [
   {
-   "label": "Account",
+   "label": "Chart Of Accounts",
    "link_to": "Account",
    "type": "DocType"
+  },
+  {
+   "label": "Sales Invoice",
+   "link_to": "Sales Invoice",
+   "type": "DocType"
+  },
+  {
+   "label": "Purchase Invoice",
+   "link_to": "Purchase Invoice",
+   "type": "DocType"
+  },
+  {
+   "label": "Dashboard",
+   "link_to": "Accounts",
+   "type": "Dashboard"
   },
   {
    "label": "Journal Entry",
@@ -134,11 +145,6 @@
   {
    "label": "General Ledger",
    "link_to": "General Ledger",
-   "type": "Report"
-  },
-  {
-   "label": "Profit and Loss Statement",
-   "link_to": "Profit and Loss Statement",
    "type": "Report"
   },
   {
