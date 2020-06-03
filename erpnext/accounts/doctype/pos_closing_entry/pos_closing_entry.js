@@ -24,15 +24,6 @@ frappe.ui.form.on('POS Closing Entry', {
 		if (frm.doc.docstatus === 1) set_html_data(frm);
 	},
 
-	before_save(frm) {
-		frm.doc.payment_reconciliation.forEach((pay, idx) => {
-			if (pay.opening_amount === pay.expected_amount) {
-				frm.doc.payment_reconciliation.splice(idx, 1);
-			}
-		})
-		frm.refresh_field("payment_reconciliation")
-	},
-
 	pos_opening_entry(frm) {
 		if (frm.doc.pos_opening_entry && frm.doc.period_start_date && frm.doc.period_end_date && frm.doc.user) {
 			reset_values(frm);
