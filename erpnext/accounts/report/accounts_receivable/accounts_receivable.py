@@ -169,9 +169,11 @@ class ReceivablePayableReport(object):
 
 	def append_subtotal_row(self, party):
 		sub_total_row = self.total_row_map.get(party)
-		self.data.append(sub_total_row)
-		self.data.append({})
-		self.update_sub_total_row(sub_total_row, 'Total')
+
+		if sub_total_row:
+			self.data.append(sub_total_row)
+			self.data.append({})
+			self.update_sub_total_row(sub_total_row, 'Total')
 
 	def get_voucher_balance(self, gle):
 		if self.filters.get("sales_person"):
@@ -232,7 +234,8 @@ class ReceivablePayableReport(object):
 
 		if self.filters.get('group_by_party'):
 			self.append_subtotal_row(self.previous_party)
-			self.data.append(self.total_row_map.get('Total'))
+			if self.data:
+				self.data.append(self.total_row_map.get('Total'))
 
 	def append_row(self, row):
 		self.allocate_future_payments(row)
