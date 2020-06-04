@@ -22,10 +22,10 @@ def execute():
 			if values:
 				holiday_list = values[0]
 				employee_group = values[1]
-			frappe.db.set_value('Service Level Agreement', entry.name, {
-				'holiday_list': holiday_list,
-				'employee_group': employee_group
-			})
+				frappe.db.set_value('Service Level Agreement', entry.name, {
+					'holiday_list': holiday_list,
+					'employee_group': employee_group
+				})
 
 		priority_dict = {}
 
@@ -76,18 +76,14 @@ def execute():
 					row.db_update()
 				sla.db_update()
 
+	frappe.delete_doc('DocType', 'Service Level')
+
 	# set issue status as Replied since Hold status is removed
 	if frappe.db.exists('DocType', 'Issue'):
-		issues_on_hold = frappe.db.sql("""
-			SELECT
-				name
-			FROM
-				`tabIssue`
-			WHERE
-				status = 'Hold'
-		""", as_dict=1)
-
+		issues_on_hold = frappe.db.get_all('Issue', {'status': 'Hold'})
 		issues = [entry.name for entry in issues_on_hold]
+		if not issues:
+			return
 
 		frappe.reload_doc('support', 'doctype', 'issue')
 		frappe.db.sql("""
@@ -96,8 +92,8 @@ def execute():
 			SET
 				status='Replied'
 			WHERE
-				name in %(issues)s
-		""", {'issues': issues}, debug=1)
+				name IN %(issues)s
+		""", {'issues': issues})
 
 
 def convert_to_seconds(value, unit):

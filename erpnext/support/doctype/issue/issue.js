@@ -43,11 +43,11 @@ frappe.ui.form.on("Issue", {
 			if (frm.doc.service_level_agreement) {
 				if (frm.doc.status == "Replied") {
 					frm.dashboard.clear_headline();
-					let message = {"indicator": "orange", "msg": __("Replied {0}", [moment(frm.doc.on_hold_since).fromNow()])};
+					let message = {"indicator": "orange", "msg": __("Replied {0}", [frappe.datetime.comment_when(frm.doc.on_hold_since)])};
 					frm.dashboard.set_headline_alert(
 						'<div class="row">' +
 							'<div class="col-xs-12">' +
-								'<span class="indicator whitespace-nowrap '+ message.indicator +'"><span class="hidden-xs">'+ message.msg +'</span></span> ' +
+								'<span class="indicator whitespace-nowrap '+ message.indicator +'"><span>'+ message.msg +'</span></span> ' +
 							'</div>' +
 						'</div>'
 					);
