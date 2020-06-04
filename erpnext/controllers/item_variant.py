@@ -315,7 +315,7 @@ def make_variant_item_code(template_item_code, template_item_name, variant):
 			# 	exc=InvalidItemAttributeValueError)
 
 		abbr_or_value = cstr(attr.attribute_value) if item_attribute[0].numeric_values else item_attribute[0].abbr
-		abbreviations.append(abbr_or_value)
+		abbreviations.append(abbr_or_value.strip())
 
 	if abbreviations:
 		variant.item_code = "{0}-{1}".format(template_item_code, "-".join(abbreviations))
