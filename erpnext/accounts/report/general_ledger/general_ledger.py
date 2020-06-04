@@ -168,7 +168,7 @@ def get_gl_entries(filters):
 			name as gl_entry, posting_date, account, party_type, party,
 			voucher_type, voucher_no, cost_center, project,
 			against_voucher_type, against_voucher, account_currency,
-			remarks, against, is_opening {select_fields}
+			remarks, against, is_opening, creation {select_fields}
 		from `tabGL Entry`
 		where company=%(company)s {conditions}
 		{distributed_cost_center_query}
