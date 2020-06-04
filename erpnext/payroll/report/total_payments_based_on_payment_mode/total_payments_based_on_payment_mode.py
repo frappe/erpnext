@@ -2,7 +2,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 from erpnext.regional.report.provident_fund_deductions.provident_fund_deductions import get_conditions
 
@@ -13,9 +13,10 @@ def execute(filters=None):
 		return [], []
 
 	columns = get_columns(filters, mode_of_payments)
-	data = get_data(filters, mode_of_payments)
+	data, total_rows, report_summary = get_data(filters, mode_of_payments)
+	chart =  get_chart(mode_of_payments, total_rows)
 
-	return columns, data
+	return columns, data, None, chart, report_summary
 
 def get_columns(filters, mode_of_payments):
 	columns = [{
@@ -93,31 +94,84 @@ def get_data(filters, mode_of_payments):
 				row[mode] = branch_wise_entries.get(branch).get(mode)
 				total +=  branch_wise_entries.get(branch).get(mode)
 
-				if total_row.get(mode):
-					total_row[mode] += total
-				else:
-					total_row[mode] = total
-
 		row["total"] = total
-		total_row["total"] += total
 		data.append(row)
 
+	total_row = get_total_based_on_mode_of_payment(data, mode_of_payments)
 	total_deductions = gross_pay - total_row.get("total")
 
 	if data:
 		data.append(total_row)
 		data.append({})
 		data.append({
-			"branch": "Gross Pay",
+			"branch": "<b>Total Gross Pay</b>",
 			mode_of_payments[0]:gross_pay
 		})
 		data.append({
-			"branch": "Total Deductions",
+			"branch": "<b>Total Deductions</b>",
 			mode_of_payments[0]:total_deductions
 		})
 		data.append({
-			"branch": "Net Pay",
+			"branch": "<b>Total Net Pay</b>",
 			mode_of_payments[0]:total_row.get("total")
 		})
 
-	return data
+		currency = erpnext.get_company_currency(filters.company)
+		report_summary = get_report_summary(gross_pay, total_deductions, total_row.get("total"), currency)
+
+	return data, total_row, report_summary
+
+def get_total_based_on_mode_of_payment(data, mode_of_payments):
+
+	total = 0
+	total_row = {"branch": "<b>Total</b>"}
+	for mode in mode_of_payments:
+		sum_of_payment = sum([detail[mode] for detail in data if mode in detail.keys()])
+		total_row[mode] = sum_of_payment
+		total += sum_of_payment
+
+	total_row["total"] = total
+	return total_row
+
+def get_report_summary(gross_pay, total_deductions, net_pay, currency):
+	return [
+		{
+			"value": gross_pay,
+			"label": "Total Gross Pay",
+			"indicator": "Green",
+			"datatype": "Currency",
+			"currency": currency
+		},
+		{
+			"value": total_deductions,
+			"label": "Total Deduction",
+			"datatype": "Currency",
+			"indicator": "Red",
+			"currency": currency
+		},
+		{
+			"value": net_pay,
+			"label": "Total Net Pay",
+			"datatype": "Currency",
+			"indicator": "Blue",
+			"currency": currency
+		}
+	]
+
+def get_chart(mode_of_payments, data):
+	if data:
+		values = []
+		labels = []
+
+		for mode in mode_of_payments:
+			values.append(data[mode])
+			labels.append([mode])
+
+		chart = {
+			"data": {
+				"labels": labels,
+				"datasets": [{'name': 'Mode Of Payments', "values": values}]
+			}
+		}
+		chart['type'] = "bar"
+		return chart
