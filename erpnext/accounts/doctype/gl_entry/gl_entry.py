@@ -233,7 +233,7 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 			frappe.throw(_("Outstanding for {0} cannot be less than zero ({1})").format(against_voucher, fmt_money(bal)))
 
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
-		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
+		ref_doc = frappe.get_cached_doc(against_voucher_type, against_voucher)
 
 		# Didn't use db_set for optimisation purpose
 		ref_doc.outstanding_amount = bal
