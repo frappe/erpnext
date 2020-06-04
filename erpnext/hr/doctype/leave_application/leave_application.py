@@ -131,8 +131,6 @@ class LeaveApplication(Document):
 			for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 				date = dt.strftime("%Y-%m-%d")
 				status = "Half Day" if getdate(date) == getdate(self.half_day_date) else "On Leave"
-				print("-------->>>", status)
-				# frappe.throw("Hello")
 
 				attendance_name = frappe.db.exists('Attendance', dict(employee = self.employee,
 					attendance_date = date, docstatus = ('!=', 2)))
@@ -442,6 +440,7 @@ def get_leave_details(employee, date):
 		total_allocated_leaves = frappe.db.get_value('Leave Allocation', {
 			'from_date': ('<=', date),
 			'to_date': ('>=', date),
+			'employee': employee,
 			'leave_type': allocation.leave_type,
 		}, 'SUM(total_leaves_allocated)') or 0
 
