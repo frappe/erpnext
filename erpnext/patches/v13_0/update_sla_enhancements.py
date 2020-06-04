@@ -78,23 +78,6 @@ def execute():
 
 	frappe.delete_doc('DocType', 'Service Level')
 
-	# set issue status as Replied since Hold status is removed
-	if frappe.db.exists('DocType', 'Issue'):
-		issues_on_hold = frappe.db.get_all('Issue', {'status': 'Hold'})
-		issues = [entry.name for entry in issues_on_hold]
-		if not issues:
-			return
-
-		frappe.reload_doc('support', 'doctype', 'issue')
-		frappe.db.sql("""
-			UPDATE
-				`tabIssue`
-			SET
-				status='Replied'
-			WHERE
-				name IN %(issues)s
-		""", {'issues': issues})
-
 
 def convert_to_seconds(value, unit):
 	seconds = 0
