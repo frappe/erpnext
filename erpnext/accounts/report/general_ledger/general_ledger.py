@@ -147,7 +147,7 @@ def get_gl_entries(filters):
 			against_voucher,
 			account_currency,
 			remarks, against, 
-			is_opening {select_fields_with_percentage}
+			is_opening, `tabGL Entry`.creation {select_fields_with_percentage}
 		FROM `tabGL Entry`,
 		(
 			SELECT parent, sum(percentage_allocation) as percentage_allocation
