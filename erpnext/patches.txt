@@ -702,5 +702,5 @@ erpnext.patches.v12_0.update_address_template_for_india
 erpnext.patches.v12_0.set_multi_uom_in_rfq
 erpnext.patches.v13_0.delete_old_sales_reports
 execute:frappe.delete_doc_if_exists("DocType", "Bank Reconciliation")
-erpnext.patches.v13_0.move_print_format_from_hr_to_payroll
 erpnext.patches.v13_0.move_doctype_reports_and_notification_from_hr_to_payroll
+erpnext.patches.v13_0.move_payroll_setting_separately_from_hr_settings

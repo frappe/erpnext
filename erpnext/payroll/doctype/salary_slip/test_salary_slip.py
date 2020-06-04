@@ -20,7 +20,7 @@ class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
 		setup_test()
 	def tearDown(self):
-		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
+		frappe.db.set_value("Payroll Settings", None, "include_holidays_in_total_working_days", 0)
 		frappe.set_user("Administrator")
 
 	def test_payment_days_based_on_attendance(self):
@@ -28,8 +28,8 @@ class TestSalarySlip(unittest.TestCase):
 		no_of_days = self.get_no_of_days()
 
 		# Payroll based on attendance
-		frappe.db.set_value("HR Settings", None, "payroll_based_on", "Attendance")
-		frappe.db.set_value("HR Settings", None, "daily_wages_fraction_for_half_day", 0.75)
+		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Attendance")
+		frappe.db.set_value("Payroll Settings", None, "daily_wages_fraction_for_half_day", 0.75)
 
 		emp_id = make_employee("test_for_attendance@salary.com")
 		frappe.db.set_value("Employee", emp_id, {"relieving_date": None, "status": "Active"})
@@ -67,13 +67,13 @@ class TestSalarySlip(unittest.TestCase):
 
 		self.assertEqual(ss.gross_pay, gross_pay)
 
-		frappe.db.set_value("HR Settings", None, "payroll_based_on", "Leave")
+		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Leave")
 
 	def test_payment_days_based_on_leave_application(self):
 		no_of_days = self.get_no_of_days()
 
 		# Payroll based on attendance
-		frappe.db.set_value("HR Settings", None, "payroll_based_on", "Leave")
+		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Leave")
 
 		emp_id = make_employee("test_for_attendance@salary.com")
 		frappe.db.set_value("Employee", emp_id, {"relieving_date": None, "status": "Active"})
@@ -106,11 +106,11 @@ class TestSalarySlip(unittest.TestCase):
 
 		self.assertEqual(ss.gross_pay, gross_pay)
 
-		frappe.db.set_value("HR Settings", None, "payroll_based_on", "Leave")
+		frappe.db.set_value("Payroll Settings", None, "payroll_based_on", "Leave")
 
 	def test_salary_slip_with_holidays_included(self):
 		no_of_days = self.get_no_of_days()
-		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 1)
+		frappe.db.set_value("Payroll Settings", None, "include_holidays_in_total_working_days", 1)
 		make_employee("test_employee@salary.com")
 		frappe.db.set_value("Employee", frappe.get_value("Employee",
 			{"employee_name":"test_employee@salary.com"}, "name"), "relieving_date", None)
@@ -126,7 +126,7 @@ class TestSalarySlip(unittest.TestCase):
 
 	def test_salary_slip_with_holidays_excluded(self):
 		no_of_days = self.get_no_of_days()
-		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
+		frappe.db.set_value("Payroll Settings", None, "include_holidays_in_total_working_days", 0)
 		make_employee("test_employee@salary.com")
 		frappe.db.set_value("Employee", frappe.get_value("Employee",
 			{"employee_name":"test_employee@salary.com"}, "name"), "relieving_date", None)
@@ -144,7 +144,7 @@ class TestSalarySlip(unittest.TestCase):
 	def test_payment_days(self):
 		no_of_days = self.get_no_of_days()
 		# Holidays not included in working days
-		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 1)
+		frappe.db.set_value("Payroll Settings", None, "include_holidays_in_total_working_days", 1)
 
 		# set joinng date in the same month
 		make_employee("test_employee@salary.com")
@@ -200,7 +200,7 @@ class TestSalarySlip(unittest.TestCase):
 	def test_email_salary_slip(self):
 		frappe.db.sql("delete from `tabEmail Queue`")
 
-		frappe.db.set_value("HR Settings", None, "email_salary_slip_to_employee", 1)
+		frappe.db.set_value("Payroll Settings", None, "email_salary_slip_to_employee", 1)
 
 		make_employee("test_employee@salary.com")
 		ss = make_employee_salary_slip("test_employee@salary.com", "Monthly")
@@ -699,7 +699,7 @@ def setup_test():
 	make_holiday_list()
 
 	frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Slip Test Holiday List")
-	frappe.db.set_value("HR Settings", None, "email_salary_slip_to_employee", 0)
+	frappe.db.set_value("Payroll Settings", None, "email_salary_slip_to_employee", 0)
 	frappe.db.set_value('HR Settings', None, 'leave_status_notification_template', None)
 	frappe.db.set_value('HR Settings', None, 'leave_approval_notification_template', None)
 

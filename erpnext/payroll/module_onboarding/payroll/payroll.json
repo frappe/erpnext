@@ -13,7 +13,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/human-resources/payroll-entry",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-06-01 12:10:52.560472",
+ "modified": "2020-06-04 16:35:30.650792",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll",
@@ -39,6 +39,9 @@
   },
   {
    "step": "Create Salary Slip"
+  },
+  {
+   "step": "Payroll Settings"
   }
  ],
  "subtitle": "Salary, Compensations and more.",

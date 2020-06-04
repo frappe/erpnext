@@ -55,7 +55,7 @@ class PayrollEntry(Document):
 					ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s
 					{condition}""".format(condition=condition),
 				{"company": self.company, "salary_slip_based_on_timesheet":self.salary_slip_based_on_timesheet})
-		
+
 		if sal_struct:
 			cond += "and t2.salary_structure IN %(sal_struct)s "
 			cond += "and %(from_date)s >= t2.from_date"
@@ -154,7 +154,7 @@ class PayrollEntry(Document):
 			submit_salary_slips_for_employees(self, ss_list, publish_progress=False)
 
 	def email_salary_slip(self, submitted_ss):
-		if frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee"):
+		if frappe.db.get_single_value("Payroll Settings", "email_salary_slip_to_employee"):
 			for ss in submitted_ss:
 				ss.email_salary_slip()
 
@@ -170,7 +170,7 @@ class PayrollEntry(Document):
 
 	def get_salary_components(self, component_type):
 		salary_slips = self.get_sal_slip_list(ss_status = 1, as_dict = True)
-		if salary_slips:			
+		if salary_slips:
 			salary_components = frappe.db.sql("""
 				select ssd.salary_component, ssd.amount, ssd.parentfield, ss.payroll_cost_center
 				from `tabSalary Slip` ss, `tabSalary Detail` ssd
@@ -197,7 +197,7 @@ class PayrollEntry(Document):
 			return account_details
 
 	def get_account(self, component_dict = None):
-		account_dict = {}		
+		account_dict = {}
 		for key, amount in component_dict.items():
 			account = self.get_salary_component_account(key[0])
 			account_dict[(account, key[1])] = account_dict.get((account, key[1]), 0) + amount

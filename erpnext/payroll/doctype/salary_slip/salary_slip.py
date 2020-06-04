@@ -54,8 +54,8 @@ class SalarySlip(TransactionBase):
 		total = self.net_pay if self.is_rounding_total_disabled() else self.rounded_total
 		self.total_in_words = money_in_words(total, company_currency)
 
-		if frappe.db.get_single_value("HR Settings", "max_working_hours_against_timesheet"):
-			max_working_hours = frappe.db.get_single_value("HR Settings", "max_working_hours_against_timesheet")
+		if frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet"):
+			max_working_hours = frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet")
 			if self.salary_slip_based_on_timesheet and (self.total_working_hours > int(max_working_hours)):
 				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
 								format(max_working_hours), alert=True)
@@ -67,7 +67,7 @@ class SalarySlip(TransactionBase):
 			self.set_status()
 			self.update_status(self.name)
 			self.make_loan_repayment_entry()
-			if (frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee")) and not frappe.flags.via_payroll_entry:
+			if (frappe.db.get_single_value("Payroll Settings", "email_salary_slip_to_employee")) and not frappe.flags.via_payroll_entry:
 				self.email_salary_slip()
 
 	def on_cancel(self):
@@ -93,7 +93,7 @@ class SalarySlip(TransactionBase):
 			frappe.throw(_("To date cannot be before From date"))
 
 	def is_rounding_total_disabled(self):
-		return cint(frappe.db.get_single_value("HR Settings", "disable_rounded_total"))
+		return cint(frappe.db.get_single_value("Payroll Settings", "disable_rounded_total"))
 
 	def check_existing(self):
 		if not self.salary_slip_based_on_timesheet:
@@ -188,8 +188,8 @@ class SalarySlip(TransactionBase):
 		make_salary_slip(self._salary_structure_doc.name, self)
 
 	def get_working_days_details(self, joining_date=None, relieving_date=None, lwp=None, for_preview=0):
-		payroll_based_on = frappe.db.get_value("HR Settings", None, "payroll_based_on")
-		include_holidays_in_total_working_days = frappe.db.get_single_value("HR Settings", "include_holidays_in_total_working_days")
+		payroll_based_on = frappe.db.get_value("Payroll Settings", None, "payroll_based_on")
+		include_holidays_in_total_working_days = frappe.db.get_single_value("Payroll Settings", "include_holidays_in_total_working_days")
 
 		working_days = date_diff(self.end_date, self.start_date) + 1
 		if for_preview:
@@ -277,7 +277,7 @@ class SalarySlip(TransactionBase):
 		lwp = 0
 		holidays = "','".join(holidays)
 		daily_wages_fraction_for_half_day = \
-			flt(frappe.db.get_value("HR Settings", None, "daily_wages_fraction_for_half_day")) or 0.5
+			flt(frappe.db.get_value("Payroll Settings", None, "daily_wages_fraction_for_half_day")) or 0.5
 
 		for d in range(working_days):
 			dt = add_days(cstr(getdate(self.start_date)), d)
@@ -309,7 +309,7 @@ class SalarySlip(TransactionBase):
 		lwp = 0
 
 		daily_wages_fraction_for_half_day = \
-			flt(frappe.db.get_value("HR Settings", None, "daily_wages_fraction_for_half_day")) or 0.5
+			flt(frappe.db.get_value("Payroll Settings", None, "daily_wages_fraction_for_half_day")) or 0.5
 
 		lwp_leave_types = dict(frappe.get_all("Leave Type", {"is_lwp": 1}, ["name", "include_holiday"], as_list=1))
 
@@ -955,13 +955,13 @@ class SalarySlip(TransactionBase):
 
 	def email_salary_slip(self):
 		receiver = frappe.db.get_value("Employee", self.employee, "prefered_email")
-		hr_settings = frappe.get_single("HR Settings")
+		payroll_settings = frappe.get_single("Payroll Settings")
 		message = "Please see attachment"
 		password = None
-		if hr_settings.encrypt_salary_slips_in_emails:
-			password = generate_password_for_pdf(hr_settings.password_policy, self.employee)
+		if payroll_settings.encrypt_salary_slips_in_emails:
+			password = generate_password_for_pdf(payroll_settings.password_policy, self.employee)
 			message += """<br>Note: Your salary slip is password protected,
-				the password to unlock the PDF is of the format {0}. """.format(hr_settings.password_policy)
+				the password to unlock the PDF is of the format {0}. """.format(payroll_settings.password_policy)
 
 		if receiver:
 			email_args = {
