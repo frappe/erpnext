@@ -64,7 +64,6 @@ class Issue(Document):
 			if frappe.db.get_value("Issue", self.name, "agreement_fulfilled") == "Ongoing":
 				set_service_level_agreement_variance(issue=self.name)
 				self.update_agreement_status()
-			set_average_response_time(issue=self)
 			set_resolution_time(issue=self)
 			set_user_resolution_time(issue=self)
 
@@ -265,7 +264,6 @@ class Issue(Document):
 	def reset_issue_metrics(self):
 		self.db_set("resolution_time", None)
 		self.db_set("user_resolution_time", None)
-		self.db_set("avg_response_time", None)
 
 
 def get_priority(issue):
@@ -354,27 +352,6 @@ def set_service_level_agreement_variance(issue=None):
 			frappe.db.set_value(dt="Issue", dn=doc.name, field="resolution_by_variance", val=variance, update_modified=False)
 			if variance < 0:
 				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_fulfilled", val="Failed", update_modified=False)
-
-def set_average_response_time(issue):
-	# avg response time for all the responses
-	communications = frappe.get_list("Communication", filters={
-			"reference_doctype": issue.doctype,
-			"reference_name": issue.name
-		},
-		fields=["sent_or_received", "name", "creation"],
-		order_by="creation"
-	)
-
-	if len(communications):
-		response_times = []
-		for i in range(len(communications)):
-			if communications[i].sent_or_received == "Sent" and communications[i-1].sent_or_received == "Received":
-				response_time = time_diff_in_seconds(communications[i].creation, communications[i-1].creation)
-				if response_time > 0:
-					response_times.append(response_time)
-		if response_times:
-			avg_response_time = sum(response_times) / len(response_times)
-			issue.db_set("avg_response_time", avg_response_time)
 
 
 def set_resolution_time(issue):
