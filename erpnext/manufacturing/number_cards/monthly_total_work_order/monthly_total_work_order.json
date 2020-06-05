@@ -1,0 +1,18 @@
+{
+ "creation": "2020-05-30 15:31:04.414480",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Work Order",
+ "filters_json": "[\n [\n  \"Work Order\",\n  \"docstatus\",\n  \"=\",\n  1\n ],\n [\n  \"Work Order\",\n  \"creation\",\n  \"between\",\n  [\n   \"2020-04-30\",\n   \"2020-05-30\"\n  ]\n ]\n]",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Monthly Total Work Order",
+ "modified": "2020-06-04 15:59:13.403970",
+ "modified_by": "Administrator",
+ "name": "Monthly Total Work Order",
+ "owner": "Administrator",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Weekly"
+}

@@ -1,0 +1,18 @@
+{
+ "creation": "2020-05-30 15:31:04.430706",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Job Card",
+ "filters_json": "[\n [\n  \"Job Card\",\n  \"status\",\n  \"!=\",\n  \"Completed\"\n ],\n [\n  \"Job Card\",\n  \"docstatus\",\n  \"=\",\n  1\n ]\n]",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Ongoing Job Card",
+ "modified": "2020-06-04 15:59:13.336866",
+ "modified_by": "Administrator",
+ "name": "Ongoing Job Card",
+ "owner": "Administrator",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Weekly"
+}
