@@ -43,11 +43,11 @@ frappe.ui.form.on("Issue", {
 				frappe.call({
 					'method': 'frappe.client.get',
 					args: {
-						doctype: 'Support Settings',
-						name: 'Support Settings'
+						doctype: 'Service Level Agreement',
+						name: frm.doc.service_level_agreement
 					},
 					callback: function(data) {
-						let statuses = data.message.pause_sla_on_status;
+						let statuses = data.message.pause_sla_on;
 						const hold_statuses = [];
 						$.each(statuses, (_i, entry) => {
 							hold_statuses.push(entry.status);

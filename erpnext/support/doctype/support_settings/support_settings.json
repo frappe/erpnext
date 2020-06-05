@@ -10,7 +10,6 @@
   "allow_resetting_service_level_agreement",
   "issues_sb",
   "close_issue_after_days",
-  "pause_sla_on_status",
   "portal_sb",
   "get_started_sections",
   "show_latest_forum_posts",
@@ -128,20 +127,11 @@
    "fieldname": "allow_resetting_service_level_agreement",
    "fieldtype": "Check",
    "label": "Allow Resetting Service Level Agreement"
-  },
-  {
-   "depends_on": "eval:doc.track_service_level_agreement;",
-   "fieldname": "pause_sla_on_status",
-   "fieldtype": "Table",
-   "label": "Pause SLA On",
-   "options": "Pause SLA On Status",
-   "show_days": 1,
-   "show_seconds": 1
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-06-05 16:35:13.905096",
+ "modified": "2020-06-05 17:56:17.491684",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support Settings",

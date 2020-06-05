@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 import frappe
-from erpnext.setup.install import add_sla_hold_statuses_to_support_settings
 
 def execute():
 	# add holiday list and employee group fields in SLA
@@ -78,9 +77,6 @@ def execute():
 				sla.db_update()
 
 	frappe.delete_doc('DocType', 'Service Level')
-
-	# add SLA hold statuses to Support Settings
-	add_sla_hold_statuses_to_support_settings()
 
 
 def convert_to_seconds(value, unit):
