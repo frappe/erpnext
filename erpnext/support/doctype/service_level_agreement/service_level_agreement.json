@@ -23,6 +23,8 @@
   "active",
   "column_break_7",
   "end_date",
+  "section_break_18",
+  "pause_sla_on",
   "response_and_resolution_time_section",
   "priorities",
   "support_and_resolution_section_break",
@@ -160,10 +162,25 @@
    "read_only": 1,
    "show_days": 1,
    "show_seconds": 1
+  },
+  {
+   "fieldname": "section_break_18",
+   "fieldtype": "Section Break",
+   "hide_border": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "pause_sla_on",
+   "fieldtype": "Table",
+   "label": "Pause SLA On",
+   "options": "Pause SLA On Status",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "links": [],
- "modified": "2020-05-26 16:02:59.859980",
+ "modified": "2020-06-05 17:51:15.050785",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",

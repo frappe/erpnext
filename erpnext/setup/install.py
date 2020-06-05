@@ -25,7 +25,6 @@ def after_install():
 	create_default_success_action()
 	create_default_energy_point_rules()
 	add_company_to_session_defaults()
-	add_sla_hold_statuses_to_support_settings()
 	frappe.db.commit()
 
 
@@ -107,12 +106,3 @@ def add_company_to_session_defaults():
 	})
 	settings.save()
 
-def add_sla_hold_statuses_to_support_settings():
-	settings = frappe.get_single("Support Settings")
-	settings.append("pause_sla_on_status", {
-		"status": "Replied"
-	})
-	settings.append("pause_sla_on_status", {
-		"status": "Hold"
-	})
-	settings.save()
