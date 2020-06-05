@@ -18,9 +18,11 @@ class ItemAttribute(Document):
 
 	def validate(self):
 		frappe.flags.attribute_values = None
+		if not self.numeric_values:
+			self.validate_attribute_value_and_abbr()
 		self.validate_numeric()
 		self.validate_duplication()
-
+		
 	def on_update(self):
 		self.validate_exising_items()
 
@@ -61,3 +63,10 @@ class ItemAttribute(Document):
 			if d.abbr in abbrs:
 				frappe.throw(_("{0} must appear only once").format(d.abbr))
 			abbrs.append(d.abbr)
+
+	def validate_attribute_value_and_abbr(self):
+		for value in self.item_attribute_values:
+			if value.abbr.startswith(' ',0,-1) or value.attribute_value.startswith(' ',0,-1):
+				value.abbr = value.abbr.strip()
+				value.attribute_value = value.attribute_value.strip()
+
