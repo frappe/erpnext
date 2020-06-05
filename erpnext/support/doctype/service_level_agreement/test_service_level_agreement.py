@@ -9,10 +9,11 @@ from erpnext.hr.doctype.employee_group.test_employee_group import make_employee_
 from erpnext.support.doctype.issue_priority.test_issue_priority import make_priorities
 
 class TestServiceLevelAgreement(unittest.TestCase):
-
-	def test_service_level_agreement(self):
+	def setUp(self):
+		frappe.db.sql("delete from `tabService Level Agreement`")
 		frappe.db.set_value("Support Settings", None, "track_service_level_agreement", 1)
 
+	def test_service_level_agreement(self):
 		# Default Service Level Agreement
 		create_default_service_level_agreement = create_service_level_agreement(default_service_level_agreement=1,
 			holiday_list="__Test Holiday List", employee_group="_Test Employee Group",
