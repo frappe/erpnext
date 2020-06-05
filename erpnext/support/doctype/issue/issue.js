@@ -38,22 +38,35 @@ frappe.ui.form.on("Issue", {
 	},
 
 	refresh: function (frm) {
-
 		if (frm.doc.status !== "Closed" && frm.doc.agreement_fulfilled === "Ongoing") {
 			if (frm.doc.service_level_agreement) {
-				if (frm.doc.status == "Replied") {
-					frm.dashboard.clear_headline();
-					let message = {"indicator": "orange", "msg": __("Replied {0}", [frappe.datetime.comment_when(frm.doc.on_hold_since)])};
-					frm.dashboard.set_headline_alert(
-						'<div class="row">' +
-							'<div class="col-xs-12">' +
-								'<span class="indicator whitespace-nowrap '+ message.indicator +'"><span>'+ message.msg +'</span></span> ' +
-							'</div>' +
-						'</div>'
-					);
-				} else {
-					set_time_to_resolve_and_response(frm);
-				}
+				frappe.call({
+					'method': 'frappe.client.get',
+					args: {
+						doctype: 'Support Settings',
+						name: 'Support Settings'
+					},
+					callback: function(data) {
+						let statuses = data.message.pause_sla_on_status;
+						const hold_statuses = [];
+						$.each(statuses, (_i, entry) => {
+							hold_statuses.push(entry.status);
+						});
+						if (hold_statuses.includes(frm.doc.status)) {
+							frm.dashboard.clear_headline();
+							let message = {"indicator": "orange", "msg": __("SLA is on hold since {0}", [moment(frm.doc.on_hold_since).fromNow(true)])};
+							frm.dashboard.set_headline_alert(
+								'<div class="row">' +
+									'<div class="col-xs-12">' +
+										'<span class="indicator whitespace-nowrap '+ message.indicator +'"><span>'+ message.msg +'</span></span> ' +
+									'</div>' +
+								'</div>'
+							);
+						} else {
+							set_time_to_resolve_and_response(frm);
+						}
+					}
+				});
 			}
 
 			frm.add_custom_button(__("Close"), function () {
@@ -67,6 +80,7 @@ frappe.ui.form.on("Issue", {
 					frm: frm
 				});
 			}, __("Make"));
+
 		} else {
 			if (frm.doc.service_level_agreement) {
 				frm.dashboard.clear_headline();
