@@ -106,7 +106,7 @@
    "depends_on": "eval:cur_frm.doc.employee",
    "fieldname": "due_advance_amount",
    "fieldtype": "Currency",
-   "label": "Due Advance Amount",
+   "label": "Pending Amount",
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -181,7 +181,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-06 15:11:33.747535",
+ "modified": "2020-06-05 17:42:34.831424",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Advance",
