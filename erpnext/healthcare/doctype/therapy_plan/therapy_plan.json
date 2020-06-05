@@ -10,6 +10,7 @@
   "patient",
   "patient_name",
   "column_break_4",
+  "company",
   "status",
   "start_date",
   "section_break_3",
@@ -98,10 +99,17 @@
    "label": "Status",
    "options": "Not Started\nIn Progress\nCompleted\nCancelled",
    "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "links": [],
- "modified": "2020-04-21 13:13:43.956014",
+ "modified": "2020-05-25 14:38:53.649315",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Plan",

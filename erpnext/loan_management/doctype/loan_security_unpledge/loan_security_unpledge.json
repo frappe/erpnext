@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "LSU-.{applicant}.-.#####",
  "creation": "2019-09-21 13:23:16.117028",
  "doctype": "DocType",
@@ -15,7 +16,6 @@
   "status",
   "loan_security_details_section",
   "securities",
-  "unpledge_type",
   "amended_from"
  ],
  "fields": [
@@ -47,6 +47,7 @@
   {
    "allow_on_submit": 1,
    "default": "Requested",
+   "depends_on": "eval:doc.docstatus == 1",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
@@ -81,13 +82,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "unpledge_type",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Unpledge Type",
-   "read_only": 1
-  },
-  {
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -104,7 +98,8 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-10-28 07:41:47.084882",
+ "links": [],
+ "modified": "2020-05-05 07:23:18.440058",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Unpledge",

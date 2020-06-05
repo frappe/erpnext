@@ -47,6 +47,16 @@ erpnext.financial_statements = {
 		// dropdown for links to other financial statements
 		erpnext.financial_statements.filters = get_filters()
 
+		let fiscal_year = frappe.defaults.get_user_default("fiscal_year")
+
+		frappe.model.with_doc("Fiscal Year", fiscal_year, function(r) {
+			var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
+			frappe.query_report.set_filter_value({
+				period_start_date: fy.year_start_date,
+				period_end_date: fy.year_end_date
+			});
+		});
+
 		report.page.add_inner_button(__("Balance Sheet"), function() {
 			var filters = report.get_values();
 			frappe.set_route('query-report', 'Balance Sheet', {company: filters.company});
@@ -62,7 +72,7 @@ erpnext.financial_statements = {
 	}
 };
 
-function get_filters(){
+function get_filters() {
 	let filters = [
 		{
 			"fieldname":"company",
@@ -99,7 +109,6 @@ function get_filters(){
 			"fieldname":"period_start_date",
 			"label": __("Start Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.nowdate(),
 			"hidden": 1,
 			"reqd": 1
 		},
@@ -107,7 +116,6 @@ function get_filters(){
 			"fieldname":"period_end_date",
 			"label": __("End Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.add_months(frappe.datetime.nowdate(), 12),
 			"hidden": 1,
 			"reqd": 1
 		},
@@ -161,15 +169,6 @@ function get_filters(){
 			}
 		}
 	]
-
-	erpnext.dimension_filters.forEach((dimension) => {
-		filters.push({
-			"fieldname": dimension["fieldname"],
-			"label": __(dimension["label"]),
-			"fieldtype": "Link",
-			"options": dimension["document_type"]
-		});
-	});
 
 	return filters;
 }
