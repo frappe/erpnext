@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from erpnext.support.doctype.service_level_agreement.test_service_level_agreement import create_service_level_agreements_for_issues
+from erpnext.setup.install import add_sla_hold_statuses_to_support_settings
 from frappe.utils import now_datetime, get_datetime
 import datetime
 from datetime import timedelta
@@ -100,6 +101,7 @@ class TestIssue(unittest.TestCase):
 		self.assertEqual(issue.user_resolution_time, 1200)
 
 	def test_hold_time_on_replied(self):
+		add_sla_hold_statuses_to_support_settings()
 		creation = datetime.datetime(2020, 3, 4, 4, 0)
 
 		issue = make_issue(creation, index=1)
