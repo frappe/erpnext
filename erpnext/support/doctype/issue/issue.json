@@ -403,6 +403,7 @@
   {
    "fieldname": "on_hold_since",
    "fieldtype": "Datetime",
+   "hidden": 1,
    "label": "On Hold Since",
    "read_only": 1,
    "show_days": 1,
@@ -420,7 +421,7 @@
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2020-06-04 15:53:38.322514",
+ "modified": "2020-06-05 15:45:24.474425",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",

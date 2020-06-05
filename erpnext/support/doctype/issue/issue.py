@@ -78,40 +78,44 @@ class Issue(Document):
 		self.handle_hold_time(status)
 
 	def handle_hold_time(self, status):
-		# set response and resolution variance as None as the issue is on Hold for status as Replied
-		if self.status == "Replied" and status != "Replied":
-			self.on_hold_since = frappe.flags.current_time or now_datetime()
-			if not self.first_responded_on:
-				self.response_by = None
-				self.response_by_variance = None
-			self.resolution_by = None
-			self.resolution_by_variance = None
+		if frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
+			# set response and resolution variance as None as the issue is on Hold for status as Replied
+			pause_sla_on = frappe.db.get_all("Pause SLA On Status", fields=["status"])
+			hold_statuses = [entry.status for entry in pause_sla_on]
 
-		# calculate hold time when status is changed from Replied to any other status
-		if self.status != "Replied" and status == "Replied":
-			hold_time = self.total_hold_time if self.total_hold_time else 0
-			now_time = frappe.flags.current_time or now_datetime()
-			self.total_hold_time = hold_time + time_diff_in_seconds(now_time, self.on_hold_since)
+			if self.status in hold_statuses and status not in hold_statuses:
+				self.on_hold_since = frappe.flags.current_time or now_datetime()
+				if not self.first_responded_on:
+					self.response_by = None
+					self.response_by_variance = None
+				self.resolution_by = None
+				self.resolution_by_variance = None
 
-		# re-calculate SLA variables after issue changes from Replied to Open
-		# add hold time to SLA variables
-		if self.status == "Open" and status == "Replied":
-			start_date_time = get_datetime(self.service_level_agreement_creation)
-			priority = get_priority(self)
-			now_time = frappe.flags.current_time or now_datetime()
-			hold_time = time_diff_in_seconds(now_time, self.on_hold_since)
+			# calculate hold time when status is changed from Replied to any other status
+			if self.status not in hold_statuses and status in hold_statuses:
+				hold_time = self.total_hold_time if self.total_hold_time else 0
+				now_time = frappe.flags.current_time or now_datetime()
+				self.total_hold_time = hold_time + time_diff_in_seconds(now_time, self.on_hold_since)
 
-			if not self.first_responded_on:
-				response_by = get_expected_time_for(parameter="response", service_level=priority, start_date_time=start_date_time)
-				self.response_by = add_to_date(response_by, seconds=round(hold_time))
-				response_by_variance = round(time_diff_in_hours(self.response_by, now_time))
-				self.response_by_variance = response_by_variance + (hold_time // 3600)
+			# re-calculate SLA variables after issue changes from Replied to Open
+			# add hold time to SLA variables
+			if self.status == "Open" and status in hold_statuses:
+				start_date_time = get_datetime(self.service_level_agreement_creation)
+				priority = get_priority(self)
+				now_time = frappe.flags.current_time or now_datetime()
+				hold_time = time_diff_in_seconds(now_time, self.on_hold_since)
 
-			resolution_by = get_expected_time_for(parameter="resolution", service_level=priority, start_date_time=start_date_time)
-			self.resolution_by = add_to_date(resolution_by, seconds=round(hold_time))
-			resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_time))
-			self.resolution_by_variance = resolution_by_variance + (hold_time // 3600)
-			self.on_hold_since = None
+				if not self.first_responded_on:
+					response_by = get_expected_time_for(parameter="response", service_level=priority, start_date_time=start_date_time)
+					self.response_by = add_to_date(response_by, seconds=round(hold_time))
+					response_by_variance = round(time_diff_in_hours(self.response_by, now_time))
+					self.response_by_variance = response_by_variance + (hold_time // 3600)
+
+				resolution_by = get_expected_time_for(parameter="resolution", service_level=priority, start_date_time=start_date_time)
+				self.resolution_by = add_to_date(resolution_by, seconds=round(hold_time))
+				resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_time))
+				self.resolution_by_variance = resolution_by_variance + (hold_time // 3600)
+				self.on_hold_since = None
 
 	def update_agreement_status(self):
 		if self.service_level_agreement and self.agreement_fulfilled == "Ongoing":
