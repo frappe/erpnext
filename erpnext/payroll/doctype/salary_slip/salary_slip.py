@@ -136,6 +136,8 @@ class SalarySlip(TransactionBase):
 				self.salary_slip_based_on_timesheet = self._salary_structure_doc.salary_slip_based_on_timesheet or 0
 				self.set_time_sheet()
 				self.pull_sal_struct()
+				consider_unmarked_attendance_as = frappe.db.get_value("Payroll Settings", None, "consider_unmarked_attendance_as") or "Present"
+				return consider_unmarked_attendance_as
 
 	def set_time_sheet(self):
 		if self.salary_slip_based_on_timesheet:
@@ -208,7 +210,8 @@ class SalarySlip(TransactionBase):
 			frappe.throw(_("Please set Payroll based on in HR settings"))
 
 		if payroll_based_on == "Attendance":
-			actual_lwp = self.calculate_lwp_based_on_attendance(holidays)
+			actual_lwp, absent = self.calculate_lwp_and_absent_days_based_on_attendance(holidays)
+			self.absent_days = absent
 		else:
 			actual_lwp = self.calculate_lwp_based_on_leave_application(holidays, working_days)
 
@@ -225,9 +228,33 @@ class SalarySlip(TransactionBase):
 			relieving_date, include_holidays_in_total_working_days)
 
 		if flt(payment_days) > flt(lwp):
-			self.payment_days = flt(payment_days) - flt(lwp)
+			self.payment_days = flt(payment_days) - flt(lwp) - flt(absent)
+
+			unmarked_days = self.get_unmarked_days()
+			consider_unmarked_attendance_as = frappe.db.get_value("Payroll Settings", None, "consider_unmarked_attendance_as") or "Present"
+
+			if payroll_based_on == "Attendance" and consider_unmarked_attendance_as =="Absent":
+				self.absent_days += unmarked_days #will be treated as absent
+				self.payment_days -= unmarked_days
+				if include_holidays_in_total_working_days:
+					self.absent_days -= len(holidays)
+					for holiday in holidays:
+						if not frappe.db.exists("Attendance", {"employee": self.employee, "attendance_date": holiday, "docstatus": 1 }):
+							self.payment_days += 1
+
+
 		else:
 			self.payment_days = 0
+
+	def get_unmarked_days(self):
+		marked_days = frappe.get_all("Attendance", filters = {
+					"attendance_date": ["between", ['2020-05-1',"2020-05-30"]],
+					"employee": 'HR-EMP-00003',
+					"docstatus": 1
+				}, fields = ["COUNT(*) as marked_days"])[0].marked_days
+
+		return self.total_working_days - marked_days
+
 
 	def get_payment_days(self, joining_date, relieving_date, include_holidays_in_total_working_days):
 		if not joining_date:
@@ -270,6 +297,7 @@ class SalarySlip(TransactionBase):
 				})
 
 		holidays = [cstr(i) for i in holidays]
+		print(holidays, "Col")
 
 		return holidays
 
@@ -305,8 +333,9 @@ class SalarySlip(TransactionBase):
 
 		return lwp
 
-	def calculate_lwp_based_on_attendance(self, holidays):
+	def calculate_lwp_and_absent_days_based_on_attendance(self, holidays):
 		lwp = 0
+		absent = 0
 
 		daily_wages_fraction_for_half_day = \
 			flt(frappe.db.get_value("Payroll Settings", None, "daily_wages_fraction_for_half_day")) or 0.5
@@ -332,9 +361,14 @@ class SalarySlip(TransactionBase):
 					(d.leave_type and d.leave_type in lwp_leave_types and not lwp_leave_types[d.leave_type]):
 						continue
 
-			lwp += (1 - daily_wages_fraction_for_half_day) if d.status == "Half Day" else 1
+			if d.status == "Half Day":
+				lwp += (1 - daily_wages_fraction_for_half_day)
+			elif d.status == "Leave" and d.leave_type not in lwp_leave_types:
+				lwp += 1
+			elif d.status == "Absent":
+				absent += 1
 
-		return lwp
+		return lwp, absent
 
 	def add_earning_for_hourly_wages(self, doc, salary_component, amount):
 		row_exists = False

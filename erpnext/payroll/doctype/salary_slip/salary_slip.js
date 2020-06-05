@@ -123,6 +123,9 @@ frappe.ui.form.on("Salary Slip", {
 			doc: frm.doc,
 			callback: function(r, rt) {
 				frm.refresh();
+				if (frm.doc.absent_days){
+					cur_frm.fields_dict.absent_days.set_description("Unmarked Days is treated as "+ r.message +". You can can change this in " + frappe.utils.get_form_link("Payroll Settings", "Payroll Settings", true));
+				}
 			}
 		});
 	}
