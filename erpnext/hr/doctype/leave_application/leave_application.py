@@ -33,6 +33,7 @@ class LeaveApplication(Document):
 		self.validate_block_days()
 		self.validate_salary_processed_days()
 		self.validate_attendance()
+		self.set_half_day_date()
 		if frappe.db.get_value("Leave Type", self.leave_type, 'is_optional_leave'):
 			self.validate_optional_leave()
 		self.validate_applicable_after()
@@ -289,6 +290,10 @@ class LeaveApplication(Document):
 			if not frappe.db.exists({"doctype": "Holiday", "parent": optional_holiday_list, "holiday_date": day}):
 				frappe.throw(_("{0} is not in Optional Holiday List").format(formatdate(day)), NotAnOptionalHoliday)
 			day = add_days(day, 1)
+
+	def set_half_day_date(self):
+		if self.from_date == self.to_date and self.half_day == 1:
+			self.half_day_date = self.from_date
 
 	def notify_employee(self):
 		employee = frappe.get_doc("Employee", self.employee)
@@ -596,7 +601,7 @@ def get_leave_entries(employee, leave_type, from_date, to_date):
 			is_carry_forward, is_expired
 		FROM `tabLeave Ledger Entry`
 		WHERE employee=%(employee)s AND leave_type=%(leave_type)s
-			AND docstatus=1 
+			AND docstatus=1
 			AND (leaves<0
 				OR is_expired=1)
 			AND (from_date between %(from_date)s AND %(to_date)s
