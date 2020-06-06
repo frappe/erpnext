@@ -29,7 +29,7 @@ class WebPageSection(Document):
 			if item.content_doctype == 'Blog Post':
 				item.__dict__['title']        = item_doc.title
 				item.__dict__['subtitle']     = item_doc.blog_category
-				item.__dict__['image']        = item_doc.meta_image
+				item.__dict__['image']        = None
 				item.__dict__['content']      = item_doc.blog_intro
 				item.__dict__['route']        = item_doc.route
 				item.__dict__['route_follow'] = 1
