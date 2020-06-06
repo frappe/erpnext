@@ -59,7 +59,7 @@ def get_data(filters, leave_types):
 
 	data = []
 	for employee in active_employees:
-		leave_approvers = department_approver_map.get(employee.department_name, [])
+		leave_approvers = department_approver_map.get(employee.department, [])
 		if employee.leave_approver:
 			leave_approvers.append(employee.leave_approver)
 
