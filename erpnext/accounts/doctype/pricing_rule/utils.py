@@ -12,6 +12,7 @@ from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.get_item_details import get_conversion_factor
 
+import pdb
 class MultiplePricingRuleConflict(frappe.ValidationError): pass
 
 apply_on_table = {
@@ -78,7 +79,7 @@ def _get_pricing_rules(apply_on, args, values):
 	conditions += " and ifnull(`tabPricing Rule`.for_price_list, '') in (%(price_list)s, '')"
 	values["price_list"] = args.get("price_list")
 
-	pricing_rules = frappe.db.sql("""select `tabPricing Rule`.*,
+	sql = ("""select `tabPricing Rule`.*,
 			{child_doc}.{apply_on_field}, {child_doc}.uom
 		from `tabPricing Rule`, {child_doc}
 		where ({item_conditions} or (`tabPricing Rule`.apply_rule_on_other is not null
@@ -87,15 +88,10 @@ def _get_pricing_rules(apply_on, args, values):
 			and `tabPricing Rule`.disable = 0 and
 			`tabPricing Rule`.{transaction_type} = 1 {warehouse_cond} {conditions}
 		order by `tabPricing Rule`.priority desc,
-			`tabPricing Rule`.name desc""".format(
-			child_doc = child_doc,
-			apply_on_field = apply_on_field,
-			item_conditions = item_conditions,
-			item_variant_condition = item_variant_condition,
-			transaction_type = args.transaction_type,
-			warehouse_cond = warehouse_conditions,
-			apply_on_other_field = "other_{0}".format(apply_on_field),
-			conditions = conditions), values, as_dict=1) or []
+			`tabPricing Rule`.name desc""".format(child_doc = child_doc,apply_on_field = apply_on_field,item_conditions = item_conditions,item_variant_condition = item_variant_condition,transaction_type = args.transaction_type,warehouse_cond = warehouse_conditions,apply_on_other_field = "other_{0}".format(apply_on_field),conditions = conditions))
+	# frappe.errprint(sql)
+	pricing_rules = frappe.db.sql(sql, values, as_dict=1) or []
+	# pdb.set_trace()
 
 	return pricing_rules
 
@@ -178,7 +174,8 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 
 		if pricing_rules[0].mixed_conditions and doc:
 			stock_qty, amount, items = get_qty_and_rate_for_mixed_conditions(doc, pr_doc, args)
-			pricing_rules[0].apply_rule_on_other_items = items
+			for pricing_rule_args in pricing_rules:
+				pricing_rule_args.apply_rule_on_other_items = items
 
 		elif pricing_rules[0].is_cumulative:
 			items = [args.get(frappe.scrub(pr_doc.get('apply_on')))]
@@ -329,9 +326,9 @@ def get_qty_and_rate_for_mixed_conditions(doc, pr_doc, args):
 			if pr_doc.mixed_conditions:
 				amt = args.get('qty') * args.get("price_list_rate")
 				if args.get("item_code") != row.get("item_code"):
-					amt = row.get('qty') * row.get("price_list_rate")
+					amt = row.get('qty') * (row.get("price_list_rate") or args.get("rate"))
 
-				sum_qty += row.get("stock_qty") or args.get("stock_qty")
+				sum_qty += row.get("stock_qty") or args.get("stock_qty") or args.get("qty")
 				sum_amt += amt
 
 		if pr_doc.is_cumulative:
@@ -443,9 +440,10 @@ def get_applied_pricing_rules(item_row):
 	return (item_row.get("pricing_rules").split(',')
 		if item_row.get("pricing_rules") else [])
 
-def get_product_discount_rule(pricing_rule, item_details, doc=None):
-	free_item = (pricing_rule.free_item
-		if not pricing_rule.same_item or pricing_rule.apply_on == 'Transaction' else item_details.item_code)
+def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
+	free_item = pricing_rule.free_item
+	if pricing_rule.same_item:
+		free_item = item_details.item_code or args.item_code
 
 	if not free_item:
 		frappe.throw(_("Free item not set in the pricing rule {0}")
@@ -453,7 +451,7 @@ def get_product_discount_rule(pricing_rule, item_details, doc=None):
 
 	item_details.free_item_data = {
 		'item_code': free_item,
-		'qty': pricing_rule.free_qty or 1,
+		'qty': args.qty//(pricing_rule.min_qty/pricing_rule.free_qty) or 1,
 		'rate': pricing_rule.free_item_rate or 0,
 		'price_list_rate': pricing_rule.free_item_rate or 0,
 		'is_free_item': 1
@@ -461,8 +459,11 @@ def get_product_discount_rule(pricing_rule, item_details, doc=None):
 
 	item_data = frappe.get_cached_value('Item', free_item, ['item_name',
 		'description', 'stock_uom'], as_dict=1)
+	income_account = frappe.get_all('Item Default', filters=[['parent', '=', free_item]], fields=['income_account'])
 
 	item_details.free_item_data.update(item_data)
+	if income_account:
+		item_details.free_item_data.update(income_account[0])
 	item_details.free_item_data['uom'] = pricing_rule.free_item_uom or item_data.stock_uom
 	item_details.free_item_data['conversion_factor'] = get_conversion_factor(free_item, 
 		item_details.free_item_data['uom']).get("conversion_factor", 1)
