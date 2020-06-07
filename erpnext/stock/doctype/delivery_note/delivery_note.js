@@ -101,17 +101,6 @@ frappe.ui.form.on("Delivery Note", {
 				})
 			}, __('Create'));
 		}
-	},
-
-	to_warehouse: function(frm) {
-		if(frm.doc.to_warehouse) {
-			["items", "packed_items"].forEach(doctype => {
-				frm.doc[doctype].forEach(d => {
-					frappe.model.set_value(d.doctype, d.name,
-						"target_warehouse", frm.doc.to_warehouse);
-				});
-			});
-		}
 	}
 });
 
@@ -188,7 +177,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			}
 		}
 
-		if (doc.docstatus==1) {
+		if (doc.docstatus > 0) {
 			this.show_stock_ledger();
 			if (erpnext.is_perpetual_inventory_enabled(doc.company)) {
 				this.show_general_ledger();
@@ -287,6 +276,14 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				frappe.ui.form.is_saving = false;
 			}
 		})
+	},
+
+	to_warehouse: function() {
+		let packed_items_table = this.frm.doc["packed_items"];
+		this.autofill_warehouse(this.frm.doc["items"], "target_warehouse", this.frm.doc.to_warehouse);
+		if (packed_items_table && packed_items_table.length) {
+			this.autofill_warehouse(packed_items_table, "target_warehouse", this.frm.doc.to_warehouse);
+		}
 	}
 
 });

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-02-22 01:27:39",
  "doctype": "DocType",
@@ -271,7 +272,8 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-01-13 12:41:33.968025",
+ "links": [],
+ "modified": "2020-04-25 01:47:49.060128",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
