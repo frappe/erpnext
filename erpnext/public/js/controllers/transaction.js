@@ -1476,7 +1476,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	apply_product_discount: function(free_item_data) {
 		const items = this.frm.doc.items.filter(d => (d.item_code == free_item_data.item_code
 			&& d.is_free_item)) || [];
-		debugger
+		// debugger
 		if (!items.length) {
 			let row_to_modify = frappe.model.add_child(this.frm.doc,
 				this.frm.doc.doctype + ' Item', 'items');
