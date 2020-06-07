@@ -34,6 +34,15 @@ frappe.ui.form.on("Sales Order", {
 				}
 			};
 		})
+
+		frm.set_query("bom_no", "items", function(doc, cdt, cdn) {
+			var row = locals[cdt][cdn];
+			return {
+				filters: {
+					"item": row.item_code
+				}
+			}
+		});
 	},
 	refresh: function(frm) {
 		if(frm.doc.docstatus === 1 && frm.doc.status !== 'Closed'
@@ -61,15 +70,6 @@ frappe.ui.form.on("Sales Order", {
 				query: "erpnext.controllers.queries.get_project_name",
 				filters: {
 					'customer': doc.customer
-				}
-			}
-		});
-
-		frm.set_query("blanket_order", "items", function() {
-			return {
-				filters: {
-					"company": frm.doc.company,
-					"docstatus": 1
 				}
 			}
 		});
@@ -148,7 +148,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					}
 
 					this.frm.add_custom_button(__('Pick List'), () => this.create_pick_list(), __('Create'));
-					
+
 					const order_is_a_sale = ["Sales", "Shopping Cart"].indexOf(doc.order_type) !== -1;
 					const order_is_maintenance = ["Maintenance"].indexOf(doc.order_type) !== -1;
 					// order type has been customised then show all the action buttons

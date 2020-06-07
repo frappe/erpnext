@@ -33,7 +33,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 		self.get_party_total(args)
 
 		party_advance_amount = get_partywise_advanced_payment_amount(self.party_type,
-			self.filters.report_date) or {}
+			self.filters.report_date, self.filters.company) or {}
 
 		for party, party_dict in iteritems(self.party_total):
 			if party_dict.outstanding == 0:

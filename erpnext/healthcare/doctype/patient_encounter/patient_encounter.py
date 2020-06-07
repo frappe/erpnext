@@ -10,6 +10,9 @@ from frappe.utils import cstr
 from frappe import _
 
 class PatientEncounter(Document):
+	def validate(self):
+		self.set_title()
+
 	def on_update(self):
 		if self.appointment:
 			frappe.db.set_value('Patient Appointment', self.appointment, 'status', 'Closed')
@@ -18,6 +21,9 @@ class PatientEncounter(Document):
 	def after_insert(self):
 		insert_encounter_to_medical_record(self)
 
+	def on_submit(self):
+		update_encounter_medical_record(self)
+
 	def on_cancel(self):
 		if self.appointment:
 			frappe.db.set_value('Patient Appointment', self.appointment, 'status', 'Open')
@@ -25,6 +31,10 @@ class PatientEncounter(Document):
 
 	def on_submit(self):
 		create_therapy_plan(self)
+
+	def set_title(self):
+		self.title = _('{0} with {1}').format(self.patient_name or self.patient,
+			self.practitioner_name or self.practitioner)[:100]
 
 def create_therapy_plan(encounter):
 	if len(encounter.therapies):
@@ -66,22 +76,26 @@ def delete_medical_record(encounter):
 	frappe.db.delete_doc_if_exists('Patient Medical Record', 'reference_name', encounter.name)
 
 def set_subject_field(encounter):
-	subject = encounter.practitioner + '\n'
+	subject = frappe.bold(_('Healthcare Practitioner: ')) + encounter.practitioner + '<br>'
 	if encounter.symptoms:
-		subject += _('Symptoms: ') + cstr(encounter.symptoms) + '\n'
+		subject += frappe.bold(_('Symptoms: ')) + '<br>'
+		for entry in encounter.symptoms:
+			subject += cstr(entry.complaint) + '<br>'
 	else:
-		subject +=  _('No Symptoms') + '\n'
+		subject += frappe.bold(_('No Symptoms')) + '<br>'
 
 	if encounter.diagnosis:
-		subject += _('Diagnosis: ') + cstr(encounter.diagnosis) + '\n'
+		subject += frappe.bold(_('Diagnosis: ')) + '<br>'
+		for entry in encounter.diagnosis:
+			subject += cstr(entry.diagnosis) + '<br>'
 	else:
-		subject += _('No Diagnosis') + '\n'
+		subject += frappe.bold(_('No Diagnosis')) + '<br>'
 
 	if encounter.drug_prescription:
-		subject += '\n' + _('Drug(s) Prescribed.')
+		subject += '<br>' + _('Drug(s) Prescribed.')
 	if encounter.lab_test_prescription:
-		subject += '\n' + _('Test(s) Prescribed.')
+		subject += '<br>' + _('Test(s) Prescribed.')
 	if encounter.procedure_prescription:
-		subject += '\n' + _('Procedure(s) Prescribed.')
+		subject += '<br>' + _('Procedure(s) Prescribed.')
 
 	return subject
