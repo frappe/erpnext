@@ -1,5 +1,4 @@
 {
- "actions": [],
  "beta": 1,
  "creation": "2016-04-22 05:27:52.109319",
  "doctype": "DocType",
@@ -9,10 +8,10 @@
   "company",
   "title",
   "description",
+  "hero_image",
   "section_break_4",
   "hero_section_based_on",
   "tag_line",
-  "hero_image",
   "slideshow",
   "hero_section",
   "section_break_5",
@@ -28,13 +27,13 @@
    "reqd": 1
   },
   {
-   "description": "The title of the homepage also shown on search engine results.",
+   "description": "The title of the homepage, also shown in search engine results.",
    "fieldname": "title",
    "fieldtype": "Data",
    "label": "Title"
   },
   {
-   "description": "The homepage description also shown on search engine results.",
+   "description": "The homepage description, also shown in search engine results.",
    "fieldname": "description",
    "fieldtype": "Text",
    "in_list_view": 1,
@@ -63,10 +62,10 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.hero_section_based_on === 'Default'",
+   "description": "The homepage hero image, also shown in social media cards. Recommended size: 1200px by 630px.",
    "fieldname": "hero_image",
    "fieldtype": "Attach Image",
-   "label": "Hero Image"
+   "label": "Image"
   },
   {
    "depends_on": "eval:doc.hero_section_based_on === 'Slideshow'",
@@ -96,8 +95,7 @@
   }
  ],
  "issingle": 1,
- "links": [],
- "modified": "2020-06-02 06:43:08.402936",
+ "modified": "2020-06-08 05:22:36.919133",
  "modified_by": "Administrator",
  "module": "Portal",
  "name": "Homepage",
