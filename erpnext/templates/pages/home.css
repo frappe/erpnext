@@ -5,5 +5,18 @@
 	background-size: cover;
 	padding: 10rem 0;
 }
+
+section.hero-image > .caption,
+.carousel-caption {
+	color: white;
+	background: #0007;
+	border-radius: 0.25rem;
+}
+
+.carousel-caption {
+        padding: 10px;
+        left: 33%;
+        right: 33%;
+}
 {% endif %}
 /* csslint ignore:end */

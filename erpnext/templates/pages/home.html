@@ -7,14 +7,14 @@
 <!-- Hero -->
 	{% if homepage.hero_section_based_on == 'Default' %}
 	<section class="hero-section border-bottom{% if homepage.hero_image %} hero-image{% endif %}">
-		<div class="container py-5">
+		<div class="container caption py-4">
 			<h1 class="d-none d-sm-block display-4">{{ homepage.tag_line }}</h1>
 			<h1 class="d-block d-sm-none">{{ homepage.tag_line }}</h1>
 			<h2 class="d-none d-sm-block">{{ homepage.description }}</h2>
 			<h3 class="d-block d-sm-none">{{ homepage.description }}</h3>
 		</div>
 
-		<div class="container">
+		<div class="container py-4">
 			<a href="{{ explore_link }}" class="mb-5 btn btn-primary">{{ _('Explore') }}</a>
 		</div>
 	</section>
