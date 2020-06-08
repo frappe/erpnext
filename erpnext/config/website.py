@@ -9,16 +9,25 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Homepage",
-					"description": _("Settings for website homepage"),
+					"label": _("Homepage"),
+					"description": _("Settings for the website homepage"),
 				},
 				{
 					"type": "doctype",
-					"name": "Homepage Section",
-					"description": _("Add cards or custom sections on homepage"),
+					"name": "Web Page Section",
+					"label": _("Web Page Section"),
+					"description": _("Add custom sections with cards on the homepage"),
+				},
+				{
+					"type": "doctype",
+					"name": "Web Page Card",
+					"label": _("Web Page Card"),
+					"description": _("Create and edit homepage cards"),
 				},
 				{
 					"type": "doctype",
 					"name": "Products Settings",
+					"label": _("Products Settings"),
 					"description": _("Settings for website product listing"),
 				},
 				{
