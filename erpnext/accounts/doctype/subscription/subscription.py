@@ -419,7 +419,7 @@ class Subscription(Document):
 		but it will not affect already created invoices.
 		"""
 		if self.status != 'Cancelled':
-			to_generate_invoice = True if self.status == 'Active' else False
+			to_generate_invoice = True if self.status == 'Active' and not self.generate_invoice_at_period_start else False
 			to_prorate = frappe.db.get_single_value('Subscription Settings', 'prorate')
 			self.status = 'Cancelled'
 			self.cancelation_date = nowdate()
