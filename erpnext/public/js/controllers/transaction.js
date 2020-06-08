@@ -917,7 +917,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	shipping_rule: function() {
 		var me = this;
-		if(this.frm.doc.shipping_rule && this.frm.doc.shipping_address) {
+		if(this.frm.doc.shipping_rule) {
 			return this.frm.call({
 				doc: this.frm.doc,
 				method: "apply_shipping_rule",
