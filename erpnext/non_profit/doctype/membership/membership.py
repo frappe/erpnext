@@ -64,9 +64,21 @@ def get_member_based_on_subscription(subscription_id, email):
 				}, order_by="creation desc")
 	return frappe.get_doc("Member", members[0]['name'])
 
+def verify_signature(data):
+	signature = frappe.request.headers.get('X-Razorpay-Signature')
+
+	settings = frappe.get_doc("Membership Settings")
+	key = settings.get_webhook_secret()
+
+	controller = frappe.get_doc("Razorpay Settings")
+
+	controller.verify_signature(data, signature, key)
+
+
 @frappe.whitelist(allow_guest=True)
 def trigger_razorpay_subscription(*args, **kwargs):
 	data = frappe.request.get_data()
+	verify_signature(data)
 
 	if isinstance(data, six.string_types):
 		data = json.loads(data)
@@ -111,7 +123,6 @@ def trigger_razorpay_subscription(*args, **kwargs):
 	member.save(ignore_permissions=True)
 
 	return True
-
 
 
 def notify_failure(log):
