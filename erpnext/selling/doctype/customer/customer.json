@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -14,6 +13,7 @@
   "naming_series",
   "salutation",
   "customer_name",
+  "customer_default",
   "gender",
   "customer_type",
   "default_bank_account",
@@ -473,13 +473,18 @@
    "fieldtype": "Data",
    "label": "RTN",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "customer_default",
+   "fieldtype": "Check",
+   "label": "Default"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "links": [],
- "modified": "2020-03-18 19:17:34.932576",
+ "modified": "2020-06-08 11:56:15.059321",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
