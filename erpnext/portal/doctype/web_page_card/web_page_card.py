@@ -6,4 +6,6 @@ from __future__ import unicode_literals
 from frappe.model.document import Document
 
 class WebPageCard(Document):
-	pass
+	@property
+	def route_external(self):
+		return (self.route or '').strip().startswith('http')

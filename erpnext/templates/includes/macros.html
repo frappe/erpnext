@@ -60,9 +60,9 @@
 		{% endif %}
 
 			{% if item.render_as == 'Vertical Card' %}
-			{{ render_vcard(item.title, item.subtitle, item.image, item.content, item.route, item.route_text, item.route_follow) }}
+			{{ render_vcard(item.title, item.subtitle, item.image, item.content, item.route, item.route_text, item.route_rel) }}
 			{% elif item.render_as == 'Horizontal Card' %}
-			{{ render_hcard(item.title, item.subtitle, item.image, item.content, item.route, item.route_text, item.route_follow) }}
+			{{ render_hcard(item.title, item.subtitle, item.image, item.content, item.route, item.route_text, item.route_rel) }}
 			{% endif %}
 
 		{% if section.section_based_on == 'Grid' %}
@@ -81,11 +81,11 @@
 
 
 
-{% macro render_vcard(title, subtitle, image, content, route, route_text, route_follow) %}
+{% macro render_vcard(title, subtitle, image, content, route, route_text, route_rel) %}
 <div class="card">
 {% if image %}
 {% if route %}
-	<a class="no-underline" href="{{ route }}"{% if not route_follow %} rel="nofollow"{% endif %}>
+	<a class="no-underline" href="{{ route }}"{% if route_rel %} rel="{{ route_rel }}"{% endif %}{% if 'external' in route_rel %} target="_blank"{% endif %}>
 {% endif %}
 	<div class="website-image-lazy" data-class="card-img-top" data-src="{{ image }}" data-alt="{{ title }}"></div>
 {% if route %}
@@ -95,10 +95,10 @@
 	<div class="card-body">
 		<h3 class="card-title">
 		{% if route %}
-			<a class="text-dark" href="{{ route }}"{% if not route_follow %} rel="nofollow"{% endif %}>
-		{% endif %}
+			<a class="text-dark" href="{{ route }}"{% if route_rel %} rel="{{ route_rel }}"{% endif %}{% if 'external' in route_rel %} target="_blank"{% endif %}>
+		{%- endif -%}
 			{{ title }}
-		{% if route %}
+		{%- if route -%}
 			</a>
 		{% endif %}
 		</h3>
@@ -107,22 +107,22 @@
 	{% endif %}
 		<p class="card-text">{{ content or '' | truncate(140, True) }}</p>
 	{% if route %}
-		<a href="{{ route }}" class="card-link" {% if not route_follow %}rel="nofollow"{% endif %}>
-			{{ route_text or _('More details') }}</a>
+		<a class="card-link" href="{{ route }}"{% if route_rel %} rel="{{ route_rel }}"{% endif %}{% if 'external' in route_rel %} target="_blank"{% endif %}>
+			{{- route_text or _('More details') }}</a>
 	{% endif %}
 	</div>
 </div>
 {% endmacro %}
 
-{% macro render_hcard(title, subtitle, image, content, route, route_text, route_follow, image_right=false) %}
+{% macro render_hcard(title, subtitle, image, content, route, route_text, route_rel, image_right=false) %}
 <div class="card">
 	<div class="row no-gutters">
 		<div class="col-md-3{% if image_right %} order-md-12{% endif %}">
 		{% if image %}
 		{% if route %}
-			<a class="no-underline" href="{{ route }}"{% if not route_follow %} rel="nofollow"{% endif %}>
+			<a class="no-underline" href="{{ route }}"{% if route_rel %} rel="{{ route_rel }}"{% endif %}{% if 'external' in route_rel %} target="_blank"{% endif %}>
 		{% endif %}
-			<div class="website-image-lazy" data-class="card-img" data-src="{{ image }}" data-alt="{{ title }}"></div>
+			<div class="website-image-lazy" data-class="card-img p-2" data-src="{{ image }}" data-alt="{{ title }}"></div>
 		{% if route %}
 			</a>
 		{% endif %}
@@ -132,10 +132,10 @@
 			<div class="card-body">
 				<h3 class="card-title">
 				{% if route %}
-					<a class="text-dark" href="{{ route }}"{% if not route_follow %} rel="nofollow"{% endif %}>
-				{% endif %}
+					<a class="text-dark" href="{{ route }}"{% if route_rel %} rel="{{ route_rel }}"{% endif %}{% if 'external' in route_rel %} target="_blank"{% endif %}>
+				{%- endif -%}
 					{{ title }}
-				{% if route %}
+				{%- if route -%}
 					</a>
 				{% endif %}
 				</h3>
@@ -144,8 +144,8 @@
 			{% endif %}
 				<p class="card-text">{{ content or '' | truncate(140, True) }}</p>
 			{% if route %}
-				<a href="{{ route }}" class="card-link" {% if not route_follow %}rel="nofollow"{% endif %}>
-					{{ route_text or _('More details') }}</a>
+				<a class="card-link" href="{{ route }}"{% if route_rel %} rel="{{ route_rel }}"{% endif %}{% if 'external' in route_rel %} target="_blank"{% endif %}>
+					{{- route_text or _('More details') }}</a>
 			{% endif %}
 			</div>
 		</div>
