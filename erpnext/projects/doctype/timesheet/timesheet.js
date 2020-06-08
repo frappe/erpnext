@@ -206,6 +206,9 @@ frappe.ui.form.on("Timesheet Detail", {
 		update_billing_hours(frm, cdt, cdn);
 		update_time_rates(frm, cdt, cdn);
 		calculate_billing_costing_amount(frm, cdt, cdn);
+
+		// bill all `hours` by default
+		frappe.model.set_value(cdt, cdn, "billing_hours", locals[cdt][cdn].hours);
 	},
 
 	activity_type: function(frm, cdt, cdn) {
