@@ -32,16 +32,18 @@ class WebPageSection(Document):
 				item.__dict__['image']        = item_doc.meta_image
 				item.__dict__['content']      = item_doc.blog_intro
 				item.__dict__['route']        = item_doc.route
-				item.__dict__['route_follow'] = 1
+				item.__dict__['route_rel']    = ''
 			elif item.content_doctype == 'Item':
 				item.__dict__['title']        = item_doc.item_name
 				item.__dict__['subtitle']     = item_doc.item_group
 				item.__dict__['image']        = item_doc.website_image
 				item.__dict__['content']      = clean_html(item_doc.web_long_description) or item_doc.description
 				item.__dict__['route']        = item_doc.route
-				item.__dict__['route_follow'] = 1
+				item.__dict__['route_rel']    = ''
 			else:
 				item.__dict__.update(item_doc.__dict__)
+				rel = [ None if item_doc.route_follow else 'nofollow', 'external' if item_doc.route_external else None ]
+				item.__dict__['route_rel'] = ' '.join(filter(None, rel))
 
 		# Hacky way to fix column_value property not available to template
 		self.__dict__['column_value'] = self.column_value
