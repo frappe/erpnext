@@ -41,10 +41,16 @@ def get_loyalty_program_details_with_points(customer, loyalty_program=None, expi
 	loyalty_program = frappe.get_doc("Loyalty Program", loyalty_program)
 	lp_details.update(get_loyalty_details(customer, loyalty_program.name, expiry_date, company, include_expired_entry))
 
-	tier_spent_level = sorted([d.as_dict() for d in loyalty_program.collection_rules],
-		key=lambda rule:rule.min_spent, reverse=True)
+	# sort collection rule, first item on list will be lowest min_spent 
+	tier_spent_level = sorted(
+		[d.as_dict() for d in loyalty_program.collection_rules],
+		key=lambda rule: rule.min_spent, reverse=False,
+	)
+
+	# looping and apply tier from highest min_spent
 	for i, d in enumerate(tier_spent_level):
-		if i==0 or (lp_details.total_spent+current_transaction_amount) <= d.min_spent:
+		# if cumulative spend more than min_spent then continue to next tier
+		if (lp_details.total_spent + current_transaction_amount) >= d.min_spent:
 			lp_details.tier_name = d.tier_name
 			lp_details.collection_factor = d.collection_factor
 		else:
