@@ -428,110 +428,113 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	item_code: function(doc, cdt, cdn) {
-		// var me = this;
-		// var item = frappe.get_doc(cdt, cdn);
-		// var update_stock = 0, show_batch_dialog = 0;
-		// if(['Sales Invoice'].includes(this.frm.doc.doctype)) {
-		// 	update_stock = cint(me.frm.doc.update_stock);
-		// 	show_batch_dialog = update_stock;
+		var me = this;
+		var item = frappe.get_doc(cdt, cdn);
+		if (!item.qty){
+			return
+		}
+		var update_stock = 0, show_batch_dialog = 0;
+		if(['Sales Invoice'].includes(this.frm.doc.doctype)) {
+			update_stock = cint(me.frm.doc.update_stock);
+			show_batch_dialog = update_stock;
 
-		// } else if((this.frm.doc.doctype === 'Purchase Receipt' && me.frm.doc.is_return) ||
-		// 	this.frm.doc.doctype === 'Delivery Note') {
-		// 	show_batch_dialog = 1;
-		// }
-		// // clear barcode if setting item (else barcode will take priority)
-		// if(!this.frm.from_barcode) {
-		// 	item.barcode = null;
-		// }
+		} else if((this.frm.doc.doctype === 'Purchase Receipt' && me.frm.doc.is_return) ||
+			this.frm.doc.doctype === 'Delivery Note') {
+			show_batch_dialog = 1;
+		}
+		// clear barcode if setting item (else barcode will take priority)
+		if(!this.frm.from_barcode) {
+			item.barcode = null;
+		}
 
-		// this.frm.from_barcode = false;
-		// if(item.item_code || item.barcode || item.serial_no) {
-		// 	if(!this.validate_company_and_party()) {
-		// 		this.frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
-		// 	} else {
-		// 		return this.frm.call({
-		// 			method: "erpnext.stock.get_item_details.get_item_details",
-		// 			child: item,
-		// 			args: {
-		// 				doc: me.frm.doc,
-		// 				args: {
-		// 					item_code: item.item_code,
-		// 					barcode: item.barcode,
-		// 					serial_no: item.serial_no,
-		// 					set_warehouse: me.frm.doc.set_warehouse,
-		// 					warehouse: item.warehouse,
-		// 					customer: me.frm.doc.customer || me.frm.doc.party_name,
-		// 					quotation_to: me.frm.doc.quotation_to,
-		// 					supplier: me.frm.doc.supplier,
-		// 					currency: me.frm.doc.currency,
-		// 					update_stock: update_stock,
-		// 					conversion_rate: me.frm.doc.conversion_rate,
-		// 					price_list: me.frm.doc.selling_price_list || me.frm.doc.buying_price_list,
-		// 					price_list_currency: me.frm.doc.price_list_currency,
-		// 					plc_conversion_rate: me.frm.doc.plc_conversion_rate,
-		// 					company: me.frm.doc.company,
-		// 					order_type: me.frm.doc.order_type,
-		// 					is_pos: cint(me.frm.doc.is_pos),
-		// 					is_subcontracted: me.frm.doc.is_subcontracted,
-		// 					transaction_date: me.frm.doc.transaction_date || me.frm.doc.posting_date,
-		// 					ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,
-		// 					doctype: me.frm.doc.doctype,
-		// 					name: me.frm.doc.name,
-		// 					project: item.project || me.frm.doc.project,
-		// 					qty: item.qty || 1,
-		// 					stock_qty: item.stock_qty,
-		// 					conversion_factor: item.conversion_factor,
-		// 					weight_per_unit: item.weight_per_unit,
-		// 					weight_uom: item.weight_uom,
-		// 					uom : item.uom,
-		// 					manufacturer: item.manufacturer,
-		// 					stock_uom: item.stock_uom,
-		// 					pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
-		// 					cost_center: item.cost_center,
-		// 					tax_category: me.frm.doc.tax_category,
-		// 					item_tax_template: item.item_tax_template,
-		// 					child_docname: item.name,
-		// 				}
-		// 			},
+		this.frm.from_barcode = false;
+		if(item.item_code || item.barcode || item.serial_no) {
+			if(!this.validate_company_and_party()) {
+				this.frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
+			} else {
+				return this.frm.call({
+					method: "erpnext.stock.get_item_details.get_item_details",
+					child: item,
+					args: {
+						doc: me.frm.doc,
+						args: {
+							item_code: item.item_code,
+							barcode: item.barcode,
+							serial_no: item.serial_no,
+							set_warehouse: me.frm.doc.set_warehouse,
+							warehouse: item.warehouse,
+							customer: me.frm.doc.customer || me.frm.doc.party_name,
+							quotation_to: me.frm.doc.quotation_to,
+							supplier: me.frm.doc.supplier,
+							currency: me.frm.doc.currency,
+							update_stock: update_stock,
+							conversion_rate: me.frm.doc.conversion_rate,
+							price_list: me.frm.doc.selling_price_list || me.frm.doc.buying_price_list,
+							price_list_currency: me.frm.doc.price_list_currency,
+							plc_conversion_rate: me.frm.doc.plc_conversion_rate,
+							company: me.frm.doc.company,
+							order_type: me.frm.doc.order_type,
+							is_pos: cint(me.frm.doc.is_pos),
+							is_subcontracted: me.frm.doc.is_subcontracted,
+							transaction_date: me.frm.doc.transaction_date || me.frm.doc.posting_date,
+							ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,
+							doctype: me.frm.doc.doctype,
+							name: me.frm.doc.name,
+							project: item.project || me.frm.doc.project,
+							qty: item.qty || 1,
+							stock_qty: item.stock_qty,
+							conversion_factor: item.conversion_factor,
+							weight_per_unit: item.weight_per_unit,
+							weight_uom: item.weight_uom,
+							uom : item.uom,
+							manufacturer: item.manufacturer,
+							stock_uom: item.stock_uom,
+							pos_profile: me.frm.doc.doctype == 'Sales Invoice' ? me.frm.doc.pos_profile : '',
+							cost_center: item.cost_center,
+							tax_category: me.frm.doc.tax_category,
+							item_tax_template: item.item_tax_template,
+							child_docname: item.name,
+						}
+					},
 
-		// 			callback: function(r) {
-		// 				if(!r.exc) {
-		// 					frappe.run_serially([
-		// 						() => {
-		// 							var d = locals[cdt][cdn];
-		// 							me.add_taxes_from_item_tax_template(d.item_tax_rate);
-		// 							if (d.free_item_data) {
-		// 								me.apply_product_discount(d.free_item_data);
-		// 							}
-		// 						},
-		// 						() => me.frm.script_manager.trigger("price_list_rate", cdt, cdn),
-		// 						() => me.toggle_conversion_factor(item),
-		// 						() => {
-		// 							if(show_batch_dialog && !frappe.flags.hide_serial_batch_dialog) {
-		// 								var d = locals[cdt][cdn];
-		// 								$.each(r.message, function(k, v) {
-		// 									if(!d[k]) d[k] = v;
-		// 								});
+					callback: function(r) {
+						if(!r.exc) {
+							frappe.run_serially([
+								() => {
+									var d = locals[cdt][cdn];
+									me.add_taxes_from_item_tax_template(d.item_tax_rate);
+									if (d.free_item_data) {
+										me.apply_product_discount(d.free_item_data);
+									}
+								},
+								() => me.frm.script_manager.trigger("price_list_rate", cdt, cdn),
+								() => me.toggle_conversion_factor(item),
+								() => {
+									if(show_batch_dialog && !frappe.flags.hide_serial_batch_dialog) {
+										var d = locals[cdt][cdn];
+										$.each(r.message, function(k, v) {
+											if(!d[k]) d[k] = v;
+										});
 
-		// 								erpnext.show_serial_batch_selector(me.frm, d, (item) => {
-		// 									me.frm.script_manager.trigger('qty', item.doctype, item.name);
-		// 								});
-		// 							}
-		// 						},
-		// 						() => me.conversion_factor(doc, cdt, cdn, true),
-		// 						() => me.remove_pricing_rule(item),
-		// 						() => {
-		// 							if (item.apply_rule_on_other_items) {
-		// 								let key = item.name;
-		// 								me.apply_rule_on_other_items({key: item});
-		// 							}
-		// 						}
-		// 					]);
-		// 				}
-		// 			}
-		// 		});
-		// 	}
-		// }
+										erpnext.show_serial_batch_selector(me.frm, d, (item) => {
+											me.frm.script_manager.trigger('qty', item.doctype, item.name);
+										});
+									}
+								},
+								() => me.conversion_factor(doc, cdt, cdn, true),
+								() => me.remove_pricing_rule(item),
+								() => {
+									if (item.apply_rule_on_other_items) {
+										let key = item.name;
+										me.apply_rule_on_other_items({key: item});
+									}
+								}
+							]);
+						}
+					}
+				});
+			}
+		}
 	},
 
 	add_taxes_from_item_tax_template: function(item_tax_map) {
