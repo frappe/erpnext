@@ -1,51 +1,41 @@
 frappe.provide('frappe.phone_call');
 
 class CallHandler {
-	constructor(to_number, frm) {
-		this.to_number = to_number;
+	constructor(to_number) {
+		// to_number call be string or array
+		// like '12345' or ['1234', '4567'] or '1234\n4567'
+		if (Array.isArray(to_number)) {
+			this.to_numbers = to_number;
+		} else {
+			this.to_numbers = to_number.split('\n');
+		}
 		this.make();
 	}
 	make() {
 		this.dialog = new frappe.ui.Dialog({
+			'static': 1,
 			'title': __('Make a Call'),
 			'minimizable': true,
 			'fields': [{
 				'fieldname': 'from_number',
 				'label': 'From Number',
+				'default': 'Cell number set in your employee master will be used.',
 				'fieldtype': 'Data',
-				'read_only': 0
+				'read_only': 1
 			}, {
 				'fieldname': 'to_number',
 				'label': 'To Number',
-				'default': this.to_number,
-				'fieldtype': 'Data',
-				'read_only': 0
+				'fieldtype': 'Autocomplete',
+				'default': this.to_numbers[0],
+				'ignore_validation': true,
+				'options': this.to_numbers,
+				'read_only': 0,
+				'reqd': 1
 			}, {
 				'fieldname': 'caller_id',
 				'label': 'Caller ID',
 				'fieldtype': 'Select',
 				'reqd': 1
-			}, {
-				'fieldname': 'status',
-				'label': 'Status',
-				'fieldtype': 'Data',
-				'read_only': 1
-			}, {
-				'fieldtype': 'Button',
-				'label': __('Call'),
-				'primary': 1,
-				'click': () => {
-					frappe.xcall('erpnext.erpnext_integrations.exotel_integration.make_a_call', {
-						'from_number': this.dialog.get_value('from_number'),
-						'to_number': this.dialog.get_value('to_number'),
-					}).then(res => {
-						this.dialog.set_value('response', JSON.stringify(res));
-						this.call_id = res.Call.Sid;
-						this.setup_call_status_updater();
-					}).catch(e => {
-						this.dialog.set_value('response', JSON.stringify(e));
-					});
-				}
 			}, {
 				'label': 'Response',
 				'fieldtype': 'Section Break',
@@ -55,12 +45,28 @@ class CallHandler {
 				'label': 'Response',
 				'fieldtype': 'Code',
 				'read_only': 1
-			}]
+			}],
+			primary_action: () => {
+				this.dialog.disable_primary_action();
+				frappe.xcall('erpnext.erpnext_integrations.exotel_integration.make_a_call', {
+					'to_number': this.dialog.get_value('to_number'),
+				}).then(res => {
+					this.dialog.get_close_btn().hide();
+					this.dialog.set_value('response', JSON.stringify(res, null, 2));
+					this.call_id = res.Call.Sid;
+					this.setup_call_status_updater();
+				}).catch(e => {
+					this.dialog.enable_primary_action();
+					this.dialog.set_value('response', JSON.stringify(e, null, 2));
+				});
+			},
+			primary_action_label: __('Call')
 		});
 		frappe.xcall('erpnext.erpnext_integrations.exotel_integration.get_all_exophones').then(numbers => {
 			this.dialog.set_df_property('caller_id', 'options', numbers);
 			this.dialog.set_value('caller_id', numbers[0]);
 			this.dialog.show();
+			this.dialog.get_close_btn().show();
 		});
 	}
 	setup_call_status_updater() {
@@ -72,30 +78,35 @@ class CallHandler {
 		frappe.xcall('erpnext.erpnext_integrations.exotel_integration.get_call_status', {
 			'call_id': this.call_id
 		}).then(status => {
-			this.dialog.set_value('status', status);
 			this.set_indicator(status);
 			if (['completed', 'failed', 'busy', 'no-answer'].includes(status)) {
-				clearInterval(this.updater);
+				this.set_call_as_complete();
 			}
 		}).catch(() => {
-			clearInterval(this.updater);
+			this.set_call_as_complete();
 		});
 	}
 
-	set_indicator(status) {
+	set_call_as_complete() {
+		this.dialog.get_close_btn().show();
+		clearInterval(this.updater);
+	}
+
+	set_header(status) {
+		this.dialog.set_title(frappe.model.unscrub(status));
 		const indicator_class = this.get_status_indicator(status);
 		this.dialog.header.find('.indicator').attr('class', `indicator ${indicator_class}`);
 	}
 
 	get_status_indicator(status) {
 		const indicator_map = {
-			'completed': 'red',
+			'completed': 'blue',
 			'failed': 'red',
 			'busy': 'yellow',
-			'no-answer': 'yellow',
-			'queued': 'yellow',
-			'ringing': 'blue blink',
-			'in-progress': 'blue blink'
+			'no-answer': 'orange',
+			'queued': 'orange',
+			'ringing': 'green blink',
+			'in-progress': 'green blink'
 		};
 
 		const indicator_class = `indicator ${indicator_map[status] || 'blue blink'}`;
@@ -104,4 +115,4 @@ class CallHandler {
 
 }
 
-frappe.phone_call.handler = (to_number, frm) => new CallHandler(to_number, frm);
+frappe.phone_call.handler = (to_number) => new CallHandler(to_number);

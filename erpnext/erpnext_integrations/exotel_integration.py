@@ -19,7 +19,12 @@ def handle_incoming_call(**kwargs):
 
 		call_log = get_call_log(call_payload)
 		if not call_log:
-			create_call_log(call_payload)
+			create_call_log(
+				call_id=call_payload.get('CallSid'),
+				from_number=call_payload.get('CallFrom'),
+				to_number=call_payload.get('DialWhomNumber'),
+				medium=call_payload.get('To')
+			)
 		else:
 			update_call_log(call_payload, call_log=call_log)
 	except Exception as e:
@@ -54,14 +59,15 @@ def get_call_log(call_payload):
 	if call_log:
 		return frappe.get_doc('Call Log', call_log[0].name)
 
-def create_call_log(call_payload):
+def create_call_log(call_id, from_number, to_number, medium,
+	status='Ringing', call_type='Incoming'):
 	call_log = frappe.new_doc('Call Log')
-	call_log.id = call_payload.get('CallSid')
-	call_log.to = call_payload.get('DialWhomNumber')
-	call_log.medium = call_payload.get('To')
-	call_log.type = 'Incoming'
-	call_log.status = 'Ringing'
-	setattr(call_log, 'from', call_payload.get('CallFrom'))
+	call_log.id = call_id
+	call_log.to = to_number
+	call_log.medium = medium
+	call_log.type = call_type
+	call_log.status = status
+	setattr(call_log, 'from', from_number)
 	call_log.save(ignore_permissions=True)
 	frappe.db.commit()
 	return call_log
@@ -71,22 +77,41 @@ def get_call_status(call_id):
 	endpoint = get_exotel_endpoint('Calls/{call_id}.json'.format(call_id=call_id))
 	response = requests.get(endpoint)
 	status = response.json().get('Call', {}).get('Status')
+	frappe.db.set_value('Call Log', call_id, 'status', frappe.unscrub(status))
 	return status
 
 @frappe.whitelist()
-def make_a_call(from_number, to_number, caller_id=None):
+def make_a_call(to_number, caller_id=None):
 	endpoint = get_exotel_endpoint('Calls/connect.json?details=true')
+	cell_number = frappe.get_value('Employee', {
+		'user_id': frappe.session.user
+	}, 'cell_number')
+
+	if not cell_number:
+		frappe.throw('Cell number not set')
+
 	try:
 		response = requests.post(endpoint, data={
-			'From': from_number,
+			'From': cell_number,
 			'To': to_number,
-			'CallerId': caller_id
+			'CallerId': caller_id,
+			'Record': frappe.db.get_single_value('Exotel Settings', 'record_call', True)
 		})
 		response.raise_for_status()
 	except requests.exceptions.HTTPError as e:
 		exc = response.json().get('RestException')
 		if exc:
 			frappe.throw(exc.get('Message'), title=_('Invalid Input'))
+	else:
+		res = response.json()
+		call_payload = res.get('Call', {})
+		create_call_log(
+			call_id=call_payload.get('Sid'),
+			from_number=call_payload.get('From'),
+			to_number=call_payload.get('To'),
+			medium=call_payload.get('PhoneNumberSid'),
+			call_type="Outgoing"
+		)
 
 	return response.json()
 
