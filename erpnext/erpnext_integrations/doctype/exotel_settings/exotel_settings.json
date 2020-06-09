@@ -39,7 +39,7 @@
    "label": "API Key"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "record_call",
    "fieldtype": "Check",
    "label": "Record Outgoing Calls"
@@ -47,7 +47,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-06-08 20:59:28.378914",
+ "modified": "2020-06-10 00:41:04.939591",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Exotel Settings",

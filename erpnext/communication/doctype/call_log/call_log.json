@@ -8,35 +8,17 @@
   "id",
   "from",
   "to",
-  "column_break_3",
-  "received_by",
   "medium",
-  "caller_information",
-  "contact",
-  "contact_name",
-  "column_break_10",
-  "lead",
-  "lead_name",
-  "section_break_5",
+  "column_break_4",
   "type",
   "status",
   "duration",
   "recording_url",
-  "recording_html"
+  "recording_html",
+  "section_break_19",
+  "links"
  ],
  "fields": [
-  {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fieldname": "section_break_5",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
-  },
   {
    "fieldname": "id",
    "fieldtype": "Data",
@@ -58,6 +40,7 @@
   {
    "fieldname": "to",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "To",
    "read_only": 1,
    "show_days": 1,
@@ -68,7 +51,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Ringing\nIn Progress\nCompleted\nMissed",
+   "options": "Ringing\nIn Progress\nCompleted\nMissed\nFailed\nBusy\nNo Answer\nQueued",
    "read_only": 1,
    "show_days": 1,
    "show_seconds": 1
@@ -100,68 +83,6 @@
    "show_seconds": 1
   },
   {
-   "fieldname": "received_by",
-   "fieldtype": "Link",
-   "label": "Received By",
-   "options": "Employee",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fieldname": "caller_information",
-   "fieldtype": "Section Break",
-   "label": "Caller Information",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fieldname": "contact",
-   "fieldtype": "Link",
-   "label": "Contact",
-   "options": "Contact",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fieldname": "lead",
-   "fieldtype": "Link",
-   "label": "Lead ",
-   "options": "Lead",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fetch_from": "contact.name",
-   "fieldname": "contact_name",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "in_list_view": 1,
-   "label": "Contact Name",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fieldname": "column_break_10",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fetch_from": "lead.lead_name",
-   "fieldname": "lead_name",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "in_list_view": 1,
-   "label": "Lead Name",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
    "fieldname": "type",
    "fieldtype": "Select",
    "label": "Type",
@@ -176,11 +97,32 @@
    "label": "Recording HTML",
    "show_days": 1,
    "show_seconds": 1
+  },
+  {
+   "fieldname": "section_break_19",
+   "fieldtype": "Section Break",
+   "label": "Reference",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "links",
+   "fieldtype": "Table",
+   "label": "Links",
+   "options": "Dynamic Link",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "in_create": 1,
  "links": [],
- "modified": "2020-06-09 11:24:14.590640",
+ "modified": "2020-06-09 15:33:14.035187",
  "modified_by": "Administrator",
  "module": "Communication",
  "name": "Call Log",
