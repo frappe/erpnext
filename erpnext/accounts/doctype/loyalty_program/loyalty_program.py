@@ -47,7 +47,7 @@ def get_loyalty_program_details_with_points(customer, loyalty_program=None, expi
 		key=lambda rule: rule.min_spent, reverse=False,
 	)
 
-	# looping and apply tier from highest min_spent
+	# looping and apply tier from lowest min_spent
 	for i, d in enumerate(tier_spent_level):
 		# if cumulative spend more than min_spent then continue to next tier
 		if (lp_details.total_spent + current_transaction_amount) >= d.min_spent:
