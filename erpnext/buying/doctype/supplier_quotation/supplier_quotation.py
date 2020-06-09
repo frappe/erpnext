@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, nowdate, add_days
+from frappe.utils import flt, nowdate, add_days, getdate
 from frappe.model.mapper import get_mapped_doc
 
 from erpnext.controllers.buying_controller import BuyingController
@@ -28,6 +28,7 @@ class SupplierQuotation(BuyingController):
 		validate_for_items(self)
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
+		self.validate_valid_till()
 
 	def on_submit(self):
 		frappe.db.set(self, "status", "Submitted")
@@ -52,6 +53,11 @@ class SupplierQuotation(BuyingController):
 				"is_child_table": True
 			}
 		})
+
+	def validate_valid_till(self):
+		if self.valid_till and getdate(self.valid_till) < getdate(self.transaction_date):
+			frappe.throw(_("Valid till Date cannot be before Transaction Date"))
+
 	def update_rfq_supplier_status(self, include_me):
 		rfq_list = set([])
 		for item in self.items:
@@ -158,3 +164,11 @@ def make_quotation(source_name, target_doc=None):
 	}, target_doc)
 
 	return doclist
+
+def set_expired_status():
+	frappe.db.sql("""
+		UPDATE
+			`tabSupplier Quotation` SET `status` = 'Expired'
+		WHERE
+			`status` not in ('Cancelled', 'Stopped') AND `valid_till` < %s
+		""", (nowdate()))

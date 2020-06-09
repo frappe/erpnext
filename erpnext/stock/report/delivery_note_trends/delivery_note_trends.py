@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from erpnext.controllers.trends	import get_columns,get_data
 
 def execute(filters=None):
@@ -10,5 +11,39 @@ def execute(filters=None):
 	data = []
 	conditions = get_columns(filters, "Delivery Note")
 	data = get_data(filters, conditions)
-	
-	return conditions["columns"], data 
+
+	chart_data = get_chart_data(data, filters)
+
+	return conditions["columns"], data, None, chart_data
+
+def get_chart_data(data, filters):
+	if not data:
+		return []
+
+	labels, datapoints = [], []
+
+	if filters.get("group_by"):
+		# consider only consolidated row
+		data = [row for row in data if row[0]]
+
+	if len(data) > 10:
+		# get top 10 if data too long
+		data = sorted(data, key = lambda i: i[-1],reverse=True)
+		data = data[:10]
+
+	for row in data:
+		labels.append(row[0])
+		datapoints.append(row[-1])
+
+	return {
+		"data": {
+			"labels" : labels,
+			"datasets" : [
+				{
+				"name": _("Total Delivered Amount"),
+				"values": datapoints
+				}
+			]
+		},
+		"type" : "bar"
+	}
