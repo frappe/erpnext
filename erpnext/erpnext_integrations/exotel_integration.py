@@ -59,6 +59,7 @@ def create_call_log(call_payload):
 	call_log.id = call_payload.get('CallSid')
 	call_log.to = call_payload.get('DialWhomNumber')
 	call_log.medium = call_payload.get('To')
+	call_log.type = 'Incoming'
 	call_log.status = 'Ringing'
 	setattr(call_log, 'from', call_payload.get('CallFrom'))
 	call_log.save(ignore_permissions=True)
@@ -73,13 +74,19 @@ def get_call_status(call_id):
 	return status
 
 @frappe.whitelist()
-def make_a_call(from_number, to_number, caller_id):
+def make_a_call(from_number, to_number, caller_id=None):
 	endpoint = get_exotel_endpoint('Calls/connect.json?details=true')
-	response = requests.post(endpoint, data={
-		'From': from_number,
-		'To': to_number,
-		'CallerId': caller_id
-	})
+	try:
+		response = requests.post(endpoint, data={
+			'From': from_number,
+			'To': to_number,
+			'CallerId': caller_id
+		})
+		response.raise_for_status()
+	except requests.exceptions.HTTPError as e:
+		exc = response.json().get('RestException')
+		if exc:
+			frappe.throw(exc.get('Message'), title=_('Invalid Input'))
 
 	return response.json()
 
@@ -95,14 +102,18 @@ def whitelist_numbers(numbers, caller_id):
 
 	return response
 
+@frappe.whitelist()
 def get_all_exophones():
-	endpoint = get_exotel_endpoint('IncomingPhoneNumbers')
-	response = requests.post(endpoint)
-	return response
+	endpoint = get_exotel_endpoint('IncomingPhoneNumbers.json')
+	response = requests.get(endpoint)
+	numbers = [phone.get('IncomingPhoneNumber', {}).get('PhoneNumber') \
+		for phone in response.json().get('IncomingPhoneNumbers', [])]
+	return numbers
 
-def get_exotel_endpoint(action):
+def get_exotel_endpoint(action, version='v1'):
 	settings = get_exotel_settings()
-	return 'https://{api_key}:{api_token}@api.exotel.com/v1/Accounts/{sid}/{action}'.format(
+	return 'https://{api_key}:{api_token}@api.exotel.com/{version}/Accounts/{sid}/{action}'.format(
+		version=version,
 		api_key=settings.api_key,
 		api_token=settings.api_token,
 		sid=settings.account_sid,
