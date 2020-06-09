@@ -21,7 +21,7 @@ def get_context(context):
 
 	# Issues
 	if frappe.session.user != "Guest":
-		context.issues = frappe.get_all("Issue", fields=["name", "status", "subject", "modified"])[:3]
+		context.issues = frappe.get_list("Issue", fields=["name", "status", "subject", "modified"])[:3]
 	else:
 		context.issues = []
 
