@@ -14,8 +14,7 @@
   "devDependencies": {
     "snyk": "^1.290.1"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "scripts": {
     "snyk-protect": "snyk protect",
     "prepare": "yarn run snyk-protect"

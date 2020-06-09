@@ -5,12 +5,12 @@ import requests
 
 def get_context(context):
 	context.no_cache = 1
-	settings = frappe.get_doc("Support Settings", "Support Settings")
-	s = settings
-
-	# # Get Started sections
-	# sections = json.loads(s.get_started_sections)
-	# context.get_started_sections = sections
+	s = frappe.get_doc("Support Settings", "Support Settings")
+	
+	# Get Started sections
+	if s.get_started_sections:
+		sections = json.loads(s.get_started_sections)
+		context.get_started_sections = sections
 
 	# Forum posts
 	if s.show_latest_forum_posts:

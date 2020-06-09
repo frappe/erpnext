@@ -1,55 +1,32 @@
-{% extends "templates/base.html" %}
+{% extends "templates/web.html" %}
 
 {% block content %}
 <section class="jumbotron bg-light">
-	<div class='container'>
-		<h1 class="h1">We're here to help</h1>
-		<!-- <p class="mt-4">
-			<div class="input-group shadow-sm" style="width:50%">
-				<input class="form-control py-2 border-right-0 border" type="Text" placeholder="Search for help articles and more">
+	<div class='container {{ align_greeting }}'>
+		<h1 class="h1">{{ _(greeting_text) }}</h1>
+		<p class="mt-4">
+			<div class="input-group shadow-sm {{ align_search_box }}">
+				<form action="/search_help" class="search-input">
+				<input name='q' class="form-control py-2 border-right-0 border" type="Text"
+				value='{{ frappe.form_dict.q or ''}}'
+				{% if not frappe.form_dict.q %}placeholder="{{ _("Search for help articles and more") }}"{% endif %}>
 				<span class="input-group-append">
 					<div class="border input-group-text bg-white"><i class="fa fa-search text-muted"></i></div>
 				</span>
+				</form>
 			</div>
-		</p> -->
+		</p>
 	</div>
 </section>
-<!-- <div class="container mb-5">
-	<div class="alert alert-warning">
-		<h6><i class="fa fa-info-circle mr-2" aria-hidden="true"></i>Service Degradation</h6>
-			<p class='mb-2'><b>Holy guacamole!</b> We have noticed minor disruption in ERPNext services. We'll be back soon</p>
-	</div>
-</div> -->
-<!-- {% if frappe.session.user=='Guest' %}
-<div class="container mb-5">
-	<div class="alert alert-warning">
-		<h6><i class="fa fa-info-circle mr-2" aria-hidden="true"></i>You are not logged in</h6>
-			<p class='mb-2'>To view or generate tickets, please <b><span style="cursor: pointer;" onclick="location.href='/login?redirect-to=/issues'">Login</span></b></p>
-	</div>
-</div>
-{%endif %}
-{% if frappe.session.user!='Guest' %}
-<div class='container mb-5'>
-	<div class="row"> -->
-		<!-- <h3 class="h3 pb-3 col-sm-12 col-md-10">View Your Tickets</h3> -->
-		<!-- <div class="col-sm-12 col-md-2">
-			<button type="button" class="btn btn-primary" onclick="location.href='/issues'">View Your Tickets</button>
-		</div>
-		<div class="col-sm-12 col-md-2 text-right"> -->
-			<!-- <button type="button" class="btn btn-primary" onclick="location.href='/issues/new_issue'">New Ticket</button> -->
-			<!-- <button type="button" class="btn btn-primary" onclick="location.href='/customer-issues?new=1'">New Ticket</button>
-		</div>
-	</div>
-</div>
-{% endif %} -->
 <div class='container no-padding mb-5 mt-5'>
 	<div class="col-sm-12 col-md-2">
 		<!-- <button type="button" class="btn btn-primary" onclick="location.href='/customer-issues?new=1'">New Ticket</button> -->
 		<button type="button" class="btn btn-primary" onclick="location.href='/issues'">View Your Tickets</button>
 	</div>
 </div>
+{% if favorite_article_list %}
 <div class='container mb-5'>
-	<h3 class="h3 pb-3">Frequently Read Articles</h3>
+	<h3 class="h3 pb-3">{{ _("Frequently Read Articles") }}</h3>
 	<div class="row row-cols-1 row-cols-md-3">
 		{% for favorite_article in favorite_article_list %}
 		<div class="col mb-4">
@@ -57,7 +34,7 @@
 				<div class="card-body">
 					<h5 class="card-title">{{ favorite_article['title'] }}</h5>
 					<h6 class="card-subtitle mb-2 text-muted">{{ favorite_article['category'] }}</h6>
-					<p class="card-text">{{ favorite_article['content'] }}</p>
+					<p class="card-text">{{ favorite_article['description'] }}</p>
 					<a href="{{ favorite_article['route'] }}" class="card-link">Read More</a>
 				</div>
 			</div>
@@ -65,9 +42,11 @@
 		{% endfor %}
 	</div>
 </div>
+{% endif %}
 
+{% if help_article_list %}
 <div class='container mb-5'>
-	<h3 class="h3 pb-3">Help Articles</h3>
+	<h3 class="h3 pb-3">{{ _("Help Articles") }}</h3>
 	<div class="row row-cols-1 row-cols-md-3">
 		{% for item in help_article_list %}
 		<div class="col mb-4 text-truncate">
@@ -81,41 +60,58 @@
 		{% endfor %}
 	</div>
 </div>
+{% endif %}
+
+{% if get_started_sections %}
+	{% for section in get_started_sections %}
+	<div class="container mb-30">
+		<h2>{{ section["name"] }}</h2>
+		{% for item in section["items"] %}
+		<div class="m-20-0">
+			<a href="{{ item.link }}"><b>{{ item.title }}</b></a>
+			{% if item.description -%}
+			<p>{{ item.description }}</p>
+			{%- endif %}
+		</div>
+		{% endfor %}
+		<p><a href="/kb/support">{{ _("See All Articles") }}</a></p>
+		<hr>
+	</div>
+	{% endfor %}
+{% endif %}
+
+{% if topics %}
+<div class="container mb-30">
+	<h2>{{ _("Forum Activity") }}</h2>
+	{% for topic in topics %}
+	<div class="m-20-0">
+		<a href="{{ topic[post_params.link] }}">
+			<b>{{ topic[post_params.title] }}</b>
+		</a>
+		{% if topic[post_params.description] -%}
+		<p>{{ topic[post_params.description] }}</p>
+		{%- endif %}
+	</div>
+	{% endfor %}
+	<p><a href="{{ forum_url }}">{{ _("Visit the forums") }}</a></p>
+	<hr>
+</div>
+{% endif %}
+
+{% if issues | len > 0 -%}
+<div class="container mb-30">
+	<h2>{{ _("Your tickets") }}</h2>
+		{% for doc in issues %}
+			{% include "templates/includes/issue_row.html" %}
+		{% endfor %}
+	<p><a href="/issues">{{ _("See all open tickets") }}</a></p>
+	<a href="/issues?new=1" class="btn btn-primary btn-new btn-sm">
+		{{ _("Open a new ticket") }}
+	</a>
+</div>
+{%- endif %}
 
 <style>
-	.selectable-card {
-		cursor: pointer;
-	}
-
-	.selectable-card:hover {
-		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-	}
-
-	.status-pill {
-		padding: 2px 8px;
-		font-size: 85%;
-		border-radius: 1000px;
-	}
-
-	.status-green {
-		background: #C6F6D5;
-		color: #2F855A !important;
-	}
-
-	.status-orange {
-		background: #FBD38D;
-		color: #C05621 !important;
-	}
-
-	.status-red {
-		background: #FEB2B2;
-		color: #C53030 !important;
-	}
-
-	.no-padding {
-		padding: 0;
-	}
-
 	.card-text {
 		height: 80px;
 	}
@@ -124,5 +120,41 @@
 		padding: 0 10px;
 	}
 
+	.jumbotron {
+		height: 400px;
+	}
+	
+	.search-input {
+		width: 100%; 
+		display: flex;
+	}
+
+	.text-end {
+		text-align: end;
+	}
+
+	.search-input-alignment-left {
+		width: 50%;
+	}
+
+	.search-input-alignment-center {
+		width: 50%;
+		margin-left: 25%;
+	}
+
+	.search-input-alignment-right {
+		width: 50%;
+		margin-left: 50%;
+	}
+
+	.mb-30 {
+		margin-bottom: 30px;
+	}
+
+	.m-20-0 {
+		margin: 20px 0;
+	}
+
 </style>
+
 {% endblock %}

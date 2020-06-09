@@ -11,7 +11,6 @@
   "issues_sb",
   "close_issue_after_days",
   "portal_sb",
-  "enable_support_portal",
   "get_started_sections",
   "show_latest_forum_posts",
   "forum_sb",
@@ -23,6 +22,10 @@
   "post_description_key",
   "post_route_key",
   "post_route_string",
+  "support_portal_settings_section",
+  "greeting_text",
+  "column_break_21",
+  "greeting_text_and_search_bar_alignment",
   "search_apis_sb",
   "search_apis"
  ],
@@ -129,16 +132,38 @@
    "label": "Allow Resetting Service Level Agreement"
   },
   {
-   "default": "0",
-   "description": "Visit /support",
-   "fieldname": "enable_support_portal",
-   "fieldtype": "Check",
-   "label": "Enable Support Portal"
+   "fieldname": "support_portal_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Support Portal Settings",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "greeting_text",
+   "fieldtype": "Data",
+   "label": "Greeting Text",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "default": "Left",
+   "fieldname": "greeting_text_and_search_bar_alignment",
+   "fieldtype": "Select",
+   "label": "Greeting Text and Search Bar Alignment",
+   "options": "Left\nCenter\nRight",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-05-27 20:13:07.233427",
+ "modified": "2020-06-09 13:30:37.879883",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support Settings",

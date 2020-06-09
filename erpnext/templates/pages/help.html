@@ -15,22 +15,25 @@
 	</form>
 </div>
 
-<!-- {% for section in get_started_sections %}
-<div style="margin-bottom: 30px;">
-	<h2>{{ section["name"] }}</h2>
-	{% for item in section["items"] %}
-	<div style="margin: 20px 0;">
-		<a href="{{ item.link }}"><b>{{ item.title }}</b></a>
-		{% if item.description -%}
-		<p>{{ item.description }}</p>
-		{%- endif %}
+{% if get_started_sections %}
+	{% for section in get_started_sections %}
+	<div style="margin-bottom: 30px;">
+		<h2>{{ section["name"] }}</h2>
+		{% for item in section["items"] %}
+		<div style="margin: 20px 0;">
+			<a href="{{ item.link }}"><b>{{ item.title }}</b></a>
+			{% if item.description -%}
+			<p>{{ item.description }}</p>
+			{%- endif %}
+		</div>
+		{% endfor %}
+		<p><a href="/kb/support">{{ _("See All Articles") }}</a></p>
+		<hr>
 	</div>
 	{% endfor %}
-	<p><a href="/kb/support">{{ _("See All Articles") }}</a></p>
-	<hr>
-</div>
-{% endfor %} -->
+{% endif %}
 
+{% if topics %}
 <div style="margin-bottom: 30px;">
 	<h2>{{ _("Forum Activity") }}</h2>
 	{% for topic in topics %}
@@ -46,6 +49,7 @@
 	<p><a href="{{ forum_url }}">{{ _("Visit the forums") }}</a></p>
 	<hr>
 </div>
+{% endif %}
 
 {% if issues | len > 0 -%}
 <div style="margin-bottom: 20px;">
