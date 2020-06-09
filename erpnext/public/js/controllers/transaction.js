@@ -569,6 +569,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 										let key = item.name;
 										me.apply_rule_on_other_items({key: item});
 									}
+								},
+								() => {
+									me.frm.trigger('qty', cdt, cdn);
 								}
 							]);
 						}
@@ -1245,7 +1248,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-	apply_pricing_rule: function(item, calculate_taxes_and_totals) {
+	apply_pricing_rule: async function(item, calculate_taxes_and_totals) {
 		var me = this;
 		var args = this._get_args(item);
 		if (!(args.items && args.items.length)) {
@@ -1253,7 +1256,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			return;
 		}
 
-		return this.frm.call({
+		const pricing_rule = this.frm.call({
 			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_pricing_rule",
 			args: {	args: args, doc: me.frm.doc },
 			callback: function(r) {
@@ -1264,6 +1267,43 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 			}
 		});
+
+		const transaction_pricing_rule = this.frm.call({
+			method: "erpnext.accounts.doctype.pricing_rule.pricing_rule.apply_transaction_pricing_rule",
+			args: {	doc: me.frm.doc },
+			callback: function(r) {
+				if (!r.exc && r.message) {
+					r = r.message;
+					if ('price' in r) {
+						me._apply_transaction_price_discount(r.price);
+					} else if ('product' in r) {
+						me._apply_transaction_product_discount(r.product);
+					}
+				}
+			}
+		});
+
+		return pricing_rule;
+	},
+
+	_apply_transaction_product_discount: async function(product_discount) {
+		this.apply_product_discount(product_discount);
+		this.frm.refresh_field('items');
+	},
+
+	_apply_transaction_price_discount: async function(price_discount) {
+		await this.frm.set_value(
+			'apply_discount_on',
+			price_discount.apply_discount_on,
+		);
+		await this.frm.set_value(
+			'additional_discount_percentage',
+			price_discount.additional_discount_percentage
+		);
+		await this.frm.set_value(
+			'discount_amount',
+			price_discount.discount_amount,
+		);
 	},
 
 	_get_args: function(item) {

@@ -175,6 +175,51 @@ def apply_pricing_rule(args, doc=None):
 
 	return out
 
+@frappe.whitelist()
+def apply_transaction_pricing_rule(doc):
+	from erpnext.accounts.doctype.pricing_rule.utils import apply_pricing_rule_on_transaction
+
+	# converting dict into doc
+	if isinstance(doc, string_types):
+		doc = json.loads(doc)
+	if doc:
+		doc = frappe.get_doc(doc)
+
+	apply_pricing_rule_on_transaction(doc)
+
+	discount = {}
+
+	if (
+		doc.apply_discount_on and (
+			doc.additional_discount_percentage or
+			doc.discount_amount
+		)
+	):
+		discount['price'] = {
+			'apply_discount_on': doc.apply_discount_on,
+			'additional_discount_percentage': doc.additional_discount_percentage,
+			'discount_amount': doc.discount_amount,
+		}
+
+	for item in doc.items:
+		if item.is_free_item:
+			discount['product'] = {
+				'item_code': item.item_code,
+				'qty': item.qty,
+				'rate': item.rate,
+				'price_list_rate': item.price_list_rate,
+				'is_free_item': item.is_free_item,
+				'item_name': item.item_name,
+				'description': item.description,
+				'stock_uom': item.stock_uom,
+				'uom': item.uom,
+				'conversion_factor': item.conversion_factor,
+				'amount': item.amount,
+				'income_account': item.income_account,
+			}
+
+	return discount
+
 def get_serial_no_for_item(args):
 	from erpnext.stock.get_item_details import get_serial_no
 

@@ -127,8 +127,8 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				on_customer_change: (customer) => {
 					this.frm.set_value('customer', customer);
 				},
-				on_field_change: (item_code, field, value, batch_no) => {
-					this.update_item_in_cart(item_code, field, value, batch_no);
+				on_field_change: (item_code, field, value, batch_no, is_free_item) => {
+					this.update_item_in_cart(item_code, field, value, batch_no, is_free_item);
 				},
 				on_numpad: (value) => {
 					if (value == __('Pay')) {
@@ -228,19 +228,33 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					if(!this.frm.doc.customer) {
 						frappe.throw(__('Please select a customer'));
 					}
-					this.update_item_in_cart(item, field, value);
+					const is_free_item = 0;
+					const batch_no = '';
+					this.update_item_in_cart(item, field, value, batch_no, is_free_item);
 					this.cart && this.cart.unselect_all();
 				}
 			}
 		});
 	}
 
-	update_item_in_cart(item_code, field='qty', value=1, batch_no) {
-		frappe.dom.freeze();
-		if(this.cart.exists(item_code, batch_no)) {
+	update_item_in_cart(item_code, field='qty', value=1, batch_no, is_free_item) {
+		if(this.cart.exists(item_code, batch_no, is_free_item)) {
 			const search_field = batch_no ? 'batch_no' : 'item_code';
 			const search_value = batch_no || item_code;
-			const item = this.frm.doc.items.find(i => i[search_field] === search_value);
+
+			// getting item
+			let item;
+			for (let i in this.frm.doc.items) {
+				i = this.frm.doc.items[i];
+				if (
+					(i[search_field] === search_value) &&
+					(i['is_free_item'] === is_free_item)
+				) {
+					item = i;
+					break;
+				}
+			}
+
 			frappe.flags.hide_serial_batch_dialog = false;
 
 			if (typeof value === 'string' && !in_list(['serial_no', 'batch_no'], field)) {
@@ -1022,10 +1036,11 @@ class POSCart {
 					} else {
 						const item_code = unescape(this.selected_item.attr('data-item-code'));
 						const batch_no = this.selected_item.attr('data-batch-no');
+						const is_free_item = (this.selected_item.attar('data-is-free-item') == '1');
 						const field = this.selected_item.active_field;
 						const value = this.numpad.get_value();
 
-						this.events.on_field_change(item_code, field, value, batch_no);
+						this.events.on_field_change(item_code, field, value, batch_no, is_free_item);
 					}
 				}
 
@@ -1053,7 +1068,7 @@ class POSCart {
 	add_item(item) {
 		this.$empty_state.hide();
 
-		if (this.exists(item.item_code, item.batch_no)) {
+		if (this.exists(item.item_code, item.batch_no, item.is_free_item)) {
 			// update quantity
 			this.update_item(item);
 		} else if (flt(item.qty) > 0.0) {
@@ -1065,8 +1080,13 @@ class POSCart {
 	}
 
 	update_item(item) {
-		const item_selector = item.batch_no ?
+		let item_selector = item.batch_no ?
 			`[data-batch-no="${item.batch_no}"]` : `[data-item-code="${escape(item.item_code)}"]`;
+
+ 		// convert is_free_item from bool to string
+		let is_free_item = item.is_free_item ? '1' : '0';
+		// add is_free_item to query
+		item_selector += `[data-is-free-item="${is_free_item}"]`;
 
 		const $item = this.$cart_items.find(item_selector);
 
@@ -1074,9 +1094,11 @@ class POSCart {
 			const is_stock_item = this.get_item_details(item.item_code).is_stock_item;
 			const indicator_class = (!is_stock_item || item.actual_qty >= item.qty) ? 'green' : 'red';
 			const remove_class = indicator_class == 'green' ? 'red' : 'green';
+			const discount_percentage = item.discount_percentage == undefined ?
+			`Free` : `${item.discount_percentage}%`;
 
 			$item.find('.quantity input').val(item.qty);
-			$item.find('.discount').text(item.discount_percentage + '%');
+			$item.find('.discount').text(discount_percentage);
 			$item.find('.rate').text(format_currency(item.rate, this.frm.doc.currency));
 			$item.addClass(indicator_class);
 			$item.removeClass(remove_class);
@@ -1090,10 +1112,17 @@ class POSCart {
 		const rate = format_currency(item.rate, this.frm.doc.currency);
 		const indicator_class = (!is_stock_item || item.actual_qty >= item.qty) ? 'green' : 'red';
 		const batch_no = item.batch_no || '';
+		const is_free_item = item.is_free_item;
+		const discount_percentage = item.discount_percentage == undefined ?
+			`Free` : `${item.discount_percentage}%`;
 
 		return `
-			<div class="list-item indicator ${indicator_class}" data-item-code="${escape(item.item_code)}"
-				data-batch-no="${batch_no}" title="Item: ${item.item_name}  Available Qty: ${item.actual_qty} ${item.stock_uom}">
+			<div class="list-item indicator ${indicator_class}"
+				data-item-code="${escape(item.item_code)}"
+				data-batch-no="${batch_no}"
+				data-is-free-item="${is_free_item}"
+				title="Item: ${item.item_name}  Available Qty: ${item.actual_qty} ${item.stock_uom}"
+			>
 				<div class="item-name list-item__content list-item__content--flex-1.5 ellipsis">
 					${item.item_name}
 				</div>
@@ -1101,7 +1130,7 @@ class POSCart {
 					${get_quantity_html(item.qty)}
 				</div>
 				<div class="discount list-item__content text-right">
-					${item.discount_percentage}%
+					${discount_percentage}
 				</div>
 				<div class="rate list-item__content text-right">
 					${rate}
@@ -1134,9 +1163,14 @@ class POSCart {
 		return this.item_data[item_code];
 	}
 
-	exists(item_code, batch_no) {
-		const is_exists = batch_no ?
+	exists(item_code, batch_no, is_free_item) {		
+		let is_exists = batch_no ?
 			`[data-batch-no="${batch_no}"]` : `[data-item-code="${escape(item_code)}"]`;
+
+		// convert is_free_item from bool to string
+		is_free_item = is_free_item ? '1' : '0';
+		// add is_free_item to query
+		is_exists += `[data-is-free-item="${is_free_item}"]`;
 
 		let $item = this.$cart_items.find(is_exists);
 
@@ -1159,6 +1193,8 @@ class POSCart {
 	bind_events() {
 		const me = this;
 		const events = this.events;
+		const is_free_item = 0;
+		const batch_no = '';
 
 		// quantity change
 		this.$cart_items.on('click',
@@ -1169,9 +1205,9 @@ class POSCart {
 				const action = $btn.attr('data-action');
 
 				if(action === 'increment') {
-					events.on_field_change(item_code, 'qty', '+1');
+					events.on_field_change(item_code, 'qty', '+1', batch_no, is_free_item);
 				} else if(action === 'decrement') {
-					events.on_field_change(item_code, 'qty', '-1');
+					events.on_field_change(item_code, 'qty', '-1', batch_no, is_free_item);
 				}
 			});
 
@@ -1179,7 +1215,7 @@ class POSCart {
 			const $input = $(this);
 			const $item = $input.closest('.list-item[data-item-code]');
 			const item_code = unescape($item.attr('data-item-code'));
-			events.on_field_change(item_code, 'qty', flt($input.val()));
+			events.on_field_change(item_code, 'qty', flt($input.val()), batch_no, is_free_item);
 		});
 
 		// current item
