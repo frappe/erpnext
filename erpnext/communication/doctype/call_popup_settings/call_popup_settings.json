@@ -1,0 +1,39 @@
+{
+ "actions": [],
+ "creation": "2020-06-08 23:11:59.374692",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enable"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "enable",
+   "fieldtype": "Check",
+   "label": "Enable",
+   "show_days": 1,
+   "show_seconds": 1
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2020-06-08 23:12:18.175583",
+ "modified_by": "Administrator",
+ "module": "Communication",
+ "name": "Call Popup Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
