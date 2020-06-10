@@ -1,8 +1,0 @@
-web-page
-blog-post
-web-form
-blogger
-setup
-add-products-to-website
-shopping-cart
-articles

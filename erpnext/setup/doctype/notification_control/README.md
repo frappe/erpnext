@@ -1,1 +1,0 @@
-Tool to automatically prompt sending of Email on Submission of various records.

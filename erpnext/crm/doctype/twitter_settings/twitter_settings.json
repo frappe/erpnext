@@ -1,0 +1,101 @@
+{
+ "actions": [],
+ "creation": "2020-01-30 10:29:08.562108",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "account_name",
+  "profile_pic",
+  "oauth_details",
+  "consumer_key",
+  "column_break_5",
+  "consumer_secret",
+  "access_token",
+  "access_token_secret",
+  "session_status"
+ ],
+ "fields": [
+  {
+   "fieldname": "account_name",
+   "fieldtype": "Data",
+   "label": "Account Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "oauth_details",
+   "fieldtype": "Section Break",
+   "label": "OAuth Credentials"
+  },
+  {
+   "fieldname": "consumer_key",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "API Key",
+   "reqd": 1
+  },
+  {
+   "fieldname": "consumer_secret",
+   "fieldtype": "Password",
+   "in_list_view": 1,
+   "label": "API Secret Key",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "profile_pic",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "session_status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Session Status",
+   "options": "Expired\nActive",
+   "read_only": 1
+  },
+  {
+   "fieldname": "access_token",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Access Token",
+   "read_only": 1
+  },
+  {
+   "fieldname": "access_token_secret",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Access Token Secret",
+   "read_only": 1
+  }
+ ],
+ "image_field": "profile_pic",
+ "issingle": 1,
+ "links": [],
+ "modified": "2020-05-13 17:50:47.934776",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Twitter Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -20,8 +20,10 @@ erpnext.SMSManager = function SMSManager(doc) {
 			'Purchase Receipt'	: 'Items has been received against purchase receipt: ' + doc.name
 		}
 
-		if (in_list(['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice'], doc.doctype))
+		if (in_list(['Sales Order', 'Delivery Note', 'Sales Invoice'], doc.doctype))
 			this.show(doc.contact_person, 'Customer', doc.customer, '', default_msg[doc.doctype]);
+		else if (doc.doctype === 'Quotation')
+			this.show(doc.contact_person, 'Customer', doc.party_name, '', default_msg[doc.doctype]);
 		else if (in_list(['Purchase Order', 'Purchase Receipt'], doc.doctype))
 			this.show(doc.contact_person, 'Supplier', doc.supplier, '', default_msg[doc.doctype]);
 		else if (doc.doctype == 'Lead')

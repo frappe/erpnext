@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import json
-from frappe.utils import cint, getdate, formatdate
+from frappe.utils import cint, getdate, formatdate, today
 from frappe import throw, _
 from frappe.model.document import Document
 
@@ -13,6 +13,7 @@ class OverlapError(frappe.ValidationError): pass
 class HolidayList(Document):
 	def validate(self):
 		self.validate_days()
+		self.total_holidays = len(self.holidays)
 
 	def get_weekly_off_dates(self):
 		self.validate_values()
@@ -22,6 +23,7 @@ class HolidayList(Document):
 			ch = self.append('holidays', {})
 			ch.description = self.weekly_off
 			ch.holiday_date = d
+			ch.weekly_off = 1
 			ch.idx = last_idx + i + 1
 
 	def validate_values(self):
@@ -80,6 +82,16 @@ def get_events(start, end, filters=None):
 		filters.append(['Holiday', 'holiday_date', '<', getdate(end)])
 
 	return frappe.get_list('Holiday List',
-		fields=['name', '`tabHoliday`.holiday_date', '`tabHoliday`.description'],
+		fields=['name', '`tabHoliday`.holiday_date', '`tabHoliday`.description', '`tabHoliday List`.color'],
 		filters = filters,
 		update={"allDay": 1})
+
+
+def is_holiday(holiday_list, date=today()):
+	"""Returns true if the given date is a holiday in the given holiday list
+	"""
+	if holiday_list:
+		return bool(frappe.get_all('Holiday List',
+			dict(name=holiday_list, holiday_date=date)))
+	else:
+		return False

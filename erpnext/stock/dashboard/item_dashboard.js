@@ -16,17 +16,46 @@ erpnext.stock.ItemDashboard = Class.extend({
 		this.content = $(frappe.render_template('item_dashboard')).appendTo(this.parent);
 		this.result = this.content.find('.result');
 
-		// move
 		this.content.on('click', '.btn-move', function() {
-			erpnext.stock.move_item($(this).attr('data-item'), $(this).attr('data-warehouse'),
-				null, $(this).attr('data-actual_qty'), null, function() { me.refresh(); });
+			handle_move_add($(this), "Move")
 		});
 
 		this.content.on('click', '.btn-add', function() {
-			erpnext.stock.move_item($(this).attr('data-item'), null, $(this).attr('data-warehouse'),
-				$(this).attr('data-actual_qty'), $(this).attr('data-rate'),
-				function() { me.refresh(); });
+			handle_move_add($(this), "Add")
 		});
+
+		function handle_move_add(element, action) {
+			let item = unescape(element.attr('data-item'));
+			let warehouse = unescape(element.attr('data-warehouse'));
+			let actual_qty = unescape(element.attr('data-actual_qty'));
+			let disable_quick_entry = Number(unescape(element.attr('data-disable_quick_entry')));
+			let entry_type = action === "Move" ? "Material Transfer": null;
+
+			if (disable_quick_entry) {
+				open_stock_entry(item, warehouse, entry_type);
+			} else {
+				if (action === "Add") {
+					let rate = unescape($(this).attr('data-rate'));
+					erpnext.stock.move_item(item, null, warehouse, actual_qty, rate, function() { me.refresh(); });
+				}
+				else {
+					erpnext.stock.move_item(item, warehouse, null, actual_qty, null, function() { me.refresh(); });
+				}
+			}
+		}
+
+		function open_stock_entry(item, warehouse, entry_type) {
+			frappe.model.with_doctype('Stock Entry', function() {
+				var doc = frappe.model.get_new_doc('Stock Entry');
+				if (entry_type) doc.stock_entry_type = entry_type;
+
+				var row = frappe.model.add_child(doc, 'items');
+				row.item_code = item;
+				row.s_warehouse = warehouse;
+
+				frappe.set_route('Form', doc.doctype, doc.name);
+			})
+		}
 
 		// more
 		this.content.find('.btn-more').on('click', function() {
@@ -79,8 +108,8 @@ erpnext.stock.ItemDashboard = Class.extend({
 		if (context.data.length > 0) {
 			$(frappe.render_template('item_dashboard_list', context)).appendTo(this.result);
 		} else {
-			var message = __(" Currently no stock available in any warehouse")
-			$("<span class='text-muted small'>"+message+"</span>").appendTo(this.result);
+			var message = __("Currently no stock available in any warehouse");
+			$(`<span class='text-muted small'>  ${message} </span>`).appendTo(this.result);
 		}
 	},
 	get_item_dashboard_data: function(data, max_count, show_item) {
@@ -88,7 +117,7 @@ erpnext.stock.ItemDashboard = Class.extend({
 		if(!data) data = [];
 
 		data.forEach(function(d) {
-			d.actual_or_pending = d.projected_qty + d.reserved_qty + d.reserved_qty_for_production;
+			d.actual_or_pending = d.projected_qty + d.reserved_qty + d.reserved_qty_for_production + d.reserved_qty_for_sub_contract;
 			d.pending_qty = 0;
 			d.total_reserved = d.reserved_qty + d.reserved_qty_for_production + d.reserved_qty_for_sub_contract;
 			if(d.actual_or_pending > d.actual_qty) {
@@ -166,6 +195,7 @@ erpnext.stock.move_item = function(item, source, target, actual_qty, rate, callb
 		frappe.call({
 			method: 'erpnext.stock.doctype.stock_entry.stock_entry_utils.make_stock_entry',
 			args: values,
+			freeze: true,
 			callback: function(r) {
 				frappe.show_alert(__('Stock Entry {0} created',
 					['<a href="#Form/Stock Entry/'+r.message.name+'">' + r.message.name+ '</a>']));

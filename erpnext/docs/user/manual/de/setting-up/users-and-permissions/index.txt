@@ -1,4 +1,0 @@
-adding-users
-role-based-permissions
-user-permissions
-sharing

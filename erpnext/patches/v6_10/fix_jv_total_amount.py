@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import frappe
 
 # patch all for-print field (total amount) in Journal Entry in 2015

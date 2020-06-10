@@ -15,10 +15,11 @@ def update_hr_permissions():
 	# add set user permissions rights to HR Manager
 	frappe.db.sql("""update `tabDocPerm` set `set_user_permissions`=1 where parent in ('Employee', 'Leave Application')
 		and role='HR Manager' and permlevel=0 and `read`=1""")
-
-	# apply user permissions on Employee and Leave Application
-	frappe.db.sql("""update `tabDocPerm` set `apply_user_permissions`=1 where parent in ('Employee', 'Leave Application')
-		and role in ('Employee', 'Leave Approver') and permlevel=0 and `read`=1""")
+	docperm_meta = frappe.get_meta('DocPerm')
+	if docperm_meta.get_field('apply_user_permissions'):
+		# apply user permissions on Employee and Leave Application
+		frappe.db.sql("""update `tabDocPerm` set `apply_user_permissions`=1 where parent in ('Employee', 'Leave Application')
+			and role in ('Employee', 'Leave Approver') and permlevel=0 and `read`=1""")
 
 	frappe.clear_cache()
 

@@ -8,7 +8,8 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Student"
+					"name": "Student",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
@@ -21,18 +22,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Student Group"
-				},
-				{
-					"type": "doctype",
-					"name": "Student Group Creation Tool"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Student and Guardian Contact Details",
-					"doctype": "Program Enrollment"
 				}
-
 			]
 		},
 		{
@@ -45,15 +35,15 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Web Academy Applicant"
+				},
+				{
+					"type": "doctype",
 					"name": "Student Admission"
 				},
 				{
 					"type": "doctype",
 					"name": "Program Enrollment"
-				},
-				{
-					"type": "doctype",
-					"name": "Program Enrollment Tool"
 				}
 			]
 		},
@@ -69,10 +59,6 @@ def get_data():
 					"name": "Student Leave Application"
 				},
 				{
-					"type": "doctype",
-					"name": "Student Attendance Tool"
-				},
-				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Absent Student Report",
@@ -84,21 +70,26 @@ def get_data():
 					"name": "Student Batch-Wise Attendance",
 					"doctype": "Student Attendance"
 				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Student Monthly Attendance Sheet",
-					"doctype": "Student Attendance"
-				}
 			]
 		},
 		{
-			"label": _("Schedule"),
+			"label": _("Tools"),
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Course Schedule",
-					"route": "List/Course Schedule/Calendar"
+					"name": "Student Attendance Tool"
+				},
+				{
+					"type": "doctype",
+					"name": "Assessment Result Tool"
+				},
+				{
+					"type": "doctype",
+					"name": "Student Group Creation Tool"
+				},
+				{
+					"type": "doctype",
+					"name": "Program Enrollment Tool"
 				},
 				{
 					"type": "doctype",
@@ -125,15 +116,12 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Assessment Criteria"
-				},
-				{
-					"type": "doctype",
-					"name": "Assessment Criteria Group"
-				},
-				{
-					"type": "doctype",
-					"name": "Assessment Result Tool"
-				},
+				}
+			]
+		},
+		{
+			"label": _("Assessment Reports"),
+			"items": [
 				{
 					"type": "report",
 					"is_query_report": True,
@@ -143,10 +131,19 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Final Assessment Grades",
+					"doctype": "Assessment Result"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Assessment Plan Status",
 					"doctype": "Assessment Plan"
 				},
-
+				{
+					"type": "doctype",
+					"name": "Student Report Generation Tool"
+				}
 			]
 		},
 		{
@@ -167,34 +164,88 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Fee Category"
-				},
-				{
-					"type": "report",
-					"name": "Student Fee Collection",
-					"doctype": "Fees",
-					"is_query_report": True
 				}
 			]
 		},
 		{
-			"label": _("Setup"),
+			"label": _("Schedule"),
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Course"
+					"name": "Course Schedule",
+					"route": "#List/Course Schedule/Calendar"
 				},
 				{
 					"type": "doctype",
-					"name": "Program"
+					"name": "Course Scheduling Tool"
+				}
+			]
+		},
+		{
+			"label": _("Masters"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Program",
 				},
 				{
 					"type": "doctype",
-					"name": "Instructor"
+					"name": "Course",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
-					"name": "Room"
+					"name": "Topic",
 				},
+				{
+					"type": "doctype",
+					"name": "Instructor",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Room",
+					"onboard": 1,
+				}
+			]
+		},
+		{
+			"label": _("Content Masters"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Article"
+				},
+				{
+					"type": "doctype",
+					"name": "Video"
+				},
+				{
+					"type": "doctype",
+					"name": "Quiz"
+				}
+			]
+		},
+		{
+			"label": _("LMS Activity"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Course Enrollment"
+				},
+				{
+					"type": "doctype",
+					"name": "Course Activity"
+				},
+				{
+					"type": "doctype",
+					"name": "Quiz Activity"
+				}
+			]
+		},
+		{
+			"label": _("Settings"),
+			"items": [
 				{
 					"type": "doctype",
 					"name": "Student Category"
@@ -205,7 +256,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Grading Scale"
+					"name": "Grading Scale",
+					"onboard": 1,
 				},
 				{
 					"type": "doctype",
@@ -221,4 +273,27 @@ def get_data():
 				}
 			]
 		},
+		{
+			"label": _("Other Reports"),
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Student and Guardian Contact Details",
+					"doctype": "Program Enrollment"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Student Monthly Attendance Sheet",
+					"doctype": "Student Attendance"
+				},
+				{
+					"type": "report",
+					"name": "Student Fee Collection",
+					"doctype": "Fees",
+					"is_query_report": True
+				}
+			]
+		}
 	]

@@ -1,0 +1,149 @@
+{
+ "autoname": "format:GOAL-{goal}",
+ "creation": "2018-10-02 12:17:41.727541",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "goal",
+  "frequency",
+  "created_by",
+  "cb_00",
+  "procedure",
+  "weekday",
+  "quarter",
+  "date",
+  "sb_00",
+  "revision",
+  "cb_01",
+  "revised_on",
+  "sb_01",
+  "objectives"
+ ],
+ "fields": [
+  {
+   "fieldname": "created_by",
+   "fieldtype": "Link",
+   "label": "Created By",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "default": "None",
+   "fieldname": "frequency",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Monitoring Frequency",
+   "options": "None\nDaily\nWeekly\nMonthly\nQuarterly"
+  },
+  {
+   "fieldname": "procedure",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Procedure",
+   "options": "Quality Procedure"
+  },
+  {
+   "depends_on": "eval:doc.frequency == 'Monthly' || doc.frequency == 'Quarterly';",
+   "fieldname": "date",
+   "fieldtype": "Select",
+   "label": "Date",
+   "options": "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n25\n26\n27\n28\n29\n30"
+  },
+  {
+   "default": "0",
+   "fieldname": "revision",
+   "fieldtype": "Int",
+   "label": "Revision",
+   "read_only": 1
+  },
+  {
+   "fieldname": "revised_on",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Revised On",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.frequency == 'Weekly';",
+   "fieldname": "weekday",
+   "fieldtype": "Select",
+   "label": "Weekday",
+   "options": "Monday\nTuesday\nWednesday\nThursday\nFriday\nSaturday"
+  },
+  {
+   "fieldname": "cb_00",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break",
+   "label": "Revision and Revised On"
+  },
+  {
+   "fieldname": "cb_01",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sb_01",
+   "fieldtype": "Section Break",
+   "label": "Objectives"
+  },
+  {
+   "fieldname": "objectives",
+   "fieldtype": "Table",
+   "label": "Objectives",
+   "options": "Quality Goal Objective"
+  },
+  {
+   "fieldname": "goal",
+   "fieldtype": "Data",
+   "label": "Goal",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "January-April-July-October",
+   "depends_on": "eval:doc.frequency == 'Quarterly';",
+   "fieldname": "quarter",
+   "fieldtype": "Select",
+   "label": "Quarter",
+   "options": "January-April-July-October",
+   "read_only": 1
+  }
+ ],
+ "modified": "2019-05-28 14:49:12.768863",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality Goal",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

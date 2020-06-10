@@ -14,13 +14,13 @@ def execute(filters=None):
 
 def get_column():
 	return [
-		_("Delivery Note") + ":Link/Delivery Note:120", _("Date") + ":Date:100",
+		_("Delivery Note") + ":Link/Delivery Note:120", _("Status") + "::120", _("Date") + ":Date:100",
 		_("Suplier") + ":Link/Customer:120", _("Customer Name") + "::120",
-		_("Project") + ":Link/Project:120", _("Item Code") + ":Link/Item:120", 
+		_("Project") + ":Link/Project:120", _("Item Code") + ":Link/Item:120",
 		_("Amount") + ":Currency:100", _("Billed Amount") + ":Currency:100", _("Pending Amount") + ":Currency:100",
 		_("Item Name") + "::120", _("Description") + "::120", _("Company") + ":Link/Company:120",
 	]
 
 def get_args():
-	return {'doctype': 'Delivery Note', 'party': 'customer', 
+	return {'doctype': 'Delivery Note', 'party': 'customer',
 		'date': 'posting_date', 'order': 'name', 'order_by': 'desc'}

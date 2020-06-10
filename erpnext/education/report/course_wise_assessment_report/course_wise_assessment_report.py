@@ -60,7 +60,7 @@ def execute(filters=None):
 	return columns, data, None, chart
 
 
-def get_formatted_result(args, get_assessment_criteria=False, get_course=False):
+def get_formatted_result(args, get_assessment_criteria=False, get_course=False, get_all_assessment_groups=False):
 	cond, cond1, cond2, cond3, cond4 = " ", " ", " ", " ", " "
 	args_list = [args.academic_year]
 
@@ -77,15 +77,9 @@ def get_formatted_result(args, get_assessment_criteria=False, get_course=False):
 		args_list.append(args.student_group)
 
 	create_total_dict = False
-	group_type = frappe.get_value("Assessment Group", args.assessment_group, "is_group")
-	if group_type:
-		from frappe.desk.treeview import get_children
-		assessment_groups = [d.get("value") for d in get_children("Assessment Group",
-			args.assessment_group) if d.get("value") and not d.get("expandable")]
-		cond3 = " and ar.assessment_group in (%s)"%(', '.join(['%s']*len(assessment_groups)))
-	else:
-		assessment_groups = [args.assessment_group]
-		cond3 = " and ar.assessment_group=%s"
+
+	assessment_groups = get_child_assessment_groups(args.assessment_group)
+	cond3 = " and ar.assessment_group in (%s)"%(', '.join(['%s']*len(assessment_groups)))
 	args_list += assessment_groups
 
 	if args.students:
@@ -156,6 +150,9 @@ def get_formatted_result(args, get_assessment_criteria=False, get_course=False):
 
 		# create the total of all the assessment groups criteria-wise
 		elif create_total_dict:
+			if get_all_assessment_groups:
+				formatted_assessment_result[result.student][result.course][result.assessment_group]\
+					[result.assessment_criteria] = assessment_criteria_details				
 			if not formatted_assessment_result[result.student][result.course][args.assessment_group]:
 				formatted_assessment_result[result.student][result.course][args.assessment_group] = defaultdict(dict)
 				formatted_assessment_result[result.student][result.course][args.assessment_group]\
@@ -238,3 +235,15 @@ def get_chart_data(grades, criteria_list, kounter):
 		},
 		"type": 'bar',
 	}
+
+
+def get_child_assessment_groups(assessment_group):
+	assessment_groups = []
+	group_type = frappe.get_value("Assessment Group", assessment_group, "is_group")
+	if group_type:
+		from frappe.desk.treeview import get_children
+		assessment_groups = [d.get("value") for d in get_children("Assessment Group",
+			assessment_group) if d.get("value") and not d.get("expandable")]
+	else:
+		assessment_groups = [assessment_group]
+	return assessment_groups

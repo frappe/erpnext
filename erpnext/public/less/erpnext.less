@@ -1,4 +1,4 @@
-@import "../../../../frappe/frappe/public/less/variables.less";
+@import "variables.less";
 
 .erpnext-footer {
 	margin: 11px auto;
@@ -21,6 +21,20 @@
 	width: 24px;
 	margin-right: 0px;
 	margin-top: -3px;
+}
+
+.app-icon-svg {
+	display: inline-block;
+	margin: auto;
+	text-align: center;
+	border-radius: 16px;
+	cursor: pointer;
+	box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.app-icon-svg .hub-icon {
+	height: 72px;
+	width: 72px;
 }
 
 .dashboard-list-item {
@@ -412,6 +426,12 @@ body[data-route="pos"] {
 	.collapse-btn {
 		cursor: pointer;
 	}
+
+	@media (max-width: @screen-xs) {
+		.page-actions {
+			max-width: 110px;
+		}
+	}
 }
 
 .price-info {
@@ -438,4 +458,50 @@ body[data-route="pos"] {
 	.list-item_content {
 		padding-right: 45px;
 	}
+}
+
+// Healthcare
+
+.exercise-card {
+	box-shadow: 0 1px 3px rgba(0,0,0,0.30);
+	border-radius: 2px;
+	padding: 6px 6px 6px 8px;
+	margin-top: 10px;
+	height: 100% !important;
+
+	.card-img-top {
+		width: 100%;
+		height: 15vw;
+		object-fit: cover;
+	}
+
+	.btn-edit {
+		position: absolute;
+		bottom: 10px;
+		left: 20px;
+	}
+
+	.btn-del {
+		position: absolute;
+		bottom: 10px;
+		left: 50px;
+	}
+
+	.card-body {
+		margin-bottom: 10px;
+	}
+
+	.card-footer {
+		padding: 10px;
+	}
+}
+
+.exercise-row {
+	height: 100% !important;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.exercise-col {
+	padding: 10px;
 }

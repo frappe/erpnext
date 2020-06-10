@@ -6,21 +6,14 @@
  "mappings": [
   {
    "enabled": 1, 
-   "mapping": "Company to Hub Company"
-  }, 
-  {
-   "enabled": 1, 
    "mapping": "Item to Hub Item"
-  }, 
-  {
-   "enabled": 1, 
-   "mapping": "Hub Message to Lead"
   }
  ], 
- "modified": "2017-10-09 17:30:17.680059", 
+ "modified": "2018-08-19 22:20:25.644602", 
  "modified_by": "Administrator", 
  "module": "Hub Node", 
  "name": "Hub Sync", 
  "owner": "Administrator", 
- "plan_name": "Hub Sync"
+ "plan_name": "Hub Sync", 
+ "postprocess_method": "erpnext.hub_node.api.item_sync_postprocess"
 }

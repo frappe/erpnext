@@ -4,20 +4,20 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Setup"),
+			"label": _("Settings"),
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Hub Settings"
+					"name": "Marketplace Settings"
 				},
 			]
 		},
 		{
-			"label": _("Hub"),
+			"label": _("Marketplace"),
 			"items": [
 				{
 					"type": "page",
-					"name": "hub"
+					"name": "marketplace/home"
 				},
 			]
 		},

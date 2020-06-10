@@ -1,0 +1,36 @@
+{
+ "add_total_row": 1,
+ "creation": "2019-03-08 15:08:19.929728",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2019-06-13 15:54:49.213973",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Employee Billing Summary",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Timesheet",
+ "report_name": "Employee Billing Summary",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Projects User"
+  },
+  {
+   "role": "HR User"
+  },
+  {
+   "role": "Manufacturing User"
+  },
+  {
+   "role": "Employee"
+  },
+  {
+   "role": "Accounts User"
+  }
+ ]
+}

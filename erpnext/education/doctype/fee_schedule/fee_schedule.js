@@ -31,15 +31,13 @@ frappe.ui.form.on('Fee Schedule', {
 			return {
 				"program": frm.doc.program,
 				"academic_term": frm.doc.academic_term,
-				"academic_year": frm.doc.academic_year
+				"academic_year": frm.doc.academic_year,
+				"disabled": 0
 			};
 		});
 		frappe.realtime.on("fee_schedule_progress", function(data) {
 			if (data.reload && data.reload === 1) {
 				frm.reload_doc();
-			}
-			if (data.progress && data.progress === "0") {
-				frappe.msgprint(__("Fee records will be created in the background. In case of any error the error message will be updated in the Schedule."));
 			}
 			if (data.progress) {
 				let progress_bar = $(cur_frm.dashboard.progress_area).find(".progress-bar");
@@ -74,6 +72,15 @@ frappe.ui.form.on('Fee Schedule', {
 				});
 			}, "fa fa-play", "btn-success");
 		}
+		if (frm.doc.fee_creation_status == "Successful") {
+			frm.add_custom_button(__("View Fees Records"), function() {
+				frappe.route_options = {
+					fee_schedule: frm.doc.name
+				};
+				frappe.set_route("List", "Fees");
+			});
+		}
+
 	},
 
 	fee_structure: function(frm) {

@@ -29,9 +29,14 @@ class StudentApplicant(Document):
 		set_name_by_naming_series(self)
 
 	def validate(self):
+		self.validate_dates()
 		self.title = " ".join(filter(None, [self.first_name, self.middle_name, self.last_name]))
 		if self.student_admission and self.program and self.date_of_birth:
 			self.validation_from_student_admission()
+
+	def validate_dates(self):
+		if self.date_of_birth and getdate(self.date_of_birth) >= getdate():
+			frappe.throw(_("Date of Birth cannot be greater than today."))
 
 	def on_update_after_submit(self):
 		student = frappe.get_list("Student",  filters= {"student_applicant": self.name})

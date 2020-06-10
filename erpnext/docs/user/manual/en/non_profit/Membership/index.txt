@@ -1,3 +1,0 @@
-membership_type
-member
-membership

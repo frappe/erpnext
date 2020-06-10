@@ -1,0 +1,175 @@
+{
+ "creation": "2018-02-12 15:10:05.495713",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enable_sync",
+  "sb_00",
+  "woocommerce_server_url",
+  "secret",
+  "cb_00",
+  "api_consumer_key",
+  "api_consumer_secret",
+  "sb_accounting_details",
+  "tax_account",
+  "column_break_10",
+  "f_n_f_account",
+  "defaults_section",
+  "creation_user",
+  "warehouse",
+  "sales_order_series",
+  "column_break_14",
+  "company",
+  "delivery_after_days",
+  "uom",
+  "endpoints",
+  "endpoint"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "enable_sync",
+   "fieldtype": "Check",
+   "label": "Enable Sync"
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "woocommerce_server_url",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Woocommerce Server URL"
+  },
+  {
+   "fieldname": "secret",
+   "fieldtype": "Code",
+   "label": "Secret",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_00",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "api_consumer_key",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "API consumer key"
+  },
+  {
+   "fieldname": "api_consumer_secret",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "API consumer secret"
+  },
+  {
+   "fieldname": "sb_accounting_details",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "tax_account",
+   "fieldtype": "Link",
+   "label": "Tax Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "f_n_f_account",
+   "fieldtype": "Link",
+   "label": "Freight and Forwarding Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Defaults"
+  },
+  {
+   "description": "The user that will be used to create Customers, Items and Sales Orders. This user should have the relevant permissions.",
+   "fieldname": "creation_user",
+   "fieldtype": "Link",
+   "label": "Creation User",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "description": "This warehouse will be used to create Sales Orders. The fallback warehouse is \"Stores\".",
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "The fallback series is \"SO-WOO-\".",
+   "fieldname": "sales_order_series",
+   "fieldtype": "Select",
+   "label": "Sales Order Series"
+  },
+  {
+   "description": "This is the default UOM used for items and Sales orders. The fallback UOM is \"Nos\".",
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "endpoints",
+   "fieldtype": "Section Break",
+   "label": "Endpoints"
+  },
+  {
+   "fieldname": "endpoint",
+   "fieldtype": "Code",
+   "label": "Endpoint",
+   "read_only": 1
+  },
+  {
+   "description": "This company will be used to create Sales Orders.",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "description": "This is the default offset (days) for the Delivery Date in Sales Orders. The fallback offset is 7 days from the order placement date.",
+   "fieldname": "delivery_after_days",
+   "fieldtype": "Int",
+   "label": "Delivery After (Days)"
+  }
+ ],
+ "issingle": 1,
+ "modified": "2019-11-04 00:45:21.232096",
+ "modified_by": "Administrator",
+ "module": "ERPNext Integrations",
+ "name": "Woocommerce Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

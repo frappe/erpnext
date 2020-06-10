@@ -5,6 +5,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt
 from frappe import msgprint, _
+from frappe.model.meta import get_field_precision
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
 def execute(filters=None):
 	return _execute(filters)
@@ -25,9 +27,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 	#Cost Center & Warehouse Map
 	invoice_cc_wh_map = get_invoice_cc_wh_map(invoice_list)
 	invoice_so_dn_map = get_invoice_so_dn_map(invoice_list)
-	customers = list(set([inv.customer for inv in invoice_list]))
-	customer_map = get_customer_details(customers)
-	company_currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
+	company_currency = frappe.get_cached_value('Company',  filters.get("company"),  "default_currency")
 	mode_of_payments = get_mode_of_payments([inv.name for inv in invoice_list])
 
 	data = []
@@ -38,43 +38,66 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 		cost_center = list(set(invoice_cc_wh_map.get(inv.name, {}).get("cost_center", [])))
 		warehouse = list(set(invoice_cc_wh_map.get(inv.name, {}).get("warehouse", [])))
 
-		customer_details = customer_map.get(inv.customer, {})
-		row = [
-			inv.name, inv.posting_date, inv.customer, inv.customer_name
-		]
+		row = {
+			'invoice': inv.name,
+			'posting_date': inv.posting_date,
+			'customer': inv.customer,
+			'customer_name': inv.customer_name
+		}
 
 		if additional_query_columns:
 			for col in additional_query_columns:
-				row.append(inv.get(col))
+				row.update({
+					col: inv.get(col)
+				})
 
-		row +=[
-			customer_details.get("customer_group"),
-			customer_details.get("territory"),
-			inv.debit_to, ", ".join(mode_of_payments.get(inv.name, [])),
-			inv.project, inv.owner, inv.remarks,
-			", ".join(sales_order), ", ".join(delivery_note),", ".join(cost_center),
-			", ".join(warehouse), company_currency
-		]
+		row.update({
+			'customer_group': inv.get("customer_group"),
+			'territory': inv.get("territory"),
+			'tax_id': inv.get("tax_id"),
+			'receivable_account': inv.debit_to,
+			'mode_of_payment':  ", ".join(mode_of_payments.get(inv.name, [])),
+			'project': inv.project,
+			'owner': inv.owner,
+			'remarks': inv.remarks,
+			'sales_order': ", ".join(sales_order),
+			'delivery_note': ", ".join(delivery_note),
+			'cost_center': ", ".join(cost_center),
+			'warehouse': ", ".join(warehouse),
+			'currency': company_currency
+		})
+
 		# map income values
 		base_net_total = 0
 		for income_acc in income_accounts:
 			income_amount = flt(invoice_income_map.get(inv.name, {}).get(income_acc))
 			base_net_total += income_amount
-			row.append(income_amount)
+			row.update({
+				frappe.scrub(income_acc): income_amount
+			})
 
 		# net total
-		row.append(base_net_total or inv.base_net_total)
+		row.update({'net_total': base_net_total or inv.base_net_total})
 
 		# tax account
 		total_tax = 0
 		for tax_acc in tax_accounts:
 			if tax_acc not in income_accounts:
-				tax_amount = flt(invoice_tax_map.get(inv.name, {}).get(tax_acc))
+				tax_amount_precision = get_field_precision(frappe.get_meta("Sales Taxes and Charges").get_field("tax_amount"), currency=company_currency) or 2
+				tax_amount = flt(invoice_tax_map.get(inv.name, {}).get(tax_acc), tax_amount_precision)
 				total_tax += tax_amount
-				row.append(tax_amount)
+				row.update({
+					frappe.scrub(tax_acc): tax_amount
+				})
 
 		# total tax, grand total, outstanding amount & rounded total
-		row += [total_tax, inv.base_grand_total, inv.base_rounded_total, inv.outstanding_amount]
+
+		row.update({
+			'tax_total': total_tax,
+			'grand_total': inv.base_grand_total,
+			'rounded_total': inv.base_rounded_total,
+			'outstanding_amount': inv.outstanding_amount
+		})
 
 		data.append(row)
 
@@ -83,19 +106,118 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 def get_columns(invoice_list, additional_table_columns):
 	"""return columns based on filters"""
 	columns = [
-		_("Invoice") + ":Link/Sales Invoice:120", _("Posting Date") + ":Date:80",
-		_("Customer") + ":Link/Customer:120", _("Customer Name") + "::120"
+		{
+			'label': _("Invoice"),
+			'fieldname': 'invoice',
+			'fieldtype': 'Link',
+			'options': 'Sales Invoice',
+			'width': 120
+		},
+		{
+			'label': _("Posting Date"),
+			'fieldname': 'posting_date',
+			'fieldtype': 'Date',
+			'width': 80
+		},
+		{
+			'label': _("Customer"),
+			'fieldname': 'customer',
+			'fieldtype': 'Link',
+			'options': 'Customer',
+			'width': 120
+		},
+		{
+			'label': _("Customer Name"),
+			'fieldname': 'customer_name',
+			'fieldtype': 'Data',
+			'width': 120
+		},
 	]
 
 	if additional_table_columns:
 		columns += additional_table_columns
 
 	columns +=[
-		_("Customer Group") + ":Link/Customer Group:120", _("Territory") + ":Link/Territory:80",
-		_("Receivable Account") + ":Link/Account:120", _("Mode of Payment") + "::120",
-		_("Project") +":Link/Project:80", _("Owner") + "::150", _("Remarks") + "::150",
-		_("Sales Order") + ":Link/Sales Order:100", _("Delivery Note") + ":Link/Delivery Note:100",
-		_("Cost Center") + ":Link/Cost Center:100", _("Warehouse") + ":Link/Warehouse:100",
+		{
+			'label': _("Customer Group"),
+			'fieldname': 'customer_group',
+			'fieldtype': 'Link',
+			'options': 'Customer Group',
+			'width': 120
+		},
+		{
+			'label': _("Territory"),
+			'fieldname': 'territory',
+			'fieldtype': 'Link',
+			'options': 'Territory',
+			'width': 80
+		},
+		{
+			'label': _("Tax Id"),
+			'fieldname': 'tax_id',
+			'fieldtype': 'Data',
+			'width': 120
+		},
+		{
+			'label': _("Receivable Account"),
+			'fieldname': 'receivable_account',
+			'fieldtype': 'Link',
+			'options': 'Account',
+			'width': 80
+		},
+		{
+			'label': _("Mode Of Payment"),
+			'fieldname': 'mode_of_payment',
+			'fieldtype': 'Data',
+			'width': 120
+		},
+		{
+			'label': _("Project"),
+			'fieldname': 'project',
+			'fieldtype': 'Link',
+			'options': 'Project',
+			'width': 80
+		},
+		{
+			'label': _("Owner"),
+			'fieldname': 'owner',
+			'fieldtype': 'Data',
+			'width': 150
+		},
+		{
+			'label': _("Remarks"),
+			'fieldname': 'remarks',
+			'fieldtype': 'Data',
+			'width': 150
+		},
+		{
+			'label': _("Sales Order"),
+			'fieldname': 'sales_order',
+			'fieldtype': 'Link',
+			'options': 'Sales Order',
+			'width': 100
+		},
+		{
+			'label': _("Delivery Note"),
+			'fieldname': 'delivery_note',
+			'fieldtype': 'Link',
+			'options': 'Delivery Note',
+			'width': 100
+		},
+		{
+			'label': _("Cost Center"),
+			'fieldname': 'cost_center',
+			'fieldtype': 'Link',
+			'options': 'Cost Center',
+			'width': 100
+		},
+		{
+			'label': _("Warehouse"),
+			'fieldname': 'warehouse',
+			'fieldtype': 'Link',
+			'options': 'Warehouse',
+			'width': 100
+		},
 		{
 			"fieldname": "currency",
 			"label": _("Currency"),
@@ -104,7 +226,10 @@ def get_columns(invoice_list, additional_table_columns):
 		}
 	]
 
-	income_accounts = tax_accounts = income_columns = tax_columns = []
+	income_accounts = []
+	tax_accounts = []
+	income_columns = []
+	tax_columns = []
 
 	if invoice_list:
 		income_accounts = frappe.db.sql_list("""select distinct income_account
@@ -118,14 +243,65 @@ def get_columns(invoice_list, additional_table_columns):
 			and parent in (%s) order by account_head""" %
 			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 
-	income_columns = [(account + ":Currency/currency:120") for account in income_accounts]
+	for account in income_accounts:
+		income_columns.append({
+			"label": account,
+			"fieldname": frappe.scrub(account),
+			"fieldtype": "Currency",
+			"options": 'currency',
+			"width": 120
+		})
+
 	for account in tax_accounts:
 		if account not in income_accounts:
-			tax_columns.append(account + ":Currency/currency:120")
+			tax_columns.append({
+				"label": account,
+				"fieldname": frappe.scrub(account),
+				"fieldtype": "Currency",
+				"options": 'currency',
+				"width": 120
+			})
 
-	columns = columns + income_columns + [_("Net Total") + ":Currency/currency:120"] + tax_columns + \
-		[_("Total Tax") + ":Currency/currency:120", _("Grand Total") + ":Currency/currency:120",
-		_("Rounded Total") + ":Currency/currency:120", _("Outstanding Amount") + ":Currency/currency:120"]
+	net_total_column = [{
+		"label": _("Net Total"),
+		"fieldname": "net_total",
+		"fieldtype": "Currency",
+		"options": 'currency',
+		"width": 120
+	}]
+
+	total_columns = [
+		{
+			"label": _("Tax Total"),
+			"fieldname": "tax_total",
+			"fieldtype": "Currency",
+			"options": 'currency',
+			"width": 120
+		},
+		{
+			"label": _("Grand Total"),
+			"fieldname": "grand_total",
+			"fieldtype": "Currency",
+			"options": 'currency',
+			"width": 120
+		},
+		{
+			"label": _("Rounded Total"),
+			"fieldname": "rounded_total",
+			"fieldtype": "Currency",
+			"options": 'currency',
+			"width": 120
+		},
+		{
+			"label": _("Outstanding Amount"),
+			"fieldname": "outstanding_amount",
+			"fieldtype": "Currency",
+			"options": 'currency',
+			"width": 120
+		}
+	]
+
+	columns = columns + income_columns + net_total_column + tax_columns + total_columns
 
 	return columns, income_accounts, tax_accounts
 
@@ -155,6 +331,33 @@ def get_conditions(filters):
 			 where parent=`tabSales Invoice`.name
 			 	and ifnull(`tabSales Invoice Item`.warehouse, '') = %(warehouse)s)"""
 
+	if filters.get("brand"):
+		conditions +=  """ and exists(select name from `tabSales Invoice Item`
+			 where parent=`tabSales Invoice`.name
+			 	and ifnull(`tabSales Invoice Item`.brand, '') = %(brand)s)"""
+
+	if filters.get("item_group"):
+		conditions +=  """ and exists(select name from `tabSales Invoice Item`
+			 where parent=`tabSales Invoice`.name
+			 	and ifnull(`tabSales Invoice Item`.item_group, '') = %(item_group)s)"""
+
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
+
+	if accounting_dimensions:
+		common_condition = """
+			and exists(select name from `tabSales Invoice Item`
+				where parent=`tabSales Invoice`.name
+			"""
+		for dimension in accounting_dimensions:
+			if filters.get(dimension.fieldname):
+				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
+					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
+						filters.get(dimension.fieldname))
+
+					conditions += common_condition + "and ifnull(`tabSales Invoice Item`.{0}, '') in %({0})s)".format(dimension.fieldname)
+				else:
+					conditions += common_condition + "and ifnull(`tabSales Invoice Item`.{0}, '') in (%({0})s))".format(dimension.fieldname)
+
 	return conditions
 
 def get_invoices(filters, additional_query_columns):
@@ -162,7 +365,9 @@ def get_invoices(filters, additional_query_columns):
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
 
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select name, posting_date, debit_to, project, customer, customer_name, owner, remarks,
+	return frappe.db.sql("""
+		select name, posting_date, debit_to, project, customer,
+		customer_name, owner, remarks, territory, tax_id, customer_group,
 		base_net_total, base_grand_total, base_rounded_total, outstanding_amount {0}
 		from `tabSales Invoice`
 		where docstatus = 1 %s order by posting_date desc, name desc""".format(additional_query_columns or '') %
@@ -189,7 +394,7 @@ def get_invoice_tax_map(invoice_list, invoice_income_map, income_accounts):
 	invoice_tax_map = {}
 	for d in tax_details:
 		if d.account_head in income_accounts:
-			if invoice_income_map[d.parent].has_key(d.account_head):
+			if d.account_head in invoice_income_map[d.parent]:
 				invoice_income_map[d.parent][d.account_head] += flt(d.tax_amount)
 			else:
 				invoice_income_map[d.parent][d.account_head] = flt(d.tax_amount)
@@ -240,15 +445,6 @@ def get_invoice_cc_wh_map(invoice_list):
 				"warehouse", []).append(d.warehouse)
 
 	return invoice_cc_wh_map
-
-def get_customer_details(customers):
-	customer_map = {}
-	for cust in frappe.db.sql("""select name, territory, customer_group from `tabCustomer`
-		where name in (%s)""" % ", ".join(["%s"]*len(customers)), tuple(customers), as_dict=1):
-			customer_map.setdefault(cust.name, cust)
-
-	return customer_map
-
 
 def get_mode_of_payments(invoice_list):
 	mode_of_payments = {}

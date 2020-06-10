@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 data = {
 	'desktop_icons': [
 		'Student',
@@ -12,7 +14,7 @@ data = {
 		'Student Attendance Tool',
 		'Student Applicant'
 	],
-	'default_portal_role': 'Guardian',
+	'default_portal_role': 'Student',
 	'restricted_roles': [
 		'Student',
 		'Instructor',

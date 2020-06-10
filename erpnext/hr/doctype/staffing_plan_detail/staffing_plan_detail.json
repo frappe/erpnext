@@ -1,0 +1,79 @@
+{
+ "creation": "2018-04-13 18:04:20.978931",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "designation",
+  "vacancies",
+  "estimated_cost_per_position",
+  "total_estimated_cost",
+  "column_break_5",
+  "current_count",
+  "current_openings",
+  "number_of_positions"
+ ],
+ "fields": [
+  {
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Designation",
+   "options": "Designation",
+   "reqd": 1
+  },
+  {
+   "fieldname": "number_of_positions",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Number Of Positions",
+   "read_only": 1
+  },
+  {
+   "fieldname": "estimated_cost_per_position",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Estimated Cost Per Position"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "current_count",
+   "fieldtype": "Int",
+   "label": "Current Count",
+   "read_only": 1
+  },
+  {
+   "fieldname": "current_openings",
+   "fieldtype": "Int",
+   "label": "Current Openings",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vacancies",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Vacancies"
+  },
+  {
+   "fieldname": "total_estimated_cost",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Estimated Cost",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-06-24 18:40:37.140178",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Staffing Plan Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

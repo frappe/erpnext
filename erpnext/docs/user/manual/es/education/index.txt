@@ -1,6 +1,0 @@
-student
-admission
-schedule
-fees
-setup
-assessment

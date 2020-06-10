@@ -20,21 +20,28 @@ class NamingSeries(Document):
 			+ frappe.db.sql_list("""select dt from `tabCustom Field`
 				where fieldname='naming_series'""")))
 
-		doctypes = list(set(get_doctypes_with_read()) | set(doctypes))
+		doctypes = list(set(get_doctypes_with_read()).intersection(set(doctypes)))
 		prefixes = ""
 		for d in doctypes:
 			options = ""
 			try:
 				options = self.get_options(d)
 			except frappe.DoesNotExistError:
-				frappe.msgprint('Unable to find DocType {0}'.format(d))
+				frappe.msgprint(_('Unable to find DocType {0}').format(d))
 				#frappe.pass_does_not_exist_error()
 				continue
 
 			if options:
 				prefixes = prefixes + "\n" + options
 		prefixes.replace("\n\n", "\n")
-		prefixes = "\n".join(sorted(prefixes.split("\n")))
+		prefixes = prefixes.split("\n")
+
+		custom_prefixes = frappe.get_all('DocType', fields=["autoname"],
+			filters={"name": ('not in', doctypes), "autoname":('like', '%.#%'), 'module': ('not in', ['Core'])})
+		if custom_prefixes:
+			prefixes = prefixes + [d.autoname.rsplit('.', 1)[0] for d in custom_prefixes]
+
+		prefixes = "\n".join(sorted(prefixes))
 
 		return {
 			"transactions": "\n".join([''] + sorted(doctypes)),
@@ -42,11 +49,12 @@ class NamingSeries(Document):
 		}
 
 	def scrub_options_list(self, ol):
-		options = filter(lambda x: x, [cstr(n).strip() for n in ol])
+		options = list(filter(lambda x: x, [cstr(n).strip() for n in ol]))
 		return options
 
 	def update_series(self, arg=None):
 		"""update series list"""
+		self.validate_series_set()
 		self.check_duplicate()
 		series_list = self.set_options.split("\n")
 
@@ -59,6 +67,10 @@ class NamingSeries(Document):
 		msgprint(_("Series Updated"))
 
 		return self.get_transactions()
+
+	def validate_series_set(self):
+		if self.select_doc_for_series and not self.set_options:
+			frappe.throw(_("Please set the series to be used."))
 
 	def set_series_for(self, doctype, ol):
 		options = self.scrub_options_list(ol)
@@ -123,8 +135,8 @@ class NamingSeries(Document):
 
 	def validate_series_name(self, n):
 		import re
-		if not re.match("^[\w\- /.#]*$", n, re.UNICODE):
-			throw(_('Special Characters except "-", "#", "." and "/" not allowed in naming series'))
+		if not re.match("^[\w\- /.#{}]*$", n, re.UNICODE):
+			throw(_('Special Characters except "-", "#", ".", "/", "{" and "}" not allowed in naming series'))
 
 	def get_options(self, arg=None):
 		if frappe.get_meta(arg or self.select_doc_for_series).get_field("naming_series"):
@@ -139,7 +151,7 @@ class NamingSeries(Document):
 
 	def insert_series(self, series):
 		"""insert series if missing"""
-		if not frappe.db.get_value('Series', series, 'name', order_by="name"):
+		if frappe.db.get_value('Series', series, 'name', order_by="name") == None:
 			frappe.db.sql("insert into tabSeries (name, current) values (%s, 0)", (series))
 
 	def update_series_start(self):
@@ -154,13 +166,12 @@ class NamingSeries(Document):
 
 	def parse_naming_series(self):
 		parts = self.prefix.split('.')
-		# If series contain date format like INV.YYYY.MM.#####
-		if len(parts) > 2:
-			del parts[-1] # Removed ### from the series
-			prefix = parse_naming_series(parts)
-		else:
-			prefix = parts[0]
 
+		# Remove ### from the end of series
+		if parts[-1] == "#" * len(parts[-1]):
+			del parts[-1]
+
+		prefix = parse_naming_series(parts)
 		return prefix
 
 def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True):

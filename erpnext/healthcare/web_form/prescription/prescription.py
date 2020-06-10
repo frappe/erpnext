@@ -7,13 +7,13 @@ def get_context(context):
 
 def get_list_context(context):
 	context.row_template = "erpnext/templates/includes/healthcare/prescription_row_template.html"
-	context.get_list = get_consultation_list
+	context.get_list = get_encounter_list
 
-def get_consultation_list(doctype, txt, filters, limit_start, limit_page_length = 20, order_by='modified desc'):
+def get_encounter_list(doctype, txt, filters, limit_start, limit_page_length = 20, order_by='modified desc'):
 	patient = get_patient()
-	consultations = frappe.db.sql("""select * from `tabConsultation`
+	encounters = frappe.db.sql("""select * from `tabPatient Encounter`
 		where patient = %s order by creation desc""", patient, as_dict = True)
-	return consultations
+	return encounters
 
 def get_patient():
 	return frappe.get_value("Patient",{"email": frappe.session.user}, "name")

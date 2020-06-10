@@ -11,16 +11,61 @@ def execute(filters=None):
 	columns=get_columns()
 	data=get_lead_data(filters, "Lead Owner")
 	return columns, data
-	
+
 def get_columns():
 	return [
-		_("Lead Owner") + ":Data:130", 
-		_("Lead Count") + ":Int:80",
-		_("Opp Count") + ":Int:80",
-		_("Quot Count") + ":Int:80", 
-		_("Order Count") + ":Int:100",
-		_("Order Value") + ":Float:100",
-		_("Opp/Lead %") + ":Float:100",
-		_("Quot/Lead %") + ":Float:100",
-		_("Order/Quot %") + ":Float:100"
+		{
+			"fieldname": "lead_owner",
+			"label": _("Lead Owner"),
+			"fieldtype": "Data",
+			"width": "130"
+		},
+		{
+			"fieldname": "lead_count",
+			"label": _("Lead Count"),
+			"fieldtype": "Int",
+			"width": "80"
+		},
+		{
+			"fieldname": "opp_count",
+			"label": _("Opp Count"),
+			"fieldtype": "Int",
+			"width": "80"
+		},
+		{
+			"fieldname": "quot_count",
+			"label": _("Quot Count"),
+			"fieldtype": "Int",
+			"width": "80"
+		},
+		{
+			"fieldname": "order_count",
+			"label": _("Order Count"),
+			"fieldtype": "Int",
+			"width": "100"
+		},
+		{
+			"fieldname": "order_value",
+			"label": _("Order Value"),
+			"fieldtype": "Float",
+			"width": "100"
+		},
+		{
+			"fieldname": "opp_lead",
+			"label": _("Opp/Lead %"),
+			"fieldtype": "Float",
+			"width": "100"
+		},
+		{
+			"fieldname": "quot_lead",
+			"label": _("Quot/Lead %"),
+			"fieldtype": "Float",
+			"width": "100"
+		},
+		{
+			"fieldname": "order_quot",
+			"label": _("Order/Quot %"),
+			"fieldtype": "Float",
+			"width": "100"
+		}
 	]

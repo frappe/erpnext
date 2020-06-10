@@ -1,0 +1,16 @@
+name: Backport
+on:
+  pull_request:
+    types:
+      - closed
+      - labeled
+
+jobs:
+  backport:
+    runs-on: ubuntu-18.04
+    name: Backport
+    steps:
+      - name: Backport
+        uses: tibdex/backport@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}

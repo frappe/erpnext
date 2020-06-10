@@ -1,27 +1,27 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+
 frappe.require("assets/erpnext/js/financial_statements.js", function() {
 	frappe.query_reports["Profit and Loss Statement"] = $.extend({},
 		erpnext.financial_statements);
 
+	erpnext.utils.add_dimensions('Profit and Loss Statement', 10);
+
 	frappe.query_reports["Profit and Loss Statement"]["filters"].push(
 		{
-			"fieldname":"cost_center",
-			"label": __("Cost Center"),
-			"fieldtype": "Link",
-			"options": "Cost Center"
-		},
-		{
-			"fieldname":"project",
+			"fieldname": "project",
 			"label": __("Project"),
-			"fieldtype": "Link",
-			"options": "Project"
+			"fieldtype": "MultiSelectList",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Project', txt);
+			}
 		},
 		{
-			"fieldname": "accumulated_values",
-			"label": __("Accumulated Values"),
-			"fieldtype": "Check"
+			"fieldname": "include_default_book_entries",
+			"label": __("Include Default Book Entries"),
+			"fieldtype": "Check",
+			"default": 1
 		}
 	);
 });

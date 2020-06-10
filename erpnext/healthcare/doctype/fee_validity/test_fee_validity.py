@@ -5,50 +5,44 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from erpnext.healthcare.doctype.patient_appointment.patient_appointment import create_invoice
-from frappe.utils.make_random import get_random
 from frappe.utils import nowdate, add_days
-# test_records = frappe.get_test_records('Fee Validity')
+from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_healthcare_docs, create_appointment, create_healthcare_service_items
+
+test_dependencies = ["Company"]
 
 class TestFeeValidity(unittest.TestCase):
+	def setUp(self):
+		frappe.db.sql("""delete from `tabPatient Appointment`""")
+		frappe.db.sql("""delete from `tabFee Validity`""")
+		frappe.db.sql("""delete from `tabPatient`""")
+
 	def test_fee_validity(self):
-		patient = get_random("Patient")
-		physician = get_random("Physician")
+		item = create_healthcare_service_items()
+		healthcare_settings = frappe.get_single("Healthcare Settings")
+		healthcare_settings.enable_free_follow_ups = 1
+		healthcare_settings.max_visits = 2
+		healthcare_settings.valid_days = 7
+		healthcare_settings.automate_appointment_invoicing = 1
+		healthcare_settings.op_consulting_charge_item = item
+		healthcare_settings.save(ignore_permissions=True)
+		patient, medical_department, practitioner = create_healthcare_docs()
 
-		if not patient:
-			patient = frappe.new_doc("Patient")
-			patient.patient_name = "Test Patient"
-			patient.sex = "Male"
-			patient.save(ignore_permissions=True)
-			patient = patient.name
+		# appointment should not be invoiced. Check Fee Validity created for new patient
+		appointment = create_appointment(patient, practitioner, nowdate())
+		invoiced = frappe.db.get_value("Patient Appointment", appointment.name, "invoiced")
+		self.assertEqual(invoiced, 0)
 
-		if not physician:
-			physician = frappe.new_doc("Physician")
-			physician.first_name = "Amit Jain"
-			physician.save(ignore_permissions=True)
-			physician = physician.name
+		# appointment should not be invoiced as it is within fee validity
+		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 4))
+		invoiced = frappe.db.get_value("Patient Appointment", appointment.name, "invoiced")
+		self.assertEqual(invoiced, 0)
 
-		frappe.db.set_value("Healthcare Settings", None, "max_visit", 2)
-		frappe.db.set_value("Healthcare Settings", None, "valid_days", 7)
+		# appointment should be invoiced as it is within fee validity but the max_visits are exceeded
+		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 5), invoice=1)
+		invoiced = frappe.db.get_value("Patient Appointment", appointment.name, "invoiced")
+		self.assertEqual(invoiced, 1)
 
-		appointment = create_appointment(patient, physician, nowdate())
-		invoice = frappe.db.get_value("Patient Appointment", appointment.name, "sales_invoice")
-		self.assertEqual(invoice, None)
-		create_invoice(frappe.defaults.get_global_default("company"), physician, patient, appointment.name, appointment.appointment_date)
-		appointment = create_appointment(patient, physician, add_days(nowdate(), 4))
-		invoice = frappe.db.get_value("Patient Appointment", appointment.name, "sales_invoice")
-		self.assertTrue(invoice)
-		appointment = create_appointment(patient, physician, add_days(nowdate(), 5))
-		invoice = frappe.db.get_value("Patient Appointment", appointment.name, "sales_invoice")
-		self.assertEqual(invoice, None)
-		appointment = create_appointment(patient, physician, add_days(nowdate(), 10))
-		invoice = frappe.db.get_value("Patient Appointment", appointment.name, "sales_invoice")
-		self.assertEqual(invoice, None)
-
-def create_appointment(patient, physician, appointment_date):
-	appointment = frappe.new_doc("Patient Appointment")
-	appointment.patient = patient
-	appointment.physician = physician
-	appointment.appointment_date = appointment_date
-	appointment.save(ignore_permissions=True)
-	return appointment
+		# appointment should be invoiced as it is not within fee validity and the max_visits are exceeded
+		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 10), invoice=1)
+		invoiced = frappe.db.get_value("Patient Appointment", appointment.name, "invoiced")
+		self.assertEqual(invoiced, 1)

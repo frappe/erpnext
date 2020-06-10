@@ -1,7 +1,0 @@
-item-price
-item-codification
-item-variants
-purchase-details
-reorder
-item-valuation-fifo-and-moving-average
-item-settings

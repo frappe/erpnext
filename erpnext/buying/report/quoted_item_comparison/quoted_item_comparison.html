@@ -1,10 +1,10 @@
 
 <head>
-	
-	
+
+
 	<link href="/assets/frappe/css/c3.min.css" rel="stylesheet" type="text/css">
-	
-	
+
+
 	<script type="text/javascript" src="/assets/frappe/js/lib/d3.min.js"></script>
 	<script type="text/javascript" src="/assets/frappe/js/lib/c3.min.js"></script>
     <script type="text/javascript">
@@ -13,12 +13,12 @@
 			var chartData = [];
 			{% var q = 0; %}
 			{% for(var j=0, m=data.length+1; j<m; j++) { %}
-			
+
 				var tempData{%=j%} = [];
-				
+
 				{% for(var i=1, l=report.columns.length; i<l; i++) { %}
 					{% if(__(report.columns[i].label) != __("Quotation")) { %}
-					
+
 						{% if(j == 0) { %}
 							{% if(i == 1) { %}
 								tempData{%=j%}[{%=i%}-1] = \"x\";
@@ -28,14 +28,14 @@
 							{% } %}
 						{% } else { %}
 							{% if(i == 1) { %}
-								tempData{%=j%}[{%=i%}-1] = \"{%= data[j-1][report.columns[i].field] %} \";
+								tempData{%=j%}[{%=i%}-1] = \"{%= data[j-1][report.columns[i].fieldname] %} \";
 							{% } else { %}
-							tempData{%=j%}[{%=i%}-1] = {% if(data[j-1][report.columns[i].field] == "") { if (i > 2) { %} 
-										tempData{%=j%}[{%=i%}-2] 
-									{% } else { %} 
-										0 
-								{% } } else { %} 
-									{%= data[j-1][report.columns[i].field] %} 
+							tempData{%=j%}[{%=i%}-1] = {% if(data[j-1][report.columns[i].fieldname] == "") { if (i > 2) { %}
+										tempData{%=j%}[{%=i%}-2]
+									{% } else { %}
+										0
+								{% } } else { %}
+									{%= data[j-1][report.columns[i].fieldname] %}
 							{% } %};
 							{% } %};
 						{% } %}
@@ -52,12 +52,12 @@
 						{% } %}
 
 					{% } %}
-					
+
 				{% } %}
 				chartData[{%=j%}] = tempData{%=j%};
 			{% } %}
 			console.log(chartData);
-			
+
 			hold = {
 			bindto: "#chart_div" ,data: {
 				x: "x",
@@ -81,7 +81,7 @@
 			console.log(hold);
 			var chart = c3.generate(hold);
 		});
-		
+
 		function onReady(selector, callback) {
         var intervalID = window.setInterval(function() {
           if (document.querySelector(selector) !== undefined) {
@@ -89,8 +89,8 @@
             callback.call(this);
           }
         }, 500);}
-				
-		
+
+
     </script>
 
  </head>
@@ -114,9 +114,9 @@
 
 		{% for(var i=0, l=data.length; i<l; i++) { %}
 			<tr>
-			
+
 				{% for(var j=0,m=report.columns.length; j<m; j++) { %}
-					<td style="width: 15%">{%= data[i][report.columns[j].field] %}</td>
+					<td style="width: 15%">{%= data[i][report.columns[j].fieldname] %}</td>
 				{% } %}
 
 		</tr>
@@ -128,5 +128,5 @@
 <div id="chart_div"></div>
 
 
-		
-<p class="text-right text-muted">Printed On {%= dateutil.str_to_user(dateutil.get_datetime_as_string()) %}</p>
+
+<p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>

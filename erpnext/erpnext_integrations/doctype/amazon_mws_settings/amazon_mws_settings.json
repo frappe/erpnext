@@ -1,0 +1,237 @@
+{
+ "actions": [],
+ "creation": "2018-07-31 05:51:41.357047",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enable_amazon",
+  "mws_credentials",
+  "seller_id",
+  "aws_access_key_id",
+  "mws_auth_token",
+  "secret_key",
+  "column_break_4",
+  "market_place_id",
+  "region",
+  "domain",
+  "section_break_13",
+  "company",
+  "warehouse",
+  "item_group",
+  "price_list",
+  "column_break_17",
+  "customer_group",
+  "territory",
+  "customer_type",
+  "market_place_account_group",
+  "section_break_12",
+  "after_date",
+  "taxes_charges",
+  "sync_products",
+  "sync_orders",
+  "column_break_10",
+  "enable_sync",
+  "max_retry_limit"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "enable_amazon",
+   "fieldtype": "Check",
+   "label": "Enable Amazon"
+  },
+  {
+   "fieldname": "mws_credentials",
+   "fieldtype": "Section Break",
+   "label": "MWS Credentials"
+  },
+  {
+   "fieldname": "seller_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Seller ID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "aws_access_key_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "AWS Access Key ID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mws_auth_token",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "MWS Auth Token",
+   "reqd": 1
+  },
+  {
+   "fieldname": "secret_key",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Secret Key",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "market_place_id",
+   "fieldtype": "Data",
+   "label": "Market Place ID",
+   "reqd": 1
+  },
+  {
+   "fieldname": "region",
+   "fieldtype": "Select",
+   "label": "Region",
+   "options": "\nAE\nAU\nBR\nCA\nCN\nDE\nES\nFR\nIN\nJP\nIT\nMX\nUK\nUS",
+   "reqd": 1
+  },
+  {
+   "fieldname": "domain",
+   "fieldtype": "Data",
+   "label": "Domain",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_13",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group",
+   "reqd": 1
+  },
+  {
+   "fieldname": "price_list",
+   "fieldtype": "Link",
+   "label": "Price List",
+   "options": "Price List",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer_group",
+   "fieldtype": "Link",
+   "label": "Customer Group",
+   "options": "Customer Group",
+   "reqd": 1
+  },
+  {
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "label": "Territory",
+   "options": "Territory",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer_type",
+   "fieldtype": "Select",
+   "label": "Customer Type",
+   "options": "Individual\nCompany",
+   "reqd": 1
+  },
+  {
+   "fieldname": "market_place_account_group",
+   "fieldtype": "Link",
+   "label": "Market Place Account Group",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_12",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "Amazon will synch data updated after this date",
+   "fieldname": "after_date",
+   "fieldtype": "Datetime",
+   "label": "After Date",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "Get financial breakup of Taxes and charges data by Amazon ",
+   "fieldname": "taxes_charges",
+   "fieldtype": "Check",
+   "label": "Sync Taxes and Charges"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "3",
+   "fieldname": "max_retry_limit",
+   "fieldtype": "Int",
+   "label": "Max Retry Limit"
+  },
+  {
+   "description": "Always sync your products from Amazon MWS before synching the Orders details",
+   "fieldname": "sync_products",
+   "fieldtype": "Button",
+   "label": "Sync Products",
+   "options": "get_products_details"
+  },
+  {
+   "description": "Click this button to pull your Sales Order data from Amazon MWS.",
+   "fieldname": "sync_orders",
+   "fieldtype": "Button",
+   "label": "Sync Orders",
+   "options": "get_order_details"
+  },
+  {
+   "default": "0",
+   "description": "Check this to enable a scheduled Daily synchronization routine via scheduler",
+   "fieldname": "enable_sync",
+   "fieldtype": "Check",
+   "label": "Enable Scheduled Sync"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2020-04-07 14:26:20.174848",
+ "modified_by": "Administrator",
+ "module": "ERPNext Integrations",
+ "name": "Amazon MWS Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

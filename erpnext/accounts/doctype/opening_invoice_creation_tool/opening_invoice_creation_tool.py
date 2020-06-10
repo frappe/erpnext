@@ -7,6 +7,7 @@ import frappe
 from frappe import _, scrub
 from frappe.utils import flt, nowdate
 from frappe.model.document import Document
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
 
 class OpeningInvoiceCreationTool(Document):
@@ -31,8 +32,10 @@ class OpeningInvoiceCreationTool(Document):
 				})
 				invoices_summary.update({company: _summary})
 
-				paid_amount.append(invoice.paid_amount)
-				outstanding_amount.append(invoice.outstanding_amount)
+				if invoice.paid_amount:
+					paid_amount.append(invoice.paid_amount)
+				if invoice.outstanding_amount:
+					outstanding_amount.append(invoice.outstanding_amount)
 
 			if paid_amount or outstanding_amount:
 				max_count.update({
@@ -61,7 +64,7 @@ class OpeningInvoiceCreationTool(Document):
 
 	def make_invoices(self):
 		names = []
-		mandatory_error_msg = _("Row {idx}: {field} is required to create the Opening {invoice_type} Invoices")
+		mandatory_error_msg = _("Row {0}: {1} is required to create the Opening {2} Invoices")
 		if not self.company:
 			frappe.throw(_("Please select the Company"))
 
@@ -73,6 +76,14 @@ class OpeningInvoiceCreationTool(Document):
 			if not row.temporary_opening_account:
 				row.temporary_opening_account = get_temporary_opening_account(self.company)
 			row.party_type = "Customer" if self.invoice_type == "Sales" else "Supplier"
+
+			# Allow to create invoice even if no party present in customer or supplier.
+			if not frappe.db.exists(row.party_type, row.party):
+				if self.create_missing_party:
+					self.add_party(row.party_type, row.party)
+				else:
+					frappe.throw(_("{0} {1} does not exist.").format(frappe.bold(row.party_type), frappe.bold(row.party)))
+
 			if not row.item_name:
 				row.item_name = _("Opening Invoice Item")
 			if not row.posting_date:
@@ -82,11 +93,7 @@ class OpeningInvoiceCreationTool(Document):
 
 			for d in ("Party", "Outstanding Amount", "Temporary Opening Account"):
 				if not row.get(scrub(d)):
-					frappe.throw(mandatory_error_msg.format(
-						idx=row.idx,
-						field=_(d),
-						invoice_type=self.invoice_type
-					))
+					frappe.throw(mandatory_error_msg.format(row.idx, _(d), self.invoice_type))
 
 			args = self.get_invoice_dict(row=row)
 			if not args:
@@ -107,13 +114,30 @@ class OpeningInvoiceCreationTool(Document):
 
 		return names
 
+	def add_party(self, party_type, party):
+		party_doc = frappe.new_doc(party_type)
+		if party_type == "Customer":
+			party_doc.customer_name = party
+		else:
+			supplier_group = frappe.db.get_single_value("Buying Settings", "supplier_group")
+			if not supplier_group:
+				frappe.throw(_("Please Set Supplier Group in Buying Settings."))
+
+			party_doc.supplier_name = party
+			party_doc.supplier_group = supplier_group
+
+		party_doc.flags.ignore_mandatory = True
+		party_doc.save(ignore_permissions=True)
+
 	def get_invoice_dict(self, row=None):
 		def get_item_dict():
 			default_uom = frappe.db.get_single_value("Stock Settings", "stock_uom") or _("Nos")
-			cost_center = frappe.db.get_value("Company", self.company, "cost_center")
+			cost_center = row.get('cost_center') or frappe.get_cached_value('Company',
+				self.company,  "cost_center")
+
 			if not cost_center:
 				frappe.throw(
-					_("Please set the Default Cost Center in {0} company").format(frappe.bold(self.company))
+					_("Please set the Default Cost Center in {0} company.").format(frappe.bold(self.company))
 				)
 			rate = flt(row.outstanding_amount) / flt(row.qty)
 
@@ -138,17 +162,31 @@ class OpeningInvoiceCreationTool(Document):
 			income_expense_account_field = "expense_account"
 
 		item = get_item_dict()
-		return frappe._dict({
+
+		args = frappe._dict({
 			"items": [item],
 			"is_opening": "Yes",
 			"set_posting_time": 1,
 			"company": self.company,
+			"cost_center": self.cost_center,
 			"due_date": row.due_date,
 			"posting_date": row.posting_date,
 			frappe.scrub(party_type): row.party,
 			"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice",
-			"currency": frappe.db.get_value("Company", self.company, "default_currency")
+			"currency": frappe.get_cached_value('Company',  self.company,  "default_currency")
 		})
+
+		accounting_dimension = get_accounting_dimensions()
+
+		for dimension in accounting_dimension:
+			args.update({
+				dimension: item.get(dimension)
+			})
+
+		if self.invoice_type == "Sales":
+			args["is_pos"] = 0
+
+		return args
 
 @frappe.whitelist()
 def get_temporary_opening_account(company=None):
@@ -163,3 +201,5 @@ def get_temporary_opening_account(company=None):
 		frappe.throw(_("Please add a Temporary Opening account in Chart of Accounts"))
 
 	return accounts[0].name
+
+

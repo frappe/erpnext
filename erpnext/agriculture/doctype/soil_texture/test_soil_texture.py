@@ -10,5 +10,5 @@ class TestSoilTexture(unittest.TestCase):
 	def test_texture_selection(self):
 		soil_tex = frappe.get_all('Soil Texture', fields=['name'], filters={'collection_datetime': '2017-11-08'})
 		doc = frappe.get_doc('Soil Texture', soil_tex[0].name)
-		self.assertEquals(doc.silt_composition, 50)
-		self.assertEquals(doc.soil_type, 'Silt Loam')
+		self.assertEqual(doc.silt_composition, 50)
+		self.assertEqual(doc.soil_type, 'Silt Loam')

@@ -18,7 +18,7 @@
  "is_standard": 1, 
  "login_required": 1, 
  "max_attachment_size": 0, 
- "modified": "2017-06-07 15:57:27.196428", 
+ "modified": "2018-07-16 13:11:08.626316", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "patient-appointments", 
@@ -43,13 +43,13 @@
    "reqd": 1
   }, 
   {
-   "fieldname": "physician", 
+   "fieldname": "practitioner", 
    "fieldtype": "Link", 
    "hidden": 0, 
-   "label": "Physician", 
+   "label": "Healthcare Practitioner", 
    "max_length": 0, 
    "max_value": 0, 
-   "options": "Physician", 
+   "options": "Healthcare Practitioner", 
    "read_only": 0, 
    "reqd": 1
   }, 

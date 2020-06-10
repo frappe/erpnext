@@ -3,12 +3,45 @@
 
 frappe.provide("erpnext.accounts");
 
+frappe.ui.form.on("Payment Reconciliation Payment", {
+	invoice_number: function(frm, cdt, cdn) {
+		var row = locals[cdt][cdn];
+		if(row.invoice_number) {
+			var parts = row.invoice_number.split(' | ');
+			var invoice_type = parts[0];
+			var invoice_number = parts[1];
+
+			var invoice_amount = frm.doc.invoices.filter(function(d) {
+				return d.invoice_type === invoice_type && d.invoice_number === invoice_number;
+			})[0].outstanding_amount;
+
+			frappe.model.set_value(cdt, cdn, "allocated_amount", Math.min(invoice_amount, row.amount));
+
+			frm.call({
+				doc: frm.doc,
+				method: 'get_difference_amount',
+				args: {
+					child_row: row
+				},
+				callback: function(r, rt) {
+					if(r.message) {
+						frappe.model.set_value(cdt, cdn,
+							"difference_amount", r.message);
+					}
+				}
+			});
+		}
+	}
+});
+
 erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.extend({
 	onload: function() {
-		var me = this
+		var me = this;
 		this.frm.set_query("party_type", function() {
-			return{
-				query: "erpnext.setup.doctype.party_type.party_type.get_party_type"
+			return {
+				"filters": {
+					"name": ["in", Object.keys(frappe.boot.party_account_types)],
+				}
 			}
 		});
 
@@ -20,7 +53,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 					filters: {
 						"company": me.frm.doc.company,
 						"is_group": 0,
-						"account_type": (me.frm.doc.party_type == "Customer" ? "Receivable" : "Payable")
+						"account_type": frappe.boot.party_account_types[me.frm.doc.party_type]
 					}
 				};
 			}
@@ -85,6 +118,91 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 
 	reconcile: function() {
 		var me = this;
+		var show_dialog = me.frm.doc.payments.filter(d => d.difference_amount && !d.difference_account);
+
+		if (show_dialog && show_dialog.length) {
+
+			this.data = [];
+			const dialog = new frappe.ui.Dialog({
+				title: __("Select Difference Account"),
+				fields: [
+					{
+						fieldname: "payments", fieldtype: "Table", label: __("Payments"),
+						data: this.data, in_place_edit: true,
+						get_data: () => {
+							return this.data;
+						},
+						fields: [{
+							fieldtype:'Data',
+							fieldname:"docname",
+							in_list_view: 1,
+							hidden: 1
+						}, {
+							fieldtype:'Data',
+							fieldname:"reference_name",
+							label: __("Voucher No"),
+							in_list_view: 1,
+							read_only: 1
+						}, {
+							fieldtype:'Link',
+							options: 'Account',
+							in_list_view: 1,
+							label: __("Difference Account"),
+							fieldname: 'difference_account',
+							reqd: 1,
+							get_query: function() {
+								return {
+									filters: {
+										company: me.frm.doc.company,
+										is_group: 0
+									}
+								}
+							}
+						}, {
+							fieldtype:'Currency',
+							in_list_view: 1,
+							label: __("Difference Amount"),
+							fieldname: 'difference_amount',
+							read_only: 1
+						}]
+					},
+				],
+				primary_action: function() {
+					const args = dialog.get_values()["payments"];
+
+					args.forEach(d => {
+						frappe.model.set_value("Payment Reconciliation Payment", d.docname,
+							"difference_account", d.difference_account);
+					});
+
+					me.reconcile_payment_entries();
+					dialog.hide();
+				},
+				primary_action_label: __('Reconcile Entries')
+			});
+
+			this.frm.doc.payments.forEach(d => {
+				if (d.difference_amount && !d.difference_account) {
+					dialog.fields_dict.payments.df.data.push({
+						'docname': d.name,
+						'reference_name': d.reference_name,
+						'difference_amount': d.difference_amount,
+						'difference_account': d.difference_account,
+					});
+				}
+			});
+
+			this.data = dialog.fields_dict.payments.df.data;
+			dialog.fields_dict.payments.grid.refresh();
+			dialog.show();
+		} else {
+			this.reconcile_payment_entries();
+		}
+	},
+
+	reconcile_payment_entries: function() {
+		var me = this;
+
 		return this.frm.call({
 			doc: me.frm.doc,
 			method: 'reconcile',

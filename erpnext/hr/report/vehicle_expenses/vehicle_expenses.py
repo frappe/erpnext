@@ -9,21 +9,23 @@ from frappe.utils import flt,cstr
 from erpnext.accounts.report.financial_statements import get_period_list
 
 def execute(filters=None):
-	columns, data = [], []
+	columns, data, chart = [], [], []
 	if filters.get('fiscal_year'):
 		company = erpnext.get_default_company()
-		period_list = get_period_list(filters.get('fiscal_year'), filters.get('fiscal_year'),"Monthly", company)
+		period_list = get_period_list(filters.get('fiscal_year'), filters.get('fiscal_year'),
+		'', '', 'Fiscal Year', 'Monthly', company=company)
 		columns=get_columns()
 		data=get_log_data(filters)
 		chart=get_chart_data(data,period_list)
 	return columns, data, None, chart
 
 def get_columns():
-	columns = [_("License") + ":Link/Vehicle:100", _("Make") + ":data:50",
+	columns = [_("License") + ":Link/Vehicle:100", _('Create') + ":data:50",
 		_("Model") + ":data:50", _("Location") + ":data:100",
 		_("Log") + ":Link/Vehicle Log:100", _("Odometer") + ":Int:80",
 		_("Date") + ":Date:100", _("Fuel Qty") + ":Float:80",
-		_("Fuel Price") + ":Float:100",_("Service Expense") + ":Float:100"
+		_("Fuel Price") + ":Float:100",_("Fuel Expense") + ":Float:100",
+		_("Service Expense") + ":Float:100"
 	]
 	return columns
 
@@ -32,7 +34,8 @@ def get_log_data(filters):
 	data = frappe.db.sql("""select
 			vhcl.license_plate as "License", vhcl.make as "Make", vhcl.model as "Model",
 			vhcl.location as "Location", log.name as "Log", log.odometer as "Odometer",
-			log.date as "Date", log.fuel_qty as "Fuel Qty", log.price as "Fuel Price"
+			log.date as "Date", log.fuel_qty as "Fuel Qty", log.price as "Fuel Price",
+			log.fuel_qty * log.price as "Fuel Expense"
 		from
 			`tabVehicle` vhcl,`tabVehicle Log` log
 		where
@@ -58,7 +61,7 @@ def get_chart_data(data,period_list):
 		total_ser_exp=0
 		for row in data:
 			if row["Date"] <= period.to_date and row["Date"] >= period.from_date:
-				total_fuel_exp+=flt(row["Fuel Price"])
+				total_fuel_exp+=flt(row["Fuel Expense"])
 				total_ser_exp+=flt(row["Service Expense"])
 		fueldata.append([period.key,total_fuel_exp])
 		servicedata.append([period.key,total_ser_exp])
@@ -69,12 +72,12 @@ def get_chart_data(data,period_list):
 	datasets = []
 	if fuel_exp_data:
 		datasets.append({
-			'title': 'Fuel Expenses',
+			'name': 'Fuel Expenses',
 			'values': fuel_exp_data
 		})
 	if service_exp_data:
 		datasets.append({
-			'title': 'Service Expenses',
+			'name': 'Service Expenses',
 			'values': service_exp_data
 		})
 	chart = {

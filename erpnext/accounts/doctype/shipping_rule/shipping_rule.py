@@ -45,7 +45,9 @@ class ShippingRule(Document):
 		shipping_amount = 0.0
 		by_value = False
 
-		self.validate_countries(doc)
+		if doc.get_shipping_address():
+			# validate country only if there is address
+			self.validate_countries(doc)
 
 		if self.calculate_based_on == 'Net Total':
 			value = doc.base_net_total
@@ -70,7 +72,7 @@ class ShippingRule(Document):
 
 	def get_shipping_amount_from_rules(self, value):
 		for condition in self.get("conditions"):
-			if not condition.to_value or (flt(condition.from_value) <= value <= flt(condition.to_value)):
+			if not condition.to_value or (flt(condition.from_value) <= flt(value) <= flt(condition.to_value)):
 				return condition.shipping_amount
 
 		return 0.0
@@ -82,7 +84,7 @@ class ShippingRule(Document):
 			if not shipping_country:
 				frappe.throw(_('Shipping Address does not have country, which is required for this Shipping Rule'))
 			if shipping_country not in [d.country for d in self.countries]:
-				frappe.throw(_('Shipping rule not applicable for country {0}'.format(shipping_country)))
+				frappe.throw(_('Shipping rule not applicable for country {0} in Shipping Address').format(shipping_country))
 
 	def add_shipping_rule_to_tax_table(self, doc, shipping_amount):
 		shipping_charge = {
@@ -133,8 +135,8 @@ class ShippingRule(Document):
 			return (not separate)
 
 		overlaps = []
-		for i in xrange(0, len(self.conditions)):
-			for j in xrange(i+1, len(self.conditions)):
+		for i in range(0, len(self.conditions)):
+			for j in range(i+1, len(self.conditions)):
 				d1, d2 = self.conditions[i], self.conditions[j]
 				if d1.as_dict() != d2.as_dict():
 					# in our case, to_value can be zero, hence pass the from_value if so

@@ -10,7 +10,7 @@
  "amount_based_on_field": 0, 
  "creation": "2017-06-06 17:13:19.101374", 
  "currency": "INR", 
- "doc_type": "Consultation", 
+ "doc_type": "Patient Encounter", 
  "docstatus": 0, 
  "doctype": "Web Form", 
  "idx": 0, 
@@ -18,30 +18,32 @@
  "is_standard": 1, 
  "login_required": 1, 
  "max_attachment_size": 0, 
- "modified": "2017-06-20 11:56:05.132154", 
+ "modified": "2018-09-04 11:53:40.954517", 
  "modified_by": "Administrator", 
  "module": "Healthcare", 
  "name": "prescription", 
  "owner": "Administrator", 
  "payment_button_label": "Buy Now", 
- "print_format": "Consultation Print", 
+ "print_format": "Encounter Print", 
  "published": 1, 
  "route": "prescription", 
+ "show_in_grid": 0, 
  "show_sidebar": 1, 
  "sidebar_items": [], 
  "success_url": "/prescription", 
  "title": "Prescription", 
  "web_form_fields": [
   {
-   "fieldname": "physician", 
+   "fieldname": "practitioner", 
    "fieldtype": "Link", 
    "hidden": 0, 
-   "label": "Doctor", 
+   "label": "Healthcare Practitioner", 
    "max_length": 0, 
    "max_value": 0, 
-   "options": "Physician", 
+   "options": "Healthcare Practitioner", 
    "read_only": 0, 
-   "reqd": 1
+   "reqd": 1, 
+   "show_in_filter": 0
   }, 
   {
    "fieldname": "visit_department", 
@@ -52,29 +54,32 @@
    "max_value": 0, 
    "options": "Medical Department", 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
    "default": "Today", 
-   "fieldname": "consultation_date", 
+   "fieldname": "encounter_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
-   "label": "Consultation Date", 
+   "label": "Encounter Date", 
    "max_length": 0, 
    "max_value": 0, 
    "read_only": 0, 
-   "reqd": 1
+   "reqd": 1, 
+   "show_in_filter": 0
   }, 
   {
    "default": "", 
-   "fieldname": "consultation_time", 
+   "fieldname": "encounter_time", 
    "fieldtype": "Data", 
    "hidden": 0, 
-   "label": "Consultation Time", 
+   "label": "Encounter Time", 
    "max_length": 0, 
    "max_value": 0, 
    "read_only": 0, 
-   "reqd": 1
+   "reqd": 1, 
+   "show_in_filter": 0
   }, 
   {
    "fieldname": "drug_prescription", 
@@ -85,10 +90,11 @@
    "max_value": 0, 
    "options": "Drug Prescription", 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
-   "fieldname": "test_prescription", 
+   "fieldname": "lab_test_prescription", 
    "fieldtype": "Table", 
    "hidden": 0, 
    "label": "Investigations", 
@@ -96,17 +102,19 @@
    "max_value": 0, 
    "options": "Lab Prescription", 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }, 
   {
-   "fieldname": "consultation_comment", 
+   "fieldname": "encounter_comment", 
    "fieldtype": "Small Text", 
    "hidden": 0, 
    "label": "Review Details", 
    "max_length": 0, 
    "max_value": 0, 
    "read_only": 0, 
-   "reqd": 0
+   "reqd": 0, 
+   "show_in_filter": 0
   }
  ]
 }

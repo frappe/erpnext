@@ -7,6 +7,8 @@ from frappe.utils import flt, comma_or, nowdate, getdate
 from frappe import _
 from frappe.model.document import Document
 
+class OverAllowanceError(frappe.ValidationError): pass
+
 def validate_status(status, options):
 	if status not in options:
 		frappe.throw(_("Status must be one of {0}").format(comma_or(options)))
@@ -27,7 +29,7 @@ status_map = {
 	],
 	"Quotation": [
 		["Draft", None],
-		["Submitted", "eval:self.docstatus==1"],
+		["Open", "eval:self.docstatus==1"],
 		["Lost", "eval:self.status=='Lost'"],
 		["Ordered", "has_sales_order"],
 		["Cancelled", "eval:self.docstatus==2"],
@@ -35,41 +37,22 @@ status_map = {
 	"Sales Order": [
 		["Draft", None],
 		["To Deliver and Bill", "eval:self.per_delivered < 100 and self.per_billed < 100 and self.docstatus == 1"],
-		["To Bill", "eval:self.per_delivered == 100 and self.per_billed < 100 and self.docstatus == 1"],
-		["To Deliver", "eval:self.per_delivered < 100 and self.per_billed == 100 and self.docstatus == 1"],
-		["Completed", "eval:self.per_delivered == 100 and self.per_billed == 100 and self.docstatus == 1"],
-		["Completed", "eval:self.order_type == 'Maintenance' and self.per_billed == 100 and self.docstatus == 1"],
+		["To Bill", "eval:(self.per_delivered == 100 or self.skip_delivery_note) and self.per_billed < 100 and self.docstatus == 1"],
+		["To Deliver", "eval:self.per_delivered < 100 and self.per_billed == 100 and self.docstatus == 1 and not self.skip_delivery_note"],
+		["Completed", "eval:(self.per_delivered == 100 or self.skip_delivery_note) and self.per_billed == 100 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed'"],
-	],
-	"Sales Invoice": [
-		["Draft", None],
-		["Submitted", "eval:self.docstatus==1"],
-		["Return", "eval:self.is_return==1 and self.docstatus==1"],
-		["Paid", "eval:self.outstanding_amount<=0 and self.docstatus==1 and self.is_return==0"],
-		["Credit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1 and self.is_return==0 and get_value('Sales Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1})"],
-		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
-		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
-		["Cancelled", "eval:self.docstatus==2"],
-	],
-	"Purchase Invoice": [
-		["Draft", None],
-		["Submitted", "eval:self.docstatus==1"],
-		["Return", "eval:self.is_return==1 and self.docstatus==1"],
-		["Paid", "eval:self.outstanding_amount<=0 and self.docstatus==1 and self.is_return==0"],
-		["Debit Note Issued", "eval:self.outstanding_amount < 0 and self.docstatus==1 and self.is_return==0 and get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1})"],
-		["Unpaid", "eval:self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()) and self.docstatus==1"],
-		["Overdue", "eval:self.outstanding_amount > 0 and getdate(self.due_date) < getdate(nowdate()) and self.docstatus==1"],
-		["Cancelled", "eval:self.docstatus==2"],
+		["On Hold", "eval:self.status=='On Hold'"],
 	],
 	"Purchase Order": [
 		["Draft", None],
 		["To Receive and Bill", "eval:self.per_received < 100 and self.per_billed < 100 and self.docstatus == 1"],
-		["To Bill", "eval:self.per_received == 100 and self.per_billed < 100 and self.docstatus == 1"],
+		["To Bill", "eval:self.per_received >= 100 and self.per_billed < 100 and self.docstatus == 1"],
 		["To Receive", "eval:self.per_received < 100 and self.per_billed == 100 and self.docstatus == 1"],
-		["Completed", "eval:self.per_received == 100 and self.per_billed == 100 and self.docstatus == 1"],
+		["Completed", "eval:self.per_received >= 100 and self.per_billed == 100 and self.docstatus == 1"],
 		["Delivered", "eval:self.status=='Delivered'"],
 		["Cancelled", "eval:self.docstatus==2"],
+		["On Hold", "eval:self.status=='On Hold'"],
 		["Closed", "eval:self.status=='Closed'"],
 	],
 	"Delivery Note": [
@@ -94,7 +77,14 @@ status_map = {
 		["Partially Ordered", "eval:self.status != 'Stopped' and self.per_ordered < 100 and self.per_ordered > 0 and self.docstatus == 1"],
 		["Ordered", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
 		["Transferred", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Transfer'"],
-		["Issued", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Issue'"]
+		["Issued", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Material Issue'"],
+		["Received", "eval:self.status != 'Stopped' and self.per_received == 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
+		["Partially Received", "eval:self.status != 'Stopped' and self.per_received > 0 and self.per_received < 100 and self.docstatus == 1 and self.material_request_type == 'Purchase'"],
+		["Manufactured", "eval:self.status != 'Stopped' and self.per_ordered == 100 and self.docstatus == 1 and self.material_request_type == 'Manufacture'"]
+	],
+	"Bank Transaction": [
+		["Unreconciled", "eval:self.docstatus == 1 and self.unallocated_amount>0"],
+		["Reconciled", "eval:self.docstatus == 1 and self.unallocated_amount<=0"]
 	]
 }
 
@@ -118,7 +108,6 @@ class StatusUpdater(Document):
 
 		if self.doctype in status_map:
 			_status = self.status
-
 			if status and update:
 				self.db_set("status", status)
 
@@ -129,7 +118,7 @@ class StatusUpdater(Document):
 					self.status = s[0]
 					break
 				elif s[1].startswith("eval:"):
-					if frappe.safe_eval(s[1][5:], None, { "self": self.as_dict(), "getdate": getdate, 
+					if frappe.safe_eval(s[1][5:], None, { "self": self.as_dict(), "getdate": getdate,
 							"nowdate": nowdate, "get_value": frappe.db.get_value }):
 						self.status = s[0]
 						break
@@ -146,8 +135,9 @@ class StatusUpdater(Document):
 
 	def validate_qty(self):
 		"""Validates qty at row level"""
-		self.tolerance = {}
-		self.global_tolerance = None
+		self.item_allowance = {}
+		self.global_qty_allowance = None
+		self.global_amount_allowance = None
 
 		for args in self.status_updater:
 			if "target_ref_field" not in args:
@@ -156,6 +146,12 @@ class StatusUpdater(Document):
 
 			# get unique transactions to update
 			for d in self.get_all_children():
+				if hasattr(d, 'qty') and d.qty < 0 and not self.get('is_return'):
+					frappe.throw(_("For an item {0}, quantity must be positive number").format(d.item_code))
+
+				if hasattr(d, 'qty') and d.qty > 0 and self.get('is_return'):
+					frappe.throw(_("For an item {0}, quantity must be negative number").format(d.item_code))
+
 				if d.doctype == args['source_dt'] and d.get(args["join_field"]):
 					args['name'] = d.get(args['join_field'])
 
@@ -172,32 +168,41 @@ class StatusUpdater(Document):
 
 						# if not item[args['target_ref_field']]:
 						# 	msgprint(_("Note: System will not check over-delivery and over-booking for Item {0} as quantity or amount is 0").format(item.item_code))
-						if args.get('no_tolerance'):
+						if args.get('no_allowance'):
 							item['reduce_by'] = item[args['target_field']] - item[args['target_ref_field']]
 							if item['reduce_by'] > .01:
-								self.limits_crossed_error(args, item)
+								self.limits_crossed_error(args, item, "qty")
 
 						elif item[args['target_ref_field']]:
-							self.check_overflow_with_tolerance(item, args)
+							self.check_overflow_with_allowance(item, args)
 
-	def check_overflow_with_tolerance(self, item, args):
+	def check_overflow_with_allowance(self, item, args):
 		"""
-			Checks if there is overflow condering a relaxation tolerance
+			Checks if there is overflow condering a relaxation allowance
 		"""
-		# check if overflow is within tolerance
-		tolerance, self.tolerance, self.global_tolerance = get_tolerance_for(item['item_code'],
-			self.tolerance, self.global_tolerance)
+		qty_or_amount = "qty" if "qty" in args['target_ref_field'] else "amount"
+
+		# check if overflow is within allowance
+		allowance, self.item_allowance, self.global_qty_allowance, self.global_amount_allowance = \
+			get_allowance_for(item['item_code'], self.item_allowance,
+				self.global_qty_allowance, self.global_amount_allowance, qty_or_amount)
+
 		overflow_percent = ((item[args['target_field']] - item[args['target_ref_field']]) /
 		 	item[args['target_ref_field']]) * 100
 
-		if overflow_percent - tolerance > 0.01:
-			item['max_allowed'] = flt(item[args['target_ref_field']] * (100+tolerance)/100)
+		if overflow_percent - allowance > 0.01:
+			item['max_allowed'] = flt(item[args['target_ref_field']] * (100+allowance)/100)
 			item['reduce_by'] = item[args['target_field']] - item['max_allowed']
 
-			self.limits_crossed_error(args, item)
+			self.limits_crossed_error(args, item, qty_or_amount)
 
-	def limits_crossed_error(self, args, item):
+	def limits_crossed_error(self, args, item, qty_or_amount):
 		'''Raise exception for limits crossed'''
+		if qty_or_amount == "qty":
+			action_msg = _('To allow over receipt / delivery, update "Over Receipt/Delivery Allowance" in Stock Settings or the Item.')
+		else:
+			action_msg = _('To allow over billing, update "Over Billing Allowance" in Accounts Settings or the Item.')
+
 		frappe.throw(_('This document is over limit by {0} {1} for item {4}. Are you making another {3} against the same {2}?')
 			.format(
 				frappe.bold(_(item["target_ref_field"].title())),
@@ -205,9 +210,7 @@ class StatusUpdater(Document):
 				frappe.bold(_(args.get('target_dt'))),
 				frappe.bold(_(self.doctype)),
 				frappe.bold(item.get('item_code'))
-			) + '<br><br>' +
-				_('To allow over-billing or over-ordering, update "Allowance" in Stock Settings or the Item.'),
-			title = _('Limit Crossed'))
+			) + '<br><br>' + action_msg, OverAllowanceError, title = _('Limit Crossed'))
 
 	def update_qty(self, update_modified=True):
 		"""Updates qty or amount at row level
@@ -280,9 +283,9 @@ class StatusUpdater(Document):
 			frappe.db.sql("""update `tab%(target_parent_dt)s`
 				set %(target_parent_field)s = round(
 					ifnull((select
-						ifnull(sum(if(%(target_ref_field)s > %(target_field)s, abs(%(target_field)s), abs(%(target_ref_field)s))), 0)
+						ifnull(sum(if(abs(%(target_ref_field)s) > abs(%(target_field)s), abs(%(target_field)s), abs(%(target_ref_field)s))), 0)
 						/ sum(abs(%(target_ref_field)s)) * 100
-					from `tab%(target_dt)s` where parent="%(name)s"), 0), 2)
+					from `tab%(target_dt)s` where parent="%(name)s" having sum(abs(%(target_ref_field)s)) > 0), 0), 6)
 					%(update_modified)s
 				where name='%(name)s'""" % args)
 
@@ -290,7 +293,7 @@ class StatusUpdater(Document):
 			if args.get('status_field'):
 				frappe.db.sql("""update `tab%(target_parent_dt)s`
 					set %(status_field)s = if(%(target_parent_field)s<0.001,
-						'Not %(keyword)s', if(%(target_parent_field)s>=99.99,
+						'Not %(keyword)s', if(%(target_parent_field)s>=99.999999,
 						'Fully %(keyword)s', 'Partly %(keyword)s'))
 					where name='%(name)s'""" % args)
 
@@ -302,23 +305,31 @@ class StatusUpdater(Document):
 	def _update_modified(self, args, update_modified):
 		args['update_modified'] = ''
 		if update_modified:
-			args['update_modified'] = ', modified = now(), modified_by = "{0}"'\
+			args['update_modified'] = ', modified = now(), modified_by = {0}'\
 				.format(frappe.db.escape(frappe.session.user))
 
 	def update_billing_status_for_zero_amount_refdoc(self, ref_dt):
-		ref_fieldname = ref_dt.lower().replace(" ", "_")
-		zero_amount_refdoc = []
-		all_zero_amount_refdoc = frappe.db.sql_list("""select name from `tab%s`
-			where docstatus=1 and base_net_total = 0""" % ref_dt)
+		ref_fieldname = frappe.scrub(ref_dt)
 
-		for item in self.get("items"):
-			if item.get(ref_fieldname) \
-				and item.get(ref_fieldname) in all_zero_amount_refdoc \
-				and item.get(ref_fieldname) not in zero_amount_refdoc:
-					zero_amount_refdoc.append(item.get(ref_fieldname))
+		ref_docs = [item.get(ref_fieldname) for item in (self.get('items') or []) if item.get(ref_fieldname)]
+		if not ref_docs:
+			return
 
-		if zero_amount_refdoc:
-			self.update_billing_status(zero_amount_refdoc, ref_dt, ref_fieldname)
+		zero_amount_refdocs = frappe.db.sql_list("""
+			SELECT
+				name
+			from
+				`tab{ref_dt}`
+			where
+				docstatus = 1
+				and base_net_total = 0
+				and name in %(ref_docs)s
+		""".format(ref_dt=ref_dt), {
+			'ref_docs': ref_docs
+		})
+
+		if zero_amount_refdocs:
+			self.update_billing_status(zero_amount_refdocs, ref_dt, ref_fieldname)
 
 	def update_billing_status(self, zero_amount_refdoc, ref_dt, ref_fieldname):
 		for ref_dn in zero_amount_refdoc:
@@ -329,27 +340,41 @@ class StatusUpdater(Document):
 				from `tab%s Item` where %s=%s and docstatus=1""" %
 				(self.doctype, ref_fieldname, '%s'), (ref_dn))[0][0])
 
-			per_billed = ((ref_doc_qty if billed_qty > ref_doc_qty else billed_qty)\
-				/ ref_doc_qty)*100
+			per_billed = (min(ref_doc_qty, billed_qty) / ref_doc_qty) * 100
 
 			ref_doc = frappe.get_doc(ref_dt, ref_dn)
 
 			ref_doc.db_set("per_billed", per_billed)
 			ref_doc.set_status(update=True)
 
-def get_tolerance_for(item_code, item_tolerance={}, global_tolerance=None):
+def get_allowance_for(item_code, item_allowance={}, global_qty_allowance=None, global_amount_allowance=None, qty_or_amount="qty"):
 	"""
-		Returns the tolerance for the item, if not set, returns global tolerance
+		Returns the allowance for the item, if not set, returns global allowance
 	"""
-	if item_tolerance.get(item_code):
-		return item_tolerance[item_code], item_tolerance, global_tolerance
+	if qty_or_amount == "qty":
+		if item_allowance.get(item_code, frappe._dict()).get("qty"):
+			return item_allowance[item_code].qty, item_allowance, global_qty_allowance, global_amount_allowance
+	else:
+		if item_allowance.get(item_code, frappe._dict()).get("amount"):
+			return item_allowance[item_code].amount, item_allowance, global_qty_allowance, global_amount_allowance
 
-	tolerance = flt(frappe.db.get_value('Item',item_code,'tolerance') or 0)
+	qty_allowance, over_billing_allowance = \
+		frappe.db.get_value('Item', item_code, ['over_delivery_receipt_allowance', 'over_billing_allowance'])
 
-	if not tolerance:
-		if global_tolerance == None:
-			global_tolerance = flt(frappe.db.get_value('Stock Settings', None, 'tolerance'))
-		tolerance = global_tolerance
+	if qty_or_amount == "qty" and not qty_allowance:
+		if global_qty_allowance == None:
+			global_qty_allowance = flt(frappe.db.get_single_value('Stock Settings', 'over_delivery_receipt_allowance'))
+		qty_allowance = global_qty_allowance
+	elif qty_or_amount == "amount" and not over_billing_allowance:
+		if global_amount_allowance == None:
+			global_amount_allowance = flt(frappe.db.get_single_value('Accounts Settings', 'over_billing_allowance'))
+		over_billing_allowance = global_amount_allowance
 
-	item_tolerance[item_code] = tolerance
-	return tolerance, item_tolerance, global_tolerance
+	if qty_or_amount == "qty":
+		allowance = qty_allowance
+		item_allowance.setdefault(item_code, frappe._dict()).setdefault("qty", qty_allowance)
+	else:
+		allowance = over_billing_allowance
+		item_allowance.setdefault(item_code, frappe._dict()).setdefault("amount", over_billing_allowance)
+
+	return allowance, item_allowance, global_qty_allowance, global_amount_allowance

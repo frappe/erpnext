@@ -27,26 +27,27 @@ def execute(filters=None):
 	course_dict = values.get("course_dict")
 
 	for student in args.students:
-		student_row = {}
-		student_row["student"] = student
-		student_row["student_name"] = student_details[student]
-		for course in course_dict:
-			scrub_course = frappe.scrub(course)
-			if assessment_group in assessment_result[student][course]:
-				student_row["grade_" + scrub_course] = assessment_result[student][course][assessment_group]["Total Score"]["grade"]
-				student_row["score_" + scrub_course] = assessment_result[student][course][assessment_group]["Total Score"]["score"]
+		if student_details.get(student):
+			student_row = {}
+			student_row["student"] = student
+			student_row["student_name"] = student_details[student]
+			for course in course_dict:
+				scrub_course = frappe.scrub(course)
+				if assessment_group in assessment_result[student][course]:
+					student_row["grade_" + scrub_course] = assessment_result[student][course][assessment_group]["Total Score"]["grade"]
+					student_row["score_" + scrub_course] = assessment_result[student][course][assessment_group]["Total Score"]["score"]
 
-				# create the list of possible grades
-				if student_row["grade_" + scrub_course] not in grades:
-					grades.append(student_row["grade_" + scrub_course])
+					# create the list of possible grades
+					if student_row["grade_" + scrub_course] not in grades:
+						grades.append(student_row["grade_" + scrub_course])
 
-				# create the dict of for gradewise analysis
-				if student_row["grade_" + scrub_course] not in course_wise_analysis[course]:
-					course_wise_analysis[course][student_row["grade_" + scrub_course]] = 1
-				else:
-					course_wise_analysis[course][student_row["grade_" + scrub_course]] += 1
+					# create the dict of for gradewise analysis
+					if student_row["grade_" + scrub_course] not in course_wise_analysis[course]:
+						course_wise_analysis[course][student_row["grade_" + scrub_course]] = 1
+					else:
+						course_wise_analysis[course][student_row["grade_" + scrub_course]] += 1
 
-		data.append(student_row)
+			data.append(student_row)
 
 	course_list = [d for d in course_dict]
 	columns = get_column(course_dict)

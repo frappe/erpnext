@@ -6,14 +6,18 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
 
-from frappe.utils import cstr, flt, getdate, new_line_sep, nowdate, add_days
+from frappe.utils import cstr, flt, getdate, new_line_sep, nowdate, add_days, get_link_to_form
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
 from erpnext.controllers.buying_controller import BuyingController
-from erpnext.manufacturing.doctype.production_order.production_order import get_item_details
-from erpnext.buying.utils import check_for_closed_status, validate_for_items
+from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
+from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
+from erpnext.stock.doctype.item.item import get_item_defaults
+
+from six import string_types
 
 form_grid_templates = {
 	"items": "templates/form_grid/material_request_grid.html"
@@ -30,10 +34,10 @@ class MaterialRequest(BuyingController):
 		so_items = {} # Format --> {'SO/00001': {'Item/001': 120, 'Item/002': 24}}
 		for d in self.get('items'):
 			if d.sales_order:
-				if not so_items.has_key(d.sales_order):
+				if not d.sales_order in so_items:
 					so_items[d.sales_order] = {d.item_code: flt(d.qty)}
 				else:
-					if not so_items[d.sales_order].has_key(d.item_code):
+					if not d.item_code in so_items[d.sales_order]:
 						so_items[d.sales_order][d.item_code] = flt(d.qty)
 					else:
 						so_items[d.sales_order][d.item_code] += flt(d.qty)
@@ -59,37 +63,36 @@ class MaterialRequest(BuyingController):
 		super(MaterialRequest, self).validate()
 
 		self.validate_schedule_date()
+		self.check_for_on_hold_or_closed_status('Sales Order', 'sales_order')
 		self.validate_uom_is_integer("uom", "qty")
 
 		if not self.status:
 			self.status = "Draft"
 
 		from erpnext.controllers.status_updater import validate_status
-		validate_status(self.status, 
+		validate_status(self.status,
 			["Draft", "Submitted", "Stopped", "Cancelled", "Pending",
-			"Partially Ordered", "Ordered", "Issued", "Transferred"])
+			"Partially Ordered", "Ordered", "Issued", "Transferred", "Received"])
 
 		validate_for_items(self)
 
-		# self.set_title()
+		self.set_title()
 		# self.validate_qty_against_so()
 		# NOTE: Since Item BOM and FG quantities are combined, using current data, it cannot be validated
 		# Though the creation of Material Request from a Production Plan can be rethought to fix this
 
 	def set_title(self):
 		'''Set title as comma separated list of items'''
-		items = []
-		for d in self.items:
-			if d.item_code not in items:
-				items.append(d.item_code)
-			if(len(items)==4):
-				break
-
-		self.title = ', '.join(items)
+		if not self.title:
+			items = ', '.join([d.item_name for d in self.items][:3])
+			self.title = _('{0} Request for {1}').format(self.material_request_type, items)[:100]
 
 	def on_submit(self):
 		# frappe.db.set(self, 'status', 'Submitted')
 		self.update_requested_qty()
+		self.update_requested_qty_in_production_plan()
+		if self.material_request_type == 'Purchase':
+			self.validate_budget()
 
 	def before_save(self):
 		self.set_status(update=True)
@@ -99,7 +102,8 @@ class MaterialRequest(BuyingController):
 
 	def before_cancel(self):
 		# if MRQ is already closed, no point saving the document
-		check_for_closed_status(self.doctype, self.name)
+		check_on_hold_or_closed_status(self.doctype, self.name)
+
 		self.set_status(update=True, status='Cancelled')
 
 	def check_modified_date(self):
@@ -142,6 +146,7 @@ class MaterialRequest(BuyingController):
 
 	def on_cancel(self):
 		self.update_requested_qty()
+		self.update_requested_qty_in_production_plan()
 
 	def update_completed_qty(self, mr_items=None, update_modified=True):
 		if self.material_request_type == "Purchase":
@@ -152,7 +157,7 @@ class MaterialRequest(BuyingController):
 
 		for d in self.get("items"):
 			if d.name in mr_items:
-				if self.material_request_type in ("Material Issue", "Material Transfer"):
+				if self.material_request_type in ("Material Issue", "Material Transfer", "Customer Provided"):
 					d.ordered_qty =  flt(frappe.db.sql("""select sum(transfer_qty)
 						from `tabStock Entry Detail` where material_request = %s
 						and material_request_item = %s and docstatus = 1""",
@@ -164,18 +169,17 @@ class MaterialRequest(BuyingController):
 
 				elif self.material_request_type == "Manufacture":
 					d.ordered_qty = flt(frappe.db.sql("""select sum(qty)
-						from `tabProduction Order` where material_request = %s
+						from `tabWork Order` where material_request = %s
 						and material_request_item = %s and docstatus = 1""",
 						(self.name, d.name))[0][0])
 
 				frappe.db.set_value(d.doctype, d.name, "ordered_qty", d.ordered_qty)
 
-		target_ref_field = 'qty' if self.material_request_type == "Manufacture" else 'stock_qty'
 		self._update_percent_field({
 			"target_dt": "Material Request Item",
 			"target_parent_dt": self.doctype,
 			"target_parent_field": "per_ordered",
-			"target_ref_field": target_ref_field,
+			"target_ref_field": "stock_qty",
 			"target_field": "ordered_qty",
 			"name": self.name,
 		}, update_modified)
@@ -192,6 +196,22 @@ class MaterialRequest(BuyingController):
 			update_bin_qty(item_code, warehouse, {
 				"indented_qty": get_indented_qty(item_code, warehouse)
 			})
+
+	def update_requested_qty_in_production_plan(self):
+		production_plans = []
+		for d in self.get('items'):
+			if d.production_plan and d.material_request_plan_item:
+				qty = d.qty if self.docstatus == 1 else 0
+				frappe.db.set_value('Material Request Plan Item',
+					d.material_request_plan_item, 'requested_qty', qty)
+
+				if d.production_plan not in production_plans:
+					production_plans.append(d.production_plan)
+
+		for production_plan in production_plans:
+			doc = frappe.get_doc('Production Plan', production_plan)
+			doc.set_status()
+			doc.db_set('status', doc.status)
 
 def update_completed_and_requested_qty(stock_entry, method):
 	if stock_entry.doctype == "Stock Entry":
@@ -213,6 +233,8 @@ def update_completed_and_requested_qty(stock_entry, method):
 				mr_obj.update_requested_qty(mr_item_rows)
 
 def set_missing_values(source, target_doc):
+	if target_doc.doctype == "Purchase Order" and getdate(target_doc.schedule_date) <  getdate(nowdate()):
+		target_doc.schedule_date = None
 	target_doc.run_method("set_missing_values")
 	target_doc.run_method("calculate_taxes_and_totals")
 
@@ -220,11 +242,44 @@ def update_item(obj, target, source_parent):
 	target.conversion_factor = obj.conversion_factor
 	target.qty = flt(flt(obj.stock_qty) - flt(obj.ordered_qty))/ target.conversion_factor
 	target.stock_qty = (target.qty * target.conversion_factor)
+	if getdate(target.schedule_date) < getdate(nowdate()):
+		target.schedule_date = None
+
+def get_list_context(context=None):
+	from erpnext.controllers.website_list_for_contact import get_list_context
+	list_context = get_list_context(context)
+	list_context.update({
+		'show_sidebar': True,
+		'show_search': True,
+		'no_breadcrumbs': True,
+		'title': _('Material Request'),
+	})
+
+	return list_context
+
+@frappe.whitelist()
+def update_status(name, status):
+	material_request = frappe.get_doc('Material Request', name)
+	material_request.check_permission('write')
+	material_request.update_status(status)
 
 @frappe.whitelist()
 def make_purchase_order(source_name, target_doc=None):
+
 	def postprocess(source, target_doc):
+		if frappe.flags.args and frappe.flags.args.default_supplier:
+			# items only for given default supplier
+			supplier_items = []
+			for d in target_doc.items:
+				default_supplier = get_item_defaults(d.item_code, target_doc.company).get('default_supplier')
+				if frappe.flags.args.default_supplier == default_supplier:
+					supplier_items.append(d)
+			target_doc.items = supplier_items
+
 		set_missing_values(source, target_doc)
+
+	def select_item(d):
+		return d.ordered_qty < d.stock_qty
 
 	doclist = get_mapped_doc("Material Request", source_name, 	{
 		"Material Request": {
@@ -240,10 +295,12 @@ def make_purchase_order(source_name, target_doc=None):
 				["name", "material_request_item"],
 				["parent", "material_request"],
 				["uom", "stock_uom"],
-				["uom", "uom"]
+				["uom", "uom"],
+				["sales_order", "sales_order"],
+				["sales_order_item", "sales_order_item"]
 			],
 			"postprocess": update_item,
-			"condition": lambda doc: doc.ordered_qty < doc.stock_qty
+			"condition": select_item
 		}
 	}, target_doc, postprocess)
 
@@ -272,60 +329,90 @@ def make_request_for_quotation(source_name, target_doc=None):
 	return doclist
 
 @frappe.whitelist()
-def make_purchase_order_based_on_supplier(source_name, target_doc=None):
-	if target_doc:
-		if isinstance(target_doc, basestring):
-			import json
-			target_doc = frappe.get_doc(json.loads(target_doc))
-		target_doc.set("items", [])
+def make_purchase_order_based_on_supplier(source_name, target_doc=None, args=None):
+	mr = source_name
 
-	material_requests, supplier_items = get_material_requests_based_on_supplier(source_name)
+	supplier_items = get_items_based_on_default_supplier(args.get("supplier"))
 
 	def postprocess(source, target_doc):
-		target_doc.supplier = source_name
-		target_doc.schedule_date = add_days(nowdate(), 1)
+		target_doc.supplier = args.get("supplier")
+		if getdate(target_doc.schedule_date) < getdate(nowdate()):
+			target_doc.schedule_date = None
 		target_doc.set("items", [d for d in target_doc.get("items")
 			if d.get("item_code") in supplier_items and d.get("qty") > 0])
 
 		set_missing_values(source, target_doc)
 
-	for mr in material_requests:
-		target_doc = get_mapped_doc("Material Request", mr, 	{
-			"Material Request": {
-				"doctype": "Purchase Order",
-			},
-			"Material Request Item": {
-				"doctype": "Purchase Order Item",
-				"field_map": [
-					["name", "material_request_item"],
-					["parent", "material_request"],
-					["uom", "stock_uom"],
-					["uom", "uom"]
-				],
-				"postprocess": update_item,
-				"condition": lambda doc: doc.ordered_qty < doc.qty
-			}
-		}, target_doc, postprocess)
+	target_doc = get_mapped_doc("Material Request", mr, {
+		"Material Request": {
+			"doctype": "Purchase Order",
+		},
+		"Material Request Item": {
+			"doctype": "Purchase Order Item",
+			"field_map": [
+				["name", "material_request_item"],
+				["parent", "material_request"],
+				["uom", "stock_uom"],
+				["uom", "uom"]
+			],
+			"postprocess": update_item,
+			"condition": lambda doc: doc.ordered_qty < doc.qty
+		}
+	}, target_doc, postprocess)
 
 	return target_doc
 
-def get_material_requests_based_on_supplier(supplier):
-	supplier_items = [d[0] for d in frappe.db.get_values("Item",
-		{"default_supplier": supplier})]
-	if supplier_items:
-		material_requests = frappe.db.sql_list("""select distinct mr.name
-			from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
-			where mr.name = mr_item.parent
-				and mr_item.item_code in (%s)
-				and mr.material_request_type = 'Purchase'
-				and mr.per_ordered < 99.99
-				and mr.docstatus = 1
-				and mr.status != 'Stopped'
-			order by mr_item.item_code ASC""" % ', '.join(['%s']*len(supplier_items)),
-			tuple(supplier_items))
-	else:
-		material_requests = []
-	return material_requests, supplier_items
+@frappe.whitelist()
+def get_items_based_on_default_supplier(supplier):
+	supplier_items = [d.parent for d in frappe.db.get_all("Item Default",
+		{"default_supplier": supplier, "parenttype": "Item"}, 'parent')]
+
+	return supplier_items
+
+@frappe.whitelist()
+def get_material_requests_based_on_supplier(doctype, txt, searchfield, start, page_len, filters):
+	conditions = ""
+	if txt:
+		conditions += "and mr.name like '%%"+txt+"%%' "
+
+	if filters.get("transaction_date"):
+		date = filters.get("transaction_date")[1]
+		conditions += "and mr.transaction_date between '{0}' and '{1}' ".format(date[0], date[1])
+
+	supplier = filters.get("supplier")
+	supplier_items = get_items_based_on_default_supplier(supplier)
+
+	if not supplier_items:
+		frappe.throw(_("{0} is not the default supplier for any items.").format(supplier))
+
+	material_requests = frappe.db.sql("""select distinct mr.name, transaction_date,company
+		from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
+		where mr.name = mr_item.parent
+			and mr_item.item_code in ({0})
+			and mr.material_request_type = 'Purchase'
+			and mr.per_ordered < 99.99
+			and mr.docstatus = 1
+			and mr.status != 'Stopped'
+			and mr.company = '{1}'
+			{2}
+		order by mr_item.item_code ASC
+		limit {3} offset {4} """ \
+		.format(', '.join(['%s']*len(supplier_items)), filters.get("company"), conditions, page_len, start),
+		tuple(supplier_items), as_dict=1)
+
+	return material_requests
+
+def get_default_supplier_query(doctype, txt, searchfield, start, page_len, filters):
+	doc = frappe.get_doc("Material Request", filters.get("doc"))
+	item_list = []
+	for d in doc.items:
+		item_list.append(d.item_code)
+
+	return frappe.db.sql("""select default_supplier
+		from `tabItem Default`
+		where parent in ({0}) and
+		default_supplier IS NOT NULL
+		""".format(', '.join(['%s']*len(item_list))),tuple(item_list))
 
 @frappe.whitelist()
 def make_supplier_quotation(source_name, target_doc=None):
@@ -344,7 +431,8 @@ def make_supplier_quotation(source_name, target_doc=None):
 			"doctype": "Supplier Quotation Item",
 			"field_map": {
 				"name": "material_request_item",
-				"parent": "material_request"
+				"parent": "material_request",
+				"sales_order": "sales_order"
 			}
 		}
 	}, target_doc, postprocess)
@@ -360,21 +448,35 @@ def make_stock_entry(source_name, target_doc=None):
 		target.transfer_qty = qty * obj.conversion_factor
 		target.conversion_factor = obj.conversion_factor
 
-		if source_parent.material_request_type == "Material Transfer":
+		if source_parent.material_request_type == "Material Transfer" or source_parent.material_request_type == "Customer Provided":
 			target.t_warehouse = obj.warehouse
 		else:
 			target.s_warehouse = obj.warehouse
 
+		if source_parent.material_request_type == "Customer Provided":
+			target.allow_zero_valuation_rate = 1
+
+		if source_parent.material_request_type == "Material Transfer":
+			target.s_warehouse = obj.from_warehouse
+
 	def set_missing_values(source, target):
 		target.purpose = source.material_request_type
+		if source.job_card:
+			target.purpose = 'Material Transfer for Manufacture'
+
+		if source.material_request_type == "Customer Provided":
+			target.purpose = "Material Receipt"
+
 		target.run_method("calculate_rate_and_amount")
+		target.set_stock_entry_type()
+		target.set_job_card_data()
 
 	doclist = get_mapped_doc("Material Request", source_name, {
 		"Material Request": {
 			"doctype": "Stock Entry",
 			"validation": {
 				"docstatus": ["=", 1],
-				"material_request_type": ["in", ["Material Transfer", "Material Issue"]]
+				"material_request_type": ["in", ["Material Transfer", "Material Issue", "Customer Provided"]]
 			}
 		},
 		"Material Request Item": {
@@ -382,7 +484,7 @@ def make_stock_entry(source_name, target_doc=None):
 			"field_map": {
 				"name": "material_request_item",
 				"parent": "material_request",
-				"uom": "stock_uom",
+				"uom": "stock_uom"
 			},
 			"postprocess": update_item,
 			"condition": lambda doc: doc.ordered_qty < doc.stock_qty
@@ -392,36 +494,77 @@ def make_stock_entry(source_name, target_doc=None):
 	return doclist
 
 @frappe.whitelist()
-def raise_production_orders(material_request):
+def raise_work_orders(material_request):
 	mr= frappe.get_doc("Material Request", material_request)
 	errors =[]
-	production_orders = []
+	work_orders = []
 	default_wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
+
 	for d in mr.items:
-		if (d.qty - d.ordered_qty) >0:
-			if frappe.db.get_value("BOM", {"item": d.item_code, "is_default": 1}):
-				prod_order = frappe.new_doc("Production Order")
-				prod_order.production_item = d.item_code
-				prod_order.qty = d.qty - d.ordered_qty
-				prod_order.fg_warehouse = d.warehouse
-				prod_order.wip_warehouse = default_wip_warehouse
-				prod_order.description = d.description
-				prod_order.stock_uom = d.stock_uom
-				prod_order.expected_delivery_date = d.schedule_date
-				prod_order.sales_order = d.sales_order
-				prod_order.bom_no = get_item_details(d.item_code).bom_no
-				prod_order.material_request = mr.name
-				prod_order.material_request_item = d.name
-				prod_order.planned_start_date = mr.transaction_date
-				prod_order.company = mr.company
-				prod_order.save()
-				production_orders.append(prod_order.name)
+		if (d.stock_qty - d.ordered_qty) > 0:
+			if frappe.db.exists("BOM", {"item": d.item_code, "is_default": 1}):
+				wo_order = frappe.new_doc("Work Order")
+				wo_order.update({
+					"production_item": d.item_code,
+					"qty": d.stock_qty - d.ordered_qty,
+					"fg_warehouse": d.warehouse,
+					"wip_warehouse": default_wip_warehouse,
+					"description": d.description,
+					"stock_uom": d.stock_uom,
+					"expected_delivery_date": d.schedule_date,
+					"sales_order": d.sales_order,
+					"bom_no": get_item_details(d.item_code).bom_no,
+					"material_request": mr.name,
+					"material_request_item": d.name,
+					"planned_start_date": mr.transaction_date,
+					"company": mr.company
+				})
+
+				wo_order.set_work_order_operations()
+				wo_order.save()
+
+				work_orders.append(wo_order.name)
 			else:
-				errors.append(_("Row {0}: Bill of Materials not found for the Item {1}").format(d.idx, d.item_code))
-	if production_orders:
-		message = ["""<a href="#Form/Production Order/%s" target="_blank">%s</a>""" % \
-			(p, p) for p in production_orders]
-		msgprint(_("The following Production Orders were created:") + '\n' + new_line_sep(message))
+				errors.append(_("Row {0}: Bill of Materials not found for the Item {1}")
+					.format(d.idx, get_link_to_form("Item", d.item_code)))
+
+	if work_orders:
+		work_orders_list = [get_link_to_form("Work Order", d) for d in work_orders]
+
+		if len(work_orders) > 1:
+			msgprint(_("The following {0} were created: {1}")
+				.format(frappe.bold(_("Work Orders")), '<br>' + ', '.join(work_orders_list)))
+		else:
+			msgprint(_("The {0} {1} created sucessfully")
+				.format(frappe.bold(_("Work Order")), work_orders_list[0]))
+
 	if errors:
-		frappe.throw(_("Productions Orders cannot be raised for:") + '\n' + new_line_sep(errors))
-	return production_orders
+		frappe.throw(_("Work Order cannot be created for following reason: <br> {0}")
+			.format(new_line_sep(errors)))
+
+	return work_orders
+
+@frappe.whitelist()
+def create_pick_list(source_name, target_doc=None):
+	doc = get_mapped_doc('Material Request', source_name, {
+		'Material Request': {
+			'doctype': 'Pick List',
+			'field_map': {
+				'material_request_type': 'purpose'
+			},
+			'validation': {
+				'docstatus': ['=', 1]
+			}
+		},
+		'Material Request Item': {
+			'doctype': 'Pick List Item',
+			'field_map': {
+				'name': 'material_request_item',
+				'qty': 'stock_qty'
+			},
+		},
+	}, target_doc)
+
+	doc.set_item_locations()
+
+	return doc

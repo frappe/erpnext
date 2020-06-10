@@ -25,6 +25,7 @@ frappe.ui.form.on('Asset Maintenance', {
 			}
 		);
 	},
+
 	refresh: (frm) => {
 		if(!frm.is_new()) {
 			frm.trigger('make_dashboard');
@@ -72,25 +73,6 @@ frappe.ui.form.on('Asset Maintenance Task', {
 	},
 	end_date: (frm, cdt, cdn)  => {
 		get_next_due_date(frm, cdt, cdn);
-	},
-	assign_to: (frm, cdt, cdn)  => {
-		var d = locals[cdt][cdn];
-		if (frm.doc.__islocal) {
-			frappe.model.set_value(cdt, cdn, "assign_to", "");
-			frappe.model.set_value(cdt, cdn, "assign_to_name", "");
-			frappe.throw(__("Please save before assigning task."));
-		}
-		if (d.assign_to) {
-			return frappe.call({
-				method: 'erpnext.assets.doctype.asset_maintenance.asset_maintenance.assign_tasks',
-				args: {
-					asset_maintenance_name: frm.doc.name,
-					assign_to_member: d.assign_to,
-					maintenance_task: d.maintenance_task,
-					next_due_date: d.next_due_date
-				}
-			});
-		}
 	}
 });
 

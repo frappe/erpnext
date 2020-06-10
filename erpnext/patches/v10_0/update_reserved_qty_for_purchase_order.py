@@ -1,5 +1,5 @@
+from __future__ import unicode_literals
 import frappe
-from frappe import _
 from erpnext.stock.utils import get_bin
 
 def execute():
@@ -12,6 +12,7 @@ def execute():
 	if not po_item:
 		return
 
+	frappe.reload_doc("stock", "doctype", "bin")
 	frappe.reload_doc("buying", "doctype", "purchase_order_item_supplied")
 	company_warehouse = frappe._dict(frappe.db.sql("""select company, min(name) from `tabWarehouse`
 		where is_group = 0 group by company"""))
@@ -23,22 +24,25 @@ def execute():
 	# Update reserved warehouse
 	for item in po_item:
 		reserve_warehouse = get_warehouse(item.rm_item_code, item.company, company_warehouse, item_wh)
-		update_res_warehouse = frappe.db.sql("""update `tabPurchase Order Item Supplied`
+		frappe.db.sql("""update `tabPurchase Order Item Supplied`
 			set reserve_warehouse = %s
 			where parent = %s and rm_item_code = %s
 		""", (reserve_warehouse, item["poname"], item["rm_item_code"]))
 
 	# Update bin
 	item_wh_bin = frappe.db.sql(("""
-		select distinct poitemsup.rm_item_code as rm_item_code, 
+		select distinct poitemsup.rm_item_code as rm_item_code,
 			poitemsup.reserve_warehouse as reserve_warehouse
 		from `tabPurchase Order` po, `tabPurchase Order Item Supplied` poitemsup
 		where po.name = poitemsup.parent
 			and po.is_subcontracted = "Yes"
 			and po.docstatus = 1"""), as_dict=1)
 	for d in item_wh_bin:
-		stock_bin = get_bin(d["rm_item_code"], d["reserve_warehouse"])
-		stock_bin.update_reserved_qty_for_sub_contracting()
+		try:
+			stock_bin = get_bin(d["rm_item_code"], d["reserve_warehouse"])
+			stock_bin.update_reserved_qty_for_sub_contracting()
+		except:
+			pass
 
 def get_warehouse(item_code, company, company_warehouse, item_wh):
 	reserve_warehouse = item_wh.get(item_code)

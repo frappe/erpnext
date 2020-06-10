@@ -2,20 +2,22 @@ frappe.provide("erpnext.financial_statements");
 
 erpnext.financial_statements = {
 	"filters": get_filters(),
-	"formatter": function(row, cell, value, columnDef, dataContext, default_formatter) {
-		if (columnDef.df.fieldname=="account") {
-			value = dataContext.account_name;
+	"formatter": function(value, row, column, data, default_formatter) {
+		if (column.fieldname=="account") {
+			value = data.account_name || value;
 
-			columnDef.df.link_onclick =
-				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(dataContext) + ")";
-			columnDef.df.is_tree = true;
+			column.link_onclick =
+				"erpnext.financial_statements.open_general_ledger(" + JSON.stringify(data) + ")";
+			column.is_tree = true;
 		}
 
-		value = default_formatter(row, cell, value, columnDef, dataContext);
+		value = default_formatter(value, row, column, data);
 
-		if (!dataContext.parent_account) {
+		if (!data.parent_account) {
+			value = $(`<span>${value}</span>`);
+
 			var $value = $(value).css("font-weight", "bold");
-			if (dataContext.warn_if_negative && dataContext[columnDef.df.fieldname] < 0) {
+			if (data.warn_if_negative && data[column.fieldname] < 0) {
 				$value.addClass("text-danger");
 			}
 
@@ -30,7 +32,7 @@ erpnext.financial_statements = {
 
 		frappe.route_options = {
 			"account": data.account,
-			"company": frappe.query_report_filters_by_name.company.get_value(),
+			"company": frappe.query_report.get_filter_value('company'),
 			"from_date": data.from_date || data.year_start_date,
 			"to_date": data.to_date || data.year_end_date,
 			"project": (project && project.length > 0) ? project[0].$input.val() : ""
@@ -44,6 +46,16 @@ erpnext.financial_statements = {
 	onload: function(report) {
 		// dropdown for links to other financial statements
 		erpnext.financial_statements.filters = get_filters()
+
+		let fiscal_year = frappe.defaults.get_user_default("fiscal_year")
+
+		frappe.model.with_doc("Fiscal Year", fiscal_year, function(r) {
+			var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
+			frappe.query_report.set_filter_value({
+				period_start_date: fy.year_start_date,
+				period_end_date: fy.year_end_date
+			});
+		});
 
 		report.page.add_inner_button(__("Balance Sheet"), function() {
 			var filters = report.get_values();
@@ -60,14 +72,51 @@ erpnext.financial_statements = {
 	}
 };
 
-function get_filters(){
-	return [
+function get_filters() {
+	let filters = [
 		{
 			"fieldname":"company",
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("Company"),
+			"reqd": 1
+		},
+		{
+			"fieldname":"finance_book",
+			"label": __("Finance Book"),
+			"fieldtype": "Link",
+			"options": "Finance Book"
+		},
+		{
+			"fieldname":"filter_based_on",
+			"label": __("Filter Based On"),
+			"fieldtype": "Select",
+			"options": ["Fiscal Year", "Date Range"],
+			"default": ["Fiscal Year"],
+			"reqd": 1,
+			on_change: function() {
+				let filter_based_on = frappe.query_report.get_filter_value('filter_based_on');
+				frappe.query_report.toggle_filter_display('from_fiscal_year', filter_based_on === 'Date Range');
+				frappe.query_report.toggle_filter_display('to_fiscal_year', filter_based_on === 'Date Range');
+				frappe.query_report.toggle_filter_display('period_start_date', filter_based_on === 'Fiscal Year');
+				frappe.query_report.toggle_filter_display('period_end_date', filter_based_on === 'Fiscal Year');
+
+				frappe.query_report.refresh();
+			}
+		},
+		{
+			"fieldname":"period_start_date",
+			"label": __("Start Date"),
+			"fieldtype": "Date",
+			"hidden": 1,
+			"reqd": 1
+		},
+		{
+			"fieldname":"period_end_date",
+			"label": __("End Date"),
+			"fieldtype": "Date",
+			"hidden": 1,
 			"reqd": 1
 		},
 		{
@@ -96,8 +145,32 @@ function get_filters(){
 				{ "value": "Half-Yearly", "label": __("Half-Yearly") },
 				{ "value": "Yearly", "label": __("Yearly") }
 			],
-			"default": "Monthly",
+			"default": "Yearly",
 			"reqd": 1
+		},
+		// Note:
+		// If you are modifying this array such that the presentation_currency object
+		// is no longer the last object, please make adjustments in cash_flow.js
+		// accordingly.
+		{
+			"fieldname": "presentation_currency",
+			"label": __("Currency"),
+			"fieldtype": "Select",
+			"options": erpnext.get_presentation_currency_list()
+		},
+		{
+			"fieldname": "cost_center",
+			"label": __("Cost Center"),
+			"fieldtype": "MultiSelectList",
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Cost Center', txt, {
+					company: frappe.query_report.get_filter_value("company")
+				});
+			}
 		}
 	]
+
+	return filters;
 }
+
+

@@ -1,6 +1,11 @@
+from __future__ import unicode_literals
+
 def get_data():
 	return {
 		'fieldname': 'asset_name',
+		'non_standard_fieldnames': {
+			'Asset Movement': 'asset'
+		},
 		'transactions': [
 			{
 				'label': ['Maintenance'],
@@ -9,6 +14,10 @@ def get_data():
 			{
 				'label': ['Repair'],
 				'items': ['Asset Repair']
+			},
+			{
+				'label': ['Movement'],
+				'items': ['Asset Movement']
 			}
 		]
 	}

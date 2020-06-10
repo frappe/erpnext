@@ -15,7 +15,7 @@ from erpnext.education.api import get_student_group_students, make_attendance_re
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_education_user'))
-	for d in xrange(20):
+	for d in range(20):
 		approve_random_student_applicant()
 		enroll_random_student(frappe.flags.current_date)
 	# if frappe.flags.current_date.weekday()== 0:
@@ -51,12 +51,12 @@ def enroll_random_student(current_date):
 		
 def assign_student_group(student, student_name, program, courses, batch):
 	course_list = [d["course"] for d in courses]
-	for d in frappe.get_list("Student Group", fields=("name"), filters={"program": program, "course":("in", course_list)}):
+	for d in frappe.get_list("Student Group", fields=("name"), filters={"program": program, "course":("in", course_list), "disabled": 0}):
 		student_group = frappe.get_doc("Student Group", d.name)
 		student_group.append("students", {"student": student, "student_name": student_name,
 			"group_roll_number":len(student_group.students)+1, "active":1})
 		student_group.save()
-	student_batch = frappe.get_list("Student Group", fields=("name"), filters={"program": program, "group_based_on":"Batch", "batch":batch})[0]
+	student_batch = frappe.get_list("Student Group", fields=("name"), filters={"program": program, "group_based_on":"Batch", "batch":batch, "disabled": 0})[0]
 	student_batch_doc = frappe.get_doc("Student Group", student_batch.name)
 	student_batch_doc.append("students", {"student": student, "student_name": student_name,
 		"group_roll_number":len(student_batch_doc.students)+1, "active":1})
@@ -65,7 +65,7 @@ def assign_student_group(student, student_name, program, courses, batch):
 
 def mark_student_attendance(current_date):
 	status = ["Present", "Absent"]
-	for d in frappe.db.get_list("Student Group", filters={"group_based_on": "Batch"}):
+	for d in frappe.db.get_list("Student Group", filters={"group_based_on": "Batch", "disabled": 0}):
 		students = get_student_group_students(d.name)
 		for stud in students:
 			make_attendance_records(stud.student, stud.student_name, status[weighted_choice([9,4])], None, d.name, current_date)
@@ -77,7 +77,7 @@ def make_fees():
 
 def make_assessment_plan(date):
 	for d in range(1,4):
-		random_group = get_random("Student Group", {"group_based_on": "Course"}, True)
+		random_group = get_random("Student Group", {"group_based_on": "Course", "disabled": 0}, True)
 		doc = frappe.new_doc("Assessment Plan")
 		doc.student_group = random_group.name
 		doc.course = random_group.course
@@ -94,7 +94,7 @@ def make_course_schedule(start_date, end_date):
 		cs.course_start_date = cstr(start_date)
 		cs.course_end_date = cstr(end_date)
 		day = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-		for x in xrange(3):
+		for x in range(3):
 			random_day = random.choice(day)
 			cs.day = random_day
 			cs.from_time = timedelta(hours=(random.randrange(7, 17,1)))

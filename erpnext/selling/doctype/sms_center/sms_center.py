@@ -15,19 +15,24 @@ class SMSCenter(Document):
 	def create_receiver_list(self):
 		rec, where_clause = '', ''
 		if self.send_to == 'All Customer Contact':
-			where_clause = self.customer and " and customer = '%s'" % \
-				self.customer.replace("'", "\'") or " and ifnull(customer, '') != ''"
+			where_clause = " and dl.link_doctype = 'Customer'"
+			if self.customer:
+				where_clause += " and dl.link_name = '%s'" % \
+					self.customer.replace("'", "\'") or " and ifnull(dl.link_name, '') != ''"
 		if self.send_to == 'All Supplier Contact':
-			where_clause = self.supplier and " and supplier = '%s'" % \
-				self.supplier.replace("'", "\'") or " and ifnull(supplier, '') != ''"
+			where_clause = " and dl.link_doctype = 'Supplier'"
+			if self.supplier:
+				where_clause += " and dl.link_name = '%s'" % \
+					self.supplier.replace("'", "\'") or " and ifnull(dl.link_name, '') != ''"
 		if self.send_to == 'All Sales Partner Contact':
-			where_clause = self.sales_partner and " and sales_partner = '%s'" % \
-				self.sales_partner.replace("'", "\'") or " and ifnull(sales_partner, '') != ''"
-
+			where_clause = " and dl.link_doctype = 'Sales Partner'"
+			if self.sales_partner:
+				where_clause += "and dl.link_name = '%s'" % \
+					self.sales_partner.replace("'", "\'") or " and ifnull(dl.link_name, '') != ''"
 		if self.send_to in ['All Contact', 'All Customer Contact', 'All Supplier Contact', 'All Sales Partner Contact']:
-			rec = frappe.db.sql("""select CONCAT(ifnull(first_name,''), ' ', ifnull(last_name,'')),
-				mobile_no from `tabContact` where ifnull(mobile_no,'')!='' and
-				docstatus != 2 %s""" % where_clause)
+			rec = frappe.db.sql("""select CONCAT(ifnull(c.first_name,''), ' ', ifnull(c.last_name,'')),
+				c.mobile_no from `tabContact` c, `tabDynamic Link` dl  where ifnull(c.mobile_no,'')!='' and
+				c.docstatus != 2 and dl.parent = c.name%s""" % where_clause)
 
 		elif self.send_to == 'All Lead (Open)':
 			rec = frappe.db.sql("""select lead_name, mobile_no from `tabLead` where
@@ -50,7 +55,6 @@ class SMSCenter(Document):
 				where ifnull(tabEmployee.cell_number,'')!=''""")
 
 		rec_list = ''
-
 		for d in rec:
 			rec_list += d[0] + ' - ' + d[1] + '\n'
 		self.receiver_list = rec_list

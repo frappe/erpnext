@@ -35,16 +35,22 @@ def get_conditions(filters):
 
 def get_entries(filters):
 	conditions = get_conditions(filters)
-	journal_entries =  frappe.db.sql("""select "Journal Entry", jv.name, jv.posting_date,
-		jv.cheque_no, jv.clearance_date, jvd.against_account, (jvd.debit - jvd.credit)
-		from `tabJournal Entry Account` jvd, `tabJournal Entry` jv
-		where jvd.parent = jv.name and jv.docstatus=1 and jvd.account = %(account)s {0}
-		order by posting_date DESC, jv.name DESC""".format(conditions), filters, as_list=1)
+	journal_entries =  frappe.db.sql("""SELECT
+			"Journal Entry", jv.name, jv.posting_date, jv.cheque_no,
+			jv.clearance_date, jvd.against_account, jvd.debit - jvd.credit
+		FROM 
+			`tabJournal Entry Account` jvd, `tabJournal Entry` jv
+		WHERE 
+			jvd.parent = jv.name and jv.docstatus=1 and jvd.account = %(account)s {0}
+			order by posting_date DESC, jv.name DESC""".format(conditions), filters, as_list=1)
 
-	payment_entries =  frappe.db.sql("""select "Payment Entry", name, posting_date,
-		reference_no, clearance_date, party, if(paid_from=%(account)s, paid_amount, received_amount)
-		from `tabPayment Entry`
-		where docstatus=1 and (paid_from = %(account)s or paid_to = %(account)s) {0}
-		order by posting_date DESC, name DESC""".format(conditions), filters, as_list=1)
+	payment_entries =  frappe.db.sql("""SELECT
+			"Payment Entry", name, posting_date, reference_no, clearance_date, party, 
+			if(paid_from=%(account)s, paid_amount * -1, received_amount)
+		FROM 
+			`tabPayment Entry`
+		WHERE 
+			docstatus=1 and (paid_from = %(account)s or paid_to = %(account)s) {0}
+			order by posting_date DESC, name DESC""".format(conditions), filters, as_list=1)
 
 	return sorted(journal_entries + payment_entries, key=lambda k: k[2] or getdate(nowdate()))

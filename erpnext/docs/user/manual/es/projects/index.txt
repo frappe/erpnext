@@ -1,7 +1,0 @@
-tasks
-project
-time-log-batch
-activity-type
-activity-cost
-articles
-timesheet

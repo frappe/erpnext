@@ -10,7 +10,7 @@ QUnit.test("Test: Leave type [HR]", function (assert) {
 		() => frappe.new_doc("Leave Type"),
 		() => frappe.timeout(1),
 		() => cur_frm.set_value("leave_type_name", "Test Leave type"),
-		() => cur_frm.set_value("max_days_allowed", "5"),
+		() => cur_frm.set_value("max_continuous_days_allowed", "5"),
 		() => frappe.click_check('Is Carry Forward'),
 		// save form
 		() => cur_frm.save(),

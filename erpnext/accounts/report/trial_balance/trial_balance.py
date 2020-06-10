@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import flt, getdate, formatdate, cstr
 from erpnext.accounts.report.financial_statements \
 	import filter_accounts, set_gl_entries_by_account, filter_out_zero_value_rows
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
 value_fields = ("opening_debit", "opening_credit", "debit", "credit", "closing_debit", "closing_credit")
 
@@ -51,8 +52,10 @@ def validate_filters(filters):
 		filters.to_date = filters.year_end_date
 
 def get_data(filters):
-	accounts = frappe.db.sql("""select name, parent_account, account_name, account_number, root_type, report_type, lft, rgt
-		from `tabAccount` where company=%s order by account_name, lft""", filters.company, as_dict=True)
+
+	accounts = frappe.db.sql("""select name, account_number, parent_account, account_name, root_type, report_type, lft, rgt
+
+		from `tabAccount` where company=%s order by lft""", filters.company, as_dict=True)
 	company_currency = erpnext.get_company_currency(filters.company)
 
 	if not accounts:
@@ -65,18 +68,21 @@ def get_data(filters):
 
 	gl_entries_by_account = {}
 
+	opening_balances = get_opening_balances(filters)
+
+	#add filter inside list so that the query in financial_statements.py doesn't break
+	if filters.project:
+		filters.project = [filters.project]
+
 	set_gl_entries_by_account(filters.company, filters.from_date,
 		filters.to_date, min_lft, max_rgt, filters, gl_entries_by_account, ignore_closing_entries=not flt(filters.with_period_closing_entry))
-
-	opening_balances = get_opening_balances(filters)
 
 	total_row = calculate_values(accounts, gl_entries_by_account, opening_balances, filters, company_currency)
 	accumulate_values_into_parents(accounts, accounts_by_name)
 
 	data = prepare_data(accounts, filters, total_row, parent_children_map, company_currency)
-	data = filter_out_zero_value_rows(data, parent_children_map, 
-		show_zero_values=filters.get("show_zero_values"))
-		
+	data = filter_out_zero_value_rows(data, parent_children_map, show_zero_values=filters.get("show_zero_values"))
+
 	return data
 
 def get_opening_balances(filters):
@@ -96,6 +102,47 @@ def get_rootwise_opening_balances(filters, report_type):
 	if not flt(filters.with_period_closing_entry):
 		additional_conditions += " and ifnull(voucher_type, '')!='Period Closing Voucher'"
 
+	if filters.cost_center:
+		lft, rgt = frappe.db.get_value('Cost Center', filters.cost_center, ['lft', 'rgt'])
+		additional_conditions += """ and cost_center in (select name from `tabCost Center`
+			where lft >= %s and rgt <= %s)""" % (lft, rgt)
+
+	if filters.project:
+		additional_conditions += " and project = %(project)s"
+
+	if filters.finance_book:
+		fb_conditions = " AND finance_book = %(finance_book)s"
+		if filters.include_default_book_entries:
+			fb_conditions = " AND (finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)"
+
+		additional_conditions += fb_conditions
+
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
+
+	query_filters = {
+		"company": filters.company,
+		"from_date": filters.from_date,
+		"report_type": report_type,
+		"year_start_date": filters.year_start_date,
+		"project": filters.project,
+		"finance_book": filters.finance_book,
+		"company_fb": frappe.db.get_value("Company", filters.company, 'default_finance_book')
+	}
+
+	if accounting_dimensions:
+		for dimension in accounting_dimensions:
+			if filters.get(dimension.fieldname):
+				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
+					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
+						filters.get(dimension.fieldname))
+					additional_conditions += "and {0} in %({0})s".format(dimension.fieldname)
+				else:
+					additional_conditions += "and {0} in (%({0})s)".format(dimension.fieldname)
+
+				query_filters.update({
+					dimension.fieldname: filters.get(dimension.fieldname)
+				})
+
 	gle = frappe.db.sql("""
 		select
 			account, sum(debit) as opening_debit, sum(credit) as opening_credit
@@ -105,14 +152,7 @@ def get_rootwise_opening_balances(filters, report_type):
 			{additional_conditions}
 			and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
 			and account in (select name from `tabAccount` where report_type=%(report_type)s)
-		group by account""".format(additional_conditions=additional_conditions),
-		{
-			"company": filters.company,
-			"from_date": filters.from_date,
-			"report_type": report_type,
-			"year_start_date": filters.year_start_date
-		},
-		as_dict=True)
+		group by account""".format(additional_conditions=additional_conditions), query_filters , as_dict=True)
 
 	opening = frappe._dict()
 	for d in gle:
@@ -158,12 +198,13 @@ def calculate_values(accounts, gl_entries_by_account, opening_balances, filters,
 				d["debit"] += flt(entry.debit)
 				d["credit"] += flt(entry.credit)
 
-		total_row["debit"] += d["debit"]
-		total_row["credit"] += d["credit"]
-		total_row["opening_debit"] += d["opening_debit"]
-		total_row["opening_credit"] += d["opening_credit"]
-		total_row["closing_debit"] += (d["opening_debit"] + d["debit"])
-		total_row["closing_credit"] += (d["opening_credit"] + d["credit"])
+		d["closing_debit"] = d["opening_debit"] + d["debit"]
+		d["closing_credit"] = d["opening_credit"] + d["credit"]
+
+		prepare_opening_closing(d)
+
+		for field in value_fields:
+			total_row[field] += d[field]
 
 	return total_row
 
@@ -175,34 +216,34 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 
 def prepare_data(accounts, filters, total_row, parent_children_map, company_currency):
 	data = []
-	tmpaccnt = sorted(accounts)
-	if not (accounts[0].account_number is None):
-		accounts = tmpaccnt
-	
+
 	for d in accounts:
+		# Prepare opening closing for group account
+		if parent_children_map.get(d.account):
+			prepare_opening_closing(d)
+
 		has_value = False
 		row = {
-			"account_name": d.account_name,
 			"account": d.name,
 			"parent_account": d.parent_account,
 			"indent": d.indent,
 			"from_date": filters.from_date,
 			"to_date": filters.to_date,
-			"currency": company_currency
+			"currency": company_currency,
+			"account_name": ('{} - {}'.format(d.account_number, d.account_name)
+				if d.account_number else d.account_name)
 		}
-
-		prepare_opening_and_closing(d)
 
 		for key in value_fields:
 			row[key] = flt(d.get(key, 0.0), 3)
-			
+
 			if abs(row[key]) >= 0.005:
 				# ignore zero values
 				has_value = True
 
 		row["has_value"] = has_value
 		data.append(row)
-		
+
 	data.extend([{},total_row])
 
 	return data
@@ -215,6 +256,13 @@ def get_columns():
 			"fieldtype": "Link",
 			"options": "Account",
 			"width": 300
+		},
+		{
+			"fieldname": "currency",
+			"label": _("Currency"),
+			"fieldtype": "Link",
+			"options": "Currency",
+			"hidden": 1
 		},
 		{
 			"fieldname": "opening_debit",
@@ -257,32 +305,19 @@ def get_columns():
 			"fieldtype": "Currency",
 			"options": "currency",
 			"width": 120
-		},
-		{
-			"fieldname": "currency",
-			"label": _("Currency"),
-			"fieldtype": "Link",
-			"options": "Currency",
-			"hidden": 1
 		}
 	]
 
-def prepare_opening_and_closing(d):
-	d["closing_debit"] = d["opening_debit"] + d["debit"]
-	d["closing_credit"] = d["opening_credit"] + d["credit"]
+def prepare_opening_closing(row):
+	dr_or_cr = "debit" if row["root_type"] in ["Asset", "Equity", "Expense"] else "credit"
+	reverse_dr_or_cr = "credit" if dr_or_cr == "debit" else "debit"
 
-	if d["closing_debit"] > d["closing_credit"]:
-		d["closing_debit"] -= d["closing_credit"]
-		d["closing_credit"] = 0.0
-
-	else:
-		d["closing_credit"] -= d["closing_debit"]
-		d["closing_debit"] = 0.0
-
-	if d["opening_debit"] > d["opening_credit"]:
-		d["opening_debit"] -= d["opening_credit"]
-		d["opening_credit"] = 0.0
-
-	else:
-		d["opening_credit"] -= d["opening_debit"]
-		d["opening_debit"] = 0.0
+	for col_type in ["opening", "closing"]:
+		valid_col = col_type + "_" + dr_or_cr
+		reverse_col = col_type + "_" + reverse_dr_or_cr
+		row[valid_col] -= row[reverse_col]
+		if row[valid_col] < 0:
+			row[reverse_col] = abs(row[valid_col])
+			row[valid_col] = 0.0
+		else:
+			row[reverse_col] = 0.0

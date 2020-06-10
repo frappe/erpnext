@@ -9,14 +9,12 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import get_party_account_currency
-
-subject_field = "title"
-sender_field = "contact_email"
+from frappe.email.inbox import link_communication_to_document
 
 class Opportunity(TransactionBase):
 	def after_insert(self):
-		if self.lead:
-			frappe.get_doc("Lead", self.lead).set_status(update=True)
+		if self.opportunity_from == "Lead":
+			frappe.get_doc("Lead", self.party_name).set_status(update=True)
 
 	def validate(self):
 		self._prev = frappe._dict({
@@ -28,12 +26,8 @@ class Opportunity(TransactionBase):
 
 		self.make_new_lead_if_required()
 
-		if not self.enquiry_from:
-			frappe.throw(_("Opportunity From field is mandatory"))
-
 		self.validate_item_details()
 		self.validate_uom_is_integer("uom", "qty")
-		self.validate_lead_cust()
 		self.validate_cust_name()
 
 		if not self.title:
@@ -44,7 +38,7 @@ class Opportunity(TransactionBase):
 
 	def make_new_lead_if_required(self):
 		"""Set lead against new opportunity"""
-		if not (self.lead or self.customer) and self.contact_email:
+		if (not self.get("party_name")) and self.contact_email:
 			# check if customer is already created agains the self.contact_email
 			customer = frappe.db.sql("""select
 				distinct `tabDynamic Link`.link_name as customer
@@ -60,8 +54,8 @@ class Opportunity(TransactionBase):
 					`tabDynamic Link`.link_doctype='Customer'
 			""".format(self.contact_email), as_dict=True)
 			if customer and customer[0].customer:
-				self.customer = customer[0].customer
-				self.enquiry_from = "Customer"
+				self.party_name = customer[0].customer
+				self.opportunity_from = "Customer"
 				return
 
 			lead_name = frappe.db.get_value("Lead", {"email_id": self.contact_email})
@@ -88,13 +82,21 @@ class Opportunity(TransactionBase):
 				lead.insert(ignore_permissions=True)
 				lead_name = lead.name
 
-			self.enquiry_from = "Lead"
-			self.lead = lead_name
+			self.opportunity_from = "Lead"
+			self.party_name = lead_name
 
-	def declare_enquiry_lost(self,arg):
+	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_active_quotation():
 			frappe.db.set(self, 'status', 'Lost')
-			frappe.db.set(self, 'order_lost_reason', arg)
+
+			if detailed_reason:
+				frappe.db.set(self, 'order_lost_reason', detailed_reason)
+
+			for reason in lost_reasons_list:
+				self.append('lost_reasons', reason)
+
+			self.save()
+
 		else:
 			frappe.throw(_("Cannot declare as lost, because Quotation has been made."))
 
@@ -125,10 +127,10 @@ class Opportunity(TransactionBase):
 
 	def has_lost_quotation(self):
 		lost_quotation = frappe.db.sql("""
-			select q.name
-			from `tabQuotation` q, `tabQuotation Item` qi
-			where q.name = qi.parent and q.docstatus=1
-				and qi.prevdoc_docname =%s and q.status = 'Lost'
+			select name
+			from `tabQuotation`
+			where docstatus=1
+				and opportunity =%s and status = 'Lost'
 			""", self.name)
 		if lost_quotation:
 			if self.has_active_quotation():
@@ -136,10 +138,10 @@ class Opportunity(TransactionBase):
 			return True
 
 	def validate_cust_name(self):
-		if self.customer:
-			self.customer_name = frappe.db.get_value("Customer", self.customer, "customer_name")
-		elif self.lead:
-			lead_name, company_name = frappe.db.get_value("Lead", self.lead, ["lead_name", "company_name"])
+		if self.party_name and self.opportunity_from == 'Customer':
+			self.customer_name = frappe.db.get_value("Customer", self.party_name, "customer_name")
+		elif self.party_name and self.opportunity_from == 'Lead':
+			lead_name, company_name = frappe.db.get_value("Lead", self.party_name, ["lead_name", "company_name"])
 			self.customer_name = company_name or lead_name
 
 	def on_update(self):
@@ -152,16 +154,16 @@ class Opportunity(TransactionBase):
 		opts.description = ""
 		opts.contact_date = self.contact_date
 
-		if self.customer:
+		if self.party_name and self.opportunity_from == 'Customer':
 			if self.contact_person:
 				opts.description = 'Contact '+cstr(self.contact_person)
 			else:
-				opts.description = 'Contact customer '+cstr(self.customer)
-		elif self.lead:
+				opts.description = 'Contact customer '+cstr(self.party_name)
+		elif self.party_name and self.opportunity_from == 'Lead':
 			if self.contact_display:
 				opts.description = 'Contact '+cstr(self.contact_display)
 			else:
-				opts.description = 'Contact lead '+cstr(self.lead)
+				opts.description = 'Contact lead '+cstr(self.party_name)
 
 		opts.subject = opts.description
 		opts.description += '. By : ' + cstr(self.contact_by)
@@ -186,17 +188,6 @@ class Opportunity(TransactionBase):
 			for key in item_fields:
 				if not d.get(key): d.set(key, item.get(key))
 
-	def validate_lead_cust(self):
-		if self.enquiry_from == 'Lead':
-			if not self.lead:
-				frappe.throw(_("Lead must be set if Opportunity is made from Lead"))
-			else:
-				self.customer = None
-		elif self.enquiry_from == 'Customer':
-			if not self.customer:
-				msgprint("Customer is mandatory if 'Opportunity From' is selected as Customer", raise_exception=1)
-			else:
-				self.lead = None
 
 @frappe.whitelist()
 def get_item_details(item_code):
@@ -217,9 +208,12 @@ def make_quotation(source_name, target_doc=None):
 		from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
 		quotation = frappe.get_doc(target)
 
-		company_currency = frappe.db.get_value("Company", quotation.company, "default_currency")
-		party_account_currency = get_party_account_currency("Customer", quotation.customer,
-			quotation.company) if quotation.customer else company_currency
+		company_currency = frappe.get_cached_value('Company',  quotation.company,  "default_currency")
+
+		if quotation.quotation_to == 'Customer' and quotation.party_name:
+			party_account_currency = get_party_account_currency("Customer", quotation.party_name, quotation.company)
+		else:
+			party_account_currency = company_currency
 
 		quotation.currency = party_account_currency or company_currency
 
@@ -227,7 +221,7 @@ def make_quotation(source_name, target_doc=None):
 			exchange_rate = 1
 		else:
 			exchange_rate = get_exchange_rate(quotation.currency, company_currency,
-				quotation.transaction_date)
+				quotation.transaction_date, args="for_selling")
 
 		quotation.conversion_rate = exchange_rate
 
@@ -245,7 +239,7 @@ def make_quotation(source_name, target_doc=None):
 		"Opportunity": {
 			"doctype": "Quotation",
 			"field_map": {
-				"enquiry_from": "quotation_to",
+				"opportunity_from": "quotation_to",
 				"opportunity_type": "order_type",
 				"name": "enq_no",
 			}
@@ -310,7 +304,7 @@ def set_multiple_status(names, status):
 
 def auto_close_opportunity():
 	""" auto close the `Replied` Opportunities after 7 days """
-	auto_close_after_days = frappe.db.get_value("Support Settings", "Support Settings", "close_opportunity_after_days") or 15
+	auto_close_after_days = frappe.db.get_single_value("Selling Settings", "close_opportunity_after_days") or 15
 
 	opportunities = frappe.db.sql(""" select name from tabOpportunity where status='Replied' and
 		modified<DATE_SUB(CURDATE(), INTERVAL %s DAY) """, (auto_close_after_days), as_dict=True)
@@ -321,3 +315,48 @@ def auto_close_opportunity():
 		doc.flags.ignore_permissions = True
 		doc.flags.ignore_mandatory = True
 		doc.save()
+
+@frappe.whitelist()
+def make_opportunity_from_communication(communication, ignore_communication_links=False):
+	from erpnext.crm.doctype.lead.lead import make_lead_from_communication
+	doc = frappe.get_doc("Communication", communication)
+
+	lead = doc.reference_name if doc.reference_doctype == "Lead" else None
+	if not lead:
+		lead = make_lead_from_communication(communication, ignore_communication_links=True)
+
+	opportunity_from = "Lead"
+
+	opportunity = frappe.get_doc({
+		"doctype": "Opportunity",
+		"opportunity_from": opportunity_from,
+		"lead": lead
+	}).insert(ignore_permissions=True)
+
+	link_communication_to_document(doc, "Opportunity", opportunity.name, ignore_communication_links)
+
+	return opportunity.name
+@frappe.whitelist()
+def get_events(start, end, filters=None):
+	"""Returns events for Gantt / Calendar view rendering.
+	:param start: Start date-time.
+	:param end: End date-time.
+	:param filters: Filters (JSON).
+	"""
+	from frappe.desk.calendar import get_event_conditions
+	conditions = get_event_conditions("Opportunity", filters)
+
+	data = frappe.db.sql("""
+		select
+			distinct `tabOpportunity`.name, `tabOpportunity`.customer_name, `tabOpportunity`.opportunity_amount,
+			`tabOpportunity`.title, `tabOpportunity`.contact_date
+		from
+			`tabOpportunity`
+		where
+			(`tabOpportunity`.contact_date between %(start)s and %(end)s)
+			{conditions}
+		""".format(conditions=conditions), {
+			"start": start,
+			"end": end
+		}, as_dict=True, update={"allDay": 0})
+	return data

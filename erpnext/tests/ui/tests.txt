@@ -2,7 +2,7 @@ erpnext/tests/ui/make_fixtures.js #long
 erpnext/accounts/doctype/account/tests/test_account.js
 erpnext/accounts/doctype/account/tests/test_make_tax_account.js
 erpnext/accounts/doctype/account/tests/test_account_with_number.js
-erpnext/accounts/doctype/pricing_rule/test_pricing_rule.js
+erpnext/accounts/doctype/pricing_rule/tests/test_pricing_rule.js
 erpnext/accounts/doctype/sales_taxes_and_charges_template/test_sales_taxes_and_charges_template.js
 erpnext/accounts/doctype/purchase_taxes_and_charges_template/test_purchase_taxes_and_charges_template.js
 erpnext/accounts/doctype/shipping_rule/test_shipping_rule.js
@@ -40,7 +40,7 @@ erpnext/hr/doctype/leave_control_panel/test_leave_control_panel.js
 erpnext/hr/doctype/leave_allocation/test_leave_allocation.js
 erpnext/hr/doctype/leave_application/test_leave_application.js
 erpnext/stock/doctype/warehouse/test_warehouse.js
-erpnext/manufacturing/doctype/production_order/test_production_order.js #long
+erpnext/manufacturing/doctype/work_order/test_work_order.js #long
 erpnext/accounts/page/pos/test_pos.js
 erpnext/selling/page/point_of_sale/tests/test_point_of_sale.js
 erpnext/selling/doctype/product_bundle/test_product_bundle.js
@@ -56,7 +56,7 @@ erpnext/hr/doctype/salary_structure/test_salary_structure.js
 erpnext/hr/doctype/salary_slip/test_salary_slip.js
 erpnext/hr/doctype/job_opening/test_job_opening.js
 erpnext/hr/doctype/job_applicant/test_job_applicant.js
-erpnext/hr/doctype/offer_letter/test_offer_letter.js
+erpnext/hr/doctype/job_offer/test_job_offer.js
 erpnext/hr/doctype/appraisal_template/test_appraisal_template.js
 erpnext/hr/doctype/appraisal/test_appraisal.js
 erpnext/hr/doctype/expense_claim_type/test_expense_claim_type.js
@@ -65,8 +65,8 @@ erpnext/hr/doctype/training_event/tests/test_training_event.js
 erpnext/hr/doctype/training_result_employee/test_training_result.js
 erpnext/hr/doctype/training_feedback/test_training_feedback.js
 erpnext/hr/doctype/loan_type/test_loan_type.js
-erpnext/hr/doctype/employee_loan_application/test_employee_loan_application.js
-erpnext/hr/doctype/employee_loan/test_employee_loan.js
+erpnext/hr/doctype/loan_application/test_loan_application.js
+erpnext/hr/doctype/loan/test_loan.js
 erpnext/buying/doctype/supplier/test_supplier.js
 erpnext/buying/doctype/request_for_quotation/tests/test_request_for_quotation.js
 erpnext/buying/doctype/supplier_quotation/tests/test_supplier_quotation.js
@@ -106,3 +106,5 @@ erpnext/selling/doctype/quotation/tests/test_quotation_with_margin.js
 erpnext/accounts/doctype/sales_invoice/tests/test_sales_invoice_with_margin.js
 erpnext/hr/doctype/payroll_entry/test_set_salary_components.js
 erpnext/hr/doctype/payroll_entry/test_payroll_entry.js
+erpnext/accounts/doctype/pricing_rule/tests/test_pricing_rule_with_same_currency.js
+erpnext/accounts/doctype/pricing_rule/tests/test_pricing_rule_with_different_currency.js

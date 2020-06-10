@@ -1,0 +1,28 @@
+<div class="col-md-8">
+<!-- title -->
+<h1 itemprop="name">
+	{{ item_name }}
+</h1>
+<p class="text-muted">
+	<span>{{ _("Item Code") }}:</span>
+	<span itemprop="productID">{{ doc.name }}</span>
+</p>
+<!-- description -->
+<div itemprop="description">
+{% if frappe.utils.strip_html(doc.web_long_description or '') %}
+	{{ doc.web_long_description | safe }}
+{% elif frappe.utils.strip_html(doc.description or '')  %}
+	{{ doc.description | safe }}
+{% else %}
+	{{ _("No description given") }}
+{% endif  %}
+</div>
+
+{% if has_variants %}
+	<!-- configure template -->
+	{% include "templates/generators/item/item_configure.html" %}
+{% else %}
+	<!-- add variant to cart -->
+	{% include "templates/generators/item/item_add_to_cart.html" %}
+{% endif %}
+</div>

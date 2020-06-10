@@ -17,7 +17,7 @@ def execute(filters=None):
 
 	data = []
 	for lab_test in lab_test_list:
-		row = [ lab_test.test_name, lab_test.patient, lab_test.physician, lab_test.invoice, lab_test.status, lab_test.result_date, lab_test.department]
+		row = [ lab_test.lab_test_name, lab_test.patient, lab_test.practitioner, lab_test.invoiced, lab_test.status, lab_test.result_date, lab_test.department]
 		data.append(row)
 
 	return columns, data
@@ -27,8 +27,8 @@ def get_columns():
 	columns = [
 		_("Test") + ":Data:120",
 		_("Patient") + ":Link/Patient:180",
-		_("Doctor") + ":Link/Physician:120",
-		_("Invoice") + ":Link/Sales Invoice:120",
+		_("Healthcare Practitioner") + ":Link/Healthcare Practitioner:120",
+		_("Invoiced") + ":Check:100",
 		_("Status") + ":Data:120",
 		_("Result Date") + ":Date:120",
 		_("Department") + ":Data:120",
@@ -52,7 +52,7 @@ def get_conditions(filters):
 
 def get_lab_test(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select name, patient, test_name, patient_name, status, result_date, physician, invoice, department
+	return frappe.db.sql("""select name, patient, lab_test_name, patient_name, status, result_date, practitioner, invoiced, department
 		from `tabLab Test`
 		where docstatus<2 %s order by submitted_date desc, name desc""" %
 		conditions, filters, as_dict=1)

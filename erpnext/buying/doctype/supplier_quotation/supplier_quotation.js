@@ -4,27 +4,36 @@
 // attach required files
 {% include 'erpnext/public/js/controllers/buying.js' %};
 
-frappe.ui.form.on('Suppier Quotation', {
-	setup: function(frm) {
-		frm.custom_make_buttons = {
-			'Purchase Order': 'Purchase Order'
-		}
-	}
-});
-
 erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.extend({
+	setup: function() {
+		this.frm.custom_make_buttons = {
+			'Purchase Order': 'Purchase Order',
+			'Quotation': 'Quotation',
+			'Subscription': 'Subscription'
+		}
+
+		this._super();
+	},
+
 	refresh: function() {
 		var me = this;
 		this._super();
+
+		if (this.frm.doc.__islocal && !this.frm.doc.valid_till) {
+			this.frm.set_value('valid_till', frappe.datetime.add_months(this.frm.doc.transaction_date, 1));
+		}
 		if (this.frm.doc.docstatus === 1) {
 			cur_frm.add_custom_button(__("Purchase Order"), this.make_purchase_order,
-				__("Make"));
-			cur_frm.page.set_inner_btn_group_as_primary(__("Make"));
+				__('Create'));
+			cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 			cur_frm.add_custom_button(__("Quotation"), this.make_quotation,
-				__("Make"));
-			cur_frm.add_custom_button(__('Subscription'), function() {
-				erpnext.utils.make_subscription(me.frm.doc.doctype, me.frm.doc.name)
-			}, __("Make"))
+				__('Create'));
+
+			if(!this.frm.doc.auto_repeat) {
+				cur_frm.add_custom_button(__('Subscription'), function() {
+					erpnext.utils.make_subscription(me.frm.doc.doctype, me.frm.doc.name)
+				}, __('Create'))
+			}
 		}
 		else if (this.frm.doc.docstatus===0) {
 

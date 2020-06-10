@@ -1,4 +1,0 @@
-quotation
-sales-order
-setup
-articles

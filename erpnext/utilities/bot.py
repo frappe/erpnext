@@ -36,4 +36,4 @@ class FindItemBot(BotParser):
 				return "\n\n".join(out)
 
 			else:
-				return _("Did not find any item called {0}".format(item))
+				return _("Did not find any item called {0}").format(item)

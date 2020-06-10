@@ -1,2 +1,18 @@
-<a href="https://erpnext.com?source=website_footer" target="_blank" class="text-muted">
-		Powered by ERPNext</a>
+{% set domains = frappe.get_doc("Domain Settings").active_domains %}
+{% set links = {
+	'Manufacturing': '/manufacturing',
+	'Services': '/services',
+	'Retail': '/retail',
+	'Distribution': '/distribution',
+	'Non Profit': '/non-profit',
+	'Education': '/education',
+	'Healthcare': '/healthcare',
+	'Agriculture': '/agriculture',
+	'Hospitality': ''
+} %}
+{% set link = '' %}
+{% if domains %}
+	{% set link = links[domains[0].domain] %}
+{% endif %}
+
+<a href="https://erpnext.com{{ link }}?source=website_footer" target="_blank" class="text-muted">Powered by ERPNext - {{ '' if domains else 'Open Source' }} ERP Software {{ ('for ' + domains[0].domain + ' Companies') if domains else '' }}</a>

@@ -1,6 +1,31 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+frappe.ui.form.on('Sales Person', {
+	refresh: function(frm) {
+		if(frm.doc.__onload && frm.doc.__onload.dashboard_info) {
+			var info = frm.doc.__onload.dashboard_info;
+			frm.dashboard.add_indicator(__('Total Contribution Amount: {0}',
+				[format_currency(info.allocated_amount, info.currency)]), 'blue');
+		}
+	},
+
+	setup: function(frm) {
+		frm.fields_dict["targets"].grid.get_field("distribution_id").get_query = function(doc, cdt, cdn){
+			var row = locals[cdt][cdn];
+			return {
+				filters: {
+					'fiscal_year': row.fiscal_year
+				}
+			}
+		};
+	
+		frm.make_methods = {
+			'Sales Order': () => frappe.new_doc("Sales Order")
+				.then(() => frm.add_child("sales_team", {"sales_person": frm.doc.name}))
+		}
+	}
+});
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	cur_frm.cscript.set_root_readonly(doc);

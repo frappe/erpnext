@@ -4,10 +4,17 @@
 frappe.query_reports["Salary Register"] = {
 	"filters": [
 		{
-			"fieldname":"date_range",
-			"label": __("Date Range"),
-			"fieldtype": "DateRange",
-			"default": [frappe.datetime.add_months(frappe.datetime.get_today(),-1), frappe.datetime.get_today()],
+			"fieldname":"from_date",
+			"label": __("From"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.add_months(frappe.datetime.get_today(),-1),
+			"reqd": 1
+		},
+		{
+			"fieldname":"to_date",
+			"label": __("To"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.get_today(),
 			"reqd": 1
 		},
 		{
@@ -22,6 +29,13 @@ frappe.query_reports["Salary Register"] = {
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("Company")
+		},
+		{
+			"fieldname":"docstatus",
+			"label":__("Document Status"),
+			"fieldtype":"Select",
+			"options":["Draft", "Submitted", "Cancelled"],
+			"default":"Submitted"
 		}
 	]
 }

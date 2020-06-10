@@ -36,8 +36,7 @@ erpnext.AccountTreeGrid = frappe.views.TreeGridReport.extend({
 	},
 	setup_columns: function() {
 		this.columns = [
-			{id: "name", name: __("Account"), field: "name", width: 300, cssClass: "cell-title",
-				formatter: this.tree_formatter},
+			{id: "name", name: __("Account"), field: "name", width: 300, cssClass: "cell-title"},
 			{id: "opening_dr", name: __("Opening (Dr)"), field: "opening_dr", width: 100,
 				formatter: this.currency_formatter},
 			{id: "opening_cr", name: __("Opening (Cr)"), field: "opening_cr", width: 100,

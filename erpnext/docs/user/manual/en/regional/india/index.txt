@@ -1,2 +1,0 @@
-gst-setup
-gst-reminders

@@ -1,6 +1,0 @@
-adding-users
-role-based-permissions
-user-permissions
-role-permisison-for-page-and-report
-sharing
-admin-user

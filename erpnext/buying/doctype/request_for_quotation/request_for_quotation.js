@@ -9,7 +9,7 @@ cur_frm.add_fetch('contact', 'email_id', 'email_id')
 frappe.ui.form.on("Request for Quotation",{
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'Supplier Quotation': 'Supplier Quotation'
+			'Supplier Quotation': 'Create'
 		}
 
 		frm.fields_dict["suppliers"].grid.get_field("contact").get_query = function(doc, cdt, cdn) {
@@ -22,7 +22,7 @@ frappe.ui.form.on("Request for Quotation",{
 	},
 
 	onload: function(frm) {
-		frm.add_fetch('standard_reply', 'response', 'message_for_supplier');
+		frm.add_fetch('email_template', 'response', 'message_for_supplier');
 
 		if(!frm.doc.message_for_supplier) {
 			frm.set_value("message_for_supplier", __("Please supply the specified items at the best possible rates"))
@@ -31,7 +31,7 @@ frappe.ui.form.on("Request for Quotation",{
 
 	refresh: function(frm, cdt, cdn) {
 		if (frm.doc.docstatus === 1) {
-			frm.add_custom_button(__("Make"),
+			frm.add_custom_button(__('Create'),
 				function(){ frm.trigger("make_suppplier_quotation") }, __("Supplier Quotation"));
 
 			frm.add_custom_button(__("View"),
@@ -59,18 +59,38 @@ frappe.ui.form.on("Request for Quotation",{
 		var dialog = new frappe.ui.Dialog({
 			title: __("Get Suppliers"),
 			fields: [
-				{	"fieldtype": "Select", "label": __("Get Suppliers By"),
+				{
+					"fieldtype": "Select", "label": __("Get Suppliers By"),
 					"fieldname": "search_type",
-					"options": "Tag\nSupplier Type", "reqd": 1 },
-				{	"fieldtype": "Link", "label": __("Supplier Type"),
-					"fieldname": "supplier_type",
-					"options": "Supplier Type",	"reqd": 0,
-					"depends_on": "eval:doc.search_type == 'Supplier Type'"},
-				{	"fieldtype": "Data", "label": __("Tag"),
-					"fieldname": "tag",	"reqd": 0,
-					"depends_on": "eval:doc.search_type == 'Tag'" },
-				{	"fieldtype": "Button", "label": __("Add All Suppliers"),
-					"fieldname": "add_suppliers", "cssClass": "btn-primary"},
+					"options": ["Tag","Supplier Group"],
+					"reqd": 1,
+					onchange() {
+						if(dialog.get_value('search_type') == 'Tag'){
+							frappe.call({
+								method: 'erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_supplier_tag',
+							}).then(r => {
+								dialog.set_df_property("tag", "options", r.message)
+						});
+						}
+					}
+				},
+				{
+					"fieldtype": "Link", "label": __("Supplier Group"),
+					"fieldname": "supplier_group",
+					"options": "Supplier Group",
+					"reqd": 0,
+					"depends_on": "eval:doc.search_type == 'Supplier Group'"
+				},
+				{
+					"fieldtype": "Select", "label": __("Tag"),
+					"fieldname": "tag",
+					"reqd": 0,
+					"depends_on": "eval:doc.search_type == 'Tag'",
+				},
+				{
+					"fieldtype": "Button", "label": __("Add All Suppliers"),
+					"fieldname": "add_suppliers"
+				},
 			]
 		});
 
@@ -114,21 +134,21 @@ frappe.ui.form.on("Request for Quotation",{
 			if (args.search_type === "Tag" && args.tag) {
 				return frappe.call({
 					type: "GET",
-					method: "frappe.desk.tags.get_tagged_docs",
+					method: "frappe.desk.doctype.tag.tag.get_tagged_docs",
 					args: {
 						"doctype": "Supplier",
 						"tag": args.tag
 					},
 					callback: load_suppliers
 				});
-			} else if (args.supplier_type) {
+			} else if (args.supplier_group) {
 				return frappe.call({
 					method: "frappe.client.get_list",
 					args: {
 						doctype: "Supplier",
 						order_by: "name",
 						fields: ["name"],
-						filters: [["Supplier", "supplier_type", "=", args.supplier_type]]
+						filters: [["Supplier", "supplier_group", "=", args.supplier_group]]
 
 					},
 					callback: load_suppliers
@@ -147,7 +167,7 @@ frappe.ui.form.on("Request for Quotation",{
 					"fieldname": "supplier",
 					"options": doc.suppliers.map(d => d.supplier),
 					"reqd": 1 },
-				{	"fieldtype": "Button", "label": __("Make Supplier Quotation"),
+				{	"fieldtype": "Button", "label": __('Create Supplier Quotation'),
 					"fieldname": "make_supplier_quotation", "cssClass": "btn-primary" },
 			]
 		});

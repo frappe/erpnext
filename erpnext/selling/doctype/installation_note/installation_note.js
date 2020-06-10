@@ -1,46 +1,36 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-
-
-frappe.ui.form.on_change("Installation Note", "customer",
-	function(frm) { erpnext.utils.get_party_details(frm); });
-
-frappe.ui.form.on_change("Installation Note", "customer_address",
-	function(frm) { erpnext.utils.get_address_display(frm); });
-
-frappe.ui.form.on_change("Installation Note", "contact_person",
-	function(frm) { erpnext.utils.get_contact_details(frm); });
+frappe.ui.form.on('Installation Note', {
+	setup: function(frm) {
+		frappe.dynamic_link = {doc: frm.doc, fieldname: 'customer', doctype: 'Customer'}
+		frm.set_query('customer_address', erpnext.queries.address_query);
+		frm.set_query('contact_person', erpnext.queries.contact_query);
+		frm.set_query('customer', erpnext.queries.customer);
+	},
+	onload: function(frm) {
+		if(!frm.doc.status) {
+			frm.set_value({ status:'Draft'});
+		}
+		if(frm.doc.__islocal) {
+			frm.set_value({inst_date: frappe.datetime.get_today()});
+		}
+	},
+	customer: function(frm) {
+		erpnext.utils.get_party_details(frm);
+	},
+	customer_address: function(frm) {
+		erpnext.utils.get_address_display(frm);
+	},
+	contact_person: function(frm) {
+		erpnext.utils.get_contact_details(frm);
+	}
+});
 
 frappe.provide("erpnext.selling");
+
 // TODO commonify this code
 erpnext.selling.InstallationNote = frappe.ui.form.Controller.extend({
-	onload: function() {
-		if(!this.frm.doc.status) {
-			set_multiple(this.frm.doc.doctype, this.frm.doc.name, { status:'Draft'});
-		}
-		if(this.frm.doc.__islocal) {
-			set_multiple(this.frm.doc.doctype, this.frm.doc.name,
-				{inst_date: frappe.datetime.get_today()});
-		}
-
-		this.setup_queries();
-	},
-
-	setup_queries: function() {
-		var me = this;
-
-		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
-		frm.set_query('customer_address', erpnext.queries.address_query);
-		this.frm.set_query('contact_person', erpnext.queries.contact_query);
-
-		this.frm.set_query("customer", function() {
-			return {
-				query: "erpnext.controllers.queries.customer_query"
-			}
-		});
-	},
-
 	refresh: function() {
 		var me = this;
 		if (this.frm.doc.docstatus===0) {

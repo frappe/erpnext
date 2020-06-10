@@ -10,12 +10,16 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 				}
 			};
 		});
+
+		if (frm.doc.company) {
+			frm.trigger('setup_company_filters');
+		}
 	},
 
 	refresh: function(frm) {
 		frm.disable_save();
 		frm.trigger("make_dashboard");
-		frm.page.set_primary_action(__("Make Invoices"), () => {
+		frm.page.set_primary_action(__('Create Invoices'), () => {
 			let btn_primary = frm.page.btn_primary.get(0);
 			return frm.call({
 				doc: frm.doc,
@@ -35,19 +39,50 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 		});
 	},
 
-	company: function(frm) {
-		frappe.call({
-			method: 'erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool.get_temporary_opening_account',
-			args: {
-				company: frm.doc.company
-			},
-			callback: (r) => {
-				if (r.message) {
-					frm.doc.__onload.temporary_opening_account = r.message;
-					frm.trigger('update_invoice_table');
+	setup_company_filters: function(frm) {
+		frm.set_query('cost_center', 'invoices', function(doc, cdt, cdn) {
+			return {
+				filters: {
+					'company': doc.company
+				}
+			};
+		});
+
+		frm.set_query('cost_center', function(doc) {
+			return {
+				filters: {
+					'company': doc.company
+				}
+			};
+		});
+
+		frm.set_query('temporary_opening_account', 'invoices', function(doc, cdt, cdn) {
+			return {
+				filters: {
+					'company': doc.company
 				}
 			}
-		})
+		});
+	},
+
+	company: function(frm) {
+		if (frm.doc.company) {
+
+			frm.trigger('setup_company_filters');
+
+			frappe.call({
+				method: 'erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool.get_temporary_opening_account',
+				args: {
+					company: frm.doc.company
+				},
+				callback: (r) => {
+					if (r.message) {
+						frm.doc.__onload.temporary_opening_account = r.message;
+						frm.trigger('update_invoice_table');
+					}
+				}
+			})
+		}
 	},
 
 	invoice_type: function(frm) {
@@ -84,6 +119,11 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 			if (!row.temporary_opening_account) {
 				row.temporary_opening_account = frm.doc.__onload.temporary_opening_account;
 			}
+
+			if(!row.cost_center) {
+				row.cost_center = frm.doc.cost_center;
+			}
+
 			row.party_type = frm.doc.invoice_type == "Sales"? "Customer": "Supplier";
 		});
 	}

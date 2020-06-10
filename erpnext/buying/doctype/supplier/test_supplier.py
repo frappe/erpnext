@@ -36,14 +36,14 @@ class TestSupplier(unittest.TestCase):
 
         frappe.db.set_value("Supplier", "_Test Supplier With Template 1", "payment_terms", "")
 
-        # Set credit limit for the supplier type instead of supplier and evaluate the due date
-        frappe.db.set_value("Supplier Type", "_Test Supplier Type", "payment_terms", "_Test Payment Term Template 3")
+        # Set credit limit for the supplier group instead of supplier and evaluate the due date
+        frappe.db.set_value("Supplier Group", "_Test Supplier Group", "payment_terms", "_Test Payment Term Template 3")
 
         due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier With Template 1")
         self.assertEqual(due_date, "2016-02-21")
 
-        # Payment terms for Supplier Type instead of supplier and evaluate the due date
-        frappe.db.set_value("Supplier Type", "_Test Supplier Type", "payment_terms", "_Test Payment Term Template 1")
+        # Payment terms for Supplier Group instead of supplier and evaluate the due date
+        frappe.db.set_value("Supplier Group", "_Test Supplier Group", "payment_terms", "_Test Payment Term Template 1")
 
         # Leap year
         due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier With Template 1")
@@ -53,7 +53,7 @@ class TestSupplier(unittest.TestCase):
         self.assertEqual(due_date, "2017-02-28")
 
         # Supplier with no default Payment Terms Template
-        frappe.db.set_value("Supplier Type", "_Test Supplier Type", "payment_terms", "")
+        frappe.db.set_value("Supplier Group", "_Test Supplier Group", "payment_terms", "")
         frappe.db.set_value("Supplier", "_Test Supplier", "payment_terms", "")
 
         due_date = get_due_date("2016-01-22", "Supplier", "_Test Supplier")
@@ -90,3 +90,33 @@ class TestSupplier(unittest.TestCase):
         supplier.country = 'Greece'
         supplier.save()
         self.assertEqual(supplier.country, "Greece")
+
+    def test_party_details_tax_category(self):
+        from erpnext.accounts.party import get_party_details
+
+        frappe.delete_doc_if_exists("Address", "_Test Address With Tax Category-Billing")
+
+        # Tax Category without Address
+        details = get_party_details("_Test Supplier With Tax Category", party_type="Supplier")
+        self.assertEqual(details.tax_category, "_Test Tax Category 1")
+
+        address = frappe.get_doc(dict(
+            doctype='Address',
+            address_title='_Test Address With Tax Category',
+            tax_category='_Test Tax Category 2',
+            address_type='Billing',
+            address_line1='Station Road',
+            city='_Test City',
+            country='India',
+            links=[dict(
+                link_doctype='Supplier',
+                link_name='_Test Supplier With Tax Category'
+            )]
+        )).insert()
+
+        # Tax Category with Address
+        details = get_party_details("_Test Supplier With Tax Category", party_type="Supplier")
+        self.assertEqual(details.tax_category, "_Test Tax Category 2")
+
+        # Rollback
+        address.delete()

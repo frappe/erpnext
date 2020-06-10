@@ -13,7 +13,7 @@ frappe.query_reports["Stock Ageing"] = {
 		},
 		{
 			"fieldname":"to_date",
-			"label": __("To Date"),
+			"label": __("As On Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today(),
 			"reqd": 1
@@ -35,6 +35,12 @@ frappe.query_reports["Stock Ageing"] = {
 			"label": __("Brand"),
 			"fieldtype": "Link",
 			"options": "Brand"
+		},
+		{
+			"fieldname":"show_warehouse_wise_stock",
+			"label": __("Show Warehouse-wise Stock"),
+			"fieldtype": "Check",
+			"default": 0
 		}
 	]
 }

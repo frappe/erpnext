@@ -5,6 +5,9 @@ from frappe import _
 
 def execute():
 	"""Add setup progress actions"""
+	if not frappe.db.exists('DocType', 'Setup Progress') or not frappe.db.exists('DocType', 'Setup Progress Action'):
+		return
+
 	frappe.reload_doc("setup", "doctype", "setup_progress")
 	frappe.reload_doc("setup", "doctype", "setup_progress_action")
 

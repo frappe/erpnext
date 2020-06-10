@@ -22,6 +22,21 @@ frappe.ui.form.on('BOM Update Tool', {
 		frm.disable_save();
 	},
 
+	replace: function(frm) {
+		if (frm.doc.current_bom && frm.doc.new_bom) {
+			frappe.call({
+				method: "erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.enqueue_replace_bom",
+				freeze: true,
+				args: {
+					args: {
+						"current_bom": frm.doc.current_bom,
+						"new_bom": frm.doc.new_bom
+					}
+				}
+			});
+		}
+	},
+
 	update_latest_price_in_all_boms: function() {
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.enqueue_update_cost",

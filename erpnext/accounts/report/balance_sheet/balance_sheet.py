@@ -9,7 +9,10 @@ from erpnext.accounts.report.financial_statements import (get_period_list, get_c
 
 def execute(filters=None):
 	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year,
+		filters.period_start_date, filters.period_end_date, filters.filter_based_on,
 		filters.periodicity, company=filters.company)
+
+	currency = filters.presentation_currency or frappe.get_cached_value('Company',  filters.company,  "default_currency")
 
 	asset = get_data(filters.company, "Asset", "Debit", period_list,
 		only_current_fiscal_year=False, filters=filters,
@@ -24,7 +27,7 @@ def execute(filters=None):
 		accumulated_values=filters.accumulated_values)
 
 	provisional_profit_loss, total_credit = get_provisional_profit_loss(asset, liability, equity,
-		period_list, filters.company)
+		period_list, filters.company, currency)
 
 	message, opening_balance = check_opening_balance(asset, liability, equity)
 
@@ -37,7 +40,7 @@ def execute(filters=None):
 			"account_name": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
 			"account": "'" + _("Unclosed Fiscal Years Profit / Loss (Credit)") + "'",
 			"warn_if_negative": True,
-			"currency": frappe.db.get_value("Company", filters.company, "default_currency")
+			"currency": currency
 		}
 		for period in period_list:
 			unclosed[period.key] = opening_balance
@@ -56,14 +59,17 @@ def execute(filters=None):
 
 	chart = get_chart_data(filters, columns, asset, liability, equity)
 
-	return columns, data, message, chart
+	report_summary = get_report_summary(period_list, asset, liability, equity, provisional_profit_loss,
+		total_credit, currency, filters)
 
-def get_provisional_profit_loss(asset, liability, equity, period_list, company):
+	return columns, data, message, chart, report_summary
+
+def get_provisional_profit_loss(asset, liability, equity, period_list, company, currency=None, consolidated=False):
 	provisional_profit_loss = {}
 	total_row = {}
 	if asset and (liability or equity):
 		total = total_row_total=0
-		currency = frappe.db.get_value("Company", company, "default_currency")
+		currency = currency or frappe.get_cached_value('Company',  company,  "default_currency")
 		total_row = {
 			"account_name": "'" + _("Total (Credit)") + "'",
 			"account": "'" + _("Total (Credit)") + "'",
@@ -73,22 +79,23 @@ def get_provisional_profit_loss(asset, liability, equity, period_list, company):
 		has_value = False
 
 		for period in period_list:
+			key = period if consolidated else period.key
 			effective_liability = 0.0
 			if liability:
-				effective_liability += flt(liability[-2].get(period.key))
+				effective_liability += flt(liability[-2].get(key))
 			if equity:
-				effective_liability += flt(equity[-2].get(period.key))
+				effective_liability += flt(equity[-2].get(key))
 
-			provisional_profit_loss[period.key] = flt(asset[-2].get(period.key)) - effective_liability
-			total_row[period.key] = effective_liability + provisional_profit_loss[period.key]
+			provisional_profit_loss[key] = flt(asset[-2].get(key)) - effective_liability
+			total_row[key] = effective_liability + provisional_profit_loss[key]
 
-			if provisional_profit_loss[period.key]:
+			if provisional_profit_loss[key]:
 				has_value = True
 
-			total += flt(provisional_profit_loss[period.key])
+			total += flt(provisional_profit_loss[key])
 			provisional_profit_loss["total"] = total
 
-			total_row_total += flt(total_row[period.key])
+			total_row_total += flt(total_row[key])
 			total_row["total"] = total_row_total
 
 		if has_value:
@@ -117,6 +124,56 @@ def check_opening_balance(asset, liability, equity):
 		return _("Previous Financial Year is not closed"),opening_balance
 	return None,None
 
+def get_report_summary(period_list, asset, liability, equity, provisional_profit_loss, total_credit, currency,
+	filters, consolidated=False):
+
+	net_asset, net_liability, net_equity, net_provisional_profit_loss = 0.0, 0.0, 0.0, 0.0
+
+	if filters.get('accumulated_values'):
+		period_list = [period_list[-1]]
+
+	for period in period_list:
+		key = period if consolidated else period.key
+		if asset:
+			net_asset += asset[-2].get(key)
+		if liability:
+			net_liability += liability[-2].get(key)
+		if equity:
+			net_equity += equity[-2].get(key)
+		if provisional_profit_loss:
+			net_provisional_profit_loss += provisional_profit_loss.get(key)
+
+	return [
+		{
+			"value": net_asset,
+			"label": "Total Asset",
+			"indicator": "Green",
+			"datatype": "Currency",
+			"currency": currency
+		},
+		{
+			"value": net_liability,
+			"label": "Total Liability",
+			"datatype": "Currency",
+			"indicator": "Red",
+			"currency": currency
+		},
+		{
+			"value": net_equity,
+			"label": "Total Equity",
+			"datatype": "Currency",
+			"indicator": "Blue",
+			"currency": currency
+		},
+		{
+			"value": net_provisional_profit_loss,
+			"label": "Provisional Profit / Loss (Credit)",
+			"indicator": "Green" if net_provisional_profit_loss > 0 else "Red",
+			"datatype": "Currency",
+			"currency": currency
+		}
+	]
+
 def get_chart_data(filters, columns, asset, liability, equity):
 	labels = [d.get("label") for d in columns[2:]]
 
@@ -132,11 +189,11 @@ def get_chart_data(filters, columns, asset, liability, equity):
 
 	datasets = []
 	if asset_data:
-		datasets.append({'title':'Assets', 'values': asset_data})
+		datasets.append({'name': _('Assets'), 'values': asset_data})
 	if liability_data:
-		datasets.append({'title':'Liabilities', 'values': liability_data})
+		datasets.append({'name': _('Liabilities'), 'values': liability_data})
 	if equity_data:
-		datasets.append({'title':'Equity', 'values': equity_data})
+		datasets.append({'name': _('Equity'), 'values': equity_data})
 
 	chart = {
 		"data": {

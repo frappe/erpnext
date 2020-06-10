@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt
 from frappe import msgprint, _
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
 def execute(filters=None):
 	return _execute(filters)
@@ -26,7 +27,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	suppliers = list(set([d.supplier for d in invoice_list]))
 	supplier_details = get_supplier_details(suppliers)
 
-	company_currency = frappe.db.get_value("Company", filters.company, "default_currency")
+	company_currency = frappe.get_cached_value('Company',  filters.company,  "default_currency")
 
 	data = []
 	for inv in invoice_list:
@@ -42,8 +43,8 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 				row.append(inv.get(col))
 
 		row += [
-			supplier_details.get(inv.supplier), # supplier_type
-			inv.credit_to, inv.mode_of_payment, ", ".join(project),
+			supplier_details.get(inv.supplier), # supplier_group
+			inv.tax_id, inv.credit_to, inv.mode_of_payment, ", ".join(project),
 			inv.bill_no, inv.bill_date, inv.remarks,
 			", ".join(purchase_order), ", ".join(purchase_receipt), company_currency
 		]
@@ -66,8 +67,8 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 				total_tax += tax_amount
 				row.append(tax_amount)
 
-		# total tax, grand total, outstanding amount & rounded total
-		row += [total_tax, inv.base_grand_total, flt(inv.base_grand_total, 2), inv.outstanding_amount]
+		# total tax, grand total, rounded total & outstanding amount
+		row += [total_tax, inv.base_grand_total, flt(inv.base_grand_total, 0), inv.outstanding_amount]
 		data.append(row)
 
 	return columns, data
@@ -83,7 +84,7 @@ def get_columns(invoice_list, additional_table_columns):
 		columns += additional_table_columns
 
 	columns += [
-		_("Supplier Type") + ":Link/Supplier Type:120", _("Payable Account") + ":Link/Account:120",
+		_("Supplier Group") + ":Link/Supplier Group:120", _("Tax Id") + "::80", _("Payable Account") + ":Link/Account:120",
 		_("Mode of Payment") + ":Link/Mode of Payment:80", _("Project") + ":Link/Project:80",
 		_("Bill No") + "::120", _("Bill Date") + ":Date:80", _("Remarks") + "::150",
 		_("Purchase Order") + ":Link/Purchase Order:100",
@@ -134,6 +135,38 @@ def get_conditions(filters):
 
 	if filters.get("mode_of_payment"): conditions += " and ifnull(mode_of_payment, '') = %(mode_of_payment)s"
 
+	if filters.get("cost_center"):
+		conditions +=  """ and exists(select name from `tabPurchase Invoice Item`
+			 where parent=`tabPurchase Invoice`.name
+			 	and ifnull(`tabPurchase Invoice Item`.cost_center, '') = %(cost_center)s)"""
+
+	if filters.get("warehouse"):
+		conditions +=  """ and exists(select name from `tabPurchase Invoice Item`
+			 where parent=`tabPurchase Invoice`.name
+			 	and ifnull(`tabPurchase Invoice Item`.warehouse, '') = %(warehouse)s)"""
+
+	if filters.get("item_group"):
+		conditions +=  """ and exists(select name from `tabPurchase Invoice Item`
+			 where parent=`tabPurchase Invoice`.name
+			 	and ifnull(`tabPurchase Invoice Item`.item_group, '') = %(item_group)s)"""
+
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
+
+	if accounting_dimensions:
+		common_condition = """
+			and exists(select name from `tabPurchase Invoice Item`
+				where parent=`tabPurchase Invoice`.name
+			"""
+		for dimension in accounting_dimensions:
+			if filters.get(dimension.fieldname):
+				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
+					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
+						filters.get(dimension.fieldname))
+
+					conditions += common_condition + "and ifnull(`tabPurchase Invoice Item`.{0}, '') in %({0})s)".format(dimension.fieldname)
+				else:
+					conditions += common_condition + "and ifnull(`tabPurchase Invoice Item`.{0}, '') in (%({0})s))".format(dimension.fieldname)
+
 	return conditions
 
 def get_invoices(filters, additional_query_columns):
@@ -143,7 +176,7 @@ def get_invoices(filters, additional_query_columns):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select
-			name, posting_date, credit_to, supplier, supplier_name, bill_no, bill_date,
+			name, posting_date, credit_to, supplier, supplier_name, tax_id, bill_no, bill_date,
 			remarks, base_net_total, base_grand_total, outstanding_amount,
 			mode_of_payment {0}
 		from `tabPurchase Invoice`
@@ -172,13 +205,14 @@ def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
 		else sum(base_tax_amount_after_discount_amount) * -1 end as tax_amount
 		from `tabPurchase Taxes and Charges`
 		where parent in (%s) and category in ('Total', 'Valuation and Total')
+			and base_tax_amount_after_discount_amount != 0
 		group by parent, account_head, add_deduct_tax
 	""" % ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 
 	invoice_tax_map = {}
 	for d in tax_details:
 		if d.account_head in expense_accounts:
-			if invoice_expense_map[d.parent].has_key(d.account_head):
+			if d.account_head in invoice_expense_map[d.parent]:
 				invoice_expense_map[d.parent][d.account_head] += flt(d.tax_amount)
 			else:
 				invoice_expense_map[d.parent][d.account_head] = flt(d.tax_amount)
@@ -192,7 +226,7 @@ def get_invoice_po_pr_map(invoice_list):
 	pi_items = frappe.db.sql("""
 		select parent, purchase_order, purchase_receipt, po_detail, project
 		from `tabPurchase Invoice Item`
-		where parent in (%s) and (ifnull(purchase_order, '') != '' or ifnull(purchase_receipt, '') != '')
+		where parent in (%s)
 	""" % ', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 
 	invoice_po_pr_map = {}
@@ -228,8 +262,8 @@ def get_account_details(invoice_list):
 
 def get_supplier_details(suppliers):
 	supplier_details = {}
-	for supp in frappe.db.sql("""select name, supplier_type from `tabSupplier`
+	for supp in frappe.db.sql("""select name, supplier_group from `tabSupplier`
 		where name in (%s)""" % ", ".join(["%s"]*len(suppliers)), tuple(suppliers), as_dict=1):
-			supplier_details.setdefault(supp.name, supp.supplier_type)
+			supplier_details.setdefault(supp.name, supp.supplier_group)
 
 	return supplier_details

@@ -14,17 +14,6 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 			return { query: "erpnext.controllers.queries.employee_query"} }
 	},
 
-	onload: function() {
-		this.frm.set_query("leave_approver", "leave_approvers", function(doc) {
-			return {
-				query:"erpnext.hr.doctype.employee_leave_approver.employee_leave_approver.get_approvers",
-				filters:{
-					user: doc.user_id
-				}
-			}
-		});
-	},
-
 	refresh: function() {
 		var me = this;
 		erpnext.toggle_naming_series();
@@ -48,8 +37,26 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 
 });
 frappe.ui.form.on('Employee',{
-	prefered_contact_email:function(frm){		
-		frm.events.update_contact(frm)		
+	setup: function(frm) {
+		frm.set_query("leave_policy", function() {
+			return {
+				"filters": {
+					"docstatus": 1
+				}
+			};
+		});
+	},
+	onload:function(frm) {
+		frm.set_query("department", function() {
+			return {
+				"filters": {
+					"company": frm.doc.company,
+				}
+			};
+		});
+	},
+	prefered_contact_email:function(frm){
+		frm.events.update_contact(frm)
 	},
 	personal_email:function(frm){
 		frm.events.update_contact(frm)
@@ -81,7 +88,7 @@ frappe.ui.form.on('Employee',{
 		}
 		frappe.call({
 			method: "erpnext.hr.doctype.employee.employee.create_user",
-			args: { employee: cur_frm.doc.name },
+			args: { employee: frm.doc.name, email: frm.doc.prefered_email },
 			callback: function(r)
 			{
 				frm.set_value("user_id", r.message)

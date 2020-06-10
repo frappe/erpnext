@@ -24,8 +24,17 @@ def get_accounts_data(based_on, company):
 	if based_on == 'cost_center':
 		return frappe.db.sql("""select name, parent_cost_center as parent_account, cost_center_name as account_name, lft, rgt
 			from `tabCost Center` where company=%s order by name""", company, as_dict=True)
-	else:
+	elif based_on == 'project':
 		return frappe.get_all('Project', fields = ["name"], filters = {'company': company}, order_by = 'name')
+	else:
+		filters = {}
+		doctype = frappe.unscrub(based_on)
+		has_company = frappe.db.has_column(doctype, 'company')
+
+		if has_company:
+			filters.update({'company': company})
+
+		return frappe.get_all(doctype, fields = ["name"], filters = filters, order_by = 'name')
 
 def get_data(accounts, filters, based_on):
 	if not accounts:
@@ -42,7 +51,7 @@ def get_data(accounts, filters, based_on):
 	accumulate_values_into_parents(accounts, accounts_by_name)
 
 	data = prepare_data(accounts, filters, total_row, parent_children_map, based_on)
-	data = filter_out_zero_value_rows(data, parent_children_map, 
+	data = filter_out_zero_value_rows(data, parent_children_map,
 		show_zero_values=filters.get("show_zero_values"))
 
 	return data
@@ -96,7 +105,8 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 
 def prepare_data(accounts, filters, total_row, parent_children_map, based_on):
 	data = []
-	company_currency = frappe.db.get_value("Company", filters.get("company"), "default_currency")
+	new_accounts = accounts
+	company_currency = frappe.get_cached_value('Company',  filters.get("company"),  "default_currency")
 
 	for d in accounts:
 		has_value = False
@@ -109,17 +119,30 @@ def prepare_data(accounts, filters, total_row, parent_children_map, based_on):
 			"currency": company_currency,
 			"based_on": based_on
 		}
+		if based_on == 'cost_center':
+			cost_center_doc = frappe.get_doc("Cost Center",d.name)
+			if not cost_center_doc.enable_distributed_cost_center:
+				DCC_allocation = frappe.db.sql("""SELECT parent, sum(percentage_allocation) as percentage_allocation
+					FROM `tabDistributed Cost Center`
+					WHERE cost_center IN %(cost_center)s
+					AND parent NOT IN %(cost_center)s
+					GROUP BY parent""",{'cost_center': [d.name]})
+				if DCC_allocation:
+					for account in new_accounts:
+						if account['name'] == DCC_allocation[0][0]:
+							for value in value_fields:
+								d[value] += account[value]*(DCC_allocation[0][1]/100)
 
 		for key in value_fields:
 			row[key] = flt(d.get(key, 0.0), 3)
-			
+
 			if abs(row[key]) >= 0.005:
 				# ignore zero values
 				has_value = True
 
 		row["has_value"] = has_value
 		data.append(row)
-		
+
 	data.extend([{},total_row])
 
 	return data
@@ -132,6 +155,13 @@ def get_columns(filters):
 			"fieldtype": "Link",
 			"options": filters.get("based_on"),
 			"width": 300
+		},
+		{
+			"fieldname": "currency",
+			"label": _("Currency"),
+			"fieldtype": "Link",
+			"options": "Currency",
+			"hidden": 1
 		},
 		{
 			"fieldname": "income",
@@ -153,13 +183,6 @@ def get_columns(filters):
 			"fieldtype": "Currency",
 			"options": "currency",
 			"width": 120
-		},
-		{
-			"fieldname": "currency",
-			"label": _("Currency"),
-			"fieldtype": "Link",
-			"options": "Currency",
-			"hidden": 1
 		}
 	]
 
@@ -174,7 +197,7 @@ def set_gl_entries_by_account(company, from_date, to_date, based_on, gl_entries_
 	if from_date:
 		additional_conditions.append("and posting_date >= %(from_date)s")
 
-	gl_entries = frappe.db.sql("""select posting_date, {based_on} as based_on, debit, credit, 
+	gl_entries = frappe.db.sql("""select posting_date, {based_on} as based_on, debit, credit,
 		is_opening, (select root_type from `tabAccount` where name = account) as type
 		from `tabGL Entry` where company=%(company)s
 		{additional_conditions}

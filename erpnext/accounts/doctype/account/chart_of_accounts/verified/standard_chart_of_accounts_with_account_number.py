@@ -29,7 +29,9 @@ def get():
                     "account_number": "1100"
                 },
                 _("Loans and Advances (Assets)"): {
-                    "is_group": 1,
+                    _("Employee Advances"): {
+                        "account_number": "1610"
+                    },
                     "account_number": "1600"
                 },
                 _("Securities and Deposits"): {
@@ -85,6 +87,10 @@ def get():
                     "account_type": "Accumulated Depreciation",
                     "account_number": "1780"
                 },
+                _("CWIP Account"): {
+                    "account_type": "Capital Work in Progress",
+                    "account_number": "1790"
+                },
                 "account_number": "1700"
             },
             _("Investments"): {
@@ -107,6 +113,10 @@ def get():
                     _("Cost of Goods Sold"): {
                         "account_type": "Cost of Goods Sold",
                         "account_number": "5111"
+                    },
+                    _("Expenses Included In Asset Valuation"): {
+                        "account_type": "Expenses Included In Asset Valuation",
+                        "account_number": "5112"
                     },
                     _("Expenses Included In Valuation"): {
                         "account_type": "Expenses Included In Valuation",
@@ -227,6 +237,10 @@ def get():
                     _("Stock Received But Not Billed"): {
                         "account_type": "Stock Received But Not Billed",
                         "account_number": "2210"
+                    },
+                    _("Asset Received But Not Billed"): {
+                        "account_type": "Asset Received But Not Billed",
+                        "account_number": "2211"
                     },
                     "account_number": "2200"
                 },

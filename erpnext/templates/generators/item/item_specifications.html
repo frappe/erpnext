@@ -1,0 +1,14 @@
+{% if doc.website_specifications -%}
+<div class="row item-website-specification mt-5">
+	<div class="col-md-12">
+		<table class="table table-bordered">
+		{% for d in doc.website_specifications -%}
+			<tr>
+				<td class="text-muted" style="width: 30%;">{{ d.label }}</td>
+				<td>{{ d.description }}</td>
+			</tr>
+		{%- endfor %}
+		</table>
+	</div>
+</div>
+{%- endif %}

@@ -28,5 +28,10 @@ frappe.query_reports["Bank Reconciliation Statement"] = {
 			"default": frappe.datetime.get_today(),
 			"reqd": 1
 		},
+		{
+			"fieldname":"include_pos_transactions",
+			"label": __("Include POS Transactions"),
+			"fieldtype": "Check"
+		},
 	]
 }

@@ -66,18 +66,21 @@ frappe.ui.form.on("Fees", {
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, __("View"));
+			frm.add_custom_button(__("Payments"), function() {
+				frappe.set_route("List", "Payment Entry", {"Payment Entry Reference.reference_name": frm.doc.name});
+			}, __("View"));
 		}
 		if(frm.doc.docstatus===1 && frm.doc.outstanding_amount>0) {
 			frm.add_custom_button(__("Payment Request"), function() {
 				frm.events.make_payment_request(frm);
-			}, __("Make"));
-			frm.page.set_inner_btn_group_as_primary(__("Make"));
+			}, __('Create'));
+			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 		if(frm.doc.docstatus===1 && frm.doc.outstanding_amount!=0) {
 			frm.add_custom_button(__("Payment"), function() {
 				frm.events.make_payment_entry(frm);
-			}, __("Make"));
-			frm.page.set_inner_btn_group_as_primary(__("Make"));
+			}, __('Create'));
+			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 	},
 
@@ -109,6 +112,8 @@ frappe.ui.form.on("Fees", {
 				args: {
 					"dt": frm.doc.doctype,
 					"dn": frm.doc.name,
+					"party_type": "Student",
+					"party": frm.doc.student,
 					"recipient_id": frm.doc.student_email
 				},
 				callback: function(r) {

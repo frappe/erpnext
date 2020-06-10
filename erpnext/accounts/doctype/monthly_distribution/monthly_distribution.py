@@ -3,8 +3,8 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt
 from frappe import _
+from frappe.utils import (flt, add_months)
 from frappe.model.document import Document
 
 class MonthlyDistribution(Document):
@@ -25,3 +25,33 @@ class MonthlyDistribution(Document):
 		if flt(total, 2) != 100.0:
 			frappe.throw(_("Percentage Allocation should be equal to 100%") + \
 				" ({0}%)".format(str(flt(total, 2))))
+
+def get_periodwise_distribution_data(distribution_id, period_list, periodicity):
+	doc = frappe.get_doc('Monthly Distribution', distribution_id)
+
+	months_to_add = {
+		"Yearly": 12,
+		"Half-Yearly": 6,
+		"Quarterly": 3,
+		"Monthly": 1
+	}[periodicity]
+
+	period_dict = {}
+
+	for d in period_list:
+		period_dict[d.key] = get_percentage(doc, d.from_date, months_to_add)
+
+	return period_dict
+
+def get_percentage(doc, start_date, period):
+	percentage = 0
+	months = [start_date.strftime("%B").title()]
+
+	for r in range(1, period):
+		months.append(add_months(start_date, r).strftime("%B").title())
+
+	for d in doc.percentages:
+		if d.month in months:
+			percentage += d.percentage_allocation
+
+	return percentage

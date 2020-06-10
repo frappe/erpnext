@@ -10,6 +10,8 @@ earnings or deductions in existing salary slips
 
 def execute():
 	frappe.reload_doc("accounts", "doctype", "salary_component_account")
+	frappe.reload_doc("hr", "doctype", "salary_component")
+	frappe.reload_doc("hr", "doctype", "taxable_salary_slab")
 	
 	for s in frappe.db.sql('''select name, type, salary_component_abbr from `tabSalary Component` 
 			where ifnull(type, "")="" or ifnull(salary_component_abbr, "") = ""''', as_dict=1):

@@ -8,13 +8,19 @@ import erpnext
 from frappe.utils.make_random import get_random
 from frappe.utils import nowdate, add_days, add_years, getdate, add_months
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
-from erpnext.hr.doctype.salary_slip.test_salary_slip \
-	import make_earning_salary_component, make_deduction_salary_component
+from erpnext.hr.doctype.salary_slip.test_salary_slip import make_earning_salary_component,\
+	make_deduction_salary_component, make_employee_salary_slip, create_tax_slab
+from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.employee_tax_exemption_declaration.test_employee_tax_exemption_declaration import create_payroll_period
+
 
 test_dependencies = ["Fiscal Year"]
 
 class TestSalaryStructure(unittest.TestCase):
 	def setUp(self):
+		for dt in ["Salary Slip", "Salary Structure", "Salary Structure Assignment"]:
+			frappe.db.sql("delete from `tab%s`" % dt)
+
 		self.make_holiday_list()
 		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", "Salary Structure Test Holiday List")
 		make_employee("test_employee@salary.com")
@@ -28,24 +34,48 @@ class TestSalaryStructure(unittest.TestCase):
 				"from_date": nowdate(),
 				"to_date": add_years(nowdate(), 1),
 				"weekly_off": "Sunday"
-			}).insert()	
+			}).insert()
 			holiday_list.get_weekly_off_dates()
 			holiday_list.save()
 
+	def test_salary_structure_deduction_based_on_gross_pay(self):
+
+		emp = make_employee("test_employee_3@salary.com")
+
+		sal_struct = make_salary_structure("Salary Structure 2", "Monthly", dont_submit = True)
+
+		sal_struct.earnings = [sal_struct.earnings[0]]
+		sal_struct.earnings[0].amount_based_on_formula = 1
+		sal_struct.earnings[0].formula =  "base"
+
+		sal_struct.deductions = [sal_struct.deductions[0]]
+
+		sal_struct.deductions[0].amount_based_on_formula = 1
+		sal_struct.deductions[0].condition = "gross_pay > 100"
+		sal_struct.deductions[0].formula =  "gross_pay * 0.2"
+
+		sal_struct.submit()
+
+		assignment = create_salary_structure_assignment(emp, "Salary Structure 2")
+		ss = make_salary_slip(sal_struct.name, employee = emp)
+
+		self.assertEqual(assignment.base * 0.2, ss.deductions[0].amount)
+
 	def test_amount_totals(self):
-		sal_slip = frappe.get_value("Salary Slip", {"employee_name":"test_employee@salary.com"})
+		frappe.db.set_value("HR Settings", None, "include_holidays_in_total_working_days", 0)
+		sal_slip = frappe.get_value("Salary Slip", {"employee_name":"test_employee_2@salary.com"})
 		if not sal_slip:
-			sal_slip = make_salary_slip_from_salary_structure(employee=frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}))
-			self.assertEquals(sal_slip.get("salary_structure"), 'Salary Structure Sample')
-			self.assertEquals(sal_slip.get("earnings")[0].amount, 5000)
-			self.assertEquals(sal_slip.get("deductions")[0].amount, 5000)
-			self.assertEquals(sal_slip.get("deductions")[1].amount, 2500)
-			self.assertEquals(sal_slip.get("total_deduction"), 7500)
-			self.assertEquals(sal_slip.get("net_pay"), 7500)
+			sal_slip = make_employee_salary_slip("test_employee_2@salary.com", "Monthly", "Salary Structure Sample")
+			self.assertEqual(sal_slip.get("salary_structure"), 'Salary Structure Sample')
+			self.assertEqual(sal_slip.get("earnings")[0].amount, 50000)
+			self.assertEqual(sal_slip.get("earnings")[1].amount, 3000)
+			self.assertEqual(sal_slip.get("earnings")[2].amount, 25000)
+			self.assertEqual(sal_slip.get("gross_pay"), 78000)
+			self.assertEqual(sal_slip.get("deductions")[0].amount, 200)
+			self.assertEqual(sal_slip.get("net_pay"), 78000 - sal_slip.get("total_deduction"))
 
 	def test_whitespaces_in_formula_conditions_fields(self):
-		make_salary_structure("Salary Structure Sample")
-		salary_structure = frappe.get_doc("Salary Structure", "Salary Structure Sample")
+		salary_structure = make_salary_structure("Salary Structure Sample", "Monthly", dont_submit=True)
 
 		for row in salary_structure.earnings:
 			row.formula = "\n%s\n\n"%row.formula
@@ -63,131 +93,66 @@ class TestSalaryStructure(unittest.TestCase):
 		for row in salary_structure.deductions:
 			self.assertFalse(("\n" in row.formula) or ("\n" in row.condition))
 
-def make_employee(user):
-	if not frappe.db.get_value("User", user):
-		frappe.get_doc({
-			"doctype": "User",
-			"email": user,
-			"first_name": user,
-			"new_password": "password",
-			"roles": [{"doctype": "Has Role", "role": "Employee"}]
-		}).insert()
+	def test_salary_structures_assignment(self):
+		salary_structure = make_salary_structure("Salary Structure Sample", "Monthly")
+		employee = "test_assign_stucture@salary.com"
+		employee_doc_name = make_employee(employee)
+		# clear the already assigned stuctures
+		frappe.db.sql('''delete from `tabSalary Structure Assignment` where employee=%s and salary_structure=%s ''',
+					  ("test_assign_stucture@salary.com",salary_structure.name))
+		#test structure_assignment
+		salary_structure.assign_salary_structure(employee=employee_doc_name,from_date='2013-01-01',base=5000,variable=200)
+		salary_structure_assignment = frappe.get_doc("Salary Structure Assignment",{'employee':employee_doc_name, 'from_date':'2013-01-01'})
+		self.assertEqual(salary_structure_assignment.docstatus, 1)
+		self.assertEqual(salary_structure_assignment.base, 5000)
+		self.assertEqual(salary_structure_assignment.variable, 200)
 
-	if not frappe.db.get_value("Employee", {"user_id": user}):
-		emp = frappe.get_doc({
-			"doctype": "Employee",
-			"naming_series": "EMP-",
-			"employee_name": user,
-			"company": erpnext.get_default_company(),
-			"user_id": user,
-			"date_of_birth": "1990-05-08",
-			"date_of_joining": "2013-01-01",
-			"relieving_date": "",
-			"department": frappe.get_all("Department", fields="name")[0].name,
-			"gender": "Female",
-			"company_email": user,
-			"status": "Active",
-			"employment_type": "Intern"
-		}).insert()
-		return emp.name
-	else:
-		return frappe.get_value("Employee", {"employee_name":user}, "name")			
+def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None,
+	test_tax=False, company=None):
+	if test_tax:
+		frappe.db.sql("""delete from `tabSalary Structure` where name=%s""",(salary_structure))
 
-def make_salary_slip_from_salary_structure(employee):
-	sal_struct = make_salary_structure('Salary Structure Sample')
-	sal_slip = make_salary_slip(sal_struct, employee = employee)
-	sal_slip.employee_name = frappe.get_value("Employee", {"name":employee}, "employee_name")
-	sal_slip.start_date = nowdate()
-	sal_slip.posting_date = nowdate()
-	sal_slip.payroll_frequency =  "Monthly"
-	sal_slip.insert()
-	sal_slip.submit()
-	return sal_slip	
-
-def make_salary_structure(sal_struct, employees=None):
-	if not frappe.db.exists('Salary Structure', sal_struct):
-		frappe.get_doc({
+	if not frappe.db.exists('Salary Structure', salary_structure):
+		details = {
 			"doctype": "Salary Structure",
-			"name": sal_struct,
-			"company": erpnext.get_default_company(),
-			"employees": employees or get_employee_details(),
-			"earnings": get_earnings_component(),
-			"deductions": get_deductions_component(),
-			"payroll_frequency": "Monthly",
-			"payment_account": frappe.get_value('Account', {'account_type': 'Cash', 'company': erpnext.get_default_company(),'is_group':0}, "name")
-		}).insert()
-	return sal_struct	
+			"name": salary_structure,
+			"company": company or erpnext.get_default_company(),
+			"earnings": make_earning_salary_component(test_tax=test_tax, company_list=["_Test Company"]),
+			"deductions": make_deduction_salary_component(test_tax=test_tax, company_list=["_Test Company"]),
+			"payroll_frequency": payroll_frequency,
+			"payment_account": get_random("Account")
+		}
+		if other_details and isinstance(other_details, dict):
+			details.update(other_details)
+		salary_structure_doc = frappe.get_doc(details)
+		salary_structure_doc.insert()
+		if not dont_submit:
+			salary_structure_doc.submit()
+		
+	else:
+		salary_structure_doc = frappe.get_doc("Salary Structure", salary_structure)
 
-def get_employee_details():
-	return [{"employee": frappe.get_value("Employee", {"employee_name":"test_employee@salary.com"}, "name"),
-			"base": 25000,
-			"variable": 5000,
-			"from_date": add_months(nowdate(),-1),
-			"idx": 1
-			},
-			{"employee": frappe.get_value("Employee", {"employee_name":"test_employee_2@salary.com"}, "name"),
-			 "base": 15000,
-			 "variable": 100,
-			 "from_date": add_months(nowdate(),-1),
-			 "idx": 2
-			}
-		]
+	if employee and not frappe.db.get_value("Salary Structure Assignment",
+		{'employee':employee, 'docstatus': 1}) and salary_structure_doc.docstatus==1:
+			create_salary_structure_assignment(employee, salary_structure, company=company)
 
-def get_earnings_component():
-	make_earning_salary_component(["Basic Salary", "Special Allowance", "HRA"])
-	make_deduction_salary_component(["Professional Tax", "TDS"])
+	return salary_structure_doc
 
-	return [
-				{
-					"salary_component": 'Basic Salary',
-					"abbr":'BS',
-					"condition": 'base > 10000',
-					"formula": 'base*.2',
-					"idx": 1
-				},
-				{
-					"salary_component": 'Basic Salary',
-					"abbr":'BS',
-					"condition": 'base < 10000',
-					"formula": 'base*.1',
-					"idx": 2
-				},
-				{
-					"salary_component": 'HRA',
-					"abbr":'H',
-					"amount": 10000,
-					"idx": 3
-				},
-				{
-					"salary_component": 'Special Allowance',
-					"abbr":'SA',
-					"condition": 'H < 10000',
-					"formula": 'BS*.5',
-					"idx": 4
-				},
-			]
+def create_salary_structure_assignment(employee, salary_structure, from_date=None, company=None):
+	if frappe.db.exists("Salary Structure Assignment", {"employee": employee}):
+		frappe.db.sql("""delete from `tabSalary Structure Assignment` where employee=%s""",(employee))
 
-def get_deductions_component():	
-	return [
-				{
-					"salary_component": 'Professional Tax',
-					"abbr":'PT',
-					"condition": 'base > 10000',
-					"formula": 'base*.2',
-					"idx": 1
-				},
-				{
-					"salary_component": 'TDS',
-					"abbr":'T',
-					"condition": 'employment_type!="Intern"',
-					"formula": 'base*.5',
-					"idx": 2
-				},
-				{
-					"salary_component": 'TDS',
-					"abbr":'T',
-					"condition": 'employment_type=="Intern"',
-					"formula": 'base*.1',
-					"idx": 3
-				}
-			]		
+	payroll_period = create_payroll_period()
+	create_tax_slab(payroll_period, allow_tax_exemption=True)
+
+	salary_structure_assignment = frappe.new_doc("Salary Structure Assignment")
+	salary_structure_assignment.employee = employee
+	salary_structure_assignment.base = 50000
+	salary_structure_assignment.variable = 5000
+	salary_structure_assignment.from_date = from_date or add_days(nowdate(), -1)
+	salary_structure_assignment.salary_structure = salary_structure
+	salary_structure_assignment.company = company or erpnext.get_default_company()
+	salary_structure_assignment.save(ignore_permissions=True)
+	salary_structure_assignment.income_tax_slab = "Tax Slab: _Test Payroll Period"
+	salary_structure_assignment.submit()
+	return salary_structure_assignment

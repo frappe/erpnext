@@ -16,7 +16,6 @@ QUnit.test("Test: Leave application [HR]", function (assert) {
 				{to_date: leave_date},
 				{half_day: 1},
 				{employee: employee.message.name},
-				{leave_approver: "Administrator"},
 				{follow_via_email: 0}
 			]);
 		},
@@ -36,8 +35,8 @@ QUnit.test("Test: Leave application [HR]", function (assert) {
 		() => frappe.set_route("List", "Leave Application", "List"),
 		() => frappe.timeout(1),
 		// // check approved application in list
-		() => assert.deepEqual(["Test Employee 1", "Approved"], [cur_list.data[0].employee_name, cur_list.data[0].workflow_state]),
-		// 	"leave for correct employee is approved"),
+		() => assert.deepEqual(["Test Employee 1", 1], [cur_list.data[0].employee_name, cur_list.data[0].docstatus]),
+		// 	"leave for correct employee is submitted"),
 		() => done()
 	]);
 });

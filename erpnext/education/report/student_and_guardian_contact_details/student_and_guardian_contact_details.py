@@ -14,7 +14,7 @@ def execute(filters=None):
 	student_batch_name = filters.get("student_batch_name")
 
 	columns = get_columns()
-	
+
 	program_enrollments = frappe.get_list("Program Enrollment", fields=["student", "student_name"],
 		filters={"academic_year": academic_year, "program": program, "student_batch_name": student_batch_name})
 
@@ -34,7 +34,7 @@ def execute(filters=None):
 		student_guardians = guardian_map.get(d.student)
 
 		if student_guardians:
-			for i in xrange(2):
+			for i in range(2):
 				if i < len(student_guardians):
 					g = student_guardians[i]
 					row += [g.guardian_name, g.relation, g.mobile_number, g.email_address]
@@ -46,9 +46,9 @@ def execute(filters=None):
 
 def get_columns():
 	columns = [
-		_(" Group Roll No") + "::60",  
-		_("Student ID") + ":Link/Student:90", 
-		_("Student Name") + "::150", 
+		_("Group Roll No") + "::60",
+		_("Student ID") + ":Link/Student:90",
+		_("Student Name") + "::150",
 		_("Student Mobile No.") + "::110",
 		_("Student Email ID") + "::125",
 		_("Student Address") + "::175",
@@ -84,10 +84,10 @@ def get_guardian_map(student_list):
 
 	guardian_list = list(set([g.guardian for g in guardian_details])) or ['']
 
-	guardian_mobile_no = dict(frappe.db.sql("""select name, mobile_number from `tabGuardian` 
+	guardian_mobile_no = dict(frappe.db.sql("""select name, mobile_number from `tabGuardian`
 			where name in (%s)""" % ", ".join(['%s']*len(guardian_list)), tuple(guardian_list)))
 
-	guardian_email_id = dict(frappe.db.sql("""select name, email_address from `tabGuardian` 
+	guardian_email_id = dict(frappe.db.sql("""select name, email_address from `tabGuardian`
 			where name in (%s)""" % ", ".join(['%s']*len(guardian_list)), tuple(guardian_list)))
 
 	for guardian in guardian_details:
@@ -99,7 +99,7 @@ def get_guardian_map(student_list):
 
 def get_student_roll_no(academic_year, program, batch):
 	student_group = frappe.get_all("Student Group",
-		filters={"academic_year":academic_year, "program":program, "batch":batch})
+		filters={"academic_year":academic_year, "program":program, "batch":batch, "disabled": 0})
 	if student_group:
 		roll_no_dict = dict(frappe.db.sql('''select student, group_roll_number from `tabStudent Group Student` where parent=%s''',
 			(student_group[0].name)))

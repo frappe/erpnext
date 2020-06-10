@@ -13,11 +13,23 @@ def execute(filters=None):
 def get_columns():
 	return [
 		{
-			"label": _("Item Name"),
-			"fieldname": "item_name",
+			"label": _("Item Code"),
+			"fieldname": "item_code",
 			"fieldtype": "Link",
 			"options": "Item",
 			"width": 120
+		},
+		{
+			"label": _("Item Name"),
+			"fieldname": "item_name",
+			"fieldtype": "Data",
+			"width": 120
+		},
+		{
+			"label": _("Brand"),
+			"fieldname": "brand",
+			"fieldtype": "Data",
+			"width": 100
 		},
 		{
 			"label": _("Warehouse"),
@@ -70,14 +82,14 @@ def get_item_price_qty_data(filters):
 	if filters.get("item_code"):
 		conditions += "where a.item_code=%(item_code)s"
 
-	item_results = frappe.db.sql("""select a.item_code as item_name, a.name as price_list_name,
-		b.warehouse as warehouse, b.actual_qty as actual_qty
+	item_results = frappe.db.sql("""select a.item_code, a.item_name, a.name as price_list_name,
+		a.brand as brand, b.warehouse as warehouse, b.actual_qty as actual_qty
 		from `tabItem Price` a left join `tabBin` b
 		ON a.item_code = b.item_code
 		{conditions}"""
 		.format(conditions=conditions), filters, as_dict=1)
 
-	price_list_names = list(set([frappe.db.escape(item.price_list_name) for item in item_results]))
+	price_list_names = list(set([item.price_list_name for item in item_results]))
 
 	buying_price_map = get_price_map(price_list_names, buying=1)
 	selling_price_map = get_price_map(price_list_names, selling=1)
@@ -86,7 +98,9 @@ def get_item_price_qty_data(filters):
 	if item_results:
 		for item_dict in item_results:
 			data = {
+				'item_code': item_dict.item_code,
 				'item_name': item_dict.item_name,
+				'brand': item_dict.brand,
 				'warehouse': item_dict.warehouse,
 				'stock_available': item_dict.actual_qty or 0,
 				'buying_price_list': "",
@@ -115,17 +129,15 @@ def get_price_map(price_list_names, buying=0, selling=0):
 
 	rate_key = "Buying Rate" if buying else "Selling Rate"
 	price_list_key = "Buying Price List" if buying else "Selling Price List"
-	price_list_condition = " and buying=1" if buying else " and selling=1"
 
-	pricing_details = frappe.db.sql("""
-		select
-			name,price_list,price_list_rate
-		from
-			`tabItem Price`
-		where
-			name in ({price_list_names}) {price_list_condition}
-		""".format(price_list_names=', '.join(['%s']*len(price_list_names)),
-	price_list_condition=price_list_condition), price_list_names, as_dict=1)
+	filters = {"name": ("in", price_list_names)}
+	if buying:
+		filters["buying"] = 1
+	else:
+		filters["selling"] = 1
+
+	pricing_details = frappe.get_all("Item Price",
+		fields = ["name", "price_list", "price_list_rate"], filters=filters)
 
 	for d in pricing_details:
 		name = d["name"]

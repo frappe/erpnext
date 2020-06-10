@@ -22,7 +22,7 @@ frappe.ui.form.on('Asset Category', {
 			var d  = locals[cdt][cdn];
 			return {
 				"filters": {
-					"root_type": "Asset",
+					"account_type": "Accumulated Depreciation",
 					"is_group": 0,
 					"company": d.company_name
 				}
@@ -34,6 +34,17 @@ frappe.ui.form.on('Asset Category', {
 			return {
 				"filters": {
 					"root_type": "Expense",
+					"is_group": 0,
+					"company": d.company_name
+				}
+			};
+		});
+
+		frm.set_query('capital_work_in_progress_account', 'accounts', function(doc, cdt, cdn) {
+			var d  = locals[cdt][cdn];
+			return {
+				"filters": {
+					"account_type": "Capital Work in Progress",
 					"is_group": 0,
 					"company": d.company_name
 				}

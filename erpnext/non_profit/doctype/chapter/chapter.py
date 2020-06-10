@@ -35,7 +35,6 @@ def get_list_context(context):
 	context.title = 'All Chapters'
 	context.no_breadcrumbs = True
 	context.order_by = 'creation desc'
-	context.introduction = '<p>All Chapters</p>'
 
 
 @frappe.whitelist()

@@ -1,0 +1,29 @@
+{
+	"add_total_row": 0,
+	"apply_user_permissions": 0,
+	"creation": "2019-04-24 08:45:16.650129",
+	"disabled": 0,
+	"icon": "octicon octicon-repo-pull",
+	"color": "#4CB944",
+	"docstatus": 0,
+	"doctype": "Report",
+	"idx": 0,
+	"is_standard": "Yes",
+	"module": "Regional",
+	"name": "DATEV",
+	"owner": "Administrator",
+	"ref_doctype": "GL Entry",
+	"report_name": "DATEV",
+	"report_type": "Script Report",
+	"roles": [
+		{
+			"role": "Accounts User"
+		},
+		{
+			"role": "Accounts Manager"
+		},
+		{
+			"role": "Auditor"
+		}
+	]
+}

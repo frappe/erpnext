@@ -1,0 +1,28 @@
+{
+ "creation": "2019-05-26 21:20:40.520197",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "parameter"
+ ],
+ "fields": [
+  {
+   "fieldname": "parameter",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Parameter"
+  }
+ ],
+ "istable": 1,
+ "modified": "2019-05-26 21:23:53.574743",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality Feedback Template Parameter",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

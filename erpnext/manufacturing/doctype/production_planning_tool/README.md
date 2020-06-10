@@ -1,1 +1,0 @@
-Tool to create Production Orders from a bunch of Sales Orders and generate Material Requests (MRP) as required.

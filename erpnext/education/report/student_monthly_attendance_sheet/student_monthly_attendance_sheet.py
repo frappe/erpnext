@@ -73,6 +73,7 @@ def get_attendance_list(from_date, to_date, student_group, students_list):
 	return att_map
 
 def get_students_with_leave_application(from_date, to_date, students_list):
+	if not students_list: return
 	leave_applications = frappe.db.sql("""
 		select student, from_date, to_date 
 		from `tabStudent Leave Application` 

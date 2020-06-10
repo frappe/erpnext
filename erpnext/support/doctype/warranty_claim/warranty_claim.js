@@ -7,6 +7,23 @@ frappe.ui.form.on("Warranty Claim", {
 	setup: function(frm) {
 		frm.set_query('contact_person', erpnext.queries.contact_query);
 		frm.set_query('customer_address', erpnext.queries.address_query);
+		frm.set_query('customer', erpnext.queries.customer);
+
+		frm.add_fetch('serial_no', 'item_code', 'item_code');
+		frm.add_fetch('serial_no', 'item_name', 'item_name');
+		frm.add_fetch('serial_no', 'description', 'description');
+		frm.add_fetch('serial_no', 'maintenance_status', 'warranty_amc_status');
+		frm.add_fetch('serial_no', 'warranty_expiry_date', 'warranty_expiry_date');
+		frm.add_fetch('serial_no', 'amc_expiry_date', 'amc_expiry_date');
+		frm.add_fetch('serial_no', 'customer', 'customer');
+		frm.add_fetch('serial_no', 'customer_name', 'customer_name');
+		frm.add_fetch('item_code', 'item_name', 'item_name');
+		frm.add_fetch('item_code', 'description', 'description');
+	},
+	onload: function(frm) {
+		if(!frm.doc.status) {
+			frm.set_value('status', 'Open');
+		}
 	},
 	customer: function(frm) {
 		erpnext.utils.get_party_details(frm);
@@ -40,11 +57,6 @@ erpnext.support.WarrantyClaim = frappe.ui.form.Controller.extend({
 
 $.extend(cur_frm.cscript, new erpnext.support.WarrantyClaim({frm: cur_frm}));
 
-cur_frm.cscript.onload = function(doc,cdt,cdn){
-	if(!doc.status)
-		set_multiple(cdt,cdn,{status:'Open'});
-}
-
 cur_frm.fields_dict['serial_no'].get_query = function(doc, cdt, cdn) {
 	var cond = [];
 	var filter = [
@@ -62,17 +74,6 @@ cur_frm.fields_dict['serial_no'].get_query = function(doc, cdt, cdn) {
 		filters:filter
 	}
 }
-
-cur_frm.add_fetch('serial_no', 'item_code', 'item_code');
-cur_frm.add_fetch('serial_no', 'item_name', 'item_name');
-cur_frm.add_fetch('serial_no', 'description', 'description');
-cur_frm.add_fetch('serial_no', 'maintenance_status', 'warranty_amc_status');
-cur_frm.add_fetch('serial_no', 'warranty_expiry_date', 'warranty_expiry_date');
-cur_frm.add_fetch('serial_no', 'amc_expiry_date', 'amc_expiry_date');
-cur_frm.add_fetch('serial_no', 'customer', 'customer');
-cur_frm.add_fetch('serial_no', 'customer_name', 'customer_name');
-cur_frm.add_fetch('item_code', 'item_name', 'item_name');
-cur_frm.add_fetch('item_code', 'description', 'description');
 
 cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
 	if(doc.serial_no) {
@@ -92,10 +93,4 @@ cur_frm.fields_dict['item_code'].get_query = function(doc, cdt, cdn) {
 			]
 		}
 	}
-}
-
-
-
-cur_frm.fields_dict.customer.get_query = function(doc,cdt,cdn) {
-	return{	query: "erpnext.controllers.queries.customer_query" } }
-
+};

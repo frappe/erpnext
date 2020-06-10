@@ -41,12 +41,19 @@ class MaintenanceVisit(TransactionBase):
 						work_done = nm and nm[0][3] or ''
 					else:
 						status = 'Open'
-						mntc_date = ''
-						service_person = ''
-						work_done = ''
+						mntc_date = None
+						service_person = None
+						work_done = None
 
-				frappe.db.sql("update `tabWarranty Claim` set resolution_date=%s, resolved_by=%s, resolution_details=%s, status=%s where name =%s",(mntc_date,service_person,work_done,status,d.prevdoc_docname))
+				wc_doc = frappe.get_doc('Warranty Claim', d.prevdoc_docname)
+				wc_doc.update({
+					'resolution_date': mntc_date,
+					'resolved_by': service_person,
+					'resolution_details': work_done,
+					'status': status
+				})
 
+				wc_doc.db_update()
 
 	def check_if_last_visit(self):
 		"""check if last maintenance visit against same sales order/ Warranty Claim"""

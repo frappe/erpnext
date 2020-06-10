@@ -1,8 +1,11 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 
+from __future__ import unicode_literals
 import frappe, erpnext
 from frappe.utils import cint, flt
+
+from six import string_types
 
 @frappe.whitelist()
 def make_stock_entry(**args):
@@ -10,6 +13,7 @@ def make_stock_entry(**args):
 
 	:item_code: Item to be moved
 	:qty: Qty to be moved
+	:company: Company Name (optional)
 	:from_warehouse: Optional
 	:to_warehouse: Optional
 	:rate: Optional
@@ -17,6 +21,7 @@ def make_stock_entry(**args):
 	:batch_no: Optional
 	:posting_date: Optional
 	:posting_time: Optional
+	:purpose: Optional
 	:do_not_save: Optional flag
 	:do_not_submit: Optional flag
 	'''
@@ -49,7 +54,7 @@ def make_stock_entry(**args):
 	if args.item_code:
 		args.item = args.item_code
 
-	if isinstance(args.qty, basestring):
+	if isinstance(args.qty, string_types):
 		if '.' in args.qty:
 			args.qty = flt(args.qty)
 		else:
@@ -84,10 +89,11 @@ def make_stock_entry(**args):
 	s.purchase_receipt_no = args.purchase_receipt_no
 	s.delivery_note_no = args.delivery_note_no
 	s.sales_invoice_no = args.sales_invoice_no
+	s.is_opening = args.is_opening or "No"
 	if not args.cost_center:
 		args.cost_center = frappe.get_value('Company', s.company, 'cost_center')
 
-	if not args.expense_account:
+	if not args.expense_account and s.is_opening == "No":
 		args.expense_account = frappe.get_value('Company', s.company, 'stock_adjustment_account')
 
 	# We can find out the serial number using the batch source document
@@ -119,6 +125,7 @@ def make_stock_entry(**args):
 		'expense_account': args.expense_account
 	})
 
+	s.set_stock_entry_type()
 	if not args.do_not_save:
 		s.insert()
 		if not args.do_not_submit:

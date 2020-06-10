@@ -1,7 +1,7 @@
 frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
-		title: 'Stock Summary',
+		title: __('Stock Summary'),
 		single_column: true
 	});
 	page.start = 0;
@@ -60,7 +60,7 @@ frappe.pages['stock-balance'].on_page_load = function(wrapper) {
 		}
 	});
 
-	page.sort_selector.wrapper.css({'margin-right': '15px', 'margin-top': '4px'});
+	// page.sort_selector.wrapper.css({'margin-right': '15px', 'margin-top': '4px'});
 
 	frappe.require('assets/js/item-dashboard.min.js', function() {
 		page.item_dashboard = new erpnext.stock.ItemDashboard({

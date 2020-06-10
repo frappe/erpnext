@@ -1,0 +1,71 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "creation": "2019-02-01 12:24:34.761380",
+ "description": "Import Chart of Accounts from a csv file",
+ "doctype": "DocType",
+ "document_type": "Other",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "download_template",
+  "import_file",
+  "chart_preview",
+  "chart_tree"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "depends_on": "company",
+   "fieldname": "import_file",
+   "fieldtype": "Attach",
+   "label": "Attach custom Chart of Accounts file"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "chart_preview",
+   "fieldtype": "Section Break",
+   "label": "Chart Preview"
+  },
+  {
+   "fieldname": "chart_tree",
+   "fieldtype": "HTML",
+   "label": "Chart Tree"
+  },
+  {
+   "depends_on": "company",
+   "fieldname": "download_template",
+   "fieldtype": "Button",
+   "label": "Download Template"
+  }
+ ],
+ "hide_toolbar": 1,
+ "in_create": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2020-02-28 08:49:11.422846",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Chart of Accounts Importer",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "read": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "read_only": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

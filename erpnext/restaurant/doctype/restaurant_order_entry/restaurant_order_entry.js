@@ -15,8 +15,8 @@ frappe.ui.form.on('Restaurant Order Entry', {
 		frm.set_query('add_item', get_item_query);
 	},
 	onload_post_render: function(frm) {
-		if(!this.item_selector) {
-			this.item_selector = new erpnext.ItemSelector({
+		if(!frm.item_selector) {
+			frm.item_selector = new erpnext.ItemSelector({
 				frm: frm,
 				item_field: 'item',
 				item_query: 'erpnext.restaurant.doctype.restaurant_order_entry.restaurant_order_entry.item_query_restaurant',

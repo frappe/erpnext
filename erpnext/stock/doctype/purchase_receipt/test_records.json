@@ -85,7 +85,6 @@
   "supplier": "_Test Supplier"
  },
 
-
  {
   "buying_price_list": "_Test Price List",
   "company": "_Test Company",
@@ -95,7 +94,6 @@
   "base_grand_total": 5000.0,
   "is_subcontracted": "Yes",
   "base_net_total": 5000.0,
-  "posting_date": "2013-02-12",
   "items": [
    {
     "base_amount": 5000.0,

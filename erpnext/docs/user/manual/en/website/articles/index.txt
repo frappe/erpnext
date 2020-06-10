@@ -1,3 +1,0 @@
-managing-user-sign-up-via-website
-website-security
-website-home-page

@@ -68,8 +68,6 @@
   "selling_price_list": "_Test Price List",
   "territory": "_Test Territory"
  },
- 
- 
  {
   "company": "_Test Company",
   "conversion_rate": 1.0,
@@ -142,7 +140,7 @@
 	"expense_account": "_Test Account Cost for Goods Sold - _TC",
     "item_code": "_Test Item Home Desktop 100",
     "item_name": "_Test Item Home Desktop 100",
-    "item_tax_rate": "{\"_Test Account Excise Duty - _TC\": 10}",
+    "item_tax_template": "_Test Account Excise Duty @ 10",
     "parentfield": "items",
     "price_list_rate": 50,
     "qty": 10,
@@ -269,14 +267,13 @@
 	"expense_account": "_Test Account Cost for Goods Sold - _TC",
     "item_code": "_Test Item Home Desktop 100",
     "item_name": "_Test Item Home Desktop 100",
-    "item_tax_rate": "{\"_Test Account Excise Duty - _TC\": 10}",
+    "item_tax_template": "_Test Account Excise Duty @ 10",
     "parentfield": "items",
     "price_list_rate": 62.5,
     "qty": 10,
 	  "uom": "_Test UOM 1",
 	  "conversion_factor": 1,
     "stock_uom": "_Test UOM 1"
-	
    },
    {
     "cost_center": "_Test Cost Center - _TC",

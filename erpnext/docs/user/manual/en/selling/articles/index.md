@@ -1,3 +1,0 @@
-# Articles
-
-{index}

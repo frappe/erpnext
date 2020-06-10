@@ -1,0 +1,110 @@
+{
+ "actions": [],
+ "autoname": "format:PRC-{quality_procedure_name}",
+ "creation": "2018-10-06 00:06:29.756804",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "quality_procedure_name",
+  "parent_quality_procedure",
+  "is_group",
+  "sb_00",
+  "processes",
+  "lft",
+  "rgt",
+  "old_parent"
+ ],
+ "fields": [
+  {
+   "fieldname": "parent_quality_procedure",
+   "fieldtype": "Link",
+   "label": "Parent Procedure",
+   "options": "Quality Procedure",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_group",
+   "fieldtype": "Check",
+   "label": "Is Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "lft",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Lft",
+   "read_only": 1
+  },
+  {
+   "fieldname": "rgt",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Rgt",
+   "read_only": 1
+  },
+  {
+   "fieldname": "old_parent",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "old_parent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_00",
+   "fieldtype": "Section Break",
+   "label": "Processes"
+  },
+  {
+   "fieldname": "processes",
+   "fieldtype": "Table",
+   "label": "Processes",
+   "options": "Quality Procedure Process"
+  },
+  {
+   "fieldname": "quality_procedure_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Quality Procedure",
+   "reqd": 1
+  }
+ ],
+ "is_tree": 1,
+ "links": [],
+ "modified": "2020-03-18 18:09:29.371627",
+ "modified_by": "Administrator",
+ "module": "Quality Management",
+ "name": "Quality Procedure",
+ "nsm_parent_field": "parent_quality_procedure",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
