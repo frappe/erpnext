@@ -38,6 +38,9 @@ frappe.ui.form.on("Leave Application", {
 	},
 
 	validate: function(frm) {
+		if (frm.doc.from_date == frm.doc.to_date && frm.doc.half_day == 1){
+			frm.doc.half_day_date = frm.doc.from_date;
+		}
 		frm.toggle_reqd("half_day_date", frm.doc.half_day == 1);
 	},
 
