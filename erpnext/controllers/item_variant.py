@@ -70,7 +70,7 @@ def validate_item_variant_attributes(item, args=None):
 
 		else:
 			attributes_list = attribute_values.get(attribute.lower(), [])
-			validate_item_attribute_value(attributes_list, attribute, value, item.name)
+			validate_item_attribute_value(attributes_list, attribute, value, item.name, from_variant=True)
 
 def validate_is_incremental(numeric_attribute, attribute, value, item):
 	from_range = numeric_attribute.from_range
@@ -93,13 +93,20 @@ def validate_is_incremental(numeric_attribute, attribute, value, item):
 			.format(attribute, from_range, to_range, increment, item),
 			InvalidItemAttributeValueError, title=_('Invalid Attribute'))
 
-def validate_item_attribute_value(attributes_list, attribute, attribute_value, item):
+def validate_item_attribute_value(attributes_list, attribute, attribute_value, item, from_variant=True):
 	allow_rename_attribute_value = frappe.db.get_single_value('Item Variant Settings', 'allow_rename_attribute_value')
 	if allow_rename_attribute_value:
 		pass
 	elif attribute_value not in attributes_list:
-		frappe.throw(_("The value {0} is already assigned to an exisiting Item {2}.").format(
-			attribute_value, attribute, item), InvalidItemAttributeValueError, title=_('Rename Not Allowed'))
+		if from_variant:
+			frappe.throw(_("{0} is not a valid Value for Attribute {1} of Item {2}.").format(
+				frappe.bold(attribute_value), frappe.bold(attribute), frappe.bold(item)), InvalidItemAttributeValueError, title=_("Invalid Value"))
+		else:
+			msg = _("The value {0} is already assigned to an exisiting Item {1}.").format(
+				frappe.bold(attribute_value), frappe.bold(item))
+			msg += "<br>" + _("To still proceed with editing this Attribute Value, enable {0} in Item Variant Settings.").format(frappe.bold("Allow Rename Attribute Value"))
+
+			frappe.throw(msg, InvalidItemAttributeValueError, title=_('Edit Not Allowed'))
 
 def get_attribute_values(item):
 	if not frappe.flags.attribute_values:
