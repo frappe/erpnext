@@ -1339,7 +1339,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var idx = 0;
 		this.items = []
 		$.each(this.frm.doc["items"] || [], function (i, d) {
-			if (!in_list(me.remove_item, d.idx)) {
+			if (!in_list(me.remove_item[0], d.idx)) {
 				d.idx = idx;
 				me.items.push(d);
 				idx++;
