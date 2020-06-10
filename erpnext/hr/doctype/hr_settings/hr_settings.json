@@ -39,17 +39,13 @@
   {
    "fieldname": "employee_settings",
    "fieldtype": "Section Break",
-   "label": "Employee Settings",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Employee Settings"
   },
   {
    "description": "Enter retirement age in years",
    "fieldname": "retirement_age",
    "fieldtype": "Data",
-   "label": "Retirement Age",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Retirement Age"
   },
   {
    "default": "Naming Series",
@@ -57,70 +53,52 @@
    "fieldname": "emp_created_by",
    "fieldtype": "Select",
    "label": "Employee Records to be created by",
-   "options": "Naming Series\nEmployee Number\nFull Name",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Naming Series\nEmployee Number\nFull Name"
   },
   {
    "fieldname": "column_break_4",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "default": "0",
    "description": "Don't send Employee Birthday Reminders",
    "fieldname": "stop_birthday_reminders",
    "fieldtype": "Check",
-   "label": "Stop Birthday Reminders",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Stop Birthday Reminders"
   },
   {
    "default": "1",
    "fieldname": "expense_approver_mandatory_in_expense_claim",
    "fieldtype": "Check",
-   "label": "Expense Approver Mandatory In Expense Claim",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Expense Approver Mandatory In Expense Claim"
   },
   {
    "fieldname": "payroll_settings",
    "fieldtype": "Section Break",
-   "label": "Payroll Settings",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Payroll Settings"
   },
   {
    "default": "0",
    "description": "If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day",
    "fieldname": "include_holidays_in_total_working_days",
    "fieldtype": "Check",
-   "label": "Include holidays in Total no. of Working Days",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Include holidays in Total no. of Working Days"
   },
   {
    "fieldname": "max_working_hours_against_timesheet",
    "fieldtype": "Float",
-   "label": "Max working hours against Timesheet",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Max working hours against Timesheet"
   },
   {
    "fieldname": "column_break_11",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "default": "1",
    "description": "Emails salary slip to employee based on preferred email selected in Employee",
    "fieldname": "email_salary_slip_to_employee",
    "fieldtype": "Check",
-   "label": "Email Salary Slip to Employee",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Email Salary Slip to Employee"
   },
   {
    "default": "0",
@@ -128,9 +106,7 @@
    "description": "The salary slip emailed to the employee will be password protected, the password will be generated based on the password policy.",
    "fieldname": "encrypt_salary_slips_in_emails",
    "fieldtype": "Check",
-   "label": "Encrypt Salary Slips in Emails",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Encrypt Salary Slips in Emails"
   },
   {
    "depends_on": "eval: doc.encrypt_salary_slips_in_emails == 1",
@@ -138,132 +114,100 @@
    "fieldname": "password_policy",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Password Policy",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Password Policy"
   },
   {
    "collapsible": 1,
    "fieldname": "leave_settings",
    "fieldtype": "Section Break",
-   "label": "Leave Settings",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Leave Settings"
   },
   {
    "fieldname": "leave_approval_notification_template",
    "fieldtype": "Link",
    "label": "Leave Approval Notification Template",
-   "options": "Email Template",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Email Template"
   },
   {
    "fieldname": "leave_status_notification_template",
    "fieldtype": "Link",
    "label": "Leave Status Notification Template",
-   "options": "Email Template",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Email Template"
   },
   {
    "fieldname": "column_break_18",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "default": "1",
    "fieldname": "leave_approver_mandatory_in_leave_application",
    "fieldtype": "Check",
-   "label": "Leave Approver Mandatory In Leave Application",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Leave Approver Mandatory In Leave Application"
   },
   {
    "default": "0",
    "fieldname": "show_leaves_of_all_department_members_in_calendar",
    "fieldtype": "Check",
-   "label": "Show Leaves Of All Department Members In Calendar",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Show Leaves Of All Department Members In Calendar"
   },
   {
    "collapsible": 1,
    "fieldname": "hiring_settings",
    "fieldtype": "Section Break",
-   "label": "Hiring Settings",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Hiring Settings"
   },
   {
    "default": "0",
    "fieldname": "check_vacancies",
    "fieldtype": "Check",
-   "label": "Check Vacancies On Job Offer Creation",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Check Vacancies On Job Offer Creation"
   },
   {
    "default": "0",
    "fieldname": "auto_leave_encashment",
    "fieldtype": "Check",
-   "label": "Auto Leave Encashment",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Auto Leave Encashment"
   },
   {
    "default": "0",
    "description": "If checked, hides and disables Rounded Total field in Salary Slips",
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
-   "label": "Disable Rounded Total",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Disable Rounded Total"
   },
   {
    "default": "0",
    "fieldname": "restrict_backdated_leave_application",
    "fieldtype": "Check",
-   "label": "Restrict Backdated Leave Application",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Restrict Backdated Leave Application"
   },
   {
    "depends_on": "eval:doc.restrict_backdated_leave_application == 1",
    "fieldname": "role_allowed_to_create_backdated_leave_application",
    "fieldtype": "Link",
    "label": "Role Allowed to Create Backdated Leave Application",
-   "options": "Role",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Role"
   },
   {
    "default": "Leave",
    "fieldname": "payroll_based_on",
    "fieldtype": "Select",
    "label": "Calculate Payroll Working Days Based On",
-   "options": "Leave\nAttendance",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Leave\nAttendance"
   },
   {
    "default": "0.5",
    "description": "The fraction of daily wages to be paid for half-day attendance",
    "fieldname": "daily_wages_fraction_for_half_day",
    "fieldtype": "Float",
-   "label": "Daily Wages Fraction for Half Day",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Daily Wages Fraction for Half Day"
   },
   {
    "default": "0",
    "description": "Allow accrual of payroll entry accounts on a per employee basis for payable-type accounts. (This is useful for companies that handle payroll on their main book of accounts, but it will reveal salary information to any user with accounts access.)",
    "fieldname": "allow_salary_accrual_per_employee",
    "fieldtype": "Check",
-   "label": "Allow Salary Accrual Per Employee",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Allow Salary Accrual Per Employee"
   }
  ],
  "icon": "fa fa-cog",
