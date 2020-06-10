@@ -53,7 +53,7 @@
  "modified": "2020-04-15 02:23:58.892313",
  "modified_by": "Administrator",
  "module": "Shopping Cart",
- "name": "Gateway Selector Item",
+ "name": "Shopping Cart Payment Gateway",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,

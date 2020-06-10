@@ -4,7 +4,7 @@ import frappe
 def execute():
 	frappe.reload_doc('shopping_cart', 'doctype', 'Shopping Cart Settings')
 	frappe.reload_doc('accounts', 'doctype', 'Payment Gateway Account')
-	frappe.reload_doc('shopping_cart', 'doctype', 'Gateway Selector Item')
+	frappe.reload_doc('shopping_cart', 'doctype', 'Shopping Cart Payment Gateway')
 
 	cart_settings = frappe.get_single("Shopping Cart Settings")
 

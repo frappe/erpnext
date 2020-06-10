@@ -15,7 +15,7 @@ $.extend(cur_frm.cscript, {
 	},
 });
 
-frappe.ui.form.on('Gateway Selector Item', {
+frappe.ui.form.on('Shopping Cart Payment Gateway', {
 	payment_gateway_account: function (frm, cdt, cdn) {
 		const row = frm.selected_doc || locals[cdt][cdn];
 
