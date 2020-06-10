@@ -117,14 +117,13 @@ def get_items_with_location_and_quantity(item_doc, item_location_map):
 			serial_nos = '\n'.join(item_location.serial_no[0: cint(stock_qty)])
 
 		auto_set_serial_no = frappe.db.get_single_value("Stock Settings", "automatically_set_serial_nos_based_on_fifo")
-		auto_set_batch_no = frappe.db.get_single_value("Stock Settings", "automatically_set_batch_nos_based_on_fifo")
 
 		locations.append(frappe._dict({
 			'qty': qty,
 			'stock_qty': stock_qty,
 			'warehouse': item_location.warehouse,
 			'serial_no': serial_nos if auto_set_serial_no else item_doc.serial_no,
-			'batch_no': item_location.batch_no if auto_set_batch_no else item_doc.batch_no
+			'batch_no': item_location.batch_no
 		}))
 
 		remaining_stock_qty -= stock_qty
