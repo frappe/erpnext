@@ -231,12 +231,13 @@ class PayrollEntry(Document):
 
 			accounts = []
 			payable_amount = 0
+			allow_per_employee = frappe.db.get_single_value("HR Settings", "allow_salary_accrual_per_employee")
 
 			# Earnings
 			for acc_cc, amount in earnings.items():
 				payable_amount += flt(amount, precision)
 
-				if (frappe.db.get_value("Account", acc_cc[0], "account_type") == "Payable"):
+				if (allow_per_employee & frappe.db.get_value("Account", acc_cc[0], "account_type") == "Payable"):
 						slips = frappe.db.get_all("Salary Slip", filters={'payroll_entry': self.name})
 						for slip in slips:
 							slip_doc = frappe.get_doc("Salary Slip", slip)
@@ -269,7 +270,7 @@ class PayrollEntry(Document):
 			for acc_cc, amount in deductions.items():
 				payable_amount -= flt(amount, precision)
 
-				if (frappe.db.get_value("Account", acc_cc[0], "account_type") == "Payable"):
+				if (allow_per_employee & frappe.db.get_value("Account", acc_cc[0], "account_type") == "Payable"):
 						slips = frappe.db.get_all("Salary Slip", filters={'payroll_entry': self.name})
 						for slip in slips:
 							slip_doc = frappe.get_doc("Salary Slip", slip)
@@ -295,7 +296,7 @@ class PayrollEntry(Document):
 						})
 
 			# Payable amount
-			if (frappe.db.get_value("Account", default_payroll_payable_account, "account_type") == "Payable"):
+			if (allow_per_employee & frappe.db.get_value("Account", default_payroll_payable_account, "account_type") == "Payable"):
 				slips = frappe.db.get_all("Salary Slip", filters={'payroll_entry': self.name})
 				for slip in slips:
 					slip_doc = frappe.get_doc("Salary Slip", slip)
