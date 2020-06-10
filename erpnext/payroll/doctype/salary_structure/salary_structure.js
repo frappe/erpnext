@@ -14,7 +14,30 @@ cur_frm.cscript.onload = function(doc, dt, dn){
 
 frappe.ui.form.on('Salary Structure', {
 	onload: function(frm) {
-		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet),
+
+		let help_button = $(`<a class = 'control-label'>
+			Condition and Formula Help
+		</a>`).click(()=>{
+
+			let d = new frappe.ui.Dialog({
+				title: 'Condition and Formula Help',
+				fields: [
+					{
+						fieldname: 'msg_wrapper',
+						fieldtype: 'HTML'
+					}
+				]
+			});
+
+			let message_html = frappe.render_template("condition_and_formula_help")
+
+			d.fields_dict.msg_wrapper.$wrapper.append(message_html)
+
+			d.show()
+		});
+		frm.get_field("conditions_and_formula_variable_and_example").$wrapper.append(frm.doc.filters_html).append(help_button)
+
+		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet)
 
 		frm.set_query("salary_component", "earnings", function() {
 			return {
