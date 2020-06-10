@@ -159,28 +159,22 @@
    "fieldtype": "Link",
    "label": "Default Priority",
    "options": "Issue Priority",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "section_break_18",
    "fieldtype": "Section Break",
-   "hide_border": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "hide_border": 1
   },
   {
    "fieldname": "pause_sla_on",
    "fieldtype": "Table",
    "label": "Pause SLA On",
-   "options": "Pause SLA On Status",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Pause SLA On Status"
   }
  ],
  "links": [],
- "modified": "2020-06-05 17:51:15.050785",
+ "modified": "2020-06-10 12:30:15.050785",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",

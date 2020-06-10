@@ -380,48 +380,38 @@
    "fieldname": "avg_response_time",
    "fieldtype": "Duration",
    "label": "Average Response Time",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "resolution_time",
    "fieldtype": "Duration",
    "label": "Resolution Time",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "user_resolution_time",
    "fieldtype": "Duration",
    "label": "User Resolution Time",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "on_hold_since",
    "fieldtype": "Datetime",
    "hidden": 1,
    "label": "On Hold Since",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "total_hold_time",
    "fieldtype": "Duration",
    "label": "Total Hold Time",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2020-06-05 15:45:24.474425",
+ "modified": "2020-06-10 12:47:37.146914",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
