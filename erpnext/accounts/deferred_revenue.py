@@ -199,9 +199,12 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 		if item.get(enable_check):
 			_book_deferred_revenue_or_expense(item)
 
-def process_deferred_accounting(posting_date=today()):
+def process_deferred_accounting(posting_date=None):
 	''' Converts deferred income/expense into income/expense
 		Executed via background jobs on every month end '''
+
+	if not posting_date:
+		posting_date = today()
 
 	if not cint(frappe.db.get_singles_value('Accounts Settings', 'automatically_process_deferred_accounting_entry')):
 		return

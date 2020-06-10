@@ -85,11 +85,9 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "hidden": 1,
+   "in_standard_filter": 1,
    "label": "Company",
-   "options": "Company",
-   "print_hide": 1,
-   "report_hide": 1
+   "options": "Company"
   },
   {
    "fieldname": "section_break_6",
@@ -167,7 +165,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-04 19:17:02.707203",
+ "modified": "2020-05-25 14:36:46.990469",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Sample Collection",

@@ -447,7 +447,7 @@ def get_prescribed_therapies(patient):
 		"""
 			SELECT
 				t.therapy_type, t.name, t.parent, e.practitioner,
-				e.encounter_date, e.therapy_plan, e.visit_department
+				e.encounter_date, e.therapy_plan, e.medical_department
 			FROM
 				`tabPatient Encounter` e, `tabTherapy Plan Detail` t
 			WHERE

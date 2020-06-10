@@ -11,7 +11,7 @@
 		<div class="input-group input-group-sm mb-3">
 			<input type="search" class="form-control" placeholder="{{_('Search')}}"
 				aria-label="{{_('Product Search')}}" aria-describedby="product-search"
-				value="{{ frappe.form_dict.search or '' }}"
+				value="{{ frappe.sanitize_html(frappe.form_dict.search) or '' }}"
 			>
 		</div>
 	</div>

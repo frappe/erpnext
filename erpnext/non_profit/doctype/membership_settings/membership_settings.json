@@ -8,7 +8,8 @@
   "enable_razorpay",
   "razorpay_settings_section",
   "billing_cycle",
-  "billing_frequency"
+  "billing_frequency",
+  "webhook_secret"
  ],
  "fields": [
   {
@@ -34,11 +35,17 @@
    "fieldname": "billing_frequency",
    "fieldtype": "Int",
    "label": "Billing Frequency"
+  },
+  {
+   "fieldname": "webhook_secret",
+   "fieldtype": "Password",
+   "label": "Webhook Secret",
+   "read_only": 1
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-04-07 18:42:51.496807",
+ "modified": "2020-05-22 12:38:27.103759",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership Settings",

@@ -1144,6 +1144,17 @@ def set_item_default(item_code, company, fieldname, value):
 	item.clear_cache()
 
 @frappe.whitelist()
+def get_item_details(item_code, company=None):
+	out = frappe._dict()
+	if company:
+		out = get_item_defaults(item_code, company) or frappe._dict()
+
+	doc = frappe.get_cached_doc("Item", item_code)
+	out.update(doc.as_dict())
+
+	return out
+
+@frappe.whitelist()
 def get_uom_conv_factor(uom, stock_uom):
 	uoms = [uom, stock_uom]
 	value = ""
