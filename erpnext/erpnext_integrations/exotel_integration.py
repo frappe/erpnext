@@ -1,13 +1,15 @@
 import frappe
 import requests
 from frappe import _
+from frappe.utils import cint
 
-# api/method/erpnext.erpnext_integrations.exotel_integration.handle_incoming_call
-# api/method/erpnext.erpnext_integrations.exotel_integration.handle_end_call
-# api/method/erpnext.erpnext_integrations.exotel_integration.handle_missed_call
+# <site>/api/method/erpnext.erpnext_integrations.exotel_integration.handle_incoming_call/<key>
+# <site>/api/method/erpnext.erpnext_integrations.exotel_integration.handle_end_call/<key>
+# <site>/api/method/erpnext.erpnext_integrations.exotel_integration.handle_missed_call/<key>
 
 @frappe.whitelist(allow_guest=True)
 def handle_incoming_call(**kwargs):
+	validate_request()
 	try:
 		exotel_settings = get_exotel_settings()
 		if not exotel_settings.enabled: return
@@ -34,11 +36,26 @@ def handle_incoming_call(**kwargs):
 
 @frappe.whitelist(allow_guest=True)
 def handle_end_call(**kwargs):
+	validate_request()
 	update_call_log(kwargs, 'Completed')
 
 @frappe.whitelist(allow_guest=True)
 def handle_missed_call(**kwargs):
+	validate_request()
 	update_call_log(kwargs, 'Missed')
+
+def validate_request():
+	# workaround security since exotel does not support request signature
+	#/api/method/frappe.integrations.custom/<key>
+	exotel_settings = get_exotel_settings()
+	key = ''
+	path = frappe.request.path[1:].split("/")
+	if len(path) == 4 and path[3]:
+		key = path[3]
+	is_valid = key and key == exotel_settings.webhook_key
+
+	if not is_valid:
+		frappe.throw(_('Unauthorized request'), exc=frappe.PermissionError)
 
 def update_call_log(call_payload, status='Ringing', call_log=None):
 	call_log = call_log or get_call_log(call_payload)
@@ -76,8 +93,12 @@ def create_call_log(call_id, from_number, to_number, medium,
 def get_call_status(call_id):
 	endpoint = get_exotel_endpoint('Calls/{call_id}.json'.format(call_id=call_id))
 	response = requests.get(endpoint)
-	status = response.json().get('Call', {}).get('Status')
-	frappe.db.set_value('Call Log', call_id, 'status', frappe.unscrub(status))
+	call_data = response.json().get('Call', {})
+	status = call_data.get('Status')
+	frappe.db.set_value('Call Log', call_id, {
+		'status': frappe.unscrub(status),
+		'duration': cint(call_data.get('Duration', 0))
+	})
 	return status
 
 @frappe.whitelist()

@@ -9,7 +9,9 @@
   "account_sid",
   "api_key",
   "api_token",
-  "record_call"
+  "record_call",
+  "webhook_key",
+  "integration_info"
  ],
  "fields": [
   {
@@ -43,11 +45,23 @@
    "fieldname": "record_call",
    "fieldtype": "Check",
    "label": "Record Outgoing Calls"
+  },
+  {
+   "fieldname": "webhook_key",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Webhook Key"
+  },
+  {
+   "depends_on": "webhook_key",
+   "fieldname": "integration_info",
+   "fieldtype": "HTML",
+   "label": "Integration Information"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-06-10 00:41:04.939591",
+ "modified": "2020-06-11 21:04:51.310490",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Exotel Settings",
