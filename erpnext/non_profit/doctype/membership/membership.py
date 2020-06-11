@@ -77,7 +77,7 @@ def verify_signature(data):
 
 @frappe.whitelist(allow_guest=True)
 def trigger_razorpay_subscription(*args, **kwargs):
-	data = frappe.request.get_data()
+	data = frappe.request.get_data(as_text=True)
 	verify_signature(data)
 
 	if isinstance(data, six.string_types):
