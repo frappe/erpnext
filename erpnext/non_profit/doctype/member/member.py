@@ -92,6 +92,10 @@ def create_customer(user_details):
 		})
 
 		contact.insert()
+
+	except frappe.DuplicateEntryError:
+		return customer.name
+
 	except Exception as e:
 		frappe.log_error(frappe.get_traceback(), _("Contact Creation Failed"))
 		pass
