@@ -1,4 +1,5 @@
 import frappe
+from frappe.utils import cint
 from erpnext.portal.product_configurator.item_variants_cache import ItemVariantsCacheManager
 
 def get_field_filter_data():
@@ -242,6 +243,8 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 			product_info = None
 	else:
 		product_info = None
+
+	product_info["allow_items_not_in_stock"] = cint(frappe.db.get_singles_value("Shopping Cart Settings", "allow_items_not_in_stock"))
 
 	return {
 		'next_attribute': next_attribute,
