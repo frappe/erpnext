@@ -78,7 +78,7 @@ class CallHandler {
 		frappe.xcall('erpnext.erpnext_integrations.exotel_integration.get_call_status', {
 			'call_id': this.call_id
 		}).then(status => {
-			this.set_indicator(status);
+			this.set_header(status);
 			if (['completed', 'failed', 'busy', 'no-answer'].includes(status)) {
 				this.set_call_as_complete();
 			}
