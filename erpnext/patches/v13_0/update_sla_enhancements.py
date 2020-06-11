@@ -45,38 +45,39 @@ def execute():
 
 		# copy Service Levels to Service Level Agreements
 		sl = [entry.service_level for entry in sla_details]
-		service_levels = frappe.db.get_all('Service Level', filters={'service_level': ('not in', sl)}, fields=['*'])
-		for entry in service_levels:
-			sla = frappe.new_doc('Service Level Agreement')
-			sla.service_level = entry.service_level
-			sla.holiday_list = entry.holiday_list
-			sla.employee_group = entry.employee_group
-			sla.flags.ignore_validate = True
-			sla = sla.insert(ignore_mandatory=True)
+		if frappe.db.exists('DocType', 'Service Level'):
+			service_levels = frappe.db.get_all('Service Level', filters={'service_level': ('not in', sl)}, fields=['*'])
+			for entry in service_levels:
+				sla = frappe.new_doc('Service Level Agreement')
+				sla.service_level = entry.service_level
+				sla.holiday_list = entry.holiday_list
+				sla.employee_group = entry.employee_group
+				sla.flags.ignore_validate = True
+				sla = sla.insert(ignore_mandatory=True)
 
-			frappe.db.sql("""
-				UPDATE
-					`tabService Day`
-				SET
-					parent = %(new_parent)s , parentfield = 'support_and_resolution', parenttype = 'Service Level Agreement'
-				WHERE
-					parent = %(old_parent)s
-			""", {'new_parent': sla.name, 'old_parent': entry.name}, as_dict = 1)
+				frappe.db.sql("""
+					UPDATE
+						`tabService Day`
+					SET
+						parent = %(new_parent)s , parentfield = 'support_and_resolution', parenttype = 'Service Level Agreement'
+					WHERE
+						parent = %(old_parent)s
+				""", {'new_parent': sla.name, 'old_parent': entry.name}, as_dict = 1)
 
-			priority_list = priority_dict.get(entry.name)
-			if priority_list:
-				sla = frappe.get_doc('Service Level Agreement', sla.name)
-				for priority in priority_list:
-					row = sla.append('priorities', {
-						'priority': priority.priority,
-						'default_priority': priority.default_priority,
-						'response_time': convert_to_seconds(priority.response_time, priority.response_time_period),
-						'resolution_time': convert_to_seconds(priority.resolution_time, priority.resolution_time_period)
-					})
-					row.db_update()
-				sla.db_update()
+				priority_list = priority_dict.get(entry.name)
+				if priority_list:
+					sla = frappe.get_doc('Service Level Agreement', sla.name)
+					for priority in priority_list:
+						row = sla.append('priorities', {
+							'priority': priority.priority,
+							'default_priority': priority.default_priority,
+							'response_time': convert_to_seconds(priority.response_time, priority.response_time_period),
+							'resolution_time': convert_to_seconds(priority.resolution_time, priority.resolution_time_period)
+						})
+						row.db_update()
+					sla.db_update()
 
-	frappe.delete_doc('DocType', 'Service Level')
+	frappe.delete_doc_if_exists('DocType', 'Service Level')
 
 
 def convert_to_seconds(value, unit):
