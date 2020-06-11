@@ -12,9 +12,14 @@
   "section_break_11",
   "from_date",
   "company",
+  "account",
+  "party_type",
   "project",
   "column_break_14",
   "to_date",
+  "finance_book",
+  "voucher_number",
+  "party",
   "cost_center",
   "section_break_3",
   "customer_collection",
@@ -54,8 +59,7 @@
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
-   "options": "Cost Center",
-   "reqd": 1
+   "options": "Cost Center"
   },
   {
    "fieldname": "project",
@@ -128,12 +132,40 @@
   {
    "fieldname": "section_break_1",
    "fieldtype": "Section Break",
-   "label": "Email Settings"
+   "label": "Auto Email Settings"
+  },
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "finance_book",
+   "fieldtype": "Link",
+   "label": "Finance Book",
+   "options": "Finance Book"
+  },
+  {
+   "fieldname": "voucher_number",
+   "fieldtype": "Data",
+   "label": "Voucher Number"
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "label": "Party Type",
+   "options": "Party Type"
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Data",
+   "label": "Party"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-29 18:02:45.621661",
+ "modified": "2020-06-11 13:50:17.722264",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bulk Statement Of Accounts",

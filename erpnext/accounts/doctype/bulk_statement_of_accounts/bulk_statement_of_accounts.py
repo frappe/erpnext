@@ -7,7 +7,8 @@ import frappe
 from frappe.model.document import Document
 
 class BulkStatementOfAccounts(Document):
-	pass
+	def onsubmit():
+		pass
 
 @frappe.whitelist()
 def get_customer_list(customer_collection, collection_name):
