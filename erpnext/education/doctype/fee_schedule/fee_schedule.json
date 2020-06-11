@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2017-07-18 15:21:21.527136",
@@ -7,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "fee_structure",
+  "posting_date",
   "due_date",
   "naming_series",
   "fee_creation_status",
@@ -259,10 +261,18 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2019-05-26 09:10:34.522409",
+ "links": [],
+ "modified": "2020-05-15 08:39:20.682837",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Fee Schedule",

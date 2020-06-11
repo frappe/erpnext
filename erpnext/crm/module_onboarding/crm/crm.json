@@ -16,7 +16,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/CRM",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-05-20 12:53:47.029412",
+ "modified": "2020-05-28 21:07:41.278784",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
@@ -35,8 +35,8 @@
    "step": "Create and Send Quotation"
   }
  ],
- "subtitle": "Lead, Opportunity, Customer and more",
- "success_message": "CRM Module is all setup!",
- "title": "Let's Setup Your CRM",
+ "subtitle": "Lead, Opportunity, Customer and more.",
+ "success_message": "CRM Module is all Set Up!",
+ "title": "Let's Set Up Your CRM.",
  "user_can_dismiss": 1
 }

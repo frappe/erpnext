@@ -1450,10 +1450,16 @@ def get_inter_company_details(doc, doctype):
 		parties = frappe.db.get_all("Supplier", fields=["name"], filters={"disabled": 0, "is_internal_supplier": 1, "represents_company": doc.company})
 		company = frappe.get_cached_value("Customer", doc.customer, "represents_company")
 
+		if not parties:
+			frappe.throw(_('No Supplier found for Inter Company Transactions which represents company {0}').format(frappe.bold(doc.company)))
+
 		party = get_internal_party(parties, "Supplier", doc)
 	else:
 		parties = frappe.db.get_all("Customer", fields=["name"], filters={"disabled": 0, "is_internal_customer": 1, "represents_company": doc.company})
 		company = frappe.get_cached_value("Supplier", doc.supplier, "represents_company")
+
+		if not parties:
+			frappe.throw(_('No Customer found for Inter Company Transactions which represents company {0}').format(frappe.bold(doc.company)))
 
 		party = get_internal_party(parties, "Customer", doc)
 
@@ -1519,13 +1525,21 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	def update_details(source_doc, target_doc, source_parent):
 		target_doc.inter_company_invoice_reference = source_doc.name
 		if target_doc.doctype in ["Purchase Invoice", "Purchase Order"]:
+			currency = frappe.db.get_value('Supplier', details.get('party'), 'default_currency')
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
 			target_doc.buying_price_list = source_doc.selling_price_list
+
+			if currency:
+				target_doc.currency = currency
 		else:
+			currency = frappe.db.get_value('Customer', details.get('party'), 'default_currency')
 			target_doc.company = details.get("company")
 			target_doc.customer = details.get("party")
 			target_doc.selling_price_list = source_doc.buying_price_list
+
+			if currency:
+				target_doc.currency = currency
 
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {

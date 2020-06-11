@@ -14,7 +14,6 @@ def execute(filters=None):
 
 def _execute(filters=None, additional_table_columns=None, additional_query_columns=None):
 	if not filters: filters = {}
-	filters.update({"from_date": filters.get("date_range") and filters.get("date_range")[0], "to_date": filters.get("date_range") and filters.get("date_range")[1]})
 	columns = get_columns(additional_table_columns, filters)
 
 	company_currency = frappe.get_cached_value('Company',  filters.get("company"),  "default_currency")
@@ -224,7 +223,7 @@ def get_columns(additional_table_columns, filters):
 		}
 	]
 
-	if filters.get('group_by') != 'Terriotory':
+	if filters.get('group_by') != 'Territory':
 		columns.extend([
 			{
 				'label': _("Territory"),
@@ -305,13 +304,6 @@ def get_columns(additional_table_columns, filters):
 			'fieldtype': 'Currency',
 			'options': 'currency',
 			'width': 100
-		},
-		{
-			'fieldname': 'currency',
-			'label': _('Currency'),
-			'fieldtype': 'Currency',
-			'width': 80,
-			'hidden': 1
 		}
 	]
 
@@ -537,6 +529,13 @@ def get_tax_accounts(item_list, columns, company_currency,
 			'fieldtype': 'Currency',
 			'options': 'currency',
 			'width': 100
+		},
+		{
+			'fieldname': 'currency',
+			'label': _('Currency'),
+			'fieldtype': 'Currency',
+			'width': 80,
+			'hidden': 1
 		}
 	]
 

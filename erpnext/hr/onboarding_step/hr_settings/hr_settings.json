@@ -1,6 +1,6 @@
 {
  "action": "Update Settings",
- "creation": "2020-05-14 13:13:52.427711",
+ "creation": "2020-05-28 13:13:52.427711",
  "docstatus": 0,
  "doctype": "Onboarding Step",
  "idx": 0,
@@ -14,6 +14,6 @@
  "owner": "Administrator",
  "reference_document": "HR Settings",
  "show_full_form": 0,
- "title": "HR settings",
+ "title": "HR Settings",
  "validate_action": 0
 }

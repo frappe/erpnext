@@ -182,7 +182,8 @@ def set_items_in_sales_order(new_sales_order, woocommerce_settings, order, sys_l
 	company_abbr = frappe.db.get_value('Company', woocommerce_settings.company, 'abbr')
 
 	default_warehouse = _("Stores - {0}", sys_lang).format(company_abbr)
-	if not frappe.db.exists("Warehouse", default_warehouse):
+	if not frappe.db.exists("Warehouse", default_warehouse) \
+		and not woocommerce_settings.warehouse:
 		frappe.throw(_("Please set Warehouse in Woocommerce Settings"))
 
 	for item in order.get("line_items"):

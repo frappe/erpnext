@@ -197,9 +197,9 @@ def set_expired_status():
 	cond = "qo.docstatus = 1 and qo.status != 'Expired' and qo.valid_till < %s"
 	# check if those QUO have SO against it
 	so_against_quo = """
-		SELECT 
+		SELECT
 			so.name FROM `tabSales Order` so, `tabSales Order Item` so_item
-		WHERE 
+		WHERE
 			so_item.docstatus = 1 and so.docstatus = 1
 			and so_item.parent = so.name
 			and so_item.prevdoc_docname = qo.name"""

@@ -24,7 +24,12 @@ def get_data(filters):
 	if filters.get("workstation"):
 		query_filters["workstation"] = filters.get("workstation")
 
-	return frappe.get_all("Downtime Entry", fields= fields, filters=query_filters)
+	data = frappe.get_all("Downtime Entry", fields= fields, filters=query_filters) or []
+	for d in data:
+		if d.downtime:
+			d.downtime = d.downtime / 60
+
+	return data
 
 def get_chart_data(data, columns):
 	labels = sorted(list(set([d.workstation for d in data])))
@@ -44,7 +49,7 @@ def get_chart_data(data, columns):
 		"data": {
 			"labels": labels,
 			"datasets": [
-				{"name": "Dataset 1", "values": datasets}
+				{"name": "Machine Downtime", "values": datasets}
 			]
 		},
 		"type": "bar"
@@ -88,7 +93,7 @@ def get_columns(filters):
 			"width": 160
 		},
 		{
-			"label": _("Downtime (In Mins)"),
+			"label": _("Downtime (In Hours)"),
 			"fieldname": "downtime",
 			"fieldtype": "Float",
 			"width": 150
