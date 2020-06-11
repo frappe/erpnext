@@ -77,6 +77,7 @@ def create_customer(user_details):
 	customer = frappe.new_doc("Customer")
 	customer.customer_name = user_details.fullname
 	customer.customer_type = "Individual"
+	customer.flags.ignore_mandatory = True
 	customer.insert(ignore_permissions=True)
 
 	try:
@@ -91,7 +92,7 @@ def create_customer(user_details):
 			"link_name": customer.name
 		})
 
-		contact.insert()
+		contact.save()
 
 	except frappe.DuplicateEntryError:
 		return customer.name
