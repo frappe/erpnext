@@ -1,0 +1,17 @@
+<div class="row">
+	<div class="col-sm-3 layout-side-section">
+		<ul class="overlay-sidebar nav nav-pills nav-stacked sidebar">
+			{% for item in sidebar_items %}
+			<li data-action="on_sidebar_item_click"
+				data-type="{{ item.type }}"
+				class="sidebar-item list-link">
+				<a>
+					<span class="ellipsis">{{ item.label }}</span>
+					<span class="badge"></span>
+				</a>
+			</li>
+			{% } %}
+		</ul>
+	</div>
+	<div class="col-sm-9 details"></div>
+<div>

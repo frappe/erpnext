@@ -1,6 +1,25 @@
+@import "../../../../frappe/frappe/public/less/variables.less";
+
 .call-popup {
+	.modal-body {
+		padding: 0px 15px;
+	}
+	.layout-side-section {
+		height: 425px;
+		padding: 0px;
+		overflow-y: auto;
+		border-right: 1px solid @border-color;
+	}
 	a:hover {
 		text-decoration: underline;
+	}
+	.details {
+		padding-top: 10px;
+		.sidebar-item {
+			.active {
+				background-color: @panel-bg;
+			}
+		}
 	}
 	.for-description {
 		max-height: 250px;

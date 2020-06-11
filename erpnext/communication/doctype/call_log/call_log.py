@@ -8,13 +8,10 @@ from frappe import _
 from frappe.model.document import Document
 from erpnext.crm.doctype.utils import get_scheduled_employees_for_popup, strip_number
 from frappe.contacts.doctype.contact.contact import get_contact_with_phone_number
-from erpnext.crm.doctype.lead.lead import get_lead_with_phone_number
 
 class CallLog(Document):
 	def before_insert(self):
-		number = strip_number(self.get('from'))
-		self.contact = get_contact_with_phone_number(number)
-		self.lead = get_lead_with_phone_number(number)
+		self.set_caller_information()
 
 	def after_insert(self):
 		self.trigger_call_popup()
@@ -26,6 +23,10 @@ class CallLog(Document):
 			frappe.publish_realtime('call_{id}_disconnected'.format(id=self.id), self)
 		elif doc_before_save.to != self.to:
 			self.trigger_call_popup()
+
+	def set_caller_information(self):
+		number = strip_number(self.get('from'))
+		self.contact = get_contact_with_phone_number(number)
 
 	def trigger_call_popup(self):
 		scheduled_employees = get_scheduled_employees_for_popup(self.medium)
@@ -63,33 +64,96 @@ def get_employees_with_number(number):
 	return employee_emails
 
 def set_caller_information(doc, state):
-	'''Called from hooks on creation of Lead or Contact'''
-	if doc.doctype not in ['Lead', 'Contact']: return
+	'''Called from hooks on creation of Contact'''
+	pass
+	# if doc.doctype not in ['Lead', 'Contact']: return
 
-	numbers = [doc.get('phone'), doc.get('mobile_no')]
-	# contact for Contact and lead for Lead
-	fieldname = doc.doctype.lower()
+	# numbers = [doc.get('phone'), doc.get('mobile_no')]
+	# # contact for Contact and lead for Lead
+	# fieldname = doc.doctype.lower()
 
-	# contact_name or lead_name
-	display_name_field = '{}_name'.format(fieldname)
+	# # contact_name or lead_name
+	# display_name_field = '{}_name'.format(fieldname)
 
-	# Contact now has all the nos saved in child table
-	if doc.doctype == 'Contact':
-		numbers = [d.phone for d in doc.phone_nos]
+	# # Contact now has all the nos saved in child table
+	# if doc.doctype == 'Contact':
+	# 	numbers = [d.phone for d in doc.phone_nos]
 
-	for number in numbers:
-		number = strip_number(number)
-		if not number: continue
+	# for number in numbers:
+	# 	number = strip_number(number)
+	# 	if not number: continue
 
-		filters = frappe._dict({
-			'from': ['like', '%{}'.format(number)],
-			fieldname: ''
-		})
+	# 	filters = frappe._dict({
+	# 		'from': ['like', '%{}'.format(number)],
+	# 		fieldname: ''
+	# 	})
 
-		logs = frappe.get_all('Call Log', filters=filters)
+	# 	logs = frappe.get_all('Call Log', filters=filters)
 
-		for log in logs:
-			frappe.db.set_value('Call Log', log.name, {
-				fieldname: doc.name,
-				display_name_field: doc.get_title()
-			}, update_modified=False)
+	# 	for log in logs:
+	# 		frappe.db.set_value('Call Log', log.name, {
+	# 			fieldname: doc.name,
+	# 			display_name_field: doc.get_title()
+	# 		}, update_modified=False)
+
+def link_call_logs(doctype, docname):
+	logs = frappe.get_all('Dynamic Link', fields=['parent'], filters={
+		'parenttype': 'Call Log',
+		'link_doctype': doctype,
+		'link_name': docname
+	})
+
+	logs = [log.parent for log in logs]
+
+	logs = frappe.get_all('Call Log', fields=['name', '`from`', '`to`', '`type`'], filters={
+		'name': ['in', logs]
+	})
+
+	for log in logs:
+		log.content = "<a href='#'>{} call from {} to {}</a>".format(log.type or 'Incoming', log.get('from'), log.to)
+
+	return logs
+
+@frappe.whitelist()
+def get_caller_activities(number):
+	activities = {
+		'issues': []
+	}
+	number = strip_number(number)
+	contact = get_contact_with_phone_number(number)
+
+	if not contact:
+		return activities
+
+	contact_doc = frappe.get_doc('Contact', contact)
+
+	for link in contact_doc.links:
+		if link.link_doctype == 'Customer':
+			activities['issues'].extend(get_issues_by_customer(link.link_name))
+		if link.link_doctype == 'Lead':
+			activities['issues'].extend(get_issues_by_lead(link.link_name))
+
+	return activities
+
+def get_issues_by_customer(customer):
+	issues = frappe.get_all('Issue', {
+		'customer': customer
+	})
+	return issues
+
+def get_issues_by_lead(lead):
+	issues = frappe.get_all('Issue', {
+		'lead': lead
+	})
+	return issues
+
+@frappe.whitelist()
+def link_issue(call_id, issue):
+	doc = frappe.get_doc('Call Log', call_id)
+
+	doc.append('links', {
+		'link_doctype': 'Issue',
+		'link_name': issue
+	})
+
+	doc.save(ignore_permissions=True)
