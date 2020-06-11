@@ -253,9 +253,6 @@ doc_events = {
 		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information",
 		"validate": "erpnext.crm.utils.update_lead_phone_numbers"
 	},
-	"Lead": {
-		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information"
-	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
 	}
@@ -539,3 +536,7 @@ global_search_doctypes = {
 		{'doctype': 'Hotel Room Type', 'index': 4}
 	]
 }
+
+additional_timeline_content = [
+	'erpnext.communication.doctype.call_log.call_log.link_call_logs'
+]

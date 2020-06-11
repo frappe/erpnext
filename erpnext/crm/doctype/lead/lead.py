@@ -362,15 +362,3 @@ def make_lead_from_communication(communication, ignore_communication_links=False
 
 	link_communication_to_document(doc, "Lead", lead_name, ignore_communication_links)
 	return lead_name
-
-def get_lead_with_phone_number(number):
-	if not number: return
-
-	leads = frappe.get_all('Lead', or_filters={
-		'phone': ['like', '%{}'.format(number)],
-		'mobile_no': ['like', '%{}'.format(number)]
-	}, limit=1)
-
-	lead = leads[0].name if leads else None
-
-	return lead
