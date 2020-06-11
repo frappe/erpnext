@@ -15,7 +15,7 @@
  ],
  "fields": [
   {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "priority",
    "fieldtype": "Link",
    "in_list_view": 1,
