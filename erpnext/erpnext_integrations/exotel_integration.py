@@ -95,7 +95,7 @@ def make_a_call(to_number, caller_id=None):
 			'From': cell_number,
 			'To': to_number,
 			'CallerId': caller_id,
-			'Record': frappe.db.get_single_value('Exotel Settings', 'record_call', True)
+			'Record': 'true' if frappe.db.get_single_value('Exotel Settings', 'record_call', True) else 'false'
 		})
 		response.raise_for_status()
 	except requests.exceptions.HTTPError as e:
