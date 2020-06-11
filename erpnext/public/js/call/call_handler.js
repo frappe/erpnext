@@ -82,7 +82,8 @@ class CallHandler {
 			if (['completed', 'failed', 'busy', 'no-answer'].includes(status)) {
 				this.set_call_as_complete();
 			}
-		}).catch(() => {
+		}).catch(e => {
+			console.log(e);
 			this.set_call_as_complete();
 		});
 	}

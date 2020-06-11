@@ -205,7 +205,8 @@ class CallPopup {
 					fieldname: 'issue',
 					options: 'Issue',
 				},
-				render_input: 1,
+				render_input: true,
+				only_input: false,
 				parent: this.caller_activities.find('.search'),
 			});
 		});
@@ -224,8 +225,7 @@ class CallPopup {
 				'call_id': this.call_log.id,
 				'issue': issue_name
 			}).then(() => {
-				$el.removeAttr('data-action');
-				$el.replaceWith('<span>Linked</span>');
+				$el.replaceWith(`<span>${__('Linked')}</span>`);
 			});
 		});
 	}
