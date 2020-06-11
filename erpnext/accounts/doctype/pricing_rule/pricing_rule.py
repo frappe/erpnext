@@ -99,7 +99,7 @@ class PricingRule(Document):
 				self.same_item = 1
 
 	def validate_max_discount(self):
-		if self.rate_or_discount == "Discount Percentage" and self.items:
+		if self.rate_or_discount == "Discount Percentage" and self.get("items"):
 			for d in self.items:
 				max_discount = frappe.get_cached_value("Item", d.item_code, "max_discount")
 				if max_discount and flt(self.discount_percentage) > flt(max_discount):

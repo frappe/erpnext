@@ -60,6 +60,8 @@
   "default_shift",
   "salary_information",
   "salary_mode",
+  "payroll_cost_center",
+  "column_break_52",
   "bank_name",
   "bank_ac_no",
   "health_insurance_section",
@@ -783,13 +785,25 @@
   {
    "fieldname": "column_break_19",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "department.payroll_cost_center",
+   "fetch_if_empty": 1,
+   "fieldname": "payroll_cost_center",
+   "fieldtype": "Link",
+   "label": "Payroll Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "column_break_52",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2020-04-08 12:25:34.306695",
+ "modified": "2020-05-05 18:51:03.152503",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

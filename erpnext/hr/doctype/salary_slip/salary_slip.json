@@ -12,6 +12,7 @@
   "department",
   "designation",
   "branch",
+  "payroll_cost_center",
   "column_break1",
   "status",
   "journal_entry",
@@ -459,13 +460,22 @@
    "options": "Salary Slip",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "employee.payroll_cost_center",
+   "fetch_if_empty": 1,
+   "fieldname": "payroll_cost_center",
+   "fieldtype": "Link",
+   "label": "Payroll Cost Center",
+   "options": "Cost Center",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-14 20:02:53.159827", 
+ "modified": "2020-05-05 18:55:26.173629",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Slip",
