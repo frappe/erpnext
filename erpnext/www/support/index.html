@@ -1,155 +1,55 @@
 {% extends "templates/web.html" %}
 
 {% block content %}
-<section class="jumbotron bg-light">
-	<div class='container {{ align_greeting }}'>
-		<h1 class="h1">{{ _(greeting_text) }}</h1>
-		<p class="mt-4">
-			<div class="input-group shadow-sm {{ align_search_box }}">
-				<form action="/search_help" class="search-input">
-				<input name='q' class="form-control py-2 border-right-0 border" type="Text"
-				value='{{ frappe.form_dict.q or ''}}'
-				{% if not frappe.form_dict.q %}placeholder="{{ _("Search for help articles and more") }}"{% endif %}>
-				<span class="input-group-append">
-					<div class="border input-group-text bg-white"><i class="fa fa-search text-muted"></i></div>
-				</span>
-				</form>
-			</div>
-		</p>
+<section class="section section-padding-top section-padding-bottom">
+	<div class='container'>
+		<div class="hero-content">
+			<h1 class="h1">{{ _(greeting_title) or _("We're here to help") }}</h1>
+			<p class="hero-subtitle">{{ greeting_subtitle or _("Browse help topics.") }}</p>
+		</div>
 	</div>
 </section>
 
 {% if favorite_article_list %}
-<div class='container mb-5'>
-	<h3 class="h3 pb-3">{{ _("Frequently Read Articles") }}</h3>
-	<div class="row row-cols-1 row-cols-md-3">
-		{% for favorite_article in favorite_article_list %}
-		<div class="col mb-4">
-			<div class="card">
-				<div class="card-body">
-					<h5 class="card-title">{{ favorite_article['title'] }}</h5>
-					<h6 class="card-subtitle mb-2 text-muted">{{ favorite_article['category'] }}</h6>
-					<p class="card-text">{{ favorite_article['description'] }}</p>
-					<a href="{{ favorite_article['route'] }}" class="card-link">Read More</a>
+<section class="section section-padding-top section-padding-bottom">
+	<div class='container'>
+		<h3>{{ _("Frequently Read Articles") }}</h3>
+		<div class="row">
+			{% for favorite_article in favorite_article_list %}
+				<div class="mt-4 col-12 col-sm-6 col-lg-4">
+					<div class="card card-md h-100">
+						<div class="card-body">
+							<h6 class="card-subtitle mb-2 text-uppercase small text-muted">{{ favorite_article['category'] }}</h6>
+							<h3 class="card-title">{{ favorite_article['title'] }}</h3>
+							<p class="card-text">{{ favorite_article['description'] }}</p>
+						</div>
+						<a href="{{ favorite_article['route'] }}" class="stretched-link"></a>
+					</div>
 				</div>
-			</div>
+			{% endfor %}
 		</div>
-		{% endfor %}
 	</div>
-</div>
+</section>
 {% endif %}
 
 {% if help_article_list %}
-<div class='container mb-5'>
-	<h3 class="h3 pb-3">{{ _("Help Articles") }}</h3>
-	<div class="row row-cols-1 row-cols-md-3">
-		{% for item in help_article_list %}
-		<div class="col mb-4 text-truncate">
-			<h5 class="list">{{ item['category'].name }}</h5>
-			<div class="list">
-				{% for article in item['articles'] %}
-				<a href="{{ article.route }}" class="d-block">{{ article.title }}</a>
-				{% endfor %}
+<section class="section section-padding-top section-padding-bottom bg-light">
+	<div class='container'>
+		<h3>{{ _("Help Articles") }}</h3>
+		<div class="row">
+			{% for item in help_article_list %}
+			<div class="mt-5 col-12 col-sm-6 col-lg-4">
+				<h5>{{ item['category'].name }}</h5>
+				<div>
+					{% for article in item['articles'] %}
+					<a href="{{ article.route }}" class="mt-2 d-block">{{ article.title }}</a>
+					{% endfor %}
+				</div>
 			</div>
+			{% endfor %}
 		</div>
-		{% endfor %}
 	</div>
-</div>
+</section>
 {% endif %}
-
-{% if get_started_sections %}
-	{% for section in get_started_sections %}
-	<div class="container mb-30">
-		<h2>{{ section["name"] }}</h2>
-		{% for item in section["items"] %}
-		<div class="m-20-0">
-			<a href="{{ item.link }}"><b>{{ item.title }}</b></a>
-			{% if item.description -%}
-			<p>{{ item.description }}</p>
-			{%- endif %}
-		</div>
-		{% endfor %}
-		<p><a href="/kb/support">{{ _("See All Articles") }}</a></p>
-		<hr>
-	</div>
-	{% endfor %}
-{% endif %}
-
-{% if topics %}
-<div class="container mb-30">
-	<h2>{{ _("Forum Activity") }}</h2>
-	{% for topic in topics %}
-	<div class="m-20-0">
-		<a href="{{ topic[post_params.link] }}">
-			<b>{{ topic[post_params.title] }}</b>
-		</a>
-		{% if topic[post_params.description] -%}
-		<p>{{ topic[post_params.description] }}</p>
-		{%- endif %}
-	</div>
-	{% endfor %}
-	<p><a href="{{ forum_url }}">{{ _("Visit the forums") }}</a></p>
-	<hr>
-</div>
-{% endif %}
-
-{% if issues | len > 0 -%}
-<div class="container mb-30">
-	<h2>{{ _("Your tickets") }}</h2>
-		{% for doc in issues %}
-			{% include "templates/includes/issue_row.html" %}
-		{% endfor %}
-	<p><a href="/issues">{{ _("See all open tickets") }}</a></p>
-	<a href="/issues?new=1" class="btn btn-primary btn-new btn-sm">
-		{{ _("Open a new ticket") }}
-	</a>
-</div>
-{%- endif %}
-
-<style>
-	.card-text {
-		height: 80px;
-	}
-
-	.list {
-		padding: 0 10px;
-	}
-
-	.jumbotron {
-		height: 400px;
-	}
-	
-	.search-input {
-		width: 100%; 
-		display: flex;
-	}
-
-	.text-end {
-		text-align: end;
-	}
-
-	.search-input-alignment-left {
-		width: 50%;
-	}
-
-	.search-input-alignment-center {
-		width: 50%;
-		margin-left: 25%;
-	}
-
-	.search-input-alignment-right {
-		width: 50%;
-		margin-left: 50%;
-	}
-
-	.mb-30 {
-		margin-bottom: 30px;
-	}
-
-	.m-20-0 {
-		margin: 20px 0;
-	}
-
-</style>
 
 {% endblock %}

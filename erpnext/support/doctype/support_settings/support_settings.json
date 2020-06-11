@@ -23,11 +23,12 @@
   "post_route_key",
   "post_route_string",
   "support_portal_settings_section",
-  "greeting_text",
+  "greeting_title",
   "column_break_21",
-  "greeting_text_and_search_bar_alignment",
+  "greeting_subtitle",
   "search_apis_sb",
-  "search_apis"
+  "search_apis",
+  "data_25"
  ],
  "fields": [
   {
@@ -139,31 +140,36 @@
    "show_seconds": 1
   },
   {
-   "fieldname": "greeting_text",
-   "fieldtype": "Data",
-   "label": "Greeting Text",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "default": "Left",
-   "fieldname": "greeting_text_and_search_bar_alignment",
-   "fieldtype": "Select",
-   "label": "Greeting Text and Search Bar Alignment",
-   "options": "Left\nCenter\nRight",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
    "fieldname": "column_break_21",
    "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "data_25",
+   "fieldtype": "Data",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "greeting_title",
+   "fieldtype": "Data",
+   "label": "Greeting Title",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "default": "Browse help topics.",
+   "fieldname": "greeting_subtitle",
+   "fieldtype": "Data",
+   "label": "Greeting Subtitle",
    "show_days": 1,
    "show_seconds": 1
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-06-09 13:30:37.879883",
+ "modified": "2020-06-11 12:38:26.402606",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support Settings",
