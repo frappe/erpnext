@@ -11,14 +11,19 @@ def get_context(context):
 	context.greeting_subtitle = setting.greeting_subtitle
 	
 	# Support content
-	context.favorite_article_list=[]
-	context.help_article_list=[]
-	context.category_list = frappe.get_all("Help Category", fields="name")
+	latest_articles = None
 	favorite_articles = get_favorite_articles_by_page_view()
-	if not favorite_articles or len(favorite_articles) < 3:
-		favorite_articles = get_latest_articles()
-	
-	set_favorite_articles(context, favorite_articles)
+	if len(favorite_articles) < 6:
+		title_list = []
+		if favorite_articles:
+			for article in favorite_articles:
+				title_list.append(article.title)
+		latest_articles = frappe.get_all("Help Article", 
+		fields=["title", "content", "route", "category"], 
+		filters={"title": ['not in', tuple(title_list)], "published": 1}, 
+		order_by="creation desc", limit=(6-len(favorite_articles)))
+
+	set_favorite_articles(context, favorite_articles, latest_articles)
 
 	set_help_article_list(context)
 
@@ -41,38 +46,33 @@ def get_favorite_articles_by_page_view():
 			LIMIT 6;
 			""", as_dict=True)
 
-def get_latest_articles():
-	return frappe.db.sql(
-		"""
-		SELECT 
-			title,
-			content,
-			route,
-			category
-		FROM `tabHelp Article`
-		WHERE published=1
-		ORDER BY creation DESC
-		LIMIT 6;
-		""", as_dict=True)
-
-def set_favorite_articles(context, favorite_articles):
+def set_favorite_articles(context, favorite_articles, latest_articles):
+	context.favorite_article_list=[]
 	for article in favorite_articles:
-		description = frappe.utils.strip_html(article.content)
-		if len(description) > 150:
-			description = description[:150] + '...'
-		favorite_article_dict = {
-					'title': article.title,
-					'description': description,
-					'route': article.route,
-					'category': article.category,
-				}
-		context.favorite_article_list.append(favorite_article_dict)
+		set_article(context, article)
+	for article in latest_articles:
+		set_article(context, article)
+
+def set_article(context, article):
+	description = frappe.utils.strip_html(article.content)
+	if len(description) > 175:
+		description = description[:172] + '...'
+	favorite_article_dict = {
+				'title': article.title,
+				'description': description,
+				'route': article.route,
+				'category': article.category,
+			}
+	context.favorite_article_list.append(favorite_article_dict)
 
 def set_help_article_list(context):
+	context.help_article_list=[]
+	context.category_list = frappe.get_all("Help Category", fields="name")
 	for category in context.category_list:
-		help_articles = frappe.get_all("Help Article", fields="*", filters={"category": category.name}, order_by="modified desc", limit=5)
-		help_aricles_per_caetgory = {
-			'category': category,
-			'articles': help_articles,
-		}
-		context.help_article_list.append(help_aricles_per_caetgory)
+		help_articles = frappe.get_all("Help Article", fields="*", filters={"category": category.name, "published": 1}, order_by="modified desc", limit=5)
+		if help_articles:
+			help_aricles_per_caetgory = {
+				'category': category,
+				'articles': help_articles,
+			}
+			context.help_article_list.append(help_aricles_per_caetgory)
