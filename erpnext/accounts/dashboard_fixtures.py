@@ -9,11 +9,15 @@ from erpnext.accounts.utils import get_fiscal_year, get_account_name, FiscalYear
 
 def _get_fiscal_year(date=None):
 	try:
-		fiscal_year = get_fiscal_year(date=nowdate())
+		fiscal_year = get_fiscal_year(date=nowdate(), as_dict=True)
+		return fiscal_year
+
 	except FiscalYearError:
 		#if no fiscal year for current date then get default fiscal year
 		try:
-			fiscal_year = get_fiscal_year()
+			fiscal_year = get_fiscal_year(as_dict=True)
+			return fiscal_year
+
 		except FiscalYearError:
 			#if still no fiscal year found then no accounting data created, return
 			return None
@@ -77,8 +81,8 @@ def get_charts(fiscal_year):
 			"filters_json": json.dumps({
 				"company": company.name,
 				"filter_based_on": "Fiscal Year",
-				"from_fiscal_year": fiscal_year[0],
-				"to_fiscal_year": fiscal_year[0],
+				"from_fiscal_year": fiscal_year.get('name'),
+				"to_fiscal_year": fiscal_year.get('name'),
 				"periodicity": "Monthly",
 				"include_default_book_entries": 1
 			}),
@@ -174,8 +178,8 @@ def get_charts(fiscal_year):
 			"report_name": "Budget Variance Report",
 			"filters_json": json.dumps({
 				"company": company.name,
-				"from_fiscal_year": fiscal_year[0],
-				"to_fiscal_year": fiscal_year[0],
+				"from_fiscal_year": fiscal_year.get('name'),
+				"to_fiscal_year": fiscal_year.get('name'),
 				"period": "Monthly",
 				"budget_against": "Cost Center"
 			}),
@@ -208,8 +212,8 @@ def get_charts(fiscal_year):
 
 def get_number_cards(fiscal_year):
 
-	year_start_date = get_date_str(fiscal_year[1])
-	year_end_date = get_date_str(fiscal_year[2])
+	year_start_date = get_date_str(fiscal_year.get("year_start_date"))
+	year_end_date = get_date_str(fiscal_year.get("year_end_date"))
 	return [
 		{
 			"doctype": "Number Card",
