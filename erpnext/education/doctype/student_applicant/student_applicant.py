@@ -6,7 +6,7 @@ from __future__ import print_function, unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate
+from frappe.utils import getdate, add_years, nowdate
 
 class StudentApplicant(Document):
 	def autoname(self):
@@ -31,7 +31,12 @@ class StudentApplicant(Document):
 	def validate(self):
 		self.validate_dates()
 		self.title = " ".join(filter(None, [self.first_name, self.middle_name, self.last_name]))
+		frappe.msgprint("CHeck 1")
+		print("student_admission : ", self.student_admission)
+		print("program : ", self.program)
+		print("date_of_birth : ", self.date_of_birth)
 		if self.student_admission and self.program and self.date_of_birth:
+			frappe.msgprint("CHeck 2")
 			self.validation_from_student_admission()
 
 	def validate_dates(self):
@@ -49,10 +54,11 @@ class StudentApplicant(Document):
 
 	def validation_from_student_admission(self):
 		student_admission = get_student_admission_data(self.student_admission, self.program)
-
+		print("------------------------- TEST -------------------------")
+		frappe.msgprint("COOl")
 		# different validation for minimum and maximum age so that either min/max can also work independently.
-		if student_admission and student_admission.minimum_age and \
-			getdate(student_admission.minimum_age) < getdate(self.date_of_birth):
+		if student_admission and student_admission.min_age and \
+			getdate(add_years(nowdate(), student_admission.min_age)) < getdate(self.date_of_birth):
 				frappe.throw(_("Not eligible for the admission in this program as per DOB"))
 
 		if student_admission and student_admission.maximum_age and \
