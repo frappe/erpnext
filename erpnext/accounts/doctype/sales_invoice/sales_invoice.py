@@ -334,7 +334,7 @@ class SalesInvoice(SellingController):
 				validate_against_credit_limit = True
 				break
 		if validate_against_credit_limit:
-			check_credit_limit(self.customer, self.company, bypass_credit_limit_check_at_sales_order)
+			check_credit_limit(self.customer, self.company,  self.doctype, self.name, bypass_credit_limit_check_at_sales_order)
 
 	def set_missing_values(self, for_validate=False):
 		pos = self.set_pos_fields(for_validate)

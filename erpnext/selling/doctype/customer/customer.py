@@ -370,8 +370,9 @@ def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
 		("%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, start, page_len))
 
 
-def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, extra_amount=0):
+def check_credit_limit(customer, company, reference_doctype, reference_document, ignore_outstanding_sales_order=False, extra_amount=0):
 	customer_outstanding = get_customer_outstanding(customer, company, ignore_outstanding_sales_order)
+	document_info = get_customer_outstanding(customer, company, ignore_outstanding_sales_order)
 	if extra_amount > 0:
 		customer_outstanding += flt(extra_amount)
 
@@ -408,7 +409,8 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 						'customer': customer,
 						'customer_outstanding': customer_outstanding,
 						'credit_limit': credit_limit,
-						'credit_controller_users_list': credit_controller_users_list
+						'credit_controller_users_list': credit_controller_users_list,
+						'document_link': frappe.utils.get_link_to_form(reference_doctype, reference_document)
 					}
 				}
 			)
@@ -417,9 +419,10 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 def send_emails(args):
 	args = json.loads(args)
 	subject = (_("Credit limit reached for customer {0}").format(args.get('customer')))
-	message = (_("Credit limit has been crossed for customer {0} ({1}/{2})")
-			.format(args.get('customer'), args.get('customer_outstanding'), args.get('credit_limit')))
-	frappe.sendmail(recipients=[args.get('credit_controller_users_list')], subject=subject, message=message)
+	message = (_("Credit limit has been crossed for customer {0} ({1}/{2})<br>\
+		Document Link:{3}")
+			.format(args.get('customer'), args.get('customer_outstanding'), args.get('credit_limit'), args.get('document_link')))
+	frappe.sendmail(recipients=args.get('credit_controller_users_list'), subject=subject, message=message)
 
 def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):
 	# Outstanding based on GL Entries
