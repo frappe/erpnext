@@ -15,8 +15,8 @@ def get_data():
 	if not fiscal_year:
 		return frappe._dict()
 
-	year_start_date = get_date_str(fiscal_year[1])
-	year_end_date = get_date_str(fiscal_year[2])
+	year_start_date = get_date_str(fiscal_year.get('year_start_date'))
+	year_end_date = get_date_str(fiscal_year.get('year_end_date'))
 
 	return frappe._dict({
 		"dashboards": get_dashboards(),
@@ -59,8 +59,8 @@ def get_charts(fiscal_year, year_start_date, year_end_date):
 				"company": company,
 				"status": "In Location",
 				"filter_based_on": "Fiscal Year",
-				"from_fiscal_year": fiscal_year[0],
-				"to_fiscal_year": fiscal_year[0],
+				"from_fiscal_year": fiscal_year.get('name'),
+				"to_fiscal_year": fiscal_year.get('name'),
 				"period_start_date": year_start_date,
 				"period_end_date": year_end_date,
 				"date_based_on": "Purchase Date",
