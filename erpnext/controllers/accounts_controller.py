@@ -1134,7 +1134,7 @@ def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname,
 	child_item.item_name = item.item_name
 	child_item.description = item.description
 	child_item.delivery_date = trans_item.get('delivery_date') or p_doc.delivery_date
-	child_item.conversion_factor = flt(d.get('conversion_factor')) or get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
+	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.uom = item.stock_uom
 	child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
 	if not child_item.warehouse:
@@ -1154,7 +1154,7 @@ def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docna
 	child_item.item_name = item.item_name
 	child_item.description = item.description
 	child_item.schedule_date = trans_item.get('schedule_date') or p_doc.schedule_date
-	child_item.conversion_factor = flt(d.get('conversion_factor')) or get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
+	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.uom = item.stock_uom
 	child_item.base_rate = 1 # Initiallize value will update in parent validation
 	child_item.base_amount = 1 # Initiallize value will update in parent validation
@@ -1234,7 +1234,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 				prev_date, new_date = child_item.get("schedule_date") == d.get("schedule_date")
 
 			rate_unchanged = prev_rate == new_rate
-			qty_unchanged = prev_qty == prev_qty
+			qty_unchanged = prev_qty == new_qty
 			conversion_factor_unchanged = prev_con_fac == new_con_fac
 			date_unchanged = prev_date == new_date if prev_date and new_date else False # in case of delivery note etc
 			if rate_unchanged and qty_unchanged and conversion_factor_unchanged and date_unchanged:
@@ -1250,13 +1250,16 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 						 .format(child_item.idx, child_item.item_code))
 		else:
 			child_item.rate = flt(d.get("rate"))
-		
+
 		if d.get("conversion_factor"):
-			child_item.conversion_factor = flt(d.get('conversion_factor'))
+			if child_item.stock_uom == child_item.uom:
+				child_item.conversion_factor = 1
+			else:
+				child_item.conversion_factor = flt(d.get('conversion_factor'))
 
 		if d.get("delivery_date") and parent_doctype == 'Sales Order':
 			child_item.delivery_date = d.get('delivery_date')
-		
+
 		if d.get("schedule_date") and parent_doctype == 'Purchase Order':
 			child_item.schedule_date = d.get('schedule_date')
 
