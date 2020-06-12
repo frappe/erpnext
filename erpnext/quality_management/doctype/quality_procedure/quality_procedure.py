@@ -10,7 +10,7 @@ from frappe import _
 class QualityProcedure(NestedSet):
 	nsm_parent_field = 'parent_quality_procedure'
 
-	def before_save(self):
+	def on_save(self):
 		for process in self.processes:
 			if process.procedure:
 				doc = frappe.get_doc("Quality Procedure", process.procedure)
@@ -23,6 +23,11 @@ class QualityProcedure(NestedSet):
 
 	def after_insert(self):
 		self.set_parent()
+		#if Child is Added through Tree View.
+		if self.parent_quality_procedure:
+			parent_quality_procedure = frappe.get_doc("Quality Procedure", self.parent_quality_procedure)
+			parent_quality_procedure.append("processes", {"procedure": self.name})
+			parent_quality_procedure.save()
 
 	def on_trash(self):
 		if self.parent_quality_procedure:
