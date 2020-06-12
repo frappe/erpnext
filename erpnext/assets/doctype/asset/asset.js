@@ -387,7 +387,8 @@ frappe.ui.form.on('Asset', {
 		}
 		frm.set_value('gross_purchase_amount', item.base_net_rate + item.item_tax_amount);
 		frm.set_value('purchase_receipt_amount', item.base_net_rate + item.item_tax_amount);
-		frm.set_value('location', item.asset_location);
+		item.asset_location && frm.set_value('location', item.asset_location);
+		frm.set_value('cost_center', item.cost_center || purchase_doc.cost_center);
 	},
 
 	set_depreciation_rate: function(frm, row) {

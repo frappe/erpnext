@@ -53,7 +53,7 @@ frappe.query_reports["General Ledger"] = {
 			"label": __("Voucher No"),
 			"fieldtype": "Data",
 			on_change: function() {
-				frappe.query_report.set_filter_value('group_by', "");
+				frappe.query_report.set_filter_value('group_by', "Group by Voucher (Consolidated)");
 			}
 		},
 		{
@@ -164,12 +164,5 @@ frappe.query_reports["General Ledger"] = {
 	]
 }
 
-erpnext.dimension_filters.forEach((dimension) => {
-	frappe.query_reports["General Ledger"].filters.splice(15, 0 ,{
-		"fieldname": dimension["fieldname"],
-		"label": __(dimension["label"]),
-		"fieldtype": "Link",
-		"options": dimension["document_type"]
-	});
-});
+erpnext.utils.add_dimensions('General Ledger', 15)
 
