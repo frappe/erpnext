@@ -187,7 +187,7 @@ def get_fifo_queue(filters, sle=None):
 						transferred_item_details[(d.voucher_no, d.name)].append(fifo_queue.pop(0))
 					else:
 						# all from current batch
-						flt(batch[0]) -= qty_to_pop
+						batch[0] -= qty_to_pop
 						transferred_item_details[(d.voucher_no, d.name)].append([qty_to_pop, batch[1]])
 						qty_to_pop = 0
 
