@@ -5,8 +5,9 @@ from __future__ import unicode_literals
 import frappe
 import frappe.share
 from frappe import _
-from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_link_to_form
+from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_datetime, get_link_to_form
 from erpnext.controllers.status_updater import StatusUpdater
+from erpnext.accounts.utils import get_fiscal_year
 
 from six import string_types
 
@@ -27,6 +28,8 @@ class TransactionBase(StatusUpdater):
 				get_time(self.posting_time)
 			except ValueError:
 				frappe.throw(_('Invalid Posting Time'))
+
+		self.validate_with_last_transaction_posting_time()
 
 	def add_calendar_event(self, opts, force=False):
 		if cstr(self.contact_by) != cstr(self._prev.contact_by) or \
@@ -126,7 +129,7 @@ class TransactionBase(StatusUpdater):
 						frappe.msgprint(_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4}) ")
 							.format(d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate))
 						frappe.throw(_("To allow different rates, disable the {0} checkbox in {1}.")
-							.format(frappe.bold("Maintain Same Rate Throughout Sales Cycle"), 
+							.format(frappe.bold(_("Maintain Same Rate Throughout Sales Cycle")),
 							get_link_to_form("Selling Settings", "Selling Settings", frappe.bold("Selling Settings"))))
 
 	def get_link_filters(self, for_doctype):
@@ -147,6 +150,30 @@ class TransactionBase(StatusUpdater):
 			ret = None
 
 		return ret
+
+	def validate_with_last_transaction_posting_time(self):
+
+		if self.doctype not in ["Sales Invoice", "Purchase Invoice", "Stock Entry", "Stock Reconciliation",
+			"Delivery Note", "Purchase Receipt", "Fees"]:
+				return
+
+		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
+			if not (self.get("update_stock") or self.get("is_pos")):
+				return
+
+		fiscal_year = get_fiscal_year(self.get('posting_date'), as_dict=True).name
+
+		last_transaction_time = frappe.db.sql("""
+			select MAX(timestamp(posting_date, posting_time)) as posting_time
+			from `tabStock Ledger Entry`
+			where docstatus = 1""")[0][0]
+
+		cur_doc_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")
+
+		if last_transaction_time and get_datetime(cur_doc_posting_datetime) < get_datetime(last_transaction_time):
+			frappe.throw(_("""Posting timestamp of current transaction
+				must be after last Stock transaction's timestamp which is {0}""").format(frappe.bold(last_transaction_time)),
+				title=_("Backdated Stock Entry"))
 
 def delete_events(ref_type, ref_name):
 	events = frappe.db.sql_list(""" SELECT
@@ -179,4 +206,6 @@ def validate_uom_is_integer(doc, uom_field, qty_fields, child_dt=None):
 				qty = d.get(f)
 				if qty:
 					if abs(cint(qty) - flt(qty)) > 0.0000001:
-						frappe.throw(_("Quantity ({0}) cannot be a fraction in row {1}").format(qty, d.idx), UOMMustBeIntegerError)
+						frappe.throw(_("Row {1}: Quantity ({0}) cannot be a fraction. To allow this, disable '{2}' in UOM {3}.") \
+							.format(qty, d.idx, frappe.bold(_("Must be Whole Number")), frappe.bold(d.get(uom_field))),
+								UOMMustBeIntegerError)

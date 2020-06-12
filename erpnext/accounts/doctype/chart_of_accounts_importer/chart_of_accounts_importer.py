@@ -152,10 +152,9 @@ def build_forest(data):
 				return [parent_account]
 			elif account_name == child:
 				parent_account_list = return_parent(data, parent_account)
-				if not parent_account_list:
+				if not parent_account_list and parent_account:
 					frappe.throw(_("The parent account {0} does not exists in the uploaded template").format(
 						frappe.bold(parent_account)))
-
 				return [child] + parent_account_list
 
 	charts_map, paths = {}, []
@@ -164,7 +163,7 @@ def build_forest(data):
 	error_messages = []
 
 	for i in data:
-		account_name, _, account_number, is_group, account_type, root_type = i
+		account_name, dummy, account_number, is_group, account_type, root_type = i
 
 		if not account_name:
 			error_messages.append("Row {0}: Please enter Account Name".format(line_no))

@@ -18,17 +18,20 @@ from frappe.utils import (flt, getdate, get_first_day, add_months, add_days, for
 from six import itervalues
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
-def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_values=False,
-	company=None, reset_period_on_fy_change=True):
+def get_period_list(from_fiscal_year, to_fiscal_year, period_start_date, period_end_date, filter_based_on, periodicity, accumulated_values=False,
+	company=None, reset_period_on_fy_change=True, ignore_fiscal_year=False):
 	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
 		Periodicity can be (Yearly, Quarterly, Monthly)"""
 
-	fiscal_year = get_fiscal_year_data(from_fiscal_year, to_fiscal_year)
-	validate_fiscal_year(fiscal_year, from_fiscal_year, to_fiscal_year)
-
-	# start with first day, so as to avoid year to_dates like 2-April if ever they occur]
-	year_start_date = getdate(fiscal_year.year_start_date)
-	year_end_date = getdate(fiscal_year.year_end_date)
+	if filter_based_on == 'Fiscal Year':
+		fiscal_year = get_fiscal_year_data(from_fiscal_year, to_fiscal_year)
+		validate_fiscal_year(fiscal_year, from_fiscal_year, to_fiscal_year)
+		year_start_date = getdate(fiscal_year.year_start_date)
+		year_end_date = getdate(fiscal_year.year_end_date)
+	else:
+		validate_dates(period_start_date, period_end_date)
+		year_start_date = getdate(period_start_date)
+		year_end_date = getdate(period_end_date)
 
 	months_to_add = {
 		"Yearly": 12,
@@ -41,6 +44,9 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_v
 
 	start_date = year_start_date
 	months = get_months(year_start_date, year_end_date)
+
+	if (months // months_to_add) != (months / months_to_add):
+		months += months_to_add
 
 	for i in range(months // months_to_add):
 		period = frappe._dict({
@@ -61,8 +67,9 @@ def get_period_list(from_fiscal_year, to_fiscal_year, periodicity, accumulated_v
 			# if a fiscal year ends before a 12 month period
 			period.to_date = year_end_date
 
-		period.to_date_fiscal_year = get_fiscal_year(period.to_date, company=company)[0]
-		period.from_date_fiscal_year_start_date = get_fiscal_year(period.from_date, company=company)[1]
+		if not ignore_fiscal_year:
+			period.to_date_fiscal_year = get_fiscal_year(period.to_date, company=company)[0]
+			period.from_date_fiscal_year_start_date = get_fiscal_year(period.from_date, company=company)[1]
 
 		period_list.append(period)
 
@@ -103,9 +110,18 @@ def get_fiscal_year_data(from_fiscal_year, to_fiscal_year):
 
 
 def validate_fiscal_year(fiscal_year, from_fiscal_year, to_fiscal_year):
-	if not fiscal_year.get('year_start_date') and not fiscal_year.get('year_end_date'):
+	if not fiscal_year.get('year_start_date') or not fiscal_year.get('year_end_date'):
+		frappe.throw(_("Start Year and End Year are mandatory"))
+
+	if getdate(fiscal_year.get('year_end_date')) < getdate(fiscal_year.get('year_start_date')):
 		frappe.throw(_("End Year cannot be before Start Year"))
 
+def validate_dates(from_date, to_date):
+	if not from_date or not to_date:
+		frappe.throw("From Date and To Date are mandatory")
+
+	if to_date < from_date:
+		frappe.throw("To Date cannot be less than From Date")
 
 def get_months(start_date, end_date):
 	diff = (12 * end_date.year + end_date.month) - (12 * start_date.year + start_date.month)
@@ -151,7 +167,7 @@ def get_data(
 
 	calculate_values(
 		accounts_by_name, gl_entries_by_account, period_list, accumulated_values, ignore_accumulated_values_for_fy)
-	accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values)
+	accumulate_values_into_parents(accounts, accounts_by_name, period_list)
 	out = prepare_data(accounts, balance_must_be, period_list, company_currency)
 	out = filter_out_zero_value_rows(out, parent_children_map)
 
@@ -191,7 +207,7 @@ def calculate_values(
 				d["opening_balance"] = d.get("opening_balance", 0.0) + flt(entry.debit) - flt(entry.credit)
 
 
-def accumulate_values_into_parents(accounts, accounts_by_name, period_list, accumulated_values):
+def accumulate_values_into_parents(accounts, accounts_by_name, period_list):
 	"""accumulate children's values in parent accounts"""
 	for d in reversed(accounts):
 		if d.parent_account:
@@ -371,11 +387,41 @@ def set_gl_entries_by_account(
 					key: value
 				})
 
+		distributed_cost_center_query = ""
+		if filters and filters.get('cost_center'):
+			distributed_cost_center_query = """
+			UNION ALL
+			SELECT posting_date,
+				account,
+				debit*(DCC_allocation.percentage_allocation/100) as debit,
+				credit*(DCC_allocation.percentage_allocation/100) as credit,
+				is_opening,
+				fiscal_year,
+				debit_in_account_currency*(DCC_allocation.percentage_allocation/100) as debit_in_account_currency,
+				credit_in_account_currency*(DCC_allocation.percentage_allocation/100) as credit_in_account_currency,
+				account_currency
+			FROM `tabGL Entry`,
+			(
+				SELECT parent, sum(percentage_allocation) as percentage_allocation
+				FROM `tabDistributed Cost Center`
+				WHERE cost_center IN %(cost_center)s
+				AND parent NOT IN %(cost_center)s
+				GROUP BY parent
+			) as DCC_allocation
+			WHERE company=%(company)s
+			{additional_conditions}
+			AND posting_date <= %(to_date)s
+			AND cost_center = DCC_allocation.parent
+			""".format(additional_conditions=additional_conditions.replace("and cost_center in %(cost_center)s ", ''))
+
 		gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
 			where company=%(company)s
 			{additional_conditions}
 			and posting_date <= %(to_date)s
-			order by account, posting_date""".format(additional_conditions=additional_conditions), gl_filters, as_dict=True) #nosec
+			{distributed_cost_center_query}
+			order by account, posting_date""".format(
+				additional_conditions=additional_conditions,
+				distributed_cost_center_query=distributed_cost_center_query), gl_filters, as_dict=True) #nosec
 
 		if filters and filters.get('presentation_currency'):
 			convert_to_presentation_currency(gl_entries, get_currency(filters))
@@ -419,7 +465,9 @@ def get_additional_conditions(from_date, ignore_closing_entries, filters):
 				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
 					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
 						filters.get(dimension.fieldname))
-				additional_conditions.append("{0} in %({0})s".format(dimension.fieldname))
+					additional_conditions.append("{0} in %({0})s".format(dimension.fieldname))
+				else:
+					additional_conditions.append("{0} in (%({0})s)".format(dimension.fieldname))
 
 	return " and {}".format(" and ".join(additional_conditions)) if additional_conditions else ""
 

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "ACC-GLE-.YYYY.-.#####",
  "creation": "2013-01-10 16:34:06",
  "doctype": "DocType",
@@ -30,7 +31,8 @@
   "company",
   "finance_book",
   "to_rename",
-  "due_date"
+  "due_date",
+  "is_cancelled"
  ],
  "fields": [
   {
@@ -114,13 +116,13 @@
    "fieldname": "debit_in_account_currency",
    "fieldtype": "Currency",
    "label": "Debit Amount in Account Currency",
-   "options": "currency"
+   "options": "account_currency"
   },
   {
    "fieldname": "credit_in_account_currency",
    "fieldtype": "Currency",
    "label": "Credit Amount in Account Currency",
-   "options": "currency"
+   "options": "account_currency"
   },
   {
    "fieldname": "against",
@@ -245,12 +247,18 @@
    "fieldname": "due_date",
    "fieldtype": "Date",
    "label": "Due Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_cancelled",
+   "fieldtype": "Check",
+   "label": "Is Cancelled"
   }
  ],
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
- "modified": "2020-02-10 04:54:57.777905",
+ "modified": "2020-04-07 16:22:33.766994",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "GL Entry",

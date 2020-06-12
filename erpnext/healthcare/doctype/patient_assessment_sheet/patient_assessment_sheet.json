@@ -1,0 +1,57 @@
+{
+ "actions": [],
+ "creation": "2020-04-19 23:07:02.220244",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "parameter",
+  "score",
+  "time",
+  "column_break_4",
+  "comments"
+ ],
+ "fields": [
+  {
+   "fieldname": "parameter",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Parameter",
+   "options": "Patient Assessment Parameter",
+   "reqd": 1
+  },
+  {
+   "fieldname": "score",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Score",
+   "reqd": 1
+  },
+  {
+   "fieldname": "time",
+   "fieldtype": "Time",
+   "label": "Time"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "comments",
+   "fieldtype": "Small Text",
+   "label": "Comments"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-04-20 09:56:28.746619",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Patient Assessment Sheet",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

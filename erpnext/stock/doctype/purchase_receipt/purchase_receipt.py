@@ -50,8 +50,8 @@ class PurchaseReceipt(BuyingController):
 			'target_field': 'received_qty',
 			'target_parent_dt': 'Material Request',
 			'target_parent_field': 'per_received',
-			'target_ref_field': 'qty',
-			'source_field': 'qty',
+			'target_ref_field': 'stock_qty',
+			'source_field': 'stock_qty',
 			'percent_join_field': 'material_request'
 		}]
 		if cint(self.is_return):
@@ -196,6 +196,7 @@ class PurchaseReceipt(BuyingController):
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
 		self.update_stock_ledger()
 		self.make_gl_entries_on_cancel()
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
 		self.delete_auto_created_batches()
 
 	def get_current_stock(self):
@@ -357,7 +358,7 @@ class PurchaseReceipt(BuyingController):
 		if warehouse_with_no_account:
 			frappe.msgprint(_("No accounting entries for the following warehouses") + ": \n" +
 				"\n".join(warehouse_with_no_account))
-		
+
 		return process_gl_map(gl_entries)
 
 	def get_asset_gl_entry(self, gl_entries):
@@ -503,7 +504,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		if len(target.get("items")) == 0:
-			frappe.throw(_("All items have already been invoiced"))
+			frappe.throw(_("All items have already been Invoiced/Returned"))
 
 		doc = frappe.get_doc(target)
 		doc.ignore_pricing_rule = 1
@@ -513,11 +514,11 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty, returned_qty = get_pending_qty(source_doc)
-		returned_qty_map[source_doc.item_code] = returned_qty
+		returned_qty_map[source_doc.name] = returned_qty
 
 	def get_pending_qty(item_row):
 		pending_qty = item_row.qty - invoiced_qty_map.get(item_row.name, 0)
-		returned_qty = flt(returned_qty_map.get(item_row.item_code, 0))
+		returned_qty = flt(returned_qty_map.get(item_row.name, 0))
 		if returned_qty:
 			if returned_qty >= pending_qty:
 				pending_qty = 0
@@ -575,13 +576,12 @@ def get_invoiced_qty_map(purchase_receipt):
 
 def get_returned_qty_map(purchase_receipt):
 	"""returns a map: {so_detail: returned_qty}"""
-	returned_qty_map = frappe._dict(frappe.db.sql("""select pr_item.item_code, sum(abs(pr_item.qty)) as qty
+	returned_qty_map = frappe._dict(frappe.db.sql("""select pr_item.purchase_receipt_item, abs(pr_item.qty) as qty
 		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
 		where pr.name = pr_item.parent
 			and pr.docstatus = 1
 			and pr.is_return = 1
 			and pr.return_against = %s
-		group by pr_item.item_code
 	""", purchase_receipt))
 
 	return returned_qty_map
@@ -628,7 +628,7 @@ def get_item_account_wise_additional_cost(purchase_document):
 
 	if not landed_cost_vouchers:
 		return
-	
+
 	item_account_wise_cost = {}
 
 	for lcv in landed_cost_vouchers:

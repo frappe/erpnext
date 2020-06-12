@@ -33,6 +33,7 @@
   "notes",
   "address_info",
   "address_html",
+  "address_type",
   "address_title",
   "address_line1",
   "address_line2",
@@ -171,7 +172,6 @@
    "options": "Customer"
   },
   {
-   "depends_on": "eval: doc.source==\"Campaign\"",
    "fieldname": "campaign_name",
    "fieldtype": "Link",
    "label": "Campaign Name",
@@ -285,8 +285,7 @@
    "depends_on": "eval: doc.__islocal",
    "fieldname": "pincode",
    "fieldtype": "Data",
-   "label": "Postal Code",
-   "options": "Country"
+   "label": "Postal Code"
   },
   {
    "fieldname": "column_break2",
@@ -304,7 +303,8 @@
    "fieldtype": "Data",
    "label": "Phone",
    "oldfieldname": "contact_no",
-   "oldfieldtype": "Data"
+   "oldfieldtype": "Data",
+   "options": "Phone"
   },
   {
    "depends_on": "eval: doc.__islocal",
@@ -312,7 +312,8 @@
    "fieldtype": "Data",
    "label": "Mobile No.",
    "oldfieldname": "mobile_no",
-   "oldfieldtype": "Data"
+   "oldfieldtype": "Data",
+   "options": "Phone"
   },
   {
    "depends_on": "eval: doc.__islocal",
@@ -433,13 +434,21 @@
    "fieldname": "contact_section",
    "fieldtype": "Section Break",
    "label": "Contact"
+  },
+  {
+   "default": "Billing",
+   "depends_on": "eval: doc.__islocal",
+   "fieldname": "address_type",
+   "fieldtype": "Select",
+   "label": "Address Type",
+   "options": "Billing\nShipping\nOffice\nPersonal\nPlant\nPostal\nShop\nSubsidiary\nWarehouse\nCurrent\nPermanent\nOther"
   }
  ],
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2019-12-24 16:00:44.239168",
+ "modified": "2020-05-11 20:27:45.868960",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -496,15 +505,6 @@
    "read": 1,
    "report": 1,
    "role": "Sales User"
-  },
-  {
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Guest",
-   "share": 1
   }
  ],
  "search_fields": "lead_name,lead_owner,status",

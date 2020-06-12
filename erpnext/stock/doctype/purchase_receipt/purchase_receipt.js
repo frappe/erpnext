@@ -25,7 +25,7 @@ frappe.ui.form.on("Purchase Receipt", {
 
 		frm.custom_make_buttons = {
 			'Stock Entry': 'Return',
-			'Purchase Invoice': 'Invoice'
+			'Purchase Invoice': 'Purchase Invoice'
 		};
 
 		frm.set_query("expense_account", "items", function() {
@@ -92,7 +92,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 	refresh: function() {
 		var me = this;
 		this._super();
-		if(this.frm.doc.docstatus===1) {
+		if(this.frm.doc.docstatus > 0) {
 			this.show_stock_ledger();
 			//removed for temporary
 			this.show_general_ledger();

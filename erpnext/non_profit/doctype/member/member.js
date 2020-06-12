@@ -2,6 +2,14 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Member', {
+	setup: function(frm) {
+		frappe.db.get_single_value("Membership Settings", "enable_razorpay").then(val => {
+			if (val && (frm.doc.subscription_id || frm.doc.customer_id)) {
+				frm.set_df_property('razorpay_details_section', 'hidden', false);
+			}
+		})
+	},
+
 	refresh: function(frm) {
 
 		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Member'};

@@ -47,6 +47,16 @@ erpnext.financial_statements = {
 		// dropdown for links to other financial statements
 		erpnext.financial_statements.filters = get_filters()
 
+		let fiscal_year = frappe.defaults.get_user_default("fiscal_year")
+
+		frappe.model.with_doc("Fiscal Year", fiscal_year, function(r) {
+			var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
+			frappe.query_report.set_filter_value({
+				period_start_date: fy.year_start_date,
+				period_end_date: fy.year_end_date
+			});
+		});
+
 		report.page.add_inner_button(__("Balance Sheet"), function() {
 			var filters = report.get_values();
 			frappe.set_route('query-report', 'Balance Sheet', {company: filters.company});
@@ -62,7 +72,7 @@ erpnext.financial_statements = {
 	}
 };
 
-function get_filters(){
+function get_filters() {
 	let filters = [
 		{
 			"fieldname":"company",
@@ -77,6 +87,37 @@ function get_filters(){
 			"label": __("Finance Book"),
 			"fieldtype": "Link",
 			"options": "Finance Book"
+		},
+		{
+			"fieldname":"filter_based_on",
+			"label": __("Filter Based On"),
+			"fieldtype": "Select",
+			"options": ["Fiscal Year", "Date Range"],
+			"default": ["Fiscal Year"],
+			"reqd": 1,
+			on_change: function() {
+				let filter_based_on = frappe.query_report.get_filter_value('filter_based_on');
+				frappe.query_report.toggle_filter_display('from_fiscal_year', filter_based_on === 'Date Range');
+				frappe.query_report.toggle_filter_display('to_fiscal_year', filter_based_on === 'Date Range');
+				frappe.query_report.toggle_filter_display('period_start_date', filter_based_on === 'Fiscal Year');
+				frappe.query_report.toggle_filter_display('period_end_date', filter_based_on === 'Fiscal Year');
+
+				frappe.query_report.refresh();
+			}
+		},
+		{
+			"fieldname":"period_start_date",
+			"label": __("Start Date"),
+			"fieldtype": "Date",
+			"hidden": 1,
+			"reqd": 1
+		},
+		{
+			"fieldname":"period_end_date",
+			"label": __("End Date"),
+			"fieldtype": "Date",
+			"hidden": 1,
+			"reqd": 1
 		},
 		{
 			"fieldname":"from_fiscal_year",
@@ -128,15 +169,6 @@ function get_filters(){
 			}
 		}
 	]
-
-	erpnext.dimension_filters.forEach((dimension) => {
-		filters.push({
-			"fieldname": dimension["fieldname"],
-			"label": __(dimension["label"]),
-			"fieldtype": "Link",
-			"options": dimension["document_type"]
-		});
-	});
 
 	return filters;
 }

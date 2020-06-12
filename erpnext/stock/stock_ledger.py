@@ -4,8 +4,8 @@ from __future__ import unicode_literals
 
 import frappe, erpnext
 from frappe import _
-from frappe.utils import cint, flt, cstr, now
-from erpnext.stock.utils import get_valuation_method
+from frappe.utils import cint, flt, cstr, now, now_datetime
+from erpnext.stock.utils import get_valuation_method, get_incoming_outgoing_rate_for_cancel
 import json
 
 from six import iteritems
@@ -16,36 +16,48 @@ class NegativeStockError(frappe.ValidationError): pass
 _exceptions = frappe.local('stockledger_exceptions')
 # _exceptions = []
 
-def make_sl_entries(sl_entries, is_amended=None, allow_negative_stock=False, via_landed_cost_voucher=False):
+def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_voucher=False):
 	if sl_entries:
 		from erpnext.stock.utils import update_bin
 
-		cancel = True if sl_entries[0].get("is_cancelled") == "Yes" else False
+		cancel = sl_entries[0].get("is_cancelled")
 		if cancel:
-			set_as_cancel(sl_entries[0].get('voucher_no'), sl_entries[0].get('voucher_type'))
+			set_as_cancel(sl_entries[0].get('voucher_type'), sl_entries[0].get('voucher_no'))
 
 		for sle in sl_entries:
 			sle_id = None
-			if sle.get('is_cancelled') == 'Yes':
-				sle['actual_qty'] = -flt(sle['actual_qty'])
+			if via_landed_cost_voucher or cancel:
+				sle['posting_date'] = now_datetime().strftime('%Y-%m-%d')
+				sle['posting_time'] = now_datetime().strftime('%H:%M:%S.%f')
+
+				if cancel:
+					sle['actual_qty'] = -flt(sle.get('actual_qty'), 0)
+
+					if sle['actual_qty'] < 0 and not sle.get('outgoing_rate'):
+						sle['outgoing_rate'] = get_incoming_outgoing_rate_for_cancel(sle.item_code,
+							sle.voucher_type, sle.voucher_no, sle.voucher_detail_no)
+						sle['incoming_rate'] = 0.0
+
+					if sle['actual_qty'] > 0 and not sle.get('incoming_rate'):
+						sle['incoming_rate'] = get_incoming_outgoing_rate_for_cancel(sle.item_code,
+							sle.voucher_type, sle.voucher_no, sle.voucher_detail_no)
+						sle['outgoing_rate'] = 0.0
+
 
 			if sle.get("actual_qty") or sle.get("voucher_type")=="Stock Reconciliation":
 				sle_id = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
 
 			args = sle.copy()
 			args.update({
-				"sle_id": sle_id,
-				"is_amended": is_amended
+				"sle_id": sle_id
 			})
 			update_bin(args, allow_negative_stock, via_landed_cost_voucher)
 
-		if cancel:
-			delete_cancelled_entry(sl_entries[0].get('voucher_type'), sl_entries[0].get('voucher_no'))
 
 def set_as_cancel(voucher_type, voucher_no):
-	frappe.db.sql("""update `tabStock Ledger Entry` set is_cancelled='Yes',
+	frappe.db.sql("""update `tabStock Ledger Entry` set is_cancelled=1,
 		modified=%s, modified_by=%s
-		where voucher_no=%s and voucher_type=%s""",
+		where voucher_type=%s and voucher_no=%s and is_cancelled = 0""",
 		(now(), frappe.session.user, voucher_type, voucher_no))
 
 def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
@@ -58,9 +70,6 @@ def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	sle.submit()
 	return sle.name
 
-def delete_cancelled_entry(voucher_type, voucher_no):
-	frappe.db.sql("""delete from `tabStock Ledger Entry`
-		where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 
 class update_entries_after(object):
 	"""
@@ -106,14 +115,17 @@ class update_entries_after(object):
 		self.stock_queue = json.loads(self.previous_sle.stock_queue or "[]")
 		self.valuation_method = get_valuation_method(self.item_code)
 		self.stock_value_difference = 0.0
-		self.build()
+		self.build(args.get('sle_id'))
 
-	def build(self):
-		# includes current entry!
-		entries_to_fix = self.get_sle_after_datetime()
-
-		for sle in entries_to_fix:
+	def build(self, sle_id):
+		if sle_id:
+			sle = get_sle_by_id(sle_id)
 			self.process_sle(sle)
+		else:
+			# includes current entry!
+			entries_to_fix = self.get_sle_after_datetime()
+			for sle in entries_to_fix:
+				self.process_sle(sle)
 
 		if self.exceptions:
 			self.raise_exceptions()
@@ -403,7 +415,10 @@ class update_entries_after(object):
 
 	def get_sle_before_datetime(self):
 		"""get previous stock ledger entry before current time-bucket"""
-		return get_stock_ledger_entries(self.args, "<", "desc", "limit 1", for_update=False)
+		if self.args.get('sle_id'):
+			self.args['name'] = self.args.get('sle_id')
+
+		return get_stock_ledger_entries(self.args, "<=", "desc", "limit 1", for_update=False)
 
 	def get_sle_after_datetime(self):
 		"""get Stock Ledger Entries after a particular datetime, for reposting"""
@@ -428,7 +443,7 @@ class update_entries_after(object):
 				frappe.get_desk_link(self.exceptions[0]["voucher_type"], self.exceptions[0]["voucher_no"]))
 
 		if self.verbose:
-			frappe.throw(msg, NegativeStockError, title='Insufficent Stock')
+			frappe.throw(msg, NegativeStockError, title='Insufficient Stock')
 		else:
 			raise NegativeStockError(msg)
 
@@ -470,9 +485,10 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 	if operator in (">", "<=") and previous_sle.get("name"):
 		conditions += " and name!=%(name)s"
 
-	return frappe.db.sql("""select *, timestamp(posting_date, posting_time) as "timestamp" from `tabStock Ledger Entry`
+	return frappe.db.sql("""
+		select *, timestamp(posting_date, posting_time) as "timestamp"
+		from `tabStock Ledger Entry`
 		where item_code = %%(item_code)s
-		and ifnull(is_cancelled, 'No')='No'
 		%(conditions)s
 		order by timestamp(posting_date, posting_time) %(order)s, creation %(order)s
 		%(limit)s %(for_update)s""" % {
@@ -481,6 +497,11 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 			"for_update": for_update and "for update" or "",
 			"order": order
 		}, previous_sle, as_dict=1, debug=debug)
+
+def get_sle_by_id(sle_id):
+	return frappe.db.get_all('Stock Ledger Entry',
+		fields=['*', 'timestamp(posting_date, posting_time) as timestamp'],
+		filters={'name': sle_id})[0]
 
 def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	allow_zero_rate=False, currency=None, company=None, raise_error_if_no_rate=True):
@@ -527,7 +548,16 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	if not allow_zero_rate and not valuation_rate and raise_error_if_no_rate \
 			and cint(erpnext.is_perpetual_inventory_enabled(company)):
 		frappe.local.message_log = []
-		frappe.throw(_("Valuation rate not found for the Item {0}, which is required to do accounting entries for {1} {2}. If the item is transacting as a zero valuation rate item in the {1}, please mention that in the {1} Item table. Otherwise, please create an incoming stock transaction for the item or mention valuation rate in the Item record, and then try submiting / cancelling this entry.")
-			.format(item_code, voucher_type, voucher_no))
+		form_link = frappe.utils.get_link_to_form("Item", item_code)
+
+		message = _("Valuation Rate for the Item {0}, is required to do accounting entries for {1} {2}.").format(form_link, voucher_type, voucher_no)
+		message += "<br><br>" + _(" Here are the options to proceed:")
+		solutions = "<li>" + _("If the item is transacting as a Zero Valuation Rate item in this entry, please enable 'Allow Zero Valuation Rate' in the {0} Item table.").format(voucher_type) + "</li>"
+		solutions += "<li>" + _("If not, you can Cancel / Submit this entry ") + _("{0}").format(frappe.bold("after")) + _(" performing either one below:") + "</li>"
+		sub_solutions = "<ul><li>" + _("Create an incoming stock transaction for the Item.") + "</li>"
+		sub_solutions += "<li>" + _("Mention Valuation Rate in the Item master.") + "</li></ul>"
+		msg = message + solutions + sub_solutions + "</li>"
+
+		frappe.throw(msg=msg, title=_("Valuation Rate Missing"))
 
 	return valuation_rate

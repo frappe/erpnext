@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "creation": "2019-06-02 04:41:37.332911",
  "doctype": "DocType",
@@ -10,7 +11,8 @@
   "manufacturer_part_no",
   "column_break_3",
   "item_name",
-  "description"
+  "description",
+  "is_default"
  ],
  "fields": [
   {
@@ -52,9 +54,17 @@
    "fieldtype": "Small Text",
    "label": "Description",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_default",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Default"
   }
  ],
- "modified": "2019-06-06 19:07:31.175919",
+ "links": [],
+ "modified": "2020-04-07 20:25:55.507905",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Manufacturer",

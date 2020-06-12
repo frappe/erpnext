@@ -67,11 +67,11 @@ def add_bank_accounts(response, bank, company):
 		frappe.throw(_("Please setup a default bank account for company {0}").format(company))
 
 	for account in response["accounts"]:
-		acc_type = frappe.db.get_value("Account Type", account["type"])
+		acc_type = frappe.db.get_value("Bank Account Type", account["type"])
 		if not acc_type:
 			add_account_type(account["type"])
 
-		acc_subtype = frappe.db.get_value("Account Subtype", account["subtype"])
+		acc_subtype = frappe.db.get_value("Bank Account Subtype", account["subtype"])
 		if not acc_subtype:
 			add_account_subtype(account["subtype"])
 
@@ -106,7 +106,7 @@ def add_bank_accounts(response, bank, company):
 def add_account_type(account_type):
 	try:
 		frappe.get_doc({
-			"doctype": "Account Type",
+			"doctype": "Bank Account Type",
 			"account_type": account_type
 		}).insert()
 	except Exception:
@@ -116,7 +116,7 @@ def add_account_type(account_type):
 def add_account_subtype(account_subtype):
 	try:
 		frappe.get_doc({
-			"doctype": "Account Subtype",
+			"doctype": "Bank Account Subtype",
 			"account_subtype": account_subtype
 		}).insert()
 	except Exception:
@@ -124,10 +124,11 @@ def add_account_subtype(account_subtype):
 
 @frappe.whitelist()
 def sync_transactions(bank, bank_account):
-
-	last_sync_date = frappe.db.get_value("Bank Account", bank_account, "last_integration_date")
-	if last_sync_date:
-		start_date = formatdate(last_sync_date, "YYYY-MM-dd")
+	'''Sync transactions based on the last integration date as the start date, after the sync is completed
+		add the transaction date of the oldest transaction as the last integration date'''
+	last_transaction_date = frappe.db.get_value("Bank Account", bank_account, "last_integration_date")
+	if last_transaction_date:
+		start_date = formatdate(last_transaction_date, "YYYY-MM-dd")
 	else:
 		start_date = formatdate(add_months(today(), -12), "YYYY-MM-dd")
 	end_date = formatdate(today(), "YYYY-MM-dd")
@@ -139,12 +140,14 @@ def sync_transactions(bank, bank_account):
 		for transaction in reversed(transactions):
 			result += new_bank_transaction(transaction)
 
-		frappe.logger().info("Plaid added {} new Bank Transactions from '{}' between {} and {}".format(
-			len(result), bank_account, start_date, end_date))
+		if result:
+			last_transaction_date = frappe.db.get_value('Bank Transaction', result.pop(), 'date')
 
-		frappe.db.set_value("Bank Account", bank_account, "last_integration_date", getdate(end_date))
+			frappe.logger().info("Plaid added {} new Bank Transactions from '{}' between {} and {}".format(
+				len(result), bank_account, start_date, end_date))
 
-		return result
+			frappe.db.set_value("Bank Account", bank_account, "last_integration_date", last_transaction_date)
+
 	except Exception:
 		frappe.log_error(frappe.get_traceback(), _("Plaid transactions sync error"))
 
@@ -209,7 +212,7 @@ def new_bank_transaction(transaction):
 			result.append(new_transaction.name)
 
 		except Exception:
-			frappe.throw(frappe.get_traceback())
+			frappe.throw(title=_('Bank transaction creation error'))
 
 	return result
 

@@ -122,12 +122,8 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	source_warehouse: function(frm) {
-		if (frm.doc.source_warehouse) {
-			frm.doc.required_items.forEach(d => {
-				frappe.model.set_value(d.doctype, d.name,
-					"source_warehouse", frm.doc.source_warehouse);
-			});
-		}
+		let transaction_controller = new erpnext.TransactionController();
+		transaction_controller.autofill_warehouse(frm.doc.required_items, "source_warehouse", frm.doc.source_warehouse);
 	},
 
 	refresh: function(frm) {
@@ -240,6 +236,8 @@ frappe.ui.form.on("Work Order", {
 			});
 		}, __("Job Card"), __("Create"));
 
+		dialog.fields_dict["operations"].grid.wrapper.find('.grid-add-row').hide();
+
 		var pending_qty = 0;
 		frm.doc.operations.forEach(data => {
 			if(data.completed_qty != frm.doc.qty) {
@@ -311,7 +309,7 @@ frappe.ui.form.on("Work Order", {
 				"Work in Progress": "progress-bar-warning",
 				"Completed": "progress-bar-success"
 			};
-	
+
 			let bars = [];
 			let message = '';
 			let title = '';
@@ -402,7 +400,6 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	before_submit: function(frm) {
-		frm.toggle_reqd(["fg_warehouse", "wip_warehouse"], true);
 		frm.fields_dict.required_items.grid.toggle_reqd("source_warehouse", true);
 		frm.toggle_reqd("transfer_material_against",
 			frm.doc.operations && frm.doc.operations.length > 0);
@@ -449,6 +446,32 @@ frappe.ui.form.on("Work Order Item", {
 				callback: function (r) {
 					frappe.model.set_value(row.doctype, row.name,
 						"available_qty_at_source_warehouse", r.message);
+				}
+			});
+		}
+	},
+
+	item_code: function(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+
+		if (row.item_code) {
+			frappe.call({
+				method: "erpnext.stock.doctype.item.item.get_item_details",
+				args: {
+					item_code: row.item_code,
+					company: frm.doc.company
+				},
+				callback: function(r) {
+					if (r.message) {
+						frappe.model.set_value(cdt, cdn, {
+							"required_qty": 1,
+							"item_name": r.message.item_name,
+							"description": r.message.description,
+							"source_warehouse": r.message.default_warehouse,
+							"allow_alternative_item": r.message.allow_alternative_item,
+							"include_item_in_manufacturing": r.message.include_item_in_manufacturing
+						});
+					}
 				}
 			});
 		}
