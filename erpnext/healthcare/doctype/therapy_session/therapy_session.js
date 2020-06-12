@@ -9,6 +9,16 @@ frappe.ui.form.on('Therapy Session', {
 			{fieldname: 'counts_completed', columns: 1},
 			{fieldname: 'assistance_level', columns: 1}
 		];
+
+		frm.set_query('service_unit', function() {
+			return {
+				filters: {
+					'is_group': false,
+					'allow_appointments': true,
+					'company': frm.doc.company
+				}
+			};
+		});
 	},
 
 	refresh: function(frm) {

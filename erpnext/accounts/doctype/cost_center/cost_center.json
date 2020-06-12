@@ -16,6 +16,9 @@
   "cb0",
   "is_group",
   "disabled",
+  "section_break_9",
+  "enable_distributed_cost_center",
+  "distributed_cost_center",
   "lft",
   "rgt",
   "old_parent"
@@ -119,6 +122,24 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_distributed_cost_center",
+   "fieldtype": "Check",
+   "label": "Enable Distributed Cost Center"
+  },
+  {
+   "depends_on": "eval:doc.is_group==0",
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "enable_distributed_cost_center",
+   "fieldname": "distributed_cost_center",
+   "fieldtype": "Table",
+   "label": "Distributed Cost Center",
+   "options": "Distributed Cost Center"
   }
  ],
  "icon": "fa fa-money",
