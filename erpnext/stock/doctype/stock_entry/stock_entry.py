@@ -270,8 +270,13 @@ class StockEntry(StockController):
 	def validate_fg_completed_qty(self):
 		if self.purpose == "Manufacture" and self.work_order:
 			production_item = frappe.get_value('Work Order', self.work_order, 'production_item')
+			allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
+				"overproduction_percentage_for_work_order"))
+
 			for item in self.items:
-				if item.item_code == production_item and item.t_warehouse and item.qty != self.fg_completed_qty:
+				qty_variance_allowed = allowance_percentage/100 * item.qty
+				qty_diff = abs(item.qty - self.fg_completed_qty)
+				if item.item_code == production_item and item.t_warehouse and qty_diff > qty_variance_allowed:
 					frappe.throw(_("Finished product quantity <b>{0}</b> and For Quantity <b>{1}</b> cannot be different")
 						.format(item.qty, self.fg_completed_qty))
 
