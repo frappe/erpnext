@@ -6,6 +6,8 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 	frappe.query_reports["Profit and Loss Statement"] = $.extend({},
 		erpnext.financial_statements);
 
+	erpnext.utils.add_dimensions('Profit and Loss Statement', 10);
+
 	frappe.query_reports["Profit and Loss Statement"]["filters"].push(
 		{
 			"fieldname": "project",
@@ -14,11 +16,6 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 			get_data: function(txt) {
 				return frappe.db.get_link_options('Project', txt);
 			}
-		},
-		{
-			"fieldname": "accumulated_values",
-			"label": __("Accumulated Values"),
-			"fieldtype": "Check"
 		},
 		{
 			"fieldname": "include_default_book_entries",

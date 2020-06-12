@@ -128,18 +128,53 @@ def get_gl_entries(filters):
 		filters['company_fb'] = frappe.db.get_value("Company",
 			filters.get("company"), 'default_finance_book')
 
+	distributed_cost_center_query = ""
+	if filters and filters.get('cost_center'):
+		select_fields_with_percentage = """, debit*(DCC_allocation.percentage_allocation/100) as debit, credit*(DCC_allocation.percentage_allocation/100) as credit, debit_in_account_currency*(DCC_allocation.percentage_allocation/100) as debit_in_account_currency,
+		credit_in_account_currency*(DCC_allocation.percentage_allocation/100) as credit_in_account_currency """
+		
+		distributed_cost_center_query = """
+		UNION ALL
+		SELECT name as gl_entry,
+			posting_date,
+			account,
+			party_type,
+			party,
+			voucher_type,
+			voucher_no,
+			cost_center, project,
+			against_voucher_type,
+			against_voucher,
+			account_currency,
+			remarks, against, 
+			is_opening, `tabGL Entry`.creation {select_fields_with_percentage}
+		FROM `tabGL Entry`,
+		(
+			SELECT parent, sum(percentage_allocation) as percentage_allocation
+			FROM `tabDistributed Cost Center`
+			WHERE cost_center IN %(cost_center)s
+			AND parent NOT IN %(cost_center)s
+			GROUP BY parent
+		) as DCC_allocation
+		WHERE company=%(company)s
+		{conditions}
+		AND posting_date <= %(to_date)s
+		AND cost_center = DCC_allocation.parent
+		""".format(select_fields_with_percentage=select_fields_with_percentage, conditions=get_conditions(filters).replace("and cost_center in %(cost_center)s ", ''))
+
 	gl_entries = frappe.db.sql(
 		"""
 		select
 			name as gl_entry, posting_date, account, party_type, party,
 			voucher_type, voucher_no, cost_center, project,
 			against_voucher_type, against_voucher, account_currency,
-			remarks, against, is_opening {select_fields}
+			remarks, against, is_opening, creation {select_fields}
 		from `tabGL Entry`
 		where company=%(company)s {conditions}
+		{distributed_cost_center_query}
 		{order_by_statement}
 		""".format(
-			select_fields=select_fields, conditions=get_conditions(filters),
+			select_fields=select_fields, conditions=get_conditions(filters), distributed_cost_center_query=distributed_cost_center_query,
 			order_by_statement=order_by_statement
 		),
 		filters, as_dict=1)
@@ -188,6 +223,9 @@ def get_conditions(filters):
 		else:
 			conditions.append("finance_book in (%(finance_book)s)")
 
+	if not filters.get("show_cancelled_entries"):
+		conditions.append("is_cancelled = 0")
+
 	from frappe.desk.reportview import build_match_conditions
 	match_conditions = build_match_conditions("GL Entry")
 
@@ -202,7 +240,9 @@ def get_conditions(filters):
 				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
 					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
 						filters.get(dimension.fieldname))
-				conditions.append("{0} in %({0})s".format(dimension.fieldname))
+					conditions.append("{0} in %({0})s".format(dimension.fieldname))
+				else:
+					conditions.append("{0} in (%({0})s)".format(dimension.fieldname))
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
@@ -291,6 +331,9 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 		data[key].debit_in_account_currency += flt(gle.debit_in_account_currency)
 		data[key].credit_in_account_currency += flt(gle.credit_in_account_currency)
 
+		if data[key].against_voucher and gle.against_voucher:
+			data[key].against_voucher += ', ' + gle.against_voucher
+
 	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
 	for gle in gl_entries:
 		if (gle.posting_date < from_date or
@@ -363,6 +406,7 @@ def get_columns(filters):
 
 	columns = [
 		{
+			"label": _("GL Entry"),
 			"fieldname": "gl_entry",
 			"fieldtype": "Link",
 			"options": "GL Entry",

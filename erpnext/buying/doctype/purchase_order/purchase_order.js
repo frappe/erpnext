@@ -27,15 +27,6 @@ frappe.ui.form.on("Purchase Order", {
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
 
-		frm.set_query("blanket_order", "items", function() {
-			return {
-				filters: {
-					"company": frm.doc.company,
-					"docstatus": 1
-				}
-			}
-		});
-
 		frm.set_query("expense_account", "items", function() {
 			return {
 				query: "erpnext.controllers.queries.get_expense_account",
@@ -365,9 +356,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
 					source_doctype: "Material Request",
 					target: me.frm,
-					setters: {
-						company: me.frm.doc.company
-					},
+					setters: {},
 					get_query_filters: {
 						material_request_type: "Purchase",
 						docstatus: 1,
@@ -384,7 +373,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					source_doctype: "Supplier Quotation",
 					target: me.frm,
 					setters: {
-						company: me.frm.doc.company
+						supplier: me.frm.doc.supplier
 					},
 					get_query_filters: {
 						docstatus: 1,
@@ -499,7 +488,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						reference_doctype: me.frm.doctype,
 						reference_name: me.frm.docname,
 						content: __('Reason for hold: ')+data.reason_for_hold,
-						comment_email: frappe.session.user
+						comment_email: frappe.session.user,
+						comment_by: frappe.session.user_fullname
 					},
 					callback: function(r) {
 						if(!r.exc) {

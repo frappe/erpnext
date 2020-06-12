@@ -24,12 +24,15 @@ class PickList(Document):
 		for item in self.locations:
 			if not frappe.get_cached_value('Item', item.item_code, 'has_serial_no'):
 				continue
+			if not item.serial_no:
+				frappe.throw(_("Row #{0}: {1} does not have any available serial numbers in {2}".format(
+					frappe.bold(item.idx), frappe.bold(item.item_code), frappe.bold(item.warehouse))))
 			if len(item.serial_no.split('\n')) == item.picked_qty:
 				continue
 			frappe.throw(_('For item {0} at row {1}, count of serial numbers does not match with the picked quantity')
 				.format(frappe.bold(item.item_code), frappe.bold(item.idx)))
 
-	def set_item_locations(self):
+	def set_item_locations(self, save=False):
 		items = self.aggregate_item_qty()
 		self.item_location_map = frappe._dict()
 
@@ -43,7 +46,7 @@ class PickList(Document):
 			item_code = item_doc.item_code
 
 			self.item_location_map.setdefault(item_code,
-				get_available_item_locations(item_code, from_warehouses, self.item_count_map.get(item_code)))
+				get_available_item_locations(item_code, from_warehouses, self.item_count_map.get(item_code), self.company))
 
 			locations = get_items_with_location_and_quantity(item_doc, self.item_location_map)
 
@@ -59,12 +62,17 @@ class PickList(Document):
 				location.update(row)
 				self.append('locations', location)
 
+		if save:
+			self.save()
+
 	def aggregate_item_qty(self):
 		locations = self.get('locations')
 		self.item_count_map = {}
 		# aggregate qty for same item
 		item_map = OrderedDict()
 		for item in locations:
+			if not item.item_code:
+				frappe.throw("Row #{0}: Item Code is Mandatory".format(item.idx))
 			item_code = item.item_code
 			reference = item.sales_order_item or item.material_request_item
 			key = (item_code, item.uom, reference)
@@ -84,6 +92,10 @@ class PickList(Document):
 
 		return item_map.values()
 
+
+def validate_item_locations(pick_list):
+	if not pick_list.locations:
+		frappe.throw(_("Add items in the Item Locations table"))
 
 def get_items_with_location_and_quantity(item_doc, item_location_map):
 	available_locations = item_location_map.get(item_doc.item_code)
@@ -107,11 +119,13 @@ def get_items_with_location_and_quantity(item_doc, item_location_map):
 		if item_location.serial_no:
 			serial_nos = '\n'.join(item_location.serial_no[0: cint(stock_qty)])
 
+		auto_set_serial_no = frappe.db.get_single_value("Stock Settings", "automatically_set_serial_nos_based_on_fifo")
+
 		locations.append(frappe._dict({
 			'qty': qty,
 			'stock_qty': stock_qty,
 			'warehouse': item_location.warehouse,
-			'serial_no': serial_nos,
+			'serial_no': serial_nos if auto_set_serial_no else item_doc.serial_no,
 			'batch_no': item_location.batch_no
 		}))
 
@@ -130,29 +144,30 @@ def get_items_with_location_and_quantity(item_doc, item_location_map):
 	item_location_map[item_doc.item_code] = available_locations
 	return locations
 
-def get_available_item_locations(item_code, from_warehouses, required_qty):
+def get_available_item_locations(item_code, from_warehouses, required_qty, company, ignore_validation=False):
 	locations = []
 	if frappe.get_cached_value('Item', item_code, 'has_serial_no'):
-		locations = get_available_item_locations_for_serialized_item(item_code, from_warehouses, required_qty)
+		locations = get_available_item_locations_for_serialized_item(item_code, from_warehouses, required_qty, company)
 	elif frappe.get_cached_value('Item', item_code, 'has_batch_no'):
-		locations = get_available_item_locations_for_batched_item(item_code, from_warehouses, required_qty)
+		locations = get_available_item_locations_for_batched_item(item_code, from_warehouses, required_qty, company)
 	else:
-		locations = get_available_item_locations_for_other_item(item_code, from_warehouses, required_qty)
+		locations = get_available_item_locations_for_other_item(item_code, from_warehouses, required_qty, company)
 
 	total_qty_available = sum(location.get('qty') for location in locations)
 
 	remaining_qty = required_qty - total_qty_available
 
-	if remaining_qty > 0:
+	if remaining_qty > 0 and not ignore_validation:
 		frappe.msgprint(_('{0} units of {1} is not available.')
 			.format(remaining_qty, frappe.get_desk_link('Item', item_code)))
 
 	return locations
 
 
-def get_available_item_locations_for_serialized_item(item_code, from_warehouses, required_qty):
+def get_available_item_locations_for_serialized_item(item_code, from_warehouses, required_qty, company):
 	filters = frappe._dict({
 		'item_code': item_code,
+		'company': company,
 		'warehouse': ['!=', '']
 	})
 
@@ -180,7 +195,7 @@ def get_available_item_locations_for_serialized_item(item_code, from_warehouses,
 
 	return locations
 
-def get_available_item_locations_for_batched_item(item_code, from_warehouses, required_qty):
+def get_available_item_locations_for_batched_item(item_code, from_warehouses, required_qty, company):
 	warehouse_condition = 'and warehouse in %(warehouses)s' if from_warehouses else ''
 	batch_locations = frappe.db.sql("""
 		SELECT
@@ -192,6 +207,8 @@ def get_available_item_locations_for_batched_item(item_code, from_warehouses, re
 		WHERE
 			sle.batch_no = batch.name
 			and sle.`item_code`=%(item_code)s
+			and sle.`company` = %(company)s
+			and batch.disabled = 0
 			and IFNULL(batch.`expiry_date`, '2200-01-01') > %(today)s
 			{warehouse_condition}
 		GROUP BY
@@ -202,16 +219,20 @@ def get_available_item_locations_for_batched_item(item_code, from_warehouses, re
 		ORDER BY IFNULL(batch.`expiry_date`, '2200-01-01'), batch.`creation`
 	""".format(warehouse_condition=warehouse_condition), { #nosec
 		'item_code': item_code,
+		'company': company,
 		'today': today(),
 		'warehouses': from_warehouses
 	}, as_dict=1)
 
 	return batch_locations
 
-def get_available_item_locations_for_other_item(item_code, from_warehouses, required_qty):
+def get_available_item_locations_for_other_item(item_code, from_warehouses, required_qty, company):
 	# gets all items available in different warehouses
+	warehouses = [x.get('name') for x in frappe.get_list("Warehouse", {'company': company}, "name")]
+
 	filters = frappe._dict({
 		'item_code': item_code,
+		'warehouse': ['in', warehouses],
 		'actual_qty': ['>', 0]
 	})
 
@@ -230,13 +251,19 @@ def get_available_item_locations_for_other_item(item_code, from_warehouses, requ
 @frappe.whitelist()
 def create_delivery_note(source_name, target_doc=None):
 	pick_list = frappe.get_doc('Pick List', source_name)
-	sales_orders = [d.sales_order for d in pick_list.locations]
+	validate_item_locations(pick_list)
+
+	sales_orders = [d.sales_order for d in pick_list.locations if d.sales_order]
 	sales_orders = set(sales_orders)
 
 	delivery_note = None
 	for sales_order in sales_orders:
 		delivery_note = create_delivery_note_from_sales_order(sales_order,
 			delivery_note, skip_item_mapping=True)
+
+	# map rows without sales orders as well
+	if not delivery_note:
+		delivery_note = frappe.new_doc("Delivery Note")
 
 	item_table_mapper = {
 		'doctype': 'Delivery Note Item',
@@ -248,9 +275,25 @@ def create_delivery_note(source_name, target_doc=None):
 		'condition': lambda doc: abs(doc.delivered_qty) < abs(doc.qty) and doc.delivered_by_supplier!=1
 	}
 
+	item_table_mapper_without_so = {
+		'doctype': 'Delivery Note Item',
+		'field_map': {
+			'rate': 'rate',
+			'name': 'name',
+			'parent': '',
+		}
+	}
+
 	for location in pick_list.locations:
-		sales_order_item = frappe.get_cached_doc('Sales Order Item', location.sales_order_item)
-		dn_item = map_child_doc(sales_order_item, delivery_note, item_table_mapper)
+		if location.sales_order_item:
+			sales_order_item = frappe.get_cached_doc('Sales Order Item', {'name':location.sales_order_item})
+		else:
+			sales_order_item = None
+
+		source_doc, table_mapper = [sales_order_item, item_table_mapper] if sales_order_item \
+			else [location, item_table_mapper_without_so]
+
+		dn_item = map_child_doc(source_doc, delivery_note, table_mapper)
 
 		if dn_item:
 			dn_item.warehouse = location.warehouse
@@ -258,17 +301,19 @@ def create_delivery_note(source_name, target_doc=None):
 			dn_item.batch_no = location.batch_no
 			dn_item.serial_no = location.serial_no
 
-			update_delivery_note_item(sales_order_item, dn_item, delivery_note)
+			update_delivery_note_item(source_doc, dn_item, delivery_note)
 
 	set_delivery_note_missing_values(delivery_note)
 
 	delivery_note.pick_list = pick_list.name
+	delivery_note.customer = pick_list.customer if pick_list.customer else None
 
 	return delivery_note
 
 @frappe.whitelist()
 def create_stock_entry(pick_list):
 	pick_list = frappe.get_doc(json.loads(pick_list))
+	validate_item_locations(pick_list)
 
 	if stock_entry_exists(pick_list.get('name')):
 		return frappe.msgprint(_('Stock Entry has been already created against this Pick List'))
@@ -318,7 +363,7 @@ def get_pending_work_orders(doctype, txt, searchfield, start, page_length, filte
 
 @frappe.whitelist()
 def target_document_exists(pick_list_name, purpose):
-	if purpose == 'Delivery against Sales Order':
+	if purpose == 'Delivery':
 		return frappe.db.exists('Delivery Note', {
 			'pick_list': pick_list_name
 		})

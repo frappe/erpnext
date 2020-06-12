@@ -66,8 +66,10 @@ class PaymentRequest(Document):
 		if self.payment_request_type == 'Outward':
 			self.db_set('status', 'Initiated')
 			return
+		elif self.payment_request_type == 'Inward':
+			self.db_set('status', 'Requested')
 
-		send_mail = self.payment_gateway_validation()
+		send_mail = self.payment_gateway_validation() if self.payment_gateway else None
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 
 		if (hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart") \
@@ -88,6 +90,7 @@ class PaymentRequest(Document):
 		if (hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart"):
 			from erpnext.selling.doctype.sales_order.sales_order import make_sales_invoice
 			si = make_sales_invoice(self.reference_name, ignore_permissions=True)
+			si.allocate_advances_automatically = True
 			si = si.insert(ignore_permissions=True)
 			si.submit()
 
@@ -317,13 +320,13 @@ def make_payment_request(**args):
 			"payment_request_type": args.get("payment_request_type"),
 			"currency": ref_doc.currency,
 			"grand_total": grand_total,
-			"email_to": args.recipient_id or "",
+			"email_to": args.recipient_id or ref_doc.owner,
 			"subject": _("Payment Request for {0}").format(args.dn),
 			"message": gateway_account.get("message") or get_dummy_message(ref_doc),
 			"reference_doctype": args.dt,
 			"reference_name": args.dn,
-			"party_type": args.get("party_type"),
-			"party": args.get("party"),
+			"party_type": args.get("party_type") or "Customer",
+			"party": args.get("party") or ref_doc.get("customer"),
 			"bank_account": bank_account
 		})
 
@@ -415,17 +418,31 @@ def make_payment_entry(docname):
 	doc = frappe.get_doc("Payment Request", docname)
 	return doc.create_payment_entry(submit=False).as_dict()
 
-def make_status_as_paid(doc, method):
+def update_payment_req_status(doc, method):
+	from erpnext.accounts.doctype.payment_entry.payment_entry import get_reference_details
+
 	for ref in doc.references:
 		payment_request_name = frappe.db.get_value("Payment Request",
 			{"reference_doctype": ref.reference_doctype, "reference_name": ref.reference_name,
 			"docstatus": 1})
 
 		if payment_request_name:
-			doc = frappe.get_doc("Payment Request", payment_request_name)
-			if doc.status != "Paid":
-				doc.db_set('status', 'Paid')
-				frappe.db.commit()
+			ref_details = get_reference_details(ref.reference_doctype, ref.reference_name, doc.party_account_currency)
+			pay_req_doc = frappe.get_doc('Payment Request', payment_request_name)
+			status = pay_req_doc.status
+
+			if status != "Paid" and not ref_details.outstanding_amount:
+				status = 'Paid'
+			elif status != "Partially Paid" and ref_details.outstanding_amount != ref_details.total_amount:
+				status = 'Partially Paid'
+			elif ref_details.outstanding_amount == ref_details.total_amount:
+				if pay_req_doc.payment_request_type == 'Outward':
+					status = 'Initiated'
+				elif pay_req_doc.payment_request_type == 'Inward':
+					status = 'Requested'
+
+			pay_req_doc.db_set('status', status)
+			frappe.db.commit()
 
 def get_dummy_message(doc):
 	return frappe.render_template("""{% if doc.contact_person -%}

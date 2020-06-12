@@ -6,6 +6,9 @@ def get_data():
 		'heatmap': True,
 		'heatmap_message': _('This is based on the attendance of this Student'),
 		'fieldname': 'student',
+		'non_standard_fieldnames': {
+			'Bank Account': 'party'
+		},
 		'transactions': [
 			{
 				'label': _('Admission'),
@@ -29,7 +32,7 @@ def get_data():
 			},
 			{
 				'label': _('Fee'),
-				'items': ['Fees']
+				'items': ['Fees', 'Bank Account']
 			}
 		]
 	}

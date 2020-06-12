@@ -10,16 +10,16 @@
 {% endif %}
 
 {% for d in doc.taxes %}
-{% if d.base_tax_amount > 0 %}
-<tr>
-	<td class="text-right" colspan="2">
-		{{ d.description }}
-	</td>
-	<td class="text-right">
-		{{ d.get_formatted("base_tax_amount") }}
-	</td>
-</tr>
-{% endif %}
+	{% if d.base_tax_amount %}
+	<tr>
+		<td class="text-right" colspan="2">
+			{{ d.description }}
+		</td>
+		<td class="text-right">
+			{{ d.get_formatted("base_tax_amount") }}
+		</td>
+	</tr>
+	{% endif %}
 {% endfor %}
 
 {% if doc.doctype == 'Quotation' %}

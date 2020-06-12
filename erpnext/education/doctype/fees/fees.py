@@ -10,7 +10,7 @@ from frappe.utils import money_in_words
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from frappe.utils.csvutils import getlink
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.general_ledger import delete_gl_entries
+from erpnext.accounts.general_ledger import make_reverse_gl_entries
 
 
 class Fees(AccountsController):
@@ -75,12 +75,14 @@ class Fees(AccountsController):
 		self.make_gl_entries()
 
 		if self.send_payment_request and self.student_email:
-			pr = make_payment_request(dt="Fees", dn=self.name, recipient_id=self.student_email,
+			pr = make_payment_request(party_type="Student", party=self.student, dt="Fees",
+					dn=self.name, recipient_id=self.student_email,
 					submit_doc=True, use_dummy_message=True)
 			frappe.msgprint(_("Payment request {0} created").format(getlink("Payment Request", pr.name)))
 
 	def on_cancel(self):
-		delete_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
+		make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 		# frappe.db.set(self, 'status', 'Cancelled')
 
 
@@ -96,14 +98,16 @@ class Fees(AccountsController):
 			"debit_in_account_currency": self.grand_total,
 			"against_voucher": self.name,
 			"against_voucher_type": self.doctype
-		})
+		}, item=self)
+
 		fee_gl_entry = self.get_gl_dict({
 			"account": self.income_account,
 			"against": self.student,
 			"credit": self.grand_total,
 			"credit_in_account_currency": self.grand_total,
 			"cost_center": self.cost_center
-		})
+		}, item=self)
+
 		from erpnext.accounts.general_ledger import make_gl_entries
 		make_gl_entries([student_gl_entries, fee_gl_entry], cancel=(self.docstatus == 2),
 			update_outstanding="Yes", merge_entries=False)

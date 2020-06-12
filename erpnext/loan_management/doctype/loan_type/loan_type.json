@@ -41,6 +41,7 @@
    "options": "Company:company:default_currency"
   },
   {
+   "default": "0",
    "fieldname": "rate_of_interest",
    "fieldtype": "Percent",
    "label": "Rate of Interest (%) Yearly",
@@ -119,6 +120,7 @@
    "label": "Penalty Interest Rate (%) Per Day"
   },
   {
+   "description": "No. of days from due date until which penalty won't be charged in case of delay in loan repayment",
    "fieldname": "grace_period_in_days",
    "fieldtype": "Int",
    "label": "Grace Period in Days"
@@ -142,7 +144,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-03 05:03:00.334813",
+ "modified": "2020-06-07 18:55:59.346292",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Type",

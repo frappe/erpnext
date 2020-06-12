@@ -88,32 +88,40 @@ def get_previous_expiry_ledger_entry(ledger):
 	}, fieldname=['name'])
 
 def process_expired_allocation():
-	''' Check if a carry forwarded allocation has expired and create a expiry ledger entry '''
+	''' Check if a carry forwarded allocation has expired and create a expiry ledger entry
+		Case 1: carry forwarded expiry period is set for the leave type,
+			create a separate leave expiry entry against each entry of carry forwarded and non carry forwarded leaves
+		Case 2: leave type has no specific expiry period for carry forwarded leaves
+			and there is no carry forwarded leave allocation, create a single expiry against the remaining leaves.
+	'''
 
 	# fetch leave type records that has carry forwarded leaves expiry
 	leave_type_records = frappe.db.get_values("Leave Type", filters={
 			'expire_carry_forwarded_leaves_after_days': (">", 0)
 		}, fieldname=['name'])
 
-	leave_type = [record[0] for record in leave_type_records]
+	leave_type = [record[0] for record in leave_type_records] or ['']
 
-	expired_allocation = frappe.db.sql_list("""SELECT name
-		FROM `tabLeave Ledger Entry`
-		WHERE
-			`transaction_type`='Leave Allocation'
-			AND `is_expired`=1""")
-
-	expire_allocation = frappe.get_all("Leave Ledger Entry",
-		fields=['leaves', 'to_date', 'employee', 'leave_type', 'is_carry_forward', 'transaction_name as name', 'transaction_type'],
-		filters={
-			'to_date': ("<", today()),
-			'transaction_type': 'Leave Allocation',
-			'transaction_name': ('not in', expired_allocation)
-		},
-		or_filters={
-			'is_carry_forward': 0,
-			'leave_type': ('in', leave_type)
-		})
+	# fetch non expired leave ledger entry of transaction_type allocation
+	expire_allocation = frappe.db.sql("""
+		SELECT
+			leaves, to_date, employee, leave_type,
+			is_carry_forward, transaction_name as name, transaction_type
+		FROM `tabLeave Ledger Entry` l
+		WHERE (NOT EXISTS
+			(SELECT name
+				FROM `tabLeave Ledger Entry`
+				WHERE
+					transaction_name = l.transaction_name
+					AND transaction_type = 'Leave Allocation'
+					AND name<>l.name
+					AND docstatus = 1
+					AND (
+						is_carry_forward=l.is_carry_forward
+						OR (is_carry_forward = 0 AND leave_type not in %s)
+			)))
+			AND transaction_type = 'Leave Allocation'
+			AND to_date < %s""", (leave_type, today()), as_dict=1)
 
 	if expire_allocation:
 		create_expiry_ledger_entry(expire_allocation)
@@ -133,6 +141,7 @@ def get_remaining_leaves(allocation):
 			'employee': allocation.employee,
 			'leave_type': allocation.leave_type,
 			'to_date': ('<=', allocation.to_date),
+			'docstatus': 1
 		}, fieldname=['SUM(leaves)'])
 
 @frappe.whitelist()
@@ -141,6 +150,7 @@ def expire_allocation(allocation, expiry_date=None):
 	leaves = get_remaining_leaves(allocation)
 	expiry_date = expiry_date if expiry_date else allocation.to_date
 
+	# allows expired leaves entry to be created/reverted
 	if leaves:
 		args = dict(
 			leaves=flt(leaves) * -1,
@@ -158,8 +168,11 @@ def expire_allocation(allocation, expiry_date=None):
 def expire_carried_forward_allocation(allocation):
 	''' Expires remaining leaves in the on carried forward allocation '''
 	from erpnext.hr.doctype.leave_application.leave_application import get_leaves_for_period
-	leaves_taken = get_leaves_for_period(allocation.employee, allocation.leave_type, allocation.from_date, allocation.to_date)
+	leaves_taken = get_leaves_for_period(allocation.employee, allocation.leave_type,
+		allocation.from_date, allocation.to_date, do_not_skip_expired_leaves=True)
 	leaves = flt(allocation.leaves) + flt(leaves_taken)
+
+	# allow expired leaves entry to be created
 	if leaves > 0:
 		args = frappe._dict(
 			transaction_name=allocation.name,

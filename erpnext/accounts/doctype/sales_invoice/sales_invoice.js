@@ -32,6 +32,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			me.frm.script_manager.trigger("is_pos");
 			me.frm.refresh_fields();
 		}
+		erpnext.queries.setup_warehouse_query(this.frm);
 	},
 
 	refresh: function(doc, dt, dn) {
@@ -344,7 +345,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 	set_dynamic_labels: function() {
 		this._super();
-		this.hide_fields(this.frm.doc);
+		this.frm.events.hide_fields(this.frm)
 	},
 
 	items_on_form_rendered: function() {
@@ -403,7 +404,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 							if(r.message && r.message.print_format) {
 								me.frm.pos_print_format = r.message.print_format;
 							}
-							me.frm.script_manager.trigger("update_stock");
+							me.frm.trigger("update_stock");
 							if(me.frm.doc.taxes_and_charges) {
 								me.frm.script_manager.trigger("taxes_and_charges");
 							}
@@ -444,35 +445,6 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_frm}));
-
-// Hide Fields
-// ------------
-cur_frm.cscript.hide_fields = function(doc) {
-	var parent_fields = ['project', 'due_date', 'is_opening', 'source', 'total_advance', 'get_advances',
-		'advances', 'from_date', 'to_date'];
-
-	if(cint(doc.is_pos) == 1) {
-		hide_field(parent_fields);
-	} else {
-		for (var i in parent_fields) {
-			var docfield = frappe.meta.docfield_map[doc.doctype][parent_fields[i]];
-			if(!docfield.hidden) unhide_field(parent_fields[i]);
-		}
-	}
-
-	// India related fields
-	if (frappe.boot.sysdefaults.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
-	else hide_field(['c_form_applicable', 'c_form_no']);
-
-	this.frm.toggle_enable("write_off_amount", !!!cint(doc.write_off_outstanding_amount_automatically));
-
-	cur_frm.refresh_fields();
-}
-
-cur_frm.cscript.update_stock = function(doc, dt, dn) {
-	cur_frm.cscript.hide_fields(doc, dt, dn);
-	this.frm.fields_dict.items.grid.toggle_reqd("item_code", doc.update_stock? true: false)
-}
 
 cur_frm.cscript['Make Delivery Note'] = function() {
 	frappe.model.open_mapped_doc({
@@ -586,7 +558,9 @@ frappe.ui.form.on('Sales Invoice', {
 		frm.set_query("account_for_change_amount", function() {
 			return {
 				filters: {
-					account_type: ['in', ["Cash", "Bank"]]
+					account_type: ['in', ["Cash", "Bank"]],
+					company: frm.doc.company,
+					is_group: 0
 				}
 			};
 		});
@@ -667,7 +641,8 @@ frappe.ui.form.on('Sales Invoice', {
 		frm.fields_dict["loyalty_redemption_account"].get_query = function() {
 			return {
 				filters:{
-					"company": frm.doc.company
+					"company": frm.doc.company,
+					"is_group": 0
 				}
 			}
 		};
@@ -676,7 +651,8 @@ frappe.ui.form.on('Sales Invoice', {
 		frm.fields_dict["loyalty_redemption_cost_center"].get_query = function() {
 			return {
 				filters:{
-					"company": frm.doc.company
+					"company": frm.doc.company,
+					"is_group": 0
 				}
 			}
 		};
@@ -714,6 +690,12 @@ frappe.ui.form.on('Sales Invoice', {
 		frm.redemption_conversion_factor = null;
 	},
 
+	update_stock: function(frm, dt, dn) {
+		frm.events.hide_fields(frm);
+		frm.fields_dict.items.grid.toggle_reqd("item_code", frm.doc.update_stock);
+		frm.trigger('reset_posting_time');
+	},
+
 	redeem_loyalty_points: function(frm) {
 		frm.events.get_loyalty_details(frm);
 	},
@@ -735,6 +717,29 @@ frappe.ui.form.on('Sales Invoice', {
 				}
 			});
 		}
+	},
+
+	hide_fields: function(frm) {
+		let doc = frm.doc;
+		var parent_fields = ['project', 'due_date', 'is_opening', 'source', 'total_advance', 'get_advances',
+		'advances', 'from_date', 'to_date'];
+
+		if(cint(doc.is_pos) == 1) {
+			hide_field(parent_fields);
+		} else {
+			for (var i in parent_fields) {
+				var docfield = frappe.meta.docfield_map[doc.doctype][parent_fields[i]];
+				if(!docfield.hidden) unhide_field(parent_fields[i]);
+			}
+		}
+
+		// India related fields
+		if (frappe.boot.sysdefaults.country == 'India') unhide_field(['c_form_applicable', 'c_form_no']);
+		else hide_field(['c_form_applicable', 'c_form_no']);
+
+		frm.toggle_enable("write_off_amount", !!!cint(doc.write_off_outstanding_amount_automatically));
+
+		frm.refresh_fields();
 	},
 
 	get_loyalty_details: function(frm) {
@@ -794,7 +799,7 @@ frappe.ui.form.on('Sales Invoice', {
 	},
 
 	refresh: function(frm) {
-		if (frappe.boot.active_domains.includes("Healthcare")){
+		if (frappe.boot.active_domains.includes("Healthcare")) {
 			frm.set_df_property("patient", "hidden", 0);
 			frm.set_df_property("patient_name", "hidden", 0);
 			frm.set_df_property("ref_practitioner", "hidden", 0);
@@ -807,7 +812,7 @@ frappe.ui.form.on('Sales Invoice', {
 				},"Get items from");
 			}
 		}
-		else{
+		else {
 			frm.set_df_property("patient", "hidden", 1);
 			frm.set_df_property("patient_name", "hidden", 1);
 			frm.set_df_property("ref_practitioner", "hidden", 1);
@@ -919,7 +924,7 @@ var get_healthcare_services_to_invoice = function(frm) {
 		if(patient && patient!=selected_patient){
 			selected_patient = patient;
 			var method = "erpnext.healthcare.utils.get_healthcare_services_to_invoice";
-			var args = {patient: patient};
+			var args = {patient: patient, company: frm.doc.company};
 			var columns = (["service", "reference_name", "reference_type"]);
 			get_healthcare_items(frm, true, $results, $placeholder, method, args, columns);
 		}
@@ -1063,7 +1068,11 @@ var get_drugs_to_invoice = function(frm) {
 				description:'Quantity will be calculated only for items which has "Nos" as UoM. You may change as required for each invoice item.',
 				get_query: function(doc) {
 					return {
-						filters: { patient: dialog.get_value("patient"), docstatus: 1 }
+						filters: { 
+							patient: dialog.get_value("patient"),
+							company: frm.doc.company,
+							docstatus: 1
+						}
 					};
 				}
 			},

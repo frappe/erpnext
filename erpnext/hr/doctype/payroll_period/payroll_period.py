@@ -45,8 +45,9 @@ class PayrollPeriod(Document):
 				+ _(") for {0}").format(self.company)
 			frappe.throw(msg)
 
-def get_payroll_period_days(start_date, end_date, employee):
-	company = frappe.db.get_value("Employee", employee, "company")
+def get_payroll_period_days(start_date, end_date, employee, company=None):
+	if not company:
+		company = frappe.db.get_value("Employee", employee, "company")
 	payroll_period = frappe.db.sql("""
 		select name, start_date, end_date
 		from `tabPayroll Period`

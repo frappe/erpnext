@@ -60,6 +60,8 @@
   "default_shift",
   "salary_information",
   "salary_mode",
+  "payroll_cost_center",
+  "column_break_52",
   "bank_name",
   "bank_ac_no",
   "health_insurance_section",
@@ -259,7 +261,8 @@
    "bold": 1,
    "fieldname": "emergency_phone_number",
    "fieldtype": "Data",
-   "label": "Emergency Phone"
+   "label": "Emergency Phone",
+   "options": "Phone"
   },
   {
    "bold": 1,
@@ -480,7 +483,8 @@
   {
    "fieldname": "cell_number",
    "fieldtype": "Data",
-   "label": "Mobile"
+   "label": "Mobile",
+   "options": "Phone"
   },
   {
    "fieldname": "prefered_contact_email",
@@ -781,13 +785,25 @@
   {
    "fieldname": "column_break_19",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "department.payroll_cost_center",
+   "fetch_if_empty": 1,
+   "fieldname": "payroll_cost_center",
+   "fieldtype": "Link",
+   "label": "Payroll Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "column_break_52",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2020-01-09 04:23:55.611366",
+ "modified": "2020-05-05 18:51:03.152503",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
@@ -834,6 +850,5 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "employee_name",
- "track_changes": 1
+ "title_field": "employee_name"
 }

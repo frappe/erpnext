@@ -9,6 +9,7 @@ from erpnext.accounts.report.financial_statements import (get_period_list, get_c
 
 def execute(filters=None):
 	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year,
+		filters.period_start_date, filters.period_end_date, filters.filter_based_on,
 		filters.periodicity, company=filters.company)
 
 	currency = filters.presentation_currency or frappe.get_cached_value('Company',  filters.company,  "default_currency")
@@ -58,7 +59,10 @@ def execute(filters=None):
 
 	chart = get_chart_data(filters, columns, asset, liability, equity)
 
-	return columns, data, message, chart
+	report_summary = get_report_summary(period_list, asset, liability, equity, provisional_profit_loss,
+		total_credit, currency, filters)
+
+	return columns, data, message, chart, report_summary
 
 def get_provisional_profit_loss(asset, liability, equity, period_list, company, currency=None, consolidated=False):
 	provisional_profit_loss = {}
@@ -119,6 +123,56 @@ def check_opening_balance(asset, liability, equity):
 	if opening_balance:
 		return _("Previous Financial Year is not closed"),opening_balance
 	return None,None
+
+def get_report_summary(period_list, asset, liability, equity, provisional_profit_loss, total_credit, currency,
+	filters, consolidated=False):
+
+	net_asset, net_liability, net_equity, net_provisional_profit_loss = 0.0, 0.0, 0.0, 0.0
+
+	if filters.get('accumulated_values'):
+		period_list = [period_list[-1]]
+
+	for period in period_list:
+		key = period if consolidated else period.key
+		if asset:
+			net_asset += asset[-2].get(key)
+		if liability:
+			net_liability += liability[-2].get(key)
+		if equity:
+			net_equity += equity[-2].get(key)
+		if provisional_profit_loss:
+			net_provisional_profit_loss += provisional_profit_loss.get(key)
+
+	return [
+		{
+			"value": net_asset,
+			"label": "Total Asset",
+			"indicator": "Green",
+			"datatype": "Currency",
+			"currency": currency
+		},
+		{
+			"value": net_liability,
+			"label": "Total Liability",
+			"datatype": "Currency",
+			"indicator": "Red",
+			"currency": currency
+		},
+		{
+			"value": net_equity,
+			"label": "Total Equity",
+			"datatype": "Currency",
+			"indicator": "Blue",
+			"currency": currency
+		},
+		{
+			"value": net_provisional_profit_loss,
+			"label": "Provisional Profit / Loss (Credit)",
+			"indicator": "Green" if net_provisional_profit_loss > 0 else "Red",
+			"datatype": "Currency",
+			"currency": currency
+		}
+	]
 
 def get_chart_data(filters, columns, asset, liability, equity):
 	labels = [d.get("label") for d in columns[2:]]

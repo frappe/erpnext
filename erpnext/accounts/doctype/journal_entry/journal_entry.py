@@ -57,6 +57,7 @@ class JournalEntry(AccountsController):
 		from erpnext.hr.doctype.salary_slip.salary_slip import unlink_ref_doc_from_salary_slip
 		unlink_ref_doc_from_payment_entries(self)
 		unlink_ref_doc_from_salary_slip(self.name)
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
 		self.make_gl_entries(1)
 		self.update_advance_paid()
 		self.update_expense_claim()
@@ -559,20 +560,20 @@ class JournalEntry(AccountsController):
 
 			if self.write_off_based_on == 'Accounts Receivable':
 				jd1.party_type = "Customer"
-				jd1.credit = flt(d.outstanding_amount, self.precision("credit", "accounts"))
+				jd1.credit_in_account_currency = flt(d.outstanding_amount, self.precision("credit", "accounts"))
 				jd1.reference_type = "Sales Invoice"
 				jd1.reference_name = cstr(d.name)
 			elif self.write_off_based_on == 'Accounts Payable':
 				jd1.party_type = "Supplier"
-				jd1.debit = flt(d.outstanding_amount, self.precision("debit", "accounts"))
+				jd1.debit_in_account_currency = flt(d.outstanding_amount, self.precision("debit", "accounts"))
 				jd1.reference_type = "Purchase Invoice"
 				jd1.reference_name = cstr(d.name)
 
 		jd2 = self.append('accounts', {})
 		if self.write_off_based_on == 'Accounts Receivable':
-			jd2.debit = total
+			jd2.debit_in_account_currency = total
 		elif self.write_off_based_on == 'Accounts Payable':
-			jd2.credit = total
+			jd2.credit_in_account_currency = total
 
 		self.validate_total_debit_and_credit()
 
@@ -594,7 +595,7 @@ class JournalEntry(AccountsController):
 		for d in self.accounts:
 			if d.reference_type=="Expense Claim" and d.reference_name:
 				doc = frappe.get_doc("Expense Claim", d.reference_name)
-				update_reimbursed_amount(doc)
+				update_reimbursed_amount(doc, jv=self.name)
 
 
 	def validate_expense_claim(self):
