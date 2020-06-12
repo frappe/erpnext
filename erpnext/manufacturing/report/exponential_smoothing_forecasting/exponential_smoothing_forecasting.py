@@ -217,6 +217,8 @@ class ForecastingReport(ExponentialSmoothingForecast):
 		}
 
 	def get_summary_data(self):
+		if not self.data: return
+
 		return [
 			{
 				"value": sum(self.total_demand),
