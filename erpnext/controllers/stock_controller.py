@@ -19,7 +19,7 @@ class QualityInspectionNotSubmittedError(frappe.ValidationError): pass
 class StockController(AccountsController):
 	def validate(self):
 		super(StockController, self).validate()
-		if not self.is_return:
+		if not self.get('is_return'):
 			self.validate_inspection()
 		self.validate_serialized_batch()
 		self.validate_customer_provided_item()
