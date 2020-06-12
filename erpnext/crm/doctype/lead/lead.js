@@ -34,7 +34,7 @@ erpnext.LeadController = frappe.ui.form.Controller.extend({
 
 	refresh: function () {
 		var doc = this.frm.doc;
-		erpnext.toggle_naming_series();
+		// erpnext.toggle_naming_series();
 		frappe.dynamic_link = { doc: doc, fieldname: 'name', doctype: 'Lead' }
 
 		if(!doc.__islocal && doc.__onload && !doc.__onload.is_customer) {

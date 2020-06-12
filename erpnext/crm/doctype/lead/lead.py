@@ -136,9 +136,9 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 			"field_map": {
 				"name": "lead_name",
 				"company_name": "customer_name",
-				"contact_no": "phone_1",
-				"fax": "fax_number",
-				"phone": "phone_number_1",
+				# "contact_no": "phone_1",
+				# "fax": "fax_number",
+				# "phone": "phone_number_1",
 				"territory": "territory"
 			}
 		}}, target_doc, set_missing_values, ignore_permissions=ignore_permissions)
