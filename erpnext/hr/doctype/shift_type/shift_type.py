@@ -28,13 +28,14 @@ class ShiftType(Document):
 		logs = frappe.db.get_list('Employee Checkin', fields="*", filters=filters, order_by="employee,time")
 		for key, group in itertools.groupby(logs, key=lambda x: (x['employee'], x['shift_actual_start'])):
 			single_shift_logs = list(group)
-			attendance_status, working_hours, late_entry, early_exit = self.get_attendance(single_shift_logs)
-			mark_attendance_and_link_log(single_shift_logs, attendance_status, key[1].date(), working_hours, late_entry, early_exit, self.name)
+			attendance_status, working_hours, late_entry, early_exit, in_time, out_time = self.get_attendance(single_shift_logs)
+			mark_attendance_and_link_log(single_shift_logs, attendance_status, key[1].date(), working_hours, late_entry, early_exit, in_time, out_time, self.name)
 		for employee in self.get_assigned_employee(self.process_attendance_after, True):
 			self.mark_absent_for_dates_with_no_attendance(employee)
 
 	def get_attendance(self, logs):
-		"""Return attendance_status, working_hours for a set of logs belonging to a single shift.
+		"""Return attendance_status, working_hours, late_entry, early_exit, in_time, out_time
+		for a set of logs belonging to a single shift.
 		Assumtion:
 			1. These logs belongs to an single shift, single employee and is not in a holiday date.
 			2. Logs are in chronological order
@@ -48,10 +49,10 @@ class ShiftType(Document):
 			early_exit = True
 
 		if self.working_hours_threshold_for_absent and total_working_hours < self.working_hours_threshold_for_absent:
-			return 'Absent', total_working_hours, late_entry, early_exit
+			return 'Absent', total_working_hours, late_entry, early_exit, in_time, out_time
 		if self.working_hours_threshold_for_half_day and total_working_hours < self.working_hours_threshold_for_half_day:
-			return 'Half Day', total_working_hours, late_entry, early_exit
-		return 'Present', total_working_hours, late_entry, early_exit
+			return 'Half Day', total_working_hours, late_entry, early_exit, in_time, out_time
+		return 'Present', total_working_hours, late_entry, early_exit, in_time, out_time
 
 	def mark_absent_for_dates_with_no_attendance(self, employee):
 		"""Marks Absents for the given employee on working days in this shift which have no attendance marked.
