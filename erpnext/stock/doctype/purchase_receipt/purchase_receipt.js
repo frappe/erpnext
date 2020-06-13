@@ -25,7 +25,7 @@ frappe.ui.form.on("Purchase Receipt", {
 
 		frm.custom_make_buttons = {
 			'Stock Entry': 'Return',
-			'Purchase Invoice': 'Invoice'
+			'Purchase Invoice': 'Purchase Invoice'
 		};
 
 		frm.set_query("expense_account", "items", function() {
