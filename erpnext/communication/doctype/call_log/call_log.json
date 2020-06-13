@@ -9,6 +9,8 @@
   "from",
   "to",
   "medium",
+  "start_time",
+  "end_time",
   "column_break_4",
   "type",
   "status",
@@ -106,11 +108,21 @@
    "fieldname": "section_break_11",
    "fieldtype": "Section Break",
    "hide_border": 1
+  },
+  {
+   "fieldname": "start_time",
+   "fieldtype": "Datetime",
+   "label": "Start Time"
+  },
+  {
+   "fieldname": "end_time",
+   "fieldtype": "Datetime",
+   "label": "End Time"
   }
  ],
  "in_create": 1,
  "links": [],
- "modified": "2020-06-12 23:27:50.896906",
+ "modified": "2020-06-13 22:00:52.963759",
  "modified_by": "Administrator",
  "module": "Communication",
  "name": "Call Log",

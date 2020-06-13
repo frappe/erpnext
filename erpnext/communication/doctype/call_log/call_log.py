@@ -10,6 +10,9 @@ from erpnext.crm.doctype.utils import get_scheduled_employees_for_popup, strip_n
 from frappe.contacts.doctype.contact.contact import get_contact_with_phone_number
 from frappe.core.doctype.dynamic_link.dynamic_link import deduplicate_dynamic_links
 
+END_CALL_STATUSES = ['No Answer', 'Completed', 'Busy', 'Failed']
+ONGOING_CALL_STATUSES = ['Ringing', 'In Progress']
+
 class CallLog(Document):
 	def validate(self):
 		deduplicate_dynamic_links(self)
@@ -18,25 +21,24 @@ class CallLog(Document):
 		self.set_caller_information()
 
 	def after_insert(self):
-		self.trigger_call_popup()
+		if self.get('type') == 'Incoming':
+			self.trigger_call_popup()
 
 	def on_update(self):
-		doc_before_save = self.get_doc_before_save()
-		if not doc_before_save: return
-		if doc_before_save.status in ['Ringing'] and self.status in ['Missed', 'Completed']:
-			frappe.publish_realtime('call_{id}_disconnected'.format(id=self.id), self)
-		elif doc_before_save.to != self.to:
-			self.trigger_call_popup()
+		if self.get('type') == 'Incoming':
+			doc_before_save = self.get_doc_before_save()
+			if not doc_before_save: return
+			if doc_before_save.status in ONGOING_CALL_STATUSES and self.status in END_CALL_STATUSES:
+				frappe.publish_realtime('call_{id}_ended'.format(id=self.id), self)
+			elif doc_before_save.to != self.to:
+				self.trigger_call_popup()
 
 	def set_caller_information(self):
 		number = self.get('from') if self.type == 'Incoming' else self.get('to')
 		number = strip_number(number)
 		contact = get_contact_with_phone_number(number)
 		if contact:
-			self.append('links', {
-				'link_doctype': 'Contact',
-				'link_name': contact
-			})
+			self.link_contact(contact)
 
 	def link_contact(self, contact):
 		self.append('links', {

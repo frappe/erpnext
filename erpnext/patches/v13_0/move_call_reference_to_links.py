@@ -3,7 +3,10 @@ import frappe
 # move employee/lead/Contact to links
 def execute():
 	frappe.reload_doctype('Call Log')
+
 	frappe.db.sql("UPDATE `tabCall Log` SET `type`='Incoming' where `type` is NULL")
+	frappe.db.sql("UPDATE `tabCall Log` SET `status`='No Answer' where `status` is 'Missed'")
+
 	logs = frappe.get_all('Call Log', fields=['lead', 'contact', 'name', 'contact_name', 'lead_name'])
 	for log in logs:
 		links = []
