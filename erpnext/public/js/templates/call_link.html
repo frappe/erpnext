@@ -1,13 +1,20 @@
 <div class="call-detail-wrapper">
-	<div class="head padding">
+	<div class="left-arrow"></div>
+	<div class="head text-muted">
 		<span>
 			<i class="fa fa-phone"> </i>
 		<span>
 		<span> {{ type }} Call</span>
 		-
-		<a href="#Form/Call Log/{{name}}">Details</a>
+		<span> {{ frappe.format(duration, { fieldtype: "Duration" }) }}</span>
+		-
+		<span> {{ comment_when(creation) }}</span>
+		-
+		<!-- <span> {{ status }}</span>
+		- -->
+		<a class="text-muted" href="#Form/Call Log/{{name}}">Details</a>
 		{% if (show_call_button) { %}
-		<a class="pull-right">Callback</a>
+			<a class="pull-right">Callback</a>
 		{% } %}
 	</div>
 	<div class="body padding">
@@ -18,7 +25,11 @@
 		{% } %}
 		<hr>
 		<div class="summary">
-			<span>{{ summary || "No Summary"}}</span>
+		{% if (summary) { %}
+			<span>{{ summary }}</span>
+		{% } else { %}
+			<i class="text-muted">{{ __("No Summary") }}</i>
+		{% } %}
 		</div>
 		{% if (recording_url) { %}
 		<div class="margin-top">
