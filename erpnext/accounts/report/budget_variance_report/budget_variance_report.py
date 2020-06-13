@@ -29,36 +29,59 @@ def execute(filters=None):
 	for dimension in dimensions:
 		dimension_items = cam_map.get(dimension)
 		if dimension_items:
-			for account, monthwise_data in iteritems(dimension_items):
-				row = [dimension, account]
-				totals = [0, 0, 0]
-				for year in get_fiscal_years(filters):
-					last_total = 0
-					for relevant_months in period_month_ranges:
-						period_data = [0, 0, 0]
-						for month in relevant_months:
-							if monthwise_data.get(year[0]):
-								month_data = monthwise_data.get(year[0]).get(month, {})
-								for i, fieldname in enumerate(["target", "actual", "variance"]):
-									value = flt(month_data.get(fieldname))
-									period_data[i] += value
-									totals[i] += value
-
-						period_data[0] += last_total
-
-						if filters.get("show_cumulative"):
-							last_total = period_data[0] - period_data[1]
-
-						period_data[2] = period_data[0] - period_data[1]
-						row += period_data
-				totals[2] = totals[0] - totals[1]
-				if filters["period"] != "Yearly":
-					row += totals
-				data.append(row)
+			data = get_final_data(dimension, dimension_items, filters, period_month_ranges, data, 0)
+		else:
+			DCC_allocation = frappe.db.sql('''SELECT parent, sum(percentage_allocation) as percentage_allocation
+				FROM `tabDistributed Cost Center`
+				WHERE cost_center IN %(dimension)s
+				AND parent NOT IN %(dimension)s
+				GROUP BY parent''',{'dimension':[dimension]})
+			if DCC_allocation:
+				filters['budget_against_filter'] = [DCC_allocation[0][0]]
+				cam_map = get_dimension_account_month_map(filters)
+				dimension_items = cam_map.get(DCC_allocation[0][0])
+				if dimension_items:
+					data = get_final_data(dimension, dimension_items, filters, period_month_ranges, data, DCC_allocation[0][1])
 
 	chart = get_chart_data(filters, columns, data)
 
 	return columns, data, None, chart
+
+def get_final_data(dimension, dimension_items, filters, period_month_ranges, data, DCC_allocation):
+
+	for account, monthwise_data in iteritems(dimension_items):
+		row = [dimension, account]
+		totals = [0, 0, 0]
+		for year in get_fiscal_years(filters):
+			last_total = 0
+			for relevant_months in period_month_ranges:
+				period_data = [0, 0, 0]
+				for month in relevant_months:
+					if monthwise_data.get(year[0]):
+						month_data = monthwise_data.get(year[0]).get(month, {})
+						for i, fieldname in enumerate(["target", "actual", "variance"]):
+							value = flt(month_data.get(fieldname))
+							period_data[i] += value
+							totals[i] += value
+
+				period_data[0] += last_total
+
+				if DCC_allocation:
+					period_data[0] = period_data[0]*(DCC_allocation/100)
+					period_data[1] = period_data[1]*(DCC_allocation/100)
+
+				if(filters.get("show_cumulative")):
+					last_total = period_data[0] - period_data[1]
+
+				period_data[2] = period_data[0] - period_data[1]
+				row += period_data
+		totals[2] = totals[0] - totals[1]
+		if filters["period"] != "Yearly" :
+			row += totals
+		data.append(row)
+		
+	return data
+
 
 def get_columns(filters):
 	columns = [
@@ -366,7 +389,7 @@ def get_chart_data(filters, columns, data):
 			budget_values[i] += values[index]
 			actual_values[i] += values[index+1]
 			index += 3
-
+			
 	return {
 		'data': {
 			'labels': labels,
