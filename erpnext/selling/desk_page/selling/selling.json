@@ -29,7 +29,7 @@
  "category": "Modules",
  "charts": [
   {
-   "chart_name": "Income",
+   "chart_name": "Incoming Bills (Purchase Invoice)",
    "label": "Income"
   }
  ],
@@ -43,7 +43,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Selling",
- "modified": "2020-05-28 13:46:08.314240",
+ "modified": "2020-06-03 13:23:24.861706",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
