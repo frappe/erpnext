@@ -173,7 +173,8 @@ def get_call_log(call_payload):
 
 def get_status_updater_url():
 	from frappe.utils.data import get_url
-	return get_url('api/method/erpnext.erpnext_integrations.exotel_integration.update_call_status/{key}')
+	webhook_key = frappe.db.get_single_value('Exotel Settings', 'webhook_key')
+	return get_url('api/method/erpnext.erpnext_integrations.exotel_integration.update_call_status/{key}'.format(key=webhook_key))
 
 def get_exotel_endpoint(action, version='v1'):
 	api_key = frappe.db.get_single_value('Exotel Settings', 'api_key')
