@@ -148,7 +148,7 @@ class CallPopup {
 				'fieldtype': 'Button',
 				'label': __('Save'),
 				'click': () => {
-					const call_summary = this.form.get_value('call_summary');
+					const call_summary = this.call_details.get_value('call_summary');
 					if (!call_summary) return;
 					frappe.xcall('erpnext.communication.doctype.call_log.call_log.add_call_summary', {
 						'call_log': this.call_log.name,
