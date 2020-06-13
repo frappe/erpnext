@@ -77,7 +77,7 @@ def get_call_log(call_payload):
 		return frappe.get_doc('Call Log', call_log[0].name)
 
 def create_call_log(call_id, from_number, to_number, medium,
-	status='Ringing', call_type='Incoming'):
+	status='Ringing', call_type='Incoming', link_to_document=None):
 	call_log = frappe.new_doc('Call Log')
 	call_log.id = call_id
 	call_log.to = to_number
@@ -85,6 +85,8 @@ def create_call_log(call_id, from_number, to_number, medium,
 	call_log.type = call_type
 	call_log.status = status
 	setattr(call_log, 'from', from_number)
+	if link_to_document:
+		call_log.append('links', link_to_document)
 	call_log.save(ignore_permissions=True)
 	frappe.db.commit()
 	return call_log
@@ -102,7 +104,7 @@ def get_call_status(call_id):
 	return status
 
 @frappe.whitelist()
-def make_a_call(to_number, caller_id=None):
+def make_a_call(to_number, caller_id=None, link_to_document=None):
 	endpoint = get_exotel_endpoint('Calls/connect.json?details=true')
 	cell_number = frappe.get_value('Employee', {
 		'user_id': frappe.session.user
@@ -126,12 +128,15 @@ def make_a_call(to_number, caller_id=None):
 	else:
 		res = response.json()
 		call_payload = res.get('Call', {})
+		if link_to_document:
+			link_to_document = json.loads(link_to_document)
 		create_call_log(
 			call_id=call_payload.get('Sid'),
 			from_number=call_payload.get('From'),
 			to_number=call_payload.get('To'),
 			medium=call_payload.get('PhoneNumberSid'),
-			call_type="Outgoing"
+			call_type="Outgoing",
+			link_to_document=link_to_document
 		)
 
 	return response.json()

@@ -1,13 +1,19 @@
 frappe.provide('frappe.phone_call');
 
 class CallHandler {
-	constructor(to_number) {
+	constructor(to_number, frm) {
 		// to_number call be string or array
 		// like '12345' or ['1234', '4567'] or '1234\n4567'
 		if (Array.isArray(to_number)) {
 			this.to_numbers = to_number;
 		} else {
 			this.to_numbers = to_number.split('\n');
+		}
+		if (frm) {
+			this.document_to_link = {
+				'link_doctype': frm.doctype,
+				'link_docname': frm.docnane
+			};
 		}
 		this.make();
 	}
@@ -50,6 +56,7 @@ class CallHandler {
 				this.dialog.disable_primary_action();
 				frappe.xcall('erpnext.erpnext_integrations.exotel_integration.make_a_call', {
 					'to_number': this.dialog.get_value('to_number'),
+					'link_call_to_document': this.document_to_link
 				}).then(res => {
 					this.dialog.get_close_btn().hide();
 					this.dialog.set_value('response', JSON.stringify(res, null, 2));
@@ -109,11 +116,10 @@ class CallHandler {
 			'ringing': 'green blink',
 			'in-progress': 'green blink'
 		};
-
 		const indicator_class = `indicator ${indicator_map[status] || 'blue blink'}`;
 		return indicator_class;
 	}
 
 }
 
-frappe.phone_call.handler = (to_number) => new CallHandler(to_number);
+frappe.phone_call.handler = (to_number, frm) => new CallHandler(to_number, frm);
