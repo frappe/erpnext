@@ -418,6 +418,7 @@ def set_gl_entries_by_account(
 			where company=%(company)s
 			{additional_conditions}
 			and posting_date <= %(to_date)s
+			and is_cancelled = 0
 			{distributed_cost_center_query}
 			order by account, posting_date""".format(
 				additional_conditions=additional_conditions,
