@@ -28,12 +28,32 @@
 }
 
 .call-detail-wrapper {
+	color: initial;
 	border: 1px solid @border-color;
 	border-radius: 4px;
 	margin-left: 5px;
 	max-width: 60%;
+	overflow: hidden;
+	i {
+		margin-right: 5px;
+	}
 	.head {
 		background: @light-bg;
 		border-bottom: 1px solid @light-border-color;
+	}
+	.body {
+		hr {
+			margin: 10px 0;
+		}
+		.summary span {
+			color: @text-color;
+		}
+
+	}
+	audio {
+		height: 40px;
+		border: 1px solid @border-color;
+		background-color: #f0f3f4;
+		border-radius: 4px
 	}
 }
