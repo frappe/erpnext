@@ -156,7 +156,8 @@ var total_work_hours = function(frm, dt, dn) {
 			}
 			gross_pay += earning.amount;
 		});
-		frm.set_value('gross_pay', gross_pay);
+		 //Is adding the components with do_not_include_in_total so should be removed.
+		//frm.set_value('gross_pay', gross_pay);
 
 		frm.doc.net_pay = flt(frm.doc.gross_pay) - flt(frm.doc.total_deduction);
 		frm.doc.rounded_total = Math.round(frm.doc.net_pay);
