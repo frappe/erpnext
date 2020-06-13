@@ -15,6 +15,8 @@
   "duration",
   "recording_url",
   "recording_html",
+  "section_break_11",
+  "summary",
   "section_break_19",
   "links"
  ],
@@ -24,8 +26,6 @@
    "fieldtype": "Data",
    "label": "ID",
    "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1,
    "unique": 1
   },
   {
@@ -33,18 +33,14 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "From",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "to",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "To",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "status",
@@ -52,77 +48,69 @@
    "in_list_view": 1,
    "label": "Status",
    "options": "Ringing\nIn Progress\nCompleted\nMissed\nFailed\nBusy\nNo Answer\nQueued",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "description": "Call Duration in seconds",
    "fieldname": "duration",
-   "fieldtype": "Int",
+   "fieldtype": "Duration",
    "in_list_view": 1,
    "label": "Duration",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "recording_url",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "Recording URL",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Recording URL"
   },
   {
    "fieldname": "medium",
    "fieldtype": "Data",
    "label": "Medium",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "type",
    "fieldtype": "Select",
    "label": "Type",
    "options": "Incoming\nOutgoing",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "recording_html",
    "fieldtype": "HTML",
-   "label": "Recording HTML",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Recording HTML"
   },
   {
    "fieldname": "section_break_19",
    "fieldtype": "Section Break",
-   "label": "Reference",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Reference"
   },
   {
    "fieldname": "links",
    "fieldtype": "Table",
    "label": "Links",
-   "options": "Dynamic Link",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Dynamic Link"
   },
   {
    "fieldname": "column_break_4",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "summary",
+   "fieldtype": "Small Text",
+   "label": "Call Summary"
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break",
+   "hide_border": 1
   }
  ],
  "in_create": 1,
  "links": [],
- "modified": "2020-06-09 15:33:14.035187",
+ "modified": "2020-06-12 23:27:50.896906",
  "modified_by": "Administrator",
  "module": "Communication",
  "name": "Call Log",
@@ -145,8 +133,8 @@
    "role": "Employee"
   }
  ],
- "sort_field": "modified",
- "sort_order": "ASC",
+ "sort_field": "creation",
+ "sort_order": "DESC",
  "title_field": "from",
  "track_changes": 1,
  "track_views": 1

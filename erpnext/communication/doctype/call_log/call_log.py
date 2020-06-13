@@ -8,8 +8,12 @@ from frappe import _
 from frappe.model.document import Document
 from erpnext.crm.doctype.utils import get_scheduled_employees_for_popup, strip_number
 from frappe.contacts.doctype.contact.contact import get_contact_with_phone_number
+from frappe.core.doctype.dynamic_link.dynamic_link import deduplicate_dynamic_links
 
 class CallLog(Document):
+	def validate(self):
+		deduplicate_dynamic_links(self)
+
 	def before_insert(self):
 		self.set_caller_information()
 
@@ -25,8 +29,20 @@ class CallLog(Document):
 			self.trigger_call_popup()
 
 	def set_caller_information(self):
-		number = strip_number(self.get('from'))
-		self.contact = get_contact_with_phone_number(number)
+		number = self.get('from') if self.type == 'Incoming' else self.get('to')
+		number = strip_number(number)
+		contact = get_contact_with_phone_number(number)
+		if contact:
+			self.append('links', {
+				'link_doctype': 'Contact',
+				'link_name': contact
+			})
+
+	def link_contact(self, contact):
+		self.append('links', {
+			'link_doctype': 'Contact',
+			'link_name': contact
+		})
 
 	def trigger_call_popup(self):
 		scheduled_employees = get_scheduled_employees_for_popup(self.medium)
@@ -35,16 +51,18 @@ class CallLog(Document):
 		# check if employees with matched number are scheduled to receive popup
 		emails = set(scheduled_employees).intersection(employee_emails)
 
-		# # if no employee found with matching phone number then show popup to scheduled employees
-		# emails = emails or scheduled_employees if employee_emails
+		if employee_emails and not emails:
+			self.add_comment(text=_("No employee was scheduled for call popup"))
 
 		for email in emails:
 			frappe.publish_realtime('show_call_popup', self, user=email)
 
+
 @frappe.whitelist()
 def add_call_summary(call_log, summary):
 	doc = frappe.get_doc('Call Log', call_log)
-	doc.add_comment('Comment', frappe.bold(_('Call Summary')) + '<br><br>' + summary)
+	doc.summary = summary
+	doc.save()
 
 def get_employees_with_number(number):
 	number = strip_number(number)
@@ -65,54 +83,58 @@ def get_employees_with_number(number):
 
 def set_caller_information(doc, state):
 	'''Called from hooks on creation of Contact'''
-	pass
-	# if doc.doctype not in ['Lead', 'Contact']: return
+	if doc.doctype != 'Contact': return
 
-	# numbers = [doc.get('phone'), doc.get('mobile_no')]
-	# # contact for Contact and lead for Lead
-	# fieldname = doc.doctype.lower()
+	numbers = [d.phone for d in doc.phone_nos]
 
-	# # contact_name or lead_name
-	# display_name_field = '{}_name'.format(fieldname)
+	for number in numbers:
+		number = strip_number(number)
+		if not number: continue
+		logs = frappe.db.sql_list("""
+			SELECT cl.name FROM `tabCall Log` cl
+			LEFT JOIN `tabDynamic Link` dl
+			ON cl.name = dl.parent
+			WHERE (cl.`from` like %(phone_number)s or cl.`to` like %(phone_number)s)
+			GROUP BY cl.name
+			HAVING SUM(
+				CASE
+					WHEN dl.link_doctype = 'Contact' AND dl.link_name = %(contact_name)s
+					THEN 1
+					ELSE 0
+				END
+			)=0
+		""", dict(phone_number='%{}'.format(number),
+			contact_name=doc.name))
 
-	# # Contact now has all the nos saved in child table
-	# if doc.doctype == 'Contact':
-	# 	numbers = [d.phone for d in doc.phone_nos]
+		for log in logs:
+			call_log = frappe.get_doc('Call Log', log)
+			call_log.link_contact(doc.name)
+			call_log.save()
 
-	# for number in numbers:
-	# 	number = strip_number(number)
-	# 	if not number: continue
-
-	# 	filters = frappe._dict({
-	# 		'from': ['like', '%{}'.format(number)],
-	# 		fieldname: ''
-	# 	})
-
-	# 	logs = frappe.get_all('Call Log', filters=filters)
-
-	# 	for log in logs:
-	# 		frappe.db.set_value('Call Log', log.name, {
-	# 			fieldname: doc.name,
-	# 			display_name_field: doc.get_title()
-	# 		}, update_modified=False)
-
-def link_call_logs(doctype, docname):
+def get_linked_call_logs(doctype, docname):
+	# content will be shown in timeline
 	logs = frappe.get_all('Dynamic Link', fields=['parent'], filters={
 		'parenttype': 'Call Log',
 		'link_doctype': doctype,
 		'link_name': docname
 	})
 
-	logs = [log.parent for log in logs]
+	logs = set([log.parent for log in logs])
 
-	logs = frappe.get_all('Call Log', fields=['name', '`from`', '`to`', '`type`'], filters={
+	logs = frappe.get_all('Call Log', fields=['*'], filters={
 		'name': ['in', logs]
 	})
 
+	timeline_contents = []
 	for log in logs:
-		log.content = "<a href='#'>{} call from {} to {}</a>".format(log.type or 'Incoming', log.get('from'), log.to)
+		log.show_call_button = 0
+		timeline_contents.append({
+			'creation': log.creation,
+			'template': 'call_link',
+			'template_data': log
+		})
 
-	return logs
+	return timeline_contents
 
 @frappe.whitelist()
 def get_caller_activities(number):

@@ -538,5 +538,5 @@ global_search_doctypes = {
 }
 
 additional_timeline_content = [
-	'erpnext.communication.doctype.call_log.call_log.link_call_logs'
+	'erpnext.communication.doctype.call_log.call_log.get_linked_call_logs'
 ]
