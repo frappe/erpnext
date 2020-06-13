@@ -85,8 +85,7 @@ def make_a_call(to_number, caller_id=None, link_to_document=None):
 			'To': to_number,
 			'CallerId': caller_id,
 			'Record': 'true' if frappe.db.get_single_value('Exotel Settings', 'record_call', True) else 'false',
-			'StatusCallback': get_status_updater_url(),
-			'StatusCallbackEvents': ['terminal'],
+			'StatusCallback': get_status_updater_url()
 		})
 		response.raise_for_status()
 	except requests.exceptions.HTTPError as e:
