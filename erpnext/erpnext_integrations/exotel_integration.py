@@ -53,7 +53,7 @@ def update_call_status(**kwargs):
 			'start_time': kwargs.get('StartTime'),
 			'end_time': kwargs.get('EndTime'),
 			'recording_url': kwargs.get('RecordingUrl'),
-			'duration': kwargs.get('ConversationDuration')
+			'duration': kwargs.get('ConversationDuration') or 0
 		})
 	except Exception as e:
 		frappe.log_error(title='Error while updating outgoing call status')
@@ -148,11 +148,11 @@ def create_call_log(call_id, from_number, to_number, medium,
 
 def update_call_log(call_payload, status='Ringing', call_log=None):
 	call_log = call_log or get_call_log(call_payload)
-	status = call_payload.get('Status')
+	status = call_payload.get('DialCallStatus')
 	status = frappe.unscrub(status)
 	try:
 		if call_log:
-			call_log.status = call_payload.get('Status')
+			call_log.status = status
 			# resetting this because call might be redirected to other number
 			call_log.to = call_payload.get('DialWhomNumber')
 			call_log.duration = call_payload.get('DialCallDuration') or 0
