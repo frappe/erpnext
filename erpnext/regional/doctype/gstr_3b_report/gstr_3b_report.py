@@ -158,7 +158,7 @@ class GSTR3BReport(Document):
 
 		self.prepare_data("Sales Invoice", outward_supply_tax_amounts, "sup_details", "osup_det", ["Registered Regular"])
 		self.prepare_data("Sales Invoice", outward_supply_tax_amounts, "sup_details", "osup_zero", ["SEZ", "Deemed Export", "Overseas"])
-		self.prepare_data("Purchase Invoice", inward_supply_tax_amounts, "sup_details", "isup_rev", ["Unregistered"], reverse_charge="Y")
+		self.prepare_data("Purchase Invoice", inward_supply_tax_amounts, "sup_details", "isup_rev", ["Unregistered", "Overseas"], reverse_charge="Y")
 		self.report_dict["sup_details"]["osup_nil_exmp"]["txval"] = flt(self.get_nil_rated_supply_value(), 2)
 		self.set_itc_details(itc_details)
 
@@ -192,32 +192,27 @@ class GSTR3BReport(Document):
 		for d in self.report_dict["itc_elg"]["itc_avl"]:
 
 			itc_type = itc_type_map.get(d["ty"])
-			gst_category = "Registered Regular"
+			gst_category = ["Registered Regular"]
 
 			if d["ty"] == 'ISRC':
 				reverse_charge = "Y"
 				itc_type = 'All Other ITC'
-				gst_category = 'Unregistered'
+				gst_category = ['Unregistered', 'Overseas']
 			else:
 				reverse_charge = "N"
 
 			for account_head in self.account_heads:
-				d["iamt"] += flt(itc_details.get((gst_category, itc_type, reverse_charge, account_head.get('igst_account')), {}).get("amount"), 2)
-				d["camt"] += flt(itc_details.get((gst_category, itc_type, reverse_charge, account_head.get('cgst_account')), {}).get("amount"), 2)
-				d["samt"] += flt(itc_details.get((gst_category, itc_type, reverse_charge, account_head.get('sgst_account')), {}).get("amount"), 2)
-				d["csamt"] += flt(itc_details.get((gst_category, itc_type, reverse_charge, account_head.get('cess_account')), {}).get("amount"), 2)
+				for category in gst_category:
+					for key in [['iamt', 'igst_account'], ['camt', 'cgst_account'], ['samt', 'sgst_account'], ['csamt', 'cess_account']]:
+						d[key[0]] += flt(itc_details.get((category, itc_type, reverse_charge, account_head.get(key[1])), {}).get("amount"), 2)
 
-			net_itc["iamt"] += flt(d["iamt"], 2)
-			net_itc["camt"] += flt(d["camt"], 2)
-			net_itc["samt"] += flt(d["samt"], 2)
-			net_itc["csamt"] += flt(d["csamt"], 2)
+			for key in ['iamt', 'camt', 'samt', 'csamt']:
+				net_itc[key] += flt(d[key], 2)
 
 		for account_head in self.account_heads:
 			itc_inelg = self.report_dict["itc_elg"]["itc_inelg"][1]
-			itc_inelg["iamt"] = flt(itc_details.get(("Ineligible", "N", account_head.get("igst_account")), {}).get("amount"), 2)
-			itc_inelg["camt"] = flt(itc_details.get(("Ineligible", "N", account_head.get("cgst_account")), {}).get("amount"), 2)
-			itc_inelg["samt"] = flt(itc_details.get(("Ineligible", "N", account_head.get("sgst_account")), {}).get("amount"), 2)
-			itc_inelg["csamt"] = flt(itc_details.get(("Ineligible", "N", account_head.get("cess_account")), {}).get("amount"), 2)
+			for key in [['iamt', 'igst_account'], ['camt', 'cgst_account'], ['samt', 'sgst_account'], ['csamt', 'cess_account']]:
+				itc_inelg[key[0]] = flt(itc_details.get(("Ineligible", "N", account_head.get(key[1])), {}).get("amount"), 2)
 
 	def prepare_data(self, doctype, tax_details, supply_type, supply_category, gst_category_list, reverse_charge="N"):
 
