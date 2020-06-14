@@ -48,6 +48,7 @@ def _order(*args, **kwargs):
 		return "success"
 
 	if event == "created":
+		sys_lang = frappe.get_single("System Settings").language or 'en'
 		raw_billing_data = order.get("billing")
 		customer_name = raw_billing_data.get("first_name") + " " + raw_billing_data.get("last_name")
 

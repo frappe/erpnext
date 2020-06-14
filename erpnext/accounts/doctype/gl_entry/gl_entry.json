@@ -114,13 +114,13 @@
    "fieldname": "debit_in_account_currency",
    "fieldtype": "Currency",
    "label": "Debit Amount in Account Currency",
-   "options": "currency"
+   "options": "account_currency"
   },
   {
    "fieldname": "credit_in_account_currency",
    "fieldtype": "Currency",
    "label": "Credit Amount in Account Currency",
-   "options": "currency"
+   "options": "account_currency"
   },
   {
    "fieldname": "against",
@@ -250,7 +250,7 @@
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
- "modified": "2020-02-10 04:54:57.777905",
+ "modified": "2020-03-28 16:22:33.766994",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "GL Entry",

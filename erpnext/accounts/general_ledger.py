@@ -136,12 +136,14 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 
 
 def make_entry(args, adv_adj, update_outstanding, from_repost=False):
-	args.update({"doctype": "GL Entry"})
-	gle = frappe.get_doc(args)
+	gle = frappe.new_doc("GL Entry")
+	gle.update(args)
 	gle.flags.ignore_permissions = 1
 	gle.flags.from_repost = from_repost
-	gle.insert()
+	gle.validate()
+	gle.db_insert()
 	gle.run_method("on_update_with_args", adv_adj, update_outstanding, from_repost)
+	gle.flags.ignore_validate = True
 	gle.submit()
 
 def validate_account_for_perpetual_inventory(gl_map):

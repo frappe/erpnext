@@ -206,6 +206,9 @@ class Analytics(object):
 	def get_rows(self):
 		self.data = []
 		self.get_periodic_data()
+		total_row = {
+			"entity": "Total",
+		}
 
 		for entity, period_data in iteritems(self.entity_periodic_data):
 			row = {
@@ -219,6 +222,9 @@ class Analytics(object):
 				row[scrub(period)] = amount
 				total += amount
 
+				if not total_row.get(scrub(period)): total_row[scrub(period)] = 0
+				total_row[scrub(period)] += amount
+
 			row["total"] = total
 
 			if self.filters.tree_type == "Item":
@@ -226,6 +232,8 @@ class Analytics(object):
 				row["item_brand"] = period_data.get("item_brand")
 
 			self.data.append(row)
+
+		self.data.append(total_row)
 
 	def get_rows_by_group(self):
 		self.get_periodic_data()
@@ -245,8 +253,10 @@ class Analytics(object):
 					self.entity_periodic_data.setdefault(d.parent, frappe._dict()).setdefault(period, 0.0)
 					self.entity_periodic_data[d.parent][period] += amount
 				total += amount
+
 			row["total"] = total
 			out = [row] + out
+
 		self.data = out
 
 	def get_periodic_data(self):

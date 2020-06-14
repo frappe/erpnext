@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, time_diff_in_hours, get_datetime
+from frappe.utils import flt, time_diff_in_hours, get_datetime, time_diff, get_link_to_form
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 
@@ -90,13 +90,15 @@ class JobCard(Document):
 
 	def validate_job_card(self):
 		if not self.time_logs:
-			frappe.throw(_("Time logs are required for job card {0}").format(self.name))
+			frappe.throw(_("Time logs are required for {0} {1}")
+				.format(frappe.bold("Job Card"), get_link_to_form("Job Card", self.name)))
 
-		if self.total_completed_qty <= 0.0:
-			frappe.throw(_("Total completed qty must be greater than zero"))
+		if self.for_quantity and self.total_completed_qty != self.for_quantity:
+			total_completed_qty = frappe.bold(_("Total Completed Qty"))
+			qty_to_manufacture = frappe.bold(_("Qty to Manufacture"))
 
-		if self.total_completed_qty > self.for_quantity:
-			frappe.throw(_("Total completed qty can not be greater than for quantity"))
+			frappe.throw(_("The {0} ({1}) must be equal to {2} ({3})"
+				.format(total_completed_qty, frappe.bold(self.total_completed_qty), qty_to_manufacture,frappe.bold(self.for_quantity))))
 
 	def update_work_order(self):
 		if not self.work_order:
@@ -105,27 +107,35 @@ class JobCard(Document):
 		for_quantity, time_in_mins = 0, 0
 		from_time_list, to_time_list = [], []
 
-		for d in frappe.get_all('Job Card',
-			filters = {'docstatus': 1, 'operation_id': self.operation_id}):
-			doc = frappe.get_doc('Job Card', d.name)
+		field = "operation_id" if self.operation_id else "operation"
+		data = frappe.get_all('Job Card',
+			fields = ["sum(total_time_in_mins) as time_in_mins", "sum(total_completed_qty) as completed_qty"],
+			filters = {"docstatus": 1, "work_order": self.work_order,
+				"workstation": self.workstation, field: self.get(field)})
 
-			for_quantity += doc.total_completed_qty
-			time_in_mins += doc.total_time_in_mins
-			for time_log in doc.time_logs:
-				if time_log.from_time:
-					from_time_list.append(time_log.from_time)
-				if time_log.to_time:
-					to_time_list.append(time_log.to_time)
+		if data and len(data) > 0:
+			for_quantity = data[0].completed_qty
+			time_in_mins = data[0].time_in_mins
 
-		if for_quantity:
+		if self.get(field):
+			time_data = frappe.db.sql("""
+				SELECT
+					min(from_time) as start_time, max(to_time) as end_time
+				FROM `tabJob Card` jc, `tabJob Card Time Log` jctl
+				WHERE
+					jctl.parent = jc.name and jc.work_order = %s
+					and jc.workstation = %s and jc.{0} = %s and jc.docstatus = 1
+			""".format(field), (self.work_order, self.workstation, self.get(field)), as_dict=1)
+
 			wo = frappe.get_doc('Work Order', self.work_order)
 
+			work_order_field = "name" if field == "operation_id" else field
 			for data in wo.operations:
-				if data.name == self.operation_id:
+				if data.get(work_order_field) == self.get(field) and data.workstation == self.workstation:
 					data.completed_qty = for_quantity
 					data.actual_operation_time = time_in_mins
-					data.actual_start_time = min(from_time_list) if from_time_list else None
-					data.actual_end_time = max(to_time_list) if to_time_list else None
+					data.actual_start_time = time_data[0].start_time if time_data else None
+					data.actual_end_time = time_data[0].end_time if time_data else None
 
 			wo.flags.ignore_validate_update_after_submit = True
 			wo.update_operation_status()
@@ -172,6 +182,8 @@ class JobCard(Document):
 		self.set_status(update_status)
 
 	def set_status(self, update_status=False):
+		if self.status == "On Hold": return
+
 		self.status = {
 			0: "Open",
 			1: "Submitted",
@@ -230,6 +242,7 @@ def make_stock_entry(source_name, target_doc=None):
 		target.fg_completed_qty = source.get('for_quantity', 0) - source.get('transferred_qty', 0)
 		target.calculate_rate_and_amount()
 		target.set_missing_values()
+		target.set_stock_entry_type()
 
 	doclist = get_mapped_doc("Job Card", source_name, {
 		"Job Card": {
@@ -251,3 +264,48 @@ def make_stock_entry(source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+def time_diff_in_minutes(string_ed_date, string_st_date):
+	return time_diff(string_ed_date, string_st_date).total_seconds() / 60
+
+@frappe.whitelist()
+def get_job_details(start, end, filters=None):
+	events = []
+
+	event_color = {
+		"Completed": "#cdf5a6",
+		"Material Transferred": "#ffdd9e",
+		"Work In Progress": "#D3D3D3"
+	}
+
+	from frappe.desk.reportview import get_filters_cond
+	conditions = get_filters_cond("Job Card", filters, [])
+
+	job_cards = frappe.db.sql(""" SELECT `tabJob Card`.name, `tabJob Card`.work_order,
+			`tabJob Card`.employee_name, `tabJob Card`.status, ifnull(`tabJob Card`.remarks, ''),
+			min(`tabJob Card Time Log`.from_time) as from_time,
+			max(`tabJob Card Time Log`.to_time) as to_time
+		FROM `tabJob Card` , `tabJob Card Time Log`
+		WHERE
+			`tabJob Card`.name = `tabJob Card Time Log`.parent {0}
+			group by `tabJob Card`.name""".format(conditions), as_dict=1)
+
+	for d in job_cards:
+			subject_data = []
+			for field in ["name", "work_order", "remarks", "employee_name"]:
+				if not d.get(field): continue
+
+				subject_data.append(d.get(field))
+
+			color = event_color.get(d.status)
+			job_card_data = {
+				'from_time': d.from_time,
+				'to_time': d.to_time,
+				'name': d.name,
+				'subject': '\n'.join(subject_data),
+				'color': color if color else "#89bcde"
+			}
+
+			events.append(job_card_data)
+
+	return events

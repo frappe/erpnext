@@ -71,12 +71,13 @@ frappe.ui.form.on('Production Plan', {
 			}, __('Create'));
 		}
 
+		frm.page.set_inner_btn_group_as_primary(__('Create'));
 		frm.trigger("material_requirement");
 
 		const projected_qty_formula = ` <table class="table table-bordered" style="background-color: #f9f9f9;">
 			<tr><td style="padding-left:25px">
 				<div>
-				<h3>
+				<h3 style="text-decoration: underline;">
 					<a href = "https://erpnext.com/docs/user/manual/en/stock/projected-quantity">
 						${__("Projected Quantity Formula")}
 					</a>

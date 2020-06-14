@@ -643,8 +643,7 @@ def get_itemised_tax_breakup_html(doc):
 			itemised_tax=itemised_tax,
 			itemised_taxable_amount=itemised_taxable_amount,
 			tax_accounts=tax_accounts,
-			conversion_rate=doc.conversion_rate,
-			currency=doc.currency
+			doc=doc
 		)
 	)
 

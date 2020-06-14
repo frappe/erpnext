@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-from frappe.utils import flt, cint
+from frappe.utils import flt, cint, get_link_to_form
 from frappe.utils.jinja import render_template
 from frappe.utils.data import add_days
 from six import string_types
@@ -122,8 +122,11 @@ class Batch(Document):
 			self.expiry_date = add_days(self.manufacturing_date, shelf_life_in_days)
 
 		if has_expiry_date and not self.expiry_date:
-			frappe.msgprint(_('Expiry date is mandatory for selected item.'))
-			frappe.throw(_("Set item's shelf life in days, to set expiry based on manufacturing date plus shelf-life."))
+			frappe.throw(msg=_("Please set {0} for Batched Item {1}, which is used to set {2} on Submit.") \
+				.format(frappe.bold("Shelf Life in Days"),
+					get_link_to_form("Item", self.item),
+					frappe.bold("Batch Expiry Date")),
+				title=_("Expiry Date Mandatory"))
 
 	def get_name_from_naming_series(self):
 		"""
@@ -261,15 +264,19 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
 def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 	cond = ''
-	if serial_no:
+	if serial_no and frappe.get_cached_value('Item', item_code, 'has_batch_no'):
+		serial_nos = get_serial_nos(serial_no)
 		batch = frappe.get_all("Serial No",
 			fields = ["distinct batch_no"],
 			filters= {
 				"item_code": item_code,
 				"warehouse": warehouse,
-				"name": ("in", get_serial_nos(serial_no))
+				"name": ("in", serial_nos)
 			}
 		)
+
+		if not batch:
+			validate_serial_no_with_batch(serial_nos, item_code)
 
 		if batch and len(batch) > 1:
 			return []
@@ -286,3 +293,14 @@ def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 		group by batch_id
 		order by `tabBatch`.expiry_date ASC, `tabBatch`.creation ASC
 	""".format(cond), (item_code, warehouse), as_dict=True)
+
+def validate_serial_no_with_batch(serial_nos, item_code):
+	if frappe.get_cached_value("Serial No", serial_nos[0], "item_code") != item_code:
+		frappe.throw(_("The serial no {0} does not belong to item {1}")
+			.format(get_link_to_form("Serial No", serial_nos[0]), get_link_to_form("Item", item_code)))
+
+	serial_no_link = ','.join([get_link_to_form("Serial No", sn) for sn in serial_nos])
+
+	message = "Serial Nos" if len(serial_nos) > 1 else "Serial No"
+	frappe.throw(_("There is no batch found against the {0}: {1}")
+		.format(message, serial_no_link))

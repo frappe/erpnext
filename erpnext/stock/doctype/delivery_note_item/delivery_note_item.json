@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-04-22 13:15:44",
  "doctype": "DocType",
@@ -80,6 +81,8 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+  "reason_for_return_section_break",
+  "reason_for_return",
   "section_break_72",
   "page_break"
  ],
@@ -180,6 +183,7 @@
    "oldfieldname": "stock_uom",
    "oldfieldtype": "Data",
    "options": "UOM",
+   "print_hide": 1,
    "print_width": "50px",
    "read_only": 1,
    "reqd": 1,
@@ -195,7 +199,6 @@
    "in_list_view": 1,
    "label": "UOM",
    "options": "UOM",
-   "print_hide": 1,
    "reqd": 1
   },
   {
@@ -698,11 +701,26 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:parent.is_return==1",
+   "fieldname": "reason_for_return",
+   "fieldtype": "Small Text",
+   "label": "Reason for Return",
+   "no_copy": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:parent.is_return==1",
+   "fieldname": "reason_for_return_section_break",
+   "fieldtype": "Section Break",
+   "label": "Reason For Return"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-05-25 22:08:27.452734",
+ "links": [],
+ "modified": "2020-03-06 14:18:33.131672",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

@@ -31,17 +31,7 @@ frappe.ui.form.on('Clinical Procedure Template', {
 		if(!frm.doc.__islocal) {
 			cur_frm.add_custom_button(__('Change Item Code'), function() {
 				change_template_code(frm.doc);
-			} );
-			if(frm.doc.disabled == 1){
-				cur_frm.add_custom_button(__('Enable Template'), function() {
-					enable_template(frm.doc);
-				} );
-			}
-			else{
-				cur_frm.add_custom_button(__('Disable Template'), function() {
-					disable_template(frm.doc);
-				} );
-			}
+			});
 		}
 	}
 });
@@ -51,27 +41,6 @@ var mark_change_in_item = function(frm) {
 		frm.doc.change_in_item = 1;
 	}
 };
-
-var disable_template = function(doc){
-	frappe.call({
-		method: "erpnext.healthcare.doctype.clinical_procedure_template.clinical_procedure_template.disable_enable_template",
-		args: {status: 1, name: doc.name, item_code: doc.item_code, is_billable: doc.is_billable},
-		callback: function(){
-			cur_frm.reload_doc();
-		}
-	});
-};
-
-var enable_template = function(doc){
-	frappe.call({
-		method: "erpnext.healthcare.doctype.clinical_procedure_template.clinical_procedure_template.disable_enable_template",
-		args: {status: 0, name: doc.name, item_code: doc.item_code, is_billable: doc.is_billable},
-		callback: function(){
-			cur_frm.reload_doc();
-		}
-	});
-};
-
 
 var change_template_code = function(doc){
 	var d = new frappe.ui.Dialog({

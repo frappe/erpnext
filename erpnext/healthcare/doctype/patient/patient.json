@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_copy": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -19,15 +20,14 @@
   "blood_group",
   "dob",
   "age_html",
-  "status",
   "image",
   "column_break_14",
+  "status",
   "customer",
   "report_preference",
   "mobile",
   "email",
   "phone",
-  "disabled",
   "sb_relation",
   "patient_relation",
   "allergy_medical_and_surgical_history",
@@ -125,15 +125,15 @@
    "report_hide": 1
   },
   {
-   "default": "Active",
    "fieldname": "status",
    "fieldtype": "Select",
-   "hidden": 1,
+   "in_filter": 1,
+   "in_list_view": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Active\nDormant\nOpen",
+   "options": "Active\nDisabled",
    "print_hide": 1,
-   "report_hide": 1
+   "read_only": 1
   },
   {
    "fieldname": "image",
@@ -183,18 +183,7 @@
    "fieldname": "phone",
    "fieldtype": "Data",
    "in_filter": 1,
-   "in_list_view": 1,
    "label": "Phone"
-  },
-  {
-   "default": "0",
-   "fieldname": "disabled",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Disabled",
-   "no_copy": 1,
-   "print_hide": 1,
-   "report_hide": 1
   },
   {
    "collapsible": 1,
@@ -346,8 +335,9 @@
  ],
  "icon": "fa fa-user",
  "image_field": "image",
+ "links": [],
  "max_attachments": 50,
- "modified": "2019-09-25 23:30:49.905893",
+ "modified": "2020-01-29 11:22:40.698125",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
