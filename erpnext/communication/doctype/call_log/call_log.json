@@ -53,7 +53,6 @@
    "read_only": 1
   },
   {
-   "description": "Call Duration in seconds",
    "fieldname": "duration",
    "fieldtype": "Duration",
    "in_list_view": 1,
@@ -124,7 +123,7 @@
  ],
  "in_create": 1,
  "links": [],
- "modified": "2020-06-14 01:05:58.984853",
+ "modified": "2020-06-14 01:51:01.891822",
  "modified_by": "Administrator",
  "module": "Communication",
  "name": "Call Log",

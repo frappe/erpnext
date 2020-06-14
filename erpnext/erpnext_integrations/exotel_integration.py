@@ -8,7 +8,7 @@ from frappe.utils import cint
 # Incoming Call:
 # <site>/api/method/erpnext.erpnext_integrations.exotel_integration.handle_incoming_call/<key>
 # Outgoing Call:
-#  <site>/api/method/erpnext.erpnext_integrations.exotel_integration.update_call_status/<key>
+# <site>/api/method/erpnext.erpnext_integrations.exotel_integration.update_call_status/<key>
 
 # Exotel Reference:
 # https://developer.exotel.com/api/
@@ -84,7 +84,7 @@ def make_a_call(to_number, caller_id=None, link_to_document=None):
 			'From': cell_number,
 			'To': to_number,
 			'CallerId': caller_id,
-			'Record': 'true' if frappe.db.get_single_value('Exotel Settings', 'record_call', True) else 'false',
+			'Record': 'true' if frappe.db.get_single_value('Exotel Settings', 'record_call') else 'false',
 			'StatusCallback': get_status_updater_url(),
 			'StatusCallbackEvents[0]': 'terminal'
 		})
