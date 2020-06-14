@@ -27,8 +27,8 @@ frappe.query_reports["Payment Period Based On Invoice Date"] = {
 			fieldname:"payment_type",
 			label: __("Payment Type"),
 			fieldtype: "Select",
-			options: "Incoming\nOutgoing",
-			default: "Incoming"
+			options: __("Incoming") + "\n" + __("Outgoing"),
+			default: __("Incoming")
 		},
 		{
 			"fieldname":"party_type",

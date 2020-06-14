@@ -1,0 +1,151 @@
+{
+ "creation": "2019-08-27 10:56:48.309824",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enable_scheduling",
+  "agent_detail_section",
+  "availability_of_slots",
+  "number_of_agents",
+  "agent_list",
+  "holiday_list",
+  "appointment_details_section",
+  "appointment_duration",
+  "email_reminders",
+  "advance_booking_days",
+  "success_details",
+  "success_redirect_url"
+ ],
+ "fields": [
+  {
+   "fieldname": "availability_of_slots",
+   "fieldtype": "Table",
+   "label": "Availability Of Slots",
+   "options": "Appointment Booking Slots",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "number_of_agents",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Number of Concurrent Appointments",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "holiday_list",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Holiday List",
+   "options": "Holiday List",
+   "reqd": 1
+  },
+  {
+   "default": "60",
+   "fieldname": "appointment_duration",
+   "fieldtype": "Int",
+   "label": "Appointment Duration (In Minutes)",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "Notify customer and agent via email on the day of the appointment.",
+   "fieldname": "email_reminders",
+   "fieldtype": "Check",
+   "label": "Notify Via Email"
+  },
+  {
+   "default": "7",
+   "fieldname": "advance_booking_days",
+   "fieldtype": "Int",
+   "label": "Number of days appointments can be booked in advance",
+   "reqd": 1
+  },
+  {
+   "fieldname": "agent_list",
+   "fieldtype": "Table MultiSelect",
+   "label": "Agents",
+   "options": "Assignment Rule User",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_scheduling",
+   "fieldtype": "Check",
+   "label": "Enable Appointment Scheduling",
+   "reqd": 1
+  },
+  {
+   "fieldname": "agent_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Agent Details"
+  },
+  {
+   "fieldname": "appointment_details_section",
+   "fieldtype": "Section Break",
+   "label": "Appointment Details"
+  },
+  {
+   "fieldname": "success_details",
+   "fieldtype": "Section Break",
+   "label": "Success Settings"
+  },
+  {
+   "description": "Leave blank for home.\nThis is relative to site URL, for example \"about\" will redirect to \"https://yoursitename.com/about\"",
+   "fieldname": "success_redirect_url",
+   "fieldtype": "Data",
+   "label": "Success Redirect URL"
+  }
+ ],
+ "issingle": 1,
+ "modified": "2019-11-26 12:14:17.669366",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Appointment Booking Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Guest",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -167,7 +167,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		if (me.frm.doc.opportunity_from == "Lead") {
 			me.frm.set_query('party_name', erpnext.queries['lead']);
 		}
-		else if (me.frm.doc.opportunity_from == "Cuatomer") {
+		else if (me.frm.doc.opportunity_from == "Customer") {
 			me.frm.set_query('party_name', erpnext.queries['customer']);
 		}
 	},

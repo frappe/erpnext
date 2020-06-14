@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -56,15 +57,16 @@
   "section_break_48",
   "pricing_rules",
   "raw_material_details",
+  "set_reserve_warehouse",
   "supplied_items",
   "sb_last_purchase",
   "total_qty",
   "base_total",
   "base_net_total",
   "column_break_26",
+  "total_net_weight",
   "total",
   "net_total",
-  "total_net_weight",
   "taxes_section",
   "tax_category",
   "column_break_50",
@@ -170,6 +172,7 @@
   },
   {
    "depends_on": "eval:doc.supplier && doc.docstatus===0 && (!(doc.items && doc.items.length) || (doc.items.length==1 && !doc.items[0].item_code))",
+   "description": "Fetch items based on Default Supplier.",
    "fieldname": "get_items_from_open_material_requests",
    "fieldtype": "Button",
    "label": "Get Items from Open Material Requests"
@@ -340,6 +343,7 @@
    "fieldname": "contact_email",
    "fieldtype": "Small Text",
    "label": "Contact Email",
+   "options": "Email",
    "print_hide": 1,
    "read_only": 1
   },
@@ -607,7 +611,7 @@
   },
   {
    "fieldname": "other_charges_calculation",
-   "fieldtype": "Text",
+   "fieldtype": "Long Text",
    "label": "Taxes and Charges Calculation",
    "no_copy": 1,
    "oldfieldtype": "HTML",
@@ -1039,12 +1043,20 @@
    "fieldtype": "Link",
    "label": "Tax Category",
    "options": "Tax Category"
+  },
+  {
+   "depends_on": "supplied_items",
+   "fieldname": "set_reserve_warehouse",
+   "fieldtype": "Link",
+   "label": "Set Reserve Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2019-07-11 18:25:49.509343",
+ "links": [],
+ "modified": "2020-04-17 13:04:28.185197",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

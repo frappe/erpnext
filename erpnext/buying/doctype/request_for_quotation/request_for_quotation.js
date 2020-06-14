@@ -9,7 +9,7 @@ cur_frm.add_fetch('contact', 'email_id', 'email_id')
 frappe.ui.form.on("Request for Quotation",{
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'Supplier Quotation': 'Supplier Quotation'
+			'Supplier Quotation': 'Create'
 		}
 
 		frm.fields_dict["suppliers"].grid.get_field("contact").get_query = function(doc, cdt, cdn) {
@@ -134,7 +134,7 @@ frappe.ui.form.on("Request for Quotation",{
 			if (args.search_type === "Tag" && args.tag) {
 				return frappe.call({
 					type: "GET",
-					method: "frappe.desk.tags.get_tagged_docs",
+					method: "frappe.desk.doctype.tag.tag.get_tagged_docs",
 					args: {
 						"doctype": "Supplier",
 						"tag": args.tag

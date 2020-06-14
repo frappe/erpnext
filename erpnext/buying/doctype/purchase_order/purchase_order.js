@@ -10,13 +10,15 @@ frappe.ui.form.on("Purchase Order", {
 		frm.custom_make_buttons = {
 			'Purchase Receipt': 'Receipt',
 			'Purchase Invoice': 'Invoice',
-			'Stock Entry': 'Material to Supplier'
+			'Stock Entry': 'Material to Supplier',
+			'Payment Entry': 'Payment'
 		}
 
 		frm.set_query("reserve_warehouse", "supplied_items", function() {
 			return {
 				filters: {
 					"company": frm.doc.company,
+					"name": ['!=', frm.doc.supplier_warehouse],
 					"is_group": 0
 				}
 			}
@@ -24,15 +26,6 @@ frappe.ui.form.on("Purchase Order", {
 
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
-
-		frm.set_query("blanket_order", "items", function() {
-			return {
-				filters: {
-					"company": frm.doc.company,
-					"docstatus": 1
-				}
-			}
-		});
 
 		frm.set_query("expense_account", "items", function() {
 			return {
@@ -132,7 +125,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				if (doc.status != "On Hold") {
 					if(flt(doc.per_received, 2) < 100 && allow_receipt) {
 						cur_frm.add_custom_button(__('Receipt'), this.make_purchase_receipt, __('Create'));
-						if(doc.is_subcontracted==="Yes") {
+						if(doc.is_subcontracted==="Yes" && me.has_unsupplied_items()) {
 							cur_frm.add_custom_button(__('Material to Supplier'),
 								function() { me.make_stock_entry(); }, __("Transfer"));
 						}
@@ -189,6 +182,10 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		set_schedule_date(this.frm);
 	},
 
+	has_unsupplied_items: function() {
+		return this.frm.doc['supplied_items'].some(item => item.required_qty != item.supplied_qty)
+	},
+
 	make_stock_entry: function() {
 		var items = $.map(cur_frm.doc.items, function(d) { return d.bom ? d.item_code : false; });
 		var me = this;
@@ -196,10 +193,10 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		if(items.length >= 1){
 			me.raw_material_data = [];
 			me.show_dialog = 1;
-			let title = "";
+			let title = __('Transfer Material to Supplier');
 			let fields = [
 			{fieldtype:'Section Break', label: __('Raw Materials')},
-			{fieldname: 'sub_con_rm_items', fieldtype: 'Table',
+			{fieldname: 'sub_con_rm_items', fieldtype: 'Table', label: __('Items'),
 				fields: [
 					{
 						fieldtype:'Data',
@@ -265,13 +262,13 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 		if (me.frm.doc['supplied_items']) {
 			me.frm.doc['supplied_items'].forEach((item, index) => {
-			if (item.rm_item_code && item.main_item_code) {
+			if (item.rm_item_code && item.main_item_code && item.required_qty - item.supplied_qty != 0) {
 					me.raw_material_data.push ({
 						'name':item.name,
 						'item_code': item.main_item_code,
 						'rm_item_code': item.rm_item_code,
 						'item_name': item.rm_item_code,
-						'qty': item.required_qty,
+						'qty': item.required_qty - item.supplied_qty,
 						'warehouse':item.reserve_warehouse,
 						'rate':item.rate,
 						'amount':item.amount,
@@ -281,6 +278,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 				}
 			})
 		}
+
+		me.dialog.get_field('sub_con_rm_items').check_all_rows()
 
 		me.dialog.show()
 		this.dialog.set_primary_action(__('Transfer'), function() {

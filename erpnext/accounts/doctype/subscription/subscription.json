@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "ACC-SUB-.YYYY.-.#####",
  "creation": "2017-07-18 17:50:43.967266",
  "doctype": "DocType",
@@ -155,7 +156,7 @@
    "fieldname": "apply_additional_discount",
    "fieldtype": "Select",
    "label": "Apply Additional Discount On",
-   "options": "\nGrand Total\nNet total"
+   "options": "\nGrand Total\nNet Total"
   },
   {
    "fieldname": "cb_2",
@@ -196,7 +197,8 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2019-07-25 18:45:38.579579",
+ "links": [],
+ "modified": "2020-01-27 14:37:32.845173",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",

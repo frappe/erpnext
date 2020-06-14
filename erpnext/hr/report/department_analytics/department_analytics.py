@@ -7,6 +7,10 @@ from frappe import _
 
 def execute(filters=None):
 	if not filters: filters = {}
+
+	if not filters["company"]:
+		frappe.throw(_('{0} is mandatory').format(_('Company')))
+
 	columns = get_columns()
 	employees = get_employees(filters)
 	departments_result = get_department(filters)
@@ -28,6 +32,9 @@ def get_conditions(filters):
 	conditions = ""
 	if filters.get("department"): conditions += " and department = '%s'" % \
 		filters["department"].replace("'", "\\'")
+	
+	if filters.get("company"): conditions += " and company = '%s'" % \
+		filters["company"].replace("'", "\\'")
 	return conditions
 
 def get_employees(filters):
@@ -37,7 +44,7 @@ def get_employees(filters):
 	gender, company from `tabEmployee` where status = 'Active' %s""" % conditions, as_list=1)
 
 def get_department(filters):
-	return frappe.db.sql("""select name from `tabDepartment`""" , as_list=1)
+	return frappe.db.sql("""select name from `tabDepartment` where company = %s""", (filters["company"]), as_list=1)
 	
 def get_chart_data(departments,employees):
 	if not departments:

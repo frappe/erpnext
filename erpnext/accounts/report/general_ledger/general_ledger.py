@@ -10,7 +10,7 @@ from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from six import iteritems
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 from collections import OrderedDict
 
 def execute(filters=None):
@@ -119,7 +119,7 @@ def get_gl_entries(filters):
 	select_fields = """, debit, credit, debit_in_account_currency,
 		credit_in_account_currency """
 
-	order_by_statement = "order by posting_date, account"
+	order_by_statement = "order by posting_date, account, creation"
 
 	if filters.get("group_by") == _("Group by Voucher"):
 		order_by_statement = "order by posting_date, voucher_type, voucher_no"
@@ -131,7 +131,7 @@ def get_gl_entries(filters):
 	gl_entries = frappe.db.sql(
 		"""
 		select
-			posting_date, account, party_type, party,
+			name as gl_entry, posting_date, account, party_type, party,
 			voucher_type, voucher_no, cost_center, project,
 			against_voucher_type, against_voucher, account_currency,
 			remarks, against, is_opening {select_fields}
@@ -184,7 +184,7 @@ def get_conditions(filters):
 
 	if filters.get("finance_book"):
 		if filters.get("include_default_book_entries"):
-			conditions.append("finance_book in (%(finance_book)s, %(company_fb)s)")
+			conditions.append("(finance_book in (%(finance_book)s, %(company_fb)s, '') OR finance_book IS NULL)")
 		else:
 			conditions.append("finance_book in (%(finance_book)s)")
 
@@ -194,12 +194,17 @@ def get_conditions(filters):
 	if match_conditions:
 		conditions.append(match_conditions)
 
-	accounting_dimensions = get_accounting_dimensions()
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
-			if filters.get(dimension):
-				conditions.append("{0} in (%({0})s)".format(dimension))
+			if filters.get(dimension.fieldname):
+				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
+					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
+						filters.get(dimension.fieldname))
+					conditions.append("{0} in %({0})s".format(dimension.fieldname))
+				else:
+					conditions.append("{0} in (%({0})s)".format(dimension.fieldname))
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
@@ -288,6 +293,9 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 		data[key].debit_in_account_currency += flt(gle.debit_in_account_currency)
 		data[key].credit_in_account_currency += flt(gle.credit_in_account_currency)
 
+		if data[key].against_voucher and gle.against_voucher:
+			data[key].against_voucher += ', ' + gle.against_voucher
+
 	from_date, to_date = getdate(filters.from_date), getdate(filters.to_date)
 	for gle in gl_entries:
 		if (gle.posting_date < from_date or
@@ -359,6 +367,13 @@ def get_columns(filters):
 			currency = get_company_currency(company)
 
 	columns = [
+		{
+			"label": _("GL Entry"),
+			"fieldname": "gl_entry",
+			"fieldtype": "Link",
+			"options": "GL Entry",
+			"hidden": 1
+		},
 		{
 			"label": _("Posting Date"),
 			"fieldname": "posting_date",

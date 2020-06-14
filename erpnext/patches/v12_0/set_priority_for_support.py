@@ -3,6 +3,7 @@ import frappe
 def execute():
 	frappe.reload_doc("support", "doctype", "issue_priority")
 	frappe.reload_doc("support", "doctype", "service_level_priority")
+	frappe.reload_doc('support', 'doctype', 'issue')
 
 	set_issue_priority()
 	set_priority_for_issue()

@@ -3,6 +3,7 @@
  "autoname": "Prompt",
  "creation": "2013-05-24 12:15:51",
  "doctype": "DocType",
+ "engine": "InnoDB",
  "field_order": [
   "disabled",
   "section_break_2",
@@ -50,6 +51,7 @@
   "income_account",
   "expense_account",
   "taxes_and_charges",
+  "tax_category",
   "apply_discount_on",
   "accounting_dimensions_section",
   "cost_center",
@@ -381,11 +383,17 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tax_category",
+   "fieldtype": "Link",
+   "label": "Tax Category",
+   "options": "Tax Category"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
- "modified": "2019-05-25 22:56:30.352693",
+ "modified": "2020-01-24 15:52:03.797701",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

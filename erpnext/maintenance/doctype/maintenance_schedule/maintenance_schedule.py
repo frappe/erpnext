@@ -150,7 +150,7 @@ class MaintenanceSchedule(TransactionBase):
 			elif not d.no_of_visits:
 				throw(_("Please mention no of visits required"))
 			elif not d.sales_person:
-				throw(_("Please select Incharge Person's name"))
+				throw(_("Please select a Sales Person for item: {0}".format(d.item_name)))
 
 			if getdate(d.start_date) >= getdate(d.end_date):
 				throw(_("Start date should be less than end date for Item {0}").format(d.item_code))
@@ -193,7 +193,7 @@ class MaintenanceSchedule(TransactionBase):
 
 			if sr_details.amc_expiry_date and getdate(sr_details.amc_expiry_date) >= getdate(amc_start_date):
 				throw(_("Serial No {0} is under maintenance contract upto {1}")
-					.format(serial_no, sr_details.amc_start_date))
+					.format(serial_no, sr_details.amc_expiry_date))
 
 			if not sr_details.warehouse and sr_details.delivery_date and \
 				getdate(sr_details.delivery_date) >= getdate(amc_start_date):

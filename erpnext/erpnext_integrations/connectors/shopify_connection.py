@@ -19,6 +19,7 @@ def store_request_data(order=None, event=None):
 	dump_request_data(order, event)
 
 def sync_sales_order(order, request_id=None):
+	frappe.set_user('Administrator')
 	shopify_settings = frappe.get_doc("Shopify Settings")
 	frappe.flags.request_id = request_id
 
@@ -28,11 +29,13 @@ def sync_sales_order(order, request_id=None):
 			validate_item(order, shopify_settings)
 			create_order(order, shopify_settings)
 		except Exception as e:
-			make_shopify_log(status="Error", message=e.message, exception=False)
+			make_shopify_log(status="Error", exception=e)
+
 		else:
 			make_shopify_log(status="Success")
 
 def prepare_sales_invoice(order, request_id=None):
+	frappe.set_user('Administrator')
 	shopify_settings = frappe.get_doc("Shopify Settings")
 	frappe.flags.request_id = request_id
 
@@ -40,11 +43,12 @@ def prepare_sales_invoice(order, request_id=None):
 		sales_order = get_sales_order(cstr(order['id']))
 		if sales_order:
 			create_sales_invoice(order, shopify_settings, sales_order)
-		make_shopify_log(status="Success")
-	except Exception:
-		make_shopify_log(status="Error", exception=True)
+			make_shopify_log(status="Success")
+	except Exception as e:
+		make_shopify_log(status="Error", exception=e, rollback=True)
 
 def prepare_delivery_note(order, request_id=None):
+	frappe.set_user('Administrator')
 	shopify_settings = frappe.get_doc("Shopify Settings")
 	frappe.flags.request_id = request_id
 
@@ -53,8 +57,8 @@ def prepare_delivery_note(order, request_id=None):
 		if sales_order:
 			create_delivery_note(order, shopify_settings, sales_order)
 		make_shopify_log(status="Success")
-	except Exception:
-		make_shopify_log(status="Error", exception=True)
+	except Exception as e:
+		make_shopify_log(status="Error", exception=e, rollback=True)
 
 def get_sales_order(shopify_order_id):
 	sales_order = frappe.db.get_value("Sales Order", filters={"shopify_order_id": shopify_order_id})
@@ -94,7 +98,7 @@ def create_sales_order(shopify_order, shopify_settings, company=None):
 			message = 'Following items are exists in order but relevant record not found in Product master'
 			message += "\n" + ", ".join(product_not_exists)
 
-			make_shopify_log(status="Error", message=message, exception=True)
+			make_shopify_log(status="Error", exception=e, rollback=True)
 
 			return ''
 
@@ -137,6 +141,7 @@ def create_sales_invoice(shopify_order, shopify_settings, so):
 		si.naming_series = shopify_settings.sales_invoice_series or "SI-Shopify-"
 		si.flags.ignore_mandatory = True
 		set_cost_center(si.items, shopify_settings.cost_center)
+		si.insert(ignore_mandatory=True)
 		si.submit()
 		make_payament_entry_against_sales_invoice(si, shopify_settings)
 		frappe.db.commit()
@@ -151,6 +156,7 @@ def make_payament_entry_against_sales_invoice(doc, shopify_settings):
 	payemnt_entry.flags.ignore_mandatory = True
 	payemnt_entry.reference_no = doc.name
 	payemnt_entry.reference_date = nowdate()
+	payemnt_entry.insert(ignore_permissions=True)
 	payemnt_entry.submit()
 
 def create_delivery_note(shopify_order, shopify_settings, so):
@@ -168,6 +174,7 @@ def create_delivery_note(shopify_order, shopify_settings, so):
 			dn.items = get_fulfillment_items(dn.items, fulfillment.get("line_items"), shopify_settings)
 			dn.flags.ignore_mandatory = True
 			dn.save()
+			dn.submit()
 			frappe.db.commit()
 
 def get_fulfillment_items(dn_items, fulfillment_items, shopify_settings):
@@ -200,7 +207,7 @@ def get_order_items(order_items, shopify_settings):
 				"rate": shopify_item.get("price"),
 				"delivery_date": nowdate(),
 				"qty": shopify_item.get("quantity"),
-				"stock_uom": shopify_item.get("sku"),
+				"stock_uom": shopify_item.get("uom") or _("Nos"),
 				"warehouse": shopify_settings.warehouse
 			})
 		else:

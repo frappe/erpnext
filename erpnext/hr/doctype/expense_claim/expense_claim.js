@@ -208,6 +208,25 @@ frappe.ui.form.on("Expense Claim", {
 		frm.refresh_fields();
 	},
 
+	grand_total: function(frm) {
+		frm.trigger("update_employee_advance_claimed_amount");
+	},
+
+	update_employee_advance_claimed_amount: function(frm) {
+		console.log("update_employee_advance_claimed_amount")
+		let amount_to_be_allocated = frm.doc.grand_total;
+		$.each(frm.doc.advances || [], function(i, advance){
+			if (amount_to_be_allocated >= advance.unclaimed_amount){
+				advance.allocated_amount = frm.doc.advances[i].unclaimed_amount;
+				amount_to_be_allocated -= advance.allocated_amount;
+			} else{
+				advance.allocated_amount = amount_to_be_allocated;
+				amount_to_be_allocated = 0;
+			}
+			frm.refresh_field("advances");
+		});
+	},
+
 	make_payment_entry: function(frm) {
 		var method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
 		if(frm.doc.__onload && frm.doc.__onload.make_payment_via_journal_entry) {
@@ -277,6 +296,7 @@ frappe.ui.form.on("Expense Claim", {
 				doc: frm.doc,
 				callback: () => {
 					refresh_field("taxes");
+					frm.trigger("update_employee_advance_claimed_amount");
 				}
 			});
 		}
@@ -300,7 +320,7 @@ frappe.ui.form.on("Expense Claim", {
 							row.advance_account = d.advance_account;
 							row.advance_paid = d.paid_amount;
 							row.unclaimed_amount = flt(d.paid_amount) - flt(d.claimed_amount);
-							row.allocated_amount = flt(d.paid_amount) - flt(d.claimed_amount);
+							row.allocated_amount = 0;
 						});
 						refresh_field("advances");
 					}
@@ -313,16 +333,12 @@ frappe.ui.form.on("Expense Claim", {
 frappe.ui.form.on("Expense Claim Detail", {
 	amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		var doc = frm.doc;
 		frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.amount);
-		cur_frm.cscript.calculate_total(doc,cdt,cdn);
 	},
 
 	sanctioned_amount: function(frm, cdt, cdn) {
-		var doc = frm.doc;
-		cur_frm.cscript.calculate_total(doc,cdt,cdn);
+		cur_frm.cscript.calculate_total(frm.doc, cdt, cdn);
 		frm.trigger("get_taxes");
-		frm.trigger("calculate_grand_total");
 	}
 });
 

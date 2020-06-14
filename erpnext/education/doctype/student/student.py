@@ -40,7 +40,8 @@ class Student(Document):
 			frappe.throw(_("Student {0} exist against student applicant {1}").format(student[0][0], self.student_applicant))
 
 	def after_insert(self):
-		self.create_student_user()
+		if not frappe.get_single('Education Settings').get('user_creation_skip'):
+			self.create_student_user()
 
 	def create_student_user(self):
 		"""Create a website user for student creation if not already exists"""
@@ -54,6 +55,7 @@ class Student(Document):
 				'send_welcome_email': 1,
 				'user_type': 'Website User'
 				})
+			student_user.flags.ignore_permissions = True
 			student_user.add_roles("Student")
 			student_user.save()
 			update_password_link = student_user.reset_password()

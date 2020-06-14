@@ -12,6 +12,7 @@ frappe.ui.form.on('Blanket Order', {
 	},
 
 	refresh: function(frm) {
+		erpnext.hide_company();
 		if (frm.doc.customer && frm.doc.docstatus === 1) {
 			frm.add_custom_button(__('View Orders'), function() {
 				frappe.set_route('List', 'Sales Order', {blanket_order: frm.doc.name});
@@ -51,11 +52,19 @@ frappe.ui.form.on('Blanket Order', {
 
 	set_tc_name_filter: function(frm) {
 		if (frm.doc.blanket_order_type === 'Selling') {
+			frm.set_df_property("customer","reqd", 1);
+			frm.set_df_property("supplier","reqd", 0);
+			frm.set_value("supplier", "");
+
 			frm.set_query("tc_name", function() {
 				return { filters: { selling: 1 } };
 			});
 		}
 		if (frm.doc.blanket_order_type === 'Purchasing') {
+			frm.set_df_property("supplier","reqd", 1);
+			frm.set_df_property("customer","reqd", 0);
+			frm.set_value("customer", "");
+
 			frm.set_query("tc_name", function() {
 				return { filters: { buying: 1 } };
 			});

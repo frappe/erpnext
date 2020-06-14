@@ -116,6 +116,73 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(po.get("items")[0].amount, 1400)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 3)
 
+	
+	def test_add_new_item_in_update_child_qty_rate(self):
+		po = create_purchase_order(do_not_save=1)
+		po.items[0].qty = 4
+		po.save()
+		po.submit()
+		pr = make_pr_against_po(po.name, 2)
+
+		po.load_from_db()
+		first_item_of_po = po.get("items")[0]
+
+		trans_item = json.dumps([
+			{
+				'item_code': first_item_of_po.item_code,
+				'rate': first_item_of_po.rate,
+				'qty': first_item_of_po.qty,
+				'docname': first_item_of_po.name
+			},
+			{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7}
+		])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+
+		po.reload()
+		self.assertEquals(len(po.get('items')), 2)
+		self.assertEqual(po.status, 'To Receive and Bill')
+
+	
+	def test_remove_item_in_update_child_qty_rate(self):
+		po = create_purchase_order(do_not_save=1)
+		po.items[0].qty = 4
+		po.save()
+		po.submit()
+		pr = make_pr_against_po(po.name, 2)
+
+		po.reload()
+		first_item_of_po = po.get("items")[0]
+		# add an item
+		trans_item = json.dumps([
+			{
+				'item_code': first_item_of_po.item_code,
+				'rate': first_item_of_po.rate,
+				'qty': first_item_of_po.qty,
+				'docname': first_item_of_po.name
+			},
+			{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7}])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+
+		po.reload()
+		# check if can remove received item
+		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7, 'docname': po.get("items")[1].name}])
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate, 'Purchase Order', trans_item, po.name)
+
+		first_item_of_po = po.get("items")[0]
+		trans_item = json.dumps([
+			{
+				'item_code': first_item_of_po.item_code,
+				'rate': first_item_of_po.rate,
+				'qty': first_item_of_po.qty,
+				'docname': first_item_of_po.name
+			}
+		])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+
+		po.reload()
+		self.assertEquals(len(po.get('items')), 1)
+		self.assertEqual(po.status, 'To Receive and Bill')
+
 	def test_update_qty(self):
 		po = create_purchase_order()
 
@@ -519,47 +586,62 @@ class TestPurchaseOrder(unittest.TestCase):
 	def test_backflush_based_on_stock_entry(self):
 		item_code = "_Test Subcontracted FG Item 1"
 		make_subcontracted_item(item_code)
+		make_item('Sub Contracted Raw Material 1', {
+			'is_stock_item': 1,
+			'is_sub_contracted_item': 1
+		})
 
 		update_backflush_based_on("Material Transferred for Subcontract")
-		po = create_purchase_order(item_code=item_code, qty=1,
+
+		order_qty = 5
+		po = create_purchase_order(item_code=item_code, qty=order_qty,
 			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
 
-		make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 		make_stock_entry(target="_Test Warehouse - _TC",
 			item_code="_Test Item Home Desktop 100", qty=10, basic_rate=100)
 		make_stock_entry(target="_Test Warehouse - _TC",
 			item_code = "Test Extra Item 1", qty=100, basic_rate=100)
 		make_stock_entry(target="_Test Warehouse - _TC",
 			item_code = "Test Extra Item 2", qty=10, basic_rate=100)
+		make_stock_entry(target="_Test Warehouse - _TC",
+			item_code = "Sub Contracted Raw Material 1", qty=10, basic_rate=100)
 
-		rm_item = [
-			{"item_code":item_code,"rm_item_code":"_Test Item","item_name":"_Test Item",
-				"qty":1,"warehouse":"_Test Warehouse - _TC","rate":100,"amount":100,"stock_uom":"Nos"},
+		rm_items = [
+			{"item_code":item_code,"rm_item_code":"Sub Contracted Raw Material 1","item_name":"_Test Item",
+				"qty":10,"warehouse":"_Test Warehouse - _TC", "stock_uom":"Nos"},
 			{"item_code":item_code,"rm_item_code":"_Test Item Home Desktop 100","item_name":"_Test Item Home Desktop 100",
-				"qty":2,"warehouse":"_Test Warehouse - _TC","rate":100,"amount":200,"stock_uom":"Nos"},
+				"qty":20,"warehouse":"_Test Warehouse - _TC", "stock_uom":"Nos"},
 			{"item_code":item_code,"rm_item_code":"Test Extra Item 1","item_name":"Test Extra Item 1",
-				"qty":1,"warehouse":"_Test Warehouse - _TC","rate":100,"amount":200,"stock_uom":"Nos"}]
+				"qty":10,"warehouse":"_Test Warehouse - _TC", "stock_uom":"Nos"},
+			{'item_code': item_code, 'rm_item_code': 'Test Extra Item 2', 'stock_uom':'Nos',
+				'qty': 10, 'warehouse': '_Test Warehouse - _TC', 'item_name':'Test Extra Item 2'}]
 
-		rm_item_string = json.dumps(rm_item)
+		rm_item_string = json.dumps(rm_items)
 		se = frappe.get_doc(make_subcontract_transfer_entry(po.name, rm_item_string))
-		se.append('items', {
-			'item_code': "Test Extra Item 2",
-			"qty": 1,
-			"rate": 100,
-			"s_warehouse": "_Test Warehouse - _TC",
-			"t_warehouse": "_Test Warehouse 1 - _TC"
-		})
-		se.set_missing_values()
 		se.submit()
 
 		pr = make_purchase_receipt(po.name)
+
+		received_qty = 2
+		# partial receipt
+		pr.get('items')[0].qty = received_qty
 		pr.save()
 		pr.submit()
 
-		se_items = sorted([d.item_code for d in se.get('items')])
-		supplied_items = sorted([d.rm_item_code for d in pr.get('supplied_items')])
+		transferred_items = sorted([d.item_code for d in se.get('items') if se.purchase_order == po.name])
+		issued_items = sorted([d.rm_item_code for d in pr.get('supplied_items')])
 
-		self.assertEquals(se_items, supplied_items)
+		self.assertEquals(transferred_items, issued_items)
+		self.assertEquals(pr.get('items')[0].rm_supp_cost, 2000)
+
+
+		transferred_rm_map = frappe._dict()
+		for item in rm_items:
+			transferred_rm_map[item.get('rm_item_code')] = item
+
+		for item in pr.get('supplied_items'):
+			self.assertEqual(item.get('required_qty'), (transferred_rm_map[item.get('rm_item_code')].get('qty') / order_qty) * received_qty)
+
 		update_backflush_based_on("BOM")
 
 	def test_advance_payment_entry_unlink_against_purchase_order(self):
@@ -588,6 +670,23 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		frappe.db.set_value("Accounts Settings", "Accounts Settings",
 			"unlink_advance_payment_on_cancelation_of_order", 0)
+
+	def test_schedule_date(self):
+		po = create_purchase_order(do_not_submit=True)
+		po.schedule_date = None
+		po.append("items", {
+			"item_code": "_Test Item",
+			"qty": 1,
+			"rate": 100,
+			"schedule_date": add_days(nowdate(), 5)
+		})
+		po.save()
+		self.assertEqual(po.schedule_date, add_days(nowdate(), 1))
+
+		po.items[0].schedule_date = add_days(nowdate(), 2)
+		po.save()
+		self.assertEqual(po.schedule_date, add_days(nowdate(), 2))
+
 
 def make_pr_against_po(po, received_qty=0):
 	pr = make_purchase_receipt(po)

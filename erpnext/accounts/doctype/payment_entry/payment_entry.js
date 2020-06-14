@@ -104,6 +104,21 @@ frappe.ui.form.on('Payment Entry', {
 			};
 		});
 
+		frm.set_query('payment_term', 'references', function(frm, cdt, cdn) {
+			const child = locals[cdt][cdn];
+			if (in_list(['Purchase Invoice', 'Sales Invoice'], child.reference_doctype) && child.reference_name) {
+				let payment_term_list = frappe.get_list('Payment Schedule', {'parent': child.reference_name});
+
+				payment_term_list = payment_term_list.map(pt => pt.payment_term);
+
+				return {
+					filters: {
+						'name': ['in', payment_term_list]
+					}
+				}
+			}
+		});
+
 		frm.set_query("reference_name", "references", function(doc, cdt, cdn) {
 			const child = locals[cdt][cdn];
 			const filters = {"docstatus": 1, "company": doc.company};
@@ -154,8 +169,11 @@ frappe.ui.form.on('Payment Entry', {
 
 		frm.toggle_display("base_paid_amount", frm.doc.paid_from_account_currency != company_currency);
 
-		frm.toggle_display("base_received_amount", (frm.doc.paid_to_account_currency != company_currency &&
-			frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency));
+		frm.toggle_display("base_received_amount", (
+			frm.doc.paid_to_account_currency != company_currency &&
+			frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency 
+			&& frm.doc.base_paid_amount != frm.doc.base_received_amount
+		));
 
 		frm.toggle_display("received_amount", (frm.doc.payment_type=="Internal Transfer" ||
 			frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency))
@@ -269,7 +287,7 @@ frappe.ui.form.on('Payment Entry', {
 			frm.set_value("contact_email", "");
 			frm.set_value("contact_person", "");
 		}
-		if(frm.doc.payment_type && frm.doc.party_type && frm.doc.party) {
+		if(frm.doc.payment_type && frm.doc.party_type && frm.doc.party && frm.doc.company) {
 			if(!frm.doc.posting_date) {
 				frappe.msgprint(__("Please select Posting Date before selecting Party"))
 				frm.set_value("party", "");
@@ -308,7 +326,7 @@ frappe.ui.form.on('Payment Entry', {
 							() => {
 								frm.set_party_account_based_on_party = false;
 								if (r.message.bank_account) {
-									frm.set_value("bank_account", r.message.bank_account);
+									frm.set_value("party_bank_account", r.message.bank_account);
 								}
 							}
 						]);
@@ -486,6 +504,7 @@ frappe.ui.form.on('Payment Entry', {
 	paid_amount: function(frm) {
 		frm.set_value("base_paid_amount", flt(frm.doc.paid_amount) * flt(frm.doc.source_exchange_rate));
 		frm.trigger("reset_received_amount");
+		frm.events.hide_unhide_fields(frm);
 	},
 
 	received_amount: function(frm) {
@@ -509,6 +528,7 @@ frappe.ui.form.on('Payment Entry', {
 			frm.events.set_unallocated_amount(frm);
 
 		frm.set_paid_amount_based_on_received_amount = false;
+		frm.events.hide_unhide_fields(frm);
 	},
 
 	reset_received_amount: function(frm) {
@@ -554,7 +574,7 @@ frappe.ui.form.on('Payment Entry', {
 			frappe.flags.allocate_payment_amount = true;
 			frm.events.validate_filters_data(frm, filters);
 			frm.events.get_outstanding_documents(frm, filters);
-		}, __("Filters"), __("Get Outstanding Invoices"));
+		}, __("Filters"), __("Get Outstanding Documents"));
 	},
 
 	validate_filters_data: function(frm, filters) {
@@ -652,14 +672,16 @@ frappe.ui.form.on('Payment Entry', {
 						(frm.doc.payment_type=="Receive" && frm.doc.party_type=="Student")
 					) {
 						if(total_positive_outstanding > total_negative_outstanding)
-							frm.set_value("paid_amount",
-								total_positive_outstanding - total_negative_outstanding);
+							if (!frm.doc.paid_amount)
+								frm.set_value("paid_amount",
+									total_positive_outstanding - total_negative_outstanding);
 					} else if (
 						total_negative_outstanding &&
 						total_positive_outstanding < total_negative_outstanding
 					) {
-						frm.set_value("received_amount",
-							total_negative_outstanding - total_positive_outstanding);
+						if (!frm.doc.received_amount)
+							frm.set_value("received_amount",
+								total_negative_outstanding - total_positive_outstanding);
 					}
 				}
 
@@ -720,7 +742,7 @@ frappe.ui.form.on('Payment Entry', {
 
 		$.each(frm.doc.references || [], function(i, row) {
 			row.allocated_amount = 0 //If allocate payment amount checkbox is unchecked, set zero to allocate amount
-			if(frappe.flags.allocate_payment_amount){
+			if(frappe.flags.allocate_payment_amount != 0){
 				if(row.outstanding_amount > 0 && allocated_positive_outstanding > 0) {
 					if(row.outstanding_amount >= allocated_positive_outstanding) {
 						row.allocated_amount = allocated_positive_outstanding;

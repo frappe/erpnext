@@ -18,7 +18,7 @@
    "fieldname": "procedure",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Procedure",
+   "label": "Child Procedure",
    "options": "Quality Procedure"
   }
  ],

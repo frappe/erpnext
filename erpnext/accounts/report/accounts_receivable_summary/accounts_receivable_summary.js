@@ -106,6 +106,11 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			"label": __("Sales Person"),
 			"fieldtype": "Link",
 			"options": "Sales Person"
+		},
+		{
+			"fieldname":"based_on_payment_terms",
+			"label": __("Based On Payment Terms"),
+			"fieldtype": "Check",
 		}
 	],
 

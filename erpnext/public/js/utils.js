@@ -63,14 +63,33 @@ $.extend(erpnext, {
 			let callback = '';
 			let on_close = '';
 
-			if (grid_row.doc.serial_no) {
-				grid_row.doc.has_serial_no = true;
-			}
-
-			me.show_serial_batch_selector(grid_row.frm, grid_row.doc,
-				callback, on_close, true);
+			frappe.model.get_value('Item', {'name':grid_row.doc.item_code}, 'has_serial_no',
+				(data) => {
+					if(data) {
+						grid_row.doc.has_serial_no = data.has_serial_no;
+						me.show_serial_batch_selector(grid_row.frm, grid_row.doc,
+							callback, on_close, true);
+					}
+				}
+			);
 		});
 	},
+
+	route_to_adjustment_jv: (args) => {
+		frappe.model.with_doctype('Journal Entry', () => {
+			// route to adjustment Journal Entry to handle Account Balance and Stock Value mismatch
+			let journal_entry = frappe.model.get_new_doc('Journal Entry');
+
+			args.accounts.forEach((je_account) => {
+				let child_row = frappe.model.add_child(journal_entry, "accounts");
+				child_row.account = je_account.account;
+				child_row.debit_in_account_currency = je_account.debit_in_account_currency;
+				child_row.credit_in_account_currency = je_account.credit_in_account_currency;
+				child_row.party_type = "" ;
+			});
+			frappe.set_route('Form','Journal Entry', journal_entry.name);
+		});
+	}
 });
 
 
@@ -417,45 +436,59 @@ erpnext.utils.update_child_items = function(opts) {
 	const cannot_add_row = (typeof opts.cannot_add_row === 'undefined') ? true : opts.cannot_add_row;
 	const child_docname = (typeof opts.cannot_add_row === 'undefined') ? "items" : opts.child_docname;
 	this.data = [];
+	const fields = [{
+		fieldtype:'Data',
+		fieldname:"docname",
+		read_only: 1,
+		hidden: 1,
+	}, {
+		fieldtype:'Link',
+		fieldname:"item_code",
+		options: 'Item',
+		in_list_view: 1,
+		read_only: 0,
+		disabled: 0,
+		label: __('Item Code')
+	}, {
+		fieldtype:'Float',
+		fieldname:"qty",
+		default: 0,
+		read_only: 0,
+		in_list_view: 1,
+		label: __('Qty')
+	}, {
+		fieldtype:'Currency',
+		fieldname:"rate",
+		default: 0,
+		read_only: 0,
+		in_list_view: 1,
+		label: __('Rate')
+	}];
+
+	if (frm.doc.doctype == 'Sales Order' || frm.doc.doctype == 'Purchase Order' ) {
+		fields.splice(2, 0, {
+			fieldtype: 'Date',
+			fieldname: frm.doc.doctype == 'Sales Order' ? "delivery_date" : "schedule_date",
+			in_list_view: 1,
+			label: frm.doc.doctype == 'Sales Order' ? __("Delivery Date") : __("Reqd by date")
+		})
+	}
+
 	const dialog = new frappe.ui.Dialog({
 		title: __("Update Items"),
 		fields: [
-			{fieldtype:'Section Break', label: __('Items')},
 			{
 				fieldname: "trans_items",
 				fieldtype: "Table",
+				label: "Items",
 				cannot_add_rows: cannot_add_row,
 				in_place_edit: true,
+				reqd: 1,
 				data: this.data,
 				get_data: () => {
 					return this.data;
 				},
-				fields: [{
-					fieldtype:'Data',
-					fieldname:"docname",
-					hidden: 0,
-				}, {
-					fieldtype:'Link',
-					fieldname:"item_code",
-					options: 'Item',
-					in_list_view: 1,
-					read_only: 1,
-					label: __('Item Code')
-				}, {
-					fieldtype:'Float',
-					fieldname:"qty",
-					default: 0,
-					read_only: 0,
-					in_list_view: 1,
-					label: __('Qty')
-				}, {
-					fieldtype:'Currency',
-					fieldname:"rate",
-					default: 0,
-					read_only: 0,
-					in_list_view: 1,
-					label: __('Rate')
-				}]
+				fields: fields
 			},
 		],
 		primary_action: function() {
@@ -482,7 +515,10 @@ erpnext.utils.update_child_items = function(opts) {
 	frm.doc[opts.child_docname].forEach(d => {
 		dialog.fields_dict.trans_items.df.data.push({
 			"docname": d.name,
+			"name": d.name,
 			"item_code": d.item_code,
+			"delivery_date": d.delivery_date,
+			"schedule_date": d.schedule_date,
 			"qty": d.qty,
 			"rate": d.rate,
 		});

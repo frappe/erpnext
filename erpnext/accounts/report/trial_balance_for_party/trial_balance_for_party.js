@@ -66,6 +66,21 @@ frappe.query_reports["Trial Balance for Party"] = {
 			}
 		},
 		{
+			"fieldname": "account",
+			"label": __("Account"),
+			"fieldtype": "Link",
+			"options": "Account",
+			"get_query": function() {
+				var company = frappe.query_report.get_filter_value('company');
+				return {
+					"doctype": "Account",
+					"filters": {
+						"company": company,
+					}
+				}
+			}
+		},
+		{
 			"fieldname": "show_zero_values",
 			"label": __("Show zero values"),
 			"fieldtype": "Check"

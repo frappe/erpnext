@@ -10,6 +10,7 @@ import urllib
 import hashlib
 import hmac
 import base64
+import six
 from erpnext.erpnext_integrations.doctype.amazon_mws_settings import xml_utils
 import re
 try:
@@ -38,16 +39,19 @@ __all__ = [
 # for a list of the end points and marketplace IDs
 
 MARKETPLACES = {
-	"CA" : "https://mws.amazonservices.ca", #A2EUQ1WTGCTBG2
-	"US" : "https://mws.amazonservices.com", #ATVPDKIKX0DER",
-	"DE" : "https://mws-eu.amazonservices.com", #A1PA6795UKMFR9
-	"ES" : "https://mws-eu.amazonservices.com", #A1RKKUPIHCS9HS
-	"FR" : "https://mws-eu.amazonservices.com", #A13V1IB3VIYZZH
-	"IN" : "https://mws.amazonservices.in", #A21TJRUUN4KGV
-	"IT" : "https://mws-eu.amazonservices.com", #APJ6JRA9NG5V4
-	"UK" : "https://mws-eu.amazonservices.com", #A1F83G8C2ARO7P
-	"JP" : "https://mws.amazonservices.jp", #A1VC38T7YXB528
-	"CN" : "https://mws.amazonservices.com.cn", #AAHKV2X7AFYLW
+	"CA": "https://mws.amazonservices.ca", #A2EUQ1WTGCTBG2
+	"US": "https://mws.amazonservices.com", #ATVPDKIKX0DER",
+	"DE": "https://mws-eu.amazonservices.com", #A1PA6795UKMFR9
+	"ES": "https://mws-eu.amazonservices.com", #A1RKKUPIHCS9HS
+	"FR": "https://mws-eu.amazonservices.com", #A13V1IB3VIYZZH
+	"IN": "https://mws.amazonservices.in", #A21TJRUUN4KGV
+	"IT": "https://mws-eu.amazonservices.com", #APJ6JRA9NG5V4
+	"UK": "https://mws-eu.amazonservices.com", #A1F83G8C2ARO7P
+	"JP": "https://mws.amazonservices.jp", #A1VC38T7YXB528
+	"CN": "https://mws.amazonservices.com.cn", #AAHKV2X7AFYLW
+	"AE": "	https://mws.amazonservices.ae", #A2VIGQ35RCS4UG
+	"MX": "https://mws.amazonservices.com.mx", #A1AM78C64UM0Y8
+	"BR": "https://mws.amazonservices.com", #A2Q3Y263D00KWC
 }
 
 
@@ -64,19 +68,21 @@ def calc_md5(string):
 	"""
 	md = hashlib.md5()
 	md.update(string)
-	return base64.encodestring(md.digest()).strip('\n')
+	return base64.encodestring(md.digest()).strip('\n') if six.PY2 \
+		else base64.encodebytes(md.digest()).decode().strip()
 
 def remove_empty(d):
 	"""
 		Helper function that removes all keys from a dictionary (d),
 	that have an empty value.
 	"""
-	for key in d.keys():
+	for key in list(d):
 		if not d[key]:
 			del d[key]
 	return d
 
 def remove_namespace(xml):
+	xml = xml.decode('utf-8')
 	regex = re.compile(' xmlns(:ns2)?="[^"]+"|(ns2:)|(xml:)')
 	return regex.sub('', xml)
 
@@ -85,8 +91,7 @@ class DictWrapper(object):
 		self.original = xml
 		self._rootkey = rootkey
 		self._mydict = xml_utils.xml2dict().fromstring(remove_namespace(xml))
-		self._response_dict = self._mydict.get(self._mydict.keys()[0],
-												self._mydict)
+		self._response_dict = self._mydict.get(list(self._mydict)[0], self._mydict)
 
 	@property
 	def parsed(self):
@@ -172,9 +177,10 @@ class MWS(object):
 			'SignatureMethod': 'HmacSHA256',
 		}
 		params.update(extra_data)
-		request_description = '&'.join(['%s=%s' % (k, urllib.quote(params[k], safe='-_.~').encode('utf-8')) for k in sorted(params)])
+		quote = urllib.quote if six.PY2 else urllib.parse.quote
+		request_description = '&'.join(['%s=%s' % (k, quote(params[k], safe='-_.~')) for k in sorted(params)])
 		signature = self.calc_signature(method, request_description)
-		url = '%s%s?%s&Signature=%s' % (self.domain, self.uri, request_description, urllib.quote(signature))
+		url = '%s%s?%s&Signature=%s' % (self.domain, self.uri, request_description, quote(signature))
 		headers = {'User-Agent': 'python-amazon-mws/0.0.1 (Language=Python)'}
 		headers.update(kwargs.get('extra_headers', {}))
 
@@ -218,7 +224,10 @@ class MWS(object):
 		"""Calculate MWS signature to interface with Amazon
 		"""
 		sig_data = method + '\n' + self.domain.replace('https://', '').lower() + '\n' + self.uri + '\n' + request_description
-		return base64.b64encode(hmac.new(str(self.secret_key), sig_data, hashlib.sha256).digest())
+		sig_data = sig_data.encode('utf-8')
+		secret_key = self.secret_key.encode('utf-8')
+		digest = hmac.new(secret_key, sig_data, hashlib.sha256).digest()
+		return base64.b64encode(digest).decode('utf-8')
 
 	def get_timestamp(self):
 		"""

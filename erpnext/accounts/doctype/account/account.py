@@ -89,48 +89,36 @@ class Account(NestedSet):
 				throw(_("Root cannot be edited."), RootNotEditable)
 
 		if not self.parent_account and not self.is_group:
-			frappe.throw(_("Root Account must be a group"))
+			frappe.throw(_("The root account {0} must be a group").format(frappe.bold(self.name)))
 
 	def validate_root_company_and_sync_account_to_children(self):
 		# ignore validation while creating new compnay or while syncing to child companies
 		if frappe.local.flags.ignore_root_company_validation or self.flags.ignore_root_company_validation:
 			return
-
 		ancestors = get_root_company(self.company)
 		if ancestors:
 			if frappe.get_value("Company", self.company, "allow_account_creation_against_child_company"):
 				return
-			frappe.throw(_("Please add the account to root level Company - %s" % ancestors[0]))
-		else:
+			if not frappe.db.get_value("Account",
+				{'account_name': self.account_name, 'company': ancestors[0]}, 'name'):
+				frappe.throw(_("Please add the account to root level Company - %s" % ancestors[0]))
+		elif self.parent_account:
 			descendants = get_descendants_of('Company', self.company)
 			if not descendants: return
-
 			parent_acc_name_map = {}
-			parent_acc_name = frappe.db.get_value('Account', self.parent_account, "account_name")
-			for d in frappe.db.get_values('Account',
-				{"company": ["in", descendants], "account_name": parent_acc_name},
-				["company", "name"], as_dict=True):
+			parent_acc_name, parent_acc_number = frappe.db.get_value('Account', self.parent_account, \
+				["account_name", "account_number"])
+			filters = {
+				"company": ["in", descendants],
+				"account_name": parent_acc_name,
+			}
+			if parent_acc_number:
+				filters["account_number"] = parent_acc_number
+
+			for d in frappe.db.get_values('Account', filters=filters, fieldname=["company", "name"], as_dict=True):
 				parent_acc_name_map[d["company"]] = d["name"]
-
 			if not parent_acc_name_map: return
-
-			for company in descendants:
-				if not parent_acc_name_map.get(company):
-					frappe.throw(_("While creating account for child Company {0}, parent account {1} not found. Please create the parent account in corresponding COA")
-						.format(company, parent_acc_name))
-
-				doc = frappe.copy_doc(self)
-				doc.flags.ignore_root_company_validation = True
-				doc.update({
-					"company": company,
-					# parent account's currency should be passed down to child account's curreny
-					# if it is None, it picks it up from default company currency, which might be unintended
-					"account_currency": self.account_currency,
-					"parent_account": parent_acc_name_map[company]
-				})
-				doc.save()
-				frappe.msgprint(_("Account {0} is added in the child company {1}")
-					.format(doc.name, company))
+			self.create_account_for_child_company(parent_acc_name_map, descendants, parent_acc_name)
 
 	def validate_group_or_ledger(self):
 		if self.get("__islocal"):
@@ -171,6 +159,48 @@ class Account(NestedSet):
 		elif self.account_currency != frappe.db.get_value("Account", self.name, "account_currency"):
 			if frappe.db.get_value("GL Entry", {"account": self.name}):
 				frappe.throw(_("Currency can not be changed after making entries using some other currency"))
+
+	def create_account_for_child_company(self, parent_acc_name_map, descendants, parent_acc_name):
+		for company in descendants:
+			if not parent_acc_name_map.get(company):
+				frappe.throw(_("While creating account for child Company {0}, parent account {1} not found. Please create the parent account in corresponding COA")
+					.format(company, parent_acc_name))
+
+			filters = {
+				"account_name": self.account_name,
+				"company": company
+			}
+
+			if self.account_number:
+				filters["account_number"] = self.account_number
+
+			child_account = frappe.db.get_value("Account", filters, 'name')
+			if not child_account:
+				doc = frappe.copy_doc(self)
+				doc.flags.ignore_root_company_validation = True
+				doc.update({
+					"company": company,
+					# parent account's currency should be passed down to child account's curreny
+					# if it is None, it picks it up from default company currency, which might be unintended
+					"account_currency": self.account_currency,
+					"parent_account": parent_acc_name_map[company]
+				})
+
+				doc.save()
+				frappe.msgprint(_("Account {0} is added in the child company {1}")
+					.format(doc.name, company))
+			elif child_account:
+				# update the parent company's value in child companies
+				doc = frappe.get_doc("Account", child_account)
+				parent_value_changed = False
+				for field in ['account_type', 'account_currency',
+					'freeze_account', 'balance_must_be']:
+					if doc.get(field) != self.get(field):
+						parent_value_changed = True
+						doc.set(field, self.get(field))
+
+				if parent_value_changed:
+					doc.save()
 
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():

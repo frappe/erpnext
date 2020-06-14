@@ -10,7 +10,7 @@
   "account_type",
   "balance",
   "col_break1",
-  "bank_account_no",
+  "bank_account",
   "party_type",
   "party",
   "party_balance",
@@ -40,7 +40,7 @@
  "fields": [
   {
    "bold": 1,
-   "columns": 3,
+   "columns": 2,
    "fieldname": "account",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -90,20 +90,15 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "bank_account_no",
-   "fieldtype": "Link",
-   "label": "Bank Account No",
-   "options": "Bank Account"
-  },
-  {
    "fieldname": "party_type",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Party Type",
    "options": "DocType",
    "search_index": 1
   },
   {
-   "columns": 3,
+   "columns": 2,
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
@@ -266,11 +261,17 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-07-16 17:12:08.238334",
+ "modified": "2020-01-13 12:41:33.968025",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",

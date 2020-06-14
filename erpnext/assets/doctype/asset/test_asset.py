@@ -7,14 +7,13 @@ import frappe
 import unittest
 from frappe.utils import cstr, nowdate, getdate, flt, get_last_day, add_days, add_months
 from erpnext.assets.doctype.asset.depreciation import post_depreciation_entries, scrap_asset, restore_asset
-from erpnext.assets.doctype.asset.asset import make_sales_invoice, make_purchase_invoice
+from erpnext.assets.doctype.asset.asset import make_sales_invoice
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice as make_invoice
 
 class TestAsset(unittest.TestCase):
 	def setUp(self):
 		set_depreciation_settings_in_company()
-		remove_prorated_depreciation_schedule()
 		create_asset_data()
 		frappe.db.sql("delete from `tabTax Rule`")
 
@@ -40,15 +39,15 @@ class TestAsset(unittest.TestCase):
 		})
 		asset.submit()
 
-		pi = make_purchase_invoice(asset.name, asset.item_code, asset.gross_purchase_amount,
-			asset.company, asset.purchase_date)
+		pi = make_invoice(pr.name)
 		pi.supplier = "_Test Supplier"
 		pi.insert()
 		pi.submit()
 		asset.load_from_db()
 		self.assertEqual(asset.supplier, "_Test Supplier")
 		self.assertEqual(asset.purchase_date, getdate(purchase_date))
-		self.assertEqual(asset.purchase_invoice, pi.name)
+		# Asset won't have reference to PI when purchased through PR
+		self.assertEqual(asset.purchase_receipt, pr.name)
 
 		expected_gle = (
 			("Asset Received But Not Billed - _TC", 100000.0, 0.0),
@@ -61,25 +60,27 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(gle, expected_gle)
 
 		pi.cancel()
-
+		asset.cancel()
 		asset.load_from_db()
-		self.assertEqual(asset.supplier, None)
-		self.assertEqual(asset.purchase_invoice, None)
+		pr.load_from_db()
+		pr.cancel()
+		self.assertEqual(asset.docstatus, 2)
 
 		self.assertFalse(frappe.db.get_value("GL Entry",
 			{"voucher_type": "Purchase Invoice", "voucher_no": pi.name}))
 
 	def test_is_fixed_asset_set(self):
+		asset = create_asset(is_existing_asset = 1)
 		doc = frappe.new_doc('Purchase Invoice')
 		doc.supplier = '_Test Supplier'
 		doc.append('items', {
 			'item_code': 'Macbook Pro',
-			'qty': 1
+			'qty': 1,
+			'asset': asset.name
 		})
 
 		doc.set_missing_values()
 		self.assertEquals(doc.items[0].is_fixed_asset, 1)
-
 
 	def test_schedule_for_straight_line_method(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
@@ -200,7 +201,6 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(schedules, expected_schedules)
 
 	def test_schedule_for_prorated_straight_line_method(self):
-		set_prorated_depreciation_schedule()
 		pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=1, rate=100000.0, location="Test Location")
 
@@ -232,8 +232,6 @@ class TestAsset(unittest.TestCase):
 			for d in asset.get("schedules")]
 
 		self.assertEqual(schedules, expected_schedules)
-
-		remove_prorated_depreciation_schedule()
 
 	def test_depreciation(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
@@ -456,8 +454,6 @@ class TestAsset(unittest.TestCase):
 		self.assertEqual(gle, expected_gle)
 
 		si.cancel()
-		frappe.delete_doc("Sales Invoice", si.name)
-
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "status"), "Partially Depreciated")
 
 	def test_asset_expected_value_after_useful_life(self):
@@ -486,9 +482,6 @@ class TestAsset(unittest.TestCase):
 		self.assertTrue(asset.finance_books[0].expected_value_after_useful_life >= asset_value_after_full_schedule)
 
 	def test_cwip_accounting(self):
-		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import (
-			make_purchase_invoice as make_purchase_invoice_from_pr)
-
 		pr = make_purchase_receipt(item_code="Macbook Pro",
 			qty=1, rate=5000, do_not_submit=True, location="Test Location")
 
@@ -517,13 +510,13 @@ class TestAsset(unittest.TestCase):
 			("CWIP Account - _TC", 5250.0, 0.0)
 		)
 
-		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
+		pr_gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
 			where voucher_type='Purchase Receipt' and voucher_no = %s
 			order by account""", pr.name)
 
-		self.assertEqual(gle, expected_gle)
+		self.assertEqual(pr_gle, expected_gle)
 
-		pi = make_purchase_invoice_from_pr(pr.name)
+		pi = make_invoice(pr.name)
 		pi.submit()
 
 		expected_gle = (
@@ -534,11 +527,11 @@ class TestAsset(unittest.TestCase):
 			("Expenses Included In Asset Valuation - _TC", 0.0, 250.0),
 		)
 
-		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
+		pi_gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
 			where voucher_type='Purchase Invoice' and voucher_no = %s
 			order by account""", pi.name)
 
-		self.assertEqual(gle, expected_gle)
+		self.assertEqual(pi_gle, expected_gle)
 
 		asset = frappe.db.get_value('Asset',
 			{'purchase_receipt': pr.name, 'docstatus': 0}, 'name')
@@ -567,7 +560,83 @@ class TestAsset(unittest.TestCase):
 			where voucher_type='Asset' and voucher_no = %s
 			order by account""", asset_doc.name)
 
+
 		self.assertEqual(gle, expected_gle)
+
+	def test_gle_with_cwip_toggling(self):
+		# TEST: purchase an asset with cwip enabled and then disable cwip and try submitting the asset
+		frappe.db.set_value("Asset Category", "Computers", "enable_cwip_accounting", 1)
+
+		pr = make_purchase_receipt(item_code="Macbook Pro",
+			qty=1, rate=5000, do_not_submit=True, location="Test Location")
+		pr.set('taxes', [{
+			'category': 'Total',
+			'add_deduct_tax': 'Add',
+			'charge_type': 'On Net Total',
+			'account_head': '_Test Account Service Tax - _TC',
+			'description': '_Test Account Service Tax',
+			'cost_center': 'Main - _TC',
+			'rate': 5.0
+		}, {
+			'category': 'Valuation and Total',
+			'add_deduct_tax': 'Add',
+			'charge_type': 'On Net Total',
+			'account_head': '_Test Account Shipping Charges - _TC',
+			'description': '_Test Account Shipping Charges',
+			'cost_center': 'Main - _TC',
+			'rate': 5.0
+		}])
+		pr.submit()
+		expected_gle = (
+			("Asset Received But Not Billed - _TC", 0.0, 5250.0),
+			("CWIP Account - _TC", 5250.0, 0.0)
+		)
+		pr_gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
+			where voucher_type='Purchase Receipt' and voucher_no = %s
+			order by account""", pr.name)
+		self.assertEqual(pr_gle, expected_gle)
+
+		pi = make_invoice(pr.name)
+		pi.submit()
+		expected_gle = (
+			("_Test Account Service Tax - _TC", 250.0, 0.0),
+			("_Test Account Shipping Charges - _TC", 250.0, 0.0),
+			("Asset Received But Not Billed - _TC", 5250.0, 0.0),
+			("Creditors - _TC", 0.0, 5500.0),
+			("Expenses Included In Asset Valuation - _TC", 0.0, 250.0),
+		)
+		pi_gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
+			where voucher_type='Purchase Invoice' and voucher_no = %s
+			order by account""", pi.name)
+		self.assertEqual(pi_gle, expected_gle)
+
+		asset = frappe.db.get_value('Asset', {'purchase_receipt': pr.name, 'docstatus': 0}, 'name')
+		asset_doc = frappe.get_doc('Asset', asset)
+		month_end_date = get_last_day(nowdate())
+		asset_doc.available_for_use_date = nowdate() if nowdate() != month_end_date else add_days(nowdate(), -15)
+		self.assertEqual(asset_doc.gross_purchase_amount, 5250.0)
+		asset_doc.append("finance_books", {
+			"expected_value_after_useful_life": 200,
+			"depreciation_method": "Straight Line",
+			"total_number_of_depreciations": 3,
+			"frequency_of_depreciation": 10,
+			"depreciation_start_date": month_end_date
+		})
+
+		# disable cwip and try submitting
+		frappe.db.set_value("Asset Category", "Computers", "enable_cwip_accounting", 0)
+		asset_doc.submit()
+		# asset should have gl entries even if cwip is disabled
+		expected_gle = (
+			("_Test Fixed Asset - _TC", 5250.0, 0.0),
+			("CWIP Account - _TC", 0.0, 5250.0)
+		)
+		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
+			where voucher_type='Asset' and voucher_no = %s
+			order by account""", asset_doc.name)
+		self.assertEqual(gle, expected_gle)
+
+		frappe.db.set_value("Asset Category", "Computers", "enable_cwip_accounting", 1)
 
 	def test_expense_head(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",
@@ -576,7 +645,6 @@ class TestAsset(unittest.TestCase):
 		doc = make_invoice(pr.name)
 
 		self.assertEquals('Asset Received But Not Billed - _TC', doc.items[0].expense_account)
-
 
 def create_asset_data():
 	if not frappe.db.exists("Asset Category", "Computers"):
@@ -598,15 +666,16 @@ def create_asset(**args):
 
 	asset = frappe.get_doc({
 		"doctype": "Asset",
-		"asset_name": "Macbook Pro 1",
+		"asset_name": args.asset_name or "Macbook Pro 1",
 		"asset_category": "Computers",
-		"item_code": "Macbook Pro",
-		"company": "_Test Company",
+		"item_code": args.item_code or "Macbook Pro",
+		"company": args.company or"_Test Company",
 		"purchase_date": "2015-01-01",
 		"calculate_depreciation": 0,
 		"gross_purchase_amount": 100000,
+		"purchase_receipt_amount": 100000,
 		"expected_value_after_useful_life": 10000,
-		"warehouse": "_Test Warehouse - _TC",
+		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"available_for_use_date": "2020-06-06",
 		"location": "Test Location",
 		"asset_owner": "Company",
@@ -618,6 +687,9 @@ def create_asset(**args):
 	except frappe.DuplicateEntryError:
 		pass
 
+	if args.submit:
+		asset.submit()
+
 	return asset
 
 def create_asset_category():
@@ -625,6 +697,7 @@ def create_asset_category():
 	asset_category.asset_category_name = "Computers"
 	asset_category.total_number_of_depreciations = 3
 	asset_category.frequency_of_depreciation = 3
+	asset_category.enable_cwip_accounting = 1
 	asset_category.append("accounts", {
 		"company_name": "_Test Company",
 		"fixed_asset_account": "_Test Fixed Asset - _TC",
@@ -634,6 +707,8 @@ def create_asset_category():
 	asset_category.insert()
 
 def create_fixed_asset_item():
+	meta = frappe.get_meta('Asset')
+	naming_series = meta.get_field("naming_series").options.splitlines()[0] or 'ACC-ASS-.YYYY.-'
 	try:
 		frappe.get_doc({
 			"doctype": "Item",
@@ -644,7 +719,9 @@ def create_fixed_asset_item():
 			"item_group": "All Item Groups",
 			"stock_uom": "Nos",
 			"is_stock_item": 0,
-			"is_fixed_asset": 1
+			"is_fixed_asset": 1,
+			"auto_create_assets": 1,
+			"asset_naming_series": naming_series
 		}).insert()
 	except frappe.DuplicateEntryError:
 		pass
@@ -659,18 +736,3 @@ def set_depreciation_settings_in_company():
 
 	# Enable booking asset depreciation entry automatically
 	frappe.db.set_value("Accounts Settings", None, "book_asset_depreciation_entry_automatically", 1)
-
-def remove_prorated_depreciation_schedule():
-	asset_settings = frappe.get_doc("Asset Settings", "Asset Settings")
-	asset_settings.schedule_based_on_fiscal_year = 0
-	asset_settings.save()
-
-	frappe.db.commit()
-
-def set_prorated_depreciation_schedule():
-	asset_settings = frappe.get_doc("Asset Settings", "Asset Settings")
-	asset_settings.schedule_based_on_fiscal_year = 1
-	asset_settings.number_of_days_in_fiscal_year = 360
-	asset_settings.save()
-
-	frappe.db.commit()

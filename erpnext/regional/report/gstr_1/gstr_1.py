@@ -54,8 +54,8 @@ class Gstr1Report(object):
 		return self.columns, self.data
 
 	def get_data(self):
-		if self.filters.get("type_of_business") ==  "B2C Small":
-			self.get_b2cs_data()
+		if self.filters.get("type_of_business") in  ("B2C Small", "B2C Large"):
+			self.get_b2c_data()
 		else:
 			for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
 				invoice_details = self.invoices.get(inv)
@@ -69,7 +69,7 @@ class Gstr1Report(object):
 					if taxable_value:
 						self.data.append(row)
 
-	def get_b2cs_data(self):
+	def get_b2c_data(self):
 		b2cs_output = {}
 
 		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
@@ -84,7 +84,10 @@ class Gstr1Report(object):
 					"rate": "",
 					"taxable_value": 0,
 					"cess_amount": 0,
-					"type": ""
+					"type": "",
+					"invoice_number": invoice_details.get("invoice_number"),
+					"posting_date": invoice_details.get("posting_date"),
+					"invoice_value": invoice_details.get("base_grand_total"),
 				})
 
 				row = b2cs_output.get((rate, place_of_supply, ecommerce_gstin))
@@ -116,7 +119,7 @@ class Gstr1Report(object):
 		taxable_value = 0
 		for item_code, net_amount in self.invoice_items.get(invoice).items():
 				if item_code in items:
-					if self.item_tax_rate.get(invoice) and tax_rate in self.item_tax_rate.get(invoice, {}).get(item_code):
+					if self.item_tax_rate.get(invoice) and tax_rate in self.item_tax_rate.get(invoice, {}).get(item_code, []):
 						taxable_value += abs(net_amount)
 					elif not self.item_tax_rate.get(invoice):
 						taxable_value += abs(net_amount)
@@ -163,15 +166,14 @@ class Gstr1Report(object):
 			if not b2c_limit:
 				frappe.throw(_("Please set B2C Limit in GST Settings."))
 
-		if self.filters.get("type_of_business") ==  "B2C Large" and customers:
-			conditions += """ and SUBSTR(place_of_supply, 1, 2) != SUBSTR(company_gstin, 1, 2)
-				and grand_total > {0} and is_return != 1 and gst_category ='Unregistered' """.\
-					format(flt(b2c_limit), ", ".join([frappe.db.escape(c.name) for c in customers]))
-		elif self.filters.get("type_of_business") ==  "B2C Small" and customers:
+		if self.filters.get("type_of_business") ==  "B2C Large":
+			conditions += """ and ifnull(SUBSTR(place_of_supply, 1, 2),'') != ifnull(SUBSTR(company_gstin, 1, 2),'')
+				and grand_total > {0} and is_return != 1 and gst_category ='Unregistered' """.format(flt(b2c_limit))
+
+		elif self.filters.get("type_of_business") ==  "B2C Small":
 			conditions += """ and (
 				SUBSTR(place_of_supply, 1, 2) = SUBSTR(company_gstin, 1, 2)
-					or grand_total <= {0}) and is_return != 1 and gst_category ='Unregistered' """.\
-						format(flt(b2c_limit), ", ".join([frappe.db.escape(c.name) for c in customers]))
+					or grand_total <= {0}) and is_return != 1 and gst_category ='Unregistered' """.format(flt(b2c_limit))
 
 		elif self.filters.get("type_of_business") ==  "CDNR":
 			conditions += """ and is_return = 1 """
@@ -533,16 +535,9 @@ class Gstr1Report(object):
 		self.columns = self.invoice_columns + self.tax_columns + self.other_columns
 
 @frappe.whitelist()
-def get_json():
-	data = frappe._dict(frappe.local.form_dict)
-
-	del data["cmd"]
-	if "csrf_token" in data:
-		del data["csrf_token"]
-
-	filters = json.loads(data["filters"])
-	report_data = json.loads(data["data"])
-	report_name = data["report_name"]
+def get_json(filters, report_name, data):
+	filters = json.loads(filters)
+	report_data = json.loads(data)
 	gstin = get_company_gstin_number(filters["company"])
 
 	fp = "%02d%s" % (getdate(filters["to_date"]).month, getdate(filters["to_date"]).year)
@@ -576,7 +571,11 @@ def get_json():
 		out = get_export_json(res)
 		gst_json["exp"] = out
 
-	download_json_file(report_name, filters["type_of_business"], gst_json)
+	return {
+		'report_name': report_name,
+		'report_type': filters['type_of_business'],
+		'data': gst_json
+	}
 
 def get_b2b_json(res, gstin):
 	inv_type, out = {"Registered Regular": "R", "Deemed Export": "DE", "URD": "URD", "SEZ": "SEZ"}, []
@@ -585,6 +584,11 @@ def get_b2b_json(res, gstin):
 		if not gst_in: continue
 
 		for number, invoice in iteritems(res[gst_in]):
+			if not invoice[0]["place_of_supply"]:
+				frappe.throw(_("""{0} not entered in Invoice {1}.
+					Please update and try again""").format(frappe.bold("Place Of Supply"),
+					frappe.bold(invoice[0]['invoice_number'])))
+
 			inv_item = get_basic_invoice_detail(invoice[0])
 			inv_item["pos"] = "%02d" % int(invoice[0]["place_of_supply"].split('-')[0])
 			inv_item["rchrg"] = invoice[0]["reverse_charge"]
@@ -610,6 +614,9 @@ def get_b2cs_json(data, gstin):
 
 	out = []
 	for d in data:
+		if not d.get("place_of_supply"):
+			frappe.throw(_("""{0} not entered in some invoices.
+				Please update and try again""").format(frappe.bold("Place Of Supply")))
 
 		pos = d.get('place_of_supply').split('-')[0]
 		tax_details = {}
@@ -646,6 +653,10 @@ def get_b2cs_json(data, gstin):
 def get_b2cl_json(res, gstin):
 	out = []
 	for pos in res:
+		if not pos:
+			frappe.throw(_("""{0} not entered in some invoices.
+				Please update and try again""").format(frappe.bold("Place Of Supply")))
+
 		b2cl_item, inv = {"pos": "%02d" % int(pos.split('-')[0]), "inv": []}, []
 
 		for row in res[pos]:
@@ -723,11 +734,15 @@ def get_company_gstin_number(company):
 	if gstin:
 		return gstin[0]["gstin"]
 	else:
-		frappe.throw(_("No GST No. found for the Company."))
+		frappe.throw(_("Please set valid GSTIN No. in Company Address for company {0}".format(
+			frappe.bold(company)
+		)))
 
-def download_json_file(filename, report_type, data):
+@frappe.whitelist()
+def download_json_file():
 	''' download json content in a file '''
-	frappe.response['filename'] = frappe.scrub("{0} {1}".format(filename, report_type)) + '.json'
-	frappe.response['filecontent'] = json.dumps(data)
+	data = frappe._dict(frappe.local.form_dict)
+	frappe.response['filename'] = frappe.scrub("{0} {1}".format(data['report_name'], data['report_type'])) + '.json'
+	frappe.response['filecontent'] = data['data']
 	frappe.response['content_type'] = 'application/json'
 	frappe.response['type'] = 'download'

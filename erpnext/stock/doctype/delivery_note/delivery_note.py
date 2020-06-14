@@ -111,7 +111,6 @@ class DeliveryNote(SellingController):
 		self.so_required()
 		self.validate_proj_cust()
 		self.check_sales_order_on_hold_or_close("against_sales_order")
-		self.validate_for_items()
 		self.validate_warehouse()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
@@ -164,29 +163,6 @@ class DeliveryNote(SellingController):
 					ifnull(customer,'')='')""", (self.project, self.customer))
 			if not res:
 				frappe.throw(_("Customer {0} does not belong to project {1}").format(self.customer, self.project))
-
-	def validate_for_items(self):
-		check_list, chk_dupl_itm = [], []
-		if cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
-			return
-
-		for d in self.get('items'):
-			e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
-			f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
-
-			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
-				if e in check_list:
-					frappe.msgprint(_("Note: Item {0} entered multiple times").format(d.item_code))
-				else:
-					check_list.append(e)
-			else:
-				if f in chk_dupl_itm:
-					frappe.msgprint(_("Note: Item {0} entered multiple times").format(d.item_code))
-				else:
-					chk_dupl_itm.append(f)
-			#Customer Provided parts will have zero valuation rate
-			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
-				d.allow_zero_valuation_rate = 1
 
 	def validate_warehouse(self):
 		super(DeliveryNote, self).validate_warehouse()
@@ -251,8 +227,10 @@ class DeliveryNote(SellingController):
 
 		extra_amount = 0
 		validate_against_credit_limit = False
-		bypass_credit_limit_check_at_sales_order = cint(frappe.db.get_value("Customer", self.customer,
-			"bypass_credit_limit_check_at_sales_order"))
+		bypass_credit_limit_check_at_sales_order = cint(frappe.db.get_value("Customer Credit Limit",
+			filters={'parent': self.customer, 'parenttype': 'Customer', 'company': self.company},
+			fieldname="bypass_credit_limit_check"))
+
 		if bypass_credit_limit_check_at_sales_order:
 			validate_against_credit_limit = True
 			extra_amount = self.base_grand_total
@@ -428,7 +406,6 @@ def make_sales_invoice(source_name, target_doc=None):
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
 
 	def set_missing_values(source, target):
-		target.is_pos = 0
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
@@ -439,7 +416,12 @@ def make_sales_invoice(source_name, target_doc=None):
 		target.run_method("calculate_taxes_and_totals")
 
 		# set company address
-		target.update(get_company_address(target.company))
+		if source.company_address:
+			target.update({'company_address': source.company_address})
+		else:
+			# set company address
+			target.update(get_company_address(target.company))
+
 		if target.company_address:
 			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
 
@@ -473,6 +455,9 @@ def make_sales_invoice(source_name, target_doc=None):
 	doc = get_mapped_doc("Delivery Note", source_name, {
 		"Delivery Note": {
 			"doctype": "Sales Invoice",
+			"field_map": {
+				"is_return": "is_return"
+			},
 			"validation": {
 				"docstatus": ["=", 1]
 			}

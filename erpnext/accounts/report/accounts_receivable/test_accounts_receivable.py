@@ -14,33 +14,44 @@ class TestAccountsReceivable(unittest.TestCase):
 
 		filters = {
 			'company': '_Test Company 2',
-			'based_on_payment_terms': 1
+			'based_on_payment_terms': 1,
+			'report_date': today(),
+			'range1': 30,
+			'range2': 60,
+			'range3': 90,
+			'range4': 120
 		}
 
+		# check invoice grand total and invoiced column's value for 3 payment terms
 		name = make_sales_invoice()
 		report = execute(filters)
 
-		expected_data = [[100,30], [100,50], [100,20]]
+		expected_data = [[100, 30], [100, 50], [100, 20]]
 
-		self.assertEqual(expected_data[0], report[1][0][7:9])
-		self.assertEqual(expected_data[1], report[1][1][7:9])
-		self.assertEqual(expected_data[2], report[1][2][7:9])
+		for i in range(3):
+			row = report[1][i-1]
+			self.assertEqual(expected_data[i-1], [row.invoice_grand_total, row.invoiced])
 
+		# check invoice grand total, invoiced, paid and outstanding column's value after payment
 		make_payment(name)
 		report = execute(filters)
 
-		expected_data_after_payment = [[100,50], [100,20]]
+		expected_data_after_payment = [[100, 50, 10, 40], [100, 20, 0, 20]]
 
-		self.assertEqual(expected_data_after_payment[0], report[1][0][7:9])
-		self.assertEqual(expected_data_after_payment[1], report[1][1][7:9])
+		for i in range(2):
+			row = report[1][i-1]
+			self.assertEqual(expected_data_after_payment[i-1],
+				[row.invoice_grand_total, row.invoiced, row.paid, row.outstanding])
 
+		# check invoice grand total, invoiced, paid and outstanding column's value after credit note
 		make_credit_note(name)
 		report = execute(filters)
 
-		expected_data_after_credit_note = [[100,100,30,100,-30]]
+		expected_data_after_credit_note = [100, 0, 0, 40, -40]
 
-		self.assertEqual(expected_data_after_credit_note[0], report[1][0][7:12])
-
+		row = report[1][0]
+		self.assertEqual(expected_data_after_credit_note,
+			[row.invoice_grand_total, row.invoiced, row.paid, row.credit_note, row.outstanding])
 
 def make_sales_invoice():
 	frappe.set_user("Administrator")
@@ -64,7 +75,7 @@ def make_sales_invoice():
 	return si.name
 
 def make_payment(docname):
-	pe = get_payment_entry("Sales Invoice", docname, bank_account="Cash - _TC2", party_amount=30)
+	pe = get_payment_entry("Sales Invoice", docname, bank_account="Cash - _TC2", party_amount=40)
 	pe.paid_from = "Debtors - _TC2"
 	pe.insert()
 	pe.submit()

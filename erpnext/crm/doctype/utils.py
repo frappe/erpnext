@@ -17,7 +17,7 @@ def get_last_interaction(contact=None, lead=None):
 			if link.link_doctype == 'Customer':
 				last_issue = get_last_issue_from_customer(link.link_name)
 			query_condition += "(`reference_doctype`=%s AND `reference_name`=%s) OR"
-			values += [link_link_doctype, link_link_name]
+			values += [link.link_doctype, link.link_name]
 
 		if query_condition:
 			# remove extra appended 'OR'

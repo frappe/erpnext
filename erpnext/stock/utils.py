@@ -15,7 +15,7 @@ def get_stock_value_from_bin(warehouse=None, item_code=None):
 	values = {}
 	conditions = ""
 	if warehouse:
-		conditions += """ and warehouse in (
+		conditions += """ and `tabBin`.warehouse in (
 						select w2.name from `tabWarehouse` w1
 						join `tabWarehouse` w2 on
 						w1.name = %(warehouse)s
@@ -25,11 +25,12 @@ def get_stock_value_from_bin(warehouse=None, item_code=None):
 		values['warehouse'] = warehouse
 
 	if item_code:
-		conditions += " and item_code = %(item_code)s"
+		conditions += " and `tabBin`.item_code = %(item_code)s"
 
 		values['item_code'] = item_code
 
-	query = "select sum(stock_value) from `tabBin` where 1 = 1 %s" % conditions
+	query = """select sum(stock_value) from `tabBin`, `tabItem` where 1 = 1
+		and `tabItem`.name = `tabBin`.item_code and ifnull(`tabItem`.disabled, 0) = 0 %s""" % conditions
 
 	stock_value = frappe.db.sql(query, values)
 
@@ -73,7 +74,8 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 	return sum(sle_map.values())
 
 @frappe.whitelist()
-def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None, with_valuation_rate=False):
+def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None,
+	with_valuation_rate=False, with_serial_no=False):
 	"""Returns stock balance quantity at given warehouse on given posting date or current date.
 
 	If `with_valuation_rate` is True, will return tuple (qty, rate)"""
@@ -83,16 +85,50 @@ def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None
 	if not posting_date: posting_date = nowdate()
 	if not posting_time: posting_time = nowtime()
 
-	last_entry = get_previous_sle({
+	args = {
 		"item_code": item_code,
 		"warehouse":warehouse,
 		"posting_date": posting_date,
-		"posting_time": posting_time })
+		"posting_time": posting_time
+	}
+
+	last_entry = get_previous_sle(args)
 
 	if with_valuation_rate:
-		return (last_entry.qty_after_transaction, last_entry.valuation_rate) if last_entry else (0.0, 0.0)
+		if with_serial_no:
+			serial_nos = last_entry.get("serial_no")
+
+			if (serial_nos and
+				len(get_serial_nos_data(serial_nos)) < last_entry.qty_after_transaction):
+				serial_nos = get_serial_nos_data_after_transactions(args)
+
+			return ((last_entry.qty_after_transaction, last_entry.valuation_rate, serial_nos)
+				if last_entry else (0.0, 0.0, 0.0))
+		else:
+			return (last_entry.qty_after_transaction, last_entry.valuation_rate) if last_entry else (0.0, 0.0)
 	else:
 		return last_entry.qty_after_transaction if last_entry else 0.0
+
+def get_serial_nos_data_after_transactions(args):
+	serial_nos = []
+	data = frappe.db.sql(""" SELECT serial_no, actual_qty
+		FROM `tabStock Ledger Entry`
+		WHERE
+			item_code = %(item_code)s and warehouse = %(warehouse)s
+			and timestamp(posting_date, posting_time) < timestamp(%(posting_date)s, %(posting_time)s)
+			order by posting_date, posting_time asc """, args, as_dict=1)
+
+	for d in data:
+		if d.actual_qty > 0:
+			serial_nos.extend(get_serial_nos_data(d.serial_no))
+		else:
+			serial_nos = list(set(serial_nos) - set(get_serial_nos_data(d.serial_no)))
+
+	return '\n'.join(serial_nos)
+
+def get_serial_nos_data(serial_nos):
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+	return get_serial_nos(serial_nos)
 
 @frappe.whitelist()
 def get_latest_stock_qty(item_code, warehouse=None):
@@ -135,7 +171,7 @@ def get_bin(item_code, warehouse):
 		bin_obj.flags.ignore_permissions = 1
 		bin_obj.insert()
 	else:
-		bin_obj = frappe.get_doc('Bin', bin)
+		bin_obj = frappe.get_cached_doc('Bin', bin)
 	bin_obj.flags.ignore_permissions = True
 	return bin_obj
 
@@ -252,32 +288,80 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 		return
 
 	convertible_cols = {}
-	for col_idx in reversed(range(0, len(columns))):
-		col = columns[col_idx]
-		if isinstance(col, dict) and col.get("convertible") in ['rate', 'qty']:
-			convertible_cols[col_idx] = col['convertible']
-			columns.insert(col_idx+1, col.copy())
-			columns[col_idx+1]['fieldname'] += "_alt"
-			if convertible_cols[col_idx] == 'rate':
-				columns[col_idx+1]['label'] += " (per {})".format(include_uom)
+
+	is_dict_obj = False
+	if isinstance(result[0], dict):
+		is_dict_obj = True
+
+	convertible_columns = {}
+	for idx, d in enumerate(columns):
+		key = d.get("fieldname") if is_dict_obj else idx
+		if d.get("convertible"):
+			convertible_columns.setdefault(key, d.get("convertible"))
+
+			# Add new column to show qty/rate as per the selected UOM
+			columns.insert(idx+1, {
+				'label': "{0} (per {1})".format(d.get("label"), include_uom),
+				'fieldname': "{0}_{1}".format(d.get("fieldname"), frappe.scrub(include_uom)),
+				'fieldtype': 'Currency' if d.get("convertible") == 'rate' else 'Float'
+			})
+
+	update_dict_values = []
+	for row_idx, row in enumerate(result):
+		data = row.items() if is_dict_obj else enumerate(row)
+		for key, value in data:
+			if not key in convertible_columns or not conversion_factors[row_idx]:
+				continue
+
+			if convertible_columns.get(key) == 'rate':
+				new_value = flt(value) * conversion_factors[row_idx]
 			else:
-				columns[col_idx+1]['label'] += " ({})".format(include_uom)
+				new_value = flt(value) / conversion_factors[row_idx]
+
+			if not is_dict_obj:
+				row.insert(key+1, new_value)
+			else:
+				new_key = "{0}_{1}".format(key, frappe.scrub(include_uom))
+				update_dict_values.append([row, new_key, new_value])
+
+	for data in update_dict_values:
+		row, key, value = data
+		row[key] = value
+
+def get_available_serial_nos(args):
+	return frappe.db.sql(""" SELECT name from `tabSerial No`
+		WHERE item_code = %(item_code)s and warehouse = %(warehouse)s
+		 and timestamp(purchase_date, purchase_time) <= timestamp(%(posting_date)s, %(posting_time)s)
+	""", args, as_dict=1)
+
+def add_additional_uom_columns(columns, result, include_uom, conversion_factors):
+	if not include_uom or not conversion_factors:
+		return
+
+	convertible_column_map = {}
+	for col_idx in list(reversed(range(0, len(columns)))):
+		col = columns[col_idx]
+		if isinstance(col, dict) and col.get('convertible') in ['rate', 'qty']:
+			next_col = col_idx + 1
+			columns.insert(next_col, col.copy())
+			columns[next_col]['fieldname'] += '_alt'
+			convertible_column_map[col.get('fieldname')] = frappe._dict({
+				'converted_col': columns[next_col]['fieldname'],
+				'for_type': col.get('convertible')
+			})
+			if col.get('convertible') == 'rate':
+				columns[next_col]['label'] += ' (per {})'.format(include_uom)
+			else:
+				columns[next_col]['label'] += ' ({})'.format(include_uom)
 
 	for row_idx, row in enumerate(result):
-		new_row = []
-		for col_idx, d in enumerate(row):
-			new_row.append(d)
-			if col_idx in convertible_cols:
-				if conversion_factors[row_idx]:
-					if convertible_cols[col_idx] == 'rate':
-						new_row.append(flt(d) * conversion_factors[row_idx])
-					else:
-						new_row.append(flt(d) / conversion_factors[row_idx])
-				else:
-					new_row.append(None)
+		for convertible_col, data in convertible_column_map.items():
+			conversion_factor = conversion_factors[row.get('item_code')] or 1
+			for_type = data.for_type
+			value_before_conversion = row.get(convertible_col)
+			if for_type == 'rate':
+				row[data.converted_col] = flt(value_before_conversion) * conversion_factor
+			else:
+				row[data.converted_col] = flt(value_before_conversion) / conversion_factor
 
-		result[row_idx] = new_row
-
-def get_available_serial_nos(item_code, warehouse):
-	return frappe.get_all("Serial No", filters = {'item_code': item_code,
-		'warehouse': warehouse, 'delivery_document_no': ''}) or []
+		result[row_idx] = row

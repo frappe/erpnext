@@ -72,7 +72,7 @@ class TestLeaveApplication(unittest.TestCase):
 		application.to_date = "2013-01-05"
 		return application
 
-	def test_attendance_creation(self):
+	def test_overwrite_attendance(self):
 		'''check attendance is automatically created on leave approval'''
 		make_allocation_record()
 		application = self.get_application(_test_records[0])
@@ -82,7 +82,8 @@ class TestLeaveApplication(unittest.TestCase):
 		application.insert()
 		application.submit()
 
-		attendance = frappe.get_all('Attendance', ['name', 'status', 'attendance_date'], dict(leave_application = application.name))
+		attendance = frappe.get_all('Attendance', ['name', 'status', 'attendance_date'],
+			dict(attendance_date=('between', ['2018-01-01', '2018-01-03']), docstatus=("!=", 2)))
 
 		# attendance created for all 3 days
 		self.assertEqual(len(attendance), 3)
@@ -94,20 +95,6 @@ class TestLeaveApplication(unittest.TestCase):
 		dates = [d.attendance_date for d in attendance]
 		for d in ('2018-01-01', '2018-01-02', '2018-01-03'):
 			self.assertTrue(getdate(d) in dates)
-
-	def test_overwrite_attendance(self):
-		# employee marked as absent
-		doc = frappe.new_doc("Attendance")
-		doc.employee = '_T-Employee-00001'
-		doc.attendance_date = '2018-01-01'
-		doc.company = '_Test Company'
-		doc.status = 'Absent'
-		doc.flags.ignore_validate = True
-		doc.insert(ignore_permissions=True)
-		doc.submit()
-
-		# now check if the status has been updated
-		self.test_attendance_creation()
 
 	def test_block_list(self):
 		self._clear_roles()
@@ -248,8 +235,8 @@ class TestLeaveApplication(unittest.TestCase):
 			frappe.get_doc(dict(
 				doctype = 'Holiday List',
 				holiday_list_name = holiday_list,
-				from_date = date(date.today().year, 1, 1),
-				to_date = date(date.today().year, 12, 31),
+				from_date = add_months(today, -6),
+				to_date = add_months(today, 6),
 				holidays = [
 					dict(holiday_date = today, description = 'Test')
 				]
@@ -422,7 +409,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		self.assertEqual(get_leave_balance_on(employee.name, leave_type.name, nowdate(), add_days(nowdate(), 8)), 21)
 
-	def test_earned_leave(self):
+	def test_earned_leaves_creation(self):
 		leave_period = get_leave_period()
 		employee = get_employee()
 		leave_type = 'Test Earned Leave Type'
@@ -449,6 +436,14 @@ class TestLeaveApplication(unittest.TestCase):
 			allocate_earned_leaves()
 			i += 1
 		self.assertEqual(get_leave_balance_on(employee.name, leave_type, nowdate()), 6)
+
+		# validate earned leaves creation without maximum leaves
+		frappe.db.set_value('Leave Type', leave_type, 'max_leaves_allowed', 0)
+		i = 0
+		while(i<6):
+			allocate_earned_leaves()
+			i += 1
+		self.assertEqual(get_leave_balance_on(employee.name, leave_type, nowdate()), 9)
 
 	# test to not consider current leave in leave balance while submitting
 	def test_current_leave_on_submit(self):
@@ -610,8 +605,8 @@ def get_leave_period():
 		return frappe.get_doc(dict(
 				name = 'Test Leave Period',
 				doctype = 'Leave Period',
-				from_date = "{0}-12-01".format(now_datetime().year - 1),
-				to_date = "{0}-12-31".format(now_datetime().year),
+				from_date = add_months(nowdate(), -6),
+				to_date = add_months(nowdate(), 6),
 				company = "_Test Company",
 				is_active = 1
 			)).insert()

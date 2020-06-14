@@ -5,7 +5,9 @@ frappe.ready(function(){
 
 	var loyalty_points_input = document.getElementById("loyalty-point-to-redeem");
 	var loyalty_points_status = document.getElementById("loyalty-points-status");
-	loyalty_points_input.onblur = apply_loyalty_points;
+	if (loyalty_points_input) {
+		loyalty_points_input.onblur = apply_loyalty_points;
+	}
 
 	function apply_loyalty_points() {
 		var loyalty_points = parseInt(loyalty_points_input.value);

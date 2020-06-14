@@ -8,10 +8,17 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 	render_dialog: function() {
 		this.mandatory = this.get_variant_fields().concat(this.mandatory);
 		this.mandatory = this.mandatory.concat(this.get_attributes_fields());
+		this.check_naming_series_based_on();
 		this._super();
 		this.init_post_render_dialog_operations();
 		this.preset_fields_for_template();
 		this.dialog.$wrapper.find('.edit-full').text(__('Edit in full page for more options like assets, serial nos, batches etc.'))
+	},
+
+	check_naming_series_based_on: function() {
+		if (frappe.defaults.get_default("item_naming_by") === "Naming Series") {
+			this.mandatory = this.mandatory.filter(d => d.fieldname !== "item_code");
+		}
 	},
 
 	init_post_render_dialog_operations: function() {

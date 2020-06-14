@@ -6,11 +6,14 @@
 frappe.ui.form.on("Sales Order", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'Delivery Note': 'Delivery',
+			'Delivery Note': 'Delivery Note',
+			'Pick List': 'Pick List',
 			'Sales Invoice': 'Invoice',
 			'Material Request': 'Material Request',
 			'Purchase Order': 'Purchase Order',
-			'Project': 'Project'
+			'Project': 'Project',
+			'Payment Entry': "Payment",
+			'Work Order': "Work Order"
 		}
 		frm.add_fetch('customer', 'tax_id', 'tax_id');
 
@@ -62,15 +65,6 @@ frappe.ui.form.on("Sales Order", {
 			}
 		});
 
-		frm.set_query("blanket_order", "items", function() {
-			return {
-				filters: {
-					"company": frm.doc.company,
-					"docstatus": 1
-				}
-			}
-		});
-
 		erpnext.queries.setup_warehouse_query(frm);
 	},
 
@@ -109,7 +103,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		this._super();
 		let allow_delivery = false;
 
-		if(doc.docstatus==1) {
+		if (doc.docstatus==1) {
+
 			if(this.frm.has_perm("submit")) {
 				if(doc.status === 'On Hold') {
 				   // un-hold
@@ -131,8 +126,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			}
 			if(doc.status !== 'Closed') {
 				if(doc.status !== 'On Hold') {
-
 					allow_delivery = this.frm.doc.items.some(item => item.delivered_by_supplier === 0 && item.qty > flt(item.delivered_qty))
+						&& !this.frm.doc.skip_delivery_note
 
 					if (this.frm.has_perm("submit")) {
 						if(flt(doc.per_delivered, 6) < 100 || flt(doc.per_billed) < 100) {
@@ -143,9 +138,11 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						}
 					}
 
+					this.frm.add_custom_button(__('Pick List'), () => this.create_pick_list(), __('Create'));
+
 					// delivery note
 					if(flt(doc.per_delivered, 6) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
-						this.frm.add_custom_button(__('Delivery'), () => this.make_delivery_note_based_on_delivery_date(), __('Create'));
+						this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note_based_on_delivery_date(), __('Create'));
 						this.frm.add_custom_button(__('Work Order'), () => this.make_work_order(), __('Create'));
 					}
 
@@ -197,7 +194,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					}
 				}
 				// payment request
-				if(flt(doc.per_billed)==0) {
+				if(flt(doc.per_billed)<100) {
 					this.frm.add_custom_button(__('Payment Request'), () => this.make_payment_request(), __('Create'));
 					this.frm.add_custom_button(__('Payment'), () => this.make_payment_entry(), __('Create'));
 				}
@@ -231,6 +228,13 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		}
 
 		this.order_type(doc);
+	},
+
+	create_pick_list() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.selling.doctype.sales_order.sales_order.create_pick_list",
+			frm: this.frm
+		})
 	},
 
 	make_work_order() {
@@ -330,7 +334,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	},
 
 	order_type: function() {
-		this.frm.fields_dict.items.grid.toggle_reqd("delivery_date", this.frm.doc.order_type == "Sales");
+		this.toggle_delivery_date();
 	},
 
 	tc_name: function() {
@@ -342,6 +346,15 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
 			frm: this.frm
 		})
+	},
+
+	skip_delivery_note: function() {
+		this.toggle_delivery_date();
+	},
+
+	toggle_delivery_date: function() {
+		this.frm.fields_dict.items.grid.toggle_reqd("delivery_date",
+			(this.frm.doc.order_type == "Sales" && !this.frm.doc.skip_delivery_note));
 	},
 
 	make_raw_material_request: function() {

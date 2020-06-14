@@ -7,6 +7,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import cint
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 class HRSettings(Document):
 	def validate(self):
@@ -22,3 +24,12 @@ class HRSettings(Document):
 		if self.email_salary_slip_to_employee and self.encrypt_salary_slips_in_emails:
 			if not self.password_policy:
 				frappe.throw(_("Password policy for Salary Slips is not set"))
+	
+	def on_update(self):
+		self.toggle_rounded_total()
+		frappe.clear_cache()
+
+	def toggle_rounded_total(self):
+		self.disable_rounded_total = cint(self.disable_rounded_total)
+		make_property_setter("Salary Slip", "rounded_total", "hidden", self.disable_rounded_total, "Check")
+		make_property_setter("Salary Slip", "rounded_total", "print_hide", self.disable_rounded_total, "Check")

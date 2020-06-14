@@ -29,7 +29,6 @@ class GLEntry(Document):
 		self.validate_and_set_fiscal_year()
 		self.pl_must_have_cost_center()
 		self.validate_cost_center()
-		self.validate_dimensions_for_pl_and_bs()
 
 		if not self.flags.from_repost:
 			self.check_pl_account()
@@ -39,6 +38,7 @@ class GLEntry(Document):
 	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes', from_repost=False):
 		if not from_repost:
 			self.validate_account_details(adv_adj)
+			self.validate_dimensions_for_pl_and_bs()
 			check_freezing_date(self.posting_date, adv_adj)
 
 		validate_frozen_account(self.account, adv_adj)
@@ -115,8 +115,8 @@ class GLEntry(Document):
 			from tabAccount where name=%s""", self.account, as_dict=1)[0]
 
 		if ret.is_group==1:
-			frappe.throw(_("{0} {1}: Account {2} cannot be a Group")
-				.format(self.voucher_type, self.voucher_no, self.account))
+			frappe.throw(_('''{0} {1}: Account {2} is a Group Account and group accounts cannot be used in
+				transactions''').format(self.voucher_type, self.voucher_no, self.account))
 
 		if ret.docstatus==2:
 			frappe.throw(_("{0} {1}: Account {2} is inactive")
@@ -232,10 +232,13 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 		if bal < 0 and not on_cancel:
 			frappe.throw(_("Outstanding for {0} cannot be less than zero ({1})").format(against_voucher, fmt_money(bal)))
 
-	# Update outstanding amt on against voucher
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
 		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
-		ref_doc.db_set('outstanding_amount', bal)
+
+		# Didn't use db_set for optimisation purpose
+		ref_doc.outstanding_amount = bal
+		frappe.db.set_value(against_voucher_type, against_voucher, 'outstanding_amount', bal)
+
 		ref_doc.set_status(update=True)
 
 def validate_frozen_account(account, adv_adj=None):
@@ -274,6 +277,9 @@ def update_against_account(voucher_type, voucher_no):
 		if d.against != new_against:
 			frappe.db.set_value("GL Entry", d.name, "against", new_against)
 
+def on_doctype_update():
+	frappe.db.add_index("GL Entry", ["against_voucher_type", "against_voucher"])
+	frappe.db.add_index("GL Entry", ["voucher_type", "voucher_no"])
 
 def rename_gle_sle_docs():
 	for doctype in ["GL Entry", "Stock Ledger Entry"]:

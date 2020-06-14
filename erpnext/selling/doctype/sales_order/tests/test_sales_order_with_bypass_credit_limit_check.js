@@ -1,7 +1,7 @@
 QUnit.module('Sales Order');
 
 QUnit.test("test_sales_order_with_bypass_credit_limit_check", function(assert) {
-//#PR : 10861, Author : ashish-greycube & jigneshpshah,  Email:mr.ashish.shah@gmail.com 
+//#PR : 10861, Author : ashish-greycube & jigneshpshah,  Email:mr.ashish.shah@gmail.com
 	assert.expect(2);
 	let done = assert.async();
 	frappe.run_serially([
@@ -10,8 +10,10 @@ QUnit.test("test_sales_order_with_bypass_credit_limit_check", function(assert) {
 		() => frappe.quick_entry.dialog.$wrapper.find('.edit-full').click(),
 		() => frappe.timeout(1),
 		() => cur_frm.set_value("customer_name", "Test Customer 10"),
-		() => cur_frm.set_value("credit_limit", 100.00),
-		() => cur_frm.set_value("bypass_credit_limit_check_at_sales_order", 1),
+		() => cur_frm.add_child('credit_limits', {
+			'company': cur_frm.doc.company || '_Test Company'
+			'credit_limit': 1000,
+			'bypass_credit_limit_check': 1}),
 		// save form
 		() => cur_frm.save(),
 		() => frappe.timeout(1),
@@ -22,10 +24,10 @@ QUnit.test("test_sales_order_with_bypass_credit_limit_check", function(assert) {
 		() => frappe.timeout(1),
 		() => cur_frm.set_value("item_code", "Test Product 10"),
 		() => cur_frm.set_value("item_group", "Products"),
-		() => cur_frm.set_value("standard_rate", 100),	
+		() => cur_frm.set_value("standard_rate", 100),
 		// save form
 		() => cur_frm.save(),
-		() => frappe.timeout(1),		
+		() => frappe.timeout(1),
 
 		() => {
 			return frappe.tests.make('Sales Order', [
@@ -46,11 +48,11 @@ QUnit.test("test_sales_order_with_bypass_credit_limit_check", function(assert) {
 		() => frappe.tests.click_button('Yes'),
 		() => frappe.timeout(3),
 		() => {
-			
+
 			assert.ok(cur_frm.doc.status=="To Deliver and Bill", "It is submited. Credit limit is NOT checked for sales order");
 
 
-		},		
+		},
 		() => done()
 	]);
 });

@@ -147,6 +147,15 @@ frappe.ui.form.on("Timesheet Detail", {
 		calculate_time_and_amount(frm);
 	},
 
+	task: (frm, cdt, cdn) => {
+		let row = frm.selected_doc;
+		if (row.task) {
+			frappe.db.get_value("Task", row.task, "project", (r) => {
+				frappe.model.set_value(cdt, cdn, "project", r.project);
+			});
+		}
+	},
+
 	from_time: function(frm, cdt, cdn) {
 		calculate_end_time(frm, cdt, cdn);
 	},
@@ -200,9 +209,6 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	activity_type: function(frm, cdt, cdn) {
-		frm.script_manager.copy_from_first_row('time_logs', frm.selected_doc,
-			'project');
-
 		frappe.call({
 			method: "erpnext.projects.doctype.timesheet.timesheet.get_activity_cost",
 			args: {

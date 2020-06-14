@@ -8,10 +8,12 @@ from frappe import _
 from frappe.utils import flt, getdate, nowdate, add_days
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
 class InvoiceDiscounting(AccountsController):
 	def validate(self):
 		self.validate_mandatory()
+		self.validate_invoices()
 		self.calculate_total_amount()
 		self.set_status()
 		self.set_end_date()
@@ -23,6 +25,21 @@ class InvoiceDiscounting(AccountsController):
 	def validate_mandatory(self):
 		if self.docstatus == 1 and not (self.loan_start_date and self.loan_period):
 			frappe.throw(_("Loan Start Date and Loan Period are mandatory to save the Invoice Discounting"))
+
+	def validate_invoices(self):
+		discounted_invoices = [record.sales_invoice for record in
+			frappe.get_all("Discounted Invoice",fields=["sales_invoice"], filters={"docstatus":1})]
+
+		for record in self.invoices:
+			if record.sales_invoice in discounted_invoices:
+				frappe.throw(_("Row({0}): {1} is already discounted in {2}")
+					.format(record.idx, frappe.bold(record.sales_invoice), frappe.bold(record.parent)))
+
+			actual_outstanding = frappe.db.get_value("Sales Invoice", record.sales_invoice,"outstanding_amount")
+			if record.outstanding_amount > actual_outstanding :
+				frappe.throw(_
+					("Row({0}): Outstanding Amount cannot be greater than actual Outstanding Amount {1} in {2}").format(
+					record.idx, frappe.bold(actual_outstanding), frappe.bold(record.sales_invoice)))
 
 	def calculate_total_amount(self):
 		self.total_amount = sum([flt(d.outstanding_amount) for d in self.invoices])
@@ -65,10 +82,15 @@ class InvoiceDiscounting(AccountsController):
 	def make_gl_entries(self):
 		company_currency = frappe.get_cached_value('Company',  self.company, "default_currency")
 
+
 		gl_entries = []
+		invoice_fields = ["debit_to", "party_account_currency", "conversion_rate", "cost_center"]
+		accounting_dimensions = get_accounting_dimensions()
+
+		invoice_fields.extend(accounting_dimensions)
+
 		for d in self.invoices:
-			inv = frappe.db.get_value("Sales Invoice", d.sales_invoice,
-				["debit_to", "party_account_currency", "conversion_rate", "cost_center"], as_dict=1)
+			inv = frappe.db.get_value("Sales Invoice", d.sales_invoice, invoice_fields, as_dict=1)
 
 			if d.outstanding_amount:
 				outstanding_in_company_currency = flt(d.outstanding_amount * inv.conversion_rate,
@@ -86,7 +108,7 @@ class InvoiceDiscounting(AccountsController):
 					"cost_center": inv.cost_center,
 					"against_voucher": d.sales_invoice,
 					"against_voucher_type": "Sales Invoice"
-				}, inv.party_account_currency))
+				}, inv.party_account_currency, item=inv))
 
 				gl_entries.append(self.get_gl_dict({
 					"account": self.accounts_receivable_credit,
@@ -99,7 +121,7 @@ class InvoiceDiscounting(AccountsController):
 					"cost_center": inv.cost_center,
 					"against_voucher": d.sales_invoice,
 					"against_voucher_type": "Sales Invoice"
-				}, ar_credit_account_currency))
+				}, ar_credit_account_currency, item=inv))
 
 		make_gl_entries(gl_entries, cancel=(self.docstatus == 2), update_outstanding='No')
 
@@ -212,7 +234,8 @@ def get_invoices(filters):
 			name as sales_invoice,
 			customer,
 			posting_date,
-			outstanding_amount
+			outstanding_amount,
+			debit_to
 		from `tabSales Invoice` si
 		where
 			docstatus = 1

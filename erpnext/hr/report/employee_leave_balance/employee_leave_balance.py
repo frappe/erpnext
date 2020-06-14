@@ -8,7 +8,6 @@ from frappe.utils import flt
 from erpnext.hr.doctype.leave_application.leave_application \
 	import get_leave_balance_on, get_leaves_for_period
 
-
 def execute(filters=None):
 	leave_types = frappe.db.sql_list("select name from `tabLeave Type` order by name asc")
 
@@ -19,13 +18,15 @@ def execute(filters=None):
 
 def get_columns(leave_types):
 	columns = [
-		_("Employee") + ":Link/Employee:150",
+		_("Employee") + ":Link.Employee:150",
 		_("Employee Name") + "::200",
 		_("Department") +"::150"
 	]
 
 	for leave_type in leave_types:
 		columns.append(_(leave_type) + " " + _("Opening") + ":Float:160")
+		columns.append(_(leave_type) + " " + _("Allocated") + ":Float:160")
+		columns.append(_(leave_type) + " " + _("Expired") + ":Float:160")
 		columns.append(_(leave_type) + " " + _("Taken") + ":Float:160")
 		columns.append(_(leave_type) + " " + _("Balance") + ":Float:160")
 
@@ -52,60 +53,111 @@ def get_data(filters, leave_types):
 
 	active_employees = frappe.get_all("Employee",
 		filters=conditions,
-		fields=["name", "employee_name", "department", "user_id"])
+		fields=["name", "employee_name", "department", "user_id", "leave_approver"])
+
+	department_approver_map = get_department_leave_approver_map(filters.get('department'))
 
 	data = []
 	for employee in active_employees:
-		leave_approvers = get_approvers(employee.department)
+		leave_approvers = department_approver_map.get(employee.department_name, [])
+		if employee.leave_approver:
+			leave_approvers.append(employee.leave_approver)
+
 		if (len(leave_approvers) and user in leave_approvers) or (user in ["Administrator", employee.user_id]) or ("HR Manager" in frappe.get_roles(user)):
 			row = [employee.name, employee.employee_name, employee.department]
 
 			for leave_type in leave_types:
-				# leaves taken
-				leaves_taken = get_leaves_for_period(employee.name, leave_type,
-					filters.from_date, filters.to_date) * -1
 
-				# opening balance
-				opening = get_total_allocated_leaves(employee.name, leave_type, filters.from_date, filters.to_date)
 
-				# closing balance
-				closing = flt(opening) - flt(leaves_taken)
-
-				row += [opening, leaves_taken, closing]
+				row += calculate_leaves_details(filters, leave_type, employee)
 
 			data.append(row)
-
 	return data
 
-def get_approvers(department):
-	if not department:
-		return []
+def calculate_leaves_details(filters, leave_type, employee):
+	ledger_entries = get_leave_ledger_entries(filters.from_date, filters.to_date, employee.name, leave_type)
 
-	approvers = []
+	#Leaves Deducted consist of both expired and leaves taken
+	leaves_deducted = get_leaves_for_period(employee.name, leave_type,
+		filters.from_date, filters.to_date) * -1
+
+	# removing expired leaves
+	leaves_taken = leaves_deducted - remove_expired_leave(ledger_entries)
+
+	opening = get_leave_balance_on(employee.name, leave_type, filters.from_date)
+
+	new_allocation , expired_allocation = get_allocated_and_expired_leaves(ledger_entries, filters.from_date, filters.to_date)
+
+	#removing leaves taken from expired_allocation
+	expired_leaves = max(expired_allocation - leaves_taken, 0)
+
+	#Formula for calculating  closing balance
+	closing = max(opening + new_allocation - (leaves_taken + expired_leaves), 0)
+
+	return [opening, new_allocation, expired_leaves, leaves_taken, closing]
+
+
+def remove_expired_leave(records):
+	expired_within_period = 0
+	for record in records:
+		if record.is_expired:
+			expired_within_period += record.leaves
+	return expired_within_period * -1
+
+
+def get_allocated_and_expired_leaves(records, from_date, to_date):
+
+	from frappe.utils import getdate
+
+	new_allocation = 0
+	expired_leaves = 0
+
+	for record in records:
+		if record.to_date <= getdate(to_date) and record.leaves>0:
+			expired_leaves += record.leaves
+
+		if record.from_date >= getdate(from_date) and record.leaves>0:
+			new_allocation += record.leaves
+
+	return new_allocation, expired_leaves
+
+def get_leave_ledger_entries(from_date, to_date, employee, leave_type):
+	records= frappe.db.sql("""
+		SELECT
+			employee, leave_type, from_date, to_date, leaves, transaction_name, transaction_type
+			is_carry_forward, is_expired
+		FROM `tabLeave Ledger Entry`
+		WHERE employee=%(employee)s AND leave_type=%(leave_type)s
+			AND docstatus=1
+			AND (from_date between %(from_date)s AND %(to_date)s
+				OR to_date between %(from_date)s AND %(to_date)s
+				OR (from_date < %(from_date)s AND to_date > %(to_date)s))
+	""", {
+		"from_date": from_date,
+		"to_date": to_date,
+		"employee": employee,
+		"leave_type": leave_type
+	}, as_dict=1)
+
+	return records
+
+def get_department_leave_approver_map(department=None):
+	conditions=''
+	if department:
+		conditions="and (department_name = '%(department)s' or parent_department = '%(department)s')"%{'department': department}
+
 	# get current department and all its child
-	department_details = frappe.db.get_value("Department", {"name": department}, ["lft", "rgt"], as_dict=True)
-	department_list = frappe.db.sql("""select name from `tabDepartment`
-		where lft >= %s and rgt <= %s order by lft desc
-		""", (department_details.lft, department_details.rgt), as_list = True)
+	department_list = frappe.db.sql_list(""" SELECT name FROM `tabDepartment` WHERE disabled=0 {0}""".format(conditions)) #nosec
 
 	# retrieve approvers list from current department and from its subsequent child departments
-	for d in department_list:
-		approvers.extend([l.leave_approver for l in frappe.db.sql("""select approver from `tabDepartment Approver` \
-			where parent = %s and parentfield = 'leave_approvers'""", (d), as_dict=True)])
+	approver_list = frappe.get_all('Department Approver', filters={
+		'parentfield': 'leave_approvers',
+		'parent': ('in', department_list)
+	}, fields=['parent', 'approver'], as_list=1)
+
+	approvers = {}
+
+	for k, v in approver_list:
+		approvers.setdefault(k, []).append(v)
 
 	return approvers
-
-def get_total_allocated_leaves(employee, leave_type, from_date, to_date):
-	''' Returns leave allocation between from date and to date '''
-	leave_allocation_records = frappe.db.get_all('Leave Ledger Entry', filters={
-			'docstatus': 1,
-			'is_expired': 0,
-			'leave_type': leave_type,
-			'employee': employee,
-			'transaction_type': 'Leave Allocation'
-		}, or_filters={
-			'from_date': ['between', (from_date, to_date)],
-			'to_date': ['between', (from_date, to_date)]
-		}, fields=['SUM(leaves) as leaves'])
-
-	return flt(leave_allocation_records[0].get('leaves')) if leave_allocation_records else flt(0)

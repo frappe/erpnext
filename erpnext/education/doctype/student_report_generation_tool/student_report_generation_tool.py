@@ -55,7 +55,7 @@ def preview_report_card(doc):
 			"courses": courses,
 			"assessment_groups": assessment_groups,
 			"course_criteria": course_criteria,
-			"letterhead": letterhead.content,
+			"letterhead": letterhead and letterhead.get('content', None),
 			"add_letterhead": doc.add_letterhead if doc.add_letterhead else 0
 		})
 	final_template = frappe.render_template(base_template_path, {"body": html, "title": "Report Card"})

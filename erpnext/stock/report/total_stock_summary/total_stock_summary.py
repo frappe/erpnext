@@ -15,8 +15,8 @@ def execute(filters=None):
 
 def get_columns():
 	columns = [
-		_("Company") + ":Link/Item:250",
-		_("Warehouse") + ":Link/Item:150",
+		_("Company") + ":Link/Company:250",
+		_("Warehouse") + ":Link/Warehouse:150",
 		_("Item") + ":Link/Item:150",
 		_("Description") + "::300",
 		_("Current Qty") + ":Float:100",

@@ -34,7 +34,7 @@ frappe.ui.form.on('Employee Advance', {
 		}
 		else if (
 			frm.doc.docstatus === 1
-			&& flt(frm.doc.claimed_amount) < flt(frm.doc.paid_amount)
+			&& flt(frm.doc.claimed_amount) < flt(frm.doc.paid_amount) - flt(frm.doc.return_amount)
 			&& frappe.model.can_create("Expense Claim")
 		) {
 			frm.add_custom_button(
@@ -44,6 +44,15 @@ frappe.ui.form.on('Employee Advance', {
 				},
 				__('Create')
 			);
+		}
+
+		if (frm.doc.docstatus === 1
+			&& (flt(frm.doc.claimed_amount) + flt(frm.doc.return_amount) < flt(frm.doc.paid_amount))
+			&& frappe.model.can_create("Journal Entry")) {
+
+			frm.add_custom_button(__("Return"),  function() {
+				frm.trigger('make_return_entry');
+			}, __('Create'));
 		}
 	},
 
@@ -79,6 +88,24 @@ frappe.ui.form.on('Employee Advance', {
 			callback: function(r) {
 				const doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
+	},
+
+	make_return_entry: function(frm) {
+		frappe.call({
+			method: 'erpnext.hr.doctype.employee_advance.employee_advance.make_return_entry',
+			args: {
+				'employee': frm.doc.employee,
+				'company': frm.doc.company,
+				'employee_advance_name': frm.doc.name,
+				'return_amount': flt(frm.doc.paid_amount - frm.doc.claimed_amount),
+				'advance_account': frm.doc.advance_account,
+				'mode_of_payment': frm.doc.mode_of_payment
+			},
+			callback: function(r) {
+				const doclist = frappe.model.sync(r.message);
+				frappe.set_route('Form', doclist[0].doctype, doclist[0].name);
 			}
 		});
 	},

@@ -9,6 +9,8 @@ from frappe.model.document import Document
 from frappe.desk.form import assign_to
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
+class DuplicateDeclarationError(frappe.ValidationError): pass
+
 class EmployeeBoardingController(Document):
 	'''
 		Create the project and the task for the boarding process
@@ -226,6 +228,17 @@ def get_employee_leave_policy(employee):
 	else:
 		frappe.throw(_("Please set leave policy for employee {0} in Employee / Grade record").format(employee))
 
+def validate_duplicate_exemption_for_payroll_period(doctype, docname, payroll_period, employee):
+	existing_record = frappe.db.exists(doctype, {
+		"payroll_period": payroll_period,
+		"employee": employee,
+		'docstatus': ['<', 2],
+		'name': ['!=', docname]
+	})
+	if existing_record:
+		frappe.throw(_("{0} already exists for employee {1} and period {2}")
+			.format(doctype, employee, payroll_period), DuplicateDeclarationError)
+
 def validate_tax_declaration(declarations):
 	subcategories = []
 	for d in declarations:
@@ -316,16 +329,18 @@ def allocate_earned_leaves():
 
 				allocation = frappe.get_doc('Leave Allocation', allocation.name)
 				new_allocation = flt(allocation.total_leaves_allocated) + flt(earned_leaves)
-				new_allocation = new_allocation if new_allocation <= e_leave_type.max_leaves_allowed else e_leave_type.max_leaves_allowed
+
+				if new_allocation > e_leave_type.max_leaves_allowed and e_leave_type.max_leaves_allowed > 0:
+					new_allocation = e_leave_type.max_leaves_allowed
 
 				if new_allocation == allocation.total_leaves_allocated:
 					continue
 				allocation.db_set("total_leaves_allocated", new_allocation, update_modified=False)
-				create_earned_leave_ledger_entry(allocation, earned_leaves, today)
+				create_additional_leave_ledger_entry(allocation, earned_leaves, today)
 
-def create_earned_leave_ledger_entry(allocation, earned_leaves, date):
-	''' Create leave ledger entry based on the earned leave frequency '''
-	allocation.new_leaves_allocated = earned_leaves
+def create_additional_leave_ledger_entry(allocation, leaves, date):
+	''' Create leave ledger entry for leave types '''
+	allocation.new_leaves_allocated = leaves
 	allocation.from_date = date
 	allocation.unused_leaves = 0
 	allocation.create_leave_ledger_entry()
@@ -389,6 +404,7 @@ def get_sal_slip_total_benefit_given(employee, payroll_period, component=False):
 
 def get_holidays_for_employee(employee, start_date, end_date):
 	holiday_list = get_holiday_list_for_employee(employee)
+
 	holidays = frappe.db.sql_list('''select holiday_date from `tabHoliday`
 		where
 			parent=%(holiday_list)s

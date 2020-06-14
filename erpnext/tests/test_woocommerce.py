@@ -18,6 +18,7 @@ class TestWoocommerce(unittest.TestCase):
 			woo_settings.api_consumer_key = "ck_fd43ff5756a6abafd95fadb6677100ce95a758a1"
 			woo_settings.api_consumer_secret = "cs_94360a1ad7bef7fa420a40cf284f7b3e0788454e"
 			woo_settings.enable_sync = 1
+			woo_settings.company = "Woocommerce"
 			woo_settings.tax_account = "Sales Expenses - W"
 			woo_settings.f_n_f_account = "Expenses - W"
 			woo_settings.creation_user = "Administrator"

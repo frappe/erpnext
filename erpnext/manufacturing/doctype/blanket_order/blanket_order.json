@@ -88,7 +88,9 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "section_break_12",
@@ -128,7 +130,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-06-19 11:59:09.279607",
+ "modified": "2019-11-18 19:37:37.151686",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Blanket Order",

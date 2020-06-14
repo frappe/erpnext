@@ -12,16 +12,6 @@
 
 
 {% block header_actions %}
-{% if doc.items and cart_settings.enable_checkout %}
-<button class="btn btn-primary btn-place-order" type="button">
-	{{ _("Place Order") }}
-</button>
-{% endif %}
-{% if doc.items and not cart_settings.enable_checkout %}
-<button class="btn btn-primary btn-request-for-quotation" type="button">
-	{{ _("Request for Quotation") }}
-</button>
-{% endif %}
 {% endblock %}
 
 {% block page_content %}
@@ -56,6 +46,20 @@
 	{% endif %}
 
 	{% if doc.items %}
+		<div class="place-order-container">
+			{% if cart_settings.enable_checkout %}
+				<button class="btn btn-primary btn-place-order" type="button">
+					{{ _("Place Order") }}
+				</button>
+			{% else %}
+				<button class="btn btn-primary btn-request-for-quotation" type="button">
+					{{ _("Request for Quotation") }}
+				</button>
+			{% endif %}
+		</div>
+	{% endif %}
+
+	{% if doc.items %}
 	{% if doc.tc_name %}
 		<div class="terms-and-conditions-link">
 			<a href class="link-terms-and-conditions" data-terms-name="{{ doc.tc_name }}">
@@ -83,11 +87,9 @@
 		</div>
 	{% endif %}
 
-	{% if cart_settings.enable_checkout %}
 	<div class="cart-addresses mt-5">
 	{% include "templates/includes/cart/cart_address.html" %}
 	</div>
-	{% endif %}
 	{% endif %}
 </div>
 

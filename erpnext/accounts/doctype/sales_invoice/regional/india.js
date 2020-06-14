@@ -1,3 +1,7 @@
+{% include "erpnext/regional/india/taxes.js" %}
+
+erpnext.setup_auto_gst_taxation('Sales Invoice');
+
 frappe.ui.form.on("Sales Invoice", {
 	setup: function(frm) {
 		frm.set_query('transporter', function() {
@@ -21,18 +25,29 @@ frappe.ui.form.on("Sales Invoice", {
 		if(frm.doc.docstatus == 1 && !frm.is_dirty()
 			&& !frm.doc.is_return && !frm.doc.ewaybill) {
 
-			frm.add_custom_button('e-Way Bill JSON', () => {
-				var w = window.open(
-					frappe.urllib.get_full_url(
-						"/api/method/erpnext.regional.india.utils.generate_ewb_json?"
-						+ "dt=" + encodeURIComponent(frm.doc.doctype)
-						+ "&dn=" + encodeURIComponent(frm.doc.name)
-					)
-				);
-				if (!w) {
-					frappe.msgprint(__("Please enable pop-ups")); return;
-				}
-			}, __("Make"));
+			frm.add_custom_button('E-Way Bill JSON', () => {
+				frappe.call({
+					method: 'erpnext.regional.india.utils.generate_ewb_json',
+					args: {
+						'dt': frm.doc.doctype,
+						'dn': [frm.doc.name]
+					},
+					callback: function(r) {
+						if (r.message) {
+							const args = {
+								cmd: 'erpnext.regional.india.utils.download_ewb_json',
+								data: r.message,
+								docname: frm.doc.name
+							};
+							open_url_post(frappe.request.url, args);
+						}
+					}
+				});
+
+			}, __("Create"));
 		}
-	}
+	},
+
 });
+
+

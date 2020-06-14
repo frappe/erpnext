@@ -40,6 +40,16 @@ class Analytics(object):
 				"fieldtype": "Data",
 				"width": 140
 			})
+
+		if self.filters.tree_type == "Item":
+			self.columns.append({
+				"label": _("UOM"),
+				"fieldname": 'stock_uom',
+				"fieldtype": "Link",
+				"options": "UOM",
+				"width": 100
+			})
+
 		for end_date in self.periodic_daterange:
 			period = self.get_period(end_date)
 			self.columns.append({
@@ -126,10 +136,10 @@ class Analytics(object):
 		if self.filters["value_quantity"] == 'Value':
 			value_field = 'base_amount'
 		else:
-			value_field = 'qty'
+			value_field = 'stock_qty'
 
 		self.entries = frappe.db.sql("""
-			select i.item_code as entity, i.item_name as entity_name, i.{value_field} as value_field, s.{date_field}
+			select i.item_code as entity, i.item_name as entity_name, i.stock_uom, i.{value_field} as value_field, s.{date_field}
 			from `tab{doctype} Item` i , `tab{doctype}` s
 			where s.name = i.parent and i.docstatus = 1 and s.company = %s
 			and s.{date_field} between %s and %s
@@ -184,6 +194,9 @@ class Analytics(object):
 	def get_rows(self):
 		self.data = []
 		self.get_periodic_data()
+		total_row = {
+			"entity": "Total",
+		}
 
 		for entity, period_data in iteritems(self.entity_periodic_data):
 			row = {
@@ -197,8 +210,17 @@ class Analytics(object):
 				row[scrub(period)] = amount
 				total += amount
 
+				if not total_row.get(scrub(period)): total_row[scrub(period)] = 0
+				total_row[scrub(period)] += amount
+
 			row["total"] = total
+
+			if self.filters.tree_type == "Item":
+				row["stock_uom"] = period_data.get("stock_uom")
+
 			self.data.append(row)
+
+		self.data.append(total_row)
 
 	def get_rows_by_group(self):
 		self.get_periodic_data()
@@ -218,8 +240,10 @@ class Analytics(object):
 					self.entity_periodic_data.setdefault(d.parent, frappe._dict()).setdefault(period, 0.0)
 					self.entity_periodic_data[d.parent][period] += amount
 				total += amount
+
 			row["total"] = total
 			out = [row] + out
+
 		self.data = out
 
 	def get_periodic_data(self):
@@ -231,6 +255,9 @@ class Analytics(object):
 			period = self.get_period(d.get(self.date_field))
 			self.entity_periodic_data.setdefault(d.entity, frappe._dict()).setdefault(period, 0.0)
 			self.entity_periodic_data[d.entity][period] += flt(d.value_field)
+
+			if self.filters.tree_type == "Item":
+				self.entity_periodic_data[d.entity]['stock_uom'] = d.stock_uom
 
 	def get_period(self, posting_date):
 		if self.filters.range == 'Weekly':
@@ -321,8 +348,10 @@ class Analytics(object):
 	def get_chart_data(self):
 		length = len(self.columns)
 
-		if self.filters.tree_type in ["Customer", "Supplier", "Item"]:
+		if self.filters.tree_type in ["Customer", "Supplier"]:
 			labels = [d.get("label") for d in self.columns[2:length - 1]]
+		elif self.filters.tree_type == "Item":
+			labels = [d.get("label") for d in self.columns[3:length - 1]]
 		else:
 			labels = [d.get("label") for d in self.columns[1:length - 1]]
 		self.chart = {

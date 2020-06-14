@@ -1,5 +1,6 @@
 import frappe
 import requests
+from frappe import _
 
 # api/method/erpnext.erpnext_integrations.exotel_integration.handle_incoming_call
 # api/method/erpnext.erpnext_integrations.exotel_integration.handle_end_call
@@ -7,19 +8,24 @@ import requests
 
 @frappe.whitelist(allow_guest=True)
 def handle_incoming_call(**kwargs):
-	exotel_settings = get_exotel_settings()
-	if not exotel_settings.enabled: return
+	try:
+		exotel_settings = get_exotel_settings()
+		if not exotel_settings.enabled: return
 
-	call_payload = kwargs
-	status = call_payload.get('Status')
-	if status == 'free':
-		return
+		call_payload = kwargs
+		status = call_payload.get('Status')
+		if status == 'free':
+			return
 
-	call_log = get_call_log(call_payload)
-	if not call_log:
-		create_call_log(call_payload)
-	else:
-		update_call_log(call_payload, call_log=call_log)
+		call_log = get_call_log(call_payload)
+		if not call_log:
+			create_call_log(call_payload)
+		else:
+			update_call_log(call_payload, call_log=call_log)
+	except Exception as e:
+		frappe.db.rollback()
+		frappe.log_error(title=_('Error in Exotel incoming call'))
+		frappe.db.commit()
 
 @frappe.whitelist(allow_guest=True)
 def handle_end_call(**kwargs):

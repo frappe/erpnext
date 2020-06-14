@@ -20,20 +20,20 @@ $.extend(shopping_cart, {
 		shopping_cart.bind_change_qty();
 		shopping_cart.bind_change_notes();
 		shopping_cart.bind_dropdown_cart_buttons();
+		shopping_cart.bind_coupon_code();
 	},
 
 	bind_address_select: function() {
 		$(".cart-addresses").on('click', '.address-card', function(e) {
 			const $card = $(e.currentTarget);
-			const address_fieldname = $card.closest('[data-fieldname]').attr('data-fieldname');
+			const address_type = $card.closest('[data-address-type]').attr('data-address-type');
 			const address_name = $card.closest('[data-address-name]').attr('data-address-name');
-
 			return frappe.call({
 				type: "POST",
 				method: "erpnext.shopping_cart.cart.update_cart_address",
 				freeze: true,
 				args: {
-					address_fieldname,
+					address_type,
 					address_name
 				},
 				callback: function(r) {
@@ -190,6 +190,29 @@ $.extend(shopping_cart, {
 					$('.cart-container table').hide();
 					$(btn).hide();
 					window.location.href = '/quotations/' + encodeURIComponent(r.message);
+				}
+			}
+		});
+	},
+
+	bind_coupon_code: function() {
+		$(".bt-coupon").on("click", function() {
+			shopping_cart.apply_coupon_code(this);
+		});
+	},
+
+	apply_coupon_code: function(btn) {
+		return frappe.call({
+			type: "POST",
+			method: "erpnext.shopping_cart.cart.apply_coupon_code",
+			btn: btn,
+			args : {
+				applied_code : $('.txtcoupon').val(),
+				applied_referral_sales_partner: $('.txtreferral_sales_partner').val()
+			},
+			callback: function(r) {
+				if (r && r.message){
+					location.reload();
 				}
 			}
 		});

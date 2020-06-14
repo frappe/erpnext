@@ -11,10 +11,25 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe import scrub
 from frappe.utils import cstr
 from frappe.utils.background_jobs import enqueue
+from frappe.model import core_doctypes_list
 
 class AccountingDimension(Document):
 	def before_insert(self):
 		self.set_fieldname_and_label()
+
+	def validate(self):
+		if self.document_type in core_doctypes_list + ('Accounting Dimension', 'Project',
+				'Cost Center', 'Accounting Dimension Detail') :
+
+			msg = _("Not allowed to create accounting dimension for {0}").format(self.document_type)
+			frappe.throw(msg)
+
+		exists = frappe.db.get_value("Accounting Dimension", {'document_type': self.document_type}, ['name'])
+
+		if exists and self.is_new():
+			frappe.throw("Document Type already used as a dimension")
+
+	def after_insert(self):
 		if frappe.flags.in_test:
 			make_dimension_in_accounting_doctypes(doc=self)
 		else:
@@ -50,7 +65,8 @@ def make_dimension_in_accounting_doctypes(doc):
 			"label": doc.label,
 			"fieldtype": "Link",
 			"options": doc.document_type,
-			"insert_after": insert_after_field
+			"insert_after": insert_after_field,
+			"owner": "Administrator"
 		}
 
 		if doctype == "Budget":
@@ -146,9 +162,9 @@ def toggle_disabling(doc):
 
 def get_doctypes_with_dimensions():
 	doclist = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "Asset",
-		"Expense Claim", "Stock Entry", "Budget", "Payroll Entry", "Delivery Note", "Sales Invoice Item", "Purchase Invoice Item",
-		"Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item", "Purchase Receipt Item",
-		"Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
+		"Expense Claim", "Expense Claim Detail", "Expense Taxes and Charges", "Stock Entry", "Budget", "Payroll Entry", "Delivery Note",
+		"Sales Invoice Item", "Purchase Invoice Item", "Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item",
+		"Purchase Receipt Item", "Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
 		"Landed Cost Item", "Asset Value Adjustment", "Loyalty Program", "Fee Schedule", "Fee Structure", "Stock Reconciliation",
 		"Travel Request", "Fees", "POS Profile", "Opening Invoice Creation Tool", "Opening Invoice Creation Tool Item", "Subscription",
 		"Subscription Plan"]
@@ -156,7 +172,7 @@ def get_doctypes_with_dimensions():
 	return doclist
 
 def get_accounting_dimensions(as_list=True):
-	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["label", "fieldname", "disabled"])
+	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["label", "fieldname", "disabled", "document_type"])
 
 	if as_list:
 		return [d.fieldname for d in accounting_dimensions]
@@ -164,11 +180,23 @@ def get_accounting_dimensions(as_list=True):
 		return accounting_dimensions
 
 def get_checks_for_pl_and_bs_accounts():
-	dimensions = frappe.db.sql("""SELECT p.label, p.disabled, p.fieldname, c.company, c.mandatory_for_pl, c.mandatory_for_bs
+	dimensions = frappe.db.sql("""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
 		FROM `tabAccounting Dimension`p ,`tabAccounting Dimension Detail` c
 		WHERE p.name = c.parent""", as_dict=1)
 
 	return dimensions
+
+def get_dimension_with_children(doctype, dimension):
+
+	if isinstance(dimension, list):
+		dimension = dimension[0]
+
+	all_dimensions = []
+	lft, rgt = frappe.db.get_value(doctype, dimension, ["lft", "rgt"])
+	children = frappe.get_all(doctype, filters={"lft": [">=", lft], "rgt": ["<=", rgt]}, order_by="lft")
+	all_dimensions += [c.name for c in children]
+
+	return all_dimensions
 
 @frappe.whitelist()
 def get_dimension_filters():
@@ -178,12 +206,13 @@ def get_dimension_filters():
 		WHERE disabled = 0
 	""", as_dict=1)
 
-	default_dimensions = frappe.db.sql("""SELECT parent, company, default_dimension
-		FROM `tabAccounting Dimension Detail`""", as_dict=1)
+	default_dimensions = frappe.db.sql("""SELECT p.fieldname, c.company, c.default_dimension
+		FROM `tabAccounting Dimension Detail` c, `tabAccounting Dimension` p
+		WHERE c.parent = p.name""", as_dict=1)
 
 	default_dimensions_map = {}
 	for dimension in default_dimensions:
-		default_dimensions_map.setdefault(dimension['company'], {})
-		default_dimensions_map[dimension['company']][dimension['parent']] = dimension['default_dimension']
+		default_dimensions_map.setdefault(dimension.company, {})
+		default_dimensions_map[dimension.company][dimension.fieldname] = dimension.default_dimension
 
 	return dimension_filters, default_dimensions_map

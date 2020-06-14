@@ -70,7 +70,7 @@ def get_result(filters):
 		rate = [i.tax_withholding_rate for i in tds_doc.rates
 			if i.fiscal_year == gle_map[d][0].fiscal_year]
 
-		if rate and len(rate) > 0:
+		if rate and len(rate) > 0 and tds_deducted:
 			rate = rate[0]
 
 			if getdate(filters.from_date) <= gle_map[d][0].posting_date \
@@ -164,7 +164,7 @@ def get_columns(filters):
 		{
 			"label": _("TDS Rate %"),
 			"fieldname": "tds_rate",
-			"fieldtype": "Float",
+			"fieldtype": "Percent",
 			"width": 90
 		},
 		{

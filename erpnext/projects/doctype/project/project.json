@@ -108,7 +108,7 @@
    "fieldname": "percent_complete_method",
    "fieldtype": "Select",
    "label": "% Complete Method",
-   "options": "Task Completion\nTask Progress\nTask Weight"
+   "options": "Manual\nTask Completion\nTask Progress\nTask Weight"
   },
   {
    "bold": 1,
@@ -123,6 +123,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "project_template",
    "fieldtype": "Link",
    "label": "From Template",
@@ -434,7 +435,7 @@
   },
   {
    "depends_on": "collect_progress",
-   "description": "Message will sent to users to get their status on the project",
+   "description": "Message will be sent to the users to get their status on the Project",
    "fieldname": "message",
    "fieldtype": "Text",
    "label": "Message"
@@ -443,7 +444,7 @@
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "max_attachments": 4,
- "modified": "2019-07-16 11:11:12.343658",
+ "modified": "2020-04-09 14:17:15.524529",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

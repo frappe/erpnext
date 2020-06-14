@@ -20,6 +20,8 @@ class StockController(AccountsController):
 	def validate(self):
 		super(StockController, self).validate()
 		self.validate_inspection()
+		self.validate_serialized_batch()
+		self.validate_customer_provided_item()
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if self.docstatus == 2:
@@ -33,7 +35,7 @@ class StockController(AccountsController):
 					gl_entries = self.get_gl_entries(warehouse_account)
 				make_gl_entries(gl_entries, from_repost=from_repost)
 
-			if repost_future_gle:
+			if (repost_future_gle or self.flags.repost_future_gle):
 				items, warehouses = self.get_items_and_warehouses()
 				update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items,
 					warehouse_account, company=self.company)
@@ -41,6 +43,18 @@ class StockController(AccountsController):
 			gl_entries = []
 			gl_entries = self.get_asset_gl_entry(gl_entries)
 			make_gl_entries(gl_entries, from_repost=from_repost)
+
+	def validate_serialized_batch(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		for d in self.get("items"):
+			if not (hasattr(d, 'serial_no') and d.serial_no and d.batch_no): continue
+
+			serial_nos = get_serial_nos(d.serial_no)
+			for serial_no_data in frappe.get_all("Serial No",
+				filters={"name": ("in", serial_nos)}, fields=["batch_no", "name"]):
+				if serial_no_data.batch_no != d.batch_no:
+					frappe.throw(_("Row #{0}: Serial No {1} does not belong to Batch {2}")
+						.format(d.idx, serial_no_data.name, d.batch_no))
 
 	def get_gl_entries(self, warehouse_account=None, default_expense_account=None,
 			default_cost_center=None):
@@ -54,6 +68,7 @@ class StockController(AccountsController):
 		gl_list = []
 		warehouse_with_no_account = []
 
+		precision = frappe.get_precision("GL Entry", "debit_in_account_currency")
 		for item_row in voucher_details:
 			sle_list = sle_map.get(item_row.name)
 			if sle_list:
@@ -79,7 +94,7 @@ class StockController(AccountsController):
 							"against": item_row.expense_account,
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"debit": flt(sle.stock_value_difference, 2),
+							"debit": flt(sle.stock_value_difference, precision),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
 						}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
 
@@ -89,7 +104,7 @@ class StockController(AccountsController):
 							"against": warehouse_account[sle.warehouse]["account"],
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"credit": flt(sle.stock_value_difference, 2),
+							"credit": flt(sle.stock_value_difference, precision),
 							"project": item_row.get("project") or self.get("project"),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No"
 						}, item=item_row))
@@ -207,41 +222,6 @@ class StockController(AccountsController):
 						reference_doctype=self.doctype,
 						reference_name=self.name)).insert().name
 
-	def make_adjustment_entry(self, expected_gle, voucher_obj):
-		from erpnext.accounts.utils import get_stock_and_account_difference
-		account_list = [d.account for d in expected_gle]
-		acc_diff = get_stock_and_account_difference(account_list,
-			expected_gle[0].posting_date, self.company)
-
-		cost_center = self.get_company_default("cost_center")
-		stock_adjustment_account = self.get_company_default("stock_adjustment_account")
-
-		gl_entries = []
-		for account, diff in acc_diff.items():
-			if diff:
-				gl_entries.append([
-					# stock in hand account
-					voucher_obj.get_gl_dict({
-						"account": account,
-						"against": stock_adjustment_account,
-						"debit": diff,
-						"remarks": "Adjustment Accounting Entry for Stock",
-					}),
-
-					# account against stock in hand
-					voucher_obj.get_gl_dict({
-						"account": stock_adjustment_account,
-						"against": account,
-						"credit": diff,
-						"cost_center": cost_center or None,
-						"remarks": "Adjustment Accounting Entry for Stock",
-					}),
-				])
-
-		if gl_entries:
-			from erpnext.accounts.general_ledger import make_gl_entries
-			make_gl_entries(gl_entries)
-
 	def check_expense_account(self, item):
 		if not item.get("expense_account"):
 			frappe.throw(_("Expense or Difference account is mandatory for Item {0} as it impacts overall stock value").format(item.item_code))
@@ -255,6 +235,21 @@ class StockController(AccountsController):
 			if is_expense_account and not item.get("cost_center"):
 				frappe.throw(_("{0} {1}: Cost Center is mandatory for Item {2}").format(
 					_(self.doctype), self.name, item.get("item_code")))
+
+	def delete_auto_created_batches(self):
+		for d in self.items:
+			if not d.batch_no: continue
+
+			serial_nos = [sr.name for sr in frappe.get_all("Serial No", {'batch_no': d.batch_no})]
+			if serial_nos:
+				frappe.db.set_value("Serial No", { 'name': ['in', serial_nos] }, "batch_no", None)
+
+			d.batch_no = None
+			d.db_set("batch_no", None)
+
+		for data in frappe.get_all("Batch",
+			{'reference_name': self.name, 'reference_doctype': self.doctype}):
+			frappe.delete_doc("Batch", data.name)
 
 	def get_sl_entries(self, d, args):
 		sl_dict = frappe._dict({
@@ -374,6 +369,12 @@ class StockController(AccountsController):
 		for blanket_order in blanket_orders:
 			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
 
+	def validate_customer_provided_item(self):
+		for d in self.get('items'):
+			# Customer Provided parts will have zero valuation rate
+			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
+				d.allow_zero_valuation_rate = 1
+
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None, company=None):
 	def _delete_gl_entries(voucher_type, voucher_no):
@@ -430,7 +431,7 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
 		from `tabStock Ledger Entry` sle
 		where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) {condition}
-		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc""".format(condition=condition),
+		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc for update""".format(condition=condition),
 		tuple([posting_date, posting_time] + values), as_dict=True):
 			future_stock_vouchers.append([d.voucher_type, d.voucher_no])
 

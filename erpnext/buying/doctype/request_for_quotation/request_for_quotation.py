@@ -344,13 +344,9 @@ def get_item_from_material_requests_based_on_supplier(source_name, target_doc = 
 
 @frappe.whitelist()
 def get_supplier_tag():
-	data = frappe.db.sql("select _user_tags from `tabSupplier`")
+	if not frappe.cache().hget("Supplier", "Tags"):
+		filters = {"document_type": "Supplier"}
+		tags = list(set([tag.tag for tag in frappe.get_all("Tag Link", filters=filters, fields=["tag"]) if tag]))
+		frappe.cache().hset("Supplier", "Tags", tags)
 
-	tags = []
-	for tag in data:
-		tags += filter(bool, tag[0].split(","))
-
-	tags = list(set(tags))
-
-	return tags
-
+	return frappe.cache().hget("Supplier", "Tags")

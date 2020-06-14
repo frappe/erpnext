@@ -53,8 +53,8 @@ class Lead(SellingController):
 		if self.contact_date and getdate(self.contact_date) < getdate(nowdate()):
 			frappe.throw(_("Next Contact Date cannot be in the past"))
 
-		if self.ends_on and self.contact_date and\
-			(self.ends_on < self.contact_date):
+		if (self.ends_on and self.contact_date and
+			(getdate(self.ends_on) < getdate(self.contact_date))):
 			frappe.throw(_("Ends On date cannot be before Next Contact Date."))
 
 	def on_update(self):
@@ -146,14 +146,7 @@ def _make_customer(source_name, target_doc=None, ignore_permissions=False):
 @frappe.whitelist()
 def make_opportunity(source_name, target_doc=None):
 	def set_missing_values(source, target):
-		address = frappe.get_all('Dynamic Link', {
-			'link_doctype': source.doctype,
-			'link_name': source.name,
-			'parenttype': 'Address',
-		}, ['parent'], limit=1)
-
-		if address:
-			target.customer_address = address[0].parent
+		_set_missing_values(source, target)
 
 	target_doc = get_mapped_doc("Lead", source_name,
 		{"Lead": {
@@ -173,19 +166,42 @@ def make_opportunity(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		_set_missing_values(source, target)
+
 	target_doc = get_mapped_doc("Lead", source_name,
 		{"Lead": {
 			"doctype": "Quotation",
 			"field_map": {
 				"name": "party_name"
 			}
-		}}, target_doc)
+		}}, target_doc, set_missing_values)
+
 	target_doc.quotation_to = "Lead"
 	target_doc.run_method("set_missing_values")
 	target_doc.run_method("set_other_charges")
 	target_doc.run_method("calculate_taxes_and_totals")
 
 	return target_doc
+
+def _set_missing_values(source, target):
+	address = frappe.get_all('Dynamic Link', {
+			'link_doctype': source.doctype,
+			'link_name': source.name,
+			'parenttype': 'Address',
+		}, ['parent'], limit=1)
+
+	contact = frappe.get_all('Dynamic Link', {
+			'link_doctype': source.doctype,
+			'link_name': source.name,
+			'parenttype': 'Contact',
+		}, ['parent'], limit=1)
+
+	if address:
+		target.customer_address = address[0].parent
+
+	if contact:
+		target.contact_person = contact[0].parent
 
 @frappe.whitelist()
 def get_lead_details(lead, posting_date=None, company=None):

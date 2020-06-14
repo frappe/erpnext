@@ -4,6 +4,14 @@
 frappe.query_reports["Stock Balance"] = {
 	"filters": [
 		{
+			"fieldname": "company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"width": "80",
+			"options": "Company",
+			"default": frappe.defaults.get_default("company")
+		},
+		{
 			"fieldname":"from_date",
 			"label": __("From Date"),
 			"fieldtype": "Date",
@@ -27,12 +35,6 @@ frappe.query_reports["Stock Balance"] = {
 			"options": "Item Group"
 		},
 		{
-			"fieldname":"brand",
-			"label": __("Brand"),
-			"fieldtype": "Link",
-			"options": "Brand"
-		},
-		{
 			"fieldname": "item_code",
 			"label": __("Item"),
 			"fieldtype": "Link",
@@ -41,7 +43,7 @@ frappe.query_reports["Stock Balance"] = {
 			"get_query": function() {
 				return {
 					query: "erpnext.controllers.queries.item_query",
-				}
+				};
 			}
 		},
 		{
@@ -57,7 +59,7 @@ frappe.query_reports["Stock Balance"] = {
 						filters: {
 							'warehouse_type': warehouse_type
 						}
-					}
+					};
 				}
 			}
 		},
@@ -79,5 +81,23 @@ frappe.query_reports["Stock Balance"] = {
 			"label": __("Show Variant Attributes"),
 			"fieldtype": "Check"
 		},
-	]
-}
+		{
+			"fieldname": 'show_stock_ageing_data',
+			"label": __('Show Stock Ageing Data'),
+			"fieldtype": 'Check'
+		},
+	],
+
+	"formatter": function (value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+
+		if (column.fieldname == "out_qty" && data && data.out_qty > 0) {
+			value = "<span style='color:red'>" + value + "</span>";
+		}
+		else if (column.fieldname == "in_qty" && data && data.in_qty > 0) {
+			value = "<span style='color:green'>" + value + "</span>";
+		}
+
+		return value;
+	}
+};

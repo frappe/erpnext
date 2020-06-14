@@ -139,15 +139,11 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 	}
 
 	make() {
-		const me = this;
-		frappe.upload.make({
-			args: {
-				method: 'erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.upload_bank_statement',
-				allow_multiple: 0
-			},
-			no_socketio: true,
-			sample_url: "e.g. http://example.com/somefile.csv",
-			callback: function(attachment, r) {
+		const me = this;	
+		new frappe.ui.FileUploader({
+			method: 'erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.upload_bank_statement',
+			allow_multiple: 0,
+			on_success: function(attachment, r) {
 				if (!r.exc && r.message) {
 					me.data = r.message;
 					me.setup_transactions_dom();
@@ -533,9 +529,16 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 			frappe.db.get_doc(dt, event.value)
 			.then(doc => {
 				let displayed_docs = []
+				let payment = []
 				if (dt === "Payment Entry") {
 					payment.currency = doc.payment_type == "Receive" ? doc.paid_to_account_currency : doc.paid_from_account_currency;
 					payment.doctype = dt
+					payment.posting_date = doc.posting_date;
+					payment.party = doc.party;
+					payment.reference_no = doc.reference_no;
+					payment.reference_date = doc.reference_date;
+					payment.paid_amount = doc.paid_amount;
+					payment.name = doc.name;
 					displayed_docs.push(payment);
 				} else if (dt === "Journal Entry") {
 					doc.accounts.forEach(payment => {
@@ -568,8 +571,8 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 
 				const details_wrapper = me.dialog.fields_dict.payment_details.$wrapper;
 				details_wrapper.append(frappe.render_template("linked_payment_header"));
-				displayed_docs.forEach(values => {
-					details_wrapper.append(frappe.render_template("linked_payment_row", values));
+				displayed_docs.forEach(payment => {
+					details_wrapper.append(frappe.render_template("linked_payment_row", payment));
 				})
 			})
 		}

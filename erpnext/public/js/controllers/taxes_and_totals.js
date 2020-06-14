@@ -44,6 +44,12 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			this.calculate_contribution();
 		}
 
+		// Update paid amount on return/debit note creation
+		if(this.frm.doc.doctype === "Purchase Invoice" && this.frm.doc.is_return
+			&& (this.frm.doc.grand_total > this.frm.doc.paid_amount)) {
+			this.frm.doc.paid_amount = flt(this.frm.doc.grand_total, precision("grand_total"));
+		}
+
 		this.frm.refresh_fields();
 	},
 
@@ -382,9 +388,14 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				var diff = me.frm.doc.total + non_inclusive_tax_amount
 					- flt(last_tax.total, precision("grand_total"));
 
+				if(me.discount_amount_applied && me.frm.doc.discount_amount) {
+					diff -= flt(me.frm.doc.discount_amount);
+				}
+
+				diff = flt(diff, precision("rounding_adjustment"));
+
 				if ( diff && Math.abs(diff) <= (5.0 / Math.pow(10, precision("tax_amount", last_tax))) ) {
-					this.frm.doc.rounding_adjustment = flt(flt(this.frm.doc.rounding_adjustment) + diff,
-						precision("rounding_adjustment"));
+					me.frm.doc.rounding_adjustment = diff;
 				}
 			}
 		}

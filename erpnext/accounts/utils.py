@@ -13,6 +13,10 @@ from six import iteritems
 # imported to enable erpnext.accounts.utils.get_account_currency
 from erpnext.accounts.doctype.account.account import get_account_currency
 
+from erpnext.stock.utils import get_stock_value_on
+from erpnext.stock import get_warehouse_account_map
+
+
 class FiscalYearError(frappe.ValidationError): pass
 
 @frappe.whitelist()
@@ -560,23 +564,23 @@ def fix_total_debit_credit():
 				(dr_or_cr, dr_or_cr, '%s', '%s', '%s', dr_or_cr),
 				(d.diff, d.voucher_type, d.voucher_no))
 
-def get_stock_and_account_difference(account_list=None, posting_date=None, company=None):
-	from erpnext.stock.utils import get_stock_value_on
-	from erpnext.stock import get_warehouse_account_map
-
+def get_stock_and_account_balance(account=None, posting_date=None, company=None):
 	if not posting_date: posting_date = nowdate()
 
-	difference = {}
 	warehouse_account = get_warehouse_account_map(company)
 
-	for warehouse, account_data in iteritems(warehouse_account):
-		if account_data.get('account') in account_list:
-			account_balance = get_balance_on(account_data.get('account'), posting_date, in_account_currency=False)
-			stock_value = get_stock_value_on(warehouse, posting_date)
-			if abs(flt(stock_value) - flt(account_balance)) > 0.005:
-				difference.setdefault(account_data.get('account'), flt(stock_value) - flt(account_balance))
+	account_balance = get_balance_on(account, posting_date, in_account_currency=False, ignore_account_permission=True)
 
-	return difference
+	related_warehouses = [wh for wh, wh_details in warehouse_account.items()
+		if wh_details.account == account and not wh_details.is_group]
+
+	total_stock_value = 0.0
+	for warehouse in related_warehouses:
+		value = get_stock_value_on(warehouse, posting_date)
+		total_stock_value += value
+
+	precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
+	return flt(account_balance, precision), flt(total_stock_value, precision), related_warehouses
 
 def get_currency_precision():
 	precision = cint(frappe.db.get_default("currency_precision"))
@@ -626,7 +630,7 @@ def get_held_invoices(party_type, party):
 			'select name from `tabPurchase Invoice` where release_date IS NOT NULL and release_date > CURDATE()',
 			as_dict=1
 		)
-		held_invoices = [d['name'] for d in held_invoices]
+		held_invoices = set([d['name'] for d in held_invoices])
 
 	return held_invoices
 
@@ -635,14 +639,20 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 	outstanding_invoices = []
 	precision = frappe.get_precision("Sales Invoice", "outstanding_amount") or 2
 
-	if erpnext.get_party_account_type(party_type) == 'Receivable':
+	if account:
+		root_type, account_type = frappe.get_cached_value("Account", account, ["root_type", "account_type"])
+		party_account_type = "Receivable" if root_type == "Asset" else "Payable"
+		party_account_type = account_type or party_account_type
+	else:
+		party_account_type = erpnext.get_party_account_type(party_type)
+
+	if party_account_type == 'Receivable':
 		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 		payment_dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 	else:
 		dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 		payment_dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 
-	invoice = 'Sales Invoice' if erpnext.get_party_account_type(party_type) == 'Receivable' else 'Purchase Invoice'
 	held_invoices = get_held_invoices(party_type, party)
 
 	invoice_list = frappe.db.sql("""
@@ -661,7 +671,6 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 		group by voucher_type, voucher_no
 		order by posting_date, name""".format(
 			dr_or_cr=dr_or_cr,
-			invoice = invoice,
 			condition=condition or ""
 		), {
 			"party_type": party_type,
@@ -808,48 +817,37 @@ def create_payment_gateway_account(gateway):
 		pass
 
 @frappe.whitelist()
-def update_number_field(doctype_name, name, field_name, number_value, company):
+def update_cost_center(docname, cost_center_name, cost_center_number, company):
 	'''
-		doctype_name = Name of the DocType
-		name = Docname being referred
-		field_name = Name of the field thats holding the 'number' attribute
-		number_value = Numeric value entered in field_name
-
-		Stores the number entered in the dialog to the DocType's field.
-
 		Renames the document by adding the number as a prefix to the current name and updates
 		all transaction where it was present.
 	'''
-	doc_title = frappe.db.get_value(doctype_name, name, frappe.scrub(doctype_name)+"_name")
+	validate_field_number("Cost Center", docname, cost_center_number, company, "cost_center_number")
 
-	validate_field_number(doctype_name, name, number_value, company, field_name)
+	if cost_center_number:
+		frappe.db.set_value("Cost Center", docname, "cost_center_number", cost_center_number.strip())
+	else:
+		frappe.db.set_value("Cost Center", docname, "cost_center_number", "")
 
-	frappe.db.set_value(doctype_name, name, field_name, number_value)
+	frappe.db.set_value("Cost Center", docname, "cost_center_name", cost_center_name.strip())
 
-	if doc_title[0].isdigit():
-		separator = " - " if " - " in doc_title else " "
-		doc_title = doc_title.split(separator, 1)[1]
-
-	frappe.db.set_value(doctype_name, name, frappe.scrub(doctype_name)+"_name", doc_title)
-
-	new_name = get_autoname_with_number(number_value, doc_title, name, company)
-
-	if name != new_name:
-		frappe.rename_doc(doctype_name, name, new_name)
+	new_name = get_autoname_with_number(cost_center_number, cost_center_name, docname, company)
+	if docname != new_name:
+		frappe.rename_doc("Cost Center", docname, new_name, force=1)
 		return new_name
 
-def validate_field_number(doctype_name, name, number_value, company, field_name):
+def validate_field_number(doctype_name, docname, number_value, company, field_name):
 	''' Validate if the number entered isn't already assigned to some other document. '''
 	if number_value:
+		filters = {field_name: number_value, "name": ["!=", docname]}
 		if company:
-			doctype_with_same_number = frappe.db.get_value(doctype_name,
-				{field_name: number_value, "company": company, "name": ["!=", name]})
-		else:
-			doctype_with_same_number = frappe.db.get_value(doctype_name,
-				{field_name: number_value, "name": ["!=", name]})
+			filters["company"] = company
+
+		doctype_with_same_number = frappe.db.get_value(doctype_name, filters)
+
 		if doctype_with_same_number:
-			frappe.throw(_("{0} Number {1} already used in account {2}")
-				.format(doctype_name, number_value, doctype_with_same_number))
+			frappe.throw(_("{0} Number {1} is already used in {2} {3}")
+				.format(doctype_name, number_value, doctype_name.lower(), doctype_with_same_number))
 
 def get_autoname_with_number(number_value, doc_title, name, company):
 	''' append title with prefix as number and suffix as company's abbreviation separated by '-' '''
@@ -883,3 +881,9 @@ def get_allow_cost_center_in_entry_of_bs_account():
 	def generator():
 		return cint(frappe.db.get_value('Accounts Settings', None, 'allow_cost_center_in_entry_of_bs_account'))
 	return frappe.local_cache("get_allow_cost_center_in_entry_of_bs_account", (), generator, regenerate_if_none=True)
+
+def get_stock_accounts(company):
+	return frappe.get_all("Account", filters = {
+		"account_type": "Stock",
+		"company": company
+	})

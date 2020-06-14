@@ -32,6 +32,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			me.frm.script_manager.trigger("is_pos");
 			me.frm.refresh_fields();
 		}
+		erpnext.queries.setup_warehouse_query(this.frm);
 	},
 
 	refresh: function(doc, dt, dn) {
@@ -158,7 +159,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				cur_frm.meta._default_print_format = cur_frm.meta.default_print_format;
 				cur_frm.meta.default_print_format = cur_frm.pos_print_format;
 			}
-		} else if(cur_frm.doc.is_return) {
+		} else if(cur_frm.doc.is_return && !cur_frm.meta.default_print_format) {
 			if(cur_frm.return_print_format) {
 				cur_frm.meta._default_print_format = cur_frm.meta.default_print_format;
 				cur_frm.meta.default_print_format = cur_frm.return_print_format;
@@ -556,22 +557,11 @@ cur_frm.cscript.cost_center = function(doc, cdt, cdn) {
 }
 
 cur_frm.set_query("debit_to", function(doc) {
-	// filter on Account
-	if (doc.customer) {
-		return {
-			filters: {
-				'account_type': 'Receivable',
-				'is_group': 0,
-				'company': doc.company
-			}
-		}
-	} else {
-		return {
-			filters: {
-				'report_type': 'Balance Sheet',
-				'is_group': 0,
-				'company': doc.company
-			}
+	return {
+		filters: {
+			'account_type': 'Receivable',
+			'is_group': 0,
+			'company': doc.company
 		}
 	}
 });
@@ -597,7 +587,9 @@ frappe.ui.form.on('Sales Invoice', {
 		frm.set_query("account_for_change_amount", function() {
 			return {
 				filters: {
-					account_type: ['in', ["Cash", "Bank"]]
+					account_type: ['in', ["Cash", "Bank"]],
+					company: frm.doc.company,
+					is_group: 0
 				}
 			};
 		});
@@ -678,7 +670,8 @@ frappe.ui.form.on('Sales Invoice', {
 		frm.fields_dict["loyalty_redemption_account"].get_query = function() {
 			return {
 				filters:{
-					"company": frm.doc.company
+					"company": frm.doc.company,
+					"is_group": 0
 				}
 			}
 		};
@@ -687,7 +680,8 @@ frappe.ui.form.on('Sales Invoice', {
 		frm.fields_dict["loyalty_redemption_cost_center"].get_query = function() {
 			return {
 				filters:{
-					"company": frm.doc.company
+					"company": frm.doc.company,
+					"is_group": 0
 				}
 			}
 		};
@@ -697,8 +691,8 @@ frappe.ui.form.on('Sales Invoice', {
 		if (frm.doc.company)
 		{
 			frappe.call({
-				method:"frappe.contacts.doctype.address.address.get_default_address",
-				args:{ doctype:'Company',name:frm.doc.company},
+				method:"erpnext.setup.doctype.company.company.get_default_company_address",
+				args:{name:frm.doc.company, existing_address: frm.doc.company_address},
 				callback: function(r){
 					if (r.message){
 						frm.set_value("company_address",r.message)

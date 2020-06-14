@@ -9,7 +9,6 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_account_currency
 from erpnext.accounts.party import get_party_account
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
-from erpnext.hr.doctype.loan.loan import update_disbursement_status, update_total_amount_paid
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import get_party_account_based_on_invoice_discounting
 
 from six import string_types, iteritems
@@ -457,11 +456,12 @@ class JournalEntry(AccountsController):
 	def set_print_format_fields(self):
 		bank_amount = party_amount = total_amount = 0.0
 		currency = bank_account_currency = party_account_currency = pay_to_recd_from= None
+		party_type = None
 		for d in self.get('accounts'):
 			if d.party_type in ['Customer', 'Supplier'] and d.party:
+				party_type = d.party_type
 				if not pay_to_recd_from:
-					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
-						"customer_name" if d.party_type=="Customer" else "supplier_name")
+					pay_to_recd_from = d.party
 
 				if pay_to_recd_from and pay_to_recd_from == d.party:
 					party_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
@@ -471,8 +471,9 @@ class JournalEntry(AccountsController):
 				bank_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
 				bank_account_currency = d.account_currency
 
-		if pay_to_recd_from:
-			self.pay_to_recd_from = pay_to_recd_from
+		if party_type and pay_to_recd_from:
+			self.pay_to_recd_from = frappe.db.get_value(party_type, pay_to_recd_from,
+				"customer_name" if party_type=="Customer" else "supplier_name")
 			if bank_amount:
 				total_amount = bank_amount
 				currency = bank_account_currency
@@ -560,20 +561,20 @@ class JournalEntry(AccountsController):
 
 			if self.write_off_based_on == 'Accounts Receivable':
 				jd1.party_type = "Customer"
-				jd1.credit = flt(d.outstanding_amount, self.precision("credit", "accounts"))
+				jd1.credit_in_account_currency = flt(d.outstanding_amount, self.precision("credit", "accounts"))
 				jd1.reference_type = "Sales Invoice"
 				jd1.reference_name = cstr(d.name)
 			elif self.write_off_based_on == 'Accounts Payable':
 				jd1.party_type = "Supplier"
-				jd1.debit = flt(d.outstanding_amount, self.precision("debit", "accounts"))
+				jd1.debit_in_account_currency = flt(d.outstanding_amount, self.precision("debit", "accounts"))
 				jd1.reference_type = "Purchase Invoice"
 				jd1.reference_name = cstr(d.name)
 
 		jd2 = self.append('accounts', {})
 		if self.write_off_based_on == 'Accounts Receivable':
-			jd2.debit = total
+			jd2.debit_in_account_currency = total
 		elif self.write_off_based_on == 'Accounts Payable':
-			jd2.credit = total
+			jd2.credit_in_account_currency = total
 
 		self.validate_total_debit_and_credit()
 
@@ -606,8 +607,8 @@ class JournalEntry(AccountsController):
 		for d in self.accounts:
 			if d.reference_type=="Loan" and flt(d.debit) > 0:
 				doc = frappe.get_doc("Loan", d.reference_name)
-				update_disbursement_status(doc)
-				update_total_amount_paid(doc)
+				doc.update_total_amount_paid()
+				doc.set_status()
 
 	def validate_expense_claim(self):
 		for d in self.accounts:
@@ -827,10 +828,10 @@ def get_opening_accounts(company):
 	accounts = frappe.db.sql_list("""select
 			name from tabAccount
 		where
-			is_group=0 and report_type='Balance Sheet' and company=%s and
-			name not in(select distinct account from tabWarehouse where
+			is_group=0 and report_type='Balance Sheet' and company={0} and
+			name not in (select distinct account from tabWarehouse where
 			account is not null and account != '')
-		order by name asc""", frappe.db.escape(company))
+		order by name asc""".format(frappe.db.escape(company)))
 
 	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
 
@@ -968,7 +969,7 @@ def get_exchange_rate(posting_date, account=None, account_currency=None, company
 
 		# The date used to retreive the exchange rate here is the date passed
 		# in as an argument to this function.
-		elif (not exchange_rate or exchange_rate==1) and account_currency and posting_date:
+		elif (not exchange_rate or flt(exchange_rate)==1) and account_currency and posting_date:
 			exchange_rate = get_exchange_rate(account_currency, company_currency, posting_date)
 	else:
 		exchange_rate = 1

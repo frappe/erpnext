@@ -181,10 +181,7 @@ class update_entries_after(object):
 		# rounding as per precision
 		self.stock_value = flt(self.stock_value, self.precision)
 
-		if self.prev_stock_value < 0 and self.stock_value >= 0 and sle.voucher_type != 'Stock Reconciliation':
-			stock_value_difference = sle.actual_qty * self.valuation_rate
-		else:
-			stock_value_difference = self.stock_value - self.prev_stock_value
+		stock_value_difference = self.stock_value - self.prev_stock_value
 
 		self.prev_stock_value = self.stock_value
 
@@ -215,7 +212,7 @@ class update_entries_after(object):
 	def get_serialized_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
 		actual_qty = flt(sle.actual_qty)
-		serial_no = cstr(sle.serial_no).split("\n")
+		serial_nos = cstr(sle.serial_no).split("\n")
 
 		if incoming_rate < 0:
 			# wrong incoming rate
@@ -227,9 +224,8 @@ class update_entries_after(object):
 		elif actual_qty < 0:
 			# In case of delivery/stock issue, get average purchase rate
 			# of serial nos of current entry
-			stock_value_change = -1 * flt(frappe.db.sql("""select sum(purchase_rate)
-				from `tabSerial No` where name in (%s)""" % (", ".join(["%s"]*len(serial_no))),
-				tuple(serial_no))[0][0])
+			outgoing_value = self.get_incoming_value_for_serial_nos(sle, serial_nos)
+			stock_value_change = -1 * outgoing_value
 
 		new_stock_qty = self.qty_after_transaction + actual_qty
 
@@ -246,6 +242,36 @@ class update_entries_after(object):
 				self.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
 					sle.voucher_type, sle.voucher_no, self.allow_zero_rate,
 					currency=erpnext.get_company_currency(sle.company))
+
+	def get_incoming_value_for_serial_nos(self, sle, serial_nos):
+		# get rate from serial nos within same company
+		all_serial_nos = frappe.get_all("Serial No",
+			fields=["purchase_rate", "name", "company"],
+			filters = {'name': ('in', serial_nos)})
+
+		incoming_values = sum([flt(d.purchase_rate) for d in all_serial_nos if d.company==sle.company])
+
+		# Get rate for serial nos which has been transferred to other company
+		invalid_serial_nos = [d.name for d in all_serial_nos if d.company!=sle.company]
+		for serial_no in invalid_serial_nos:
+			incoming_rate = frappe.db.sql("""
+				select incoming_rate
+				from `tabStock Ledger Entry`
+				where
+					company = %s
+					and actual_qty > 0
+					and (serial_no = %s
+						or serial_no like %s
+						or serial_no like %s
+						or serial_no like %s
+					)
+				order by posting_date desc
+				limit 1
+			""", (sle.company, serial_no, serial_no+'\n%', '%\n'+serial_no, '%\n'+serial_no+'\n%'))
+
+			incoming_values += flt(incoming_rate[0][0]) if incoming_rate else 0
+
+		return incoming_values
 
 	def get_moving_average_values(self, sle):
 		actual_qty = flt(sle.actual_qty)
@@ -402,7 +428,7 @@ class update_entries_after(object):
 				frappe.get_desk_link(self.exceptions[0]["voucher_type"], self.exceptions[0]["voucher_no"]))
 
 		if self.verbose:
-			frappe.throw(msg, NegativeStockError, title='Insufficent Stock')
+			frappe.throw(msg, NegativeStockError, title='Insufficient Stock')
 		else:
 			raise NegativeStockError(msg)
 
@@ -501,7 +527,16 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	if not allow_zero_rate and not valuation_rate and raise_error_if_no_rate \
 			and cint(erpnext.is_perpetual_inventory_enabled(company)):
 		frappe.local.message_log = []
-		frappe.throw(_("Valuation rate not found for the Item {0}, which is required to do accounting entries for {1} {2}. If the item is transacting as a zero valuation rate item in the {1}, please mention that in the {1} Item table. Otherwise, please create an incoming stock transaction for the item or mention valuation rate in the Item record, and then try submiting / cancelling this entry.")
-			.format(item_code, voucher_type, voucher_no))
+		form_link = frappe.utils.get_link_to_form("Item", item_code)
+
+		message = _("Valuation Rate for the Item {0}, is required to do accounting entries for {1} {2}.").format(form_link, voucher_type, voucher_no)
+		message += "<br><br>" + _(" Here are the options to proceed:")
+		solutions = "<li>" + _("If the item is transacting as a Zero Valuation Rate item in this entry, please enable 'Allow Zero Valuation Rate' in the {0} Item table.").format(voucher_type) + "</li>"
+		solutions += "<li>" + _("If not, you can Cancel / Submit this entry ") + _("{0}").format(frappe.bold("after")) + _(" performing either one below:") + "</li>"
+		sub_solutions = "<ul><li>" + _("Create an incoming stock transaction for the Item.") + "</li>"
+		sub_solutions += "<li>" + _("Mention Valuation Rate in the Item master.") + "</li></ul>"
+		msg = message + solutions + sub_solutions + "</li>"
+
+		frappe.throw(msg=msg, title=_("Valuation Rate Missing"))
 
 	return valuation_rate

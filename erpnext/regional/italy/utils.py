@@ -13,6 +13,8 @@ from erpnext.regional.italy import state_codes
 def update_itemised_tax_data(doc):
 	if not doc.taxes: return
 
+	if doc.doctype == "Purchase Invoice": return
+
 	itemised_tax = get_itemised_tax(doc.taxes)
 
 	for row in doc.items:
@@ -176,6 +178,10 @@ def get_invoice_summary(items, taxes):
 						summary_data[key]["tax_exemption_reason"] = tax.tax_exemption_reason
 						summary_data[key]["tax_exemption_law"] = tax.tax_exemption_law
 
+			if summary_data.get("0.0") and tax.charge_type in ["On Previous Row Total",
+				"On Previous Row Amount"]:
+				summary_data[key]["taxable_amount"] = tax.total
+
 			if summary_data == {}: #Implies that Zero VAT has not been set on any item.
 				summary_data.setdefault("0.0", {"tax_amount": 0.0, "taxable_amount": tax.total,
 					"tax_exemption_reason": tax.tax_exemption_reason, "tax_exemption_law": tax.tax_exemption_law})
@@ -278,7 +284,11 @@ def prepare_and_attach_invoice(doc, replace=False):
 	progressive_name, progressive_number = get_progressive_name_and_number(doc, replace)
 
 	invoice = prepare_invoice(doc, progressive_number)
-	invoice_xml = frappe.render_template('erpnext/regional/italy/e-invoice.xml', context={"doc": invoice}, is_path=True)
+	item_meta = frappe.get_meta("Sales Invoice Item")
+
+	invoice_xml = frappe.render_template('erpnext/regional/italy/e-invoice.xml',
+		context={"doc": invoice, "item_meta": item_meta}, is_path=True)
+
 	invoice_xml = invoice_xml.replace("&", "&amp;")
 
 	xml_filename = progressive_name + ".xml"

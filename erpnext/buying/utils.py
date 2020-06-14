@@ -24,12 +24,12 @@ def update_last_purchase_rate(doc, is_submit):
 		last_purchase_rate = None
 		if last_purchase_details and \
 				(last_purchase_details.purchase_date > this_purchase_date):
-			last_purchase_rate = last_purchase_details['base_rate']
+			last_purchase_rate = last_purchase_details['base_net_rate']
 		elif is_submit == 1:
 			# even if this transaction is the latest one, it should be submitted
 			# for it to be considered for latest purchase rate
 			if flt(d.conversion_factor):
-				last_purchase_rate = flt(d.base_rate) / flt(d.conversion_factor)
+				last_purchase_rate = flt(d.base_net_rate) / flt(d.conversion_factor)
 			# Check if item code is present
 			# Conversion factor should not be mandatory for non itemized items
 			elif d.item_code:

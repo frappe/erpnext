@@ -21,7 +21,7 @@ class TestItemPrice(unittest.TestCase):
 	def test_addition_of_new_fields(self):
 		# Based on https://github.com/frappe/erpnext/issues/8456
 		test_fields_existance = [
-			'supplier', 'customer', 'uom', 'min_qty', 'lead_time_days',
+			'supplier', 'customer', 'uom', 'lead_time_days',
 			'packing_unit', 'valid_from', 'valid_upto', 'note'
 		]
 		doc_fields = frappe.copy_doc(test_records[1]).__dict__.keys()
@@ -43,7 +43,6 @@ class TestItemPrice(unittest.TestCase):
 
 		args = {
 			"price_list": doc.price_list,
-			"min_qty": doc.min_qty,
             "customer": doc.customer,
             "uom": "_Test UOM",
             "transaction_date": '2017-04-18',
@@ -58,7 +57,6 @@ class TestItemPrice(unittest.TestCase):
 		doc = frappe.copy_doc(test_records[2])
 		args = {
 			"price_list": doc.price_list,
-			"min_qty": 30,
 			"customer": doc.customer,
 			"uom": "_Test UOM",
             "transaction_date": '2017-04-18',
@@ -74,7 +72,6 @@ class TestItemPrice(unittest.TestCase):
 
 		args = {
 			"price_list": doc.price_list,
-			"min_qty": doc.min_qty,
 			"customer": "_Test Customer",
 			"uom": "_Test UOM",
 			"transaction_date": '2017-04-18',
@@ -90,7 +87,6 @@ class TestItemPrice(unittest.TestCase):
 
 		args = {
 			"price_list": doc.price_list,
-			"min_qty": doc.min_qty,
 			"qty": 7,
 			"uom": "_Test UOM",
 			"transaction_date": "01-15-2019"
@@ -105,7 +101,6 @@ class TestItemPrice(unittest.TestCase):
 
 		args = {
 			"price_list": doc.price_list,
-			"min_qty": doc.min_qty,
             "customer": "_Test Customer",
             "uom": "_Test UOM",
 			"transaction_date": "2017-04-25",
@@ -121,7 +116,6 @@ class TestItemPrice(unittest.TestCase):
 
 		args = {
 			"price_list": doc.price_list,
-			"min_qty": doc.min_qty,
 			"uom": "_Test UOM",
 			"qty": 7,
 		}

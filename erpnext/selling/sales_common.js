@@ -84,6 +84,13 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				return me.set_query_for_batch(doc, cdt, cdn)
 			});
 		}
+
+		if(this.frm.fields_dict["items"].grid.get_field('item_code')) {
+			this.frm.set_query("item_tax_template", "items", function(doc, cdt, cdn) {
+				return me.set_query_for_item_tax_template(doc, cdt, cdn)
+			});
+		}
+
 	},
 
 	refresh: function() {
@@ -221,9 +228,15 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	warehouse: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
+
+		if (item.serial_no && item.qty === item.serial_no.split(`\n`).length) {
+			return;
+		}
+
 		if (item.serial_no && !item.batch_no) {
 			item.serial_no = null;
 		}
+
 		var has_batch_no;
 		frappe.db.get_value('Item', {'item_code': item.item_code}, 'has_batch_no', (r) => {
 			has_batch_no = r && r.has_batch_no;
@@ -234,7 +247,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					args: {
 						item_code: item.item_code,
 						warehouse: item.warehouse,
-						has_batch_no: has_batch_no,
+						has_batch_no: has_batch_no || 0,
 						stock_qty: item.stock_qty,
 						serial_no: item.serial_no || "",
 					},
@@ -309,7 +322,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 					child: item,
 					args: {
 						"batch_no": item.batch_no,
-						"stock_qty": item.stock_qty,
+						"stock_qty": item.stock_qty || item.qty, //if stock_qty field is not available fetch qty (in case of Packed Items table)
 						"warehouse": item.warehouse,
 						"item_code": item.item_code,
 						"has_serial_no": has_serial_no
@@ -406,15 +419,20 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	*/
 	set_batch_number: function(cdt, cdn) {
 		const doc = frappe.get_doc(cdt, cdn);
-		if (doc && doc.has_batch_no) {
+		if (doc && doc.has_batch_no && doc.warehouse) {
 			this._set_batch_number(doc);
 		}
 	},
 
 	_set_batch_number: function(doc) {
+		let args = {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': flt(doc.qty) * flt(doc.conversion_factor)};
+		if (doc.has_serial_no && doc.serial_no) {
+			args['serial_no'] = doc.serial_no
+		}
+
 		return frappe.call({
 			method: 'erpnext.stock.doctype.batch.batch.get_batch_no',
-			args: {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': flt(doc.qty) * flt(doc.conversion_factor)},
+			args: args,
 			callback: function(r) {
 				if(r.message) {
 					frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);

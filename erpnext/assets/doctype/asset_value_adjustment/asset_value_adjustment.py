@@ -5,12 +5,13 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate, cint, date_diff
+from frappe.utils import flt, getdate, cint, date_diff, formatdate
 from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
 from frappe.model.document import Document
 
 class AssetValueAdjustment(Document):
 	def validate(self):
+		self.validate_date()
 		self.set_difference_amount()
 		self.set_current_asset_value()
 
@@ -23,6 +24,12 @@ class AssetValueAdjustment(Document):
 			frappe.throw(_("Cancel the journal entry {0} first").format(self.journal_entry))
 
 		self.reschedule_depreciations(self.current_asset_value)
+	
+	def validate_date(self):
+		asset_purchase_date = frappe.db.get_value('Asset', self.asset, 'purchase_date')
+		if getdate(self.date) < getdate(asset_purchase_date):
+			frappe.throw(_("Asset Value Adjustment cannot be posted before Asset's purchase date <b>{0}</b>.")
+				.format(formatdate(asset_purchase_date)), title="Incorrect Date")
 
 	def set_difference_amount(self):
 		self.difference_amount = flt(self.current_asset_value - self.new_asset_value)

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-05-22 12:43:10",
  "doctype": "DocType",
@@ -71,8 +72,8 @@
   "expense_account",
   "col_break5",
   "is_fixed_asset",
-  "asset",
   "asset_location",
+  "asset_category",
   "deferred_expense_section",
   "deferred_expense_account",
   "service_stop_date",
@@ -116,6 +117,8 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "item_code.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -195,7 +198,6 @@
    "fieldtype": "Link",
    "label": "UOM",
    "options": "UOM",
-   "print_hide": 1,
    "reqd": 1
   },
   {
@@ -414,6 +416,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "batch_no",
    "fieldtype": "Link",
    "label": "Batch No",
@@ -425,12 +428,14 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "serial_no",
    "fieldtype": "Text",
    "label": "Serial No",
    "no_copy": 1
   },
   {
+   "depends_on": "eval:!doc.is_fixed_asset",
    "fieldname": "rejected_serial_no",
    "fieldtype": "Text",
    "label": "Rejected Serial No",
@@ -502,7 +507,8 @@
    "depends_on": "enable_deferred_expense",
    "fieldname": "service_stop_date",
    "fieldtype": "Date",
-   "label": "Service Stop Date"
+   "label": "Service Stop Date",
+   "no_copy": 1
   },
   {
    "default": "0",
@@ -518,13 +524,15 @@
    "depends_on": "enable_deferred_expense",
    "fieldname": "service_start_date",
    "fieldtype": "Date",
-   "label": "Service Start Date"
+   "label": "Service Start Date",
+   "no_copy": 1
   },
   {
    "depends_on": "enable_deferred_expense",
    "fieldname": "service_end_date",
    "fieldtype": "Date",
-   "label": "Service End Date"
+   "label": "Service End Date",
+   "no_copy": 1
   },
   {
    "fieldname": "reference",
@@ -591,7 +599,6 @@
    "oldfieldname": "purchase_order",
    "oldfieldtype": "Link",
    "options": "Purchase Order",
-   "print_hide": 1,
    "read_only": 1,
    "search_index": 1
   },
@@ -607,6 +614,7 @@
    "fieldname": "include_exploded_items",
    "fieldtype": "Check",
    "label": "Include Exploded Items",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -615,6 +623,7 @@
   },
   {
    "default": "0",
+   "fetch_from": "item_code.is_fixed_asset",
    "fieldname": "is_fixed_asset",
    "fieldtype": "Check",
    "hidden": 1,
@@ -622,14 +631,6 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "depends_on": "is_fixed_asset",
-   "fieldname": "asset",
-   "fieldtype": "Link",
-   "label": "Asset",
-   "no_copy": 1,
-   "options": "Asset"
   },
   {
    "depends_on": "is_fixed_asset",
@@ -676,7 +677,7 @@
    "fieldname": "pr_detail",
    "fieldtype": "Data",
    "hidden": 1,
-   "label": "PR Detail",
+   "label": "Purchase Receipt Detail",
    "no_copy": 1,
    "oldfieldname": "pr_detail",
    "oldfieldtype": "Data",
@@ -752,13 +753,23 @@
   {
    "fieldname": "manufacturer_part_no",
    "fieldtype": "Data",
-   "label": "Manufacturer Part Number",
+   "label": "Manufacturer Part Number"
+  },
+  {
+   "depends_on": "is_fixed_asset",
+   "fetch_from": "item_code.asset_category",
+   "fieldname": "asset_category",
+   "fieldtype": "Link",
+   "in_preview": 1,
+   "label": "Asset Category",
+   "options": "Asset Category",
    "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-06-02 06:36:17.078419",
+ "links": [],
+ "modified": "2020-04-07 18:34:35.104178",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
