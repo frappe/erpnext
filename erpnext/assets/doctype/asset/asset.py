@@ -44,7 +44,6 @@ class Asset(AccountsController):
 		self.set_status()
 		delete_gl_entries(voucher_type='Asset', voucher_no=self.name)
 		self.db_set('booked_fixed_asset', 0)
-
 	def validate_asset_and_reference(self):
 		if self.purchase_invoice or self.purchase_receipt:
 			reference_doc = 'Purchase Invoice' if self.purchase_invoice else 'Purchase Receipt'

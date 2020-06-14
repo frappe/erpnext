@@ -646,7 +646,7 @@ class JournalEntry(AccountsController):
 			d.party_balance = party_balance[(d.party_type, d.party)]
 
 @frappe.whitelist()
-def get_default_bank_cash_account(company, account_type=None, mode_of_payment=None, account=None):
+def get_default_bank_cash_account(company, account_type=None, mode_of_payment=None, account=None, currency=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
 	if mode_of_payment:
 		account = get_bank_cash_account(mode_of_payment, company).get("account")
@@ -658,10 +658,12 @@ def get_default_bank_cash_account(company, account_type=None, mode_of_payment=No
 			account (of that type), otherwise return empty dict.
 		'''
 		if account_type=="Bank":
-			account = frappe.get_cached_value('Company',  company,  "default_bank_account")
+			if currency == None:
+				currency = frappe.get_cached_value('Company',  company,  "default_currency")
+			#account = frappe.get_cached_value('Company',  company,  "default_bank_account")
 			if not account:
 				account_list = frappe.get_all("Account", filters = {"company": company,
-					"account_type": "Bank", "is_group": 0})
+					"account_type": "Bank", "is_group": 0, "account_currency": currency})
 				if len(account_list) == 1:
 					account = account_list[0].name
 

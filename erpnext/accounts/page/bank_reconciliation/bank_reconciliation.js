@@ -25,7 +25,8 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		const empty_state = __("Upload a bank statement, link or reconcile a bank account")
 		me.$main_section.append(`<div class="flex justify-center align-center text-muted"
 			style="height: 50vh; display: flex;"><h5 class="text-muted">${empty_state}</h5></div>`)
-
+		
+		
 		me.page.add_field({
 			fieldtype: 'Link',
 			label: __('Company'),
@@ -100,6 +101,11 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		me.page.add_menu_item(__("Reconcile this account"), function() {
 			me.clear_page_content();
 			me.make_reconciliation_tool();
+			let companyName = $("input[data-fieldname='bank_account']").val()
+			$(".page-form").children().slice(0, 3).remove()
+			setTimeout(function(){
+				$("input[data-fieldname='bank_account']").val(companyName)
+			}, 1000);
 		}, true)
 	}
 
@@ -125,17 +131,18 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 	constructor(parent) {
 		this.parent = parent;
 		this.data = [];
-
+		
 		const assets = [
 			"/assets/frappe/css/frappe-datatable.css",
 			"/assets/frappe/js/lib/clusterize.min.js",
 			"/assets/frappe/js/lib/Sortable.min.js",
-			"/assets/frappe/js/lib/frappe-datatable.js"
+			"/assets/frappe/js/lib/frappe-datatable.js",
 		];
 
 		frappe.require(assets, () => {
 			this.make();
 		});
+		
 	}
 
 	make() {
@@ -256,7 +263,7 @@ erpnext.accounts.ReconciliationTool = class ReconciliationTool extends frappe.vi
 
 		this.page_title = __("Bank Reconciliation");
 		this.doctype = 'Bank Transaction';
-		this.fields = ['date', 'description', 'debit', 'credit', 'currency']
+		this.fields = ['date', 'description', 'reference_number', 'debit', 'credit', 'allocated_amount', 'unallocated_amount', 'currency']
 
 	}
 

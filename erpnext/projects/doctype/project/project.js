@@ -76,7 +76,6 @@ frappe.ui.form.on("Project", {
 				frm.events.set_status(frm, 'Cancelled');
 			}, __('Set Status'));
 		}
-
 		if (frappe.model.can_read("Task")) {
 			frm.add_custom_button(__("Gantt Chart"), function () {
 				frappe.route_options = {
