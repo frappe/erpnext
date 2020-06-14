@@ -77,5 +77,6 @@ install:
   - bench --site test_site reinstall --yes
 
 after_script:
+  - pip install coverage==4.5.4
   - pip install python-coveralls
   - coveralls -b apps/erpnext -d ../../sites/.coverage

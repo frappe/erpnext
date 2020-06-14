@@ -27,7 +27,7 @@ class EmailCampaign(Document):
 		for entry in campaign.get("campaign_schedules"):
 			send_after_days.append(entry.send_after_days)
 		try:
-			end_date = add_days(getdate(self.start_date), max(send_after_days))
+			self.end_date = add_days(getdate(self.start_date), max(send_after_days))
 		except ValueError:
 			frappe.throw(_("Please set up the Campaign Schedule in the Campaign {0}").format(self.campaign_name))
 

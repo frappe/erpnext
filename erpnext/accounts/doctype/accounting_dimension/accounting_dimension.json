@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "field:label",
  "creation": "2019-05-04 18:13:37.002352",
  "doctype": "DocType",
@@ -46,7 +47,8 @@
    "options": "Accounting Dimension Detail"
   }
  ],
- "modified": "2019-07-17 16:49:31.134385",
+ "links": [],
+ "modified": "2020-03-22 20:34:39.805728",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension",
@@ -63,9 +65,20 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
  "track_changes": 1

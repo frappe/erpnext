@@ -7,7 +7,7 @@ from frappe import _, scrub
 from frappe.utils import getdate, nowdate, flt, cint, formatdate, cstr, now, time_diff_in_seconds
 from collections import OrderedDict
 from erpnext.accounts.utils import get_currency_precision
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
 #  This report gives a summary of all Outstanding Invoices considering the following
 
@@ -344,26 +344,28 @@ class ReceivablePayableReport(object):
 	def allocate_outstanding_based_on_payment_terms(self, row):
 		self.get_payment_terms(row)
 		for term in row.payment_terms:
-			term.outstanding = term.invoiced
 
 			# update "paid" and "oustanding" for this term
-			self.allocate_closing_to_term(row, term, 'paid')
+			if not term.paid:
+				self.allocate_closing_to_term(row, term, 'paid')
 
 			# update "credit_note" and "oustanding" for this term
 			if term.outstanding:
 				self.allocate_closing_to_term(row, term, 'credit_note')
+
+		row.payment_terms = sorted(row.payment_terms, key=lambda x: x['due_date'])
 
 	def get_payment_terms(self, row):
 		# build payment_terms for row
 		payment_terms_details = frappe.db.sql("""
 			select
 				si.name, si.party_account_currency, si.currency, si.conversion_rate,
-				ps.due_date, ps.payment_amount, ps.description
+				ps.due_date, ps.payment_amount, ps.description, ps.paid_amount
 			from `tab{0}` si, `tabPayment Schedule` ps
 			where
 				si.name = ps.parent and
 				si.name = %s
-			order by ps.due_date
+			order by ps.paid_amount desc, due_date
 		""".format(row.voucher_type), row.voucher_no, as_dict = 1)
 
 
@@ -389,10 +391,13 @@ class ReceivablePayableReport(object):
 			"invoiced": invoiced,
 			"invoice_grand_total": row.invoiced,
 			"payment_term": d.description,
-			"paid": 0.0,
+			"paid": d.paid_amount,
 			"credit_note": 0.0,
-			"outstanding": 0.0
+			"outstanding": invoiced - d.paid_amount
 		}))
+
+		if d.paid_amount:
+			row['paid'] -= d.paid_amount
 
 	def allocate_closing_to_term(self, row, term, key):
 		if row[key]:
@@ -603,7 +608,6 @@ class ReceivablePayableReport(object):
 			self.add_supplier_filters(conditions, values)
 
 		self.add_accounting_dimensions_filters(conditions, values)
-
 		return " and ".join(conditions), values
 
 	def get_order_by_condition(self):
@@ -666,13 +670,16 @@ class ReceivablePayableReport(object):
 					doctype=doctype, lft=lft, rgt=rgt, key=key)
 
 	def add_accounting_dimensions_filters(self, conditions, values):
-		accounting_dimensions = get_accounting_dimensions()
+		accounting_dimensions = get_accounting_dimensions(as_list=False)
 
 		if accounting_dimensions:
 			for dimension in accounting_dimensions:
-				if self.filters.get(dimension):
-					conditions.append("{0} = %s".format(dimension))
-					values.append(self.filters.get(dimension))
+				if self.filters.get(dimension.fieldname):
+					if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
+						self.filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
+							self.filters.get(dimension.fieldname))
+					conditions.append("{0} in %s".format(dimension.fieldname))
+					values.append(tuple(self.filters.get(dimension.fieldname)))
 
 	def get_gle_balance(self, gle):
 		# get the balance of the GL (debit - credit) or reverse balance based on report type

@@ -39,19 +39,21 @@ class AdditionalSalary(Document):
 		return amount_per_day * no_of_days
 
 @frappe.whitelist()
-def get_additional_salary_component(employee, start_date, end_date):
+def get_additional_salary_component(employee, start_date, end_date, component_type):
 	additional_components = frappe.db.sql("""
 		select salary_component, sum(amount) as amount, overwrite_salary_structure_amount, deduct_full_tax_on_selected_payroll_date
 		from `tabAdditional Salary`
 		where employee=%(employee)s
 			and docstatus = 1
 			and payroll_date between %(from_date)s and %(to_date)s
+			and type = %(component_type)s
 		group by salary_component, overwrite_salary_structure_amount
 		order by salary_component, overwrite_salary_structure_amount
 	""", {
 		'employee': employee,
 		'from_date': start_date,
-		'to_date': end_date
+		'to_date': end_date,
+		'component_type': "Earning" if component_type == "earnings" else "Deduction"
 	}, as_dict=1)
 
 	additional_components_list = []

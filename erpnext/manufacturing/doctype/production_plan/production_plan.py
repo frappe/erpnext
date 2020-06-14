@@ -144,7 +144,7 @@ class ProductionPlan(Document):
 			item_condition = " and mr_item.item_code ={0}".format(frappe.db.escape(self.item_code))
 
 		items = frappe.db.sql("""select distinct parent, name, item_code, warehouse, description,
-			(qty - ordered_qty) as pending_qty
+			(qty - ordered_qty) * conversion_factor as pending_qty
 			from `tabMaterial Request Item` mr_item
 			where parent in (%s) and docstatus = 1 and qty > ordered_qty
 			and exists (select name from `tabBOM` bom where bom.item=mr_item.item_code

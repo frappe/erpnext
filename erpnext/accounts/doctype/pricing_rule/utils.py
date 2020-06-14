@@ -4,13 +4,19 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, copy, json
-from frappe import throw, _
+
+import copy
+import json
+
 from six import string_types
-from frappe.utils import flt, cint, get_datetime, get_link_to_form, today
+
+import frappe
 from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.get_item_details import get_conversion_factor
+from frappe import _, throw
+from frappe.utils import cint, flt, get_datetime, get_link_to_form, getdate, today
+
 
 import pdb
 class MultiplePricingRuleConflict(frappe.ValidationError): pass
@@ -242,7 +248,7 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 
 def validate_quantity_and_amount_for_suggestion(args, qty, amount, item_code, transaction_type):
 	fieldname, msg = '', ''
-	type_of_transaction = 'purcahse' if transaction_type == "buying" else "sale"
+	type_of_transaction = 'purchase' if transaction_type == 'buying' else 'sale'
 
 	for field, value in {'min_qty': qty, 'min_amt': amount}.items():
 		if (args.get(field) and value < args.get(field)
@@ -326,9 +332,9 @@ def get_qty_and_rate_for_mixed_conditions(doc, pr_doc, args):
 			if pr_doc.mixed_conditions:
 				amt = args.get('qty') * args.get("price_list_rate")
 				if args.get("item_code") != row.get("item_code"):
-					amt = row.get('qty') * (row.get("price_list_rate") or args.get("rate"))
+					amt = flt(row.get('qty')) * flt(row.get("price_list_rate") or args.get("rate"))
 
-				sum_qty += row.get("stock_qty") or args.get("stock_qty") or args.get("qty")
+				sum_qty += flt(row.get("stock_qty")) or flt(args.get("stock_qty")) or flt(args.get("qty"))
 				sum_amt += amt
 
 		if pr_doc.is_cumulative:
@@ -432,7 +438,7 @@ def apply_pricing_rule_on_transaction(doc):
 				doc.calculate_taxes_and_totals()
 			elif d.price_or_product_discount == 'Product':
 				item_details = frappe._dict({'parenttype': doc.doctype})
-				get_product_discount_rule(d, item_details, doc)
+				get_product_discount_rule(d, item_details, doc=doc)
 				apply_pricing_rule_for_free_items(doc, item_details.free_item_data)
 				doc.set_missing_values()
 
@@ -465,7 +471,7 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 	if income_account:
 		item_details.free_item_data.update(income_account[0])
 	item_details.free_item_data['uom'] = pricing_rule.free_item_uom or item_data.stock_uom
-	item_details.free_item_data['conversion_factor'] = get_conversion_factor(free_item, 
+	item_details.free_item_data['conversion_factor'] = get_conversion_factor(free_item,
 		item_details.free_item_data['uom']).get("conversion_factor", 1)
 
 	if item_details.get("parenttype") == 'Purchase Order':
@@ -501,18 +507,16 @@ def get_pricing_rule_items(pr_doc):
 	return list(set(apply_on_data))
 
 def validate_coupon_code(coupon_name):
-	from frappe.utils import today,getdate
-	coupon=frappe.get_doc("Coupon Code",coupon_name)
+	coupon = frappe.get_doc("Coupon Code", coupon_name)
+
 	if coupon.valid_from:
-		if coupon.valid_from > getdate(today()) :
-			frappe.throw(_("Sorry,coupon code validity has not started"))
+		if coupon.valid_from > getdate(today()):
+			frappe.throw(_("Sorry, this coupon code's validity has not started"))
 	elif coupon.valid_upto:
-		if coupon.valid_upto < getdate(today()) :
-			frappe.throw(_("Sorry,coupon code validity has expired"))	
-	elif coupon.used>=coupon.maximum_use:
-		frappe.throw(_("Sorry,coupon code are exhausted"))
-	else:
-		return
+		if coupon.valid_upto < getdate(today()):
+			frappe.throw(_("Sorry, this coupon code's validity has expired"))
+	elif coupon.used >= coupon.maximum_use:
+		frappe.throw(_("Sorry, this coupon code is no longer valid"))
 
 def update_coupon_code_count(coupon_name,transaction_type):
 	coupon=frappe.get_doc("Coupon Code",coupon_name)

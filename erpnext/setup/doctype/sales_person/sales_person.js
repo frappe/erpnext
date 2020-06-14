@@ -19,6 +19,11 @@ frappe.ui.form.on('Sales Person', {
 				}
 			}
 		};
+	
+		frm.make_methods = {
+			'Sales Order': () => frappe.new_doc("Sales Order")
+				.then(() => frm.add_child("sales_team", {"sales_person": frm.doc.name}))
+		}
 	}
 });
 

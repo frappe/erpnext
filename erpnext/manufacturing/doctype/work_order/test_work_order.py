@@ -14,6 +14,7 @@ from erpnext.stock.utils import get_bin
 from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_order
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 
 class TestWorkOrder(unittest.TestCase):
 	def setUp(self):
@@ -81,6 +82,37 @@ class TestWorkOrder(unittest.TestCase):
 		wo_order.qty = 2
 		wo_order.set_work_order_operations()
 		self.assertEqual(wo_order.planned_operating_cost, cost*2)
+
+	def test_resered_qty_for_partial_completion(self):
+		item = "_Test Item"
+		warehouse = create_warehouse("Test Warehouse for reserved_qty - _TC")
+
+		bin1_at_start = get_bin(item, warehouse)
+
+		# reset to correct value
+		bin1_at_start.update_reserved_qty_for_production()
+
+		wo_order = make_wo_order_test_record(item="_Test FG Item", qty=2,
+			source_warehouse=warehouse, skip_transfer=1)
+
+		bin1_on_submit = get_bin(item, warehouse)
+
+		# reserved qty for production is updated
+		self.assertEqual(cint(bin1_at_start.reserved_qty_for_production) + 2,
+			cint(bin1_on_submit.reserved_qty_for_production))
+
+		test_stock_entry.make_stock_entry(item_code="_Test Item",
+			target=warehouse, qty=100, basic_rate=100)
+		test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
+			target=warehouse, qty=100, basic_rate=100)
+
+		s = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 1))
+		s.submit()
+
+		bin1_at_completion = get_bin(item, warehouse)
+
+		self.assertEqual(cint(bin1_at_completion.reserved_qty_for_production),
+			cint(bin1_on_submit.reserved_qty_for_production) - 1)
 
 	def test_production_item(self):
 		wo_order = make_wo_order_test_record(item="_Test FG Item", qty=1, do_not_save=True)
@@ -368,7 +400,7 @@ def make_wo_order_test_record(**args):
 	wo_order.company = args.company or "_Test Company"
 	wo_order.stock_uom = args.stock_uom or "_Test UOM"
 	wo_order.use_multi_level_bom=0
-	wo_order.skip_transfer=1
+	wo_order.skip_transfer=args.skip_transfer or 0
 	wo_order.get_items_and_operations_from_bom()
 	wo_order.sales_order = args.sales_order or None
 

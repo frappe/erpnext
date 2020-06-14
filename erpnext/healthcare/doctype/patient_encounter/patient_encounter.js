@@ -62,7 +62,7 @@ frappe.ui.form.on('Patient Encounter', {
 
 		frm.set_query("patient", function () {
 			return {
-				filters: {"disabled": 0}
+				filters: {"status": "Active"}
 			};
 		});
 		frm.set_query("drug_code", "drug_prescription", function() {

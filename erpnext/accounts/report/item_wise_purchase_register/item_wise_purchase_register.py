@@ -54,8 +54,8 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			'description': d.description,
 			'invoice': d.parent,
 			'posting_date': d.posting_date,
-			'customer': d.supplier,
-			'customer_name': d.supplier_name
+			'supplier': d.supplier,
+			'supplier_name': d.supplier_name
 		}
 
 		if additional_query_columns:
@@ -102,7 +102,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 
 		data.append(row)
 
-	if filters.get('group_by'):
+	if filters.get('group_by') and item_list:
 		total_row = total_row_map.get(prev_group_by_value or d.get('item_name'))
 		total_row['percent_gt'] = flt(total_row['total']/grand_total * 100)
 		data.append(total_row)
@@ -201,7 +201,8 @@ def get_columns(additional_table_columns, filters):
 		{
 			'label': _('Mode Of Payment'),
 			'fieldname': 'mode_of_payment',
-			'fieldtype': 'Data',
+			'fieldtype': 'Link',
+			'options': 'Mode of Payment',
 			'width': 120
 		},
 		{
@@ -306,13 +307,11 @@ def get_conditions(filters):
 
 def get_items(filters, additional_query_columns):
 	conditions = get_conditions(filters)
-	match_conditions = frappe.build_match_conditions("Purchase Invoice")
-
-	if match_conditions:
-		match_conditions = " and {0} ".format(match_conditions)
 
 	if additional_query_columns:
 		additional_query_columns = ', ' + ', '.join(additional_query_columns)
+	else:
+		additional_query_columns = ''
 
 	return frappe.db.sql("""
 		select
@@ -324,11 +323,11 @@ def get_items(filters, additional_query_columns):
 			`tabPurchase Invoice Item`.`purchase_receipt`, `tabPurchase Invoice Item`.`po_detail`,
 			`tabPurchase Invoice Item`.`expense_account`, `tabPurchase Invoice Item`.`stock_qty`,
 			`tabPurchase Invoice Item`.`stock_uom`, `tabPurchase Invoice Item`.`base_net_amount`,
-			`tabPurchase Invoice`.supplier_name, `tabPurchase Invoice`.mode_of_payment {0}
+			`tabPurchase Invoice`.`supplier_name`, `tabPurchase Invoice`.`mode_of_payment` {0}
 		from `tabPurchase Invoice`, `tabPurchase Invoice Item`
 		where `tabPurchase Invoice`.name = `tabPurchase Invoice Item`.`parent` and
-		`tabPurchase Invoice`.docstatus = 1 %s %s
-	""".format(additional_query_columns) % (conditions, match_conditions), filters, as_dict=1)
+		`tabPurchase Invoice`.docstatus = 1 %s
+	""".format(additional_query_columns) % (conditions), filters, as_dict=1)
 
 def get_aii_accounts():
 	return dict(frappe.db.sql("select name, stock_received_but_not_billed from tabCompany"))

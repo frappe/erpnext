@@ -114,6 +114,8 @@
   "is_sub_contracted_item",
   "column_break_74",
   "customer_code",
+  "default_item_manufacturer",
+  "default_manufacturer_part_no",
   "website_section",
   "show_in_website",
   "show_variant_in_website",
@@ -343,7 +345,8 @@
   {
    "fieldname": "shelf_life_in_days",
    "fieldtype": "Int",
-   "label": "Shelf Life In Days"
+   "label": "Shelf Life In Days",
+   "mandatory_depends_on": "eval:doc.has_batch_no && doc.has_expiry_date"
   },
   {
    "default": "2099-12-31",
@@ -1037,6 +1040,18 @@
    "fieldname": "auto_create_assets",
    "fieldtype": "Check",
    "label": "Auto Create Assets on Purchase"
+  },
+  {
+   "fieldname": "default_item_manufacturer",
+   "fieldtype": "Data",
+   "label": "Default Item Manufacturer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "default_manufacturer_part_no",
+   "fieldtype": "Data",
+   "label": "Default Manufacturer Part No",
+   "read_only": 1
   }
  ],
  "has_web_view": 1,
@@ -1045,7 +1060,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 1,
- "modified": "2020-01-02 19:13:59.295963",
+ "modified": "2020-04-07 15:56:06.195722",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

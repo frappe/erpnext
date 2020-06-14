@@ -54,8 +54,8 @@ class Gstr1Report(object):
 		return self.columns, self.data
 
 	def get_data(self):
-		if self.filters.get("type_of_business") ==  "B2C Small":
-			self.get_b2cs_data()
+		if self.filters.get("type_of_business") in  ("B2C Small", "B2C Large"):
+			self.get_b2c_data()
 		else:
 			for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
 				invoice_details = self.invoices.get(inv)
@@ -69,7 +69,7 @@ class Gstr1Report(object):
 					if taxable_value:
 						self.data.append(row)
 
-	def get_b2cs_data(self):
+	def get_b2c_data(self):
 		b2cs_output = {}
 
 		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
@@ -84,7 +84,10 @@ class Gstr1Report(object):
 					"rate": "",
 					"taxable_value": 0,
 					"cess_amount": 0,
-					"type": ""
+					"type": "",
+					"invoice_number": invoice_details.get("invoice_number"),
+					"posting_date": invoice_details.get("posting_date"),
+					"invoice_value": invoice_details.get("base_grand_total"),
 				})
 
 				row = b2cs_output.get((rate, place_of_supply, ecommerce_gstin))
@@ -164,7 +167,7 @@ class Gstr1Report(object):
 				frappe.throw(_("Please set B2C Limit in GST Settings."))
 
 		if self.filters.get("type_of_business") ==  "B2C Large":
-			conditions += """ and SUBSTR(place_of_supply, 1, 2) != SUBSTR(company_gstin, 1, 2)
+			conditions += """ and ifnull(SUBSTR(place_of_supply, 1, 2),'') != ifnull(SUBSTR(company_gstin, 1, 2),'')
 				and grand_total > {0} and is_return != 1 and gst_category ='Unregistered' """.format(flt(b2c_limit))
 
 		elif self.filters.get("type_of_business") ==  "B2C Small":
@@ -581,6 +584,11 @@ def get_b2b_json(res, gstin):
 		if not gst_in: continue
 
 		for number, invoice in iteritems(res[gst_in]):
+			if not invoice[0]["place_of_supply"]:
+				frappe.throw(_("""{0} not entered in Invoice {1}.
+					Please update and try again""").format(frappe.bold("Place Of Supply"),
+					frappe.bold(invoice[0]['invoice_number'])))
+
 			inv_item = get_basic_invoice_detail(invoice[0])
 			inv_item["pos"] = "%02d" % int(invoice[0]["place_of_supply"].split('-')[0])
 			inv_item["rchrg"] = invoice[0]["reverse_charge"]
@@ -606,6 +614,9 @@ def get_b2cs_json(data, gstin):
 
 	out = []
 	for d in data:
+		if not d.get("place_of_supply"):
+			frappe.throw(_("""{0} not entered in some invoices.
+				Please update and try again""").format(frappe.bold("Place Of Supply")))
 
 		pos = d.get('place_of_supply').split('-')[0]
 		tax_details = {}
@@ -642,6 +653,10 @@ def get_b2cs_json(data, gstin):
 def get_b2cl_json(res, gstin):
 	out = []
 	for pos in res:
+		if not pos:
+			frappe.throw(_("""{0} not entered in some invoices.
+				Please update and try again""").format(frappe.bold("Place Of Supply")))
+
 		b2cl_item, inv = {"pos": "%02d" % int(pos.split('-')[0]), "inv": []}, []
 
 		for row in res[pos]:
