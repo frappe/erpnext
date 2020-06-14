@@ -391,6 +391,7 @@ def set_gl_entries_by_account(
 			where company=%(company)s
 			{additional_conditions}
 			and posting_date <= %(to_date)s
+			and is_cancelled = 0
 			order by account, posting_date""".format(additional_conditions=additional_conditions), gl_filters, as_dict=True) #nosec
 
 		if filters and filters.get('presentation_currency'):
