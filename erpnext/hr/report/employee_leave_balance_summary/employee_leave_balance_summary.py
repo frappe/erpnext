@@ -46,14 +46,14 @@ def get_columns():
 		'fieldname': 'new_allocation',
 		'width': 120,
 	}, {
-		'label': _('Expired Leaves'),
-		'fieldtype': 'Float',
-		'fieldname': 'expired_leaves',
-		'width': 120,
-	}, {
 		'label': _('Leaves Taken'),
 		'fieldtype': 'float',
 		'fieldname': 'leaves_taken',
+		'width': 120,
+	}, {
+		'label': _('Expired Leaves'),
+		'fieldtype': 'Float',
+		'fieldname': 'expired_leaves',
 		'width': 120,
 	}, {
 		'label': _('Closing Balance'),
@@ -96,8 +96,8 @@ def get_data(filters):
 				leave_details = calculate_leaves_details(filters, leave_type, employee)
 				row.opening_balance = flt(leave_details[0])
 				row.new_allocation = flt(leave_details[1])
-				row.expired_leaves = flt(leave_details[2])
-				row.leaves_taken = flt(leave_details[3])
+				row.leaves_taken = flt(leave_details[2])
+				row.expired_leaves = flt(leave_details[3])
 				row.closing_balance = flt(leave_details[4])
 
 				data.append(row)
