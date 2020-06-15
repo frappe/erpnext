@@ -244,7 +244,7 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 	else:
 		product_info = None
 
-	product_info["allow_items_not_in_stock"] = cint(frappe.db.get_singles_value("Shopping Cart Settings", "allow_items_not_in_stock"))
+	product_info["allow_items_not_in_stock"] = cint(data.cart_settings.allow_items_not_in_stock)
 
 	return {
 		'next_attribute': next_attribute,
