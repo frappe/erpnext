@@ -58,7 +58,7 @@ def get_tax_withholding_details(tax_withholding_category, fiscal_year, company):
 				"rate": tax_rate_detail.tax_withholding_rate,
 				"threshold": tax_rate_detail.single_threshold,
 				"cumulative_threshold": tax_rate_detail.cumulative_threshold,
-				"description": tax_withholding.category_name
+				"description": tax_withholding.category_name if tax_withholding.category_name else tax_withholding_category
 			})
 
 def get_tax_withholding_rates(tax_withholding, fiscal_year):

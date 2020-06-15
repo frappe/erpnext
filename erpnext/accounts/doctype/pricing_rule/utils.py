@@ -13,7 +13,10 @@ from six import string_types
 import frappe
 from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
-from erpnext.stock.get_item_details import get_conversion_factor
+from erpnext.stock.get_item_details import get_conversion_factor, get_default_income_account
+from erpnext.stock.doctype.item.item import get_item_defaults
+from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from frappe import _, throw
 from frappe.utils import cint, flt, get_datetime, get_link_to_form, getdate, today
 
@@ -366,8 +369,7 @@ def get_qty_amount_data_for_cumulative(pr_doc, doc, items=[]):
 	sum_qty, sum_amt = [0, 0]
 	doctype = doc.get('parenttype') or doc.doctype
 
-	date_field = ('transaction_date'
-		if doc.get('transaction_date') else 'posting_date')
+	date_field = 'transaction_date' if frappe.get_meta(doctype).has_field('transaction_date') else 'posting_date'
 
 	child_doctype = '{0} Item'.format(doctype)
 	apply_on = frappe.scrub(pr_doc.get('apply_on'))
@@ -480,6 +482,14 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 
 	if item_details.get("parenttype") == 'Sales Order':
 		item_details.free_item_data['delivery_date'] = doc.delivery_date if doc else today()
+
+	company = args.get('company') or doc.company
+	item_details.free_item_data['income_account'] = get_default_income_account(
+		args=args,
+		item=get_item_defaults(free_item, company),
+		item_group=get_item_group_defaults(free_item, company),
+		brand=get_brand_defaults(free_item, company),
+	)
 
 def apply_pricing_rule_for_free_items(doc, pricing_rule_args, set_missing_values=False):
 	if pricing_rule_args.get('item_code'):

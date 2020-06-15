@@ -670,3 +670,5 @@ erpnext.patches.v12_0.update_price_list_currency_in_bom
 erpnext.patches.v12_0.update_uom_conversion_factor
 erpnext.patches.v12_0.set_italian_import_supplier_invoice_permissions
 erpnext.patches.v12_0.unhide_cost_center_field
+execute:frappe.reload_doc("HR", "doctype", "Employee Advance")
+erpnext.patches.v12_0.move_due_advance_amount_to_pending_amount
