@@ -126,7 +126,7 @@ class CallPopup {
 			}, {
 				'fieldtype': 'Button',
 				'label': __('Open Contact'),
-				'click': () => frappe.set_route('Form', 'Contact', this.call_log.contact),
+				'click': () => frappe.set_route('Form', 'Contact', this.get_contact_link().link_name),
 				'depends_on': () => this.get_caller_name()
 			}, {
 				'fieldtype': 'Button',
