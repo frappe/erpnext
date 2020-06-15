@@ -1745,6 +1745,57 @@ class TestSalesInvoice(unittest.TestCase):
 
 		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
 
+	def test_fixed_deferred_revenue(self):
+		deferred_account = create_account(account_name="Deferred Revenue",
+			parent_account="Current Liabilities - _TC", company="_Test Company")
+
+		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		acc_settings.book_fixed_monthly_amount = 1
+		acc_settings.save()
+
+		item = create_item("_Test Item for Deferred Accounting")
+		item.enable_deferred_revenue = 1
+		item.deferred_revenue_account = deferred_account
+		item.no_of_months = 12
+		item.save()
+
+		si = create_sales_invoice(item=item.name, posting_date="2019-01-16", rate=50000, do_not_submit=True)
+		si.items[0].enable_deferred_revenue = 1
+		si.items[0].service_start_date = "2019-01-16"
+		si.items[0].service_end_date = "2019-03-31"
+		si.items[0].deferred_revenue_account = deferred_account
+		si.save()
+		si.submit()
+
+		from erpnext.accounts.deferred_revenue import convert_deferred_revenue_to_income
+
+		pda1 = frappe.get_doc(dict(
+			doctype='Process Deferred Accounting',
+			posting_date=nowdate(),
+			start_date="2019-01-01",
+			end_date="2019-03-31",
+			type="Income",
+			company="_Test Company"
+		))
+
+		pda1.insert()
+		pda1.submit()
+
+		expected_gle = [
+			[deferred_account, 10000.0, 0.0, "2019-01-31"],
+			["Sales - _TC", 0.0, 10000.0, "2019-01-31"],
+			[deferred_account, 20000.0, 0.0, "2019-02-28"],
+			["Sales - _TC", 0.0, 20000.0, "2019-02-28"],
+			[deferred_account, 20000.0, 0.0, "2019-03-31"],
+			["Sales - _TC", 0.0, 20000.0, "2019-03-31"]
+		]
+
+		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
+
+		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		acc_settings.booke_fixed_monthly_amount = 0
+		acc_settings.save()
+
 	def test_inter_company_transaction(self):
 
 		if not frappe.db.exists("Customer", "_Test Internal Customer"):
