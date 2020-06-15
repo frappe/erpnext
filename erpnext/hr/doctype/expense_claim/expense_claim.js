@@ -154,6 +154,14 @@ frappe.ui.form.on("Expense Claim", {
 				}
 			};
 		});
+		frm.set_query("cost_center", "expenses", function() {
+			return {
+				filters: {
+					"company": frm.doc.company,
+					"is_group": 0
+				}
+			};
+		});
 		frm.set_query("account_head", "taxes", function(doc) {
 			return {
 				filters: [
