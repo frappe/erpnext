@@ -420,7 +420,7 @@ def send_emails(args):
 	args = json.loads(args)
 	subject = (_("Credit limit reached for customer {0}").format(args.get('customer')))
 	message = (_("Credit limit has been crossed for customer {0} ({1}/{2})<br>\
-		Document Link:{3}")
+		Document Link: {3}")
 			.format(args.get('customer'), args.get('customer_outstanding'), args.get('credit_limit'), args.get('document_link')))
 	frappe.sendmail(recipients=args.get('credit_controller_users_list'), subject=subject, message=message)
 
