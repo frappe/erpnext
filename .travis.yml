@@ -1,5 +1,12 @@
 language: python
-dist: trusty
+
+dist: xenial
+
+addons:
+  apt:
+    packages:
+      - "python3"
+      - "python3-pip"
 
 python:
   - "2.7"
@@ -9,14 +16,13 @@ services:
 
 install:
   - pip install flake8==3.3.0
-  - flake8 . --count --select=E901,E999,F821,F822,F823 --show-source --statistics
-  - sudo rm /etc/apt/sources.list.d/docker.list
+  - sudo -H python3 -m pip install --upgrade setuptools pip
   - sudo apt-get install hhvm && rm -rf /home/travis/.kiex/
   - sudo apt-get purge -y mysql-common mysql-server mysql-client
   - nvm install v7.10.0
   - wget https://raw.githubusercontent.com/frappe/bench/master/playbooks/install.py
-  - sudo python install.py --develop --user travis --without-bench-setup
-  - sudo pip install -e ~/bench
+  - sudo python3 install.py --develop --user travis --without-bench-setup
+  - sudo python3 -m pip install -e ~/bench
 
   - rm $TRAVIS_BUILD_DIR/.git/shallow
   - bash $TRAVIS_BUILD_DIR/travis/bench_init.sh
