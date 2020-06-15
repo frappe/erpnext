@@ -249,11 +249,11 @@ window.CallPopup = CallPopup;
 
 $(document).on('app_ready', function () {
 	frappe.realtime.on('show_call_popup', call_log => {
-		if (!erpnext.call_popup) {
-			erpnext.call_popup = new CallPopup(call_log);
-		} else {
+		if (erpnext.call_popup && erpnext.call_popup.call_log.id === call_log.id) {
 			erpnext.call_popup.update_call_log(call_log);
 			erpnext.call_popup.dialog.show();
+		} else {
+			erpnext.call_popup = new CallPopup(call_log);
 		}
 	});
 });

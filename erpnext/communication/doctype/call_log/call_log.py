@@ -21,17 +21,15 @@ class CallLog(Document):
 		self.set_caller_information()
 
 	def after_insert(self):
-		if self.get('type') == 'Incoming':
-			self.trigger_call_popup()
+		self.trigger_call_popup()
 
 	def on_update(self):
-		if self.get('type') == 'Incoming':
-			doc_before_save = self.get_doc_before_save()
-			if not doc_before_save: return
-			if doc_before_save.status in ONGOING_CALL_STATUSES and self.status in END_CALL_STATUSES:
-				frappe.publish_realtime('call_{id}_ended'.format(id=self.id), self)
-			elif doc_before_save.to != self.to:
-				self.trigger_call_popup()
+		doc_before_save = self.get_doc_before_save()
+		if not doc_before_save: return
+		if doc_before_save.status in ONGOING_CALL_STATUSES and self.status in END_CALL_STATUSES:
+			frappe.publish_realtime('call_{id}_ended'.format(id=self.id), self)
+		elif doc_before_save.to != self.to:
+			self.trigger_call_popup()
 
 	def set_caller_information(self):
 		number = self.get('from') if self.type == 'Incoming' else self.get('to')
@@ -47,17 +45,25 @@ class CallLog(Document):
 		})
 
 	def trigger_call_popup(self):
-		scheduled_employees = get_scheduled_employees_for_popup(self.medium)
-		employee_emails = get_employees_with_number(self.to)
+		if self.get('type') == 'Incoming':
+			scheduled_employees = get_scheduled_employees_for_popup(self.medium)
+			employee_emails = get_employees_with_number(self.to)
 
-		# check if employees with matched number are scheduled to receive popup
-		emails = set(scheduled_employees).intersection(employee_emails)
+			# check if employees with matched number are scheduled to receive popup
+			emails = set(scheduled_employees).intersection(employee_emails)
 
-		if employee_emails and not emails:
-			self.add_comment(text=_("No employee was scheduled for call popup"))
+			if frappe.conf.developer_mode:
+				self.add_comment(text=f"""
+					Scheduled Employees: {scheduled_employees}
+					Matching Employee: {employee_emails}
+					Show Popup To: {emails}
+				""")
 
-		for email in emails:
-			frappe.publish_realtime('show_call_popup', self, user=email)
+			if employee_emails and not emails:
+				self.add_comment(text=_("No employee was scheduled for call popup"))
+
+			for email in emails:
+				frappe.publish_realtime('show_call_popup', self, user=email)
 
 
 @frappe.whitelist()

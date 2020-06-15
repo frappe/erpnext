@@ -31,7 +31,7 @@ def handle_incoming_call(**kwargs):
 			create_call_log(
 				call_id=call_payload.get('CallSid'),
 				from_number=call_payload.get('CallFrom'),
-				to_number=call_payload.get('CallTo'),
+				to_number=call_payload.get('DialWhomNumber'),
 				medium=call_payload.get('To')
 			)
 		else:
