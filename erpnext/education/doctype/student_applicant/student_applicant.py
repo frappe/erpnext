@@ -31,12 +31,8 @@ class StudentApplicant(Document):
 	def validate(self):
 		self.validate_dates()
 		self.title = " ".join(filter(None, [self.first_name, self.middle_name, self.last_name]))
-		frappe.msgprint("CHeck 1")
-		print("student_admission : ", self.student_admission)
-		print("program : ", self.program)
-		print("date_of_birth : ", self.date_of_birth)
+
 		if self.student_admission and self.program and self.date_of_birth:
-			frappe.msgprint("CHeck 2")
 			self.validation_from_student_admission()
 
 	def validate_dates(self):
@@ -53,16 +49,15 @@ class StudentApplicant(Document):
 			frappe.throw(_("Please select Student Admission which is mandatory for the paid student applicant"))
 
 	def validation_from_student_admission(self):
+		
 		student_admission = get_student_admission_data(self.student_admission, self.program)
-		print("------------------------- TEST -------------------------")
-		frappe.msgprint("COOl")
-		# different validation for minimum and maximum age so that either min/max can also work independently.
+
 		if student_admission and student_admission.min_age and \
-			getdate(add_years(nowdate(), student_admission.min_age)) < getdate(self.date_of_birth):
+			getdate(nowdate()) < getdate(add_years(getdate(self.date_of_birth),  student_admission.min_age)):
 				frappe.throw(_("Not eligible for the admission in this program as per DOB"))
 
-		if student_admission and student_admission.maximum_age and \
-			getdate(student_admission.maximum_age) > getdate(self.date_of_birth):
+		if student_admission and student_admission.max_age and \
+			getdate(nowdate()) > getdate(add_years(getdate(self.date_of_birth),  student_admission.max_age)):
 				frappe.throw(_("Not eligible for the admission in this program as per DOB"))
 
 
@@ -71,10 +66,12 @@ class StudentApplicant(Document):
 
 
 def get_student_admission_data(student_admission, program):
+
 	student_admission = frappe.db.sql("""select sa.admission_start_date, sa.admission_end_date,
-		sap.program, sap.minimum_age, sap.maximum_age, sap.applicant_naming_series
+		sap.program, sap.min_age, sap.max_age, sap.applicant_naming_series
 		from `tabStudent Admission` sa, `tabStudent Admission Program` sap
 		where sa.name = sap.parent and sa.name = %s and sap.program = %s""", (student_admission, program), as_dict=1)
+
 	if student_admission:
 		return student_admission[0]
 	else:

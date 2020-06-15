@@ -61,12 +61,11 @@
 			</table>
 		</div>
 	{% endif %}
-
-	{%- if application_form_route -%}
+	{%- if doc.application_form_route -%}
 		<br>
 		<p>
 			<a class='btn btn-primary'
-			href='/{{ doc.application_form_route }}?new=1&student_admission={{doc.name}}'>
+			href='/student-applicant?new=1&student_admission={{doc.name}}'>
 			{{ _("Apply Now") }}</a>
 		</p>
 	{% endif %}
