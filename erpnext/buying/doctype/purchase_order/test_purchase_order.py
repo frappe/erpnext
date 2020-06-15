@@ -198,6 +198,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		# add new item
 		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 100, 'qty' : 2}])
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Purchase Order', trans_item, po.name)
+		frappe.set_user("Administrator")
 
 	def test_update_qty(self):
 		po = create_purchase_order()

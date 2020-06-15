@@ -334,7 +334,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(so.get("items")[-1].qty, 7)
 		self.assertEqual(so.get("items")[-1].amount, 1400)
 		self.assertEqual(so.status, 'To Deliver and Bill')
-	
+
 	def test_remove_item_in_update_child_qty_rate(self):
 		so = make_sales_order(**{
 			"item_list": [{
@@ -372,7 +372,7 @@ class TestSalesOrder(unittest.TestCase):
 			"docname": so.get("items")[0].name
 		}])
 		update_child_qty_rate('Sales Order', trans_item, so.name)
-		
+
 		so.reload()
 		self.assertEqual(len(so.get("items")), 1)
 		self.assertEqual(so.status, 'To Deliver and Bill')
@@ -414,6 +414,7 @@ class TestSalesOrder(unittest.TestCase):
 		# add new item
 		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 100, 'qty' : 2}])
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Sales Order', trans_item, so.name)
+		frappe.set_user("Administrator")
 
 	def test_warehouse_user(self):
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
