@@ -127,6 +127,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.track_service_level_agreement;",
    "fieldname": "allow_resetting_service_level_agreement",
    "fieldtype": "Check",
    "label": "Allow Resetting Service Level Agreement"
