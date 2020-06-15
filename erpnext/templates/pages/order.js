@@ -5,6 +5,7 @@ frappe.ready(function(){
 
 	var loyalty_points_input = document.getElementById("loyalty-point-to-redeem");
 	var loyalty_points_status = document.getElementById("loyalty-points-status");
+	var amount_to_be_paid = document.getElementById("amount-to-be-paid")
 	if (loyalty_points_input) {
 		loyalty_points_input.onblur = apply_loyalty_points;
 	}
@@ -27,8 +28,8 @@ frappe.ready(function(){
 							frappe.msgprint(__(message));
 						} else {
 							message = loyalty_points + " Loyalty Points of amount "+ loyalty_amount + " is applied."
-							frappe.msgprint(__(message));
 							var remaining_amount = flt(doc_info.grand_total) - flt(loyalty_amount);
+							console.log(remaining_amount)
 							var payment_button = document.getElementById("pay-for-order");
 							payment_button.innerHTML = __("Pay Remaining");
 							payment_button.href = "/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request?dn="+doc_info.doctype_name+"&dt="+doc_info.doctype+"&loyalty_points="+loyalty_points+"&submit_doc=1&order_type=Shopping Cart";

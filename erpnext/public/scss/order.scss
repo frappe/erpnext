@@ -1,0 +1,103 @@
+@import "frappe/public/scss/variables";
+
+.order-header {
+	display: flex;
+	flex-direction: column;
+	padding: 1rem 0;
+
+	h2 {
+		 margin: 0px;
+	}
+}
+
+.order-section {
+	margin: 3rem 0;
+
+	.order-summary {
+		 margin-bottom: 2rem;
+
+		 @include media-breakpoint-up(md) {
+			margin-bottom: 0rem;
+		}
+	}
+
+	.order-label {
+		color: $text-muted;
+		margin-bottom: 0.5rem;
+		font-weight: 400;
+	}
+
+	.order-item {
+		border-bottom: 1px solid $border-color;
+	}
+
+	.order-detail {
+		width: 100%;
+
+		&.discount {
+			color: $text-muted;
+		}
+	}
+
+	.taxes-row {
+		.order-detail {
+			text-align: right;
+		}
+	}
+
+	.grand-total {
+		.order-detail {
+			color: $green;
+			font-weight: 600;
+		}
+	}
+
+	#loyalty-points-status {
+		text-align: right;
+	}
+
+	.make-payment {
+		display: block;
+
+		@include media-breakpoint-up(md) {
+			display: inline-block;
+		}
+	}
+
+	.full {
+		display: none;
+
+		@include media-breakpoint-up(md) {
+			display: flex;
+		}
+	}
+
+	.mobile {
+		display: flex;
+
+		@include media-breakpoint-up(md) {
+			display: none;
+		}
+	}
+}
+
+.order-container {
+	.order-item-header {
+		margin-bottom: 0.2rem;
+		color: $text-muted;
+	}
+}
+
+.order-terms-and-condition {
+	h1 {
+		font-size: 1.875rem;
+	}
+
+	h2 {
+		font-size: 1.5rem;
+	}
+
+	h3 {
+		font-size: 1.25rem;
+	}
+}

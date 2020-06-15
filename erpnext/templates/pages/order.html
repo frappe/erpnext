@@ -8,12 +8,17 @@
 {% block title %}{{ doc.name }}{% endblock %}
 
 {% block header %}
-	<h1 class="m-0">{{ doc.name }}</h1>
+	<div class="order-header">
+		<h2>{{ doc.name }}</h2>
+		<span class="indicator {{ doc.indicator_color or ("blue" if doc.docstatus==1 else "darkgrey") }}">
+			{{ _(doc.get('indicator_title')) or _(doc.status) or _("Submitted") }}
+		</span>
+	</div>
 {% endblock %}
 
 {% block header_actions %}
 <div class="dropdown">
-	<button class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+	<button class="btn btn-primary-light dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
 		<span>{{ _('Actions') }}</span>
 		<b class="caret"></b>
 	</button>
@@ -32,121 +37,139 @@
 
 {% block page_content %}
 
-<div class="row transaction-subheading">
-	<div class="col-6">
-		<span class="indicator {{ doc.indicator_color or ("blue" if doc.docstatus==1 else "darkgrey") }}">
-			{{ _(doc.get('indicator_title')) or _(doc.status) or _("Submitted") }}
-		</span>
-	</div>
-	<div class="col-6 text-muted text-right small">
-		{{ frappe.utils.formatdate(doc.transaction_date, 'medium') }}
-		{% if doc.valid_till %}
-		<p>
-		{{ _("Valid Till") }}: {{ frappe.utils.formatdate(doc.valid_till, 'medium') }}
-		</p>
+<section class="order-section">
+	<div class="row">
+		<div class="order-summary col-md-4 col-12">
+			<div class="order-label">{{ _("Party Details") }}</div>
+			<div class="order-detail">
+				{%- set party_name = doc.supplier_name if doc.doctype in ['Supplier Quotation', 'Purchase Invoice', 'Purchase Order'] else doc.customer_name %}
+				<b>{{ party_name }}</b>
+
+				{% if doc.contact_display and doc.contact_display != party_name %}
+					<br>
+					{{ doc.contact_display }}
+				{% endif %}
+			</div>
+		</div>
+		{% if doc.transaction_date or doc.valid_till %}
+			<div class="order-summary col-md-4 col-12">
+				<div class="order-label">{{ _("Transaction Details") }}</div>
+				<div class="order-detail">
+					{% if doc.transaction_date %}
+						<div>
+							{{ frappe.utils.formatdate(doc.transaction_date, 'medium') }}
+						</div>
+					{% endif %}
+					{% if doc.valid_till %}
+						<div>
+							{{ _("Valid Till") }}: {{ frappe.utils.formatdate(doc.valid_till, 'medium') }}
+						</div>
+					{% endif %}
+				</div>
+			</div>
 		{% endif %}
 	</div>
-</div>
-
-<p class="small my-3">
-	{%- set party_name = doc.supplier_name if doc.doctype in ['Supplier Quotation', 'Purchase Invoice', 'Purchase Order'] else doc.customer_name %}
-	<b>{{ party_name }}</b>
-
-	{% if doc.contact_display and doc.contact_display != party_name %}
-		<br>
-		{{ doc.contact_display }}
-	{% endif %}
-</p>
+</section>
 
 {% if doc._header %}
 {{ doc._header }}
 {% endif %}
 
-<div class="order-container">
-
+<section class="order-section order-container">
 	<!-- items -->
 	<div class="order-item-table">
-		<div class="row order-items order-item-header text-muted">
-			<div class="col-sm-6 col-6 h6 text-uppercase">
-				{{ _("Item") }}
+		<div class="order-item">
+			<div class="row order-item-header full">
+				<div class="col-sm-6 col-6 order-label">
+					{{ _("Item") }}
+				</div>
+				<div class="col-sm-3 col-xs-3 text-right order-label">
+					{{ _("Quantity") }}
+				</div>
+				<div class="col-sm-3 col-xs-3 text-right order-label">
+					{{ _("Amount") }}
+				</div>
 			</div>
-			<div class="col-sm-3 col-xs-3 text-right h6 text-uppercase">
-				{{ _("Quantity") }}
-			</div>
-			<div class="col-sm-3 col-xs-3 text-right h6 text-uppercase">
-				{{ _("Amount") }}
+			<div class="order-label mobile">
+				Item Details
 			</div>
 		</div>
 		{% for d in doc.items %}
-		<div class="row order-items">
-			<div class="col-sm-6 col-6">
-				{{ item_name_and_description(d) }}
-			</div>
-			<div class="col-sm-3 col-xs-3 text-right">
-				{{ d.qty }}
-				{% if d.delivered_qty is defined and d.delivered_qty != None %}
-				<p class="text-muted small">{{ _("Delivered") }}&nbsp;{{ d.delivered_qty }}</p>
-				{% endif %}
-			</div>
-			<div class="col-sm-3 col-xs-3 text-right">
-				{{ d.get_formatted("amount")	 }}
-				<p class="text-muted small">{{ _("Rate:") }}&nbsp;{{ d.get_formatted("rate") }}</p>
+		<div class="order-item">
+			<div class="row my-3">
+				<div class="col-md-6 col-12">
+					{{ item_name_and_description(d) }}
+				</div>
+				<div class="col-md-3 col-xs-6 text-left text-md-right">
+					<div class="order-label d-block d-md-none mt-3">
+						{{ _("Quantity") }}
+					</div>
+					<div class="order-detail tnum">
+						{{ d.qty }}
+					</div>
+					{% if d.delivered_qty is defined and d.delivered_qty != None %}
+					<div class="text-muted small">{{ _("Delivered") }} {{ d.delivered_qty }}</div>
+					{% endif %}
+				</div>
+				<div class="col-md-3 col-xs-6 text-right text-md-right">
+					<div class="order-label d-block d-md-none mt-3">
+						{{ _("Amount") }}
+					</div>
+					<div class="order-detail tnum">
+						{{ d.get_formatted("amount") }}
+					</div>
+					<p class="m-0 text-muted small">{{ _("Rate:") }} {{ d.get_formatted("rate") }}</p>
+					{% if d.discount_percentage %}
+						<p class="m-0 text-muted small">{{ _("Discount:") }} {{ d.discount_percentage }} %</p>
+					{% endif %}
+				</div>
 			</div>
 		</div>
 		{% endfor %}
 	</div>
+</section>
 
+<section class="order-section">
 	<!-- taxes -->
-	<div class="order-taxes d-flex justify-content-end">
-		<table>
+	<div class="row taxes-row">
+		<div class="col-md-7"></div>
+		<div class="col-md-5 col-12">
 			{% include "erpnext/templates/includes/order/order_taxes.html" %}
-		</table>
+		</div>
 	</div>
-</div>
+</section>
 
-{% if enabled_checkout and ((doc.doctype=="Sales Order" and doc.per_billed <= 0)
-	or (doc.doctype=="Sales Invoice" and doc.outstanding_amount > 0)) %}
+{% set sales_order_billed = doc.doctype=="Sales Order" and doc.per_billed <= 0 %}
+{% set sales_invoice_outstanding = doc.doctype=="Sales Invoice" and doc.outstanding_amount > 0 %}
 
-<div class="panel panel-default">
-	<div class="panel-heading">
-		<div class="row">
-			<div class="form-column col-sm-6 address-title">
-				<strong>Payment</strong>
+{% if enabled_checkout and (sales_order_billed or sales_invoice_outstanding) %}
+<section class="order-section my-5">
+	<div class="row align-items-center justify-content-between">
+		<div class="col-md-6 col-12">
+			{% set available_loyalty_points = 500 %}
+			{% if available_loyalty_points %}
+			<div class="form-group">
+				<div class="mb-2">Apply Loyalty Points</div>
+				<div class="control-input-wrapper">
+					<div class="control-input">
+						<input class="form-control" type="number" min="0" max="{{ available_loyalty_points }}" id="loyalty-point-to-redeem">
+					</div>
+					<p class="help-box small text-muted d-none d-sm-block"> Available Points: {{ available_loyalty_points }} </p>
+				</div>
+			</div>
+			{% endif %}
+		</div>
+
+		<div class="col-md-6 col-12 text-right">
+			<div class="page-header-actions-block" data-html-block="header-actions">
+				<a href="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request?dn={{ doc.name }}&dt={{ doc.doctype }}&submit_doc=1&order_type=Shopping Cart"
+					class="btn btn-primary btn-lg make-payment" id="pay-for-order">{{ _("Make Payment") }}</a>
+				<p id="amount-to-be-paid" class="small text-muted mt-2">{{ _("Amount") }}: {{ doc.get_formatted("grand_total") }}</p>
 			</div>
 		</div>
 	</div>
-	<div class="panel-collapse">
-		<div class="panel-body text-muted small">
-			<div class="row">
-				<div class="form-column col-sm-6">
-					{% if available_loyalty_points %}
-					<div class="form-group">
-						<div class="h6">Enter Loyalty Points</div>
-						<div class="control-input-wrapper">
-							<div class="control-input">
-								<input class="form-control" type="number" min="0" max="{{ available_loyalty_points }}" id="loyalty-point-to-redeem">
-							</div>
-							<p class="help-box small text-muted d-none d-sm-block"> Available Points: {{ available_loyalty_points }} </p>
-						</div>
-					</div>
-					{% endif %}
-				</div>
-
-				<div class="form-column col-sm-6">
-					<div id="loyalty-points-status" style="text-align: right"></div>
-					<div class="page-header-actions-block" data-html-block="header-actions">
-						<p>
-							<a href="/api/method/erpnext.accounts.doctype.payment_request.payment_request.make_payment_request?dn={{ doc.name }}&dt={{ doc.doctype }}&submit_doc=1&order_type=Shopping Cart"
-								class="btn btn-primary btn-sm" id="pay-for-order">{{ _("Pay") }} {{ doc.get_formatted("grand_total") }} </a>
-						</p>
-					</div>
-				</div>
-
-			</div>
-
-		</div>
-	</div>
-</div>
+	<div id="loyalty-points-status"></div>
+</section>
 {% endif %}
 
 
@@ -169,10 +192,11 @@
 </div>
 {% endif %}
 </div>
+
 {% if doc.terms %}
-<div class="terms-and-condition text-muted small">
-	<hr><p>{{ doc.terms }}</p>
-</div>
+<section class="order-section order-terms-and-condition">
+	<p>{{ doc.terms }}</p>
+</section>
 {% endif %}
 {% endblock %}
 
