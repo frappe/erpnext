@@ -55,6 +55,7 @@
   "leave_policy",
   "attendance_device_id",
   "leave_approver",
+  "expense_approver",
   "column_break_44",
   "holiday_list",
   "default_shift",
@@ -798,13 +799,21 @@
   {
    "fieldname": "column_break_52",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expense_approver",
+   "fieldtype": "Link",
+   "label": "Expense Approver",
+   "options": "User",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2020-06-15 12:26:30.003741",
+ "modified": "2020-06-18 13:24:11.207374",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
