@@ -64,7 +64,7 @@ class TestTask(unittest.TestCase):
 		def assign():
 			from frappe.desk.form import assign_to
 			assign_to.add({
-				"assign_to": "test@example.com",
+				"assign_to": ["test@example.com"],
 				"doctype": task.doctype,
 				"name": task.name,
 				"description": "Close this task"
