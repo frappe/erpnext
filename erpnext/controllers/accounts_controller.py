@@ -1234,7 +1234,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			if parent_doctype == 'Sales Order':
 				prev_date, new_date = child_item.get("delivery_date"), d.get("delivery_date")
 			elif parent_doctype == 'Purchase Order':
-				prev_date, new_date = child_item.get("schedule_date") == d.get("schedule_date")
+				prev_date, new_date = child_item.get("schedule_date"), d.get("schedule_date")
 
 			rate_unchanged = prev_rate == new_rate
 			qty_unchanged = prev_qty == new_qty
