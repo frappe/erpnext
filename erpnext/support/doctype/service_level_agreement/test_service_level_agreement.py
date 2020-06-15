@@ -236,7 +236,6 @@ def create_service_level_agreements_for_issues():
 def make_holiday_list():
 	holiday_list = frappe.db.exists("Holiday List", "__Test Holiday List")
 	if not holiday_list:
-		now = frappe.utils.now_datetime()
 		holiday_list = frappe.get_doc({
 			"doctype": "Holiday List",
 			"holiday_list_name": "__Test Holiday List",

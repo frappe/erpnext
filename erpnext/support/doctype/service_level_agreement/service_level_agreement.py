@@ -7,7 +7,6 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from frappe.utils import getdate, get_weekdays
-from datetime import datetime
 
 class ServiceLevelAgreement(Document):
 
