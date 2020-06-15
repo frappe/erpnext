@@ -33,7 +33,6 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 			"fieldname":"period_start_date",
 			"label": __("Start Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.nowdate(),
 			"hidden": 1,
 			"reqd": 1
 		},
@@ -41,7 +40,6 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 			"fieldname":"period_end_date",
 			"label": __("End Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.add_months(frappe.datetime.nowdate(), 12),
 			"hidden": 1,
 			"reqd": 1
 		},
@@ -106,5 +104,16 @@ frappe.query_reports["Consolidated Financial Statement"] = {
 			value = $value.wrap("<p></p>").parent().html();
 		}
 		return value;
+	},
+	onload: function() {
+		let fiscal_year = frappe.defaults.get_user_default("fiscal_year")
+
+		frappe.model.with_doc("Fiscal Year", fiscal_year, function(r) {
+			var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
+			frappe.query_report.set_filter_value({
+				period_start_date: fy.year_start_date,
+				period_end_date: fy.year_end_date
+			});
+		});
 	}
 }

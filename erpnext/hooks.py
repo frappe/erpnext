@@ -308,7 +308,8 @@ scheduler_events = {
 		"erpnext.crm.doctype.email_campaign.email_campaign.send_email_to_leads_or_contacts",
 		"erpnext.crm.doctype.email_campaign.email_campaign.set_email_campaign_status",
 		"erpnext.selling.doctype.quotation.quotation.set_expired_status",
-		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_appointment_status"
+		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_appointment_status",
+		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status"
 	],
 	"daily_long": [
 		"erpnext.setup.doctype.email_digest.email_digest.send",
@@ -319,8 +320,7 @@ scheduler_events = {
 		"erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual.process_loan_interest_accrual_for_term_loans"
 	],
 	"monthly_long": [
-		"erpnext.accounts.deferred_revenue.convert_deferred_revenue_to_income",
-		"erpnext.accounts.deferred_revenue.convert_deferred_expense_to_expense",
+		"erpnext.accounts.deferred_revenue.process_deferred_accounting",
 		"erpnext.hr.utils.allocate_earned_leaves",
 		"erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual.process_loan_interest_accrual_for_demand_loans"
 	]

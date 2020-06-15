@@ -14,6 +14,8 @@
   "is_group",
   "disabled",
   "section_break_4",
+  "payroll_cost_center",
+  "column_break_9",
   "leave_block_list",
   "leave_section",
   "leave_approvers",
@@ -125,13 +127,23 @@
   {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "payroll_cost_center",
+   "fieldtype": "Link",
+   "label": "Payroll Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2020-03-18 18:03:27.784362",
+ "modified": "2020-05-05 18:49:28.503931",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Department",
