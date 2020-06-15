@@ -15,7 +15,9 @@ def execute():
 		})
 
 		frappe.reload_doc('support', 'doctype', 'service_level_agreement')
+		frappe.reload_doc('support', 'doctype', 'pause_sla_on_status')
 		frappe.reload_doc('support', 'doctype', 'service_level_priority')
+		frappe.reload_doc('support', 'doctype', 'service_day')
 
 		for entry in sla_details:
 			values = frappe.db.get_value('Service Level', entry.service_level, ['holiday_list', 'employee_group'])
