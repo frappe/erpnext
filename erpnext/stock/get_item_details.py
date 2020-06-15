@@ -459,9 +459,15 @@ def _get_item_tax_template(args, taxes, out={}, for_validate=False):
 		return None
 
 	for tax in taxes:
-		if cstr(tax.tax_category) == cstr(args.get("tax_category")):
+		if cstr(args.get("tax_category")) and cstr(tax.tax_category) == cstr(args.get("tax_category")):
 			out["item_tax_template"] = tax.item_tax_template
 			return tax.item_tax_template
+
+	# if no tax category return the latest valid tax template
+	if taxes and not cstr(args.get("tax_category")):
+		out["item_tax_template"] = taxes[0].get("item_tax_template")
+		return taxes[0].get("item_tax_template")
+
 	return None
 
 @frappe.whitelist()
