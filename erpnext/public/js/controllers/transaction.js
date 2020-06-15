@@ -571,7 +571,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 									}
 								},
 								() => {
-									me.frm.trigger('qty', cdt, cdn);
+									me.apply_pricing_rule(item, true);
 								}
 							]);
 						}
