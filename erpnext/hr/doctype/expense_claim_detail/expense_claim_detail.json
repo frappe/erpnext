@@ -13,9 +13,11 @@
   "description",
   "section_break_6",
   "amount",
-  "cost_center",
   "column_break_8",
-  "sanctioned_amount"
+  "sanctioned_amount",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break"
  ],
  "fields": [
   {
@@ -104,12 +106,21 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2019-12-11 13:42:33.233432",
+ "modified": "2020-05-11 18:54:35.601592",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim Detail",

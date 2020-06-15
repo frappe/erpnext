@@ -21,7 +21,7 @@ class Attendance(Document):
 		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
 
 		# leaves can be marked for future dates
-		if self.status not in ('On Leave', 'Half Day') and getdate(self.attendance_date) > getdate(nowdate()):
+		if self.status != 'On Leave' and not self.leave_application and getdate(self.attendance_date) > getdate(nowdate()):
 			frappe.throw(_("Attendance can not be marked for future dates"))
 		elif date_of_joining and getdate(self.attendance_date) < getdate(date_of_joining):
 			frappe.throw(_("Attendance date can not be less than employee's joining date"))
@@ -41,7 +41,7 @@ class Attendance(Document):
 		leave_record = frappe.db.sql("""
 			select leave_type, half_day, half_day_date
 			from `tabLeave Application`
-			where employee = %s 
+			where employee = %s
 				and %s between from_date and to_date
 				and status = 'Approved'
 				and docstatus = 1
@@ -172,8 +172,8 @@ def get_unmarked_days(employee, month):
 
 
 	records = frappe.get_all("Attendance", fields = ['attendance_date', 'employee'] , filters = [
-		["attendance_date", ">", month_start],
-		["attendance_date", "<", month_end],
+		["attendance_date", ">=", month_start],
+		["attendance_date", "<=", month_end],
 		["employee", "=", employee],
 		["docstatus", "!=", 2]
 	])

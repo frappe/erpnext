@@ -18,7 +18,7 @@
   {
    "hidden": 0,
    "label": "Leaves",
-   "links": "[\n    {\n        \"dependencies\": [\n            \"Employee\"\n        ],\n        \"label\": \"Leave Application\",\n        \"name\": \"Leave Application\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Employee\"\n        ],\n        \"label\": \"Leave Allocation\",\n        \"name\": \"Leave Allocation\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Leave Type\"\n        ],\n        \"label\": \"Leave Policy\",\n        \"name\": \"Leave Policy\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Employee\"\n        ],\n        \"label\": \"Leave Period\",\n        \"name\": \"Leave Period\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Leave Type\",\n        \"name\": \"Leave Type\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Holiday List\",\n        \"name\": \"Holiday List\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Employee\"\n        ],\n        \"label\": \"Compensatory Leave Request\",\n        \"name\": \"Compensatory Leave Request\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Employee\"\n        ],\n        \"label\": \"Leave Encashment\",\n        \"name\": \"Leave Encashment\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Leave Block List\",\n        \"name\": \"Leave Block List\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Leave Application\"\n        ],\n        \"doctype\": \"Leave Application\",\n        \"is_query_report\": true,\n        \"label\": \"Employee Leave Balance\",\n        \"name\": \"Employee Leave Balance\",\n        \"type\": \"report\"\n    }\n]"
+   "links": "[\n    {\n        \"dependencies\": [\n            \"Employee\"\n        ],\n        \"label\": \"Leave Application\",\n        \"name\": \"Leave Application\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Employee\"\n        ],\n        \"label\": \"Leave Allocation\",\n        \"name\": \"Leave Allocation\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Leave Type\"\n        ],\n        \"label\": \"Leave Policy\",\n        \"name\": \"Leave Policy\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Leave Period\",\n        \"name\": \"Leave Period\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Leave Type\",\n        \"name\": \"Leave Type\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Holiday List\",\n        \"name\": \"Holiday List\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Employee\"\n        ],\n        \"label\": \"Compensatory Leave Request\",\n        \"name\": \"Compensatory Leave Request\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Employee\"\n        ],\n        \"label\": \"Leave Encashment\",\n        \"name\": \"Leave Encashment\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Leave Block List\",\n        \"name\": \"Leave Block List\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Leave Application\"\n        ],\n        \"doctype\": \"Leave Application\",\n        \"is_query_report\": true,\n        \"label\": \"Employee Leave Balance\",\n        \"name\": \"Employee Leave Balance\",\n        \"type\": \"report\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -77,26 +77,33 @@
   }
  ],
  "category": "Modules",
- "charts": [],
+ "charts": [
+  {
+   "chart_name": "Outgoing Salary",
+   "label": "Outgoing Salary"
+  }
+ ],
  "creation": "2020-03-02 15:48:58.322521",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Desk Page",
  "extends_another_page": 0,
- "icon": "",
+ "hide_custom": 0,
  "idx": 0,
  "is_standard": 1,
  "label": "HR",
- "modified": "2020-04-29 20:29:22.114309",
+ "modified": "2020-06-10 12:41:41.695669",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR",
+ "onboarding": "Human Resource",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 0,
  "shortcuts": [
   {
+   "color": "#cef6d1",
    "format": "{} Active",
    "label": "Employee",
    "link_to": "Employee",
@@ -104,33 +111,35 @@
    "type": "DocType"
   },
   {
-   "format": "{} Unpaid",
-   "label": "Expense Claim",
-   "link_to": "Expense Claim",
-   "stats_filter": "{\"approval_status\":\"Draft\"}",
+   "color": "#ffe8cd",
+   "format": "{} Open",
+   "label": "Leave Application",
+   "link_to": "Leave Application",
+   "stats_filter": "{\"status\":\"Open\"}",
    "type": "DocType"
   },
   {
-   "format": "{} Open",
-   "label": "Job Applicant",
-   "link_to": "Job Applicant",
-   "stats_filter": "{\n    \"status\": \"Open\"\n}",
+   "label": "Attendance",
+   "link_to": "Attendance",
+   "stats_filter": "",
    "type": "DocType"
   },
   {
    "label": "Salary Structure",
-   "link_to": "Salary Structure",
+   "link_to": "Payroll Entry",
    "type": "DocType"
   },
   {
-   "label": "Leave Application",
-   "link_to": "Leave Application",
-   "type": "DocType"
-  },
-  {
-   "label": "Salary Register",
-   "link_to": "Salary Register",
+   "label": "Monthly Attendance Sheet",
+   "link_to": "Monthly Attendance Sheet",
    "type": "Report"
+  },
+  {
+   "format": "{} Open",
+   "label": "Dashboard",
+   "link_to": "Human Resource",
+   "stats_filter": "{\n    \"status\": \"Open\"\n}",
+   "type": "Dashboard"
   }
  ]
 }
