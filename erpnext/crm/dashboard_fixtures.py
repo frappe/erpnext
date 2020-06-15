@@ -21,8 +21,8 @@ def get_dashboards():
                 { "chart": "Opportunity Trends", "width": "Full"},
                 { "chart": "Won Opportunities", "width": "Full" },
                 { "chart": "Territory Wise Opportunity Count", "width": "Half"},
-                { "chart": "Territory Wise Sales", "width": "Half"},
                 { "chart": "Opportunities via Campaigns", "width": "Half" },
+                { "chart": "Territory Wise Sales", "width": "Full"},
                 { "chart": "Lead Source", "width": "Half"}
             ],
             "cards": [
@@ -59,7 +59,7 @@ def get_charts():
         'is_public': 1,
         'timeseries': 1,
         "owner": "Administrator",
-        "filters_json": json.dumps([["Opportunity", "company", "=", company, False]]),
+        "filters_json": json.dumps([]),
         "type": "Bar"
     },
     {
@@ -90,7 +90,11 @@ def get_charts():
         'timeseries': 1,
         "owner": "Administrator",
         "filters_json": json.dumps([["Opportunity", "company", "=", company, False]]),
-        "type": "Pie"
+        "type": "Pie",
+        "custom_options": json.dumps({
+            "truncateLegends": 1,
+            "maxSlices": 8
+        })
     },
     {
         "name": "Won Opportunities",
@@ -123,7 +127,11 @@ def get_charts():
             ["Opportunity", "company", "=", company, False]
         ]),
         "owner": "Administrator",
-        "type": "Donut"
+        "type": "Donut",
+        "custom_options": json.dumps({
+            "truncateLegends": 1,
+            "maxSlices": 8
+        })
     },
     {
         "name": "Territory Wise Sales",
@@ -140,7 +148,7 @@ def get_charts():
             ["Opportunity", "company", "=", company, False],
             ["Opportunity", "status", "=", "Converted", False]
         ]),
-        "type": "Donut"
+        "type": "Bar"
     },
     {
         "name": "Lead Source",
@@ -152,7 +160,11 @@ def get_charts():
         "document_type": "Lead",
         'is_public': 1,
         "owner": "Administrator",
-        "type": "Pie"
+        "type": "Pie",
+        "custom_options": json.dumps({
+            "truncateLegends": 1,
+            "maxSlices": 8
+        })
     }]
 
 def get_number_cards():
