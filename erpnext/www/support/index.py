@@ -10,7 +10,6 @@ def get_context(context):
 	context.greeting_subtitle = setting.greeting_subtitle
 	
 	# Support content
-	latest_articles = None
 	favorite_articles = get_favorite_articles_by_page_view()
 	if len(favorite_articles) < 6:
 		name_list = []
