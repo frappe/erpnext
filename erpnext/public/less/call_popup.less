@@ -5,10 +5,9 @@
 		padding: 0px 15px;
 	}
 	.layout-side-section {
-		height: 425px;
+		min-height: 350px;
 		padding: 0px;
 		overflow-y: auto;
-		border-right: 1px solid @border-color;
 	}
 	a:hover {
 		text-decoration: underline;
@@ -21,9 +20,19 @@
 			}
 		}
 	}
+	.list-link > a {
+		display: flex;
+	}
 	.for-description {
 		max-height: 250px;
 		overflow: scroll;
+	}
+	.nav-stacked > li {
+		margin-top: 0px;
+	}
+	.list-item {
+		padding: 10px;
+		height: auto;
 	}
 }
 

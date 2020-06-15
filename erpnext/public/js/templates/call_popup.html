@@ -5,9 +5,12 @@
 			<li data-action="on_sidebar_item_click"
 				data-type="{{ item.type }}"
 				class="sidebar-item list-link">
-				<a>
+				<a class="flex justify-between">
 					<span class="ellipsis">{{ item.label }}</span>
-					<span class="badge"></span>
+					<div>
+						<span class="badge"></span>
+						<i class="octicon octicon-chevron-right hide"></i>
+					</div>
 				</a>
 			</li>
 			{% } %}

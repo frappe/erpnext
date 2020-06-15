@@ -160,15 +160,15 @@ def get_caller_activities(number):
 	return activities
 
 def get_issues_by_customer(customer):
-	issues = frappe.get_all('Issue', {
+	issues = frappe.get_all('Issue', filters={
 		'customer': customer
-	})
+	}, fields=['name', 'subject'])
 	return issues
 
 def get_issues_by_lead(lead):
-	issues = frappe.get_all('Issue', {
+	issues = frappe.get_all('Issue', filters={
 		'lead': lead
-	})
+	}, fields=['name', 'subject'])
 	return issues
 
 @frappe.whitelist()

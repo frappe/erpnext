@@ -23,12 +23,6 @@ class CallHandler {
 			'title': __('Make a Call'),
 			'minimizable': true,
 			'fields': [{
-				'fieldname': 'from_number',
-				'label': 'From Number',
-				'default': 'Cell number set in your employee master will be used.',
-				'fieldtype': 'Data',
-				'read_only': 1
-			}, {
 				'fieldname': 'to_number',
 				'label': 'To Number',
 				'fieldtype': 'Autocomplete',
@@ -36,11 +30,6 @@ class CallHandler {
 				'ignore_validation': true,
 				'options': this.to_numbers,
 				'read_only': 0,
-				'reqd': 1
-			}, {
-				'fieldname': 'caller_id',
-				'label': 'Caller ID',
-				'fieldtype': 'Select',
 				'reqd': 1
 			}, {
 				'label': 'Response',
@@ -69,12 +58,8 @@ class CallHandler {
 			},
 			primary_action_label: __('Call')
 		});
-		frappe.xcall('erpnext.erpnext_integrations.exotel_integration.get_all_exophones').then(numbers => {
-			this.dialog.set_df_property('caller_id', 'options', numbers);
-			this.dialog.set_value('caller_id', numbers[0]);
-			this.dialog.show();
-			this.dialog.get_close_btn().show();
-		});
+		this.dialog.show();
+		this.dialog.get_close_btn().show();
 	}
 	setup_call_status_updater() {
 		if (!this.updater) {

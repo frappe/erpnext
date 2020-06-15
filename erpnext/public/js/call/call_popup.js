@@ -14,7 +14,7 @@ class CallPopup {
 		});
 		this.dialog.get_close_btn().show();
 		this.setup_dialog();
-		this.setup_additional_info();
+		this.setup_call_details();
 		this.setup_caller_activities();
 		this.set_call_status();
 		frappe.utils.bind_actions_with_object(this.dialog.$body, this);
@@ -22,7 +22,7 @@ class CallPopup {
 		this.dialog.set_secondary_action(this.close_modal.bind(this));
 		this.dialog.show();
 		// show call details by default
-		this.dialog.$body.find('.sidebar-item[data-type="name"]').click();
+		this.dialog.$body.find('.sidebar-item[data-type="details"]').click();
 	}
 
 	set_indicator(color, blink=false) {
@@ -94,8 +94,9 @@ class CallPopup {
 	setup_dialog() {
 		this.dialog.$body.html(frappe.render_template('call_popup', {
 			'sidebar_items': [
-				{'label': 'Call Details', 'type': 'name'},
-				{'label': 'Issue', 'type': 'data'}
+				{'label': __('Call Details'), 'type': 'details'},
+				{'label': __('Issue'), 'type': 'issue_list'},
+				{'label': __('Previous Calls'), 'type': 'previous_calls'},
 			]
 		}));
 	}
@@ -103,15 +104,17 @@ class CallPopup {
 	on_sidebar_item_click(e, $el) {
 		let type = decodeURIComponent($el.data('type'));
 		this.dialog.$body.find('.sidebar-item').removeClass('active');
+		this.dialog.$body.find('.sidebar-item i').addClass('hide');
 		$el.addClass('active');
-		if (type == 'name') {
+		$el.find('i').removeClass('hide');
+		if (type == 'details') {
 			this.set_details(this.caller_info);
-		} else {
+		} else if (type == 'issue_list') {
 			this.set_details(this.caller_activities);
 		}
 	}
 
-	setup_additional_info() {
+	setup_call_details() {
 		this.caller_info = $(`<div></div>`);
 		this.call_details = new frappe.ui.FieldGroup({
 			fields: [{
@@ -124,7 +127,7 @@ class CallPopup {
 				'fieldtype': 'Button',
 				'label': __('Open Contact'),
 				'click': () => frappe.set_route('Form', 'Contact', this.call_log.contact),
-				'depends_on': () => this.call_log.contact
+				'depends_on': () => this.get_caller_name()
 			}, {
 				'fieldtype': 'Button',
 				'label': __('Create New Contact'),
@@ -145,6 +148,7 @@ class CallPopup {
 				'read_only': 1
 			}, {
 				'fieldtype': 'Section Break',
+				'hide_border': 1,
 			}, {
 				'fieldtype': 'Small Text',
 				'label': __('Call Summary'),
@@ -188,7 +192,12 @@ class CallPopup {
 		}).then((act) => {
 			act.issues.forEach(issue => {
 				list_html += `<div class="list-item flex justify-between padding">
-					<a class="issue-label" data-value="${issue.name}">${issue.name}</a>
+					<div>
+						<a href="${frappe.utils.get_form_link('Issue', issue.name)}">
+							${frappe.ellipsis(issue.subject, 55)}
+						</a>
+						<div class="text-muted">${issue.name}</div>
+					</div>
 					<a data-value="${issue.name}" data-action="link_issue">link</a>
 				</div>`;
 			});
@@ -202,8 +211,8 @@ class CallPopup {
 				</div>
 			`;
 			this.caller_activities.html(html);
-			this.dialog.$body.find('.sidebar-item[data-type="data"] > a > span.badge').text(act.issues.length);
-			let search_input = frappe.ui.form.make_control({
+			this.dialog.$body.find('.sidebar-item[data-type="issue_list"] span.badge').text(act.issues.length);
+			frappe.ui.form.make_control({
 				df: {
 					label: 'Link Other Issue',
 					fieldtype: 'Link',
