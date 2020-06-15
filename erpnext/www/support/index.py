@@ -13,14 +13,14 @@ def get_context(context):
 	latest_articles = None
 	favorite_articles = get_favorite_articles_by_page_view()
 	if len(favorite_articles) < 6:
-		title_list = []
+		name_list = []
 		if favorite_articles:
 			for article in favorite_articles:
-				title_list.append(article.title)
+				name_list.append(article.name)
 		latest_articles = frappe.get_all("Help Article", 
-		fields=["title", "content", "route", "category"], 
-		filters={"title": ['not in', tuple(title_list)], "published": 1}, 
-		order_by="creation desc", limit=(6-len(favorite_articles)))
+			fields=["title", "content", "route", "category"], 
+			filters={"name": ['not in', tuple(name_list)], "published": 1}, 
+			order_by="creation desc", limit=(6-len(favorite_articles)))
 
 	set_favorite_articles(context, favorite_articles, latest_articles)
 
@@ -30,6 +30,7 @@ def get_favorite_articles_by_page_view():
 	return frappe.db.sql(
 			"""
 			SELECT
+				t1.name as name,
 				t1.title as title,
 				t1.content as content,
 				t1.route as route,
