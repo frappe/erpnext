@@ -175,11 +175,9 @@ def get_customer_stats(filters, tree_view=False):
 
 		key = si.territory if tree_view else si.posting_date.strftime('%Y-%m')
 		new_or_repeat = 'new' if si.customer not in customers else 'repeat'
-
 		customers_in.setdefault(key, {'new': [0, 0.0], 'repeat': [0, 0.0]})
-		revenue_condition = (filters.from_date <= si.posting_date.strftime('%Y-%m-%d'))
 
-		if revenue_condition:
+		if filters.from_date <= si.posting_date.strftime('%Y-%m-%d'):
 				customers_in[key][new_or_repeat][0] += 1
 				customers_in[key][new_or_repeat][1] += si.base_grand_total
 		if new_or_repeat == 'new':
