@@ -12,5 +12,5 @@ frappe.require("assets/erpnext/js/salary_slip_deductions_report_filters.js", fun
 		options:["", "Bank", "Cash", "Cheque"]
 	})
 
-	frappe.query_reports["ECS Checklist"] = ecs_checklist_filter
+	frappe.query_reports["Salary Payments via ECS"] = ecs_checklist_filter
 });
