@@ -12,10 +12,13 @@
   "party",
   "subscription_period",
   "start",
+  "end",
   "cancelation_date",
   "trial_period_start",
   "trial_period_end",
+  "follow_calendar_months",
   "column_break_11",
+  "execution_date",
   "current_invoice_start",
   "current_invoice_end",
   "days_until_due",
@@ -214,10 +217,27 @@
    "fieldtype": "Link",
    "label": "Purchase Taxes and Charges Template",
    "options": "Purchase Taxes and Charges Template"
+  },
+  {
+   "default": "0",
+   "fieldname": "follow_calendar_months",
+   "fieldtype": "Check",
+   "label": "Follow Calendar Months"
+  },
+  {
+   "fieldname": "end",
+   "fieldtype": "Date",
+   "label": "Subscription End Date",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "execution_date",
+   "fieldtype": "Date",
+   "label": "Execution Date"
   }
  ],
  "links": [],
- "modified": "2020-06-01 22:35:02.906967",
+ "modified": "2020-06-15 15:41:43.002414",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",

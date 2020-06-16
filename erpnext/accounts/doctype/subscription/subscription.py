@@ -35,7 +35,7 @@ class Subscription(Document):
 		If the `date` parameter is not given , it will be automatically set as today's
 		date.
 		"""
-		if self.new_subscription() and self.trial_period_end and getdate(self.trial_period_end) > getdate(self.start):
+		if self.is_new_subscription() and self.trial_period_end and getdate(self.trial_period_end) > getdate(self.start):
 			self.current_invoice_start = add_days(self.trial_period_end, 1)
 		elif self.trial_period_start and self.is_trialling():
 			self.current_invoice_start = self.trial_period_start
@@ -60,7 +60,10 @@ class Subscription(Document):
 		else:
 			billing_cycle_info = self.get_billing_cycle_data()
 			if billing_cycle_info:
-				self.current_invoice_end = add_to_date(self.current_invoice_start, **billing_cycle_info)
+				if self.is_new_subscription() and self.start < self.current_invoice_start:
+					self.current_invoice_end = add_to_date(self.start, **billing_cycle_info)
+				else:
+					self.current_invoice_end = add_to_date(self.current_invoice_start, **billing_cycle_info)
 			else:
 				self.current_invoice_end = get_last_day(self.current_invoice_start)
 
@@ -182,7 +185,7 @@ class Subscription(Document):
 		if not current_invoice:
 			current_invoice = self.get_current_invoice()
 
-		if not current_invoice:
+		if not current_invoice or self.is_not_outstanding(current_invoice):
 			return False
 		else:
 			return getdate() > getdate(current_invoice.due_date)
@@ -289,13 +292,18 @@ class Subscription(Document):
 			invoice.taxes_and_charges = tax_template
 			invoice.set_taxes()
 
+		if nowdate() < add_days(self.current_invoice_end, cint(self.days_until_due)):
+			due_date = nowdate()
+		else:
+			due_date = add_days(self.current_invoice_end, cint(self.days_until_due))
+
 		# Due date
 		invoice.payment_terms_template = 'Default Payment Term - N20'
 
 		invoice.append(
 			'payment_schedule',
 			{
-				'due_date': add_days(self.current_invoice_end, cint(self.days_until_due)),
+				'due_date': due_date,
 				'invoice_portion': 100
 			}
 		)
@@ -332,10 +340,28 @@ class Subscription(Document):
 		party = self.party
 		for plan in plans:
 			item_code = frappe.db.get_value("Subscription Plan", plan.plan, "item")
-			if not prorate:
-				items.append({'item_code': item_code, 'qty': plan.qty, 'rate': get_plan_rate(plan.plan, plan.qty, party)})
+			if self.party == 'Customer':
+				deferred_field = 'enable_deferred_revenue'
 			else:
-				items.append({'item_code': item_code, 'qty': plan.qty, 'rate': (get_plan_rate(plan.plan, plan.qty, party) * prorate_factor)})
+				deferred_field = 'enable_deferred_expense'
+
+			deferred = frappe.db.get_value('Item', item_code, deferred_field)
+
+			if not prorate:
+				item = {'item_code': item_code, 'qty': plan.qty, 'rate': get_plan_rate(plan.plan, plan.qty, party,
+					self.current_invoice_start, self.current_invoice_end)}
+			else:
+				item = {'item_code': item_code, 'qty': plan.qty, 'rate': get_plan_rate(plan.plan, plan.qty, party,
+					self.current_invoice_start, self.current_invoice_end, prorate_factor)}
+
+			if deferred:
+				item.update({
+					deferred_field: deferred,
+					'service_start_date': self.current_invoice_start,
+					'service_end_date': self.current_invoice_end
+				})
+
+			items.append(item)
 
 		return items
 
@@ -391,6 +417,9 @@ class Subscription(Document):
 		2. Change the `Subscription` status to 'Past Due Date'
 		3. Change the `Subscription` status to 'Cancelled'
 		"""
+		if nowdate() > self.current_invoice_end:
+			self.update_subscription_period(add_days(self.current_invoice_end, 1))
+
 		if not self.is_current_invoice_paid() and (self.is_postpaid_to_invoice() or self.is_prepaid_to_invoice()):
 			prorate = frappe.db.get_single_value('Subscription Settings', 'prorate')
 			self.generate_invoice(prorate)
@@ -427,7 +456,8 @@ class Subscription(Document):
 		else:
 			if self.is_not_outstanding(current_invoice):
 				self.status = 'Active'
-				self.update_subscription_period(add_days(self.current_invoice_end, 1))
+				if nowdate() > self.current_invoice_end:
+					self.update_subscription_period(add_days(self.current_invoice_end, 1))
 			else:
 				self.set_status_grace_period()
 

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_rename": 1,
  "autoname": "field:plan_name",
  "creation": "2018-02-24 11:31:23.066506",
@@ -61,7 +62,7 @@
    "fieldname": "price_determination",
    "fieldtype": "Select",
    "label": "Price Determination",
-   "options": "\nFixed rate\nBased on price list",
+   "options": "\nFixed rate\nBased on price list\nMonthly rate",
    "reqd": 1
   },
   {
@@ -69,7 +70,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.price_determination==\"Fixed rate\"",
+   "depends_on": "eval:['Fixed rate', 'Monthly rate'].includes(doc.price_determination)",
    "fieldname": "cost",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -138,7 +139,8 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2019-07-25 18:35:04.362556",
+ "links": [],
+ "modified": "2020-06-14 22:39:48.732956",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription Plan",
