@@ -108,6 +108,7 @@ class BOM(WebsiteGenerator):
 					"description": d.description,
 					"time_in_mins": d.time_in_mins,
 					"batch_size": d.batch_size,
+					"operating_cost": d.operating_cost,
 					"idx": d.idx
 				})
 				child.hour_rate = flt(d.hour_rate / self.conversion_rate, 2)
