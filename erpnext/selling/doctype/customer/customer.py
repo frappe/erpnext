@@ -422,7 +422,8 @@ def send_emails(args):
 		Document Link: {3}")
 			.format(args.get('customer'), args.get('customer_outstanding'), args.get('credit_limit'), args.get('document_link')))
 	frappe.sendmail(recipients=args.get('credit_controller_users_list'), subject=subject, message=message)
-	return (_("An email was sent to {0} number of people").format(len(args.get('credit_controller_users_list'))))
+	return  (_("""An email was sent to {0} number of people.
+				<br><br><ul><li>{1}</li></ul>""").format(len(args.get('credit_controller_users_list')), '<li>'.join(args.get('credit_controller_users_list'))))
 
 def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):
 	# Outstanding based on GL Entries
