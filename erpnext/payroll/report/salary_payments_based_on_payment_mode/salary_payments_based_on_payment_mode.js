@@ -3,5 +3,5 @@
 /* eslint-disable */
 
 frappe.require("assets/erpnext/js/salary_slip_deductions_report_filters.js", function() {
-	frappe.query_reports["Total Payments Based On Payment Mode"] = erpnext.salary_slip_deductions_report_filters;
+	frappe.query_reports["Salary Payments Based On Payment Mode"] = erpnext.salary_slip_deductions_report_filters;
 });
