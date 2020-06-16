@@ -147,10 +147,10 @@ def get_linked_call_logs(doctype, docname):
 @frappe.whitelist()
 def get_caller_activities(number):
 	activities = {
-		'issues': []
+		'issues': [],
+		'previous_calls': []
 	}
-	number = strip_number(number)
-	contact = get_contact_with_phone_number(number)
+	contact = get_contact_with_phone_number(strip_number(number))
 
 	if not contact:
 		return activities
@@ -159,22 +159,23 @@ def get_caller_activities(number):
 
 	for link in contact_doc.links:
 		if link.link_doctype == 'Customer':
-			activities['issues'].extend(get_issues_by_customer(link.link_name))
+			activities['issues'].extend(get_issues_by(link.link_name, 'customer'))
 		if link.link_doctype == 'Lead':
-			activities['issues'].extend(get_issues_by_lead(link.link_name))
+			activities['issues'].extend(get_issues_by(link.link_name, 'lead'))
+
+	activities['previous_calls'] = frappe.get_all('Call Log',
+		fields=['name', '`from`', '`to`', 'creation', 'type', 'summary'],
+		or_filters={
+			'`from`': number,
+			'`to`': number
+		}, limit=5)
 
 	return activities
 
-def get_issues_by_customer(customer):
+def get_issues_by(contact, contact_field):
 	issues = frappe.get_all('Issue', filters={
-		'customer': customer
-	}, fields=['name', 'subject'])
-	return issues
-
-def get_issues_by_lead(lead):
-	issues = frappe.get_all('Issue', filters={
-		'lead': lead
-	}, fields=['name', 'subject'])
+		contact_field: contact
+	}, fields=['name', 'subject', 'status', 'creation'], limit=10)
 	return issues
 
 @frappe.whitelist()

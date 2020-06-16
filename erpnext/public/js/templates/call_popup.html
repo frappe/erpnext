@@ -4,13 +4,13 @@
 			{% for item in sidebar_items %}
 			<li data-action="on_sidebar_item_click"
 				data-type="{{ item.type }}"
-				class="sidebar-item list-link">
+				class="sidebar-item list-link {% if (item.active) { %} active {% } %}">
 				<a class="flex justify-between">
-					<span class="ellipsis">{{ item.label }}</span>
 					<div>
+						<span class="ellipsis">{{ item.label }}</span>
 						<span class="badge"></span>
-						<i class="octicon octicon-chevron-right hide"></i>
 					</div>
+					<i class="octicon octicon-chevron-right {% if (!item.active) { %} hide {% } %}"></i>
 				</a>
 			</li>
 			{% } %}

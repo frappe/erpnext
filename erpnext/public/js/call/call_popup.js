@@ -14,15 +14,28 @@ class CallPopup {
 		});
 		this.dialog.get_close_btn().show();
 		this.setup_dialog();
-		this.setup_call_details();
-		this.setup_caller_activities();
 		this.set_call_status();
 		frappe.utils.bind_actions_with_object(this.dialog.$body, this);
 		this.dialog.$wrapper.addClass('call-popup');
 		this.dialog.set_secondary_action(this.close_modal.bind(this));
 		this.dialog.show();
-		// show call details by default
-		this.dialog.$body.find('.sidebar-item[data-type="details"]').click();
+	}
+
+	setup_dialog() {
+		if (this.is_known_caller()) {
+			this.dialog.$body.html(frappe.render_template('call_popup', {
+				'sidebar_items': [
+					{'label': __('Call Details'), 'type': 'details', 'active': 1},
+					{'label': __('Issues'), 'type': 'issue_list'},
+					{'label': __('Calls'), 'type': 'previous_calls'},
+				]
+			}));
+			this.setup_caller_activities();
+		} else {
+			this.dialog.$body.html(`<div class="details"></div>`);
+		}
+		this.setup_call_details();
+		this.set_details(this.caller_info);
 	}
 
 	set_indicator(color, blink=false) {
@@ -91,16 +104,6 @@ class CallPopup {
 		});
 	}
 
-	setup_dialog() {
-		this.dialog.$body.html(frappe.render_template('call_popup', {
-			'sidebar_items': [
-				{'label': __('Call Details'), 'type': 'details'},
-				{'label': __('Issue'), 'type': 'issue_list'},
-				{'label': __('Previous Calls'), 'type': 'previous_calls'},
-			]
-		}));
-	}
-
 	on_sidebar_item_click(e, $el) {
 		let type = decodeURIComponent($el.data('type'));
 		this.dialog.$body.find('.sidebar-item').removeClass('active');
@@ -110,7 +113,9 @@ class CallPopup {
 		if (type == 'details') {
 			this.set_details(this.caller_info);
 		} else if (type == 'issue_list') {
-			this.set_details(this.caller_activities);
+			this.set_details(this.issue_list);
+		} else if (type == 'previous_calls') {
+			this.set_details(this.previous_calls);
 		}
 	}
 
@@ -185,45 +190,78 @@ class CallPopup {
 	}
 
 	setup_caller_activities() {
-		this.caller_activities = $(`<div></div>`);
-		let list_html = '';
 		frappe.xcall('erpnext.communication.doctype.call_log.call_log.get_caller_activities', {
 			'number': this.caller_number
-		}).then((act) => {
-			act.issues.forEach(issue => {
-				list_html += `<div class="list-item flex justify-between padding">
-					<div>
-						<a href="${frappe.utils.get_form_link('Issue', issue.name)}">
-							${frappe.ellipsis(issue.subject, 55)}
-						</a>
-						<div class="text-muted">${issue.name}</div>
-					</div>
-					<a data-value="${issue.name}" data-action="link_issue">link</a>
-				</div>`;
-			});
-			let html = `
+		}).then(activities => {
+			this.setup_issues_list(activities.issues);
+			this.setup_previous_calls(activities.previous_calls);
+		});
+	}
+
+	setup_issues_list(issues) {
+		this.issue_list = $(`<div>`);
+		let list_html = '';
+		issues.forEach(issue => {
+			list_html += `<div class="list-item flex justify-between padding">
 				<div>
-					<div class="search"></div>
-					<label>Previous Issues</label>
-					<div class="list-items">
-						${list_html}
+					<a href="${frappe.utils.get_form_link('Issue', issue.name)}">
+						${frappe.ellipsis(issue.subject, 55)}
+					</a>
+					<div class="text-muted">${issue.name}</div>
+				</div>
+				<a data-value="${issue.name}" data-action="link_issue">link</a>
+			</div>`;
+		});
+		let html = `
+			<div>
+				<div class="search"></div>
+				<label>Previous Issues</label>
+				<div class="list-items">
+					${list_html}
+				</div>
+			</div>
+		`;
+		this.issue_list.html(html);
+		this.dialog.$body.find('.sidebar-item[data-type="issue_list"] span.badge').text(issues.length);
+		frappe.ui.form.make_control({
+			df: {
+				label: 'Link Other Issue',
+				fieldtype: 'Link',
+				fieldname: 'issue',
+				options: 'Issue',
+			},
+			render_input: true,
+			only_input: false,
+			parent: this.issue_list.find('.search'),
+		});
+	}
+
+	setup_previous_calls(previous_calls) {
+		this.previous_calls = $(`<div>`);
+		let list_html = '';
+		previous_calls.forEach(call => {
+			list_html += `<div class="list-item flex justify-between padding">
+				<div>
+					<a href="${frappe.utils.get_form_link('Call Log', call.name)}">
+						${call.type} call from ${call.from} to ${call.to}
+					</a>
+					<div class="text-muted">
+						${frappe.ellipsis(call.summary, 30) || __('No Summary')}
 					</div>
 				</div>
-			`;
-			this.caller_activities.html(html);
-			this.dialog.$body.find('.sidebar-item[data-type="issue_list"] span.badge').text(act.issues.length);
-			frappe.ui.form.make_control({
-				df: {
-					label: 'Link Other Issue',
-					fieldtype: 'Link',
-					fieldname: 'issue',
-					options: 'Issue',
-				},
-				render_input: true,
-				only_input: false,
-				parent: this.caller_activities.find('.search'),
-			});
+			</div>`;
 		});
+		let html = `
+			<div>
+				<div class="search"></div>
+				<label>Previous Calls</label>
+				<div class="list-items">
+					${list_html}
+				</div>
+			</div>
+		`;
+		this.previous_calls.html(html);
+		this.dialog.$body.find('.sidebar-item[data-type="previous_calls"] span.badge').text(previous_calls.length);
 	}
 
 	set_details(html) {
@@ -242,6 +280,10 @@ class CallPopup {
 				$el.replaceWith(`<span>${__('Linked')}</span>`);
 			});
 		});
+	}
+
+	is_known_caller() {
+		return Boolean(this.get_caller_name());
 	}
 }
 
