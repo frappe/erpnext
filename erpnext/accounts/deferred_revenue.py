@@ -439,7 +439,7 @@ def get_deferred_booking_accounts(doctype, voucher_detail_no, dr_or_cr):
 			['income_account', 'deferred_revenue_account'])
 	else:
 		credit_account, debit_account = frappe.db.get_value('Purchase Invoice Item', {'name': voucher_detail_no},
-			['deferred_expense_account', 'expense_acccount'])
+			['deferred_expense_account', 'expense_account'])
 
 	if dr_or_cr == 'Debit':
 		return debit_account
