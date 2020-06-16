@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2020-06-01 23:44:07.919117",
+ "modified": "2020-06-16 18:54:19.305763",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Provident Fund Deductions",
@@ -16,15 +16,5 @@
  "ref_doctype": "Salary Slip",
  "report_name": "Provident Fund Deductions",
  "report_type": "Script Report",
- "roles": [
-  {
-   "role": "HR User"
-  },
-  {
-   "role": "HR Manager"
-  },
-  {
-   "role": "Employee"
-  }
- ]
+ "roles": []
 }

@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2020-06-02 00:37:44.537355",
+ "modified": "2020-06-16 19:02:26.306348",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Professional Tax Deductions",
@@ -16,15 +16,5 @@
  "ref_doctype": "Salary Slip",
  "report_name": "Professional Tax Deductions",
  "report_type": "Script Report",
- "roles": [
-  {
-   "role": "HR User"
-  },
-  {
-   "role": "HR Manager"
-  },
-  {
-   "role": "Employee"
-  }
- ]
+ "roles": []
 }

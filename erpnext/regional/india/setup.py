@@ -60,6 +60,19 @@ def add_custom_roles_for_reports():
 				]
 			)).insert()
 
+	for report_name in ('Professional Tax Deductions', 'Provident Fund Deductions'):
+
+		if not frappe.db.get_value('Custom Role', dict(report=report_name)):
+			frappe.get_doc(dict(
+				doctype='Custom Role',
+				report=report_name,
+				roles= [
+					dict(role='HR User'),
+					dict(role='HR Manager'),
+					dict(role='Employee')
+				]
+			)).insert()
+
 def add_permissions():
 	for doctype in ('GST HSN Code', 'GST Settings', 'GSTR 3B Report', 'Lower Deduction Certificate'):
 		add_permission(doctype, 'All', 0)
