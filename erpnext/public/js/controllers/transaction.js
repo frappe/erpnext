@@ -539,7 +539,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 									if (show_batch_dialog)
 										return frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"])
 											.then((r) => {
-												if(r.message.has_batch_no || r.message.has_serial_no) {
+												if(r.message &&
+													(r.message.has_batch_no || r.message.has_serial_no)) {
 													frappe.flags.hide_serial_batch_dialog = false;
 												}
 											});
