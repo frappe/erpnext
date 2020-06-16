@@ -139,13 +139,13 @@ frappe.ui.form.on('Employee Advance', {
 	employee: function (frm) {
 		if (frm.doc.employee) {
 			return frappe.call({
-				method: "erpnext.hr.doctype.employee_advance.employee_advance.get_due_advance_amount",
+				method: "erpnext.hr.doctype.employee_advance.employee_advance.get_pending_amount",
 				args: {
 					"employee": frm.doc.employee,
 					"posting_date": frm.doc.posting_date
 				},
 				callback: function(r) {
-					frm.set_value("due_advance_amount",r.message);
+					frm.set_value("pending_amount",r.message);
 				}
 			});
 		}
