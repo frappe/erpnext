@@ -53,12 +53,12 @@ class StudentApplicant(Document):
 		student_admission = get_student_admission_data(self.student_admission, self.program)
 
 		if student_admission and student_admission.min_age and \
-			getdate(nowdate()) < getdate(add_years(getdate(self.date_of_birth),  student_admission.min_age)):
-				frappe.throw(_("Not eligible for the admission in this program as per DOB"))
+			getdate(nowdate()) < getdate(add_years(getdate(self.date_of_birth), student_admission.min_age)):
+				frappe.throw(_("Not eligible for the admission in this program as per Date Of Birth"))
 
 		if student_admission and student_admission.max_age and \
-			getdate(nowdate()) > getdate(add_years(getdate(self.date_of_birth),  student_admission.max_age)):
-				frappe.throw(_("Not eligible for the admission in this program as per DOB"))
+			getdate(nowdate()) > getdate(add_years(getdate(self.date_of_birth), student_admission.max_age)):
+				frappe.throw(_("Not eligible for the admission in this program as per Date Of Birth"))
 
 
 	def on_payment_authorized(self, *args, **kwargs):
