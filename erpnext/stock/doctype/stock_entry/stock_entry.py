@@ -178,7 +178,7 @@ class StockEntry(StockController):
 		stock_items = self.get_stock_items()
 		serialized_items = self.get_serialized_items()
 		for item in self.get("items"):
-			if item.qty and item.qty < 0:
+			if flt(item.qty) and flt(item.qty) < 0:
 				frappe.throw(_("Row {0}: The item {1}, quantity must be positive number")
 					.format(item.idx, frappe.bold(item.item_code)))
 
@@ -497,7 +497,7 @@ class StockEntry(StockController):
 					if raw_material_cost and self.purpose == "Manufacture":
 						d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
 						d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
-					elif self.purpose == "Repack" and total_fg_qty:
+					elif self.purpose == "Repack" and total_fg_qty and not d.set_basic_rate_manually:
 						d.basic_rate = flt(raw_material_cost) / flt(total_fg_qty)
 						d.basic_amount = d.basic_rate * d.qty
 
