@@ -234,8 +234,7 @@ def get_list_context(context=None):
 		"show_search": True,
 		'no_breadcrumbs': True,
 		"title": _("Projects"),
-		"get_list": get_project_list,
-		"row_template": "templates/includes/projects/project_row.html"
+		"get_list": get_project_list
 	}
 
 def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
