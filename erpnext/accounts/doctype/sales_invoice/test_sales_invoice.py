@@ -1750,7 +1750,7 @@ class TestSalesInvoice(unittest.TestCase):
 			parent_account="Current Liabilities - _TC", company="_Test Company")
 
 		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		acc_settings.book_fixed_monthly_amount = 1
+		acc_settings.book_deferred_entries_based_on = 'Months'
 		acc_settings.save()
 
 		item = create_item("_Test Item for Deferred Accounting")
@@ -1771,7 +1771,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		pda1 = frappe.get_doc(dict(
 			doctype='Process Deferred Accounting',
-			posting_date=nowdate(),
+			posting_date='2019-03-31',
 			start_date="2019-01-01",
 			end_date="2019-03-31",
 			type="Income",
@@ -1793,7 +1793,7 @@ class TestSalesInvoice(unittest.TestCase):
 		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
 
 		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		acc_settings.booke_fixed_monthly_amount = 0
+		acc_settings.book_deferred_entries_based_on = 'Days'
 		acc_settings.save()
 
 	def test_inter_company_transaction(self):
