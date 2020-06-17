@@ -225,7 +225,9 @@ class StockController(AccountsController):
 
 	def check_expense_account(self, item):
 		if not item.get("expense_account"):
-			frappe.throw(_("Expense Account not set for Item {0}. Please set an Expense Account for the item in the Items table").format(item.item_code))
+			frappe.throw(_("Row #{0}: Expense Account not set for Item {1}. Please set an Expense \
+				Account in the Items table").format(item.idx, frappe.bold(item.item_code)),
+				title=_("Expense Account Missing"))
 
 		else:
 			is_expense_account = frappe.db.get_value("Account",
