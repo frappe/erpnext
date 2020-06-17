@@ -93,7 +93,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "HR",
- "modified": "2020-06-10 12:41:41.695669",
+ "modified": "2020-06-16 19:20:50.976045",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR",
@@ -126,7 +126,7 @@
   },
   {
    "label": "Salary Structure",
-   "link_to": "Payroll Entry",
+   "link_to": "Salary Structure",
    "type": "DocType"
   },
   {
