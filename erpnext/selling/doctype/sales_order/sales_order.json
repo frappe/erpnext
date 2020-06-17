@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-06-18 12:39:59",
@@ -1194,9 +1193,9 @@
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
+ "in_create": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-04-17 12:50:39.640534",
+ "modified": "2020-06-17 15:27:32.932722",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
@@ -1265,6 +1264,7 @@
    "write": 1
   }
  ],
+ "read_only": 1,
  "search_fields": "status,transaction_date,customer,customer_name, territory,order_type,company",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
