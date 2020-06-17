@@ -19,7 +19,8 @@ import bleach
 def handle_incoming_call(**kwargs):
 	validate_request()
 	try:
-		if is_integration_enabled(): return
+		if not is_integration_enabled():
+			return
 
 		call_payload = kwargs
 		status = call_payload.get('Status')
@@ -72,6 +73,9 @@ def get_call_status(call_id):
 
 @frappe.whitelist()
 def make_a_call(to_number, caller_id=None, link_to_document=None):
+	if not is_integration_enabled():
+		frappe.throw(_('Please setup Exotel intergration'), title=_('Integration Not Enabled'))
+
 	endpoint = get_exotel_endpoint('Calls/connect.json?details=true')
 	cell_number = frappe.get_value('Employee', {
 		'user_id': frappe.session.user
@@ -192,7 +196,7 @@ def get_exotel_endpoint(action, version='v1'):
 	)
 
 def is_integration_enabled():
-	frappe.db.get_single_value('Exotel Settings', 'enabled', True)
+	return frappe.db.get_single_value('Exotel Settings', 'enabled', True)
 
 def whitelist_numbers(numbers, caller_id):
 	endpoint = get_exotel_endpoint('CustomerWhitelist')
