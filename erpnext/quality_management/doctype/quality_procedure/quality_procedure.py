@@ -46,9 +46,7 @@ class QualityProcedure(NestedSet):
 			# Set parent for only those children who don't have a parent
 			parent_quality_procedure = frappe.db.get_value("Quality Procedure", process.procedure, "parent_quality_procedure")
 			if not parent_quality_procedure and process.procedure:
-				doc = frappe.get_doc("Quality Procedure", process.procedure)
-				doc.parent_quality_procedure = self.name
-				doc.save(ignore_permissions=True)
+				frappe.db.set_value(self.doctype, process.procedure, "parent_quality_procedure", self.name)
 
 	def check_for_incorrect_child(self):
 		for process in self.processes:
