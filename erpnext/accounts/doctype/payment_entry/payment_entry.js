@@ -25,7 +25,7 @@ frappe.ui.form.on('Payment Entry', {
 		});
 		frm.set_query("party_type", function() {
 			return{
-				"filters": {
+				filters: {
 					"name": ["in", Object.keys(frappe.boot.party_account_types)],
 				}
 			}
@@ -33,7 +33,7 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_query("party_bank_account", function() {
 			return {
 				filters: {
-					"is_company_account":0,
+					is_company_account: 0,
 					party_type: frm.doc.party_type,
 					party: frm.doc.party
 				}
@@ -42,7 +42,7 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_query("bank_account", function() {
 			return {
 				filters: {
-					"is_company_account":1
+					is_company_account: 1
 				}
 			}
 		});
@@ -341,7 +341,7 @@ frappe.ui.form.on('Payment Entry', {
 							() => {
 								frm.set_party_account_based_on_party = false;
 								if (r.message.bank_account) {
-									frm.set_value("party_bank_account", r.message.bank_account);
+									frm.set_value("bank_account", r.message.bank_account);
 								}
 							}
 						]);
