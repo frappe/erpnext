@@ -11,13 +11,13 @@
 </section>
 
 {% if favorite_article_list %}
-<section class="section section-padding-top section-padding-bottom">
+<section class="section section-padding-top section-padding-bottom bg-light">
 	<div class='container'>
 		<h3>{{ _("Frequently Read Articles") }}</h3>
 		<div class="row">
 			{% for favorite_article in favorite_article_list %}
 				<div class="mt-4 col-12 col-sm-6 col-lg-4">
-					<div class="card card-md h-100">
+					<div class="card card-md h-100 kb-card">
 						<div class="card-body">
 							<h6 class="card-subtitle mb-2 text-uppercase small text-muted">{{ favorite_article['category'] }}</h6>
 							<h3 class="card-title">{{ favorite_article['title'] }}</h3>
@@ -33,7 +33,7 @@
 {% endif %}
 
 {% if help_article_list %}
-<section class="section section-padding-top section-padding-bottom bg-light">
+<section class="section section-padding-top section-padding-bottom">
 	<div class='container'>
 		<h3>{{ _("Help Articles") }}</h3>
 		<div class="row">
