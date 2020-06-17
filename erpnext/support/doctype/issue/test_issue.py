@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from erpnext.support.doctype.service_level_agreement.test_service_level_agreement import create_service_level_agreements_for_issues
-from frappe.utils import now_datetime, get_datetime
+from frappe.utils import now_datetime, get_datetime, flt
 import datetime
 from datetime import timedelta
 
@@ -120,7 +120,7 @@ class TestIssue(unittest.TestCase):
 		create_communication(issue.name, "test@example.com", "Received", creation)
 
 		issue.reload()
-		self.assertEqual(issue.total_hold_time, 2700)
+		self.assertEqual(flt(issue.total_hold_time, 2), 2700)
 		self.assertEqual(issue.resolution_by, datetime.datetime(2020, 3, 4, 16, 45))
 
 		creation = datetime.datetime(2020, 3, 4, 5, 5)
@@ -132,7 +132,7 @@ class TestIssue(unittest.TestCase):
 		issue.save()
 
 		issue.reload()
-		self.assertEqual(issue.total_hold_time, 2700)
+		self.assertEqual(flt(issue.total_hold_time, 2), 2700)
 
 
 def make_issue(creation=None, customer=None, index=0):
