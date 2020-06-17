@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import calendar
 import frappe
 from frappe import _
-from frappe.utils import cint, cstr
+from frappe.utils import cint, cstr, getdate
 
 def execute(filters=None):
 	common_columns = [
@@ -177,7 +177,8 @@ def get_customer_stats(filters, tree_view=False):
 		new_or_repeat = 'new' if si.customer not in customers else 'repeat'
 		customers_in.setdefault(key, {'new': [0, 0.0], 'repeat': [0, 0.0]})
 
-		if filters.from_date <= si.posting_date.strftime('%Y-%m-%d'):
+		# if filters.from_date <= si.posting_date.strftime('%Y-%m-%d'):
+		if getdate(filters.from_date) <= getdate(si.posting_date):
 				customers_in[key][new_or_repeat][0] += 1
 				customers_in[key][new_or_repeat][1] += si.base_grand_total
 		if new_or_repeat == 'new':
