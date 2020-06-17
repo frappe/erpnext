@@ -22,8 +22,8 @@ def get_context(context):
 			order_by="creation desc", limit=(6-len(favorite_articles)))):
 			favorite_articles.append(record)
 		
-	context.favorite_article_list = set_favorite_articles(favorite_articles)
-	context.help_article_list = set_help_article_list()
+	context.favorite_article_list = get_favorite_articles(favorite_articles)
+	context.help_article_list = get_help_article_list()
 	
 def get_favorite_articles_by_page_view():
 	return frappe.db.sql(
@@ -45,7 +45,7 @@ def get_favorite_articles_by_page_view():
 			LIMIT 6;
 			""", as_dict=True)
 
-def set_favorite_articles(favorite_articles):
+def get_favorite_articles(favorite_articles):
 	favorite_article_list=[]
 	for article in favorite_articles:
 		description = frappe.utils.strip_html(article.content)
@@ -60,7 +60,7 @@ def set_favorite_articles(favorite_articles):
 		favorite_article_list.append(favorite_article_dict)
 	return favorite_article_list
 
-def set_help_article_list():
+def get_help_article_list():
 	help_article_list=[]
 	category_list = frappe.get_all("Help Category", fields="name")
 	for category in category_list:
