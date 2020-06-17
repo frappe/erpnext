@@ -20,7 +20,7 @@ frappe.ui.form.on('Process Deferred Accounting', {
 						'is_group': 0
 					}
 				};
-			})
+			});
 		}
 	},
 

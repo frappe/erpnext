@@ -891,8 +891,6 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.save()
 		pi.submit()
 
-		from erpnext.accounts.deferred_revenue import convert_deferred_expense_to_expense
-
 		pda1 = frappe.get_doc(dict(
 			doctype='Process Deferred Accounting',
 			posting_date=nowdate(),

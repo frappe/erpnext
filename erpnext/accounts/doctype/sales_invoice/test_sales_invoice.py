@@ -1720,8 +1720,6 @@ class TestSalesInvoice(unittest.TestCase):
 		si.save()
 		si.submit()
 
-		from erpnext.accounts.deferred_revenue import convert_deferred_revenue_to_income
-
 		pda1 = frappe.get_doc(dict(
 			doctype='Process Deferred Accounting',
 			posting_date=nowdate(),
@@ -1766,8 +1764,6 @@ class TestSalesInvoice(unittest.TestCase):
 		si.items[0].deferred_revenue_account = deferred_account
 		si.save()
 		si.submit()
-
-		from erpnext.accounts.deferred_revenue import convert_deferred_revenue_to_income
 
 		pda1 = frappe.get_doc(dict(
 			doctype='Process Deferred Accounting',
