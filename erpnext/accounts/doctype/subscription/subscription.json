@@ -18,7 +18,6 @@
   "trial_period_end",
   "follow_calendar_months",
   "column_break_11",
-  "execution_date",
   "current_invoice_start",
   "current_invoice_end",
   "days_until_due",
@@ -49,7 +48,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nTrialling\nActive\nPast Due Date\nCancelled\nUnpaid",
+   "options": "\nTrialling\nActive\nPast Due Date\nCancelled\nUnpaid\nCompleted",
    "read_only": 1
   },
   {
@@ -222,22 +221,18 @@
    "default": "0",
    "fieldname": "follow_calendar_months",
    "fieldtype": "Check",
-   "label": "Follow Calendar Months"
+   "label": "Follow Calendar Months",
+   "set_only_once": 1
   },
   {
    "fieldname": "end",
    "fieldtype": "Date",
    "label": "Subscription End Date",
    "set_only_once": 1
-  },
-  {
-   "fieldname": "execution_date",
-   "fieldtype": "Date",
-   "label": "Execution Date"
   }
  ],
  "links": [],
- "modified": "2020-06-15 15:41:43.002414",
+ "modified": "2020-06-16 19:56:53.682567",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",
