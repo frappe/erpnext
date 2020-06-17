@@ -4,7 +4,7 @@
 <section class="section section-padding-top section-padding-bottom">
 	<div class='container'>
 		<div class="hero-content">
-			<h1>{{ _(greeting_title) or _("We're here to help") }}</h1>
+			<h1 class="hero-title">{{ _(greeting_title) or _("We're here to help") }}</h1>
 			<p class="hero-subtitle">{{ greeting_subtitle or _("Browse help topics.") }}</p>
 		</div>
 	</div>
@@ -13,7 +13,7 @@
 {% if favorite_article_list %}
 <section class="section section-padding-top section-padding-bottom bg-light">
 	<div class='container'>
-		<h3>{{ _("Frequently Read Articles") }}</h3>
+		<h2>{{ _("Frequently Read Articles") }}</h2>
 		<div class="row">
 			{% for favorite_article in favorite_article_list %}
 				<div class="mt-4 col-12 col-sm-6 col-lg-4">
@@ -35,7 +35,7 @@
 {% if help_article_list %}
 <section class="section section-padding-top section-padding-bottom">
 	<div class='container'>
-		<h3>{{ _("Help Articles") }}</h3>
+		<h2>{{ _("Help Articles") }}</h2>
 		<div class="row">
 			{% for item in help_article_list %}
 			<div class="mt-5 col-12 col-sm-6 col-lg-4">
