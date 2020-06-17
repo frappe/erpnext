@@ -6,7 +6,7 @@ from __future__ import print_function, unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, add_years, nowdate
+from frappe.utils import getdate, add_years, nowdate, date_diff
 
 class StudentApplicant(Document):
 	def autoname(self):
@@ -53,11 +53,11 @@ class StudentApplicant(Document):
 		student_admission = get_student_admission_data(self.student_admission, self.program)
 
 		if student_admission and student_admission.min_age and \
-			getdate(nowdate()) < getdate(add_years(getdate(self.date_of_birth), student_admission.min_age)):
+			date_diff(nowdate(), add_years(getdate(self.date_of_birth), student_admission.min_age)) < 0:
 				frappe.throw(_("Not eligible for the admission in this program as per Date Of Birth"))
 
 		if student_admission and student_admission.max_age and \
-			getdate(nowdate()) > getdate(add_years(getdate(self.date_of_birth), student_admission.max_age)):
+			date_diff(nowdate(), add_years(getdate(self.date_of_birth), student_admission.max_age)) > 0:
 				frappe.throw(_("Not eligible for the admission in this program as per Date Of Birth"))
 
 
