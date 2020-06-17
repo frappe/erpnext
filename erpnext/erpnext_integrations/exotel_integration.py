@@ -2,6 +2,7 @@ import frappe
 import requests
 from frappe import _
 from frappe.utils import cint
+import bleach
 
 # Endpoints for webhook
 #
@@ -77,7 +78,7 @@ def make_a_call(to_number, caller_id=None, link_to_document=None):
 	}, 'cell_number')
 
 	if not cell_number:
-		frappe.throw('Cell number not set')
+		frappe.throw(_('You do not have mobile number set in your Employee Master'))
 
 	try:
 		response = requests.post(endpoint, data={
@@ -92,7 +93,7 @@ def make_a_call(to_number, caller_id=None, link_to_document=None):
 	except requests.exceptions.HTTPError as e:
 		exc = response.json().get('RestException')
 		if exc:
-			frappe.throw(exc.get('Message'), title=_('Invalid Input'))
+			frappe.throw(bleach.linkify(exc.get('Message')), title=_('Exotel Exception'))
 	else:
 		res = response.json()
 		call_payload = res.get('Call', {})
