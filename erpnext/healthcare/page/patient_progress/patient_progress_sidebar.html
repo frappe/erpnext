@@ -1,0 +1,23 @@
+<div class="patient-progress-sidebar">
+	<div class="patient-image-container hidden-xs hidden-sm">
+		{% if patient_image %}
+			{{patient_image}}
+		{% endif %}
+	</div>
+	<div class="progress-details">
+		{% if patient_name %}
+		<p class="patient-name">{{patient_name}}</p>
+		{% endif %}
+		{% if patient_gender %}
+		<p class="patient-gender text-muted">{{patient_gender}}</p>
+		{% endif %}
+		{% if patient_mobile %}
+		<p class="patient-mobile text-muted">{{patient_mobile}}</p>
+		{% endif %}
+	</div>
+	<div class="important-links">
+		<p><a class="patient-profile-link">{%=__("Patient Profile") %}</a></p>
+		<p><a class="therapy-plan-link">{%=__("Therapy Plan") %}</a></p>
+		<p><a class="patient-history">{%=__("Patient History") %}</a></p>
+	</div>
+</div>
