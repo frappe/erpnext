@@ -241,7 +241,7 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 	enable_check = "enable_deferred_revenue" \
 		if doc.doctype=="Sales Invoice" else "enable_deferred_expense"
 
-	def _book_deferred_revenue_or_expense(item, via_journal_entry, submit_journal_entry, booked_fixed_amount_per_month):
+	def _book_deferred_revenue_or_expense(item, via_journal_entry, submit_journal_entry, book_deferred_entries_based_on):
 		start_date, end_date, last_gl_entry = get_booking_dates(doc, item, posting_date=posting_date)
 		if not (start_date and end_date): return
 
@@ -256,7 +256,7 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 		total_days = date_diff(item.service_end_date, item.service_start_date) + 1
 		total_booking_days = date_diff(end_date, start_date) + 1
 
-		if booked_fixed_amount_per_month:
+		if book_deferred_entries_based_on == 'Months':
 			amount, base_amount = calculate_monthly_amount(doc, item, last_gl_entry,
 				start_date, end_date, total_days, total_booking_days, account_currency)
 		else:
@@ -275,15 +275,15 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 			return
 
 		if getdate(end_date) < getdate(posting_date) and not last_gl_entry:
-			_book_deferred_revenue_or_expense(item, via_journal_entry, submit_journal_entry, booked_fixed_amount_per_month)
+			_book_deferred_revenue_or_expense(item, via_journal_entry, submit_journal_entry, book_deferred_entries_based_on)
 
 	via_journal_entry = frappe.db.get_singles_value('Accounts Settings', 'book_deferred_entries_via_journal_entry')
 	submit_journal_entry = frappe.db.get_singles_value('Accounts Settings', 'submit_journal_entries')
-	booked_fixed_amount_per_month = cint(frappe.db.get_singles_value('Accounts Settings', 'book_fixed_monthly_amount'))
+	book_deferred_entries_based_on = frappe.db.get_singles_value('Accounts Settings', 'book_deferred_entries_based_on')
 
 	for item in doc.get('items'):
 		if item.get(enable_check):
-			_book_deferred_revenue_or_expense(item, via_journal_entry, submit_journal_entry, booked_fixed_amount_per_month)
+			_book_deferred_revenue_or_expense(item, via_journal_entry, submit_journal_entry, book_deferred_entries_based_on)
 
 def process_deferred_accounting(posting_date=None):
 	''' Converts deferred income/expense into income/expense
