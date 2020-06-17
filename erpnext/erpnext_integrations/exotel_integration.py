@@ -82,7 +82,7 @@ def make_a_call(to_number, caller_id=None, link_to_document=None):
 	}, 'cell_number')
 
 	if not cell_number:
-		frappe.throw(_('You do not have mobile number set in your Employee Master'))
+		frappe.throw(_('You do not have mobile number set in your Employee master'))
 
 	try:
 		response = requests.post(endpoint, data={

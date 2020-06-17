@@ -18,7 +18,6 @@ frappe.ui.form.on('Call Log', {
 			recording_wrapper.addClass('input-max-width');
 			recording_wrapper.html(`
 				<audio
-					style="width: 100%"
 					controls
 					src="${frm.doc.recording_url}">
 						Your browser does not support the
