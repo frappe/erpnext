@@ -49,8 +49,8 @@ def get_favorite_articles(favorite_articles):
 	favorite_article_list=[]
 	for article in favorite_articles:
 		description = frappe.utils.strip_html(article.content)
-		if len(description) > 175:
-			description = description[:172] + '...'
+		if len(description) > 120:
+			description = description[:120] + '...'
 		favorite_article_dict = {
 			'title': article.title,
 			'description': description,
