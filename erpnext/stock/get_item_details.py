@@ -442,7 +442,7 @@ def _get_item_tax_template(args, taxes, out={}, for_validate=False):
 	taxes_with_no_validity = []
 
 	for tax in taxes:
-		if tax.valid_from:
+		if tax.valid_from and tax.company == args['company']:
 			# In purchase Invoice first preference will be given to supplier invoice date
 			# if supplier date is not present then posting date
 			validation_date = args.get('transaction_date') or args.get('bill_date') or args.get('posting_date')
