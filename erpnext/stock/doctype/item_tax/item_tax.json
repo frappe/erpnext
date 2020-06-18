@@ -41,12 +41,13 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-06-18 02:30:44.610171",
+ "modified": "2020-06-18 22:53:44.546967",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Tax",
