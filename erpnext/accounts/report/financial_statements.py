@@ -56,9 +56,8 @@ def get_period_list(from_fiscal_year, to_fiscal_year, period_start_date, period_
 		to_date = add_months(start_date, months_to_add)
 		start_date = to_date
 
-		if to_date == get_first_day(to_date):
-			# if to_date is the first day, get the last day of previous month
-			to_date = add_days(to_date, -1)
+		# Subtract one day from to_date, as it may be first day in next fiscal year or month
+		to_date = add_days(to_date, -1)
 
 		if to_date <= year_end_date:
 			# the normal case
@@ -406,6 +405,7 @@ def set_gl_entries_by_account(
 				FROM `tabDistributed Cost Center`
 				WHERE cost_center IN %(cost_center)s
 				AND parent NOT IN %(cost_center)s
+				AND is_cancelled = 0
 				GROUP BY parent
 			) as DCC_allocation
 			WHERE company=%(company)s
@@ -418,6 +418,7 @@ def set_gl_entries_by_account(
 			where company=%(company)s
 			{additional_conditions}
 			and posting_date <= %(to_date)s
+			and is_cancelled = 0
 			{distributed_cost_center_query}
 			order by account, posting_date""".format(
 				additional_conditions=additional_conditions,
