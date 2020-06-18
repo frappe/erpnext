@@ -339,6 +339,7 @@ def get_loyalty_programs(doc):
 
 	return lp_details
 
+@frappe.whitelist()
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
 	from erpnext.controllers.queries import get_fields
 
