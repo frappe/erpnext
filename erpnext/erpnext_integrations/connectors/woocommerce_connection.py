@@ -73,25 +73,16 @@ def link_customer_and_address(raw_billing_data, raw_shipping_data, customer_name
 
 	if customer_exists:
 		frappe.rename_doc("Customer", old_name, customer_name)
-		try:
-			billing_address = frappe.get_doc("Address", {"woocommerce_email": customer_woo_com_email, "address_type": "Billing"})
-			rename_address(billing_address, customer)
-		except (
-			frappe.DoesNotExistError,
-			frappe.DuplicateEntryError,
-			frappe.ValidationError,
-		):
-			pass
-		
-		try:
-			shipping_address = frappe.get_doc("Address", {"woocommerce_email": customer_woo_com_email, "address_type": "Shipping"})
-			rename_address(shipping_address, customer)
-		except (
-			frappe.DoesNotExistError,
-			frappe.DuplicateEntryError,
-			frappe.ValidationError,
-		):
-			pass
+		for address_type in ("Billing", "Shipping",):
+			try:
+				address = frappe.get_doc("Address", {"woocommerce_email": customer_woo_com_email, "address_type": address_type})
+				rename_address(address, customer)
+			except (
+				frappe.DoesNotExistError,
+				frappe.DuplicateEntryError,
+				frappe.ValidationError,
+			):
+				pass
 	else:
 		create_address(raw_billing_data, customer, "Billing")
 		create_address(raw_shipping_data, customer, "Shipping")
