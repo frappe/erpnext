@@ -419,12 +419,12 @@ def check_credit_limit(customer, company, reference_doctype, reference_document,
 def send_emails(args):
 	args = json.loads(args)
 	subject = (_("Credit limit reached for customer {0}").format(args.get('customer')))
-	message = (_("Credit limit has been crossed for customer {0} ({1}/{2})<br>\
-		Document Link: {3}")
-			.format(args.get('customer'), args.get('customer_outstanding'), args.get('credit_limit'), args.get('document_link')))
-	frappe.sendmail(recipients=args.get('credit_controller_user_list'), subject=subject, message=message)
-	return  (_("""An email was sent to {0} number of people.
-				<br><br><ul><li>{1}</li></ul>""").format(len(args.get('credit_controller_users_list')), '<li>'.join(args.get('credit_controller_users_list'))))
+	message = (_("Credit limit has been crossed for customer {0} ({1}/{2})<br>Document Link: {3}").format(
+		args.get('customer'), args.get('customer_outstanding'), args.get('credit_limit'), args.get('document_link')))
+	frappe.sendmail(recipients=args.get('credit_controller_users_list'), subject=subject, message=message)
+
+	return (_("""A request was sent to the following people:<br><br><ul><li>{0}</li></ul>""").format(
+		'<li>'.join(args.get('credit_controller_users_list'))))
 
 def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):
 	# Outstanding based on GL Entries
