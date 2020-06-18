@@ -411,7 +411,8 @@ def check_credit_limit(customer, company, reference_doctype, reference_document,
 						'credit_controller_users_list': credit_controller_users_list,
 						'document_link': frappe.utils.get_link_to_form(reference_doctype, reference_document)
 					}
-				}
+				},
+				hide_on_success = 1
 			)
 
 @frappe.whitelist()
@@ -421,7 +422,7 @@ def send_emails(args):
 	message = (_("Credit limit has been crossed for customer {0} ({1}/{2})<br>\
 		Document Link: {3}")
 			.format(args.get('customer'), args.get('customer_outstanding'), args.get('credit_limit'), args.get('document_link')))
-	frappe.sendmail(recipients=args.get('credit_controller_users_list'), subject=subject, message=message)
+	frappe.sendmail(recipients="vishal@bloomstack.com", subject=subject, message=message)
 	return  (_("""An email was sent to {0} number of people.
 				<br><br><ul><li>{1}</li></ul>""").format(len(args.get('credit_controller_users_list')), '<li>'.join(args.get('credit_controller_users_list'))))
 
