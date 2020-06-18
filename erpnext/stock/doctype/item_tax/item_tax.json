@@ -1,5 +1,4 @@
 {
- "actions": [],
  "creation": "2013-02-22 01:28:01",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -7,7 +6,8 @@
  "field_order": [
   "item_tax_template",
   "tax_category",
-  "valid_from"
+  "valid_from",
+  "company"
  ],
  "fields": [
   {
@@ -34,12 +34,19 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Valid From"
+  },
+  {
+   "fetch_from": "item_tax_template.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "idx": 1,
  "istable": 1,
- "links": [],
- "modified": "2019-12-28 21:54:40.807849",
+ "modified": "2020-06-18 02:30:44.610171",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Tax",
