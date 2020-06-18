@@ -67,6 +67,7 @@ def validate_service_item(item, msg):
 	if frappe.db.get_value("Item", item, "is_stock_item") == 1:
 		frappe.throw(_(msg))
 
+@frappe.whitelist()
 def get_practitioner_list(doctype, txt, searchfield, start, page_len, filters=None):
 	fields = ["name", "first_name", "mobile_phone"]
 
