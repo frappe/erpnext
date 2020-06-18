@@ -8,7 +8,7 @@ frappe.ui.form.on('Quality Procedure', {
 				filters: {
 					name: ["not in", [frm.parent_quality_procedure, frm.name]]
 				}
-			}
-		})
+			};
+		});
 	}
 });
