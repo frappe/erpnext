@@ -84,9 +84,15 @@ class PricingRule(Document):
 			for f in options:
 				if not f: continue
 
-				f = frappe.scrub(f)
-				if f!=fieldname:
-					self.set(f, None)
+				scrubbed_f = frappe.scrub(f)
+
+				if logic_field == 'apply_on':
+					apply_on_f = apply_on_dict.get(f, f)
+				else:
+					apply_on_f = scrubbed_f
+
+				if scrubbed_f != fieldname:
+					self.set(apply_on_f, None)
 
 		if self.mixed_conditions and self.get("same_item"):
 			self.same_item = 0
