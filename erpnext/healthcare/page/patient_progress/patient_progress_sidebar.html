@@ -1,18 +1,24 @@
 <div class="patient-progress-sidebar">
 	<div class="patient-image-container hidden-xs hidden-sm">
 		{% if patient_image %}
-			{{patient_image}}
+			<div class="patient-image" src={{patient_image}} style="background-image: url(\'{%= patient_image %}\')"></div>
 		{% endif %}
 	</div>
-	<div class="progress-details">
+	<div class="patient-details">
 		{% if patient_name %}
-		<p class="patient-name">{{patient_name}}</p>
+		<p class="patient-name bold">{{patient_name}}</p>
 		{% endif %}
 		{% if patient_gender %}
-		<p class="patient-gender text-muted">{{patient_gender}}</p>
+		<p class="patient-gender text-muted">{%=__("Gender: ") %} {{patient_gender}}</p>
 		{% endif %}
 		{% if patient_mobile %}
-		<p class="patient-mobile text-muted">{{patient_mobile}}</p>
+		<p class="patient-mobile text-muted">{%=__("Contact: ") %} {{patient_mobile}}</p>
+		{% endif %}
+		{% if total_therapy_sessions %}
+		<p class="patient-sessions text-muted">{%=__("Total Therapy Sessions: ") %} {{total_therapy_sessions}}</p>
+		{% endif %}
+		{% if therapy_sessions_this_month %}
+		<p class="patient-sessions text-muted">{%=__("Monthly Therapy Sessions: ") %} {{therapy_sessions_this_month}}</p>
 		{% endif %}
 	</div>
 	<div class="important-links">
