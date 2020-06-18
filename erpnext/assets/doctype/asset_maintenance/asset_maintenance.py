@@ -16,12 +16,11 @@ class AssetMaintenance(Document):
 				throw(_("Start date should be less than end date for task {0}").format(task.maintenance_task))
 			if getdate(task.next_due_date) < getdate(nowdate()):
 				task.maintenance_status = "Overdue"
+			if not task.assign_to and self.docstatus == 0:
+				throw(_("Row #{}: Please asign task to a member.").format(task.idx))
 
 	def on_update(self):
 		for task in self.get('asset_maintenance_tasks'):
-			if not task.assign_to:
-				task.db_set("assign_to", self.maintenance_manager)
-				task.db_set("assign_to_name", self.maintenance_manager_name)
 			assign_tasks(self.name, task.assign_to, task.maintenance_task, task.next_due_date)
 		self.sync_maintenance_tasks()
 
@@ -39,7 +38,7 @@ class AssetMaintenance(Document):
 
 @frappe.whitelist()
 def assign_tasks(asset_maintenance_name, assign_to_member, maintenance_task, next_due_date):
-	team_member = frappe.get_doc('User', assign_to_member).email
+	team_member = frappe.db.get_value('User', assign_to_member, "email")
 	args = {
 		'doctype' : 'Asset Maintenance',
 		'assign_to' : team_member,
@@ -78,7 +77,7 @@ def calculate_next_due_date(periodicity, start_date = None, end_date = None, las
 
 def update_maintenance_log(asset_maintenance, item_code, item_name, task):
 	asset_maintenance_log = frappe.get_value("Asset Maintenance Log", {"asset_maintenance": asset_maintenance,
-		"task": task.maintenance_task, "maintenance_status": ('in',['Planned','Overdue'])})
+		"task": task.name, "maintenance_status": ('in',['Planned','Overdue'])})
 
 	if not asset_maintenance_log:
 		asset_maintenance_log = frappe.get_doc({
@@ -87,7 +86,7 @@ def update_maintenance_log(asset_maintenance, item_code, item_name, task):
 			"asset_name": asset_maintenance,
 			"item_code": item_code,
 			"item_name": item_name,
-			"task": task.maintenance_task,
+			"task": task.name,
 			"has_certificate": task.certificate_required,
 			"description": task.description,
 			"assign_to_name": task.assign_to_name,
@@ -108,7 +107,7 @@ def update_maintenance_log(asset_maintenance, item_code, item_name, task):
 
 @frappe.whitelist()
 def get_team_members(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.get_values('Maintenance Team Member', {'parent':filters.get("maintenance_team")})
+	return frappe.db.get_values('Maintenance Team Member', { 'parent': filters.get("maintenance_team") })
 
 @frappe.whitelist()
 def get_maintenance_log(asset_name):

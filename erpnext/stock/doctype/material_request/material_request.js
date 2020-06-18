@@ -17,7 +17,7 @@ frappe.ui.form.on('Material Request', {
 
 		// formatter for material request item
 		frm.set_indicator_formatter('item_code',
-			function(doc) { return (doc.qty<=doc.ordered_qty) ? "green" : "orange"; });
+			function(doc) { return (doc.stock_qty<=doc.ordered_qty) ? "green" : "orange"; });
 
 	},
 
