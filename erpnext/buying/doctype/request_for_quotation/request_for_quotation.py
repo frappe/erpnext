@@ -25,6 +25,7 @@ class RequestforQuotation(BuyingController):
 		self.validate_duplicate_supplier()
 		self.validate_supplier_list()
 		validate_for_items(self)
+		super(RequestforQuotation, self).set_qty_as_per_stock_uom()
 		self.update_email_id()
 
 	def validate_duplicate_supplier(self):
@@ -278,6 +279,7 @@ def create_rfq_items(sq_doc, supplier, data):
 		"description": data.description,
 		"qty": data.qty,
 		"rate": data.rate,
+		"conversion_factor": data.conversion_factor if data.conversion_factor else None,
 		"supplier_part_no": frappe.db.get_value("Item Supplier", {'parent': data.item_code, 'supplier': supplier}, "supplier_part_no"),
 		"warehouse": data.warehouse or '',
 		"request_for_quotation_item": data.name,
