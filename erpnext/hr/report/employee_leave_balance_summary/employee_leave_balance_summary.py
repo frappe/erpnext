@@ -10,7 +10,7 @@ from erpnext.hr.report.employee_leave_balance.employee_leave_balance import calc
 
 def execute(filters=None):
 	if filters.to_date <= filters.from_date:
-		frappe.throw(_('From date can not be greater than than To date'))
+		frappe.throw(_('From Date should be less than To Date'))
 
 	columns = get_columns()
 	data = get_data(filters)

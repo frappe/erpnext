@@ -49,7 +49,7 @@ def get_data(filters, leave_types):
 	conditions = get_conditions(filters)
 
 	if filters.to_date <= filters.from_date:
-		frappe.throw(_("From date can not be greater than than To date"))
+		frappe.throw(_("'From Date should be less than To Date"))
 
 	active_employees = frappe.get_all("Employee",
 		filters=conditions,

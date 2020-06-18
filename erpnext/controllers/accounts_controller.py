@@ -1194,11 +1194,11 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			action = "add" if perm_type == 'create' else "update"
 			frappe.throw(_("You do not have permissions to {} items in a Sales Order.").format(action), title=_("Insufficient Permissions"))
 
-	def get_new_child_item():
+	def get_new_child_item(item_row):
 		if parent_doctype == "Sales Order":
-			return set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, d)
+			return set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, item_row)
 		if parent_doctype == "Purchase Order":
-			return set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, d)
+			return set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, item_row)
 
 	def validate_quantity(child_item, d):
 		if parent_doctype == "Sales Order" and flt(d.get("qty")) < flt(child_item.delivered_qty):
@@ -1219,7 +1219,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		if not d.get("docname"):
 			new_child_flag = True
 			check_permissions(parent, 'create')
-			child_item = get_new_child_item()
+			child_item = get_new_child_item(d)
 		else:
 			check_permissions(parent, 'write')
 			child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
