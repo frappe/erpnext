@@ -8,7 +8,8 @@ def execute():
 	if frappe.db.exists('DocType', 'Issue'):
 		frappe.reload_doctype('Issue')
 
-		for parent in frappe.get_all('Issue', order_by='creation desc', limit=500):
+		count = 0
+		for parent in frappe.get_all('Issue', order_by='creation desc'):
 			parent_doc = frappe.get_doc('Issue', parent.name)
 
 			communication = frappe.get_all('Communication', filters={
@@ -25,3 +26,8 @@ def execute():
 			if parent_doc.status in ['Closed', 'Resolved']:
 				set_resolution_time(parent_doc)
 				set_user_resolution_time(parent_doc)
+
+			# commit after every 100 records
+			count += 1
+			if count % 100 == 0:
+				frappe.db.commit()
