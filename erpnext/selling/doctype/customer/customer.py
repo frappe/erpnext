@@ -376,7 +376,7 @@ def send_emails(args):
 	subject = (_("Credit limit reached for customer {0}").format(args.get('customer')))
 	message = (_("Credit limit has been crossed for customer {0} ({1}/{2})<br>Document Link: {3}").format(
 		args.get('customer'), args.get('customer_outstanding'), args.get('credit_limit'), args.get('document_link')))
-	frappe.sendmail(recipients=args.get('credit_controller_user_list'), subject=subject, message=message)
+	frappe.sendmail(recipients=args.get('credit_controller_users_list'), subject=subject, message=message)
 
 	return (_("""A request was sent to the following people:<br><br><ul><li>{0}</li></ul>""").format(
 		'<li>'.join(args.get('credit_controller_users_list'))))
