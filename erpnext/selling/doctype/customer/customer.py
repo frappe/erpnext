@@ -404,6 +404,7 @@ def check_credit_limit(customer, company, reference_doctype, reference_document,
 				primary_action={
 					'label': 'Send Email',
 					'server_action': 'erpnext.selling.doctype.customer.customer.send_emails',
+					'hide_on_success': 1,
 					'args': {
 						'customer': customer,
 						'customer_outstanding': customer_outstanding,
@@ -411,8 +412,7 @@ def check_credit_limit(customer, company, reference_doctype, reference_document,
 						'credit_controller_users_list': credit_controller_users_list,
 						'document_link': frappe.utils.get_link_to_form(reference_doctype, reference_document)
 					}
-				},
-				hide_on_success = 1
+				}
 			)
 
 @frappe.whitelist()
