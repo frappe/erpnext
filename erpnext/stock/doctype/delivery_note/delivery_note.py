@@ -266,7 +266,7 @@ class DeliveryNote(SellingController):
 					break
 
 		if validate_against_credit_limit:
-			check_credit_limit(self.customer, self.company,
+			check_credit_limit(self.customer, self.company, self.doctype, self.name,
 				bypass_credit_limit_check_at_sales_order, extra_amount)
 
 	def validate_packed_qty(self):

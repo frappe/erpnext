@@ -175,7 +175,7 @@ class JournalEntry(AccountsController):
 		if customers:
 			from erpnext.selling.doctype.customer.customer import check_credit_limit
 			for customer in customers:
-				check_credit_limit(customer, self.company)
+				check_credit_limit(customer, self.company, self.doctype, self.name)
 
 	def validate_cheque_info(self):
 		if self.voucher_type in ['Bank Entry']:
