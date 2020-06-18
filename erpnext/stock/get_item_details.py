@@ -443,7 +443,8 @@ def _get_item_tax_template(args, taxes, out={}, for_validate=False):
 			if getdate(tax.valid_from) <= getdate(validation_date):
 				taxes_with_validity.append(tax)
 		else:
-			taxes_with_no_validity.append(tax)
+			if tax.company == args['company']:
+				taxes_with_no_validity.append(tax)
 
 	if taxes_with_validity:
 		taxes = sorted(taxes_with_validity, key = lambda i: i.valid_from, reverse=True)
