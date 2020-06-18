@@ -238,6 +238,9 @@ doc_events = {
 		"on_cancel": "erpnext.regional.italy.utils.sales_invoice_on_cancel",
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
+	"Purchase Invoice": {
+		"on_submit": "erpnext.regional.india.utils.make_reverse_charge_entries"
+	},
 	"Payment Entry": {
 		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.update_payment_req_status"],
 		"on_trash": "erpnext.regional.check_deletion_permission"
