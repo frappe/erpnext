@@ -30,13 +30,19 @@ apply_on_table = {
 }
 
 def get_pricing_rules(args, doc=None):
-	pricing_rules = []
-	values =  {}
+	pricing_rules_all = []
+	values = {}
 
 	for apply_on in ['Item Code', 'Item Group', 'Brand']:
-		pricing_rules.extend(_get_pricing_rules(apply_on, args, values))
-		if pricing_rules and not apply_multiple_pricing_rules(pricing_rules):
-			break
+		pricing_rules_all.extend(_get_pricing_rules(apply_on, args, values))
+
+	# removing duplicate pricing rule
+	pricing_rules_title = []
+	pricing_rules = []
+	for p in pricing_rules_all:
+		if p['title'] not in pricing_rules_title:
+			pricing_rules_title.append(p['title'])
+			pricing_rules.append(p)
 
 	rules = []
 
