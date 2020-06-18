@@ -57,7 +57,7 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 
 		frappe.cache().hset("fiscal_years", company, fiscal_years)
 
-	if not transaction_date:
+	if not transaction_date and not fiscal_year:
 		return fiscal_years
 
 	if transaction_date:
