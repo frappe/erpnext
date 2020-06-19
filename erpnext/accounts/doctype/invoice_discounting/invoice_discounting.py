@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils import flt, getdate, nowdate, add_days
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
 class InvoiceDiscounting(AccountsController):
 	def validate(self):
@@ -81,10 +82,15 @@ class InvoiceDiscounting(AccountsController):
 	def make_gl_entries(self):
 		company_currency = frappe.get_cached_value('Company',  self.company, "default_currency")
 
+
 		gl_entries = []
+		invoice_fields = ["debit_to", "party_account_currency", "conversion_rate", "cost_center"]
+		accounting_dimensions = get_accounting_dimensions()
+
+		invoice_fields.extend(accounting_dimensions)
+
 		for d in self.invoices:
-			inv = frappe.db.get_value("Sales Invoice", d.sales_invoice,
-				["debit_to", "party_account_currency", "conversion_rate", "cost_center"], as_dict=1)
+			inv = frappe.db.get_value("Sales Invoice", d.sales_invoice, invoice_fields, as_dict=1)
 
 			if d.outstanding_amount:
 				outstanding_in_company_currency = flt(d.outstanding_amount * inv.conversion_rate,
@@ -102,7 +108,7 @@ class InvoiceDiscounting(AccountsController):
 					"cost_center": inv.cost_center,
 					"against_voucher": d.sales_invoice,
 					"against_voucher_type": "Sales Invoice"
-				}, inv.party_account_currency))
+				}, inv.party_account_currency, item=inv))
 
 				gl_entries.append(self.get_gl_dict({
 					"account": self.accounts_receivable_credit,
@@ -115,7 +121,7 @@ class InvoiceDiscounting(AccountsController):
 					"cost_center": inv.cost_center,
 					"against_voucher": d.sales_invoice,
 					"against_voucher_type": "Sales Invoice"
-				}, ar_credit_account_currency))
+				}, ar_credit_account_currency, item=inv))
 
 		make_gl_entries(gl_entries, cancel=(self.docstatus == 2), update_outstanding='No')
 

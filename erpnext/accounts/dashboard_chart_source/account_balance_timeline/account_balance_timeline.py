@@ -6,7 +6,7 @@ import frappe, json
 from frappe import _
 from frappe.utils import add_to_date, date_diff, getdate, nowdate, get_last_day, formatdate, get_link_to_form
 from erpnext.accounts.report.general_ledger.general_ledger import execute
-from frappe.core.page.dashboard.dashboard import cache_source, get_from_date_from_timespan
+from frappe.utils.dashboard import cache_source, get_from_date_from_timespan
 from frappe.desk.doctype.dashboard_chart.dashboard_chart import get_period_ending
 
 from frappe.utils.nestedset import get_descendants_of
@@ -14,7 +14,7 @@ from frappe.utils.nestedset import get_descendants_of
 @frappe.whitelist()
 @cache_source
 def get(chart_name = None, chart = None, no_cache = None, filters = None, from_date = None,
-	to_date = None, timespan = None, time_interval = None):
+	to_date = None, timespan = None, time_interval = None, heatmap_year = None):
 	if chart_name:
 		chart = frappe.get_doc('Dashboard Chart', chart_name)
 	else:

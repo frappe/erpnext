@@ -11,21 +11,9 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 			};
 		});
 
-		frm.set_query('cost_center', 'invoices', function(doc, cdt, cdn) {
-			return {
-				filters: {
-					'company': doc.company
-				}
-			};
-		});
-
-		frm.set_query('cost_center', function(doc) {
-			return {
-				filters: {
-					'company': doc.company
-				}
-			};
-		});
+		if (frm.doc.company) {
+			frm.trigger('setup_company_filters');
+		}
 	},
 
 	refresh: function(frm) {
@@ -51,19 +39,50 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 		});
 	},
 
-	company: function(frm) {
-		frappe.call({
-			method: 'erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool.get_temporary_opening_account',
-			args: {
-				company: frm.doc.company
-			},
-			callback: (r) => {
-				if (r.message) {
-					frm.doc.__onload.temporary_opening_account = r.message;
-					frm.trigger('update_invoice_table');
+	setup_company_filters: function(frm) {
+		frm.set_query('cost_center', 'invoices', function(doc, cdt, cdn) {
+			return {
+				filters: {
+					'company': doc.company
+				}
+			};
+		});
+
+		frm.set_query('cost_center', function(doc) {
+			return {
+				filters: {
+					'company': doc.company
+				}
+			};
+		});
+
+		frm.set_query('temporary_opening_account', 'invoices', function(doc, cdt, cdn) {
+			return {
+				filters: {
+					'company': doc.company
 				}
 			}
-		})
+		});
+	},
+
+	company: function(frm) {
+		if (frm.doc.company) {
+
+			frm.trigger('setup_company_filters');
+
+			frappe.call({
+				method: 'erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool.get_temporary_opening_account',
+				args: {
+					company: frm.doc.company
+				},
+				callback: (r) => {
+					if (r.message) {
+						frm.doc.__onload.temporary_opening_account = r.message;
+						frm.trigger('update_invoice_table');
+					}
+				}
+			})
+		}
 	},
 
 	invoice_type: function(frm) {

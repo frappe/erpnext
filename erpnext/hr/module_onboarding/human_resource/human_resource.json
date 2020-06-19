@@ -1,0 +1,51 @@
+{
+ "allow_roles": [
+  {
+   "role": "HR Manager"
+  },
+  {
+   "role": "HR User"
+  }
+ ],
+ "creation": "2020-05-14 11:51:45.050242",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/human-resources",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2020-05-20 11:20:07.992597",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Human Resource",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Create Department"
+  },
+  {
+   "step": "Create Designation"
+  },
+  {
+   "step": "Create Holiday list"
+  },
+  {
+   "step": "Create Employee"
+  },
+  {
+   "step": "Create Leave Type"
+  },
+  {
+   "step": "Create Leave Allocation"
+  },
+  {
+   "step": "Create Leave Application"
+  },
+  {
+   "step": "HR Settings"
+  }
+ ],
+ "subtitle": "Employee, Leaves and more.",
+ "success_message": "The HR Module is all set up!",
+ "title": "Let's Setup the Human Resource Module. ",
+ "user_can_dismiss": 0
+}

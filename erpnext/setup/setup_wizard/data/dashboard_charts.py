@@ -32,7 +32,14 @@ def get_default_dashboards():
 					{ "chart": "Expenses" },
 					{ "chart": "Patient Appointments" }
 				]
-			}
+			},
+			{
+				"doctype": "Dashboard",
+				"dashboard_name": "Project",
+				"charts": [
+					{ "chart": "Project Summary", "width": "Full" }
+				]
+			},
 		],
 		"Charts": [
 			{
@@ -108,6 +115,17 @@ def get_default_dashboards():
 				"document_type": "Sales Invoice",
 				"type": "Bar",
 				"width": "Half"
+			},
+			{
+				'doctype': 'Dashboard Chart',
+				'name': 'Project Summary',
+				'chart_name': 'Project Summary',
+				'chart_type': 'Report',
+				'report_name': 'Project Summary',
+				'is_public': 1,
+				'filters_json': json.dumps({"company": company.name, "status": "Open"}),
+				'type': 'Bar',
+				'custom_options': '{"type": "bar", "colors": ["#fc4f51", "#78d6ff", "#7575ff"], "axisOptions": { "shortenYAxisNumbers": 1}, "barOptions": { "stacked": 1 }}',
 			},
 			{
 				"doctype": "Dashboard Chart",
