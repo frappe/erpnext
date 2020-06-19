@@ -98,7 +98,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Accounting",
- "modified": "2020-05-30 17:33:22.965206",
+ "modified": "2020-06-19 12:42:44.054598",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
@@ -121,11 +121,6 @@
    "label": "Purchase Invoice",
    "link_to": "Purchase Invoice",
    "type": "DocType"
-  },
-  {
-   "label": "Accounts Dashboard",
-   "link_to": "Accounts Dashboard",
-   "type": "Dashboard"
   },
   {
    "label": "Journal Entry",
@@ -151,6 +146,11 @@
    "label": "Trial Balance",
    "link_to": "Trial Balance",
    "type": "Report"
+  },
+  {
+   "label": "Dashboard",
+   "link_to": "Accounts",
+   "type": "Dashboard"
   }
  ]
 }
