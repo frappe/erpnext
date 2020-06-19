@@ -700,4 +700,3 @@ erpnext.patches.v12_0.set_italian_import_supplier_invoice_permissions
 erpnext.patches.v13_0.update_sla_enhancements
 erpnext.patches.v12_0.update_address_template_for_india
 erpnext.patches.v12_0.set_multi_uom_in_rfq
-erpnext.patches.v13_0.update_issue_metrics
