@@ -24,7 +24,7 @@ class Analytics(object):
 		self.get_data()
 		self.get_chart_data()
 
-		# Skiping total row for tree-view reports
+		# Skipping total row for tree-view reports
 		skip_total_row = 0
 
 		if self.filters.tree_type in ["Supplier Group", "Item Group", "Customer Group", "Territory"]:
