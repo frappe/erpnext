@@ -345,7 +345,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				tax.row_id = tax.idx - 1;
 			}
 		}
-		
 		if(tax.charge_type == "Actual") {
 			// distribute the tax amount proportionally to each item row
 			var actual = flt(tax.tax_amount, precision("tax_amount", tax));
