@@ -14,15 +14,21 @@ def execute():
 		frappe.reload_doc("hr", "doctype", doctype)
 
 
+	standard_tax_exemption_amount_exists = frappe.db.has_column("Payroll Period", "standard_tax_exemption_amount")
+
+	select_fields = "name, start_date, end_date"
+	if standard_tax_exemption_amount_exists:
+		select_fields = "name, start_date, end_date, standard_tax_exemption_amount"
+
 	for company in frappe.get_all("Company"):
 		payroll_periods =  frappe.db.sql("""
 			SELECT
-				name, start_date, end_date, standard_tax_exemption_amount
+				{0}
 			FROM
 				`tabPayroll Period`
 			WHERE company=%s
 			ORDER BY start_date DESC
-		""", company.name, as_dict = 1)
+		""".format(select_fields), company.name, as_dict = 1)
 			
 		for i, period in enumerate(payroll_periods):
 			income_tax_slab = frappe.new_doc("Income Tax Slab")
@@ -36,7 +42,8 @@ def execute():
 			income_tax_slab.effective_from = period.start_date
 			income_tax_slab.company = company.name
 			income_tax_slab.allow_tax_exemption = 1
-			income_tax_slab.standard_tax_exemption_amount = period.standard_tax_exemption_amount
+			if standard_tax_exemption_amount_exists:
+				income_tax_slab.standard_tax_exemption_amount = period.standard_tax_exemption_amount
 
 			income_tax_slab.flags.ignore_mandatory = True
 			income_tax_slab.submit()

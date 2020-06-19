@@ -95,7 +95,7 @@ class EmployeeAdvance(Document):
 		frappe.db.set_value("Employee Advance", self.name, "status", self.status)
 
 @frappe.whitelist()
-def get_due_advance_amount(employee, posting_date):
+def get_pending_amount(employee, posting_date):
 	employee_due_amount = frappe.get_all("Employee Advance", \
 		filters = {"employee":employee, "docstatus":1, "posting_date":("<=", posting_date)}, \
 		fields = ["advance_amount", "paid_amount"])

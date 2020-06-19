@@ -4,7 +4,6 @@
 import frappe, erpnext, json
 from frappe import _
 from frappe.utils import nowdate, get_first_day, get_last_day, add_months
-from erpnext.accounts.utils import get_fiscal_year
 
 def get_data():
 	return frappe._dict({
