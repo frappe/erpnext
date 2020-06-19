@@ -704,4 +704,4 @@ erpnext.patches.v13_0.delete_old_sales_reports
 execute:frappe.delete_doc_if_exists("DocType", "Bank Reconciliation")
 erpnext.patches.v13_0.move_doctype_reports_and_notification_from_hr_to_payroll
 erpnext.patches.v13_0.move_payroll_setting_separately_from_hr_settings
-erpnext.patches.v13_0.check_is_income_tax_component #1
+erpnext.patches.v13_0.check_is_income_tax_component

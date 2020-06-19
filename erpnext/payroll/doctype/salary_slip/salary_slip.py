@@ -300,7 +300,6 @@ class SalarySlip(TransactionBase):
 				})
 
 		holidays = [cstr(i) for i in holidays]
-		print(holidays, "Col")
 
 		return holidays
 
