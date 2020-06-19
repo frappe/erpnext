@@ -671,3 +671,4 @@ erpnext.patches.v12_0.update_uom_conversion_factor
 erpnext.patches.v12_0.set_italian_import_supplier_invoice_permissions
 execute:frappe.reload_doc("HR", "doctype", "Employee Advance")
 erpnext.patches.v12_0.move_due_advance_amount_to_pending_amount
+erpnext.patches.v12_0.set_multi_uom_in_rfq
