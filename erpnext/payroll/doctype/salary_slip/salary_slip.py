@@ -228,7 +228,10 @@ class SalarySlip(TransactionBase):
 			relieving_date, include_holidays_in_total_working_days)
 
 		if flt(payment_days) > flt(lwp):
-			self.payment_days = flt(payment_days) - flt(lwp) - flt(absent)
+			self.payment_days = flt(payment_days) - flt(lwp)
+
+			if payroll_based_on == "Attendance":
+				self.payment_days -= flt(absent)
 
 			unmarked_days = self.get_unmarked_days()
 			consider_unmarked_attendance_as = frappe.db.get_value("Payroll Settings", None, "consider_unmarked_attendance_as") or "Present"
