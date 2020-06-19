@@ -96,7 +96,7 @@ def get_columns(filters):
 			"label": _("Customer Group"),
 			"fieldtype": "Link",
 			"fieldname": "customer_group",
-			"options": "customer Group",
+			"options": "Customer Group",
 			"width": 120
 		},
 		{
