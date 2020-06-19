@@ -4,7 +4,7 @@ from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_month_detail
 from frappe.utils import cint
 
 def execute():
-	frappe.reload_doctype('Salary Slip')
+	frappe.reload_doc("Payroll", "doctype", "Salary Slip")
 	if not frappe.db.has_column('Salary Slip', 'fiscal_year'):
 		return
 
