@@ -47,7 +47,7 @@ class TestSalarySlip(unittest.TestCase):
 		""", (month_start_date, month_end_date))[0][0]
 
 		mark_attendance(emp_id, first_sunday, 'Absent', ignore_validate=True) # invalid lwp
-		mark_attendance(emp_id, add_days(first_sunday, 1), 'Absent', ignore_validate=True) # valid lwp
+		mark_attendance(emp_id, add_days(first_sunday, 1), 'Absent', ignore_validate=True) # counted as absent
 		mark_attendance(emp_id, add_days(first_sunday, 2), 'Half Day', leave_type='Leave Without Pay', ignore_validate=True) # valid 0.75 lwp
 		mark_attendance(emp_id, add_days(first_sunday, 3), 'On Leave', leave_type='Leave Without Pay', ignore_validate=True) # valid lwp
 		mark_attendance(emp_id, add_days(first_sunday, 4), 'On Leave', leave_type='Casual Leave', ignore_validate=True) # invalid lwp
@@ -55,7 +55,8 @@ class TestSalarySlip(unittest.TestCase):
 
 		ss = make_employee_salary_slip("test_for_attendance@salary.com", "Monthly")
 
-		self.assertEqual(ss.leave_without_pay, 2.25)
+		self.assertEqual(ss.leave_without_pay, 1.25)
+		self.assertEqual(ss.absent_days, 1)
 
 		days_in_month = no_of_days[0]
 		no_of_holidays = no_of_days[1]
@@ -63,7 +64,7 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(ss.payment_days, days_in_month - no_of_holidays - 2.25)
 
 		#Gross pay calculation based on attendances
-		gross_pay = 78000 - ((78000 / (days_in_month - no_of_holidays)) * flt(ss.leave_without_pay))
+		gross_pay = 78000 - ((78000 / (days_in_month - no_of_holidays)) * flt(ss.leave_without_pay + ss.absent_days))
 
 		self.assertEqual(ss.gross_pay, gross_pay)
 

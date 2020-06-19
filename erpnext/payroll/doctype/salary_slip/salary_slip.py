@@ -343,7 +343,6 @@ class SalarySlip(TransactionBase):
 			flt(frappe.db.get_value("Payroll Settings", None, "daily_wages_fraction_for_half_day")) or 0.5
 
 		lwp_leave_types = dict(frappe.get_all("Leave Type", {"is_lwp": 1}, ["name", "include_holiday"], as_list=1))
-
 		attendances = frappe.db.sql('''
 			SELECT attendance_date, status, leave_type
 			FROM `tabAttendance`
@@ -365,7 +364,7 @@ class SalarySlip(TransactionBase):
 
 			if d.status == "Half Day":
 				lwp += (1 - daily_wages_fraction_for_half_day)
-			elif d.status == "Leave" and d.leave_type not in lwp_leave_types:
+			elif d.status == "On Leave" and d.leave_type in lwp_leave_types:
 				lwp += 1
 			elif d.status == "Absent":
 				absent += 1
