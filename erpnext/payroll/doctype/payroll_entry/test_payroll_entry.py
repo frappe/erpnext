@@ -9,7 +9,7 @@ from erpnext.accounts.utils import get_fiscal_year, getdate, nowdate
 from frappe.utils import add_months
 from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_start_end_dates, get_end_date
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.hr.doctype.salary_slip.test_salary_slip import get_salary_component_account, \
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import get_salary_component_account, \
 		make_earning_salary_component, make_deduction_salary_component, create_account
 from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 from erpnext.loan_management.doctype.loan.test_loan import create_loan, make_loan_disbursement_entry

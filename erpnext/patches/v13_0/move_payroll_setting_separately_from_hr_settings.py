@@ -23,6 +23,5 @@ def execute():
             )
             ''', as_dict=1)
 
-
     for d in data:
         frappe.db.set_value("Payroll Settings", None, d.field, d.value)
