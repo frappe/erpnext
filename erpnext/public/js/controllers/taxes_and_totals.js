@@ -331,9 +331,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		// To set row_id by default as previous row.
 		if(["On Previous Row Amount", "On Previous Row Total"].includes(tax.charge_type)) {
-			if (tax.idx == 1) {
-			frappe.throw(
-				__("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"))
+			if (tax.idx === 1) {
+				frappe.throw(
+					__("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"));
 			}
 			if (!tax.row_id) {
 				tax.row_id = tax.idx - 1;
