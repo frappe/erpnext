@@ -420,14 +420,14 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "\nActive\nDelivered\nExpired",
+   "options": "\nActive\nInactive\nDelivered\nExpired",
    "read_only": 1
   }
  ],
  "icon": "fa fa-barcode",
  "idx": 1,
  "links": [],
- "modified": "2020-04-08 13:29:58.517772",
+ "modified": "2020-05-21 19:29:58.517772",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",

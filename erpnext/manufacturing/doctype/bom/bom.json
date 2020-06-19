@@ -53,6 +53,7 @@
   "section_break_25",
   "description",
   "column_break_27",
+  "has_variants",
   "section_break0",
   "exploded_items",
   "website_section",
@@ -498,6 +499,17 @@
    "options": "Currency",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item.has_variants",
+   "fieldname": "has_variants",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Has Variants",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-sitemap",
@@ -505,7 +517,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-05 14:29:32.634952",
+ "modified": "2020-05-21 12:29:32.634952",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
