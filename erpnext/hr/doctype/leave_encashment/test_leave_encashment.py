@@ -7,7 +7,7 @@ import frappe
 import unittest
 from frappe.utils import today, add_months
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.hr.doctype.salary_structure.test_salary_structure import make_salary_structure
+from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 from erpnext.hr.doctype.leave_period.test_leave_period import create_leave_period
 from erpnext.hr.doctype.leave_policy.test_leave_policy import create_leave_policy\
 
