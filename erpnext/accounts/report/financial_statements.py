@@ -56,9 +56,8 @@ def get_period_list(from_fiscal_year, to_fiscal_year, period_start_date, period_
 		to_date = add_months(start_date, months_to_add)
 		start_date = to_date
 
-		if to_date == get_first_day(to_date):
-			# if to_date is the first day, get the last day of previous month
-			to_date = add_days(to_date, -1)
+		# Subtract one day from to_date, as it may be first day in next fiscal year or month
+		to_date = add_days(to_date, -1)
 
 		if to_date <= year_end_date:
 			# the normal case
@@ -387,11 +386,43 @@ def set_gl_entries_by_account(
 					key: value
 				})
 
+		distributed_cost_center_query = ""
+		if filters and filters.get('cost_center'):
+			distributed_cost_center_query = """
+			UNION ALL
+			SELECT posting_date,
+				account,
+				debit*(DCC_allocation.percentage_allocation/100) as debit,
+				credit*(DCC_allocation.percentage_allocation/100) as credit,
+				is_opening,
+				fiscal_year,
+				debit_in_account_currency*(DCC_allocation.percentage_allocation/100) as debit_in_account_currency,
+				credit_in_account_currency*(DCC_allocation.percentage_allocation/100) as credit_in_account_currency,
+				account_currency
+			FROM `tabGL Entry`,
+			(
+				SELECT parent, sum(percentage_allocation) as percentage_allocation
+				FROM `tabDistributed Cost Center`
+				WHERE cost_center IN %(cost_center)s
+				AND parent NOT IN %(cost_center)s
+				AND is_cancelled = 0
+				GROUP BY parent
+			) as DCC_allocation
+			WHERE company=%(company)s
+			{additional_conditions}
+			AND posting_date <= %(to_date)s
+			AND cost_center = DCC_allocation.parent
+			""".format(additional_conditions=additional_conditions.replace("and cost_center in %(cost_center)s ", ''))
+
 		gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
 			where company=%(company)s
 			{additional_conditions}
 			and posting_date <= %(to_date)s
-			order by account, posting_date""".format(additional_conditions=additional_conditions), gl_filters, as_dict=True) #nosec
+			and is_cancelled = 0
+			{distributed_cost_center_query}
+			order by account, posting_date""".format(
+				additional_conditions=additional_conditions,
+				distributed_cost_center_query=distributed_cost_center_query), gl_filters, as_dict=True) #nosec
 
 		if filters and filters.get('presentation_currency'):
 			convert_to_presentation_currency(gl_entries, get_currency(filters))

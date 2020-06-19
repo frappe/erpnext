@@ -105,3 +105,4 @@ def add_company_to_session_defaults():
 		"ref_doctype": "Company"
 	})
 	settings.save()
+

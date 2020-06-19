@@ -41,6 +41,7 @@
    "options": "Company:company:default_currency"
   },
   {
+   "default": "0",
    "fieldname": "rate_of_interest",
    "fieldtype": "Percent",
    "label": "Rate of Interest (%) Yearly",
@@ -143,7 +144,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-15 00:24:43.259963",
+ "modified": "2020-06-07 18:55:59.346292",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Type",
