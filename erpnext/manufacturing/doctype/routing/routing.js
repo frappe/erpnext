@@ -44,7 +44,6 @@ frappe.ui.form.on('BOM Operation', {
 				name: d.workstation
 			},
 			callback: function (data) {
-				frappe.model.set_value(d.doctype, d.name, "base_hour_rate", data.message.hour_rate);
 				frappe.model.set_value(d.doctype, d.name, "hour_rate", data.message.hour_rate);
 				frm.events.calculate_operating_cost(frm, d);
 			}

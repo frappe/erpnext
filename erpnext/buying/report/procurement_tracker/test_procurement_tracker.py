@@ -37,8 +37,6 @@ class TestProcurementTracker(unittest.TestCase):
 		po = make_purchase_order(mr.name)
 		po.supplier = "_Test Supplier"
 		po.get("items")[0].cost_center = "Main - _TPC"
-		po.items[0].rate = 500.0
-		po.save()
 		po.submit()
 		pr = make_purchase_receipt(po.name)
 		pr.get("items")[0].cost_center = "Main - _TPC"
@@ -55,7 +53,7 @@ class TestProcurementTracker(unittest.TestCase):
 			"requesting_site": "_Test Procurement Warehouse - _TPC",
 			"requestor": "Administrator",
 			"material_request_no": mr.name,
-			"description": '_Test Item 1',
+			"item_code": '_Test Item',
 			"quantity": 10.0,
 			"unit_of_measurement": "_Test UOM",
 			"status": "To Bill",
@@ -63,7 +61,7 @@ class TestProcurementTracker(unittest.TestCase):
 			"purchase_order": po.name,
 			"supplier": "_Test Supplier",
 			"estimated_cost": 0.0,
-			"actual_cost": None,
+			"actual_cost": 0.0,
 			"purchase_order_amt": po.net_total,
 			"purchase_order_amt_in_company_currency": po.base_net_total,
 			"expected_delivery_date": date_obj,
