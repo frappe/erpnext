@@ -18,8 +18,12 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		item.rate = flt(item.rate_with_margin , precision("rate", item));
 
-		if(item.discount_percentage){
+		if (item.discount_percentage) {
 			item.discount_amount = flt(item.rate_with_margin) * flt(item.discount_percentage) / 100;
+		} else if (item.discount_percentage === 0) {
+			// there are some case that discount_amount has been set
+			// by previous item and doesn't got clear when change item
+			item.discount_amount = 0;
 		}
 
 		if (item.discount_amount) {
