@@ -107,6 +107,9 @@ frappe.ui.form.on("Company", {
 
 		erpnext.company.set_chart_of_accounts_options(frm.doc);
 
+		if (!frappe.user.has_role('System Manager')) {
+			frm.get_field("delete_company_transactions").hide();
+		}
 	},
 
 	make_default_tax_template: function(frm) {
@@ -134,7 +137,7 @@ frappe.ui.form.on("Company", {
 			var d = frappe.prompt({
 				fieldtype:"Data",
 				fieldname: "company_name",
-				label: __("Please re-type company name to confirm"),
+				label: __("Please enter the company name to confirm"),
 				reqd: 1,
 				description: __("Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone.")
 			},

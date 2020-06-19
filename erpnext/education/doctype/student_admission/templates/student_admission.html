@@ -43,8 +43,8 @@
 				<thead>
 					<tr class="active">
 						<th style="width: 90px">Program/Std.</th>
-						<th style="width: 170px">Minumum Age(DOB)</th>
-						<th style="width: 170px">Maximum Age(DOB)</th>
+						<th style="width: 170px">Minumum Age</th>
+						<th style="width: 170px">Maximum Age</th>
 						<th style="width: 100px">Application Fee</th>
 					</tr>
 				</thead>
@@ -52,8 +52,8 @@
 					{% for row in program_details %}
 						<tr>
 							<td>{{ row.program }}</td>
-							<td>{{ row.minimum_age }}</td>
-							<td>{{ row.maximum_age }}</td>
+							<td>{{ row.min_age }}</td>
+							<td>{{ row.max_age }}</td>
 							<td>{{ row.application_fee }}</td>
 						</tr>
 					{% endfor %}
@@ -61,12 +61,11 @@
 			</table>
 		</div>
 	{% endif %}
-
-	{%- if application_form_route -%}
+	{%- if doc.enable_admission_application -%}
 		<br>
 		<p>
 			<a class='btn btn-primary'
-			href='/{{ doc.application_form_route }}?new=1'>
+			href='/student-applicant?new=1&student_admission={{doc.name}}'>
 			{{ _("Apply Now") }}</a>
 		</p>
 	{% endif %}

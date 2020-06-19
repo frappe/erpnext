@@ -1,0 +1,58 @@
+{% extends "templates/web.html" %}
+
+{% block content %}
+<section class="section section-padding-top section-padding-bottom">
+	<div class='container'>
+		<div class="hero-content">
+			<h1 class="hero-title">{{ greeting_title or _("We're here to help!") }}</h1>
+			{% if greeting_subtitle %}
+			<p class="hero-subtitle">{{ greeting_subtitle }}</p>
+			{% endif %}
+		</div>
+	</div>
+</section>
+
+{% if favorite_article_list %}
+<section class="section section-padding-top section-padding-bottom bg-light">
+	<div class='container'>
+		<h2>{{ _("Frequently Read Articles") }}</h2>
+		<div class="row">
+			{% for favorite_article in favorite_article_list %}
+			<div class="mt-4 col-12 col-sm-6 col-lg-4">
+				<div class="card card-md h-100 kb-card">
+					<div class="card-body">
+						<h6 class="card-subtitle mb-2 text-uppercase small text-muted">
+							{{ favorite_article['category'] }}</h6>
+						<h3 class="card-title">{{ favorite_article['title'] }}</h3>
+						<p class="card-text">{{ favorite_article['description'] }}</p>
+					</div>
+					<a href="{{ favorite_article['route'] }}" class="stretched-link"></a>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+</section>
+{% endif %}
+
+{% if help_article_list %}
+<section class="section section-padding-top section-padding-bottom">
+	<div class='container'>
+		<h2>{{ _("Help Articles") }}</h2>
+		<div class="row">
+			{% for item in help_article_list %}
+			<div class="mt-5 col-12 col-sm-6 col-lg-4">
+				<h5>{{ item['category'].name }}</h5>
+				<div>
+					{% for article in item['articles'] %}
+					<a href="{{ article.route }}" class="mt-2 d-block">{{ article.title }}</a>
+					{% endfor %}
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+</section>
+{% endif %}
+
+{% endblock %}

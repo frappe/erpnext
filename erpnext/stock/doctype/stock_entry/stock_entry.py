@@ -500,7 +500,7 @@ class StockEntry(StockController):
 					if raw_material_cost and self.purpose == "Manufacture":
 						d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
 						d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
-					elif self.purpose == "Repack" and total_fg_qty:
+					elif self.purpose == "Repack" and total_fg_qty and not d.set_basic_rate_manually:
 						d.basic_rate = flt(raw_material_cost) / flt(total_fg_qty)
 						d.basic_amount = d.basic_rate * d.qty
 
@@ -732,10 +732,14 @@ class StockEntry(StockController):
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
 			_validate_work_order(pro_doc)
 			pro_doc.run_method("update_status")
+
 			if self.fg_completed_qty:
 				pro_doc.run_method("update_work_order_qty")
 				if self.purpose == "Manufacture":
 					pro_doc.run_method("update_planned_qty")
+
+			if not pro_doc.operations:
+				pro_doc.set_actual_dates()
 
 	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select i.name, i.stock_uom, i.description, i.image, i.item_name, i.item_group,

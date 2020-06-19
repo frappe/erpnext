@@ -69,7 +69,7 @@ class PaymentRequest(Document):
 		elif self.payment_request_type == 'Inward':
 			self.db_set('status', 'Requested')
 
-		send_mail = self.payment_gateway_validation()
+		send_mail = self.payment_gateway_validation() if self.payment_gateway else None
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 
 		if (hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart") \
