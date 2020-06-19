@@ -3,17 +3,16 @@
 # These owners will be the default owners for everything in
 # the repo. Unless a later match takes precedence,
 
-*                       @nabinhait
-manufacturing/          @rohitwaghchaure
+manufacturing/          @rohitwaghchaure @marination
 accounts/               @deepeshgarg007 @nextchamp-saqib
-loan_management/        @deepeshgarg007
-pos*                    @nextchamp-saqib
-assets/                 @nextchamp-saqib
+loan_management/        @deepeshgarg007 @rohitwaghchaure
+pos*                    @nextchamp-saqib @rohitwaghchaure
+assets/                 @nextchamp-saqib @deepeshgarg007
 stock/                  @marination @rohitwaghchaure
-buying/                 @marination @rohitwaghchaure
-hr/                     @Anurag810
-projects/               @hrwX
-support/                @hrwX
-healthcare/             @ruchamahabal
-erpnext_integrations/   @Mangesh-Khairnar 	
+buying/                 @marination @deepeshgarg007
+hr/                     @Anurag810 @rohitwaghchaure
+projects/               @hrwX @nextchamp-saqib
+support/                @hrwX @marination
+healthcare/             @ruchamahabal @marination
+erpnext_integrations/   @Mangesh-Khairnar @nextchamp-saqib
 requirements.txt        @gavindsouza

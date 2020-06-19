@@ -62,6 +62,7 @@
   "salary_mode",
   "payroll_cost_center",
   "column_break_52",
+  "expense_approver",
   "bank_name",
   "bank_ac_no",
   "health_insurance_section",
@@ -205,7 +206,7 @@
    "label": "Status",
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nActive\nLeft",
+   "options": "Active\nLeft",
    "reqd": 1,
    "search_index": 1
   },
@@ -667,6 +668,7 @@
    "oldfieldtype": "Date"
   },
   {
+   "depends_on": "eval:doc.status == \"Left\"",
    "fieldname": "relieving_date",
    "fieldtype": "Date",
    "label": "Relieving Date",
@@ -797,13 +799,21 @@
   {
    "fieldname": "column_break_52",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expense_approver",
+   "fieldtype": "Link",
+   "label": "Expense Approver",
+   "options": "User",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2020-05-05 18:51:03.152503",
+ "modified": "2020-06-18 18:01:27.223535",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
