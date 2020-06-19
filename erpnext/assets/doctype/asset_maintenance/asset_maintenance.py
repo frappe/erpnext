@@ -16,12 +16,11 @@ class AssetMaintenance(Document):
 				throw(_("Start date should be less than end date for task {0}").format(task.maintenance_task))
 			if getdate(task.next_due_date) < getdate(nowdate()):
 				task.maintenance_status = "Overdue"
+			if not task.assign_to and self.docstatus == 0:
+				throw(_("Row #{}: Please asign task to a member.").format(task.idx))
 
 	def on_update(self):
 		for task in self.get('asset_maintenance_tasks'):
-			if not task.assign_to:
-				task.db_set("assign_to", self.maintenance_manager)
-				task.db_set("assign_to_name", self.maintenance_manager_name)
 			assign_tasks(self.name, task.assign_to, task.maintenance_task, task.next_due_date)
 		self.sync_maintenance_tasks()
 
@@ -108,7 +107,7 @@ def update_maintenance_log(asset_maintenance, item_code, item_name, task):
 
 @frappe.whitelist()
 def get_team_members(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.get_values('Maintenance Team Member', {'parent':filters.get("maintenance_team")})
+	return frappe.db.get_values('Maintenance Team Member', { 'parent': filters.get("maintenance_team") })
 
 @frappe.whitelist()
 def get_maintenance_log(asset_name):
