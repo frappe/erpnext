@@ -58,7 +58,7 @@ def get_tax_withholding_details(tax_withholding_category, fiscal_year, company):
 				"rate": tax_rate_detail.tax_withholding_rate,
 				"threshold": tax_rate_detail.single_threshold,
 				"cumulative_threshold": tax_rate_detail.cumulative_threshold,
-				"description": tax_withholding.category_name
+				"description": tax_withholding.category_name if tax_withholding.category_name else tax_withholding_category
 			})
 
 def get_tax_withholding_rates(tax_withholding, fiscal_year):
@@ -180,7 +180,7 @@ def get_advance_vouchers(suppliers, fiscal_year=None, company=None, from_date=No
 	if company:
 		condition += "and company =%s" % (company)
 	if from_date and to_date:
-		condition += "and posting_date between %s and %s" % (company, from_date, to_date)
+		condition += "and posting_date between %s and %s" % (from_date, to_date)
 
 	## Appending the same supplier again if length of suppliers list is 1
 	## since tuple of single element list contains None, For example ('Test Supplier 1', )

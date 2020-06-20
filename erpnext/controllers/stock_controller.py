@@ -19,7 +19,8 @@ class QualityInspectionNotSubmittedError(frappe.ValidationError): pass
 class StockController(AccountsController):
 	def validate(self):
 		super(StockController, self).validate()
-		self.validate_inspection()
+		if not self.get('is_return'):
+			self.validate_inspection()
 		self.validate_serialized_batch()
 		self.validate_customer_provided_item()
 
@@ -224,7 +225,9 @@ class StockController(AccountsController):
 
 	def check_expense_account(self, item):
 		if not item.get("expense_account"):
-			frappe.throw(_("Expense or Difference account is mandatory for Item {0} as it impacts overall stock value").format(item.item_code))
+			frappe.throw(_("Row #{0}: Expense Account not set for Item {1}. Please set an Expense \
+				Account in the Items table").format(item.idx, frappe.bold(item.item_code)),
+				title=_("Expense Account Missing"))
 
 		else:
 			is_expense_account = frappe.db.get_value("Account",
