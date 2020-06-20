@@ -7,6 +7,7 @@ import frappe, erpnext
 
 def execute():
     frappe.reload_doc('Payroll', 'doctype', 'salary_structure')
+    frappe.reload_doc('Payroll', 'doctype', 'salary_component')
 
     if frappe.db.exists("Salary Component", "Income Tax"):
         frappe.db.set_value("Salary Component", "Income Tax", "is_income_tax_component", 1)
