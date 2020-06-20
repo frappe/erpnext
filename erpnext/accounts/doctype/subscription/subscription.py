@@ -60,8 +60,12 @@ class Subscription(Document):
 		else:
 			billing_cycle_info = self.get_billing_cycle_data()
 			if billing_cycle_info:
-				if self.is_new_subscription() and self.start < self.current_invoice_start:
+				if self.is_new_subscription() and getdate(self.start) < getdate(self.current_invoice_start):
 					self.current_invoice_end = add_to_date(self.start, **billing_cycle_info)
+
+					# For cases where trial period is for an entire billing interval
+					if getdate(self.current_invoice_end) < getdate(self.current_invoice_start):
+						self.current_invoice_end = add_to_date(self.current_invoice_start, **billing_cycle_info)
 				else:
 					self.current_invoice_end = add_to_date(self.current_invoice_start, **billing_cycle_info)
 			else:
@@ -161,13 +165,13 @@ class Subscription(Document):
 			self.status = 'Trialling'
 		elif self.status == 'Active' and self.end and getdate() > getdate(self.end):
 			self.status = 'Completed'
-		elif self.status == 'Past Due Date' and self.is_past_grace_period():
+		elif self.is_past_grace_period():
 			subscription_settings = frappe.get_single('Subscription Settings')
 			self.status = 'Cancelled' if cint(subscription_settings.cancel_after_grace) else 'Unpaid'
-		elif self.status == 'Past Due Date' and not self.has_outstanding_invoice():
-			self.status = 'Active'
-		elif self.current_invoice_is_past_due():
+		elif self.current_invoice_is_past_due() and not self.is_past_grace_period():
 			self.status = 'Past Due Date'
+		elif not self.has_outstanding_invoice():
+			self.status = 'Active'
 		elif self.is_new_subscription():
 			self.status = 'Active'
 		self.save()
@@ -188,7 +192,7 @@ class Subscription(Document):
 			return True
 
 		end_date = getdate(end_date)
-		return getdate(nowdate()) > getdate(end_date)
+		return getdate() > getdate(end_date)
 
 	def is_past_grace_period(self):
 		"""
@@ -250,7 +254,7 @@ class Subscription(Document):
 		if self.trial_period_start and not self.trial_period_end:
 			frappe.throw(_('Both Trial Period Start Date and Trial Period End Date must be set'))
 
-		if self.trial_period_start and self.trial_period_start > self.start:
+		if self.trial_period_start and getdate(self.trial_period_start) > getdate(self.start):
 			frappe.throw(_('Trial Period Start date cannot be after Subscription Start Date'))
 
 	def validate_end_date(self):
@@ -300,7 +304,8 @@ class Subscription(Document):
 
 		invoice = frappe.new_doc(doctype)
 		invoice.set_posting_time = 1
-		invoice.posting_date = getdate()
+		invoice.posting_date = self.current_invoice_start if self.generate_invoice_at_period_start \
+			else self.current_invoice_end
 
 		if doctype == 'Sales Invoice':
 			invoice.customer = self.party
@@ -336,16 +341,11 @@ class Subscription(Document):
 			invoice.taxes_and_charges = tax_template
 			invoice.set_taxes()
 
-		if nowdate() < add_days(self.current_invoice_end, cint(self.days_until_due)):
-			due_date = nowdate()
-		else:
-			due_date = add_days(self.current_invoice_end, cint(self.days_until_due))
-
 		# Due date
 		invoice.append(
 			'payment_schedule',
 			{
-				'due_date': due_date,
+				'due_date': add_days(invoice.posting_date, cint(self.days_until_due)),
 				'invoice_portion': 100
 			}
 		)
@@ -414,12 +414,12 @@ class Subscription(Document):
 		1. `process_for_active`
 		2. `process_for_past_due`
 		"""
-		self.set_subscription_status()
-
 		if self.status == 'Active':
 			self.process_for_active()
 		elif self.status in ['Past Due Date', 'Unpaid']:
 			self.process_for_past_due_date()
+
+		self.set_subscription_status()
 
 		self.save()
 
@@ -441,7 +441,7 @@ class Subscription(Document):
 		invoice = self.get_current_invoice()
 
 		if invoice:
-			if self.current_invoice_start <= invoice.posting_date <= self.current_invoice_end:
+			if getdate(self.current_invoice_start) <= getdate(invoice.posting_date) <= getdate(self.current_invoice_end):
 				return True
 			else:
 				False
@@ -457,7 +457,7 @@ class Subscription(Document):
 		2. Change the `Subscription` status to 'Past Due Date'
 		3. Change the `Subscription` status to 'Cancelled'
 		"""
-		if nowdate() > self.current_invoice_end:
+		if getdate() > getdate(self.current_invoice_end) and self.is_prepaid_to_invoice():
 			self.update_subscription_period(add_days(self.current_invoice_end, 1))
 
 		if not self.is_current_invoice_generated() and (self.is_postpaid_to_invoice() or self.is_prepaid_to_invoice()):
@@ -496,11 +496,12 @@ class Subscription(Document):
 			else:
 				self.set_status_grace_period()
 
-			if nowdate() > self.current_invoice_end:
+			if getdate() > getdate(self.current_invoice_end):
 				self.update_subscription_period(add_days(self.current_invoice_end, 1))
 
 			# Generate invoices periodically even if current invoice are unpaid
-			if not self.is_current_invoice_generated() and (self.is_postpaid_to_invoice() or self.is_prepaid_to_invoice()):
+			if self.generate_new_invoices_past_due_date and not self.is_current_invoice_generated() and (self.is_postpaid_to_invoice()
+				or self.is_prepaid_to_invoice()):
 				prorate = frappe.db.get_single_value('Subscription Settings', 'prorate')
 				self.generate_invoice(prorate)
 

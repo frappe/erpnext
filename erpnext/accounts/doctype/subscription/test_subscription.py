@@ -7,7 +7,7 @@ import unittest
 
 import frappe
 from erpnext.accounts.doctype.subscription.subscription import get_prorata_factor
-from frappe.utils.data import nowdate, add_days, add_to_date, add_months, date_diff, flt
+from frappe.utils.data import nowdate, add_days, add_to_date, add_months, date_diff, flt, get_date_str
 
 
 def create_plan():
@@ -57,8 +57,8 @@ class TestSubscription(unittest.TestCase):
 
 		self.assertEqual(subscription.trial_period_start, nowdate())
 		self.assertEqual(subscription.trial_period_end, add_days(nowdate(), 30))
-		self.assertEqual(subscription.trial_period_start, subscription.current_invoice_start)
-		self.assertEqual(subscription.trial_period_end, subscription.current_invoice_end)
+		self.assertEqual(add_days(subscription.trial_period_end, 1), get_date_str(subscription.current_invoice_start))
+		self.assertEqual(add_days(subscription.current_invoice_start, 30), get_date_str(subscription.current_invoice_end))
 		self.assertEqual(subscription.invoices, [])
 		self.assertEqual(subscription.status, 'Trialling')
 
@@ -66,7 +66,8 @@ class TestSubscription(unittest.TestCase):
 
 	def test_create_subscription_without_trial_with_correct_period(self):
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.save()
 
@@ -82,7 +83,8 @@ class TestSubscription(unittest.TestCase):
 
 	def test_create_subscription_trial_with_wrong_dates(self):
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.trial_period_end = nowdate()
 		subscription.trial_period_start = add_days(nowdate(), 30)
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
@@ -92,7 +94,8 @@ class TestSubscription(unittest.TestCase):
 
 	def test_create_subscription_multi_with_different_billing_fails(self):
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.trial_period_end = nowdate()
 		subscription.trial_period_start = add_days(nowdate(), 30)
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
@@ -116,18 +119,22 @@ class TestSubscription(unittest.TestCase):
 
 		self.assertEqual(len(subscription.invoices), 1)
 		self.assertEqual(subscription.current_invoice_start, '2018-01-01')
-		self.assertEqual(subscription.status, 'Past Due Date')
-		# subscription.delete()
+		subscription.process()
+		self.assertEqual(subscription.status, 'Unpaid')
+		subscription.delete()
 
 	def test_status_goes_back_to_active_after_invoice_is_paid(self):
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.start = '2018-01-01'
 		subscription.insert()
 		subscription.process()	# generate first invoice
 		self.assertEqual(len(subscription.invoices), 1)
-		self.assertEqual(subscription.status, 'Past Due Date')
+
+		# Status is unpaid as Days until Due is zero and grace period is Zero
+		self.assertEqual(subscription.status, 'Unpaid')
 
 		subscription.get_current_invoice()
 		current_invoice = subscription.get_current_invoice()
@@ -151,16 +158,17 @@ class TestSubscription(unittest.TestCase):
 		settings.save()
 
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.start = '2018-01-01'
 		subscription.insert()
+
+		self.assertEqual(subscription.status, 'Active')
+
 		subscription.process()		# generate first invoice
-
-		self.assertEqual(subscription.status, 'Past Due Date')
-
-		subscription.process()
 		# This should change status to Cancelled since grace period is 0
+		# And is backdated subscription so subscription will be cancelled after processing
 		self.assertEqual(subscription.status, 'Cancelled')
 
 		settings.cancel_after_grace = default_grace_period_action
@@ -174,16 +182,14 @@ class TestSubscription(unittest.TestCase):
 		settings.save()
 
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.start = '2018-01-01'
 		subscription.insert()
 		subscription.process()		# generate first invoice
 
-		self.assertEqual(subscription.status, 'Past Due Date')
-
-		subscription.process()
-		# This should change status to Cancelled since grace period is 0
+		# Status is unpaid as Days until Due is zero and grace period is Zero
 		self.assertEqual(subscription.status, 'Unpaid')
 
 		settings.cancel_after_grace = default_grace_period_action
@@ -192,7 +198,8 @@ class TestSubscription(unittest.TestCase):
 
 	def test_subscription_invoice_days_until_due(self):
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.days_until_due = 10
 		subscription.start = add_months(nowdate(), -1)
@@ -210,7 +217,8 @@ class TestSubscription(unittest.TestCase):
 		settings.save()
 
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.start = '2018-01-01'
 		subscription.insert()
@@ -234,7 +242,8 @@ class TestSubscription(unittest.TestCase):
 
 	def test_subscription_remains_active_during_invoice_period(self):
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.save()
 		subscription.process()		# no changes expected
@@ -260,7 +269,8 @@ class TestSubscription(unittest.TestCase):
 
 	def test_subscription_cancelation(self):
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.save()
 		subscription.cancel_subscription()
@@ -276,7 +286,8 @@ class TestSubscription(unittest.TestCase):
 		settings.save()
 
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.save()
 
@@ -311,7 +322,8 @@ class TestSubscription(unittest.TestCase):
 		settings.save()
 
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.save()
 		subscription.cancel_subscription()
@@ -331,7 +343,8 @@ class TestSubscription(unittest.TestCase):
 		settings.save()
 
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.save()
 		subscription.cancel_subscription()
@@ -355,15 +368,13 @@ class TestSubscription(unittest.TestCase):
 		settings.save()
 
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.start = '2018-01-01'
 		subscription.insert()
 		subscription.process()	# generate first invoice
 		invoices = len(subscription.invoices)
-
-		self.assertEqual(subscription.status, 'Past Due Date')
-		self.assertEqual(len(subscription.invoices), invoices)
 
 		subscription.cancel_subscription()
 		self.assertEqual(subscription.status, 'Cancelled')
@@ -389,15 +400,14 @@ class TestSubscription(unittest.TestCase):
 		settings.save()
 
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.start = '2018-01-01'
 		subscription.insert()
 		subscription.process()		# generate first invoice
 
-		self.assertEqual(subscription.status, 'Past Due Date')
-
-		subscription.process()
+		# Status is unpaid as Days until Due is zero and grace period is Zero
 		self.assertEqual(subscription.status, 'Unpaid')
 
 		subscription.cancel_subscription()
@@ -426,16 +436,14 @@ class TestSubscription(unittest.TestCase):
 		settings.save()
 
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.start = '2018-01-01'
 		subscription.insert()
+
 		subscription.process()		# generate first invoice
-
-		self.assertEqual(subscription.status, 'Past Due Date')
-
-		subscription.process()
-		# This should change status to Cancelled since grace period is 0
+		# This should change status to Unpaid since grace period is 0
 		self.assertEqual(subscription.status, 'Unpaid')
 
 		invoice = subscription.get_current_invoice()
@@ -447,7 +455,7 @@ class TestSubscription(unittest.TestCase):
 
 		# A new invoice is generated
 		subscription.process()
-		self.assertEqual(subscription.status, 'Past Due Date')
+		self.assertEqual(subscription.status, 'Unpaid')
 
 		settings.cancel_after_grace = default_grace_period_action
 		settings.save()
@@ -455,7 +463,8 @@ class TestSubscription(unittest.TestCase):
 
 	def test_restart_active_subscription(self):
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.save()
 
@@ -465,7 +474,8 @@ class TestSubscription(unittest.TestCase):
 
 	def test_subscription_invoice_discount_percentage(self):
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.additional_discount_percentage = 10
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.save()
@@ -480,7 +490,8 @@ class TestSubscription(unittest.TestCase):
 
 	def test_subscription_invoice_discount_amount(self):
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.additional_discount_amount = 11
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.save()
@@ -497,7 +508,8 @@ class TestSubscription(unittest.TestCase):
 		# Create a non pre-billed subscription, processing should not create
 		# invoices.
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.save()
 		subscription.process()
@@ -519,10 +531,12 @@ class TestSubscription(unittest.TestCase):
 		settings.save()
 
 		subscription = frappe.new_doc('Subscription')
-		subscription.customer = '_Test Customer'
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
 		subscription.generate_invoice_at_period_start = True
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.save()
+		subscription.process()
 		subscription.cancel_subscription()
 
 		self.assertEqual(len(subscription.invoices), 1)
