@@ -333,7 +333,7 @@ erpnext.patches.v7_0.update_mode_of_payment_type
 
 execute:frappe.reload_doctype('Employee') #2016-10-18
 execute:frappe.db.sql("update `tabEmployee` set prefered_contact_email = IFNULL(prefered_contact_email,'') ")
-execute:frappe.reload_doctype("Salary Slip")
+execute:frappe.reload_doc("Payroll", "doctype", "salary_slip")
 execute:frappe.db.sql("update `tabSalary Slip` set posting_date=creation")
 execute:frappe.reload_doc("stock", "doctype", "stock_settings")
 erpnext.patches.v8_0.create_domain_docs	#16-05-2017
@@ -680,6 +680,8 @@ erpnext.patches.v12_0.update_appointment_reminder_scheduler_entry
 erpnext.patches.v12_0.retain_permission_rules_for_video_doctype
 erpnext.patches.v12_0.remove_duplicate_leave_ledger_entries #2020-05-22
 erpnext.patches.v13_0.patch_to_fix_reverse_linking_in_additional_salary_encashment_and_incentive
+execute:frappe.reload_doc("HR", "doctype", "Employee Advance")
+erpnext.patches.v12_0.move_due_advance_amount_to_pending_amount
 execute:frappe.delete_doc_if_exists("Page", "appointment-analytic")
 execute:frappe.rename_doc("Desk Page", "Getting Started", "Home", force=True)
 erpnext.patches.v12_0.unset_customer_supplier_based_on_type_of_item_price
@@ -695,3 +697,11 @@ execute:frappe.rename_doc("Desk Page", "Loan Management", "Loan", force=True)
 erpnext.patches.v12_0.update_uom_conversion_factor
 erpnext.patches.v13_0.delete_old_purchase_reports
 erpnext.patches.v12_0.set_italian_import_supplier_invoice_permissions
+erpnext.patches.v13_0.update_sla_enhancements
+erpnext.patches.v12_0.update_address_template_for_india
+erpnext.patches.v12_0.set_multi_uom_in_rfq
+erpnext.patches.v13_0.delete_old_sales_reports
+execute:frappe.delete_doc_if_exists("DocType", "Bank Reconciliation")
+erpnext.patches.v13_0.move_doctype_reports_and_notification_from_hr_to_payroll
+erpnext.patches.v13_0.move_payroll_setting_separately_from_hr_settings
+erpnext.patches.v13_0.check_is_income_tax_component
