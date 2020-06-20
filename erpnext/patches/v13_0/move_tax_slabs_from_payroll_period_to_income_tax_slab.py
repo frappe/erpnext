@@ -11,7 +11,7 @@ def execute():
 		return
 
 	for doctype in ("income_tax_slab", "salary_structure_assignment", "employee_other_income", "income_tax_slab_other_charges"):
-		frappe.reload_doc("hr", "doctype", doctype)
+		frappe.reload_doc("Payroll", "doctype", doctype)
 
 
 	standard_tax_exemption_amount_exists = frappe.db.has_column("Payroll Period", "standard_tax_exemption_amount")
@@ -29,7 +29,7 @@ def execute():
 			WHERE company=%s
 			ORDER BY start_date DESC
 		""".format(select_fields), company.name, as_dict = 1)
-			
+
 		for i, period in enumerate(payroll_periods):
 			income_tax_slab = frappe.new_doc("Income Tax Slab")
 			income_tax_slab.name = "Tax Slab:" + period.name
