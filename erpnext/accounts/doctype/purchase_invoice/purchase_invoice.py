@@ -570,7 +570,7 @@ class PurchaseInvoice(BuyingController):
 					else:
 						amount = flt(item.base_net_amount + item.item_tax_amount, item.precision("base_net_amount"))
 
-					auto_accounting_for_non_stock_items = cint(frappe.db.get_single_value('Stock Settings', 'enable_perpetual_inventory_for_non_stock_items'))
+					auto_accounting_for_non_stock_items = cint(frappe.db.get_value('Company', self.company, 'enable_perpetual_inventory_for_non_stock_items'))
 					service_received_but_not_billed_account = self.get_company_default("service_received_but_not_billed")
 
 					if item.purchase_receipt and auto_accounting_for_non_stock_items:
