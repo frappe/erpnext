@@ -337,10 +337,9 @@ def get_loyalty_programs(doc):
 	return lp_details
 
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
+	fields = ["name", "customer_name", "customer_group", "territory"]
 	if frappe.db.get_default("cust_master_name") == "Customer Name":
 		fields = ["name", "customer_group", "territory"]
-	else:
-		fields = ["name", "customer_name", "customer_group", "territory"]
 
 	match_conditions = build_match_conditions("Customer")
 	match_conditions = "and {}".format(match_conditions) if match_conditions else ""
