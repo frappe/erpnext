@@ -9,13 +9,14 @@ def execute():
 	frappe.reload_doc('accounts', 'doctype', 'subscription')
 	frappe.reload_doc('accounts', 'doctype', 'subscription_invoice')
 
-	frappe.db.sql("""
-		UPDATE `tabSubscription`
-		SET party_type = 'Customer',
-			party = customer,
-			sales_tax_template = tax_template
-		WHERE IFNULL(party,'') = ''
-	""")
+	if frappe.db.has_column('Subscription', 'customer'):
+		frappe.db.sql("""
+			UPDATE `tabSubscription`
+			SET party_type = 'Customer',
+				party = customer,
+				sales_tax_template = tax_template
+			WHERE IFNULL(party,'') = ''
+		""")
 
 	frappe.db.sql("""
 		UPDATE `tabSubscription Invoice`
