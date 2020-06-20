@@ -11,7 +11,7 @@ QUnit.test('Test: Student Admission', function(assert) {
 				{admission_start_date: '2016-04-20'},
 				{admission_end_date: '2016-05-31'},
 				{title: '2016-17 Admissions'},
-				{application_form_route: 'student-applicant'},
+				{enable_admission_application: 1},
 				{introduction: 'Test intro'},
 				{program_details: [
 					[
@@ -28,7 +28,7 @@ QUnit.test('Test: Student Admission', function(assert) {
 			assert.ok(cur_frm.doc.admission_start_date == '2016-04-20');
 			assert.ok(cur_frm.doc.admission_end_date == '2016-05-31');
 			assert.ok(cur_frm.doc.title == '2016-17 Admissions');
-			assert.ok(cur_frm.doc.application_form_route == 'student-applicant');
+			assert.ok(cur_frm.doc.enable_admission_application == 1);
 			assert.ok(cur_frm.doc.introduction == 'Test intro');
 			assert.ok(cur_frm.doc.program_details[0].program == 'Standard Test', 'Program correctly selected');
 			assert.ok(cur_frm.doc.program_details[0].application_fee == 1000);
