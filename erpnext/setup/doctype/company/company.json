@@ -67,6 +67,7 @@
   "payment_terms",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
+  "enable_perpetual_inventory_for_non_stock_items",
   "default_inventory_account",
   "stock_adjustment_account",
   "column_break_32",
@@ -107,9 +108,7 @@
   {
    "fieldname": "details",
    "fieldtype": "Section Break",
-   "oldfieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "oldfieldtype": "Section Break"
   },
   {
    "fieldname": "company_name",
@@ -118,8 +117,6 @@
    "oldfieldname": "company_name",
    "oldfieldtype": "Data",
    "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1,
    "unique": 1
   },
   {
@@ -128,48 +125,36 @@
    "label": "Abbr",
    "oldfieldname": "abbr",
    "oldfieldtype": "Data",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "depends_on": "eval:!doc.__islocal && in_list(frappe.user_roles, \"System Manager\")",
    "fieldname": "change_abbr",
    "fieldtype": "Button",
-   "label": "Change Abbreviation",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Change Abbreviation"
   },
   {
    "bold": 1,
    "default": "0",
    "fieldname": "is_group",
    "fieldtype": "Check",
-   "label": "Is Group",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Is Group"
   },
   {
    "fieldname": "default_finance_book",
    "fieldtype": "Link",
    "label": "Default Finance Book",
-   "options": "Finance Book",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Finance Book"
   },
   {
    "fieldname": "cb0",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "domain",
    "fieldtype": "Link",
    "label": "Domain",
-   "options": "Domain",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Domain"
   },
   {
    "fieldname": "parent_company",
@@ -177,32 +162,24 @@
    "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Parent Company",
-   "options": "Company",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Company"
   },
   {
    "fieldname": "company_logo",
    "fieldtype": "Attach Image",
    "hidden": 1,
-   "label": "Company Logo",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Company Logo"
   },
   {
    "fieldname": "company_description",
    "fieldtype": "Text Editor",
-   "label": "Company Description",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Company Description"
   },
   {
    "collapsible": 1,
    "fieldname": "sales_settings",
    "fieldtype": "Section Break",
-   "label": "Sales Settings",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Sales Settings"
   },
   {
    "fieldname": "sales_monthly_history",
@@ -210,9 +187,7 @@
    "hidden": 1,
    "label": "Sales Monthly History",
    "no_copy": 1,
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "transactions_annual_history",
@@ -220,23 +195,17 @@
    "hidden": 1,
    "label": "Transactions Annual History",
    "no_copy": 1,
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "monthly_sales_target",
    "fieldtype": "Currency",
    "label": "Monthly Sales Target",
-   "options": "default_currency",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "default_currency"
   },
   {
    "fieldname": "column_break_goals",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "total_monthly_sales",
@@ -244,16 +213,12 @@
    "label": "Total Monthly Sales",
    "no_copy": 1,
    "options": "default_currency",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "charts_section",
    "fieldtype": "Section Break",
-   "label": "Default Values",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Default Values"
   },
   {
    "fieldname": "default_currency",
@@ -261,46 +226,34 @@
    "ignore_user_permissions": 1,
    "label": "Default Currency",
    "options": "Currency",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fieldname": "default_letter_head",
    "fieldtype": "Link",
    "label": "Default Letter Head",
-   "options": "Letter Head",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Letter Head"
   },
   {
    "fieldname": "default_holiday_list",
    "fieldtype": "Link",
    "label": "Default Holiday List",
-   "options": "Holiday List",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Holiday List"
   },
   {
    "fieldname": "standard_working_hours",
    "fieldtype": "Float",
-   "label": "Standard Working Hours",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Standard Working Hours"
   },
   {
    "fieldname": "default_warehouse_for_sales_return",
    "fieldtype": "Link",
    "label": "Default warehouse for Sales Return",
-   "options": "Warehouse",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Warehouse"
   },
   {
    "fieldname": "column_break_10",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "country",
@@ -308,26 +261,20 @@
    "in_list_view": 1,
    "label": "Country",
    "options": "Country",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fieldname": "create_chart_of_accounts_based_on",
    "fieldtype": "Select",
    "label": "Create Chart Of Accounts Based On",
-   "options": "\nStandard Template\nExisting Company",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "\nStandard Template\nExisting Company"
   },
   {
    "depends_on": "eval:doc.create_chart_of_accounts_based_on===\"Standard Template\"",
    "fieldname": "chart_of_accounts",
    "fieldtype": "Select",
    "label": "Chart Of Accounts Template",
-   "no_copy": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "no_copy": 1
   },
   {
    "depends_on": "eval:doc.create_chart_of_accounts_based_on===\"Existing Company\"",
@@ -336,31 +283,23 @@
    "ignore_user_permissions": 1,
    "label": "Existing Company ",
    "no_copy": 1,
-   "options": "Company",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Company"
   },
   {
    "fieldname": "tax_id",
    "fieldtype": "Data",
-   "label": "Tax ID",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Tax ID"
   },
   {
    "fieldname": "date_of_establishment",
    "fieldtype": "Date",
-   "label": "Date of Establishment",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Date of Establishment"
   },
   {
    "fieldname": "default_settings",
    "fieldtype": "Section Break",
    "label": "Accounts Settings",
-   "oldfieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "oldfieldtype": "Section Break"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -371,9 +310,7 @@
    "no_copy": 1,
    "oldfieldname": "default_bank_account",
    "oldfieldtype": "Link",
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -382,9 +319,7 @@
    "ignore_user_permissions": 1,
    "label": "Default Cash Account",
    "no_copy": 1,
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -395,72 +330,54 @@
    "no_copy": 1,
    "oldfieldname": "receivables_group",
    "oldfieldtype": "Link",
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "fieldname": "round_off_account",
    "fieldtype": "Link",
    "label": "Round Off Account",
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "fieldname": "round_off_cost_center",
    "fieldtype": "Link",
    "label": "Round Off Cost Center",
-   "options": "Cost Center",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Cost Center"
   },
   {
    "fieldname": "write_off_account",
    "fieldtype": "Link",
    "label": "Write Off Account",
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "fieldname": "discount_allowed_account",
    "fieldtype": "Link",
    "label": "Discount Allowed Account",
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "fieldname": "discount_received_account",
    "fieldtype": "Link",
    "label": "Discount Received Account",
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "fieldname": "exchange_gain_loss_account",
    "fieldtype": "Link",
    "label": "Exchange Gain / Loss Account",
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "fieldname": "unrealized_exchange_gain_loss_account",
    "fieldtype": "Link",
    "label": "Unrealized Exchange Gain/Loss Account",
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "fieldname": "column_break0",
    "fieldtype": "Column Break",
    "oldfieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1,
    "width": "50%"
   },
   {
@@ -468,9 +385,7 @@
    "depends_on": "eval:doc.parent_company",
    "fieldname": "allow_account_creation_against_child_company",
    "fieldtype": "Check",
-   "label": "Allow Account Creation Against Child Company",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Allow Account Creation Against Child Company"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -481,18 +396,14 @@
    "no_copy": 1,
    "oldfieldname": "payables_group",
    "oldfieldtype": "Link",
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "fieldname": "default_employee_advance_account",
    "fieldtype": "Link",
    "label": "Default Employee Advance Account",
    "no_copy": 1,
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -501,9 +412,7 @@
    "ignore_user_permissions": 1,
    "label": "Default Cost of Goods Sold Account",
    "no_copy": 1,
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -512,9 +421,7 @@
    "ignore_user_permissions": 1,
    "label": "Default Income Account",
    "no_copy": 1,
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -523,9 +430,7 @@
    "ignore_user_permissions": 1,
    "label": "Default Deferred Revenue Account",
    "no_copy": 1,
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -534,9 +439,7 @@
    "ignore_user_permissions": 1,
    "label": "Default Deferred Expense Account",
    "no_copy": 1,
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -545,9 +448,7 @@
    "ignore_user_permissions": 1,
    "label": "Default Payroll Payable Account",
    "no_copy": 1,
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -556,15 +457,11 @@
    "ignore_user_permissions": 1,
    "label": "Default Expense Claim Payable Account",
    "no_copy": 1,
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "fieldname": "section_break_22",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Section Break"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -573,15 +470,11 @@
    "ignore_user_permissions": 1,
    "label": "Default Cost Center",
    "no_copy": 1,
-   "options": "Cost Center",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Cost Center"
   },
   {
    "fieldname": "column_break_26",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -590,41 +483,31 @@
    "label": "Credit Limit",
    "oldfieldname": "credit_limit",
    "oldfieldtype": "Currency",
-   "options": "default_currency",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "default_currency"
   },
   {
    "fieldname": "payment_terms",
    "fieldtype": "Link",
    "label": "Default Payment Terms Template",
-   "options": "Payment Terms Template",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Payment Terms Template"
   },
   {
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "auto_accounting_for_stock_settings",
    "fieldtype": "Section Break",
-   "label": "Stock Settings",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Stock Settings"
   },
   {
    "default": "1",
    "fieldname": "enable_perpetual_inventory",
    "fieldtype": "Check",
-   "label": "Enable Perpetual Inventory",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Enable Perpetual Inventory"
   },
   {
    "fieldname": "default_inventory_account",
    "fieldtype": "Link",
    "label": "Default Inventory Account",
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "fieldname": "stock_adjustment_account",
@@ -632,15 +515,11 @@
    "ignore_user_permissions": 1,
    "label": "Stock Adjustment Account",
    "no_copy": 1,
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "fieldname": "column_break_32",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "stock_received_but_not_billed",
@@ -648,9 +527,7 @@
    "ignore_user_permissions": 1,
    "label": "Stock Received But Not Billed",
    "no_copy": 1,
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "fieldname": "expenses_included_in_valuation",
@@ -658,144 +535,108 @@
    "ignore_user_permissions": 1,
    "label": "Expenses Included In Valuation",
    "no_copy": 1,
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "collapsible": 1,
    "fieldname": "fixed_asset_depreciation_settings",
    "fieldtype": "Section Break",
-   "label": "Fixed Asset Depreciation Settings",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Fixed Asset Depreciation Settings"
   },
   {
    "fieldname": "accumulated_depreciation_account",
    "fieldtype": "Link",
    "label": "Accumulated Depreciation Account",
    "no_copy": 1,
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "fieldname": "depreciation_expense_account",
    "fieldtype": "Link",
    "label": "Depreciation Expense Account",
    "no_copy": 1,
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "fieldname": "series_for_depreciation_entry",
    "fieldtype": "Data",
-   "label": "Series for Asset Depreciation Entry (Journal Entry)",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Series for Asset Depreciation Entry (Journal Entry)"
   },
   {
    "fieldname": "expenses_included_in_asset_valuation",
    "fieldtype": "Link",
    "label": "Expenses Included In Asset Valuation",
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "fieldname": "column_break_40",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "disposal_account",
    "fieldtype": "Link",
    "label": "Gain/Loss Account on Asset Disposal",
    "no_copy": 1,
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "fieldname": "depreciation_cost_center",
    "fieldtype": "Link",
    "label": "Asset Depreciation Cost Center",
    "no_copy": 1,
-   "options": "Cost Center",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Cost Center"
   },
   {
    "fieldname": "capital_work_in_progress_account",
    "fieldtype": "Link",
    "label": "Capital Work In Progress Account",
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "fieldname": "asset_received_but_not_billed",
    "fieldtype": "Link",
    "label": "Asset Received But Not Billed",
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
   },
   {
    "collapsible": 1,
    "fieldname": "budget_detail",
    "fieldtype": "Section Break",
-   "label": "Budget Detail",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Budget Detail"
   },
   {
    "fieldname": "exception_budget_approver_role",
    "fieldtype": "Link",
    "label": "Exception Budget Approver Role",
-   "options": "Role",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Role"
   },
   {
    "collapsible": 1,
    "description": "For reference only.",
    "fieldname": "company_info",
    "fieldtype": "Section Break",
-   "label": "Company Info",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Company Info"
   },
   {
    "fieldname": "date_of_incorporation",
    "fieldtype": "Date",
-   "label": "Date of Incorporation",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Date of Incorporation"
   },
   {
    "fieldname": "address_html",
-   "fieldtype": "HTML",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "HTML"
   },
   {
    "fieldname": "column_break1",
    "fieldtype": "Column Break",
    "oldfieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1,
    "width": "50%"
   },
   {
    "depends_on": "eval:doc.date_of_incorporation",
    "fieldname": "date_of_commencement",
    "fieldtype": "Date",
-   "label": "Date of Commencement",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Date of Commencement"
   },
   {
    "fieldname": "phone_no",
@@ -803,9 +644,7 @@
    "label": "Phone No",
    "oldfieldname": "phone_no",
    "oldfieldtype": "Data",
-   "options": "Phone",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Phone"
   },
   {
    "fieldname": "fax",
@@ -813,9 +652,7 @@
    "label": "Fax",
    "oldfieldname": "fax",
    "oldfieldtype": "Data",
-   "options": "Phone",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Phone"
   },
   {
    "fieldname": "email",
@@ -823,25 +660,19 @@
    "label": "Email",
    "oldfieldname": "email",
    "oldfieldtype": "Data",
-   "options": "Email",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Email"
   },
   {
    "fieldname": "website",
    "fieldtype": "Data",
    "label": "Website",
    "oldfieldname": "website",
-   "oldfieldtype": "Data",
-   "show_days": 1,
-   "show_seconds": 1
+   "oldfieldtype": "Data"
   },
   {
    "fieldname": "registration_info",
    "fieldtype": "Section Break",
    "oldfieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1,
    "width": "50%"
   },
   {
@@ -850,16 +681,12 @@
    "fieldtype": "Code",
    "label": "Registration Details",
    "oldfieldname": "registration_details",
-   "oldfieldtype": "Code",
-   "show_days": 1,
-   "show_seconds": 1
+   "oldfieldtype": "Code"
   },
   {
    "fieldname": "delete_company_transactions",
    "fieldtype": "Button",
-   "label": "Delete Company Transactions",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Delete Company Transactions"
   },
   {
    "fieldname": "lft",
@@ -868,9 +695,7 @@
    "label": "Lft",
    "print_hide": 1,
    "read_only": 1,
-   "search_index": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "search_index": 1
   },
   {
    "fieldname": "rgt",
@@ -879,9 +704,7 @@
    "label": "Rgt",
    "print_hide": 1,
    "read_only": 1,
-   "search_index": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "search_index": 1
   },
   {
    "fieldname": "old_parent",
@@ -889,25 +712,19 @@
    "hidden": 1,
    "label": "old_parent",
    "print_hide": 1,
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "default_selling_terms",
    "fieldtype": "Link",
    "label": "Default Selling Terms",
-   "options": "Terms and Conditions",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Terms and Conditions"
   },
   {
    "fieldname": "default_buying_terms",
    "fieldtype": "Link",
    "label": "Default Buying Terms",
-   "options": "Terms and Conditions",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Terms and Conditions"
   },
   {
    "fieldname": "service_received_but_not_billed",
@@ -915,9 +732,13 @@
    "ignore_user_permissions": 1,
    "label": "Service Received But Not Billed",
    "no_copy": 1,
-   "options": "Account",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_perpetual_inventory_for_non_stock_items",
+   "fieldtype": "Check",
+   "label": "Enable Perpetual Inventory For Non Stock Items"
   }
  ],
  "icon": "fa fa-building",
@@ -925,7 +746,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2020-06-11 15:32:59.147735",
+ "modified": "2020-06-20 11:38:43.178970",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

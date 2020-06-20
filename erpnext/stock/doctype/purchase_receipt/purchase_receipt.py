@@ -212,7 +212,7 @@ class PurchaseReceipt(BuyingController):
 		landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 		service_received_but_not_billed_account = self.get_company_default("service_received_but_not_billed")
-		auto_accounting_for_non_stock_items = cint(frappe.db.get_single_value('Stock Settings', 'enable_perpetual_inventory_for_non_stock_items'))
+		auto_accounting_for_non_stock_items = cint(frappe.db.get_value('Company', self.company, 'enable_perpetual_inventory_for_non_stock_items'))
 
 		gl_entries = []
 		warehouse_with_no_account = []
