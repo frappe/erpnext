@@ -16,7 +16,6 @@
   "action_if_quality_inspection_is_not_submitted",
   "show_barcode_field",
   "clean_description_html",
-  "enable_perpetual_inventory_for_non_stock_items",
   "section_break_7",
   "auto_insert_price_list_rate_if_missing",
   "allow_negative_stock",
@@ -44,248 +43,180 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Item Naming By",
-   "options": "Item Code\nNaming Series",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Item Code\nNaming Series"
   },
   {
    "fieldname": "item_group",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Default Item Group",
-   "options": "Item Group",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Item Group"
   },
   {
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Default Stock UOM",
-   "options": "UOM",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "UOM"
   },
   {
    "fieldname": "default_warehouse",
    "fieldtype": "Link",
    "label": "Default Warehouse",
-   "options": "Warehouse",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Warehouse"
   },
   {
    "fieldname": "sample_retention_warehouse",
    "fieldtype": "Link",
    "label": "Sample Retention Warehouse",
-   "options": "Warehouse",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Warehouse"
   },
   {
    "fieldname": "column_break_4",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "valuation_method",
    "fieldtype": "Select",
    "label": "Default Valuation Method",
-   "options": "FIFO\nMoving Average",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "FIFO\nMoving Average"
   },
   {
    "description": "Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.",
    "fieldname": "over_delivery_receipt_allowance",
    "fieldtype": "Float",
-   "label": "Over Delivery/Receipt Allowance (%)",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Over Delivery/Receipt Allowance (%)"
   },
   {
    "default": "Stop",
    "fieldname": "action_if_quality_inspection_is_not_submitted",
    "fieldtype": "Select",
    "label": "Action if Quality inspection is not submitted",
-   "options": "Stop\nWarn",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Stop\nWarn"
   },
   {
    "default": "1",
    "fieldname": "show_barcode_field",
    "fieldtype": "Check",
-   "label": "Show Barcode Field",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Show Barcode Field"
   },
   {
    "default": "1",
    "fieldname": "clean_description_html",
    "fieldtype": "Check",
-   "label": "Convert Item Description to Clean HTML",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Convert Item Description to Clean HTML"
   },
   {
    "fieldname": "section_break_7",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Section Break"
   },
   {
    "default": "0",
    "fieldname": "auto_insert_price_list_rate_if_missing",
    "fieldtype": "Check",
-   "label": "Auto insert Price List rate if missing",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Auto insert Price List rate if missing"
   },
   {
    "default": "0",
    "fieldname": "allow_negative_stock",
    "fieldtype": "Check",
-   "label": "Allow Negative Stock",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Allow Negative Stock"
   },
   {
    "fieldname": "column_break_10",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "default": "1",
    "fieldname": "automatically_set_serial_nos_based_on_fifo",
    "fieldtype": "Check",
-   "label": "Automatically Set Serial Nos based on FIFO",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Automatically Set Serial Nos based on FIFO"
   },
   {
    "default": "1",
    "fieldname": "set_qty_in_transactions_based_on_serial_no_input",
    "fieldtype": "Check",
-   "label": "Set Qty in Transactions based on Serial No Input",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Set Qty in Transactions based on Serial No Input"
   },
   {
    "fieldname": "auto_material_request",
    "fieldtype": "Section Break",
-   "label": "Auto Material Request",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Auto Material Request"
   },
   {
    "default": "0",
    "fieldname": "auto_indent",
    "fieldtype": "Check",
-   "label": "Raise Material Request when stock reaches re-order level",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Raise Material Request when stock reaches re-order level"
   },
   {
    "default": "0",
    "fieldname": "reorder_email_notify",
    "fieldtype": "Check",
-   "label": "Notify by Email on creation of automatic Material Request",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Notify by Email on creation of automatic Material Request"
   },
   {
    "fieldname": "freeze_stock_entries",
    "fieldtype": "Section Break",
-   "label": "Freeze Stock Entries",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Freeze Stock Entries"
   },
   {
    "fieldname": "stock_frozen_upto",
    "fieldtype": "Date",
-   "label": "Stock Frozen Upto",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Stock Frozen Upto"
   },
   {
    "fieldname": "stock_frozen_upto_days",
    "fieldtype": "Int",
-   "label": "Freeze Stocks Older Than [Days]",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Freeze Stocks Older Than [Days]"
   },
   {
    "fieldname": "stock_auth_role",
    "fieldtype": "Link",
    "label": "Role Allowed to edit frozen stock",
-   "options": "Role",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Role"
   },
   {
    "fieldname": "batch_id_sb",
    "fieldtype": "Section Break",
-   "label": "Batch Identification",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Batch Identification"
   },
   {
    "default": "0",
    "fieldname": "use_naming_series",
    "fieldtype": "Check",
-   "label": "Use Naming Series",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Use Naming Series"
   },
   {
    "default": "BATCH-",
    "depends_on": "eval:doc.use_naming_series==1",
    "fieldname": "naming_series_prefix",
    "fieldtype": "Data",
-   "label": "Naming Series Prefix",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Naming Series Prefix"
   },
   {
    "fieldname": "inter_warehouse_transfer_settings_section",
    "fieldtype": "Section Break",
-   "label": "Inter Warehouse Transfer Settings",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Inter Warehouse Transfer Settings"
   },
   {
    "default": "0",
    "fieldname": "allow_from_dn",
    "fieldtype": "Check",
-   "label": "Allow Material Transfer From Delivery Note and Sales Invoice",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Allow Material Transfer From Delivery Note and Sales Invoice"
   },
   {
    "default": "0",
    "fieldname": "allow_from_pr",
    "fieldtype": "Check",
-   "label": "Allow Material Transfer From Purchase Receipt and Purchase Invoice",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "enable_perpetual_inventory_for_non_stock_items",
-   "fieldtype": "Check",
-   "label": "Enable Perpetual Inventory For Non Stock Items",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Allow Material Transfer From Purchase Receipt and Purchase Invoice"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-06-11 15:10:41.211638",
+ "modified": "2020-06-20 11:39:15.344112",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
