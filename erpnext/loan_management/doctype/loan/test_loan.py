@@ -9,7 +9,7 @@ import unittest
 from frappe.utils import (nowdate, add_days, getdate, now_datetime, add_to_date, get_datetime,
 	add_months, get_first_day, get_last_day, flt, date_diff)
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
-from erpnext.hr.doctype.salary_structure.test_salary_structure import make_employee
+from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_employee
 from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import (process_loan_interest_accrual_for_demand_loans,
 	process_loan_interest_accrual_for_term_loans)
 from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import days_in_year
