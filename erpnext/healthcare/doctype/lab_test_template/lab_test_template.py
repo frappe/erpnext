@@ -115,7 +115,7 @@ def make_item_price(item, price_list_name, item_price):
 		"price_list": price_list_name,
 		"item_code": item,
 		"price_list_rate": item_price
-	}).insert(ignore_permissions=True)
+	}).insert(ignore_permissions=True, ignore_mandatory=True)
 
 @frappe.whitelist()
 def change_test_code_from_template(lab_test_code, doc):
