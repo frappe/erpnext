@@ -18,6 +18,14 @@ def execute():
         frappe.db.set_value("Salary Component", component.name, "is_income_tax_component", 1)
 
     if erpnext.get_region() == "India":
+        from erpnext.regional.india.setup import make_custom_fields
+
+        for doctype in ("Employee Tax Exemption Declaration", "Employee Tax Exemption Proof Submission",
+                        "Employee Tax Exemption Declaration Category", "Employee Tax Exemption Proof Submission Detail"):
+            frappe.reload_doc("Payroll", "doctype", doctype)
+
+        make_custom_fields()
+
         if frappe.db.exists("Salary Component", "Provident Fund"):
             frappe.db.set_value("Salary Component", "Provident Fund", "component_type", "Provident Fund")
         if frappe.db.exists("Salary Component", "Professional Tax"):
