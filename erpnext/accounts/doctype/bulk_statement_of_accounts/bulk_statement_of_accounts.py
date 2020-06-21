@@ -10,9 +10,3 @@ class BulkStatementOfAccounts(Document):
 	def onsubmit():
 		pass
 
-@frappe.whitelist()
-def get_customer_list(customer_collection, collection_name):
-	if customer_collection == 'Customer Group':
-		return frappe.get_list('Customer', filter={'customer_group': collection_name}, fields=['name'])
-	else:
-		return 0

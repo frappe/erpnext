@@ -27,7 +27,7 @@
   "collection_name",
   "column_break_17",
   "amended_from",
-  "customers"
+  "customer_list"
  ],
  "fields": [
   {
@@ -77,13 +77,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "customers",
-   "fieldtype": "Table",
-   "label": "Customers",
-   "options": "Bulk Statement Of Accounts Customers",
-   "reqd": 1
-  },
-  {
    "fieldname": "section_break_3",
    "fieldtype": "Section Break",
    "label": "Autoselect Customers"
@@ -121,7 +114,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Select Customers By",
-   "options": "Customer Group\nTerritory\nSales Partner\nSales Person"
+   "options": "Customer Group\nTerritory\nSales Partner\nSales Team"
   },
   {
    "fieldname": "collection_name",
@@ -161,11 +154,18 @@
    "fieldname": "party",
    "fieldtype": "Data",
    "label": "Party"
+  },
+  {
+   "fieldname": "customer_list",
+   "fieldtype": "Table",
+   "label": "Customer List",
+   "options": "Bulk Statement Of Accounts Customers",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-11 13:50:17.722264",
+ "modified": "2020-06-19 02:22:39.735514",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bulk Statement Of Accounts",
