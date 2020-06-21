@@ -162,8 +162,6 @@ class TransactionBase(StatusUpdater):
 				return
 
 		for item in self.get('items'):
-			fiscal_year = get_fiscal_year(self.get('posting_date'), as_dict=True).name
-
 			last_transaction_time = frappe.db.sql("""
 				select MAX(timestamp(posting_date, posting_time)) as posting_time
 				from `tabStock Ledger Entry`
