@@ -4,9 +4,28 @@
 from __future__ import unicode_literals
 
 import frappe, erpnext
+from erpnext.regional.india.setup import setup
 
 def execute():
-    frappe.reload_doc('Payroll', 'doctype', 'salary_structure')
+
+    doctypes = ['salary_component',
+        'Employee Tax Exemption Declaration',
+        'Employee Tax Exemption Proof Submission',
+        'Employee Tax Exemption Declaration Category',
+        'Employee Tax Exemption Proof Submission Detail'
+    ]
+
+    for doctype in doctypes:
+        frappe.reload_doc('Payroll', 'doctype', doctype)
+
+
+    reports = ['Professional Tax Deductions', 'Provident Fund Deductions']
+    for report in reports:
+        frappe.reload_doc('Regional', 'Report', report)
+        frappe.reload_doc('Regional', 'Report', report)
+
+    if erpnext.get_region() == "India":
+        setup(patch=True)
 
     if frappe.db.exists("Salary Component", "Income Tax"):
         frappe.db.set_value("Salary Component", "Income Tax", "is_income_tax_component", 1)
