@@ -24,3 +24,36 @@
 .patient-name {
 	font-size: 20px;
 }
+
+.therapy-session-percentage-chart .frappe-chart {
+	position: absolute;
+	top: 5px;
+}
+
+.percentage-chart-container {
+	height: 130px;
+}
+
+.chart-filter {
+	position: relative;
+	top: 5px;
+	margin-right: 10px;
+}
+
+text.title {
+	text-transform: uppercase;
+	font-size: 11px;
+	margin-left: 20px;
+}
+
+.chart-filter-search {
+	margin-left: 20px;
+}
+
+.line-chart-container .frappe-chart {
+	margin-top: -20px;
+}
+
+.line-chart-container {
+	margin-top: 10px;
+}

@@ -1,20 +1,68 @@
-<div class="col-sm-12">
-	<div class="col-sm-3">
-	<p class="text-center">{%= __('Select Patient') %}</p>
-	<p class="patient" style="margin: auto; max-width: 300px; margin-bottom: 20px;"></p>
-	<div class="patient_details" style="z-index=0"></div>
-	</div>
-	<div class="col-sm-9 patient_documents">
-		<div class="col-sm-12">
-			<div class="col-sm-12 show_chart_btns" align="center">
+<div class="row patient-progress">
+	<div class="col-md-12">
+		<div class="progress-graphs">
+			<div class="chart-column-container heatmap-container hidden-xs hidden-sm">
+				<div class="patient-heatmap"></div>
 			</div>
-			<div id="chart" class="col-sm-12 patient_vital_charts">
+			<div class="chart-column-container percentage-chart-container">
+				<div class="therapy-session-percentage-chart"></div>
 			</div>
-		</div>
-		<div class="col-sm-12 patient_documents_list">
-		</div>
-		<div class="col-sm-12 text-center py-3">
-			<a class="btn btn-sm btn-default btn-get-records" style="display:none">More..</a>
+			<hr>
+
+			<div class="therapy-progress">
+				<div class="row">
+					<text class="col-md-3 title" text-anchor="start">Therapy Progress</text>
+				</div>
+				<div class="row">
+					<div class="col-md-3 chart-filter-search therapy-type-search"></div>
+				</div>
+				<div class="col-md-12 chart-column-container line-chart-container">
+					<div class="therapy-progress-line-chart">
+					</div>
+				</div>
+			</div>
+
+			<hr>
+			<div class="assessment-results">
+				<div class="row">
+					<text class="col-md-3 title" text-anchor="start">Assessment Results</text>
+				</div>
+				<div class="row">
+					<div class="col-md-3 chart-filter-search assessment-template-search"></div>
+				</div>
+				<div class="col-md-12 chart-column-container line-chart-container">
+					<div class="assessment-results-line-chart">
+					</div>
+				</div>
+			</div>
+
+			<hr>
+			<div class="therapy-assessment-correlation">
+				<div class="row">
+					<text class="col-md-3 title" text-anchor="start">Therapy Type and Assessment Correlation</text>
+				</div>
+				<div class="row">
+					<div class="col-md-3 chart-filter-search assessment-correlation-template-search"></div>
+				</div>
+				<div class="col-md-12 chart-column-container line-chart-container">
+					<div class="therapy-assessment-correlation-chart">
+					</div>
+				</div>
+			</div>
+
+			<hr>
+			<div class="assessment-parameter-progress">
+				<div class="row">
+					<text class="col-md-3 title" text-anchor="start">Progress according to Assessment Parameter</text>
+				</div>
+				<div class="row">
+					<div class="col-md-3 chart-filter-search assessment-parameter-search"></div>
+				</div>
+				<div class="col-md-12 chart-column-container line-chart-container">
+					<div class="assessment-parameter-progress-chart">
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
