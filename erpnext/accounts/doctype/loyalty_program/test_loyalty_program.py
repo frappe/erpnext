@@ -130,7 +130,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 		si_return.submit()
 
 		# fetch original invoice again as its status would have been updated
-		si_original = frappe.get_doc('Sales Invoice', lpe_original.sales_invoice)
+		si_original = frappe.get_doc('Sales Invoice', lpe_original.invoice)
 
 		earned_points = get_points_earned(si_original)
 		lpe_after_return = frappe.get_doc('Loyalty Point Entry', {'invoice_type': 'Sales Invoice', 'invoice': si_original.name, 'customer': si_original.customer})

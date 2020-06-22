@@ -733,6 +733,7 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_pos_returns_with_repayment(self):
 		pos_profile = make_pos_profile()
 
+		pos_profile.set('payments', [])
 		pos_profile.append('payments', {
 			'default': 1,
 			'mode_of_payment': 'Cash',

@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from erpnext.stock.get_item_details import get_pos_profile
+from erpnext.accounts.doctype.pos_profile.pos_profile import get_child_nodes
 
 class TestPOSProfile(unittest.TestCase):
 	def test_pos_profile(self):
