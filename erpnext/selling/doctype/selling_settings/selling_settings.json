@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2013-06-25 10:25:16",
  "description": "Settings for Selling Module",
  "doctype": "DocType",
@@ -79,13 +80,13 @@
   {
    "fieldname": "so_required",
    "fieldtype": "Select",
-   "label": "Sales Order Required",
+   "label": "Sales Order Required for Sales Invoice & Delivery Note Creation",
    "options": "No\nYes"
   },
   {
    "fieldname": "dn_required",
    "fieldtype": "Select",
-   "label": "Delivery Note Required",
+   "label": "Delivery Note Required for Sales Invoice Creation",
    "options": "No\nYes"
   },
   {
@@ -137,7 +138,8 @@
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2019-12-09 13:38:36.486298",
+ "links": [],
+ "modified": "2020-06-01 13:58:35.637858",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",

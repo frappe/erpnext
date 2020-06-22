@@ -582,14 +582,14 @@ class SalesInvoice(SellingController):
 
 	def validate_item_code(self):
 		for d in self.get('items'):
-			if not d.item_code:
+			if not d.item_code and self.is_opening == "No":
 				msgprint(_("Item Code required at Row No {0}").format(d.idx), raise_exception=True)
 
 	def validate_warehouse(self):
 		super(SalesInvoice, self).validate_warehouse()
 
 		for d in self.get_item_list():
-			if not d.warehouse and frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
+			if not d.warehouse and d.item_code and frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
 				frappe.throw(_("Warehouse required for stock Item {0}").format(d.item_code))
 
 	def validate_delivery_note(self):
@@ -1450,10 +1450,16 @@ def get_inter_company_details(doc, doctype):
 		parties = frappe.db.get_all("Supplier", fields=["name"], filters={"disabled": 0, "is_internal_supplier": 1, "represents_company": doc.company})
 		company = frappe.get_cached_value("Customer", doc.customer, "represents_company")
 
+		if not parties:
+			frappe.throw(_('No Supplier found for Inter Company Transactions which represents company {0}').format(frappe.bold(doc.company)))
+
 		party = get_internal_party(parties, "Supplier", doc)
 	else:
 		parties = frappe.db.get_all("Customer", fields=["name"], filters={"disabled": 0, "is_internal_customer": 1, "represents_company": doc.company})
 		company = frappe.get_cached_value("Supplier", doc.supplier, "represents_company")
+
+		if not parties:
+			frappe.throw(_('No Customer found for Inter Company Transactions which represents company {0}').format(frappe.bold(doc.company)))
 
 		party = get_internal_party(parties, "Customer", doc)
 

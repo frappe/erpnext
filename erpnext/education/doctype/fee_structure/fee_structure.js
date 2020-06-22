@@ -9,6 +9,14 @@ frappe.ui.form.on('Fee Structure', {
 	},
 
 	onload: function(frm) {
+		frm.set_query("academic_term", function() {
+			return {
+				"filters": {
+					"academic_year": frm.doc.academic_year
+				}
+			};
+		});
+
 		frm.set_query("receivable_account", function(doc) {
 			return {
 				filters: {
