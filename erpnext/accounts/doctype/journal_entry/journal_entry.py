@@ -365,11 +365,11 @@ class JournalEntry(AccountsController):
 	def set_total_debit_credit(self):
 		self.total_debit, self.total_credit, self.difference = 0, 0, 0
 		for d in self.get("accounts"):
-			if d.debit_in_account_currency and d.credit_in_account_currency:
+			if d.debit and d.credit:
 				frappe.throw(_("You cannot credit and debit same account at the same time"))
 
-			self.total_debit = flt(self.total_debit) + flt(d.debit_in_account_currency, d.precision("debit"))
-			self.total_credit = flt(self.total_credit) + flt(d.credit_in_account_currency, d.precision("credit"))
+			self.total_debit = flt(self.total_debit) + flt(d.debit, d.precision("debit"))
+			self.total_credit = flt(self.total_credit) + flt(d.credit, d.precision("credit"))
 
 		self.difference = flt(self.total_debit, self.precision("total_debit")) - \
 			flt(self.total_credit, self.precision("total_credit"))
@@ -561,20 +561,20 @@ class JournalEntry(AccountsController):
 
 			if self.write_off_based_on == 'Accounts Receivable':
 				jd1.party_type = "Customer"
-				jd1.credit_in_account_currency = flt(d.outstanding_amount, self.precision("credit", "accounts"))
+				jd1.credit = flt(d.outstanding_amount, self.precision("credit", "accounts"))
 				jd1.reference_type = "Sales Invoice"
 				jd1.reference_name = cstr(d.name)
 			elif self.write_off_based_on == 'Accounts Payable':
 				jd1.party_type = "Supplier"
-				jd1.debit_in_account_currency = flt(d.outstanding_amount, self.precision("debit", "accounts"))
+				jd1.debit = flt(d.outstanding_amount, self.precision("debit", "accounts"))
 				jd1.reference_type = "Purchase Invoice"
 				jd1.reference_name = cstr(d.name)
 
 		jd2 = self.append('accounts', {})
 		if self.write_off_based_on == 'Accounts Receivable':
-			jd2.debit_in_account_currency = total
+			jd2.debit = total
 		elif self.write_off_based_on == 'Accounts Payable':
-			jd2.credit_in_account_currency = total
+			jd2.credit = total
 
 		self.validate_total_debit_and_credit()
 
