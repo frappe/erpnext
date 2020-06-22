@@ -161,20 +161,11 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	to_time: function(frm, cdt, cdn) {
+		debugger;
 		var child = locals[cdt][cdn];
-		var time_diff = (moment(child.to_time).diff(moment(child.from_time),"seconds")) / ( 60 * 60 * 24);
-		var std_working_hours = 0;
-
 		if(frm._setting_hours) return;
-
 		var hours = moment(child.to_time).diff(moment(child.from_time), "seconds") / 3600;
-		std_working_hours = time_diff * frappe.working_hours;
-
-		if (std_working_hours < hours && std_working_hours > 0) {
-			frappe.model.set_value(cdt, cdn, "hours", std_working_hours);
-		} else {
-			frappe.model.set_value(cdt, cdn, "hours", hours);
-		}
+		frappe.model.set_value(cdt, cdn, "hours", hours);
 	},
 
 	time_logs_add: function(frm) {
@@ -187,6 +178,7 @@ frappe.ui.form.on("Timesheet Detail", {
 		});
 	},
 	hours: function(frm, cdt, cdn) {
+		debugger;
 		calculate_end_time(frm, cdt, cdn);
 	},
 
@@ -236,23 +228,12 @@ var calculate_end_time = function(frm, cdt, cdn) {
 
 	let d = moment(child.from_time);
 	if(child.hours) {
-		var time_diff = (moment(child.to_time).diff(moment(child.from_time),"seconds")) / (60 * 60 * 24);
-		var std_working_hours = 0;
-		var hours = moment(child.to_time).diff(moment(child.from_time), "seconds") / 3600;
-
-		std_working_hours = time_diff * frappe.working_hours;
-
-		if (std_working_hours < hours && std_working_hours > 0) {
-			frappe.model.set_value(cdt, cdn, "hours", std_working_hours);
-			frappe.model.set_value(cdt, cdn, "to_time", d.add(hours, "hours").format(frappe.defaultDatetimeFormat));
-		} else {
-			d.add(child.hours, "hours");
-			frm._setting_hours = true;
-			frappe.model.set_value(cdt, cdn, "to_time",
-				d.format(frappe.defaultDatetimeFormat)).then(() => {
-				frm._setting_hours = false;
-			});
-		}
+		d.add(child.hours, "hours");
+		frm._setting_hours = true;
+		frappe.model.set_value(cdt, cdn, "to_time",
+			d.format(frappe.defaultDatetimeFormat)).then(() => {
+			frm._setting_hours = false;
+		});
 	}
 };
 
