@@ -328,7 +328,10 @@ def apply_internal_priority(pricing_rules, field_set, args):
 	filtered_rules = []
 	for field in field_set:
 		if args.get(field):
-			filtered_rules = filter(lambda x: x[field]==args[field], pricing_rules)
+			for rule in pricing_rules:
+				if rule.get(field) == args.get(field):
+					filtered_rules = [rule]
+					break
 			if filtered_rules: break
 
 	return filtered_rules or pricing_rules
