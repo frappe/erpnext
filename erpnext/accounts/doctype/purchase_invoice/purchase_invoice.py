@@ -238,6 +238,12 @@ class PurchaseInvoice(BuyingController):
 					not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
 
 				if self.update_stock and (not item.from_warehouse):
+					if for_validate and item.expense_account and item.expense_account != warehouse_account[item.warehouse]["account"]:
+						frappe.msgprint(_('''Row {0}: Expense Head changed to {1} because account {2}
+							is not linked to warehouse {3} or it is not the default inventory account'''.format(
+								item.idx, frappe.bold(warehouse_account[item.warehouse]["account"]),
+								frappe.bold(item.expense_account), frappe.bold(item.warehouse))))
+
 					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
 					# check if 'Stock Received But Not Billed' account is credited in Purchase receipt or not
@@ -247,10 +253,21 @@ class PurchaseInvoice(BuyingController):
 							(item.purchase_receipt, stock_not_billed_account))
 
 						if negative_expense_booked_in_pr:
+							if for_validate and item.expense_account and item.expense_account != stock_not_billed_account:
+								frappe.msgprint(_('''Row {0}: Expense Head changed to {1} because
+								expense is booked against this account in Purchase Receipt {2}'''.format(
+								item.idx, frappe.bold(stock_not_billed_account), frappe.bold(item.purchase_receipt))))
+
 							item.expense_account = stock_not_billed_account
 					else:
 						# If no purchase receipt present then book expense in 'Stock Received But Not Billed'
 						# This is done in cases when Purchase Invoice is created before Purchase Receipt
+						if for_validate and item.expense_account and item.expense_account != stock_not_billed_account:
+							frappe.msgprint(_('''Row {0}: Expense Head changed to {1} as no Purchase
+								Receipt is created against Item {2}. This is done to handle accounting for cases
+								when Purchase Receipt is created after Purchase Invoice'''.format(
+								item.idx, frappe.bold(stock_not_billed_account), frappe.bold(item.item_code))))
+
 						item.expense_account = stock_not_billed_account
 
 			elif item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category):
@@ -460,7 +477,7 @@ class PurchaseInvoice(BuyingController):
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
 					"cost_center": self.cost_center
-				}, self.party_account_currency)
+				}, self.party_account_currency, item=self)
 			)
 
 	def make_item_gl_entries(self, gl_entries):
@@ -841,7 +858,7 @@ class PurchaseInvoice(BuyingController):
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
 					"cost_center": self.cost_center
-				}, self.party_account_currency)
+				}, self.party_account_currency, item=self)
 			)
 
 			gl_entries.append(
@@ -852,7 +869,7 @@ class PurchaseInvoice(BuyingController):
 					"credit_in_account_currency": self.base_paid_amount \
 						if bank_account_currency==self.company_currency else self.paid_amount,
 					"cost_center": self.cost_center
-				}, bank_account_currency)
+				}, bank_account_currency, item=self)
 			)
 
 	def make_write_off_gl_entry(self, gl_entries):
@@ -873,7 +890,7 @@ class PurchaseInvoice(BuyingController):
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
 					"cost_center": self.cost_center
-				}, self.party_account_currency)
+				}, self.party_account_currency, item=self)
 			)
 			gl_entries.append(
 				self.get_gl_dict({
@@ -883,7 +900,7 @@ class PurchaseInvoice(BuyingController):
 					"credit_in_account_currency": self.base_write_off_amount \
 						if write_off_account_currency==self.company_currency else self.write_off_amount,
 					"cost_center": self.cost_center or self.write_off_cost_center
-				})
+				}, item=self)
 			)
 
 	def make_gle_for_rounding_adjustment(self, gl_entries):
@@ -902,8 +919,7 @@ class PurchaseInvoice(BuyingController):
 					"debit_in_account_currency": self.rounding_adjustment,
 					"debit": self.base_rounding_adjustment,
 					"cost_center": self.cost_center or round_off_cost_center,
-				}
-			))
+				}, item=self))
 
 	def on_cancel(self):
 		super(PurchaseInvoice, self).on_cancel()
@@ -1021,6 +1037,40 @@ class PurchaseInvoice(BuyingController):
 
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
+
+	def set_status(self, update=False, status=None, update_modified=True):
+		if self.is_new():
+			if self.get('amended_from'):
+				self.status = 'Draft'
+			return
+
+		precision = self.precision("outstanding_amount")
+		outstanding_amount = flt(self.outstanding_amount, precision)
+		due_date = getdate(self.due_date)
+		nowdate = getdate()
+
+		if not status:
+			if self.docstatus == 2:
+				status = "Cancelled"
+			elif self.docstatus == 1:
+				if outstanding_amount > 0 and due_date < nowdate:
+					self.status = "Overdue"
+				elif outstanding_amount > 0 and due_date >= nowdate:
+					self.status = "Unpaid"
+				#Check if outstanding amount is 0 due to debit note issued against invoice
+				elif outstanding_amount <= 0 and self.is_return == 0 and frappe.db.get_value('Purchase Invoice', {'is_return': 1, 'return_against': self.name, 'docstatus': 1}):
+					self.status = "Debit Note Issued"
+				elif self.is_return == 1:
+					self.status = "Return"
+				elif outstanding_amount<=0:
+					self.status = "Paid"
+				else:
+					self.status = "Submitted"
+			else:
+				self.status = "Draft"
+
+		if update:
+			self.db_set('status', self.status, update_modified = update_modified)
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context

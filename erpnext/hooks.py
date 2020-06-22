@@ -41,7 +41,7 @@ boot_session = "erpnext.startup.boot.boot_session"
 notification_config = "erpnext.startup.notifications.get_notification_config"
 get_help_messages = "erpnext.utilities.activation.get_help_messages"
 leaderboards = "erpnext.startup.leaderboard.get_leaderboards"
-
+filters_config = "erpnext.startup.filters.get_filters_config"
 
 on_session_creation = [
 	"erpnext.portal.utils.create_customer_or_supplier",
@@ -238,6 +238,9 @@ doc_events = {
 		"on_cancel": "erpnext.regional.italy.utils.sales_invoice_on_cancel",
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
+	"Purchase Invoice": {
+		"on_submit": "erpnext.regional.india.utils.make_reverse_charge_entries"
+	},
 	"Payment Entry": {
 		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.update_payment_req_status"],
 		"on_trash": "erpnext.regional.check_deletion_permission"
@@ -308,7 +311,8 @@ scheduler_events = {
 		"erpnext.crm.doctype.email_campaign.email_campaign.send_email_to_leads_or_contacts",
 		"erpnext.crm.doctype.email_campaign.email_campaign.set_email_campaign_status",
 		"erpnext.selling.doctype.quotation.quotation.set_expired_status",
-		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_appointment_status"
+		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_appointment_status",
+		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status"
 	],
 	"daily_long": [
 		"erpnext.setup.doctype.email_digest.email_digest.send",
@@ -319,8 +323,7 @@ scheduler_events = {
 		"erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual.process_loan_interest_accrual_for_term_loans"
 	],
 	"monthly_long": [
-		"erpnext.accounts.deferred_revenue.convert_deferred_revenue_to_income",
-		"erpnext.accounts.deferred_revenue.convert_deferred_expense_to_expense",
+		"erpnext.accounts.deferred_revenue.process_deferred_accounting",
 		"erpnext.hr.utils.allocate_earned_leaves",
 		"erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual.process_loan_interest_accrual_for_demand_loans"
 	]

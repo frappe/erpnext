@@ -1,10 +1,12 @@
 {
+ "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-04-10 11:45:37",
  "doctype": "DocType",
  "document_type": "Document",
+ "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
   "organization_lead",
@@ -447,7 +449,7 @@
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2020-04-08 22:26:11.687110",
+ "modified": "2020-06-18 14:39:41.835416",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",
@@ -504,20 +506,13 @@
    "read": 1,
    "report": 1,
    "role": "Sales User"
-  },
-  {
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Guest",
-   "share": 1
   }
  ],
  "search_fields": "lead_name,lead_owner,status",
+ "sender_field": "email_id",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "subject_field": "title",
  "title_field": "title"
 }

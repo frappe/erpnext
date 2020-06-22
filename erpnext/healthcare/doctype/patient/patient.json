@@ -24,13 +24,20 @@
   "image",
   "column_break_14",
   "status",
-  "inpatient_status",
   "inpatient_record",
-  "customer",
+  "inpatient_status",
+  "report_preference",
   "mobile",
   "email",
   "phone",
-  "report_preference",
+  "customer_details_section",
+  "customer",
+  "customer_group",
+  "territory",
+  "column_break_24",
+  "default_currency",
+  "default_price_list",
+  "language",
   "personal_and_social_history",
   "occupation",
   "column_break_25",
@@ -52,9 +59,7 @@
   "surrounding_factors",
   "other_risk_factors",
   "more_info",
-  "patient_details",
-  "ac_sb",
-  "default_currency"
+  "patient_details"
  ],
  "fields": [
   {
@@ -67,6 +72,7 @@
   {
    "fieldname": "inpatient_status",
    "fieldtype": "Select",
+   "in_preview": 1,
    "label": "Inpatient Status",
    "options": "\nAdmission Scheduled\nAdmitted\nDischarge Scheduled",
    "read_only": 1
@@ -101,6 +107,7 @@
   {
    "fieldname": "sex",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Gender",
    "options": "Gender",
    "reqd": 1
@@ -109,6 +116,7 @@
    "bold": 1,
    "fieldname": "blood_group",
    "fieldtype": "Select",
+   "in_preview": 1,
    "label": "Blood Group",
    "options": "\nA Positive\nA Negative\nAB Positive\nAB Negative\nB Positive\nB Negative\nO Positive\nO Negative"
   },
@@ -116,6 +124,7 @@
    "bold": 1,
    "fieldname": "dob",
    "fieldtype": "Date",
+   "in_preview": 1,
    "label": "Date of birth"
   },
   {
@@ -142,6 +151,7 @@
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
+   "in_preview": 1,
    "label": "Image",
    "no_copy": 1,
    "print_hide": 1,
@@ -157,7 +167,8 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Customer",
-   "options": "Customer"
+   "options": "Customer",
+   "set_only_once": 1
   },
   {
    "fieldname": "report_preference",
@@ -171,7 +182,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Mobile"
+   "label": "Mobile",
+   "options": "Phone"
   },
   {
    "bold": 1,
@@ -186,7 +198,8 @@
    "fieldname": "phone",
    "fieldtype": "Data",
    "in_filter": 1,
-   "label": "Phone"
+   "label": "Phone",
+   "options": "Phone"
   },
   {
    "collapsible": 1,
@@ -268,25 +281,25 @@
    "fieldname": "tobacco_past_use",
    "fieldtype": "Data",
    "ignore_xss_filter": 1,
-   "label": "Tobacco Consumption Habbits (Past)"
+   "label": "Tobacco Consumption (Past)"
   },
   {
    "fieldname": "tobacco_current_use",
    "fieldtype": "Data",
    "ignore_xss_filter": 1,
-   "label": "Tobacco Consumption Habbits (Present)"
+   "label": "Tobacco Consumption (Present)"
   },
   {
    "fieldname": "alcohol_past_use",
    "fieldtype": "Data",
    "ignore_xss_filter": 1,
-   "label": "Alcohol Consumption Habbits (Past)"
+   "label": "Alcohol Consumption (Past)"
   },
   {
    "fieldname": "alcohol_current_use",
    "fieldtype": "Data",
    "ignore_user_permissions": 1,
-   "label": "Alcohol Consumption Habbits (Present)"
+   "label": "Alcohol Consumption (Present)"
   },
   {
    "fieldname": "column_break_32",
@@ -321,19 +334,10 @@
    "label": "Patient Details"
   },
   {
-   "collapsible": 1,
-   "fieldname": "ac_sb",
-   "fieldtype": "Section Break",
-   "label": "Account Details"
-  },
-  {
    "fieldname": "default_currency",
    "fieldtype": "Link",
-   "hidden": 1,
-   "ignore_xss_filter": 1,
-   "label": "Default Currency",
-   "options": "Currency",
-   "print_hide": 1
+   "label": "Billing Currency",
+   "options": "Currency"
   },
   {
    "fieldname": "last_name",
@@ -351,13 +355,47 @@
    "fieldname": "middle_name",
    "fieldtype": "Data",
    "label": "Middle Name (optional)"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "customer_details_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Details"
+  },
+  {
+   "fieldname": "customer_group",
+   "fieldtype": "Link",
+   "label": "Customer Group",
+   "options": "Customer Group"
+  },
+  {
+   "fieldname": "territory",
+   "fieldtype": "Link",
+   "label": "Territory",
+   "options": "Territory"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_price_list",
+   "fieldtype": "Link",
+   "label": "Default Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "label": "Print Language",
+   "options": "Language"
   }
  ],
  "icon": "fa fa-user",
  "image_field": "image",
  "links": [],
  "max_attachments": 50,
- "modified": "2020-04-06 12:55:30.807744",
+ "modified": "2020-04-25 17:24:32.146415",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",
