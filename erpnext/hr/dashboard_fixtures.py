@@ -24,24 +24,19 @@ def get_human_resource_dashboard():
 		"dashboard_name": "Human Resource",
 		"is_default": 1,
 		"charts": [
-			{ "chart": "Outgoing Salary", "width": "Full"},
+			{ "chart": "Attendance Count", "width": "Full"},
 			{ "chart": "Gender Diversity Ratio", "width": "Half"},
 			{ "chart": "Job Application Status", "width": "Half"},
 			{ "chart": 'Designation Wise Employee Count', "width": "Half"},
 			{ "chart": 'Department Wise Employee Count', "width": "Half"},
 			{ "chart": 'Designation Wise Openings', "width": "Half"},
-			{ "chart": 'Department Wise Openings', "width": "Half"},
-			{ "chart": "Attendance Count", "width": "Full"}
+			{ "chart": 'Department Wise Openings', "width": "Half"}
 		],
 		"cards": [
 			{"card": "Total Employees"},
 			{"card": "New Joinees (Last year)"},
 			{'card': "Employees Left (Last year)"},
-			{'card': "Total Job Openings (Last month)"},
 			{'card': "Total Applicants (Last month)"},
-			{'card': "Shortlisted Candidates (Last month)"},
-			{'card': "Rejected Candidates (Last month)"},
-			{'card': "Total Job Offered (Last month)"},
 		]
 	}
 
@@ -69,13 +64,6 @@ def get_charts():
 		get_dashboards_chart_doc('Job Application Status', "Group By", "Pie",
 			document_type = "Job Applicant", group_by_type="Count", group_by_based_on="status",
 			filters_json = json.dumps([["Job Applicant", "creation", "Previous", "1 month"]]))
-	)
-
-	dashboard_charts.append(
-		get_dashboards_chart_doc('Outgoing Salary', "Sum", "Line",
-			document_type = "Salary Slip", based_on="end_date",
-			value_based_on = "rounded_total", time_interval = "Monthly", timeseries = 1,
-			filters_json = json.dumps([["Salary Slip", "docstatus", "=", 1]]))
 	)
 
 	custom_options = '''{
@@ -153,32 +141,6 @@ def get_number_cards():
 		get_number_cards_doc("Job Applicant", "Total Applicants (Last month)", filters_json = json.dumps([
 				["Job Applicant", "creation", "Previous", "1 month"]
 			])
-		)
-	)
-
-	number_cards.append(
-		get_number_cards_doc("Job Opening", "Total Job Openings (Last month)", func = "Sum",
-			aggregate_function_based_on = "planned_vacancies",
-			filters_json = json.dumps([["Job Opening", "creation", "Previous", "1 month"]])
-		)
-	)
-	number_cards.append(
-		get_number_cards_doc("Job Applicant", "Shortlisted Candidates (Last month)", filters_json = json.dumps([
-				["Job Applicant", "status", "=", "Accepted"],
-				["Job Applicant", "creation", "Previous", "1 month"]
-			])
-		)
-	)
-	number_cards.append(
-		get_number_cards_doc("Job Applicant", "Rejected Candidates (Last month)", filters_json = json.dumps([
-				["Job Applicant", "status", "=", "Rejected"],
-				["Job Applicant", "creation", "Previous", "1 month"]
-			])
-		)
-	)
-	number_cards.append(
-		get_number_cards_doc("Job Offer", "Total Job Offered (Last month)",
-			filters_json = json.dumps([["Job Offer", "creation", "Previous", "1 month"]])
 		)
 	)
 
