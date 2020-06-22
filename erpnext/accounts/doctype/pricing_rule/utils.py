@@ -37,11 +37,11 @@ def get_pricing_rules(args, doc=None):
 		pricing_rules_all.extend(_get_pricing_rules(apply_on, args, values))
 
 	# removing duplicate pricing rule
-	pricing_rules_title = []
+	pricing_rules_name = []
 	pricing_rules = []
 	for p in pricing_rules_all:
-		if p['title'] not in pricing_rules_title:
-			pricing_rules_title.append(p['title'])
+		if p['name'] not in pricing_rules_name:
+			pricing_rules_name.append(p['name'])
 			pricing_rules.append(p)
 
 	rules = []
