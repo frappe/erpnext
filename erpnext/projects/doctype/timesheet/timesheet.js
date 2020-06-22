@@ -161,7 +161,6 @@ frappe.ui.form.on("Timesheet Detail", {
 	},
 
 	to_time: function(frm, cdt, cdn) {
-		debugger;
 		var child = locals[cdt][cdn];
 		if(frm._setting_hours) return;
 		var hours = moment(child.to_time).diff(moment(child.from_time), "seconds") / 3600;
@@ -178,7 +177,6 @@ frappe.ui.form.on("Timesheet Detail", {
 		});
 	},
 	hours: function(frm, cdt, cdn) {
-		debugger;
 		calculate_end_time(frm, cdt, cdn);
 	},
 
