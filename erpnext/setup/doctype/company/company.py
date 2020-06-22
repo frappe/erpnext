@@ -46,6 +46,7 @@ class Company(NestedSet):
 		self.validate_currency()
 		self.validate_coa_input()
 		self.validate_perpetual_inventory()
+		self.validate_perpetual_inventory_for_non_stock_items()
 		self.check_country_change()
 		self.set_chart_of_accounts()
 		self.validate_parent_company()
@@ -181,6 +182,12 @@ class Company(NestedSet):
 			if cint(self.enable_perpetual_inventory) == 1 and not self.default_inventory_account:
 				frappe.msgprint(_("Set default inventory account for perpetual inventory"),
 					alert=True, indicator='orange')
+
+	def validate_perpetual_inventory_for_non_stock_items(self):
+		if not self.get("__islocal"):
+			if cint(self.enable_perpetual_inventory_for_non_stock_items) == 1 and not self.service_received_but_not_billed:
+				frappe.throw(_("Set default {0} account for perpetual inventory for non stock items").format(
+					frappe.bold('Service Received But Not Billed')))
 
 	def check_country_change(self):
 		frappe.flags.country_change = False
