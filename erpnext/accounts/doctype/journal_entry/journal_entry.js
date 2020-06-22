@@ -347,8 +347,8 @@ cur_frm.cscript.update_totals = function(doc) {
 	var td=0.0; var tc =0.0;
 	var accounts = doc.accounts || [];
 	for(var i in accounts) {
-		td += flt(accounts[i].debit_in_account_currency, precision("debit", accounts[i]));
-		tc += flt(accounts[i].credit_in_account_currency, precision("credit", accounts[i]));
+		td += flt(accounts[i].debit, precision("debit", accounts[i]));
+		tc += flt(accounts[i].credit, precision("credit", accounts[i]));
 	}
 	var doc = locals[doc.doctype][doc.name];
 	doc.total_debit = td;
