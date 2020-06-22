@@ -883,7 +883,12 @@ class Item(WebsiteGenerator):
 			linked_doctypes += ["Sales Order Item", "Purchase Order Item", "Material Request Item"]
 
 		for doctype in linked_doctypes:
-			if frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}) or \
+			if doctype in ("Purchase Invoice Item", "Sales Invoice Item",):
+				# If Invoice has Stock impact, only then consider it.
+				if self.stock_ledger_created():
+					return True
+
+			elif frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}) or \
 				frappe.db.get_value("Production Order",
 					filters={"production_item": self.name, "docstatus": 1}):
 				return True
