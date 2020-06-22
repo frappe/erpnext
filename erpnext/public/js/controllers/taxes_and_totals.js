@@ -329,6 +329,16 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		var tax_rate = this._get_tax_rate(tax, item_tax_map);
 		var current_tax_amount = 0.0;
 
+		// To set row_id by default as previous row.
+		if(["On Previous Row Amount", "On Previous Row Total"].includes(tax.charge_type)) {
+			if (tax.idx === 1) {
+				frappe.throw(
+					__("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"));
+			}
+			if (!tax.row_id) {
+				tax.row_id = tax.idx - 1;
+			}
+		}
 		if(tax.charge_type == "Actual") {
 			// distribute the tax amount proportionally to each item row
 			var actual = flt(tax.tax_amount, precision("tax_amount", tax));
