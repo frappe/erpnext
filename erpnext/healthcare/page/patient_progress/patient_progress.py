@@ -24,6 +24,21 @@ def get_therapy_sessions_count(patient):
 
 
 @frappe.whitelist()
+def get_patient_heatmap_data(patient, date):
+	return dict(frappe.db.sql('''
+		SELECT
+			unix_timestamp(communication_date), count(*)
+		FROM
+			`tabPatient Medical Record`
+		WHERE
+			communication_date > subdate('{date}', interval 1 year) and
+			communication_date < subdate('{date}', interval -1 year) and
+			patient = '{patient}'
+		GROUP BY communication_date
+		ORDER BY communication_date asc'''.format(patient=patient, date=date)))
+
+
+@frappe.whitelist()
 def get_therapy_sessions_distribution_data(patient, field):
 	if field == 'therapy_type':
 		result = frappe.db.get_all('Therapy Session',
@@ -115,9 +130,9 @@ def get_therapy_assessment_correlation_data(patient, assessment_template):
 	return {
 		'labels': [r[0] for r in result if r[0] != None],
 		'datasets': [
-			{ 'name': _('Therapy Sessions'), 'chartType': 'bar', 'values': [r[1] for r in result if r[0] != None] },
-			{ 'name': _('Average Score Obtained'), 'chartType': 'line', 'values': [round(r[2], 2) for r in result if r[0] != None] },
-			{ 'name': _('Maximum Score'), 'chartType': 'line', 'values': [r[3] for r in result if r[0] != None] }
+			{ 'name': _('Sessions'), 'chartType': 'bar', 'values': [r[1] for r in result if r[0] != None] },
+			{ 'name': _('Avg Score'), 'chartType': 'line', 'values': [round(r[2], 2) for r in result if r[0] != None] },
+			{ 'name': _('Max Score'), 'chartType': 'line', 'values': [r[3] for r in result if r[0] != None] }
 		]
 	}
 

@@ -63,6 +63,7 @@ class PatientProgress {
 		this.page.set_title(__('Patient Progress'));
 		this.main_section.empty().append(frappe.render_template('patient_progress'));
 		this.render_patient_details();
+		this.render_heatmap();
 		this.render_percentage_chart('therapy_type', 'Therapy Type Distribution');
 		this.create_percentage_chart_filters();
 		this.show_therapy_progress();
@@ -132,6 +133,39 @@ class PatientProgress {
 			};
 			frappe.set_route('patient_history');
 		});
+	}
+
+	render_heatmap() {
+		this.heatmap = new frappe.Chart('.patient-heatmap', {
+			type: 'heatmap',
+			countLabel: 'Interactions',
+			data: {},
+			discreteDomains: 0,
+		});
+		this.update_heatmap_data();
+		this.create_heatmap_chart_filters();
+	}
+
+	update_heatmap_data(date_from) {
+		frappe.xcall('erpnext.healthcare.page.patient_progress.patient_progress.get_patient_heatmap_data', {
+			patient: this.patient_id,
+			date: date_from || frappe.datetime.year_start(),
+		}).then((r) => {
+			this.heatmap.update( {dataPoints: r} );
+		});
+	}
+
+	create_heatmap_chart_filters() {
+		let filters = [
+			{
+				label: frappe.dashboard_utils.get_year(frappe.datetime.now_date()),
+				options: frappe.dashboard_utils.get_years_since_creation(frappe.boot.user.creation),
+				action: (selected_item) => {
+					this.update_heatmap_data(frappe.datetime.obj_to_str(selected_item));
+				}
+			},
+		];
+		frappe.dashboard_utils.render_chart_filters(filters, 'chart-filter', '.heatmap-container');
 	}
 
 	render_percentage_chart(field, title) {
@@ -214,7 +248,6 @@ class PatientProgress {
 			if (!this.line_chart) {
 				this.wrapper.find('.therapy-progress-line-chart').show();
 				this.therapy_line_chart = new frappe.Chart('.therapy-progress-line-chart', {
-					title: __('Therapy Progress'),
 					type: 'axis-mixed',
 					height: 250,
 					data: data,
@@ -271,7 +304,6 @@ class PatientProgress {
 			if (!this.assessment_line_chart) {
 				this.wrapper.find('.assessment-results-line-chart').show();
 				this.assessment_line_chart = new frappe.Chart('.assessment-results-line-chart', {
-					title: __('Assessment Results'),
 					type: 'axis-mixed',
 					height: 250,
 					data: data,
@@ -329,7 +361,6 @@ class PatientProgress {
 			if (!this.correlation_chart) {
 				this.wrapper.find('.therapy-assessment-correlation-line-chart').show();
 				this.correlation_chart = new frappe.Chart('.therapy-assessment-correlation-chart', {
-					title: __('Correlation'),
 					type: 'axis-mixed',
 					height: 300,
 					data: data,
@@ -383,7 +414,6 @@ class PatientProgress {
 			if (!this.parameter_chart) {
 				this.wrapper.find('.assessment-parameter-progress-chart').show();
 				this.parameter_chart = new frappe.Chart('.assessment-parameter-progress-chart', {
-					title: __('Assessment Parameter Progress'),
 					type: 'line',
 					height: 250,
 					data: data,
