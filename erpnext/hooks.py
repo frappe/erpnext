@@ -41,7 +41,7 @@ boot_session = "erpnext.startup.boot.boot_session"
 notification_config = "erpnext.startup.notifications.get_notification_config"
 get_help_messages = "erpnext.utilities.activation.get_help_messages"
 leaderboards = "erpnext.startup.leaderboard.get_leaderboards"
-
+filters_config = "erpnext.startup.filters.get_filters_config"
 
 on_session_creation = [
 	"erpnext.portal.utils.create_customer_or_supplier",
@@ -237,6 +237,9 @@ doc_events = {
 		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.regional.italy.utils.sales_invoice_on_submit"],
 		"on_cancel": "erpnext.regional.italy.utils.sales_invoice_on_cancel",
 		"on_trash": "erpnext.regional.check_deletion_permission"
+	},
+	"Purchase Invoice": {
+		"on_submit": "erpnext.regional.india.utils.make_reverse_charge_entries"
 	},
 	"Payment Entry": {
 		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.update_payment_req_status"],

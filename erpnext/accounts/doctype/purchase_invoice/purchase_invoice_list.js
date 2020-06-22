@@ -16,7 +16,7 @@ frappe.listview_settings['Purchase Invoice'] = {
 			} else if(frappe.datetime.get_diff(doc.due_date) < 0) {
 				return [__("Overdue"), "red", "outstanding_amount,>,0|due_date,<,Today"];
 			} else {
-				return [__("Unpaid"), "orange", "outstanding_amount,>,0|due,>=,Today"];
+				return [__("Unpaid"), "orange", "outstanding_amount,>,0|due_date,>=,Today"];
 			}
 		} else if(cint(doc.is_return)) {
 			return [__("Return"), "darkgrey", "is_return,=,Yes"];
