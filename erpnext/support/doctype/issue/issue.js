@@ -1,3 +1,5 @@
+frappe.provide('frappe.phone_call');
+
 frappe.ui.form.on("Issue", {
 	onload: function(frm) {
 		frm.email_field = "raised_by";
@@ -103,6 +105,8 @@ frappe.ui.form.on("Issue", {
 				frm.save();
 			});
 		}
+
+		frm.events.setup_call_buttons(frm);
 	},
 
 	reset_service_level_agreement: function(frm) {
@@ -192,6 +196,22 @@ frappe.ui.form.on("Issue", {
 			}
 		}
 	},
+
+	setup_call_buttons(frm) {
+		let customer = frm.doc.customer;
+		if (frappe.phone_call.handler && customer) {
+			frm.add_custom_button(__("Call {0}", [customer]), function () {
+				frappe.db.get_value('Customer', customer, 'mobile_no').then(r => {
+					const mobile_no = r.message.mobile_no;
+					if (mobile_no) {
+						frappe.phone_call.handler(mobile_no, frm);
+					} else {
+						frappe.msgprint(__('Please set primary number for {0}', [frappe.utils.get_form_link('Customer', customer, true)]));
+					}
+				});
+			});
+		}
+	}
 });
 
 function set_time_to_resolve_and_response(frm) {

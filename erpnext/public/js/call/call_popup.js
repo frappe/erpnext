@@ -140,6 +140,11 @@ class CallPopup {
 				'depends_on': () => !this.get_caller_name()
 			}, {
 				'fieldtype': 'Button',
+				'label': __('Create New Customer'),
+				'click': this.create_new_customer(),
+				'depends_on': () => !this.get_caller_name()
+			}, {
+				'fieldtype': 'Button',
 				'label': __('Create New Lead'),
 				'click': () => frappe.new_doc('Lead', { 'mobile_no': this.caller_number }),
 				'depends_on': () => !this.get_caller_name()
@@ -284,6 +289,10 @@ class CallPopup {
 
 	is_known_caller() {
 		return Boolean(this.get_caller_name());
+	}
+
+	create_new_customer() {
+		frappe.get_doc('Customer', { 'mobile_no': this.caller_number });
 	}
 }
 
