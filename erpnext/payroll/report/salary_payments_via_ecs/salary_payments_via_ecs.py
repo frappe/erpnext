@@ -86,6 +86,7 @@ def get_conditions(filters):
 
 	if filters.get("period"):
 		conditions.append("month(start_date) = '%s' " % (filters["period"]))
+		conditions.append("year(start_date) = '%s' " % (frappe.utils.getdate().year))
 
 	return " and ".join(conditions)
 
