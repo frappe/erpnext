@@ -1376,6 +1376,12 @@
    "read": 1,
    "role": "Purchase Manager",
    "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts User"
   }
  ],
  "search_fields": "status, transaction_date, supplier,grand_total",

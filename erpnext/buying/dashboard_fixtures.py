@@ -155,8 +155,7 @@ def get_number_cards(company, fiscal_year_name, start_date, end_date):
 				["Purchase Order", "transaction_date", "Between", [start_date, end_date], False],
 				["Purchase Order", "status", "not in", ["Draft", "Cancelled", "Closed", None], False],
 				["Purchase Order", "docstatus", "=", 1, False],
-				["Purchase Order", "company", "=", company.name, False],
-				["Purchase Order", "transaction_date", "Between", [start_date,end_date], False]
+				["Purchase Order", "company", "=", company.name, False]
 			]),
 			"function": "Sum",
 			"is_public": 1,
