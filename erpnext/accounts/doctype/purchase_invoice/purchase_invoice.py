@@ -571,16 +571,18 @@ class PurchaseInvoice(BuyingController):
 						amount = flt(item.base_net_amount + item.item_tax_amount, item.precision("base_net_amount"))
 
 					auto_accounting_for_non_stock_items = cint(frappe.db.get_value('Company', self.company, 'enable_perpetual_inventory_for_non_stock_items'))
-					service_received_but_not_billed_account = self.get_company_default("service_received_but_not_billed")
 
-					if item.purchase_receipt and auto_accounting_for_non_stock_items:
-						# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
-						expense_booked_in_pr = frappe.db.get_value('GL Entry', {'is_cancelled': 0,
-							'voucher_type': 'Purchase Receipt', 'voucher_no': item.purchase_receipt, 'voucher_detail_no': item.pr_detail,
-							'account':service_received_but_not_billed_account}, ['name'])
+					if auto_accounting_for_non_stock_items:
+						service_received_but_not_billed_account = self.get_company_default("service_received_but_not_billed")
 
-						if expense_booked_in_pr:
-							expense_account = service_received_but_not_billed_account
+						if item.purchase_receipt:
+							# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
+							expense_booked_in_pr = frappe.db.get_value('GL Entry', {'is_cancelled': 0,
+								'voucher_type': 'Purchase Receipt', 'voucher_no': item.purchase_receipt, 'voucher_detail_no': item.pr_detail,
+								'account':service_received_but_not_billed_account}, ['name'])
+
+							if expense_booked_in_pr:
+								expense_account = service_received_but_not_billed_account
 
 					gl_entries.append(self.get_gl_dict({
 							"account": expense_account,
