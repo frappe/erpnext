@@ -37,6 +37,9 @@
   "sample_uom",
   "sample_qty",
   "sample_details",
+  "result_legend_section",
+  "legend_print_position",
+  "result_legend",
   "change_in_item"
  ],
  "fields": [
@@ -237,10 +240,26 @@
    "fieldtype": "Text",
    "ignore_xss_filter": 1,
    "label": "Collection Details"
+  },
+  {
+   "fieldname": "result_legend_section",
+   "fieldtype": "Section Break",
+   "label": "Result Legend"
+  },
+  {
+   "fieldname": "result_legend",
+   "fieldtype": "Text Editor",
+   "label": "Result Legend"
+  },
+  {
+   "fieldname": "legend_print_position",
+   "fieldtype": "Select",
+   "label": "Print In Result",
+   "options": "Bottom\nTop\nBoth"
   }
  ],
  "links": [],
- "modified": "2020-03-25 16:53:01.740103",
+ "modified": "2020-06-19 19:51:55.589278",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",
