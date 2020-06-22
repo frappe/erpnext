@@ -221,7 +221,6 @@ frappe.ui.form.on("Expense Claim", {
 	},
 
 	update_employee_advance_claimed_amount: function(frm) {
-		console.log("update_employee_advance_claimed_amount")
 		let amount_to_be_allocated = frm.doc.grand_total;
 		$.each(frm.doc.advances || [], function(i, advance){
 			if (amount_to_be_allocated >= advance.unclaimed_amount){
@@ -297,6 +296,16 @@ frappe.ui.form.on("Expense Claim", {
 		frm.events.get_advances(frm);
 	},
 
+	cost_center: function(frm) {
+		frm.events.set_child_cost_center(frm);
+	},
+	set_child_cost_center: function(frm){
+		(frm.doc.expenses || []).forEach(function(d) {
+			if (!d.cost_center){
+				d.cost_center = frm.doc.cost_center;
+			}
+		});
+	},
 	get_taxes: function(frm) {
 		if(frm.doc.taxes) {
 			frappe.call({
@@ -339,6 +348,9 @@ frappe.ui.form.on("Expense Claim", {
 });
 
 frappe.ui.form.on("Expense Claim Detail", {
+	expenses_add: function(frm, cdt, cdn) {
+		frm.events.set_child_cost_center(frm);
+	},
 	amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.amount);

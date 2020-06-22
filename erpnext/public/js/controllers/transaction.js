@@ -535,6 +535,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 								() => me.frm.script_manager.trigger("price_list_rate", cdt, cdn),
 								() => me.toggle_conversion_factor(item),
 								() => {
+									if (show_batch_dialog && !item.has_serial_no
+										&& !item.has_batch_no) {
+										show_batch_dialog = false;
+									}
+								},
+								() => {
 									if (show_batch_dialog)
 										return frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"])
 											.then((r) => {
