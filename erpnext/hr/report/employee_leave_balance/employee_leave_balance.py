@@ -3,13 +3,13 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import flt
+from frappe.utils import flt, add_days
 from frappe import _
-from erpnext.hr.doctype.leave_application.leave_application import get_leaves_for_period, get_leave_balance_on, get_leave_allocation_records
+from erpnext.hr.doctype.leave_application.leave_application import get_leaves_for_period, get_leave_balance_on
 
 def execute(filters=None):
 	if filters.to_date <= filters.from_date:
-		frappe.throw(_('From date can not be greater than than To date'))
+		frappe.throw(_('"From date" can not be greater than or equal to "To date"'))
 
 	columns = get_columns()
 	data = get_data(filters)
@@ -104,14 +104,17 @@ def get_data(filters):
 				new_allocation, expired_leaves = get_allocated_and_expired_leaves(filters.from_date, filters.to_date, employee.name, leave_type)
 
 
-				opening = get_leave_balance_on(employee.name, leave_type, filters.from_date)
-				closing = get_leave_balance_on(employee.name, leave_type, filters.to_date)
+				opening = get_leave_balance_on(employee.name, leave_type, add_days(filters.from_date, -1)) #allocation boundary condition
 
 				row.leaves_allocated = new_allocation
 				row.leaves_expired = expired_leaves - leaves_taken if expired_leaves - leaves_taken > 0 else 0
 				row.opening_balance = opening
 				row.leaves_taken = leaves_taken
-				row.closing_balance = closing
+
+				# not be shown on the basis of days left it create in user mind for carry_forward leave
+				row.closing_balance = (new_allocation + opening - (row.leaves_expired + leaves_taken))
+
+
 				row.indent = 1
 				data.append(row)
 				new_leaves_allocated = 0
@@ -177,7 +180,7 @@ def get_allocated_and_expired_leaves(from_date, to_date, employee, leave_type):
 	}, as_dict=1)
 
 	for record in records:
-		if record.to_date <= getdate(to_date):
+		if record.to_date < getdate(to_date):
 			expired_leaves += record.leaves
 
 		if record.from_date >= getdate(from_date):

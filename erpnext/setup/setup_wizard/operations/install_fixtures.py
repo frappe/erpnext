@@ -50,7 +50,7 @@ def install(country=None):
 			'is_group': 0, 'parent_item_group': _('All Item Groups') },
 
 		# salary component
-		{'doctype': 'Salary Component', 'salary_component': _('Income Tax'), 'description': _('Income Tax'), 'type': 'Deduction'},
+		{'doctype': 'Salary Component', 'salary_component': _('Income Tax'), 'description': _('Income Tax'), 'type': 'Deduction', 'is_income_tax_component': 1},
 		{'doctype': 'Salary Component', 'salary_component': _('Basic'), 'description': _('Basic'), 'type': 'Earning'},
 		{'doctype': 'Salary Component', 'salary_component': _('Arrear'), 'description': _('Arrear'), 'type': 'Earning'},
 		{'doctype': 'Salary Component', 'salary_component': _('Leave Encashment'), 'description': _('Leave Encashment'), 'type': 'Earning'},
@@ -336,13 +336,14 @@ def add_uom_data():
 				"category_name": _(d.get("category"))
 			}).insert(ignore_permissions=True)
 
-		uom_conversion = frappe.get_doc({
-			"doctype": "UOM Conversion Factor",
-			"category": _(d.get("category")),
-			"from_uom": _(d.get("from_uom")),
-			"to_uom": _(d.get("to_uom")),
-			"value": d.get("value")
-		}).insert(ignore_permissions=True)
+		if not frappe.db.exists("UOM Conversion Factor", {"from_uom": _(d.get("from_uom")), "to_uom": _(d.get("to_uom"))}):
+			uom_conversion = frappe.get_doc({
+				"doctype": "UOM Conversion Factor",
+				"category": _(d.get("category")),
+				"from_uom": _(d.get("from_uom")),
+				"to_uom": _(d.get("to_uom")),
+				"value": d.get("value")
+			}).insert(ignore_permissions=True)
 
 def add_market_segments():
 	records = [
