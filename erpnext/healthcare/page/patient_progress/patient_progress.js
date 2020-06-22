@@ -107,7 +107,30 @@ class PatientProgress {
 					total_therapy_sessions: this.total_therapy_sessions,
 					therapy_sessions_this_month: this.therapy_sessions_this_month
 				}));
+
+				this.setup_patient_profile_links();
 			});
+		});
+	}
+
+	setup_patient_profile_links() {
+		this.wrapper.find('.patient-profile-link').on('click', () => {
+			frappe.set_route('Form', 'Patient', this.patient_id);
+		});
+
+		this.wrapper.find('.therapy-plan-link').on('click', () => {
+			frappe.route_options = {
+				'patient': this.patient_id,
+				'docstatus': 1
+			};
+			frappe.set_route('List', 'Therapy Plan');
+		});
+
+		this.wrapper.find('.patient-history').on('click', () => {
+			frappe.route_options = {
+				'patient': this.patient_id
+			};
+			frappe.set_route('patient_history');
 		});
 	}
 
