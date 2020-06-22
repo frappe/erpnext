@@ -9,7 +9,7 @@
 			<p class="hero-subtitle">{{ greeting_subtitle }}</p>
 			{% endif %}
 		</div>
-		<div class="search-container mt-4" style="max-width: 500px;">
+		<div class="search-container">
 			<div class="website-search" id="search-container">
 				<div class="dropdown">
 					<div class="search-icon">
@@ -81,7 +81,6 @@
 	</div>
 </section>
 {% endif %}
-
 {% endblock %}
 
 {%- block script -%}
@@ -90,4 +89,13 @@
 		frappe.setup_search('#search-container', 'kb');
 	});
 </script>
+{%- endblock -%}
+
+{%- block style -%}
+<style>
+	.search-container {
+		margin-top: 1.2rem;
+		max-width: 500px;
+	}	
+</style>
 {%- endblock -%}
