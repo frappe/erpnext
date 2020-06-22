@@ -170,11 +170,10 @@ class TransactionBase(StatusUpdater):
 			cur_doc_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")
 
 			if last_transaction_time and get_datetime(cur_doc_posting_datetime) < get_datetime(last_transaction_time):
-				frappe.throw(_("""Last Stock Transaction for item {0} was on {1}.
-					Stock Transactions for Item {2} cannot be posted before this time.
-					Please remove this item and try to submit again or update the posting time""").format(
-					frappe.bold(item.item_code), frappe.bold(last_transaction_time), frappe.bold(item.item_code)),
-					title=_("Backdated Stock Entry"))
+				msg = _("Last Stock Transaction for item {0} was on {1}.").format(frappe.bold(item.item_code), frappe.bold(last_transaction_time))
+				msg += "<br><br>" + _("Stock Transactions for Item {0} cannot be posted before this time.").format(frappe.bold(item.item_code))
+				msg += "<br><br>" + _("Please remove this item and try to submit again or update the posting time.")
+				frappe.throw(msg, title=_("Backdated Stock Entry"))
 
 def delete_events(ref_type, ref_name):
 	events = frappe.db.sql_list(""" SELECT
