@@ -872,8 +872,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 			parent_account="Current Assets - _TC", company="_Test Company")
 
 		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		acc_settings.book_deferred_entries_via_journal_entry = 'Yes'
-		acc_settings.submit_journal_entries = 'Yes'
+		acc_settings.book_deferred_entries_via_journal_entry = 1
+		acc_settings.submit_journal_entries = 1
 		acc_settings.save()
 
 		item = create_item("_Test Item for Deferred Accounting")
@@ -924,8 +924,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
 
 		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		acc_settings.book_deferred_entries_via_journal_entry = 'No'
-		acc_settings.submit_journal_entriessubmit_journal_entries = 'No'
+		acc_settings.book_deferred_entries_via_journal_entry = 0
+		acc_settings.submit_journal_entriessubmit_journal_entries = 0
 		acc_settings.save()
 
 

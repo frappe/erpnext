@@ -205,21 +205,19 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "No",
-   "description": "If this is set as 'No' direct GL Entries will be created to book Deferred Revenue/Expense",
+   "default": "0",
+   "description": "If this is unchecked direct GL Entries will be created to book Deferred Revenue/Expense",
    "fieldname": "book_deferred_entries_via_journal_entry",
-   "fieldtype": "Select",
-   "label": "Book Deferred Entries Via Journal Entry",
-   "options": "No\nYes"
+   "fieldtype": "Check",
+   "label": "Book Deferred Entries Via Journal Entry"
   },
   {
-   "default": "No",
-   "depends_on": "eval:doc.book_deferred_entries_via_journal_entry == 'Yes'",
-   "description": "If this is set as 'No' Journal Entries will be saved in a Draft state and will have to be submitted manuallly",
+   "default": "0",
+   "depends_on": "eval:doc.book_deferred_entries_via_journal_entry",
+   "description": "If this is unchecked Journal Entries will be saved in a Draft state and will have to be submitted manually",
    "fieldname": "submit_journal_entries",
-   "fieldtype": "Select",
-   "label": "Submit Journal Entries",
-   "options": "No\nYes"
+   "fieldtype": "Check",
+   "label": "Submit Journal Entries"
   },
   {
    "default": "Days",
@@ -234,7 +232,7 @@
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-06-17 02:42:41.761494",
+ "modified": "2020-06-22 20:13:26.043092",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

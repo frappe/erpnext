@@ -263,7 +263,7 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 			amount, base_amount = calculate_amount(doc, item, last_gl_entry,
 				total_days, total_booking_days, account_currency)
 
-		if via_journal_entry == 'Yes':
+		if via_journal_entry:
 			book_revenue_via_journal_entry(doc, credit_account, debit_account, against, amount,
 				base_amount, end_date, project, account_currency, item.cost_center, item, deferred_process, submit_journal_entry)
 		else:
@@ -277,8 +277,8 @@ def book_deferred_income_or_expense(doc, deferred_process, posting_date=None):
 		if getdate(end_date) < getdate(posting_date) and not last_gl_entry:
 			_book_deferred_revenue_or_expense(item, via_journal_entry, submit_journal_entry, book_deferred_entries_based_on)
 
-	via_journal_entry = frappe.db.get_singles_value('Accounts Settings', 'book_deferred_entries_via_journal_entry')
-	submit_journal_entry = frappe.db.get_singles_value('Accounts Settings', 'submit_journal_entries')
+	via_journal_entry = cint(frappe.db.get_singles_value('Accounts Settings', 'book_deferred_entries_via_journal_entry'))
+	submit_journal_entry = cint(frappe.db.get_singles_value('Accounts Settings', 'submit_journal_entries'))
 	book_deferred_entries_based_on = frappe.db.get_singles_value('Accounts Settings', 'book_deferred_entries_based_on')
 
 	for item in doc.get('items'):
@@ -423,7 +423,7 @@ def book_revenue_via_journal_entry(doc, credit_account, debit_account, against,
 	try:
 		journal_entry.save()
 
-		if submit == 'Yes':
+		if submit:
 			journal_entry.submit()
 	except:
 		frappe.db.rollback()
