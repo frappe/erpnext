@@ -220,7 +220,7 @@ def execute():
 	frappe.reload_doc("manufacturing", "doctype", "work_order_operation")
 	frappe.reload_doc("manufacturing", "doctype", "workstation_working_hour")
 	frappe.reload_doc("stock", "doctype", "item_variant")
-	frappe.reload_doc("hr", "doctype", "salary_detail")
+	frappe.reload_doc("Payroll", "doctype", "salary_detail")
 	frappe.reload_doc("accounts", "doctype", "party_account")
 	frappe.reload_doc("accounts", "doctype", "fiscal_year_company")
 
