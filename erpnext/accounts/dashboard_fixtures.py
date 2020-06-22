@@ -5,7 +5,22 @@ import frappe
 import json
 from frappe.utils import nowdate, add_months, get_date_str
 from frappe import _
-from erpnext.accounts.utils import get_fiscal_year, get_account_name
+from erpnext.accounts.utils import get_fiscal_year, get_account_name, FiscalYearError
+
+def _get_fiscal_year(date=None):
+	try:
+		fiscal_year = get_fiscal_year(date=nowdate(), as_dict=True)
+		return fiscal_year
+
+	except FiscalYearError:
+		#if no fiscal year for current date then get default fiscal year
+		try:
+			fiscal_year = get_fiscal_year(as_dict=True)
+			return fiscal_year
+
+		except FiscalYearError:
+			#if still no fiscal year found then no accounting data created, return
+			return None
 
 def get_company_for_dashboards():
 	company = frappe.defaults.get_defaults().company
@@ -18,10 +33,16 @@ def get_company_for_dashboards():
 	return None
 
 def get_data():
+
+	fiscal_year = _get_fiscal_year(nowdate())
+
+	if not fiscal_year:
+		return frappe._dict()
+
 	return frappe._dict({
 		"dashboards": get_dashboards(),
-		"charts": get_charts(),
-		"number_cards": get_number_cards()
+		"charts": get_charts(fiscal_year),
+		"number_cards": get_number_cards(fiscal_year)
 	})
 
 def get_dashboards():
@@ -46,10 +67,9 @@ def get_dashboards():
 		]
 	}]
 
-def get_charts():
+def get_charts(fiscal_year):
 	company = frappe.get_doc("Company", get_company_for_dashboards())
 	bank_account = company.default_bank_account or get_account_name("Bank", company=company.name)
-	fiscal_year = get_fiscal_year(date=nowdate())
 	default_cost_center = company.cost_center
 
 	return [
@@ -60,9 +80,9 @@ def get_charts():
 			"report_name": "Profit and Loss Statement",
 			"filters_json": json.dumps({
 				"company": company.name,
-				"filter_based_on": "Date Range",
-				"period_start_date": get_date_str(fiscal_year[1]),
-				"period_end_date": get_date_str(fiscal_year[2]),
+				"filter_based_on": "Fiscal Year",
+				"from_fiscal_year": fiscal_year.get('name'),
+				"to_fiscal_year": fiscal_year.get('name'),
 				"periodicity": "Monthly",
 				"include_default_book_entries": 1
 			}),
@@ -158,8 +178,8 @@ def get_charts():
 			"report_name": "Budget Variance Report",
 			"filters_json": json.dumps({
 				"company": company.name,
-				"from_fiscal_year": fiscal_year[0],
-				"to_fiscal_year": fiscal_year[0],
+				"from_fiscal_year": fiscal_year.get('name'),
+				"to_fiscal_year": fiscal_year.get('name'),
 				"period": "Monthly",
 				"budget_against": "Cost Center"
 			}),
@@ -190,10 +210,10 @@ def get_charts():
 		},
 	]
 
-def get_number_cards():
-	fiscal_year = get_fiscal_year(date=nowdate())
-	year_start_date = get_date_str(fiscal_year[1])
-	year_end_date = get_date_str(fiscal_year[2])
+def get_number_cards(fiscal_year):
+
+	year_start_date = get_date_str(fiscal_year.get("year_start_date"))
+	year_end_date = get_date_str(fiscal_year.get("year_end_date"))
 	return [
 		{
 			"doctype": "Number Card",
