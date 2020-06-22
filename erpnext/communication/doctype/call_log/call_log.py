@@ -26,10 +26,10 @@ class CallLog(Document):
 	def on_update(self):
 		doc_before_save = self.get_doc_before_save()
 		if not doc_before_save: return
-		if doc_before_save.status in ONGOING_CALL_STATUSES and self.status in END_CALL_STATUSES:
-			frappe.publish_realtime('call_{id}_ended'.format(id=self.id), self)
-		elif doc_before_save.to != self.to:
+		if doc_before_save.to != self.to:
 			self.trigger_call_popup()
+		if doc_before_save.status not in END_CALL_STATUSES and self.status in END_CALL_STATUSES:
+			frappe.publish_realtime('call_{id}_ended'.format(id=self.id), self)
 
 	def set_caller_information(self):
 		number = self.get('from') if self.type == 'Incoming' else self.get('to')
@@ -92,32 +92,34 @@ def get_employees_with_number(number):
 def set_caller_information(doc, state):
 	'''Called from hooks on creation of Contact'''
 	if doc.doctype != 'Contact': return
+	try:
+		numbers = [d.phone for d in doc.phone_nos]
 
-	numbers = [d.phone for d in doc.phone_nos]
+		for number in numbers:
+			number = strip_number(number)
+			if not number: continue
+			logs = frappe.db.sql_list("""
+				SELECT cl.name FROM `tabCall Log` cl
+				LEFT JOIN `tabDynamic Link` dl
+				ON cl.name = dl.parent
+				WHERE (cl.`from` like %(phone_number)s or cl.`to` like %(phone_number)s)
+				GROUP BY cl.name
+				HAVING SUM(
+					CASE
+						WHEN dl.link_doctype = 'Contact' AND dl.link_name = %(contact_name)s
+						THEN 1
+						ELSE 0
+					END
+				)=0
+			""", dict(phone_number='%{}'.format(number),
+				contact_name=doc.name))
 
-	for number in numbers:
-		number = strip_number(number)
-		if not number: continue
-		logs = frappe.db.sql_list("""
-			SELECT cl.name FROM `tabCall Log` cl
-			LEFT JOIN `tabDynamic Link` dl
-			ON cl.name = dl.parent
-			WHERE (cl.`from` like %(phone_number)s or cl.`to` like %(phone_number)s)
-			GROUP BY cl.name
-			HAVING SUM(
-				CASE
-					WHEN dl.link_doctype = 'Contact' AND dl.link_name = %(contact_name)s
-					THEN 1
-					ELSE 0
-				END
-			)=0
-		""", dict(phone_number='%{}'.format(number),
-			contact_name=doc.name))
-
-		for log in logs:
-			call_log = frappe.get_doc('Call Log', log)
-			call_log.link_contact(doc.name)
-			call_log.save()
+			for log in logs:
+				call_log = frappe.get_doc('Call Log', log)
+				call_log.link_contact(doc.name)
+				call_log.save()
+	except Exception as e:
+		frappe.log_error(title=_('Error during caller information update'))
 
 def get_linked_call_logs(doctype, docname):
 	# content will be shown in timeline
