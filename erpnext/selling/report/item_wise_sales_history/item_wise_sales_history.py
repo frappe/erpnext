@@ -11,7 +11,10 @@ def execute(filters=None):
 	filters = frappe._dict(filters or {})
 	columns = get_columns(filters)
 	data = get_data(filters)
-	return columns, data
+
+	chart_data = get_chart_data(data)
+
+	return columns, data, None, chart_data
 
 def get_columns(filters):
 	return [
@@ -181,6 +184,12 @@ def get_conditions(filters):
 	if filters.get('to_date'):
 		conditions += "AND so.transaction_date <= '%s'" %filters.to_date
 
+	if filters.get("item_code"):
+		conditions += "AND so_item.item_code = '%s'" %frappe.db.escape(filters.item_code)
+
+	if filters.get("customer"):
+		conditions += "AND so.customer = '%s'" %frappe.db.escape(filters.customer)
+
 	return conditions
 
 def get_customer_details():
@@ -212,3 +221,34 @@ def get_sales_order_details(company_list, filters):
 			AND so.company in ({0})
 			AND so.docstatus = 1 {1}
 	""".format(','.join(["%s"] * len(company_list)), conditions), tuple(company_list), as_dict=1)
+
+def get_chart_data(data):
+	item_wise_sales_map = {}
+	labels, datapoints = [], []
+
+	for row in data:
+		item_key = row.get("item_code")
+
+		if not item_key in item_wise_sales_map:
+			item_wise_sales_map[item_key] = 0
+
+		item_wise_sales_map[item_key] = flt(item_wise_sales_map[item_key]) + flt(row.get("amount"))
+
+	item_wise_sales_map = { item: value for item, value in (sorted(item_wise_sales_map.items(), key = lambda i: i[1], reverse=True))}
+
+	for key in item_wise_sales_map:
+		labels.append(key)
+		datapoints.append(item_wise_sales_map[key])
+
+	return {
+		"data" : {
+			"labels" : labels[:30], # show max of 30 items in chart
+			"datasets" : [
+				{
+					"name" : _(" Total Sales Amount"),
+					"values" : datapoints[:30]
+				}
+			]
+		},
+		"type" : "bar"
+	}
