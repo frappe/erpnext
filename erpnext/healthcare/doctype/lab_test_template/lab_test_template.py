@@ -84,7 +84,7 @@ class LabTestTemplate(Document):
 					frappe.throw(_("Conversion Factor is mandatory"))
 		if self.lab_test_template_type == "Grouped":
 			for group in self.lab_test_groups:
-				if group.template_or_new_line == "Add new line" and group.secondary_uom and not group.conversion_factor:
+				if group.template_or_new_line == "Add New Line" and group.secondary_uom and not group.conversion_factor:
 					frappe.throw(_("Conversion Factor is mandatory"))
 
 

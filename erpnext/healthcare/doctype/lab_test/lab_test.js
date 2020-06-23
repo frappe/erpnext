@@ -175,7 +175,7 @@ var show_lab_tests = function(frm, result) {
 cur_frm.cscript.custom_before_submit =  function(doc) {
 	if(doc.normal_test_items) {
 		for(let result in doc.normal_test_items) {
-			if(!doc.normal_test_items[result].result_value	&&	doc.normal_test_items[result].require_result_value == 1) {
+			if(!doc.normal_test_items[result].result_value && !doc.normal_test_items[result].allow_blank && doc.normal_test_items[result].require_result_value) {
 				frappe.msgprint(__('Please input all required Result Value(s)'));
 				throw('Error');
 			}
@@ -183,7 +183,7 @@ cur_frm.cscript.custom_before_submit =  function(doc) {
 	}
 	if(doc.special_test_items) {
 		for(let result in doc.special_test_items) {
-			if(!doc.special_test_items[result].result_value	&&	doc.special_test_items[result].require_result_value == 1) {
+			if(!doc.special_test_items[result].result_value && !doc.special_test_items[result].allow_blank && doc.special_test_items[result].require_result_value) {
 				frappe.msgprint(__('Please input all required Result Value(s)'));
 				throw('Error');
 			}

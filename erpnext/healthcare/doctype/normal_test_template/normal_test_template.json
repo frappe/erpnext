@@ -10,6 +10,7 @@
  "field_order": [
   "heading_text",
   "lab_test_event",
+  "allow_blank",
   "lab_test_uom",
   "secondary_uom",
   "conversion_factor",
@@ -61,11 +62,17 @@
    "fieldtype": "Float",
    "label": "Conversion Factor",
    "mandatory_depends_on": "secondary_uom"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_blank",
+   "fieldtype": "Check",
+   "label": "Allow Blank"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-06-21 12:55:06.280155",
+ "modified": "2020-06-23 13:28:40.156224",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Normal Test Template",

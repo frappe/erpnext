@@ -12,7 +12,7 @@
   "lab_test_event",
   "result_value",
   "lab_test_uom",
-  "require_result_value",
+  "allow_blank",
   "template",
   "secondary_uom_result",
   "secondary_uom",
@@ -22,7 +22,8 @@
   "lab_test_comment",
   "bold",
   "italic",
-  "underline"
+  "underline",
+  "require_result_value"
  ],
  "fields": [
   {
@@ -139,22 +140,31 @@
    "report_hide": 1
   },
   {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
    "default": "0",
    "fieldname": "require_result_value",
    "fieldtype": "Check",
-   "hidden": 1,
    "label": "Require Result Value",
    "print_hide": 1,
+   "read_only": 1,
    "report_hide": 1
   },
   {
-   "fieldname": "column_break_10",
-   "fieldtype": "Column Break"
+   "default": "0",
+   "fieldname": "allow_blank",
+   "fieldtype": "Check",
+   "label": "Allow Blank",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-06-21 14:58:24.465287",
+ "modified": "2020-06-23 13:28:08.722757",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Normal Test Items",

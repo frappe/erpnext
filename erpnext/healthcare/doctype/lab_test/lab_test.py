@@ -180,6 +180,7 @@ def create_normals(template, lab_test):
 	normal.conversion_factor = template.conversion_factor
 	normal.normal_range = template.lab_test_normal_range
 	normal.require_result_value = 1
+	normal.allow_blank = 0
 	normal.template = template.name
 
 def create_compounds(template, lab_test, is_group):
@@ -196,6 +197,7 @@ def create_compounds(template, lab_test, is_group):
 		normal.conversion_factor = normal_test_template.conversion_factor
 		normal.normal_range = normal_test_template.normal_range
 		normal.require_result_value = 1
+		normal.allow_blank = normal_test_template.allow_blank
 		normal.template = template.name
 
 def create_specials(template, lab_test):
@@ -206,6 +208,7 @@ def create_specials(template, lab_test):
 		special = lab_test.append('special_test_items')
 		special.lab_test_particulars = special_test_template.particulars
 		special.require_result_value = 1
+		special.allow_blank = special_test_template.allow_blank
 		special.template = template.name
 
 def create_sample_doc(template, patient, invoice, company = None):
@@ -283,13 +286,14 @@ def load_result_format(lab_test, template, prescription, invoice):
 						special_heading.require_result_value = 0
 						special_heading.template = template_in_group.name
 						create_specials(template_in_group, lab_test)
-			else:
+			else: # Lab Test Group - Add New Line
 				normal = lab_test.append('normal_test_items')
 				normal.lab_test_name = lab_test_group.group_event
 				normal.lab_test_uom = lab_test_group.group_test_uom
 				normal.secondary_uom = lab_test_group.secondary_uom
 				normal.conversion_factor = lab_test_group.conversion_factor
 				normal.normal_range = lab_test_group.group_test_normal_range
+				normal.allow_blank = lab_test_group.allow_blank
 				normal.require_result_value = 1
 				normal.template = template.name
 	if(template.lab_test_template_type != 'No Result'):

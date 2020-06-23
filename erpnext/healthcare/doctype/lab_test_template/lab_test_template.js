@@ -81,7 +81,7 @@ frappe.ui.form.on('Lab Test Template', 'lab_test_description', function(frm) {
 
 frappe.ui.form.on('Lab Test Groups', 'template_or_new_line', function (frm, cdt, cdn) {
 	let child = locals[cdt][cdn];
-	if (child.template_or_new_line == 'Add new line') {
+	if (child.template_or_new_line == 'Add New Line') {
 		frappe.model.set_value(cdt, cdn, 'lab_test_template', '');
 		frappe.model.set_value(cdt, cdn, 'lab_test_description', '');
 	}
