@@ -484,7 +484,9 @@ class JournalEntry(AccountsController):
 		self.set_total_amount(total_amount, currency)
 
 	def set_total_amount(self, amt, currency):
-		self.total_amount = amt
+		# override the amt
+		self.total_amount = self.total_credit
+		# self.total_amount = amt
 		self.total_amount_currency = currency
 		from frappe.utils import money_in_words
 		self.total_amount_in_words = money_in_words(amt, currency)
