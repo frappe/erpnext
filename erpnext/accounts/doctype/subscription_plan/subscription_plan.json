@@ -61,7 +61,7 @@
   {
    "fieldname": "price_determination",
    "fieldtype": "Select",
-   "label": "Price Determination",
+   "label": "Subscription Price Based On",
    "options": "\nFixed Rate\nBased On Price List\nMonthly Rate",
    "reqd": 1
   },
@@ -140,7 +140,7 @@
   }
  ],
  "links": [],
- "modified": "2020-06-23 04:53:54.611388",
+ "modified": "2020-06-23 09:17:41.004374",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription Plan",

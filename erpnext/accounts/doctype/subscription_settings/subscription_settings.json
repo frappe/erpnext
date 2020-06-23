@@ -32,7 +32,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-06-16 17:36:54.767754",
+ "modified": "2020-06-23 09:13:44.292792",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription Settings",
@@ -54,7 +54,17 @@
    "email": 1,
    "print": 1,
    "read": 1,
-   "role": "Administrator",
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts User",
    "share": 1,
    "write": 1
   }
