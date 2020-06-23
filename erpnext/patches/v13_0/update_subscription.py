@@ -9,6 +9,7 @@ def execute():
 
 	frappe.reload_doc('accounts', 'doctype', 'subscription')
 	frappe.reload_doc('accounts', 'doctype', 'subscription_invoice')
+	frappe.reload_doc('accounts', 'doctype', 'subscription_plan')
 
 	if frappe.db.has_column('Subscription', 'customer'):
 		frappe.db.sql("""
