@@ -16,6 +16,7 @@ class ShiftRequest(Document):
 		self.validate_dates()
 		self.validate_shift_request_overlap_dates()
 		self.validate_approver()
+		self.validate_default_shift()
 
 	def on_submit(self):
 		if self.status not in ["Approved", "Rejected"]:
@@ -39,11 +40,17 @@ class ShiftRequest(Document):
 				shift_assignment_doc = frappe.get_doc("Shift Assignment", shift['name'])
 				shift_assignment_doc.cancel()
 
+	def validate_default_shift(self):
+		default_shift = frappe.get_value("Employee", self.employee, "default_shift")
+		if self.shift_type == default_shift:
+			frappe.throw(_("You can not request for your Default Shift: {0}").format(frappe.bold(self.shift_type)))
+
 	def validate_approver(self):
 		department = frappe.get_value("Employee", self.employee, "department")
-		# shift_approver = frappe.get_value("Employee", self.employee, "shift_request_approver")
+		shift_approver = frappe.get_value("Employee", self.employee, "shift_request_approver")
 		approvers = frappe.db.sql("""select approver from `tabDepartment Approver` where parent= %s and parentfield = 'shift_request_approver'""", (department))
 		approvers = [approver[0] for approver in approvers]
+		approvers.append(shift_approver)
 		if self.approver not in approvers:
 			frappe.throw(__("Only Approvers can Approve this Request."))
 
