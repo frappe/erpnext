@@ -32,6 +32,10 @@
 	margin-top: 17px;
 }
 
+.line-chart-container .chart-filter {
+	z-index: 1;
+}
+
 .patient-image {
 	display: inline-block;
 	width: 100%;

@@ -140,7 +140,7 @@ class PatientProgress {
 			type: 'heatmap',
 			countLabel: 'Interactions',
 			data: {},
-			discreteDomains: 0,
+			discreteDomains: 0
 		});
 		this.update_heatmap_data();
 		this.create_heatmap_chart_filters();
@@ -156,16 +156,18 @@ class PatientProgress {
 	}
 
 	create_heatmap_chart_filters() {
-		let filters = [
-			{
-				label: frappe.dashboard_utils.get_year(frappe.datetime.now_date()),
-				options: frappe.dashboard_utils.get_years_since_creation(frappe.boot.user.creation),
-				action: (selected_item) => {
-					this.update_heatmap_data(frappe.datetime.obj_to_str(selected_item));
-				}
-			},
-		];
-		frappe.dashboard_utils.render_chart_filters(filters, 'chart-filter', '.heatmap-container');
+		this.get_patient_info().then(() => {
+			let filters = [
+				{
+					label: frappe.dashboard_utils.get_year(frappe.datetime.now_date()),
+					options: frappe.dashboard_utils.get_years_since_creation(this.patient.creation),
+					action: (selected_item) => {
+						this.update_heatmap_data(frappe.datetime.obj_to_str(selected_item));
+					}
+				},
+			];
+			frappe.dashboard_utils.render_chart_filters(filters, 'chart-filter', '.heatmap-container');
+		});
 	}
 
 	render_percentage_chart(field, title) {
@@ -201,7 +203,7 @@ class PatientProgress {
 	create_percentage_chart_filters() {
 		let filters = [
 			{
-				label: 'Type',
+				label: 'Therapy Type',
 				options: ['Therapy Type', 'Exercise Type'],
 				fieldnames: ['therapy_type', 'exercise_type'],
 				action: (selected_item, fieldname) => {

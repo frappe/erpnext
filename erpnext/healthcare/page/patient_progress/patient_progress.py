@@ -104,13 +104,15 @@ def get_patient_assessment_data(patient, assessment_template):
 	fields=['assessment_datetime', 'total_score', 'total_score_obtained'],
 	as_list=True)
 
-	max_score = result[0][1]
+	if result:
+		max_score = result[0][1]
+
 	return {
 		'labels': [getdate(r[0]) for r in result if r[0] != None],
 		'datasets': [
 			{ 'name': _('Score Obtained'), 'values': [r[2] for r in result if r[0] != None] }
 		],
-		'max_score': max_score
+		'max_score': max_score if max_score else 0
 	}
 
 @frappe.whitelist()
@@ -128,14 +130,16 @@ def get_therapy_assessment_correlation_data(patient, assessment_template):
 			therapy.therapy_type
 	''', {'assessment': assessment_template}, as_list=True)
 
-	max_score = result[0][3]
+	if result:
+		max_score = result[0][3]
+
 	return {
 		'labels': [r[0] for r in result if r[0] != None],
 		'datasets': [
 			{ 'name': _('Sessions'), 'chartType': 'bar', 'values': [r[1] for r in result if r[0] != None] },
 			{ 'name': _('Average Score'), 'chartType': 'line', 'values': [round(r[2], 2) for r in result if r[0] != None] }
 		],
-		'max_score': max_score
+		'max_score': max_score if max_score else 0
 	}
 
 @frappe.whitelist()
