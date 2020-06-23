@@ -299,7 +299,10 @@ class PatientProgress {
 		).then(chart => {
 			let data = {
 				labels: chart.labels,
-				datasets: chart.datasets
+				datasets: chart.datasets,
+				yMarkers: [
+					{ label: 'Max Score', value: chart.max_score }
+				],
 			}
 			if (!this.assessment_line_chart) {
 				this.wrapper.find('.assessment-results-line-chart').show();
@@ -356,7 +359,10 @@ class PatientProgress {
 		).then(chart => {
 			let data = {
 				labels: chart.labels,
-				datasets: chart.datasets
+				datasets: chart.datasets,
+				yMarkers: [
+					{ label: 'Max Score', value: chart.max_score }
+				],
 			}
 			if (!this.correlation_chart) {
 				this.wrapper.find('.therapy-assessment-correlation-line-chart').show();
