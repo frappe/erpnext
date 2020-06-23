@@ -33,6 +33,7 @@
   "reference_type",
   "reference_name",
   "reference_due_date",
+  "reference_detail_no",
   "col_break3",
   "is_advance",
   "user_remark",
@@ -268,6 +269,12 @@
    "fieldtype": "Link",
    "label": "Bank Account",
    "options": "Bank Account"
+  },
+  {
+   "fieldname": "reference_detail_no",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Reference Detail No"
   }
  ],
  "idx": 1,

@@ -63,7 +63,7 @@
    "description": "The fraction of daily wages to be paid for half-day attendance",
    "fieldname": "daily_wages_fraction_for_half_day",
    "fieldtype": "Float",
-   "label": "Daily Wages Fraction for Half Day",
+   "label": "Fraction of Daily Salary for Half Day",
    "show_days": 1,
    "show_seconds": 1
   },
@@ -109,7 +109,7 @@
  "icon": "fa fa-cog",
  "issingle": 1,
  "links": [],
- "modified": "2020-06-05 12:35:34.861674",
+ "modified": "2020-06-22 17:00:58.408030",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll Settings",
