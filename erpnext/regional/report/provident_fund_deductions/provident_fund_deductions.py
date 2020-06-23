@@ -6,8 +6,8 @@ import frappe
 from frappe import _
 
 def execute(filters=None):
-	columns = get_columns(filters)
 	data = get_data(filters)
+	columns = get_columns(filters) if len(data) else []
 
 	return columns, data
 
@@ -71,10 +71,13 @@ def get_conditions(filters):
 		conditions.append("sal.branch = '%s' " % (filters["branch"]) )
 
 	if filters.get("company"):
-		conditions.append("sal.company = '%s' " % (filters["company"]) )
+		conditions.append("sal.company = '%s' " % (filters["company"]))
 
-	if filters.get("period"):
-		conditions.append("month(sal.start_date) = '%s' " % (filters["period"]))
+	if filters.get("month"):
+		conditions.append("month(sal.start_date) = '%s' " % (filters["month"]))
+
+	if filters.get("year"):
+		conditions.append("year(start_date) = '%s' " % (filters["year"]))
 
 	if filters.get("mode_of_payment"):
 		conditions.append("sal.mode_of_payment = '%s' " % (filters["mode_of_payment"]))
@@ -114,6 +117,9 @@ def get_data(filters):
 	component_type_dict = frappe._dict(frappe.db.sql(""" select name, component_type from `tabSalary Component`
 		where component_type in ('Provident Fund', 'Additional Provident Fund', 'Provident Fund Loan')"""))
 
+	if not len(component_type_dict):
+		return []
+
 	entry = frappe.db.sql(""" select sal.name, sal.employee, sal.employee_name, ded.salary_component, ded.amount
 		from `tabSalary Slip` sal, `tabSalary Detail` ded
 		where sal.name = ded.parent
@@ -151,3 +157,11 @@ def get_data(filters):
 			data.append(employee)
 
 	return data
+
+@frappe.whitelist()
+def get_years():
+	year_list = frappe.db.sql_list("""select distinct YEAR(end_date) from `tabSalary Slip` ORDER BY YEAR(end_date) DESC""")
+	if not year_list:
+		year_list = [getdate().year]
+
+	return "\n".join(str(year) for year in year_list)
