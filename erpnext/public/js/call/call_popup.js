@@ -212,15 +212,21 @@ class CallPopup {
 					<a href="${frappe.utils.get_form_link('Issue', issue.name)}">
 						${frappe.ellipsis(issue.subject, 55)}
 					</a>
-					<div class="text-muted">${issue.name}</div>
+					<div class="text-muted">
+						<span>${issue.status}</span> •
+						<span>${issue.name}</span> •
+						<a data-value="${issue.name}" data-action="link_issue">link</a>
+					</div>
 				</div>
-				<a data-value="${issue.name}" data-action="link_issue">link</a>
+				<div>
+					<span class="text-muted">${comment_when(issue.creation)}<span>
+				</div>
 			</div>`;
 		});
 		let html = `
 			<div>
 				<div class="search"></div>
-				<label>Previous Issues</label>
+				<label>${__('Issues raised by {0}', [this.get_caller_name() || this.caller_number])}</label>
 				<div class="list-items">
 					${list_html}
 				</div>
@@ -228,17 +234,17 @@ class CallPopup {
 		`;
 		this.issue_list.html(html);
 		this.dialog.$body.find('.sidebar-item[data-type="issue_list"] span.badge').text(issues.length);
-		frappe.ui.form.make_control({
-			df: {
-				label: 'Link Other Issue',
-				fieldtype: 'Link',
-				fieldname: 'issue',
-				options: 'Issue',
-			},
-			render_input: true,
-			only_input: false,
-			parent: this.issue_list.find('.search'),
-		});
+		// frappe.ui.form.make_control({
+		// 	df: {
+		// 		label: 'Link Other Issue',
+		// 		fieldtype: 'Link',
+		// 		fieldname: 'issue',
+		// 		options: 'Issue',
+		// 	},
+		// 	render_input: true,
+		// 	only_input: false,
+		// 	parent: this.issue_list.find('.search'),
+		// });
 	}
 
 	setup_previous_calls(previous_calls) {
@@ -248,18 +254,19 @@ class CallPopup {
 			list_html += `<div class="list-item flex justify-between padding">
 				<div>
 					<a href="${frappe.utils.get_form_link('Call Log', call.name)}">
-						${call.type} call from ${call.from} to ${call.to}
+						${call.type == 'Incoming' ? __('Call received by {0}', [call.to]) : __('Call made by {0}', [call.from])}
 					</a>
 					<div class="text-muted">
 						${frappe.ellipsis(call.summary, 30) || __('No Summary')}
 					</div>
 				</div>
+				<span class="text-muted">${comment_when(call.creation)}<span>
 			</div>`;
 		});
 		let html = `
 			<div>
 				<div class="search"></div>
-				<label>Previous Calls</label>
+				<label>${__('Calls by {0}', [this.get_caller_name() || this.caller_number])}</label>
 				<div class="list-items">
 					${list_html}
 				</div>
