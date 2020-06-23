@@ -20,6 +20,7 @@ class LabTest(Document):
 		self.reload()
 
 	def on_update(self):
+		self.set_secondary_uom_result()
 		if(self.sensitivity_test_items):
 			sensitivity = sorted(self.sensitivity_test_items, key=lambda x: x.antibiotic_sensitivity)
 			for i, item in enumerate(sensitivity):
@@ -40,6 +41,15 @@ class LabTest(Document):
 		create_test_from_template(lab_test)
 		self.reload()
 
+	def set_secondary_uom_result(self):
+		for item in self.normal_test_items:
+			if item.secondary_uom and item.conversion_factor:
+				try:
+					item.secondary_uom_result = float(item.result_value) * float(item.conversion_factor)
+				except Exception:
+					item.secondary_uom_result = None
+
+
 def create_test_from_template(lab_test):
 	template = frappe.get_doc('Lab Test Template', lab_test.template)
 	patient = frappe.get_doc('Patient', lab_test.patient)
@@ -48,6 +58,9 @@ def create_test_from_template(lab_test):
 	lab_test.result_date = getdate()
 	lab_test.department = template.department
 	lab_test.lab_test_group = template.lab_test_group
+	lab_test.legend_print_position = template.legend_print_position
+	lab_test.result_legend = template.result_legend
+	lab_test.worksheet_instructions = template.worksheet_instructions
 
 	lab_test = create_sample_collection(lab_test, template, patient, None)
 	lab_test = load_result_format(lab_test, template, None, None)
@@ -163,6 +176,8 @@ def create_normals(template, lab_test):
 	normal = lab_test.append('normal_test_items')
 	normal.lab_test_name = template.lab_test_name
 	normal.lab_test_uom = template.lab_test_uom
+	normal.secondary_uom = template.secondary_uom
+	normal.conversion_factor = template.conversion_factor
 	normal.normal_range = template.lab_test_normal_range
 	normal.require_result_value = 1
 	normal.template = template.name
@@ -177,6 +192,8 @@ def create_compounds(template, lab_test, is_group):
 			normal.lab_test_name = normal_test_template.lab_test_event
 
 		normal.lab_test_uom = normal_test_template.lab_test_uom
+		normal.secondary_uom = normal_test_template.secondary_uom
+		normal.conversion_factor = normal_test_template.conversion_factor
 		normal.normal_range = normal_test_template.normal_range
 		normal.require_result_value = 1
 		normal.template = template.name
@@ -270,6 +287,8 @@ def load_result_format(lab_test, template, prescription, invoice):
 				normal = lab_test.append('normal_test_items')
 				normal.lab_test_name = lab_test_group.group_event
 				normal.lab_test_uom = lab_test_group.group_test_uom
+				normal.secondary_uom = lab_test_group.secondary_uom
+				normal.conversion_factor = lab_test_group.conversion_factor
 				normal.normal_range = lab_test_group.group_test_normal_range
 				normal.require_result_value = 1
 				normal.template = template.name

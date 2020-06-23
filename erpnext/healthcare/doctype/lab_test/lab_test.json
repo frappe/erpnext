@@ -35,6 +35,7 @@
   "mobile",
   "c_b",
   "practitioner",
+  "practitioner_name",
   "requesting_department",
   "employee",
   "employee_name",
@@ -54,6 +55,12 @@
   "lab_test_comment",
   "sb_customresult",
   "custom_result",
+  "worksheet_section",
+  "worksheet_instructions",
+  "result_legend_section",
+  "legend_print_position",
+  "result_legend",
+  "section_break_50",
   "email_sent",
   "sms_sent",
   "printed",
@@ -61,7 +68,9 @@
   "special_toggle",
   "sensitivity_toggle",
   "amended_from",
-  "prescription"
+  "prescription",
+  "data_61",
+  "data_62"
  ],
  "fields": [
   {
@@ -135,6 +144,7 @@
    "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Requesting Practitioner",
+   "no_copy": 1,
    "options": "Healthcare Practitioner",
    "search_index": 1
   },
@@ -225,18 +235,21 @@
    "default": "Today",
    "fieldname": "expected_result_date",
    "fieldtype": "Date",
+   "hidden": 1,
    "label": "Expected Result Date",
    "read_only": 1
   },
   {
    "fieldname": "expected_result_time",
    "fieldtype": "Time",
+   "hidden": 1,
    "label": "Expected Result Time",
    "read_only": 1
   },
   {
    "fieldname": "result_date",
    "fieldtype": "Date",
+   "hidden": 1,
    "label": "Result Date",
    "search_index": 1
   },
@@ -338,7 +351,8 @@
   {
    "fieldname": "normal_test_items",
    "fieldtype": "Table",
-   "options": "Normal Test Items"
+   "options": "Normal Test Items",
+   "print_hide": 1
   },
   {
    "fieldname": "lab_test_html",
@@ -363,7 +377,8 @@
   {
    "fieldname": "organisms",
    "fieldtype": "Table",
-   "options": "Organism Test Item"
+   "options": "Organism Test Item",
+   "print_hide": 1
   },
   {
    "fieldname": "sb_sensitivity",
@@ -384,7 +399,8 @@
    "fieldname": "lab_test_comment",
    "fieldtype": "Text",
    "ignore_xss_filter": 1,
-   "label": "Comments"
+   "label": "Comments",
+   "print_hide": 1
   },
   {
    "collapsible": 1,
@@ -396,7 +412,8 @@
    "fieldname": "custom_result",
    "fieldtype": "Text Editor",
    "ignore_xss_filter": 1,
-   "label": "Custom Result"
+   "label": "Custom Result",
+   "print_hide": 1
   },
   {
    "default": "0",
@@ -479,11 +496,61 @@
    "label": "Requesting Department",
    "options": "Medical Department",
    "read_only": 1
+  },
+  {
+   "fetch_from": "practitioner.practitioner_name",
+   "fieldname": "practitioner_name",
+   "fieldtype": "Data",
+   "label": "Requesting Practitioner",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "result_legend_section",
+   "fieldtype": "Section Break",
+   "label": "Result Legend Print"
+  },
+  {
+   "fieldname": "legend_print_position",
+   "fieldtype": "Select",
+   "label": "Print Position",
+   "options": "Bottom\nTop\nBoth",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "result_legend",
+   "fieldtype": "Text Editor",
+   "label": "Result Legend",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "section_break_50",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "worksheet_instructions",
+   "fieldtype": "Text Editor",
+   "label": "Worksheet Instructions",
+   "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "worksheet_section",
+   "fieldtype": "Section Break",
+   "label": "Worksheet Print"
+  },
+  {
+   "fieldname": "data_61",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "data_62",
+   "fieldtype": "Data"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-20 12:56:06.497406",
+ "modified": "2020-06-21 20:17:19.116446",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

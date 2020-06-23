@@ -14,6 +14,9 @@ class LabTestTemplate(Document):
 			create_item_from_template(self)
 
 	def validate(self):
+		if self.is_billable and (not self.lab_test_rate or self.lab_test_rate <= 0.0):
+			frappe.throw(_("Standard Selling Rate should be greater than zero."))
+		self.validate_conversion_factor()
 		self.enable_disable_item()
 
 	def on_update(self):
@@ -72,12 +75,20 @@ class LabTestTemplate(Document):
 		else:
 			return False
 
+	def validate_conversion_factor(self):
+		if self.lab_test_template_type == "Single" and self.secondary_uom and not self.conversion_factor:
+			frappe.throw(_("Conversion Factor is mandatory"))
+		if self.lab_test_template_type == "Compound":
+			for item in self.normal_test_templates:
+				if item.secondary_uom and not item.conversion_factor:
+					frappe.throw(_("Conversion Factor is mandatory"))
+		if self.lab_test_template_type == "Grouped":
+			for group in self.lab_test_groups:
+				if group.template_or_new_line == "Add new line" and group.secondary_uom and not group.conversion_factor:
+					frappe.throw(_("Conversion Factor is mandatory"))
+
 
 def create_item_from_template(doc):
-	disabled = doc.disabled
-	if doc.is_billable and not doc.disabled:
-		disabled = 0
-
 	uom = frappe.db.exists('UOM', 'Unit') or frappe.db.get_single_value('Stock Settings', 'stock_uom')
 	# Insert item
 	item =  frappe.get_doc({
@@ -90,9 +101,10 @@ def create_item_from_template(doc):
 		'is_service_item': 1,
 		'is_purchase_item': 0,
 		'is_stock_item': 0,
+		'include_item_in_manufacturing': 0,
 		'show_in_website': 0,
 		'is_pro_applicable': 0,
-		'disabled': disabled,
+		'disabled': 0 if doc.is_billable and not doc.disabled else doc.disabled, 
 		'stock_uom': uom
 	}).insert(ignore_permissions = True, ignore_mandatory = True)
 
