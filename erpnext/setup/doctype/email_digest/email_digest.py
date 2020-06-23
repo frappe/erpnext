@@ -101,8 +101,7 @@ class EmailDigest(Document):
 			if not context.purchase_order_list:
 				frappe.throw(_("No items to be received are overdue"))
 
-		if not (context.events or context.todo_list or context.notifications or context.cards
-				or context.purchase_orders_items_overdue_list):
+		if not context:
 			return None
 
 		frappe.flags.ignore_account_permission = False
