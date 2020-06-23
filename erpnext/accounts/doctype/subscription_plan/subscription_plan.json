@@ -62,7 +62,7 @@
    "fieldname": "price_determination",
    "fieldtype": "Select",
    "label": "Price Determination",
-   "options": "\nFixed rate\nBased on price list\nMonthly rate",
+   "options": "\nFixed Rate\nBased On Price List\nMonthly Rate",
    "reqd": 1
   },
   {
@@ -70,7 +70,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:['Fixed rate', 'Monthly rate'].includes(doc.price_determination)",
+   "depends_on": "eval:['Fixed Rate', 'Monthly Rate'].includes(doc.price_determination)",
    "fieldname": "cost",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -140,7 +140,7 @@
   }
  ],
  "links": [],
- "modified": "2020-06-14 22:39:48.732956",
+ "modified": "2020-06-23 04:53:54.611388",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription Plan",
@@ -155,6 +155,30 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
    "share": 1,
    "write": 1
   }

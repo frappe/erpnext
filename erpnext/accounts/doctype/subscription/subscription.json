@@ -11,8 +11,8 @@
   "cb_1",
   "party",
   "subscription_period",
-  "start",
-  "end",
+  "start_date",
+  "end_date",
   "cancelation_date",
   "trial_period_start",
   "trial_period_end",
@@ -56,12 +56,6 @@
    "fieldname": "subscription_period",
    "fieldtype": "Section Break",
    "label": "Subscription Period"
-  },
-  {
-   "fieldname": "start",
-   "fieldtype": "Date",
-   "label": "Subscription Start Date",
-   "set_only_once": 1
   },
   {
    "fieldname": "cancelation_date",
@@ -220,15 +214,10 @@
   },
   {
    "default": "0",
+   "description": "If this is checked subsequent new invoices will be created on calendar  month and quarter start dates irrespective of current invoice start date",
    "fieldname": "follow_calendar_months",
    "fieldtype": "Check",
    "label": "Follow Calendar Months",
-   "set_only_once": 1
-  },
-  {
-   "fieldname": "end",
-   "fieldtype": "Date",
-   "label": "Subscription End Date",
    "set_only_once": 1
   },
   {
@@ -237,10 +226,22 @@
    "fieldname": "generate_new_invoices_past_due_date",
    "fieldtype": "Check",
    "label": "Generate New Invoices Past Due Date"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "Subscription End Date",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Subscription Start Date",
+   "set_only_once": 1
   }
  ],
  "links": [],
- "modified": "2020-06-19 11:04:36.447433",
+ "modified": "2020-06-23 12:51:16.210437",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",

@@ -15,7 +15,7 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import g
 class Subscription(Document):
 	def before_insert(self):
 		# update start just before the subscription doc is created
-		self.update_subscription_period(self.start)
+		self.update_subscription_period(self.start_date)
 
 	def update_subscription_period(self, date=None):
 		"""
@@ -35,7 +35,7 @@ class Subscription(Document):
 		If the `date` parameter is not given , it will be automatically set as today's
 		date.
 		"""
-		if self.is_new_subscription() and self.trial_period_end and getdate(self.trial_period_end) > getdate(self.start):
+		if self.is_new_subscription() and self.trial_period_end and getdate(self.trial_period_end) > getdate(self.start_date):
 			self.current_invoice_start = add_days(self.trial_period_end, 1)
 		elif self.trial_period_start and self.is_trialling():
 			self.current_invoice_start = self.trial_period_start
@@ -60,8 +60,8 @@ class Subscription(Document):
 		else:
 			billing_cycle_info = self.get_billing_cycle_data()
 			if billing_cycle_info:
-				if self.is_new_subscription() and getdate(self.start) < getdate(self.current_invoice_start):
-					self.current_invoice_end = add_to_date(self.start, **billing_cycle_info)
+				if self.is_new_subscription() and getdate(self.start_date) < getdate(self.current_invoice_start):
+					self.current_invoice_end = add_to_date(self.start_date, **billing_cycle_info)
 
 					# For cases where trial period is for an entire billing interval
 					if getdate(self.current_invoice_end) < getdate(self.current_invoice_start):
@@ -83,15 +83,16 @@ class Subscription(Document):
 					if month <= current_invoice_end_month:
 						calendar_month = month
 
-				if cint(calendar_month - billing_interval_count) <= 0:
+				if cint(calendar_month - billing_interval_count) <= 0 and \
+					getdate(self.current_invoice_start).month != 1:
 					calendar_month = 12
 					current_invoice_end_year -= 1
 
 				self.current_invoice_end = get_last_day(cstr(current_invoice_end_year) + '-' \
 					+ cstr(calendar_month) + '-01')
 
-			if self.end and getdate(self.current_invoice_end) > getdate(self.end):
-				self.current_invoice_end = self.end
+			if self.end_date and getdate(self.current_invoice_end) > getdate(self.end_date):
+				self.current_invoice_end = self.end_date
 
 	@staticmethod
 	def validate_plans_billing_cycle(billing_cycle_data):
@@ -163,7 +164,7 @@ class Subscription(Document):
 		"""
 		if self.is_trialling():
 			self.status = 'Trialling'
-		elif self.status == 'Active' and self.end and getdate() > getdate(self.end):
+		elif self.status == 'Active' and self.end_date and getdate() > getdate(self.end_date):
 			self.status = 'Completed'
 		elif self.is_past_grace_period():
 			subscription_settings = frappe.get_single('Subscription Settings')
@@ -212,7 +213,7 @@ class Subscription(Document):
 		if not current_invoice:
 			current_invoice = self.get_current_invoice()
 
-		if not current_invoice or self.is_not_outstanding(current_invoice):
+		if not current_invoice or self.is_paid(current_invoice):
 			return False
 		else:
 			return getdate() > getdate(current_invoice.due_date)
@@ -254,21 +255,21 @@ class Subscription(Document):
 		if self.trial_period_start and not self.trial_period_end:
 			frappe.throw(_('Both Trial Period Start Date and Trial Period End Date must be set'))
 
-		if self.trial_period_start and getdate(self.trial_period_start) > getdate(self.start):
+		if self.trial_period_start and getdate(self.trial_period_start) > getdate(self.start_date):
 			frappe.throw(_('Trial Period Start date cannot be after Subscription Start Date'))
 
 	def validate_end_date(self):
 		billing_cycle_info = self.get_billing_cycle_data()
-		end_date = add_to_date(self.start, **billing_cycle_info)
+		end_date = add_to_date(self.start_date, **billing_cycle_info)
 
-		if self.end and getdate(self.end) <= getdate(end_date):
+		if self.end_date and getdate(self.end_date) <= getdate(end_date):
 			frappe.throw(_('Subscription End Date must be after {0} as per the subscription plan').format(end_date))
 
 	def validate_to_follow_calendar_months(self):
 		if self.follow_calendar_months:
 			billing_info = self.get_billing_cycle_and_interval()
 
-			if not self.end:
+			if not self.end_date:
 				frappe.throw(_('Subscription End Date is mandatory to follow calendar months'))
 
 			if billing_info[0]['billing_interval'] != 'Month':
@@ -440,13 +441,10 @@ class Subscription(Document):
 	def is_current_invoice_generated(self):
 		invoice = self.get_current_invoice()
 
-		if invoice:
-			if getdate(self.current_invoice_start) <= getdate(invoice.posting_date) <= getdate(self.current_invoice_end):
-				return True
-			else:
-				False
-		else:
-			return False
+		if invoice and getdate(self.current_invoice_start) <= getdate(invoice.posting_date) <= getdate(self.current_invoice_end):
+			return True
+
+		return False
 
 	def process_for_active(self):
 		"""
@@ -471,7 +469,7 @@ class Subscription(Document):
 		"""
 		Called when `Subscription.cancel_at_period_end` is truthy
 		"""
-		if self.end and getdate() < getdate(self.end):
+		if self.end_date and getdate() < getdate(self.end_date):
 			return
 
 		self.status = 'Cancelled'
@@ -506,7 +504,7 @@ class Subscription(Document):
 				self.generate_invoice(prorate)
 
 	@staticmethod
-	def is_not_outstanding(invoice):
+	def is_paid(invoice):
 		"""
 		Return `True` if the given invoice is paid
 		"""
@@ -592,7 +590,7 @@ def get_all_subscriptions():
 	"""
 	Returns all `Subscription` documents
 	"""
-	return frappe.db.get_all('Subscription', {'status': 'Cancelled'})
+	return frappe.db.get_all('Subscription', {'status': ('!=','Cancelled')})
 
 
 def process(data):

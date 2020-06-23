@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import get_first_day, get_last_day, date_diff, flt
+from frappe.utils import get_first_day, get_last_day, date_diff, flt, getdate
 from frappe.model.document import Document
 from erpnext.utilities.product import get_price
 
@@ -20,10 +20,10 @@ class SubscriptionPlan(Document):
 @frappe.whitelist()
 def get_plan_rate(plan, quantity=1, customer=None, start_date=None, end_date=None, prorate_factor=1):
 	plan = frappe.get_doc("Subscription Plan", plan)
-	if plan.price_determination == "Fixed rate":
+	if plan.price_determination == "Fixed Rate":
 		return plan.cost * prorate_factor
 
-	elif plan.price_determination == "Based on price list":
+	elif plan.price_determination == "Based On Price List":
 		if customer:
 			customer_group = frappe.db.get_value("Customer", customer, "customer_group")
 		else:
@@ -35,7 +35,10 @@ def get_plan_rate(plan, quantity=1, customer=None, start_date=None, end_date=Non
 		else:
 			return price.price_list_rate * prorate_factor
 
-	elif plan.price_determination == 'Monthly rate':
+	elif plan.price_determination == 'Monthly Rate':
+		start_date = getdate(start_date)
+		end_date = getdate(end_date)
+
 		no_of_months = (end_date.year - start_date.year) * 12 + (end_date.month - start_date.month) + 1
 		cost = plan.cost * no_of_months
 

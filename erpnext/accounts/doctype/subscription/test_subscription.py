@@ -15,7 +15,7 @@ def create_plan():
 		plan = frappe.new_doc('Subscription Plan')
 		plan.plan_name = '_Test Plan Name'
 		plan.item = '_Test Non Stock Item'
-		plan.price_determination = "Fixed rate"
+		plan.price_determination = "Fixed Rate"
 		plan.cost = 900
 		plan.billing_interval = 'Month'
 		plan.billing_interval_count = 1
@@ -25,7 +25,7 @@ def create_plan():
 		plan = frappe.new_doc('Subscription Plan')
 		plan.plan_name = '_Test Plan Name 2'
 		plan.item = '_Test Non Stock Item'
-		plan.price_determination = "Fixed rate"
+		plan.price_determination = "Fixed Rate"
 		plan.cost = 1999
 		plan.billing_interval = 'Month'
 		plan.billing_interval_count = 1
@@ -35,11 +35,28 @@ def create_plan():
 		plan = frappe.new_doc('Subscription Plan')
 		plan.plan_name = '_Test Plan Name 3'
 		plan.item = '_Test Non Stock Item'
-		plan.price_determination = "Fixed rate"
+		plan.price_determination = "Fixed Rate"
 		plan.cost = 1999
 		plan.billing_interval = 'Day'
 		plan.billing_interval_count = 14
 		plan.insert()
+
+	# Defined a quarterly Subscription Plan
+	if not frappe.db.exists('Subscription Plan', '_Test Plan Name 4'):
+		plan = frappe.new_doc('Subscription Plan')
+		plan.plan_name = '_Test Plan Name 4'
+		plan.item = '_Test Non Stock Item'
+		plan.price_determination = "Monthly Rate"
+		plan.cost = 20000
+		plan.billing_interval = 'Month'
+		plan.billing_interval_count = 3
+		plan.insert()
+
+	if not frappe.db.exists('Supplier', '_Test Supplier'):
+		supplier = frappe.new_doc('Supplier')
+		supplier.supplier_name = '_Test Supplier'
+		supplier.supplier_group = 'All Supplier Groups'
+		supplier.insert()
 
 class TestSubscription(unittest.TestCase):
 
@@ -108,7 +125,7 @@ class TestSubscription(unittest.TestCase):
 		subscription = frappe.new_doc('Subscription')
 		subscription.party_type = 'Customer'
 		subscription.party = '_Test Customer'
-		subscription.start = '2018-01-01'
+		subscription.start_date = '2018-01-01'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.insert()
 
@@ -128,7 +145,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.party_type = 'Customer'
 		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
-		subscription.start = '2018-01-01'
+		subscription.start_date = '2018-01-01'
 		subscription.insert()
 		subscription.process()	# generate first invoice
 		self.assertEqual(len(subscription.invoices), 1)
@@ -146,7 +163,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.process()
 
 		self.assertEqual(subscription.status, 'Active')
-		self.assertEqual(subscription.current_invoice_start, add_months(subscription.start, 1))
+		self.assertEqual(subscription.current_invoice_start, add_months(subscription.start_date, 1))
 		self.assertEqual(len(subscription.invoices), 1)
 
 		subscription.delete()
@@ -161,7 +178,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.party_type = 'Customer'
 		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
-		subscription.start = '2018-01-01'
+		subscription.start_date = '2018-01-01'
 		subscription.insert()
 
 		self.assertEqual(subscription.status, 'Active')
@@ -185,7 +202,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.party_type = 'Customer'
 		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
-		subscription.start = '2018-01-01'
+		subscription.start_date = '2018-01-01'
 		subscription.insert()
 		subscription.process()		# generate first invoice
 
@@ -202,7 +219,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.days_until_due = 10
-		subscription.start = add_months(nowdate(), -1)
+		subscription.start_date = add_months(nowdate(), -1)
 		subscription.insert()
 		subscription.process()		# generate first invoice
 		self.assertEqual(len(subscription.invoices), 1)
@@ -220,7 +237,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.party_type = 'Customer'
 		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
-		subscription.start = '2018-01-01'
+		subscription.start_date = '2018-01-01'
 		subscription.insert()
 		subscription.process()		# generate first invoice
 
@@ -371,7 +388,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.party_type = 'Customer'
 		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
-		subscription.start = '2018-01-01'
+		subscription.start_date = '2018-01-01'
 		subscription.insert()
 		subscription.process()	# generate first invoice
 		invoices = len(subscription.invoices)
@@ -403,7 +420,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.party_type = 'Customer'
 		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
-		subscription.start = '2018-01-01'
+		subscription.start_date = '2018-01-01'
 		subscription.insert()
 		subscription.process()		# generate first invoice
 
@@ -439,7 +456,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.party_type = 'Customer'
 		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
-		subscription.start = '2018-01-01'
+		subscription.start_date = '2018-01-01'
 		subscription.insert()
 
 		subscription.process()		# generate first invoice
@@ -554,3 +571,65 @@ class TestSubscription(unittest.TestCase):
 		settings.save()
 
 		subscription.delete()
+
+	def test_subscription_with_follow_calendar_months(self):
+		subscription = frappe.new_doc('Subscription')
+		subscription.party_type = 'Supplier'
+		subscription.party = '_Test Supplier'
+		subscription.generate_invoice_at_period_start = 1
+		subscription.follow_calendar_months = 1
+
+		# select subscription start date as '2018-01-15'
+		subscription.start_date = '2018-01-15'
+		subscription.end_date = '2018-07-15'
+		subscription.append('plans', {'plan': '_Test Plan Name 4', 'qty': 1})
+		subscription.save()
+
+		# even though subscription starts at '2018-01-15' and Billing interval is Month and count 3
+		# First invoice will end at '2018-03-31' instead of '2018-04-14'
+		self.assertEqual(get_date_str(subscription.current_invoice_end), '2018-03-31')
+
+	def test_subscription_generate_invoice_past_due(self):
+		subscription = frappe.new_doc('Subscription')
+		subscription.party_type = 'Supplier'
+		subscription.party = '_Test Supplier'
+		subscription.generate_invoice_at_period_start = 1
+		subscription.generate_new_invoices_past_due_date = 1
+		# select subscription start date as '2018-01-15'
+		subscription.start_date = '2018-01-01'
+		subscription.append('plans', {'plan': '_Test Plan Name 4', 'qty': 1})
+		subscription.save()
+
+		# Process subscription and create first invoice
+		# Subscription status will be unpaid since due date has already passed
+		subscription.process()
+		self.assertEqual(len(subscription.invoices), 1)
+		self.assertEqual(subscription.status, 'Unpaid')
+
+		# Now the Subscription is unpaid
+		# Even then new invoice should be created as we have enabled `generate_new_invoices_past_due_date` in
+		# subscription
+
+		subscription.process()
+		self.assertEqual(len(subscription.invoices), 2)
+
+	def test_subscription_without_generate_invoice_past_due(self):
+		subscription = frappe.new_doc('Subscription')
+		subscription.party_type = 'Supplier'
+		subscription.party = '_Test Supplier'
+		subscription.generate_invoice_at_period_start = 1
+		# select subscription start date as '2018-01-15'
+		subscription.start_date = '2018-01-01'
+		subscription.append('plans', {'plan': '_Test Plan Name 4', 'qty': 1})
+		subscription.save()
+
+		# Process subscription and create first invoice
+		# Subscription status will be unpaid since due date has already passed
+		subscription.process()
+		self.assertEqual(len(subscription.invoices), 1)
+		self.assertEqual(subscription.status, 'Unpaid')
+
+		subscription.process()
+		self.assertEqual(len(subscription.invoices), 1)
+
+
