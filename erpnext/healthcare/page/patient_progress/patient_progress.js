@@ -32,6 +32,7 @@ class PatientProgress {
 				options: 'Patient',
 				fieldname: 'patient',
 				placeholder: __('Select Patient'),
+				only_select: true,
 				change: () => {
 					me.patient_id = ''
 					if (me.patient_id != patient.get_value() && patient.get_value()) {
@@ -40,8 +41,7 @@ class PatientProgress {
 						me.make_patient_profile();
 					}
 				}
-			},
-			only_select: true,
+			}
 		});
 		patient.refresh();
 
@@ -222,14 +222,14 @@ class PatientProgress {
 				options: 'Therapy Type',
 				fieldname: 'therapy_type',
 				placeholder: __('Select Therapy Type'),
+				only_select: true,
 				change: () => {
 					if (me.therapy_type != therapy_type.get_value() && therapy_type.get_value()) {
 						me.therapy_type = therapy_type.get_value();
 						me.render_therapy_progress_chart(me.therapy_type);
 					}
 				}
-			},
-			only_select: true
+			}
 		});
 		therapy_type.refresh();
 	}
@@ -278,14 +278,14 @@ class PatientProgress {
 				options: 'Patient Assessment Template',
 				fieldname: 'assessment_template',
 				placeholder: __('Select Assessment Template'),
+				only_select: true,
 				change: () => {
 					if (me.assessment_template != assessment_template.get_value() && assessment_template.get_value()) {
 						me.assessment_template = assessment_template.get_value();
 						me.render_assessment_result_chart(me.assessment_template);
 					}
 				}
-			},
-			only_select: true
+			}
 		});
 		assessment_template.refresh();
 	}
@@ -316,6 +316,9 @@ class PatientProgress {
 					axisOptions: {
 						xIsSeries: 1
 					},
+					tooltipOptions: {
+						formatTooltipY: d => d + __(' out of ') + chart.max_score
+					}
 				});
 			} else {
 				if (data.labels.length) {
@@ -338,14 +341,14 @@ class PatientProgress {
 				options: 'Patient Assessment Template',
 				fieldname: 'assessment',
 				placeholder: __('Select Assessment Template'),
+				only_select: true,
 				change: () => {
 					if (me.assessment != assessment.get_value() && assessment.get_value()) {
 						me.assessment = assessment.get_value();
 						me.render_therapy_assessment_correlation_chart(me.assessment);
 					}
 				}
-			},
-			only_select: true
+			}
 		});
 		assessment.refresh();
 	}
@@ -394,14 +397,14 @@ class PatientProgress {
 				options: 'Patient Assessment Parameter',
 				fieldname: 'assessment',
 				placeholder: __('Select Assessment Parameter'),
+				only_select: true,
 				change: () => {
 					if (me.parameter != parameter.get_value() && parameter.get_value()) {
 						me.parameter = parameter.get_value();
 						me.render_assessment_parameter_progress_chart(me.parameter);
 					}
 				}
-			},
-			only_select: true
+			}
 		});
 		parameter.refresh();
 	}
@@ -423,8 +426,14 @@ class PatientProgress {
 					type: 'line',
 					height: 250,
 					data: data,
+					lineOptions: {
+						regionFill: 1,
+					},
 					axisOptions: {
 						xIsSeries: 1
+					},
+					tooltipOptions: {
+						formatTooltipY: d => d + '%'
 					}
 				});
 			} else {

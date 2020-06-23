@@ -133,7 +133,7 @@ def get_therapy_assessment_correlation_data(patient, assessment_template):
 		'labels': [r[0] for r in result if r[0] != None],
 		'datasets': [
 			{ 'name': _('Sessions'), 'chartType': 'bar', 'values': [r[1] for r in result if r[0] != None] },
-			{ 'name': _('Average Score Obtained'), 'chartType': 'line', 'values': [round(r[2], 2) for r in result if r[0] != None] }
+			{ 'name': _('Average Score'), 'chartType': 'line', 'values': [round(r[2], 2) for r in result if r[0] != None] }
 		],
 		'max_score': max_score
 	}
@@ -167,7 +167,7 @@ def get_assessment_parameter_data(patient, parameter):
 	return {
 		'labels': [getdate(r[0]) for r in results if r[0] != None],
 		'datasets': [
-			{ 'values': score_percentages }
+			{ 'name': _('Score'), 'values': score_percentages }
 		]
 	}
 

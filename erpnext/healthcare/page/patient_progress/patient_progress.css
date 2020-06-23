@@ -3,6 +3,10 @@
 	margin: 5px 0;
 }
 
+.frappe-control[data-fieldname='patient'] {
+	max-width: 300px;
+}
+
 .heatmap-container {
 	height: 170px
 }
@@ -74,7 +78,8 @@ text.title {
 }
 
 .chart-filter-search {
-	margin-left: 20px;
+	margin-left: 35px;
+	width: 25%;
 }
 
 .line-chart-container .frappe-chart {
@@ -83,4 +88,26 @@ text.title {
 
 .line-chart-container {
 	margin-top: 10px;
+}
+
+@media (max-width: 991px) {
+	.patient-progress-sidebar {
+		display: flex;
+	}
+
+	.percentage-chart-container {
+		border-top: 1px solid #d1d8dd;
+	}
+
+	.patient-progress-sidebar .important-links {
+		margin: 0;
+	}
+
+	.patient-progress-sidebar .patient-details {
+		width: 50%;
+	}
+
+	.chart-filter-search {
+		width: 40%;
+	}
 }
