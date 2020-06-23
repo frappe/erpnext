@@ -15,7 +15,7 @@ class DepartmentApprover(Document):
 def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 
 	if not filters.get("employee"):
-		frappe.throw(_("Please select Employee Record first."))
+		frappe.throw(_("Please select Employee first."))
 
 	approvers = []
 	department_details = {}
@@ -41,9 +41,12 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("doctype") == "Leave Application":
 		parentfield = "leave_approvers"
 		field_name = "Leave Approver"
-	else:
+	elif filters.get("doctype") == "Leave Application":
 		parentfield = "expense_approvers"
 		field_name = "Expense Approver"
+	else:
+		parentfield = "shift_request_approver"
+		field_name = "Approver"
 	if department_list:
 		for d in department_list:
 			approvers += frappe.db.sql("""select user.name, user.first_name, user.last_name from
