@@ -225,6 +225,13 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			me.frm.doc.base_net_total += item.base_net_amount;
 			});
 
+		$.each(this.frm.doc["timesheets"] || [], function(i, timesheet) {
+			me.frm.doc.total += timesheet.billing_amount;
+			me.frm.doc.base_total += timesheet.billing_amount;
+			me.frm.doc.net_total += timesheet.billing_amount;
+			me.frm.doc.base_net_total += timesheet.billing_amount;
+			});
+
 		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total"]);
 	},
 
