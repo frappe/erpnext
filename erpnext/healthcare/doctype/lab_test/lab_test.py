@@ -204,12 +204,12 @@ def create_specials(template, lab_test):
 	lab_test.special_toggle = '1'
 	if(template.sensitivity):
 		lab_test.sensitivity_toggle = '1'
-	for special_test_template in template.special_test_template:
-		special = lab_test.append('special_test_items')
-		special.lab_test_particulars = special_test_template.particulars
-		special.require_result_value = 1
-		special.allow_blank = special_test_template.allow_blank
-		special.template = template.name
+	for descriptive_test_template in template.descriptive_test_templates:
+		descriptive = lab_test.append('descriptive_test_items')
+		descriptive.lab_test_particulars = descriptive_test_template.particulars
+		descriptive.require_result_value = 1
+		descriptive.allow_blank = descriptive_test_template.allow_blank
+		descriptive.template = template.name
 
 def create_sample_doc(template, patient, invoice, company = None):
 	if template.sample:
@@ -281,7 +281,7 @@ def load_result_format(lab_test, template, prescription, invoice):
 						normal_heading.template = template_in_group.name
 						create_compounds(template_in_group, lab_test, True)
 					elif(template_in_group.lab_test_template_type == 'Descriptive'):
-						special_heading = lab_test.append('special_test_items')
+						special_heading = lab_test.append('descriptive_test_items')
 						special_heading.lab_test_name = template_in_group.lab_test_name
 						special_heading.require_result_value = 0
 						special_heading.template = template_in_group.name
@@ -332,8 +332,8 @@ def insert_lab_test_to_medical_record(doc):
 			table_row += ' ' + _('Normal Range:') + item.normal_range
 		table_row += ' ' + comment
 
-	elif doc.special_test_items:
-		item = doc.special_test_items[0]
+	elif doc.descriptive_test_items:
+		item = doc.descriptive_test_items[0]
 
 		if item.lab_test_particulars and item.result_value:
 			table_row = item.lab_test_particulars +' '+ item.result_value

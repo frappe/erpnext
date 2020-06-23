@@ -45,8 +45,8 @@
   "sb_normal",
   "lab_test_html",
   "normal_test_items",
-  "sb_special",
-  "special_test_items",
+  "sb_descriptive",
+  "descriptive_test_items",
   "organisms_section",
   "organisms",
   "sb_sensitivity",
@@ -351,23 +351,12 @@
   {
    "fieldname": "normal_test_items",
    "fieldtype": "Table",
-   "options": "Normal Test Items",
+   "options": "Normal Test Result",
    "print_hide": 1
   },
   {
    "fieldname": "lab_test_html",
    "fieldtype": "HTML"
-  },
-  {
-   "fieldname": "sb_special",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "special_test_items",
-   "fieldtype": "Table",
-   "options": "Special Test Items",
-   "print_hide": 1,
-   "report_hide": 1
   },
   {
    "depends_on": "special_toggle",
@@ -377,7 +366,7 @@
   {
    "fieldname": "organisms",
    "fieldtype": "Table",
-   "options": "Organism Test Item",
+   "options": "Organism Test Result",
    "print_hide": 1
   },
   {
@@ -387,7 +376,7 @@
   {
    "fieldname": "sensitivity_test_items",
    "fieldtype": "Table",
-   "options": "Sensitivity Test Items",
+   "options": "Sensitivity Test Result",
    "print_hide": 1,
    "report_hide": 1
   },
@@ -546,11 +535,22 @@
   {
    "fieldname": "data_62",
    "fieldtype": "Data"
+  },
+  {
+   "fieldname": "descriptive_test_items",
+   "fieldtype": "Table",
+   "options": "Descriptive Test Result",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "sb_descriptive",
+   "fieldtype": "Section Break"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-21 22:50:40.146660",
+ "modified": "2020-06-22 12:19:28.979692",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

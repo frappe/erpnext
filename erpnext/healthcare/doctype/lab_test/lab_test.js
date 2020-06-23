@@ -17,14 +17,14 @@ frappe.ui.form.on('Lab Test', {
 			{fieldname: 'lab_test_uom', columns: 1},
 			{fieldname: 'normal_range', columns: 2}
 		];
-		frm.get_field('special_test_items').grid.editable_fields = [
+		frm.get_field('descriptive_test_items').grid.editable_fields = [
 			{fieldname: 'lab_test_particulars', columns: 3},
 			{fieldname: 'result_value', columns: 7}
 		];
 	},
 	refresh : function(frm) {
 		refresh_field('normal_test_items');
-		refresh_field('special_test_items');
+		refresh_field('descriptive_test_items');
 		if (frm.doc.__islocal) {
 			frm.add_custom_button(__('Get from Patient Encounter'), function () {
 				get_lab_test_prescribed(frm);
@@ -80,14 +80,14 @@ frappe.ui.form.on('Lab Test', 'patient', function(frm) {
 	}
 });
 
-frappe.ui.form.on('Normal Test Items', {
+frappe.ui.form.on('Normal Test Result', {
 	normal_test_items_remove: function() {
 		frappe.msgprint(__('Not permitted, configure Lab Test Template as required'));
 		cur_frm.reload_doc();
 	}
 });
 
-frappe.ui.form.on('Special Test Items', {
+frappe.ui.form.on('Descriptive Test Result', {
 	special_test_items_remove: function() {
 		frappe.msgprint(__('Not permitted, configure Lab Test Template as required'));
 		cur_frm.reload_doc();

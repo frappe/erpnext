@@ -1,0 +1,40 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "beta": 1,
+ "creation": "2016-02-22 16:12:12.394200",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "particulars",
+  "allow_blank"
+ ],
+ "fields": [
+  {
+   "fieldname": "particulars",
+   "fieldtype": "Data",
+   "ignore_xss_filter": 1,
+   "in_list_view": 1,
+   "label": "Result Component"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_blank",
+   "fieldtype": "Check",
+   "label": "Allow Blank"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-06-23 13:29:06.961121",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Descriptive Test Template",
+ "owner": "Administrator",
+ "permissions": [],
+ "restrict_to_domain": "Healthcare",
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

@@ -31,7 +31,7 @@
   "normal_test_templates",
   "section_break_special",
   "sensitivity",
-  "special_test_template",
+  "descriptive_test_templates",
   "section_break_group",
   "lab_test_groups",
   "sb_sample_collection",
@@ -163,18 +163,13 @@
    "depends_on": "eval:doc.lab_test_template_type == 'Descriptive'",
    "fieldname": "section_break_special",
    "fieldtype": "Section Break",
-   "label": "Special"
+   "label": "Descriptive"
   },
   {
    "default": "0",
    "fieldname": "sensitivity",
    "fieldtype": "Check",
    "label": "Sensitivity"
-  },
-  {
-   "fieldname": "special_test_template",
-   "fieldtype": "Table",
-   "options": "Special Test Template"
   },
   {
    "depends_on": "eval:doc.lab_test_template_type == 'Grouped'",
@@ -185,7 +180,7 @@
   {
    "fieldname": "lab_test_groups",
    "fieldtype": "Table",
-   "options": "Lab Test Groups"
+   "options": "Lab Test Group Template"
   },
   {
    "collapsible": 1,
@@ -290,10 +285,15 @@
    "fieldname": "worksheet_section",
    "fieldtype": "Section Break",
    "label": "Worksheet Print"
+  },
+  {
+   "fieldname": "descriptive_test_templates",
+   "fieldtype": "Table",
+   "options": "Descriptive Test Template"
   }
  ],
  "links": [],
- "modified": "2020-06-21 19:52:18.524929",
+ "modified": "2020-06-22 12:00:30.164278",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",
