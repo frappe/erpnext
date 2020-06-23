@@ -224,6 +224,12 @@ class calculate_taxes_and_totals(object):
 			self.doc.net_total += item.net_amount
 			self.doc.base_net_total += item.base_net_amount
 
+		for timesheet in self.doc.get("timesheets", default=[]):
+			self.doc.total += timesheet.billing_amount
+			self.doc.base_total += timesheet.billing_amount
+			self.doc.net_total += timesheet.billing_amount
+			self.doc.base_net_total += timesheet.billing_amount
+
 		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total"])
 
 		if self.doc.doctype == 'Sales Invoice' and self.doc.is_pos:

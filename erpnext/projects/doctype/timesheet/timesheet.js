@@ -103,10 +103,10 @@ frappe.ui.form.on("Timesheet", {
 
 	make_invoice: function(frm) {
 		let dialog = new frappe.ui.Dialog({
-			title: __("Select Item (optional)"),
+			title: __("Select Item and Customer"),
 			fields: [
-				{"fieldtype": "Link", "label": __("Item Code"), "fieldname": "item_code", "options":"Item"},
-				{"fieldtype": "Link", "label": __("Customer"), "fieldname": "customer", "options":"Customer"}
+				{"fieldtype": "Link", "label": __("Item Code"), "fieldname": "item_code", "options":"Item", "reqd": 1},
+				{"fieldtype": "Link", "label": __("Customer"), "fieldname": "customer", "options":"Customer", "reqd": 1}
 			]
 		});
 
