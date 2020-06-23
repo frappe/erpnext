@@ -97,8 +97,6 @@ def add_assignments(events, start, end, conditions=None):
 		query += conditions
 
 	for d in frappe.db.sql(query, {"start_date":start}, as_dict=True):
-		from pprint import pprint
-		pprint(d)
 		e = {
 			"name": d.name,
 			"doctype": "Shift Assignment",
@@ -155,17 +153,20 @@ def get_employee_shift(employee, for_date=nowdate(), consider_default_shift=Fals
 			direction = '<' if next_shift_direction == 'reverse' else '>'
 			sort_order = 'desc' if next_shift_direction == 'reverse' else 'asc'
 			dates = frappe.db.get_all('Shift Assignment',
-				'start_date',
+				['start_date', 'end_date'],
 				{'employee':employee, 'start_date':(direction, for_date), 'docstatus': '1', "status": "Active"},
 				as_list=True,
-				limit=MAX_DAYS, order_by="date "+sort_order)
+				limit=MAX_DAYS, order_by="start_date "+sort_order)
 
-			for date in dates:
-				shift_details = get_employee_shift(employee, date.start_date, consider_default_shift, None)
-				if shift_details:
-					shift_type_name = shift_details.shift_type.name
-					for_date = date[0]
-					break
+			if dates:
+				for date in dates:
+					if date[1] and date[1] < for_date:
+						continue
+					shift_details = get_employee_shift(employee, date[0], consider_default_shift, None)
+					if shift_details:
+						shift_type_name = shift_details.shift_type.name
+						for_date = date[0]
+						break
 
 	return get_shift_details(shift_type_name, for_date)
 

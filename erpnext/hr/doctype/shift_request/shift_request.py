@@ -7,7 +7,6 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import formatdate, getdate
-from erpnext.hr.doctype.department_approver.department_approver import get_approvers
 
 class OverlapError(frappe.ValidationError): pass
 
@@ -52,7 +51,7 @@ class ShiftRequest(Document):
 		approvers = [approver[0] for approver in approvers]
 		approvers.append(shift_approver)
 		if self.approver not in approvers:
-			frappe.throw(__("Only Approvers can Approve this Request."))
+			frappe.throw(_("Only Approvers can Approve this Request."))
 
 	def validate_dates(self):
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):
