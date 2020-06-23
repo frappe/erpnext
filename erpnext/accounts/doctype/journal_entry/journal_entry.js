@@ -278,7 +278,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			// payroll entry
 			if(jvd.reference_type==="Payroll Entry") {
 				return {
-					query: "erpnext.hr.doctype.payroll_entry.payroll_entry.get_payroll_entries_for_jv",
+					query: "erpnext.payroll.doctype.payroll_entry.payroll_entry.get_payroll_entries_for_jv",
 				};
 			}
 

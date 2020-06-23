@@ -363,6 +363,9 @@ class StockEntry(StockController):
 					+ self.work_order + ":" + ", ".join(other_ste), DuplicateEntryForWorkOrderError)
 
 	def set_incoming_rate(self):
+		if self.purpose == "Repack":
+			self.set_basic_rate_for_finished_goods()
+
 		for d in self.items:
 			if d.s_warehouse:
 				args = self.get_args_for_incoming_rate(d)
@@ -475,20 +478,31 @@ class StockEntry(StockController):
 			"allow_zero_valuation": item.allow_zero_valuation_rate,
 		})
 
-	def set_basic_rate_for_finished_goods(self, raw_material_cost, scrap_material_cost):
+	def set_basic_rate_for_finished_goods(self, raw_material_cost=0, scrap_material_cost=0):
+		total_fg_qty = 0
+		if not raw_material_cost and self.get("items"):
+			raw_material_cost = sum([flt(row.basic_amount) for row in self.items
+				if row.s_warehouse and not row.t_warehouse])
+
+			total_fg_qty = sum([flt(row.qty) for row in self.items
+				if row.t_warehouse and not row.s_warehouse])
+
 		if self.purpose in ["Manufacture", "Repack"]:
 			for d in self.get("items"):
 				if (d.transfer_qty and (d.bom_no or d.t_warehouse)
 					and (getattr(self, "pro_doc", frappe._dict()).scrap_warehouse != d.t_warehouse)):
 
-					if self.work_order \
-						and frappe.db.get_single_value("Manufacturing Settings", "material_consumption"):
+					if (self.work_order and self.purpose == "Manufacture"
+						and frappe.db.get_single_value("Manufacturing Settings", "material_consumption")):
 						bom_items = self.get_bom_raw_materials(d.transfer_qty)
 						raw_material_cost = sum([flt(row.qty)*flt(row.rate) for row in bom_items.values()])
 
-					if raw_material_cost:
+					if raw_material_cost and self.purpose == "Manufacture":
 						d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
 						d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
+					elif self.purpose == "Repack" and total_fg_qty and not d.set_basic_rate_manually:
+						d.basic_rate = flt(raw_material_cost) / flt(total_fg_qty)
+						d.basic_amount = d.basic_rate * d.qty
 
 	def distribute_additional_costs(self):
 		if self.purpose == "Material Issue":
@@ -560,9 +574,7 @@ class StockEntry(StockController):
 						{"parent": self.purchase_order, "item_code": se_item.subcontracted_item},
 						"bom")
 
-					allow_alternative_item = frappe.get_value("BOM", bom_no, "allow_alternative_item")
-
-					if allow_alternative_item:
+					if se_item.allow_alternative_item:
 						original_item_code = frappe.get_value("Item Alternative", {"alternative_item_code": item_code}, "item_code")
 
 						required_qty = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
@@ -718,14 +730,18 @@ class StockEntry(StockController):
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
 			_validate_work_order(pro_doc)
 			pro_doc.run_method("update_status")
+
 			if self.fg_completed_qty:
 				pro_doc.run_method("update_work_order_qty")
 				if self.purpose == "Manufacture":
 					pro_doc.run_method("update_planned_qty")
 
+			if not pro_doc.operations:
+				pro_doc.set_actual_dates()
+
 	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select i.name, i.stock_uom, i.description, i.image, i.item_name, i.item_group,
-				i.has_batch_no, i.sample_quantity, i.has_serial_no,
+				i.has_batch_no, i.sample_quantity, i.has_serial_no, i.allow_alternative_item,
 				id.expense_account, id.buying_cost_center
 			from `tabItem` i LEFT JOIN `tabItem Default` id ON i.name=id.parent and id.company=%s
 			where i.name=%s
@@ -759,6 +775,9 @@ class StockEntry(StockController):
 			'sample_quantity'		: item.sample_quantity,
 			'expense_account'		: item.expense_account
 		})
+
+		if self.purpose == 'Send to Subcontractor':
+			ret["allow_alternative_item"] = item.allow_alternative_item
 
 		# update uom
 		if args.get("uom") and for_update:

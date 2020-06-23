@@ -31,6 +31,7 @@ class LoanInterestAccrual(AccountsController):
 			self.update_is_accrued()
 
 		self.make_gl_entries(cancel=1)
+		self.ignore_linked_doctypes = ['GL Entry']
 
 	def update_is_accrued(self):
 		frappe.db.set_value('Repayment Schedule', self.repayment_schedule_name, 'is_accrued', 0)
@@ -176,21 +177,23 @@ def get_term_loans(date, term_loan=None, loan_type=None):
 	return term_loans
 
 def make_loan_interest_accrual_entry(args):
-		loan_interest_accrual = frappe.new_doc("Loan Interest Accrual")
-		loan_interest_accrual.loan = args.loan
-		loan_interest_accrual.applicant_type = args.applicant_type
-		loan_interest_accrual.applicant = args.applicant
-		loan_interest_accrual.interest_income_account = args.interest_income_account
-		loan_interest_accrual.loan_account = args.loan_account
-		loan_interest_accrual.pending_principal_amount = flt(args.pending_principal_amount, 2)
-		loan_interest_accrual.interest_amount = flt(args.interest_amount, 2)
-		loan_interest_accrual.posting_date = args.posting_date or nowdate()
-		loan_interest_accrual.process_loan_interest_accrual = args.process_loan_interest
-		loan_interest_accrual.repayment_schedule_name = args.repayment_schedule_name
-		loan_interest_accrual.payable_principal_amount = args.payable_principal
+	precision = cint(frappe.db.get_default("currency_precision")) or 2
 
-		loan_interest_accrual.save()
-		loan_interest_accrual.submit()
+	loan_interest_accrual = frappe.new_doc("Loan Interest Accrual")
+	loan_interest_accrual.loan = args.loan
+	loan_interest_accrual.applicant_type = args.applicant_type
+	loan_interest_accrual.applicant = args.applicant
+	loan_interest_accrual.interest_income_account = args.interest_income_account
+	loan_interest_accrual.loan_account = args.loan_account
+	loan_interest_accrual.pending_principal_amount = flt(args.pending_principal_amount, precision)
+	loan_interest_accrual.interest_amount = flt(args.interest_amount, precision)
+	loan_interest_accrual.posting_date = args.posting_date or nowdate()
+	loan_interest_accrual.process_loan_interest_accrual = args.process_loan_interest
+	loan_interest_accrual.repayment_schedule_name = args.repayment_schedule_name
+	loan_interest_accrual.payable_principal_amount = args.payable_principal
+
+	loan_interest_accrual.save()
+	loan_interest_accrual.submit()
 
 
 def get_no_of_days_for_interest_accural(loan, posting_date):

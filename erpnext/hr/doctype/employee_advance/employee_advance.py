@@ -22,6 +22,7 @@ class EmployeeAdvance(Document):
 		self.validate_employee_advance_account()
 
 	def on_cancel(self):
+		self.ignore_linked_doctypes = ('GL Entry')
 		self.set_status()
 
 	def set_status(self):
@@ -95,7 +96,7 @@ class EmployeeAdvance(Document):
 		frappe.db.set_value("Employee Advance", self.name, "status", self.status)
 
 @frappe.whitelist()
-def get_due_advance_amount(employee, posting_date):
+def get_pending_amount(employee, posting_date):
 	employee_due_amount = frappe.get_all("Employee Advance", \
 		filters = {"employee":employee, "docstatus":1, "posting_date":("<=", posting_date)}, \
 		fields = ["advance_amount", "paid_amount"])
@@ -146,7 +147,7 @@ def create_return_through_additional_salary(doc):
 	return additional_salary
 
 @frappe.whitelist()
-def make_return_entry(employee_name, company, employee_advance_name, return_amount, mode_of_payment, advance_account):
+def make_return_entry(employee, company, employee_advance_name, return_amount,  advance_account, mode_of_payment=None):
 	return_account = get_default_bank_cash_account(company, account_type='Cash', mode_of_payment = mode_of_payment)
 
 	mode_of_payment_type = ''

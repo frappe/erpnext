@@ -86,7 +86,7 @@ class PaymentEntry(AccountsController):
 		self.update_payment_schedule(cancel=1)
 		self.set_payment_req_status()
 		self.set_status()
-	
+
 	def set_payment_req_status(self):
 		from erpnext.accounts.doctype.payment_request.payment_request import update_payment_req_status
 		update_payment_req_status(self, None)
@@ -280,7 +280,7 @@ class PaymentEntry(AccountsController):
 				outstanding_amount, is_return = frappe.get_cached_value(d.reference_doctype, d.reference_name, ["outstanding_amount", "is_return"])
 				if outstanding_amount <= 0 and not is_return:
 					no_oustanding_refs.setdefault(d.reference_doctype, []).append(d)
-		
+
 		for k, v in no_oustanding_refs.items():
 			frappe.msgprint(_("{} - {} now have {} as they had no outstanding amount left before submitting the Payment Entry.<br><br>\
 					If this is undesirable please cancel the corresponding Payment Entry.")
@@ -319,7 +319,7 @@ class PaymentEntry(AccountsController):
 				invoice_payment_amount_map.setdefault(key, 0.0)
 				invoice_payment_amount_map[key] += reference.allocated_amount
 
-				if not invoice_paid_amount_map.get(reference.reference_name):
+				if not invoice_paid_amount_map.get(key):
 					payment_schedule = frappe.get_all('Payment Schedule', filters={'parent': reference.reference_name},
 						fields=['paid_amount', 'payment_amount', 'payment_term'])
 					for term in payment_schedule:
@@ -332,12 +332,14 @@ class PaymentEntry(AccountsController):
 				frappe.db.sql(""" UPDATE `tabPayment Schedule` SET paid_amount = `paid_amount` - %s
 					WHERE parent = %s and payment_term = %s""", (amount, key[1], key[0]))
 			else:
-				outstanding = invoice_paid_amount_map.get(key)['outstanding']
+				outstanding = flt(invoice_paid_amount_map.get(key, {}).get('outstanding'))
+
 				if amount > outstanding:
 					frappe.throw(_('Cannot allocate more than {0} against payment term {1}').format(outstanding, key[0]))
 
-				frappe.db.sql(""" UPDATE `tabPayment Schedule` SET paid_amount = `paid_amount` + %s
-						WHERE parent = %s and payment_term = %s""", (amount, key[1], key[0]))
+				if amount and outstanding:
+					frappe.db.sql(""" UPDATE `tabPayment Schedule` SET paid_amount = `paid_amount` + %s
+							WHERE parent = %s and payment_term = %s""", (amount, key[1], key[0]))
 
 	def set_status(self):
 		if self.docstatus == 2:
@@ -506,7 +508,7 @@ class PaymentEntry(AccountsController):
 				"against": against_account,
 				"account_currency": self.party_account_currency,
 				"cost_center": self.cost_center
-			})
+			}, item=self)
 
 			dr_or_cr = "credit" if erpnext.get_party_account_type(self.party_type) == 'Receivable' else "debit"
 
@@ -550,7 +552,7 @@ class PaymentEntry(AccountsController):
 					"credit_in_account_currency": self.paid_amount,
 					"credit": self.base_paid_amount,
 					"cost_center": self.cost_center
-				})
+				}, item=self)
 			)
 		if self.payment_type in ("Receive", "Internal Transfer"):
 			gl_entries.append(
@@ -561,7 +563,7 @@ class PaymentEntry(AccountsController):
 					"debit_in_account_currency": self.received_amount,
 					"debit": self.base_received_amount,
 					"cost_center": self.cost_center
-				})
+				}, item=self)
 			)
 
 	def add_deductions_gl_entries(self, gl_entries):
@@ -1093,17 +1095,20 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 def get_reference_as_per_payment_terms(payment_schedule, dt, dn, doc, grand_total, outstanding_amount):
 	references = []
 	for payment_term in payment_schedule:
-		references.append({
-			'reference_doctype': dt,
-			'reference_name': dn,
-			'bill_no': doc.get('bill_no'),
-			'due_date': doc.get('due_date'),
-			'total_amount': grand_total,
-			'outstanding_amount': outstanding_amount,
-			'payment_term': payment_term.payment_term,
-			'allocated_amount': flt(payment_term.payment_amount - payment_term.paid_amount,
+		payment_term_outstanding = flt(payment_term.payment_amount - payment_term.paid_amount,
 				payment_term.precision('payment_amount'))
-		})
+
+		if payment_term_outstanding:
+			references.append({
+				'reference_doctype': dt,
+				'reference_name': dn,
+				'bill_no': doc.get('bill_no'),
+				'due_date': doc.get('due_date'),
+				'total_amount': grand_total,
+				'outstanding_amount': outstanding_amount,
+				'payment_term': payment_term.payment_term,
+				'allocated_amount': payment_term_outstanding
+			})
 
 	return references
 

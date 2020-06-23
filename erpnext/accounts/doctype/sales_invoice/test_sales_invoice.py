@@ -1720,8 +1720,6 @@ class TestSalesInvoice(unittest.TestCase):
 		si.save()
 		si.submit()
 
-		from erpnext.accounts.deferred_revenue import convert_deferred_revenue_to_income
-
 		pda1 = frappe.get_doc(dict(
 			doctype='Process Deferred Accounting',
 			posting_date=nowdate(),
@@ -1745,9 +1743,13 @@ class TestSalesInvoice(unittest.TestCase):
 
 		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
 
-	def test_deferred_error_email(self):
+	def test_fixed_deferred_revenue(self):
 		deferred_account = create_account(account_name="Deferred Revenue",
 			parent_account="Current Liabilities - _TC", company="_Test Company")
+
+		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		acc_settings.book_deferred_entries_based_on = 'Months'
+		acc_settings.save()
 
 		item = create_item("_Test Item for Deferred Accounting")
 		item.enable_deferred_revenue = 1
@@ -1755,41 +1757,39 @@ class TestSalesInvoice(unittest.TestCase):
 		item.no_of_months = 12
 		item.save()
 
-		si = create_sales_invoice(item=item.name, posting_date="2019-01-10", do_not_submit=True)
+		si = create_sales_invoice(item=item.name, posting_date="2019-01-16", rate=50000, do_not_submit=True)
 		si.items[0].enable_deferred_revenue = 1
-		si.items[0].service_start_date = "2019-01-10"
-		si.items[0].service_end_date = "2019-03-15"
+		si.items[0].service_start_date = "2019-01-16"
+		si.items[0].service_end_date = "2019-03-31"
 		si.items[0].deferred_revenue_account = deferred_account
 		si.save()
 		si.submit()
 
-		from erpnext.accounts.deferred_revenue import convert_deferred_revenue_to_income
-
-		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		acc_settings.acc_frozen_upto = '2019-01-31'
-		acc_settings.save()
-
-		pda = frappe.get_doc(dict(
+		pda1 = frappe.get_doc(dict(
 			doctype='Process Deferred Accounting',
-			posting_date=nowdate(),
+			posting_date='2019-03-31',
 			start_date="2019-01-01",
 			end_date="2019-03-31",
 			type="Income",
 			company="_Test Company"
 		))
 
-		pda.insert()
-		pda.submit()
+		pda1.insert()
+		pda1.submit()
 
-		email = frappe.db.sql(""" select name from `tabEmail Queue`
-		where message like %(txt)s """, {
-			'txt': "%%%s%%" % "Error while processing deferred accounting for {0}".format(pda.name)
-		})
+		expected_gle = [
+			[deferred_account, 10000.0, 0.0, "2019-01-31"],
+			["Sales - _TC", 0.0, 10000.0, "2019-01-31"],
+			[deferred_account, 20000.0, 0.0, "2019-02-28"],
+			["Sales - _TC", 0.0, 20000.0, "2019-02-28"],
+			[deferred_account, 20000.0, 0.0, "2019-03-31"],
+			["Sales - _TC", 0.0, 20000.0, "2019-03-31"]
+		]
 
-		self.assertTrue(email)
+		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
 
-		acc_settings.load_from_db()
-		acc_settings.acc_frozen_upto = None
+		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		acc_settings.book_deferred_entries_based_on = 'Days'
 		acc_settings.save()
 
 	def test_inter_company_transaction(self):

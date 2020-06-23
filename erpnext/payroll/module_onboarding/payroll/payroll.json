@@ -1,0 +1,51 @@
+{
+ "allow_roles": [
+  {
+   "role": "HR Manager"
+  },
+  {
+   "role": "HR User"
+  }
+ ],
+ "creation": "2020-06-01 12:10:52.560472",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/human-resources/payroll-entry",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2020-06-04 16:35:30.650792",
+ "modified_by": "Administrator",
+ "module": "Payroll",
+ "name": "Payroll",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Create Employee"
+  },
+  {
+   "step": "Create Salary Component"
+  },
+  {
+   "step": "Create Payroll Period"
+  },
+  {
+   "step": "Create Income Tax Slab"
+  },
+  {
+   "step": "Create Salary Structure"
+  },
+  {
+   "step": "Assign Salary Structure"
+  },
+  {
+   "step": "Create Salary Slip"
+  },
+  {
+   "step": "Payroll Settings"
+  }
+ ],
+ "subtitle": "Salary, Compensations and more.",
+ "success_message": "The Payroll is all set up!",
+ "title": "Let's Setup the Payroll Module. ",
+ "user_can_dismiss": 1
+}

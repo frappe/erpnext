@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2015-09-07 14:37:01.886859",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -16,26 +17,33 @@
    "in_list_view": 1,
    "label": "Course",
    "options": "Course",
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
-   {
+  {
+   "fetch_from": "course.course_name",
    "fieldname": "course_name",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Course Name",
-   "fetch_from": "course.course_name",
-   "read_only":1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
    "fieldname": "required",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Mandatory"
+   "label": "Mandatory",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "istable": 1,
- "modified": "2019-06-12 12:42:12.845972",
+ "links": [],
+ "modified": "2020-06-09 18:56:10.213241",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Program Course",
