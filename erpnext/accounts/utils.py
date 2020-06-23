@@ -57,6 +57,9 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 
 		frappe.cache().hset("fiscal_years", company, fiscal_years)
 
+	if not transaction_date and not fiscal_year:
+		return fiscal_years
+
 	if transaction_date:
 		transaction_date = getdate(transaction_date)
 
@@ -78,6 +81,23 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 	error_msg = _("""{0} {1} not in any active Fiscal Year.""").format(label, formatdate(transaction_date))
 	if verbose==1: frappe.msgprint(error_msg)
 	raise FiscalYearError(error_msg)
+
+@frappe.whitelist()
+def get_fiscal_year_filter_field(company=None):
+	field = {
+		"fieldtype": "Select",
+		"options": [],
+		"operator": "Between",
+		"query_value": True
+	}
+	fiscal_years = get_fiscal_years(company=company)
+	for fiscal_year in fiscal_years:
+		field["options"].append({
+			"label": fiscal_year.name,
+			"value": fiscal_year.name,
+			"query_value": [fiscal_year.year_start_date.strftime("%Y-%m-%d"), fiscal_year.year_end_date.strftime("%Y-%m-%d")]
+		})
+	return field
 
 def validate_fiscal_year(date, fiscal_year, company, label="Date", doc=None):
 	years = [f[0] for f in get_fiscal_years(date, label=_(label), company=company)]
@@ -817,7 +837,7 @@ def create_payment_gateway_account(gateway):
 		pass
 
 @frappe.whitelist()
-def update_cost_center(docname, cost_center_name, cost_center_number, company):
+def update_cost_center(docname, cost_center_name, cost_center_number, company, merge):
 	'''
 		Renames the document by adding the number as a prefix to the current name and updates
 		all transaction where it was present.
@@ -833,7 +853,7 @@ def update_cost_center(docname, cost_center_name, cost_center_number, company):
 
 	new_name = get_autoname_with_number(cost_center_number, cost_center_name, docname, company)
 	if docname != new_name:
-		frappe.rename_doc("Cost Center", docname, new_name, force=1)
+		frappe.rename_doc("Cost Center", docname, new_name, force=1, merge=merge)
 		return new_name
 
 def validate_field_number(doctype_name, docname, number_value, company, field_name):

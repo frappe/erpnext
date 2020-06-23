@@ -19,7 +19,6 @@ class NotAnOptionalHoliday(frappe.ValidationError): pass
 
 from frappe.model.document import Document
 class LeaveApplication(Document):
-
 	def get_feed(self):
 		return _("{0}: From {0} of type {1}").format(self.employee_name, self.leave_type)
 
@@ -33,6 +32,7 @@ class LeaveApplication(Document):
 		self.validate_block_days()
 		self.validate_salary_processed_days()
 		self.validate_attendance()
+		self.set_half_day_date()
 		if frappe.db.get_value("Leave Type", self.leave_type, 'is_optional_leave'):
 			self.validate_optional_leave()
 		self.validate_applicable_after()
@@ -131,8 +131,6 @@ class LeaveApplication(Document):
 			for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 				date = dt.strftime("%Y-%m-%d")
 				status = "Half Day" if getdate(date) == getdate(self.half_day_date) else "On Leave"
-				print("-------->>>", status)
-				# frappe.throw("Hello")
 
 				attendance_name = frappe.db.exists('Attendance', dict(employee = self.employee,
 					attendance_date = date, docstatus = ('!=', 2)))
@@ -292,6 +290,10 @@ class LeaveApplication(Document):
 				frappe.throw(_("{0} is not in Optional Holiday List").format(formatdate(day)), NotAnOptionalHoliday)
 			day = add_days(day, 1)
 
+	def set_half_day_date(self):
+		if self.from_date == self.to_date and self.half_day == 1:
+			self.half_day_date = self.from_date
+
 	def notify_employee(self):
 		employee = frappe.get_doc("Employee", self.employee)
 		if not employee.user_id:
@@ -438,21 +440,36 @@ def get_leave_details(employee, date):
 	leave_allocation = {}
 	for d in allocation_records:
 		allocation = allocation_records.get(d, frappe._dict())
+
+		total_allocated_leaves = frappe.db.get_value('Leave Allocation', {
+			'from_date': ('<=', date),
+			'to_date': ('>=', date),
+			'employee': employee,
+			'leave_type': allocation.leave_type,
+		}, 'SUM(total_leaves_allocated)') or 0
+
 		remaining_leaves = get_leave_balance_on(employee, d, date, to_date = allocation.to_date,
 			consider_all_leaves_in_the_allocation_period=True)
+
 		end_date = allocation.to_date
 		leaves_taken = get_leaves_for_period(employee, d, allocation.from_date, end_date) * -1
 		leaves_pending = get_pending_leaves_for_period(employee, d, allocation.from_date, end_date)
 
 		leave_allocation[d] = {
-			"total_leaves": allocation.total_leaves_allocated,
+			"total_leaves": total_allocated_leaves,
+			"expired_leaves": total_allocated_leaves - (remaining_leaves + leaves_taken),
 			"leaves_taken": leaves_taken,
 			"pending_leaves": leaves_pending,
 			"remaining_leaves": remaining_leaves}
 
+	#is used in set query
+	lwps = frappe.get_list("Leave Type", filters = {"is_lwp": 1})
+	lwps = [lwp.name for lwp in lwps]
+
 	ret = {
 		'leave_allocation': leave_allocation,
-		'leave_approver': get_leave_approver(employee)
+		'leave_approver': get_leave_approver(employee),
+		'lwps': lwps
 	}
 
 	return ret

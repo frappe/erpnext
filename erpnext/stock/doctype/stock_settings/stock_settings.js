@@ -20,7 +20,7 @@ frappe.tour['Stock Settings'] = [
 	{
 		fieldname: "item_naming_by",
 		title: __("Item Naming By"),
-		description: __("By default, the Item Name is set as per the Item Code entered. If you want Items to be named by a set Naming Series choose the 'Naming Series' option.")
+		description: __("By default, the Item Name is set as per the Item Code entered. If you want Items to be named by a") + "<a href='https://docs.erpnext.com/docs/user/manual/en/setting-up/settings/naming-series' target='_blank'>Naming Series</a>" + __(" choose the 'Naming Series' option."),
 	},
 	{
 		fieldname: "default_warehouse",
