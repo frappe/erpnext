@@ -121,13 +121,15 @@ def get_employee_shift(employee, for_date=nowdate(), consider_default_shift=Fals
 	:param next_shift_direction: One of: None, 'forward', 'reverse'. Direction to look for next shift if shift not found on given date.
 	"""
 	default_shift = frappe.db.get_value('Employee', employee, 'default_shift')
+	shift_type_name = None
 	shift_assignment_details = frappe.db.get_value('Shift Assignment', {'employee':employee, 'start_date':('<=', for_date), 'docstatus': '1', 'status': "Active"}, ['shift_type', 'end_date'])
 
-	shift_type_name = shift_assignment_details[0]
+	if shift_assignment_details:
+		shift_type_name = shift_assignment_details[0]
 
-	# if end_date present means that shift is over after end_date else it is a ongoing shift.
-	if shift_assignment_details[1] and for_date >= shift_assignment_details[1] :
-		shift_type_name = None
+		# if end_date present means that shift is over after end_date else it is a ongoing shift.
+		if shift_assignment_details[1] and for_date >= shift_assignment_details[1] :
+			shift_type_name = None
 
 	if not shift_type_name and consider_default_shift:
 		shift_type_name = default_shift
