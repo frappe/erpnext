@@ -6,8 +6,8 @@ import frappe, erpnext
 from frappe import _
 
 def execute(filters=None):
-	columns = get_columns(filters)
 	data = get_data(filters)
+	columns = get_columns(filters) if len(data) else []
 
 	return columns, data
 
@@ -78,8 +78,11 @@ def get_conditions(filters):
 	if filters.get("company"):
 		conditions.append("sal.company = '%s' " % (filters["company"]) )
 
-	if filters.get("period"):
-		conditions.append("month(sal.start_date) = '%s' " % (filters["period"]))
+	if filters.get("month"):
+		conditions.append("month(sal.start_date) = '%s' " % (filters["month"]))
+
+	if filters.get("year"):
+		conditions.append("year(start_date) = '%s' " % (filters["year"]))
 
 	return " and ".join(conditions)
 
@@ -95,6 +98,9 @@ def get_data(filters):
 		where is_income_tax_component = 1 """)
 
 	component_types = [comp_type[0] for comp_type in component_types]
+
+	if not len(component_types):
+		return []
 
 	conditions = get_conditions(filters)
 
