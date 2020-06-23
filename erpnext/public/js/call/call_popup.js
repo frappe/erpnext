@@ -141,7 +141,7 @@ class CallPopup {
 			}, {
 				'fieldtype': 'Button',
 				'label': __('Create New Customer'),
-				'click': this.create_new_customer(),
+				'click': this.create_new_customer.bind(this),
 				'depends_on': () => !this.get_caller_name()
 			}, {
 				'fieldtype': 'Button',
@@ -292,7 +292,10 @@ class CallPopup {
 	}
 
 	create_new_customer() {
-		frappe.get_doc('Customer', { 'mobile_no': this.caller_number });
+		// to avoid quick entry form
+		const new_customer = frappe.model.get_new_doc('Customer');
+		new_customer.mobile_no = this.caller_number;
+		frappe.set_route('Form', new_customer.doctype, new_customer.name);
 	}
 }
 
