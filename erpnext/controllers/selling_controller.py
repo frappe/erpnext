@@ -361,7 +361,7 @@ class SellingController(StockController):
 					self.po_no = ', '.join(list(set([d.po_no for d in po_nos if d.po_no])))
 
 	def set_gross_profit(self):
-		if self.doctype == "Sales Order":
+		if self.doctype in ["Sales Order", "Quotation"]:
 			for item in self.items:
 				item.gross_profit = flt(((item.base_rate - item.valuation_rate) * item.stock_qty), self.precision("amount", item))
 

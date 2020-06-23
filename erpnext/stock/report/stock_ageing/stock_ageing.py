@@ -180,10 +180,10 @@ def get_fifo_queue(filters, sle=None):
 				qty_to_pop = abs(d.actual_qty)
 				while qty_to_pop:
 					batch = fifo_queue[0] if fifo_queue else [0, None]
-					if 0 < batch[0] <= qty_to_pop:
+					if 0 < flt(batch[0]) <= qty_to_pop:
 						# if batch qty > 0
 						# not enough or exactly same qty in current batch, clear batch
-						qty_to_pop -= batch[0]
+						qty_to_pop -= flt(batch[0])
 						transferred_item_details[(d.voucher_no, d.name)].append(fifo_queue.pop(0))
 					else:
 						# all from current batch
