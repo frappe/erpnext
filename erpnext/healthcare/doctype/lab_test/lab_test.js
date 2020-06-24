@@ -202,8 +202,7 @@ var make_dialog = function(frm, emailed, printed) {
 		fields: [
 			{fieldname: 'sms_type', fieldtype: 'Select', label: 'Type', options: ['Emailed', 'Printed']},
 			{fieldname: 'number', fieldtype: 'Data', label: 'Mobile Number', reqd: 1},
-			{fieldname: 'messages_label', fieldtype: 'HTML'},
-			{fieldname: 'messages', fieldtype: 'HTML', reqd: 1}
+			{fieldname: 'message', fieldtype: 'Small Text', label: 'Message', reqd: 1}
 		],
 		primary_action_label: __('Send'),
 		primary_action : function() {
@@ -215,44 +214,40 @@ var make_dialog = function(frm, emailed, printed) {
 			dialog.hide();
 		}
 	});
-	if (frm.doc.report_preference == 'Email') {
-		dialog.set_values({
-			'sms_type': 'Emailed',
-			'number': number
-		});
-		dialog.fields_dict.messages_label.html('Message'.bold());
-		dialog.fields_dict.messages.html(emailed);
-	} else {
+	if (frm.doc.report_preference == 'Print') {
 		dialog.set_values({
 			'sms_type': 'Printed',
-			'number': number
+			'number': number,
+			'message': printed
 		});
-		dialog.fields_dict.messages_label.html('Message'.bold());
-		dialog.fields_dict.messages.html(printed);
+	} else {
+		dialog.set_values({
+			'sms_type': 'Emailed',
+			'number': number,
+			'message': emailed
+		});
 	}
 	var fd = dialog.fields_dict;
 	$(fd.sms_type.input).change(function() {
 		if (dialog.get_value('sms_type') == 'Emailed') {
 			dialog.set_values({
-				'number': number
+				'number': number,
+				'message': emailed
 			});
-			fd.messages_label.html('Message'.bold());
-			fd.messages.html(emailed);
 		} else {
 			dialog.set_values({
-				'number': number
+				'number': number,
+				'message': printed
 			});
-			fd.messages_label.html('Message'.bold());
-			fd.messages.html(printed);
 		}
 	});
 	dialog.show();
 };
 
 var send_sms = function(vals, frm) {
-	var doc = frm.doc;
-	var number = vals.number.last_value;
-	var message = vals.messages.wrapper.innerText;
+	var number = vals.number.value;
+	var message = vals.message.last_value;
+
 	if (!number || !message) {
 		frappe.throw(__('Did not send SMS, missing patient mobile number or message content.'));
 	}
