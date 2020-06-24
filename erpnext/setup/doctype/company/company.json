@@ -22,7 +22,6 @@
   "default_letter_head",
   "default_holiday_list",
   "default_finance_book",
-  "standard_working_hours",
   "default_selling_terms",
   "default_buying_terms",
   "default_warehouse_for_sales_return",
@@ -237,11 +236,6 @@
    "fieldtype": "Link",
    "label": "Default Holiday List",
    "options": "Holiday List"
-  },
-  {
-   "fieldname": "standard_working_hours",
-   "fieldtype": "Float",
-   "label": "Standard Working Hours"
   },
   {
    "fieldname": "default_warehouse_for_sales_return",
@@ -730,7 +724,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2020-03-21 18:09:53.534211",
+ "modified": "2020-06-24 12:45:31.462195",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
