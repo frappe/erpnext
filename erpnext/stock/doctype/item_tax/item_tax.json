@@ -6,8 +6,7 @@
  "field_order": [
   "item_tax_template",
   "tax_category",
-  "valid_from",
-  "company"
+  "valid_from"
  ],
  "fields": [
   {
@@ -34,20 +33,11 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Valid From"
-  },
-  {
-   "fetch_from": "item_tax_template.company",
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Company",
-   "options": "Company",
-   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-06-18 22:53:44.546967",
+ "modified": "2020-06-25 01:40:28.859752",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Tax",

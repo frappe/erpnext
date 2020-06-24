@@ -442,7 +442,8 @@ def _get_item_tax_template(args, taxes, out={}, for_validate=False):
 	taxes_with_no_validity = []
 
 	for tax in taxes:
-		if tax.valid_from and tax.company == args['company']:
+		tax_company = frappe.get_value("Item Tax Template", tax.item_tax_template, 'company')
+		if tax.valid_from and tax_company == args['company']:
 			# In purchase Invoice first preference will be given to supplier invoice date
 			# if supplier date is not present then posting date
 			validation_date = args.get('transaction_date') or args.get('bill_date') or args.get('posting_date')
@@ -450,7 +451,7 @@ def _get_item_tax_template(args, taxes, out={}, for_validate=False):
 			if getdate(tax.valid_from) <= getdate(validation_date):
 				taxes_with_validity.append(tax)
 		else:
-			if tax.company == args['company']:
+			if tax_company == args['company']:
 				taxes_with_no_validity.append(tax)
 
 	if taxes_with_validity:
