@@ -1,3 +1,4 @@
+
 from __future__ import unicode_literals
 from frappe import _
 
@@ -309,7 +310,8 @@ scheduler_events = {
 		"erpnext.crm.doctype.email_campaign.email_campaign.set_email_campaign_status",
 		"erpnext.selling.doctype.quotation.quotation.set_expired_status",
 		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_appointment_status",
-		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status"
+		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status",
+		"erpnext.accounts.doctype.bulk_statement_of_accounts.bulk_statement_of_accounts.auto_email_soa"
 	],
 	"daily_long": [
 		"erpnext.setup.doctype.email_digest.email_digest.send",

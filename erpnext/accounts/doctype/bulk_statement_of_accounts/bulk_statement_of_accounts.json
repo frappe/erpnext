@@ -1,40 +1,46 @@
 {
  "actions": [],
+ "autoname": "format:BSOA-{#####}",
  "creation": "2020-05-22 16:46:18.712954",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "preferences",
+  "orientation",
+  "column_break_24",
+  "include_ageing_summary",
   "section_break_1",
   "frequency",
   "column_break_2",
-  "include_aging",
+  "start_date",
   "section_break_11",
   "from_date",
   "company",
   "account",
-  "party_type",
-  "project",
+  "group_by",
+  "cost_center",
   "column_break_14",
   "to_date",
   "finance_book",
   "voucher_number",
-  "party",
-  "cost_center",
+  "currency",
+  "project",
   "section_break_3",
   "customer_collection",
   "column_break_6",
   "collection_name",
   "column_break_17",
   "amended_from",
-  "customer_list"
+  "customer_list",
+  "is_autoemail"
  ],
  "fields": [
   {
    "fieldname": "frequency",
    "fieldtype": "Select",
    "label": "Frequency",
-   "options": "Monthly\nBefore Due Date\nAfter Due Date"
+   "options": "\nEvery Week\nEvery Month\nEvery Quarter"
   },
   {
    "fieldname": "company",
@@ -44,16 +50,18 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.frequency == '';",
    "fieldname": "from_date",
    "fieldtype": "Date",
    "label": "From Date",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.frequency == '';"
   },
   {
+   "depends_on": "eval:doc.frequency == '';",
    "fieldname": "to_date",
    "fieldtype": "Date",
    "label": "To Date",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.frequency == '';"
   },
   {
    "fieldname": "cost_center",
@@ -100,13 +108,8 @@
   },
   {
    "fieldname": "column_break_17",
-   "fieldtype": "Section Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "include_aging",
-   "fieldtype": "Check",
-   "label": "Include Aging"
+   "fieldtype": "Section Break",
+   "hide_border": 1
   },
   {
    "default": "Customer Group",
@@ -114,7 +117,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Select Customers By",
-   "options": "Customer Group\nTerritory\nSales Partner\nSales Team"
+   "options": "Customer Group\nTerritory\nSales Partner\nSales Person"
   },
   {
    "fieldname": "collection_name",
@@ -140,32 +143,69 @@
    "options": "Finance Book"
   },
   {
-   "fieldname": "voucher_number",
-   "fieldtype": "Data",
-   "label": "Voucher Number"
-  },
-  {
-   "fieldname": "party_type",
-   "fieldtype": "Link",
-   "label": "Party Type",
-   "options": "Party Type"
-  },
-  {
-   "fieldname": "party",
-   "fieldtype": "Data",
-   "label": "Party"
-  },
-  {
    "fieldname": "customer_list",
    "fieldtype": "Table",
    "label": "Customer List",
    "options": "Bulk Statement Of Accounts Customers",
    "reqd": 1
+  },
+  {
+   "fieldname": "preferences",
+   "fieldtype": "Section Break",
+   "label": "Print Preferences"
+  },
+  {
+   "fieldname": "orientation",
+   "fieldtype": "Select",
+   "label": "Orientation",
+   "options": "Landscape\nPortrait"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "include_ageing_summary",
+   "fieldtype": "Check",
+   "label": "Include Ageing Summary"
+  },
+  {
+   "default": "Today",
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "default": "Group by Voucher (Consolidated)",
+   "fieldname": "group_by",
+   "fieldtype": "Select",
+   "label": "Group By",
+   "options": "\nGroup by Voucher\nGroup by Voucher (Consolidated)\nGroup By Account\nGroup By Party"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Select",
+   "label": "Currency",
+   "options": "\nAED\nAUD\nCHF\nCNY\nEUR\nGBP\nINR\nJPY\nUSD"
+  },
+  {
+   "fieldname": "voucher_number",
+   "fieldtype": "Data",
+   "label": "Voucher No"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_autoemail",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "is_autoemail",
+   "print_hide": 1,
+   "report_hide": 1
   }
  ],
- "is_submittable": 1,
  "links": [],
- "modified": "2020-06-19 02:22:39.735514",
+ "modified": "2020-07-01 15:22:25.055587",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bulk Statement Of Accounts",

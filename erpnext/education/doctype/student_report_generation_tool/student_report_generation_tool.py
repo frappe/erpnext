@@ -43,7 +43,7 @@ def preview_report_card(doc):
 	doc.attendance = get_attendance_count(doc.students[0], doc.academic_year, doc.academic_term)
 
 	template = "erpnext/education/doctype/student_report_generation_tool/student_report_generation_tool.html"
-	base_template_path = "frappe/www/printview.html"
+	base_template_path = "frappe/www/web.html"
 
 	from frappe.www.printview import get_letter_head
 	letterhead = get_letter_head(frappe._dict({"letter_head": doc.letterhead}), not doc.add_letterhead)

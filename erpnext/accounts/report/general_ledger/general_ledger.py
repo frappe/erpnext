@@ -132,7 +132,7 @@ def get_gl_entries(filters):
 	if filters and filters.get('cost_center'):
 		select_fields_with_percentage = """, debit*(DCC_allocation.percentage_allocation/100) as debit, credit*(DCC_allocation.percentage_allocation/100) as credit, debit_in_account_currency*(DCC_allocation.percentage_allocation/100) as debit_in_account_currency,
 		credit_in_account_currency*(DCC_allocation.percentage_allocation/100) as credit_in_account_currency """
-		
+
 		distributed_cost_center_query = """
 		UNION ALL
 		SELECT name as gl_entry,
@@ -146,7 +146,7 @@ def get_gl_entries(filters):
 			against_voucher_type,
 			against_voucher,
 			account_currency,
-			remarks, against, 
+			remarks, against,
 			is_opening, `tabGL Entry`.creation {select_fields_with_percentage}
 		FROM `tabGL Entry`,
 		(
