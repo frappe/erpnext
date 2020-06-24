@@ -7,7 +7,6 @@ import frappe.share
 from frappe import _
 from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_datetime, get_link_to_form
 from erpnext.controllers.status_updater import StatusUpdater
-from erpnext.accounts.utils import get_fiscal_year
 
 from six import string_types
 
@@ -161,19 +160,19 @@ class TransactionBase(StatusUpdater):
 			if not (self.get("update_stock") or self.get("is_pos")):
 				return
 
-		fiscal_year = get_fiscal_year(self.get('posting_date'), as_dict=True).name
+		for item in self.get('items'):
+			last_transaction_time = frappe.db.sql("""
+				select MAX(timestamp(posting_date, posting_time)) as posting_time
+				from `tabStock Ledger Entry`
+				where docstatus = 1 and item_code = %s """, (item.item_code))[0][0]
 
-		last_transaction_time = frappe.db.sql("""
-			select MAX(timestamp(posting_date, posting_time)) as posting_time
-			from `tabStock Ledger Entry`
-			where docstatus = 1""")[0][0]
+			cur_doc_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")
 
-		cur_doc_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")
-
-		if last_transaction_time and get_datetime(cur_doc_posting_datetime) < get_datetime(last_transaction_time):
-			frappe.throw(_("""Posting timestamp of current transaction
-				must be after last Stock transaction's timestamp which is {0}""").format(frappe.bold(last_transaction_time)),
-				title=_("Backdated Stock Entry"))
+			if last_transaction_time and get_datetime(cur_doc_posting_datetime) < get_datetime(last_transaction_time):
+				msg = _("Last Stock Transaction for item {0} was on {1}.").format(frappe.bold(item.item_code), frappe.bold(last_transaction_time))
+				msg += "<br><br>" + _("Stock Transactions for Item {0} cannot be posted before this time.").format(frappe.bold(item.item_code))
+				msg += "<br><br>" + _("Please remove this item and try to submit again or update the posting time.")
+				frappe.throw(msg, title=_("Backdated Stock Entry"))
 
 def delete_events(ref_type, ref_name):
 	events = frappe.db.sql_list(""" SELECT

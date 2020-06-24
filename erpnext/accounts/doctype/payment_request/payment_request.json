@@ -349,9 +349,10 @@
    "read_only": 1
   }
  ],
+ "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-08 10:23:02.815237",
+ "modified": "2020-05-29 17:38:49.392713",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",
