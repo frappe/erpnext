@@ -139,7 +139,7 @@ var show_lab_tests = function(frm, lab_test_list) {
 	$.each(lab_test_list, function(x, y) {
 		var row = $( repl(
 			'<div class="col-xs-12" style="padding-top:12px;">\
-				<div class="col-xs-"> %(lab_test)s </div>\
+				<div class="col-xs-3"> %(lab_test)s </div>\
 				<div class="col-xs-4"> %(practitioner_name)s<br>%(encounter)s</div>\
 				<div class="col-xs-3"> %(date)s </div>\
 				<div class="col-xs-1">\
