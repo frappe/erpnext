@@ -12,6 +12,7 @@ frappe.ui.form.on("Issue", {
 			frappe.call({
 				method: "erpnext.support.doctype.service_level_agreement.service_level_agreement.get_service_level_agreement_filters",
 				args: {
+					doctype: frm.doc.doctype,
 					name: frm.doc.service_level_agreement,
 					customer: frm.doc.customer
 				},

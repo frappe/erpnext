@@ -217,6 +217,9 @@ standard_queries = {
 }
 
 doc_events = {
+	"*": {
+		"validate": "erpnext.support.doctype.service_level_agreement.service_level_agreement.apply"
+	},
 	"Stock Entry": {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty",
 		"on_cancel": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty"
