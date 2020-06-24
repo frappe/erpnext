@@ -324,6 +324,7 @@
    "options": "Department"
   },
   {
+   "fetch_from": "project.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -364,7 +365,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2020-03-18 18:08:44.153211",
+ "modified": "2020-06-24 04:30:53.712091",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
