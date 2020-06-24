@@ -215,6 +215,19 @@ class PatientProgress {
 		frappe.dashboard_utils.render_chart_filters(filters, 'chart-filter', '.percentage-chart-container');
 	}
 
+	create_time_span_filters(action_method, parent) {
+		let filters = [
+			{
+				label: 'Last Month',
+				options: ['Last Week', 'Last Month', 'Last Quarter', 'Last Year'],
+				action: (selected_item) => {
+					this[action_method](selected_item);
+				}
+			}
+		];
+		frappe.dashboard_utils.render_chart_filters(filters, 'chart-filter', parent, 1);
+	}
+
 	show_therapy_progress() {
 		let me = this;
 		let therapy_type = frappe.ui.form.make_control({
@@ -228,19 +241,21 @@ class PatientProgress {
 				change: () => {
 					if (me.therapy_type != therapy_type.get_value() && therapy_type.get_value()) {
 						me.therapy_type = therapy_type.get_value();
-						me.render_therapy_progress_chart(me.therapy_type);
+						me.render_therapy_progress_chart();
 					}
 				}
 			}
 		});
 		therapy_type.refresh();
+		this.create_time_span_filters('render_therapy_progress_chart', '.therapy-progress');
 	}
 
-	render_therapy_progress_chart(therapy_type) {
+	render_therapy_progress_chart(time_span='Last Month') {
 		frappe.xcall(
 			'erpnext.healthcare.page.patient_progress.patient_progress.get_therapy_progress_data', {
 				patient: this.patient_id,
-				therapy_type: therapy_type
+				therapy_type: this.therapy_type,
+				time_span: time_span
 			}
 		).then(chart => {
 			let data = {
@@ -284,19 +299,21 @@ class PatientProgress {
 				change: () => {
 					if (me.assessment_template != assessment_template.get_value() && assessment_template.get_value()) {
 						me.assessment_template = assessment_template.get_value();
-						me.render_assessment_result_chart(me.assessment_template);
+						me.render_assessment_result_chart();
 					}
 				}
 			}
 		});
 		assessment_template.refresh();
+		this.create_time_span_filters('render_assessment_result_chart', '.assessment-results');
 	}
 
-	render_assessment_result_chart(assessment_template) {
+	render_assessment_result_chart(time_span='Last Month') {
 		frappe.xcall(
 			'erpnext.healthcare.page.patient_progress.patient_progress.get_patient_assessment_data', {
 				patient: this.patient_id,
-				assessment_template: assessment_template
+				assessment_template: this.assessment_template,
+				time_span: time_span
 			}
 		).then(chart => {
 			let data = {
@@ -347,19 +364,21 @@ class PatientProgress {
 				change: () => {
 					if (me.assessment != assessment.get_value() && assessment.get_value()) {
 						me.assessment = assessment.get_value();
-						me.render_therapy_assessment_correlation_chart(me.assessment);
+						me.render_therapy_assessment_correlation_chart();
 					}
 				}
 			}
 		});
 		assessment.refresh();
+		this.create_time_span_filters('render_therapy_assessment_correlation_chart', '.therapy-assessment-correlation');
 	}
 
-	render_therapy_assessment_correlation_chart(assessment) {
+	render_therapy_assessment_correlation_chart(time_span='Last Month') {
 		frappe.xcall(
 			'erpnext.healthcare.page.patient_progress.patient_progress.get_therapy_assessment_correlation_data', {
 				patient: this.patient_id,
-				assessment_template: assessment
+				assessment_template: this.assessment,
+				time_span: time_span
 			}
 		).then(chart => {
 			let data = {
@@ -403,19 +422,21 @@ class PatientProgress {
 				change: () => {
 					if (me.parameter != parameter.get_value() && parameter.get_value()) {
 						me.parameter = parameter.get_value();
-						me.render_assessment_parameter_progress_chart(me.parameter);
+						me.render_assessment_parameter_progress_chart();
 					}
 				}
 			}
 		});
 		parameter.refresh();
+		this.create_time_span_filters('render_assessment_parameter_progress_chart', '.assessment-parameter-progress');
 	}
 
-	render_assessment_parameter_progress_chart(parameter) {
+	render_assessment_parameter_progress_chart(time_span='Last Month') {
 		frappe.xcall(
 			'erpnext.healthcare.page.patient_progress.patient_progress.get_assessment_parameter_data', {
 				patient: this.patient_id,
-				parameter: parameter
+				parameter: this.parameter,
+				time_span: time_span
 			}
 		).then(chart => {
 			let data = {

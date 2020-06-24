@@ -1,7 +1,7 @@
 import frappe
 from datetime import datetime
 from frappe import _
-from frappe.utils import getdate
+from frappe.utils import getdate, get_timespan_date_range
 
 @frappe.whitelist()
 def get_therapy_sessions_count(patient):
@@ -75,15 +75,20 @@ def get_therapy_sessions_distribution_data(patient, field):
 
 
 @frappe.whitelist()
-def get_therapy_progress_data(patient, therapy_type):
-	result = frappe.db.get_all('Therapy Session', filters={
-		'docstatus': 1,
-		'patient': patient,
-		'therapy_type': therapy_type
-	},
-	order_by='start_date asc',
-	fields=['start_date', 'total_counts_targeted', 'total_counts_completed'],
-	as_list=True)
+def get_therapy_progress_data(patient, therapy_type, time_span):
+	date_range = get_timespan_date_range(time_span.lower())
+	query_values = {'from_date': date_range[0], 'to_date': date_range[1], 'therapy_type': therapy_type, 'patient': patient}
+	result = frappe.db.sql("""
+		SELECT
+			start_date, total_counts_targeted, total_counts_completed
+		FROM
+			`tabTherapy Session`
+		WHERE
+			start_date BETWEEN %(from_date)s AND %(to_date)s and
+			docstatus = 1 and
+			therapy_type = %(therapy_type)s and
+			patient = %(patient)s
+		ORDER BY start_date""", query_values, as_list=1)
 
 	return {
 		'labels': [r[0] for r in result if r[0] != None],
@@ -94,15 +99,20 @@ def get_therapy_progress_data(patient, therapy_type):
 	}
 
 @frappe.whitelist()
-def get_patient_assessment_data(patient, assessment_template):
-	result = frappe.db.get_all('Patient Assessment', filters={
-		'docstatus': 1,
-		'patient': patient,
-		'assessment_template': assessment_template
-	},
-	order_by='assessment_datetime asc',
-	fields=['assessment_datetime', 'total_score', 'total_score_obtained'],
-	as_list=True)
+def get_patient_assessment_data(patient, assessment_template, time_span):
+	date_range = get_timespan_date_range(time_span.lower())
+	query_values = {'from_date': date_range[0], 'to_date': date_range[1], 'assessment_template': assessment_template, 'patient': patient}
+	result = frappe.db.sql("""
+		SELECT
+			assessment_datetime, total_score, total_score_obtained
+		FROM
+			`tabPatient Assessment`
+		WHERE
+			DATE(assessment_datetime) BETWEEN %(from_date)s AND %(to_date)s and
+			docstatus = 1 and
+			assessment_template = %(assessment_template)s and
+			patient = %(patient)s
+		ORDER BY assessment_datetime""", query_values, as_list=1)
 
 	if result:
 		max_score = result[0][1]
@@ -116,8 +126,10 @@ def get_patient_assessment_data(patient, assessment_template):
 	}
 
 @frappe.whitelist()
-def get_therapy_assessment_correlation_data(patient, assessment_template):
-	result = frappe.db.sql('''
+def get_therapy_assessment_correlation_data(patient, assessment_template, time_span):
+	date_range = get_timespan_date_range(time_span.lower())
+	query_values = {'from_date': date_range[0], 'to_date': date_range[1], 'assessment': assessment_template, 'patient': patient}
+	result = frappe.db.sql("""
 		SELECT
 			therapy.therapy_type, count(*), avg(assessment.total_score_obtained), total_score
 		FROM
@@ -125,10 +137,12 @@ def get_therapy_assessment_correlation_data(patient, assessment_template):
 		ON
 			assessment.therapy_session = therapy.name
 		WHERE
+			DATE(assessment.assessment_datetime) BETWEEN %(from_date)s AND %(to_date)s and
+			assessment.docstatus = 1 and
+			assessment.patient = %(patient)s and
 			assessment.assessment_template = %(assessment)s
-		GROUP BY
-			therapy.therapy_type
-	''', {'assessment': assessment_template}, as_list=True)
+		GROUP BY therapy.therapy_type
+	""", query_values, as_list=1)
 
 	if result:
 		max_score = result[0][3]
@@ -143,8 +157,10 @@ def get_therapy_assessment_correlation_data(patient, assessment_template):
 	}
 
 @frappe.whitelist()
-def get_assessment_parameter_data(patient, parameter):
-	results = frappe.db.sql('''
+def get_assessment_parameter_data(patient, parameter, time_span):
+	date_range = get_timespan_date_range(time_span.lower())
+	query_values = {'from_date': date_range[0], 'to_date': date_range[1], 'parameter': parameter, 'patient': patient}
+	results = frappe.db.sql("""
 		SELECT
 			assessment.assessment_datetime,
 			sheet.score,
@@ -156,11 +172,13 @@ def get_assessment_parameter_data(patient, parameter):
 		INNER JOIN `tabPatient Assessment Template` template
 			ON template.name = assessment.assessment_template
 		WHERE
+			DATE(assessment.assessment_datetime) BETWEEN %(from_date)s AND %(to_date)s and
+			assessment.docstatus = 1 and
 			sheet.parameter = %(parameter)s and
 			assessment.patient = %(patient)s
 		ORDER BY
 			assessment.assessment_datetime asc
-	''', {'parameter': parameter, 'patient': patient}, as_list=True)
+	""", query_values, as_list=1)
 
 	score_percentages = []
 	for r in results:
