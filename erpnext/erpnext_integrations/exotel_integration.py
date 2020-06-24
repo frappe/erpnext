@@ -155,7 +155,7 @@ def create_call_log(call_id, from_number, to_number, medium,
 def update_call_log(call_payload, status='Ringing', call_log=None):
 	call_log = call_log or get_call_log(call_payload)
 	status = call_payload.get('DialCallStatus')
-	status = frappe.unscrub(status)
+	status = frappe.unscrub(status) if status else call_log.status
 	try:
 		if call_log:
 			call_log.status = status

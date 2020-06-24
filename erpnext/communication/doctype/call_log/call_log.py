@@ -26,7 +26,7 @@ class CallLog(Document):
 	def on_update(self):
 		doc_before_save = self.get_doc_before_save()
 		if not doc_before_save: return
-		if doc_before_save.to != self.to:
+		if doc_before_save.to != self.to and self.status not in END_CALL_STATUSES:
 			self.trigger_call_popup()
 		if doc_before_save.status not in END_CALL_STATUSES and self.status in END_CALL_STATUSES:
 			frappe.publish_realtime('call_{id}_ended'.format(id=self.id), self)
