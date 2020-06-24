@@ -883,7 +883,10 @@ def get_default_taxes_and_charges(master_doctype, tax_template=None, company=Non
 	if tax_template and company:
 		tax_template_company = frappe.db.get_value(master_doctype, tax_template, "company")
 		if tax_template_company == company:
-			return
+			return {
+				'taxes_and_charges': tax_template,
+				'taxes': get_taxes_and_charges(master_doctype, tax_template)
+			}
 
 	default_tax = frappe.db.get_value(master_doctype, {"is_default": 1, "company": company})
 
