@@ -51,11 +51,11 @@ class CallPopup {
 			this.set_indicator('blue', true);
 		} else if (call_status === 'In Progress') {
 			title = __('Call Connected');
+			this.set_indicator('green');
+		} else if (['No Answer', 'Missed'].includes(call_status)) {
 			this.set_indicator('yellow');
-		} else if (call_status === 'No Answer') {
-			this.set_indicator('red');
 			title = __('Call Missed');
-		} else if (['Completed', 'Busy'].includes(call_status)) {
+		} else if (['Completed', 'Busy', 'Failed'].includes(call_status)) {
 			this.set_indicator('red');
 			title = __('Call Ended');
 		} else {
@@ -65,9 +65,9 @@ class CallPopup {
 		this.dialog.set_title(title);
 	}
 
-	update_call_log(call_log) {
+	update_call_log(call_log, missed) {
 		this.call_log = call_log;
-		this.set_call_status();
+		this.set_call_status(missed ? 'Missed': null);
 	}
 
 	close_modal() {
@@ -75,14 +75,14 @@ class CallPopup {
 		delete erpnext.call_popup;
 	}
 
-	call_ended(call_log) {
+	call_ended(call_log, missed) {
 		frappe.utils.play_sound('call-disconnect');
-		this.update_call_log(call_log);
+		this.update_call_log(call_log, missed);
 		setTimeout(() => {
 			if (!this.dialog.get_value('call_summary')) {
 				this.close_modal();
 			}
-		}, 30000);
+		}, 60000);
 	}
 
 	get_caller_name() {
@@ -101,6 +101,12 @@ class CallPopup {
 			this.call_ended(call_log);
 			// Remove call disconnect listener after the call is disconnected
 			frappe.realtime.off(`call_${this.call_log.id}_ended`);
+		});
+
+		frappe.realtime.on(`call_${this.call_log.id}_missed`, call_log => {
+			this.call_ended(call_log, true);
+			// Remove call disconnect listener after the call is disconnected
+			frappe.realtime.off(`call_${this.call_log.id}_missed`);
 		});
 	}
 
