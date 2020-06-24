@@ -663,3 +663,4 @@ erpnext.patches.v12_0.add_affirm_integration_field
 erpnext.patches.v12_0.add_taxjar_integration_field
 erpnext.patches.v12_0.update_uom_conversion_factor
 erpnext.patches.v12_0.update_sales_taxes_and_charges_template
+erpnext.patches.v13_0.setup_remove_assignment_on_task
