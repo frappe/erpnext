@@ -238,6 +238,12 @@ class PurchaseInvoice(BuyingController):
 					not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
 
 				if self.update_stock and (not item.from_warehouse):
+					if for_validate and item.expense_account and item.expense_account != warehouse_account[item.warehouse]["account"]:
+						frappe.msgprint(_('''Row {0}: Expense Head changed to {1} because account {2}
+							is not linked to warehouse {3} or it is not the default inventory account'''.format(
+								item.idx, frappe.bold(warehouse_account[item.warehouse]["account"]),
+								frappe.bold(item.expense_account), frappe.bold(item.warehouse))))
+
 					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
 					# check if 'Stock Received But Not Billed' account is credited in Purchase receipt or not
@@ -247,10 +253,21 @@ class PurchaseInvoice(BuyingController):
 							(item.purchase_receipt, stock_not_billed_account))
 
 						if negative_expense_booked_in_pr:
+							if for_validate and item.expense_account and item.expense_account != stock_not_billed_account:
+								frappe.msgprint(_('''Row {0}: Expense Head changed to {1} because
+								expense is booked against this account in Purchase Receipt {2}'''.format(
+								item.idx, frappe.bold(stock_not_billed_account), frappe.bold(item.purchase_receipt))))
+
 							item.expense_account = stock_not_billed_account
 					else:
 						# If no purchase receipt present then book expense in 'Stock Received But Not Billed'
 						# This is done in cases when Purchase Invoice is created before Purchase Receipt
+						if for_validate and item.expense_account and item.expense_account != stock_not_billed_account:
+							frappe.msgprint(_('''Row {0}: Expense Head changed to {1} as no Purchase
+								Receipt is created against Item {2}. This is done to handle accounting for cases
+								when Purchase Receipt is created after Purchase Invoice'''.format(
+								item.idx, frappe.bold(stock_not_billed_account), frappe.bold(item.item_code))))
+
 						item.expense_account = stock_not_billed_account
 
 			elif item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category):
@@ -1020,7 +1037,7 @@ class PurchaseInvoice(BuyingController):
 
 		# calculate totals again after applying TDS
 		self.calculate_taxes_and_totals()
-	
+
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
 			if self.get('amended_from'):

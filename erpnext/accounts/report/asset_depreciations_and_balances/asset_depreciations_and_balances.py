@@ -93,7 +93,7 @@ def get_assets(filters):
 			   sum(results.depreciation_eliminated_during_the_period) as depreciation_eliminated_during_the_period,
 			   sum(results.depreciation_amount_during_the_period) as depreciation_amount_during_the_period
 		from (SELECT a.asset_category,
-				   ifnull(sum(case when ds.schedule_date < %(from_date)s then
+				   ifnull(sum(case when ds.schedule_date < %(from_date)s and (ifnull(a.disposal_date, 0) = 0 or a.disposal_date >= %(from_date)s) then
 								   ds.depreciation_amount
 							  else
 								   0
@@ -111,13 +111,11 @@ def get_assets(filters):
 								   0
 							  end), 0) as depreciation_amount_during_the_period
 			from `tabAsset` a, `tabDepreciation Schedule` ds
-			where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s and a.name = ds.parent
+			where a.docstatus=1 and a.company=%(company)s and a.purchase_date <= %(to_date)s and a.name = ds.parent and ifnull(ds.journal_entry, '') != ''
 			group by a.asset_category
 			union
 			SELECT a.asset_category,
-				   ifnull(sum(case when ifnull(a.disposal_date, 0) != 0
-										and (a.disposal_date < %(from_date)s or a.disposal_date > %(to_date)s) 
-										then
+				   ifnull(sum(case when ifnull(a.disposal_date, 0) != 0 and (a.disposal_date < %(from_date)s or a.disposal_date > %(to_date)s) then
 									0
 							   else
 									a.opening_accumulated_depreciation

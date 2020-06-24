@@ -29,6 +29,9 @@ class Contract(Document):
 		self.update_contract_status()
 		self.update_fulfilment_status()
 
+	def before_submit(self):
+		self.signed_by_company = frappe.session.user
+
 	def before_update_after_submit(self):
 		self.update_contract_status()
 		self.update_fulfilment_status()
