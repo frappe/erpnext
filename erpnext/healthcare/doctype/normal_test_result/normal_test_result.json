@@ -12,17 +12,17 @@
   "lab_test_event",
   "result_value",
   "lab_test_uom",
-  "allow_blank",
-  "template",
   "secondary_uom_result",
   "secondary_uom",
   "conversion_factor",
   "column_break_10",
+  "allow_blank",
   "normal_range",
   "lab_test_comment",
   "bold",
   "italic",
   "underline",
+  "template",
   "require_result_value"
  ],
  "fields": [
@@ -43,7 +43,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.require_result_value == 1 ",
+   "depends_on": "eval:doc.require_result_value",
    "fieldname": "result_value",
    "fieldtype": "Data",
    "ignore_xss_filter": 1,
@@ -51,12 +51,15 @@
    "label": "Result Value"
   },
   {
+   "depends_on": "eval:doc.require_result_value",
    "fieldname": "lab_test_uom",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "UOM",
+   "options": "Lab Test UOM",
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.require_result_value",
    "fieldname": "normal_range",
    "fieldtype": "Long Text",
    "ignore_xss_filter": 1,
@@ -65,6 +68,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.require_result_value",
    "fieldname": "lab_test_comment",
    "fieldtype": "Data",
    "hidden": 1,
@@ -84,6 +88,7 @@
    "report_hide": 1
   },
   {
+   "depends_on": "eval:doc.require_result_value",
    "fieldname": "secondary_uom",
    "fieldtype": "Link",
    "label": "Secondary UOM",
@@ -112,6 +117,7 @@
   {
    "allow_on_submit": 1,
    "default": "0",
+   "depends_on": "eval:doc.require_result_value",
    "fieldname": "bold",
    "fieldtype": "Check",
    "label": "Bold",
@@ -122,6 +128,7 @@
   {
    "allow_on_submit": 1,
    "default": "0",
+   "depends_on": "eval:doc.require_result_value",
    "fieldname": "italic",
    "fieldtype": "Check",
    "label": "Italic",
@@ -132,6 +139,7 @@
   {
    "allow_on_submit": 1,
    "default": "0",
+   "depends_on": "eval:doc.require_result_value",
    "fieldname": "underline",
    "fieldtype": "Check",
    "label": "Underline",
@@ -153,7 +161,8 @@
    "report_hide": 1
   },
   {
-   "default": "0",
+   "default": "1",
+   "depends_on": "eval:doc.require_result_value",
    "fieldname": "allow_blank",
    "fieldtype": "Check",
    "label": "Allow Blank",
@@ -164,7 +173,7 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-06-23 13:28:08.722757",
+ "modified": "2020-06-24 10:53:45.831155",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Normal Test Result",

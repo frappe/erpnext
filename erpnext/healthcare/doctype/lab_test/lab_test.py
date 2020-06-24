@@ -200,8 +200,8 @@ def create_compounds(template, lab_test, is_group):
 		normal.allow_blank = normal_test_template.allow_blank
 		normal.template = template.name
 
-def create_specials(template, lab_test):
-	lab_test.special_toggle = '1'
+def create_descriptives(template, lab_test):
+	lab_test.descriptive_toggle = '1'
 	if(template.sensitivity):
 		lab_test.sensitivity_toggle = '1'
 	for descriptive_test_template in template.descriptive_test_templates:
@@ -263,7 +263,7 @@ def load_result_format(lab_test, template, prescription, invoice):
 	elif(template.lab_test_template_type == 'Compound'):
 		create_compounds(template, lab_test, False)
 	elif(template.lab_test_template_type == 'Descriptive'):
-		create_specials(template, lab_test)
+		create_descriptives(template, lab_test)
 	elif(template.lab_test_template_type == 'Grouped'):
 		# Iterate for each template in the group and create one result for all.
 		for lab_test_group in template.lab_test_groups:
@@ -278,14 +278,16 @@ def load_result_format(lab_test, template, prescription, invoice):
 						normal_heading = lab_test.append('normal_test_items')
 						normal_heading.lab_test_name = template_in_group.lab_test_name
 						normal_heading.require_result_value = 0
+						normal_heading.allow_blank = 1
 						normal_heading.template = template_in_group.name
 						create_compounds(template_in_group, lab_test, True)
 					elif(template_in_group.lab_test_template_type == 'Descriptive'):
-						special_heading = lab_test.append('descriptive_test_items')
-						special_heading.lab_test_name = template_in_group.lab_test_name
-						special_heading.require_result_value = 0
-						special_heading.template = template_in_group.name
-						create_specials(template_in_group, lab_test)
+						descriptive_heading = lab_test.append('descriptive_test_items')
+						descriptive_heading.lab_test_name = template_in_group.lab_test_name
+						descriptive_heading.require_result_value = 0
+						descriptive_heading.allow_blank = 1
+						descriptive_heading.template = template_in_group.name
+						create_descriptives(template_in_group, lab_test)
 			else: # Lab Test Group - Add New Line
 				normal = lab_test.append('normal_test_items')
 				normal.lab_test_name = lab_test_group.group_event

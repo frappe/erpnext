@@ -3,8 +3,8 @@
 
 cur_frm.cscript.custom_refresh = function(doc) {
 	cur_frm.toggle_display('sb_sensitivity', doc.sensitivity_toggle == '1');
-	cur_frm.toggle_display('organisms_section', doc.special_toggle == '1');
-	cur_frm.toggle_display('sb_special', doc.special_toggle == '1');
+	cur_frm.toggle_display('organisms_section', doc.descriptive_toggle == '1');
+	cur_frm.toggle_display('sb_descriptive', doc.descriptive_toggle == '1');
 	cur_frm.toggle_display('sb_normal', doc.normal_toggle == '1');
 };
 
@@ -88,7 +88,7 @@ frappe.ui.form.on('Normal Test Result', {
 });
 
 frappe.ui.form.on('Descriptive Test Result', {
-	special_test_items_remove: function() {
+	descriptive_test_items_remove: function() {
 		frappe.msgprint(__('Not permitted, configure Lab Test Template as required'));
 		cur_frm.reload_doc();
 	}
@@ -181,9 +181,9 @@ cur_frm.cscript.custom_before_submit =  function(doc) {
 			}
 		}
 	}
-	if(doc.special_test_items) {
-		for(let result in doc.special_test_items) {
-			if(!doc.special_test_items[result].result_value && !doc.special_test_items[result].allow_blank && doc.special_test_items[result].require_result_value) {
+	if(doc.descriptive_test_items) {
+		for(let result in doc.descriptive_test_items) {
+			if(!doc.descriptive_test_items[result].result_value && !doc.descriptive_test_items[result].allow_blank && doc.descriptive_test_items[result].require_result_value) {
 				frappe.msgprint(__('Please input all required Result Value(s)'));
 				throw('Error');
 			}

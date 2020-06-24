@@ -65,12 +65,10 @@
   "sms_sent",
   "printed",
   "normal_toggle",
-  "special_toggle",
+  "descriptive_toggle",
   "sensitivity_toggle",
   "amended_from",
-  "prescription",
-  "data_61",
-  "data_62"
+  "prescription"
  ],
  "fields": [
   {
@@ -134,6 +132,7 @@
    "label": "Gender",
    "options": "Gender",
    "print_hide": 1,
+   "read_only": 1,
    "report_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -438,14 +437,6 @@
   },
   {
    "default": "0",
-   "fieldname": "special_toggle",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "print_hide": 1,
-   "report_hide": 1
-  },
-  {
-   "default": "0",
    "fieldname": "sensitivity_toggle",
    "fieldtype": "Check",
    "hidden": 1,
@@ -529,14 +520,6 @@
    "label": "Worksheet Print"
   },
   {
-   "fieldname": "data_61",
-   "fieldtype": "Data"
-  },
-  {
-   "fieldname": "data_62",
-   "fieldtype": "Data"
-  },
-  {
    "fieldname": "descriptive_test_items",
    "fieldtype": "Table",
    "options": "Descriptive Test Result",
@@ -546,12 +529,20 @@
   {
    "fieldname": "sb_descriptive",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "descriptive_toggle",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "print_hide": 1,
+   "report_hide": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-22 12:19:28.979692",
- "modified_by": "Administrator",
+ "modified": "2020-06-24 14:06:06.708229",
+ "modified_by": "ant@ess.com",
  "module": "Healthcare",
  "name": "Lab Test",
  "owner": "Administrator",

@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import frappe
+from frappe.model.utils.rename_field import rename_field
 
 def execute():
 	# Rename fields
@@ -10,6 +11,14 @@ def execute():
 	frappe.reload_doc('healthcare', 'doctype', frappe.scrub('Lab Test'))
 	if frappe.db.has_column('Lab Test', 'special_test_items'):
 		rename_field('Lab Test', 'special_test_items', 'descriptive_test_items')
+
+	if frappe.db.has_column('Lab Test', 'special_toggle'):
+		rename_field('Lab Test', 'special_toggle', 'descriptive_toggle')
+
+	# Rename Options
+	frappe.reload_doc('healthcare', 'doctype', frappe.scrub('Lab Test Groups'))
+	frappe.db.sql("""update `tabLab Test Groups` set template_or_new_line = 'Add New Line'
+			where template_or_new_line = 'Add new line'""")
 
 	# Rename doctypes
 	doctypes = {
