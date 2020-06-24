@@ -59,7 +59,8 @@ class Task(NestedSet):
 				if frappe.db.get_value("Task", d.task, "status") not in ("Completed", "Cancelled"):
 					frappe.throw(_("Cannot complete task {0} as its dependant tasks {1} are not completed / cancelled.").format(frappe.bold(self.name), frappe.bold(d.task)))
 
-			close_all_assignments(self.doctype, self.name)
+			if frappe.db.get_single_value("Projects Settings", "remove_assignment_on_task_completion"):
+				close_all_assignments(self.doctype, self.name)
 
 	def validate_progress(self):
 		if (self.progress or 0) > 100:
@@ -90,7 +91,7 @@ class Task(NestedSet):
 		self.populate_depends_on()
 
 	def unassign_todo(self):
-		if self.status == "Completed":
+		if self.status == "Completed" and frappe.db.get_single_value("Projects Settings", "remove_assignment_on_task_completion"):
 			close_all_assignments(self.doctype, self.name)
 		if self.status == "Cancelled":
 			clear(self.doctype, self.name)
