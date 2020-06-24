@@ -55,11 +55,51 @@ class TestTask(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Task", task3.name, "exp_end_date"),
 			getdate(add_days(nowdate(), 30)))
 
-	def test_close_assignment(self):
-		if not frappe.db.exists("Task", "Test Close Assignment"):
+	def test_complete_task_without_assignment_closing(self):
+		if not frappe.db.exists("Task", "Test Close Assignment 1"):
 			task = frappe.new_doc("Task")
-			task.subject = "Test Close Assignment"
+			task.subject = "Test Close Assignment 1"
 			task.insert()
+
+		frappe.db.set_value("Projects Settings", None,
+			"remove_assignment_on_task_completion", 0)
+
+		def assign():
+			from frappe.desk.form import assign_to
+			assign_to.add({
+				"assign_to": ["test@example.com"],
+				"doctype": task.doctype,
+				"name": task.name,
+				"description": "Close this task"
+			})
+
+		def get_owner_and_status():
+			return frappe.db.get_value("ToDo",
+				filters={"reference_type": task.doctype, "reference_name": task.name,
+					"description": "Close this task"},
+				fieldname=("owner", "status"), as_dict=True)
+
+		assign()
+		todo = get_owner_and_status()
+		self.assertEqual(todo.owner, "test@example.com")
+		self.assertEqual(todo.status, "Open")
+
+		# assignment should be
+		task.load_from_db()
+		task.status = "Completed"
+		task.save()
+		todo = get_owner_and_status()
+		self.assertEqual(todo.owner, "test@example.com")
+		self.assertEqual(todo.status, "Open")
+
+	def test_complete_task_with_assignment_closing(self):
+		if not frappe.db.exists("Task", "Test Close Assignment 2"):
+			task = frappe.new_doc("Task")
+			task.subject = "Test Close Assignment 2"
+			task.insert()
+
+		frappe.db.set_value("Projects Settings", None,
+			"remove_assignment_on_task_completion", 1)
 
 		def assign():
 			from frappe.desk.form import assign_to
