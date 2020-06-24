@@ -45,7 +45,7 @@ class CallHandler {
 				this.dialog.disable_primary_action();
 				frappe.xcall('erpnext.erpnext_integrations.exotel_integration.make_a_call', {
 					'to_number': this.dialog.get_value('to_number'),
-					'link_call_to_document': this.document_to_link
+					'link_to_document': this.document_to_link
 				}).then(res => {
 					this.dialog.get_close_btn().hide();
 					this.dialog.set_value('response', JSON.stringify(res, null, 2));
