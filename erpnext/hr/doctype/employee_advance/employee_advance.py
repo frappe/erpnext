@@ -22,6 +22,7 @@ class EmployeeAdvance(Document):
 		self.validate_employee_advance_account()
 
 	def on_cancel(self):
+		self.ignore_linked_doctypes = ('GL Entry')
 		self.set_status()
 
 	def set_status(self):

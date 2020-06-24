@@ -5,11 +5,11 @@ from __future__ import unicode_literals
 import frappe
 from datetime import datetime
 from frappe.utils import getdate
-from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import DuplicateAssignment
+from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import DuplicateAssignment
 
 def execute():
-	frappe.reload_doc('hr', 'doctype', 'salary_structure')
-	frappe.reload_doc("hr", "doctype", "salary_structure_assignment")
+	frappe.reload_doc('Payroll', 'doctype', 'salary_structure')
+	frappe.reload_doc("Payroll", "doctype", "salary_structure_assignment")
 	frappe.db.sql("""
 		delete from `tabSalary Structure Assignment`
 		where salary_structure in (select name from `tabSalary Structure` where is_active='No' or docstatus!=1)

@@ -102,7 +102,7 @@ def validate_item_attribute_value(attributes_list, attribute, attribute_value, i
 			frappe.throw(_("{0} is not a valid Value for Attribute {1} of Item {2}.").format(
 				frappe.bold(attribute_value), frappe.bold(attribute), frappe.bold(item)), InvalidItemAttributeValueError, title=_("Invalid Value"))
 		else:
-			msg = _("The value {0} is already assigned to an exisiting Item {1}.").format(
+			msg = _("The value {0} is already assigned to an existing Item {1}.").format(
 				frappe.bold(attribute_value), frappe.bold(item))
 			msg += "<br>" + _("To still proceed with editing this Attribute Value, enable {0} in Item Variant Settings.").format(frappe.bold("Allow Rename Attribute Value"))
 
