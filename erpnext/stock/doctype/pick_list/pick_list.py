@@ -26,11 +26,12 @@ class PickList(Document):
 				continue
 			if not item.serial_no:
 				frappe.throw(_("Row #{0}: {1} does not have any available serial numbers in {2}".format(
-					frappe.bold(item.idx), frappe.bold(item.item_code), frappe.bold(item.warehouse))))
+					frappe.bold(item.idx), frappe.bold(item.item_code), frappe.bold(item.warehouse))),
+					title=_("Serial Nos Required"))
 			if len(item.serial_no.split('\n')) == item.picked_qty:
 				continue
 			frappe.throw(_('For item {0} at row {1}, count of serial numbers does not match with the picked quantity')
-				.format(frappe.bold(item.item_code), frappe.bold(item.idx)))
+				.format(frappe.bold(item.item_code), frappe.bold(item.idx)), title=_("Quantity Mismatch"))
 
 	def set_item_locations(self, save=False):
 		items = self.aggregate_item_qty()
@@ -40,6 +41,9 @@ class PickList(Document):
 		if self.parent_warehouse:
 			from_warehouses = frappe.db.get_descendants('Warehouse', self.parent_warehouse)
 
+		# Create replica before resetting, to handle empty table on update after submit.
+		locations_replica  = self.get('locations')
+
 		# reset
 		self.delete_key('locations')
 		for item_doc in items:
@@ -48,7 +52,7 @@ class PickList(Document):
 			self.item_location_map.setdefault(item_code,
 				get_available_item_locations(item_code, from_warehouses, self.item_count_map.get(item_code), self.company))
 
-			locations = get_items_with_location_and_quantity(item_doc, self.item_location_map)
+			locations = get_items_with_location_and_quantity(item_doc, self.item_location_map, self.docstatus)
 
 			item_doc.idx = None
 			item_doc.name = None
@@ -61,6 +65,16 @@ class PickList(Document):
 				location = item_doc.as_dict()
 				location.update(row)
 				self.append('locations', location)
+
+		# If table is empty on update after submit, set stock_qty, picked_qty to 0 so that indicator is red
+		# and give feedback to the user. This is to avoid empty Pick Lists.
+		if not self.get('locations') and self.docstatus == 1:
+			for location in locations_replica:
+				location.stock_qty = 0
+				location.picked_qty = 0
+				self.append('locations', location)
+			frappe.msgprint(_("Please Restock Items and Update the Pick List to continue. To discontinue, cancel the Pick List."),
+				 title=_("Out of Stock"), indicator="red")
 
 		if save:
 			self.save()
@@ -97,11 +111,13 @@ def validate_item_locations(pick_list):
 	if not pick_list.locations:
 		frappe.throw(_("Add items in the Item Locations table"))
 
-def get_items_with_location_and_quantity(item_doc, item_location_map):
+def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus):
 	available_locations = item_location_map.get(item_doc.item_code)
 	locations = []
 
-	remaining_stock_qty = item_doc.stock_qty
+	# if stock qty is zero on submitted entry, show positive remaining qty to recalculate in case of restock.
+	remaining_stock_qty = item_doc.qty if (docstatus == 1 and item_doc.stock_qty == 0) else item_doc.stock_qty
+
 	while remaining_stock_qty > 0 and available_locations:
 		item_location = available_locations.pop(0)
 		item_location = frappe._dict(item_location)
@@ -119,13 +135,11 @@ def get_items_with_location_and_quantity(item_doc, item_location_map):
 		if item_location.serial_no:
 			serial_nos = '\n'.join(item_location.serial_no[0: cint(stock_qty)])
 
-		auto_set_serial_no = frappe.db.get_single_value("Stock Settings", "automatically_set_serial_nos_based_on_fifo")
-
 		locations.append(frappe._dict({
 			'qty': qty,
 			'stock_qty': stock_qty,
 			'warehouse': item_location.warehouse,
-			'serial_no': serial_nos if auto_set_serial_no else item_doc.serial_no,
+			'serial_no': serial_nos,
 			'batch_no': item_location.batch_no
 		}))
 
@@ -137,7 +151,7 @@ def get_items_with_location_and_quantity(item_doc, item_location_map):
 			item_location.qty = qty_diff
 			if item_location.serial_no:
 				# set remaining serial numbers
-				item_location.serial_no = item_location.serial_no[-qty_diff:]
+				item_location.serial_no = item_location.serial_no[-int(qty_diff):]
 			available_locations = [item_location] + available_locations
 
 	# update available locations for the item
@@ -146,9 +160,14 @@ def get_items_with_location_and_quantity(item_doc, item_location_map):
 
 def get_available_item_locations(item_code, from_warehouses, required_qty, company, ignore_validation=False):
 	locations = []
-	if frappe.get_cached_value('Item', item_code, 'has_serial_no'):
+	has_serial_no  = frappe.get_cached_value('Item', item_code, 'has_serial_no')
+	has_batch_no = frappe.get_cached_value('Item', item_code, 'has_batch_no')
+
+	if has_batch_no and has_serial_no:
+		locations = get_available_item_locations_for_serial_and_batched_item(item_code, from_warehouses, required_qty, company)
+	elif has_serial_no:
 		locations = get_available_item_locations_for_serialized_item(item_code, from_warehouses, required_qty, company)
-	elif frappe.get_cached_value('Item', item_code, 'has_batch_no'):
+	elif has_batch_no:
 		locations = get_available_item_locations_for_batched_item(item_code, from_warehouses, required_qty, company)
 	else:
 		locations = get_available_item_locations_for_other_item(item_code, from_warehouses, required_qty, company)
@@ -158,8 +177,9 @@ def get_available_item_locations(item_code, from_warehouses, required_qty, compa
 	remaining_qty = required_qty - total_qty_available
 
 	if remaining_qty > 0 and not ignore_validation:
-		frappe.msgprint(_('{0} units of {1} is not available.')
-			.format(remaining_qty, frappe.get_desk_link('Item', item_code)))
+		frappe.msgprint(_('{0} units of Item {1} is not available.')
+			.format(remaining_qty, frappe.get_desk_link('Item', item_code)),
+			title=_("Insufficient Stock"))
 
 	return locations
 
@@ -225,6 +245,34 @@ def get_available_item_locations_for_batched_item(item_code, from_warehouses, re
 	}, as_dict=1)
 
 	return batch_locations
+
+def get_available_item_locations_for_serial_and_batched_item(item_code, from_warehouses, required_qty, company):
+	# Get batch nos by FIFO
+	locations = get_available_item_locations_for_batched_item(item_code, from_warehouses, required_qty, company)
+
+	filters = frappe._dict({
+		'item_code': item_code,
+		'company': company,
+		'warehouse': ['!=', ''],
+		'batch_no': ''
+	})
+
+	# Get Serial Nos by FIFO for Batch No
+	for location in locations:
+		filters.batch_no = location.batch_no
+		filters.warehouse = location.warehouse
+		location.qty = required_qty if location.qty > required_qty else location.qty # if extra qty in batch
+
+		serial_nos = frappe.get_list('Serial No',
+			fields=['name'],
+			filters=filters,
+			limit=location.qty,
+			order_by='purchase_date')
+
+		serial_nos = [sn.name for sn in serial_nos]
+		location.serial_no = serial_nos
+
+	return locations
 
 def get_available_item_locations_for_other_item(item_code, from_warehouses, required_qty, company):
 	# gets all items available in different warehouses
