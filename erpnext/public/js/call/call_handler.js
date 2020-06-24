@@ -12,7 +12,7 @@ class CallHandler {
 		if (frm) {
 			this.document_to_link = {
 				'link_doctype': frm.doctype,
-				'link_docname': frm.docnane
+				'link_name': frm.docname
 			};
 		}
 		this.make();
