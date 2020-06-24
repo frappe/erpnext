@@ -81,17 +81,24 @@ def verify_signature(data):
 @frappe.whitelist(allow_guest=True)
 def trigger_razorpay_subscription(*args, **kwargs):
 	data = frappe.request.get_data(as_text=True)
-	verify_signature(data)
+	try:
+		verify_signature(data)
+	except Exception as e:
+		frappe.log_error(e, "Webhook Verification Error")
 
 	if isinstance(data, six.string_types):
 		data = json.loads(data)
 	data = frappe._dict(data)
 
-	subscription = data.payload.get("subscription", {}).get('entity', {})
-	subscription = frappe._dict(subscription)
+	try:
+		subscription = data.payload.get("subscription", {}).get('entity', {})
+		subscription = frappe._dict(subscription)
 
-	payment = data.payload.get("payment", {}).get('entity', {})
-	payment = frappe._dict(payment)
+		payment = data.payload.get("payment", {}).get('entity', {})
+		payment = frappe._dict(payment)
+	except Exception as e:
+		frappe.log_error(e, "Webhook Data Parsing Error")
+		return False
 
 	try:
 		data_json = json.dumps(data, indent=4, sort_keys=True)
@@ -103,30 +110,32 @@ def trigger_razorpay_subscription(*args, **kwargs):
 
 	if not member:
 		return False
+	try:
+		if data.event == "subscription.activated":
+			member.customer_id = payment.customer_id
+		elif data.event == "subscription.charged":
+			membership = frappe.new_doc("Membership")
+			membership.update({
+				"member": member.name,
+				"membership_status": "Current",
+				"membership_type": member.membership_type,
+				"currency": "INR",
+				"paid": 1,
+				"payment_id": payment.id,
+				"webhook_payload": data_json,
+				"from_date": datetime.fromtimestamp(subscription.current_start),
+				"to_date": datetime.fromtimestamp(subscription.current_end),
+				"amount": payment.amount / 100 # Convert to rupees from paise
+			})
+			membership.insert(ignore_permissions=True)
 
-	if data.event == "subscription.activated":
-		member.customer_id = payment.customer_id
-	elif data.event == "subscription.charged":
-		membership = frappe.new_doc("Membership")
-		membership.update({
-			"member": member.name,
-			"membership_status": "Current",
-			"membership_type": member.membership_type,
-			"currency": "INR",
-			"paid": 1,
-			"payment_id": payment.id,
-			"webhook_payload": data_json,
-			"from_date": datetime.fromtimestamp(subscription.current_start),
-			"to_date": datetime.fromtimestamp(subscription.current_end),
-			"amount": payment.amount / 100 # Convert to rupees from paise
-		})
-		membership.insert(ignore_permissions=True)
-
-	# Update these values anyway
-	member.subscription_start = datetime.fromtimestamp(subscription.start_at)
-	member.subscription_end = datetime.fromtimestamp(subscription.end_at)
-	member.subscription_activated = 1
-	member.save(ignore_permissions=True)
+		# Update these values anyway
+		member.subscription_start = datetime.fromtimestamp(subscription.start_at)
+		member.subscription_end = datetime.fromtimestamp(subscription.end_at)
+		member.subscription_activated = 1
+		member.save(ignore_permissions=True)
+	except Exception as e:
+		frappe.log_error(e, "Error creating membership entry")
 
 	return True
 
