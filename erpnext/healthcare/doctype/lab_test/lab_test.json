@@ -494,7 +494,7 @@
    "fieldname": "legend_print_position",
    "fieldtype": "Select",
    "label": "Print Position",
-   "options": "Bottom\nTop\nBoth",
+   "options": "\nBottom\nTop\nBoth",
    "print_hide": 1
   },
   {
@@ -541,8 +541,8 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-24 14:06:06.708229",
- "modified_by": "ant@ess.com",
+ "modified": "2020-06-24 18:24:03.554572",
+ "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",
  "owner": "Administrator",

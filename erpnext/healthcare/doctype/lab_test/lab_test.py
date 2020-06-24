@@ -24,7 +24,7 @@ class LabTest(Document):
 		if(self.sensitivity_test_items):
 			sensitivity = sorted(self.sensitivity_test_items, key=lambda x: x.antibiotic_sensitivity)
 			for i, item in enumerate(sensitivity):
-				item.idx = i+1
+				item.idx = i + 1
 			self.sensitivity_test_items = sensitivity
 
 	def after_insert(self):
@@ -70,10 +70,6 @@ def update_status(status, name):
 	frappe.db.sql('''update `tabLab Test` set status=%s, approved_date=%s where name = %s''', (status, getdate(), name))
 
 @frappe.whitelist()
-def update_lab_test_print_sms_email_status(print_sms_email, name):
-	frappe.db.set_value('Lab Test',name,print_sms_email,1)
-
-@frappe.whitelist()
 def create_multiple(doctype, docname):
 	lab_test_created = False
 	if doctype == 'Sales Invoice':
@@ -91,9 +87,9 @@ def create_lab_test_from_encounter(encounter_id):
 	encounter = frappe.get_doc('Patient Encounter', encounter_id)
 
 	lab_test_ids = frappe.db.sql('''select lp.name, lp.lab_test_code, lp.invoiced
-	from `tabPatient Encounter` et, `tabLab Prescription` lp
-	where et.patient=%s and lp.parent=%s and
-	lp.parent=et.name and lp.lab_test_created=0 and et.docstatus=1''', (encounter.patient, encounter_id))
+		from `tabPatient Encounter` et, `tabLab Prescription` lp
+		where et.patient=%s and lp.parent=%s and
+		lp.parent=et.name and lp.lab_test_created=0 and et.docstatus=1''', (encounter.patient, encounter_id))
 
 	if lab_test_ids:
 		patient = frappe.get_doc('Patient', encounter.patient)
@@ -106,7 +102,7 @@ def create_lab_test_from_encounter(encounter_id):
 				if not lab_test_created:
 					lab_test_created = lab_test.name
 				else:
-					lab_test_created += ', '+lab_test.name
+					lab_test_created += ', ' + lab_test.name
 	return lab_test_created
 
 
@@ -138,20 +134,9 @@ def create_lab_test_from_invoice(invoice_name):
 	return lab_tests_created
 
 def get_lab_test_template(item):
-	template_id = check_template_exists(item)
+	template_id = frappe.db.exists('Lab Test Template', {'item': item})
 	if template_id:
 		return frappe.get_doc('Lab Test Template', template_id)
-	return False
-
-def check_template_exists(item):
-	template_exists = frappe.db.exists(
-		'Lab Test Template',
-		{
-			'item': item
-		}
-	)
-	if template_exists:
-		return template_exists
 	return False
 
 def create_lab_test_doc(invoiced, practitioner, patient, template, company):
@@ -224,11 +209,11 @@ def create_sample_doc(template, patient, invoice, company = None):
 			sample_collection = frappe.get_doc('Sample Collection', sample_exists[0][0])
 			quantity = int(sample_collection.sample_qty) + int(template.sample_qty)
 			if template.sample_details:
-				sample_details = sample_collection.sample_details + '\n==============\n' + _('Test: ')
+				sample_details = sample_collection.sample_details + '\n-\n' + _('Test: ')
 				sample_details += (template.get('lab_test_name') or template.get('template')) +	'\n'
 				sample_details += _('Collection Details: ') + '\n\t' + template.sample_details
-
 				frappe.db.set_value('Sample Collection', sample_collection.name, 'sample_details', sample_details)
+
 			frappe.db.set_value('Sample Collection', sample_collection.name, 'sample_qty', quantity)
 
 		else:
@@ -236,6 +221,7 @@ def create_sample_doc(template, patient, invoice, company = None):
 			sample_collection = frappe.new_doc('Sample Collection')
 			if(invoice):
 				sample_collection.invoiced = True
+
 			sample_collection.patient = patient.name
 			sample_collection.patient_age = patient.get_age()
 			sample_collection.patient_sex = patient.sex
@@ -245,7 +231,7 @@ def create_sample_doc(template, patient, invoice, company = None):
 			sample_collection.company = company
 
 			if(template.sample_details):
-				sample_collection.sample_details = 'Test :' + (template.get('lab_test_name') or template.get('template')) +'\n'+'Collection Detials:\n\t'+template.sample_details
+				sample_collection.sample_details = 'Test :' + (template.get('lab_test_name') or template.get('template')) + '\n' + 'Collection Detials:\n\t' + template.sample_details
 			sample_collection.save(ignore_permissions=True)
 
 		return sample_collection
@@ -255,6 +241,7 @@ def create_sample_collection(lab_test, template, patient, invoice):
 		sample_collection = create_sample_doc(template, patient, invoice, lab_test.company)
 		if(sample_collection):
 			lab_test.sample = sample_collection.name
+
 	return lab_test
 
 def load_result_format(lab_test, template, prescription, invoice):
@@ -338,7 +325,7 @@ def insert_lab_test_to_medical_record(doc):
 		item = doc.descriptive_test_items[0]
 
 		if item.lab_test_particulars and item.result_value:
-			table_row = item.lab_test_particulars +' '+ item.result_value
+			table_row = item.lab_test_particulars + ' ' + item.result_value
 
 	elif doc.sensitivity_test_items:
 		item = doc.sensitivity_test_items[0]
@@ -362,7 +349,7 @@ def insert_lab_test_to_medical_record(doc):
 	medical_record.save(ignore_permissions=True)
 
 def delete_lab_test_from_medical_record(self):
-	medical_record_id = frappe.db.sql('select name from `tabPatient Medical Record` where reference_name=%s',(self.name))
+	medical_record_id = frappe.db.sql('select name from `tabPatient Medical Record` where reference_name= %s', (self.name))
 
 	if medical_record_id and medical_record_id[0][0]:
 		frappe.delete_doc('Patient Medical Record', medical_record_id[0][0])
@@ -370,7 +357,6 @@ def delete_lab_test_from_medical_record(self):
 @frappe.whitelist()
 def get_lab_test_prescribed(patient):
 	return frappe.db.sql('''select
-		cp.name, cp.lab_test_code, cp.parent, cp.invoiced, ct.practitioner, ct.encounter_date
-		from `tabPatient Encounter` ct,`tabLab Prescription` cp
-		where ct.patient=%s and cp.parent=ct.name and cp.lab_test_created=0''',
-		(patient))
+		lp.name, lp.lab_test_code, lp.parent, lp.invoiced, pe.practitioner, pe.practitioner_name, pe.encounter_date
+		from `tabPatient Encounter` pe,`tabLab Prescription` lp
+		where pe.patient = %s and lp.parent = pe.name and lp.lab_test_created = 0''', (patient))
