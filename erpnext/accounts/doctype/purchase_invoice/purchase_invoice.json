@@ -3232,7 +3232,7 @@
    "allow_bulk_edit": 0,
    "allow_in_quick_entry": 0,
    "allow_on_submit": 0,
-   "bold": 0,
+   "bold": 1,
    "collapsible": 0,
    "columns": 0,
    "depends_on": "eval:!doc.disable_rounded_total",
