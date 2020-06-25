@@ -408,6 +408,8 @@ class Asset(AccountsController):
 					row.expected_value_after_useful_life = asset_value_after_full_schedule
 
 	def validate_cancellation(self):
+		if self.status in ("In Maintenance", "Out of Order"):
+			frappe.throw(_("You must cancel all the maintenance or repair documents before cancelling the asset."))
 		if self.status not in ("Submitted", "Partially Depreciated", "Fully Depreciated"):
 			frappe.throw(_("Asset cannot be cancelled, as it is already {0}").format(self.status))
 
