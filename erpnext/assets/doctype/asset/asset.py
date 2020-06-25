@@ -409,7 +409,8 @@ class Asset(AccountsController):
 
 	def validate_cancellation(self):
 		if self.status in ("In Maintenance", "Out of Order"):
-			frappe.throw(_("You must cancel all the maintenance or repair documents before cancelling the asset."))
+			frappe.throw(_("There are active maintenance or repairs against the asset. You must complete \
+				all of them before cancelling the asset."))
 		if self.status not in ("Submitted", "Partially Depreciated", "Fully Depreciated"):
 			frappe.throw(_("Asset cannot be cancelled, as it is already {0}").format(self.status))
 
