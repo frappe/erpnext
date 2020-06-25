@@ -358,7 +358,7 @@
    "fieldtype": "HTML"
   },
   {
-   "depends_on": "special_toggle",
+   "depends_on": "descriptive_toggle",
    "fieldname": "organisms_section",
    "fieldtype": "Section Break"
   },
