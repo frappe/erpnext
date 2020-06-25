@@ -38,7 +38,7 @@
   {
    "hidden": 0,
    "label": "Records and History",
-   "links": "[\n\t{\n\t\t\"type\": \"page\",\n\t\t\"name\": \"patient_history\",\n\t\t\"label\": \"Patient History\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Patient Medical Record\",\n\t\t\"label\": \"Patient Medical Record\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Inpatient Record\",\n\t\t\"label\": \"Inpatient Record\"\n\t}\n]"
+   "links": "[\n\t{\n\t\t\"type\": \"page\",\n\t\t\"name\": \"patient_history\",\n\t\t\"label\": \"Patient History\"\n\t},\n\t{\n\t\t\"type\": \"page\",\n\t\t\"name\": \"patient-progress\",\n\t\t\"label\": \"Patient Progress\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Patient Medical Record\",\n\t\t\"label\": \"Patient Medical Record\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Inpatient Record\",\n\t\t\"label\": \"Inpatient Record\"\n\t}\n]"
   },
   {
    "hidden": 0,
@@ -64,7 +64,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Healthcare",
- "modified": "2020-05-28 19:02:28.824995",
+ "modified": "2020-06-25 23:50:56.951698",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",

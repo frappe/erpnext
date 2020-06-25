@@ -45,7 +45,7 @@ class PatientProgress {
 		});
 		patient.refresh();
 
-		if (frappe.route_options) {
+		if (frappe.route_options && !this.patient) {
 			patient.set_value(frappe.route_options.patient);
 			this.patient_id = frappe.route_options.patient;
 		}
@@ -54,7 +54,6 @@ class PatientProgress {
 	}
 
 	make_patient_profile() {
-		frappe.set_route('patient-progress', this.patient_id);
 		this.page.set_title(__('Patient Progress'));
 		this.main_section.empty().append(frappe.render_template('patient_progress'));
 		this.render_patient_details();
