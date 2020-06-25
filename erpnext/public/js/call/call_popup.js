@@ -83,6 +83,7 @@ class CallPopup {
 				this.close_modal();
 			}
 		}, 60000);
+		this.clear_listeners();
 	}
 
 	get_caller_name() {
@@ -99,15 +100,16 @@ class CallPopup {
 	setup_listener() {
 		frappe.realtime.on(`call_${this.call_log.id}_ended`, call_log => {
 			this.call_ended(call_log);
-			// Remove call disconnect listener after the call is disconnected
-			frappe.realtime.off(`call_${this.call_log.id}_ended`);
 		});
 
 		frappe.realtime.on(`call_${this.call_log.id}_missed`, call_log => {
 			this.call_ended(call_log, true);
-			// Remove call disconnect listener after the call is disconnected
-			frappe.realtime.off(`call_${this.call_log.id}_missed`);
 		});
+	}
+
+	clear_listeners() {
+		frappe.realtime.off(`call_${this.call_log.id}_ended`);
+		frappe.realtime.off(`call_${this.call_log.id}_missed`);
 	}
 
 	on_sidebar_item_click(e, $el) {
