@@ -16,8 +16,7 @@ class TestServiceLevelAgreement(unittest.TestCase):
 	def test_service_level_agreement(self):
 		# Default Service Level Agreement
 		create_default_service_level_agreement = create_service_level_agreement(default_service_level_agreement=1,
-			holiday_list="__Test Holiday List", employee_group="_Test Employee Group",
-			entity_type=None, entity=None, response_time=14400, resolution_time=21600)
+			holiday_list="__Test Holiday List", entity_type=None, entity=None, response_time=14400, resolution_time=21600)
 
 		get_default_service_level_agreement = get_service_level_agreement(default_service_level_agreement=1)
 
@@ -29,8 +28,8 @@ class TestServiceLevelAgreement(unittest.TestCase):
 		# Service Level Agreement for Customer
 		customer = create_customer()
 		create_customer_service_level_agreement = create_service_level_agreement(default_service_level_agreement=0,
-			holiday_list="__Test Holiday List", employee_group="_Test Employee Group",
-			entity_type="Customer", entity=customer, response_time=7200, resolution_time=10800)
+			holiday_list="__Test Holiday List", entity_type="Customer", entity=customer,
+			response_time=7200, resolution_time=10800)
 		get_customer_service_level_agreement = get_service_level_agreement(entity_type="Customer", entity=customer)
 
 		self.assertEqual(create_customer_service_level_agreement.name, get_customer_service_level_agreement.name)
@@ -41,8 +40,8 @@ class TestServiceLevelAgreement(unittest.TestCase):
 		# Service Level Agreement for Customer Group
 		customer_group = create_customer_group()
 		create_customer_group_service_level_agreement = create_service_level_agreement(default_service_level_agreement=0,
-			holiday_list="__Test Holiday List", employee_group="_Test Employee Group",
-			entity_type="Customer Group", entity=customer_group, response_time=7200, resolution_time=10800)
+			holiday_list="__Test Holiday List", entity_type="Customer Group", entity=customer_group,
+			response_time=7200, resolution_time=10800)
 		get_customer_group_service_level_agreement = get_service_level_agreement(entity_type="Customer Group", entity=customer_group)
 
 		self.assertEqual(create_customer_group_service_level_agreement.name, get_customer_group_service_level_agreement.name)
@@ -53,7 +52,7 @@ class TestServiceLevelAgreement(unittest.TestCase):
 		# Service Level Agreement for Territory
 		territory = create_territory()
 		create_territory_service_level_agreement = create_service_level_agreement(default_service_level_agreement=0,
-			holiday_list="__Test Holiday List", employee_group="_Test Employee Group",
+			holiday_list="__Test Holiday List",
 			entity_type="Territory", entity=territory, response_time=7200, resolution_time=10800)
 		get_territory_service_level_agreement = get_service_level_agreement(entity_type="Territory", entity=territory)
 
@@ -61,7 +60,6 @@ class TestServiceLevelAgreement(unittest.TestCase):
 		self.assertEqual(create_territory_service_level_agreement.entity_type, get_territory_service_level_agreement.entity_type)
 		self.assertEqual(create_territory_service_level_agreement.entity, get_territory_service_level_agreement.entity)
 		self.assertEqual(create_territory_service_level_agreement.default_service_level_agreement, get_territory_service_level_agreement.default_service_level_agreement)
-
 
 def get_service_level_agreement(default_service_level_agreement=None, entity_type=None, entity=None):
 	if default_service_level_agreement:
@@ -72,10 +70,9 @@ def get_service_level_agreement(default_service_level_agreement=None, entity_typ
 	service_level_agreement = frappe.get_doc("Service Level Agreement", filters)
 	return service_level_agreement
 
-def create_service_level_agreement(default_service_level_agreement, holiday_list, employee_group,
-	response_time, entity_type, entity, resolution_time):
+def create_service_level_agreement(default_service_level_agreement, holiday_list, response_time, entity_type,
+	entity, resolution_time):
 
-	employee_group = make_employee_group()
 	make_holiday_list()
 	make_priorities()
 
@@ -86,7 +83,6 @@ def create_service_level_agreement(default_service_level_agreement, holiday_list
 		"default_service_level_agreement": default_service_level_agreement,
 		"default_priority": "Medium",
 		"holiday_list": holiday_list,
-		"employee_group": employee_group,
 		"entity_type": entity_type,
 		"entity": entity,
 		"start_date": frappe.utils.getdate(),
@@ -219,19 +215,19 @@ def create_territory():
 
 def create_service_level_agreements_for_issues():
 	create_service_level_agreement(default_service_level_agreement=1, holiday_list="__Test Holiday List",
-		employee_group="_Test Employee Group", entity_type=None, entity=None, response_time=14400, resolution_time=21600)
+		entity_type=None, entity=None, response_time=14400, resolution_time=21600)
 
 	create_customer()
 	create_service_level_agreement(default_service_level_agreement=0, holiday_list="__Test Holiday List",
-		employee_group="_Test Employee Group", entity_type="Customer", entity="_Test Customer", response_time=7200, resolution_time=10800)
+		entity_type="Customer", entity="_Test Customer", response_time=7200, resolution_time=10800)
 
 	create_customer_group()
 	create_service_level_agreement(default_service_level_agreement=0, holiday_list="__Test Holiday List",
-		employee_group="_Test Employee Group", entity_type="Customer Group", entity="_Test SLA Customer Group", response_time=7200, resolution_time=10800)
+		entity_type="Customer Group", entity="_Test SLA Customer Group", response_time=7200, resolution_time=10800)
 
 	create_territory()
 	create_service_level_agreement(default_service_level_agreement=0, holiday_list="__Test Holiday List",
-		employee_group="_Test Employee Group", entity_type="Territory", entity="_Test SLA Territory", response_time=7200, resolution_time=10800)
+		entity_type="Territory", entity="_Test SLA Territory", response_time=7200, resolution_time=10800)
 
 def make_holiday_list():
 	holiday_list = frappe.db.exists("Holiday List", "__Test Holiday List")

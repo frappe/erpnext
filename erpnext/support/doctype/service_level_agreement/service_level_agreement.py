@@ -101,16 +101,27 @@ class ServiceLevelAgreement(Document):
 			"resolution_time": priority.resolution_time
 		})
 
+	def after_insert(self):
+		self.set_documents_with_active_service_level_agreement()
+
+	def on_trash(self):
+		self.set_documents_with_active_service_level_agreement()
+
+	def set_documents_with_active_service_level_agreement(self):
+		frappe.cache().hset("service_level_agreement", "active", [sla.name for sla in frappe.get_all("Service Level Agreement")])
+
+
 def check_agreement_status():
 	service_level_agreements = frappe.get_list("Service Level Agreement", filters=[
-		{"active": 1},
+		{"enabled": 1},
 		{"default_service_level_agreement": 0}
 	], fields=["name"])
 
 	for service_level_agreement in service_level_agreements:
 		doc = frappe.get_doc("Service Level Agreement", service_level_agreement.name)
 		if doc.end_date and getdate(doc.end_date) < getdate(frappe.utils.getdate()):
-			frappe.db.set_value("Service Level Agreement", service_level_agreement.name, "active", 0)
+			frappe.db.set_value("Service Level Agreement", service_level_agreement.name, "enabled", 0)
+
 
 def get_active_service_level_agreement_for(doctype, priority, customer=None, service_level_agreement=None):
 	if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
@@ -118,8 +129,7 @@ def get_active_service_level_agreement_for(doctype, priority, customer=None, ser
 
 	filters = [
 		["Service Level Agreement", "document_type", "=", doctype],
-		["Service Level Agreement", "active", "=", 1],
-		["Service Level Agreement", "enable", "=", 1]
+		["Service Level Agreement", "enabled", "=", 1]
 	]
 
 	or_filters = []
@@ -144,11 +154,14 @@ def get_active_service_level_agreement_for(doctype, priority, customer=None, ser
 
 	return agreement[0] if agreement else None
 
+
 def get_customer_group(customer):
 	return frappe.db.get_value("Customer", customer, "customer_group") if customer else None
 
+
 def get_customer_territory(customer):
 	return frappe.db.get_value("Customer", customer, "territory") if customer else None
+
 
 @frappe.whitelist()
 def get_service_level_agreement_filters(doctype, name, customer=None):
@@ -157,8 +170,7 @@ def get_service_level_agreement_filters(doctype, name, customer=None):
 
 	filters = [
 		["Service Level Agreement", "document_type", "=", doctype],
-		["Service Level Agreement", "active", "=", 1],
-		["Service Level Agreement", "enable", "=", 1]
+		["Service Level Agreement", "enabled", "=", 1]
 	]
 
 	or_filters = [
@@ -189,11 +201,17 @@ def get_repeated(values):
 	return " ".join(diff)
 
 
+def get_documents_with_active_service_level_agreement():
+	return frappe.cache().hget("service_level_agreement", "active") or []
+
+
 def apply(doc, method=None):
 	"""
 		Applies SLA to document on validate
 	"""
-	if frappe.flags.in_patch or frappe.flags.in_install or frappe.flags.in_setup_wizard:
+	if frappe.flags.in_patch or frappe.flags.in_install or frappe.flags.in_setup_wizard or \
+		not doc.doctype in get_documents_with_active_service_level_agreement():
+
 		return
 
 	service_level_agreement = get_active_service_level_agreement_for(doctype=doc.get("doctype"), priority=doc.get("priority"),
