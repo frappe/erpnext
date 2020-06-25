@@ -707,6 +707,8 @@ class TestSalesInvoice(unittest.TestCase):
 		self.pos_gl_entry(si, pos, 50)
 
 	def test_pos_returns_without_repayment(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+
 		pos_profile = make_pos_profile()
 
 		pos = create_sales_invoice(qty = 10, do_not_save=True)
@@ -718,8 +720,7 @@ class TestSalesInvoice(unittest.TestCase):
 		pos.insert()
 		pos.submit()
 
-		pos_return = create_sales_invoice(is_return=1,
-			return_against=pos.name, qty=-5, do_not_save=True)
+		pos_return = make_sales_return(pos.name)
 
 		pos_return.is_pos = 1
 		pos_return.pos_profile = pos_profile.name
@@ -727,7 +728,6 @@ class TestSalesInvoice(unittest.TestCase):
 		pos_return.insert()
 		pos_return.submit()
 
-		self.assertFalse(pos_return.is_pos)
 		self.assertFalse(pos_return.get('payments'))
 
 	def test_pos_returns_with_repayment(self):

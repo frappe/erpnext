@@ -1164,7 +1164,9 @@ class SalesInvoice(SellingController):
 
 		points_to_redeem = self.loyalty_points
 		for lp_entry in loyalty_point_entries:
-			if lp_entry.invoice_type == 'Sales Invoice' and lp_entry.invoice == self.name:
+			if lp_entry.invoice_type != self.doctype or lp_entry.invoice == self.name:
+				# redeemption should be done against same doctype
+				# also it shouldn't be against itself
 				continue
 			available_points = lp_entry.loyalty_points - flt(redemption_details.get(lp_entry.name))
 			if available_points > points_to_redeem:
