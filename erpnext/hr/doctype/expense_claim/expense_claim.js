@@ -211,6 +211,17 @@ frappe.ui.form.on("Expense Claim", {
 	},
 
 	refresh: function(frm) {
+
+		if (!frm.doc.__islocal){
+			// toggle '+' button from dashboard depends upon status.
+			if (frm.doc.status === "Paid" || frm.doc.status === "Rejected"){
+				$('[data-doctype="Payment Entry"]').find("button").hide();
+				$('[data-doctype="Journal Entry"]').find("button").hide();
+			}else if (frm.doc.status === "Unpaid"){
+				$('[data-doctype="Payment Entry"]').find("button").show();
+				$('[data-doctype="Journal Entry"]').find("button").show();
+			}
+		}
 		frm.trigger("toggle_fields");
 
 		if(frm.doc.docstatus === 1 && frm.doc.approval_status !== "Rejected") {
