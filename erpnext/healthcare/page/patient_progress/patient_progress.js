@@ -51,11 +51,6 @@ class PatientProgress {
 		}
 
 		this.sidebar.find('[data-fieldname="patient"]').append('<div class="patient-info"></div>');
-		this.empty = $(
-			`<div class="chart-loading-state text-muted">${__(
-				"No Data..."
-			)}</div>`
-		);
 	}
 
 	make_patient_profile() {
@@ -251,6 +246,8 @@ class PatientProgress {
 	}
 
 	render_therapy_progress_chart(time_span='Last Month') {
+		if (!this.therapy_type) return;
+
 		frappe.xcall(
 			'erpnext.healthcare.page.patient_progress.patient_progress.get_therapy_progress_data', {
 				patient: this.patient_id,
@@ -262,25 +259,23 @@ class PatientProgress {
 				labels: chart.labels,
 				datasets: chart.datasets
 			}
-			if (!this.line_chart) {
-				this.wrapper.find('.therapy-progress-line-chart').show();
-				this.therapy_line_chart = new frappe.Chart('.therapy-progress-line-chart', {
-					type: 'axis-mixed',
-					height: 250,
-					data: data,
-					lineOptions: {
-						regionFill: 1,
-					},
-					axisOptions: {
-						xIsSeries: 1
-					},
-				});
+			if (!chart.labels.length) {
+				this.show_null_state('.therapy-progress-line-chart');
 			} else {
-				if (data.labels.length) {
-					this.wrapper.find('.therapy-progress-line-chart').show();
-					this.therapy_line_chart.update(data);
+				if (!this.line_chart) {
+					this.therapy_line_chart = new frappe.Chart('.therapy-progress-line-chart', {
+						type: 'axis-mixed',
+						height: 250,
+						data: data,
+						lineOptions: {
+							regionFill: 1,
+						},
+						axisOptions: {
+							xIsSeries: 1
+						},
+					});
 				} else {
-					this.wrapper.find('.therapy-progress-line-chart').hide();
+					this.therapy_line_chart.update(data);
 				}
 			}
 		});
@@ -309,6 +304,8 @@ class PatientProgress {
 	}
 
 	render_assessment_result_chart(time_span='Last Month') {
+		if (!this.assessment_template) return;
+
 		frappe.xcall(
 			'erpnext.healthcare.page.patient_progress.patient_progress.get_patient_assessment_data', {
 				patient: this.patient_id,
@@ -323,29 +320,26 @@ class PatientProgress {
 					{ label: 'Max Score', value: chart.max_score }
 				],
 			}
-			if (!this.assessment_line_chart) {
-				this.wrapper.find('.assessment-results-line-chart').show();
-				this.assessment_line_chart = new frappe.Chart('.assessment-results-line-chart', {
-					type: 'axis-mixed',
-					height: 250,
-					data: data,
-					lineOptions: {
-						regionFill: 1,
-					},
-					axisOptions: {
-						xIsSeries: 1
-					},
-					tooltipOptions: {
-						formatTooltipY: d => d + __(' out of ') + chart.max_score
-					}
-				});
+			if (!chart.labels.length) {
+				this.show_null_state('.assessment-results-line-chart');
 			} else {
-				if (data.labels.length) {
-					this.wrapper.find('.assessment-results-line-chart').show();
-					this.assessment_line_chart.update(data);
-					this.empty.hide();
+				if (!this.assessment_line_chart) {
+					this.assessment_line_chart = new frappe.Chart('.assessment-results-line-chart', {
+						type: 'axis-mixed',
+						height: 250,
+						data: data,
+						lineOptions: {
+							regionFill: 1,
+						},
+						axisOptions: {
+							xIsSeries: 1
+						},
+						tooltipOptions: {
+							formatTooltipY: d => d + __(' out of ') + chart.max_score
+						}
+					});
 				} else {
-					this.wrapper.find('.assessment-results-line-chart').hide();
+					this.assessment_line_chart.update(data);
 				}
 			}
 		});
@@ -374,6 +368,8 @@ class PatientProgress {
 	}
 
 	render_therapy_assessment_correlation_chart(time_span='Last Month') {
+		if (!this.assessment) return;
+
 		frappe.xcall(
 			'erpnext.healthcare.page.patient_progress.patient_progress.get_therapy_assessment_correlation_data', {
 				patient: this.patient_id,
@@ -388,22 +384,20 @@ class PatientProgress {
 					{ label: 'Max Score', value: chart.max_score }
 				],
 			}
-			if (!this.correlation_chart) {
-				this.wrapper.find('.therapy-assessment-correlation-line-chart').show();
-				this.correlation_chart = new frappe.Chart('.therapy-assessment-correlation-chart', {
-					type: 'axis-mixed',
-					height: 300,
-					data: data,
-					axisOptions: {
-						xIsSeries: 1
-					}
-				});
+			if (!chart.labels.length) {
+				this.show_null_state('.therapy-assessment-correlation-line-chart');
 			} else {
-				if (data.labels.length) {
-					this.wrapper.find('.therapy-assessment-correlation-chart').show();
-					this.correlation_chart.update(data);
+				if (!this.correlation_chart) {
+					this.correlation_chart = new frappe.Chart('.therapy-assessment-correlation-chart', {
+						type: 'axis-mixed',
+						height: 300,
+						data: data,
+						axisOptions: {
+							xIsSeries: 1
+						}
+					});
 				} else {
-					this.wrapper.find('.therapy-assessment-correlation-chart').hide();
+					this.correlation_chart.update(data);
 				}
 			}
 		});
@@ -432,6 +426,8 @@ class PatientProgress {
 	}
 
 	render_assessment_parameter_progress_chart(time_span='Last Month') {
+		if (!this.parameter) return;
+
 		frappe.xcall(
 			'erpnext.healthcare.page.patient_progress.patient_progress.get_assessment_parameter_data', {
 				patient: this.patient_id,
@@ -443,30 +439,37 @@ class PatientProgress {
 				labels: chart.labels,
 				datasets: chart.datasets
 			}
-			if (!this.parameter_chart) {
-				this.wrapper.find('.assessment-parameter-progress-chart').show();
-				this.parameter_chart = new frappe.Chart('.assessment-parameter-progress-chart', {
-					type: 'line',
-					height: 250,
-					data: data,
-					lineOptions: {
-						regionFill: 1,
-					},
-					axisOptions: {
-						xIsSeries: 1
-					},
-					tooltipOptions: {
-						formatTooltipY: d => d + '%'
-					}
-				});
+			if (!chart.labels.length) {
+				this.show_null_state('.assessment-parameter-progress-chart');
 			} else {
-				if (data.labels.length) {
-					this.wrapper.find('.assessment-parameter-progress-chart').show();
-					this.parameter_chart.update(data);
+				if (!this.parameter_chart) {
+					this.parameter_chart = new frappe.Chart('.assessment-parameter-progress-chart', {
+						type: 'line',
+						height: 250,
+						data: data,
+						lineOptions: {
+							regionFill: 1,
+						},
+						axisOptions: {
+							xIsSeries: 1
+						},
+						tooltipOptions: {
+							formatTooltipY: d => d + '%'
+						}
+					});
 				} else {
-					this.wrapper.find('.assessment-parameter-progress-chart').hide();
+					this.parameter_chart.update(data);
 				}
 			}
 		});
+	}
+
+	show_null_state(parent) {
+		let null_state = $(
+			`<div class="chart-loading-state text-muted text-center" style="margin-bottom: 20px;">${__(
+				"No Data..."
+			)}</div>`
+		);
+		$(parent).empty().append(null_state);
 	}
 }
