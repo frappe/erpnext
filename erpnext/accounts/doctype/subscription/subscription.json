@@ -37,6 +37,7 @@
   "sb_3",
   "invoices",
   "accounting_dimensions_section",
+  "cost_center",
   "dimension_col_break"
  ],
  "fields": [
@@ -238,10 +239,16 @@
    "fieldtype": "Date",
    "label": "Subscription Start Date",
    "set_only_once": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "links": [],
- "modified": "2020-06-23 12:51:16.210437",
+ "modified": "2020-06-25 10:52:52.265105",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",

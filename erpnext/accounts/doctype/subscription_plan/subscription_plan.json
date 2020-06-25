@@ -25,6 +25,7 @@
   "column_break_16",
   "payment_gateway",
   "accounting_dimensions_section",
+  "cost_center",
   "dimension_col_break"
  ],
  "fields": [
@@ -137,10 +138,16 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "links": [],
- "modified": "2020-06-23 09:17:41.004374",
+ "modified": "2020-06-25 10:53:44.205774",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription Plan",

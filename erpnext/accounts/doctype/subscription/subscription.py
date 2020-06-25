@@ -308,6 +308,8 @@ class Subscription(Document):
 		invoice.posting_date = self.current_invoice_start if self.generate_invoice_at_period_start \
 			else self.current_invoice_end
 
+		invoice.cost_center = self.cost_center
+
 		if doctype == 'Sales Invoice':
 			invoice.customer = self.party
 		else:
@@ -382,7 +384,10 @@ class Subscription(Document):
 		items = []
 		party = self.party
 		for plan in plans:
-			item_code = frappe.db.get_value("Subscription Plan", plan.plan, "item")
+			plan_doc = frappe.get_doc('Subscription Plan', plan.plan)
+
+			item_code = plan_doc.item
+
 			if self.party == 'Customer':
 				deferred_field = 'enable_deferred_revenue'
 			else:
@@ -392,10 +397,10 @@ class Subscription(Document):
 
 			if not prorate:
 				item = {'item_code': item_code, 'qty': plan.qty, 'rate': get_plan_rate(plan.plan, plan.qty, party,
-					self.current_invoice_start, self.current_invoice_end)}
+					self.current_invoice_start, self.current_invoice_end), 'cost_center': plan_doc.cost_center}
 			else:
 				item = {'item_code': item_code, 'qty': plan.qty, 'rate': get_plan_rate(plan.plan, plan.qty, party,
-					self.current_invoice_start, self.current_invoice_end, prorate_factor)}
+					self.current_invoice_start, self.current_invoice_end, prorate_factor), 'cost_center': plan_doc.cost_center}
 
 			if deferred:
 				item.update({
@@ -403,6 +408,14 @@ class Subscription(Document):
 					'service_start_date': self.current_invoice_start,
 					'service_end_date': self.current_invoice_end
 				})
+
+			accounting_dimensions = get_accounting_dimensions()
+
+			for dimension in accounting_dimensions:
+				if plan_doc.get(dimension):
+					item.update({
+						dimension: plan_doc.get(dimension)
+					})
 
 			items.append(item)
 
