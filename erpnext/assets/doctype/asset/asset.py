@@ -35,9 +35,6 @@ class Asset(AccountsController):
 		if not self.booked_fixed_asset and self.validate_make_gl_entry():
 			self.make_gl_entries()
 
-	def before_cancel(self):
-		self.cancel_auto_gen_movement()
-
 	def on_cancel(self):
 		self.validate_cancellation()
 		self.delete_depreciation_entries()
@@ -133,19 +130,6 @@ class Asset(AccountsController):
 			frappe.throw(_("Gross Purchase Amount should be {} to purchase amount of one single Asset. {}\
 				Please do not book expense of multiple assets against one single Asset.")
 				.format(frappe.bold("equal"), "<br>"), title=_("Invalid Gross Purchase Amount"))
-
-	def cancel_auto_gen_movement(self):
-		movements = frappe.db.sql(
-			"""SELECT asm.name, asm.docstatus
-			FROM `tabAsset Movement` asm, `tabAsset Movement Item` asm_item
-			WHERE asm_item.parent=asm.name and asm_item.asset=%s and asm.docstatus=1""", self.name, as_dict=1)
-		if len(movements) > 1:
-			frappe.throw(_('Asset has multiple Asset Movement Entries which has to be \
-				cancelled manually to cancel this asset.'))
-		if movements:
-			movement = frappe.get_doc('Asset Movement', movements[0].get('name'))
-			movement.flags.ignore_validate = True
-			movement.cancel()
 
 	def make_asset_movement(self):
 		reference_doctype = 'Purchase Receipt' if self.purchase_receipt else 'Purchase Invoice'
