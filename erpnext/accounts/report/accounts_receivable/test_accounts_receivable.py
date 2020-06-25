@@ -63,7 +63,7 @@ def make_sales_invoice():
 			debit_to = 'Debtors - _TC2',
 			income_account = 'Sales - _TC2',
 			expense_account = 'Cost of Goods Sold - _TC2',
-			cost_center = '_Test Company 2 - _TC2',
+			cost_center = 'Main - _TC2',
 			do_not_save=1)
 
 	si.append('payment_schedule', dict(due_date=getdate(add_days(today(), 30)), invoice_portion=30.00, payment_amount=30))
@@ -83,14 +83,14 @@ def make_payment(docname):
 
 def make_credit_note(docname):
 	create_sales_invoice(company="_Test Company 2",
-			customer = '_Test Customer 2',
-			currency = 'EUR',
-			qty = -1,
-			warehouse = 'Finished Goods - _TC2',
-			debit_to = 'Debtors - _TC2',
-			income_account = 'Sales - _TC2',
-			expense_account = 'Cost of Goods Sold - _TC2',
-			cost_center = '_Test Company 2 - _TC2',
-			is_return = 1,
-			return_against = docname)
+		customer = '_Test Customer 2',
+		currency = 'EUR',
+		qty = -1,
+		warehouse = 'Finished Goods - _TC2',
+		debit_to = 'Debtors - _TC2',
+		income_account = 'Sales - _TC2',
+		expense_account = 'Cost of Goods Sold - _TC2',
+		cost_center = 'Main - _TC2',
+		is_return = 1,
+		return_against = docname)
 
