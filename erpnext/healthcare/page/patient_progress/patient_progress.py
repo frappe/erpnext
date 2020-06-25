@@ -18,8 +18,8 @@ def get_therapy_sessions_count(patient):
 	})
 
 	return {
-	'total_therapy_sessions': total,
-	'therapy_sessions_this_month': this_month
+		'total_therapy_sessions': total,
+		'therapy_sessions_this_month': this_month
 	}
 
 

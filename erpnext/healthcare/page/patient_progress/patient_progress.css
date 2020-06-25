@@ -3,7 +3,7 @@
 	margin: 5px 0;
 }
 
-.frappe-control[data-fieldname='patient'] {
+.layout-side-section .frappe-control[data-fieldname='patient'] {
 	max-width: 300px;
 }
 
