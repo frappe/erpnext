@@ -155,6 +155,7 @@ def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, ord
 
 @frappe.whitelist()
 def set_multiple_status(names, status):
+
 	for name in json.loads(names):
 		frappe.db.set_value("Issue", name, "status", status)
 
@@ -210,3 +211,8 @@ def make_issue_from_communication(communication, ignore_communication_links=Fals
 	link_communication_to_document(doc, "Issue", issue.name, ignore_communication_links)
 
 	return issue.name
+
+def get_holidays(holiday_list_name):
+	holiday_list = frappe.get_cached_doc("Holiday List", holiday_list_name)
+	holidays = [holiday.holiday_date for holiday in holiday_list.holidays]
+	return holidays
