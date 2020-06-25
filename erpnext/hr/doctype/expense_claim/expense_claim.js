@@ -213,12 +213,15 @@ frappe.ui.form.on("Expense Claim", {
 	refresh: function(frm) {
 		frm.trigger("toggle_fields");
 
-		if(frm.doc.docstatus === 1 && frm.doc.approval_status !== "Rejected") {
+		if(frm.doc.docstatus > 0 && frm.doc.approval_status !== "Rejected") {
 			frm.add_custom_button(__('Accounting Ledger'), function() {
 				frappe.route_options = {
 					voucher_no: frm.doc.name,
 					company: frm.doc.company,
-					group_by_voucher: false
+					from_date: frm.doc.posting_date,
+					to_date: moment(frm.doc.modified).format('YYYY-MM-DD'),
+					group_by: '',
+					show_cancelled_entries: frm.doc.docstatus === 2
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, __("View"));
