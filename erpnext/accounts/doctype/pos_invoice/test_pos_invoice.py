@@ -212,6 +212,7 @@ class TestPOSInvoice(unittest.TestCase):
 	def test_without_payment(self):
 		inv = create_pos_invoice(do_not_save=1)
 		# Check that the invoice cannot be submitted without payments
+		inv.payments = []
 		self.assertRaises(frappe.ValidationError, inv.insert)
 	
 	def test_serialized_item_transaction(self):

@@ -731,13 +731,14 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(pos_return.get('payments'))
 
 	def test_pos_returns_with_repayment(self):
+		from erpnext.accounts.doctype.sales_invoice.sales_invoice import make_sales_return
+
 		pos_profile = make_pos_profile()
 
-		pos_profile.set('payments', [])
+		pos_profile.payments = []
 		pos_profile.append('payments', {
 			'default': 1,
-			'mode_of_payment': 'Cash',
-			'amount': 0.0
+			'mode_of_payment': 'Cash'
 		})
 
 		pos_profile.save()
@@ -752,18 +753,12 @@ class TestSalesInvoice(unittest.TestCase):
 		pos.insert()
 		pos.submit()
 
-		pos_return = create_sales_invoice(is_return=1,
-			return_against=pos.name, qty=-5, do_not_save=True)
+		pos_return = make_sales_return(pos.name)
 
-		pos_return.is_pos = 1
-		pos_return.pos_profile = pos_profile.name
 		pos_return.insert()
 		pos_return.submit()
 
-		self.assertEqual(pos_return.get('payments')[0].amount, -500)
-		pos_profile.payments = []
-		pos_profile.save()
-
+		self.assertEqual(pos_return.get('payments')[0].amount, -1000)
 
 	def test_pos_change_amount(self):
 		make_pos_profile()
