@@ -12,5 +12,16 @@ frappe.ui.form.on('Service Level Agreement', {
 			allow_statuses = statuses.filter((status) => !exclude_statuses.includes(status));
 			frappe.meta.get_docfield('Pause SLA On Status', 'status', frm.doc.name).options = [''].concat(allow_statuses);
 		});
+	},
+	onload: function(frm) {
+		frm.set_query("document_type", function() {
+			return {
+				filters: [
+					['DocType', 'issingle', '=', 0],
+					['DocType', 'name', 'not in', frappe.model.core_doctypes_list],
+					['DocType', 'module', 'not in', ["Email", "Core", "Custom", "Event Streaming", "Social", "Data Migration", "Geo", "Desk"]]
+				]
+			};
+		});
 	}
 });

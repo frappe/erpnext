@@ -103,12 +103,95 @@ class ServiceLevelAgreement(Document):
 
 	def after_insert(self):
 		self.set_documents_with_active_service_level_agreement()
+		self.create_custom_fields()
 
 	def on_trash(self):
 		self.set_documents_with_active_service_level_agreement()
 
 	def set_documents_with_active_service_level_agreement(self):
 		frappe.cache().hset("service_level_agreement", "active", [sla.name for sla in frappe.get_all("Service Level Agreement")])
+
+	def create_custom_fields(self):
+		meta = frappe.get_meta(self.document_type)
+
+		service_level_agreement_fields = [
+			{
+				"collapsible": 1,
+				"fieldname": "service_level_section",
+				"fieldtype": "Section Break",
+				"label": "Service Level"
+			},
+			{
+				"fieldname": "service_level_agreement",
+				"fieldtype": "Link",
+				"label": "Service Level Agreement",
+				"options": "Service Level Agreement"
+			},
+			{
+				"fieldname": "response_by",
+				"fieldtype": "Datetime",
+				"label": "Response By",
+				"read_only": 1
+			},
+			{
+				"description": "in hours",
+				"fieldname": "response_by_variance",
+				"fieldtype": "Float",
+				"label": "Response By Variance",
+				"read_only": 1
+			},
+			{
+				"fieldname": "cb",
+				"fieldtype": "Column Break",
+				"read_only": 1
+			},
+			{
+				"default": "Ongoing",
+				"fieldname": "agreement_fulfilled",
+				"fieldtype": "Select",
+				"label": "Service Level Agreement Fulfilled",
+				"options": "Ongoing\nFulfilled\nFailed",
+				"read_only": 1
+			},
+			{
+				"fieldname": "resolution_by",
+				"fieldtype": "Datetime",
+				"label": "Resolution By",
+				"read_only": 1
+			},
+			{
+				"description": "in hours",
+				"fieldname": "resolution_by_variance",
+				"fieldtype": "Float",
+				"label": "Resolution By Variance",
+				"read_only": 1
+			},
+			{
+				"fieldname": "service_level_agreement_creation",
+				"fieldtype": "Datetime",
+				"hidden": 1,
+				"label": "Service Level Agreement Creation",
+				"read_only": 1
+			}
+		]
+
+		for field in service_level_agreement_fields:
+			if not meta.has_field(field.get("fieldname")):
+				frappe.get_doc({
+					"doctype": "Custom Field",
+					"dt": self.document_type,
+					"label": field.get("label"),
+					"fieldname": field.get("fieldname"),
+					"fieldtype": field.get("fieldtype"),
+					"insert_after": "append",
+					"collapsible": field.get("collapsible"),
+					"hidden": field.get("hidden"),
+					"options": field.get("options"),
+					"read_only": field.get("read_only"),
+					"hidden": field.get("hidden"),
+					"description": field.get("description"),
+					"default": field.get("default"),
+				}).insert(ignore_permissions=True)
 
 
 def check_agreement_status():
