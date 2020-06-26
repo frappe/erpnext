@@ -31,6 +31,21 @@ frappe.ui.form.on('Material Request', {
 				filters: {'company': doc.company}
 			};
 		});
+		
+		frm.set_query("cost_center", "items", function(doc) {
+				return {
+					filters: {'company': doc.company,
+					"is_group": 0
+					}
+						
+				};
+			});
+		
+		frm.set_query("expense_account", "items", function(doc) {
+				return {
+					filters: {'company': doc.company}	
+				};
+			});
 
 		frm.set_query("bom_no", "items", function(doc, cdt, cdn) {
 			var row = locals[cdt][cdn];
