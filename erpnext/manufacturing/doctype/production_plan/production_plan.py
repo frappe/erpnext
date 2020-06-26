@@ -622,7 +622,7 @@ def get_items_for_material_requests(doc, ignore_existing_ordered_qty=None):
 
 	doc['mr_items'] = []
 
-	po_items = doc.get('po_items')
+	po_items = doc.get('po_items') if doc.get('po_items') else doc.get('items')
 	# Check for empty table or empty rows
 	if not po_items or not [row.get('item_code') for row in po_items if row.get('item_code')]:
 		frappe.throw(_("Items to Manufacture are required to pull the Raw Materials associated with it."),
