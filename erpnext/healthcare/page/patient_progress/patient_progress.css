@@ -68,22 +68,23 @@
 
 /* therapy progress chart */
 
-.progress-line-chart {
+/* .progress-line-chart {
 	margin-top: 25px;
-}
-.therapy-progress .chart-filter {
-	position: relative;
-	top: -7px;
-	margin-right: 10px;
-}
+} */
 
 /* line charts */
 
-.progress-line-chart .chart-filter {
-	position: relative;
-	top: -7px;
-	margin-right: 10px;
-
+.date-field .clearfix {
+	display: none;
+}
+.date-field .help-box {
+	display: none;
+}
+.date-field	.frappe-control {
+	margin-bottom: 0px !important;
+}
+.date-field .form-group {
+	margin-bottom: 0px !important;
 }
 
 /* common */
@@ -108,6 +109,15 @@ text.title {
 }
 .line-chart-container {
 	margin-bottom: 20px;
+}
+.chart-control {
+	align-self: center;
+	display: flex;
+	flex-direction: row-reverse;
+	margin-top: -25px;
+}
+.chart-control > * {
+	margin-right: 10px;
 }
 
 /* mobile */

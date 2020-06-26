@@ -210,16 +210,56 @@ class PatientProgress {
 	}
 
 	create_time_span_filters(action_method, parent) {
+		let chart_control = $(parent).find('.chart-control');
 		let filters = [
 			{
 				label: 'Last Month',
-				options: ['Last Week', 'Last Month', 'Last Quarter', 'Last Year'],
+				options: ['Select Date Range', 'Last Week', 'Last Month', 'Last Quarter', 'Last Year'],
 				action: (selected_item) => {
-					this[action_method](selected_item);
+					if (selected_item === 'Select Date Range') {
+						this.render_date_range_fields(action_method, chart_control);
+					} else {
+						// hide date range field if visible
+						let date_field = $(parent).find('.date-field');
+						if (date_field.is(':visible')) {
+							date_field.hide();
+						}
+						this[action_method](selected_item);
+					}
 				}
 			}
 		];
-		frappe.dashboard_utils.render_chart_filters(filters, 'chart-filter', parent, 1);
+		frappe.dashboard_utils.render_chart_filters(filters, 'chart-filter', chart_control, 1);
+	}
+
+	render_date_range_fields(action_method, parent) {
+		let date_field = $(parent).find('.date-field');
+
+		if (!date_field.length) {
+			let date_field_wrapper = $(
+				`<div class="date-field pull-right"></div>`
+			).appendTo(parent);
+
+			let date_range_field = frappe.ui.form.make_control({
+				df: {
+					fieldtype: 'DateRange',
+					fieldname: 'from_date',
+					placeholder: 'Date Range',
+					input_class: 'input-xs',
+					reqd: 1,
+					change: () => {
+						let selected_date_range = date_range_field.get_value();
+						if (selected_date_range && selected_date_range.length == 2) {
+							this[action_method](selected_date_range);
+						}
+					}
+				},
+				parent: date_field_wrapper,
+				render_input: 1
+			});
+		} else if (!date_field.is(':visible')) {
+			date_field.show();
+		}
 	}
 
 	show_therapy_progress() {

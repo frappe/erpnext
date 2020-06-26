@@ -2,6 +2,7 @@ import frappe
 from datetime import datetime
 from frappe import _
 from frappe.utils import getdate, get_timespan_date_range
+import json
 
 @frappe.whitelist()
 def get_therapy_sessions_count(patient):
@@ -76,7 +77,7 @@ def get_therapy_sessions_distribution_data(patient, field):
 
 @frappe.whitelist()
 def get_therapy_progress_data(patient, therapy_type, time_span):
-	date_range = get_timespan_date_range(time_span.lower())
+	date_range = get_date_range(time_span)
 	query_values = {'from_date': date_range[0], 'to_date': date_range[1], 'therapy_type': therapy_type, 'patient': patient}
 	result = frappe.db.sql("""
 		SELECT
@@ -192,4 +193,11 @@ def get_assessment_parameter_data(patient, parameter, time_span):
 			{ 'name': _('Score'), 'values': score_percentages }
 		]
 	}
+
+def get_date_range(time_span):
+	try:
+		time_span = json.loads(time_span)
+		return time_span
+	except json.decoder.JSONDecodeError:
+		return get_timespan_date_range(time_span.lower())
 
