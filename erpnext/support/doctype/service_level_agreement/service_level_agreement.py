@@ -195,7 +195,7 @@ class ServiceLevelAgreement(Document):
 
 
 def check_agreement_status():
-	service_level_agreements = frappe.get_list("Service Level Agreement", filters=[
+	service_level_agreements = frappe.get_all("Service Level Agreement", filters=[
 		{"enabled": 1},
 		{"default_service_level_agreement": 0}
 	], fields=["name"])
@@ -232,7 +232,7 @@ def get_active_service_level_agreement_for(doctype, priority, customer=None, ser
 
 	or_filters.append(["Service Level Agreement", "default_service_level_agreement", "=", 1])
 
-	agreement = frappe.get_list("Service Level Agreement", filters=filters, or_filters=or_filters,
+	agreement = frappe.get_all("Service Level Agreement", filters=filters, or_filters=or_filters,
 		fields=["name", "default_priority"])
 
 	return agreement[0] if agreement else None
@@ -267,8 +267,8 @@ def get_service_level_agreement_filters(doctype, name, customer=None):
 		)
 
 	return {
-		"priority": [priority.priority for priority in frappe.get_list("Service Level Priority", filters={"parent": name}, fields=["priority"])],
-		"service_level_agreements": [d.name for d in frappe.get_list("Service Level Agreement", filters=filters, or_filters=or_filters)]
+		"priority": [priority.priority for priority in frappe.get_all("Service Level Priority", filters={"parent": name}, fields=["priority"])],
+		"service_level_agreements": [d.name for d in frappe.get_all("Service Level Agreement", filters=filters, or_filters=or_filters)]
 	}
 
 
@@ -419,7 +419,7 @@ def set_service_level_agreement_variance(doctype, doc=None):
 	if doc:
 		filters = {"name": doc}
 
-	for doc in frappe.get_list(doctype, filters=filters):
+	for doc in frappe.get_all(doctype, filters=filters):
 		doc = frappe.get_doc(doctype, doc.name)
 
 		if not doc.first_responded_on: # first_responded_on set when first reply is sent to customer
@@ -442,7 +442,7 @@ def set_user_resolution_time(doc, meta):
 	if not meta.has_field("user_resolution_time"):
 		return
 
-	communications = frappe.get_list("Communication", filters={
+	communications = frappe.get_all("Communication", filters={
 			"reference_doctype": doc.doctype,
 			"reference_name": doc.name
 		}, fields=["sent_or_received", "name", "creation"], order_by="creation")
