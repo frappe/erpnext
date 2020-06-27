@@ -20,7 +20,7 @@ def update_shortfall_status(loan, security_value):
 
 	if security_value >= loan_security_shortfall.shortfall_amount:
 		frappe.db.set_value("Loan Security Shortfall", loan_security_shortfall.name, {
-			"status", "Completed",
+			"status": "Completed",
 			"shortfall_value": loan_security_shortfall.shortfall_amount})
 	else:
 		frappe.db.set_value("Loan Security Shortfall", loan_security_shortfall.name,
