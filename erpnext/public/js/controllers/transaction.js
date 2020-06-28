@@ -160,7 +160,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 		if (this.frm.fields_dict["items"].grid.get_field("cost_center")) {
 			this.frm.set_query("cost_center", "items", function(doc) {
-				 return {
+				return {
 					filters: {
 						"company": doc.company,
 						"is_group": 0
@@ -169,16 +169,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 		}
 
-	   if (this.frm.fields_dict["items"].grid.get_field("expense_account")) {
+		if (this.frm.fields_dict["items"].grid.get_field("expense_account")) {
 			this.frm.set_query("expense_account", "items", function(doc) {
-				 return {
+				return {
 					filters: {
 						"company": doc.company
 					}
 				};
 			});
 		}
-
 
 		if(frappe.meta.get_docfield(this.frm.doc.doctype, "pricing_rules")) {
 			this.frm.set_indicator_formatter('pricing_rule', function(doc) {
