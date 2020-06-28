@@ -271,6 +271,7 @@ class TestSalarySlip(unittest.TestCase):
 		# as per assigned salary structure 40500 in monthly salary so 236000*5/100/12
 		frappe.db.sql("""delete from `tabPayroll Period`""")
 		frappe.db.sql("""delete from `tabSalary Component`""")
+		frappe.db.sql("""delete from `tabAdditional Salary`""")
 
 		payroll_period = create_payroll_period()
 
