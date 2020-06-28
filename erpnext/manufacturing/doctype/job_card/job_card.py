@@ -131,7 +131,7 @@ class JobCard(Document):
 
 			work_order_field = "name" if field == "operation_id" else field
 			for data in wo.operations:
-				if data.get(work_order_field) == self.get(field) and data.workstation == self.workstation:
+				if data.get(work_order_field) == self.get(field):
 					data.completed_qty = for_quantity
 					data.actual_operation_time = time_in_mins
 					data.actual_start_time = time_data[0].start_time if time_data else None
