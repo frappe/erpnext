@@ -37,7 +37,6 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 	def on_update(self):
 		NestedSet.on_update(self)
 		invalidate_cache_for(self)
-		self.make_route()
 		self.validate_name_with_item()
 		self.validate_one_root()
 		self.delete_child_item_groups_key()
@@ -63,7 +62,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 	def after_rename(self, old_name, new_name, merge):
 		self.make_route()
-		self.save()
+		frappe.db.set_value("Item Group", self.item_group_name, "route", self.route)
 
 	def validate_name_with_item(self):
 		if frappe.db.exists("Item", self.name):
