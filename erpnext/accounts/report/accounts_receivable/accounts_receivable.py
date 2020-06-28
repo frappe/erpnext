@@ -336,10 +336,12 @@ class ReceivablePayableReport(object):
 		# customer / supplier name
 		party_details = self.get_party_details(row.party) or {}
 		row.update(party_details)
-		if self.filters.get(scrub(self.filters.party_type)):
-			row.currency = row.account_currency
-		else:
-			row.currency = self.company_currency
+		row.currency = row.account_currency
+
+		# if self.filters.get(scrub(self.filters.party_type)):
+		# 	row.currency = row.account_currency
+		# else:
+		# 	row.currency = self.company_currency
 
 	def allocate_outstanding_based_on_payment_terms(self, row):
 		self.get_payment_terms(row)
@@ -558,11 +560,12 @@ class ReceivablePayableReport(object):
 
 		conditions, values = self.prepare_conditions()
 		order_by = self.get_order_by_condition()
-
-		if self.filters.get(scrub(self.party_type)):
-			select_fields = "debit_in_account_currency as debit, credit_in_account_currency as credit"
-		else:
-			select_fields = "debit, credit"
+		
+		select_fields = "debit_in_account_currency as debit, credit_in_account_currency as credit"
+		# if self.filters.get(scrub(self.party_type)):
+		# 	select_fields = "debit_in_account_currency as debit, credit_in_account_currency as credit"
+		# else:
+		# 	select_fields = "debit, credit"
 
 		self.gl_entries = frappe.db.sql("""
 			select
