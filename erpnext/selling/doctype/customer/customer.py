@@ -388,8 +388,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 			credit_controller_users = get_users_with_role(credit_controller_role or "Sales Master Manager")
 
 			# form a list of emails and names to show to the user
-			credit_controller_users_list = [user for user in credit_controller_users if frappe.db.exists("Employee", {"prefered_email": user})]
-			credit_controller_users = [get_formatted_email(user).replace("<", "(").replace(">", ")") for user in credit_controller_users_list]
+			credit_controller_users = [get_formatted_email(user).replace("<", "(").replace(">", ")") for user in credit_controller_users]
 
 			if not credit_controller_users:
 				frappe.throw(_("Please contact your administrator to extend the credit limits for {0}.".format(customer)))
@@ -409,7 +408,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 						'customer': customer,
 						'customer_outstanding': customer_outstanding,
 						'credit_limit': credit_limit,
-						'credit_controller_users_list': credit_controller_users_list
+						'credit_controller_users_list': credit_controller_users
 					}
 				}
 			)
