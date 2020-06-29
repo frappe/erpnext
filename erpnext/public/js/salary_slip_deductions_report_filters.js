@@ -11,8 +11,8 @@ erpnext.salary_slip_deductions_report_filters = {
 			default: frappe.defaults.get_user_default("Company"),
 		},
 		{
-			fieldname: "period",
-			label: __("Period"),
+			fieldname: "month",
+			label: __("Month"),
 			fieldtype: "Select",
 			reqd: 1 ,
 			options: [
@@ -32,6 +32,12 @@ erpnext.salary_slip_deductions_report_filters = {
 			default: frappe.datetime.str_to_obj(frappe.datetime.get_today()).getMonth() + 1
 		},
 		{
+			fieldname:"year",
+			label: __("Year"),
+			fieldtype: "Select",
+			reqd: 1
+		},
+		{
 			fieldname: "department",
 			label: __("Department"),
 			fieldtype: "Link",
@@ -43,5 +49,18 @@ erpnext.salary_slip_deductions_report_filters = {
 			fieldtype: "Link",
 			options: "Branch",
 		}
-	]
+	],
+
+	"onload": function() {
+		return  frappe.call({
+			method: "erpnext.regional.report.provident_fund_deductions.provident_fund_deductions.get_years",
+			callback: function(r) {
+				var year_filter = frappe.query_report.get_filter('year');
+				year_filter.df.options = r.message;
+				year_filter.df.default = r.message.split("\n")[0];
+				year_filter.refresh();
+				year_filter.set_input(year_filter.df.default);
+			}
+		});
+	}
 }
