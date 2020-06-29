@@ -223,7 +223,7 @@ class CallPopup {
 					<div class="text-muted">
 						<span>${issue.status}</span> •
 						<span>${issue.name}</span> •
-						<a data-value="${issue.name}" data-action="link_issue">link</a>
+						<a data-value="${issue.name}" data-action="link_issue">${__('Link')}</a>
 					</div>
 				</div>
 				<div>
