@@ -37,6 +37,7 @@ class Asset(AccountsController):
 
 	def on_cancel(self):
 		self.validate_cancellation()
+		self.cancel_movement_entries()
 		self.delete_depreciation_entries()
 		self.set_status()
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
@@ -394,6 +395,16 @@ class Asset(AccountsController):
 	def validate_cancellation(self):
 		if self.status not in ("Submitted", "Partially Depreciated", "Fully Depreciated"):
 			frappe.throw(_("Asset cannot be cancelled, as it is already {0}").format(self.status))
+
+	def cancel_movement_entries(self):
+		movements = frappe.db.sql(
+			"""SELECT asm.name, asm.docstatus
+			FROM `tabAsset Movement` asm, `tabAsset Movement Item` asm_item
+			WHERE asm_item.parent=asm.name and asm_item.asset=%s and asm.docstatus=1""", self.name, as_dict=1)
+
+		for movement in movements:
+			movement = frappe.get_doc('Asset Movement', movement.get('name'))
+			movement.cancel()
 
 	def delete_depreciation_entries(self):
 		for d in self.get("schedules"):
