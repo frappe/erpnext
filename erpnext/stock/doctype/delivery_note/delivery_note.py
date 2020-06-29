@@ -101,6 +101,9 @@ class DeliveryNote(SellingController):
 	def so_required(self):
 		"""check in manage account if sales order required or not"""
 		if frappe.db.get_value("Selling Settings", None, 'so_required') == 'Yes':
+			if frappe.get_value('Customer', self.customer, 'so_required'):
+				return
+
 			for d in self.get('items'):
 				if not d.against_sales_order:
 					frappe.throw(_("Sales Order required for Item {0}").format(d.item_code))
