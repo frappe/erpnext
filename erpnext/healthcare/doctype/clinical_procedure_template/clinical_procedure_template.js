@@ -36,7 +36,7 @@ frappe.ui.form.on('Clinical Procedure Template', {
 				filters: {
 					medical_code_standard: frm.doc.medical_code_standard
 				}
-			}
+			};
 		});
 	},
 

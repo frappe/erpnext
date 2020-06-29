@@ -53,7 +53,7 @@ frappe.ui.form.on('Therapy Type', {
 				filters: {
 					medical_code_standard: frm.doc.medical_code_standard
 				}
-			}
+			};
 		});
 	}
 });
