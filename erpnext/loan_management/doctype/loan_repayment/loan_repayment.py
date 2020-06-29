@@ -116,7 +116,7 @@ class LoanRepayment(AccountsController):
 	def allocate_amounts(self, paid_entries):
 		self.set('repayment_details', [])
 		self.principal_amount_paid = 0
-		interest_paid = 0
+		interest_paid = self.amount_paid - self.penalty_amount
 
 		if self.amount_paid - self.penalty_amount > 0 and paid_entries:
 			interest_paid = self.amount_paid - self.penalty_amount

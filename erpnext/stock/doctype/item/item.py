@@ -592,7 +592,7 @@ class Item(WebsiteGenerator):
 	def stock_ledger_created(self):
 		if not hasattr(self, '_stock_ledger_created'):
 			self._stock_ledger_created = len(frappe.db.sql("""select name from `tabStock Ledger Entry`
-				where item_code = %s limit 1""", self.name))
+				where item_code = %s and is_cancelled = 0 limit 1""", self.name))
 		return self._stock_ledger_created
 
 	def validate_name_with_item_group(self):
@@ -878,7 +878,12 @@ class Item(WebsiteGenerator):
 			linked_doctypes += ["Sales Order Item", "Purchase Order Item", "Material Request Item"]
 
 		for doctype in linked_doctypes:
-			if frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}) or \
+			if doctype in ("Purchase Invoice Item", "Sales Invoice Item",):
+				# If Invoice has Stock impact, only then consider it.
+				if self.stock_ledger_created():
+					return True
+
+			elif frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}) or \
 				frappe.db.get_value("Production Order",
 					filters={"production_item": self.name, "docstatus": 1}):
 				return True
