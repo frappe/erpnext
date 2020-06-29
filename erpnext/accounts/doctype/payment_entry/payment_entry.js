@@ -172,8 +172,8 @@ frappe.ui.form.on('Payment Entry', {
 		frm.toggle_display("base_paid_amount", frm.doc.paid_from_account_currency != company_currency);
 
 		frm.toggle_display("base_received_amount", (
-			frm.doc.paid_to_account_currency != company_currency 
-			&& frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency 
+			frm.doc.paid_to_account_currency != company_currency
+			&& frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency
 			&& frm.doc.base_paid_amount != frm.doc.base_received_amount
 		));
 
@@ -234,14 +234,15 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	show_general_ledger: function(frm) {
-		if(frm.doc.docstatus==1) {
+		if(frm.doc.docstatus > 0) {
 			frm.add_custom_button(__('Ledger'), function() {
 				frappe.route_options = {
 					"voucher_no": frm.doc.name,
 					"from_date": frm.doc.posting_date,
-					"to_date": frm.doc.posting_date,
+					"to_date": moment(frm.doc.modified).format('YYYY-MM-DD'),
 					"company": frm.doc.company,
-					group_by: ""
+					"group_by": "",
+					"show_cancelled_entries": frm.doc.docstatus === 2
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, "fa fa-table");
