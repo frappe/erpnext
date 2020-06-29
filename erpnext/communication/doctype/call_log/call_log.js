@@ -20,8 +20,6 @@ frappe.ui.form.on('Call Log', {
 				<audio
 					controls
 					src="${frm.doc.recording_url}">
-						Your browser does not support the
-						<code>audio</code> element.
 				</audio>
 			`);
 		}

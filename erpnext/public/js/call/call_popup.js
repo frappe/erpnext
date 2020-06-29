@@ -144,7 +144,7 @@ class CallPopup {
 			}, {
 				'fieldtype': 'Button',
 				'label': __('Create New Contact'),
-				'click': () => frappe.new_doc('Contact', { 'mobile_no': this.caller_number }),
+				'click': this.create_new_contact.bind(this),
 				'depends_on': () => !this.get_caller_name()
 			}, {
 				'fieldtype': 'Button',
@@ -311,6 +311,15 @@ class CallPopup {
 		const new_customer = frappe.model.get_new_doc('Customer');
 		new_customer.mobile_no = this.caller_number;
 		frappe.set_route('Form', new_customer.doctype, new_customer.name);
+	}
+
+	create_new_contact() {
+		// TODO: fix new_doc, it should accept child table values
+		const new_contact = frappe.model.get_new_doc('Contact');
+		const phone_no = frappe.model.add_child(new_contact, 'Contact Phone', 'phone_nos');
+		phone_no.phone = this.caller_number;
+		phone_no.is_primary_mobile_no = 1;
+		frappe.set_route('Form', new_contact.doctype, new_contact.name);
 	}
 }
 
