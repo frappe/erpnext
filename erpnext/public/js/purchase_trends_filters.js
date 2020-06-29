@@ -49,7 +49,8 @@ erpnext.get_purchase_trends_filters = function() {
 				{ "value": "Item Group", "label": __("Item Group") },
 				{ "value": "Supplier", "label": __("Supplier") },
 				{ "value": "Supplier Group", "label": __("Supplier Group") },
-				{ "value": "Project", "label": __("Project") }
+				{ "value": "Project", "label": __("Project") },
+				{ "value": "Cost Center", "label": __("Cost Center") }
 			],
 			"default": "Item",
 			"dashboard_config": {

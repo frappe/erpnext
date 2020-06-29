@@ -273,6 +273,12 @@ def based_wise_columns_query(based_on, trans):
 		else:
 			frappe.throw(_("Project-wise data is not available for Quotation"))
 
+	elif based_on == "Cost Center":
+		based_on_details["based_on_cols"] = ["Cost Center:Link/Cost Center:120"]
+		based_on_details["based_on_select"] = "t1.cost_center,"
+		based_on_details["based_on_group_by"] = 't1.cost_center'
+		based_on_details["addl_tables"] = ''
+
 	return based_on_details
 
 def group_wise_column(group_by):

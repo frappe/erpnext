@@ -25,7 +25,8 @@ erpnext.get_sales_trends_filters = function() {
 				{ "value": "Customer", "label": __("Customer") },
 				{ "value": "Customer Group", "label": __("Customer Group") },
 				{ "value": "Territory", "label": __("Territory") },
-				{ "value": "Project", "label": __("Project") }
+				{ "value": "Project", "label": __("Project") },
+				{ "value": "Cost Center", "label": __("Cost Center") }
 			],
 			"default": "Item",
 			"dashboard_config": {
