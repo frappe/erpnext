@@ -32,7 +32,8 @@ class JobOffer(Document):
 		return frappe.get_all("Job Offer", filters={
 				"offer_date": ['between', (from_date, to_date)],
 				"designation": self.designation,
-				"company": self.company
+				"company": self.company,
+				"docstatus": 1
 			}, fields=['name'])
 
 def update_job_applicant(status, job_applicant):
