@@ -81,7 +81,7 @@ frappe.ui.form.on("Issue", {
 					method: "erpnext.support.doctype.issue.issue.make_task",
 					frm: frm
 				});
-			}, __("Make"));
+			}, __("Create"));
 
 		} else {
 			if (frm.doc.service_level_agreement) {
