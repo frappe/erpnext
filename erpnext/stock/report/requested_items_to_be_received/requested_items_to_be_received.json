@@ -1,0 +1,34 @@
+{
+ "add_total_row": 0,
+ "creation": "2020-06-29 13:51:21.750170",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2020-06-29 16:15:20.458986",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Requested Items To Be Received",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "query": "select \n    mr.name as \"Material Request:Link/Material Request:120\",\n\tmr.transaction_date as \"Date:Date:100\",\n\tmr_item.item_code as \"Item Code:Link/Item:120\",\n\tmr_item.qty as \"Qty:Float:100\",\n\tmr_item.received_qty as \"Received Qty:Float:100\", \n\t(mr_item.qty - ifnull(mr_item.received_qty, 0)) as \"Pending Qty:Float:100\",\n\tmr_item.item_name as \"Item Name::150\",\n\tmr_item.description as \"Description::200\",\n\tmr.company as \"Company:Link/Company:\"\nfrom\n\t`tabMaterial Request` mr, `tabMaterial Request Item` mr_item\nwhere\n\tmr_item.parent = mr.name\n\tand mr.material_request_type = \"Purchase\"\n\tand mr.docstatus = 1\n\tand ifnull(mr_item.received_qty, 0) < ifnull(mr_item.qty, 0)\norder by mr.transaction_date asc",
+ "ref_doctype": "Material Request",
+ "report_name": "Requested Items To Be Received",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "Purchase Manager"
+  },
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Stock User"
+  },
+  {
+   "role": "Purchase User"
+  }
+ ]
+}
