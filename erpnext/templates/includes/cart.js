@@ -26,8 +26,8 @@ $.extend(shopping_cart, {
 	bind_address_select: function() {
 		$(".cart-addresses").on('click', '.address-card', function(e) {
 			const $card = $(e.currentTarget);
-			const address_type = $card.closest('[data-address-type]').attr('data-address-type');
-			const address_name = $card.closest('[data-address-name]').attr('data-address-name');
+			const address_type = $card.closest('[data-address-type]').data('address-type');
+			const address_name = $card.closest('[data-address-name]').data('address-name');
 			return frappe.call({
 				type: "POST",
 				method: "erpnext.shopping_cart.cart.update_cart_address",
@@ -60,18 +60,19 @@ $.extend(shopping_cart, {
 	bind_change_qty: function() {
 		// bind update button
 		$(".cart-items").on("change", ".cart-qty", function() {
-			var item_code = $(this).attr("data-item-code");
-			var newVal = $(this).val();
-			shopping_cart.shopping_cart_update({item_code, qty: newVal});
+			let row = $(this).closest("tr").data("name");
+			let item_code = $(this).data("item-code");
+			let newVal = $(this).val();
+			shopping_cart.shopping_cart_update({item_code, qty: newVal, row: row});
 		});
 
 		$(".cart-items").on('click', '.number-spinner button', function () {
-			var btn = $(this),
+			let btn = $(this),
 				input = btn.closest('.number-spinner').find('input'),
 				oldValue = input.val().trim(),
 				newVal = 0;
 
-			if (btn.attr('data-dir') == 'up') {
+			if (btn.data('dir') == 'up') {
 				newVal = parseInt(oldValue) + 1;
 			} else {
 				if (oldValue > 1) {
@@ -79,7 +80,7 @@ $.extend(shopping_cart, {
 				}
 			}
 			input.val(newVal);
-			var item_code = input.attr("data-item-code");
+			let item_code = input.data("item-code");
 			shopping_cart.shopping_cart_update({item_code, qty: newVal});
 		});
 	},
@@ -87,7 +88,7 @@ $.extend(shopping_cart, {
 	bind_change_notes: function() {
 		$('.cart-items').on('change', 'textarea', function() {
 			const $textarea = $(this);
-			const item_code = $textarea.attr('data-item-code');
+			const item_code = $textarea.data('item-code');
 			const qty = $textarea.closest('tr').find('.cart-qty').val();
 			const notes = $textarea.val();
 			shopping_cart.shopping_cart_update({
