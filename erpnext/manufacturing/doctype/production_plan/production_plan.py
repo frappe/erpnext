@@ -47,7 +47,9 @@ class ProductionPlan(Document):
 				'sales_order': data.name,
 				'sales_order_date': data.transaction_date,
 				'customer': data.customer,
-				'grand_total': data.grand_total
+				'grand_total': data.grand_total,
+				'delivery_date': data.delivery_date,
+				'shipping_address_name': data.shipping_address_name
 			})
 
 	def get_pending_material_requests(self):
@@ -63,8 +65,14 @@ class ProductionPlan(Document):
 		if self.item_code:
 			item_filter += " and mr_item.item_code = %(item)s"
 
+		if self.from_delivery_date:
+			item_filter += " and mr.schedule_date >= %(from_delivery_date)s"
+
+		if self.to_delivery_date:
+			item_filter += " and mr.schedule_date <= %(to_delivery_date)s"
+
 		pending_mr = frappe.db.sql("""
-			select distinct mr.name, mr.transaction_date
+			select distinct mr.name, mr.transaction_date, mr.schedule_date
 			from `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
 			where mr_item.parent = mr.name
 				and mr.material_request_type = "Manufacture"
@@ -77,7 +85,9 @@ class ProductionPlan(Document):
 				"to_date": self.to_date,
 				"warehouse": self.warehouse,
 				"item": self.item_code,
-				"company": self.company
+				"company": self.company,
+				"from_delivery_date": self.from_delivery_date,
+				"to_delivery_date": self.to_delivery_date
 			}, as_dict=1)
 
 		self.add_mr_in_table(pending_mr)
@@ -90,6 +100,7 @@ class ProductionPlan(Document):
 			self.append('material_requests', {
 				'material_request': data.name,
 				'material_request_date': data.transaction_date
+				'schedule_date': data.schedule_date
 			})
 
 	def get_items(self):
@@ -115,7 +126,7 @@ class ProductionPlan(Document):
 			item_condition = ' and so_item.item_code = {0}'.format(frappe.db.escape(self.item_code))
 
 		items = frappe.db.sql("""select distinct parent, item_code, warehouse,
-			(qty - work_order_qty) * conversion_factor as pending_qty, description, name
+			(qty - work_order_qty) * conversion_factor as pending_qty, description, name, delivery_date
 			from `tabSales Order Item` so_item
 			where parent in (%s) and docstatus = 1 and qty > work_order_qty
 			and exists (select name from `tabBOM` bom where bom.item=so_item.item_code
@@ -127,7 +138,7 @@ class ProductionPlan(Document):
 
 		packed_items = frappe.db.sql("""select distinct pi.parent, pi.item_code, pi.warehouse as warehouse,
 			(((so_item.qty - so_item.work_order_qty) * pi.qty) / so_item.qty)
-				as pending_qty, pi.parent_item, pi.description, so_item.name
+				as pending_qty, pi.parent_item, pi.description, so_item.name, so_item.delivery_date
 			from `tabSales Order Item` so_item, `tabPacked Item` pi
 			where so_item.parent = pi.parent and so_item.docstatus = 1
 			and pi.parent_item = so_item.item_code
@@ -150,7 +161,7 @@ class ProductionPlan(Document):
 		if self.item_code:
 			item_condition = " and mr_item.item_code ={0}".format(frappe.db.escape(self.item_code))
 
-		items = frappe.db.sql("""select distinct parent, name, item_code, warehouse, description,
+		items = frappe.db.sql("""select distinct parent, name, item_code, warehouse, description, schedule_date,
 			(qty - ordered_qty) * conversion_factor as pending_qty
 			from `tabMaterial Request Item` mr_item
 			where parent in (%s) and docstatus = 1 and qty > ordered_qty
@@ -175,18 +186,21 @@ class ProductionPlan(Document):
 				'planned_qty': data.pending_qty,
 				'pending_qty': data.pending_qty,
 				'planned_start_date': now_datetime(),
-				'product_bundle_item': data.parent_item
+				'product_bundle_item': data.parent_item,
+				'delivery_date': data.delivery_date or data.schedule_date or '',
 			})
 
 			if self.get_items_from == "Sales Order":
 				pi.sales_order = data.parent
 				pi.sales_order_item = data.name
 				pi.description = data.description
+				pi.delivery_date = data.delivery_date
 
 			elif self.get_items_from == "Material Request":
 				pi.material_request = data.parent
 				pi.material_request_item = data.name
 				pi.description = data.description
+				pi.schedule_date = data.schedule_date
 
 	def calculate_total_planned_qty(self):
 		self.total_planned_qty = 0
@@ -567,8 +581,14 @@ def get_sales_orders(self):
 	if self.item_code:
 		item_filter += " and so_item.item_code = %(item)s"
 
+	if self.from_delivery_date:
+		item_filter += " and so.delivery_date >= %(from_delivery_date)s"
+
+	if self.to_delivery_date:
+		item_filter += " and so.delivery_date >= %(to_delivery_date)s"
+
 	open_so = frappe.db.sql("""
-		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total
+		select distinct so.name, so.transaction_date, so.customer, so.base_grand_total, so.delivery_date, so.shipping_address_name
 		from `tabSales Order` so, `tabSales Order Item` so_item
 		where so_item.parent = so.name
 			and so.docstatus = 1 and so.status not in ("Stopped", "Closed")
@@ -586,7 +606,9 @@ def get_sales_orders(self):
 			"customer": self.customer,
 			"project": self.project,
 			"item": self.item_code,
-			"company": self.company
+			"company": self.company,
+			"from_delivery_date": self.from_delivery_date,
+			"to_delivery_date": self.to_delivery_date
 
 		}, as_dict=1)
 	return open_so
@@ -720,8 +742,8 @@ def get_item_data(item_code):
 
 	return {
 		"bom_no": item_details.get("bom_no"),
-		"stock_uom": item_details.get("stock_uom")
-#		"description": item_details.get("description")
+		"stock_uom": item_details.get("stock_uom"),
+		"description": item_details.get("description")
 	}
 
 def get_sub_assembly_items(bom_no, bom_data):
