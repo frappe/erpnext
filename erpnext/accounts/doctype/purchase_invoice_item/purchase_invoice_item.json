@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "hash",
  "creation": "2013-05-22 12:43:10",
  "doctype": "DocType",
@@ -86,6 +85,7 @@
   "item_tax_rate",
   "bom",
   "include_exploded_items",
+  "purchase_invoice_item",
   "col_break6",
   "purchase_order",
   "po_detail",
@@ -764,12 +764,21 @@
    "label": "Asset Category",
    "options": "Asset Category",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:parent.update_stock == 1",
+   "fieldname": "purchase_invoice_item",
+   "fieldtype": "Data",
+   "ignore_user_permissions": 1,
+   "label": "Purchase Invoice Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "links": [],
- "modified": "2020-04-07 18:34:35.104178",
+ "modified": "2020-06-30 16:48:01.398356",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
