@@ -13,15 +13,16 @@ frappe.ui.form.on("Journal Entry", {
 	refresh: function(frm) {
 		erpnext.toggle_naming_series();
 
-		if(frm.doc.docstatus==1) {
+		if(frm.doc.docstatus > 0) {
 			frm.add_custom_button(__('Ledger'), function() {
 				frappe.route_options = {
 					"voucher_no": frm.doc.name,
 					"from_date": frm.doc.posting_date,
-					"to_date": frm.doc.posting_date,
+					"to_date": moment(frm.doc.modified).format('YYYY-MM-DD'),
 					"company": frm.doc.company,
 					"finance_book": frm.doc.finance_book,
-					"group_by_voucher": 0
+					"group_by": '',
+					"show_cancelled_entries": frm.doc.docstatus === 2
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, __('View'));
@@ -278,7 +279,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			// payroll entry
 			if(jvd.reference_type==="Payroll Entry") {
 				return {
-					query: "erpnext.hr.doctype.payroll_entry.payroll_entry.get_payroll_entries_for_jv",
+					query: "erpnext.payroll.doctype.payroll_entry.payroll_entry.get_payroll_entries_for_jv",
 				};
 			}
 

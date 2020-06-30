@@ -15,6 +15,7 @@ class TestInpatientRecord(unittest.TestCase):
 		patient = create_patient()
 		# Schedule Admission
 		ip_record = create_inpatient(patient)
+		ip_record.expected_length_of_stay = 0
 		ip_record.save(ignore_permissions = True)
 		self.assertEqual(ip_record.name, frappe.db.get_value("Patient", patient, "inpatient_record"))
 		self.assertEqual(ip_record.status, frappe.db.get_value("Patient", patient, "inpatient_status"))
@@ -26,7 +27,7 @@ class TestInpatientRecord(unittest.TestCase):
 		self.assertEqual("Occupied", frappe.db.get_value("Healthcare Service Unit", service_unit, "occupancy_status"))
 
 		# Discharge
-		schedule_discharge(patient=patient)
+		schedule_discharge(frappe.as_json({'patient': patient}))
 		self.assertEqual("Vacant", frappe.db.get_value("Healthcare Service Unit", service_unit, "occupancy_status"))
 
 		ip_record1 = frappe.get_doc("Inpatient Record", ip_record.name)
@@ -44,8 +45,10 @@ class TestInpatientRecord(unittest.TestCase):
 		patient = create_patient()
 
 		ip_record = create_inpatient(patient)
+		ip_record.expected_length_of_stay = 0
 		ip_record.save(ignore_permissions = True)
 		ip_record_new = create_inpatient(patient)
+		ip_record_new.expected_length_of_stay = 0
 		self.assertRaises(frappe.ValidationError, ip_record_new.save)
 
 		service_unit = get_healthcare_service_unit()

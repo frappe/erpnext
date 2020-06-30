@@ -73,10 +73,16 @@ def link_customer_and_address(raw_billing_data, raw_shipping_data, customer_name
 
 	if customer_exists:
 		frappe.rename_doc("Customer", old_name, customer_name)
-		billing_address = frappe.get_doc("Address", {"woocommerce_email": customer_woo_com_email, "address_type": "Billing"})
-		shipping_address = frappe.get_doc("Address", {"woocommerce_email": customer_woo_com_email, "address_type": "Shipping"})
-		rename_address(billing_address, customer)
-		rename_address(shipping_address, customer)
+		for address_type in ("Billing", "Shipping",):
+			try:
+				address = frappe.get_doc("Address", {"woocommerce_email": customer_woo_com_email, "address_type": address_type})
+				rename_address(address, customer)
+			except (
+				frappe.DoesNotExistError,
+				frappe.DuplicateEntryError,
+				frappe.ValidationError,
+			):
+				pass
 	else:
 		create_address(raw_billing_data, customer, "Billing")
 		create_address(raw_shipping_data, customer, "Shipping")
@@ -182,7 +188,8 @@ def set_items_in_sales_order(new_sales_order, woocommerce_settings, order, sys_l
 	company_abbr = frappe.db.get_value('Company', woocommerce_settings.company, 'abbr')
 
 	default_warehouse = _("Stores - {0}", sys_lang).format(company_abbr)
-	if not frappe.db.exists("Warehouse", default_warehouse):
+	if not frappe.db.exists("Warehouse", default_warehouse) \
+		and not woocommerce_settings.warehouse:
 		frappe.throw(_("Please set Warehouse in Woocommerce Settings"))
 
 	for item in order.get("line_items"):

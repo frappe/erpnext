@@ -366,8 +366,7 @@ def get_qty_amount_data_for_cumulative(pr_doc, doc, items=[]):
 	sum_qty, sum_amt = [0, 0]
 	doctype = doc.get('parenttype') or doc.doctype
 
-	date_field = ('transaction_date'
-		if doc.get('transaction_date') else 'posting_date')
+	date_field = 'transaction_date' if frappe.get_meta(doctype).has_field('transaction_date') else 'posting_date'
 
 	child_doctype = '{0} Item'.format(doctype)
 	apply_on = frappe.scrub(pr_doc.get('apply_on'))

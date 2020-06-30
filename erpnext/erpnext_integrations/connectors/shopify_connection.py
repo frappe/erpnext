@@ -95,10 +95,10 @@ def create_sales_order(shopify_order, shopify_settings, company=None):
 		items = get_order_items(shopify_order.get("line_items"), shopify_settings)
 
 		if not items:
-			message = 'Following items are exists in order but relevant record not found in Product master'
+			message = 'Following items exists in the shopify order but relevant records were not found in the shopify Product master'
 			message += "\n" + ", ".join(product_not_exists)
 
-			make_shopify_log(status="Error", exception=e, rollback=True)
+			make_shopify_log(status="Error", exception=message, rollback=True)
 
 			return ''
 
@@ -241,14 +241,17 @@ def get_order_taxes(shopify_order, shopify_settings):
 	return taxes
 
 def update_taxes_with_shipping_lines(taxes, shipping_lines, shopify_settings):
+	"""Shipping lines represents the shipping details,
+		each such shipping detail consists of a list of tax_lines"""
 	for shipping_charge in shipping_lines:
-		taxes.append({
-			"charge_type": _("Actual"),
-			"account_head": get_tax_account_head(shipping_charge),
-			"description": shipping_charge["title"],
-			"tax_amount": shipping_charge["price"],
-			"cost_center": shopify_settings.cost_center
-		})
+		for tax in shipping_charge.get("tax_lines"):
+			taxes.append({
+				"charge_type": _("Actual"),
+				"account_head": get_tax_account_head(tax),
+				"description": tax["title"],
+				"tax_amount": tax["price"],
+				"cost_center": shopify_settings.cost_center
+			})
 
 	return taxes
 
