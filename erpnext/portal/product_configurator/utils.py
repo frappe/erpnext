@@ -396,7 +396,7 @@ def get_items(filters=None, search=None):
 			page_length=page_length,
 			left_join=left_join
 		)
-	, as_dict=1, debug=1)
+	, as_dict=1)
 
 	for r in results:
 		r.description = r.web_long_description or r.description
