@@ -8,7 +8,7 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'items': ['Employee','Employee Grade', 'Leave Allocation' ]
+				'items': ['Employee','Employee Grade', 'Leave Allocation']
 			},
 		]
 	}
