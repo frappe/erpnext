@@ -101,19 +101,7 @@ class ServiceLevelAgreement(Document):
 			"resolution_time": priority.resolution_time
 		})
 
-	def after_insert(self):
-		self.set_documents_with_active_service_level_agreement()
-		self.create_custom_fields()
-
-	def on_trash(self):
-		self.set_documents_with_active_service_level_agreement()
-
-	def set_documents_with_active_service_level_agreement(self):
-		frappe.cache().hset("service_level_agreement", "active", [sla.name for sla in frappe.get_all("Service Level Agreement")])
-
-	def create_custom_fields(self):
-		meta = frappe.get_meta(self.document_type)
-
+	def before_insert(self):
 		service_level_agreement_fields = [
 			{
 				"collapsible": 1,
@@ -172,9 +160,57 @@ class ServiceLevelAgreement(Document):
 				"hidden": 1,
 				"label": "Service Level Agreement Creation",
 				"read_only": 1
-			}
+			},
+			{
+				"fieldname": "priority",
+				"fieldtype": "Link",
+				"label": "Priority",
+				"options": "Issue Priority"
+			},
 		]
 
+		meta = frappe.get_meta(self.document_type)
+
+		if meta.custom:
+			self.create_docfields(meta, service_level_agreement_fields)
+		else:
+			self.create_custom_fields(meta, service_level_agreement_fields)
+
+	def on_trash(self):
+		set_documents_with_active_service_level_agreement()
+
+	def after_insert(self):
+		set_documents_with_active_service_level_agreement()
+
+	def create_docfields(self, meta, service_level_agreement_fields):
+		last_index = len(meta.fields)
+
+		for field in service_level_agreement_fields:
+			if not meta.has_field(field.get("fieldname")):
+				last_index += 1
+
+				frappe.get_doc({
+					"doctype": "DocField",
+					"idx": last_index,
+					"parenttype": "DocType",
+					"parentfield": "fields",
+					"parent": self.document_type,
+					"label": field.get("label"),
+					"fieldname": field.get("fieldname"),
+					"fieldtype": field.get("fieldtype"),
+					"collapsible": field.get("collapsible"),
+					"hidden": field.get("hidden"),
+					"options": field.get("options"),
+					"read_only": field.get("read_only"),
+					"hidden": field.get("hidden"),
+					"description": field.get("description"),
+					"default": field.get("default"),
+				}).insert(ignore_permissions=True)
+			else:
+				existing_field = meta.get_field(field.get("fieldname"))
+				self.reset_field_properties(existing_field, field)
+
+	def create_custom_fields(self, meta, service_level_agreement_fields):
 		for field in service_level_agreement_fields:
 			if not meta.has_field(field.get("fieldname")):
 				frappe.get_doc({
@@ -192,7 +228,23 @@ class ServiceLevelAgreement(Document):
 					"description": field.get("description"),
 					"default": field.get("default"),
 				}).insert(ignore_permissions=True)
+			else:
+				existing_field = meta.get_field(field.get("fieldname"))
+				self.reset_field_properties(existing_field, field)
 
+	def reset_field_properties(self, field, sla_field):
+		field = frappe.get_doc(field.doctype, field.name)
+		field.label = sla_field.get("label")
+		field.fieldname = sla_field.get("fieldname")
+		field.fieldtype = sla_field.get("fieldtype")
+		field.collapsible = sla_field.get("collapsible")
+		field.hidden = sla_field.get("hidden")
+		field.options = sla_field.get("options")
+		field.read_only = sla_field.get("read_only")
+		field.hidden = sla_field.get("hidden")
+		field.description = sla_field.get("description")
+		field.default = sla_field.get("default")
+		field.save(ignore_permissions=True)
 
 def check_agreement_status():
 	service_level_agreements = frappe.get_all("Service Level Agreement", filters=[
@@ -285,7 +337,15 @@ def get_repeated(values):
 
 
 def get_documents_with_active_service_level_agreement():
-	return frappe.cache().hget("service_level_agreement", "active") or []
+	if not frappe.cache().hget("service_level_agreement", "active"):
+		set_documents_with_active_service_level_agreement()
+
+	return frappe.cache().hget("service_level_agreement", "active")
+
+
+def set_documents_with_active_service_level_agreement():
+	active = [sla.document_type for sla in frappe.get_all("Service Level Agreement", fields=["document_type"])]
+	frappe.cache().hset("service_level_agreement", "active", active)
 
 
 def apply(doc, method=None):
