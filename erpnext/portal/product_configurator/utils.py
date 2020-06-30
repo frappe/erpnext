@@ -377,13 +377,15 @@ def get_items(filters=None, search=None):
 			`tabItem`.`route`
 		FROM
 			`tabItem`
+		LEFT JOIN `tabItem Price` ON `tabItem`.`name` = `tabItem Price`.`item_code`
 		{left_join}
 		WHERE
 			{where_conditions}
 		GROUP BY
 			`tabItem`.`name`
 		ORDER BY
-			`tabItem`.`item_group`
+			`tabItem`.`item_group`,
+			`tabItem Price`.`price_list_rate` DESC
 		LIMIT
 			{page_length}
 		OFFSET
@@ -394,7 +396,7 @@ def get_items(filters=None, search=None):
 			page_length=page_length,
 			left_join=left_join
 		)
-	, as_dict=1)
+	, as_dict=1, debug=1)
 
 	for r in results:
 		r.description = r.web_long_description or r.description
