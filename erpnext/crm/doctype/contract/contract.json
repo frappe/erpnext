@@ -29,6 +29,9 @@
   "requires_fulfilment",
   "fulfilment_deadline",
   "fulfilment_terms",
+  "authorised_by_section",
+  "signee_company",
+  "signed_by_company",
   "sb_references",
   "document_type",
   "cb_links",
@@ -223,10 +226,28 @@
    "options": "Contract",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "signee_company",
+   "fieldtype": "Signature",
+   "label": "Signee (Company)"
+  },
+  {
+   "fieldname": "signed_by_company",
+   "fieldtype": "Link",
+   "label": "Signed By (Company)",
+   "options": "User",
+   "read_only": 1
+  },
+  {
+   "fieldname": "authorised_by_section",
+   "fieldtype": "Section Break",
+   "label": "Authorised By"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-30 00:56:41.559681",
+ "links": [],
+ "modified": "2020-03-30 06:56:07.257932",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Contract",

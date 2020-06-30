@@ -41,7 +41,7 @@ frappe.query_reports["Job Card Summary"] = {
 			reqd: 1
 		},
 		{
-			label: __("To Posting Datetime"),
+			label: __("To Posting Date"),
 			fieldname:"to_date",
 			fieldtype: "Date",
 			default: frappe.defaults.get_user_default("year_end_date"),
