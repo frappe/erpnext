@@ -445,7 +445,7 @@ def generate_ewb_json(dt, dn):
 def download_ewb_json():
 	data = frappe._dict(frappe.local.form_dict)
 
-	frappe.local.response.filecontent = json.dumps(data['data'], indent=4, sort_keys=True)
+	frappe.local.response.filecontent = json.dumps(json.loads(data['data']), indent=4, sort_keys=True)
 	frappe.local.response.type = 'download'
 
 	billList = json.loads(data['data'])['billLists']
