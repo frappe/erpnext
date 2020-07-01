@@ -129,7 +129,7 @@ frappe.ui.form.on("Salary Slip", {
 			}
 		});
 	}
-})
+});
 
 frappe.ui.form.on('Salary Slip Timesheet', {
 	time_sheet: function(frm, dt, dn) {

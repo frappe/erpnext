@@ -46,7 +46,8 @@ class SalarySlip(TransactionBase):
 			# get details from salary structure
 			self.get_emp_and_working_day_details()
 		else:
-			self.get_working_days_details(lwp = self.leave_without_pay)
+			if not self.salary_slip_based_on_timesheet:
+				self.get_working_days_details(lwp = self.leave_without_pay)
 
 		self.calculate_net_pay()
 
@@ -128,7 +129,8 @@ class SalarySlip(TransactionBase):
 				["date_of_joining", "relieving_date"])
 
 			#getin leave details
-			self.get_working_days_details(joining_date, relieving_date)
+			if not self.salary_slip_based_on_timesheet:
+				self.get_working_days_details(joining_date, relieving_date)
 			struct = self.check_sal_struct(joining_date, relieving_date)
 
 			if struct:
@@ -1033,7 +1035,8 @@ class SalarySlip(TransactionBase):
 		if not self.salary_slip_based_on_timesheet:
 			self.get_date_details()
 		self.pull_emp_details()
-		self.get_working_days_details(for_preview=for_preview)
+		if not self.salary_slip_based_on_timesheet:
+			self.get_working_days_details(for_preview=for_preview)
 		self.calculate_net_pay()
 
 	def pull_emp_details(self):
@@ -1044,7 +1047,8 @@ class SalarySlip(TransactionBase):
 			self.bank_account_no = emp.bank_ac_no
 
 	def process_salary_based_on_working_days(self):
-		self.get_working_days_details(lwp=self.leave_without_pay)
+		if not self.salary_slip_based_on_timesheet:
+			self.get_working_days_details(lwp=self.leave_without_pay)
 		self.calculate_net_pay()
 
 def unlink_ref_doc_from_salary_slip(ref_no):

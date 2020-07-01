@@ -12,25 +12,27 @@
   "department",
   "designation",
   "branch",
-  "payroll_cost_center",
   "column_break1",
   "status",
+  "payroll_cost_center",
   "journal_entry",
   "payroll_entry",
   "company",
   "letter_head",
   "section_break_10",
-  "salary_slip_based_on_timesheet",
   "start_date",
   "end_date",
+  "column_break_17",
+  "salary_slip_based_on_timesheet",
   "salary_structure",
   "payroll_frequency",
   "column_break_15",
   "total_working_days",
+  "payment_days",
+  "column_break_23",
   "unmarked_days",
   "leave_without_pay",
   "absent_days",
-  "payment_days",
   "hourly_wages",
   "timesheets",
   "column_break_20",
@@ -201,8 +203,11 @@
    "label": "End Date"
   },
   {
+   "depends_on": "eval:doc.salary_slip_based_on_timesheet == 0",
    "fieldname": "column_break_15",
-   "fieldtype": "Column Break"
+   "fieldtype": "Section Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "salary_structure",
@@ -219,6 +224,7 @@
    "options": "\nMonthly\nFortnightly\nBimonthly\nWeekly\nDaily"
   },
   {
+   "depends_on": "eval:doc.salary_slip_based_on_timesheet == 0",
    "fieldname": "total_working_days",
    "fieldtype": "Float",
    "label": "Working Days",
@@ -228,6 +234,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:doc.salary_slip_based_on_timesheet == 0",
    "fieldname": "leave_without_pay",
    "fieldtype": "Float",
    "label": "Leave Without Pay",
@@ -235,6 +242,7 @@
    "oldfieldtype": "Currency"
   },
   {
+   "depends_on": "eval:doc.salary_slip_based_on_timesheet == 0",
    "fieldname": "payment_days",
    "fieldtype": "Float",
    "label": "Payment Days",
@@ -315,6 +323,7 @@
   {
    "fieldname": "earning",
    "fieldtype": "Column Break",
+   "label": "Earning",
    "oldfieldtype": "Column Break",
    "width": "50%"
   },
@@ -329,6 +338,7 @@
   {
    "fieldname": "deduction",
    "fieldtype": "Column Break",
+   "label": "Deduction",
    "oldfieldtype": "Column Break",
    "width": "50%"
   },
@@ -480,6 +490,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.salary_slip_based_on_timesheet == 0",
    "fieldname": "absent_days",
    "fieldtype": "Float",
    "label": "Absent Days",
@@ -489,7 +500,21 @@
    "fieldname": "unmarked_days",
    "fieldtype": "Float",
    "hidden": 1,
-   "label": "Unmarked days"
+   "label": "Unmarked days",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "icon": "fa fa-file-text",
