@@ -101,12 +101,60 @@ frappe.ui.form.on("Timesheet", {
 			});
 	},
 
-	make_invoice: function(frm) {
+	make_invoice: async function(frm) {
+		let customers = [];
+		const billable_projects = frm.doc.time_logs
+			.filter(log => log.billable)
+			.map(log => log.project)
+			.filter(Boolean);
+
+		// find unique customers to bill from linked projects
+		if (billable_projects.length > 0) {
+			for (let project of billable_projects) {
+				await frappe.db.get_value("Project", { "name": project }, "customer")
+					.then((r) => {
+						customers.push(r.message.customer);
+					})
+			}
+		}
+
+		// set default customer and project if single value found
+		let project;
+		let customer;
+
+		if (customers.length == 1) {
+			customer = customers[0];
+		}
+
+		if (billable_projects.length == 1) {
+			project = billable_projects[0];
+		}
+
 		let dialog = new frappe.ui.Dialog({
 			title: __("Select Item (optional)"),
 			fields: [
-				{"fieldtype": "Link", "label": __("Item Code"), "fieldname": "item_code", "options":"Item"},
-				{"fieldtype": "Link", "label": __("Customer"), "fieldname": "customer", "options":"Customer"}
+				{
+					"fieldtype": "Link",
+					"label": __("Item Code"),
+					"fieldname": "item_code",
+					"options": "Item",
+					"reqd": 1
+				},
+				{
+					"fieldtype": "Link",
+					"label": __("Customer"),
+					"fieldname": "customer",
+					"options": "Customer",
+					"default": customer,
+					"reqd": 1
+				},
+				{
+					"fieldtype": "Link",
+					"label": __("Project"),
+					"fieldname": "project",
+					"options": "Project",
+					"default": project
+				},
 			]
 		});
 
@@ -120,7 +168,8 @@ frappe.ui.form.on("Timesheet", {
 				args: {
 					"source_name": frm.doc.name,
 					"item_code": args.item_code,
-					"customer": args.customer
+					"customer": args.customer,
+					"project": args.project
 				},
 				freeze: true,
 				callback: function(r) {

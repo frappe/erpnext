@@ -247,7 +247,7 @@ def get_timesheet_data(name, project):
 	}
 
 @frappe.whitelist()
-def make_sales_invoice(source_name, item_code=None, customer=None):
+def make_sales_invoice(source_name, item_code=None, customer=None, project=None):
 	target = frappe.new_doc("Sales Invoice")
 	timesheet = frappe.get_doc('Timesheet', source_name)
 
@@ -264,6 +264,9 @@ def make_sales_invoice(source_name, item_code=None, customer=None):
 	target.company = timesheet.company
 	if customer:
 		target.customer = customer
+
+	if project:
+		target.project = project
 
 	if item_code:
 		target.append('items', {
