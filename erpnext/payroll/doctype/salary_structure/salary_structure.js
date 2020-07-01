@@ -35,7 +35,9 @@ frappe.ui.form.on('Salary Structure', {
 
 			d.show()
 		});
-		frm.get_field("conditions_and_formula_variable_and_example").$wrapper.append(frm.doc.filters_html).append(help_button)
+		let help_button_wrapper = frm.get_field("conditions_and_formula_variable_and_example").$wrapper;
+		help_button_wrapper.empty();
+		help_button_wrapper.append(frm.doc.filters_html).append(help_button)
 
 		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet)
 

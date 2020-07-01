@@ -84,9 +84,11 @@ def get_conditions(filters):
 	if filters.get("company"):
 		conditions.append("company = '%s' " % (filters["company"]) )
 
-	if filters.get("period"):
-		conditions.append("month(start_date) = '%s' " % (filters["period"]))
-		conditions.append("year(start_date) = '%s' " % (frappe.utils.getdate().year))
+	if filters.get("month"):
+		conditions.append("month(start_date) = '%s' " % (filters["month"]))
+
+	if filters.get("year"):
+		conditions.append("year(start_date) = '%s' " % (filters["year"]))
 
 	return " and ".join(conditions)
 
