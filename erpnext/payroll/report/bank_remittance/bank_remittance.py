@@ -152,6 +152,9 @@ def set_company_account(payment_accounts, payroll_entries):
 		company_accounts_map[acc.account] = acc
 
 	for entry in payroll_entries:
-		entry["company_account"] = company_accounts_map[entry.payment_account]['bank_account_no']
+		company_account = ''
+		if entry.payment_account in company_accounts_map:
+			company_account = company_accounts_map[entry.payment_account]['bank_account_no']
+		entry["company_account"] = company_account
 
 	return payroll_entries
