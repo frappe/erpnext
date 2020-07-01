@@ -174,7 +174,7 @@ def get_patient_detail(patient):
 	return details
 
 def get_timeline_data(doctype, name):
-	'''Return timeline for medical records'''
+	"""Return timeline data from medical records"""
 	return dict(frappe.db.sql('''
 		SELECT
 			unix_timestamp(communication_date), count(*)

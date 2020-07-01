@@ -9,7 +9,7 @@ frappe.pages['patient-progress'].on_page_load = function(wrapper) {
 	$(wrapper).bind('show', ()=> {
 		patient_progress.show();
 	});
-}
+};
 
 class PatientProgress {
 
@@ -34,7 +34,7 @@ class PatientProgress {
 				placeholder: __('Select Patient'),
 				only_select: true,
 				change: () => {
-					me.patient_id = ''
+					me.patient_id = '';
 					if (me.patient_id != patient.get_value() && patient.get_value()) {
 						me.start = 0;
 						me.patient_id = patient.get_value();
@@ -69,8 +69,7 @@ class PatientProgress {
 	get_patient_info() {
 		return frappe.xcall('frappe.client.get', {
 			doctype: 'Patient',
-			name: this.patient_id,
-
+			name: this.patient_id
 		}).then((patient) => {
 			if (patient) {
 				this.patient = patient;
@@ -144,8 +143,8 @@ class PatientProgress {
 		frappe.xcall('erpnext.healthcare.page.patient_progress.patient_progress.get_patient_heatmap_data', {
 			patient: this.patient_id,
 			date: date_from || frappe.datetime.year_start(),
-		}).then((r) => {
-			this.heatmap.update( {dataPoints: r} );
+		}).then((data) => {
+			this.heatmap.update( {dataPoints: data} );
 		});
 	}
 
@@ -249,7 +248,7 @@ class PatientProgress {
 					reqd: 1,
 					change: () => {
 						let selected_date_range = date_range_field.get_value();
-						if (selected_date_range && selected_date_range.length == 2) {
+						if (selected_date_range && selected_date_range.length === 2) {
 							this[action_method](selected_date_range);
 						}
 					}
@@ -298,22 +297,25 @@ class PatientProgress {
 				labels: chart.labels,
 				datasets: chart.datasets
 			}
+			let parent = '.therapy-progress-line-chart';
 			if (!chart.labels.length) {
-				this.show_null_state('.therapy-progress-line-chart');
+				this.show_null_state(parent);
 			} else {
-				if (!this.line_chart) {
-					this.therapy_line_chart = new frappe.Chart('.therapy-progress-line-chart', {
+				if (!this.therapy_line_chart) {
+					this.therapy_line_chart = new frappe.Chart(parent, {
 						type: 'axis-mixed',
 						height: 250,
 						data: data,
 						lineOptions: {
-							regionFill: 1,
+							regionFill: 1
 						},
 						axisOptions: {
 							xIsSeries: 1
 						},
 					});
 				} else {
+					$(parent).find('.chart-container').show();
+					$(parent).find('.chart-empty-state').hide();
 					this.therapy_line_chart.update(data);
 				}
 			}
@@ -359,16 +361,17 @@ class PatientProgress {
 					{ label: 'Max Score', value: chart.max_score }
 				],
 			}
+			let parent = '.assessment-results-line-chart';
 			if (!chart.labels.length) {
-				this.show_null_state('.assessment-results-line-chart');
+				this.show_null_state(parent);
 			} else {
 				if (!this.assessment_line_chart) {
-					this.assessment_line_chart = new frappe.Chart('.assessment-results-line-chart', {
+					this.assessment_line_chart = new frappe.Chart(parent, {
 						type: 'axis-mixed',
 						height: 250,
 						data: data,
 						lineOptions: {
-							regionFill: 1,
+							regionFill: 1
 						},
 						axisOptions: {
 							xIsSeries: 1
@@ -378,6 +381,8 @@ class PatientProgress {
 						}
 					});
 				} else {
+					$(parent).find('.chart-container').show();
+					$(parent).find('.chart-empty-state').hide();
 					this.assessment_line_chart.update(data);
 				}
 			}
@@ -423,11 +428,12 @@ class PatientProgress {
 					{ label: 'Max Score', value: chart.max_score }
 				],
 			}
+			let parent = '.therapy-assessment-correlation-chart';
 			if (!chart.labels.length) {
-				this.show_null_state('.therapy-assessment-correlation-line-chart');
+				this.show_null_state(parent);
 			} else {
 				if (!this.correlation_chart) {
-					this.correlation_chart = new frappe.Chart('.therapy-assessment-correlation-chart', {
+					this.correlation_chart = new frappe.Chart(parent, {
 						type: 'axis-mixed',
 						height: 300,
 						data: data,
@@ -436,6 +442,8 @@ class PatientProgress {
 						}
 					});
 				} else {
+					$(parent).find('.chart-container').show();
+					$(parent).find('.chart-empty-state').hide();
 					this.correlation_chart.update(data);
 				}
 			}
@@ -478,16 +486,17 @@ class PatientProgress {
 				labels: chart.labels,
 				datasets: chart.datasets
 			}
+			let parent = '.assessment-parameter-progress-chart';
 			if (!chart.labels.length) {
-				this.show_null_state('.assessment-parameter-progress-chart');
+				this.show_null_state(parent);
 			} else {
 				if (!this.parameter_chart) {
-					this.parameter_chart = new frappe.Chart('.assessment-parameter-progress-chart', {
+					this.parameter_chart = new frappe.Chart(parent, {
 						type: 'line',
 						height: 250,
 						data: data,
 						lineOptions: {
-							regionFill: 1,
+							regionFill: 1
 						},
 						axisOptions: {
 							xIsSeries: 1
@@ -497,6 +506,8 @@ class PatientProgress {
 						}
 					});
 				} else {
+					$(parent).find('.chart-container').show();
+					$(parent).find('.chart-empty-state').hide();
 					this.parameter_chart.update(data);
 				}
 			}
@@ -504,11 +515,17 @@ class PatientProgress {
 	}
 
 	show_null_state(parent) {
-		let null_state = $(
-			`<div class="chart-loading-state text-muted text-center" style="margin-bottom: 20px;">${__(
-				"No Data..."
-			)}</div>`
-		);
-		$(parent).empty().append(null_state);
+		let null_state = $(parent).find('.chart-empty-state');
+		if (null_state.length) {
+			$(null_state).show();
+		} else {
+			null_state = $(
+				`<div class="chart-empty-state text-muted text-center" style="margin-bottom: 20px;">${__(
+					"No Data..."
+				)}</div>`
+			);
+			$(parent).append(null_state);
+		}
+		$(parent).find('.chart-container').hide();
 	}
 }

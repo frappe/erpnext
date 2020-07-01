@@ -26,17 +26,17 @@ def get_therapy_sessions_count(patient):
 
 @frappe.whitelist()
 def get_patient_heatmap_data(patient, date):
-	return dict(frappe.db.sql('''
+	return dict(frappe.db.sql("""
 		SELECT
 			unix_timestamp(communication_date), count(*)
 		FROM
 			`tabPatient Medical Record`
 		WHERE
-			communication_date > subdate('{date}', interval 1 year) and
-			communication_date < subdate('{date}', interval -1 year) and
-			patient = '{patient}'
+			communication_date > subdate(%(date)s, interval 1 year) and
+			communication_date < subdate(%(date)s, interval -1 year) and
+			patient = %(patient)s
 		GROUP BY communication_date
-		ORDER BY communication_date asc'''.format(patient=patient, date=date)))
+		ORDER BY communication_date asc""", {'date': date, 'patient': patient}))
 
 
 @frappe.whitelist()
@@ -101,7 +101,7 @@ def get_therapy_progress_data(patient, therapy_type, time_span):
 
 @frappe.whitelist()
 def get_patient_assessment_data(patient, assessment_template, time_span):
-	date_range = get_timespan_date_range(time_span.lower())
+	date_range = get_date_range(time_span)
 	query_values = {'from_date': date_range[0], 'to_date': date_range[1], 'assessment_template': assessment_template, 'patient': patient}
 	result = frappe.db.sql("""
 		SELECT
@@ -115,20 +115,17 @@ def get_patient_assessment_data(patient, assessment_template, time_span):
 			patient = %(patient)s
 		ORDER BY assessment_datetime""", query_values, as_list=1)
 
-	if result:
-		max_score = result[0][1]
-
 	return {
 		'labels': [getdate(r[0]) for r in result if r[0] != None],
 		'datasets': [
 			{ 'name': _('Score Obtained'), 'values': [r[2] for r in result if r[0] != None] }
 		],
-		'max_score': max_score if max_score else 0
+		'max_score': result[0][1] if result else None
 	}
 
 @frappe.whitelist()
 def get_therapy_assessment_correlation_data(patient, assessment_template, time_span):
-	date_range = get_timespan_date_range(time_span.lower())
+	date_range = get_date_range(time_span)
 	query_values = {'from_date': date_range[0], 'to_date': date_range[1], 'assessment': assessment_template, 'patient': patient}
 	result = frappe.db.sql("""
 		SELECT
@@ -145,21 +142,18 @@ def get_therapy_assessment_correlation_data(patient, assessment_template, time_s
 		GROUP BY therapy.therapy_type
 	""", query_values, as_list=1)
 
-	if result:
-		max_score = result[0][3]
-
 	return {
 		'labels': [r[0] for r in result if r[0] != None],
 		'datasets': [
 			{ 'name': _('Sessions'), 'chartType': 'bar', 'values': [r[1] for r in result if r[0] != None] },
 			{ 'name': _('Average Score'), 'chartType': 'line', 'values': [round(r[2], 2) for r in result if r[0] != None] }
 		],
-		'max_score': max_score if max_score else 0
+		'max_score': result[0][1] if result else None
 	}
 
 @frappe.whitelist()
 def get_assessment_parameter_data(patient, parameter, time_span):
-	date_range = get_timespan_date_range(time_span.lower())
+	date_range = get_date_range(time_span)
 	query_values = {'from_date': date_range[0], 'to_date': date_range[1], 'parameter': parameter, 'patient': patient}
 	results = frappe.db.sql("""
 		SELECT
