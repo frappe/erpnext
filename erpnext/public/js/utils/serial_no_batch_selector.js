@@ -354,14 +354,11 @@ erpnext.SerialNoBatchSelector = Class.extend({
 								return;
 							}
 
-							let batch_number = me.item.batch_no ||
-								this.grid_row.on_grid_fields_dict.batch_no.get_value();
-
 							if (me.warehouse_details.name) {
 								frappe.call({
 									method: 'erpnext.stock.doctype.batch.batch.get_batch_qty',
 									args: {
-										batch_no: batch_number,
+										batch_no: val,
 										warehouse: me.warehouse_details.name,
 										item_code: me.item_code
 									},
