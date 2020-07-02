@@ -333,8 +333,8 @@ erpnext.SerialNoBatchSelector = Class.extend({
 							};
 						},
 						change: function () {
-							let val = this.get_value();
-							if (val.length === 0) {
+							const batch_no = this.get_value();
+							if (!batch_no) {
 								this.grid_row.on_grid_fields_dict
 									.available_qty.set_value(0);
 								return;
@@ -358,7 +358,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 								frappe.call({
 									method: 'erpnext.stock.doctype.batch.batch.get_batch_qty',
 									args: {
-										batch_no: val,
+										batch_no,
 										warehouse: me.warehouse_details.name,
 										item_code: me.item_code
 									},
