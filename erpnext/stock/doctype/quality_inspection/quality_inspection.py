@@ -58,6 +58,7 @@ class QualityInspection(Document):
 				.format(parent_doc=self.reference_type, child_doc=doctype),
 				(quality_inspection, self.modified, self.reference_name, self.item_code))
 
+@frappe.whitelist()
 def item_query(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("from"):
 		from frappe.desk.reportview import get_match_cond
