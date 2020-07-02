@@ -2,7 +2,7 @@
 {% set cart_settings = shopping_cart.cart_settings %}
 
 <div class="mt-3">
-	{% if cart_settings.show_configure_button | int %}
+	{% if cart_settings.enable_variants | int %}
 	<button class="btn btn-primary btn-configure"
 		data-item-code="{{ doc.name }}"
 		data-item-name="{{ doc.item_name }}"

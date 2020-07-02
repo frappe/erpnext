@@ -16,8 +16,8 @@ $.extend(cur_frm.cscript, {
 	},
 	enabled: function() {
 		if (cur_frm.doc.enabled === 1) {
-			cur_frm.doc.show_configure_button = 1;
-			cur_frm.refresh_field('show_configure_button');
+			cur_frm.doc.enable_variants = 1;
+			cur_frm.refresh_field('enable_variants');
 		}
 	}
 });
