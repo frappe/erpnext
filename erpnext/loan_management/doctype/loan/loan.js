@@ -45,15 +45,6 @@ frappe.ui.form.on('Loan', {
 			});
 		})
 
-		frm.set_query('loan_security_pledge', function(doc, cdt, cdn) {
-			return {
-				filters: {
-					applicant: frm.doc.applicant,
-					docstatus: 1,
-					loan_application: frm.doc.loan_application || ''
-				}
-			};
-		});
 	},
 
 	refresh: function (frm) {
@@ -86,9 +77,6 @@ frappe.ui.form.on('Loan', {
 		frm.toggle_display("repayment_periods", s1 - frm.doc.is_term_loan);
 	},
 
-	is_secured_loan: function(frm) {
-		frm.toggle_reqd("loan_security_pledge", frm.doc.is_secured_loan);
-	},
 
 	make_loan_disbursement: function (frm) {
 		frappe.call({
