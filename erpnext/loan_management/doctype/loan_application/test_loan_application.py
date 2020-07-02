@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from erpnext.hr.doctype.salary_structure.test_salary_structure import make_employee
+from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_employee
 from erpnext.loan_management.doctype.loan.test_loan import create_loan_type, create_loan_accounts
 
 class TestLoanApplication(unittest.TestCase):
