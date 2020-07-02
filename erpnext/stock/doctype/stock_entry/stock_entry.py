@@ -365,6 +365,8 @@ class StockEntry(StockController):
 	def set_incoming_rate(self):
 		if self.purpose == "Repack":
 			self.set_basic_rate_for_finished_goods()
+		elif self.purpose == "Manufacture":
+			self.set_basic_rate()
 
 		for d in self.items:
 			if d.s_warehouse:
@@ -487,13 +489,22 @@ class StockEntry(StockController):
 			total_fg_qty = sum([flt(row.qty) for row in self.items
 				if row.t_warehouse and not row.s_warehouse])
 
+		has_raw_materials = []
+
+		allow_material_consumption = frappe.db.get_single_value("Manufacturing Settings",
+			"material_consumption")
+
 		if self.purpose in ["Manufacture", "Repack"]:
 			for d in self.get("items"):
+				# To check whether stock entry has only finished goods and not raw materials
+				if allow_material_consumption and d.s_warehouse and not d.t_warehouse:
+					has_raw_materials.append(d.item_code)
+
 				if (d.transfer_qty and (d.bom_no or d.t_warehouse)
 					and (getattr(self, "pro_doc", frappe._dict()).scrap_warehouse != d.t_warehouse)):
 
 					if (self.work_order and self.purpose == "Manufacture"
-						and frappe.db.get_single_value("Manufacturing Settings", "material_consumption")):
+						and allow_material_consumption and not has_raw_materials):
 						bom_items = self.get_bom_raw_materials(d.transfer_qty)
 						raw_material_cost = sum([flt(row.qty)*flt(row.rate) for row in bom_items.values()])
 
