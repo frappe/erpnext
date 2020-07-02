@@ -12,8 +12,8 @@
 } %}
 
 {% set link = '' %}
-{% set label = domains[0].domain %}
 {% if domains %}
+    {% set label = domains[0].domain %}
 	{% set link = links[label] %}
 {% endif %}
 
