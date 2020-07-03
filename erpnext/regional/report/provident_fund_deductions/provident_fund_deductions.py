@@ -101,7 +101,7 @@ def prepare_data(entry,component_type_dict):
 				"employee": d.employee,
 				"employee_name": d.employee_name,
 				"pf_account": employee_account_dict.get(d.employee),
-				"component_type": d.amount
+				component_type: d.amount
 			})
 
 	return data_list

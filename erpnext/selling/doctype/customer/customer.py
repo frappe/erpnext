@@ -342,11 +342,10 @@ def get_loyalty_programs(doc):
 @frappe.whitelist()
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
 	from erpnext.controllers.queries import get_fields
+	fields = ["name", "customer_name", "customer_group", "territory"]
 
 	if frappe.db.get_default("cust_master_name") == "Customer Name":
 		fields = ["name", "customer_group", "territory"]
-	else:
-		fields = ["name", "customer_name", "customer_group", "territory"]
 
 	fields = get_fields("Customer", fields)
 
