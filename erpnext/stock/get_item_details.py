@@ -18,6 +18,7 @@ from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_manufacturer_part_no
 
 from six import string_types, iteritems
+import pdb
 
 sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
 purchase_doctypes = ['Material Request', 'Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
@@ -630,6 +631,10 @@ def get_item_price(args, item_code, ignore_party=False):
 		conditions += """ and %(transaction_date)s between
 			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
 
+	if args.get('posting_date'):
+		conditions += """ and %(posting_date)s between
+			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
+
 	return frappe.db.sql(""" select name, price_list_rate, uom
 		from `tabItem Price` {conditions}
 		order by valid_from desc, uom desc """.format(conditions=conditions), args)
@@ -650,6 +655,7 @@ def get_price_list_rate_for(args, item_code):
 			"supplier": args.get('supplier'),
 			"uom": args.get('uom'),
 			"transaction_date": args.get('transaction_date'),
+			"posting_date": args.get('posting_date')
 	}
 
 	item_price_data = 0
