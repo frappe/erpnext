@@ -411,6 +411,7 @@
   },
   {
    "fetch_from": "grade.default_leave_policy",
+   "fetch_if_empty": 1,
    "fieldname": "leave_policy",
    "fieldtype": "Link",
    "label": "Leave Policy",
@@ -812,7 +813,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2020-07-03 16:02:01.939511",
+ "modified": "2020-07-03 21:28:04.109189",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
