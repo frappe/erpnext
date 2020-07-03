@@ -702,7 +702,7 @@ def now_datetime(user):
 def convert_utc_to_user_timezone(utc_timestamp, user):
 	from pytz import timezone, UnknownTimeZoneError
 
-	user_tz = get_tz()
+	user_tz = get_tz(user)
 	utcnow = timezone('UTC').localize(utc_timestamp)
 	try:
 		return utcnow.astimezone(timezone(user_tz))
