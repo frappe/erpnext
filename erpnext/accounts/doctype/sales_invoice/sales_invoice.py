@@ -1573,3 +1573,8 @@ def create_invoice_discounting(source_name, target_doc=None):
 	})
 
 	return invoice_discounting
+
+@frappe.whitelist()
+def get_item_details(item_code):
+	item = frappe.get_doc("Item", item_code).as_dict()
+	return item

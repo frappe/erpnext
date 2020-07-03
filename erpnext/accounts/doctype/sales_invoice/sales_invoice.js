@@ -830,28 +830,92 @@ frappe.ui.form.on('Sales Invoice', {
 
 frappe.ui.form.on('Sales Invoice Timesheet', {
 	time_sheet: function(frm, cdt, cdn){
-		var d = locals[cdt][cdn];
-		if(d.time_sheet) {
+		const row = frm.selected_doc || locals[cdt][cdn];
+		if (row.time_sheet) {
 			frappe.call({
 				method: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet_data",
 				args: {
-					'name': d.time_sheet,
+					'name': row.time_sheet,
 					'project': frm.doc.project || null
-				},
-				callback: function(r, rt) {
-					if(r.message){
-						let data = r.message;
-						frappe.model.set_value(cdt, cdn, "billing_hours", data.billing_hours);
-						frappe.model.set_value(cdt, cdn, "billing_amount", data.billing_amount);
-						frappe.model.set_value(cdt, cdn, "timesheet_detail", data.timesheet_detail);
-						calculate_total_billing_amount(frm);
-					}
 				}
-			})
+			}).then((r, rt) => {
+				if (r.message) {
+					let data = r.message;
+					frappe.model.set_value(cdt, cdn, "billing_hours", data.billing_hours);
+					frappe.model.set_value(cdt, cdn, "billing_amount", data.billing_amount);
+					frappe.model.set_value(cdt, cdn, "timesheet_detail", data.timesheet_detail);
+					calculate_total_billing_amount(frm);
+				}
+				return r.message;
+			}).then((data) => {
+				frappe.prompt({
+						label: "Add Item",
+						fieldname: "item_code",
+						fieldtype: "Link",
+						options: "Item",
+						reqd: 1
+					}, (item_data) => {
+						frappe.model.set_value(cdt, cdn, "item_code", item_data.item_code);
+						let billing_rate = data.billing_hours
+							? data.billing_amount / data.billing_hours
+							: 0;
+
+						frappe.call({
+							method: "erpnext.accounts.doctype.sales_invoice.sales_invoice.get_item_details",
+							args: { "item_code": item_data.item_code },
+							callback: function (r) {
+								if (r.message) {
+									let item_list = frm.doc.items.map(item => item.item_code);
+
+									if (item_list.includes(item_data.item_code)) {
+										frm.doc.items.forEach(item => {
+											if (item.item_code == item_data.item_code) {
+												let qty = item.qty += data.billing_hours;
+												frappe.model.set_value(item.doctype, item.name, "qty", qty);
+												refresh_field("items");
+											}
+										})
+									} else {
+										let item = r.message;
+										frm.add_child("items", {
+											'item_code': item.item_code,
+											'item_name': item.item_name,
+											'time_sheet': row.time_sheet,
+											'qty': data.billing_hours,
+											'amount': data.billing_amount,
+											'rate': billing_rate,
+											'description': item.description,
+											'uom': item.uoms[0].uom,
+											'conversion_factor': item.uoms[0].conversion_factor,
+											'income_account': item.item_defaults[0].income_account
+										});
+										frm.cscript.calculate_taxes_and_totals();
+									}
+								}
+							}
+						})
+					},
+					__("Select Item"));
+				}
+			)
 		}
 	},
 
-	timesheets_remove: function(frm, cdt, cdn){
+	before_timesheets_remove: function (frm, cdt, cdn) {
+		const row = frm.selected_doc || locals[cdt][cdn];
+
+		frm.doc.items.forEach(item => {
+			if (row.item_code == item.item_code) {
+				let qty = item.qty -= row.billing_hours;
+				frappe.model.set_value(item.doctype, item.name, "qty", qty);
+
+				frm.doc.items = frm.doc.items.filter(item => item.qty > 0)
+				calculate_total_billing_amount(frm);
+			}
+		})
+	},
+
+	timesheets_remove: function (frm, cdt, cdn) {
 		calculate_total_billing_amount(frm);
 	}
 })
@@ -865,7 +929,7 @@ var calculate_total_billing_amount =  function(frm) {
 			doc.total_billing_amount += data.billing_amount
 		})
 	}
-
+	refresh_field('total_billing_amount')
 	frm.cscript.calculate_taxes_and_totals();
 }
 
