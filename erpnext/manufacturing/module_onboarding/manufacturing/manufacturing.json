@@ -19,7 +19,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/manufacturing",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-06-29 20:25:36.899106",
+ "modified": "2020-07-04 12:17:54.737718",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
@@ -51,6 +51,6 @@
   }
  ],
  "subtitle": "Products, Raw Materials, BOM, Work Order and more.",
- "success_message": "Manufacturing module is all setup!",
- "title": "Let's Set Up the Manufacturing Module"
+ "success_message": "Manufacturing module is all set up!",
+ "title": "Let's Set Up the Manufacturing Module."
 }
