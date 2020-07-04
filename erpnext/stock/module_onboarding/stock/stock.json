@@ -19,7 +19,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/stock",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-07-04 12:22:05.280910",
+ "modified": "2020-07-04 12:37:04.430153",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
@@ -47,7 +47,7 @@
    "step": "Stock Settings"
   }
  ],
- "subtitle": "Inventory, Warehouses, Analysis and more.",
- "success_message": "The Stock Module is all set up!",
+ "subtitle": "Inventory, Warehouses, Analysis, and more.",
+ "success_message": "Yayy! The Stock Module is all set up!",
  "title": "Let's Set Up the Stock Module."
 }

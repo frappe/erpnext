@@ -13,7 +13,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/asset",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-07-04 12:18:28.189465",
+ "modified": "2020-07-04 12:38:38.343248",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Assets",
@@ -35,7 +35,7 @@
    "step": "Create an Asset"
   }
  ],
- "subtitle": "Assets, Depreciations, Repairs and more.",
- "success_message": "The Assets Module is all set up!",
+ "subtitle": "Assets, Depreciations, Repairs, and more.",
+ "success_message": "Yayy! The Assets Module is all set up!",
  "title": "Let's Set Up the Assets Module."
 }

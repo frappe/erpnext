@@ -13,7 +13,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/human-resources/payroll-entry",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-07-04 12:21:06.362465",
+ "modified": "2020-07-04 12:36:43.657504",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll",
@@ -44,7 +44,7 @@
    "step": "Payroll Settings"
   }
  ],
- "subtitle": "Salary, Compensation and more.",
- "success_message": "The Payroll Module is all set up!",
+ "subtitle": "Salary, Compensation, and more.",
+ "success_message": "Yayy! The Payroll Module is all set up!",
  "title": "Let's Set Up the Payroll Module. "
 }
