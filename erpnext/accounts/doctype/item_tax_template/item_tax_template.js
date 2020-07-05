@@ -13,7 +13,7 @@ frappe.ui.form.on('Item Tax Template', {
 			}
 		});
 	},
-	company: function (frm) {  
+	company: function (frm) {
 		frm.set_query("tax_type", "taxes", function(doc) {
 			return {
 				filters: [
