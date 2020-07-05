@@ -367,6 +367,9 @@ def make_template(template_name, project):
 	task_map = {}
 	tasks = []
 
+	if not task_list:
+		frappe.throw(_('Please add Tasks to this project to make a template'))
+
 	for task in task_list:
 		task_map.setdefault(task.name, task.subject)
 		tasks.append(task.name)
