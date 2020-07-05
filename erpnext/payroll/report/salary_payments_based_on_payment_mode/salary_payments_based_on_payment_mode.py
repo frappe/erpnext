@@ -100,6 +100,8 @@ def get_data(filters, mode_of_payments):
 	total_row = get_total_based_on_mode_of_payment(data, mode_of_payments)
 	total_deductions = gross_pay - total_row.get("total")
 
+	report_summary = []
+
 	if data:
 		data.append(total_row)
 		data.append({})
