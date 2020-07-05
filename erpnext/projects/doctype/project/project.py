@@ -7,7 +7,7 @@ from frappe import _
 from six import iteritems
 from email_reply_parser import EmailReplyParser
 from frappe.utils import (flt, getdate, get_url, now,
-	nowtime, get_time, today, get_datetime, add_days)
+	nowtime, get_time, today, get_datetime, add_days, date_diff)
 from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
@@ -53,9 +53,10 @@ class Project(Document):
 			if not self.project_type:
 				self.project_type = template.project_type
 
+			task_doc_map = {}
 			# create tasks from template
 			for task in template.tasks:
-				frappe.get_doc(dict(
+				task_doc_map.setdefault(task.subject, frappe.get_doc(dict(
 					doctype = 'Task',
 					subject = task.subject,
 					project = self.name,
@@ -63,8 +64,27 @@ class Project(Document):
 					exp_start_date = add_days(self.expected_start_date, task.start),
 					exp_end_date = add_days(self.expected_start_date, task.start + task.duration),
 					description = task.description,
-					task_weight = task.task_weight
-				)).insert()
+					task_weight = task.task_weight,
+					is_group = task.is_group
+				)).insert())
+
+			task_map = frappe._dict(frappe.get_all('Task', fields=['subject', 'name'],
+				filters={'project': self.name}, as_list=1))
+
+			for task in template.dependent_tasks:
+				task_doc = task_doc_map.get(task.task_subject)
+				task_doc.append('depends_on', {
+					'task': task_map.get(task.dependent_task_subject),
+					'subject': task.dependent_task_subject
+				})
+
+				task_doc.save()
+
+			for task in template.tasks:
+				if task.parent_task:
+					frappe.db.set_value('Task', task_map.get(task.subject), {
+						'parent_task': task_map.get(task.parent_task),
+					})
 
 	def is_row_updated(self, row, existing_task_data, fields):
 		if self.get("__islocal") or not existing_task_data: return True
@@ -325,34 +345,66 @@ def allow_to_make_project_update(project, time, frequency):
 
 
 @frappe.whitelist()
-def create_duplicate_project(prev_doc, project_name):
-	''' Create duplicate project based on the old project '''
+def make_template(template_name, project):
+	''' Create project template based on the old project '''
 	import json
-	prev_doc = json.loads(prev_doc)
+	project = json.loads(project)
 
-	if project_name == prev_doc.get('name'):
-		frappe.throw(_("Use a name that is different from previous project name"))
+	template = frappe.new_doc('Project Template')
+	template.name = template_name
 
-	# change the copied doc name to new project name
-	project = frappe.copy_doc(prev_doc)
-	project.name = project_name
-	project.project_template = ''
-	project.project_name = project_name
-	project.insert()
+	if not project.get('expected_start_date'):
+		frappe.throw(_('Please add Expected Start Date for the project to convert this project into a template'))
 
 	# fetch all the task linked with the old project
-	task_list = frappe.get_all("Task", filters={
-		'project': prev_doc.get('name')
-	}, fields=['name'])
+	task_list = frappe.get_all("Task",
+		filters={
+			'project': project.get('name')
+		},
+		fields=['name', 'subject', 'exp_start_date', 'exp_end_date', 'parent_task', 'is_group'],
+		order_by='exp_start_date, is_group desc')
 
-	# Create duplicate task for all the task
+	task_map = {}
+	tasks = []
+
 	for task in task_list:
-		task = frappe.get_doc('Task', task)
-		new_task = frappe.copy_doc(task)
-		new_task.project = project.name
-		new_task.insert()
+		task_map.setdefault(task.name, task.subject)
+		tasks.append(task.name)
 
-	project.db_set('project_template', prev_doc.get('project_template'))
+	dependent_tasks = frappe.get_all('Task Depends On', fields=['parent', 'task'],
+		filters={'parent': ('in', tasks)})
+
+	# Add tasks to the template
+	for task in task_list:
+		# Expected start and end dates (start, duration) are mandatory in project template
+		# Ignoring for group tasks as it can be computed for parent task using child tasks
+		if not task.exp_start_date:
+			frappe.throw(_('Please add Expected Start Date for the task {0} to convert this project into a template').format(
+				frappe.bold(task.name)
+			))
+
+		if not task.exp_end_date:
+			frappe.throw(_('Please add Expected End Date for the task {0} to convert this project into a template').format(
+				frappe.bold(task.name)
+			))
+
+		template.append('tasks', {
+			'subject': task.subject,
+			'start': date_diff(task.exp_start_date, project.get('expected_start_date')) + 1,
+			'duration': date_diff(task.exp_end_date, task.exp_start_date) + 1,
+			'parent_task': task_map.get(task.parent_task),
+			'is_group': task.is_group
+		})
+
+	for task in dependent_tasks:
+		template.append('dependent_tasks', {
+			'task_subject': task_map.get(task.parent),
+			'dependent_task_subject': task_map.get(task.task)
+		})
+
+	template.save()
+
+	return template.name
 
 def get_projects_for_collect_progress(frequency, fields):
 	fields.extend(["name"])

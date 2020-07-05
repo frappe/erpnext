@@ -64,8 +64,8 @@ frappe.ui.form.on("Project", {
 
 	set_buttons: function(frm) {
 		if (!frm.is_new()) {
-			frm.add_custom_button(__('Duplicate Project with Tasks'), () => {
-				frm.events.create_duplicate(frm);
+			frm.add_custom_button(__('Make Template'), () => {
+				frm.events.make_template(frm);
 			});
 
 			frm.add_custom_button(__('Completed'), () => {
@@ -95,18 +95,17 @@ frappe.ui.form.on("Project", {
 		}
 	},
 
-	create_duplicate: function(frm) {
-		return new Promise(resolve => {
-			frappe.prompt('Project Name', (data) => {
-				frappe.xcall('erpnext.projects.doctype.project.project.create_duplicate_project',
-					{
-						prev_doc: frm.doc,
-						project_name: data.value
-					}).then(() => {
-					frappe.set_route('Form', "Project", data.value);
-					frappe.show_alert(__("Duplicate project has been created"));
-				});
-				resolve();
+	make_template: function(frm) {
+		frappe.prompt('Project Template Name', (data) => {
+			frappe.call({
+				'method': 'erpnext.projects.doctype.project.project.make_template',
+				'args': {
+					'template_name': data.value,
+					'project': frm.doc
+				},
+				'callback': function(r) {
+					frappe.set_route('Form', 'Project Template', r.message);
+				}
 			});
 		});
 	},

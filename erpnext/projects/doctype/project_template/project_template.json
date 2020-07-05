@@ -7,7 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "project_type",
-  "tasks"
+  "tasks",
+  "dependent_tasks"
  ],
  "fields": [
   {
@@ -15,18 +16,31 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Project Type",
-   "options": "Project Type"
+   "options": "Project Type",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "tasks",
    "fieldtype": "Table",
    "label": "Tasks",
    "options": "Project Template Task",
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "dependent_tasks",
+   "fieldtype": "Table",
+   "label": "Dependent Tasks",
+   "options": "Dependent Task Template",
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "links": [],
- "modified": "2020-04-26 02:23:53.990322",
+ "modified": "2020-07-04 18:46:02.281787",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Template",
