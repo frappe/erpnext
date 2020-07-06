@@ -20,7 +20,6 @@ def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, upd
 		if not cancel:
 			validate_accounting_period(gl_map)
 			gl_map = process_gl_map(gl_map, merge_entries)
-			print(gl_map, "$$$$$$$$$")
 			if gl_map and len(gl_map) > 1:
 				save_entries(gl_map, adv_adj, update_outstanding)
 			else:
