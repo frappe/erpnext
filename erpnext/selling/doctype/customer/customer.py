@@ -7,7 +7,7 @@ import json
 from frappe.model.naming import set_name_by_naming_series
 from frappe import _, msgprint
 import frappe.defaults
-from frappe.utils import flt, cint, cstr, today, get_formatted_email
+from frappe.utils import flt, cint, cstr, today, get_formatted_email, add_months, add_days, formatdate
 from frappe.desk.reportview import build_match_conditions, get_filters_cond
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
@@ -552,3 +552,29 @@ def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, fil
 			'customer': customer,
 			'txt': '%%%s%%' % txt
 		})
+
+def update_customer_current_month_sales(customer):
+	current_month_year = formatdate(today(), "MM-yyyy")
+
+	results = frappe.db.sql('''
+		SELECT
+			SUM(base_grand_total) AS total,
+			DATE_FORMAT(`posting_date`, '%m-%Y') AS month_year
+		FROM
+			`tabSales Invoice`
+		WHERE
+			DATE_FORMAT(`posting_date`, '%m-%Y') = '{current_month_year}'
+			AND docstatus = 1
+			AND customer = {customer}
+		GROUP BY
+			month_year
+	'''.format(current_month_year=current_month_year, customer=frappe.db.escape(customer)),
+		as_dict = True)
+
+	monthly_total = results[0]['total'] if len(results) > 0 else 0
+
+	frappe.db.set_value("Customer", customer, "total_monthly_sales", monthly_total)
+
+def set_total_monthly_sales_to_zero():
+	# will be trigger on the 1st of month at 12:00 AM and set total_monthly_sales to 0
+	frappe.db.sql(""" UPDATE `tabCustomer` SET total_monthly_sales = 0""")

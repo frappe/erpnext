@@ -140,9 +140,44 @@ frappe.ui.form.on("Customer", {
 		var grid = cur_frm.get_field("sales_team").grid;
 		grid.set_column_disp("allocated_amount", false);
 		grid.set_column_disp("incentives", false);
+
+		if(frm.doc.monthly_sales_target){
+			frm.trigger('make_dashboard_and_show_progress');
+		}
+
 	},
 	validate: function(frm) {
 		if(frm.doc.lead_name) frappe.model.clear_doc("Lead", frm.doc.lead_name);
 
 	},
+	make_dashboard_and_show_progress: function(frm) {
+		let bars = [];
+		let message = '';
+
+		// Total Monthly Sales
+		let title = __('{0} total sales this month', [format_currency(frm.doc.total_monthly_sales)]);
+		bars.push({
+			'title': title,
+			'width': Math.min(100 ,(frm.doc.total_monthly_sales / frm.doc.monthly_sales_target * 100)) + '%',
+			'progress_class': 'progress-bar-success'
+		});
+		message = title;
+
+		// Target Remaining
+		let pending_complete = frm.doc.monthly_sales_target - frm.doc.total_monthly_sales;
+		if(pending_complete > 0) {
+			let width = ((pending_complete / frm.doc.monthly_sales_target * 100));
+			title = __('{0} remaining', [format_currency(pending_complete)]);
+			bars.push({
+				'title': title,
+				'width': width + '%',
+				'progress_class': 'progress-bar-warning'
+			});
+			message = message + '. ' + title;
+		}
+		let section = frm.dashboard.add_section(`<h5 style="margin-top: 0px;">
+			${ __("Sales Target") }</a></h5>`);
+		frm.dashboard.add_progress(__('Status'), bars, message).appendTo(section)
+		frm.dashboard.show();
+	}
 });

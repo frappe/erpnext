@@ -332,6 +332,9 @@ scheduler_events = {
 		"erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall.create_process_loan_security_shortfall",
 		"erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual.process_loan_interest_accrual_for_term_loans"
 	],
+	"monthly": [
+		"erpnext.selling.doctype.customer.customer.set_total_monthly_sales_to_zero"
+	],
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.process_deferred_accounting",
 		"erpnext.hr.utils.allocate_earned_leaves",

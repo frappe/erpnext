@@ -707,3 +707,6 @@ erpnext.patches.v13_0.move_doctype_reports_and_notification_from_hr_to_payroll #
 erpnext.patches.v13_0.move_payroll_setting_separately_from_hr_settings #22-06-2020
 erpnext.patches.v13_0.check_is_income_tax_component #22-06-2020
 erpnext.patches.v12_0.add_taxjar_integration_field
+erpnext.patches.v12_0.update_sales_taxes_and_charges_template
+erpnext.patches.v13_0.update_customer_total_sales
+erpnext.patches.v13_0.setup_remove_assignment_on_task
