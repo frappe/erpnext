@@ -119,7 +119,7 @@ cur_frm.fields_dict['cost_center'].get_query = function(doc) {
 			"company": doc.company
 		}
 	}
-}
+};
 
 erpnext.expense_claim = {
 	set_title: function(frm) {
