@@ -57,10 +57,11 @@
  "doctype": "Desk Page",
  "extends_another_page": 0,
  "hide_custom": 0,
+ "icon": "buying",
  "idx": 0,
  "is_standard": 1,
  "label": "Buying",
- "modified": "2020-06-29 19:30:24.983050",
+ "modified": "2020-06-30 18:36:53.390498",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",
@@ -70,7 +71,7 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
-   "color": "#cef6d1",
+   "color": "Green",
    "format": "{} Available",
    "label": "Item",
    "link_to": "Item",
@@ -78,7 +79,7 @@
    "type": "DocType"
   },
   {
-   "color": "#ffe8cd",
+   "color": "Yellow",
    "format": "{} Pending",
    "label": "Material Request",
    "link_to": "Material Request",
@@ -86,7 +87,7 @@
    "type": "DocType"
   },
   {
-   "color": "#ffe8cd",
+   "color": "Yellow",
    "format": "{}  To Receive",
    "label": "Purchase Order",
    "link_to": "Purchase Order",

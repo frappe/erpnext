@@ -41,10 +41,11 @@
  "doctype": "Desk Page",
  "extends_another_page": 0,
  "hide_custom": 1,
+ "icon": "sell",
  "idx": 0,
  "is_standard": 1,
  "label": "Selling",
- "modified": "2020-06-29 19:26:35.139097",
+ "modified": "2020-06-30 18:32:50.587478",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
@@ -54,7 +55,7 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
-   "color": "#cef6d1",
+   "color": "Grey",
    "format": "{} Available",
    "label": "Item",
    "link_to": "Item",
@@ -62,7 +63,7 @@
    "type": "DocType"
   },
   {
-   "color": "#ffe8cd",
+   "color": "Yellow",
    "format": "{}  To Deliver",
    "label": "Sales Order",
    "link_to": "Sales Order",
@@ -70,7 +71,7 @@
    "type": "DocType"
   },
   {
-   "color": "#cef6d1",
+   "color": "Grey",
    "format": "{} Open",
    "label": "Sales Analytics",
    "link_to": "Sales Analytics",
