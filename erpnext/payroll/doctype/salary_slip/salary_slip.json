@@ -381,7 +381,6 @@
   {
    "fieldname": "earning",
    "fieldtype": "Column Break",
-   "label": "Earning",
    "oldfieldtype": "Column Break",
    "show_days": 1,
    "show_seconds": 1,
@@ -400,7 +399,6 @@
   {
    "fieldname": "deduction",
    "fieldtype": "Column Break",
-   "label": "Deduction",
    "oldfieldtype": "Column Break",
    "show_days": 1,
    "show_seconds": 1,
@@ -616,7 +614,7 @@
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-05 14:42:43.921828",
+ "modified": "2020-06-25 14:42:43.921828",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",

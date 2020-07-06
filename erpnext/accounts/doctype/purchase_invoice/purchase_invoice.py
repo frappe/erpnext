@@ -238,6 +238,12 @@ class PurchaseInvoice(BuyingController):
 					not frappe.db.get_value("Purchase Order Item", item.po_detail, "delivered_by_supplier")):
 
 				if self.update_stock and (not item.from_warehouse):
+					if for_validate and item.expense_account and item.expense_account != warehouse_account[item.warehouse]["account"]:
+						frappe.msgprint(_('''Row {0}: Expense Head changed to {1} because account {2}
+							is not linked to warehouse {3} or it is not the default inventory account'''.format(
+								item.idx, frappe.bold(warehouse_account[item.warehouse]["account"]),
+								frappe.bold(item.expense_account), frappe.bold(item.warehouse))))
+
 					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
 					# check if 'Stock Received But Not Billed' account is credited in Purchase receipt or not
@@ -247,10 +253,21 @@ class PurchaseInvoice(BuyingController):
 							(item.purchase_receipt, stock_not_billed_account))
 
 						if negative_expense_booked_in_pr:
+							if for_validate and item.expense_account and item.expense_account != stock_not_billed_account:
+								frappe.msgprint(_('''Row {0}: Expense Head changed to {1} because
+								expense is booked against this account in Purchase Receipt {2}'''.format(
+								item.idx, frappe.bold(stock_not_billed_account), frappe.bold(item.purchase_receipt))))
+
 							item.expense_account = stock_not_billed_account
 					else:
 						# If no purchase receipt present then book expense in 'Stock Received But Not Billed'
 						# This is done in cases when Purchase Invoice is created before Purchase Receipt
+						if for_validate and item.expense_account and item.expense_account != stock_not_billed_account:
+							frappe.msgprint(_('''Row {0}: Expense Head changed to {1} as no Purchase
+								Receipt is created against Item {2}. This is done to handle accounting for cases
+								when Purchase Receipt is created after Purchase Invoice'''.format(
+								item.idx, frappe.bold(stock_not_billed_account), frappe.bold(item.item_code))))
+
 						item.expense_account = stock_not_billed_account
 
 			elif item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category):
@@ -573,6 +590,20 @@ class PurchaseInvoice(BuyingController):
 						amount = flt(item.base_net_amount, item.precision("base_net_amount"))
 					else:
 						amount = flt(item.base_net_amount + item.item_tax_amount, item.precision("base_net_amount"))
+
+					auto_accounting_for_non_stock_items = cint(frappe.db.get_value('Company', self.company, 'enable_perpetual_inventory_for_non_stock_items'))
+
+					if auto_accounting_for_non_stock_items:
+						service_received_but_not_billed_account = self.get_company_default("service_received_but_not_billed")
+
+						if item.purchase_receipt:
+							# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
+							expense_booked_in_pr = frappe.db.get_value('GL Entry', {'is_cancelled': 0,
+								'voucher_type': 'Purchase Receipt', 'voucher_no': item.purchase_receipt, 'voucher_detail_no': item.pr_detail,
+								'account':service_received_but_not_billed_account}, ['name'])
+
+							if expense_booked_in_pr:
+								expense_account = service_received_but_not_billed_account
 
 					gl_entries.append(self.get_gl_dict({
 							"account": expense_account,
