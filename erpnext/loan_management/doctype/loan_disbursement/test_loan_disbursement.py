@@ -5,11 +5,12 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from frappe.utils import (nowdate, add_days, get_datetime, get_first_day, get_last_day, date_diff, flt, add_to_date)
-from erpnext.loan_management.doctype.loan.test_loan import (create_loan_type, create_loan_security_pledge, create_repayment_entry,
+from erpnext.loan_management.doctype.loan.test_loan import (create_loan_type, create_loan_security_pledge, create_repayment_entry, create_loan_application,
 	make_loan_disbursement_entry, create_loan_accounts, create_loan_security_type, create_loan_security, create_demand_loan, create_loan_security_price)
 from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_demand_loans
 from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import days_in_year
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
+from erpnext.loan_management.doctype.loan_application.loan_application import create_pledge
 
 class TestLoanDisbursement(unittest.TestCase):
 
@@ -31,18 +32,15 @@ class TestLoanDisbursement(unittest.TestCase):
 		self.applicant = frappe.db.get_value("Customer", {'name': '_Test Loan Customer'}, 'name')
 
 	def test_loan_topup(self):
-		pledges = []
-		pledges.append({
+		pledge = [{
 			"loan_security": "Test Security 1",
-			"qty": 4000.00,
-			"haircut": 50,
-			"loan_security_price": 500.00
-		})
+			"qty": 4000.00
+		}]
 
-		loan_security_pledge = create_loan_security_pledge(self.applicant, pledges)
+		loan_application = create_loan_application('_Test Company', self.applicant, 'Demand Loan', pledge)
+		create_pledge(loan_application)
 
-		loan = create_demand_loan(self.applicant, "Demand Loan", loan_security_pledge.name,
-			posting_date=get_first_day(nowdate()))
+		loan = create_demand_loan(self.applicant, "Demand Loan", loan_application, posting_date=get_first_day(nowdate()))
 
 		loan.submit()
 

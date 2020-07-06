@@ -13,11 +13,9 @@ from erpnext.controllers.accounts_controller import AccountsController
 class Loan(AccountsController):
 	def validate(self):
 		self.set_loan_amount()
-
+		self.validate_loan_amount()
 		self.set_missing_fields()
 		self.validate_accounts()
-		self.validate_loan_security_pledge()
-		self.validate_loan_amount()
 		self.check_sanctioned_amount_limit()
 		self.validate_repay_from_salary()
 
@@ -55,21 +53,6 @@ class Loan(AccountsController):
 
 		if self.repayment_method == "Repay Over Number of Periods":
 			self.monthly_repayment_amount = get_monthly_repayment_amount(self.repayment_method, self.loan_amount, self.rate_of_interest, self.repayment_periods)
-
-	def validate_loan_security_pledge(self):
-
-		if self.is_secured_loan and not self.loan_security_pledge:
-			frappe.throw(_("Loan Security Pledge is mandatory for secured loan"))
-
-		if self.loan_security_pledge:
-			loan_security_details = frappe.db.get_value("Loan Security Pledge", self.loan_security_pledge,
-					['loan', 'company'], as_dict=1)
-
-			if loan_security_details.loan:
-				frappe.throw(_("Loan Security Pledge already pledged against loan {0}").format(loan_security_details.loan))
-
-			if loan_security_details.company != self.company:
-				frappe.throw(_("Loan Security Pledge Company and Loan Company must be same"))
 
 	def check_sanctioned_amount_limit(self):
 		total_loan_amount = get_total_loan_amount(self.applicant_type, self.applicant, self.company)
@@ -129,22 +112,29 @@ class Loan(AccountsController):
 			self.total_payment = self.loan_amount
 
 	def set_loan_amount(self):
+		if self.loan_application and not self.loan_amount:
+			self.loan_amount = frappe.db.get_value('Loan Application', self.loan_application, 'loan_amount')
 
-		if not self.loan_amount and self.is_secured_loan and self.loan_security_pledge:
-			self.loan_amount = self.maximum_loan_value
 
 	def validate_loan_amount(self):
-		if self.is_secured_loan and self.loan_amount > self.maximum_loan_value:
-			msg = _("Loan amount cannot be greater than {0}").format(self.maximum_loan_value)
+		if self.maximum_loan_amount and self.loan_amount > self.maximum_loan_amount:
+			msg = _("Loan amount cannot be greater than {0}").format(self.maximum_loan_amount)
 			frappe.throw(msg)
 
 		if not self.loan_amount:
 			frappe.throw(_("Loan amount is mandatory"))
 
 	def link_loan_security_pledge(self):
-		frappe.db.sql("""UPDATE `tabLoan Security Pledge` SET
-			loan = %s, status = 'Pledged', pledge_time = %s
-			where name = %s """, (self.name, now_datetime(), self.loan_security_pledge))
+		if self.is_secured_loan:
+			loan_security_pledge = frappe.db.get_value('Loan Security Pledge', {'loan_application': self.loan_application},
+				'name')
+
+			if loan_security_pledge:
+				frappe.db.set_value('Loan Security Pledge', loan_security_pledge, {
+					'loan': self.name,
+					'status': 'Pledged',
+					'pledge_time': now_datetime()
+				})
 
 	def unlink_loan_security_pledge(self):
 		frappe.db.sql("""UPDATE `tabLoan Security Pledge` SET
