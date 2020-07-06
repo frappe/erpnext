@@ -25,15 +25,12 @@
   "disbursement_date",
   "disbursed_amount",
   "column_break_11",
+  "maximum_loan_amount",
   "is_term_loan",
   "repayment_method",
   "repayment_periods",
   "monthly_repayment_amount",
   "repayment_start_date",
-  "loan_security_details_section",
-  "loan_security_pledge",
-  "column_break_25",
-  "maximum_loan_value",
   "account_info",
   "mode_of_payment",
   "payment_account",
@@ -292,13 +289,8 @@
    "default": "0",
    "fieldname": "is_secured_loan",
    "fieldtype": "Check",
-   "label": "Is Secured Loan"
-  },
-  {
-   "depends_on": "is_secured_loan",
-   "fieldname": "loan_security_details_section",
-   "fieldtype": "Section Break",
-   "label": "Loan Security Details"
+   "label": "Is Secured Loan",
+   "read_only": 1
   },
   {
    "default": "0",
@@ -325,12 +317,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "loan_security_pledge",
-   "fieldtype": "Link",
-   "label": "Loan Security Pledge",
-   "options": "Loan Security Pledge"
-  },
-  {
    "fieldname": "disbursed_amount",
    "fieldtype": "Currency",
    "label": "Disbursed Amount",
@@ -338,21 +324,17 @@
    "read_only": 1
   },
   {
-   "fetch_from": "loan_security_pledge.maximum_loan_value",
-   "fieldname": "maximum_loan_value",
+   "fetch_from": "loan_application.maximum_loan_amount",
+   "fieldname": "maximum_loan_amount",
    "fieldtype": "Currency",
-   "label": "Maximum Loan Value",
+   "label": "Maximum Loan Amount",
    "options": "Company:company:default_currency",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_25",
-   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-13 13:16:10.192624",
+ "modified": "2020-07-02 20:46:40.128142",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
