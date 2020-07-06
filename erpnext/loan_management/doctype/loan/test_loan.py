@@ -79,10 +79,12 @@ class TestLoan(unittest.TestCase):
 			"qty": 4000.00,
 		}]
 
-		loan_application = create_loan_application('_Test Company', self.applicant2, 'Stock Loan', pledge, "Repay Over Number of Periods", 12)
+		loan_application = create_loan_application('_Test Company', self.applicant2,
+			'Stock Loan', pledge, "Repay Over Number of Periods", 12)
 		create_pledge(loan_application)
 
-		loan = create_loan_with_security(self.applicant2, "Stock Loan", "Repay Over Number of Periods", 12, loan_application)
+		loan = create_loan_with_security(self.applicant2, "Stock Loan", "Repay Over Number of Periods",
+			12, loan_application)
 		self.assertEquals(loan.loan_amount, 1000000)
 
 	def test_loan_disbursement(self):
@@ -92,6 +94,7 @@ class TestLoan(unittest.TestCase):
 		}]
 
 		loan_application = create_loan_application('_Test Company', self.applicant2, 'Stock Loan', pledge, "Repay Over Number of Periods", 12)
+
 		create_pledge(loan_application)
 
 		loan = create_loan_with_security(self.applicant2, "Stock Loan", "Repay Over Number of Periods", 12, loan_application)
@@ -217,7 +220,8 @@ class TestLoan(unittest.TestCase):
 			"qty": 2000.00
 		}]
 
-		loan_application = create_loan_application('_Test Company', self.applicant2, 'Stock Loan', pledges)
+		loan_application = create_loan_application('_Test Company', self.applicant2, 'Stock Loan', pledges,
+			"Repay Over Number of Periods", 12)
 		create_pledge(loan_application)
 
 		loan = create_loan_with_security(self.applicant2, "Stock Loan", "Repay Over Number of Periods", 12, loan_application,
@@ -247,7 +251,9 @@ class TestLoan(unittest.TestCase):
 			"haircut": 50,
 		}]
 
-		loan_application = create_loan_application('_Test Company', self.applicant2, 'Stock Loan', pledges)
+		loan_application = create_loan_application('_Test Company', self.applicant2,
+			'Stock Loan', pledges, "Repay Over Number of Periods", 12)
+
 		create_pledge(loan_application)
 
 		loan = create_loan_with_security(self.applicant2, "Stock Loan", "Repay Over Number of Periods", 12, loan_application)
