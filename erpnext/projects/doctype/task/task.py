@@ -174,6 +174,9 @@ class Task(NestedSet):
 
 		self.update_nsm_model()
 
+	def after_delete(self):
+		self.update_project()
+
 	def update_status(self):
 		if self.status not in ('Cancelled', 'Completed') and self.exp_end_date:
 			from datetime import datetime
