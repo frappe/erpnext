@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
-from frappe.utils import time_diff_in_hours, getdate, get_weekdays, add_to_date, get_time, get_datetime, time_diff_in_seconds, get_time_zone
+from frappe.utils import time_diff_in_hours, getdate, get_weekdays, add_to_date, get_time, get_datetime, time_diff_in_seconds, get_time_zone, to_timedelta
 from datetime import datetime, timedelta
 from erpnext.support.doctype.issue.issue import get_holidays
 
@@ -18,33 +18,18 @@ class ServiceLevelAgreement(Document):
 		self.check_support_and_resolution()
 
 	def check_priorities(self):
-		default_priority = []
 		priorities = []
 
 		for priority in self.priorities:
-			# Check if response and resolution time is set for every priority
-			if not (priority.response_time or priority.resolution_time):
-				frappe.throw(_("Set Response Time and Resolution for Priority {0} at index {1}.").format(priority.priority, priority.idx))
-
 			priorities.append(priority.priority)
 
-			if priority.default_priority:
-				default_priority.append(priority.default_priority)
-
-			response = priority.response_time
-			resolution = priority.resolution_time
-
-			if response > resolution:
+			if priority.response_time > priority.resolution_time:
 				frappe.throw(_("Response Time for {0} at index {1} can't be greater than Resolution Time.").format(priority.priority, priority.idx))
 
 		# Check if repeated priority
 		if not len(set(priorities)) == len(priorities):
 			repeated_priority = get_repeated(priorities)
 			frappe.throw(_("Priority {0} has been repeated.").format(repeated_priority))
-
-		# Check if repeated default priority
-		if not len(set(default_priority)) == len(default_priority):
-			frappe.throw(_("Select only one Priority as Default."))
 
 		# set default priority from priorities
 		try:
@@ -57,15 +42,10 @@ class ServiceLevelAgreement(Document):
 		support_days = []
 
 		for support_and_resolution in self.support_and_resolution:
-			# Check if start and end time is set for every support day
-			if not (support_and_resolution.start_time or support_and_resolution.end_time):
-				frappe.throw(_("Set Start Time and End Time for  \
-					Support Day {0} at index {1}.".format(support_and_resolution.workday, support_and_resolution.idx)))
-
 			support_days.append(support_and_resolution.workday)
 			support_and_resolution.idx = week.index(support_and_resolution.workday) + 1
 
-			if support_and_resolution.start_time >= support_and_resolution.end_time:
+			if to_timedelta(support_and_resolution.start_time) >= to_timedelta(support_and_resolution.end_time):
 				frappe.throw(_("Start Time can't be greater than or equal to End Time \
 					for {0}.".format(support_and_resolution.workday)))
 
