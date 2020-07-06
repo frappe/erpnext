@@ -51,6 +51,14 @@
   "primary_address",
   "default_receivable_accounts",
   "accounts",
+  "sales_target_sb",
+  "monthly_sales_target",
+  "column_break_41",
+  "total_monthly_sales",
+  "delivery_window",
+  "delivery_start_time",
+  "column_break_42",
+  "delivery_end_time",
   "credit_limit_section",
   "payment_terms",
   "credit_limits",
@@ -480,13 +488,40 @@
    "fieldname": "dn_required",
    "fieldtype": "Check",
    "label": "Allow Sales Invoice Creation Without Delivery Note"
+  },
+  {
+   "fieldname": "column_break_42",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "monthly_sales_target",
+   "fieldtype": "Currency",
+   "label": "Monthly Sales Target",
+   "options": "default_currency"
+  },
+  {
+   "fieldname": "total_monthly_sales",
+   "fieldtype": "Currency",
+   "label": "Total Monthly Sales",
+   "options": "default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_41",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sales_target_sb",
+   "fieldtype": "Section Break",
+   "label": "Sales Target"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
  "links": [],
- "modified": "2020-03-17 11:03:42.706907",
+ "modified": "2020-06-30 22:24:37.691545",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

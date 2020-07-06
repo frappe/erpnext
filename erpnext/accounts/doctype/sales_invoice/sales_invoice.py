@@ -20,6 +20,7 @@ from erpnext.assets.doctype.asset.depreciation \
 from erpnext.stock.doctype.batch.batch import set_batch_nos
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, get_delivery_note_serial_no
 from erpnext.setup.doctype.company.company import update_company_current_month_sales
+from erpnext.selling.doctype.customer.customer import update_customer_current_month_sales
 from erpnext.accounts.general_ledger import get_round_off_account_and_cost_center
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 	get_loyalty_program_details_with_points, get_loyalty_details, validate_loyalty_points
@@ -190,6 +191,7 @@ class SalesInvoice(SellingController):
 
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
 			update_company_current_month_sales(self.company)
+			update_customer_current_month_sales(self.customer)
 			self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
@@ -258,6 +260,7 @@ class SalesInvoice(SellingController):
 
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
 			update_company_current_month_sales(self.company)
+			update_customer_current_month_sales(self.customer)
 			self.update_project()
 		if not self.is_return and self.loyalty_program:
 			self.delete_loyalty_point_entry()
