@@ -40,10 +40,11 @@
  "doctype": "Desk Page",
  "extends_another_page": 0,
  "hide_custom": 0,
+ "icon": "support",
  "idx": 0,
  "is_standard": 1,
  "label": "Support",
- "modified": "2020-06-04 11:54:56.124219",
+ "modified": "2020-06-30 18:41:35.683929",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support",
@@ -52,7 +53,7 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
-   "color": "#ffc4c4",
+   "color": "Yellow",
    "format": "{} Assigned",
    "label": "Issue",
    "link_to": "Issue",
