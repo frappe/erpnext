@@ -59,8 +59,11 @@ def get_data(filters, conditions):
 			sum(ifnull(mr_item.stock_qty, 0)) as qty,
 			ifnull(mr_item.stock_uom, '') as uom,
 			sum(ifnull(mr_item.ordered_qty, 0)) as ordered_qty,
-			(sum(mr_item.stock_qty) - sum(ifnull(mr_item.ordered_qty, 0))) as qty_to_order,
+			sum(ifnull(mr_item.received_qty, 0)) as received_qty,
+			(sum(ifnull(mr_item.stock_qty, 0)) - sum(ifnull(mr_item.received_qty, 0))) as pending_qty,
+			(sum(ifnull(mr_item.stock_qty, 0)) - sum(ifnull(mr_item.ordered_qty, 0))) as qty_to_order,
 			mr_item.item_name as item_name,
+			mr_item.description as "description",
 			mr.company as company
 		from
 			`tabMaterial Request` mr, `tabMaterial Request Item` mr_item
@@ -78,7 +81,7 @@ def get_data(filters, conditions):
 	return data
 
 def update_qty_columns(row_to_update, data_row):
-	fields = ["qty", "ordered_qty", "qty_to_order"]
+	fields = ["qty", "ordered_qty", "received_qty", "pending_qty", "qty_to_order"]
 	for field in fields:
 		row_to_update[field] += flt(data_row[field])
 
@@ -92,7 +95,9 @@ def prepare_data(data, filters):
 			item_qty_map[row["item_code"]] = {
 				"qty" : row["qty"],
 				"ordered_qty" : row["ordered_qty"],
-				"qty_to_order" : row["qty_to_order"]
+				"received_qty": row["received_qty"],
+				"pending_qty": row["pending_qty"],
+				"qty_to_order" : row["qty_to_order"],
 			}
 		else:
 			item_entry = item_qty_map[row["item_code"]]
@@ -122,7 +127,7 @@ def prepare_data(data, filters):
 	return data, chart_data
 
 def prepare_chart_data(item_data):
-	labels, qty_to_order, ordered_qty = [], [], []
+	labels, qty_to_order, ordered_qty, received_qty, pending_qty = [], [], [], [], []
 
 	if len(item_data) > 30:
 		item_data = dict(list(item_data.items())[:30])
@@ -132,6 +137,8 @@ def prepare_chart_data(item_data):
 		labels.append(row)
 		qty_to_order.append(mr_row["qty_to_order"])
 		ordered_qty.append(mr_row["ordered_qty"])
+		received_qty.append(mr_row["received_qty"])
+		pending_qty.append(mr_row["pending_qty"])
 
 	chart_data = {
 		"data" : {
@@ -144,6 +151,14 @@ def prepare_chart_data(item_data):
 				{
 					'name': _('Ordered Qty'),
 					'values': ordered_qty
+				},
+				{
+					'name': _('Received Qty'),
+					'values': received_qty
+				},
+				{
+					'name': _('Pending Qty'),
+					'values': pending_qty
 				}
 			]
 		},
@@ -193,7 +208,13 @@ def get_columns(filters):
 			"width": 100
 		},
 		{
-			"label": _("UOM"),
+			"label": _("Description"),
+			"fieldname": "description",
+			"fieldtype": "Data",
+			"width": 200
+		},
+		{
+			"label": _("Stock UOM"),
 			"fieldname": "uom",
 			"fieldtype": "Data",
 			"width": 100,
@@ -201,7 +222,7 @@ def get_columns(filters):
 
 	columns.extend([
 		{
-			"label": _("Qty"),
+			"label": _("Stock Qty"),
 			"fieldname": "qty",
 			"fieldtype": "Float",
 			"width": 120,
@@ -210,6 +231,20 @@ def get_columns(filters):
 		{
 			"label": _("Ordered Qty"),
 			"fieldname": "ordered_qty",
+			"fieldtype": "Float",
+			"width": 120,
+			"convertible": "qty"
+		},
+		{
+			"label": _("Received Qty"),
+			"fieldname": "received_qty",
+			"fieldtype": "Float",
+			"width": 120,
+			"convertible": "qty"
+		},
+		{
+			"label": _("Pending Qty"),
+			"fieldname": "pending_qty",
 			"fieldtype": "Float",
 			"width": 120,
 			"convertible": "qty"
