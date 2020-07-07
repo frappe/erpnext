@@ -170,7 +170,7 @@ class PaymentReconciliation(Document):
 			reconcile_against_document(lst)
 
 		if dr_or_cr_notes:
-			reconcile_dr_cr_note(dr_or_cr_notes, self.receivable_payable_account)
+			reconcile_dr_cr_note(dr_or_cr_notes, self.company)
 
 		msgprint(_("Successfully Reconciled"))
 		self.get_unreconciled_entries()
@@ -261,8 +261,7 @@ class PaymentReconciliation(Document):
 
 		return cond
 
-def reconcile_dr_cr_note(dr_cr_notes, receivable_payable_account):
-	company = frappe.db.get_value('Account', receivable_payable_account, 'company')
+def reconcile_dr_cr_note(dr_cr_notes, company):
 	for d in dr_cr_notes:
 		voucher_type = ('Credit Note'
 			if d.voucher_type == 'Sales Invoice' else 'Debit Note')
