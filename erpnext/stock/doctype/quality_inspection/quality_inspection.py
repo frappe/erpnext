@@ -87,6 +87,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 			page_len = page_len, qi_condition = qi_condition),
 			{'parent': filters.get('parent'), 'txt': "%%%s%%" % txt})
 
+@frappe.whitelist()
 def quality_inspection_query(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.get_all('Quality Inspection',
 		limit_start=start,
