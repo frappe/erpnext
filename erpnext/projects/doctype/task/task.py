@@ -188,6 +188,7 @@ def check_if_child_exists(name):
 	return child_tasks
 
 
+@frappe.whitelist()
 def get_project(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
 	return frappe.db.sql(""" select name from `tabProject`
