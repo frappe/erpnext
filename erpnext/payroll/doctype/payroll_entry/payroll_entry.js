@@ -51,7 +51,7 @@ frappe.ui.form.on('Payroll Entry', {
 			doc: frm.doc,
 			method: 'fill_employee_details',
 		}).then(r => {
-			if (r.docs[0].employees){
+			if (r.docs && r.docs[0].employees){
 				frm.employees = r.docs[0].employees;
 				frm.dirty();
 				frm.save();
