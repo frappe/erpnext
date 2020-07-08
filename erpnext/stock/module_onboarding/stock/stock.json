@@ -19,7 +19,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/stock",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-07-08 14:06:04.112491",
+ "modified": "2020-07-08 14:22:07.951891",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
@@ -32,13 +32,13 @@
    "step": "Create a Product"
   },
   {
+   "step": "Create a Supplier"
+  },
+  {
    "step": "Introduction to Stock Entry"
   },
   {
    "step": "Create a Stock Entry"
-  },
-  {
-   "step": "Create a Supplier"
   },
   {
    "step": "Create a Purchase Receipt"
