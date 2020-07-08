@@ -695,5 +695,6 @@ def convert_utc_to_user_timezone(utc_timestamp, user):
 	except UnknownTimeZoneError:
 		return utcnow
 
+@frappe.whitelist()
 def get_tz(user):
 	return frappe.db.get_value("User", user, "time_zone") or get_time_zone()
