@@ -19,7 +19,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/selling",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-07-04 12:39:47.212061",
+ "modified": "2020-07-08 14:05:37.669753",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",
@@ -48,6 +48,6 @@
   }
  ],
  "subtitle": "Products, Sales, Analysis, and more.",
- "success_message": "Yayy! The Selling Module is all set up!",
+ "success_message": "The Selling Module is all set up!",
  "title": "Let's Set Up the Selling Module."
 }

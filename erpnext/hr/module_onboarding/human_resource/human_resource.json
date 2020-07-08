@@ -13,7 +13,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/human-resources",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-07-04 12:39:26.581232",
+ "modified": "2020-07-08 14:05:47.018799",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Human Resource",
@@ -45,6 +45,6 @@
   }
  ],
  "subtitle": "Employee, Leaves, and more.",
- "success_message": "Yayy! The Human Resource Module is all set up!",
+ "success_message": "The Human Resource Module is all set up!",
  "title": "Let's Set Up the Human Resource Module. "
 }
