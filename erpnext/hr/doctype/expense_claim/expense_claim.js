@@ -113,6 +113,14 @@ cur_frm.cscript.calculate_total_amount = function(doc,cdt,cdn){
 	cur_frm.cscript.calculate_total(doc,cdt,cdn);
 };
 
+cur_frm.fields_dict['cost_center'].get_query = function(doc) {
+	return {
+		filters: {
+			"company": doc.company
+		}
+	}
+};
+
 erpnext.expense_claim = {
 	set_title: function(frm) {
 		if (!frm.doc.task) {
