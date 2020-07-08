@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import date_diff, flt, cint
-# from frappe.utils import getdate, nowdate, flt, cint, formatdate, cstr, now, time_diff_in_seconds
 from six import iteritems
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
