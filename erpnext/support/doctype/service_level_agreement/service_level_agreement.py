@@ -147,6 +147,12 @@ class ServiceLevelAgreement(Document):
 				"label": "Priority",
 				"options": "Issue Priority"
 			},
+			{
+				"fieldname": "first_responded_on",
+				"fieldtype": "Datetime",
+				"label": "First Responded On",
+				"read_only": 1
+			}
 		]
 
 		meta = frappe.get_meta(self.document_type)
