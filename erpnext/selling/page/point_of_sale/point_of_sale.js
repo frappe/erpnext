@@ -199,7 +199,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				this.items.reset_items();
 			}
 		})
-		frappe.ui.form.on('Sales Invoice', 'apply_discount_on', (frm) => {
+		frappe.ui.form.on('Sales Invoice', 'discount_amount', (frm) => {
 			this.cart.update_taxes_and_totals();
 			this.cart.update_grand_total();
 		})
