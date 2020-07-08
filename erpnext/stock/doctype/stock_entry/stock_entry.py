@@ -50,7 +50,7 @@ class StockEntry(StockController):
 		self.validate_posting_time()
 		self.validate_purpose()
 		self.validate_item()
-		super(StockEntry, self).validate_document_linking()
+		self.validate_document_linking()
 		self.validate_customer_provided_item()
 		self.validate_qty()
 		self.set_transfer_qty()

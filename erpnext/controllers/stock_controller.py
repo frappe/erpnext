@@ -388,6 +388,7 @@ class StockController(AccountsController):
 
 	def validate_document_linking(self):
 		""" Check if row is correctly linked to any previous document """
+
 		prevdoc_link_map = {
 			"Stock Entry" : {
 				"against_fields" : ["material_request", "against_stock_entry"],
@@ -431,17 +432,23 @@ class StockController(AccountsController):
 			"Supplier Quotation" : {
 				"against_fields" : ["material_request", "request_for_quotation"],
 				"detail_fields" : ["material_request_item", "request_for_quotation_item"]
+			},
+			"Production Plan" : {
+				"against_fields" : ["sales_order", "material_request"],
+				"detail_fields" : ["sales_order_item", "material_request_item"]
 			}
 		}
 
-		# validation in production plan for PP
-		link_fields = prevdoc_link_map.get(self.doctype)
-		if not link_fields:
+		# get fields to validate for current doctype
+		linking_fields = prevdoc_link_map.get(self.doctype)
+		if not linking_fields:
 			return
-		against_fields = link_fields.get("against_fields")
-		detail_fields = link_fields.get("detail_fields")
+		against_fields = linking_fields.get("against_fields")
+		detail_fields = linking_fields.get("detail_fields")
 
-		for item in self.items:
+		items_table = "items" if not self.doctype == "Production Plan" else "po_items"
+
+		for item in self.get(items_table):
 			link_error = False
 			for index, field in enumerate(against_fields):
 				# check against fields and detail fields
@@ -450,12 +457,14 @@ class StockController(AccountsController):
 					break
 
 			if self.doctype in ["Delivery Note", "Purchase Receipt"] and not link_error:
-				return_detail_field = link_fields.get("return_detail_field")
+				# Check detail fields for return documents
+				return_detail_field = linking_fields.get("return_detail_field")
 				if self.return_against and not item.get(return_detail_field):
 					link_error = True
 
 			elif self.doctype == "Stock Entry" and not link_error:
-				po_field = link_fields.get("po_field")
+				# Handle stock entry case
+				po_field = linking_fields.get("po_field")
 				if self.purchase_order and not item.get(po_field):
 					link_error = True
 

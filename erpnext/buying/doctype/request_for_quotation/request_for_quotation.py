@@ -26,7 +26,7 @@ class RequestforQuotation(BuyingController):
 		self.validate_supplier_list()
 		validate_for_items(self)
 		super(RequestforQuotation, self).set_qty_as_per_stock_uom()
-    super(BuyingController, self).validate_document_linking()
+		self.validate_document_linking()
 		self.update_email_id()
 
 	def validate_duplicate_supplier(self):
@@ -153,7 +153,7 @@ class RequestforQuotation(BuyingController):
 	def send_email(self, data, sender, subject, message, attachments):
 		make(subject = subject, content=message,recipients=data.email_id,
 			sender=sender,attachments = attachments, send_email=True,
-		     	doctype=self.doctype, name=self.name)["name"]
+			 	doctype=self.doctype, name=self.name)["name"]
 
 		frappe.msgprint(_("Email Sent to Supplier {0}").format(data.supplier))
 

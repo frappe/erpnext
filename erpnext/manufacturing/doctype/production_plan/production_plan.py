@@ -13,9 +13,11 @@ from frappe.utils.csvutils import build_csv_response
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_children
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.controllers.stock_controller import StockController
 
 class ProductionPlan(Document):
 	def validate(self):
+		StockController.validate_document_linking(self)
 		self.calculate_total_planned_qty()
 		self.set_status()
 
