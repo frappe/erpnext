@@ -32,13 +32,13 @@
    "step": "Create a Product"
   },
   {
+	"step": "Create a Supplier"
+  },
+  {
    "step": "Introduction to Stock Entry"
   },
   {
    "step": "Create a Stock Entry"
-  },
-  {
-   "step": "Create a Supplier"
   },
   {
    "step": "Create a Purchase Receipt"
