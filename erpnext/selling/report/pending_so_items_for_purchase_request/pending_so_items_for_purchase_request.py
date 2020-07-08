@@ -158,7 +158,7 @@ def get_data():
 				}
 				pending_so.append(so_record)
 		else:
-			for item in bundled_item_map.get((so.name, so.item_code)):
+			for item in bundled_item_map.get((so.name, so.item_code), []):
 				material_requests_against_so = materials_request_dict.get((so.name, item.item_code)) or {}
 				if flt(item.qty) > flt(material_requests_against_so.get('qty')):
 					so_record = {
