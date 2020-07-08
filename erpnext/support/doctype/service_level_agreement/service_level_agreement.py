@@ -6,7 +6,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
-from frappe.utils import time_diff_in_hours, getdate, get_weekdays, add_to_date, get_time, get_datetime, time_diff_in_seconds, get_time_zone, to_timedelta
+from frappe.utils import time_diff_in_hours, getdate, get_weekdays, add_to_date, get_time, get_datetime, \
+	time_diff_in_seconds, get_time_zone, to_timedelta, get_datetime_str
 from datetime import datetime, timedelta
 from erpnext.support.doctype.issue.issue import get_holidays
 
@@ -695,6 +696,9 @@ def convert_utc_to_user_timezone(utc_timestamp, user):
 	except UnknownTimeZoneError:
 		return utcnow
 
-@frappe.whitelist()
 def get_tz(user):
 	return frappe.db.get_value("User", user, "time_zone") or get_time_zone()
+
+@frappe.whitelist()
+def get_user_time(user, to_string=False):
+	return get_datetime_str(now_datetime(user)) if to_string else now_datetime(user)
