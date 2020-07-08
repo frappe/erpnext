@@ -60,13 +60,6 @@ def get_report_summary(period_list, periodicity, income, expense, net_profit_los
 
 	return [
 		{
-			"value": net_profit,
-			"indicator": "Green" if net_profit > 0 else "Red",
-			"label": profit_label,
-			"datatype": "Currency",
-			"currency": net_profit_loss.get("currency") if net_profit_loss else default_currency
-		},
-		{
 			"value": net_income,
 			"label": income_label,
 			"datatype": "Currency",
@@ -77,6 +70,13 @@ def get_report_summary(period_list, periodicity, income, expense, net_profit_los
 			"label": expense_label,
 			"datatype": "Currency",
 			"currency": expense[-1].get('currency') if expense else default_currency
+		},
+		{
+			"value": net_profit,
+			"indicator": "Green" if net_profit > 0 else "Red",
+			"label": profit_label,
+			"datatype": "Currency",
+			"currency": net_profit_loss.get("currency") if net_profit_loss else default_currency
 		}
 	]
 
