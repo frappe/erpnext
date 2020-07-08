@@ -25,16 +25,13 @@ class LabTestTemplate(Document):
 			self.update_item()
 			item_price = self.item_price_exists()
 			if not item_price:
-				if self.lab_test_rate != 0.0:
+				if self.lab_test_rate and self.lab_test_rate > 0.0:
 					price_list_name = frappe.db.get_value('Price List', {'selling': 1})
-					if self.lab_test_rate:
-						make_item_price(self.lab_test_code, price_list_name, self.lab_test_rate)
-					else:
-						make_item_price(self.lab_test_code, price_list_name, 0.0)
+					make_item_price(self.lab_test_code, price_list_name, self.lab_test_rate)
 			else:
 				frappe.db.set_value('Item Price', item_price, 'price_list_rate', self.lab_test_rate)
 
-			frappe.db.set_value(self.doctype, self.name, 'change_in_item', 0)
+			self.db_set('change_in_item', 0)
 
 		elif not self.is_billable and self.item:
 			frappe.db.set_value('Item', self.item, 'disabled', 1)
@@ -109,8 +106,7 @@ def create_item_from_template(doc):
 	}).insert(ignore_permissions = True, ignore_mandatory = True)
 
 	# Insert item price
-	# Get item price list to insert item price
-	if doc.lab_test_rate != 0.0:
+	if doc.is_billable and doc.lab_test_rate != 0.0:
 		price_list_name = frappe.db.get_value('Price List', {'selling': 1})
 		if doc.lab_test_rate:
 			make_item_price(item.name, price_list_name, doc.lab_test_rate)
