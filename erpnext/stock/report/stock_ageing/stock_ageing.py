@@ -4,12 +4,12 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import date_diff, flt
+from frappe.utils import date_diff, flt, cint
+# from frappe.utils import getdate, nowdate, flt, cint, formatdate, cstr, now, time_diff_in_seconds
 from six import iteritems
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 def execute(filters=None):
-
 	columns = get_columns(filters)
 	item_details = get_fifo_queue(filters)
 	to_date = filters["to_date"]
@@ -25,6 +25,7 @@ def execute(filters=None):
 		average_age = get_average_age(fifo_queue, to_date)
 		earliest_age = date_diff(to_date, fifo_queue[0][1])
 		latest_age = date_diff(to_date, fifo_queue[-1][1])
+		range1, range2, range3, above_range3 = get_range_age(filters, fifo_queue, to_date)
 
 		row = [details.name, details.item_name,
 			details.description, details.item_group, details.brand]
@@ -33,6 +34,7 @@ def execute(filters=None):
 			row.append(details.warehouse)
 
 		row.extend([item_dict.get("total_qty"), average_age,
+			range1, range2, range3, above_range3,
 			earliest_age, latest_age, details.stock_uom])
 
 		data.append(row)
@@ -55,7 +57,25 @@ def get_average_age(fifo_queue, to_date):
 
 	return flt(age_qty / total_qty, 2) if total_qty else 0.0
 
+def get_range_age(filters, fifo_queue, to_date):
+	range1 = range2 = range3 = above_range3 = 0.0
+	for item in fifo_queue:
+		age = date_diff(to_date, item[1])
+		
+		if age <= filters.range1:
+			range1 = item[0]
+		elif age <= filters.range2:
+			range2 = item[0]
+		elif age <= filters.range3:
+			range3 = item[0]
+		else:
+			above_range3 = item[0]
+		
+		return range1, range2, range3, above_range3
+
 def get_columns(filters):
+	range_columns = []
+	setup_ageing_columns(filters, range_columns)
 	columns = [
 		{
 			"label": _("Item Code"),
@@ -112,7 +132,9 @@ def get_columns(filters):
 			"fieldname": "average_age",
 			"fieldtype": "Float",
 			"width": 100
-		},
+		}])
+	columns.extend(range_columns)
+	columns.extend([
 		{
 			"label": _("Earliest"),
 			"fieldname": "earliest",
@@ -263,3 +285,18 @@ def get_chart_data(data, filters):
 		},
 		"type" : "bar"
 	}
+
+def setup_ageing_columns(filters, range_columns):
+	for i, label in enumerate(["0-{range1}".format(range1=filters["range1"]),
+		"{range1}-{range2}".format(range1=cint(filters["range1"])+ 1, range2=filters["range2"]),
+		"{range2}-{range3}".format(range2=cint(filters["range2"])+ 1, range3=filters["range3"]),
+		"{range3}-{above}".format(range3=cint(filters["range3"])+ 1, above=_("Above"))]):
+			add_column(range_columns, label="Age in ("+ label +")", fieldname='range' + str(i+1))
+
+def add_column(range_columns, label, fieldname, fieldtype='Float', width=140):
+	range_columns.append(dict(
+		label=label,
+		fieldname=fieldname,
+		fieldtype=fieldtype,
+		width=width
+	))
