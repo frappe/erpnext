@@ -48,7 +48,7 @@ class StudentAttendance(Document):
 				(self.student, cstr(self.course_schedule), self.name))
 		else:
 			attendance_records= frappe.db.sql("""select name from `tabStudent Attendance` where \
-				student= %s and student_group= %s and date= %s and name != %s and \
+				student= %s and student_group= %s and date= %s and name != %s and docstatus != 2 and \
 				(course_schedule is Null or course_schedule='')""",
 				(self.student, self.student_group, self.date, self.name))
 
