@@ -79,7 +79,7 @@ def get_students_with_leave_application(from_date, to_date, students_list):
 		select student, from_date, to_date
 		from `tabStudent Leave Application`
 		where
-			mark_as_present and docstatus = 1
+			mark_as_present = 1 and docstatus = 1
 			and student in %(students)s
 			and (
 				from_date between %(from_date)s and %(to_date)s
