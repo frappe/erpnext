@@ -57,8 +57,9 @@ def get_students_list(students):
 	return student_list
 
 def get_attendance_list(from_date, to_date, student_group, students_list):
-	attendance_list = frappe.db.sql('''select student, date, status 
-		from `tabStudent Attendance` where student_group = %s 
+	attendance_list = frappe.db.sql('''select student, date, status
+		from `tabStudent Attendance` where student_group = %s
+		and docstatus = 1
 		and date between %s and %s
 		order by student, date''',
 		(student_group, from_date, to_date), as_dict=1)
@@ -75,9 +76,9 @@ def get_attendance_list(from_date, to_date, student_group, students_list):
 def get_students_with_leave_application(from_date, to_date, students_list):
 	if not students_list: return
 	leave_applications = frappe.db.sql("""
-		select student, from_date, to_date 
-		from `tabStudent Leave Application` 
-		where 
+		select student, from_date, to_date
+		from `tabStudent Leave Application`
+		where
 			mark_as_present and docstatus = 1
 			and student in %(students)s
 			and (

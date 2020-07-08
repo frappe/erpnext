@@ -17,19 +17,19 @@ class StudentAttendance(Document):
 		self.validate_course_schedule()
 		self.validate_student()
 		self.validate_duplication()
-		
+
 	def validate_date(self):
 		if self.course_schedule:
 			self.date = frappe.db.get_value("Course Schedule", self.course_schedule, "schedule_date")
-	
+
 	def validate_mandatory(self):
 		if not (self.student_group or self.course_schedule):
 			frappe.throw(_("""Student Group or Course Schedule is mandatory"""))
-	
+
 	def validate_course_schedule(self):
 		if self.course_schedule:
 			self.student_group = frappe.db.get_value("Course Schedule", self.course_schedule, "student_group")
-	
+
 	def validate_student(self):
 		if self.course_schedule:
 			student_group = frappe.db.get_value("Course Schedule", self.course_schedule, "student_group")
@@ -51,7 +51,7 @@ class StudentAttendance(Document):
 				student= %s and student_group= %s and date= %s and name != %s and \
 				(course_schedule is Null or course_schedule='')""",
 				(self.student, self.student_group, self.date, self.name))
-			
+
 		if attendance_records:
 			frappe.throw(_("Attendance Record {0} exists against Student {1}")
 				.format(attendance_records[0][0], self.student))
