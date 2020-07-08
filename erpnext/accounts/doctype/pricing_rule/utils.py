@@ -425,6 +425,11 @@ def apply_pricing_rule_on_transaction(doc):
 			doc.total, pricing_rules)
 
 		for d in pricing_rules:
+			if d.coupon_code_based == 1 :
+				coupons = [x["name"] for x in frappe.db.get_list("Coupon Code",filters= {"pricing_rule":d.name},fields=["name"])]
+				if doc.coupon_code not in coupons:
+					continue
+					
 			if d.price_or_product_discount == 'Price':
 				if d.apply_discount_on:
 					doc.set('apply_discount_on', d.apply_discount_on)
