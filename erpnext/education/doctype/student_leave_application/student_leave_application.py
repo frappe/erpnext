@@ -11,8 +11,8 @@ from frappe.model.document import Document
 
 class StudentLeaveApplication(Document):
 	def validate(self):
-		self.validate_dates()
 		self.validate_duplicate()
+		self.validate_from_to_dates('from_date', 'to_date')
 
 	def on_submit(self):
 		self.update_attendance()
@@ -21,7 +21,7 @@ class StudentLeaveApplication(Document):
 		self.cancel_attendance()
 
 	def validate_duplicate(self):
-		data = frappe.db.sql(""" select name from `tabStudent Leave Application`
+		data = frappe.db.sql("""select name from `tabStudent Leave Application`
 			where
 				((%(from_date)s > from_date and %(from_date)s < to_date) or
 				(%(to_date)s > from_date and %(to_date)s < to_date) or
@@ -37,11 +37,7 @@ class StudentLeaveApplication(Document):
 		if data:
 			link = get_link_to_form('Student Leave Application', data[0].name)
 			frappe.throw(_('Leave application {0} already exists against the student {1}')
-				.format(link, self.student))
-
-	def validate_dates(self):
-		if self.to_date < self.from_date :
-			throw(_('To Date cannot be less than From Date'))
+				.format(link, frappe.bold(self.student)), title=_('Duplicate Entry'))
 
 	def update_attendance(self):
 		for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
