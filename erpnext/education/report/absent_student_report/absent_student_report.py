@@ -60,7 +60,7 @@ def get_absent_students(date):
 		SELECT student, student_name, student_group
 		FROM `tabStudent Attendance`
 		WHERE
-			status='Absent' and date = %s
+			status='Absent' and docstatus=1 and date = %s
 		ORDER BY
 			student_group, student_name""",
 	date, as_dict=1)

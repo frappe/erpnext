@@ -49,6 +49,7 @@ class StudentAttendance(Document):
 			attendance_record = frappe.db.exists('Student Attendance', {
 				'student': self.student,
 				'course_schedule': self.course_schedule,
+				'docstatus': ('!=', 2),
 				'name': ('!=', self.name)
 			})
 		else:
