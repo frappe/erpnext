@@ -183,9 +183,7 @@ $.extend(shopping_cart, {
 		frappe.call({
 			method: "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.is_cart_enabled",
 			callback: function(r) {
-				if (r.message == 0) {
-					$(".shopping-cart").toggleClass('hidden', true);
-				}
+				$(".shopping-cart").toggleClass('hidden', r.message ? false : true);
 			}
 		});
 	}
