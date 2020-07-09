@@ -103,10 +103,13 @@ class LoanApplication(Document):
 		if self.is_secured_loan and not self.proposed_pledges:
 			frappe.throw(_("Proposed Pledges are mandatory for secured Loans"))
 
-		if not self.loan_amount and self.is_secured_loan and self.proposed_pledges:
-			self.loan_amount = 0
+		if self.is_secured_loan and self.proposed_pledges:
+			self.maximum_loan_amount = 0
 			for security in self.proposed_pledges:
-				self.loan_amount += security.post_haircut_amount
+				self.maximum_loan_amount += security.post_haircut_amount
+
+		if not self.loan_amount and self.is_secured_loan and self.proposed_pledges:
+			self.loan_amount = self.maximum_loan_amount
 
 @frappe.whitelist()
 def create_loan(source_name, target_doc=None, submit=0):
@@ -116,7 +119,6 @@ def create_loan(source_name, target_doc=None, submit=0):
 		 filters = {'name': source_doc.loan_type}
 		)[0]
 
-		loan_security_pledge = frappe.db.get_value("Loan Security Pledge", {"loan_application": source_name}, 'name')
 
 		target_doc.mode_of_payment = account_details.mode_of_payment
 		target_doc.payment_account = account_details.payment_account
@@ -124,9 +126,6 @@ def create_loan(source_name, target_doc=None, submit=0):
 		target_doc.interest_income_account = account_details.interest_income_account
 		target_doc.penalty_income_account = account_details.penalty_income_account
 
-		if loan_security_pledge:
-			target_doc.is_secured_loan = 1
-			target_doc.loan_security_pledge = loan_security_pledge
 
 	doclist = get_mapped_doc("Loan Application", source_name, {
 		"Loan Application": {

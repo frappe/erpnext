@@ -11,6 +11,7 @@
   "title",
   "appointment",
   "procedure_template",
+  "medical_code",
   "column_break_30",
   "company",
   "invoiced",
@@ -290,11 +291,19 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "procedure_template.medical_code",
+   "fieldname": "medical_code",
+   "fieldtype": "Link",
+   "label": "Medical Code",
+   "options": "Medical Code",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-27 21:36:23.796924",
+ "modified": "2020-06-29 14:28:11.779815",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure",
