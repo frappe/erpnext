@@ -19,8 +19,11 @@ class LabTest(Document):
 		self.db_set('status', 'Cancelled')
 		self.reload()
 
+	def validate(self):
+		if not self.is_new():
+			self.set_secondary_uom_result()
+
 	def on_update(self):
-		self.set_secondary_uom_result()
 		if self.sensitivity_test_items:
 			sensitivity = sorted(self.sensitivity_test_items, key=lambda x: x.antibiotic_sensitivity)
 			for i, item in enumerate(sensitivity):
@@ -43,11 +46,12 @@ class LabTest(Document):
 
 	def set_secondary_uom_result(self):
 		for item in self.normal_test_items:
-			if item.secondary_uom and item.conversion_factor:
+			if item.result_value and item.secondary_uom and item.conversion_factor:
 				try:
 					item.secondary_uom_result = float(item.result_value) * float(item.conversion_factor)
-				except Exception:
-					item.secondary_uom_result = None
+				except:
+					item.secondary_uom_result = ''
+					frappe.msgprint(_('Result for Secondary UOM not calculated for row #{0}'.format(item.idx)), title = _('Warning'))
 
 
 def create_test_from_template(lab_test):
