@@ -987,6 +987,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "depends_on": "eval:(!doc.is_item_from_hub)",
    "fieldname": "hub_publishing_sb",
    "fieldtype": "Section Break",
@@ -1060,7 +1061,7 @@
  "image_field": "image",
  "links": [],
  "max_attachments": 1,
- "modified": "2020-04-08 15:56:06.195722",
+ "modified": "2020-06-30 12:01:07.534447",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
