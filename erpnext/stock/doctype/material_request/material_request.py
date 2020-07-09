@@ -385,6 +385,7 @@ def get_material_requests_based_on_supplier(supplier):
 
 	return material_requests, supplier_items
 
+@frappe.whitelist()
 def get_default_supplier_query(doctype, txt, searchfield, start, page_len, filters):
 	doc = frappe.get_doc("Material Request", filters.get("doc"))
 	item_list = []
