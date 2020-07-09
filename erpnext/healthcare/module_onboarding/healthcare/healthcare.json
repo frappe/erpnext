@@ -10,7 +10,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/healthcare",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-05-26 23:16:37.603361",
+ "modified": "2020-07-08 14:06:19.512946",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
@@ -35,8 +35,7 @@
    "step": "Explore Clinical Procedure Templates"
   }
  ],
- "subtitle": "Patients, Practitioner Schedules, Settings and more.",
- "success_message": "Yayy! The Healthcare Module is all set up!",
- "title": "Let's Setup the Healthcare Module",
- "user_can_dismiss": 1
+ "subtitle": "Patients, Practitioner Schedules, Settings, and more.",
+ "success_message": "The Healthcare Module is all set up!",
+ "title": "Let's Set Up the Healthcare Module."
 }
