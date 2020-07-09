@@ -26,12 +26,6 @@ frappe.ui.form.on('Material Request', {
 			};
 		});
 
-		frm.set_query("from_warehouse", "items", function(doc) {
-			return {
-				filters: {'company': doc.company}
-			};
-		});
-
 		frm.set_query("bom_no", "items", function(doc, cdt, cdn) {
 			var row = locals[cdt][cdn];
 			return {
@@ -48,20 +42,6 @@ frappe.ui.form.on('Material Request', {
 
 		// set schedule_date
 		set_schedule_date(frm);
-
-		let filters = {'company': frm.doc.company}
-
-		frm.set_query("warehouse", "items", function() {
-			return {
-				filters: filters
-			};
-		});
-
-		frm.set_query("set_warehouse", function(){
-			return {
-				filters: filters
-			};
-		});
 	},
 
 	onload_post_render: function(frm) {
@@ -160,6 +140,34 @@ frappe.ui.form.on('Material Request', {
 					frm.reload_doc();
 				}
 			}
+		});
+	},
+
+	company: function(frm) {
+		let filters = {'company': frm.doc.company}
+
+		frm.set_query("warehouse", "items", function() {
+			return {
+				filters: filters
+			};
+		});
+
+		frm.set_query("set_warehouse", function(){
+			return {
+				filters: filters
+			};
+		});
+
+		frm.set_query("set_from_warehouse", function(){
+			return {
+				filters: filters
+			};
+		});
+
+		frm.set_query("from_warehouse", "items", function(doc) {
+			return {
+				filters: filters
+			};
 		});
 	},
 
