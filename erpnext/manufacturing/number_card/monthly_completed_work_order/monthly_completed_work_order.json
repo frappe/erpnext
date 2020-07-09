@@ -1,0 +1,19 @@
+{
+ "creation": "2020-07-08 22:40:22.575086",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Work Order",
+ "filters_json": "[[\"Work Order\",\"status\",\"=\",\"Completed\"],[\"Work Order\",\"docstatus\",\"=\",1],[\"Work Order\",\"creation\",\"between\",[\"2020-06-08\",\"2020-07-08\"]]]",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Monthly Completed Work Orders",
+ "modified": "2020-07-09 12:22:54.809813",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Monthly Completed Work Order",
+ "owner": "Administrator",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Weekly"
+}
