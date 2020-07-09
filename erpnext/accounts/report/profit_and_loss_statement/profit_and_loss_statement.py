@@ -65,12 +65,14 @@ def get_report_summary(period_list, periodicity, income, expense, net_profit_los
 			"datatype": "Currency",
 			"currency": income[-1].get('currency') if income else default_currency
 		},
+		{ "type": "separator", "value": "-"},
 		{
 			"value": net_expense,
 			"label": expense_label,
 			"datatype": "Currency",
 			"currency": expense[-1].get('currency') if expense else default_currency
 		},
+		{ "type": "separator", "value": "=", "color": "blue"},
 		{
 			"value": net_profit,
 			"indicator": "Green" if net_profit > 0 else "Red",
