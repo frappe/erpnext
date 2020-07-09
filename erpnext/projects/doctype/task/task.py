@@ -7,10 +7,11 @@ import json
 
 import frappe
 from frappe import _, throw
+from frappe.desk.form.assign_to import clear, close_all_assignments
+from frappe.model.mapper import get_mapped_doc
 from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate, today
 from frappe.utils.nestedset import NestedSet
-from frappe.desk.form.assign_to import close_all_assignments, clear
-from frappe.utils import date_diff
+
 
 class CircularReferenceError(frappe.ValidationError): pass
 class EndDateCannotBeGreaterThanProjectEndDateError(frappe.ValidationError): pass
@@ -219,6 +220,26 @@ def set_tasks_as_overdue():
 			if getdate(task.review_date) > getdate(today()):
 				continue
 		frappe.get_doc("Task", task.name).update_status()
+
+
+@frappe.whitelist()
+def make_timesheet(source_name, target_doc=None, ignore_permissions=False):
+	def set_missing_values(source, target):
+		target.append("time_logs", {
+			"hours": source.actual_time,
+			"completed": source.status == "Completed",
+			"project": source.project,
+			"task": source.name
+		})
+
+	doclist = get_mapped_doc("Task", source_name, {
+			"Task": {
+				"doctype": "Timesheet"
+			}
+		}, target_doc, postprocess=set_missing_values, ignore_permissions=ignore_permissions)
+
+	return doclist
+
 
 @frappe.whitelist()
 def get_children(doctype, parent, task=None, project=None, is_root=False):
