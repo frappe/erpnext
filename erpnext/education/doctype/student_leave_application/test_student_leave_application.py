@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils.make_random import get_random
 from frappe.utils import getdate, add_days
 from erpnext.education.doctype.student_group.test_student_group import get_random_group
 from erpnext.education.doctype.student.test_student import create_student
@@ -27,7 +26,7 @@ class TestStudentLeaveApplication(unittest.TestCase):
 
 	def test_attendance_record_updated(self):
 		attendance = create_student_attendance()
-		leave_application = create_leave_application()
+		create_leave_application()
 		self.assertEqual(frappe.db.get_value('Student Attendance', attendance.name, 'status'), 'Absent')
 
 	def test_attendance_record_cancellation(self):

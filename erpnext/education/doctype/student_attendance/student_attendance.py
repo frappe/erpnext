@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
-from frappe.utils import cstr, get_link_to_form
+from frappe.utils import get_link_to_form
 from erpnext.education.api import get_student_group_students
 
 
@@ -44,7 +44,7 @@ class StudentAttendance(Document):
 
 	def validate_duplication(self):
 		"""Check if the Attendance Record is Unique"""
-		attendance_records=None
+		attendance_record = None
 		if self.course_schedule:
 			attendance_record = frappe.db.exists('Student Attendance', {
 				'student': self.student,
