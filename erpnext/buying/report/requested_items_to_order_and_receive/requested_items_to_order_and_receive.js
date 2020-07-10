@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Requested Items to Order"] = {
+frappe.query_reports["Requested Items to Order and Receive"] = {
 	"filters": [
 		{
 			"fieldname": "company",
