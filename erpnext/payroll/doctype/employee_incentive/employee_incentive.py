@@ -13,6 +13,7 @@ class EmployeeIncentive(Document):
 		additional_salary = frappe.new_doc('Additional Salary')
 		additional_salary.employee = self.employee
 		additional_salary.salary_component = self.salary_component
+		additional_salary.overwrite_salary_structure_amount = 0
 		additional_salary.amount = self.incentive_amount
 		additional_salary.payroll_date = self.payroll_date
 		additional_salary.company = company
