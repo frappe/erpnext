@@ -60,7 +60,7 @@ def get_data(filters, conditions):
 			ifnull(mr_item.stock_uom, '') as uom,
 			sum(ifnull(mr_item.ordered_qty, 0)) as ordered_qty,
 			sum(ifnull(mr_item.received_qty, 0)) as received_qty,
-			(sum(ifnull(mr_item.stock_qty, 0)) - sum(ifnull(mr_item.received_qty, 0))) as pending_qty,
+			(sum(ifnull(mr_item.stock_qty, 0)) - sum(ifnull(mr_item.received_qty, 0))) as qty_to_receive,
 			(sum(ifnull(mr_item.stock_qty, 0)) - sum(ifnull(mr_item.ordered_qty, 0))) as qty_to_order,
 			mr_item.item_name as item_name,
 			mr_item.description as "description",
@@ -81,7 +81,7 @@ def get_data(filters, conditions):
 	return data
 
 def update_qty_columns(row_to_update, data_row):
-	fields = ["qty", "ordered_qty", "received_qty", "pending_qty", "qty_to_order"]
+	fields = ["qty", "ordered_qty", "received_qty", "qty_to_receive", "qty_to_order"]
 	for field in fields:
 		row_to_update[field] += flt(data_row[field])
 
@@ -96,7 +96,7 @@ def prepare_data(data, filters):
 				"qty" : row["qty"],
 				"ordered_qty" : row["ordered_qty"],
 				"received_qty": row["received_qty"],
-				"pending_qty": row["pending_qty"],
+				"qty_to_receive": row["qty_to_receive"],
 				"qty_to_order" : row["qty_to_order"],
 			}
 		else:
@@ -127,7 +127,7 @@ def prepare_data(data, filters):
 	return data, chart_data
 
 def prepare_chart_data(item_data):
-	labels, qty_to_order, ordered_qty, received_qty, pending_qty = [], [], [], [], []
+	labels, qty_to_order, ordered_qty, received_qty, qty_to_receive = [], [], [], [], []
 
 	if len(item_data) > 30:
 		item_data = dict(list(item_data.items())[:30])
@@ -138,7 +138,7 @@ def prepare_chart_data(item_data):
 		qty_to_order.append(mr_row["qty_to_order"])
 		ordered_qty.append(mr_row["ordered_qty"])
 		received_qty.append(mr_row["received_qty"])
-		pending_qty.append(mr_row["pending_qty"])
+		qty_to_receive.append(mr_row["qty_to_receive"])
 
 	chart_data = {
 		"data" : {
@@ -157,8 +157,8 @@ def prepare_chart_data(item_data):
 					'values': received_qty
 				},
 				{
-					'name': _('Pending Qty'),
-					'values': pending_qty
+					'name': _('Qty to Receive'),
+					'values': qty_to_receive
 				}
 			]
 		},
@@ -243,8 +243,8 @@ def get_columns(filters):
 			"convertible": "qty"
 		},
 		{
-			"label": _("Pending Qty"),
-			"fieldname": "pending_qty",
+			"label": _("Qty to Receive"),
+			"fieldname": "qty_to_receive",
 			"fieldtype": "Float",
 			"width": 120,
 			"convertible": "qty"
