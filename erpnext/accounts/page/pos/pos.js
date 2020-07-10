@@ -1062,7 +1062,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 				}
 				if(index < me.page_len) {
 					$(frappe.render_template("pos_item", {
-						item_code: obj.name,
+						item_code: escape(obj.name),
 						item_price: item_price,
 						item_name: obj.name === obj.item_name ? "" : obj.item_name,
 						item_image: obj.image,
@@ -1099,6 +1099,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	get_items: function (item_code) {
 		// To search item as per the key enter
 
+		item_code = unescape(item_code);
 		var me = this;
 		this.item_serial_no = {};
 		this.item_batch_no = {};
@@ -1164,7 +1165,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			$(this).addClass('active');
 			me.numeric_val = "";
 			me.numeric_id = ""
-			me.item_code = $(this).attr("data-item-code");
+			me.item_code = unescape($(this).attr("data-item-code"));
 			me.render_selected_item()
 			me.bind_qty_event()
 			me.update_rate()
@@ -1176,33 +1177,33 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		var me = this;
 
 		$(this.wrapper).on("change", ".pos-item-qty", function () {
-			var item_code = $(this).parents(".pos-selected-item-action").attr("data-item-code");
+			var item_code = unescape($(this).parents(".pos-selected-item-action").attr("data-item-code"));
 			var qty = $(this).val();
 			me.update_qty(item_code, qty);
 			me.update_value();
 		})
 
 		$(this.wrapper).on("focusout", ".pos-item-qty", function () {
-			var item_code = $(this).parents(".pos-selected-item-action").attr("data-item-code");
+			var item_code = unescape($(this).parents(".pos-selected-item-action").attr("data-item-code"));
 			var qty = $(this).val();
 			me.update_qty(item_code, qty, true);
 			me.update_value();
 		})
 
 		$(this.wrapper).find("[data-action='increase-qty']").on("click", function () {
-			var item_code = $(this).parents(".pos-bill-item").attr("data-item-code");
+			var item_code = unescape($(this).parents(".pos-bill-item").attr("data-item-code"));
 			var qty = flt($(this).parents(".pos-bill-item").find('.pos-item-qty').val()) + 1;
 			me.update_qty(item_code, qty);
 		})
 
 		$(this.wrapper).find("[data-action='decrease-qty']").on("click", function () {
-			var item_code = $(this).parents(".pos-bill-item").attr("data-item-code");
+			var item_code = unescape($(this).parents(".pos-bill-item").attr("data-item-code"));
 			var qty = flt($(this).parents(".pos-bill-item").find('.pos-item-qty').val()) - 1;
 			me.update_qty(item_code, qty);
 		})
 
 		$(this.wrapper).on("change", ".pos-item-disc", function () {
-			var item_code = $(this).parents(".pos-selected-item-action").attr("data-item-code");
+			var item_code = unescape($(this).parents(".pos-selected-item-action").attr("data-item-code"));
 			var discount = $(this).val();
 			if(discount > 100){
 				discount = $(this).val('');
@@ -1253,7 +1254,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 	update_rate: function () {
 		var me = this;
 		$(this.wrapper).on("change", ".pos-item-price", function () {
-			var item_code = $(this).parents(".pos-selected-item-action").attr("data-item-code");
+			var item_code = unescape($(this).parents(".pos-selected-item-action").attr("data-item-code"));
 			me.set_item_details(item_code, "rate", $(this).val());
 			me.update_value()
 		})
@@ -1282,9 +1283,17 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		this.child_doc = this.get_child_item(this.item_code);
 		$(this.wrapper).find('.selected-item').empty();
 		if(this.child_doc.length) {
-			this.child_doc[0]["allow_user_to_edit_rate"] = this.pos_profile_data["allow_user_to_edit_rate"] ? true : false,
-			this.child_doc[0]["allow_user_to_edit_discount"] = this.pos_profile_data["allow_user_to_edit_discount"] ? true : false;
-			this.selected_row = $(frappe.render_template("pos_selected_item", this.child_doc[0]))
+			this.selected_row = $(frappe.render_template("pos_selected_item", {
+				idx: this.child_doc[0].idx,
+				item_code: escape(this.child_doc[0].item_code),
+				qty: this.child_doc[0].qty,
+				price_list_rate: this.child_doc[0].price_list_rate,
+				allow_user_to_edit_rate: this.pos_profile_data["allow_user_to_edit_rate"] ? true : false,
+				allow_user_to_edit_discount: this.pos_profile_data["allow_user_to_edit_discount"] ? true : false,
+				discount_percentage: this.child_doc[0].discount_percentage,
+				rate: this.child_doc[0].rate,
+				amount: this.child_doc[0].amount
+			}))
 			$(this.wrapper).find('.selected-item').html(this.selected_row)
 		}
 
@@ -1535,7 +1544,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 		$.each(this.frm.doc.items || [], function (i, d) {
 			$(frappe.render_template("pos_bill_item_new", {
-				item_code: d.item_code,
+				item_code: escape(d.item_code),
 				item_name: (d.item_name === d.item_code || !d.item_name) ? "" : ("<br>" + d.item_name),
 				qty: d.qty,
 				discount_percentage: d.discount_percentage || 0.0,

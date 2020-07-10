@@ -113,7 +113,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		acc = frappe.get_doc("Account", account)
 
 	try:
-		year_start_date = get_fiscal_year(date, verbose=0)[1]
+		year_start_date = get_fiscal_year(date, company=company, verbose=0)[1]
 	except FiscalYearError:
 		if getdate(date) > getdate(nowdate()):
 			# if fiscal year not found and the date is greater than today
@@ -767,10 +767,10 @@ def get_children(doctype, parent, company, is_root=False):
 		company_currency = frappe.get_cached_value('Company',  company,  "default_currency")
 		for each in acc:
 			each["company_currency"] = company_currency
-			each["balance"] = flt(get_balance_on(each.get("value"), in_account_currency=False))
+			each["balance"] = flt(get_balance_on(each.get("value"), in_account_currency=False, company=company))
 
 			if each.account_currency != company_currency:
-				each["balance_in_account_currency"] = flt(get_balance_on(each.get("value")))
+				each["balance_in_account_currency"] = flt(get_balance_on(each.get("value"), company=company))
 
 	return acc
 
@@ -817,7 +817,7 @@ def create_payment_gateway_account(gateway):
 		pass
 
 @frappe.whitelist()
-def update_cost_center(docname, cost_center_name, cost_center_number, company):
+def update_cost_center(docname, cost_center_name, cost_center_number, company, merge):
 	'''
 		Renames the document by adding the number as a prefix to the current name and updates
 		all transaction where it was present.
@@ -833,7 +833,7 @@ def update_cost_center(docname, cost_center_name, cost_center_number, company):
 
 	new_name = get_autoname_with_number(cost_center_number, cost_center_name, docname, company)
 	if docname != new_name:
-		frappe.rename_doc("Cost Center", docname, new_name, force=1)
+		frappe.rename_doc("Cost Center", docname, new_name, force=1, merge=merge)
 		return new_name
 
 def validate_field_number(doctype_name, docname, number_value, company, field_name):
