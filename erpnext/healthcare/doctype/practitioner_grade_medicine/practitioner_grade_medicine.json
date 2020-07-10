@@ -1,0 +1,39 @@
+{
+ "actions": [],
+ "creation": "2020-03-24 12:40:50.385231",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "medicine_name",
+  "generic_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "medicine_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Medicine Name",
+   "options": "Medication"
+  },
+  {
+   "fetch_from": "medicine_name.generic_name",
+   "fieldname": "generic_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Generic Name",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-07-10 21:35:54.306522",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Practitioner Grade Medicine",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,0 +1,49 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:practitioner_type",
+ "creation": "2020-03-24 12:15:46.880698",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "practitioner_type",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "practitioner_type",
+   "fieldtype": "Data",
+   "label": "Practitioner Type",
+   "unique": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description"
+  }
+ ],
+ "links": [],
+ "modified": "2020-07-10 21:35:16.244657",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Healthcare Practitioner Type",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

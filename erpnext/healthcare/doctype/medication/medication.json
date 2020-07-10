@@ -1,0 +1,238 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{item}",
+ "creation": "2020-03-24 15:56:36.583587",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "national_drug_code",
+  "medication_name",
+  "generic_name",
+  "medication_class",
+  "column_break_4",
+  "strength",
+  "strength_uom",
+  "abbr",
+  "item",
+  "defaults_section",
+  "default_dosage_form",
+  "default_prescription_dosage",
+  "column_break_6",
+  "default_prescription_duration",
+  "default_interval",
+  "default_interval_uom",
+  "section_break_11",
+  "generic_ok",
+  "column_break_18",
+  "status",
+  "section_break_20",
+  "reference_url",
+  "drug_interactions_section",
+  "bypass_medication_class_interaction_check",
+  "medication_class_interaction",
+  "allergy_interactions_section",
+  "bypass_allergy_check",
+  "allergy_interaction",
+  "allowed_diagnostic_codes_section",
+  "bypass_medical_coding_check",
+  "codification_table"
+ ],
+ "fields": [
+  {
+   "fieldname": "national_drug_code",
+   "fieldtype": "Data",
+   "label": "National Drug Code"
+  },
+  {
+   "fieldname": "medication_name",
+   "fieldtype": "Data",
+   "label": "Medication Name"
+  },
+  {
+   "fieldname": "generic_name",
+   "fieldtype": "Data",
+   "label": "Generic Name"
+  },
+  {
+   "fieldname": "medication_class",
+   "fieldtype": "Link",
+   "label": "Medication Class",
+   "options": "Medication Class"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "strength",
+   "fieldtype": "Float",
+   "label": "Strength",
+   "precision": "2",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "strength_uom",
+   "fieldtype": "Link",
+   "label": "Strength UOM",
+   "options": "UOM",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "label": "Abbr"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "label": "Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Defaults"
+  },
+  {
+   "fieldname": "default_dosage_form",
+   "fieldtype": "Link",
+   "label": "Default Dosage Form",
+   "options": "Dosage Form"
+  },
+  {
+   "fieldname": "default_prescription_dosage",
+   "fieldtype": "Link",
+   "label": "Default Prescription Dosage",
+   "options": "Prescription Dosage"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_prescription_duration",
+   "fieldtype": "Link",
+   "label": "Default Prescription Duration",
+   "options": "Prescription Duration"
+  },
+  {
+   "fieldname": "default_interval",
+   "fieldtype": "Int",
+   "label": "Default Interval"
+  },
+  {
+   "fieldname": "default_interval_uom",
+   "fieldtype": "Select",
+   "label": "Default Interval UOM",
+   "options": "Hour\nDay"
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "generic_ok",
+   "fieldtype": "Check",
+   "label": "Generic OK"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Active\nInactive"
+  },
+  {
+   "fieldname": "section_break_20",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "reference_url",
+   "fieldtype": "HTML Editor",
+   "label": "Reference URL"
+  },
+  {
+   "fieldname": "drug_interactions_section",
+   "fieldtype": "Section Break",
+   "label": "Drug Interactions"
+  },
+  {
+   "default": "1",
+   "fieldname": "bypass_medication_class_interaction_check",
+   "fieldtype": "Check",
+   "label": "Bypass Medication Class Interaction Check"
+  },
+  {
+   "depends_on": "eval:!doc.bypass_medication_class_interaction_check",
+   "fieldname": "medication_class_interaction",
+   "fieldtype": "Table",
+   "label": "Medication Class Interaction",
+   "options": "Medication Class Interaction"
+  },
+  {
+   "fieldname": "allergy_interactions_section",
+   "fieldtype": "Section Break",
+   "label": "Allergy Interactions"
+  },
+  {
+   "default": "1",
+   "fieldname": "bypass_allergy_check",
+   "fieldtype": "Check",
+   "label": "Bypass Allergy Check"
+  },
+  {
+   "depends_on": "eval:!doc.bypass_allergy_check",
+   "fieldname": "allergy_interaction",
+   "fieldtype": "Table",
+   "label": "Allergy Interaction",
+   "options": "Allergy Interaction"
+  },
+  {
+   "fieldname": "allowed_diagnostic_codes_section",
+   "fieldtype": "Section Break",
+   "label": "Allowed Diagnostic Codes"
+  },
+  {
+   "default": "1",
+   "fieldname": "bypass_medical_coding_check",
+   "fieldtype": "Check",
+   "label": "Bypass Medical Coding Check"
+  },
+  {
+   "depends_on": "eval:!doc.bypass_medical_coding_check",
+   "fieldname": "codification_table",
+   "fieldtype": "Table",
+   "label": "Codification Table",
+   "options": "Codification Table"
+  }
+ ],
+ "links": [],
+ "modified": "2020-07-10 21:35:12.845310",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Medication",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

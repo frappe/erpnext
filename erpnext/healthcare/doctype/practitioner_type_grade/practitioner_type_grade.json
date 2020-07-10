@@ -1,0 +1,94 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{practitioner_type}-{grade_level}",
+ "creation": "2020-03-24 16:40:20.376928",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "practitioner_type",
+  "grade_level",
+  "allowed_medication_section",
+  "allowed_medication",
+  "allowed_lab_templates_section",
+  "allowed_lab_template",
+  "allowed_procedure_templates_section",
+  "allowed_clinical_procedure",
+  "allowed_radiology_procedures_section"
+ ],
+ "fields": [
+  {
+   "fieldname": "practitioner_type",
+   "fieldtype": "Link",
+   "label": "Practitioner Type",
+   "options": "Healthcare Practitioner Type"
+  },
+  {
+   "fieldname": "grade_level",
+   "fieldtype": "Data",
+   "label": "Grade Level"
+  },
+  {
+   "fieldname": "allowed_medication_section",
+   "fieldtype": "Section Break",
+   "label": "Allowed Medications"
+  },
+  {
+   "fieldname": "allowed_medication",
+   "fieldtype": "Table",
+   "label": "Allowed Medication",
+   "options": "Allowed Medication"
+  },
+  {
+   "fieldname": "allowed_lab_templates_section",
+   "fieldtype": "Section Break",
+   "label": "Allowed Lab Templates"
+  },
+  {
+   "fieldname": "allowed_lab_template",
+   "fieldtype": "Table",
+   "label": "Allowed Lab Template",
+   "options": "Allowed Lab Template"
+  },
+  {
+   "fieldname": "allowed_procedure_templates_section",
+   "fieldtype": "Section Break",
+   "label": "Allowed Procedure Templates"
+  },
+  {
+   "fieldname": "allowed_clinical_procedure",
+   "fieldtype": "Table",
+   "label": "Allowed Clinical Procedure",
+   "options": "Allowed Clinical Procedure"
+  },
+  {
+   "fieldname": "allowed_radiology_procedures_section",
+   "fieldtype": "Section Break",
+   "label": "Allowed Radiology Procedures"
+  }
+ ],
+ "links": [],
+ "modified": "2020-07-10 21:35:13.692999",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Practitioner Type Grade",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
