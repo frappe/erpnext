@@ -10,6 +10,7 @@ from erpnext.accounts.utils import get_balance_on, get_account_currency
 from erpnext.accounts.party import get_party_account
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import get_party_account_based_on_invoice_discounting
+from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
 
 from six import string_types, iteritems
 
@@ -54,7 +55,7 @@ class JournalEntry(AccountsController):
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
-		from erpnext.hr.doctype.salary_slip.salary_slip import unlink_ref_doc_from_salary_slip
+		from erpnext.payroll.doctype.salary_slip.salary_slip import unlink_ref_doc_from_salary_slip
 		unlink_ref_doc_from_payment_entries(self)
 		unlink_ref_doc_from_salary_slip(self.name)
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
@@ -265,7 +266,10 @@ class JournalEntry(AccountsController):
 				# set totals
 				if not d.reference_name in self.reference_totals:
 					self.reference_totals[d.reference_name] = 0.0
-				self.reference_totals[d.reference_name] += flt(d.get(dr_or_cr))
+
+				if self.voucher_type not in ('Deferred Revenue', 'Deferred Expense'):
+					self.reference_totals[d.reference_name] += flt(d.get(dr_or_cr))
+
 				self.reference_types[d.reference_name] = d.reference_type
 				self.reference_accounts[d.reference_name] = d.account
 
@@ -277,10 +281,16 @@ class JournalEntry(AccountsController):
 
 				# check if party and account match
 				if d.reference_type in ("Sales Invoice", "Purchase Invoice"):
-					if d.reference_type == "Sales Invoice":
-						party_account = get_party_account_based_on_invoice_discounting(d.reference_name) or against_voucher[1]
+					if self.voucher_type in ('Deferred Revenue', 'Deferred Expense') and d.reference_detail_no:
+						debit_or_credit = 'Debit' if d.debit else 'Credit'
+						party_account = get_deferred_booking_accounts(d.reference_type, d.reference_detail_no,
+							debit_or_credit)
 					else:
-						party_account = against_voucher[1]
+						if d.reference_type == "Sales Invoice":
+							party_account = get_party_account_based_on_invoice_discounting(d.reference_name) or against_voucher[1]
+						else:
+							party_account = against_voucher[1]
+
 					if (against_voucher[0] != d.party or party_account != d.account):
 						frappe.throw(_("Row {0}: Party / Account does not match with {1} / {2} in {3} {4}")
 							.format(d.idx, field_dict.get(d.reference_type)[0], field_dict.get(d.reference_type)[1],
@@ -513,14 +523,20 @@ class JournalEntry(AccountsController):
 						"against_voucher_type": d.reference_type,
 						"against_voucher": d.reference_name,
 						"remarks": remarks,
+						"voucher_detail_no": d.reference_detail_no,
 						"cost_center": d.cost_center,
 						"project": d.project,
 						"finance_book": self.finance_book
 					}, item=d)
 				)
 
+		if self.voucher_type in ('Deferred Revenue', 'Deferred Expense'):
+			update_outstanding = 'No'
+		else:
+			update_outstanding = 'Yes'
+
 		if gl_map:
-			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj)
+			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj, update_outstanding=update_outstanding)
 
 	def get_balance(self):
 		if not self.get('accounts'):
@@ -824,6 +840,7 @@ def get_opening_accounts(company):
 	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
 
 
+@frappe.whitelist()
 def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select jv.name, jv.posting_date, jv.user_remark
 		from `tabJournal Entry` jv, `tabJournal Entry Account` jv_detail

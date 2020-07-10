@@ -103,7 +103,7 @@ def get_columns(filters):
 		"fieldtype": "Int",
 		"width": 140
 	}, {
-		"label": _("Subassembly BOM Count"),
+		"label": _("Sub-assembly BOM Count"),
 		"fieldname": "used_as_subassembly_items",
 		"fieldtype": "Int",
 		"width": 180

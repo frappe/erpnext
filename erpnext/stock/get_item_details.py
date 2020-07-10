@@ -413,7 +413,7 @@ def get_item_tax_info(company, tax_category, item_codes):
 			continue
 		out[item_code] = {}
 		item = frappe.get_cached_doc("Item", item_code)
-		get_item_tax_template({"tax_category": tax_category}, item, out[item_code])
+		get_item_tax_template({"company": company, "tax_category": tax_category}, item, out[item_code])
 		out[item_code]["item_tax_rate"] = get_item_tax_map(company, out[item_code].get("item_tax_template"), as_json=True)
 
 	return out
@@ -442,7 +442,8 @@ def _get_item_tax_template(args, taxes, out={}, for_validate=False):
 	taxes_with_no_validity = []
 
 	for tax in taxes:
-		if tax.valid_from:
+		tax_company = frappe.get_value("Item Tax Template", tax.item_tax_template, 'company')
+		if tax.valid_from and tax_company == args['company']:
 			# In purchase Invoice first preference will be given to supplier invoice date
 			# if supplier date is not present then posting date
 			validation_date = args.get('transaction_date') or args.get('bill_date') or args.get('posting_date')
@@ -450,7 +451,8 @@ def _get_item_tax_template(args, taxes, out={}, for_validate=False):
 			if getdate(tax.valid_from) <= getdate(validation_date):
 				taxes_with_validity.append(tax)
 		else:
-			taxes_with_no_validity.append(tax)
+			if tax_company == args['company']:
+				taxes_with_no_validity.append(tax)
 
 	if taxes_with_validity:
 		taxes = sorted(taxes_with_validity, key = lambda i: i.valid_from, reverse=True)
@@ -636,6 +638,10 @@ def get_item_price(args, item_code, ignore_party=False):
 	if args.get('transaction_date'):
 		conditions += """ and %(transaction_date)s between
 			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
+		
+	if args.get('posting_date'):
+		conditions += """ and %(posting_date)s between
+			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
 
 	return frappe.db.sql(""" select name, price_list_rate, uom
 		from `tabItem Price` {conditions}
@@ -657,6 +663,7 @@ def get_price_list_rate_for(args, item_code):
 			"supplier": args.get('supplier'),
 			"uom": args.get('uom'),
 			"transaction_date": args.get('transaction_date'),
+			"posting_date": args.get('posting_date'),
 	}
 
 	item_price_data = 0
