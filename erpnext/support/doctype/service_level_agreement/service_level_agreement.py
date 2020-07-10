@@ -366,8 +366,8 @@ def apply(doc, method=None):
 	if not doc.creation:
 		doc.creation = now_datetime(doc.get("owner"))
 
-		if meta.has_field("service_level_agreement_creation"):
-			doc.service_level_agreement_creation = now_datetime(doc.get("owner"))
+	if meta.has_field("service_level_agreement_creation"):
+		doc.service_level_agreement_creation = now_datetime(doc.get("owner"))
 
 	start_date_time = get_datetime(doc.get("service_level_agreement_creation") or doc.creation)
 
