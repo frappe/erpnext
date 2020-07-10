@@ -49,6 +49,10 @@ class SalarySlip(TransactionBase):
 			if not self.salary_slip_based_on_timesheet:
 				self.get_working_days_details(lwp = self.leave_without_pay)
 
+		if self.salary_slip_based_on_timesheet:
+			self.total_working_days = 0
+			self.payment_days = 0
+
 		self.calculate_net_pay()
 
 		company_currency = erpnext.get_company_currency(self.company)

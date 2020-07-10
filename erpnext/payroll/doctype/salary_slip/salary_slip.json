@@ -224,6 +224,7 @@
    "options": "\nMonthly\nFortnightly\nBimonthly\nWeekly\nDaily"
   },
   {
+   "default": "0",
    "depends_on": "eval:doc.salary_slip_based_on_timesheet == 0",
    "fieldname": "total_working_days",
    "fieldtype": "Float",
@@ -242,6 +243,7 @@
    "oldfieldtype": "Currency"
   },
   {
+   "default": "0",
    "depends_on": "eval:doc.salary_slip_based_on_timesheet == 0",
    "fieldname": "payment_days",
    "fieldtype": "Float",
