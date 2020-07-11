@@ -41,10 +41,6 @@ frappe.ui.form.on("Task", {
 		});
 	},
 
-	refresh: function (frm) {
-		// frm.set_query("parent_task", { "is_group": 1 });
-	},
-
 	is_group: function (frm) {
 		frappe.call({
 			method: "erpnext.projects.doctype.task.task.check_if_child_exists",
