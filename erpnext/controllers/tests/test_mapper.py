@@ -14,12 +14,10 @@ class TestMapper(unittest.TestCase):
 
 		make_test_records("Item")
 		items = frappe.get_all("Item", fields = ["name", "item_code"], filters = {'is_sales_item': 1, 'has_variants': 0, 'disabled': 0})
-		customers = frappe.get_all("Customer")
-		if items and customers:
+		if items:
 			# Make source docs (quotations) and a target doc (sales order)
-			customer = random.choice(customers).name
-			qtn1, item_list_1 = self.make_quotation(items, customer)
-			qtn2, item_list_2 = self.make_quotation(items, customer)
+			qtn1, item_list_1 = self.make_quotation(items, '_Test Customer')
+			qtn2, item_list_2 = self.make_quotation(items, '_Test Customer')
 			so, item_list_3 = self.make_sales_order()
 
 		# Map source docs to target with corresponding mapper method
