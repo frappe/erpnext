@@ -636,7 +636,7 @@ def get_item_price(args, item_code, ignore_party=False):
 	if args.get('transaction_date'):
 		conditions += """ and %(transaction_date)s between
 			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
-		
+
 	if args.get('posting_date'):
 		conditions += """ and %(posting_date)s between
 			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
