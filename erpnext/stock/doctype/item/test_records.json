@@ -454,6 +454,7 @@
    {
     "doctype": "Item Tax",
     "parentfield": "taxes",
+    "tax_category": "_Test Tax Category 1",
     "item_tax_template": "_Test Item Tax Template 1"
    }
   ]
