@@ -293,6 +293,8 @@ class LeaveApplication(Document):
 	def set_half_day_date(self):
 		if self.from_date == self.to_date and self.half_day == 1:
 			self.half_day_date = self.from_date
+		elif self.half_day == 0:
+			self.half_day_date = None
 
 	def notify_employee(self):
 		employee = frappe.get_doc("Employee", self.employee)

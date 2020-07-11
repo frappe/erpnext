@@ -8,12 +8,21 @@ frappe.ui.form.on("Lab Test Template",{
 		if (!frm.doc.lab_test_description)
 			frm.set_value("lab_test_description", frm.doc.lab_test_name);
 	},
-	refresh : function(frm) {
+	refresh: function(frm) {
 		// Restrict Special, Grouped type templates in Child TestGroups
 		frm.set_query("lab_test_template", "lab_test_groups", function() {
 			return {
 				filters: {
 					lab_test_template_type: ['in',['Single','Compound']]
+				}
+			};
+		});
+	},
+	medical_code: function(frm) {
+		frm.set_query("medical_code", function() {
+			return {
+				filters: {
+					medical_code_standard: frm.doc.medical_code_standard
 				}
 			};
 		});
