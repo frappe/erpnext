@@ -19,6 +19,7 @@
   "practitioner",
   "department",
   "details_section",
+  "medical_code",
   "duration",
   "rate",
   "location",
@@ -206,11 +207,19 @@
    "fieldtype": "Data",
    "label": "Patient Name",
    "read_only": 1
+  },
+  {
+   "fetch_from": "therapy_type.medical_code",
+   "fieldname": "medical_code",
+   "fieldtype": "Link",
+   "label": "Medical Code",
+   "options": "Medical Code",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-29 16:49:16.286006",
+ "modified": "2020-06-29 14:33:34.836594",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Session",

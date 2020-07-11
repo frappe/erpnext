@@ -19,7 +19,7 @@ def get_columns(filters):
 			"options": "Work Order",
 			"width": 120
 		}]
-	
+
 	if not filters.get('bom_no'):
 		columns.extend([
 			{
