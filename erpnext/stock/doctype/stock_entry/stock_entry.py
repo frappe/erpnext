@@ -1214,9 +1214,13 @@ class StockEntry(StockController):
 				mreq_item = frappe.db.get_value("Material Request Item",
 					{"name": item.material_request_item, "parent": item.material_request},
 					["item_code", "warehouse", "idx"], as_dict=True)
-				if mreq_item.item_code != item.item_code or \
-				mreq_item.warehouse != (item.s_warehouse if self.purpose== "Material Issue" else item.t_warehouse):
-					frappe.throw(_("Item or Warehouse for row {0} does not match Material Request").format(item.idx),
+				if mreq_item.item_code != item.item_code:
+					frappe.throw(_("Item for row {0} does not match Material Request").format(item.idx),
+						frappe.MappingMismatchError)
+				elif self.purpose == "Send to Warehouse":
+					continue
+				elif mreq_item.warehouse != (item.s_warehouse if self.purpose == "Material Issue" else item.t_warehouse):
+					frappe.throw(_("Warehouse for row {0} does not match Material Request").format(item.idx),
 						frappe.MappingMismatchError)
 
 	def validate_batch(self):
@@ -1381,12 +1385,19 @@ def move_sample_to_retention_warehouse(company, items):
 
 @frappe.whitelist()
 def make_stock_in_entry(source_name, target_doc=None):
+	print(source_name)
+	print(target_doc)
 	def set_missing_values(source, target):
 		target.purpose = 'Receive at Warehouse'
 		target.set_stock_entry_type()
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.t_warehouse = ''
+
+		if source_doc.material_request_item and source_doc.material_request :
+			material_request_item = frappe.get_doc('Material Request Item', source_doc.material_request_item)
+			target_doc.t_warehouse = material_request_item.warehouse
+		
 		target_doc.s_warehouse = source_doc.t_warehouse
 		target_doc.qty = source_doc.qty - source_doc.transferred_qty
 
@@ -1412,7 +1423,7 @@ def make_stock_in_entry(source_name, target_doc=None):
 			"condition": lambda doc: flt(doc.qty) - flt(doc.transferred_qty) > 0.01
 		},
 	}, target_doc, set_missing_values)
-
+	print(doclist)
 	return doclist
 
 @frappe.whitelist()

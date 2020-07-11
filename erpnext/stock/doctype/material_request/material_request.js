@@ -100,7 +100,39 @@ frappe.ui.form.on('Material Request', {
 					add_create_pick_list_button();
 					frm.add_custom_button(__("Transfer Material"),
 						() => frm.events.make_stock_entry(frm), __('Create'));
+
+					frm.add_custom_button(__("Send To Warehouse"),
+						() => {
+							new frappe.ui.Dialog({
+								title: __("Send To Warehouse"),
+								fields: [
+									{"fieldname":"warehouse", "fieldtype":"Link", "label":__("Warehouse"),
+										options:"Warehouse", reqd: 1, default:"GIT - ST"},
+								],
+								primary_action_label: 'Select',
+								primary_action(values) {
+									console.log(values);
+									return frappe.call({
+										type: "GET",
+										method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
+										args: {
+											"source_name": frm.doc.name,
+											"warehouse": values.warehouse,
+											"purpose": "Send to Warehouse"
+										},
+										freeze: true,
+										callback: function(r) {
+											console.log(r.message);
+											var doc = frappe.model.sync(r.message);
+											frappe.set_route("Form", r.message.doctype, r.message.name);
+										}
+									})
+								}
+							}).show();
+				
+						},__('Create'));
 				}
+			
 
 				if (frm.doc.material_request_type === "Material Issue") {
 					frm.add_custom_button(__("Issue Material"),
@@ -312,10 +344,12 @@ frappe.ui.form.on('Material Request', {
 		});
 	},
 
-	make_stock_entry: function(frm) {
+	make_stock_entry: function(frm, warehouse = null) {
+		console.log(warehouse);
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
-			frm: frm
+			frm: frm,
+			warehouse: warehouse
 		});
 	},
 
