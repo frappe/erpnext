@@ -78,6 +78,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:parent.doctype == 'BOM'",
    "fieldname": "base_hour_rate",
    "fieldtype": "Currency",
    "force_currency_symbol": 1,
@@ -88,6 +89,7 @@
   },
   {
    "default": "5",
+   "depends_on": "eval:parent.doctype == 'BOM'",
    "fieldname": "base_operating_cost",
    "fieldtype": "Currency",
    "force_currency_symbol": 1,
@@ -110,7 +112,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:48:08.570403",
+ "modified": "2020-06-16 17:01:11.128420",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Operation",

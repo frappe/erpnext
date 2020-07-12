@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "EDU-ASP-.YYYY.-.#####",
  "creation": "2015-11-12 16:34:34.658092",
@@ -57,6 +58,7 @@
   },
   {
    "fetch_from": "course.default_grading_scale",
+   "fetch_if_empty": 1,
    "fieldname": "grading_scale",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -70,6 +72,7 @@
   },
   {
    "fetch_from": "student_group.course",
+   "fetch_if_empty": 1,
    "fieldname": "course",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -194,7 +197,8 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:41:12.798124",
+ "links": [],
+ "modified": "2020-05-09 16:44:04.313175",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Assessment Plan",

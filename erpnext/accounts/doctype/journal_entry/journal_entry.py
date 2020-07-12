@@ -524,6 +524,7 @@ class JournalEntry(AccountsController):
 	def set_print_format_fields(self):
 		bank_amount = party_amount = total_amount = 0.0
 		currency = bank_account_currency = party_account_currency = pay_to_recd_from= None
+		party_type = None
 		for d in self.get('accounts'):
 			if d.party_type in ['Customer', 'Supplier', 'Letter of Credit', 'Employee'] and d.party:
 				if not pay_to_recd_from:
@@ -635,20 +636,20 @@ class JournalEntry(AccountsController):
 
 			if self.write_off_based_on == 'Accounts Receivable':
 				jd1.party_type = "Customer"
-				jd1.credit = flt(d.outstanding_amount, self.precision("credit", "accounts"))
+				jd1.credit_in_account_currency = flt(d.outstanding_amount, self.precision("credit", "accounts"))
 				jd1.reference_type = "Sales Invoice"
 				jd1.reference_name = cstr(d.name)
 			elif self.write_off_based_on == 'Accounts Payable':
 				jd1.party_type = "Supplier"
-				jd1.debit = flt(d.outstanding_amount, self.precision("debit", "accounts"))
+				jd1.debit_in_account_currency = flt(d.outstanding_amount, self.precision("debit", "accounts"))
 				jd1.reference_type = "Purchase Invoice"
 				jd1.reference_name = cstr(d.name)
 
 		jd2 = self.append('accounts', {})
 		if self.write_off_based_on == 'Accounts Receivable':
-			jd2.debit = total
+			jd2.debit_in_account_currency = total
 		elif self.write_off_based_on == 'Accounts Payable':
-			jd2.credit = total
+			jd2.credit_in_account_currency = total
 
 		self.validate_total_debit_and_credit()
 

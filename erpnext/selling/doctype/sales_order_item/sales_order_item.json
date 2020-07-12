@@ -203,6 +203,7 @@
    "width": "300px"
   },
   {
+   "allow_on_submit": 1,
    "columns": 2,
    "depends_on": "eval: !parent.skip_delivery_note",
    "fieldname": "delivery_date",
@@ -262,7 +263,7 @@
    "fieldtype": "Link",
    "label": "UOM",
    "options": "UOM",
-   "print_hide": 1,
+   "print_hide": 0,
    "reqd": 1
   },
   {
@@ -1195,7 +1196,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:50:31.347776",
+ "modified": "2020-05-22 12:40:01.696076",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

@@ -27,15 +27,6 @@ frappe.ui.form.on("Purchase Order", {
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
 
-		frm.set_query("blanket_order", "items", function() {
-			return {
-				filters: {
-					"company": frm.doc.company,
-					"docstatus": 1
-				}
-			}
-		});
-
 		frm.set_query("expense_account", "items", function() {
 			return {
 				query: "erpnext.controllers.queries.get_expense_account",

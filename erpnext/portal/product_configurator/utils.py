@@ -1,5 +1,6 @@
 import frappe
 import numpy as np
+from frappe.utils import cint
 from erpnext.portal.product_configurator.item_variants_cache import ItemVariantsCacheManager
 
 def get_field_filter_data():
@@ -188,7 +189,9 @@ def get_attributes_and_values(item_code):
 
 def get_numeric_values():
 	attribute_values_list = []
-	numeric_attributes = frappe.get_list("Item Attribute", fields=['name', 'from_range', 'to_range', 'increment'], filters={"numeric_values": 1})
+	numeric_attributes = frappe.db.get_all("Item Attribute",
+		fields=['name', 'from_range', 'to_range', 'increment'],
+		filters={"numeric_values": 1})
 	for attribute in numeric_attributes:
 		from_range = attribute["from_range"]
 		to_range = attribute['to_range'] + attribute['increment']
@@ -262,6 +265,8 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 			product_info = None
 	else:
 		product_info = None
+
+	product_info["allow_items_not_in_stock"] = cint(data.cart_settings.allow_items_not_in_stock)
 
 	return {
 		'next_attribute': next_attribute,

@@ -79,7 +79,8 @@ class Customer(TransactionBase):
 	def validate_default_bank_account(self):
 		if self.default_bank_account:
 			is_company_account = frappe.db.get_value('Bank Account', self.default_bank_account, 'is_company_account')
-			frappe.throw(_("{0} is not a company bank account").format(frappe.bold(self.default_bank_account)))
+			if not is_company_account:
+				frappe.throw(_("{0} is not a company bank account").format(frappe.bold(self.default_bank_account)))
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
@@ -152,7 +153,7 @@ class Customer(TransactionBase):
 						contact.save()
 
 			else:
-				lead.lead_name = lead.lead_name.split(" ")
+				lead.lead_name = lead.lead_name.lstrip().split(" ")
 				lead.first_name = lead.lead_name[0]
 				lead.last_name = " ".join(lead.lead_name[1:])
 
@@ -167,6 +168,10 @@ class Customer(TransactionBase):
 				contact.mobile_no = lead.mobile_no
 				contact.is_primary_contact = 1
 				contact.append('links', dict(link_doctype='Customer', link_name=self.name))
+				if lead.email_id:
+					contact.append('email_ids', dict(email_id=lead.email_id, is_primary=1))
+				if lead.mobile_no:
+					contact.append('phone_nos', dict(phone=lead.mobile_no, is_primary_mobile_no=1))
 				contact.flags.ignore_permissions = self.flags.ignore_permissions
 				contact.autoname()
 				if not frappe.db.exists("Contact", contact.name):
@@ -233,9 +238,11 @@ def make_quotation(source_name, target_doc=None):
 	target_doc.run_method("set_other_charges")
 	target_doc.run_method("calculate_taxes_and_totals")
 
-	price_list = frappe.get_value("Customer", source_name, "default_price_list")
+	price_list, currency = frappe.db.get_value("Customer", source_name, ['default_price_list', 'default_currency'])
 	if price_list:
 		target_doc.selling_price_list = price_list
+	if currency:
+		target_doc.currency = currency
 
 	return target_doc
 
@@ -296,10 +303,14 @@ def get_loyalty_programs(doc):
 	return lp_details
 
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
+	from erpnext.controllers.queries import get_fields
+
 	if frappe.db.get_default("cust_master_name") == "Customer Name":
 		fields = ["name", "customer_group", "territory"]
 	else:
 		fields = ["name", "customer_name", "customer_group", "territory"]
+
+	fields = get_fields("Customer", fields)
 
 	match_conditions = build_match_conditions("Customer")
 	match_conditions = "and {}".format(match_conditions) if match_conditions else ""
@@ -308,15 +319,18 @@ def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
 		filter_conditions = get_filters_cond(doctype, filters, [])
 		match_conditions += "{}".format(filter_conditions)
 
-	return frappe.db.sql("""select %s from `tabCustomer` where docstatus < 2
-		and (%s like %s or customer_name like %s)
-		{match_conditions}
-		order by
-		case when name like %s then 0 else 1 end,
-		case when customer_name like %s then 0 else 1 end,
-		name, customer_name limit %s, %s""".format(match_conditions=match_conditions) %
-		(", ".join(fields), searchfield, "%s", "%s", "%s", "%s", "%s", "%s"),
-		("%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, start, page_len))
+	return frappe.db.sql("""
+			select %s
+			from `tabCustomer`
+			where docstatus < 2
+				and (%s like %s or customer_name like %s)
+					{match_conditions}
+			order by
+				case when name like %s then 0 else 1 end,
+				case when customer_name like %s then 0 else 1 end,
+				name, customer_name limit %s, %s
+		""".format(match_conditions=match_conditions) % (", ".join(fields), searchfield, "%s", "%s", "%s", "%s", "%s", "%s"),
+			("%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, start, page_len))
 
 
 def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, extra_amount=0):

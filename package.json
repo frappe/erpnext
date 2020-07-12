@@ -1,5 +1,14 @@
 {
-  "dependencies": {
-    "cypress": "^3.1.4"
+  "name": "erpnext",
+  "description": "Open Source ERP System powered by the Frappe Framework",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/frappe/erpnext.git"
+  },
+  "homepage": "https://erpnext.com",
+  "author": "Frappe Technologies Pvt. Ltd.",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/frappe/erpnext/issues"
   }
 }

@@ -319,6 +319,110 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEquals(item.discount_amount, 110)
 		self.assertEquals(item.rate, 990)
 
+	def test_pricing_rule_for_product_discount_on_same_item(self):
+		frappe.delete_doc_if_exists('Pricing Rule', '_Test Pricing Rule')
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule",
+			"apply_on": "Item Code",
+			"currency": "USD",
+			"items": [{
+				"item_code": "_Test Item",
+			}],
+			"selling": 1,
+			"rate_or_discount": "Discount Percentage",
+			"rate": 0,
+			"min_qty": 0,
+			"max_qty": 7,
+			"discount_percentage": 17.5,
+			"price_or_product_discount": "Product",
+			"same_item": 1,
+			"free_qty": 1,
+			"company": "_Test Company"
+		}
+		frappe.get_doc(test_record.copy()).insert()
+
+		# With pricing rule
+		so = make_sales_order(item_code="_Test Item", qty=1)
+		so.load_from_db()
+		self.assertEqual(so.items[1].is_free_item, 1)
+		self.assertEqual(so.items[1].item_code, "_Test Item")
+
+
+	def test_pricing_rule_for_product_discount_on_different_item(self):
+		frappe.delete_doc_if_exists('Pricing Rule', '_Test Pricing Rule')
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Pricing Rule",
+			"apply_on": "Item Code",
+			"currency": "USD",
+			"items": [{
+				"item_code": "_Test Item",
+			}],
+			"selling": 1,
+			"rate_or_discount": "Discount Percentage",
+			"rate": 0,
+			"min_qty": 0,
+			"max_qty": 7,
+			"discount_percentage": 17.5,
+			"price_or_product_discount": "Product",
+			"same_item": 0,
+			"free_item": "_Test Item 2",
+			"free_qty": 1,
+			"company": "_Test Company"
+		}
+		frappe.get_doc(test_record.copy()).insert()
+
+		# With pricing rule
+		so = make_sales_order(item_code="_Test Item", qty=1)
+		so.load_from_db()
+		self.assertEqual(so.items[1].is_free_item, 1)
+		self.assertEqual(so.items[1].item_code, "_Test Item 2")
+	
+	def test_cumulative_pricing_rule(self):
+		frappe.delete_doc_if_exists('Pricing Rule', '_Test Cumulative Pricing Rule')
+		test_record = {
+			"doctype": "Pricing Rule",
+			"title": "_Test Cumulative Pricing Rule",
+			"apply_on": "Item Code",
+			"currency": "USD",
+			"items": [{
+				"item_code": "_Test Item",
+			}],
+			"is_cumulative": 1,
+			"selling": 1,
+			"applicable_for": "Customer",
+			"customer": "_Test Customer",
+			"rate_or_discount": "Discount Percentage",
+			"rate": 0,
+			"min_amt": 0,
+			"max_amt": 10000,
+			"discount_percentage": 17.5,
+			"price_or_product_discount": "Price",
+			"company": "_Test Company",
+			"valid_from": frappe.utils.nowdate(),
+			"valid_upto": frappe.utils.nowdate()
+		}
+		frappe.get_doc(test_record.copy()).insert()
+
+		args = frappe._dict({
+			"item_code": "_Test Item",
+			"company": "_Test Company",
+			"price_list": "_Test Price List",
+			"currency": "_Test Currency",
+			"doctype": "Sales Invoice",
+			"conversion_rate": 1,
+			"price_list_currency": "_Test Currency",
+			"plc_conversion_rate": 1,
+			"order_type": "Sales",
+			"customer": "_Test Customer",
+			"name": None,
+			"transaction_date": frappe.utils.nowdate()
+		})
+		details = get_item_details(args)
+
+		self.assertTrue(details)
+
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
 

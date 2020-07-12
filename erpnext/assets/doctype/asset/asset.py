@@ -22,6 +22,7 @@ class Asset(AccountsController):
 		self.validate_item()
 		self.set_missing_values()
 		self.prepare_depreciation_data()
+		self.validate_gross_and_purchase_amount()
 		if self.get("schedules"):
 			self.validate_expected_value_after_useful_life()
 
@@ -31,7 +32,7 @@ class Asset(AccountsController):
 		self.validate_in_use_date()
 		self.set_status()
 		self.make_asset_movement()
-		if not self.booked_fixed_asset and is_cwip_accounting_enabled(self.asset_category):
+		if not self.booked_fixed_asset and self.validate_make_gl_entry():
 			self.make_gl_entries()
 
 	def before_cancel(self):
@@ -123,6 +124,14 @@ class Asset(AccountsController):
 
 		if self.available_for_use_date and getdate(self.available_for_use_date) < getdate(self.purchase_date):
 			frappe.throw(_("Available-for-use Date should be after purchase date"))
+	
+	def validate_gross_and_purchase_amount(self):
+		if self.is_existing_asset: return
+		
+		if self.gross_purchase_amount and self.gross_purchase_amount != self.purchase_receipt_amount:
+			frappe.throw(_("Gross Purchase Amount should be {} to purchase amount of one single Asset. {}\
+				Please do not book expense of multiple assets against one single Asset.")
+				.format(frappe.bold("equal"), "<br>"), title=_("Invalid Gross Purchase Amount"))
 
 	def cancel_auto_gen_movement(self):
 		movements = frappe.db.sql(
@@ -447,18 +456,55 @@ class Asset(AccountsController):
 			for d in self.get('finance_books'):
 				if d.finance_book == self.default_finance_book:
 					return cint(d.idx) - 1
+	
+	def validate_make_gl_entry(self):
+		purchase_document = self.get_purchase_document()
+		asset_bought_with_invoice = purchase_document == self.purchase_invoice
+		fixed_asset_account, cwip_account = self.get_asset_accounts()
+		cwip_enabled = is_cwip_accounting_enabled(self.asset_category)
+		# check if expense already has been booked in case of cwip was enabled after purchasing asset
+		expense_booked = False
+		cwip_booked = False
+
+		if asset_bought_with_invoice:
+			expense_booked = frappe.db.sql("""SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s""",
+				(purchase_document, fixed_asset_account), as_dict=1)
+		else:
+			cwip_booked = frappe.db.sql("""SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s""",
+				(purchase_document, cwip_account), as_dict=1)
+
+		if cwip_enabled and (expense_booked or not cwip_booked):
+			# if expense has already booked from invoice or cwip is booked from receipt
+			return False
+		elif not cwip_enabled and (not expense_booked or cwip_booked):
+			# if cwip is disabled but expense hasn't been booked yet
+			return True
+		elif cwip_enabled:
+			# default condition
+			return True
+
+	def get_purchase_document(self):
+		asset_bought_with_invoice = self.purchase_invoice and frappe.db.get_value('Purchase Invoice', self.purchase_invoice, 'update_stock')
+		purchase_document = self.purchase_invoice if asset_bought_with_invoice else self.purchase_receipt
+
+		return purchase_document
+	
+	def get_asset_accounts(self):
+		fixed_asset_account = get_asset_category_account('fixed_asset_account', asset=self.name,
+					asset_category = self.asset_category, company = self.company)
+
+		cwip_account = get_asset_account("capital_work_in_progress_account",
+			self.name, self.asset_category, self.company)
+		
+		return fixed_asset_account, cwip_account
 
 	def make_gl_entries(self):
 		gl_entries = []
 
-		if ((self.purchase_receipt \
-			or (self.purchase_invoice and frappe.db.get_value('Purchase Invoice', self.purchase_invoice, 'update_stock')))
-			and self.purchase_receipt_amount and self.available_for_use_date <= nowdate()):
-			fixed_asset_account = get_asset_category_account('fixed_asset_account', asset=self.name,
-					asset_category = self.asset_category, company = self.company)
+		purchase_document = self.get_purchase_document()
+		fixed_asset_account, cwip_account = self.get_asset_accounts()
 
-			cwip_account = get_asset_account("capital_work_in_progress_account",
-				self.name, self.asset_category, self.company)
+		if (purchase_document and self.purchase_receipt_amount and self.available_for_use_date <= nowdate()):
 
 			gl_entries.append(self.get_gl_dict({
 				"account": cwip_account,
@@ -468,7 +514,7 @@ class Asset(AccountsController):
 				"credit": self.purchase_receipt_amount,
 				"credit_in_account_currency": self.purchase_receipt_amount,
 				"cost_center": self.cost_center
-			}))
+			}, item=self))
 
 			gl_entries.append(self.get_gl_dict({
 				"account": fixed_asset_account,
@@ -478,7 +524,7 @@ class Asset(AccountsController):
 				"debit": self.purchase_receipt_amount,
 				"debit_in_account_currency": self.purchase_receipt_amount,
 				"cost_center": self.cost_center
-			}))
+			}, item=self))
 
 		if gl_entries:
 			from erpnext.accounts.general_ledger import make_gl_entries
@@ -611,7 +657,7 @@ def get_asset_account(account_name, asset=None, asset_category=None, company=Non
 	if asset:
 		account = get_asset_category_account(account_name, asset=asset,
 				asset_category = asset_category, company = company)
-	
+
 	if not asset and not account:
 		account = get_asset_category_account(account_name, asset_category = asset_category, company = company)
 

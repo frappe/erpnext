@@ -461,7 +461,7 @@ class SalesInvoice(SellingController):
 
 		if pos:
 			self.allow_print_before_pay = pos.allow_print_before_pay
-			
+
 			if not for_validate:
 				self.tax_category = pos.get("tax_category")
 
@@ -478,13 +478,18 @@ class SalesInvoice(SellingController):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, pos.get(fieldname))
 
-			customer_price_list = frappe.get_value("Customer", self.customer, 'default_price_list')
-
 			if pos.get("company_address"):
 				self.company_address = pos.get("company_address")
 
-			if not customer_price_list:
-				self.set('selling_price_list', pos.get('selling_price_list'))
+			if self.customer:
+				customer_price_list, customer_group = frappe.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
+				customer_group_price_list = frappe.get_value("Customer Group", customer_group, 'default_price_list')
+				selling_price_list = customer_price_list or customer_group_price_list or pos.get('selling_price_list')
+			else:
+				selling_price_list = pos.get('selling_price_list')
+
+			if selling_price_list:
+				self.set('selling_price_list', selling_price_list)
 
 			if not for_validate:
 				self.update_stock = cint(pos.get("update_stock"))
@@ -515,13 +520,17 @@ class SalesInvoice(SellingController):
 			["account_type", "report_type", "account_currency"], as_dict=True)
 
 		if not account:
-			frappe.throw(_("Debit To is required"))
+			frappe.throw(_("Debit To is required"), title=_("Account Missing"))
 
 		if account.report_type != "Balance Sheet":
-			frappe.throw(_("Debit To account must be a Balance Sheet account"))
+			frappe.throw(_("Please ensure {} account is a Balance Sheet account. \
+					You can change the parent account to a Balance Sheet account or select a different account.")
+				.format(frappe.bold("Debit To")), title=_("Invalid Account"))
 
 		if self.customer and account.account_type != "Receivable":
-			frappe.throw(_("Debit To account must be a Receivable account"))
+			frappe.throw(_("Please ensure {} account is a Receivable account. \
+					Change the account type to Receivable or select a different account.")
+				.format(frappe.bold("Debit To")), title=_("Invalid Account"))
 
 		self.party_account_currency = account.account_currency
 
@@ -592,15 +601,20 @@ class SalesInvoice(SellingController):
 		"""check in manage account if sales order / delivery note required or not."""
 		if self.is_return:
 			return
-		dic = {'Sales Order':['so_required', 'is_pos'],'Delivery Note':['dn_required', 'update_stock']}
-		for i in dic:
-			if frappe.db.get_single_value('Selling Settings', dic[i][0]) == 'Yes':
+
+		prev_doc_field_map = {'Sales Order': ['so_required', 'is_pos'],'Delivery Note': ['dn_required', 'update_stock']}
+		for key, value in iteritems(prev_doc_field_map):
+			if frappe.db.get_single_value('Selling Settings', value[0]) == 'Yes':
+
+				if frappe.get_value('Customer', self.customer, value[0]):
+					continue
+
 				for d in self.get('items'):
-					if d.item_code:
-						is_stock_item = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
-						if (is_stock_item == 1\
-							and not d.get(i.lower().replace(' ','_')) and not self.get(dic[i][1])):
-							msgprint(_("{0} is mandatory for Item {1}").format(i,d.item_code), raise_exception=1)
+					if not d.item_code: continue
+
+					is_stock_item = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
+					if (d.item_code and is_stock_item ==1 and not d.get(key.lower().replace(' ', '_')) and not self.get(value[1])):
+						msgprint(_("{0} is mandatory for Item {1}").format(key, d.item_code), raise_exception=1)
 
 
 	def validate_proj_cust(self):
@@ -620,14 +634,14 @@ class SalesInvoice(SellingController):
 
 	def validate_item_code(self):
 		for d in self.get('items'):
-			if not d.item_code:
+			if not d.item_code and self.is_opening == "No":
 				msgprint(_("Item Code required at Row No {0}").format(d.idx), raise_exception=True)
 
 	def validate_warehouse(self):
 		super(SalesInvoice, self).validate_warehouse()
 
 		for d in self.get_item_list():
-			if not d.warehouse and frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
+			if not d.warehouse and d.item_code and frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
 				frappe.throw(_("Warehouse required for stock Item {0}").format(d.item_code))
 
 	def validate_delivery_note_if_update_stock(self):
@@ -780,7 +794,7 @@ class SalesInvoice(SellingController):
 
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2), merge_entries=False, from_repost=from_repost)
 
-			if repost_future_gle and cint(self.update_stock) \
+			if (repost_future_gle or self.flags.repost_future_gle) and cint(self.update_stock) \
 				and cint(auto_accounting_for_stock):
 					items, warehouses = self.get_items_and_warehouses()
 					update_gl_entries_after(self.posting_date, self.posting_time,
@@ -834,7 +848,7 @@ class SalesInvoice(SellingController):
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else None,
 					"against_voucher_type": self.doctype if cint(self.is_return) and self.return_against else None,
 					"cost_center": self.cost_center
-				}, self.party_account_currency)
+				}, self.party_account_currency, item=self)
 			)
 
 	def make_tax_gl_entries(self, gl_entries):
@@ -851,7 +865,7 @@ class SalesInvoice(SellingController):
 							tax.precision("base_tax_amount_after_discount_amount")) if account_currency==self.company_currency else
 							flt(tax.tax_amount_after_discount_amount, tax.precision("tax_amount_after_discount_amount"))),
 						"cost_center": tax.cost_center or self.cost_center
-					}, account_currency)
+					}, account_currency, item=tax)
 				)
 
 	def make_item_gl_entries(self, gl_entries):
@@ -871,7 +885,7 @@ class SalesInvoice(SellingController):
 
 					for gle in fixed_asset_gl_entries:
 						gle["against"] = self.customer
-						gl_entries.append(self.get_gl_dict(gle))
+						gl_entries.append(self.get_gl_dict(gle, item=item))
 
 					asset.db_set("disposal_date", self.posting_date)
 					asset.set_status("Sold" if self.docstatus==1 else None)
@@ -909,7 +923,7 @@ class SalesInvoice(SellingController):
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
 					"cost_center": self.cost_center
-				})
+				}, item=self)
 			)
 			gl_entries.append(
 				self.get_gl_dict({
@@ -918,7 +932,7 @@ class SalesInvoice(SellingController):
 					"against": self.customer,
 					"debit": self.loyalty_amount,
 					"remark": "Loyalty Points redeemed by the customer"
-				})
+				}, item=self)
 			)
 
 	def make_pos_gl_entries(self, gl_entries):
@@ -939,7 +953,7 @@ class SalesInvoice(SellingController):
 							"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 							"against_voucher_type": self.doctype,
 							"cost_center": self.cost_center
-						}, self.party_account_currency)
+						}, self.party_account_currency, item=self)
 					)
 
 					payment_mode_account_currency = get_account_currency(payment_mode.account)
@@ -952,7 +966,7 @@ class SalesInvoice(SellingController):
 								if payment_mode_account_currency==self.company_currency \
 								else payment_mode.amount,
 							"cost_center": self.cost_center
-						}, payment_mode_account_currency)
+						}, payment_mode_account_currency, item=self)
 					)
 
 	def make_gle_for_change_amount(self, gl_entries):
@@ -970,7 +984,7 @@ class SalesInvoice(SellingController):
 						"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 						"against_voucher_type": self.doctype,
 						"cost_center": self.cost_center
-					}, self.party_account_currency)
+					}, self.party_account_currency, item=self)
 				)
 
 				gl_entries.append(
@@ -979,7 +993,7 @@ class SalesInvoice(SellingController):
 						"against": self.customer,
 						"credit": self.base_change_amount,
 						"cost_center": self.cost_center
-					})
+					}, item=self)
 				)
 			else:
 				frappe.throw(_("Select change amount account"), title="Mandatory Field")
@@ -1003,7 +1017,7 @@ class SalesInvoice(SellingController):
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
 					"cost_center": self.cost_center
-				}, self.party_account_currency)
+				}, self.party_account_currency, item=self)
 			)
 			gl_entries.append(
 				self.get_gl_dict({
@@ -1014,7 +1028,7 @@ class SalesInvoice(SellingController):
 						self.precision("base_write_off_amount")) if write_off_account_currency==self.company_currency
 						else flt(self.write_off_amount, self.precision("write_off_amount"))),
 					"cost_center": self.cost_center or self.write_off_cost_center or default_cost_center
-				}, write_off_account_currency)
+				}, write_off_account_currency, item=self)
 			)
 
 	def make_gle_for_rounding_adjustment(self, gl_entries):
@@ -1031,8 +1045,7 @@ class SalesInvoice(SellingController):
 					"credit": flt(self.base_rounding_adjustment,
 						self.precision("base_rounding_adjustment")),
 					"cost_center": self.cost_center or round_off_cost_center,
-				}
-			))
+				}, item=self))
 
 	def update_billing_status_in_dn(self, update_modified=True):
 		updated_delivery_notes = []
@@ -1270,24 +1283,6 @@ class SalesInvoice(SellingController):
 
 		self.set_missing_values(for_validate = True)
 
-	def get_discounting_status(self):
-		status = None
-		if self.is_discounted:
-			invoice_discounting_list = frappe.db.sql("""
-				select status
-				from `tabInvoice Discounting` id, `tabDiscounted Invoice` d
-				where
-					id.name = d.parent
-					and d.sales_invoice=%s
-					and id.docstatus=1
-					and status in ('Disbursed', 'Settled')
-			""", self.name)
-			for d in invoice_discounting_list:
-				status = d[0]
-				if status == "Disbursed":
-					break
-		return status
-
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
 			if self.get('amended_from'):
@@ -1296,6 +1291,12 @@ class SalesInvoice(SellingController):
 
 		precision = self.precision("outstanding_amount")
 		outstanding_amount = flt(self.outstanding_amount, precision)
+		due_date = getdate(self.due_date)
+		nowdate = getdate()
+
+		discounting_status = None
+		if self.is_discounted:
+			discountng_status = get_discounting_status(self.name)
 
 		if not status:
 			if self.docstatus == 2:
@@ -1323,6 +1324,26 @@ class SalesInvoice(SellingController):
 
 		if update:
 			self.db_set('status', self.status, update_modified=update_modified)
+
+def get_discounting_status(sales_invoice):
+	status = None
+
+	invoice_discounting_list = frappe.db.sql("""
+		select status
+		from `tabInvoice Discounting` id, `tabDiscounted Invoice` d
+		where
+			id.name = d.parent
+			and d.sales_invoice=%s
+			and id.docstatus=1
+			and status in ('Disbursed', 'Settled')
+	""", sales_invoice)
+
+	for d in invoice_discounting_list:
+		status = d[0]
+		if status == "Disbursed":
+			break
+
+	return status
 
 def validate_inter_company_party(doctype, party, company, inter_company_reference):
 	if not party:
@@ -1491,6 +1512,21 @@ def get_inter_company_details(doc, doctype):
 		"company": company
 	}
 
+def get_internal_party(parties, link_doctype, doc):
+	if len(parties) == 1:
+			party = parties[0].name
+	else:
+		# If more than one Internal Supplier/Customer, get supplier/customer on basis of address
+		if doc.get('company_address') or doc.get('shipping_address'):
+			party = frappe.db.get_value("Dynamic Link", {"parent": doc.get('company_address') or doc.get('shipping_address'),
+			"parenttype": "Address", "link_doctype": link_doctype}, "link_name")
+
+			if not party:
+				party = parties[0].name
+		else:
+			party = parties[0].name
+
+	return party
 
 def validate_inter_company_transaction(doc, doctype):
 
@@ -1578,6 +1614,9 @@ def get_loyalty_programs(customer):
 		return []
 	else:
 		return lp_details
+
+def on_doctype_update():
+	frappe.db.add_index("Sales Invoice", ["customer", "is_return", "return_against"])
 
 @frappe.whitelist()
 def create_invoice_discounting(source_name, target_doc=None):

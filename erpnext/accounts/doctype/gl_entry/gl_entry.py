@@ -122,8 +122,8 @@ class GLEntry(Document):
 			from tabAccount where name=%s""", self.account, as_dict=1)[0]
 
 		if ret.is_group==1:
-			frappe.throw(_("{0} {1}: Account {2} cannot be a Group")
-				.format(self.voucher_type, self.voucher_no, self.account))
+			frappe.throw(_('''{0} {1}: Account {2} is a Group Account and group accounts cannot be used in
+				transactions''').format(self.voucher_type, self.voucher_no, self.account))
 
 		if ret.docstatus==2:
 			frappe.throw(_("{0} {1}: Account {2} is inactive")
@@ -254,6 +254,9 @@ def update_against_account(voucher_type, voucher_no):
 		if d.against != new_against:
 			frappe.db.set_value("GL Entry", d.name, "against", new_against)
 
+def on_doctype_update():
+	frappe.db.add_index("GL Entry", ["against_voucher_type", "against_voucher"])
+	frappe.db.add_index("GL Entry", ["voucher_type", "voucher_no"])
 
 def rename_gle_sle_docs():
 	for doctype in ["GL Entry", "Stock Ledger Entry"]:

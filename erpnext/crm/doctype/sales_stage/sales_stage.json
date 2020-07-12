@@ -1,4 +1,6 @@
 {
+ "actions": [],
+ "allow_rename": 1,
  "autoname": "field:stage_name",
  "creation": "2018-10-01 09:28:16.399518",
  "doctype": "DocType",
@@ -15,7 +17,8 @@
    "unique": 1
   }
  ],
- "modified": "2020-03-03 15:41:07.848822",
+ "links": [],
+ "modified": "2020-05-20 12:37:17.431879",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Sales Stage",

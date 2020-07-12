@@ -18,7 +18,7 @@
  "is_standard": 1,
  "login_required": 1,
  "max_attachment_size": 0,
- "modified": "2019-06-27 22:58:49.609672",
+ "modified": "2020-05-19 15:08:45.361878",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "issues",
@@ -58,7 +58,7 @@
    "options": "Open\nReplied\nHold\nClosed",
    "read_only": 1,
    "reqd": 0,
-   "show_in_filter": 0
+   "show_in_filter": 1
   },
   {
    "allow_read_on_all_link_options": 0,
@@ -76,7 +76,7 @@
   {
    "allow_read_on_all_link_options": 0,
    "fieldname": "description",
-   "fieldtype": "Text",
+   "fieldtype": "Text Editor",
    "hidden": 0,
    "label": "Description",
    "max_length": 0,

@@ -46,7 +46,9 @@ def execute(filters=None):
 				re_order_level = d.warehouse_reorder_level
 				re_order_qty = d.warehouse_reorder_qty
 
-		shortage_qty = re_order_level - flt(bin.projected_qty) if (re_order_level or re_order_qty) else 0
+		shortage_qty = 0
+		if (re_order_level or re_order_qty) and re_order_level > bin.projected_qty:
+			shortage_qty = re_order_level - flt(bin.projected_qty)
 
 		data.append([item.name, item.item_group, item.brand, bin.warehouse,
 			item.alt_uom or item.stock_uom if filters.qty_field == "Contents Qty" else item.stock_uom,

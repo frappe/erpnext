@@ -96,7 +96,7 @@ def get_columns(filters):
 			"label": _("Customer Group"),
 			"fieldtype": "Link",
 			"fieldname": "customer_group",
-			"options": "customer Group",
+			"options": "Customer Group",
 			"width": 120
 		},
 		{
@@ -121,8 +121,8 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Billed Amount"),
-			"fieldname": "rate",
-			"options": "billed_amount",
+			"fieldtype": "currency",
+			"fieldname": "billed_amount",
 			"width": 120
 		},
 		{

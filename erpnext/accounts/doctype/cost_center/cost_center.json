@@ -1,7 +1,6 @@
 {
  "allow_copy": 1,
  "allow_import": 1,
- "allow_rename": 1,
  "creation": "2013-01-23 19:57:17",
  "description": "Track separate Income and Expense for product verticals or divisions.",
  "doctype": "DocType",
@@ -129,10 +128,13 @@
  ],
  "icon": "fa fa-money",
  "idx": 1,
- "modified": "2020-03-03 15:35:22.811823",
+ "is_tree": 1,
+ "links": [],
+ "modified": "2020-04-29 16:09:30.025214",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Cost Center",
+ "nsm_parent_field": "parent_cost_center",
  "owner": "Administrator",
  "permissions": [
   {

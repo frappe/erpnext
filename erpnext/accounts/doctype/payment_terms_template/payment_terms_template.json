@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:template_name",
@@ -8,6 +9,7 @@
  "engine": "InnoDB",
  "field_order": [
   "template_name",
+  "allocate_payment_based_on_payment_terms",
   "terms"
  ],
  "fields": [
@@ -23,9 +25,17 @@
    "label": "Payment Terms",
    "options": "Payment Terms Template Detail",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "description": "If this checkbox is checked, paid amount will be splitted and allocated as per the amounts in payment schedule against each payment term",
+   "fieldname": "allocate_payment_based_on_payment_terms",
+   "fieldtype": "Check",
+   "label": "Allocate Payment Based On Payment Terms"
   }
  ],
- "modified": "2020-03-03 15:36:33.987536",
+ "links": [],
+ "modified": "2020-04-01 15:35:18.112619",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Terms Template",
@@ -44,16 +54,22 @@
    "write": 1
   },
   {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Accounts User"
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
   },
   {
    "create": 1,
    "delete": 1,
    "email": 1,
    "export": 1,
-   "import": 1,
    "print": 1,
    "read": 1,
    "report": 1,

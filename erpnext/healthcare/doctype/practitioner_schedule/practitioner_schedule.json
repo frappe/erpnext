@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:schedule_name",
@@ -8,9 +9,10 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "disabled",
+  "schedule_details_section",
   "schedule_name",
-  "time_slots",
-  "disabled"
+  "time_slots"
  ],
  "fields": [
   {
@@ -33,11 +35,16 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled",
-   "print_hide": 1,
-   "report_hide": 1
+   "print_hide": 1
+  },
+  {
+   "fieldname": "schedule_details_section",
+   "fieldtype": "Section Break",
+   "label": "Schedule Details"
   }
  ],
- "modified": "2020-03-03 15:41:59.712886",
+ "links": [],
+ "modified": "2020-01-31 12:21:45.975488",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Practitioner Schedule",

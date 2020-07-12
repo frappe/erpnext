@@ -24,26 +24,6 @@ frappe.ui.form.on('Asset Maintenance', {
 				return indicator;
 			}
 		);
-
-		frm.set_query('select_serial_no', function(doc){
-			return {
-				asset: frm.doc.asset_name
-			}
-		})
-	},
-
-	select_serial_no: (frm) => {
-		let serial_nos = frm.doc.serial_no || frm.doc.select_serial_no;
-		if (serial_nos) {
-			serial_nos = serial_nos.split('\n');
-			serial_nos.push(frm.doc.select_serial_no);
-
-			const unique_sn = serial_nos.filter(function(elem, index, self) {
-			    return index === self.indexOf(elem);
-			});
-
-			frm.set_value("serial_no", unique_sn.join('\n'));
-		}
 	},
 
 	refresh: (frm) => {
@@ -93,25 +73,6 @@ frappe.ui.form.on('Asset Maintenance Task', {
 	},
 	end_date: (frm, cdt, cdn)  => {
 		get_next_due_date(frm, cdt, cdn);
-	},
-	assign_to: (frm, cdt, cdn)  => {
-		var d = locals[cdt][cdn];
-		if (frm.doc.__islocal) {
-			frappe.model.set_value(cdt, cdn, "assign_to", "");
-			frappe.model.set_value(cdt, cdn, "assign_to_name", "");
-			frappe.throw(__("Please save before assigning task."));
-		}
-		if (d.assign_to) {
-			return frappe.call({
-				method: 'erpnext.assets.doctype.asset_maintenance.asset_maintenance.assign_tasks',
-				args: {
-					asset_maintenance_name: frm.doc.name,
-					assign_to_member: d.assign_to,
-					maintenance_task: d.maintenance_task,
-					next_due_date: d.next_due_date
-				}
-			});
-		}
 	}
 });
 

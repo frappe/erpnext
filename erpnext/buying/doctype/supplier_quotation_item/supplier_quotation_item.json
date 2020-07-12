@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-05-22 12:43:10",
  "doctype": "DocType",
@@ -569,8 +570,7 @@
   {
    "fieldname": "manufacturer_part_no",
    "fieldtype": "Data",
-   "label": "Manufacturer Part Number",
-   "read_only": 1
+   "label": "Manufacturer Part Number"
   },
   {
    "fieldname": "column_break_15",
@@ -910,7 +910,8 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:50:25.254742",
+ "links": [],
+ "modified": "2020-04-07 18:35:51.175947",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation Item",

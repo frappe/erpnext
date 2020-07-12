@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "naming_series:",
  "creation": "2017-10-29 11:53:09.523362",
  "doctype": "DocType",
@@ -37,7 +38,6 @@
   "get_items_for_mr",
   "section_break_27",
   "mr_items",
-  "projected_qty_formula",
   "other_details",
   "total_planned_qty",
   "total_produced_qty",
@@ -49,9 +49,9 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "hidden": 1,
    "label": "Naming Series",
-   "options": "MFG-PP-"
+   "options": "MFG-PP-.YYYY.-",
+   "reqd": 1
   },
   {
    "fieldname": "company",
@@ -138,7 +138,7 @@
    "depends_on": "eval: doc.get_items_from == \"Sales Order\"",
    "fieldname": "sales_orders_detail",
    "fieldtype": "Section Break",
-   "label": "Sales Orders Detail"
+   "label": "Sales Orders"
   },
   {
    "fieldname": "get_sales_orders",
@@ -209,7 +209,7 @@
   },
   {
    "default": "0",
-   "description": "If enabled, then system will create the material even if the raw materials are available",
+   "description": "To know more about projected quantity, <a href=\"https://erpnext.com/docs/user/manual/en/stock/projected-quantity\" style=\"text-decoration: underline;\" target=\"_blank\">click here</a>.",
    "fieldname": "ignore_existing_ordered_qty",
    "fieldtype": "Check",
    "label": "Ignore Existing Projected Quantity"
@@ -227,7 +227,7 @@
   {
    "fieldname": "download_materials_required",
    "fieldtype": "Button",
-   "label": "Download Materials Required"
+   "label": "Download Required Materials"
   },
   {
    "fieldname": "get_items_for_mr",
@@ -244,11 +244,6 @@
    "label": "Material Request Plan Item",
    "no_copy": 1,
    "options": "Material Request Plan Item"
-  },
-  {
-   "fieldname": "projected_qty_formula",
-   "fieldtype": "HTML",
-   "label": "Projected Qty Formula"
   },
   {
    "collapsible": 1,
@@ -300,7 +295,8 @@
  ],
  "icon": "fa fa-calendar",
  "is_submittable": 1,
- "modified": "2020-03-03 16:15:04.214254",
+ "links": [],
+ "modified": "2019-12-04 15:58:50.940460",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:territory_name",
@@ -120,11 +121,14 @@
  ],
  "icon": "fa fa-map-marker",
  "idx": 1,
- "modified": "2020-03-03 15:35:23.219604",
+ "is_tree": 1,
+ "links": [],
+ "modified": "2020-03-18 18:26:02.055750",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Territory",
  "name_case": "Title Case",
+ "nsm_parent_field": "parent_territory",
  "owner": "Administrator",
  "permissions": [
   {

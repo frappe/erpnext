@@ -1,7 +1,7 @@
 frappe.provide("frappe.treeview_settings")
 
 frappe.treeview_settings["Account"] = {
-	breadcrumbs: "Accounts",
+	breadcrumb: "Accounts",
 	title: __("Chart Of Accounts"),
 	get_tree_root: false,
 	filters: [
@@ -14,6 +14,9 @@ frappe.treeview_settings["Account"] = {
 			on_change: function() {
 				var me = frappe.treeview_settings['Account'].treeview;
 				var company = me.page.fields_dict.company.get_value();
+				if (!company) {
+					frappe.throw(__("Please set a Company"));
+				}
 				frappe.call({
 					method: "erpnext.accounts.doctype.account.account.get_root_company",
 					args: {

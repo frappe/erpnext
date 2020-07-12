@@ -40,6 +40,8 @@
   "lead_name",
   "industry",
   "market_segment",
+  "so_required",
+  "dn_required",
   "address_contacts",
   "address_html",
   "column_break1",
@@ -501,12 +503,25 @@
   {
    "fieldname": "column_break_9",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "so_required",
+   "fieldtype": "Check",
+   "label": "Allow Sales Invoice Creation Without Sales Order"
+  },
+  {
+   "default": "0",
+   "fieldname": "dn_required",
+   "fieldtype": "Check",
+   "label": "Allow Sales Invoice Creation Without Delivery Note"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2020-03-08 00:30:19.128288",
+ "links": [],
+ "modified": "2020-03-17 11:03:42.706907",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

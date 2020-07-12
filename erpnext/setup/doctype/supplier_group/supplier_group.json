@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:supplier_group_name",
@@ -104,10 +105,13 @@
  ],
  "icon": "fa fa-flag",
  "idx": 1,
- "modified": "2020-03-03 15:36:35.424272",
+ "is_tree": 1,
+ "links": [],
+ "modified": "2020-03-18 18:26:07.179330",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Supplier Group",
+ "nsm_parent_field": "parent_supplier_group",
  "owner": "Administrator",
  "permissions": [
   {

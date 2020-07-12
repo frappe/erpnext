@@ -23,10 +23,10 @@
    "default": "PMO-",
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
-   "options": "PMO-"
+   "options": "PMO-",
+   "reqd": 1
   },
   {
    "fieldname": "company",
@@ -59,7 +59,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "allow_bulk_edit": 1,
    "fieldname": "references",
    "fieldtype": "Table",
    "label": "Payment Order Reference",
@@ -108,7 +107,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 16:14:08.878995",
+ "modified": "2020-04-06 18:00:56.022642",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Order",

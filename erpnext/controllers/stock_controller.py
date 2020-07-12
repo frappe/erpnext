@@ -19,8 +19,10 @@ class QualityInspectionNotSubmittedError(frappe.ValidationError): pass
 class StockController(AccountsController):
 	def validate(self):
 		super(StockController, self).validate()
-		self.validate_inspection()
+		if not self.get('is_return'):
+			self.validate_inspection()
 		self.validate_serialized_batch()
+		self.validate_customer_provided_item()
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if self.docstatus == 2:
@@ -34,7 +36,7 @@ class StockController(AccountsController):
 					gl_entries = self.get_gl_entries(warehouse_account)
 				make_gl_entries(gl_entries, from_repost=from_repost)
 
-			if repost_future_gle:
+			if (repost_future_gle or self.flags.repost_future_gle):
 				items, warehouses = self.get_items_and_warehouses()
 				update_gl_entries_after(self.posting_date, self.posting_time, warehouses, items,
 					warehouse_account, company=self.company)
@@ -230,7 +232,9 @@ class StockController(AccountsController):
 
 	def check_expense_account(self, item):
 		if not item.get("expense_account"):
-			frappe.throw(_("Expense or Difference account is mandatory for Item {0} as it impacts overall stock value").format(item.item_code))
+			frappe.throw(_("Row #{0}: Expense Account not set for Item {1}. Please set an Expense \
+				Account in the Items table").format(item.idx, frappe.bold(item.item_code)),
+				title=_("Expense Account Missing"))
 
 		else:
 			is_expense_account = frappe.db.get_value("Account",
@@ -245,6 +249,10 @@ class StockController(AccountsController):
 	def delete_auto_created_batches(self):
 		for d in self.items:
 			if not d.batch_no: continue
+
+			serial_nos = [sr.name for sr in frappe.get_all("Serial No", {'batch_no': d.batch_no})]
+			if serial_nos:
+				frappe.db.set_value("Serial No", { 'name': ['in', serial_nos] }, "batch_no", None)
 
 			d.batch_no = None
 			d.db_set("batch_no", None)
@@ -409,6 +417,12 @@ class StockController(AccountsController):
 		for blanket_order in blanket_orders:
 			frappe.get_doc("Blanket Order", blanket_order).update_ordered_qty()
 
+	def validate_customer_provided_item(self):
+		for d in self.get('items'):
+			# Customer Provided parts will have zero valuation rate
+			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
+				d.allow_zero_valuation_rate = 1
+
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None, company=None):
 	def _delete_gl_entries(voucher_type, voucher_no):
@@ -465,7 +479,7 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
 		from `tabStock Ledger Entry` sle
 		where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) {condition}
-		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc""".format(condition=condition),
+		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc for update""".format(condition=condition),
 		tuple([posting_date, posting_time] + values), as_dict=True):
 			future_stock_vouchers.append([d.voucher_type, d.voucher_no])
 

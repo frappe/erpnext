@@ -7,11 +7,13 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.permissions import add_permission, update_permission_property
 from erpnext.regional.italy import fiscal_regimes, tax_exemption_reasons, mode_of_payment_codes, vat_collectability_options
 
 def setup(company=None, patch=True):
 	make_custom_fields()
 	setup_report()
+	add_permissions()
 
 def make_custom_fields(update=True):
 	invoice_item_fields = [
@@ -155,6 +157,31 @@ def make_custom_fields(update=True):
 				fetch_from="country.code"),
 			dict(fieldname='state_code', label='State Code',
 				fieldtype='Data', insert_after='state', print_hide=1)
+		],
+		'Purchase Invoice': [
+			dict(fieldname='document_type', label='Document Type',
+				fieldtype='Data', insert_after='company', print_hide=1, read_only=1
+				),
+			dict(fieldname='destination_code', label='Destination Code',
+				fieldtype='Data', insert_after='company', print_hide=1, read_only=1
+				),
+			dict(fieldname='imported_grand_total', label='Imported Grand Total',
+				fieldtype='Data', insert_after='update_auto_repeat_reference', print_hide=1, read_only=1
+				)
+		],
+		'Purchase Taxes and Charges': [
+			dict(fieldname='tax_rate', label='Tax Rate',
+				fieldtype='Data', insert_after='parenttype', print_hide=1, read_only=0
+				)
+		],
+		'Supplier': [
+			dict(fieldname='fiscal_code', label='Fiscal Code',
+				fieldtype='Data', insert_after='tax_id', print_hide=1, read_only=1
+				),
+			dict(fieldname='fiscal_regime', label='Fiscal Regime',
+				fieldtype='Select', insert_after='fiscal_code', print_hide=1, read_only=1,
+				options= "\nRF01\nRF02\nRF04\nRF05\nRF06\nRF07\nRF08\nRF09\nRF10\nRF11\nRF12\nRF13\nRF14\nRF15\nRF16\nRF17\nRF18\nRF19"
+				)
 		]
 	}
 
@@ -175,3 +202,21 @@ def setup_report():
 				dict(role='Accounts Manager')
 			]
 		)).insert()
+
+def add_permissions():
+	doctype = 'Import Supplier Invoice'
+	add_permission(doctype, 'All', 0)
+
+	for role in ('Accounts Manager', 'Accounts User','Purchase User', 'Auditor'):
+		add_permission(doctype, role, 0)
+		update_permission_property(doctype, role, 0, 'print', 1)
+		update_permission_property(doctype, role, 0, 'report', 1)
+
+		if role in ('Accounts Manager', 'Accounts User'):
+			update_permission_property(doctype, role, 0, 'write', 1)
+			update_permission_property(doctype, role, 0, 'create', 1)
+
+	update_permission_property(doctype, 'Accounts Manager', 0, 'delete', 1)
+	add_permission(doctype, 'Accounts Manager', 1)
+	update_permission_property(doctype, 'Accounts Manager', 1, 'write', 1)
+	update_permission_property(doctype, 'Accounts Manager', 1, 'create', 1)

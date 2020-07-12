@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-03-29 18:22:12",
  "doctype": "DocType",
@@ -26,6 +27,7 @@
   "image",
   "image_view",
   "quantity_and_rate",
+  "set_basic_rate_manually",
   "qty",
   "basic_rate",
   "basic_amount",
@@ -484,8 +486,7 @@
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
-   "options": "Project",
-   "read_only": 1
+   "options": "Project"
   },
   {
    "fieldname": "po_detail",
@@ -525,11 +526,21 @@
    "fieldname": "hide_item_code",
    "fieldtype": "Check",
    "label": "Hide Item Code"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:parent.purpose===\"Repack\" && doc.t_warehouse",
+   "fieldname": "set_basic_rate_manually",
+   "fieldtype": "Check",
+   "label": "Set Basic Rate Manually",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:50:32.438065",
+ "links": [],
+ "modified": "2020-06-08 12:57:03.172887",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

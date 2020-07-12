@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:assessment_group_name",
@@ -61,10 +62,13 @@
    "options": "Assessment Group"
   }
  ],
- "modified": "2020-03-03 15:42:32.734727",
+ "is_tree": 1,
+ "links": [],
+ "modified": "2020-03-18 18:26:07.834596",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Assessment Group",
+ "nsm_parent_field": "parent_assessment_group",
  "owner": "Administrator",
  "permissions": [
   {

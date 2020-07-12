@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:sales_person_name",
@@ -142,10 +143,13 @@
  ],
  "icon": "icon-user",
  "idx": 1,
- "modified": "2020-03-03 15:35:22.401530",
+ "is_tree": 1,
+ "links": [],
+ "modified": "2020-03-18 18:26:01.076203",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Person",
+ "nsm_parent_field": "parent_sales_person",
  "owner": "Administrator",
  "permissions": [
   {

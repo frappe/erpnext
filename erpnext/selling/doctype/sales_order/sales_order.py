@@ -35,7 +35,6 @@ class SalesOrder(SellingController):
 
 	def validate(self):
 		super(SalesOrder, self).validate()
-		self.validate_order_type()
 		self.validate_delivery_date()
 		self.validate_proj_cust()
 		self.validate_po()
@@ -100,9 +99,6 @@ class SalesOrder(SellingController):
 				if not res:
 					frappe.msgprint(_("Quotation {0} not of type {1}")
 						.format(d.prevdoc_docname, self.order_type))
-
-	def validate_order_type(self):
-		super(SalesOrder, self).validate_order_type()
 
 	def validate_delivery_date(self):
 		if self.order_type == 'Sales' and not self.skip_delivery_note:
@@ -501,7 +497,7 @@ def close_or_unclose_sales_orders(names, status):
 
 def get_requested_item_qty(sales_order):
 	return frappe._dict(frappe.db.sql("""
-		select sales_order_item, sum(stock_qty)
+		select sales_order_item, sum(qty)
 		from `tabMaterial Request Item`
 		where docstatus = 1
 			and sales_order = %s
@@ -512,16 +508,12 @@ def get_requested_item_qty(sales_order):
 def make_material_request(source_name, target_doc=None):
 	requested_item_qty = get_requested_item_qty(source_name)
 
-	def postprocess(source, doc):
-		doc.material_request_type = "Purchase"
-
 	def update_item(source, target, source_parent):
 		# qty is for packed items, because packed items don't have stock_qty field
-		qty = source.get("stock_qty") or source.get("qty")
+		qty = source.get("qty")
 		target.project = source_parent.project
 		target.qty = qty - requested_item_qty.get(source.name, 0)
-		target.conversion_factor = 1
-		target.stock_qty = qty - requested_item_qty.get(source.name, 0)
+		target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
 
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -542,14 +534,12 @@ def make_material_request(source_name, target_doc=None):
 			"doctype": "Material Request Item",
 			"field_map": {
 				"name": "sales_order_item",
-				"parent": "sales_order",
-				"stock_uom": "uom",
-				"stock_qty": "qty"
+				"parent": "sales_order"
 			},
 			"condition": lambda doc: not frappe.db.exists('Product Bundle', doc.item_code) and doc.stock_qty > requested_item_qty.get(doc.name, 0),
 			"postprocess": update_item
 		}
-	}, target_doc, postprocess)
+	}, target_doc)
 
 	return doc
 
@@ -768,7 +758,6 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			target.set_advances()
 
 	def set_missing_values(source, target):
-		target.is_pos = 0
 		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = True
 		target.run_method("set_missing_values")
@@ -989,7 +978,8 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 			 		],
 					"field_no_map": [
 						"rate",
-						"price_list_rate"
+						"price_list_rate",
+						"item_tax_template"
 					],
 					"postprocess": update_item,
 					"condition": lambda doc: doc.ordered_qty < doc.qty and doc.supplier == supplier and doc.item_code in selected_items
@@ -1157,7 +1147,7 @@ def create_pick_list(source_name, target_doc=None):
 		},
 	}, target_doc)
 
-	doc.purpose = 'Delivery against Sales Order'
+	doc.purpose = 'Delivery'
 
 	doc.set_item_locations()
 

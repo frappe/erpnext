@@ -144,12 +144,5 @@ frappe.query_reports["Accounts Payable"] = {
 	initial_depth: 1
 }
 
-erpnext.dimension_filters.forEach((dimension) => {
-	frappe.query_reports["Accounts Payable"].filters.splice(9, 0 ,{
-		"fieldname": dimension["fieldname"],
-		"label": __(dimension["label"]),
-		"fieldtype": "Link",
-		"options": dimension["document_type"]
-	});
-});
+erpnext.utils.add_dimensions('Accounts Payable', 9);
 

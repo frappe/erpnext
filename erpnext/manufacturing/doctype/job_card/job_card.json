@@ -1,10 +1,11 @@
 {
- "autoname": "PO-JOB.#####",
+ "autoname": "naming_series:",
  "creation": "2018-07-09 17:23:29.518745",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "work_order",
   "bom_no",
   "workstation",
@@ -12,27 +13,34 @@
   "column_break_4",
   "posting_date",
   "company",
+  "remarks",
+  "production_section",
+  "production_item",
+  "item_name",
   "for_quantity",
   "wip_warehouse",
-  "timing_detail",
+  "column_break_12",
   "employee",
+  "employee_name",
+  "status",
+  "project",
+  "timing_detail",
   "time_logs",
   "section_break_13",
   "total_completed_qty",
-  "column_break_15",
   "total_time_in_mins",
+  "column_break_15",
   "section_break_8",
   "items",
   "more_information",
   "operation_id",
   "transferred_qty",
   "requested_qty",
-  "project",
-  "remarks",
   "column_break_20",
-  "status",
+  "barcode",
   "job_started",
   "started_time",
+  "current_time",
   "amended_from"
  ],
  "fields": [
@@ -40,13 +48,14 @@
    "fieldname": "work_order",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Work Order",
    "options": "Work Order",
-   "read_only": 1,
    "reqd": 1,
    "search_index": 1
   },
   {
+   "fetch_from": "work_order.bom_no",
    "fieldname": "bom_no",
    "fieldtype": "Link",
    "label": "BOM No",
@@ -90,8 +99,7 @@
    "fieldname": "for_quantity",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "For Quantity",
-   "reqd": 1
+   "label": "Qty To Manufacture"
   },
   {
    "fieldname": "wip_warehouse",
@@ -108,10 +116,12 @@
   {
    "fieldname": "employee",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Employee",
    "options": "Employee"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "time_logs",
    "fieldtype": "Table",
    "label": "Time Logs",
@@ -197,7 +207,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "options": "Open\nWork In Progress\nMaterial Transferred\nSubmitted\nCancelled\nCompleted",
+   "options": "Open\nWork In Progress\nMaterial Transferred\nOn Hold\nSubmitted\nCancelled\nCompleted",
    "read_only": 1
   },
   {
@@ -227,10 +237,60 @@
    "options": "Job Card",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "PO-JOB.#####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "PO-JOB.#####",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Read Only",
+   "label": "Employee Name"
+  },
+  {
+   "fieldname": "production_section",
+   "fieldtype": "Section Break",
+   "label": "Production"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "work_order.production_item",
+   "fieldname": "production_item",
+   "fieldtype": "Read Only",
+   "label": "Production Item"
+  },
+  {
+   "fieldname": "barcode",
+   "fieldtype": "Barcode",
+   "label": "Barcode",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "work_order.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Read Only",
+   "label": "Item Name"
+  },
+  {
+   "fieldname": "current_time",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Current Time",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:37:43.244423",
+ "modified": "2020-03-27 13:36:35.417502",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

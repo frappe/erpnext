@@ -188,6 +188,23 @@ $.extend(erpnext.utils, {
 		})
 	},
 
+	add_dimensions: function(report_name, index) {
+		let filters = frappe.query_reports[report_name].filters;
+
+		erpnext.dimension_filters.forEach((dimension) => {
+			let found = filters.some(el => el.fieldname === dimension['fieldname']);
+
+			if (!found) {
+				filters.splice(index, 0 ,{
+					"fieldname": dimension["fieldname"],
+					"label": __(dimension["label"]),
+					"fieldtype": "Link",
+					"options": dimension["document_type"]
+				});
+			}
+		});
+	},
+
 	make_subscription: function(doctype, docname) {
 		frappe.call({
 			method: "frappe.automation.doctype.auto_repeat.auto_repeat.make_auto_repeat",
@@ -539,46 +556,66 @@ erpnext.utils.update_child_items = function(opts) {
 	const cannot_add_row = (typeof opts.cannot_add_row === 'undefined') ? true : opts.cannot_add_row;
 	const child_docname = (typeof opts.cannot_add_row === 'undefined') ? "items" : opts.child_docname;
 	this.data = [];
+	const fields = [{
+		fieldtype:'Data',
+		fieldname:"docname",
+		read_only: 1,
+		hidden: 1,
+	}, {
+		fieldtype:'Link',
+		fieldname:"item_code",
+		options: 'Item',
+		in_list_view: 1,
+		read_only: 0,
+		disabled: 0,
+		label: __('Item Code')
+	}, {
+		fieldtype:'Float',
+		fieldname:"qty",
+		default: 0,
+		read_only: 0,
+		in_list_view: 1,
+		label: __('Qty')
+	}, {
+		fieldtype:'Currency',
+		fieldname:"rate",
+		default: 0,
+		read_only: 0,
+		in_list_view: 1,
+		label: __('Rate')
+	}];
+
+	if (frm.doc.doctype == 'Sales Order' || frm.doc.doctype == 'Purchase Order' ) {
+		fields.splice(2, 0, {
+			fieldtype: 'Date',
+			fieldname: frm.doc.doctype == 'Sales Order' ? "delivery_date" : "schedule_date",
+			in_list_view: 1,
+			label: frm.doc.doctype == 'Sales Order' ? __("Delivery Date") : __("Reqd by date"),
+			reqd: 1
+		})
+		fields.splice(3, 0, {
+			fieldtype: 'Float',
+			fieldname: "conversion_factor",
+			in_list_view: 1,
+			label: __("Conversion Factor")
+		})
+	}
+
 	const dialog = new frappe.ui.Dialog({
 		title: __("Update Items"),
 		fields: [
-			{fieldtype:'Section Break', label: __('Items')},
 			{
 				fieldname: "trans_items",
 				fieldtype: "Table",
+				label: "Items",
 				cannot_add_rows: cannot_add_row,
 				in_place_edit: true,
+				reqd: 1,
 				data: this.data,
 				get_data: () => {
 					return this.data;
 				},
-				fields: [{
-					fieldtype:'Data',
-					fieldname:"docname",
-					hidden: 0,
-				}, {
-					fieldtype:'Link',
-					fieldname:"item_code",
-					options: 'Item',
-					in_list_view: 1,
-					read_only: 0,
-					disabled: 0,
-					label: __('Item Code')
-				}, {
-					fieldtype:'Float',
-					fieldname:"qty",
-					default: 0,
-					read_only: 0,
-					in_list_view: 1,
-					label: __('Qty')
-				}, {
-					fieldtype:'Currency',
-					fieldname:"rate",
-					default: 0,
-					read_only: 0,
-					in_list_view: 1,
-					label: __('Rate')
-				}]
+				fields: fields
 			},
 		],
 		primary_action: function() {
@@ -607,6 +644,9 @@ erpnext.utils.update_child_items = function(opts) {
 			"docname": d.name,
 			"name": d.name,
 			"item_code": d.item_code,
+			"delivery_date": d.delivery_date,
+			"schedule_date": d.schedule_date,
+			"conversion_factor": d.conversion_factor,
 			"qty": d.qty,
 			"rate": d.rate,
 		});

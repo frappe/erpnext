@@ -1,12 +1,20 @@
 from __future__ import unicode_literals
+import frappe
 from frappe import _
 
 def get_data():
-	return [
+	config =  [
 		{
 			"label": _("Purchasing"),
 			"icon": "fa fa-star",
 			"items": [
+				{
+					"type": "doctype",
+					"name": "Material Request",
+					"onboard": 1,
+					"dependencies": ["Item"],
+					"description": _("Request for purchase."),
+				},
 				{
 					"type": "doctype",
 					"name": "Purchase Order",
@@ -19,13 +27,6 @@ def get_data():
 					"name": "Purchase Invoice",
 					"onboard": 1,
 					"dependencies": ["Item", "Supplier"]
-				},
-				{
-					"type": "doctype",
-					"name": "Material Request",
-					"onboard": 1,
-					"dependencies": ["Item"],
-					"description": _("Request for purchase."),
 				},
 				{
 					"type": "doctype",
@@ -65,6 +66,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Pricing Rule",
+					"description": _("Rules for applying pricing and discount.")
+				},
+				{
+					"type": "doctype",
 					"name": "Product Bundle",
 					"description": _("Bundle items at time of sale."),
 				},
@@ -80,11 +86,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Promotional Scheme",
 					"description": _("Rules for applying different promotional schemes.")
-				},
-				{
-					"type": "doctype",
-					"name": "Pricing Rule",
-					"description": _("Rules for applying pricing and discount.")
 				}
 			]
 		},
@@ -152,13 +153,6 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Supplier-Wise Sales Analytics",
-					"reference_doctype": "Stock Ledger Entry",
-					"onboard": 1
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
 					"name": "Purchase Order Trends",
 					"reference_doctype": "Purchase Order",
 					"onboard": 1,
@@ -177,6 +171,16 @@ def get_data():
 					"reference_doctype": "Material Request",
 					"onboard": 1,
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Address And Contacts",
+					"label": _("Supplier Addresses And Contacts"),
+					"reference_doctype": "Address",
+					"route_options": {
+						"party_type": "Supplier"
+					}
+				}
 			]
 		},
 		{
@@ -226,20 +230,35 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Material Requests for which Supplier Quotations are not created",
-					"reference_doctype": "Material Request"
+					"name": "Supplier-Wise Sales Analytics",
+					"reference_doctype": "Stock Ledger Entry",
+					"onboard": 1
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Address And Contacts",
-					"label": _("Supplier Addresses And Contacts"),
-					"reference_doctype": "Address",
-					"route_options": {
-						"party_type": "Supplier"
-					}
+					"name": "Material Requests for which Supplier Quotations are not created",
+					"reference_doctype": "Material Request"
 				}
 			]
 		},
 
 	]
+
+	regional = {
+			"label": _("Regional"),
+			"items": [
+				{
+				"type": "doctype",
+				"name": "Import Supplier Invoice",
+				"description": _("Import Italian Supplier Invoice."),
+				"onboard": 1,
+				}
+			]
+		}
+
+	countries = frappe.get_all("Company", fields="country")
+	countries = [country["country"] for country in countries]
+	if "Italy" in countries:
+		config.append(regional)
+	return config

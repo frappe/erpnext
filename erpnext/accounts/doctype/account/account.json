@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_copy": 1,
  "allow_import": 1,
  "creation": "2013-01-30 12:49:46",
@@ -130,7 +131,7 @@
    "label": "Account Type",
    "oldfieldname": "account_type",
    "oldfieldtype": "Select",
-   "options": "\nAccumulated Depreciation\nAsset Received But Not Billed\nBank\nCash\nLoan\nChargeable\nCapital Work in Progress\nCost of Goods Sold\nDepreciation\nEquity\nExpense Account\nExpenses Included In Asset Valuation\nExpenses Included In Valuation\nFixed Asset\nIncome Account\nPayable\nReceivable\nRound Off\nStock\nStock Adjustment\nStock Received But Not Billed\nTax\nTemporary"
+   "options": "\nAccumulated Depreciation\nAsset Received But Not Billed\nBank\nCash\nChargeable\nCapital Work in Progress\nCost of Goods Sold\nDepreciation\nEquity\nExpense Account\nExpenses Included In Asset Valuation\nExpenses Included In Valuation\nFixed Asset\nIncome Account\nPayable\nReceivable\nRound Off\nStock\nStock Adjustment\nStock Received But Not Billed\nTax\nTemporary"
   },
   {
    "description": "Rate at which this tax is applied",
@@ -203,10 +204,13 @@
  ],
  "icon": "fa fa-money",
  "idx": 1,
- "modified": "2020-03-11 16:33:55.108921",
+ "is_tree": 1,
+ "links": [],
+ "modified": "2020-03-18 18:26:03.992861",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
+ "nsm_parent_field": "parent_account",
  "owner": "Administrator",
  "permissions": [
   {

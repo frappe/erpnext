@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2018-07-31 05:51:41.357047",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -27,10 +28,10 @@
   "section_break_12",
   "after_date",
   "taxes_charges",
-  "synch_products",
-  "synch_orders",
+  "sync_products",
+  "sync_orders",
   "column_break_10",
-  "enable_synch",
+  "enable_sync",
   "max_retry_limit"
  ],
  "fields": [
@@ -87,7 +88,7 @@
    "fieldname": "region",
    "fieldtype": "Select",
    "label": "Region",
-   "options": "\nIN\nCN\nJP\nBR\nAU\nES\nUK\nFR\nDE\nIT\nCA\nUS\nMX",
+   "options": "\nAE\nAU\nBR\nCA\nCN\nDE\nES\nFR\nIN\nJP\nIT\nMX\nUK\nUS",
    "reqd": 1
   },
   {
@@ -176,42 +177,43 @@
    "description": "Get financial breakup of Taxes and charges data by Amazon ",
    "fieldname": "taxes_charges",
    "fieldtype": "Check",
-   "label": "Synch Taxes and Charges"
-  },
-  {
-   "description": "Always synch your products from Amazon MWS before synching the Orders details",
-   "fieldname": "synch_products",
-   "fieldtype": "Button",
-   "label": "Synch Products",
-   "options": "get_products_details"
-  },
-  {
-   "description": "Click this button to pull your Sales Order data from Amazon MWS.",
-   "fieldname": "synch_orders",
-   "fieldtype": "Button",
-   "label": "Synch Orders",
-   "options": "get_order_details"
+   "label": "Sync Taxes and Charges"
   },
   {
    "fieldname": "column_break_10",
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "description": "Check this to enable a scheduled Daily synchronization routine via scheduler",
-   "fieldname": "enable_synch",
-   "fieldtype": "Check",
-   "label": "Enable Scheduled Synch"
-  },
-  {
    "default": "3",
    "fieldname": "max_retry_limit",
    "fieldtype": "Int",
    "label": "Max Retry Limit"
+  },
+  {
+   "description": "Always sync your products from Amazon MWS before synching the Orders details",
+   "fieldname": "sync_products",
+   "fieldtype": "Button",
+   "label": "Sync Products",
+   "options": "get_products_details"
+  },
+  {
+   "description": "Click this button to pull your Sales Order data from Amazon MWS.",
+   "fieldname": "sync_orders",
+   "fieldtype": "Button",
+   "label": "Sync Orders",
+   "options": "get_order_details"
+  },
+  {
+   "default": "0",
+   "description": "Check this to enable a scheduled Daily synchronization routine via scheduler",
+   "fieldname": "enable_sync",
+   "fieldtype": "Check",
+   "label": "Enable Scheduled Sync"
   }
  ],
  "issingle": 1,
- "modified": "2020-03-03 15:41:09.788838",
+ "links": [],
+ "modified": "2020-04-07 14:26:20.174848",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Amazon MWS Settings",

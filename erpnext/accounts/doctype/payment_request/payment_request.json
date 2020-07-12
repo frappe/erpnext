@@ -71,12 +71,12 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "hidden": 1,
    "in_list_view": 1,
    "label": "Series",
    "no_copy": 1,
-   "options": "PRQ-",
+   "options": "ACC-PRQ-.YYYY.-",
    "print_hide": 1,
+   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -262,7 +262,7 @@
    "hidden": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "\nDraft\nInitiated\nPayment Ordered\nPaid\nFailed\nCancelled",
+   "options": "\nDraft\nRequested\nInitiated\nPartially Paid\nPayment Ordered\nPaid\nFailed\nCancelled",
    "read_only": 1
   },
   {
@@ -348,7 +348,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 16:14:02.958411",
+ "modified": "2020-03-28 16:07:31.960798",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",

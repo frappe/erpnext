@@ -739,8 +739,7 @@
   {
    "fieldname": "manufacturer_part_no",
    "fieldtype": "Data",
-   "label": "Manufacturer Part Number",
-   "read_only": 1
+   "label": "Manufacturer Part Number"
   },
   {
    "default": "0",
@@ -1121,7 +1120,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:50:28.652467",
+ "modified": "2020-04-07 18:35:17.558928",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

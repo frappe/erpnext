@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "creation": "2013-05-02 16:29:48",
  "description": "Multiple Item prices.",
@@ -9,7 +10,6 @@
   "item_code",
   "uom",
   "packing_unit",
-  "min_qty",
   "column_break_17",
   "item_name",
   "item_group",
@@ -62,13 +62,6 @@
    "fieldname": "packing_unit",
    "fieldtype": "Int",
    "label": "Packing Unit"
-  },
-  {
-   "default": "1",
-   "fieldname": "min_qty",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Minimum Qty "
   },
   {
    "fieldname": "column_break_17",
@@ -223,7 +216,8 @@
  ],
  "icon": "fa fa-flag",
  "idx": 1,
- "modified": "2020-03-03 15:35:12.218235",
+ "links": [],
+ "modified": "2020-02-28 14:21:25.580331",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",

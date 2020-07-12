@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "field:asset_name",
  "creation": "2017-10-19 16:50:22.879545",
  "doctype": "DocType",
@@ -7,12 +8,10 @@
  "field_order": [
   "asset_name",
   "asset_category",
+  "company",
+  "column_break_3",
   "item_code",
   "item_name",
-  "column_break_3",
-  "company",
-  "select_serial_no",
-  "serial_no",
   "section_break_6",
   "maintenance_team",
   "column_break_9",
@@ -61,17 +60,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "select_serial_no",
-   "fieldtype": "Link",
-   "label": "Select Serial No",
-   "options": "Serial No"
-  },
-  {
-   "fieldname": "serial_no",
-   "fieldtype": "Small Text",
-   "label": "Serial No"
-  },
-  {
    "fieldname": "section_break_6",
    "fieldtype": "Section Break"
   },
@@ -114,7 +102,8 @@
    "reqd": 1
   }
  ],
- "modified": "2020-03-03 15:42:03.432287",
+ "links": [],
+ "modified": "2020-05-28 20:28:32.993823",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Maintenance",

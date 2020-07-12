@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "Prompt",
  "creation": "2018-04-13 15:18:53.698553",
@@ -11,10 +12,7 @@
   "start_date",
   "end_date",
   "section_break_5",
-  "periods",
-  "section_break_7",
-  "taxable_salary_slabs",
-  "standard_tax_exemption_amount"
+  "periods"
  ],
  "fields": [
   {
@@ -52,25 +50,10 @@
    "fieldtype": "Table",
    "label": "Payroll Periods",
    "options": "Payroll Period Date"
-  },
-  {
-   "fieldname": "section_break_7",
-   "fieldtype": "Section Break",
-   "label": "Taxable Salary Slabs"
-  },
-  {
-   "fieldname": "taxable_salary_slabs",
-   "fieldtype": "Table",
-   "label": "Taxable Salary Slabs",
-   "options": "Taxable Salary Slab"
-  },
-  {
-   "fieldname": "standard_tax_exemption_amount",
-   "fieldtype": "Currency",
-   "label": "Standard Tax Exemption Amount"
   }
  ],
- "modified": "2020-03-03 15:37:31.951326",
+ "links": [],
+ "modified": "2020-03-18 18:13:23.859980",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Payroll Period",

@@ -26,15 +26,14 @@ $.extend(shopping_cart, {
 	bind_address_select: function() {
 		$(".cart-addresses").on('click', '.address-card', function(e) {
 			const $card = $(e.currentTarget);
-			const address_fieldname = $card.closest('[data-fieldname]').attr('data-fieldname');
+			const address_type = $card.closest('[data-address-type]').attr('data-address-type');
 			const address_name = $card.closest('[data-address-name]').attr('data-address-name');
-
 			return frappe.call({
 				type: "POST",
 				method: "erpnext.shopping_cart.cart.update_cart_address",
 				freeze: true,
 				args: {
-					address_fieldname,
+					address_type,
 					address_name
 				},
 				callback: function(r) {

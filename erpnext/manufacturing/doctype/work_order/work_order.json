@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-01-10 16:34:16",
@@ -71,11 +72,11 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "hidden": 1,
    "label": "Series",
    "no_copy": 1,
-   "options": "MFG-WO-",
+   "options": "MFG-WO-.YYYY.-",
    "print_hide": 1,
+   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -468,7 +469,8 @@
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2020-03-03 16:14:10.650262",
+ "links": [],
+ "modified": "2019-12-04 11:20:04.695123",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
