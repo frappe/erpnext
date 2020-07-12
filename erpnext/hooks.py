@@ -13,7 +13,7 @@ source_link = "https://github.com/frappe/erpnext"
 app_logo_url = '/assets/erpnext/images/erp-icon.svg'
 
 
-develop_version = '12.x.x-develop'
+develop_version = '13.x.x-develop'
 
 app_include_js = "assets/js/erpnext.min.js"
 app_include_css = "assets/css/erpnext.css"
@@ -234,8 +234,15 @@ doc_events = {
 		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
 	},
 	"Sales Invoice": {
-		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.regional.italy.utils.sales_invoice_on_submit"],
-		"on_cancel": "erpnext.regional.italy.utils.sales_invoice_on_cancel",
+		"on_submit": [
+			"erpnext.regional.create_transaction_log",
+			"erpnext.regional.italy.utils.sales_invoice_on_submit",
+			"erpnext.erpnext_integrations.taxjar_integration.create_transaction"
+		],
+		"on_cancel": [
+			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
+			"erpnext.erpnext_integrations.taxjar_integration.delete_transaction"
+		],
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	"Purchase Invoice": {
@@ -261,6 +268,9 @@ doc_events = {
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
+	},
+	('Quotation', 'Sales Order', 'Sales Invoice'): {
+		'validate': ["erpnext.erpnext_integrations.taxjar_integration.set_sales_tax"]
 	}
 }
 
