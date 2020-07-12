@@ -234,6 +234,7 @@
  ],
  "icon": "fa fa-shopping-cart",
  "is_submittable": 1,
+ "links": [],
  "modified": "2020-06-25 14:37:21.140194",
  "modified_by": "Administrator",
  "module": "Buying",
