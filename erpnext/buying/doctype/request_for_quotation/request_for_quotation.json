@@ -1,5 +1,5 @@
 {
- "actions": " ",
+ "actions": "",
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2016-02-25 01:24:07.224790",
@@ -234,7 +234,6 @@
  ],
  "icon": "fa fa-shopping-cart",
  "is_submittable": 1,
- "links": [],
  "modified": "2020-06-25 14:37:21.140194",
  "modified_by": "Administrator",
  "module": "Buying",
