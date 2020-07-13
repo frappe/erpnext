@@ -29,10 +29,16 @@ frappe.ui.form.on("Task", {
 				filters: filters
 			};
 		})
-	},
 
-	refresh: function (frm) {
-		frm.set_query("parent_task", { "is_group": 1 });
+		frm.set_query("parent_task", function () {
+			let filters = {
+				"is_group": 1
+			};
+			if (frm.doc.project) filters["project"] = frm.doc.project;
+			return {
+				filters: filters
+			}
+		});
 	},
 
 	is_group: function (frm) {
