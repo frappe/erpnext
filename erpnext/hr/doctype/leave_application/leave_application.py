@@ -19,7 +19,6 @@ class NotAnOptionalHoliday(frappe.ValidationError): pass
 
 from frappe.model.document import Document
 class LeaveApplication(Document):
-
 	def get_feed(self):
 		return _("{0}: From {0} of type {1}").format(self.employee_name, self.leave_type)
 
@@ -294,6 +293,8 @@ class LeaveApplication(Document):
 	def set_half_day_date(self):
 		if self.from_date == self.to_date and self.half_day == 1:
 			self.half_day_date = self.from_date
+		elif self.half_day == 0:
+			self.half_day_date = None
 
 	def notify_employee(self):
 		employee = frappe.get_doc("Employee", self.employee)
@@ -463,9 +464,14 @@ def get_leave_details(employee, date):
 			"pending_leaves": leaves_pending,
 			"remaining_leaves": remaining_leaves}
 
+	#is used in set query
+	lwps = frappe.get_list("Leave Type", filters = {"is_lwp": 1})
+	lwps = [lwp.name for lwp in lwps]
+
 	ret = {
 		'leave_allocation': leave_allocation,
-		'leave_approver': get_leave_approver(employee)
+		'leave_approver': get_leave_approver(employee),
+		'lwps': lwps
 	}
 
 	return ret

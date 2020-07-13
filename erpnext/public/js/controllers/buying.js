@@ -73,6 +73,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		me.frm.set_query('contact_person', erpnext.queries.contact_query);
 		me.frm.set_query('supplier_address', erpnext.queries.address_query);
 
+		me.frm.set_query('billing_address', erpnext.queries.company_address_query);
+
 		if(this.frm.fields_dict.supplier) {
 			this.frm.set_query("supplier", function() {
 				return{	query: "erpnext.controllers.queries.supplier_query" }});
@@ -281,6 +283,11 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var me = this;
 		erpnext.utils.get_address_display(this.frm, "shipping_address",
 			"shipping_address_display", true);
+	},
+
+	billing_address: function() {
+		erpnext.utils.get_address_display(this.frm, "billing_address",
+			"billing_address_display", true);
 	},
 
 	tc_name: function() {

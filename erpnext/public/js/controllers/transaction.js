@@ -159,6 +159,26 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				};
 			});
 		}
+		if (this.frm.fields_dict["items"].grid.get_field("cost_center")) {
+			this.frm.set_query("cost_center", "items", function(doc) {
+				return {
+					filters: {
+						"company": doc.company,
+						"is_group": 0
+					}
+				};
+			});
+		}
+
+		if (this.frm.fields_dict["items"].grid.get_field("expense_account")) {
+			this.frm.set_query("expense_account", "items", function(doc) {
+				return {
+					filters: {
+						"company": doc.company
+					}
+				};
+			});
+		}
 
 		if(frappe.meta.get_docfield(this.frm.doc.doctype, "pricing_rules")) {
 			this.frm.set_indicator_formatter('pricing_rule', function(doc) {
@@ -552,7 +572,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 									if (show_batch_dialog)
 										return frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"])
 											.then((r) => {
-												if(r.message.has_batch_no || r.message.has_serial_no) {
+												if (r.message &&
+													(r.message.has_batch_no || r.message.has_serial_no)) {
 													frappe.flags.hide_serial_batch_dialog = false;
 												}
 											});
@@ -1814,7 +1835,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 			if (doc.tax_category)
 				filters['tax_category'] = doc.tax_category;
-
+			if (doc.company)
+				filters['company'] = doc.company;
 			return {
 				query: "erpnext.controllers.queries.get_tax_template",
 				filters: filters

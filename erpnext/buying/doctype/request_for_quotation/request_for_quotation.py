@@ -25,6 +25,7 @@ class RequestforQuotation(BuyingController):
 		self.validate_duplicate_supplier()
 		self.validate_supplier_list()
 		validate_for_items(self)
+		super(RequestforQuotation, self).set_qty_as_per_stock_uom()
 		self.update_email_id()
 
 	def validate_duplicate_supplier(self):
@@ -50,7 +51,7 @@ class RequestforQuotation(BuyingController):
 
 	def validate_email_id(self, args):
 		if not args.email_id:
-			frappe.throw(_("Row {0}: For supplier {0} Email Address is required to send email").format(args.idx, args.supplier))
+			frappe.throw(_("Row {0}: For Supplier {0}, Email Address is Required to Send Email").format(args.idx, args.supplier))
 
 	def on_submit(self):
 		frappe.db.set(self, 'status', 'Submitted')
@@ -153,7 +154,7 @@ class RequestforQuotation(BuyingController):
 			sender=sender,attachments = attachments, send_email=True,
 		     	doctype=self.doctype, name=self.name)["name"]
 
-		frappe.msgprint(_("Email sent to supplier {0}").format(data.supplier))
+		frappe.msgprint(_("Email Sent to Supplier {0}").format(data.supplier))
 
 	def get_attachments(self):
 		attachments = [d.name for d in get_attachments(self.doctype, self.name)]
@@ -192,7 +193,7 @@ def send_supplier_emails(rfq_name):
 def check_portal_enabled(reference_doctype):
 	if not frappe.db.get_value('Portal Menu Item',
 		{'reference_doctype': reference_doctype}, 'enabled'):
-		frappe.throw(_("Request for Quotation is disabled to access from portal, for more check portal settings."))
+		frappe.throw(_("The Access to Request for Quotation From Portal is Disabled. To Allow Access, Enable it in Portal Settings."))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -205,6 +206,7 @@ def get_list_context(context=None):
 	})
 	return list_context
 
+@frappe.whitelist()
 def get_supplier_contacts(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select `tabContact`.name from `tabContact`, `tabDynamic Link`
 		where `tabDynamic Link`.link_doctype = 'Supplier' and (`tabDynamic Link`.link_name=%(name)s
@@ -258,7 +260,7 @@ def create_supplier_quotation(doc):
 		sq_doc.flags.ignore_permissions = True
 		sq_doc.run_method("set_missing_values")
 		sq_doc.save()
-		frappe.msgprint(_("Supplier Quotation {0} created").format(sq_doc.name))
+		frappe.msgprint(_("Supplier Quotation {0} Created").format(sq_doc.name))
 		return sq_doc.name
 	except Exception:
 		return None
@@ -278,6 +280,7 @@ def create_rfq_items(sq_doc, supplier, data):
 		"description": data.description,
 		"qty": data.qty,
 		"rate": data.rate,
+		"conversion_factor": data.conversion_factor if data.conversion_factor else None,
 		"supplier_part_no": frappe.db.get_value("Item Supplier", {'parent': data.item_code, 'supplier': supplier}, "supplier_part_no"),
 		"warehouse": data.warehouse or '',
 		"request_for_quotation_item": data.name,

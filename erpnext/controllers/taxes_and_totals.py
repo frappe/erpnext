@@ -53,7 +53,8 @@ class calculate_taxes_and_totals(object):
 					'tax_category': self.doc.get('tax_category'),
 					'posting_date': self.doc.get('posting_date'),
 					'bill_date': self.doc.get('bill_date'),
-					'transaction_date': self.doc.get('transaction_date')
+					'transaction_date': self.doc.get('transaction_date'),
+					'company': self.doc.get('company')
 				}
 
 				item_group = item_doc.item_group

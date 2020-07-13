@@ -31,9 +31,13 @@
   "resolution_by",
   "resolution_by_variance",
   "service_level_agreement_creation",
+  "on_hold_since",
+  "total_hold_time",
   "response",
   "mins_to_first_response",
   "first_responded_on",
+  "column_break_26",
+  "avg_response_time",
   "additional_info",
   "lead",
   "contact",
@@ -50,7 +54,9 @@
   "resolution_date",
   "content_type",
   "attachment",
-  "via_customer_portal"
+  "via_customer_portal",
+  "resolution_time",
+  "user_resolution_time"
  ],
  "fields": [
   {
@@ -114,7 +120,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Open\nReplied\nHold\nClosed",
+   "options": "Open\nReplied\nHold\nResolved\nClosed",
    "search_index": 1
   },
   {
@@ -161,6 +167,7 @@
    "options": "Service Level Agreement"
   },
   {
+   "depends_on": "eval: doc.status != 'Replied';",
    "fieldname": "response_by",
    "fieldtype": "Datetime",
    "label": "Response By",
@@ -174,6 +181,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval: doc.status != 'Replied';",
    "fieldname": "resolution_by",
    "fieldtype": "Datetime",
    "label": "Resolution By",
@@ -328,7 +336,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval: doc.service_level_agreement",
+   "depends_on": "eval: doc.service_level_agreement && doc.status != 'Replied';",
    "description": "in hours",
    "fieldname": "response_by_variance",
    "fieldtype": "Float",
@@ -336,7 +344,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval: doc.service_level_agreement",
+   "depends_on": "eval: doc.service_level_agreement && doc.status != 'Replied';",
    "description": "in hours",
    "fieldname": "resolution_by_variance",
    "fieldtype": "Float",
@@ -362,12 +370,48 @@
    "label": "Issue Split From",
    "options": "Issue",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "avg_response_time",
+   "fieldtype": "Duration",
+   "label": "Average Response Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "resolution_time",
+   "fieldtype": "Duration",
+   "label": "Resolution Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user_resolution_time",
+   "fieldtype": "Duration",
+   "label": "User Resolution Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "on_hold_since",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "On Hold Since",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_hold_time",
+   "fieldtype": "Duration",
+   "label": "Total Hold Time",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2020-03-13 02:19:49.477928",
+ "modified": "2020-06-10 12:47:37.146914",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",

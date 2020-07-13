@@ -96,6 +96,7 @@ frappe.ui.form.on("Opportunity", {
 				});
 			} else {
 				frm.add_custom_button(__("Reopen"), function() {
+					frm.set_value("lost_reasons",[])
 					frm.set_value("status", "Open");
 					frm.save();
 				});

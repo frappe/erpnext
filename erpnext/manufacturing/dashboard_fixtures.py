@@ -4,7 +4,6 @@
 import frappe, erpnext, json
 from frappe import _
 from frappe.utils import nowdate, get_first_day, get_last_day, add_months
-from erpnext.accounts.utils import get_fiscal_year
 
 def get_data():
 	return frappe._dict({
@@ -193,7 +192,7 @@ def get_number_cards():
 		]),
 		"function": "Count",
 		"is_public": 1,
-		"label": _("Monthly Total Work Order"),
+		"label": _("Monthly Total Work Orders"),
 		"show_percentage_stats": 1,
 		"stats_time_interval": "Weekly"
 	},
@@ -208,7 +207,7 @@ def get_number_cards():
 		]),
 		"function": "Count",
 		"is_public": 1,
-		"label": _("Monthly Completed Work Order"),
+		"label": _("Monthly Completed Work Orders"),
 		"show_percentage_stats": 1,
 		"stats_time_interval": "Weekly"
 	},
@@ -222,7 +221,7 @@ def get_number_cards():
 		]),
 		"function": "Count",
 		"is_public": 1,
-		"label": _("Ongoing Job Card"),
+		"label": _("Ongoing Job Cards"),
 		"show_percentage_stats": 1,
 		"stats_time_interval": "Weekly"
 	},
@@ -236,7 +235,7 @@ def get_number_cards():
 		]),
 		"function": "Count",
 		"is_public": 1,
-		"label": _("Monthly Quality Inspection"),
+		"label": _("Monthly Quality Inspections"),
 		"show_percentage_stats": 1,
 		"stats_time_interval": "Weekly"
 	}]
