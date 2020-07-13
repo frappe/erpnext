@@ -251,13 +251,15 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-13 13:10:14.453678",
+ "modified": "2020-07-13 17:48:56.695587",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Vehicle",
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -267,6 +269,7 @@
    "report": 1,
    "role": "Fleet Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

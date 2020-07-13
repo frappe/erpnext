@@ -204,14 +204,13 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-13 13:46:26.660400",
+ "modified": "2020-07-13 16:17:02.674535",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Vehicle Log",
  "owner": "Administrator",
  "permissions": [
   {
-   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
