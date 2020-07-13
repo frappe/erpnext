@@ -206,6 +206,7 @@ def get_list_context(context=None):
 	})
 	return list_context
 
+@frappe.whitelist()
 def get_supplier_contacts(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select `tabContact`.name from `tabContact`, `tabDynamic Link`
 		where `tabDynamic Link`.link_doctype = 'Supplier' and (`tabDynamic Link`.link_name=%(name)s

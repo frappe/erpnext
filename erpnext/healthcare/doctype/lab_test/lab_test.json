@@ -13,6 +13,7 @@
   "template",
   "lab_test_name",
   "lab_test_group",
+  "medical_code",
   "department",
   "column_break_26",
   "company",
@@ -344,6 +345,14 @@
    "report_hide": 1
   },
   {
+    "fetch_from": "template.medical_code",
+    "fieldname": "medical_code",
+    "fieldtype": "Link",
+    "label": "Medical Code",
+    "options": "Medical Code",
+    "read_only": 1
+  },
+  {
    "fieldname": "sb_normal",
    "fieldtype": "Section Break"
   },
@@ -541,7 +550,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-24 18:24:03.554572",
+ "modified": "2020-07-12 18:24:03.554572",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

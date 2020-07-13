@@ -34,6 +34,9 @@
   "descriptive_test_templates",
   "section_break_group",
   "lab_test_groups",
+  "medical_coding_section",
+  "medical_code_standard",
+  "medical_code",
   "sb_sample_collection",
   "sample",
   "sample_uom",
@@ -123,6 +126,24 @@
    "in_list_view": 1,
    "label": "Rate",
    "mandatory_depends_on": "eval:doc.is_billable == 1"
+  },
+  {
+   "fieldname": "medical_coding_section",
+   "fieldtype": "Section Break",
+   "label": "Medical Coding"
+  },
+  {
+   "depends_on": "medical_code_standard",
+   "fieldname": "medical_code",
+   "fieldtype": "Link",
+   "label": "Medical Code",
+   "options": "Medical Code"
+  },
+  {
+   "fieldname": "medical_code_standard",
+   "fieldtype": "Link",
+   "label": "Medical Code Standard",
+   "options": "Medical Code Standard"
   },
   {
    "depends_on": "eval:doc.lab_test_template_type == 'Single'",
@@ -293,7 +314,7 @@
   }
  ],
  "links": [],
- "modified": "2020-06-22 12:00:30.164278",
+ "modified": "2020-07-13 12:57:09.925436",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",
