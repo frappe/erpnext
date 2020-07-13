@@ -1,0 +1,41 @@
+{
+ "actions": [],
+ "creation": "2020-07-23 10:47:23.626510",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "parcel_service",
+  "parcel_type_alias"
+ ],
+ "fields": [
+  {
+   "fieldname": "parcel_service",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Parcel Service",
+   "options": "Parcel Service",
+   "read_only": 1
+  },
+  {
+   "fieldname": "parcel_type_alias",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Parcel Type Alias",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-07-23 10:47:23.626510",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Parcel Service Type Alias",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

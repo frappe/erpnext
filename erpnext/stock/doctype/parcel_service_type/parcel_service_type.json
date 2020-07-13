@@ -1,0 +1,89 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format: {parcel_service} - {parcel_service_type}",
+ "creation": "2020-07-23 10:47:43.794083",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "parcel_service",
+  "parcel_service_type",
+  "description",
+  "section_break_4",
+  "parcel_service_type_alias",
+  "column_break_6",
+  "section_break_7",
+  "show_in_preferred_services_list"
+ ],
+ "fields": [
+  {
+   "fieldname": "parcel_service",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Parcel Service",
+   "options": "Parcel Service",
+   "reqd": 1
+  },
+  {
+   "fieldname": "parcel_service_type",
+   "fieldtype": "Data",
+   "label": "Parcel Service Type",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "parcel_service_type_alias",
+   "fieldtype": "Table",
+   "label": "Parcel Service Type Alias",
+   "options": "Parcel Service Type Alias"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_in_preferred_services_list",
+   "fieldtype": "Check",
+   "label": "Show in Preferred Services List"
+  }
+ ],
+ "links": [],
+ "modified": "2020-07-23 10:47:43.794083",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Parcel Service Type",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

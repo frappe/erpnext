@@ -1,0 +1,70 @@
+{% if (data.length) { %}
+	<div style="overflow-x:scroll;height: 550px;">
+		<h5>{{ __("Preferred Services") }}</h5>
+		<table class="table table-bordered table-hover">
+			<thead class="grid-heading-row">
+				<tr style="text-align: center">
+					{% for (var i = 0; i < header_columns.length; i++) { %} 
+						<th style="text-align: center">{{ header_columns[i] }}</th>
+					{% } %}
+				</tr>
+			</thead>
+			<tbody>
+				{% for (var i = 0; i < data.length; i++) { %} 
+					{% if (data[i].is_preferred) { %} 
+						<tr style="text-align: center" id="data-list-{{i}}">
+							<td style="width:20%">{{ data[i].service_provider }}</td>
+							<td style="width:20%">{{ data[i].carrier }}</td>
+							<td style="width:40%">{{ data[i].service_name }}</td>
+							<td style="width:10%">{{ format_currency(data[i].total_price, 'EUR', 2) }}</td>
+							<td style="width:10%">
+								<button id="data-list-{{i}}" onclick='cur_frm.select_row({{JSON.stringify(data[i])}})' type="button" class="btn btn-success">
+									<span class="glyphicon glyphicon-check"></span>
+								</button>
+							</td>
+						</tr>
+					{% } %}
+				{% } %}
+			</tbody>
+		</table>
+		<h5>{{ __("Other Services") }}</h5>
+		<table class="table table-bordered table-hover">
+			<thead class="grid-heading-row">
+				<tr style="text-align: center">
+					{% for (var i = 0; i < header_columns.length; i++) { %}
+						<th style="text-align: center" >{{ header_columns[i] }}</th>
+					{% } %}
+				</tr>
+			</thead>
+			<tbody>
+				{% for (var i = 0; i < data.length; i++) { %}
+					{% if (!data[i].is_preferred) { %}
+						<tr style="text-align: center" id="data-list-{{i}}">
+							<td style="width:20%">{{ data[i].service_provider }}</td>
+							<td style="width:20%">{{ data[i].carrier }}</td>
+							<td style="width:40%">{{ data[i].service_name }}</td>
+							<td style="width:10%">{{ format_currency(data[i].total_price, 'EUR', 2) }}</td>
+							<td style="width:10%">
+								<button id="data-list-{{i}}" onclick='cur_frm.select_row({{JSON.stringify(data[i])}})' type="button" class="btn btn-success">
+									<span class="glyphicon glyphicon-check"></span>
+								</button>
+							</td>
+						</tr>
+					{% } %}
+				{% } %}
+			</tbody>
+		</table>
+	</div>
+{% } else { %}
+	<div><strong class="text-muted">{{ __("No Services Available") }}</strong></div>
+{% } %}
+
+<style type="text/css" media="screen">
+.modal-dialog {
+	width: 750px;
+}
+
+.table > tbody > tr > td, .table > tfoot > tr > td {
+	padding: 4px;
+}
+</style>
