@@ -84,6 +84,12 @@ frappe.query_reports["Sales Analytics"] = {
 			"fieldtype": "Link",
 			"options": "Brand",
 			"hidden": 1
+		},
+		{
+			"label": __("Customer"),
+			"fieldname": "customer_id",
+			"fieldtype": "Data",
+			"options": "Customer"
 		}
 	],
 	after_datatable_render: function(datatable_obj) {
