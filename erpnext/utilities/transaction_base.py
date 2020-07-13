@@ -120,6 +120,15 @@ class TransactionBase(StatusUpdater):
 
 
 	def validate_rate_with_reference_doc(self, ref_details):
+		buying_doctypes = ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]
+
+		if self.doctype in buying_doctypes:
+			to_disable = "Maintain same rate throughout Purchase cycle"
+			settings_page = "Buying Settings"
+		else:
+			to_disable = "Maintain same rate throughout Sales cycle"
+			settings_page = "Selling Settings"
+
 		for ref_dt, ref_dn_field, ref_link_field in ref_details:
 			for d in self.get("items"):
 				if d.get(ref_link_field):
@@ -129,8 +138,8 @@ class TransactionBase(StatusUpdater):
 						frappe.msgprint(_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4}) ")
 							.format(d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate))
 						frappe.throw(_("To allow different rates, disable the {0} checkbox in {1}.")
-							.format(frappe.bold(_("Maintain Same Rate Throughout Sales Cycle")),
-							get_link_to_form("Selling Settings", "Selling Settings", frappe.bold("Selling Settings"))))
+							.format(frappe.bold(_(to_disable)),
+							get_link_to_form(settings_page, settings_page, frappe.bold(settings_page))))
 
 	def get_link_filters(self, for_doctype):
 		if hasattr(self, "prev_link_mapper") and self.prev_link_mapper.get(for_doctype):

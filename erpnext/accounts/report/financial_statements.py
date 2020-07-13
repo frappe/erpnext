@@ -405,12 +405,12 @@ def set_gl_entries_by_account(
 				FROM `tabDistributed Cost Center`
 				WHERE cost_center IN %(cost_center)s
 				AND parent NOT IN %(cost_center)s
-				AND is_cancelled = 0
 				GROUP BY parent
 			) as DCC_allocation
 			WHERE company=%(company)s
 			{additional_conditions}
 			AND posting_date <= %(to_date)s
+			AND is_cancelled = 0
 			AND cost_center = DCC_allocation.parent
 			""".format(additional_conditions=additional_conditions.replace("and cost_center in %(cost_center)s ", ''))
 
