@@ -458,19 +458,23 @@ def generate_ewb_json(dt, dn):
 
 @frappe.whitelist()
 def download_ewb_json():
-	data = frappe._dict(frappe.local.form_dict)
-
-	frappe.local.response.filecontent = json.dumps(data['data'], indent=4, sort_keys=True)
+	data = json.loads(frappe.local.form_dict.data)
+	frappe.local.response.filecontent = json.dumps(data, indent=4, sort_keys=True)
 	frappe.local.response.type = 'download'
 
-	billList = json.loads(data['data'])['billLists']
+	filename_prefix = 'Bulk'
+	docname = frappe.local.form_dict.docname
+	if docname:
+		if docname.startswith('['):
+			docname = json.loads(docname)
+			if len(docname) == 1:
+				docname = docname[0]
 
-	if len(billList) > 1:
-		doc_name = 'Bulk'
-	else:
-		doc_name = data['docname']
+		if not isinstance(docname, list):
+			# removes characters not allowed in a filename (https://stackoverflow.com/a/38766141/4767738)
+			filename_prefix = re.sub('[^\w_.)( -]', '', docname)
 
-	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(doc_name, frappe.utils.random_string(5))
+	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(filename_prefix, frappe.utils.random_string(5))
 
 @frappe.whitelist()
 def get_gstins_for_company(company):
