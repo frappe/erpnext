@@ -1,4 +1,5 @@
 {
+ "actions": "",
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2016-02-25 01:24:07.224790",
@@ -28,7 +29,6 @@
   "letter_head",
   "more_info",
   "status",
-  "fiscal_year",
   "column_break3",
   "amended_from"
  ],
@@ -219,17 +219,6 @@
    "search_index": 1
   },
   {
-   "fieldname": "fiscal_year",
-   "fieldtype": "Link",
-   "label": "Fiscal Year",
-   "oldfieldname": "fiscal_year",
-   "oldfieldtype": "Select",
-   "options": "Fiscal Year",
-   "print_hide": 1,
-   "reqd": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "column_break3",
    "fieldtype": "Column Break"
   },
@@ -245,7 +234,8 @@
  ],
  "icon": "fa fa-shopping-cart",
  "is_submittable": 1,
- "modified": "2019-09-24 15:08:32.750661",
+ "links": [],
+ "modified": "2020-06-25 14:37:21.140194",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",
