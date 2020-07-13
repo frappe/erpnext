@@ -2,7 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Vehicle', {
-	refresh: function(frm) {
+	validate: function(frm) {
+		if (frm.doc.__islocal){
+			frm.doc.last_odometer_value = frm.doc.initial_odometer_value;
+		}
 
 	}
 });

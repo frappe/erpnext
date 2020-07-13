@@ -3,11 +3,20 @@
 
 frappe.ui.form.on("Vehicle Log", {
 	refresh: function(frm) {
-		if(frm.doc.docstatus == 1) {
+		if(frm.doc.docstatus == 1 && !frm.doc.is_opening) {
 			frm.add_custom_button(__('Expense Claim'), function() {
 				frm.events.expense_claim(frm);
 			}, __('Create'));
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
+		}
+	},
+
+	odometer: function(frm){
+		if (!frm.doc.license_plate){
+			frappe.throw(__("Please set License Plate"));
+		}
+		if(frm.doc.last_odometer){
+			cur_frm.set_value("distance_covered", frm.doc.odometer - frm.doc.last_odometer);
 		}
 	},
 

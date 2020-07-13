@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "naming_series:",
  "creation": "2016-09-03 14:14:51.788550",
  "doctype": "DocType",
@@ -6,12 +7,11 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "vehicle_section",
   "naming_series",
   "license_plate",
   "employee",
   "column_break_4",
-  "column_break_7",
+  "is_opening",
   "model",
   "make",
   "odometer_reading",
@@ -19,10 +19,13 @@
   "odometer",
   "column_break_12",
   "last_odometer",
+  "distance_covered",
   "refuelling_details",
+  "fuel_type",
   "fuel_qty",
   "price",
   "column_break_15",
+  "fuel_uom",
   "supplier",
   "invoice",
   "service_details",
@@ -30,11 +33,6 @@
   "amended_from"
  ],
  "fields": [
-  {
-   "fieldname": "vehicle_section",
-   "fieldtype": "Section Break",
-   "options": "fa fa-user"
-  },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
@@ -50,7 +48,7 @@
    "fieldtype": "Link",
    "in_global_search": 1,
    "in_list_view": 1,
-   "label": "License Plate",
+   "label": "Vehicle (License Plate)",
    "options": "Vehicle",
    "reqd": 1
   },
@@ -62,15 +60,11 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Employee",
-   "options": "Employee",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.is_opening == 0",
+   "options": "Employee"
   },
   {
    "fieldname": "column_break_4",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_7",
    "fieldtype": "Column Break"
   },
   {
@@ -104,6 +98,7 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval:doc.is_opening == 0",
    "fieldname": "refuelling_details",
    "fieldtype": "Section Break",
    "label": "Refuelling Details"
@@ -111,12 +106,14 @@
   {
    "fieldname": "fuel_qty",
    "fieldtype": "Float",
-   "label": "Fuel Qty"
+   "label": "Fuel Qty",
+   "mandatory_depends_on": "eval:doc.is_opening == 0"
   },
   {
    "fieldname": "price",
    "fieldtype": "Currency",
-   "label": "Fuel Price"
+   "label": "Fuel Price",
+   "mandatory_depends_on": "eval:doc.is_opening == 0"
   },
   {
    "fieldname": "column_break_15",
@@ -155,20 +152,59 @@
    "read_only": 1
   },
   {
-   "fetch_from": "license_plate.last_odometer",
+   "depends_on": "eval:doc.is_opening == 0",
+   "fetch_from": "license_plate.last_odometer_value",
    "fieldname": "last_odometer",
    "fieldtype": "Int",
    "label": "last Odometer Value ",
-   "read_only": 1,
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.is_opening == 0",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_12",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.is_opening == 1",
+   "fieldname": "is_opening",
+   "fieldtype": "Check",
+   "label": "Is opening",
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "depends_on": "eval:doc.is_opening == 0",
+   "fieldname": "distance_covered",
+   "fieldtype": "Int",
+   "label": "Distance Covered",
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fetch_from": "license_plate.uom",
+   "fieldname": "fuel_uom",
+   "fieldtype": "Data",
+   "label": "Fuel UOM",
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fetch_from": "license_plate.fuel_type",
+   "fieldname": "fuel_type",
+   "fieldtype": "Data",
+   "label": "Fuel Type",
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-18 16:45:45.060761",
+ "links": [],
+ "modified": "2020-07-13 13:46:26.660400",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Vehicle Log",
