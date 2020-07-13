@@ -2,6 +2,7 @@
  {
   "doctype": "Item Tax Template",
   "title": "_Test Account Excise Duty @ 10",
+  "company": "_Test Company",
   "taxes": [
    {
     "doctype": "Item Tax Template Detail",
@@ -14,6 +15,7 @@
  {
   "doctype": "Item Tax Template",
   "title": "_Test Account Excise Duty @ 12",
+  "company": "_Test Company",
   "taxes": [
    {
     "doctype": "Item Tax Template Detail",
@@ -26,6 +28,7 @@
  {
   "doctype": "Item Tax Template",
   "title": "_Test Account Excise Duty @ 15",
+  "company": "_Test Company",
   "taxes": [
    {
     "doctype": "Item Tax Template Detail",
@@ -38,6 +41,7 @@
  {
   "doctype": "Item Tax Template",
   "title": "_Test Account Excise Duty @ 20",
+  "company": "_Test Company",
   "taxes": [
    {
     "doctype": "Item Tax Template Detail",
@@ -50,6 +54,7 @@
  {
   "doctype": "Item Tax Template",
   "title": "_Test Item Tax Template 1",
+  "company": "_Test Company",
   "taxes": [
    {
     "doctype": "Item Tax Template Detail",
