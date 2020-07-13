@@ -15,5 +15,5 @@
  "reference_document": "Employee",
  "show_full_form": 0,
  "title": "Create Employee",
- "validate_action": 1
+ "validate_action": 0
 }
