@@ -9,6 +9,8 @@ from erpnext.hr.utils import get_salary_assignment
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.regional.india import number_state_mapping
 from six import string_types
+from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.accounts.utils import get_account_currency
 
 def validate_gstin_for_india(doc, method):
 	if hasattr(doc, 'gst_state') and doc.gst_state:
@@ -441,19 +443,23 @@ def generate_ewb_json(dt, dn):
 
 @frappe.whitelist()
 def download_ewb_json():
-	data = frappe._dict(frappe.local.form_dict)
-
-	frappe.local.response.filecontent = json.dumps(data['data'], indent=4, sort_keys=True)
+	data = json.loads(frappe.local.form_dict.data)
+	frappe.local.response.filecontent = json.dumps(data, indent=4, sort_keys=True)
 	frappe.local.response.type = 'download'
 
-	billList = json.loads(data['data'])['billLists']
+	filename_prefix = 'Bulk'
+	docname = frappe.local.form_dict.docname
+	if docname:
+		if docname.startswith('['):
+			docname = json.loads(docname)
+			if len(docname) == 1:
+				docname = docname[0]
 
-	if len(billList) > 1:
-		doc_name = 'Bulk'
-	else:
-		doc_name = data['docname']
+		if not isinstance(docname, list):
+			# removes characters not allowed in a filename (https://stackoverflow.com/a/38766141/4767738)
+			filename_prefix = re.sub('[^\w_.)( -]', '', docname)
 
-	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(doc_name, frappe.utils.random_string(5))
+	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(filename_prefix, frappe.utils.random_string(5))
 
 @frappe.whitelist()
 def get_gstins_for_company(company):
@@ -643,5 +649,53 @@ def get_gst_accounts(company, account_wise=False):
 			elif val:
 				gst_accounts[val] = acc
 
-
 	return gst_accounts
+
+def make_reverse_charge_entries(doc, method):
+	country = frappe.get_cached_value('Company', doc.company, 'country')
+
+	if country != 'India':
+		return
+
+	if doc.reverse_charge == 'Y':
+		gl_entries = []
+		gst_accounts = get_gst_accounts(doc.company)
+		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
+			+ gst_accounts.get('igst_account')
+
+		for tax in doc.get('taxes'):
+			if tax.category not in ("Total", "Valuation and Total"):
+				continue
+
+			if flt(tax.base_tax_amount_after_discount_amount) and tax.account_head in gst_account_list:
+				account_currency = get_account_currency(tax.account_head)
+
+				gl_entries.append(doc.get_gl_dict(
+					{
+						"account": tax.account_head,
+						"cost_center": tax.cost_center,
+						"posting_date": doc.posting_date,
+						"against": doc.supplier,
+						"credit": tax.base_tax_amount_after_discount_amount,
+						"credits_in_account_currency": tax.base_tax_amount_after_discount_amount \
+							if account_currency==doc.company_currency \
+							else tax.tax_amount_after_discount_amount
+					}, account_currency, item=tax)
+				)
+
+				gl_entries.append(doc.get_gl_dict(
+					{
+						"account": doc.credit_to if doc.doctype == 'Purchase Invoice' else doc.debit_to,
+						"cost_center": doc.cost_center,
+						"posting_date": doc.posting_date,
+						"party_type": 'Supplier',
+						"party": doc.supplier,
+						"against": tax.account_head,
+						"debit": tax.base_tax_amount_after_discount_amount,
+						"debit_in_account_currency": tax.base_tax_amount_after_discount_amount \
+							if account_currency==doc.company_currency \
+							else tax.tax_amount_after_discount_amount
+					}, account_currency, item=doc)
+				)
+
+		make_gl_entries(gl_entries)

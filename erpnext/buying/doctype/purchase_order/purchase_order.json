@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -998,6 +997,7 @@
    "print_hide": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
    "label": "Subscription Section"
@@ -1055,8 +1055,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-04-17 13:04:28.185197",
+ "modified": "2020-07-01 12:40:45.240948",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
@@ -1100,6 +1099,12 @@
    "read": 1,
    "role": "Purchase Manager",
    "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts User"
   }
  ],
  "search_fields": "status, transaction_date, supplier,grand_total",

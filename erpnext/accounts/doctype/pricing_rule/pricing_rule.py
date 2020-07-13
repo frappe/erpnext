@@ -17,6 +17,8 @@ from six import string_types
 apply_on_dict = {"Item Code": "items",
 	"Item Group": "item_groups", "Brand": "brands"}
 
+other_fields = ["other_item_code", "other_item_group", "other_brand"]
+
 class PricingRule(Document):
 	def validate(self):
 		self.validate_mandatory()
@@ -51,6 +53,13 @@ class PricingRule(Document):
 		if tocheck and not self.get(tocheck):
 			throw(_("{0} is required").format(self.meta.get_label(tocheck)), frappe.MandatoryError)
 
+		if self.apply_rule_on_other:
+			o_field = 'other_' + frappe.scrub(self.apply_rule_on_other)
+			if not self.get(o_field) and o_field in other_fields:
+				frappe.throw(_("For the 'Apply Rule On Other' condition the field {0} is mandatory")
+					.format(frappe.bold(self.apply_rule_on_other)))
+
+
 		if self.price_or_product_discount == 'Price' and not self.rate_or_discount:
 			throw(_("Rate or Discount is required for the price discount."), frappe.MandatoryError)
 
@@ -84,12 +93,26 @@ class PricingRule(Document):
 			for f in options:
 				if not f: continue
 
-				f = frappe.scrub(f)
-				if f!=fieldname:
-					self.set(f, None)
+				scrubbed_f = frappe.scrub(f)
+
+				if logic_field == 'apply_on':
+					apply_on_f = apply_on_dict.get(f, f)
+				else:
+					apply_on_f = scrubbed_f
+
+				if scrubbed_f != fieldname:
+					self.set(apply_on_f, None)
 
 		if self.mixed_conditions and self.get("same_item"):
 			self.same_item = 0
+
+		apply_rule_on_other = frappe.scrub(self.apply_rule_on_other or "")
+
+		cleanup_other_fields = (other_fields if not apply_rule_on_other
+			else [o_field for o_field in other_fields if o_field != 'other_' + apply_rule_on_other])
+
+		for other_field in cleanup_other_fields:
+			self.set(other_field, None)
 
 	def validate_rate_or_discount(self):
 		for field in ["Rate"]:
@@ -248,7 +271,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 
 			if pricing_rule.coupon_code_based==1 and args.coupon_code==None:
 				return item_details
-				
+
 			if not pricing_rule.validate_applied_rule:
 				if pricing_rule.price_or_product_discount == "Price":
 					apply_price_discount_rule(pricing_rule, item_details, args)
@@ -413,6 +436,7 @@ def make_pricing_rule(doctype, docname):
 
 	return doc
 
+@frappe.whitelist()
 def get_item_uoms(doctype, txt, searchfield, start, page_len, filters):
 	items = [filters.get('value')]
 	if filters.get('apply_on') != 'Item Code':

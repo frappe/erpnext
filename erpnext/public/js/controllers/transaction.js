@@ -4,7 +4,6 @@
 erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	setup: function() {
 		this._super();
-		frappe.flags.hide_serial_batch_dialog = true;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
 			var has_margin_field = frappe.meta.has_field(cdt, 'margin_type');
@@ -156,6 +155,26 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 				return {
 					filters: filters
+				};
+			});
+		}
+		if (this.frm.fields_dict["items"].grid.get_field("cost_center")) {
+			this.frm.set_query("cost_center", "items", function(doc) {
+				return {
+					filters: {
+						"company": doc.company,
+						"is_group": 0
+					}
+				};
+			});
+		}
+
+		if (this.frm.fields_dict["items"].grid.get_field("expense_account")) {
+			this.frm.set_query("expense_account", "items", function(doc) {
+				return {
+					filters: {
+						"company": doc.company
+					}
 				};
 			});
 		}
@@ -536,10 +555,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 								() => me.frm.script_manager.trigger("price_list_rate", cdt, cdn),
 								() => me.toggle_conversion_factor(item),
 								() => {
+									if (show_batch_dialog && !item.has_serial_no
+										&& !item.has_batch_no) {
+										show_batch_dialog = false;
+									}
+								},
+								() => {
 									if (show_batch_dialog)
 										return frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"])
 											.then((r) => {
-												if(r.message &&
+												if(r.message && !frappe.flags.hide_serial_batch_dialog &&
 													(r.message.has_batch_no || r.message.has_serial_no)) {
 													frappe.flags.hide_serial_batch_dialog = false;
 												}
