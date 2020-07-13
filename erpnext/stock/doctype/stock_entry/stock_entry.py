@@ -1210,9 +1210,17 @@ class StockEntry(StockController):
 
 	def validate_with_material_request(self):
 		for item in self.get("items"):
-			if item.material_request:
+			material_request = item.material_request or None
+			material_request_item = item.material_request_item or None
+			if self.purpose == "Receive at Warehouse":
+				parent_se = frappe.get_value("Stock Entry Detail", item.ste_detail, ['material_request','material_request_item'],as_dict=True)
+				if parent_se:
+					material_request = parent_se.material_request
+					material_request_item = parent_se.material_request_item
+
+			if material_request:
 				mreq_item = frappe.db.get_value("Material Request Item",
-					{"name": item.material_request_item, "parent": item.material_request},
+					{"name": material_request_item, "parent": material_request},
 					["item_code", "warehouse", "idx"], as_dict=True)
 				if mreq_item.item_code != item.item_code:
 					frappe.throw(_("Item for row {0} does not match Material Request").format(item.idx),
@@ -1385,8 +1393,7 @@ def move_sample_to_retention_warehouse(company, items):
 
 @frappe.whitelist()
 def make_stock_in_entry(source_name, target_doc=None):
-	print(source_name)
-	print(target_doc)
+
 	def set_missing_values(source, target):
 		target.purpose = 'Receive at Warehouse'
 		target.set_stock_entry_type()
@@ -1395,8 +1402,8 @@ def make_stock_in_entry(source_name, target_doc=None):
 		target_doc.t_warehouse = ''
 
 		if source_doc.material_request_item and source_doc.material_request :
-			material_request_item = frappe.get_doc('Material Request Item', source_doc.material_request_item)
-			target_doc.t_warehouse = material_request_item.warehouse
+			warehouse = frappe.get_value('Material Request Item', source_doc.material_request_item, 'warehouse')
+			target_doc.t_warehouse = warehouse
 		
 		target_doc.s_warehouse = source_doc.t_warehouse
 		target_doc.qty = source_doc.qty - source_doc.transferred_qty
@@ -1423,7 +1430,7 @@ def make_stock_in_entry(source_name, target_doc=None):
 			"condition": lambda doc: flt(doc.qty) - flt(doc.transferred_qty) > 0.01
 		},
 	}, target_doc, set_missing_values)
-	print(doclist)
+
 	return doclist
 
 @frappe.whitelist()

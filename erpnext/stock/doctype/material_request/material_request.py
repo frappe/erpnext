@@ -442,12 +442,7 @@ def make_supplier_quotation(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_stock_entry(source_name, target_doc=None, purpose=None, warehouse=None):
-	print("----------------------------------------")
-	print(source_name)
-	print(target_doc)
-	print(warehouse)
-	print(purpose)
-	print("----------------------------------------")
+
 	def update_item(obj, target, source_parent):
 		qty = flt(flt(obj.stock_qty) - flt(obj.ordered_qty))/ target.conversion_factor \
 			if flt(obj.stock_qty) > flt(obj.ordered_qty) else 0
