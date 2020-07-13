@@ -1,0 +1,40 @@
+{
+ "actions": [],
+ "creation": "2020-07-09 12:49:09.185552",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "email",
+  "unsubscribed"
+ ],
+ "fields": [
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "email",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "unsubscribed",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "unsubscribed"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-07-09 12:55:14.217387",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Shipment Notification Subscriptions",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

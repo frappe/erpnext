@@ -1,0 +1,55 @@
+{
+ "actions": [],
+ "creation": "2020-07-23 10:55:19.669830",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "enabled",
+  "api_id",
+  "api_password"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "label": "Enabled"
+  },
+  {
+   "fieldname": "api_id",
+   "fieldtype": "Data",
+   "label": "API ID",
+   "read_only_depends_on": "eval:doc.enabled == 0"
+  },
+  {
+   "fieldname": "api_password",
+   "fieldtype": "Data",
+   "label": "API Password",
+   "read_only_depends_on": "eval:doc.enabled == 0"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2020-08-05 16:33:44.548230",
+ "modified_by": "Administrator",
+ "module": "ERPNext Integrations",
+ "name": "LetMeShip",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
