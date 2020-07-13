@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -108,6 +107,7 @@
   "amended_from",
   "range",
   "column_break4",
+  "project",
   "per_billed",
   "is_internal_supplier",
   "inter_company_reference",
@@ -1124,6 +1124,12 @@
    "show_days": 1,
    "show_seconds": 1,
    "width": "50%"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   },
   {
    "fieldname": "per_billed",
