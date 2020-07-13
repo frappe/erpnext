@@ -11,18 +11,18 @@ frappe.query_reports["Sales Analytics"] = {
 			options: ["Customer Group","Customer","Item Group","Item","Territory","Order Type"],
 			default: "Customer",
 			reqd: 1,
-			on_change: () => {
-				// var tree_type = frappe.query_report.get_filter_value('tree_type')
-				var tree_type = frappe.query_report.get_filter_value('tree_type')
-				if (tree_type == 'Item'){
-					frappe.query_reports["Sales Analytics"].filters[7].hidden = 0
-				} else {
-					frappe.query_reports["Sales Analytics"].filters[7].hidden = 1
-				}
-				frappe.set_route("query-report","Sales Analytics",{"tree_type": tree_type})
-				frappe.query_report.load();
+			// on_change: () => {
+			// 	// var tree_type = frappe.query_report.get_filter_value('tree_type')
+			// 	var tree_type = frappe.query_report.get_filter_value('tree_type')
+			// 	if (tree_type == 'Item'){
+			// 		frappe.query_reports["Sales Analytics"].filters[7].hidden = 0
+			// 	} else {
+			// 		frappe.query_reports["Sales Analytics"].filters[7].hidden = 1
+			// 	}
+			// 	frappe.set_route("query-report","Sales Analytics",{"tree_type": tree_type})
+			// 	frappe.query_report.load();
 
-			}
+			// }
 		},
 		{
 			fieldname: "doc_type",
