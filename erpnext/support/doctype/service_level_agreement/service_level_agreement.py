@@ -21,8 +21,8 @@ class ServiceLevelAgreement(Document):
 
 		for priority in self.priorities:
 			# Check if response and resolution time is set for every priority
-			if not (priority.response_time or priority.resolution_time):
-				frappe.throw(_("Set Response Time and Resolution for Priority {0} at index {1}.").format(priority.priority, priority.idx))
+			if not priority.response_time or not priority.resolution_time:
+				frappe.throw(_("Set Response Time and Resolution Time for Priority {0} in row {1}.").format(priority.priority, priority.idx))
 
 			priorities.append(priority.priority)
 
@@ -33,7 +33,7 @@ class ServiceLevelAgreement(Document):
 			resolution = priority.resolution_time
 
 			if response > resolution:
-				frappe.throw(_("Response Time for {0} at index {1} can't be greater than Resolution Time.").format(priority.priority, priority.idx))
+				frappe.throw(_("Response Time for {0} priority in row {1} can't be greater than Resolution Time.").format(priority.priority, priority.idx))
 
 		# Check if repeated priority
 		if not len(set(priorities)) == len(priorities):
