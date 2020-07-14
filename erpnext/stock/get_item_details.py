@@ -780,7 +780,7 @@ def get_item_price(args, item_code, ignore_party=False):
 		elif args.get("supplier"):
 			conditions += " and supplier=%(supplier)s"
 		else:
-			conditions += "and (customer is null or customer = '') and (supplier is null or supplier = '')"
+			conditions += " and (customer is null or customer = '') and (supplier is null or supplier = '')"
 
 	if args.get('transaction_date'):
 		if args.get('period') == 'future':
