@@ -254,6 +254,7 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
+   "mandatory_depends_on": "eval: doc.with_items == 1",
    "oldfieldname": "enquiry_details",
    "oldfieldtype": "Table",
    "options": "Opportunity Item"
@@ -423,7 +424,7 @@
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2020-04-07 09:05:39.391109",
+ "modified": "2020-07-14 16:49:15.888503",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
