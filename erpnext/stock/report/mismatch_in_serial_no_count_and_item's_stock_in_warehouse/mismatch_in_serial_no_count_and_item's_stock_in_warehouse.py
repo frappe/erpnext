@@ -6,7 +6,6 @@ import frappe
 from frappe import _
 
 def execute(filters=None):
-	print(filters)
 	columns = get_columns()
 	data = get_data(filters.warehouse)
 	return columns, data
