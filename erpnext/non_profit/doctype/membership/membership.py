@@ -84,6 +84,8 @@ def trigger_razorpay_subscription(*args, **kwargs):
 	try:
 		verify_signature(data)
 	except Exception as e:
+		signature = frappe.request.headers.get('X-Razorpay-Signature')
+		log = "{0} \n\n {1} \n\n {2} \n\n {3}".format(e, frappe.get_traceback(), signature, data)
 		frappe.log_error(e, "Webhook Verification Error")
 
 	if isinstance(data, six.string_types):
