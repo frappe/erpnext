@@ -1,17 +1,17 @@
 {
  "actions": [],
  "allow_import": 1,
- "autoname": "field:lost_reason",
+ "autoname": "field:order_lost_reason",
  "creation": "2013-01-10 16:34:24",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
-  "lost_reason"
+  "order_lost_reason"
  ],
  "fields": [
   {
-   "fieldname": "lost_reason",
+   "fieldname": "order_lost_reason",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Quotation Lost Reason",
@@ -23,7 +23,7 @@
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2020-07-14 13:32:56.830331",
+ "modified": "2020-07-14 18:52:17.175936",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Quotation Lost Reason",

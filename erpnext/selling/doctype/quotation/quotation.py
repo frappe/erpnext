@@ -68,7 +68,7 @@ class Quotation(SellingController):
 
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_sales_order():
-			get_lost_reasons = frappe.get_list('Opportunity Lost Reason',
+			get_lost_reasons = frappe.get_list('Quotation Lost Reason',
 			fields = ["name"])
 			lost_reasons_lst = [reason.get('name') for reason in get_lost_reasons]
 			frappe.db.set(self, 'status', 'Lost')
