@@ -83,6 +83,7 @@ frappe.ui.form.on("Opportunity", {
 
 			if(doc.status!=="Quotation") {
 				frm.add_custom_button(__('Lost'), () => {
+					frm.doc.lost_doctype = 'Lost Reason Detail';
 					frm.trigger('set_as_lost_dialog');
 				});
 			}

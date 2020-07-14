@@ -486,16 +486,22 @@ frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {
 
 frappe.ui.form.on(cur_frm.doctype, {
 	set_as_lost_dialog: function(frm) {
+		console.log(frm.doc.lost_doctype);
 		var dialog = new frappe.ui.Dialog({
 			title: __("Set as Lost"),
 			fields: [
-				{"fieldtype": "Table MultiSelect",
-				"label": __("Lost Reasons"),
-				"fieldname": "lost_reason",
-				"options": "Lost Reason Detail",
-				"reqd": 1},
-
-				{"fieldtype": "Text", "label": __("Detailed Reason"), "fieldname": "detailed_reason"},
+				{
+					"fieldtype": "Table MultiSelect",
+					"label": __("Lost Reasons"),
+					"fieldname": "lost_reason",
+					"options": 'Quotation Lost Reason Detail',
+					"reqd": 1
+				},
+				{
+					"fieldtype": "Text",
+					"label": __("Detailed Reason"),
+					"fieldname": "detailed_reason"
+				},
 			],
 			primary_action: function() {
 				var values = dialog.get_values();

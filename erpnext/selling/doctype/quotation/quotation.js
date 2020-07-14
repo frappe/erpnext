@@ -75,6 +75,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 
 			if(doc.status!=="Ordered") {
 				this.frm.add_custom_button(__('Set as Lost'), () => {
+						this.frm.doc.lost_doctype = 'Quotation Lost Reason Detail';
 						this.frm.trigger('set_as_lost_dialog');
 					});
 				}
