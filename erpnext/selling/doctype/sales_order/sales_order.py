@@ -697,6 +697,10 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 		"Sales Team": {
 			"doctype": "Sales Team",
 			"add_if_empty": True
+		},
+		"Payment Schedule": {
+			"doctype": "Payment Schedule",
+			"add_if_empty": True
 		}
 	}, target_doc, postprocess, ignore_permissions=ignore_permissions)
 
