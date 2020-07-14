@@ -31,7 +31,7 @@ frappe.ui.form.on('Lab Test', {
 			});
 		}
 		if (frappe.defaults.get_default('lab_test_approval_required') && frappe.user.has_role('LabTest Approver')) {
-			if (frm.doc.docstatus == 1 && frm.doc.status != 'Approved' && frm.doc.status != 'Rejected') {
+			if (frm.doc.docstatus === 1 && frm.doc.status !== 'Approved' && frm.doc.status !== 'Rejected') {
 				frm.add_custom_button(__('Approve'), function () {
 					status_update(1, frm);
 				});
@@ -41,7 +41,7 @@ frappe.ui.form.on('Lab Test', {
 			}
 		}
 
-		if (frm.doc.docstatus == 1 && frm.doc.sms_sent == 0 && frm.doc.status != 'Rejected' ) {
+		if (frm.doc.docstatus === 1 && frm.doc.sms_sent === 0 && frm.doc.status !== 'Rejected' ) {
 			frm.add_custom_button(__('Send SMS'), function () {
 				frappe.call({
 					method: 'erpnext.healthcare.doctype.healthcare_settings.healthcare_settings.get_sms_text',
@@ -162,7 +162,7 @@ var show_lab_tests = function (frm, lab_test_list) {
 			frm.set_df_property('patient', 'read_only', 1);
 			frm.set_df_property('practitioner', 'read_only', 1);
 			frm.doc.invoiced = 0;
-			if ($(this).attr('data-invoiced') == 1) {
+			if ($(this).attr('data-invoiced') === 1) {
 				frm.doc.invoiced = 1;
 			}
 			refresh_field('invoiced');
@@ -264,7 +264,7 @@ var send_sms = function (vals, frm) {
 			if (r.exc) {
 				frappe.msgprint(r.exc);
 			} else {
-				cur_frm.reload_doc();
+				frm.reload_doc();
 			}
 		}
 	});

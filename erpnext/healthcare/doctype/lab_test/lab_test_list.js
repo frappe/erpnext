@@ -52,7 +52,7 @@ var create_multiple_dialog = function (listview) {
 				callback: function (data) {
 					if (!data.exc) {
 						if (!data.message) {
-							frappe.msgprint(__('No Lab Tests created'))
+							frappe.msgprint(__('No Lab Tests created'));
 						}
 						listview.refresh();
 					}
