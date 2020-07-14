@@ -19,7 +19,6 @@
   "unlink_payment_on_cancellation_of_invoice",
   "unlink_advance_payment_on_cancelation_of_order",
   "book_asset_depreciation_entry_automatically",
-  "allow_cost_center_in_entry_of_bs_account",
   "add_taxes_from_item_tax_template",
   "automatically_fetch_payment_terms",
   "deferred_accounting_settings_section",
@@ -112,12 +111,6 @@
    "fieldname": "book_asset_depreciation_entry_automatically",
    "fieldtype": "Check",
    "label": "Book Asset Depreciation Entry Automatically"
-  },
-  {
-   "default": "0",
-   "fieldname": "allow_cost_center_in_entry_of_bs_account",
-   "fieldtype": "Check",
-   "label": "Allow Cost Center In Entry of Balance Sheet Account"
   },
   {
    "default": "1",
