@@ -47,6 +47,8 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	"""
 
 	args = process_args(args)
+	for_validate = process_string_args(for_validate)
+	overwrite_warehouse = process_string_args(overwrite_warehouse)
 	item = frappe.get_cached_doc("Item", args.item_code)
 	validate_item_details(args, item)
 
@@ -166,6 +168,10 @@ def process_args(args):
 	set_transaction_type(args)
 	return args
 
+def process_string_args(args):
+	if isinstance(args, string_types):
+		args = json.loads(args)
+	return args
 
 @frappe.whitelist()
 def get_item_code(barcode=None, serial_no=None):
