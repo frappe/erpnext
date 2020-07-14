@@ -1,15 +1,17 @@
 {
  "actions": [],
- "autoname": "format:BSOA-{#####}",
+ "allow_workflow": 1,
+ "autoname": "Prompt",
  "creation": "2020-05-22 16:46:18.712954",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "preferences",
-  "orientation",
+  "include_ageing",
+  "ageing_based_on",
   "column_break_24",
-  "include_ageing_summary",
+  "orientation",
   "section_break_1",
   "frequency",
   "column_break_2",
@@ -165,12 +167,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
-   "fieldname": "include_ageing_summary",
-   "fieldtype": "Check",
-   "label": "Include Ageing Summary"
-  },
-  {
    "default": "Today",
    "fieldname": "start_date",
    "fieldtype": "Date",
@@ -202,10 +198,24 @@
    "label": "is_autoemail",
    "print_hide": 1,
    "report_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "include_ageing",
+   "fieldtype": "Check",
+   "label": "Include Ageing Summary"
+  },
+  {
+   "default": "Due Date",
+   "depends_on": "eval:doc.include_ageing === 1",
+   "fieldname": "ageing_based_on",
+   "fieldtype": "Select",
+   "label": "Ageing Based On",
+   "options": "Due Date\nPosting Date"
   }
  ],
  "links": [],
- "modified": "2020-07-01 15:22:25.055587",
+ "modified": "2020-07-22 13:02:51.434680",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bulk Statement Of Accounts",

@@ -388,7 +388,7 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
 	args = {
 		party_type.lower(): party,
-		"company":			company
+		"company": company
 	}
 
 	if tax_category:

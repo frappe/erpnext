@@ -7,10 +7,13 @@ frappe.ui.form.on('Bulk Statement Of Accounts', {
 			frm.add_custom_button('Manually Email Statements',function(){
 				var w = window.open(
 					frappe.urllib.get_full_url(
-						'/api/method/erpnext.accounts.doctype.bulk_statement_of_accounts.bulk_statement_of_accounts.download_statements?'
+						'/api/method/erpnext.accounts.doctype.bulk_statement_of_accounts.bulk_statement_of_accounts.manual_email_send?'
 						+ 'document_name='+encodeURIComponent(frm.doc.name)), '_self');
 				if(!w) {
 					frappe.msgprint(__("Please enable pop-ups")); return;
+				}
+				else{
+					frappe.show_alert({message: __('Emails Queued'), indictor: 'blue'});
 				}
 			});
 			frm.add_custom_button('Manually Download Statements',function(){
@@ -22,11 +25,24 @@ frappe.ui.form.on('Bulk Statement Of Accounts', {
 					frappe.msgprint(__("Please enable pop-ups")); return;
 				}
 			});
+			frm.add_custom_button('Trigger Auto Email',function(){
+				var w = window.open(
+					frappe.urllib.get_full_url(
+						'/api/method/erpnext.accounts.doctype.bulk_statement_of_accounts.bulk_statement_of_accounts.auto_email_soa'), '_self');
+				if(!w) {
+					frappe.msgprint(__("Please enable pop-ups")); return;
+				}
+				else{
+					frappe.show_alert({message: __('Auto Emails Queued'), indicator: 'blue'});
+				}
+			});
 		}
 	},
 	onload: function(frm) {
-		frm.set_value('from_date', frappe.datetime.get_today());
-		frm.set_value('to_date', frappe.datetime.add_months(frappe.datetime.get_today(),1));
+		if(frm.doc.__islocal){
+			frm.set_value('from_date', frappe.datetime.add_months(frappe.datetime.get_today(), -1));
+			frm.set_value('to_date', frappe.datetime.get_today());
+		}
 		frm.set_query('collection_name', function(doc){
 			if (frm.doc.customer_collection == 'Customer Group'){
 				return {

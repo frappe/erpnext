@@ -349,7 +349,7 @@ class BuyingController(StockController):
 			})
 
 			if not rm.rate:
-				rm.rate = get_valuation_rate(raw_material_data.item_code, self.supplier_warehouse,
+				rm.rate = get_valuation_rate(raw_material_data.rm_item_code, self.supplier_warehouse,
 					self.doctype, self.name, currency=self.company_currency, company=self.company)
 
 		rm.amount = qty * flt(rm.rate)

@@ -5,15 +5,18 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from erpnext.support.doctype.service_level_agreement.test_service_level_agreement import create_service_level_agreements_for_issues
-from frappe.utils import now_datetime, get_datetime
+from frappe.utils import now_datetime, get_datetime, flt
 import datetime
 from datetime import timedelta
 
 class TestIssue(unittest.TestCase):
-	def test_response_time_and_resolution_time_based_on_different_sla(self):
+	def setUp(self):
+		frappe.db.sql("delete from `tabService Level Agreement`")
+		frappe.db.sql("delete from `tabEmployee`")
 		frappe.db.set_value("Support Settings", None, "track_service_level_agreement", 1)
 		create_service_level_agreements_for_issues()
 
+	def test_response_time_and_resolution_time_based_on_different_sla(self):
 		creation = datetime.datetime(2019, 3, 4, 12, 0)
 
 		# make issue with customer specific SLA
@@ -72,8 +75,67 @@ class TestIssue(unittest.TestCase):
 
 		self.assertEqual(issue.agreement_fulfilled, 'Fulfilled')
 
-def make_issue(creation=None, customer=None, index=0):
+	def test_issue_metrics(self):
+		creation = datetime.datetime(2020, 3, 4, 4, 0)
 
+		issue = make_issue(creation, index=1)
+		create_communication(issue.name, "test@example.com", "Received", creation)
+
+		creation = datetime.datetime(2020, 3, 4, 4, 15)
+		create_communication(issue.name, "test@admin.com", "Sent", creation)
+
+		creation = datetime.datetime(2020, 3, 4, 5, 0)
+		create_communication(issue.name, "test@example.com", "Received", creation)
+
+		creation = datetime.datetime(2020, 3, 4, 5, 5)
+		create_communication(issue.name, "test@admin.com", "Sent", creation)
+
+		frappe.flags.current_time = datetime.datetime(2020, 3, 4, 5, 5)
+		issue.reload()
+		issue.status = 'Closed'
+		issue.save()
+
+		self.assertEqual(issue.avg_response_time, 600)
+		self.assertEqual(issue.resolution_time, 3900)
+		self.assertEqual(issue.user_resolution_time, 1200)
+
+	def test_hold_time_on_replied(self):
+		creation = datetime.datetime(2020, 3, 4, 4, 0)
+
+		issue = make_issue(creation, index=1)
+		create_communication(issue.name, "test@example.com", "Received", creation)
+
+		creation = datetime.datetime(2020, 3, 4, 4, 15)
+		create_communication(issue.name, "test@admin.com", "Sent", creation)
+
+		frappe.flags.current_time = datetime.datetime(2020, 3, 4, 4, 15)
+		issue.reload()
+		issue.status = 'Replied'
+		issue.save()
+
+		self.assertEqual(issue.on_hold_since, frappe.flags.current_time)
+
+		creation = datetime.datetime(2020, 3, 4, 5, 0)
+		frappe.flags.current_time = datetime.datetime(2020, 3, 4, 5, 0)
+		create_communication(issue.name, "test@example.com", "Received", creation)
+
+		issue.reload()
+		self.assertEqual(flt(issue.total_hold_time, 2), 2700)
+		self.assertEqual(issue.resolution_by, datetime.datetime(2020, 3, 4, 16, 45))
+
+		creation = datetime.datetime(2020, 3, 4, 5, 5)
+		create_communication(issue.name, "test@admin.com", "Sent", creation)
+
+		frappe.flags.current_time = datetime.datetime(2020, 3, 4, 5, 5)
+		issue.reload()
+		issue.status = 'Closed'
+		issue.save()
+
+		issue.reload()
+		self.assertEqual(flt(issue.total_hold_time, 2), 2700)
+
+
+def make_issue(creation=None, customer=None, index=0):
 	issue = frappe.get_doc({
 		"doctype": "Issue",
 		"subject": "Service Level Agreement Issue {0}".format(index),
@@ -85,6 +147,7 @@ def make_issue(creation=None, customer=None, index=0):
 	}).insert(ignore_permissions=True)
 
 	return issue
+
 
 def create_customer(name, customer_group, territory):
 
@@ -99,6 +162,7 @@ def create_customer(name, customer_group, territory):
 			"territory": territory
 		}).insert(ignore_permissions=True)
 
+
 def create_customer_group(customer_group):
 
 	if not frappe.db.exists("Customer Group", {"customer_group_name": customer_group}):
@@ -107,6 +171,7 @@ def create_customer_group(customer_group):
 			"customer_group_name": customer_group
 		}).insert(ignore_permissions=True)
 
+
 def create_territory(territory):
 
 	if not frappe.db.exists("Territory", {"territory_name": territory}):
@@ -114,3 +179,21 @@ def create_territory(territory):
 			"doctype": "Territory",
 			"territory_name": territory,
 		}).insert(ignore_permissions=True)
+
+
+def create_communication(reference_name, sender, sent_or_received, creation):
+	issue = frappe.get_doc({
+		"doctype": "Communication",
+		"communication_type": "Communication",
+		"communication_medium": "Email",
+		"sent_or_received": sent_or_received,
+		"email_status": "Open",
+		"subject": "Test Issue",
+		"sender": sender,
+		"content": "Test",
+		"status": "Linked",
+		"reference_doctype": "Issue",
+		"creation": creation,
+		"reference_name": reference_name
+	})
+	issue.save()

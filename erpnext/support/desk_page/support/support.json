@@ -13,7 +13,7 @@
   {
    "hidden": 0,
    "label": "Service Level Agreement",
-   "links": "[\n    {\n        \"description\": \"Service Level.\",\n        \"label\": \"Service Level\",\n        \"name\": \"Service Level\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Service Level Agreement.\",\n        \"label\": \"Service Level Agreement\",\n        \"name\": \"Service Level Agreement\",\n        \"type\": \"doctype\"\n    }\n]"
+   "links": "[\n    {\n        \"description\": \"Service Level Agreement.\",\n        \"label\": \"Service Level Agreement\",\n        \"name\": \"Service Level Agreement\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -43,7 +43,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Support",
- "modified": "2020-05-28 13:51:23.869954",
+ "modified": "2020-06-04 11:54:56.124219",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support",
@@ -65,8 +65,8 @@
    "type": "DocType"
   },
   {
-   "label": "Service Level",
-   "link_to": "Service Level",
+   "label": "Service Level Agreement",
+   "link_to": "Service Level Agreement",
    "type": "DocType"
   }
  ]

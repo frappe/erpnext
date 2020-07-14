@@ -5,30 +5,25 @@ import frappe
 import json
 from frappe import _
 from frappe.utils import nowdate
-from erpnext.accounts.utils import get_fiscal_year
+from erpnext.accounts.dashboard_fixtures import _get_fiscal_year
+from erpnext.buying.dashboard_fixtures import get_company_for_dashboards
 
 def get_data():
+	fiscal_year = _get_fiscal_year(nowdate())
+
+	if not fiscal_year:
+		return frappe._dict()
+
+	company = frappe.get_doc("Company", get_company_for_dashboards())
+	fiscal_year_name = fiscal_year.get("name")
+	start_date = str(fiscal_year.get("year_start_date"))
+	end_date = str(fiscal_year.get("year_end_date"))
+
 	return frappe._dict({
 		"dashboards": get_dashboards(),
-		"charts": get_charts(),
-		"number_cards": get_number_cards(),
+		"charts": get_charts(company, fiscal_year_name, start_date, end_date),
+		"number_cards": get_number_cards(company, fiscal_year_name, start_date, end_date),
 	})
-
-def get_company_for_dashboards():
-	company = frappe.defaults.get_defaults().company
-	if company:
-		return company
-	else:
-		company_list = frappe.get_list("Company")
-		if company_list:
-			return company_list[0].name
-	return None
-
-company = frappe.get_doc("Company", get_company_for_dashboards())
-fiscal_year = get_fiscal_year(nowdate(), as_dict=1)
-fiscal_year_name = fiscal_year.get("name")
-start_date = str(fiscal_year.get("year_start_date"))
-end_date = str(fiscal_year.get("year_end_date"))
 
 def get_dashboards():
 	return [{
@@ -48,7 +43,7 @@ def get_dashboards():
 		]
 	}]
 
-def get_charts():
+def get_charts(company, fiscal_year_name, start_date, end_date):
 	return [
 		{
 			"doctype": "Dashboard Chart",
@@ -133,7 +128,7 @@ def get_charts():
 		}
 	]
 
-def get_number_cards():
+def get_number_cards(company, fiscal_year_name, start_date, end_date):
 	return [
 		{
 			"name": "Total Active Items",

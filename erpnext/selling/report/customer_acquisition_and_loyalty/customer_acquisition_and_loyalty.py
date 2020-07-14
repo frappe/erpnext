@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import calendar
 import frappe
 from frappe import _
-from frappe.utils import cint, cstr
+from frappe.utils import cint, cstr, getdate
 
 def execute(filters=None):
 	common_columns = [
@@ -160,7 +160,7 @@ def get_data_by_territory(filters, common_columns):
 	return columns, data, None, None, None, 1
 
 def get_customer_stats(filters, tree_view=False):
-	""" Calculates number of new and repeated customers. """
+	""" Calculates number of new and repeated customers and revenue. """
 	company_condition = ''
 	if filters.get('company'):
 		company_condition = ' and company=%(company)s'
@@ -174,14 +174,14 @@ def get_customer_stats(filters, tree_view=False):
 		filters, as_dict=1):
 
 		key = si.territory if tree_view else si.posting_date.strftime('%Y-%m')
+		new_or_repeat = 'new' if si.customer not in customers else 'repeat'
 		customers_in.setdefault(key, {'new': [0, 0.0], 'repeat': [0, 0.0]})
 
-		if not si.customer in customers:
-			customers_in[key]['new'][0] += 1
-			customers_in[key]['new'][1] += si.base_grand_total
+		# if filters.from_date <= si.posting_date.strftime('%Y-%m-%d'):
+		if getdate(filters.from_date) <= getdate(si.posting_date):
+				customers_in[key][new_or_repeat][0] += 1
+				customers_in[key][new_or_repeat][1] += si.base_grand_total
+		if new_or_repeat == 'new':
 			customers.append(si.customer)
-		else:
-			customers_in[key]['repeat'][0] += 1
-			customers_in[key]['repeat'][1] += si.base_grand_total
 
 	return customers_in

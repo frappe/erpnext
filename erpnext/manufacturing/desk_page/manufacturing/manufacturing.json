@@ -94,12 +94,6 @@
    "type": "DocType"
   },
   {
-   "label": "Dashboard",
-   "link_to": "Manufacturing",
-   "restrict_to_domain": "Manufacturing",
-   "type": "Dashboard"
-  },
-  {
    "label": "Forecasting",
    "link_to": "Exponential Smoothing Forecasting",
    "type": "Report"
@@ -119,6 +113,12 @@
    "label": "Production Planning Report",
    "link_to": "Production Planning Report",
    "type": "Report"
-  }
+  },
+  {
+    "label": "Dashboard",
+    "link_to": "Manufacturing",
+    "restrict_to_domain": "Manufacturing",
+    "type": "Dashboard"
+   } 
  ]
 }

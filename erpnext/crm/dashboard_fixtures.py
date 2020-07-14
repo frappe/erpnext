@@ -172,7 +172,9 @@ def get_number_cards():
         "doctype": "Number Card",
         "document_type": "Lead",
         "name": "New Lead (Last 1 Month)",
-        "filters_json": json.dumps([["Lead","creation","Previous","1 month",False]]),
+        "filters_json": json.dumps([
+            ["Lead", "creation", "Timespan", "last month"]
+        ]),
         "function": "Count",
         "is_public": 1,
         "label": _("New Lead (Last 1 Month)"),
@@ -183,7 +185,9 @@ def get_number_cards():
         "doctype": "Number Card",
         "document_type": "Opportunity",
         "name": "New Opportunity (Last 1 Month)",
-        "filters_json": json.dumps([["Opportunity","creation","Previous","1 month",False]]),
+        "filters_json": json.dumps([
+            ["Opportunity", "creation", "Timespan", "last month"]
+        ]),
         "function": "Count",
         "is_public": 1,
         "label": _("New Opportunity (Last 1 Month)"),
@@ -194,7 +198,10 @@ def get_number_cards():
         "doctype": "Number Card",
         "document_type": "Opportunity",
         "name": "Won Opportunity (Last 1 Month)",
-        "filters_json": json.dumps([["Opportunity","creation","Previous","1 month",False]]),
+        "filters_json": json.dumps([
+            ["Opportunity", "status", "=", "Converted",False],
+            ["Opportunity", "creation", "Timespan", "last month"]
+        ]),
         "function": "Count",
         "is_public": 1,
         "label": _("Won Opportunity (Last 1 Month)"),

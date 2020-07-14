@@ -5,14 +5,23 @@ import frappe
 import json
 from frappe.utils import nowdate, add_months, get_date_str
 from frappe import _
-from erpnext.accounts.utils import get_fiscal_year
-
+from erpnext.accounts.dashboard_fixtures import _get_fiscal_year
+from erpnext.buying.dashboard_fixtures import get_company_for_dashboards
 
 def get_data():
+
+	fiscal_year = _get_fiscal_year(nowdate())
+
+	if not fiscal_year:
+		return frappe._dict()
+
+	year_start_date = get_date_str(fiscal_year.get('year_start_date'))
+	year_end_date = get_date_str(fiscal_year.get('year_end_date'))
+
 	return frappe._dict({
 		"dashboards": get_dashboards(),
-		"charts": get_charts(),
-		"number_cards": get_number_cards(),
+		"charts": get_charts(fiscal_year, year_start_date, year_end_date),
+		"number_cards": get_number_cards(fiscal_year, year_start_date, year_end_date),
 	})
 
 def get_dashboards():
@@ -31,12 +40,7 @@ def get_dashboards():
 		]
     }]
 
-fiscal_year = get_fiscal_year(date=nowdate())
-year_start_date = get_date_str(fiscal_year[1])
-year_end_date = get_date_str(fiscal_year[2])
-
-
-def get_charts():
+def get_charts(fiscal_year, year_start_date, year_end_date):
 	company = get_company_for_dashboards()
 	return [
 		{
@@ -55,8 +59,8 @@ def get_charts():
 				"company": company,
 				"status": "In Location",
 				"filter_based_on": "Fiscal Year",
-				"from_fiscal_year": fiscal_year[0],
-				"to_fiscal_year": fiscal_year[0],
+				"from_fiscal_year": fiscal_year.get('name'),
+				"to_fiscal_year": fiscal_year.get('name'),
 				"period_start_date": year_start_date,
 				"period_end_date": year_end_date,
 				"date_based_on": "Purchase Date",
@@ -134,7 +138,7 @@ def get_charts():
 		}
 	]
 
-def get_number_cards():
+def get_number_cards(fiscal_year, year_start_date, year_end_date):
 	return [
 		{
 			"name": "Total Assets",
@@ -173,13 +177,3 @@ def get_number_cards():
 			"doctype": "Number Card"
 		}
 	]
-
-def get_company_for_dashboards():
-	company = frappe.defaults.get_defaults().company
-	if company:
-		return company
-	else:
-		company_list = frappe.get_list("Company")
-		if company_list:
-			return company_list[0].name
-	return None

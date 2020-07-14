@@ -8,17 +8,18 @@ Provide a report and downloadable CSV according to the German DATEV format.
   all required columns. Used to import the data into the DATEV Software.
 """
 from __future__ import unicode_literals
+
 import datetime
 import json
-import zlib
 import zipfile
 import six
+import frappe
+import pandas as pd
+
+from frappe import _
 from csv import QUOTE_NONNUMERIC
 from six import BytesIO
 from six import string_types
-import frappe
-from frappe import _
-import pandas as pd
 from .datev_constants import DataCategory
 from .datev_constants import Transactions
 from .datev_constants import DebtorsCreditors
@@ -130,8 +131,10 @@ def get_customers(filters):
 		SELECT
 
 			acc.account_number as 'Konto',
-			cus.customer_name as 'Name (Adressatentyp Unternehmen)',
-			case cus.customer_type when 'Individual' then 1 when 'Company' then 2 else 0 end as 'Adressatentyp',
+			CASE cus.customer_type WHEN 'Company' THEN cus.customer_name ELSE null END as 'Name (Adressatentyp Unternehmen)',
+			CASE cus.customer_type WHEN 'Individual' THEN con.last_name ELSE null END as 'Name (Adressatentyp natürl. Person)',
+			CASE cus.customer_type WHEN 'Individual' THEN con.first_name ELSE null END as 'Vorname (Adressatentyp natürl. Person)',
+			CASE cus.customer_type WHEN 'Individual' THEN '1' WHEN 'Company' THEN '2' ELSE '0' end as 'Adressatentyp',
 			adr.address_line1 as 'Straße',
 			adr.pincode as 'Postleitzahl',
 			adr.city as 'Ort',
@@ -140,8 +143,7 @@ def get_customers(filters):
 			con.email_id as 'E-Mail',
 			coalesce(con.mobile_no, con.phone) as 'Telefon',
 			cus.website as 'Internet',
-			cus.tax_id as 'Steuernummer',
-			ccl.credit_limit as 'Kreditlimit (Debitor)'
+			cus.tax_id as 'Steuernummer'
 
 		FROM `tabParty Account` par
 
@@ -160,10 +162,6 @@ def get_customers(filters):
 			left join `tabContact` con
 			on con.name = cus.customer_primary_contact
 
-			left join `tabCustomer Credit Limit` ccl
-			on ccl.parent = cus.name
-			and ccl.company = par.company
-
 		WHERE par.company = %(company)s
 		AND par.parenttype = 'Customer'""", filters, as_dict=1)
 
@@ -179,8 +177,10 @@ def get_suppliers(filters):
 		SELECT
 
 			acc.account_number as 'Konto',
-			sup.supplier_name as 'Name (Adressatentyp Unternehmen)',
-			case sup.supplier_type when 'Individual' then '1' when 'Company' then '2' else '0' end as 'Adressatentyp',
+			CASE sup.supplier_type WHEN 'Company' THEN sup.supplier_name ELSE null END as 'Name (Adressatentyp Unternehmen)',
+			CASE sup.supplier_type WHEN 'Individual' THEN con.last_name ELSE null END as 'Name (Adressatentyp natürl. Person)',
+			CASE sup.supplier_type WHEN 'Individual' THEN con.first_name ELSE null END as 'Vorname (Adressatentyp natürl. Person)',
+			CASE sup.supplier_type WHEN 'Individual' THEN '1' WHEN 'Company' THEN '2' ELSE '0' end as 'Adressatentyp',
 			adr.address_line1 as 'Straße',
 			adr.pincode as 'Postleitzahl',
 			adr.city as 'Ort',
@@ -226,9 +226,18 @@ def get_suppliers(filters):
 
 
 def get_account_names(filters):
-	return frappe.get_list("Account", 
-		fields=["account_number as Konto", "name as Kontenbeschriftung"], 
-		filters={"company": filters.get("company"), "is_group": "0"})
+	return frappe.db.sql("""
+		SELECT
+
+			account_number as 'Konto',
+			LEFT(account_name, 40) as 'Kontenbeschriftung',
+			'de-DE' as 'Sprach-ID'
+
+		FROM `tabAccount`
+		WHERE company = %(company)s
+		AND is_group = 0
+		AND account_number != ''
+	""", filters, as_dict=1)
 
 
 def get_datev_csv(data, filters, csv_class):
@@ -287,9 +296,7 @@ def get_datev_csv(data, filters, csv_class):
 
 
 def get_header(filters, csv_class):
-	coa = frappe.get_value("Company", filters.get("company"), "chart_of_accounts")
-	description = filters.get("voucher_type", csv_class.FORMAT_NAME)
-	coa_used = "04" if "SKR04" in coa else ("03" if "SKR03" in coa else "")
+	description = filters.get('voucher_type', csv_class.FORMAT_NAME)
 
 	header = [
 		# DATEV format
@@ -316,19 +323,19 @@ def get_header(filters, csv_class):
 		# J = Imported by -- stays empty
 		'',
 		# K = Tax consultant number (Beraternummer)
-		frappe.get_value("DATEV Settings", filters.get("company"), "consultant_number"),
+		filters.get('consultant_number', '0000000'),
 		# L = Tax client number (Mandantennummer)
-		frappe.get_value("DATEV Settings", filters.get("company"), "client_number"),
+		filters.get('client_number', '00000'),
 		# M = Start of the fiscal year (Wirtschaftsjahresbeginn)
 		frappe.utils.formatdate(frappe.defaults.get_user_default("year_start_date"), "yyyyMMdd"),
 		# N = Length of account numbers (Sachkontenlänge)
-		'4',
+		'%d' % filters.get('acc_len', 4),
 		# O = Transaction batch start date (YYYYMMDD)
-		frappe.utils.formatdate(filters.get('from_date'), "yyyyMMdd"),
+		frappe.utils.formatdate(filters.get('from_date'), "yyyyMMdd") if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
 		# P = Transaction batch end date (YYYYMMDD)
-		frappe.utils.formatdate(filters.get('to_date'), "yyyyMMdd"),
+		frappe.utils.formatdate(filters.get('to_date'), "yyyyMMdd") if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
 		# Q = Description (for example, "Sales Invoice") Max. 30 chars
-		'"{}"'.format(_(description)),
+		'"{}"'.format(_(description)) if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
 		# R = Diktatkürzel
 		'',
 		# S = Buchungstyp
@@ -343,12 +350,12 @@ def get_header(filters, csv_class):
 		#	40 = Kalkulatorik
 		#	11 = Reserviert
 		#	12 = Reserviert
-		'0',
+		'0' if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
 		# U = Festschreibung
 		# TODO: Filter by Accounting Period. In export for closed Accounting Period, this will be "1"
 		'0',
 		# V = Default currency, for example, "EUR"
-		'"%s"' % frappe.get_value("Company", filters.get("company"), "default_currency"),
+		'"%s"' % filters.get('default_currency', 'EUR') if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
 		# reserviert
 		'',
 		# Derivatskennzeichen
@@ -358,7 +365,7 @@ def get_header(filters, csv_class):
 		# reserviert
 		'',
 		# SKR
-		'"%s"' % coa_used,
+		'"%s"' % filters.get('skr', '04'),
 		# Branchen-Lösungs-ID
 		'',
 		# reserviert
@@ -388,6 +395,18 @@ def download_datev_csv(filters=None):
 		filters = json.loads(filters)
 
 	validate(filters)
+
+	# set chart of accounts used
+	coa = frappe.get_value('Company', filters.get('company'), 'chart_of_accounts')
+	filters['skr'] = '04' if 'SKR04' in coa else ('03' if 'SKR03' in coa else '')
+
+	# set account number length
+	account_numbers = frappe.get_list('Account', fields=['account_number'], filters={'is_group': 0, 'account_number': ('!=', '')})
+	filters['acc_len'] = max([len(a.account_number) for a in account_numbers])
+
+	filters['consultant_number'] = frappe.get_value('DATEV Settings', filters.get('company'), 'consultant_number')
+	filters['client_number'] = frappe.get_value('DATEV Settings', filters.get('company'), 'client_number')
+	filters['default_currency'] = frappe.get_value('Company', filters.get('company'), 'default_currency')
 
 	# This is where my zip will be written
 	zip_buffer = BytesIO()

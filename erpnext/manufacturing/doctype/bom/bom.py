@@ -119,6 +119,7 @@ class BOM(WebsiteGenerator):
 					"description": d.description,
 					"time_in_mins": d.time_in_mins,
 					"batch_size": d.batch_size,
+					"operating_cost": d.operating_cost,
 					"idx": d.idx
 				})
 				child.hour_rate = flt(d.hour_rate / self.conversion_rate, 2)
@@ -909,6 +910,7 @@ def get_bom_diff(bom1, bom2):
 
 	return out
 
+@frappe.whitelist()
 def item_query(doctype, txt, searchfield, start, page_len, filters):
 	meta = frappe.get_meta("Item", cached=True)
 	searchfields = meta.get_search_fields()

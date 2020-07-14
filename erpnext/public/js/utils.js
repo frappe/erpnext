@@ -487,7 +487,14 @@ erpnext.utils.update_child_items = function(opts) {
 			fieldtype: 'Date',
 			fieldname: frm.doc.doctype == 'Sales Order' ? "delivery_date" : "schedule_date",
 			in_list_view: 1,
-			label: frm.doc.doctype == 'Sales Order' ? __("Delivery Date") : __("Reqd by date")
+			label: frm.doc.doctype == 'Sales Order' ? __("Delivery Date") : __("Reqd by date"),
+			reqd: 1
+		})
+		fields.splice(3, 0, {
+			fieldtype: 'Float',
+			fieldname: "conversion_factor",
+			in_list_view: 1,
+			label: __("Conversion Factor")
 		})
 	}
 
@@ -536,6 +543,7 @@ erpnext.utils.update_child_items = function(opts) {
 			"item_code": d.item_code,
 			"delivery_date": d.delivery_date,
 			"schedule_date": d.schedule_date,
+			"conversion_factor": d.conversion_factor,
 			"qty": d.qty,
 			"rate": d.rate,
 		});

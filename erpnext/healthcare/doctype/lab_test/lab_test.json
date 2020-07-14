@@ -33,9 +33,10 @@
   "user",
   "invoiced",
   "sb_first",
+  "template",
   "lab_test_name",
   "column_break_26",
-  "template",
+  "medical_code",
   "lab_test_group",
   "sb_normal",
   "normal_test_items",
@@ -424,11 +425,19 @@
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
+  },
+  {
+   "fetch_from": "template.medical_code",
+   "fieldname": "medical_code",
+   "fieldtype": "Link",
+   "label": "Medical Code",
+   "options": "Medical Code",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-04 19:16:29.131168",
+ "modified": "2020-06-29 14:24:26.509721",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

@@ -75,4 +75,31 @@
 		{% endfor %}
 	</tbody>
 </table>
+{% if aging %}
+<h3 class="text-center">{{ _("Ageing Report Based On ") }} {{ aging.ageing_based_on }}</h2>
+<h5 class="text-center">
+	{{ _("Up to " ) }} {{ aging.ageing_based_on }}
+	{{ frappe.format(filters.to_date, 'Date')}}
+</h5>
+<br>
+
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th style="width: 12%">30 Days</th>
+			<th style="width: 15%">60 Days</th>
+			<th style="width: 25%">90 Days</th>
+			<th style="width: 15%">120 Days</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>{{ aging.range1 }}</td>
+			<td>{{ aging.range2 }}</td>
+			<td>{{ aging.range3 }}</td>
+			<td>{{ aging.range4 }}</td>
+		</tr>
+	</tbody>
+</table>
+{% endif %}
 <p class="text-right text-muted">Printed On {{ frappe.format(frappe.utils.get_datetime(), 'Datetime') }}</p>

@@ -13,6 +13,12 @@ $.extend(cur_frm.cscript, {
 	},
 	enable_checkout: function(){
 		toggle_mandatory(cur_frm)
+	},
+	enabled: function() {
+		if (cur_frm.doc.enabled === 1) {
+			cur_frm.doc.show_configure_button = 1;
+			cur_frm.refresh_field('show_configure_button');
+		}
 	}
 });
 
