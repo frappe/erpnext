@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import copy
 from frappe import _
 from six import iteritems
 from email_reply_parser import EmailReplyParser
@@ -339,6 +340,8 @@ def create_duplicate_project(prev_doc, project_name):
 	project.name = project_name
 	project.project_template = ''
 	project.project_name = project_name
+	project.status = 'Open'
+	project.percent_complete = 0
 	project.insert()
 
 	# fetch all the task linked with the old project
@@ -346,6 +349,7 @@ def create_duplicate_project(prev_doc, project_name):
 		'project': prev_doc.get('name')
 	}, fields=['name'])
 
+	new_task_list = []
 	# Create duplicate task for all the task
 	for task in task_list:
 		task = frappe.get_doc('Task', task)
