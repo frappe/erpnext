@@ -8,8 +8,8 @@ def get_data():
 		'fieldname': 'course',
 		'transactions': [
 			{
-				'label': _('Course'),
-				'items': ['Course Enrollment', 'Course Schedule']
+				'label': _('Program and Course'),
+				'items': ['Program', 'Course Enrollment', 'Course Schedule']
 			},
 			{
 				'label': _('Student'),
