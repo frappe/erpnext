@@ -14,3 +14,37 @@ frappe.ui.form.on('Holiday List', {
 		}
 	}
 });
+
+
+frappe.tour['Holiday List'] = [
+	{
+		fieldname: "holiday_list_name",
+		title: "Enter Name",
+		description: __("Name your Holiday List"),
+	},
+	{
+		fieldname: "from_date",
+		title: "From Date",
+		description: __("Enter the date from which the Holiday List will be applicable.")
+	},
+	{
+		fieldname: "to_date",
+		title: "To Date",
+		description: __("Enter the date till which the Holiday List will be applicable.")
+	},
+	{
+		fieldname: "weekly_off",
+		title: "Weekly Off",
+		description: __("Select day for Weekly Off")
+	},
+	{
+		fieldname: "get_weekly_off_dates",
+		title: "Add to holidays",
+		description: __("On click, it will add Weekly off for a mentioned period in the Holidays List.")
+	},
+	{
+		fieldname: "holidays",
+		title: "Holidays",
+		description: __("You can also add different dates in Holiday List")
+	},
+];

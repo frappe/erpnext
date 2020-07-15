@@ -15,5 +15,5 @@
  "reference_document": "Leave Application",
  "show_full_form": 0,
  "title": "Create Leave Application",
- "validate_action": 0
+ "validate_action": 1
 }
