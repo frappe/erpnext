@@ -11,6 +11,7 @@ import json
 from six import string_types
 
 import frappe
+from erpnext.accounts.doctype.pricing_rule.pricing_rule import set_transaction_type
 from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.get_item_details import get_conversion_factor, get_default_income_account
@@ -418,9 +419,28 @@ def apply_pricing_rule_on_transaction(doc):
 	values = {}
 	conditions = get_other_conditions(conditions, values, doc)
 
-	pricing_rules = frappe.db.sql(""" Select `tabPricing Rule`.* from `tabPricing Rule`
-		where  {conditions} and `tabPricing Rule`.disable = 0
-	""".format(conditions = conditions), values, as_dict=1)
+	args = frappe._dict({
+		'doctype': doc.doctype,
+		'transaction_type': None,
+	})
+	set_transaction_type(args)
+	tran_type_condition = '{} = 1'.format(args.transaction_type)
+
+	sql = """
+		SELECT
+			`tabPricing Rule`.*
+		FROM
+			`tabPricing Rule`
+		WHERE
+			{conditions} and
+			{tran_type_condition} and
+			`tabPricing Rule`.disable = 0
+	""".format(
+		conditions=conditions,
+		tran_type_condition=tran_type_condition,
+	)
+
+	pricing_rules = frappe.db.sql(sql, values, as_dict=1)
 
 	if pricing_rules:
 		pricing_rules = filter_pricing_rules_for_qty_amount(doc.total_qty,
