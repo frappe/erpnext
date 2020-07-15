@@ -108,7 +108,6 @@
   "amended_from",
   "range",
   "column_break4",
-  "project",
   "per_billed",
   "is_internal_supplier",
   "inter_company_reference",
@@ -933,6 +932,7 @@
    "width": "50%"
   },
   {
+   "description": "Track this Purchase Receipt against any Project",
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
@@ -1100,20 +1100,13 @@
    "fieldtype": "Small Text",
    "label": "Billing Address",
    "read_only": 1
-  },
-  {
-   "description": "Track this Purchase Receipt against any Project",
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "label": "Project",
-   "options": "Project"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-13 14:01:39.302238",
+ "modified": "2020-07-15 10:01:39.302238",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
