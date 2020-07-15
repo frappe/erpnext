@@ -303,3 +303,37 @@ frappe.ui.form.on('Salary Detail', {
 		}
 	}
 })
+
+
+frappe.tour['Salary Structure'] = [
+	{
+		fieldname: "__newname",
+		title: "Enter Name",
+		description: __("Enter name for your Salary Structure"),
+	},
+	{
+		fieldname: "company",
+		title: "Company",
+		description: __("Select Company")
+	},
+	{
+		fieldname: "payroll_frequency",
+		title: "Payroll Frequency",
+		description: __("Payroll Frequency Can be Monthly, Weekly, Daily etc. ")
+	},
+	{
+		fieldname: "salary_slip_based_on_timesheet",
+		title: "Salary Slip Based On Timesheet",
+		description: __("Our system allow users to define the Salary Structure for Salary Slip based on Timesheet, which allows the Company to pay there Employee as per working hours.")
+	},
+	{
+		fieldname: "earnings",
+		title: "Earnings",
+		description: __("Earnings specify the Salary Components that are earned by an Employee. Read More about ") + "<a href='https://docs.erpnext.com/docs/user/manual/en/human-resources/salary-structure#21-earnings-and-deductions target='_blank'>"+__("Earnings And deductions")+ "</a>"
+	},
+	{
+		fieldname: "deductions",
+		title: "Deductions",
+		description: __("Deductions specify the Salary Components that are Deducted from Employee's salary. Read More about ") + "<a href='https://docs.erpnext.com/docs/user/manual/en/human-resources/salary-structure#21-earnings-and-deductions target='_blank'>" +__("Earnings And deductions") + "</a>"
+	}
+];

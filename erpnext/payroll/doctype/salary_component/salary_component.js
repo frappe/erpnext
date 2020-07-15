@@ -67,3 +67,37 @@ var set_value_for_condition_and_formula = function(frm) {
 	frm.set_value("do_not_include_in_total", 0);
 	frm.set_value("depends_on_payment_days", 0);
 };
+
+
+frappe.tour['Salary Component'] = [
+	{
+		fieldname: "salary_component",
+		title: "Enter Name",
+		description: __("Name you Salary Component"),
+	},
+	{
+		fieldname: "salary_component_abbr",
+		title: "Salary Component Abbreviation",
+		description: __("Abbreviation for salary components are used during creation of Salary Structure for calculating different component amount in formula and condition section")
+	},
+	{
+		fieldname: "Component Type",
+		title: "type",
+		description: __("Component Type should be one of deduction or earning ")
+	},
+	{
+		fieldname: "depends_on_payment_days",
+		title: "Depends on Payment Days",
+		description: __("If this checkbox is enabled then the Salary Component will be calculated based on the number of Payment days.")
+	},
+	{
+		fieldname: "do_not_include_in_total",
+		title: "Do Not Include in Total",
+		description: __("Selecting this checkbox ensures that the Salary Component is not included in the Total Salary. It is used to define the component which is part of the CTC but not payable.")
+	},
+	{
+		fieldname: "accounts",
+		title: "Accounts",
+		description: __("Select Accounts For your Salary Component which is used during.")
+	},
+];

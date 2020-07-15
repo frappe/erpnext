@@ -17,3 +17,26 @@ frappe.ui.form.on('Payroll Settings', {
 		}
 	},
 });
+
+frappe.tour['Payroll Settings'] = [
+	{
+		fieldname: "payroll_based_on",
+		title: "Calculate Payroll Payment Based On",
+		description: __("Payment Days in Salary Slip can be calculated based on Leave Application or Attendance records. You can select the option based on which Payment days will be calculated"),
+	},
+	{
+		fieldname: "daily_wages_fraction_for_half_day",
+		title: "Daily Wages Fraction for Half Day",
+		description: __("Based on this fraction, the salary for Half Day will be calculated. For example, if the value is set as 0.75, the three-fourth salary will be given on half-day attendance.")
+	},
+	{
+		fieldname: "max_working_hours_against_timesheet",
+		title: "Max working hours against Timesheet",
+		description: __("For salary slips based on the timesheet, you can set the maximum allowed hours against a single timesheet. Set this value to zero to disable this validation.")
+	},
+	{
+		fieldname: "encrypt_salary_slips_in_emails",
+		title: "Encrypt Salary Slips in Emails",
+		description: __("If Enabled, the salary slip PDF sent to the employee is encrypted using the mentioned Password Policy")
+	}
+];
