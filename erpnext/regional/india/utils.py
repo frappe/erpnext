@@ -668,6 +668,11 @@ def get_gst_accounts(company, account_wise=False):
 	return gst_accounts
 
 def update_grand_total_for_rcm(doc, method):
+	country = frappe.get_cached_value('Company', doc.company, 'country')
+
+	if country != 'India':
+		return
+
 	if doc.reverse_charge == 'Y':
 		gst_accounts = get_gst_accounts(doc.company)
 		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
