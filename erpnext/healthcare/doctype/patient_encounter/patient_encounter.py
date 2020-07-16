@@ -73,7 +73,7 @@ def update_encounter_medical_record(encounter):
 		insert_encounter_to_medical_record(encounter)
 
 def delete_medical_record(encounter):
-	frappe.db.delete_doc_if_exists('Patient Medical Record', 'reference_name', encounter.name)
+	frappe.delete_doc_if_exists('Patient Medical Record', 'reference_name', encounter.name)
 
 def set_subject_field(encounter):
 	subject = frappe.bold(_('Healthcare Practitioner: ')) + encounter.practitioner + '<br>'

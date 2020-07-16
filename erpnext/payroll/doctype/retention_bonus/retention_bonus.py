@@ -26,6 +26,7 @@ class RetentionBonus(Document):
 			additional_salary.amount = self.bonus_amount
 			additional_salary.payroll_date = self.bonus_payment_date
 			additional_salary.company = company
+			additional_salary.overwrite_salary_structure_amount = 0
 			additional_salary.ref_doctype = self.doctype
 			additional_salary.ref_docname = self.name
 			additional_salary.submit()
@@ -53,7 +54,7 @@ class RetentionBonus(Document):
 				'employee': self.employee,
 				'salary_component': self.salary_component,
 				'payroll_date': self.bonus_payment_date,
-				'company': company,
+				'company': self.company,
 				'docstatus': 1,
 				'ref_doctype': self.doctype,
 				'ref_docname': self.name
