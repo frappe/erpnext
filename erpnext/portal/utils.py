@@ -88,21 +88,30 @@ def create_customer_or_supplier():
 	party.flags.ignore_mandatory = True
 	party.insert(ignore_permissions=True)
 
+	alternate_doctype = "Customer" if doctype == "Supplier" else "Supplier"
+
+	if party_exists(alternate_doctype, user):
+		# if user is both customer and supplier, alter fullname to avoid contact name duplication
+		fullname +=  "-" + doctype
+
+	create_party_contact(doctype, fullname, user, party.name)
+
+	return party
+
+def create_party_contact(doctype, fullname, user, party_name):
 	contact = frappe.new_doc("Contact")
 	contact.update({
 		"first_name": fullname,
 		"email_id": user
 	})
-	contact.append('links', dict(link_doctype=doctype, link_name=party.name))
+	contact.append('links', dict(link_doctype=doctype, link_name=party_name))
+	contact.append('email_ids', dict(email_id=user))
 	contact.flags.ignore_mandatory = True
 	contact.insert(ignore_permissions=True)
 
-	return party
-
-
 def party_exists(doctype, user):
+	# check if contact exists against party and if it is linked to the doctype
 	contact_name = frappe.db.get_value("Contact", {"email_id": user})
-
 	if contact_name:
 		contact = frappe.get_doc('Contact', contact_name)
 		doctypes = [d.link_doctype for d in contact.links]
