@@ -123,7 +123,7 @@ def get_number_cards():
 
 	number_cards.append(
 		get_number_cards_doc("Employee", "New Joinees (Last year)", filters_json = json.dumps([
-				["Employee","date_of_joining","Previous","1 year"],
+				["Employee","date_of_joining","Timespan","last year"],
 				["Employee","status","=","Active"]
 			])
 		)
@@ -131,7 +131,7 @@ def get_number_cards():
 
 	number_cards.append(
 		get_number_cards_doc("Employee", "Employees Left (Last year)", filters_json = json.dumps([
-				["Employee", "relieving_date", "Previous", "1 year"],
+				["Employee", "relieving_date", "Timespan", "last year"],
 				["Employee", "status", "=", "Left"]
 			])
 		)
@@ -139,7 +139,7 @@ def get_number_cards():
 
 	number_cards.append(
 		get_number_cards_doc("Job Applicant", "Total Applicants (Last month)", filters_json = json.dumps([
-				["Job Applicant", "creation", "Previous", "1 month"]
+				["Job Applicant", "creation", "Timespan", "last month"]
 			])
 		)
 	)
