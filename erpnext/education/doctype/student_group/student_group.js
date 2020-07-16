@@ -30,26 +30,8 @@ frappe.ui.form.on("Student Group", {
 
 	refresh: function(frm) {
 		if (!frm.doc.__islocal) {
-			frm.add_custom_button(__("Attendance"), function() {
-				frappe.route_options = {
-					based_on: "Student Group",
-					student_group: frm.doc.name
-				}
-				frappe.set_route("List", "Student Attendance Tool");
-			});
-			frm.add_custom_button(__("Course Schedule"), function() {
-				frappe.route_options = {
-					student_group: frm.doc.name
-				}
-				frappe.set_route("List", "Course Schedule");
-			});
-			frm.add_custom_button(__("Assessment Plan"), function() {
-				frappe.route_options = {
-					student_group: frm.doc.name
-				}
-				frappe.set_route("List", "Assessment Plan");
-			});
-			frm.add_custom_button(__("Update Email Group"), function() {
+
+			frm.add_custom_button(__("Add Guardians to Email Group"), function() {
 				frappe.call({
 					method: "erpnext.education.api.update_email_group",
 					args: {
@@ -57,16 +39,33 @@ frappe.ui.form.on("Student Group", {
 						"name": frm.doc.name
 					}
 				});
-			});
+			}, __("Actions"));
+
+			frm.add_custom_button(__("Student Attendance Tool"), function() {
+				frappe.route_options = {
+					based_on: "Student Group",
+					student_group: frm.doc.name
+				}
+				frappe.set_route("Form", "Student Attendance Tool", "Student Attendance Tool");
+			}, __("Tools"));
+
+			frm.add_custom_button(__("Course Scheduling Tool"), function() {
+				frappe.route_options = {
+					student_group: frm.doc.name
+				}
+				frappe.set_route("Form", "Course Scheduling Tool", "Course Scheduling Tool");
+			}, __("Tools"));
+
 			frm.add_custom_button(__("Newsletter"), function() {
 				frappe.route_options = {
 					"Newsletter Email Group.email_group": frm.doc.name
 				}
 				frappe.set_route("List", "Newsletter");
-			});
+			}, __("View"));
+
 		}
 	},
-	
+
 	group_based_on: function(frm) {
 		if (frm.doc.group_based_on == "Batch") {
 			frm.doc.course = null;

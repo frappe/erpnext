@@ -17,7 +17,7 @@ frappe.ui.form.on('Course', {
 
 	add_course_to_programs: function(frm) {
 		get_programs_without_course(frm.doc.name).then(r => {
-			if (r.message) {
+			if (r.message.length) {
 				frappe.prompt([
 					{
 						fieldname: 'programs',
@@ -50,6 +50,8 @@ frappe.ui.form.on('Course', {
 						freeze_message: __('...Adding Course to Programs')
 					})
 				}, __('Add Course to Programs'), __('Add'));
+			} else {
+				frappe.msgprint(__('This course is already added to the existing programs'));
 			}
 		})
 	}

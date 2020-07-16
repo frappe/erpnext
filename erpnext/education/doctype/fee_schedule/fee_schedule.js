@@ -69,7 +69,7 @@ frappe.ui.form.on('Fee Schedule', {
 					callback: function() {
 						frm.refresh();
 					}
-				});
+				}).addClass("btn-primary");
 			}, "fa fa-play", "btn-success");
 		}
 		if (frm.doc.fee_creation_status == "Successful") {
