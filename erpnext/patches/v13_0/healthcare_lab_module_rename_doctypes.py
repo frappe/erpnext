@@ -85,7 +85,7 @@ def execute():
 		frappe.reload_doc('healthcare', 'doctype', 'lab_test_template')
 		if lab_test_groups:
 			frappe.db.sql("""
-				INSERT INTO `tabLab Test Group Template`
+				INSERT IGNORE INTO `tabLab Test Group Template`
 					(name, template_or_new_line, lab_test_template, lab_test_rate, lab_test_description,
 					group_event, group_test_uom, group_test_normal_range,
 					creation, owner, parent, parenttype, parentfield)
@@ -96,7 +96,9 @@ def execute():
 			frappe.db.sql("""
 				INSERT INTO `tabDescriptive Test Template`
 					(name, particulars, creation, owner, parent, parenttype, parentfield)
-				VALUES {}""".format(', '.join(['%s'] * len(special_test_templates))), tuple(special_test_templates)
+				VALUES {}
+				ON DUPLICATE KEY UPDATE parentfield = 'descriptive_test_templates'
+				""".format(', '.join(['%s'] * len(special_test_templates))), tuple(special_test_templates)
 			)
 
 	if frappe.db.exists('DocType', 'Lab Test'):
@@ -107,7 +109,9 @@ def execute():
 					(name, lab_test_name, lab_test_event, result_value, lab_test_uom,
 					normal_range, lab_test_comment, require_result_value, template,
 					creation, owner, parent, parenttype, parentfield)
-				VALUES {}""".format(', '.join(['%s'] * len(normal_tests))), tuple(normal_tests)
+				VALUES {}
+				ON DUPLICATE KEY UPDATE parentfield = 'normal_test_items'
+				""".format(', '.join(['%s'] * len(normal_tests))), tuple(normal_tests)
 			)
 
 		if sensitivity_tests:
@@ -115,7 +119,9 @@ def execute():
 				INSERT INTO `tabSensitivity Test Result`
 					(name, antibiotic, antibiotic_sensitivity,
 					creation, owner, parent, parenttype, parentfield)
-				VALUES {}""".format(', '.join(['%s'] * len(sensitivity_tests))), tuple(sensitivity_tests)
+				VALUES {}
+				ON DUPLICATE KEY UPDATE parentfield = 'sensitivity_test_items'
+				""".format(', '.join(['%s'] * len(sensitivity_tests))), tuple(sensitivity_tests)
 			)
 
 		if special_tests:
@@ -123,7 +129,9 @@ def execute():
 				INSERT INTO `tabDescriptive Test Result`
 					(name, lab_test_particulars, result_value, require_result_value, template,
 					creation, owner, parent, parenttype, parentfield)
-				VALUES {}""".format(', '.join(['%s'] * len(special_tests))), tuple(special_tests)
+				VALUES {}
+				ON DUPLICATE KEY UPDATE parentfield = 'descriptive_test_items'
+				""".format(', '.join(['%s'] * len(special_tests))), tuple(special_tests)
 			)
 
 		if frappe.db.has_column('Lab Test', 'special_toggle'):

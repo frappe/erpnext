@@ -49,7 +49,7 @@
   "sb_descriptive",
   "descriptive_test_items",
   "organisms_section",
-  "organisms",
+  "organism_test_items",
   "sb_sensitivity",
   "sensitivity_test_items",
   "sb_comments",
@@ -345,12 +345,12 @@
    "report_hide": 1
   },
   {
-    "fetch_from": "template.medical_code",
-    "fieldname": "medical_code",
-    "fieldtype": "Link",
-    "label": "Medical Code",
-    "options": "Medical Code",
-    "read_only": 1
+   "fetch_from": "template.medical_code",
+   "fieldname": "medical_code",
+   "fieldtype": "Link",
+   "label": "Medical Code",
+   "options": "Medical Code",
+   "read_only": 1
   },
   {
    "fieldname": "sb_normal",
@@ -370,12 +370,6 @@
    "depends_on": "descriptive_toggle",
    "fieldname": "organisms_section",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "organisms",
-   "fieldtype": "Table",
-   "options": "Organism Test Result",
-   "print_hide": 1
   },
   {
    "fieldname": "sb_sensitivity",
@@ -546,11 +540,17 @@
    "hidden": 1,
    "print_hide": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "organism_test_items",
+   "fieldtype": "Table",
+   "options": "Organism Test Result",
+   "print_hide": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-12 18:24:03.554572",
+ "modified": "2020-07-16 13:35:24.811062",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",
