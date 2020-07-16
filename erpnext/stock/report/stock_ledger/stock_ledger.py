@@ -32,7 +32,7 @@ def execute(filters=None):
 			actual_qty += flt(sle.actual_qty, precision)
 			stock_value += sle.stock_value_difference
 
-			if sle.voucher_type == 'Stock Reconciliation':
+			if sle.voucher_type == 'Stock Reconciliation' and not sle.actual_qty:
 				actual_qty = sle.qty_after_transaction
 				stock_value = sle.stock_value
 
