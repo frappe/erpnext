@@ -47,14 +47,10 @@ def add_course_to_programs(course, programs, mandatory=False):
 
 @frappe.whitelist()
 def get_programs_without_course(course):
-	data = frappe.db.sql(
-		"""
-			SELECT program.name
-			FROM `tabProgram` program
-			LEFT JOIN `tabProgram Course` program_course
-			ON program_course.parent = program.name
-			WHERE
-				program_course.course != %(course)s or
-				program_course.parent is NULL
-		""", {'course': course}, as_list=1)
-	return [entry[0] for entry in data]
+	data = []
+	for entry in frappe.db.get_all('Program'):
+		program = frappe.get_doc('Program', entry.name)
+		courses = [c.course for c in program.courses]
+		if not courses or course not in courses:
+			data.append(program.name)
+	return data

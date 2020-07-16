@@ -42,7 +42,7 @@ frappe.ui.form.on('Course', {
 							'mandatory': data.mandatory
 						},
 						callback: function(r) {
-							if (r.message) {
+							if (!r.exc) {
 								frm.reload_doc();
 							}
 						},
@@ -53,7 +53,7 @@ frappe.ui.form.on('Course', {
 			} else {
 				frappe.msgprint(__('This course is already added to the existing programs'));
 			}
-		})
+		});
 	}
 });
 
