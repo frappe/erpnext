@@ -618,7 +618,7 @@ def get_partywise_advanced_payment_amount(party_type, posting_date = None, compa
 		WHERE
 			party_type = %s and against_voucher is null
 			and {1} GROUP BY party"""
-		.format(("credit") if party_type == "Customer" else "debit", cond) , party_type)
+		.format(("credit_in_account_currency") if party_type == "Customer" else "debit_in_account_currency", cond) , party_type)
 
 	if data:
 		return frappe._dict(data)
