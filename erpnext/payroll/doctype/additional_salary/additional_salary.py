@@ -35,7 +35,7 @@ class AdditionalSalary(Document):
 		if date_of_joining:
 			if self.payroll_date and getdate(self.payroll_date) < getdate(date_of_joining):
 				frappe.throw(_("Payroll date can not be less than employee's joining date."))
-			elif self.to_date and getdate(self.from_date) < getdate(date_of_joining):
+			elif self.from_date and getdate(self.from_date) < getdate(date_of_joining):
 				frappe.throw(_("From date can not be less than employee's joining date."))
 
 		if relieving_date:
