@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe.utils import add_to_date
-from frappe.utils.dashboard import get_config, make_records
 
 def execute():
 	frappe.reload_doc("manufacturing", "doctype", "work_order")

@@ -113,6 +113,14 @@ cur_frm.cscript.calculate_total_amount = function(doc,cdt,cdn){
 	cur_frm.cscript.calculate_total(doc,cdt,cdn);
 };
 
+cur_frm.fields_dict['cost_center'].get_query = function(doc) {
+	return {
+		filters: {
+			"company": doc.company
+		}
+	}
+};
+
 erpnext.expense_claim = {
 	set_title: function(frm) {
 		if (!frm.doc.task) {
@@ -300,6 +308,11 @@ frappe.ui.form.on("Expense Claim", {
 	cost_center: function(frm) {
 		frm.events.set_child_cost_center(frm);
 	},
+
+	validate: function(frm) {
+		frm.events.set_child_cost_center(frm);
+	},
+
 	set_child_cost_center: function(frm){
 		(frm.doc.expenses || []).forEach(function(d) {
 			if (!d.cost_center){
@@ -349,9 +362,6 @@ frappe.ui.form.on("Expense Claim", {
 });
 
 frappe.ui.form.on("Expense Claim Detail", {
-	expenses_add: function(frm, cdt, cdn) {
-		frm.events.set_child_cost_center(frm);
-	},
 	amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.amount);
