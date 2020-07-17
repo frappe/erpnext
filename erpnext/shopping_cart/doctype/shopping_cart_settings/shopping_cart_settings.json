@@ -12,6 +12,7 @@
   "show_price",
   "show_stock_availability",
   "enable_variants",
+  "column_break_7",
   "show_contact_us_button",
   "show_quantity_in_website",
   "show_apply_coupon_code_in_website",
@@ -94,9 +95,9 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Company",
-   "mandatory_depends_on": "eval: doc.enabled == 1",
    "options": "Company",
-   "remember_last_selected_value": 1
+   "remember_last_selected_value": 1,
+   "reqd": 1
   },
   {
    "description": "Prices will not be shown if Price List is not set",
@@ -114,14 +115,14 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Default Customer Group",
-   "mandatory_depends_on": "eval: doc.enabled == 1",
-   "options": "Customer Group"
+   "options": "Customer Group",
+   "reqd": 1
   },
   {
    "fieldname": "quotation_series",
    "fieldtype": "Select",
    "label": "Quotation Series",
-   "mandatory_depends_on": "eval: doc.enabled == 1"
+   "reqd": 1
   },
   {
    "collapsible": 1,
@@ -153,8 +154,11 @@
    "fieldname": "payment_gateway_account",
    "fieldtype": "Link",
    "label": "Payment Gateway Account",
-   "mandatory_depends_on": "eval: doc.enabled == 1 && doc.enable_checkout == 1",
    "options": "Payment Gateway Account"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -167,8 +171,8 @@
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-07-08 14:18:02.274138",
- "modified_by": "anupam@erpnext.com",
+ "modified": "2020-07-17 17:53:22.667228",
+ "modified_by": "Administrator",
  "module": "Shopping Cart",
  "name": "Shopping Cart Settings",
  "owner": "Administrator",
