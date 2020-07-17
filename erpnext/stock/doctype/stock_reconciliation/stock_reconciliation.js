@@ -85,7 +85,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 	set_valuation_rate_and_qty_for_all_items: function(frm) {
 		frm.doc.items.forEach(row => {
 			frm.events.set_valuation_rate_and_qty(frm, row.doctype, row.name);
-		})
+		});
 	},
 
 	set_valuation_rate_and_qty: function(frm, cdt, cdn) {
