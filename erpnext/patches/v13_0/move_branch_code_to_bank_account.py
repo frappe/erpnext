@@ -13,4 +13,5 @@ def execute():
 	if frappe.db.has_column('Bank', 'branch_code') and frappe.db.has_column('Bank Account', 'branch_code'):
 		frappe.db.sql("""UPDATE `tabBank` b, `tabBank Account` ba
 			SET ba.branch_code = b.branch_code
-			WHERE b.branch_code IS NOT NULL and ba.branch_code IS NULL""")
+			WHERE ba.bank = b.name AND
+			ifnull(b.branch_code, '') != '' AND ifnull(ba.branch_code, '') = ''""")
