@@ -3,6 +3,13 @@ import frappe
 from frappe.model.utils.rename_field import rename_field
 
 def execute():
+	"""
+	Rename Lab Test and Lab Test Template child Doctypes
+	Rename child table field name sin Lab Test and Lab Test Template
+	Rename field in Lab Test
+	Rename options in Lab Test Group Template child doctype
+	"""
+	# copy records from child doctypes to be renamed
 	lab_test_groups = []
 	if frappe.db.exists('DocType', 'Lab Test Groups'):
 		for d in frappe.db.sql("""
@@ -66,7 +73,7 @@ def execute():
 			special_tests.append((d.name, d.lab_test_particulars, d.result_value, d.require_result_value,
 				d.template, d.creation, d.owner, d.parent, 'Lab Test', 'descriptive_test_items'))
 
-	# Rename doctypes
+	# rename child doctypes
 	doctypes = {
 		'Lab Test Groups': 'Lab Test Group Template',
 		'Normal Test Items': 'Normal Test Result',
@@ -81,8 +88,13 @@ def execute():
 			frappe.reload_doc('healthcare', 'doctype', frappe.scrub(new_dt))
 			frappe.delete_doc('DocType', old_dt)
 
+	# insert copied records in case migrate failed
+	# ignore insert or update parenttype field (if child table fields renamed)
+
+	# Lab Test Template child tables
 	if frappe.db.exists('DocType', 'Lab Test Template'):
 		frappe.reload_doc('healthcare', 'doctype', 'lab_test_template')
+
 		if lab_test_groups:
 			frappe.db.sql("""
 				INSERT IGNORE INTO `tabLab Test Group Template`
@@ -100,9 +112,10 @@ def execute():
 				ON DUPLICATE KEY UPDATE parentfield = 'descriptive_test_templates'
 				""".format(', '.join(['%s'] * len(special_test_templates))), tuple(special_test_templates)
 			)
-
+	# Lab Test child tables
 	if frappe.db.exists('DocType', 'Lab Test'):
 		frappe.reload_doc('healthcare', 'doctype', 'lab_test')
+
 		if normal_tests:
 			frappe.db.sql("""
 				INSERT INTO `tabNormal Test Result`
@@ -133,11 +146,11 @@ def execute():
 				ON DUPLICATE KEY UPDATE parentfield = 'descriptive_test_items'
 				""".format(', '.join(['%s'] * len(special_tests))), tuple(special_tests)
 			)
-
+		# rename field in Lab Test
 		if frappe.db.has_column('Lab Test', 'special_toggle'):
 			rename_field('Lab Test', 'special_toggle', 'descriptive_toggle')
 
-	# Fix Options
+	# fix select options in Lab Test Group Template
 	if frappe.db.exists('DocType', 'Lab Test Group Template'):
 		frappe.reload_doc('healthcare', 'doctype', 'lab_test_group_template')
 		frappe.db.sql("""update `tabLab Test Group Template` set template_or_new_line = 'Add New Line'
