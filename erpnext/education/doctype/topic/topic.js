@@ -5,7 +5,7 @@ frappe.ui.form.on('Topic', {
 	refresh: function(frm) {
 		if (!cur_frm.doc.__islocal) {
 			frm.add_custom_button(__('Add to Courses'), function() {
-				frm.trigger('add_topic_to_courses')
+				frm.trigger('add_topic_to_courses');
 			}, __('Action'));
 		}
 	},
@@ -37,7 +37,7 @@ frappe.ui.form.on('Topic', {
 						},
 						freeze: true,
 						freeze_message: __('...Adding Topic to Courses')
-					})
+					});
 				}, __('Add Topic to Courses'), __('Add'));
 			} else {
 				frappe.msgprint(__('This topic is already added to the existing courses'));
@@ -52,4 +52,4 @@ let get_courses_without_topic = function(topic) {
 		method: 'erpnext.education.doctype.topic.topic.get_courses_without_topic',
 		args: {'topic': topic}
 	});
-}
+};

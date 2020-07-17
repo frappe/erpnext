@@ -40,7 +40,7 @@ def add_topic_to_courses(topic, courses, mandatory=False):
 		course.flags.ignore_mandatory = True
 		course.save()
 	frappe.db.commit()
-	frappe.msgprint(_("Topic {0} has been added to all the selected courses successfully.").format(frappe.bold(topic)),
+	frappe.msgprint(_('Topic {0} has been added to all the selected courses successfully.').format(frappe.bold(topic)),
 		title=_('Courses updated'), indicator='green')
 
 @frappe.whitelist()
@@ -55,5 +55,5 @@ def add_content_to_topics(content_type, content, topics):
 		topic.flags.ignore_mandatory = True
 		topic.save()
 	frappe.db.commit()
-	frappe.msgprint(_("{0} {1} has been added to all the selected topics successfully.").format(content_type, frappe.bold(content)),
+	frappe.msgprint(_('{0} {1} has been added to all the selected topics successfully.').format(content_type, frappe.bold(content)),
 		title=_('Topics updated'), indicator='green')

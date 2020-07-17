@@ -1,2 +1,2 @@
-frappe.ui.form.on("Room", function(frm) {
+frappe.ui.form.on("Room", {
 });

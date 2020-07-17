@@ -18,12 +18,12 @@ class Course(Document):
 			for criteria in self.assessment_criteria:
 				total_weightage += criteria.weightage or 0
 			if total_weightage != 100:
-				frappe.throw(_("Total Weightage of all Assessment Criteria must be 100%"))
+				frappe.throw(_('Total Weightage of all Assessment Criteria must be 100%'))
 
 	def get_topics(self):
 		topic_data= []
 		for topic in self.topics:
-			topic_doc = frappe.get_doc("Topic", topic.topic)
+			topic_doc = frappe.get_doc('Topic', topic.topic)
 			if topic_doc.topic_content:
 				topic_data.append(topic_doc)
 		return topic_data
@@ -42,7 +42,7 @@ def add_course_to_programs(course, programs, mandatory=False):
 		program.flags.ignore_mandatory = True
 		program.save()
 	frappe.db.commit()
-	frappe.msgprint(_("Course {0} has been added to all the selected programs successfully.").format(frappe.bold(course)),
+	frappe.msgprint(_('Course {0} has been added to all the selected programs successfully.').format(frappe.bold(course)),
 		title=_('Programs updated'), indicator='green')
 
 @frappe.whitelist()

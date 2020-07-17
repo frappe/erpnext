@@ -38,7 +38,7 @@ frappe.ui.form.on('Article', {
 						},
 						freeze: true,
 						freeze_message: __('...Adding Article to Topics')
-					})
+					});
 				}, __('Add Article to Topics'), __('Add'));
 			} else {
 				frappe.msgprint(__('This article is already added to the existing topics'));
@@ -52,5 +52,5 @@ let get_topics_without_article = function(article) {
 		type: 'GET',
 		method: 'erpnext.education.doctype.article.article.get_topics_without_article',
 		args: {'article': article}
-	})
-}
+	});
+};

@@ -53,7 +53,7 @@ frappe.ui.form.on('Quiz', {
 						},
 						freeze: true,
 						freeze_message: __('...Adding Quiz to Topics')
-					})
+					});
 				}, __('Add Quiz to Topics'), __('Add'));
 			} else {
 				frappe.msgprint(__('This quiz is already added to the existing topics'));
@@ -68,4 +68,4 @@ let get_topics_without_quiz = function(quiz) {
 		method: 'erpnext.education.doctype.quiz.quiz.get_topics_without_quiz',
 		args: {'quiz': quiz}
 	});
-}
+};
