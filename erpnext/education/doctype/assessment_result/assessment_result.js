@@ -2,6 +2,12 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on("Assessment Result", {
+	refresh: function(frm) {
+		if (!frm.doc.__islocal) {
+			frm.trigger('setup_chart');
+		}
+	},
+
 	onload: function(frm) {
 		frm.set_query('assessment_plan', function(){
 			return {
@@ -30,6 +36,41 @@ frappe.ui.form.on("Assessment Result", {
 					}
 					refresh_field("details");
 				}
+			});
+		}
+	},
+
+	setup_chart: function(frm) {
+		let labels = [];
+		let maximum_scores = [];
+		let scores = [];
+		$.each(frm.doc.details, function(_i, e) {
+			labels.push(e.assessment_criteria);
+			maximum_scores.push(e.maximum_score);
+			scores.push(e.score);
+		});
+
+		if (labels.length && maximum_scores.length && scores.length) {
+			frm.dashboard.chart_area.empty().removeClass('hidden');
+			new frappe.Chart('.form-graph', {
+				title: "Assessment Results",
+				data: {
+					labels: labels,
+					datasets: [
+						{
+							name: "Maximum Score",
+							chartType: "bar",
+							values: maximum_scores,
+						},
+						{
+							name: "Score Obtained",
+							chartType: "bar",
+							values: scores,
+						}
+					]
+				},
+				colors: ['#4CA746', '#98D85B'],
+				type: 'bar'
 			});
 		}
 	}
