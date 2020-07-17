@@ -9,7 +9,7 @@ import frappe
 from frappe import _, throw
 from frappe.desk.form.assign_to import clear, close_all_assignments
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate, today
+from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate, today, flt
 from frappe.utils.nestedset import NestedSet
 
 
@@ -63,10 +63,10 @@ class Task(NestedSet):
 			close_all_assignments(self.doctype, self.name)
 
 	def validate_progress(self):
-		if (self.progress or 0) > 100:
+		if flt(self.progress or 0) > 100:
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
 
-		if self.progress == 100:
+		if flt(self.progress) == 100:
 			self.status = 'Completed'
 
 		if self.status == 'Completed':
