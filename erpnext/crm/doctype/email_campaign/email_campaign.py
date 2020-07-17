@@ -72,13 +72,13 @@ def send_email_to_leads_or_contacts():
 def send_mail(entry, email_campaign):
 	recipient_list = []
 	if email_campaign.email_campaign_for == "Email Group":
-		for member in frappe.db.get_list("Email Group Member", filters={"email_group": email_campaign.get("recipient")}, fields=['email']):
+		for member in frappe.db.get_list("Email Group Member", filters={"email_group": email_campaign.get("recipient")}, fields=["email"]):
 			recipient_list.append(member['email'])
 	else:
-		recipient_list.append(frappe.db.get_value(email_campaign.email_campaign_for, email_campaign.get("recipient"), 'email_id'))
+		recipient_list.append(frappe.db.get_value(email_campaign.email_campaign_for, email_campaign.get("recipient"), "email_id"))
 
 	email_template = frappe.get_doc("Email Template", entry.get("email_template"))
-	sender = frappe.db.get_value("User", email_campaign.get("sender"), 'email')
+	sender = frappe.db.get_value("User", email_campaign.get("sender"), "email")
 	context = {"doc": frappe.get_doc(email_campaign.email_campaign_for, email_campaign.recipient)}
 	# send mail and link communication to document
 	comm = make(
