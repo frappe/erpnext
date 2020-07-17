@@ -184,9 +184,8 @@ frappe.ui.form.on('Material Request', {
 		});
 	},
 
-	get_item_data: function(frm, item) {
+	get_item_data: function(frm, item, overwrite_warehouse=false) {
 		if (item && !item.item_code) { return; }
-
 		frm.call({
 			method: "erpnext.stock.get_item_details.get_item_details",
 			child: item,
@@ -207,7 +206,8 @@ frappe.ui.form.on('Material Request', {
 					plc_conversion_rate: 1,
 					rate: item.rate,
 					conversion_factor: item.conversion_factor
-				}
+				},
+				overwrite_warehouse: overwrite_warehouse
 			},
 			callback: function(r) {
 				const d = item;
@@ -358,29 +358,29 @@ frappe.ui.form.on("Material Request Item", {
 		}
 
 		const item = locals[doctype][name];
-		frm.events.get_item_data(frm, item);
+		frm.events.get_item_data(frm, item, false);
 	},
 
 	from_warehouse: function(frm, doctype, name) {
 		const item = locals[doctype][name];
-		frm.events.get_item_data(frm, item);
+		frm.events.get_item_data(frm, item, false);
 	},
 
 	warehouse: function(frm, doctype, name) {
 		const item = locals[doctype][name];
-		frm.events.get_item_data(frm, item);
+		frm.events.get_item_data(frm, item, false);
 	},
 
 	rate: function(frm, doctype, name) {
 		const item = locals[doctype][name];
-		frm.events.get_item_data(frm, item);
+		frm.events.get_item_data(frm, item, false);
 	},
 
 	item_code: function(frm, doctype, name) {
 		const item = locals[doctype][name];
 		item.rate = 0;
 		set_schedule_date(frm);
-		frm.events.get_item_data(frm, item);
+		frm.events.get_item_data(frm, item, true);
 	},
 
 	schedule_date: function(frm, cdt, cdn) {
