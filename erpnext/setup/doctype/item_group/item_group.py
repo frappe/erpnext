@@ -45,11 +45,11 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		'''Make website route'''
 		self.route = ''
 		if self.parent_item_group:
-			parent_item_group = frappe.get_doc('Item Group', self.parent_item_group)
+			parent_item_group, route = frappe.db.get_value("Item Group", self.parent_item_group, ["parent_item_group", "route"])
 
 			# make parent route only if not root
-			if parent_item_group.parent_item_group and parent_item_group.route:
-				self.route = parent_item_group.route + '/'
+			if parent_item_group and route:
+				self.route = route + '/'
 
 		self.route += self.scrub(self.item_group_name)
 
