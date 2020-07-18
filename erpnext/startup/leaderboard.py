@@ -175,7 +175,6 @@ def get_all_sales_partner(date_range, company, field, limit = None):
 @frappe.whitelist()
 def get_all_sales_person(date_range, company, field = None, limit = 0):
 	date_condition = get_date_condition(date_range, 'sales_order.transaction_date')
-	print('date condition', date_condition)
 
 	return frappe.db.sql("""
 		select sales_team.sales_person as name, sum(sales_order.base_net_total) as value
@@ -194,5 +193,7 @@ def get_date_condition(date_range, field):
 	if date_range:
 		date_range = frappe.parse_json(date_range)
 		from_date, to_date = date_range
-		date_condition = "and {0} between '{1}' and '{2}'".format(field, from_date, to_date)
+		date_condition = "and {0} between {1} and {2}".format(
+			field, frappe.db.escape(from_date), frappe.db.escape(to_date)
+		)
 	return date_condition
