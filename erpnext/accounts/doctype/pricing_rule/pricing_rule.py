@@ -243,9 +243,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 	if pricing_rules:
 		rules = []
 
-		print(pricing_rules, "$$$$$$")
 		for pricing_rule in pricing_rules:
-			print(pricing_rule)
 			if not pricing_rule: continue
 
 			if isinstance(pricing_rule, string_types):
