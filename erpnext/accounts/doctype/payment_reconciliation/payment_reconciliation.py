@@ -48,7 +48,8 @@ class PaymentReconciliation(Document):
 			select
 				"Journal Entry" as reference_type, t1.name as reference_name,
 				t1.posting_date, t1.remark as remarks, t2.name as reference_row,
-				{dr_or_cr} as amount, t2.is_advance
+				{dr_or_cr} as amount, t2.is_advance,
+				t2.account_currency as currency
 			from
 				`tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where
@@ -88,7 +89,8 @@ class PaymentReconciliation(Document):
 			if self.party_type == 'Customer' else "Purchase Invoice")
 
 		return frappe.db.sql(""" SELECT `tab{doc}`.name as reference_name, %(voucher_type)s as reference_type,
-				(sum(`tabGL Entry`.{dr_or_cr}) - sum(`tabGL Entry`.{reconciled_dr_or_cr})) as amount
+				(sum(`tabGL Entry`.{dr_or_cr}) - sum(`tabGL Entry`.{reconciled_dr_or_cr})) as amount,
+				account_currency as currency
 			FROM `tab{doc}`, `tabGL Entry`
 			WHERE
 				(`tab{doc}`.name = `tabGL Entry`.against_voucher or `tab{doc}`.name = `tabGL Entry`.voucher_no)
@@ -141,6 +143,7 @@ class PaymentReconciliation(Document):
 			ent.invoice_number = e.get('voucher_no')
 			ent.invoice_date = e.get('posting_date')
 			ent.amount = flt(e.get('invoice_amount'))
+			ent.currency = e.get('currency')
 			ent.outstanding_amount = e.get('outstanding_amount')
 
 	def reconcile(self, args):
@@ -269,11 +272,14 @@ def reconcile_dr_cr_note(dr_cr_notes, company):
 		reconcile_dr_or_cr = ('debit_in_account_currency'
 			if d.dr_or_cr == 'credit_in_account_currency' else 'credit_in_account_currency')
 
+		company_currency = erpnext.get_company_currency(company)
+
 		jv = frappe.get_doc({
 			"doctype": "Journal Entry",
 			"voucher_type": voucher_type,
 			"posting_date": today(),
 			"company": company,
+			"multi_currency": 1 if d.currency != company_currency else 0,
 			"accounts": [
 				{
 					'account': d.account,
