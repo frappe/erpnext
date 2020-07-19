@@ -325,6 +325,7 @@
    "options": "Department"
   },
   {
+   "fetch_from": "project.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",

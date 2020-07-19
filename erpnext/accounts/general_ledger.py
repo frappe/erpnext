@@ -140,10 +140,8 @@ def make_entry(args, adv_adj, update_outstanding):
 	gle = frappe.new_doc("GL Entry")
 	gle.update(args)
 	gle.flags.ignore_permissions = 1
-	gle.validate()
-	gle.db_insert()
+	gle.insert()
 	gle.run_method("on_update_with_args", adv_adj, update_outstanding)
-	gle.flags.ignore_validate = True
 	gle.submit()
 
 	# check against budget
