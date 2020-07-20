@@ -1,0 +1,53 @@
+{
+ "allow_roles": [
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Stock Manager"
+  },
+  {
+   "role": "Stock User"
+  }
+ ],
+ "creation": "2020-06-01 12:44:42.589930",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/selling",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2020-07-08 14:05:37.669753",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Selling",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Introduction to Selling"
+  },
+  {
+   "step": "Create a Customer"
+  },
+  {
+   "step": "Setup your Warehouse"
+  },
+  {
+   "step": "Create a Product"
+  },
+  {
+   "step": "Create a Quotation"
+  },
+  {
+   "step": "Create your first Sales Order"
+  },
+  {
+   "step": "Selling Settings"
+  }
+ ],
+ "subtitle": "Products, Sales, Analysis, and more.",
+ "success_message": "The Selling Module is all set up!",
+ "title": "Let's Set Up the Selling Module."
+}

@@ -582,14 +582,14 @@ class SalesInvoice(SellingController):
 
 	def validate_item_code(self):
 		for d in self.get('items'):
-			if not d.item_code:
+			if not d.item_code and self.is_opening == "No":
 				msgprint(_("Item Code required at Row No {0}").format(d.idx), raise_exception=True)
 
 	def validate_warehouse(self):
 		super(SalesInvoice, self).validate_warehouse()
 
 		for d in self.get_item_list():
-			if not d.warehouse and frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
+			if not d.warehouse and d.item_code and frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
 				frappe.throw(_("Warehouse required for stock Item {0}").format(d.item_code))
 
 	def validate_delivery_note(self):
@@ -790,7 +790,8 @@ class SalesInvoice(SellingController):
 						if self.party_account_currency==self.company_currency else grand_total,
 					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 					"against_voucher_type": self.doctype,
-					"cost_center": self.cost_center
+					"cost_center": self.cost_center,
+					"project": self.project
 				}, self.party_account_currency, item=self)
 			)
 
@@ -845,7 +846,8 @@ class SalesInvoice(SellingController):
 							"credit_in_account_currency": (flt(item.base_net_amount, item.precision("base_net_amount"))
 								if account_currency==self.company_currency
 								else flt(item.net_amount, item.precision("net_amount"))),
-							"cost_center": item.cost_center
+							"cost_center": item.cost_center,
+							"project": item.project or self.project
 						}, account_currency, item=item)
 					)
 
@@ -926,7 +928,8 @@ class SalesInvoice(SellingController):
 							if self.party_account_currency==self.company_currency else flt(self.change_amount),
 						"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
 						"against_voucher_type": self.doctype,
-						"cost_center": self.cost_center
+						"cost_center": self.cost_center,
+						"project": self.project
 					}, self.party_account_currency, item=self)
 				)
 
@@ -959,7 +962,8 @@ class SalesInvoice(SellingController):
 						else flt(self.write_off_amount, self.precision("write_off_amount"))),
 					"against_voucher": self.return_against if cint(self.is_return) else self.name,
 					"against_voucher_type": self.doctype,
-					"cost_center": self.cost_center
+					"cost_center": self.cost_center,
+					"project": self.project
 				}, self.party_account_currency, item=self)
 			)
 			gl_entries.append(
@@ -1109,7 +1113,10 @@ class SalesInvoice(SellingController):
 			expiry_date=self.posting_date, include_expired_entry=True)
 		if lp_details and getdate(lp_details.from_date) <= getdate(self.posting_date) and \
 			(not lp_details.to_date or getdate(lp_details.to_date) >= getdate(self.posting_date)):
-			points_earned = cint(eligible_amount/lp_details.collection_factor)
+
+			collection_factor = lp_details.collection_factor if lp_details.collection_factor else 1.0
+			points_earned = cint(eligible_amount/collection_factor)
+
 			doc = frappe.get_doc({
 				"doctype": "Loyalty Point Entry",
 				"company": self.company,
@@ -1450,10 +1457,16 @@ def get_inter_company_details(doc, doctype):
 		parties = frappe.db.get_all("Supplier", fields=["name"], filters={"disabled": 0, "is_internal_supplier": 1, "represents_company": doc.company})
 		company = frappe.get_cached_value("Customer", doc.customer, "represents_company")
 
+		if not parties:
+			frappe.throw(_('No Supplier found for Inter Company Transactions which represents company {0}').format(frappe.bold(doc.company)))
+
 		party = get_internal_party(parties, "Supplier", doc)
 	else:
 		parties = frappe.db.get_all("Customer", fields=["name"], filters={"disabled": 0, "is_internal_customer": 1, "represents_company": doc.company})
 		company = frappe.get_cached_value("Supplier", doc.supplier, "represents_company")
+
+		if not parties:
+			frappe.throw(_('No Customer found for Inter Company Transactions which represents company {0}').format(frappe.bold(doc.company)))
 
 		party = get_internal_party(parties, "Customer", doc)
 
@@ -1519,13 +1532,21 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	def update_details(source_doc, target_doc, source_parent):
 		target_doc.inter_company_invoice_reference = source_doc.name
 		if target_doc.doctype in ["Purchase Invoice", "Purchase Order"]:
+			currency = frappe.db.get_value('Supplier', details.get('party'), 'default_currency')
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
 			target_doc.buying_price_list = source_doc.selling_price_list
+
+			if currency:
+				target_doc.currency = currency
 		else:
+			currency = frappe.db.get_value('Customer', details.get('party'), 'default_currency')
 			target_doc.company = details.get("company")
 			target_doc.customer = details.get("party")
 			target_doc.selling_price_list = source_doc.buying_price_list
+
+			if currency:
+				target_doc.currency = currency
 
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {

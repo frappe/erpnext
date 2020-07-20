@@ -201,9 +201,9 @@ frappe.ui.form.on('Production Plan', {
 				title: title,
 				fields: [
 					{
-						"fieldtype": "Table MultiSelect", "label": __("Source Warehouses"),
+						"fieldtype": "Table MultiSelect", "label": __("Source Warehouses (Optional)"),
 						"fieldname": "warehouses", "options": "Production Plan Material Request Warehouse",
-						"description": "System will pickup the materials from the selected warehouses",
+						"description": __("System will pickup the materials from the selected warehouses. If not specified, system will create material request for purchase."),
 						get_query: function () {
 							return {
 								filters: {

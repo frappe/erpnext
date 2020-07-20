@@ -4,9 +4,9 @@
 from __future__ import unicode_literals
 
 import frappe
+from frappe.utils import cint, flt
 from erpnext.stock.utils import update_included_uom_in_report
 from frappe import _
-
 
 def execute(filters=None):
 	include_uom = filters.get("include_uom")
@@ -15,6 +15,7 @@ def execute(filters=None):
 	sl_entries = get_stock_ledger_entries(filters, items)
 	item_details = get_item_details(items, sl_entries, include_uom)
 	opening_row = get_opening_balance(filters, columns)
+	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 
 	data = []
 	conversion_factors = []
@@ -29,10 +30,10 @@ def execute(filters=None):
 		sle.update(item_detail)
 
 		if filters.get("batch_no"):
-			actual_qty += sle.actual_qty
+			actual_qty += flt(sle.actual_qty, precision)
 			stock_value += sle.stock_value_difference
 
-			if sle.voucher_type == 'Stock Reconciliation':
+			if sle.voucher_type == 'Stock Reconciliation' and not sle.actual_qty:
 				actual_qty = sle.qty_after_transaction
 				stock_value = sle.stock_value
 

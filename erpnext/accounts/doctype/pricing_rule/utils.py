@@ -319,7 +319,9 @@ def apply_internal_priority(pricing_rules, field_set, args):
 	filtered_rules = []
 	for field in field_set:
 		if args.get(field):
-			filtered_rules = filter(lambda x: x[field]==args[field], pricing_rules)
+			# filter function always returns a filter object even if empty
+			# list conversion is necessary to check for an empty result
+			filtered_rules = list(filter(lambda x: x.get(field)==args.get(field), pricing_rules))
 			if filtered_rules: break
 
 	return filtered_rules or pricing_rules
@@ -366,8 +368,7 @@ def get_qty_amount_data_for_cumulative(pr_doc, doc, items=[]):
 	sum_qty, sum_amt = [0, 0]
 	doctype = doc.get('parenttype') or doc.doctype
 
-	date_field = ('transaction_date'
-		if doc.get('transaction_date') else 'posting_date')
+	date_field = 'transaction_date' if frappe.get_meta(doctype).has_field('transaction_date') else 'posting_date'
 
 	child_doctype = '{0} Item'.format(doctype)
 	apply_on = frappe.scrub(pr_doc.get('apply_on'))
