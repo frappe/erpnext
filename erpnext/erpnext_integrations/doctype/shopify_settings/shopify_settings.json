@@ -133,7 +133,7 @@
    "label": "Customer Settings"
   },
   {
-   "description": "If Shopify not contains a customer in Order, then while syncing Orders, the system will consider default customer for order",
+   "description": "If Shopify does not have a customer in the order, then while syncing the orders, the system will consider the default customer for the order",
    "fieldname": "default_customer",
    "fieldtype": "Link",
    "label": "Default Customer",
@@ -258,7 +258,7 @@
   }
  ],
  "issingle": 1,
- "modified": "2019-09-13 12:32:11.384757",
+ "modified": "2020-05-28 12:32:11.384757",
  "modified_by": "umair@erpnext.com",
  "module": "ERPNext Integrations",
  "name": "Shopify Settings",

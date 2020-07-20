@@ -1,6 +1,8 @@
 {
+ "actions": [],
  "creation": "2019-05-26 00:10:00.248885",
  "doctype": "DocType",
+ "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "process_description",
@@ -23,7 +25,8 @@
   }
  ],
  "istable": 1,
- "modified": "2019-05-26 22:05:49.007189",
+ "links": [],
+ "modified": "2020-06-17 15:44:38.937915",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Procedure Process",

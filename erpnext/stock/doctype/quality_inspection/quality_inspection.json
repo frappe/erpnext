@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "naming_series:",
  "creation": "2013-04-30 13:13:03",
  "doctype": "DocType",
@@ -8,6 +9,7 @@
  "field_order": [
   "naming_series",
   "report_date",
+  "status",
   "column_break_4",
   "inspection_type",
   "reference_type",
@@ -20,17 +22,16 @@
   "column_break1",
   "item_name",
   "description",
-  "status",
+  "bom_no",
+  "specification_details",
+  "quality_inspection_template",
+  "readings",
   "section_break_14",
   "inspected_by",
   "verified_by",
-  "bom_no",
   "column_break_17",
   "remarks",
-  "amended_from",
-  "specification_details",
-  "quality_inspection_template",
-  "readings"
+  "amended_from"
  ],
  "fields": [
   {
@@ -231,7 +232,8 @@
  "icon": "fa fa-search",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2019-07-12 12:07:23.153698",
+ "links": [],
+ "modified": "2020-04-26 17:50:25.068222",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection",

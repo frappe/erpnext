@@ -512,10 +512,10 @@ def get_children(doctype, parent, company, is_root=False):
 def get_patient_vitals(patient, from_date=None, to_date=None):
 	if not patient: return
 
-	vitals = frappe.db.get_all('Vital Signs', {
+	vitals = frappe.db.get_all('Vital Signs', filters={
 			'docstatus': 1,
 			'patient': patient
-		}, order_by='signs_date, signs_time')
+		}, order_by='signs_date, signs_time', fields=['*'])
 
 	if len(vitals):
 		return vitals

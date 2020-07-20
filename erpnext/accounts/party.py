@@ -388,7 +388,7 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
 	args = {
 		party_type.lower(): party,
-		"company":			company
+		"company": company
 	}
 
 	if tax_category:
@@ -602,10 +602,14 @@ def get_party_shipping_address(doctype, name):
 	else:
 		return ''
 
-def get_partywise_advanced_payment_amount(party_type, posting_date = None, company=None):
+def get_partywise_advanced_payment_amount(party_type, posting_date = None, future_payment=0, company=None):
 	cond = "1=1"
 	if posting_date:
-		cond = "posting_date <= '{0}'".format(posting_date)
+		if future_payment:
+			cond = "posting_date <= '{0}' OR DATE(creation) <= '{0}' """.format(posting_date)
+		else:
+			cond = "posting_date <= '{0}'".format(posting_date)
+
 	if company:
 		cond += "and company = '{0}'".format(company)
 

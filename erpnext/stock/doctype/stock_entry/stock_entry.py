@@ -500,7 +500,7 @@ class StockEntry(StockController):
 					if raw_material_cost and self.purpose == "Manufacture":
 						d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
 						d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
-					elif self.purpose == "Repack" and total_fg_qty:
+					elif self.purpose == "Repack" and total_fg_qty and not d.set_basic_rate_manually:
 						d.basic_rate = flt(raw_material_cost) / flt(total_fg_qty)
 						d.basic_amount = d.basic_rate * d.qty
 
@@ -574,9 +574,7 @@ class StockEntry(StockController):
 						{"parent": self.purchase_order, "item_code": se_item.subcontracted_item},
 						"bom")
 
-					allow_alternative_item = frappe.get_value("BOM", bom_no, "allow_alternative_item")
-
-					if allow_alternative_item:
+					if se_item.allow_alternative_item:
 						original_item_code = frappe.get_value("Item Alternative", {"alternative_item_code": item_code}, "item_code")
 
 						required_qty = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
@@ -732,14 +730,18 @@ class StockEntry(StockController):
 			pro_doc = frappe.get_doc("Work Order", self.work_order)
 			_validate_work_order(pro_doc)
 			pro_doc.run_method("update_status")
+
 			if self.fg_completed_qty:
 				pro_doc.run_method("update_work_order_qty")
 				if self.purpose == "Manufacture":
 					pro_doc.run_method("update_planned_qty")
 
+			if not pro_doc.operations:
+				pro_doc.set_actual_dates()
+
 	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select i.name, i.stock_uom, i.description, i.image, i.item_name, i.item_group,
-				i.has_batch_no, i.sample_quantity, i.has_serial_no,
+				i.has_batch_no, i.sample_quantity, i.has_serial_no, i.allow_alternative_item,
 				id.expense_account, id.buying_cost_center
 			from `tabItem` i LEFT JOIN `tabItem Default` id ON i.name=id.parent and id.company=%s
 			where i.name=%s
@@ -773,6 +775,9 @@ class StockEntry(StockController):
 			'sample_quantity'		: item.sample_quantity,
 			'expense_account'		: item.expense_account
 		})
+
+		if self.purpose == 'Send to Subcontractor':
+			ret["allow_alternative_item"] = item.allow_alternative_item
 
 		# update uom
 		if args.get("uom") and for_update:

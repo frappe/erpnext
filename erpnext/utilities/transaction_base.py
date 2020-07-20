@@ -120,6 +120,15 @@ class TransactionBase(StatusUpdater):
 
 
 	def validate_rate_with_reference_doc(self, ref_details):
+		buying_doctypes = ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]
+
+		if self.doctype in buying_doctypes:
+			to_disable = "Maintain same rate throughout Purchase cycle"
+			settings_page = "Buying Settings"
+		else:
+			to_disable = "Maintain same rate throughout Sales cycle"
+			settings_page = "Selling Settings"
+
 		for ref_dt, ref_dn_field, ref_link_field in ref_details:
 			for d in self.get("items"):
 				if d.get(ref_link_field):
@@ -129,8 +138,8 @@ class TransactionBase(StatusUpdater):
 						frappe.msgprint(_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4}) ")
 							.format(d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate))
 						frappe.throw(_("To allow different rates, disable the {0} checkbox in {1}.")
-							.format(frappe.bold(_("Maintain Same Rate Throughout Sales Cycle")),
-							get_link_to_form("Selling Settings", "Selling Settings", frappe.bold("Selling Settings"))))
+							.format(frappe.bold(_(to_disable)),
+							get_link_to_form(settings_page, settings_page, frappe.bold(settings_page))))
 
 	def get_link_filters(self, for_doctype):
 		if hasattr(self, "prev_link_mapper") and self.prev_link_mapper.get(for_doctype):
@@ -161,19 +170,19 @@ class TransactionBase(StatusUpdater):
 			if not (self.get("update_stock") or self.get("is_pos")):
 				return
 
-		fiscal_year = get_fiscal_year(self.get('posting_date'), as_dict=True).name
+		for item in self.get('items'):
+			last_transaction_time = frappe.db.sql("""
+				select MAX(timestamp(posting_date, posting_time)) as posting_time
+				from `tabStock Ledger Entry`
+				where docstatus = 1 and item_code = %s """, (item.item_code))[0][0]
 
-		last_transaction_time = frappe.db.sql("""
-			select MAX(timestamp(posting_date, posting_time)) as posting_time
-			from `tabStock Ledger Entry`
-			where docstatus = 1 and fiscal_year = %s""", (fiscal_year))[0][0]
+			cur_doc_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")
 
-		cur_doc_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")
-
-		if last_transaction_time and get_datetime(cur_doc_posting_datetime) < get_datetime(last_transaction_time):
-			frappe.throw(_("""Posting timestamp of current transaction
-				must be after last Stock transaction's timestamp which is {0}""").format(frappe.bold(last_transaction_time)),
-				title=_("Backdated Stock Entry"))
+			if last_transaction_time and get_datetime(cur_doc_posting_datetime) < get_datetime(last_transaction_time):
+				msg = _("Last Stock Transaction for item {0} was on {1}.").format(frappe.bold(item.item_code), frappe.bold(last_transaction_time))
+				msg += "<br><br>" + _("Stock Transactions for Item {0} cannot be posted before this time.").format(frappe.bold(item.item_code))
+				msg += "<br><br>" + _("Please remove this item and try to submit again or update the posting time.")
+				frappe.throw(msg, title=_("Backdated Stock Entry"))
 
 def delete_events(ref_type, ref_name):
 	events = frappe.db.sql_list(""" SELECT
