@@ -44,30 +44,30 @@ class Gstr2Report(Gstr1Report):
 		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
 			invoice_details = self.invoices.get(inv)
 			for rate, items in items_based_on_rate.items():
-				if inv not in self.igst_invoices:
-					rate = rate / 2
-					row, taxable_value = self.get_row_data_for_invoice(inv, invoice_details, rate, items)
-					tax_amount = taxable_value * rate / 100
-					row += [0, tax_amount, tax_amount]
-				else:
-					row, taxable_value = self.get_row_data_for_invoice(inv, invoice_details, rate, items)
-					tax_amount = taxable_value * rate / 100
-					row += [tax_amount, 0, 0]
+				if rate:
+					if inv not in self.igst_invoices:
+						rate = rate / 2
+						row, taxable_value = self.get_row_data_for_invoice(inv, invoice_details, rate, items)
+						tax_amount = taxable_value * rate / 100
+						row += [0, tax_amount, tax_amount]
+					else:
+						row, taxable_value = self.get_row_data_for_invoice(inv, invoice_details, rate, items)
+						tax_amount = taxable_value * rate / 100
+						row += [tax_amount, 0, 0]
 
+					row += [
+						self.invoice_cess.get(inv),
+						invoice_details.get('eligibility_for_itc'),
+						invoice_details.get('itc_integrated_tax'),
+						invoice_details.get('itc_central_tax'),
+						invoice_details.get('itc_state_tax'),
+						invoice_details.get('itc_cess_amount')
+					]
+					if self.filters.get("type_of_business") ==  "CDNR":
+						row.append("Y" if invoice_details.posting_date <= date(2017, 7, 1) else "N")
+						row.append("C" if invoice_details.return_against else "R")
 
-				row += [
-					self.invoice_cess.get(inv),
-					invoice_details.get('eligibility_for_itc'),
-					invoice_details.get('itc_integrated_tax'),
-					invoice_details.get('itc_central_tax'),
-					invoice_details.get('itc_state_tax'),
-					invoice_details.get('itc_cess_amount')
-				]
-				if self.filters.get("type_of_business") ==  "CDNR":
-					row.append("Y" if invoice_details.posting_date <= date(2017, 7, 1) else "N")
-					row.append("C" if invoice_details.return_against else "R")
-
-				self.data.append(row)
+					self.data.append(row)
 
 	def get_igst_invoices(self):
 		self.igst_invoices = []
@@ -86,7 +86,7 @@ class Gstr2Report(Gstr1Report):
 					conditions += opts[1]
 
 		if self.filters.get("type_of_business") ==  "B2B":
-			conditions += "and ifnull(gst_category, '') != 'Overseas' and is_return != 1 "
+			conditions += "and ifnull(gst_category, '') in ('Registered Regular', 'Deemed Export', 'SEZ') and is_return != 1 "
 
 		elif self.filters.get("type_of_business") ==  "CDNR":
 			conditions += """ and is_return = 1 """
