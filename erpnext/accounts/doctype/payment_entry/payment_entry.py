@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe, erpnext, json
 from frappe import _, scrub, ValidationError
 from frappe.utils import flt, comma_or, nowdate, getdate
-from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on, get_allow_cost_center_in_entry_of_bs_account
+from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
 from erpnext.setup.utils import get_exchange_rate
@@ -453,6 +453,8 @@ class PaymentEntry(AccountsController):
 				frappe.throw(_("Reference No and Reference Date is mandatory for Bank transaction"))
 
 	def set_remarks(self):
+		if self.remarks: return
+
 		if self.payment_type=="Internal Transfer":
 			remarks = [_("Amount {0} {1} transferred from {2} to {3}")
 				.format(self.paid_from_account_currency, self.paid_amount, self.paid_from, self.paid_to)]
@@ -656,7 +658,7 @@ def get_outstanding_reference_documents(args):
 			.format(frappe.db.escape(args["voucher_type"]), frappe.db.escape(args["voucher_no"]))
 
 	# Add cost center condition
-	if args.get("cost_center") and get_allow_cost_center_in_entry_of_bs_account():
+	if args.get("cost_center"):
 		condition += " and cost_center='%s'" % args.get("cost_center")
 
 	date_fields_dict = {
@@ -1027,14 +1029,14 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		if bank_amount:
 			received_amount = bank_amount
 		else:
-			received_amount = paid_amount * doc.conversion_rate
+			received_amount = paid_amount * doc.get('conversion_rate', 1)
 	else:
 		received_amount = abs(outstanding_amount)
 		if bank_amount:
 			paid_amount = bank_amount
 		else:
 			# if party account currency and bank currency is different then populate paid amount as well
-			paid_amount = received_amount * doc.conversion_rate
+			paid_amount = received_amount * doc.get('conversion_rate', 1)
 
 	pe = frappe.new_doc("Payment Entry")
 	pe.payment_type = payment_type

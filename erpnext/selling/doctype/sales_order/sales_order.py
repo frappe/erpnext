@@ -868,7 +868,8 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 			 		],
 					"field_no_map": [
 						"rate",
-						"price_list_rate"
+						"price_list_rate",
+						"item_tax_template"
 					],
 					"postprocess": update_item,
 					"condition": lambda doc: doc.ordered_qty < doc.qty and doc.supplier == supplier and doc.item_code in selected_items

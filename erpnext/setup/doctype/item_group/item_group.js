@@ -66,7 +66,7 @@ frappe.ui.form.on("Item Group", {
 	set_root_readonly: function(frm) {
 		// read-only for root item group
 		frm.set_intro("");
-		if(!frm.doc.parent_item_group) {
+		if(!frm.doc.parent_item_group && !frm.doc.__islocal) {
 			frm.set_read_only();
 			frm.set_intro(__("This is a root item group and cannot be edited."), true);
 		}

@@ -22,6 +22,7 @@ class EmployeeAdvance(Document):
 		self.validate_employee_advance_account()
 
 	def on_cancel(self):
+		self.ignore_linked_doctypes = ('GL Entry')
 		self.set_status()
 
 	def set_status(self):
@@ -119,12 +120,14 @@ def make_bank_entry(dt, dn):
 		"reference_type": "Employee Advance",
 		"reference_name": doc.name,
 		"party_type": "Employee",
+		"cost_center": erpnext.get_default_cost_center(doc.company),
 		"party": doc.employee,
 		"is_advance": "Yes"
 	})
 
 	je.append("accounts", {
 		"account": payment_account.account,
+		"cost_center": erpnext.get_default_cost_center(doc.company),
 		"credit_in_account_currency": flt(doc.advance_amount),
 		"account_currency": payment_account.account_currency,
 		"account_type": payment_account.account_type

@@ -62,6 +62,7 @@
   "salary_mode",
   "payroll_cost_center",
   "column_break_52",
+  "expense_approver",
   "bank_name",
   "bank_ac_no",
   "health_insurance_section",
@@ -409,6 +410,8 @@
    "options": "Branch"
   },
   {
+   "fetch_from": "grade.default_leave_policy",
+   "fetch_if_empty": 1,
    "fieldname": "leave_policy",
    "fieldtype": "Link",
    "label": "Leave Policy",
@@ -798,13 +801,19 @@
   {
    "fieldname": "column_break_52",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expense_approver",
+   "fieldtype": "Link",
+   "label": "Expense Approver",
+   "options": "User"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2020-06-15 12:26:30.003741",
+ "modified": "2020-07-03 21:28:04.109189",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

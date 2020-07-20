@@ -1640,11 +1640,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si_doc = frappe.get_doc('Sales Invoice', si.name)
 		self.assertEqual(si_doc.outstanding_amount, 0)
 
-	def test_sales_invoice_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+	def test_sales_invoice_with_cost_center(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
-		accounts_settings.save()
 		cost_center = "_Test Cost Center for BS Account - _TC"
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
 
@@ -1669,14 +1666,47 @@ class TestSalesInvoice(unittest.TestCase):
 
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+	
+	def test_sales_invoice_with_project_link(self):
+		from erpnext.projects.doctype.project.test_project import make_project
 
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
+		project = make_project({
+			'project_name': 'Sales Invoice Project',
+			'project_template_name': 'Test Project Template',
+			'start_date': '2020-01-01'
+		})
+		item_project = make_project({
+			'project_name': 'Sales Invoice Item Project',
+			'project_template_name': 'Test Project Template',
+			'start_date': '2019-06-01'
+		})
 
-	def test_sales_invoice_for_disable_allow_cost_center_in_entry_of_bs_account(self):
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
-		accounts_settings.save()
+		sales_invoice = create_sales_invoice(do_not_save=1)
+		sales_invoice.items[0].project = item_project.project_name
+		sales_invoice.project = project.project_name
+
+		sales_invoice.submit()
+
+		expected_values = {
+			"Debtors - _TC": {
+				"project": project.project_name
+			},
+			"Sales - _TC": {
+				"project": item_project.project_name
+			}
+		}
+
+		gl_entries = frappe.db.sql("""select account, cost_center, project, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", sales_invoice.name, as_dict=1)
+		
+		self.assertTrue(gl_entries)
+		
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account]["project"], gle.project)
+
+	def test_sales_invoice_without_cost_center(self):
 		cost_center = "_Test Cost Center - _TC"
 		si =  create_sales_invoice(debit_to="Debtors - _TC")
 
@@ -1699,9 +1729,6 @@ class TestSalesInvoice(unittest.TestCase):
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
-
 	def test_deferred_revenue(self):
 		deferred_account = create_account(account_name="Deferred Revenue",
 			parent_account="Current Liabilities - _TC", company="_Test Company")
@@ -1719,8 +1746,6 @@ class TestSalesInvoice(unittest.TestCase):
 		si.items[0].deferred_revenue_account = deferred_account
 		si.save()
 		si.submit()
-
-		from erpnext.accounts.deferred_revenue import convert_deferred_revenue_to_income
 
 		pda1 = frappe.get_doc(dict(
 			doctype='Process Deferred Accounting',
@@ -1744,6 +1769,55 @@ class TestSalesInvoice(unittest.TestCase):
 		]
 
 		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
+
+	def test_fixed_deferred_revenue(self):
+		deferred_account = create_account(account_name="Deferred Revenue",
+			parent_account="Current Liabilities - _TC", company="_Test Company")
+
+		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		acc_settings.book_deferred_entries_based_on = 'Months'
+		acc_settings.save()
+
+		item = create_item("_Test Item for Deferred Accounting")
+		item.enable_deferred_revenue = 1
+		item.deferred_revenue_account = deferred_account
+		item.no_of_months = 12
+		item.save()
+
+		si = create_sales_invoice(item=item.name, posting_date="2019-01-16", rate=50000, do_not_submit=True)
+		si.items[0].enable_deferred_revenue = 1
+		si.items[0].service_start_date = "2019-01-16"
+		si.items[0].service_end_date = "2019-03-31"
+		si.items[0].deferred_revenue_account = deferred_account
+		si.save()
+		si.submit()
+
+		pda1 = frappe.get_doc(dict(
+			doctype='Process Deferred Accounting',
+			posting_date='2019-03-31',
+			start_date="2019-01-01",
+			end_date="2019-03-31",
+			type="Income",
+			company="_Test Company"
+		))
+
+		pda1.insert()
+		pda1.submit()
+
+		expected_gle = [
+			[deferred_account, 10000.0, 0.0, "2019-01-31"],
+			["Sales - _TC", 0.0, 10000.0, "2019-01-31"],
+			[deferred_account, 20000.0, 0.0, "2019-02-28"],
+			["Sales - _TC", 0.0, 20000.0, "2019-02-28"],
+			[deferred_account, 20000.0, 0.0, "2019-03-31"],
+			["Sales - _TC", 0.0, 20000.0, "2019-03-31"]
+		]
+
+		check_gl_entries(self, si.name, expected_gle, "2019-01-30")
+
+		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		acc_settings.book_deferred_entries_based_on = 'Days'
+		acc_settings.save()
 
 	def test_inter_company_transaction(self):
 
