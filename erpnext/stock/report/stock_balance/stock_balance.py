@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 from frappe.utils import flt, cint, getdate, now, date_diff
 from erpnext.stock.utils import add_additional_uom_columns
@@ -19,6 +19,11 @@ def execute(filters=None):
 
 	from_date = filters.get('from_date')
 	to_date = filters.get('to_date')
+
+	if filters.get("company"):
+		company_currency = erpnext.get_company_currency(filters.get("company"))
+	else:
+		company_currency = frappe.db.get_single_value("Global Defaults", "default_currency")
 
 	include_uom = filters.get("include_uom")
 	columns = get_columns(filters)
@@ -52,6 +57,7 @@ def execute(filters=None):
 				item_reorder_qty = item_reorder_detail_map[item + warehouse]["warehouse_reorder_qty"]
 
 			report_data = {
+				'currency': company_currency,
 				'item_code': item,
 				'warehouse': warehouse,
 				'company': company,
@@ -89,7 +95,6 @@ def execute(filters=None):
 
 def get_columns(filters):
 	"""return columns"""
-
 	columns = [
 		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 100},
 		{"label": _("Item Name"), "fieldname": "item_name", "width": 150},
@@ -97,14 +102,14 @@ def get_columns(filters):
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
 		{"label": _("Stock UOM"), "fieldname": "stock_uom", "fieldtype": "Link", "options": "UOM", "width": 90},
 		{"label": _("Balance Qty"), "fieldname": "bal_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Balance Value"), "fieldname": "bal_val", "fieldtype": "Currency", "width": 100},
+		{"label": _("Balance Value"), "fieldname": "bal_val", "fieldtype": "Currency", "width": 100, "options": "currency"},
 		{"label": _("Opening Qty"), "fieldname": "opening_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Opening Value"), "fieldname": "opening_val", "fieldtype": "Float", "width": 110},
+		{"label": _("Opening Value"), "fieldname": "opening_val", "fieldtype": "Currency", "width": 110, "options": "currency"},
 		{"label": _("In Qty"), "fieldname": "in_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("In Value"), "fieldname": "in_val", "fieldtype": "Float", "width": 80},
 		{"label": _("Out Qty"), "fieldname": "out_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Out Value"), "fieldname": "out_val", "fieldtype": "Float", "width": 80},
-		{"label": _("Valuation Rate"), "fieldname": "val_rate", "fieldtype": "Currency", "width": 90, "convertible": "rate"},
+		{"label": _("Valuation Rate"), "fieldname": "val_rate", "fieldtype": "Currency", "width": 90, "convertible": "rate", "options": "currency"},
 		{"label": _("Reorder Level"), "fieldname": "reorder_level", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Reorder Qty"), "fieldname": "reorder_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 100}
