@@ -400,8 +400,6 @@ def replace_abbr(company, old, new):
 	for dt in ["Warehouse", "Account", "Cost Center", "Department",
 			"Sales Taxes and Charges Template", "Purchase Taxes and Charges Template"]:
 		_rename_records(dt)
-		frappe.db.commit()
-
 
 def get_name_with_abbr(name, company):
 	company_abbr = frappe.get_cached_value('Company',  company,  "abbr")
