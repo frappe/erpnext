@@ -101,10 +101,10 @@ class PaymentReconciliation(Document):
 			Having
 				amount > 0
 		""".format(
-			doc=voucher_type, 
-			dr_or_cr=dr_or_cr, 
-			reconciled_dr_or_cr=reconciled_dr_or_cr, 
-			party_type_field=frappe.scrub(self.party_type)), 
+			doc=voucher_type,
+			dr_or_cr=dr_or_cr,
+			reconciled_dr_or_cr=reconciled_dr_or_cr,
+			party_type_field=frappe.scrub(self.party_type)),
 			{
 				'party': self.party,
 				'party_type': self.party_type,
@@ -170,7 +170,7 @@ class PaymentReconciliation(Document):
 			reconcile_against_document(lst)
 
 		if dr_or_cr_notes:
-			reconcile_dr_cr_note(dr_or_cr_notes)
+			reconcile_dr_cr_note(dr_or_cr_notes, self.company)
 
 		msgprint(_("Successfully Reconciled"))
 		self.get_unreconciled_entries()
@@ -261,7 +261,7 @@ class PaymentReconciliation(Document):
 
 		return cond
 
-def reconcile_dr_cr_note(dr_cr_notes):
+def reconcile_dr_cr_note(dr_cr_notes, company):
 	for d in dr_cr_notes:
 		voucher_type = ('Credit Note'
 			if d.voucher_type == 'Sales Invoice' else 'Debit Note')
@@ -273,6 +273,7 @@ def reconcile_dr_cr_note(dr_cr_notes):
 			"doctype": "Journal Entry",
 			"voucher_type": voucher_type,
 			"posting_date": today(),
+			"company": company,
 			"accounts": [
 				{
 					'account': d.account,
@@ -280,7 +281,8 @@ def reconcile_dr_cr_note(dr_cr_notes):
 					'party_type': d.party_type,
 					d.dr_or_cr: abs(d.allocated_amount),
 					'reference_type': d.against_voucher_type,
-					'reference_name': d.against_voucher
+					'reference_name': d.against_voucher,
+					'cost_center': erpnext.get_default_cost_center(company)
 				},
 				{
 					'account': d.account,
@@ -289,7 +291,8 @@ def reconcile_dr_cr_note(dr_cr_notes):
 					reconcile_dr_or_cr: (abs(d.allocated_amount)
 						if abs(d.unadjusted_amount) > abs(d.allocated_amount) else abs(d.unadjusted_amount)),
 					'reference_type': d.voucher_type,
-					'reference_name': d.voucher_no
+					'reference_name': d.voucher_no,
+					'cost_center': erpnext.get_default_cost_center(company)
 				}
 			]
 		})
