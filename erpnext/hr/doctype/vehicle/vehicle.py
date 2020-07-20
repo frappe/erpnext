@@ -15,7 +15,7 @@ class Vehicle(Document):
 		if getdate(self.carbon_check_date) > getdate():
 			frappe.throw(_("Last carbon check date cannot be a future date"))
 
-def get_timeline_data(doctype, name):	
+def get_timeline_data(doctype, name):
 	'''Return timeline for vehicle log'''
 	return dict(frappe.db.sql('''select unix_timestamp(date), count(*)
 	from `tabVehicle Log` where license_plate=%s
