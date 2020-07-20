@@ -19,6 +19,9 @@
   "disabled",
   "is_billable",
   "lab_test_rate",
+  "medical_coding_section",
+  "medical_code_standard",
+  "medical_code",
   "section_break_normal",
   "lab_test_uom",
   "lab_test_normal_range",
@@ -237,10 +240,29 @@
    "fieldtype": "Text",
    "ignore_xss_filter": 1,
    "label": "Collection Details"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "medical_coding_section",
+   "fieldtype": "Section Break",
+   "label": "Medical Coding"
+  },
+  {
+   "depends_on": "medical_code_standard",
+   "fieldname": "medical_code",
+   "fieldtype": "Link",
+   "label": "Medical Code",
+   "options": "Medical Code"
+  },
+  {
+   "fieldname": "medical_code_standard",
+   "fieldtype": "Link",
+   "label": "Medical Code Standard",
+   "options": "Medical Code Standard"
   }
  ],
  "links": [],
- "modified": "2020-03-25 16:53:01.740103",
+ "modified": "2020-06-29 14:07:20.772219",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",

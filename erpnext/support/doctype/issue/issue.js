@@ -38,10 +38,35 @@ frappe.ui.form.on("Issue", {
 	},
 
 	refresh: function (frm) {
-
 		if (frm.doc.status !== "Closed" && frm.doc.agreement_fulfilled === "Ongoing") {
 			if (frm.doc.service_level_agreement) {
-				set_time_to_resolve_and_response(frm);
+				frappe.call({
+					'method': 'frappe.client.get',
+					args: {
+						doctype: 'Service Level Agreement',
+						name: frm.doc.service_level_agreement
+					},
+					callback: function(data) {
+						let statuses = data.message.pause_sla_on;
+						const hold_statuses = [];
+						$.each(statuses, (_i, entry) => {
+							hold_statuses.push(entry.status);
+						});
+						if (hold_statuses.includes(frm.doc.status)) {
+							frm.dashboard.clear_headline();
+							let message = {"indicator": "orange", "msg": __("SLA is on hold since {0}", [moment(frm.doc.on_hold_since).fromNow(true)])};
+							frm.dashboard.set_headline_alert(
+								'<div class="row">' +
+									'<div class="col-xs-12">' +
+										'<span class="indicator whitespace-nowrap '+ message.indicator +'"><span>'+ message.msg +'</span></span> ' +
+									'</div>' +
+								'</div>'
+							);
+						} else {
+							set_time_to_resolve_and_response(frm);
+						}
+					}
+				});
 			}
 
 			frm.add_custom_button(__("Close"), function () {
@@ -54,7 +79,8 @@ frappe.ui.form.on("Issue", {
 					method: "erpnext.support.doctype.issue.issue.make_task",
 					frm: frm
 				});
-			}, __("Make"));
+			}, __("Create"));
+
 		} else {
 			if (frm.doc.service_level_agreement) {
 				frm.dashboard.clear_headline();
