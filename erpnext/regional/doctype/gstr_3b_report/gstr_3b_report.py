@@ -300,6 +300,7 @@ class GSTR3BReport(Document):
 			s.name, s.net_total, s.place_of_supply, s.gst_category from `tabSales Invoice` s, `tabSales Taxes and Charges` t
 			where t.parent = s.name and s.docstatus = 1 and month(s.posting_date) = %s and year(s.posting_date) = %s
 			and s.company = %s and s.company_gstin = %s and s.gst_category in ('Unregistered', 'Registered Composition', 'UIN Holders')
+			and ifnull(s.name, '') != ''
 		""", (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
 
 		inter_state_supply_tax_mapping = {}
