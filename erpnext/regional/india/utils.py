@@ -704,9 +704,10 @@ def update_totals(gst_tax, doc):
 			doc.rounding_adjustment += flt(doc.rounded_total - doc.grand_total,
 				doc.precision("rounding_adjustment"))
 
-			doc.outstanding_amount = doc.base_rounded_total
+			doc.outstanding_amount = doc.rounded_total or doc.grand_total
 
 	doc.in_words = money_in_words(doc.grand_total, doc.currency)
+	doc.set_payment_schedule()
 
 def make_regional_gl_entries(gl_entries, doc):
 	country = frappe.get_cached_value('Company', doc.company, 'country')
