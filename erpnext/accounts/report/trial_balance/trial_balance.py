@@ -152,6 +152,7 @@ def get_rootwise_opening_balances(filters, report_type):
 			{additional_conditions}
 			and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
 			and account in (select name from `tabAccount` where report_type=%(report_type)s)
+			and is_cancelled = 0
 		group by account""".format(additional_conditions=additional_conditions), query_filters , as_dict=True)
 
 	opening = frappe._dict()
