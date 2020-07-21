@@ -9,10 +9,10 @@
  "filters_json": "[[\"Work Order Operation\",\"docstatus\",\"=\",1,false]]",
  "group_by_type": "Count",
  "idx": 0,
- "is_custom": 0,
  "is_public": 1,
  "is_standard": 1,
- "modified": "2020-07-09 12:10:05.758382",
+ "last_synced_on": "2020-07-21 16:57:09.767009",
+ "modified": "2020-07-21 16:57:55.719802",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Completed Operation",
@@ -22,6 +22,7 @@
  "timeseries": 1,
  "timespan": "Last Year",
  "type": "Line",
+ "use_report_chart": 0,
  "value_based_on": "completed_qty",
  "y_axis": []
 }

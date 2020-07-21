@@ -8,10 +8,9 @@
  "dynamic_filters_json": "{\"company\":\"frappe.defaults.get_user_default(\\\"Company\\\")\",\"from_date\":\"frappe.defaults.get_user_default(\\\"year_start_date\\\")\",\"to_date\":\"frappe.defaults.get_user_default(\\\"year_end_date\\\")\"}",
  "filters_json": "{\"charts_based_on\":\"Quantity\"}",
  "idx": 0,
- "is_custom": 1,
  "is_public": 1,
  "is_standard": 1,
- "modified": "2020-07-09 12:37:59.530931",
+ "modified": "2020-07-21 17:46:59.020709",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Qty Analysis",
@@ -22,5 +21,6 @@
  "timeseries": 0,
  "timespan": "Last Year",
  "type": "Bar",
+ "use_report_chart": 1,
  "y_axis": []
 }

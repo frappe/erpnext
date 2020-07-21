@@ -7,7 +7,7 @@
  "doctype": "Dashboard Chart",
  "filters_json": "{\"from_date\":\"2019-07-09\",\"to_date\":\"2020-07-09\"}",
  "idx": 0,
- "is_custom": 1,
+ "use_report_chart": 1,
  "is_public": 1,
  "is_standard": 1,
  "modified": "2020-07-09 12:15:51.564487",
