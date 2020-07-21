@@ -12,6 +12,7 @@
   "subject",
   "customer",
   "raised_by",
+  "color",
   "cb00",
   "status",
   "priority",
@@ -359,12 +360,16 @@
    "label": "Issue Split From",
    "options": "Issue",
    "read_only": 1
+  },
+  {
+   "fieldname": "color",
+   "fieldtype": "Color",
+   "label": "Color"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "links": [],
- "modified": "2020-02-26 02:19:49.477928",
+ "modified": "2020-07-21 08:46:07.167366",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
