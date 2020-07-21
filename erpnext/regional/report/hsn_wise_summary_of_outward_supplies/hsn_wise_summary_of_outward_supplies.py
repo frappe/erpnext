@@ -95,7 +95,7 @@ def get_conditions(filters):
 		("gst_hsn_code", " and gst_hsn_code=%(gst_hsn_code)s"),
 		("company_gstin", " and company_gstin=%(company_gstin)s"),
 		("from_date", " and posting_date >= %(from_date)s"),
-		("to_date", " and posting_date <= %(to_date)s")):
+		("to_date", "and posting_date <= %(to_date)s")):
 			if filters.get(opts[0]):
 				conditions += opts[1]
 
@@ -126,7 +126,6 @@ def get_items(filters):
 	return items
 
 def get_tax_accounts(item_list, columns, company_currency, doctype="Sales Invoice", tax_doctype="Sales Taxes and Charges"):
-
 	item_row_map = {}
 	tax_columns = []
 	invoice_item_row = {}
@@ -156,7 +155,6 @@ def get_tax_accounts(item_list, columns, company_currency, doctype="Sales Invoic
 
 	for parent, description, item_wise_tax_detail, tax_amount in tax_details:
 		description = handle_html(description)
-		print(parent, description, item_wise_tax_detail, tax_amount)
 		if description not in tax_columns and tax_amount:
 			# as description is text editor earlier and markup can break the column convention in reports
 			tax_columns.append(description)
