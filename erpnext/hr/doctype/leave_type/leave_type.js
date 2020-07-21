@@ -7,7 +7,6 @@ frappe.tour['Leave Type'] = [
 	{
 		fieldname: "leave_type_name",
 		title: "Leave Type Name",
-		description: __("Name you Leave Type."),
 	},
 	{
 		fieldname: "is_carry_forward",

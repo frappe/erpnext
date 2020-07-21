@@ -1,5 +1,5 @@
 {
- "action": "Create Entry",
+ "action": "Show Form Tour",
  "creation": "2020-05-27 11:47:34.700174",
  "docstatus": 0,
  "doctype": "Onboarding Step",
@@ -8,7 +8,7 @@
  "is_mandatory": 1,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2020-05-14 12:25:38.068582",
+ "modified": "2020-07-21 12:03:18.469457",
  "modified_by": "Administrator",
  "name": "Create Holiday list",
  "owner": "Administrator",

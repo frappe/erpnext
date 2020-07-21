@@ -102,31 +102,25 @@ frappe.tour['Employee'] = [
 	{
 		fieldname: "first_name",
 		title: "Enter Name",
-		description: __("Enter Employee Name."),
 	},
 	{
 		fieldname: "company",
 		title: "Company",
-		description: __("Select Company.")
 	},
 	{
 		fieldname: "gender",
 		title: "Gender",
-		description: __("select Gender.")
 	},
 	{
 		fieldname: "date_of_birth",
 		title: "Date of Birth",
-		description: __("Select Date of Birth.")
 	},
 	{
 		fieldname: "date_of_joining",
 		title: "Date of Joining",
-		description: __("Select Date of Joining.")
 	},
 	{
 		fieldname: "holiday_list",
 		title: "Holiday List",
-		description: __("Select Holiday list.")
 	},
 ];

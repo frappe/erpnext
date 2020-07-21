@@ -20,7 +20,6 @@ frappe.tour['Holiday List'] = [
 	{
 		fieldname: "holiday_list_name",
 		title: "Enter Name",
-		description: __("Name your Holiday List"),
 	},
 	{
 		fieldname: "from_date",

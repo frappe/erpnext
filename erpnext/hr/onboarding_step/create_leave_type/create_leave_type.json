@@ -1,5 +1,5 @@
 {
- "action": "Create Entry",
+ "action": "Show Form Tour",
  "creation": "2020-05-27 11:17:31.119312",
  "docstatus": 0,
  "doctype": "Onboarding Step",
@@ -8,7 +8,7 @@
  "is_mandatory": 1,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2020-05-20 11:17:31.119312",
+ "modified": "2020-07-21 12:05:25.440467",
  "modified_by": "Administrator",
  "name": "Create Leave Type",
  "owner": "Administrator",
