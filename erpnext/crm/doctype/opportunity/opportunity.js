@@ -76,6 +76,11 @@ frappe.ui.form.on("Opportunity", {
 					function() {
 						frm.trigger("make_supplier_quotation")
 					}, __('Create'));
+
+				frm.add_custom_button(__('Request For Quotation'),
+					function() {
+						frm.trigger("make_request_for_quotation")
+					}, __('Create'));
 			}
 
 			frm.add_custom_button(__('Quotation'),
@@ -122,6 +127,13 @@ frappe.ui.form.on("Opportunity", {
 	make_supplier_quotation: function(frm) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.opportunity.opportunity.make_supplier_quotation",
+			frm: cur_frm
+		})
+	},
+
+	make_request_for_quotation: function(frm) {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.crm.doctype.opportunity.opportunity.make_request_for_quotation",
 			frm: cur_frm
 		})
 	},
