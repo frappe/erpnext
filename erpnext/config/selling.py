@@ -265,6 +265,18 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Backorder Summary",
+					"doctype": "Backorder"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Backorder Analytics",
+					"doctype": "Backorder"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Lead Details",
 					"doctype": "Lead"
 				},
