@@ -26,7 +26,7 @@ class ProductBundle(Document):
 	def validate_child_items(self):
 		for item in self.items:
 			if frappe.db.exists("Product Bundle", item.item_code):
-				frappe.throw(_("Child Item should not be a Product Bundle. Please remove item `{0}` and save").format(item.item_code))
+				frappe.throw(_("Row #{0}: Child Item should not be a Product Bundle. Please remove Item {1} and Save").format(item.idx, frappe.bold(item.item_code)))
 
 @frappe.whitelist()
 def get_new_item_code(doctype, txt, searchfield, start, page_len, filters):
