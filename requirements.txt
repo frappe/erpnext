@@ -2,7 +2,7 @@ braintree==3.57.1
 frappe
 gocardless-pro==1.11.0
 googlemaps==3.1.1
-pandas==0.24.2
+pandas==1.0.5
 plaid-python==3.4.0
 pycountry==19.8.18
 PyGithub==1.44.1
