@@ -74,9 +74,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Posting Date",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fieldname": "employee",
@@ -89,9 +87,7 @@
    "oldfieldtype": "Link",
    "options": "Employee",
    "reqd": 1,
-   "search_index": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "search_index": 1
   },
   {
    "fetch_from": "employee.employee_name",
@@ -102,9 +98,7 @@
    "label": "Employee Name",
    "oldfieldname": "employee_name",
    "oldfieldtype": "Data",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fetch_from": "employee.department",
@@ -115,20 +109,18 @@
    "oldfieldname": "department",
    "oldfieldtype": "Link",
    "options": "Department",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.designation",
    "fetch_from": "employee.designation",
    "fieldname": "designation",
-   "fieldtype": "Read Only",
+   "fieldtype": "Link",
    "label": "Designation",
    "oldfieldname": "designation",
    "oldfieldtype": "Link",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Designation",
+   "read_only": 1
   },
   {
    "fetch_from": "employee.branch",
@@ -139,16 +131,12 @@
    "oldfieldname": "branch",
    "oldfieldtype": "Link",
    "options": "Branch",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "column_break1",
    "fieldtype": "Column Break",
    "oldfieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1,
    "width": "50%"
   },
   {
@@ -156,27 +144,21 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "Draft\nSubmitted\nCancelled",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "journal_entry",
    "fieldtype": "Link",
    "label": "Journal Entry",
    "options": "Journal Entry",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "payroll_entry",
    "fieldtype": "Link",
    "label": "Payroll Entry",
    "options": "Payroll Entry",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "company",
@@ -186,9 +168,7 @@
    "label": "Company",
    "options": "Company",
    "remember_last_selected_value": 1,
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "allow_on_submit": 1,
@@ -197,62 +177,46 @@
    "ignore_user_permissions": 1,
    "label": "Letter Head",
    "options": "Letter Head",
-   "print_hide": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "print_hide": 1
   },
   {
    "fieldname": "section_break_10",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Section Break"
   },
   {
    "default": "0",
    "fieldname": "salary_slip_based_on_timesheet",
    "fieldtype": "Check",
    "label": "Salary Slip Based on Timesheet",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "start_date",
    "fieldtype": "Date",
-   "label": "Start Date",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Start Date"
   },
   {
    "fieldname": "end_date",
    "fieldtype": "Date",
-   "label": "End Date",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "End Date"
   },
   {
    "fieldname": "column_break_15",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "salary_structure",
    "fieldtype": "Link",
    "label": "Salary Structure",
    "options": "Salary Structure",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "depends_on": "eval:(!doc.salary_slip_based_on_timesheet)",
    "fieldname": "payroll_frequency",
    "fieldtype": "Select",
    "label": "Payroll Frequency",
-   "options": "\nMonthly\nFortnightly\nBimonthly\nWeekly\nDaily",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "\nMonthly\nFortnightly\nBimonthly\nWeekly\nDaily"
   },
   {
    "fieldname": "total_working_days",
@@ -261,18 +225,14 @@
    "oldfieldname": "total_days_in_month",
    "oldfieldtype": "Int",
    "read_only": 1,
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fieldname": "leave_without_pay",
    "fieldtype": "Float",
    "label": "Leave Without Pay",
    "oldfieldname": "leave_without_pay",
-   "oldfieldtype": "Currency",
-   "show_days": 1,
-   "show_seconds": 1
+   "oldfieldtype": "Currency"
   },
   {
    "fieldname": "payment_days",
@@ -281,52 +241,38 @@
    "oldfieldname": "payment_days",
    "oldfieldtype": "Float",
    "read_only": 1,
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fieldname": "hourly_wages",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "timesheets",
    "fieldtype": "Table",
    "label": "Salary Slip Timesheet",
-   "options": "Salary Slip Timesheet",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Salary Slip Timesheet"
   },
   {
    "fieldname": "column_break_20",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "total_working_hours",
    "fieldtype": "Float",
    "label": "Total Working Hours",
-   "print_hide_if_no_value": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "print_hide_if_no_value": 1
   },
   {
    "fieldname": "hour_rate",
    "fieldtype": "Currency",
    "label": "Hour Rate",
    "options": "Company:company:default_currency",
-   "print_hide_if_no_value": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "print_hide_if_no_value": 1
   },
   {
    "fieldname": "section_break_26",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "bank_name",
@@ -334,9 +280,7 @@
    "label": "Bank Name",
    "oldfieldname": "bank_name",
    "oldfieldtype": "Data",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "bank_account_no",
@@ -344,46 +288,34 @@
    "label": "Bank Account No.",
    "oldfieldname": "bank_account_no",
    "oldfieldtype": "Data",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "section_break_32",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Section Break"
   },
   {
    "default": "0",
    "fieldname": "deduct_tax_for_unclaimed_employee_benefits",
    "fieldtype": "Check",
-   "label": "Deduct Tax For Unclaimed Employee Benefits",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Deduct Tax For Unclaimed Employee Benefits"
   },
   {
    "default": "0",
    "fieldname": "deduct_tax_for_unsubmitted_tax_exemption_proof",
    "fieldtype": "Check",
-   "label": "Deduct Tax For Unsubmitted Tax Exemption Proof",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Deduct Tax For Unsubmitted Tax Exemption Proof"
   },
   {
    "fieldname": "earning_deduction",
    "fieldtype": "Section Break",
    "label": "Earning & Deduction",
-   "oldfieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "oldfieldtype": "Section Break"
   },
   {
    "fieldname": "earning",
    "fieldtype": "Column Break",
    "oldfieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1,
    "width": "50%"
   },
   {
@@ -392,16 +324,12 @@
    "label": "Earnings",
    "oldfieldname": "earning_details",
    "oldfieldtype": "Table",
-   "options": "Salary Detail",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Salary Detail"
   },
   {
    "fieldname": "deduction",
    "fieldtype": "Column Break",
    "oldfieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1,
    "width": "50%"
   },
   {
@@ -410,16 +338,12 @@
    "label": "Deductions",
    "oldfieldname": "deduction_details",
    "oldfieldtype": "Table",
-   "options": "Salary Detail",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Salary Detail"
   },
   {
    "fieldname": "totals",
    "fieldtype": "Section Break",
-   "oldfieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "oldfieldtype": "Section Break"
   },
   {
    "fieldname": "gross_pay",
@@ -428,15 +352,11 @@
    "oldfieldname": "gross_pay",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "column_break_25",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "total_deduction",
@@ -445,32 +365,24 @@
    "oldfieldname": "total_deduction",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "depends_on": "total_loan_repayment",
    "fieldname": "loan_repayment",
    "fieldtype": "Section Break",
-   "label": "Loan repayment",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Loan repayment"
   },
   {
    "fieldname": "loans",
    "fieldtype": "Table",
    "label": "Employee Loan",
    "options": "Salary Slip Loan",
-   "print_hide": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "print_hide": 1
   },
   {
    "fieldname": "section_break_43",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Section Break"
   },
   {
    "default": "0",
@@ -478,9 +390,7 @@
    "fieldtype": "Currency",
    "label": "Total Principal Amount",
    "options": "Company:company:default_currency",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "default": "0",
@@ -488,15 +398,11 @@
    "fieldtype": "Currency",
    "label": "Total Interest Amount",
    "options": "Company:company:default_currency",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "column_break_45",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -504,16 +410,12 @@
    "fieldtype": "Currency",
    "label": "Total Loan Repayment",
    "options": "Company:company:default_currency",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "net_pay_info",
    "fieldtype": "Section Break",
-   "label": "net pay info",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "net pay info"
   },
   {
    "description": "Gross Pay - Total Deduction - Loan Repayment",
@@ -523,15 +425,11 @@
    "oldfieldname": "net_pay",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "column_break_53",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "bold": 1,
@@ -539,15 +437,11 @@
    "fieldtype": "Currency",
    "label": "Rounded Total",
    "options": "Company:company:default_currency",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "section_break_55",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Section Break"
   },
   {
    "description": "Net Pay (in words) will be visible once you save the Salary Slip.",
@@ -556,9 +450,7 @@
    "label": "Total in words",
    "oldfieldname": "net_pay_in_words",
    "oldfieldtype": "Data",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -570,9 +462,7 @@
    "oldfieldtype": "Data",
    "options": "Salary Slip",
    "print_hide": 1,
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fetch_from": "employee.payroll_cost_center",
@@ -581,40 +471,32 @@
    "fieldtype": "Link",
    "label": "Payroll Cost Center",
    "options": "Cost Center",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "mode_of_payment",
    "fieldtype": "Select",
    "label": "Mode Of Payment",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "absent_days",
    "fieldtype": "Float",
    "label": "Absent Days",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "unmarked_days",
    "fieldtype": "Float",
    "hidden": 1,
-   "label": "Unmarked days",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Unmarked days"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-25 14:42:43.921828",
+ "modified": "2020-07-22 12:41:03.659422",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
