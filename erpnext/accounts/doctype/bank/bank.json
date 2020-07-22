@@ -13,7 +13,6 @@
   "bank_name",
   "swift_number",
   "column_break_1",
-  "branch_code",
   "website",
   "address_and_contact",
   "address_html",
@@ -50,15 +49,6 @@
    "fieldname": "column_break_1",
    "fieldtype": "Column Break",
    "search_index": 1
-  },
-  {
-   "allow_in_quick_entry": 1,
-   "fieldname": "branch_code",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Branch Code",
-   "unique": 1
   },
   {
    "fieldname": "address_and_contact",
@@ -111,7 +101,7 @@
   }
  ],
  "links": [],
- "modified": "2020-03-25 21:22:33.496264",
+ "modified": "2020-07-17 14:00:13.105433",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank",
