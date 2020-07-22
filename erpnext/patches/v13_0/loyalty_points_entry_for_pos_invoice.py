@@ -8,13 +8,8 @@ import frappe
 def execute():
 	'''`sales_invoice` field from loyalty point entry is splitted into `invoice_type` & `invoice` fields'''
 
-	loyalty_point_entries = frappe.db.get_all("Loyalty Point Entry", 
-		filters={ 'sales_invoice': ('is', 'set') },
-		fields=['name', 'sales_invoice'])
-
-	if not loyalty_point_entries:
-		return
-
 	frappe.reload_doctype("Loyalty Point Entry")
-	for lpe in loyalty_point_entries:
-		frappe.db.sql("""UPDATE `tabLoyalty Point Entry` SET invoice_type = 'Sales Invoice', invoice = %s""", (lpe.sales_invoice))
+	frappe.db.sql(
+		"""UPDATE `tabLoyalty Point Entry` lpe
+		SET lpe.`invoice_type` = 'Sales Invoice', lpe.`invoice` = lpe.`sales_invoice`
+		WHERE lpe.`sales_invoice` IS NOT NULL""")
