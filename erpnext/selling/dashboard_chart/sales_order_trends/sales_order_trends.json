@@ -1,0 +1,23 @@
+{
+ "chart_name": "Sales Order Trends",
+ "chart_type": "Report",
+ "creation": "2020-07-20 20:17:16.508240",
+ "custom_options": "{\"type\": \"line\", \"axisOptions\": {\"shortenYAxisNumbers\": 1}, \"tooltipOptions\": {}, \"lineOptions\": {\"regionFill\": 1}}",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "filters_json": "{\"period\":\"Monthly\",\"based_on\":\"Item\",\"fiscal_year\":\"2020-2021\",\"company\":\"Silver Tech\"}",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "modified": "2020-07-22 14:25:39.073199",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Sales Order Trends",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "report_name": "Sales Order Trends",
+ "timeseries": 0,
+ "type": "Line",
+ "use_report_chart": 1,
+ "y_axis": []
+}
