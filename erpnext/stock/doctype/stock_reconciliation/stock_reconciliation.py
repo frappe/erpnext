@@ -184,8 +184,12 @@ class StockReconciliation(StockController):
 
 		sl_entries = []
 		has_serial_no = False
+		has_batch_no = False
 		for row in self.items:
 			item = frappe.get_doc("Item", row.item_code)
+			if item.has_batch_no:
+				has_batch_no = True
+
 			if item.has_serial_no or item.has_batch_no:
 				has_serial_no = True
 				self.get_sle_for_serialized_items(row, sl_entries)
@@ -222,7 +226,11 @@ class StockReconciliation(StockController):
 			if has_serial_no:
 				sl_entries = self.merge_similar_item_serial_nos(sl_entries)
 
-			self.make_sl_entries(sl_entries)
+			allow_negative_stock = False
+			if has_batch_no:
+				allow_negative_stock = True
+
+			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
 
 		if has_serial_no and sl_entries:
 			self.update_valuation_rate_for_serial_no()
@@ -493,7 +501,7 @@ def get_stock_balance_for(item_code, warehouse,
 		qty, rate = data
 
 	if item_dict.get("has_batch_no"):
-		qty = get_batch_qty(batch_no, warehouse) or 0
+		qty = get_batch_qty(batch_no, warehouse, posting_date=posting_date, posting_time=posting_time) or 0
 
 	return {
 		'qty': qty,
