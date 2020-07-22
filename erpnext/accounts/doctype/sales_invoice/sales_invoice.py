@@ -1113,7 +1113,10 @@ class SalesInvoice(SellingController):
 			expiry_date=self.posting_date, include_expired_entry=True)
 		if lp_details and getdate(lp_details.from_date) <= getdate(self.posting_date) and \
 			(not lp_details.to_date or getdate(lp_details.to_date) >= getdate(self.posting_date)):
-			points_earned = cint(eligible_amount/lp_details.collection_factor)
+
+			collection_factor = lp_details.collection_factor if lp_details.collection_factor else 1.0
+			points_earned = cint(eligible_amount/collection_factor)
+
 			doc = frappe.get_doc({
 				"doctype": "Loyalty Point Entry",
 				"company": self.company,
