@@ -1,0 +1,20 @@
+{
+ "cards": [],
+ "charts": [
+  {
+   "width": "Half"
+  }
+ ],
+ "creation": "2020-07-22 18:51:02.195762",
+ "dashboard_name": "Education",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "modified": "2020-07-22 18:51:02.195762",
+ "modified_by": "Administrator",
+ "module": "Education",
+ "name": "Education",
+ "owner": "Administrator"
+}
