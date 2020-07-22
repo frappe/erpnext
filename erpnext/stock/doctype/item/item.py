@@ -668,17 +668,17 @@ class Item(WebsiteGenerator):
 		""", new_name, as_dict=1)
 
 		if not records: return
-		document = "stock reconciliation" if len(records) == 1 else "stock reconciliations"
+		document = _("Stock Reconciliation") if len(records) == 1 else _("Stock Reconciliations")
 
-		msg = _("The item {0} and {1} are present in the following {2} : <br>"
+		msg = _("The items {0} and {1} are present in the following {2} : <br>"
 			.format(frappe.bold(old_name), frappe.bold(new_name), document))
 
 		msg += ', '.join([get_link_to_form("Stock Reconciliation", d.parent) for d in records]) + "<br><br>"
 
-		msg += _("Note: To merge the items, create separate stock reconciliation for the old item {0}"
+		msg += _("Note: To merge the items, create a separate Stock Reconciliation for the old item {0}"
 			.format(frappe.bold(old_name)))
 
-		frappe.throw(_(msg), title=_("Can not merge {0} with {1}".format(old_name, new_name)))
+		frappe.throw(_(msg), title=_("Merge not allowed"))
 
 	def set_last_purchase_rate(self, new_name):
 		last_purchase_rate = get_last_purchase_details(new_name).get("base_net_rate", 0)
