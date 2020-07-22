@@ -743,6 +743,13 @@ erpnext.PointOfSale.ItemCart = class {
 			this.$totals_section.removeClass('d-none');
 			this.$numpad_section.addClass('d-none');
 		}
+		this.reset_numpad();
+	}
+
+	reset_numpad() {
+		this.numpad_value = '';
+		this.prev_action = undefined;
+		this.$numpad_section.find('.shadow-inner').removeClass('shadow-inner bg-selected');
 	}
 
 	toggle_numpad_field_edit(fieldname) {
