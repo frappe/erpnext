@@ -56,9 +56,7 @@ frappe.ui.form.on("Opportunity", {
 	opportunity_from: function(frm) {
 		frm.trigger('setup_opportunity_from');
 
-		if (frm.doc.opportunity_from) {
-			frm.set_value("party_name", "");
-		}
+		frm.set_value("party_name", "");
 	},
 
 	setup_opportunity_from: function(frm) {
