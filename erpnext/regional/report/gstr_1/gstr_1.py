@@ -118,7 +118,7 @@ class Gstr1Report(object):
 				row.append(invoice_details.get(fieldname))
 		taxable_value = 0
 
-		if invoice in self.cgst_igst_invoices:
+		if invoice in self.cgst_sgst_invoices:
 			division_factor = 2
 		else:
 			division_factor = 1
@@ -128,6 +128,8 @@ class Gstr1Report(object):
 				if self.item_tax_rate.get(invoice) and tax_rate/division_factor in self.item_tax_rate.get(invoice, {}).get(item_code, []):
 					taxable_value += abs(net_amount)
 				elif not self.item_tax_rate.get(invoice):
+					taxable_value += abs(net_amount)
+				elif tax_rate:
 					taxable_value += abs(net_amount)
 
 		row += [tax_rate or 0, taxable_value]
@@ -227,7 +229,7 @@ class Gstr1Report(object):
 
 		self.items_based_on_tax_rate = {}
 		self.invoice_cess = frappe._dict()
-		self.cgst_igst_invoices = []
+		self.cgst_sgst_invoices = []
 
 		unidentified_gst_accounts = []
 		for parent, account, item_wise_tax_detail, tax_amount in self.tax_details:
@@ -251,8 +253,8 @@ class Gstr1Report(object):
 							tax_rate = tax_amounts[0]
 							if cgst_or_sgst:
 								tax_rate *= 2
-								if parent not in self.cgst_igst_invoices:
-									self.cgst_igst_invoices.append(parent)
+								if parent not in self.cgst_sgst_invoices:
+									self.cgst_sgst_invoices.append(parent)
 
 							rate_based_dict = self.items_based_on_tax_rate\
 								.setdefault(parent, {}).setdefault(tax_rate, [])

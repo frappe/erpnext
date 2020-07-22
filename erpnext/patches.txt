@@ -700,6 +700,7 @@ erpnext.patches.v12_0.update_uom_conversion_factor
 execute:frappe.delete_doc_if_exists("Page", "pos")
 erpnext.patches.v13_0.delete_old_purchase_reports
 erpnext.patches.v12_0.set_italian_import_supplier_invoice_permissions
+erpnext.patches.v12_0.unhide_cost_center_field
 erpnext.patches.v13_0.update_sla_enhancements
 erpnext.patches.v12_0.update_address_template_for_india
 erpnext.patches.v13_0.update_deferred_settings
@@ -711,3 +712,4 @@ erpnext.patches.v13_0.move_payroll_setting_separately_from_hr_settings #22-06-20
 erpnext.patches.v13_0.check_is_income_tax_component #22-06-2020
 erpnext.patches.v13_0.loyalty_points_entry_for_pos_invoice
 erpnext.patches.v12_0.add_taxjar_integration_field
+erpnext.patches.v12_0.update_item_tax_template_company

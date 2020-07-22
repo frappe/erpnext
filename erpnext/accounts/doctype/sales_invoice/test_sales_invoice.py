@@ -1536,11 +1536,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si_doc = frappe.get_doc('Sales Invoice', si.name)
 		self.assertEqual(si_doc.outstanding_amount, 0)
 
-	def test_sales_invoice_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+	def test_sales_invoice_with_cost_center(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
-		accounts_settings.save()
 		cost_center = "_Test Cost Center for BS Account - _TC"
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
 
@@ -1565,14 +1562,47 @@ class TestSalesInvoice(unittest.TestCase):
 
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+	
+	def test_sales_invoice_with_project_link(self):
+		from erpnext.projects.doctype.project.test_project import make_project
 
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
+		project = make_project({
+			'project_name': 'Sales Invoice Project',
+			'project_template_name': 'Test Project Template',
+			'start_date': '2020-01-01'
+		})
+		item_project = make_project({
+			'project_name': 'Sales Invoice Item Project',
+			'project_template_name': 'Test Project Template',
+			'start_date': '2019-06-01'
+		})
 
-	def test_sales_invoice_for_disable_allow_cost_center_in_entry_of_bs_account(self):
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
-		accounts_settings.save()
+		sales_invoice = create_sales_invoice(do_not_save=1)
+		sales_invoice.items[0].project = item_project.project_name
+		sales_invoice.project = project.project_name
+
+		sales_invoice.submit()
+
+		expected_values = {
+			"Debtors - _TC": {
+				"project": project.project_name
+			},
+			"Sales - _TC": {
+				"project": item_project.project_name
+			}
+		}
+
+		gl_entries = frappe.db.sql("""select account, cost_center, project, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
+			order by account asc""", sales_invoice.name, as_dict=1)
+		
+		self.assertTrue(gl_entries)
+		
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account]["project"], gle.project)
+
+	def test_sales_invoice_without_cost_center(self):
 		cost_center = "_Test Cost Center - _TC"
 		si =  create_sales_invoice(debit_to="Debtors - _TC")
 
@@ -1594,9 +1624,6 @@ class TestSalesInvoice(unittest.TestCase):
 
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
-
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
 
 	def test_deferred_revenue(self):
 		deferred_account = create_account(account_name="Deferred Revenue",
