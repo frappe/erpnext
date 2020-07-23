@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 import frappe
-from frappe.model.utils.rename_field import rename_field
 
 def execute():
 	if frappe.db.exists('DocType', 'Lab Test') and frappe.db.exists('DocType', 'Lab Test Template'):
