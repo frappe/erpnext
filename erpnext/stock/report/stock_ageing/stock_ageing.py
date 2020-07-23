@@ -62,13 +62,13 @@ def get_range_age(filters, fifo_queue, to_date):
 		age = date_diff(to_date, item[1])
 		
 		if age <= filters.range1:
-			range1 += item[0]
+			range1 += flt(item[0])
 		elif age <= filters.range2:
-			range2 += item[0]
+			range2 += flt(item[0])
 		elif age <= filters.range3:
-			range3 += item[0]
+			range3 += flt(item[0])
 		else:
-			above_range3 += item[0]
+			above_range3 += flt(item[0])
 		
 	return range1, range2, range3, above_range3
 
