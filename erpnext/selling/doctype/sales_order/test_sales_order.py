@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
 import frappe
+import json
 from frappe.utils import flt, add_days, nowdate
 import frappe.permissions
 import unittest
@@ -10,9 +11,10 @@ from erpnext.selling.doctype.sales_order.sales_order \
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.selling.doctype.sales_order.sales_order import make_work_orders
 from erpnext.controllers.accounts_controller import update_child_qty_rate
-import json
 from erpnext.selling.doctype.sales_order.sales_order import make_raw_material_request
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
+from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
+from erpnext.stock.doctype.item.test_item import make_item
 
 class TestSalesOrder(unittest.TestCase):
 	def tearDown(self):
@@ -417,6 +419,26 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Sales Order', trans_item, so.name)
 		frappe.set_user("Administrator")
 
+	def test_update_child_qty_rate_product_bundle(self):
+		# test Update Items with product bundle
+		if not frappe.db.exists("Item", "_Product Bundle Item"):
+			bundle_item = make_item("_Product Bundle Item", {"is_stock_item": 0})
+			bundle_item.append("item_defaults", {
+					"company": "_Test Company",
+					"default_warehouse": "_Test Warehouse - _TC"})
+			bundle_item.save(ignore_permissions=True)
+
+		make_item("_Packed Item", {"is_stock_item": 1})
+		make_product_bundle("_Product Bundle Item", ["_Packed Item"], 2)
+
+		so = make_sales_order(item_code = "_Test Item", warehouse=None)
+
+		added_item = json.dumps([{"item_code" : "_Product Bundle Item", "rate" : 200, 'qty' : 2}])
+		update_child_qty_rate('Sales Order', added_item, so.name)
+
+		so.reload()
+		self.assertEqual(so.packed_items[0].qty, 4)
+
 	def test_warehouse_user(self):
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
@@ -457,8 +479,6 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertRaises(frappe.CancelledLinkError, dn.submit)
 
 	def test_service_type_product_bundle(self):
-		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-		from erpnext.stock.doctype.item.test_item import make_item
 		make_item("_Test Service Product Bundle", {"is_stock_item": 0})
 		make_item("_Test Service Product Bundle Item 1", {"is_stock_item": 0})
 		make_item("_Test Service Product Bundle Item 2", {"is_stock_item": 0})
@@ -472,8 +492,6 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertTrue("_Test Service Product Bundle Item 2" in [d.item_code for d in so.packed_items])
 
 	def test_mix_type_product_bundle(self):
-		from erpnext.selling.doctype.product_bundle.test_product_bundle import make_product_bundle
-		from erpnext.stock.doctype.item.test_item import make_item
 		make_item("_Test Mix Product Bundle", {"is_stock_item": 0})
 		make_item("_Test Mix Product Bundle Item 1", {"is_stock_item": 1})
 		make_item("_Test Mix Product Bundle Item 2", {"is_stock_item": 0})
@@ -484,7 +502,6 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertRaises(WarehouseRequired, make_sales_order, item_code = "_Test Mix Product Bundle", warehouse="")
 
 	def test_auto_insert_price(self):
-		from erpnext.stock.doctype.item.test_item import make_item
 		make_item("_Test Item for Auto Price List", {"is_stock_item": 0})
 		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 1)
 
@@ -519,7 +536,6 @@ class TestSalesOrder(unittest.TestCase):
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 
 		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
-		from erpnext.stock.doctype.item.test_item import make_item
 		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "delivered_by_supplier": 1})
 
 		dn_item = make_item("_Test Regular Item", {"is_stock_item": 1})
@@ -714,7 +730,6 @@ class TestSalesOrder(unittest.TestCase):
 
 	def test_serial_no_based_delivery(self):
 		frappe.set_value("Stock Settings", None, "automatically_set_serial_nos_based_on_fifo", 1)
-		from erpnext.stock.doctype.item.test_item import make_item
 		item = make_item("_Reserved_Serialized_Item", {"is_stock_item": 1,
 					"maintain_stock": 1,
 					"has_serial_no": 1,
@@ -835,7 +850,6 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertRaises(frappe.LinkExistsError, so_doc.cancel)
 
 	def test_request_for_raw_materials(self):
-		from erpnext.stock.doctype.item.test_item import make_item
 		item = make_item("_Test Finished Item", {"is_stock_item": 1,
 			"maintain_stock": 1,
 			"valuation_rate": 500,

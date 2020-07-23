@@ -22,7 +22,6 @@
   "default_letter_head",
   "default_holiday_list",
   "default_finance_book",
-  "standard_working_hours",
   "default_selling_terms",
   "default_buying_terms",
   "default_warehouse_for_sales_return",
@@ -67,10 +66,12 @@
   "payment_terms",
   "auto_accounting_for_stock_settings",
   "enable_perpetual_inventory",
+  "enable_perpetual_inventory_for_non_stock_items",
   "default_inventory_account",
   "stock_adjustment_account",
   "column_break_32",
   "stock_received_but_not_billed",
+  "service_received_but_not_billed",
   "expenses_included_in_valuation",
   "fixed_asset_depreciation_settings",
   "accumulated_depreciation_account",
@@ -237,11 +238,6 @@
    "fieldtype": "Link",
    "label": "Default Holiday List",
    "options": "Holiday List"
-  },
-  {
-   "fieldname": "standard_working_hours",
-   "fieldtype": "Float",
-   "label": "Standard Working Hours"
   },
   {
    "fieldname": "default_warehouse_for_sales_return",
@@ -723,6 +719,20 @@
    "fieldtype": "Link",
    "label": "Default Buying Terms",
    "options": "Terms and Conditions"
+  },
+  {
+   "fieldname": "service_received_but_not_billed",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Service Received But Not Billed",
+   "no_copy": 1,
+   "options": "Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_perpetual_inventory_for_non_stock_items",
+   "fieldtype": "Check",
+   "label": "Enable Perpetual Inventory For Non Stock Items"
   }
  ],
  "icon": "fa fa-building",
@@ -730,7 +740,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2020-03-21 18:09:53.534211",
+ "modified": "2020-06-24 12:45:31.462195",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
