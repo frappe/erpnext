@@ -12,7 +12,7 @@ from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profi
 
 class TestPOSClosingEntry(unittest.TestCase):
 	def test_pos_closing_entry(self):
-		old_user, test_user, pos_profile = init_user_and_profile()
+		test_user, pos_profile = init_user_and_profile()
 
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
@@ -42,11 +42,10 @@ class TestPOSClosingEntry(unittest.TestCase):
 		self.assertEqual(pcv_doc.total_quantity, 2)
 		self.assertEqual(pcv_doc.net_total, 6700)
 
-		frappe.set_user(old_user)
+		frappe.set_user("Administrator")
 		frappe.db.sql("delete from `tabPOS Profile`")
 
 def init_user_and_profile():
-	old_user = frappe.session.user
 	user = 'test@example.com'
 	test_user = frappe.get_doc('User', user)
 
@@ -62,4 +61,4 @@ def init_user_and_profile():
 
 	pos_profile.save()
 
-	return old_user, test_user, pos_profile
+	return test_user, pos_profile
