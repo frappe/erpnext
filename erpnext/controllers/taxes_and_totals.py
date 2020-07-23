@@ -597,7 +597,7 @@ class calculate_taxes_and_totals(object):
 		base_rate_with_margin = 0.0
 		if item.price_list_rate:
 			if item.pricing_rules and not self.doc.ignore_pricing_rule:
-				for d in item.pricing_rules.split(','):
+				for d in json.loads(item.pricing_rules):
 					pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
 
 					if (pricing_rule.margin_type == 'Amount' and pricing_rule.currency == self.doc.currency)\
