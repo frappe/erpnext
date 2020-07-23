@@ -26,14 +26,14 @@ def get_columns():
 			"width": 200
 		},
 		{
-			"label": _("Total no of Serial Nos"),
+			"label": _("Serial No Count"),
 			"fieldname": "total",
 			"fieldtype": "Float",
 			"width": 150
 		},
 		{
-			"label": _("Balance Qty"),
-			"fieldname": "balance",
+			"label": _("Stock Qty"),
+			"fieldname": "stock_qty",
 			"fieldtype": "Float",
 			"width": 150
 		},
@@ -51,18 +51,13 @@ def get_data(warehouse):
 	serial_item_list = frappe.get_all("Item", filters={
 		'has_serial_no': True,
 	}, fields=['item_code', 'item_name'])
-
+	
+	status_list = ['Active', 'Expired']
 	data = []
 	for item in serial_item_list:
-		total_serial_no = frappe.db.count("Serial No", filters={"item_code": item.item_code, "status": "Active", "warehouse": warehouse})
-
-		if not total_serial_no:
-			total_serial_no = 0
+		total_serial_no = frappe.db.count("Serial No", filters={"item_code": item.item_code, "status": ("in", status_list), "warehouse": warehouse})
 
 		actual_qty = frappe.db.get_value('Bin', fieldname=['actual_qty'], filters={"warehouse": warehouse, "item_code": item.item_code})
-
-		if not actual_qty:
-			actual_qty = 0
 
 		difference = total_serial_no - actual_qty
 
@@ -70,7 +65,7 @@ def get_data(warehouse):
 			"item_code": item.item_code,
 			"item_name": item.item_name,
 			"total": total_serial_no,
-			"balance": actual_qty,
+			"stock_qty": actual_qty,
 			"difference": difference,
 		}
 

@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Mismatch in Serial No count and Item's Stock in Warehouse"] = {
+frappe.query_reports["Stock Qty vs Serial No Count"] = {
 	"filters": [
 		{
 			"fieldname":"company",
@@ -31,7 +31,7 @@ frappe.query_reports["Mismatch in Serial No count and Item's Stock in Warehouse"
 		value = default_formatter(value, row, column, data);
 		if (column.fieldname == "difference" && data) {
 			if (data.difference > 0) {
-				value = "<span style='color:green'>" + value + "</span>";
+				value = "<span style='color:red'>" + value + "</span>";
 			}
 			else if (data.difference < 0) {
 				value = "<span style='color:red'>" + value + "</span>";
