@@ -35,3 +35,17 @@ def execute():
 				UPDATE `tab{0}`
 				SET parentfield = %(parentfield)s
 			""".format(doctype), {'parentfield': parentfield})
+
+		# rename field
+		frappe.reload_doc('healthcare', 'doctype', 'lab_test')
+		if frappe.db.has_column('Lab Test', 'special_toggle'):
+			rename_field('Lab Test', 'special_toggle', 'descriptive_toggle')
+
+	if frappe.db.exists('DocType', 'Lab Test Group Template'):
+		# fix select field option
+		frappe.reload_doc('healthcare', 'doctype', 'lab_test_group_template')
+		frappe.db.sql("""
+			UPDATE `tabLab Test Group Template`
+			SET template_or_new_line = 'Add New Line'
+			WHERE template_or_new_line = 'Add new line'
+		""")
