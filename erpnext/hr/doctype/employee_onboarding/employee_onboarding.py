@@ -17,7 +17,7 @@ class EmployeeOnboarding(EmployeeBoardingController):
 
 	def validate_duplicate_employee_onboarding(self):
 		emp_onboarding = frappe.db.exists("Employee Onboarding",{"job_applicant": self.job_applicant})
-		if emp_onboarding:
+		if emp_onboarding and emp_onboarding != self.name:
 			frappe.throw(_("Employee Onboarding: {0} is already for Job Applicant: {1}").format(frappe.bold(emp_onboarding), frappe.bold(self.job_applicant)))
 
 	def validate_employee_creation(self):
