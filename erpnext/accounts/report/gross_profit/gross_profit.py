@@ -268,24 +268,19 @@ class GrossProfitGenerator(object):
 	def get_last_purchase_rate(self, item_code, row):
 		condition = ''
 		if row.project:
-			condition += "AND a.project='%s'"%(row.project)
+			condition += " AND a.project='%s'" % (row.project)
 		elif row.cost_center:
-			condition += "AND a.cost_center='%s'"%(row.cost_center)
+			condition += " AND a.cost_center='%s'" % (row.cost_center)
 		if self.filters.to_date:
-			last_purchase_rate = frappe.db.sql("""
-			select (a.base_rate / a.conversion_factor)
-			from `tabPurchase Invoice Item` a
-			where a.item_code = %s and a.docstatus=1
-			{0}
-			and modified <= %s
-			order by a.modified desc limit 1""".format(condition), (item_code, self.filters.to_date))
-		else:
-			last_purchase_rate = frappe.db.sql("""
-			select (a.base_rate / a.conversion_factor)
-			from `tabPurchase Invoice Item` a
-			where a.item_code = %s and a.docstatus=1
-			{0}
-			order by a.modified desc limit 1""".format(condition), item_code)
+			condition += " AND modified='%s'" % (self.filters.to_date)
+
+		last_purchase_rate = frappe.db.sql("""
+		select (a.base_rate / a.conversion_factor)
+		from `tabPurchase Invoice Item` a
+		where a.item_code = %s and a.docstatus=1
+		{0}
+		order by a.modified desc limit 1""".format(condition), item_code)
+
 		return flt(last_purchase_rate[0][0]) if last_purchase_rate else 0
 
 	def load_invoice_items(self):
