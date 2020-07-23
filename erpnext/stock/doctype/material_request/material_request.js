@@ -49,17 +49,21 @@ frappe.ui.form.on('Material Request', {
 		// set schedule_date
 		set_schedule_date(frm);
 
-		let filters = {'company': frm.doc.company}
-
-		frm.set_query("warehouse", "items", function() {
+		frm.set_query("warehouse", "items", function(doc) {
 			return {
-				filters: filters
+				filters: {'company': doc.company}
 			};
 		});
 
-		frm.set_query("set_warehouse", function(){
+		frm.set_query("set_warehouse", function(doc){
 			return {
-				filters: filters
+				filters: {'company': doc.company}
+			};
+		});
+
+		frm.set_query("set_from_warehouse", function(doc){
+			return {
+				filters: {'company': doc.company}
 			};
 		});
 	},

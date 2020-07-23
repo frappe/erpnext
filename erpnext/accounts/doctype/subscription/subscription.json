@@ -6,14 +6,18 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "customer",
-  "cb_1",
+  "party_type",
   "status",
+  "cb_1",
+  "party",
   "subscription_period",
-  "start",
+  "start_date",
+  "end_date",
   "cancelation_date",
   "trial_period_start",
   "trial_period_end",
+  "follow_calendar_months",
+  "generate_new_invoices_past_due_date",
   "column_break_11",
   "current_invoice_start",
   "current_invoice_end",
@@ -23,7 +27,8 @@
   "sb_4",
   "plans",
   "sb_1",
-  "tax_template",
+  "sales_tax_template",
+  "purchase_tax_template",
   "sb_2",
   "apply_additional_discount",
   "cb_2",
@@ -32,18 +37,10 @@
   "sb_3",
   "invoices",
   "accounting_dimensions_section",
+  "cost_center",
   "dimension_col_break"
  ],
  "fields": [
-  {
-   "fieldname": "customer",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Customer",
-   "options": "Customer",
-   "reqd": 1,
-   "set_only_once": 1
-  },
   {
    "allow_on_submit": 1,
    "fieldname": "cb_1",
@@ -53,19 +50,13 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nTrialling\nActive\nPast Due Date\nCancelled\nUnpaid",
+   "options": "\nTrialling\nActive\nPast Due Date\nCancelled\nUnpaid\nCompleted",
    "read_only": 1
   },
   {
    "fieldname": "subscription_period",
    "fieldtype": "Section Break",
    "label": "Subscription Period"
-  },
-  {
-   "fieldname": "start",
-   "fieldtype": "Date",
-   "label": "Subscription Start Date",
-   "set_only_once": 1
   },
   {
    "fieldname": "cancelation_date",
@@ -137,15 +128,10 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:['Customer', 'Supplier'].includes(doc.party_type)",
    "fieldname": "sb_1",
    "fieldtype": "Section Break",
    "label": "Taxes"
-  },
-  {
-   "fieldname": "tax_template",
-   "fieldtype": "Link",
-   "label": "Sales Taxes and Charges Template",
-   "options": "Sales Taxes and Charges Template"
   },
   {
    "fieldname": "sb_2",
@@ -195,10 +181,74 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "label": "Party Type",
+   "options": "DocType",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Party",
+   "options": "party_type",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "depends_on": "eval:doc.party_type === 'Customer'",
+   "fieldname": "sales_tax_template",
+   "fieldtype": "Link",
+   "label": "Sales Taxes and Charges Template",
+   "options": "Sales Taxes and Charges Template"
+  },
+  {
+   "depends_on": "eval:doc.party_type === 'Supplier'",
+   "fieldname": "purchase_tax_template",
+   "fieldtype": "Link",
+   "label": "Purchase Taxes and Charges Template",
+   "options": "Purchase Taxes and Charges Template"
+  },
+  {
+   "default": "0",
+   "description": "If this is checked subsequent new invoices will be created on calendar  month and quarter start dates irrespective of current invoice start date",
+   "fieldname": "follow_calendar_months",
+   "fieldtype": "Check",
+   "label": "Follow Calendar Months",
+   "set_only_once": 1
+  },
+  {
+   "default": "0",
+   "description": "New invoices will be generated as per schedule even if current invoices are unpaid or past due date",
+   "fieldname": "generate_new_invoices_past_due_date",
+   "fieldtype": "Check",
+   "label": "Generate New Invoices Past Due Date"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "Subscription End Date",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Subscription Start Date",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "links": [],
- "modified": "2020-01-27 14:37:32.845173",
+ "modified": "2020-06-25 10:52:52.265105",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",
