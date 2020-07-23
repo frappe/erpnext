@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 import re
 from past.builtins import cmp
 import functools
+import math
 
 import frappe, erpnext
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
@@ -45,10 +46,7 @@ def get_period_list(from_fiscal_year, to_fiscal_year, period_start_date, period_
 	start_date = year_start_date
 	months = get_months(year_start_date, year_end_date)
 
-	if (months // months_to_add) != (months / months_to_add):
-		months += months_to_add
-
-	for i in range(months // months_to_add):
+	for i in range(math.ceil(months / months_to_add)):
 		period = frappe._dict({
 			"from_date": start_date
 		})

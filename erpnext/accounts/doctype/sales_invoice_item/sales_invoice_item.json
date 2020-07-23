@@ -94,6 +94,7 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+  "project",
   "section_break_54",
   "page_break"
  ],
@@ -783,12 +784,18 @@
    "fieldtype": "Link",
    "label": "Finance Book",
    "options": "Finance Book"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2019-12-04 12:22:38.517710",
+ "modified": "2020-07-18 12:24:41.749986",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
