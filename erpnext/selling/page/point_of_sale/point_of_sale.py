@@ -6,6 +6,7 @@ import frappe, json
 from frappe.utils.nestedset import get_root_of
 from frappe.utils import cint
 from erpnext.accounts.doctype.pos_profile.pos_profile import get_item_groups
+from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availability
 
 from six import string_types
 
@@ -43,6 +44,7 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 		SELECT
 			name AS item_code,
 			item_name,
+			description,
 			stock_uom,
 			image AS item_image,
 			idx AS idx,
@@ -53,10 +55,11 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 			disabled = 0
 				AND has_variants = 0
 				AND is_sales_item = 1
+				AND is_fixed_asset = 0
 				AND item_group in (SELECT name FROM `tabItem Group` WHERE lft >= {lft} AND rgt <= {rgt})
 				AND {condition}
 		ORDER BY
-			idx desc
+			name asc
 		LIMIT
 			{start}, {page_length}"""
 		.format(
@@ -73,32 +76,14 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 			fields = ["item_code", "price_list_rate", "currency"],
 			filters = {'price_list': price_list, 'item_code': ['in', items]})
 
-		item_prices, bin_data = {}, {}
+		item_prices = {}
 		for d in item_prices_data:
 			item_prices[d.item_code] = d
-
-		# prepare filter for bin query
-		bin_filters = {'item_code': ['in', items]}
-		if warehouse:
-			bin_filters['warehouse'] = warehouse
-		if display_items_in_stock:
-			bin_filters['actual_qty'] = [">", 0]
-
-		# query item bin
-		bin_data = frappe.get_all(
-			'Bin', fields=['item_code', 'sum(actual_qty) as actual_qty'],
-			filters=bin_filters, group_by='item_code'
-		)
-
-		# convert list of dict into dict as {item_code: actual_qty}
-		bin_dict = {}
-		for b in bin_data:
-			bin_dict[b.get('item_code')] = b.get('actual_qty')
 
 		for item in items_data:
 			item_code = item.item_code
 			item_price = item_prices.get(item_code) or {}
-			item_stock_qty = bin_dict.get(item_code)
+			item_stock_qty = get_stock_availability(item_code, warehouse)
 
 			if display_items_in_stock and not item_stock_qty:
 				pass
@@ -115,6 +100,13 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 	res = {
 		'items': result
 	}
+
+	if len(res['items']) == 1:
+		res['items'][0].setdefault('serial_no', serial_no)
+		res['items'][0].setdefault('batch_no', batch_no)
+		res['items'][0].setdefault('barcode', barcode)
+
+		return res
 
 	if serial_no:
 		res.update({
@@ -167,6 +159,7 @@ def get_item_group_condition(pos_profile):
 
 	return cond % tuple(item_groups)
 
+@frappe.whitelist()
 def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 	item_groups = []
 	cond = "1=1"
@@ -185,6 +178,73 @@ def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 			{'txt': '%%%s%%' % txt})
 
 @frappe.whitelist()
-def get_pos_fields():
-	return frappe.get_all("POS Field", fields=["label", "fieldname",
-		"fieldtype", "default_value", "reqd", "read_only", "options"])
+def check_opening_entry(user):
+	open_vouchers = frappe.db.get_all("POS Opening Entry", 
+		filters = { 
+			"user": user, 
+			"pos_closing_entry": ["in", ["", None]],
+			"docstatus": 1
+		}, 
+		fields = ["name", "company", "pos_profile", "period_start_date"],
+		order_by = "period_start_date desc"
+	)
+
+	return open_vouchers
+
+@frappe.whitelist()
+def create_opening_voucher(pos_profile, company, balance_details):
+	import json
+	balance_details = json.loads(balance_details)
+
+	new_pos_opening = frappe.get_doc({
+		'doctype': 'POS Opening Entry',
+		"period_start_date": frappe.utils.get_datetime(),
+		"posting_date": frappe.utils.getdate(),
+		"user": frappe.session.user,
+		"pos_profile": pos_profile,
+		"company": company,
+	})
+	new_pos_opening.set("balance_details", balance_details)
+	new_pos_opening.submit()
+
+	return new_pos_opening.as_dict()
+
+@frappe.whitelist()
+def get_past_order_list(search_term, status, limit=20):
+	fields = ['name', 'grand_total', 'currency', 'customer', 'posting_time', 'posting_date']
+	invoice_list = []
+
+	if search_term and status:
+		invoices_by_customer = frappe.db.get_all('POS Invoice', filters={
+			'customer': ['like', '%{}%'.format(search_term)],
+			'status': status
+		}, fields=fields)
+		invoices_by_name = frappe.db.get_all('POS Invoice', filters={
+			'name': ['like', '%{}%'.format(search_term)],
+			'status': status
+		}, fields=fields)
+
+		invoice_list = invoices_by_customer + invoices_by_name
+	elif status:
+		invoice_list = frappe.db.get_all('POS Invoice', filters={
+			'status': status
+		}, fields=fields)
+	
+	return invoice_list
+
+@frappe.whitelist()
+def set_customer_info(fieldname, customer, value=""):
+	if fieldname == 'loyalty_program':
+		frappe.db.set_value('Customer', customer, 'loyalty_program', value)
+
+	contact = frappe.get_cached_value('Customer', customer, 'customer_primary_contact')
+
+	if contact:
+		contact_doc = frappe.get_doc('Contact', contact)
+		if fieldname == 'email_id':
+			contact_doc.set('email_ids', [{ 'email_id': value, 'is_primary': 1}])
+			frappe.db.set_value('Customer', customer, 'email_id', value)
+		elif fieldname == 'mobile_no': 
+			contact_doc.set('phone_nos', [{ 'phone': value, 'is_primary_mobile_no': 1}])
+			frappe.db.set_value('Customer', customer, 'mobile_no', value)
+		contact_doc.save()
