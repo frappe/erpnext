@@ -5,17 +5,15 @@ from frappe import _
 
 def get_data():
 	return {
-		'fieldname': 'assessment_plan',
+		'fieldname': 'room',
 		'transactions': [
 			{
-				'label': _('Assessment'),
-				'items': ['Assessment Result']
-			}
-		],
-		'reports': [
+				'label': _('Course'),
+				'items': ['Course Schedule']
+			},
 			{
-				'label': _('Report'),
-				'items': ['Assessment Plan Status']
+				'label': _('Assessment'),
+				'items': ['Assessment Plan']
 			}
 		]
 	}
