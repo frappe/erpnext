@@ -70,7 +70,7 @@ def get_range_age(filters, fifo_queue, to_date):
 		else:
 			above_range3 = item[0]
 		
-		return range1, range2, range3, above_range3
+	return range1, range2, range3, above_range3
 
 def get_columns(filters):
 	range_columns = []
