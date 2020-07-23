@@ -1,0 +1,106 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "field:title",
+ "creation": "2018-10-17 05:47:13.087395",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "title",
+  "provider",
+  "url",
+  "column_break_4",
+  "publish_date",
+  "duration",
+  "section_break_7",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Title",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "provider",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Provider",
+   "options": "YouTube\nVimeo",
+   "reqd": 1
+  },
+  {
+   "fieldname": "url",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "URL",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "publish_date",
+   "fieldtype": "Date",
+   "label": "Publish Date"
+  },
+  {
+   "fieldname": "duration",
+   "fieldtype": "Data",
+   "label": "Duration"
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Description",
+   "reqd": 1
+  }
+ ],
+ "links": [],
+ "modified": "2020-07-21 19:29:46.603734",
+ "modified_by": "Administrator",
+ "module": "Utilities",
+ "name": "Video",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

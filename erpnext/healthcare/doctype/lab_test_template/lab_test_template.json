@@ -15,31 +15,38 @@
   "lab_test_group",
   "department",
   "column_break_3",
-  "lab_test_template_type",
   "disabled",
+  "lab_test_template_type",
   "is_billable",
   "lab_test_rate",
-  "medical_coding_section",
-  "medical_code_standard",
-  "medical_code",
+  "section_break_description",
+  "lab_test_description",
   "section_break_normal",
   "lab_test_uom",
-  "lab_test_normal_range",
+  "secondary_uom",
+  "conversion_factor",
   "column_break_10",
+  "lab_test_normal_range",
   "section_break_compound",
   "normal_test_templates",
   "section_break_special",
   "sensitivity",
-  "special_test_template",
+  "descriptive_test_templates",
   "section_break_group",
   "lab_test_groups",
-  "section_break_description",
-  "lab_test_description",
+  "medical_coding_section",
+  "medical_code_standard",
+  "medical_code",
   "sb_sample_collection",
   "sample",
   "sample_uom",
   "sample_qty",
   "sample_details",
+  "worksheet_section",
+  "worksheet_instructions",
+  "result_legend_section",
+  "legend_print_position",
+  "result_legend",
   "change_in_item"
  ],
  "fields": [
@@ -95,7 +102,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Single for results which require only a single input, result UOM and normal value \n<br>\nCompound for results which require multiple input fields with corresponding event names, result UOMs and normal values\n<br>\nDescriptive for tests which have multiple result components and corresponding result entry fields. \n<br>\nGrouped for test templates which are a group of other test templates.\n<br>\nNo Result for tests with no results. Also, no Lab Test is created. e.g.. Sub Tests for Grouped results.",
+   "description": "<b>Single</b>: Results which require only a single input.\n<br>\n<b>Compound</b>: Results which require multiple event inputs.\n<br>\n<b>Descriptive</b>: Tests which have multiple result components with manual result entry.\n<br>\n<b>Grouped</b>: Test templates which are a group of other test templates.\n<br>\n<b>No Result</b>: Tests with no results, can be ordered and billed but no Lab Test will be created. e.g.. Sub Tests for Grouped results",
    "fieldname": "lab_test_template_type",
    "fieldtype": "Select",
    "in_standard_filter": 1,
@@ -119,6 +126,24 @@
    "in_list_view": 1,
    "label": "Rate",
    "mandatory_depends_on": "eval:doc.is_billable == 1"
+  },
+  {
+   "fieldname": "medical_coding_section",
+   "fieldtype": "Section Break",
+   "label": "Medical Coding"
+  },
+  {
+   "depends_on": "medical_code_standard",
+   "fieldname": "medical_code",
+   "fieldtype": "Link",
+   "label": "Medical Code",
+   "options": "Medical Code"
+  },
+  {
+   "fieldname": "medical_code_standard",
+   "fieldtype": "Link",
+   "label": "Medical Code Standard",
+   "options": "Medical Code Standard"
   },
   {
    "depends_on": "eval:doc.lab_test_template_type == 'Single'",
@@ -159,18 +184,13 @@
    "depends_on": "eval:doc.lab_test_template_type == 'Descriptive'",
    "fieldname": "section_break_special",
    "fieldtype": "Section Break",
-   "label": "Special"
+   "label": "Descriptive"
   },
   {
    "default": "0",
    "fieldname": "sensitivity",
    "fieldtype": "Check",
    "label": "Sensitivity"
-  },
-  {
-   "fieldname": "special_test_template",
-   "fieldtype": "Table",
-   "options": "Special Test Template"
   },
   {
    "depends_on": "eval:doc.lab_test_template_type == 'Grouped'",
@@ -181,20 +201,23 @@
   {
    "fieldname": "lab_test_groups",
    "fieldtype": "Table",
-   "options": "Lab Test Groups"
+   "options": "Lab Test Group Template"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_break_description",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Description "
   },
   {
    "fieldname": "lab_test_description",
-   "fieldtype": "Text",
+   "fieldtype": "Text Editor",
    "ignore_xss_filter": 1,
    "label": "Description",
    "no_copy": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "sb_sample_collection",
    "fieldtype": "Section Break",
    "label": "Sample Collection"
@@ -237,32 +260,61 @@
   },
   {
    "fieldname": "sample_details",
-   "fieldtype": "Text",
+   "fieldtype": "Small Text",
    "ignore_xss_filter": 1,
    "label": "Collection Details"
   },
   {
    "collapsible": 1,
-   "fieldname": "medical_coding_section",
+   "description": "Information to help easily interpret the test report, will be printed as part of the Lab Test result.",
+   "fieldname": "result_legend_section",
    "fieldtype": "Section Break",
-   "label": "Medical Coding"
+   "label": "Result Legend Print"
   },
   {
-   "depends_on": "medical_code_standard",
-   "fieldname": "medical_code",
-   "fieldtype": "Link",
-   "label": "Medical Code",
-   "options": "Medical Code"
+   "fieldname": "result_legend",
+   "fieldtype": "Text Editor",
+   "label": "Result Legend"
   },
   {
-   "fieldname": "medical_code_standard",
+   "fieldname": "legend_print_position",
+   "fieldtype": "Select",
+   "label": "Print Position",
+   "options": "Bottom\nTop\nBoth"
+  },
+  {
+   "fieldname": "secondary_uom",
    "fieldtype": "Link",
-   "label": "Medical Code Standard",
-   "options": "Medical Code Standard"
+   "label": "Secondary UOM",
+   "options": "Lab Test UOM"
+  },
+  {
+   "depends_on": "secondary_uom",
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "Conversion Factor",
+   "mandatory_depends_on": "secondary_uom"
+  },
+  {
+   "description": "Instructions to be printed on the worksheet",
+   "fieldname": "worksheet_instructions",
+   "fieldtype": "Text Editor",
+   "label": "Worksheet Instructions"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "worksheet_section",
+   "fieldtype": "Section Break",
+   "label": "Worksheet Print"
+  },
+  {
+   "fieldname": "descriptive_test_templates",
+   "fieldtype": "Table",
+   "options": "Descriptive Test Template"
   }
  ],
  "links": [],
- "modified": "2020-06-29 14:07:20.772219",
+ "modified": "2020-07-13 12:57:09.925436",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",

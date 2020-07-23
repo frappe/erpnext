@@ -15,6 +15,9 @@ class JobOffer(Document):
 
 	def validate(self):
 		self.validate_vacancies()
+		job_offer = frappe.db.exists("Job Offer",{"job_applicant": self.job_applicant})
+		if job_offer and job_offer != self.name:
+			frappe.throw(_("Job Offer: {0} is already for Job Applicant: {1}").format(frappe.bold(job_offer), frappe.bold(self.job_applicant)))
 
 	def validate_vacancies(self):
 		staffing_plan = get_staffing_plan_detail(self.designation, self.company, self.offer_date)
