@@ -110,7 +110,6 @@
   "amended_from",
   "range",
   "column_break4",
-  "project",
   "per_billed",
   "is_internal_supplier",
   "inter_company_reference",
@@ -937,6 +936,7 @@
    "width": "50%"
   },
   {
+   "description": "Track this Purchase Receipt against any Project",
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
@@ -1104,13 +1104,6 @@
    "fieldtype": "Small Text",
    "label": "Billing Address",
    "read_only": 1
-  },
-  {
-   "description": "Track this Purchase Receipt against any Project",
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "label": "Project",
-   "options": "Project"
   }
  ],
  "icon": "fa fa-truck",

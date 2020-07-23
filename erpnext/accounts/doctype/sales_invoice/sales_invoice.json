@@ -14,6 +14,7 @@
   "customer_name",
   "tax_id",
   "is_pos",
+  "is_consolidated",
   "pos_profile",
   "offline_pos_name",
   "is_return",
@@ -1923,6 +1924,13 @@
    "fieldtype": "Column Break",
    "hide_days": 1,
    "hide_seconds": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_consolidated",
+   "fieldtype": "Check",
+   "label": "Is Consolidated",
+   "read_only": 1
   },
   {
    "default": "0",

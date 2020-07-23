@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
-from frappe.utils import getdate, get_weekdays
+from frappe.utils import getdate, get_weekdays, get_link_to_form
 
 class ServiceLevelAgreement(Document):
 
@@ -73,8 +73,9 @@ class ServiceLevelAgreement(Document):
 			frappe.throw(_("Workday {0} has been repeated.").format(repeated_days))
 
 	def validate_doc(self):
-		if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
-			frappe.throw(_("Service Level Agreement tracking is not enabled."))
+		if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement") and self.enable:
+			frappe.throw(_("{0} is not enabled in {1}").format(frappe.bold("Track Service Level Agreement"),
+				get_link_to_form("Support Settings", "Support Settings")))
 
 		if self.default_service_level_agreement:
 			if frappe.db.exists("Service Level Agreement", {"default_service_level_agreement": "1", "name": ["!=", self.name]}):
