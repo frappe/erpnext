@@ -322,7 +322,7 @@ class GSTR3BReport(Document):
 				inter_state_supply_tax_mapping[d.name]['samt'] += d.tax_amount
 
 			if d.account_head in [d.igst_account for d in self.account_heads]:
-				inter_state_supply_tax_mapping[d.name]['samt'] += d.tax_amount
+				inter_state_supply_tax_mapping[d.name]['iamt'] += d.tax_amount
 
 			if d.account_head in [d.cess_account for d in self.account_heads]:
 				inter_state_supply_tax_mapping[d.name]['csamt'] += d.tax_amount
@@ -331,6 +331,7 @@ class GSTR3BReport(Document):
 			if d.place_of_supply:
 				osup_det = self.report_dict["sup_details"]["osup_det"]
 				osup_det["txval"] = flt(osup_det["txval"] + value['taxable_value'], 2)
+				osup_det["iamt"] = flt(osup_det["iamt"] + value['iamt'], 2)
 				osup_det["camt"] = flt(osup_det["camt"] + value['camt'], 2)
 				osup_det["samt"] = flt(osup_det["samt"] + value['samt'], 2)
 				osup_det["csamt"] = flt(osup_det["csamt"] + value['csamt'], 2)
