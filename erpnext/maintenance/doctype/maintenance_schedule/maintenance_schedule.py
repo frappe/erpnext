@@ -44,7 +44,7 @@ class MaintenanceSchedule(TransactionBase):
 		for d in self.get('items'):
 			if d.serial_no:
 				serial_nos = get_valid_serial_nos(d.serial_no)
-				self.validate_serial_no(serial_nos, d.start_date)
+				self.validate_serial_no(d.item_code, serial_nos, d.start_date)
 				self.update_amc_date(serial_nos, d.end_date)
 
 			no_email_sp = []
@@ -178,13 +178,17 @@ class MaintenanceSchedule(TransactionBase):
 			serial_no_doc.amc_expiry_date = amc_expiry_date
 			serial_no_doc.save()
 
-	def validate_serial_no(self, serial_nos, amc_start_date):
+	def validate_serial_no(self, item_code, serial_nos, amc_start_date):
 		for serial_no in serial_nos:
 			sr_details = frappe.db.get_value("Serial No", serial_no,
-				["warranty_expiry_date", "amc_expiry_date", "warehouse", "delivery_date"], as_dict=1)
+				["warranty_expiry_date", "amc_expiry_date", "warehouse", "delivery_date", "item_code"], as_dict=1)
 
 			if not sr_details:
 				frappe.throw(_("Serial No {0} not found").format(serial_no))
+
+			if sr_details.get("item_code") != item_code:
+				frappe.throw(_("Serial No {0} does not belong to Item {1}")
+					.format(frappe.bold(serial_no), frappe.bold(item_code)), title="Invalid")
 
 			if sr_details.warranty_expiry_date \
 				and getdate(sr_details.warranty_expiry_date) >= getdate(amc_start_date):
