@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from erpnext.stock.get_item_details import get_pos_profile
-from erpnext.accounts.doctype.sales_invoice.pos import get_items_list, get_customers_list
+from erpnext.accounts.doctype.pos_profile.pos_profile import get_child_nodes
 
 class TestPOSProfile(unittest.TestCase):
 	def test_pos_profile(self):
@@ -29,6 +29,44 @@ class TestPOSProfile(unittest.TestCase):
 
 		frappe.db.sql("delete from `tabPOS Profile`")
 
+def get_customers_list(pos_profile={}):
+	cond = "1=1"
+	customer_groups = []
+	if pos_profile.get('customer_groups'):
+		# Get customers based on the customer groups defined in the POS profile
+		for d in pos_profile.get('customer_groups'):
+			customer_groups.extend([d.get('name') for d in get_child_nodes('Customer Group', d.get('customer_group'))])
+		cond = "customer_group in (%s)" % (', '.join(['%s'] * len(customer_groups)))
+
+	return frappe.db.sql(""" select name, customer_name, customer_group,
+		territory, customer_pos_id from tabCustomer where disabled = 0
+		and {cond}""".format(cond=cond), tuple(customer_groups), as_dict=1) or {}
+
+def get_items_list(pos_profile, company):
+	cond = ""
+	args_list = []
+	if pos_profile.get('item_groups'):
+		# Get items based on the item groups defined in the POS profile
+		for d in pos_profile.get('item_groups'):
+			args_list.extend([d.name for d in get_child_nodes('Item Group', d.item_group)])
+		if args_list:
+			cond = "and i.item_group in (%s)" % (', '.join(['%s'] * len(args_list)))
+
+	return frappe.db.sql("""
+		select
+			i.name, i.item_code, i.item_name, i.description, i.item_group, i.has_batch_no,
+			i.has_serial_no, i.is_stock_item, i.brand, i.stock_uom, i.image,
+			id.expense_account, id.selling_cost_center, id.default_warehouse,
+			i.sales_uom, c.conversion_factor
+		from
+			`tabItem` i
+		left join `tabItem Default` id on id.parent = i.name and id.company = %s
+		left join `tabUOM Conversion Detail` c on i.name = c.parent and i.sales_uom = c.uom
+		where
+			i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1 and i.is_fixed_asset = 0
+			{cond}
+		""".format(cond=cond), tuple([company] + args_list), as_dict=1)
+
 def make_pos_profile(**args):
 	frappe.db.sql("delete from `tabPOS Profile`")
 
@@ -50,6 +88,12 @@ def make_pos_profile(**args):
 		"write_off_account":  args.write_off_account or "_Test Write Off - _TC",
 		"write_off_cost_center":  args.write_off_cost_center or "_Test Write Off Cost Center - _TC"
 	})
+	
+	payments = [{
+		'mode_of_payment': 'Cash',
+		'default': 1
+	}]
+	pos_profile.set("payments", payments)
 
 	if not frappe.db.exists("POS Profile", args.name or "_Test POS Profile"):
 		pos_profile.insert()
