@@ -148,6 +148,11 @@
    "type": "Report"
   },
   {
+   "label": "Point of Sale",
+   "link_to": "point-of-sale",
+   "type": "Page"
+  },
+  {
    "label": "Dashboard",
    "link_to": "Accounts",
    "type": "Dashboard"
