@@ -40,5 +40,3 @@ def home_page_is_products(doc, method):
 	home_page_is_products = cint(frappe.db.get_single_value('Products Settings', 'home_page_is_products'))
 	if home_page_is_products:
 		doc.home_page = 'products'
-	elif doc.home_page == "products":
-		doc.home_page = 'home'
