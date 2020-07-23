@@ -43,6 +43,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				label: __(me.warehouse_details.type),
 				default: typeof me.warehouse_details.name == "string" ? me.warehouse_details.name : '',
 				onchange: function(e) {
+					me.warehouse_details.name = this.get_value();
 
 					if(me.has_batch && !me.has_serial_no) {
 						fields = fields.concat(me.get_batch_fields());
@@ -50,7 +51,6 @@ erpnext.SerialNoBatchSelector = Class.extend({
 						fields = fields.concat(me.get_serial_no_fields());
 					}
 
-					me.warehouse_details.name = this.get_value();
 					var batches = this.layout.fields_dict.batches;
 					if(batches) {
 						batches.grid.df.data = [];
@@ -98,8 +98,13 @@ erpnext.SerialNoBatchSelector = Class.extend({
 					numbers.then((data) => {
 						let auto_fetched_serial_numbers = data.message;
 						let records_length = auto_fetched_serial_numbers.length;
+						if (!records_length) {
+							const warehouse = me.dialog.fields_dict.warehouse.get_value().bold();
+							frappe.msgprint(__(`Serial numbers unavailable for Item ${me.item.item_code.bold()} 
+								under warehouse ${warehouse}. Please try changing warehouse.`));
+						}
 						if (records_length < qty) {
-							frappe.msgprint(`Fetched only ${records_length} serial numbers.`);
+							frappe.msgprint(__(`Fetched only ${records_length} available serial numbers.`));
 						}
 						let serial_no_list_field = this.dialog.fields_dict.serial_no;
 						numbers = auto_fetched_serial_numbers.join('\n');
@@ -333,8 +338,8 @@ erpnext.SerialNoBatchSelector = Class.extend({
 							};
 						},
 						change: function () {
-							let val = this.get_value();
-							if (val.length === 0) {
+							const batch_no = this.get_value();
+							if (!batch_no) {
 								this.grid_row.on_grid_fields_dict
 									.available_qty.set_value(0);
 								return;
@@ -354,14 +359,11 @@ erpnext.SerialNoBatchSelector = Class.extend({
 								return;
 							}
 
-							let batch_number = me.item.batch_no ||
-								this.grid_row.on_grid_fields_dict.batch_no.get_value();
-
 							if (me.warehouse_details.name) {
 								frappe.call({
 									method: 'erpnext.stock.doctype.batch.batch.get_batch_qty',
 									args: {
-										batch_no: batch_number,
+										batch_no,
 										warehouse: me.warehouse_details.name,
 										item_code: me.item_code
 									},
@@ -443,6 +445,28 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 		if (me.warehouse_details.name) {
 			serial_no_filters['warehouse'] = me.warehouse_details.name;
+		}
+
+		if (me.frm.doc.doctype === 'POS Invoice' && !this.showing_reserved_serial_nos_error) {
+			frappe.call({
+				method: "erpnext.stock.doctype.serial_no.serial_no.get_pos_reserved_serial_nos",
+				args: {
+					item_code: me.item_code,
+					warehouse: typeof me.warehouse_details.name == "string" ? me.warehouse_details.name : ''
+				}
+			}).then((data) => {
+				if (!data.message[1].length) {
+					this.showing_reserved_serial_nos_error = true;
+					const warehouse = me.dialog.fields_dict.warehouse.get_value().bold();
+					const d = frappe.msgprint(__(`Serial numbers unavailable for Item ${me.item.item_code.bold()} 
+						under warehouse ${warehouse}. Please try changing warehouse.`));
+					d.get_close_btn().on('click', () => {
+						this.showing_reserved_serial_nos_error = false;
+						d.hide();
+					});
+				}
+				serial_no_filters['name'] = ["not in", data.message[0]]
+			})
 		}
 
 		return [
