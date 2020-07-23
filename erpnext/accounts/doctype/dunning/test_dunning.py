@@ -63,38 +63,38 @@ class TestDunning(unittest.TestCase):
 
 
 def create_dunning():
-    posting_date = add_days(today(), -20)
-    due_date = add_days(today(), -15)
-    sales_invoice = create_sales_invoice_against_cost_center(
-        posting_date=posting_date, due_date=due_date, status='Overdue')
-    dunning_type = frappe.get_doc("Dunning Type", 'First Notice')
-    dunning = frappe.new_doc("Dunning")
-    dunning.sales_invoice = sales_invoice.name
-    dunning.customer_name = sales_invoice.customer_name
-    dunning.outstanding_amount = sales_invoice.outstanding_amount
-    dunning.debit_to = sales_invoice.debit_to
-    dunning.currency = sales_invoice.currency
-    dunning.company = sales_invoice.company
-    dunning.posting_date = nowdate()
-    dunning.due_date = sales_invoice.due_date
-    dunning.dunning_type = 'First Notice'
-    dunning.rate_of_interest = dunning_type.rate_of_interest
-    dunning.dunning_fee = dunning_type.dunning_fee
-    dunning.save()
-    return dunning
-
+	posting_date = add_days(today(), -20)
+	due_date = add_days(today(), -15)
+	sales_invoice = create_sales_invoice_against_cost_center(
+		posting_date=posting_date, due_date=due_date, status='Overdue')
+	dunning_type = frappe.get_doc("Dunning Type", 'First Notice')
+	dunning = frappe.new_doc("Dunning")
+	dunning.sales_invoice = sales_invoice.name
+	dunning.customer_name = sales_invoice.customer_name
+	dunning.outstanding_amount = sales_invoice.outstanding_amount
+	dunning.debit_to = sales_invoice.debit_to
+	dunning.currency = sales_invoice.currency
+	dunning.company = sales_invoice.company
+	dunning.posting_date = nowdate()
+	dunning.due_date = sales_invoice.due_date
+	dunning.dunning_type = 'First Notice'
+	dunning.rate_of_interest = dunning_type.rate_of_interest
+	dunning.dunning_fee = dunning_type.dunning_fee
+	dunning.save()
+	return dunning
 
 def create_dunning_type():
-    dunning_type = frappe.new_doc("Dunning Type")
-    dunning_type.dunning_type = 'First Notice'
-    dunning_type.start_day = 10
-    dunning_type.end_day = 20
-    dunning_type.dunning_fee = 20
-    dunning_type.rate_of_interest = 8
-    dunning_type.append(
-        "dunning_letter_text", {
-            'language': 'en',
-            'body_text': 'We have still not received payment for our invoice ',
-            'closing_text': 'We kindly request that you pay the outstanding amount immediately, including interest and late fees.'
-        })
-    dunning_type.save()
+	dunning_type = frappe.new_doc("Dunning Type")
+	dunning_type.dunning_type = 'First Notice'
+	dunning_type.start_day = 10
+	dunning_type.end_day = 20
+	dunning_type.dunning_fee = 20
+	dunning_type.rate_of_interest = 8
+	dunning_type.append(
+		"dunning_letter_text", {
+			'language': 'en',
+			'body_text': 'We have still not received payment for our invoice ',
+			'closing_text': 'We kindly request that you pay the outstanding amount immediately, including interest and late fees.'
+		}
+	)
+	dunning_type.save()
