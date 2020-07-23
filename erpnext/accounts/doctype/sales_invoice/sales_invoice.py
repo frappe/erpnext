@@ -418,8 +418,6 @@ class SalesInvoice(SellingController):
 			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
 		if pos:
-			self.allow_print_before_pay = pos.allow_print_before_pay
-
 			if not for_validate:
 				self.tax_category = pos.get("tax_category")
 
