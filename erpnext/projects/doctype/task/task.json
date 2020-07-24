@@ -183,7 +183,8 @@
   {
    "fieldname": "progress",
    "fieldtype": "Percent",
-   "label": "% Progress"
+   "label": "% Progress",
+   "no_copy": 1
   },
   {
    "default": "0",
@@ -324,6 +325,7 @@
    "options": "Department"
   },
   {
+   "fetch_from": "project.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -356,6 +358,7 @@
    "fieldname": "completed_by",
    "fieldtype": "Link",
    "label": "Completed By",
+   "no_copy": 1,
    "options": "User"
   }
  ],
@@ -364,7 +367,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2020-03-18 18:08:44.153211",
+ "modified": "2020-07-03 12:36:04.960457",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

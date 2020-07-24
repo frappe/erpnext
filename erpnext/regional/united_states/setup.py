@@ -14,6 +14,22 @@ def make_custom_fields(update=True):
 		'Supplier': [
 			dict(fieldname='irs_1099', fieldtype='Check', insert_after='tax_id',
 				label='Is IRS 1099 reporting required for supplier?')
+		],
+		'Sales Order': [
+			dict(fieldname='exempt_from_sales_tax', fieldtype='Check', insert_after='taxes_and_charges',
+				label='Is customer exempted from sales tax?')
+		],
+		'Sales Invoice': [
+			dict(fieldname='exempt_from_sales_tax', fieldtype='Check', insert_after='taxes_section',
+				label='Is customer exempted from sales tax?')
+		],
+		'Customer': [
+			dict(fieldname='exempt_from_sales_tax', fieldtype='Check', insert_after='represents_company',
+				label='Is customer exempted from sales tax?')
+		],
+		'Quotation': [
+			dict(fieldname='exempt_from_sales_tax', fieldtype='Check', insert_after='taxes_and_charges',
+				label='Is customer exempted from sales tax?')
 		]
 	}
 	create_custom_fields(custom_fields, update=update)

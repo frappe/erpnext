@@ -410,6 +410,8 @@
    "options": "Branch"
   },
   {
+   "fetch_from": "grade.default_leave_policy",
+   "fetch_if_empty": 1,
    "fieldname": "leave_policy",
    "fieldtype": "Link",
    "label": "Leave Policy",
@@ -804,16 +806,14 @@
    "fieldname": "expense_approver",
    "fieldtype": "Link",
    "label": "Expense Approver",
-   "options": "User",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "User"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2020-06-18 18:01:27.223535",
+ "modified": "2020-07-03 21:28:04.109189",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
