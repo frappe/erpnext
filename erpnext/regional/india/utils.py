@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import frappe, re, json
 from frappe import _
-from frappe.utils import cstr, flt, date_diff, nowdate
+from frappe.utils import cstr, flt, date_diff, nowdate, round_based_on_smallest_currency_fraction, money_in_words
 from erpnext.regional.india import states, state_numbers
 from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
@@ -458,19 +458,23 @@ def generate_ewb_json(dt, dn):
 
 @frappe.whitelist()
 def download_ewb_json():
-	data = frappe._dict(frappe.local.form_dict)
-
-	frappe.local.response.filecontent = json.dumps(data['data'], indent=4, sort_keys=True)
+	data = json.loads(frappe.local.form_dict.data)
+	frappe.local.response.filecontent = json.dumps(data, indent=4, sort_keys=True)
 	frappe.local.response.type = 'download'
 
-	billList = json.loads(data['data'])['billLists']
+	filename_prefix = 'Bulk'
+	docname = frappe.local.form_dict.docname
+	if docname:
+		if docname.startswith('['):
+			docname = json.loads(docname)
+			if len(docname) == 1:
+				docname = docname[0]
 
-	if len(billList) > 1:
-		doc_name = 'Bulk'
-	else:
-		doc_name = data['docname']
+		if not isinstance(docname, list):
+			# removes characters not allowed in a filename (https://stackoverflow.com/a/38766141/4767738)
+			filename_prefix = re.sub('[^\w_.)( -]', '', docname)
 
-	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(doc_name, frappe.utils.random_string(5))
+	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(filename_prefix, frappe.utils.random_string(5))
 
 @frappe.whitelist()
 def get_gstins_for_company(company):
@@ -644,6 +648,7 @@ def validate_state_code(state_code, address):
 	else:
 		return int(state_code)
 
+@frappe.whitelist()
 def get_gst_accounts(company, account_wise=False):
 	gst_accounts = frappe._dict()
 	gst_settings_accounts = frappe.get_all("GST Account",
@@ -662,14 +667,55 @@ def get_gst_accounts(company, account_wise=False):
 
 	return gst_accounts
 
-def make_reverse_charge_entries(doc, method):
+def update_grand_total_for_rcm(doc, method):
 	country = frappe.get_cached_value('Company', doc.company, 'country')
 
 	if country != 'India':
 		return
 
 	if doc.reverse_charge == 'Y':
-		gl_entries = []
+		gst_accounts = get_gst_accounts(doc.company)
+		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
+			+ gst_accounts.get('igst_account')
+
+		gst_tax = 0
+		for tax in doc.get('taxes'):
+			if tax.category not in ("Total", "Valuation and Total"):
+				continue
+
+			if flt(tax.base_tax_amount_after_discount_amount) and tax.account_head in gst_account_list:
+				gst_tax += tax.base_tax_amount_after_discount_amount
+
+		doc.taxes_and_charges_added -= gst_tax
+		doc.total_taxes_and_charges -= gst_tax
+
+		update_totals(gst_tax, doc)
+
+def update_totals(gst_tax, doc):
+	doc.grand_total -= gst_tax
+
+	if doc.meta.get_field("rounded_total"):
+		if doc.is_rounded_total_disabled():
+			doc.outstanding_amount = doc.grand_total
+		else:
+			doc.rounded_total = round_based_on_smallest_currency_fraction(doc.grand_total,
+				doc.currency, doc.precision("rounded_total"))
+
+			doc.rounding_adjustment += flt(doc.rounded_total - doc.grand_total,
+				doc.precision("rounding_adjustment"))
+
+			doc.outstanding_amount = doc.rounded_total or doc.grand_total
+
+	doc.in_words = money_in_words(doc.grand_total, doc.currency)
+	doc.set_payment_schedule()
+
+def make_regional_gl_entries(gl_entries, doc):
+	country = frappe.get_cached_value('Company', doc.company, 'country')
+
+	if country != 'India':
+		return
+
+	if doc.reverse_charge == 'Y':
 		gst_accounts = get_gst_accounts(doc.company)
 		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
 			+ gst_accounts.get('igst_account')
@@ -694,19 +740,4 @@ def make_reverse_charge_entries(doc, method):
 					}, account_currency, item=tax)
 				)
 
-				gl_entries.append(doc.get_gl_dict(
-					{
-						"account": doc.credit_to if doc.doctype == 'Purchase Invoice' else doc.debit_to,
-						"cost_center": doc.cost_center,
-						"posting_date": doc.posting_date,
-						"party_type": 'Supplier',
-						"party": doc.supplier,
-						"against": tax.account_head,
-						"debit": tax.base_tax_amount_after_discount_amount,
-						"debit_in_account_currency": tax.base_tax_amount_after_discount_amount \
-							if account_currency==doc.company_currency \
-							else tax.tax_amount_after_discount_amount
-					}, account_currency, item=doc)
-				)
-
-		make_gl_entries(gl_entries)
+	return gl_entries

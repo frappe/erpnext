@@ -20,6 +20,7 @@ from erpnext.exceptions import InvalidCurrency
 from six import text_type
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.stock.get_item_details import get_item_warehouse
+from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
 force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules")
 
@@ -1013,6 +1014,7 @@ def get_advance_journal_entries(party_type, party, party_account, amount_field,
 def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 		order_list=None, include_unallocated=True, against_all_orders=False, limit=None):
 	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
+	currency_field = "paid_from_account_currency" if party_type == "Customer" else "paid_to_account_currency"
 	payment_type = "Receive" if party_type == "Customer" else "Pay"
 	payment_entries_against_order, unallocated_payment_entries = [], []
 	limit_cond = "limit %s" % limit if limit else ""
@@ -1029,14 +1031,15 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 			select
 				"Payment Entry" as reference_type, t1.name as reference_name,
 				t1.remarks, t2.allocated_amount as amount, t2.name as reference_row,
-				t2.reference_name as against_order, t1.posting_date
+				t2.reference_name as against_order, t1.posting_date,
+				t1.{0} as currency
 			from `tabPayment Entry` t1, `tabPayment Entry Reference` t2
 			where
-				t1.name = t2.parent and t1.{0} = %s and t1.payment_type = %s
+				t1.name = t2.parent and t1.{1} = %s and t1.payment_type = %s
 				and t1.party_type = %s and t1.party = %s and t1.docstatus = 1
-				and t2.reference_doctype = %s {1}
-			order by t1.posting_date {2}
-		""".format(party_account_field, reference_condition, limit_cond),
+				and t2.reference_doctype = %s {2}
+			order by t1.posting_date {3}
+		""".format(currency_field, party_account_field, reference_condition, limit_cond),
 													  [party_account, payment_type, party_type, party,
 													   order_doctype] + order_list, as_dict=1)
 
@@ -1301,6 +1304,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	parent.set_qty_as_per_stock_uom()
 	parent.calculate_taxes_and_totals()
 	if parent_doctype == "Sales Order":
+		make_packing_list(parent)
 		parent.set_gross_profit()
 	frappe.get_doc('Authorization Control').validate_approving_authority(parent.doctype,
 		parent.company, parent.base_grand_total)

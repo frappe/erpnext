@@ -7,8 +7,8 @@ from frappe import _
 from erpnext.regional.report.provident_fund_deductions.provident_fund_deductions import get_conditions
 
 def execute(filters=None):
-	columns = get_columns(filters)
 	data = get_data(filters)
+	columns = get_columns(filters) if len(data) else []
 
 	return columns, data
 
@@ -44,6 +44,9 @@ def get_data(filters):
 
 	component_type_dict = frappe._dict(frappe.db.sql(""" select name, component_type from `tabSalary Component`
 		where component_type = 'Professional Tax' """))
+
+	if not len(component_type_dict):
+		return []
 
 	conditions = get_conditions(filters)
 

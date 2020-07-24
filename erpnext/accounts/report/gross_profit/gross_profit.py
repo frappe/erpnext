@@ -223,9 +223,9 @@ class GrossProfitGenerator(object):
 		# IMP NOTE
 		# stock_ledger_entries should already be filtered by item_code and warehouse and
 		# sorted by posting_date desc, posting_time desc
-		if item_code in self.non_stock_items:
+		if item_code in self.non_stock_items and (row.project or row.cost_center):
 			#Issue 6089-Get last purchasing rate for non-stock item
-			item_rate = self.get_last_purchase_rate(item_code)
+			item_rate = self.get_last_purchase_rate(item_code, row)
 			return flt(row.qty) * item_rate
 
 		else:
@@ -253,38 +253,34 @@ class GrossProfitGenerator(object):
 	def get_average_buying_rate(self, row, item_code):
 		args = row
 		if not item_code in self.average_buying_rate:
-			if item_code in self.non_stock_items:
-				self.average_buying_rate[item_code] = flt(frappe.db.sql("""
-					select sum(base_net_amount) / sum(qty * conversion_factor)
-					from `tabPurchase Invoice Item`
-					where item_code = %s and docstatus=1""", item_code)[0][0])
-			else:
-				args.update({
-					'voucher_type': row.parenttype,
-					'voucher_no': row.parent,
-					'allow_zero_valuation': True,
-					'company': self.filters.company
-				})
+			args.update({
+				'voucher_type': row.parenttype,
+				'voucher_no': row.parent,
+				'allow_zero_valuation': True,
+				'company': self.filters.company
+			})
 
-				average_buying_rate = get_incoming_rate(args)
-				self.average_buying_rate[item_code] =  flt(average_buying_rate)
+			average_buying_rate = get_incoming_rate(args)
+			self.average_buying_rate[item_code] =  flt(average_buying_rate)
 
 		return self.average_buying_rate[item_code]
 
-	def get_last_purchase_rate(self, item_code):
+	def get_last_purchase_rate(self, item_code, row):
+		condition = ''
+		if row.project:
+			condition += " AND a.project='%s'" % (row.project)
+		elif row.cost_center:
+			condition += " AND a.cost_center='%s'" % (row.cost_center)
 		if self.filters.to_date:
-			last_purchase_rate = frappe.db.sql("""
-			select (a.base_rate / a.conversion_factor)
-			from `tabPurchase Invoice Item` a
-			where a.item_code = %s and a.docstatus=1
-			and modified <= %s
-			order by a.modified desc limit 1""", (item_code, self.filters.to_date))
-		else:
-			last_purchase_rate = frappe.db.sql("""
-			select (a.base_rate / a.conversion_factor)
-			from `tabPurchase Invoice Item` a
-			where a.item_code = %s and a.docstatus=1
-			order by a.modified desc limit 1""", item_code)
+			condition += " AND modified='%s'" % (self.filters.to_date)
+
+		last_purchase_rate = frappe.db.sql("""
+		select (a.base_rate / a.conversion_factor)
+		from `tabPurchase Invoice Item` a
+		where a.item_code = %s and a.docstatus=1
+		{0}
+		order by a.modified desc limit 1""".format(condition), item_code)
+
 		return flt(last_purchase_rate[0][0]) if last_purchase_rate else 0
 
 	def load_invoice_items(self):
@@ -321,7 +317,8 @@ class GrossProfitGenerator(object):
 				`tabSales Invoice Item`.brand, `tabSales Invoice Item`.dn_detail,
 				`tabSales Invoice Item`.delivery_note, `tabSales Invoice Item`.stock_qty as qty,
 				`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount,
-				`tabSales Invoice Item`.name as "item_row", `tabSales Invoice`.is_return
+				`tabSales Invoice Item`.name as "item_row", `tabSales Invoice`.is_return,
+				`tabSales Invoice Item`.cost_center
 				{sales_person_cols}
 			from
 				`tabSales Invoice` inner join `tabSales Invoice Item`
