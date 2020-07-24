@@ -133,7 +133,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		acc = frappe.get_doc("Account", account)
 
 	try:
-		year_start_date = get_fiscal_year(date, verbose=0)[1]
+		year_start_date = get_fiscal_year(date, company=company, verbose=0)[1]
 	except FiscalYearError:
 		if getdate(date) > getdate(nowdate()):
 			# if fiscal year not found and the date is greater than today
@@ -144,14 +144,12 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 			# hence, assuming balance as 0.0
 			return 0.0
 
-	allow_cost_center_in_entry_of_bs_account = get_allow_cost_center_in_entry_of_bs_account()
-
 	if account:
 		report_type = acc.report_type
 	else:
 		report_type = ""
 
-	if cost_center and (allow_cost_center_in_entry_of_bs_account or report_type =='Profit and Loss'):
+	if cost_center and report_type == 'Profit and Loss':
 		cc = frappe.get_doc("Cost Center", cost_center)
 		if cc.is_group:
 			cond.append(""" exists (
@@ -678,7 +676,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 	invoice_list = frappe.db.sql("""
 		select
 			voucher_no, voucher_type, posting_date, due_date,
-			ifnull(sum({dr_or_cr}), 0) as invoice_amount
+			ifnull(sum({dr_or_cr}), 0) as invoice_amount,
+			account_currency as currency
 		from
 			`tabGL Entry`
 		where
@@ -735,7 +734,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 						'invoice_amount': flt(d.invoice_amount),
 						'payment_amount': payment_amount,
 						'outstanding_amount': outstanding_amount,
-						'due_date': d.due_date
+						'due_date': d.due_date,
+						'currency': d.currency
 					})
 				)
 
@@ -787,10 +787,10 @@ def get_children(doctype, parent, company, is_root=False):
 		company_currency = frappe.get_cached_value('Company',  company,  "default_currency")
 		for each in acc:
 			each["company_currency"] = company_currency
-			each["balance"] = flt(get_balance_on(each.get("value"), in_account_currency=False))
+			each["balance"] = flt(get_balance_on(each.get("value"), in_account_currency=False, company=company))
 
 			if each.account_currency != company_currency:
-				each["balance_in_account_currency"] = flt(get_balance_on(each.get("value")))
+				each["balance_in_account_currency"] = flt(get_balance_on(each.get("value"), company=company))
 
 	return acc
 
@@ -896,11 +896,6 @@ def get_coa(doctype, parent, is_root, chart=None):
 	accounts = [d for d in accounts if d['parent_account']==parent]
 
 	return accounts
-
-def get_allow_cost_center_in_entry_of_bs_account():
-	def generator():
-		return cint(frappe.db.get_value('Accounts Settings', None, 'allow_cost_center_in_entry_of_bs_account'))
-	return frappe.local_cache("get_allow_cost_center_in_entry_of_bs_account", (), generator, regenerate_if_none=True)
 
 def get_stock_accounts(company):
 	return frappe.get_all("Account", filters = {

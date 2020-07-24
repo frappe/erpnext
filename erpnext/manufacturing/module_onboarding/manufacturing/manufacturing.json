@@ -50,7 +50,7 @@
    "step": "Explore Manufacturing Settings"
   }
  ],
- "subtitle": "Products, Raw Materials, BOM, Work Order and more.",
- "success_message": "Manufacturing module is all setup!",
- "title": "Let's Set Up the Manufacturing Module"
+ "subtitle": "Products, Raw Materials, BOM, Work Order, and more.",
+ "success_message": "Manufacturing module is all set up!",
+ "title": "Let's Set Up the Manufacturing Module."
 }

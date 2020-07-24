@@ -184,7 +184,7 @@ def set_price_list(party_details, party, party_type, given_price_list, pos=None)
 
 
 def set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype):
-	if doctype not in ["Sales Invoice", "Purchase Invoice"]:
+	if doctype not in ["POS Invoice", "Sales Invoice", "Purchase Invoice"]:
 		# not an invoice
 		return {
 			party_type.lower(): party
@@ -388,7 +388,7 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
 	args = {
 		party_type.lower(): party,
-		"company":			company
+		"company": company
 	}
 
 	if tax_category:
