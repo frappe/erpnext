@@ -648,9 +648,22 @@
 	},
 
 	"Italy": {
-		"Italy Tax": {
-			"account_name": "VAT",
-			"tax_rate": 22.00
+		"Italy IVA 22%": {
+			"account_name": "IVA 22%",
+			"tax_rate": 22.00,
+			"default": 1
+		},
+		"IVA 5%": {
+			"account_name": "IVA 5%",
+			"tax_rate": 5.00
+		},
+		"IVA 4%": {
+			"account_name": "IVA 4%",
+			"tax_rate": 4.00
+		},
+		"IVA 10%": {
+			"account_name": "IVA 10%",
+			"tax_rate": 10.00
 		}
 	},
 
