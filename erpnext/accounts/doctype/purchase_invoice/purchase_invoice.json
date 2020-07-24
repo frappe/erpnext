@@ -26,6 +26,7 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+  "project",
   "supplier_invoice_details",
   "bill_no",
   "column_break_15",
@@ -1319,13 +1320,19 @@
    "fieldtype": "Small Text",
    "label": "Billing Address",
    "read_only": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-18 05:06:08.488761",
+ "modified": "2020-07-24 09:46:40.405463",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
