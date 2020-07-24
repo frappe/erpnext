@@ -191,7 +191,7 @@ def get_conditions(filters):
 		conditions += "AND so_item.item_code = '%s'" %frappe.db.escape(filters.item_code)
 
 	if filters.get("customer"):
-		conditions += "AND so.customer = '%s'" %frappe.db.escape(filters.customer)
+		conditions += "AND so.customer = %s" %frappe.db.escape(filters.customer)
 
 	return conditions
 

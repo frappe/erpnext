@@ -211,7 +211,7 @@
    "label": "IBAN"
   },
   {
-   "fetch_from": "bank.branch_code",
+   "fetch_from": "bank_account.branch_code",
    "fetch_if_empty": 1,
    "fieldname": "branch_code",
    "fieldtype": "Read Only",
@@ -352,7 +352,7 @@
  "in_create": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-29 17:38:49.392713",
+ "modified": "2020-07-17 14:06:42.185763",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",

@@ -213,7 +213,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		doc.return_against = source.name
 		doc.ignore_pricing_rule = 1
 		doc.set_warehouse = ""
-		if doctype == "Sales Invoice":
+		if doctype == "Sales Invoice" or doctype == "POS Invoice":
 			doc.is_pos = source.is_pos
 
 			# look for Print Heading "Credit Note"
@@ -229,7 +229,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 				tax.tax_amount = -1 * tax.tax_amount
 
 		if doc.get("is_return"):
-			if doc.doctype == 'Sales Invoice':
+			if doc.doctype == 'Sales Invoice' or doc.doctype == 'POS Invoice':
 				doc.set('payments', [])
 				for data in source.payments:
 					paid_amount = 0.00
@@ -241,8 +241,11 @@ def make_return_doc(doctype, source_name, target_doc=None):
 						'mode_of_payment': data.mode_of_payment,
 						'type': data.type,
 						'amount': -1 * paid_amount,
-						'base_amount': -1 * base_paid_amount
+						'base_amount': -1 * base_paid_amount,
+						'account': data.account
 					})
+				if doc.is_pos:
+					doc.paid_amount = -1 * source.paid_amount
 			elif doc.doctype == 'Purchase Invoice':
 				doc.paid_amount = -1 * source.paid_amount
 				doc.base_paid_amount = -1 * source.base_paid_amount
@@ -287,7 +290,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.dn_detail = source_doc.name
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
-		elif doctype == "Sales Invoice":
+		elif doctype == "Sales Invoice" or doctype == "POS Invoice":
 			target_doc.sales_order = source_doc.sales_order
 			target_doc.delivery_note = source_doc.delivery_note
 			target_doc.so_detail = source_doc.so_detail

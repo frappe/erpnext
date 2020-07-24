@@ -27,7 +27,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 		customer = frappe.get_doc('Customer', {"customer_name": "Test Loyalty Customer"})
 		earned_points = get_points_earned(si_original)
 
-		lpe = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si_original.name, 'customer': si_original.customer})
+		lpe = frappe.get_doc('Loyalty Point Entry', {'invoice_type': 'Sales Invoice', 'invoice': si_original.name, 'customer': si_original.customer})
 
 		self.assertEqual(si_original.get('loyalty_program'), customer.loyalty_program)
 		self.assertEqual(lpe.get('loyalty_program_tier'), customer.loyalty_program_tier)
@@ -42,8 +42,8 @@ class TestLoyaltyProgram(unittest.TestCase):
 
 		earned_after_redemption = get_points_earned(si_redeem)
 
-		lpe_redeem = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si_redeem.name, 'redeem_against': lpe.name})
-		lpe_earn = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si_redeem.name, 'name': ['!=', lpe_redeem.name]})
+		lpe_redeem = frappe.get_doc('Loyalty Point Entry', {'invoice_type': 'Sales Invoice', 'invoice': si_redeem.name, 'redeem_against': lpe.name})
+		lpe_earn = frappe.get_doc('Loyalty Point Entry', {'invoice_type': 'Sales Invoice', 'invoice': si_redeem.name, 'name': ['!=', lpe_redeem.name]})
 
 		self.assertEqual(lpe_earn.loyalty_points, earned_after_redemption)
 		self.assertEqual(lpe_redeem.loyalty_points, (-1*earned_points))
@@ -66,7 +66,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 
 		earned_points = get_points_earned(si_original)
 
-		lpe = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si_original.name, 'customer': si_original.customer})
+		lpe = frappe.get_doc('Loyalty Point Entry', {'invoice_type': 'Sales Invoice', 'invoice': si_original.name, 'customer': si_original.customer})
 
 		self.assertEqual(si_original.get('loyalty_program'), customer.loyalty_program)
 		self.assertEqual(lpe.get('loyalty_program_tier'), customer.loyalty_program_tier)
@@ -82,8 +82,8 @@ class TestLoyaltyProgram(unittest.TestCase):
 		customer = frappe.get_doc('Customer', {"customer_name": "Test Loyalty Customer"})
 		earned_after_redemption = get_points_earned(si_redeem)
 
-		lpe_redeem = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si_redeem.name, 'redeem_against': lpe.name})
-		lpe_earn = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si_redeem.name, 'name': ['!=', lpe_redeem.name]})
+		lpe_redeem = frappe.get_doc('Loyalty Point Entry', {'invoice_type': 'Sales Invoice', 'invoice': si_redeem.name, 'redeem_against': lpe.name})
+		lpe_earn = frappe.get_doc('Loyalty Point Entry', {'invoice_type': 'Sales Invoice', 'invoice': si_redeem.name, 'name': ['!=', lpe_redeem.name]})
 
 		self.assertEqual(lpe_earn.loyalty_points, earned_after_redemption)
 		self.assertEqual(lpe_redeem.loyalty_points, (-1*earned_points))
@@ -101,7 +101,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 		si.insert()
 		si.submit()
 
-		lpe = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si.name, 'customer': si.customer})
+		lpe = frappe.get_doc('Loyalty Point Entry', {'invoice_type': 'Sales Invoice', 'invoice': si.name, 'customer': si.customer})
 		self.assertEqual(True, not (lpe is None))
 
 		# cancelling sales invoice
@@ -118,7 +118,7 @@ class TestLoyaltyProgram(unittest.TestCase):
 		si_original.submit()
 
 		earned_points = get_points_earned(si_original)
-		lpe_original = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si_original.name, 'customer': si_original.customer})
+		lpe_original = frappe.get_doc('Loyalty Point Entry', {'invoice_type': 'Sales Invoice', 'invoice': si_original.name, 'customer': si_original.customer})
 		self.assertEqual(lpe_original.loyalty_points, earned_points)
 
 		# create sales invoice return
@@ -130,10 +130,10 @@ class TestLoyaltyProgram(unittest.TestCase):
 		si_return.submit()
 
 		# fetch original invoice again as its status would have been updated
-		si_original = frappe.get_doc('Sales Invoice', lpe_original.sales_invoice)
+		si_original = frappe.get_doc('Sales Invoice', lpe_original.invoice)
 
 		earned_points = get_points_earned(si_original)
-		lpe_after_return = frappe.get_doc('Loyalty Point Entry', {'sales_invoice': si_original.name, 'customer': si_original.customer})
+		lpe_after_return = frappe.get_doc('Loyalty Point Entry', {'invoice_type': 'Sales Invoice', 'invoice': si_original.name, 'customer': si_original.customer})
 		self.assertEqual(lpe_after_return.loyalty_points, earned_points)
 		self.assertEqual(True, (lpe_original.loyalty_points > lpe_after_return.loyalty_points))
 
