@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -1233,6 +1232,7 @@
    "print_hide": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
    "label": "Subscription Section",
@@ -1298,8 +1298,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-04-18 13:05:25.199832",
+ "modified": "2020-07-01 12:41:54.851217",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

@@ -60,12 +60,18 @@ frappe.ui.form.on("Opportunity", {
 
 	opportunity_from: function(frm) {
 		frm.toggle_reqd("party_name", frm.doc.opportunity_from);
+		frm.trigger("setup_opportunity_from");
+		frm.set_value("party_name","");
+	},
+
+	setup_opportunity_from: function(frm) {
+		frm.trigger('setup_queries');
 		frm.trigger("set_dynamic_field_label");
 	},
 
 	refresh: function(frm) {
 		var doc = frm.doc;
-		frm.events.opportunity_from(frm);
+		frm.trigger("setup_opportunity_from");
 		frm.trigger('toggle_mandatory');
 		erpnext.toggle_naming_series();
 

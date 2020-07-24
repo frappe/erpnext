@@ -128,7 +128,7 @@ class ExpenseClaim(AccountsController):
 					"debit": data.sanctioned_amount,
 					"debit_in_account_currency": data.sanctioned_amount,
 					"against": self.employee,
-					"cost_center": data.cost_center
+					"cost_center": data.cost_center or self.cost_center
 				}, item=data)
 			)
 
