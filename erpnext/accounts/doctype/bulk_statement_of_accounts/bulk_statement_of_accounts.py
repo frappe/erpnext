@@ -15,18 +15,20 @@ from frappe.utils import today, add_days, add_months, getdate, format_date
 from datetime import timedelta
 from frappe.www.printview import get_print_style
 
-days_to_add = {	'Weekly': 7, 'Monthly': 30, 'Quarterly': 91 }
+to_add = { 'Monthly': 1, 'Quarterly': 3 }
 
 class BulkStatementOfAccounts(Document):
 	def validate(self):
 		if not self.customer_list:
 			frappe.throw(frappe._('Customers not selected!'))
 
-		global days_to_add
+		global to_add
 		if self.enable_auto_email:
-			self.from_date = self.start_date
-			self.to_date = add_months(self.start_date, days_to_add[self.frequency])
-
+			if self.frequency == 'Weekly':
+				self.to_date = add_days(self.start_date, to_add[self.frequency])
+			else:
+				self.to_date = add_months(self.start_date, to_add[self.frequency])
+			self.from_date = add_months(self.to_date, -1 * self.filter_duration)
 
 def get_report_pdf(doc, consolidated=True):
 	statement_dict = {}
@@ -217,14 +219,13 @@ def send_emails(document_name, from_scheduler=False):
 			)
 		if doc.enable_auto_email and from_scheduler:
 			today_date = getdate(today())
-			duration_map = {
-				'Monthly': 1,
-				'Quarterly': 3
-			}
+			global to_add
 			if doc.frequency == 'Weekly':
 				doc.to_date = add_days(today_date, 7)
 			else:
-				doc.to_date = add_months(today_date, duration_map[doc.frequency])
+				doc.to_date = add_months(today_date, to_add[doc.frequency])
+			doc.from_date = add_months(doc.to_date, -1 * filter_duration)
+
 			doc.add_comment('Emails sent on:' + frappe.utils.format_datetime(frappe.utils.now()))
 			doc.save()
 			frappe.db.commit()

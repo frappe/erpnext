@@ -26,15 +26,6 @@ frappe.ui.form.on('Lab Test Template', {
 				}
 			};
 		});
-	},
-	medical_code: function(frm) {
-		frm.set_query("medical_code", function() {
-			return {
-				filters: {
-					medical_code_standard: frm.doc.medical_code_standard
-				}
-			};
-		});
 	}
 });
 
