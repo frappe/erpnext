@@ -6,7 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "customer",
-  "email_id"
+  "billing_email",
+  "primary_email"
  ],
  "fields": [
   {
@@ -19,15 +20,21 @@
   },
   {
    "fetch_from": "this.customers",
-   "fieldname": "email_id",
+   "fieldname": "billing_email",
    "fieldtype": "Read Only",
    "in_list_view": 1,
-   "label": "Email Id"
+   "label": "Billing Email"
+  },
+  {
+   "fieldname": "primary_email",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Primary Email"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-07-14 14:16:14.489089",
+ "modified": "2020-07-25 13:08:56.220460",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bulk Statement Of Accounts Customers",

@@ -11,10 +11,11 @@ from frappe.core.doctype.communication.email import make
 
 from frappe.utils.print_format import report_to_pdf
 from frappe.utils.pdf import get_pdf
-from frappe.utils import today, add_days, getdate, format_date
+from frappe.utils import today, add_days, add_months, getdate, format_date
 from datetime import timedelta
+from frappe.www.printview import get_print_style
 
-days_to_add = {	'Every Week': 7, 'Every Month': 30, 'Every Quarter': 91 }
+days_to_add = {	'Weekly': 7, 'Monthly': 30, 'Quarterly': 91 }
 
 class BulkStatementOfAccounts(Document):
 	def validate(self):
@@ -22,41 +23,15 @@ class BulkStatementOfAccounts(Document):
 			frappe.throw(frappe._('Customers not selected!'))
 
 		global days_to_add
-		if self.frequency != '':
+		if self.enable_auto_email:
 			self.from_date = self.start_date
-			self.to_date = add_days(self.start_date, days_to_add[self.frequency])
+			self.to_date = add_months(self.start_date, days_to_add[self.frequency])
 
-	def send_mail(self):
-		attachment = {
-			'fname': 'Statement Of Accounts',
-			'fcontent': self.get_report_pdf()
-		}
-		# In Loop
-		frappe.sendmail(
-			recipients=[ 'customer@email.com '],
-			sender = frappe.session.user,
-			subject= 'Statement Of Accs',
-			message= 'Something',
-			reference_doctype=self.doctype,
-			reference_name=self.name,
-			attachments=attachments
-		)
 
 def get_report_pdf(doc, consolidated=True):
 	statement_dict = {}
 	aging = ''
 	base_template_path = "frappe/www/printview.html"
-
-	if doc.frequency != '':
-		to_add = 0
-		if doc.frequency == 'Every Week':
-			to_add = -7
-		elif doc.frequency == 'Every Month':
-			to_add = -30
-		elif doc.frequency == 'Every Quarter':
-			to_add = -91
-		doc.from_date = add_days(doc.from_date, to_add)
-		doc.to_date = getdate(today())
 
 	for entry in doc.customer_list:
 		if doc.include_ageing:
@@ -72,32 +47,36 @@ def get_report_pdf(doc, consolidated=True):
 			})
 			col1, aging = get_ageing(ageing_filters)
 			aging[0]['ageing_based_on'] = doc.ageing_based_on
+
 		tax_id = frappe.get_doc('Customer', entry.customer).tax_id
+
 		filters= frappe._dict({
 			'from_date': doc.from_date,
 			'to_date': doc.to_date,
 			'company': doc.company,
 			'finance_book': doc.finance_book if doc.finance_book else '',
 			'account': doc.account if doc.account else '',
-			'voucher_number': doc.voucher_number if doc.voucher_number else '',
 			'party_type': 'Customer',
 			'party': [entry.customer],
 			'group_by': doc.group_by,
 			'currency': doc.currency,
-			'cost_center': [doc.cost_center] if doc.cost_center else [],
-			'project': [doc.project] if doc.project else [],
-			'show_opening_entries': 'No',
+			'cost_center': [cc.cost_center_name for cc in doc.cost_center],
+			'project': [p.project_name for p in doc.project],
+			'show_opening_entries': 0,
 			'include_default_book_entries': 0,
-			'show_cancelled_entries': 0,
+			'show_cancelled_entries': 1,
 			'tax_id': tax_id if tax_id else ''
 		})
 		col, res = get_soa(filters)
+		if len(res) == 3:
+			continue
 		html = frappe.render_template('accounts/doctype/bulk_statement_of_accounts/bsoa.html', \
-			{ "filters": filters, "data": res, "aging": aging[0] if doc.include_ageing else None})
-		html = frappe.render_template(base_template_path, {"body": ''.join(html), "title": "Statement For " + entry.customer})
+			{"filters": filters, "data": res, "aging": aging[0] if doc.include_ageing else None})
+		html = frappe.render_template(base_template_path, {"body": html, "css": get_print_style(), "title": "Statement For " + entry.customer})
 		statement_dict[entry.customer] = html
-
-	if consolidated:
+	if not bool(statement_dict):
+		return False
+	elif consolidated:
 		result = ''.join(list(statement_dict.values()))
 		return get_pdf(result, {'orientation': doc.orientation})
 	else:
@@ -106,6 +85,76 @@ def get_report_pdf(doc, consolidated=True):
 		return statement_dict
 
 @frappe.whitelist()
+def fetch_customers(customer_collection, collection_name, primary_mandatory):
+	print(type(primary_mandatory))
+	customer_list = []
+	customers = []
+	if customer_collection == 'Sales Person':
+		customer_list = get_customers_based_on_sales_person(collection_name)
+
+		if not bool(customer_list):
+			frappe.throw('No Customers found with selected options!')
+
+		customers = frappe.get_list('Customer', fields=['name', 'email_id'], \
+			filters=[['name', 'in', list(customer_list['Customer'])]])
+		customer_list = []
+	else:
+		field_dict = {
+			'Customer Group': 'customer_group',
+			'Territory': 'territory',
+			'Sales Partner': 'default_sales_partner'
+		}
+		if customer_collection == 'Sales Partner':
+			customers = frappe.get_list('Customer', fields=['name', 'email_id'], \
+				filters=[[field_dict[customer_collection], '=', collection_name]])
+		else:
+			collection = frappe.get_doc(customer_collection, collection_name)
+			selected = frappe.get_list(customer_collection, filters=[
+					['lft', '>=', collection.lft],
+					['rgt', '<=', collection.rgt]
+				],
+				fields=['name'],
+				order_by='lft asc, rgt desc'
+			)
+			selected = [customer.name for customer in selected]
+			customers = frappe.get_list('Customer', fields=['name', 'email_id'], \
+				filters=[[field_dict[customer_collection], 'IN', selected]])
+	for customer in customers:
+		primary_email = customer.get('email_id') or ''
+		billing_email = get_customer_emails(customer.name, 1, billing_and_primary=False)
+
+		if billing_email == '' or (primary_email == '' and int(primary_mandatory)):
+			continue
+
+		customer_list.append({
+			'name': customer.name,
+			'primary_email': primary_email,
+			'billing_email': billing_email
+		})
+	return customer_list
+
+@frappe.whitelist()
+def get_customer_emails(customer_name, primary_mandatory, billing_and_primary=True):
+	billing_email = frappe.db.sql("""
+		SELECT c.email_id FROM `tabContact` AS c JOIN `tabDynamic Link` AS l ON c.name=l.parent \
+		WHERE l.link_doctype='Customer' and l.link_name='""" + customer_name + """' and \
+		c.is_billing_contact=1 \
+		order by c.creation desc""")
+
+	if len(billing_email) == 0 or (billing_email[0][0] is None):
+		if billing_and_primary:
+			frappe.throw('No billing email found for customer: '+ customer_name)
+		else:
+			return ''
+
+	if billing_and_primary:
+		primary_email =  frappe.get_value('Customer', customer_name, 'email_id')
+		if primary_email is None and int(primary_mandatory):
+			frappe.throw('No primary email found for customer: '+ customer_name)
+		return [primary_email or '', billing_email[0][0]]
+	else:
+		return billing_email[0][0] or ''
+
 def get_customers_based_on_sales_person(sales_person):
 	lft, rgt = frappe.db.get_value("Sales Person",
 		sales_person, ["lft", "rgt"])
@@ -123,38 +172,69 @@ def get_customers_based_on_sales_person(sales_person):
 @frappe.whitelist()
 def download_statements(document_name):
 	doc = frappe.get_doc('Bulk Statement Of Accounts', document_name)
-	frappe.local.response.filename = doc.name + '.pdf'
-	frappe.local.response.filecontent = get_report_pdf(doc)
-	frappe.local.response.type = "download"
+	report = get_report_pdf(doc)
+	if report:
+		frappe.local.response.filename = doc.name + '.pdf'
+		frappe.local.response.filecontent = report
+		frappe.local.response.type = "download"
 
 @frappe.whitelist()
-def manual_email_send(document_name):
+def send_emails(document_name, from_scheduler=False):
 	doc = frappe.get_doc('Bulk Statement Of Accounts', document_name)
-	for customer, report_pdf in get_report_pdf(doc, consolidated=False).items():
-		attachment = {
-			'fname': customer + '.pdf',
-			'fcontent': report_pdf
-		}
-		frappe.enqueue(
-			queue='short',
-			job_name=doc.name + ':' + format_date(doc.from_date) + '-' + format_date(doc.to_date),
-			method=frappe.sendmail,
-			recipients=[frappe.get_value('Customer', customer, 'email_id')],
-			sender=frappe.session.user,
-			subject='Statement Of Account for '+customer,
-			message='Hi '+customer,
-			reference_doctype='Bulk Statement Of Accounts',
-			reference_name=document_name,
-			attachments=[attachment]
-		)
+	report = get_report_pdf(doc, consolidated=False)
 
+	if report:
+		for customer, report_pdf in report.items():
+			attachment = {
+				'fname': customer + '.pdf',
+				'fcontent': report_pdf
+			}
+			recipients = []
+			for clist in doc.customer_list:
+				if clist.customer == customer:
+					recipients.append(clist.billing_email)
+					if doc.primary_mandatory:
+						recipients.append(clist.primary_email or '')
+			cc = None
+			if doc.cc_to != '':
+				try:
+					cc=frappe.get_doc('User', doc.cc_to, 'email')
+				except:
+					pass
+
+			frappe.enqueue(
+				queue='short',
+				job_name=doc.name + ':' + format_date(doc.from_date) + '-' + format_date(doc.to_date),
+				method=frappe.sendmail,
+				recipients=recipients,
+				sender=frappe.session.user,
+				cc=cc,
+				subject='Statement Of Account for '+customer,
+				message='Hi '+customer,
+				reference_doctype='Bulk Statement Of Accounts',
+				reference_name=document_name,
+				attachments=[attachment]
+			)
+		if doc.enable_auto_email and from_scheduler:
+			today_date = getdate(today())
+			duration_map = {
+				'Monthly': 1,
+				'Quarterly': 3
+			}
+			if doc.frequency == 'Weekly':
+				doc.to_date = add_days(today_date, 7)
+			else:
+				doc.to_date = add_months(today_date, duration_map[doc.frequency])
+			doc.add_comment('Emails sent on:' + frappe.utils.format_datetime(frappe.utils.now()))
+			doc.save()
+			frappe.db.commit()
+		return True
+	else:
+		return False
+
+@frappe.whitelist()
 def auto_email_soa():
-	selected = frappe.get_list('Bulk Statement Of Accounts', filter={'to_date': format_date(today())})
+	selected = frappe.get_list('Bulk Statement Of Accounts', filter={'to_date': format_date(today()), 'enable_autoemail': 1})
 
 	for entry in selected:
-		manual_email_send(entry.name)
-		doc = frappe.get_doc('Bulk Statement Of Accounts', entry.name)
-		doc.from_date = doc.to_date
-		doc.to_date = add_days(doc.to_date, days_to_add[doc.frequency])
-		doc.save()
-	frappe.db.commit()
+		send_emails(entry.name, from_scheduler=True)

@@ -7,15 +7,6 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "preferences",
-  "include_ageing",
-  "ageing_based_on",
-  "column_break_24",
-  "orientation",
-  "section_break_1",
-  "frequency",
-  "column_break_2",
-  "start_date",
   "section_break_11",
   "from_date",
   "company",
@@ -25,41 +16,56 @@
   "column_break_14",
   "to_date",
   "finance_book",
-  "voucher_number",
   "currency",
   "project",
+  "preferences",
+  "include_ageing",
+  "ageing_based_on",
+  "section_break_14",
+  "orientation",
+  "section_break_1",
+  "enable_auto_email",
+  "section_break_18",
+  "frequency",
+  "filter_duration",
+  "column_break_21",
+  "start_date",
   "section_break_3",
+  "cc_to",
   "customer_collection",
   "column_break_6",
+  "primary_mandatory",
+  "section_break_27",
   "collection_name",
+  "column_break_29",
+  "fetch_customers",
   "column_break_17",
-  "amended_from",
-  "customer_list",
-  "is_autoemail"
+  "customer_list"
  ],
  "fields": [
   {
    "fieldname": "frequency",
    "fieldtype": "Select",
    "label": "Frequency",
-   "options": "\nEvery Week\nEvery Month\nEvery Quarter"
+   "options": "Weekly\nMonthly\nQuarterly"
   },
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.frequency == '';",
+   "depends_on": "eval:doc.enable_auto_email == 0;",
    "fieldname": "from_date",
    "fieldtype": "Date",
    "label": "From Date",
    "mandatory_depends_on": "eval:doc.frequency == '';"
   },
   {
-   "depends_on": "eval:doc.frequency == '';",
+   "depends_on": "eval:doc.enable_auto_email == 0;",
    "fieldname": "to_date",
    "fieldtype": "Date",
    "label": "To Date",
@@ -67,33 +73,20 @@
   },
   {
    "fieldname": "cost_center",
-   "fieldtype": "Link",
+   "fieldtype": "Table MultiSelect",
    "label": "Cost Center",
-   "options": "Cost Center"
+   "options": "BSOA Cost Center Field"
   },
   {
    "fieldname": "project",
-   "fieldtype": "Link",
+   "fieldtype": "Table MultiSelect",
    "label": "Project",
-   "options": "Project"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Bulk Statement Of Accounts",
-   "print_hide": 1,
-   "read_only": 1
+   "options": "BSOA Project Field"
   },
   {
    "fieldname": "section_break_3",
    "fieldtype": "Section Break",
-   "label": "Autoselect Customers"
-  },
-  {
-   "fieldname": "column_break_2",
-   "fieldtype": "Column Break"
+   "label": "Customers"
   },
   {
    "fieldname": "column_break_6",
@@ -114,17 +107,15 @@
    "hide_border": 1
   },
   {
-   "default": "Customer Group",
    "fieldname": "customer_collection",
    "fieldtype": "Select",
-   "in_list_view": 1,
    "label": "Select Customers By",
-   "options": "Customer Group\nTerritory\nSales Partner\nSales Person"
+   "options": "\nCustomer Group\nTerritory\nSales Partner\nSales Person"
   },
   {
    "fieldname": "collection_name",
    "fieldtype": "Dynamic Link",
-   "label": "Enter Selection",
+   "label": "Recipient",
    "options": "customer_collection"
   },
   {
@@ -163,10 +154,6 @@
    "options": "Landscape\nPortrait"
   },
   {
-   "fieldname": "column_break_24",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "Today",
    "fieldname": "start_date",
    "fieldtype": "Date",
@@ -177,7 +164,7 @@
    "fieldname": "group_by",
    "fieldtype": "Select",
    "label": "Group By",
-   "options": "\nGroup by Voucher\nGroup by Voucher (Consolidated)\nGroup By Account\nGroup By Party"
+   "options": "\nGroup by Voucher\nGroup by Voucher (Consolidated)"
   },
   {
    "fieldname": "currency",
@@ -186,23 +173,10 @@
    "options": "\nAED\nAUD\nCHF\nCNY\nEUR\nGBP\nINR\nJPY\nUSD"
   },
   {
-   "fieldname": "voucher_number",
-   "fieldtype": "Data",
-   "label": "Voucher No"
-  },
-  {
-   "default": "0",
-   "fieldname": "is_autoemail",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "is_autoemail",
-   "print_hide": 1,
-   "report_hide": 1
-  },
-  {
    "default": "0",
    "fieldname": "include_ageing",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Include Ageing Summary"
   },
   {
@@ -212,10 +186,68 @@
    "fieldtype": "Select",
    "label": "Ageing Based On",
    "options": "Due Date\nPosting Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_auto_email",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Enable Auto Email"
+  },
+  {
+   "fieldname": "section_break_14",
+   "fieldtype": "Column Break",
+   "hide_border": 1
+  },
+  {
+   "depends_on": "eval: doc.enable_auto_email ==1",
+   "fieldname": "section_break_18",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fetch_customers",
+   "fieldtype": "Button",
+   "label": "Fetch Customers",
+   "options": "fetch_customers",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "depends_on": "eval: doc.customer_collection !== ''",
+   "fieldname": "section_break_27",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "primary_mandatory",
+   "fieldtype": "Check",
+   "label": "Always Send To Primary Contact"
+  },
+  {
+   "fieldname": "cc_to",
+   "fieldtype": "Link",
+   "label": "CC Emails To",
+   "options": "User"
+  },
+  {
+   "default": "1",
+   "fieldname": "filter_duration",
+   "fieldtype": "Int",
+   "label": "Filter Duration (Months)"
   }
  ],
  "links": [],
- "modified": "2020-07-22 13:02:51.434680",
+ "modified": "2020-07-25 15:09:27.285400",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bulk Statement Of Accounts",
@@ -230,6 +262,18 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
    "share": 1,
    "write": 1
   }
