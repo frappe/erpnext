@@ -8,7 +8,7 @@ def get_data():
 		'fieldname': 'pos_profile',
 		'transactions': [
 			{
-				'items': ['Sales Invoice', 'POS Closing Voucher']
+				'items': ['Sales Invoice', 'POS Closing Entry', 'POS Opening Entry']
 			}
 		]
 	}

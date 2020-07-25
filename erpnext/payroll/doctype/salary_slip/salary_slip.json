@@ -123,12 +123,12 @@
    "depends_on": "eval:doc.designation",
    "fetch_from": "employee.designation",
    "fieldname": "designation",
-   "fieldtype": "Read Only",
+   "fieldtype": "Link",
    "label": "Designation",
    "oldfieldname": "designation",
    "oldfieldtype": "Link",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Designation",
+   "read_only": 1
   },
   {
    "fetch_from": "employee.branch",
@@ -581,40 +581,32 @@
    "fieldtype": "Link",
    "label": "Payroll Cost Center",
    "options": "Cost Center",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "mode_of_payment",
    "fieldtype": "Select",
    "label": "Mode Of Payment",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "absent_days",
    "fieldtype": "Float",
    "label": "Absent Days",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "unmarked_days",
    "fieldtype": "Float",
    "hidden": 1,
-   "label": "Unmarked days",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Unmarked days"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-25 14:42:43.921828",
+ "modified": "2020-07-22 12:41:03.659422",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
