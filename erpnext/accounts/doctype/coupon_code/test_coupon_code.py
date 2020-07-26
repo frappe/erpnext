@@ -68,7 +68,7 @@ def test_create_test_data():
 		"selling": 1,
 		"rate_or_discount": "Discount Percentage",
 		"discount_percentage": 30,
-		"company": "_Test Company",
+		"company": "_Test Company with perpetual inventory",
 		"currency":"INR",
 		"for_price_list":"_Test Price List"
 		})
@@ -112,7 +112,10 @@ class TestCouponCode(unittest.TestCase):
 		self.assertEqual(coupon_code.get("used"),0)
 
 	def test_2_sales_order_with_coupon_code(self):
-		so = make_sales_order(customer="_Test Customer",selling_price_list="_Test Price List",item_code="_Test Tesla Car", rate=5000,qty=1, do_not_submit=True)
+		so = make_sales_order(company='_Test Company with perpetual inventory', warehouse='Stores - TCP1',
+			customer="_Test Customer", selling_price_list="_Test Price List", item_code="_Test Tesla Car", rate=5000,qty=1,
+			do_not_submit=True)
+
 		so = frappe.get_doc('Sales Order', so.name)
 		# check item price before coupon code is applied
 		self.assertEqual(so.items[0].rate, 5000)
