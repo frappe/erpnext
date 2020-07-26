@@ -220,7 +220,7 @@ var schedule_inpatient = function(frm) {
 					}
 				},
 				freeze: true,
-				freeze_message: 'Scheduling Patient Admission'
+				freeze_message: __('Scheduling Patient Admission')
 			});
 			frm.refresh_fields();
 			dialog.hide();
