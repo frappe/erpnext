@@ -413,7 +413,7 @@ class TestStockEntry(unittest.TestCase):
 	def test_serial_item_error(self):
 		se, serial_nos = self.test_serial_by_series()
 		if not frappe.db.exists('Serial No', 'ABCD'):
-			make_serialized_item("_Test Serialized Item", "ABCD\nEFGH")
+			make_serialized_item(item_code="_Test Serialized Item", serial_no="ABCD\nEFGH")
 
 		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Material Transfer"
@@ -833,7 +833,7 @@ def make_serialized_item(**args):
 	se.get("items")[0].item_code = args.item_code or "_Test Serialized Item With Series"
 
 	if args.serial_no:
-		se.get("items")[0].serial_no = serial_no
+		se.get("items")[0].serial_no = args.serial_no
 
 	if args.cost_center:
 		se.get("items")[0].cost_center = args.cost_center
