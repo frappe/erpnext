@@ -101,10 +101,10 @@ class PaymentReconciliation(Document):
 			Having
 				amount > 0
 		""".format(
-			doc=voucher_type, 
-			dr_or_cr=dr_or_cr, 
-			reconciled_dr_or_cr=reconciled_dr_or_cr, 
-			party_type_field=frappe.scrub(self.party_type)), 
+			doc=voucher_type,
+			dr_or_cr=dr_or_cr,
+			reconciled_dr_or_cr=reconciled_dr_or_cr,
+			party_type_field=frappe.scrub(self.party_type)),
 			{
 				'party': self.party,
 				'party_type': self.party_type,
@@ -170,7 +170,7 @@ class PaymentReconciliation(Document):
 			reconcile_against_document(lst)
 
 		if dr_or_cr_notes:
-			reconcile_dr_cr_note(dr_or_cr_notes)
+			reconcile_dr_cr_note(dr_or_cr_notes, self.company)
 
 		msgprint(_("Successfully Reconciled"))
 		self.get_unreconciled_entries()
@@ -261,7 +261,7 @@ class PaymentReconciliation(Document):
 
 		return cond
 
-def reconcile_dr_cr_note(dr_cr_notes):
+def reconcile_dr_cr_note(dr_cr_notes, company):
 	for d in dr_cr_notes:
 		voucher_type = ('Credit Note'
 			if d.voucher_type == 'Sales Invoice' else 'Debit Note')
@@ -273,6 +273,7 @@ def reconcile_dr_cr_note(dr_cr_notes):
 			"doctype": "Journal Entry",
 			"voucher_type": voucher_type,
 			"posting_date": today(),
+			"company": company,
 			"accounts": [
 				{
 					'account': d.account,
