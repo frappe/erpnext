@@ -6,6 +6,7 @@ import unittest, frappe
 from frappe.utils import flt, nowdate
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.exceptions import InvalidAccountCurrency
+from erpnext.accounts.general_ledger import StockAccountInvalidTransaction
 
 class TestJournalEntry(unittest.TestCase):
 	def test_journal_entry_with_against_jv(self):
@@ -119,11 +120,8 @@ class TestJournalEntry(unittest.TestCase):
 			"party": None
 		})
 
-		jv.insert()
-
-		from erpnext.accounts.general_ledger import StockAccountInvalidTransaction
 		self.assertRaises(StockAccountInvalidTransaction, jv.submit)
-
+		jv.cancel()
 		set_perpetual_inventory(0)
 
 	def test_multi_currency(self):
