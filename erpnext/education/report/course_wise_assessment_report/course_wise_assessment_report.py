@@ -42,7 +42,7 @@ def execute(filters=None):
 				# create the list of possible grades
 				if student_row[scrub_criteria] not in grades:
 					grades.append(student_row[scrub_criteria])
-				
+
 				# create the dict of for gradewise analysis
 				if student_row[scrub_criteria] not in grade_wise_analysis[criteria]:
 					grade_wise_analysis[criteria][student_row[scrub_criteria]] = 1
@@ -152,7 +152,7 @@ def get_formatted_result(args, get_assessment_criteria=False, get_course=False, 
 		elif create_total_dict:
 			if get_all_assessment_groups:
 				formatted_assessment_result[result.student][result.course][result.assessment_group]\
-					[result.assessment_criteria] = assessment_criteria_details				
+					[result.assessment_criteria] = assessment_criteria_details
 			if not formatted_assessment_result[result.student][result.course][args.assessment_group]:
 				formatted_assessment_result[result.student][result.course][args.assessment_group] = defaultdict(dict)
 				formatted_assessment_result[result.student][result.course][args.assessment_group]\

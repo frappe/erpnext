@@ -9,6 +9,7 @@
  "field_order": [
   "instructor_name",
   "employee",
+  "gender",
   "column_break_5",
   "status",
   "naming_series",
@@ -77,11 +78,19 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "Active\nLeft"
+  },
+  {
+   "fetch_from": "employee.gender",
+   "fieldname": "gender",
+   "fieldtype": "Link",
+   "label": "Gender",
+   "options": "Gender",
+   "read_only_depends_on": "employee"
   }
  ],
  "image_field": "image",
  "links": [],
- "modified": "2020-07-22 18:55:43.699989",
+ "modified": "2020-07-23 18:33:57.904398",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Instructor",
