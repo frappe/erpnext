@@ -17,6 +17,7 @@
   "priority",
   "issue_type",
   "issue_split_from",
+  "color",
   "sb_details",
   "description",
   "service_level_section",
@@ -359,12 +360,17 @@
    "label": "Issue Split From",
    "options": "Issue",
    "read_only": 1
+  },
+  {
+   "fieldname": "color",
+   "fieldtype": "Color",
+   "label": "Color"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
- "modified": "2019-09-11 09:03:57.465623",
- "modified_by": "himanshu@erpnext.com",
+ "modified": "2020-07-27 11:16:16.261950",
+ "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
  "owner": "Administrator",
@@ -384,7 +390,7 @@
  "quick_entry": 1,
  "search_fields": "status,customer,subject,raised_by",
  "sort_field": "modified",
- "sort_order": "ASC",
+ "sort_order": "DESC",
  "timeline_field": "customer",
  "title_field": "subject",
  "track_changes": 1,
