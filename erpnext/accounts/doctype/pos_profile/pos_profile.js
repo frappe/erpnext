@@ -28,7 +28,7 @@ frappe.ui.form.on("POS Profile", "onload", function(frm) {
 
 frappe.ui.form.on('POS Profile', {
 	setup: function(frm) {
-		frm.set_query("print_format_for_online", function() {
+		frm.set_query("print_format", function() {
 			return {
 				filters: [
 					['Print Format', 'doc_type', '=', 'Sales Invoice'],
@@ -47,12 +47,6 @@ frappe.ui.form.on('POS Profile', {
 
 		frm.set_query("print_format", function() {
 			return { filters: { doc_type: "Sales Invoice", print_format_type: "JS"} };
-		});
-
-		frappe.db.get_value('POS Settings', 'POS Settings', 'use_pos_in_offline_mode', (r) => {
-			const is_offline = r && cint(r.use_pos_in_offline_mode)
-			frm.toggle_display('offline_pos_section', is_offline);
-			frm.toggle_display('print_format_for_online', !is_offline);
 		});
 
 		frm.set_query('company_address', function(doc) {

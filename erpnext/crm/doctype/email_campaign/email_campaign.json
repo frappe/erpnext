@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "format:MAIL-CAMP-{YYYY}-{#####}",
  "creation": "2019-06-30 16:05:30.015615",
  "doctype": "DocType",
@@ -52,7 +53,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Email Campaign For ",
-   "options": "\nLead\nContact",
+   "options": "\nLead\nContact\nEmail Group",
    "reqd": 1
   },
   {
@@ -70,7 +71,8 @@
    "options": "User"
   }
  ],
- "modified": "2019-11-11 17:18:47.342839",
+ "links": [],
+ "modified": "2020-07-15 12:43:25.548682",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Email Campaign",

@@ -36,7 +36,8 @@ def get_loyalty_details(customer, loyalty_program, expiry_date=None, company=Non
 		return {"loyalty_points": 0, "total_spent": 0}
 
 @frappe.whitelist()
-def get_loyalty_program_details_with_points(customer, loyalty_program=None, expiry_date=None, company=None, silent=False, include_expired_entry=False, current_transaction_amount=0):
+def get_loyalty_program_details_with_points(customer, loyalty_program=None, expiry_date=None, company=None, \
+		silent=False, include_expired_entry=False, current_transaction_amount=0):
 	lp_details = get_loyalty_program_details(customer, loyalty_program, company=company, silent=silent)
 	loyalty_program = frappe.get_doc("Loyalty Program", loyalty_program)
 	lp_details.update(get_loyalty_details(customer, loyalty_program.name, expiry_date, company, include_expired_entry))
@@ -59,10 +60,10 @@ def get_loyalty_program_details(customer, loyalty_program=None, expiry_date=None
 	if not loyalty_program:
 		loyalty_program = frappe.db.get_value("Customer", customer, "loyalty_program")
 
-		if not (loyalty_program or silent):
+		if not loyalty_program and not silent:
 			frappe.throw(_("Customer isn't enrolled in any Loyalty Program"))
 		elif silent and not loyalty_program:
-			return frappe._dict({"loyalty_program": None})
+			return frappe._dict({"loyalty_programs": None})
 
 	if not company:
 		company = frappe.db.get_default("company") or frappe.get_all("Company")[0].name
