@@ -28,7 +28,7 @@
   {
    "hidden": 0,
    "label": "Fees",
-   "links": "[\n    {\n        \"label\": \"Fee Structure\",\n        \"name\": \"Fee Structure\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Fee Category\",\n        \"name\": \"Fee Category\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Fee Schedule\",\n        \"name\": \"Fee Schedule\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Fees\",\n        \"name\": \"Fees\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Fees\"\n        ],\n        \"doctype\": \"Fees\",\n        \"is_query_report\": true,\n        \"label\": \"Student Fee Collection Report\",\n        \"name\": \"Student Fee Collection\",\n        \"type\": \"report\"\n    }\n]"
+   "links": "[\n    {\n        \"label\": \"Fee Structure\",\n        \"name\": \"Fee Structure\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Fee Category\",\n        \"name\": \"Fee Category\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Fee Schedule\",\n        \"name\": \"Fee Schedule\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Fees\",\n        \"name\": \"Fees\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Fees\"\n        ],\n        \"doctype\": \"Fees\",\n        \"is_query_report\": true,\n        \"label\": \"Student Fee Collection Report\",\n        \"name\": \"Student Fee Collection\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Fees\"\n        ],\n        \"doctype\": \"Fees\",\n        \"is_query_report\": true,\n        \"label\": \"Program wise Fee Collection Report\",\n        \"name\": \"Program wise Fee Collection\",\n        \"type\": \"report\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -67,7 +67,12 @@
   }
  ],
  "category": "Domains",
- "charts": [],
+ "charts": [
+  {
+   "chart_name": "Program Enrollments",
+   "label": "Program Enrollments"
+  }
+ ],
  "creation": "2020-03-02 17:22:57.066401",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
@@ -78,7 +83,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Education",
- "modified": "2020-07-22 18:56:12.276117",
+ "modified": "2020-07-27 17:50:13.745212",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Education",
