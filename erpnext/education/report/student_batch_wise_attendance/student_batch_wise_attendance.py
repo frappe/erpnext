@@ -11,7 +11,7 @@ def execute(filters=None):
 
 	if not filters.get("date"):
 		msgprint(_("Please select date"), raise_exception=1)
-	
+
 	columns = get_columns(filters)
 
 	active_student_group = get_active_student_group()
@@ -37,28 +37,28 @@ def execute(filters=None):
 	return columns, data
 
 def get_columns(filters):
-	columns = [ 
-		_("Student Group") + ":Link/Student Group:250", 
-		_("Student Group Strength") + "::170", 
-		_("Present") + "::90", 
+	columns = [
+		_("Student Group") + ":Link/Student Group:250",
+		_("Student Group Strength") + "::170",
+		_("Present") + "::90",
 		_("Absent") + "::90",
 		_("Not Marked") + "::90"
 	]
 	return columns
 
 def get_active_student_group():
-	active_student_groups = frappe.db.sql("""select name from `tabStudent Group` where group_based_on = "Batch" 
+	active_student_groups = frappe.db.sql("""select name from `tabStudent Group` where group_based_on = "Batch"
 		and academic_year=%s order by name""", (frappe.defaults.get_defaults().academic_year), as_dict=1)
 	return active_student_groups
 
 def get_student_group_strength(student_group):
-	student_group_strength = frappe.db.sql("""select count(*) from `tabStudent Group Student` 
+	student_group_strength = frappe.db.sql("""select count(*) from `tabStudent Group Student`
 		where parent = %s and active=1""", student_group)[0][0]
 	return student_group_strength
 
 def get_student_attendance(student_group, date):
-	student_attendance = frappe.db.sql("""select count(*) as count, status from `tabStudent Attendance` where \
-				student_group= %s and date= %s and\
+	student_attendance = frappe.db.sql("""select count(*) as count, status from `tabStudent Attendance` where
+				student_group= %s and date= %s and docstatus = 1 and
 				(course_schedule is Null or course_schedule='') group by status""",
 				(student_group, date), as_dict=1)
 	return student_attendance

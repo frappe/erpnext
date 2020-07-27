@@ -465,60 +465,71 @@ QUERY_REPORT_COLUMNS = [
 		"label": "Umsatz (ohne Soll/Haben-Kz)",
 		"fieldname": "Umsatz (ohne Soll/Haben-Kz)",
 		"fieldtype": "Currency",
+		"width": 100
 	},
 	{
 		"label": "Soll/Haben-Kennzeichen",
 		"fieldname": "Soll/Haben-Kennzeichen",
 		"fieldtype": "Data",
+		"width": 100
 	},
 	{
 		"label": "Konto",
 		"fieldname": "Konto",
 		"fieldtype": "Data",
+		"width": 100
 	},
 	{
 		"label": "Gegenkonto (ohne BU-Schlüssel)",
 		"fieldname": "Gegenkonto (ohne BU-Schlüssel)",
 		"fieldtype": "Data",
+		"width": 100
 	},
 	{
 		"label": "Belegdatum",
 		"fieldname": "Belegdatum",
 		"fieldtype": "Date",
+		"width": 100
 	},
 	{
 		"label": "Belegfeld 1",
 		"fieldname": "Belegfeld 1",
 		"fieldtype": "Data",
+		"width": 150
 	},
 	{
 		"label": "Buchungstext",
 		"fieldname": "Buchungstext",
 		"fieldtype": "Text",
+		"width": 300
 	},
 	{
 		"label": "Beleginfo - Art 1",
 		"fieldname": "Beleginfo - Art 1",
 		"fieldtype": "Link",
-		"options": "DocType"
+		"options": "DocType",
+		"width": 100
 	},
 	{
 		"label": "Beleginfo - Inhalt 1",
 		"fieldname": "Beleginfo - Inhalt 1",
 		"fieldtype": "Dynamic Link",
-		"options": "Beleginfo - Art 1"
+		"options": "Beleginfo - Art 1",
+		"width": 150
 	},
 	{
 		"label": "Beleginfo - Art 2",
 		"fieldname": "Beleginfo - Art 2",
 		"fieldtype": "Link",
-		"options": "DocType"
+		"options": "DocType",
+		"width": 100
 	},
 	{
 		"label": "Beleginfo - Inhalt 2",
 		"fieldname": "Beleginfo - Inhalt 2",
 		"fieldtype": "Dynamic Link",
-		"options": "Beleginfo - Art 2"
+		"options": "Beleginfo - Art 2",
+		"width": 150
 	}
 ]
 

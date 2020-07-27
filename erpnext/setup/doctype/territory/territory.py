@@ -6,12 +6,14 @@ import frappe
 from frappe.utils import flt
 from frappe import _
 
-from frappe.utils.nestedset import NestedSet
+from frappe.utils.nestedset import NestedSet, get_root_of
 
 class Territory(NestedSet):
 	nsm_parent_field = 'parent_territory'
 
 	def validate(self):
+		if not self.parent_territory:
+			self.parent_territory = get_root_of("Territory")
 
 		for d in self.get('targets') or []:
 			if not flt(d.target_qty) and not flt(d.target_amount):

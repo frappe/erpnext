@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "LM-LSP-.####",
  "creation": "2019-09-03 18:20:31.382887",
  "doctype": "DocType",
@@ -46,6 +47,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Loan Security Price",
+   "options": "Company:company:default_currency",
    "reqd": 1
   },
   {
@@ -79,7 +81,8 @@
    "read_only": 1
   }
  ],
- "modified": "2019-10-26 09:46:46.069667",
+ "links": [],
+ "modified": "2020-06-11 03:41:33.900340",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Price",
