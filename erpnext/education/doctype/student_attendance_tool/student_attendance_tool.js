@@ -140,7 +140,7 @@ education.StudentsEditor = Class.extend({
 							frappe.call({
 								method: "erpnext.education.api.mark_attendance",
 								freeze: true,
-								freeze_message: "Marking attendance",
+								freeze_message: __("Marking attendance"),
 								args: {
 									"students_present": students_present,
 									"students_absent": students_absent,

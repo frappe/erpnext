@@ -869,10 +869,10 @@ class SalarySlip(TransactionBase):
 
 		# other taxes and charges on income tax
 		for d in tax_slab.other_taxes_and_charges:
-			if flt(d.min_taxable_income) and flt(d.min_taxable_income) > tax_amount:
+			if flt(d.min_taxable_income) and flt(d.min_taxable_income) > annual_taxable_earning:
 				continue
 
-			if flt(d.max_taxable_income) and flt(d.max_taxable_income) < tax_amount:
+			if flt(d.max_taxable_income) and flt(d.max_taxable_income) < annual_taxable_earning:
 				continue
 
 			tax_amount += tax_amount * flt(d.percent) / 100
