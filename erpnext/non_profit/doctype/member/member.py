@@ -121,7 +121,7 @@ def create_member_subscription_order(user_details):
 			'subscription_id': 'sub_EZycCvXFvqnC6p'
 		}
 	"""
-	# {"plan_id":"IFF Starter","fullname":"Shivam Mishra","mobile":"7506056962","email":"shivam@shivam.dev","pan":"Testing123"}
+
 	user_details = frappe._dict(user_details)
 	member = get_or_create_member(user_details)
 	if not member:

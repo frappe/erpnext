@@ -92,15 +92,11 @@ def trigger_razorpay_subscription(*args, **kwargs):
 		data = json.loads(data)
 	data = frappe._dict(data)
 
-	try:
-		subscription = data.payload.get("subscription", {}).get('entity', {})
-		subscription = frappe._dict(subscription)
+	subscription = data.payload.get("subscription", {}).get('entity', {})
+	subscription = frappe._dict(subscription)
 
-		payment = data.payload.get("payment", {}).get('entity', {})
-		payment = frappe._dict(payment)
-	except Exception as e:
-		frappe.log_error(e, "Webhook Data Parsing Error")
-		return False
+	payment = data.payload.get("payment", {}).get('entity', {})
+	payment = frappe._dict(payment)
 
 	try:
 		data_json = json.dumps(data, indent=4, sort_keys=True)
@@ -108,10 +104,10 @@ def trigger_razorpay_subscription(*args, **kwargs):
 	except Exception as e:
 		error_log = frappe.log_error(frappe.get_traceback() + '\n' + data_json , _("Membership Webhook Failed"))
 		notify_failure(error_log)
-		return False
+		return { status: 'Failed' }
 
 	if not member:
-		return False
+		return { status: 'Failed' }
 	try:
 		if data.event == "subscription.activated":
 			member.customer_id = payment.customer_id
@@ -137,9 +133,11 @@ def trigger_razorpay_subscription(*args, **kwargs):
 		member.subscription_activated = 1
 		member.save(ignore_permissions=True)
 	except Exception as e:
-		frappe.log_error(e, "Error creating membership entry")
+		log = frappe.log_error(e, "Error creating membership entry")
+		notify_failure(log)
+		return { status: 'Failed' }
 
-	return True
+	return { status: 'Success' }
 
 
 def notify_failure(log):
