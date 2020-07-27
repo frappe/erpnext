@@ -129,6 +129,7 @@ def get_non_stock_item_status(item_code, item_warehouse_field):
 #if item belongs to product bundle, check if bundle items are in stock
 	if frappe.db.exists("Product Bundle", item_code):
 		items = frappe.get_doc("Product Bundle", item_code).get_all_children()
-		return all([ get_qty_in_stock(d.item_code, item_warehouse_field).in_stock for d in items ])
+		bundle_warehouse = frappe.db.get_value('Item', item_code, item_warehouse_field)
+		return all([ get_qty_in_stock(d.item_code, item_warehouse_field, bundle_warehouse).in_stock for d in items ])
 	else:
 		return 1

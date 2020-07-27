@@ -456,11 +456,12 @@ class JournalEntry(AccountsController):
 	def set_print_format_fields(self):
 		bank_amount = party_amount = total_amount = 0.0
 		currency = bank_account_currency = party_account_currency = pay_to_recd_from= None
+		party_type = None
 		for d in self.get('accounts'):
 			if d.party_type in ['Customer', 'Supplier'] and d.party:
+				party_type = d.party_type
 				if not pay_to_recd_from:
-					pay_to_recd_from = frappe.db.get_value(d.party_type, d.party,
-						"customer_name" if d.party_type=="Customer" else "supplier_name")
+					pay_to_recd_from = d.party
 
 				if pay_to_recd_from and pay_to_recd_from == d.party:
 					party_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
@@ -470,8 +471,9 @@ class JournalEntry(AccountsController):
 				bank_amount += (d.debit_in_account_currency or d.credit_in_account_currency)
 				bank_account_currency = d.account_currency
 
-		if pay_to_recd_from:
-			self.pay_to_recd_from = pay_to_recd_from
+		if party_type and pay_to_recd_from:
+			self.pay_to_recd_from = frappe.db.get_value(party_type, pay_to_recd_from,
+				"customer_name" if party_type=="Customer" else "supplier_name")
 			if bank_amount:
 				total_amount = bank_amount
 				currency = bank_account_currency
@@ -559,20 +561,20 @@ class JournalEntry(AccountsController):
 
 			if self.write_off_based_on == 'Accounts Receivable':
 				jd1.party_type = "Customer"
-				jd1.credit = flt(d.outstanding_amount, self.precision("credit", "accounts"))
+				jd1.credit_in_account_currency = flt(d.outstanding_amount, self.precision("credit", "accounts"))
 				jd1.reference_type = "Sales Invoice"
 				jd1.reference_name = cstr(d.name)
 			elif self.write_off_based_on == 'Accounts Payable':
 				jd1.party_type = "Supplier"
-				jd1.debit = flt(d.outstanding_amount, self.precision("debit", "accounts"))
+				jd1.debit_in_account_currency = flt(d.outstanding_amount, self.precision("debit", "accounts"))
 				jd1.reference_type = "Purchase Invoice"
 				jd1.reference_name = cstr(d.name)
 
 		jd2 = self.append('accounts', {})
 		if self.write_off_based_on == 'Accounts Receivable':
-			jd2.debit = total
+			jd2.debit_in_account_currency = total
 		elif self.write_off_based_on == 'Accounts Payable':
-			jd2.credit = total
+			jd2.credit_in_account_currency = total
 
 		self.validate_total_debit_and_credit()
 
@@ -834,6 +836,7 @@ def get_opening_accounts(company):
 	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
 
 
+@frappe.whitelist()
 def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select jv.name, jv.posting_date, jv.user_remark
 		from `tabJournal Entry` jv, `tabJournal Entry Account` jv_detail

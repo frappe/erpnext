@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import frappe, re, json
 from frappe import _
-from frappe.utils import cstr, flt, date_diff, nowdate
+from frappe.utils import cstr, flt, date_diff, nowdate, round_based_on_smallest_currency_fraction, money_in_words
 from erpnext.regional.india import states, state_numbers
 from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
@@ -9,6 +9,8 @@ from erpnext.hr.utils import get_salary_assignment
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.regional.india import number_state_mapping
 from six import string_types
+from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.accounts.utils import get_account_currency
 
 def validate_gstin_for_india(doc, method):
 	if hasattr(doc, 'gst_state') and doc.gst_state:
@@ -236,8 +238,7 @@ def get_tax_template_for_sez(party_details, master_doctype, company, party_type)
 
 
 def calculate_annual_eligible_hra_exemption(doc):
-	basic_component = frappe.get_cached_value('Company',  doc.company,  "basic_component")
-	hra_component = frappe.get_cached_value('Company',  doc.company,  "hra_component")
+	basic_component, hra_component = frappe.db.get_value('Company',  doc.company,  ["basic_component", "hra_component"])
 	if not (basic_component and hra_component):
 		frappe.throw(_("Please mention Basic and HRA component in Company"))
 	annual_exemption, monthly_exemption, hra_amount = 0, 0, 0
@@ -273,7 +274,7 @@ def calculate_annual_eligible_hra_exemption(doc):
 	})
 
 def get_component_amt_from_salary_slip(employee, salary_structure, basic_component, hra_component):
-	salary_slip = make_salary_slip(salary_structure, employee=employee, for_preview=1)
+	salary_slip = make_salary_slip(salary_structure, employee=employee, for_preview=1, ignore_permissions=True)
 	basic_amt, hra_amt = 0, 0
 	for earning in salary_slip.earnings:
 		if earning.salary_component == basic_component:
@@ -360,8 +361,6 @@ def get_ewb_data(dt, dn):
 	if dt != 'Sales Invoice':
 		frappe.throw(_('e-Way Bill JSON can only be generated from Sales Invoice'))
 
-	dn = dn.split(',')
-
 	ewaybills = []
 	for doc_name in dn:
 		doc = frappe.get_doc(dt, doc_name)
@@ -439,18 +438,28 @@ def get_ewb_data(dt, dn):
 
 @frappe.whitelist()
 def generate_ewb_json(dt, dn):
+	dn = json.loads(dn)
+	return get_ewb_data(dt, dn)
 
-	data = get_ewb_data(dt, dn)
-
+@frappe.whitelist()
+def download_ewb_json():
+	data = json.loads(frappe.local.form_dict.data)
 	frappe.local.response.filecontent = json.dumps(data, indent=4, sort_keys=True)
 	frappe.local.response.type = 'download'
 
-	if len(data['billLists']) > 1:
-		doc_name = 'Bulk'
-	else:
-		doc_name = dn
+	filename_prefix = 'Bulk'
+	docname = frappe.local.form_dict.docname
+	if docname:
+		if docname.startswith('['):
+			docname = json.loads(docname)
+			if len(docname) == 1:
+				docname = docname[0]
 
-	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(doc_name, frappe.utils.random_string(5))
+		if not isinstance(docname, list):
+			# removes characters not allowed in a filename (https://stackoverflow.com/a/38766141/4767738)
+			filename_prefix = re.sub('[^\w_.)( -]', '', docname)
+
+	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(filename_prefix, frappe.utils.random_string(5))
 
 @frappe.whitelist()
 def get_gstins_for_company(company):
@@ -464,7 +473,7 @@ def get_gstins_for_company(company):
 			`tabDynamic Link`.parent = `tabAddress`.name and
 			`tabDynamic Link`.parenttype = 'Address' and
 			`tabDynamic Link`.link_doctype = 'Company' and
-			`tabDynamic Link`.link_name = '{0}'""".format(company))
+			`tabDynamic Link`.link_name = %(company)s""", {"company": company})
 	return company_gstins
 
 def get_address_details(data, doc, company_address, billing_address):
@@ -597,8 +606,9 @@ def get_transport_details(data, doc):
 		data.transDocDate = frappe.utils.formatdate(doc.lr_date, 'dd/mm/yyyy')
 
 	if doc.gst_transporter_id:
-		validate_gstin_check_digit(doc.gst_transporter_id, label='GST Transporter ID')
-		data.transporterId  = doc.gst_transporter_id
+		if doc.gst_transporter_id[0:2] != "88":
+			validate_gstin_check_digit(doc.gst_transporter_id, label='GST Transporter ID')
+		data.transporterId = doc.gst_transporter_id
 
 	return data
 
@@ -623,6 +633,7 @@ def validate_state_code(state_code, address):
 	else:
 		return int(state_code)
 
+@frappe.whitelist()
 def get_gst_accounts(company, account_wise=False):
 	gst_accounts = frappe._dict()
 	gst_settings_accounts = frappe.get_all("GST Account",
@@ -639,5 +650,78 @@ def get_gst_accounts(company, account_wise=False):
 			elif val:
 				gst_accounts[val] = acc
 
-
 	return gst_accounts
+
+def update_grand_total_for_rcm(doc, method):
+	country = frappe.get_cached_value('Company', doc.company, 'country')
+
+	if country != 'India':
+		return
+
+	if doc.reverse_charge == 'Y':
+		gst_accounts = get_gst_accounts(doc.company)
+		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
+			+ gst_accounts.get('igst_account')
+
+		gst_tax = 0
+		for tax in doc.get('taxes'):
+			if tax.category not in ("Total", "Valuation and Total"):
+				continue
+
+			if flt(tax.base_tax_amount_after_discount_amount) and tax.account_head in gst_account_list:
+				gst_tax += tax.base_tax_amount_after_discount_amount
+
+		doc.taxes_and_charges_added -= gst_tax
+		doc.total_taxes_and_charges -= gst_tax
+
+		update_totals(gst_tax, doc)
+
+def update_totals(gst_tax, doc):
+	doc.grand_total -= gst_tax
+
+	if doc.meta.get_field("rounded_total"):
+		if doc.is_rounded_total_disabled():
+			doc.outstanding_amount = doc.grand_total
+		else:
+			doc.rounded_total = round_based_on_smallest_currency_fraction(doc.grand_total,
+				doc.currency, doc.precision("rounded_total"))
+
+			doc.rounding_adjustment += flt(doc.rounded_total - doc.grand_total,
+				doc.precision("rounding_adjustment"))
+
+			doc.outstanding_amount = doc.base_rounded_total
+
+	doc.in_words = money_in_words(doc.grand_total, doc.currency)
+
+def make_regional_gl_entries(gl_entries, doc):
+	country = frappe.get_cached_value('Company', doc.company, 'country')
+
+	if country != 'India':
+		return
+
+	if doc.reverse_charge == 'Y':
+		gst_accounts = get_gst_accounts(doc.company)
+		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
+			+ gst_accounts.get('igst_account')
+
+		for tax in doc.get('taxes'):
+			if tax.category not in ("Total", "Valuation and Total"):
+				continue
+
+			if flt(tax.base_tax_amount_after_discount_amount) and tax.account_head in gst_account_list:
+				account_currency = get_account_currency(tax.account_head)
+
+				gl_entries.append(doc.get_gl_dict(
+					{
+						"account": tax.account_head,
+						"cost_center": tax.cost_center,
+						"posting_date": doc.posting_date,
+						"against": doc.supplier,
+						"credit": tax.base_tax_amount_after_discount_amount,
+						"credits_in_account_currency": tax.base_tax_amount_after_discount_amount \
+							if account_currency==doc.company_currency \
+							else tax.tax_amount_after_discount_amount
+					}, account_currency, item=tax)
+				)
+
+	return gl_entries

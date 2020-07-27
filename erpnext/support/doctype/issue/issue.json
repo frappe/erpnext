@@ -370,6 +370,7 @@
  "icon": "fa fa-ticket",
  "idx": 7,
  "modified": "2020-07-27 11:16:16.261950",
+ "links": [],
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",

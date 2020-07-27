@@ -158,7 +158,7 @@ def get_item_dict(table, parent, parenttype):
 def create_stock_entry(doc):
 	stock_entry = frappe.new_doc("Stock Entry")
 	stock_entry = set_stock_items(stock_entry, doc.name, "Clinical Procedure")
-	stock_entry.purpose = "Material Issue"
+	stock_entry.stock_entry_type = "Material Issue"
 	stock_entry.from_warehouse = doc.warehouse
 	stock_entry.company = doc.company
 	expense_account = get_account(None, "expense_account", "Healthcare Settings", doc.company)

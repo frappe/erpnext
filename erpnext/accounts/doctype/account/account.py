@@ -89,7 +89,7 @@ class Account(NestedSet):
 				throw(_("Root cannot be edited."), RootNotEditable)
 
 		if not self.parent_account and not self.is_group:
-			frappe.throw(_("Root Account must be a group"))
+			frappe.throw(_("The root account {0} must be a group").format(frappe.bold(self.name)))
 
 	def validate_root_company_and_sync_account_to_children(self):
 		# ignore validation while creating new compnay or while syncing to child companies
@@ -102,15 +102,15 @@ class Account(NestedSet):
 			if not frappe.db.get_value("Account",
 				{'account_name': self.account_name, 'company': ancestors[0]}, 'name'):
 				frappe.throw(_("Please add the account to root level Company - %s" % ancestors[0]))
-		else:
+		elif self.parent_account:
 			descendants = get_descendants_of('Company', self.company)
 			if not descendants: return
 			parent_acc_name_map = {}
 			parent_acc_name, parent_acc_number = frappe.db.get_value('Account', self.parent_account, \
 				["account_name", "account_number"])
-			filters = { 
+			filters = {
 				"company": ["in", descendants],
-				"account_name": parent_acc_name, 
+				"account_name": parent_acc_name,
 			}
 			if parent_acc_number:
 				filters["account_number"] = parent_acc_number

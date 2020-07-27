@@ -63,9 +63,9 @@
   "base_total",
   "base_net_total",
   "column_break_26",
+  "total_net_weight",
   "total",
   "net_total",
-  "total_net_weight",
   "taxes_section",
   "tax_category",
   "column_break_50",
@@ -171,6 +171,7 @@
   },
   {
    "depends_on": "eval:doc.supplier && doc.docstatus===0 && (!(doc.items && doc.items.length) || (doc.items.length==1 && !doc.items[0].item_code))",
+   "description": "Fetch items based on Default Supplier.",
    "fieldname": "get_items_from_open_material_requests",
    "fieldtype": "Button",
    "label": "Get Items from Open Material Requests"
@@ -996,6 +997,7 @@
    "print_hide": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
    "label": "Subscription Section"
@@ -1053,7 +1055,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-01-14 18:54:39.694448",
+ "modified": "2020-07-01 12:40:45.240948",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
@@ -1097,6 +1099,12 @@
    "read": 1,
    "role": "Purchase Manager",
    "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts User"
   }
  ],
  "search_fields": "status, transaction_date, supplier,grand_total",

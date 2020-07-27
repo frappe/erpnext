@@ -1,10 +1,11 @@
 {
- "autoname": "format:MTNG-{date}",
+ "autoname": "naming_series:",
  "creation": "2018-10-15 16:25:41.548432",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "date",
   "cb_00",
   "status",
@@ -53,9 +54,15 @@
    "fieldname": "sb_01",
    "fieldtype": "Section Break",
    "label": "Minutes"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "MTNG-.YYYY.-.MM.-.DD.-"
   }
  ],
- "modified": "2019-07-13 19:57:40.500541",
+ "modified": "2020-05-19 13:18:59.821740",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Meeting",

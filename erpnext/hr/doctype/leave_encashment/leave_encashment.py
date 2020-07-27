@@ -8,7 +8,6 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate, nowdate, flt
 from erpnext.hr.utils import set_employee_name
-from erpnext.hr.doctype.leave_application.leave_application import get_leave_balance_on
 from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
 from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry
 from erpnext.hr.doctype.leave_allocation.leave_allocation import get_unused_leaves
@@ -63,6 +62,9 @@ class LeaveEncashment(Document):
 			frappe.throw(_("Leave Type {0} is not encashable").format(self.leave_type))
 
 		allocation = self.get_leave_allocation()
+
+		if not allocation:
+			frappe.throw(_("No Leaves Allocated to Employee: {0} for Leave Type: {1}").format(self.employee, self.leave_type))
 
 		self.leave_balance = allocation.total_leaves_allocated - allocation.carry_forwarded_leaves_count\
 			- get_unused_leaves(self.employee, self.leave_type, allocation.from_date, self.encashment_date)

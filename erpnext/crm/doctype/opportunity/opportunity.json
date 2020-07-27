@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
@@ -208,7 +209,8 @@
   {
    "fieldname": "opportunity_amount",
    "fieldtype": "Currency",
-   "label": "Opportunity Amount"
+   "label": "Opportunity Amount",
+   "options": "currency"
   },
   {
    "default": "0",
@@ -412,7 +414,8 @@
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
- "modified": "2019-09-30 12:58:37.385400",
+ "links": [],
+ "modified": "2020-03-20 12:28:45.228994",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

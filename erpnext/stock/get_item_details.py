@@ -239,26 +239,13 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	item_group_defaults = get_item_group_defaults(item.name, args.company)
 	brand_defaults = get_brand_defaults(item.name, args.company)
 
-	if overwrite_warehouse or not args.warehouse:
-		warehouse = (
-			args.get("set_warehouse") or
-			item_defaults.get("default_warehouse") or
-			item_group_defaults.get("default_warehouse") or
-			brand_defaults.get("default_warehouse") or
-			args.warehouse
-		)
+	defaults = frappe._dict({
+		'item_defaults': item_defaults,
+		'item_group_defaults': item_group_defaults,
+		'brand_defaults': brand_defaults
+	})
 
-		if not warehouse:
-			defaults = frappe.defaults.get_defaults() or {}
-			warehouse_exists = frappe.db.exists("Warehouse", {
-				'name': defaults.default_warehouse,
-				'company': args.company
-			})
-			if defaults.get("default_warehouse") and warehouse_exists:
-				warehouse = defaults.default_warehouse
-
-	else:
-		warehouse = args.warehouse
+	warehouse = get_item_warehouse(item, args, overwrite_warehouse, defaults)
 
 	if args.get('doctype') == "Material Request" and not args.get('material_request_type'):
 		args['material_request_type'] = frappe.db.get_value('Material Request',
@@ -271,7 +258,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		expense_account = get_asset_category_account(fieldname = "fixed_asset_account", item = args.item_code, company= args.company)
 
 	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
-	if not args.uom:
+	if not args.get('uom'):
 		if args.get('doctype') in sales_doctypes:
 			args.uom = item.sales_uom if item.sales_uom else item.stock_uom
 		elif (args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']) or \
@@ -291,7 +278,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"cost_center": get_default_cost_center(args, item_defaults, item_group_defaults, brand_defaults),
 		'has_serial_no': item.has_serial_no,
 		'has_batch_no': item.has_batch_no,
-		"batch_no": None,
+		"batch_no": args.get("batch_no"),
 		"uom": args.uom,
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
 		"qty": flt(args.qty) or 1.0,
@@ -352,6 +339,15 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		else:
 			out["manufacturer_part_no"] = None
 			out["manufacturer"] = None
+	else:
+		data = frappe.get_value("Item", item.name,
+			["default_item_manufacturer", "default_manufacturer_part_no"] , as_dict=1)
+
+		if data:
+			out.update({
+				"manufacturer": data.default_item_manufacturer,
+				"manufacturer_part_no": data.default_manufacturer_part_no
+			})
 
 	child_doctype = args.doctype + ' Item'
 	meta = frappe.get_meta(child_doctype)
@@ -359,6 +355,37 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		update_barcode_value(out)
 
 	return out
+
+def get_item_warehouse(item, args, overwrite_warehouse, defaults={}):
+	if not defaults:
+		defaults = frappe._dict({
+			'item_defaults' : get_item_defaults(item.name, args.company),
+			'item_group_defaults' : get_item_group_defaults(item.name, args.company),
+			'brand_defaults' : get_brand_defaults(item.name, args.company)
+		})
+
+	if overwrite_warehouse or not args.warehouse:
+		warehouse = (
+			args.get("set_warehouse") or
+			defaults.item_defaults.get("default_warehouse") or
+			defaults.item_group_defaults.get("default_warehouse") or
+			defaults.brand_defaults.get("default_warehouse") or
+			args.get('warehouse')
+		)
+
+		if not warehouse:
+			defaults = frappe.defaults.get_defaults() or {}
+			warehouse_exists = frappe.db.exists("Warehouse", {
+				'name': defaults.default_warehouse,
+				'company': args.company
+			})
+			if defaults.get("default_warehouse") and warehouse_exists:
+				warehouse = defaults.default_warehouse
+
+	else:
+		warehouse = args.get('warehouse')
+
+	return warehouse
 
 def update_barcode_value(out):
 	from erpnext.accounts.doctype.sales_invoice.pos import get_barcode_data
@@ -597,7 +624,7 @@ def get_item_price(args, item_code, ignore_party=False):
 		elif args.get("supplier"):
 			conditions += " and supplier=%(supplier)s"
 		else:
-			conditions += " and (customer is null or customer = '') and (supplier is null or supplier = '')"
+			conditions += "and (customer is null or customer = '') and (supplier is null or supplier = '')"
 
 	if args.get('transaction_date'):
 		conditions += """ and %(transaction_date)s between

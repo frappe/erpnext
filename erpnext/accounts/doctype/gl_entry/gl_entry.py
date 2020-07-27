@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
-from frappe.utils import flt, fmt_money, getdate, formatdate
+from frappe.utils import flt, fmt_money, getdate, formatdate, cint
 from frappe.model.document import Document
 from frappe.model.naming import set_name_from_naming_options
 from frappe.model.meta import get_field_precision
@@ -115,8 +115,8 @@ class GLEntry(Document):
 			from tabAccount where name=%s""", self.account, as_dict=1)[0]
 
 		if ret.is_group==1:
-			frappe.throw(_("{0} {1}: Account {2} cannot be a Group")
-				.format(self.voucher_type, self.voucher_no, self.account))
+			frappe.throw(_('''{0} {1}: Account {2} is a Group Account and group accounts cannot be used in
+				transactions''').format(self.voucher_type, self.voucher_no, self.account))
 
 		if ret.docstatus==2:
 			frappe.throw(_("{0} {1}: Account {2} is inactive")
@@ -137,9 +137,16 @@ class GLEntry(Document):
 
 			return self.cost_center_company[self.cost_center]
 
+		def _check_is_group():
+			return cint(frappe.get_cached_value('Cost Center', self.cost_center, 'is_group'))
+
 		if self.cost_center and _get_cost_center_company() != self.company:
 			frappe.throw(_("{0} {1}: Cost Center {2} does not belong to Company {3}")
 				.format(self.voucher_type, self.voucher_no, self.cost_center, self.company))
+
+		if self.cost_center and _check_is_group():
+			frappe.throw(_("""{0} {1}: Cost Center {2} is a group cost center and group cost centers cannot
+				be used in transactions""").format(self.voucher_type, self.voucher_no, frappe.bold(self.cost_center)))
 
 	def validate_party(self):
 		validate_party_frozen_disabled(self.party_type, self.party)
@@ -232,10 +239,13 @@ def update_outstanding_amt(account, party_type, party, against_voucher_type, aga
 		if bal < 0 and not on_cancel:
 			frappe.throw(_("Outstanding for {0} cannot be less than zero ({1})").format(against_voucher, fmt_money(bal)))
 
-	# Update outstanding amt on against voucher
 	if against_voucher_type in ["Sales Invoice", "Purchase Invoice", "Fees"]:
 		ref_doc = frappe.get_doc(against_voucher_type, against_voucher)
-		ref_doc.db_set('outstanding_amount', bal)
+
+		# Didn't use db_set for optimisation purpose
+		ref_doc.outstanding_amount = bal
+		frappe.db.set_value(against_voucher_type, against_voucher, 'outstanding_amount', bal)
+
 		ref_doc.set_status(update=True)
 
 def validate_frozen_account(account, adv_adj=None):
@@ -274,6 +284,9 @@ def update_against_account(voucher_type, voucher_no):
 		if d.against != new_against:
 			frappe.db.set_value("GL Entry", d.name, "against", new_against)
 
+def on_doctype_update():
+	frappe.db.add_index("GL Entry", ["against_voucher_type", "against_voucher"])
+	frappe.db.add_index("GL Entry", ["voucher_type", "voucher_no"])
 
 def rename_gle_sle_docs():
 	for doctype in ["GL Entry", "Stock Ledger Entry"]:

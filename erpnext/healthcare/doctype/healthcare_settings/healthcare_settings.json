@@ -78,6 +78,7 @@
   },
   {
    "default": "0",
+   "description": "Checking this will create new Patients with a Disabled status by default and will only be enabled after invoicing the Registration Fee.",
    "fieldname": "collect_registration_fee",
    "fieldtype": "Check",
    "label": "Collect Fee for Patient Registration"

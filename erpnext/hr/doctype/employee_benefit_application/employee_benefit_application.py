@@ -190,6 +190,7 @@ def get_benefit_component_amount(employee, start_date, end_date, salary_componen
 	component_max_benefit, depends_on_payment_days = frappe.db.get_value("Salary Component",
 		salary_component, ["max_benefit_amount", "depends_on_payment_days"])
 
+	benefit_amount = 0
 	if benefit_application:
 		benefit_amount = frappe.db.get_value("Employee Benefit Application Detail",
 			{"parent": benefit_application[0][0], "earning_component": salary_component}, "amount")
@@ -222,6 +223,7 @@ def get_benefit_amount_based_on_pro_rata(sal_struct, component_max_benefit):
 	return benefit_amount
 
 
+@frappe.whitelist()
 def get_earning_components(doctype, txt, searchfield, start, page_len, filters):
 	if len(filters) < 2:
 		return {}

@@ -13,7 +13,7 @@ def execute(filters=None):
 	conditions, filters = get_conditions(filters)
 	columns = get_columns(filters)
 	att_map = get_attendance_list(conditions, filters)
-	emp_map = get_employee_details()
+	emp_map = get_employee_details(filters)
 
 	holiday_list = [emp_map[d]["holiday_list"] for d in emp_map if emp_map[d]["holiday_list"]]
 	default_holiday_list = frappe.get_cached_value('Company',  filters.get("company"),  "default_holiday_list")
@@ -131,10 +131,10 @@ def get_conditions(filters):
 
 	return conditions, filters
 
-def get_employee_details():
+def get_employee_details(filters):
 	emp_map = frappe._dict()
 	for d in frappe.db.sql("""select name, employee_name, designation, department, branch, company,
-		holiday_list from tabEmployee""", as_dict=1):
+		holiday_list from tabEmployee where company = "%s" """ % (filters.get("company")), as_dict=1):
 		emp_map.setdefault(d.name, d)
 
 	return emp_map

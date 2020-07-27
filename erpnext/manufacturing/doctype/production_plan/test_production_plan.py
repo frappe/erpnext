@@ -192,9 +192,10 @@ def make_bom(**args):
 	args = frappe._dict(args)
 
 	bom = frappe.get_doc({
-		'doctype': "BOM",
+		'doctype': 'BOM',
 		'is_default': 1,
 		'item': args.item,
+		'currency': args.currency or 'USD',
 		'quantity': args.quantity or 1,
 		'company': args.company or '_Test Company'
 	})
@@ -212,3 +213,4 @@ def make_bom(**args):
 
 	bom.insert(ignore_permissions=True)
 	bom.submit()
+	return bom

@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 def execute(filters=None):
 	columns = get_columns(filters)
@@ -54,15 +55,16 @@ def get_columns(filters):
 			"width": 140
 		},
 		{
-			"label": _("Description"),
-			"fieldname": "description",
-			"fieldtype": "Data",
-			"width": 200
+			"label": _("Item"),
+			"fieldname": "item_code",
+			"fieldtype": "Link",
+			"options": "Item",
+			"width": 150
 		},
 		{
 			"label": _("Quantity"),
 			"fieldname": "quantity",
-			"fieldtype": "Int",
+			"fieldtype": "Float",
 			"width": 140
 		},
 		{
@@ -118,7 +120,7 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Purchase Order Amount(Company Currency)"),
-			"fieldname": "purchase_order_amt_usd",
+			"fieldname": "purchase_order_amt_in_company_currency",
 			"fieldtype": "Float",
 			"width": 140
 		},
@@ -141,19 +143,18 @@ def get_conditions(filters):
 	conditions = ""
 
 	if filters.get("company"):
-		conditions += " AND company=%s"% frappe.db.escape(filters.get('company'))
+		conditions += " AND par.company=%s" % frappe.db.escape(filters.get('company'))
 
 	if filters.get("cost_center") or filters.get("project"):
 		conditions += """
-			AND (cost_center=%s
-			OR project=%s)
-			"""% (frappe.db.escape(filters.get('cost_center')), frappe.db.escape(filters.get('project')))
+			AND (child.`cost_center`=%s OR child.`project`=%s)
+			""" % (frappe.db.escape(filters.get('cost_center')), frappe.db.escape(filters.get('project')))
 
 	if filters.get("from_date"):
-		conditions += " AND transaction_date>=%s"% filters.get('from_date')
+		conditions += " AND par.transaction_date>='%s'" % filters.get('from_date')
 
 	if filters.get("to_date"):
-		conditions += " AND transaction_date<=%s"% filters.get('to_date')
+		conditions += " AND par.transaction_date<='%s'" % filters.get('to_date')
 	return conditions
 
 def get_data(filters):
@@ -162,7 +163,6 @@ def get_data(filters):
 	mr_records, procurement_record_against_mr = get_mapped_mr_details(conditions)
 	pr_records = get_mapped_pr_records()
 	pi_records = get_mapped_pi_records()
-	print(pi_records)
 
 	procurement_record=[]
 	if procurement_record_against_mr:
@@ -177,17 +177,17 @@ def get_data(filters):
 			"requesting_site": po.warehouse,
 			"requestor": po.owner,
 			"material_request_no": po.material_request,
-			"description": po.description,
-			"quantity": po.qty,
+			"item_code": po.item_code,
+			"quantity": flt(po.qty),
 			"unit_of_measurement": po.stock_uom,
 			"status": po.status,
 			"purchase_order_date": po.transaction_date,
 			"purchase_order": po.parent,
 			"supplier": po.supplier,
-			"estimated_cost": mr_record.get('amount'),
-			"actual_cost": pi_records.get(po.name),
-			"purchase_order_amt": po.amount,
-			"purchase_order_amt_in_company_currency": po.base_amount,
+			"estimated_cost": flt(mr_record.get('amount')),
+			"actual_cost": flt(pi_records.get(po.name)),
+			"purchase_order_amt": flt(po.amount),
+			"purchase_order_amt_in_company_currency": flt(po.base_amount),
 			"expected_delivery_date": po.schedule_date,
 			"actual_delivery_date": pr_records.get(po.name)
 		}
@@ -198,16 +198,21 @@ def get_mapped_mr_details(conditions):
 	mr_records = {}
 	mr_details = frappe.db.sql("""
 		SELECT
-			mr.transaction_date,
-			mr.per_ordered,
-			mr_item.name,
-			mr_item.parent,
-			mr_item.amount
-		FROM `tabMaterial Request` mr, `tabMaterial Request Item` mr_item
+			par.transaction_date,
+			par.per_ordered,
+			par.owner,
+			child.name,
+			child.parent,
+			child.amount,
+			child.qty,
+			child.item_code,
+			child.uom,
+			par.status
+		FROM `tabMaterial Request` par, `tabMaterial Request Item` child
 		WHERE
-			mr.per_ordered>=0
-			AND mr.name=mr_item.parent
-			AND mr.docstatus=1
+			par.per_ordered>=0
+			AND par.name=child.parent
+			AND par.docstatus=1
 			{conditions}
 		""".format(conditions=conditions), as_dict=1) #nosec
 
@@ -219,7 +224,15 @@ def get_mapped_mr_details(conditions):
 			procurement_record_details = dict(
 				material_request_date=record.transaction_date,
 				material_request_no=record.parent,
-				estimated_cost=record.amount
+				requestor=record.owner,
+				item_code=record.item_code,
+				estimated_cost=flt(record.amount),
+				quantity=flt(record.qty),
+				unit_of_measurement=record.uom,
+				status=record.status,
+				actual_cost=0,
+				purchase_order_amt=0,
+				purchase_order_amt_in_company_currency=0
 			)
 			procurement_record_against_mr.append(procurement_record_details)
 	return mr_records, procurement_record_against_mr
@@ -254,29 +267,29 @@ def get_mapped_pr_records():
 def get_po_entries(conditions):
 	return frappe.db.sql("""
 		SELECT
-			po_item.name,
-			po_item.parent,
-			po_item.cost_center,
-			po_item.project,
-			po_item.warehouse,
-			po_item.material_request,
-			po_item.material_request_item,
-			po_item.description,
-			po_item.stock_uom,
-			po_item.qty,
-			po_item.amount,
-			po_item.base_amount,
-			po_item.schedule_date,
-			po.transaction_date,
-			po.supplier,
-			po.status,
-			po.owner
-		FROM `tabPurchase Order` po, `tabPurchase Order Item` po_item
+			child.name,
+			child.parent,
+			child.cost_center,
+			child.project,
+			child.warehouse,
+			child.material_request,
+			child.material_request_item,
+			child.item_code,
+			child.stock_uom,
+			child.qty,
+			child.amount,
+			child.base_amount,
+			child.schedule_date,
+			par.transaction_date,
+			par.supplier,
+			par.status,
+			par.owner
+		FROM `tabPurchase Order` par, `tabPurchase Order Item` child
 		WHERE
-			po.docstatus = 1
-			AND po.name = po_item.parent
-			AND po.status not in  ("Closed","Completed","Cancelled")
+			par.docstatus = 1
+			AND par.name = child.parent
+			AND par.status not in  ("Closed","Completed","Cancelled")
 			{conditions}
 		GROUP BY
-			po.name,po_item.item_code
+			par.name, child.item_code
 		""".format(conditions=conditions), as_dict=1) #nosec

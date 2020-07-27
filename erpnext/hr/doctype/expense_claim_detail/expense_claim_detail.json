@@ -10,6 +10,22 @@
  "docstatus": 0,
  "doctype": "DocType",
  "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "expense_date",
+  "column_break_2",
+  "expense_type",
+  "default_account",
+  "section_break_4",
+  "description",
+  "section_break_6",
+  "amount",
+  "column_break_8",
+  "sanctioned_amount",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break"
+ ],
  "fields": [
   {
    "allow_bulk_edit": 0,
@@ -348,6 +364,21 @@
    "translatable": 0,
    "unique": 0,
    "width": "150px"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "has_web_view": 0,
@@ -359,12 +390,12 @@
  "is_submittable": 0,
  "issingle": 0,
  "istable": 1,
- "max_attachments": 0,
- "modified": "2019-06-10 08:41:36.122565",
+ "links": [],
+ "modified": "2020-05-11 18:54:35.601592",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim Detail",
- "owner": "harshada@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [],
  "quick_entry": 0,
  "read_only": 0,

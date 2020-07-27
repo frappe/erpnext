@@ -92,6 +92,7 @@ class PaymentReconciliation(Document):
 			FROM `tab{doc}`, `tabGL Entry`
 			WHERE
 				(`tab{doc}`.name = `tabGL Entry`.against_voucher or `tab{doc}`.name = `tabGL Entry`.voucher_no)
+				and `tab{doc}`.{party_type_field} = %(party)s
 				and `tab{doc}`.is_return = 1 and `tab{doc}`.return_against IS NULL
 				and `tabGL Entry`.against_voucher_type = %(voucher_type)s
 				and `tab{doc}`.docstatus = 1 and `tabGL Entry`.party = %(party)s
@@ -99,12 +100,17 @@ class PaymentReconciliation(Document):
 			GROUP BY `tab{doc}`.name
 			Having
 				amount > 0
-		""".format(doc=voucher_type, dr_or_cr=dr_or_cr, reconciled_dr_or_cr=reconciled_dr_or_cr), {
-			'party': self.party,
-			'party_type': self.party_type,
-			'voucher_type': voucher_type,
-			'account': self.receivable_payable_account
-		}, as_dict=1)
+		""".format(
+			doc=voucher_type,
+			dr_or_cr=dr_or_cr,
+			reconciled_dr_or_cr=reconciled_dr_or_cr,
+			party_type_field=frappe.scrub(self.party_type)),
+			{
+				'party': self.party,
+				'party_type': self.party_type,
+				'voucher_type': voucher_type,
+				'account': self.receivable_payable_account
+			}, as_dict=1)
 
 	def add_payment_entries(self, entries):
 		self.set('payments', [])
@@ -164,7 +170,7 @@ class PaymentReconciliation(Document):
 			reconcile_against_document(lst)
 
 		if dr_or_cr_notes:
-			reconcile_dr_cr_note(dr_or_cr_notes)
+			reconcile_dr_cr_note(dr_or_cr_notes, self.company)
 
 		msgprint(_("Successfully Reconciled"))
 		self.get_unreconciled_entries()
@@ -255,7 +261,7 @@ class PaymentReconciliation(Document):
 
 		return cond
 
-def reconcile_dr_cr_note(dr_cr_notes):
+def reconcile_dr_cr_note(dr_cr_notes, company):
 	for d in dr_cr_notes:
 		voucher_type = ('Credit Note'
 			if d.voucher_type == 'Sales Invoice' else 'Debit Note')
@@ -267,6 +273,7 @@ def reconcile_dr_cr_note(dr_cr_notes):
 			"doctype": "Journal Entry",
 			"voucher_type": voucher_type,
 			"posting_date": today(),
+			"company": company,
 			"accounts": [
 				{
 					'account': d.account,

@@ -6,7 +6,7 @@ def get_data():
 		'fieldname': 'production_plan',
 		'transactions': [
 			{
-				'label': _('Related'),
+				'label': _('Transactions'),
 				'items': ['Work Order', 'Material Request']
 			},
 		]

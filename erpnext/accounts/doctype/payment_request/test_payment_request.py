@@ -101,6 +101,23 @@ class TestPaymentRequest(unittest.TestCase):
 			self.assertEqual(expected_gle[gle.account][2], gle.credit)
 			self.assertEqual(expected_gle[gle.account][3], gle.against_voucher)
 
+	def test_status(self):
+		si_usd = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
+			currency="USD", conversion_rate=50)
+
+		pr = make_payment_request(dt="Sales Invoice", dn=si_usd.name, recipient_id="saurabh@erpnext.com",
+			mute_email=1, payment_gateway="_Test Gateway - USD", submit_doc=1, return_doc=1)
+
+		pe = pr.create_payment_entry()
+		pr.load_from_db()
+
+		self.assertEqual(pr.status, 'Paid')
+
+		pe.cancel()
+		pr.load_from_db()
+
+		self.assertEqual(pr.status, 'Requested')
+
 	def test_multiple_payment_entries_against_sales_order(self):
 		# Make Sales Order, grand_total = 1000
 		so = make_sales_order()

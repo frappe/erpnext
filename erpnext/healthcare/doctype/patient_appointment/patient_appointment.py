@@ -25,6 +25,7 @@ class PatientAppointment(Document):
 			self.reload()
 
 	def validate(self):
+		self.set_appointment_datetime()
 		end_time = datetime.datetime.combine(getdate(self.appointment_date), get_time(self.appointment_time)) + datetime.timedelta(minutes=float(self.duration))
 		overlaps = frappe.db.sql("""
 		select
@@ -43,6 +44,9 @@ class PatientAppointment(Document):
 		if overlaps:
 			frappe.throw(_("""Appointment overlaps with {0}.<br> {1} has appointment scheduled
 			with {2} at {3} having {4} minute(s) duration.""").format(overlaps[0][0], overlaps[0][1], overlaps[0][2], overlaps[0][3], overlaps[0][4]))
+
+	def set_appointment_datetime(self):
+		self.appointment_datetime = "%s %s" % (self.appointment_date, self.appointment_time or "00:00:00")
 
 	def after_insert(self):
 		if self.procedure_prescription:
@@ -65,11 +69,12 @@ class PatientAppointment(Document):
 				if fee_validity.ref_invoice:
 					frappe.db.set_value("Patient Appointment", appointment.name, "invoiced", True)
 				frappe.msgprint(_("{0} has fee validity till {1}").format(appointment.patient, fee_validity.valid_till))
-		confirm_sms(self)
 
 		if frappe.db.get_value("Healthcare Settings", None, "manage_appointment_invoice_automatically") == '1' and \
 			frappe.db.get_value("Patient Appointment", self.name, "invoiced") != 1:
 			invoice_appointment(self)
+
+		send_confirmation_msg(self)
 
 @frappe.whitelist()
 def invoice_appointment(appointment_doc):
@@ -299,10 +304,14 @@ def set_pending_appointments():
 		"('Scheduled','Open') and appointment_date < %s", today)
 
 
-def confirm_sms(doc):
-	if frappe.db.get_value("Healthcare Settings", None, "app_con") == '1':
-		message = frappe.db.get_value("Healthcare Settings", None, "app_con_msg")
-		send_message(doc, message)
+def send_confirmation_msg(doc):
+	if frappe.db.get_single_value("Healthcare Settings", "app_con"):
+		message = frappe.db.get_single_value("Healthcare Settings", "app_con_msg")
+		try:
+			send_message(doc, message)
+		except Exception:
+			frappe.log_error(frappe.get_traceback(), _("Appointment Confirmation Message Not Sent"))
+			frappe.msgprint(_("Appointment Confirmation Message Not Sent"), indicator="orange")
 
 @frappe.whitelist()
 def create_encounter(appointment):
@@ -319,34 +328,36 @@ def create_encounter(appointment):
 	return encounter.as_dict()
 
 
-def remind_appointment():
-	if frappe.db.get_value("Healthcare Settings", None, "app_rem") == '1':
-		rem_before = datetime.datetime.strptime(frappe.get_value("Healthcare Settings", None, "rem_before"), "%H:%M:%S")
-		rem_dt = datetime.datetime.now() + datetime.timedelta(
-			hours=rem_before.hour, minutes=rem_before.minute, seconds=rem_before.second)
+def set_appointment_reminder():
+	if frappe.db.get_single_value("Healthcare Settings", "app_rem"):
+		remind_before = datetime.datetime.strptime(frappe.db.get_single_value("Healthcare Settings", "rem_before"), '%H:%M:%S')
 
-		appointment_list = frappe.db.sql(
-			"select name from `tabPatient Appointment` where start_dt between %s and %s and reminded = 0 ",
-			(datetime.datetime.now(), rem_dt)
-		)
+		reminder_dt = datetime.datetime.now() + datetime.timedelta(
+			hours=remind_before.hour, minutes=remind_before.minute, seconds=remind_before.second)
 
-		for i in range(0, len(appointment_list)):
-			doc = frappe.get_doc("Patient Appointment", appointment_list[i][0])
-			message = frappe.db.get_value("Healthcare Settings", None, "app_rem_msg")
+		appointment_list = frappe.db.get_all("Patient Appointment", {
+			"appointment_datetime": ["between", (datetime.datetime.now(), reminder_dt)],
+			"reminded": 0,
+			"status": ["!=", "Cancelled"]
+		})
+
+		for appointment in appointment_list:
+			doc = frappe.get_doc('Patient Appointment', appointment.name)
+			message = frappe.db.get_single_value("Healthcare Settings", "app_rem_msg")
 			send_message(doc, message)
-			frappe.db.set_value("Patient Appointment", doc.name, "reminded",1)
+			frappe.db.set_value('Patient Appointment', doc.name, 'reminded', 1)
 
 
 def send_message(doc, message):
-	patient = frappe.get_doc("Patient", doc.patient)
-	if patient.mobile:
+	patient_mobile = frappe.db.get_value("Patient", doc.patient, "mobile")
+	if patient_mobile:
 		context = {"doc": doc, "alert": doc, "comments": None}
 		if doc.get("_comments"):
 			context["comments"] = json.loads(doc.get("_comments"))
 
 		# jinja to string convertion happens here
 		message = frappe.render_template(message, context)
-		number = [patient.mobile]
+		number = [patient_mobile]
 		send_sms(number, message)
 
 
@@ -386,5 +397,5 @@ def get_procedure_prescribed(patient):
 	return frappe.db.sql("""select pp.name, pp.procedure, pp.parent, ct.practitioner,
 	ct.encounter_date, pp.practitioner, pp.date, pp.department
 	from `tabPatient Encounter` ct, `tabProcedure Prescription` pp
-	where ct.patient='{0}' and pp.parent=ct.name and pp.appointment_booked=0
-	order by ct.creation desc""".format(patient))
+	where ct.patient=%(patient)s and pp.parent=ct.name and pp.appointment_booked=0
+	order by ct.creation desc""", {"patient": patient})

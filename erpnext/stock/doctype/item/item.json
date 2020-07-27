@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_guest_to_view": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -114,6 +113,8 @@
   "is_sub_contracted_item",
   "column_break_74",
   "customer_code",
+  "default_item_manufacturer",
+  "default_manufacturer_part_no",
   "website_section",
   "show_in_website",
   "show_variant_in_website",
@@ -343,7 +344,8 @@
   {
    "fieldname": "shelf_life_in_days",
    "fieldtype": "Int",
-   "label": "Shelf Life In Days"
+   "label": "Shelf Life In Days",
+   "mandatory_depends_on": "eval:doc.has_batch_no && doc.has_expiry_date"
   },
   {
    "default": "2099-12-31",
@@ -984,6 +986,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "depends_on": "eval:(!doc.is_item_from_hub)",
    "fieldname": "hub_publishing_sb",
    "fieldtype": "Section Break",
@@ -1037,15 +1040,26 @@
    "fieldname": "auto_create_assets",
    "fieldtype": "Check",
    "label": "Auto Create Assets on Purchase"
+  },
+  {
+   "fieldname": "default_item_manufacturer",
+   "fieldtype": "Data",
+   "label": "Default Item Manufacturer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "default_manufacturer_part_no",
+   "fieldtype": "Data",
+   "label": "Default Manufacturer Part No",
+   "read_only": 1
   }
  ],
  "has_web_view": 1,
  "icon": "fa fa-tag",
  "idx": 2,
  "image_field": "image",
- "links": [],
  "max_attachments": 1,
- "modified": "2020-01-02 19:13:59.295963",
+ "modified": "2020-07-01 12:43:10.656530",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

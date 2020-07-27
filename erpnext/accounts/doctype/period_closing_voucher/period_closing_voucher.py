@@ -7,6 +7,8 @@ from frappe.utils import flt
 from frappe import _
 from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (get_accounting_dimensions,
+	get_dimension_filters)
 
 class PeriodClosingVoucher(AccountsController):
 	def validate(self):
@@ -49,7 +51,15 @@ class PeriodClosingVoucher(AccountsController):
 	def make_gl_entries(self):
 		gl_entries = []
 		net_pl_balance = 0
-		pl_accounts = self.get_pl_balances()
+		dimension_fields = ['t1.cost_center']
+
+		accounting_dimensions = get_accounting_dimensions()
+		for dimension in accounting_dimensions:
+			dimension_fields.append('t1.{0}'.format(dimension))
+
+		dimension_filters, default_dimensions = get_dimension_filters()
+
+		pl_accounts = self.get_pl_balances(dimension_fields)
 
 		for acc in pl_accounts:
 			if flt(acc.balance_in_company_currency):
@@ -65,34 +75,41 @@ class PeriodClosingVoucher(AccountsController):
 						if flt(acc.balance_in_account_currency) > 0 else 0,
 					"credit": abs(flt(acc.balance_in_company_currency)) \
 						if flt(acc.balance_in_company_currency) > 0 else 0
-				}))
+				}, item=acc))
 
 				net_pl_balance += flt(acc.balance_in_company_currency)
 
 		if net_pl_balance:
 			cost_center = frappe.db.get_value("Company", self.company, "cost_center")
-			gl_entries.append(self.get_gl_dict({
+			gl_entry = self.get_gl_dict({
 				"account": self.closing_account_head,
 				"debit_in_account_currency": abs(net_pl_balance) if net_pl_balance > 0 else 0,
 				"debit": abs(net_pl_balance) if net_pl_balance > 0 else 0,
 				"credit_in_account_currency": abs(net_pl_balance) if net_pl_balance < 0 else 0,
 				"credit": abs(net_pl_balance) if net_pl_balance < 0 else 0,
 				"cost_center": cost_center
-			}))
+			})
+
+			for dimension in accounting_dimensions:
+				gl_entry.update({
+					dimension: default_dimensions.get(self.company, {}).get(dimension)
+				})
+
+			gl_entries.append(gl_entry)
 
 		from erpnext.accounts.general_ledger import make_gl_entries
 		make_gl_entries(gl_entries)
 
-	def get_pl_balances(self):
+	def get_pl_balances(self, dimension_fields):
 		"""Get balance for pl accounts"""
 		return frappe.db.sql("""
 			select
-				t1.account, t1.cost_center, t2.account_currency,
+				t1.account, t2.account_currency, {dimension_fields},
 				sum(t1.debit_in_account_currency) - sum(t1.credit_in_account_currency) as balance_in_account_currency,
 				sum(t1.debit) - sum(t1.credit) as balance_in_company_currency
 			from `tabGL Entry` t1, `tabAccount` t2
 			where t1.account = t2.name and t2.report_type = 'Profit and Loss'
 			and t2.docstatus < 2 and t2.company = %s
 			and t1.posting_date between %s and %s
-			group by t1.account, t1.cost_center
-		""", (self.company, self.get("year_start_date"), self.posting_date), as_dict=1)
+			group by t1.account, {dimension_fields}
+		""".format(dimension_fields = ', '.join(dimension_fields)), (self.company, self.get("year_start_date"), self.posting_date), as_dict=1)

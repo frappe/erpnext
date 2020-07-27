@@ -4,18 +4,28 @@
 
 from __future__ import unicode_literals
 from functools import reduce
-import frappe, csv
+import frappe, csv, os
 from frappe import _
-from frappe.utils import cstr
+from frappe.utils import cstr, cint
 from frappe.model.document import Document
 from frappe.utils.csvutils import UnicodeWriter
 from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts, build_tree_from_json
+from frappe.utils.xlsxutils import read_xlsx_file_from_attached_file, read_xls_file_from_attached_file
 
 class ChartofAccountsImporter(Document):
 	pass
 
 @frappe.whitelist()
 def validate_company(company):
+	parent_company, allow_account_creation_against_child_company = frappe.db.get_value('Company',
+		{'name': company}, ['parent_company',
+		'allow_account_creation_against_child_company'])
+
+	if parent_company and (not allow_account_creation_against_child_company):
+		frappe.throw(_("""{0} is a child company. Please import accounts against parent company
+			or enable {1} in company master""").format(frappe.bold(company),
+			frappe.bold('Allow Account Creation Against Child Company')), title='Wrong Company')
+
 	if frappe.db.get_all('GL Entry', {"company": company}, "name", limit=1):
 		return False
 
@@ -25,42 +35,85 @@ def import_coa(file_name, company):
 	unset_existing_data(company)
 
 	# create accounts
-	forest = build_forest(generate_data_from_csv(file_name))
+	file_doc, extension = get_file(file_name)
+
+	if extension  == 'csv':
+		data = generate_data_from_csv(file_doc)
+	else:
+		data = generate_data_from_excel(file_doc, extension)
+
+	forest = build_forest(data)
 	create_charts(company, custom_chart=forest)
 
 	# trigger on_update for company to reset default accounts
 	set_default_accounts(company)
 
-def generate_data_from_csv(file_name, as_dict=False):
-	''' read csv file and return the generated nested tree '''
-	if not file_name.endswith('.csv'):
-		frappe.throw("Only CSV files can be used to for importing data. Please check the file format you are trying to upload")
+def get_file(file_name):
+	file_doc = frappe.get_doc("File", {"file_url": file_name})
+	parts = file_doc.get_extension()
+	extension = parts[1]
+	extension = extension.lstrip(".")
 
-	file_doc = frappe.get_doc('File', {"file_url": file_name})
+	if extension not in ('csv',  'xlsx', 'xls'):
+		frappe.throw("Only CSV and Excel files can be used to for importing data. Please check the file format you are trying to upload")
+
+	return  file_doc, extension
+
+def generate_data_from_csv(file_doc, as_dict=False):
+	''' read csv file and return the generated nested tree '''
+
 	file_path = file_doc.get_full_path()
 
 	data = []
 	with open(file_path, 'r') as in_file:
 		csv_reader = list(csv.reader(in_file))
-		headers = csv_reader[1][1:]
-		del csv_reader[0:2] # delete top row and headers row
+		headers = csv_reader[0]
+		del csv_reader[0] # delete top row and headers row
 
 		for row in csv_reader:
 			if as_dict:
-				data.append({frappe.scrub(header): row[index+1] for index, header in enumerate(headers)})
+				data.append({frappe.scrub(header): row[index] for index, header in enumerate(headers)})
 			else:
-				if not row[2]: row[2] = row[1]
-				data.append(row[1:])
+				if not row[1]: row[1] = row[0]
+				data.append(row)
 
 	# convert csv data
+	return data
+
+def generate_data_from_excel(file_doc, extension, as_dict=False):
+	content = file_doc.get_content()
+
+	if extension == "xlsx":
+		rows = read_xlsx_file_from_attached_file(fcontent=content)
+	elif extension == "xls":
+		rows = read_xls_file_from_attached_file(content)
+
+	data = []
+	headers = rows[0]
+	del rows[0]
+
+	for row in rows:
+		if as_dict:
+			data.append({frappe.scrub(header): row[index] for index, header in enumerate(headers)})
+		else:
+			if not row[1]: row[1] = row[0]
+			data.append(row)
+
 	return data
 
 @frappe.whitelist()
 def get_coa(doctype, parent, is_root=False, file_name=None):
 	''' called by tree view (to fetch node's children) '''
 
+	file_doc, extension = get_file(file_name)
 	parent = None if parent==_('All Accounts') else parent
-	forest = build_forest(generate_data_from_csv(file_name))
+
+	if extension  == 'csv':
+		data = generate_data_from_csv(file_doc)
+	else:
+		data = generate_data_from_excel(file_doc, extension)
+
+	forest = build_forest(data)
 	accounts = build_tree_from_json("", chart_data=forest) # returns alist of dict in a tree render-able form
 
 	# filter out to show data for the selected node only
@@ -91,6 +144,8 @@ def build_forest(data):
 
 	# returns the path of any node in list format
 	def return_parent(data, child):
+		from frappe import _
+
 		for row in data:
 			account_name, parent_account = row[0:2]
 			if parent_account == account_name == child:
@@ -98,8 +153,9 @@ def build_forest(data):
 			elif account_name == child:
 				parent_account_list = return_parent(data, parent_account)
 				if not parent_account_list:
-					frappe.throw(_("The parent account {0} does not exists")
-						.format(parent_account))
+					frappe.throw(_("The parent account {0} does not exists in the uploaded template").format(
+						frappe.bold(parent_account)))
+
 				return [child] + parent_account_list
 
 	charts_map, paths = {}, []
@@ -108,13 +164,13 @@ def build_forest(data):
 	error_messages = []
 
 	for i in data:
-		account_name, _, account_number, is_group, account_type, root_type = i
+		account_name, dummy, account_number, is_group, account_type, root_type = i
 
 		if not account_name:
 			error_messages.append("Row {0}: Please enter Account Name".format(line_no))
 
 		charts_map[account_name] = {}
-		if is_group == 1: charts_map[account_name]["is_group"] = is_group
+		if cint(is_group) == 1: charts_map[account_name]["is_group"] = is_group
 		if account_type: charts_map[account_name]["account_type"] = account_type
 		if root_type: charts_map[account_name]["root_type"] = root_type
 		if account_number: charts_map[account_name]["account_number"] = account_number
@@ -132,24 +188,94 @@ def build_forest(data):
 
 	return out
 
+def build_response_as_excel(writer):
+	filename = frappe.generate_hash("", 10)
+	with open(filename, 'wb') as f:
+		f.write(cstr(writer.getvalue()).encode('utf-8'))
+	f = open(filename)
+	reader = csv.reader(f)
+
+	from frappe.utils.xlsxutils import make_xlsx
+	xlsx_file = make_xlsx(reader, "Chart Of Accounts Importer Template")
+
+	f.close()
+	os.remove(filename)
+
+	# write out response as a xlsx type
+	frappe.response['filename'] = 'coa_importer_template.xlsx'
+	frappe.response['filecontent'] = xlsx_file.getvalue()
+	frappe.response['type'] = 'binary'
+
 @frappe.whitelist()
-def download_template():
+def download_template(file_type, template_type):
 	data = frappe._dict(frappe.local.form_dict)
+
+	writer = get_template(template_type)
+
+	if file_type == 'CSV':
+		# download csv file
+		frappe.response['result'] = cstr(writer.getvalue())
+		frappe.response['type'] = 'csv'
+		frappe.response['doctype'] = 'Chart of Accounts Importer'
+	else:
+		build_response_as_excel(writer)
+
+def get_template(template_type):
+
 	fields = ["Account Name", "Parent Account", "Account Number", "Is Group", "Account Type", "Root Type"]
 	writer = UnicodeWriter()
+	writer.writerow(fields)
 
-	writer.writerow([_('Chart of Accounts Template')])
-	writer.writerow([_("Column Labels : ")] + fields)
-	writer.writerow([_("Start entering data from here : ")])
+	if template_type == 'Blank Template':
+		for root_type in  get_root_types():
+			writer.writerow(['', '', '', 1, '', root_type])
 
-	# download csv file
-	frappe.response['result'] = cstr(writer.getvalue())
-	frappe.response['type'] = 'csv'
-	frappe.response['doctype'] = data.get('doctype')
+		for account in get_mandatory_group_accounts():
+			writer.writerow(['', '', '', 1, account, "Asset"])
+
+		for account_type in get_mandatory_account_types():
+			writer.writerow(['', '', '', 0, account_type.get('account_type'), account_type.get('root_type')])
+	else:
+		writer = get_sample_template(writer)
+
+	return writer
+
+def get_sample_template(writer):
+	template = [
+		["Application Of Funds(Assets)", "", "", 1, "", "Asset"],
+		["Sources Of Funds(Liabilities)", "", "", 1, "", "Liability"],
+		["Equity", "", "", 1, "", "Equity"],
+		["Expenses", "", "", 1, "", "Expense"],
+		["Income", "", "", 1, "", "Income"],
+		["Bank Accounts", "Application Of Funds(Assets)", "", 1, "Bank", "Asset"],
+		["Cash In Hand", "Application Of Funds(Assets)", "", 1, "Cash", "Asset"],
+		["Stock Assets", "Application Of Funds(Assets)", "", 1, "Stock", "Asset"],
+		["Cost Of Goods Sold", "Expenses", "", 0, "Cost of Goods Sold", "Expense"],
+		["Asset Depreciation", "Expenses", "", 0, "Depreciation", "Expense"],
+		["Fixed Assets", "Application Of Funds(Assets)", "", 0, "Fixed Asset", "Asset"],
+		["Accounts Payable", "Sources Of Funds(Liabilities)", "", 0, "Payable", "Liability"],
+		["Accounts Receivable", "Application Of Funds(Assets)", "", 1, "Receivable", "Asset"],
+		["Stock Expenses", "Expenses", "", 0, "Stock Adjustment", "Expense"],
+		["Sample Bank", "Bank Accounts", "", 0, "Bank", "Asset"],
+		["Cash", "Cash In Hand", "", 0, "Cash", "Asset"],
+		["Stores", "Stock Assets", "", 0, "Stock", "Asset"],
+	]
+
+	for row in template:
+		writer.writerow(row)
+
+	return writer
+
 
 @frappe.whitelist()
 def validate_accounts(file_name):
-	accounts = generate_data_from_csv(file_name, as_dict=True)
+
+	file_doc, extension = get_file(file_name)
+
+	if extension  == 'csv':
+		accounts = generate_data_from_csv(file_doc, as_dict=True)
+	else:
+		accounts = generate_data_from_excel(file_doc, extension, as_dict=True)
 
 	accounts_dict = {}
 	for account in accounts:
@@ -174,11 +300,37 @@ def validate_root(accounts):
 	for account in roots:
 		if not account.get("root_type") and account.get("account_name"):
 			error_messages.append("Please enter Root Type for account- {0}".format(account.get("account_name")))
-		elif account.get("root_type") not in ("Asset", "Liability", "Expense", "Income", "Equity") and account.get("account_name"):
+		elif account.get("root_type") not in get_root_types() and account.get("account_name"):
 			error_messages.append("Root Type for {0} must be one of the Asset, Liability, Income, Expense and Equity".format(account.get("account_name")))
 
 	if error_messages:
 		return "<br>".join(error_messages)
+
+def get_root_types():
+	return ('Asset', 'Liability', 'Expense', 'Income', 'Equity')
+
+def get_report_type(root_type):
+	if root_type in ('Asset', 'Liability', 'Equity'):
+		return 'Balance Sheet'
+	else:
+		return 'Profit and Loss'
+
+def get_mandatory_group_accounts():
+	return ('Bank', 'Cash', 'Stock')
+
+def get_mandatory_account_types():
+	return [
+		{'account_type': 'Cost of Goods Sold', 'root_type': 'Expense'},
+		{'account_type': 'Depreciation', 'root_type': 'Expense'},
+		{'account_type': 'Fixed Asset', 'root_type': 'Asset'},
+		{'account_type': 'Payable', 'root_type': 'Liability'},
+		{'account_type': 'Receivable', 'root_type': 'Asset'},
+		{'account_type': 'Stock Adjustment', 'root_type': 'Expense'},
+		{'account_type': 'Bank', 'root_type': 'Asset'},
+		{'account_type': 'Cash', 'root_type': 'Asset'},
+		{'account_type': 'Stock', 'root_type': 'Asset'}
+	]
+
 
 def validate_account_types(accounts):
 	account_types_for_ledger = ["Cost of Goods Sold", "Depreciation", "Fixed Asset", "Payable", "Receivable", "Stock Adjustment"]
