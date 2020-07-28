@@ -57,6 +57,35 @@ class Membership(Document):
 			self.load_from_db()
 			self.db_set('paid', 1)
 
+	def generate_and_send_invoice(self):
+		if not self.paid:
+			frappe.throw(_("The payment for this membership is not paid. To generate invoice mark the paid check"))
+
+		member = frappe.get_doc("Member", self.member)
+		plan = frappe.get_doc("Membership Type", self.membership_type)
+		settings = frappe.get_doc("Membership Settings")
+
+		invoice = make_invoice(self, member, plan, settings)
+
+def make_invoice(membership, member, plan, settings):
+	invoice = frappe.get_doc({
+		'doctype': 'Sales Invoice',
+		'customer': member.customer,
+		'debit_to': settings.debit_account,
+		'currency': membership.currency,
+		'is_pos': 0,
+		'items': [
+			{
+				'item_code': plan.linked_item,
+				'rate': membership.amount,
+				'qty': 1
+			}
+		]
+	})
+
+	invoice.insert(ignore_permissions=True)
+	invoice.submit()
+
 def get_member_based_on_subscription(subscription_id, email):
 	members = frappe.get_all("Member", filters={
 					'subscription_id': subscription_id,
