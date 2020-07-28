@@ -11,8 +11,15 @@
   "billing_frequency",
   "webhook_secret",
   "column_break_6",
+  "print_format",
+  "company",
+  "debit_account",
+  "column_break_9",
   "enable_auto_invoicing",
-  "print_format"
+  "send_invoice",
+  "section_break_10",
+  "new_member",
+  "renewal"
  ],
  "fields": [
   {
@@ -47,7 +54,8 @@
   },
   {
    "fieldname": "column_break_6",
-   "fieldtype": "Column Break"
+   "fieldtype": "Section Break",
+   "label": "Invoicing"
   },
   {
    "default": "0",
@@ -56,18 +64,57 @@
    "label": "Enable Auto Invoicing"
   },
   {
-   "depends_on": "eval:doc.enable_auto_invoicing",
    "fieldname": "print_format",
    "fieldtype": "Link",
    "label": "Print Format",
-   "mandatory_depends_on": "eval:doc.enable_auto_invoicing",
    "options": "Print Format"
+  },
+  {
+   "fieldname": "new_member",
+   "fieldtype": "Text Editor",
+   "label": "Message for New Member",
+   "mandatory_depends_on": "eval:doc.send_invoice"
+  },
+  {
+   "fieldname": "renewal",
+   "fieldtype": "Text Editor",
+   "label": "Message for Renewal",
+   "mandatory_depends_on": "eval:doc.send_invoice"
+  },
+  {
+   "depends_on": "eval:doc.company",
+   "fieldname": "debit_account",
+   "fieldtype": "Link",
+   "label": "Debit Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:doc.send_invoice",
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "default": "0",
+   "fieldname": "send_invoice",
+   "fieldtype": "Check",
+   "label": "Send Email with Invoice"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-07-28 11:01:40.125896",
+ "modified": "2020-07-28 12:18:35.289893",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership Settings",
