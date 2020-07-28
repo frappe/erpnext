@@ -8,7 +8,7 @@ from frappe.model.document import Document
 from frappe import _
 from frappe.utils import time_diff_in_hours, getdate, get_weekdays, add_to_date, get_time, get_datetime, \
 	time_diff_in_seconds, get_time_zone, to_timedelta, get_datetime_str, get_link_to_form
-from datetime import datetime, timedelta
+from datetime import datetime
 from erpnext.support.doctype.issue.issue import get_holidays
 
 class ServiceLevelAgreement(Document):
@@ -197,7 +197,6 @@ class ServiceLevelAgreement(Document):
 					"fieldname": field.get("fieldname"),
 					"fieldtype": field.get("fieldtype"),
 					"collapsible": field.get("collapsible"),
-					"hidden": field.get("hidden"),
 					"options": field.get("options"),
 					"read_only": field.get("read_only"),
 					"hidden": field.get("hidden"),
@@ -347,9 +346,8 @@ def set_documents_with_active_service_level_agreement():
 
 
 def apply(doc, method=None):
-	"""
-		Applies SLA to document on validate
-	"""
+	"Applies SLA to document on validate"
+
 	if frappe.flags.in_patch or frappe.flags.in_install or frappe.flags.in_setup_wizard or \
 		not doc.doctype in get_documents_with_active_service_level_agreement():
 
@@ -554,7 +552,7 @@ def reset_service_level_agreement(doc, reason, user):
 	}).insert(ignore_permissions=True)
 
 	doc.service_level_agreement_creation = now_datetime(doc.get("owner"))
-	doc.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
+	doc.set_response_and_resolution_time(priority=doc.priority, service_level_agreement=self.service_level_agreement)
 	doc.agreement_fulfilled = "Ongoing"
 	doc.save()
 
