@@ -28,9 +28,6 @@ class ServiceLevelAgreement(Document):
 
 			priorities.append(priority.priority)
 
-			if priority.default_priority:
-				default_priority.append(priority.default_priority)
-
 			response = priority.response_time
 			resolution = priority.resolution_time
 
@@ -218,7 +215,6 @@ class ServiceLevelAgreement(Document):
 					"fieldtype": field.get("fieldtype"),
 					"insert_after": "append",
 					"collapsible": field.get("collapsible"),
-					"hidden": field.get("hidden"),
 					"options": field.get("options"),
 					"read_only": field.get("read_only"),
 					"hidden": field.get("hidden"),
@@ -346,7 +342,7 @@ def set_documents_with_active_service_level_agreement():
 
 
 def apply(doc, method=None):
-	"Applies SLA to document on validate"
+	# Applies SLA to document on validate
 
 	if frappe.flags.in_patch or frappe.flags.in_install or frappe.flags.in_setup_wizard or \
 		not doc.doctype in get_documents_with_active_service_level_agreement():
@@ -552,7 +548,7 @@ def reset_service_level_agreement(doc, reason, user):
 	}).insert(ignore_permissions=True)
 
 	doc.service_level_agreement_creation = now_datetime(doc.get("owner"))
-	doc.set_response_and_resolution_time(priority=doc.priority, service_level_agreement=self.service_level_agreement)
+	doc.set_response_and_resolution_time(priority=doc.priority, service_level_agreement=doc.service_level_agreement)
 	doc.agreement_fulfilled = "Ongoing"
 	doc.save()
 
@@ -636,9 +632,8 @@ def handle_hold_time(doc, meta, status):
 
 
 def update_agreement_fulfilled_on_custom_status(doc):
-	"""
-		Update Agreement Fulfilled status using Custom Scripts for Custom Status
-	"""
+	# Update Agreement Fulfilled status using Custom Scripts for Custom Status
+
 	meta = frappe.get_meta(doc.doctype)
 	if meta.has_field("first_responded_on") and not doc.first_responded_on:
 		# first_responded_on set when first reply is sent to customer
