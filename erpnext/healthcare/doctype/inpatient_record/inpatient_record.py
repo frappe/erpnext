@@ -33,7 +33,7 @@ class InpatientRecord(Document):
 		for entry in self.inpatient_occupancies:
 			if entry.check_in and entry.check_out and \
 				get_datetime(entry.check_in) > get_datetime(entry.check_out):
-				frappe.throw(_('Check Out datetime cannot be less than Check In datetime for entry #{0}').format(entry.idx))
+				frappe.throw(_('Row #{0}: Check Out datetime cannot be less than Check In datetime').format(entry.idx))
 
 	def validate_already_scheduled_or_admitted(self):
 		query = """
