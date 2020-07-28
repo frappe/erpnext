@@ -19,7 +19,12 @@ frappe.ui.form.on("Membership Settings", {
 			};
 		});
 
+		let docs_url = "https://docs.erpnext.com/docs/user/manual/en/non_profit/membership";
+
+		frm.set_intro(__("You can learn more about memberships in the manual. ") + `<a href='${docs_url}'>${__('ERPNext Docs')}</a>`, true);
+
 		frm.trigger("add_generate_button");
+		frm.trigger("add_copy_buttonn");
 	},
 
 	add_generate_button: function(frm) {
@@ -36,4 +41,12 @@ frappe.ui.form.on("Membership Settings", {
 			});
 		});
 	},
+
+	add_copy_buttonn: function(frm) {
+		if (frm.doc.webhook_secret) {
+			frm.add_custom_button(__("Copy Webhook URL"), () => {
+				frappe.utils.copy_to_clipboard(`https://${frappe.boot.sitename}/api/method/erpnext.non_profit.doctype.membership.membership.trigger_razorpay_subscription`);
+			});
+		}
+	}
 });
