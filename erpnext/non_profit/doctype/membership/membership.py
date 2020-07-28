@@ -67,6 +67,25 @@ class Membership(Document):
 
 		invoice = make_invoice(self, member, plan, settings)
 
+		if invoice and settings.send_invoice and self.membership_status in ["New", "Current"]:
+			print("Sending")
+			message = settings.new_message if self.membership_status == "New" else settings.renewal
+			email = member.email_id if member.email_id else member.email
+
+			email_args = {
+				"recipients": [email],
+				"message": message,
+				"subject": _('Here is your invoice'),
+				"attachments": [frappe.attach_print("Sales Invoice", invoice.name, print_format=settings.print_format)],
+				"reference_doctype": self.doctype,
+				"reference_name": self.name
+			}
+			if not frappe.flags.in_test:
+				frappe.enqueue(method=frappe.sendmail, queue='short', timeout=300, is_async=True, **email_args)
+			else:
+				frappe.sendmail(**email_args)
+
+
 def make_invoice(membership, member, plan, settings):
 	invoice = frappe.get_doc({
 		'doctype': 'Sales Invoice',
@@ -85,6 +104,8 @@ def make_invoice(membership, member, plan, settings):
 
 	invoice.insert(ignore_permissions=True)
 	invoice.submit()
+
+	return invoice
 
 def get_member_based_on_subscription(subscription_id, email):
 	members = frappe.get_all("Member", filters={
