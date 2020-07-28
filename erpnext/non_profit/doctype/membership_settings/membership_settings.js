@@ -10,6 +10,15 @@ frappe.ui.form.on("Membership Settings", {
 				})
 			});
 		}
+
+		frm.set_query('print_format', function(doc) {
+			return {
+				filters: {
+					"doc_type": "Sales Invoice"
+				}
+			};
+		});
+
 		frm.trigger("add_generate_button");
 	},
 
