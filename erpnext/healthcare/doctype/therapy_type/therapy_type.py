@@ -21,6 +21,15 @@ class TherapyType(Document):
 		if self.change_in_item:
 			self.update_item_and_item_price()
 
+	def on_trash(self):
+		if self.item:
+			try:
+				item = self.item
+				self.db_set('item', '')
+				frappe.delete_doc('Item', item)
+			except:
+				frappe.throw(_('Not permitted. Please disable the Therapy Type'), title = _('Cannot Delete'))
+
 	def enable_disable_item(self):
 		if self.is_billable:
 			if self.disabled:

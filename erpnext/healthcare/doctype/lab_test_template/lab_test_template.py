@@ -39,12 +39,13 @@ class LabTestTemplate(Document):
 		self.reload()
 
 	def on_trash(self):
-		# Remove template reference from item and disable item
 		if self.item:
 			try:
-				frappe.delete_doc('Item', self.item)
-			except Exception:
-				frappe.throw(_('Not permitted. Please disable the Lab Test Template'))
+				item = self.item
+				self.db_set('item', '')
+				frappe.delete_doc('Item', item)
+			except:
+				frappe.throw(_('Not permitted. Please disable the Lab Test Template'), title = _('Cannot Delete'))
 
 	def enable_disable_item(self):
 		if self.is_billable:
