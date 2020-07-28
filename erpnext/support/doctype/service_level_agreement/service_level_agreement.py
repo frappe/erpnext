@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from frappe.utils import time_diff_in_hours, getdate, get_weekdays, add_to_date, get_time, get_datetime, \
-	time_diff_in_seconds, get_time_zone, to_timedelta, get_datetime_str
+	time_diff_in_seconds, get_time_zone, to_timedelta, get_datetime_str, get_link_to_form
 from datetime import datetime, timedelta
 from erpnext.support.doctype.issue.issue import get_holidays
 
@@ -22,10 +22,20 @@ class ServiceLevelAgreement(Document):
 		priorities = []
 
 		for priority in self.priorities:
+			# Check if response and resolution time is set for every priority
+			if not priority.response_time or not priority.resolution_time:
+				frappe.throw(_("Set Response Time and Resolution Time for Priority {0} in row {1}.").format(priority.priority, priority.idx))
+
 			priorities.append(priority.priority)
 
-			if priority.response_time > priority.resolution_time:
-				frappe.throw(_("Response Time for {0} at index {1} can't be greater than Resolution Time.").format(priority.priority, priority.idx))
+			if priority.default_priority:
+				default_priority.append(priority.default_priority)
+
+			response = priority.response_time
+			resolution = priority.resolution_time
+
+			if response > resolution:
+				frappe.throw(_("Response Time for {0} priority in row {1} can't be greater than Resolution Time.").format(priority.priority, priority.idx))
 
 		# Check if repeated priority
 		if not len(set(priorities)) == len(priorities):
@@ -56,8 +66,9 @@ class ServiceLevelAgreement(Document):
 			frappe.throw(_("Workday {0} has been repeated.").format(repeated_days))
 
 	def validate_doc(self):
-		if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
-			frappe.throw(_("Service Level Agreement tracking is not enabled."))
+		if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement") and self.enable:
+			frappe.throw(_("{0} is not enabled in {1}").format(frappe.bold("Track Service Level Agreement"),
+				get_link_to_form("Support Settings", "Support Settings")))
 
 		if self.default_service_level_agreement and frappe.db.exists("Service Level Agreement", \
 			{"document_type": self.document_type, "default_service_level_agreement": "1", "name": ["!=", self.name]}):

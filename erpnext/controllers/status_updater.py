@@ -85,6 +85,12 @@ status_map = {
 	"Bank Transaction": [
 		["Unreconciled", "eval:self.docstatus == 1 and self.unallocated_amount>0"],
 		["Reconciled", "eval:self.docstatus == 1 and self.unallocated_amount<=0"]
+	],
+	"POS Opening Entry": [
+		["Draft", None],
+		["Open", "eval:self.docstatus == 1 and not self.pos_closing_entry"],
+		["Closed", "eval:self.docstatus == 1 and self.pos_closing_entry"],
+		["Cancelled", "eval:self.docstatus == 2"],
 	]
 }
 
