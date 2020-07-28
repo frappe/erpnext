@@ -23,6 +23,7 @@
   "account_details_section",
   "iban",
   "column_break_12",
+  "branch_code",
   "bank_account_no",
   "address_and_contact",
   "address_html",
@@ -197,10 +198,16 @@
    "fieldtype": "Data",
    "label": "Mask",
    "read_only": 1
+  },
+  {
+   "fieldname": "branch_code",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Branch Code"
   }
  ],
  "links": [],
- "modified": "2020-04-06 21:00:45.379804",
+ "modified": "2020-07-17 13:59:50.795412",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",

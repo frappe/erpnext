@@ -68,6 +68,9 @@ class OpeningInvoiceCreationTool(Document):
 		if not self.company:
 			frappe.throw(_("Please select the Company"))
 
+		company_details = frappe.get_cached_value('Company', self.company,
+			["default_currency", "default_letter_head"], as_dict=1) or {}
+
 		for row in self.invoices:
 			if not row.qty:
 				row.qty = 1.0
@@ -98,6 +101,12 @@ class OpeningInvoiceCreationTool(Document):
 			args = self.get_invoice_dict(row=row)
 			if not args:
 				continue
+
+			if company_details:
+				args.update({
+					"currency": company_details.get("default_currency"),
+					"letter_head": company_details.get("default_letter_head")
+				})
 
 			doc = frappe.get_doc(args).insert()
 			doc.submit()
@@ -172,8 +181,7 @@ class OpeningInvoiceCreationTool(Document):
 			"due_date": row.due_date,
 			"posting_date": row.posting_date,
 			frappe.scrub(party_type): row.party,
-			"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice",
-			"currency": frappe.get_cached_value('Company',  self.company,  "default_currency")
+			"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice"
 		})
 
 		accounting_dimension = get_accounting_dimensions()

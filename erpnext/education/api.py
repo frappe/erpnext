@@ -104,6 +104,7 @@ def make_attendance_records(student, student_name, status, course_schedule=None,
 	student_attendance.date = date
 	student_attendance.status = status
 	student_attendance.save()
+	student_attendance.submit()
 
 
 @frappe.whitelist()
@@ -151,7 +152,7 @@ def get_fee_components(fee_structure):
 	:param fee_structure: Fee Structure.
 	"""
 	if fee_structure:
-		fs = frappe.get_list("Fee Component", fields=["fees_category", "amount"] , filters={"parent": fee_structure}, order_by= "idx")
+		fs = frappe.get_list("Fee Component", fields=["fees_category", "description", "amount"] , filters={"parent": fee_structure}, order_by= "idx")
 		return fs
 
 
@@ -363,9 +364,9 @@ def get_current_enrollment(student, academic_year=None):
 		select
 			name as program_enrollment, student_name, program, student_batch_name as student_batch,
 			student_category, academic_term, academic_year
-		from 
+		from
 			`tabProgram Enrollment`
-		where 
+		where
 			student = %s and academic_year = %s
 		order by creation''', (student, current_academic_year), as_dict=1)
 

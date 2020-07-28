@@ -207,7 +207,7 @@ class SalarySlip(TransactionBase):
 				frappe.throw(_("There are more holidays than working days this month."))
 
 		if not payroll_based_on:
-			frappe.throw(_("Please set Payroll based on in HR settings"))
+			frappe.throw(_("Please set Payroll based on in Payroll settings"))
 
 		if payroll_based_on == "Attendance":
 			actual_lwp, absent = self.calculate_lwp_and_absent_days_based_on_attendance(holidays)
@@ -244,15 +244,13 @@ class SalarySlip(TransactionBase):
 					for holiday in holidays:
 						if not frappe.db.exists("Attendance", {"employee": self.employee, "attendance_date": holiday, "docstatus": 1 }):
 							self.payment_days += 1
-
-
 		else:
 			self.payment_days = 0
 
 	def get_unmarked_days(self):
 		marked_days = frappe.get_all("Attendance", filters = {
-					"attendance_date": ["between", ['2020-05-1',"2020-05-30"]],
-					"employee": 'HR-EMP-00003',
+					"attendance_date": ["between", [self.start_date, self.end_date]],
+					"employee": self.employee,
 					"docstatus": 1
 				}, fields = ["COUNT(*) as marked_days"])[0].marked_days
 
@@ -871,10 +869,10 @@ class SalarySlip(TransactionBase):
 
 		# other taxes and charges on income tax
 		for d in tax_slab.other_taxes_and_charges:
-			if flt(d.min_taxable_income) and flt(d.min_taxable_income) > tax_amount:
+			if flt(d.min_taxable_income) and flt(d.min_taxable_income) > annual_taxable_earning:
 				continue
 
-			if flt(d.max_taxable_income) and flt(d.max_taxable_income) < tax_amount:
+			if flt(d.max_taxable_income) and flt(d.max_taxable_income) < annual_taxable_earning:
 				continue
 
 			tax_amount += tax_amount * flt(d.percent) / 100

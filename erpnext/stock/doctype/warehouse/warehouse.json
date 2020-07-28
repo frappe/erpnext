@@ -10,12 +10,14 @@
  "field_order": [
   "warehouse_detail",
   "warehouse_name",
+  "column_break_3",
+  "warehouse_type",
+  "parent_warehouse",
   "is_group",
-  "company",
-  "disabled",
   "column_break_4",
   "account",
-  "warehouse_type",
+  "company",
+  "disabled",
   "address_and_contact",
   "address_html",
   "column_break_10",
@@ -31,7 +33,6 @@
   "state",
   "pin",
   "tree_details",
-  "parent_warehouse",
   "lft",
   "rgt",
   "old_parent"
@@ -91,6 +92,7 @@
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "address_and_contact",
    "fieldtype": "Section Break",
    "label": "Address and Contact"
@@ -224,13 +226,17 @@
    "fieldtype": "Link",
    "label": "Warehouse Type",
    "options": "Warehouse Type"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2020-03-18 18:11:53.282358",
+ "modified": "2020-07-16 15:43:50.653256",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",

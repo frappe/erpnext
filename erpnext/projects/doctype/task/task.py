@@ -7,10 +7,11 @@ import json
 
 import frappe
 from frappe import _, throw
-from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate, today
+from frappe.desk.form.assign_to import clear, close_all_assignments
+from frappe.model.mapper import get_mapped_doc
+from frappe.utils import add_days, cstr, date_diff, get_link_to_form, getdate, today, flt
 from frappe.utils.nestedset import NestedSet
-from frappe.desk.form.assign_to import close_all_assignments, clear
-from frappe.utils import date_diff
+
 
 class CircularReferenceError(frappe.ValidationError): pass
 class EndDateCannotBeGreaterThanProjectEndDateError(frappe.ValidationError): pass
@@ -62,10 +63,10 @@ class Task(NestedSet):
 			close_all_assignments(self.doctype, self.name)
 
 	def validate_progress(self):
-		if (self.progress or 0) > 100:
+		if flt(self.progress or 0) > 100:
 			frappe.throw(_("Progress % for a task cannot be more than 100."))
 
-		if self.progress == 100:
+		if flt(self.progress) == 100:
 			self.status = 'Completed'
 
 		if self.status == 'Completed':
@@ -174,6 +175,9 @@ class Task(NestedSet):
 
 		self.update_nsm_model()
 
+	def after_delete(self):
+		self.update_project()
+
 	def update_status(self):
 		if self.status not in ('Cancelled', 'Completed') and self.exp_end_date:
 			from datetime import datetime
@@ -188,6 +192,7 @@ def check_if_child_exists(name):
 	return child_tasks
 
 
+@frappe.whitelist()
 def get_project(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
 	return frappe.db.sql(""" select name from `tabProject`
@@ -218,6 +223,26 @@ def set_tasks_as_overdue():
 			if getdate(task.review_date) > getdate(today()):
 				continue
 		frappe.get_doc("Task", task.name).update_status()
+
+
+@frappe.whitelist()
+def make_timesheet(source_name, target_doc=None, ignore_permissions=False):
+	def set_missing_values(source, target):
+		target.append("time_logs", {
+			"hours": source.actual_time,
+			"completed": source.status == "Completed",
+			"project": source.project,
+			"task": source.name
+		})
+
+	doclist = get_mapped_doc("Task", source_name, {
+			"Task": {
+				"doctype": "Timesheet"
+			}
+		}, target_doc, postprocess=set_missing_values, ignore_permissions=ignore_permissions)
+
+	return doclist
+
 
 @frappe.whitelist()
 def get_children(doctype, parent, task=None, project=None, is_root=False):

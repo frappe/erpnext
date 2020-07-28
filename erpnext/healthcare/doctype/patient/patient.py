@@ -172,3 +172,15 @@ def get_patient_detail(patient):
 	if vital_sign:
 		details.update(vital_sign[0])
 	return details
+
+def get_timeline_data(doctype, name):
+	"""Return timeline data from medical records"""
+	return dict(frappe.db.sql('''
+		SELECT
+			unix_timestamp(communication_date), count(*)
+		FROM
+			`tabPatient Medical Record`
+		WHERE
+			patient=%s
+			and `communication_date` > date_sub(curdate(), interval 1 year)
+		GROUP BY communication_date''', name))
