@@ -9,7 +9,10 @@
   "razorpay_settings_section",
   "billing_cycle",
   "billing_frequency",
-  "webhook_secret"
+  "webhook_secret",
+  "column_break_6",
+  "enable_auto_invoicing",
+  "print_format"
  ],
  "fields": [
   {
@@ -41,11 +44,30 @@
    "fieldtype": "Password",
    "label": "Webhook Secret",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_auto_invoicing",
+   "fieldtype": "Check",
+   "label": "Enable Auto Invoicing"
+  },
+  {
+   "depends_on": "eval:doc.enable_auto_invoicing",
+   "fieldname": "print_format",
+   "fieldtype": "Link",
+   "label": "Print Format",
+   "mandatory_depends_on": "eval:doc.enable_auto_invoicing",
+   "options": "Print Format"
   }
  ],
+ "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-05-22 12:38:27.103759",
+ "modified": "2020-07-28 11:01:40.125896",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership Settings",
