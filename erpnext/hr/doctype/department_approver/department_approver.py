@@ -46,7 +46,7 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 	elif filters.get("doctype") == "Leave Application":
 		parentfield = "expense_approvers"
 		field_name = "Expense Approver"
-	else:
+	elif filters.get("doctype") == "Shift Request":
 		parentfield = "shift_request_approver"
 		field_name = "Approver"
 	if department_list:
