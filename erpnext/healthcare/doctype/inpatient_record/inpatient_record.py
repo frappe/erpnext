@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe, json
 from frappe import _
-from frappe.utils import today, now_datetime, getdate
+from frappe.utils import today, now_datetime, getdate, get_datetime
 from frappe.model.document import Document
 from frappe.desk.reportview import get_match_cond
 
@@ -29,6 +29,11 @@ class InpatientRecord(Document):
 		if (getdate(self.expected_discharge) < getdate(self.scheduled_date)) or \
 			(getdate(self.discharge_ordered_date) < getdate(self.scheduled_date)):
 			frappe.throw(_('Expected and Discharge dates cannot be less than Admission Schedule date'))
+
+		for entry in self.inpatient_occupancies:
+			if entry.check_in and entry.check_out and \
+				get_datetime(entry.check_in) > get_datetime(entry.check_out):
+				frappe.throw(_('Check Out datetime cannot be less than Check In datetime for entry #{0}').format(entry.idx))
 
 	def validate_already_scheduled_or_admitted(self):
 		query = """
