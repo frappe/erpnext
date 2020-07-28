@@ -16,7 +16,7 @@ class ShiftAssignment(Document):
 		self.validate_overlapping_dates()
 
 		if self.end_date and self.end_date <= self.start_date:
-			frappe.throw(_("End Date should not be less than Start Date"))
+			frappe.throw(_("End Date must not be greater than Start Date"))
 
 	def validate_overlapping_dates(self):
 		if not self.name:
@@ -62,7 +62,7 @@ class ShiftAssignment(Document):
 		if shift_details.docstatus == 0:
 			msg = _("Employee {0} has already applied for {1}: {2}").format(self.employee, self.shift_type, shift_details.name)
 		if shift_details.docstatus == 1 and shift_details.status == "Active":
-			msg = _("Employee {0} already have Active Shift {1}: {2}").format(self.employee, self.shift_type, shift_details.name)
+			msg = _("Employee {0} already has Active Shift {1}: {2}").format(self.employee, self.shift_type, shift_details.name)
 		if shift_details.start_date:
 			msg += _(" from {0}").format(getdate(self.start_date).strftime("%d-%m-%Y"))
 			if shift_details.end_date:
