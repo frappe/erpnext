@@ -184,6 +184,14 @@ class Customer(TransactionBase):
 	def validate_credit_limit_on_change(self):
 		if self.get("__islocal") or not self.credit_limits:
 			return
+		
+		last_credit_limits = [d.credit_limit
+			for d in frappe.db.get_all("Customer Credit Limit", filters={'parent': self.name}, fields=["credit_limit"], order_by="idx")]
+		
+		current_credit_limits = [d.credit_limit for d in self.credit_limits]
+
+		if last_credit_limits == current_credit_limits:
+			return
 
 		company_record = []
 		for limit in self.credit_limits:
