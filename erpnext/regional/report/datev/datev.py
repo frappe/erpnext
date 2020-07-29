@@ -10,7 +10,6 @@ Provide a report and downloadable CSV according to the German DATEV format.
 from __future__ import unicode_literals
 
 import json
-import six
 import frappe
 from frappe import _
 from six import string_types

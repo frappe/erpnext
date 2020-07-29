@@ -461,6 +461,7 @@ ACCOUNT_NAME_COLUMNS = [
 ]
 
 class DataCategory():
+
 	"""Field of the CSV Header."""
 
 	DEBTORS_CREDITORS = "16"
@@ -469,6 +470,7 @@ class DataCategory():
 	POSTING_TEXT_CONSTANTS = "67"
 
 class FormatName():
+
 	"""Field of the CSV Header, corresponds to DataCategory."""
 
 	DEBTORS_CREDITORS = "Debitoren/Kreditoren"
