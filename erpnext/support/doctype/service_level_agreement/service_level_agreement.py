@@ -388,7 +388,7 @@ def update_status(doc, from_db, meta):
 
 		doc.first_responded_on = frappe.flags.current_time or now_datetime(doc.get("owner"))
 
-	if meta.has_field("status") and doc.status in ["Closed", "Resolved"] and from_db.status not in ["Closed", "Resolved"]:
+	if meta.has_field("status") and doc.status == "Closed" and from_db.status != "Closed":
 		if meta.has_field("resolution_date"):
 			doc.resolution_date = frappe.flags.current_time or now_datetime(doc.get("owner"))
 
