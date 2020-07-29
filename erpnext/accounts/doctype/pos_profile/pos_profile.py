@@ -5,8 +5,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
 from frappe.utils import cint, now
-from erpnext.accounts.doctype.sales_invoice.pos import get_child_nodes
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import set_account_for_mode_of_payment
 from six import iteritems
 from frappe.model.document import Document
 
@@ -16,7 +14,6 @@ class POSProfile(Document):
 		self.validate_all_link_fields()
 		self.validate_duplicate_groups()
 		self.check_default_payment()
-		self.validate_customer_territory_group()
 
 	def validate_default_profile(self):
 		for row in self.applicable_for_users:
@@ -64,19 +61,6 @@ class POSProfile(Document):
 			if len(default_mode_of_payment) > 1:
 				frappe.throw(_("Multiple default mode of payment is not allowed"))
 
-	def validate_customer_territory_group(self):
-		if not frappe.db.get_single_value('POS Settings', 'use_pos_in_offline_mode'):
-			return
-
-		if not self.territory:
-			frappe.throw(_("Territory is Required in POS Profile"), title="Mandatory Field")
-
-		if not self.customer_group:
-			frappe.throw(_("Customer Group is Required in POS Profile"), title="Mandatory Field")
-
-	def before_save(self):
-		set_account_for_mode_of_payment(self)
-
 	def on_update(self):
 		self.set_defaults()
 
@@ -111,10 +95,16 @@ def get_item_groups(pos_profile):
 
 	return list(set(item_groups))
 
+def get_child_nodes(group_type, root):
+	lft, rgt = frappe.db.get_value(group_type, root, ["lft", "rgt"])
+	return frappe.db.sql(""" Select name, lft, rgt from `tab{tab}` where
+			lft >= {lft} and rgt <= {rgt} order by lft""".format(tab=group_type, lft=lft, rgt=rgt), as_dict=1)
+
 @frappe.whitelist()
 def get_series():
-	return frappe.get_meta("Sales Invoice").get_field("naming_series").options or ""
+	return frappe.get_meta("POS Invoice").get_field("naming_series").options or "s"
 
+@frappe.whitelist()
 def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 	user = frappe.session['user']
 	company = filters.get('company') or frappe.defaults.get_user_default('company')

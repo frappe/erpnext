@@ -58,7 +58,7 @@
    "type": "Report"
   },
   {
-   "label": "Assets Dashboard",
+   "label": "Dashboard",
    "link_to": "Asset",
    "type": "Dashboard"
   }

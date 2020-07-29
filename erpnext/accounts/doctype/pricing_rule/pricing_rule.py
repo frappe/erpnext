@@ -276,7 +276,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 
 		item_details.has_pricing_rule = 1
 
-		item_details.pricing_rules = ','.join([d.pricing_rule for d in rules])
+		item_details.pricing_rules = frappe.as_json([d.pricing_rule for d in rules])
 
 		if not doc: return item_details
 
@@ -366,7 +366,7 @@ def set_discount_amount(rate, item_details):
 
 def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
 	from erpnext.accounts.doctype.pricing_rule.utils import get_pricing_rule_items
-	for d in pricing_rules.split(','):
+	for d in json.loads(pricing_rules):
 		if not d or not frappe.db.exists("Pricing Rule", d): continue
 		pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
 
@@ -432,6 +432,7 @@ def make_pricing_rule(doctype, docname):
 
 	return doc
 
+@frappe.whitelist()
 def get_item_uoms(doctype, txt, searchfield, start, page_len, filters):
 	items = [filters.get('value')]
 	if filters.get('apply_on') != 'Item Code':
