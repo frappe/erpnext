@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:05",
@@ -415,7 +414,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "po_no",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "label": "Customer's Purchase Order",
    "no_copy": 1,
    "print_hide": 1
@@ -1892,8 +1891,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-05-19 17:00:57.208696",
+ "modified": "2020-07-29 17:36:59.854601",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

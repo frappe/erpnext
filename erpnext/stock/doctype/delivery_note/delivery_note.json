@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:09",
@@ -332,7 +331,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "po_no",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "label": "Customer's Purchase Order No",
    "no_copy": 1,
    "oldfieldname": "po_no",
@@ -1576,8 +1575,7 @@
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-05-19 17:03:45.880106",
+ "modified": "2020-07-29 17:36:38.222076",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
