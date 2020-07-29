@@ -6,7 +6,7 @@ from frappe import _
 import frappe
 
 def execute(filters=None):
-	columns, data = get_columns(), get_leads(filters)
+	columns, data = get_columns(), get_data(filters)
 	return columns, data
 
 def get_columns():
@@ -117,7 +117,7 @@ def get_columns():
 	]
 	return columns
 
-def get_leads(filters):
+def get_data(filters):
 	return frappe.db.sql("""
 		SELECT
 			`tabLead`.name,
