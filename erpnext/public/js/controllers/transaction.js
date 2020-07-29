@@ -161,6 +161,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 		}
 
+		this.frm.set_query("uom", "items", function(doc, cdt, cdn) {
+			var d = locals[cdt][cdn];
+			return {
+				query : "erpnext.controllers.queries.item_uom_query",
+				filters: {
+					item_code: d.item_code
+				}
+			}
+		});
+
 		if(this.frm.fields_dict["return_against"]) {
 			this.frm.set_query("return_against", function(doc) {
 				var filters = {

@@ -507,6 +507,31 @@ def get_batch_numbers(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
+def item_uom_query(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("""
+		select distinct uom
+		from `tabUOM Conversion Detail`
+			where parenttype = 'Item' and parent = %(item_code)s
+				and (uom like %(txt)s)
+				{mcond}
+			order by
+				if(locate(%(_txt)s, uom), locate(%(_txt)s, uom), 99999),
+				idx desc,
+				uom
+			limit %(start)s, %(page_len)s
+	""".format(**{
+		'key': searchfield,
+		'mcond': get_match_cond(doctype)
+	}), {
+		'txt': "%%%s%%" % txt,
+		'_txt': txt.replace("%", ""),
+		'start': start,
+		'page_len': page_len,
+		'item_code': filters.get('item_code')
+	})
+
+
+@frappe.whitelist()
 def item_manufacturer_query(doctype, txt, searchfield, start, page_len, filters):
 	item_filters = [
 		['manufacturer', 'like', '%' + txt + '%'],
