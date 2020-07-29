@@ -10,7 +10,8 @@ from collections import defaultdict
 from erpnext.stock.get_item_details import _get_item_tax_template
 from frappe.utils import unique
 
- # searches for active employees
+# searches for active employees
+@frappe.whitelist()
 def employee_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
 	fields = get_fields("Employee", ["name", "employee_name"])
@@ -40,6 +41,7 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 
 
 # searches for leads which are not converted
+@frappe.whitelist()
 def lead_query(doctype, txt, searchfield, start, page_len, filters):
 	fields = get_fields("Lead", ["name", "lead_name", "company_name"])
 
@@ -69,6 +71,7 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 
 
  # searches for customer
+@frappe.whitelist()
 def customer_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
 	cust_master_name = frappe.defaults.get_user_default("cust_master_name")
@@ -106,6 +109,7 @@ def customer_query(doctype, txt, searchfield, start, page_len, filters):
 
 
 # searches for supplier
+@frappe.whitelist()
 def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 	supp_master_name = frappe.defaults.get_user_default("supp_master_name")
 	if supp_master_name == "Supplier Name":
@@ -137,6 +141,7 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 		})
 
 
+@frappe.whitelist()
 def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 	company_currency = erpnext.get_company_currency(filters.get('company'))
 
@@ -162,6 +167,7 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 	return tax_accounts
 
 
+@frappe.whitelist()
 def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	conditions = []
 
@@ -224,6 +230,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			}, as_dict=as_dict)
 
 
+@frappe.whitelist()
 def bom(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
 	fields = get_fields("BOM", ["name", "item"])
@@ -250,6 +257,7 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 		})
 
 
+@frappe.whitelist()
 def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 	cond = ''
 	if filters.get('customer'):
@@ -276,6 +284,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 			})
 
 
+@frappe.whitelist()
 def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters, as_dict):
 	fields = get_fields("Delivery Note", ["name", "customer", "posting_date"])
 
@@ -305,6 +314,7 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 	}, {"txt": ("%%%s%%" % txt)}, as_dict=as_dict)
 
 
+@frappe.whitelist()
 def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	cond = ""
 	if filters.get("posting_date"):
@@ -362,6 +372,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 			limit %(start)s, %(page_len)s""".format(cond, match_conditions=get_match_cond(doctype)), args)
 
 
+@frappe.whitelist()
 def get_account_list(doctype, txt, searchfield, start, page_len, filters):
 	filter_list = []
 
@@ -385,6 +396,7 @@ def get_account_list(doctype, txt, searchfield, start, page_len, filters):
 		limit_start=start, limit_page_length=page_len, as_list=True)
 
 
+@frappe.whitelist()
 def get_blanket_orders(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select distinct bo.name, bo.blanket_order_type, bo.to_date
 		from `tabBlanket Order` bo, `tabBlanket Order Item` boi
@@ -570,7 +582,8 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 		args = {
 			'item_code': filters.get('item_code'),
 			'posting_date': filters.get('valid_from'),
-			'tax_category': filters.get('tax_category')
+			'tax_category': filters.get('tax_category'),
+			'company': filters.get('company')
 		}
 
 		taxes = _get_item_tax_template(args, taxes, for_validate=True)

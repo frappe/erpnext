@@ -6,12 +6,10 @@ from frappe import _
 def get_data():
 	return {
 		'fieldname': 'course',
-		'non_standard_fieldnames': {
-		},
 		'transactions': [
 			{
-				'label': _('Course'),
-				'items': ['Course Enrollment', 'Course Schedule']
+				'label': _('Program and Course'),
+				'items': ['Program', 'Course Enrollment', 'Course Schedule']
 			},
 			{
 				'label': _('Student'),
@@ -19,7 +17,7 @@ def get_data():
 			},
 			{
 				'label': _('Assessment'),
-				'items': ['Assessment Plan']
+				'items': ['Assessment Plan', 'Assessment Result']
 			},
 		]
 	}

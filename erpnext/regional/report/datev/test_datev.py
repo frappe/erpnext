@@ -90,7 +90,7 @@ def make_customer_with_account(customer_name, company):
 
 	if not frappe.db.exists("Customer", customer_name):
 		customer = frappe.get_doc({
-			"doctype": "Customer",		
+			"doctype": "Customer",
 			"customer_name": customer_name,
 			"customer_type": "Company",
 			"accounts": [{
@@ -155,17 +155,17 @@ class TestDatev(TestCase):
 		setup_fiscal_year()
 
 		warehouse = frappe.db.get_value("Item Default", {
-				"parent": item.name, 
+				"parent": item.name,
 				"company": self.company.name
 			}, "default_warehouse")
 
 		income_account = frappe.db.get_value("Account", {
-				"account_number": "4200", 
+				"account_number": "4200",
 				"company": self.company.name
 			}, "name")
 
 		tax_account = frappe.db.get_value("Account", {
-				"account_number": "3806", 
+				"account_number": "3806",
 				"company": self.company.name
 			}, "name")
 
@@ -186,8 +186,11 @@ class TestDatev(TestCase):
 			"charge_type": "On Net Total",
 			"account_head": tax_account,
 			"description": "Umsatzsteuer 19 %",
-			"rate": 19
+			"rate": 19,
+			"cost_center": self.company.cost_center
 		})
+
+		si.cost_center = self.company.cost_center
 
 		si.save()
 		si.submit()
@@ -196,7 +199,7 @@ class TestDatev(TestCase):
 		def is_subset(get_data, allowed_keys):
 			"""
 			Validate that the dict contains only allowed keys.
-			
+
 			Params:
 			get_data -- Function that returns a list of dicts.
 			allowed_keys -- List of allowed keys

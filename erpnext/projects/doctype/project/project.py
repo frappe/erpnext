@@ -238,6 +238,7 @@ def get_list_context(context=None):
 		"row_template": "templates/includes/projects/project_row.html"
 	}
 
+@frappe.whitelist()
 def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
 	return frappe.db.sql("""select name, concat_ws(' ', first_name, middle_name, last_name)
@@ -471,7 +472,7 @@ def create_kanban_board_if_not_exists(project):
 	from frappe.desk.doctype.kanban_board.kanban_board import quick_kanban_board
 
 	if not frappe.db.exists('Kanban Board', project):
-		quick_kanban_board('Task', project, 'status')
+		quick_kanban_board('Task', project, 'status', project)
 
 	return True
 

@@ -140,10 +140,8 @@ def make_entry(args, adv_adj, update_outstanding):
 	gle = frappe.new_doc("GL Entry")
 	gle.update(args)
 	gle.flags.ignore_permissions = 1
-	gle.validate()
-	gle.db_insert()
+	gle.insert()
 	gle.run_method("on_update_with_args", adv_adj, update_outstanding)
-	gle.flags.ignore_validate = True
 	gle.submit()
 
 	# check against budget
@@ -160,8 +158,10 @@ def validate_account_for_perpetual_inventory(gl_map):
 			if account not in aii_accounts:
 				continue
 
+			# Always use current date to get stock and account balance as there can future entries for
+			# other items
 			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(account,
-				gl_map[0].posting_date, gl_map[0].company)
+				getdate(), gl_map[0].company)
 
 			if gl_map[0].voucher_type=="Journal Entry":
 				# In case of Journal Entry, there are no corresponding SL entries,
@@ -171,7 +171,6 @@ def validate_account_for_perpetual_inventory(gl_map):
 					frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
 						.format(account), StockAccountInvalidTransaction)
 
-			# This has been comment for a temporary, will add this code again on release of immutable ledger
 			elif account_bal != stock_bal:
 				precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
 					currency=frappe.get_cached_value('Company',  gl_map[0].company,  "default_currency"))
