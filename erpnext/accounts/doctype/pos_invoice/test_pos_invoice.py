@@ -23,13 +23,13 @@ class TestPOSInvoice(unittest.TestCase):
 		import time
 		time.sleep(1)
 		self.assertRaises(frappe.TimestampMismatchError, w2.save)
-	
+
 	def test_change_naming_series(self):
 		inv = create_pos_invoice(do_not_submit=1)
 		inv.naming_series = 'TEST-'
 
 		self.assertRaises(frappe.CannotChangeConstantError, inv.save)
-	
+
 	def test_discount_and_inclusive_tax(self):
 		inv = create_pos_invoice(qty=100, rate=50, do_not_save=1)
 		inv.append("taxes", {
@@ -66,7 +66,7 @@ class TestPOSInvoice(unittest.TestCase):
 
 		self.assertEqual(inv.net_total, 4298.25)
 		self.assertEqual(inv.grand_total, 4900.00)
-	
+
 	def test_tax_calculation_with_multiple_items(self):
 		inv = create_pos_invoice(qty=84, rate=4.6, do_not_save=True)
 		item_row = inv.get("items")[0]
@@ -148,7 +148,7 @@ class TestPOSInvoice(unittest.TestCase):
 		self.assertEqual(inv.grand_total, 5675.57)
 		self.assertEqual(inv.rounding_adjustment, 0.43)
 		self.assertEqual(inv.rounded_total, 5676.0)
-	
+
 	def test_tax_calculation_with_multiple_items_and_discount(self):
 		inv = create_pos_invoice(qty=1, rate=75, do_not_save=True)
 		item_row = inv.get("items")[0]
@@ -194,7 +194,7 @@ class TestPOSInvoice(unittest.TestCase):
 
 		self.assertEqual(pos_return.get('payments')[0].amount, -500)
 		self.assertEqual(pos_return.get('payments')[1].amount, -500)
-	
+
 	def test_pos_change_amount(self):
 		pos = create_pos_invoice(company= "_Test Company", debit_to="Debtors - _TC",
 			income_account = "Sales - _TC", expense_account = "Cost of Goods Sold - _TC", rate=105,
@@ -208,33 +208,43 @@ class TestPOSInvoice(unittest.TestCase):
 
 		self.assertEqual(pos.grand_total, 105.0)
 		self.assertEqual(pos.change_amount, 5.0)
-	
+
 	def test_without_payment(self):
 		inv = create_pos_invoice(do_not_save=1)
 		# Check that the invoice cannot be submitted without payments
 		inv.payments = []
 		self.assertRaises(frappe.ValidationError, inv.insert)
-	
+
 	def test_serialized_item_transaction(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-		se = make_serialized_item(target_warehouse="_Test Warehouse - _TC")
+		se = make_serialized_item(company='_Test Company with perpetual inventory',
+			target_warehouse="Stores - TCP1", cost_center='Main - TCP1', expense_account='Cost of Goods Sold - TCP1')
+
 		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
 
-		pos = create_pos_invoice(item=se.get("items")[0].item_code, rate=1000, do_not_save=1)
+		pos = create_pos_invoice(company='_Test Company with perpetual inventory', debit_to='Debtors - TCP1',
+			account_for_change_amount='Cash - TCP1', warehouse='Stores - TCP1', income_account='Sales - TCP1',
+			expense_account='Cost of Goods Sold - TCP1', cost_center='Main - TCP1',
+			item=se.get("items")[0].item_code, rate=1000, do_not_save=1)
+
 		pos.get("items")[0].serial_no = serial_nos[0]
-		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 1000})
+		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - TCP1', 'amount': 1000})
 
 		pos.insert()
 		pos.submit()
 
-		pos2 = create_pos_invoice(item=se.get("items")[0].item_code, rate=1000, do_not_save=1)
+		pos2 = create_pos_invoice(company='_Test Company with perpetual inventory', debit_to='Debtors - TCP1',
+			account_for_change_amount='Cash - TCP1', warehouse='Stores - TCP1', income_account='Sales - TCP1',
+			expense_account='Cost of Goods Sold - TCP1', cost_center='Main - TCP1',
+			item=se.get("items")[0].item_code, rate=1000, do_not_save=1)
+
 		pos2.get("items")[0].serial_no = serial_nos[0]
-		pos2.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 1000})
-		
+		pos2.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - TCP1', 'amount': 1000})
+
 		self.assertRaises(frappe.ValidationError, pos2.insert)
-	
+
 	def test_loyalty_points(self):
 		from erpnext.accounts.doctype.loyalty_program.test_loyalty_program import create_records
 		from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_program_details_with_points
@@ -255,14 +265,14 @@ class TestPOSInvoice(unittest.TestCase):
 		inv.cancel()
 		after_cancel_lp_details = get_loyalty_program_details_with_points(inv.customer, company=inv.company, loyalty_program=inv.loyalty_program)
 		self.assertEqual(after_cancel_lp_details.loyalty_points, before_lp_details.loyalty_points)
-	
+
 	def test_loyalty_points_redeemption(self):
 		from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_program_details_with_points
 		# add 10 loyalty points
 		create_pos_invoice(customer="Test Loyalty Customer", rate=10000)
 
 		before_lp_details = get_loyalty_program_details_with_points("Test Loyalty Customer", company="_Test Company", loyalty_program="Test Single Loyalty")
-		
+
 		inv = create_pos_invoice(customer="Test Loyalty Customer", rate=10000, do_not_save=1)
 		inv.redeem_loyalty_points = 1
 		inv.loyalty_points = before_lp_details.loyalty_points
@@ -299,7 +309,7 @@ def create_pos_invoice(**args):
 	pos_inv.return_against = args.return_against
 	pos_inv.currency=args.currency or "INR"
 	pos_inv.conversion_rate = args.conversion_rate or 1
-	pos_inv.account_for_change_amount = "Cash - _TC"
+	pos_inv.account_for_change_amount = args.account_for_change_amount or "Cash - _TC"
 
 	pos_inv.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
