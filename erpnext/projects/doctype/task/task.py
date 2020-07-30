@@ -35,6 +35,25 @@ class Task(NestedSet):
 		self.validate_status()
 		self.update_depends_on()
 
+	def before_save(self):
+		change_idx = False
+		parent_task = frappe.get_value("Task", filters={"name": self.name}, fieldname=["parent_task"])
+		if parent_task and not self.parent_task:
+			dependent_task = frappe.get_value("Task", filters={"name": parent_task}, fieldname=["depends_on_tasks"])
+			dependent_task_list = dependent_task.split(',')
+			for dependent_task in dependent_task_list:
+				if dependent_task:
+					dependent_task_name = frappe.get_value("Task Depends On", filters={"task": dependent_task, "parent": parent_task}, fieldname=["name"])
+					dependent_task_idx = frappe.get_value("Task Depends On", filters={"task": dependent_task, "parent": parent_task}, fieldname=["idx"])
+					if dependent_task == self.name:
+						frappe.delete_doc('Task Depends On', dependent_task_name)
+						change_idx = True
+					elif change_idx:
+						frappe.db.set_value("Task Depends On", dependent_task_name, "idx", (dependent_task_idx-1))
+			dependent_task_list.remove(self.name)
+			dependent_task_string = ','.join(map(str, dependent_task_list))
+			frappe.db.set_value("Task", parent_task, "depends_on_tasks", dependent_task_string)
+
 	def validate_dates(self):
 		if self.exp_start_date and self.exp_end_date and getdate(self.exp_start_date) > getdate(self.exp_end_date):
 			frappe.throw(_("{0} can not be greater than {1}").format(frappe.bold("Expected Start Date"), \
