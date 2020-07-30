@@ -248,8 +248,8 @@
   {
    "fieldname": "result_date",
    "fieldtype": "Date",
-   "hidden": 1,
    "label": "Result Date",
+   "read_only": 1,
    "search_index": 1
   },
   {
@@ -555,7 +555,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-30 14:03:00.166003",
+ "modified": "2020-07-30 18:18:38.516215",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",
