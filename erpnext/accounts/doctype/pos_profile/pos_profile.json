@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_rename": 1,
  "autoname": "Prompt",
  "creation": "2013-05-24 12:15:51",
@@ -11,17 +12,12 @@
   "customer",
   "company",
   "country",
-  "warehouse",
-  "campaign",
-  "company_address",
   "column_break_9",
   "update_stock",
   "ignore_pricing_rule",
-  "allow_delete",
-  "allow_user_to_edit_rate",
-  "allow_user_to_edit_discount",
-  "allow_print_before_pay",
-  "display_items_in_stock",
+  "warehouse",
+  "campaign",
+  "company_address",
   "section_break_15",
   "applicable_for_users",
   "section_break_11",
@@ -31,16 +27,11 @@
   "column_break_16",
   "customer_groups",
   "section_break_16",
-  "print_format_for_online",
+  "print_format",
   "letter_head",
   "column_break0",
   "tc_name",
   "select_print_heading",
-  "offline_pos_section",
-  "territory",
-  "column_break_31",
-  "print_format",
-  "customer_group",
   "section_break_19",
   "selling_price_list",
   "currency",
@@ -105,15 +96,6 @@
    "label": "Country"
   },
   {
-   "depends_on": "update_stock",
-   "fieldname": "warehouse",
-   "fieldtype": "Link",
-   "label": "Warehouse",
-   "oldfieldname": "warehouse",
-   "oldfieldtype": "Link",
-   "options": "Warehouse"
-  },
-  {
    "fieldname": "campaign",
    "fieldtype": "Link",
    "label": "Campaign",
@@ -130,48 +112,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "1",
-   "fieldname": "update_stock",
-   "fieldtype": "Check",
-   "label": "Update Stock"
-  },
-  {
-   "default": "0",
-   "fieldname": "ignore_pricing_rule",
-   "fieldtype": "Check",
-   "label": "Ignore Pricing Rule"
-  },
-  {
-   "default": "0",
-   "fieldname": "allow_delete",
-   "fieldtype": "Check",
-   "label": "Allow Delete"
-  },
-  {
-   "default": "0",
-   "fieldname": "allow_user_to_edit_rate",
-   "fieldtype": "Check",
-   "label": "Allow user to edit Rate"
-  },
-  {
-   "default": "0",
-   "fieldname": "allow_user_to_edit_discount",
-   "fieldtype": "Check",
-   "label": "Allow user to edit Discount"
-  },
-  {
-   "default": "0",
-   "fieldname": "allow_print_before_pay",
-   "fieldtype": "Check",
-   "label": "Allow Print Before Pay"
-  },
-  {
-   "default": "0",
-   "fieldname": "display_items_in_stock",
-   "fieldtype": "Check",
-   "label": "Display Items In Stock"
-  },
-  {
    "fieldname": "section_break_15",
    "fieldtype": "Section Break",
    "label": "Applicable for Users"
@@ -185,13 +125,13 @@
   {
    "fieldname": "section_break_11",
    "fieldtype": "Section Break",
-   "label": "Mode of Payment"
+   "label": "Payment Methods"
   },
   {
    "fieldname": "payments",
    "fieldtype": "Table",
-   "label": "Sales Invoice Payment",
-   "options": "Sales Invoice Payment"
+   "options": "POS Payment Method",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_14",
@@ -219,12 +159,6 @@
    "fieldname": "section_break_16",
    "fieldtype": "Section Break",
    "label": "Print Settings"
-  },
-  {
-   "fieldname": "print_format_for_online",
-   "fieldtype": "Link",
-   "label": "Print Format for Online",
-   "options": "Print Format"
   },
   {
    "allow_on_submit": 1,
@@ -257,39 +191,6 @@
    "oldfieldname": "select_print_heading",
    "oldfieldtype": "Select",
    "options": "Print Heading"
-  },
-  {
-   "fieldname": "offline_pos_section",
-   "fieldtype": "Section Break",
-   "label": "Offline POS Settings"
-  },
-  {
-   "fieldname": "territory",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Territory",
-   "oldfieldname": "territory",
-   "oldfieldtype": "Link",
-   "options": "Territory",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_31",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "Point of Sale",
-   "fieldname": "print_format",
-   "fieldtype": "Link",
-   "label": "Print Format",
-   "options": "Print Format"
-  },
-  {
-   "fieldname": "customer_group",
-   "fieldtype": "Link",
-   "label": "Customer Group",
-   "options": "Customer Group",
-   "reqd": 1
   },
   {
    "fieldname": "section_break_19",
@@ -381,19 +282,48 @@
    "label": "Accounting Dimensions"
   },
   {
-   "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "tax_category",
    "fieldtype": "Link",
    "label": "Tax Category",
    "options": "Tax Category"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "print_format",
+   "fieldtype": "Link",
+   "label": "Print Format",
+   "options": "Print Format"
+  },
+  {
+   "depends_on": "update_stock",
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "oldfieldname": "warehouse",
+   "oldfieldtype": "Link",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "update_stock",
+   "fieldtype": "Check",
+   "label": "Update Stock"
+  },
+  {
+   "default": "0",
+   "fieldname": "ignore_pricing_rule",
+   "fieldtype": "Check",
+   "label": "Ignore Pricing Rule"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
- "modified": "2020-01-24 15:52:03.797701",
+ "links": [],
+ "modified": "2020-06-29 12:20:30.977272",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
