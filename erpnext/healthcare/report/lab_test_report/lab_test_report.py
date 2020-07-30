@@ -14,7 +14,7 @@ def execute(filters=None):
 	lab_test_list = get_lab_tests(filters)
 
 	if not lab_test_list:
-		msgprint(_("No records found"))
+		msgprint(_('No records found'))
 		return columns, lab_test_list
 
 	data = []
@@ -34,83 +34,85 @@ def execute(filters=None):
 			})
 		data.append(row)
 
-	return columns, data
+	chart = get_chart_data(data)
+	report_summary = get_report_summary(data)
+	return columns, data, None, chart, report_summary
 
 
 def get_columns():
 	return [
 		{
-			"fieldname": "test",
-			"label": _("Lab Test"),
-			"fieldtype": "Link",
-			"options": "Lab Test",
-			"width": "120"
+			'fieldname': 'test',
+			'label': _('Lab Test'),
+			'fieldtype': 'Link',
+			'options': 'Lab Test',
+			'width': '120'
 		},
 		{
-			"fieldname": "template",
-			"label": _("Lab Test Template"),
-			"fieldtype": "Link",
-			"options": "Lab Test Template",
-			"width": "120"
+			'fieldname': 'template',
+			'label': _('Lab Test Template'),
+			'fieldtype': 'Link',
+			'options': 'Lab Test Template',
+			'width': '120'
 		},
 		{
-			"fieldname": "company",
-			"label": _("Company"),
-			"fieldtype": "Link",
-			"options": "Company",
-			"width": "120"
+			'fieldname': 'company',
+			'label': _('Company'),
+			'fieldtype': 'Link',
+			'options': 'Company',
+			'width': '120'
 		},
 		{
-			"fieldname": "patient",
-			"label": _("Patient"),
-			"fieldtype": "Link",
-			"options": "Patient",
-			"width": "120"
+			'fieldname': 'patient',
+			'label': _('Patient'),
+			'fieldtype': 'Link',
+			'options': 'Patient',
+			'width': '120'
 		},
 		{
-			"fieldname": "patient_name",
-			"label": _("Patient Name"),
-			"fieldtype": "Data",
-			"width": "120"
+			'fieldname': 'patient_name',
+			'label': _('Patient Name'),
+			'fieldtype': 'Data',
+			'width': '120'
 		},
 		{
-			"fieldname": "practitioner",
-			"label": _("Requesting Practitioner"),
-			"fieldtype": "Link",
-			"options": "Healthcare Practitioner",
-			"width": "120"
+			'fieldname': 'employee',
+			'label': _('Lab Technician'),
+			'fieldtype': 'Link',
+			'options': 'Employee',
+			'width': '120'
 		},
 		{
-			"fieldname": "employee",
-			"label": _("Lab Technician"),
-			"fieldtype": "Link",
-			"options": "Employee",
-			"width": "120"
+			'fieldname': 'status',
+			'label': _('Status'),
+			'fieldtype': 'Data',
+			'width': '100'
 		},
 		{
-			"fieldname": "status",
-			"label": _("Status"),
-			"fieldtype": "Data",
-			"width": "100"
+			'fieldname': 'invoiced',
+			'label': _('Invoiced'),
+			'fieldtype': 'Check',
+			'width': '100'
 		},
 		{
-			"fieldname": "invoiced",
-			"label": _("Invoiced"),
-			"fieldtype": "Check",
-			"width": "100"
+			'fieldname': 'result_date',
+			'label': _('Result Date'),
+			'fieldtype': 'Date',
+			'width': '100'
 		},
 		{
-			"fieldname": "result_date",
-			"label": _("Result Date"),
-			"fieldtype": "Date",
-			"width": "100"
+			'fieldname': 'practitioner',
+			'label': _('Requesting Practitioner'),
+			'fieldtype': 'Link',
+			'options': 'Healthcare Practitioner',
+			'width': '120'
 		},
 		{
-			"fieldname": "department",
-			"label": _("Medical Department"),
-			"fieldtype": "Link",
-			"options": "Medical Department",
-			"width": "100"
+			'fieldname': 'department',
+			'label': _('Medical Department'),
+			'fieldtype': 'Link',
+			'options': 'Medical Department',
+			'width': '100'
 		}
 	]
 
@@ -139,3 +141,71 @@ def get_conditions(filters):
 			conditions[key] = value
 
 	return conditions
+
+def get_chart_data(data):
+	if not data:
+		return None
+
+	labels = ['Completed', 'Approved', 'Rejected']
+
+	status_wise_data = {
+		'Completed': 0,
+		'Approved': 0,
+		'Rejected': 0
+	}
+
+	datasets = []
+
+	for entry in data:
+		status_wise_data[entry.status] += 1
+
+	datasets.append({
+		'name': 'Lab Test Status',
+		'values': [status_wise_data.get('Completed'), status_wise_data.get('Approved'), status_wise_data.get('Rejected')]
+	})
+
+	chart = {
+		'data': {
+			'labels': labels,
+			'datasets': datasets
+		},
+		'type': 'donut',
+		'height': 300,
+	}
+
+	return chart
+
+
+def get_report_summary(data):
+	if not data:
+		return None
+
+	total_lab_tests = len(data)
+	invoiced_lab_tests, unbilled_lab_tests = 0, 0
+
+	for entry in data:
+		if entry.invoiced:
+			invoiced_lab_tests += 1
+		else:
+			unbilled_lab_tests += 1
+
+	return [
+		{
+			'value': total_lab_tests,
+			'indicator': 'Blue',
+			'label': 'Total Lab Tests',
+			'datatype': 'Int',
+		},
+		{
+			'value': invoiced_lab_tests,
+			'indicator': 'Green',
+			'label': 'Invoiced Lab Tests',
+			'datatype': 'Int',
+		},
+		{
+			'value': unbilled_lab_tests,
+			'indicator': 'Red',
+			'label': 'Unbilled Lab Tests',
+			'datatype': 'Int',
+		}
+	]
