@@ -81,11 +81,11 @@ class LabTestTemplate(Document):
 		if self.lab_test_template_type == 'Compound':
 			for item in self.normal_test_templates:
 				if item.secondary_uom and not item.conversion_factor:
-					frappe.throw(_('Conversion Factor is mandatory'))
+					frappe.throw(_('Row #{0}: Conversion Factor is mandatory').format(item.idx))
 		if self.lab_test_template_type == 'Grouped':
 			for group in self.lab_test_groups:
 				if group.template_or_new_line == 'Add New Line' and group.secondary_uom and not group.conversion_factor:
-					frappe.throw(_('Conversion Factor is mandatory'))
+					frappe.throw(_('Row #{0}: Conversion Factor is mandatory').format(group.idx))
 
 
 def create_item_from_template(doc):
