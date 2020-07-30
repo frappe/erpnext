@@ -8,51 +8,134 @@ from frappe import msgprint, _
 def execute(filters=None):
 	if not filters: filters = {}
 
-	lab_test_list = get_lab_test(filters)
+	data, columns = [], []
+
 	columns = get_columns()
+	lab_test_list = get_lab_tests(filters)
 
 	if not lab_test_list:
-		msgprint(_("No record found"))
+		msgprint(_("No records found"))
 		return columns, lab_test_list
 
 	data = []
 	for lab_test in lab_test_list:
-		row = [ lab_test.lab_test_name, lab_test.patient, lab_test.practitioner, lab_test.invoiced, lab_test.status, lab_test.result_date, lab_test.department]
+		row = frappe._dict({
+				'test': lab_test.name,
+				'template': lab_test.template,
+				'company': lab_test.company,
+				'patient': lab_test.patient,
+				'patient_name': lab_test.patient_name,
+				'practitioner': lab_test.practitioner,
+				'employee': lab_test.employee,
+				'status': lab_test.status,
+				'invoiced': lab_test.invoiced,
+				'result_date': lab_test.result_date,
+				'department': lab_test.department
+			})
 		data.append(row)
 
 	return columns, data
 
 
 def get_columns():
-	columns = [
-		_("Test") + ":Data:120",
-		_("Patient") + ":Link/Patient:180",
-		_("Healthcare Practitioner") + ":Link/Healthcare Practitioner:120",
-		_("Invoiced") + ":Check:100",
-		_("Status") + ":Data:120",
-		_("Result Date") + ":Date:120",
-		_("Department") + ":Data:120",
+	return [
+		{
+			"fieldname": "test",
+			"label": _("Lab Test"),
+			"fieldtype": "Link",
+			"options": "Lab Test",
+			"width": "120"
+		},
+		{
+			"fieldname": "template",
+			"label": _("Lab Test Template"),
+			"fieldtype": "Link",
+			"options": "Lab Test Template",
+			"width": "120"
+		},
+		{
+			"fieldname": "company",
+			"label": _("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+			"width": "120"
+		},
+		{
+			"fieldname": "patient",
+			"label": _("Patient"),
+			"fieldtype": "Link",
+			"options": "Patient",
+			"width": "120"
+		},
+		{
+			"fieldname": "patient_name",
+			"label": _("Patient Name"),
+			"fieldtype": "Data",
+			"width": "120"
+		},
+		{
+			"fieldname": "practitioner",
+			"label": _("Requesting Practitioner"),
+			"fieldtype": "Link",
+			"options": "Healthcare Practitioner",
+			"width": "120"
+		},
+		{
+			"fieldname": "employee",
+			"label": _("Lab Technician"),
+			"fieldtype": "Link",
+			"options": "Employee",
+			"width": "120"
+		},
+		{
+			"fieldname": "status",
+			"label": _("Status"),
+			"fieldtype": "Data",
+			"width": "100"
+		},
+		{
+			"fieldname": "invoiced",
+			"label": _("Invoiced"),
+			"fieldtype": "Check",
+			"width": "100"
+		},
+		{
+			"fieldname": "result_date",
+			"label": _("Result Date"),
+			"fieldtype": "Date",
+			"width": "100"
+		},
+		{
+			"fieldname": "department",
+			"label": _("Medical Department"),
+			"fieldtype": "Link",
+			"options": "Medical Department",
+			"width": "100"
+		}
 	]
 
-	return columns
+def get_lab_tests(filters):
+	conditions = get_conditions(filters)
+	data = frappe.get_all(
+		doctype='Lab Test',
+		fields=['name', 'template', 'company', 'patient', 'patient_name', 'practitioner', 'employee', 'status', 'invoiced', 'result_date', 'department'],
+		filters=conditions,
+		order_by='submitted_date desc'
+	)
+	return data
 
 def get_conditions(filters):
-	conditions = ""
+	conditions = {
+		'docstatus': ('=', 1)
+	}
 
-	if filters.get("patient"):
-		conditions += "and patient = %(patient)s"
-	if filters.get("from_date"):
-		conditions += "and result_date >= %(from_date)s"
-	if filters.get("to_date"):
-		conditions += " and result_date <= %(to_date)s"
-	if filters.get("department"):
-		conditions += " and department = %(department)s"
+	if filters.get('from_date') and filters.get('to_date'):
+		conditions['result_date'] = ('between', (filters.get('from_date'), filters.get('to_date')))
+		filters.pop('from_date')
+		filters.pop('to_date')
+
+	for key, value in filters.items():
+		if filters.get(key):
+			conditions[key] = value
 
 	return conditions
-
-def get_lab_test(filters):
-	conditions = get_conditions(filters)
-	return frappe.db.sql("""select name, patient, lab_test_name, patient_name, status, result_date, practitioner, invoiced, department
-		from `tabLab Test`
-		where docstatus<2 %s order by submitted_date desc, name desc""" %
-		conditions, filters, as_dict=1)
