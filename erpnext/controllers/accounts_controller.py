@@ -60,7 +60,7 @@ class AccountsController(TransactionBase):
 					(is_supplier_payment and supplier.hold_type in ['All', 'Payments']):
 				if not supplier.release_date or getdate(nowdate()) <= supplier.release_date:
 					frappe.msgprint(
-						_('{0} is blocked so this transaction cannot proceed'.format(supplier_name)), raise_exception=1)
+						_('{0} is blocked so this transaction cannot proceed').format(supplier_name), raise_exception=1)
 
 	def validate(self):
 		if not self.get('is_return'):
@@ -440,7 +440,7 @@ class AccountsController(TransactionBase):
 
 		if account_currency not in valid_currency:
 			frappe.throw(_("Account {0} is invalid. Account Currency must be {1}")
-						 .format(account, _(" or ").join(valid_currency)))
+				.format(account, (' ' + _("or") + ' ').join(valid_currency)))
 
 	def clear_unallocated_advances(self, childtype, parentfield):
 		self.set(parentfield, self.get(parentfield, {"allocated_amount": ["not in", [0, None, ""]]}))
@@ -665,23 +665,26 @@ class AccountsController(TransactionBase):
 	def set_total_advance_paid(self):
 		if self.doctype == "Sales Order":
 			dr_or_cr = "credit_in_account_currency"
+			rev_dr_or_cr = "debit_in_account_currency"
 			party = self.customer
 		else:
 			dr_or_cr = "debit_in_account_currency"
+			rev_dr_or_cr = "credit_in_account_currency"
 			party = self.supplier
 
 		advance = frappe.db.sql("""
 			select
-				account_currency, sum({dr_or_cr}) as amount
+				account_currency, sum({dr_or_cr}) - sum({rev_dr_cr}) as amount
 			from
 				`tabGL Entry`
 			where
 				against_voucher_type = %s and against_voucher = %s and party=%s
 				and docstatus = 1
-		""".format(dr_or_cr=dr_or_cr), (self.doctype, self.name, party), as_dict=1)
+		""".format(dr_or_cr=dr_or_cr, rev_dr_cr=rev_dr_or_cr), (self.doctype, self.name, party), as_dict=1) #nosec
 
 		if advance:
 			advance = advance[0]
+
 			advance_paid = flt(advance.amount, self.precision("advance_paid"))
 			formatted_advance_paid = fmt_money(advance_paid, precision=self.precision("advance_paid"),
 											   currency=advance.account_currency)
@@ -928,7 +931,7 @@ def validate_taxes_and_charges(tax):
 			frappe.throw(
 				_("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"))
 		elif not tax.row_id:
-			frappe.throw(_("Please specify a valid Row ID for row {0} in table {1}".format(tax.idx, _(tax.doctype))))
+			frappe.throw(_("Please specify a valid Row ID for row {0} in table {1}").format(tax.idx, _(tax.doctype)))
 		elif tax.row_id and cint(tax.row_id) >= cint(tax.idx):
 			frappe.throw(_("Cannot refer row number greater than or equal to current row number for this Charge type"))
 
@@ -1011,6 +1014,7 @@ def get_advance_journal_entries(party_type, party, party_account, amount_field,
 def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 		order_list=None, include_unallocated=True, against_all_orders=False, limit=None):
 	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
+	currency_field = "paid_from_account_currency" if party_type == "Customer" else "paid_to_account_currency"
 	payment_type = "Receive" if party_type == "Customer" else "Pay"
 	payment_entries_against_order, unallocated_payment_entries = [], []
 	limit_cond = "limit %s" % limit if limit else ""
@@ -1027,14 +1031,15 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 			select
 				"Payment Entry" as reference_type, t1.name as reference_name,
 				t1.remarks, t2.allocated_amount as amount, t2.name as reference_row,
-				t2.reference_name as against_order, t1.posting_date
+				t2.reference_name as against_order, t1.posting_date,
+				t1.{0} as currency
 			from `tabPayment Entry` t1, `tabPayment Entry Reference` t2
 			where
-				t1.name = t2.parent and t1.{0} = %s and t1.payment_type = %s
+				t1.name = t2.parent and t1.{1} = %s and t1.payment_type = %s
 				and t1.party_type = %s and t1.party = %s and t1.docstatus = 1
-				and t2.reference_doctype = %s {1}
-			order by t1.posting_date {2}
-		""".format(party_account_field, reference_condition, limit_cond),
+				and t2.reference_doctype = %s {2}
+			order by t1.posting_date {3}
+		""".format(currency_field, party_account_field, reference_condition, limit_cond),
 													  [party_account, payment_type, party_type, party,
 													   order_doctype] + order_list, as_dict=1)
 

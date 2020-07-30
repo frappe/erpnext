@@ -47,9 +47,7 @@ class TestCompany(unittest.TestCase):
 		frappe.delete_doc("Company", "COA from Existing Company")
 
 	def test_coa_based_on_country_template(self):
-		countries = ["India", "Brazil", "United Arab Emirates", "Canada", "Germany", "France",
-			"Guatemala", "Indonesia", "Italy", "Mexico", "Nicaragua", "Netherlands", "Singapore",
-			"Brazil", "Argentina", "Hungary", "Taiwan"]
+		countries = ["Canada", "Germany", "France"]
 
 		for country in countries:
 			templates = get_charts_for_country(country)
@@ -81,7 +79,7 @@ class TestCompany(unittest.TestCase):
 							filters["is_group"] = 1
 
 						has_matching_accounts = frappe.get_all("Account", filters)
-						error_message = _("No Account matched these filters: {}".format(json.dumps(filters)))
+						error_message = _("No Account matched these filters: {}").format(json.dumps(filters))
 
 						self.assertTrue(has_matching_accounts, msg=error_message)
 				finally:

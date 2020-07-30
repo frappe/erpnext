@@ -4,19 +4,18 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.model.rename_doc import rename_doc
 from frappe.model.utils.rename_field import rename_field
 
 
 def execute():
 	# Rename and reload the Land Unit and Linked Land Unit doctypes
 	if frappe.db.table_exists('Land Unit') and not frappe.db.table_exists('Location'):
-		rename_doc('DocType', 'Land Unit', 'Location', force=True)
+		frappe.rename_doc('DocType', 'Land Unit', 'Location', force=True)
 
 	frappe.reload_doc('assets', 'doctype', 'location')
 
 	if frappe.db.table_exists('Linked Land Unit') and not frappe.db.table_exists('Linked Location'):
-		rename_doc('DocType', 'Linked Land Unit', 'Linked Location', force=True)
+		frappe.rename_doc('DocType', 'Linked Land Unit', 'Linked Location', force=True)
 
 	frappe.reload_doc('assets', 'doctype', 'linked_location')
 

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -12,24 +13,25 @@
   "basic_information",
   "employee",
   "naming_series",
-  "salutation",
   "first_name",
   "middle_name",
   "last_name",
+  "salutation",
   "employee_name",
+  "employment_type",
   "image",
   "column_break1",
   "company",
   "status",
-  "employee_number",
-  "employment_type",
   "gender",
   "date_of_birth",
   "date_of_joining",
+  "employee_number",
   "emergency_contact_details",
-  "emergency_phone_number",
   "person_to_be_contacted",
   "relation",
+  "column_break_19",
+  "emergency_phone_number",
   "erpnext_user",
   "user_id",
   "create_user",
@@ -52,12 +54,15 @@
   "attendance_and_leave_details",
   "leave_policy",
   "attendance_device_id",
+  "leave_approver",
   "column_break_44",
   "holiday_list",
   "default_shift",
-  "leave_approver",
   "salary_information",
   "salary_mode",
+  "payroll_cost_center",
+  "column_break_52",
+  "expense_approver",
   "bank_name",
   "bank_ac_no",
   "health_insurance_section",
@@ -65,14 +70,14 @@
   "health_insurance_no",
   "contact_details",
   "cell_number",
-  "prefered_contact_email",
   "prefered_email",
-  "company_email",
   "personal_email",
   "unsubscribed",
-  "column_break4",
   "permanent_accommodation_type",
   "permanent_address",
+  "column_break4",
+  "prefered_contact_email",
+  "company_email",
   "current_accommodation_type",
   "current_address",
   "sb53",
@@ -82,9 +87,9 @@
   "date_of_issue",
   "valid_upto",
   "place_of_issue",
-  "column_break6",
   "marital_status",
   "blood_group",
+  "column_break6",
   "family_background",
   "health_details",
   "educational_qualification",
@@ -201,7 +206,7 @@
    "label": "Status",
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nActive\nLeft",
+   "options": "Active\nLeft",
    "reqd": 1,
    "search_index": 1
   },
@@ -232,7 +237,6 @@
    "reqd": 1
   },
   {
-   "description": "You can enter any date manually",
    "fieldname": "date_of_birth",
    "fieldtype": "Date",
    "label": "Date of Birth",
@@ -250,7 +254,6 @@
   },
   {
    "allow_in_quick_entry": 1,
-   "collapsible": 1,
    "fieldname": "emergency_contact_details",
    "fieldtype": "Section Break",
    "label": "Emergency Contact"
@@ -259,7 +262,8 @@
    "bold": 1,
    "fieldname": "emergency_phone_number",
    "fieldtype": "Data",
-   "label": "Emergency Phone"
+   "label": "Emergency Phone",
+   "options": "Phone"
   },
   {
    "bold": 1,
@@ -406,6 +410,8 @@
    "options": "Branch"
   },
   {
+   "fetch_from": "grade.default_leave_policy",
+   "fetch_if_empty": 1,
    "fieldname": "leave_policy",
    "fieldtype": "Link",
    "label": "Leave Policy",
@@ -480,7 +486,8 @@
   {
    "fieldname": "cell_number",
    "fieldtype": "Data",
-   "label": "Mobile"
+   "label": "Mobile",
+   "options": "Phone"
   },
   {
    "fieldname": "prefered_contact_email",
@@ -663,6 +670,7 @@
    "oldfieldtype": "Date"
   },
   {
+   "depends_on": "eval:doc.status == \"Left\"",
    "fieldname": "relieving_date",
    "fieldtype": "Date",
    "label": "Relieving Date",
@@ -777,12 +785,35 @@
    "fieldtype": "Link",
    "label": "Leave Approver",
    "options": "User"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "department.payroll_cost_center",
+   "fetch_if_empty": 1,
+   "fieldname": "payroll_cost_center",
+   "fieldtype": "Link",
+   "label": "Payroll Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "column_break_52",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expense_approver",
+   "fieldtype": "Link",
+   "label": "Expense Approver",
+   "options": "User"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2020-01-09 04:23:55.611366",
+ "links": [],
+ "modified": "2020-07-03 21:28:04.109189",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
@@ -829,6 +860,5 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "employee_name",
- "track_changes": 1
+ "title_field": "employee_name"
 }

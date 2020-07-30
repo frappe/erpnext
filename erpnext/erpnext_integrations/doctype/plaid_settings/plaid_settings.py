@@ -64,14 +64,14 @@ def add_bank_accounts(response, bank, company):
 
 	default_gl_account = get_default_bank_cash_account(company, "Bank")
 	if not default_gl_account:
-		frappe.throw(_("Please setup a default bank account for company {0}".format(company)))
+		frappe.throw(_("Please setup a default bank account for company {0}").format(company))
 
 	for account in response["accounts"]:
-		acc_type = frappe.db.get_value("Account Type", account["type"])
+		acc_type = frappe.db.get_value("Bank Account Type", account["type"])
 		if not acc_type:
 			add_account_type(account["type"])
 
-		acc_subtype = frappe.db.get_value("Account Subtype", account["subtype"])
+		acc_subtype = frappe.db.get_value("Bank Account Subtype", account["subtype"])
 		if not acc_subtype:
 			add_account_subtype(account["subtype"])
 
@@ -106,7 +106,7 @@ def add_bank_accounts(response, bank, company):
 def add_account_type(account_type):
 	try:
 		frappe.get_doc({
-			"doctype": "Account Type",
+			"doctype": "Bank Account Type",
 			"account_type": account_type
 		}).insert()
 	except Exception:
@@ -116,7 +116,7 @@ def add_account_type(account_type):
 def add_account_subtype(account_subtype):
 	try:
 		frappe.get_doc({
-			"doctype": "Account Subtype",
+			"doctype": "Bank Account Subtype",
 			"account_subtype": account_subtype
 		}).insert()
 	except Exception:
@@ -124,9 +124,8 @@ def add_account_subtype(account_subtype):
 
 @frappe.whitelist()
 def sync_transactions(bank, bank_account):
-	''' Sync transactions based on the last integration date as the start date, after sync is completed
-		add the transaction date of the oldest transaction as the last integration date '''
-
+	'''Sync transactions based on the last integration date as the start date, after the sync is completed
+		add the transaction date of the oldest transaction as the last integration date'''
 	last_transaction_date = frappe.db.get_value("Bank Account", bank_account, "last_integration_date")
 	if last_transaction_date:
 		start_date = formatdate(last_transaction_date, "YYYY-MM-dd")

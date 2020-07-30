@@ -36,11 +36,7 @@ class PricingRule(Document):
 
 	def validate_duplicate_apply_on(self):
 		field = apply_on_dict.get(self.apply_on)
-		if not field:
-			return False
-
-		values = [d.get(frappe.scrub(self.apply_on)) for d in self.get(field)]
-
+		values = [d.get(frappe.scrub(self.apply_on)) for d in self.get(field) if field]
 		if len(values) != len(set(values)):
 			frappe.throw(_("Duplicate {0} found in the table").format(self.apply_on))
 
@@ -69,12 +65,12 @@ class PricingRule(Document):
 
 		if not self.selling and self.applicable_for in ["Customer", "Customer Group",
 				"Territory", "Sales Partner", "Campaign"]:
-			throw(_("Selling must be checked, if Applicable For is selected as {0}"
-				.format(self.applicable_for)))
+			throw(_("Selling must be checked, if Applicable For is selected as {0}")
+				.format(self.applicable_for))
 
 		if not self.buying and self.applicable_for in ["Supplier", "Supplier Group"]:
-			throw(_("Buying must be checked, if Applicable For is selected as {0}"
-				.format(self.applicable_for)))
+			throw(_("Buying must be checked, if Applicable For is selected as {0}")
+				.format(self.applicable_for))
 
 	def validate_min_max_qty(self):
 		if self.min_qty and self.max_qty and flt(self.min_qty) > flt(self.max_qty):
@@ -280,7 +276,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 
 		item_details.has_pricing_rule = 1
 
-		item_details.pricing_rules = ','.join([d.pricing_rule for d in rules])
+		item_details.pricing_rules = frappe.as_json([d.pricing_rule for d in rules])
 
 		if not doc: return item_details
 
@@ -370,7 +366,7 @@ def set_discount_amount(rate, item_details):
 
 def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
 	from erpnext.accounts.doctype.pricing_rule.utils import get_pricing_rule_items
-	for d in pricing_rules.split(','):
+	for d in json.loads(pricing_rules):
 		if not d or not frappe.db.exists("Pricing Rule", d): continue
 		pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
 

@@ -174,7 +174,8 @@
    "label": "Status",
    "no_copy": 1,
    "options": "Open\nApproved\nRejected\nCancelled",
-   "permlevel": 1
+   "permlevel": 1,
+   "reqd": 1
   },
   {
    "fieldname": "sb10",
@@ -189,6 +190,7 @@
    "reqd": 1
   },
   {
+   "fetch_from": "employee.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -248,7 +250,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2020-03-10 22:40:43.487721",
+ "modified": "2020-05-18 13:00:41.577327",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Application",

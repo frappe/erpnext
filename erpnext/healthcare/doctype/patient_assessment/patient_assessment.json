@@ -1,0 +1,181 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2020-04-19 22:45:12.356209",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "therapy_session",
+  "patient",
+  "assessment_template",
+  "column_break_4",
+  "company",
+  "healthcare_practitioner",
+  "assessment_datetime",
+  "assessment_description",
+  "section_break_7",
+  "assessment_sheet",
+  "section_break_9",
+  "total_score_obtained",
+  "column_break_11",
+  "total_score",
+  "scale_min",
+  "scale_max",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fetch_from": "therapy_session.patient",
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fieldname": "assessment_template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Assessment Template",
+   "options": "Patient Assessment Template",
+   "reqd": 1
+  },
+  {
+   "fieldname": "therapy_session",
+   "fieldtype": "Link",
+   "label": "Therapy Session",
+   "options": "Therapy Session"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "therapy_session.practitioner",
+   "fieldname": "healthcare_practitioner",
+   "fieldtype": "Link",
+   "label": "Healthcare Practitioner",
+   "options": "Healthcare Practitioner"
+  },
+  {
+   "fieldname": "assessment_datetime",
+   "fieldtype": "Datetime",
+   "label": "Assessment Datetime",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "assessment_sheet",
+   "fieldtype": "Table",
+   "label": "Assessment Sheet",
+   "options": "Patient Assessment Sheet"
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_score",
+   "fieldtype": "Int",
+   "label": "Total Score",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_score_obtained",
+   "fieldtype": "Int",
+   "label": "Total Score Obtained",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scale_min",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Scale Min",
+   "read_only": 1
+  },
+  {
+   "fieldname": "scale_max",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Scale Max",
+   "read_only": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "HLC-PA-.YYYY.-"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Patient Assessment",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "assessment_description",
+   "fieldtype": "Small Text",
+   "label": "Assessment Description"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company"
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-06-25 00:25:13.208400",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Patient Assessment",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Physician",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "patient",
+ "track_changes": 1
+}

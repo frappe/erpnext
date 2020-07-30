@@ -77,8 +77,7 @@ frappe.ui.form.on("Work Order", {
 			return {
 				query: "erpnext.controllers.queries.item_query",
 				filters:[
-					['is_stock_item', '=',1],
-					['default_bom', '!=', '']
+					['is_stock_item', '=',1]
 				]
 			};
 		});
@@ -401,7 +400,6 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	before_submit: function(frm) {
-		frm.toggle_reqd(["fg_warehouse", "wip_warehouse"], true);
 		frm.fields_dict.required_items.grid.toggle_reqd("source_warehouse", true);
 		frm.toggle_reqd("transfer_material_against",
 			frm.doc.operations && frm.doc.operations.length > 0);
@@ -448,6 +446,32 @@ frappe.ui.form.on("Work Order Item", {
 				callback: function (r) {
 					frappe.model.set_value(row.doctype, row.name,
 						"available_qty_at_source_warehouse", r.message);
+				}
+			});
+		}
+	},
+
+	item_code: function(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+
+		if (row.item_code) {
+			frappe.call({
+				method: "erpnext.stock.doctype.item.item.get_item_details",
+				args: {
+					item_code: row.item_code,
+					company: frm.doc.company
+				},
+				callback: function(r) {
+					if (r.message) {
+						frappe.model.set_value(cdt, cdn, {
+							"required_qty": 1,
+							"item_name": r.message.item_name,
+							"description": r.message.description,
+							"source_warehouse": r.message.default_warehouse,
+							"allow_alternative_item": r.message.allow_alternative_item,
+							"include_item_in_manufacturing": r.message.include_item_in_manufacturing
+						});
+					}
 				}
 			});
 		}
@@ -581,6 +605,7 @@ erpnext.work_order = {
 					if (!r.exe) {
 						frm.set_value("wip_warehouse", r.message.wip_warehouse);
 						frm.set_value("fg_warehouse", r.message.fg_warehouse);
+						frm.set_value("scrap_warehouse", r.message.scrap_warehouse);
 					}
 				}
 			});

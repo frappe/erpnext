@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -12,8 +13,8 @@
   "supplier",
   "get_items_from_open_material_requests",
   "supplier_name",
-  "company",
   "column_break1",
+  "company",
   "transaction_date",
   "schedule_date",
   "order_confirmation_no",
@@ -37,6 +38,8 @@
   "col_break_address",
   "shipping_address",
   "shipping_address_display",
+  "billing_address",
+  "billing_address_display",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -53,11 +56,6 @@
   "items_section",
   "scan_barcode",
   "items",
-  "section_break_48",
-  "pricing_rules",
-  "raw_material_details",
-  "set_reserve_warehouse",
-  "supplied_items",
   "sb_last_purchase",
   "total_qty",
   "base_total",
@@ -66,6 +64,11 @@
   "total_net_weight",
   "total",
   "net_total",
+  "section_break_48",
+  "pricing_rules",
+  "raw_material_details",
+  "set_reserve_warehouse",
+  "supplied_items",
   "taxes_section",
   "tax_category",
   "column_break_50",
@@ -104,23 +107,25 @@
   "payment_schedule_section",
   "payment_terms_template",
   "payment_schedule",
+  "tracking_section",
+  "per_billed",
+  "column_break_75",
+  "per_received",
   "terms_section_break",
   "tc_name",
   "terms",
   "more_info",
   "status",
   "ref_sq",
+  "column_break_74",
   "party_account_currency",
   "inter_company_order_reference",
-  "column_break_74",
-  "per_received",
-  "per_billed",
   "column_break5",
   "letter_head",
   "select_print_heading",
   "column_break_86",
-  "group_same_items",
   "language",
+  "group_same_items",
   "subscription_section",
   "from_date",
   "to_date",
@@ -219,7 +224,7 @@
    "allow_on_submit": 1,
    "fieldname": "schedule_date",
    "fieldtype": "Date",
-   "label": "Reqd By Date"
+   "label": "Required By"
   },
   {
    "allow_on_submit": 1,
@@ -431,6 +436,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "description": "Sets 'Warehouse' in each row of the Items table.",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
    "label": "Set Target Warehouse",
@@ -755,6 +761,7 @@
    "fieldname": "base_in_words",
    "fieldtype": "Data",
    "label": "In Words (Company Currency)",
+   "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -811,6 +818,7 @@
    "fieldname": "in_words",
    "fieldtype": "Data",
    "label": "In Words",
+   "length": 240,
    "oldfieldname": "in_words_import",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -826,6 +834,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "payment_schedule_section",
    "fieldtype": "Section Break",
    "label": "Payment Terms"
@@ -916,7 +925,8 @@
    "fieldname": "inter_company_order_reference",
    "fieldtype": "Link",
    "label": "Inter Company Order Reference",
-   "options": "Sales Order"
+   "options": "Sales Order",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_74",
@@ -929,8 +939,6 @@
    "in_list_view": 1,
    "label": "% Received",
    "no_copy": 1,
-   "oldfieldname": "per_received",
-   "oldfieldtype": "Currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -941,8 +949,6 @@
    "in_list_view": 1,
    "label": "% Billed",
    "no_copy": 1,
-   "oldfieldname": "per_billed",
-   "oldfieldtype": "Currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1050,12 +1056,35 @@
    "fieldtype": "Link",
    "label": "Set Reserve Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "tracking_section",
+   "fieldtype": "Section Break",
+   "label": "Tracking"
+  },
+  {
+   "fieldname": "column_break_75",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "billing_address",
+   "fieldtype": "Link",
+   "label": "Select Billing Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "billing_address_display",
+   "fieldtype": "Small Text",
+   "label": "Billing Address",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-07-01 12:40:45.240948",
+ "links": [],
+ "modified": "2020-07-18 05:09:33.800633",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

@@ -13,7 +13,7 @@ from erpnext.controllers.item_variant import (ItemVariantExistsError,
 from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
 from frappe import _, msgprint
 from frappe.utils import (cint, cstr, flt, formatdate, get_timestamp, getdate,
-						  now_datetime, random_string, strip)
+		now_datetime, random_string, strip, get_link_to_form, nowtime)
 from frappe.utils.html_utils import clean_html
 from frappe.website.doctype.website_slideshow.website_slideshow import \
 	get_slideshow
@@ -194,7 +194,7 @@ class Item(WebsiteGenerator):
 
 			if default_warehouse:
 				stock_entry = make_stock_entry(item_code=self.name, target=default_warehouse, qty=self.opening_stock,
-					rate=self.valuation_rate, company=default.company)
+					rate=self.valuation_rate, company=default.company, posting_date=getdate(), posting_time=nowtime())
 
 				stock_entry.add_comment("Comment", _("Opening Stock"))
 
@@ -308,7 +308,7 @@ class Item(WebsiteGenerator):
 		if self.retain_sample and not frappe.db.get_single_value('Stock Settings', 'sample_retention_warehouse'):
 			frappe.throw(_("Please select Sample Retention Warehouse in Stock Settings first"))
 		if self.retain_sample and not self.has_batch_no:
-			frappe.throw(_(" {0} Retain Sample is based on batch, please check Has Batch No to retain sample of item").format(
+			frappe.throw(_("{0} Retain Sample is based on batch, please check Has Batch No to retain sample of item").format(
 				self.item_code))
 
 	def get_context(self, context):
@@ -597,7 +597,7 @@ class Item(WebsiteGenerator):
 	def stock_ledger_created(self):
 		if not hasattr(self, '_stock_ledger_created'):
 			self._stock_ledger_created = len(frappe.db.sql("""select name from `tabStock Ledger Entry`
-				where item_code = %s limit 1""", self.name))
+				where item_code = %s and is_cancelled = 0 limit 1""", self.name))
 		return self._stock_ledger_created
 
 	def validate_name_with_item_group(self):
@@ -634,6 +634,9 @@ class Item(WebsiteGenerator):
 									+ ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list]))
 
 	def after_rename(self, old_name, new_name, merge):
+		if merge:
+			self.validate_duplicate_item_in_stock_reconciliation(old_name, new_name)
+
 		if self.route:
 			invalidate_cache_for_item(self)
 			clear_cache(self.route)
@@ -655,6 +658,27 @@ class Item(WebsiteGenerator):
 
 					frappe.db.set_value(dt, d.name, "item_wise_tax_detail",
 											json.dumps(item_wise_tax_detail), update_modified=False)
+
+	def validate_duplicate_item_in_stock_reconciliation(self, old_name, new_name):
+		records = frappe.db.sql(""" SELECT parent, COUNT(*) as records
+			FROM `tabStock Reconciliation Item`
+			WHERE item_code = %s and docstatus = 1
+			GROUP By item_code, warehouse, parent
+			HAVING records > 1
+		""", new_name, as_dict=1)
+
+		if not records: return
+		document = _("Stock Reconciliation") if len(records) == 1 else _("Stock Reconciliations")
+
+		msg = _("The items {0} and {1} are present in the following {2} : <br>"
+			.format(frappe.bold(old_name), frappe.bold(new_name), document))
+
+		msg += ', '.join([get_link_to_form("Stock Reconciliation", d.parent) for d in records]) + "<br><br>"
+
+		msg += _("Note: To merge the items, create a separate Stock Reconciliation for the old item {0}"
+			.format(frappe.bold(old_name)))
+
+		frappe.throw(_(msg), title=_("Merge not allowed"))
 
 	def set_last_purchase_rate(self, new_name):
 		last_purchase_rate = get_last_purchase_details(new_name).get("base_net_rate", 0)
@@ -832,7 +856,7 @@ class Item(WebsiteGenerator):
 			for d in self.attributes:
 				if d.attribute in attributes:
 					frappe.throw(
-						_("Attribute {0} selected multiple times in Attributes Table".format(d.attribute)))
+						_("Attribute {0} selected multiple times in Attributes Table").format(d.attribute))
 				else:
 					attributes.append(d.attribute)
 
@@ -898,6 +922,56 @@ class Item(WebsiteGenerator):
 			enabled = frappe.db.get_single_value('Stock Settings', 'auto_indent')
 			if not enabled:
 				frappe.msgprint(msg=_("You have to enable auto re-order in Stock Settings to maintain re-order levels."), title=_("Enable Auto Re-Order"), indicator="orange")
+
+	def create_onboarding_docs(self, args):
+		company = frappe.defaults.get_defaults().get('company') or \
+			frappe.db.get_single_value('Global Defaults', 'default_company')
+
+		for i in range(1, args.get('max_count')):
+			item = args.get('item_' + str(i))
+			if item:
+				default_warehouse = ''
+				default_warehouse = frappe.db.get_value('Warehouse', filters={
+					'warehouse_name': _('Finished Goods'),
+					'company': company
+				})
+
+				try:
+					frappe.get_doc({
+						'doctype': self.doctype,
+						'item_code': item,
+						'item_name': item,
+						'description': item,
+						'show_in_website': 1,
+						'is_sales_item': 1,
+						'is_purchase_item': 1,
+						'is_stock_item': 1,
+						'item_group': _('Products'),
+						'stock_uom': _(args.get('item_uom_' + str(i))),
+						'item_defaults': [{
+							'default_warehouse': default_warehouse,
+							'company': company
+						}]
+					}).insert()
+
+				except frappe.NameError:
+					pass
+				else:
+					if args.get('item_price_' + str(i)):
+						item_price = flt(args.get('item_price_' + str(i)))
+
+						price_list_name = frappe.db.get_value('Price List', {'selling': 1})
+						make_item_price(item, price_list_name, item_price)
+						price_list_name = frappe.db.get_value('Price List', {'buying': 1})
+						make_item_price(item, price_list_name, item_price)
+
+def make_item_price(item, price_list_name, item_price):
+	frappe.get_doc({
+		'doctype': 'Item Price',
+		'price_list': price_list_name,
+		'item_code': item,
+		'price_list_rate': item_price
+	}).insert()
 
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''
@@ -986,7 +1060,6 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 
 	if last_purchase_order and (purchase_order_date >= purchase_receipt_date or not last_purchase_receipt):
 		# use purchase order
-		
 		last_purchase = last_purchase_order[0]
 		purchase_date = purchase_order_date
 
@@ -1007,6 +1080,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 		"purchase_date": purchase_date
 	})
 	
+
 
 	conversion_rate = flt(conversion_rate) or 1.0
 	out.update({
@@ -1099,6 +1173,17 @@ def set_item_default(item_code, company, fieldname, value):
 	d = item.append('item_defaults', {fieldname: value, "company": company})
 	d.db_insert()
 	item.clear_cache()
+
+@frappe.whitelist()
+def get_item_details(item_code, company=None):
+	out = frappe._dict()
+	if company:
+		out = get_item_defaults(item_code, company) or frappe._dict()
+
+	doc = frappe.get_cached_doc("Item", item_code)
+	out.update(doc.as_dict())
+
+	return out
 
 @frappe.whitelist()
 def get_uom_conv_factor(uom, stock_uom):

@@ -24,7 +24,7 @@ import NotFound from './pages/NotFound.vue';
 function get_route_map() {
 	const read_only_routes = {
 		'marketplace/home': Home,
-		'marketplace/search/:keyword': Search,
+		'marketplace/search/:category/:keyword': Search,
 		'marketplace/category/:category': Category,
 		'marketplace/item/:item': Item,
 		'marketplace/seller/:seller': Seller,

@@ -7,7 +7,7 @@ from frappe.exceptions import ValidationError
 import unittest
 
 from erpnext.stock.doctype.batch.batch import get_batch_qty, UnableToSelectBatchError, get_batch_no
-from frappe.utils import cint
+from frappe.utils import cint, flt
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 class TestBatch(unittest.TestCase):
@@ -35,12 +35,13 @@ class TestBatch(unittest.TestCase):
 		receipt = frappe.get_doc(dict(
 			doctype='Purchase Receipt',
 			supplier='_Test Supplier',
+			company='_Test Company',
 			items=[
 				dict(
 					item_code='ITEM-BATCH-1',
 					qty=batch_qty,
 					rate=10,
-					warehouse= 'Stores - WP'
+					warehouse= 'Stores - _TC'
 				)
 			]
 		)).insert()
@@ -175,6 +176,18 @@ class TestBatch(unittest.TestCase):
 
 		self.assertEqual(get_batch_qty('batch a', '_Test Warehouse - _TC'), 90)
 
+	def test_total_batch_qty(self):
+		self.make_batch_item('ITEM-BATCH-3')
+		existing_batch_qty = flt(frappe.db.get_value("Batch", "B100", "batch_qty"))
+		stock_entry = self.make_new_batch_and_entry('ITEM-BATCH-3', 'B100', '_Test Warehouse - _TC')
+
+		current_batch_qty = flt(frappe.db.get_value("Batch", "B100", "batch_qty"))
+		self.assertEqual(current_batch_qty, existing_batch_qty + 90)
+
+		stock_entry.cancel()
+		current_batch_qty = flt(frappe.db.get_value("Batch", "B100", "batch_qty"))
+		self.assertEqual(current_batch_qty, existing_batch_qty)
+		
 	@classmethod
 	def make_new_batch_and_entry(cls, item_name, batch_name, warehouse):
 		'''Make a new stock entry for given target warehouse and batch name of item'''
@@ -207,6 +220,8 @@ class TestBatch(unittest.TestCase):
 		stock_entry.set_stock_entry_type()
 		stock_entry.insert()
 		stock_entry.submit()
+
+		return stock_entry
 
 	def test_batch_name_with_naming_series(self):
 		stock_settings = frappe.get_single('Stock Settings')

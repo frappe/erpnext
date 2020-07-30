@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "naming_series:",
  "creation": "2018-10-15 16:25:41.548432",
  "doctype": "DocType",
@@ -62,6 +63,7 @@
    "options": "MTNG-.YYYY.-.MM.-.DD.-"
   }
  ],
+ "links": [],
  "modified": "2020-05-19 13:18:59.821740",
  "modified_by": "Administrator",
  "module": "Quality Management",

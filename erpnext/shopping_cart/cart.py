@@ -42,9 +42,9 @@ def get_cart_quotation(doc=None):
 
 	return {
 		"doc": decorate_quotation_doc(doc),
-		"shipping_addresses": [{"name": address.name, "display": address.display}
+		"shipping_addresses": [{"name": address.name, "title": address.address_title, "display": address.display}
 			for address in addresses if address.address_type == "Shipping"],
-		"billing_addresses": [{"name": address.name, "display": address.display}
+		"billing_addresses": [{"name": address.name, "title": address.address_title, "display": address.display}
 			for address in addresses if address.address_type == "Billing"],
 		"shipping_rules": get_applicable_shipping_rules(party),
 		"cart_settings": frappe.get_cached_doc("Shopping Cart Settings")
@@ -434,7 +434,7 @@ def get_debtors_account(cart_settings):
 	payment_gateway_account_currency = \
 		frappe.get_doc("Payment Gateway Account", cart_settings.payment_gateway_account).currency
 
-	account_name = _("Debtors ({0})".format(payment_gateway_account_currency))
+	account_name = _("Debtors ({0})").format(payment_gateway_account_currency)
 
 	debtors_account_name = get_account_name("Receivable", "Asset", is_group=0,\
 		account_currency=payment_gateway_account_currency, company=cart_settings.company)

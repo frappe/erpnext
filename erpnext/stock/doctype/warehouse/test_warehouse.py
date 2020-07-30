@@ -1,17 +1,21 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
-from frappe.model.rename_doc import rename_doc
-from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+
+import unittest
+
+import frappe
 from frappe.utils import cint
-from erpnext import set_perpetual_inventory
 from frappe.test_runner import make_test_records
-from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
 
 import erpnext
-import frappe
-import unittest
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext import set_perpetual_inventory
+from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
+
+
 test_records = frappe.get_test_records('Warehouse')
+
 
 class TestWarehouse(unittest.TestCase):
 	def setUp(self):
@@ -41,7 +45,7 @@ class TestWarehouse(unittest.TestCase):
 		# Rename with abbr
 		if frappe.db.exists("Warehouse", "Test Warehouse for Renaming 2 - _TC"):
 			frappe.delete_doc("Warehouse", "Test Warehouse for Renaming 2 - _TC")
-		rename_doc("Warehouse", "Test Warehouse for Renaming 1 - _TC", "Test Warehouse for Renaming 2 - _TC")
+		frappe.rename_doc("Warehouse", "Test Warehouse for Renaming 1 - _TC", "Test Warehouse for Renaming 2 - _TC")
 
 		self.assertTrue(frappe.db.get_value("Warehouse",
 			filters={"account": "Test Warehouse for Renaming 1 - _TC"}))
@@ -50,7 +54,7 @@ class TestWarehouse(unittest.TestCase):
 		if frappe.db.exists("Warehouse", "Test Warehouse for Renaming 3 - _TC"):
 			frappe.delete_doc("Warehouse", "Test Warehouse for Renaming 3 - _TC")
 
-		rename_doc("Warehouse", "Test Warehouse for Renaming 2 - _TC", "Test Warehouse for Renaming 3")
+		frappe.rename_doc("Warehouse", "Test Warehouse for Renaming 2 - _TC", "Test Warehouse for Renaming 3")
 
 		self.assertTrue(frappe.db.get_value("Warehouse",
 			filters={"account": "Test Warehouse for Renaming 1 - _TC"}))
@@ -58,7 +62,7 @@ class TestWarehouse(unittest.TestCase):
 		# Another rename with multiple dashes
 		if frappe.db.exists("Warehouse", "Test - Warehouse - Company - _TC"):
 			frappe.delete_doc("Warehouse", "Test - Warehouse - Company - _TC")
-		rename_doc("Warehouse", "Test Warehouse for Renaming 3 - _TC", "Test - Warehouse - Company")
+		frappe.rename_doc("Warehouse", "Test Warehouse for Renaming 3 - _TC", "Test - Warehouse - Company")
 
 	def test_warehouse_merging(self):
 		set_perpetual_inventory(1)
@@ -78,7 +82,7 @@ class TestWarehouse(unittest.TestCase):
 				{"item_code": "_Test Item", "warehouse": "Test Warehouse for Merging 2 - _TC"}, "actual_qty"))
 		)
 
-		rename_doc("Warehouse", "Test Warehouse for Merging 1 - _TC",
+		frappe.rename_doc("Warehouse", "Test Warehouse for Merging 1 - _TC",
 			"Test Warehouse for Merging 2 - _TC", merge=True)
 
 		self.assertFalse(frappe.db.exists("Warehouse", "Test Warehouse for Merging 1 - _TC"))

@@ -32,8 +32,8 @@ class HotelRoomReservation(Document):
 					+ d.qty + self.rooms_booked.get(d.item)
 				total_rooms = self.get_total_rooms(d.item)
 				if total_rooms < rooms_booked:
-					frappe.throw(_("Hotel Rooms of type {0} are unavailable on {1}".format(d.item,
-						frappe.format(day, dict(fieldtype="Date")))), exc=HotelRoomUnavailableError)
+					frappe.throw(_("Hotel Rooms of type {0} are unavailable on {1}").format(d.item,
+						frappe.format(day, dict(fieldtype="Date"))), exc=HotelRoomUnavailableError)
 
 				self.rooms_booked[d.item] += rooms_booked
 
@@ -74,8 +74,8 @@ class HotelRoomReservation(Document):
 					net_rate += day_rate[0][0]
 				else:
 					frappe.throw(
-						_("Please set Hotel Room Rate on {}".format(
-							frappe.format(day, dict(fieldtype="Date")))), exc=HotelRoomPricingNotSetError)
+						_("Please set Hotel Room Rate on {}").format(
+							frappe.format(day, dict(fieldtype="Date"))), exc=HotelRoomPricingNotSetError)
 			d.rate = net_rate
 			d.amount = net_rate * flt(d.qty)
 			self.net_total += d.amount

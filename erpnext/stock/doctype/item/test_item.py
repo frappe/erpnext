@@ -11,7 +11,6 @@ from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsE
 	InvalidItemAttributeValueError, get_variant)
 from erpnext.stock.doctype.item.item import StockExistsForTemplate, InvalidBarcode
 from erpnext.stock.doctype.item.item import get_uom_conv_factor
-from frappe.model.rename_doc import rename_doc
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
 
@@ -348,7 +347,7 @@ class TestItem(unittest.TestCase):
 		make_stock_entry(item_code="Test Item for Merging 2", target="_Test Warehouse 1 - _TC",
 			qty=1, rate=100)
 
-		rename_doc("Item", "Test Item for Merging 1", "Test Item for Merging 2", merge=True)
+		frappe.rename_doc("Item", "Test Item for Merging 1", "Test Item for Merging 2", merge=True)
 
 		self.assertFalse(frappe.db.exists("Item", "Test Item for Merging 1"))
 

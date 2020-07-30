@@ -202,7 +202,6 @@
   {
    "fieldname": "description",
    "fieldtype": "Text Editor",
-   "in_preview": 1,
    "label": "Task Description",
    "oldfieldname": "description",
    "oldfieldtype": "Text Editor",

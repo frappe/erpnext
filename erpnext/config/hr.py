@@ -299,6 +299,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Appointment Letter",
+				},
+				{
+					"type": "doctype",
 					"name": "Staffing Plan",
 				},
 			]

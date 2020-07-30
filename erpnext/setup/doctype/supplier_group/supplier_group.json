@@ -6,7 +6,6 @@
  "creation": "2013-01-10 16:34:24",
  "doctype": "DocType",
  "document_type": "Setup",
- "engine": "InnoDB",
  "field_order": [
   "supplier_group_name",
   "parent_supplier_group",
@@ -107,7 +106,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2020-03-18 18:26:07.179330",
+ "modified": "2020-03-18 18:10:49.228407",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Supplier Group",
@@ -160,6 +159,5 @@
   }
  ],
  "show_name_in_global_search": 1,
- "sort_field": "modified",
  "sort_order": "ASC"
 }

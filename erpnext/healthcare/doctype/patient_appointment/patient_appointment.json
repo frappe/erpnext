@@ -1,46 +1,53 @@
 {
+ "actions": [],
  "allow_copy": 1,
  "allow_import": 1,
- "autoname": "OP-.######",
+ "autoname": "naming_series:",
  "beta": 1,
  "creation": "2017-05-04 11:52:40.941507",
  "doctype": "DocType",
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
-  "inpatient_record",
-  "patient",
-  "appointment_type",
-  "duration",
-  "column_break_1",
+  "naming_series",
+  "title",
   "status",
+  "patient",
+  "patient_name",
+  "patient_sex",
+  "patient_age",
+  "inpatient_record",
+  "column_break_1",
+  "company",
+  "service_unit",
   "procedure_template",
   "get_procedure_from_encounter",
   "procedure_prescription",
-  "service_unit",
-  "check_availability",
-  "section_break_12",
+  "therapy_type",
+  "get_prescribed_therapies",
+  "therapy_plan",
   "practitioner",
+  "practitioner_name",
   "department",
+  "section_break_12",
+  "appointment_type",
+  "duration",
   "column_break_17",
   "appointment_date",
   "appointment_time",
-  "section_break_16",
-  "patient_name",
-  "patient_sex",
-  "column_break_21",
-  "patient_age",
-  "section_break_1",
   "appointment_datetime",
+  "section_break_16",
   "mode_of_payment",
-  "paid_amount",
-  "column_break_2",
+  "billing_item",
   "invoiced",
-  "company",
+  "column_break_2",
+  "paid_amount",
+  "ref_sales_invoice",
   "section_break_3",
-  "notes",
   "referring_practitioner",
-  "reminded"
+  "reminded",
+  "column_break_36",
+  "notes"
  ],
  "fields": [
   {
@@ -52,7 +59,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "inpatient_record.patient",
    "fieldname": "patient",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -73,11 +79,11 @@
    "set_only_once": 1
   },
   {
-   "description": "In Minutes",
    "fieldname": "duration",
    "fieldtype": "Int",
    "in_filter": 1,
-   "label": "Duration"
+   "label": "Duration (In Minutes)",
+   "set_only_once": 1
   },
   {
    "fieldname": "column_break_1",
@@ -85,27 +91,29 @@
    "read_only": 1
   },
   {
-   "default": "Scheduled",
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_filter": 1,
+   "in_list_view": 1,
    "label": "Status",
-   "options": "\nScheduled\nOpen\nClosed\nPending\nCancelled",
+   "options": "\nScheduled\nOpen\nClosed\nCancelled",
    "read_only": 1,
    "search_index": 1
   },
   {
+   "depends_on": "eval:doc.patient;",
    "fieldname": "procedure_template",
    "fieldtype": "Link",
-   "label": "Procedure",
+   "label": "Clinical Procedure Template",
    "options": "Clinical Procedure Template",
    "set_only_once": 1
   },
   {
+   "depends_on": "eval:doc.__islocal && doc.patient",
    "fieldname": "get_procedure_from_encounter",
    "fieldtype": "Button",
-   "label": "Get prescribed procedures"
+   "label": "Get Prescribed Clinical Procedures"
   },
   {
    "fieldname": "procedure_prescription",
@@ -114,7 +122,8 @@
    "label": "Procedure Prescription",
    "no_copy": 1,
    "options": "Procedure Prescription",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "service_unit",
@@ -124,14 +133,9 @@
    "set_only_once": 1
   },
   {
-   "depends_on": "eval:doc.__islocal",
-   "fieldname": "check_availability",
-   "fieldtype": "Button",
-   "label": "Check availability"
-  },
-  {
    "fieldname": "section_break_12",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Appointment Details"
   },
   {
    "fieldname": "practitioner",
@@ -146,6 +150,7 @@
    "set_only_once": 1
   },
   {
+   "fetch_from": "practitioner.department",
    "fieldname": "department",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -176,11 +181,13 @@
    "fieldtype": "Time",
    "in_list_view": 1,
    "label": "Time",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "section_break_16",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Payments"
   },
   {
    "fetch_from": "patient.patient_name",
@@ -192,16 +199,13 @@
   {
    "fetch_from": "patient.sex",
    "fieldname": "patient_sex",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Gender",
    "no_copy": 1,
+   "options": "Gender",
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
-  },
-  {
-   "fieldname": "column_break_21",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "patient_age",
@@ -210,16 +214,13 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_1",
-   "fieldtype": "Section Break",
-   "set_only_once": 1
-  },
-  {
    "fieldname": "appointment_datetime",
    "fieldtype": "Datetime",
+   "hidden": 1,
    "label": "Appointment Datetime",
    "print_hide": 1,
    "read_only": 1,
+   "report_hide": 1,
    "search_index": 1
   },
   {
@@ -242,18 +243,17 @@
    "fieldname": "invoiced",
    "fieldtype": "Check",
    "label": "Invoiced",
-   "read_only": 1,
-   "search_index": 1
+   "read_only": 1
   },
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "hidden": 1,
+   "in_standard_filter": 1,
    "label": "Company",
    "no_copy": 1,
    "options": "Company",
-   "print_hide": 1,
-   "report_hide": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "collapsible": 1,
@@ -272,8 +272,7 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Referring Practitioner",
-   "options": "Healthcare Practitioner",
-   "set_only_once": 1
+   "options": "Healthcare Practitioner"
   },
   {
    "default": "0",
@@ -283,10 +282,74 @@
    "label": "Reminded",
    "print_hide": 1,
    "report_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.patient;",
+   "fieldname": "therapy_type",
+   "fieldtype": "Link",
+   "label": "Therapy",
+   "options": "Therapy Type",
+   "set_only_once": 1
+  },
+  {
+   "depends_on": "eval:doc.patient && doc.__islocal;",
+   "fieldname": "get_prescribed_therapies",
+   "fieldtype": "Button",
+   "label": "Get Prescribed Therapies"
+  },
+  {
+   "depends_on": "eval: doc.patient && doc.therapy_type",
+   "fieldname": "therapy_plan",
+   "fieldtype": "Link",
+   "label": "Therapy Plan",
+   "mandatory_depends_on": "eval: doc.patient && doc.therapy_type",
+   "options": "Therapy Plan"
+  },
+  {
+   "fieldname": "ref_sales_invoice",
+   "fieldtype": "Link",
+   "label": "Reference Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "HLC-APP-.YYYY.-",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "billing_item",
+   "fieldtype": "Link",
+   "label": "Billing Item",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_36",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "practitioner.practitioner_name",
+   "fieldname": "practitioner_name",
+   "fieldtype": "Data",
+   "label": "Practitioner Name",
+   "read_only": 1
   }
  ],
- "modified": "2020-03-27 15:55:24.344945",
- "modified_by": "ruchamahabal2@gmail.com",
+ "links": [],
+ "modified": "2020-05-21 03:04:21.400893",
+ "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",
  "owner": "Administrator",
@@ -333,7 +396,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "patient",
+ "title_field": "title",
  "track_changes": 1,
  "track_seen": 1
 }

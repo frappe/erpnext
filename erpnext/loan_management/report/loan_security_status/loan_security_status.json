@@ -1,0 +1,27 @@
+{
+ "add_total_row": 1,
+ "creation": "2019-10-07 05:57:33.435705",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2019-10-07 13:45:46.793949",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Loan Security Status",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Loan Security",
+ "report_name": "Loan Security Status",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Loan Manager"
+  }
+ ]
+}

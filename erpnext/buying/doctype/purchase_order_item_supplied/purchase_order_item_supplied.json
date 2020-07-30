@@ -1,20 +1,26 @@
 {
+ "actions": [],
  "creation": "2013-02-22 01:27:42",
  "doctype": "DocType",
  "editable_grid": 1,
+ "engine": "InnoDB",
  "field_order": [
   "main_item_code",
-  "rm_item_code",
-  "required_qty",
-  "supplied_qty",
-  "rate",
-  "amount",
-  "column_break_6",
   "bom_detail_no",
-  "reference_name",
-  "conversion_factor",
   "stock_uom",
-  "reserve_warehouse"
+  "conversion_factor",
+  "column_break_6",
+  "rm_item_code",
+  "reference_name",
+  "reserve_warehouse",
+  "section_break2",
+  "rate",
+  "col_break2",
+  "amount",
+  "section_break1",
+  "required_qty",
+  "col_break1",
+  "supplied_qty"
  ],
  "fields": [
   {
@@ -120,15 +126,34 @@
    "in_list_view": 1,
    "label": "Supplied Qty",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_break1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_break2",
+   "fieldtype": "Column Break"
   }
  ],
  "hide_toolbar": 1,
  "idx": 1,
  "istable": 1,
- "modified": "2019-08-20 13:37:32.702068",
+ "links": [],
+ "modified": "2020-03-12 15:43:53.862897",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item Supplied",
  "owner": "dhanalekshmi@webnotestech.com",
- "permissions": []
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC"
 }

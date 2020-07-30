@@ -1,9 +1,11 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-03-07 14:48:38",
  "doctype": "DocType",
  "document_type": "Document",
+ "engine": "InnoDB",
  "field_order": [
   "type_section",
   "naming_series",
@@ -14,6 +16,10 @@
   "schedule_date",
   "company",
   "amended_from",
+  "warehouse_section",
+  "set_warehouse",
+  "column_break5",
+  "set_from_warehouse",
   "items_section",
   "scan_barcode",
   "items",
@@ -66,7 +72,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Type",
+   "label": "Purpose",
    "options": "Purchase\nMaterial Transfer\nMaterial Issue\nManufacture\nCustomer Provided",
    "reqd": 1
   },
@@ -85,7 +91,7 @@
    "allow_on_submit": 1,
    "fieldname": "schedule_date",
    "fieldtype": "Date",
-   "label": "Required Date"
+   "label": "Required By"
   },
   {
    "fieldname": "company",
@@ -190,6 +196,7 @@
    "width": "100px"
   },
   {
+   "depends_on": "eval:doc.docstatus==1",
    "fieldname": "per_ordered",
    "fieldtype": "Percent",
    "label": "% Ordered",
@@ -200,6 +207,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.docstatus==1",
    "fieldname": "per_received",
    "fieldtype": "Percent",
    "label": "% Received",
@@ -270,12 +278,38 @@
    "options": "Job Card",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "warehouse_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "Sets 'For Warehouse' in each row of the Items table.",
+   "fieldname": "set_warehouse",
+   "fieldtype": "Link",
+   "label": "Set Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "column_break5",
+   "fieldtype": "Column Break",
+   "oldfieldtype": "Column Break",
+   "print_width": "50%",
+   "width": "50%"
+  },
+  {
+   "depends_on": "eval:doc.material_request_type == 'Material Transfer'",
+   "fieldname": "set_from_warehouse",
+   "fieldtype": "Link",
+   "label": "Set From Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
- "modified": "2019-04-29 11:45:07.570292",
+ "links": [],
+ "modified": "2020-05-01 20:21:09.990867",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",

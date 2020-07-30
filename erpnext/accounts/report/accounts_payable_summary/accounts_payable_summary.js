@@ -11,17 +11,17 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
+			"fieldname":"report_date",
+			"label": __("Posting Date"),
+			"fieldtype": "Date",
+			"default": frappe.datetime.get_today()
+		},
+		{
 			"fieldname":"ageing_based_on",
 			"label": __("Ageing Based On"),
 			"fieldtype": "Select",
 			"options": 'Posting Date\nDue Date',
-			"default": "Posting Date"
-		},
-		{
-			"fieldname":"report_date",
-			"label": __("Date"),
-			"fieldtype": "Date",
-			"default": frappe.datetime.get_today()
+			"default": "Due Date"
 		},
 		{
 			"fieldname":"range1",

@@ -57,6 +57,9 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 
 		frappe.cache().hset("fiscal_years", company, fiscal_years)
 
+	if not transaction_date and not fiscal_year:
+		return fiscal_years
+
 	if transaction_date:
 		transaction_date = getdate(transaction_date)
 
@@ -78,6 +81,23 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 	error_msg = _("""{0} {1} not in any active Fiscal Year.""").format(label, formatdate(transaction_date))
 	if verbose==1: frappe.msgprint(error_msg)
 	raise FiscalYearError(error_msg)
+
+@frappe.whitelist()
+def get_fiscal_year_filter_field(company=None):
+	field = {
+		"fieldtype": "Select",
+		"options": [],
+		"operator": "Between",
+		"query_value": True
+	}
+	fiscal_years = get_fiscal_years(company=company)
+	for fiscal_year in fiscal_years:
+		field["options"].append({
+			"label": fiscal_year.name,
+			"value": fiscal_year.name,
+			"query_value": [fiscal_year.year_start_date.strftime("%Y-%m-%d"), fiscal_year.year_end_date.strftime("%Y-%m-%d")]
+		})
+	return field
 
 def validate_fiscal_year(date, fiscal_year, company, label="Date", doc=None):
 	years = [f[0] for f in get_fiscal_years(date, label=_(label), company=company)]
@@ -124,14 +144,12 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 			# hence, assuming balance as 0.0
 			return 0.0
 
-	allow_cost_center_in_entry_of_bs_account = get_allow_cost_center_in_entry_of_bs_account()
-
 	if account:
 		report_type = acc.report_type
 	else:
 		report_type = ""
 
-	if cost_center and (allow_cost_center_in_entry_of_bs_account or report_type =='Profit and Loss'):
+	if cost_center and report_type == 'Profit and Loss':
 		cc = frappe.get_doc("Cost Center", cost_center)
 		if cc.is_group:
 			cond.append(""" exists (
@@ -513,7 +531,7 @@ def remove_ref_doc_link_from_jv(ref_type, ref_no):
 			where reference_type=%s and reference_name=%s
 			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
 
-		frappe.msgprint(_("Journal Entries {0} are un-linked".format("\n".join(linked_jv))))
+		frappe.msgprint(_("Journal Entries {0} are un-linked").format("\n".join(linked_jv)))
 
 def remove_ref_doc_link_from_pe(ref_type, ref_no):
 	linked_pe = frappe.db.sql_list("""select parent from `tabPayment Entry Reference`
@@ -536,7 +554,7 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 				where name=%s""", (pe_doc.total_allocated_amount, pe_doc.base_total_allocated_amount,
 					pe_doc.unallocated_amount, now(), frappe.session.user, pe))
 
-		frappe.msgprint(_("Payment Entries {0} are un-linked".format("\n".join(linked_pe))))
+		frappe.msgprint(_("Payment Entries {0} are un-linked").format("\n".join(linked_pe)))
 
 @frappe.whitelist()
 def get_company_default(company, fieldname):
@@ -658,7 +676,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 	invoice_list = frappe.db.sql("""
 		select
 			voucher_no, voucher_type, posting_date, due_date,
-			ifnull(sum({dr_or_cr}), 0) as invoice_amount
+			ifnull(sum({dr_or_cr}), 0) as invoice_amount,
+			account_currency as currency
 		from
 			`tabGL Entry`
 		where
@@ -715,7 +734,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 						'invoice_amount': flt(d.invoice_amount),
 						'payment_amount': payment_amount,
 						'outstanding_amount': outstanding_amount,
-						'due_date': d.due_date
+						'due_date': d.due_date,
+						'currency': d.currency
 					})
 				)
 
@@ -877,13 +897,64 @@ def get_coa(doctype, parent, is_root, chart=None):
 
 	return accounts
 
-def get_allow_cost_center_in_entry_of_bs_account():
-	def generator():
-		return cint(frappe.db.get_value('Accounts Settings', None, 'allow_cost_center_in_entry_of_bs_account'))
-	return frappe.local_cache("get_allow_cost_center_in_entry_of_bs_account", (), generator, regenerate_if_none=True)
-
 def get_stock_accounts(company):
 	return frappe.get_all("Account", filters = {
 		"account_type": "Stock",
 		"company": company
 	})
+
+def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
+		warehouse_account=None, company=None):
+	def _delete_gl_entries(voucher_type, voucher_no):
+		frappe.db.sql("""delete from `tabGL Entry`
+			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
+
+	if not warehouse_account:
+		warehouse_account = get_warehouse_account_map(company)
+
+	future_stock_vouchers = get_future_stock_vouchers(posting_date, posting_time, for_warehouses, for_items)
+	gle = get_voucherwise_gl_entries(future_stock_vouchers, posting_date)
+
+	for voucher_type, voucher_no in future_stock_vouchers:
+		existing_gle = gle.get((voucher_type, voucher_no), [])
+		voucher_obj = frappe.get_doc(voucher_type, voucher_no)
+		expected_gle = voucher_obj.get_gl_entries(warehouse_account)
+		if expected_gle:
+			if not existing_gle or not compare_existing_and_expected_gle(existing_gle, expected_gle):
+				_delete_gl_entries(voucher_type, voucher_no)
+				voucher_obj.make_gl_entries(gl_entries=expected_gle, repost_future_gle=False, from_repost=True)
+		else:
+			_delete_gl_entries(voucher_type, voucher_no)
+
+def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None):
+	future_stock_vouchers = []
+
+	values = []
+	condition = ""
+	if for_items:
+		condition += " and item_code in ({})".format(", ".join(["%s"] * len(for_items)))
+		values += for_items
+
+	if for_warehouses:
+		condition += " and warehouse in ({})".format(", ".join(["%s"] * len(for_warehouses)))
+		values += for_warehouses
+
+	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
+		from `tabStock Ledger Entry` sle
+		where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) {condition}
+		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc for update""".format(condition=condition),
+		tuple([posting_date, posting_time] + values), as_dict=True):
+			future_stock_vouchers.append([d.voucher_type, d.voucher_no])
+
+	return future_stock_vouchers
+
+def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
+	gl_entries = {}
+	if future_stock_vouchers:
+		for d in frappe.db.sql("""select * from `tabGL Entry`
+			where posting_date >= %s and voucher_no in (%s)""" %
+			('%s', ', '.join(['%s']*len(future_stock_vouchers))),
+			tuple([posting_date] + [d[1] for d in future_stock_vouchers]), as_dict=1):
+				gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
+
+	return gl_entries

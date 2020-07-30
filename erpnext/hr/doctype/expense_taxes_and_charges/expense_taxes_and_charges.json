@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2019-06-03 11:42:33.123976",
  "doctype": "DocType",
@@ -7,8 +8,8 @@
  "engine": "InnoDB",
  "field_order": [
   "account_head",
-  "col_break1",
   "rate",
+  "col_break1",
   "description",
   "section_break_6",
   "tax_amount",

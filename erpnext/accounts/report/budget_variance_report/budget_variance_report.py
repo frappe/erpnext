@@ -29,41 +29,76 @@ def execute(filters=None):
 	for dimension in dimensions:
 		dimension_items = cam_map.get(dimension)
 		if dimension_items:
-			for account, monthwise_data in iteritems(dimension_items):
-				row = [dimension, account]
-				totals = [0, 0, 0]
-				for year in get_fiscal_years(filters):
-					last_total = 0
-					for relevant_months in period_month_ranges:
-						period_data = [0, 0, 0]
-						for month in relevant_months:
-							if monthwise_data.get(year[0]):
-								month_data = monthwise_data.get(year[0]).get(month, {})
-								for i, fieldname in enumerate(["target", "actual", "variance"]):
-									value = flt(month_data.get(fieldname))
-									period_data[i] += value
-									totals[i] += value
+			data = get_final_data(dimension, dimension_items, filters, period_month_ranges, data, 0)
+		else:
+			DCC_allocation = frappe.db.sql('''SELECT parent, sum(percentage_allocation) as percentage_allocation
+				FROM `tabDistributed Cost Center`
+				WHERE cost_center IN %(dimension)s
+				AND parent NOT IN %(dimension)s
+				GROUP BY parent''',{'dimension':[dimension]})
+			if DCC_allocation:
+				filters['budget_against_filter'] = [DCC_allocation[0][0]]
+				cam_map = get_dimension_account_month_map(filters)
+				dimension_items = cam_map.get(DCC_allocation[0][0])
+				if dimension_items:
+					data = get_final_data(dimension, dimension_items, filters, period_month_ranges, data, DCC_allocation[0][1])
 
-						period_data[0] += last_total
+	chart = get_chart_data(filters, columns, data)
 
-						if filters.get("show_cumulative"):
-							last_total = period_data[0] - period_data[1]
+	return columns, data, None, chart
 
-						period_data[2] = period_data[0] - period_data[1]
-						row += period_data
-				totals[2] = totals[0] - totals[1]
-				if filters["period"] != "Yearly":
-					row += totals
-				data.append(row)
+def get_final_data(dimension, dimension_items, filters, period_month_ranges, data, DCC_allocation):
 
-	return columns, data
+	for account, monthwise_data in iteritems(dimension_items):
+		row = [dimension, account]
+		totals = [0, 0, 0]
+		for year in get_fiscal_years(filters):
+			last_total = 0
+			for relevant_months in period_month_ranges:
+				period_data = [0, 0, 0]
+				for month in relevant_months:
+					if monthwise_data.get(year[0]):
+						month_data = monthwise_data.get(year[0]).get(month, {})
+						for i, fieldname in enumerate(["target", "actual", "variance"]):
+							value = flt(month_data.get(fieldname))
+							period_data[i] += value
+							totals[i] += value
+
+				period_data[0] += last_total
+
+				if DCC_allocation:
+					period_data[0] = period_data[0]*(DCC_allocation/100)
+					period_data[1] = period_data[1]*(DCC_allocation/100)
+
+				if(filters.get("show_cumulative")):
+					last_total = period_data[0] - period_data[1]
+
+				period_data[2] = period_data[0] - period_data[1]
+				row += period_data
+		totals[2] = totals[0] - totals[1]
+		if filters["period"] != "Yearly" :
+			row += totals
+		data.append(row)
+		
+	return data
 
 
 def get_columns(filters):
 	columns = [
-		_(filters.get("budget_against"))
-		+ ":Link/%s:150" % (filters.get("budget_against")),
-		_("Account") + ":Link/Account:150"
+		{
+			'label': _(filters.get("budget_against")),
+			'fieldtype': 'Link',
+			'fieldname': 'budget_against',
+			'options': filters.get('budget_against'),
+			'width': 150
+		},
+		{
+			'label': _('Account'),
+			'fieldname': 'Account',
+			'fieldtype': 'Link',
+			'options': 'Account',
+			'width': 150
+		}
 	]
 
 	group_months = False if filters["period"] == "Monthly" else True
@@ -79,7 +114,12 @@ def get_columns(filters):
 					_("Variance ") + " " + str(year[0])
 				]
 				for label in labels:
-					columns.append(label + ":Float:150")
+					columns.append({
+						'label': label,
+						'fieldtype': 'Float',
+						'fieldname': frappe.scrub(label),
+						'width': 150
+					})
 			else:
 				for label in [
 					_("Budget") + " (%s)" + " " + str(year[0]),
@@ -95,14 +135,23 @@ def get_columns(filters):
 					else:
 						label = label % formatdate(from_date, format_string="MMM")
 
-					columns.append(label + ":Float:150")
+					columns.append({
+						'label': label,
+						'fieldtype': 'Float',
+						'fieldname': frappe.scrub(label),
+						'width': 150
+					})
 
 	if filters["period"] != "Yearly":
-		return columns + [
-			_("Total Budget") + ":Float:150",
-			_("Total Actual") + ":Float:150",
-			_("Total Variance") + ":Float:150"
-		]
+		for label in [_("Total Budget"), _("Total Actual"), _("Total Variance")]:
+			columns.append({
+				'label': label,
+				'fieldtype': 'Float',
+				'fieldname': frappe.scrub(label),
+				'width': 150
+			})
+
+		return columns
 	else:
 		return columns
 
@@ -173,7 +222,7 @@ def get_dimension_target_details(filters):
 				filters.budget_against,
 				filters.company,
 			]
-			+ filters.get("budget_against_filter")
+			+ (filters.get("budget_against_filter") or [])
 		), as_dict=True)
 
 
@@ -305,3 +354,49 @@ def get_fiscal_years(filters):
 		})
 
 	return fiscal_year
+
+def get_chart_data(filters, columns, data):
+
+	if not data:
+		return None
+
+	labels = []
+
+	fiscal_year = get_fiscal_years(filters)
+	group_months = False if filters["period"] == "Monthly" else True
+
+	for year in fiscal_year:
+		for from_date, to_date in get_period_date_ranges(filters["period"], year[0]):
+			if filters['period'] == 'Yearly':
+				labels.append(year[0])
+			else:
+				if group_months:
+					label = formatdate(from_date, format_string="MMM") + "-" \
+						+ formatdate(to_date, format_string="MMM")
+					labels.append(label)
+				else:
+					label = formatdate(from_date, format_string="MMM")
+					labels.append(label)
+
+	no_of_columns = len(labels)
+
+	budget_values, actual_values = [0] * no_of_columns, [0] * no_of_columns
+	for d in data:
+		values = d[2:]
+		index = 0
+
+		for i in range(no_of_columns):
+			budget_values[i] += values[index]
+			actual_values[i] += values[index+1]
+			index += 3
+			
+	return {
+		'data': {
+			'labels': labels,
+			'datasets': [
+				{'name': 'Budget', 'chartType': 'bar', 'values': budget_values},
+				{'name': 'Actual Expense', 'chartType': 'bar', 'values': actual_values}
+			]
+		}
+	}
+

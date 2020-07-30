@@ -46,7 +46,7 @@ frappe.ui.form.on("Sales Invoice", {
 
 			}, __("Create"));
 		}
-	},
+	}
 
 });
 

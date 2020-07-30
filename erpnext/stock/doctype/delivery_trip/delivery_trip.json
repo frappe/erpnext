@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "naming_series:",
  "creation": "2017-10-16 16:45:48.293335",
  "doctype": "DocType",
@@ -13,6 +14,7 @@
   "section_break_3",
   "driver",
   "driver_name",
+  "driver_email",
   "driver_address",
   "total_distance",
   "uom",
@@ -168,6 +170,12 @@
    "fieldtype": "Link",
    "label": "Driver Address",
    "options": "Address"
+  },
+  {
+   "fieldname": "driver_email",
+   "fieldtype": "Data",
+   "label": "Driver Email",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,

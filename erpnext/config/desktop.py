@@ -81,6 +81,15 @@ def get_data():
 			"description": "Sales pipeline, leads, opportunities and customers."
 		},
 		{
+			"module_name": "Loan Management",
+			"category": "Modules",
+			"label": _("Loan Management"),
+			"color": "#EF4DB6",
+			"icon": "octicon octicon-repo",
+			"type": "module",
+			"description": "Loan Management for Customer and Employees"
+		},
+		{
 			"module_name": "Support",
 			"category": "Modules",
 			"label": _("Support"),

@@ -8,8 +8,10 @@ import frappe, os, json
 from frappe import _
 from frappe.desk.page.setup_wizard.setup_wizard import make_records
 from frappe.utils import cstr, getdate
-from erpnext.accounts.doctype.account.account import RootNotEditable
 from frappe.desk.doctype.global_search_settings.global_search_settings import update_global_search_doctypes
+
+from erpnext.accounts.doctype.account.account import RootNotEditable
+from erpnext.regional.address_template.setup import set_up_address_templates
 
 default_lead_sources = ["Existing Customer", "Reference", "Advertisement",
 	"Cold Calling", "Exhibition", "Supplier Reference", "Mass Mailing",
@@ -30,7 +32,7 @@ def install(country=None):
 		{ 'doctype': 'Domain', 'domain': 'Agriculture'},
 		{ 'doctype': 'Domain', 'domain': 'Non Profit'},
 
-		# address template
+		# ensure at least an empty Address Template exists for this Country
 		{'doctype':"Address Template", "country": country},
 
 		# item group
@@ -48,7 +50,7 @@ def install(country=None):
 			'is_group': 0, 'parent_item_group': _('All Item Groups') },
 
 		# salary component
-		{'doctype': 'Salary Component', 'salary_component': _('Income Tax'), 'description': _('Income Tax'), 'type': 'Deduction'},
+		{'doctype': 'Salary Component', 'salary_component': _('Income Tax'), 'description': _('Income Tax'), 'type': 'Deduction', 'is_income_tax_component': 1},
 		{'doctype': 'Salary Component', 'salary_component': _('Basic'), 'description': _('Basic'), 'type': 'Earning'},
 		{'doctype': 'Salary Component', 'salary_component': _('Arrear'), 'description': _('Arrear'), 'type': 'Earning'},
 		{'doctype': 'Salary Component', 'salary_component': _('Leave Encashment'), 'description': _('Leave Encashment'), 'type': 'Earning'},
@@ -269,12 +271,11 @@ def install(country=None):
 
 	# Records for the Supplier Scorecard
 	from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import make_default_records
+
 	make_default_records()
-
 	make_records(records)
-
+	set_up_address_templates(default_country=country)
 	set_more_defaults()
-
 	update_global_search_doctypes()
 
 	# path = frappe.get_app_path('erpnext', 'regional', frappe.scrub(country))
@@ -485,8 +486,6 @@ def install_defaults(args=None):
 				# bank account same as a CoA entry
 				pass
 
-	add_dashboards()
-
 	# Now, with fixtures out of the way, onto concrete stuff
 	records = [
 
@@ -503,27 +502,6 @@ def install_defaults(args=None):
 	]
 
 	make_records(records)
-
-def add_dashboards():
-	from erpnext.setup.setup_wizard.data.dashboard_charts import get_company_for_dashboards
-
-	if not get_company_for_dashboards():
-		return
-
-	from erpnext.setup.setup_wizard.data.dashboard_charts import get_default_dashboards
-	from frappe.modules.import_file import import_file_by_path
-
-	dashboard_data = get_default_dashboards()
-
-	# create account balance timeline before creating dashbaord charts
-	doctype = "dashboard_chart_source"
-	docname = "account_balance_timeline"
-	folder = os.path.dirname(frappe.get_module("erpnext.accounts").__file__)
-	doc_path = os.path.join(folder, doctype, docname, docname) + ".json"
-	import_file_by_path(doc_path, force=0, for_sync=True)
-
-	make_records(dashboard_data["Charts"])
-	make_records(dashboard_data["Dashboards"])
 
 
 def get_fy_details(fy_start_date, fy_end_date):

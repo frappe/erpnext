@@ -3,16 +3,19 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
 from frappe.model.naming import set_name_by_naming_series
-from frappe import _, msgprint, throw
+from frappe import _, msgprint
 import frappe.defaults
-from frappe.utils import flt, cint, cstr, today
+from frappe.utils import flt, cint, cstr, today, get_formatted_email
 from frappe.desk.reportview import build_match_conditions, get_filters_cond
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
 from frappe.model.rename_doc import update_linked_doctypes
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils.user import get_users_with_role
+
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -216,6 +219,105 @@ class Customer(TransactionBase):
 		else:
 			frappe.msgprint(_("Multiple Loyalty Program found for the Customer. Please select manually."))
 
+	def create_onboarding_docs(self, args):
+		defaults = frappe.defaults.get_defaults()
+		company = defaults.get('company') or \
+			frappe.db.get_single_value('Global Defaults', 'default_company')
+
+		for i in range(1, args.get('max_count')):
+			customer = args.get('customer_name_' + str(i))
+			if customer:
+				try:
+					doc = frappe.get_doc({
+						'doctype': self.doctype,
+						'customer_name': customer,
+						'customer_type': 'Company',
+						'customer_group': _('Commercial'),
+						'territory': defaults.get('country'),
+						'company': company
+					}).insert()
+
+					if args.get('customer_email_' + str(i)):
+						create_contact(customer, self.doctype,
+							doc.name, args.get("customer_email_" + str(i)))
+				except frappe.NameError:
+					pass
+
+def create_contact(contact, party_type, party, email):
+	"""Create contact based on given contact name"""
+	contact = contact.split(' ')
+
+	contact = frappe.get_doc({
+		'doctype': 'Contact',
+		'first_name': contact[0],
+		'last_name': len(contact) > 1 and contact[1] or ""
+	})
+	contact.append('email_ids', dict(email_id=email, is_primary=1))
+	contact.append('links', dict(link_doctype=party_type, link_name=party))
+	contact.insert()
+
+@frappe.whitelist()
+def make_quotation(source_name, target_doc=None):
+
+	def set_missing_values(source, target):
+		_set_missing_values(source, target)
+
+	target_doc = get_mapped_doc("Customer", source_name,
+		{"Customer": {
+			"doctype": "Quotation",
+			"field_map": {
+				"name":"party_name"
+			}
+		}}, target_doc, set_missing_values)
+
+	target_doc.quotation_to = "Customer"
+	target_doc.run_method("set_missing_values")
+	target_doc.run_method("set_other_charges")
+	target_doc.run_method("calculate_taxes_and_totals")
+
+	price_list, currency = frappe.db.get_value("Customer", {'name': source_name}, ['default_price_list', 'default_currency'])
+	if price_list:
+		target_doc.selling_price_list = price_list
+	if currency:
+		target_doc.currency = currency
+
+	return target_doc
+
+@frappe.whitelist()
+def make_opportunity(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		_set_missing_values(source, target)
+
+	target_doc = get_mapped_doc("Customer", source_name,
+		{"Customer": {
+			"doctype": "Opportunity",
+			"field_map": {
+				"name": "party_name",
+				"doctype": "opportunity_from",
+			}
+		}}, target_doc, set_missing_values)
+
+	return target_doc
+
+def _set_missing_values(source, target):
+	address = frappe.get_all('Dynamic Link', {
+			'link_doctype': source.doctype,
+			'link_name': source.name,
+			'parenttype': 'Address',
+		}, ['parent'], limit=1)
+
+	contact = frappe.get_all('Dynamic Link', {
+			'link_doctype': source.doctype,
+			'link_name': source.name,
+			'parenttype': 'Contact',
+		}, ['parent'], limit=1)
+
+	if address:
+		target.customer_address = address[0].parent
+
+	if contact:
+		target.contact_person = contact[0].parent
+
 @frappe.whitelist()
 def make_quotation(source_name, target_doc=None):
 
@@ -302,11 +404,12 @@ def get_loyalty_programs(doc):
 @frappe.whitelist()
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
 	from erpnext.controllers.queries import get_fields
+	fields = ["name", "customer_name", "customer_group", "territory"]
 
 	if frappe.db.get_default("cust_master_name") == "Customer Name":
 		fields = ["name", "customer_group", "territory"]
-	else:
-		fields = ["name", "customer_name", "customer_group", "territory"]
+
+	fields = get_fields("Customer", fields)
 
 	fields = get_fields("Customer", fields)
 
@@ -318,17 +421,17 @@ def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
 		match_conditions += "{}".format(filter_conditions)
 
 	return frappe.db.sql("""
-			select %s
-			from `tabCustomer`
-			where docstatus < 2
-				and (%s like %s or customer_name like %s)
-					{match_conditions}
-			order by
-				case when name like %s then 0 else 1 end,
-				case when customer_name like %s then 0 else 1 end,
-				name, customer_name limit %s, %s
+		select %s
+		from `tabCustomer`
+		where docstatus < 2
+			and (%s like %s or customer_name like %s)
+			{match_conditions}
+		order by
+			case when name like %s then 0 else 1 end,
+			case when customer_name like %s then 0 else 1 end,
+			name, customer_name limit %s, %s
 		""".format(match_conditions=match_conditions) % (", ".join(fields), searchfield, "%s", "%s", "%s", "%s", "%s", "%s"),
-			("%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, start, page_len))
+		("%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, "%%%s%%" % txt, start, page_len))
 
 
 def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, extra_amount=0):
@@ -342,10 +445,44 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 			.format(customer, customer_outstanding, credit_limit))
 
 		# If not authorized person raise exception
-		credit_controller = frappe.db.get_value('Accounts Settings', None, 'credit_controller')
-		if not credit_controller or credit_controller not in frappe.get_roles():
-			throw(_("Please contact to the user who have Sales Master Manager {0} role")
-				.format(" / " + credit_controller if credit_controller else ""))
+		credit_controller_role = frappe.db.get_single_value('Accounts Settings', 'credit_controller')
+		if not credit_controller_role or credit_controller_role not in frappe.get_roles():
+			# form a list of emails for the credit controller users
+			credit_controller_users = get_users_with_role(credit_controller_role or "Sales Master Manager")
+
+			# form a list of emails and names to show to the user
+			credit_controller_users = [get_formatted_email(user).replace("<", "(").replace(">", ")") for user in credit_controller_users]
+
+			if not credit_controller_users:
+				frappe.throw(_("Please contact your administrator to extend the credit limits for {0}.".format(customer)))
+
+			message = """Please contact any of the following users to extend the credit limits for {0}:
+				<br><br><ul><li>{1}</li></ul>""".format(customer, '<li>'.join(credit_controller_users))
+
+			# if the current user does not have permissions to override credit limit,
+			# prompt them to send out an email to the controller users
+			frappe.msgprint(message,
+				title="Notify",
+				raise_exception=1,
+				primary_action={
+					'label': 'Send Email',
+					'server_action': 'erpnext.selling.doctype.customer.customer.send_emails',
+					'args': {
+						'customer': customer,
+						'customer_outstanding': customer_outstanding,
+						'credit_limit': credit_limit,
+						'credit_controller_users_list': credit_controller_users
+					}
+				}
+			)
+
+@frappe.whitelist()
+def send_emails(args):
+	args = json.loads(args)
+	subject = (_("Credit limit reached for customer {0}").format(args.get('customer')))
+	message = (_("Credit limit has been crossed for customer {0} ({1}/{2})")
+			.format(args.get('customer'), args.get('customer_outstanding'), args.get('credit_limit')))
+	frappe.sendmail(recipients=[args.get('credit_controller_users_list')], subject=subject, message=message)
 
 def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):
 	# Outstanding based on GL Entries

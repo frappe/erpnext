@@ -43,7 +43,7 @@ class SupplierScorecardPeriod(Document):
 			try:
 				crit.score = min(crit.max_score, max( 0 ,frappe.safe_eval(self.get_eval_statement(crit.formula),  None, {'max':max, 'min': min})))
 			except Exception:
-				frappe.throw(_("Could not solve criteria score function for {0}. Make sure the formula is valid.".format(crit.criteria_name)),frappe.ValidationError)
+				frappe.throw(_("Could not solve criteria score function for {0}. Make sure the formula is valid.").format(crit.criteria_name),frappe.ValidationError)
 				crit.score = 0
 
 	def calculate_score(self):

@@ -1,0 +1,41 @@
+{
+ "allow_roles": [
+  {
+   "role": "Accounts User"
+  },
+  {
+   "role": "Maintenance User"
+  }
+ ],
+ "creation": "2020-05-08 15:10:45.571457",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/asset",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2020-07-08 14:05:51.828497",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Assets",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Introduction to Assets"
+  },
+  {
+   "step": "Create a Fixed Asset Item"
+  },
+  {
+   "step": "Create an Asset Category"
+  },
+  {
+   "step": "Purchase an Asset Item"
+  },
+  {
+   "step": "Create an Asset"
+  }
+ ],
+ "subtitle": "Assets, Depreciations, Repairs, and more.",
+ "success_message": "The Assets Module is all set up!",
+ "title": "Let's Set Up the Assets Module."
+}

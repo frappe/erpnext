@@ -7,6 +7,8 @@ import frappe
 
 def create_test_contact_and_address():
 	frappe.db.sql('delete from tabContact')
+	frappe.db.sql('delete from `tabContact Email`')
+	frappe.db.sql('delete from `tabContact Phone`')
 	frappe.db.sql('delete from tabAddress')
 	frappe.db.sql('delete from `tabDynamic Link`')
 

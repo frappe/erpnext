@@ -314,7 +314,7 @@ class BankStatementTransactionEntry(Document):
 			try:
 				reconcile_against_document(lst)
 			except:
-				frappe.throw(_("Exception occurred while reconciling {0}".format(payment.reference_name)))
+				frappe.throw(_("Exception occurred while reconciling {0}").format(payment.reference_name))
 
 	def submit_payment_entries(self):
 		for payment in self.new_transaction_items:

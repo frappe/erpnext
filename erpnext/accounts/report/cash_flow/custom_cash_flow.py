@@ -334,10 +334,9 @@ def compute_data(filters, company_currency, profit_data, period_list, light_mapp
 
 def execute(filters=None):
 	if not filters.periodicity: filters.periodicity = "Monthly"
-	period_list = get_period_list(
-		filters.from_fiscal_year, filters.to_fiscal_year, filters.periodicity,
-		filters.accumulated_values, filters.company
-	)
+	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year,
+		filters.period_start_date, filters.period_end_date, filters.filter_based_on,
+		filters.periodicity, company=filters.company)
 
 	mappers = get_mappers_from_db()
 
@@ -396,7 +395,7 @@ def _get_account_type_based_data(filters, account_names, period_list, accumulate
 			gl_sum = frappe.db.sql_list("""
 				select sum(credit) - sum(debit)
 				from `tabGL Entry`
-				where company=%s and posting_date >= %s and posting_date <= %s 
+				where company=%s and posting_date >= %s and posting_date <= %s
 					and voucher_type != 'Period Closing Voucher'
 					and account in ( SELECT name FROM tabAccount WHERE name IN (%s)
 					OR parent_account IN (%s))
@@ -405,7 +404,7 @@ def _get_account_type_based_data(filters, account_names, period_list, accumulate
 			gl_sum = frappe.db.sql_list("""
 				select sum(credit) - sum(debit)
 				from `tabGL Entry`
-				where company=%s and posting_date >= %s and posting_date <= %s 
+				where company=%s and posting_date >= %s and posting_date <= %s
 					and voucher_type != 'Period Closing Voucher'
 					and account in ( SELECT name FROM tabAccount WHERE name IN (%s)
 					OR parent_account IN (%s))

@@ -44,7 +44,7 @@ class MaintenanceSchedule(TransactionBase):
 		for d in self.get('items'):
 			if d.serial_no:
 				serial_nos = get_valid_serial_nos(d.serial_no)
-				self.validate_serial_no(serial_nos, d.start_date)
+				self.validate_serial_no(d.item_code, serial_nos, d.start_date)
 				self.update_amc_date(serial_nos, d.end_date)
 
 			no_email_sp = []
@@ -54,7 +54,7 @@ class MaintenanceSchedule(TransactionBase):
 					email_map[d.sales_person] = sp.get_email_id()
 				except frappe.ValidationError:
 					no_email_sp.append(d.sales_person)
-					
+
 			if no_email_sp:
 				frappe.msgprint(
 					frappe._("Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}").format(
@@ -66,7 +66,7 @@ class MaintenanceSchedule(TransactionBase):
 				parent=%s""", (d.sales_person, d.item_code, self.name), as_dict=1)
 
 			for key in scheduled_date:
-				description =frappe._("Reference: {0}, Item Code: {1} and Customer: {2}").format(self.name, d.item_code, self.customer)	
+				description =frappe._("Reference: {0}, Item Code: {1} and Customer: {2}").format(self.name, d.item_code, self.customer)
 				frappe.get_doc({
 					"doctype": "Event",
 					"owner": email_map.get(d.sales_person, self.owner),
@@ -146,11 +146,11 @@ class MaintenanceSchedule(TransactionBase):
 			if not d.item_code:
 				throw(_("Please select item code"))
 			elif not d.start_date or not d.end_date:
-				throw(_("Please select Start Date and End Date for Item {0}".format(d.item_code)))
+				throw(_("Please select Start Date and End Date for Item {0}").format(d.item_code))
 			elif not d.no_of_visits:
 				throw(_("Please mention no of visits required"))
 			elif not d.sales_person:
-				throw(_("Please select a Sales Person for item: {0}".format(d.item_name)))
+				throw(_("Please select a Sales Person for item: {0}").format(d.item_name))
 
 			if getdate(d.start_date) >= getdate(d.end_date):
 				throw(_("Start date should be less than end date for Item {0}").format(d.item_code))
@@ -178,13 +178,17 @@ class MaintenanceSchedule(TransactionBase):
 			serial_no_doc.amc_expiry_date = amc_expiry_date
 			serial_no_doc.save()
 
-	def validate_serial_no(self, serial_nos, amc_start_date):
+	def validate_serial_no(self, item_code, serial_nos, amc_start_date):
 		for serial_no in serial_nos:
 			sr_details = frappe.db.get_value("Serial No", serial_no,
-				["warranty_expiry_date", "amc_expiry_date", "warehouse", "delivery_date"], as_dict=1)
+				["warranty_expiry_date", "amc_expiry_date", "warehouse", "delivery_date", "item_code"], as_dict=1)
 
 			if not sr_details:
 				frappe.throw(_("Serial No {0} not found").format(serial_no))
+
+			if sr_details.get("item_code") != item_code:
+				frappe.throw(_("Serial No {0} does not belong to Item {1}")
+					.format(frappe.bold(serial_no), frappe.bold(item_code)), title="Invalid")
 
 			if sr_details.warranty_expiry_date \
 				and getdate(sr_details.warranty_expiry_date) >= getdate(amc_start_date):

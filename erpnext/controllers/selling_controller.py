@@ -191,7 +191,8 @@ class SellingController(StockController):
 				""", (it.item_code, it.warehouse))
 			if last_valuation_rate:
 				last_valuation_rate_in_sales_uom = last_valuation_rate[0][0] / (it.conversion_factor or 1)
-				if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate_in_sales_uom):
+				if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate_in_sales_uom) \
+					and not self.get('is_internal_customer'):
 					throw_message(it.idx, frappe.bold(it.item_name), last_valuation_rate_in_sales_uom, "valuation rate")
 
 
@@ -301,7 +302,7 @@ class SellingController(StockController):
 					d.conversion_factor = get_conversion_factor(d.item_code, d.uom).get("conversion_factor") or 1.0
 				return_rate = 0
 				if cint(self.is_return) and self.return_against and self.docstatus==1:
-					return_rate = self.get_incoming_rate_for_sales_return(d.item_code, self.return_against)
+					return_rate = self.get_incoming_rate_for_return(d.item_code, self.return_against)
 
 				# On cancellation or if return entry submission, make stock ledger entry for
 				# target warehouse first, to update serial no values properly
@@ -360,7 +361,7 @@ class SellingController(StockController):
 					self.po_no = ', '.join(list(set([d.po_no for d in po_nos if d.po_no])))
 
 	def set_gross_profit(self):
-		if self.doctype == "Sales Order":
+		if self.doctype in ["Sales Order", "Quotation"]:
 			for item in self.items:
 				item.gross_profit = flt(((item.base_rate - item.valuation_rate) * item.stock_qty), self.precision("amount", item))
 

@@ -183,13 +183,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"label": _("Invoice Discounting"),
-					"name": "Invoice Discounting",
-				},
-				{
-					"type": "doctype",
-					"label": _("Update Bank Transaction Dates"),
-					"name": "Bank Reconciliation",
+					"label": _("Update Bank Clearance Dates"),
+					"name": "Bank Clearance",
 					"description": _("Update bank payment dates with journals.")
 				},
 				{
@@ -203,6 +198,11 @@ def get_data():
 					"name": "Bank Reconciliation Statement",
 					"is_query_report": True,
 					"doctype": "Journal Entry"
+				},{
+					"type": "page",
+					"name": "bank-reconciliation",
+					"label": _("Bank Reconciliation"),
+					"icon": "fa fa-bar-chart"
 				},
 				{
 					"type": "report",
@@ -246,6 +246,10 @@ def get_data():
 					"name": "Supplier Ledger Summary",
 					"doctype": "Sales Invoice",
 					"is_query_report": True,
+				},
+				{
+					"type": "doctype",
+					"name": "Process Deferred Accounting"
 				}
 			]
 		},

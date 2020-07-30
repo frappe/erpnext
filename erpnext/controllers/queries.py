@@ -70,7 +70,7 @@ def lead_query(doctype, txt, searchfield, start, page_len, filters):
 		})
 
 
-# searches for customer
+ # searches for customer
 @frappe.whitelist()
 def customer_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
@@ -203,8 +203,8 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		{columns}
 		from tabItem
 		where tabItem.docstatus < 2
-			and tabItem.has_variants=0
 			and tabItem.disabled=0
+			and tabItem.has_variants=0
 			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
 			and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
 				{description_cond})
@@ -582,7 +582,8 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 		args = {
 			'item_code': filters.get('item_code'),
 			'posting_date': filters.get('valid_from'),
-			'tax_category': filters.get('tax_category')
+			'tax_category': filters.get('tax_category'),
+			'company': filters.get('company')
 		}
 
 		taxes = _get_item_tax_template(args, taxes, for_validate=True)

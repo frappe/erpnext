@@ -1,0 +1,19 @@
+{
+ "action": "Create Entry",
+ "creation": "2020-05-08 13:20:00.259985",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-05-08 13:20:00.259985",
+ "modified_by": "Administrator",
+ "name": "Create a Fixed Asset Item",
+ "owner": "Administrator",
+ "reference_document": "Item",
+ "show_full_form": 0,
+ "title": "Create a Fixed Asset Item",
+ "validate_action": 0
+}

@@ -53,7 +53,8 @@ class calculate_taxes_and_totals(object):
 					'tax_category': self.doc.get('tax_category'),
 					'posting_date': self.doc.get('posting_date'),
 					'bill_date': self.doc.get('bill_date'),
-					'transaction_date': self.doc.get('transaction_date')
+					'transaction_date': self.doc.get('transaction_date'),
+					'company': self.doc.get('company')
 				}
 
 				item_group = item_doc.item_group
@@ -369,7 +370,7 @@ class calculate_taxes_and_totals(object):
 
 		self._set_in_company_currency(self.doc, ["total_taxes_and_charges", "rounding_adjustment"])
 
-		if self.doc.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+		if self.doc.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "POS Invoice"]:
 			self.doc.base_grand_total = flt(self.doc.grand_total * self.doc.conversion_rate, self.doc.precision("base_grand_total")) \
 				if self.doc.total_taxes_and_charges else self.doc.base_net_total
 		else:
@@ -514,7 +515,7 @@ class calculate_taxes_and_totals(object):
 		if self.doc.doctype == "Sales Invoice":
 			self.calculate_paid_amount()
 
-		if self.doc.is_return and self.doc.return_against: return
+		if self.doc.is_return and self.doc.return_against and not self.doc.get('is_pos'): return
 
 		self.doc.round_floats_in(self.doc, ["grand_total", "total_advance", "write_off_amount"])
 		self._set_in_company_currency(self.doc, ['write_off_amount'])
@@ -532,7 +533,7 @@ class calculate_taxes_and_totals(object):
 			self.doc.round_floats_in(self.doc, ["paid_amount"])
 			change_amount = 0
 
-			if self.doc.doctype == "Sales Invoice":
+			if self.doc.doctype == "Sales Invoice" and not self.doc.get('is_return'):
 				self.calculate_write_off_amount()
 				self.calculate_change_amount()
 				change_amount = self.doc.change_amount \
@@ -543,6 +544,9 @@ class calculate_taxes_and_totals(object):
 
 			self.doc.outstanding_amount = flt(total_amount_to_pay - flt(paid_amount) + flt(change_amount),
 				self.doc.precision("outstanding_amount"))
+
+			if self.doc.doctype == 'Sales Invoice' and self.doc.get('is_pos') and self.doc.get('is_return'):
+			 	self.update_paid_amount_for_return(total_amount_to_pay)
 
 	def calculate_paid_amount(self):
 
@@ -593,7 +597,7 @@ class calculate_taxes_and_totals(object):
 		base_rate_with_margin = 0.0
 		if item.price_list_rate:
 			if item.pricing_rules and not self.doc.ignore_pricing_rule:
-				for d in item.pricing_rules.split(','):
+				for d in json.loads(item.pricing_rules):
 					pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
 
 					if (pricing_rule.margin_type == 'Amount' and pricing_rule.currency == self.doc.currency)\
@@ -613,6 +617,24 @@ class calculate_taxes_and_totals(object):
 
 	def set_item_wise_tax_breakup(self):
 		self.doc.other_charges_calculation = get_itemised_tax_breakup_html(self.doc)
+
+	def update_paid_amount_for_return(self, total_amount_to_pay):
+		default_mode_of_payment = frappe.db.get_value('POS Payment Method',
+			{'parent': self.doc.pos_profile, 'default': 1}, ['mode_of_payment'], as_dict=1)
+
+		self.doc.payments = []
+
+		if default_mode_of_payment:
+			self.doc.append('payments', {
+				'mode_of_payment': default_mode_of_payment.mode_of_payment,
+				'amount': total_amount_to_pay
+			})
+		else:
+			self.doc.is_pos = 0
+			self.doc.pos_profile = ''
+
+		self.calculate_paid_amount()
+
 
 def get_itemised_tax_breakup_html(doc):
 	if not doc.taxes:

@@ -115,6 +115,8 @@
   "campaign",
   "source",
   "column_break5",
+  "is_internal_customer",
+  "inter_company_reference",
   "per_billed",
   "customer_group",
   "territory",
@@ -799,6 +801,7 @@
    "fieldname": "base_in_words",
    "fieldtype": "Data",
    "label": "In Words (Company Currency)",
+   "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -849,6 +852,7 @@
    "fieldname": "in_words",
    "fieldtype": "Data",
    "label": "In Words",
+   "length": 240,
    "oldfieldname": "in_words_export",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -1231,13 +1235,27 @@
   {
    "fieldname": "section_break_18",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fetch_from": "customer.is_internal_customer",
+   "fieldname": "is_internal_customer",
+   "fieldtype": "Check",
+   "label": "Is Internal Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "inter_company_reference",
+   "fieldtype": "Link",
+   "label": "Inter Company Reference",
+   "options": "Purchase Receipt"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-19 17:03:45.880106",
+ "modified": "2020-07-18 05:13:55.580420",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

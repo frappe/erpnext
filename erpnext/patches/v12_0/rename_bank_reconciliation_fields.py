@@ -9,6 +9,6 @@ def _rename_single_field(**kwargs):
 		frappe.db.sql("UPDATE tabSingles SET field='{new_name}' WHERE doctype='{doctype}' AND field='{old_name}';".format(**kwargs)) #nosec
 
 def execute():
-	_rename_single_field(doctype = "Bank Reconciliation", old_name = "bank_account" , new_name = "account")
-	_rename_single_field(doctype = "Bank Reconciliation", old_name = "bank_account_no", new_name = "bank_account")
-	frappe.reload_doc("Accounts", "doctype", "Bank Reconciliation")
+	_rename_single_field(doctype = "Bank Clearance", old_name = "bank_account" , new_name = "account")
+	_rename_single_field(doctype = "Bank Clearance", old_name = "bank_account_no", new_name = "bank_account")
+	frappe.reload_doc("Accounts", "doctype", "Bank Clearance")

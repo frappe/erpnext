@@ -11,8 +11,8 @@ from erpnext.accounts.doctype.monthly_distribution.monthly_distribution import g
 
 def get_data_column(filters, partner_doctype):
 	data = []
-	period_list = get_period_list(filters.fiscal_year, filters.fiscal_year,
-		filters.period, company=filters.company)
+	period_list = get_period_list(filters.fiscal_year, filters.fiscal_year, '', '',
+		'Fiscal Year', filters.period, company=filters.company)
 
 	rows = get_data(filters, period_list, partner_doctype)
 	columns = get_columns(filters, period_list, partner_doctype)
@@ -78,19 +78,19 @@ def get_columns(filters, period_list, partner_doctype):
 
 		columns.extend([{
 			"fieldname": target_key,
-			"label": _("Target ({})".format(period.label)),
+			"label": _("Target ({})").format(period.label),
 			"fieldtype": fieldtype,
 			"options": options,
 			"width": 100
 		}, {
 			"fieldname": period.key,
-			"label": _("Achieved ({})".format(period.label)),
+			"label": _("Achieved ({})").format(period.label),
 			"fieldtype": fieldtype,
 			"options": options,
 			"width": 100
 		}, {
 			"fieldname": variance_key,
-			"label": _("Variance ({})".format(period.label)),
+			"label": _("Variance ({})").format(period.label),
 			"fieldtype": fieldtype,
 			"options": options,
 			"width": 100

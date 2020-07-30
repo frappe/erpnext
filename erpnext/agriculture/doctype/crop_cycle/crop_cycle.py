@@ -44,7 +44,7 @@ class CropCycle(Document):
 				self.import_disease_tasks(disease.disease, disease.start_date)
 				disease.tasks_created = True
 
-				frappe.msgprint(_("Tasks have been created for managing the {0} disease (on row {1})".format(disease.disease, disease.idx)))
+				frappe.msgprint(_("Tasks have been created for managing the {0} disease (on row {1})").format(disease.disease, disease.idx))
 
 	def import_disease_tasks(self, disease, start_date):
 		disease_doc = frappe.get_doc('Disease', disease)

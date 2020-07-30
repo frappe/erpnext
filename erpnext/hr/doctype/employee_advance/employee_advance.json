@@ -10,9 +10,10 @@
   "naming_series",
   "employee",
   "employee_name",
+  "department",
   "column_break_4",
   "posting_date",
-  "department",
+  "repay_unclaimed_amount_from_salary",
   "section_break_8",
   "purpose",
   "column_break_11",
@@ -156,6 +157,7 @@
    "options": "Mode of Payment"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "return_amount",
    "fieldtype": "Currency",
    "label": "Returned Amount",

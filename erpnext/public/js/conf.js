@@ -29,19 +29,6 @@ $(document).bind('toolbar_setup', function() {
 
 });
 
-
-
-// doctypes created via tree
-$.extend(frappe.create_routes, {
-	"Customer Group": "Tree/Customer Group",
-	"Territory": "Tree/Territory",
-	"Item Group": "Tree/Item Group",
-	"Sales Person": "Tree/Sales Person",
-	"Account": "Tree/Account",
-	"Cost Center": "Tree/Cost Center",
-	"Department": "Tree/Department",
-});
-
 // preferred modules for breadcrumbs
 $.extend(frappe.breadcrumbs.preferred, {
 	"Item Group": "Stock",

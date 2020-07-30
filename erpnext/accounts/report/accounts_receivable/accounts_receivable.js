@@ -12,45 +12,10 @@ frappe.query_reports["Accounts Receivable"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
-			"fieldname":"ageing_based_on",
-			"label": __("Ageing Based On"),
-			"fieldtype": "Select",
-			"options": 'Posting Date\nDue Date',
-			"default": "Posting Date"
-		},
-		{
 			"fieldname":"report_date",
-			"label": __("As on Date"),
+			"label": __("Posting Date"),
 			"fieldtype": "Date",
 			"default": frappe.datetime.get_today()
-		},
-		{
-			"fieldname":"range1",
-			"label": __("Ageing Range 1"),
-			"fieldtype": "Int",
-			"default": "30",
-			"reqd": 1
-		},
-		{
-			"fieldname":"range2",
-			"label": __("Ageing Range 2"),
-			"fieldtype": "Int",
-			"default": "60",
-			"reqd": 1
-		},
-		{
-			"fieldname":"range3",
-			"label": __("Ageing Range 3"),
-			"fieldtype": "Int",
-			"default": "90",
-			"reqd": 1
-		},
-		{
-			"fieldname":"range4",
-			"label": __("Ageing Range 4"),
-			"fieldtype": "Int",
-			"default": "120",
-			"reqd": 1
 		},
 		{
 			"fieldname":"finance_book",
@@ -102,6 +67,41 @@ frappe.query_reports["Accounts Receivable"] = {
 			}
 		},
 		{
+			"fieldname":"ageing_based_on",
+			"label": __("Ageing Based On"),
+			"fieldtype": "Select",
+			"options": 'Posting Date\nDue Date',
+			"default": "Due Date"
+		},
+		{
+			"fieldname":"range1",
+			"label": __("Ageing Range 1"),
+			"fieldtype": "Int",
+			"default": "30",
+			"reqd": 1
+		},
+		{
+			"fieldname":"range2",
+			"label": __("Ageing Range 2"),
+			"fieldtype": "Int",
+			"default": "60",
+			"reqd": 1
+		},
+		{
+			"fieldname":"range3",
+			"label": __("Ageing Range 3"),
+			"fieldtype": "Int",
+			"default": "90",
+			"reqd": 1
+		},
+		{
+			"fieldname":"range4",
+			"label": __("Ageing Range 4"),
+			"fieldtype": "Int",
+			"default": "120",
+			"reqd": 1
+		},
+		{
 			"fieldname":"customer_group",
 			"label": __("Customer Group"),
 			"fieldtype": "Link",
@@ -114,12 +114,6 @@ frappe.query_reports["Accounts Receivable"] = {
 			"options": "Payment Terms Template"
 		},
 		{
-			"fieldname":"territory",
-			"label": __("Territory"),
-			"fieldtype": "Link",
-			"options": "Territory"
-		},
-		{
 			"fieldname":"sales_partner",
 			"label": __("Sales Partner"),
 			"fieldtype": "Link",
@@ -130,6 +124,12 @@ frappe.query_reports["Accounts Receivable"] = {
 			"label": __("Sales Person"),
 			"fieldtype": "Link",
 			"options": "Sales Person"
+		},
+		{
+			"fieldname":"territory",
+			"label": __("Territory"),
+			"fieldtype": "Link",
+			"options": "Territory"
 		},
 		{
 			"fieldname": "group_by_party",
@@ -148,7 +148,7 @@ frappe.query_reports["Accounts Receivable"] = {
 		},
 		{
 			"fieldname":"show_delivery_notes",
-			"label": __("Show Delivery Notes"),
+			"label": __("Show Linked Delivery Notes"),
 			"fieldtype": "Check",
 		},
 		{

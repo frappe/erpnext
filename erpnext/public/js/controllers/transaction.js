@@ -4,6 +4,7 @@
 erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	setup: function() {
 		this._super();
+		frappe.flags.hide_serial_batch_dialog = true;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
 			var has_margin_field = frappe.meta.has_field(cdt, 'margin_type');
@@ -321,7 +322,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.setup_sms();
 		this.setup_quality_inspection();
 		let scan_barcode_field = this.frm.get_field('scan_barcode');
-		if (scan_barcode_field) {
+		if (scan_barcode_field && scan_barcode_field.get_value()) {
 			scan_barcode_field.set_value("");
 			scan_barcode_field.set_new_description("");
 
@@ -538,7 +539,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							cost_center: item.cost_center,
 							tax_category: me.frm.doc.tax_category,
 							item_tax_template: item.item_tax_template,
-							child_docname: item.name,
+							child_docname: item.name
 						}
 					},
 
@@ -552,19 +553,26 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 										me.apply_product_discount(d.free_item_data);
 									}
 								},
-								() => me.frm.script_manager.trigger("price_list_rate", cdt, cdn),
-								() => me.toggle_conversion_factor(item),
 								() => {
-									if (show_batch_dialog && !item.has_serial_no
-										&& !item.has_batch_no) {
-										show_batch_dialog = false;
+									// for internal customer instead of pricing rule directly apply valuation rate on item
+									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
+										me.get_incoming_rate(item, me.frm.posting_date, me.frm.posting_time,
+											me.frm.doc.doctype, me.frm.doc.company);
+									} else {
+										me.frm.script_manager.trigger("price_list_rate", cdt, cdn);
 									}
 								},
+								() => {
+									if (me.frm.doc.is_internal_customer || me.frm.doc.is_internal_supplier) {
+										me.calculate_taxes_and_totals();
+									}
+								},
+								() => me.toggle_conversion_factor(item),
 								() => {
 									if (show_batch_dialog)
 										return frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"])
 											.then((r) => {
-												if(r.message && !frappe.flags.hide_serial_batch_dialog &&
+												if (r.message &&
 													(r.message.has_batch_no || r.message.has_serial_no)) {
 													frappe.flags.hide_serial_batch_dialog = false;
 												}
@@ -604,6 +612,31 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	get_incoming_rate: function(item, posting_date, posting_time, voucher_type, company) {
+
+		let item_args = {
+			'item_code': item.item_code,
+			'warehouse': in_list('Purchase Receipt', 'Purchase Invoice') ? item.from_warehouse : item.warehouse,
+			'posting_date': posting_date,
+			'posting_time': posting_time,
+			'qty': item.qty * item.conversion_factor,
+			'serial_no': item.serial_no,
+			'voucher_type': voucher_type,
+			'company': company,
+			'allow_zero_valuation_rate': item.allow_zero_valuation_rate
+		}
+
+		frappe.call({
+			method: 'erpnext.stock.utils.get_incoming_rate',
+			args: {
+				args: item_args
+			},
+			callback: function(r) {
+				frappe.model.set_value(item.doctype, item.name, 'rate', r.message);
+			}
+		});
+	},
+
 	add_taxes_from_item_tax_template: function(item_tax_map) {
 		let me = this;
 
@@ -618,7 +651,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					let child = frappe.model.add_child(me.frm.doc, "taxes");
 					child.charge_type = "On Net Total";
 					child.account_head = tax;
-					child.rate = 0;
+					child.rate = rate;
 				}
 			});
 		}
@@ -1699,7 +1732,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	set_gross_profit: function(item) {
-		if (this.frm.doc.doctype == "Sales Order" && item.valuation_rate) {
+		if (["Sales Order", "Quotation"].includes(this.frm.doc.doctype) && item.valuation_rate) {
 			var rate = flt(item.rate) * flt(this.frm.doc.conversion_rate || 1);
 			item.gross_profit = flt(((rate - item.valuation_rate) * item.stock_qty), precision("amount", item));
 		}
@@ -1802,7 +1835,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 			if (doc.tax_category)
 				filters['tax_category'] = doc.tax_category;
-
+			if (doc.company)
+				filters['company'] = doc.company;
 			return {
 				query: "erpnext.controllers.queries.get_tax_template",
 				filters: filters
@@ -1851,6 +1885,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					}
 				}
 			})
+		}
+	},
+
+	against_blanket_order: function(doc, cdt, cdn) {
+		var item = locals[cdt][cdn];
+		if(!item.against_blanket_order) {
+			frappe.model.set_value(this.frm.doctype + " Item", item.name, "blanket_order", null);
+			frappe.model.set_value(this.frm.doctype + " Item", item.name, "blanket_order_rate", 0.00);
 		}
 	},
 
@@ -1912,14 +1954,44 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	}
 });
 
-erpnext.show_serial_batch_selector = function(frm, d, callback, on_close, show_dialog) {
+erpnext.show_serial_batch_selector = function (frm, d, callback, on_close, show_dialog) {
+	let warehouse, receiving_stock, existing_stock;
+	if (frm.doc.is_return) {
+		if (["Purchase Receipt", "Purchase Invoice"].includes(frm.doc.doctype)) {
+			existing_stock = true;
+			warehouse = d.warehouse;
+		} else if (["Delivery Note", "Sales Invoice"].includes(frm.doc.doctype)) {
+			receiving_stock = true;
+		}
+	} else {
+		if (frm.doc.doctype == "Stock Entry") {
+			if (frm.doc.purpose == "Material Receipt") {
+				receiving_stock = true;
+			} else {
+				existing_stock = true;
+				warehouse = d.s_warehouse;
+			}
+		} else {
+			existing_stock = true;
+			warehouse = d.warehouse;
+		}
+	}
+
+	if (!warehouse) {
+		if (receiving_stock) {
+			warehouse = ["like", ""];
+		} else if (existing_stock) {
+			warehouse = ["!=", ""];
+		}
+	}
+
 	frappe.require("assets/erpnext/js/utils/serial_no_batch_selector.js", function() {
 		new erpnext.SerialNoBatchSelector({
 			frm: frm,
 			item: d,
 			warehouse_details: {
 				type: "Warehouse",
-				name: d.warehouse
+				name: warehouse
 			},
 			callback: callback,
 			on_close: on_close

@@ -1,0 +1,20 @@
+{
+ "action": "Show Form Tour",
+ "creation": "2020-05-19 11:55:11.378374",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 1,
+ "is_skipped": 0,
+ "modified": "2020-05-26 20:28:03.558199",
+ "modified_by": "Administrator",
+ "name": "Explore Manufacturing Settings",
+ "owner": "Administrator",
+ "reference_document": "Manufacturing Settings",
+ "show_full_form": 0,
+ "title": "Explore Manufacturing Settings",
+ "validate_action": 0,
+ "video_url": "https://www.youtube.com/watch?v=UVGfzwOOZC4"
+}

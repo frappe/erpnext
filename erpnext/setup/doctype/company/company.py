@@ -16,6 +16,7 @@ from frappe.utils.nestedset import NestedSet
 
 from past.builtins import cmp
 import functools
+from erpnext.accounts.doctype.account.account import get_account_currency
 
 class Company(NestedSet):
 	nsm_parent_field = 'parent_company'
@@ -45,8 +46,10 @@ class Company(NestedSet):
 		self.validate_currency()
 		self.validate_coa_input()
 		self.validate_perpetual_inventory()
+		self.validate_perpetual_inventory_for_non_stock_items()
 		self.check_country_change()
 		self.set_chart_of_accounts()
+		self.validate_parent_company()
 
 	def validate_abbr(self):
 		if not self.abbr:
@@ -72,18 +75,22 @@ class Company(NestedSet):
 
 	def validate_default_accounts(self):
 		accounts = [
-			"default_bank_account", "default_cash_account",
-			"default_receivable_account", "default_payable_account",
-			"default_expense_account", "default_income_account",
-			"stock_received_but_not_billed", "stock_adjustment_account",
-			"expenses_included_in_valuation", "default_payroll_payable_account"
+			["Default Bank Account", "default_bank_account"], ["Default Cash  Account", "default_cash_account"],
+			["Default Receivable Account", "default_receivable_account"], ["Default Payable Account", "default_payable_account"],
+			["Default Expense Account", "default_expense_account"], ["Default Income Account", "default_income_account"],
+			["Stock Received But Not Billed Account", "stock_received_but_not_billed"], ["Stock Adjustment Account", "stock_adjustment_account"],
+			["Expense Included In Valuation Account", "expenses_included_in_valuation"], ["Default Payroll Payable Account", "default_payroll_payable_account"]
 		]
 
-		for field in accounts:
-			if self.get(field):
-				for_company = frappe.db.get_value("Account", self.get(field), "company")
+		for account in accounts:
+			if self.get(account[1]):
+				for_company = frappe.db.get_value("Account", self.get(account[1]), "company")
 				if for_company != self.name:
-					frappe.throw(_("Account {0} does not belong to company: {1}").format(self.get(field), self.name))
+					frappe.throw(_("Account {0} does not belong to company: {1}").format(self.get(account[1]), self.name))
+
+				if get_account_currency(self.get(account[1])) != self.default_currency:
+					frappe.throw(_("""{0} currency must be same as company's default currency.
+						Please select another account""").format(frappe.bold(account[0])))
 
 	def validate_currency(self):
 		if self.is_new():
@@ -176,6 +183,12 @@ class Company(NestedSet):
 				frappe.msgprint(_("Set default inventory account for perpetual inventory"),
 					alert=True, indicator='orange')
 
+	def validate_perpetual_inventory_for_non_stock_items(self):
+		if not self.get("__islocal"):
+			if cint(self.enable_perpetual_inventory_for_non_stock_items) == 1 and not self.service_received_but_not_billed:
+				frappe.throw(_("Set default {0} account for perpetual inventory for non stock items").format(
+					frappe.bold('Service Received But Not Billed')))
+
 	def check_country_change(self):
 		frappe.flags.country_change = False
 
@@ -188,6 +201,13 @@ class Company(NestedSet):
 		if self.parent_company:
 			self.create_chart_of_accounts_based_on = "Existing Company"
 			self.existing_company = self.parent_company
+
+	def validate_parent_company(self):
+		if self.parent_company:
+			is_group = frappe.get_value('Company', self.parent_company, 'is_group')
+
+			if not is_group:
+				frappe.throw(_("Parent Company must be a group company"))
 
 	def set_default_accounts(self):
 		default_accounts = {
@@ -418,7 +438,7 @@ def install_country_fixtures(company):
 			module_name = "erpnext.regional.{0}.setup.setup".format(frappe.scrub(company_doc.country))
 			frappe.get_attr(module_name)(company_doc, False)
 		except Exception as e:
-			frappe.log_error(title=str(e), message=frappe.get_traceback())
+			frappe.log_error(str(e), frappe.get_traceback())
 			frappe.throw(_("Failed to setup defaults for country {0}. Please contact support@erpnext.com").format(frappe.bold(company_doc.country)))
 
 

@@ -22,7 +22,7 @@ frappe.ui.form.on("Purchase Receipt", {
 				frappe.set_route("Form", lcv.doctype, lcv.name);
 			},
 		}
-		
+
 		frm.custom_make_buttons = {
 			'Stock Entry': 'Return',
 			'Purchase Invoice': 'Purchase Invoice'
@@ -34,7 +34,13 @@ frappe.ui.form.on("Purchase Receipt", {
 				filters: {'company': frm.doc.company }
 			}
 		});
-		
+
+		frm.set_query("taxes_and_charges", function() {
+			return {
+				filters: {'company': frm.doc.company }
+			}
+		});
+
 	},
 	onload: function(frm) {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
@@ -55,6 +61,15 @@ frappe.ui.form.on("Purchase Receipt", {
 				})
 			}, __('Create'));
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
+		}
+
+		if (frm.doc.docstatus === 1 && frm.doc.is_internal_supplier && !frm.doc.inter_company_reference) {
+			frm.add_custom_button(__('Delivery Note'), function() {
+				frappe.model.open_mapped_doc({
+					method: 'erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_inter_company_delivery_note',
+					frm: cur_frm,
+				})
+			}, __('Create'));
 		}
 	},
 
@@ -77,7 +92,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 	refresh: function() {
 		var me = this;
 		this._super();
-		if(this.frm.doc.docstatus===1) {
+		if(this.frm.doc.docstatus > 0) {
 			this.show_stock_ledger();
 			//removed for temporary
 			this.show_general_ledger();

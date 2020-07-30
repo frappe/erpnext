@@ -6,8 +6,8 @@ def execute():
 	if not frappe.db.exists("DocType", "Salary Structure Earning"):
 		return
 
-	frappe.reload_doc("hr", "doctype", "salary_detail")
-	frappe.reload_doc("hr", "doctype", "salary_component")
+	frappe.reload_doc("Payroll", "doctype", "salary_detail")
+	frappe.reload_doc("Payroll", "doctype", "salary_component")
 
 	standard_cols = ["name", "creation", "modified", "owner", "modified_by", "parent", "parenttype", "parentfield", "idx"]
 

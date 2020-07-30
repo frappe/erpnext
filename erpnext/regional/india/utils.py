@@ -6,7 +6,7 @@ from erpnext.regional.india import states, state_numbers
 from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.hr.utils import get_salary_assignment
-from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
+from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.regional.india import number_state_mapping
 from six import string_types
 from erpnext.accounts.general_ledger import make_gl_entries
@@ -143,18 +143,24 @@ def get_place_of_supply(party_details, doctype):
 		address_name = party_details.shipping_address or party_details.supplier_address
 
 	if address_name:
-		address = frappe.db.get_value("Address", address_name, ["gst_state", "gst_state_number"], as_dict=1)
+		address = frappe.db.get_value("Address", address_name, ["gst_state", "gst_state_number", "gstin"], as_dict=1)
 		if address and address.gst_state and address.gst_state_number:
+			party_details.gstin = address.gstin
 			return cstr(address.gst_state_number) + "-" + cstr(address.gst_state)
 
 @frappe.whitelist()
 def get_regional_address_details(party_details, doctype, company, return_taxes=None):
-
 	if isinstance(party_details, string_types):
 		party_details = json.loads(party_details)
 		party_details = frappe._dict(party_details)
 
 	party_details.place_of_supply = get_place_of_supply(party_details, doctype)
+
+	if is_internal_transfer(party_details, doctype):
+		party_details.taxes_and_charges = ''
+		party_details.taxes = ''
+		return
+
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
 		master_doctype = "Sales Taxes and Charges Template"
 
@@ -169,7 +175,6 @@ def get_regional_address_details(party_details, doctype, company, return_taxes=N
 
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		master_doctype = "Purchase Taxes and Charges Template"
-
 		get_tax_template_for_sez(party_details, master_doctype, company, 'Supplier')
 		get_tax_template_based_on_category(master_doctype, company, party_details)
 
@@ -198,6 +203,17 @@ def get_regional_address_details(party_details, doctype, company, return_taxes=N
 	if return_taxes:
 		return party_details
 
+def is_internal_transfer(party_details, doctype):
+	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
+		destination_gstin = party_details.company_gstin
+	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
+		destination_gstin = party_details.supplier_gstin
+
+	if party_details.gstin == destination_gstin:
+		return True
+	else:
+		False
+
 def get_tax_template_based_on_category(master_doctype, company, party_details):
 	if not party_details.get('tax_category'):
 		return
@@ -220,7 +236,6 @@ def get_tax_template(master_doctype, company, is_inter_state, state_code):
 	 		(not default_tax and not tax_category.gst_state):
 			default_tax = frappe.db.get_value(master_doctype,
 				{'disabled': 0, 'tax_category': tax_category.name}, 'name')
-
 	return default_tax
 
 def get_tax_template_for_sez(party_details, master_doctype, company, party_type):
@@ -358,14 +373,12 @@ def calculate_hra_exemption_for_period(doc):
 		return exemptions
 
 def get_ewb_data(dt, dn):
-	if dt != 'Sales Invoice':
-		frappe.throw(_('e-Way Bill JSON can only be generated from Sales Invoice'))
 
 	ewaybills = []
 	for doc_name in dn:
 		doc = frappe.get_doc(dt, doc_name)
 
-		validate_sales_invoice(doc)
+		validate_doc(doc)
 
 		data = frappe._dict({
 			"transporterId": "",
@@ -375,12 +388,14 @@ def get_ewb_data(dt, dn):
 		data.userGstin = data.fromGstin = doc.company_gstin
 		data.supplyType = 'O'
 
-		if doc.gst_category in ['Registered Regular', 'SEZ']:
+		if dt == 'Delivery Note':
+			data.subSupplyType = 1
+		elif doc.gst_category in ['Registered Regular', 'SEZ']:
 			data.subSupplyType = 1
 		elif doc.gst_category in ['Overseas', 'Deemed Export']:
 			data.subSupplyType = 3
 		else:
-			frappe.throw(_('Unsupported GST Category for e-Way Bill JSON generation'))
+			frappe.throw(_('Unsupported GST Category for E-Way Bill JSON generation'))
 
 		data.docType = 'INV'
 		data.docDate = frappe.utils.formatdate(doc.posting_date, 'dd/mm/yyyy')
@@ -544,12 +559,12 @@ def get_item_list(data, doc):
 
 	return data
 
-def validate_sales_invoice(doc):
+def validate_doc(doc):
 	if doc.docstatus != 1:
-		frappe.throw(_('e-Way Bill JSON can only be generated from submitted document'))
+		frappe.throw(_('E-Way Bill JSON can only be generated from submitted document'))
 
 	if doc.is_return:
-		frappe.throw(_('e-Way Bill JSON cannot be generated for Sales Return as of now'))
+		frappe.throw(_('E-Way Bill JSON cannot be generated for Sales Return as of now'))
 
 	if doc.ewaybill:
 		frappe.throw(_('e-Way Bill already exists for this document'))
@@ -559,9 +574,9 @@ def validate_sales_invoice(doc):
 
 	for fieldname in reqd_fields:
 		if not doc.get(fieldname):
-			frappe.throw(_('{} is required to generate e-Way Bill JSON'.format(
+			frappe.throw(_('{} is required to generate E-Way Bill JSON').format(
 				doc.meta.get_label(fieldname)
-			)))
+			))
 
 	if len(doc.company_gstin) < 15:
 		frappe.throw(_('You must be a registered supplier to generate e-Way Bill'))
@@ -653,6 +668,11 @@ def get_gst_accounts(company, account_wise=False):
 	return gst_accounts
 
 def update_grand_total_for_rcm(doc, method):
+	country = frappe.get_cached_value('Company', doc.company, 'country')
+
+	if country != 'India':
+		return
+
 	if doc.reverse_charge == 'Y':
 		gst_accounts = get_gst_accounts(doc.company)
 		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
@@ -684,9 +704,10 @@ def update_totals(gst_tax, doc):
 			doc.rounding_adjustment += flt(doc.rounded_total - doc.grand_total,
 				doc.precision("rounding_adjustment"))
 
-			doc.outstanding_amount = doc.base_rounded_total
+			doc.outstanding_amount = doc.rounded_total or doc.grand_total
 
 	doc.in_words = money_in_words(doc.grand_total, doc.currency)
+	doc.set_payment_schedule()
 
 def make_regional_gl_entries(gl_entries, doc):
 	country = frappe.get_cached_value('Company', doc.company, 'country')

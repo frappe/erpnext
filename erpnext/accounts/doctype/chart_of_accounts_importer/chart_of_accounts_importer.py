@@ -152,10 +152,9 @@ def build_forest(data):
 				return [parent_account]
 			elif account_name == child:
 				parent_account_list = return_parent(data, parent_account)
-				if not parent_account_list:
+				if not parent_account_list and parent_account:
 					frappe.throw(_("The parent account {0} does not exists in the uploaded template").format(
 						frappe.bold(parent_account)))
-
 				return [child] + parent_account_list
 
 	charts_map, paths = {}, []
@@ -341,7 +340,8 @@ def validate_account_types(accounts):
 		return _("Please identify/create Account (Ledger) for type - {0}").format(' , '.join(missing))
 
 	account_types_for_group = ["Bank", "Cash", "Stock"]
-	account_groups = [accounts[d]["account_type"] for d in accounts if accounts[d]['is_group'] not in ('', 1)]
+	# fix logic bug
+	account_groups = [accounts[d]["account_type"] for d in accounts if accounts[d]['is_group'] == 1]
 
 	missing = list(set(account_types_for_group) - set(account_groups))
 	if missing:

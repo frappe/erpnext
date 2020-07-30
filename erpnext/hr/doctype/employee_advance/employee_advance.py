@@ -22,6 +22,7 @@ class EmployeeAdvance(Document):
 		self.validate_employee_advance_account()
 
 	def on_cancel(self):
+		self.ignore_linked_doctypes = ('GL Entry')
 		self.set_status()
 
 	def set_status(self):
@@ -119,12 +120,14 @@ def make_bank_entry(dt, dn):
 		"reference_type": "Employee Advance",
 		"reference_name": doc.name,
 		"party_type": "Employee",
+		"cost_center": erpnext.get_default_cost_center(doc.company),
 		"party": doc.employee,
 		"is_advance": "Yes"
 	})
 
 	je.append("accounts", {
 		"account": payment_account.account,
+		"cost_center": erpnext.get_default_cost_center(doc.company),
 		"credit_in_account_currency": flt(doc.advance_amount),
 		"account_currency": payment_account.account_currency,
 		"account_type": payment_account.account_type
@@ -133,8 +136,20 @@ def make_bank_entry(dt, dn):
 	return je.as_dict()
 
 @frappe.whitelist()
-def make_return_entry(employee, company, employee_advance_name,
-		return_amount, advance_account, mode_of_payment=None):
+def create_return_through_additional_salary(doc):
+	import json
+	doc = frappe._dict(json.loads(doc))
+	additional_salary = frappe.new_doc('Additional Salary')
+	additional_salary.employee = doc.employee
+	additional_salary.amount = doc.paid_amount - doc.claimed_amount
+	additional_salary.company = doc.company
+	additional_salary.ref_doctype = doc.doctype
+	additional_salary.ref_docname = doc.name
+
+	return additional_salary
+
+@frappe.whitelist()
+def make_return_entry(employee, company, employee_advance_name, return_amount,  advance_account, mode_of_payment=None):
 	return_account = get_default_bank_cash_account(company, account_type='Cash', mode_of_payment = mode_of_payment)
 
 	mode_of_payment_type = ''

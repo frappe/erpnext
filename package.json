@@ -10,5 +10,15 @@
   "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/frappe/erpnext/issues"
-  }
+  },
+  "devDependencies": {
+    "snyk": "^1.290.1"
+  },
+  "dependencies": {
+  },
+  "scripts": {
+    "snyk-protect": "snyk protect",
+    "prepare": "yarn run snyk-protect"
+  },
+  "snyk": true
 }

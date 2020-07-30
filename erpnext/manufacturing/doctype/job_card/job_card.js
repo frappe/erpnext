@@ -3,10 +3,6 @@
 
 frappe.ui.form.on('Job Card', {
 	refresh: function(frm) {
-
-		if(frm.doc.docstatus == 0) {
-			frm.set_df_property("operation", "read_only", frm.doc.operation_id ? 1 : 0);
-		}
 		frappe.flags.pause_job = 0;
 		frappe.flags.resume_job = 0;
 
