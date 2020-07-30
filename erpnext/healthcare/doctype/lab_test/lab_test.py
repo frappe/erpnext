@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, cstr
+from frappe.utils import getdate, cstr, get_link_to_form
 
 class LabTest(Document):
 	def validate(self):
@@ -262,7 +262,9 @@ def create_sample_collection(lab_test, template, patient, invoice):
 		sample_collection = create_sample_doc(template, patient, invoice, lab_test.company)
 		if sample_collection:
 			lab_test.sample = sample_collection.name
-
+			sample_collection_doc = get_link_to_form('Sample Collection', sample_collection.name)
+			frappe.msgprint(_('Sample Collection {0} has been created').format(sample_collection_doc),
+				title=_('Sample Collection'), indicator='green')
 	return lab_test
 
 def load_result_format(lab_test, template, prescription, invoice):
