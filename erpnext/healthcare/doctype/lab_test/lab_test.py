@@ -64,8 +64,8 @@ class LabTest(Document):
 		if self.descriptive_test_items:
 			for item in self.descriptive_test_items:
 				if not item.result_value and not item.allow_blank and item.require_result_value:
-					frappe.throw(_('Row #{0}: Please enter the result value {1}').format(
-						item.idx, frappe.bold(item.lab_test_name)), title=_('Mandatory Results'))
+					frappe.throw(_('Row #{0}: Please enter the result value for {1}').format(
+						item.idx, frappe.bold(item.lab_test_particulars)), title=_('Mandatory Results'))
 
 
 def create_test_from_template(lab_test):
@@ -103,7 +103,7 @@ def create_multiple(doctype, docname):
 		lab_test_created = create_lab_test_from_encounter(docname)
 
 	if lab_test_created:
-		frappe.msgprint(_('Lab Test(s) {0} created'.format(lab_test_created)), indicator='green')
+		frappe.msgprint(_('Lab Test(s) {0} created successfully').format(lab_test_created), indicator='green')
 	else:
 		frappe.msgprint(_('No Lab Tests created'))
 
