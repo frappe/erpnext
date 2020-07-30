@@ -179,23 +179,6 @@ var show_lab_tests = function (frm, lab_test_list) {
 	d.show();
 };
 
-cur_frm.cscript.custom_before_submit = function (doc) {
-	if (doc.normal_test_items) {
-		for (let result in doc.normal_test_items) {
-			if (!doc.normal_test_items[result].result_value && !doc.normal_test_items[result].allow_blank && doc.normal_test_items[result].require_result_value) {
-				frappe.throw(__('Please input all required result values'));
-			}
-		}
-	}
-	if (doc.descriptive_test_items) {
-		for (let result in doc.descriptive_test_items) {
-			if (!doc.descriptive_test_items[result].result_value && !doc.descriptive_test_items[result].allow_blank && doc.descriptive_test_items[result].require_result_value) {
-				frappe.throw(__('Please input all required result values'));
-			}
-		}
-	}
-};
-
 var make_dialog = function (frm, emailed, printed) {
 	var number = frm.doc.mobile;
 

@@ -84,7 +84,7 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
-   "options": "LP-",
+   "options": "HLC-LAB-.YYYY.-",
    "print_hide": 1,
    "report_hide": 1,
    "reqd": 1
@@ -197,11 +197,10 @@
   {
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Status",
    "options": "Draft\nCompleted\nApproved\nRejected\nCancelled",
-   "print_hide": 1,
    "read_only": 1,
-   "report_hide": 1,
    "search_index": 1
   },
   {
@@ -354,7 +353,8 @@
   },
   {
    "fieldname": "sb_normal",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Compound Test Result"
   },
   {
    "fieldname": "normal_test_items",
@@ -369,11 +369,13 @@
   {
    "depends_on": "descriptive_toggle",
    "fieldname": "organisms_section",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Organism Test Result"
   },
   {
    "fieldname": "sb_sensitivity",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Sensitivity Test Result"
   },
   {
    "fieldname": "sensitivity_test_items",
@@ -383,8 +385,10 @@
    "report_hide": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "sb_comments",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Comments"
   },
   {
    "fieldname": "lab_test_comment",
@@ -531,7 +535,8 @@
   },
   {
    "fieldname": "sb_descriptive",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Descriptive Test Result"
   },
   {
    "default": "0",
@@ -550,7 +555,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-16 13:35:24.811062",
+ "modified": "2020-07-30 14:03:00.166003",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",
