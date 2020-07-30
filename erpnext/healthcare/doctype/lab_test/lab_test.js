@@ -34,10 +34,10 @@ frappe.ui.form.on('Lab Test', {
 			if (frm.doc.docstatus === 1 && frm.doc.status !== 'Approved' && frm.doc.status !== 'Rejected') {
 				frm.add_custom_button(__('Approve'), function () {
 					status_update(1, frm);
-				});
+				}, __('Actions'));
 				frm.add_custom_button(__('Reject'), function () {
 					status_update(0, frm);
-				});
+				}, __('Actions'));
 			}
 		}
 
@@ -186,7 +186,7 @@ var make_dialog = function (frm, emailed, printed) {
 		title: 'Send SMS',
 		width: 400,
 		fields: [
-			{ fieldname: 'sms_type', fieldtype: 'Select', label: 'Type', options: ['Emailed', 'Printed'] },
+			{ fieldname: 'result_format', fieldtype: 'Select', label: 'Result Format', options: ['Emailed', 'Printed'] },
 			{ fieldname: 'number', fieldtype: 'Data', label: 'Mobile Number', reqd: 1 },
 			{ fieldname: 'message', fieldtype: 'Small Text', label: 'Message', reqd: 1 }
 		],
@@ -200,22 +200,22 @@ var make_dialog = function (frm, emailed, printed) {
 			dialog.hide();
 		}
 	});
-	if (frm.doc.report_preference == 'Print') {
+	if (frm.doc.report_preference === 'Print') {
 		dialog.set_values({
-			'sms_type': 'Printed',
+			'result_format': 'Printed',
 			'number': number,
 			'message': printed
 		});
 	} else {
 		dialog.set_values({
-			'sms_type': 'Emailed',
+			'result_format': 'Emailed',
 			'number': number,
 			'message': emailed
 		});
 	}
 	var fd = dialog.fields_dict;
-	$(fd.sms_type.input).change(function () {
-		if (dialog.get_value('sms_type') == 'Emailed') {
+	$(fd.result_format.input).change(function () {
+		if (dialog.get_value('result_format') === 'Emailed') {
 			dialog.set_values({
 				'number': number,
 				'message': emailed

@@ -103,7 +103,7 @@ def create_multiple(doctype, docname):
 		lab_test_created = create_lab_test_from_encounter(docname)
 
 	if lab_test_created:
-		frappe.msgprint(_('Lab Test(s) {0} created'.format(lab_test_created)))
+		frappe.msgprint(_('Lab Test(s) {0} created'.format(lab_test_created)), indicator='green')
 	else:
 		frappe.msgprint(_('No Lab Tests created'))
 
@@ -225,8 +225,9 @@ def create_sample_doc(template, patient, invoice, company = None):
 			'docstatus': 0,
 			'sample': template.sample
 		})
+
 		if sample_exists:
-			# Update Sample Collection by adding quantity
+			# update sample collection by adding quantity
 			sample_collection = frappe.get_doc('Sample Collection', sample_exists[0][0])
 			quantity = int(sample_collection.sample_qty) + int(template.sample_qty)
 			if template.sample_details:
@@ -252,7 +253,7 @@ def create_sample_doc(template, patient, invoice, company = None):
 			sample_collection.company = company
 
 			if template.sample_details:
-				sample_collection.sample_details = 'Test :' + (template.get('lab_test_name') or template.get('template')) + '\n' + 'Collection Detials:\n\t' + template.sample_details
+				sample_collection.sample_details = _('Test :') + (template.get('lab_test_name') or template.get('template')) + '\n' + 'Collection Detials:\n\t' + template.sample_details
 			sample_collection.save(ignore_permissions=True)
 
 		return sample_collection
@@ -270,10 +271,13 @@ def create_sample_collection(lab_test, template, patient, invoice):
 def load_result_format(lab_test, template, prescription, invoice):
 	if template.lab_test_template_type == 'Single':
 		create_normals(template, lab_test)
+
 	elif template.lab_test_template_type == 'Compound':
 		create_compounds(template, lab_test, False)
+
 	elif template.lab_test_template_type == 'Descriptive':
 		create_descriptives(template, lab_test)
+
 	elif template.lab_test_template_type == 'Grouped':
 		# Iterate for each template in the group and create one result for all.
 		for lab_test_group in template.lab_test_groups:
@@ -283,6 +287,7 @@ def load_result_format(lab_test, template, prescription, invoice):
 				if template_in_group:
 					if template_in_group.lab_test_template_type == 'Single':
 						create_normals(template_in_group, lab_test)
+
 					elif template_in_group.lab_test_template_type == 'Compound':
 						normal_heading = lab_test.append('normal_test_items')
 						normal_heading.lab_test_name = template_in_group.lab_test_name
@@ -290,6 +295,7 @@ def load_result_format(lab_test, template, prescription, invoice):
 						normal_heading.allow_blank = 1
 						normal_heading.template = template_in_group.name
 						create_compounds(template_in_group, lab_test, True)
+
 					elif template_in_group.lab_test_template_type == 'Descriptive':
 						descriptive_heading = lab_test.append('descriptive_test_items')
 						descriptive_heading.lab_test_name = template_in_group.lab_test_name
@@ -297,6 +303,7 @@ def load_result_format(lab_test, template, prescription, invoice):
 						descriptive_heading.allow_blank = 1
 						descriptive_heading.template = template_in_group.name
 						create_descriptives(template_in_group, lab_test)
+
 			else: # Lab Test Group - Add New Line
 				normal = lab_test.append('normal_test_items')
 				normal.lab_test_name = lab_test_group.group_event
@@ -307,6 +314,7 @@ def load_result_format(lab_test, template, prescription, invoice):
 				normal.allow_blank = lab_test_group.allow_blank
 				normal.require_result_value = 1
 				normal.template = template.name
+
 	if template.lab_test_template_type != 'No Result':
 		if prescription:
 			lab_test.prescription = prescription
