@@ -112,7 +112,7 @@
   {
    "default": "1",
    "depends_on": "eval:doc.lab_test_template_type != 'Grouped'",
-   "description": "If unchecked, the item wont be appear in Sales Invoice, but can be used in group test creation. ",
+   "description": "If unchecked, the item will not be available in Sales Invoices for billing but can be used in group test creation. ",
    "fieldname": "is_billable",
    "fieldtype": "Check",
    "label": "Is Billable",
@@ -184,7 +184,7 @@
    "depends_on": "eval:doc.lab_test_template_type == 'Descriptive'",
    "fieldname": "section_break_special",
    "fieldtype": "Section Break",
-   "label": "Descriptive"
+   "label": "Descriptive Test"
   },
   {
    "default": "0",
@@ -196,7 +196,7 @@
    "depends_on": "eval:doc.lab_test_template_type == 'Grouped'",
    "fieldname": "section_break_group",
    "fieldtype": "Section Break",
-   "label": "Group"
+   "label": "Group Tests"
   },
   {
    "fieldname": "lab_test_groups",
@@ -314,7 +314,7 @@
   }
  ],
  "links": [],
- "modified": "2020-07-13 12:57:09.925436",
+ "modified": "2020-07-30 11:55:43.093828",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",
