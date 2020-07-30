@@ -24,7 +24,7 @@ frappe.listview_settings['Lab Test'] = {
 
 var create_multiple_dialog = function (listview) {
 	var dialog = new frappe.ui.Dialog({
-		title: 'Create Multiple Lab Test',
+		title: 'Create Multiple Lab Tests',
 		width: 100,
 		fields: [
 			{ fieldtype: 'Link', label: 'Patient', fieldname: 'patient', options: 'Patient', reqd: 1 },
@@ -44,7 +44,7 @@ var create_multiple_dialog = function (listview) {
 				}
 			}
 		],
-		primary_action_label: __('Create Lab Test'),
+		primary_action_label: __('Create'),
 		primary_action: function () {
 			frappe.call({
 				method: 'erpnext.healthcare.doctype.lab_test.lab_test.create_multiple',
