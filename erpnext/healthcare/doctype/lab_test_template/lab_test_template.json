@@ -34,14 +34,15 @@
   "descriptive_test_templates",
   "section_break_group",
   "lab_test_groups",
-  "medical_coding_section",
-  "medical_code_standard",
-  "medical_code",
   "sb_sample_collection",
   "sample",
   "sample_uom",
   "sample_qty",
+  "column_break_33",
   "sample_details",
+  "medical_coding_section",
+  "medical_code",
+  "medical_code_standard",
   "worksheet_section",
   "worksheet_instructions",
   "result_legend_section",
@@ -128,6 +129,7 @@
    "mandatory_depends_on": "eval:doc.is_billable == 1"
   },
   {
+   "collapsible": 1,
    "fieldname": "medical_coding_section",
    "fieldtype": "Section Break",
    "label": "Medical Coding"
@@ -217,7 +219,6 @@
    "no_copy": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "sb_sample_collection",
    "fieldtype": "Section Break",
    "label": "Sample Collection"
@@ -311,10 +312,14 @@
    "fieldname": "descriptive_test_templates",
    "fieldtype": "Table",
    "options": "Descriptive Test Template"
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
   }
  ],
  "links": [],
- "modified": "2020-07-30 11:55:43.093828",
+ "modified": "2020-07-30 14:32:40.449818",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",
