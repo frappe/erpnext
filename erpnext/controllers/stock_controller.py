@@ -79,7 +79,7 @@ class StockController(AccountsController):
 							"against": item_row.expense_account,
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"debit": flt(sle.stock_value_difference, 2),
+							"debit": flt(sle.stock_value_difference, precision),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
 						}, warehouse_account[sle.warehouse]["account_currency"]))
 
@@ -89,7 +89,7 @@ class StockController(AccountsController):
 							"against": warehouse_account[sle.warehouse]["account"],
 							"cost_center": item_row.cost_center,
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
-							"credit": flt(sle.stock_value_difference, 2),
+							"credit": flt(sle.stock_value_difference, precision),
 							"project": item_row.get("project") or self.get("project"),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No"
 						}))
