@@ -1,5 +1,7 @@
 {
+ "actions": [],
  "allow_import": 1,
+ "allow_workflow": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
  "doctype": "DocType",
@@ -108,7 +110,6 @@
   "amended_from",
   "range",
   "column_break4",
-  "project",
   "per_billed",
   "is_internal_supplier",
   "inter_company_reference",
@@ -769,6 +770,7 @@
    "fieldname": "base_in_words",
    "fieldtype": "Data",
    "label": "In Words (Company Currency)",
+   "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -821,6 +823,7 @@
    "fieldname": "in_words",
    "fieldtype": "Data",
    "label": "In Words",
+   "length": 240,
    "oldfieldname": "in_words_import",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -933,6 +936,7 @@
    "width": "50%"
   },
   {
+   "description": "Track this Purchase Receipt against any Project",
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
@@ -1100,20 +1104,13 @@
    "fieldtype": "Small Text",
    "label": "Billing Address",
    "read_only": 1
-  },
-  {
-   "description": "Track this Purchase Receipt against any Project",
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "label": "Project",
-   "options": "Project"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-13 14:01:39.302238",
+ "modified": "2020-07-18 05:19:12.148115",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

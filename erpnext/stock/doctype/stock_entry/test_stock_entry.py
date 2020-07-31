@@ -413,7 +413,7 @@ class TestStockEntry(unittest.TestCase):
 	def test_serial_item_error(self):
 		se, serial_nos = self.test_serial_by_series()
 		if not frappe.db.exists('Serial No', 'ABCD'):
-			make_serialized_item("_Test Serialized Item", "ABCD\nEFGH")
+			make_serialized_item(item_code="_Test Serialized Item", serial_no="ABCD\nEFGH")
 
 		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Material Transfer"
@@ -823,15 +823,29 @@ class TestStockEntry(unittest.TestCase):
 			])
 		)
 
-def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
+def make_serialized_item(**args):
+	args = frappe._dict(args)
 	se = frappe.copy_doc(test_records[0])
-	se.get("items")[0].item_code = item_code or "_Test Serialized Item With Series"
-	se.get("items")[0].serial_no = serial_no
+
+	if args.company:
+		se.company = args.company
+
+	se.get("items")[0].item_code = args.item_code or "_Test Serialized Item With Series"
+
+	if args.serial_no:
+		se.get("items")[0].serial_no = args.serial_no
+
+	if args.cost_center:
+		se.get("items")[0].cost_center = args.cost_center
+
+	if args.expense_account:
+		se.get("items")[0].expense_account = args.expense_account
+
 	se.get("items")[0].qty = 2
 	se.get("items")[0].transfer_qty = 2
 
-	if target_warehouse:
-		se.get("items")[0].t_warehouse = target_warehouse
+	if args.target_warehouse:
+		se.get("items")[0].t_warehouse = args.target_warehouse
 
 	se.set_stock_entry_type()
 	se.insert()

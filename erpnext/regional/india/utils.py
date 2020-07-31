@@ -668,6 +668,11 @@ def get_gst_accounts(company, account_wise=False):
 	return gst_accounts
 
 def update_grand_total_for_rcm(doc, method):
+	country = frappe.get_cached_value('Company', doc.company, 'country')
+
+	if country != 'India':
+		return
+
 	if doc.reverse_charge == 'Y':
 		gst_accounts = get_gst_accounts(doc.company)
 		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
@@ -699,9 +704,10 @@ def update_totals(gst_tax, doc):
 			doc.rounding_adjustment += flt(doc.rounded_total - doc.grand_total,
 				doc.precision("rounding_adjustment"))
 
-			doc.outstanding_amount = doc.base_rounded_total
+			doc.outstanding_amount = doc.rounded_total or doc.grand_total
 
 	doc.in_words = money_in_words(doc.grand_total, doc.currency)
+	doc.set_payment_schedule()
 
 def make_regional_gl_entries(gl_entries, doc):
 	country = frappe.get_cached_value('Company', doc.company, 'country')
