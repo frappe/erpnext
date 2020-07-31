@@ -55,20 +55,33 @@ class PurchaseReceipt(BuyingController):
 			'percent_join_field': 'material_request'
 		}]
 		if cint(self.is_return):
-			self.status_updater.append({
-				'source_dt': 'Purchase Receipt Item',
-				'target_dt': 'Purchase Order Item',
-				'join_field': 'purchase_order_item',
-				'target_field': 'returned_qty',
-				'source_field': '-1 * qty',
-				'second_source_dt': 'Purchase Invoice Item',
-				'second_source_field': '-1 * qty',
-				'second_join_field': 'po_detail',
-				'extra_cond': """ and exists (select name from `tabPurchase Receipt`
-					where name=`tabPurchase Receipt Item`.parent and is_return=1)""",
-				'second_source_extra_cond': """ and exists (select name from `tabPurchase Invoice`
-					where name=`tabPurchase Invoice Item`.parent and is_return=1 and update_stock=1)"""
-			})
+			self.status_updater.extend([
+				{
+					'source_dt': 'Purchase Receipt Item',
+					'target_dt': 'Purchase Order Item',
+					'join_field': 'purchase_order_item',
+					'target_field': 'returned_qty',
+					'source_field': '-1 * qty',
+					'second_source_dt': 'Purchase Invoice Item',
+					'second_source_field': '-1 * qty',
+					'second_join_field': 'po_detail',
+					'extra_cond': """ and exists (select name from `tabPurchase Receipt`
+						where name=`tabPurchase Receipt Item`.parent and is_return=1)""",
+					'second_source_extra_cond': """ and exists (select name from `tabPurchase Invoice`
+						where name=`tabPurchase Invoice Item`.parent and is_return=1 and update_stock=1)"""
+				},
+				{
+					'source_dt': 'Purchase Receipt Item',
+					'target_dt': 'Purchase Receipt Item',
+					'join_field': 'purchase_receipt_item',
+					'target_field': 'returned_qty',
+					'target_parent_dt': 'Purchase Receipt',
+					'target_parent_field': 'per_returned',
+					'target_ref_field': 'stock_qty',
+					'source_field': '-1 * stock_qty',
+					'percent_join_field_parent': 'return_against'
+				}
+			])
 
 	def validate(self):
 		self.validate_posting_time()
@@ -470,7 +483,7 @@ class PurchaseReceipt(BuyingController):
 			frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(valuation_rate))
 
 	def update_status(self, status):
-		self.set_status(update=True, status = status)
+		self.set_status(update=True, status=status)
 		self.notify_update()
 		clear_doctype_notifications(self)
 

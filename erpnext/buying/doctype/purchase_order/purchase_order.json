@@ -1084,7 +1084,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-18 05:09:33.800633",
+ "modified": "2020-07-31 14:39:44.599294",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
@@ -1135,5 +1135,5 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "timeline_field": "supplier",
- "title_field": "title"
+ "title_field": "supplier"
 }
