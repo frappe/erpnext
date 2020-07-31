@@ -130,6 +130,7 @@
   "per_installed",
   "installation_status",
   "column_break_89",
+  "per_returned",
   "excise_page",
   "instructions",
   "subscription_section",
@@ -1231,13 +1232,23 @@
   {
    "fieldname": "section_break_18",
    "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "per_returned",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "% Returned",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-19 17:03:45.880106",
+ "modified": "2020-12-10 17:03:45.880106",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
