@@ -57,34 +57,65 @@ class Membership(Document):
 			self.load_from_db()
 			self.db_set('paid', 1)
 
-	def generate_and_send_invoice(self):
-		if not self.paid:
-			frappe.throw(_("The payment for this membership is not paid. To generate invoice mark the paid check"))
+	def generate_invoice(self, save=True):
+		if not (self.paid or self.currency or self.amount):
+			frappe.throw(_("The payment for this membership is not paid. To generate invoice fill the payment details"))
+
+		if self.invoice:
+			frappe.throw(_("An invoice is already linked to this document"))
 
 		member = frappe.get_doc("Member", self.member)
 		plan = frappe.get_doc("Membership Type", self.membership_type)
 		settings = frappe.get_doc("Membership Settings")
+		attachments = []
+
+		if not member.customer:
+			frappe.throw(_("No customer linked to member {}", [member.name]))
+
+		if not settings.debit_account:
+			frappe.throw(_("You need to set <b>Debit Account</b> in Membership Settings"))
+
+		if not settings.company:
+			frappe.throw(_("You need to set <b>Default Company</b> for invoicing in Membership Settings"))
 
 		invoice = make_invoice(self, member, plan, settings)
+		self.invoice = invoice.name
 
-		if invoice and settings.send_invoice and self.membership_status in ["New", "Current"]:
-			print("Sending")
-			message = settings.new_message if self.membership_status == "New" else settings.renewal
-			email = member.email_id if member.email_id else member.email
+		if save:
+			self.save()
 
-			email_args = {
-				"recipients": [email],
-				"message": message,
-				"subject": _('Here is your invoice'),
-				"attachments": [frappe.attach_print("Sales Invoice", invoice.name, print_format=settings.print_format)],
-				"reference_doctype": self.doctype,
-				"reference_name": self.name
-			}
-			if not frappe.flags.in_test:
-				frappe.enqueue(method=frappe.sendmail, queue='short', timeout=300, is_async=True, **email_args)
-			else:
-				frappe.sendmail(**email_args)
+		return invoice
 
+	def send_acknowlement(self):
+		settings = frappe.get_doc("Membership Settings")
+		if not settings.send_email:
+			frappe.throw(_("You need to enable <b>Send Acknowledge Email</b> in Membership Settings"))
+
+		member = frappe.get_doc("Member", self.member)
+		plan = frappe.get_doc("Membership Type", self.membership_type)
+		email = member.email_id if member.email_id else member.email
+		attachments = [frappe.attach_print("Membership", self.name, print_format=settings.membership_print_format)]
+
+		if self.invoice and settings.send_invoice:
+			attachments.append(frappe.attach_print("Sales Invoice", self.invoice, print_format=settings.inv_print_format))
+
+		email_args = {
+			"recipients": [email],
+			"message": settings.message,
+			"subject": _('Here is your invoice'),
+			"attachments": [frappe.attach_print("Sales Invoice", invoice.name, print_format=settings.inv_print_format)],
+			"reference_doctype": self.doctype,
+			"reference_name": self.name
+		}
+
+		if not frappe.flags.in_test:
+			frappe.enqueue(method=frappe.sendmail, queue='short', timeout=300, is_async=True, **email_args)
+		else:
+			frappe.sendmail(**email_args)
+
+	def generate_and_send_invoice(self):
+		invoice = self.generate_invoice(False)
+		self.send_acknowlement()
 
 def make_invoice(membership, member, plan, settings):
 	invoice = frappe.get_doc({
