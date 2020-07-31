@@ -8,6 +8,22 @@ frappe.ui.form.on('Membership', {
 		})
 	},
 
+	refresh: function(frm) {
+		!frm.doc.invoice && frm.add_custom_button("Generate Invoice", () => {
+			frm.call("generate_invoice", {
+				save: true
+			}).then(() => {
+				frm.reload_doc();
+			});
+		});
+
+		frm.add_custom_button("Send Acknowledgement", () => {
+			frm.call("send_acknowlement").then(() => {
+				frm.reload_doc();
+			});
+		});
+	},
+
 	onload: function(frm) {
 		frm.add_fetch('membership_type', 'amount', 'amount');
 	}

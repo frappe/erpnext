@@ -67,7 +67,6 @@ class Membership(Document):
 		member = frappe.get_doc("Member", self.member)
 		plan = frappe.get_doc("Membership Type", self.membership_type)
 		settings = frappe.get_doc("Membership Settings")
-		attachments = []
 
 		if not member.customer:
 			frappe.throw(_("No customer linked to member {}", [member.name]))
