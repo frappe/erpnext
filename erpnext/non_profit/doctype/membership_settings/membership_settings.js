@@ -11,10 +11,18 @@ frappe.ui.form.on("Membership Settings", {
 			});
 		}
 
-		frm.set_query('print_format', function(doc) {
+		frm.set_query('inv_print_format', function(doc) {
 			return {
 				filters: {
 					"doc_type": "Sales Invoice"
+				}
+			};
+		});
+
+		frm.set_query('membership_print_format', function(doc) {
+			return {
+				filters: {
+					"doc_type": "Membership"
 				}
 			};
 		});
