@@ -207,6 +207,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	company = frappe.db.get_value("Delivery Note", source_name, "company")
 	default_warehouse_for_sales_return = frappe.db.get_value("Company", company, "default_warehouse_for_sales_return")
+
 	def set_missing_values(source, target):
 		doc = frappe.get_doc(target)
 		doc.is_return = 1

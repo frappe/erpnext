@@ -65,6 +65,7 @@ status_map = {
 	"Purchase Receipt": [
 		["Draft", None],
 		["To Bill", "eval:self.per_billed < 100 and self.docstatus == 1"],
+		["Return Issued", "eval:self.per_returned == 100 and self.docstatus == 1"],
 		["Completed", "eval:self.per_billed == 100 and self.docstatus == 1"],
 		["Cancelled", "eval:self.docstatus==2"],
 		["Closed", "eval:self.status=='Closed'"],
@@ -232,7 +233,7 @@ class StatusUpdater(Document):
 
 			self._update_children(args, update_modified)
 
-			if "percent_join_field" in args:
+			if "percent_join_field" in args or "percent_join_field_parent" in args:
 				self._update_percent_field_in_targets(args, update_modified)
 
 	def _update_children(self, args, update_modified):
@@ -272,13 +273,19 @@ class StatusUpdater(Document):
 
 	def _update_percent_field_in_targets(self, args, update_modified=True):
 		"""Update percent field in parent transaction"""
-		distinct_transactions = set([d.get(args['percent_join_field'])
-			for d in self.get_all_children(args['source_dt'])])
+		if args.get('percent_join_field_parent'):
+			# if reference to target doc where % is to be updated, is
+			# in source doc's parent form, consider percent_join_field_parent
+			args['name'] = self.get(args['percent_join_field_parent'])
+			self._update_percent_field(args, update_modified)
+		else:
+			distinct_transactions = set([d.get(args['percent_join_field'])
+				for d in self.get_all_children(args['source_dt'])])
 
-		for name in distinct_transactions:
-			if name:
-				args['name'] = name
-				self._update_percent_field(args, update_modified)
+			for name in distinct_transactions:
+				if name:
+					args['name'] = name
+					self._update_percent_field(args, update_modified)
 
 	def _update_percent_field(self, args, update_modified=True):
 		"""Update percent field in parent transaction"""
