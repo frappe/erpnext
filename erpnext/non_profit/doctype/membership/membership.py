@@ -157,9 +157,7 @@ def verify_signature(data):
 
 	controller.verify_signature(data, signature, key)
 
-
-@frappe.whitelist(allow_guest=True)
-def trigger_razorpay_subscription(*args, **kwargs):
+def make_membership_entry(*args, **kwargs):
 	data = frappe.request.get_data(as_text=True)
 	try:
 		verify_signature(data)
@@ -217,6 +215,14 @@ def trigger_razorpay_subscription(*args, **kwargs):
 		return { status: 'Failed' }
 
 	return { status: 'Success' }
+
+@frappe.whitelist(allow_guest=True)
+def trigger_razorpay_subscription(*args, **kwargs):
+	try:
+		return make_membership_entry(*args, **kwargs)
+	except Exception as e:
+		log = frappe.log_error(e, "Webhook Failed")
+		return { status: 'Failed' }
 
 
 def notify_failure(log):
