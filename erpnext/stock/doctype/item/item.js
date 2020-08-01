@@ -121,9 +121,7 @@ frappe.ui.form.on("Item", {
 			frm.set_df_property(fieldname, 'read_only', stock_exists);
 		});
 
-		['variants_section'].forEach((fieldname) => {
-			frm.set_df_property(fieldname, 'hidden', stock_exists);
-		});
+		frm.set_df_property('variants_section', 'hidden', stock_exists);
 
 		frm.toggle_reqd('customer', frm.doc.is_customer_provided_item ? 1:0);
 	},
