@@ -200,7 +200,6 @@ def trigger_razorpay_subscription(*args, **kwargs):
 				"currency": "INR",
 				"paid": 1,
 				"payment_id": payment.id,
-				"webhook_payload": data_json,
 				"from_date": datetime.fromtimestamp(subscription.current_start),
 				"to_date": datetime.fromtimestamp(subscription.current_end),
 				"amount": payment.amount / 100 # Convert to rupees from paise
