@@ -26,24 +26,28 @@ def get_video_stats(docname, youtube_id, update=True):
 	api_key = frappe.db.get_single_value("Video Settings", "api_key")
 	api = Api(api_key=api_key)
 
-	video = api.get_video_by_id(video_id=youtube_id)
-	video_stats = video.items[0].to_dict().get('statistics')
-	stats = {
-		'like_count' : video_stats.get('likeCount'),
-		'view_count' : video_stats.get('viewCount'),
-		'dislike_count' : video_stats.get('dislikeCount'),
-		'comment_count' : video_stats.get('commentCount')
-	}
+	try:
+		video = api.get_video_by_id(video_id=youtube_id)
+		video_stats = video.items[0].to_dict().get('statistics')
+		stats = {
+			'like_count' : video_stats.get('likeCount'),
+			'view_count' : video_stats.get('viewCount'),
+			'dislike_count' : video_stats.get('dislikeCount'),
+			'comment_count' : video_stats.get('commentCount')
+		}
 
-	if not update:
-		return stats
+		if not update:
+			return stats
 
-	frappe.db.sql("""
-		UPDATE `tabVideo`
-		SET
-			like_count  = %(like_count)s,
-			view_count = %(view_count)s,
-			dislike_count = %(dislike_count)s,
-			comment_count = %(comment_count)s
-		WHERE name = {0}""".format(frappe.db.escape(docname)), stats) #nosec
-	frappe.db.commit()
+		frappe.db.sql("""
+			UPDATE `tabVideo`
+			SET
+				like_count  = %(like_count)s,
+				view_count = %(view_count)s,
+				dislike_count = %(dislike_count)s,
+				comment_count = %(comment_count)s
+			WHERE name = {0}""".format(frappe.db.escape(docname)), stats) #nosec
+		frappe.db.commit()
+	except:
+		message = "Please make sure you are connected to the Internet"
+		frappe.log_error(message + "\n\n" + frappe.get_traceback(), "Failed to Update YouTube Statistics for Video: {0}".format(docname))
