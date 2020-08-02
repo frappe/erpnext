@@ -237,6 +237,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	is_return: function() {
+		if(this.frm.doc.is_return) {
+			frm.fields_dict.naming_series = this.frm.doc.return_naming_series;
+		}
 		if(!this.frm.doc.is_return && this.frm.doc.return_against) {
 			this.frm.set_value('return_against', '');
 		}

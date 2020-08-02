@@ -16,6 +16,7 @@ from frappe.contacts.doctype.address.address import get_address_display
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.controllers.stock_controller import StockController
+from frappe.model.naming import make_autoname
 
 class BuyingController(StockController):
 	def __setup__(self):
@@ -816,6 +817,10 @@ class BuyingController(StockController):
 			validate_item_type(self, "is_sub_contracted_item", "subcontracted")
 		else:
 			validate_item_type(self, "is_purchase_item", "purchase")
+
+	def autoname(self):
+		if self.doctype in ['Purchase Receipt', 'Purchase Invoice'] and self.is_return:
+			self.name = make_autoname(self.return_naming_series)
 
 def get_items_from_bom(item_code, bom, exploded_item=1):
 	doctype = "BOM Item" if not exploded_item else "BOM Explosion Item"

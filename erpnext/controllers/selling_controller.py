@@ -10,6 +10,7 @@ from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.doctype.item.item import set_item_default
 from frappe.contacts.doctype.address.address import get_address_display
+from frappe.model.naming import make_autoname
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -417,6 +418,10 @@ class SellingController(StockController):
 		# validate items to see if they have is_sales_item enabled
 		from erpnext.controllers.buying_controller import validate_item_type
 		validate_item_type(self, "is_sales_item", "sales")
+
+	def autoname(self):
+		if self.doctype in ['Sales Invoice', 'Delivery Note'] and self.is_return:
+			self.name = make_autoname(self.return_naming_series)
 
 def set_default_income_account_for_item(obj):
 	for d in obj.get("items"):

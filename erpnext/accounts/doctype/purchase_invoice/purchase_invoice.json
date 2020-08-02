@@ -9,6 +9,7 @@
  "field_order": [
   "title",
   "naming_series",
+  "return_naming_series",
   "supplier",
   "supplier_name",
   "tax_id",
@@ -174,6 +175,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "eval: doc.is_return === 0",
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
@@ -1326,13 +1328,25 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "bold": 1,
+   "depends_on": "eval: doc.is_return === 1",
+   "fieldname": "return_naming_series",
+   "fieldtype": "Select",
+   "label": "Return Series",
+   "no_copy": 1,
+   "options": "ACC-PINV-RET-.YYYY.-",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-24 09:46:40.405463",
+ "modified": "2020-08-03 00:17:38.634629",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
