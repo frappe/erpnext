@@ -182,10 +182,10 @@ def make_membership_entry(*args, **kwargs):
 	except Exception as e:
 		error_log = frappe.log_error(frappe.get_traceback() + '\n' + data_json , _("Membership Webhook Failed"))
 		notify_failure(error_log)
-		return { status: 'Failed' }
+		return { 'status': 'Failed' }
 
 	if not member:
-		return { status: 'Failed' }
+		return { 'status': 'Failed' }
 	try:
 		if data.event == "subscription.activated":
 			member.customer_id = payment.customer_id
@@ -212,9 +212,9 @@ def make_membership_entry(*args, **kwargs):
 	except Exception as e:
 		log = frappe.log_error(e, "Error creating membership entry")
 		notify_failure(log)
-		return { status: 'Failed' }
+		return { 'status': 'Failed' }
 
-	return { status: 'Success' }
+	return { 'status': 'Success' }
 
 @frappe.whitelist(allow_guest=True)
 def trigger_razorpay_subscription(*args, **kwargs):
@@ -222,7 +222,7 @@ def trigger_razorpay_subscription(*args, **kwargs):
 		return make_membership_entry(*args, **kwargs)
 	except Exception as e:
 		log = frappe.log_error(e, "Webhook Failed")
-		return { status: 'Failed' }
+		return { 'status': 'Failed' }
 
 
 def notify_failure(log):
