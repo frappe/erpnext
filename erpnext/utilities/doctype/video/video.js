@@ -21,17 +21,10 @@ frappe.ui.form.on('Video', {
 		var youtube_id = frm.doc.url.match(expression)[1];
 
 		frappe.call({
-			method: "erpnext.utilities.doctype.video.video.update_video_stats",
+			method: "erpnext.utilities.doctype.video.video.get_video_stats",
 			args: {
+				docname: frm.doc.name,
 				youtube_id: youtube_id
-			},
-			callback: (r) => {
-				var result = r.message;
-				var fields = ['like_count', 'view_count', 'dislike_count', 'comment_count'];
-				fields.forEach((field) => {
-					frm.doc[field] = result[field];
-				})
-				frm.refresh_fields();
 			}
 		});
 	}
