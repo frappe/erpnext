@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
 from frappe.model.document import Document
 from six import string_types
 from pyyoutube import Api
@@ -14,6 +15,7 @@ class Video(Document):
 @frappe.whitelist()
 def get_video_stats(docname, youtube_id, update=True):
 	'''Returns/Sets video statistics
+
 	:param docname: Name of Video
 	:param youtube_id: Unique ID from URL
 	:param update: Updates db stats value if True, else returns statistics
@@ -43,5 +45,5 @@ def get_video_stats(docname, youtube_id, update=True):
 			view_count = %(view_count)s,
 			dislike_count = %(dislike_count)s,
 			comment_count = %(comment_count)s
-		WHERE name = {0}""".format(frappe.db.escape(docname)), stats)
+		WHERE name = {0}""".format(frappe.db.escape(docname)), stats) #nosec
 	frappe.db.commit()
