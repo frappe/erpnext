@@ -78,7 +78,7 @@ def create_member(user_details):
 	member.update({
 		"member_name": user_details.fullname,
 		"email_id": user_details.email,
-		"pan_number": user_details.pan,
+		"pan_number": user_details.pan or None,
 		"membership_type": user_details.plan_id,
 		"customer": create_customer(user_details)
 	})
