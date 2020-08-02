@@ -10,6 +10,7 @@ from datetime import datetime
 from frappe.model.document import Document
 from frappe.email import sendmail_to_system_managers
 from frappe.utils import add_days, add_years, nowdate, getdate, add_months, get_link_to_form
+from erpnext.non_profit.doctype.member.member import create_member
 from frappe import _
 import erpnext
 
@@ -142,6 +143,7 @@ def get_member_based_on_subscription(subscription_id, email):
 					'subscription_id': subscription_id,
 					'email_id': email
 				}, order_by="creation desc")
+
 	try:
 		return frappe.get_doc("Member", members[0]['name'])
 	except:
@@ -157,14 +159,15 @@ def verify_signature(data):
 
 	controller.verify_signature(data, signature, key)
 
-def make_membership_entry(*args, **kwargs):
+@frappe.whitelist(allow_guest=True)
+def trigger_razorpay_subscription(*args, **kwargs):
 	data = frappe.request.get_data(as_text=True)
 	try:
 		verify_signature(data)
 	except Exception as e:
-		signature = frappe.request.headers.get('X-Razorpay-Signature')
-		log = "{0} \n\n {1} \n\n {2} \n\n {3}".format(e, frappe.get_traceback(), signature, data)
-		frappe.log_error(e, "Webhook Verification Error")
+		log = frappe.log_error(e, "Webhook Verification Error")
+		notify_failure(log)
+		return { 'status': 'Failed', 'reason': e}
 
 	if isinstance(data, six.string_types):
 		data = json.loads(data)
@@ -177,34 +180,42 @@ def make_membership_entry(*args, **kwargs):
 	payment = frappe._dict(payment)
 
 	try:
-		data_json = json.dumps(data, indent=4, sort_keys=True)
+		if not data.event == "subscription.charged":
+			return
+
 		member = get_member_based_on_subscription(subscription.id, payment.email)
-	except Exception as e:
-		error_log = frappe.log_error(frappe.get_traceback() + '\n' + data_json , _("Membership Webhook Failed"))
-		notify_failure(error_log)
-		return { 'status': 'Failed' }
+		if not member:
+			member = create_member(frappe._dict({
+				'fullname': payment.email,
+				'email': payment.email,
+				'plan_id': get_plan_from_razorpay_id(subscription.plan_id)
+			}))
 
-	if not member:
-		return { 'status': 'Failed' }
-	try:
-		if data.event == "subscription.activated":
+			member.subscription_id = subscription.id
 			member.customer_id = payment.customer_id
-		elif data.event == "subscription.charged":
-			membership = frappe.new_doc("Membership")
-			membership.update({
-				"member": member.name,
-				"membership_status": "Current",
-				"membership_type": member.membership_type,
-				"currency": "INR",
-				"paid": 1,
-				"payment_id": payment.id,
-				"from_date": datetime.fromtimestamp(subscription.current_start),
-				"to_date": datetime.fromtimestamp(subscription.current_end),
-				"amount": payment.amount / 100 # Convert to rupees from paise
-			})
-			membership.insert(ignore_permissions=True)
+			if subscription.notes and type(subscription.notes) == dict:
+				notes = '\n'.join("{}: {}".format(k, v) for k, v in subscription.notes.items())
+				member.add_comment("Comment", notes)
+			elif subscription.notes and type(subscription.notes) == str:
+				member.add_comment("Comment", subscription.notes)
 
-		# Update these values anyway
+
+		# Update Membership
+		membership = frappe.new_doc("Membership")
+		membership.update({
+			"member": member.name,
+			"membership_status": "Current",
+			"membership_type": member.membership_type,
+			"currency": "INR",
+			"paid": 1,
+			"payment_id": payment.id,
+			"from_date": datetime.fromtimestamp(subscription.current_start),
+			"to_date": datetime.fromtimestamp(subscription.current_end),
+			"amount": payment.amount / 100 # Convert to rupees from paise
+		})
+		membership.insert(ignore_permissions=True)
+
+		# Update membership values
 		member.subscription_start = datetime.fromtimestamp(subscription.start_at)
 		member.subscription_end = datetime.fromtimestamp(subscription.end_at)
 		member.subscription_activated = 1
@@ -212,17 +223,9 @@ def make_membership_entry(*args, **kwargs):
 	except Exception as e:
 		log = frappe.log_error(e, "Error creating membership entry")
 		notify_failure(log)
-		return { 'status': 'Failed' }
+		return { 'status': 'Failed', 'reason': e}
 
 	return { 'status': 'Success' }
-
-@frappe.whitelist(allow_guest=True)
-def trigger_razorpay_subscription(*args, **kwargs):
-	try:
-		return make_membership_entry(*args, **kwargs)
-	except Exception as e:
-		log = frappe.log_error(e, "Webhook Failed")
-		return { 'status': 'Failed' }
 
 
 def notify_failure(log):
@@ -237,3 +240,11 @@ Administrator""".format(get_link_to_form("Error Log", log.name))
 		sendmail_to_system_managers("[Important] [ERPNext] Razorpay membership webhook failed , please check.", content)
 	except:
 		pass
+
+def get_plan_from_razorpay_id(plan_id):
+	plan = frappe.get_all("Membership Type", filters={'razorpay_plan_id': plan_id}, order_by="creation desc")
+
+	try:
+		return plan[0]['name']
+	except:
+		return None
