@@ -1,0 +1,772 @@
+frappe.provide('frappe.views');
+
+frappe.pages['project'].on_page_load = function(wrapper) {
+	let page = frappe.ui.make_app_page({
+		parent: wrapper,
+		title: 'Project',
+		single_column: true
+	});
+
+	frappe.model.with_doctype("Project", () => {
+		frappe.model.with_doctype("Task", () => {
+			new frappe.views.Projects({
+				doctype: "Project",
+				parent: wrapper,
+				page: page
+			})
+		});
+	});
+}
+
+frappe.views.Projects = class Projects extends frappe.views.BaseList {
+	constructor(opts) {
+		super(opts);
+		this.show();
+	}
+
+	setup_defaults() {
+		super.setup_defaults();
+
+		this.task_meta = frappe.get_meta("Task");
+
+		this.task_fields = [];
+		this.task_columns = []
+		this.get_settings("Project", "listview_settings");
+		this.get_settings("Task", "task_listview_settings");
+	}
+
+	setup_page() {
+		this.$page = $(this.parent);
+		this.page.page_form.removeClass('row').addClass('flex');
+		this.setup_page_head();
+	}
+
+	setup_page_head() {
+		this.set_title("Projects");
+		this.set_menu_items();
+		this.set_breadcrumbs();
+	}
+
+	set_title(title) {
+		this.page.set_title(title);
+	}
+
+	setup_view() {
+		this.columns = this.setup_columns("Project", this.meta, this.listview_settings);
+		this.task_columns = this.setup_columns("Task", this.task_meta, this.task_listview_settings);
+
+		this.render_header(this.columns);
+		this.render_skeleton();
+		this.setup_events();
+	}
+
+	setup_fields() {
+		super.setup_fields();
+
+		this.set_task_fields();
+		this.build_task_fields();
+	}
+
+	set_task_fields() {
+		let fields = [].concat(
+			frappe.model.std_fields_list,
+			this.get_fields_in_list_view("Task", this.task_meta),
+			[this.meta.title_field, this.meta.image_field],
+			(this.settings.add_fields || []),
+			this.meta.track_seen ? '_seen' : null,
+			this.sort_by,
+			'enabled',
+			'disabled',
+			'color'
+		);
+
+		fields.forEach(f => this._add_task_field(f));
+
+		this.task_fields.forEach(f => {
+			const df = frappe.meta.get_docfield(f[1], f[0]);
+			if (df && df.fieldtype === 'Currency' && df.options && !df.options.includes(':')) {
+				this._add_field(df.options);
+			}
+		});
+	}
+
+	build_task_fields() {
+		// fill in missing doctype
+		this.task_fields = this.task_fields.map(f => {
+			if (typeof f === 'string') {
+				f = [f, this.doctype];
+			}
+			return f;
+		});
+		// remove null or undefined values
+		this.task_fields = this.task_fields.filter(Boolean);
+		//de-duplicate
+		this.task_fields = this.task_fields.uniqBy(f => f[0] + f[1]);
+	}
+
+	_add_task_field(fieldname) {
+		if (!fieldname) return;
+		let doctype = "Task";
+
+		if (typeof fieldname === 'object') {
+			// df is passed
+			const df = fieldname;
+			fieldname = df.fieldname;
+			doctype = df.parent;
+		}
+
+		const is_valid_field = frappe.model.std_fields_list.includes(fieldname)
+			|| frappe.meta.has_field(doctype, fieldname)
+			|| fieldname === '_seen';
+
+		if (!is_valid_field) {
+			return;
+		}
+
+		this.task_fields.push([fieldname, doctype]);
+	}
+
+	setup_columns(doctype, meta, list_view_settings) {
+		// setup columns for list view
+		let columns = [];
+
+		const get_df = frappe.meta.get_docfield.bind(null, doctype);
+
+		// 1st column: title_field or name
+		if (meta.title_field) {
+			columns.push({
+				type: 'Subject',
+				df: get_df(meta.title_field)
+			});
+		} else {
+			columns.push({
+				type: 'Subject',
+				df: {
+					label: __('Name'),
+					fieldname: 'name'
+				}
+			});
+		}
+
+		// 2nd column: Status indicator
+		if (frappe.has_indicator(doctype)) {
+			// indicator
+			columns.push({
+				type: 'Status'
+			});
+		}
+
+		const fields_in_list_view = this.get_fields_in_list_view(doctype, meta);
+		// Add rest from in_list_view docfields
+		columns = columns.concat(
+			fields_in_list_view
+				.filter(df => {
+					if (frappe.has_indicator(doctype) && df.fieldname === 'status') {
+						return false;
+					}
+					if (!df.in_list_view) {
+						return false;
+					}
+					return df.fieldname !== meta.title_field;
+				})
+				.map(df => ({
+					type: 'Field',
+					df
+				}))
+		);
+
+		if (list_view_settings && list_view_settings.fields) {
+			columns = this.reorder_listview_fields(columns, list_view_settings.fields);
+		}
+
+		// limit max to 8 columns if no total_fields is set in List View Settings
+		// Screen with low density no of columns 4
+		// Screen with medium density no of columns 6
+		// Screen with high density no of columns 8
+		let total_fields = 6;
+
+		if (window.innerWidth <= 1366) {
+			total_fields = 4;
+		} else if (window.innerWidth >= 1920) {
+			total_fields = 8;
+		}
+
+		return columns.slice(0, total_fields);
+	}
+
+	reorder_listview_fields(columns, fields) {
+		let fields_order = [];
+		fields = JSON.parse(fields);
+
+		//title_field is fixed
+		fields_order.push(columns[0]);
+		columns.splice(0, 1);
+
+		for (let fld in fields) {
+			for (let col in columns) {
+				let field = fields[fld];
+				let column =columns[col];
+
+				if (column.type == "Status" && field.fieldname == "status_field") {
+					fields_order.push(column);
+					break;
+				} else if (column.type == "Field" && field.fieldname === column.df.fieldname) {
+					fields_order.push(column);
+					break;
+				}
+			}
+		}
+
+		return fields_order;
+	}
+
+	get_fields_in_list_view(doctype, meta) {
+		return meta.fields.filter(df => {
+			return frappe.model.is_value_type(df.fieldtype) && (
+				df.in_list_view
+				&& frappe.perm.has_perm(doctype, df.permlevel, 'read')
+			) || (
+				df.fieldtype === 'Currency'
+				&& df.options
+				&& !df.options.includes(':')
+			) || (
+				df.fieldname === 'status'
+			);
+		});
+	}
+
+	render_skeleton() {
+		const $row = this.get_list_row_html_skeleton('<div><input type="checkbox" /></div>');
+		this.$result.append($row);
+	}
+
+	set_fields() {
+		let fields = [].concat(
+			frappe.model.std_fields_list,
+			this.get_fields_in_list_view("Project", this.meta),
+			[this.meta.title_field, this.meta.image_field],
+			(this.settings.add_fields || []),
+			this.meta.track_seen ? '_seen' : null,
+			this.sort_by,
+			'enabled',
+			'disabled',
+			'color'
+		);
+
+		fields.forEach(f => this._add_field(f));
+
+		this.fields.forEach(f => {
+			const df = frappe.meta.get_docfield(f[1], f[0]);
+			if (df && df.fieldtype === 'Currency' && df.options && !df.options.includes(':')) {
+				this._add_field(df.options);
+			}
+		});
+	}
+
+	get_task_fields() {
+		// convert [fieldname, Doctype] => tabDoctype.fieldname
+		return this.task_fields.map(f => frappe.model.get_full_column_name(f[0], f[1]));
+	}
+
+	get_call_args(doctype, method, fields, filters) {
+		doctype = doctype || "Project";
+		method = method || "erpnext.projects.page.project.project.get_projects_data";
+		fields = fields || this.get_fields();
+		filters = filters || this.get_filters_for_args();
+
+		return {
+			method: method,
+			args: {
+				params: {
+					doctype: doctype,
+					fields: fields,
+					filters: filters,
+					with_comment_count: true
+				}
+			}
+		};
+	}
+
+	setup_side_bar() {}
+
+	toggle_result_area() {}
+
+	get_settings(doctype, attr) {
+		return frappe.call({
+			method: "frappe.desk.listview.get_list_settings",
+			args: {
+				doctype: doctype
+			},
+			async: false
+		}).then(doc => this[attr] = doc.message || {});
+	}
+
+	setup_events() {
+		this.get_tasks();
+		this.setup_open_doc();
+		this.setup_task_tree_dropdown();
+		this.setup_create_new_task();
+		this.get_projects();
+	}
+
+	setup_task_tree_dropdown() {
+		this.$result.on('click', '.btn-action', (e) => {
+			let el = e.currentTarget;
+			let $el = $(el);
+			let method = "erpnext.projects.page.project.project.get_tasks";
+			let fields = this.get_task_fields();
+
+			let target = unescape(el.getAttribute("data-name"));
+			let $row = this.$result.find(`.list-rows[data-name="${target}"]`);
+			if (!$row) return;
+
+			$el.find(".octicon").removeClass("octicon-chevron-right").addClass("octicon-chevron-down");
+
+			let list = $row.find(`.nested-list-row-container`);
+			let $list = $(list);
+			let height = parseInt($row[0].getAttribute("data-height")) + 1;
+			let $result = $(`<div class="nested-result">`);
+
+			$list.toggleClass("hide")
+
+			if ($list[0].classList.contains("hide")) {
+				$list.find(`.nested-result`).remove();
+				$el.find(".octicon").removeClass("octicon-chevron-down").addClass("octicon-chevron-right");
+				return
+			}
+
+			frappe.call(this.get_call_args("Task", method, fields, [["Task", "parent_task", "=", target]])).then(r => {
+				// render
+				let data = r.message || {};
+				data = !Array.isArray(data) ? frappe.utils.dict(data.keys, data.values) : data;
+
+				list.append($result);
+				data.map((doc, i) => {
+					doc._idx = i;
+					doc.doctype = 'Task';
+					$result.append(this.get_task_list_row_html(doc, height));
+				});
+			});
+		});
+	}
+
+	setup_open_doc() {
+		this.$result.on('click', '.btn-open', (e) => {
+			e.stopPropagation()
+			let el = e.currentTarget;
+			let doctype = unescape(el.getAttribute("data-doctype"));
+			let name = unescape(el.getAttribute("data-name"));
+			frappe.set_route("Form", doctype, name);
+		});
+	}
+
+	setup_create_new_task() {
+		this.$result.on('click', '.create-new', (e) => {
+			let parent = unescape(e.currentTarget.getAttribute("data-name"));
+			let task = frappe.model.get_new_doc("Task");
+			task["parent_task"] = parent;
+
+			frappe.ui.form.make_quick_entry("Task", null, null, task);
+		});
+	}
+
+	get_projects() {
+		this.$result.on('click', '.btn-prev', (e) => {
+			this.set_title("Projects");
+			this.remove_previous_button()
+			this.render_header(this.columns, true);
+			this.refresh();
+		})
+	}
+
+	get_tasks() {
+		this.$result.on('click', '.project-list-row-container', (e) => {
+			this.set_title("Tasks");
+
+			let method = "erpnext.projects.page.project.project.get_tasks";
+			let fields = this.get_task_fields();
+			let filters = [["Task", "project", "=", unescape(e.currentTarget.getAttribute("data-name"))]];
+
+			frappe.call(this.get_call_args("Task", method, fields, filters)).then(r => {
+				// render
+				this.render_header(this.task_columns, true);
+				this.prepare_data(r);
+				this.toggle_result_area();
+				this.render("Task", true);
+				this.render_previous_button();
+				this.after_render();
+			});
+
+		});
+	}
+
+	render(doctype, is_task=false) {
+		// clear rows
+		this.$result.find('.list-row-container').remove();
+		if (this.data.length > 0) {
+			// append rows
+			this.$result.append(
+				this.data.map((doc, i) => {
+					doc._idx = i;
+					doc.doctype = doctype || this.doctype;
+					return is_task ? this.get_task_list_row_html(doc, 0) : this.get_list_row_html(doc);
+				}).join('')
+			);
+		}
+	}
+
+	after_render() {
+		this.$no_result.html(`
+			<div class="no-result text-muted flex justify-center align-center">
+				${this.get_no_result_message()}
+			</div>
+		`);
+	}
+
+	get_list_row_html(doc) {
+		return this.get_list_row_html_skeleton(this.get_left_html(this.columns, doc), this.get_right_html(doc), doc);
+	}
+
+	get_task_list_row_html(doc, height) {
+		return this.get_task_list_row_html_skeleton(this.get_left_html(this.task_columns, doc, height), this.get_right_html(doc, true), doc, height);
+	}
+
+	get_list_row_html_skeleton(left = '', right = '', doc = {}) {
+		return `
+			<div class="list-row-container project-list-row-container" tabindex="1" data-doctype="Project" data-name="${escape(doc.name)}">
+				<div class="level list-row small">
+					<div class="level-left ellipsis">
+						${left}
+					</div>
+					<div class="level-right text-muted ellipsis">
+						${right}
+					</div>
+				</div>
+			</div>
+		`;
+	}
+
+	get_task_list_row_html_skeleton(left = '', right = '', doc = {}, height) {
+		return `
+		<div class="list-rows" data-doctype="Task" data-name="${escape(doc.name)}" data-height="${height}">
+			<div class="list-row-container" tabindex="1">
+				<div class="level list-row small">
+					<div class="level-left ellipsis">
+						${left}
+					</div>
+					<div class="level-right text-muted ellipsis">
+						${right}
+					</div>
+				</div>
+			</div>
+			<div class="nested-list-row-container hide">
+			</div>
+		</div>
+		`;
+
+		// style="padding-left: 25px;"
+	}
+
+	get_left_html(columns, doc, height) {
+		return columns.map(col => this.get_column_html(col, columns, doc, height)).join('');
+	}
+
+	get_right_html(doc, create_new=false) {
+		return this.get_meta_html(doc, create_new);
+	}
+
+	get_column_html(col, columns, doc, height) {
+		if (col.type === 'Status') {
+			return `
+				<div class="list-row-col hidden-xs ellipsis">
+					${this.get_indicator_html(doc)}
+				</div>
+			`;
+		}
+
+		const df = col.df || {};
+		const label = df.label;
+		const fieldname = df.fieldname;
+		const value = doc[fieldname] || '';
+
+		const format = () => {
+			if (df.fieldtype === 'Code') {
+				return value;
+			} else if (df.fieldtype === 'Percent') {
+				return `<div class="progress level" style="margin: 0px;">
+						<div class="progress-bar progress-bar-success" role="progressbar"
+							aria-valuenow="${value}"
+							aria-valuemin="0" aria-valuemax="100" style="width: ${Math.round(value)}%;">
+						</div>
+					</div>`;
+			} else {
+				return frappe.format(value, df, null, doc);
+			}
+		};
+
+		const field_html = () => {
+			let html;
+			let _value;
+			// listview_setting formatter
+			if (this.settings.formatters && this.settings.formatters[fieldname]) {
+				_value = this.settings.formatters[fieldname](value, df, doc);
+			} else {
+				let strip_html_required = df.fieldtype == 'Text Editor'
+					|| (df.fetch_from && ['Text', 'Small Text'].includes(df.fieldtype));
+				if (strip_html_required) {
+					_value = strip_html(value);
+				} else {
+					_value = typeof value === 'string' ? frappe.utils.escape_html(value) : value;
+				}
+			}
+
+			if (df.fieldtype === 'Image') {
+				html = df.options ?
+					`<img src="${doc[df.options]}" style="max-height: 30px; max-width: 100%;">` :
+					`<div class="missing-image small">
+						<span class="octicon octicon-circle-slash"></span>
+					</div>`;
+			} else if (df.fieldtype === 'Select') {
+				html = `<span class="filterable indicator ${frappe.utils.guess_colour(_value)} ellipsis"
+					data-filter="${fieldname},=,${value}">
+					${__(_value)}
+				</span>`;
+			} else if (df.fieldtype === 'Link') {
+				html = `<a class="filterable text-muted ellipsis"
+					data-filter="${fieldname},=,${value}">
+					${_value}
+				</a>`;
+			} else if (['Text Editor', 'Text', 'Small Text', 'HTML Editor'].includes(df.fieldtype)) {
+				html = `<span class="text-muted ellipsis">
+					${_value}
+				</span>`;
+			} else {
+				html = `<a class="filterable text-muted ellipsis"
+					data-filter="${fieldname},=,${value}">
+					${format()}
+				</a>`;
+			}
+
+			return `<span class="ellipsis"
+				title="${__(label)}: ${escape(_value)}">
+				${html}
+			</span>`;
+		};
+
+		const class_map = {
+			Subject: 'list-subject level',
+			Field: 'hidden-xs'
+		};
+		const css_class = [
+			'list-row-col ellipsis',
+			class_map[col.type],
+			frappe.model.is_numeric_field(df) ? 'text-right' : ''
+		].join(' ');
+
+		const html_map = {
+			Subject: this.get_subject_html(columns, doc, height),
+			Field: field_html()
+		};
+		const column_html = html_map[col.type];
+
+		return `
+			<div class="${css_class}">
+				${column_html}
+			</div>
+		`;
+	}
+
+	get_subject_html(columns, doc, height) {
+		let user = frappe.session.user;
+		let subject_field = columns[0].df;
+		let value = doc[subject_field.fieldname] || doc.name;
+		let subject = strip_html(value.toString());
+		let escaped_subject = frappe.utils.escape_html(subject);
+
+		const liked_by = JSON.parse(doc._liked_by || '[]');
+		let heart_class = liked_by.includes(user) ? 'liked-by' : 'text-extra-muted not-liked';
+
+		const seen = JSON.parse(doc._seen || '[]').includes(user) ? '' : 'bold';
+
+		let html = doc.doctype == 'Task' && doc.expandable ? `<a class="btn btn-action btn-xs"
+			data-doctype="Task" data-name="${escape(doc.name)}" style="width: 20px;">
+				<i class="octicon octicon-chevron-right" />
+			</a>` : ``;
+
+
+		let subject_html = `
+			<input class="level-item list-row-checkbox hidden-xs" type="checkbox" data-name="${escape(doc.name)}">
+			<span class="level-item" style="margin-bottom: 1px;">
+				<i class="octicon octicon-heart like-action ${heart_class}"
+					data-name="${doc.name}" data-doctype="${doc.doctype}"
+					data-liked-by="${encodeURI(doc._liked_by) || '[]'}">
+				</i>
+				<span class="likes-count">
+					${ liked_by.length > 99 ? __("99") + '+' : __(liked_by.length || '')}
+				</span>
+			</span>
+			<span class="level-item ${seen} ellipsis" title="${escaped_subject}" style="padding-left: ${20*height}px;">
+				<span class="level-item" style="margin-bottom: 1px;"">
+					${html}
+				</span>
+				<span class="ellipsis" title="${escaped_subject}" data-doctype="${doc.doctype}" data-name="${doc.name}">
+					${subject}
+				</span>
+			</span>
+		`;
+
+		return subject_html;
+	}
+
+	get_indicator_html(doc) {
+		const indicator = frappe.get_indicator(doc, this.doctype);
+		if (indicator) {
+			return `<span class="indicator ${indicator[1]} filterable"
+				data-filter='${indicator[2]}'>
+				${__(indicator[0])}
+			<span>`;
+		}
+		return '';
+	}
+
+	get_indicator_dot(doc) {
+		const indicator = frappe.get_indicator(doc, this.doctype);
+		if (!indicator) return '';
+		return `<span class='indicator ${indicator[1]}' title='${__(indicator[0])}'></span>`;
+	}
+
+	get_meta_html(doc, create_new) {
+		let html = '';
+
+		if (create_new) {
+			html += `
+				<div class="level-item hidden-xs">
+					<button class="btn create-new btn-default btn-xs"
+						data-name="${escape(doc.name)}">
+						${__("Add")}
+					</button>
+				</div>
+			`;
+		}
+
+		html += `
+			<div class="level-item hidden-xs" style="margin-left: 5px;">
+				<button class="btn btn-open btn-default btn-xs"
+					data-doctype="${escape(doc.doctype)}" data-name="${escape(doc.name)}">
+					${__("Open")}
+				</button>
+			</div>
+		`;
+
+		const modified = comment_when(doc.modified, true);
+
+		const last_assignee = JSON.parse(doc._assign || '[]').slice(-1)[0];
+		const assigned_to = last_assignee ?
+			`<span class="filterable"
+				data-filter="_assign,like,%${last_assignee}%">
+				${frappe.avatar(last_assignee)}
+			</span>` :
+			`<span class="avatar avatar-small avatar-empty"></span>`;
+
+		const comment_count =
+			`<span class="${!doc._comment_count ? 'text-extra-muted' : ''} comment-count">
+				<i class="octicon octicon-comment-discussion"></i>
+				${doc._comment_count > 99 ? "99+" : doc._comment_count}
+			</span>`;
+
+		html += `
+			<div class="level-item hidden-xs list-row-activity">
+				${modified}
+				${assigned_to}
+				${comment_count}
+			</div>
+			<div class="level-item visible-xs text-right">
+				${this.get_indicator_dot(doc)}
+			</div>
+		`;
+
+		return html;
+	}
+
+	render_header(columns, refresh_header) {
+		if (refresh_header) {
+			this.$result.find('.list-row-head').remove();
+		}
+
+		if (this.$result.find('.list-row-head').length === 0) {
+			// append header once
+			this.$result.prepend(this.get_header_html(columns));
+		}
+	}
+
+	render_previous_button() {
+		if (this.$result.find('.list-row-previous-head').length === 0) {
+			// append header once
+			this.$result.prepend(this.get_previous_header_html());
+		}
+	}
+
+	remove_previous_button() {
+		this.$result.find('.list-row-previous-head').remove();
+	}
+
+	get_header_html(columns) {
+		const subject_field = columns[0].df;
+
+		let subject_html = `
+			<div class="ellipsis" style="width:25px; margin-right:5px;" />
+			<span class="level-item">${__(subject_field.label)}</span>
+		`;
+
+		const $columns = columns.map(col => {
+			let classes = [
+				'list-row-col ellipsis',
+				col.type == 'Subject' ? 'list-subject level' : 'hidden-xs',
+				frappe.model.is_numeric_field(col.df) ? 'text-right' : ''
+			].join(' ');
+
+			return `
+				<div class="${classes}">
+					${col.type === 'Subject' ? subject_html : `
+					<span>${__(col.df && col.df.label || col.type)}</span>`}
+				</div>
+			`;
+		}).join('');
+
+		return this.get_header_html_skeleton($columns, '<span class="list-count"></span>');
+	}
+
+	get_previous_header_html() {
+		return `
+			<header class="level list-row list-row-head text-muted small">
+				<a class="btn btn-prev btn-xs">
+					<i class="octicon octicon-chevron-left" />
+					<span style="margin-left: 10px">Projects</span>
+				</a>
+			</header>
+		`;
+	}
+
+	get_header_html_skeleton(left = '', right = '') {
+		return `
+			<header class="level list-row list-row-head text-muted small">
+				<div class="level-left list-header-subject">
+					${left}
+				</div>
+				<div class="level-left checkbox-actions">
+					<div class="level list-subject">
+						<input class="level-item list-check-all hidden-xs" type="checkbox" title="${__("Select All")}">
+						<span class="level-item list-header-meta"></span>
+					</div>
+				</div>
+				<div class="level-right">
+					${right}
+				</div>
+			</header>
+		`;
+	}
+
+	setup_filter_area() {}
+
+	setup_sort_selector() {}
+}
