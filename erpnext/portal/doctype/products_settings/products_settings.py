@@ -11,9 +11,9 @@ from frappe.model.document import Document
 class ProductsSettings(Document):
 	def validate(self):
 		if self.home_page_is_products:
-			frappe.db.set_value("Website Settings", "home_page", "products")
+			frappe.db.set_value("Website Settings", None, "home_page", "products")
 		elif frappe.db.get_single_value("Website Settings", "home_page") == 'products':
-			frappe.db.set_value("Website Settings", "home_page", "home")
+			frappe.db.set_value("Website Settings", None, "home_page", "home")
 
 		self.validate_field_filters()
 		self.validate_attribute_filters()
