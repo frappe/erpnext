@@ -45,7 +45,6 @@
    "oldfieldtype": "Section Break"
   },
   {
-   "description": "If blank, parent Warehouse Account or company default will be considered",
    "fieldname": "warehouse_name",
    "fieldtype": "Data",
    "label": "Warehouse Name",
@@ -236,7 +235,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2020-07-16 15:43:50.653256",
+ "modified": "2020-08-03 11:19:35.943330",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",
