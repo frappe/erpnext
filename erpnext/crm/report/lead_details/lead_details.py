@@ -69,12 +69,6 @@ def get_columns():
 			"width": 120
 		},
 		{
-			"label": _("Notes"),
-			"fieldname": "notes",
-			"fieldtype": "Data",
-			"width": 120
-		},
-		{
 			"label": _("Owner"),
 			"fieldname": "owner",
 			"fieldtype": "Link",
@@ -129,7 +123,6 @@ def get_data(filters):
 			`tabLead`.email_id,
 			`tabLead`.mobile_no,
 			`tabLead`.phone,
-			`tabLead`.notes,
 			`tabLead`.owner,
 			`tabLead`.company,
 			concat_ws(', ',
@@ -153,12 +146,12 @@ def get_data(filters):
 			`tabLead`.creation asc """.format(conditions=get_conditions(filters)), filters, as_dict=1)
 
 def get_conditions(filters) :
-	conditions = []
+	conditions = ""
 
 	if filters.get("territory"):
-		conditions.append("territory=%(territory)s")
+		conditions+=" and territory=%(territory)s "
 
 	if filters.get("status"):
-		conditions.append("status=%(status)s")
+		conditions+=" and status=%(status)s "
 
-	return " and {}".format(" and ".join(conditions)) if conditions else ""
+	return conditions
