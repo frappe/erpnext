@@ -48,7 +48,7 @@ def get_product_info_for_website(item_code):
 
 def set_product_info_for_website(item):
 	"""set product price uom for website"""
-	product_info = get_product_info_for_website(item.item_code)
+	product_info = get_product_info_for_website(item.item_code).get("product_info")
 
 	if product_info:
 		item.update(product_info)
