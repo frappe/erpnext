@@ -25,7 +25,7 @@ class BulkStatementOfAccounts(Document):
 		global to_add
 		if self.enable_auto_email:
 			if self.frequency == 'Weekly':
-				self.to_date = add_days(self.start_date, to_add[self.frequency])
+				self.to_date = add_days(self.start_date, 7)
 			else:
 				self.to_date = add_months(self.start_date, to_add[self.frequency])
 			self.from_date = add_months(self.to_date, -1 * self.filter_duration)
@@ -197,10 +197,10 @@ def send_emails(document_name, from_scheduler=False):
 					recipients.append(clist.billing_email)
 					if doc.primary_mandatory:
 						recipients.append(clist.primary_email or '')
-			cc = None
+			cc = []
 			if doc.cc_to != '':
 				try:
-					cc=frappe.get_doc('User', doc.cc_to, 'email')
+					cc=[frappe.get_value('User', doc.cc_to, 'email')]
 				except:
 					pass
 
@@ -224,9 +224,9 @@ def send_emails(document_name, from_scheduler=False):
 				doc.to_date = add_days(today_date, 7)
 			else:
 				doc.to_date = add_months(today_date, to_add[doc.frequency])
-			doc.from_date = add_months(doc.to_date, -1 * filter_duration)
+			doc.from_date = add_months(doc.to_date, -1 * doc.filter_duration)
 
-			doc.add_comment('Emails sent on:' + frappe.utils.format_datetime(frappe.utils.now()))
+			doc.add_comment('Comment', 'Emails sent on: ' + frappe.utils.format_datetime(frappe.utils.now()))
 			doc.save()
 			frappe.db.commit()
 		return True
@@ -235,7 +235,8 @@ def send_emails(document_name, from_scheduler=False):
 
 @frappe.whitelist()
 def auto_email_soa():
-	selected = frappe.get_list('Bulk Statement Of Accounts', filter={'to_date': format_date(today()), 'enable_autoemail': 1})
-
+	selected = frappe.get_list('Bulk Statement Of Accounts', filters={'to_date': format_date(today()), 'enable_auto_email': 1})
+	print(selected)
 	for entry in selected:
-		send_emails(entry.name, from_scheduler=True)
+		print('here')
+		print(send_emails(entry.name, from_scheduler=True))
