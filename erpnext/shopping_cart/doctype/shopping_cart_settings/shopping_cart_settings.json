@@ -95,15 +95,16 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Company",
+   "mandatory_depends_on": "eval: doc.enabled === 1",
    "options": "Company",
-   "remember_last_selected_value": 1,
-   "reqd": 1
+   "remember_last_selected_value": 1
   },
   {
    "description": "Prices will not be shown if Price List is not set",
    "fieldname": "price_list",
    "fieldtype": "Link",
    "label": "Price List",
+   "mandatory_depends_on": "eval: doc.enabled === 1",
    "options": "Price List"
   },
   {
@@ -115,14 +116,14 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Default Customer Group",
-   "options": "Customer Group",
-   "reqd": 1
+   "mandatory_depends_on": "eval: doc.enabled === 1",
+   "options": "Customer Group"
   },
   {
    "fieldname": "quotation_series",
    "fieldtype": "Select",
    "label": "Quotation Series",
-   "reqd": 1
+   "mandatory_depends_on": "eval: doc.enabled === 1"
   },
   {
    "collapsible": 1,
@@ -171,7 +172,7 @@
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-07-17 17:53:22.667228",
+ "modified": "2020-08-03 19:32:27.958221",
  "modified_by": "Administrator",
  "module": "Shopping Cart",
  "name": "Shopping Cart Settings",
