@@ -39,12 +39,12 @@
    "fieldname": "linked_item",
    "fieldtype": "Link",
    "label": "Linked Item",
-   "options": "Item"
+   "options": "Item",
+   "unique": 1
   }
  ],
- "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-07-28 10:57:50.821375",
+ "modified": "2020-08-05 15:21:43.595745",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership Type",
