@@ -2,6 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Process Statement Of Accounts', {
+	view_properties: function(frm) {
+		frappe.route_options = {doc_type: 'Customer'};
+		frappe.set_route("Form", "Customize Form");
+	},
 	refresh: function(frm){
 		if(!frm.doc.__islocal) {
 			frm.add_custom_button('Send Emails',function(){
@@ -43,6 +47,13 @@ frappe.ui.form.on('Process Statement Of Accounts', {
 		}
 	},
 	onload: function(frm) {
+		frm.set_query('currency', function(){
+			return {
+				filters: {
+					'enabled': 1
+				}
+			}
+		});
 		frm.fields_dict['customers'].grid.get_field('customer').get_query = function(doc, cdt, cdn) {
 			return {
 				filters: [

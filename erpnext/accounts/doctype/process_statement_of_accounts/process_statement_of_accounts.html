@@ -1,21 +1,5 @@
 <h2 class="text-center" style="page-break-before:always">{{ filters.party[0] }}</h2>
-<h2 class="text-center">{{ _("Statement of Accounts") }}</h2>
-
-<h4 class="text-center">
-	{% if (filters.party_name) %}
-		{{ filters.party_name }}
-	{% elif (filters.party and filters.party.length) %}
-		{{ filters.party }}
-	{% elif (filters.account) %}
-		{{ filters.account }}
-	{% endif %}
-</h4>
-
-<h6 class="text-center">
-	{% if (filters.tax_id) %}
-	{{ _("Tax Id: ") }}	{{ filters.tax_id }}
-	{% endif %}
-</h6>
+<h3 class="text-center">{{ _("Statement of Accounts") }}</h3>
 
 <h5 class="text-center">
     {{ frappe.format(filters.from_date, 'Date')}}
@@ -75,11 +59,11 @@
 		{% endfor %}
 		</tbody>
 </table>
+<br><br>
 {% if aging %}
-<h3 class="text-center">{{ _("Ageing Report Based On ") }} {{ aging.ageing_based_on }}</h2>
+<h3 class="text-center">{{ _("Ageing Report Based On ") }} {{ aging.ageing_based_on }}</h3>
 <h5 class="text-center">
-	{{ _("Up to " ) }} {{ aging.ageing_based_on }}
-	{{ frappe.format(filters.to_date, 'Date')}}
+	{{ _("Up to " ) }}  {{ frappe.format(filters.to_date, 'Date')}}
 </h5>
 <br>
 

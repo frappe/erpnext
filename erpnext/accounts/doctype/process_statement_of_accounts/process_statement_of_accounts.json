@@ -18,6 +18,15 @@
   "finance_book",
   "currency",
   "project",
+  "section_break_3",
+  "customer_collection",
+  "column_break_6",
+  "primary_mandatory",
+  "section_break_27",
+  "collection_name",
+  "fetch_customers",
+  "column_break_17",
+  "customers",
   "preferences",
   "include_ageing",
   "ageing_based_on",
@@ -30,17 +39,13 @@
   "filter_duration",
   "column_break_21",
   "start_date",
-  "section_break_3",
+  "section_break_33",
+  "subject",
+  "column_break_28",
   "cc_to",
-  "customer_collection",
-  "column_break_6",
-  "primary_mandatory",
-  "section_break_27",
-  "collection_name",
-  "column_break_29",
-  "fetch_customers",
-  "column_break_17",
-  "customers"
+  "section_break_30",
+  "body",
+  "help_text"
  ],
  "fields": [
   {
@@ -121,7 +126,7 @@
   {
    "fieldname": "section_break_1",
    "fieldtype": "Section Break",
-   "label": "Auto Email Settings"
+   "label": "Email Settings"
   },
   {
    "fieldname": "account",
@@ -161,9 +166,9 @@
   },
   {
    "fieldname": "currency",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Currency",
-   "options": "\nAED\nAUD\nCHF\nCNY\nEUR\nGBP\nINR\nJPY\nUSD"
+   "options": "Currency"
   },
   {
    "default": "0",
@@ -217,10 +222,6 @@
    "hide_border": 1
   },
   {
-   "fieldname": "column_break_29",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "1",
    "fieldname": "primary_mandatory",
    "fieldtype": "Check",
@@ -229,7 +230,7 @@
   {
    "fieldname": "cc_to",
    "fieldtype": "Link",
-   "label": "CC Emails To",
+   "label": "CC To",
    "options": "User"
   },
   {
@@ -244,10 +245,40 @@
    "label": "Customers",
    "options": "Process Statement Of Accounts Customer",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_30",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "section_break_33",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "help_text",
+   "fieldtype": "HTML",
+   "label": "Help Text",
+   "options": "<br>\n<h4>Note</h4>\n<ul>\n<li>\nYou can use <a href=\"https://jinja.palletsprojects.com/en/2.11.x/\" target=\"_blank\">Jinja tags</a> in <b>Subject</b> and <b>Body</b> fields for dynamic values.\n</li><li>\n    All fields in this doctype are available under the <b>doc</b> object and all fields for the customer to whom the mail will go to is available under the  <b>customer</b> object.\n</li></ul>\n<h4> Examples</h4>\n<!-- {% raw %} -->\n<ul>\n    <li><b>Subject</b>:<br><br><pre><code>Statement Of Accounts for {{ customer.name }}</code></pre><br></li>\n    <li><b>Body</b>: <br><br>\n<pre><code>Hello {{ customer.name }},<br>PFA your Statement Of Accounts from {{ doc.from_date }} to {{ doc.to_date }}.</code> </pre></li>\n</ul>\n<!-- {% endraw %} -->"
+  },
+  {
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Subject"
+  },
+  {
+   "fieldname": "body",
+   "fieldtype": "Text Editor",
+   "label": "Body"
   }
  ],
  "links": [],
- "modified": "2020-08-03 18:18:12.729816",
+ "modified": "2020-08-03 23:09:39.889209",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",

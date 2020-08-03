@@ -12,6 +12,8 @@ from frappe.core.doctype.communication.email import make
 from frappe.utils.print_format import report_to_pdf
 from frappe.utils.pdf import get_pdf
 from frappe.utils import today, add_days, add_months, getdate, format_date
+from frappe.utils.jinja import validate_template
+
 from datetime import timedelta
 from frappe.www.printview import get_print_style
 
@@ -19,6 +21,14 @@ to_add = { 'Monthly': 1, 'Quarterly': 3 }
 
 class ProcessStatementOfAccounts(Document):
 	def validate(self):
+		if not self.subject:
+			self.subject = 'Statement Of Accounts for {{ customer.name }}'
+		if not self.body:
+			self.body = 'Hello {{ customer.name }},<br>PFA your Statement Of Accounts from {{ doc.from_date }} to {{ doc.to_date }}.'
+
+		validate_template(self.subject)
+		validate_template(self.body)
+
 		if not self.customers:
 			frappe.throw(frappe._('Customers not selected.'))
 
@@ -171,6 +181,22 @@ def get_customers_based_on_sales_person(sales_person):
 		sales_person_records.setdefault(d.parenttype, set()).add(d.parent)
 	return sales_person_records
 
+def get_recepients(customer, doc):
+	recipients = []
+	for clist in doc.customers:
+		if clist.customer == customer:
+			recipients.append(clist.billing_email)
+			if doc.primary_mandatory and clist.primary_email:
+				recipients.append(clist.primary_email)
+	return recipients
+
+def get_context(customer, doc):
+	del doc.customers
+	return {
+		'doc': doc,
+		'customer': frappe.get_doc('Customer', customer)
+	}
+
 @frappe.whitelist()
 def download_statements(document_name):
 	doc = frappe.get_doc('Process Statement Of Accounts', document_name)
@@ -191,12 +217,12 @@ def send_emails(document_name, from_scheduler=False):
 				'fname': customer + '.pdf',
 				'fcontent': report_pdf
 			}
-			recipients = []
-			for clist in doc.customers:
-				if clist.customer == customer:
-					recipients.append(clist.billing_email)
-					if doc.primary_mandatory:
-						recipients.append(clist.primary_email or '')
+
+			recipients = get_recepients(customer, doc)
+			context = get_context(customer, doc)
+			subject = frappe.render_template(doc.subject, context)
+			message = frappe.render_template(doc.body, context)
+
 			cc = []
 			if doc.cc_to != '':
 				try:
@@ -211,8 +237,8 @@ def send_emails(document_name, from_scheduler=False):
 				recipients=recipients,
 				sender=frappe.session.user,
 				cc=cc,
-				subject='Statement Of Account for '+customer,
-				message='Hi '+customer,
+				subject=subject,
+				message=message,
 				reference_doctype='Process Statement Of Accounts',
 				reference_name=document_name,
 				attachments=[attachment]
@@ -236,7 +262,6 @@ def send_emails(document_name, from_scheduler=False):
 @frappe.whitelist()
 def auto_email_soa():
 	selected = frappe.get_list('Process Statement Of Accounts', filters={'to_date': format_date(today()), 'enable_auto_email': 1})
-	print(selected)
 	for entry in selected:
-		print('here')
-		print(send_emails(entry.name, from_scheduler=True))
+		send_emails(entry.name, from_scheduler=True)
+	return True
