@@ -85,6 +85,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "If blank, parent Warehouse Account or company default will be considered in transactions",
    "fieldname": "account",
    "fieldtype": "Link",
    "label": "Account",
@@ -235,7 +236,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2020-08-03 11:19:35.943330",
+ "modified": "2020-08-03 18:41:52.442502",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",
