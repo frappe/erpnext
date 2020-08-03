@@ -50,6 +50,12 @@ def get_columns():
 			"fieldtype": "Link",
 			"options": "User",
 			"width": 120
+		},
+		{
+			"label": _("Lost Reasons"),
+			"fieldname": "lost_reason",
+			"fieldtype": "Data",
+			"width": 220
 		}
 	]
 	return columns
@@ -62,14 +68,20 @@ def get_data(filters):
 			`tabOpportunity`.party_name,
 			`tabOpportunity`.customer_name,
 			`tabOpportunity`.opportunity_type,
-			`tabOpportunity`.contact_by
+			`tabOpportunity`.contact_by,
+			GROUP_CONCAT(`tabLost Reason Detail`.lost_reason  separator ', ') lost_reason
 		FROM
 			`tabOpportunity`
+			LEFT JOIN `tabLost Reason Detail` 
+			ON `tabLost Reason Detail`.parenttype = 'Opportunity' and `tabLost Reason Detail`.parent = `tabOpportunity`.name
 		WHERE
-			status = 'Lost' and company = %(company)s
+			`tabOpportunity`.status = 'Lost' and `tabOpportunity`.company = %(company)s
 			{conditions}
+		GROUP BY 
+			`tabOpportunity`.name
 		ORDER BY 
-			creation asc """.format(conditions=get_conditions(filters)), filters, as_dict=1)
+			`tabOpportunity`.creation asc  """.format(conditions=get_conditions(filters)), filters, as_dict=1)
+		
 
 def get_conditions(filters) :
 	conditions = []
