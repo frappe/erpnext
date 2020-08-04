@@ -24,6 +24,8 @@
   "is_internal_supplier",
   "represents_company",
   "is_transporter",
+  "allow_purchase_invoice_creation_without_purchase_order",
+  "allow_purchase_invoice_creation_without_purchase_receipt",
   "warn_rfqs",
   "warn_pos",
   "prevent_rfqs",
@@ -380,12 +382,24 @@
   {
    "fieldname": "column_break_47",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_purchase_invoice_creation_without_purchase_order",
+   "fieldtype": "Check",
+   "label": "Allow Purchase Invoice Creation Without Purchase Order"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_purchase_invoice_creation_without_purchase_receipt",
+   "fieldtype": "Check",
+   "label": "Allow Purchase Invoice Creation Without Purchase Receipt"
   }
  ],
  "icon": "fa fa-user",
  "idx": 370,
  "image_field": "image",
- "modified": "2020-03-08 00:21:57.985819",
+ "modified": "2020-08-04 16:11:02.060585",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
