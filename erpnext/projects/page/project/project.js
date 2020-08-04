@@ -331,7 +331,6 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 			if ($list[0].classList.contains("hide")) {
 				$list.find(`.nested-result`).remove();
 				$el.find(".octicon").removeClass("octicon-chevron-down").addClass("octicon-chevron-right");
-				return
 			}
 
 			frappe.call(this.get_call_args("Task", method, fields, [["Task", "parent_task", "=", target]])).then(r => {
@@ -654,12 +653,12 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 	get_meta_html(doc, create_new) {
 		let html = '';
 
-		if (create_new) {
+		if (create_new && doc.is_group) {
 			html += `
 				<div class="level-item hidden-xs">
 					<button class="btn create-new btn-default btn-xs"
 						data-name="${escape(doc.name)}">
-						${__("Add")}
+						${__("Add Child")}
 					</button>
 				</div>
 			`;
