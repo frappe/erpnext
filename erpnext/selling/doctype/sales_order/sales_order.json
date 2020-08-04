@@ -928,6 +928,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "In Words (Company Currency)",
+   "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -986,6 +987,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "In Words",
+   "length": 240,
    "oldfieldname": "in_words_export",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -1458,7 +1460,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-30 11:56:42.301317",
+ "modified": "2020-07-31 14:13:17.962015",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
@@ -1532,7 +1534,7 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "timeline_field": "customer",
- "title_field": "title",
+ "title_field": "customer",
  "track_changes": 1,
  "track_seen": 1
 }

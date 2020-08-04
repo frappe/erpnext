@@ -6,27 +6,19 @@ frappe.ui.form.on('POS Settings', {
 		frm.trigger("get_invoice_fields");
 	},
 
-	use_pos_in_offline_mode: function(frm) {
-		frm.trigger("get_invoice_fields");
-	},
-
 	get_invoice_fields: function(frm) {
-		if (!frm.doc.use_pos_in_offline_mode) {
-			frappe.model.with_doctype("Sales Invoice", () => {
-				var fields = $.map(frappe.get_doc("DocType", "Sales Invoice").fields, function(d) {
-					if (frappe.model.no_value_type.indexOf(d.fieldtype) === -1 ||
-						d.fieldtype === 'Table') {
-						return { label: d.label + ' (' + d.fieldtype + ')', value: d.fieldname };
-					} else {
-						return null;
-					}
-				});
-
-				frappe.meta.get_docfield("POS Field", "fieldname", frm.doc.name).options = [""].concat(fields);
+		frappe.model.with_doctype("Sales Invoice", () => {
+			var fields = $.map(frappe.get_doc("DocType", "Sales Invoice").fields, function(d) {
+				if (frappe.model.no_value_type.indexOf(d.fieldtype) === -1 ||
+					d.fieldtype === 'Table') {
+					return { label: d.label + ' (' + d.fieldtype + ')', value: d.fieldname };
+				} else {
+					return null;
+				}
 			});
-		} else {
-			frappe.meta.get_docfield("POS Field", "fieldname", frm.doc.name).options = [""];
-		}
+
+			frappe.meta.get_docfield("POS Field", "fieldname", frm.doc.name).options = [""].concat(fields);
+		});
 	}
 });
 
