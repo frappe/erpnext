@@ -323,7 +323,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 
 			let list = $row.find(`.nested-list-row-container`);
 			let $list = $(list);
-			let height = parseInt($row[0].getAttribute("data-height")) + 1;
+			let level = parseInt($row[0].getAttribute("data-level")) + 1;
 			let $result = $(`<div class="nested-result">`);
 
 			$list.toggleClass("hide")
@@ -337,14 +337,15 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 			frappe.call(this.get_call_args("Task", method, fields, [["Task", "parent_task", "=", target]])).then(r => {
 				// render
 				this.set_title(target);
-				let data = r.message || {};
-				data = !Array.isArray(data) ? frappe.utils.dict(data.keys, data.values) : data;
+				// let data = r.message || {};
+				// data = !Array.isArray(data) ? frappe.utils.dict(data.keys, data.values) : data;
+				this.prepare_data(r);
 
 				list.append($result);
-				data.map((doc, i) => {
+				this.data.map((doc, i) => {
 					doc._idx = i;
 					doc.doctype = 'Task';
-					$result.append(this.get_task_list_row_html(doc, height));
+					$result.append(this.get_task_list_row_html(doc, level));
 				});
 			});
 		});
@@ -371,13 +372,6 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 	}
 
 	get_projects() {
-		this.$result.on('click', '.btn-prev', (e) => {
-			this.set_title("Projects");
-			this.remove_previous_button()
-			this.render_header(this.columns, true);
-			this.refresh();
-		});
-
 		this.$frappe_list.on('click', '.btn-prev', (e) => {
 			this.set_title("Projects");
 			this.remove_previous_button()
@@ -449,8 +443,8 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		return this.get_list_row_html_skeleton(this.get_left_html(this.columns, doc), this.get_right_html(doc), doc);
 	}
 
-	get_task_list_row_html(doc, height) {
-		return this.get_task_list_row_html_skeleton(this.get_left_html(this.task_columns, doc, height), this.get_right_html(doc, true), doc, height);
+	get_task_list_row_html(doc, level) {
+		return this.get_task_list_row_html_skeleton(this.get_left_html(this.task_columns, doc, level), this.get_right_html(doc, true), doc, level);
 	}
 
 	get_list_row_html_skeleton(left = '', right = '', doc = {}) {
@@ -468,9 +462,9 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		`;
 	}
 
-	get_task_list_row_html_skeleton(left = '', right = '', doc = {}, height) {
+	get_task_list_row_html_skeleton(left = '', right = '', doc = {}, level) {
 		return `
-		<div class="list-rows" data-doctype="Task" data-name="${escape(doc.name)}" data-height="${height}">
+		<div class="list-rows" data-doctype="Task" data-name="${escape(doc.name)}" data-level="${level}">
 			<div class="list-row-container" tabindex="1">
 				<div class="level list-row small">
 					<div class="level-left ellipsis">
@@ -489,15 +483,15 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		// style="padding-left: 25px;"
 	}
 
-	get_left_html(columns, doc, height) {
-		return columns.map(col => this.get_column_html(col, columns, doc, height)).join('');
+	get_left_html(columns, doc, level) {
+		return columns.map(col => this.get_column_html(col, columns, doc, level)).join('');
 	}
 
 	get_right_html(doc, create_new=false) {
 		return this.get_meta_html(doc, create_new);
 	}
 
-	get_column_html(col, columns, doc, height) {
+	get_column_html(col, columns, doc, level) {
 		if (col.type === 'Status') {
 			return `
 				<div class="list-row-col hidden-xs ellipsis">
@@ -544,7 +538,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 
 			if (df.fieldtype === 'Image') {
 				html = df.options ?
-					`<img src="${doc[df.options]}" style="max-height: 30px; max-width: 100%;">` :
+					`<img src="${doc[df.options]}" style="max-level: 30px; max-width: 100%;">` :
 					`<div class="missing-image small">
 						<span class="octicon octicon-circle-slash"></span>
 					</div>`;
@@ -586,7 +580,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		].join(' ');
 
 		const html_map = {
-			Subject: this.get_subject_html(columns, doc, height),
+			Subject: this.get_subject_html(columns, doc, level),
 			Field: field_html()
 		};
 		const column_html = html_map[col.type];
@@ -598,7 +592,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		`;
 	}
 
-	get_subject_html(columns, doc, height) {
+	get_subject_html(columns, doc, level) {
 		let user = frappe.session.user;
 		let subject_field = columns[0].df;
 		let value = doc[subject_field.fieldname] || doc.name;
@@ -627,7 +621,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 					${ liked_by.length > 99 ? __("99") + '+' : __(liked_by.length || '')}
 				</span>
 			</span>
-			<span class="level-item ${seen} ellipsis" title="${escaped_subject}" style="padding-left: ${20*height}px;">
+			<span class="level-item ${seen} ellipsis" title="${escaped_subject}" style="padding-left: ${20*level}px;">
 				<span class="level-item" style="margin-bottom: 1px;"">
 					${html}
 				</span>
@@ -763,7 +757,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 			<header class="level list-row list-row-head text-muted small">
 				<a class="btn btn-prev btn-xs">
 					<i class="octicon octicon-chevron-left" />
-					<span style="margin-left: 10px">Projects</span>
+					<span style="margin-left: 5px">Projects</span>
 				</a>
 			</header>
 		`;
@@ -791,6 +785,4 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 	setup_filter_area() {}
 
 	setup_sort_selector() {}
-
-	// setup_paging_area() {}
 }
