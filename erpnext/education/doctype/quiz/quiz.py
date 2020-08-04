@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
 from frappe import _
 from frappe.model.document import Document
 
@@ -59,3 +60,12 @@ def compare_list_elementwise(*args):
 	except TypeError:
 		frappe.throw(_("Compare List function takes on list arguments"))
 
+@frappe.whitelist()
+def get_topics_without_quiz(quiz):
+	data = []
+	for entry in frappe.db.get_all('Topic'):
+		topic = frappe.get_doc('Topic', entry.name)
+		topic_contents = [tc.content for tc in topic.topic_content]
+		if not topic_contents or quiz not in topic_contents:
+			data.append(topic.name)
+	return data

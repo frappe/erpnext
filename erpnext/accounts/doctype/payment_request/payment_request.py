@@ -140,9 +140,6 @@ class PaymentRequest(Document):
 		})
 
 	def set_as_paid(self):
-		if frappe.session.user == "Guest":
-			frappe.set_user("Administrator")
-
 		payment_entry = self.create_payment_entry()
 		self.make_invoice()
 
@@ -254,7 +251,7 @@ class PaymentRequest(Document):
 
 		if status in ["Authorized", "Completed"]:
 			redirect_to = None
-			self.run_method("set_as_paid")
+			self.set_as_paid()
 
 			# if shopping cart enabled and in session
 			if (shopping_cart_settings.enabled and hasattr(frappe.local, "session")
