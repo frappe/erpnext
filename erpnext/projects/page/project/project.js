@@ -281,15 +281,14 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 					doctype: doctype,
 					fields: fields,
 					filters: filters,
-					with_comment_count: true
+					with_comment_count: true,
+					page_length: this.page_length,
 				}
 			}
 		};
 	}
 
 	setup_side_bar() {}
-
-	toggle_result_area() {}
 
 	get_settings(doctype, attr) {
 		return frappe.call({
@@ -337,6 +336,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 
 			frappe.call(this.get_call_args("Task", method, fields, [["Task", "parent_task", "=", target]])).then(r => {
 				// render
+				this.set_title(target);
 				let data = r.message || {};
 				data = !Array.isArray(data) ? frappe.utils.dict(data.keys, data.values) : data;
 
@@ -372,6 +372,13 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 
 	get_projects() {
 		this.$result.on('click', '.btn-prev', (e) => {
+			this.set_title("Projects");
+			this.remove_previous_button()
+			this.render_header(this.columns, true);
+			this.refresh();
+		});
+
+		this.$frappe_list.on('click', '.btn-prev', (e) => {
 			this.set_title("Projects");
 			this.remove_previous_button()
 			this.render_header(this.columns, true);
@@ -415,12 +422,27 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		}
 	}
 
-	after_render() {
-		this.$no_result.html(`
+	setup_no_result_area() {
+		this.$no_result = $(`
 			<div class="no-result text-muted flex justify-center align-center">
 				${this.get_no_result_message()}
 			</div>
-		`);
+		`).hide();
+		this.$no_result_prev = $(this.get_previous_header_html()).hide();
+
+		this.$frappe_list.append(this.$no_result_prev);
+		this.$frappe_list.append(this.$no_result);
+	}
+
+	toggle_result_area() {
+		this.$result.toggle(this.data.length > 0);
+		this.$paging_area.toggle(this.data.length > 0);
+		this.$no_result.toggle(this.data.length == 0);
+		this.$no_result_prev.toggle(this.data.length == 0);
+
+		const show_more = (this.start + this.page_length) <= this.data.length;
+		this.$paging_area.find('.btn-more')
+			.toggle(show_more);
 	}
 
 	get_list_row_html(doc) {
@@ -769,4 +791,6 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 	setup_filter_area() {}
 
 	setup_sort_selector() {}
+
+	// setup_paging_area() {}
 }
