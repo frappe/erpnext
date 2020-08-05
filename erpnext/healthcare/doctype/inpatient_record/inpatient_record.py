@@ -217,6 +217,7 @@ def patient_leave_service_unit(inpatient_record, check_out, leave_from):
 	inpatient_record.save(ignore_permissions = True)
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_leave_from(doctype, txt, searchfield, start, page_len, filters):
 	docname = filters['docname']
 
