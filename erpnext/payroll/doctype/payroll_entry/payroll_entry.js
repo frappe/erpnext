@@ -30,6 +30,7 @@ frappe.ui.form.on('Payroll Entry', {
 				).toggleClass('btn-primary', !(frm.doc.employees || []).length);
 			}
 			if ((frm.doc.employees || []).length) {
+				frm.page.clear_primary_action();
 				frm.page.set_primary_action(__('Create Salary Slips'), () => {
 					frm.save('Submit').then(()=>{
 						frm.page.clear_primary_action();
@@ -49,13 +50,14 @@ frappe.ui.form.on('Payroll Entry', {
 		return frappe.call({
 			doc: frm.doc,
 			method: 'fill_employee_details',
-			callback: function(r) {
-				if (r.docs[0].employees){
-					frm.save();
-					frm.refresh();
-					if(r.docs[0].validate_attendance){
-						render_employee_attendance(frm, r.message);
-					}
+		}).then(r => {
+			if (r.docs && r.docs[0].employees){
+				frm.employees = r.docs[0].employees;
+				frm.dirty();
+				frm.save();
+				frm.refresh();
+				if(r.docs[0].validate_attendance){
+					render_employee_attendance(frm, r.message);
 				}
 			}
 		})
@@ -211,7 +213,7 @@ frappe.ui.form.on('Payroll Entry', {
 				},
 				doc: frm.doc,
 				freeze: true,
-				freeze_message: 'Validating Employee Attendance...'
+				freeze_message: __('Validating Employee Attendance...')
 			});
 		}else{
 			frm.fields_dict.attendance_detail_html.html("");
@@ -235,7 +237,7 @@ const submit_salary_slip = function (frm) {
 				callback: function() {frm.events.refresh(frm);},
 				doc: frm.doc,
 				freeze: true,
-				freeze_message: 'Submitting Salary Slips and creating Journal Entry...'
+				freeze_message: __('Submitting Salary Slips and creating Journal Entry...')
 			});
 		},
 		function() {

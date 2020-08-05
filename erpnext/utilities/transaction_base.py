@@ -121,7 +121,6 @@ class TransactionBase(StatusUpdater):
 
 	def validate_rate_with_reference_doc(self, ref_details):
 		buying_doctypes = ["Purchase Order", "Purchase Invoice", "Purchase Receipt"]
-		selling_doctypes = ["Sales Invoice", "Delivery Note"]
 
 		if self.doctype in buying_doctypes:
 			to_disable = "Maintain same rate throughout Purchase cycle"
