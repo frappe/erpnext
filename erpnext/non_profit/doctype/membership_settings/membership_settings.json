@@ -19,8 +19,7 @@
   "send_invoice",
   "membership_print_format",
   "inv_print_format",
-  "section_break_15",
-  "message"
+  "email_template"
  ],
  "fields": [
   {
@@ -96,7 +95,7 @@
    "default": "0",
    "fieldname": "send_email",
    "fieldtype": "Check",
-   "label": "Send Acknowledge Email"
+   "label": "Send Membership Acknowledgement"
   },
   {
    "depends_on": "eval: doc.send_invoice",
@@ -111,26 +110,20 @@
    "fieldname": "membership_print_format",
    "fieldtype": "Link",
    "label": "Membership Print Format",
-   "mandatory_depends_on": "eval:doc.send_email",
    "options": "Print Format"
   },
   {
    "depends_on": "eval:doc.send_email",
-   "fieldname": "section_break_15",
-   "fieldtype": "Section Break",
-   "hide_border": 1
-  },
-  {
-   "depends_on": "eval:doc.send_email",
-   "fieldname": "message",
-   "fieldtype": "Text Editor",
-   "label": "Message"
+   "fieldname": "email_template",
+   "fieldtype": "Link",
+   "label": "Email Template",
+   "mandatory_depends_on": "eval:doc.send_email",
+   "options": "Email Template"
   }
  ],
- "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-07-31 14:30:15.701767",
+ "modified": "2020-08-05 17:26:37.287395",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership Settings",
