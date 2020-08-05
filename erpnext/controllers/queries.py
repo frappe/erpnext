@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import frappe
 import erpnext
-from frappe.desk.search import validate_and_sanitize_search_inputs
 from frappe.desk.reportview import get_match_cond, get_filters_cond
 from frappe.utils import nowdate, getdate
 from collections import defaultdict
