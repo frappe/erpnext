@@ -837,7 +837,7 @@ def get_opening_accounts(company):
 
 
 @frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs()
+@frappe.validate_and_sanitize_search_inputs
 def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 	if not frappe.db.has_column('Journal Entry', searchfield):
 		return []
