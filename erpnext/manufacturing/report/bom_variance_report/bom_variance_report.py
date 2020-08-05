@@ -95,7 +95,7 @@ def get_data(filters):
 	return results
 
 @frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs()
+@frappe.validate_and_sanitize_search_inputs
 def get_work_orders(doctype, txt, searchfield, start, page_len, filters):
 	cond = "1=1"
 	if filters.get('bom_no'):
