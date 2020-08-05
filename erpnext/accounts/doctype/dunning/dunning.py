@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 from six import string_types
-from frappe.utils import getdate, get_datetime, rounded, flt
+from frappe.utils import getdate, get_datetime, rounded, flt, cint
 from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import days_in_year
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
@@ -27,11 +27,11 @@ class Dunning(AccountsController):
 		amounts = calculate_interest_and_amount(
 			self.posting_date, self.outstanding_amount, self.rate_of_interest, self.dunning_fee, self.overdue_days)
 		if self.interest_amount != amounts.get('interest_amount'):
-			self.interest_amount = amounts.get('interest_amount')
+			self.interest_amount = flt(amounts.get('interest_amount'), self.precision('interest_amount'))
 		if self.dunning_amount != amounts.get('dunning_amount'):
-			self.dunning_amount = amounts.get('dunning_amount')
+			self.dunning_amount = flt(amounts.get('dunning_amount'), self.precision('dunning_amount'))
 		if self.grand_total != amounts.get('grand_total'):
-			self.grand_total = amounts.get('grand_total')
+			self.grand_total = flt(amounts.get('grand_total'), self.precision('grand_total'))
 
 	def on_submit(self):
 		self.make_gl_entries()
@@ -47,10 +47,13 @@ class Dunning(AccountsController):
 		gl_entries = []
 		invoice_fields = ["project", "cost_center", "debit_to", "party_account_currency", "conversion_rate", "cost_center"]
 		inv = frappe.db.get_value("Sales Invoice", self.sales_invoice, invoice_fields, as_dict=1)
+
 		accounting_dimensions = get_accounting_dimensions()
 		invoice_fields.extend(accounting_dimensions)
+
 		dunning_in_company_currency = flt(self.dunning_amount * inv.conversion_rate)
 		default_cost_center = frappe.get_cached_value('Company',  self.company,  'cost_center')
+
 		gl_entries.append(
 			self.get_gl_dict({
 				"account": inv.debit_to,
@@ -91,9 +94,8 @@ def resolve_dunning(doc, state):
 def calculate_interest_and_amount(posting_date, outstanding_amount, rate_of_interest, dunning_fee, overdue_days):
 	interest_amount = 0
 	if rate_of_interest:
-		interest_per_year = rounded(flt(outstanding_amount) * flt(rate_of_interest))/100
-		interest_amount = (
-            interest_per_year / days_in_year(get_datetime(posting_date).year)) * int(overdue_days)
+		interest_per_year = flt(outstanding_amount) * flt(rate_of_interest) / 100
+		interest_amount = (interest_per_year * cint(overdue_days)) / 365 
 		grand_total = flt(outstanding_amount) + flt(interest_amount) + flt(dunning_fee)
 	dunning_amount = flt(interest_amount) + flt(dunning_fee)
 	return {

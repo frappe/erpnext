@@ -96,33 +96,35 @@ def get_data(filters):
 
 def get_parent_row(sp_jo_map, sp, jo_ja_map, ja_joff_map):
 	data = []
-	for jo in sp_jo_map[sp]:
-		row = {
-			"staffing_plan" : sp,
-			"job_opening" : jo["name"],
-		}
-		data.append(row)
-		child_row = get_child_row( jo["name"], jo_ja_map, ja_joff_map)
-		data += child_row
+	if sp in sp_jo_map.keys():
+		for jo in sp_jo_map[sp]:
+			row = {
+				"staffing_plan" : sp,
+				"job_opening" : jo["name"],
+			}
+			data.append(row)
+			child_row = get_child_row( jo["name"], jo_ja_map, ja_joff_map)
+			data += child_row
 	return data
 
 def get_child_row(jo, jo_ja_map, ja_joff_map):
 	data = []
-	for ja in jo_ja_map[jo]:
-		row = {
-			"indent":1,
-			"job_applicant": ja.name,
-			"applicant_name": ja.applicant_name,
-			"application_status": ja.status,
-		}
-		if ja.name in ja_joff_map.keys():
-			jo_detail =ja_joff_map[ja.name][0]
-			row["job_offer"] = jo_detail.name
-			row["job_offer_status"] = jo_detail.status
-			row["offer_date"]= jo_detail.offer_date.strftime("%d-%m-%Y")
-			row["designation"] = jo_detail.designation
+	if jo in jo_ja_map.keys():
+		for ja in jo_ja_map[jo]:
+			row = {
+				"indent":1,
+				"job_applicant": ja.name,
+				"applicant_name": ja.applicant_name,
+				"application_status": ja.status,
+			}
+			if ja.name in ja_joff_map.keys():
+				jo_detail =ja_joff_map[ja.name][0]
+				row["job_offer"] = jo_detail.name
+				row["job_offer_status"] = jo_detail.status
+				row["offer_date"]= jo_detail.offer_date.strftime("%d-%m-%Y")
+				row["designation"] = jo_detail.designation
 
-		data.append(row)
+			data.append(row)
 	return data
 
 def get_staffing_plan(filters):
@@ -177,7 +179,7 @@ def get_job_applicant(jo_list):
 def get_job_offer(ja_list):
 	ja_joff_map = {}
 
-	offers = frappe.get_all("Job offer", filters = [["job_applicant", "IN", ja_list]], fields =["name", "job_applicant", "status", 'offer_date', 'designation'])
+	offers = frappe.get_all("Job Offer", filters = [["job_applicant", "IN", ja_list]], fields =["name", "job_applicant", "status", 'offer_date', 'designation'])
 
 	for offer in offers:
 		if offer.job_applicant not in ja_joff_map.keys():

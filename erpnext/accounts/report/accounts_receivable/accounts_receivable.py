@@ -643,8 +643,10 @@ class ReceivablePayableReport(object):
 		account_type = "Receivable" if self.party_type == "Customer" else "Payable"
 		accounts = [d.name for d in frappe.get_all("Account",
 			filters={"account_type": account_type, "company": self.filters.company})]
-		conditions.append("account in (%s)" % ','.join(['%s'] *len(accounts)))
-		values += accounts
+
+		if accounts:
+			conditions.append("account in (%s)" % ','.join(['%s'] *len(accounts)))
+			values += accounts
 
 	def add_customer_filters(self, conditions, values):
 		if self.filters.get("customer_group"):
