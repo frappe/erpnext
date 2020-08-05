@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	frappe.reload_doc("Selling", "doctype", "POS Payment Method")
+	frappe.reload_doc("accounts", "doctype", "POS Payment Method")
 	pos_profiles = frappe.get_all("POS Profile")
 
 	for pos_profile in pos_profiles:
