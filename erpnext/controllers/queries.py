@@ -142,27 +142,42 @@ def supplier_query(doctype, txt, searchfield, start, page_len, filters):
 
 
 @frappe.whitelist()
+@validate_and_sanitize_search_inputs()
 def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 	company_currency = erpnext.get_company_currency(filters.get('company'))
 
-	tax_accounts = frappe.db.sql("""select name, parent_account	from tabAccount
-		where tabAccount.docstatus!=2
-			and account_type in (%s)
-			and is_group = 0
-			and company = %s
-			and account_currency = %s
-			and `%s` LIKE %s
-		order by idx desc, name
-		limit %s, %s""" %
-		(", ".join(['%s']*len(filters.get("account_type"))), "%s", "%s", searchfield, "%s", "%s", "%s"),
-		tuple(filters.get("account_type") + [filters.get("company"), company_currency, "%%%s%%" % txt,
-			start, page_len]))
+	def get_accounts(with_account_type_filter):
+		account_type_condition = ''
+		if with_account_type_filter:
+			account_type_condition = "AND account_type in %(account_types)s"
+
+		accounts = frappe.db.sql("""
+			SELECT name, parent_account
+			FROM `tabAccount`
+			WHERE `tabAccount`.docstatus!=2
+				{account_type_condition}
+				AND is_group = 0
+				AND company = %(company)s
+				AND account_currency = %(currency)s
+				AND `{searchfield}` LIKE %(txt)s
+			ORDER BY idx DESC, name
+			LIMIT %(offset)s, %(limit)s""".format(account_type_condition=account_type_condition, searchfield=searchfield),
+			dict(
+				account_types=filters.get("account_type"),
+				company=filters.get("company"),
+				currency=company_currency,
+				txt="%{}%".format(txt),
+				offset=start,
+				limit=page_len
+			)
+		)
+
+		return accounts
+
+	tax_accounts = get_accounts(True)
+
 	if not tax_accounts:
-		tax_accounts = frappe.db.sql("""select name, parent_account	from tabAccount
-			where tabAccount.docstatus!=2 and is_group = 0
-				and company = %s and account_currency = %s and `%s` LIKE %s limit %s, %s""" #nosec
-			% ("%s", "%s", searchfield, "%s", "%s", "%s"),
-			(filters.get("company"), company_currency, "%%%s%%" % txt, start, page_len))
+		tax_accounts = get_accounts(False)
 
 	return tax_accounts
 
