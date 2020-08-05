@@ -865,7 +865,8 @@ def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 				txt="%{0}%".format(txt),
 				offset=start,
 				limit=page_len
-			))
+			)
+		)
 
 
 @frappe.whitelist()
