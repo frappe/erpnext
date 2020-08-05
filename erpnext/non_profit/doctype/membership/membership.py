@@ -99,11 +99,14 @@ class Membership(Document):
 		if self.invoice and settings.send_invoice:
 			attachments.append(frappe.attach_print("Sales Invoice", self.invoice, print_format=settings.inv_print_format))
 
+		email_template = frappe.get_doc("Email Template", settings.email_template)
+		context = { "doc": self, "member": member}
+
 		email_args = {
 			"recipients": [email],
-			"message": settings.message,
-			"subject": _('Here is your invoice'),
-			"attachments": [frappe.attach_print("Sales Invoice", invoice.name, print_format=settings.inv_print_format)],
+			"message": frappe.render_template(email_template.get("response"), context),
+			"subject": frappe.render_template(email_template.get("subject"), context),
+			"attachments": attachments,
 			"reference_doctype": self.doctype,
 			"reference_name": self.name
 		}
