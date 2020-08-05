@@ -479,6 +479,18 @@ class AccountsController(TransactionBase):
 			if d.against_order:
 				allocated_amount = flt(d.amount)
 			else:
+				party_account_currency = self.get('party_account_currency')
+
+				if not party_account_currency:
+					party_type, party = self.get_party()
+
+					if party_type and party:
+						party_account_currency = get_party_account_currency(party_type, party, self.company)
+
+				if party_account_currency == self.company_currency:
+					amount = self.get('base_rounded_total') or self.base_grand_total
+				else:
+					amount = self.get('rounded_total') or self.grand_total
 				amount = self.base_rounded_total or self.base_grand_total
 				allocated_amount = min(amount - advance_allocated, d.amount)
 			advance_allocated += flt(allocated_amount)
@@ -802,10 +814,22 @@ class AccountsController(TransactionBase):
 			self.payment_terms_template = ''
 			return
 
+		party_account_currency = self.get('party_account_currency')
+		if not party_account_currency:
+			party_type, party = self.get_party()
+
+			if party_type and party:
+				party_account_currency = get_party_account_currency(party_type, party, self.company)
+
 		posting_date = self.get("bill_date") or self.get("posting_date") or self.get("transaction_date")
 		date = self.get("due_date")
 		due_date = date or posting_date
-		grand_total = self.get("rounded_total") or self.grand_total
+
+		if party_account_currency == self.company_currency:
+			grand_total = self.get("base_rounded_total") or self.base_grand_total
+		else:
+			grand_total = self.get("rounded_total") or self.grand_total
+
 		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 			grand_total = grand_total - flt(self.write_off_amount)
 
@@ -850,13 +874,25 @@ class AccountsController(TransactionBase):
 	def validate_payment_schedule_amount(self):
 		if self.doctype == 'Sales Invoice' and self.is_pos: return
 
+		party_account_currency = self.get('party_account_currency')
+		if not party_account_currency:
+			party_type, party = self.get_party()
+
+			if party_type and party:
+				party_account_currency = get_party_account_currency(party_type, party, self.company)
+
 		if self.get("payment_schedule"):
 			total = 0
 			for d in self.get("payment_schedule"):
 				total += flt(d.payment_amount)
-			total = flt(total, self.precision("grand_total"))
 
-			grand_total = flt(self.get("rounded_total") or self.grand_total, self.precision('grand_total'))
+			if party_account_currency == self.company_currency:
+				total = flt(total, self.precision("base_grand_total"))
+				grand_total = flt(self.get("base_rounded_total") or self.base_grand_total, self.precision('base_grand_total'))
+			else:
+				total = flt(total, self.precision("grand_total"))
+				grand_total = flt(self.get("rounded_total") or self.grand_total, self.precision('grand_total'))
+
 			if self.get("total_advance"):
 				grand_total -= self.get("total_advance")
 
