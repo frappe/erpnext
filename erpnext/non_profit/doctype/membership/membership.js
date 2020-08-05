@@ -17,11 +17,13 @@ frappe.ui.form.on('Membership', {
 			});
 		});
 
-		frm.add_custom_button("Send Acknowledgement", () => {
-			frm.call("send_acknowlement").then(() => {
-				frm.reload_doc();
+		frappe.db.get_single_value("Membership Settings", "send_email").then(val => {
+			if (val) frm.add_custom_button("Send Acknowledgement", () => {
+				frm.call("send_acknowlement").then(() => {
+					frm.reload_doc();
+				});
 			});
-		});
+		})
 	},
 
 	onload: function(frm) {
