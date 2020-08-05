@@ -167,7 +167,8 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 				AND account_currency = %(currency)s
 				AND `{searchfield}` LIKE %(txt)s
 			ORDER BY idx DESC, name
-			LIMIT %(offset)s, %(limit)s""".format(account_type_condition=account_type_condition, searchfield=searchfield),
+			LIMIT %(offset)s, %(limit)s
+		""".format(account_type_condition=account_type_condition, searchfield=searchfield),
 			dict(
 				account_types=filters.get("account_type"),
 				company=filters.get("company"),
