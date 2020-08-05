@@ -437,6 +437,7 @@ def make_pricing_rule(doctype, docname):
 	return doc
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs()
 def get_item_uoms(doctype, txt, searchfield, start, page_len, filters):
 	items = [filters.get('value')]
 	if filters.get('apply_on') != 'Item Code':

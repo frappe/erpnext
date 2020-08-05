@@ -30,6 +30,7 @@ class ProductBundle(Document):
 
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs()
 def get_new_item_code(doctype, txt, searchfield, start, page_len, filters):
 	from erpnext.controllers.queries import get_match_cond
 

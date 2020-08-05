@@ -286,6 +286,7 @@ def get_matching_transactions_payments(description_matching):
 		return []
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs()
 def payment_entry_query(doctype, txt, searchfield, start, page_len, filters):
 	account = frappe.db.get_value("Bank Account", filters.get("bank_account"), "account")
 	if not account:
@@ -315,6 +316,7 @@ def payment_entry_query(doctype, txt, searchfield, start, page_len, filters):
 	)
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs()
 def journal_entry_query(doctype, txt, searchfield, start, page_len, filters):
 	account = frappe.db.get_value("Bank Account", filters.get("bank_account"), "account")
 
@@ -351,6 +353,7 @@ def journal_entry_query(doctype, txt, searchfield, start, page_len, filters):
 	)
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs()
 def sales_invoices_query(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""
 		SELECT
