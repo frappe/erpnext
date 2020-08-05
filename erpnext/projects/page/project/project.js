@@ -604,6 +604,8 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 
 		const seen = JSON.parse(doc._seen || '[]').includes(user) ? '' : 'bold';
 
+		const subject_link = this.get_subject_link(doc, subject, escaped_subject)
+
 		let html = doc.doctype == 'Task' && doc.expandable ? `<a class="btn btn-action btn-xs"
 			data-doctype="Task" data-name="${escape(doc.name)}" style="width: 20px;">
 				<i class="octicon octicon-chevron-right" />
@@ -625,13 +627,23 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 				<span class="level-item" style="margin-bottom: 1px;"">
 					${html}
 				</span>
-				<span class="ellipsis" title="${escaped_subject}" data-doctype="${doc.doctype}" data-name="${doc.name}">
-					${subject}
-				</span>
+				${subject_link}
 			</span>
 		`;
 
 		return subject_html;
+	}
+
+	get_subject_link(doc, subject, escaped_subject) {
+		if (doc.doctype === 'Project') {
+			return `<span class="ellipsis" title="${escaped_subject}" data-doctype="${doc.doctype}" data-name="${doc.name}">
+				${subject}
+			</span>`
+		} else {
+			return `<a href ="desk#Form/Task/${doc.name}" class="ellipsis" title="${escaped_subject}" data-doctype="${doc.doctype}" data-name="${doc.name}">
+				${subject}
+			</a>`
+		}
 	}
 
 	get_indicator_html(doc) {
@@ -665,14 +677,16 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 			`;
 		}
 
-		html += `
-			<div class="level-item hidden-xs" style="margin-left: 5px;">
-				<button class="btn btn-open btn-default btn-xs"
-					data-doctype="${escape(doc.doctype)}" data-name="${escape(doc.name)}">
-					${__("Open")}
-				</button>
-			</div>
-		`;
+		if (doc.doctype == 'Project') {
+			html += `
+				<div class="level-item hidden-xs" style="margin-left: 5px;">
+					<button class="btn btn-open btn-default btn-xs"
+						data-doctype="${escape(doc.doctype)}" data-name="${escape(doc.name)}">
+						${__("Open")}
+					</button>
+				</div>
+			`;
+		}
 
 		const modified = comment_when(doc.modified, true);
 
