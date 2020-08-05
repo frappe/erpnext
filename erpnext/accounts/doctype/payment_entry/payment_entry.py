@@ -897,7 +897,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		total_amount = ref_doc.get("grand_total")
 		exchange_rate = 1
 		outstanding_amount = ref_doc.get("outstanding_amount")
-	if reference_doctype == "Dunning":
+	elif reference_doctype == "Dunning":
 		total_amount = ref_doc.get("dunning_amount")
 		exchange_rate = 1
 		outstanding_amount = ref_doc.get("dunning_amount")
@@ -1101,7 +1101,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 					'outstanding_amount': doc.get('dunning_amount'),
 					'allocated_amount': doc.get('dunning_amount')
 				})
-			else:	
+			else:
 				pe.append("references", {
 					'reference_doctype': dt,
 					'reference_name': dn,
