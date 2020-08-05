@@ -308,7 +308,7 @@ def get_loyalty_programs(doc):
 	return lp_details
 
 @frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs()
+@frappe.validate_and_sanitize_search_inputs
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
 	from erpnext.controllers.queries import get_fields
 
@@ -478,7 +478,7 @@ def make_address(args, is_primary_address=1):
 	return address
 
 @frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs()
+@frappe.validate_and_sanitize_search_inputs
 def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, filters):
 	customer = filters.get('customer')
 	return frappe.db.sql("""
