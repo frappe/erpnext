@@ -385,7 +385,8 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 
 			let method = "erpnext.projects.page.project.project.get_tasks";
 			let fields = this.get_task_fields();
-			let filters = [["Task", "project", "=", unescape(e.currentTarget.getAttribute("data-name"))]];
+			let filters = [["Task", "project", "=", unescape(e.currentTarget.getAttribute("data-name"))],
+							["Task", "parent_task", "=", '']];
 
 			frappe.call(this.get_call_args("Task", method, fields, filters)).then(r => {
 				// render
