@@ -117,11 +117,9 @@ frappe.ui.form.on("Item", {
 		const stock_exists = (frm.doc.__onload
 			&& frm.doc.__onload.stock_exists) ? 1 : 0;
 
-		['is_stock_item', 'has_serial_no', 'has_batch_no'].forEach((fieldname) => {
+		['is_stock_item', 'has_serial_no', 'has_batch_no', 'has_variants'].forEach((fieldname) => {
 			frm.set_df_property(fieldname, 'read_only', stock_exists);
 		});
-
-		frm.set_df_property('variants_section', 'hidden', stock_exists);
 
 		frm.toggle_reqd('customer', frm.doc.is_customer_provided_item ? 1:0);
 	},
