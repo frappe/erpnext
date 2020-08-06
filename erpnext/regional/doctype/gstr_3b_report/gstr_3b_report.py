@@ -226,6 +226,7 @@ class GSTR3BReport(Document):
 		txval = 0
 		total_taxable_value = self.get_total_taxable_value(doctype, reverse_charge)
 
+		print(tax_details)
 		for gst_category in gst_category_list:
 			txval += total_taxable_value.get(gst_category,0)
 			for account_head in self.account_heads:
@@ -305,9 +306,6 @@ class GSTR3BReport(Document):
 
 		inter_state_supply_tax_mapping = {}
 		inter_state_supply_details = {}
-
-		print(inter_state_supply_tax)
-		print(self.account_heads)
 
 		for d in inter_state_supply_tax:
 			inter_state_supply_tax_mapping.setdefault(cstr(d.name), {
