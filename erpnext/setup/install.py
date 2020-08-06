@@ -25,12 +25,13 @@ def after_install():
 	create_default_success_action()
 	create_default_energy_point_rules()
 	add_company_to_session_defaults()
+	add_standard_navbar_items()
 	frappe.db.commit()
 
 
 def check_setup_wizard_not_completed():
 	if frappe.db.get_default('desktop:home_page') != 'setup-wizard':
-		message = """ERPNext can only be installed on a fresh site where the setup wizard is not completed. 
+		message = """ERPNext can only be installed on a fresh site where the setup wizard is not completed.
 You can reinstall this site (after saving your data) using: bench --site [sitename] reinstall"""
 		frappe.throw(message)
 
@@ -103,3 +104,45 @@ def add_company_to_session_defaults():
 		"ref_doctype": "Company"
 	})
 	settings.save()
+
+def add_standard_navbar_items():
+	navbar_settings = frappe.get_single("Navbar Settings")
+
+	erpnext_navbar_items = [
+		{
+			'item_label': 'Documentation',
+			'item_type': 'Route',
+			'route': 'https://erpnext.com/docs/user/manual',
+			'is_standard': 1
+		},
+		{
+			'item_label': 'User Forum',
+			'item_type': 'Route',
+			'route': 'https://discuss.erpnext.com',
+			'is_standard': 1
+		},
+		{
+			'item_label': 'Report an Issue',
+			'item_type': 'Route',
+			'route': 'https://github.com/frappe/erpnext/issues',
+			'is_standard': 1
+		}
+	]
+
+	current_nabvar_items = navbar_settings.help_dropdown
+	navbar_settings.set('help_dropdown', [])
+
+	for item in erpnext_navbar_items:
+		navbar_settings.append('help_dropdown', item)
+
+	for item in current_nabvar_items:
+		navbar_settings.append('help_dropdown', {
+			'item_label': item.item_label,
+			'item_type': item.item_type,
+			'route': item.route,
+			'action': item.action,
+			'is_standard': item.is_standard,
+			'hidden': item.hidden
+		})
+
+	navbar_settings.save()
