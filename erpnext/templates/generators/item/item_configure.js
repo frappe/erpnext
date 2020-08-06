@@ -202,7 +202,7 @@ class ItemConfigure {
 			add_to_cart = `<a href data-action="btn_add_to_cart" data-item-code="${one_item}">${__('Add to cart')}</a>`;
 			product_action =  in_stock ? add_to_cart : `<a style="color:#74808b;">${__('Not in Stock')}</a>`;
 		} else {
-			product_info = '';
+			product_action = '';
 		}
 
 		const item_add_to_cart = one_item ? `
