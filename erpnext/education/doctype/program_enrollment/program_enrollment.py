@@ -97,6 +97,7 @@ class ProgramEnrollment(Document):
 		return quiz_progress
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_program_courses(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get('program'):
 		return frappe.db.sql("""select course, course_name from `tabProgram Course`
@@ -115,6 +116,7 @@ def get_program_courses(doctype, txt, searchfield, start, page_len, filters):
 				})
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_students(doctype, txt, searchfield, start, page_len, filters):
 	if not filters.get("academic_term"):
 		filters["academic_term"] = frappe.defaults.get_defaults().academic_term
