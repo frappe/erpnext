@@ -173,7 +173,8 @@ frappe.ui.form.on('Stock Entry', {
 
 		if (frm.doc.docstatus === 1 && frm.doc.purpose == 'Send to Warehouse') {
 			if (frm.doc.per_transferred < 100) {
-				frm.add_custom_button(__('Receive at Warehouse Entry'), function() {
+				let btn_label = frm.doc.add_to_transit ? __('End Transit') : __('Receive at Warehouse Entry')
+				frm.add_custom_button(btn_label, function() {
 					frappe.model.open_mapped_doc({
 						method: "erpnext.stock.doctype.stock_entry.stock_entry.make_stock_in_entry",
 						frm: frm

@@ -25,7 +25,7 @@
   "default_selling_terms",
   "default_buying_terms",
   "default_warehouse_for_sales_return",
-  "default_git_warehouse",
+  "default_in_transit_warehouse",
   "column_break_10",
   "country",
   "create_chart_of_accounts_based_on",
@@ -736,9 +736,9 @@
    "label": "Enable Perpetual Inventory For Non Stock Items"
   },
   {
-   "fieldname": "default_git_warehouse",
+   "fieldname": "default_in_transit_warehouse",
    "fieldtype": "Link",
-   "label": "Default GIT Warehouse",
+   "label": "Default In Transit Warehouse",
    "options": "Warehouse"
   }
  ],
@@ -747,7 +747,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2020-07-10 12:10:32.484687",
+ "modified": "2020-08-06 00:38:08.311216",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

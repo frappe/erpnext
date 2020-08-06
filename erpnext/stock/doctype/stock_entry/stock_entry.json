@@ -13,6 +13,8 @@
   "stock_entry_type",
   "outgoing_stock_entry",
   "purpose",
+  "add_to_transit",
+  "transfer_status",
   "work_order",
   "purchase_order",
   "delivery_note_no",
@@ -630,13 +632,31 @@
   {
    "fieldname": "print_settings_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval: doc.add_to_transit===1",
+   "fieldname": "transfer_status",
+   "fieldtype": "Select",
+   "label": "Transfer Status",
+   "options": "\nNot Started\nIn Transit\nCompleted",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.add_to_transit",
+   "fieldname": "add_to_transit",
+   "fieldtype": "Check",
+   "label": "Add To Transit",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-23 12:56:52.881752",
+ "modified": "2020-08-06 18:51:31.266263",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

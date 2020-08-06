@@ -443,7 +443,7 @@ def make_supplier_quotation(source_name, target_doc=None):
 	return doclist
 
 @frappe.whitelist()
-def make_stock_entry(source_name, target_doc=None, purpose=None, warehouse=None):
+def make_stock_entry(source_name, target_doc=None, purpose=None, add_to_transit=False):
 
 	def update_item(obj, target, source_parent):
 		qty = flt(flt(obj.stock_qty) - flt(obj.ordered_qty))/ target.conversion_factor \
@@ -463,8 +463,9 @@ def make_stock_entry(source_name, target_doc=None, purpose=None, warehouse=None)
 		if source_parent.material_request_type == "Material Transfer":
 			target.s_warehouse = obj.from_warehouse
 
-		if warehouse :
-			target.t_warehouse = warehouse
+		if add_to_transit:
+			target_warehouse = frappe.db.get_value('Company', source_parent.company, 'default_in_transit_warehouse')
+			target.t_warehouse = target_warehouse if target_warehouse else None
 
 
 	def set_missing_values(source, target):
@@ -474,8 +475,15 @@ def make_stock_entry(source_name, target_doc=None, purpose=None, warehouse=None)
 
 		if source.material_request_type == "Customer Provided":
 			target.purpose = "Material Receipt"
+
 		if purpose:
 			target.purpose = purpose
+
+		if add_to_transit:
+			target.add_to_transit = 1
+			target.transfer_status = "Not Started"
+			target.to_warehouse = frappe.db.get_value("Company", target.company, 'default_in_transit_warehouse')
+
 		target.run_method("calculate_rate_and_amount")
 		target.set_stock_entry_type()
 		target.set_job_card_data()

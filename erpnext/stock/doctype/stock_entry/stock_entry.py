@@ -96,6 +96,11 @@ class StockEntry(StockController):
 		self.update_quality_inspection()
 		if self.work_order and self.purpose == "Manufacture":
 			self.update_so_in_serial_number()
+		
+		if self.purpose == 'Send to Warehouse' and self.add_to_transit:
+			self.transfer_status = 'In Transit'
+		if self.purpose == 'Receive at Warehouse':
+			self.set_transfer_status_outgoing_stock_entry("Completed")
 
 	def on_cancel(self):
 
@@ -1225,7 +1230,7 @@ class StockEntry(StockController):
 				if mreq_item.item_code != item.item_code:
 					frappe.throw(_("Item for row {0} does not match Material Request").format(item.idx),
 						frappe.MappingMismatchError)
-				elif self.purpose == "Send to Warehouse":
+				elif self.purpose == "Send to Warehouse" and self.add_to_transit:
 					continue
 				elif mreq_item.warehouse != (item.s_warehouse if self.purpose == "Material Issue" else item.t_warehouse):
 					frappe.throw(_("Warehouse for row {0} does not match Material Request").format(item.idx),
@@ -1354,6 +1359,13 @@ class StockEntry(StockController):
 						'reference_type': reference_type,
 						'reference_name': reference_name
 					})
+	def set_transfer_status_outgoing_stock_entry(self, status):
+		if self.outgoing_stock_entry:
+			doc = frappe.get_doc('Stock Entry', self.outgoing_stock_entry)
+
+			if doc.add_to_transit:
+				doc.transfer_status = status
+				doc.save()
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):

@@ -105,45 +105,23 @@ frappe.ui.form.on('Material Request', {
 					frm.add_custom_button(__("Transfer Material"),
 						() => frm.events.make_stock_entry(frm), __('Create'));
 
-					let default_git = null;
-					frappe.db.get_value("Company", frm.doc.company,'default_git_warehouse',(r) => {
-						default_git = r.default_git_warehouse;
-					});
-
-					frm.add_custom_button(__("Send To Warehouse"),
+					frm.add_custom_button(__("Begin Transit"),
 						() => {
-							new frappe.ui.Dialog({
-								title: __("Send To Warehouse"),
-								fields: [
-									{
-										fieldname: "warehouse",
-										fieldtype: "Link", 
-										label: __("Warehouse"),
-										options: "Warehouse",
-										reqd: 1, 
-										default: default_git
-									}
-								],
-								primary_action_label: 'Select',
-								primary_action(values) {
-									return frappe.call({
-										type: "GET",
-										method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
-										args: {
-											"source_name": frm.doc.name,
-											"warehouse": values.warehouse,
-											"purpose": "Send to Warehouse"
-										},
-										freeze: true,
-										callback: function(r) {
-											var doc = frappe.model.sync(r.message);
-											frappe.set_route("Form", r.message.doctype, r.message.name);
-										}
-									})
+							return frappe.call({
+								type: "GET",
+								method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
+								args: {
+									"source_name": frm.doc.name,
+									"purpose": "Send to Warehouse",
+									"add_to_transit": true
+								},
+								freeze: true,
+								callback: function(r) {
+									var doc = frappe.model.sync(r.message);
+									frappe.set_route("Form", r.message.doctype, r.message.name);
 								}
-							}).show();
-				
-						},__('Create'));
+							})
+					},__('Create'));
 				}
 			
 
@@ -357,11 +335,11 @@ frappe.ui.form.on('Material Request', {
 		});
 	},
 
-	make_stock_entry: function(frm, warehouse = null) {
+	make_stock_entry: function(frm, target_warehouse = null) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
 			frm: frm,
-			warehouse: warehouse
+			warehouse: target_warehouse
 		});
 	},
 
