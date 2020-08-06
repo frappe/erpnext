@@ -243,6 +243,12 @@ def get_data():
 				},
 				{
 					"type": "report",
+					"name": "Customer Transaction List Report",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
 					"name": "Supplier Ledger Summary",
 					"doctype": "Sales Invoice",
 					"is_query_report": True,
