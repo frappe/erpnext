@@ -494,7 +494,7 @@ class BOM(WebsiteGenerator):
 					'image'			: d.image,
 					'stock_uom'		: d.stock_uom,
 					'stock_qty'		: flt(d.stock_qty),
-					'rate'			: d.base_rate,
+					'rate'			: flt(d.base_rate) / flt(d.conversion_factor),
 					'include_item_in_manufacturing': d.include_item_in_manufacturing
 				}))
 
@@ -910,6 +910,8 @@ def get_bom_diff(bom1, bom2):
 
 	return out
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def item_query(doctype, txt, searchfield, start, page_len, filters):
 	meta = frappe.get_meta("Item", cached=True)
 	searchfields = meta.get_search_fields()

@@ -26,6 +26,8 @@ class PaymentOrder(Document):
 		for d in self.references:
 			frappe.db.set_value(self.payment_order_type, d.get(frappe.scrub(self.payment_order_type)), ref_field, status)
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_mop_query(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql(""" select mode_of_payment from `tabPayment Order Reference`
 		where parent = %(parent)s and mode_of_payment like %(txt)s
@@ -36,6 +38,8 @@ def get_mop_query(doctype, txt, searchfield, start, page_len, filters):
 			'txt': "%%%s%%" % txt
 		})
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_supplier_query(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql(""" select supplier from `tabPayment Order Reference`
 		where parent = %(parent)s and supplier like %(txt)s and

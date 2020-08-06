@@ -9,6 +9,9 @@ from frappe.utils.nestedset import get_descendants_of
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
+	if filters.from_date > filters.to_date:
+		frappe.throw(_('From Date cannot be greater than To Date'))
+	
 	columns = get_columns(filters)
 	data = get_data(filters)
 
@@ -188,7 +191,7 @@ def get_conditions(filters):
 		conditions += "AND so_item.item_code = '%s'" %frappe.db.escape(filters.item_code)
 
 	if filters.get("customer"):
-		conditions += "AND so.customer = '%s'" %frappe.db.escape(filters.customer)
+		conditions += "AND so.customer = %s" %frappe.db.escape(filters.customer)
 
 	return conditions
 

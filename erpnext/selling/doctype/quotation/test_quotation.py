@@ -280,5 +280,3 @@ def make_quotation(**args):
 			qo.submit()
 
 	return qo
-
-

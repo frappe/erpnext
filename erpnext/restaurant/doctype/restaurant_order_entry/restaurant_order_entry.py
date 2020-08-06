@@ -65,6 +65,7 @@ def make_invoice(table, customer, mode_of_payment):
 
 	return invoice.name
 
+@frappe.whitelist()
 def item_query_restaurant(doctype='Item', txt='', searchfield='name', start=0, page_len=20, filters=None, as_dict=False):
 	'''Return items that are selected in active menu of the restaurant'''
 	restaurant, menu = get_restaurant_and_menu_name(filters['table'])
