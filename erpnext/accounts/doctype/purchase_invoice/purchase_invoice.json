@@ -969,8 +969,10 @@
   {
    "fieldname": "clearance_date",
    "fieldtype": "Date",
-   "hidden": 1,
-   "label": "Clearance Date"
+   "label": "Clearance Date",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "col_br_payments",
@@ -1332,7 +1334,11 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2020-08-03 23:20:04.466153",
+=======
+ "modified": "2020-08-03 12:46:01.411074",
+>>>>>>> a78336e77de6156e843e6fc5343d841b140f6460
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

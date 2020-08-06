@@ -888,6 +888,7 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_supplier(doctype, txt, searchfield, start, page_len, filters):
 	supp_master_name = frappe.defaults.get_user_default("supp_master_name")
 	if supp_master_name == "Supplier Name":
