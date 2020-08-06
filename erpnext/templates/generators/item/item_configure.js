@@ -193,24 +193,14 @@ class ItemConfigure {
 			filtered_items_count === 1 ?
 				filtered_items[0] : '';
 
-		// Allow Add to Cart if adding out of stock items enabled in Shopping Cart else check stock.
-		var in_stock;
-		var add_to_cart;
-		var product_action;
-		if (product_info) {
-			in_stock = product_info.allow_items_not_in_stock ? 1 : product_info.in_stock;
-			add_to_cart = `<a href data-action="btn_add_to_cart" data-item-code="${one_item}">${__('Add to cart')}</a>`;
-			product_action =  in_stock ? add_to_cart : `<a style="color:#74808b;">${__('Not in Stock')}</a>`;
-		} else {
-			product_action = '';
-		}
-
 		const item_add_to_cart = one_item ? `
 			<div class="alert alert-success d-flex justify-content-between align-items-center" role="alert">
 				<div>
 					<div>${one_item} ${product_info && product_info.price ? '(' + product_info.price.formatted_price_sales_uom + ')' : ''}</div>
 				</div>
-				${product_action}
+				<a href data-action="btn_add_to_cart" data-item-code="${one_item}">
+					${__('Add to cart')}
+				</a>
 			</div>
 		`: '';
 
