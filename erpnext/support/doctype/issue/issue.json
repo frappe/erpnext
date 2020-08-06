@@ -20,6 +20,9 @@
   "issue_type",
   "issue_split_from",
   "sb_details",
+  "via_customer_portal",
+  "attachment",
+  "content_type",
   "description",
   "service_level_section",
   "service_level_agreement",
@@ -27,7 +30,7 @@
   "response_by_variance",
   "reset_service_level_agreement",
   "cb",
-  "agreement_fulfilled",
+  "agreement_status",
   "resolution_by",
   "resolution_by_variance",
   "service_level_agreement_creation",
@@ -38,6 +41,14 @@
   "first_responded_on",
   "column_break_26",
   "avg_response_time",
+  "section_break_19",
+  "resolution_details",
+  "column_break1",
+  "opening_date",
+  "opening_time",
+  "resolution_date",
+  "resolution_time",
+  "user_resolution_time",
   "additional_info",
   "lead",
   "contact",
@@ -45,24 +56,12 @@
   "column_break_16",
   "customer_name",
   "project",
-  "company",
-  "section_break_19",
-  "resolution_details",
-  "column_break1",
-  "opening_date",
-  "opening_time",
-  "resolution_date",
-  "content_type",
-  "attachment",
-  "via_customer_portal",
-  "resolution_time",
-  "user_resolution_time"
+  "company"
  ],
  "fields": [
   {
    "fieldname": "subject_section",
    "fieldtype": "Section Break",
-   "label": "Subject",
    "options": "fa fa-flag"
   },
   {
@@ -158,7 +157,7 @@
    "collapsible": 1,
    "fieldname": "service_level_section",
    "fieldtype": "Section Break",
-   "label": "Service Level"
+   "label": "Service Level Agreement Details"
   },
   {
    "fieldname": "service_level_agreement",
@@ -192,13 +191,6 @@
    "fieldname": "response",
    "fieldtype": "Section Break",
    "label": "Response"
-  },
-  {
-   "bold": 1,
-   "fieldname": "mins_to_first_response",
-   "fieldtype": "Float",
-   "label": "Mins to First Response",
-   "read_only": 1
   },
   {
    "fieldname": "first_responded_on",
@@ -327,27 +319,18 @@
    "label": "Via Customer Portal"
   },
   {
-   "default": "Ongoing",
-   "depends_on": "eval: doc.service_level_agreement",
-   "fieldname": "agreement_fulfilled",
-   "fieldtype": "Select",
-   "label": "Service Level Agreement Fulfilled",
-   "options": "Ongoing\nFulfilled\nFailed",
-   "read_only": 1
-  },
-  {
    "depends_on": "eval: doc.service_level_agreement && doc.status != 'Replied';",
-   "description": "in hours",
    "fieldname": "response_by_variance",
-   "fieldtype": "Float",
+   "fieldtype": "Duration",
+   "hide_seconds": 1,
    "label": "Response By Variance",
    "read_only": 1
   },
   {
    "depends_on": "eval: doc.service_level_agreement && doc.status != 'Replied';",
-   "description": "in hours",
    "fieldname": "resolution_by_variance",
-   "fieldtype": "Float",
+   "fieldtype": "Duration",
+   "hide_seconds": 1,
    "label": "Resolution By Variance",
    "read_only": 1
   },
@@ -406,12 +389,28 @@
    "fieldtype": "Duration",
    "label": "Total Hold Time",
    "read_only": 1
+  },
+  {
+   "default": "Ongoing",
+   "depends_on": "eval: doc.service_level_agreement",
+   "fieldname": "agreement_status",
+   "fieldtype": "Select",
+   "label": "Service Level Agreement Status",
+   "options": "Ongoing\nFulfilled\nFailed",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "mins_to_first_response",
+   "fieldtype": "Float",
+   "label": "Mins to First Response",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2020-06-10 12:47:37.146914",
+ "modified": "2020-08-06 19:07:30.346311",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
