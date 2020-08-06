@@ -306,6 +306,9 @@ class GSTR3BReport(Document):
 		inter_state_supply_tax_mapping = {}
 		inter_state_supply_details = {}
 
+		print(inter_state_supply_tax)
+		print(self.account_heads)
+
 		for d in inter_state_supply_tax:
 			inter_state_supply_tax_mapping.setdefault(cstr(d.name), {
 				'place_of_supply': d.place_of_supply,
