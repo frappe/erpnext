@@ -244,6 +244,9 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	:param qty: quantity of Items
 	:return: String represent batch number of batch with sufficient quantity else an empty String
 	"""
+	from frappe.utils import add_months, getdate, today
+	today_date = getdate(today())
+	alert_date = add_months(today_date, 6)
 
 	batch_no = None
 	batches = get_batches(item_code, warehouse, qty, throw, serial_no)
@@ -251,6 +254,8 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	for batch in batches:
 		if cint(qty) <= cint(batch.qty):
 			batch_no = batch.batch_id
+			if (alert_date > getdate(batch.expiry_date)):
+				frappe.msgprint("Warning: Batch {0} for Item {1} will expire in less than 6 months. Expiry date: <strong>{2}</strong>".format(batch.batch_id, item_code, batch.expiry_date))
 			break
 
 	if not batch_no:
@@ -284,7 +289,7 @@ def get_batches(item_code, warehouse, qty=1, throw=False, serial_no=None):
 		cond = " and `tabBatch`.name = %s" %(frappe.db.escape(batch[0].batch_no))
 
 	return frappe.db.sql("""
-		select batch_id, sum(`tabStock Ledger Entry`.actual_qty) as qty
+		select batch_id, sum(`tabStock Ledger Entry`.actual_qty) as qty, expiry_date
 		from `tabBatch`
 			join `tabStock Ledger Entry` ignore index (item_code, warehouse)
 				on (`tabBatch`.batch_id = `tabStock Ledger Entry`.batch_no )
