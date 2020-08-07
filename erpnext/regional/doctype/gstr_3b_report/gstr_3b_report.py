@@ -239,8 +239,6 @@ class GSTR3BReport(Document):
 
 		self.report_dict[supply_type][supply_category]["txval"] += flt(txval, 2)
 
-		print(self.report_dict['sup_details']['osup_det']['iamt'], 1)
-
 	def set_inter_state_supply(self, inter_state_supply):
 
 		osup_det = self.report_dict["sup_details"]["osup_det"]
@@ -308,9 +306,7 @@ class GSTR3BReport(Document):
 		inter_state_supply_tax_mapping = {}
 		inter_state_supply_details = {}
 
-		print(inter_state_supply_tax)
 		for d in inter_state_supply_tax:
-			print(d)
 			inter_state_supply_tax_mapping.setdefault(cstr(d.name), {
 				'place_of_supply': d.place_of_supply,
 				'taxable_value': d.net_total,
@@ -321,24 +317,19 @@ class GSTR3BReport(Document):
 			})
 
 			if d.account_head in [d.cgst_account for d in self.account_heads]:
-				print(d.account_head, d.name, d.tax_amount)
 				inter_state_supply_tax_mapping[cstr(d.name)]['camt'] += d.tax_amount
 
 			if d.account_head in [d.sgst_account for d in self.account_heads]:
-				print(d.account_head, d.name, d.tax_amount)
 				inter_state_supply_tax_mapping[cstr(d.name)]['samt'] += d.tax_amount
 
 			if d.account_head in [d.igst_account for d in self.account_heads]:
-				print(d.account_head, d.name, d.tax_amount)
 				inter_state_supply_tax_mapping[cstr(d.name)]['iamt'] += d.tax_amount
 
 			if d.account_head in [d.cess_account for d in self.account_heads]:
-				print(d.account_head, d.name, d.tax_amount)
 				inter_state_supply_tax_mapping[cstr(d.name)]['csamt'] += d.tax_amount
 
 		for key, value in iteritems(inter_state_supply_tax_mapping):
-			print(key, value, d.place_of_supply)
-			if d.place_of_supply:
+			if value.get('place_of_supply'):
 				osup_det = self.report_dict["sup_details"]["osup_det"]
 				osup_det["txval"] = flt(osup_det["txval"] + value['taxable_value'], 2)
 				osup_det["iamt"] = flt(osup_det["iamt"] + value['iamt'], 2)
