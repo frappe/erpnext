@@ -97,10 +97,10 @@ class StockEntry(StockController):
 		if self.work_order and self.purpose == "Manufacture":
 			self.update_so_in_serial_number()
 		
-		if self.purpose == 'Send to Warehouse' and self.add_to_transit:
-			self.transfer_status = 'In Transit'
+		if self.purpose == 'Send to Warehouse' and self.in_transit:
+			self.set_material_request_transfer_status('In Transit')
 		if self.purpose == 'Receive at Warehouse':
-			self.set_transfer_status_outgoing_stock_entry("Completed")
+			self.set_material_request_transfer_status('Completed')
 
 	def on_cancel(self):
 
@@ -120,6 +120,11 @@ class StockEntry(StockController):
 		self.update_transferred_qty()
 		self.update_quality_inspection()
 		self.delete_auto_created_batches()
+
+		if self.purpose == 'Send to Warehouse' and self.in_transit:
+			self.set_material_request_transfer_status('Not Started')
+		if self.purpose == 'Receive at Warehouse':
+			self.set_material_request_transfer_status('In Transit')
 
 	def set_job_card_data(self):
 		if self.job_card and not self.work_order:
@@ -1230,7 +1235,7 @@ class StockEntry(StockController):
 				if mreq_item.item_code != item.item_code:
 					frappe.throw(_("Item for row {0} does not match Material Request").format(item.idx),
 						frappe.MappingMismatchError)
-				elif self.purpose == "Send to Warehouse" and self.add_to_transit:
+				elif self.purpose == "Send to Warehouse" and self.in_transit:
 					continue
 				elif mreq_item.warehouse != (item.s_warehouse if self.purpose == "Material Issue" else item.t_warehouse):
 					frappe.throw(_("Warehouse for row {0} does not match Material Request").format(item.idx),
@@ -1359,13 +1364,16 @@ class StockEntry(StockController):
 						'reference_type': reference_type,
 						'reference_name': reference_name
 					})
-	def set_transfer_status_outgoing_stock_entry(self, status):
-		if self.outgoing_stock_entry:
-			doc = frappe.get_doc('Stock Entry', self.outgoing_stock_entry)
+	def set_material_request_transfer_status(self, status):
+		material_request = self.items[0].material_request or None
+		if self.purpose == "Receive at Warehouse":
+			if self.outgoing_stock_entry:
+				parent_se = frappe.get_value("Stock Entry", self.outgoing_stock_entry, 'in_transit')
+			if parent_se:
+				material_request = frappe.get_value("Stock Entry Detail", self.items[0].ste_detail, 'material_request')
 
-			if doc.add_to_transit:
-				doc.transfer_status = status
-				doc.save()
+		if material_request:
+			frappe.db.set_value('Material Request', material_request, 'transfer_status', status)
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
@@ -1414,8 +1422,10 @@ def make_stock_in_entry(source_name, target_doc=None):
 		target_doc.t_warehouse = ''
 
 		if source_doc.material_request_item and source_doc.material_request :
-			warehouse = frappe.get_value('Material Request Item', source_doc.material_request_item, 'warehouse')
-			target_doc.t_warehouse = warehouse
+			add_to_transit = frappe.db.get_value('Material Request', source_doc.material_request, 'add_to_transit')
+			if add_to_transit:
+				warehouse = frappe.get_value('Material Request Item', source_doc.material_request_item, 'warehouse')
+				target_doc.t_warehouse = warehouse
 		
 		target_doc.s_warehouse = source_doc.t_warehouse
 		target_doc.qty = source_doc.qty - source_doc.transferred_qty

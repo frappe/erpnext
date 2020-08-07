@@ -68,6 +68,12 @@ frappe.ui.form.on('Material Request', {
 		});
 	},
 
+	on_submit: function(frm) {
+		if(frm.doc.docstatus === 1 && frm.doc.add_to_transit) {
+			frm.events.make_stock_entry(frm)
+		}
+	},
+
 	onload_post_render: function(frm) {
 		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	},
@@ -104,26 +110,7 @@ frappe.ui.form.on('Material Request', {
 					add_create_pick_list_button();
 					frm.add_custom_button(__("Transfer Material"),
 						() => frm.events.make_stock_entry(frm), __('Create'));
-
-					frm.add_custom_button(__("Begin Transit"),
-						() => {
-							return frappe.call({
-								type: "GET",
-								method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
-								args: {
-									"source_name": frm.doc.name,
-									"purpose": "Send to Warehouse",
-									"add_to_transit": true
-								},
-								freeze: true,
-								callback: function(r) {
-									var doc = frappe.model.sync(r.message);
-									frappe.set_route("Form", r.message.doctype, r.message.name);
-								}
-							})
-					},__('Create'));
 				}
-			
 
 				if (frm.doc.material_request_type === "Material Issue") {
 					frm.add_custom_button(__("Issue Material"),
@@ -335,11 +322,11 @@ frappe.ui.form.on('Material Request', {
 		});
 	},
 
-	make_stock_entry: function(frm, target_warehouse = null) {
+	make_stock_entry: function(frm) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
 			frm: frm,
-			warehouse: target_warehouse
+			add_to_transit : frm.doc.add_to_transit ? 1 : 0
 		});
 	},
 

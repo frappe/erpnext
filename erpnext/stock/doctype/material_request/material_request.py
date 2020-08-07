@@ -97,6 +97,8 @@ class MaterialRequest(BuyingController):
 	def before_save(self):
 		self.set_status(update=True)
 
+		self.transfer_status = 'Not Started' if self.add_to_transit else ''
+
 	def before_submit(self):
 		self.set_status(update=True)
 
@@ -443,8 +445,7 @@ def make_supplier_quotation(source_name, target_doc=None):
 	return doclist
 
 @frappe.whitelist()
-def make_stock_entry(source_name, target_doc=None, purpose=None, add_to_transit=False):
-
+def make_stock_entry(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
 		qty = flt(flt(obj.stock_qty) - flt(obj.ordered_qty))/ target.conversion_factor \
 			if flt(obj.stock_qty) > flt(obj.ordered_qty) else 0
@@ -463,7 +464,7 @@ def make_stock_entry(source_name, target_doc=None, purpose=None, add_to_transit=
 		if source_parent.material_request_type == "Material Transfer":
 			target.s_warehouse = obj.from_warehouse
 
-		if add_to_transit:
+		if source_parent.add_to_transit:
 			target_warehouse = frappe.db.get_value('Company', source_parent.company, 'default_in_transit_warehouse')
 			target.t_warehouse = target_warehouse if target_warehouse else None
 
@@ -476,12 +477,9 @@ def make_stock_entry(source_name, target_doc=None, purpose=None, add_to_transit=
 		if source.material_request_type == "Customer Provided":
 			target.purpose = "Material Receipt"
 
-		if purpose:
-			target.purpose = purpose
-
-		if add_to_transit:
-			target.add_to_transit = 1
-			target.transfer_status = "Not Started"
+		if source.add_to_transit:
+			target.in_transit = 1
+			target.purpose = "Send to Warehouse"
 			target.to_warehouse = frappe.db.get_value("Company", target.company, 'default_in_transit_warehouse')
 
 		target.run_method("calculate_rate_and_amount")
