@@ -479,19 +479,11 @@ class AccountsController(TransactionBase):
 			if d.against_order:
 				allocated_amount = flt(d.amount)
 			else:
-				party_account_currency = self.get('party_account_currency')
-
-				if not party_account_currency:
-					party_type, party = self.get_party()
-
-					if party_type and party:
-						party_account_currency = get_party_account_currency(party_type, party, self.company)
-
-				if party_account_currency == self.company_currency:
+				if self.get('party_account_currency') == self.company_currency:
 					amount = self.get('base_rounded_total') or self.base_grand_total
 				else:
 					amount = self.get('rounded_total') or self.grand_total
-				amount = self.base_rounded_total or self.base_grand_total
+
 				allocated_amount = min(amount - advance_allocated, d.amount)
 			advance_allocated += flt(allocated_amount)
 
