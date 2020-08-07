@@ -310,6 +310,7 @@ class GSTR3BReport(Document):
 			inter_state_supply_tax_mapping.setdefault(cstr(d.name), {
 				'place_of_supply': d.place_of_supply,
 				'taxable_value': d.net_total,
+				'gst_category': d.gst_category,
 				'camt': 0.0,
 				'samt': 0.0,
 				'iamt': 0.0,
@@ -337,15 +338,15 @@ class GSTR3BReport(Document):
 				osup_det["samt"] = flt(osup_det["samt"] + value['samt'], 2)
 				osup_det["csamt"] = flt(osup_det["csamt"] + value['csamt'], 2)
 
-				if state_number != d.place_of_supply.split("-")[0]:
-					inter_state_supply_details.setdefault((d.gst_category, d.place_of_supply), {
+				if state_number != value.get('place_of_supply').split("-")[0]:
+					inter_state_supply_details.setdefault((value.get('gst_category'), value.get('place_of_supply')), {
 						"txval": 0.0,
-						"pos": d.place_of_supply.split("-")[0],
+						"pos": value.get('place_of_supply').split("-")[0],
 						"iamt": 0.0
 					})
 
-					inter_state_supply_details[(d.gst_category, d.place_of_supply)]['txval'] += value['taxable_value']
-					inter_state_supply_details[(d.gst_category, d.place_of_supply)]['iamt'] += value['iamt']
+					inter_state_supply_details[(value.get('gst_category'), value.get('place_of_supply'))]['txval'] += value['taxable_value']
+					inter_state_supply_details[(value.get('gst_category'), value.get('place_of_supply'))]['iamt'] += value['iamt']
 
 		return inter_state_supply_details
 
