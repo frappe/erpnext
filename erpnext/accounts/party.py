@@ -611,7 +611,7 @@ def get_partywise_advanced_payment_amount(party_type, posting_date = None, futur
 			cond = "posting_date <= '{0}'".format(posting_date)
 
 	if company:
-		cond += "and company = '{0}'".format(company)
+		cond += "and company = '{0}'".format(frappe.db.escape(company))
 
 	data = frappe.db.sql(""" SELECT party, sum({0}) as amount
 		FROM `tabGL Entry`
