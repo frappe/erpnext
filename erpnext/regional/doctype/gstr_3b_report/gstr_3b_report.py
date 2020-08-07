@@ -226,7 +226,6 @@ class GSTR3BReport(Document):
 		txval = 0
 		total_taxable_value = self.get_total_taxable_value(doctype, reverse_charge)
 
-		print(tax_details)
 		for gst_category in gst_category_list:
 			txval += total_taxable_value.get(gst_category,0)
 			for account_head in self.account_heads:
@@ -239,6 +238,8 @@ class GSTR3BReport(Document):
 			txval -= self.report_dict.get(supply_type, {}).get(supply_category, {}).get(v, 0)
 
 		self.report_dict[supply_type][supply_category]["txval"] += flt(txval, 2)
+
+		print(self.report_dict['sup_details']['osup_det']['iamt'], 1)
 
 	def set_inter_state_supply(self, inter_state_supply):
 
@@ -347,7 +348,7 @@ class GSTR3BReport(Document):
 
 					inter_state_supply_details[(d.gst_category, d.place_of_supply)]['txval'] += value['taxable_value']
 					inter_state_supply_details[(d.gst_category, d.place_of_supply)]['iamt'] += value['iamt']
-
+		print(self.report_dict['sup_details']['osup_det']['iamt'], 2)
 		return inter_state_supply_details
 
 	def get_inward_nil_exempt(self, state):
