@@ -122,7 +122,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		cost_center = frappe.form_dict.get("cost_center")
 
 
-	cond = []
+	cond = ["is_cancelled=0"]
 	if date:
 		cond.append("posting_date <= %s" % frappe.db.escape(cstr(date)))
 	else:
@@ -206,7 +206,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		return flt(bal)
 
 def get_count_on(account, fieldname, date):
-	cond = []
+	cond = ["is_cancelled=0"]
 	if date:
 		cond.append("posting_date <= %s" % frappe.db.escape(cstr(date)))
 	else:
@@ -676,7 +676,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 	invoice_list = frappe.db.sql("""
 		select
 			voucher_no, voucher_type, posting_date, due_date,
-			ifnull(sum({dr_or_cr}), 0) as invoice_amount
+			ifnull(sum({dr_or_cr}), 0) as invoice_amount,
+			account_currency as currency
 		from
 			`tabGL Entry`
 		where
@@ -733,7 +734,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 						'invoice_amount': flt(d.invoice_amount),
 						'payment_amount': payment_amount,
 						'outstanding_amount': outstanding_amount,
-						'due_date': d.due_date
+						'due_date': d.due_date,
+						'currency': d.currency
 					})
 				)
 

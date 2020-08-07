@@ -40,7 +40,7 @@ def get_appointments_to_invoice(patient, company):
 	patient_appointments = frappe.get_list(
 			'Patient Appointment',
 			fields = '*',
-			filters = {'patient': patient.name, 'company': company, 'invoiced': 0},
+			filters = {'patient': patient.name, 'company': company, 'invoiced': 0, 'status': ['not in', 'Cancelled']},
 			order_by = 'appointment_date'
 		)
 
