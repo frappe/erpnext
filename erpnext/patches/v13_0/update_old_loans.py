@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.utils import nowdate
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_term_loans
@@ -27,11 +28,15 @@ def execute():
 		# Update details in Loan Types and Loan
 		loan_type_company = frappe.db.get_value('Loan Type', loan.loan_type, 'company')
 
-		parent_income = frappe.get_value('Account', {'company': loan.company,
-			'is_group': 1, 'root_type': 'Income'})
+		group_income_account = frappe.get_value('Account', {'company': loan.company,
+			'is_group': 1, 'root_type': 'Income', 'account_name': _('Indirect Income')})
+
+		if not group_income_account:
+			group_income_account = frappe.get_value('Account', {'company': loan.company,
+				'is_group': 1, 'root_type': 'Income'})
 
 		penalty_account = create_account(company=loan.company, account_type='Income Account',
-			account_name='Penalty Account', parent_account=parent_income)
+			account_name='Penalty Account', parent_account=group_income_account)
 
 		if not loan_type_company:
 			loan_type_doc = frappe.get_doc('Loan Type', loan.loan_type)
