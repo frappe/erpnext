@@ -15,7 +15,7 @@ frappe.ui.form.on('Process Statement Of Accounts', {
 						"document_name": frm.doc.name,
 					},
 					callback: function(r) {
-						if(r.message) {
+						if(r && r.message) {
 							frappe.show_alert({message: __('Emails Queued'), indicator: 'blue'});
 						}
 						else{
@@ -31,16 +31,13 @@ frappe.ui.form.on('Process Statement Of Accounts', {
 				$.ajax({
 					url: url,
 					type: 'GET',
-					success: function(result, status) {
+					success: function(result) {
 						if(jQuery.isEmptyObject(result)){
 							frappe.msgprint('No Records for these settings.');
 						}
 						else{
 							window.location = url;
 						}
-					},
-					fail: function(){
-						frappe.msgprint('No Records for this day');
 					}
 				});
 			});
@@ -54,13 +51,6 @@ frappe.ui.form.on('Process Statement Of Accounts', {
 				}
 			}
 		});
-		frm.fields_dict['customers'].grid.get_field('customer').get_query = function(doc, cdt, cdn) {
-			return {
-				filters: [
-					['email_id', '!=', '']
-				]
-			}
-		}
 		if(frm.doc.__islocal){
 			frm.set_value('from_date', frappe.datetime.add_months(frappe.datetime.get_today(), -1));
 			frm.set_value('to_date', frappe.datetime.get_today());
