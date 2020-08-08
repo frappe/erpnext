@@ -234,9 +234,6 @@ class GSTR3BReport(Document):
 						self.report_dict[supply_type][supply_category][account_map.get(account_type)] += \
 							flt(tax_details.get((account_name, gst_category), {}).get("amount"), 2)
 
-		for k, v in iteritems(account_map):
-			txval -= self.report_dict.get(supply_type, {}).get(supply_category, {}).get(v, 0)
-
 		self.report_dict[supply_type][supply_category]["txval"] += flt(txval, 2)
 
 	def set_inter_state_supply(self, inter_state_supply):
@@ -256,7 +253,7 @@ class GSTR3BReport(Document):
 	def get_total_taxable_value(self, doctype, reverse_charge):
 
 		return frappe._dict(frappe.db.sql("""
-			select gst_category, sum(base_grand_total) as total
+			select gst_category, sum(net_total) as total
 			from `tab{doctype}`
 			where docstatus = 1 and month(posting_date) = %s
 			and year(posting_date) = %s and reverse_charge = %s
@@ -307,7 +304,6 @@ class GSTR3BReport(Document):
 		inter_state_supply_details = {}
 
 		for d in inter_state_supply_tax:
-			print(d)
 			inter_state_supply_tax_mapping.setdefault(cstr(d.name), {
 				'place_of_supply': d.place_of_supply,
 				'taxable_value': d.net_total,
@@ -319,23 +315,18 @@ class GSTR3BReport(Document):
 			})
 
 			if d.account_head in [a.cgst_account for a in self.account_heads]:
-				print(d, "CGST")
 				inter_state_supply_tax_mapping[cstr(d.name)]['camt'] += d.tax_amount
 
 			if d.account_head in [a.sgst_account for a in self.account_heads]:
-				print(d, "SGST")
 				inter_state_supply_tax_mapping[cstr(d.name)]['samt'] += d.tax_amount
 
 			if d.account_head in [a.igst_account for a in self.account_heads]:
-				print(d, "IGST")
 				inter_state_supply_tax_mapping[cstr(d.name)]['iamt'] += d.tax_amount
 
 			if d.account_head in [a.cess_account for a in self.account_heads]:
-				print(d, "CESS")
 				inter_state_supply_tax_mapping[cstr(d.name)]['csamt'] += d.tax_amount
 
 		for key, value in iteritems(inter_state_supply_tax_mapping):
-			print(key, value, state_number)
 			if value.get('place_of_supply'):
 				osup_det = self.report_dict["sup_details"]["osup_det"]
 				osup_det["txval"] = flt(osup_det["txval"] + value['taxable_value'], 2)
@@ -354,7 +345,6 @@ class GSTR3BReport(Document):
 					inter_state_supply_details[(value.get('gst_category'), value.get('place_of_supply'))]['txval'] += value['taxable_value']
 					inter_state_supply_details[(value.get('gst_category'), value.get('place_of_supply'))]['iamt'] += value['iamt']
 
-		print(inter_state_supply_details)
 		return inter_state_supply_details
 
 	def get_inward_nil_exempt(self, state):
