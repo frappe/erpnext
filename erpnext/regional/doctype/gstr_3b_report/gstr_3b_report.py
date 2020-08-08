@@ -337,7 +337,7 @@ class GSTR3BReport(Document):
 				if state_number != value.get('place_of_supply').split("-")[0]:
 					inter_state_supply_details.setdefault((value.get('gst_category'), value.get('place_of_supply')), {
 						"txval": 0.0,
-						"pos": d.place_of_supply.split("-")[0],
+						"pos": value.get('place_of_supply').split("-")[0],
 						"iamt": 0.0
 					})
 
