@@ -307,6 +307,7 @@ class GSTR3BReport(Document):
 		inter_state_supply_details = {}
 
 		for d in inter_state_supply_tax:
+			print(d)
 			inter_state_supply_tax_mapping.setdefault(cstr(d.name), {
 				'place_of_supply': d.place_of_supply,
 				'taxable_value': d.net_total,
@@ -317,16 +318,20 @@ class GSTR3BReport(Document):
 				'csamt': 0.0
 			})
 
-			if d.account_head in [d.cgst_account for d in self.account_heads]:
+			if d.account_head in [a.cgst_account for a in self.account_heads]:
+				print(d, "CGST")
 				inter_state_supply_tax_mapping[cstr(d.name)]['camt'] += d.tax_amount
 
-			if d.account_head in [d.sgst_account for d in self.account_heads]:
+			if d.account_head in [a.sgst_account for a in self.account_heads]:
+				print(d, "SGST")
 				inter_state_supply_tax_mapping[cstr(d.name)]['samt'] += d.tax_amount
 
-			if d.account_head in [d.igst_account for d in self.account_heads]:
+			if d.account_head in [a.igst_account for a in self.account_heads]:
+				print(d, "IGST")
 				inter_state_supply_tax_mapping[cstr(d.name)]['iamt'] += d.tax_amount
 
-			if d.account_head in [d.cess_account for d in self.account_heads]:
+			if d.account_head in [a.cess_account for a in self.account_heads]:
+				print(d, "CESS")
 				inter_state_supply_tax_mapping[cstr(d.name)]['csamt'] += d.tax_amount
 
 		for key, value in iteritems(inter_state_supply_tax_mapping):
