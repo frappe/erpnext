@@ -330,6 +330,7 @@ class GSTR3BReport(Document):
 				inter_state_supply_tax_mapping[cstr(d.name)]['csamt'] += d.tax_amount
 
 		for key, value in iteritems(inter_state_supply_tax_mapping):
+			print(key, value, state_number)
 			if value.get('place_of_supply'):
 				osup_det = self.report_dict["sup_details"]["osup_det"]
 				osup_det["txval"] = flt(osup_det["txval"] + value['taxable_value'], 2)
@@ -348,6 +349,7 @@ class GSTR3BReport(Document):
 					inter_state_supply_details[(value.get('gst_category'), value.get('place_of_supply'))]['txval'] += value['taxable_value']
 					inter_state_supply_details[(value.get('gst_category'), value.get('place_of_supply'))]['iamt'] += value['iamt']
 
+		print(inter_state_supply_details)
 		return inter_state_supply_details
 
 	def get_inward_nil_exempt(self, state):
