@@ -90,9 +90,9 @@
   },
   {
    "fieldname": "currency",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Currency",
-   "options": "USD\nINR"
+   "options": "Currency"
   },
   {
    "fieldname": "amount",
