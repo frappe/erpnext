@@ -170,47 +170,40 @@
    "fieldname": "is_opening",
    "fieldtype": "Check",
    "label": "Is opening",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "depends_on": "eval:doc.is_opening == 0",
    "fieldname": "distance_covered",
    "fieldtype": "Int",
    "label": "Distance Covered",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fetch_from": "license_plate.uom",
    "fieldname": "fuel_uom",
    "fieldtype": "Data",
    "label": "Fuel UOM",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fetch_from": "license_plate.fuel_type",
    "fieldname": "fuel_type",
    "fieldtype": "Data",
    "label": "Fuel Type",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-13 16:17:02.674535",
+ "modified": "2020-08-10 13:26:26.253128",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Vehicle Log",
  "owner": "Administrator",
  "permissions": [
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,

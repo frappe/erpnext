@@ -33,6 +33,6 @@ class Vehicle(Document):
 def get_timeline_data(doctype, name):
 	'''Return timeline for vehicle log'''
 	return dict(frappe.db.sql('''select unix_timestamp(date), count(*)
-	from `tabVehicle Log` where license_plate=%s
+	from `tabVehicle Log` where license_plate=%s and docstatus = 1
 	and date > date_sub(curdate(), interval 1 year)
 	group by date''', name))

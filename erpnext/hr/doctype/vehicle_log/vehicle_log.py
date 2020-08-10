@@ -20,14 +20,6 @@ class VehicleLog(Document):
 	def on_submit(self):
 		frappe.db.set_value("Vehicle", self.license_plate, "last_odometer_value", self.odometer)
 
-	def on_cancel(self):
-		latest_odometer_value = frappe.db.get_value("Vehicle", self.license_plate, "last_odometer_value")
-		if self.odometer ==  latest_odometer_value and self.distance_covered > 0:
-			updated_odometer_value = flt(frappe.db.get_value("Vehicle", self.license_plate, "last_odometer_value")) - (self.distance_covered)
-			frappe.db.set_value("Vehicle", self.license_plate, "last_odometer_value", updated_odometer_value)
-		else:
-			frappe.throw(_("You can only Cancel Latest Vehicle Log"))
-
 @frappe.whitelist()
 def make_expense_claim(docname):
 	expense_claim = frappe.db.exists("Expense Claim", {"vehicle_log": docname})
