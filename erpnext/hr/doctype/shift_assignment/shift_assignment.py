@@ -60,15 +60,17 @@ class ShiftAssignment(Document):
 	def throw_overlap_error(self, shift_details):
 		shift_details = frappe._dict(shift_details)
 		if shift_details.docstatus == 0:
-			msg = _("Employee {0} has already applied for {1}: {2}").format(self.employee, self.shift_type, shift_details.name)
+			msg = _("Employee {0} has already applied for {1}: {2}").format(frappe.bold(self.employee), frappe.bold(self.shift_type), frappe.bold(shift_details.name))
 		if shift_details.docstatus == 1 and shift_details.status == "Active":
-			msg = _("Employee {0} already has Active Shift {1}: {2}").format(self.employee, self.shift_type, shift_details.name)
+			msg = _("Employee {0} already has Active Shift {1}: {2}").format(frappe.bold(self.employee), frappe.bold(self.shift_type), frappe.bold(shift_details.name))
 		if shift_details.start_date:
 			msg += _(" from {0}").format(getdate(self.start_date).strftime("%d-%m-%Y"))
+			title = "Ongoing Shift"
 			if shift_details.end_date:
 				msg += _(" to {0}").format(getdate(self.end_date).strftime("%d-%m-%Y"))
+				title = "Active Shift"
 		if msg:
-			frappe.throw(msg)
+			frappe.throw(msg, title=title)
 
 @frappe.whitelist()
 def get_events(start, end, filters=None):
