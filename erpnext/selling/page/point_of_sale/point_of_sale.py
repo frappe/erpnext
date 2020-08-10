@@ -14,10 +14,9 @@ from six import string_types
 def get_items(start, page_length, price_list, item_group, search_value="", pos_profile=None):
 	data = dict()
 	warehouse = ""
-	display_items_in_stock = 0
 
 	if pos_profile:
-		warehouse, display_items_in_stock = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'display_items_in_stock'])
+		warehouse = frappe.db.get_value('POS Profile', pos_profile, ['warehouse'])
 
 	if not frappe.db.exists('Item Group', item_group):
 		item_group = get_root_of('Item Group')
@@ -85,7 +84,7 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 			item_price = item_prices.get(item_code) or {}
 			item_stock_qty = get_stock_availability(item_code, warehouse)
 
-			if display_items_in_stock and not item_stock_qty:
+			if not item_stock_qty:
 				pass
 			else:
 				row = {}
@@ -160,6 +159,7 @@ def get_item_group_condition(pos_profile):
 	return cond % tuple(item_groups)
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 	item_groups = []
 	cond = "1=1"
@@ -179,12 +179,12 @@ def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 def check_opening_entry(user):
-	open_vouchers = frappe.db.get_all("POS Opening Entry", 
-		filters = { 
-			"user": user, 
+	open_vouchers = frappe.db.get_all("POS Opening Entry",
+		filters = {
+			"user": user,
 			"pos_closing_entry": ["in", ["", None]],
 			"docstatus": 1
-		}, 
+		},
 		fields = ["name", "company", "pos_profile", "period_start_date"],
 		order_by = "period_start_date desc"
 	)
@@ -229,7 +229,7 @@ def get_past_order_list(search_term, status, limit=20):
 		invoice_list = frappe.db.get_all('POS Invoice', filters={
 			'status': status
 		}, fields=fields)
-	
+
 	return invoice_list
 
 @frappe.whitelist()
@@ -244,7 +244,7 @@ def set_customer_info(fieldname, customer, value=""):
 		if fieldname == 'email_id':
 			contact_doc.set('email_ids', [{ 'email_id': value, 'is_primary': 1}])
 			frappe.db.set_value('Customer', customer, 'email_id', value)
-		elif fieldname == 'mobile_no': 
+		elif fieldname == 'mobile_no':
 			contact_doc.set('phone_nos', [{ 'phone': value, 'is_primary_mobile_no': 1}])
 			frappe.db.set_value('Customer', customer, 'mobile_no', value)
 		contact_doc.save()

@@ -6,10 +6,11 @@ frappe.ui.form.on('Assessment Result', {
 		if (!frm.doc.__islocal) {
 			frm.trigger('setup_chart');
 		}
+		frm.set_df_property('details', 'read_only', 1);
 	},
 
 	onload: function(frm) {
-		frm.set_query('assessment_plan', function(){
+		frm.set_query('assessment_plan', function() {
 			return {
 				filters: {
 					docstatus: 1
@@ -27,14 +28,14 @@ frappe.ui.form.on('Assessment Result', {
 				},
 				callback: function(r) {
 					if (r.message) {
-						frm.doc.details = [];
+						frappe.model.clear_table(frm.doc, 'details');
 						$.each(r.message, function(i, d) {
-							var row = frappe.model.add_child(frm.doc, 'Assessment Result Detail', 'details');
+							var row = frm.add_child('details');
 							row.assessment_criteria = d.assessment_criteria;
 							row.maximum_score = d.maximum_score;
 						});
+						frm.refresh_field('details');
 					}
-					refresh_field('details');
 				}
 			});
 		}
@@ -80,7 +81,7 @@ frappe.ui.form.on('Assessment Result Detail', {
 	score: function(frm, cdt, cdn) {
 		var d  = locals[cdt][cdn];
 
-		if(!d.maximum_score || !frm.doc.grading_scale) {
+		if (!d.maximum_score || !frm.doc.grading_scale) {
 			d.score = '';
 			frappe.throw(__('Please fill in all the details to generate Assessment Result.'));
 		}
