@@ -37,7 +37,7 @@
   "on_hold_since",
   "total_hold_time",
   "response",
-  "mins_to_first_response",
+  "first_response_time",
   "first_responded_on",
   "column_break_26",
   "avg_response_time",
@@ -190,7 +190,7 @@
    "collapsible": 1,
    "fieldname": "response",
    "fieldtype": "Section Break",
-   "label": "Response"
+   "label": "Response Details"
   },
   {
    "fieldname": "first_responded_on",
@@ -253,7 +253,7 @@
    "collapsible": 1,
    "fieldname": "section_break_19",
    "fieldtype": "Section Break",
-   "label": "Resolution"
+   "label": "Resolution Details"
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -401,16 +401,16 @@
   },
   {
    "bold": 1,
-   "fieldname": "mins_to_first_response",
-   "fieldtype": "Float",
-   "label": "Mins to First Response",
+   "fieldname": "first_response_time",
+   "fieldtype": "Duration",
+   "label": "First Response Time",
    "read_only": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2020-08-06 19:07:30.346311",
+ "modified": "2020-08-06 22:00:40.184108",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
