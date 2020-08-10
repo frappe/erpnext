@@ -150,7 +150,7 @@ let transfer_patient_dialog = function(frm) {
 			if(check_in > frappe.datetime.now_datetime()){
 				frappe.msgprint({
 					title: __('Not Allowed'),
-					message: __('Check-in time should not be later than current time'),
+					message: __('Check-in time cannot be greater than the current time'),
 					indicator: 'red'
 				});
 				return;
