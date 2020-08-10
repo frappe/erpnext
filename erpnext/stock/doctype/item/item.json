@@ -1058,7 +1058,7 @@
   {
    "fieldname": "website_image_alt",
    "fieldtype": "Data",
-   "label": "Image Alt Text"
+   "label": "Image Description"
   }
  ],
  "has_web_view": 1,
