@@ -26,9 +26,7 @@
    "in_list_view": 1,
    "label": "Shift Type",
    "options": "Shift Type",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fieldname": "employee",
@@ -36,18 +34,14 @@
    "in_list_view": 1,
    "label": "Employee",
    "options": "Employee",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "label": "Employee Name",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fetch_from": "employee.department",
@@ -55,15 +49,11 @@
    "fieldtype": "Link",
    "label": "Department",
    "options": "Department",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "column_break_4",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "company",
@@ -71,24 +61,18 @@
    "in_list_view": 1,
    "label": "Company",
    "options": "Company",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fieldname": "from_date",
    "fieldtype": "Date",
    "label": "From Date",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fieldname": "to_date",
    "fieldtype": "Date",
-   "label": "To Date",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "To Date"
   },
   {
    "fieldname": "amended_from",
@@ -97,9 +81,7 @@
    "no_copy": 1,
    "options": "Shift Request",
    "print_hide": 1,
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "default": "Draft",
@@ -107,23 +89,21 @@
    "fieldtype": "Select",
    "label": "Status",
    "options": "Draft\nApproved\nRejected",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
+   "fetch_from": "employee.shift_request_approver",
+   "fetch_if_empty": 1,
    "fieldname": "approver",
    "fieldtype": "Link",
    "label": "Approver",
    "options": "User",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-23 15:56:44.536207",
+ "modified": "2020-08-10 17:59:31.550558",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Request",

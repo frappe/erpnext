@@ -32,6 +32,8 @@ class ShiftRequest(Document):
 			assignment_doc.insert()
 			assignment_doc.submit()
 
+			frappe.msgprint(_("Shift Assignment: {0} created for Employee: {1}").format(frappe.bold(assignment_doc.name), frappe.bold(self.employee)))
+
 	def on_cancel(self):
 		shift_assignment_list = frappe.get_list("Shift Assignment", {'employee': self.employee, 'shift_request': self.name})
 		if shift_assignment_list:
