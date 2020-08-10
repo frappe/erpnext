@@ -139,7 +139,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 					}, __('Create'))
 				}
 
-				cur_frm.add_custom_button(__('Landed Cost Voucher'), this.make_landed_cost_voucher, __("Make"));
+				cur_frm.add_custom_button(__('Landed Cost Voucher'), this.make_landed_cost_voucher, __("Create"));
 
 				cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
