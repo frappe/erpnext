@@ -12,7 +12,8 @@ def get_data():
 			'Payment Entry': 'party',
 			'Quotation': 'party_name',
 			'Opportunity': 'party_name',
-			'Bank Account': 'party'
+			'Bank Account': 'party',
+			'Subscription': 'party'
 		},
 		'dynamic_links': {
 			'party_name': ['Customer', 'quotation_to']
