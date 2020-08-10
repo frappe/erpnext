@@ -68,12 +68,6 @@ frappe.ui.form.on('Material Request', {
 		});
 	},
 
-	on_submit: function(frm) {
-		if(frm.doc.docstatus === 1 && frm.doc.add_to_transit) {
-			frm.events.make_stock_entry(frm)
-		}
-	},
-
 	onload_post_render: function(frm) {
 		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	},
@@ -325,8 +319,7 @@ frappe.ui.form.on('Material Request', {
 	make_stock_entry: function(frm) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_stock_entry",
-			frm: frm,
-			add_to_transit : frm.doc.add_to_transit ? 1 : 0
+			frm: frm
 		});
 	},
 

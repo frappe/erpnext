@@ -97,8 +97,6 @@ class MaterialRequest(BuyingController):
 	def before_save(self):
 		self.set_status(update=True)
 
-		self.transfer_status = 'Not Started' if self.add_to_transit else ''
-
 	def before_submit(self):
 		self.set_status(update=True)
 
@@ -406,7 +404,6 @@ def get_material_requests_based_on_supplier(doctype, txt, searchfield, start, pa
 	return material_requests
 
 @frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
 def get_default_supplier_query(doctype, txt, searchfield, start, page_len, filters):
 	doc = frappe.get_doc("Material Request", filters.get("doc"))
 	item_list = []
@@ -464,11 +461,6 @@ def make_stock_entry(source_name, target_doc=None):
 		if source_parent.material_request_type == "Material Transfer":
 			target.s_warehouse = obj.from_warehouse
 
-		if source_parent.add_to_transit:
-			target_warehouse = frappe.db.get_value('Company', source_parent.company, 'default_in_transit_warehouse')
-			target.t_warehouse = target_warehouse if target_warehouse else None
-
-
 	def set_missing_values(source, target):
 		target.purpose = source.material_request_type
 		if source.job_card:
@@ -476,11 +468,6 @@ def make_stock_entry(source_name, target_doc=None):
 
 		if source.material_request_type == "Customer Provided":
 			target.purpose = "Material Receipt"
-
-		if source.add_to_transit:
-			target.in_transit = 1
-			target.purpose = "Send to Warehouse"
-			target.to_warehouse = frappe.db.get_value("Company", target.company, 'default_in_transit_warehouse')
 
 		target.run_method("calculate_rate_and_amount")
 		target.set_stock_entry_type()

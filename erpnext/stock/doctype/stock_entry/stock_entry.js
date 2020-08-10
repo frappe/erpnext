@@ -19,7 +19,6 @@ frappe.ui.form.on('Stock Entry', {
 				filters: [
 					['Stock Entry', 'docstatus', '=', 1],
 					['Stock Entry', 'per_transferred', '<','100'],
-					['Stock Entry', 'purpose', '=', 'Send to Warehouse']
 				]
 			}
 		});
@@ -171,10 +170,9 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		}
 
-		if (frm.doc.docstatus === 1 && frm.doc.purpose == 'Send to Warehouse') {
-			if (frm.doc.per_transferred < 100) {
-				let btn_label = frm.doc.in_transit ? __('End Transit') : __('Receive at Warehouse Entry')
-				frm.add_custom_button(btn_label, function() {
+		if (frm.doc.docstatus === 1) {
+			if (frm.doc.add_to_transit && frm.doc.purpose=='Material Transfer' && frm.doc.per_transferred < 100) {
+				frm.add_custom_button('End Transit', function() {
 					frappe.model.open_mapped_doc({
 						method: "erpnext.stock.doctype.stock_entry.stock_entry.make_stock_in_entry",
 						frm: frm
@@ -267,6 +265,7 @@ frappe.ui.form.on('Stock Entry', {
 	stock_entry_type: function(frm){
 		frm.remove_custom_button('Bill of Materials', "Get items from");
 		frm.events.show_bom_custom_button(frm);
+		frm.trigger('add_to_transit');
 	},
 
 	purpose: function(frm) {
@@ -533,6 +532,26 @@ frappe.ui.form.on('Stock Entry', {
 
 	target_warehouse_address: function(frm) {
 		erpnext.utils.get_address_display(frm, 'target_warehouse_address', 'target_address_display', false);
+	},
+
+	add_to_transit: function(frm) {
+		if(frm.doc.add_to_transit && frm.doc.purpose=='Material Transfer') {
+			frm.set_value('stock_entry_type', 'Material Transfer');
+			frm.fields_dict.to_warehouse.get_query = function() {
+				return {
+					filters:{
+						'warehouse_type' : 'Transit',
+						'is_group': 0,
+						'company': frm.doc.company
+					}
+				};
+			};
+			frappe.db.get_value('Company', frm.doc.company, 'default_in_transit_warehouse', (r) => {
+				if (r.default_in_transit_warehouse) {
+					frm.set_value('to_warehouse', r.default_in_transit_warehouse)
+				}
+			});
+		}
 	}
 })
 
@@ -755,6 +774,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 		erpnext.hide_company();
 		erpnext.utils.add_item(this.frm);
+		frm.trigger('add_to_transit');
 	},
 
 	scan_barcode: function() {
