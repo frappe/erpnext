@@ -1,5 +1,4 @@
 {
- "actions": [],
  "creation": "2019-05-09 15:47:39.760406",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -64,10 +63,12 @@
    "options": "transaction_type"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "leaves",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Leaves"
+   "label": "Leaves",
+   "read_only": 1
   },
   {
    "fieldname": "from_date",
@@ -110,8 +111,7 @@
  ],
  "in_create": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-02-27 14:40:10.502605",
+ "modified": "2020-08-10 05:19:11.024643",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Ledger Entry",

@@ -49,6 +49,9 @@ class LeaveAllocation(Document):
 		if self.carry_forward and allocation:
 			expire_allocation(allocation)
 
+	def on_update_after_submit(self):
+		update_ledger_leaves(self.name, self.total_leaves_allocated)
+
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
 		if self.carry_forward:
@@ -221,3 +224,9 @@ def get_unused_leaves(employee, leave_type, from_date, to_date):
 def validate_carry_forward(leave_type):
 	if not frappe.db.get_value("Leave Type", leave_type, "is_carry_forward"):
 		frappe.throw(_("Leave Type {0} cannot be carry-forwarded").format(leave_type))
+
+def update_ledger_leaves(name, total_leaves_allocated):
+	ledger = frappe.get_doc("Leave Ledger Entry", { 'transaction_name': name })
+	ledger.leaves = total_leaves_allocated
+	ledger.save()
+	frappe.db.commit()
