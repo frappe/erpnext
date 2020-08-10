@@ -16,7 +16,7 @@ class ShiftAssignment(Document):
 		self.validate_overlapping_dates()
 
 		if self.end_date and self.end_date <= self.start_date:
-			frappe.throw(_("End Date must not be greater than Start Date"))
+			frappe.throw(_("End Date must not be lesser than Start Date"))
 
 	def validate_overlapping_dates(self):
 		if not self.name:
