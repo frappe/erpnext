@@ -24,8 +24,8 @@ class JobOffer(Document):
 		check_vacancies = frappe.get_single("HR Settings").check_vacancies
 		if staffing_plan and check_vacancies:
 			job_offers = self.get_job_offer(staffing_plan.from_date, staffing_plan.to_date)
-			if staffing_plan.vacancies - len(job_offers) <= 0:
-				frappe.throw(_("There are no vacancies under staffing plan {0}").format(frappe.bold(get_link_to_form("Staffing Plan", staffing_plan.parent))))
+			if staffing_plan.vacancies is None or staffing_plan.vacancies - len(job_offers) <= 0:
+				frappe.throw(_("There are no vacancies under staffing plan {0}").format(frappe.bold(get_link_to_form("Staffing Plan", staffing_plan.parent) if staffing_plan.parent else 'for ' + self.designation)))
 
 	def on_change(self):
 		update_job_applicant(self.status, self.job_applicant)
