@@ -8,7 +8,7 @@ def get_data():
 		'fieldname': 'taxes_and_charges',
 		'non_standard_fieldnames': {
 			'Tax Rule': 'sales_tax_template',
-			'Subscription': 'tax_template',
+			'Subscription': 'sales_tax_template',
 			'Restaurant': 'default_tax_template'
 		},
 		'transactions': [
