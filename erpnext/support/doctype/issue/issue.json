@@ -20,9 +20,6 @@
   "issue_type",
   "issue_split_from",
   "sb_details",
-  "via_customer_portal",
-  "attachment",
-  "content_type",
   "description",
   "service_level_section",
   "service_level_agreement",
@@ -56,7 +53,10 @@
   "column_break_16",
   "customer_name",
   "project",
-  "company"
+  "company",
+  "via_customer_portal",
+  "attachment",
+  "content_type"
  ],
  "fields": [
   {
@@ -410,7 +410,7 @@
  "icon": "fa fa-ticket",
  "idx": 7,
  "links": [],
- "modified": "2020-08-06 22:00:40.184108",
+ "modified": "2020-08-11 18:49:07.574769",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue",
