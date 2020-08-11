@@ -29,6 +29,7 @@
    "unique": 1
   },
   {
+   "description": "Haircut percentage is the percentage difference between market value of the Loan Security and the value ascribed to that Loan Security when used as collateral for that loan.",
    "fieldname": "haircut",
    "fieldtype": "Percent",
    "label": "Haircut %"
@@ -46,13 +47,14 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Loan To Value Ratio expresses the ratio of the loan amount to the value of the security pledged. A loan security shortfall will be triggered if this falls below the specified value for any loan ",
    "fieldname": "loan_to_value_ratio",
    "fieldtype": "Percent",
    "label": "Loan To Value Ratio"
   }
  ],
  "links": [],
- "modified": "2020-04-28 14:06:49.046177",
+ "modified": "2020-05-16 09:38:45.988080",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Type",

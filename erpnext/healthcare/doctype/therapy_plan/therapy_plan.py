@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils import today
 
 class TherapyPlan(Document):
 	def validate(self):
@@ -45,4 +46,6 @@ def make_therapy_session(therapy_plan, patient, therapy_type):
 	therapy_session.rate = therapy_type.rate
 	therapy_session.exercises = therapy_type.exercises
 
+	if frappe.flags.in_test:
+		therapy_session.start_date = today()
 	return therapy_session.as_dict()

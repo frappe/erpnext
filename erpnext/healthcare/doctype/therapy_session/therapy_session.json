@@ -154,7 +154,8 @@
   {
    "fieldname": "start_date",
    "fieldtype": "Date",
-   "label": "Start Date"
+   "label": "Start Date",
+   "reqd": 1
   },
   {
    "fieldname": "start_time",
@@ -219,7 +220,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-29 14:33:34.836594",
+ "modified": "2020-06-30 10:56:10.354268",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Session",
