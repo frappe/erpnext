@@ -868,7 +868,7 @@ class Item(WebsiteGenerator):
 				</thead>
 				{3}
 			</table>
-		""".format(error_description, _('Items'), _('Attributes'), rows)
+		""".format(error_description, _('Variant Items'), _('Attributes'), rows)
 
 		frappe.throw(message, title=_("Variant Attribute Error"), is_minimizable=True, wide=True)
 
