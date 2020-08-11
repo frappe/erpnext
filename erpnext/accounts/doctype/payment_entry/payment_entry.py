@@ -295,9 +295,9 @@ class PaymentEntry(AccountsController):
 				.format(d.idx, d.reference_name, self.party_account))
 		else:
 			if self.payment_type == "Receive":
-				dr_or_cr = "debit" if d.allocated_amount >= 0 else "credit"
+				dr_or_cr = "debit" if flt(d.allocated_amount) >= 0 else "credit"
 			else:
-				dr_or_cr = "credit" if d.allocated_amount >= 0 else "debit"
+				dr_or_cr = "credit" if flt(d.allocated_amount) >= 0 else "debit"
 
 			valid = False
 			for jvd in je_accounts:
@@ -337,7 +337,7 @@ class PaymentEntry(AccountsController):
 
 		total_allocated_amount, base_total_allocated_amount = 0, 0
 		for d in self.get("references"):
-			if d.allocated_amount:
+			if flt(d.allocated_amount):
 				total_allocated_amount += flt(d.allocated_amount)
 				base_total_allocated_amount += flt(flt(d.allocated_amount) * flt(d.exchange_rate),
 					self.precision("base_paid_amount"))
@@ -440,7 +440,7 @@ class PaymentEntry(AccountsController):
 
 		if self.payment_type in ["Receive", "Pay"]:
 			for d in self.get("references"):
-				if d.allocated_amount:
+				if flt(d.allocated_amount):
 					remarks.append(_("Amount {0} {1} against {2} {3}").format(self.party_account_currency,
 						d.allocated_amount, d.reference_doctype, d.reference_name))
 
@@ -498,7 +498,7 @@ class PaymentEntry(AccountsController):
 					self.precision("paid_amount"))
 
 				gle.update({
-					dr_or_cr + "_in_account_currency": d.allocated_amount,
+					dr_or_cr + "_in_account_currency": flt(d.allocated_amount),
 					dr_or_cr: allocated_amount_in_company_currency
 				})
 
@@ -572,7 +572,7 @@ class PaymentEntry(AccountsController):
 	def update_advance_paid(self):
 		if self.payment_type in ("Receive", "Pay") and self.party:
 			for d in self.get("references"):
-				if d.allocated_amount \
+				if flt(d.allocated_amount) \
 					and d.reference_doctype in ("Sales Order", "Purchase Order", "Employee Advance"):
 						frappe.get_doc(d.reference_doctype, d.reference_name).set_total_advance_paid()
 
