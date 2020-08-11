@@ -438,7 +438,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 			this.filter_area.add([["Task", "project", "=", project]]);
 		}
 		let filters = this.get_filters_for_args()
-		filters.append(["Task", "parent_task", "=", '']);
+		filters.push(["Task", "parent_task", "=", '']);
 		console.log(filters)
 
 		frappe.call(this.get_call_args("Task", method, fields, filters)).then(r => {
@@ -878,7 +878,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 	}
 }
 
-class CustomFilterArea extends frappe.views.FilterArea {
+class CustomFilterArea extends frappe.ui.FilterArea {
 
 	refresh_filters(meta) {
 		this.list_view.page.clear_fields();
