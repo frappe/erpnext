@@ -1,0 +1,89 @@
+<h1 class="text-center" style="page-break-before:always">{{ filters.party[0] }}</h1>
+<h3 class="text-center">{{ _("Statement of Accounts") }}</h3>
+
+<h5 class="text-center">
+    {{ frappe.format(filters.from_date, 'Date')}}
+	{{ _("to") }}
+	{{ frappe.format(filters.to_date, 'Date')}}
+</h5>
+
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th style="width: 12%">{{ _("Date") }}</th>
+			<th style="width: 15%">{{ _("Ref") }}</th>
+			<th style="width: 25%">{{ _("Party") }}</th>
+			<th style="width: 15%">{{ _("Debit") }}</th>
+			<th style="width: 15%">{{ _("Credit") }}</th>
+			<th style="width: 18%">{{ _("Balance (Dr - Cr)") }}</th>
+		</tr>
+	</thead>
+	<tbody>
+        {% for row in data %}
+			<tr>
+			{% if(row.posting_date) %}
+				<td>{{ frappe.format(row.posting_date, 'Date') }}</td>
+				<td>{{ row.voucher_type }}
+					<br>{{ row.voucher_no }}</td>
+				<td>
+					{% if not (filters.party or filters.account)  %}
+						{{ row.party or row.account }}
+						<br>
+					{% endif %}
+
+					{{ _("Against") }}: {{ row.against }}
+					<br>{{ _("Remarks") }}: {{ row.remarks }}
+					{% if row.bill_no %}
+						<br>{{ _("Supplier Invoice No") }}: {{ row.bill_no }}
+					{% endif %}
+					</td>
+					<td style="text-align: right">
+						{{ frappe.utils.fmt_money(row.debit, filters.presentation_currency) }}</td>
+					<td style="text-align: right">
+						{{ frappe.utils.fmt_money(row.credit, filters.presentation_currency) }}</td>
+			{% else %}
+				<td></td>
+				<td></td>
+				<td><b>{{ frappe.format(row.account, {fieldtype: "Link"}) or "&nbsp;" }}</b></td>
+				<td style="text-align: right">
+					{{ row.account and frappe.utils.fmt_money(row.debit, filters.presentation_currency) }}
+				</td>
+				<td style="text-align: right">
+					{{ row.account and frappe.utils.fmt_money(row.credit, filters.presentation_currency) }}
+				</td>
+			{% endif %}
+				<td style="text-align: right">
+					{{ frappe.utils.fmt_money(row.balance, filters.presentation_currency) }}
+				</td>
+			</tr>
+		{% endfor %}
+		</tbody>
+</table>
+<br><br>
+{% if aging %}
+<h3 class="text-center">{{ _("Ageing Report Based On ") }} {{ aging.ageing_based_on }}</h3>
+<h5 class="text-center">
+	{{ _("Up to " ) }}  {{ frappe.format(filters.to_date, 'Date')}}
+</h5>
+<br>
+
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th style="width: 12%">30 Days</th>
+			<th style="width: 15%">60 Days</th>
+			<th style="width: 25%">90 Days</th>
+			<th style="width: 15%">120 Days</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>{{ aging.range1 }}</td>
+			<td>{{ aging.range2 }}</td>
+			<td>{{ aging.range3 }}</td>
+			<td>{{ aging.range4 }}</td>
+		</tr>
+	</tbody>
+</table>
+{% endif %}
+<p class="text-right text-muted">Printed On {{ frappe.format(frappe.utils.get_datetime(), 'Datetime') }}</p>
