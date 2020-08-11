@@ -48,7 +48,7 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 		field_name = "Expense Approver"
 	elif filters.get("doctype") == "Shift Request":
 		parentfield = "shift_request_approver"
-		field_name = "Approver"
+		field_name = "Shift Request Approver"
 	if department_list:
 		for d in department_list:
 			approvers += frappe.db.sql("""select user.name, user.first_name, user.last_name from

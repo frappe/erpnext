@@ -78,8 +78,10 @@ class ShiftType(Document):
 			if shift_details and shift_details.shift_type.name == self.name:
 				mark_attendance(employee, date, 'Absent', self.name)
 
-	def get_assigned_employee(self, consider_default_shift=False):
-		filters = {'shift_type': self.name, 'docstatus': '1'}
+	def get_assigned_employee(self, from_date=None, consider_default_shift=False):
+		filters = {'start_date':('>', from_date), 'shift_type': self.name, 'docstatus': '1'}
+		if not from_date:
+			del filters["start_date"]
 
 		assigned_employees = frappe.get_all('Shift Assignment', 'employee', filters, as_list=True)
 		assigned_employees = [x[0] for x in assigned_employees]
