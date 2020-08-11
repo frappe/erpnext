@@ -113,7 +113,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		acc = frappe.get_doc("Account", account)
 
 	try:
-		year_start_date = get_fiscal_year(date, verbose=0)[1]
+		year_start_date = get_fiscal_year(date, company=company, verbose=0)[1]
 	except FiscalYearError:
 		if getdate(date) > getdate(nowdate()):
 			# if fiscal year not found and the date is greater than today
@@ -656,7 +656,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 	invoice_list = frappe.db.sql("""
 		select
 			voucher_no, voucher_type, posting_date, due_date,
-			ifnull(sum({dr_or_cr}), 0) as invoice_amount
+			ifnull(sum({dr_or_cr}), 0) as invoice_amount,
+			account_currency as currency
 		from
 			`tabGL Entry`
 		where
@@ -713,7 +714,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 						'invoice_amount': flt(d.invoice_amount),
 						'payment_amount': payment_amount,
 						'outstanding_amount': outstanding_amount,
-						'due_date': d.due_date
+						'due_date': d.due_date,
+						'currency': d.currency
 					})
 				)
 
@@ -765,10 +767,10 @@ def get_children(doctype, parent, company, is_root=False):
 		company_currency = frappe.get_cached_value('Company',  company,  "default_currency")
 		for each in acc:
 			each["company_currency"] = company_currency
-			each["balance"] = flt(get_balance_on(each.get("value"), in_account_currency=False))
+			each["balance"] = flt(get_balance_on(each.get("value"), in_account_currency=False, company=company))
 
 			if each.account_currency != company_currency:
-				each["balance_in_account_currency"] = flt(get_balance_on(each.get("value")))
+				each["balance_in_account_currency"] = flt(get_balance_on(each.get("value"), company=company))
 
 	return acc
 

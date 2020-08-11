@@ -167,6 +167,7 @@ def get_item_group_condition(pos_profile):
 
 	return cond % tuple(item_groups)
 
+@frappe.whitelist()
 def item_group_query(doctype, txt, searchfield, start, page_len, filters):
 	item_groups = []
 	cond = "1=1"
