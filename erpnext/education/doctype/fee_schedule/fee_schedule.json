@@ -168,6 +168,7 @@
    "fieldname": "grand_total_in_words",
    "fieldtype": "Data",
    "label": "In Words",
+   "length": 240,
    "read_only": 1
   },
   {
@@ -272,7 +273,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-15 08:39:20.682837",
+ "modified": "2020-07-18 05:11:49.905457",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Fee Schedule",

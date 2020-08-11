@@ -248,10 +248,7 @@ def get_conditions(filters):
 	if not (filters.get("month") and filters.get("year")):
 		msgprint(_("Please select month and year"), raise_exception=1)
 
-	filters["month"] = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov",
-		"Dec"].index(filters.month) + 1
-
-	filters["total_days_in_month"] = monthrange(cint(filters.year), filters.month)[1]
+	filters["total_days_in_month"] = monthrange(cint(filters.year), cint(filters.month))[1]
 
 	conditions = " and month(attendance_date) = %(month)s and year(attendance_date) = %(year)s"
 
