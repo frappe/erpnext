@@ -36,12 +36,12 @@ frappe.ui.form.on("Company", {
 		});
 
 		frm.set_query("default_in_transit_warehouse", function() {
-			return { 
+			return {
 				filters:{
 					'warehouse_type' : 'Transit',
 					'is_group': 0,
 					'company': frm.doc.company
-				} 
+				}
 			};
 		});
 	},

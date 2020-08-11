@@ -548,7 +548,7 @@ frappe.ui.form.on('Stock Entry', {
 			};
 			frappe.db.get_value('Company', frm.doc.company, 'default_in_transit_warehouse', (r) => {
 				if (r.default_in_transit_warehouse) {
-					frm.set_value('to_warehouse', r.default_in_transit_warehouse)
+					frm.set_value('to_warehouse', r.default_in_transit_warehouse);
 				}
 			});
 		}
@@ -774,7 +774,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 		erpnext.hide_company();
 		erpnext.utils.add_item(this.frm);
-		frm.trigger('add_to_transit');
+		this.frm.trigger('add_to_transit');
 	},
 
 	scan_barcode: function() {
@@ -940,8 +940,6 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			doc.purpose!='Material Issue');
 
 		this.frm.fields_dict["items"].grid.set_column_disp("additional_cost", doc.purpose!='Material Issue');
-		this.frm.toggle_reqd("outgoing_stock_entry",
-			doc.purpose == 'Receive at Warehouse' ? 1: 0);
 	},
 
 	supplier: function(doc) {
