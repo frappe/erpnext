@@ -16,6 +16,7 @@ def get_projects_data(params):
 @frappe.whitelist()
 def get_tasks(params):
 	args = get_form_params(json.loads(params))
+
 	args.get("fields").append('`tabTask`.`is_group` as expandable')
 	data = compress(execute(**args), args=args)
 

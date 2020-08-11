@@ -22,6 +22,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 	constructor(opts) {
 		super(opts);
 		this.show();
+		window.cur_list = this;
 	}
 
 	setup_defaults() {
@@ -268,11 +269,13 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		return this.task_fields.map(f => frappe.model.get_full_column_name(f[0], f[1]));
 	}
 
-	get_call_args(doctype, method, fields, filters) {
+	get_call_args(doctype, method, fields, filters, order_by, start) {
 		doctype = doctype || "Project";
 		method = method || "erpnext.projects.page.project.project.get_projects_data";
 		fields = fields || this.get_fields();
 		filters = filters || this.get_filters_for_args();
+		// order_by = order_by || this.sort_selector.get_sql_string();
+		start = start || this.start;
 
 		return {
 			method: method,
@@ -376,6 +379,8 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 			this.set_title("Projects");
 			this.remove_previous_button()
 			this.render_header(this.columns, true);
+			this.filter_area.refresh_filters(this.meta);
+			this.filter_area.clear();
 			this.refresh();
 		})
 	}
@@ -383,21 +388,29 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 	get_tasks() {
 		this.$result.on('click', '.project-list-row-container', (e) => {
 			this.set_title("Tasks");
+			this.filter_area.refresh_filters(this.task_meta);
+			this.fetch_tasks(unescape(e.currentTarget.getAttribute("data-name")));
+		});
+	}
 
-			let method = "erpnext.projects.page.project.project.get_tasks";
-			let fields = this.get_task_fields();
-			let filters = [["Task", "project", "=", unescape(e.currentTarget.getAttribute("data-name"))]];
+	fetch_tasks(project) {
+		let method = "erpnext.projects.page.project.project.get_tasks";
+		let fields = this.get_task_fields();
 
-			frappe.call(this.get_call_args("Task", method, fields, filters)).then(r => {
-				// render
-				this.render_header(this.task_columns, true);
-				this.prepare_data(r);
-				this.toggle_result_area();
-				this.render("Task", true);
-				this.render_previous_button();
-				this.after_render();
-			});
+		if (project) {
+			this.filter_area.add([["Task", "project", "=", project]]);
+		}
+		let filters = this.get_filters_for_args()
+		console.log(filters)
 
+		frappe.call(this.get_call_args("Task", method, fields, filters)).then(r => {
+			// render
+			this.render_header(this.task_columns, true);
+			this.prepare_data(r);
+			this.toggle_result_area();
+			this.render("Task", true);
+			this.render_previous_button();
+			this.after_render();
 		});
 	}
 
@@ -437,6 +450,14 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		const show_more = (this.start + this.page_length) <= this.data.length;
 		this.$paging_area.find('.btn-more')
 			.toggle(show_more);
+	}
+
+	setup_filter_area() {
+		this.filter_area = new CustomFilterArea(this);
+
+		if (this.filters && this.filters.length > 0) {
+			return this.filter_area.set(this.filters);
+		}
 	}
 
 	get_list_row_html(doc) {
@@ -479,8 +500,6 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 			</div>
 		</div>
 		`;
-
-		// style="padding-left: 25px;"
 	}
 
 	get_left_html(columns, doc, level) {
@@ -730,7 +749,10 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		const subject_field = columns[0].df;
 
 		let subject_html = `
-			<div class="ellipsis" style="width:25px; margin-right:5px;" />
+			<input class="level-item list-check-all hidden-xs" type="checkbox" title="${__("Select All")}">
+			<span class="level-item list-liked-by-me">
+				<i class="octicon octicon-heart text-extra-muted" title="${__("Likes")}"></i>
+			</span>
 			<span class="level-item">${__(subject_field.label)}</span>
 		`;
 
@@ -763,6 +785,27 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		`;
 	}
 
+	on_row_checked() {
+		this.$list_head_subject = this.$list_head_subject || this.$result.find('header .list-header-subject');
+		this.$checkbox_actions = this.$checkbox_actions || this.$result.find('header .checkbox-actions');
+
+		this.$checks = this.$result.find('.list-row-checkbox:checked');
+
+		this.$list_head_subject.toggle(this.$checks.length === 0);
+		this.$checkbox_actions.toggle(this.$checks.length > 0);
+
+		if (this.$checks.length === 0) {
+			this.$list_head_subject.find('.list-check-all').prop('checked', false);
+		} else {
+			this.$checkbox_actions.find('.list-header-meta').html(
+				__('{0} items selected', [this.$checks.length])
+			);
+			this.$checkbox_actions.show();
+			this.$list_head_subject.hide();
+		}
+		this.toggle_actions_menu_button(this.$checks.length > 0);
+	}
+
 	get_header_html_skeleton(left = '', right = '') {
 		return `
 			<header class="level list-row list-row-head text-muted small">
@@ -781,8 +824,107 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 			</header>
 		`;
 	}
+}
 
-	setup_filter_area() {}
+class CustomFilterArea extends frappe.views.FilterArea {
 
-	setup_sort_selector() {}
+	refresh_filters(meta) {
+		this.list_view.page.clear_fields();
+		this.list_view.current_doctype = meta.name;
+		// this.$filter_list_wrapper.remove();
+
+		let existing_list = $(this.list_view.parent).find(".filter-list")
+
+		if (existing_list) {
+			existing_list.remove()
+		}
+
+		this.list_view.doctype = meta.name;
+		// this.standard_filters_wrapper = this.list_view.page.page_form;
+		// this.$filter_list_wrapper = $('<div class="filter-list">').appendTo(this.list_view.$frappe_list);
+		this.$filter_list_wrapper = $('<div class="filter-list">').prependTo(this.list_view.$frappe_list);
+
+		this.make_standard_filters(meta);
+		this.make_filter_list(meta.name);
+		this.clear(false);
+	}
+
+	make_standard_filters(meta) {
+		if (!meta) {
+			meta = this.list_view.meta;
+		}
+
+		let fields = [
+			{
+				fieldtype: 'Data',
+				label: 'Name',
+				condition: 'like',
+				fieldname: 'name',
+				onchange: () => this.refresh_list_view()
+			}
+		];
+
+		const doctype_fields = meta.fields;
+		const title_field = meta.title_field;
+
+		fields = fields.concat(doctype_fields.filter(
+			df => (df.fieldname === title_field) || (df.in_standard_filter && frappe.model.is_value_type(df.fieldtype))
+		).map(df => {
+			let options = df.options;
+			let condition = '=';
+			let fieldtype = df.fieldtype;
+			if (['Text', 'Small Text', 'Text Editor', 'HTML Editor', 'Data', 'Code', 'Read Only'].includes(fieldtype)) {
+				fieldtype = 'Data';
+				condition = 'like';
+			}
+			if (df.fieldtype == "Select" && df.options) {
+				options = df.options.split("\n");
+				if (options.length > 0 && options[0] != "") {
+					options.unshift("");
+					options = options.join("\n");
+				}
+			}
+			let default_value = (fieldtype === 'Link') ? frappe.defaults.get_user_default(options) : null;
+			if (['__default', '__global'].includes(default_value)) {
+				default_value = null;
+			}
+			return {
+				fieldtype: fieldtype,
+				label: __(df.label),
+				options: options,
+				fieldname: df.fieldname,
+				condition: condition,
+				default: default_value,
+				onchange: () => this.refresh_list_view(),
+				ignore_link_validation: fieldtype === 'Dynamic Link',
+				is_filter: 1,
+			};
+		}));
+
+		fields.map(df => this.list_view.page.add_field(df));
+	}
+
+	make_filter_list(doctype) {
+		if (!doctype) {
+			doctype = this.list_view.doctype;
+		}
+
+		this.filter_list = new frappe.ui.FilterGroup({
+			base_list: this.list_view,
+			parent: this.$filter_list_wrapper,
+			doctype: doctype,
+			default_filters: [],
+			on_change: () => this.refresh_list_view()
+		});
+	}
+
+	refresh_list_view() {
+		if (this.list_view.doctype == "Task") {
+			this.list_view.fetch_tasks();
+			return;
+		}
+		this.list_view.start = 0;
+		this.list_view.refresh();
+		this.list_view.on_filter_change();
+	}
 }
