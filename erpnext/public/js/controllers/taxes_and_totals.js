@@ -211,7 +211,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		if(tax.add_deduct_tax && tax.add_deduct_tax == "Deduct") {
 			current_tax_fraction *= -1;
-			inclusive_tax_amount_per_qty *= -1
+			inclusive_tax_amount_per_qty *= -1;
 		}
 		return [current_tax_fraction, inclusive_tax_amount_per_qty];
 	},
