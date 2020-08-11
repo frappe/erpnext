@@ -632,6 +632,7 @@ class WorkOrder(Document):
 		return bom
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_bom_operations(doctype, txt, searchfield, start, page_len, filters):
 	if txt:
 		filters['operation'] = ('like', '%%%s%%' % txt)
