@@ -1334,11 +1334,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
-<<<<<<< HEAD
  "modified": "2020-08-03 23:20:04.466153",
-=======
- "modified": "2020-08-03 12:46:01.411074",
->>>>>>> a78336e77de6156e843e6fc5343d841b140f6460
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
