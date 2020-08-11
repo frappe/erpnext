@@ -34,6 +34,16 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		this.task_columns = []
 		this.get_settings("Project", "listview_settings");
 		this.get_settings("Task", "task_listview_settings");
+
+		this.menu_items = [];
+
+		if (frappe.user.has_role('System Manager')) {
+			this.menu_items.push({
+				label: __('Settings'),
+				action: () => this.show_list_settings(),
+				standard: true
+			});
+		}
 	}
 
 	setup_page() {
@@ -46,6 +56,34 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		this.set_title("Projects");
 		this.set_menu_items();
 		this.set_breadcrumbs();
+	}
+
+	set_menu_items() {
+		this.menu_items.map(item => {
+			const $item = this.page.add_menu_item(item.label, item.action, item.standard, item.shortcut);
+			if (item.class) {
+				$item && $item.addClass(item.class);
+			}
+		});
+	}
+
+	show_list_settings() {
+		frappe.model.with_doctype('Task', () => {
+			new frappe.views.ListSettings({
+				listview: this,
+				doctype: 'Task',
+				settings: this.task_listview_settings,
+				meta: frappe.get_meta('Task')
+			});
+		});
+	}
+
+	refresh_columns(meta, list_view_settings) {
+		this.task_meta = meta;
+		this.task_listview_settings = list_view_settings;
+		this.task_columns = this.setup_columns("Task", this.task_meta, this.task_listview_settings);
+		this.get_task_list();
+
 	}
 
 	set_title(title) {
@@ -334,7 +372,6 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 			if ($list[0].classList.contains("hide")) {
 				$list.find(`.nested-result`).remove();
 				$el.find(".octicon").removeClass("octicon-chevron-down").addClass("octicon-chevron-right");
-				return
 			}
 
 			frappe.call(this.get_call_args("Task", method, fields, [["Task", "parent_task", "=", target]])).then(r => {
@@ -401,6 +438,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 			this.filter_area.add([["Task", "project", "=", project]]);
 		}
 		let filters = this.get_filters_for_args()
+		filters.append(["Task", "parent_task", "=", '']);
 		console.log(filters)
 
 		frappe.call(this.get_call_args("Task", method, fields, filters)).then(r => {
@@ -623,6 +661,8 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 
 		const seen = JSON.parse(doc._seen || '[]').includes(user) ? '' : 'bold';
 
+		const subject_link = this.get_subject_link(doc, subject, escaped_subject)
+
 		let html = doc.doctype == 'Task' && doc.expandable ? `<a class="btn btn-action btn-xs"
 			data-doctype="Task" data-name="${escape(doc.name)}" style="width: 20px;">
 				<i class="octicon octicon-chevron-right" />
@@ -644,13 +684,23 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 				<span class="level-item" style="margin-bottom: 1px;"">
 					${html}
 				</span>
-				<span class="ellipsis" title="${escaped_subject}" data-doctype="${doc.doctype}" data-name="${doc.name}">
-					${subject}
-				</span>
+				${subject_link}
 			</span>
 		`;
 
 		return subject_html;
+	}
+
+	get_subject_link(doc, subject, escaped_subject) {
+		if (doc.doctype === 'Project') {
+			return `<span class="ellipsis" title="${escaped_subject}" data-doctype="${doc.doctype}" data-name="${doc.name}">
+				${subject}
+			</span>`
+		} else {
+			return `<a href ="desk#Form/Task/${doc.name}" class="ellipsis" title="${escaped_subject}" data-doctype="${doc.doctype}" data-name="${doc.name}">
+				${subject}
+			</a>`
+		}
 	}
 
 	get_indicator_html(doc) {
@@ -673,25 +723,27 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 	get_meta_html(doc, create_new) {
 		let html = '';
 
-		if (create_new) {
+		if (create_new && doc.is_group) {
 			html += `
 				<div class="level-item hidden-xs">
 					<button class="btn create-new btn-default btn-xs"
 						data-name="${escape(doc.name)}">
-						${__("Add")}
+						${__("Add Child")}
 					</button>
 				</div>
 			`;
 		}
 
-		html += `
-			<div class="level-item hidden-xs" style="margin-left: 5px;">
-				<button class="btn btn-open btn-default btn-xs"
-					data-doctype="${escape(doc.doctype)}" data-name="${escape(doc.name)}">
-					${__("Open")}
-				</button>
-			</div>
-		`;
+		if (doc.doctype == 'Project') {
+			html += `
+				<div class="level-item hidden-xs" style="margin-left: 5px;">
+					<button class="btn btn-open btn-default btn-xs"
+						data-doctype="${escape(doc.doctype)}" data-name="${escape(doc.name)}">
+						${__("Open")}
+					</button>
+				</div>
+			`;
+		}
 
 		const modified = comment_when(doc.modified, true);
 
