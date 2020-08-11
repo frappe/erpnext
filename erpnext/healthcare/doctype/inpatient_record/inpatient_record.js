@@ -134,7 +134,7 @@ let transfer_patient_dialog = function(frm) {
 			{fieldtype: 'Link', label: 'Leave From', fieldname: 'leave_from', options: 'Healthcare Service Unit', reqd: 1, read_only:1},
 			{fieldtype: 'Link', label: 'Service Unit Type', fieldname: 'service_unit_type', options: 'Healthcare Service Unit Type'},
 			{fieldtype: 'Link', label: 'Transfer To', fieldname: 'service_unit', options: 'Healthcare Service Unit', reqd: 1},
-			{fieldtype: 'Datetime', label: 'Check In', fieldname: 'check_in', reqd: 1}
+			{fieldtype: 'Datetime', label: 'Check In', fieldname: 'check_in', reqd: 1, default: frappe.datetime.now_datetime()}
 		],
 		primary_action_label: __('Transfer'),
 		primary_action : function() {
@@ -147,7 +147,12 @@ let transfer_patient_dialog = function(frm) {
 			if(dialog.get_value('service_unit')){
 				service_unit = dialog.get_value('service_unit');
 			}
-			if(!check_in){
+			if(check_in > frappe.datetime.now_datetime()){
+				frappe.msgprint({
+					title: __('Not Allowed'),
+					message: __('Check-in time cannot be greater than the current time'),
+					indicator: 'red'
+				});
 				return;
 			}
 			frappe.call({

@@ -330,7 +330,7 @@ def make_opportunity_from_communication(communication, ignore_communication_link
 	opportunity = frappe.get_doc({
 		"doctype": "Opportunity",
 		"opportunity_from": opportunity_from,
-		"lead": lead
+		"party_name": lead
 	}).insert(ignore_permissions=True)
 
 	link_communication_to_document(doc, "Opportunity", opportunity.name, ignore_communication_links)
