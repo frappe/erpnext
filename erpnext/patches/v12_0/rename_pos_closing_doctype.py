@@ -12,11 +12,11 @@ def execute():
 			frappe.rename_doc('DocType', 'POS Closing Voucher Taxes', 'POS Closing Entry Taxes', force=True)
 		
 		if not frappe.db.exists('DocType', 'POS Closing Voucher Details'):
-			frappe.rename_doc('DocType', 'POS Closing Voucher Details', 'POS Closing Entry Details', force=True)
+			frappe.rename_doc('DocType', 'POS Closing Voucher Details', 'POS Closing Entry Detail', force=True)
 
 		frappe.reload_doc('Accounts', 'doctype', 'POS Closing Entry')
 		frappe.reload_doc('Accounts', 'doctype', 'POS Closing Entry Taxes')
-		frappe.reload_doc('Accounts', 'doctype', 'POS Closing Entry Details')
+		frappe.reload_doc('Accounts', 'doctype', 'POS Closing Entry Detail')
 
 	if frappe.db.exists("DocType", "POS Closing Voucher"):
 		frappe.delete_doc("DocType", "POS Closing Voucher")

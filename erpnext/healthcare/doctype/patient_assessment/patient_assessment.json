@@ -63,7 +63,8 @@
   {
    "fieldname": "assessment_datetime",
    "fieldtype": "Datetime",
-   "label": "Assessment Datetime"
+   "label": "Assessment Datetime",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_7",
@@ -139,7 +140,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-25 14:38:38.302399",
+ "modified": "2020-06-25 00:25:13.208400",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Assessment",

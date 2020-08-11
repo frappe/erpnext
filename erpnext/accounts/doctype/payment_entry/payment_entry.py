@@ -897,7 +897,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		total_amount = ref_doc.get("grand_total")
 		exchange_rate = 1
 		outstanding_amount = ref_doc.get("outstanding_amount")
-	if reference_doctype == "Dunning":
+	elif reference_doctype == "Dunning":
 		total_amount = ref_doc.get("dunning_amount")
 		exchange_rate = 1
 		outstanding_amount = ref_doc.get("dunning_amount")
@@ -911,7 +911,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 	elif reference_doctype != "Journal Entry":
 		if party_account_currency == company_currency:
 			if ref_doc.doctype == "Expense Claim":
-				total_amount = ref_doc.total_sanctioned_amount
+				total_amount = flt(ref_doc.total_sanctioned_amount) + flt(ref_doc.total_taxes_and_charges)
 			elif ref_doc.doctype == "Employee Advance":
 				total_amount = ref_doc.advance_amount
 			else:
@@ -929,8 +929,8 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			outstanding_amount = ref_doc.get("outstanding_amount")
 			bill_no = ref_doc.get("bill_no")
 		elif reference_doctype == "Expense Claim":
-			outstanding_amount = flt(ref_doc.get("total_sanctioned_amount")) \
-				- flt(ref_doc.get("total_amount+reimbursed")) - flt(ref_doc.get("total_advance_amount"))
+			outstanding_amount = flt(ref_doc.get("total_sanctioned_amount")) + flt(ref_doc.get("total_taxes_and_charges"))\
+				- flt(ref_doc.get("total_amount_reimbursed")) - flt(ref_doc.get("total_advance_amount"))
 		elif reference_doctype == "Employee Advance":
 			outstanding_amount = ref_doc.advance_amount - flt(ref_doc.paid_amount)
 		else:
@@ -1101,7 +1101,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 					'outstanding_amount': doc.get('dunning_amount'),
 					'allocated_amount': doc.get('dunning_amount')
 				})
-			else:	
+			else:
 				pe.append("references", {
 					'reference_doctype': dt,
 					'reference_name': dn,

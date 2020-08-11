@@ -26,6 +26,7 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+  "project",
   "supplier_invoice_details",
   "bill_no",
   "column_break_15",
@@ -179,7 +180,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "ACC-PINV-.YYYY.-",
+   "options": "ACC-PINV-.YYYY.-\nACC-PINV-RET-.YYYY.-",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -968,8 +969,10 @@
   {
    "fieldname": "clearance_date",
    "fieldtype": "Date",
-   "hidden": 1,
-   "label": "Clearance Date"
+   "label": "Clearance Date",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "col_br_payments",
@@ -1319,13 +1322,19 @@
    "fieldtype": "Small Text",
    "label": "Billing Address",
    "read_only": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-18 05:06:08.488761",
+ "modified": "2020-08-03 23:20:04.466153",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
