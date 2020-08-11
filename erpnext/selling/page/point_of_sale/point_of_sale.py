@@ -14,10 +14,9 @@ from six import string_types
 def get_items(start, page_length, price_list, item_group, search_value="", pos_profile=None):
 	data = dict()
 	warehouse = ""
-	display_items_in_stock = 0
 
 	if pos_profile:
-		warehouse, display_items_in_stock = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'display_items_in_stock'])
+		warehouse = frappe.db.get_value('POS Profile', pos_profile, ['warehouse'])
 
 	if not frappe.db.exists('Item Group', item_group):
 		item_group = get_root_of('Item Group')
@@ -85,7 +84,7 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 			item_price = item_prices.get(item_code) or {}
 			item_stock_qty = get_stock_availability(item_code, warehouse)
 
-			if display_items_in_stock and not item_stock_qty:
+			if not item_stock_qty:
 				pass
 			else:
 				row = {}
