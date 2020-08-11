@@ -19,7 +19,8 @@ def execute():
             purpose = 'Material Transfer'
             WHERE stock_entry_type = 'Receive at Warehouse'
             """)
-
+        
+        frappe.reload_doc("stock", "doctype", "warehouse_type")
         if not frappe.db.exists('Warehouse Type', 'Transit'):
             doc = frappe.new_doc('Warehouse Type')
             doc.name = 'Transit'

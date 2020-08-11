@@ -1366,13 +1366,14 @@ class StockEntry(StockController):
 					})
 	def set_material_request_transfer_status(self, status):
 		material_requests = []
+		if self.outgoing_stock_entry:
+			parent_se = frappe.get_value("Stock Entry", self.outgoing_stock_entry, 'add_to_transit')
+
 		for item in self.items: 
 			material_request = item.material_request or None
 			if self.purpose == "Material Transfer" and material_request not in material_requests:
-				if self.outgoing_stock_entry:
-					parent_se = frappe.get_value("Stock Entry", self.outgoing_stock_entry, 'add_to_transit')
-					if parent_se:
-						material_request = frappe.get_value("Stock Entry Detail", item.ste_detail, 'material_request')
+				if self.outgoing_stock_entry and parent_se:
+					material_request = frappe.get_value("Stock Entry Detail", item.ste_detail, 'material_request')
 
 			if material_request and material_request not in material_requests:
 				material_requests.append(material_request)
