@@ -72,7 +72,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 				listview: this,
 				doctype: 'Task',
 				settings: this.task_listview_settings,
-				meta: frappe.get_meta(this.doctype)
+				meta: frappe.get_meta('Task')
 			});
 		});
 	}
