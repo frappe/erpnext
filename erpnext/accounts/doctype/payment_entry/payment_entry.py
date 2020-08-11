@@ -307,6 +307,38 @@ class PaymentEntry(AccountsController):
 				frappe.throw(_("Against Journal Entry {0} does not have any unmatched {1} entry")
 					.format(d.reference_name, dr_or_cr))
 
+	def update_payment_schedule(self, cancel=0):
+		invoice_payment_amount_map = {}
+		invoice_paid_amount_map = {}
+
+		for reference in self.get('references'):
+			if reference.payment_term and reference.reference_name:
+				key = (reference.payment_term, reference.reference_name)
+				invoice_payment_amount_map.setdefault(key, 0.0)
+				invoice_payment_amount_map[key] += reference.allocated_amount
+
+				if not invoice_paid_amount_map.get(key):
+					payment_schedule = frappe.get_all('Payment Schedule', filters={'parent': reference.reference_name},
+						fields=['paid_amount', 'payment_amount', 'payment_term'])
+					for term in payment_schedule:
+						invoice_key = (term.payment_term, reference.reference_name)
+						invoice_paid_amount_map.setdefault(invoice_key, {})
+						invoice_paid_amount_map[invoice_key]['outstanding'] = term.payment_amount - term.paid_amount
+
+		for key, amount in iteritems(invoice_payment_amount_map):
+			if cancel:
+				frappe.db.sql(""" UPDATE `tabPayment Schedule` SET paid_amount = `paid_amount` - %s
+					WHERE parent = %s and payment_term = %s""", (amount, key[1], key[0]))
+			else:
+				outstanding = flt(invoice_paid_amount_map.get(key, {}).get('outstanding'))
+
+				if amount > outstanding:
+					frappe.throw(_('Cannot allocate more than {0} against payment term {1}').format(outstanding, key[0]))
+
+				if amount and outstanding:
+					frappe.db.sql(""" UPDATE `tabPayment Schedule` SET paid_amount = `paid_amount` + %s
+							WHERE parent = %s and payment_term = %s""", (amount, key[1], key[0]))
+
 	def set_status(self):
 		if self.docstatus == 2:
 			self.status = 'Cancelled'
