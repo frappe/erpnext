@@ -33,6 +33,16 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		this.task_columns = []
 		this.get_settings("Project", "listview_settings");
 		this.get_settings("Task", "task_listview_settings");
+
+		this.menu_items = [];
+
+		if (frappe.user.has_role('System Manager')) {
+			this.menu_items.push({
+				label: __('Settings'),
+				action: () => this.show_list_settings(),
+				standard: true
+			});
+		}
 	}
 
 	setup_page() {
@@ -45,6 +55,34 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		this.set_title("Projects");
 		this.set_menu_items();
 		this.set_breadcrumbs();
+	}
+
+	set_menu_items() {
+		this.menu_items.map(item => {
+			const $item = this.page.add_menu_item(item.label, item.action, item.standard, item.shortcut);
+			if (item.class) {
+				$item && $item.addClass(item.class);
+			}
+		});
+	}
+
+	show_list_settings() {
+		frappe.model.with_doctype('Task', () => {
+			new frappe.views.ListSettings({
+				listview: this,
+				doctype: 'Task',
+				settings: this.task_listview_settings,
+				meta: frappe.get_meta(this.doctype)
+			});
+		});
+	}
+
+	refresh_columns(meta, list_view_settings) {
+		this.task_meta = meta;
+		this.task_listview_settings = list_view_settings;
+		this.task_columns = this.setup_columns("Task", this.task_meta, this.task_listview_settings);
+		this.get_task_list();
+
 	}
 
 	set_title(title) {
@@ -382,22 +420,25 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 	get_tasks() {
 		this.$result.on('click', '.project-list-row-container', (e) => {
 			this.set_title("Tasks");
+			this.project = unescape(e.currentTarget.getAttribute("data-name")) || this.project;
+			this.get_task_list();
+		});
+	}
 
-			let method = "erpnext.projects.page.project.project.get_tasks";
-			let fields = this.get_task_fields();
-			let filters = [["Task", "project", "=", unescape(e.currentTarget.getAttribute("data-name"))],
-							["Task", "parent_task", "=", '']];
+	get_task_list() {
+		let method = "erpnext.projects.page.project.project.get_tasks";
+		let fields = this.get_task_fields();
+		let filters = [["Task", "project", "=", this.project],
+						["Task", "parent_task", "=", '']];
 
-			frappe.call(this.get_call_args("Task", method, fields, filters)).then(r => {
-				// render
-				this.render_header(this.task_columns, true);
-				this.prepare_data(r);
-				this.toggle_result_area();
-				this.render("Task", true);
-				this.render_previous_button();
-				this.after_render();
-			});
-
+		frappe.call(this.get_call_args("Task", method, fields, filters)).then(r => {
+			// render
+			this.render_header(this.task_columns, true);
+			this.prepare_data(r);
+			this.toggle_result_area();
+			this.render("Task", true);
+			this.render_previous_button();
+			this.after_render();
 		});
 	}
 
