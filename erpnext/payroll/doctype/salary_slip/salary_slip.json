@@ -20,15 +20,17 @@
   "company",
   "letter_head",
   "section_break_10",
-  "salary_slip_based_on_timesheet",
   "start_date",
   "end_date",
   "salary_structure",
+  "column_break_18",
+  "salary_slip_based_on_timesheet",
   "payroll_frequency",
-  "column_break_15",
+  "section_break_20",
   "total_working_days",
   "unmarked_days",
   "leave_without_pay",
+  "column_break_24",
   "absent_days",
   "payment_days",
   "hourly_wages",
@@ -199,10 +201,6 @@
    "fieldname": "end_date",
    "fieldtype": "Date",
    "label": "End Date"
-  },
-  {
-   "fieldname": "column_break_15",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "salary_structure",
@@ -490,13 +488,25 @@
    "fieldtype": "Float",
    "hidden": 1,
    "label": "Unmarked days"
+  },
+  {
+   "fieldname": "section_break_20",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-11 17:28:03.478715",
+ "modified": "2020-08-11 17:37:54.274384",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
