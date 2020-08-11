@@ -50,9 +50,9 @@
   "contact_email",
   "contact_mobile",
   "more_info",
+  "company",
   "campaign",
   "column_break1",
-  "company",
   "transaction_date",
   "amended_from",
   "lost_reasons"
@@ -344,7 +344,7 @@
    "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
-   "label": "Company Information",
+   "label": "More Information",
    "oldfieldtype": "Section Break",
    "options": "fa fa-file-text"
   },
@@ -424,7 +424,7 @@
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2020-08-11 16:15:45.052240",
+ "modified": "2020-08-11 17:34:35.066961",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
