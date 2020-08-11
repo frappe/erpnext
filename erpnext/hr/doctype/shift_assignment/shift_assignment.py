@@ -41,7 +41,7 @@ class ShiftAssignment(Document):
 			select name, shift_type, start_date ,end_date, docstatus, status
 			from `tabShift Assignment`
 			where
-				employee=%(employee)s and docstatus < 2
+				employee=%(employee)s and docstatus = 1
 				and name != %(name)s
 				and status = "Active"
 				{0}
@@ -53,14 +53,11 @@ class ShiftAssignment(Document):
 			"name": self.name
 		}, as_dict = 1)
 
-		for shift in assigned_shifts:
-			if shift.name:
-				self.throw_overlap_error(shift)
+		if len(assigned_shifts):
+			self.throw_overlap_error(assigned_shifts[0])
 
 	def throw_overlap_error(self, shift_details):
 		shift_details = frappe._dict(shift_details)
-		if shift_details.docstatus == 0:
-			msg = _("Employee {0} has already applied for {1}: {2}").format(frappe.bold(self.employee), frappe.bold(self.shift_type), frappe.bold(shift_details.name))
 		if shift_details.docstatus == 1 and shift_details.status == "Active":
 			msg = _("Employee {0} already has Active Shift {1}: {2}").format(frappe.bold(self.employee), frappe.bold(self.shift_type), frappe.bold(shift_details.name))
 		if shift_details.start_date:
