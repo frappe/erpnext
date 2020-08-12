@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-    if frappe.db.exists("DocType", "Opportunity Lost Reason Detail") and frappe.db.exists("DocType", "Quotation Lost Reason Detail") and frappe.db.exists("DocType", "Lost Reason Detail"):
+    if frappe.db.exists("DocType", "Lost Reason Detail"):
         frappe.reload_doc("crm", "doctype", "opportunity_lost_reason_detail")
         frappe.reload_doc("setup", "doctype", "quotation_lost_reason_detail")
 
