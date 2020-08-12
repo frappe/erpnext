@@ -185,7 +185,7 @@ class ExpenseClaim(AccountsController):
 					"debit": tax.tax_amount,
 					"debit_in_account_currency": tax.tax_amount,
 					"against": self.employee,
-					"cost_center": self.cost_center,
+					"cost_center": tax.cost_center or self.cost_center,
 					"against_voucher_type": self.doctype,
 					"against_voucher": self.name
 				}, item=tax)
