@@ -91,11 +91,13 @@ def add_assignments(events, start, end, conditions=None):
 		employee, docstatus
 		from `tabShift Assignment` where
 		start_date >= %(start_date)s
-		and docstatus < 2""".format()
+		or end_date <=  %(end_date)s
+		or (%(start_date)s between start_date and end_date and %(end_date)s between start_date and end_date)
+		and docstatus = 1"""
 	if conditions:
 		query += conditions
 
-	for d in frappe.db.sql(query, {"start_date":start}, as_dict=True):
+	for d in frappe.db.sql(query, {"start_date":start, "end_date":end}, as_dict=True):
 		e = {
 			"name": d.name,
 			"doctype": "Shift Assignment",
