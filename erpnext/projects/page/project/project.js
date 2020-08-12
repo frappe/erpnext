@@ -307,20 +307,29 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		return this.task_fields.map(f => frappe.model.get_full_column_name(f[0], f[1]));
 	}
 
-	get_call_args(doctype, method, fields, filters, order_by, start) {
-		doctype = doctype || "Project";
-		method = method || "erpnext.projects.page.project.project.get_projects_data";
-		fields = fields || this.get_fields();
-		filters = filters || this.get_filters_for_args();
-		// order_by = order_by || this.sort_selector.get_sql_string();
-		start = start || this.start;
-
+	get_call_args(filters) {
 		return {
-			method: method,
+			method: "erpnext.projects.page.project.project.get_projects_data",
 			args: {
 				params: {
-					doctype: doctype,
-					fields: fields,
+					doctype: "Project",
+					fields: this.get_fields(),
+					filters: filters || this.get_filters_for_args(),
+					with_comment_count: true,
+					page_length: this.page_length,
+					start: this.start
+				}
+			}
+		};
+	}
+
+	get_task_call_args(filters) {
+		return {
+			method: "erpnext.projects.page.project.project.get_tasks",
+			args: {
+				params: {
+					doctype: "Task",
+					fields: this.get_task_fields(),
 					filters: filters,
 					with_comment_count: true,
 					page_length: this.page_length,
@@ -353,8 +362,6 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		this.$result.on('click', '.btn-action', (e) => {
 			let el = e.currentTarget;
 			let $el = $(el);
-			let method = "erpnext.projects.page.project.project.get_tasks";
-			let fields = this.get_task_fields();
 
 			let target = unescape(el.getAttribute("data-name"));
 			let $row = this.$result.find(`.list-rows[data-name="${target}"]`);
@@ -374,7 +381,9 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 				$el.find(".octicon").removeClass("octicon-chevron-down").addClass("octicon-chevron-right");
 			}
 
-			frappe.call(this.get_call_args("Task", method, fields, [["Task", "parent_task", "=", target]])).then(r => {
+			console.log("--2")
+
+			frappe.call(this.get_task_call_args([["Task", "parent_task", "=", target]])).then(r => {
 				// render
 				this.set_title(target);
 				// let data = r.message || {};
@@ -413,17 +422,28 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 
 	get_projects() {
 		this.$frappe_list.on('click', '.btn-prev', (e) => {
+			this.filter_area.clear(false);
 			this.set_title("Projects");
 			this.remove_previous_button()
 			this.render_header(this.columns, true);
 			this.filter_area.refresh_filters(this.meta);
-			this.filter_area.clear();
-			this.refresh();
+			this.fetch_projects();
 		})
+	}
+
+	fetch_projects() {
+		frappe.call(this.get_call_args([])).then(r => {
+			// render
+			this.render_header(this.columns, true);
+			this.prepare_data(r);
+			this.toggle_result_area();
+			this.render();
+		});
 	}
 
 	get_tasks() {
 		this.$result.on('click', '.project-list-row-container', (e) => {
+			this.filter_area.clear(false);
 			this.set_title("Tasks");
 			this.filter_area.refresh_filters(this.task_meta);
 			this.fetch_tasks(unescape(e.currentTarget.getAttribute("data-name")));
@@ -431,24 +451,20 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 	}
 
 	fetch_tasks(project) {
-		let method = "erpnext.projects.page.project.project.get_tasks";
-		let fields = this.get_task_fields();
-
 		if (project) {
-			this.filter_area.add([["Task", "project", "=", project]]);
+			this.filter_area.add([["Task", "project", "=", project]], false);
 		}
+
 		let filters = this.get_filters_for_args()
 		filters.push(["Task", "parent_task", "=", '']);
-		console.log(filters)
 
-		frappe.call(this.get_call_args("Task", method, fields, filters)).then(r => {
+		frappe.call(this.get_task_call_args(filters)).then(r => {
 			// render
 			this.render_header(this.task_columns, true);
 			this.prepare_data(r);
 			this.toggle_result_area();
 			this.render("Task", true);
 			this.render_previous_button();
-			this.after_render();
 		});
 	}
 
@@ -971,12 +987,15 @@ class CustomFilterArea extends frappe.ui.FilterArea {
 	}
 
 	refresh_list_view() {
-		if (this.list_view.doctype == "Task") {
-			this.list_view.fetch_tasks();
-			return;
+		if (this.trigger_refresh) {
+			if (this.list_view.doctype == "Task") {
+				this.list_view.fetch_tasks();
+				return;
+			}
+
+			this.list_view.start = 0;
+			this.list_view.refresh();
+			this.list_view.on_filter_change();
 		}
-		this.list_view.start = 0;
-		this.list_view.refresh();
-		this.list_view.on_filter_change();
 	}
 }
