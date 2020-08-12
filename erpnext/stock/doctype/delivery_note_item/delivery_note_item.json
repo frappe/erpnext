@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "hash",
  "creation": "2013-04-22 13:15:44",
  "doctype": "DocType",
@@ -82,6 +81,7 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+  "project",
   "reason_for_return_section_break",
   "reason_for_return",
   "section_break_72",
@@ -702,6 +702,12 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   },
   {
    "depends_on": "eval:parent.is_return==1",
