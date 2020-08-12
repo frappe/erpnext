@@ -53,6 +53,19 @@ class Member(Document):
 
 		return subscription
 
+	def make_customer_and_link(self):
+		if self.customer:
+			frappe.msgprint(_("A customer is already linked to this Member"))
+		cust = create_customer(frappe._dict({
+			'fullname': self.member_name,
+			'email': self.email_id or self.user,
+			'phone': None
+		}))
+
+		self.customer = cust
+		self.save()
+
+
 def get_or_create_member(user_details):
 	member_list = frappe.get_all("Member", filters={'email': user_details.email, 'membership_type': user_details.plan_id})
 	if member_list and member_list[0]:
@@ -83,8 +96,10 @@ def create_customer(user_details):
 	try:
 		contact = frappe.new_doc("Contact")
 		contact.first_name = user_details.fullname
-		contact.add_phone(user_details.mobile, is_primary_phone=1, is_primary_mobile_no=1)
-		contact.add_email(user_details.email, is_primary=1)
+		if user_details.mobile:
+			contact.add_phone(user_details.mobile, is_primary_phone=1, is_primary_mobile_no=1)
+		if user_details.email:
+			contact.add_email(user_details.email, is_primary=1)
 		contact.insert(ignore_permissions=True)
 
 		contact.append("links", {
@@ -121,7 +136,7 @@ def create_member_subscription_order(user_details):
 			'subscription_id': 'sub_EZycCvXFvqnC6p'
 		}
 	"""
-	# {"plan_id":"IFF Starter","fullname":"Shivam Mishra","mobile":"7506056962","email":"shivam@shivam.dev","pan":"Testing123"}
+
 	user_details = frappe._dict(user_details)
 	member = get_or_create_member(user_details)
 	if not member:
