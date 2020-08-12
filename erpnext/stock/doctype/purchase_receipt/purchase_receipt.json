@@ -106,7 +106,6 @@
   "amended_from",
   "range",
   "column_break4",
-  "project",
   "per_billed",
   "subscription_detail",
   "auto_repeat",
@@ -924,12 +923,6 @@
    "print_hide": 1,
    "print_width": "50%",
    "width": "50%"
-  },
-  {
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "label": "Project",
-   "options": "Project"
   },
   {
    "fieldname": "per_billed",
