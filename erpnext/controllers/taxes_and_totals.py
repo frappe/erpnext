@@ -172,7 +172,7 @@ class calculate_taxes_and_totals(object):
 						+ tax.tax_fraction_for_current_item
 
 				cumulated_tax_fraction += tax.tax_fraction_for_current_item
-				total_inclusive_tax_amount_per_qty += inclusive_tax_amount_per_qty * flt(item.stock_qty)
+				total_inclusive_tax_amount_per_qty += inclusive_tax_amount_per_qty * flt(item.qty)
 
 			if not self.discount_amount_applied and item.qty and (cumulated_tax_fraction or total_inclusive_tax_amount_per_qty):
 				amount = flt(item.amount) - total_inclusive_tax_amount_per_qty
