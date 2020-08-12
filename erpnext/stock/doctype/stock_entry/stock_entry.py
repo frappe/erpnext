@@ -196,7 +196,8 @@ class StockEntry(StockController):
 						item.set(f, item_details.get(f))
 
 			if not item.transfer_qty and item.qty:
-				item.transfer_qty = item.qty * item.conversion_factor
+				item.transfer_qty = flt(flt(item.qty) * flt(item.conversion_factor),
+				self.precision("transfer_qty", item))
 
 			if (self.purpose in ("Material Transfer", "Material Transfer for Manufacture")
 				and not item.serial_no
