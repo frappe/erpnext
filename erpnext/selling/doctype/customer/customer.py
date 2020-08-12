@@ -188,7 +188,7 @@ class Customer(TransactionBase):
 		past_credit_limits = [d.credit_limit
 			for d in frappe.db.get_all("Customer Credit Limit", filters={'parent': self.name}, fields=["credit_limit"], order_by="company")]
 		
-		current_credit_limits = [d.credit_limit for d in sorted(self.credit_limits, key=lambda k: k['company'])]
+		current_credit_limits = [d.credit_limit for d in sorted(self.credit_limits, key=lambda k: k.company)]
 
 		if past_credit_limits == current_credit_limits:
 			return
