@@ -737,34 +737,6 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual(se.get("items")[0].allow_zero_valuation_rate, 1)
 		self.assertEqual(se.get("items")[0].amount, 0)
 
-	def test_goods_in_transit(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-		warehouse = "_Test Warehouse FG 1 - _TC"
-
-		if not frappe.db.exists('Warehouse', warehouse):
-			create_warehouse("_Test Warehouse FG 1")
-
-		outward_entry = make_stock_entry(item_code="_Test Item",
-			purpose="Send to Warehouse",
-			source="_Test Warehouse - _TC",
-			target="_Test Warehouse 1 - _TC", qty=50, basic_rate=100)
-
-		inward_entry1 = make_stock_in_entry(outward_entry.name)
-		inward_entry1.items[0].t_warehouse = warehouse
-		inward_entry1.items[0].qty = 25
-		inward_entry1.submit()
-
-		doc = frappe.get_doc('Stock Entry', outward_entry.name)
-		self.assertEqual(doc.per_transferred, 50)
-
-		inward_entry2 = make_stock_in_entry(outward_entry.name)
-		inward_entry2.items[0].t_warehouse = warehouse
-		inward_entry2.items[0].qty = 25
-		inward_entry2.submit()
-
-		doc = frappe.get_doc('Stock Entry', outward_entry.name)
-		self.assertEqual(doc.per_transferred, 100)
-
 	def test_gle_for_opening_stock_entry(self):
 		mr = make_stock_entry(item_code="_Test Item", target="Stores - TCP1", company="_Test Company with perpetual inventory",qty=50, basic_rate=100, expense_account="Stock Adjustment - TCP1", is_opening="Yes", do_not_save=True)
 
