@@ -7,9 +7,10 @@ from __future__ import unicode_literals
 import frappe
 import json
 import copy
+import re
+
 from frappe import throw, _
 from frappe.utils import flt, cint, getdate
-
 from frappe.model.document import Document
 
 from six import string_types
@@ -31,6 +32,7 @@ class PricingRule(Document):
 		self.validate_max_discount()
 		self.validate_price_list_with_currency()
 		self.validate_dates()
+		validate_condition(self)
 
 		if not self.margin_type: self.margin_rate_or_amount = 0.0
 
@@ -140,6 +142,16 @@ class PricingRule(Document):
 
 		if self.valid_from and self.valid_upto and getdate(self.valid_from) > getdate(self.valid_upto):
 			frappe.throw(_("Valid from date must be less than valid upto date"))
+
+def validate_condition(doc, args=None):
+	if doc.condition and ("=" in doc.condition) and re.match("""[\w\.:_]+\s*={1}\s*[\w\.@'"]+""", doc.condition):
+		frappe.throw(_("Invalid condition in Pricing Rule: {0}").format(doc.name), frappe.ValidationError)
+	else:
+		try:
+			return frappe.safe_eval(doc.condition, None, args) if bool(args) else True
+		except Exception as e:
+			frappe.throw(doc.name + " Pricing Rule 'Condition' field error:<br>" + str(e).capitalize() )
+			return False
 
 #--------------------------------------------------------------------------------
 
@@ -251,6 +263,8 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 				pricing_rule.apply_rule_on_other_items = get_pricing_rule_items(pricing_rule)
 
 			if pricing_rule.get('suggestion'): continue
+
+			if not validate_condition(pricing_rule, args): continue
 
 			item_details.validate_applied_rule = pricing_rule.get("validate_applied_rule", 0)
 			item_details.price_or_product_discount = pricing_rule.get("price_or_product_discount")
