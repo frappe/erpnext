@@ -42,7 +42,8 @@ frappe.ui.form.on('Payment Entry', {
 		frm.set_query("bank_account", function() {
 			return {
 				filters: {
-					is_company_account: 1
+					is_company_account: 1,
+					company: frm.doc.company
 				}
 			}
 		});

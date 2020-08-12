@@ -24,7 +24,7 @@ class POSClosingEntry(Document):
 		if user:
 			frappe.throw(_("POS Closing Entry {} against {} between selected period"
 				.format(frappe.bold("already exists"), frappe.bold(self.user))), title=_("Invalid Period"))
-		
+
 		if frappe.db.get_value("POS Opening Entry", self.pos_opening_entry, "status") != "Open":
 			frappe.throw(_("Selected POS Opening Entry should be open."), title=_("Invalid Opening Entry"))
 
@@ -41,6 +41,7 @@ class POSClosingEntry(Document):
 			{"data": self, "currency": currency})
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
 	cashiers_list = frappe.get_all("POS Profile User", filters=filters, fields=['user'])
 	return [c['user'] for c in cashiers_list]
@@ -48,12 +49,12 @@ def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def get_pos_invoices(start, end, user):
 	data = frappe.db.sql("""
-	select 
+	select
 		name, timestamp(posting_date, posting_time) as "timestamp"
-	from 
+	from
 		`tabPOS Invoice`
-	where 
-		owner = %s and docstatus = 1 and 
+	where
+		owner = %s and docstatus = 1 and
 		(consolidated_invoice is NULL or consolidated_invoice = '')
 	""", (user), as_dict=1)
 
@@ -101,7 +102,7 @@ def make_closing_entry_from_opening(opening_entry):
 		for t in d.taxes:
 			existing_tax = [tx for tx in taxes if tx.account_head == t.account_head and tx.rate == t.rate]
 			if existing_tax:
-				existing_tax[0].amount += flt(t.tax_amount); 
+				existing_tax[0].amount += flt(t.tax_amount);
 			else:
 				taxes.append(frappe._dict({
 					'account_head': t.account_head,

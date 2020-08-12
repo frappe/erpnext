@@ -44,6 +44,19 @@ frappe.ui.form.on("Dunning", {
 			);
 			frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
+
+		if(frm.doc.docstatus > 0) {
+			frm.add_custom_button(__('Ledger'), function() {
+				frappe.route_options = {
+					"voucher_no": frm.doc.name,
+					"from_date": frm.doc.posting_date,
+					"to_date": frm.doc.posting_date,
+					"company": frm.doc.company,
+					"show_cancelled_entries": frm.doc.docstatus === 2
+				};
+				frappe.set_route("query-report", "General Ledger");
+			}, __('View'));
+		}
 	},
 	overdue_days: function (frm) {
 		frappe.db.get_value(
@@ -125,9 +138,9 @@ frappe.ui.form.on("Dunning", {
 	},
 	calculate_interest_and_amount: function (frm) {
 		const interest_per_year = frm.doc.outstanding_amount * frm.doc.rate_of_interest / 100;
-		const interest_amount = interest_per_year / 365 * frm.doc.overdue_days || 0;
-		const dunning_amount = interest_amount + frm.doc.dunning_fee;
-		const grand_total = frm.doc.outstanding_amount + dunning_amount;
+		const interest_amount = flt((interest_per_year * cint(frm.doc.overdue_days)) / 365 || 0, precision('interest_amount'));
+		const dunning_amount = flt(interest_amount + frm.doc.dunning_fee, precision('dunning_amount'));
+		const grand_total = flt(frm.doc.outstanding_amount + dunning_amount, precision('grand_total'));
 		frm.set_value("interest_amount", interest_amount);
 		frm.set_value("dunning_amount", dunning_amount);
 		frm.set_value("grand_total", grand_total);
