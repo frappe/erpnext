@@ -7,9 +7,9 @@
 </div>
 {% endmacro %}
 
-{% macro product_image(website_image, css_class="") %}
+{% macro product_image(website_image, css_class="", alt="") %}
     <div class="border text-center rounded h-100 {{ css_class }}" style="overflow: hidden;">
-		<img itemprop="image" class="website-image h-100 w-100" src="{{ frappe.utils.quoted(website_image or 'no-image.jpg') | abs_url }}">
+		<img itemprop="image" class="website-image h-100 w-100" alt="{{ alt }}" src="{{ frappe.utils.quoted(website_image or 'no-image.jpg') | abs_url }}">
     </div>
 {% endmacro %}
 
