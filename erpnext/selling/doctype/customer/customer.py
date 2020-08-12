@@ -185,12 +185,12 @@ class Customer(TransactionBase):
 		if self.get("__islocal") or not self.credit_limits:
 			return
 		
-		last_credit_limits = [d.credit_limit
-			for d in frappe.db.get_all("Customer Credit Limit", filters={'parent': self.name}, fields=["credit_limit"], order_by="idx")]
+		past_credit_limits = [d.credit_limit
+			for d in frappe.db.get_all("Customer Credit Limit", filters={'parent': self.name}, fields=["credit_limit"], order_by="company")]
 		
 		current_credit_limits = [d.credit_limit for d in self.credit_limits]
 
-		if last_credit_limits == current_credit_limits:
+		if past_credit_limits == current_credit_limits:
 			return
 
 		company_record = []
