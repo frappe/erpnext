@@ -1,8 +1,16 @@
 frappe.listview_settings['Material Request'] = {
-	add_fields: ["material_request_type", "status", "per_ordered", "per_received"],
+	add_fields: ["material_request_type", "status", "per_ordered", "per_received", "transfer_status"],
 	get_indicator: function(doc) {
 		if(doc.status=="Stopped") {
 			return [__("Stopped"), "red", "status,=,Stopped"];
+		} else if(doc.transfer_status && doc.docstatus != 2) {
+			if (doc.transfer_status == "Not Started") {
+				return [__("Not Started"), "orange"];
+			} else if (doc.transfer_status == "In Transit") {
+				return [__("In Transit"), "yellow"];
+			} else if (doc.transfer_status == "Completed") {
+				return [__("Completed"), "green"];
+			}
 		} else if(doc.docstatus==1 && flt(doc.per_ordered, 2) == 0) {
 			return [__("Pending"), "orange", "per_ordered,=,0"];
 		}  else if(doc.docstatus==1 && flt(doc.per_ordered, 2) < 100) {
