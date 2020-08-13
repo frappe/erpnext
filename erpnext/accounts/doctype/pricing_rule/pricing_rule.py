@@ -145,7 +145,7 @@ class PricingRule(Document):
 def validate_condition(pricing_rule, doc=None):
 	if pricing_rule.condition and ("=" in pricing_rule.condition) and re.match("""[\w\.:_]+\s*={1}\s*[\w\.@'"]+""", pricing_rule.condition):
 		frappe.throw(_("Invalid condition in Pricing Rule: {0}").format(pricing_rule.name), frappe.ValidationError)
-	else:
+	elif pricing_rule.condition:
 		try:
 			doc = doc.as_dict()
 			return frappe.safe_eval(pricing_rule.condition, None, doc)
