@@ -16,14 +16,15 @@ from six import string_types
 
 class LoanApplication(Document):
 	def validate(self):
+		self.set_loan_amount()
+		self.validate_loan_amount()
 
 		validate_repayment_method(self.repayment_method, self.loan_amount, self.repayment_amount,
 			self.repayment_periods, self.is_term_loan)
 
 		self.validate_loan_type()
 		self.set_pledge_amount()
-		self.set_loan_amount()
-		self.validate_loan_amount()
+
 		self.get_repayment_details()
 		self.check_sanctioned_amount_limit()
 
