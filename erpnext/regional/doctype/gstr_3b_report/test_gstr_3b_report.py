@@ -387,6 +387,10 @@ def make_company():
 
 def set_account_heads():
 
+	from erpnext.accounts.doctype.account.test_account import create_account
+
+	create_account(account_name="Cess", parent_account = "Duties and Taxes - _GST", company="_Test Company GST")
+
 	gst_settings = frappe.get_doc("GST Settings")
 
 	gst_account = frappe.get_all(
@@ -400,6 +404,7 @@ def set_account_heads():
 			"cgst_account": "CGST - _GST",
 			"sgst_account": "SGST - _GST",
 			"igst_account": "IGST - _GST",
+			"cess_account": "Cess - _GST"
 		})
 
 		gst_settings.save()

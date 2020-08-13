@@ -98,11 +98,17 @@ class ProductionPlan(Document):
 		elif self.get_items_from == "Material Request":
 			self.get_mr_items()
 
+	def get_so_mr_list(self, field, table):
+		"""Returns a list of Sales Orders or Material Requests from the respective tables"""
+		so_mr_list = [d.get(field) for d in self.get(table) if d.get(field)]
+		return so_mr_list
+
 	def get_so_items(self):
-		so_list = [d.sales_order for d in self.sales_orders if d.sales_order]
-		if not so_list:
-			msgprint(_("Please enter Sales Orders in the above table"))
-			return []
+		# Check for empty table or empty rows
+		if not self.get("sales_orders") or not self.get_so_mr_list("sales_order", "sales_orders"):
+			frappe.throw(_("Please fill the Sales Orders table"), title=_("Sales Orders Required"))
+
+		so_list = self.get_so_mr_list("sales_order", "sales_orders")
 
 		item_condition = ""
 		if self.item_code:
@@ -134,10 +140,11 @@ class ProductionPlan(Document):
 		self.calculate_total_planned_qty()
 
 	def get_mr_items(self):
-		mr_list = [d.material_request for d in self.material_requests if d.material_request]
-		if not mr_list:
-			msgprint(_("Please enter Material Requests in the above table"))
-			return []
+		# Check for empty table or empty rows
+		if not self.get("material_requests") or not self.get_so_mr_list("material_request", "material_requests"):
+			frappe.throw(_("Please fill the Material Requests table"), title=_("Material Requests Required"))
+
+		mr_list = self.get_so_mr_list("material_request", "material_requests")
 
 		item_condition = ""
 		if self.item_code:
@@ -614,7 +621,13 @@ def get_items_for_material_requests(doc, ignore_existing_ordered_qty=None):
 		doc = frappe._dict(json.loads(doc))
 
 	doc['mr_items'] = []
+
 	po_items = doc.get('po_items') if doc.get('po_items') else doc.get('items')
+	# Check for empty table or empty rows
+	if not po_items or not [row.get('item_code') for row in po_items if row.get('item_code')]:
+		frappe.throw(_("Items to Manufacture are required to pull the Raw Materials associated with it."),
+			title=_("Items Required"))
+
 	company = doc.get('company')
 	warehouse = doc.get('for_warehouse')
 

@@ -196,7 +196,8 @@ class StockEntry(StockController):
 						item.set(f, item_details.get(f))
 
 			if not item.transfer_qty and item.qty:
-				item.transfer_qty = item.qty * item.conversion_factor
+				item.transfer_qty = flt(flt(item.qty) * flt(item.conversion_factor),
+				self.precision("transfer_qty", item))
 
 			if (self.purpose in ("Material Transfer", "Material Transfer for Manufacture")
 				and not item.serial_no
@@ -571,9 +572,7 @@ class StockEntry(StockController):
 						{"parent": self.purchase_order, "item_code": se_item.subcontracted_item},
 						"bom")
 
-					allow_alternative_item = frappe.get_value("BOM", bom_no, "allow_alternative_item")
-
-					if allow_alternative_item:
+					if se_item.allow_alternative_item:
 						original_item_code = frappe.get_value("Item Alternative", {"alternative_item_code": item_code}, "item_code")
 
 						required_qty = sum([flt(d.required_qty) for d in purchase_order.supplied_items \
@@ -736,7 +735,7 @@ class StockEntry(StockController):
 
 	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select i.name, i.stock_uom, i.description, i.image, i.item_name, i.item_group,
-				i.has_batch_no, i.sample_quantity, i.has_serial_no,
+				i.has_batch_no, i.sample_quantity, i.has_serial_no, i.allow_alternative_item,
 				id.expense_account, id.buying_cost_center
 			from `tabItem` i LEFT JOIN `tabItem Default` id ON i.name=id.parent and id.company=%s
 			where i.name=%s
@@ -769,6 +768,9 @@ class StockEntry(StockController):
 			'has_batch_no'			: item.has_batch_no,
 			'sample_quantity'		: item.sample_quantity
 		})
+
+		if self.purpose == 'Send to Subcontractor':
+			ret["allow_alternative_item"] = item.allow_alternative_item
 
 		# update uom
 		if args.get("uom") and for_update:

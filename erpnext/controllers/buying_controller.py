@@ -182,7 +182,7 @@ class BuyingController(StockController):
 			if item.item_code and item.qty and item.item_code in stock_and_asset_items:
 				item_proportion = flt(item.base_net_amount) / stock_and_asset_items_amount if stock_and_asset_items_amount \
 					else flt(item.qty) / stock_and_asset_items_qty
-				
+
 				if i == (last_item_idx - 1):
 					item.item_tax_amount = flt(valuation_amount_adjustment,
 						self.precision("item_tax_amount", item))
@@ -540,9 +540,19 @@ class BuyingController(StockController):
 						"serial_no": cstr(d.serial_no).strip()
 					})
 					if self.is_return:
-						original_incoming_rate = frappe.db.get_value("Stock Ledger Entry",
-							{"voucher_type": "Purchase Receipt", "voucher_no": self.return_against,
-							"item_code": d.item_code}, "incoming_rate")
+						filters = {
+							"voucher_type": self.doctype,
+							"voucher_no": self.return_against,
+							"item_code": d.item_code
+						}
+
+						if (self.doctype == "Purchase Invoice" and self.update_stock
+							and d.get("purchase_invoice_item")):
+							filters["voucher_detail_no"] = d.purchase_invoice_item
+						elif self.doctype == "Purchase Receipt" and d.get("purchase_receipt_item"):
+							filters["voucher_detail_no"] = d.purchase_receipt_item
+
+						original_incoming_rate = frappe.db.get_value("Stock Ledger Entry", filters, "incoming_rate")
 
 						sle.update({
 							"outgoing_rate": original_incoming_rate
@@ -728,7 +738,7 @@ class BuyingController(StockController):
 					if delete_asset and is_auto_create_enabled:
 						# need to delete movements to delete assets otherwise throws link exists error
 						movements = frappe.db.sql(
-							"""SELECT asm.name 
+							"""SELECT asm.name
 							FROM `tabAsset Movement` asm, `tabAsset Movement Item` asm_item
 							WHERE asm_item.parent=asm.name and asm_item.asset=%s""", asset.name, as_dict=1)
 						for movement in movements:

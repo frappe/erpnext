@@ -94,6 +94,7 @@ class StockController(AccountsController):
 							"account": warehouse_account[sle.warehouse]["account"],
 							"against": item_row.expense_account,
 							"cost_center": item_row.cost_center,
+							"project": item_row.project or self.get('project'),
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"debit": flt(sle.stock_value_difference, precision),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
@@ -104,6 +105,7 @@ class StockController(AccountsController):
 							"account": item_row.expense_account,
 							"against": warehouse_account[sle.warehouse]["account"],
 							"cost_center": item_row.cost_center,
+							"project": item_row.project or self.get('project'),
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, precision),
 							"project": item_row.get("project") or self.get("project"),
@@ -297,14 +299,19 @@ class StockController(AccountsController):
 
 		return serialized_items
 
-	def get_incoming_rate_for_sales_return(self, item_code, against_document):
+	def get_incoming_rate_for_sales_return(self, item_code, against_document, against_document_no=None):
 		incoming_rate = 0.0
+		cond = ''
 		if against_document and item_code:
+			if against_document_no:
+				cond = " and voucher_detail_no = %s" %(frappe.db.escape(against_document_no))
+
 			incoming_rate = frappe.db.sql("""select abs(stock_value_difference / actual_qty)
 				from `tabStock Ledger Entry`
 				where voucher_type = %s and voucher_no = %s
-					and item_code = %s limit 1""",
+					and item_code = %s {0} limit 1""".format(cond),
 				(self.doctype, against_document, item_code))
+
 			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
 
 		return incoming_rate

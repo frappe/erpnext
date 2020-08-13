@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-06-18 12:39:59",
@@ -1140,6 +1139,7 @@
   },
   {
    "allow_on_submit": 1,
+   "collapsible": 1,
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
    "label": "Auto Repeat Section",
@@ -1196,8 +1196,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-05-19 21:36:57.437325",
+ "modified": "2020-07-01 12:39:57.698621",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
