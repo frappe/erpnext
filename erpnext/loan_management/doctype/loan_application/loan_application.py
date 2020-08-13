@@ -16,6 +16,7 @@ from six import string_types
 
 class LoanApplication(Document):
 	def validate(self):
+		self.set_pledge_amount()
 		self.set_loan_amount()
 		self.validate_loan_amount()
 
@@ -24,7 +25,6 @@ class LoanApplication(Document):
 				self.repayment_periods, self.is_term_loan)
 
 		self.validate_loan_type()
-		self.set_pledge_amount()
 
 		self.get_repayment_details()
 		self.check_sanctioned_amount_limit()
@@ -108,7 +108,7 @@ class LoanApplication(Document):
 		if self.is_secured_loan and self.proposed_pledges:
 			self.maximum_loan_amount = 0
 			for security in self.proposed_pledges:
-				self.maximum_loan_amount += security.post_haircut_amount
+				self.maximum_loan_amount += flt(security.post_haircut_amount)
 
 		if not self.loan_amount and self.is_secured_loan and self.proposed_pledges:
 			self.loan_amount = self.maximum_loan_amount
