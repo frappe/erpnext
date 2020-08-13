@@ -150,7 +150,7 @@ def validate_condition(pricing_rule, doc=None):
 			doc = doc.as_dict()
 			return frappe.safe_eval(pricing_rule.condition, None, doc)
 		except Exception as e:
-			frappe.throw(doc.name + " Pricing Rule 'Condition' field error:<br>" + str(e).capitalize() )
+			frappe.throw(" Pricing Rule - " + pricing_rule.name + " - 'Condition' field error:<br>" + str(e).capitalize() )
 			return False
 	return True
 #--------------------------------------------------------------------------------
