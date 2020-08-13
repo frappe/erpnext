@@ -32,6 +32,7 @@ class PricingRule(Document):
 		self.validate_max_discount()
 		self.validate_price_list_with_currency()
 		self.validate_dates()
+		validate_condition(self)
 
 		if not self.margin_type: self.margin_rate_or_amount = 0.0
 
@@ -144,13 +145,13 @@ class PricingRule(Document):
 
 def validate_condition(pricing_rule, doc=None):
 	if pricing_rule.condition and ("=" in pricing_rule.condition) and re.match("""[\w\.:_]+\s*={1}\s*[\w\.@'"]+""", pricing_rule.condition):
-		frappe.throw(_("Invalid condition in Pricing Rule: {0}").format(pricing_rule.name), frappe.ValidationError)
-	elif pricing_rule.condition:
+		frappe.throw(_("Invalid condition in Pricing Rule - {0}").format(pricing_rule.name), frappe.ValidationError)
+	elif doc:
 		try:
-			doc = doc.as_dict()
-			return frappe.safe_eval(pricing_rule.condition, None, doc)
+			return frappe.safe_eval(pricing_rule.condition, None, doc.as_dict())
 		except Exception as e:
-			frappe.throw(" Pricing Rule - " + pricing_rule.name + " - 'Condition' field error:<br>" + str(e).capitalize() )
+			frappe.msgprint(_("Pricing Rule - " + pricing_rule.name + " - <b>condition</b> field error:<br>" + \
+			str(e).capitalize() + "<br><br>Ignoring Pricing Rule"), indicator="orange", title=_("Warning"))
 			return False
 	return True
 #--------------------------------------------------------------------------------
