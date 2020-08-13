@@ -20,6 +20,7 @@ from frappe.website.doctype.website_slideshow.website_slideshow import \
 
 from frappe.website.render import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
+from frappe.website.doctype.web_page.web_page import get_web_blocks_html
 
 from six import iteritems
 
@@ -322,6 +323,7 @@ class Item(WebsiteGenerator):
 		self.set_disabled_attributes(context)
 		self.set_metatags(context)
 		self.set_shopping_cart_data(context)
+		self.set_page_blocks(context)
 
 		return context
 
@@ -468,6 +470,13 @@ class Item(WebsiteGenerator):
 	def set_shopping_cart_data(self, context):
 		from erpnext.shopping_cart.product_info import get_product_info_for_website
 		context.shopping_cart = get_product_info_for_website(self.name, skip_quotation_creation=True)
+
+	def set_page_blocks(self, context):
+		if self.content_type != 'Page Builder':
+			return
+		out = get_web_blocks_html(self.page_building_blocks)
+		context.page_builder_html = out.html
+		context.page_builder_scripts = out.scripts
 
 	def add_default_uom_in_conversion_factor_table(self):
 		uom_conv_list = [d.uom for d in self.get("uoms")]

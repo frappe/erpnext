@@ -17,7 +17,11 @@
 
 		{% include "templates/generators/item/item_specifications.html" %}
 
-		{{ doc.website_content or '' }}
+		{% if doc.content_type == 'Page Builder' %}
+			{{ page_builder_html }}
+		{% else %}
+			{{ doc.website_content or '' }}
+		{% endif %}
 	</div>
 </div>
 {% endblock %}
