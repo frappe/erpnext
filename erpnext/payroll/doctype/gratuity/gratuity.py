@@ -32,7 +32,6 @@ class Gratuity(Document):
 			additional_salary.ref_docname = self.name
 			additional_salary.submit()
 
-
 	def set_total_advance_paid(self):
 		paid_amount = frappe.db.sql("""
 			select ifnull(sum(debit_in_account_currency), 0) as paid_amount
@@ -62,7 +61,7 @@ def calculate_work_experience_and_amount(employee, gratuity_rule):
 
 def calculate_work_experience(employee, gratuity_rule):
 
-	total_working_days_per_year = frappe.db.get_value("Gratuity Rule", gratuity_rule, "total_working_days_per_year")
+	total_working_days_per_year, minimum_year_for_gratuity = frappe.db.get_value("Gratuity Rule", gratuity_rule, ["total_working_days_per_year", "minimum_year_for_gratuity"])
 
 	date_of_joining, relieving_date = frappe.db.get_value('Employee', employee, ['date_of_joining', 'relieving_date'])
 	if not relieving_date:
@@ -89,6 +88,8 @@ def calculate_work_experience(employee, gratuity_rule):
 	else:
 		current_work_experience = floor(current_work_experience)
 
+	if current_work_experience < minimum_year_for_gratuity:
+		frappe.throw(_("Employee: {0} have to complete minimum {1} years for gratuity").format(bold(employee), minimum_year_for_gratuity))
 
 	return current_work_experience
 
@@ -125,19 +126,19 @@ def calculate_gratuity_amount(employee, gratuity_rule, experience):
 	year_left = experience
 	for slab in slabs:
 		if calculate_gratuity_amount_based_on == "Current Slab":
-			if experience >= slab.get("from", 0) and (slab.to == 0 or experience <= slab.to):
+			if experience >= slab.from_year and (slab.to_year == 0 or experience < slab.to_year):
 				gratuity_amount = total_applicable_components_amount * experience * slab.fraction_of_applicable_earnings
 				if slab.fraction_of_applicable_earnings:
 					break
 		elif calculate_gratuity_amount_based_on == "Sum of all previous slabs":
-			if slab.get("to") == 0 and slab.get("from") == 0:
+			if slab.to_year == 0 and slab.from_year == 0:
 				gratuity_amount += year_left * total_applicable_components_amount * slab.fraction_of_applicable_earnings
 				break
 
-			if experience > slab.get("to") and experience > slab.get("from"):
-				gratuity_amount += (slab.get("to") - slab.get("from")) * total_applicable_components_amount * slab.fraction_of_applicable_earnings
-				year_left -= (slab.get("to") - slab.get("from"))
-			elif slab.get("from") < experience < slab.get("to"):
+			if experience > slab.to_year and experience > slab.from_year:
+				gratuity_amount += (slab.to_year - slab.from_year) * total_applicable_components_amount * slab.fraction_of_applicable_earnings
+				year_left -= (slab.to_year - slab.from_year)
+			elif slab.from_year <= experience < slab.to_year:
 				gratuity_amount += year_left * total_applicable_components_amount * slab.fraction_of_applicable_earnings
 
 
