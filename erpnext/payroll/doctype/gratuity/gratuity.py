@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, bold
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import flt, get_datetime
 from math import floor
 
 from frappe.utils import get_datetime
@@ -68,16 +68,21 @@ def calculate_work_experience(employee, gratuity_rule):
 	if not relieving_date:
 		frappe.throw(_("Please set Relieving Date for employee: {0}").format(bold(employee)))
 
-	# time_difference = relativedelta(relieving_date, date_of_joining)
 	method = frappe.db.get_value("Gratuity Rule", gratuity_rule, "work_experience_calculation_function")
 
 	employee_total_workings_days = (get_datetime(relieving_date) - get_datetime(date_of_joining)).days
 
+	payroll_based_on = frappe.db.get_value("Payroll Settings", None, "payroll_based_on") or "Leave"
+	if payroll_based_on == "Leave":
+		total_lwp = get_non_working_days(employee, relieving_date, "On Leave")
+		employee_total_workings_days -= total_lwp
+	elif  payroll_based_on == "Attendance":
+		total_absents = get_non_working_days(employee, relieving_date, "Absent")
+		employee_total_workings_days -= total_absents
+
 	# current_work_experience = time_difference.years
 
 	current_work_experience = employee_total_workings_days/total_working_days_per_year or 1
-
-	print("--->", current_work_experience)
 
 	if method == "Round off Work Experience":
 		current_work_experience = round(current_work_experience)
@@ -87,6 +92,24 @@ def calculate_work_experience(employee, gratuity_rule):
 
 	return current_work_experience
 
+def get_non_working_days(employee, relieving_date, status):
+
+	filters={
+			"docstatus": 1,
+			"status": status,
+			"employee": employee,
+			"attendance_date": ("<=", get_datetime(relieving_date))
+		}
+
+	if status == "On Leave":
+		lwp_leave_types =  frappe.get_list("Leave Type", filters = {"is_lwp":1})
+		lwp_leave_types = [leave_type.name for leave_type in lwp_leave_types]
+		filters["leave_type"] =  ("IN", lwp_leave_types)
+
+
+	record = frappe.get_all("Attendance", filters=filters, fields = ["COUNT(name) as total_lwp"], debug = 1)
+	return record[0].total_lwp if len(record) else 0
+
 def calculate_gratuity_amount(employee, gratuity_rule, experience):
 	applicable_earnings_component = frappe.get_all("Gratuity Applicable Component", filters= {'parent': gratuity_rule}, fields=["salary_component"])
 	applicable_earnings_component = [component.salary_component for component in applicable_earnings_component]
@@ -95,15 +118,13 @@ def calculate_gratuity_amount(employee, gratuity_rule, experience):
 
 	total_applicable_components_amount = get_total_applicable_component_amount(employee, applicable_earnings_component, gratuity_rule)
 
-
-
 	calculate_gratuity_amount_based_on = frappe.db.get_value("Gratuity Rule", gratuity_rule, "calculate_gratuity_amount_based_on")
 
 	gratuity_amount = 0
 	fraction_to_be_paid = 0
 	year_left = experience
 	for slab in slabs:
-		if calculate_gratuity_amount_based_on == "Single Slab":
+		if calculate_gratuity_amount_based_on == "Current Slab":
 			if experience >= slab.get("from", 0) and (slab.to == 0 or experience <= slab.to):
 				gratuity_amount = total_applicable_components_amount * experience * slab.fraction_of_applicable_earnings
 				if slab.fraction_of_applicable_earnings:
@@ -116,11 +137,8 @@ def calculate_gratuity_amount(employee, gratuity_rule, experience):
 			if experience > slab.get("to") and experience > slab.get("from"):
 				gratuity_amount += (slab.get("to") - slab.get("from")) * total_applicable_components_amount * slab.fraction_of_applicable_earnings
 				year_left -= (slab.get("to") - slab.get("from"))
-				print(experience, year_left)
 			elif slab.get("from") < experience < slab.get("to"):
-				print(year_left)
 				gratuity_amount += year_left * total_applicable_components_amount * slab.fraction_of_applicable_earnings
-
 
 
 	return gratuity_amount
