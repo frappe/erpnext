@@ -180,8 +180,8 @@ def get_batch_qty(batch_no=None, warehouse=None, item_code=None, posting_date=No
 	return out
 
 @frappe.whitelist()
-def get_batch_balance_on(batch_no, posting_date=None, warehouse=None):
-	"""Returns balance qty of batch before and on the date specified,
+def get_batch_balance_on(batch_no=None, posting_date=None, warehouse=None):
+	"""Returns balance qty of batch till the date specified,
 	   if no date, it will return the entire balance qty irrespective
 
 	User must pass batch_no or batch_no + date
@@ -201,13 +201,16 @@ def get_batch_balance_on(batch_no, posting_date=None, warehouse=None):
 	if warehouse:
 		cond += " and warehouse = {0}".format(frappe.db.escape(warehouse))
 
-	balance = float(frappe.db.sql("""select sum(round(actual_qty, {0}))
+	batch_sle = frappe.db.sql("""select actual_qty
 			from `tabStock Ledger Entry`
-			where batch_no=%s
-			{1}""".format(float_precision, cond),
-			(batch_no))[0][0] or 0)
+			where batch_no='{0}'
+			{1}""".format(batch_no, cond))
 
-	return balance
+	balance = 0
+	for sle in batch_sle:
+		balance = flt(balance, float_precision) + flt(sle[0], float_precision)
+
+	return flt(balance, float_precision)
 
 @frappe.whitelist()
 def get_batches_by_oldest(item_code, warehouse):

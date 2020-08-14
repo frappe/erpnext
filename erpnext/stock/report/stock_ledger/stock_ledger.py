@@ -35,7 +35,7 @@ def execute(filters=None):
 		sle.update(item_detail)
 
 		if filters.get("batch_no"):
-			actual_qty += flt(sle.actual_qty, precision)
+			actual_qty = flt(actual_qty, precision) + flt(sle.actual_qty, precision)
 			stock_value += sle.stock_value_difference
 
 			if sle.voucher_type == 'Stock Reconciliation' and not sle.actual_qty:
