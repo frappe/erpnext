@@ -27,7 +27,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Calculate Gratuity Amount Based on",
-   "options": "Single Slab\nSum of all previous slabs",
+   "options": "Current slab\nSum of all previous slabs",
    "reqd": 1
   },
   {
@@ -65,11 +65,11 @@
   {
    "fieldname": "total_working_days_per_year",
    "fieldtype": "Int",
-   "label": "Total Working Days per year"
+   "label": "Total Working Days Per Year"
   }
  ],
  "links": [],
- "modified": "2020-08-13 16:21:10.466739",
+ "modified": "2020-08-14 14:17:36.599008",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Gratuity Rule",
