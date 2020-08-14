@@ -33,12 +33,16 @@ class AdditionalSalary(Document):
 			frappe.throw(_("From Date can not be greater than To Date."))
 
 		if date_of_joining:
-			if getdate(self.payroll_date) < getdate(date_of_joining):
+			if self.payroll_date and getdate(self.payroll_date) < getdate(date_of_joining):
 				frappe.throw(_("Payroll date can not be less than employee's joining date."))
-			elif getdate(self.from_date) < getdate(date_of_joining):
+			elif self.from_date and getdate(self.from_date) < getdate(date_of_joining):
 				frappe.throw(_("From date can not be less than employee's joining date."))
-			elif relieving_date and getdate(self.to_date) > getdate(relieving_date):
+
+		if relieving_date:
+			if self.to_date and getdate(self.to_date) > getdate(relieving_date):
 				frappe.throw(_("To date can not be greater than employee's relieving date."))
+			if self.payroll_date and getdate(self.payroll_date) > getdate(relieving_date):
+				frappe.throw(_("Payroll date can not be greater than employee's relieving date."))
 
 	def get_amount(self, sal_start_date, sal_end_date):
 		start_date = getdate(sal_start_date)

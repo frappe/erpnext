@@ -1,0 +1,165 @@
+/* sidebar */
+
+.layout-side-section .frappe-control[data-fieldname='patient'] {
+  max-width: 300px;
+}
+
+.patient-image-container {
+  margin-top: 17px;
+}
+
+.patient-image {
+  display: inline-block;
+  width: 100%;
+  height: 0;
+  padding: 50% 0px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+  border-radius: 4px;
+}
+
+.patient-details {
+  margin: -5px 5px;
+}
+
+.important-links {
+  margin: 30px 5px;
+}
+
+.patient-name {
+  font-size: 20px;
+}
+
+/* heatmap */
+
+.heatmap-container {
+  height: 170px;
+}
+
+.patient-heatmap {
+  width: 80%;
+  display: inline-block;
+}
+
+.patient-heatmap .chart-container {
+  margin-left: 30px;
+}
+
+.patient-heatmap .frappe-chart {
+  margin-top: 5px;
+}
+
+.patient-heatmap .frappe-chart .chart-legend {
+  display: none;
+}
+
+.heatmap-container .chart-filter {
+  position: relative;
+  top: 5px;
+  margin-right: 10px;
+}
+
+/* percentage chart */
+
+.percentage-chart-container {
+  height: 130px;
+}
+
+.percentage-chart-container .chart-filter {
+  position: relative;
+  top: 5px;
+  margin-right: 10px;
+}
+
+.therapy-session-percentage-chart .frappe-chart {
+  position: absolute;
+  top: 5px;
+}
+
+/* line charts */
+
+.date-field .clearfix {
+  display: none;
+}
+
+.date-field .help-box {
+  display: none;
+}
+
+.date-field .frappe-control {
+  margin-bottom: 0px !important;
+}
+
+.date-field .form-group {
+  margin-bottom: 0px !important;
+}
+
+/* common */
+
+text.title {
+  text-transform: uppercase;
+  font-size: 11px;
+  margin-left: 20px;
+  margin-top: 20px;
+  display: block;
+}
+
+.chart-filter-search {
+  margin-left: 35px;
+  width: 25%;
+}
+
+.chart-column-container {
+  border-bottom: 1px solid #d1d8dd;
+  margin: 5px 0;
+}
+
+.line-chart-container .frappe-chart {
+  margin-top: -20px;
+}
+
+.line-chart-container {
+  margin-bottom: 20px;
+}
+
+.chart-control {
+  align-self: center;
+  display: flex;
+  flex-direction: row-reverse;
+  margin-top: -25px;
+}
+
+.chart-control > * {
+  margin-right: 10px;
+}
+
+/* mobile */
+
+@media (max-width: 991px) {
+  .patient-progress-sidebar {
+    display: flex;
+  }
+
+  .percentage-chart-container {
+    border-top: 1px solid #d1d8dd;
+  }
+
+  .percentage-chart-container .chart-filter {
+    position: relative;
+    top: 12px;
+    margin-right: 10px;
+  }
+
+  .patient-progress-sidebar .important-links {
+    margin: 0;
+  }
+
+  .patient-progress-sidebar .patient-details {
+    width: 50%;
+  }
+
+  .chart-filter-search {
+    width: 40%;
+  }
+}

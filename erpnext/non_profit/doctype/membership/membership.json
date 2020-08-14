@@ -120,13 +120,15 @@
   {
    "fieldname": "webhook_payload",
    "fieldtype": "Code",
+   "hidden": 1,
    "label": "Webhook Payload",
    "options": "JSON",
    "read_only": 1
   }
  ],
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-04-06 14:29:33.856060",
+ "modified": "2020-07-27 14:28:11.532696",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership",
