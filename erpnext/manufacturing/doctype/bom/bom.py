@@ -911,6 +911,7 @@ def get_bom_diff(bom1, bom2):
 	return out
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def item_query(doctype, txt, searchfield, start, page_len, filters):
 	meta = frappe.get_meta("Item", cached=True)
 	searchfields = meta.get_search_fields()
