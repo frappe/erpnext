@@ -1,0 +1,35 @@
+{% extends "templates/web.html" %}
+
+{% block script %}
+<link rel="stylesheet" href="project-tree/project_tree.css"/>
+<script src="project-tree/index.js"></script>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="page-head flex align-center">
+	<div class="col-md-12">
+		<div class="flex align-center">
+			<div class="container">
+				<div class="row flex align-center">
+					<div class="col-md-7 col-sm-8 col-xs-6 page-title">
+						<h1 class="flex" style="margin: auto;">
+							<div class="flex fill-width title-area" style="max-width: 100%">
+								<div class="ellipsis title-text">Projects</div>
+							</div>
+						</h1>
+					</div>
+				</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+
+
+{% block page_content %}
+<div class="col-md-12 layout-main-section-wrapper p-0">
+	<div class="layout-main-section">
+	</div>
+</div>
+{% endblock %}

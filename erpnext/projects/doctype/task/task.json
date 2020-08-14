@@ -49,7 +49,9 @@
   "company",
   "lft",
   "rgt",
-  "old_parent"
+  "old_parent",
+  "portal_section",
+  "show_in_portal"
  ],
  "fields": [
   {
@@ -360,6 +362,18 @@
    "label": "Completed By",
    "no_copy": 1,
    "options": "User"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "portal_section",
+   "fieldtype": "Section Break",
+   "label": "Portal"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_in_portal",
+   "fieldtype": "Check",
+   "label": "Show in Portal"
   }
  ],
  "icon": "fa fa-check",
@@ -367,7 +381,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2020-07-03 12:36:04.960457",
+ "modified": "2020-08-14 00:28:03.727698",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

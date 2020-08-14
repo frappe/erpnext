@@ -62,7 +62,9 @@
   "day_to_send",
   "weekly_time_to_send",
   "column_break_45",
-  "message"
+  "message",
+  "portal",
+  "show_in_portal"
  ],
  "fields": [
   {
@@ -440,13 +442,25 @@
    "fieldtype": "Text",
    "label": "Message",
    "mandatory_depends_on": "collect_progress"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "portal",
+   "fieldtype": "Section Break",
+   "label": "Portal"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_in_portal",
+   "fieldtype": "Check",
+   "label": "Show in Portal"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "links": [],
  "max_attachments": 4,
- "modified": "2020-04-08 22:11:14.552615",
+ "modified": "2020-08-14 00:27:54.898065",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

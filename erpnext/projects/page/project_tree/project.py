@@ -21,3 +21,11 @@ def get_tasks(params):
 	data = compress(execute(**args), args=args)
 
 	return data
+
+@frappe.whitelist()
+def get_meta():
+
+	return {
+		"project": frappe.get_meta("Project"),
+		"task": frappe.get_meta("Task")
+	}

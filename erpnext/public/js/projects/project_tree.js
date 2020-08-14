@@ -1,24 +1,7 @@
 frappe.provide('frappe.views');
+frappe.provide("erpnext.projects");
 
-frappe.pages['project'].on_page_load = function(wrapper) {
-	let page = frappe.ui.make_app_page({
-		parent: wrapper,
-		title: 'Project',
-		single_column: true
-	});
-
-	frappe.model.with_doctype("Project", () => {
-		frappe.model.with_doctype("Task", () => {
-			new frappe.views.Projects({
-				doctype: "Project",
-				parent: wrapper,
-				page: page
-			})
-		});
-	});
-}
-
-frappe.views.Projects = class Projects extends frappe.views.BaseList {
+erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 	constructor(opts) {
 		super(opts);
 		this.show();
@@ -36,6 +19,55 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		this.get_settings("Task", "task_listview_settings");
 
 		this.menu_items = [];
+	}
+
+	setup_page() {
+		this.$page = $(this.parent);
+		this.page && this.page.page_form.removeClass('row').addClass('flex');
+		this.setup_page_head();
+	}
+
+	setup_page_head() {
+		this.set_title("Projects");
+		this.set_menu_items("Project");
+		this.set_breadcrumbs();
+	}
+
+	set_menu_items(doctype) {
+
+		const bulk_delete = () => {
+			return {
+				label: __('Delete'),
+				action: () => {
+					const docnames = this.get_checked_items(true).map(docname => docname.toString());
+					frappe.confirm(__('Delete {0} items permanently?', [docnames.length]),
+						() => {
+								frappe.call({
+									method: 'frappe.desk.reportview.delete_items',
+									freeze: true,
+									args: {
+										items: docnames,
+										doctype: doctype
+									}
+								}).then((r) => {
+									let failed = r.message;
+									if (!failed) failed = [];
+
+									if (failed.length && !r._server_messages) {
+										frappe.throw(__('Cannot delete {0}', [failed.map(f => f.bold()).join(', ')]));
+									}
+
+									if (failed.length < docnames.length) {
+										frappe.utils.play_sound('delete');
+									}
+
+									this.refresh();
+								});
+						})
+				},
+				standard: true,
+			};
+		};
 
 		if (frappe.user.has_role('System Manager')) {
 			this.menu_items.push({
@@ -44,22 +76,13 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 				standard: true
 			});
 		}
-	}
 
-	setup_page() {
-		this.$page = $(this.parent);
-		this.page.page_form.removeClass('row').addClass('flex');
-		this.setup_page_head();
-	}
+		// bulk delete
+		if (frappe.model.can_delete(doctype)) {
+			this.menu_items.push(bulk_delete());
+		}
 
-	setup_page_head() {
-		this.set_title("Projects");
-		this.set_menu_items();
-		this.set_breadcrumbs();
-	}
-
-	set_menu_items() {
-		this.menu_items.map(item => {
+		this.page && this.menu_items.map(item => {
 			const $item = this.page.add_menu_item(item.label, item.action, item.standard, item.shortcut);
 			if (item.class) {
 				$item && $item.addClass(item.class);
@@ -87,7 +110,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 	}
 
 	set_title(title) {
-		this.page.set_title(title);
+		this.page && this.page.set_title(title);
 	}
 
 	setup_view() {
@@ -165,17 +188,19 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		this.task_fields.push([fieldname, doctype]);
 	}
 
+	get_df(doctype, fieldname) {
+		return frappe.meta.get_docfield(doctype, fieldname);
+	}
+
 	setup_columns(doctype, meta, list_view_settings) {
 		// setup columns for list view
 		let columns = [];
-
-		const get_df = frappe.meta.get_docfield.bind(null, doctype);
 
 		// 1st column: title_field or name
 		if (meta.title_field) {
 			columns.push({
 				type: 'Subject',
-				df: get_df(meta.title_field)
+				df: this.get_df(doctype, meta.title_field)
 			});
 		} else {
 			columns.push({
@@ -309,7 +334,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 
 	get_call_args(filters) {
 		return {
-			method: "erpnext.projects.page.project.project.get_projects_data",
+			method: "erpnext.projects.page.project_tree.project.get_projects_data",
 			args: {
 				params: {
 					doctype: "Project",
@@ -325,7 +350,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 
 	get_task_call_args(filters) {
 		return {
-			method: "erpnext.projects.page.project.project.get_tasks",
+			method: "erpnext.projects.page.project_tree.project.get_tasks",
 			args: {
 				params: {
 					doctype: "Task",
@@ -352,6 +377,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 
 	setup_events() {
 		this.get_tasks();
+		this.setup_check_events();
 		this.setup_open_doc();
 		this.setup_task_tree_dropdown();
 		this.setup_create_new_task();
@@ -381,13 +407,8 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 				$el.find(".octicon").removeClass("octicon-chevron-down").addClass("octicon-chevron-right");
 			}
 
-			console.log("--2")
-
 			frappe.call(this.get_task_call_args([["Task", "parent_task", "=", target]])).then(r => {
 				// render
-				this.set_title(target);
-				// let data = r.message || {};
-				// data = !Array.isArray(data) ? frappe.utils.dict(data.keys, data.values) : data;
 				this.prepare_data(r);
 
 				list.append($result);
@@ -402,7 +423,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 
 	setup_open_doc() {
 		this.$result.on('click', '.btn-open', (e) => {
-			e.stopPropagation()
+			e.stopPropagation();
 			let el = e.currentTarget;
 			let doctype = unescape(el.getAttribute("data-doctype"));
 			let name = unescape(el.getAttribute("data-name"));
@@ -423,12 +444,12 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 	get_projects() {
 		this.$frappe_list.on('click', '.btn-prev', (e) => {
 			this.filter_area.clear(false);
-			this.set_title("Projects");
+			this.set_title("Project");
 			this.remove_previous_button()
 			this.render_header(this.columns, true);
 			this.filter_area.refresh_filters(this.meta);
 			this.fetch_projects();
-		})
+		});
 	}
 
 	fetch_projects() {
@@ -444,7 +465,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 	get_tasks() {
 		this.$result.on('click', '.project-list-row-container', (e) => {
 			this.filter_area.clear(false);
-			this.set_title("Tasks");
+			this.set_title("Task Tree");
 			this.filter_area.refresh_filters(this.task_meta);
 			this.fetch_tasks(unescape(e.currentTarget.getAttribute("data-name")));
 		});
@@ -507,7 +528,7 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 	}
 
 	setup_filter_area() {
-		this.filter_area = new CustomFilterArea(this);
+		this.filter_area = new erpnext.projects.CustomFilterArea(this);
 
 		if (this.filters && this.filters.length > 0) {
 			return this.filter_area.set(this.filters);
@@ -736,39 +757,29 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		return `<span class='indicator ${indicator[1]}' title='${__(indicator[0])}'></span>`;
 	}
 
+	get_avatar(last_assignee) {
+		return `<span class="filterable"
+				data-filter="_assign,like,%${last_assignee}%">
+				${frappe.avatar(last_assignee)}
+			</span>`
+	}
+
 	get_meta_html(doc, create_new) {
 		let html = '';
 
 		if (create_new && doc.is_group) {
-			html += `
-				<div class="level-item hidden-xs">
-					<button class="btn create-new btn-default btn-xs"
-						data-name="${escape(doc.name)}">
-						${__("Add Child")}
-					</button>
-				</div>
-			`;
+			html += this.get_add_child_button(doc);
 		}
 
 		if (doc.doctype == 'Project') {
-			html += `
-				<div class="level-item hidden-xs" style="margin-left: 5px;">
-					<button class="btn btn-open btn-default btn-xs"
-						data-doctype="${escape(doc.doctype)}" data-name="${escape(doc.name)}">
-						${__("Open")}
-					</button>
-				</div>
-			`;
+			html += this.get_open_button(doc);
 		}
 
-		const modified = comment_when(doc.modified, true);
+		const modified = this.comment_when(doc.modified, true);
 
 		const last_assignee = JSON.parse(doc._assign || '[]').slice(-1)[0];
 		const assigned_to = last_assignee ?
-			`<span class="filterable"
-				data-filter="_assign,like,%${last_assignee}%">
-				${frappe.avatar(last_assignee)}
-			</span>` :
+			this.get_avatar(last_assignee) :
 			`<span class="avatar avatar-small avatar-empty"></span>`;
 
 		const comment_count =
@@ -789,6 +800,28 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 		`;
 
 		return html;
+	}
+
+	get_open_button(doc) {
+		return `
+				<div class="level-item hidden-xs" style="margin-left: 5px;">
+					<button class="btn btn-open btn-default btn-xs"
+						data-doctype="${escape(doc.doctype)}" data-name="${escape(doc.name)}">
+						${__("Open")}
+					</button>
+				</div>
+			`;
+	}
+
+	get_add_child_button(doc) {
+		return `
+				<div class="level-item hidden-xs">
+					<button class="btn create-new btn-default btn-xs"
+						data-name="${escape(doc.name)}">
+						${__("Add Child")}
+					</button>
+				</div>
+			`;
 	}
 
 	render_header(columns, refresh_header) {
@@ -871,7 +904,16 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 			this.$checkbox_actions.show();
 			this.$list_head_subject.hide();
 		}
-		this.toggle_actions_menu_button(this.$checks.length > 0);
+		// this.toggle_actions_menu_button(this.$checks.length > 0);
+	}
+
+	get_checked_items(only_docnames) {
+		const docnames = Array.from(this.$checks || [])
+			.map(check => cstr(unescape($(check).data().name)));
+
+		if (only_docnames) return docnames;
+
+		return this.data.filter(d => docnames.includes(d.name));
 	}
 
 	get_header_html_skeleton(left = '', right = '') {
@@ -892,9 +934,137 @@ frappe.views.Projects = class Projects extends frappe.views.BaseList {
 			</header>
 		`;
 	}
+
+	setup_check_events() {
+		this.$result.on('change', 'input[type=checkbox]', e => {
+			const $target = $(e.currentTarget);
+			e.stopPropagation()
+
+			if ($target.is('.list-header-subject .list-check-all')) {
+				const $check = this.$result.find('.checkbox-actions .list-check-all');
+				$check.prop('checked', $target.prop('checked'));
+				$check.trigger('change');
+			} else if ($target.is('.checkbox-actions .list-check-all')) {
+				const $check = this.$result.find('.list-header-subject .list-check-all');
+				$check.prop('checked', $target.prop('checked'));
+
+				this.$result.find('.list-row-checkbox')
+					.prop('checked', $target.prop('checked'));
+			}
+
+			this.on_row_checked();
+		});
+
+		this.$result.on('click', '.list-row-checkbox', e => {
+			const $target = $(e.currentTarget);
+			e.stopPropagation()
+
+			// shift select checkboxes
+			if (e.shiftKey && this.$checkbox_cursor && !$target.is(this.$checkbox_cursor)) {
+				const name_1 = this.$checkbox_cursor.data().name;
+				const name_2 = $target.data().name;
+				const index_1 = this.data.findIndex(d => d.name === name_1);
+				const index_2 = this.data.findIndex(d => d.name === name_2);
+				let [min_index, max_index] = [index_1, index_2];
+
+				if (min_index > max_index) {
+					[min_index, max_index] = [max_index, min_index];
+				}
+
+				let docnames = this.data.slice(min_index + 1, max_index).map(d => d.name);
+				const selector = docnames.map(name => `.list-row-checkbox[data-name="${name}"]`).join(',');
+				this.$result.find(selector).prop('checked', true);
+			}
+
+			this.$checkbox_cursor = $target;
+		});
+	}
+
+	comment_when(datetime, mini) {
+		var timestamp = frappe.datetime.str_to_user ?
+			frappe.datetime.str_to_user(datetime) : datetime;
+		return '<span class="frappe-timestamp '
+			+ (mini ? " mini" : "") + '" data-timestamp="' + datetime
+			+ '" title="' + timestamp + '">'
+			+ this.prettyDate(datetime, mini) + '</span>';
+	}
+
+	convert_to_user_tz(date) {
+		date = frappe.datetime.convert_to_user_tz(date);
+		return new Date((date || "").replace(/-/g, "/").replace(/[TZ]/g, " ").replace(/\.[0-9]*/, ""));
+	}
+
+	prettyDate(date, mini) {
+		if (!date) return '';
+
+		if (typeof (date) == "string") {
+			date = this.convert_to_user_tz(date)
+		}
+
+		let diff = (((new Date()).getTime() - date.getTime()) / 1000);
+		let day_diff = Math.floor(diff / 86400);
+
+		if (isNaN(day_diff) || day_diff < 0) return '';
+
+		if (mini) {
+			// Return short format of time difference
+			if (day_diff == 0) {
+				if (diff < 60) {
+					return __("now");
+				} else if (diff < 3600) {
+					return __("{0} m", [Math.floor(diff / 60)]);
+				} else if (diff < 86400) {
+					return __("{0} h", [Math.floor(diff / 3600)]);
+				}
+			} else {
+				if (day_diff < 7) {
+					return __("{0} d", [day_diff]);
+				} else if (day_diff < 31) {
+					return __("{0} w", [Math.ceil(day_diff / 7)]);
+				} else if (day_diff < 365) {
+					return __("{0} M", [Math.ceil(day_diff / 30)]);
+				} else {
+					return __("{0} y", [Math.ceil(day_diff / 365)]);
+				}
+			}
+		} else {
+			// Return long format of time difference
+			if (day_diff == 0) {
+				if (diff < 60) {
+					return __("just now");
+				} else if (diff < 120) {
+					return __("1 minute ago");
+				} else if (diff < 3600) {
+					return __("{0} minutes ago", [Math.floor(diff / 60)]);
+				} else if (diff < 7200) {
+					return __("1 hour ago");
+				} else if (diff < 86400) {
+					return __("{0} hours ago", [Math.floor(diff / 3600)]);
+				}
+			} else {
+				if (day_diff == 1) {
+					return __("yesterday");
+				} else if (day_diff < 7) {
+					return __("{0} days ago", [day_diff]);
+				} else if (day_diff < 14) {
+					return __("1 week ago");
+				} else if (day_diff < 31) {
+					return __("{0} weeks ago", [Math.ceil(day_diff / 7)]);
+				} else if (day_diff < 62) {
+					return __("1 month ago");
+				} else if (day_diff < 365) {
+					return __("{0} months ago", [Math.ceil(day_diff / 30)]);
+				} else if (day_diff < 730) {
+					return __("1 year ago");
+				} else {
+					return __("{0} years ago", [Math.ceil(day_diff / 365)]);
+				}
+			}
+		}
+	}
 }
 
-class CustomFilterArea extends frappe.ui.FilterArea {
+erpnext.projects.CustomFilterArea = class CustomFilterArea extends frappe.ui.FilterArea {
 
 	refresh_filters(meta) {
 		this.list_view.page.clear_fields();
