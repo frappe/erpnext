@@ -21,7 +21,7 @@ frappe.ui.form.on("Leave Application", {
 	onload: function(frm) {
 
 		// Ignore cancellation of doctype on cancel all.
-		frm.ignored_doctypes_on_cancel_all = ["Leave Ledger Entry"];
+		frm.ignore_doctypes_on_cancel_all = ["Leave Ledger Entry"];
 
 		if (!frm.doc.posting_date) {
 			frm.set_value("posting_date", frappe.datetime.get_today());
