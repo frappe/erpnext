@@ -163,9 +163,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		$.each(me.frm.doc["items"] || [], function(n, item) {
 			var item_tax_map = me._load_item_tax_rate(item.item_tax_rate);
 			var cumulated_tax_fraction = 0.0;
-
+			var total_inclusive_tax_amount_per_qty = 0;
 			$.each(me.frm.doc["taxes"] || [], function(i, tax) {
-				tax.tax_fraction_for_current_item = me.get_current_tax_fraction(tax, item_tax_map);
+				var current_tax_fraction = me.get_current_tax_fraction(tax, item_tax_map);
+				tax.tax_fraction_for_current_item = current_tax_fraction[0];
+				var inclusive_tax_amount_per_qty = current_tax_fraction[1];
 
 				if(i==0) {
 					tax.grand_total_fraction_for_current_item = 1 + tax.tax_fraction_for_current_item;
@@ -176,10 +178,12 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				}
 
 				cumulated_tax_fraction += tax.tax_fraction_for_current_item;
+				total_inclusive_tax_amount_per_qty += inclusive_tax_amount_per_qty * flt(item.qty);
 			});
 
-			if(cumulated_tax_fraction && !me.discount_amount_applied) {
-				item.net_amount = flt(item.amount / (1 + cumulated_tax_fraction));
+			if(!me.discount_amount_applied && item.qty && (total_inclusive_tax_amount_per_qty || cumulated_tax_fraction)) {
+				var amount = flt(item.amount) - total_inclusive_tax_amount_per_qty;
+				item.net_amount = flt(amount / (1 + cumulated_tax_fraction));
 				item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
 
 				me.set_in_company_currency(item, ["net_rate", "net_amount"]);
@@ -191,6 +195,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		// Get tax fraction for calculating tax exclusive amount
 		// from tax inclusive amount
 		var current_tax_fraction = 0.0;
+		var inclusive_tax_amount_per_qty = 0;
 
 		if(cint(tax.included_in_print_rate)) {
 			var tax_rate = this._get_tax_rate(tax, item_tax_map);
@@ -205,13 +210,16 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			} else if(tax.charge_type == "On Previous Row Total") {
 				current_tax_fraction = (tax_rate / 100.0) *
 					this.frm.doc["taxes"][cint(tax.row_id) - 1].grand_total_fraction_for_current_item;
+			} else if (tax.charge_type == "On Item Quantity") {
+				inclusive_tax_amount_per_qty = flt(tax_rate);
 			}
 		}
 
-		if(tax.add_deduct_tax) {
-			current_tax_fraction *= (tax.add_deduct_tax == "Deduct") ? -1.0 : 1.0;
+		if(tax.add_deduct_tax && tax.add_deduct_tax == "Deduct") {
+			current_tax_fraction *= -1;
+			inclusive_tax_amount_per_qty *= -1;
 		}
-		return current_tax_fraction;
+		return [current_tax_fraction, inclusive_tax_amount_per_qty];
 	},
 
 	_get_tax_rate: function(tax, item_tax_map) {
@@ -360,8 +368,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		} else if(tax.charge_type == "On Previous Row Total") {
 			current_tax_amount = (tax_rate / 100.0) *
 				this.frm.doc["taxes"][cint(tax.row_id) - 1].grand_total_for_current_item;
+		} else if (tax.charge_type == "On Item Quantity") {
+			current_tax_amount = tax_rate * item.qty;
 		}
-
 		this.set_item_wise_tax(item, tax, tax_rate, current_tax_amount);
 
 		return current_tax_amount;
@@ -573,7 +582,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			var actual_taxes_dict = {};
 
 			$.each(this.frm.doc["taxes"] || [], function(i, tax) {
-				if (tax.charge_type == "Actual") {
+				if (in_list(["Actual", "On Item Quantity"], tax.charge_type)) {
 					var tax_amount = (tax.category == "Valuation") ? 0.0 : tax.tax_amount;
 					tax_amount *= (tax.add_deduct_tax == "Deduct") ? -1.0 : 1.0;
 					actual_taxes_dict[tax.idx] = tax_amount;
@@ -586,7 +595,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			$.each(actual_taxes_dict, function(key, value) {
 				if (value) total_actual_tax += value;
 			});
-
+			
 			return flt(this.frm.doc.grand_total - total_actual_tax, precision("grand_total"));
 		}
 	},
