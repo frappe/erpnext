@@ -8,6 +8,7 @@
  "field_order": [
   "applicable_earnings_component",
   "work_experience_calculation_function",
+  "total_working_days_per_year",
   "column_break_3",
   "disable",
   "calculate_gratuity_amount_based_on",
@@ -26,7 +27,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Calculate Gratuity Amount Based on",
-   "options": "Last Month Salary\nActual Salary",
+   "options": "Single Slab\nSum of all previous slabs",
    "reqd": 1
   },
   {
@@ -60,10 +61,15 @@
    "fieldtype": "Select",
    "label": "Work Experience Calculation method",
    "options": "Round off Work Experience\nTake Exact Completed Years"
+  },
+  {
+   "fieldname": "total_working_days_per_year",
+   "fieldtype": "Int",
+   "label": "Total Working Days per year"
   }
  ],
  "links": [],
- "modified": "2020-08-06 12:28:13.757792",
+ "modified": "2020-08-13 16:21:10.466739",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Gratuity Rule",

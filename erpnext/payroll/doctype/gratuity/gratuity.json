@@ -24,6 +24,7 @@
   "column_break_15",
   "current_work_experience",
   "amount",
+  "paid_amount",
   "amended_from"
  ],
  "fields": [
@@ -77,7 +78,7 @@
    "default": "0",
    "fieldname": "amount",
    "fieldtype": "Currency",
-   "label": "Amount",
+   "label": "Total Amount",
    "read_only": 1,
    "reqd": 1
   },
@@ -164,11 +165,19 @@
    "fieldtype": "Date",
    "label": "Payroll Date",
    "mandatory_depends_on": "eval: doc.pay_via_salary_slip == 1"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.pay_via_salary_slip == 0",
+   "fieldname": "paid_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Amount",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-06 15:51:16.047698",
+ "modified": "2020-08-14 11:59:15.499548",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Gratuity",
