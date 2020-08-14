@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, add_days
 from erpnext.stock.utils import update_included_uom_in_report
 from frappe import _
 
@@ -23,6 +23,11 @@ def execute(filters=None):
 		data.append(opening_row)
 
 	actual_qty = stock_value = 0
+
+	if filters.get("batch_no") and sl_entries:
+		# add opening batch qty to balance qty
+		if sl_entries[0].voucher_type != "Stock Reconciliation" and opening_row:
+			actual_qty = opening_row.get("qty_after_transaction")
 
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
@@ -200,9 +205,17 @@ def get_opening_balance(filters, columns):
 		"posting_time": "00:00:00"
 	})
 
+	if filters.batch_no:
+		from erpnext.stock.doctype.batch.batch import get_batch_balance_on
+		# get batch balance qty before from date
+		date = add_days(filters.from_date, -1)
+		qty_after_transaction = get_batch_balance_on(filters.batch_no, date, filters.warehouse)
+	else:
+		qty_after_transaction = last_entry.get("qty_after_transaction", 0)
+
 	row = {
 		"item_code": _("'Opening'"),
-		"qty_after_transaction": last_entry.get("qty_after_transaction", 0),
+		"qty_after_transaction": qty_after_transaction,
 		"valuation_rate": last_entry.get("valuation_rate", 0),
 		"stock_value": last_entry.get("stock_value", 0)
 	}
