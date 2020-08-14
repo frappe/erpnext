@@ -122,24 +122,31 @@ def calculate_gratuity_amount(employee, gratuity_rule, experience):
 	calculate_gratuity_amount_based_on = frappe.db.get_value("Gratuity Rule", gratuity_rule, "calculate_gratuity_amount_based_on")
 
 	gratuity_amount = 0
-	fraction_to_be_paid = 0
+	slab_found = False
 	year_left = experience
 	for slab in slabs:
 		if calculate_gratuity_amount_based_on == "Current Slab":
 			if experience >= slab.from_year and (slab.to_year == 0 or experience < slab.to_year):
 				gratuity_amount = total_applicable_components_amount * experience * slab.fraction_of_applicable_earnings
 				if slab.fraction_of_applicable_earnings:
+					slab_found = True
 					break
 		elif calculate_gratuity_amount_based_on == "Sum of all previous slabs":
 			if slab.to_year == 0 and slab.from_year == 0:
 				gratuity_amount += year_left * total_applicable_components_amount * slab.fraction_of_applicable_earnings
+				slab_found = True
 				break
 
 			if experience > slab.to_year and experience > slab.from_year:
 				gratuity_amount += (slab.to_year - slab.from_year) * total_applicable_components_amount * slab.fraction_of_applicable_earnings
 				year_left -= (slab.to_year - slab.from_year)
+				slab_found = True
 			elif slab.from_year <= experience < slab.to_year:
 				gratuity_amount += year_left * total_applicable_components_amount * slab.fraction_of_applicable_earnings
+				slab_found = True
+
+		if not slab_found:
+			frappe.throw(_("No Suitable Slab found for Calculation of gratuity amount in Gratuity Rule: {0}").format(bold(gratuity_rule)))
 
 
 	return gratuity_amount
