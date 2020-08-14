@@ -123,6 +123,7 @@
   "weightage",
   "slideshow",
   "website_image",
+  "website_image_alt",
   "thumbnail",
   "cb72",
   "website_warehouse",
@@ -1337,15 +1338,21 @@
    "options": "Web Page Block",
    "show_days": 1,
    "show_seconds": 1
+  },
+  {
+   "fieldname": "website_image_alt",
+   "fieldtype": "Data",
+   "label": "Image Description"
   }
  ],
  "has_web_view": 1,
  "icon": "fa fa-tag",
  "idx": 2,
  "image_field": "image",
+ "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2020-08-12 17:50:27.825672",
+ "modified": "2020-08-07 14:24:58.384992",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
