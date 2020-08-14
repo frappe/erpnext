@@ -94,13 +94,6 @@ frappe.ui.form.on("Timesheet", {
 		}
 	},
 
-	company: function(frm) {
-		frappe.db.get_value('Company', { 'company_name' : frm.doc.company }, 'standard_working_hours')
-			.then(({ message }) => {
-				(frappe.working_hours = message.standard_working_hours || 0);
-			});
-	},
-
 	make_invoice: function(frm) {
 		let dialog = new frappe.ui.Dialog({
 			title: __("Select Item (optional)"),
