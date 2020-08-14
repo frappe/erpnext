@@ -12,6 +12,7 @@
   "column_break_3",
   "disable",
   "calculate_gratuity_amount_based_on",
+  "minimum_year_for_gratuity",
   "gratuity_rules_section",
   "gratuity_rule_slabs"
  ],
@@ -48,7 +49,7 @@
    "label": "Gratuity Rules"
   },
   {
-   "description": "Leave <b>From</b> and <b>To</b> blank for no upper and lower limit.",
+   "description": "Leave <b>From</b> and <b>To</b> 0 for no upper and lower limit.",
    "fieldname": "gratuity_rule_slabs",
    "fieldtype": "Table",
    "label": "Current Work Experience",
@@ -63,13 +64,19 @@
    "options": "Round off Work Experience\nTake Exact Completed Years"
   },
   {
+   "default": "365",
    "fieldname": "total_working_days_per_year",
    "fieldtype": "Int",
    "label": "Total Working Days Per Year"
+  },
+  {
+   "fieldname": "minimum_year_for_gratuity",
+   "fieldtype": "Int",
+   "label": "Minimum Year for Gratuity"
   }
  ],
  "links": [],
- "modified": "2020-08-14 14:17:36.599008",
+ "modified": "2020-08-14 16:23:05.287545",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Gratuity Rule",
