@@ -37,6 +37,8 @@ def get_pricing_rules(args, doc=None):
 
 	rules = []
 
+	pricing_rules = filter_pricing_rule_based_on_condition(pricing_rules, doc)
+
 	if not pricing_rules: return []
 
 	if apply_multiple_pricing_rules(pricing_rules):
@@ -50,6 +52,22 @@ def get_pricing_rules(args, doc=None):
 			rules.append(pricing_rule)
 
 	return rules
+
+def filter_pricing_rule_based_on_condition(pricing_rules, doc=None):
+	filtered_pricing_rules = []
+	if doc:
+		for pricing_rule in pricing_rules:
+			if pricing_rule.condition:
+				try:
+					if frappe.safe_eval(pricing_rule.condition, None, doc.as_dict()):
+						filtered_pricing_rules.append(pricing_rule)
+				except Exception as e:
+					frappe.msgprint(_("Pricing Rule - " + pricing_rule.name + " - <b>condition</b> field error:<br>" + \
+					str(e).capitalize() + "<br><br>Ignoring Pricing Rule"), indicator="orange", title=_("Warning"))
+			else:
+				filtered_pricing_rules.append(pricing_rule)
+
+	return filtered_pricing_rules
 
 def _get_pricing_rules(apply_on, args, values):
 	apply_on_field = frappe.scrub(apply_on)
