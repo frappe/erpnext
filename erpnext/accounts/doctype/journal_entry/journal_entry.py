@@ -171,7 +171,11 @@ class JournalEntry(AccountsController):
 				if not (d.party_type and d.party):
 					frappe.throw(_("Row {0}: Party Type and Party is required for Receivable / Payable account {1}").format(d.idx, d.account))
 
-				if not (d.reference_type and d.reference_name) and not cint(self.is_advance):
+				dr_or_cr = "debit" if erpnext.get_party_account_type(d.party_type) == "Receivable" else "credit"
+				reverse_dr_or_cr = "credit" if dr_or_cr == "debit" else "debit"
+				diff = flt(d.get(dr_or_cr)) - flt(d.get(reverse_dr_or_cr))
+
+				if not (d.reference_type and d.reference_name) and diff < 0 and not cint(self.is_advance):
 					frappe.throw(_("Row {0}: No voucher is referenced in Receivable / Payable account {1}. "
 						"Please set 'Against Document' or check 'Is Advance' if you do not want to reference this entry against another voucher")
 						.format(d.idx, d.account))
@@ -899,7 +903,7 @@ def get_opening_accounts(company):
 
 	return [{"account": a, "balance": get_balance_on(a)} for a in accounts]
 
-def get_outstanding_journal_entries(party_account, party_type, party):
+def get_outstanding_journal_entries(party_account, party_type, party, txt, start, page_len):
 	if erpnext.get_party_account_type(party_type) == "Receivable":
 		bal_dr_or_cr = "gle_je.credit_in_account_currency - gle_je.debit_in_account_currency"
 		payment_dr_or_cr = "gle_payment.debit_in_account_currency - gle_payment.credit_in_account_currency"
@@ -926,20 +930,24 @@ def get_outstanding_journal_entries(party_account, party_type, party):
 			gle_je.party_type = %(party_type)s and gle_je.party = %(party)s and gle_je.account = %(account)s
 			and gle_je.voucher_type = 'Journal Entry' and (gle_je.against_voucher = '' or gle_je.against_voucher is null)
 			and abs({bal_dr_or_cr}) > 0
+			and je.name like %(txt)s
 		group by gle_je.voucher_no
 		having abs(balance) > 0.005
-		order by gle_je.posting_date""".format(
+		order by gle_je.posting_date limit %(start)s, %(page_len)s""".format(
 	bal_dr_or_cr=bal_dr_or_cr,
 	payment_dr_or_cr=payment_dr_or_cr
 	), {
 		"party_type": party_type,
 		"party": party,
-		"account": party_account
+		"account": party_account,
+		"txt": "%{0}%".format(txt),
+		"start": start,
+		"page_len": page_len
 	}, as_dict=1)
 
 def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("account") and filters.get("party_type") and filters.get("party"):
-		res = get_outstanding_journal_entries(filters.get("account"), filters.get("party_type"), filters.get("party"))
+		res = get_outstanding_journal_entries(filters.get("account"), filters.get("party_type"), filters.get("party"), txt, start, page_len)
 		return [[jv.name, jv.posting_date, _("Balance: {0}").format(jv.balance), jv.user_remark] for jv in res]
 	else:
 		return frappe.db.sql("""select jv.name, jv.posting_date, jv.user_remark
