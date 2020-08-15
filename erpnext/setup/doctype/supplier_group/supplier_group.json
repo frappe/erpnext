@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:supplier_group_name",
@@ -106,8 +105,7 @@
  "icon": "fa fa-flag",
  "idx": 1,
  "is_tree": 1,
- "links": [],
- "modified": "2020-03-18 18:26:07.179330",
+ "modified": "2020-08-15 13:08:47.800451",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Supplier Group",

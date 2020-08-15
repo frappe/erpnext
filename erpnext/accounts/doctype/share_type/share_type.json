@@ -23,7 +23,7 @@
    "label": "Description"
   }
  ],
- "modified": "2020-03-03 15:41:59.196164",
+ "modified": "2020-08-15 13:08:48.069899",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Share Type",
@@ -97,7 +97,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Sales Master Manager",
+   "role": "Customer Master Manager",
    "share": 1,
    "write": 1
   }

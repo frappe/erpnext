@@ -124,7 +124,6 @@
    "columns": 2,
    "fieldname": "total",
    "fieldtype": "Currency",
-   "in_list_view": 1,
    "label": "Total",
    "options": "currency",
    "read_only": 1
@@ -207,7 +206,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:48:09.543133",
+ "modified": "2020-08-15 14:37:52.605720",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Taxes and Charges",

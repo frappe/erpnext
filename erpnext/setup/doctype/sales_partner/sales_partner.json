@@ -190,7 +190,7 @@
  ],
  "icon": "fa fa-user",
  "idx": 1,
- "modified": "2020-03-03 15:36:30.702692",
+ "modified": "2020-08-15 13:08:48.509857",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Partner",
@@ -216,7 +216,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Sales Master Manager",
+   "role": "Customer Master Manager",
    "share": 1,
    "write": 1
   }

@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:sales_person_name",
@@ -144,8 +143,7 @@
  "icon": "icon-user",
  "idx": 1,
  "is_tree": 1,
- "links": [],
- "modified": "2020-03-18 18:26:01.076203",
+ "modified": "2020-08-15 13:08:48.828180",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Person",
@@ -173,7 +171,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Sales Master Manager",
+   "role": "Customer Master Manager",
    "share": 1,
    "write": 1
   }

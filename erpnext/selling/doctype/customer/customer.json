@@ -520,8 +520,7 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "links": [],
- "modified": "2020-03-17 11:03:42.706907",
+ "modified": "2020-08-15 13:08:50.279449",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -559,7 +558,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Sales Master Manager",
+   "role": "Customer Master Manager",
    "set_user_permissions": 1,
    "share": 1,
    "write": 1
@@ -567,7 +566,7 @@
   {
    "permlevel": 1,
    "read": 1,
-   "role": "Sales Master Manager",
+   "role": "Customer Master Manager",
    "write": 1
   },
   {

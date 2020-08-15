@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "creation": "2013-05-02 16:29:48",
  "description": "Multiple Item prices.",
@@ -216,8 +215,7 @@
  ],
  "icon": "fa fa-flag",
  "idx": 1,
- "links": [],
- "modified": "2020-02-28 14:21:25.580331",
+ "modified": "2020-08-15 13:08:46.522816",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
@@ -233,7 +231,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Sales Master Manager",
+   "role": "Customer Master Manager",
    "share": 1,
    "write": 1
   },
@@ -246,7 +244,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Purchase Master Manager",
+   "role": "Supplier Master Manager",
    "share": 1,
    "write": 1
   }

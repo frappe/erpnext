@@ -82,7 +82,7 @@
  "icon": "fa fa-tags",
  "idx": 1,
  "max_attachments": 1,
- "modified": "2020-03-03 15:35:18.415121",
+ "modified": "2020-08-15 13:08:47.109262",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Price List",
@@ -100,7 +100,7 @@
    "import": 1,
    "read": 1,
    "report": 1,
-   "role": "Sales Master Manager",
+   "role": "Customer Master Manager",
    "share": 1,
    "write": 1
   },
@@ -114,7 +114,7 @@
    "delete": 1,
    "read": 1,
    "report": 1,
-   "role": "Purchase Master Manager",
+   "role": "Supplier Master Manager",
    "share": 1,
    "write": 1
   },

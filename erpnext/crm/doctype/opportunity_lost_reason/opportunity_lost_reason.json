@@ -15,7 +15,7 @@
    "unique": 1
   }
  ],
- "modified": "2020-03-03 15:38:00.548443",
+ "modified": "2020-08-15 13:08:46.839769",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity Lost Reason",
@@ -65,7 +65,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Sales Master Manager",
+   "role": "Customer Master Manager",
    "share": 1,
    "write": 1
   }
