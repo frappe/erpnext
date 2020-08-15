@@ -60,7 +60,7 @@ frappe.ui.form.on('Cost Center', {
 					"label": "Cost Center Number",
 					"fieldname": "cost_center_number",
 					"fieldtype": "Data",
-					"reqd": 1,
+					"reqd": 0,
 					"default": frm.doc.cost_center_number
 				}
 			],
