@@ -76,7 +76,7 @@ frappe.ui.form.on('Cost Center', {
 					args: {
 						docname: frm.doc.name,
 						cost_center_name: data.cost_center_name,
-						cost_center_number: data.cost_center_number,
+						cost_center_number: data.cost_center_number || "",
 						company: frm.doc.company
 					},
 					callback: function(r) {
