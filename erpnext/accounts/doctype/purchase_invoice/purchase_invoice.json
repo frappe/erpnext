@@ -237,6 +237,7 @@
    "oldfieldtype": "Link",
    "options": "Supplier",
    "print_hide": 1,
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -254,7 +255,7 @@
   {
    "fetch_from": "supplier.tax_id",
    "fieldname": "tax_id",
-   "fieldtype": "Read Only",
+   "fieldtype": "Data",
    "label": "Tax Id",
    "print_hide": 1,
    "read_only": 1
@@ -1272,7 +1273,8 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "\nDraft\nReturn\nDebit Note Issued\nSubmitted\nPaid\nUnpaid\nOverdue\nCancelled",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "inter_company_invoice_reference",
@@ -1291,6 +1293,7 @@
    "print_hide": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
    "label": "Subscription Section",
@@ -1685,8 +1688,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-04-18 13:05:25.199832",
+ "modified": "2020-08-15 17:42:22.295441",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

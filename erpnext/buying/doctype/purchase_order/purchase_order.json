@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -1266,8 +1265,7 @@
    "fieldtype": "Small Text",
    "in_global_search": 1,
    "label": "Remarks",
-   "print_hide": 1,
-   "reqd": 1
+   "print_hide": 1
   },
   {
    "fieldname": "set_project",
@@ -1469,8 +1467,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-06-12 14:08:11.777120",
+ "modified": "2020-08-15 17:20:01.355706",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

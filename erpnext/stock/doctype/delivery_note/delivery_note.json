@@ -345,6 +345,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "po_no",
    "fieldname": "po_date",
    "fieldtype": "Date",
    "label": "Customer's Purchase Order Date",
@@ -1575,7 +1576,7 @@
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2020-07-29 17:36:38.222076",
+ "modified": "2020-08-15 17:02:25.970359",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
