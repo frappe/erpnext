@@ -4,6 +4,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "price_list_note",
   "item_group_order"
  ],
  "fields": [
@@ -12,10 +13,15 @@
    "fieldtype": "Table",
    "label": "Item Group Order",
    "options": "Price List Item Group"
+  },
+  {
+   "fieldname": "price_list_note",
+   "fieldtype": "Text",
+   "label": "Price List Note"
   }
  ],
  "issingle": 1,
- "modified": "2020-03-03 15:37:01.576479",
+ "modified": "2020-08-15 20:23:29.020092",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Price List Settings",
