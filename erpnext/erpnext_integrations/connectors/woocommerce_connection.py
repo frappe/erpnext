@@ -3,6 +3,11 @@ from __future__ import unicode_literals
 import frappe, base64, hashlib, hmac, json
 from frappe import _
 import pdb
+import requests
+import json
+from frappe.utils.background_jobs import enqueue
+from fxnmrnth import get_site_name
+
 
 def verify_request():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
@@ -22,12 +27,34 @@ def verify_request():
 
 @frappe.whitelist(allow_guest=True)
 def order(*args, **kwargs):
+	print("Starting WooCommerce")
 	try:
 		response = _order(*args, **kwargs)
 		return response
 	except Exception:
-		error_message = frappe.get_traceback()+"\n\n Request Data: \n"+json.loads(frappe.request.data).__str__()
+		order = json.loads(frappe.request.data)
+		orderID = order['id'];
+		orderLink = order['_links']['self'][0]['href']
+		order_link_url = orderLink[0:orderLink.find("wp-json")] + "wp-admin/post.php?post=" + orderLink[orderLink.find("orders/")+7:] + "&action=edit"
+
+		# Compose error message
+		error_message = """Hi there, \n\nThere was an error pushing Order ID: <a href='{order_link_url}'> {orderID} </a>\n\n Nerd Stuff:\n\n {traceback} \n\n Request Data: \n {data})""".format(
+			order_link_url=order_link_url, orderID=str(orderID),
+			traceback=frappe.get_traceback(),
+			data=json.loads(frappe.request.data).__str__()
+		)
+
+		# Write an error log
 		frappe.log_error(error_message, "WooCommerce Error")
+
+		# Send error messages to admin
+		enqueue(
+			recipients=["Mitch@RNLabs.com.au", "andy@fxmed.co.nz"],
+			subject="WooCommerce Order Error",
+			sender="Support@RNLabs.com.au",
+			content=error_message, method=frappe.sendmail,
+			queue='short', timeout=300, is_async=True
+		)
 		raise
 
 def _order(*args, **kwargs):
@@ -36,8 +63,10 @@ def _order(*args, **kwargs):
 		order = frappe.flags.woocomm_test_order_data
 		event = "created"
 	elif frappe.request and frappe.request.data:
-		verify_request()
-		print('Second')
+		#RE-ENABLE THIS AFTER TESTING IS COMPLETE
+		#verify_request()
+		#Remove next 1 lines after finished testing
+		frappe.set_user(woocommerce_settings.creation_user)
 		try:
 			order = json.loads(frappe.request.data)
 		except ValueError:
@@ -45,120 +74,147 @@ def _order(*args, **kwargs):
 			order = frappe.request.data
 		event = frappe.get_request_header("X-Wc-Webhook-Event")
 	else:
-		return "success"
+		return "No request or data received!"
 
 	if event == "created":
-		sys_lang = frappe.get_single("System Settings").language or 'en'
-		raw_billing_data = order.get("billing")
-		customer_name = raw_billing_data.get("first_name") + " " + raw_billing_data.get("last_name")
+		userLink = order.get("_links")["customer"][0]['href']
+		customer_detail = getCustomerDetails(userLink)
 
-		metaDataList = order.get("meta_data")
-		customerCode = ''
-		for metaData in metaDataList:
-			if metaData['key'] == "customer_code" or metaData['key'] == "user_practitioner":
-				customerCode = metaData['value']
+		new_invoice = create_sales_invoice(
+			order, 
+			customer_detail['username'], 
+			customer_detail['shippingAddress'], 
+			woocommerce_settings
+		)
+		return "Sales invoice created!"
 
-		if not customerCode:
-			frappe.throw("Empty customer code. Data: " + json.loads(order).__str__())
-		else:
-			create_sales_invoice(order, customerCode, woocommerce_settings)
-			return "Sales invoice created!"	
+def getCustomerDetails(customerLink):
+	user = 'mitch'
+	ERPNextApp = 'gXmf sL4w wtGb QJUX kIXI CDt4'
+	token = base64.b64encode((user + ':' + ERPNextApp).encode("utf-8"))
+	headers = {'Authorization': 'Basic ' + token.decode("utf-8")}
+	response = requests.get(customerLink, headers=headers)
+	json = response.json()
+	returnDict = dict();  
+	returnDict['shippingAddress'] = json['shipping'];
+	returnDict['username'] = json['username'];
+	return returnDict
 
-def create_sales_invoice(order, customerCode, woocommerce_settings):
+def create_sales_invoice(order, customer_code, shipping_address, woocommerce_settings):
+	#Set Basic Info
 	new_sales_invoice = frappe.new_doc("Sales Invoice")
-
-	new_sales_invoice.customer = customerCode
+	new_sales_invoice.customer = customer_code
 	new_sales_invoice.woocommerce_order = 1
-	new_sales_invoice.po_no = new_sales_invoice.woocommerce_id = order.get("id")
-	new_sales_invoice.naming_series = "ACC-SINV-.YYYY.-"
+	new_sales_invoice.po_no = order.get("id")
+	new_sales_invoice.naming_series = frappe.get_meta("Sales Invoice").get_field("naming_series").options or ""
+	new_sales_invoice.transaction_date = order.get("date_created").split("T")[0]
 
-	# For Now - Use Primary Shipping Address - Maybe this will auto fill?
-	# addressSQL = frappe.db.sql("""SELECT 
-	# 	a.name,
-	# 	a.address_line1,
-	# 	a.address_line2,
-	# 	a.city,
-	# 	a.county,
-	# 	a.state,
-	# 	a.pincode
-	# FROM
-	# 	`tabAddress` a
-	# WHERE
-	# 	a.name IN (
-	# SELECT 
-	# 	dl.parent
-	# FROM
-	# 	`tabDynamic Link` dl
-	# INNER JOIN
-	# 	`tabCustomer` c
-	# ON
-	# 	c.name = dl.link_name AND
-	# 	c.name = '""" + customerCode + """' AND
-	# 	dl.link_doctype = "Customer" AND
-	# 	dl.parenttype = "Address")
-	# AND
-	# 	a.is_shipping_address = 1
-	# AND 
-	# 	a.disabled = 0""")
-	# pdb.set_trace()
-	# address = frappe.get_doc("Address", addressSQL[0][0])
+	if woocommerce_settings.company:
+		new_sales_invoice.company = woocommerce_settings.company
+		if woocommerce_settings.company == "RN Labs":
+			new_sales_invoice.temporary_address = 1
+			new_sales_invoice.order_type = "Practitioner Order"
+			# Need to tell if it's practitioner order or patient order
 
 
 	#Collect Shipping Information
-	# shippingAddress = order.get("shipping")
-	# shippingName = shippingAddress.get("first_name") + " " +  shippingAddress.get("last_name")
-	# shippingLine1 = shippingAddress.get("address_1") + ", " + shippingAddress.get("address_2")
-	# shippingLine2 = shippingAddress.get("city") + ", " + shippingAddress.get("state") + ", " + shippingAddress.get("postcode") + ", " + shippingAddress.get("country")
-	# billingAddress = order.get("billing")
-	# billingPhone = billingAddress.get("phone")
-	# billingEmail = billingAddress.get("email")
-	# new_sales_invoice.temporary_delivery_address_line_1 = shippingName
-	# new_sales_invoice.temporary_delivery_address_line_2 = shippingLine1
-	# new_sales_invoice.temporary_delivery_address_line_3 = shippingLine2
-	# new_sales_invoice.temporary_delivery_address_line_4 = billingPhone
-	# new_sales_invoice.temporary_delivery_address_line_5 = billingEmail
-	
-	date_created = order.get("date_created").split("T")[0]
-	new_sales_invoice.transaction_date = date_created
+	shippingName = shipping_address["first_name"] + " " +  shipping_address["last_name"]
+	shippingLine1 = shipping_address["address_1"] + ", " + shipping_address["address_2"]
+	shippingLine2 = shipping_address["city"] + ", " + shipping_address["state"] + ", " + shipping_address["postcode"] + ", " + shipping_address["country"]
 
-	delivery_after = woocommerce_settings.delivery_after_days or 7
-	new_sales_invoice.delivery_date = frappe.utils.add_days(date_created, delivery_after)
+	billing_address = order.get("billing")
+	new_sales_invoice.temporary_delivery_address_line_1 = shippingName
+	new_sales_invoice.temporary_delivery_address_line_2 = shippingLine1
+	new_sales_invoice.temporary_delivery_address_line_3 = shippingLine2
+	new_sales_invoice.temporary_delivery_address_line_4 = billing_address.get("phone")
+	new_sales_invoice.temporary_delivery_address_line_5 = billing_address.get("email")
 
-	new_sales_invoice.company = woocommerce_settings.company
+	# Add Items
+	setItemsInSalesInvoice(customer_code, new_sales_invoice, woocommerce_settings, order)
 
-	setItemsInSalesInvoice(customerCode, new_sales_invoice, woocommerce_settings, order)
+	# Save 
 	new_sales_invoice.flags.ignore_mandatory = True
-	new_sales_invoice.insert()
 	new_sales_invoice.save()
 
-def setItemsInSalesInvoice(customerCode, new_sales_invoice, woocommerce_settings, order):
+	# Need send email to CS to confirm and submit?
+	orderLink = order['_links']['self'][0]['href']
+	order_link_url = orderLink[0:orderLink.find("wp-json")] + "wp-admin/post.php?post=" + orderLink[orderLink.find("orders/")+7:] + "&action=edit"
+
+	site_name = get_site_name()
+	erpnext_url = "https://{site_name}/desk#Form/Sales%20Invoice/{invoice_id}".format(site_name=site_name, invoice_id=new_sales_invoice.name)
+	draft_message = """
+		Hi *{name}*, \n
+		There is an order captured in ERPNext from online website {company}.
+		- Online order number: {order_number}
+		- Order status: {status}
+		- Created date: {created_date}
+		- Total amount: {total}
+		- Total tax: {total_tax}
+		- Customer note: {customer_note}
+		- order URL: {url}
+
+		## ERPNext Sales Invoice brief 
+		- Customer code : {customer_code}
+		- Title : {title}
+		- Grand total : {base_grand_total}
+		- Taxes and charges : {total_taxes_and_charges}
+		- Sales invoice ID : {sales_invoice_id}
+		- Purchase order : {po_no}
+		- Invoice URL: {erpnext_url}
+	""".format(
+		name="Administrator",
+		company=woocommerce_settings.company,
+		order_number=order.get("id"),
+		status=order.get("status"),
+		created_date=order.get("date_created"),
+		total=order.get("total"),
+		total_tax=order.get("total_tax"),
+		customer_note=order.get("customer_note"),
+		url=order_link_url,
+		customer_code= new_sales_invoice.customer,
+		title= new_sales_invoice.title,
+		base_grand_total= new_sales_invoice.base_grand_total,
+		total_taxes_and_charges= new_sales_invoice.total_taxes_and_charges,
+		sales_invoice_id= new_sales_invoice.name,
+		po_no= new_sales_invoice.po_no,
+		erpnext_url= erpnext_url,
+	)
+	enqueue(
+		recipients=["andy@fxmed.co.nz"],
+		subject="WooCommerce Order Draft",
+		sender="Support@RNLabs.com.au",
+		content=draft_message, method=frappe.sendmail,
+		queue='short', as_markdown=True
+	)
+	
+
+def setItemsInSalesInvoice(customer_code, new_sales_invoice, woocommerce_settings, order):
 	company_abbr = frappe.db.get_value('Company', woocommerce_settings.company, 'abbr')
 
 	SKU = ""
 	for item in order.get("line_items"):
 		SKU = item.get("sku")
 		foundItem = frappe.get_doc("Item", {"name": SKU})
-		price_list = frappe.get_doc('Customer', customerCode).default_price_list
-		rate = frappe.get_list('Item Price', filters={'docstatus':0, 'selling': 1, 'buying': 0, 'price_list': price_list, 'item_code': SKU}, fields=['price_list_rate'])[0]
-
-		pdb.set_trace()
+		price_list = frappe.get_doc('Customer', customer_code).default_price_list
+		rate = frappe.db.get_list('Item Price', filters={'docstatus':0, 'selling': 1, 'buying': 0, 'price_list': price_list, 'item_code': SKU}, fields=['price_list_rate'])[0]
 		new_sales_invoice.append("items",{
 			"item_code": foundItem.item_code,
 			"item_name": foundItem.item_name,
 			"description": foundItem.item_name,
-			"delivery_date": new_sales_invoice.delivery_date,
 			"uom": woocommerce_settings.uom or _("Nos"),
 			"qty": item.get("quantity"),
-			"rate": rate.price_list_rate,
+			"rate": rate['price_list_rate'],
 			"warehouse": woocommerce_settings.warehouse or _("Stores - {0}").format(company_abbr)
-			})
+		})
 
+		itemTax = (rate['price_list_rate']*0.1) * item.get("quantity")
 		addTaxDetails(new_sales_invoice, itemTax, "Ordered Item tax", woocommerce_settings.tax_account)
 
-	# shipping_details = order.get("shipping_lines") # used for detailed order
+	if float(order.get("shipping_total")) > 0:
+		addTaxDetails(new_sales_invoice, order.get("shipping_total"), "Shipping Total", woocommerce_settings.f_n_f_account)
+	if float(order.get("shipping_tax")) > 0:
+		addTaxDetails(new_sales_invoice, order.get("shipping_tax"), "Shipping Tax", woocommerce_settings.f_n_f_account)
 
-	addTaxDetails(new_sales_invoice, order.get("shipping_tax"), "Shipping Tax", woocommerce_settings.f_n_f_account)
-	addTaxDetails(new_sales_invoice, order.get("shipping_total"), "Shipping Total", woocommerce_settings.f_n_f_account)
 
 def addTaxDetails(salesInvoice, price, desc, tax_account_head):
 	salesInvoice.append("taxes", {
