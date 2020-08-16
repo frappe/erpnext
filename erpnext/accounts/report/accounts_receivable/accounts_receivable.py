@@ -613,9 +613,15 @@ class ReceivablePayableReport(object):
 
 		if party_type_field=="customer":
 			self.add_customer_filters(conditions, values)
+			if self.filters.get("cost_center"):
+				conditions.append("voucher_no in (select distinct `tabSales Invoice`.name from `tabSales Invoice` left join `tabSales Invoice Item` on `tabSales Invoice Item`.parent=`tabSales Invoice`.name where `tabSales Invoice Item`.cost_center=%s)")
+				values.append(self.filters.get("cost_center"))
 
 		elif party_type_field=="supplier":
 			self.add_supplier_filters(conditions, values)
+			if self.filters.get("cost_center"):
+				conditions.append("voucher_no in (select distinct `tabPurchase Invoice`.name from `tabPurchase Invoice` left join `tabPurchase Invoice Item` on `tabPurchase Invoice Item`.parent=`tabPurchase Invoice`.name where `tabPurchase Invoice Item`.cost_center=%s)")
+				values.append(self.filters.get("cost_center"))
 
 		self.add_accounting_dimensions_filters(conditions, values)
 		return " and ".join(conditions), values
