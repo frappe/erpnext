@@ -169,7 +169,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "default": "Today",
    "fieldname": "valid_from",
    "fieldtype": "Date",
    "label": "Valid From "
@@ -215,7 +214,7 @@
  ],
  "icon": "fa fa-flag",
  "idx": 1,
- "modified": "2020-08-15 13:08:46.522816",
+ "modified": "2020-08-15 20:33:11.848614",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
