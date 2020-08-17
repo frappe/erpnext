@@ -118,7 +118,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(po.get("items")[0].amount, 1400)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 3)
 
-	
+
 	def test_add_new_item_in_update_child_qty_rate(self):
 		po = create_purchase_order(do_not_save=1)
 		po.items[0].qty = 4
@@ -144,7 +144,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(len(po.get('items')), 2)
 		self.assertEqual(po.status, 'To Receive and Bill')
 
-	
+
 	def test_remove_item_in_update_child_qty_rate(self):
 		po = create_purchase_order(do_not_save=1)
 		po.items[0].qty = 4
@@ -184,6 +184,23 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.reload()
 		self.assertEquals(len(po.get('items')), 1)
 		self.assertEqual(po.status, 'To Receive and Bill')
+
+	def test_update_child_qty_rate_perm(self):
+		po = create_purchase_order(item_code= "_Test Item", qty=4)
+
+		user = 'test@example.com'
+		test_user = frappe.get_doc('User', user)
+		test_user.add_roles("Accounts User")
+		frappe.set_user(user)
+
+		# update qty
+		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7, 'docname': po.items[0].name}])
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Purchase Order', trans_item, po.name)
+
+		# add new item
+		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 100, 'qty' : 2}])
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Purchase Order', trans_item, po.name)
+		frappe.set_user("Administrator")
 
 	def test_update_qty(self):
 		po = create_purchase_order()
@@ -689,7 +706,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.save()
 		self.assertEqual(po.schedule_date, add_days(nowdate(), 2))
 
-	
+
 	def test_po_optional_blanket_order(self):
 		"""
 			Expected result: Blanket order Ordered Quantity should only be affected on Purchase Order with against_blanket_order = 1.

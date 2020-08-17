@@ -1,0 +1,101 @@
+{% extends "templates/web.html" %}
+
+{% block content %}
+<section class="section section-padding-top section-padding-bottom">
+	<div class='container'>
+		<div class="hero-content">
+			<h1 class="hero-title">{{ greeting_title or _("We're here to help!") }}</h1>
+			{% if greeting_subtitle %}
+			<p class="hero-subtitle">{{ greeting_subtitle }}</p>
+			{% endif %}
+		</div>
+		<div class="search-container">
+			<div class="website-search" id="search-container">
+				<div class="dropdown">
+					<div class="search-icon">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor" stroke-width="2" stroke-linecap="round"
+							stroke-linejoin="round"
+							class="feather feather-search">
+							<circle cx="11" cy="11" r="8"></circle>
+							<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+						</svg>
+					</div>
+					<input type="search" class="form-control" placeholder="Search the docs (Press ? to focus)" />
+					<div class="overflow-hidden shadow dropdown-menu w-100">
+					</div>
+				</div>
+			</div>
+			<button class="navbar-toggler" type="button"
+				data-toggle="collapse"
+				data-target="#navbarSupportedContent"
+				aria-controls="navbarSupportedContent"
+				aria-expanded="false"
+				aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+		</div>
+	</div>
+</section>
+
+{% if favorite_article_list %}
+<section class="section section-padding-top section-padding-bottom bg-light">
+	<div class='container'>
+		<h2>{{ _("Frequently Read Articles") }}</h2>
+		<div class="row">
+			{% for favorite_article in favorite_article_list %}
+			<div class="mt-4 col-12 col-sm-6 col-lg-4">
+				<div class="card card-md h-100 kb-card">
+					<div class="card-body">
+						<h6 class="card-subtitle mb-2 text-uppercase small text-muted">
+							{{ favorite_article['category'] }}</h6>
+						<h3 class="card-title">{{ favorite_article['title'] }}</h3>
+						<p class="card-text">{{ favorite_article['description'] }}</p>
+					</div>
+					<a href="{{ favorite_article['route'] }}" class="stretched-link"></a>
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+</section>
+{% endif %}
+
+{% if help_article_list %}
+<section class="section section-padding-top section-padding-bottom">
+	<div class='container'>
+		<h2>{{ _("Help Articles") }}</h2>
+		<div class="row">
+			{% for item in help_article_list %}
+			<div class="mt-5 col-12 col-sm-6 col-lg-4">
+				<h5>{{ item['category'].name }}</h5>
+				<div>
+					{% for article in item['articles'] %}
+					<a href="{{ article.route }}" class="mt-2 d-block">{{ article.title }}</a>
+					{% endfor %}
+				</div>
+			</div>
+			{% endfor %}
+		</div>
+	</div>
+</section>
+{% endif %}
+{% endblock %}
+
+{%- block script -%}
+<script>
+	frappe.ready(() => {
+		frappe.setup_search('#search-container', 'kb');
+	});
+</script>
+{%- endblock -%}
+
+{%- block style -%}
+<style>
+	.search-container {
+		margin-top: 1.2rem;
+		max-width: 500px;
+	}	
+</style>
+{%- endblock -%}

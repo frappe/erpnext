@@ -34,6 +34,16 @@ frappe.ui.form.on("Company", {
 		frm.set_query("default_buying_terms", function() {
 			return { filters: { buying: 1 } };
 		});
+
+		frm.set_query("default_in_transit_warehouse", function() {
+			return {
+				filters:{
+					'warehouse_type' : 'Transit',
+					'is_group': 0,
+					'company': frm.doc.company
+				}
+			};
+		});
 	},
 
 	company_name: function(frm) {
@@ -264,7 +274,10 @@ erpnext.company.setup_queries = function(frm) {
 			["expenses_included_in_valuation",
 				{"root_type": "Expense", "account_type": "Expenses Included in Valuation"}],
 			["stock_received_but_not_billed",
-				{"root_type": "Liability", "account_type": "Stock Received But Not Billed"}]
+				{"root_type": "Liability", "account_type": "Stock Received But Not Billed"}],
+			["service_received_but_not_billed",
+				{"root_type": "Liability", "account_type": "Service Received But Not Billed"}],
+
 		], function(i, v) {
 			erpnext.company.set_custom_query(frm, v);
 		});

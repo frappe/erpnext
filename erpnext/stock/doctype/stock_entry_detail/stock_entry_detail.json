@@ -23,6 +23,7 @@
   "image",
   "image_view",
   "quantity_and_rate",
+  "set_basic_rate_manually",
   "qty",
   "basic_rate",
   "basic_amount",
@@ -491,12 +492,21 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:parent.purpose===\"Repack\" && doc.t_warehouse",
+   "fieldname": "set_basic_rate_manually",
+   "fieldtype": "Check",
+   "label": "Set Basic Rate Manually",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-04-23 19:19:28.539769",
+ "modified": "2020-06-08 12:57:03.172887",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

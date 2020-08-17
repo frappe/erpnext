@@ -10,6 +10,18 @@ frappe.ui.form.on('Process Deferred Accounting', {
 				}
 			};
 		});
+
+		if (frm.doc.company) {
+			frm.set_query("account", function() {
+				return {
+					filters: {
+						'company': frm.doc.company,
+						'root_type': 'Liability',
+						'is_group': 0
+					}
+				};
+			});
+		}
 	},
 
 	validate: function() {

@@ -19,7 +19,7 @@
   "column_break_11",
   "advance_amount",
   "paid_amount",
-  "due_advance_amount",
+  "pending_amount",
   "claimed_amount",
   "return_amount",
   "section_break_7",
@@ -103,14 +103,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:cur_frm.doc.employee",
-   "fieldname": "due_advance_amount",
-   "fieldtype": "Currency",
-   "label": "Due Advance Amount",
-   "options": "Company:company:default_currency",
-   "read_only": 1
-  },
-  {
    "fieldname": "claimed_amount",
    "fieldtype": "Currency",
    "label": "Claimed Amount",
@@ -177,11 +169,19 @@
    "fieldname": "repay_unclaimed_amount_from_salary",
    "fieldtype": "Check",
    "label": "Repay unclaimed amount from salary"
+  },
+  {
+   "depends_on": "eval:cur_frm.doc.employee",
+   "fieldname": "pending_amount",
+   "fieldtype": "Currency",
+   "label": "Pending Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-06 15:11:33.747535",
+ "modified": "2020-06-12 12:42:39.833818",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Advance",

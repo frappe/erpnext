@@ -1,0 +1,14 @@
+name: Trigger Docker build on release
+on:
+  release:
+    types: [released]
+jobs:
+  curl:
+    runs-on: ubuntu-latest
+    container:
+      image: alpine:latest
+    steps:
+    - name: curl
+      run: |
+        apk add curl bash
+        curl -s -X POST -H "Content-Type: application/json" -H "Accept: application/json" -H "Travis-API-Version: 3" -H "Authorization: token ${{ secrets.TRAVIS_CI_TOKEN }}" -d '{"request":{"branch":"master"}}' https://api.travis-ci.com/repo/frappe%2Ffrappe_docker/requests

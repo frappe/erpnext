@@ -112,13 +112,15 @@ class BOM(WebsiteGenerator):
 		if self.routing:
 			self.set("operations", [])
 			for d in frappe.get_all("BOM Operation", fields = ["*"],
-				filters = {'parenttype': 'Routing', 'parent': self.routing}):
+				filters = {'parenttype': 'Routing', 'parent': self.routing}, order_by="idx"):
 				child = self.append('operations', {
 					"operation": d.operation,
 					"workstation": d.workstation,
 					"description": d.description,
 					"time_in_mins": d.time_in_mins,
-					"batch_size": d.batch_size
+					"batch_size": d.batch_size,
+					"operating_cost": d.operating_cost,
+					"idx": d.idx
 				})
 				child.hour_rate = flt(d.hour_rate / self.conversion_rate, 2)
 
@@ -492,7 +494,7 @@ class BOM(WebsiteGenerator):
 					'image'			: d.image,
 					'stock_uom'		: d.stock_uom,
 					'stock_qty'		: flt(d.stock_qty),
-					'rate'			: d.base_rate,
+					'rate'			: flt(d.base_rate) / flt(d.conversion_factor),
 					'include_item_in_manufacturing': d.include_item_in_manufacturing
 				}))
 
@@ -908,6 +910,8 @@ def get_bom_diff(bom1, bom2):
 
 	return out
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def item_query(doctype, txt, searchfield, start, page_len, filters):
 	meta = frappe.get_meta("Item", cached=True)
 	searchfields = meta.get_search_fields()

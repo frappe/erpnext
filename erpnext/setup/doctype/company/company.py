@@ -46,6 +46,7 @@ class Company(NestedSet):
 		self.validate_currency()
 		self.validate_coa_input()
 		self.validate_perpetual_inventory()
+		self.validate_perpetual_inventory_for_non_stock_items()
 		self.check_country_change()
 		self.set_chart_of_accounts()
 		self.validate_parent_company()
@@ -139,7 +140,8 @@ class Company(NestedSet):
 			{"warehouse_name": _("All Warehouses"), "is_group": 1},
 			{"warehouse_name": _("Stores"), "is_group": 0},
 			{"warehouse_name": _("Work In Progress"), "is_group": 0},
-			{"warehouse_name": _("Finished Goods"), "is_group": 0}]:
+			{"warehouse_name": _("Finished Goods"), "is_group": 0},
+			{"warehouse_name": _("Goods In Transit"), "is_group": 0, "warehouse_type": "Transit"}]:
 
 			if not frappe.db.exists("Warehouse", "{0} - {1}".format(wh_detail["warehouse_name"], self.abbr)):
 				warehouse = frappe.get_doc({
@@ -148,7 +150,8 @@ class Company(NestedSet):
 					"is_group": wh_detail["is_group"],
 					"company": self.name,
 					"parent_warehouse": "{0} - {1}".format(_("All Warehouses"), self.abbr) \
-						if not wh_detail["is_group"] else ""
+						if not wh_detail["is_group"] else "",
+					"warehouse_type" : wh_detail["warehouse_type"] if "warehouse_type" in wh_detail else None
 				})
 				warehouse.flags.ignore_permissions = True
 				warehouse.flags.ignore_mandatory = True
@@ -181,6 +184,12 @@ class Company(NestedSet):
 			if cint(self.enable_perpetual_inventory) == 1 and not self.default_inventory_account:
 				frappe.msgprint(_("Set default inventory account for perpetual inventory"),
 					alert=True, indicator='orange')
+
+	def validate_perpetual_inventory_for_non_stock_items(self):
+		if not self.get("__islocal"):
+			if cint(self.enable_perpetual_inventory_for_non_stock_items) == 1 and not self.service_received_but_not_billed:
+				frappe.throw(_("Set default {0} account for perpetual inventory for non stock items").format(
+					frappe.bold('Service Received But Not Billed')))
 
 	def check_country_change(self):
 		frappe.flags.country_change = False

@@ -370,6 +370,7 @@ def get_items_based_on_default_supplier(supplier):
 	return supplier_items
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_material_requests_based_on_supplier(doctype, txt, searchfield, start, page_len, filters):
 	conditions = ""
 	if txt:
@@ -402,6 +403,8 @@ def get_material_requests_based_on_supplier(doctype, txt, searchfield, start, pa
 
 	return material_requests
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_default_supplier_query(doctype, txt, searchfield, start, page_len, filters):
 	doc = frappe.get_doc("Material Request", filters.get("doc"))
 	item_list = []

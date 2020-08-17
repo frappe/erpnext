@@ -19,10 +19,14 @@
   "unlink_payment_on_cancellation_of_invoice",
   "unlink_advance_payment_on_cancelation_of_order",
   "book_asset_depreciation_entry_automatically",
-  "allow_cost_center_in_entry_of_bs_account",
   "add_taxes_from_item_tax_template",
   "automatically_fetch_payment_terms",
+  "deferred_accounting_settings_section",
   "automatically_process_deferred_accounting_entry",
+  "book_deferred_entries_based_on",
+  "column_break_18",
+  "book_deferred_entries_via_journal_entry",
+  "submit_journal_entries",
   "print_settings",
   "show_inclusive_tax_in_print",
   "column_break_12",
@@ -109,12 +113,6 @@
    "label": "Book Asset Depreciation Entry Automatically"
   },
   {
-   "default": "0",
-   "fieldname": "allow_cost_center_in_entry_of_bs_account",
-   "fieldtype": "Check",
-   "label": "Allow Cost Center In Entry of Balance Sheet Account"
-  },
-  {
    "default": "1",
    "fieldname": "add_taxes_from_item_tax_template",
    "fieldtype": "Check",
@@ -189,13 +187,45 @@
    "fieldname": "automatically_process_deferred_accounting_entry",
    "fieldtype": "Check",
    "label": "Automatically Process Deferred Accounting Entry"
+  },
+  {
+   "fieldname": "deferred_accounting_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Deferred Accounting Settings"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If this is unchecked direct GL Entries will be created to book Deferred Revenue/Expense",
+   "fieldname": "book_deferred_entries_via_journal_entry",
+   "fieldtype": "Check",
+   "label": "Book Deferred Entries Via Journal Entry"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.book_deferred_entries_via_journal_entry",
+   "description": "If this is unchecked Journal Entries will be saved in a Draft state and will have to be submitted manually",
+   "fieldname": "submit_journal_entries",
+   "fieldtype": "Check",
+   "label": "Submit Journal Entries"
+  },
+  {
+   "default": "Days",
+   "description": "If \"Months\" is selected then fixed amount will be booked as deferred revenue or expense for each month irrespective of number of days in a month. Will be prorated if deferred revenue or expense is not booked for an entire month.",
+   "fieldname": "book_deferred_entries_based_on",
+   "fieldtype": "Select",
+   "label": "Book Deferred Entries Based On",
+   "options": "Days\nMonths"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2019-12-19 16:58:17.395595",
+ "modified": "2020-08-03 20:13:26.043092",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

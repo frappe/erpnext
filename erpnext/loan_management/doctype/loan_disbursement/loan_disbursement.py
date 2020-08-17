@@ -10,23 +10,22 @@ from frappe.utils import nowdate, getdate, add_days, flt
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_demand_loans
+from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
+from frappe.utils import get_datetime
 
 class LoanDisbursement(AccountsController):
 
 	def validate(self):
 		self.set_missing_values()
 
-	def before_submit(self):
-		self.set_status_and_amounts()
-
-	def before_cancel(self):
-		self.set_status_and_amounts(cancel=1)
-
 	def on_submit(self):
+		self.set_status_and_amounts()
 		self.make_gl_entries()
 
 	def on_cancel(self):
+		self.set_status_and_amounts(cancel=1)
 		self.make_gl_entries(cancel=1)
+		self.ignore_linked_doctypes = ['GL Entry']
 
 	def set_missing_values(self):
 		if not self.disbursement_date:
@@ -44,29 +43,69 @@ class LoanDisbursement(AccountsController):
 	def set_status_and_amounts(self, cancel=0):
 
 		loan_details = frappe.get_all("Loan",
-			fields = ["loan_amount", "disbursed_amount", "total_principal_paid", "status", "is_term_loan"],
-			filters= { "name": self.against_loan }
-		)[0]
-
-		if loan_details.status == "Disbursed" and not loan_details.is_term_loan:
-			process_loan_interest_accrual_for_demand_loans(posting_date=add_days(self.disbursement_date, -1),
-				loan=self.against_loan)
+			fields = ["loan_amount", "disbursed_amount", "total_payment", "total_principal_paid", "total_interest_payable",
+				"status", "is_term_loan", "is_secured_loan"], filters= { "name": self.against_loan })[0]
 
 		if cancel:
 			disbursed_amount = loan_details.disbursed_amount - self.disbursed_amount
+			total_payment = loan_details.total_payment
+
+			if loan_details.disbursed_amount > loan_details.loan_amount:
+				topup_amount = loan_details.disbursed_amount - loan_details.loan_amount
+				if topup_amount > self.disbursed_amount:
+					topup_amount = self.disbursed_amount
+
+				total_payment = total_payment - topup_amount
+
 			if disbursed_amount == 0:
 				status = "Sanctioned"
-			elif disbursed_amount >= loan_details.disbursed_amount:
+			elif disbursed_amount >= loan_details.loan_amount:
 				status = "Disbursed"
 			else:
 				status = "Partially Disbursed"
 		else:
 			disbursed_amount = self.disbursed_amount + loan_details.disbursed_amount
+			total_payment = loan_details.total_payment
 
-			if flt(disbursed_amount) - flt(loan_details.total_principal_paid) > flt(loan_details.loan_amount):
+			if disbursed_amount > loan_details.loan_amount and loan_details.is_term_loan:
 				frappe.throw(_("Disbursed Amount cannot be greater than loan amount"))
 
-			if flt(disbursed_amount) >= loan_details.disbursed_amount:
+			if loan_details.status == 'Disbursed':
+				pending_principal_amount = flt(loan_details.total_payment) - flt(loan_details.total_interest_payable) \
+					- flt(loan_details.total_principal_paid)
+			else:
+				pending_principal_amount = loan_details.disbursed_amount
+
+			security_value = 0.0
+			if loan_details.is_secured_loan:
+				security_value = get_total_pledged_security_value(self.against_loan)
+
+			if not security_value:
+				security_value = loan_details.loan_amount
+
+			if pending_principal_amount + self.disbursed_amount > flt(security_value):
+				allowed_amount = security_value - pending_principal_amount
+				if allowed_amount < 0:
+					allowed_amount = 0
+
+				frappe.throw(_("Disbursed Amount cannot be greater than {0}").format(allowed_amount))
+
+			if loan_details.status == "Disbursed" and not loan_details.is_term_loan:
+				process_loan_interest_accrual_for_demand_loans(posting_date=add_days(self.disbursement_date, -1),
+					loan=self.against_loan)
+
+			if disbursed_amount > loan_details.loan_amount:
+				topup_amount = disbursed_amount - loan_details.loan_amount
+
+				if topup_amount < 0:
+					topup_amount = 0
+
+				if topup_amount > self.disbursed_amount:
+					topup_amount = self.disbursed_amount
+
+				total_payment = total_payment + topup_amount
+
+			if flt(disbursed_amount) >= loan_details.loan_amount:
 				status = "Disbursed"
 			else:
 				status = "Partially Disbursed"
@@ -74,7 +113,8 @@ class LoanDisbursement(AccountsController):
 		frappe.db.set_value("Loan", self.against_loan, {
 			"disbursement_date": self.disbursement_date,
 			"disbursed_amount": disbursed_amount,
-			"status": status
+			"status": status,
+			"total_payment": total_payment
 		})
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
@@ -115,3 +155,24 @@ class LoanDisbursement(AccountsController):
 
 		if gle_map:
 			make_gl_entries(gle_map, cancel=cancel, adv_adj=adv_adj)
+
+def get_total_pledged_security_value(loan):
+	update_time = get_datetime()
+
+	loan_security_price_map = frappe._dict(frappe.get_all("Loan Security Price",
+		fields=["loan_security", "loan_security_price"],
+		filters = {
+			"valid_from": ("<=", update_time),
+			"valid_upto": (">=", update_time)
+		}, as_list=1))
+
+	hair_cut_map = frappe._dict(frappe.get_all('Loan Security',
+		fields=["name", "haircut"], as_list=1))
+
+	security_value = 0.0
+	pledged_securities = get_pledged_security_qty(loan)
+
+	for security, qty in pledged_securities.items():
+		security_value += (loan_security_price_map.get(security) * qty * hair_cut_map.get(security))/100
+
+	return security_value

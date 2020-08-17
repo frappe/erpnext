@@ -319,7 +319,9 @@ def apply_internal_priority(pricing_rules, field_set, args):
 	filtered_rules = []
 	for field in field_set:
 		if args.get(field):
-			filtered_rules = filter(lambda x: x[field]==args[field], pricing_rules)
+			# filter function always returns a filter object even if empty
+			# list conversion is necessary to check for an empty result
+			filtered_rules = list(filter(lambda x: x.get(field)==args.get(field), pricing_rules))
 			if filtered_rules: break
 
 	return filtered_rules or pricing_rules
@@ -446,7 +448,7 @@ def apply_pricing_rule_on_transaction(doc):
 				doc.set_missing_values()
 
 def get_applied_pricing_rules(item_row):
-	return (item_row.get("pricing_rules").split(',')
+	return (json.loads(item_row.get("pricing_rules"))
 		if item_row.get("pricing_rules") else [])
 
 def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):

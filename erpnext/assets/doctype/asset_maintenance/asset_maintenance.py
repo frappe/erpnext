@@ -41,7 +41,7 @@ def assign_tasks(asset_maintenance_name, assign_to_member, maintenance_task, nex
 	team_member = frappe.db.get_value('User', assign_to_member, "email")
 	args = {
 		'doctype' : 'Asset Maintenance',
-		'assign_to' : team_member,
+		'assign_to' : [team_member],
 		'name' : asset_maintenance_name,
 		'description' : maintenance_task,
 		'date' : next_due_date
@@ -106,6 +106,7 @@ def update_maintenance_log(asset_maintenance, item_code, item_name, task):
 		maintenance_log.save()
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_team_members(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.get_values('Maintenance Team Member', { 'parent': filters.get("maintenance_team") })
 

@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 def execute(filters=None):
 	columns = get_columns(filters)
@@ -54,15 +55,16 @@ def get_columns(filters):
 			"width": 140
 		},
 		{
-			"label": _("Description"),
-			"fieldname": "description",
-			"fieldtype": "Data",
-			"width": 200
+			"label": _("Item"),
+			"fieldname": "item_code",
+			"fieldtype": "Link",
+			"options": "Item",
+			"width": 150
 		},
 		{
 			"label": _("Quantity"),
 			"fieldname": "quantity",
-			"fieldtype": "Int",
+			"fieldtype": "Float",
 			"width": 140
 		},
 		{
@@ -118,7 +120,7 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Purchase Order Amount(Company Currency)"),
-			"fieldname": "purchase_order_amt_usd",
+			"fieldname": "purchase_order_amt_in_company_currency",
 			"fieldtype": "Float",
 			"width": 140
 		},
@@ -175,17 +177,17 @@ def get_data(filters):
 			"requesting_site": po.warehouse,
 			"requestor": po.owner,
 			"material_request_no": po.material_request,
-			"description": po.description,
-			"quantity": po.qty,
+			"item_code": po.item_code,
+			"quantity": flt(po.qty),
 			"unit_of_measurement": po.stock_uom,
 			"status": po.status,
 			"purchase_order_date": po.transaction_date,
 			"purchase_order": po.parent,
 			"supplier": po.supplier,
-			"estimated_cost": mr_record.get('amount'),
-			"actual_cost": pi_records.get(po.name),
-			"purchase_order_amt": po.amount,
-			"purchase_order_amt_in_company_currency": po.base_amount,
+			"estimated_cost": flt(mr_record.get('amount')),
+			"actual_cost": flt(pi_records.get(po.name)),
+			"purchase_order_amt": flt(po.amount),
+			"purchase_order_amt_in_company_currency": flt(po.base_amount),
 			"expected_delivery_date": po.schedule_date,
 			"actual_delivery_date": pr_records.get(po.name)
 		}
@@ -198,9 +200,14 @@ def get_mapped_mr_details(conditions):
 		SELECT
 			par.transaction_date,
 			par.per_ordered,
+			par.owner,
 			child.name,
 			child.parent,
-			child.amount
+			child.amount,
+			child.qty,
+			child.item_code,
+			child.uom,
+			par.status
 		FROM `tabMaterial Request` par, `tabMaterial Request Item` child
 		WHERE
 			par.per_ordered>=0
@@ -217,7 +224,15 @@ def get_mapped_mr_details(conditions):
 			procurement_record_details = dict(
 				material_request_date=record.transaction_date,
 				material_request_no=record.parent,
-				estimated_cost=record.amount
+				requestor=record.owner,
+				item_code=record.item_code,
+				estimated_cost=flt(record.amount),
+				quantity=flt(record.qty),
+				unit_of_measurement=record.uom,
+				status=record.status,
+				actual_cost=0,
+				purchase_order_amt=0,
+				purchase_order_amt_in_company_currency=0
 			)
 			procurement_record_against_mr.append(procurement_record_details)
 	return mr_records, procurement_record_against_mr
@@ -259,7 +274,7 @@ def get_po_entries(conditions):
 			child.warehouse,
 			child.material_request,
 			child.material_request_item,
-			child.description,
+			child.item_code,
 			child.stock_uom,
 			child.qty,
 			child.amount,

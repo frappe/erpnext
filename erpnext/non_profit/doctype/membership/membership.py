@@ -62,11 +62,31 @@ def get_member_based_on_subscription(subscription_id, email):
 					'subscription_id': subscription_id,
 					'email_id': email
 				}, order_by="creation desc")
-	return frappe.get_doc("Member", members[0]['name'])
+	try:
+		return frappe.get_doc("Member", members[0]['name'])
+	except:
+		return None
+
+def verify_signature(data):
+	signature = frappe.request.headers.get('X-Razorpay-Signature')
+
+	settings = frappe.get_doc("Membership Settings")
+	key = settings.get_webhook_secret()
+
+	controller = frappe.get_doc("Razorpay Settings")
+
+	controller.verify_signature(data, signature, key)
+
 
 @frappe.whitelist(allow_guest=True)
 def trigger_razorpay_subscription(*args, **kwargs):
-	data = frappe.request.get_data()
+	data = frappe.request.get_data(as_text=True)
+	try:
+		verify_signature(data)
+	except Exception as e:
+		signature = frappe.request.headers.get('X-Razorpay-Signature')
+		log = "{0} \n\n {1} \n\n {2} \n\n {3}".format(e, frappe.get_traceback(), signature, data)
+		frappe.log_error(e, "Webhook Verification Error")
 
 	if isinstance(data, six.string_types):
 		data = json.loads(data)
@@ -84,34 +104,40 @@ def trigger_razorpay_subscription(*args, **kwargs):
 	except Exception as e:
 		error_log = frappe.log_error(frappe.get_traceback() + '\n' + data_json , _("Membership Webhook Failed"))
 		notify_failure(error_log)
-		raise e
+		return { status: 'Failed' }
 
-	if data.event == "subscription.activated":
-		member.customer_id = payment.customer_id
-	elif data.event == "subscription.charged":
-		membership = frappe.new_doc("Membership")
-		membership.update({
-			"member": member.name,
-			"membership_status": "Current",
-			"membership_type": member.membership_type,
-			"currency": "INR",
-			"paid": 1,
-			"payment_id": payment.id,
-			"webhook_payload": data_json,
-			"from_date": datetime.fromtimestamp(subscription.current_start),
-			"to_date": datetime.fromtimestamp(subscription.current_end),
-			"amount": payment.amount / 100 # Convert to rupees from paise
-		})
-		membership.insert(ignore_permissions=True)
+	if not member:
+		return { status: 'Failed' }
+	try:
+		if data.event == "subscription.activated":
+			member.customer_id = payment.customer_id
+		elif data.event == "subscription.charged":
+			membership = frappe.new_doc("Membership")
+			membership.update({
+				"member": member.name,
+				"membership_status": "Current",
+				"membership_type": member.membership_type,
+				"currency": "INR",
+				"paid": 1,
+				"payment_id": payment.id,
+				"webhook_payload": data_json,
+				"from_date": datetime.fromtimestamp(subscription.current_start),
+				"to_date": datetime.fromtimestamp(subscription.current_end),
+				"amount": payment.amount / 100 # Convert to rupees from paise
+			})
+			membership.insert(ignore_permissions=True)
 
-	# Update these values anyway
-	member.subscription_start = datetime.fromtimestamp(subscription.start_at)
-	member.subscription_end = datetime.fromtimestamp(subscription.end_at)
-	member.subscription_activated = 1
-	member.save(ignore_permissions=True)
+		# Update these values anyway
+		member.subscription_start = datetime.fromtimestamp(subscription.start_at)
+		member.subscription_end = datetime.fromtimestamp(subscription.end_at)
+		member.subscription_activated = 1
+		member.save(ignore_permissions=True)
+	except Exception as e:
+		log = frappe.log_error(e, "Error creating membership entry")
+		notify_failure(log)
+		return { status: 'Failed' }
 
-	return True
-
+	return { status: 'Success' }
 
 
 def notify_failure(log):
