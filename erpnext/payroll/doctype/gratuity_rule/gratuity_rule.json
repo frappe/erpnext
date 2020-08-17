@@ -28,7 +28,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Calculate Gratuity Amount Based on",
-   "options": "Current slab\nSum of all previous slabs",
+   "options": "Current Slab\nSum of all previous slabs",
    "reqd": 1
   },
   {
@@ -76,7 +76,7 @@
   }
  ],
  "links": [],
- "modified": "2020-08-14 16:23:05.287545",
+ "modified": "2020-08-17 14:17:02.594665",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Gratuity Rule",
