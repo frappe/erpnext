@@ -27,7 +27,7 @@ class JobOffer(Document):
 
 			if not staffing_plan.get("vacancies") or staffing_plan.vacancies - len(job_offers) <= 0:
 				error_variable = 'for ' + frappe.bold(self.designation)
-				if staffing_plan.parent:
+				if staffing_plan.get("parent"):
 					error_variable = frappe.bold(get_link_to_form("Staffing Plan", staffing_plan.parent))
 
 				frappe.throw(_("There are no vacancies under staffing plan {0}").format(error_variable))
