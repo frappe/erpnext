@@ -798,11 +798,11 @@ def get_item_price(args, item_code, ignore_party=False):
 		{conditions} {order_by}
 	""".format(conditions=conditions, order_by=order_by), args, as_list=1)
 
-	matches_uom = filter(lambda d: cstr(d[2]) == cstr(args.get('uom')), out)
+	matches_uom = list(filter(lambda d: cstr(d[2]) == cstr(args.get('uom')), out))
 	if matches_uom:
-		return list(matches_uom)
+		return matches_uom
 
-	has_uom = filter(lambda d: d[2], out)
+	has_uom = list(filter(lambda d: d[2], out))
 	if has_uom:
 		# there are item prices with uom other than the current uom
 
@@ -811,11 +811,11 @@ def get_item_price(args, item_code, ignore_party=False):
 
 		convertible_prices = [d for d in has_uom if d[2] in item_uoms]
 		if convertible_prices:
-			has_uom_other_than_stock_uom = filter(lambda d: cstr(d[2]) != cstr(item.stock_uom), convertible_prices)
+			has_uom_other_than_stock_uom = list(filter(lambda d: cstr(d[2]) != cstr(item.stock_uom), convertible_prices))
 			if has_uom_other_than_stock_uom:
-				return list(has_uom_other_than_stock_uom)
+				return has_uom_other_than_stock_uom
 
-		return list(convertible_prices)
+		return convertible_prices
 
 	return out
 
