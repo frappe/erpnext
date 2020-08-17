@@ -21,6 +21,7 @@ def setup_company_independent_fixtures():
 	add_permissions()
 	add_custom_roles_for_reports()
 	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes', now=frappe.flags.in_test)
+	create_standard_documents()
 	add_print_formats()
 
 def add_hsn_sac_codes():
@@ -794,3 +795,23 @@ def get_tds_details(accounts, fiscal_year):
 			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
 			"single_threshold": 2500, "cumulative_threshold": 0}])
 	]
+
+def create_standard_documents():
+
+	# Standard Indain Gratuity Rule
+
+	rule = frappe.new_doc("Gratuity Rule")
+	rule.name = "Indian Standard Gratuity Rule"
+	rule.calculate_gratuity_amount_based_on = "Current Slab"
+	rule.work_experience_calculation_method = "Round Off Work Experience"
+	rule.minimum_year_for_gratuity = 5
+
+	fraction = 15/26
+	rule.append("gratuity_rule_slabs", {
+		"from_year": 0,
+		"to_year":0,
+		"fraction_of_applicable_earnings": fraction
+	})
+
+	rule.flags.ignore_mandatory = True
+	rule.save()
