@@ -66,6 +66,8 @@ def filter_pricing_rule_based_on_condition(pricing_rules, doc=None):
 					str(e).capitalize() + "<br><br>Ignoring Pricing Rule"), indicator="orange", title=_("Warning"))
 			else:
 				filtered_pricing_rules.append(pricing_rule)
+	else:
+		filtered_pricing_rules = pricing_rules
 
 	return filtered_pricing_rules
 
