@@ -161,7 +161,7 @@ def create_standard_documents():
 
 	# Rule Under Limited Contract
 	rule_1 = frappe.new_doc("Gratuity Rule")
-	rule_1.name = "Rule Under Limited Contract"
+	rule_1.name = "Rule Under Limited Contract (UAE)"
 	rule_1.calculate_gratuity_amount_based_on = "Sum of all previous slabs"
 	rule_1.work_experience_calculation_method = "Take Exact Completed Years"
 	rule_1.minimum_year_for_gratuity = 1
@@ -186,7 +186,7 @@ def create_standard_documents():
 
 	# Rule Under Unlimited Contract on termination
 	rule_2 = frappe.new_doc("Gratuity Rule")
-	rule_2.name = "Rule Under Unlimited Contract on termination"
+	rule_2.name = "Rule Under Unlimited Contract on termination (UAE)"
 	rule_2.calculate_gratuity_amount_based_on = "Current Slab"
 	rule_2.work_experience_calculation_method = "Take Exact Completed Years"
 	rule_2.minimum_year_for_gratuity = 1
@@ -211,7 +211,7 @@ def create_standard_documents():
 
 	# Rule Under Unlimited Contract
 	rule_3 = frappe.new_doc("Gratuity Rule")
-	rule_3.name = "Rule Under Unlimited Contract on resignation"
+	rule_3.name = "Rule Under Unlimited Contract on resignation (UAE)"
 	rule_3.calculate_gratuity_amount_based_on = "Current Slab"
 	rule_3.work_experience_calculation_method = "Take Exact Completed Years"
 	rule_3.minimum_year_for_gratuity = 1

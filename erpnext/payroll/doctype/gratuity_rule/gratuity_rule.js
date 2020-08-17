@@ -19,6 +19,7 @@ frappe.ui.form.on('Gratuity Rule Slab', {
 		So, on row addition setting current_row.from = previous row.to.
 		On to_year insert we have to check that it is not less than from_year
 
+		Wrong order may lead to Wrong Calculation
 	*/
 
 
@@ -33,7 +34,7 @@ frappe.ui.form.on('Gratuity Rule Slab', {
 
 	to_year(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
-		if (row.to_year <= row.from_year){
+		if (row.to_year <= row.from_year && row.to_year === 0){
 			frappe.throw(__("To(Year) year can not be less than From(year) "));
 		}
 	}
