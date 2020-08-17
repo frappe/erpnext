@@ -7,6 +7,7 @@ import requests
 import json
 from frappe.utils.background_jobs import enqueue
 from fxnmrnth import get_site_name
+from frappe.desk.doctype.tag.tag import DocTags
 
 
 def verify_request():
@@ -24,6 +25,22 @@ def verify_request():
 		not sig == bytes(frappe.get_request_header("X-Wc-Webhook-Signature").encode()):
 			frappe.throw(_("Unverified Webhook Data"))
 	frappe.set_user(woocommerce_settings.creation_user)
+
+def log_integration_request(status, data=None, output=None, error=None, reference_doctype=None, reference_docname=None):
+	doc_dict = frappe._dict(
+		doctype="Integration Request",
+		integration_type="Remote",
+		integration_request_service="WooCommerce",
+		status=status,
+		data=data,
+		output=output,
+		error=error,
+		reference_doctype=reference_doctype,
+		reference_docname=reference_docname
+	)
+	integration_request_doc = frappe.get_doc(doc_dict)
+	integration_request_doc.insert(ignore_permissions=True)
+	frappe.db.commit()
 
 @frappe.whitelist(allow_guest=True)
 def order(*args, **kwargs):
@@ -44,16 +61,20 @@ def order(*args, **kwargs):
 			data=json.loads(frappe.request.data).__str__()
 		)
 
+		# Create a intergration request
+		log_integration_request(status="Failed", data=json.loads(frappe.request.data).__str__(), output=order_link_url, error=frappe.get_traceback())
+
+
 		# Write an error log
 		frappe.log_error(error_message, "WooCommerce Error")
 
-		# Send error messages to admin
+		# Send error messages to admins
 		enqueue(
 			recipients=["Mitch@RNLabs.com.au", "andy@fxmed.co.nz"],
 			subject="WooCommerce Order Error",
 			sender="Support@RNLabs.com.au",
 			content=error_message, method=frappe.sendmail,
-			queue='short', timeout=300, is_async=True
+			queue='short', is_async=True
 		)
 		raise
 
@@ -64,7 +85,7 @@ def _order(*args, **kwargs):
 		event = "created"
 	elif frappe.request and frappe.request.data:
 		#RE-ENABLE THIS AFTER TESTING IS COMPLETE
-		#verify_request()
+		# verify_request()
 		#Remove next 1 lines after finished testing
 		frappe.set_user(woocommerce_settings.creation_user)
 		try:
@@ -86,7 +107,10 @@ def _order(*args, **kwargs):
 			customer_detail['shippingAddress'], 
 			woocommerce_settings
 		)
-		return "Sales invoice created!"
+
+		# Create a intergration request
+		log_integration_request(status="Completed", data=json.dumps(order), reference_doctype="Sales Invoice", reference_docname=new_invoice)
+		return "Sales invoice: {} created!".format(new_invoice)
 
 def getCustomerDetails(customerLink):
 	user = 'mitch'
@@ -105,29 +129,40 @@ def create_sales_invoice(order, customer_code, shipping_address, woocommerce_set
 	new_sales_invoice = frappe.new_doc("Sales Invoice")
 	new_sales_invoice.customer = customer_code
 	new_sales_invoice.woocommerce_order = 1
+	new_sales_invoice.scan_barcode = ""
 	new_sales_invoice.po_no = order.get("id")
 	new_sales_invoice.naming_series = frappe.get_meta("Sales Invoice").get_field("naming_series").options or ""
 	new_sales_invoice.transaction_date = order.get("date_created").split("T")[0]
+	new_sales_invoice.po_date = order.get("date_created").split("T")[0]
+	new_sales_invoice.source = 'WooCommerce'
 
+	billing = order.get("billing")
 	if woocommerce_settings.company:
 		new_sales_invoice.company = woocommerce_settings.company
 		if woocommerce_settings.company == "RN Labs":
 			new_sales_invoice.temporary_address = 1
-			new_sales_invoice.order_type = "Practitioner Order"
-			# Need to tell if it's practitioner order or patient order
+			# pdb.set_trace()
+			if not any(meta['key'] == "user_practitioner" for meta in order.get('meta_data')): # practitioner order
+				new_sales_invoice.order_type = "Practitioner Order"
+				#Collect Shipping Information
+				shippingName = shipping_address["first_name"] + " " +  shipping_address["last_name"]
+				shippingLine1 = shipping_address["address_1"] + ", " + shipping_address["address_2"]
+				shippingLine2 = shipping_address["city"] + ", " + shipping_address["state"] + ", " + shipping_address["postcode"] + ", " + shipping_address["country"]
+				new_sales_invoice.payment_category = frappe.db.get_value('Customer', customer_code, "payment_category")
+				new_sales_invoice.temporary_delivery_address_line_1 = shippingName
+				new_sales_invoice.temporary_delivery_address_line_2 = shippingLine1
+				new_sales_invoice.temporary_delivery_address_line_3 = shippingLine2
+			else: # Patient order
+				new_sales_invoice.order_type = "Patient Order"
+				new_sales_invoice.payment_category = "Pay before Dispatch"
+				new_sales_invoice.temporary_delivery_address_line_1 = billing.get("first_name") + " " + billing.get("last_name")
+				new_sales_invoice.temporary_delivery_address_line_2 = billing.get("address_1") + " " + billing.get("address_2")
+				new_sales_invoice.temporary_delivery_address_line_3 = billing.get("city") + ", " + billing.get("state") + ", " + billing.get("postcode") + ", " + billing.get("country")
 
+		# elif woocommerce_settings.company == "Therahealth":
 
-	#Collect Shipping Information
-	shippingName = shipping_address["first_name"] + " " +  shipping_address["last_name"]
-	shippingLine1 = shipping_address["address_1"] + ", " + shipping_address["address_2"]
-	shippingLine2 = shipping_address["city"] + ", " + shipping_address["state"] + ", " + shipping_address["postcode"] + ", " + shipping_address["country"]
-
-	billing_address = order.get("billing")
-	new_sales_invoice.temporary_delivery_address_line_1 = shippingName
-	new_sales_invoice.temporary_delivery_address_line_2 = shippingLine1
-	new_sales_invoice.temporary_delivery_address_line_3 = shippingLine2
-	new_sales_invoice.temporary_delivery_address_line_4 = billing_address.get("phone")
-	new_sales_invoice.temporary_delivery_address_line_5 = billing_address.get("email")
+	new_sales_invoice.temporary_delivery_address_line_4 = billing.get("phone")
+	new_sales_invoice.temporary_delivery_address_line_5 = billing.get("email")
 
 	# Add Items
 	setItemsInSalesInvoice(customer_code, new_sales_invoice, woocommerce_settings, order)
@@ -135,6 +170,8 @@ def create_sales_invoice(order, customer_code, shipping_address, woocommerce_set
 	# Save 
 	new_sales_invoice.flags.ignore_mandatory = True
 	new_sales_invoice.save()
+	DocTags("Sales Invoice").add(new_sales_invoice.name, "WooCommerce Order")
+
 
 	# Need send email to CS to confirm and submit?
 	orderLink = order['_links']['self'][0]['href']
@@ -186,6 +223,7 @@ def create_sales_invoice(order, customer_code, shipping_address, woocommerce_set
 		content=draft_message, method=frappe.sendmail,
 		queue='short', as_markdown=True
 	)
+	return new_sales_invoice.name
 	
 
 def setItemsInSalesInvoice(customer_code, new_sales_invoice, woocommerce_settings, order):
