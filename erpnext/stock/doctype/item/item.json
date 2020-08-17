@@ -135,6 +135,9 @@
   "web_long_description",
   "website_content_section",
   "content_type",
+  "column_break_125",
+  "full_width",
+  "section_break_127",
   "page_building_blocks",
   "website_content",
   "total_projected_qty",
@@ -1342,7 +1345,30 @@
   {
    "fieldname": "website_image_alt",
    "fieldtype": "Data",
-   "label": "Image Description"
+   "label": "Image Description",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "column_break_125",
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "full_width",
+   "fieldtype": "Check",
+   "label": "Full Width",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "section_break_127",
+   "fieldtype": "Section Break",
+   "hide_border": 1,
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "has_web_view": 1,
@@ -1352,7 +1378,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2020-08-07 14:24:58.384992",
+ "modified": "2020-08-17 20:31:36.299711",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
