@@ -253,6 +253,4 @@ def create_standard_documents():
 	rule_2.save()
 	rule_3.save()
 
-	return rule_1, rule_2, rule_3
-
 
