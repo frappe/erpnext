@@ -24,7 +24,7 @@ def get_data():
 			},
 			{
 				'label': _('Sell'),
-				'items': ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
+				'items': ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Backorder']
 			},
 			{
 				'label': _('Buy'),
