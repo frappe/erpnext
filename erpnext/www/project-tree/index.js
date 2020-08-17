@@ -118,6 +118,23 @@ class WebProjectTree extends erpnext.projects.ProjectTree {
 		});
 	}
 
+	get_call_args(filters) {
+		return {
+			method: "erpnext.projects.page.project_tree.project.get_projects_data",
+			args: {
+				params: {
+					doctype: "Project",
+					fields: this.get_fields(),
+					filters: filters || this.get_filters_for_args(),
+					with_comment_count: true,
+					page_length: this.page_length,
+					start: this.start,
+					ignore_permissions: true
+				}
+			}
+		};
+	}
+
 	get_fields_in_list_view(doctype, meta) {
 		return meta.fields.filter(df => {
 			return frappe.model.is_value_type(df.fieldtype) && (
