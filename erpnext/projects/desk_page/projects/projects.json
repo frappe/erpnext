@@ -33,7 +33,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Projects",
- "modified": "2020-08-04 18:52:49.859581",
+ "modified": "2020-08-17 12:41:46.418939",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects",
@@ -74,7 +74,7 @@
   },
   {
    "label": "Project Tree",
-   "link_to": "project",
+   "link_to": "project-tree",
    "type": "Page"
   }
  ]
