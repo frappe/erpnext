@@ -11,9 +11,13 @@ from erpnext.setup.setup_wizard.operations.taxes_setup import create_sales_tax
 def setup(company=None, patch=True):
 	make_custom_fields()
 	add_print_formats()
+<<<<<<< HEAD
 	add_custom_roles_for_reports()
 	add_permissions()
 	create_standard_documents()
+=======
+	create_gratuity_rule()
+>>>>>>> test: gratuity
 
 	if company:
 		create_sales_tax(company)
@@ -155,7 +159,8 @@ def add_permissions():
 			add_permission(doctype, role, 0)
 			update_permission_property(doctype, role, 0, 'write', 1)
 			update_permission_property(doctype, role, 0, 'create', 1)
-def create_standard_documents():
+
+def create_gratuity_rule():
 
 	# Standard Gratuity Rules for UAE
 

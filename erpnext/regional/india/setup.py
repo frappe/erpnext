@@ -21,7 +21,7 @@ def setup_company_independent_fixtures():
 	add_permissions()
 	add_custom_roles_for_reports()
 	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes', now=frappe.flags.in_test)
-	create_standard_documents()
+	create_gratuity_rule()
 	add_print_formats()
 
 def add_hsn_sac_codes():
@@ -796,7 +796,7 @@ def get_tds_details(accounts, fiscal_year):
 			"single_threshold": 2500, "cumulative_threshold": 0}])
 	]
 
-def create_standard_documents():
+def create_gratuity_rule():
 
 	# Standard Indain Gratuity Rule
 

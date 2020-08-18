@@ -12,7 +12,9 @@ from math import floor
 from frappe.utils import get_datetime
 class Gratuity(Document):
 	def validate(self):
-		calculate_work_experience_and_amount(self.employee, self.gratuity_rule)
+		data = calculate_work_experience_and_amount(self.employee, self.gratuity_rule)
+		self.current_work_experience = data["current_work_experience"]
+		self.amount = data["amount"]
 
 	def before_submit(self):
 		self.status = "Unpaid"
