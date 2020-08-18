@@ -73,7 +73,7 @@ def order(*args, **kwargs):
 			subject="WooCommerce Order Error",
 			sender="Support@RNLabs.com.au",
 			content=error_message, method=frappe.sendmail,
-			queue='short', is_async=True
+			queue='short', is_async=True, as_markdown=True
 		)
 		raise
 
@@ -186,24 +186,26 @@ def create_sales_invoice(order, customer_code, shipping_address, woocommerce_set
 	draft_message = """
 		Hi *{name}*, \n
 		There is an order captured in ERPNext from online website {company}.
+
+		## WooCommerce Order detail
 		- Online order number: {order_number}
 		- Order status: {status}
 		- Created date: {created_date}
-		- Total amount: {total}
-		- Total tax: {total_tax}
+		- Total amount: ${total}
+		- Total tax: ${total_tax}
 		- Customer note: {customer_note}
 		- order URL: {url}
 
 		## ERPNext Sales Invoice brief 
 		- Customer code : {customer_code}
 		- Title : {title}
-		- Grand total : {base_grand_total}
-		- Taxes and charges : {total_taxes_and_charges}
+		- Grand total : ${base_grand_total}
+		- Taxes and charges : ${total_taxes_and_charges}
 		- Sales invoice ID : {sales_invoice_id}
 		- Purchase order : {po_no}
 		- Invoice URL: {erpnext_url}
 	""".format(
-		name="Administrator",
+		name="All",
 		company=woocommerce_settings.company,
 		order_number=order.get("id"),
 		status=order.get("status"),
@@ -221,11 +223,12 @@ def create_sales_invoice(order, customer_code, shipping_address, woocommerce_set
 		erpnext_url= erpnext_url,
 	)
 	enqueue(
-		recipients=["andy@fxmed.co.nz"],
+		recipients=["Mitch@RNLabs.com.au"],
 		subject="WooCommerce Order Draft",
 		sender="Support@RNLabs.com.au",
 		content=draft_message, method=frappe.sendmail,
-		queue='short', as_markdown=True
+		queue='short', as_markdown=True,
+		cc=["Tiana@rnlabs.com.au", "testkits@rnlabs.com.au", "andy@fxmed.co.nz"]
 	)
 	return new_sales_invoice.name
 	
@@ -255,7 +258,7 @@ def setItemsInSalesInvoice(customer_code, new_sales_invoice, woocommerce_setting
 	if float(order.get("shipping_total")) > 0:
 		addTaxDetails(new_sales_invoice, order.get("shipping_total"), "Shipping Total", woocommerce_settings.f_n_f_account)
 	if float(order.get("shipping_tax")) > 0:
-		addTaxDetails(new_sales_invoice, order.get("shipping_tax"), "Shipping Tax", woocommerce_settings.f_n_f_account)
+		addTaxDetails(new_sales_invoice, order.get("shipping_tax"), "Shipping Tax", woocommerce_settings.tax_account)
 
 
 def addTaxDetails(salesInvoice, price, desc, tax_account_head):
