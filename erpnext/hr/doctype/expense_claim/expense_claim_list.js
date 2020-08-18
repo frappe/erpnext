@@ -1,5 +1,5 @@
 frappe.listview_settings['Expense Claim'] = {
-	add_fields: ["total_claimed_amount", "docstatus"],
+	add_fields: ["total_claimed_amount", "docstatus", "company"],
 	get_indicator: function(doc) {
 		if(doc.status == "Paid") {
 			return [__("Paid"), "green", "status,=,Paid"];
