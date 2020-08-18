@@ -13,7 +13,7 @@
   {
    "hidden": 0,
    "label": "Compensations",
-   "links": "[\n    {\n        \"label\": \"Additional Salary\",\n        \"name\": \"Additional Salary\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n        \n    },\n    {\n        \"label\": \"Retention Bonus\",\n        \"name\": \"Retention Bonus\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Employee Incentive\",\n        \"name\": \"Employee Incentive\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Employee Benefit Application\",\n        \"name\": \"Employee Benefit Application\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Employee Benefit Claim\",\n        \"name\": \"Employee Benefit Claim\",\n        \"type\": \"doctype\"\n    }\n]"
+   "links": "[\n    {\n        \"label\": \"Additional Salary\",\n        \"name\": \"Additional Salary\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n        \n    },\n    {\n        \"label\": \"Retention Bonus\",\n        \"name\": \"Retention Bonus\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Employee Incentive\",\n        \"name\": \"Employee Incentive\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Gratuity Rule\",\n        \"name\": \"Gratuity Rule\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Gratuity\",\n        \"name\": \"Gratuity\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Employee Benefit Application\",\n        \"name\": \"Employee Benefit Application\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Employee Benefit Claim\",\n        \"name\": \"Employee Benefit Claim\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -38,7 +38,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Payroll",
- "modified": "2020-08-10 19:38:45.976209",
+ "modified": "2020-08-18 15:00:55.671767",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll",
