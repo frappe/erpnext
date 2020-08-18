@@ -203,7 +203,6 @@
   {
    "fieldname": "reference",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Reference"
   },
   {
@@ -217,7 +216,7 @@
  ],
  "icon": "fa fa-flag",
  "idx": 1,
- "modified": "2020-08-18 12:38:44.445194",
+ "modified": "2020-08-18 12:47:16.580458",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
