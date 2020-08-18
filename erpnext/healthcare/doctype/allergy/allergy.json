@@ -1,33 +1,24 @@
 {
  "actions": [],
- "allow_rename": 1,
- "autoname": "field:practitioner_type",
- "creation": "2020-03-24 12:15:46.880698",
+ "creation": "2020-08-18 06:35:33.270054",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "practitioner_type",
-  "description"
+  "allergy"
  ],
  "fields": [
   {
-   "fieldname": "practitioner_type",
+   "fieldname": "allergy",
    "fieldtype": "Data",
-   "label": "Practitioner Type",
-   "unique": 1
-  },
-  {
-   "fieldname": "description",
-   "fieldtype": "Text",
-   "label": "Description"
+   "label": "Allergy"
   }
  ],
  "links": [],
- "modified": "2020-07-10 21:35:16.244657",
+ "modified": "2020-08-18 06:35:33.270054",
  "modified_by": "Administrator",
  "module": "Healthcare",
- "name": "Healthcare Practitioner Type",
+ "name": "Allergy",
  "owner": "Administrator",
  "permissions": [
   {
@@ -43,6 +34,7 @@
    "write": 1
   }
  ],
+ "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

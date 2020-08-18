@@ -74,13 +74,13 @@ frappe.ui.form.on('Patient Encounter', {
 			};
 		});
 
-		frm.set_query('drug_code', 'drug_prescription', function() {
-			return {
-				filters: {
-					is_stock_item: 1
-				}
-			};
-		});
+		// frm.set_query('drug_code', 'drug_prescription', function() {
+		// 	return {
+		// 		filters: {
+		// 			is_stock_item: 1
+		// 		}
+		// 	};
+		// });
 
 		frm.set_query('lab_test_code', 'lab_test_prescription', function() {
 			return {
