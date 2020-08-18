@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-02-20 11:18:11",
@@ -167,6 +166,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -246,9 +246,8 @@
  "icon": "fa fa-calendar",
  "idx": 1,
  "is_submittable": 1,
- "links": [],
  "max_attachments": 3,
- "modified": "2020-03-10 22:40:43.487721",
+ "modified": "2020-08-13 17:22:44.832397",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Application",
