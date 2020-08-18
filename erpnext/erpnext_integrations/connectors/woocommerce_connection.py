@@ -4,7 +4,6 @@ import frappe, base64, hashlib, hmac, json
 from frappe import _
 import pdb
 import requests
-import json
 from frappe.utils.background_jobs import enqueue
 from fxnmrnth import get_site_name
 from frappe.desk.doctype.tag.tag import DocTags
@@ -23,8 +22,8 @@ def verify_request():
 	if frappe.request.data and \
 		frappe.get_request_header("X-Wc-Webhook-Signature") and \
 		not sig == bytes(frappe.get_request_header("X-Wc-Webhook-Signature").encode()):
+			# print("sig" + sig.decode("utf-8"))
 			frappe.throw(_("Unverified Webhook Data"))
-	frappe.set_user(woocommerce_settings.creation_user)
 
 def log_integration_request(status, data=None, output=None, error=None, reference_doctype=None, reference_docname=None):
 	doc_dict = frappe._dict(
@@ -86,7 +85,6 @@ def _order(*args, **kwargs):
 	elif frappe.request and frappe.request.data:
 		#RE-ENABLE THIS AFTER TESTING IS COMPLETE
 		# verify_request()
-		#Remove next 1 lines after finished testing
 		frappe.set_user(woocommerce_settings.creation_user)
 		try:
 			order = json.loads(frappe.request.data)
@@ -114,11 +112,16 @@ def _order(*args, **kwargs):
 
 def getCustomerDetails(customerLink):
 	user = 'mitch'
-	ERPNextApp = 'gXmf sL4w wtGb QJUX kIXI CDt4'
+	site_name = get_site_name()
+	if site_name == "d.erpnext.rnlabs.com.au":
+		ERPNextApp = 'gXmf sL4w wtGb QJUX kIXI CDt4'
+	elif site_name == "erpnext.rnlabs.com.au":
+		ERPNextApp = 'xJx0 cgAv UcgV R4bh 83Rq LJfu'
 	token = base64.b64encode((user + ':' + ERPNextApp).encode("utf-8"))
 	headers = {'Authorization': 'Basic ' + token.decode("utf-8")}
 	response = requests.get(customerLink, headers=headers)
 	json = response.json()
+	# pdb.set_trace()
 	returnDict = dict();  
 	returnDict['shippingAddress'] = json['shipping'];
 	returnDict['username'] = json['username'];
@@ -134,14 +137,13 @@ def create_sales_invoice(order, customer_code, shipping_address, woocommerce_set
 	new_sales_invoice.naming_series = frappe.get_meta("Sales Invoice").get_field("naming_series").options or ""
 	new_sales_invoice.transaction_date = order.get("date_created").split("T")[0]
 	new_sales_invoice.po_date = order.get("date_created").split("T")[0]
-	new_sales_invoice.source = 'WooCommerce'
+	# new_sales_invoice.source = 'WooCommerce'
 
 	billing = order.get("billing")
 	if woocommerce_settings.company:
 		new_sales_invoice.company = woocommerce_settings.company
+		new_sales_invoice.temporary_address = 1
 		if woocommerce_settings.company == "RN Labs":
-			new_sales_invoice.temporary_address = 1
-			# pdb.set_trace()
 			if not any(meta['key'] == "user_practitioner" for meta in order.get('meta_data')): # practitioner order
 				new_sales_invoice.order_type = "Practitioner Order"
 				#Collect Shipping Information
@@ -159,8 +161,10 @@ def create_sales_invoice(order, customer_code, shipping_address, woocommerce_set
 				new_sales_invoice.temporary_delivery_address_line_2 = billing.get("address_1") + " " + billing.get("address_2")
 				new_sales_invoice.temporary_delivery_address_line_3 = billing.get("city") + ", " + billing.get("state") + ", " + billing.get("postcode") + ", " + billing.get("country")
 
-		# elif woocommerce_settings.company == "Therahealth":
-
+		elif woocommerce_settings.company == "Therahealth":
+				new_sales_invoice.temporary_delivery_address_line_1 = billing.get("first_name") + " " + billing.get("last_name")
+				new_sales_invoice.temporary_delivery_address_line_2 = billing.get("address_1") + " " + billing.get("address_2")
+				new_sales_invoice.temporary_delivery_address_line_3 = billing.get("city") + ", " + billing.get("state") + ", " + billing.get("postcode") + ", " + billing.get("country")
 	new_sales_invoice.temporary_delivery_address_line_4 = billing.get("phone")
 	new_sales_invoice.temporary_delivery_address_line_5 = billing.get("email")
 
