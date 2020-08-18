@@ -799,19 +799,19 @@ def get_tds_details(accounts, fiscal_year):
 def create_gratuity_rule():
 
 	# Standard Indain Gratuity Rule
+	if not frappe.db.exists("Gratuity Rule", "Indian Standard Gratuity Rule"):
+		rule = frappe.new_doc("Gratuity Rule")
+		rule.name = "Indian Standard Gratuity Rule"
+		rule.calculate_gratuity_amount_based_on = "Current Slab"
+		rule.work_experience_calculation_method = "Round Off Work Experience"
+		rule.minimum_year_for_gratuity = 5
 
-	rule = frappe.new_doc("Gratuity Rule")
-	rule.name = "Indian Standard Gratuity Rule"
-	rule.calculate_gratuity_amount_based_on = "Current Slab"
-	rule.work_experience_calculation_method = "Round Off Work Experience"
-	rule.minimum_year_for_gratuity = 5
+		fraction = 15/26
+		rule.append("gratuity_rule_slabs", {
+			"from_year": 0,
+			"to_year":0,
+			"fraction_of_applicable_earnings": fraction
+		})
 
-	fraction = 15/26
-	rule.append("gratuity_rule_slabs", {
-		"from_year": 0,
-		"to_year":0,
-		"fraction_of_applicable_earnings": fraction
-	})
-
-	rule.flags.ignore_mandatory = True
-	rule.save()
+		rule.flags.ignore_mandatory = True
+		rule.save()

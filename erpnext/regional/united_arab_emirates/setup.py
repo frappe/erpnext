@@ -165,97 +165,100 @@ def create_gratuity_rule():
 	# Standard Gratuity Rules for UAE
 
 	# Rule Under Limited Contract
-	rule_1 = frappe.new_doc("Gratuity Rule")
-	rule_1.name = "Rule Under Limited Contract (UAE)"
-	rule_1.calculate_gratuity_amount_based_on = "Sum of all previous slabs"
-	rule_1.work_experience_calculation_method = "Take Exact Completed Years"
-	rule_1.minimum_year_for_gratuity = 1
+	if not frappe.db.exists("Gratuity Rule", "Rule Under Limited Contract (UAE)"):
+		rule_1 = frappe.new_doc("Gratuity Rule")
+		rule_1.name = "Rule Under Limited Contract (UAE)"
+		rule_1.calculate_gratuity_amount_based_on = "Sum of all previous slabs"
+		rule_1.work_experience_calculation_method = "Take Exact Completed Years"
+		rule_1.minimum_year_for_gratuity = 1
 
-	rule_1.append("gratuity_rule_slabs", {
-		"from_year": 0,
-		"to_year":1,
-		"fraction_of_applicable_earnings": 0
-	})
+		rule_1.append("gratuity_rule_slabs", {
+			"from_year": 0,
+			"to_year":1,
+			"fraction_of_applicable_earnings": 0
+		})
 
-	rule_1.append("gratuity_rule_slabs", {
-		"from_year": 1,
-		"to_year":5,
-		"fraction_of_applicable_earnings": 21/30
-	})
+		rule_1.append("gratuity_rule_slabs", {
+			"from_year": 1,
+			"to_year":5,
+			"fraction_of_applicable_earnings": 21/30
+		})
 
-	rule_1.append("gratuity_rule_slabs", {
-		"from_year": 5,
-		"to_year":0,
-		"fraction_of_applicable_earnings": 1
-	})
+		rule_1.append("gratuity_rule_slabs", {
+			"from_year": 5,
+			"to_year":0,
+			"fraction_of_applicable_earnings": 1
+		})
 
 	# Rule Under Unlimited Contract on termination
-	rule_2 = frappe.new_doc("Gratuity Rule")
-	rule_2.name = "Rule Under Unlimited Contract on termination (UAE)"
-	rule_2.calculate_gratuity_amount_based_on = "Current Slab"
-	rule_2.work_experience_calculation_method = "Take Exact Completed Years"
-	rule_2.minimum_year_for_gratuity = 1
+	if not frappe.db.exists("Gratuity Rule", "Rule Under Unlimited Contract on termination (UAE)"):
+		rule_2 = frappe.new_doc("Gratuity Rule")
+		rule_2.name = "Rule Under Unlimited Contract on termination (UAE)"
+		rule_2.calculate_gratuity_amount_based_on = "Current Slab"
+		rule_2.work_experience_calculation_method = "Take Exact Completed Years"
+		rule_2.minimum_year_for_gratuity = 1
 
-	rule_2.append("gratuity_rule_slabs", {
-		"from_year": 0,
-		"to_year":1,
-		"fraction_of_applicable_earnings": 0
-	})
+		rule_2.append("gratuity_rule_slabs", {
+			"from_year": 0,
+			"to_year":1,
+			"fraction_of_applicable_earnings": 0
+		})
 
-	rule_2.append("gratuity_rule_slabs", {
-		"from_year": 1,
-		"to_year":5,
-		"fraction_of_applicable_earnings": 21/30
-	})
+		rule_2.append("gratuity_rule_slabs", {
+			"from_year": 1,
+			"to_year":5,
+			"fraction_of_applicable_earnings": 21/30
+		})
 
-	rule_2.append("gratuity_rule_slabs", {
-		"from_year": 5,
-		"to_year":0,
-		"fraction_of_applicable_earnings": 1
-	})
+		rule_2.append("gratuity_rule_slabs", {
+			"from_year": 5,
+			"to_year":0,
+			"fraction_of_applicable_earnings": 1
+		})
 
 	# Rule Under Unlimited Contract
-	rule_3 = frappe.new_doc("Gratuity Rule")
-	rule_3.name = "Rule Under Unlimited Contract on resignation (UAE)"
-	rule_3.calculate_gratuity_amount_based_on = "Current Slab"
-	rule_3.work_experience_calculation_method = "Take Exact Completed Years"
-	rule_3.minimum_year_for_gratuity = 1
+	if not frappe.db.exists("Gratuity Rule", "Rule Under Unlimited Contract on resignation (UAE)"):
+		rule_3 = frappe.new_doc("Gratuity Rule")
+		rule_3.name = "Rule Under Unlimited Contract on resignation (UAE)"
+		rule_3.calculate_gratuity_amount_based_on = "Current Slab"
+		rule_3.work_experience_calculation_method = "Take Exact Completed Years"
+		rule_3.minimum_year_for_gratuity = 1
 
-	rule_3.append("gratuity_rule_slabs", {
-		"from_year": 0,
-		"to_year":1,
-		"fraction_of_applicable_earnings": 0
-	})
+		rule_3.append("gratuity_rule_slabs", {
+			"from_year": 0,
+			"to_year":1,
+			"fraction_of_applicable_earnings": 0
+		})
 
-	fraction_of_applicable_earnings = 1/3 * 21/30
-	rule_3.append("gratuity_rule_slabs", {
-		"from_year": 1,
-		"to_year":3,
-		"fraction_of_applicable_earnings": fraction_of_applicable_earnings
-	})
+		fraction_of_applicable_earnings = 1/3 * 21/30
+		rule_3.append("gratuity_rule_slabs", {
+			"from_year": 1,
+			"to_year":3,
+			"fraction_of_applicable_earnings": fraction_of_applicable_earnings
+		})
 
-	fraction_of_applicable_earnings = 2/3 * 21/30
-	rule_3.append("gratuity_rule_slabs", {
-		"from_year": 3,
-		"to_year":5,
-		"fraction_of_applicable_earnings": fraction_of_applicable_earnings
-	})
+		fraction_of_applicable_earnings = 2/3 * 21/30
+		rule_3.append("gratuity_rule_slabs", {
+			"from_year": 3,
+			"to_year":5,
+			"fraction_of_applicable_earnings": fraction_of_applicable_earnings
+		})
 
-	fraction_of_applicable_earnings = 21/30
-	rule_3.append("gratuity_rule_slabs", {
-		"from_year": 5,
-		"to_year":0,
-		"fraction_of_applicable_earnings": fraction_of_applicable_earnings
-	})
+		fraction_of_applicable_earnings = 21/30
+		rule_3.append("gratuity_rule_slabs", {
+			"from_year": 5,
+			"to_year":0,
+			"fraction_of_applicable_earnings": fraction_of_applicable_earnings
+		})
 
 
-	#for applicable salary component user need to set this by its own
-	rule_1.flags.ignore_mandatory = True
-	rule_2.flags.ignore_mandatory = True
-	rule_3.flags.ignore_mandatory = True
+		#for applicable salary component user need to set this by its own
+		rule_1.flags.ignore_mandatory = True
+		rule_2.flags.ignore_mandatory = True
+		rule_3.flags.ignore_mandatory = True
 
-	rule_1.save()
-	rule_2.save()
-	rule_3.save()
+		rule_1.save()
+		rule_2.save()
+		rule_3.save()
 
 
