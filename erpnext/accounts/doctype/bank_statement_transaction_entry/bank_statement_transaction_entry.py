@@ -404,7 +404,7 @@ def get_transaction_entries(filename, headers):
 
 	if (filename.lower().endswith("xlsx")):
 		from frappe.utils.xlsxutils import read_xlsx_file_from_attached_file
-		rows = read_xlsx_file_from_attached_file(file_id=filename)
+		rows = read_xlsx_file_from_attached_file(file_url=filename)
 	elif (filename.lower().endswith("csv")):
 		from frappe.utils.csvutils import read_csv_content
 		_file = frappe.get_doc("File", {"file_name": filename})
