@@ -43,7 +43,7 @@
   {
    "hidden": 0,
    "label": "Bank Statement",
-   "links": "[\n    {\n        \"label\": \"Bank\",\n        \"name\": \"Bank\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Account\",\n        \"name\": \"Bank Account\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Statement Transaction Entry\",\n        \"name\": \"Bank Statement Transaction Entry\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Statement Settings\",\n        \"name\": \"Bank Statement Settings\",\n        \"type\": \"doctype\"\n    }\n]"
+   "links": "[\n    {\n        \"label\": \"Bank\",\n        \"name\": \"Bank\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Account\",\n        \"name\": \"Bank Account\",\n        \"type\": \"doctype\"\n    },\n    {\n\t\t\"label\": \"Bank Reconciliation\",\n\t\t\"name\": \"bank-reconciliation\",\n\t\t\"type\": \"page\",\n\t\t\"icon\": \"fa fa-bar-chart\"\n\t},\n\t{\n\t\t\"label\": \"Bank Clearance\",\n\t\t\"name\": \"Bank Clearance\",\n\t\t\"type\": \"doctype\"\n\t},\n    {\n        \"label\": \"Bank Statement Transaction Entry\",\n        \"name\": \"Bank Statement Transaction Entry\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Statement Settings\",\n        \"name\": \"Bank Statement Settings\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -98,7 +98,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Accounting",
- "modified": "2020-06-19 12:42:44.054598",
+ "modified": "2020-08-18 17:58:20.285850",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
@@ -146,11 +146,6 @@
    "label": "Trial Balance",
    "link_to": "Trial Balance",
    "type": "Report"
-  },
-  {
-   "label": "Point of Sale",
-   "link_to": "point-of-sale",
-   "type": "Page"
   },
   {
    "label": "Dashboard",
