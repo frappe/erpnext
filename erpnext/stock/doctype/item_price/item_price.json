@@ -69,7 +69,6 @@
   {
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Item Name",
    "read_only": 1
   },
@@ -77,7 +76,7 @@
    "fetch_from": "item_code.brand",
    "fieldname": "brand",
    "fieldtype": "Read Only",
-   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Brand",
    "read_only": 1
   },
@@ -97,6 +96,7 @@
    "fieldname": "price_list",
    "fieldtype": "Link",
    "in_global_search": 1,
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Price List",
    "options": "Price List",
@@ -169,8 +169,10 @@
    "fieldtype": "Section Break"
   },
   {
+   "default": "Today",
    "fieldname": "valid_from",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Valid From "
   },
   {
@@ -186,6 +188,7 @@
   {
    "fieldname": "valid_upto",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Valid Upto "
   },
   {
@@ -214,7 +217,7 @@
  ],
  "icon": "fa fa-flag",
  "idx": 1,
- "modified": "2020-08-15 20:33:11.848614",
+ "modified": "2020-08-18 12:38:44.445194",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
