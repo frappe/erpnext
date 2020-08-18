@@ -118,6 +118,22 @@ class WebProjectTree extends erpnext.projects.ProjectTree {
 		});
 	}
 
+	get_task_call_args(filters) {
+		return {
+			method: "erpnext.projects.page.project_tree.project.get_tasks",
+			args: {
+				params: {
+					doctype: "Task",
+					fields: this.get_task_fields(),
+					filters: filters,
+					with_comment_count: true,
+					page_length: this.page_length,
+					ignore_permissions: true
+				}
+			}
+		};
+	}
+
 	get_call_args(filters) {
 		return {
 			method: "erpnext.projects.page.project_tree.project.get_projects_data",
