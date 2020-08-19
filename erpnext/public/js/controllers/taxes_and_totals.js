@@ -228,7 +228,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				flt(item_tax_map[tax.account_head], precision("rate", tax)) : tax.rate;
 		} else {
 			// If no item tax template against item dont calculate tax against it
-			return 0
+			return 0;
 		}
 	},
 
