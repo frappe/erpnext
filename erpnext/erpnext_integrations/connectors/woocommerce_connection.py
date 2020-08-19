@@ -158,12 +158,17 @@ def _order(*args, **kwargs):
 		meta_data = order.get('meta_data')
 		billing = order.get('billing')
 
+
 		# link customer and address
 		patient_name = ""
 		if customer_id == 0: # this is guest login, a patient under a practitioner
 			for meta in meta_data:
 				if meta["key"] == "user_practitioner":
-					customer_code = meta["value"]
+					if "-" in meta["value"]:
+						end_index = meta["value"].find('-')
+						customer_code = meta["value"][0:end_index]
+					else:
+						customer_code = meta["value"]
 				elif meta["key"] == "practitioner_name":
 					practitioner_name = meta["value"]
 				elif meta["key"] == "delivery_option":
@@ -176,8 +181,11 @@ def _order(*args, **kwargs):
 					patient_name = meta["value"]
 				else:
 					pass
+
+			if not customer_code :
+				frappe.throw("Check order id {} in WP, cannot find user_practitioner".format(order.get('id')))
 			# For patient order, we need to get shipping address in the order itself
-			if customer_code and frappe.db.exists("Customer", customer_code):
+			if frappe.db.exists("Customer", customer_code):
 				customer_doc = frappe.get_doc("Customer", customer_code)
 				if not patient_name:
 					patient_name = billing.get('first_name') + ", " + billing.get('last_name')
@@ -186,23 +194,24 @@ def _order(*args, **kwargs):
 				phone = billing.get('phone')
 				email = billing.get('email')
 
-			# create sales invoice
-			temp_address = {
-				"temporary_address": 1,
-				"temporary_delivery_address_line_1": patient_name,
-				"temporary_delivery_address_line_2": street,
-				"temporary_delivery_address_line_3": city_postcode_country,
-				"temporary_delivery_address_line_4": phone,
-				"temporary_delivery_address_line_5": email,
-			}
-			new_invoice = create_sales_invoice(order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option)
-
+				# create sales invoice
+				temp_address = {
+					"temporary_address": 1,
+					"temporary_delivery_address_line_1": patient_name,
+					"temporary_delivery_address_line_2": street,
+					"temporary_delivery_address_line_3": city_postcode_country,
+					"temporary_delivery_address_line_4": phone,
+					"temporary_delivery_address_line_5": email,
+				}
+				new_invoice = create_sales_invoice(order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option)
+			else:
+				frappe.throw("Customer {} not exits!".format(customer_code))
 
 		else: # customer_id != 0
 			# this is a user login, a practitioner
 			customer_code = ""
 			for meta in meta_data:
-				if meta["key"] == "customer_code":
+				if meta["key"] == "user_practitioner":
 					customer_code = meta["value"]
 					break
 
@@ -231,6 +240,7 @@ def _order(*args, **kwargs):
 def create_sales_invoice(order, customer_code, payment_category,  woocommerce_settings, order_type=None, temp_address=None, delivery_option=None):
 	#Set Basic Info
 	date_created = order.get("date_created").split("T")[0]
+	customer_note = order.get('customer_note')
 	invoice_dict = {
 		"doctype": "Sales Invoice",
 		"customer": customer_code,
@@ -240,7 +250,8 @@ def create_sales_invoice(order, customer_code, payment_category,  woocommerce_se
 		"transaction_date":date_created,
 		"po_date":date_created,
 		"company": woocommerce_settings.company,
-		"payment_category": payment_category
+		"payment_category": payment_category,
+		"comments": customer_note
 	}
 	if order_type:
 		invoice_dict['order_type']= order_type
