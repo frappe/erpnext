@@ -65,8 +65,7 @@ def log_integration_request(order=None, invoice_doc=None, status=None, data=None
 			- Purchase order : {po_no}
 			- Customer code : {customer_code}
 			- Title : {title}
-			- Total amount : ${base_grand_total}
-			- Taxes and charges : ${total_taxes_and_charges}
+			- Total amount : ${base_grand_total} (Included taxes and charges: ${total_taxes_and_charges})
 			- Invoice URL: {erpnext_url}
 		""".format(
 			name="All",
@@ -80,7 +79,7 @@ def log_integration_request(order=None, invoice_doc=None, status=None, data=None
 			url=order_edit_link,
 			customer_code= invoice_doc.customer,
 			title= invoice_doc.title,
-			base_grand_total= invoice_doc.base_grand_total - invoice_doc.total_taxes_and_charges,
+			base_grand_total= invoice_doc.base_grand_total,
 			total_taxes_and_charges= invoice_doc.total_taxes_and_charges,
 			sales_invoice_id= invoice_doc.name,
 			po_no= invoice_doc.po_no,
@@ -201,16 +200,19 @@ def _order(*args, **kwargs):
 
 		else: # customer_id != 0
 			# this is a user login, a practitioner
+			customer_code = ""
 			for meta in meta_data:
 				if meta["key"] == "customer_code":
 					customer_code = meta["value"]
 					break
 
+			if not customer_code:
+				frappe.throw("WP Customer id {} don't have a customer code in ERPNext!".format(customer_id))
 			# For practitioner order, we just need to get the primary address as shipping address
-			if customer_code and frappe.db.exists("Customer", customer_code):
+			if frappe.db.exists("Customer", customer_code):
 				customer_doc = frappe.get_doc("Customer", customer_code)
 				payment_category = customer_doc.payment_category
-				if woocommerce_settings.compnay == "RN Labs":
+				if woocommerce_settings.company == "RN Labs":
 					order_type = "Practitioner Order"
 				# we don't need to find the primary address as it will auto load when you open the draft invoice
 
