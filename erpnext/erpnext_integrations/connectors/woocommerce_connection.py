@@ -87,7 +87,7 @@ def log_integration_request(order=None, invoice_doc=None, status=None, data=None
 
 		cc = []
 		if site_name == "erpnext.rnlabs.com.au" or site_name == "erpnext.therahealth.com.au":
-			cc = ["Tiana@rnlabs.com.au", "testkits@rnlabs.com.au", "andy@fxmed.co.nz"]
+			cc = ["Support@rnlabs.com.au", "testkits@rnlabs.com.au", "andy@fxmed.co.nz"]
 
 		enqueue(
 			recipients=["Mitch@RNLabs.com.au"],
@@ -128,7 +128,7 @@ def order(*args, **kwargs):
 
 		# Send error messages to admins
 		enqueue(
-			recipients=["Mitch@RNLabs.com.au", "andy@fxmed.co.nz"],
+			recipients=["Mitch@RNLabs.com.au", "andy@fxmed.co.nz", "Support@rnlabs.com.au"],
 			subject="WooCommerce Order Error",
 			sender="Support@RNLabs.com.au",
 			content=error_message, method=frappe.sendmail,
@@ -152,6 +152,10 @@ def _order(*args, **kwargs):
 		return "success"
 
 	if event == "created":
+		status = order.get("status")
+		# if status != "on-hold" and status != "processing":
+		# 	frappe.log_error("order {} status {}".format(order.get("id"), order.get('status')), "WooCommerce order status filter")
+
 		# Get basic data from order
 		customer_id = order.get('customer_id')
 		meta_data = order.get('meta_data')
@@ -210,7 +214,10 @@ def _order(*args, **kwargs):
 			# this is a user login, a practitioner
 			customer_code = ""
 			for meta in meta_data:
-				if meta["key"] == "user_practitioner":
+				if meta["key"] == "customer_code":
+					customer_code = meta["value"]
+					break
+				elif meta["key"] == "user_practitioner":
 					customer_code = meta["value"]
 					break
 
