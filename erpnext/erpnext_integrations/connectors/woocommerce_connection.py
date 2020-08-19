@@ -34,8 +34,7 @@ def log_integration_request(order=None, invoice_doc=None, status=None, data=None
 		data=data,
 		output=output,
 		error=error,
-		reference_doctype=reference_doctype,
-		reference_docname=reference_docname
+		reference_id_=reference_docname
 	)
 	integration_request_doc = frappe.get_doc(doc_dict)
 	integration_request_doc.insert(ignore_permissions=True)
