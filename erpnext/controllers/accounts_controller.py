@@ -19,7 +19,7 @@ from erpnext.accounts.doctype.pricing_rule.utils import (apply_pricing_rule_on_t
 from erpnext.exceptions import InvalidCurrency
 from six import text_type
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
-from erpnext.stock.get_item_details import get_item_warehouse
+from erpnext.stock.get_item_details import get_item_warehouse, _get_item_tax_template, get_item_tax_map
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
 force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules")
@@ -1157,6 +1157,18 @@ def get_supplier_block_status(party_name):
 	}
 	return info
 
+def set_child_tax_template_and_map(item, child_item, parent_doc):
+	args = {
+			'item_code': item.item_code,
+			'posting_date': parent_doc.transaction_date,
+			'tax_category': parent_doc.get('tax_category'),
+			'company': parent_doc.get('company')
+		}
+
+	child_item.item_tax_template = _get_item_tax_template(args, item.taxes)
+	if child_item.get("item_tax_template"):
+		child_item.item_tax_rate = get_item_tax_map(parent_doc.get('company'), child_item.item_tax_template, as_json=True)
+
 def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, trans_item):
 	"""
 	Returns a Sales Order Item child item containing the default values
@@ -1170,6 +1182,7 @@ def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname,
 	child_item.delivery_date = trans_item.get('delivery_date') or p_doc.delivery_date
 	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.uom = item.stock_uom
+	set_child_tax_template_and_map(item, child_item, p_doc)
 	child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
 	if not child_item.warehouse:
 		frappe.throw(_("Cannot find {} for item {}. Please set the same in Item Master or Stock Settings.")
@@ -1192,6 +1205,7 @@ def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docna
 	child_item.uom = item.stock_uom
 	child_item.base_rate = 1 # Initiallize value will update in parent validation
 	child_item.base_amount = 1 # Initiallize value will update in parent validation
+	set_child_tax_template_and_map(item, child_item, p_doc)
 	return child_item
 
 def check_and_delete_children(parent, data):
