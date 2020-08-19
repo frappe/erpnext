@@ -154,28 +154,30 @@ def get_batch_qty(batch_no=None, warehouse=None, item_code=None, posting_date=No
 	:param item_code: Optional - give qty for this item"""
 
 	out = 0
+	float_precision = cint(frappe.db.get_default("float_precision")) or 3
+
 	if batch_no and warehouse:
 		cond = ""
 		if posting_date and posting_time:
 			cond = " and timestamp(posting_date, posting_time) <= timestamp('{0}', '{1}')".format(posting_date,
 				posting_time)
 
-		out = float(frappe.db.sql("""select sum(actual_qty)
+		out = float(frappe.db.sql("""select sum(round(convert(actual_qty,double), {1}))
 			from `tabStock Ledger Entry`
-			where warehouse=%s and batch_no=%s {0}""".format(cond),
+			where warehouse=%s and batch_no=%s {0}""".format(cond, float_precision),
 			(warehouse, batch_no))[0][0] or 0)
 
 	if batch_no and not warehouse:
-		out = frappe.db.sql('''select warehouse, sum(actual_qty) as qty
+		out = frappe.db.sql("""select warehouse, sum(round(convert(actual_qty,double), {1})) as qty
 			from `tabStock Ledger Entry`
 			where batch_no=%s
-			group by warehouse''', batch_no, as_dict=1)
+			group by warehouse""".format(float_precision), batch_no, as_dict=1)
 
 	if not batch_no and item_code and warehouse:
-		out = frappe.db.sql('''select batch_no, sum(actual_qty) as qty
+		out = frappe.db.sql("""select batch_no, sum(round(convert(actual_qty,double), {1})) as qty
 			from `tabStock Ledger Entry`
 			where item_code = %s and warehouse=%s
-			group by batch_no''', (item_code, warehouse), as_dict=1)
+			group by batch_no""".format(float_precision), (item_code, warehouse), as_dict=1)
 
 	return out
 
