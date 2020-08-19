@@ -153,8 +153,8 @@ def _order(*args, **kwargs):
 
 	if event == "created":
 		status = order.get("status")
-		# if status != "on-hold" and status != "processing":
-		# 	frappe.log_error("order {} status {}".format(order.get("id"), order.get('status')), "WooCommerce order status filter")
+		if status == "failed":
+			frappe.log_error("order {} status {}".format(order.get("id"), order.get('status')), "WooCommerce order status filter")
 
 		# Get basic data from order
 		customer_id = order.get('customer_id')
