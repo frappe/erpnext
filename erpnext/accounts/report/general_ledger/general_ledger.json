@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 3,
  "is_standard": "Yes",
- "modified": "2020-08-13 12:15:08.525840",
+ "modified": "2020-08-19 11:32:09.153200",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "General Ledger",
@@ -22,6 +22,9 @@
   },
   {
    "role": "Auditor"
+  },
+  {
+   "role": "Accounts User"
   }
  ]
 }
