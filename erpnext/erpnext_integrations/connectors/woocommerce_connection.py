@@ -87,7 +87,7 @@ def log_integration_request(order=None, invoice_doc=None, status=None, data=None
 
 		cc = []
 		if site_name == "erpnext.rnlabs.com.au" or site_name == "erpnext.therahealth.com.au":
-			cc = ["Tiana@rnlabs.com.au", "testkits@rnlabs.com.au", "andy@fxmed.co.nz"]
+			cc = ["Support@rnlabs.com.au", "testkits@rnlabs.com.au", "andy@fxmed.co.nz"]
 
 		enqueue(
 			recipients=["Mitch@RNLabs.com.au"],
@@ -128,7 +128,7 @@ def order(*args, **kwargs):
 
 		# Send error messages to admins
 		enqueue(
-			recipients=["Mitch@RNLabs.com.au", "andy@fxmed.co.nz"],
+			recipients=["Mitch@RNLabs.com.au", "andy@fxmed.co.nz", "Support@rnlabs.com.au"],
 			subject="WooCommerce Order Error",
 			sender="Support@RNLabs.com.au",
 			content=error_message, method=frappe.sendmail,
