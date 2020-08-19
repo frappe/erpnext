@@ -1098,8 +1098,8 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 
 	get_items: function (item_code) {
 		// To search item as per the key enter
-
 		item_code = unescape(item_code);
+		item_code = item_code === "undefined" ? undefined : item_code;
 		var me = this;
 		this.item_serial_no = {};
 		this.item_batch_no = {};
