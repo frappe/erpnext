@@ -152,6 +152,10 @@ def _order(*args, **kwargs):
 		return "success"
 
 	if event == "created":
+		status = order.get("status")
+		# if status != "on-hold" and status != "processing":
+		# 	frappe.log_error("order {} status {}".format(order.get("id"), order.get('status')), "WooCommerce order status filter")
+
 		# Get basic data from order
 		customer_id = order.get('customer_id')
 		meta_data = order.get('meta_data')
@@ -210,7 +214,10 @@ def _order(*args, **kwargs):
 			# this is a user login, a practitioner
 			customer_code = ""
 			for meta in meta_data:
-				if meta["key"] == "user_practitioner":
+				if meta["key"] == "customer_code":
+					customer_code = meta["value"]
+					break
+				elif meta["key"] == "user_practitioner":
 					customer_code = meta["value"]
 					break
 
