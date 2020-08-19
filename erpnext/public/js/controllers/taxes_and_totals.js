@@ -223,8 +223,13 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	_get_tax_rate: function(tax, item_tax_map) {
-		return (Object.keys(item_tax_map).indexOf(tax.account_head) != -1) ?
-			flt(item_tax_map[tax.account_head], precision("rate", tax)) : tax.rate;
+		if(!$.isEmptyObject(item_tax_map)) {
+			return (Object.keys(item_tax_map).indexOf(tax.account_head) != -1) ?
+				flt(item_tax_map[tax.account_head], precision("rate", tax)) : tax.rate;
+		} else {
+			// If no item tax template against item dont calculate tax against it
+			return 0
+		}
 	},
 
 	calculate_net_total: function() {
@@ -595,7 +600,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			$.each(actual_taxes_dict, function(key, value) {
 				if (value) total_actual_tax += value;
 			});
-			
+
 			return flt(this.frm.doc.grand_total - total_actual_tax, precision("grand_total"));
 		}
 	},

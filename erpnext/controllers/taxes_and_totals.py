@@ -209,7 +209,7 @@ class calculate_taxes_and_totals(object):
 			elif tax.charge_type == "On Previous Row Total":
 				current_tax_fraction = (tax_rate / 100.0) * \
 					self.doc.get("taxes")[cint(tax.row_id) - 1].grand_total_fraction_for_current_item
-			
+
 			elif tax.charge_type == "On Item Quantity":
 				inclusive_tax_amount_per_qty = flt(tax_rate)
 
@@ -220,10 +220,14 @@ class calculate_taxes_and_totals(object):
 		return current_tax_fraction, inclusive_tax_amount_per_qty
 
 	def _get_tax_rate(self, tax, item_tax_map):
-		if tax.account_head in item_tax_map:
-			return flt(item_tax_map.get(tax.account_head), self.doc.precision("rate", tax))
+		if item_tax_map:
+			if tax.account_head in item_tax_map:
+				return flt(item_tax_map.get(tax.account_head), self.doc.precision("rate", tax))
+			else:
+				return tax.rate
 		else:
-			return tax.rate
+			# If no item tax template against item dont calculate tax against it
+			return 0
 
 	def calculate_net_total(self):
 		self.doc.total_qty = self.doc.total = self.doc.base_total = self.doc.net_total = self.doc.base_net_total = 0.0
