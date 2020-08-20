@@ -335,8 +335,14 @@ def make_opportunity_from_communication(communication, ignore_communication_link
 
 	opportunity_from = "Lead"
 
+	if frappe.db.get_default("Company"):
+		company = frappe.db.get_default("Company")
+	else:
+		company =  frappe.get_list("Company")[0].name
+
 	opportunity = frappe.get_doc({
 		"doctype": "Opportunity",
+		"company": company,
 		"opportunity_from": opportunity_from,
 		"party_name": lead
 	}).insert(ignore_permissions=True)
