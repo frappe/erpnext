@@ -2,11 +2,14 @@
 from __future__ import unicode_literals
 import frappe, base64, hashlib, hmac, json
 from frappe import _
+
 import pdb
 import requests
+
 from frappe.utils.background_jobs import enqueue
-from fxnmrnth import get_site_name
 from frappe.desk.doctype.tag.tag import DocTags
+from erpnext.stock.get_item_details import get_bin_details
+from fxnmrnth.integration_req_log import log_integration_request
 
 
 def verify_request():
@@ -25,120 +28,18 @@ def verify_request():
 			# print("sig" + sig.decode("utf-8"))
 			frappe.throw(_("Unverified Webhook Data"))
 
-def log_integration_request(order=None, invoice_doc=None, status=None, data=None, output=None, error=None, reference_doctype=None, reference_docname=None, woocommerce_settings=None):
-	doc_dict = frappe._dict(
-		doctype="Integration Request",
-		integration_type="Remote",
-		integration_request_service="WooCommerce",
-		status=status,
-		data=data,
-		output=output,
-		error=error,
-		reference_id_=reference_docname
-	)
-	integration_request_doc = frappe.get_doc(doc_dict)
-	integration_request_doc.insert(ignore_permissions=True)
-	frappe.db.commit()
-
-	if invoice_doc:
-		# send email as well to 4 people
-		order_link = order['_links']['self'][0]['href']
-		order_edit_link = order_link[0:order_link.find("wp-json")] + "wp-admin/post.php?post=" + order_link[order_link.find("orders/")+7:] + "&action=edit"
-
-		site_name = get_site_name()
-		erpnext_url = "https://{site_name}/desk#Form/Sales%20Invoice/{invoice_id}".format(site_name=site_name, invoice_id=invoice_doc.name)
-		draft_message = """
-			Hi *{name}*, \n
-			There is an order captured in ERPNext from online website - {company}.
-
-			## WooCommerce Order detail
-			- Online order number: {order_number}
-			- Order status: {status}
-			- Created date: {created_date}
-			- Total amount: ${total}
-			- Total tax: ${total_tax}
-			- Customer note: {customer_note}
-			- order URL: {url}
-
-			## ERPNext Sales Invoice brief 
-			- Purchase order : {po_no}
-			- Customer code : {customer_code}
-			- Title : {title}
-			- Total amount : ${base_grand_total} (Included taxes and charges: ${total_taxes_and_charges})
-			- Invoice URL: {erpnext_url}
-		""".format(
-			name="All",
-			company=woocommerce_settings.company,
-			order_number=order.get("id"),
-			status=order.get("status"),
-			created_date=order.get("date_created"),
-			total=order.get("total"),
-			total_tax=order.get("total_tax"),
-			customer_note=order.get("customer_note"),
-			url=order_edit_link,
-			customer_code= invoice_doc.customer,
-			title= invoice_doc.title,
-			base_grand_total= invoice_doc.base_grand_total,
-			total_taxes_and_charges= invoice_doc.total_taxes_and_charges,
-			sales_invoice_id= invoice_doc.name,
-			po_no= invoice_doc.po_no,
-			erpnext_url= erpnext_url,
-		)
-
-		cc = []
-		if site_name == "erpnext.rnlabs.com.au" or site_name == "erpnext.therahealth.com.au":
-			cc = ["Support@rnlabs.com.au", "testkits@rnlabs.com.au", "andy@fxmed.co.nz"]
-
-		enqueue(
-			recipients=["Mitch@RNLabs.com.au"],
-			subject="WooCommerce Order Draft",
-			sender="Support@RNLabs.com.au",
-			content=draft_message, method=frappe.sendmail,
-			queue='short', as_markdown=True,
-			expose_recipients="footer",
-			cc=cc
-		)
-
 
 @frappe.whitelist(allow_guest=True)
 def order(*args, **kwargs):
+	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
 	try:
-		response = _order(*args, **kwargs)
+		response = _order(woocommerce_settings, *args, **kwargs)
 		return response
 	except Exception:
 		order = json.loads(frappe.request.data)
-		orderID = order['id'];
-		orderLink = order['_links']['self'][0]['href']
-		order_link_url = orderLink[0:orderLink.find("wp-json")] + "wp-admin/post.php?post=" + orderLink[orderLink.find("orders/")+7:] + "&action=edit"
+		log_integration_request(order=order, invoice_doc=None, status="Failed", data=json.dumps(order, indent=4), error=frappe.get_traceback(), woocommerce_settings=woocommerce_settings)
 
-		# Compose error message
-		error_message = """Hi there, \n\nThere was an error pushing Order ID: <a href='{order_link_url}'> {orderID} </a>\n\n Nerd Stuff:\n\n {traceback} \n\n Request Data: \n {data})""".format(
-			order_link_url=order_link_url, orderID=str(orderID),
-			traceback="<pre>" + frappe.get_traceback() + "</pre>",
-			data=json.dumps(order, indent=4)
-		)
-
-		woocommerce_settings = frappe.get_doc("Woocommerce Settings")
-		# Create a intergration request
-		log_integration_request(order=order, invoice_doc=None,status="Failed", data=json.dumps(order, indent=4), output=order_link_url, error="<pre>" + frappe.get_traceback() + "</pre>", woocommerce_settings=woocommerce_settings)
-
-
-		# Write an error log
-		frappe.log_error(error_message, "WooCommerce Error")
-
-		# Send error messages to admins
-		enqueue(
-			recipients=["Mitch@RNLabs.com.au", "andy@fxmed.co.nz", "Support@rnlabs.com.au"],
-			subject="WooCommerce Order Error",
-			sender="Support@RNLabs.com.au",
-			content=error_message, method=frappe.sendmail,
-			queue='short', is_async=True, as_markdown=True,
-			expose_recipients="footer"
-		)
-		raise
-
-def _order(*args, **kwargs):
-	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
+def _order(woocommerce_settings, *args, **kwargs):
 	frappe.set_user(woocommerce_settings.creation_user)
 	if frappe.request and frappe.request.data:
 		# verify_request()
@@ -161,6 +62,13 @@ def _order(*args, **kwargs):
 		meta_data = order.get('meta_data')
 		billing = order.get('billing')
 
+		# Mapping of order type
+		order_type_mapping = {
+			"practitioner_order": "Practitioner Order",
+			"self": "Self Test",
+			"patient_order": "Patient Order",
+			"on-behalf": "Patient Order",
+		}
 
 		# link customer and address
 		patient_name = ""
@@ -213,13 +121,14 @@ def _order(*args, **kwargs):
 		else: # customer_id != 0
 			# this is a user login, a practitioner
 			customer_code = ""
+			pos_order_type = ""
 			for meta in meta_data:
 				if meta["key"] == "customer_code":
 					customer_code = meta["value"]
-					break
 				elif meta["key"] == "user_practitioner":
 					customer_code = meta["value"]
-					break
+				elif meta["key"] == "_pos_order_type":
+					pos_order_type = meta["value"]
 
 			if not customer_code:
 				frappe.throw("WP Customer id {} don't have a customer code in ERPNext!".format(customer_id))
@@ -227,26 +136,49 @@ def _order(*args, **kwargs):
 			if frappe.db.exists("Customer", customer_code):
 				customer_doc = frappe.get_doc("Customer", customer_code)
 				payment_category = customer_doc.payment_category
-				if woocommerce_settings.company == "RN Labs":
-					order_type = "Practitioner Order"
-				# we don't need to find the primary address as it will auto load when you open the draft invoice
+				accepts_backorders = customer_doc.accepts_backorders
 
-				# Create sales invoice
-				new_invoice = create_sales_invoice(order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=None, delivery_option=None)
+
+				if woocommerce_settings.company == "RN Labs":
+					# use pos_order_type to check if it's practitioner order or self test
+					order_type = order_type_mapping[pos_order_type]
+				
+					# we need to find the primary address
+
+
+					# branch off by different order type
+					if order_type == "Self Test":
+						# apply 20% of the discount
+
+						## maybe no shipping fee 
+						pass
+					elif order_type == "Practitioner Order":
+						# Item backorder validation
+						edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
+
+						if create_backorder_doc_flag == 1:
+							# throw error if the customer don't accept backorders
+							if not accepts_backorders:
+								frappe.throw("Customer {} doesn't accepts backorders!")
+							frappe.throw("This need to be developed further, to create a backorder instead of invoice")
+						else: # Create sales invoice
+							new_invoice = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=None, delivery_option=None)
 
 			else:
 				frappe.throw("Customer {} not exits!".format(customer_code))
 
 		# Create a intergration request
-		log_integration_request(order=order, invoice_doc=new_invoice, status="Completed", data=json.dumps(order), reference_doctype="Sales Invoice", reference_docname=new_invoice.name, woocommerce_settings=woocommerce_settings)
+		log_integration_request(order=order, invoice_doc=new_invoice, status="Completed", data=json.dumps(order), reference_docname=new_invoice.name, woocommerce_settings=woocommerce_settings)
 
 
 		return "Sales invoice: {} created!".format(new_invoice.name)
 
-def create_sales_invoice(order, customer_code, payment_category,  woocommerce_settings, order_type=None, temp_address=None, delivery_option=None):
+def create_sales_invoice(edited_line_items, order, customer_code, payment_category,  woocommerce_settings, order_type=None, temp_address=None, delivery_option=None):
 	#Set Basic Info
 	date_created = order.get("date_created").split("T")[0]
 	customer_note = order.get('customer_note')
+	tax_rate = frappe.db.get_value('Account', woocommerce_settings.tax_account, "tax_rate")/100
+
 	invoice_dict = {
 		"doctype": "Sales Invoice",
 		"customer": customer_code,
@@ -267,82 +199,151 @@ def create_sales_invoice(order, customer_code, payment_category,  woocommerce_se
 	
 	if delivery_option:
 		invoice_dict['customer_shipping_instructions'] = delivery_option
+
+	# create frappe doc for invoice
 	invoice_doc = frappe.get_doc(invoice_dict)
 
 	# Add Items
-	set_items_in_sales_invoice(order, customer_code, invoice_doc, woocommerce_settings)
+	set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, woocommerce_settings, tax_rate)
 
 	# Save 
 	invoice_doc.flags.ignore_mandatory = True
 	invoice_doc.insert()
+
+	# Add shipping fee according to the total 
+	if invoice_doc.total < 150:
+		# use default $10 as shipping fee need to correct in the future
+		addTaxDetails(invoice_doc, 10, "Shipping Total", woocommerce_settings.f_n_f_account)
+		addTaxDetails(invoice_doc, 10 * tax_rate, "Shipping Tax", woocommerce_settings.tax_account)
+
+
+	if woocommerce_settings.company == "RN Labs":
+		# adding handling fee
+		if invoice_doc.order_type == "Patient Order" or invoice_doc.order_type == "Self Test":
+			invoice_doc.append("items",{
+				"item_code": "HAND-FEE",
+				"item_name": "Handling Fee",
+				"description": "Handling Fee",
+				"uom": "Unit",
+				"qty": 1,
+				"rate": 20,
+				"warehouse": woocommerce_settings.warehouse
+			})
+			addTaxDetails(invoice_doc, 20*tax_rate, "Handling Fee tax", woocommerce_settings.tax_account)
+
+	invoice_doc.save()
+
 	DocTags("Sales Invoice").add(invoice_doc.name, "WooCommerce Order")
 
 	return invoice_doc
 	
 
-def set_items_in_sales_invoice(order, customer_code, invoice_doc, woocommerce_settings):
-	company_abbr = frappe.db.get_value('Company', woocommerce_settings.company, 'abbr')
-	sku = ""
-	for item in order.get("line_items"):
-		sku = item.get("sku")
-		if frappe.db.exists("Item", {"name": sku}):
-			foundItem = frappe.get_doc("Item", {"name": sku})
-		else:
-			frappe.throw("Item: {} is not found!").format(sku)
-		if frappe.db.get_value("Customer", customer_code, "default_price_list"):
-			price_list = frappe.db.get_value("Customer", customer_code, "default_price_list")
-		else:
-			frappe.throw("Default price list for customer: {} is not found!").format(customer_code)
-
-		# consider we could have multiple item price for the same item 
-		rate_list = frappe.db.get_list('Item Price', 
-			filters=[
-				['selling', '=', 1],
-				['buying', '=', 0],
-				['price_list', '=', price_list],
-				['item_code', '=', sku],
-				['valid_upto', 'is', 'not set']
-			], fields=['price_list_rate']
-		)
-		if rate_list:
-			rate = rate_list[0]
-		else:
-			frappe.throw("Item Price for {} - {} is not found!".format(sku, price_list))
-		invoice_doc.append("items",{
-			"item_code": foundItem.item_code,
-			"item_name": foundItem.item_name,
-			"description": foundItem.item_name,
+def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, woocommerce_settings, tax_rate):
+	"""
+		validated_item = {
+			"item_code": found_item.item_code,
+			"item_name": found_item.item_name,
+			"description": found_item.item_name,
+			"item_group": found_item.item_group,
 			"uom": woocommerce_settings.uom or _("Unit"),
 			"qty": item.get("quantity"),
 			"rate": rate['price_list_rate'],
-			"warehouse": woocommerce_settings.warehouse or _("Stores - {0}").format(company_abbr)
-		})
+			"warehouse": woocommerce_settings.warehouse,
+			"is_stock_item": found_item.is_stock_item
+		}
+	"""
+	# Proceed to invoice
+	for item in edited_line_items:
+		if item["is_stock_item"] == 1: # only check if it maintains stock
+			if item["qty"] > item["actual_qty"]:
+				supplier = frappe.db.get_value("Item Default",{
+					"parent": item['item_code'], 
+					"company": woocommerce_settings.company}, "default_supplier")
+				invoice_doc.append("backorder_items", {
+					"item_code": item['item_code'], 
+					"supplier": supplier,
+					"qty": item["qty"],
+					"actual_qty":item["actual_qty"]
+				})
+			else:
+				invoice_doc.append("items", item)
+				if item["item_group"] != "Tests":
+					item_tax = (item['rate'] * tax_rate) * item["qty"]
+					desc = "{} tax".format(item["item_code"])
+					addTaxDetails(invoice_doc, item_tax, desc, woocommerce_settings.tax_account)
+		else: # item["is_stock_item"] == 0 
+			invoice_doc.append("items", item)
+			if item["item_group"] != "Tests":
+				item_tax = (item['rate'] * tax_rate) * item["qty"]
+				desc = "{} tax".format(item["item_code"])
+				addTaxDetails(invoice_doc, item_tax, desc, woocommerce_settings.tax_account)
 
-		if foundItem.item_group != "Tests":
-			itemTax = (rate['price_list_rate']*0.1) * item.get("quantity")
-			addTaxDetails(invoice_doc, itemTax, "Ordered Item tax", woocommerce_settings.tax_account)
 
-	# adding handling fee
-	if invoice_doc.order_type == "Patient Order":
-		invoice_doc.append("items",{
-			"item_code": "HAND-FEE",
-			"item_name": "Handling Fee",
-			"description": "Handling Fee",
-			"uom": "Unit",
-			"qty": 1,
-			"rate": 20,
-			"warehouse": woocommerce_settings.warehouse
-		})
-		addTaxDetails(invoice_doc, 2, "Handling Fee tax", woocommerce_settings.tax_account)
+def backorder_validation(line_items, customer_code, woocommerce_settings):
+	new_line_items = []
+	backorder_item_num = 0
+	for item in line_items:
+		sku = item.get("sku")
 
-	if float(order.get("shipping_total")) > 0:
-		addTaxDetails(invoice_doc, order.get("shipping_total"), "Shipping Total", woocommerce_settings.f_n_f_account)
-	if float(order.get("shipping_tax")) > 0:
-		addTaxDetails(invoice_doc, order.get("shipping_tax"), "Shipping Tax", woocommerce_settings.tax_account)
+		# check sku
+		if not sku:
+			frappe.throw("SKU is missing!")
+		
+		# check if the item with the sku exist
+		if frappe.db.exists("Item", {"name": sku}):
+			found_item = frappe.get_doc("Item", {"name": sku})
+		else:
+			frappe.throw("Item: {} is not found!").format(sku)
+
+		# check if the customer has the default_price_list
+		if frappe.db.get_value("Customer", customer_code, "default_price_list"):
+			price_list = frappe.db.get_value("Customer", customer_code, "default_price_list")
+			# consider we could have multiple item price for the same item 
+			rate_list = frappe.db.get_list('Item Price', 
+				filters=[
+					['selling', '=', 1],
+					['buying', '=', 0],
+					['price_list', '=', price_list],
+					['item_code', '=', sku],
+					['valid_upto', 'is', 'not set']
+				], fields=['price_list_rate']
+			)
+			if rate_list:
+				rate = rate_list[0]
+			else:
+				frappe.throw("Item Price for {} - {} is not found!".format(sku, price_list))
+		else:
+			frappe.throw("Default price list for customer: {} is not found!").format(customer_code)
+
+		validated_item = {
+			"item_code": found_item.item_code,
+			"item_name": found_item.item_name,
+			"description": found_item.item_name,
+			"item_group": found_item.item_group,
+			"uom": woocommerce_settings.uom or _("Unit"),
+			"qty": item.get("quantity"),
+			"rate": rate['price_list_rate'],
+			"warehouse": woocommerce_settings.warehouse,
+			"is_stock_item": found_item.is_stock_item
+		}
+
+		# check if item is out of stock
+		if found_item.is_stock_item == 1:
+			validated_item['actual_qty'] = get_bin_details(found_item.item_code, woocommerce_settings.warehouse)['actual_qty']
+			if validated_item['actual_qty'] < validated_item["qty"]:
+				backorder_item_num += 1
+
+		new_line_items.append(validated_item)
+
+	# check if all the items need to be on back order
+	create_backorder_doc_flag = 0
+	if backorder_item_num == len(new_line_items):
+		create_backorder_doc_flag = 1
+	return new_line_items, create_backorder_doc_flag
 
 
-def addTaxDetails(salesInvoice, price, desc, tax_account_head):
-	salesInvoice.append("taxes", {
+def addTaxDetails(sales_invoice, price, desc, tax_account_head):
+	sales_invoice.append("taxes", {
 		"charge_type":"Actual",
 		"account_head": tax_account_head,
 		"tax_amount": price,
