@@ -348,9 +348,9 @@ erpnext.SerialNoBatchSelector = Class.extend({
 									return row.on_grid_fields_dict.batch_no.get_value();
 								}
 							});
-							if (selected_batches.includes(val)) {
+							if (selected_batches.includes(batch_no)) {
 								this.set_value("");
-								frappe.throw(__(`Batch ${val} already selected.`));
+								frappe.throw(__(`Batch ${batch_no} already selected.`));
 								return;
 							}
 
