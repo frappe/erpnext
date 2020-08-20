@@ -497,24 +497,18 @@ def warehouse_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions, bin_conditions = [], []
 	filter_dict = get_doctype_wise_filters(filters)
 
-	sub_query = """ select round(`tabBin`.actual_qty, 2) from `tabBin`
-		where `tabBin`.warehouse = `tabWarehouse`.name
-		{bin_conditions} """.format(
-		bin_conditions=get_filters_cond(doctype, filter_dict.get("Bin"),
-			bin_conditions, ignore_permissions=True))
-
 	query = """select `tabWarehouse`.name,
-		CONCAT_WS(" : ", "Actual Qty", ifnull( ({sub_query}), 0) ) as actual_qty
-		from `tabWarehouse`
+		CONCAT_WS(" : ", "Actual Qty", ifnull(round(`tabBin`.actual_qty, 2), 0 )) actual_qty
+		from `tabWarehouse` left join `tabBin`
+		on `tabBin`.warehouse = `tabWarehouse`.name {bin_conditions}
 		where
-		   `tabWarehouse`.`{key}` like {txt}
+			`tabWarehouse`.`{key}` like {txt}
 			{fcond} {mcond}
-		order by
-			`tabWarehouse`.name desc
+		order by ifnull(`tabBin`.actual_qty, 0) desc
 		limit
 			{start}, {page_len}
 		""".format(
-			sub_query=sub_query,
+			bin_conditions=get_filters_cond(doctype, filter_dict.get("Bin"),bin_conditions, ignore_permissions=True),
 			key=searchfield,
 			fcond=get_filters_cond(doctype, filter_dict.get("Warehouse"), conditions),
 			mcond=get_match_cond(doctype),

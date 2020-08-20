@@ -21,7 +21,7 @@ from six import iteritems
 class POSInvoice(SalesInvoice):
 	def __init__(self, *args, **kwargs):
 		super(POSInvoice, self).__init__(*args, **kwargs)
-	
+
 	def validate(self):
 		if not cint(self.is_pos):
 			frappe.throw(_("POS Invoice should have {} field checked.").format(frappe.bold("Include Payment")))
@@ -58,7 +58,7 @@ class POSInvoice(SalesInvoice):
 		if self.redeem_loyalty_points and self.loyalty_points:
 			self.apply_loyalty_points()
 		self.set_status(update=True)
-	
+
 	def on_cancel(self):
 		# run on cancel method of selling controller
 		super(SalesInvoice, self).on_cancel()
@@ -68,10 +68,10 @@ class POSInvoice(SalesInvoice):
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
 			against_psi_doc.delete_loyalty_point_entry()
 			against_psi_doc.make_loyalty_point_entry()
-		
+
 	def validate_stock_availablility(self):
 		allow_negative_stock = frappe.db.get_value('Stock Settings', None, 'allow_negative_stock')
-		
+
 		for d in self.get('items'):
 			if d.serial_no:
 				filters = {
@@ -89,11 +89,11 @@ class POSInvoice(SalesInvoice):
 				for s in serial_nos:
 					if s in reserved_serial_nos:
 						invalid_serial_nos.append(s)
-				
+
 				if len(invalid_serial_nos):
 					multiple_nos = 's' if len(invalid_serial_nos) > 1 else ''
 					frappe.throw(_("Row #{}: Serial No{}. {} has already been transacted into another POS Invoice. \
-						Please select valid serial no.".format(d.idx, multiple_nos, 
+						Please select valid serial no.".format(d.idx, multiple_nos,
 						frappe.bold(', '.join(invalid_serial_nos)))), title=_("Not Available"))
 			else:
 				if allow_negative_stock:
@@ -105,9 +105,9 @@ class POSInvoice(SalesInvoice):
 						.format(d.idx, frappe.bold(d.item_code), frappe.bold(d.warehouse))), title=_("Not Available"))
 				elif flt(available_stock) < flt(d.qty):
 					frappe.msgprint(_('Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. \
-						Available quantity {}.'.format(d.idx, frappe.bold(d.item_code), 
+						Available quantity {}.'.format(d.idx, frappe.bold(d.item_code),
 						frappe.bold(d.warehouse), frappe.bold(d.qty))), title=_("Not Available"))
-	
+
 	def validate_serialised_or_batched_item(self):
 		for d in self.get("items"):
 			serialized = d.get("has_serial_no")
@@ -125,7 +125,7 @@ class POSInvoice(SalesInvoice):
 			if batched and no_batch_selected:
 				frappe.throw(_('Row #{}: No batch selected against item: {}. Please select a batch or remove it to complete transaction.'
 						.format(d.idx, frappe.bold(d.item_code))), title=_("Invalid Item"))
-	
+
 	def validate_return_items(self):
 		if not self.get("is_return"): return
 
@@ -158,7 +158,7 @@ class POSInvoice(SalesInvoice):
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be positive").format(entry.idx))
 			if self.is_return and entry.amount > 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be negative").format(entry.idx))
-	
+
 	def validate_pos_return(self):
 		if self.is_pos and self.is_return:
 			total_amount_in_payments = 0
@@ -167,12 +167,12 @@ class POSInvoice(SalesInvoice):
 			invoice_total = self.rounded_total or self.grand_total
 			if total_amount_in_payments < invoice_total:
 				frappe.throw(_("Total payments amount can't be greater than {}".format(-invoice_total)))
-	
+
 	def validate_loyalty_transaction(self):
 		if self.redeem_loyalty_points and (not self.loyalty_redemption_account or not self.loyalty_redemption_cost_center):
 			expense_account, cost_center = frappe.db.get_value('Loyalty Program', self.loyalty_program, ["expense_account", "cost_center"])
 			if not self.loyalty_redemption_account:
-				self.loyalty_redemption_account = expense_account 
+				self.loyalty_redemption_account = expense_account
 			if not self.loyalty_redemption_cost_center:
 				self.loyalty_redemption_cost_center = cost_center
 
@@ -212,7 +212,7 @@ class POSInvoice(SalesInvoice):
 
 		if update:
 			self.db_set('status', self.status, update_modified = update_modified)
-	
+
 	def set_pos_fields(self, for_validate=False):
 		"""Set retail related fields from POS Profiles"""
 		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
@@ -315,25 +315,25 @@ class POSInvoice(SalesInvoice):
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):
-	latest_sle = frappe.db.sql("""select qty_after_transaction 
-		from `tabStock Ledger Entry` 
+	latest_sle = frappe.db.sql("""select qty_after_transaction
+		from `tabStock Ledger Entry`
 		where item_code = %s and warehouse = %s
 		order by posting_date desc, posting_time desc
 		limit 1""", (item_code, warehouse), as_dict=1)
-	
+
 	pos_sales_qty = frappe.db.sql("""select sum(p_item.qty) as qty
 		from `tabPOS Invoice` p, `tabPOS Invoice Item` p_item
-		where p.name = p_item.parent 
-		and p.consolidated_invoice is NULL 
+		where p.name = p_item.parent
+		and p.consolidated_invoice is NULL
 		and p.docstatus = 1
 		and p_item.docstatus = 1
 		and p_item.item_code = %s
 		and p_item.warehouse = %s
 		""", (item_code, warehouse), as_dict=1)
-	
+
 	sle_qty = latest_sle[0].qty_after_transaction or 0 if latest_sle else 0
 	pos_sales_qty = pos_sales_qty[0].qty or 0 if pos_sales_qty else 0
-	
+
 	if sle_qty and pos_sales_qty and sle_qty > pos_sales_qty:
 		return sle_qty - pos_sales_qty
 	else:
@@ -360,14 +360,14 @@ def make_merge_log(invoices):
 	merge_log = frappe.new_doc("POS Invoice Merge Log")
 	merge_log.posting_date = getdate(nowdate())
 	for inv in invoices:
-		inv_data = frappe.db.get_values("POS Invoice", inv.get('name'), 
+		inv_data = frappe.db.get_values("POS Invoice", inv.get('name'),
 			["customer", "posting_date", "grand_total"], as_dict=1)[0]
 		merge_log.customer = inv_data.customer
 		merge_log.append("pos_invoices", {
 			'pos_invoice': inv.get('name'),
 			'customer': inv_data.customer,
 			'posting_date': inv_data.posting_date,
-			'grand_total': inv_data.grand_total 
+			'grand_total': inv_data.grand_total
 		})
 
 	if merge_log.get('pos_invoices'):
