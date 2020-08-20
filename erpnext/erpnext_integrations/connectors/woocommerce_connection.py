@@ -114,7 +114,12 @@ def _order(woocommerce_settings, *args, **kwargs):
 					"temporary_delivery_address_line_4": phone,
 					"temporary_delivery_address_line_5": email,
 				}
-				new_invoice = create_sales_invoice(order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option)
+
+				# We don't need to use the backorder flag for test order
+				edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
+
+
+				new_invoice = create_sales_invoice(edited_line_items, order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option)
 			else:
 				frappe.throw("Customer {} not exits!".format(customer_code))
 
