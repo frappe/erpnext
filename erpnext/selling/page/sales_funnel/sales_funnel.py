@@ -23,10 +23,6 @@ def get_funnel_data(from_date, to_date, company):
 		where (date(`modified`) between %s and %s)
 		and status != "Do Not Contact" and company=%s""", (from_date, to_date, company))[0][0]
 
-	active_leads += frappe.db.sql("""select count(distinct contact.name) from `tabContact` contact
-		left join `tabDynamic Link` dl on (dl.parent=contact.name) where dl.link_doctype='Customer'
-		and (date(contact.modified) between %s and %s) and status != "Passive" """, (from_date, to_date))[0][0]
-
 	opportunities = frappe.db.sql("""select count(*) from `tabOpportunity`
 		where (date(`creation`) between %s and %s)
 		and status != "Lost" and company=%s""", (from_date, to_date, company))[0][0]
@@ -38,11 +34,16 @@ def get_funnel_data(from_date, to_date, company):
 	sales_orders = frappe.db.sql("""select count(*) from `tabSales Order`
 		where docstatus = 1 and (date(`creation`) between %s and %s) and company=%s""", (from_date, to_date, company))[0][0]
 
+	converted = frappe.db.sql("""select count(distinct contact.name) from `tabContact` contact
+		left join `tabDynamic Link` dl on (dl.parent=contact.name) where dl.link_doctype='Customer'
+		and (date(contact.creation) between %s and %s) and status != "Passive" """, (from_date, to_date))[0][0]
+
 	return [
-		{ "title": _("Active Leads / Customers"), "value": active_leads, "color": "#B03B46" },
+		{ "title": _("Active Leads"), "value": active_leads, "color": "#B03B46" },
 		{ "title": _("Opportunities"), "value": opportunities, "color": "#F09C00" },
 		{ "title": _("Quotations"), "value": quotations, "color": "#006685" },
-		{ "title": _("Sales Orders"), "value": sales_orders, "color": "#00AD65" }
+		{ "title": _("Sales Orders"), "value": sales_orders, "color": "#00AD65" },
+		{ "title": _("Converted"), "value": converted, "color": "#228B22" },
 	]
 
 @frappe.whitelist()
