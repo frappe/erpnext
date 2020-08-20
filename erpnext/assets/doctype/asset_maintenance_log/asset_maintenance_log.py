@@ -41,6 +41,7 @@ class AssetMaintenanceLog(Document):
 		asset_maintenance_doc.save()
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_maintenance_tasks(doctype, txt, searchfield, start, page_len, filters):
 	asset_maintenance_tasks = frappe.db.get_values('Asset Maintenance Task', {'parent':filters.get("asset_maintenance")}, 'maintenance_task')
 	return asset_maintenance_tasks
