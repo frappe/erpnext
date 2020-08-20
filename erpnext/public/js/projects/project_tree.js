@@ -71,8 +71,14 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 
 		if (frappe.user.has_role('System Manager')) {
 			this.menu_items.push({
-				label: __('Settings'),
-				action: () => this.show_list_settings(),
+				label: __('Project Settings'),
+				action: () => this.show_list_settings("Project", this.listview_settings),
+				standard: true
+			});
+
+			this.menu_items.push({
+				label: __('Task Settings'),
+				action: () => this.show_list_settings("Task", this.task_listview_settings),
 				standard: true
 			});
 		}
@@ -90,23 +96,19 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 		});
 	}
 
-	show_list_settings() {
-		frappe.model.with_doctype('Task', () => {
+	show_list_settings(doctype, settings) {
+		frappe.model.with_doctype(doctype, () => {
 			new frappe.views.ListSettings({
 				listview: this,
-				doctype: 'Task',
-				settings: this.task_listview_settings,
-				meta: frappe.get_meta('Task')
+				doctype: doctype,
+				settings: settings,
+				meta: frappe.get_meta(doctype)
 			});
 		});
 	}
 
-	refresh_columns(meta, list_view_settings) {
-		this.task_meta = meta;
-		this.task_listview_settings = list_view_settings;
-		this.task_columns = this.setup_columns("Task", this.task_meta, this.task_listview_settings);
-		this.get_task_list();
-
+	refresh_columns() {
+		this.show();
 	}
 
 	set_title(title) {
@@ -255,7 +257,7 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 			total_fields = 8;
 		}
 
-		return columns.slice(0, total_fields);
+		return columns.slice(0, list_view_settings.total_fields || total_fields);
 	}
 
 	reorder_listview_fields(columns, fields) {
