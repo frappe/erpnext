@@ -16,14 +16,16 @@ from six import string_types
 
 class LoanApplication(Document):
 	def validate(self):
-
-		validate_repayment_method(self.repayment_method, self.loan_amount, self.repayment_amount,
-			self.repayment_periods, self.is_term_loan)
-
-		self.validate_loan_type()
 		self.set_pledge_amount()
 		self.set_loan_amount()
 		self.validate_loan_amount()
+
+		if self.is_term_loan:
+			validate_repayment_method(self.repayment_method, self.loan_amount, self.repayment_amount,
+				self.repayment_periods, self.is_term_loan)
+
+		self.validate_loan_type()
+
 		self.get_repayment_details()
 		self.check_sanctioned_amount_limit()
 
@@ -106,7 +108,7 @@ class LoanApplication(Document):
 		if self.is_secured_loan and self.proposed_pledges:
 			self.maximum_loan_amount = 0
 			for security in self.proposed_pledges:
-				self.maximum_loan_amount += security.post_haircut_amount
+				self.maximum_loan_amount += flt(security.post_haircut_amount)
 
 		if not self.loan_amount and self.is_secured_loan and self.proposed_pledges:
 			self.loan_amount = self.maximum_loan_amount
@@ -133,10 +135,7 @@ def create_loan(source_name, target_doc=None, submit=0):
 			"validation": {
 				"docstatus": ["=", 1]
 			},
-			"postprocess": update_accounts,
-			"field_no_map": [
-				"is_secured_loan"
-			]
+			"postprocess": update_accounts
 		}
 	}, target_doc)
 
