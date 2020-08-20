@@ -70,7 +70,12 @@ frappe.ui.form.on("Communication", {
 			freeze: true,
 			callback: (r) => {
 				if(r.message) {
-					frm.reload_doc()
+					frm.reload_doc();
+					frappe.show_alert({
+						message: __("Opportunity {0} created",
+							['<a href="#Form/Opportunity/'+r.message+'">' + r.message + '</a>']),
+						indicator: 'green'
+					});
 				}
 			}
 		})
