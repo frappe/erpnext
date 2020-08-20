@@ -7,7 +7,7 @@ frappe.ui.form.on("Communication", {
 	},
 
 	setup_custom_buttons: (frm) => {
-		let confirm_msg = "Are you sure you want to create {0} from this email ?";
+		let confirm_msg = "Are you sure you want to create {0} from this email?";
 		if(frm.doc.reference_doctype !== "Issue") {
 			frm.add_custom_button(__("Issue"), () => {
 				frappe.confirm(__(confirm_msg, [__("Issue")]), () => {
