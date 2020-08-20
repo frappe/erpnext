@@ -344,7 +344,7 @@ class Item(WebsiteGenerator):
 			if variant:
 				context.variant = frappe.get_doc("Item", variant)
 
-				for fieldname in ("website_image", "web_long_description", "description",
+				for fieldname in ("website_image", "website_image_alt", "web_long_description", "description",
 										"website_specifications"):
 					if context.variant.get(fieldname):
 						value = context.variant.get(fieldname)

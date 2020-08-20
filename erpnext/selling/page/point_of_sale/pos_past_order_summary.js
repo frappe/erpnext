@@ -86,7 +86,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
         this.$summary_container.append(
             `<div class="summary-btns flex summary-btns justify-between w-full f-shrink-0"></div>`
         )
-        
+
         this.$summary_btns = this.$summary_container.find('.summary-btns');
     }
 
@@ -110,7 +110,10 @@ erpnext.PointOfSale.PastOrderSummary = class {
                 {fieldname:'print', fieldtype:'Data', label:'Print Preview'}
             ],
             primary_action: () => {
-                this.events.get_frm().print_preview.printit(true);
+                const frm = this.events.get_frm();
+                frm.doc = this.doc;
+                frm.print_preview.lang_code = frm.doc.language;
+                frm.print_preview.printit(true);
             },
             primary_action_label: __('Print'),
         });
@@ -174,7 +177,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
                     <div class="flex">
                         <div class="text-md-0 text-dark-grey text-bold w-fit">Tax Charges</div>
                         <div class="flex ml-6 text-dark-grey">
-                        ${	
+                        ${
                             doc.taxes.map((t, i) => {
                                 let margin_left = '';
                                 if (i !== 0) margin_left = 'ml-2';
@@ -271,6 +274,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
             // this.print_dialog.show();
             const frm = this.events.get_frm();
             frm.doc = this.doc;
+            frm.print_preview.lang_code = frm.doc.language;
             frm.print_preview.printit(true);
         });
     }
@@ -284,9 +288,9 @@ erpnext.PointOfSale.PastOrderSummary = class {
             this.$summary_container.find('.print-btn').click();
         });
     }
-    
+
     toggle_component(show) {
-        show ? 
+        show ?
         this.$component.removeClass('d-none') :
         this.$component.addClass('d-none');
     }
@@ -372,9 +376,9 @@ erpnext.PointOfSale.PastOrderSummary = class {
     }
 
     get_condition_btn_map(after_submission) {
-        if (after_submission) 
+        if (after_submission)
             return [{ condition: true, visible_btns: ['Print Receipt', 'Email Receipt', 'New Order'] }];
-        
+
         return [
             { condition: this.doc.docstatus === 0, visible_btns: ['Edit Order'] },
             { condition: !this.doc.is_return && this.doc.docstatus === 1, visible_btns: ['Print Receipt', 'Email Receipt', 'Return']},
@@ -384,7 +388,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
     load_summary_of(doc, after_submission=false) {
         this.$summary_wrapper.removeClass("d-none");
-        
+
         after_submission ?
             this.switch_to_post_submit_summary() : this.switch_to_recent_invoice_summary();
 
