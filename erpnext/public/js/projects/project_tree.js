@@ -257,7 +257,11 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 			total_fields = 8;
 		}
 
-		return columns.slice(0, list_view_settings.total_fields || total_fields);
+		if (list_view_settings && list_view_settings.total_fields) {
+			total_fields = parseInt(list_view_settings.total_fields);
+		}
+
+		return columns.slice(0, total_fields);
 	}
 
 	reorder_listview_fields(columns, fields) {
