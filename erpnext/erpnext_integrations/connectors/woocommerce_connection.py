@@ -152,12 +152,24 @@ def _order(woocommerce_settings, *args, **kwargs):
 
 
 					# branch off by different order type
+					"""
+						order_type_mapping = {
+							"practitioner_order": "Practitioner Order",
+							"self": "Self Test",
+							"patient_order": "Patient Order",
+							"on-behalf": "Patient Order",
+						}
+					"""
 					if order_type == "Self Test":
 						# apply 20% of the discount
+						self_test_discount = 20
+						edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings, discount=self_test_discount)
 
+
+						new_invoice = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type)
 						## maybe no shipping fee 
 						pass
-					elif order_type == "Practitioner Order":
+					elif order_type == "Practitioner Order" or order_type == "Patient Order":
 						# Item backorder validation
 						edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
 
@@ -167,11 +179,12 @@ def _order(woocommerce_settings, *args, **kwargs):
 								frappe.throw("Customer {} doesn't accepts backorders!")
 							frappe.throw("This need to be developed further, to create a backorder instead of invoice")
 						else: # Create sales invoice
-							new_invoice = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=None, delivery_option=None)
+							new_invoice = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type)
 
 			else:
 				frappe.throw("Customer {} not exits!".format(customer_code))
 
+		# pdb.set_trace()
 		# Create a intergration request
 		log_integration_request(order=order, invoice_doc=new_invoice, status="Completed", data=json.dumps(order), reference_docname=new_invoice.name, woocommerce_settings=woocommerce_settings)
 
@@ -284,7 +297,7 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
 				addTaxDetails(invoice_doc, item_tax, desc, woocommerce_settings.tax_account)
 
 
-def backorder_validation(line_items, customer_code, woocommerce_settings):
+def backorder_validation(line_items, customer_code, woocommerce_settings, discount=None):
 	new_line_items = []
 	backorder_item_num = 0
 	for item in line_items:
@@ -331,6 +344,13 @@ def backorder_validation(line_items, customer_code, woocommerce_settings):
 			"warehouse": woocommerce_settings.warehouse,
 			"is_stock_item": found_item.is_stock_item
 		}
+
+		# add discount
+		if discount: # unit is %, so discount would be 20, 30 insetad of 0.2, 0.3
+			validated_item["discount_percentage"] = discount
+			validated_item["discount_amount"] = discount/100 * validated_item["rate"]
+			validated_item["rate"] = validated_item["rate"] - validated_item["discount_amount"]
+			validated_item["ignore_pricing_rules"] = 1
 
 		# check if item is out of stock
 		if found_item.is_stock_item == 1:
