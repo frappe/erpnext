@@ -321,7 +321,7 @@ def auto_close_opportunity():
 		doc.save()
 
 @frappe.whitelist()
-def make_opportunity_from_communication(communication, ignore_communication_links=False):
+def make_opportunity_from_communication(communication, company, ignore_communication_links=False):
 	from erpnext.crm.doctype.lead.lead import make_lead_from_communication
 	doc = frappe.get_doc("Communication", communication)
 
@@ -333,6 +333,7 @@ def make_opportunity_from_communication(communication, ignore_communication_link
 
 	opportunity = frappe.get_doc({
 		"doctype": "Opportunity",
+		"company": company,
 		"opportunity_from": opportunity_from,
 		"party_name": lead
 	}).insert(ignore_permissions=True)
