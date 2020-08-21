@@ -143,7 +143,8 @@
   "dimension_col_break",
   "section_break_54",
   "page_break",
-  "item_tax_rate"
+  "item_tax_rate",
+  "item_tax_detail"
  ],
  "fields": [
   {
@@ -1191,11 +1192,19 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_tax_detail",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Item Tax Detail",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:50:30.509541",
+ "modified": "2020-08-21 18:40:24.355680",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

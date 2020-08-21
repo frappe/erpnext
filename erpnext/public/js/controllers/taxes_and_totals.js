@@ -193,6 +193,10 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				frappe.model.round_floats_in(tax, ["rate"]);
 			}
 		});
+
+		$.each(this.frm.doc["items"] || [], function(i, item) {
+			item.item_tax_detail = {}
+		});
 	},
 
 	determine_exclusive_rate: function() {
@@ -528,6 +532,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		// store tax breakup for each item
 		item.item_taxes_and_charges += current_tax_amount;
 
+		if (!item.item_tax_detail.hasOwnProperty(tax.name)) {
+			item.item_tax_detail[tax.name] = 0;
+		}
+		item.item_tax_detail[tax.name] += current_tax_amount;
+
 		let tax_detail = tax.item_wise_tax_detail;
 		let key = item.item_code || item.item_name;
 
@@ -681,6 +690,10 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					delete item["item_tax_amount"];
 				});
 			}
+
+			$.each(this.frm.doc["items"] || [], function(i, item) {
+				item.item_tax_detail = JSON.stringify(item.item_tax_detail);
+			});
 		}
 
 		if(this.frm.doc["taxes"] && this.frm.doc["taxes"].length) {

@@ -110,6 +110,7 @@
   "material_request_item",
   "request_for_quotation_item",
   "item_tax_rate",
+  "item_tax_detail",
   "section_break_44",
   "page_break"
  ],
@@ -906,12 +907,20 @@
   {
    "fieldname": "column_break_89",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_tax_detail",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Item Tax Detail",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-04-07 18:35:51.175947",
+ "modified": "2020-08-21 18:40:24.355680",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation Item",

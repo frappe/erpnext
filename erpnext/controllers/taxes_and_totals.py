@@ -190,6 +190,9 @@ class calculate_taxes_and_totals(object):
 			else:
 				self.doc.round_floats_in(tax, ["rate"])
 
+		for item in self.doc.get("items"):
+			item.item_tax_detail = {}
+
 	def determine_exclusive_rate(self):
 		for item in self.doc.get("items"):
 			item.cumulated_tax_fraction = 0
@@ -470,6 +473,8 @@ class calculate_taxes_and_totals(object):
 	def set_item_wise_tax(self, item, tax, tax_rate, current_tax_amount):
 		# store tax breakup for each item
 		item.item_taxes_and_charges += current_tax_amount
+		item.item_tax_detail.setdefault(tax.name, 0)
+		item.item_tax_detail[tax.name] += current_tax_amount
 
 		key = item.item_code or item.item_name
 		item_wise_tax_amount = current_tax_amount*self.doc.conversion_rate
@@ -577,6 +582,8 @@ class calculate_taxes_and_totals(object):
 	def _cleanup(self):
 		for tax in self.doc.get("taxes"):
 			tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail, separators=(',', ':'))
+		for item in self.doc.get("items"):
+			item.item_tax_detail = json.dumps(item.item_tax_detail, separators=(',', ':'))
 
 	def set_discount_amount(self):
 		if self.doc.additional_discount_percentage:

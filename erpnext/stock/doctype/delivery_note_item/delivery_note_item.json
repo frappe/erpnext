@@ -130,6 +130,7 @@
   "column_break_71",
   "item_tax_template",
   "item_tax_rate",
+  "item_tax_detail",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -1155,12 +1156,20 @@
    "fieldtype": "Small Text",
    "label": "Reason for Return",
    "no_copy": 1
+  },
+  {
+   "fieldname": "item_tax_detail",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Item Tax Detail",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-03-06 14:18:33.131672",
+ "modified": "2020-08-21 18:40:24.355680",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
