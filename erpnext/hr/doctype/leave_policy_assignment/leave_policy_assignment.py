@@ -28,15 +28,9 @@ class LeavePolicyAssignment(Document):
 				AND effective_from <= %s""",
 			(self.employee, self.name, self.effective_from, self.effective_to), as_dict = 1)
 
-
-		print(leave_policy_assignments)
-
 		if len(leave_policy_assignments):
 			frappe.throw(_("Leave Policy: {0} already assigned for Employee {1} for period {2} to {3}")
 				.format(bold(self.leave_policy), bold(self.employee), bold(formatdate(self.effective_from)), bold(formatdate(self.effective_to))))
-
-
-
 
 	def grant_leave_alloc_for_employee(self):
 		if self.already_allocated:
@@ -123,6 +117,24 @@ def create_assignment_for_multiple_employees(employees, data):
 
 		assignment.save()
 		assignment.submit()
+
+def automatic_allocate_leaves_based_on_leave_policy():
+	today = getdate()
+	automatic_allocate_leaves_based_on_leave_policy = frappe.db.get_single_value(
+		'HR Settings', 'automatic_allocate_leaves_based_on_leave_policy'
+	)
+
+	pending_assignments = frappe.get_list(
+		"Leave Policy Assignment",
+		filters = {"docstatus": 1, "already_allocated": 0, "effective_from": today}
+	)
+
+	if len(pending_assignments) and automatic_allocate_leaves_based_on_leave_policy:
+		for assignment in pending_assignments:
+			try:
+				frappe.get_doc("Leave Policy Assignment", assignment.name).grant_leave_alloc_for_employee()
+			except:
+				pass
 
 
 def get_leave_type_details():

@@ -31,6 +31,7 @@
   "is_earned_leave",
   "earned_leave_frequency",
   "column_break_22",
+  "based_on_date_of_joining",
   "rounding"
  ],
  "fields": [
@@ -183,12 +184,20 @@
   {
    "fieldname": "column_break_22",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.is_earned_leave",
+   "fieldname": "based_on_date_of_joining",
+   "fieldtype": "Check",
+   "label": "Based On Date Of Joining"
   }
  ],
  "icon": "fa fa-flag",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2019-12-12 12:48:37.780254",
+ "modified": "2020-08-21 15:41:07.435203",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Type",

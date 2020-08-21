@@ -3,32 +3,29 @@
 
 frappe.ui.form.on('Leave Policy Assignment', {
 	refresh: function(frm) {
+		if(frm.doc.docstatus === 1 && frm.doc.already_allocated === 0){
+			frm.add_custom_button(__("Grant Leave"), function() {
 
-		frappe.db.get_single_value("HR Settings", "automatic_allocate_leaves_based_on_leave_policy").then(r =>{
-			if(frm.doc.docstatus === 1 && !r && frm.doc.already_allocated === 0){
-				frm.add_custom_button(__("Grant Leave"), function() {
+				frappe.call({
+					doc: frm.doc,
+					method: "grant_leave_alloc_for_employee",
+					callback: function(r) {
+						let leave_allocations = r.message;
 
-					frappe.call({
-						doc: frm.doc,
-						method: "grant_leave_alloc_for_employee",
-						callback: function(r) {
-							let leave_allocations = r.message;
+						let msg = __("Leaves has been granted successfully");
+						msg += "<br><table class='table table-bordered'>";
+						msg += "<tr><th>"+__('Leave Type')+"</th><th>"+__("Leave Allocation")+"</th><th>"+__("Leaves Granted")+"</th><tr>";
+						for (let key in leave_allocations){
 
-							let msg = __("Leaves has been granted successfully");
-							msg += "<br><table class='table table-bordered'>";
-							msg += "<tr><th>"+__('Leave Type')+"</th><th>"+__("Leave Allocation")+"</th><th>"+__("Leaves Granted")+"</th><tr>";
-							for (let key in leave_allocations){
-
-								msg += "<tr><th>"+key+"</th><td>"+leave_allocations[key]["name"]+"</td><td>"+leave_allocations[key]["leaves"]+"</td></tr>";
-							}
-							msg += "</table>";
-							frappe.msgprint(msg);
-							cur_frm.refresh();
+							msg += "<tr><th>"+key+"</th><td>"+leave_allocations[key]["name"]+"</td><td>"+leave_allocations[key]["leaves"]+"</td></tr>";
 						}
-					});
+						msg += "</table>";
+						frappe.msgprint(msg);
+						cur_frm.refresh();
+					}
 				});
-			}
-		});
+			});
+		}
 	},
 
 	assignment_based_on: function(frm) {
