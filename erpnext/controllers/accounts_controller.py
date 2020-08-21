@@ -21,6 +21,7 @@ from six import text_type
 import re
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.stock.get_item_details import get_item_warehouse
+from collections import OrderedDict
 
 force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules",
 	"allow_zero_valuation_rate", "apply_discount_after_taxes", "has_batch_no")
@@ -169,6 +170,8 @@ class AccountsController(TransactionBase):
 							'Supplier Quotation', 'Purchase Receipt', 'Delivery Note', 'Quotation']:
 			if self.get("group_same_items"):
 				self.group_similar_items()
+
+			self.group_items_by_item_group_print()
 
 			self.warehouses = list(set([frappe.get_cached_value("Warehouse", item.warehouse, 'warehouse_name')
 				for item in self.items if item.get('warehouse')]))
@@ -952,9 +955,46 @@ class AccountsController(TransactionBase):
 		for item in duplicate_list:
 			self.remove(item)
 
-	def get_gl_entries_for_print(self):
-		from collections import OrderedDict
+	def group_items_by_item_group_print(self):
+		items_by_group = OrderedDict()
 
+		for item in self.items:
+			group_data = items_by_group.setdefault(item.item_group, frappe._dict({"items": []}))
+			group_data['items'].append(item)
+
+		total_fields = [
+			('total_qty', 'qty'),
+			('total_alt_uom_qty', 'alt_uom_qty'),
+
+			('total', 'amount'),
+			('tax_exclusive_total', 'tax_exlcusive_amount'),
+			('net_total', 'net_amount'),
+			('taxable_total', 'taxable_amount'),
+
+			('total_discount', 'total_discount'),
+			('total_before_discount', 'amount_before_discount'),
+			('total_exclusive_total_discount', 'total_exclusive_total_discount'),
+			('tax_exclusive_total_before_discount', 'tax_exclusive_amount_before_discount'),
+
+			('total_net_weight', 'total_weight')
+		]
+		for item_group, group_data in items_by_group.items():
+			for group_field, item_field in total_fields:
+				group_data[group_field] = sum([flt(d.get(item_field)) for d in group_data['items']])
+				group_data["base_" + group_field] = group_data[group_field] * self.conversion_rate
+
+		price_list_settings = frappe.get_cached_doc("Price List Settings", None)
+		self.items_by_group = OrderedDict()
+
+		for d in price_list_settings.item_group_order:
+			if d.item_group in items_by_group:
+				self.items_by_group[d.item_group] = items_by_group[d.item_group]
+				del items_by_group[d.item_group]
+
+		for item_group, group_data in items_by_group.items():
+			self.items_by_group[item_group] = items_by_group[item_group]
+
+	def get_gl_entries_for_print(self):
 		if self.docstatus == 1:
 			gles = frappe.db.sql("""
 				select

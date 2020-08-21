@@ -44,10 +44,12 @@
 					{% if not no_letterhead %}
 					<div class="pull-left" style="width:70%;margin-bottom:2mm;">
 						{% if address %}<div>{{ address.address_line1 }}, {{ address.city }}, {{ address.country }}</div>{% endif %}
-						<div>Tel: {{ company.phone_no }}, Fax: {{ company.fax }}, Email: {{ company.email }}</div>
+						<div>
+							{% if company.phone_no %}Tel: {{ company.phone_no }}{% endif %}{% if company.fax %}, Fax: {{ company.fax }}{% endif %}{% if company.email %}, Email: {{ company.email }}{% endif %}
+						</div>
 						{% if company.tax_strn %}<div>Sales Tax Reg No: {{ company.tax_strn }}</div>{% endif %}
 						{% if company.tax_id %}<div>NTN: {{ company.tax_id }}</div>{% endif %}
-						{% if doc.order_type == "Maintenance" and company.provincial_strn %}<div>Sindh STRN: {{ company.provincial_strn }}</div>{% endif %}
+						{% if company.provincial_strn and company.provincial_strn %}<div>Sindh STRN: {{ company.provincial_strn }}</div>{% endif %}
 					</div>
 					{% endif %}
 				</div>
