@@ -436,7 +436,9 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 	setup_create_new_task() {
 		this.$result.on('click', '.create-new', (e) => {
 			let parent = unescape(e.currentTarget.getAttribute("data-name"));
+			let project = unescape(e.currentTarget.getAttribute("data-project"));
 			let task = frappe.model.get_new_doc("Task");
+			task["project"] = project;
 			task["parent_task"] = parent;
 
 			frappe.ui.form.make_quick_entry("Task", null, null, task);
@@ -486,12 +488,12 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 			this.render_header(this.task_columns, true);
 			this.prepare_data(r);
 			this.toggle_result_area();
-			this.render("Task", true);
+			this.render("Task", true, project);
 			this.render_previous_button();
 		});
 	}
 
-	render(doctype, is_task=false) {
+	render(doctype, is_task=false, project=null) {
 		// clear rows
 		this.$result.find('.list-row-container').remove();
 		if (this.data.length > 0) {
@@ -500,6 +502,11 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 				this.data.map((doc, i) => {
 					doc._idx = i;
 					doc.doctype = doctype || this.doctype;
+
+					if (is_task && project) {
+						doc.project = project;
+					}
+
 					return is_task ? this.get_task_list_row_html(doc, 0) : this.get_list_row_html(doc);
 				}).join('')
 			);
@@ -819,7 +826,7 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 		return `
 				<div class="level-item hidden-xs">
 					<button class="btn create-new btn-default btn-xs"
-						data-name="${escape(doc.name)}">
+						data-name="${escape(doc.name)}" data-project="${escape(doc.project)}">
 						${__("Add Child")}
 					</button>
 				</div>
