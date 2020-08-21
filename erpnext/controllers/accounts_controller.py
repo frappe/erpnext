@@ -981,6 +981,7 @@ class AccountsController(TransactionBase):
 		for item_group, group_data in items_by_group.items():
 			for group_field, item_field in total_fields:
 				group_data[group_field] = sum([flt(d.get(item_field)) for d in group_data['items']])
+				group_data["base_" + group_field] = group_data[group_field] * self.conversion_rate
 
 		price_list_settings = frappe.get_cached_doc("Price List Settings", None)
 		self.items_by_group = OrderedDict()
