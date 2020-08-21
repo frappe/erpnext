@@ -6,11 +6,37 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _, bold
-from frappe.utils import getdate, date_diff, comma_and
+from frappe.utils import getdate, date_diff, comma_and, formatdate
 from math import ceil
 import json
 
 class LeavePolicyAssignment(Document):
+
+	def validate(self):
+		self.validate_policy_assignment_overlap()
+
+	def validate_policy_assignment_overlap(self):
+		leave_policy_assignments = frappe.db.sql("""
+			SELECT
+				name
+			FROM `tabLeave Policy Assignment`
+			WHERE
+				employee=%s
+				AND name <> %s
+				AND docstatus=1
+				AND effective_to >= %s
+				AND effective_from <= %s""",
+			(self.employee, self.name, self.effective_from, self.effective_to), as_dict = 1)
+
+
+		print(leave_policy_assignments)
+
+		if len(leave_policy_assignments):
+			frappe.throw(_("Leave Policy: {0} already assigned for Employee {1} for period {2} to {3}")
+				.format(bold(self.leave_policy), bold(self.employee), bold(formatdate(self.effective_from)), bold(formatdate(self.effective_to))))
+
+
+
 
 	def grant_leave_alloc_for_employee(self):
 		if self.already_allocated:
