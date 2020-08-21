@@ -89,6 +89,15 @@
 		padding-bottom:2px !important;
 	}
 
+	.transaction-pf .table-narrow td {
+		padding-top:2px !important;
+		padding-bottom:2px !important;
+	}
+
+	.transaction-pf .table-last-row-bold tr:last-child td {
+		font-weight: bold;
+	}
+
 	.transaction-pf tfoot tr:last-child td:last-child {
 		font-weight: bold;
 	}
@@ -109,5 +118,5 @@
         width: 0.18in;
         height: 0.18in;
         border: #000 1px solid;
-  }
+	}
 }

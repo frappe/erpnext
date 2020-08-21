@@ -47,8 +47,7 @@
 <!-- Summary Section -->
 <h4 style="margin: 0; margin-top: 10px;">Summary</h4>
 
-<table class="table table-bordered section-break">
-	<thead></thead>
+<table class="table table-bordered section-break table-narrow table-last-row-bold">
 	<tbody>
 		{%- for item_group, group_data in doc.items_by_group.items() -%}
 		<tr>
@@ -57,7 +56,7 @@
 			<td style="width: 17.5%;"></td>
 		</tr>
 		{%- endfor -%}
-		<tr style="border-top: #000 2px solid !important;">
+		<tr class="total-border">
 			<td>Net Total</td>
 			<td></td>
 			<td class="text-right text-nowrap">{{ doc.get_formatted("net_total") }}</td>
@@ -69,20 +68,18 @@
 			<td class="text-right text-nowrap">{{ frappe.format(tax.tax_amount_after_discount_amount, df=doc.meta.get_field('net_total')) }}</td>
 		</tr>
 		{%- endfor -%}
-	</tbody>
-	<tfoot>
-		<tr>
+		<tr class="total-border">
 			<td>Grand Total</td>
 			<td></td>
 			<td class="text-right text-nowrap">{{ doc.get_formatted("grand_total") }}</td>
 		</tr>
 		{% if doc.rounded_total != doc.grand_total %}
 		<tr>
-			<td><strong>Rounded Total</strong></td>
+			<td>Rounded Total</td>
 			<td></td>
 			<td class="text-right text-nowrap">{{ doc.get_formatted("rounded_total") }}</td>
 		</tr>
 		{% endif %}
-	</tfoot>
+	</tbody>
 </table>
 	
