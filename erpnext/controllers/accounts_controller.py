@@ -26,6 +26,23 @@ from collections import OrderedDict
 force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules",
 	"allow_zero_valuation_rate", "apply_discount_after_taxes", "has_batch_no")
 
+print_total_fields_from_items = [
+	('total_qty', 'qty'),
+	('total_alt_uom_qty', 'alt_uom_qty'),
+
+	('total', 'amount'),
+	('tax_exclusive_total', 'tax_exlcusive_amount'),
+	('net_total', 'net_amount'),
+	('taxable_total', 'taxable_amount'),
+
+	('total_discount', 'total_discount'),
+	('total_before_discount', 'amount_before_discount'),
+	('total_exclusive_total_discount', 'total_exclusive_total_discount'),
+	('tax_exclusive_total_before_discount', 'tax_exclusive_amount_before_discount'),
+
+	('total_net_weight', 'total_weight')
+]
+
 
 class AccountsController(TransactionBase):
 	def __init__(self, *args, **kwargs):
@@ -171,7 +188,8 @@ class AccountsController(TransactionBase):
 			if self.get("group_same_items"):
 				self.group_similar_items()
 
-			self.group_items_by_item_group_print()
+			self.items_by_item_group = self.group_items_by_item_group(self.items)
+			self.items_by_item_tax_and_item_group = self.group_items_by_item_tax_and_item_group()
 
 			self.warehouses = list(set([frappe.get_cached_value("Warehouse", item.warehouse, 'warehouse_name')
 				for item in self.items if item.get('warehouse')]))
@@ -955,44 +973,93 @@ class AccountsController(TransactionBase):
 		for item in duplicate_list:
 			self.remove(item)
 
-	def group_items_by_item_group_print(self):
-		items_by_group = OrderedDict()
+	def group_items_by_item_tax_and_item_group(self):
+		grouped = OrderedDict()
+		tax_copy_fields = ['name', 'idx', 'account_head', 'description', 'charge_type', 'row_id']
 
 		for item in self.items:
-			group_data = items_by_group.setdefault(item.item_group, frappe._dict({"items": []}))
+			group_data = grouped.setdefault(cstr(item.item_tax_template), frappe._dict({"items": []}))
 			group_data['items'].append(item)
 
-		total_fields = [
-			('total_qty', 'qty'),
-			('total_alt_uom_qty', 'alt_uom_qty'),
+		for item_tax_template, group_data in grouped.items():
+			# group item groups in item tax template group
+			group_data.item_groups = self.group_items_by_item_group(group_data['items'])
 
-			('total', 'amount'),
-			('tax_exclusive_total', 'tax_exlcusive_amount'),
-			('net_total', 'net_amount'),
-			('taxable_total', 'taxable_amount'),
-
-			('total_discount', 'total_discount'),
-			('total_before_discount', 'amount_before_discount'),
-			('total_exclusive_total_discount', 'total_exclusive_total_discount'),
-			('tax_exclusive_total_before_discount', 'tax_exclusive_amount_before_discount'),
-
-			('total_net_weight', 'total_weight')
-		]
-		for item_group, group_data in items_by_group.items():
-			for group_field, item_field in total_fields:
+			# calculate group totals
+			for group_field, item_field in print_total_fields_from_items:
 				group_data[group_field] = sum([flt(d.get(item_field)) for d in group_data['items']])
 				group_data["base_" + group_field] = group_data[group_field] * self.conversion_rate
 
+			# initialize tax rows for item tax template group
+			group_data.taxes = OrderedDict()
+			for tax in self.taxes:
+				new_tax_row = frappe._dict({k:v for (k, v) in tax.as_dict().items() if k in tax_copy_fields})
+				new_tax_row.tax_amount_after_discount_amount = 0
+				new_tax_row.total = 0
+
+				group_data.taxes[tax.name] = new_tax_row
+
+			# sum up tax amounts
+			for item in group_data['items']:
+				item_tax_detail = json.loads(item.item_tax_detail or '{}')
+				for tax_row_name, tax_amount in item_tax_detail.items():
+					group_data.taxes[tax_row_name].tax_amount_after_discount_amount += flt(tax_amount)
+
+			# calculate total after taxes
+			for i, tax in enumerate(group_data.taxes.values()):
+				if i == 0:
+					tax.total = group_data.taxable_total + tax.tax_amount_after_discount_amount
+				else:
+					tax.total = list(group_data.taxes.values())[i-1].total + tax.tax_amount_after_discount_amount
+
+			# calculate tax rates
+			for i, tax in enumerate(group_data.taxes.values()):
+				if tax.charge_type in ('On Previous Row Total', 'On Previous Row Amount'):
+					fieldname = 'total' if tax.charge_type == 'On Previous Row Total' else 'tax_amount_after_discount_amount'
+					prev_row_taxable = list(group_data.taxes.values())[cint(tax.row_id)-1].get(fieldname)
+					tax.rate = (tax.tax_amount_after_discount_amount / prev_row_taxable) * 100 if prev_row_taxable else 0
+				else:
+					tax.rate = (tax.tax_amount_after_discount_amount / group_data.taxable_total) * 100 if group_data.taxable_total\
+						else 0
+
+			group_data.taxes = list(group_data.taxes.values())
+
+		# reset item index
+		item_idx = 1
+		for item_tax_group in grouped.values():
+			for item_group_group in item_tax_group.item_groups.values():
+				for item in item_group_group['items']:
+					item.idx = item_idx
+					item_idx += 1
+
+		return grouped
+
+	def group_items_by_item_group(self, items):
+		grouped = OrderedDict()
+
+		for item in items:
+			group_data = grouped.setdefault(item.item_group, frappe._dict({"items": []}))
+			group_data['items'].append(item)
+
+		# calculate group totals
+		for item_group, group_data in grouped.items():
+			for group_field, item_field in print_total_fields_from_items:
+				group_data[group_field] = sum([flt(d.get(item_field)) for d in group_data['items']])
+				group_data["base_" + group_field] = group_data[group_field] * self.conversion_rate
+
+		# Sort by Item Group Order
+		out = OrderedDict()
 		price_list_settings = frappe.get_cached_doc("Price List Settings", None)
-		self.items_by_group = OrderedDict()
 
 		for d in price_list_settings.item_group_order:
-			if d.item_group in items_by_group:
-				self.items_by_group[d.item_group] = items_by_group[d.item_group]
-				del items_by_group[d.item_group]
+			if d.item_group in grouped:
+				out[d.item_group] = grouped[d.item_group]
+				del grouped[d.item_group]
 
-		for item_group, group_data in items_by_group.items():
-			self.items_by_group[item_group] = items_by_group[item_group]
+		for item_group, group_data in grouped.items():
+			out[item_group] = grouped[item_group]
+
+		return out
 
 	def get_gl_entries_for_print(self):
 		if self.docstatus == 1:
