@@ -30,6 +30,12 @@ frappe.ui.form.on("Task", {
 			};
 		})
 
+		frm.set_query("user", "external_task_users", function () {
+			return {
+				query: "erpnext.projects.doctype.project.project.get_users_for_project"
+			};
+		});
+
 		frm.set_query("parent_task", function () {
 			let filters = {
 				"is_group": 1

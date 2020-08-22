@@ -41,6 +41,8 @@
   "total_expense_claim",
   "column_break_20",
   "total_billing_amount",
+  "external_users_section",
+  "external_task_users",
   "sb_more_info",
   "review_date",
   "closing_date",
@@ -374,6 +376,18 @@
    "fieldname": "show_in_portal",
    "fieldtype": "Check",
    "label": "Show in Portal"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "external_users_section",
+   "fieldtype": "Section Break",
+   "label": "External Users"
+  },
+  {
+   "fieldname": "external_task_users",
+   "fieldtype": "Table",
+   "label": "External Task Users",
+   "options": "Task User"
   }
  ],
  "icon": "fa fa-check",
@@ -381,7 +395,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2020-08-14 00:28:03.727698",
+ "modified": "2020-08-22 20:46:25.088515",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
