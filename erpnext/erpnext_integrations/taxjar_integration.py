@@ -1,8 +1,5 @@
 import traceback
 
-import pycountry
-import taxjar
-
 import frappe
 from erpnext import get_default_company
 from frappe import _
@@ -32,6 +29,7 @@ def get_client():
 
 
 def create_transaction(doc, method):
+	import taxjar
 	"""Create an order transaction in TaxJar"""
 
 	if not TAXJAR_CREATE_TRANSACTIONS:
@@ -208,6 +206,7 @@ def get_shipping_address_details(doc):
 
 
 def get_iso_3166_2_state_code(address):
+	import pycountry
 	country_code = frappe.db.get_value("Country", address.get("country"), "code")
 
 	error_message = _("""{0} is not a valid state! Check for typos or enter the ISO code for your state.""").format(address.get("state"))
