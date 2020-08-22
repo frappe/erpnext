@@ -14,7 +14,7 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 		this.task_meta = frappe.get_meta("Task");
 
 		this.task_fields = [];
-		this.task_columns = []
+		this.task_columns = [];
 		this.get_settings("Project", "listview_settings");
 		this.get_settings("Task", "task_listview_settings");
 
@@ -42,28 +42,28 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 					const docnames = this.get_checked_items(true).map(docname => docname.toString());
 					frappe.confirm(__('Delete {0} items permanently?', [docnames.length]),
 						() => {
-								frappe.call({
-									method: 'frappe.desk.reportview.delete_items',
-									freeze: true,
-									args: {
-										items: docnames,
-										doctype: doctype
-									}
-								}).then((r) => {
-									let failed = r.message;
-									if (!failed) failed = [];
+							frappe.call({
+								method: 'frappe.desk.reportview.delete_items',
+								freeze: true,
+								args: {
+									items: docnames,
+									doctype: doctype
+								}
+							}).then((r) => {
+								let failed = r.message;
+								if (!failed) failed = [];
 
-									if (failed.length && !r._server_messages) {
-										frappe.throw(__('Cannot delete {0}', [failed.map(f => f.bold()).join(', ')]));
-									}
+								if (failed.length && !r._server_messages) {
+									frappe.throw(__('Cannot delete {0}', [failed.map(f => f.bold()).join(', ')]));
+								}
 
-									if (failed.length < docnames.length) {
-										frappe.utils.play_sound('delete');
-									}
+								if (failed.length < docnames.length) {
+									frappe.utils.play_sound('delete');
+								}
 
-									this.refresh();
-								});
-						})
+								this.refresh();
+							});
+						});
 				},
 				standard: true,
 			};
@@ -164,7 +164,7 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 		});
 		// remove null or undefined values
 		this.task_fields = this.task_fields.filter(Boolean);
-		//de-duplicate
+		// de-duplicate
 		this.task_fields = this.task_fields.uniqBy(f => f[0] + f[1]);
 	}
 
@@ -268,7 +268,7 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 		let fields_order = [];
 		fields = JSON.parse(fields);
 
-		//title_field is fixed
+		// title_field is fixed
 		fields_order.push(columns[0]);
 		columns.splice(0, 1);
 
@@ -406,7 +406,7 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 			let level = parseInt($row[0].getAttribute("data-level")) + 1;
 			let $result = $(`<div class="nested-result">`);
 
-			$list.toggleClass("hide")
+			$list.toggleClass("hide");
 
 			if ($list[0].classList.contains("hide")) {
 				$list.find(`.nested-result`).remove();
@@ -450,10 +450,10 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 	}
 
 	get_projects() {
-		this.$frappe_list.on('click', '.btn-prev', (e) => {
+		this.$frappe_list.on('click', '.btn-prev', () => {
 			this.filter_area.clear(false);
 			this.set_title("Project");
-			this.remove_previous_button()
+			this.remove_previous_button();
 			this.render_header(this.columns, true);
 			this.filter_area.refresh_filters(this.meta);
 			this.fetch_projects();
@@ -484,7 +484,7 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 			this.filter_area.add([["Task", "project", "=", project]], false);
 		}
 
-		let filters = this.get_filters_for_args()
+		let filters = this.get_filters_for_args();
 		filters.push(["Task", "parent_task", "=", '']);
 
 		frappe.call(this.get_task_call_args(filters)).then(r => {
@@ -711,7 +711,7 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 
 		const seen = JSON.parse(doc._seen || '[]').includes(user) ? '' : 'bold';
 
-		const subject_link = this.get_subject_link(doc, subject, escaped_subject)
+		const subject_link = this.get_subject_link(doc, subject, escaped_subject);
 
 		let html = doc.doctype == 'Task' && doc.expandable ? `<a class="btn btn-action btn-xs"
 			data-doctype="Task" data-name="${escape(doc.name)}" style="width: 20px;">
@@ -745,11 +745,11 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 		if (doc.doctype === 'Project') {
 			return `<span class="ellipsis" title="${escaped_subject}" data-doctype="${doc.doctype}" data-name="${doc.name}">
 				${subject}
-			</span>`
+			</span>`;
 		} else {
 			return `<a href ="desk#Form/Task/${doc.name}" class="ellipsis" title="${escaped_subject}" data-doctype="${doc.doctype}" data-name="${doc.name}">
 				${subject}
-			</a>`
+			</a>`;
 		}
 	}
 
@@ -951,7 +951,7 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 	setup_check_events() {
 		this.$result.on('change', 'input[type=checkbox]', e => {
 			const $target = $(e.currentTarget);
-			e.stopPropagation()
+			e.stopPropagation();
 
 			if ($target.is('.list-header-subject .list-check-all')) {
 				const $check = this.$result.find('.checkbox-actions .list-check-all');
@@ -1011,7 +1011,7 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 		if (!date) return '';
 
 		if (typeof (date) == "string") {
-			date = this.convert_to_user_tz(date)
+			date = this.convert_to_user_tz(date);
 		}
 
 		let diff = (((new Date()).getTime() - date.getTime()) / 1000);
@@ -1075,7 +1075,7 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 			}
 		}
 	}
-}
+};
 
 erpnext.projects.CustomFilterArea = class CustomFilterArea extends frappe.ui.FilterArea {
 
@@ -1084,10 +1084,10 @@ erpnext.projects.CustomFilterArea = class CustomFilterArea extends frappe.ui.Fil
 		this.list_view.current_doctype = meta.name;
 		// this.$filter_list_wrapper.remove();
 
-		let existing_list = $(this.list_view.parent).find(".filter-list")
+		let existing_list = $(this.list_view.parent).find(".filter-list");
 
 		if (existing_list) {
-			existing_list.remove()
+			existing_list.remove();
 		}
 
 		this.list_view.doctype = meta.name;

@@ -1,37 +1,33 @@
 .page-content-wrapper {
-    margin-top: 0px !important;
-    margin-bottom: 0px !important;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
 }
 
 .my-4 {
-    margin-top: 0px !important;
-    margin-bottom: 1.5 rem;
+  margin-top: 0px !important;
+  margin-bottom: 1.5 rem;
 }
 
-/* .page-head {
-    position: initial;
-} */
-
 h1 {
-    font-size: 24px;
-    font-family: inherit;
-    font-weight: 500;
-    line-height: 1.3em;
+  font-size: 24px;
+  font-family: inherit;
+  font-weight: 500;
+  line-height: 1.3em;
 }
 
 body, a, a:hover {
-    color: black;
-    text-decoration: none;
+  color: black;
+  text-decoration: none;
 }
 
 .page-head {
-    border-bottom: 1px solid #d1d8dd;
-    height: 70px;
-    position: initial;
-    left: 0;
-    right: 0;
-    top: 0;
-    margin: auto;
-    background-color: #fff;
-    z-index: 101;
-  }
+  border-bottom: 1px solid #d1d8dd;
+  height: 70px;
+  position: initial;
+  left: 0;
+  right: 0;
+  top: 0;
+  margin: auto;
+  background-color: #fff;
+  z-index: 101;
+}

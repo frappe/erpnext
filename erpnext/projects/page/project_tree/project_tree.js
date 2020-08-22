@@ -14,7 +14,7 @@ frappe.pages['project-tree'].on_page_load = function(wrapper) {
 				doctype: "Project",
 				parent: wrapper,
 				page: page
-			})
+			});
 		});
 	});
-}
+};

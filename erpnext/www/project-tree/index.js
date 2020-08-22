@@ -9,7 +9,7 @@ frappe.ready(() => {
 				parent: $wrapper[0],
 				project: r.message.project,
 				task: r.message.task
-			})
+			});
 		}
 	})
 });
@@ -28,7 +28,7 @@ class WebProjectTree extends erpnext.projects.ProjectTree {
 		this.task_meta = this.task;
 
 		this.task_fields = [];
-		this.task_columns = []
+		this.task_columns = [];
 
 		this.start = 0;
 		this.data = [];
@@ -78,9 +78,9 @@ class WebProjectTree extends erpnext.projects.ProjectTree {
 	}
 
 	get_projects() {
-		this.$frappe_list.on('click', '.btn-prev', (e) => {
+		this.$frappe_list.on('click', '.btn-prev', () => {
 			this.set_title("Project");
-			this.remove_previous_button()
+			this.remove_previous_button();
 			this.render_header(this.columns, true);
 			this.fetch_projects();
 		})
@@ -103,9 +103,7 @@ class WebProjectTree extends erpnext.projects.ProjectTree {
 	fetch_tasks(project) {
 		let filters = [
 			["Task", "project", "=", project],
-			["Task", "parent_task", "=", ''],
-			["Task", "show_in_portal", "=", 1],
-			["Task", "_assign", "like", `%${frappe.session.user}%`]
+			["Task", "show_in_portal", "=", 1]
 		];
 
 		frappe.call(this.get_task_call_args(filters)).then(r => {
@@ -120,13 +118,14 @@ class WebProjectTree extends erpnext.projects.ProjectTree {
 
 	get_task_call_args(filters) {
 		return {
-			method: "erpnext.projects.page.project_tree.project.get_tasks",
+			method: "erpnext.projects.page.project_tree.project.get_tasks_for_portal",
 			args: {
 				params: {
 					doctype: "Task",
 					fields: this.get_task_fields(),
 					filters: filters,
 					with_comment_count: true,
+					user: frappe.session.user,
 					page_length: this.page_length,
 					ignore_permissions: true
 				}
@@ -234,11 +233,11 @@ class WebProjectTree extends erpnext.projects.ProjectTree {
 		if (doc.doctype === 'Project') {
 			return `<span class="ellipsis" title="${escaped_subject}" data-doctype="${doc.doctype}" data-name="${doc.name}">
 				${subject}
-			</span>`
+			</span>`;
 		} else {
 			return `<a href ="/tasks?name=${doc.name}" class="ellipsis" title="${escaped_subject}" data-doctype="${doc.doctype}" data-name="${doc.name}">
 				${subject}
-			</a>`
+			</a>`;
 		}
 	}
 
