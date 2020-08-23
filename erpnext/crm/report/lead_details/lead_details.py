@@ -140,18 +140,19 @@ def get_data(filters):
 			`tabAddress`.name=`tabDynamic Link`.parent)
 		WHERE
 			company = %(company)s
-				AND `tabLead`.creation BETWEEN %(from_date)s AND %(to_date)s
+			AND `tabLead`.creation BETWEEN %(from_date)s AND %(to_date)s
 			{conditions}
 		ORDER BY 
 			`tabLead`.creation asc """.format(conditions=get_conditions(filters)), filters, as_dict=1)
 
 def get_conditions(filters) :
-	conditions = ""
+	conditions = []
 
 	if filters.get("territory"):
-		conditions+=" and territory=%(territory)s "
+		conditions.append(" and `tabLead`.territory=%(territory)s")
 
 	if filters.get("status"):
-		conditions+=" and status=%(status)s "
+		conditions.append(" and `tabLead`.status=%(status)s")
+	
+	return " ".join(conditions) if conditions else ""
 
-	return conditions
