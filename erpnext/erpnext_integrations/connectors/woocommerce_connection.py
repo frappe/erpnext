@@ -228,16 +228,9 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 	invoice_doc.flags.ignore_mandatory = True
 	invoice_doc.insert()
 
-	# Add shipping fee according to the total 
-	if invoice_doc.total < 150:
-		# use default $10 as shipping fee need to correct in the future
-		addTaxDetails(invoice_doc, 10, "Shipping Total", woocommerce_settings.f_n_f_account)
-		addTaxDetails(invoice_doc, 10 * tax_rate, "Shipping Tax", woocommerce_settings.tax_account)
-
-
 	if woocommerce_settings.company == "RN Labs":
 		# adding handling fee
-		if invoice_doc.order_type == "Patient Order" or invoice_doc.order_type == "Self Test":
+		if invoice_doc.order_type in ["Patient Order", "Self Test"]:
 			invoice_doc.append("items",{
 				"item_code": "HAND-FEE",
 				"item_name": "Handling Fee",
@@ -247,7 +240,13 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 				"rate": 20,
 				"warehouse": woocommerce_settings.warehouse
 			})
-			addTaxDetails(invoice_doc, 20*tax_rate, "Handling Fee tax", woocommerce_settings.tax_account)
+			addTaxDetails("Actual", invoice_doc, 20*tax_rate, "Handling Fee tax", woocommerce_settings.tax_account)
+		else: # Practitioner Order
+			# Add shipping fee according to the total 
+			if invoice_doc.total < 150:
+				# use default $10 as shipping fee need to correct in the future
+				addTaxDetails("Actual", invoice_doc, 10, "Shipping Total", woocommerce_settings.f_n_f_account)
+				addTaxDetails("Actual", invoice_doc, 10 * tax_rate, "Shipping Tax", woocommerce_settings.tax_account)
 
 	invoice_doc.save()
 
@@ -271,6 +270,7 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
 		}
 	"""
 	# Proceed to invoice
+	Net_total_tax = 0
 	for item in edited_line_items:
 		if item["is_stock_item"] == 1: # only check if it maintains stock
 			if item["qty"] > item["actual_qty"]:
@@ -287,14 +287,15 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
 				invoice_doc.append("items", item)
 				if item["item_group"] != "Tests":
 					item_tax = (item['rate'] * tax_rate) * item["qty"]
-					desc = "{} tax".format(item["item_code"])
-					addTaxDetails(invoice_doc, item_tax, desc, woocommerce_settings.tax_account)
+					Net_total_tax += item_tax
 		else: # item["is_stock_item"] == 0 
 			invoice_doc.append("items", item)
 			if item["item_group"] != "Tests":
 				item_tax = (item['rate'] * tax_rate) * item["qty"]
-				desc = "{} tax".format(item["item_code"])
-				addTaxDetails(invoice_doc, item_tax, desc, woocommerce_settings.tax_account)
+				Net_total_tax += item_tax
+	if Net_total_tax > 0:
+		desc = "GST 10% @ 10.0"
+		addTaxDetails("On Net Total", invoice_doc, Net_total_tax, desc, woocommerce_settings.tax_account, rate=10)
 
 
 def backorder_validation(line_items, customer_code, woocommerce_settings, discount=None):
@@ -367,10 +368,13 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 	return new_line_items, create_backorder_doc_flag
 
 
-def addTaxDetails(sales_invoice, price, desc, tax_account_head):
-	sales_invoice.append("taxes", {
-		"charge_type":"Actual",
+def addTaxDetails(charge_type, sales_invoice, price, desc, tax_account_head, rate=None):
+	tax_dict = {
+		"charge_type":charge_type,
 		"account_head": tax_account_head,
 		"tax_amount": price,
 		"description": desc
-	})
+	}
+	if rate:
+		tax_dict['rate'] = rate
+	sales_invoice.append("taxes", tax_dict)
