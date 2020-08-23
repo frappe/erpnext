@@ -7,6 +7,7 @@ import frappe
 from erpnext.accounts.doctype.cash_flow_mapper.default_cash_flow_mapper import DEFAULT_MAPPERS
 from .default_success_action import get_default_success_action
 from frappe import _
+from frappe.utils import cint
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from erpnext.setup.default_energy_point_rules import get_default_energy_point_rules
@@ -29,8 +30,8 @@ def after_install():
 
 
 def check_setup_wizard_not_completed():
-	if frappe.db.get_default('desktop:home_page') != 'setup-wizard':
-		message = """ERPNext can only be installed on a fresh site where the setup wizard is not completed. 
+	if cint(frappe.db.get_single_value('System Settings', 'setup_complete') or 0):
+		message = """ERPNext can only be installed on a fresh site where the setup wizard is not completed.
 You can reinstall this site (after saving your data) using: bench --site [sitename] reinstall"""
 		frappe.throw(message)
 

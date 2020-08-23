@@ -94,7 +94,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "HR",
- "modified": "2020-06-30 18:34:39.966096",
+ "modified": "2020-08-11 17:04:38.655417",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR",
@@ -126,8 +126,8 @@
    "type": "DocType"
   },
   {
-   "label": "Salary Structure",
-   "link_to": "Salary Structure",
+   "label": "Job Applicant",
+   "link_to": "Job Applicant",
    "type": "DocType"
   },
   {

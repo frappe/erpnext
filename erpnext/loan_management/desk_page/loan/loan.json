@@ -3,7 +3,7 @@
   {
    "hidden": 0,
    "label": "Loan",
-   "links": "[\n    {\n        \"description\": \"Loan Type for interest and penalty rates\",\n        \"label\": \"Loan Type\",\n        \"name\": \"Loan Type\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Loan Applications from customers and employees.\",\n        \"label\": \"Loan Application\",\n        \"name\": \"Loan Application\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Loans provided to customers and employees.\",\n        \"label\": \"Loan\",\n        \"name\": \"Loan\",\n        \"type\": \"doctype\"\n    }\n]"
+   "links": "[\n    {\n        \"description\": \"Loan Type for interest and penalty rates\",\n        \"label\": \"Loan Type\",\n        \"name\": \"Loan Type\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Loan Applications from customers and employees.\",\n        \"label\": \"Loan Application\",\n        \"name\": \"Loan Application\",\n        \"type\": \"doctype\"\n    },\n    {   \"dependencies\": [\n            \"Loan Type\"\n        ],\n        \"description\": \"Loans provided to customers and employees.\",\n        \"label\": \"Loan\",\n        \"name\": \"Loan\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
    "hidden": 0,
