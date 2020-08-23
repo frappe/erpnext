@@ -12,5 +12,11 @@ frappe.ui.form.on("Shopping Cart Settings", {
 		if (frm.doc.enabled === 1) {
 			frm.set_value('enable_variants', 1);
 		}
+		else {
+			frm.set_value('company', '');
+			frm.set_value('price_list', '');
+			frm.set_value('default_customer_group', '');
+			frm.set_value('quotation_series', '');
+		}
 	}
 });

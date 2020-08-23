@@ -119,11 +119,19 @@ class Opportunity(TransactionBase):
 				and q.status not in ('Lost', 'Closed')""", self.name)
 
 	def has_ordered_quotation(self):
-		return frappe.db.sql("""
-			select q.name
-			from `tabQuotation` q, `tabQuotation Item` qi
-			where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s
-			and q.status = 'Ordered'""", self.name)
+		if not self.with_items:
+			return frappe.get_all('Quotation',
+				{
+					'opportunity': self.name,
+					'status': 'Ordered',
+					'docstatus': 1
+				}, 'name')
+		else:
+			return frappe.db.sql("""
+				select q.name
+				from `tabQuotation` q, `tabQuotation Item` qi
+				where q.name = qi.parent and q.docstatus=1 and qi.prevdoc_docname =%s
+				and q.status = 'Ordered'""", self.name)
 
 	def has_lost_quotation(self):
 		lost_quotation = frappe.db.sql("""
@@ -317,7 +325,7 @@ def auto_close_opportunity():
 		doc.save()
 
 @frappe.whitelist()
-def make_opportunity_from_communication(communication, ignore_communication_links=False):
+def make_opportunity_from_communication(communication, company, ignore_communication_links=False):
 	from erpnext.crm.doctype.lead.lead import make_lead_from_communication
 	doc = frappe.get_doc("Communication", communication)
 
@@ -329,8 +337,9 @@ def make_opportunity_from_communication(communication, ignore_communication_link
 
 	opportunity = frappe.get_doc({
 		"doctype": "Opportunity",
+		"company": company,
 		"opportunity_from": opportunity_from,
-		"lead": lead
+		"party_name": lead
 	}).insert(ignore_permissions=True)
 
 	link_communication_to_document(doc, "Opportunity", opportunity.name, ignore_communication_links)
