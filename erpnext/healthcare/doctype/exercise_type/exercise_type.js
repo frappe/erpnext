@@ -71,7 +71,7 @@ erpnext.ExerciseEditor = Class.extend({
 
 		$('.btn-del').on('click', function() {
 			let id = $(this).attr('data-id');
-			$('#card-'+id).addClass("zoomOutDelete");
+			$('#card-'+id).addClass("zoom-out");
 
 			setTimeout(() => {
 				// not using grid_rows[id].remove because
