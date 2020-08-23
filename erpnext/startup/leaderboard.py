@@ -123,7 +123,7 @@ def get_all_suppliers(date_range, company, field, limit = None):
 	if field == "outstanding_amount":
 		filters = [['docstatus', '=', '1'], ['company', '=', company]]
 		if date_range:
-			filters.append(['posting_date', 'between' [date_range[0], date_range[1]]])
+			filters.append(['posting_date', 'between', date_range])
 		return frappe.db.get_all('Purchase Invoice',
 			fields = ['supplier as name', 'sum(outstanding_amount) as value'],
 			filters = filters,
