@@ -780,7 +780,7 @@
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2020-03-12 16:28:28.926930",
+ "modified": "2020-08-24 14:29:21.813560",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
@@ -820,6 +820,10 @@
    "set_user_permissions": 1,
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Accounts User"
   }
  ],
  "quick_entry": 1,
