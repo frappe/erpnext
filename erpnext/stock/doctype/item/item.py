@@ -825,7 +825,6 @@ class Item(WebsiteGenerator):
 
 		# get all item variants
 		items = [item["name"] for item in frappe.get_all("Item", {"variant_of": self.name})]
-		items_string = ', '.join(items)
 
 		# get all deleted attributes
 		deleted_attribute = list(old_doc_attributes.difference(set(own_attributes)))
