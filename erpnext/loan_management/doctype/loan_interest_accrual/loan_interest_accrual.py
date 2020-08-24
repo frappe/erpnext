@@ -85,8 +85,8 @@ def calculate_accrual_amount_for_demand_loans(loan, posting_date, process_loan_i
 	if no_of_days <= 0:
 		return
 
-	pending_principal_amount = loan.total_payment - loan.total_interest_payable \
-		- loan.total_amount_paid
+	pending_principal_amount = flt(loan.total_payment) - flt(loan.total_interest_payable) \
+		- flt(loan.total_principal_paid)
 
 	interest_per_day = (pending_principal_amount * loan.rate_of_interest) / (days_in_year(get_datetime(posting_date).year) * 100)
 	payable_interest = interest_per_day * no_of_days
