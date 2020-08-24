@@ -115,12 +115,12 @@ frappe.query_reports["Quoted Item Comparison"] = {
 		Valid till : &nbsp;&nbsp;
 		</span>
 		<span class="indicator orange">
-		Expires in a week
+		Expires in a week or less
 		</span>
 		&nbsp;&nbsp;&nbsp;&nbsp;
 		<span class="indicator red">
 		Expires today / Already Expired
-		</span>`
+		</span>`;
 		report.$status.html(status_message).show();
 
 	},
