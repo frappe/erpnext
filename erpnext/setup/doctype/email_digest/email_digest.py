@@ -24,40 +24,26 @@ class EmailDigest(Document):
 		self._accounts = {}
 		self.currency = frappe.db.get_value('Company',  self.company,  "default_currency")
 
-	def get_users(self):
-		"""get list of users"""
-		user_list = frappe.db.sql("""
-			select name, enabled from tabUser
-			where name not in ({})
-			and user_type != "Website User"
-			order by enabled desc, name asc""".format(", ".join(["%s"]*len(STANDARD_USERS))), STANDARD_USERS, as_dict=1)
-
-		if self.recipient_list:
-			recipient_list = self.recipient_list.split("\n")
-		else:
-			recipient_list = []
-		for p in user_list:
-			p["checked"] = p["name"] in recipient_list and 1 or 0
-
-		frappe.response['user_list'] = user_list
-
 	def send(self):
 		# send email only to enabled users
 		valid_users = [p[0] for p in frappe.db.sql("""select name from `tabUser`
 			where enabled=1""")]
-		recipients = list(filter(lambda r: r in valid_users,
-			self.recipient_list.split("\n")))
+		recipients = frappe.db.get_list('Email Digest Recipient',
+			filters={
+					'parent': self.name
+			},
+			fields=['recipient'])
 
 		original_user = frappe.session.user
 
 		if recipients:
-			for user_id in recipients:
-				frappe.set_user(user_id)
-				frappe.set_user_lang(user_id)
+			for user in recipients:
+				frappe.set_user(user.recipient)
+				frappe.set_user_lang(user.recipient)
 				msg_for_this_recipient = self.get_msg_html()
 				if msg_for_this_recipient:
 					frappe.sendmail(
-						recipients=user_id,
+						recipients=user.recipient,
 						subject=_("{0} Digest").format(self.frequency),
 						message=msg_for_this_recipient,
 						reference_doctype = self.doctype,
