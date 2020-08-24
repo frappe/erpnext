@@ -60,8 +60,13 @@ frappe.ui.form.on('Cost Center', {
 					"label": "Cost Center Number",
 					"fieldname": "cost_center_number",
 					"fieldtype": "Data",
-					"reqd": 1,
 					"default": frm.doc.cost_center_number
+				},
+				{
+					"label": __("Merge with existing"),
+					"fieldname": "merge",
+					"fieldtype": "Check",
+					"default": 0
 				}
 			],
 			primary_action: function() {
@@ -76,8 +81,9 @@ frappe.ui.form.on('Cost Center', {
 					args: {
 						docname: frm.doc.name,
 						cost_center_name: data.cost_center_name,
-						cost_center_number: data.cost_center_number,
-						company: frm.doc.company
+						cost_center_number: cstr(data.cost_center_number),
+						company: frm.doc.company,
+						merge: data.merge
 					},
 					callback: function(r) {
 						frappe.dom.unfreeze();

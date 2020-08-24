@@ -51,7 +51,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEqual(current_bin_stock_value, existing_bin_stock_value + 250)
 
 		self.assertFalse(get_gl_entries("Purchase Receipt", pr.name))
-	
+
 	def test_batched_serial_no_purchase(self):
 		item = frappe.db.exists("Item", {'item_name': 'Batched Serialized Item'})
 		if not item:
@@ -68,7 +68,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr = make_purchase_receipt(item_code=item.name, qty=5, rate=500)
 
 		self.assertTrue(frappe.db.get_value('Batch', {'item': item.name, 'reference_name': pr.name}))
-		
+
 		pr.load_from_db()
 		batch_no = pr.items[0].batch_no
 		pr.cancel()
@@ -374,7 +374,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		location = frappe.db.get_value('Asset', assets[0].name, 'location')
 		self.assertEquals(location, "Test Location")
-	
+
 	def test_purchase_return_with_submitted_asset(self):
 		from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_return
 
@@ -396,17 +396,14 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		pr_return = make_purchase_return(pr.name)
 		self.assertRaises(frappe.exceptions.ValidationError, pr_return.submit)
-		
+
 		asset.load_from_db()
 		asset.cancel()
-		
+
 		pr_return.submit()
 
-	def test_purchase_receipt_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+	def test_purchase_receipt_cost_center(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
-		accounts_settings.save()
 		cost_center = "_Test Cost Center for BS Account - TCP1"
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company with perpetual inventory")
 
@@ -434,14 +431,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
-
-	def test_purchase_receipt_for_disable_allow_cost_center_in_entry_of_bs_account(self):
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
-
+	def test_purchase_receipt_cost_center_with_balance_sheet_account(self):
 		if not frappe.db.exists('Location', 'Test Location'):
 			frappe.get_doc({
 				'doctype': 'Location',
@@ -453,13 +443,14 @@ class TestPurchaseReceipt(unittest.TestCase):
 		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
 
 		self.assertTrue(gl_entries)
+		cost_center = pr.get('items')[0].cost_center
 
 		expected_values = {
 			"Stock Received But Not Billed - TCP1": {
-				"cost_center": None
+				"cost_center": cost_center
 			},
 			stock_in_hand_account: {
-				"cost_center": None
+				"cost_center": cost_center
 			}
 		}
 		for i, gle in enumerate(gl_entries):
@@ -474,6 +465,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr1 = make_purchase_receipt(is_return=1, return_against=pr.name, qty=-1, do_not_submit=True)
 		pr1.items[0].purchase_order = po.name
 		pr1.items[0].purchase_order_item = po.items[0].name
+		pr1.items[0].purchase_receipt_item = pr.items[0].name
 		pr1.submit()
 
 		pi = make_purchase_invoice(pr.name)
@@ -497,7 +489,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pi1.save()
 		pi1.submit()
 
-		make_purchase_receipt(is_return=1, return_against=pr1.name, qty=-2)
+		pr2 = make_purchase_receipt(is_return=1, return_against=pr1.name, qty=-2, do_not_submit=True)
+		pr2.items[0].purchase_receipt_item = pr1.items[0].name
+		pr2.submit()
 
 		pi2 = make_purchase_invoice(pr1.name)
 		self.assertEquals(pi2.items[0].qty, 2)
