@@ -2,6 +2,17 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Job Card', {
+	setup: function(frm) {
+		frm.set_query('operation', function() {
+			return {
+				query: 'erpnext.manufacturing.doctype.job_card.job_card.get_operations',
+				filters: {
+					'work_order': frm.doc.work_order
+				}
+			};
+		});
+	},
+
 	refresh: function(frm) {
 		frappe.flags.pause_job = 0;
 		frappe.flags.resume_job = 0;
@@ -20,10 +31,58 @@ frappe.ui.form.on('Job Card', {
 			}
 		}
 
+		frm.trigger("toggle_operation_number");
+
 		if (frm.doc.docstatus == 0 && (frm.doc.for_quantity > frm.doc.total_completed_qty || !frm.doc.for_quantity)
-			&& (!frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)) {
+			&& (!frm.doc.items || !frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)) {
 			frm.trigger("prepare_timer_buttons");
 		}
+	},
+
+	operation: function(frm) {
+		frm.trigger("toggle_operation_number");
+
+		if (frm.doc.operation && frm.doc.work_order) {
+			frappe.call({
+				method: "erpnext.manufacturing.doctype.job_card.job_card.get_operation_details",
+				args: {
+					"work_order":frm.doc.work_order,
+					"operation":frm.doc.operation
+				},
+				callback: function (r) {
+					if (r.message) {
+						if (r.message.length == 1) {
+							frm.set_value("operation_id", r.message[0].name);
+						} else {
+							let args = [];
+
+							r.message.forEach((row) => {
+								args.push({ "label": row.idx, "value": row.name });
+							});
+
+							let description = __("Operation {0} added multiple times in the work order {1}",
+								[frm.doc.operation, frm.doc.work_order]);
+
+							frm.set_df_property("operation_row_number", "options", args);
+							frm.set_df_property("operation_row_number", "description", description);
+						}
+
+						frm.trigger("toggle_operation_number");
+					}
+				}
+			})
+		}
+	},
+
+	operation_row_number(frm) {
+		if (frm.doc.operation_row_number) {
+			frm.set_value("operation_id", frm.doc.operation_row_number);
+		}
+	},
+
+	toggle_operation_number(frm) {
+		frm.toggle_display("operation_row_number", !frm.doc.operation_id && frm.doc.operation);
+		frm.toggle_reqd("operation_row_number", !frm.doc.operation_id && frm.doc.operation);
 	},
 
 	prepare_timer_buttons: function(frm) {
