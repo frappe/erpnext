@@ -808,7 +808,7 @@ class Item(WebsiteGenerator):
 				frappe.throw(_("Item has variants."))
 
 	def validate_attributes_in_variants(self):
-		if not self.has_variants:
+		if not self.has_variants or self.get("__islocal"):
 			return
 
 		old_doc = self.get_doc_before_save()
