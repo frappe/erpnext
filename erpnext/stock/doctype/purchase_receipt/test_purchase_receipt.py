@@ -18,6 +18,28 @@ class TestPurchaseReceipt(unittest.TestCase):
 		set_perpetual_inventory(0)
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 
+	def test_reverse_purchase_receipt_sle(self):
+
+		frappe.db.set_value('UOM', '_Test UOM', 'must_be_whole_number', 0)
+
+		pr = make_purchase_receipt(qty=0.5)
+
+		sl_entry = frappe.db.get_all("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
+			"voucher_no": pr.name}, ['actual_qty'])
+
+		self.assertEqual(len(sl_entry), 1)
+		self.assertEqual(sl_entry[0].actual_qty, 0.5)
+
+		pr.cancel()
+
+		sl_entry_cancelled = frappe.db.get_all("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
+			"voucher_no": pr.name}, ['actual_qty'], order_by='creation')
+
+		self.assertEqual(len(sl_entry_cancelled), 2)
+		self.assertEqual(sl_entry_cancelled[1].actual_qty, -0.5)
+
+		frappe.db.set_value('UOM', '_Test UOM', 'must_be_whole_number', 1)
+
 	def test_make_purchase_invoice(self):
 		pr = make_purchase_receipt(do_not_save=True)
 		self.assertRaises(frappe.ValidationError, make_purchase_invoice, pr.name)
