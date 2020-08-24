@@ -31,8 +31,7 @@ frappe.ui.form.on('POS Profile', {
 		frm.set_query("print_format", function() {
 			return {
 				filters: [
-					['Print Format', 'doc_type', '=', 'Sales Invoice'],
-					['Print Format', 'print_format_type', '=', 'Jinja'],
+					['Print Format', 'doc_type', '=', 'POS Invoice']
 				]
 			};
 		});
@@ -43,10 +42,6 @@ frappe.ui.form.on('POS Profile', {
 					account_type: ['in', ["Cash", "Bank"]]
 				}
 			};
-		});
-
-		frm.set_query("print_format", function() {
-			return { filters: { doc_type: "Sales Invoice", print_format_type: "JS"} };
 		});
 
 		frm.set_query('company_address', function(doc) {

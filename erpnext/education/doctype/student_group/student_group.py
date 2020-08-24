@@ -108,6 +108,7 @@ def get_program_enrollment(academic_year, academic_term=None, program=None, batc
 
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def fetch_students(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("group_based_on") != "Activity":
 		enrolled_students = get_program_enrollment(filters.get('academic_year'), filters.get('academic_term'),
