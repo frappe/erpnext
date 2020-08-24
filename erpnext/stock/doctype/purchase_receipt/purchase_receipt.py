@@ -227,6 +227,14 @@ class PurchaseReceipt(BuyingController):
 					if not stock_value_diff:
 						continue
 
+					# If PR is sub-contracted and fg item rate is zero
+					# in that case if account for shource and target warehouse are same,
+					# then GL entries should not be posted
+					if flt(stock_value_diff) == flt(d.rm_supp_cost) \
+						and warehouse_account.get(self.supplier_warehouse) \
+						and warehouse_account[d.warehouse]["account"] == warehouse_account[self.supplier_warehouse]["account"]:
+							continue
+
 					gl_entries.append(self.get_gl_dict({
 						"account": warehouse_account[d.warehouse]["account"],
 						"against": stock_rbnb,
@@ -242,16 +250,16 @@ class PurchaseReceipt(BuyingController):
 
 					credit_amount = flt(d.base_net_amount, d.precision("base_net_amount")) \
 						if credit_currency == self.company_currency else flt(d.net_amount, d.precision("net_amount"))
-
-					gl_entries.append(self.get_gl_dict({
-						"account":  warehouse_account[d.from_warehouse]['account'] \
-							if d.from_warehouse else stock_rbnb,
-						"against": warehouse_account[d.warehouse]["account"],
-						"cost_center": d.cost_center,
-						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-						"debit": -1 * flt(d.base_net_amount, d.precision("base_net_amount")),
-						"debit_in_account_currency": -1 * credit_amount
-					}, credit_currency, item=d))
+					if credit_amount:
+						gl_entries.append(self.get_gl_dict({
+							"account":  warehouse_account[d.from_warehouse]['account'] \
+								if d.from_warehouse else stock_rbnb,
+							"against": warehouse_account[d.warehouse]["account"],
+							"cost_center": d.cost_center,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"debit": -1 * flt(d.base_net_amount, d.precision("base_net_amount")),
+							"debit_in_account_currency": -1 * credit_amount
+						}, credit_currency, item=d))
 
 					negative_expense_to_be_booked += flt(d.item_tax_amount)
 
