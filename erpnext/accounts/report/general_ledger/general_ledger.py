@@ -180,7 +180,7 @@ def get_gl_entries(filters):
 		filters, as_dict=1)
 
 	if filters.get('presentation_currency'):
-		return convert_to_presentation_currency(gl_entries, currency_map)
+		return convert_to_presentation_currency(gl_entries, currency_map, filters.get('company'))
 	else:
 		return gl_entries
 
