@@ -834,8 +834,8 @@ class Item(WebsiteGenerator):
 		item_attributes = frappe.get_all(
 			"Item Variant Attribute",
 			filters={
-				"parent": ["in", "({})".format(items_string)],
-				"attribute": ["in", "({})".format(', '.join(deleted_attribute))]
+				"parent": ["in", items],
+				"attribute": ["in", deleted_attribute]
 			},
 			fields=["attribute", "parent"]
 		)
