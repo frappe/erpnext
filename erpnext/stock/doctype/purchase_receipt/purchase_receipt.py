@@ -223,6 +223,15 @@ class PurchaseReceipt(BuyingController):
 
 					if not stock_value_diff:
 						continue
+
+					# If PR is sub-contracted and fg item rate is zero
+					# in that case if account for shource and target warehouse are same,
+					# then GL entries should not be posted
+					if flt(stock_value_diff) == flt(d.rm_supp_cost) \
+						and warehouse_account.get(self.supplier_warehouse) \
+						and warehouse_account[d.warehouse]["account"] == warehouse_account[self.supplier_warehouse]["account"]:
+							continue
+
 					gl_entries.append(self.get_gl_dict({
 						"account": warehouse_account[d.warehouse]["account"],
 						"against": stock_rbnb,
@@ -232,16 +241,17 @@ class PurchaseReceipt(BuyingController):
 					}, warehouse_account[d.warehouse]["account_currency"], item=d))
 
 					# stock received but not billed
-					stock_rbnb_currency = get_account_currency(stock_rbnb)
-					gl_entries.append(self.get_gl_dict({
-						"account": stock_rbnb,
-						"against": warehouse_account[d.warehouse]["account"],
-						"cost_center": d.cost_center,
-						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-						"credit": flt(d.base_net_amount, d.precision("base_net_amount")),
-						"credit_in_account_currency": flt(d.base_net_amount, d.precision("base_net_amount")) \
-							if stock_rbnb_currency==self.company_currency else flt(d.net_amount, d.precision("net_amount"))
-					}, stock_rbnb_currency, item=d))
+					if d.base_net_amount:
+						stock_rbnb_currency = get_account_currency(stock_rbnb)
+						gl_entries.append(self.get_gl_dict({
+							"account": stock_rbnb,
+							"against": warehouse_account[d.warehouse]["account"],
+							"cost_center": d.cost_center,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"credit": flt(d.base_net_amount, d.precision("base_net_amount")),
+							"credit_in_account_currency": flt(d.base_net_amount, d.precision("base_net_amount")) \
+								if stock_rbnb_currency==self.company_currency else flt(d.net_amount, d.precision("net_amount"))
+						}, stock_rbnb_currency, item=d))
 
 					negative_expense_to_be_booked += flt(d.item_tax_amount)
 
