@@ -84,6 +84,14 @@ frappe.ui.form.on("Opportunity", {
 
 			frm.add_custom_button(__('Quotation'),
 				cur_frm.cscript.create_quotation, __('Create'));
+			
+			frm.add_custom_button(__('Issue'),
+			function() {
+				frappe.new_doc('Issue', {
+				  'raised_by': frm.doc.contact_email,
+				  'subject': frm.doc.title
+					})
+			}, __('Create'));
 
 			if(doc.status!=="Quotation") {
 				frm.add_custom_button(__('Lost'), () => {
@@ -185,8 +193,12 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		frappe.model.open_mapped_doc({
 			method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
 			frm: cur_frm
+
+	
 		})
 	}
+	
+	
 });
 
 $.extend(cur_frm.cscript, new erpnext.crm.Opportunity({frm: cur_frm}));
