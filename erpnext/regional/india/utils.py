@@ -673,6 +673,9 @@ def update_grand_total_for_rcm(doc, method):
 	if country != 'India':
 		return
 
+	if not doc.total_taxes_and_charges:
+		return
+
 	if doc.reverse_charge == 'Y':
 		gst_accounts = get_gst_accounts(doc.company)
 		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
@@ -713,7 +716,10 @@ def make_regional_gl_entries(gl_entries, doc):
 	country = frappe.get_cached_value('Company', doc.company, 'country')
 
 	if country != 'India':
-		return
+		return gl_entries
+
+	if not doc.total_taxes_and_charges:
+		return gl_entries
 
 	if doc.reverse_charge == 'Y':
 		gst_accounts = get_gst_accounts(doc.company)
