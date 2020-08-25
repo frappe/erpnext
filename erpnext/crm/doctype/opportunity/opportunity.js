@@ -194,7 +194,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 			method: "erpnext.crm.doctype.opportunity.opportunity.make_quotation",
 			frm: cur_frm
 		})
-	}	
+	}
 });
 
 $.extend(cur_frm.cscript, new erpnext.crm.Opportunity({frm: cur_frm}));
