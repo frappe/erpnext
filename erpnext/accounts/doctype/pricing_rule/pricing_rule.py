@@ -370,32 +370,33 @@ def set_discount_amount(rate, item_details):
 
 def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
 	from erpnext.accounts.doctype.pricing_rule.utils import get_pricing_rule_items
-	for d in json.loads(pricing_rules):
-		if not d or not frappe.db.exists("Pricing Rule", d): continue
-		pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
+	if pricing_rules:
+		for d in json.loads(pricing_rules):
+			if not d or not frappe.db.exists("Pricing Rule", d): continue
+			pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
 
-		if pricing_rule.price_or_product_discount == 'Price':
-			if pricing_rule.rate_or_discount == 'Discount Percentage':
-				item_details.discount_percentage = 0.0
-				item_details.discount_amount = 0.0
+			if pricing_rule.price_or_product_discount == 'Price':
+				if pricing_rule.rate_or_discount == 'Discount Percentage':
+					item_details.discount_percentage = 0.0
+					item_details.discount_amount = 0.0
 
-			if pricing_rule.rate_or_discount == 'Discount Amount':
-				item_details.discount_amount = 0.0
+				if pricing_rule.rate_or_discount == 'Discount Amount':
+					item_details.discount_amount = 0.0
 
-			if pricing_rule.margin_type in ['Percentage', 'Amount']:
-				item_details.margin_rate_or_amount = 0.0
-				item_details.margin_type = None
-		elif pricing_rule.get('free_item'):
-			item_details.remove_free_item = (item_code if pricing_rule.get('same_item')
-				else pricing_rule.get('free_item'))
+				if pricing_rule.margin_type in ['Percentage', 'Amount']:
+					item_details.margin_rate_or_amount = 0.0
+					item_details.margin_type = None
+			elif pricing_rule.get('free_item'):
+				item_details.remove_free_item = (item_code if pricing_rule.get('same_item')
+					else pricing_rule.get('free_item'))
 
-		if pricing_rule.get("mixed_conditions") or pricing_rule.get("apply_rule_on_other"):
-			items = get_pricing_rule_items(pricing_rule)
-			item_details.apply_on = (frappe.scrub(pricing_rule.apply_rule_on_other)
-				if pricing_rule.apply_rule_on_other else frappe.scrub(pricing_rule.get('apply_on')))
-			item_details.applied_on_items = ','.join(items)
+			if pricing_rule.get("mixed_conditions") or pricing_rule.get("apply_rule_on_other"):
+				items = get_pricing_rule_items(pricing_rule)
+				item_details.apply_on = (frappe.scrub(pricing_rule.apply_rule_on_other)
+					if pricing_rule.apply_rule_on_other else frappe.scrub(pricing_rule.get('apply_on')))
+				item_details.applied_on_items = ','.join(items)
 
-	item_details.pricing_rules = ''
+		item_details.pricing_rules = ''
 
 	return item_details
 
