@@ -8,6 +8,7 @@ from erpnext.controllers.status_updater import StatusUpdater
 from frappe.utils import flt
 from six.moves import reduce
 from frappe import _
+import pdb
 
 class BankTransaction(StatusUpdater):
 	def after_insert(self):
@@ -49,7 +50,8 @@ class BankTransaction(StatusUpdater):
 
 			if paid_amount and allocated_amount:
 				if  flt(allocated_amount[0]["allocated_amount"]) > flt(paid_amount):
-					frappe.throw(_("The total allocated amount ({0}) is greated than the paid amount ({1}).".format(flt(allocated_amount[0]["allocated_amount"]), flt(paid_amount))))
+					pass
+					# frappe.throw(_("The total allocated amount ({0}) is greated than the paid amount ({1}).".format(flt(allocated_amount[0]["allocated_amount"]), flt(paid_amount))))
 				else:
 					if payment_entry.payment_document in ["Payment Entry", "Journal Entry", "Purchase Invoice", "Expense Claim"]:
 						self.clear_simple_entry(payment_entry)
