@@ -8,8 +8,6 @@ import json
 import copy
 from frappe import throw, _
 from frappe.utils import flt, cint, getdate
-from erpnext.accounts.doctype.pricing_rule.utils import (get_pricing_rules,
-		get_applied_pricing_rules, get_pricing_rule_items, get_product_discount_rule)
 
 from frappe.model.document import Document
 
@@ -208,6 +206,9 @@ def get_serial_no_for_item(args):
 	return item_details
 
 def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=False):
+	from erpnext.accounts.doctype.pricing_rule.utils import (get_pricing_rules,
+			get_applied_pricing_rules, get_pricing_rule_items, get_product_discount_rule)
+
 	if isinstance(doc, string_types):
 		doc = json.loads(doc)
 
@@ -363,6 +364,7 @@ def set_discount_amount(rate, item_details):
 			item_details.rate = rate
 
 def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
+	from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
 	for d in get_applied_pricing_rules(pricing_rules):
 		if not d or not frappe.db.exists("Pricing Rule", d): continue
 		pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
