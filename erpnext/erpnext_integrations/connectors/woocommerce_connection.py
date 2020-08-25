@@ -67,74 +67,71 @@ def _order(woocommerce_settings, *args, **kwargs):
 			"practitioner_order": "Practitioner Order",
 			"self": "Self Test",
 			"patient_order": "Patient Order",
-			"on-behalf": "Patient Order",
+			"on-behalf": "On Behalf",
 		}
 
 		# link customer and address
+		customer_code = ""
+		pos_order_type = ""
 		patient_name = ""
-		if customer_id == 0: # this is guest login, a patient under a practitioner
-			for meta in meta_data:
-				if meta["key"] == "user_practitioner":
-					if "-" in meta["value"]:
-						end_index = meta["value"].find('-')
-						customer_code = meta["value"][0:end_index]
-					else:
-						customer_code = meta["value"]
-				elif meta["key"] == "practitioner_name":
-					practitioner_name = meta["value"]
-				elif meta["key"] == "delivery_option":
-					delivery_option = meta["value"]
-				elif meta["key"] == "_nab_reference_id":
-					nab_reference_id = meta["value"]
-				elif meta["key"] == "pos_practitioner":
-					customer_id = meta["value"]
-				elif meta["key"] == "pos_patient":
-					patient_name = meta["value"]
+		for meta in meta_data:
+			if meta["key"] == "user_practitioner":
+				if "-" in meta["value"]:
+					end_index = meta["value"].find('-')
+					customer_code = meta["value"][0:end_index]
 				else:
-					pass
+					customer_code = meta["value"]
+			elif meta["key"] == "customer_code":
+				customer_code = meta["value"]
+			# elif meta["key"] == "practitioner_name":
+			# 	practitioner_name = meta["value"]
+			elif meta["key"] == "delivery_option":
+				delivery_option = meta["value"]
+			# elif meta["key"] == "_nab_reference_id":
+			# 	nab_reference_id = meta["value"]
+			elif meta["key"] == "pos_patient":
+				patient_name = meta["value"]
+			elif meta["key"] == "_pos_order_type":
+				pos_order_type = meta["value"]
+			else:
+				pass
 
+		if not patient_name:
+			patient_name = billing.get('first_name') + ", " + billing.get('last_name')
+		street = billing.get('address_1') + " " + billing.get('address_2')
+		city_postcode_country = billing.get('city') + ", " + billing.get('state') + ", " + billing.get('postcode') + ", " + billing.get('country')
+		phone = billing.get('phone')
+		email = billing.get('email')
+
+		# create temp_address dict for later use
+		temp_address = {
+			"temporary_address": 1,
+			"temporary_delivery_address_line_1": patient_name,
+			"temporary_delivery_address_line_2": street,
+			"temporary_delivery_address_line_3": city_postcode_country,
+			"temporary_delivery_address_line_4": phone,
+			"temporary_delivery_address_line_5": email,
+		}
+
+		test_order = 0
+		if customer_id == 0: # this is guest login, a patient under a practitioner
 			if not customer_code :
 				frappe.throw("Check order id {} in WP, cannot find user_practitioner".format(order.get('id')))
 			# For patient order, we need to get shipping address in the order itself
+
 			if frappe.db.exists("Customer", customer_code):
 				customer_doc = frappe.get_doc("Customer", customer_code)
-				if not patient_name:
-					patient_name = billing.get('first_name') + ", " + billing.get('last_name')
-				street = billing.get('address_1') + " " + billing.get('address_2')
-				city_postcode_country = billing.get('city') + ", " + billing.get('state') + ", " + billing.get('postcode') + ", " + billing.get('country')
-				phone = billing.get('phone')
-				email = billing.get('email')
-
-				# create sales invoice
-				temp_address = {
-					"temporary_address": 1,
-					"temporary_delivery_address_line_1": patient_name,
-					"temporary_delivery_address_line_2": street,
-					"temporary_delivery_address_line_3": city_postcode_country,
-					"temporary_delivery_address_line_4": phone,
-					"temporary_delivery_address_line_5": email,
-				}
 
 				# We don't need to use the backorder flag for test order
 				edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
 
 
-				new_invoice = create_sales_invoice(edited_line_items, order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option)
+				new_invoice, test_order = create_sales_invoice(edited_line_items, order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option)
 			else:
 				frappe.throw("Customer {} not exits!".format(customer_code))
 
 		else: # customer_id != 0
 			# this is a user login, a practitioner
-			customer_code = ""
-			pos_order_type = ""
-			for meta in meta_data:
-				if meta["key"] == "customer_code":
-					customer_code = meta["value"]
-				elif meta["key"] == "user_practitioner":
-					customer_code = meta["value"]
-				elif meta["key"] == "_pos_order_type":
-					pos_order_type = meta["value"]
-
 			if not customer_code:
 				frappe.throw("WP Customer id {} don't have a customer code in ERPNext!".format(customer_id))
 			# For practitioner order, we just need to get the primary address as shipping address
@@ -143,50 +140,47 @@ def _order(woocommerce_settings, *args, **kwargs):
 				payment_category = customer_doc.payment_category
 				accepts_backorders = customer_doc.accepts_backorders
 
-
 				if woocommerce_settings.company == "RN Labs":
 					# use pos_order_type to check if it's practitioner order or self test
 					order_type = order_type_mapping[pos_order_type]
-				
-					# we need to find the primary address
-
-
 					# branch off by different order type
 					"""
 						order_type_mapping = {
 							"practitioner_order": "Practitioner Order",
 							"self": "Self Test",
+							"on-behalf": "On Behalf",
 							"patient_order": "Patient Order",
-							"on-behalf": "Patient Order",
 						}
 					"""
-					if order_type == "Self Test":
+					if pos_order_type == "self":
 						# apply 20% of the discount
 						self_test_discount = 20
 						edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings, discount=self_test_discount)
-
-
-						new_invoice = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type)
+						new_invoice, test_order = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type)
 						## maybe no shipping fee 
-						pass
-					elif order_type == "Practitioner Order" or order_type == "Patient Order":
-						# Item backorder validation
-						edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
 
+					elif pos_order_type == "practitioner_order":
+
+						edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
 						if create_backorder_doc_flag == 1:
 							# throw error if the customer don't accept backorders
 							if not accepts_backorders:
 								frappe.throw("Customer {} doesn't accepts backorders!")
 							frappe.throw("This need to be developed further, to create a backorder instead of invoice")
 						else: # Create sales invoice
-							new_invoice = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type)
+							new_invoice, test_order = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type)
+
+					elif pos_order_type == "on-behalf": # Test order for patient
+						edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
+						# we can ignore the create_backorder_doc_flag since this is a test order
+						new_invoice, test_order = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=temp_address, delivery_option=delivery_option)
+
 
 			else:
 				frappe.throw("Customer {} not exits!".format(customer_code))
 
-		# pdb.set_trace()
 		# Create a intergration request
-		log_integration_request(order=order, invoice_doc=new_invoice, status="Completed", data=json.dumps(order), reference_docname=new_invoice.name, woocommerce_settings=woocommerce_settings)
+		log_integration_request(order=order, invoice_doc=new_invoice, status="Completed", data=json.dumps(order), reference_docname=new_invoice.name, woocommerce_settings=woocommerce_settings, test_order=test_order)
 
 
 		return "Sales invoice: {} created!".format(new_invoice.name)
@@ -228,20 +222,27 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 	invoice_doc.flags.ignore_mandatory = True
 	invoice_doc.insert()
 
+	shipping_total = order.get('shipping_total')
+	shipping_tax = order.get('shipping_tax')
+	test_order = 0
 	if woocommerce_settings.company == "RN Labs":
 		# adding handling fee
-		if invoice_doc.order_type in ["Patient Order", "Self Test"]:
+		if invoice_doc.order_type in ["Patient Order", "Self Test", "On Behalf"]:
+			# Hard code shipping tax
+			if invoice_doc.order_type == "On Behalf":
+				shipping_tax = 2
 			invoice_doc.append("items",{
 				"item_code": "HAND-FEE",
 				"item_name": "Handling Fee",
 				"description": "Handling Fee",
 				"uom": "Unit",
 				"qty": 1,
-				"rate": 20,
+				"rate": shipping_total,
 				"warehouse": woocommerce_settings.warehouse
 			})
-			addTaxDetails("Actual", invoice_doc, 20*tax_rate, "Handling Fee tax", woocommerce_settings.tax_account)
-		else: # Practitioner Order
+			addTaxDetails("Actual", invoice_doc, shipping_tax, "Handling Fee tax", woocommerce_settings.tax_account)
+			test_order = 1
+		elif invoice_doc.order_type == "Practitioner Order": # Practitioner Order
 			# Add shipping fee according to the total 
 			if invoice_doc.total < 150:
 				# use default $10 as shipping fee need to correct in the future
@@ -252,7 +253,7 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 
 	DocTags("Sales Invoice").add(invoice_doc.name, "WooCommerce Order")
 
-	return invoice_doc
+	return invoice_doc, test_order
 	
 
 def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, woocommerce_settings, tax_rate):
