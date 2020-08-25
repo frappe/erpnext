@@ -395,7 +395,8 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
 			items = get_pricing_rule_items(pricing_rule)
 			item_details.apply_on = (frappe.scrub(pricing_rule.apply_rule_on_other)
 				if pricing_rule.apply_rule_on_other else frappe.scrub(pricing_rule.get('apply_on')))
-			item_details.applied_on_items = ','.join(items)
+			item_details.applied_on_items = json.dumps(items)
+			item_details.price_or_product_discount = pricing_rule.price_or_product_discount
 
 	item_details.pricing_rules = ''
 
