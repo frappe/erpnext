@@ -1412,9 +1412,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 			if (data && data.apply_rule_on_other_items) {
 				me.frm.doc.items.forEach(d => {
-					if (in_list(data.apply_rule_on_other_items, d[data.apply_rule_on])) {
+					if (in_list(JSON.parse(data.apply_rule_on_other_items), d[data.apply_rule_on])) {
 						for(var k in data) {
-							if (in_list(fields, k) && data[k] && (data.price_or_product_discount === 'price' || k === 'pricing_rules')) {
+							if (in_list(fields, k) && data[k] && (data.price_or_product_discount === 'Price' || k === 'pricing_rules')) {
 								frappe.model.set_value(d.doctype, d.name, k, data[k]);
 							}
 						}
@@ -1498,9 +1498,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			me.frm.doc.items = items;
 			refresh_field('items');
 		} else if(item.applied_on_items && item.apply_on) {
-			const applied_on_items = item.applied_on_items.split(',');
+			const applied_on_items = JSON.parse(item.applied_on_items);
 			me.frm.doc.items.forEach(row => {
-				if(applied_on_items.includes(row[item.apply_on])) {
+				if(in_list(applied_on_items, row[item.apply_on])) {
 					fields.forEach(f => {
 						row[f] = 0;
 					});
