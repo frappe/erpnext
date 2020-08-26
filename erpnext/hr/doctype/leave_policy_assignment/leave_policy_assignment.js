@@ -2,6 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Leave Policy Assignment', {
+	onload: function(frm){
+		frm.ignore_doctypes_on_cancel_all = ["Leave Ledger Entry"];
+	},
+
 	refresh: function(frm) {
 		if(frm.doc.docstatus === 1 && frm.doc.already_allocated === 0){
 			frm.add_custom_button(__("Grant Leave"), function() {
