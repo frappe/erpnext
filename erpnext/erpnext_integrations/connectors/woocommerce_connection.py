@@ -113,79 +113,85 @@ def _order(woocommerce_settings, *args, **kwargs):
 			"temporary_delivery_address_line_5": email,
 		}
 
+		if not customer_code :
+			frappe.throw("Check order id {} in WP, cannot find user_practitioner".format(order.get('id')))
+
+		if frappe.db.exists("Customer", customer_code):
+			customer_doc = frappe.get_doc("Customer", customer_code)
+			payment_category = customer_doc.payment_category
+			accepts_backorders = customer_doc.accepts_backorders
+		else:
+			frappe.throw("Customer {} not exits!".format(customer_code))
+
 		test_order = 0
 		if customer_id == 0: # this is guest login, a patient under a practitioner
-			if not customer_code :
-				frappe.throw("Check order id {} in WP, cannot find user_practitioner".format(order.get('id')))
-			# For patient order, we need to get shipping address in the order itself
-
-			if frappe.db.exists("Customer", customer_code):
-				customer_doc = frappe.get_doc("Customer", customer_code)
-
+			edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
+			if pos_order_type == "patient_test_order":
 				# We don't need to use the backorder flag for test order
-				edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
+				test_order = 1
+				new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option, test_order=test_order)
 
+			elif pos_order_type == "patient_product_order":
+				if create_backorder_doc_flag == 1:
+					# throw error if the customers don't accept backorders
+					if not accepts_backorders:
+						frappe.throw("Customer {} doesn't accept backorders!")
+					frappe.throw("This need to be developed further, to create a backorder instead of invoice")
 
-				new_invoice, test_order = create_sales_invoice(edited_line_items, order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option)
+				new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option)
 			else:
-				frappe.throw("Customer {} not exits!".format(customer_code))
-
+				frappe.log_error(title="Error in guest order", message="Cannot recoginized pos_order_type: {}".format(pos_order_type))
 		else: # customer_id != 0
 			# this is a user login, a practitioner
-			if not customer_code:
-				frappe.throw("WP Customer id {} don't have a customer code in ERPNext!".format(customer_id))
-			# For practitioner order, we just need to get the primary address as shipping address
-			if frappe.db.exists("Customer", customer_code):
-				customer_doc = frappe.get_doc("Customer", customer_code)
-				payment_category = customer_doc.payment_category
-				accepts_backorders = customer_doc.accepts_backorders
+			if woocommerce_settings.company == "RN Labs":
+				order_type = order_type_mapping[pos_order_type]
+				"""
+					order_type_mapping = {
+						"practitioner_order": "Practitioner Order",
+						"self": "Self Test",
+						"on-behalf": "On Behalf",
+						"patient_order": "Patient Order",
+					}
+				"""
+				if pos_order_type == "self":
+					# apply 20% of the discount
+					self_test_discount = 20
+					edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings, discount=self_test_discount)
+					test_order = 1
+					new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, test_order=test_order)
+					## maybe no shipping fee 
 
-				if woocommerce_settings.company == "RN Labs":
-					# use pos_order_type to check if it's practitioner order or self test
-					order_type = order_type_mapping[pos_order_type]
-					# branch off by different order type
-					"""
-						order_type_mapping = {
-							"practitioner_order": "Practitioner Order",
-							"self": "Self Test",
-							"on-behalf": "On Behalf",
-							"patient_order": "Patient Order",
-						}
-					"""
-					if pos_order_type == "self":
-						# apply 20% of the discount
-						self_test_discount = 20
-						edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings, discount=self_test_discount)
-						new_invoice, test_order = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type)
-						## maybe no shipping fee 
+				elif pos_order_type == "practitioner_order":
 
-					elif pos_order_type == "practitioner_order":
+					edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
+					if create_backorder_doc_flag == 1:
+						# throw error if the customers don't accept backorders
+						if not accepts_backorders:
+							frappe.throw("Customer {} doesn't accept backorders!")
+						frappe.throw("This need to be developed further, to create a backorder instead of invoice")
+					else: # Create sales invoice
+						new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type)
 
-						edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
-						if create_backorder_doc_flag == 1:
-							# throw error if the customer don't accept backorders
-							if not accepts_backorders:
-								frappe.throw("Customer {} doesn't accepts backorders!")
-							frappe.throw("This need to be developed further, to create a backorder instead of invoice")
-						else: # Create sales invoice
-							new_invoice, test_order = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type)
+				elif pos_order_type == "on-behalf": # Test order for patient
+					# we can ignore the create_backorder_doc_flag since this is a test order
+					test_order = 1
+					edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
 
-					elif pos_order_type == "on-behalf": # Test order for patient
-						edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
-						# we can ignore the create_backorder_doc_flag since this is a test order
-						new_invoice, test_order = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=temp_address, delivery_option=delivery_option)
+					new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=temp_address, delivery_option=delivery_option, test_order=test_order)
 
-
-			else:
-				frappe.throw("Customer {} not exits!".format(customer_code))
+				else:
+					frappe.log_error(title="Error in authorized order", message="Cannot recoginized pos_order_type: {}".format(pos_order_type))
 
 		# Create a intergration request
-		log_integration_request(order=order, invoice_doc=new_invoice, status="Completed", data=json.dumps(order), reference_docname=new_invoice.name, woocommerce_settings=woocommerce_settings, test_order=test_order)
+		try:
+			log_integration_request(order=order, invoice_doc=new_invoice, status="Completed", data=json.dumps(order), reference_docname=new_invoice.name, woocommerce_settings=woocommerce_settings, test_order=test_order, customer_accepts_backorder=customer_accepts_backorder)
+			return "Sales invoice: {} created!".format(new_invoice.name)
+		except UnboundLocalError:
+			frappe.log_error(title="Error in Woocommerce Integration", message=frappe.get_traceback())
+			return "failed"
 
 
-		return "Sales invoice: {} created!".format(new_invoice.name)
-
-def create_sales_invoice(edited_line_items, order, customer_code, payment_category,  woocommerce_settings, order_type=None, temp_address=None, delivery_option=None):
+def create_sales_invoice(edited_line_items, order, customer_code, payment_category,  woocommerce_settings, order_type=None, temp_address=None, delivery_option=None, test_order=0):
 	#Set Basic Info
 	date_created = order.get("date_created").split("T")[0]
 	customer_note = order.get('customer_note')
@@ -214,11 +220,22 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 	if delivery_option:
 		invoice_dict['customer_shipping_instructions'] = delivery_option
 
+	if woocommerce_settings.company == "RN Labs":
+		# set selling price list
+		if order_type in ["Practitioner Order", "Self Test", "On Behalf"]:
+			invoice_dict["selling_price_list"] = "Aus Wholesale"
+			invoice_dict["taxes_and_charges"] = "Australia GST 10% Wholesale - RNLab"
+			included_in_print_rate = 0
+		else:
+			invoice_dict["selling_price_list"] = "Aus Retail"
+			invoice_dict["taxes_and_charges"] = "Australia GST 10% Retail - RNLab"
+			included_in_print_rate = 1
+
 	# create frappe doc for invoice
 	invoice_doc = frappe.get_doc(invoice_dict)
 
 	# Add Items
-	set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, woocommerce_settings, tax_rate)
+	customer_accepts_backorder = set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, woocommerce_settings, tax_rate)
 
 	# Save 
 	invoice_doc.flags.ignore_mandatory = True
@@ -226,36 +243,51 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 
 	shipping_total = order.get('shipping_total')
 	shipping_tax = order.get('shipping_tax')
-	test_order = 0
-	if woocommerce_settings.company == "RN Labs":
-		# adding handling fee
-		if invoice_doc.order_type in ["Patient Order", "Self Test", "On Behalf"]:
-			# Hard code shipping tax
-			if invoice_doc.order_type == "On Behalf":
-				shipping_tax = 2
-			invoice_doc.append("items",{
-				"item_code": "HAND-FEE",
-				"item_name": "Handling Fee",
-				"description": "Handling Fee",
-				"uom": "Unit",
-				"qty": 1,
-				"rate": shipping_total,
-				"warehouse": woocommerce_settings.warehouse
-			})
-			addTaxDetails("Actual", invoice_doc, shipping_tax, "Handling Fee tax", woocommerce_settings.tax_account)
-			test_order = 1
-		elif invoice_doc.order_type == "Practitioner Order": # Practitioner Order
-			# Add shipping fee according to the total 
-			if invoice_doc.total < 150:
-				# use default $10 as shipping fee need to correct in the future
-				addTaxDetails("Actual", invoice_doc, 10, "Shipping Total", woocommerce_settings.f_n_f_account)
-				addTaxDetails("Actual", invoice_doc, 10 * tax_rate, "Shipping Tax", woocommerce_settings.tax_account)
+
+
+	# adding handling fee
+	if test_order == 1:
+		# Hard code shipping tax
+		if invoice_doc.order_type == "On Behalf":
+			shipping_tax = 2
+		invoice_doc.append("items",{
+			"item_code": "HAND-FEE",
+			"item_name": "Handling Fee",
+			"description": "Handling Fee",
+			"uom": "Unit",
+			"qty": 1,
+			"rate": shipping_total,
+			"warehouse": woocommerce_settings.warehouse
+		})
+		addTaxDetails("Actual", invoice_doc, shipping_tax, "Handling Fee tax", woocommerce_settings.tax_account)
+
+	else: # test_order = 0
+		# Add shipping fee according to the total 
+		# if invoice_doc.total < 150:
+			# use default $10 as shipping fee need to correct in the future
+			# addTaxDetails("Actual", invoice_doc, 10, "Shipping Total", woocommerce_settings.f_n_f_account)
+			# addTaxDetails("Actual", invoice_doc, 10 * tax_rate, "Shipping Tax", woocommerce_settings.tax_account)
+		shipping_lines = order.get('shipping_lines')
+		if shipping_lines:
+			for shipping_line in shipping_lines:
+				if float(shipping_line["total"]) > 0:
+					invoice_doc.append("items",{
+						"item_code": "SHIP1",
+						"item_name": "Standard Shipping",
+						"description": "Standard Shipping",
+						"uom": "Unit",
+						"qty": 1,
+						"rate": float(shipping_line["total"]),
+						"warehouse": woocommerce_settings.warehouse
+					})
+		desc = "GST 10% @ 10.0"
+		addTaxDetails("On Net Total", invoice_doc, 0, desc, woocommerce_settings.tax_account, rate=10, included_in_print_rate=included_in_print_rate)
 
 	invoice_doc.save()
 
 	DocTags("Sales Invoice").add(invoice_doc.name, "WooCommerce Order")
 
-	return invoice_doc, test_order
+	return invoice_doc, customer_accepts_backorder
 	
 
 def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, woocommerce_settings, tax_rate):
@@ -273,7 +305,6 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
 		}
 	"""
 	# Proceed to invoice
-	Net_total_tax = 0
 	for item in edited_line_items:
 		if item["is_stock_item"] == 1: # only check if it maintains stock
 			if item["qty"] > item["actual_qty"]:
@@ -290,15 +321,27 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
 				invoice_doc.append("items", item)
 				if item["item_group"] != "Tests":
 					item_tax = (item['rate'] * tax_rate) * item["qty"]
-					Net_total_tax += item_tax
+
 		else: # item["is_stock_item"] == 0 
 			invoice_doc.append("items", item)
 			if item["item_group"] != "Tests":
 				item_tax = (item['rate'] * tax_rate) * item["qty"]
-				Net_total_tax += item_tax
-	if Net_total_tax > 0:
-		desc = "GST 10% @ 10.0"
-		addTaxDetails("On Net Total", invoice_doc, Net_total_tax, desc, woocommerce_settings.tax_account, rate=10)
+
+
+
+	# check if customer accepts backorder
+	customer_accepts_backorder = 1
+	try:
+		if invoice_doc.backorder_items:
+			accepts_backorders = frappe.db.get_value("Customer", customer_code, "accepts_backorders")
+			if not accepts_backorders:
+				customer_accepts_backorder = 0
+	except AttributeError:
+		pass
+	except:
+  		frappe.log_error(title='Error in woocommerce integration', message=frappe.get_traceback())
+	return customer_accepts_backorder
+
 
 
 def backorder_validation(line_items, customer_code, woocommerce_settings, discount=None):
@@ -318,24 +361,24 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 			frappe.throw("Item: {} is not found!").format(sku)
 
 		# check if the customer has the default_price_list
-		if frappe.db.get_value("Customer", customer_code, "default_price_list"):
-			price_list = frappe.db.get_value("Customer", customer_code, "default_price_list")
-			# consider we could have multiple item price for the same item 
-			rate_list = frappe.db.get_list('Item Price', 
-				filters=[
-					['selling', '=', 1],
-					['buying', '=', 0],
-					['price_list', '=', price_list],
-					['item_code', '=', sku],
-					['valid_upto', 'is', 'not set']
-				], fields=['price_list_rate']
-			)
-			if rate_list:
-				rate = rate_list[0]
-			else:
-				frappe.throw("Item Price for {} - {} is not found!".format(sku, price_list))
-		else:
-			frappe.throw("Default price list for customer: {} is not found!").format(customer_code)
+		# if frappe.db.get_value("Customer", customer_code, "default_price_list"):
+		# 	price_list = frappe.db.get_value("Customer", customer_code, "default_price_list")
+		# 	# consider we could have multiple item price for the same item 
+		# 	rate_list = frappe.db.get_list('Item Price', 
+		# 		filters=[
+		# 			['selling', '=', 1],
+		# 			['buying', '=', 0],
+		# 			['price_list', '=', price_list],
+		# 			['item_code', '=', sku],
+		# 			['valid_upto', 'is', 'not set']
+		# 		], fields=['price_list_rate']
+		# 	)
+		# 	if rate_list:
+		# 		rate = rate_list[0]
+		# 	else:
+		# 		frappe.throw("Item Price for {} - {} is not found!".format(sku, price_list))
+		# else:
+		# 	frappe.throw("Default price list for customer: {} is not found!").format(customer_code)
 
 		validated_item = {
 			"item_code": found_item.item_code,
@@ -344,7 +387,7 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 			"item_group": found_item.item_group,
 			"uom": woocommerce_settings.uom or _("Unit"),
 			"qty": item.get("quantity"),
-			"rate": rate['price_list_rate'],
+			"rate": item.get("price"),
 			"warehouse": woocommerce_settings.warehouse,
 			"is_stock_item": found_item.is_stock_item
 		}
@@ -371,13 +414,15 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 	return new_line_items, create_backorder_doc_flag
 
 
-def addTaxDetails(charge_type, sales_invoice, price, desc, tax_account_head, rate=None):
+def addTaxDetails(charge_type, sales_invoice, tax_amount, desc, tax_account_head, rate=None, included_in_print_rate=0):
 	tax_dict = {
 		"charge_type":charge_type,
 		"account_head": tax_account_head,
-		"tax_amount": price,
+		"tax_amount": tax_amount,
 		"description": desc
 	}
 	if rate:
 		tax_dict['rate'] = rate
+	if included_in_print_rate:
+		tax_dict['included_in_print_rate'] = included_in_print_rate
 	sales_invoice.append("taxes", tax_dict)
