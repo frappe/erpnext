@@ -43,23 +43,26 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 	def make_route(self):
 		'''Make website route'''
-		if not self.route:
-			self.route = ''
-			if self.parent_item_group:
-				parent_item_group = frappe.get_doc('Item Group', self.parent_item_group)
+		self.route = ''
+		if self.parent_item_group:
+			parent_item_group, route = frappe.db.get_value("Item Group", self.parent_item_group, ["parent_item_group", "route"])
 
-				# make parent route only if not root
-				if parent_item_group.parent_item_group and parent_item_group.route:
-					self.route = parent_item_group.route + '/'
+			# make parent route only if not root
+			if parent_item_group and route:
+				self.route = route + '/'
 
-			self.route += self.scrub(self.item_group_name)
+		self.route += self.scrub(self.item_group_name)
 
-			return self.route
+		return self.route
 
 	def on_trash(self):
 		NestedSet.on_trash(self)
 		WebsiteGenerator.on_trash(self)
 		self.delete_child_item_groups_key()
+
+	def after_rename(self, old_name, new_name, merge):
+		self.make_route()
+		frappe.db.set_value("Item Group", self.item_group_name, "route", self.route)
 
 	def validate_name_with_item(self):
 		if frappe.db.exists("Item", self.name):
