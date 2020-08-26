@@ -674,6 +674,9 @@ def update_grand_total_for_rcm(doc, method):
 	if country != 'India':
 		return
 
+	if not doc.total_taxes_and_charges:
+		return
+
 	if doc.reverse_charge == 'Y':
 		gst_accounts = get_gst_accounts(doc.company)
 		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
@@ -721,7 +724,7 @@ def make_regional_gl_entries(gl_entries, doc):
 	country = frappe.get_cached_value('Company', doc.company, 'country')
 
 	if country != 'India':
-		return
+		return gl_entries
 
 	if doc.reverse_charge == 'Y':
 		gst_accounts = get_gst_accounts(doc.company)
@@ -732,6 +735,7 @@ def make_regional_gl_entries(gl_entries, doc):
 			if tax.category not in ("Total", "Valuation and Total"):
 				continue
 
+			dr_or_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
 			if flt(tax.base_tax_amount_after_discount_amount) and tax.account_head in gst_account_list:
 				account_currency = get_account_currency(tax.account_head)
 
@@ -741,8 +745,8 @@ def make_regional_gl_entries(gl_entries, doc):
 						"cost_center": tax.cost_center,
 						"posting_date": doc.posting_date,
 						"against": doc.supplier,
-						"credit": tax.base_tax_amount_after_discount_amount,
-						"credits_in_account_currency": tax.base_tax_amount_after_discount_amount \
+						dr_or_cr: tax.base_tax_amount_after_discount_amount,
+						dr_or_cr + "_in_account_currency": tax.base_tax_amount_after_discount_amount \
 							if account_currency==doc.company_currency \
 							else tax.tax_amount_after_discount_amount
 					}, account_currency, item=tax)
