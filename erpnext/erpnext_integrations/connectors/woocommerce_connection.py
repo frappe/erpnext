@@ -74,6 +74,7 @@ def _order(woocommerce_settings, *args, **kwargs):
 		customer_code = ""
 		pos_order_type = ""
 		patient_name = ""
+		delivery_option = ""
 		for meta in meta_data:
 			if meta["key"] == "user_practitioner":
 				if "-" in meta["value"]:
@@ -153,17 +154,18 @@ def _order(woocommerce_settings, *args, **kwargs):
 						"patient_order": "Patient Order",
 					}
 				"""
-				if pos_order_type == "self":
+				edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
+
+				if pos_order_type in  ["self", "on-behalf"]:
 					# apply 20% of the discount
-					self_test_discount = 20
-					edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings, discount=self_test_discount)
 					test_order = 1
-					new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, test_order=test_order)
-					## maybe no shipping fee 
+					if pos_order_type == ["self"]:
+						new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, test_order=test_order)
+					else:
+						new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=temp_address, delivery_option=delivery_option, test_order=test_order)
 
 				elif pos_order_type == "practitioner_order":
 
-					edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
 					if create_backorder_doc_flag == 1:
 						# throw error if the customers don't accept backorders
 						if not accepts_backorders:
@@ -171,14 +173,6 @@ def _order(woocommerce_settings, *args, **kwargs):
 						frappe.throw("This need to be developed further, to create a backorder instead of invoice")
 					else: # Create sales invoice
 						new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type)
-
-				elif pos_order_type == "on-behalf": # Test order for patient
-					# we can ignore the create_backorder_doc_flag since this is a test order
-					test_order = 1
-					edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
-
-					new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=temp_address, delivery_option=delivery_option, test_order=test_order)
-
 				else:
 					frappe.log_error(title="Error in authorized order", message="Cannot recoginized pos_order_type: {}".format(pos_order_type))
 
@@ -393,11 +387,11 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 		}
 
 		# add discount
-		if discount: # unit is %, so discount would be 20, 30 insetad of 0.2, 0.3
-			validated_item["discount_percentage"] = discount
-			validated_item["discount_amount"] = discount/100 * validated_item["rate"]
-			validated_item["rate"] = validated_item["rate"] - validated_item["discount_amount"]
-			validated_item["ignore_pricing_rules"] = 1
+		# if discount: # unit is %, so discount would be 20, 30 insetad of 0.2, 0.3
+		# 	validated_item["discount_percentage"] = discount
+		# 	validated_item["discount_amount"] = discount/100 * validated_item["rate"]
+		# 	validated_item["rate"] = validated_item["rate"] - validated_item["discount_amount"]
+		# 	validated_item["ignore_pricing_rules"] = 1
 
 		# check if item is out of stock
 		if found_item.is_stock_item == 1:
