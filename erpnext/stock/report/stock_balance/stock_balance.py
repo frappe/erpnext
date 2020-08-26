@@ -156,10 +156,10 @@ def get_columns(filters, show_amounts=True):
 		columns += [{'label': att_name, 'fieldname': att_name, 'width': 100} for att_name in get_variants_attributes()]
 
 	if not show_amounts:
-		columns = filter(lambda d: not d.get("is_value"), columns)
+		columns = list(filter(lambda d: not d.get("is_value"), columns))
 
 	if cint(filters.consolidated):
-		columns = filter(lambda d: d.get('fieldname') not in ['warehouse', 'company'], columns)
+		columns = list(filter(lambda d: d.get('fieldname') not in ['warehouse', 'company'], columns))
 
 	return columns
 
