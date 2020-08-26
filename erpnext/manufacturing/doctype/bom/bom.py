@@ -539,7 +539,7 @@ class BOM(WebsiteGenerator):
 					'image'			: d.image,
 					'stock_uom'		: d.stock_uom,
 					'stock_qty'		: flt(d.stock_qty),
-					'rate'			: flt(d.base_rate) / flt(d.conversion_factor),
+					'rate'			: flt(d.base_rate) / (flt(d.conversion_factor) or 1.0),
 					'include_item_in_manufacturing': d.include_item_in_manufacturing
 				}))
 
