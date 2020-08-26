@@ -325,7 +325,7 @@ class AccountsController(TransactionBase):
 				apply_pricing_rule_for_free_items(self, pricing_rule_args.get('free_item_data'))
 
 		elif pricing_rule_args.get("validate_applied_rule"):
-			for pricing_rule in get_applied_pricing_rules(item):
+			for pricing_rule in get_applied_pricing_rules(item.get('pricing_rules')):
 				pricing_rule_doc = frappe.get_cached_doc("Pricing Rule", pricing_rule)
 				for field in ['discount_percentage', 'discount_amount', 'rate']:
 					if item.get(field) < pricing_rule_doc.get(field):
