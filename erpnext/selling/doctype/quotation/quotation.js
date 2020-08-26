@@ -147,6 +147,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 		this.frm.toggle_reqd("party_name", this.frm.doc.quotation_to);
 		this.frm.set_query('customer_address', this.address_query);
 		this.frm.set_query('shipping_address_name', this.address_query);
+		this.frm.set_query('contact_person', this.contact_query);
 	},
 
 	tc_name: function() {
@@ -156,6 +157,15 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 	address_query: function(doc) {
 		return {
 			query: 'frappe.contacts.doctype.address.address.address_query',
+			filters: {
+				link_doctype: frappe.dynamic_link.doctype,
+				link_name: doc.party_name
+			}
+		};
+	},
+
+	contact_query: function(doc) {
+		return {
 			filters: {
 				link_doctype: frappe.dynamic_link.doctype,
 				link_name: doc.party_name
