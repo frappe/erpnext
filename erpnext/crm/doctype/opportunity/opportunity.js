@@ -85,13 +85,15 @@ frappe.ui.form.on("Opportunity", {
 			frm.add_custom_button(__('Quotation'),
 				cur_frm.cscript.create_quotation, __('Create'));
 			
-			frm.add_custom_button(__('Issue'),
-			function() {
-				frappe.new_doc('Issue', {
-				  'raised_by': frm.doc.contact_email,
-				  'subject': frm.doc.title
-					})
-			}, __('Create'));
+			if (in_list(frappe.boot.user.can_create, "Issue")) {
+				frm.add_custom_button(__('Issue'),
+					function() {
+						frappe.new_doc('Issue', {
+							'raised_by': frm.doc.contact_email,
+							'subject': frm.doc.title
+								});
+					   }, __('Create'));
+				 }
 
 			if(doc.status!=="Quotation") {
 				frm.add_custom_button(__('Lost'), () => {
