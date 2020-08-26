@@ -225,7 +225,7 @@ def get_json(filters, report_name, data):
 
 	fp = "%02d%s" % (getdate(filters["to_date"]).month, getdate(filters["to_date"]).year)
 
-	gst_json = {"gstin": "", "version": "GST2.3.4",
+	gst_json = {"version": "GST2.3.4",
 		"hash": "hash", "gstin": gstin, "fp": fp}
 
 	gst_json["hsn"] = {
@@ -239,7 +239,7 @@ def get_json(filters, report_name, data):
 
 @frappe.whitelist()
 def download_json_file():
-	''' download json content in a file '''
+	'''download json content in a file'''
 	data = frappe._dict(frappe.local.form_dict)
 	frappe.response['filename'] = frappe.scrub("{0}".format(data['report_name'])) + '.json'
 	frappe.response['filecontent'] = data['data']
