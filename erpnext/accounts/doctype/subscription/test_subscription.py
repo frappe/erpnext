@@ -538,3 +538,23 @@ class TestSubscription(unittest.TestCase):
 		settings.save()
 
 		subscription.delete()
+
+	def test_duplicate_invoice_check(self):
+		subscription = frappe.new_doc('Subscription')
+		subscription.customer = '_Test Customer'
+		subscription.generate_invoice_at_period_start = True
+		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
+		subscription.start = nowdate()
+		subscription.save()
+
+		# Generate invoice for the current invoicing period
+		subscription.process()
+		subscription.load_from_db()
+		self.assertEqual(len(subscription.invoices), 1)
+
+		# Proccess subscription again for the same period
+		subscription.process()
+		subscription.load_from_db()
+
+		# No new invoice should be created for current period
+		self.assertEqual(len(subscription.invoices), 1)
