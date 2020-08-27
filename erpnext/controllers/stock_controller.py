@@ -242,10 +242,11 @@ class StockController(AccountsController):
 					_(self.doctype), self.name, item.get("item_code")))
 
 	def delete_auto_created_batches(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		for d in self.items:
 			if not d.batch_no: continue
 
-			serial_nos = [sr.name for sr in frappe.get_all("Serial No", {'batch_no': d.batch_no})]
+			serial_nos = get_serial_nos(d.serial_no)
 			if serial_nos:
 				frappe.db.set_value("Serial No", { 'name': ['in', serial_nos] }, "batch_no", None)
 
