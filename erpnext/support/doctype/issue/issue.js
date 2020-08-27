@@ -164,7 +164,7 @@ frappe.ui.form.on("Issue", {
 				${split_issue}
 			</button>`)
 				.appendTo(frm.timeline.wrapper.find('.comment-header .asset-details:not([data-communication-type="Comment"])'))
-			if (!frm.timeline.wrapper.data("split-issue-event-attached")){
+			if (!frm.timeline.wrapper.data("split-issue-event-attached")) {
 				frm.timeline.wrapper.on('click', '.btn-split-issue', (e) => {
 					var dialog = new frappe.ui.Dialog({
 						title: __("Split Issue"),
