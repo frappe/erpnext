@@ -9,11 +9,20 @@ from frappe import _, bold
 from frappe.utils import getdate, date_diff, comma_and, formatdate
 from math import ceil
 import json
+from six import string_types
 
 class LeavePolicyAssignment(Document):
 
 	def validate(self):
 		self.validate_policy_assignment_overlap()
+		self.set_dates()
+
+	def set_dates(self):
+		if self.assignment_based_on == "Leave Period":
+			self.effective_from = frappe.db.get_value("Leave Period", self.leave_period, "from_date")
+			self.effective_to = frappe.db.get_value("Leave Period", self.leave_period, "to_date")
+		elif self.assignment_based_on == "Joining Date":
+			self.effective_from = frappe.db.get_value("Employee", self.employee, "date_of_joining")
 
 	def validate_policy_assignment_overlap(self):
 		leave_policy_assignments = frappe.db.sql("""
@@ -103,20 +112,29 @@ def grant_leave_for_multiple_employees(leave_policy_assignments):
 
 @frappe.whitelist()
 def create_assignment_for_multiple_employees(employees, data):
-	employees= json.loads(employees)
-	data = frappe._dict(json.loads(data))
+
+	if isinstance(employees, string_types):
+		employees= json.loads(employees)
+
+	if isinstance(employees, string_types):
+		data = frappe._dict(json.loads(data))
+
+	docs_name = []
 	for employee in employees:
 		assignment = frappe.new_doc("Leave Policy Assignment")
 		assignment.employee = employee
 		assignment.assignment_based_on = data.assignment_based_on
 		assignment.leave_policy = data.leave_policy
-		assignment.effective_from = getdate(data.effective_from)
-		assignment.effective_to = getdate(data.effective_to)
+		assignment.effective_from = getdate(data.effective_from) or None
+		assignment.effective_to = getdate(data.effective_to) or None
 		assignment.leave_period = data.leave_period or None
 		assignment.carry_forward = data.carry_forward
 
 		assignment.save()
 		assignment.submit()
+		docs_name.append(assignment.name)
+	return docs_name
+
 
 def automatic_allocate_leaves_based_on_leave_policy():
 	today = getdate()
