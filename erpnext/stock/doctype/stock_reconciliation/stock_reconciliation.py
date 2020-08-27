@@ -291,8 +291,6 @@ class StockReconciliation(StockController):
 	def add_new_serial_and_batch(self, sl_entries):
 		for row in self.items:
 			if row.qty:
-				serial_nos = get_serial_nos(row.serial_no) or []
-
 				args = self.get_sle_for_items(row)
 
 				args.update({
