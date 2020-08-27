@@ -12,7 +12,7 @@ frappe.listview_settings['Work Order'] = {
 				"Not Started": "red",
 				"In Process": "orange",
 				"Completed": "green",
-				"Cancelled": "darkgray"
+				"Cancelled": "gray"
 			}[doc.status], "status,=," + doc.status];
 		}
 	}

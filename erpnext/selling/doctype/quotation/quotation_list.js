@@ -20,9 +20,9 @@ frappe.listview_settings['Quotation'] = {
 		} else if(doc.status==="Ordered") {
 			return [__("Ordered"), "green", "status,=,Ordered"];
 		} else if(doc.status==="Lost") {
-			return [__("Lost"), "darkgray", "status,=,Lost"];
+			return [__("Lost"), "gray", "status,=,Lost"];
 		} else if(doc.status==="Expired") {
-			return [__("Expired"), "darkgray", "status,=,Expired"];
+			return [__("Expired"), "gray", "status,=,Expired"];
 		}
 	}
 };
