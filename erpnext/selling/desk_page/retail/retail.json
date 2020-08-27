@@ -3,7 +3,7 @@
   {
    "hidden": 0,
    "label": "Retail Operations",
-   "links": "[\n    {\n        \"description\": \"Setup default values for POS Invoices\",\n        \"label\": \"Point-of-Sale Profile\",\n        \"name\": \"POS Profile\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"POS Profile\"\n        ],\n        \"description\": \"Point of Sale\",\n        \"label\": \"POS\",\n        \"name\": \"pos\",\n        \"onboard\": 1,\n        \"type\": \"page\"\n    },\n    {\n        \"description\": \"Cashier Closing\",\n        \"label\": \"Cashier Closing\",\n        \"name\": \"Cashier Closing\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Setup mode of POS (Online / Offline)\",\n        \"label\": \"POS Settings\",\n        \"name\": \"POS Settings\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"To make Customer based incentive schemes.\",\n        \"label\": \"Loyalty Program\",\n        \"name\": \"Loyalty Program\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"To view logs of Loyalty Points assigned to a Customer.\",\n        \"label\": \"Loyalty Point Entry\",\n        \"name\": \"Loyalty Point Entry\",\n        \"type\": \"doctype\"\n    }\n]"
+   "links": "[\n    {\n        \"description\": \"Setup default values for POS Invoices\",\n        \"label\": \"Point of Sale Profile\",\n        \"name\": \"POS Profile\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"POS Profile\"\n        ],\n        \"description\": \"Point of Sale\",\n        \"label\": \"Point of Sale\",\n        \"name\": \"point-of-sale\",\n        \"onboard\": 1,\n        \"type\": \"page\"\n    },\n    {\n        \"description\": \"Setup mode of POS (Online / Offline)\",\n        \"label\": \"POS Settings\",\n        \"name\": \"POS Settings\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Cashier Closing\",\n        \"label\": \"Cashier Closing\",\n        \"name\": \"Cashier Closing\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"To make Customer based incentive schemes.\",\n        \"label\": \"Loyalty Program\",\n        \"name\": \"Loyalty Program\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"To view logs of Loyalty Points assigned to a Customer.\",\n        \"label\": \"Loyalty Point Entry\",\n        \"name\": \"Loyalty Point Entry\",\n        \"type\": \"doctype\"\n    }\n]"
   }
  ],
  "category": "Domains",
@@ -19,7 +19,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Retail",
- "modified": "2020-06-30 18:35:58.987449",
+ "modified": "2020-08-20 18:00:07.515691",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Retail",
@@ -27,5 +27,27 @@
  "pin_to_bottom": 0,
  "pin_to_top": 0,
  "restrict_to_domain": "Retail",
- "shortcuts": []
+ "shortcuts": [
+  {
+   "color": "#9deca2",
+   "doc_view": "",
+   "format": "{} Active",
+   "label": "Point of Sale Profile",
+   "link_to": "POS Profile",
+   "stats_filter": "{\n    \"disabled\": 0\n}",
+   "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Point of Sale",
+   "link_to": "point-of-sale",
+   "type": "Page"
+  },
+  {
+   "doc_view": "",
+   "label": "POS Settings",
+   "link_to": "POS Settings",
+   "type": "DocType"
+  }
+ ]
 }
