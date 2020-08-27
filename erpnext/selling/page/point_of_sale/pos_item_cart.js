@@ -356,7 +356,7 @@ erpnext.PointOfSale.ItemCart = class {
 				onchange: function() {
 					if (this.value || this.value == 0) {
 						const frm = me.events.get_frm();
-						frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', this.value);
+						frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', parseFloat(this.value));
 						me.hide_discount_control(this.value);
 					}
 				},
