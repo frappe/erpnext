@@ -209,11 +209,11 @@ function set_time_to_resolve_and_response(frm) {
 
 	frm.dashboard.set_headline_alert(
 		'<div class="row">' +
-			'<div class="col-xs-6">' +
-				'<span class="indicator whitespace-nowrap '+ time_to_respond.indicator +'"><span class="hidden-xs">Time to Respond: '+ time_to_respond.diff_display +'</span></span> ' +
+			'<div class="col-xs-12 col-sm-6">' +
+				'<span class="indicator whitespace-nowrap '+ time_to_respond.indicator +'"><span>Time to Respond: '+ time_to_respond.diff_display +'</span></span> ' +
 			'</div>' +
-			'<div class="col-xs-6">' +
-				'<span class="indicator whitespace-nowrap '+ time_to_resolve.indicator +'"><span class="hidden-xs">Time to Resolve: '+ time_to_resolve.diff_display +'</span></span> ' +
+			'<div class="col-xs-12 col-sm-6">' +
+				'<span class="indicator whitespace-nowrap '+ time_to_resolve.indicator +'"><span>Time to Resolve: '+ time_to_resolve.diff_display +'</span></span> ' +
 			'</div>' +
 		'</div>'
 	);
