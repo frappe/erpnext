@@ -271,7 +271,6 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 						"description": "Standard Shipping",
 						"uom": "Unit",
 						"qty": 1,
-						"rate": float(shipping_line["total"]),
 						"warehouse": woocommerce_settings.warehouse
 					})
 		desc = "GST 10% @ 10.0"
