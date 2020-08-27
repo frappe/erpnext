@@ -34,7 +34,7 @@
 
 <div class="row transaction-subheading">
 	<div class="col-6">
-		<span class="indicator {{ doc.indicator_color or ("blue" if doc.docstatus==1 else "darkgray") }}">
+		<span class="indicator {{ doc.indicator_color or ("blue" if doc.docstatus==1 else "gray") }}">
 			{{ _(doc.get('indicator_title')) or _(doc.status) or _("Submitted") }}
 		</span>
 	</div>
