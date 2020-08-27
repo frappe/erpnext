@@ -378,6 +378,10 @@ class Subscription(Document):
 		if self.cancel_at_period_end and getdate(nowdate()) > getdate(self.current_invoice_end):
 			self.cancel_subscription_at_period_end()
 
+		if self.is_current_invoice_generated() and getdate() > getdate(self.current_invoice_end) and \
+			self.is_prepaid_to_invoice():
+			self.update_subscription_period(add_days(self.current_invoice_end, 1))
+
 	def cancel_subscription_at_period_end(self):
 		"""
 		Called when `Subscription.cancel_at_period_end` is truthy
