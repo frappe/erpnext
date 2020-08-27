@@ -53,7 +53,7 @@ class SalesInvoice(SellingController):
 		"""Set indicator for portal"""
 		if self.outstanding_amount < 0:
 			self.indicator_title = _("Credit Note Issued")
-			self.indicator_color = "darkgrey"
+			self.indicator_color = "darkgray"
 		elif self.outstanding_amount > 0 and getdate(self.due_date) >= getdate(nowdate()):
 			self.indicator_color = "orange"
 			self.indicator_title = _("Unpaid")
@@ -62,7 +62,7 @@ class SalesInvoice(SellingController):
 			self.indicator_title = _("Overdue")
 		elif cint(self.is_return) == 1:
 			self.indicator_title = _("Return")
-			self.indicator_color = "darkgrey"
+			self.indicator_color = "darkgray"
 		else:
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")

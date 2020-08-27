@@ -10,8 +10,8 @@ frappe.listview_settings['Sales Invoice'] = {
 			"Draft": "grey",
 			"Unpaid": "orange",
 			"Paid": "green",
-			"Return": "darkgrey",
-			"Credit Note Issued": "darkgrey",
+			"Return": "darkgray",
+			"Credit Note Issued": "darkgray",
 			"Unpaid and Discounted": "orange",
 			"Overdue and Discounted": "red",
 			"Overdue": "red"
