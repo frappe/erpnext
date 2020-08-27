@@ -109,15 +109,20 @@ def set_account_currency(filters):
 	return filters
 
 def get_result(filters, account_details):
-	gl_entries = get_gl_entries(filters)
+	accounting_dimensions = []
+	if filters.get("include_dimensions"):
+		accounting_dimensions = get_accounting_dimensions()
 
-	data = get_data_with_opening_closing(filters, account_details, gl_entries)
+	gl_entries = get_gl_entries(filters, accounting_dimensions)
+
+	data = get_data_with_opening_closing(filters, account_details,
+		accounting_dimensions, gl_entries)
 
 	result = get_result_as_list(data, filters)
 
 	return result
 
-def get_gl_entries(filters):
+def get_gl_entries(filters, accounting_dimensions):
 	currency_map = get_currency(filters)
 	select_fields = """, debit, credit, debit_in_account_currency,
 		credit_in_account_currency """
@@ -130,6 +135,10 @@ def get_gl_entries(filters):
 	if filters.get("include_default_book_entries"):
 		filters['company_fb'] = frappe.db.get_value("Company",
 			filters.get("company"), 'default_finance_book')
+
+	dimension_fields = ""
+	if accounting_dimensions:
+		dimension_fields = ', '.join(accounting_dimensions) + ','
 
 	distributed_cost_center_query = ""
 	if filters and filters.get('cost_center'):
@@ -144,7 +153,7 @@ def get_gl_entries(filters):
 			party_type,
 			party,
 			voucher_type,
-			voucher_no,
+			voucher_no, {dimension_fields}
 			cost_center, project,
 			against_voucher_type,
 			against_voucher,
@@ -163,13 +172,14 @@ def get_gl_entries(filters):
 		{conditions}
 		AND posting_date <= %(to_date)s
 		AND cost_center = DCC_allocation.parent
-		""".format(select_fields_with_percentage=select_fields_with_percentage, conditions=get_conditions(filters).replace("and cost_center in %(cost_center)s ", ''))
+		""".format(dimension_fields=dimension_fields,select_fields_with_percentage=select_fields_with_percentage, conditions=get_conditions(filters).replace("and cost_center in %(cost_center)s ", ''))
 
 	gl_entries = frappe.db.sql(
 		"""
 		select
 			name as gl_entry, posting_date, account, party_type, party,
-			voucher_type, voucher_no, cost_center, project,
+			voucher_type, voucher_no, {dimension_fields}
+			cost_center, project,
 			against_voucher_type, against_voucher, account_currency,
 			remarks, against, is_opening, creation {select_fields}
 		from `tabGL Entry`
@@ -177,13 +187,13 @@ def get_gl_entries(filters):
 		{distributed_cost_center_query}
 		{order_by_statement}
 		""".format(
-			select_fields=select_fields, conditions=get_conditions(filters), distributed_cost_center_query=distributed_cost_center_query,
+			dimension_fields=dimension_fields, select_fields=select_fields, conditions=get_conditions(filters), distributed_cost_center_query=distributed_cost_center_query,
 			order_by_statement=order_by_statement
 		),
 		filters, as_dict=1)
 
 	if filters.get('presentation_currency'):
-		return convert_to_presentation_currency(gl_entries, currency_map)
+		return convert_to_presentation_currency(gl_entries, currency_map, filters.get('company'))
 	else:
 		return gl_entries
 
@@ -250,12 +260,12 @@ def get_conditions(filters):
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 
-def get_data_with_opening_closing(filters, account_details, gl_entries):
+def get_data_with_opening_closing(filters, account_details, accounting_dimensions, gl_entries):
 	data = []
 
 	gle_map = initialize_gle_map(gl_entries, filters)
 
-	totals, entries = get_accountwise_gle(filters, gl_entries, gle_map)
+	totals, entries = get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map)
 
 	# Opening for filtered account
 	data.append(totals.opening)
@@ -321,7 +331,7 @@ def initialize_gle_map(gl_entries, filters):
 	return gle_map
 
 
-def get_accountwise_gle(filters, gl_entries, gle_map):
+def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 	totals = get_totals_dict()
 	entries = []
 	consolidated_gle = OrderedDict()
@@ -353,8 +363,11 @@ def get_accountwise_gle(filters, gl_entries, gle_map):
 			if filters.get("group_by") != _('Group by Voucher (Consolidated)'):
 				gle_map[gle.get(group_by)].entries.append(gle)
 			elif filters.get("group_by") == _('Group by Voucher (Consolidated)'):
-				key = (gle.get("voucher_type"), gle.get("voucher_no"),
-					gle.get("account"), gle.get("cost_center"))
+				keylist = [gle.get("voucher_type"), gle.get("voucher_no"), gle.get("account")]
+				for dim in accounting_dimensions:
+					keylist.append(gle.get(dim))
+				keylist.append(gle.get("cost_center"))
+				key = tuple(keylist)
 				if key not in consolidated_gle:
 					consolidated_gle.setdefault(key, gle)
 				else:
@@ -481,7 +494,19 @@ def get_columns(filters):
 			"options": "Project",
 			"fieldname": "project",
 			"width": 100
-		},
+		}
+	])
+
+	if filters.get("include_dimensions"):
+		for dim in get_accounting_dimensions(as_list = False):
+			columns.append({
+				"label": _(dim.label),
+				"options": dim.label,
+				"fieldname": dim.fieldname,
+				"width": 100
+			})
+
+	columns.extend([
 		{
 			"label": _("Cost Center"),
 			"options": "Cost Center",
