@@ -18,6 +18,28 @@ class TestPurchaseReceipt(unittest.TestCase):
 		set_perpetual_inventory(0)
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 
+	def test_reverse_purchase_receipt_sle(self):
+
+		frappe.db.set_value('UOM', '_Test UOM', 'must_be_whole_number', 0)
+
+		pr = make_purchase_receipt(qty=0.5)
+
+		sl_entry = frappe.db.get_all("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
+			"voucher_no": pr.name}, ['actual_qty'])
+
+		self.assertEqual(len(sl_entry), 1)
+		self.assertEqual(sl_entry[0].actual_qty, 0.5)
+
+		pr.cancel()
+
+		sl_entry_cancelled = frappe.db.get_all("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
+			"voucher_no": pr.name}, ['actual_qty'], order_by='creation')
+
+		self.assertEqual(len(sl_entry_cancelled), 2)
+		self.assertEqual(sl_entry_cancelled[1].actual_qty, -0.5)
+
+		frappe.db.set_value('UOM', '_Test UOM', 'must_be_whole_number', 1)
+
 	def test_make_purchase_invoice(self):
 		pr = make_purchase_receipt(do_not_save=True)
 		self.assertRaises(frappe.ValidationError, make_purchase_invoice, pr.name)
@@ -120,6 +142,22 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		rm_supp_cost = sum([d.amount for d in pr.get("supplied_items")])
 		self.assertEqual(pr.get("items")[0].rm_supp_cost, flt(rm_supp_cost, 2))
+
+	def test_subcontracting_gle_fg_item_rate_zero(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		set_perpetual_inventory()
+		frappe.db.set_value("Buying Settings", None, "backflush_raw_materials_of_subcontract_based_on", "BOM")
+		make_stock_entry(item_code="_Test Item", target="Work In Progress - TCP1", qty=100, basic_rate=100, company="_Test Company with perpetual inventory")
+		make_stock_entry(item_code="_Test Item Home Desktop 100", target="Work In Progress - TCP1",
+			qty=100, basic_rate=100, company="_Test Company with perpetual inventory")
+		pr = make_purchase_receipt(item_code="_Test FG Item", qty=10, rate=0, is_subcontracted="Yes",
+			company="_Test Company with perpetual inventory", warehouse='Stores - TCP1', supplier_warehouse='Work In Progress - TCP1')
+		
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
+
+		self.assertFalse(gl_entries)
+
+		set_perpetual_inventory(0)
 
 	def test_serial_no_supplier(self):
 		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
@@ -688,7 +726,7 @@ def make_purchase_receipt(**args):
 		"received_qty": received_qty,
 		"rejected_qty": rejected_qty,
 		"rejected_warehouse": args.rejected_warehouse or "_Test Rejected Warehouse - _TC" if rejected_qty != 0 else "",
-		"rate": args.rate or 50,
+		"rate": args.rate if args.rate != None else 50,
 		"conversion_factor": args.conversion_factor or 1.0,
 		"serial_no": args.serial_no,
 		"stock_uom": args.stock_uom or "_Test UOM",
