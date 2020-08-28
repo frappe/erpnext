@@ -116,14 +116,14 @@ def create_assignment_for_multiple_employees(employees, data):
 	if isinstance(employees, string_types):
 		employees= json.loads(employees)
 
-	if isinstance(employees, string_types):
+	if isinstance(data, string_types):
 		data = frappe._dict(json.loads(data))
 
 	docs_name = []
 	for employee in employees:
 		assignment = frappe.new_doc("Leave Policy Assignment")
 		assignment.employee = employee
-		assignment.assignment_based_on = data.assignment_based_on
+		assignment.assignment_based_on = data.assignment_based_on or None
 		assignment.leave_policy = data.leave_policy
 		assignment.effective_from = getdate(data.effective_from) or None
 		assignment.effective_to = getdate(data.effective_to) or None

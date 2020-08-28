@@ -21,15 +21,18 @@ frappe.listview_settings['Leave Policy Assignment'] = {
 					fieldtype:'Select',
 					options: ["", "Leave Period"],
 					label: __('Assignment Based On'),
-					reqd: 1,
 					onchange: () => {
 						if (cur_dialog.fields_dict.assignment_based_on.value === "Leave Period"){
 							cur_dialog.set_df_property("effective_from", "read_only", 1);
+							cur_dialog.set_df_property("leave_period", "reqd", 1);
 							cur_dialog.set_df_property("effective_to", "read_only", 1);
 						}
 						else{
 							cur_dialog.set_df_property("effective_from", "read_only", 0);
+							cur_dialog.set_df_property("leave_period", "reqd", 0);
 							cur_dialog.set_df_property("effective_to", "read_only", 0);
+							cur_dialog.set_value("effective_from", "");
+							cur_dialog.set_value("effective_to", "");
 						}
 					}
 				},
@@ -38,7 +41,6 @@ frappe.listview_settings['Leave Policy Assignment'] = {
 					fieldtype:'Link',
 					options:  "Leave Period",
 					label: __('Leave Period'),
-					reqd: 1,
 					depends_on: doc => {
 						return doc.assignment_based_on == 'Leave Period';
 					},
@@ -85,6 +87,7 @@ frappe.listview_settings['Leave Policy Assignment'] = {
 							data: data
 						}
 					});
+					cur_dialog.hide();
 				}
 			});
 		});
@@ -115,6 +118,7 @@ frappe.listview_settings['Leave Policy Assignment'] = {
 							leave_policy_assignments: leave_policy_assignments
 						}
 					});
+					cur_dialog.hide();
 				}
 			});
 		});
