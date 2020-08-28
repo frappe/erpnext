@@ -35,7 +35,8 @@ erpnext.PointOfSale.Controller = class {
 	create_opening_voucher() {
 		const table_fields = [
 			{ fieldname: "mode_of_payment", fieldtype: "Link", in_list_view: 1, label: "Mode of Payment", options: "Mode of Payment", reqd: 1 },
-			{ fieldname: "opening_amount", fieldtype: "Currency", in_list_view: 1, label: "Opening Amount", options: "company:company_currency", reqd: 1 }
+			{ fieldname: "opening_amount", fieldtype: "Currency", default: 0, in_list_view: 1, label: "Opening Amount", 
+				options: "company:company_currency", reqd: 1 }
 		];
 
 		const dialog = new frappe.ui.Dialog({
@@ -66,7 +67,7 @@ erpnext.PointOfSale.Controller = class {
 							frappe.db.get_doc("POS Closing Entry", pos_closing_entry.name).then(({ payment_reconciliation }) => {
 								dialog.fields_dict.balance_details.df.data = [];
 								payment_reconciliation.forEach(pay => {
-									const { mode_of_payment, closing_amount } = pay;
+									const { mode_of_payment } = pay;
 									dialog.fields_dict.balance_details.df.data.push({
 										mode_of_payment: mode_of_payment
 									});
@@ -152,7 +153,7 @@ erpnext.PointOfSale.Controller = class {
 			},
 			() => this.make_new_invoice(),
 			() => frappe.dom.unfreeze(),
-			() => this.page.set_title(__('Point of Sale Beta')),
+			() => this.page.set_title(__('Point of Sale')),
 		]);
 	}
 
