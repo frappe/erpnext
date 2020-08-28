@@ -326,8 +326,7 @@ class Subscription(Document):
 
 	def is_postpaid_to_invoice(self):
 		return getdate(nowdate()) > getdate(self.current_invoice_end) or \
-			(getdate(nowdate()) >= getdate(self.current_invoice_end) and getdate(self.current_invoice_end) == getdate(self.current_invoice_start)) and \
-			not self.has_outstanding_invoice()
+			(getdate(nowdate()) >= getdate(self.current_invoice_end) and getdate(self.current_invoice_end) == getdate(self.current_invoice_start))
 
 	def is_prepaid_to_invoice(self):
 		if not self.generate_invoice_at_period_start:
@@ -337,7 +336,7 @@ class Subscription(Document):
 			return True
 
 		# Check invoice dates and make sure it doesn't have outstanding invoices
-		return getdate(nowdate()) >= getdate(self.current_invoice_start) and not self.has_outstanding_invoice()
+		return getdate(nowdate()) >= getdate(self.current_invoice_start)
 
 	def is_current_invoice_generated(self):
 		invoice = self.get_current_invoice()
@@ -378,8 +377,7 @@ class Subscription(Document):
 		if self.cancel_at_period_end and getdate(nowdate()) > getdate(self.current_invoice_end):
 			self.cancel_subscription_at_period_end()
 
-		if self.is_current_invoice_generated() and getdate() > getdate(self.current_invoice_end) and \
-			self.is_prepaid_to_invoice():
+		if self.is_current_invoice_generated() and getdate() > getdate(self.current_invoice_end):
 			self.update_subscription_period(add_days(self.current_invoice_end, 1))
 
 	def cancel_subscription_at_period_end(self):
