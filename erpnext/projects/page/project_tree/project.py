@@ -2,7 +2,6 @@ from __future__ import unicode_literals
 
 import frappe
 import json
-from erpnext.projects.doctype.task.task import get_children
 from frappe.desk.reportview import get_form_params, compress, execute
 
 @frappe.whitelist()

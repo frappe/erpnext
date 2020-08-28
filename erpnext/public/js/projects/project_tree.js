@@ -1031,7 +1031,7 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 
 		this.$result.on('click', '.list-row-checkbox', e => {
 			const $target = $(e.currentTarget);
-			e.stopPropagation()
+			e.stopPropagation();
 
 			// shift select checkboxes
 			if (e.shiftKey && this.$checkbox_cursor && !$target.is(this.$checkbox_cursor)) {
@@ -1242,4 +1242,4 @@ erpnext.projects.CustomFilterArea = class CustomFilterArea extends frappe.ui.Fil
 			this.list_view.on_filter_change();
 		}
 	}
-}
+};
