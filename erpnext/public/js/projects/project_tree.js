@@ -388,42 +388,55 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 		this.setup_task_tree_dropdown();
 		this.setup_create_new_task();
 		this.get_projects();
+		this.setup_expand_all_rows();
+		this.setup_collapse_all_rows();
 	}
 
 	setup_task_tree_dropdown() {
 		this.$result.on('click', '.btn-action', (e) => {
 			let el = e.currentTarget;
 			let $el = $(el);
-
-			let target = unescape(el.getAttribute("data-name"));
-			let $row = this.$result.find(`.list-rows[data-name="${target}"]`);
-			if (!$row) return;
-
 			$el.find(".octicon").removeClass("octicon-chevron-right").addClass("octicon-chevron-down");
 
-			let list = $row.find(`.nested-list-row-container`);
-			let $list = $(list);
-			let level = parseInt($row[0].getAttribute("data-level")) + 1;
-			let $result = $(`<div class="nested-result">`);
+			let target = unescape(el.getAttribute("data-name"));
+			this.render_task(target, $el);
+		});
+	}
 
-			$list.toggleClass("hide");
+	render_task(task, $el, expand_all) {
+		let $row = this.$result.find(`.list-rows[data-name="${task}"]`);
+		if (!$row || (!$row.length)) return;
 
-			if ($list[0].classList.contains("hide")) {
-				$list.find(`.nested-result`).remove();
-				$el.find(".octicon").removeClass("octicon-chevron-down").addClass("octicon-chevron-right");
-			}
+		if (!$el) {
+			$el = $row.find(".octicon").removeClass("octicon-chevron-right").addClass("octicon-chevron-down");
+		}
 
-			frappe.call(this.get_task_call_args([["Task", "parent_task", "=", target]])).then(r => {
-				// render
-				this.prepare_data(r);
+		let list = $row.find(`.nested-list-row-container`);
+		let $list = $(list);
+		let level = parseInt($row[0].getAttribute("data-level")) + 1;
+		let $result = $(`<div class="nested-result">`);
 
-				list.append($result);
-				this.data.map((doc, i) => {
-					doc._idx = i;
-					doc.doctype = 'Task';
-					$result.append(this.get_task_list_row_html(doc, level));
-				});
+		$list.toggleClass("hide");
+
+		if ($list[0].classList.contains("hide")) {
+			$list.find(`.nested-result`).remove();
+			$el.find(".octicon").removeClass("octicon-chevron-down").addClass("octicon-chevron-right");
+		}
+
+		frappe.call(this.get_task_call_args([["Task", "parent_task", "=", task]])).then(r => {
+			// render
+			this.prepare_data(r);
+
+			list.append($result);
+			this.data.map((doc, i) => {
+				doc._idx = i;
+				doc.doctype = 'Task';
+				$result.append(this.get_task_list_row_html(doc, level));
 			});
+
+			if (expand_all) {
+				this.$result.find(".expand-all").click();
+			}
 		});
 	}
 
@@ -491,10 +504,55 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 			// render
 			this.render_header(this.task_columns, true);
 			this.prepare_data(r);
-			this.toggle_result_area();
+
 			this.render("Task", true, project);
 			this.render_previous_button();
 		});
+	}
+
+	setup_expand_all_rows() {
+		this.$result.on('click', '.expand-all', () => {
+			let task_list = this.$result.find(".octicon-chevron-right").parent();
+			this.toggle_expand_collapse_button('expand');
+
+			if (!task_list) return
+			task_list.map((i, task) => {
+				let task_name = task.getAttribute("data-name");
+				if (task_name) {
+					this.render_task(task_name, null, true);
+				}
+			});
+		});
+	}
+
+	setup_collapse_all_rows() {
+		this.$result.on('click', '.collapse-all', () => {
+			let task_list = this.$result.find(".octicon-chevron-down").parent();
+			this.toggle_expand_collapse_button('collapse');
+
+			if (!task_list) return
+			task_list.map((i, task) => {
+				let task_name = task.getAttribute("data-name")
+				let $row = this.$result.find(`.list-rows[data-name="${task_name}"]`);
+				let list = $row.find(`.nested-list-row-container`);
+				let $list = $(list);
+				$list.toggleClass("hide");
+
+				if ($list.length && $list[0].classList.contains("hide")) {
+					$list.find(`.nested-result`).remove();
+					$row.find(".octicon").removeClass("octicon-chevron-down").addClass("octicon-chevron-right");
+				}
+			});
+
+		});
+	}
+
+	toggle_expand_collapse_button(action) {
+		let hide = (action == 'expand') ? '.expand-all': '.collapse-all';
+		let show = (action == 'expand') ? '.collapse-all': '.expand-all';
+
+		this.$result.find(hide).hide();
+		this.$result.find(show).show();
 	}
 
 	render(doctype, is_task=false, project=null) {
@@ -895,6 +953,10 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 					<i class="octicon octicon-chevron-left" />
 					<span style="margin-left: 5px">Projects</span>
 				</a>
+				<button class="btn btn-xs expand-all btn-default" style="float: right">
+					${__('Expand All')}</button>
+				<button class="btn btn-xs collapse-all btn-default" style="float: right; display: none">
+					${__('Collapse All')}</button>
 			</header>
 		`;
 	}
@@ -917,7 +979,6 @@ erpnext.projects.ProjectTree = class Projects extends frappe.views.BaseList {
 			this.$checkbox_actions.show();
 			this.$list_head_subject.hide();
 		}
-		// this.toggle_actions_menu_button(this.$checks.length > 0);
 	}
 
 	get_checked_items(only_docnames) {
