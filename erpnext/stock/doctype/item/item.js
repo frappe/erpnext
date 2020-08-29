@@ -216,6 +216,28 @@ frappe.ui.form.on("Item", {
 
 	set_meta_tags(frm) {
 		frappe.utils.set_meta_tag(frm.doc.route);
+	},
+
+	copy_from_item_page_template: function(frm) {
+		let d = new frappe.ui.Dialog({
+			title: __("Select Item Page Template"),
+			fields: [{
+				'fieldname': 'template',
+				'label': 'Item Page Template',
+				'fieldtype': 'Link',
+				'options': 'Item Page Template'
+			}],
+			primary_action(values) {
+				frappe.model.with_doc("Item Page Template", values.template).then((doc) => {
+					doc.web_page_block.map((template) => {
+						frm.add_child('page_building_blocks', template);
+						frm.refresh_field('page_building_blocks');
+					});
+				});
+				d.hide();
+			},
+		});
+		d.show();
 	}
 });
 
@@ -780,39 +802,6 @@ frappe.ui.form.on("UOM Conversion Detail", {
 
 frappe.ui.form.on("Web Page Block", {
 	edit_values(frm, cdt, cdn) {
-		let row = frm.selected_doc;
-		frappe.model.with_doc("Web Template", row.web_template).then((doc) => {
-			let d = new frappe.ui.Dialog({
-				title: __("Edit Values"),
-				fields: doc.fields.map((df) => {
-					if (df.fieldtype == "Section Break") {
-						df.collapsible = 1;
-					}
-					return df;
-				}),
-				primary_action(values) {
-					frappe.model.set_value(
-						cdt,
-						cdn,
-						"web_template_values",
-						JSON.stringify(values)
-					);
-					d.hide();
-				},
-			});
-			let values = JSON.parse(row.web_template_values || "{}");
-			d.set_values(values);
-			d.show();
-
-			d.sections.forEach((sect) => {
-				let fields_with_value = sect.fields_list.filter(
-					(field) => values[field.df.fieldname]
-				);
-
-				if (fields_with_value.length) {
-					sect.collapse(false);
-				}
-			});
-		});
-	},
+		erpnext.utils.add_web_template(frm, cdt, cdn);
+	}
 });
