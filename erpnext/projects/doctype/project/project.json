@@ -445,9 +445,9 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "hidden": 1,
    "label": "Series",
    "options": "PROJ.####",
+   "reqd": 1,
    "set_only_once": 1
   }
  ],
@@ -456,7 +456,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2020-08-30 19:32:40.050707",
+ "modified": "2020-08-30 21:36:45.915818",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
