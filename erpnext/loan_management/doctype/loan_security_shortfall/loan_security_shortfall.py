@@ -51,13 +51,19 @@ def check_for_ltv_shortfall(process_loan_security_shortfall):
 			"valid_upto": (">=", update_time)
 		}, as_list=1))
 
-	loans = frappe.get_all('Loan', fields=['name', 'loan_amount', 'total_principal_paid'],
-		filters={'status': 'Disbursed', 'is_secured_loan': 1})
+	loans = frappe.get_all('Loan', fields=['name', 'loan_amount', 'total_principal_paid', 'total_payment',
+		'total_interest_payable', 'disbursed_amount'],
+		filters={'status': ('in',['Disbursed','Partially Disbursed']), 'is_secured_loan': 1})
 
 	loan_security_map = {}
 
 	for loan in loans:
-		outstanding_amount = loan.loan_amount - loan.total_principal_paid
+		if loan.status == 'Disbursed':
+			outstanding_amount = flt(loan.total_payment) - flt(loan.total_interest_payable) \
+				- flt(loan.total_principal_paid)
+		else:
+			outstanding_amount = loan.disbursed_amount
+
 		pledged_securities = get_pledged_security_qty(loan.name)
 		ltv_ratio = ''
 		security_value = 0.0
