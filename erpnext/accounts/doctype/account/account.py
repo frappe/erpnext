@@ -117,7 +117,29 @@ class Account(NestedSet):
 
 			for d in frappe.db.get_values('Account', filters=filters, fieldname=["company", "name"], as_dict=True):
 				parent_acc_name_map[d["company"]] = d["name"]
-			if not parent_acc_name_map: return
+
+			if not parent_acc_name_map:
+				# map can be empty if only one descendant or all descendants without parent account exist(s)
+				# or if no descendants exist
+				if descendants:
+					frappe.throw(_("Parent Account {0} does not exist in any Child Company").format(frappe.bold(parent_acc_name)),
+						title=_("Account Missing"))
+				else:
+					# no descendants and empty map, nothing to sync
+					return
+
+			companies_missing_account = []
+			for company in descendants:
+				if not company in parent_acc_name_map:
+					companies_missing_account.append(company)
+
+			# If atleast any one of the descendants does not have the parent account, block transaction
+			if companies_missing_account:
+				message = _("Parent Account {0} does not exist in the following companies:").format(frappe.bold(parent_acc_name))
+				message += "<br><br><ul><li>" + "</li><li>".join(companies_missing_account) + "</li></ul>"
+				message += _("Please make sure the account exists in the child companies as well")
+				frappe.throw(message, title=_("Account Missing"))
+
 			self.create_account_for_child_company(parent_acc_name_map, descendants, parent_acc_name)
 
 	def validate_group_or_ledger(self):
