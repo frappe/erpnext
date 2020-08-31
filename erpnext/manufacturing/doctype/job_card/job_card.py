@@ -110,11 +110,10 @@ class JobCard(Document):
 		for_quantity, time_in_mins = 0, 0
 		from_time_list, to_time_list = [], []
 
-		field = "operation_id" if self.operation_id else "operation"
+		field = "operation_id"
 		data = frappe.get_all('Job Card',
 			fields = ["sum(total_time_in_mins) as time_in_mins", "sum(total_completed_qty) as completed_qty"],
-			filters = {"docstatus": 1, "work_order": self.work_order,
-				"workstation": self.workstation, field: self.get(field)})
+			filters = {"docstatus": 1, "work_order": self.work_order, field: self.get(field)})
 
 		if data and len(data) > 0:
 			for_quantity = data[0].completed_qty
@@ -127,14 +126,13 @@ class JobCard(Document):
 				FROM `tabJob Card` jc, `tabJob Card Time Log` jctl
 				WHERE
 					jctl.parent = jc.name and jc.work_order = %s
-					and jc.workstation = %s and jc.{0} = %s and jc.docstatus = 1
-			""".format(field), (self.work_order, self.workstation, self.get(field)), as_dict=1)
+					and jc.{0} = %s and jc.docstatus = 1
+			""".format(field), (self.work_order, self.get(field)), as_dict=1)
 
 			wo = frappe.get_doc('Work Order', self.work_order)
 
-			work_order_field = "name" if field == "operation_id" else field
 			for data in wo.operations:
-				if data.get(work_order_field) == self.get(field):
+				if data.get("name") == self.get(field):
 					data.completed_qty = for_quantity
 					data.actual_operation_time = time_in_mins
 					data.actual_start_time = time_data[0].start_time if time_data else None
