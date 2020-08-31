@@ -369,6 +369,3 @@ class ProductionPlanReport(object):
 			"fieldtype": "Float",
 			"width": 140
 		}])
-
-def document_query(doctype, txt, searchfield, start, page_len, filters):
-	pass

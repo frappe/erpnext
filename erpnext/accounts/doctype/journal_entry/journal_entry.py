@@ -841,13 +841,33 @@ def get_opening_accounts(company):
 
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
-	return frappe.db.sql("""select jv.name, jv.posting_date, jv.user_remark
-		from `tabJournal Entry` jv, `tabJournal Entry Account` jv_detail
-		where jv_detail.parent = jv.name and jv_detail.account = %s and ifnull(jv_detail.party, '') = %s
-		and (jv_detail.reference_type is null or jv_detail.reference_type = '')
-		and jv.docstatus = 1 and jv.`{0}` like %s order by jv.name desc limit %s, %s""".format(searchfield),
-		(filters.get("account"), cstr(filters.get("party")), "%{0}%".format(txt), start, page_len))
+	if not frappe.db.has_column('Journal Entry', searchfield):
+		return []
+
+	return frappe.db.sql("""
+		SELECT jv.name, jv.posting_date, jv.user_remark
+		FROM `tabJournal Entry` jv, `tabJournal Entry Account` jv_detail
+		WHERE jv_detail.parent = jv.name
+			AND jv_detail.account = %(account)s
+			AND IFNULL(jv_detail.party, '') = %(party)s
+			AND (
+				jv_detail.reference_type IS NULL
+				OR jv_detail.reference_type = ''
+			)
+			AND jv.docstatus = 1
+			AND jv.`{0}` LIKE %(txt)s
+		ORDER BY jv.name DESC
+		LIMIT %(offset)s, %(limit)s
+		""".format(searchfield), dict(
+				account=filters.get("account"),
+				party=cstr(filters.get("party")),
+				txt="%{0}%".format(txt),
+				offset=start,
+				limit=page_len
+			)
+		)
 
 
 @frappe.whitelist()

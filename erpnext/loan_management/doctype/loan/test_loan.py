@@ -269,7 +269,7 @@ class TestLoan(unittest.TestCase):
 		self.assertTrue(loan_security_shortfall)
 
 		self.assertEquals(loan_security_shortfall.loan_amount, 1000000.00)
-		self.assertEquals(loan_security_shortfall.security_value, 400000.00)
+		self.assertEquals(loan_security_shortfall.security_value, 800000.00)
 		self.assertEquals(loan_security_shortfall.shortfall_amount, 600000.00)
 
 		frappe.db.sql(""" UPDATE `tabLoan Security Price` SET loan_security_price = 250

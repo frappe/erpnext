@@ -64,6 +64,7 @@
    "fieldname": "clearance_date",
    "fieldtype": "Date",
    "label": "Clearance Date",
+   "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
   },
@@ -78,7 +79,7 @@
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-05-05 16:51:20.091441",
+ "modified": "2020-08-03 12:45:39.986598",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Payment",
