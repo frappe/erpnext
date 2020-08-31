@@ -130,8 +130,11 @@ def get_entries(filters):
 		FROM
 			`tab{doctype}` dt, `tab{doctype} Item` dt_item
 		WHERE
-			{cond} and dt.name = dt_item.parent and dt.docstatus = 1
-			and dt.sales_partner is not null and dt.sales_partner != ''
+			{cond} and dt.name = dt_item.parent 
+			and dt.docstatus = 1
+			and dt_item.item_code NOT IN ("HAND-FEE", "SHIP1", "SHIP2", "SHIP3")
+			and dt.sales_partner is not null 
+			and dt.sales_partner != ''
 			order by dt.name desc, dt.sales_partner
 		""".format(date_field=date_field, doctype=filters.get('doctype'),
 			cond=conditions), filters, as_dict=1)
