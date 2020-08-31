@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import get_datetime
+from frappe.utils import get_datetime, flt
 from frappe.model.document import Document
 from six import iteritems
 from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
