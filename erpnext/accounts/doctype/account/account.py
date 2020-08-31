@@ -311,16 +311,25 @@ def validate_account_number(name, account_number, company):
 				.format(account_number, account_with_same_number))
 
 @frappe.whitelist()
-def update_account_number(name, account_name, account_number=None):
-
+def update_account_number(name, account_name, account_number=None, from_descendant=False):
 	account = frappe.db.get_value("Account", name, "company", as_dict=True)
 	if not account: return
+
+	old_acc_name, old_acc_number = frappe.db.get_value('Account', name, \
+				["account_name", "account_number"])
+
 	validate_account_number(name, account_number, account.company)
 	if account_number:
 		frappe.db.set_value("Account", name, "account_number", account_number.strip())
 	else:
 		frappe.db.set_value("Account", name, "account_number", "")
 	frappe.db.set_value("Account", name, "account_name", account_name.strip())
+
+	if not from_descendant:
+		# Update and rename in child company accounts as well
+		descendants = get_descendants_of('Company', account.company)
+		if descendants:
+			sync_update_account_number_in_child(descendants, old_acc_name, account_name, account_number, old_acc_number)
 
 	new_name = get_account_autoname(account_number, account_name, account.company)
 	if name != new_name:
@@ -352,3 +361,14 @@ def get_root_company(company):
 	# return the topmost company in the hierarchy
 	ancestors = get_ancestors_of('Company', company, "lft asc")
 	return [ancestors[0]] if ancestors else []
+
+def sync_update_account_number_in_child(descendants, old_acc_name, account_name, account_number=None, old_acc_number=None):
+	filters = {
+		"company": ["in", descendants],
+		"account_name": old_acc_name,
+	}
+	if old_acc_number:
+		filters["account_number"] = old_acc_number
+
+	for d in frappe.db.get_values('Account', filters=filters, fieldname=["company", "name"], as_dict=True):
+			update_account_number(d["name"], account_name, account_number, from_descendant=True)
