@@ -10,7 +10,7 @@ import unittest
 # test_records = frappe.get_test_records('Maintenance Schedule')
 
 class TestMaintenanceSchedule(unittest.TestCase):
-	def events_should_be_created_and_deleted(self):
+	def test_events_should_be_created_and_deleted(self):
 		ms = make_maintenance_schedule()
 		ms.generate_schedule()
 		ms.submit()
