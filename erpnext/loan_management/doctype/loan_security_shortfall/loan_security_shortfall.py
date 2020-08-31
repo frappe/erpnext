@@ -52,7 +52,7 @@ def check_for_ltv_shortfall(process_loan_security_shortfall):
 		}, as_list=1))
 
 	loans = frappe.get_all('Loan', fields=['name', 'loan_amount', 'total_principal_paid', 'total_payment',
-		'total_interest_payable', 'disbursed_amount'],
+		'total_interest_payable', 'disbursed_amount', 'status'],
 		filters={'status': ('in',['Disbursed','Partially Disbursed']), 'is_secured_loan': 1})
 
 	loan_security_map = {}
