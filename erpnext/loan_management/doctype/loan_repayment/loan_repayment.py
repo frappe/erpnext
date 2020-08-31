@@ -281,7 +281,7 @@ def get_amounts(amounts, against_loan, posting_date, payment_type):
 
 		due_date = add_days(entry.posting_date, 1)
 		no_of_late_days = date_diff(posting_date,
-					add_days(due_date, loan_type_details.grace_period_in_days))
+			add_days(due_date, loan_type_details.grace_period_in_days))
 
 		if no_of_late_days > 0 and (not against_loan_doc.repay_from_salary):
 			penalty_amount += (entry.interest_amount * (loan_type_details.penalty_interest_rate / 100) * no_of_late_days)/365
@@ -297,7 +297,10 @@ def get_amounts(amounts, against_loan, posting_date, payment_type):
 		if not final_due_date:
 			final_due_date = add_days(due_date, loan_type_details.grace_period_in_days)
 
-	pending_principal_amount = against_loan_doc.total_payment - against_loan_doc.total_principal_paid - against_loan_doc.total_interest_payable
+	if against_loan_doc.status == 'Disbursed':
+		pending_principal_amount = against_loan_doc.total_payment - against_loan_doc.total_principal_paid - against_loan_doc.total_interest_payable
+	else:
+		pending_principal_amount = against_loan_doc.disbursed_amount
 
 	if payment_type == "Loan Closure":
 		if due_date:
