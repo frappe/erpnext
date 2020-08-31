@@ -17,6 +17,7 @@ from erpnext.loan_management.doctype.process_loan_security_shortfall.process_loa
 from erpnext.loan_management.doctype.loan.loan import create_loan_security_unpledge
 from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
 from erpnext.loan_management.doctype.loan_application.loan_application import create_pledge
+from erpnext.loan_management.doctype.loan_disbursement.loan_disbursement import get_disbursal_amount
 
 class TestLoan(unittest.TestCase):
 	def setUp(self):
@@ -322,6 +323,56 @@ class TestLoan(unittest.TestCase):
 
 		self.assertEqual(loan.status, 'Closed')
 		self.assertEquals(sum(pledged_qty.values()), 0)
+
+	def test_disbursal_check_with_shortfall(self):
+		pledges = [{
+			"loan_security": "Test Security 2",
+			"qty": 8000.00,
+			"haircut": 50,
+		}]
+
+		loan_application = create_loan_application('_Test Company', self.applicant2,
+			'Stock Loan', pledges, "Repay Over Number of Periods", 12)
+
+		create_pledge(loan_application)
+
+		loan = create_loan_with_security(self.applicant2, "Stock Loan", "Repay Over Number of Periods", 12, loan_application)
+		loan.submit()
+
+		#Disbursing 7,00,000 from the allowed 10,00,000 according to security pledge
+		make_loan_disbursement_entry(loan.name, 700000)
+
+		frappe.db.sql("""UPDATE `tabLoan Security Price` SET loan_security_price = 100
+			where loan_security='Test Security 2'""")
+
+		create_process_loan_security_shortfall()
+		loan_security_shortfall = frappe.get_doc("Loan Security Shortfall", {"loan": loan.name})
+		self.assertTrue(loan_security_shortfall)
+
+		self.assertEqual(get_disbursal_amount(loan.name), 0)
+
+		frappe.db.sql(""" UPDATE `tabLoan Security Price` SET loan_security_price = 250
+			where loan_security='Test Security 2'""")
+
+	def test_disbursal_check_without_shortfall(self):
+		pledges = [{
+			"loan_security": "Test Security 2",
+			"qty": 8000.00,
+			"haircut": 50,
+		}]
+
+		loan_application = create_loan_application('_Test Company', self.applicant2,
+			'Stock Loan', pledges, "Repay Over Number of Periods", 12)
+
+		create_pledge(loan_application)
+
+		loan = create_loan_with_security(self.applicant2, "Stock Loan", "Repay Over Number of Periods", 12, loan_application)
+		loan.submit()
+
+		#Disbursing 7,00,000 from the allowed 10,00,000 according to security pledge
+		make_loan_disbursement_entry(loan.name, 700000)
+
+		self.assertEqual(get_disbursal_amount(loan.name), 300000)
 
 
 def create_loan_accounts():
