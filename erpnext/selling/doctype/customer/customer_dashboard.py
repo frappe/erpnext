@@ -33,7 +33,7 @@ def get_data():
 			},
 			{
 				'label': _('Support'),
-				'items': ['Issue', 'Maintenance Visit']
+				'items': ['Issue', 'Maintenance Visit', 'Installation Note', 'Warranty Claim']
 			},
 			{
 				'label': _('Projects'),
