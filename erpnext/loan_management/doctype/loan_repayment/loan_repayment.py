@@ -116,6 +116,7 @@ class LoanRepayment(AccountsController):
 	def allocate_amounts(self, paid_entries):
 		self.set('repayment_details', [])
 		self.principal_amount_paid = 0
+		total_interest_paid = 0
 		interest_paid = self.amount_paid - self.penalty_amount
 
 		if self.amount_paid - self.penalty_amount > 0 and paid_entries:
@@ -137,11 +138,18 @@ class LoanRepayment(AccountsController):
 						interest_paid = 0
 						paid_principal=0
 
+				total_interest_paid += interest_amount
 				self.append('repayment_details', {
 					'loan_interest_accrual': lia,
 					'paid_interest_amount': interest_amount,
 					'paid_principal_amount': paid_principal
 				})
+
+		if self.payment_type == 'Loan Closure' and total_interest_paid < self.interest_payable:
+			unaccrued_interest = self.interest_payable - total_interest_paid
+			interest_paid -= unaccrued_interest
+			if self.repayment_details:
+				self.repayment_details[-1].paid_interest_amount += unaccrued_interest
 
 		if interest_paid:
 			self.principal_amount_paid += interest_paid
