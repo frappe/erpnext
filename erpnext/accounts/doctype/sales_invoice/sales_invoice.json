@@ -447,7 +447,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "po_no",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Customer's Purchase Order",
@@ -1946,7 +1946,7 @@
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-03 23:31:12.675040",
+ "modified": "2020-08-27 01:56:28.532140",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
