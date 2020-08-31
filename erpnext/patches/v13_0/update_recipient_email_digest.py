@@ -6,6 +6,7 @@ import frappe
 
 def execute():
     frappe.reload_doc("setup", "doctype", "Email Digest")
+    frappe.reload_doc("setup", "doctype", "Email Digest Recipient")
     email_digests = frappe.db.get_list('Email Digest', fields=['name', 'recipient_list'])
     for email_digest in email_digests:
         if email_digest.recipient_list:
