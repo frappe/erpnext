@@ -17,8 +17,9 @@ def execute(filters=None):
 	columns = get_columns()
 
 	data, chart_data = prepare_data(supplier_quotation_data, filters)
+	message = get_message()
 
-	return columns, data, None, chart_data
+	return columns, data, message, chart_data
 
 def get_conditions(filters):
 	conditions = ""
@@ -208,3 +209,15 @@ def get_columns():
 	]
 
 	return columns
+
+def get_message():
+	return  """<span class="indicator">
+		Valid till : &nbsp;&nbsp;
+		</span>
+		<span class="indicator orange">
+		Expires in a week or less
+		</span>
+		&nbsp;&nbsp;
+		<span class="indicator red">
+		Expires today / Already Expired
+		</span>"""

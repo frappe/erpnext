@@ -65,7 +65,7 @@ frappe.query_reports["Quoted Item Comparison"] = {
 			fieldname: "supplier_quotation",
 			default: "",
 			get_data: function(txt) {
-				return frappe.db.get_link_options('Supplier Quotation', txt);
+				return frappe.db.get_link_options('Supplier Quotation', txt, {'docstatus': ["<", 2]});
 			}
 		},
 		{
@@ -109,19 +109,6 @@ frappe.query_reports["Quoted Item Comparison"] = {
 			//Always make a new one so that the latest values get updated
 			reporter.make_default_supplier_dialog(report);
 		}, 'Tools');
-
-		const status_message = `
-		<span class="indicator">
-		Valid till : &nbsp;&nbsp;
-		</span>
-		<span class="indicator orange">
-		Expires in a week or less
-		</span>
-		&nbsp;&nbsp;&nbsp;&nbsp;
-		<span class="indicator red">
-		Expires today / Already Expired
-		</span>`;
-		report.$status.html(status_message).show();
 
 	},
 	make_default_supplier_dialog: (report) => {
