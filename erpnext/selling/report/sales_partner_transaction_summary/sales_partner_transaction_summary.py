@@ -21,6 +21,13 @@ def get_columns(filters):
 
 	columns =[
 		{
+			"label": _("Sales Partner"),
+			"options": "Sales Partner",
+			"fieldname": "sales_partner",
+			"fieldtype": "Link",
+			"width": 100
+		},
+		{
 			"label": _(filters["doctype"]),
 			"options": filters["doctype"],
 			"fieldname": "name",
@@ -32,15 +39,21 @@ def get_columns(filters):
 			"options": "Customer",
 			"fieldname": "customer",
 			"fieldtype": "Link",
-			"width": 140
-		},
-		{
-			"label": _("Territory"),
-			"options": "Territory",
-			"fieldname": "territory",
-			"fieldtype": "Link",
 			"width": 100
 		},
+		{
+			"label": _("Customer Name"),
+			"fieldname": "customer_name",
+			"fieldtype": "Data",
+			"width": 140
+		},
+		# {
+		# 	"label": _("Territory"),
+		# 	"options": "Territory",
+		# 	"fieldname": "territory",
+		# 	"fieldtype": "Link",
+		# 	"width": 100
+		# },
 		{
 			"label": _("Posting Date"),
 			"fieldname": "posting_date",
@@ -52,33 +65,39 @@ def get_columns(filters):
 			"fieldname": "item_code",
 			"fieldtype": "Link",
 			"options": "Item",
-			"width": 100
+			"width": 120
 		},
 		{
-			"label": _("Item Group"),
-			"fieldname": "item_group",
-			"fieldtype": "Link",
-			"options": "Item Group",
-			"width": 100
+			"label": _("Item Name"),
+			"fieldname": "item_name",
+			"fieldtype": "Data",
+			"width": 140
 		},
-		{
-			"label": _("Brand"),
-			"fieldname": "brand",
-			"fieldtype": "Link",
-			"options": "Brand",
-			"width": 100
-		},
+		# {
+		# 	"label": _("Item Group"),
+		# 	"fieldname": "item_group",
+		# 	"fieldtype": "Link",
+		# 	"options": "Item Group",
+		# 	"width": 100
+		# },
+		# {
+		# 	"label": _("Brand"),
+		# 	"fieldname": "brand",
+		# 	"fieldtype": "Link",
+		# 	"options": "Brand",
+		# 	"width": 100
+		# },
 		{
 			"label": _("Quantity"),
 			"fieldname": "qty",
 			"fieldtype": "Float",
-			"width": 120
+			"width": 80
 		},
 		{
 			"label": _("Rate"),
 			"fieldname": "rate",
 			"fieldtype": "Currency",
-			"width": 120
+			"width": 80
 		},
 		{
 			"label": _("Amount"),
@@ -86,18 +105,12 @@ def get_columns(filters):
 			"fieldtype": "Currency",
 			"width": 120
 		},
-		{
-			"label": _("Sales Partner"),
-			"options": "Sales Partner",
-			"fieldname": "sales_partner",
-			"fieldtype": "Link",
-			"width": 140
-		},
+
 		{
 			"label": _("Commission Rate %"),
 			"fieldname": "commission_rate",
 			"fieldtype": "Data",
-			"width": 100
+			"width": 80
 		},
 		{
 			"label": _("Commission"),
@@ -124,8 +137,9 @@ def get_entries(filters):
 	entries = frappe.db.sql("""
 		SELECT
 			dt.name, dt.customer, dt.territory, dt.{date_field} as posting_date, dt.currency,
+			dt_item.item_name, dt.customer_name,
 			dt_item.base_net_rate as rate, dt_item.qty, dt_item.base_net_amount as amount,
-			((dt_item.base_net_amount * dt.commission_rate) / 100) as commission,
+			ROUND(((dt_item.base_net_amount * dt.commission_rate) / 100), 2) as commission,
 			dt_item.brand, dt.sales_partner, dt.commission_rate, dt_item.item_group, dt_item.item_code
 		FROM
 			`tab{doctype}` dt, `tab{doctype} Item` dt_item
