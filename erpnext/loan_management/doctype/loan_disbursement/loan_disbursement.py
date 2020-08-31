@@ -67,28 +67,10 @@ class LoanDisbursement(AccountsController):
 			disbursed_amount = self.disbursed_amount + loan_details.disbursed_amount
 			total_payment = loan_details.total_payment
 
-			if disbursed_amount > loan_details.loan_amount and loan_details.is_term_loan:
-				frappe.throw(_("Disbursed Amount cannot be greater than loan amount"))
+			possible_disbursal_amount = get_disbursal_amount(self.against_loan)
 
-			if loan_details.status == 'Disbursed':
-				pending_principal_amount = flt(loan_details.total_payment) - flt(loan_details.total_interest_payable) \
-					- flt(loan_details.total_principal_paid)
-			else:
-				pending_principal_amount = loan_details.disbursed_amount
-
-			security_value = 0.0
-			if loan_details.is_secured_loan:
-				security_value = get_total_pledged_security_value(self.against_loan)
-
-			if not security_value:
-				security_value = loan_details.loan_amount
-
-			if pending_principal_amount + self.disbursed_amount > flt(security_value):
-				allowed_amount = security_value - pending_principal_amount
-				if allowed_amount < 0:
-					allowed_amount = 0
-
-				frappe.throw(_("Disbursed Amount cannot be greater than {0}").format(allowed_amount))
+			if self.disbursed_amount > possible_disbursal_amount:
+				frappe.throw(_("Disbursed Amount cannot be greater than {0}").format(possible_disbursal_amount))
 
 			if loan_details.status == "Disbursed" and not loan_details.is_term_loan:
 				process_loan_interest_accrual_for_demand_loans(posting_date=add_days(self.disbursement_date, -1),
@@ -176,3 +158,32 @@ def get_total_pledged_security_value(loan):
 		security_value += (loan_security_price_map.get(security) * qty * hair_cut_map.get(security))/100
 
 	return security_value
+
+@frappe.whitelist()
+def get_disbursal_amount(loan):
+	loan_details = frappe.get_all("Loan", fields = ["loan_amount", "disbursed_amount", "total_payment",
+		"total_principal_paid", "total_interest_payable", "status", "is_term_loan", "is_secured_loan"],
+		filters= { "name": loan })[0]
+
+	if loan_details.is_secured_loan and frappe.get_all('Loan Security Shortfall', filters={'loan': loan,
+		'status': 'Pending'}):
+		return 0
+
+	if loan_details.status == 'Disbursed':
+		pending_principal_amount = flt(loan_details.total_payment) - flt(loan_details.total_interest_payable) \
+			- flt(loan_details.total_principal_paid)
+	else:
+		pending_principal_amount = flt(loan_details.disbursed_amount)
+
+	security_value = 0.0
+	if loan_details.is_secured_loan:
+		security_value = get_total_pledged_security_value(loan)
+
+	if not security_value and not loan_details.is_secured_loan:
+		security_value = flt(loan_details.loan_amount)
+
+	disbursal_amount = flt(security_value) - flt(pending_principal_amount)
+
+	return disbursal_amount
+
+
