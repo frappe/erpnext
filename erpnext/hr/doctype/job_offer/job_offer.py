@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.utils import cint
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe import _
@@ -24,8 +25,7 @@ class JobOffer(Document):
 		check_vacancies = frappe.get_single("HR Settings").check_vacancies
 		if staffing_plan and check_vacancies:
 			job_offers = self.get_job_offer(staffing_plan.from_date, staffing_plan.to_date)
-
-			if not staffing_plan.get("vacancies") or staffing_plan.vacancies - len(job_offers) <= 0:
+			if not staffing_plan.get("vacancies") or cint(staffing_plan.vacancies) - len(job_offers) <= 0:
 				error_variable = 'for ' + frappe.bold(self.designation)
 				if staffing_plan.get("parent"):
 					error_variable = frappe.bold(get_link_to_form("Staffing Plan", staffing_plan.parent))
@@ -65,7 +65,7 @@ def get_staffing_plan_detail(designation, company, offer_date):
 			AND %s between sp.from_date and sp.to_date
 	""", (designation, company, offer_date), as_dict=1)
 
-	return frappe._dict(detail[0]) if detail else None
+	return frappe._dict(detail[0]) if (detail and detail[0].parent) else None
 
 @frappe.whitelist()
 def make_employee(source_name, target_doc=None):
