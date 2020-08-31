@@ -15,7 +15,7 @@ frappe.query_reports["Sales Partner Transaction Summary"] = {
 			label: __("Document Type"),
 			fieldtype: "Select",
 			options: "Sales Order\nDelivery Note\nSales Invoice",
-			default: "Sales Order"
+			default: "Sales Invoice"
 		},
 		{
 			fieldname: "from_date",
@@ -65,7 +65,7 @@ frappe.query_reports["Sales Partner Transaction Summary"] = {
 			fieldname:"show_return_entries",
 			label: __("Show Return Entries"),
 			fieldtype: "Check",
-			default: 0,
+			default: 1,
 		},
 	]
 }
