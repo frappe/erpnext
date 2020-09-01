@@ -217,7 +217,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 		doc = frappe.get_doc(doc)
 
 	if (args.get('is_free_item') or
-		args.get("parenttype") in ["Material Request", "Purchase Order"]): return {}
+		args.get("parenttype") == "Material Request"): return {}
 
 	item_details = frappe._dict({
 		"doctype": args.doctype,
