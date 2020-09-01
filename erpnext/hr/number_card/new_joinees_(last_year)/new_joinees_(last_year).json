@@ -1,0 +1,21 @@
+{
+ "creation": "2020-07-22 11:56:32.914057",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Employee",
+ "dynamic_filters_json": "[[\"Employee\",\"company\",\"=\",\"frappe.defaults.get_user_default(\\\"Company\\\")\"]]",
+ "filters_json": "[[\"Employee\",\"date_of_joining\",\"Timespan\",\"last year\",false],[\"Employee\",\"status\",\"=\",\"Active\",false]]",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "New Joinees (Last year)",
+ "modified": "2020-07-22 14:32:09.352301",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "New Joinees (Last year)",
+ "owner": "Administrator",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Monthly",
+ "type": "Document Type"
+}
