@@ -185,6 +185,14 @@ class Customer(TransactionBase):
 		if self.get("__islocal") or not self.credit_limits:
 			return
 
+		past_credit_limits = [d.credit_limit
+			for d in frappe.db.get_all("Customer Credit Limit", filters={'parent': self.name}, fields=["credit_limit"], order_by="company")]
+
+		current_credit_limits = [d.credit_limit for d in sorted(self.credit_limits, key=lambda k: k.company)]
+
+		if past_credit_limits == current_credit_limits:
+			return
+
 		company_record = []
 		for limit in self.credit_limits:
 			if limit.company in company_record:
@@ -340,6 +348,7 @@ def get_loyalty_programs(doc):
 	return lp_details
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
 	from erpnext.controllers.queries import get_fields
 	fields = ["name", "customer_name", "customer_group", "territory"]
@@ -542,6 +551,7 @@ def make_address(args, is_primary_address=1):
 	return address
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, filters):
 	customer = filters.get('customer')
 	return frappe.db.sql("""

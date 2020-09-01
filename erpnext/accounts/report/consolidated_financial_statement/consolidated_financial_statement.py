@@ -378,7 +378,7 @@ def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, g
 		if filters and filters.get('presentation_currency') != d.default_currency:
 			currency_info['company'] = d.name
 			currency_info['company_currency'] = d.default_currency
-			convert_to_presentation_currency(gl_entries, currency_info)
+			convert_to_presentation_currency(gl_entries, currency_info, filters.get('company'))
 
 		for entry in gl_entries:
 			key = entry.account_number or entry.account_name

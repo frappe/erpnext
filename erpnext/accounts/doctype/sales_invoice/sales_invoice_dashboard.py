@@ -13,12 +13,13 @@ def get_data():
 			'Auto Repeat': 'reference_document',
 		},
 		'internal_links': {
-			'Sales Order': ['items', 'sales_order']
+			'Sales Order': ['items', 'sales_order'],
+			'Delivery Note': ['items', 'delivery_note']
 		},
 		'transactions': [
 			{
 				'label': _('Payment'),
-				'items': ['Payment Entry', 'Payment Request', 'Journal Entry', 'Invoice Discounting']
+				'items': ['Payment Entry', 'Payment Request', 'Journal Entry', 'Invoice Discounting', 'Dunning']
 			},
 			{
 				'label': _('Reference'),
