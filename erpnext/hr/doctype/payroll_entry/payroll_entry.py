@@ -290,6 +290,7 @@ class PayrollEntry(Document):
 				"account": default_payroll_payable_account,
 				"credit_in_account_currency": flt(payable_amount, precision),
 				"party_type": '',
+				"cost_center": self.cost_center
 			})
 
 			journal_entry.set("accounts", accounts)

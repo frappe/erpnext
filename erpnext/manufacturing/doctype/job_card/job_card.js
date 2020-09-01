@@ -2,6 +2,17 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Job Card', {
+	setup: function(frm) {
+		frm.set_query('operation', function() {
+			return {
+				query: 'erpnext.manufacturing.doctype.job_card.job_card.get_operations',
+				filters: {
+					'work_order': frm.doc.work_order
+				}
+			};
+		});
+	},
+
 	refresh: function(frm) {
 
 		if(frm.doc.docstatus == 0) {
@@ -24,10 +35,58 @@ frappe.ui.form.on('Job Card', {
 			}
 		}
 
+		frm.trigger("toggle_operation_number");
+
 		if (frm.doc.docstatus == 0 && (frm.doc.for_quantity > frm.doc.total_completed_qty || !frm.doc.for_quantity)
-			&& (!frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)) {
+			&& (frm.doc.items || !frm.doc.items.length || frm.doc.for_quantity == frm.doc.transferred_qty)) {
 			frm.trigger("prepare_timer_buttons");
 		}
+	},
+
+	operation: function(frm) {
+		frm.trigger("toggle_operation_number");
+
+		if (frm.doc.operation && frm.doc.work_order) {
+			frappe.call({
+				method: "erpnext.manufacturing.doctype.job_card.job_card.get_operation_details",
+				args: {
+					"work_order":frm.doc.work_order,
+					"operation":frm.doc.operation
+				},
+				callback: function (r) {
+					if (r.message) {
+						if (r.message.length == 1) {
+							frm.set_value("operation_id", r.message[0].name);
+						} else {
+							let args = [];
+
+							r.message.forEach((row) => {
+								args.push({ "label": row.idx, "value": row.name });
+							});
+
+							let description = __("Operation {0} added multiple times in the work order {1}",
+								[frm.doc.operation, frm.doc.work_order]);
+
+							frm.set_df_property("operation_row_number", "options", args);
+							frm.set_df_property("operation_row_number", "description", description);
+						}
+
+						frm.trigger("toggle_operation_number");
+					}
+				}
+			})
+		}
+	},
+
+	operation_row_number(frm) {
+		if (frm.doc.operation_row_number) {
+			frm.set_value("operation_id", frm.doc.operation_row_number);
+		}
+	},
+
+	toggle_operation_number(frm) {
+		frm.toggle_display("operation_row_number", !frm.doc.operation_id && frm.doc.operation);
+		frm.toggle_reqd("operation_row_number", !frm.doc.operation_id && frm.doc.operation);
 	},
 
 	prepare_timer_buttons: function(frm) {
@@ -39,9 +98,9 @@ frappe.ui.form.on('Job Card', {
 						fieldname: 'employee'}, d => {
 						if (d.employee) {
 							frm.set_value("employee", d.employee);
+						} else {
+							frm.events.start_job(frm);
 						}
-
-						frm.events.start_job(frm);
 					}, __("Enter Value"), __("Start"));
 				} else {
 					frm.events.start_job(frm);
@@ -86,9 +145,7 @@ frappe.ui.form.on('Job Card', {
 			frm.set_value('current_time' , 0);
 		}
 
-		frm.save("Save", () => {}, "", () => {
-			frm.doc.time_logs.pop(-1);
-		});
+		frm.save();
 	},
 
 	complete_job: function(frm, completed_time, completed_qty) {
@@ -120,6 +177,8 @@ frappe.ui.form.on('Job Card', {
 	employee: function(frm) {
 		if (frm.doc.job_started && !frm.doc.current_time) {
 			frm.trigger("reset_timer");
+		} else {
+			frm.events.start_job(frm);
 		}
 	},
 
