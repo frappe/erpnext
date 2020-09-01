@@ -722,4 +722,5 @@ erpnext.patches.v13_0.add_standard_navbar_items #4
 erpnext.patches.v13_0.stock_entry_enhancements
 erpnext.patches.v12_0.update_state_code_for_daman_and_diu
 erpnext.patches.v12_0.rename_lost_reason_detail
+erpnext.patches.v13_0.drop_razorpay_payload_column
 erpnext.patches.v13_0.update_start_end_date_for_old_shift_assignment
