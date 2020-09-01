@@ -17,6 +17,8 @@ from erpnext.loan_management.doctype.process_loan_security_shortfall.process_loa
 from erpnext.loan_management.doctype.loan.loan import create_loan_security_unpledge
 from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
 from erpnext.loan_management.doctype.loan_application.loan_application import create_pledge
+from erpnext.loan_management.doctype.loan_disbursement.loan_disbursement import get_disbursal_amount
+from erpnext.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts
 
 class TestLoan(unittest.TestCase):
 	def setUp(self):
@@ -193,18 +195,14 @@ class TestLoan(unittest.TestCase):
 		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=first_date)
 		process_loan_interest_accrual_for_demand_loans(posting_date = last_date)
 
-		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(last_date, 5),
+		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(last_date, 6),
 			"Loan Closure", flt(loan.loan_amount + accrued_interest_amount))
 		repayment_entry.submit()
 
 		amounts = frappe.db.get_value('Loan Interest Accrual', {'loan': loan.name}, ['paid_interest_amount',
 			'paid_principal_amount'])
 
-		unaccrued_interest_amount =  (loan.loan_amount * loan.rate_of_interest * 6) \
-			/ (days_in_year(get_datetime(first_date).year) * 100)
-
-		self.assertEquals(flt(amounts[0] + unaccrued_interest_amount, 3),
-			flt(accrued_interest_amount, 3))
+		self.assertEquals(flt(amounts[0], 2),flt(accrued_interest_amount, 2))
 		self.assertEquals(flt(repayment_entry.penalty_amount, 5), 0)
 
 		loan.load_from_db()
@@ -269,7 +267,7 @@ class TestLoan(unittest.TestCase):
 		self.assertTrue(loan_security_shortfall)
 
 		self.assertEquals(loan_security_shortfall.loan_amount, 1000000.00)
-		self.assertEquals(loan_security_shortfall.security_value, 400000.00)
+		self.assertEquals(loan_security_shortfall.security_value, 800000.00)
 		self.assertEquals(loan_security_shortfall.shortfall_amount, 600000.00)
 
 		frappe.db.sql(""" UPDATE `tabLoan Security Price` SET loan_security_price = 250
@@ -306,9 +304,6 @@ class TestLoan(unittest.TestCase):
 			"Loan Closure", flt(loan.loan_amount + accrued_interest_amount))
 		repayment_entry.submit()
 
-		amounts = frappe.db.get_value('Loan Interest Accrual', {'loan': loan.name}, ['paid_interest_amount',
-			'paid_principal_amount'])
-
 		loan.load_from_db()
 		self.assertEquals(loan.status, "Loan Closure Requested")
 
@@ -323,6 +318,97 @@ class TestLoan(unittest.TestCase):
 		self.assertEqual(loan.status, 'Closed')
 		self.assertEquals(sum(pledged_qty.values()), 0)
 
+	def test_disbursal_check_with_shortfall(self):
+		pledges = [{
+			"loan_security": "Test Security 2",
+			"qty": 8000.00,
+			"haircut": 50,
+		}]
+
+		loan_application = create_loan_application('_Test Company', self.applicant2,
+			'Stock Loan', pledges, "Repay Over Number of Periods", 12)
+
+		create_pledge(loan_application)
+
+		loan = create_loan_with_security(self.applicant2, "Stock Loan", "Repay Over Number of Periods", 12, loan_application)
+		loan.submit()
+
+		#Disbursing 7,00,000 from the allowed 10,00,000 according to security pledge
+		make_loan_disbursement_entry(loan.name, 700000)
+
+		frappe.db.sql("""UPDATE `tabLoan Security Price` SET loan_security_price = 100
+			where loan_security='Test Security 2'""")
+
+		create_process_loan_security_shortfall()
+		loan_security_shortfall = frappe.get_doc("Loan Security Shortfall", {"loan": loan.name})
+		self.assertTrue(loan_security_shortfall)
+
+		self.assertEqual(get_disbursal_amount(loan.name), 0)
+
+		frappe.db.sql(""" UPDATE `tabLoan Security Price` SET loan_security_price = 250
+			where loan_security='Test Security 2'""")
+
+	def test_disbursal_check_without_shortfall(self):
+		pledges = [{
+			"loan_security": "Test Security 2",
+			"qty": 8000.00,
+			"haircut": 50,
+		}]
+
+		loan_application = create_loan_application('_Test Company', self.applicant2,
+			'Stock Loan', pledges, "Repay Over Number of Periods", 12)
+
+		create_pledge(loan_application)
+
+		loan = create_loan_with_security(self.applicant2, "Stock Loan", "Repay Over Number of Periods", 12, loan_application)
+		loan.submit()
+
+		#Disbursing 7,00,000 from the allowed 10,00,000 according to security pledge
+		make_loan_disbursement_entry(loan.name, 700000)
+
+		self.assertEqual(get_disbursal_amount(loan.name), 300000)
+
+	def test_pending_loan_amount_after_closure_request(self):
+		pledge = [{
+			"loan_security": "Test Security 1",
+			"qty": 4000.00
+		}]
+
+		loan_application = create_loan_application('_Test Company', self.applicant2, 'Demand Loan', pledge)
+		create_pledge(loan_application)
+
+		loan = create_demand_loan(self.applicant2, "Demand Loan", loan_application, posting_date=get_first_day(nowdate()))
+		loan.submit()
+
+		self.assertEquals(loan.loan_amount, 1000000)
+
+		first_date = '2019-10-01'
+		last_date = '2019-10-30'
+
+		no_of_days = date_diff(last_date, first_date) + 1
+
+		no_of_days += 6
+
+		accrued_interest_amount = (loan.loan_amount * loan.rate_of_interest * no_of_days) \
+			/ (days_in_year(get_datetime(first_date).year) * 100)
+
+		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=first_date)
+		process_loan_interest_accrual_for_demand_loans(posting_date = last_date)
+
+		amounts = calculate_amounts(loan.name, add_days(last_date, 6), "Regular Repayment")
+
+		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(last_date, 6),
+			"Loan Closure", flt(loan.loan_amount + accrued_interest_amount))
+		repayment_entry.submit()
+
+		amounts = frappe.db.get_value('Loan Interest Accrual', {'loan': loan.name}, ['paid_interest_amount',
+			'paid_principal_amount'])
+
+		loan.load_from_db()
+		self.assertEquals(loan.status, "Loan Closure Requested")
+
+		amounts = calculate_amounts(loan.name, add_days(last_date, 6), "Regular Repayment")
+		self.assertEquals(amounts['pending_principal_amount'], 0.0)
 
 def create_loan_accounts():
 	if not frappe.db.exists("Account", "Loans and Advances (Assets) - _TC"):
