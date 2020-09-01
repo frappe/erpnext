@@ -357,6 +357,7 @@ def set_missing_values(source, target):
 def make_purchase_receipt(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
 		target.qty = flt(obj.qty) - flt(obj.received_qty)
+		target.received_qty = target.qty
 		target.stock_qty = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.conversion_factor)
 		target.amount = (flt(obj.qty) - flt(obj.received_qty)) * flt(obj.rate)
 		target.base_amount = (flt(obj.qty) - flt(obj.received_qty)) * \
