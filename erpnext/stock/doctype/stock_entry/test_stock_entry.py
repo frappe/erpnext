@@ -16,6 +16,7 @@ from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.stock_entry.stock_entry import move_sample_to_retention_warehouse, make_stock_in_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import OpeningEntryAccountError
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from six import iteritems
 
 def get_sle(**args):
@@ -526,7 +527,7 @@ class TestStockEntry(unittest.TestCase):
 		"""
 			Behaviour: Create 2 Stock Entries, both adding Serial Nos to same batch
 			Expected Result: 1) Cancelling first Stock Entry (origin transaction of created batch)
-				should throw a Link Exists Error
+				should throw a LinkExistsError
 				2) Cancelling second Stock Entry should make Serial Nos that are, linked to mentioned batch
 				and in that transaction only, Inactive.
 		"""
@@ -559,7 +560,7 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual(batch_qty, 2)
 		frappe.db.commit()
 
-		# Cancelling Origin Document
+		# Cancelling Origin Document of Batch
 		self.assertRaises(frappe.LinkExistsError, se1.cancel)
 		frappe.db.rollback()
 
@@ -573,7 +574,7 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Serial No", serial_no1, "batch_no"), batch_no)
 		self.assertEqual(frappe.db.get_value("Serial No", serial_no1, "status"), "Active")
 
-		# Check id Serial No from Stock Entry 2 is Unlinked and Inactive
+		# Check if Serial No from Stock Entry 2 is Unlinked and Inactive
 		self.assertEqual(frappe.db.get_value("Serial No", serial_no2, "batch_no"), None)
 		self.assertEqual(frappe.db.get_value("Serial No", serial_no2, "status"), "Inactive")
 
