@@ -43,8 +43,10 @@ class LoanSecurityUnpledge(Document):
 				"valid_upto": (">=", get_datetime())
 			}, as_list=1))
 
-		loan_amount, principal_paid = frappe.get_value("Loan", self.loan, ['loan_amount', 'total_principal_paid'])
-		pending_principal_amount = loan_amount - principal_paid
+		total_payment, principal_paid, interest_payable = frappe.get_value("Loan", self.loan, ['total_payment', 'total_principal_paid',
+			'total_interest_payable'])
+
+		pending_principal_amount = flt(total_payment) - flt(interest_payable) - flt(principal_paid)
 		security_value = 0
 
 		for security in self.securities:
@@ -60,7 +62,7 @@ class LoanSecurityUnpledge(Document):
 
 			security_value += qty_after_unpledge * loan_security_price_map.get(security.loan_security)
 
-		if not security_value and pending_principal_amount > 0:
+		if not security_value and flt(pending_principal_amount, 2) > 0:
 			frappe.throw("Cannot Unpledge, loan to value ratio is breaching")
 
 		if security_value and (pending_principal_amount/security_value) * 100 > ltv_ratio:
