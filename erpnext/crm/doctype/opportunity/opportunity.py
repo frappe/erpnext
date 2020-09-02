@@ -267,6 +267,12 @@ def make_quotation(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_request_for_quotation(source_name, target_doc=None):
+	def set_missing_values(source, target):
+		rfq = frappe.get_doc(target)
+		for item in rfq.items:
+			# opportunity item is not multi-uom
+			item.conversion_factor = 1.0
+
 	doclist = get_mapped_doc("Opportunity", source_name, {
 		"Opportunity": {
 			"doctype": "Request for Quotation"
@@ -279,7 +285,7 @@ def make_request_for_quotation(source_name, target_doc=None):
 				["uom", "uom"]
 			]
 		}
-	}, target_doc)
+	}, target_doc, set_missing_values)
 
 	return doclist
 
