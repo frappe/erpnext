@@ -10,6 +10,7 @@
   "bom_no",
   "workstation",
   "operation",
+  "operation_row_number",
   "column_break_4",
   "posting_date",
   "company",
@@ -287,10 +288,15 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "operation_row_number",
+   "fieldtype": "Select",
+   "label": "Operation Row Number"
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-27 13:36:35.417502",
+ "modified": "2020-08-24 15:21:21.398267",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
@@ -342,7 +348,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "title_field": "operation",
