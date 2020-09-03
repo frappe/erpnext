@@ -31,14 +31,14 @@ def verify_request():
 def validate_event_and_status(order_id, event, status):
 	if event == "woocommerce_payment_complete":
 		if status != "processing":
-			frappe.log_error("Order ID: {} -- Status {}".format(order_id, status), 
-				"WooCommerce Event: {}",format(event))
+			frappe.log_error(message="Order ID: {} -- Status {}".format(order_id, status), 
+				title="WooCommerce Event: {}".format(event))
 			frappe.throw("Getting unexpect status!")
 
 	if event == "wholesale_order":
 		if status != "on-hold":
-			frappe.log_error("Order ID: {} -- Status {}".format(order_id, status), 
-				"WooCommerce Event: {}",format(event))
+			frappe.log_error(message="Order ID: {} -- Status {}".format(order_id, status), 
+				title="WooCommerce Event: {}".format(event))
 			frappe.throw("Getting unexpect status!")
 
 def pre_process_payload(meta_data, billing):
