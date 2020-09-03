@@ -267,6 +267,9 @@ class BuyingController(StockController):
 		qty_to_be_received_map = get_qty_to_be_received(purchase_orders)
 
 		for item in self.get('items'):
+			if not item.purchase_order:
+				continue
+
 			# reset raw_material cost
 			item.rm_supp_cost = 0
 
@@ -278,6 +281,12 @@ class BuyingController(StockController):
 			item_key = '{}{}'.format(item.item_code, item.purchase_order)
 
 			fg_yet_to_be_received = qty_to_be_received_map.get(item_key)
+
+			if not fg_yet_to_be_received:
+				frappe.throw(_("Row #{0}: Item {1} is already fully received in Purchase Order {2}")
+					.format(item.idx, frappe.bold(item.item_code),
+						frappe.utils.get_link_to_form("Purchase Order", item.purchase_order)),
+					title=_("Limit Crossed"))
 
 			transferred_batch_qty_map = get_transferred_batch_qty_map(item.purchase_order, item.item_code)
 			backflushed_batch_qty_map = get_backflushed_batch_qty_map(item.purchase_order, item.item_code)
