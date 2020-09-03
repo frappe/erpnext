@@ -1,0 +1,11 @@
+{% if shopping_cart and shopping_cart.cart_settings.enabled %}
+{% set cart_settings = shopping_cart.cart_settings %}
+    {% if cart_settings.show_contact_us_button | int %}
+        <button class="btn btn-inquiry btn-primary-light" data-item-code="{{ doc.name }}">
+            {{ _('Contact Us') }}
+        </button>
+	{% endif %}
+<script>
+{% include "templates/generators/item/item_inquiry.js" %}
+</script>
+{% endif %}
