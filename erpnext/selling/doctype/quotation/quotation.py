@@ -262,9 +262,17 @@ def _make_customer(source_name, ignore_permissions=False):
 						return customer
 					else:
 						raise
-				except frappe.MandatoryError:
+				except frappe.MandatoryError as e:
+					mandatory_fields = e.args[0].split(':')[1].split(',')
+					mandatory_fields = [customer.meta.get_label(field.strip()) for field in mandatory_fields]
+
 					frappe.local.message_log = []
-					frappe.throw(_("Please create Customer from Lead {0}").format(lead_name))
+					lead_link = frappe.utils.get_link_to_form("Lead", lead_name)
+					message = _("Could not auto create Customer due to the following missing mandatory field(s):") + "<br>"
+					message += "<br><ul><li>" + "</li><li>".join(mandatory_fields) + "</li></ul>"
+					message += _("Please create Customer from Lead {0}.").format(lead_link)
+
+					frappe.throw(message, title=_("Mandatory Missing"))
 			else:
 				return customer_name
 		else:
