@@ -258,6 +258,7 @@ class StockReconciliation(StockController):
 
 			sl_entries.append(args)
 
+		qty_after_transaction = 0
 		for serial_no in serial_nos:
 			args = self.get_sle_for_items(row, [serial_no])
 
@@ -271,11 +272,19 @@ class StockReconciliation(StockController):
 			if previous_sle and row.warehouse != previous_sle.get("warehouse"):
 				# If serial no exists in different warehouse
 
+				warehouse = previous_sle.get("warehouse", '') or row.warehouse
+
+				if not qty_after_transaction:
+					qty_after_transaction = get_stock_balance(row.item_code,
+						warehouse, self.posting_date, self.posting_time)
+
+				qty_after_transaction -= 1
+
 				new_args = args.copy()
 				new_args.update({
 					'actual_qty': -1,
-					'qty_after_transaction': cint(previous_sle.get('qty_after_transaction')) - 1,
-					'warehouse': previous_sle.get("warehouse", '') or row.warehouse,
+					'qty_after_transaction': qty_after_transaction,
+					'warehouse': warehouse,
 					'valuation_rate': previous_sle.get("valuation_rate")
 				})
 
