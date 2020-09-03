@@ -28,6 +28,67 @@ def verify_request():
 			# print("sig" + sig.decode("utf-8"))
 			frappe.throw(_("Unverified Webhook Data"))
 
+def validate_event_and_status(order_id, event, status):
+	if event == "woocommerce_payment_complete":
+		if status != "processing":
+			frappe.log_error("Order ID: {} -- Status {}".format(order_id, status), 
+				"WooCommerce Event: {}",format(event))
+			frappe.throw("Getting unexpect status!")
+
+	if event == "wholesale_order":
+		if status != "on-hold":
+			frappe.log_error("Order ID: {} -- Status {}".format(order_id, status), 
+				"WooCommerce Event: {}",format(event))
+			frappe.throw("Getting unexpect status!")
+
+def pre_process_payload(meta_data, billing):
+	customer_code = ""
+	pos_order_type = ""
+	patient_name = ""
+	delivery_option = ""
+	for meta in meta_data:
+		if meta["key"] == "user_practitioner":
+			if "-" in meta["value"]:
+				end_index = meta["value"].find('-')
+				customer_code = meta["value"][0:end_index]
+			else:
+				customer_code = meta["value"]
+		elif meta["key"] == "customer_code":
+			customer_code = meta["value"]
+		elif meta["key"] == "delivery_option":
+			delivery_option = meta["value"]
+		# elif meta["key"] == "_nab_reference_id":
+		# 	nab_reference_id = meta["value"]
+		elif meta["key"] == "pos_patient":
+			patient_name = meta["value"]
+		elif meta["key"] == "_pos_order_type":
+			pos_order_type = meta["value"]
+		else:
+			pass
+
+	# create temp_address dict for later use
+	temp_address = {
+		"temporary_address": 1,
+		"temporary_delivery_address_line_1": patient_name if patient_name else billing.get('first_name') + ", " + billing.get('last_name'),
+		"temporary_delivery_address_line_2": billing.get('address_1') + " " + billing.get('address_2'),
+		"temporary_delivery_address_line_3": billing.get('city') + ", " + billing.get('state') + ", " + billing.get('postcode') + ", " + billing.get('country'),
+		"temporary_delivery_address_line_4": billing.get('phone'),
+		"temporary_delivery_address_line_5": billing.get('email')
+	}
+
+	return customer_code, pos_order_type, patient_name, delivery_option, temp_address
+
+def validate_customer_code_erpnext(customer_code):
+	if not customer_code :
+		frappe.throw("Check order id {} in WP, cannot find user_practitioner".format(order.get('id')))
+
+	if frappe.db.exists("Customer", customer_code):
+		customer_doc = frappe.get_doc("Customer", customer_code)
+		payment_category = customer_doc.payment_category
+		accepts_backorders = customer_doc.accepts_backorders
+	else:
+		frappe.throw("Customer {} not exits in ERPNext!".format(customer_code))
+	return payment_category, accepts_backorders
 
 @frappe.whitelist(allow_guest=True)
 def order(*args, **kwargs):
@@ -52,129 +113,83 @@ def _order(woocommerce_settings, *args, **kwargs):
 	else:
 		return "success"
 
-	if event == "created":
-		status = order.get("status")
-		if status == "failed":
-			frappe.log_error("order {} status {}".format(order.get("id"), order.get('status')), "WooCommerce order status filter")
+	# Validate if the event and status results are expecting
+	validate_event_and_status(order.get("id"), event, order.get("status"))
 
-		# Get basic data from order
-		customer_id = order.get('customer_id')
-		meta_data = order.get('meta_data')
-		billing = order.get('billing')
+	# Mapping of order type
+	order_type_mapping = {
+		"practitioner_order": "Practitioner Order",
+		"self": "Self Test",
+		"patient_order": "Patient Order",
+		"on-behalf": "On Behalf",
+	}
 
-		# Mapping of order type
-		order_type_mapping = {
-			"practitioner_order": "Practitioner Order",
-			"self": "Self Test",
-			"patient_order": "Patient Order",
-			"on-behalf": "On Behalf",
-		}
+	# pre-process to parse payload (parameter: meta_data, billing)
+	customer_code, pos_order_type, patient_name, delivery_option, temp_address = pre_process_payload(order.get('meta_data'), order.get('billing'))
 
-		# link customer and address
-		customer_code = ""
-		pos_order_type = ""
-		patient_name = ""
-		delivery_option = ""
-		for meta in meta_data:
-			if meta["key"] == "user_practitioner":
-				if "-" in meta["value"]:
-					end_index = meta["value"].find('-')
-					customer_code = meta["value"][0:end_index]
-				else:
-					customer_code = meta["value"]
-			elif meta["key"] == "customer_code":
-				customer_code = meta["value"]
-			# elif meta["key"] == "practitioner_name":
-			# 	practitioner_name = meta["value"]
-			elif meta["key"] == "delivery_option":
-				delivery_option = meta["value"]
-			# elif meta["key"] == "_nab_reference_id":
-			# 	nab_reference_id = meta["value"]
-			elif meta["key"] == "pos_patient":
-				patient_name = meta["value"]
-			elif meta["key"] == "_pos_order_type":
-				pos_order_type = meta["value"]
-			else:
-				pass
+	# Validate customer code, output payment_category and accepts_backorders 
+	payment_category, accepts_backorders = validate_customer_code_erpnext(customer_code)
 
-		if not patient_name:
-			patient_name = billing.get('first_name') + ", " + billing.get('last_name')
-		street = billing.get('address_1') + " " + billing.get('address_2')
-		city_postcode_country = billing.get('city') + ", " + billing.get('state') + ", " + billing.get('postcode') + ", " + billing.get('country')
-		phone = billing.get('phone')
-		email = billing.get('email')
+	# categorized customer type and order type
+	customer_id = order.get('customer_id')
 
-		# create temp_address dict for later use
-		temp_address = {
-			"temporary_address": 1,
-			"temporary_delivery_address_line_1": patient_name,
-			"temporary_delivery_address_line_2": street,
-			"temporary_delivery_address_line_3": city_postcode_country,
-			"temporary_delivery_address_line_4": phone,
-			"temporary_delivery_address_line_5": email,
-		}
+	# input customer_id 
+	test_order = 0
+	if customer_id == 0: # this is guest login, a patient under a practitioner
+		edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
+		if pos_order_type == "patient_test_order":
+			# We don't need to use the backorder flag for test order
+			test_order = 1
+			new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option, test_order=test_order)
 
-		if not customer_code :
-			frappe.throw("Check order id {} in WP, cannot find user_practitioner".format(order.get('id')))
+		elif pos_order_type == "patient_product_order":
+			# Cannot handle that for now as we need to check if the patient account exist or not in ERPNext
+			# frappe.log_error(title="Ignore patient product order", message=" {}".format(pos_order_type))
+			log_integration_request(order=order, invoice_doc=None, status="Cancelled", data=json.dumps(order, indent=4), error="Ignore patient product order for now", woocommerce_settings=woocommerce_settings)
 
-		if frappe.db.exists("Customer", customer_code):
-			customer_doc = frappe.get_doc("Customer", customer_code)
-			payment_category = customer_doc.payment_category
-			accepts_backorders = customer_doc.accepts_backorders
+			return "Ignore patient order type"
+			# if create_backorder_doc_flag == 1:
+			# 	# throw error if the customers don't accept backorders
+			# 	if not accepts_backorders:
+			# 		frappe.throw("Customer {} doesn't accept backorders!")
+			# 	frappe.throw("This need to be developed further, to create a backorder instead of invoice")
+
+			# new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option)
 		else:
-			frappe.throw("Customer {} not exits!".format(customer_code))
-
-		test_order = 0
-		if customer_id == 0: # this is guest login, a patient under a practitioner
+			frappe.log_error(title="Error in guest order", message="Cannot recoginized pos_order_type: {}".format(pos_order_type))
+	else: # customer_id != 0
+		# this is a user login, a practitioner
+		if woocommerce_settings.company == "RN Labs":
+			order_type = order_type_mapping[pos_order_type]
+			"""
+				order_type_mapping = {
+					"practitioner_order": "Practitioner Order",
+					"self": "Self Test",
+					"on-behalf": "On Behalf",
+					"patient_order": "Patient Order",
+				}
+			"""
 			edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
-			if pos_order_type == "patient_test_order":
-				# We don't need to use the backorder flag for test order
-				test_order = 1
-				new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option, test_order=test_order)
 
-			elif pos_order_type == "patient_product_order":
+			if pos_order_type in  ["self", "on-behalf"]:
+				# apply 20% of the discount
+				test_order = 1
+				if pos_order_type == ["self"]:
+					new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, test_order=test_order)
+				else:
+					new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=temp_address, delivery_option=delivery_option, test_order=test_order)
+
+			elif pos_order_type == "practitioner_order":
+
 				if create_backorder_doc_flag == 1:
 					# throw error if the customers don't accept backorders
 					if not accepts_backorders:
 						frappe.throw("Customer {} doesn't accept backorders!")
 					frappe.throw("This need to be developed further, to create a backorder instead of invoice")
-
-				new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option)
+				else: # Create sales invoice
+					new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type)
 			else:
-				frappe.log_error(title="Error in guest order", message="Cannot recoginized pos_order_type: {}".format(pos_order_type))
-		else: # customer_id != 0
-			# this is a user login, a practitioner
-			if woocommerce_settings.company == "RN Labs":
-				order_type = order_type_mapping[pos_order_type]
-				"""
-					order_type_mapping = {
-						"practitioner_order": "Practitioner Order",
-						"self": "Self Test",
-						"on-behalf": "On Behalf",
-						"patient_order": "Patient Order",
-					}
-				"""
-				edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
-
-				if pos_order_type in  ["self", "on-behalf"]:
-					# apply 20% of the discount
-					test_order = 1
-					if pos_order_type == ["self"]:
-						new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, test_order=test_order)
-					else:
-						new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=temp_address, delivery_option=delivery_option, test_order=test_order)
-
-				elif pos_order_type == "practitioner_order":
-
-					if create_backorder_doc_flag == 1:
-						# throw error if the customers don't accept backorders
-						if not accepts_backorders:
-							frappe.throw("Customer {} doesn't accept backorders!")
-						frappe.throw("This need to be developed further, to create a backorder instead of invoice")
-					else: # Create sales invoice
-						new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type)
-				else:
-					frappe.log_error(title="Error in authorized order", message="Cannot recoginized pos_order_type: {}".format(pos_order_type))
+				frappe.log_error(title="Error in authorized order", message="Cannot recoginized pos_order_type: {}".format(pos_order_type))
 
 		# Create a intergration request
 		try:
@@ -182,7 +197,7 @@ def _order(woocommerce_settings, *args, **kwargs):
 			return "Sales invoice: {} created!".format(new_invoice.name)
 		except UnboundLocalError:
 			frappe.log_error(title="Error in Woocommerce Integration", message=frappe.get_traceback())
-			return "failed"
+			frappe.throw(frappe.get_traceback())
 
 
 def create_sales_invoice(edited_line_items, order, customer_code, payment_category,  woocommerce_settings, order_type=None, temp_address=None, delivery_option=None, test_order=0):
@@ -202,8 +217,7 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 		"transaction_date":date_created,
 		"po_date":date_created,
 		"company": woocommerce_settings.company,
-		"payment_category": payment_category,
-		"comments": customer_note
+		"payment_category": payment_category
 	}
 	if order_type:
 		invoice_dict['order_type']= order_type
@@ -213,6 +227,9 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 	
 	if delivery_option:
 		invoice_dict['customer_shipping_instructions'] = delivery_option
+
+	if customer_note:
+		invoice_dict['customer_shipping_instructions'] += customer_note
 
 	if woocommerce_settings.company == "RN Labs":
 		# set selling price list
