@@ -19,10 +19,10 @@
   "paid",
   "currency",
   "amount",
+  "invoice",
   "razorpay_details_section",
   "subscription_id",
-  "payment_id",
-  "webhook_payload"
+  "payment_id"
  ],
  "fields": [
   {
@@ -118,17 +118,15 @@
    "read_only": 1
   },
   {
-   "fieldname": "webhook_payload",
-   "fieldtype": "Code",
-   "hidden": 1,
-   "label": "Webhook Payload",
-   "options": "JSON",
-   "read_only": 1
+   "fieldname": "invoice",
+   "fieldtype": "Link",
+   "label": "Invoice",
+   "options": "Sales Invoice"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-07-27 14:28:11.532696",
+ "modified": "2020-07-31 13:57:02.328995",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership",
