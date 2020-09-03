@@ -204,6 +204,58 @@ class TestStockReconciliation(unittest.TestCase):
 			stock_doc = frappe.get_doc("Stock Reconciliation", d)
 			stock_doc.cancel()
 
+	def test_stock_reco_for_same_item_with_multiple_batches(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		set_perpetual_inventory()
+
+		item_code = "Stock-Reco-batch-Item-2"
+		warehouse = "_Test Warehouse for Stock Reco3 - _TC"
+
+		create_warehouse("_Test Warehouse for Stock Reco3", {"is_group": 0,
+			"parent_warehouse": "_Test Warehouse Group - _TC", "company": "_Test Company"})
+
+		batch_item_doc = create_item(item_code, is_stock_item=1)
+		if not batch_item_doc.has_batch_no:
+			frappe.db.set_value("Item", item_code, {
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "Test-C.####"
+			})
+
+		# inward entries with different batch and valuation rate
+		ste1=make_stock_entry(posting_date="2012-12-15", posting_time="02:00", item_code=item_code,
+			target=warehouse, qty=6, basic_rate=700)
+		ste2=make_stock_entry(posting_date="2012-12-16", posting_time="02:00", item_code=item_code,
+			target=warehouse, qty=3, basic_rate=200)
+		ste3=make_stock_entry(posting_date="2012-12-17", posting_time="02:00", item_code=item_code,
+			target=warehouse, qty=2, basic_rate=500)
+		ste4=make_stock_entry(posting_date="2012-12-17", posting_time="02:00", item_code=item_code,
+			target=warehouse, qty=4, basic_rate=100)
+
+		batchwise_item_details = {}
+		for stock_doc in [ste1, ste2, ste3, ste4]:
+			self.assertEqual(item_code, stock_doc.items[0].item_code)
+			batchwise_item_details[stock_doc.items[0].batch_no] = [stock_doc.items[0].qty, 0.01]
+
+		stock_balance = frappe.get_all("Stock Ledger Entry",
+			filters = {"item_code": item_code, "warehouse": warehouse},
+			fields=["sum(stock_value_difference)"], as_list=1)
+
+		self.assertEqual(flt(stock_balance[0][0]), 6200.00)
+
+		sr = create_stock_reconciliation(item_code=item_code,
+			warehouse = warehouse, batch_details = batchwise_item_details)
+
+		stock_balance = frappe.get_all("Stock Ledger Entry",
+			filters = {"item_code": item_code, "warehouse": warehouse},
+			fields=["sum(stock_value_difference)"], as_list=1)
+
+		self.assertEqual(flt(stock_balance[0][0]), 0.15)
+
+		for doc in [sr, ste1, ste2, ste3, ste4]:
+			doc.cancel()
+			frappe.delete_doc(doc.doctype, doc.name)
 
 def insert_existing_sle(warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -251,16 +303,29 @@ def create_stock_reconciliation(**args):
 		or frappe.get_cached_value("Company", sr.company, "cost_center") \
 		or "_Test Cost Center - _TC"
 
-	sr.append("items", {
-		"item_code": args.item_code or "_Test Item",
-		"warehouse": args.warehouse or "_Test Warehouse - _TC",
-		"qty": args.qty,
-		"valuation_rate": args.rate,
-		"serial_no": args.serial_no,
-		"batch_no": args.batch_no
-	})
+	if not args.batch_details:
+		sr.append("items", {
+			"item_code": args.item_code or "_Test Item",
+			"warehouse": args.warehouse or "_Test Warehouse - _TC",
+			"qty": args.qty,
+			"valuation_rate": args.rate,
+			"serial_no": args.serial_no,
+			"batch_no": args.batch_no
+		})
+	elif args.batch_details:
+		for batch, data in args.batch_details.items():
+			sr.append("items", {
+				"item_code": args.item_code or "_Test Item",
+				"warehouse": args.warehouse or "_Test Warehouse - _TC",
+				"qty": data[0],
+				"valuation_rate": data[1],
+				"batch_no": batch
+			})
 
 	try:
+		if args.do_not_save:
+			return sr
+
 		if not args.do_not_submit:
 			sr.submit()
 	except EmptyStockReconciliationItemsError:
