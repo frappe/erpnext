@@ -43,6 +43,12 @@ def _execute(filters=None):
 
 			data.append(row)
 			added_item.append((d.parent, d.item_code))
+		# gst is already added, just add qty and taxable value
+		else:
+			row = [d.gst_hsn_code, d.description, d.stock_uom, d.stock_qty, d.base_net_amount, d.base_net_amount]
+			for tax in tax_columns:
+				row += [0]
+			data.append(row)
 	if data:
 		data = get_merged_data(columns, data) # merge same hsn code data
 	return columns, data
