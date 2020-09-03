@@ -191,13 +191,13 @@ def _order(woocommerce_settings, *args, **kwargs):
 			else:
 				frappe.log_error(title="Error in authorized order", message="Cannot recoginized pos_order_type: {}".format(pos_order_type))
 
-		# Create a intergration request
-		try:
-			log_integration_request(order=order, invoice_doc=new_invoice, status="Completed", data=json.dumps(order), reference_docname=new_invoice.name, woocommerce_settings=woocommerce_settings, test_order=test_order, customer_accepts_backorder=customer_accepts_backorder)
-			return "Sales invoice: {} created!".format(new_invoice.name)
-		except UnboundLocalError:
-			frappe.log_error(title="Error in Woocommerce Integration", message=frappe.get_traceback())
-			frappe.throw(frappe.get_traceback())
+	# Create a intergration request
+	try:
+		log_integration_request(order=order, invoice_doc=new_invoice, status="Completed", data=json.dumps(order, indent=4), reference_docname=new_invoice.name, woocommerce_settings=woocommerce_settings, test_order=test_order, customer_accepts_backorder=customer_accepts_backorder)
+		return "Sales invoice: {} created!".format(new_invoice.name)
+	except UnboundLocalError:
+		frappe.log_error(title="Error in Woocommerce Integration", message=frappe.get_traceback())
+		frappe.throw(frappe.get_traceback())
 
 
 def create_sales_invoice(edited_line_items, order, customer_code, payment_category,  woocommerce_settings, order_type=None, temp_address=None, delivery_option=None, test_order=0):
