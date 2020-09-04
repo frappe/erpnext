@@ -98,7 +98,8 @@ def order(*args, **kwargs):
 		return response
 	except Exception:
 		order = json.loads(frappe.request.data)
-		log_integration_request(order=order, invoice_doc=None, status="Failed", data=json.dumps(order, indent=4), error=frappe.get_traceback(), woocommerce_settings=woocommerce_settings)
+		webhook_delivery_id = frappe.get_request_header("X-WC-Webhook-Delivery-ID")
+		log_integration_request(webhook_delivery_id=webhook_delivery_id, order=order, invoice_doc=None, status="Failed", data=json.dumps(order, indent=4), error=frappe.get_traceback(), woocommerce_settings=woocommerce_settings)
 
 def _order(woocommerce_settings, *args, **kwargs):
 	frappe.set_user(woocommerce_settings.creation_user)
@@ -110,6 +111,7 @@ def _order(woocommerce_settings, *args, **kwargs):
 			#woocommerce returns 'webhook_id=value' for the first request which is not JSON
 			order = frappe.request.data
 		event = frappe.get_request_header("X-Wc-Webhook-Event")
+		webhook_delivery_id = frappe.get_request_header("X-WC-Webhook-Delivery-ID")
 	else:
 		return "success"
 
@@ -145,7 +147,7 @@ def _order(woocommerce_settings, *args, **kwargs):
 		elif pos_order_type == "patient_product_order":
 			# Cannot handle that for now as we need to check if the patient account exist or not in ERPNext
 			# frappe.log_error(title="Ignore patient product order", message=" {}".format(pos_order_type))
-			log_integration_request(order=order, invoice_doc=None, status="Cancelled", data=json.dumps(order, indent=4), error="Ignore patient product order for now", woocommerce_settings=woocommerce_settings)
+			log_integration_request(webhook_delivery_id=webhook_delivery_id, order=order, invoice_doc=None, status="Cancelled", data=json.dumps(order, indent=4), error="Ignore patient product order for now", woocommerce_settings=woocommerce_settings)
 
 			return "Ignore patient order type"
 			# if create_backorder_doc_flag == 1:
@@ -193,7 +195,7 @@ def _order(woocommerce_settings, *args, **kwargs):
 
 	# Create a intergration request
 	try:
-		log_integration_request(order=order, invoice_doc=new_invoice, status="Completed", data=json.dumps(order, indent=4), reference_docname=new_invoice.name, woocommerce_settings=woocommerce_settings, test_order=test_order, customer_accepts_backorder=customer_accepts_backorder)
+		log_integration_request(webhook_delivery_id=webhook_delivery_id,order=order, invoice_doc=new_invoice, status="Completed", data=json.dumps(order, indent=4), reference_docname=new_invoice.name, woocommerce_settings=woocommerce_settings, test_order=test_order, customer_accepts_backorder=customer_accepts_backorder)
 		return "Sales invoice: {} created!".format(new_invoice.name)
 	except UnboundLocalError:
 		frappe.log_error(title="Error in Woocommerce Integration", message=frappe.get_traceback())
