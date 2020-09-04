@@ -14,7 +14,7 @@ from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_
 	process_loan_interest_accrual_for_term_loans)
 from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import days_in_year
 from erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall import create_process_loan_security_shortfall
-from erpnext.loan_management.doctype.loan.loan import create_loan_security_unpledge
+from erpnext.loan_management.doctype.loan.loan import unpledge_security
 from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
 from erpnext.loan_management.doctype.loan_application.loan_application import create_pledge
 from erpnext.loan_management.doctype.loan_disbursement.loan_disbursement import get_disbursal_amount
@@ -307,7 +307,7 @@ class TestLoan(unittest.TestCase):
 		loan.load_from_db()
 		self.assertEquals(loan.status, "Loan Closure Requested")
 
-		unpledge_request = create_loan_security_unpledge(loan.name, loan.applicant_type, loan.applicant, loan.company, as_dict=0)
+		unpledge_request = unpledge_security(loan=loan.name, save=1)
 		unpledge_request.submit()
 		unpledge_request.status = 'Approved'
 		unpledge_request.save()
