@@ -14,6 +14,12 @@ class TestPaymentOrder(unittest.TestCase):
 	def setUp(self):
 		create_bank_account()
 
+	def tearDown(self):
+		for bt in frappe.get_all("Payment Order"):
+			doc = frappe.get_doc("Payment Order", bt.name)
+			doc.cancel()
+			doc.delete()
+
 	def test_payment_order_creation_against_payment_entry(self):
 		purchase_invoice = make_purchase_invoice()
 		payment_entry = get_payment_entry("Purchase Invoice", purchase_invoice.name, bank_account="_Test Bank - _TC")
