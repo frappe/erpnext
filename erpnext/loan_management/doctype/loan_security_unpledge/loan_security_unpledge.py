@@ -34,7 +34,6 @@ class LoanSecurityUnpledge(Document):
 
 	def validate_unpledge_qty(self):
 		pledge_qty_map = get_pledged_security_qty(self.loan)
-		print(pledge_qty_map, "$$$$$$$$")
 
 		ltv_ratio_map = frappe._dict(frappe.get_all("Loan Security Type",
 			fields=["name", "loan_to_value_ratio"], as_list=1))
