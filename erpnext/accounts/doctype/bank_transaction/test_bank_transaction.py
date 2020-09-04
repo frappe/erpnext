@@ -91,28 +91,31 @@ class TestBankTransaction(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Bank Transaction", bank_transaction.name, "unallocated_amount"), 0)
 		self.assertTrue(frappe.db.get_value("Sales Invoice Payment", dict(parent=payment.name), "clearance_date") is not None)
 
+def create_bank_account(bank_name="Citi Bank", account_name="_Test Bank - _TC"):
+	try:
+		frappe.get_doc({
+			"doctype": "Bank",
+			"bank_name":bank_name,
+		}).insert()
+	except frappe.DuplicateEntryError:
+		pass
+
+	try:
+		doc = frappe.get_doc({
+			"doctype": "Bank Account",
+			"account_name":"Checking Account",
+			"bank": bank_name,
+			"account": account_name
+		}).insert()
+	except frappe.DuplicateEntryError:
+		pass
+
 def add_transactions():
 	if frappe.flags.test_bank_transactions_created:
 		return
 
 	frappe.set_user("Administrator")
-	try:
-		frappe.get_doc({
-			"doctype": "Bank",
-			"bank_name":"Citi Bank",
-		}).insert()
-	except frappe.DuplicateEntryError:
-		pass
-
-	try:
-		frappe.get_doc({
-			"doctype": "Bank Account",
-			"account_name":"Checking Account",
-			"bank": "Citi Bank",
-			"account": "_Test Bank - _TC"
-		}).insert()
-	except frappe.DuplicateEntryError:
-		pass
+	create_bank_account()
 
 	doc = frappe.get_doc({
 		"doctype": "Bank Transaction",
