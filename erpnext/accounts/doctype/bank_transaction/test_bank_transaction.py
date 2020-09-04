@@ -101,7 +101,7 @@ def create_bank_account(bank_name="Citi Bank", account_name="_Test Bank - _TC"):
 		pass
 
 	try:
-		doc = frappe.get_doc({
+		frappe.get_doc({
 			"doctype": "Bank Account",
 			"account_name":"Checking Account",
 			"bank": bank_name,
