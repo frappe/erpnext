@@ -73,8 +73,8 @@ frappe.ui.form.on('Loan', {
 
 	loan_type: function(frm) {
 		frm.toggle_reqd("repayment_method", frm.doc.is_term_loan);
-		frm.toggle_display("repayment_method", 1 - frm.doc.is_term_loan);
-		frm.toggle_display("repayment_periods", s1 - frm.doc.is_term_loan);
+		frm.toggle_display("repayment_method", frm.doc.is_term_loan);
+		frm.toggle_display("repayment_periods", frm.doc.is_term_loan);
 	},
 
 
