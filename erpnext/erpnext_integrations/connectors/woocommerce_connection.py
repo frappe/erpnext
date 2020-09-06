@@ -110,7 +110,7 @@ def _order(woocommerce_settings, *args, **kwargs):
 		except ValueError:
 			#woocommerce returns 'webhook_id=value' for the first request which is not JSON
 			order = frappe.request.data
-		event = frappe.get_request_header("X-Wc-Webhook-Event")
+		event = frappe.get_request_header("X-WC-Webhook-Event")
 		webhook_delivery_id = frappe.get_request_header("X-WC-Webhook-Delivery-ID")
 	else:
 		return "success"
@@ -231,7 +231,11 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 		invoice_dict['customer_shipping_instructions'] = delivery_option
 
 	if customer_note:
-		invoice_dict['customer_shipping_instructions'] += customer_note
+		if 'customer_shipping_instructions' in invoice_dict: # in case the delivery option is not presented
+			invoice_dict['customer_shipping_instructions'] += (" " + customer_note)
+		else:
+			invoice_dict['customer_shipping_instructions'] = customer_note
+
 
 	if woocommerce_settings.company == "RN Labs":
 		# set selling price list
@@ -295,6 +299,16 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 		desc = "GST 10% @ 10.0"
 		addTaxDetails("On Net Total", invoice_doc, 0, desc, woocommerce_settings.tax_account, rate=10, included_in_print_rate=included_in_print_rate)
 
+	invoice_doc.save()
+
+	## put any message logs into the comments section
+	msg_comments = ""
+	messages = frappe.get_message_log()
+	if messages:
+		for message in messages:
+			msg_comments += message.get("message") + "\n"
+
+	invoice_doc.comments = msg_comments
 	invoice_doc.save()
 
 	DocTags("Sales Invoice").add(invoice_doc.name, "WooCommerce Order")
