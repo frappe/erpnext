@@ -158,7 +158,7 @@ def create_member_subscription_order(user_details):
 
 	return subscription
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def register_member(fullname, email, rzpay_plan_id, subscription_id, pan=None, mobile=None):
 	plan = get_membership_type(rzpay_plan_id)
 	if not plan:
