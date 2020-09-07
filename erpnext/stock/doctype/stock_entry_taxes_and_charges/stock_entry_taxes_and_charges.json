@@ -5,6 +5,7 @@
  "engine": "InnoDB",
  "field_order": [
   "description",
+  "expense_account",
   "col_break",
   "amount"
  ],
@@ -25,10 +26,17 @@
    "in_list_view": 1,
    "label": "Amount",
    "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Expense Account",
+   "options": "Account"
   }
  ],
  "istable": 1,
- "modified": "2020-03-03 15:37:58.814061",
+ "modified": "2020-09-07 23:35:16.476353",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Taxes and Charges",
