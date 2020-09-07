@@ -5,49 +5,48 @@
 from __future__ import unicode_literals
 import frappe
 import json
+import re
 from frappe.model.document import Document
+from frappe import _
 from six import string_types
 from pyyoutube import Api
 
 class Video(Document):
-	pass
+	def validate(self):
+		self.set_youtube_statistics()
+
+	def set_youtube_statistics(self):
+		tracking_enabled = frappe.db.get_single_value("Video Settings", "enable_youtube_tracking")
+		if self.provider == "YouTube" and not tracking_enabled:
+			return
+
+		api_key = frappe.db.get_single_value("Video Settings", "api_key")
+		youtube_id = get_id_from_url(self.url)
+		api = Api(api_key=api_key)
+
+		try:
+			video = api.get_video_by_id(video_id=youtube_id)
+			video_stats = video.items[0].to_dict().get('statistics')
+
+			self.like_count = video_stats.get('likeCount')
+			self.view_count = video_stats.get('viewCount')
+			self.dislike_count = video_stats.get('dislikeCount')
+			self.comment_count = video_stats.get('commentCount')
+
+		except Exception:
+			title = "Failed to Update YouTube Statistics for Video: {0}".format(self.name)
+			frappe.log_error(title + "\n\n" +  frappe.get_traceback(), title=title)
 
 @frappe.whitelist()
-def get_video_stats(docname, youtube_id, update=True):
-	'''Returns/Sets video statistics
-
-	:param docname: Name of Video
-	:param youtube_id: Unique ID from URL
-	:param update: Updates db stats value if True, else returns statistics
+def get_id_from_url(url):
 	'''
-	if isinstance(update, string_types):
-		update = json.loads(update)
+		Returns video id from url
 
-	api_key = frappe.db.get_single_value("Video Settings", "api_key")
-	api = Api(api_key=api_key)
+		:param youtube url: String URL
+	'''
+	if not isinstance(url, string_types):
+		frappe.throw(_("URL can only be a string"), title=_("Invalid URL"))
 
-	try:
-		video = api.get_video_by_id(video_id=youtube_id)
-		video_stats = video.items[0].to_dict().get('statistics')
-		stats = {
-			'like_count' : video_stats.get('likeCount'),
-			'view_count' : video_stats.get('viewCount'),
-			'dislike_count' : video_stats.get('dislikeCount'),
-			'comment_count' : video_stats.get('commentCount')
-		}
-
-		if not update:
-			return stats
-
-		frappe.db.sql("""
-			UPDATE `tabVideo`
-			SET
-				like_count  = %(like_count)s,
-				view_count = %(view_count)s,
-				dislike_count = %(dislike_count)s,
-				comment_count = %(comment_count)s
-			WHERE name = {0}""".format(frappe.db.escape(docname)), stats) #nosec
-		frappe.db.commit()
-	except:
-		message = "Please make sure you are connected to the Internet"
-		frappe.log_error(message + "\n\n" + frappe.get_traceback(), "Failed to Update YouTube Statistics for Video: {0}".format(docname))
+	pattern = re.compile(r'[a-z\:\//\.]+(youtube|youtu)\.(com|be)/(watch\?v=|embed/|.+\?v=)?([^"&?\s]{11})?')
+	id = pattern.match(url)
+	return id.groups()[-1]

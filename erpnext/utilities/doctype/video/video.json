@@ -14,15 +14,15 @@
   "column_break_4",
   "publish_date",
   "duration",
-  "section_break_7",
-  "description",
-  "image",
   "youtube_tracking_section",
   "like_count",
   "view_count",
   "col_break",
   "dislike_count",
-  "comment_count"
+  "comment_count",
+  "section_break_7",
+  "description",
+  "image"
  ],
  "fields": [
   {
@@ -122,7 +122,7 @@
  ],
  "image_field": "image",
  "links": [],
- "modified": "2020-08-02 04:26:16.345569",
+ "modified": "2020-09-04 12:59:28.283622",
  "modified_by": "Administrator",
  "module": "Utilities",
  "name": "Video",
