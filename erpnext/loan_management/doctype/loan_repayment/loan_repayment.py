@@ -13,6 +13,7 @@ from frappe.utils import date_diff, add_days, getdate, add_months, get_first_day
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import update_shortfall_status
+from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_demand_loans
 
 class LoanRepayment(AccountsController):
 
@@ -21,6 +22,9 @@ class LoanRepayment(AccountsController):
 		self.set_missing_values(amounts)
 		self.validate_amount()
 		self.allocate_amounts(amounts['pending_accrual_entries'])
+
+	def before_submit(self):
+		self.book_unaccrued_interest()
 
 	def on_submit(self):
 		self.update_paid_amount()
@@ -71,6 +75,26 @@ class LoanRepayment(AccountsController):
 		if self.payment_type == "Loan Closure" and flt(self.amount_paid, precision) < flt(self.payable_amount, precision):
 			msg = _("Amount of {0} is required for Loan closure").format(self.payable_amount)
 			frappe.throw(msg)
+
+	def book_unaccrued_interest(self):
+		if self.payment_type == 'Loan Closure':
+			total_interest_paid = 0
+			for payment in self.repayment_details:
+				total_interest_paid += payment.paid_interest_amount
+
+			if total_interest_paid < self.interest_payable:
+				if not self.is_term_loan:
+					process = process_loan_interest_accrual_for_demand_loans(posting_date=self.posting_date,
+						loan=self.against_loan)
+
+				lia = frappe.db.get_value('Loan Interest Accrual', {'process_loan_interest_accrual':
+					process}, ['name', 'interest_amount', 'payable_principal_amount'], as_dict=1)
+
+				self.append('repayment_details', {
+					'loan_interest_accrual': lia.name,
+					'paid_interest_amount': lia.interest_amount,
+					'paid_principal_amount': lia.payable_principal_amount
+				})
 
 	def update_paid_amount(self):
 		precision = cint(frappe.db.get_default("currency_precision")) or 2
@@ -148,8 +172,6 @@ class LoanRepayment(AccountsController):
 		if self.payment_type == 'Loan Closure' and total_interest_paid < self.interest_payable:
 			unaccrued_interest = self.interest_payable - total_interest_paid
 			interest_paid -= unaccrued_interest
-			if self.repayment_details:
-				self.repayment_details[-1].paid_interest_amount += unaccrued_interest
 
 		if interest_paid:
 			self.principal_amount_paid += interest_paid
