@@ -417,7 +417,7 @@
    "fieldname": "additional_costs",
    "fieldtype": "Table",
    "label": "Additional Costs",
-   "options": "Landed Cost Taxes and Charges"
+   "options": "Stock Entry Taxes and Charges"
   },
   {
    "fieldname": "total_additional_costs",
@@ -635,7 +635,7 @@
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-03-03 16:13:57.904275",
+ "modified": "2020-09-07 23:29:35.939739",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
