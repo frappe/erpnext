@@ -207,6 +207,12 @@ def get_data():
 					"onboard": 1,
 				},
 				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Sales Details",
+					"doctype": "Sales Order",
+				},
+				{
 					"type": "page",
 					"name": "sales-funnel",
 					"label": _("Sales Funnel"),

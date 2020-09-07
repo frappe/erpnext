@@ -153,6 +153,12 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
+					"name": "Purchase Details",
+					"reference_doctype": "Purchase Order",
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
 					"name": "Purchase Order Trends",
 					"reference_doctype": "Purchase Order",
 					"onboard": 1,
