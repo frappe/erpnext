@@ -8,6 +8,7 @@ import re
 import pytz
 from frappe.model.document import Document
 from frappe import _
+from datetime import datetime
 from six import string_types
 from pyyoutube import Api
 
@@ -71,7 +72,7 @@ def update_youtube_data_half_hourly():
 		return
 
 	if frequency == 30:
-		batch_update_data()
+		batch_update_youtube_data()
 
 
 def update_youtube_data():
