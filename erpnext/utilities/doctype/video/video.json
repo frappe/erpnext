@@ -11,6 +11,7 @@
   "title",
   "provider",
   "url",
+  "youtube_video_id",
   "column_break_4",
   "publish_date",
   "duration",
@@ -118,11 +119,18 @@
    "fieldname": "youtube_tracking_section",
    "fieldtype": "Section Break",
    "label": "Youtube Statistics"
+  },
+  {
+   "fieldname": "youtube_video_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Youtube ID",
+   "read_only": 1
   }
  ],
  "image_field": "image",
  "links": [],
- "modified": "2020-09-04 12:59:28.283622",
+ "modified": "2020-09-07 17:02:20.185794",
  "modified_by": "Administrator",
  "module": "Utilities",
  "name": "Video",

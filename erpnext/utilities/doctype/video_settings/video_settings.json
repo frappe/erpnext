@@ -6,7 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "enable_youtube_tracking",
-  "api_key"
+  "api_key",
+  "frequency"
  ],
  "fields": [
   {
@@ -21,11 +22,21 @@
    "fieldtype": "Data",
    "label": "API Key",
    "mandatory_depends_on": "eval:doc.enable_youtube_tracking"
+  },
+  {
+   "default": "1 hr",
+   "depends_on": "eval:doc.enable_youtube_tracking",
+   "fieldname": "frequency",
+   "fieldtype": "Select",
+   "label": "Frequency",
+   "mandatory_depends_on": "eval:doc.enable_youtube_tracking",
+   "options": "30 mins\n1 hr\n6 hrs\nDaily"
   }
  ],
+ "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-08-02 03:56:49.673870",
+ "modified": "2020-09-07 16:09:00.360668",
  "modified_by": "Administrator",
  "module": "Utilities",
  "name": "Video Settings",
