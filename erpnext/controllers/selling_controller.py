@@ -80,7 +80,7 @@ class SellingController(StockController):
 
 			party_details = _get_party_details(customer,
 				ignore_permissions=self.flags.ignore_permissions,
-				posting_date=self.posting_date if self.posting_date else None,
+				posting_date=self.posting_date if hasattr(self, 'posting_date') else None,
 				doctype=self.doctype, company=self.company,
 				fetch_payment_terms_template=fetch_payment_terms_template,
 				party_address=self.customer_address, shipping_address=self.shipping_address_name)
