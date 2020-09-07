@@ -43,7 +43,7 @@
   {
    "hidden": 0,
    "label": "Bank Statement",
-   "links": "[\n    {\n        \"label\": \"Bank\",\n        \"name\": \"Bank\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Account\",\n        \"name\": \"Bank Account\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Statement Transaction Entry\",\n        \"name\": \"Bank Statement Transaction Entry\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Statement Settings\",\n        \"name\": \"Bank Statement Settings\",\n        \"type\": \"doctype\"\n    }\n]"
+   "links": "[\n    {\n        \"label\": \"Bank\",\n        \"name\": \"Bank\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Account\",\n        \"name\": \"Bank Account\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Reconciliation\",\n        \"name\": \"bank-reconciliation\",\n        \"type\": \"page\"\n    },\n    {\n        \"label\": \"Bank Clearance\",\n        \"name\": \"Bank Clearance\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Statement Transaction Entry\",\n        \"name\": \"Bank Statement Transaction Entry\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Statement Settings\",\n        \"name\": \"Bank Statement Settings\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -98,7 +98,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Accounting",
- "modified": "2020-06-19 12:42:44.054598",
+ "modified": "2020-09-03 10:37:07.865801",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
