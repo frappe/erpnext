@@ -87,14 +87,14 @@ class LoanRepayment(AccountsController):
 					process = process_loan_interest_accrual_for_demand_loans(posting_date=self.posting_date,
 						loan=self.against_loan)
 
-				lia = frappe.db.get_value('Loan Interest Accrual', {'process_loan_interest_accrual':
-					process}, ['name', 'interest_amount', 'payable_principal_amount'], as_dict=1)
+					lia = frappe.db.get_value('Loan Interest Accrual', {'process_loan_interest_accrual':
+						process}, ['name', 'interest_amount', 'payable_principal_amount'], as_dict=1)
 
-				self.append('repayment_details', {
-					'loan_interest_accrual': lia.name,
-					'paid_interest_amount': lia.interest_amount,
-					'paid_principal_amount': lia.payable_principal_amount
-				})
+					self.append('repayment_details', {
+						'loan_interest_accrual': lia.name,
+						'paid_interest_amount': lia.interest_amount,
+						'paid_principal_amount': lia.payable_principal_amount
+					})
 
 	def update_paid_amount(self):
 		precision = cint(frappe.db.get_default("currency_precision")) or 2
