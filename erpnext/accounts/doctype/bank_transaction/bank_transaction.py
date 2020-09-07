@@ -45,19 +45,23 @@ class BankTransaction(StatusUpdater):
 
 	def clear_linked_payment_entries(self):
 		for payment_entry in self.payment_entries:
-			allocated_amount = get_total_allocated_amount(payment_entry)
-			paid_amount = get_paid_amount(payment_entry, self.currency)
+			if payment_entry.payment_document in ["Payment Entry", "Journal Entry", "Purchase Invoice", "Expense Claim"]:
+				self.clear_simple_entry(payment_entry)
 
-			if paid_amount and allocated_amount:
-				if  flt(allocated_amount[0]["allocated_amount"]) > flt(paid_amount):
-					pass
-					# frappe.throw(_("The total allocated amount ({0}) is greated than the paid amount ({1}).".format(flt(allocated_amount[0]["allocated_amount"]), flt(paid_amount))))
-				else:
-					if payment_entry.payment_document in ["Payment Entry", "Journal Entry", "Purchase Invoice", "Expense Claim"]:
-						self.clear_simple_entry(payment_entry)
+			elif payment_entry.payment_document == "Sales Invoice":
+				self.clear_sales_invoice(payment_entry)
+			# allocated_amount = get_total_allocated_amount(payment_entry)
+			# paid_amount = get_paid_amount(payment_entry, self.currency)
 
-					elif payment_entry.payment_document == "Sales Invoice":
-						self.clear_sales_invoice(payment_entry)
+			# if paid_amount and allocated_amount:
+			# 	if  flt(allocated_amount[0]["allocated_amount"]) > flt(paid_amount):
+			# 		frappe.throw(_("The total allocated amount ({0}) is greated than the paid amount ({1}).".format(flt(allocated_amount[0]["allocated_amount"]), flt(paid_amount))))
+			# 	else:
+			# 		if payment_entry.payment_document in ["Payment Entry", "Journal Entry", "Purchase Invoice", "Expense Claim"]:
+			# 			self.clear_simple_entry(payment_entry)
+
+			# 		elif payment_entry.payment_document == "Sales Invoice":
+			# 			self.clear_sales_invoice(payment_entry)
 
 	def clear_simple_entry(self, payment_entry):
 		frappe.db.set_value(payment_entry.payment_document, payment_entry.payment_entry, "clearance_date", self.date)
