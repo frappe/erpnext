@@ -8,7 +8,7 @@ frappe.ui.form.on('Student', {
 		frm.add_fetch('student', 'gender', 'gender');
 		frm.add_fetch('student', 'date_of_birth', 'date_of_birth');
 
-		frm.set_query('student', 'siblings', function(doc, cdt, cdn) {
+		frm.set_query('student', 'siblings', function(doc) {
 			return {
 				'filters': {
 					'name': ['!=', doc.name]
@@ -27,7 +27,7 @@ frappe.ui.form.on('Student', {
 		}
 
 		frappe.db.get_value('Education Settings', {name: 'Education Settings'}, 'user_creation_skip', (r) => {
-		if (r.user_creation_skip === "0") {
+			if (r.user_creation_skip === "0") {
 				frm.set_df_property('student_email_id', 'reqd', 1);
 			}
 		});
