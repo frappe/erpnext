@@ -45,6 +45,7 @@ class StockReconciliation(StockController):
 	def on_cancel(self):
 		self.delete_and_repost_sle()
 		self.make_gl_entries_on_cancel()
+		self.delete_auto_created_batches()
 
 	def remove_items_with_no_change(self):
 		"""Remove items if qty or rate is not changed"""
