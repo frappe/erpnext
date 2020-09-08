@@ -55,9 +55,11 @@ def get_data(warehouse):
 	status_list = ['Active', 'Expired']
 	data = []
 	for item in serial_item_list:
-		total_serial_no = frappe.db.count("Serial No", filters={"item_code": item.item_code, "status": ("in", status_list), "warehouse": warehouse})
+		total_serial_no = frappe.db.count("Serial No", 
+			filters={"item_code": item.item_code, "status": ("in", status_list), "warehouse": warehouse})
 
-		actual_qty = frappe.db.get_value('Bin', fieldname=['actual_qty'], filters={"warehouse": warehouse, "item_code": item.item_code})
+		actual_qty = frappe.db.get_value('Bin', fieldname=['actual_qty'], 
+			filters={"warehouse": warehouse, "item_code": item.item_code})
 
 		# frappe.db.get_value returns null if no record exist.
 		if not actual_qty:
