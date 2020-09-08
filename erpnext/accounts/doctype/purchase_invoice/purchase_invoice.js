@@ -141,6 +141,8 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				}
 			});
 		}
+
+		this.frm.set_df_property("tax_withholding_category", "hidden", doc.apply_tds ? 0 : 1);
 	},
 
 	unblock_invoice: function() {
