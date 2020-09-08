@@ -255,11 +255,13 @@ class TestPurchaseReceipt(unittest.TestCase):
 			self.assertEqual(frappe.db.get_value("Serial No", serial_no, "warehouse"),
 				pr.get("items")[0].rejected_warehouse)
 
-	def test_purchase_return(self):
+	def test_purchase_return_partial(self):
 
 		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1")
 
-		return_pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", is_return=1, return_against=pr.name, qty=-2)
+		return_pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", is_return=1, return_against=pr.name, qty=-2, do_not_submit=1)
+		return_pr.items[0].purchase_receipt_item = pr.items[0].name
+		return_pr.submit()
 
 		# check sle
 		outgoing_rate = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
@@ -283,6 +285,31 @@ class TestPurchaseReceipt(unittest.TestCase):
 			self.assertEqual(expected_values[gle.account][0], gle.debit)
 			self.assertEqual(expected_values[gle.account][1], gle.credit)
 
+		# hack because new_doc isn't considering is_return portion of status_updater
+		returned = frappe.get_doc("Purchase Receipt", return_pr.name)
+		returned.update_prevdoc_status()
+		pr.load_from_db()
+
+		# Check if Original PR updated
+		self.assertEqual(pr.items[0].returned_qty, 2)
+		self.assertEqual(pr.per_returned, 40)
+
+	def test_purchase_return_full(self):
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1")
+
+		return_pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", is_return=1, return_against=pr.name, qty=-5, do_not_submit=1)
+		return_pr.items[0].purchase_receipt_item = pr.items[0].name
+		return_pr.submit()
+
+		# hack because new_doc isn't considering is_return portion of status_updater
+		returned = frappe.get_doc("Purchase Receipt", return_pr.name)
+		returned.update_prevdoc_status()
+		pr.load_from_db()
+
+		# Check if Original PR updated
+		self.assertEqual(pr.items[0].returned_qty, 5)
+		self.assertEqual(pr.per_returned, 100)
+		self.assertEqual(pr.status, 'Return Issued')
 
 	def test_purchase_return_for_rejected_qty(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
