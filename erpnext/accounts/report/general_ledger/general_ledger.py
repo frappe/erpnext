@@ -43,8 +43,11 @@ def execute(filters=None):
 
 
 def validate_filters(filters, account_details):
-	if not filters.get('company'):
-		frappe.throw(_('{0} is mandatory').format(_('Company')))
+	if not filters.get("company"):
+		frappe.throw(_("{0} is mandatory").format(_("Company")))
+
+	if not filters.get("from_date") and not filters.get("to_date"):
+		frappe.throw(_("{0} and {1} are mandatory").format(frappe.bold(_("From Date")), frappe.bold(_("To Date"))))
 
 	if filters.get("account") and not account_details.get(filters.account):
 		frappe.throw(_("Account {0} does not exists").format(filters.account))
@@ -141,7 +144,7 @@ def get_gl_entries(filters, accounting_dimensions):
 	if filters and filters.get('cost_center'):
 		select_fields_with_percentage = """, debit*(DCC_allocation.percentage_allocation/100) as debit, credit*(DCC_allocation.percentage_allocation/100) as credit, debit_in_account_currency*(DCC_allocation.percentage_allocation/100) as debit_in_account_currency,
 		credit_in_account_currency*(DCC_allocation.percentage_allocation/100) as credit_in_account_currency """
-		
+
 		distributed_cost_center_query = """
 		UNION ALL
 		SELECT name as gl_entry,
@@ -155,7 +158,7 @@ def get_gl_entries(filters, accounting_dimensions):
 			against_voucher_type,
 			against_voucher,
 			account_currency,
-			remarks, against, 
+			remarks, against,
 			is_opening, `tabGL Entry`.creation {select_fields_with_percentage}
 		FROM `tabGL Entry`,
 		(

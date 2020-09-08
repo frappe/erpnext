@@ -513,7 +513,7 @@ class StockEntry(StockController):
 						d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
 					elif self.purpose == "Repack" and total_fg_qty and not d.set_basic_rate_manually:
 						d.basic_rate = flt(raw_material_cost) / flt(total_fg_qty)
-						d.basic_amount = d.basic_rate * d.qty
+						d.basic_amount = d.basic_rate * flt(d.qty)
 
 	def distribute_additional_costs(self):
 		if self.purpose == "Material Issue":
