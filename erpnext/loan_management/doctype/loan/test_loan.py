@@ -318,6 +318,11 @@ class TestLoan(unittest.TestCase):
 		self.assertEqual(loan.status, 'Closed')
 		self.assertEquals(sum(pledged_qty.values()), 0)
 
+		amounts = amounts = calculate_amounts(loan.name, add_days(last_date, 6), "Regular Repayment")
+		self.assertEqual(amounts['pending_principal_amount'], 0)
+		self.assertEqual(amounts['payable_principal_amount'], 0)
+		self.assertEqual(amounts['interest_amount'], 0)
+
 	def test_disbursal_check_with_shortfall(self):
 		pledges = [{
 			"loan_security": "Test Security 2",
