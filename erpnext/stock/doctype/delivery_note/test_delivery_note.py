@@ -260,8 +260,6 @@ class TestDeliveryNote(unittest.TestCase):
 
 		make_stock_entry(item_code="_Test Item", target="Stores - TCP1", qty=50, basic_rate=100)
 
-		actual_qty_0 = get_qty_after_transaction(warehouse="Stores - TCP1")
-
 		dn = create_delivery_note(qty=5, rate=500, warehouse="Stores - TCP1", company=company,
 			expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
 
