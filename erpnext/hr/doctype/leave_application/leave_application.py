@@ -433,7 +433,8 @@ def get_leave_details(employee, date):
 			'from_date': ('<=', date),
 			'to_date': ('>=', date),
 			'leave_type': allocation.leave_type,
-			'employee': employee
+			'employee': employee,
+			'docstatus': 1
 		}, 'SUM(total_leaves_allocated)') or 0
 
 		remaining_leaves = get_leave_balance_on(employee, d, date, to_date = allocation.to_date,
