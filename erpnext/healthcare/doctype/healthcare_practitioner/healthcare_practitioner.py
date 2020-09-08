@@ -71,6 +71,7 @@ def validate_service_item(item, msg):
 		frappe.throw(_(msg))
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_practitioner_list(doctype, txt, searchfield, start, page_len, filters=None):
 	fields = ['name', 'practitioner_name', 'mobile_phone']
 

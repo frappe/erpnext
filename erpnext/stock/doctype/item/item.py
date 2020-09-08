@@ -13,7 +13,7 @@ from erpnext.controllers.item_variant import (ItemVariantExistsError,
 from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
 from frappe import _, msgprint
 from frappe.utils import (cint, cstr, flt, formatdate, get_timestamp, getdate,
-						  now_datetime, random_string, strip, get_link_to_form)
+		now_datetime, random_string, strip, get_link_to_form, nowtime)
 from frappe.utils.html_utils import clean_html
 from frappe.website.doctype.website_slideshow.website_slideshow import \
 	get_slideshow
@@ -111,6 +111,7 @@ class Item(WebsiteGenerator):
 		self.synced_with_hub = 0
 
 		self.validate_has_variants()
+		self.validate_attributes_in_variants()
 		self.validate_stock_exists_for_template_item()
 		self.validate_attributes()
 		self.validate_variant_attributes()
@@ -194,7 +195,7 @@ class Item(WebsiteGenerator):
 
 			if default_warehouse:
 				stock_entry = make_stock_entry(item_code=self.name, target=default_warehouse, qty=self.opening_stock,
-					rate=self.valuation_rate, company=default.company)
+					rate=self.valuation_rate, company=default.company, posting_date=getdate(), posting_time=nowtime())
 
 				stock_entry.add_comment("Comment", _("Opening Stock"))
 
@@ -343,7 +344,7 @@ class Item(WebsiteGenerator):
 			if variant:
 				context.variant = frappe.get_doc("Item", variant)
 
-				for fieldname in ("website_image", "web_long_description", "description",
+				for fieldname in ("website_image", "website_image_alt", "web_long_description", "description",
 										"website_specifications"):
 					if context.variant.get(fieldname):
 						value = context.variant.get(fieldname)
@@ -805,6 +806,77 @@ class Item(WebsiteGenerator):
 		if not self.has_variants and frappe.db.get_value("Item", self.name, "has_variants"):
 			if frappe.db.exists("Item", {"variant_of": self.name}):
 				frappe.throw(_("Item has variants."))
+
+	def validate_attributes_in_variants(self):
+		if not self.has_variants or self.get("__islocal"):
+			return
+
+		old_doc = self.get_doc_before_save()
+		old_doc_attributes = set([attr.attribute for attr in old_doc.attributes])
+		own_attributes = [attr.attribute for attr in self.attributes]
+
+		# Check if old attributes were removed from the list
+		# Is old_attrs is a subset of new ones
+		# that means we need not check any changes
+		if old_doc_attributes.issubset(set(own_attributes)):
+			return
+
+		from collections import defaultdict
+
+		# get all item variants
+		items = [item["name"] for item in frappe.get_all("Item", {"variant_of": self.name})]
+
+		# get all deleted attributes
+		deleted_attribute = list(old_doc_attributes.difference(set(own_attributes)))
+
+		# fetch all attributes of these items
+		item_attributes = frappe.get_all(
+			"Item Variant Attribute",
+			filters={
+				"parent": ["in", items],
+				"attribute": ["in", deleted_attribute]
+			},
+			fields=["attribute", "parent"]
+		)
+		not_included = defaultdict(list)
+
+		for attr in item_attributes:
+			if attr["attribute"] not in own_attributes:
+				not_included[attr["parent"]].append(attr["attribute"])
+
+		if not len(not_included):
+			return
+
+		def body(docnames):
+			docnames.sort()
+			return "<br>".join(docnames)
+
+		def table_row(title, body):
+			return """<tr>
+				<td>{0}</td>
+				<td>{1}</td>
+			</tr>""".format(title, body)
+
+		rows = ''
+		for docname, attr_list in not_included.items():
+			link = "<a href='#Form/Item/{0}'>{0}</a>".format(frappe.bold(_(docname)))
+			rows += table_row(link, body(attr_list))
+
+		error_description = _('The following deleted attributes exist in Variants but not in the Template. You can either delete the Variants or keep the attribute(s) in template.')
+
+		message = """
+			<div>{0}</div><br>
+			<table class="table">
+				<thead>
+					<td>{1}</td>
+					<td>{2}</td>
+				</thead>
+				{3}
+			</table>
+		""".format(error_description, _('Variant Items'), _('Attributes'), rows)
+
+		frappe.throw(message, title=_("Variant Attribute Error"), is_minimizable=True, wide=True)
+
 
 	def validate_stock_exists_for_template_item(self):
 		if self.stock_ledger_created() and self._doc_before_save:

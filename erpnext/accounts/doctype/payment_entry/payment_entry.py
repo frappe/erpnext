@@ -897,7 +897,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		total_amount = ref_doc.get("grand_total")
 		exchange_rate = 1
 		outstanding_amount = ref_doc.get("outstanding_amount")
-	if reference_doctype == "Dunning":
+	elif reference_doctype == "Dunning":
 		total_amount = ref_doc.get("dunning_amount")
 		exchange_rate = 1
 		outstanding_amount = ref_doc.get("dunning_amount")
@@ -1101,7 +1101,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 					'outstanding_amount': doc.get('dunning_amount'),
 					'allocated_amount': doc.get('dunning_amount')
 				})
-			else:	
+			else:
 				pe.append("references", {
 					'reference_doctype': dt,
 					'reference_name': dn,
@@ -1172,30 +1172,23 @@ def make_payment_order(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	def set_missing_values(source, target):
 		target.payment_order_type = "Payment Entry"
+		target.append('references', dict(
+			reference_doctype="Payment Entry",
+			reference_name=source.name,
+			bank_account=source.party_bank_account,
+			amount=source.paid_amount,
+			account=source.paid_to,
+			supplier=source.party,
+			mode_of_payment=source.mode_of_payment,
+		))
 
-	def update_item(source_doc, target_doc, source_parent):
-		target_doc.bank_account = source_parent.party_bank_account
-		target_doc.amount = source_doc.allocated_amount
-		target_doc.account = source_parent.paid_to
-		target_doc.payment_entry = source_parent.name
-		target_doc.supplier = source_parent.party
-		target_doc.mode_of_payment = source_parent.mode_of_payment
-
-
-	doclist = get_mapped_doc("Payment Entry", source_name,	{
+	doclist = get_mapped_doc("Payment Entry", source_name, {
 		"Payment Entry": {
 			"doctype": "Payment Order",
 			"validation": {
 				"docstatus": ["=", 1]
-			}
-		},
-		"Payment Entry Reference": {
-			"doctype": "Payment Order Reference",
-			"validation": {
-				"docstatus": ["=", 1]
 			},
-			"postprocess": update_item
-		},
+		}
 
 	}, target_doc, set_missing_values)
 
