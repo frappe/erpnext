@@ -256,7 +256,7 @@ def accumulate_values_into_parents(accounts, accounts_by_name, companies):
 	"""accumulate children's values in parent accounts"""
 	for d in reversed(accounts):
 		if d.parent_account:
-			account = d.parent_account.split('-')[0].strip()
+			account = d.parent_account.split(' - ')[0].strip()
 			if not accounts_by_name.get(account):
 				continue
 
@@ -378,7 +378,7 @@ def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, g
 		if filters and filters.get('presentation_currency') != d.default_currency:
 			currency_info['company'] = d.name
 			currency_info['company_currency'] = d.default_currency
-			convert_to_presentation_currency(gl_entries, currency_info)
+			convert_to_presentation_currency(gl_entries, currency_info, filters.get('company'))
 
 		for entry in gl_entries:
 			key = entry.account_number or entry.account_name

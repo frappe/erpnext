@@ -173,7 +173,7 @@ class PartyLedgerSummaryReport(object):
 			from `tabGL Entry` gle
 			{join}
 			where
-				gle.docstatus < 2 and gle.party_type=%(party_type)s and ifnull(gle.party, '') != ''
+				gle.docstatus < 2 and gle.is_cancelled = 0 and gle.party_type=%(party_type)s and ifnull(gle.party, '') != ''
 				and gle.posting_date <= %(to_date)s {conditions}
 			order by gle.posting_date
 		""".format(join=join, join_field=join_field, conditions=conditions), self.filters, as_dict=True)
@@ -248,7 +248,7 @@ class PartyLedgerSummaryReport(object):
 			from
 				`tabGL Entry`
 			where
-				docstatus < 2
+				docstatus < 2 and is_cancelled = 0
 				and (voucher_type, voucher_no) in (
 					select voucher_type, voucher_no from `tabGL Entry` gle, `tabAccount` acc
 					where acc.name = gle.account and acc.account_type = '{income_or_expense}'

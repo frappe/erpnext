@@ -267,6 +267,9 @@ def make_quotation(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_request_for_quotation(source_name, target_doc=None):
+	def update_item(obj, target, source_parent):
+		target.conversion_factor = 1.0
+
 	doclist = get_mapped_doc("Opportunity", source_name, {
 		"Opportunity": {
 			"doctype": "Request for Quotation"
@@ -277,7 +280,8 @@ def make_request_for_quotation(source_name, target_doc=None):
 				["name", "opportunity_item"],
 				["parent", "opportunity"],
 				["uom", "uom"]
-			]
+			],
+			"postprocess": update_item
 		}
 	}, target_doc)
 
@@ -325,7 +329,7 @@ def auto_close_opportunity():
 		doc.save()
 
 @frappe.whitelist()
-def make_opportunity_from_communication(communication, ignore_communication_links=False):
+def make_opportunity_from_communication(communication, company, ignore_communication_links=False):
 	from erpnext.crm.doctype.lead.lead import make_lead_from_communication
 	doc = frappe.get_doc("Communication", communication)
 
@@ -337,6 +341,7 @@ def make_opportunity_from_communication(communication, ignore_communication_link
 
 	opportunity = frappe.get_doc({
 		"doctype": "Opportunity",
+		"company": company,
 		"opportunity_from": opportunity_from,
 		"party_name": lead
 	}).insert(ignore_permissions=True)
