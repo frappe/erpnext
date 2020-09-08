@@ -44,7 +44,7 @@ class AdditionalSalary(Document):
 
 			additional_salaries = [salary.name for salary in additional_salaries]
 
-			if len(additional_salaries):
+			if additional_salaries and len(additional_salaries):
 				frappe.throw(_("Additional Salary: {0} already exist for Salary Component: {1} for period {2} and {3}").format(
 					bold(comma_and(additional_salaries)),
 					bold(self.salary_component),
