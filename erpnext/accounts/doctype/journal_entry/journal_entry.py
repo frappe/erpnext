@@ -1023,7 +1023,7 @@ def make_inter_company_journal_entry(name, voucher_type, company):
 	return journal_entry.as_dict()
 
 @frappe.whitelist()
-def make_reverse_journal_entry(source_name, target_doc=None, ignore_permissions=False):
+def make_reverse_journal_entry(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 
 	def update_accounts(source, target, source_parent):
@@ -1049,6 +1049,6 @@ def make_reverse_journal_entry(source_name, target_doc=None, ignore_permissions=
 			},
 			"postprocess": update_accounts,
 		},
-	}, target_doc, ignore_permissions=ignore_permissions)
+	}, target_doc)
 
 	return doclist
