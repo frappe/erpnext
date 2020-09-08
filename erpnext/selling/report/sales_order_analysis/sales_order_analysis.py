@@ -96,7 +96,7 @@ def prepare_data(data, filters):
 		# prepare data for report view
 		row["qty_to_bill"] = flt(row["qty"]) - flt(row["billed_qty"])
 
-		row["delay"] = 0 if row["delay"] < 0 else row["delay"]
+		row["delay"] = 0 if row["delay"] and row["delay"] < 0 else row["delay"]
 		if filters.get("group_by_so"):
 			so_name = row["sales_order"]
 

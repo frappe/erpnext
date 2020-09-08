@@ -447,9 +447,14 @@ def apply_pricing_rule_on_transaction(doc):
 				apply_pricing_rule_for_free_items(doc, item_details.free_item_data)
 				doc.set_missing_values()
 
-def get_applied_pricing_rules(item_row):
-	return (json.loads(item_row.get("pricing_rules"))
-		if item_row.get("pricing_rules") else [])
+def get_applied_pricing_rules(pricing_rules):
+	if pricing_rules:
+		if pricing_rules.startswith('['):
+			return json.loads(pricing_rules)
+		else:
+			return pricing_rules.split(',')
+
+	return []
 
 def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 	free_item = pricing_rule.free_item
