@@ -213,7 +213,8 @@ def get_last_accural_date_in_current_month(loan):
 		WHERE loan = %s""", (loan.name))
 
 	if last_posting_date[0][0]:
-		return last_posting_date[0][0]
+		# interest for last interest accrual date is already booked, so add 1 day
+		return add_days(last_posting_date[0][0], 1)
 	else:
 		return loan.disbursement_date
 
