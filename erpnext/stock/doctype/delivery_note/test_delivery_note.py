@@ -206,7 +206,7 @@ class TestDeliveryNote(unittest.TestCase):
 		for field, value in field_values.items():
 			self.assertEqual(cstr(serial_no.get(field)), value)
 
-	def test_sales_return_for_non_bundled_items(self):
+	def test_sales_return_for_non_bundled_items_partial(self):
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
 
 		make_stock_entry(item_code="_Test Item", target="Stores - TCP1", qty=50, basic_rate=100)
@@ -225,7 +225,10 @@ class TestDeliveryNote(unittest.TestCase):
 
 		# return entry
 		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-2, rate=500,
-			company=company, warehouse="Stores - TCP1", expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
+			company=company, warehouse="Stores - TCP1", expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1", do_not_submit=1)
+		dn1.items[0].dn_detail = dn.items[0].name
+		dn1.submit()
 
 		actual_qty_2 = get_qty_after_transaction(warehouse="Stores - TCP1")
 
@@ -242,6 +245,42 @@ class TestDeliveryNote(unittest.TestCase):
 			"voucher_no": dn1.name, "account": stock_in_hand_account}, "debit")
 
 		self.assertEqual(gle_warehouse_amount, stock_value_difference)
+
+		# hack because new_doc isn't considering is_return portion of status_updater
+		returned = frappe.get_doc("Delivery Note", dn1.name)
+		returned.update_prevdoc_status()
+		dn.load_from_db()
+
+		# Check if Original DN updated
+		self.assertEqual(dn.items[0].returned_qty, 2)
+		self.assertEqual(dn.per_returned, 40)
+
+	def test_sales_return_for_non_bundled_items_full(self):
+		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
+
+		make_stock_entry(item_code="_Test Item", target="Stores - TCP1", qty=50, basic_rate=100)
+
+		actual_qty_0 = get_qty_after_transaction(warehouse="Stores - TCP1")
+
+		dn = create_delivery_note(qty=5, rate=500, warehouse="Stores - TCP1", company=company,
+			expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
+
+		#return entry
+		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-5, rate=500,
+			company=company, warehouse="Stores - TCP1", expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1", do_not_submit=1)
+		dn1.items[0].dn_detail = dn.items[0].name
+		dn1.submit()
+
+		# hack because new_doc isn't considering is_return portion of status_updater
+		returned = frappe.get_doc("Delivery Note", dn1.name)
+		returned.update_prevdoc_status()
+		dn.load_from_db()
+
+		# Check if Original DN updated
+		self.assertEqual(dn.items[0].returned_qty, 5)
+		self.assertEqual(dn.per_returned, 100)
+		self.assertEqual(dn.status, 'Return Issued')
 
 	def test_return_single_item_from_bundled_items(self):
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
