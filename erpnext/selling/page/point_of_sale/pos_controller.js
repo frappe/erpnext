@@ -36,7 +36,7 @@ erpnext.PointOfSale.Controller = class {
 		const table_fields = [
 			{ fieldname: "mode_of_payment", fieldtype: "Link", in_list_view: 1, label: "Mode of Payment", options: "Mode of Payment", reqd: 1 },
 			{ fieldname: "opening_amount", fieldtype: "Currency", default: 0, in_list_view: 1, label: "Opening Amount", 
-				options: "company:company_currency", reqd: 1 }
+				options: "company:company_currency" }
 		];
 
 		const dialog = new frappe.ui.Dialog({
