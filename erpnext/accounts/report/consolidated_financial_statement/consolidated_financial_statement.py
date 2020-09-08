@@ -256,7 +256,7 @@ def accumulate_values_into_parents(accounts, accounts_by_name, companies):
 	"""accumulate children's values in parent accounts"""
 	for d in reversed(accounts):
 		if d.parent_account:
-			account = d.parent_account.split('-')[0].strip()
+			account = d.parent_account.split(' - ')[0].strip()
 			if not accounts_by_name.get(account):
 				continue
 
