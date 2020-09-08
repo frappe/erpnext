@@ -9,6 +9,7 @@ from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 from erpnext.controllers.accounts_controller import validate_conversion_rate, \
 	validate_taxes_and_charges, validate_inclusive_tax
 from erpnext.stock.get_item_details import _get_item_tax_template
+from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
 
 class calculate_taxes_and_totals(object):
 	def __init__(self, doc):
@@ -209,7 +210,7 @@ class calculate_taxes_and_totals(object):
 			elif tax.charge_type == "On Previous Row Total":
 				current_tax_fraction = (tax_rate / 100.0) * \
 					self.doc.get("taxes")[cint(tax.row_id) - 1].grand_total_fraction_for_current_item
-			
+
 			elif tax.charge_type == "On Item Quantity":
 				inclusive_tax_amount_per_qty = flt(tax_rate)
 
@@ -607,7 +608,7 @@ class calculate_taxes_and_totals(object):
 		base_rate_with_margin = 0.0
 		if item.price_list_rate:
 			if item.pricing_rules and not self.doc.ignore_pricing_rule:
-				for d in json.loads(item.pricing_rules):
+				for d in get_applied_pricing_rules(item.pricing_rules):
 					pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
 
 					if (pricing_rule.margin_type == 'Amount' and pricing_rule.currency == self.doc.currency)\

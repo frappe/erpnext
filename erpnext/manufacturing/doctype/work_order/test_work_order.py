@@ -7,7 +7,7 @@ import unittest
 import frappe
 from frappe.utils import flt, time_diff_in_hours, now, add_months, cint, today
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
-from erpnext.manufacturing.doctype.work_order.work_order import (make_stock_entry, 
+from erpnext.manufacturing.doctype.work_order.work_order import (make_stock_entry,
 	ItemHasVariantError, stop_unstop, StockOverProductionError, OverProductionError, CapacityError)
 from erpnext.stock.doctype.stock_entry import test_stock_entry
 from erpnext.stock.utils import get_bin
