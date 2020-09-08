@@ -217,7 +217,9 @@ class SellingController(StockController):
 							'target_warehouse': p.target_warehouse,
 							'company': self.company,
 							'voucher_type': self.doctype,
-							'allow_zero_valuation': d.allow_zero_valuation_rate
+							'allow_zero_valuation': d.allow_zero_valuation_rate,
+							'sales_invoice_item': d.get("sales_invoice_item"),
+							'delivery_note_item': d.get("dn_detail")
 						}))
 			else:
 				il.append(frappe._dict({
@@ -233,7 +235,9 @@ class SellingController(StockController):
 					'target_warehouse': d.target_warehouse,
 					'company': self.company,
 					'voucher_type': self.doctype,
-					'allow_zero_valuation': d.allow_zero_valuation_rate
+					'allow_zero_valuation': d.allow_zero_valuation_rate,
+					'sales_invoice_item': d.get("sales_invoice_item"),
+					'delivery_note_item': d.get("dn_detail")
 				}))
 		return il
 
@@ -302,7 +306,11 @@ class SellingController(StockController):
 					d.conversion_factor = get_conversion_factor(d.item_code, d.uom).get("conversion_factor") or 1.0
 				return_rate = 0
 				if cint(self.is_return) and self.return_against and self.docstatus==1:
-					return_rate = self.get_incoming_rate_for_return(d.item_code, self.return_against)
+					against_document_no = (d.get("sales_invoice_item")
+						if self.doctype == "Sales Invoice" else d.get("delivery_note_item"))
+
+					return_rate = self.get_incoming_rate_for_return(d.item_code,
+						self.return_against, against_document_no)
 
 				# On cancellation or if return entry submission, make stock ledger entry for
 				# target warehouse first, to update serial no values properly
