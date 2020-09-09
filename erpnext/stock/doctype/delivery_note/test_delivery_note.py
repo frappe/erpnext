@@ -256,15 +256,19 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEqual(dn.per_returned, 40)
 
 	def test_sales_return_for_non_bundled_items_full(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
 
-		make_stock_entry(item_code="_Test Item", target="Stores - TCP1", qty=50, basic_rate=100)
+		make_item("Box", {'is_stock_item': 1})
 
-		dn = create_delivery_note(qty=5, rate=500, warehouse="Stores - TCP1", company=company,
+		make_stock_entry(item_code="Box", target="Stores - TCP1", qty=10, basic_rate=100)
+
+		dn = create_delivery_note(item_code="Box", qty=5, rate=500, warehouse="Stores - TCP1", company=company,
 			expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
 
 		#return entry
-		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-5, rate=500,
+		dn1 = create_delivery_note(item_code="Box", is_return=1, return_against=dn.name, qty=-5, rate=500,
 			company=company, warehouse="Stores - TCP1", expense_account="Cost of Goods Sold - TCP1",
 			cost_center="Main - TCP1", do_not_submit=1)
 		dn1.items[0].dn_detail = dn.items[0].name
