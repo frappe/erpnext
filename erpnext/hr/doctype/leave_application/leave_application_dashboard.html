@@ -4,12 +4,13 @@
 <table class="table table-bordered small">
 	<thead>
 		<tr>
-			<th style="width: 16%">{{ __("Leave Type") }}</th>
-			<th style="width: 16%" class="text-right">{{ __("Total Allocated Leaves") }}</th>
-			<th style="width: 16%" class="text-right">{{ __("Expired Leaves") }}</th>
-			<th style="width: 16%" class="text-right">{{ __("Used Leaves") }}</th>
-			<th style="width: 16%" class="text-right">{{ __("Pending Leaves") }}</th>
-			<th style="width: 16%" class="text-right">{{ __("Available Leaves") }}</th>
+			<th style="width: 14%">{{ __("Leave Type") }}</th>
+			<th style="width: 14%" class="text-right">{{ __("Total Allocated Leaves") }}</th>
+			<th style="width: 14%" class="text-right">{{ __("Carry forwarded Leaves") }}</th>
+			<th style="width: 14%" class="text-right">{{ __("Expired Leaves") }}</th>
+			<th style="width: 14%" class="text-right">{{ __("Used Leaves") }}</th>
+			<th style="width: 14%" class="text-right">{{ __("Pending Leaves") }}</th>
+			<th style="width: 14%" class="text-right">{{ __("Available Leaves") }}</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -17,6 +18,7 @@
 			<tr>
 				<td> {%= key %} </td>
 				<td class="text-right"> {%= value["total_leaves"] %} </td>
+				<td class="text-right"> {%= value["carry_forward"] %} </td>
 				<td class="text-right"> {%= value["expired_leaves"] %} </td>
 				<td class="text-right"> {%= value["leaves_taken"] %} </td>
 				<td class="text-right"> {%= value["pending_leaves"] %} </td>

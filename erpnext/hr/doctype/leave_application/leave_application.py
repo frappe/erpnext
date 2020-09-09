@@ -448,7 +448,21 @@ def get_leave_details(employee, date):
 			'to_date': ('>=', date),
 			'employee': employee,
 			'leave_type': allocation.leave_type,
+			'docstatus': 1
 		}, 'SUM(total_leaves_allocated)') or 0
+
+		carry_frowarded_leaves = 0
+		expired_leaves = 0
+
+		allocated_carry_forward, carry_forward_expiry_date, carry_frowarded_leaves = get_used_carry_forward_leave(employee, date, allocation.leave_type)
+
+
+		if carry_frowarded_leaves and allocated_carry_forward and allocated_carry_forward:
+			expired_leaves = carry_frowarded_leaves - allocated_carry_forward
+
+			if carry_forward_expiry_date > getdate(date):
+				allocated_carry_forward = 0
+				expired_leaves = 0
 
 		remaining_leaves = get_leave_balance_on(employee, d, date, to_date = allocation.to_date,
 			consider_all_leaves_in_the_allocation_period=True)
@@ -459,7 +473,8 @@ def get_leave_details(employee, date):
 
 		leave_allocation[d] = {
 			"total_leaves": total_allocated_leaves,
-			"expired_leaves": total_allocated_leaves - (remaining_leaves + leaves_taken),
+			"carry_forward": carry_frowarded_leaves,
+			"expired_leaves": expired_leaves,
 			"leaves_taken": leaves_taken,
 			"pending_leaves": leaves_pending,
 			"remaining_leaves": remaining_leaves}
@@ -475,6 +490,51 @@ def get_leave_details(employee, date):
 	}
 
 	return ret
+
+def get_used_carry_forward_leave(employee, date, leave_type):
+	is_carry_forward, expire_carry_forwarded_leaves_after_days = frappe.get_value(
+		"Leave Type", leave_type,
+		["is_carry_forward", "expire_carry_forwarded_leaves_after_days"])
+
+	if is_carry_forward:
+		allocations = frappe.get_list('Leave Allocation', filters = {
+				'from_date': ('<=', date),
+				'to_date': ('>=', date),
+				'employee': employee,
+				'leave_type': leave_type,
+				'carry_forward': 1,
+				'unused_leaves': (">", 0),
+				'docstatus': 1
+			}, fields=["unused_leaves", "name", "from_date", "to_date"])
+
+		allocated_carry_forward = 0
+		unused_leaves = 0
+		carry_forward_expiry_date = None
+
+
+
+		for allocation in allocations:
+			applications = frappe.get_list('Leave application', filters = {
+					'from_date': ('<=', allocation.to_date),
+					'to_date': ('>=', allocation.from_date),
+					'employee': employee,
+					'leave_type': leave_type,
+					'docstatus': 1
+				}, fields=["from_date", "to_date", "name"])
+
+			unused_leaves += allocation.unused_leaves
+
+			carry_forward_expiry_date = add_days(allocation.from_date, expire_carry_forwarded_leaves_after_days - 1)
+
+			for application in applications:
+				if allocation.from_date <= application.from_date <= carry_forward_expiry_date:
+					allocated_carry_forward_to_date = application.to_date
+					if carry_forward_expiry_date < application.to_date:
+						allocated_carry_forward_to_date = carry_forward_expiry_date
+					allocated_carry_forward += date_diff(allocated_carry_forward_to_date, application.from_date) + 1
+
+		return allocated_carry_forward, carry_forward_expiry_date, unused_leaves
+	return 0, None, 0
 
 @frappe.whitelist()
 def get_leave_balance_on(employee, leave_type, date, to_date=None, consider_all_leaves_in_the_allocation_period=False):
@@ -494,11 +554,14 @@ def get_leave_balance_on(employee, leave_type, date, to_date=None, consider_all_
 	allocation = allocation_records.get(leave_type, frappe._dict())
 
 	end_date = allocation.to_date if consider_all_leaves_in_the_allocation_period else date
-	expiry = get_allocation_expiry(employee, leave_type, to_date, date)
+
+	expiry = get_allocation_expiry(employee, leave_type, to_date, allocation.from_date)
 
 	leaves_taken = get_leaves_for_period(employee, leave_type, allocation.from_date, end_date)
 
-	return get_remaining_leaves(allocation, leaves_taken, date, expiry)
+	allocated_carry_forward, carry_forward_expiry_date, carry_frowarded_leaves = get_used_carry_forward_leave(employee, date, leave_type)
+
+	return get_remaining_leaves(allocation, leaves_taken, date, expiry , allocated_carry_forward)
 
 def get_leave_allocation_records(employee, date, leave_type=None):
 	''' returns the total allocated leaves and carry forwarded leaves based on ledger entries '''
@@ -550,7 +613,7 @@ def get_pending_leaves_for_period(employee, leave_type, from_date, to_date):
 		}, fields=['SUM(total_leave_days) as leaves'])[0]
 	return leaves['leaves'] if leaves['leaves'] else 0.0
 
-def get_remaining_leaves(allocation, leaves_taken, date, expiry):
+def get_remaining_leaves(allocation, leaves_taken, date, expiry, allocated_carry_forward):
 	''' Returns minimum leaves remaining after comparing with remaining days for allocation expiry '''
 	def _get_remaining_leaves(remaining_leaves, end_date):
 
@@ -567,8 +630,10 @@ def get_remaining_leaves(allocation, leaves_taken, date, expiry):
 		remaining_leaves = _get_remaining_leaves(remaining_leaves, expiry)
 
 		total_leaves = flt(allocation.new_leaves_allocated) + flt(remaining_leaves)
+	if getdate(date) < getdate(expiry):
+		allocated_carry_forward = 0
 
-	return _get_remaining_leaves(total_leaves, allocation.to_date)
+	return _get_remaining_leaves(total_leaves, allocation.to_date) + int(allocated_carry_forward)
 
 def get_leaves_for_period(employee, leave_type, from_date, to_date, do_not_skip_expired_leaves=False):
 	leave_entries = get_leave_entries(employee, leave_type, from_date, to_date)
