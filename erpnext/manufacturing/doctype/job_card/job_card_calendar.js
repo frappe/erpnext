@@ -1,7 +1,7 @@
 frappe.views.calendar["Job Card"] = {
 	field_map: {
-		"start": "from_time",
-		"end": "to_time",
+		"start": "started_time",
+		"end": "started_time",
 		"id": "name",
 		"title": "subject",
 		"color": "color",
