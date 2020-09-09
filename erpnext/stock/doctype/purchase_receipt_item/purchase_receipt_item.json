@@ -851,6 +851,7 @@
    "fieldname": "returned_qty",
    "fieldtype": "Float",
    "label": "Returned Qty in Stock UOM",
+   "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
   }
@@ -858,7 +859,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-07-30 21:02:17.912628",
+ "modified": "2020-09-09 13:39:46.452817",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
