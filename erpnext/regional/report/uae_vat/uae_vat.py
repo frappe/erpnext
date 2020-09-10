@@ -12,6 +12,11 @@ def execute(filters=None):
 	return columns, data
 
 def get_columns():
+	"""Creates a list of dictionaries that are used to generate column headers of the data table
+
+	Returns:
+		List(Dict): list of dictionaries that are used to generate column headers of the data table
+	"""
 	return [
 		{
 			"fieldname": "no",
@@ -46,6 +51,14 @@ def get_columns():
 	]
 
 def get_data(filters = None):
+	"""Returns the list of dictionaries. Each dictionary is a row in the datatable
+
+	Args:
+		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
+
+	Returns:
+		List(Dict): Each dictionary is a row in the datatable
+	"""
 	data = []
 	total_emiratewise = get_total_emiratewise(filters)
 	emirates = get_emirates()
@@ -90,6 +103,11 @@ def get_total_emiratewise(filters):
 		""", filters)
 
 def get_emirates():
+	"""Returns a List of emirates in the order that they are to be displayed
+
+	Returns:
+		List(String): List of emirates in the order that they are to be displayed
+	"""
 	return [
 		'Abu Dhabi',
 		'Dubai',
@@ -101,6 +119,14 @@ def get_emirates():
 	]
 
 def get_conditions(filters):
+	"""The conditions to be used to filter data to calculate the total sale
+
+	Args:
+		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
+
+	Returns:
+		String: Concatenated list of conditions to be applied to calculate the total sale
+	"""
 	conditions = ""
 	for opts in (("company", f' and company="{filters.get("company")}"'),
 		("from_date",  f' and posting_date>="{filters.get("from_date")}"'),
@@ -109,7 +135,40 @@ def get_conditions(filters):
 				conditions += opts[1]
 	return conditions
 
+def get_reverse_charge_total(filters):
+	"""Returns the sum of the total of each Purchase invoice made
+
+	Args:
+		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
+
+	Returns:
+		Float: sum of the total of each Purchase invoice made
+	"""
+	conditions = """
+	for opts in (("company", f' and company="{filters.get("company")}"'),
+		("from_date",  f' and posting_date>="{filters.get("from_date")}"'),
+		("to_date", f' and posting_date<="{filters.get("to_date")}"')):
+			if filters.get(opts[0]):
+				conditions += opts[1]
+	return conditions
+	"""
+	return frappe.db.sql(f"""
+		select sum(total)  from
+		`tabPurchase Invoice`
+		where
+		reverse_charge = "Y"
+		and docstatus = 1 {get_conditions(filters)} ;
+		""")[0][0]
+
 def get_reverse_charge_tax(filters):
+	"""Returns the sum of the tax of each Purchase invoice made
+
+	Args:
+		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
+
+	Returns:
+		Float: sum of the tax of each Purchase invoice made
+	"""
 	return frappe.db.sql(f"""
 		select sum(debit)  from
 		`tabPurchase Invoice`  inner join `tabGL Entry`
@@ -122,16 +181,16 @@ def get_reverse_charge_tax(filters):
 		""")[0][0]
 
 
-def get_reverse_charge_total(filters):
-	return frappe.db.sql(f"""
-		select sum(total)  from
-		`tabPurchase Invoice`
-		where
-		reverse_charge = "Y"
-		and docstatus = 1 {get_conditions(filters)} ;
-		""")[0][0]
 
 def get_conditions_join(filters):
+	"""The conditions to be used to filter data to calculate the total vat
+
+	Args:
+		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
+
+	Returns:
+		String: Concatenated list of conditions to be applied to calculate the total vat
+	"""
 	conditions = ""
 	for opts in (("company", f' and `tabPurchase Invoice`.company="{filters.get("company")}"'),
 		("from_date", f' and `tabPurchase Invoice`.posting_date>="{filters.get("from_date")}"'),
