@@ -20,7 +20,7 @@ def make_custom_fields():
 			insert_after='group_same_items', print_hide=1, collapsible=1),
 		dict(fieldname='permit_no', label='Permit Number',
 			fieldtype='Data', insert_after='vat_section', print_hide=1),
-		dict(fieldname='reverse_charge_applicable', label='Reverse Charge Applicable',
+		dict(fieldname='reverse_charge', label='Reverse Charge Applicable',
 			fieldtype='Select', insert_after='permit_no', print_hide=1,
 			options='Y\nN', default='N')
 	]
@@ -42,7 +42,7 @@ def make_custom_fields():
 				fieldtype='Read Only', insert_after='customer_name',
 				fetch_from='customer.customer_name_in_arabic', print_hide=1),
 			dict(fieldname='emirate', label='Emirate', insert_after='customer_address',
-				fetch_from='customer_address.emirates'),
+				fieldtype='Read Only', fetch_from='customer_address.emirates'),
 		]
 
 	invoice_item_fields = [
@@ -79,8 +79,8 @@ def make_custom_fields():
 				fieldtype='Data', insert_after='supplier_name'),
 		],
 		'Address': [
-			dict(fieldname='emirates', label='Emirates',
-				fieldtype='Data', insert_after='state'),
+			dict(fieldname='emirates', label='Emirates', fieldtype='Select', insert_after='state',
+			options='Abu Dhabi\nAjman\nDubai\nFujairah\nRas Al Khaimah\nSharjah\nUmm Al Quwain')
 		],
 		'Purchase Invoice': purchase_invoice_fields + invoice_fields,
 		'Purchase Order': purchase_invoice_fields + invoice_fields,
