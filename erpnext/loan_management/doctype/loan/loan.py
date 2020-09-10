@@ -240,14 +240,18 @@ def unpledge_security(loan=None, loan_security_pledge=None, as_dict=0, save=0, s
 		unpledge_request = create_loan_security_unpledge(security_map, pledge_doc.loan,
 			pledge_doc.company, pledge_doc.applicant_type, pledge_doc.applicant)
 
-	if approve:
-		unpledge_request.status = 'Approved'
-
 	if save:
 		unpledge_request.save()
 
 	if submit:
 		unpledge_request.submit()
+
+	if approve:
+		if unpledge_request.docstatus == 1:
+			unpledge_request.status = 'Approved'
+			unpledge_request.save()
+		else:
+			frappe.throw(_('Only submittted unpledge requests can be approved'))
 
 	if as_dict:
 		return unpledge_request
