@@ -380,8 +380,7 @@ $.extend(erpnext.item, {
 		// Show Stock Levels only if is_stock_item
 		if (frm.doc.is_stock_item) {
 			frappe.require('assets/js/item-dashboard.min.js', function() {
-				var section = frm.dashboard.add_section('<h5 style="margin-top: 0px;">\
-					<a href="#stock-balance">' + __("Stock Levels") + '</a></h5>');
+				const section = frm.dashboard.add_section('', __("Stock Levels"));
 				erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
 					parent: section,
 					item_code: frm.doc.name

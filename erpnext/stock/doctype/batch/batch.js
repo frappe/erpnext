@@ -47,8 +47,7 @@ frappe.ui.form.on('Batch', {
 						return;
 					}
 
-					var section = frm.dashboard.add_section(`<h5 style="margin-top: 0px;">
-						${ __("Stock Levels") }</a></h5>`);
+					const section = frm.dashboard.add_section('', __("Stock Levels"));
 
 					// sort by qty
 					r.message.sort(function(a, b) { a.qty > b.qty ? 1 : -1 });
