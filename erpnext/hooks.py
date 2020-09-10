@@ -284,7 +284,7 @@ auto_cancel_exempted_doctypes= [
 scheduler_events = {
 	"cron": {
 		"0/30 * * * *": [
-			"erpnext.utilities.doctype.video.video.update_youtube_data_half_hourly",
+			"erpnext.utilities.doctype.video.video.update_youtube_data",
 		]
 	},
 	"all": [
@@ -302,7 +302,6 @@ scheduler_events = {
 		"erpnext.projects.doctype.project.project.collect_project_status",
 		"erpnext.hr.doctype.shift_type.shift_type.process_auto_attendance_for_all_shifts",
 		"erpnext.support.doctype.issue.issue.set_service_level_agreement_variance",
-		"erpnext.utilities.doctype.video.video.update_youtube_data"
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
