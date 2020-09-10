@@ -61,10 +61,11 @@
  "doctype": "Desk Page",
  "extends_another_page": 0,
  "hide_custom": 0,
+ "icon": "healthcare",
  "idx": 0,
  "is_standard": 1,
  "label": "Healthcare",
- "modified": "2020-06-25 23:50:56.951698",
+ "modified": "2020-09-10 15:37:23.666787",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
@@ -75,7 +76,7 @@
  "restrict_to_domain": "Healthcare",
  "shortcuts": [
   {
-   "color": "#ffe8cd",
+   "color": "Orange",
    "format": "{} Open",
    "label": "Patient Appointment",
    "link_to": "Patient Appointment",
@@ -83,7 +84,7 @@
    "type": "DocType"
   },
   {
-   "color": "#ffe8cd",
+   "color": "Orange",
    "format": "{} Active",
    "label": "Patient",
    "link_to": "Patient",
@@ -91,7 +92,7 @@
    "type": "DocType"
   },
   {
-   "color": "#cef6d1",
+   "color": "Green",
    "format": "{} Vacant",
    "label": "Healthcare Service Unit",
    "link_to": "Healthcare Service Unit",
