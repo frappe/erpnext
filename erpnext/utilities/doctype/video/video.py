@@ -50,45 +50,37 @@ class Video(Document):
 			title = "Failed to Update YouTube Statistics for Video: {0}".format(self.name)
 			frappe.log_error(title + "\n\n" +  frappe.get_traceback(), title=title)
 
+
 def is_tracking_enabled():
 	return frappe.db.get_single_value("Video Settings", "enable_youtube_tracking")
 
-def get_frequency(value):
-	if not value:
-		return None
 
-	# Return frequency in hours
+def get_frequency(value):
+	# Return numeric value from frequency field, return 1 as fallback default value: 1 hour
 	if value != "Daily":
 		return frappe.utils.cint(value[:2].strip())
-	else:
-		# 24 hours for Daily
+	elif value:
 		return 24
-
-
-def update_youtube_data_half_hourly():
-	# Called every 30 mins via hooks
-	frequency = get_frequency(frappe.db.get_single_value("Video Settings", "frequency"))
-	if not is_tracking_enabled() or not frequency:
-		return
-
-	if frequency == 30:
-		batch_update_youtube_data()
+	return 1
 
 
 def update_youtube_data():
-	# Called every hour via hooks
-	frequency = get_frequency(frappe.db.get_single_value("Video Settings", "frequency"))
+	# Called every 30 minutes via hooks
+	enable_youtube_tracking, frequency = frappe.db.get_value("Video Settings", "Video Settings", ["enable_youtube_tracking", "frequency"])
 
-	# if frequency is 30 mins dont proceed, as its handled in another method
-	if not is_tracking_enabled() or not frequency or frequency == 30:
+	if not enable_youtube_tracking:
 		return
 
+	frequency = get_frequency(frequency)
 	time = datetime.now()
 	timezone = pytz.timezone(frappe.utils.get_time_zone())
 	site_time = time.astimezone(timezone)
 
-	if site_time.hour % frequency == 0:
+	if frequency == 30:
 		batch_update_youtube_data()
+	elif site_time.hour % frequency == 0:
+		batch_update_youtube_data()
+
 
 def get_formatted_ids(video_list):
 	# format ids to comma separated string for bulk request
@@ -97,6 +89,7 @@ def get_formatted_ids(video_list):
 		ids.append(video.youtube_video_id)
 
 	return ','.join(ids)
+
 
 @frappe.whitelist()
 def get_id_from_url(url):
@@ -128,7 +121,8 @@ def batch_update_youtube_data():
 				'like_count' : video_stats.get('likeCount'),
 				'view_count' : video_stats.get('viewCount'),
 				'dislike_count' : video_stats.get('dislikeCount'),
-				'comment_count' : video_stats.get('commentCount')
+				'comment_count' : video_stats.get('commentCount'),
+				'video_id': video_id
 			}
 
 			frappe.db.sql("""
@@ -138,7 +132,7 @@ def batch_update_youtube_data():
 					view_count = %(view_count)s,
 					dislike_count = %(dislike_count)s,
 					comment_count = %(comment_count)s
-				WHERE youtube_video_id = '{0}'""".format(video_id), stats)
+				WHERE youtube_video_id = %(video_id)s""", stats)
 
 	video_list = frappe.get_all("Video", fields=["youtube_video_id"])
 	if len(video_list) > 50:
