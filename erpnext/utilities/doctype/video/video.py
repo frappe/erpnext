@@ -14,31 +14,21 @@ from pyyoutube import Api
 
 class Video(Document):
 	def validate(self):
-		self.set_video_id()
-		self.set_youtube_statistics()
+		if self.provider == "YouTube" and is_tracking_enabled():
+			self.set_video_id()
+			self.set_youtube_statistics()
 
 	def set_video_id(self):
-		if self.provider == "YouTube" and self.url and not self.get("youtube_video_id"):
+		if self.url and not self.get("youtube_video_id"):
 			self.youtube_video_id = get_id_from_url(self.url)
 
-	def set_youtube_statistics(self, video_ids=None, update=True):
-		if self.provider == "YouTube" and not is_tracking_enabled():
-			return
-
+	def set_youtube_statistics(self):
 		api_key = frappe.db.get_single_value("Video Settings", "api_key")
 		api = Api(api_key=api_key)
 
 		try:
-			video_id = video_ids or self.youtube_video_id
-			video = api.get_video_by_id(video_id=video_id)
-
-			if video_ids:
-				video_stats = video.items
-			else:
-				video_stats = video.items[0].to_dict().get('statistics')
-
-			if not update:
-				return video_stats
+			video = api.get_video_by_id(video_id=self.youtube_video_id)
+			video_stats = video.items[0].to_dict().get('statistics')
 
 			self.like_count = video_stats.get('likeCount')
 			self.view_count = video_stats.get('viewCount')
@@ -48,7 +38,6 @@ class Video(Document):
 		except Exception:
 			title = "Failed to Update YouTube Statistics for Video: {0}".format(self.name)
 			frappe.log_error(title + "\n\n" +  frappe.get_traceback(), title=title)
-
 
 def is_tracking_enabled():
 	return frappe.db.get_single_value("Video Settings", "enable_youtube_tracking")
@@ -107,10 +96,20 @@ def get_id_from_url(url):
 
 @frappe.whitelist()
 def batch_update_youtube_data():
+	def get_youtube_statistics(video_ids):
+		api_key = frappe.db.get_single_value("Video Settings", "api_key")
+		api = Api(api_key=api_key)
+		try:
+			video = api.get_video_by_id(video_id=video_ids)
+			video_stats = video.items
+			return video_stats
+		except Exception:
+			title = "Failed to Update YouTube Statistics"
+			frappe.log_error(title + "\n\n" +  frappe.get_traceback(), title=title)
+
 	def prepare_and_set_data(video_list):
 		video_ids = get_formatted_ids(video_list)
-		video_doc = frappe.new_doc("Video")
-		stats = video_doc.set_youtube_statistics(video_ids=video_ids, update=False)
+		stats = get_youtube_statistics(video_ids)
 		set_youtube_data(stats)
 
 	def set_youtube_data(entries):
