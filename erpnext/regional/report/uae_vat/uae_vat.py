@@ -4,12 +4,12 @@
 from __future__ import unicode_literals
 import frappe
 from erpnext.regional.united_arab_emirates.utils import get_tax_accounts
+from frappe import _
 
 def execute(filters=None):
 	columns = get_columns()
-	data = get_data(filters)
-
-	return columns, data
+	data, chart = get_data(filters)
+	return columns, data, None, chart
 
 def get_columns():
 	"""Creates a list of dictionaries that are used to generate column headers of the data table
@@ -51,13 +51,14 @@ def get_columns():
 	]
 
 def get_data(filters = None):
-	"""Returns the list of dictionaries. Each dictionary is a row in the datatable
+	"""Returns the list of dictionaries. Each dictionary is a row in the datatable and chart data
 
 	Args:
 		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
 
 	Returns:
 		List(Dict): Each dictionary is a row in the datatable
+		Dict: Dictionary containing chart data
 	"""
 	data = []
 	total_emiratewise = get_total_emiratewise(filters)
@@ -70,6 +71,9 @@ def get_data(filters = None):
 				"amount": amount,
 				"vat_amount": vat
 			}
+
+	chart = get_chart_data(emirates, amounts_by_emirate)
+
 	for d, emirate in enumerate(emirates, 97):
 		if emirate in amounts_by_emirate:
 			amounts_by_emirate[emirate]["no"] = f'1{chr(d)}'
@@ -92,8 +96,42 @@ def get_data(filters = None):
 			"vat_amount": get_reverse_charge_tax(filters)
 		}
 	)
-	return data
+	return data, chart
 
+
+def get_chart_data(emirates, amounts_by_emirate):
+	"""Returns chart data
+
+	Args:
+		emirates (List): List of Emirates
+		amounts_by_emirate (Dict): Vat and Tax amount by emirates with emirates as key
+
+	Returns:
+		[Dict]: Chart Data
+	"""
+	labels = []
+	amount = []
+	vat_amount = []
+	for d in emirates:
+		if d in amounts_by_emirate:
+			amount.append(amounts_by_emirate[d]["amount"])
+			vat_amount.append(amounts_by_emirate[d]["vat_amount"])
+			labels.append(d)
+
+	datasets = []
+	datasets.append({'name': _('Amount (AED)'), 'values':  amount})
+	datasets.append({'name': _('Vat Amount (AED)'), 'values': vat_amount})
+
+	chart = {
+			"data": {
+				'labels': labels,
+				'datasets': datasets
+			}
+		}
+
+	chart["type"] = "bar"
+	chart["fieldtype"] = "Currency"
+	return chart
 
 def get_total_emiratewise(filters):
 	return frappe.db.sql(f"""
