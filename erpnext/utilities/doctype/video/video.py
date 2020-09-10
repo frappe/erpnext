@@ -21,7 +21,6 @@ class Video(Document):
 		if self.provider == "YouTube" and self.url and not self.get("youtube_video_id"):
 			self.youtube_video_id = get_id_from_url(self.url)
 
-	@classmethod
 	def set_youtube_statistics(self, video_ids=None, update=True):
 		if self.provider == "YouTube" and not is_tracking_enabled():
 			return
@@ -78,7 +77,8 @@ def update_youtube_data():
 
 	if frequency == 30:
 		batch_update_youtube_data()
-	elif site_time.hour % frequency == 0:
+	elif site_time.hour % frequency == 0 and site_time.minute < 15:
+		# make sure it runs within the first 15 mins of the hour
 		batch_update_youtube_data()
 
 
@@ -109,8 +109,8 @@ def get_id_from_url(url):
 def batch_update_youtube_data():
 	def prepare_and_set_data(video_list):
 		video_ids = get_formatted_ids(video_list)
-		Video.provider = "YouTube"
-		stats = Video.set_youtube_statistics(video_ids=video_ids, update=False)
+		video_doc = frappe.new_doc("Video")
+		stats = video_doc.set_youtube_statistics(video_ids=video_ids, update=False)
 		set_youtube_data(stats)
 
 	def set_youtube_data(entries):
