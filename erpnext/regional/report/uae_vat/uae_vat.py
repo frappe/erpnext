@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from erpnext.regional.united_arab_emirates.utils import get_tax_accounts
 
 def execute(filters=None):
 	columns = get_columns()
@@ -70,19 +71,21 @@ def get_data(filters = None):
 					"vat_amount": 0
 				}
 			)
+	data.append(
+		{
+			"no": '3',
+			"legend": f'Supplies subject to the reverse charge provision',
+			"amount": get_reverse_charge_total(filters),
+			"vat_amount": get_reverse_charge_tax(filters)
+		}
+	)
 	return data
 
 
 def get_total_emiratewise(filters):
-	conditions = get_conditions(filters)
-	print(f"""
-		select emirate, sum(total), sum(total_taxes_and_charges) from `tabSales Invoice`
-		where docstatus = 1 {conditions}
-		group by `tabSales Invoice`.emirate;
-		""")
 	return frappe.db.sql(f"""
 		select emirate, sum(total), sum(total_taxes_and_charges) from `tabSales Invoice`
-		where docstatus = 1 {conditions}
+		where docstatus = 1 {get_conditions(filters)}
 		group by `tabSales Invoice`.emirate;
 		""", filters)
 
@@ -99,10 +102,40 @@ def get_emirates():
 
 def get_conditions(filters):
 	conditions = ""
+	for opts in (("company", f' and company="{filters.get("company")}"'),
+		("from_date",  f' and posting_date>="{filters.get("from_date")}"'),
+		("to_date", f' and posting_date<="{filters.get("to_date")}"')):
+			if filters.get(opts[0]):
+				conditions += opts[1]
+	return conditions
 
-	for opts in (("company", " and company=%(company)s"),
-		("from_date", " and posting_date>=%(from_date)s"),
-		("to_date", " and posting_date<=%(to_date)s")):
+def get_reverse_charge_tax(filters):
+	return frappe.db.sql(f"""
+		select sum(debit)  from
+		`tabPurchase Invoice`  inner join `tabGL Entry`
+		on `tabGL Entry`.voucher_no = `tabPurchase Invoice`.name
+		where
+		`tabPurchase Invoice`.reverse_charge = "Y"
+		and `tabPurchase Invoice`.docstatus = 1
+		and `tabGL Entry`.docstatus = 1  {get_conditions_join(filters)}
+		and account in ("{'", "'.join(get_tax_accounts(filters['company']))}");
+		""")[0][0]
+
+
+def get_reverse_charge_total(filters):
+	return frappe.db.sql(f"""
+		select sum(total)  from
+		`tabPurchase Invoice`
+		where
+		reverse_charge = "Y"
+		and docstatus = 1 {get_conditions(filters)} ;
+		""")[0][0]
+
+def get_conditions_join(filters):
+	conditions = ""
+	for opts in (("company", f' and `tabPurchase Invoice`.company="{filters.get("company")}"'),
+		("from_date", f' and `tabPurchase Invoice`.posting_date>="{filters.get("from_date")}"'),
+		("to_date", f' and `tabPurchase Invoice`.posting_date<="{filters.get("to_date")}"')):
 			if filters.get(opts[0]):
 				conditions += opts[1]
 	return conditions
