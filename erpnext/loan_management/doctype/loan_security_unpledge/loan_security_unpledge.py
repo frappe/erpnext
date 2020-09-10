@@ -20,9 +20,6 @@ class LoanSecurityUnpledge(Document):
 		self.update_loan_status(cancel=1)
 		self.db_set('status', 'Requested')
 
-	def on_submit(self):
-		self.approve()
-
 	def validate_duplicate_securities(self):
 		security_list = []
 		for d in self.securities:
