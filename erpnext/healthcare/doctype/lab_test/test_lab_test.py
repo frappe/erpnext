@@ -151,7 +151,7 @@ def create_sales_invoice():
 
 	tests = [insulin_resistance_template, blood_test_template]
 	for entry in tests:
-		item_line = sales_invoice.append('items', {
+		sales_invoice.append('items', {
 			'item_code': entry.item,
 			'item_name': entry.lab_test_name,
 			'description': entry.lab_test_description,
