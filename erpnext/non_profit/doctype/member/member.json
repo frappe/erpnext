@@ -133,7 +133,8 @@
   {
    "fieldname": "email_id",
    "fieldtype": "Data",
-   "label": "Email Address"
+   "label": "Email Address",
+   "options": "Email"
   },
   {
    "fieldname": "subscription_id",
@@ -176,7 +177,7 @@
  ],
  "image_field": "image",
  "links": [],
- "modified": "2020-04-07 14:20:33.215700",
+ "modified": "2020-08-06 10:06:01.153564",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Member",

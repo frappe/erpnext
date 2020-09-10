@@ -146,7 +146,7 @@ class Asset(AccountsController):
 			'assets': assets,
 			'purpose': 'Receipt',
 			'company': self.company,
-			'transaction_date': getdate(nowdate()),
+			'transaction_date': getdate(self.purchase_date),
 			'reference_doctype': reference_doctype,
 			'reference_name': reference_docname
 		}).insert()
