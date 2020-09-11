@@ -3,18 +3,19 @@ from __future__ import unicode_literals
 
 import datetime
 import zipfile
+from csv import QUOTE_NONNUMERIC
+from six import BytesIO
+
 import six
 import frappe
 import pandas as pd
 from frappe import _
-from csv import QUOTE_NONNUMERIC
-from six import BytesIO
 from .datev_constants import DataCategory
-from .datev_constants import Transactions
 
 
 def get_datev_csv(data, filters, csv_class):
-	"""Fill in missing columns and return a CSV in DATEV Format.
+	"""
+	Fill in missing columns and return a CSV in DATEV Format.
 
 	For automatic processing, DATEV requires the first line of the CSV file to
 	hold meta data such as the length of account numbers oder the category of
@@ -89,7 +90,7 @@ def get_header(filters, csv_class):
 		# Format version (regarding format name)
 		csv_class.FORMAT_VERSION,
 		# Generated on
-		datetime.datetime.now().strftime("%Y%m%d%H%M%S") + '000',
+		datetime.datetime.now().strftime('%Y%m%d%H%M%S') + '000',
 		# Imported on -- stays empty
 		'',
 		# Origin. Any two symbols, will be replaced by "SV" on import.
@@ -155,7 +156,8 @@ def get_header(filters, csv_class):
 
 
 def download_csv_files_as_zip(csv_data_list):
-	"""Put CSV files in a zip archive and send that to the client.
+	"""
+	Put CSV files in a zip archive and send that to the client.
 
 	Params:
 	csv_data_list -- list of dicts [{'file_name': 'EXTF_Buchunsstapel.zip', 'csv_data': get_datev_csv()}]
