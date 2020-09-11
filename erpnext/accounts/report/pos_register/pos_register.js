@@ -47,7 +47,7 @@ frappe.query_reports["POS Register"] = {
 			"options": "Customer"
 		},
 		{
-			"fieldname":"payment_method",
+			"fieldname":"mode_of_payment",
 			"label": __("Payment Method"),
 			"fieldtype": "Link",
 			"options": "Mode of Payment"

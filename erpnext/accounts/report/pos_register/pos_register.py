@@ -15,9 +15,80 @@ def execute(filters=None):
 
 	columns = get_columns(filters)
 
-	data = get_data(filters)
+	group_by_field = get_group_by_field(filters.get("group_by"))
 
-	return columns, data
+	pos_entries = get_pos_entries(filters, group_by_field)
+	if group_by_field != "mode_of_payment":
+		concat_mode_of_payments(pos_entries)
+
+	# return only entries if group by is unselected
+	if not group_by_field:
+		return columns, pos_entries
+
+	# handle grouping
+	invoice_map, grouped_data = {}, []
+	for d in pos_entries:
+		invoice_map.setdefault(d[group_by_field], []).append(d)
+	
+	for key in invoice_map:
+		invoices = invoice_map[key]
+		grouped_data += invoices
+		add_subtotal_row(grouped_data, invoices, group_by_field, key)
+
+	# move group by column to first position
+	column_index = next((index for (index, d) in enumerate(columns) if d["fieldname"] == group_by_field), None)
+	columns.insert(0, columns.pop(column_index))
+
+	return columns, grouped_data
+
+def get_pos_entries(filters, group_by_field):
+	conditions = get_conditions(filters)
+	order_by = "p.posting_date"
+	select_mop_field, from_sales_invoice_payment, group_by_mop_condition = "", "", ""
+	if group_by_field == "mode_of_payment":
+		select_mop_field = ", sip.mode_of_payment"
+		from_sales_invoice_payment = ", `tabSales Invoice Payment` sip"
+		group_by_mop_condition = "sip.parent = p.name AND ifnull(sip.base_amount, 0) != 0 AND"
+		order_by += ", sip.mode_of_payment"
+
+	elif group_by_field:
+		order_by += ", p.{}".format(group_by_field)
+
+	return frappe.db.sql(
+		"""
+		SELECT 
+			p.posting_date, p.name as pos_invoice, p.pos_profile,
+			p.owner, p.base_grand_total as grand_total,
+			p.customer, p.is_return {select_mop_field}
+		FROM
+			`tabPOS Invoice` p {from_sales_invoice_payment}
+		WHERE
+			{group_by_mop_condition}
+			{conditions}
+		ORDER BY
+			{order_by}
+		""".format(
+			select_mop_field=select_mop_field,
+			from_sales_invoice_payment=from_sales_invoice_payment,
+			group_by_mop_condition=group_by_mop_condition,
+			conditions=conditions,
+			order_by=order_by
+		), filters, as_dict=1)
+
+def concat_mode_of_payments(pos_entries):
+	mode_of_payments = get_mode_of_payments(set([d.pos_invoice for d in pos_entries]))
+	for entry in pos_entries:
+		if mode_of_payments.get(entry.pos_invoice):
+			entry.mode_of_payment = ", ".join(mode_of_payments.get(entry.pos_invoice, []))
+
+def add_subtotal_row(data, group_invoices, group_by_field, group_by_value):
+	grand_total = sum([d.grand_total for d in group_invoices])
+	data.append({
+		group_by_field: group_by_value,
+		"grand_total": grand_total,
+		"bold": 1
+	})
+	data.append({})
 
 def validate_filters(filters):
 	if not filters.get("company"):
@@ -35,43 +106,11 @@ def validate_filters(filters):
 	if (filters.get("customer") and filters.get("group_by") == _('Group by Customer')):
 		frappe.throw(_("Can not filter based on Customer, if grouped by Customer"))
 	
-	if (filters.get("cashier") and filters.get("group_by") == _('Group by Cashier')):
+	if (filters.get("owner") and filters.get("group_by") == _('Group by Cashier')):
 		frappe.throw(_("Can not filter based on Cashier, if grouped by Cashier"))
 	
 	if (filters.get("mode_of_payment") and filters.get("group_by") == _('Group by Payment Method')):
 		frappe.throw(_("Can not filter based on Payment Method, if grouped by Payment Method"))
-
-
-def get_data(filters):
-	conditions = get_conditions(filters)
-	
-	group_by_field = get_group_by_field(filters.get("group_by"))
-	order_by = "posting_date"
-	if group_by_field:
-		order_by += ", {}".format(group_by_field)
-
-	pos_entries = frappe.db.sql(
-		"""
-		SELECT 
-			p.posting_date, p.name as pos_invoice, p.pos_profile,
-			p.owner as cashier, p.base_grand_total as grand_total,
-			p.customer, p.is_return
-		FROM
-			`tabPOS Invoice` p
-		WHERE
-			{conditions}
-		ORDER BY
-			{order_by}
-		""".format(conditions=conditions, order_by=order_by), filters, as_dict=1)
-	
-	if filters.get("group_by") != "Group by Payment Method":
-		mode_of_payments = get_mode_of_payments(set([d.pos_invoice for d in pos_entries]))
-
-		for entry in pos_entries:
-			if mode_of_payments.get(entry.pos_invoice):
-				entry.mode_of_payment = ", ".join(mode_of_payments.get(entry.pos_invoice, []))
-
-	return pos_entries
 
 def get_conditions(filters):
 	conditions = "company = %(company)s AND posting_date >= %(from_date)s AND posting_date <= %(to_date)s".format(
@@ -82,11 +121,14 @@ def get_conditions(filters):
 	if filters.get("pos_profile"):
 		conditions += " AND pos_profile = %(pos_profile)s".format(pos_profile=filters.get("pos_profile"))
 	
-	if filters.get("cashier"):
-		conditions += " AND owner = %(cashier)s".format(cashier=filters.get("cashier"))
+	if filters.get("owner"):
+		conditions += " AND owner = %(owner)s".format(owner=filters.get("owner"))
 	
 	if filters.get("customer"):
 		conditions += " AND customer = %(customer)s".format(customer=filters.get("customer"))
+	
+	if filters.get("is_return"):
+		conditions += " AND is_return = %(is_return)s".format(is_return=filters.get("is_return"))
 	
 	if filters.get("mode_of_payment"):
 		conditions += """
@@ -94,9 +136,6 @@ def get_conditions(filters):
 					SELECT name FROM `tabSales Invoice Payment` sip
 					WHERE parent=p.name AND ifnull(sip.mode_of_payment, '') = %(mode_of_payment)s
 				)"""
-	
-	if filters.get("is_return"):
-		conditions += " AND is_return = %(is_return)s".format(is_return=filters.get("is_return"))
 	
 	return conditions
 
@@ -109,6 +148,8 @@ def get_group_by_field(group_by):
 		group_by_field = "owner"
 	elif group_by == "Group by Customer":
 		group_by_field = "customer"
+	elif group_by == "Group by Payment Method":
+		group_by_field = "mode_of_payment"
 	
 	return group_by_field
 
@@ -143,7 +184,7 @@ def get_columns(filters):
 		},
 		{
 			"label": _("Cashier"),
-			"fieldname": "cashier",
+			"fieldname": "owner",
 			"fieldtype": "Link",
 			"options": "User",
 			"width": 140
