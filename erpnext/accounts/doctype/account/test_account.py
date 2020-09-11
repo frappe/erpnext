@@ -6,7 +6,7 @@ import unittest
 import frappe
 from erpnext.stock import get_warehouse_account, get_company_default_inventory_account
 from erpnext.accounts.doctype.account.account import update_account_number
-from erpnext.accounts.doctype.account.account import merge_account
+from erpnext.accounts.doctype.account.account import merge_account, update_account_number
 
 class TestAccount(unittest.TestCase):
 	def test_rename_account(self):
@@ -99,7 +99,8 @@ class TestAccount(unittest.TestCase):
 			"Softwares - _TC", doc.is_group, doc.root_type, doc.company)
 
 	def test_account_sync(self):
-		del frappe.local.flags["ignore_root_company_validation"]
+		frappe.local.flags.pop("ignore_root_company_validation", None)
+
 		acc = frappe.new_doc("Account")
 		acc.account_name = "Test Sync Account"
 		acc.parent_account = "Temporary Accounts - _TC3"
@@ -110,6 +111,56 @@ class TestAccount(unittest.TestCase):
 		acc_tc_5 = frappe.db.get_value('Account', {'account_name': "Test Sync Account", "company": "_Test Company 5"})
 		self.assertEqual(acc_tc_4, "Test Sync Account - _TC4")
 		self.assertEqual(acc_tc_5, "Test Sync Account - _TC5")
+
+	def test_account_rename_sync(self):
+		frappe.local.flags.pop("ignore_root_company_validation", None)
+
+		acc = frappe.new_doc("Account")
+		acc.account_name = "Test Rename Account"
+		acc.parent_account = "Temporary Accounts - _TC3"
+		acc.company = "_Test Company 3"
+		acc.insert()
+
+		# Rename account in parent company
+		update_account_number(acc.name, "Test Rename Sync Account", "1234")
+
+		# Check if renmamed in children
+		self.assertTrue(frappe.db.exists("Account", {'account_name': "Test Rename Sync Account", "company": "_Test Company 4", "account_number": "1234"}))
+		self.assertTrue(frappe.db.exists("Account", {'account_name': "Test Rename Sync Account", "company": "_Test Company 5", "account_number": "1234"}))
+
+		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC3")
+		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC4")
+		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC5")
+
+	def test_account_sync_with_missing_parent_account_in_child_company(self):
+		frappe.local.flags.pop("ignore_root_company_validation", None)
+
+		acc = frappe.new_doc("Account")
+		acc.account_name = "Test Group Account"
+		acc.parent_account = "Temporary Accounts - _TC3"
+		acc.is_group = 1
+		acc.company = "_Test Company 3"
+		acc.insert()
+
+		self.assertTrue(frappe.db.exists("Account", {'account_name': "Test Group Account", "company": "_Test Company 4"}))
+		self.assertTrue(frappe.db.exists("Account", {'account_name': "Test Group Account", "company": "_Test Company 5"}))
+
+		acc_tc_5 = frappe.db.get_value('Account', {'account_name': "Test Group Account", "company": "_Test Company 5"})
+		# Rename group account in one child company
+		update_account_number(acc_tc_5, "Test Modified Account")
+
+		# Add child account to test group account in parent company
+		# which will try to do the same in child company
+		acc = frappe.new_doc("Account")
+		acc.account_name = "Test Child Account"
+		acc.parent_account = "Test Group Account - _TC3"
+		acc.company = "_Test Company 3"
+
+		self.assertRaises(frappe.ValidationError, acc.insert)
+
+		to_delete = ["Test Group Account - _TC3", "Test Group Account - _TC5", "Test Modified Account - _TC5"]
+		for doc in to_delete:
+			frappe.delete_doc("Account", doc)
 
 def _make_test_records(verbose):
 	from frappe.test_runner import make_test_objects
