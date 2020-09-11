@@ -673,23 +673,14 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			);
 		}
 
-		frappe.db.get_value('Sales Invoice Payment', {'parent': this.frm.doc.pos_profile, 'default': 1},
-			['mode_of_payment', 'account', 'type'], (value) => {
-				if (this.frm.is_dirty()) {
-					frappe.model.clear_table(this.frm.doc, 'payments');
-					if (value) {
-						let row = frappe.model.add_child(this.frm.doc, 'Sales Invoice Payment', 'payments');
-						row.mode_of_payment = value.mode_of_payment;
-						row.type = value.type;
-						row.account = value.account;
-						row.default = 1;
-						row.amount = total_amount_to_pay;
-					} else {
-						this.frm.set_value('is_pos', 1);
-					}
-					this.frm.refresh_fields();
-				}
-			}, 'Sales Invoice');
+		this.frm.doc.payments.find(pay => {
+			if (pay.default) {
+				pay.amount = total_amount_to_pay;
+			} else {
+				pay.amount = 0.0
+			}
+		});
+		this.frm.refresh_fields();
 
 		this.calculate_paid_amount();
 	},
