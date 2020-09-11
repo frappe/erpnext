@@ -5,8 +5,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 from erpnext.stock import get_warehouse_account, get_company_default_inventory_account
-from erpnext.accounts.doctype.account.account import update_account_number
-from erpnext.accounts.doctype.account.account import merge_account, update_account_number
+from erpnext.accounts.doctype.account.account import update_account_number, merge_account
 
 class TestAccount(unittest.TestCase):
 	def test_rename_account(self):
