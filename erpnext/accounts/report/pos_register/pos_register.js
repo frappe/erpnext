@@ -65,5 +65,13 @@ frappe.query_reports["POS Register"] = {
 			"label": __("Is Return"),
 			"fieldtype": "Check"
 		},
-	]
+	],
+	"formatter": function(value, row, column, data, default_formatter) {
+		value = default_formatter(value, row, column, data);
+		if (data && data.bold) {
+			value = value.bold();
+
+		}
+		return value;
+	}
 };

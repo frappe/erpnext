@@ -58,7 +58,7 @@ def get_pos_entries(filters, group_by_field):
 		"""
 		SELECT 
 			p.posting_date, p.name as pos_invoice, p.pos_profile,
-			p.owner, p.base_grand_total as grand_total,
+			p.owner, p.base_grand_total as grand_total, p.base_paid_amount as paid_amount,
 			p.customer, p.is_return {select_mop_field}
 		FROM
 			`tabPOS Invoice` p {from_sales_invoice_payment}
@@ -83,9 +83,11 @@ def concat_mode_of_payments(pos_entries):
 
 def add_subtotal_row(data, group_invoices, group_by_field, group_by_value):
 	grand_total = sum([d.grand_total for d in group_invoices])
+	paid_amount = sum([d.paid_amount for d in group_invoices])
 	data.append({
 		group_by_field: group_by_value,
 		"grand_total": grand_total,
+		"paid_amount": paid_amount,
 		"bold": 1
 	})
 	data.append({})
@@ -194,13 +196,20 @@ def get_columns(filters):
 			"fieldname": "grand_total",
 			"fieldtype": "Currency",
 			"options": "company:currency",
-			"width": 140
+			"width": 120
+		},
+		{
+			"label": _("Paid Amount"),
+			"fieldname": "paid_amount",
+			"fieldtype": "Currency",
+			"options": "company:currency",
+			"width": 120
 		},
 		{
 			"label": _("Payment Method"),
 			"fieldname": "mode_of_payment",
 			"fieldtype": "Data",
-			"width": 160
+			"width": 150
 		},
 		{
 			"label": _("Is Return"),
