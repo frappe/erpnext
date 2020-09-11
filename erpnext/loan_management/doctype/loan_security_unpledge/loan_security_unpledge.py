@@ -17,7 +17,6 @@ class LoanSecurityUnpledge(Document):
 		self.validate_unpledge_qty()
 
 	def on_cancel(self):
-		self.update_loan_security_pledge(cancel=1)
 		self.update_loan_status(cancel=1)
 		self.db_set('status', 'Requested')
 
@@ -43,13 +42,14 @@ class LoanSecurityUnpledge(Document):
 				"valid_upto": (">=", get_datetime())
 			}, as_list=1))
 
-		loan_amount, principal_paid = frappe.get_value("Loan", self.loan, ['loan_amount', 'total_principal_paid'])
-		pending_principal_amount = loan_amount - principal_paid
+		total_payment, principal_paid, interest_payable = frappe.get_value("Loan", self.loan, ['total_payment', 'total_principal_paid',
+			'total_interest_payable'])
+
+		pending_principal_amount = flt(total_payment) - flt(interest_payable) - flt(principal_paid)
 		security_value = 0
 
 		for security in self.securities:
-			pledged_qty = pledge_qty_map.get(security.loan_security)
-
+			pledged_qty = pledge_qty_map.get(security.loan_security, 0)
 			if security.qty > pledged_qty:
 				frappe.throw(_("""Row {0}: {1} {2} of {3} is pledged against Loan {4}.
 					You are trying to unpledge more""").format(security.idx, pledged_qty, security.uom,
@@ -58,16 +58,23 @@ class LoanSecurityUnpledge(Document):
 			qty_after_unpledge = pledged_qty - security.qty
 			ltv_ratio = ltv_ratio_map.get(security.loan_security_type)
 
-			security_value += qty_after_unpledge * loan_security_price_map.get(security.loan_security)
+			current_price = loan_security_price_map.get(security.loan_security)
+			if not current_price:
+				frappe.throw(_("No valid Loan Security Price found for {0}").format(frappe.bold(security.loan_security)))
 
-		if not security_value and pending_principal_amount > 0:
+			security_value += qty_after_unpledge * current_price
+
+		if not security_value and flt(pending_principal_amount, 2) > 0:
 			frappe.throw("Cannot Unpledge, loan to value ratio is breaching")
 
-		if security_value and (pending_principal_amount/security_value) * 100 > ltv_ratio:
+		if security_value and flt(pending_principal_amount/security_value) * 100 > ltv_ratio:
 			frappe.throw("Cannot Unpledge, loan to value ratio is breaching")
 
 	def on_update_after_submit(self):
-		if self.status == "Approved":
+		self.approve()
+
+	def approve(self):
+		if self.status == "Approved" and not self.unpledge_time:
 			self.update_loan_status()
 			self.db_set('unpledge_time', get_datetime())
 

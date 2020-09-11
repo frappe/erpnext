@@ -8,7 +8,7 @@
 {% include "erpnext/selling/page/point_of_sale/pos_past_order_summary.js" %}
 
 erpnext.PointOfSale.Controller = class {
-    constructor(wrapper) {
+	constructor(wrapper) {
 		this.wrapper = $(wrapper).find('.layout-main-section');
 		this.page = wrapper.page;
 
@@ -36,7 +36,7 @@ erpnext.PointOfSale.Controller = class {
 		const table_fields = [
 			{ fieldname: "mode_of_payment", fieldtype: "Link", in_list_view: 1, label: "Mode of Payment", options: "Mode of Payment", reqd: 1 },
 			{ fieldname: "opening_amount", fieldtype: "Currency", default: 0, in_list_view: 1, label: "Opening Amount", 
-				options: "company:company_currency", reqd: 1 }
+				options: "company:company_currency" }
 		];
 
 		const dialog = new frappe.ui.Dialog({
@@ -51,29 +51,16 @@ erpnext.PointOfSale.Controller = class {
 					options: 'POS Profile', fieldname: 'pos_profile', reqd: 1,
 					onchange: () => {
 						const pos_profile = dialog.fields_dict.pos_profile.get_value();
-						const company = dialog.fields_dict.company.get_value();
-						const user = frappe.session.user
 
-						if (!pos_profile || !company || !user) return;
+						if (!pos_profile) return;
 
-						// auto fetch last closing entry's balance details
-						frappe.db.get_list("POS Closing Entry", {
-							filters: { company, pos_profile, user },
-							limit: 1,
-							order_by: 'period_end_date desc'
-						}).then((res) => {
-							if (!res.length) return;
-							const pos_closing_entry = res[0];
-							frappe.db.get_doc("POS Closing Entry", pos_closing_entry.name).then(({ payment_reconciliation }) => {
-								dialog.fields_dict.balance_details.df.data = [];
-								payment_reconciliation.forEach(pay => {
-									const { mode_of_payment } = pay;
-									dialog.fields_dict.balance_details.df.data.push({
-										mode_of_payment: mode_of_payment
-									});
-								});
-								dialog.fields_dict.balance_details.grid.refresh();
+						frappe.db.get_doc("POS Profile", pos_profile).then(doc => {
+							dialog.fields_dict.balance_details.df.data = [];
+							doc.payments.forEach(pay => {
+								const { mode_of_payment } = pay;
+								dialog.fields_dict.balance_details.df.data.push({ mode_of_payment });
 							});
+							dialog.fields_dict.balance_details.grid.refresh();
 						});
 					}
 				},
