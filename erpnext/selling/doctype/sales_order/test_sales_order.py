@@ -446,7 +446,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		frappe.set_user("Administrator")
 		user2 = 'test2@example.com'
-		test_user2 = frappe.get_doc('User', user)
+		test_user2 = frappe.get_doc('User', user2)
 		test_user2.add_roles("Sales User", "Test Approver")
 		frappe.set_user(user2)
 
@@ -1018,7 +1018,10 @@ test_dependencies = ["Currency Exchange"]
 
 def make_sales_order_workflow():
 	if frappe.db.exists('Workflow', 'SO Test Workflow'):
-		return frappe.get_doc("Workflow", "SO Test Workflow")
+		doc = frappe.get_doc("Workflow", "SO Test Workflow")
+		doc.set("is_active", 1)
+		doc.save()
+		return doc
 
 	frappe.get_doc(dict(doctype='Role', role_name='Test Junior Approver')).insert(ignore_if_duplicate=True)
 	frappe.get_doc(dict(doctype='Role', role_name='Test Approver')).insert(ignore_if_duplicate=True)
