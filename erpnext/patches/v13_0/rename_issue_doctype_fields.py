@@ -7,7 +7,8 @@ from frappe.model.utils.rename_field import rename_field
 
 def execute():
 	if frappe.db.exists('DocType', 'Issue'):
-		issues = frappe.db.get_all('Issue', fields=['name', 'response_by_variance', 'resolution_by_variance', 'mins_to_first_response'])
+		issues = frappe.db.get_all('Issue', fields=['name', 'response_by_variance', 'resolution_by_variance', 'mins_to_first_response'],
+			 order_by='creation desc')
 		frappe.reload_doc('support', 'doctype', 'issue')
 
 		# rename fields
@@ -19,6 +20,7 @@ def execute():
 			rename_field('Issue', old, new)
 
 		# change fieldtype to duration
+		count = 0
 		for entry in issues:
 			response_by_variance = convert_to_seconds(entry.response_by_variance, 'Hours')
 			resolution_by_variance = convert_to_seconds(entry.resolution_by_variance, 'Hours')
@@ -28,16 +30,25 @@ def execute():
 				'resolution_by_variance': resolution_by_variance,
 				'first_response_time': mins_to_first_response
 			})
+			# commit after every 100 updates
+			count += 1
+			if count%100 == 0:
+				frappe.db.commit()
 
 	if frappe.db.exists('DocType', 'Opportunity'):
-		opportunities = frappe.db.get_all('Opportunity', fields=['name', 'mins_to_first_response'])
+		opportunities = frappe.db.get_all('Opportunity', fields=['name', 'mins_to_first_response'], order_by='creation desc')
 		frappe.reload_doc('crm', 'doctype', 'opportunity')
 		rename_field('Opportunity', 'mins_to_first_response', 'first_response_time')
 
 		# change fieldtype to duration
+		count = 0
 		for entry in opportunities:
 			mins_to_first_response = convert_to_seconds(entry.mins_to_first_response, 'Minutes')
-			frappe.db.set_value('Issue', entry.name, 'first_response_time', mins_to_first_response)
+			frappe.db.set_value('Opportunity', entry.name, 'first_response_time', mins_to_first_response)
+			# commit after every 100 updates
+			count += 1
+			if count%100 == 0:
+				frappe.db.commit()
 
 	# renamed reports from "Minutes to First Response for Issues" to "First Response Time for Issues". Same for Opportunity
 	for report in ['Minutes to First Response for Issues', 'Minutes to First Response for Opportunity']:
