@@ -102,16 +102,16 @@ def validate_filters(filters):
 	if filters.from_date > filters.to_date:
 		frappe.throw(_("From Date must be before To Date"))
 
-	if (filters.get("pos_profile") and filters.get("group_by") == _('Group by POS Profile')):
+	if (filters.get("pos_profile") and filters.get("group_by") == _('POS Profile')):
 		frappe.throw(_("Can not filter based on POS Profile, if grouped by POS Profile"))
 	
-	if (filters.get("customer") and filters.get("group_by") == _('Group by Customer')):
+	if (filters.get("customer") and filters.get("group_by") == _('Customer')):
 		frappe.throw(_("Can not filter based on Customer, if grouped by Customer"))
 	
-	if (filters.get("owner") and filters.get("group_by") == _('Group by Cashier')):
+	if (filters.get("owner") and filters.get("group_by") == _('Cashier')):
 		frappe.throw(_("Can not filter based on Cashier, if grouped by Cashier"))
 	
-	if (filters.get("mode_of_payment") and filters.get("group_by") == _('Group by Payment Method')):
+	if (filters.get("mode_of_payment") and filters.get("group_by") == _('Payment Method')):
 		frappe.throw(_("Can not filter based on Payment Method, if grouped by Payment Method"))
 
 def get_conditions(filters):
@@ -144,13 +144,13 @@ def get_conditions(filters):
 def get_group_by_field(group_by):
 	group_by_field = ""
 
-	if group_by == "Group by POS Profile":
+	if group_by == "POS Profile":
 		group_by_field = "pos_profile"
-	elif group_by == "Group by Cashier":
+	elif group_by == "Cashier":
 		group_by_field = "owner"
-	elif group_by == "Group by Customer":
+	elif group_by == "Customer":
 		group_by_field = "customer"
-	elif group_by == "Group by Payment Method":
+	elif group_by == "Payment Method":
 		group_by_field = "mode_of_payment"
 	
 	return group_by_field

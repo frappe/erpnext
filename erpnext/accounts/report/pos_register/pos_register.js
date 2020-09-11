@@ -56,9 +56,8 @@ frappe.query_reports["POS Register"] = {
 			"fieldname":"group_by",
 			"label": __("Group by"),
 			"fieldtype": "Select",
-			"options": ["", __("Group by POS Profile"), __("Group by Cashier"),
-				__("Group by Payment Method"), __("Group by Customer")],
-			"default": __("Group by POS Profile")
+			"options": ["", "POS Profile", "Cashier", "Payment Method", "Customer"],
+			"default": "POS Profile"
 		},
 		{
 			"fieldname":"is_return",
