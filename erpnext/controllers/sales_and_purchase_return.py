@@ -242,7 +242,8 @@ def make_return_doc(doctype, source_name, target_doc=None):
 						'type': data.type,
 						'amount': -1 * paid_amount,
 						'base_amount': -1 * base_paid_amount,
-						'account': data.account
+						'account': data.account,
+						'default': data.default
 					})
 				if doc.is_pos:
 					doc.paid_amount = -1 * source.paid_amount
@@ -281,6 +282,8 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.rejected_warehouse = source_doc.rejected_warehouse
 			target_doc.po_detail = source_doc.po_detail
 			target_doc.pr_detail = source_doc.pr_detail
+			target_doc.purchase_invoice_item = source_doc.name
+
 		elif doctype == "Delivery Note":
 			target_doc.against_sales_order = source_doc.against_sales_order
 			target_doc.against_sales_invoice = source_doc.against_sales_invoice
@@ -296,6 +299,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.so_detail = source_doc.so_detail
 			target_doc.dn_detail = source_doc.dn_detail
 			target_doc.expense_account = source_doc.expense_account
+			target_doc.sales_invoice_item = source_doc.name
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
 
