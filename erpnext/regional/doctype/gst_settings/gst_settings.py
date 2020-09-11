@@ -19,6 +19,15 @@ class GSTSettings(Document):
 			from tabAddress where country = "India" and ifnull(gstin, '')!='' ''')
 		self.set_onload('data', data)
 
+	def validate(self):
+		companies = []
+		for row in self.get('gst_reverse_charge_accounts'):
+			if row.company not in companies:
+				companies.append(row.company)
+			else:
+				frappe.throw(_("""Company {0} added multiple times. Single reverse charge accounts can be added
+					for each company""").format(frappe.bold(row.company)))
+
 @frappe.whitelist()
 def send_reminder():
 	frappe.has_permission('GST Settings', throw=True)

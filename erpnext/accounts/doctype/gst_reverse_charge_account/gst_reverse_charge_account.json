@@ -1,0 +1,60 @@
+{
+ "actions": [],
+ "creation": "2020-09-11 12:53:39.155770",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "cgst_account",
+  "sgst_account",
+  "igst_account"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cgst_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "CGST Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sgst_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "SGST Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "igst_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "IGST Account",
+   "options": "Account",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2020-09-11 12:53:39.155770",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "GST Reverse Charge Account",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -668,6 +668,7 @@ def get_gst_accounts(company, account_wise=False):
 
 	return gst_accounts
 
+@frappe.whitelist()
 def update_grand_total_for_rcm(doc, method):
 	country = frappe.get_cached_value('Company', doc.company, 'country')
 
@@ -693,12 +694,13 @@ def update_grand_total_for_rcm(doc, method):
 				base_gst_tax += tax.base_tax_amount_after_discount_amount
 				gst_tax += tax.tax_amount_after_discount_amount
 
-		doc.taxes_and_charges_added -= gst_tax
-		doc.total_taxes_and_charges -= gst_tax
-		doc.base_taxes_and_charges_added -= base_gst_tax
-		doc.base_total_taxes_and_charges -= base_gst_tax
+		if gst_tax:
+			doc.taxes_and_charges_added -= gst_tax
+			doc.total_taxes_and_charges -= gst_tax
+			doc.base_taxes_and_charges_added -= base_gst_tax
+			doc.base_total_taxes_and_charges -= base_gst_tax
 
-		update_totals(gst_tax, base_gst_tax, doc)
+			update_totals(gst_tax, base_gst_tax, doc)
 
 def update_totals(gst_tax, base_gst_tax, doc):
 	doc.base_grand_total -= base_gst_tax
@@ -727,29 +729,76 @@ def make_regional_gl_entries(gl_entries, doc):
 		return gl_entries
 
 	if doc.reverse_charge == 'Y':
-		gst_accounts = get_gst_accounts(doc.company)
-		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
-			+ gst_accounts.get('igst_account')
+		gst_taxes = get_applied_gst(doc.get('taxes'), doc.company)
 
-		for tax in doc.get('taxes'):
-			if tax.category not in ("Total", "Valuation and Total"):
-				continue
+		gst_accounts = frappe.db.get_value('GST Reverse Charge Account', {'company': doc.company},
+			['cgst_account', 'sgst_account', 'igst_account'], as_dict=1)
 
-			dr_or_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
-			if flt(tax.base_tax_amount_after_discount_amount) and tax.account_head in gst_account_list:
-				account_currency = get_account_currency(tax.account_head)
+		if gst_taxes['cgst']:
+			if not (gst_accounts or gst_accounts.get('cgst_account')):
+				frappe.throw(_('Please add CGST Reverse Charge account in GST Settings'))
 
-				gl_entries.append(doc.get_gl_dict(
-					{
-						"account": tax.account_head,
-						"cost_center": tax.cost_center,
-						"posting_date": doc.posting_date,
-						"against": doc.supplier,
-						dr_or_cr: tax.base_tax_amount_after_discount_amount,
-						dr_or_cr + "_in_account_currency": tax.base_tax_amount_after_discount_amount \
-							if account_currency==doc.company_currency \
-							else tax.tax_amount_after_discount_amount
-					}, account_currency, item=tax)
-				)
+			gl_entries = get_gl_entry(gl_entries, 'cgst', gst_accounts.get('cgst_account'), gst_taxes, doc)
+
+		if gst_taxes['sgst']:
+			if not (gst_accounts or not gst_accounts.get('sgst_account')):
+				frappe.throw(_('Please add SGST Reverse Charge account in GST Settings'))
+
+			gl_entries = get_gl_entry(gl_entries, 'sgst', gst_accounts.get('sgst_account'), gst_taxes, doc)
+
+		if gst_taxes['igst']:
+			if not (gst_accounts or not gst_accounts.get('igst_account')):
+				frappe.throw(_('Please add IGST Reverse Charge account in GST Settings'))
+
+			gl_entries = get_gl_entry(gl_entries, 'igst', gst_accounts.get('igst_account'), gst_taxes, doc)
 
 	return gl_entries
+
+def get_gl_entry(gl_entries, tax_key, account, taxes, doc):
+	account_currency = get_account_currency(account)
+
+	dr_or_cr = 'credit' if taxes[tax_key] > 0 else 'debit'
+
+	gl_entries.append(doc.get_gl_dict(
+		{
+			"account": account,
+			"posting_date": doc.posting_date,
+			"against": doc.supplier,
+			dr_or_cr: taxes[tax_key],
+			dr_or_cr + "_in_account_currency": taxes['base_'+tax_key] \
+				if account_currency==doc.company_currency \
+				else taxes[tax_key]
+		}, account_currency, doc)
+	)
+
+	return gl_entries
+
+def get_applied_gst(taxes, company):
+	gst_accounts = get_gst_accounts(company)
+
+	tax_map = {
+		'cgst': 0.0,
+		'base_cgst': 0.0,
+		'sgst': 0.0,
+		'base_sgst': 0.0,
+		'igst': 0.0,
+		'base_igst': 0.0,
+	}
+
+	for tax in taxes:
+		if tax.account_head in gst_accounts.get('cgst_account'):
+			add_deduct_tax(tax_map, tax, 'cgst')
+		if tax.account_head in gst_accounts.get('sgst_account'):
+			add_deduct_tax(tax_map, tax, 'sgst')
+		if tax.account_head in gst_accounts.get('igst_account'):
+			add_deduct_tax(tax_map, tax, 'igst')
+
+	return tax_map
+
+def add_deduct_tax(tax_map, tax_row, tax_key):
+	if tax_row.add_deduct_tax == 'Add':
+		tax_map[tax_key] += tax_row.tax_amount_after_discount_amount
+		tax_map['base_'+tax_key] += tax_row.base_tax_amount_after_discount_amount
+	else:
+		tax_map[tax_key] -= tax_row.tax_amount_after_discount_amount
+		tax_map['base_'+tax_key] -= tax_row.base_tax_amount_after_discount_amount
