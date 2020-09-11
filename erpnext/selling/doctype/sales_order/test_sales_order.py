@@ -417,6 +417,7 @@ class TestSalesOrder(unittest.TestCase):
 		# add new item
 		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 100, 'qty' : 2}])
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Sales Order', trans_item, so.name)
+		test_user.remove_roles("Accounts User")
 		frappe.set_user("Administrator")
 	
 	def test_update_child_qty_rate_with_workflow(self):
@@ -426,6 +427,7 @@ class TestSalesOrder(unittest.TestCase):
 		so = make_sales_order(item_code= "_Test Item", qty=1, rate=150, do_not_submit=1)
 		apply_workflow(so, 'Approve')
 
+		frappe.set_user("Administrator")
 		user = 'test@example.com'
 		test_user = frappe.get_doc('User', user)
 		test_user.add_roles("Sales User", "Test Junior Approver")
@@ -442,18 +444,20 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate, 'Sales Order', trans_item, so.name)
 		test_user.remove_roles("Sales User", "Test Junior Approver")
 
-		user = 'test2@example.com'
-		test_user = frappe.get_doc('User', user)
-		test_user.add_roles("Sales User", "Test Approver")
-		frappe.set_user(user)
+		frappe.set_user("Administrator")
+		user2 = 'test2@example.com'
+		test_user2 = frappe.get_doc('User', user)
+		test_user2.add_roles("Sales User", "Test Approver")
+		frappe.set_user(user2)
 
 		# Test Approver is allowed to edit with grand_total > 200
 		update_child_qty_rate("Sales Order", trans_item, so.name)
 		so.reload()
 		self.assertEqual(so.items[0].qty, 3)
 
-		test_user.remove_roles("Sales User", "Test Approver")
 		frappe.set_user("Administrator")
+		test_user.remove_roles("Sales User", "Test Junior Approver")
+		test_user2.remove_roles("Sales User", "Test Approver")
 		workflow.is_active = 0
 		workflow.save()
 
