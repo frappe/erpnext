@@ -11,6 +11,8 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.templates.pages.rfq import check_supplier_has_docname_access
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import make_supplier_quotation
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import create_supplier_quotation
+from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+from erpnext.crm.doctype.opportunity.opportunity import make_request_for_quotation as make_rfq
 
 class TestRequestforQuotation(unittest.TestCase):
 	def test_quote_status(self):
@@ -109,6 +111,23 @@ class TestRequestforQuotation(unittest.TestCase):
 
 		self.assertEqual(supplier_quotation.items[0].qty, 5)
 		self.assertEqual(supplier_quotation.items[0].stock_qty, 10)
+
+	def test_make_rfq_from_opportunity(self):
+		opportunity = make_opportunity(with_items=1)
+		supplier_data = get_supplier_data()
+		rfq = make_rfq(opportunity.name)
+
+		self.assertEqual(len(rfq.get("items")), len(opportunity.get("items")))
+		rfq.message_for_supplier = 'Please supply the specified items at the best possible rates.'
+
+		for item in rfq.items:
+			item.warehouse = "_Test Warehouse - _TC"
+
+		for data in supplier_data:
+			rfq.append('suppliers', data)
+
+		rfq.status = 'Draft'
+		rfq.submit()
 
 def make_request_for_quotation(**args):
 	"""
