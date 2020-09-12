@@ -292,7 +292,7 @@ class BuyingController(StockController):
 			backflushed_batch_qty_map = get_backflushed_batch_qty_map(item.purchase_order, item.item_code)
 
 			for raw_material in transferred_raw_materials + non_stock_items:
-				rm_item_key = '{}{}'.format(raw_material.rm_item_code, item.purchase_order)
+				rm_item_key = (raw_material.rm_item_code, item.purchase_order)
 				raw_material_data = backflushed_raw_materials_map.get(rm_item_key, {})
 
 				consumed_qty = raw_material_data.get('qty', 0)
@@ -337,6 +337,7 @@ class BuyingController(StockController):
 		if not rm.main_item_code:
 			rm.main_item_code = fg_item_doc.item_code
 
+		rm.reference_name = fg_item_doc.name
 		rm.required_qty = qty
 		rm.consumed_qty = qty
 
@@ -864,38 +865,44 @@ def get_subcontracted_raw_materials_from_se(purchase_order, fg_item):
 	return raw_materials
 
 def get_backflushed_subcontracted_raw_materials(purchase_orders):
-	common_query = """
-		SELECT
-			CONCAT(prsi.rm_item_code, pri.purchase_order) AS item_key,
-			SUM(prsi.consumed_qty) AS qty,
-			{serial_no_concat_syntax} AS serial_nos,
-			{batch_no_concat_syntax} AS batch_nos
-		FROM `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri, `tabPurchase Receipt Item Supplied` prsi
-		WHERE
-			pr.name = pri.parent
-			AND pr.name = prsi.parent
-			AND pri.purchase_order IN %s
-			AND pri.item_code = prsi.main_item_code
-			AND pr.docstatus = 1
-		GROUP BY prsi.rm_item_code, pri.purchase_order
-	"""
+	purchase_receipts = frappe.get_all("Purchase Receipt Item",
+		fields = ["purchase_order", "item_code", "name", "parent"],
+		filters={"docstatus": 1, "purchase_order": ("in", list(purchase_orders))})
 
-	backflushed_raw_materials = frappe.db.multisql({
-		'mariadb': common_query.format(
-			serial_no_concat_syntax="GROUP_CONCAT(prsi.serial_no)",
-			batch_no_concat_syntax="GROUP_CONCAT(prsi.batch_no)"
-		),
-		'postgres': common_query.format(
-			serial_no_concat_syntax="STRING_AGG(prsi.serial_no, ',')",
-			batch_no_concat_syntax="STRING_AGG(prsi.batch_no, ',')"
-		)
-	}, (purchase_orders, ), as_dict=1)
+	distinct_purchase_receipts = {}
+	for pr in purchase_receipts:
+		key = (pr.purchase_order, pr.item_code, pr.parent)
+		if key not in distinct_purchase_receipts:
+			distinct_purchase_receipts.setdefault(key, [''])
+
+		distinct_purchase_receipts[key].append(pr.name)
 
 	backflushed_raw_materials_map = frappe._dict()
-	for item in backflushed_raw_materials:
-		backflushed_raw_materials_map.setdefault(item.item_key, item)
+	for args, references in distinct_purchase_receipts.items():
+		purchase_receipt_supplied_items = get_supplied_items(args[1], args[2], references)
+
+		for data in purchase_receipt_supplied_items:
+			pr_key = (data.rm_item_code, args[0])
+			if pr_key not in backflushed_raw_materials_map:
+				backflushed_raw_materials_map.setdefault(pr_key, frappe._dict({
+					"qty": 0.0,
+					"serial_no": [],
+					"batch_no": []
+				}))
+
+			row = backflushed_raw_materials_map.get(pr_key)
+			row.qty += data.consumed_qty
+
+			for field in ["serial_no", "batch_no"]:
+				if data.get(field):
+					row[field].append(data.get(field))
 
 	return backflushed_raw_materials_map
+
+def get_supplied_items(item_code, purchase_receipt, references):
+	return frappe.get_all("Purchase Receipt Item Supplied",
+		fields=["rm_item_code", "consumed_qty", "serial_no", "batch_no"],
+		filters={"main_item_code": item_code, "parent": purchase_receipt, "reference_name": ("in", references)})
 
 def get_asset_item_details(asset_items):
 	asset_items_data = {}
