@@ -139,7 +139,7 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 	}
 
 	make() {
-		const me = this;	
+		const me = this;
 		new frappe.ui.FileUploader({
 			method: 'erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.upload_bank_statement',
 			allow_multiple: 0,
@@ -217,9 +217,9 @@ erpnext.accounts.bankTransactionSync = class bankTransactionSync {
 		frappe.xcall('erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.plaid_configuration')
 		.then(result => {
 			me.plaid_env = result.plaid_env;
-			me.plaid_public_key = result.plaid_public_key;
 			me.client_name = result.client_name;
-			me.sync_transactions()
+			me.link_token = result.link_token;
+			me.sync_transactions();
 		})
 	}
 
