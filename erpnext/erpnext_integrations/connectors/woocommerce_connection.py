@@ -29,7 +29,7 @@ def verify_request():
 			frappe.throw(_("Unverified Webhook Data"))
 
 def validate_event_and_status(order_id, event, status):
-	if event == "woocommerce_payment_complete":
+	if event == "woocommerce_payment_complete": # normal patient test order and on-behalf test order
 		if status != "processing":
 			frappe.log_error(message="Order ID: {} -- Status {}".format(order_id, status), 
 				title="WooCommerce Event: {}".format(event))
@@ -100,6 +100,7 @@ def order(*args, **kwargs):
 		order = json.loads(frappe.request.data)
 		webhook_delivery_id = frappe.get_request_header("X-WC-Webhook-Delivery-ID")
 		log_integration_request(webhook_delivery_id=webhook_delivery_id, order=order, invoice_doc=None, status="Failed", data=json.dumps(order, indent=4), error=frappe.get_traceback(), woocommerce_settings=woocommerce_settings)
+		return frappe.get_traceback()
 
 def _order(woocommerce_settings, *args, **kwargs):
 	frappe.set_user(woocommerce_settings.creation_user)
@@ -146,31 +147,13 @@ def _order(woocommerce_settings, *args, **kwargs):
 
 		elif pos_order_type == "patient_product_order":
 			# Cannot handle that for now as we need to check if the patient account exist or not in ERPNext
-			# frappe.log_error(title="Ignore patient product order", message=" {}".format(pos_order_type))
 			log_integration_request(webhook_delivery_id=webhook_delivery_id, order=order, invoice_doc=None, status="Cancelled", data=json.dumps(order, indent=4), error="Ignore patient product order for now", woocommerce_settings=woocommerce_settings)
-
 			return "Ignore patient order type"
-			# if create_backorder_doc_flag == 1:
-			# 	# throw error if the customers don't accept backorders
-			# 	if not accepts_backorders:
-			# 		frappe.throw("Customer {} doesn't accept backorders!")
-			# 	frappe.throw("This need to be developed further, to create a backorder instead of invoice")
-
-			# new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option)
-		else:
+		else: # Throw error if the pos_order_type is something else
 			frappe.log_error(title="Error in guest order", message="Cannot recoginized pos_order_type: {}".format(pos_order_type))
-	else: # customer_id != 0
-		# this is a user login, a practitioner
+	else: # this is a user login, a practitioner
 		if woocommerce_settings.company == "RN Labs":
 			order_type = order_type_mapping[pos_order_type]
-			"""
-				order_type_mapping = {
-					"practitioner_order": "Practitioner Order",
-					"self": "Self Test",
-					"on-behalf": "On Behalf",
-					"patient_order": "Patient Order",
-				}
-			"""
 			edited_line_items, create_backorder_doc_flag = backorder_validation(order.get("line_items"), customer_code, woocommerce_settings)
 
 			if pos_order_type in  ["self", "on-behalf"]:
@@ -179,10 +162,9 @@ def _order(woocommerce_settings, *args, **kwargs):
 				if pos_order_type == ["self"]:
 					new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, test_order=test_order)
 				else:
-					new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=temp_address, delivery_option=delivery_option, test_order=test_order)
+					new_invoice, patient_invoice_doc = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=temp_address, delivery_option=delivery_option, test_order=test_order)
 
 			elif pos_order_type == "practitioner_order":
-
 				if create_backorder_doc_flag == 1:
 					# throw error if the customers don't accept backorders
 					if not accepts_backorders:
@@ -193,10 +175,20 @@ def _order(woocommerce_settings, *args, **kwargs):
 			else:
 				frappe.log_error(title="Error in authorized order", message="Cannot recoginized pos_order_type: {}".format(pos_order_type))
 
+
 	# Create a intergration request
 	try:
-		log_integration_request(webhook_delivery_id=webhook_delivery_id,order=order, invoice_doc=new_invoice, status="Completed", data=json.dumps(order, indent=4), reference_docname=new_invoice.name, woocommerce_settings=woocommerce_settings, test_order=test_order, customer_accepts_backorder=customer_accepts_backorder)
-		return "Sales invoice: {} created!".format(new_invoice.name)
+		if pos_order_type != "on-behalf":
+			patient_invoice_doc = None
+		else:
+			customer_accepts_backorder = 1
+
+		log_integration_request(webhook_delivery_id=webhook_delivery_id, order=order, invoice_doc=new_invoice, status="Completed", data=json.dumps(order, indent=4), reference_docname=new_invoice.name, woocommerce_settings=woocommerce_settings, test_order=test_order, customer_accepts_backorder=customer_accepts_backorder, patient_invoice_doc=patient_invoice_doc)
+
+		if pos_order_type != "on-behalf":
+			return "Sales invoice: {} created!".format(new_invoice.name)
+		else:
+			return "Sales invoice: {} created! \n Patient invoice: {}".format(new_invoice.name, patient_invoice_doc.name)
 	except UnboundLocalError:
 		frappe.log_error(title="Error in Woocommerce Integration", message=frappe.get_traceback())
 		frappe.throw(frappe.get_traceback())
@@ -251,8 +243,11 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 	# create frappe doc for invoice
 	invoice_doc = frappe.get_doc(invoice_dict)
 
-	# Add Items
-	customer_accepts_backorder = set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, woocommerce_settings, tax_rate)
+	# Add Items, add test kit
+	if invoice_doc.order_type == "On Behalf":
+		customer_accepts_backorder = set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, woocommerce_settings, tax_rate, order_type=invoice_doc.order_type)
+	else:
+		customer_accepts_backorder = set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, woocommerce_settings, tax_rate)
 
 	# Save 
 	invoice_doc.flags.ignore_mandatory = True
@@ -261,12 +256,23 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 	shipping_total = order.get('shipping_total')
 	shipping_tax = order.get('shipping_tax')
 
+	on_behalf_flag = 0
 
 	# adding handling fee
 	if test_order == 1:
 		# Hard code shipping tax
 		if invoice_doc.order_type == "On Behalf":
 			shipping_tax = 2
+			# create patient invoice with just test kit
+			patient_invoice_doc = frappe.get_doc(invoice_dict)
+			create_patient_invoice(edited_line_items, patient_invoice_doc)
+			# Save 
+			patient_invoice_doc.flags.ignore_mandatory = True
+			patient_invoice_doc.insert()
+
+			DocTags("Sales Invoice").add(patient_invoice_doc.name, "WC order on behalf of patient")
+			on_behalf_flag = 1
+
 		invoice_doc.append("items",{
 			"item_code": "HAND-FEE",
 			"item_name": "Handling Fee",
@@ -313,10 +319,13 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 
 	DocTags("Sales Invoice").add(invoice_doc.name, "WooCommerce Order")
 
-	return invoice_doc, customer_accepts_backorder
+	if on_behalf_flag == 1:
+		return invoice_doc, patient_invoice_doc
+	else:
+		return invoice_doc, customer_accepts_backorder
 	
 
-def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, woocommerce_settings, tax_rate):
+def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, woocommerce_settings, tax_rate, order_type=None):
 	"""
 		validated_item = {
 			"item_code": found_item.item_code,
@@ -353,6 +362,14 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
 			if item["item_group"] != "Tests":
 				item_tax = (item['rate'] * tax_rate) * item["qty"]
 
+			if item["item_group"] == "Tests" and order_type != "On Behalf":
+				test_kit = frappe.db.get_value("Item", item['item_code'], "test_kit")
+				if test_kit:
+					# test_kit_doc = frappe.get_doc("Item", item['item_code'])
+					invoice_doc.append("items", {
+						"item_code": test_kit,
+						"qty": 1,
+					})
 
 
 	# check if customer accepts backorder
@@ -368,6 +385,16 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
   		frappe.log_error(title='Error in woocommerce integration', message=frappe.get_traceback())
 	return customer_accepts_backorder
 
+def create_patient_invoice(edited_line_items, patient_invoice_doc):
+	# Proceed to invoice
+	for item in edited_line_items:
+		if item["item_group"] == "Tests":
+			test_kit = frappe.db.get_value("Item", item['item_code'], "test_kit")
+			if test_kit:
+				patient_invoice_doc.append("items", {
+					"item_code": test_kit,
+					"qty": 1,
+				})
 
 
 def backorder_validation(line_items, customer_code, woocommerce_settings, discount=None):
@@ -386,26 +413,6 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 		else:
 			frappe.throw("Item: {} is not found!").format(sku)
 
-		# check if the customer has the default_price_list
-		# if frappe.db.get_value("Customer", customer_code, "default_price_list"):
-		# 	price_list = frappe.db.get_value("Customer", customer_code, "default_price_list")
-		# 	# consider we could have multiple item price for the same item 
-		# 	rate_list = frappe.db.get_list('Item Price', 
-		# 		filters=[
-		# 			['selling', '=', 1],
-		# 			['buying', '=', 0],
-		# 			['price_list', '=', price_list],
-		# 			['item_code', '=', sku],
-		# 			['valid_upto', 'is', 'not set']
-		# 		], fields=['price_list_rate']
-		# 	)
-		# 	if rate_list:
-		# 		rate = rate_list[0]
-		# 	else:
-		# 		frappe.throw("Item Price for {} - {} is not found!".format(sku, price_list))
-		# else:
-		# 	frappe.throw("Default price list for customer: {} is not found!").format(customer_code)
-
 		validated_item = {
 			"item_code": found_item.item_code,
 			"item_name": found_item.item_name,
@@ -417,13 +424,6 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 			"warehouse": woocommerce_settings.warehouse,
 			"is_stock_item": found_item.is_stock_item
 		}
-
-		# add discount
-		# if discount: # unit is %, so discount would be 20, 30 insetad of 0.2, 0.3
-		# 	validated_item["discount_percentage"] = discount
-		# 	validated_item["discount_amount"] = discount/100 * validated_item["rate"]
-		# 	validated_item["rate"] = validated_item["rate"] - validated_item["discount_amount"]
-		# 	validated_item["ignore_pricing_rules"] = 1
 
 		# check if item is out of stock
 		if found_item.is_stock_item == 1:
