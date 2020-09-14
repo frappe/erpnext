@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
 from frappe.utils import flt,cint, cstr, getdate
-
+from six import iteritems
 from erpnext.accounts.party import get_party_details
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.buying.utils import validate_for_items, update_last_purchase_rate
@@ -872,13 +872,10 @@ def get_backflushed_subcontracted_raw_materials(purchase_orders):
 	distinct_purchase_receipts = {}
 	for pr in purchase_receipts:
 		key = (pr.purchase_order, pr.item_code, pr.parent)
-		if key not in distinct_purchase_receipts:
-			distinct_purchase_receipts.setdefault(key, [''])
-
-		distinct_purchase_receipts[key].append(pr.name)
+		distinct_purchase_receipts.setdefault(key, []).append(pr.name)
 
 	backflushed_raw_materials_map = frappe._dict()
-	for args, references in distinct_purchase_receipts.items():
+	for args, references in iteritems(distinct_purchase_receipts):
 		purchase_receipt_supplied_items = get_supplied_items(args[1], args[2], references)
 
 		for data in purchase_receipt_supplied_items:
