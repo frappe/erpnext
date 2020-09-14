@@ -331,7 +331,7 @@ class BuyingController(StockController):
 
 				if raw_material.batch_nos:
 					batches_qty = get_batches_with_qty(raw_material.rm_item_code, raw_material.main_item_code,
-						qty, transferred_batch_qty_map, backflushed_batch_qty_map)
+						qty, transferred_batch_qty_map, backflushed_batch_qty_map, item.purchase_order)
 					for batch_data in batches_qty:
 						qty = batch_data['qty']
 						raw_material.batch_no = batch_data['batch']
@@ -342,6 +342,9 @@ class BuyingController(StockController):
 	def append_raw_material_to_be_backflushed(self, fg_item_doc, raw_material_data, qty):
 		rm = self.append('supplied_items', {})
 		rm.update(raw_material_data)
+
+		if not rm.main_item_code:
+			rm.main_item_code = fg_item_doc.item_code
 
 		rm.required_qty = qty
 		rm.consumed_qty = qty
@@ -873,7 +876,7 @@ def get_subcontracted_raw_materials_from_se(purchase_order, fg_item):
 			AND se.purpose='Send to Subcontractor'
 			AND se.purchase_order = %s
 			AND IFNULL(sed.t_warehouse, '') != ''
-			AND sed.subcontracted_item = %s
+			AND IFNULL(sed.subcontracted_item, '') in ('', %s)
 		GROUP BY sed.item_code, sed.subcontracted_item
 	"""
 	raw_materials = frappe.db.multisql({
@@ -1004,14 +1007,15 @@ def get_transferred_batch_qty_map(purchase_order, fg_item):
 		SELECT
 			sed.batch_no,
 			SUM(sed.qty) AS qty,
-			sed.item_code
+			sed.item_code,
+			sed.subcontracted_item
 		FROM `tabStock Entry` se,`tabStock Entry Detail` sed
 		WHERE
 			se.name = sed.parent
 			AND se.docstatus=1
 			AND se.purpose='Send to Subcontractor'
 			AND se.purchase_order = %s
-			AND sed.subcontracted_item = %s
+			AND ifnull(sed.subcontracted_item, '') in ('', %s)
 			AND sed.batch_no IS NOT NULL
 		GROUP BY
 			sed.batch_no,
@@ -1019,8 +1023,10 @@ def get_transferred_batch_qty_map(purchase_order, fg_item):
 	""", (purchase_order, fg_item), as_dict=1)
 
 	for batch_data in transferred_batches:
-		transferred_batch_qty_map.setdefault((batch_data.item_code, fg_item), {})
-		transferred_batch_qty_map[(batch_data.item_code, fg_item)][batch_data.batch_no] = batch_data.qty
+		key = ((batch_data.item_code, fg_item)
+			if batch_data.subcontracted_item else (batch_data.item_code, purchase_order))
+		transferred_batch_qty_map.setdefault(key, {})
+		transferred_batch_qty_map[key][batch_data.batch_no] = batch_data.qty
 
 	return transferred_batch_qty_map
 
@@ -1057,9 +1063,12 @@ def get_backflushed_batch_qty_map(purchase_order, fg_item):
 
 	return backflushed_batch_qty_map
 
-def get_batches_with_qty(item_code, fg_item, required_qty, transferred_batch_qty_map, backflushed_batch_qty_map):
+def get_batches_with_qty(item_code, fg_item, required_qty, transferred_batch_qty_map, backflushed_batch_qty_map, po):
 	# Returns available batches to be backflushed based on requirements
 	transferred_batches = transferred_batch_qty_map.get((item_code, fg_item), {})
+	if not transferred_batches:
+		transferred_batches = transferred_batch_qty_map.get((item_code, po), {})
+
 	backflushed_batches = backflushed_batch_qty_map.get((item_code, fg_item), {})
 
 	available_batches = []
