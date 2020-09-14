@@ -7,6 +7,7 @@ import json
 from frappe import _, throw
 from frappe.utils import (today, flt, cint, fmt_money, formatdate,
 	getdate, add_days, add_months, get_last_day, nowdate, get_link_to_form)
+from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied, WorkflowPermissionError
 from erpnext.stock.get_item_details import get_conversion_factor, get_item_details
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
@@ -1194,7 +1195,7 @@ def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docna
 	child_item.base_amount = 1 # Initiallize value will update in parent validation
 	return child_item
 
-def check_and_delete_children(parent, data):
+def validate_and_delete_children(parent, data):
 	deleted_children = []
 	updated_item_names = [d.get("docname") for d in data]
 	for item in parent.items:
@@ -1221,18 +1222,37 @@ def check_and_delete_children(parent, data):
 
 @frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
-	def check_permissions(doc, perm_type='create'):
+	def check_doc_permissions(doc, perm_type='create'):
 		try:
 			doc.check_permission(perm_type)
-		except:
-			action = "add" if perm_type == 'create' else "update"
-			frappe.throw(_("You do not have permissions to {} items in a Sales Order.").format(action), title=_("Insufficient Permissions"))
+		except frappe.PermissionError:
+			actions = { 'create': 'add', 'write': 'update', 'cancel': 'remove' }
+
+			frappe.throw(_("You do not have permissions to {} items in a {}.")
+				.format(actions[perm_type], parent_doctype), title=_("Insufficient Permissions"))
+	
+	def validate_workflow_conditions(doc):
+		workflow = get_workflow_name(doc.doctype)
+		if not workflow:
+			return
+
+		workflow_doc = frappe.get_doc("Workflow", workflow)
+		current_state = doc.get(workflow_doc.workflow_state_field)
+		roles = frappe.get_roles()
+
+		transitions = []
+		for transition in workflow_doc.transitions:
+			if transition.next_state == current_state and transition.allowed in roles:
+				if not is_transition_condition_satisfied(transition, doc):
+					continue
+				transitions.append(transition.as_dict())
+
+		if not transitions:
+			frappe.throw(_("You do not have workflow access to update this document."), title=_("Insufficient Workflow Permissions"))
 
 	def get_new_child_item(item_row):
-		if parent_doctype == "Sales Order":
-			return set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, item_row)
-		if parent_doctype == "Purchase Order":
-			return set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, item_row)
+		new_child_function = set_sales_order_defaults if parent_doctype == "Sales Order" else set_purchase_order_defaults
+		return new_child_function(parent_doctype, parent_doctype_name, child_docname, item_row)
 
 	def validate_quantity(child_item, d):
 		if parent_doctype == "Sales Order" and flt(d.get("qty")) < flt(child_item.delivered_qty):
@@ -1245,17 +1265,18 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 	sales_doctypes = ['Sales Order', 'Sales Invoice', 'Delivery Note', 'Quotation']
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
-
-	check_and_delete_children(parent, data)
+	
+	check_doc_permissions(parent, 'cancel')
+	validate_and_delete_children(parent, data)
 
 	for d in data:
 		new_child_flag = False
 		if not d.get("docname"):
 			new_child_flag = True
-			check_permissions(parent, 'create')
+			check_doc_permissions(parent, 'create')
 			child_item = get_new_child_item(d)
 		else:
-			check_permissions(parent, 'write')
+			check_doc_permissions(parent, 'write')
 			child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
 
 			prev_rate, new_rate = flt(child_item.get("rate")), flt(d.get("rate"))
@@ -1361,6 +1382,9 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		parent.update_project()
 		parent.update_prevdoc_status('submit')
 		parent.update_delivery_status()
+
+	parent.reload()
+	validate_workflow_conditions(parent)
 
 	parent.update_blanket_order()
 	parent.update_billing_percentage()
