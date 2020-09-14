@@ -159,12 +159,11 @@ class TestProductionPlan(unittest.TestCase):
 		self.assertTrue(mr.customer, '_Test Customer')
 
 	def test_production_plan_with_multi_level_bom(self):
-		'''
-			Item Code				Qty
-			Test BOM 1	 			1
-				Test BOM 2			2
-					Test BOM 3		3
-		'''
+		#|Item Code			|	Qty	|
+		#|Test BOM 1	 		|	1	|
+		#|	Test BOM 2		|	2	|
+		#|		Test BOM 3	|	3	|
+
 		for item_code in ["Test BOM 1", "Test BOM 2", "Test BOM 3", "Test RM BOM 1"]:
 			create_item(item_code, is_stock_item=1)
 
