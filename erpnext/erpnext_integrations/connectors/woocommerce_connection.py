@@ -159,7 +159,7 @@ def _order(woocommerce_settings, *args, **kwargs):
 			if pos_order_type in  ["self", "on-behalf"]:
 				# apply 20% of the discount
 				test_order = 1
-				if pos_order_type == ["self"]:
+				if pos_order_type == "self":
 					new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, test_order=test_order)
 				else:
 					new_invoice, patient_invoice_doc = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=temp_address, delivery_option=delivery_option, test_order=test_order)
@@ -185,6 +185,7 @@ def _order(woocommerce_settings, *args, **kwargs):
 
 		log_integration_request(webhook_delivery_id=webhook_delivery_id, order=order, invoice_doc=new_invoice, status="Completed", data=json.dumps(order, indent=4), reference_docname=new_invoice.name, woocommerce_settings=woocommerce_settings, test_order=test_order, customer_accepts_backorder=customer_accepts_backorder, patient_invoice_doc=patient_invoice_doc)
 
+		# for postman display only
 		if pos_order_type != "on-behalf":
 			return "Sales invoice: {} created!".format(new_invoice.name)
 		else:
@@ -214,6 +215,8 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 		"payment_category": payment_category
 	}
 	if order_type:
+		if order_type == "Self Test":
+			invoice_dict['campaign'] = order_type
 		invoice_dict['order_type']= order_type
 
 	if temp_address: # Adding tempopary address in invoice
