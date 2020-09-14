@@ -89,7 +89,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		frappe.db.set_value("Accounts Settings", None, "over_billing_allowance", 0)
 
 
-	def test_update_child_qty_rate(self):
+	def test_update_child(self):
 		mr = make_material_request(qty=10)
 		po = make_purchase_order(mr.name)
 		po.supplier = "_Test Supplier"
@@ -119,7 +119,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 3)
 
 
-	def test_add_new_item_in_update_child_qty_rate(self):
+	def test_update_child_adding_new_item(self):
 		po = create_purchase_order(do_not_save=1)
 		po.items[0].qty = 4
 		po.save()
@@ -145,7 +145,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(po.status, 'To Receive and Bill')
 
 
-	def test_remove_item_in_update_child_qty_rate(self):
+	def test_update_child_removing_item(self):
 		po = create_purchase_order(do_not_save=1)
 		po.items[0].qty = 4
 		po.save()
@@ -185,7 +185,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(len(po.get('items')), 1)
 		self.assertEqual(po.status, 'To Receive and Bill')
 
-	def test_update_child_qty_rate_perm(self):
+	def test_update_child_perm(self):
 		po = create_purchase_order(item_code= "_Test Item", qty=4)
 
 		user = 'test@example.com'
@@ -201,6 +201,25 @@ class TestPurchaseOrder(unittest.TestCase):
 		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 100, 'qty' : 2}])
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Purchase Order', trans_item, po.name)
 		frappe.set_user("Administrator")
+
+	def test_update_child_uom_conv_factor_change(self):
+		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
+		total_reqd_qty = sum([d.get("required_qty") for d in po.as_dict().get("supplied_items")])
+
+		trans_item = json.dumps([{
+			'item_code': po.get("items")[0].item_code,
+			'rate': po.get("items")[0].rate,
+			'qty': po.get("items")[0].qty,
+			'uom': "_Test UOM 1",
+			'conversion_factor': 2,
+			'docname': po.get("items")[0].name
+		}])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+		po.reload()
+
+		total_reqd_qty_after_change = sum([d.get("required_qty") for d in po.as_dict().get("supplied_items")])
+
+		self.assertEqual(total_reqd_qty_with_changed_uom, 2 * total_reqd_qty)
 
 	def test_update_qty(self):
 		po = create_purchase_order()
