@@ -433,16 +433,9 @@ class TestSalesOrder(unittest.TestCase):
 		test_user.add_roles("Sales User", "Test Junior Approver")
 		frappe.set_user(user)
 
-		# user should be able to edit since grand_total is < 200
+		# user shouldn't be able to edit since grand_total will become > 200 if qty is doubled
 		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 150, 'qty' : 2, 'docname': so.items[0].name}])
-		update_child_qty_rate("Sales Order", trans_item, so.name)
-		so.reload()
-		self.assertEqual(so.items[0].qty, 2)
-
-		# user shouldn't be able to edit since grand_total is now 300
-		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 150, 'qty' : 3, 'docname': so.items[0].name}])
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate, 'Sales Order', trans_item, so.name)
-		test_user.remove_roles("Sales User", "Test Junior Approver")
 
 		frappe.set_user("Administrator")
 		user2 = 'test2@example.com'
@@ -453,11 +446,11 @@ class TestSalesOrder(unittest.TestCase):
 		# Test Approver is allowed to edit with grand_total > 200
 		update_child_qty_rate("Sales Order", trans_item, so.name)
 		so.reload()
-		self.assertEqual(so.items[0].qty, 3)
+		self.assertEqual(so.items[0].qty, 2)
 
 		frappe.set_user("Administrator")
-		test_user.remove_roles("Sales User", "Test Junior Approver")
-		test_user2.remove_roles("Sales User", "Test Approver")
+		test_user.remove_roles("Sales User", "Test Junior Approver", "Test Approver")
+		test_user2.remove_roles("Sales User", "Test Junior Approver", "Test Approver")
 		workflow.is_active = 0
 		workflow.save()
 
