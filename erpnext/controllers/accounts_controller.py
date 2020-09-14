@@ -1191,20 +1191,16 @@ def validate_and_delete_children(parent, data):
 
 @frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
-	def check_permissions(doc, perm_type='create'):
+	def check_doc_permissions(doc, perm_type='create'):
 		try:
 			doc.check_permission(perm_type)
-			validate_workflow_permission(doc)
 		except frappe.PermissionError:
 			actions = { 'create': 'add', 'write': 'update', 'cancel': 'remove' }
 
 			frappe.throw(_("You do not have permissions to {} items in a {}.")
 				.format(actions[perm_type], parent_doctype), title=_("Insufficient Permissions"))
-
-		except WorkflowPermissionError:
-			frappe.throw(_("You do not have workflow access to update this document."), title=_("Insufficient Workflow Permissions"))
 	
-	def validate_workflow_permission(doc):
+	def validate_workflow_conditions(doc):
 		workflow = get_workflow_name(doc.doctype)
 		if not workflow:
 			return
@@ -1221,7 +1217,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 				transitions.append(transition.as_dict())
 
 		if not transitions:
-			raise WorkflowPermissionError
+			frappe.throw(_("You do not have workflow access to update this document."), title=_("Insufficient Workflow Permissions"))
 
 	def get_new_child_item(item_row):
 		new_child_function = set_sales_order_defaults if parent_doctype == "Sales Order" else set_purchase_order_defaults
@@ -1239,17 +1235,17 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	sales_doctypes = ['Sales Order', 'Sales Invoice', 'Delivery Note', 'Quotation']
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 	
-	check_permissions(parent, 'cancel')
+	check_doc_permissions(parent, 'cancel')
 	validate_and_delete_children(parent, data)
 
 	for d in data:
 		new_child_flag = False
 		if not d.get("docname"):
 			new_child_flag = True
-			check_permissions(parent, 'create')
+			check_doc_permissions(parent, 'create')
 			child_item = get_new_child_item(d)
 		else:
-			check_permissions(parent, 'write')
+			check_doc_permissions(parent, 'write')
 			child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
 
 			prev_rate, new_rate = flt(child_item.get("rate")), flt(d.get("rate"))
@@ -1355,6 +1351,9 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		parent.update_project()
 		parent.update_prevdoc_status('submit')
 		parent.update_delivery_status()
+
+	parent.reload()
+	validate_workflow_conditions(parent)
 
 	parent.update_blanket_order()
 	parent.update_billing_percentage()
