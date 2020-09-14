@@ -219,7 +219,7 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		total_reqd_qty_after_change = sum([d.get("required_qty") for d in po.as_dict().get("supplied_items")])
 
-		self.assertEqual(total_reqd_qty_with_changed_uom, 2 * total_reqd_qty)
+		self.assertEqual(total_reqd_qty_after_change, 2 * total_reqd_qty)
 
 	def test_update_qty(self):
 		po = create_purchase_order()
