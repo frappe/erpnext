@@ -405,8 +405,6 @@ class PurchaseInvoice(BuyingController):
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
 	def make_gl_entries(self, gl_entries=None):
-		if not self.grand_total:
-			return
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
 
