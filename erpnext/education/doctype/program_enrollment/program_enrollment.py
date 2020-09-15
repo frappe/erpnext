@@ -7,12 +7,14 @@ import frappe
 from frappe import msgprint, _
 from frappe.model.document import Document
 from frappe.desk.reportview import get_match_cond, get_filters_cond
-from frappe.utils import comma_and
+from frappe.utils import comma_and, get_link_to_form, getdate
 import erpnext.www.lms as lms
 
 class ProgramEnrollment(Document):
 	def validate(self):
 		self.validate_duplication()
+		self.validate_academic_year()
+		self.validate_academic_term()
 		if not self.student_name:
 			self.student_name = frappe.db.get_value("Student", self.student, "title")
 		if not self.courses:
@@ -22,6 +24,28 @@ class ProgramEnrollment(Document):
 		self.update_student_joining_date()
 		self.make_fee_records()
 		self.create_course_enrollments()
+
+	def validate_academic_year(self):
+		start_date, end_date = frappe.db.get_value("Academic Year", self.academic_year, ["year_start_date", "year_end_date"])
+		if self.enrollment_date:
+			if start_date and getdate(self.enrollment_date) < getdate(start_date):
+				frappe.throw(_("Enrollment Date cannot be before the Start Date of the Academic Year {0}").format(
+					get_link_to_form("Academic Year", self.academic_year)))
+
+			if end_date and getdate(self.enrollment_date) > getdate(end_date):
+				frappe.throw(_("Enrollment Date cannot be after the End Date of the Academic Term {0}").format(
+					get_link_to_form("Academic Year", self.academic_year)))
+
+	def validate_academic_term(self):
+		start_date, end_date = frappe.db.get_value("Academic Term", self.academic_term, ["term_start_date", "term_end_date"])
+		if self.enrollment_date:
+			if start_date and getdate(self.enrollment_date) < getdate(start_date):
+				frappe.throw(_("Enrollment Date cannot be before the Start Date of the Academic Term {0}").format(
+					get_link_to_form("Academic Term", self.academic_term)))
+
+			if end_date and getdate(self.enrollment_date) > getdate(end_date):
+				frappe.throw(_("Enrollment Date cannot be after the End Date of the Academic Term {0}").format(
+					get_link_to_form("Academic Term", self.academic_term)))
 
 	def validate_duplication(self):
 		enrollment = frappe.get_all("Program Enrollment", filters={
