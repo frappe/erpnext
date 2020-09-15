@@ -14,7 +14,8 @@ class ProgramEnrollment(Document):
 	def validate(self):
 		self.validate_duplication()
 		self.validate_academic_year()
-		self.validate_academic_term()
+		if self.academic_term:
+			self.validate_academic_term()
 		if not self.student_name:
 			self.student_name = frappe.db.get_value("Student", self.student, "title")
 		if not self.courses:
@@ -95,8 +96,7 @@ class ProgramEnrollment(Document):
 
 	def create_course_enrollments(self):
 		student = frappe.get_doc("Student", self.student)
-		program = frappe.get_doc("Program", self.program)
-		course_list = [course.course for course in program.courses]
+		course_list = [course.course for course in self.courses]
 		for course_name in course_list:
 			student.enroll_in_course(course_name=course_name, program_enrollment=self.name, enrollment_date=self.enrollment_date)
 
