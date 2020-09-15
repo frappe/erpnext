@@ -423,7 +423,7 @@ def set_gl_entries_by_account(
 				distributed_cost_center_query=distributed_cost_center_query), gl_filters, as_dict=True) #nosec
 
 		if filters and filters.get('presentation_currency'):
-			convert_to_presentation_currency(gl_entries, get_currency(filters))
+			convert_to_presentation_currency(gl_entries, get_currency(filters), filters.get('company'))
 
 		for entry in gl_entries:
 			gl_entries_by_account.setdefault(entry.account, []).append(entry)

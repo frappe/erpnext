@@ -632,7 +632,7 @@ execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart_source')
 execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart')
 execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart_field')
 erpnext.patches.v12_0.remove_bank_remittance_custom_fields
-erpnext.patches.v12_0.generate_leave_ledger_entries
+erpnext.patches.v12_0.generate_leave_ledger_entries #27-08-2020
 execute:frappe.delete_doc_if_exists("Report", "Loan Repayment")
 erpnext.patches.v12_0.move_credit_limit_to_customer_credit_limit
 erpnext.patches.v12_0.add_variant_of_in_item_attribute_table
@@ -697,7 +697,7 @@ erpnext.patches.v12_0.update_bom_in_so_mr
 execute:frappe.delete_doc("Report", "Department Analytics")
 execute:frappe.rename_doc("Desk Page", "Loan Management", "Loan", force=True)
 erpnext.patches.v12_0.update_uom_conversion_factor
-execute:frappe.delete_doc_if_exists("Page", "pos") #29-05-2020
+erpnext.patches.v13_0.replace_pos_page_with_point_of_sale_page
 erpnext.patches.v13_0.delete_old_purchase_reports
 erpnext.patches.v12_0.set_italian_import_supplier_invoice_permissions
 erpnext.patches.v13_0.update_subscription
@@ -718,7 +718,11 @@ erpnext.patches.v13_0.delete_report_requested_items_to_order
 erpnext.patches.v12_0.update_item_tax_template_company
 erpnext.patches.v13_0.move_branch_code_to_bank_account
 erpnext.patches.v13_0.healthcare_lab_module_rename_doctypes
+erpnext.patches.v13_0.add_standard_navbar_items #4
 erpnext.patches.v13_0.stock_entry_enhancements
 erpnext.patches.v12_0.update_state_code_for_daman_and_diu
 erpnext.patches.v12_0.rename_lost_reason_detail
+erpnext.patches.v13_0.drop_razorpay_payload_column
 erpnext.patches.v13_0.update_start_end_date_for_old_shift_assignment
+erpnext.patches.v13_0.setting_custom_roles_for_some_regional_reports
+erpnext.patches.v13_0.change_default_pos_print_format

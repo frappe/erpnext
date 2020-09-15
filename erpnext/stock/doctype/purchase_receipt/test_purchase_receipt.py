@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import unittest
+import json
 import frappe, erpnext
 import frappe.defaults
 from frappe.utils import cint, flt, cstr, today, random_string
@@ -17,6 +18,28 @@ class TestPurchaseReceipt(unittest.TestCase):
 	def setUp(self):
 		set_perpetual_inventory(0)
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
+
+	def test_reverse_purchase_receipt_sle(self):
+
+		frappe.db.set_value('UOM', '_Test UOM', 'must_be_whole_number', 0)
+
+		pr = make_purchase_receipt(qty=0.5)
+
+		sl_entry = frappe.db.get_all("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
+			"voucher_no": pr.name}, ['actual_qty'])
+
+		self.assertEqual(len(sl_entry), 1)
+		self.assertEqual(sl_entry[0].actual_qty, 0.5)
+
+		pr.cancel()
+
+		sl_entry_cancelled = frappe.db.get_all("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
+			"voucher_no": pr.name}, ['actual_qty'], order_by='creation')
+
+		self.assertEqual(len(sl_entry_cancelled), 2)
+		self.assertEqual(sl_entry_cancelled[1].actual_qty, -0.5)
+
+		frappe.db.set_value('UOM', '_Test UOM', 'must_be_whole_number', 1)
 
 	def test_make_purchase_invoice(self):
 		pr = make_purchase_receipt(do_not_save=True)
@@ -120,6 +143,87 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		rm_supp_cost = sum([d.amount for d in pr.get("supplied_items")])
 		self.assertEqual(pr.get("items")[0].rm_supp_cost, flt(rm_supp_cost, 2))
+
+	def test_subcontracting_gle_fg_item_rate_zero(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		set_perpetual_inventory()
+		frappe.db.set_value("Buying Settings", None, "backflush_raw_materials_of_subcontract_based_on", "BOM")
+		make_stock_entry(item_code="_Test Item", target="Work In Progress - TCP1", qty=100, basic_rate=100, company="_Test Company with perpetual inventory")
+		make_stock_entry(item_code="_Test Item Home Desktop 100", target="Work In Progress - TCP1",
+			qty=100, basic_rate=100, company="_Test Company with perpetual inventory")
+		pr = make_purchase_receipt(item_code="_Test FG Item", qty=10, rate=0, is_subcontracted="Yes",
+			company="_Test Company with perpetual inventory", warehouse='Stores - TCP1', supplier_warehouse='Work In Progress - TCP1')
+
+		gl_entries = get_gl_entries("Purchase Receipt", pr.name)
+
+		self.assertFalse(gl_entries)
+
+		set_perpetual_inventory(0)
+
+	def test_subcontracting_over_receipt(self):
+		"""
+			Behaviour: Raise multiple PRs against one PO that in total
+				receive more than the required qty in the PO.
+			Expected Result: Error Raised for Over Receipt against PO.
+		"""
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		from erpnext.buying.doctype.purchase_order.test_purchase_order import (update_backflush_based_on,
+			make_subcontracted_item, create_purchase_order)
+		from erpnext.buying.doctype.purchase_order.purchase_order import (make_purchase_receipt,
+			make_rm_stock_entry as make_subcontract_transfer_entry)
+
+		update_backflush_based_on("Material Transferred for Subcontract")
+		item_code = "_Test Subcontracted FG Item 1"
+		make_subcontracted_item(item_code)
+
+		po = create_purchase_order(item_code=item_code, qty=1,
+			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
+
+		#stock raw materials in a warehouse before transfer
+		make_stock_entry(target="_Test Warehouse - _TC",
+			item_code="_Test Item Home Desktop 100", qty=1, basic_rate=100)
+		make_stock_entry(target="_Test Warehouse - _TC",
+			item_code = "Test Extra Item 1", qty=1, basic_rate=100)
+		make_stock_entry(target="_Test Warehouse - _TC",
+			item_code = "_Test Item", qty=1, basic_rate=100)
+
+		rm_items = [
+			{
+				"item_code": item_code,
+				"rm_item_code": po.supplied_items[0].rm_item_code,
+				"item_name": "_Test Item",
+				"qty": po.supplied_items[0].required_qty,
+				"warehouse": "_Test Warehouse - _TC",
+				"stock_uom": "Nos"
+			},
+			{
+				"item_code": item_code,
+				"rm_item_code": po.supplied_items[1].rm_item_code,
+				"item_name": "Test Extra Item 1",
+				"qty": po.supplied_items[1].required_qty,
+				"warehouse": "_Test Warehouse - _TC",
+				"stock_uom": "Nos"
+			},
+			{
+				"item_code": item_code,
+				"rm_item_code": po.supplied_items[2].rm_item_code,
+				"item_name": "_Test Item Home Desktop 100",
+				"qty": po.supplied_items[2].required_qty,
+				"warehouse": "_Test Warehouse - _TC",
+				"stock_uom": "Nos"
+			}
+		]
+		rm_item_string = json.dumps(rm_items)
+		se = frappe.get_doc(make_subcontract_transfer_entry(po.name, rm_item_string))
+		se.to_warehouse = "_Test Warehouse 1 - _TC"
+		se.save()
+		se.submit()
+
+		pr1 = make_purchase_receipt(po.name)
+		pr2 = make_purchase_receipt(po.name)
+
+		pr1.submit()
+		self.assertRaises(frappe.ValidationError, pr2.submit)
 
 	def test_serial_no_supplier(self):
 		pr = make_purchase_receipt(item_code="_Test Serialized Item With Series", qty=1)
@@ -688,7 +792,7 @@ def make_purchase_receipt(**args):
 		"received_qty": received_qty,
 		"rejected_qty": rejected_qty,
 		"rejected_warehouse": args.rejected_warehouse or "_Test Rejected Warehouse - _TC" if rejected_qty != 0 else "",
-		"rate": args.rate or 50,
+		"rate": args.rate if args.rate != None else 50,
 		"conversion_factor": args.conversion_factor or 1.0,
 		"serial_no": args.serial_no,
 		"stock_uom": args.stock_uom or "_Test UOM",
