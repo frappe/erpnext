@@ -486,7 +486,7 @@ erpnext.utils.update_child_items = function(opts) {
 							if (doc.docname == docname) {
 								doc.conversion_factor = r.message.conversion_factor;
 								dialog.fields_dict.trans_items.grid.refresh();
-								return true
+								return true;
 							}
 						})
 					}
