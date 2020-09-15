@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cstr
+from frappe.utils import cstr, getdate, add_days
 from frappe import _
 
 class PatientEncounter(Document):
@@ -22,6 +22,17 @@ class PatientEncounter(Document):
 		insert_encounter_to_medical_record(self)
 
 	def on_submit(self):
+		if self.inpatient_record and self.drug_prescription:
+			can_create_order = False
+			for entry in self.drug_prescription:
+				if entry.drug_code:
+					can_create_order = True
+			if can_create_order:
+				create_ip_medication_order(self)
+
+		if self.therapies:
+			create_therapy_plan(self)
+
 		update_encounter_medical_record(self)
 
 	def on_cancel(self):
@@ -29,12 +40,42 @@ class PatientEncounter(Document):
 			frappe.db.set_value('Patient Appointment', self.appointment, 'status', 'Open')
 		delete_medical_record(self)
 
-	def on_submit(self):
-		create_therapy_plan(self)
-
 	def set_title(self):
 		self.title = _('{0} with {1}').format(self.patient_name or self.patient,
 			self.practitioner_name or self.practitioner)[:100]
+
+def create_ip_medication_order(encounter):
+	doc = frappe.new_doc('Inpatient Medication Order')
+	doc.patient_encounter = encounter.name
+	doc.patient = encounter.patient
+	doc.patient_name = encounter.patient_name
+	doc.patient_age = encounter.patient_age
+	doc.inpatient_record = encounter.inpatient_record
+	doc.practitioner = encounter.practitioner
+	doc.start_date = encounter.encounter_date
+
+	for entry in encounter.drug_prescription:
+		if entry.drug_code:
+			dosage = frappe.get_doc('Prescription Dosage', entry.dosage)
+			dates = get_prescription_dates(entry.period, doc.start_date)
+			for date in dates:
+				for dose in dosage.dosage_strength:
+					order = doc.append('medication_orders')
+					order.drug = entry.drug_code
+					order.drug_name = entry.drug_name
+					order.dosage = dose.strength
+					order.dosage_form = entry.dosage_form
+					order.date = date
+					order.time = dose.strength_time
+	doc.save(ignore_permissions=True)
+
+def get_prescription_dates(period, start_date):
+	prescription_duration = frappe.get_doc('Prescription Duration', period)
+	days = prescription_duration.get_days()
+	dates = [start_date]
+	for i in range(days):
+		dates.append(add_days(getdate(start_date), i))
+	return dates
 
 def create_therapy_plan(encounter):
 	if len(encounter.therapies):
