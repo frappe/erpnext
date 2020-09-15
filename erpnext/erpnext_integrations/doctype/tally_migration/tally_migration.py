@@ -23,6 +23,8 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe.model.document import Document
 from frappe.model.naming import getseries, revert_series_if_last
 from frappe.utils.data import format_datetime
+from frappe.utils import cstr
+from frappe.utils.csvutils import to_csv
 
 PRIMARY_ACCOUNT = "Primary"
 VOUCHER_CHUNK_SIZE = 500
@@ -75,19 +77,48 @@ class TallyMigration(Document):
 
 	def dump_processed_data(self, data):
 		for key, value in data.items():
-			f = frappe.get_doc({
-				"doctype": "File",
-				"file_name":  key + ".json",
-				"attached_to_doctype": self.doctype,
-				"attached_to_name": self.name,
-				"content": json.dumps(value),
-				"is_private": True
-			})
-			try:
-				f.insert()
-			except frappe.DuplicateEntryError:
-				pass
+			if not value:
+				continue
+
+			if key != "chart_of_accounts":
+				filename = key + ".csv"
+				doctype = value[0].get("doctype")
+				content = make_csv_for_data_import(doctype, value)
+			else:
+				filename = key + ".json"
+				content = json.dumps(value)
+			f = self.attach_file(filename, content)
 			setattr(self, key, f.file_url)
+	
+	def attach_file(self, filename, content):
+		f = frappe.get_doc({
+			"doctype": "File",
+			"file_name":  filename,
+			"attached_to_doctype": self.doctype,
+			"attached_to_name": self.name,
+			"content": content,
+			"is_private": True
+		})
+		try:
+			f.insert()
+		except frappe.DuplicateEntryError:
+			pass
+		return f
+	
+	def make_data_import_docs(self, data):
+		for key, value in data.items():
+			if not value:
+				continue
+
+			if key != "chart_of_accounts":
+				doc = frappe.get_doc({
+					"doctype": "Data Import",
+					"reference_doctype": value[0].get("doctype"),
+					"import_type": "Insert New Records",
+					"mute_emails": 1,
+					"import_file": self.get(key)
+				})
+				doc.insert()
 
 	def set_account_defaults(self):
 		self.default_cost_center, self.default_round_off_account = frappe.db.get_value("Company", self.erpnext_company, ["cost_center", "round_off_account"])
@@ -177,14 +208,14 @@ class TallyMigration(Document):
 					tree[account] = {}
 			return tree
 
-		def get_parties_addresses(collection, customers, suppliers):
-			parties, addresses = [], []
+		def get_parties_addresses(collection, customer_ledgers, supplier_ledgers):
+			customers, suppliers, addresses = [], [], []
 			for account in collection.find_all("LEDGER"):
 				party_type = None
 				links = []
-				if account.NAME.string.strip() in customers:
+				if account.NAME.string.strip() in customer_ledgers:
 					party_type = "Customer"
-					parties.append({
+					customers.append({
 						"doctype": party_type,
 						"customer_name": account.NAME.string.strip(),
 						"tax_id": account.INCOMETAXNUMBER.string.strip() if account.INCOMETAXNUMBER else None,
@@ -194,9 +225,9 @@ class TallyMigration(Document):
 					})
 					links.append({"link_doctype": party_type, "link_name": account["NAME"]})
 
-				if account.NAME.string.strip() in suppliers:
+				if account.NAME.string.strip() in supplier_ledgers:
 					party_type = "Supplier"
-					parties.append({
+					suppliers.append({
 						"doctype": party_type,
 						"supplier_name": account.NAME.string.strip(),
 						"pan": account.INCOMETAXNUMBER.string.strip() if account.INCOMETAXNUMBER else None,
@@ -214,13 +245,31 @@ class TallyMigration(Document):
 						"country": account.COUNTRYNAME.string.strip() if account.COUNTRYNAME else None,
 						"state": account.LEDSTATENAME.string.strip() if account.LEDSTATENAME else None,
 						"gst_state": account.LEDSTATENAME.string.strip() if account.LEDSTATENAME else None,
-						"pin_code": account.PINCODE.string.strip() if account.PINCODE else None,
-						"mobile": account.LEDGERPHONE.string.strip() if account.LEDGERPHONE else None,
+						"pincode": account.PINCODE.string.strip() if account.PINCODE else None,
 						"phone": account.LEDGERPHONE.string.strip() if account.LEDGERPHONE else None,
 						"gstin": account.PARTYGSTIN.string.strip() if account.PARTYGSTIN else None,
 						"links": links
 					})
-			return parties, addresses
+			return customers, suppliers, addresses
+		
+		def get_item_groups(collection):
+			item_groups = []
+			for item_group in collection.find_all("STOCKGROUP"):
+				parent_group = "All Item Groups"
+				if item_group.PARENT:
+					parent_group = item_group.PARENT.string.strip()
+					for group in item_groups:
+						if group.get("item_group_name") == parent_group:
+							group.setdefault("is_group", 1)
+							break
+
+				item_groups.append({
+					"doctype": "Item Group",
+					"item_group_name": item_group.NAME.string.strip(),
+					"parent_item_group": parent_group
+				})
+			
+			return item_groups
 
 		def get_stock_items_uoms(collection):
 			uoms = []
@@ -234,8 +283,8 @@ class TallyMigration(Document):
 					"doctype": "Item",
 					"item_code" : item.NAME.string.strip(),
 					"stock_uom": stock_uom.strip(),
-					"is_stock_item": 0,
-					"item_group": "All Item Groups",
+					"is_stock_item": 1,
+					"item_group": item.PARENT.string.strip() if item.PARENT else "All Item Groups",
 					"item_defaults": [{"company": self.erpnext_company}]
 				})
 
@@ -243,20 +292,30 @@ class TallyMigration(Document):
 
 		try:
 			self.publish("Process Master Data", _("Reading Uploaded File"), 1, 5)
-			collection = get_collection(self.master_data)
+			collection = self.get_collection(self.master_data)
 
 			self.publish("Process Master Data", _("Processing Chart of Accounts and Parties"), 2, 5)
-			chart_of_accounts, customers, suppliers = get_coa_customers_suppliers(collection)
+			chart_of_accounts, customer_ledgers, supplier_ledgers = get_coa_customers_suppliers(collection)
 
 			self.publish("Process Master Data", _("Processing Party Addresses"), 3, 5)
-			parties, addresses = get_parties_addresses(collection, customers, suppliers)
+			customers, suppliers, addresses = get_parties_addresses(collection, customer_ledgers, supplier_ledgers)
 
 			self.publish("Process Master Data", _("Processing Items and UOMs"), 4, 5)
 			items, uoms = get_stock_items_uoms(collection)
-			data = {"chart_of_accounts": chart_of_accounts, "parties": parties, "addresses": addresses, "items": items, "uoms": uoms}
+			item_groups = get_item_groups(collection)
+			data = {
+				"chart_of_accounts": chart_of_accounts,
+				"customer": customers,
+				"supplier": suppliers, 
+				"address": addresses, 
+				"uom": uoms,
+				"item_group": item_groups,
+				"item": items
+			}
 
 			self.publish("Process Master Data", _("Done"), 5, 5)
 			self.dump_processed_data(data)
+			self.make_data_import_docs(data)
 
 			self.is_master_data_processed = 1
 
@@ -625,3 +684,92 @@ class TallyMigration(Document):
 	def set_status(self, status=""):
 		self.status = status
 		self.save()
+
+
+def convert_fieldnames_to_labels(labelled_docs, doctype, docs):
+	'''Converts fieldnames to field labels for easier csv header creation. Also helps in mapping data to proper columns.'''
+	meta = frappe.get_meta(doctype)
+	for doc in docs:
+		labelled_doc = {}
+		for fieldname, value in doc.items():
+			if fieldname == "doctype": continue
+
+			label = meta.get_label(fieldname)
+			if isinstance(value, list) and value:
+				labelled_child_docs = convert_fieldnames_to_labels([], meta.get_options(fieldname), value)
+				labelled_doc[label] = labelled_child_docs
+				continue
+			labelled_doc[label] = doc[fieldname]
+		labelled_docs.append(labelled_doc)
+	return labelled_docs
+
+def make_header(header, labelled_docs, parent_label=None):
+	'''loop over every doc and child doc and extract unique labels (columns)'''
+	for doc in labelled_docs:
+		for label, value in doc.items():
+			if label == "doctype": continue
+
+			is_list = type(value) is list
+			col = "{} ({})".format(label, parent_label) if parent_label else label
+			if not is_list and col not in header:
+				header.append(col)
+			elif is_list and value:
+				make_header(header, value, label)
+
+	return ["ID"] + header
+
+def make_csv_rows_from_doc(header, doc, has_tables=False):
+	def get_single_row(doc):
+		row = ['' for d in header] # make empty row
+		for i, col in enumerate(header):
+			if doc.get(col):
+				row[i] = doc[col] # put doc value at proper header column
+		return row
+
+	if not has_tables:
+		return [get_single_row(doc)]
+
+	docs = split_nested_doc(doc)
+	rows = []
+	for d in docs:
+		rows.append(get_single_row(d))
+	return rows
+
+def split_nested_doc(doc):
+	dict_rows = [{}] # doc will be splitted into multiple dicts depening upon child items
+	child_tables = [label for label, value in doc.items() if isinstance(value, list) and len(value) > 1]
+
+	#make first row
+	for label, value in doc.items():
+		dict_row_one = dict_rows[0]
+		if isinstance(value, list) and value:
+			for child_label, child_value in value[0].items(): # only append values from first row of every child table
+				header_label = "{} ({})".format(child_label, label)
+				dict_row_one[header_label] = child_value
+		else:
+			dict_row_one[label] = value
+
+	# loop over child tables in the doc and make new dict for each row
+	for parent_label in child_tables:
+		child_docs = doc[parent_label][1:] # skip first row
+		for child_doc in child_docs:
+			dict_row = {}
+			for child_label, child_value in child_doc.items():
+				header_label = "{} ({})".format(child_label, parent_label)
+				dict_row[header_label] = child_value
+			dict_rows.append(row)
+
+	return dict_rows
+
+def make_csv_for_data_import(doctype, docs):
+	labelled_docs = convert_fieldnames_to_labels([], doctype, docs)
+	header = make_header([], labelled_docs)
+	has_tables = any([d for d in header if '(' in d])
+
+	csv_array = [header]
+	for doc in labelled_docs:
+		csv_array += make_csv_rows_from_doc(header, doc, has_tables)
+
+	csv_content = cstr(to_csv(csv_array))
+
+	return csv_content

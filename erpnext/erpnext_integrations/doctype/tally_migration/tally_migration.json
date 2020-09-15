@@ -19,11 +19,13 @@
   "column_break_8",
   "processed_files_section",
   "chart_of_accounts",
-  "parties",
-  "addresses",
+  "customer",
+  "supplier",
+  "address",
   "column_break_17",
-  "uoms",
-  "items",
+  "uom",
+  "item_group",
+  "item",
   "vouchers",
   "accounts_section",
   "default_warehouse",
@@ -98,28 +100,8 @@
    "label": "Chart of Accounts"
   },
   {
-   "fieldname": "parties",
-   "fieldtype": "Attach",
-   "label": "Parties"
-  },
-  {
-   "fieldname": "addresses",
-   "fieldtype": "Attach",
-   "label": "Addresses"
-  },
-  {
    "fieldname": "column_break_17",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "uoms",
-   "fieldtype": "Attach",
-   "label": "UOMs"
-  },
-  {
-   "fieldname": "items",
-   "fieldtype": "Attach",
-   "label": "Items"
   },
   {
    "fieldname": "vouchers",
@@ -245,6 +227,36 @@
    "options": "Company",
    "read_only_depends_on": "eval:doc.is_master_data_processed==1",
    "reqd": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Attach",
+   "label": "Customers"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Attach",
+   "label": "Suppliers"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Attach",
+   "label": "Addresses"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Attach",
+   "label": "UOMs"
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Attach",
+   "label": "Item Groups"
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Attach",
+   "label": "Items"
   }
  ],
  "index_web_pages_for_search": 1,
