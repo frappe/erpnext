@@ -13,7 +13,7 @@ class POSProfile(Document):
 		self.validate_default_profile()
 		self.validate_all_link_fields()
 		self.validate_duplicate_groups()
-		self.check_default_payment()
+		self.validate_payment_methods()
 
 	def validate_default_profile(self):
 		for row in self.applicable_for_users:
@@ -52,14 +52,23 @@ class POSProfile(Document):
 		if len(customer_groups) != len(set(customer_groups)):
 			frappe.throw(_("Duplicate customer group found in the cutomer group table"), title = "Duplicate Customer Group")
 
-	def check_default_payment(self):
-		if self.payments:
-			default_mode_of_payment = [d.default for d in self.payments if d.default]
-			if not default_mode_of_payment:
-				frappe.throw(_("Set default mode of payment"))
+	def validate_payment_methods(self):
+		if not self.payments:
+			frappe.throw(_("Payment methods are mandatory. Add atleast one payment methods."))
 
-			if len(default_mode_of_payment) > 1:
-				frappe.throw(_("Multiple default mode of payment is not allowed"))
+		default_mode_of_payment = [d.default for d in self.payments if d.default]
+		if not default_mode_of_payment:
+			frappe.throw(_("Set default mode of payment"))
+
+		if len(default_mode_of_payment) > 1:
+			frappe.throw(_("Multiple default mode of payment is not allowed"))
+		
+		for d in self.payments:
+			account = frappe.db.get_value("Mode of Payment Account", 
+				{"parent": d.mode_of_payment, "company": self.company}, "default_account")
+			if not account:
+				frappe.throw(_("Please set default Cash or Bank account in Mode of Payment {0}")
+					.format(mode_of_payment))
 
 	def on_update(self):
 		self.set_defaults()
