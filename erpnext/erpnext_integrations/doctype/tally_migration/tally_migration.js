@@ -5,6 +5,9 @@ frappe.provide("erpnext.tally_migration");
 
 frappe.ui.form.on("Tally Migration", {
 	onload: function (frm) {
+		if (!frm.doc.erpnext_company && frappe.defaults.get_user_default("Company")) {
+			frm.set_value("erpnext_company", frappe.defaults.get_user_default("Company"));
+		}
 		let reload_status = true;
 		frappe.realtime.on("tally_migration_progress_update", function (data) {
 			if (reload_status) {
@@ -54,7 +57,7 @@ frappe.ui.form.on("Tally Migration", {
 					frm.events.add_button(frm, __("Import Master Data"), "import_master_data");
 				}
 			} else {
-				if (frm.doc.status != "Processing Master Data") {
+				if (frm.doc.status != "Processing Master Data" && frm.doc.erpnext_company) {
 					frm.events.add_button(frm, __("Process Master Data"), "process_master_data");
 				}
 			}
@@ -74,13 +77,13 @@ frappe.ui.form.on("Tally Migration", {
 	},
 
 	erpnext_company: function (frm) {
-		frappe.db.exists("Company", frm.doc.erpnext_company).then(exists => {
-			if (exists) {
-				frappe.msgprint(
-					__("Company {0} already exists. Continuing will overwrite the Company and Chart of Accounts", [frm.doc.erpnext_company]),
-				);
-			}
-		});
+		// frappe.db.exists("Company", frm.doc.erpnext_company).then(exists => {
+		// 	if (exists) {
+		// 		frappe.msgprint(
+		// 			__("Company {0} already exists. Continuing will overwrite the Company and Chart of Accounts", [frm.doc.erpnext_company]),
+		// 		);
+		// 	}
+		// });
 	},
 
 	add_button: function (frm, label, method) {

@@ -13,11 +13,10 @@
   "column_break_2",
   "tally_creditors_account",
   "tally_debtors_account",
+  "erpnext_company",
   "company_section",
-  "tally_company",
   "default_uom",
   "column_break_8",
-  "erpnext_company",
   "processed_files_section",
   "chart_of_accounts",
   "parties",
@@ -84,22 +83,8 @@
    "fieldtype": "Section Break"
   },
   {
-   "description": "Company Name as per Imported Tally Data",
-   "fieldname": "tally_company",
-   "fieldtype": "Data",
-   "label": "Tally Company",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
-  },
-  {
-   "description": "Your Company set in ERPNext",
-   "fieldname": "erpnext_company",
-   "fieldtype": "Data",
-   "label": "ERPNext Company",
-   "read_only_depends_on": "eval:doc.is_master_data_processed==1"
   },
   {
    "fieldname": "processed_files_section",
@@ -251,10 +236,20 @@
    "fieldname": "fixed_error_log_preview",
    "fieldtype": "HTML",
    "label": "Fixed Error Log"
+  },
+  {
+   "description": "Your Company set in ERPNext",
+   "fieldname": "erpnext_company",
+   "fieldtype": "Link",
+   "label": "ERPNext Company",
+   "options": "Company",
+   "read_only_depends_on": "eval:doc.is_master_data_processed==1",
+   "reqd": 1
   }
  ],
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-04-28 00:29:18.039826",
+ "modified": "2020-09-14 17:28:22.526149",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Tally Migration",

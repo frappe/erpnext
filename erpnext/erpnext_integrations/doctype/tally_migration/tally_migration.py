@@ -110,10 +110,7 @@ class TallyMigration(Document):
 			group_set =  [acc[1] for acc in accounts if acc[2]]
 			children, customers, suppliers = remove_parties(parents, children, group_set)
 
-			try:
-				coa = traverse({}, children, roots, roots, group_set)
-			except RecursionError:
-				self.log(_("Error occured while parsing Chart of Accounts: Please make sure that no two accounts have the same name"))
+			coa = traverse({}, children, roots, roots, group_set)
 
 			for account in coa:
 				coa[account]["root_type"] = root_type_map[account]
@@ -173,9 +170,9 @@ class TallyMigration(Document):
 			for account in accounts:
 				if account in group_set or account in roots:
 					if account in children:
-						tree[account] = traverse({}, children, children[account], roots, group_set)
+						tree[account] = traverse({}, children, children.pop(account), roots, group_set)
 					else:
-						tree[account] = {"is_group": 1}
+						tree[account] = {}
 				else:
 					tree[account] = {}
 			return tree
@@ -246,10 +243,7 @@ class TallyMigration(Document):
 
 		try:
 			self.publish("Process Master Data", _("Reading Uploaded File"), 1, 5)
-			collection = self.get_collection(self.master_data)
-			company = get_company_name(collection)
-			self.tally_company = company
-			self.erpnext_company = company
+			collection = get_collection(self.master_data)
 
 			self.publish("Process Master Data", _("Processing Chart of Accounts and Parties"), 2, 5)
 			chart_of_accounts, customers, suppliers = get_coa_customers_suppliers(collection)
