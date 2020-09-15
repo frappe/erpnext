@@ -1184,6 +1184,7 @@ def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname,
 	child_item.uom = trans_item.get("uom") or item.stock_uom
 	conversion_factor = flt(get_conversion_factor(item.item_code, child_item.uom).get("conversion_factor"))
 	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or conversion_factor
+	set_child_tax_template_and_map(item, child_item, p_doc)
 	child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
 	if not child_item.warehouse:
 		frappe.throw(_("Cannot find {} for item {}. Please set the same in Item Master or Stock Settings.")
@@ -1245,7 +1246,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 			frappe.throw(_("You do not have permissions to {} items in a {}.")
 				.format(actions[perm_type], parent_doctype), title=_("Insufficient Permissions"))
-	
+
 	def validate_workflow_conditions(doc):
 		workflow = get_workflow_name(doc.doctype)
 		if not workflow:
@@ -1280,7 +1281,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 	sales_doctypes = ['Sales Order', 'Sales Invoice', 'Delivery Note', 'Quotation']
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
-	
+
 	check_doc_permissions(parent, 'cancel')
 	validate_and_delete_children(parent, data)
 
@@ -1328,7 +1329,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 				child_item.conversion_factor = 1
 			else:
 				child_item.conversion_factor = flt(d.get('conversion_factor'))
-		
+
 		if d.get("uom"):
 			child_item.uom = d.get("uom")
 			conversion_factor = flt(get_conversion_factor(child_item.item_code, child_item.uom).get("conversion_factor"))
