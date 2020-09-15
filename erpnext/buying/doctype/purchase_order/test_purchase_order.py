@@ -245,6 +245,10 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(po.taxes[0].tax_amount, 60)
 		self.assertEqual(po.taxes[0].total, 660)
 
+		frappe.db.sql("""UPDATE `tabItem Tax` set valid_from = NULL
+				where parent = %(item)s and item_tax_template = %(tax)s""",
+					{"item": item, "tax": tax_template})
+
 	def test_update_child_uom_conv_factor_change(self):
 		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
 		total_reqd_qty = sum([d.get("required_qty") for d in po.as_dict().get("supplied_items")])
