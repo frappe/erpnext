@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 
 import json
+import os
 import re
 import sys
 import traceback
@@ -22,7 +23,7 @@ from frappe import _
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from frappe.model.document import Document
 from frappe.model.naming import getseries, revert_series_if_last
-from frappe.utils.data import format_datetime
+from frappe.utils.data import format_datetime, cint
 from frappe.utils import cstr
 from frappe.utils.csvutils import to_csv
 
@@ -39,6 +40,11 @@ def new_doc(document):
 	doc.update(document)
 
 	return doc
+
+def get_pincode_city_map():
+	with open(os.path.join(os.path.dirname(__file__), "pincode_info.json"), "r") as local_info:
+		all_data = json.loads(local_info.read())
+	return all_data
 
 class TallyMigration(Document):
 	def validate(self):
@@ -209,6 +215,15 @@ class TallyMigration(Document):
 			return tree
 
 		def get_parties_addresses(collection, customer_ledgers, supplier_ledgers):
+			pincode_city_map = get_pincode_city_map()
+
+			def get_city_state_from_pincode(pincode):
+				for state, cities in pincode_city_map.items():
+					for city, pincodes in cities.items():
+						if pincode in pincodes:
+							return city, state
+				return None, None
+
 			customers, suppliers, addresses = [], [], []
 			for account in collection.find_all("LEDGER"):
 				party_type = None
@@ -238,16 +253,24 @@ class TallyMigration(Document):
 
 				if party_type:
 					address = "\n".join([a.string.strip() for a in account.find_all("ADDRESS")])
+					tally_state = account.LEDSTATENAME.string.strip() if account.LEDSTATENAME else ""
+
+					pincode = account.PINCODE.string.strip() if account.PINCODE else None
+					pincode = str(pincode).replace("-", "").replace(" ", "")
+					city, pincode_state = "", ""
+					if pincode:
+						city, pincode_state = get_city_state_from_pincode(cint(pincode))
 					addresses.append({
 						"doctype": "Address",
 						"address_line1": address[:140].strip(),
 						"address_line2": address[140:].strip(),
 						"country": account.COUNTRYNAME.string.strip() if account.COUNTRYNAME else None,
-						"state": account.LEDSTATENAME.string.strip() if account.LEDSTATENAME else None,
-						"gst_state": account.LEDSTATENAME.string.strip() if account.LEDSTATENAME else None,
-						"pincode": account.PINCODE.string.strip() if account.PINCODE else None,
 						"phone": account.LEDGERPHONE.string.strip() if account.LEDGERPHONE else None,
 						"gstin": account.PARTYGSTIN.string.strip() if account.PARTYGSTIN else None,
+						"state": (pincode_state or tally_state).title(),
+						"gst_state": (pincode_state or tally_state).title(),
+						"pincode": pincode,
+						"city": city,
 						"links": links
 					})
 			return customers, suppliers, addresses
