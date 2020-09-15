@@ -217,12 +217,8 @@ class Analytics(object):
 				"company": self.filters.company,
 				"project": ["!=", ""],
 				self.date_field: ('between', [self.filters.from_date, self.filters.to_date])
-			}, debug =True
+			}
 		)
-
-		self.entity_names = {}
-		for d in self.entries:
-			self.entity_names.setdefault(d.entity, d.entity_name)
 
 	def get_rows(self):
 		self.data = []
@@ -231,7 +227,7 @@ class Analytics(object):
 		for entity, period_data in iteritems(self.entity_periodic_data):
 			row = {
 				"entity": entity,
-				"entity_name": self.entity_names.get(entity)
+				"entity_name": self.entity_names.get(entity) if hasattr(self, 'entity_names') else None
 			}
 			total = 0
 			for end_date in self.periodic_daterange:
