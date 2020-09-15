@@ -68,7 +68,7 @@ class POSProfile(Document):
 				{"parent": d.mode_of_payment, "company": self.company}, "default_account")
 			if not account:
 				frappe.throw(_("Please set default Cash or Bank account in Mode of Payment {0}")
-					.format(mode_of_payment))
+					.format(mode_of_payment), title=_("Missing Account"))
 
 	def on_update(self):
 		self.set_defaults()
