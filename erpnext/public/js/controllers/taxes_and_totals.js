@@ -595,7 +595,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			$.each(actual_taxes_dict, function(key, value) {
 				if (value) total_actual_tax += value;
 			});
-			
+
 			return flt(this.frm.doc.grand_total - total_actual_tax, precision("grand_total"));
 		}
 	},
