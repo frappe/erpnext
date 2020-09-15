@@ -32,7 +32,7 @@ frappe.ui.form.on('Program Enrollment', {
 		};
 
 		if (frm.doc.program) {
-			frm.set_query('course', 'courses', function(doc, cdt, cdn) {
+			frm.set_query('course', 'courses', function() {
 				return {
 					query: 'erpnext.education.doctype.program_enrollment.program_enrollment.get_program_courses',
 					filters: {
