@@ -424,9 +424,9 @@ class TestSalesOrder(unittest.TestCase):
 
 		workflow = make_sales_order_workflow()
 		so = make_sales_order(item_code= "_Test Item", qty=1, rate=150, do_not_submit=1)
+		frappe.set_user("Administrator")
 		apply_workflow(so, 'Approve')
 
-		frappe.set_user("Administrator")
 		user = 'test@example.com'
 		test_user = frappe.get_doc('User', user)
 		test_user.add_roles("Sales User", "Test Junior Approver")
@@ -1009,7 +1009,7 @@ def make_sales_order_workflow():
 		"is_active": 1,
 		"send_email_alert": 0,
 	})
-	workflow.append('states', dict( state = 'Pending', allow_edit = 'All' ))
+	workflow.append('states', dict( state = 'Pending', allow_edit = 'Administrator' ))
 	workflow.append('states', dict( state = 'Approved', allow_edit = 'Test Approver', doc_status = 1 ))
 	workflow.append('transitions', dict(
 		state = 'Pending', action = 'Approve', next_state = 'Approved', allowed = 'Test Junior Approver', allow_self_approval = 1,
