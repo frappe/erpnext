@@ -420,6 +420,9 @@ def get_item_details(item_code):
 		from tabItem where name=%s""", item_code, as_dict=True)[0]
 
 def get_serial_nos(serial_no):
+	if isinstance(serial_no, list):
+		return serial_no
+
 	return [s.strip() for s in cstr(serial_no).strip().upper().replace(',', '\n').split('\n')
 		if s.strip()]
 

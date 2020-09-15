@@ -152,7 +152,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		update_backflush_based_on("Material Transferred for Subcontract")
 		item_code = "_Test Subcontracted FG Item 1"
-		make_subcontracted_item(item_code)
+		make_subcontracted_item(item_code=item_code)
 
 		po = create_purchase_order(item_code=item_code, qty=1,
 			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
