@@ -220,14 +220,10 @@ class calculate_taxes_and_totals(object):
 		return current_tax_fraction, inclusive_tax_amount_per_qty
 
 	def _get_tax_rate(self, tax, item_tax_map):
-		if item_tax_map:
-			if tax.account_head in item_tax_map:
-				return flt(item_tax_map.get(tax.account_head), self.doc.precision("rate", tax))
-			else:
-				return tax.rate
+		if tax.account_head in item_tax_map:
+			return flt(item_tax_map.get(tax.account_head), self.doc.precision("rate", tax))
 		else:
-			# If no item tax template against item dont calculate tax against it
-			return 0
+			return tax.rate
 
 	def calculate_net_total(self):
 		self.doc.total_qty = self.doc.total = self.doc.base_total = self.doc.net_total = self.doc.base_net_total = 0.0
