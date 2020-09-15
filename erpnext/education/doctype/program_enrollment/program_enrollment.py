@@ -28,6 +28,7 @@ class ProgramEnrollment(Document):
 			"student": self.student,
 			"program": self.program,
 			"academic_year": self.academic_year,
+			"academic_term": self.academic_term,
 			"docstatus": ("<", 2),
 			"name": ("!=", self.name)
 		})
