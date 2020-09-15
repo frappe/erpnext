@@ -85,8 +85,11 @@ def calculate_accrual_amount_for_demand_loans(loan, posting_date, process_loan_i
 	if no_of_days <= 0:
 		return
 
-	pending_principal_amount = flt(loan.total_payment) - flt(loan.total_interest_payable) \
-		- flt(loan.total_principal_paid)
+	if loan.status == 'Disbursed':
+		pending_principal_amount = flt(loan.total_payment) - flt(loan.total_interest_payable) \
+			- flt(loan.total_principal_paid)
+	else:
+		pending_principal_amount = loan.disbursed_amount
 
 	interest_per_day = (pending_principal_amount * loan.rate_of_interest) / (days_in_year(get_datetime(posting_date).year) * 100)
 	payable_interest = interest_per_day * no_of_days
@@ -107,7 +110,7 @@ def calculate_accrual_amount_for_demand_loans(loan, posting_date, process_loan_i
 
 def make_accrual_interest_entry_for_demand_loans(posting_date, process_loan_interest, open_loans=None, loan_type=None):
 	query_filters = {
-		"status": "Disbursed",
+		"status": ('in', ['Disbursed', 'Partially Disbursed']),
 		"docstatus": 1
 	}
 
@@ -118,8 +121,9 @@ def make_accrual_interest_entry_for_demand_loans(posting_date, process_loan_inte
 
 	if not open_loans:
 		open_loans = frappe.get_all("Loan",
-			fields=["name", "total_payment", "total_amount_paid", "loan_account", "interest_income_account", "is_term_loan",
-				"disbursement_date", "applicant_type", "applicant", "rate_of_interest", "total_interest_payable", "repayment_start_date"],
+			fields=["name", "total_payment", "total_amount_paid", "loan_account", "interest_income_account",
+				"is_term_loan", "status", "disbursement_date", "disbursed_amount", "applicant_type", "applicant",
+				"rate_of_interest", "total_interest_payable", "total_principal_paid", "repayment_start_date"],
 			filters=query_filters)
 
 	for loan in open_loans:
@@ -209,7 +213,8 @@ def get_last_accural_date_in_current_month(loan):
 		WHERE loan = %s""", (loan.name))
 
 	if last_posting_date[0][0]:
-		return last_posting_date[0][0]
+		# interest for last interest accrual date is already booked, so add 1 day
+		return add_days(last_posting_date[0][0], 1)
 	else:
 		return loan.disbursement_date
 

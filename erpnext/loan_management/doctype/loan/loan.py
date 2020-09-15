@@ -7,7 +7,7 @@ import frappe, math, json
 import erpnext
 from frappe import _
 from frappe.utils import flt, rounded, add_months, nowdate, getdate, now_datetime
-
+from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
 from erpnext.controllers.accounts_controller import AccountsController
 
 class Loan(AccountsController):
@@ -223,30 +223,56 @@ def make_repayment_entry(loan, applicant_type, applicant, loan_type, company, as
 		return repayment_entry
 
 @frappe.whitelist()
-def create_loan_security_unpledge(loan, applicant_type, applicant, company, as_dict=1):
-	loan_security_pledge_details = frappe.db.sql("""
-		SELECT p.loan_security, sum(p.qty) as qty
-		FROM `tabLoan Security Pledge` lsp , `tabPledge` p
-		WHERE p.parent = lsp.name AND lsp.loan = %s AND lsp.docstatus = 1
-		GROUP BY p.loan_security
-	""",(loan), as_dict=1)
+def unpledge_security(loan=None, loan_security_pledge=None, as_dict=0, save=0, submit=0, approve=0):
+	# if loan is passed it will be considered as full unpledge
+	if loan:
+		pledge_qty_map = get_pledged_security_qty(loan)
+		loan_doc = frappe.get_doc('Loan', loan)
+		unpledge_request = create_loan_security_unpledge(pledge_qty_map, loan_doc.name, loan_doc.company,
+			loan_doc.applicant_type, loan_doc.applicant)
+	# will unpledge qty based on loan security pledge
+	elif loan_security_pledge:
+		security_map = {}
+		pledge_doc = frappe.get_doc('Loan Security Pledge', loan_security_pledge)
+		for security in pledge_doc.securities:
+			security_map.setdefault(security.loan_security, security.qty)
 
+		unpledge_request = create_loan_security_unpledge(security_map, pledge_doc.loan,
+			pledge_doc.company, pledge_doc.applicant_type, pledge_doc.applicant)
+
+	if save:
+		unpledge_request.save()
+
+	if submit:
+		unpledge_request.submit()
+
+	if approve:
+		if unpledge_request.docstatus == 1:
+			unpledge_request.status = 'Approved'
+			unpledge_request.save()
+		else:
+			frappe.throw(_('Only submittted unpledge requests can be approved'))
+
+	if as_dict:
+		return unpledge_request
+	else:
+		return unpledge_request
+
+def create_loan_security_unpledge(unpledge_map, loan, company, applicant_type, applicant):
 	unpledge_request = frappe.new_doc("Loan Security Unpledge")
 	unpledge_request.applicant_type = applicant_type
 	unpledge_request.applicant = applicant
 	unpledge_request.loan = loan
 	unpledge_request.company = company
 
-	for loan_security in loan_security_pledge_details:
-		unpledge_request.append('securities', {
-			"loan_security": loan_security.loan_security,
-			"qty": loan_security.qty
-		})
+	for security, qty in unpledge_map.items():
+		if qty:
+			unpledge_request.append('securities', {
+				"loan_security": security,
+				"qty": qty
+			})
 
-	if as_dict:
-		return unpledge_request.as_dict()
-	else:
-		return unpledge_request
+	return unpledge_request
 
 
 
