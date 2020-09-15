@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
-from frappe.utils import cint, now
+from frappe.utils import cint, now, get_link_to_form
 from six import iteritems
 from frappe.model.document import Document
 
@@ -68,7 +68,7 @@ class POSProfile(Document):
 				{"parent": d.mode_of_payment, "company": self.company}, "default_account")
 			if not account:
 				frappe.throw(_("Please set default Cash or Bank account in Mode of Payment {0}")
-					.format(mode_of_payment), title=_("Missing Account"))
+					.format(get_link_to_form("Mode of Payment", mode_of_payment)), title=_("Missing Account"))
 
 	def on_update(self):
 		self.set_defaults()
