@@ -73,7 +73,7 @@ class ProgramEnrollment(Document):
 		program = frappe.get_doc("Program", self.program)
 		course_list = [course.course for course in program.courses]
 		for course_name in course_list:
-			student.enroll_in_course(course_name=course_name, program_enrollment=self.name)
+			student.enroll_in_course(course_name=course_name, program_enrollment=self.name, enrollment_date=self.enrollment_date)
 
 	def get_all_course_enrollments(self):
 		course_enrollment_names = frappe.get_list("Course Enrollment", filters={'program_enrollment': self.name})
