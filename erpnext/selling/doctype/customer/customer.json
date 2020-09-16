@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -14,6 +13,7 @@
   "naming_series",
   "salutation",
   "customer_name",
+  "werks",
   "gender",
   "customer_type",
   "default_bank_account",
@@ -109,6 +109,7 @@
    "depends_on": "eval:doc.customer_type != 'Company'",
    "fieldname": "gender",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Gender",
    "options": "Gender"
   },
@@ -480,13 +481,17 @@
    "fieldname": "dn_required",
    "fieldtype": "Check",
    "label": "Allow Sales Invoice Creation Without Delivery Note"
+  },
+  {
+   "fieldname": "werks",
+   "fieldtype": "Data",
+   "label": "Plant"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "links": [],
- "modified": "2020-03-17 11:03:42.706907",
+ "modified": "2020-09-16 13:13:43.461525",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
