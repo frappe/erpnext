@@ -61,7 +61,7 @@ class POSProfile(Document):
 			frappe.throw(_("Please select a default mode of payment"))
 
 		if len(default_mode_of_payment) > 1:
-			frappe.throw(_("Multiple default mode of payment is not allowed"))
+			frappe.throw(_("You can only select one mode of payment as default"))
 		
 		for d in self.payments:
 			account = frappe.db.get_value("Mode of Payment Account", 
