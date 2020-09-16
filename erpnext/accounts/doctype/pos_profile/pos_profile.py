@@ -58,7 +58,7 @@ class POSProfile(Document):
 
 		default_mode_of_payment = [d.default for d in self.payments if d.default]
 		if not default_mode_of_payment:
-			frappe.throw(_("Set default mode of payment"))
+			frappe.throw(_("Please select a default mode of payment"))
 
 		if len(default_mode_of_payment) > 1:
 			frappe.throw(_("Multiple default mode of payment is not allowed"))
