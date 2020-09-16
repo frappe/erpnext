@@ -54,7 +54,7 @@ class POSProfile(Document):
 
 	def validate_payment_methods(self):
 		if not self.payments:
-			frappe.throw(_("Payment methods are mandatory. Add atleast one payment methods."))
+			frappe.throw(_("Payment methods are mandatory. Please add at least one payment method."))
 
 		default_mode_of_payment = [d.default for d in self.payments if d.default]
 		if not default_mode_of_payment:
