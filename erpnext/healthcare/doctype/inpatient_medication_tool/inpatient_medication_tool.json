@@ -6,6 +6,9 @@
  "engine": "InnoDB",
  "field_order": [
   "date",
+  "column_break_3",
+  "company",
+  "warehouse",
   "section_break_2",
   "medication_orders",
   "completed_medication_order_section"
@@ -32,12 +35,31 @@
    "fieldname": "completed_medication_order_section",
    "fieldtype": "Section Break",
    "label": "Completed Medication Order"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Medication Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-09-16 12:51:36.124288",
+ "modified": "2020-09-16 14:58:41.795566",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Medication Tool",

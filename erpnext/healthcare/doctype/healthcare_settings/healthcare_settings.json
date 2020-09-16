@@ -19,8 +19,9 @@
   "valid_days",
   "healthcare_service_items",
   "inpatient_visit_charge_item",
-  "op_consulting_charge_item",
+  "inpatient_medication_warehouse",
   "column_break_13",
+  "op_consulting_charge_item",
   "clinical_procedure_consumable_item",
   "sb_in_ac",
   "income_account",
@@ -91,7 +92,7 @@
    "description": "You can configure default Items for billing consultation charges, procedure consumption items and inpatient visits",
    "fieldname": "healthcare_service_items",
    "fieldtype": "Section Break",
-   "label": "Default Healthcare Service Items"
+   "label": "Default Service Items and Warehouse"
   },
   {
    "fieldname": "inpatient_visit_charge_item",
@@ -302,11 +303,17 @@
    "fieldname": "enable_free_follow_ups",
    "fieldtype": "Check",
    "label": "Enable Free Follow-ups"
+  },
+  {
+   "fieldname": "inpatient_medication_warehouse",
+   "fieldtype": "Link",
+   "label": "Inpatient Medication Warehouse",
+   "options": "Warehouse"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-07-08 15:17:21.543218",
+ "modified": "2020-09-16 14:10:38.117599",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",

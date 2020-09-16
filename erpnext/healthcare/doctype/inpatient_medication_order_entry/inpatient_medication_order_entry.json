@@ -12,7 +12,7 @@
   "column_break_4",
   "date",
   "time",
-  "is_order_completed"
+  "is_completed"
  ],
  "fields": [
   {
@@ -53,13 +53,6 @@
    "reqd": 1
   },
   {
-   "default": "0",
-   "fieldname": "is_order_completed",
-   "fieldtype": "Check",
-   "label": "Is Order Completed",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
   },
@@ -69,12 +62,19 @@
    "fieldtype": "Data",
    "label": "Drug Name",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_completed",
+   "fieldtype": "Check",
+   "label": "Is Order Completed",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-09-14 22:50:20.650492",
+ "modified": "2020-09-16 16:03:23.351628",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Medication Order Entry",
