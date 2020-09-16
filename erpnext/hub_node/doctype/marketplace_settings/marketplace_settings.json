@@ -86,7 +86,7 @@
    "bold": 0, 
    "collapsible": 0, 
    "columns": 0, 
-   "default": "https://hubmarket.org", 
+   "default": "https://roasterhub.com", 
    "fieldname": "marketplace_url", 
    "fieldtype": "Data", 
    "hidden": 0, 

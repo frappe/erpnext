@@ -82,7 +82,7 @@ class MarketplaceSettings(Document):
 
 
 	def unregister(self):
-		"""Disable the User on hubmarket.org"""
+		"""Disable the User on roasterhub.com"""
 		pass
 
 @frappe.whitelist()
