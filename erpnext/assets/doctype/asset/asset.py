@@ -83,6 +83,11 @@ class Asset(AccountsController):
 		if not self.available_for_use_date:
 			frappe.throw(_("Available for use date is required"))
 
+		for i, d in enumerate(self.finance_books):
+			if d.depreciation_start_date == self.available_for_use_date:
+				frappe.throw(_("Row #{}: Depreciation Posting Date should not be equal to Available for Use Date."),
+					title=_("Incorrect Date"))
+
 	def set_missing_values(self):
 		if not self.asset_category:
 			self.asset_category = frappe.get_cached_value("Item", self.item_code, "asset_category")
