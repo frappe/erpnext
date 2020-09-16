@@ -785,7 +785,49 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_purchase_order(source_name, for_supplier=None, selected_items=[], target_doc=None):
+def check_suppliers_and_qty_for_po_against_so(items, docname):
+	if isinstance(items, string_types):
+		items = json.loads(items)
+
+
+	po =frappe.get_list("Purchase Order", filters={
+		"sales_order":docname,
+		"docstatus": ("=", 1)}
+	)
+
+	if len(po):
+		item_list = [item['item_code'] for item in items]
+		items_details = frappe.db.get_all("Purchase Order Item", filters = {
+			'parent': ("in", [p.name for p in po]),
+			'item_code': ("in", item_list)
+		}, fields = ["item_code", 'SUM(qty) as quantity'], group_by = "item_code")
+
+		item_map = {}
+
+		for detail in items_details:
+			item_map[detail.item_code] = detail
+
+		print(item_map)
+
+		for item in items:
+			if item['qty'] >= item_map[item["item_code"]]["quantity"]:
+				item['qty'] -= item_map[item["item_code"]]["quantity"]
+			else:
+				item_map[item["item_code"]]["quantity"] -= item['qty']
+				item['qty'] = 0
+
+			if item['qty'] == 0:
+				items.remove(item)
+
+		if not len(items):
+			frappe.throw(_("Purchase Order already created for all sales order items"))
+		return items
+
+	else:
+		return items
+
+@frappe.whitelist()
+def make_purchase_order(source_name, supplier = None, selected_items=[], target_doc=None):
 	if isinstance(selected_items, string_types):
 		selected_items = json.loads(selected_items)
 
@@ -800,7 +842,7 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 		if default_price_list:
 			target.buying_price_list = default_price_list
 
-		if any( item.delivered_by_supplier==1 for item in source.items):
+		if any(item.delivered_by_supplier==1 for item in source.items):
 			if source.shipping_address_name:
 				target.shipping_address = source.shipping_address_name
 				target.shipping_address_display = source.shipping_address
@@ -822,69 +864,48 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 
 	def update_item(source, target, source_parent):
 		target.schedule_date = source.delivery_date
-		target.qty = flt(source.qty) - flt(source.ordered_qty)
+		for idx in selected_items :
+			if int(idx) == source.idx and selected_items[idx][0] == source.item_code:
+				target.qty = selected_items[idx][1]
 		target.stock_qty = (flt(source.qty) - flt(source.ordered_qty)) * flt(source.conversion_factor)
 		target.project = source_parent.project
 
-	suppliers =[]
-	if for_supplier:
-		suppliers.append(for_supplier)
-	else:
-		sales_order = frappe.get_doc("Sales Order", source_name)
-		for item in sales_order.items:
-			if item.supplier and item.supplier not in suppliers:
-				suppliers.append(item.supplier)
-
-	if not suppliers:
-		frappe.throw(_("Please set a Supplier against the Items to be considered in the Purchase Order."))
-
-	for supplier in suppliers:
-		po =frappe.get_list("Purchase Order", filters={"sales_order":source_name, "supplier":supplier, "docstatus": ("<", "2")})
-		if len(po) == 0:
-			doc = get_mapped_doc("Sales Order", source_name, {
-				"Sales Order": {
-					"doctype": "Purchase Order",
-					"field_no_map": [
-						"address_display",
-						"contact_display",
-						"contact_mobile",
-						"contact_email",
-						"contact_person",
-						"taxes_and_charges"
-					],
-					"validation": {
-						"docstatus": ["=", 1]
-					}
-				},
-				"Sales Order Item": {
-					"doctype": "Purchase Order Item",
-					"field_map":  [
-						["name", "sales_order_item"],
-						["parent", "sales_order"],
-						["stock_uom", "stock_uom"],
-						["uom", "uom"],
-						["conversion_factor", "conversion_factor"],
-						["delivery_date", "schedule_date"]
-			 		],
-					"field_no_map": [
-						"rate",
-						"price_list_rate",
-						"item_tax_template"
-					],
-					"postprocess": update_item,
-					"condition": lambda doc: doc.ordered_qty < doc.qty and doc.supplier == supplier and doc.item_code in selected_items
-				}
-			}, target_doc, set_missing_values)
-			if not for_supplier:
-				doc.insert()
-		else:
-			suppliers =[]
-	if suppliers:
-		if not for_supplier:
-			frappe.db.commit()
-		return doc
-	else:
-		frappe.msgprint(_("PO already created for all sales order items"))
+	doc = get_mapped_doc("Sales Order", source_name, {
+		"Sales Order": {
+			"doctype": "Purchase Order",
+			"field_no_map": [
+				"address_display",
+				"contact_display",
+				"contact_mobile",
+				"contact_email",
+				"contact_person",
+				"taxes_and_charges"
+			],
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Sales Order Item": {
+			"doctype": "Purchase Order Item",
+			"field_map":  [
+				["name", "sales_order_item"],
+				["parent", "sales_order"],
+				["stock_uom", "stock_uom"],
+				["uom", "uom"],
+				["conversion_factor", "conversion_factor"],
+				["delivery_date", "schedule_date"]
+			],
+			"field_no_map": [
+				"rate",
+				"price_list_rate",
+				"item_tax_template"
+			],
+			"postprocess": update_item,
+			"condition": lambda doc: doc.ordered_qty < doc.qty and doc.supplier == supplier and doc.item_code in [item[0] for item in selected_items.values()]
+		}
+	}, target_doc, set_missing_values)
+	return doc
+	# frappe.msgprint(_("PO already created for all sales order items"))
 
 
 @frappe.whitelist()
@@ -902,8 +923,6 @@ def get_supplier(doctype, txt, searchfield, start, page_len, filters):
 			and ({key} like %(txt)s
 				or supplier_name like %(txt)s)
 			and name in (select supplier from `tabSales Order Item` where parent = %(parent)s)
-			and name not in (select supplier from `tabPurchase Order` po inner join `tabPurchase Order Item` poi
-			     on po.name=poi.parent where po.docstatus<2 and poi.sales_order=%(parent)s)
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, supplier_name), locate(%(_txt)s, supplier_name), 99999),

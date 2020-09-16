@@ -555,99 +555,119 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 	make_purchase_order: function(){
 		var me = this;
-		var dialog = new frappe.ui.Dialog({
-			title: __("For Supplier"),
-			fields: [
-				{"fieldtype": "Link", "label": __("Supplier"), "fieldname": "supplier", "options":"Supplier",
-				 "description": __("Leave the field empty to make purchase orders for all suppliers"),
-					"get_query": function () {
-						return {
-							query:"erpnext.selling.doctype.sales_order.sales_order.get_supplier",
-							filters: {'parent': me.frm.doc.name}
-						}
-					}},
-					{fieldname: 'items_for_po', fieldtype: 'Table', label: 'Select Items',
-					fields: [
-						{
-							fieldtype:'Data',
-							fieldname:'item_code',
-							label: __('Item'),
-							read_only:1,
-							in_list_view:1
-						},
-						{
-							fieldtype:'Data',
-							fieldname:'item_name',
-							label: __('Item name'),
-							read_only:1,
-							in_list_view:1
-						},
-						{
-							fieldtype:'Float',
-							fieldname:'qty',
-							label: __('Quantity'),
-							read_only: 1,
-							in_list_view:1
-						},
-						{
-							fieldtype:'Link',
-							read_only:1,
-							fieldname:'uom',
-							label: __('UOM'),
-							in_list_view:1
-						}
-					],
-					data: cur_frm.doc.items,
-					get_data: function() {
-						return cur_frm.doc.items
-					}
-				},
-
-				{"fieldtype": "Button", "label": __('Create Purchase Order'), "fieldname": "make_purchase_order", "cssClass": "btn-primary"},
-			]
-		});
-
-		dialog.fields_dict.make_purchase_order.$input.click(function() {
-			var args = dialog.get_values();
-			let selected_items = dialog.fields_dict.items_for_po.grid.get_selected_children()
-			if(selected_items.length == 0) {
-				frappe.throw({message: 'Please select Item form Table', title: __('Message'), indicator:'blue'})
-			}
-			let selected_items_list = []
-			for(let i in selected_items){
-				selected_items_list.push(selected_items[i].item_code)
-			}
-			dialog.hide();
-			return frappe.call({
-				type: "GET",
-				method: "erpnext.selling.doctype.sales_order.sales_order.make_purchase_order",
-				args: {
-					"source_name": me.frm.doc.name,
-					"for_supplier": args.supplier,
-					"selected_items": selected_items_list
-				},
-				freeze: true,
-				callback: function(r) {
-					if(!r.exc) {
-						// var args = dialog.get_values();
-						if (args.supplier){
-							var doc = frappe.model.sync(r.message);
-							frappe.set_route("Form", r.message.doctype, r.message.name);
-						}
-						else{
-							frappe.route_options = {
-								"sales_order": me.frm.doc.name
+		this.get_data_for_po().then((remaining_items) => {
+			var dialog = new frappe.ui.Dialog({
+				title: __("For Supplier"),
+				fields: [
+					{"fieldtype": "Link", "label": __("Supplier"), "fieldname": "supplier", "options":"Supplier",
+					"description": __("Leave the field empty to make purchase orders for all suppliers"),
+						"get_query": function () {
+							return {
+								query:"erpnext.selling.doctype.sales_order.sales_order.get_supplier",
+								filters: {'parent': me.frm.doc.name}
 							}
-							frappe.set_route("List", "Purchase Order");
+						}},
+						{fieldname: 'items_for_po', fieldtype: 'Table', label: 'Select Items',
+						fields: [
+							{
+								fieldtype:'Data',
+								fieldname:'item_code',
+								label: __('Item'),
+								read_only:1,
+								in_list_view:1
+							},
+							{
+								fieldtype:'Data',
+								fieldname:'item_name',
+								label: __('Item name'),
+								read_only:1,
+								in_list_view:1
+							},
+							{
+								fieldtype:'Float',
+								fieldname:'qty',
+								label: __('Quantity'),
+								in_list_view:1
+							},
+							{
+								fieldtype:'Link',
+								read_only:1,
+								fieldname:'uom',
+								label: __('UOM'),
+								in_list_view:1
+							}
+						],
+						data: remaining_items
+					},
+
+					{"fieldtype": "Button", "label": __('Create Purchase Order'), "fieldname": "make_purchase_order", "cssClass": "btn-primary"},
+				]
+			});
+
+			dialog.fields_dict.make_purchase_order.$input.click(function() {
+				var args = dialog.get_values();
+				let selected_items = dialog.fields_dict.items_for_po.grid.get_selected_children()
+				if(selected_items.length == 0) {
+					frappe.throw({message: 'Please select Item form Table', title: __('Message'), indicator:'blue'})
+				}
+				let selected_items_list = {}
+				for(let i in selected_items){
+					let item = selected_items[i]
+					selected_items_list[item.idx] = [item.item_code, item.qty]
+				}
+				console.log(selected_items_list)
+				dialog.hide();
+				return frappe.call({
+					type: "GET",
+					method: "erpnext.selling.doctype.sales_order.sales_order.make_purchase_order",
+					args: {
+						"source_name": me.frm.doc.name,
+						"supplier": args.supplier,
+						"selected_items": selected_items_list
+					},
+					freeze: true,
+					callback: function(r) {
+						if(!r.exc) {
+
+							var args = dialog.get_values();
+							if (args.supplier){
+								frappe.model.sync(r.message);
+								frappe.set_route("Form", r.message.doctype, r.message.name);
+							}
+							else{
+								frappe.route_options = {
+									"sales_order": me.frm.doc.name
+								}
+								frappe.set_route("List", "Purchase Order");
+							}
 						}
 					}
-				}
-			})
+				})
+			});
+			dialog.get_field("items_for_po").grid.only_sortable()
+			dialog.get_field("items_for_po").refresh()
+			dialog.show();
 		});
-		dialog.get_field("items_for_po").grid.only_sortable()
-		dialog.get_field("items_for_po").refresh()
-		dialog.show();
 	},
+
+	get_data_for_po: function(){
+		return new Promise((resolve) => {
+			return 	frappe.call({
+				type: "GET",
+				async: true,
+				method: "erpnext.selling.doctype.sales_order.sales_order.check_suppliers_and_qty_for_po_against_so",
+				args: {
+					"items": this.frm.doc.items,
+					"docname": this.frm.doc.name
+				}
+			}).then(r => {
+				console.log(r)
+				resolve(r.message)
+			});
+		});
+
+	},
+
 	hold_sales_order: function(){
 		var me = this;
 		var d = new frappe.ui.Dialog({
