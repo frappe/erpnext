@@ -451,20 +451,12 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			frappe.call({
 				method: "erpnext.stock.doctype.serial_no.serial_no.get_pos_reserved_serial_nos",
 				args: {
-					item_code: me.item_code,
-					warehouse: typeof me.warehouse_details.name == "string" ? me.warehouse_details.name : ''
+					filters: {
+						item_code: me.item_code,
+						warehouse: typeof me.warehouse_details.name == "string" ? me.warehouse_details.name : '',
+					}
 				}
 			}).then((data) => {
-				if (!data.message[1].length) {
-					this.showing_reserved_serial_nos_error = true;
-					const warehouse = me.dialog.fields_dict.warehouse.get_value().bold();
-					const d = frappe.msgprint(__(`Serial numbers unavailable for Item ${me.item.item_code.bold()} 
-						under warehouse ${warehouse}. Please try changing warehouse.`));
-					d.get_close_btn().on('click', () => {
-						this.showing_reserved_serial_nos_error = false;
-						d.hide();
-					});
-				}
 				serial_no_filters['name'] = ["not in", data.message[0]]
 			})
 		}

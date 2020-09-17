@@ -14,7 +14,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 	get_loyalty_program_details_with_points, validate_loyalty_points
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, get_bank_cash_account, update_multi_mode_option
-from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos
+from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
 
 from six import iteritems
 
@@ -74,21 +74,12 @@ class POSInvoice(SalesInvoice):
 
 		for d in self.get('items'):
 			if d.serial_no:
-				filters = {
-					"item_code": d.item_code,
-					"warehouse": d.warehouse,
-					"delivery_document_no": "",
-					"sales_invoice": ""
-				}
+				filters = { "item_code": d.item_code, "warehouse": d.warehouse }
 				if d.batch_no:
 					filters["batch_no"] = d.batch_no
-				reserved_serial_nos, unreserved_serial_nos = get_pos_reserved_serial_nos(filters)
-				serial_nos = d.serial_no.split("\n")
-				serial_nos = ' '.join(serial_nos).split() # remove whitespaces
-				invalid_serial_nos = []
-				for s in serial_nos:
-					if s in reserved_serial_nos:
-						invalid_serial_nos.append(s)
+				reserved_serial_nos = get_pos_reserved_serial_nos(filters)
+				serial_nos = get_serial_nos(d.serial_no)
+				invalid_serial_nos = [s for s in serial_nos if s in reserved_serial_nos]
 
 				if len(invalid_serial_nos):
 					multiple_nos = 's' if len(invalid_serial_nos) > 1 else ''
