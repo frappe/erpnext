@@ -170,7 +170,7 @@
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
- "owner": "harshada@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "create": 1,

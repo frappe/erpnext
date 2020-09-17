@@ -48,7 +48,7 @@
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Practitioner Schedule",
- "owner": "rmehta@gmail.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "create": 1,

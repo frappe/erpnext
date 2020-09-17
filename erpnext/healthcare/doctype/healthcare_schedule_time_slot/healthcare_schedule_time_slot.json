@@ -122,7 +122,7 @@
  "module": "Healthcare", 
  "name": "Healthcare Schedule Time Slot", 
  "name_case": "", 
- "owner": "rmehta@gmail.com", 
+ "owner": "Administrator", 
  "permissions": [], 
  "quick_entry": 1, 
  "read_only": 0, 

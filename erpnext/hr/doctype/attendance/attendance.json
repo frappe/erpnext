@@ -209,7 +209,7 @@
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",
- "owner": "ashwini@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "cancel": 1,

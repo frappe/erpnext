@@ -59,7 +59,7 @@
  "module": "Hub Node", 
  "name": "Hub Users", 
  "name_case": "", 
- "owner": "test1@example.com", 
+ "owner": "Administrator", 
  "permissions": [], 
  "quick_entry": 1, 
  "read_only": 0, 

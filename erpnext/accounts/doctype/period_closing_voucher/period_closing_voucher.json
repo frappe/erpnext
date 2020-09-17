@@ -295,7 +295,7 @@
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Period Closing Voucher", 
- "owner": "jai@webnotestech.com", 
+ "owner": "Administrator", 
  "permissions": [
   {
    "amend": 1, 

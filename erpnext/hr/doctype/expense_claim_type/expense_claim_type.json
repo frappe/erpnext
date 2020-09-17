@@ -52,7 +52,7 @@
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim Type",
- "owner": "harshada@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "create": 1,

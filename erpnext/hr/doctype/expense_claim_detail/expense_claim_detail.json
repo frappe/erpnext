@@ -124,7 +124,7 @@
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim Detail",
- "owner": "harshada@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC"

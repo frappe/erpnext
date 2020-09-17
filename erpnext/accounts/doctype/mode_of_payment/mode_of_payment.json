@@ -49,7 +49,7 @@
  "modified_by": "sammish.thundiyil@gmail.com",
  "module": "Accounts",
  "name": "Mode of Payment",
- "owner": "harshada@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "create": 1,

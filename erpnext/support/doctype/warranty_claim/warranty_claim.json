@@ -365,7 +365,7 @@
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Warranty Claim",
- "owner": "harshada@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "create": 1,

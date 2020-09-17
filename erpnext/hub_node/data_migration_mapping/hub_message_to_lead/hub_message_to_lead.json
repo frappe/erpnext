@@ -24,7 +24,7 @@
  "modified": "2018-02-14 15:57:05.606597",
  "modified_by": "achilles@erpnext.com",
  "name": "Hub Message to Lead",
- "owner": "frappetest@gmail.com",
+ "owner": "Administrator",
  "page_length": 10,
  "remote_objectname": "Hub Message",
  "remote_primary_key": "name"

@@ -152,7 +152,7 @@
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item Supplied",
- "owner": "dhanalekshmi@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC"
