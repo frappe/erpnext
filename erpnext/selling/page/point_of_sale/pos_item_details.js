@@ -240,6 +240,11 @@ erpnext.PointOfSale.ItemDetails = class {
 					});
 				}
 			}
+			this.warehouse_control.df.get_query = () => {
+				return {
+					filters: { company: this.events.get_frm().doc.company }
+				}
+			};
 			this.warehouse_control.refresh();
 		}
 
