@@ -139,7 +139,7 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 	}
 
 	make() {
-		const me = this;	
+		const me = this;
 		new frappe.ui.FileUploader({
 			method: 'erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.upload_bank_statement',
 			allow_multiple: 0,

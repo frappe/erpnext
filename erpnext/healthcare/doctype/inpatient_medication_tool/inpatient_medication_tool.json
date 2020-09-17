@@ -22,6 +22,7 @@
    "reqd": 1
   },
   {
+   "description": "Select all the medication orders you want to process.",
    "fieldname": "section_break_2",
    "fieldtype": "Section Break",
    "label": "Pending Medication Orders"
@@ -59,7 +60,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-09-16 14:58:41.795566",
+ "modified": "2020-09-16 17:14:56.516299",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Medication Tool",

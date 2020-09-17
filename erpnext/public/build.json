@@ -42,6 +42,7 @@
 		"public/js/utils/item_selector.js",
 		"public/js/help_links.js",
 		"public/js/agriculture/ternary_plot.js",
+		"public/js/healthcare/inpatient_medication_order_view.js",
 		"public/js/templates/item_quick_entry.html",
 		"public/js/utils/item_quick_entry.js",
 		"public/js/utils/customer_quick_entry.js",

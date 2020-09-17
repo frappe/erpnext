@@ -9,16 +9,6 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 			if (r && r.inpatient_medication_warehouse) {
 				frm.set_value('warehouse', r.inpatient_medication_warehouse);
 			}
-		})
-
-		const assets = [
-			"/assets/frappe/css/frappe-datatable.css",
-			"/assets/frappe/js/lib/clusterize.min.js",
-			"/assets/frappe/js/lib/Sortable.min.js",
-			"/assets/frappe/js/lib/frappe-datatable.js"
-		];
-		frappe.require(assets, () => {
-			frm.events.make_wrapper(frm);
 		});
 	},
 
@@ -32,56 +22,40 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 				},
 				callback: function(r) {
 					if (r.message) {
-						let orders_datatable = frm.events.render_datatable(frm, r.message);
+						frm.events.show_pending_orders(frm, r.message);
 						frm.doc.show_submit = true;
-						frm.events.update_orders(frm, orders_datatable);
+						frm.events.update_orders(frm);
 					}
 				}
 			});
 		}
 	},
 
-	make_wrapper(frm) {
-		$(frm.fields_dict.medication_orders.wrapper).html(`
-			<div>
-				<div class="row">
-					<div class="col-sm-12">
-						<div class="table-orders border"></div>
-					</div>
-				</div>
-			</div>
-		`);
-	},
-
-	render_datatable(frm, data) {
-		let element = document.querySelector('.table-orders');
+	show_pending_orders(frm, data) {
 		let columns = frm.events.prepare_columns();
-		let orders_datatable = new DataTable(element, {
+		frm.pending_orders = new healthcare.InpatientMedicationOrderView({
+			wrapper: frm.get_field('medication_orders').$wrapper,
 			data: data,
-			columns: columns,
-			checkboxColumn: true,
-			addCheckboxColumn: true
+			columns: columns
 		});
-
-		return orders_datatable
 	},
 
 	prepare_columns() {
 		return [
+			{id: 'time', name: __('Time'), field: 'time', content: __('Time'), width: 70},
 			{id: 'patient', name: __('Patient Patient Name)'), content: __('Patient - Patient Name'), field: "patient", width: 200},
-			{id: 'service_unit', name: __('Service Unit'), content: __('Service Unit'), field: 'service_unit', width: 200},
-			{id: 'drug', name: __('Drug Code'), field: 'drug', content: __('Drug Code'), width: 170},
+			{id: 'service_unit', name: __('Service Unit'), content: __('Service Unit'), field: 'service_unit', width: 180},
+			{id: 'drug', name: __('Drug Code'), field: 'drug', content: __('Drug Code'), width: 200},
 			{id: 'drug_name', name: __('Drug Name'), field: 'drug_name', content: __('Drug Name'), width: 200},
-			{id: 'dosage', name: __('Dosage'), content: __('Dosage'), field: 'dosage', width: 60},
-			{id: 'dosage_form', name: __('Dosage'), content: __('Dosage Form'), field: 'dosage_form', width: 100},
-			{id: 'time', name: __('Time'), field: 'time', content: __('Time'), width: 100}
+			{id: 'dosage', name: __('Dosage'), content: __('Dosage'), field: 'dosage', width: 70},
+			{id: 'dosage_form', name: __('Dosage'), content: __('Dosage Form'), field: 'dosage_form', width: 100}
 		];
 	},
 
-	update_orders: function(frm, orders_datatable) {
+	update_orders: function(frm) {
 		if (frm.doc.show_submit) {
 			frm.page.set_primary_action(__("Submit"), function() {
-				const orders = frm.events.get_completed_orders(frm, orders_datatable);
+				const orders = frm.events.get_completed_orders(frm);
 				frappe.call({
 					doc: frm.doc,
 					method: 'process_medication_orders',
@@ -140,9 +114,9 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 		}
 	},
 
-	get_completed_orders: function(frm, orders_datatable) {
-		const indexes = orders_datatable.rowmanager.getCheckedRows();
-		const orders = indexes.map(i => orders_datatable.datamanager.data[i]).filter(i => i != undefined);
+	get_completed_orders: function(frm) {
+		const indexes = frm.pending_orders.orders_datatable.rowmanager.getCheckedRows();
+		const orders = indexes.map(i => frm.pending_orders.orders_datatable.datamanager.data[i]).filter(i => i != undefined);
 		return orders
 	}
 });
