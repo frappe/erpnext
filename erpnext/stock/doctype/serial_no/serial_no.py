@@ -596,6 +596,7 @@ def fetch_serial_numbers(filters, qty, do_not_include=[]):
 		expiry_date_cond = "and (batch.expiry_date is null or batch.expiry_date >= %(expiry_date)s) "
 		batch_no_condition += expiry_date_cond
 
+	excluded_sr_nos = ", ".join(["" + frappe.db.escape(sr) + "" for sr in do_not_include]) or "''"
 	serial_numbers = frappe.db.sql("""
 		SELECT sr.name FROM `tabSerial No` sr {batch_join_selection}
 		WHERE
@@ -610,7 +611,7 @@ def fetch_serial_numbers(filters, qty, do_not_include=[]):
 		LIMIT
 			{qty}
 		""".format(
-				excluded_sr_nos=", ".join(["" + frappe.db.escape(sr) + "" for sr in do_not_include]),
+				excluded_sr_nos=excluded_sr_nos,
 				qty=qty,
 				batch_join_selection=batch_join_selection,
 				batch_no_condition=batch_no_condition
