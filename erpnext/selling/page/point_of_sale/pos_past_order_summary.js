@@ -287,6 +287,20 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
             this.$summary_container.find('.print-btn').click();
         });
+        frappe.ui.keys.on("ctrl+n", () => {
+            const new_btn_visible = this.$summary_container.find('.new-btn').is(":visible");
+            const summary_visible = this.$component.is(":visible");
+            if (!summary_visible || !new_btn_visible) return;
+
+            this.$summary_container.find('.new-btn').click();
+        });
+        frappe.ui.keys.on("ctrl+e", () => {
+            const email_btn_visible = this.$summary_container.find('.email-btn').is(":visible");
+            const summary_visible = this.$component.is(":visible");
+            if (!summary_visible || !email_btn_visible) return;
+
+            this.$summary_container.find('.email-btn').click();
+        });
     }
 
     toggle_component(show) {
