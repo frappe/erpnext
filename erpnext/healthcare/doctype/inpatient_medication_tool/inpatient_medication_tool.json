@@ -10,8 +10,9 @@
   "company",
   "warehouse",
   "section_break_2",
-  "medication_orders",
-  "completed_medication_order_section"
+  "pending_medication_orders",
+  "completed_medication_order_section",
+  "completed_medication_orders"
  ],
  "fields": [
   {
@@ -28,14 +29,9 @@
    "label": "Pending Medication Orders"
   },
   {
-   "fieldname": "medication_orders",
-   "fieldtype": "HTML",
-   "label": "Medication Orders"
-  },
-  {
    "fieldname": "completed_medication_order_section",
    "fieldtype": "Section Break",
-   "label": "Completed Medication Order"
+   "label": "Completed Medication Orders"
   },
   {
    "fieldname": "warehouse",
@@ -54,13 +50,23 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "fieldname": "pending_medication_orders",
+   "fieldtype": "HTML",
+   "label": "Pending Orders"
+  },
+  {
+   "fieldname": "completed_medication_orders",
+   "fieldtype": "HTML",
+   "label": "Completed Orders"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-09-16 17:14:56.516299",
+ "modified": "2020-09-17 16:08:06.335089",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Medication Tool",

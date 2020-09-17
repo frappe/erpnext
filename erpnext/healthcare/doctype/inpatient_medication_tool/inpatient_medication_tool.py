@@ -87,7 +87,7 @@ class InpatientMedicationTool(Document):
 
 
 @frappe.whitelist()
-def get_medication_orders(date):
+def get_medication_orders(date, is_completed=0):
 	data = frappe.db.sql("""
 		SELECT
 			ip.inpatient_record, ip.patient, ip.patient_name,
@@ -100,10 +100,10 @@ def get_medication_orders(date):
 			ip.name = entry.parent
 		WHERE
 			entry.date = %(date)s and
-			entry.is_completed != 1
+			entry.is_completed = %(is_completed)s
 		ORDER BY
 			entry.time
-	""", {'date': date}, as_dict=1)
+	""", {'date': date, 'is_completed': is_completed}, as_dict=1)
 
 	for entry in data:
 		inpatient_record = entry.inpatient_record

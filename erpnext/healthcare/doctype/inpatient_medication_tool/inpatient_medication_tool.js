@@ -15,40 +15,52 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 	date: function(frm) {
 		frm.doc.show_submit = false;
 		if (frm.doc.date) {
-			frappe.call({
-				method: 'erpnext.healthcare.doctype.inpatient_medication_tool.inpatient_medication_tool.get_medication_orders',
-				args: {
-					'date': frm.doc.date
-				},
-				callback: function(r) {
-					if (r.message) {
-						frm.events.show_pending_orders(frm, r.message);
-						frm.doc.show_submit = true;
-						frm.events.update_orders(frm);
-					}
-				}
-			});
+			frm.events.get_pending_orders(frm);
+			frm.events.show_completed_orders(frm);
 		}
+	},
+
+	get_pending_orders(frm) {
+		frappe.call({
+			method: 'erpnext.healthcare.doctype.inpatient_medication_tool.inpatient_medication_tool.get_medication_orders',
+			args: {
+				'date': frm.doc.date,
+				'is_completed': 0
+			},
+			callback: function(r) {
+				if (r.message) {
+					frm.events.show_pending_orders(frm, r.message);
+					frm.doc.show_submit = true;
+					frm.events.update_orders(frm);
+				}
+			}
+		});
 	},
 
 	show_pending_orders(frm, data) {
 		let columns = frm.events.prepare_columns();
-		frm.pending_orders = new healthcare.InpatientMedicationOrderView({
-			wrapper: frm.get_field('medication_orders').$wrapper,
-			data: data,
-			columns: columns
-		});
+		if (frm.pending_orders) {
+			frm.pending_orders.orders_datatable.refresh(data, columns);
+		} else {
+			frm.pending_orders = new healthcare.InpatientMedicationOrderView({
+				wrapper: frm.get_field('pending_medication_orders').$wrapper,
+				data: data,
+				columns: columns,
+				datatable_class: 'pending-orders',
+				addCheckboxColumn: true
+			});
+		}
 	},
 
 	prepare_columns() {
 		return [
-			{id: 'time', name: __('Time'), field: 'time', content: __('Time'), width: 70},
-			{id: 'patient', name: __('Patient Patient Name)'), content: __('Patient - Patient Name'), field: "patient", width: 200},
-			{id: 'service_unit', name: __('Service Unit'), content: __('Service Unit'), field: 'service_unit', width: 180},
-			{id: 'drug', name: __('Drug Code'), field: 'drug', content: __('Drug Code'), width: 200},
-			{id: 'drug_name', name: __('Drug Name'), field: 'drug_name', content: __('Drug Name'), width: 200},
-			{id: 'dosage', name: __('Dosage'), content: __('Dosage'), field: 'dosage', width: 70},
-			{id: 'dosage_form', name: __('Dosage'), content: __('Dosage Form'), field: 'dosage_form', width: 100}
+			{id: 'time', name: __('Time'), field: 'time', content: __('Time'), width: 80, editable: false, sortable: false},
+			{id: 'patient', name: __('Patient - Patient Name'), content: __('Patient - Patient Name'), field: 'patient', width: 200, editable: false, sortable: false},
+			{id: 'service_unit', name: __('Service Unit'), content: __('Service Unit'), field: 'service_unit', width: 180, editable: false, sortable: false},
+			{id: 'drug', name: __('Drug Code'), field: 'drug', content: __('Drug Code'), width: 200, editable: false, sortable: false},
+			{id: 'drug_name', name: __('Drug Name'), field: 'drug_name', content: __('Drug Name'), width: 200, editable: false, sortable: false},
+			{id: 'dosage', name: __('Dosage'), content: __('Dosage'), field: 'dosage', width: 70, editable: false, sortable: false},
+			{id: 'dosage_form', name: __('Dosage'), content: __('Dosage Form'), field: 'dosage_form', width: 100, editable: false, sortable: false}
 		];
 	},
 
@@ -102,7 +114,9 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 									title: __(`Success`),
 									message: __(`Medication Orders Processed successfully`),
 									indicator: 'green'
-								})
+								});
+								frm.pending_orders.orders_datatable.rowmanager.checkMap = [];
+								frm.events.get_pending_orders(frm);
 							}
 						}
 					}
@@ -112,6 +126,32 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 		else {
 			frm.page.clear_primary_action();
 		}
+	},
+
+	show_completed_orders: function(frm) {
+		frappe.call({
+			method: 'erpnext.healthcare.doctype.inpatient_medication_tool.inpatient_medication_tool.get_medication_orders',
+			args: {
+				'date': frm.doc.date,
+				'is_completed': 1
+			},
+			callback: function(r) {
+				if (r.message) {
+					let columns = frm.events.prepare_columns();
+					if (frm.completed_orders) {
+						frm.completed_orders.orders_datatable.refresh(r.message, columns);
+					} else {
+						frm.completed_orders = new healthcare.InpatientMedicationOrderView({
+							wrapper: frm.get_field('completed_medication_orders').$wrapper,
+							data: r.message,
+							columns: columns,
+							datatable_class: 'completed-orders',
+							addCheckboxColumn: false
+						});
+					}
+				}
+			}
+		});
 	},
 
 	get_completed_orders: function(frm) {

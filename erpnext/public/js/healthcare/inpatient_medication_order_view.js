@@ -4,11 +4,16 @@ healthcare.InpatientMedicationOrderView = class InpatientMedicationOrderView {
 	constructor({
 		wrapper,
 		data,
-		columns
+		columns,
+		datatable_class,
+		addCheckboxColumn,
+		editable
 	}) {
 		this.wrapper = wrapper;
 		this.data = data;
 		this.columns = columns;
+		this.datatable_class = datatable_class;
+		this.addCheckboxColumn = addCheckboxColumn;
 
 		this.make();
 	}
@@ -23,13 +28,13 @@ healthcare.InpatientMedicationOrderView = class InpatientMedicationOrderView {
 			<div>
 				<div class="row">
 					<div class="col-sm-12">
-						<div class="table-orders border"></div>
+						<div class="${this.datatable_class} border"></div>
 					</div>
 				</div>
 			</div>
 		`);
 
-		this.$order_view = this.wrapper.find('.table-orders');
+		this.$order_view = this.wrapper.find('.' + `${this.datatable_class}`);
 	}
 
 	render_datatable() {
@@ -40,10 +45,22 @@ healthcare.InpatientMedicationOrderView = class InpatientMedicationOrderView {
 		this.orders_datatable = new frappe.DataTable(this.$order_view.get(0), {
 			data: this.data,
 			columns: this.columns,
-			checkboxColumn: true,
-			addCheckboxColumn: true,
+			checkboxColumn: this.addCheckboxColumn,
+			addCheckboxColumn: this.addCheckboxColumn,
 			cellHeight: 35,
+			disableReorderColumn: true,
+			inlineFilters: true,
 			noDataMessage: __('No Data')
+		});
+
+		if (this.data.length === 0) {
+			this.orders_datatable.style.setStyle('.dt-scrollable', {
+				height: 'auto'
+			});
+		}
+
+		this.orders_datatable.style.setStyle('.dt-dropdown', {
+			display: 'none'
 		});
 	}
 };
