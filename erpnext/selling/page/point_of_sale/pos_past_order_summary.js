@@ -280,27 +280,30 @@ erpnext.PointOfSale.PastOrderSummary = class {
     }
 
     attach_shortcuts() {
-        frappe.ui.keys.on("ctrl+p", () => {
-            const print_btn_visible = this.$summary_container.find('.print-btn').is(":visible");
-            const summary_visible = this.$component.is(":visible");
-            if (!summary_visible || !print_btn_visible) return;
-
-            this.$summary_container.find('.print-btn').click();
+        const ctrl_label = frappe.utils.is_mac() ? '⌘' : 'Ctrl';
+        this.$summary_container.find('.print-btn').attr("title", `${ctrl_label}+P`);
+		frappe.ui.keys.add_shortcut({
+			shortcut: "ctrl+p",
+			action: () => this.$summary_container.find('.print-btn').click(),
+			condition: () => this.$component.is(':visible') && this.$summary_container.find('.print-btn').is(":visible"),
+			description: __("Print Receipt"),
+			page: cur_page.page.page
         });
-        frappe.ui.keys.on("ctrl+n", () => {
-            const new_btn_visible = this.$summary_container.find('.new-btn').is(":visible");
-            const summary_visible = this.$component.is(":visible");
-            if (!summary_visible || !new_btn_visible) return;
-
-            this.$summary_container.find('.new-btn').click();
-        });
-        frappe.ui.keys.on("ctrl+e", () => {
-            const email_btn_visible = this.$summary_container.find('.email-btn').is(":visible");
-            const summary_visible = this.$component.is(":visible");
-            if (!summary_visible || !email_btn_visible) return;
-
-            this.$summary_container.find('.email-btn').click();
-        });
+        this.$summary_container.find('.new-btn').attr("title", `${ctrl_label}+Enter`);
+        frappe.ui.keys.on("ctrl+enter", () => {
+			const summary_is_visible = this.$component.is(":visible");
+			if (summary_is_visible && this.$summary_container.find('.new-btn').is(":visible")) {
+				this.$summary_container.find('.new-btn').click()
+			}
+		});
+        this.$summary_container.find('.edit-btn').attr("title", `${ctrl_label}+E`);
+		frappe.ui.keys.add_shortcut({
+			shortcut: "ctrl+e",
+			action: () => this.$summary_container.find('.edit-btn').click(),
+			condition: () => this.$component.is(':visible') && this.$summary_container.find('.edit-btn').is(":visible"),
+			description: __("Edit Receipt"),
+			page: cur_page.page.page
+		});
     }
 
     toggle_component(show) {

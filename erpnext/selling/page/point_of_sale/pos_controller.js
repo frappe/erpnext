@@ -163,8 +163,8 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	prepare_dom() {
-		this.wrapper.append(`
-			<div class="app grid grid-cols-10 pt-8 gap-6"></div>`
+		this.wrapper.append(
+			`<div class="app grid grid-cols-10 pt-8 gap-6"></div>`
 		);
 
 		this.$components_wrapper = this.wrapper.find('.app');
@@ -182,7 +182,7 @@ erpnext.PointOfSale.Controller = class {
 	prepare_menu() {
 		this.page.clear_menu();
 
-		this.page.add_menu_item(__("Form View"), this.open_form_view.bind(this), false, 'Ctrl+F');
+		this.page.add_menu_item(__("Open Form View"), this.open_form_view.bind(this), false, 'Ctrl+F');
 
 		this.page.add_menu_item(__("Toggle Recent Orders"), this.toggle_recent_order.bind(this), false, 'Ctrl+O');
 
@@ -373,7 +373,6 @@ erpnext.PointOfSale.Controller = class {
 				submit_invoice: () => {
 					this.frm.savesubmit()
 						.then((r) => {
-							// this.set_invoice_status();
 							this.toggle_components(false);
 							this.order_summary.toggle_component(true);
 							this.order_summary.load_summary_of(this.frm.doc, true);

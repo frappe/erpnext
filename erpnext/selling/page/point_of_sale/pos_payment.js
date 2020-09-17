@@ -254,6 +254,8 @@ erpnext.PointOfSale.Payment = class {
 	}
 
 	attach_shortcuts() {
+		const ctrl_label = frappe.utils.is_mac() ? '⌘' : 'Ctrl';
+		this.$component.find('.submit-order').attr("title", `${ctrl_label}+Enter`);
 		frappe.ui.keys.on("ctrl+enter", () => {
 			const payment_is_visible = this.$component.is(":visible");
 			const active_mode = this.$payment_modes.find(".border-primary");
@@ -262,21 +264,28 @@ erpnext.PointOfSale.Payment = class {
 			}
 		});
 
-		frappe.ui.keys.on("tab", () => {
-			const payment_is_visible = this.$component.is(":visible");
-			const mode_of_payments = Array.from(this.$payment_modes.find(".mode-of-payment")).map(m => $(m).attr("data-mode"));
-			let active_mode = this.$payment_modes.find(".border-primary");
-			active_mode = active_mode.length ? active_mode.attr("data-mode") : undefined;
-
-			if (!active_mode) return;
-
-			const mode_index = mode_of_payments.indexOf(active_mode);
-			const next_mode_index = (mode_index + 1) % mode_of_payments.length;
-			const next_mode_to_be_clicked = this.$payment_modes.find(`.mode-of-payment[data-mode="${mode_of_payments[next_mode_index]}"]`);
-
-			if (payment_is_visible && mode_index != next_mode_index) {
-				next_mode_to_be_clicked.click();
-			}
+		frappe.ui.keys.add_shortcut({
+			shortcut: "tab",
+			action: () => {
+				const payment_is_visible = this.$component.is(":visible");
+				let active_mode = this.$payment_modes.find(".border-primary");
+				active_mode = active_mode.length ? active_mode.attr("data-mode") : undefined;
+	
+				if (!active_mode) return;
+	
+				const mode_of_payments = Array.from(this.$payment_modes.find(".mode-of-payment")).map(m => $(m).attr("data-mode"));
+				const mode_index = mode_of_payments.indexOf(active_mode);
+				const next_mode_index = (mode_index + 1) % mode_of_payments.length;
+				const next_mode_to_be_clicked = this.$payment_modes.find(`.mode-of-payment[data-mode="${mode_of_payments[next_mode_index]}"]`);
+	
+				if (payment_is_visible && mode_index != next_mode_index) {
+					next_mode_to_be_clicked.click();
+				}
+			},
+			condition: () => this.$component.is(':visible') && this.$payment_modes.find(".border-primary").length,
+			description: __("Switch Between Payment Modes"),
+			ignore_inputs: true,
+			page: cur_page.page.page
 		});
 	}
 
