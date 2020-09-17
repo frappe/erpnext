@@ -270,7 +270,8 @@ erpnext.PointOfSale.ItemDetails = class {
 					query: 'erpnext.controllers.queries.get_batch_no',
 					filters: {
 						item_code: me.item_row.item_code,
-						warehouse: me.item_row.warehouse
+						warehouse: me.item_row.warehouse,
+						posting_date: me.events.get_frm().doc.posting_date
 					}
 				}
 			};
@@ -360,6 +361,8 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.$form_container.on('click', '.auto-fetch-btn', () => {
 			this.batch_no_control.set_value('');
 			let qty = this.qty_control.get_value();
+			let expiry_date = this.item_row.has_batch_no ? this.events.get_frm().doc.posting_date : "";
+
 			let numbers = frappe.call({
 				method: "erpnext.stock.doctype.serial_no.serial_no.auto_fetch_serial_number",
 				args: {
@@ -367,6 +370,7 @@ erpnext.PointOfSale.ItemDetails = class {
 					item_code: this.current_item.item_code,
 					warehouse: this.warehouse_control.get_value() || '',
 					batch_nos: this.current_item.batch_no || '',
+					posting_date: expiry_date,
 					for_doctype: 'POS Invoice'
 				}
 			});
