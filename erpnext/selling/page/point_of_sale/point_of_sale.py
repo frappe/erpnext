@@ -84,17 +84,14 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 			item_price = item_prices.get(item_code) or {}
 			item_stock_qty = get_stock_availability(item_code, warehouse)
 
-			if not item_stock_qty:
-				pass
-			else:
-				row = {}
-				row.update(item)
-				row.update({
-					'price_list_rate': item_price.get('price_list_rate'),
-					'currency': item_price.get('currency'),
-					'actual_qty': item_stock_qty,
-				})
-				result.append(row)
+			row = {}
+			row.update(item)
+			row.update({
+				'price_list_rate': item_price.get('price_list_rate'),
+				'currency': item_price.get('currency'),
+				'actual_qty': item_stock_qty,
+			})
+			result.append(row)
 
 	res = {
 		'items': result

@@ -334,11 +334,9 @@ def get_stock_availability(item_code, warehouse):
 	sle_qty = latest_sle[0].qty_after_transaction or 0 if latest_sle else 0
 	pos_sales_qty = pos_sales_qty[0].qty or 0 if pos_sales_qty else 0
 
-	if sle_qty and pos_sales_qty and sle_qty > pos_sales_qty:
+	if sle_qty and pos_sales_qty:
 		return sle_qty - pos_sales_qty
 	else:
-		# when sle_qty is 0
-		# when sle_qty > 0 and pos_sales_qty is 0
 		return sle_qty
 
 @frappe.whitelist()
