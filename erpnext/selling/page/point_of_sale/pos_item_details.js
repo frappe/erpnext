@@ -364,7 +364,7 @@ erpnext.PointOfSale.ItemDetails = class {
 	
 	bind_auto_serial_fetch_event() {
 		this.$form_container.on('click', '.auto-fetch-btn', () => {
-			this.batch_no_control.set_value('');
+			this.batch_no_control && this.batch_no_control.set_value('');
 			let qty = this.qty_control.get_value();
 			let expiry_date = this.item_row.has_batch_no ? this.events.get_frm().doc.posting_date : "";
 
