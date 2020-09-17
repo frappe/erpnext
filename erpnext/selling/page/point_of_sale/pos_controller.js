@@ -180,26 +180,25 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	prepare_menu() {
-		var me = this;
 		this.page.clear_menu();
 
-		this.page.add_menu_item(__("Form View"), function () {
-			frappe.model.sync(me.frm.doc);
-			frappe.set_route("Form", me.frm.doc.doctype, me.frm.doc.name);
-		});
+		this.page.add_menu_item(__("Form View"), this.open_form_view.bind(this), false, 'Ctrl+F');
 
-		this.page.add_menu_item(__("Toggle Recent Orders"), () => {
-			const show = this.recent_order_list.$component.hasClass('d-none');
-			this.toggle_recent_order_list(show);
-		});
+		this.page.add_menu_item(__("Toggle Recent Orders"), this.toggle_recent_order.bind(this), false, 'Ctrl+O');
 
-		this.page.add_menu_item(__("Save as Draft"), this.save_draft_invoice.bind(this));
+		this.page.add_menu_item(__("Save as Draft"), this.save_draft_invoice.bind(this), false, 'Ctrl+S');
 
-		frappe.ui.keys.on("ctrl+s", this.save_draft_invoice.bind(this));
+		this.page.add_menu_item(__('Close the POS'), this.close_pos.bind(this), false, 'Shift+Ctrl+C');
+	}
 
-		this.page.add_menu_item(__('Close the POS'), this.close_pos.bind(this));
+	open_form_view() {
+		frappe.model.sync(this.frm.doc);
+		frappe.set_route("Form", this.frm.doc.doctype, this.frm.doc.name);
+	}
 
-		frappe.ui.keys.on("shift+ctrl+s", this.close_pos.bind(this));
+	toggle_recent_order() {
+		const show = this.recent_order_list.$component.hasClass('d-none');
+		this.toggle_recent_order_list(show);
 	}
 
 	save_draft_invoice() {
