@@ -343,6 +343,7 @@ erpnext.PointOfSale.ItemDetails = class {
 	}
 
 	attach_shortcuts() {
+		this.wrapper.find('.close-btn').attr("title", "Esc");
 		frappe.ui.keys.on("escape", () => {
 			const item_details_visible = this.$component.is(":visible");
 			if (item_details_visible) {
