@@ -20,25 +20,43 @@ erpnext.PointOfSale.Controller = class {
 		frappe.require(['assets/erpnext/css/pos.css'], this.check_opening_entry.bind(this));
 	}
 
+	fetch_opening_entry() {
+		return frappe.call("erpnext.selling.page.point_of_sale.point_of_sale.check_opening_entry", { "user": frappe.session.user });
+	}
+
 	check_opening_entry() {
-		return frappe.call("erpnext.selling.page.point_of_sale.point_of_sale.check_opening_entry", { "user": frappe.session.user })
-			.then((r) => {
-				if (r.message.length) {
-					// assuming only one opening voucher is available for the current user
-					this.prepare_app_defaults(r.message[0]);
-				} else {
-					this.create_opening_voucher();
-				}
-			});
+		this.fetch_opening_entry().then((r) => {
+			if (r.message.length) {
+				// assuming only one opening voucher is available for the current user
+				this.prepare_app_defaults(r.message[0]);
+			} else {
+				this.create_opening_voucher();
+			}
+		});
 	}
 
 	create_opening_voucher() {
 		const table_fields = [
-			{ fieldname: "mode_of_payment", fieldtype: "Link", in_list_view: 1, label: "Mode of Payment", options: "Mode of Payment", reqd: 1 },
-			{ fieldname: "opening_amount", fieldtype: "Currency", default: 0, in_list_view: 1, label: "Opening Amount", 
-				options: "company:company_currency" }
+			{
+				fieldname: "mode_of_payment", fieldtype: "Link",
+				in_list_view: 1, label: "Mode of Payment",
+				options: "Mode of Payment", reqd: 1
+			},
+			{
+				fieldname: "opening_amount", fieldtype: "Currency",
+				in_list_view: 1, label: "Opening Amount",
+				options: "company:company_currency", 
+				change: function () {
+					dialog.fields_dict.balance_details.df.data.some(d => {
+						if (d.idx == this.doc.idx) {
+							d.opening_amount = this.value;
+							dialog.fields_dict.balance_details.grid.refresh();
+							return true;
+						}
+					});
+				}
+			}
 		];
-
 		const dialog = new frappe.ui.Dialog({
 			title: __('Create POS Opening Entry'),
 			fields: [
@@ -54,11 +72,11 @@ erpnext.PointOfSale.Controller = class {
 
 						if (!pos_profile) return;
 
-						frappe.db.get_doc("POS Profile", pos_profile).then(doc => {
+						frappe.db.get_doc("POS Profile", pos_profile).then(({ payments }) => {
 							dialog.fields_dict.balance_details.df.data = [];
-							doc.payments.forEach(pay => {
+							payments.forEach(pay => {
 								const { mode_of_payment } = pay;
-								dialog.fields_dict.balance_details.df.data.push({ mode_of_payment });
+								dialog.fields_dict.balance_details.df.data.push({ mode_of_payment, opening_amount: '0' });
 							});
 							dialog.fields_dict.balance_details.grid.refresh();
 						});
@@ -93,7 +111,7 @@ erpnext.PointOfSale.Controller = class {
 						if (r.message) {
 							this.prepare_app_defaults(r.message);
 						}
-					})
+					});
 			},
 			primary_action_label: __('Submit')
 		});
@@ -572,7 +590,10 @@ erpnext.PointOfSale.Controller = class {
 
 				const args = { item_code, batch_no, [field]: value };
 
-				if (serial_no) args['serial_no'] = serial_no;
+				if (serial_no) {
+					await this.check_serial_no_availablilty(item_code, this.frm.doc.set_warehouse, serial_no);
+					args['serial_no'] = serial_no;
+				}
 
 				if (field === 'serial_no') args['qty'] = value.split(`\n`).length || 0;
 
@@ -643,7 +664,10 @@ erpnext.PointOfSale.Controller = class {
 		frappe.dom.unfreeze();
 		if (!(available_qty > 0)) {
 			frappe.model.clear_doc(item_row.doctype, item_row.name);
-			frappe.throw(__(`Item Code: ${item_row.item_code.bold()} is not available under warehouse ${warehouse.bold()}.`))
+			frappe.throw({
+				title: _("Not Available"),
+				message: __(`Item Code: ${item_row.item_code.bold()} is not available under warehouse ${warehouse.bold()}.`)
+			})
 		} else if (available_qty < qty_needed) {
 			frappe.show_alert({
 				message: __(`Stock quantity not enough for Item Code: ${item_row.item_code.bold()} under warehouse ${warehouse.bold()}. 
@@ -654,6 +678,19 @@ erpnext.PointOfSale.Controller = class {
 			this.item_details.qty_control.set_value(flt(available_qty));
 		}
 		frappe.dom.freeze();
+	}
+
+	async check_serial_no_availablilty(item_code, warehouse, serial_no) {
+		const method = "erpnext.stock.doctype.serial_no.serial_no.get_pos_reserved_serial_nos";
+		const args = {filters: { item_code, warehouse }}
+		const res = await frappe.call({ method, args });
+
+		if (res.message.includes(serial_no)) {
+			frappe.throw({
+				title: _("Not Available"),
+				message: __(`Serial No: ${serial_no.bold()} has already been transacted into another POS Invoice.`)
+			});
+		}
 	}
 
 	get_available_stock(item_code, warehouse) {

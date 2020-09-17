@@ -74,7 +74,7 @@ erpnext.PointOfSale.PastOrderList = class {
         });
         this.search_field.toggle_label(false);
         this.status_field.toggle_label(false);
-        this.status_field.set_value('Paid');
+        this.status_field.set_value('Draft');
     }
     
     toggle_component(show) {
