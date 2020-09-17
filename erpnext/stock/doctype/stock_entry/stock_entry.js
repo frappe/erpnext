@@ -99,9 +99,6 @@ frappe.ui.form.on('Stock Entry', {
 		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
 	},
 
-
-
-
 	setup_quality_inspection: function(frm) {
 		if (!frm.doc.inspection_required) {
 			return;
