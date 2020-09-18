@@ -850,7 +850,8 @@ def make_purchase_order_for_default_supplier(source_name, for_supplier=None, sel
 						"contact_mobile",
 						"contact_email",
 						"contact_person",
-						"taxes_and_charges"
+						"taxes_and_charges",
+						"shipping_address"
 					],
 					"validation": {
 						"docstatus": ["=", 1]
@@ -918,7 +919,8 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 				"contact_mobile",
 				"contact_email",
 				"contact_person",
-				"taxes_and_charges"
+				"taxes_and_charges",
+				"shipping_address"
 			],
 			"validation": {
 				"docstatus": ["=", 1]
