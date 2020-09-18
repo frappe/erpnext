@@ -11,6 +11,7 @@
   "naming_series",
   "title",
   "material_request_type",
+  "transfer_status",
   "customer",
   "status",
   "column_break_2",
@@ -298,13 +299,22 @@
    "fieldtype": "Link",
    "label": "Set Source Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.add_to_transit == 1",
+   "fieldname": "transfer_status",
+   "fieldtype": "Select",
+   "label": "Transfer Status",
+   "options": "\nNot Started\nIn Transit\nCompleted",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-19 00:36:00.306761",
+ "modified": "2020-09-19 01:04:09.285862",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
