@@ -785,7 +785,7 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_purchase_order(source_name, for_supplier=None, selected_items=[], target_doc=None):
+def make_purchase_order_for_default_supplier(source_name, for_supplier=None, selected_items=[], target_doc=None):
 	if isinstance(selected_items, string_types):
 		selected_items = json.loads(selected_items)
 
@@ -822,8 +822,8 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 
 	def update_item(source, target, source_parent):
 		target.schedule_date = source.delivery_date
-		target.qty = flt(source.qty) - flt(source.ordered_qty)
-		target.stock_qty = (flt(source.qty) - flt(source.ordered_qty)) * flt(source.conversion_factor)
+		target.qty = flt(source.qty) - (flt(source.ordered_qty) / flt(source.conversion_factor))
+		target.stock_qty = (flt(source.stock_qty) - flt(source.ordered_qty))
 		target.project = source_parent.project
 
 	suppliers =[]
@@ -839,7 +839,7 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 		frappe.throw(_("Please set a Supplier against the Items to be considered in the Purchase Order."))
 
 	for supplier in suppliers:
-		po =frappe.get_list("Purchase Order", filters={"sales_order":source_name, "supplier":supplier, "docstatus": ("<", "2")})
+		po = frappe.get_list("Purchase Order", filters={"sales_order":source_name, "supplier":supplier, "docstatus": ("<", "2")})
 		if len(po) == 0:
 			doc = get_mapped_doc("Sales Order", source_name, {
 				"Sales Order": {
@@ -872,7 +872,7 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 						"item_tax_template"
 					],
 					"postprocess": update_item,
-					"condition": lambda doc: doc.ordered_qty < doc.qty and doc.supplier == supplier and doc.item_code in selected_items
+					"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.supplier == supplier and doc.item_code in selected_items
 				}
 			}, target_doc, set_missing_values)
 			if not for_supplier:
@@ -884,8 +884,67 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 			frappe.db.commit()
 		return doc
 	else:
-		frappe.msgprint(_("PO already created for all sales order items"))
+		frappe.msgprint(_("Purchase Order already created for all Sales Order items"))
 
+@frappe.whitelist()
+def make_purchase_order(source_name, for_supplier=None, selected_items=[], target_doc=None):
+	if isinstance(selected_items, string_types):
+		selected_items = json.loads(selected_items)
+
+	def set_missing_values(source, target):
+		target.supplier = ""
+		target.apply_discount_on = ""
+		target.additional_discount_percentage = 0.0
+		target.discount_amount = 0.0
+		target.inter_company_order_reference = ""
+		target.customer = ""
+		target.customer_name = ""
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+
+	def update_item(source, target, source_parent):
+		target.schedule_date = source.delivery_date
+		target.qty = flt(source.qty) - (flt(source.ordered_qty) / flt(source.conversion_factor))
+		target.stock_qty = (flt(source.stock_qty) - flt(source.ordered_qty))
+		target.project = source_parent.project
+
+	# po = frappe.get_list("Purchase Order", filters={"sales_order":source_name, "supplier":supplier, "docstatus": ("<", "2")})
+	doc = get_mapped_doc("Sales Order", source_name, {
+		"Sales Order": {
+			"doctype": "Purchase Order",
+			"field_no_map": [
+				"address_display",
+				"contact_display",
+				"contact_mobile",
+				"contact_email",
+				"contact_person",
+				"taxes_and_charges"
+			],
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Sales Order Item": {
+			"doctype": "Purchase Order Item",
+			"field_map":  [
+				["name", "sales_order_item"],
+				["parent", "sales_order"],
+				["stock_uom", "stock_uom"],
+				["uom", "uom"],
+				["conversion_factor", "conversion_factor"],
+				["delivery_date", "schedule_date"]
+			],
+			"field_no_map": [
+				"rate",
+				"price_list_rate",
+				"item_tax_template",
+				"supplier"
+			],
+			"postprocess": update_item,
+			"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.item_code in selected_items
+		}
+	}, target_doc, set_missing_values)
+	return doc
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
