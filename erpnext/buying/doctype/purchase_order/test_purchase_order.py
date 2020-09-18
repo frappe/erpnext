@@ -202,6 +202,53 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Purchase Order', trans_item, po.name)
 		frappe.set_user("Administrator")
 
+	def test_update_child_with_tax_template(self):
+		tax_template = "_Test Account Excise Duty @ 10"
+		item =  "_Test Item Home Desktop 100"
+
+		if not frappe.db.exists("Item Tax", {"parent":item, "item_tax_template":tax_template}):
+			item_doc = frappe.get_doc("Item", item)
+			item_doc.append("taxes", {
+				"item_tax_template": tax_template,
+				"valid_from": nowdate()
+			})
+			item_doc.save()
+		else:
+			# update valid from
+			frappe.db.sql("""UPDATE `tabItem Tax` set valid_from = CURDATE()
+				where parent = %(item)s and item_tax_template = %(tax)s""",
+					{"item": item, "tax": tax_template})
+
+		po = create_purchase_order(item_code=item, qty=1, do_not_save=1)
+
+		po.append("taxes", {
+			"account_head": "_Test Account Excise Duty - _TC",
+			"charge_type": "On Net Total",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Excise Duty",
+			"doctype": "Purchase Taxes and Charges",
+			"rate": 10
+		})
+		po.insert()
+		po.submit()
+
+		self.assertEqual(po.taxes[0].tax_amount, 50)
+		self.assertEqual(po.taxes[0].total, 550)
+
+		items = json.dumps([
+			{'item_code' : item, 'rate' : 500, 'qty' : 1, 'docname': po.items[0].name},
+			{'item_code' : item, 'rate' : 100, 'qty' : 1} # added item
+		])
+		update_child_qty_rate('Purchase Order', items, po.name)
+
+		po.reload()
+		self.assertEqual(po.taxes[0].tax_amount, 60)
+		self.assertEqual(po.taxes[0].total, 660)
+
+		frappe.db.sql("""UPDATE `tabItem Tax` set valid_from = NULL
+				where parent = %(item)s and item_tax_template = %(tax)s""",
+					{"item": item, "tax": tax_template})
+
 	def test_update_child_uom_conv_factor_change(self):
 		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
 		total_reqd_qty = sum([d.get("required_qty") for d in po.as_dict().get("supplied_items")])
