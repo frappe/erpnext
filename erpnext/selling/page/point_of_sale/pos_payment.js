@@ -70,13 +70,23 @@ erpnext.PointOfSale.Payment = class {
 				this.$invoice_fields.append(
 					`<div class="invoice_detail_field ${df.fieldname}-field" data-fieldname="${df.fieldname}"></div>`
 				);
+				let df_events = {
+					onchange: function() { frm.set_value(this.df.fieldname, this.value); }
+				}
+				if (df.fieldtype == "Button") {
+					df_events = {
+						click: function() {
+							if (frm.script_manager.has_handlers(df.fieldname, frm.doc.doctype)) {
+								frm.script_manager.trigger(df.fieldname, frm.doc.doctype, frm.doc.docname);
+							}
+						}
+					}
+				}
 
 				this[`${df.fieldname}_field`] = frappe.ui.form.make_control({
 					df: { 
 						...df,
-						onchange: function() {
-							frm.set_value(this.df.fieldname, this.value);
-						}
+						...df_events
 					},
 					parent: this.$invoice_fields.find(`.${df.fieldname}-field`),
 					render_input: true,
