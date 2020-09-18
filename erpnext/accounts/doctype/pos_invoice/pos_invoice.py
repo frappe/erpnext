@@ -15,6 +15,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, get_bank_cash_account, update_multi_mode_option
 from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos
+from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 
 from six import iteritems
 
@@ -312,6 +313,26 @@ class POSInvoice(SalesInvoice):
 		for pay in self.payments:
 			if not pay.account:
 				pay.account = get_bank_cash_account(pay.mode_of_payment, self.company).get("account")
+
+	def create_payment_request(self):
+		for pay in self.payments:
+
+			if pay.type == "Phone":
+				payment_gateway = frappe.db.get_value("Payment Gateway Account", {
+					"payment_account": pay.account,
+				})
+				record = {
+					"payment_gateway": payment_gateway,
+					"dt": "POS Invoice",
+					"dn": self.name,
+					"payment_request_type": "Inward",
+					"party_type": "Customer",
+					"party": self.customer,
+					"recipient_id": self.contact_mobile,
+					"submit_doc": True
+				}
+
+				return make_payment_request(**record)
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):

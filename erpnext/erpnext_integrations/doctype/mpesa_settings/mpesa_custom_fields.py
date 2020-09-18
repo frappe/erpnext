@@ -25,14 +25,18 @@ def create_custom_pos_fields():
 			"label": "Mobile No",
 			"fieldtype": "Data",
 			"options": "Phone",
-			"parent": "POS Settings"
+			"parenttype": "POS Settings",
+			"parent": "POS Settings",
+			"parentfield": "invoice_fields"
 		},
 		{
 			"doctype": "POS Field",
 			"fieldname": "request_for_payment",
 			"label": "Request for Payment",
 			"fieldtype": "Button",
-			"parent": "POS Settings"
+			"parenttype": "POS Settings",
+			"parent": "POS Settings",
+			"parentfield": "invoice_fields"
 		}
 	]
 	create_pos_settings(record_dict)

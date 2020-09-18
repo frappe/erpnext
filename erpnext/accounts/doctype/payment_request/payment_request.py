@@ -36,7 +36,7 @@ class PaymentRequest(Document):
 			ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 			if (hasattr(ref_doc, "order_type") \
 					and getattr(ref_doc, "order_type") != "Shopping Cart"):
-				ref_amount = get_amount(ref_doc)
+				ref_amount = get_amount(ref_doc, self.payment_account)
 
 				if existing_payment_request_amount + flt(self.grand_total)> ref_amount:
 					frappe.throw(_("Total Payment Request amount cannot be greater than {0} amount")
@@ -76,10 +76,15 @@ class PaymentRequest(Document):
 			or self.flags.mute_email:
 			send_mail = False
 
-		if send_mail:
+		if send_mail and self.payment_channel != "Phone":
 			self.set_payment_request_url()
 			self.send_email()
 			self.make_communication_entry()
+
+		elif self.payment_channel == "Phone":
+			controller = get_payment_gateway_controller(self.payment_gateway)
+			print(vars(self))
+			controller.request_for_payment(**vars(self))
 
 	def on_cancel(self):
 		self.check_if_payment_entry_exists()
@@ -105,13 +110,14 @@ class PaymentRequest(Document):
 			return False
 
 	def set_payment_request_url(self):
-		if self.payment_account:
+		if self.payment_account and self.payment_channel != "Phone":
 			self.payment_url = self.get_payment_url()
 
 		if self.payment_url:
 			self.db_set('payment_url', self.payment_url)
 
-		if self.payment_url or not self.payment_gateway_account:
+		if self.payment_url or not self.payment_gateway_account \
+			or (self.payment_gateway_account and self.payment_channel == "Phone"):
 			self.db_set('status', 'Initiated')
 
 	def get_payment_url(self):
@@ -280,15 +286,15 @@ def make_payment_request(**args):
 	args = frappe._dict(args)
 
 	ref_doc = frappe.get_doc(args.dt, args.dn)
-	grand_total = get_amount(ref_doc)
+	gateway_account = get_gateway_details(args) or frappe._dict()
+
+	grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
 	if args.loyalty_points and args.dt == "Sales Order":
 		from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 		loyalty_amount = validate_loyalty_points(ref_doc, int(args.loyalty_points))
 		frappe.db.set_value("Sales Order", args.dn, "loyalty_points", int(args.loyalty_points), update_modified=False)
 		frappe.db.set_value("Sales Order", args.dn, "loyalty_amount", loyalty_amount, update_modified=False)
 		grand_total = grand_total - loyalty_amount
-
-	gateway_account = get_gateway_details(args) or frappe._dict()
 
 	bank_account = (get_party_bank_account(args.get('party_type'), args.get('party'))
 		if args.get('party_type') else '')
@@ -314,6 +320,7 @@ def make_payment_request(**args):
 			"payment_gateway_account": gateway_account.get("name"),
 			"payment_gateway": gateway_account.get("payment_gateway"),
 			"payment_account": gateway_account.get("payment_account"),
+			"payment_channel": gateway_account.get("payment_channel"),
 			"payment_request_type": args.get("payment_request_type"),
 			"currency": ref_doc.currency,
 			"grand_total": grand_total,
@@ -344,9 +351,10 @@ def make_payment_request(**args):
 
 	return pr.as_dict()
 
-def get_amount(ref_doc):
+def get_amount(ref_doc, payment_account=None):
 	"""get amount based on doctype"""
 	dt = ref_doc.doctype
+	print(dt)
 	if dt in ["Sales Order", "Purchase Order"]:
 		grand_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
 
@@ -355,6 +363,12 @@ def get_amount(ref_doc):
 			grand_total = flt(ref_doc.outstanding_amount)
 		else:
 			grand_total = flt(ref_doc.outstanding_amount) / ref_doc.conversion_rate
+
+	elif dt == "POS Invoice":
+		for pay in ref_doc.payments:
+			if pay.type == "Phone" and pay.account == payment_account:
+				grand_total = pay.amount
+				break
 
 	elif dt == "Fees":
 		grand_total = ref_doc.outstanding_amount
