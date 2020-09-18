@@ -41,7 +41,7 @@
  "mapping_type": "Push",
  "migration_id_field": "hub_sync_id",
  "modified": "2018-02-14 15:57:05.571142",
- "modified_by": "achilles@erpnext.com",
+ "modified_by": "Administrator",
  "name": "Company to Hub Company",
  "owner": "Administrator",
  "page_length": 10,

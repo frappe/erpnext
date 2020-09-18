@@ -22,7 +22,7 @@
  "mapping_type": "Pull",
  "migration_id_field": "hub_sync_id",
  "modified": "2020-09-18 17:26:09.703215",
- "modified_by": "achilles@erpnext.com",
+ "modified_by": "Administrator",
  "name": "Hub Message to Lead",
  "owner": "Administrator",
  "page_length": 10,
