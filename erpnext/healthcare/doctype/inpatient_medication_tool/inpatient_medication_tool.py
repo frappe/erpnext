@@ -5,9 +5,10 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import nowdate, nowtime, flt
+from frappe.utils import nowdate, nowtime, flt, cint
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_account
+from erpnext.stock.utils import get_latest_stock_qty
 
 class InpatientMedicationTool(Document):
 	def process_medication_orders(self, orders):
@@ -22,7 +23,7 @@ class InpatientMedicationTool(Document):
 
 	def set_available_qty(self, orders):
 		for d in orders:
-			d['available_qty'] = get_stock_qty(d.get('drug'), self.warehouse)
+			d['available_qty'] = get_latest_stock_qty(d.get('drug'), self.warehouse)
 
 		return orders
 
@@ -87,7 +88,7 @@ class InpatientMedicationTool(Document):
 
 
 @frappe.whitelist()
-def get_medication_orders(date, is_completed=0):
+def get_medication_orders(date, warehouse=None, is_completed=0):
 	data = frappe.db.sql("""
 		SELECT
 			ip.inpatient_record, ip.patient, ip.patient_name,
@@ -112,7 +113,26 @@ def get_medication_orders(date, is_completed=0):
 		if entry['patient'] != entry['patient_name']:
 			entry['patient'] = entry['patient'] + ' - ' + entry['patient_name']
 
-	return data
+	stock_summary = []
+
+	if not cint(is_completed):
+		stock_summary = frappe.db.sql("""
+			SELECT
+				drug, drug_name, sum(dosage) as required_qty
+			FROM
+				`tabInpatient Medication Order Entry`
+			WHERE
+				date = %(date)s and
+				is_completed = 0 and
+				parent != ''
+			GROUP BY drug
+			ORDER BY required_qty DESC
+		""", {'date': date}, as_dict=1)
+
+		for entry in stock_summary:
+			entry['available_qty'] = get_latest_stock_qty(entry.get('drug'), warehouse)
+
+	return {'data': data, 'stock_summary': stock_summary}
 
 def get_current_healthcare_service_unit(inpatient_record):
 	ip_record = frappe.get_doc('Inpatient Record', inpatient_record)
@@ -129,11 +149,3 @@ def check_stock_qty(orders):
 			break
 
 	return in_stock
-
-def get_stock_qty(item_code, warehouse):
-	return get_previous_sle({
-		'item_code': item_code,
-		'warehouse': warehouse,
-		'posting_date': nowdate(),
-		'posting_time': nowtime()
-	}).get('qty_after_transaction') or 0

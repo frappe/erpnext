@@ -14,7 +14,11 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 
 	date: function(frm) {
 		frm.doc.show_submit = false;
-		if (frm.doc.date) {
+		frm.events.refresh_medication_orders(frm);
+	},
+
+	refresh_medication_orders(frm) {
+		if (frm.doc.date && frm.doc.warehouse) {
 			frm.events.get_pending_orders(frm);
 			frm.events.show_completed_orders(frm);
 		}
@@ -25,11 +29,15 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 			method: 'erpnext.healthcare.doctype.inpatient_medication_tool.inpatient_medication_tool.get_medication_orders',
 			args: {
 				'date': frm.doc.date,
-				'is_completed': 0
+				'is_completed': 0,
+				'warehouse': frm.doc.warehouse
 			},
+			freeze: true,
+			freeze_message: __('Fetching Medication Orders'),
 			callback: function(r) {
 				if (r.message) {
-					frm.events.show_pending_orders(frm, r.message);
+					frm.events.show_pending_orders(frm, r.message.data);
+					frm.events.show_stock_availability(frm, r.message.stock_summary);
 					frm.doc.show_submit = true;
 					frm.events.update_orders(frm);
 				}
@@ -47,7 +55,8 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 				data: data,
 				columns: columns,
 				datatable_class: 'pending-orders',
-				addCheckboxColumn: true
+				addCheckboxColumn: true,
+				showBorders: true
 			});
 		}
 	},
@@ -75,6 +84,7 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 						"orders": orders
 					},
 					freeze: true,
+					freeze_message: __('Processing Medication Orders'),
 					callback: function(r) {
 						if (!r.exc) {
 							if (r.message == 'insufficient stock') {
@@ -116,14 +126,13 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 									indicator: 'green'
 								});
 								frm.pending_orders.orders_datatable.rowmanager.checkMap = [];
-								frm.events.get_pending_orders(frm);
+								frm.events.refresh_medication_orders(frm);
 							}
 						}
 					}
 				});
 			});
-		}
-		else {
+		} else {
 			frm.page.clear_primary_action();
 		}
 	},
@@ -139,19 +148,54 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 				if (r.message) {
 					let columns = frm.events.prepare_columns();
 					if (frm.completed_orders) {
-						frm.completed_orders.orders_datatable.refresh(r.message, columns);
+						frm.completed_orders.orders_datatable.refresh(r.message.data, columns);
 					} else {
 						frm.completed_orders = new healthcare.InpatientMedicationOrderView({
 							wrapper: frm.get_field('completed_medication_orders').$wrapper,
-							data: r.message,
+							data: r.message.data,
 							columns: columns,
 							datatable_class: 'completed-orders',
-							addCheckboxColumn: false
+							addCheckboxColumn: false,
+							showBorders: true
 						});
 					}
 				}
 			}
 		});
+	},
+
+	show_stock_availability: function(frm, data) {
+		let columns = frm.events.get_stock_summary_columns(frm);
+
+		$.each(data, function(i, e) {
+			if (flt(e.required_qty) > flt(e.available_qty)) {
+				data[i].drug = `<div class="indicator orange">${e.drug}</div>`;
+			} else {
+				data[i].drug = `<div class="indicator green">${e.drug}</div>`;
+			}
+		})
+
+		if (frm.stock_summary) {
+			frm.stock_summary.datatable.refresh(data, columns);
+		} else {
+			frm.stock_summary = new healthcare.InpatientMedicationOrderView({
+				wrapper: frm.get_field('stock_summary').$wrapper,
+				data: data,
+				columns: columns,
+				datatable_class: 'stock-summary',
+				addCheckboxColumn: false,
+				showBorders: true
+			});
+		}
+	},
+
+	get_stock_summary_columns() {
+		return [
+			{id: 'drug', name: __('Drug'), field: 'drug', content: __('Drug'), width: 200, editable: false, sortable: false},
+			{id: 'drug_name', name: __('Drug Name'), field: 'drug_name', content: __('Drug Name'), width: 200, editable: false, sortable: false},
+			{id: 'required_qty', name: __('Required Qty'), field: 'required_qty', content: __('Required Qty'), width: 100, editable: false, sortable: false},
+			{id: 'available_qty', name: __('Available Qty'), field: 'available_qty', content: __('Available Qty'), width: 100, editable: false, sortable: false}
+		];
 	},
 
 	get_completed_orders: function(frm) {

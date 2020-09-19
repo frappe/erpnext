@@ -9,6 +9,8 @@
   "column_break_3",
   "company",
   "warehouse",
+  "medication_stock_summary_section",
+  "stock_summary",
   "section_break_2",
   "pending_medication_orders",
   "completed_medication_order_section",
@@ -60,13 +62,23 @@
    "fieldname": "completed_medication_orders",
    "fieldtype": "HTML",
    "label": "Completed Orders"
+  },
+  {
+   "fieldname": "medication_stock_summary_section",
+   "fieldtype": "Section Break",
+   "label": "Medication Stock Summary"
+  },
+  {
+   "fieldname": "stock_summary",
+   "fieldtype": "HTML",
+   "label": "Medication Stock Summary"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-09-17 16:08:06.335089",
+ "modified": "2020-09-19 13:43:42.653587",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Medication Tool",

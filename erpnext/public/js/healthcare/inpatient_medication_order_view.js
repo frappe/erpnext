@@ -7,13 +7,14 @@ healthcare.InpatientMedicationOrderView = class InpatientMedicationOrderView {
 		columns,
 		datatable_class,
 		addCheckboxColumn,
-		editable
+		showBorders
 	}) {
 		this.wrapper = wrapper;
 		this.data = data;
 		this.columns = columns;
 		this.datatable_class = datatable_class;
 		this.addCheckboxColumn = addCheckboxColumn;
+		this.showBorders = showBorders;
 
 		this.make();
 	}
@@ -28,13 +29,17 @@ healthcare.InpatientMedicationOrderView = class InpatientMedicationOrderView {
 			<div>
 				<div class="row">
 					<div class="col-sm-12">
-						<div class="${this.datatable_class} border"></div>
+						<div class="${this.datatable_class}"></div>
 					</div>
 				</div>
 			</div>
 		`);
 
 		this.$order_view = this.wrapper.find('.' + `${this.datatable_class}`);
+
+		if (this.showBorders) {
+			this.$order_view.find('.' + `${this.datatable_class}`).addClass('border');
+		}
 	}
 
 	render_datatable() {
