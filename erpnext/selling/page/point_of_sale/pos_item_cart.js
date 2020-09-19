@@ -515,19 +515,20 @@ erpnext.PointOfSale.ItemCart = class {
 			const currency = this.events.get_frm().doc.currency;
 			this.$totals_section.find('.taxes').html(
 				`<div class="flex items-center justify-between h-16 pr-8 pl-8 border-b-grey">
-					<div class="flex">
+					<div class="flex overflow-hidden whitespace-nowrap">
 						<div class="text-md text-dark-grey text-bold w-fit">Tax Charges</div>
-						<div class="flex ml-6 text-dark-grey">
+						<div class="flex ml-4 text-dark-grey">
 						${	
 							taxes.map((t, i) => {
 								let margin_left = '';
 								if (i !== 0) margin_left = 'ml-2';
-								return `<span class="border-grey p-1 pl-2 pr-2 rounded ${margin_left}">${t.description}</span>`
+								const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
+								return `<span class="border-grey p-1 pl-2 pr-2 rounded ${margin_left}">${description}</span>`
 							}).join('')
 						}
 						</div>
 					</div>
-					<div class="flex flex-col text-right">
+					<div class="flex flex-col text-right f-shrink-0 ml-4">
 						<div class="text-md text-dark-grey text-bold">${format_currency(value, currency)}</div>
 					</div>
 				</div>`
