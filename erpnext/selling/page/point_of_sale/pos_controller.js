@@ -113,7 +113,23 @@ erpnext.PointOfSale.Controller = class {
 						}
 					});
 			},
-			primary_action_label: __('Submit')
+			primary_action_label: __('Submit'),
+			secondary_action: () => {
+				if (frappe.get_route_str() != "point-of-sale") return;
+				
+				const args = {
+					message: __("You must create a POS Opening Entry to use Point of Sale."),
+					title: __("Mandatory Action"),
+					indicator: 'orange',
+					secondary_action: {
+						action: () => {
+							dialog.show();
+						}
+					}
+				}
+				frappe.msgprint(args);
+				frappe.msg_dialog.custom_onhide = () => args.secondary_action.action();
+			}
 		});
 		dialog.show();
 	}
