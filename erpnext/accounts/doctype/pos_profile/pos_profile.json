@@ -12,6 +12,7 @@
   "company",
   "country",
   "column_break_9",
+  "show_only_available_items",
   "update_stock",
   "ignore_pricing_rule",
   "warehouse",
@@ -290,10 +291,10 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "label": "Warehouse",
-   "mandatory_depends_on": "update_stock",
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "reqd": 1
   },
   {
    "default": "0",
@@ -306,10 +307,17 @@
    "fieldname": "ignore_pricing_rule",
    "fieldtype": "Check",
    "label": "Ignore Pricing Rule"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_only_available_items",
+   "fieldtype": "Check",
+   "label": "Show only available items"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "links": [],
  "modified": "2020-10-01 17:29:27.759088",
  "modified_by": "Administrator",
