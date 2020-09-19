@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe import _
 from frappe.utils import nowdate, nowtime, flt, cint
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_account
@@ -13,9 +14,9 @@ from erpnext.stock.utils import get_latest_stock_qty
 class InpatientMedicationTool(Document):
 	def process_medication_orders(self, orders):
 		orders = self.set_available_qty(orders)
-		in_stock = check_stock_qty(orders)
-		if not in_stock:
-			return 'insufficient stock'
+		allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		if not allow_negative_stock:
+			self.check_stock_qty(orders)
 
 		self.make_stock_entry(orders)
 		self.update_medication_orders(orders)
@@ -26,6 +27,19 @@ class InpatientMedicationTool(Document):
 			d['available_qty'] = get_latest_stock_qty(d.get('drug'), self.warehouse)
 
 		return orders
+
+	def check_stock_qty(self, orders):
+		from erpnext.stock.stock_ledger import NegativeStockError
+
+		for d in orders:
+			# validate qty
+			if flt(d.get('available_qty')) < flt(d.get('dosage')):
+				frappe.throw(_('Quantity not available for {0} in warehouse {1}').format(
+					frappe.bold(d.get('drug')), frappe.bold(self.warehouse))
+					+ '<br><br>' + _('Available quantity is {0}, you need {1}').format(
+					frappe.bold(d.get('available_qty')), frappe.bold(d.get('dosage')))
+					+ '<br><br>' + _('Please enable Allow Negative Stock in Stock Settings or create Stock Entry to proceed.'),
+					NegativeStockError, title=_('Insufficient Stock'))
 
 	def make_material_receipt(self, orders):
 		stock_entry = frappe.new_doc('Stock Entry')
@@ -137,15 +151,3 @@ def get_medication_orders(date, warehouse=None, is_completed=0):
 def get_current_healthcare_service_unit(inpatient_record):
 	ip_record = frappe.get_doc('Inpatient Record', inpatient_record)
 	return ip_record.inpatient_occupancies[-1].service_unit
-
-def check_stock_qty(orders):
-	allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
-
-	in_stock = True
-	for d in orders:
-		# validate qty
-		if not allow_negative_stock and flt(d.get('available_qty')) < flt(d.get('dosage')):
-			in_stock = False
-			break
-
-	return in_stock

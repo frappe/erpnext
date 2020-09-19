@@ -86,48 +86,14 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 					freeze: true,
 					freeze_message: __('Processing Medication Orders'),
 					callback: function(r) {
-						if (!r.exc) {
-							if (r.message == 'insufficient stock') {
-								let msg = __('Stock quantity to process the Inpatient Medication Orders is not available in the Warehouse {0}. Do you want to record a Stock Entry?',
-									[frm.doc.warehouse.bold()]);
-								frappe.confirm(
-									msg,
-									function() {
-										frappe.call({
-											doc: frm.doc,
-											method: 'make_material_receipt',
-											args: {
-												"orders": orders
-											},
-											freeze: true,
-											callback: function(r) {
-												if (r.message) {
-													frappe.msgprint({
-														title: __(`Success`),
-														message: __(`Stock Entry {0} submitted successfully. Click Submit to process the medication orders`,
-															[r.message.bold()]),
-														indicator: 'green'
-													})
-												} else {
-													frappe.msgprint({
-														title: __(`Failure`),
-														message: __(`Could not submit Stock Entries.`),
-														indicator: 'red'
-													})
-												}
-											}
-										});
-									}
-								);
-							} else if (r.message == 'success') {
-								frappe.msgprint({
-									title: __(`Success`),
-									message: __(`Medication Orders Processed successfully`),
-									indicator: 'green'
-								});
-								frm.pending_orders.orders_datatable.rowmanager.checkMap = [];
-								frm.events.refresh_medication_orders(frm);
-							}
+						if (!r.exc && r.message === 'success') {
+							frappe.msgprint({
+								title: __(`Success`),
+								message: __(`Medication Orders Processed successfully`),
+								indicator: 'green'
+							});
+							frm.pending_orders.orders_datatable.rowmanager.checkMap = [];
+							frm.events.refresh_medication_orders(frm);
 						}
 					}
 				});
