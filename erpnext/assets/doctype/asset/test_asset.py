@@ -380,8 +380,7 @@ class TestAsset(unittest.TestCase):
 			"expected_value_after_useful_life": 10000,
 			"depreciation_method": "Straight Line",
 			"total_number_of_depreciations": 3,
-			"frequency_of_depreciation": 10,
-			"depreciation_start_date": nowdate()
+			"frequency_of_depreciation": 10
 		})
 		asset.insert()
 		asset.submit()
@@ -469,8 +468,7 @@ class TestAsset(unittest.TestCase):
 			"expected_value_after_useful_life": 10000,
 			"depreciation_method": "Straight Line",
 			"total_number_of_depreciations": 3,
-			"frequency_of_depreciation": 10,
-			"depreciation_start_date": "2020-06-06"
+			"frequency_of_depreciation": 10
 		})
 		asset.insert()
 		accumulated_depreciation_after_full_schedule = \
