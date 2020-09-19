@@ -14,13 +14,14 @@ from frappe.utils import add_months, formatdate, getdate, today
 
 
 class PlaidSettings(Document):
-	def get_link_token(self):
+	@staticmethod
+	def get_link_token():
 		plaid = PlaidConnector()
 		return plaid.get_link_token()
 
 
 @frappe.whitelist()
-def plaid_configuration():
+def get_plaid_configuration():
 	if frappe.db.get_single_value("Plaid Settings", "enabled"):
 		plaid_settings = frappe.get_single("Plaid Settings")
 		return {
