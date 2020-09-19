@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe, erpnext, math, json
 from frappe import _
 from six import string_types
-from frappe.utils import flt, add_months, cint, nowdate, getdate, today, date_diff, month_diff, add_days
+from frappe.utils import flt, add_months, cint, nowdate, getdate, today, date_diff, month_diff, add_days, get_last_day
 from frappe.model.document import Document
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.assets.doctype.asset.depreciation \
@@ -83,9 +83,9 @@ class Asset(AccountsController):
 		if not self.available_for_use_date:
 			frappe.throw(_("Available for use date is required"))
 
-		for i, d in enumerate(self.finance_books):
+		for d in self.finance_books:
 			if d.depreciation_start_date == self.available_for_use_date:
-				frappe.throw(_("Row #{}: Depreciation Posting Date should not be equal to Available for Use Date."),
+				frappe.throw(_("Row #{}: Depreciation Posting Date should not be equal to Available for Use Date.").format(d.idx),
 					title=_("Incorrect Date"))
 
 	def set_missing_values(self):
@@ -299,7 +299,7 @@ class Asset(AccountsController):
 		if not row.depreciation_start_date:
 			if not self.available_for_use_date:
 				frappe.throw(_("Row {0}: Depreciation Start Date is required").format(row.idx))
-			row.depreciation_start_date = self.available_for_use_date
+			row.depreciation_start_date = get_last_day(self.available_for_use_date)
 
 		if not self.is_existing_asset:
 			self.opening_accumulated_depreciation = 0
