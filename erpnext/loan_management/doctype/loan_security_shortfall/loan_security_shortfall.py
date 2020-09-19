@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import get_datetime
+from frappe.utils import get_datetime, flt
 from frappe.model.document import Document
 from six import iteritems
 from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
@@ -51,13 +51,19 @@ def check_for_ltv_shortfall(process_loan_security_shortfall):
 			"valid_upto": (">=", update_time)
 		}, as_list=1))
 
-	loans = frappe.get_all('Loan', fields=['name', 'loan_amount', 'total_principal_paid'],
-		filters={'status': 'Disbursed', 'is_secured_loan': 1})
+	loans = frappe.get_all('Loan', fields=['name', 'loan_amount', 'total_principal_paid', 'total_payment',
+		'total_interest_payable', 'disbursed_amount', 'status'],
+		filters={'status': ('in',['Disbursed','Partially Disbursed']), 'is_secured_loan': 1})
 
 	loan_security_map = {}
 
 	for loan in loans:
-		outstanding_amount = loan.loan_amount - loan.total_principal_paid
+		if loan.status == 'Disbursed':
+			outstanding_amount = flt(loan.total_payment) - flt(loan.total_interest_payable) \
+				- flt(loan.total_principal_paid)
+		else:
+			outstanding_amount = loan.disbursed_amount
+
 		pledged_securities = get_pledged_security_qty(loan.name)
 		ltv_ratio = ''
 		security_value = 0.0

@@ -19,10 +19,10 @@
   "paid",
   "currency",
   "amount",
+  "invoice",
   "razorpay_details_section",
   "subscription_id",
-  "payment_id",
-  "webhook_payload"
+  "payment_id"
  ],
  "fields": [
   {
@@ -118,12 +118,10 @@
    "read_only": 1
   },
   {
-   "fieldname": "webhook_payload",
-   "fieldtype": "Code",
-   "hidden": 1,
-   "label": "Webhook Payload",
-   "options": "JSON",
-   "read_only": 1
+   "fieldname": "invoice",
+   "fieldtype": "Link",
+   "label": "Invoice",
+   "options": "Sales Invoice"
   }
  ],
  "index_web_pages_for_search": 1,

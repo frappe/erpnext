@@ -24,11 +24,20 @@ class POSInvoiceMergeLog(Document):
 
 	def validate_pos_invoice_status(self):
 		for d in self.pos_invoices:
-			status, docstatus = frappe.db.get_value('POS Invoice', d.pos_invoice, ['status', 'docstatus'])
+			status, docstatus, is_return, return_against = frappe.db.get_value(
+				'POS Invoice', d.pos_invoice, ['status', 'docstatus', 'is_return', 'return_against'])
+
 			if docstatus != 1:
 				frappe.throw(_("Row #{}: POS Invoice {} is not submitted yet").format(d.idx, d.pos_invoice))
-			if status in ['Consolidated']:
+			if status == "Consolidated":
 				frappe.throw(_("Row #{}: POS Invoice {} has been {}").format(d.idx, d.pos_invoice, status))
+			if is_return and return_against not in [d.pos_invoice for d in self.pos_invoices] and status != "Consolidated":
+				# if return entry is not getting merged in the current pos closing and if it is not consolidated
+				frappe.throw(
+					_("Row #{}: Return Invoice {} cannot be made against unconsolidated invoice. \
+					You can add original invoice {} manually to proceed.")
+					.format(d.idx, frappe.bold(d.pos_invoice), frappe.bold(return_against))
+				)
 
 	def on_submit(self):
 		pos_invoice_docs = [frappe.get_doc("POS Invoice", d.pos_invoice) for d in self.pos_invoices]
@@ -36,12 +45,12 @@ class POSInvoiceMergeLog(Document):
 		returns = [d for d in pos_invoice_docs if d.get('is_return') == 1]
 		sales = [d for d in pos_invoice_docs if d.get('is_return') == 0]
 
-		sales_invoice = self.process_merging_into_sales_invoice(sales)
+		sales_invoice, credit_note = "", ""
+		if sales:
+			sales_invoice = self.process_merging_into_sales_invoice(sales)
 		
-		if len(returns):
+		if returns:
 			credit_note = self.process_merging_into_credit_note(returns)
-		else:
-			credit_note = ""
 
 		self.save() # save consolidated_sales_invoice & consolidated_credit_note ref in merge log
 

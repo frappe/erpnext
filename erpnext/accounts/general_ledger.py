@@ -45,8 +45,8 @@ def validate_accounting_period(gl_map):
 			}, as_dict=1)
 
 	if accounting_periods:
-		frappe.throw(_("You can't create accounting entries in the closed accounting period {0}")
-			.format(accounting_periods[0].name), ClosedAccountingPeriod)
+		frappe.throw(_("You cannot create or cancel any accounting entries with in the closed Accounting Period {0}")
+			.format(frappe.bold(accounting_periods[0].name)), ClosedAccountingPeriod)
 
 def process_gl_map(gl_map, merge_entries=True):
 	if merge_entries:
@@ -301,8 +301,9 @@ def make_reverse_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 			})
 
 	if gl_entries:
-		set_as_cancel(gl_entries[0]['voucher_type'], gl_entries[0]['voucher_no'])
+		validate_accounting_period(gl_entries)
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
+		set_as_cancel(gl_entries[0]['voucher_type'], gl_entries[0]['voucher_no'])
 
 		for entry in gl_entries:
 			entry['name'] = None
@@ -342,7 +343,7 @@ def set_as_cancel(voucher_type, voucher_no):
 	"""
 		Set is_cancelled=1 in all original gl entries for the voucher
 	"""
-	frappe.db.sql("""update `tabGL Entry` set is_cancelled = 1,
+	frappe.db.sql("""UPDATE `tabGL Entry` SET is_cancelled = 1,
 		modified=%s, modified_by=%s
 		where voucher_type=%s and voucher_no=%s and is_cancelled = 0""",
 		(now(), frappe.session.user, voucher_type, voucher_no))
