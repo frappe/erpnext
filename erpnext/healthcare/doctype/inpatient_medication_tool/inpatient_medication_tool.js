@@ -176,7 +176,7 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 		})
 
 		if (frm.stock_summary) {
-			frm.stock_summary.datatable.refresh(data, columns);
+			frm.stock_summary.orders_datatable.refresh(data, columns);
 		} else {
 			frm.stock_summary = new healthcare.InpatientMedicationOrderView({
 				wrapper: frm.get_field('stock_summary').$wrapper,
