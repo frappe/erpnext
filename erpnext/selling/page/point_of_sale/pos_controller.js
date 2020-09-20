@@ -582,8 +582,10 @@ erpnext.PointOfSale.Controller = class {
 
 				field === 'qty' && (value = flt(value));
 
-				if (field === 'qty' && value > 0 && !this.allow_negative_stock)
-					await this.check_stock_availability(item_row, value, this.frm.doc.set_warehouse);
+				if (['qty', 'conversion_factor'].includes(field) && value > 0 && !this.allow_negative_stock) {
+					const qty_needed = field === 'qty' ? value * item_row.conversion_factor : item_row.qty * value;
+					await this.check_stock_availability(item_row, qty_needed, this.frm.doc.set_warehouse);
+				}
 				
 				if (this.is_current_item_being_edited(item_row) || item_selected_from_selector) {
 					await frappe.model.set_value(item_row.doctype, item_row.name, field, value);
@@ -668,8 +670,8 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	async trigger_new_item_events(item_row) {
-		await this.frm.script_manager.trigger('item_code', item_row.doctype, item_row.name)
-		await this.frm.script_manager.trigger('qty', item_row.doctype, item_row.name)
+		await this.frm.script_manager.trigger('item_code', item_row.doctype, item_row.name);
+		await this.frm.script_manager.trigger('qty', item_row.doctype, item_row.name);
 	}
 
 	async check_stock_availability(item_row, qty_needed, warehouse) {
@@ -689,7 +691,6 @@ erpnext.PointOfSale.Controller = class {
 				indicator: 'orange'
 			});
 			frappe.utils.play_sound("error");
-			this.item_details.qty_control.set_value(flt(available_qty));
 		}
 		frappe.dom.freeze();
 	}

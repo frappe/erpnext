@@ -75,7 +75,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				fieldtype:'Float',
 				read_only: me.has_batch && !me.has_serial_no,
 				label: __(me.has_batch && !me.has_serial_no ? 'Total Qty' : 'Qty'),
-				default: 0
+				default: flt(me.item.stock_qty),
 			},
 			{
 				fieldname: 'auto_fetch_button',
@@ -91,7 +91,8 @@ erpnext.SerialNoBatchSelector = Class.extend({
 							qty: qty,
 							item_code: me.item_code,
 							warehouse: typeof me.warehouse_details.name == "string" ? me.warehouse_details.name : '',
-							batch_no: me.item.batch_no || null
+							batch_no: me.item.batch_no || null,
+							posting_date: me.frm.doc.posting_date || me.frm.doc.transaction_date
 						}
 					});
 

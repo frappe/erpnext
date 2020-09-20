@@ -177,7 +177,7 @@ erpnext.PointOfSale.ItemDetails = class {
 	}
 
 	get_form_fields(item) {
-		const fields = ['qty', 'uom', 'rate', 'price_list_rate', 'discount_percentage', 'warehouse', 'actual_qty'];
+		const fields = ['qty', 'uom', 'rate', 'conversion_factor', 'discount_percentage', 'warehouse', 'actual_qty', 'price_list_rate'];
 		if (item.has_serial_no) fields.push('serial_no');
 		if (item.has_batch_no) fields.push('batch_no');
 		return fields;
@@ -208,7 +208,7 @@ erpnext.PointOfSale.ItemDetails = class {
 		const me = this;
 		if (this.rate_control) {
 			this.rate_control.df.onchange = function() {
-				if (this.value) {
+				if (this.value || flt(this.value) === 0) {
 					me.events.form_updated(me.doctype, me.name, 'rate', this.value).then(() => {
 						const item_row = frappe.get_doc(me.doctype, me.name);
 						const doc = me.events.get_frm().doc;
@@ -248,17 +248,6 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.warehouse_control.refresh();
 		}
 
-		if (this.discount_percentage_control) {
-			this.discount_percentage_control.df.onchange = function() {
-				if (this.value) {
-					me.events.form_updated(me.doctype, me.name, 'discount_percentage', this.value).then(() => {
-						const item_row = frappe.get_doc(me.doctype, me.name);
-						me.rate_control.set_value(item_row.rate);
-					});
-				}
-			}
-		}
-
 		if (this.serial_no_control) {
 			this.serial_no_control.df.reqd = 1;
 			this.serial_no_control.df.onchange = async function() {
@@ -293,8 +282,20 @@ erpnext.PointOfSale.ItemDetails = class {
 				me.events.set_value_in_current_cart_item('uom', this.value);
 				me.events.form_updated(me.doctype, me.name, 'uom', this.value);
 				me.current_item.uom = this.value;
+				
+				const item_row = frappe.get_doc(me.doctype, me.name);
+				me.conversion_factor_control.df.read_only = (item_row.stock_uom == this.value);
+				me.conversion_factor_control.refresh();
 			}
 		}
+
+		frappe.model.on("POS Invoice Item", "*", (fieldname, value, item_row) => {
+			const field_control = me[`${fieldname}_control`];
+			if (field_control) {
+				field_control.set_value(value);
+				cur_pos.update_cart_html(item_row);
+			}
+		});
 	}
 	
 	async auto_update_batch_no() {
