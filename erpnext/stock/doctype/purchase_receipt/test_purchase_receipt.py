@@ -471,8 +471,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 			"expected_value_after_useful_life": 10,
 			"depreciation_method": "Straight Line",
 			"total_number_of_depreciations": 3,
-			"frequency_of_depreciation": 1,
-			"depreciation_start_date": frappe.utils.nowdate()
+			"frequency_of_depreciation": 1
 		})
 		asset.submit()
 
