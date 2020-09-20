@@ -1049,14 +1049,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(item.item_code && item.uom) {
 			return this.frm.call({
 				method: "erpnext.stock.get_item_details.get_conversion_factor",
-				child: item,
 				args: {
 					item_code: item.item_code,
 					uom: item.uom
 				},
 				callback: function(r) {
 					if(!r.exc) {
-						me.conversion_factor(me.frm.doc, cdt, cdn);
+						frappe.model.set_value(cdt, cdn, 'conversion_factor', r.message.conversion_factor);
 					}
 				}
 			});

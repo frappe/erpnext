@@ -612,7 +612,7 @@ def fetch_serial_numbers(filters, qty, do_not_include=[]):
 			{qty}
 		""".format(
 				excluded_sr_nos=excluded_sr_nos,
-				qty=qty,
+				qty=qty or 1,
 				batch_join_selection=batch_join_selection,
 				batch_no_condition=batch_no_condition
 			), filters, as_dict=1)
