@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "date",
+  "assigned_to_practitioner",
   "column_break_3",
   "company",
   "warehouse",
@@ -72,13 +73,19 @@
    "fieldname": "stock_summary",
    "fieldtype": "HTML",
    "label": "Medication Stock Summary"
+  },
+  {
+   "fieldname": "assigned_to_practitioner",
+   "fieldtype": "Link",
+   "label": "Assigned To",
+   "options": "User"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-09-19 13:43:42.653587",
+ "modified": "2020-09-20 12:26:26.526695",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Medication Tool",

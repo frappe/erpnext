@@ -102,7 +102,14 @@ class InpatientMedicationTool(Document):
 
 
 @frappe.whitelist()
-def get_medication_orders(date, warehouse=None, is_completed=0):
+def get_medication_orders(date, assigned_to=None, warehouse=None, is_completed=0):
+	values = {'date': date, 'is_completed': is_completed}
+	assignment_condition = ''
+
+	if assigned_to:
+		assignment_condition += ' and ip._assign LIKE %(assigned_to)s '
+		values['assigned_to'] = '%' + assigned_to + '%'
+
 	data = frappe.db.sql("""
 		SELECT
 			ip.inpatient_record, ip.patient, ip.patient_name,
@@ -116,9 +123,10 @@ def get_medication_orders(date, warehouse=None, is_completed=0):
 		WHERE
 			entry.date = %(date)s and
 			entry.is_completed = %(is_completed)s
+			{0}
 		ORDER BY
 			entry.time
-	""", {'date': date, 'is_completed': is_completed}, as_dict=1)
+	""".format(assignment_condition), values, as_dict=1, debug=1)
 
 	for entry in data:
 		inpatient_record = entry.inpatient_record

@@ -14,10 +14,19 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 		frm.page.set_secondary_action(__('Refresh Orders'), function() {
 			frm.events.refresh_medication_orders(frm);
 		});
+
+		frm.doc.show_submit = false;
 	},
 
 	date: function(frm) {
-		frm.doc.show_submit = false;
+		frm.events.refresh_medication_orders(frm);
+	},
+
+	warehouse: function(frm) {
+		frm.events.refresh_medication_orders(frm);
+	},
+
+	assigned_to_practitioner: function(frm) {
 		frm.events.refresh_medication_orders(frm);
 	},
 
@@ -33,8 +42,9 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 			method: 'erpnext.healthcare.doctype.inpatient_medication_tool.inpatient_medication_tool.get_medication_orders',
 			args: {
 				'date': frm.doc.date,
+				'warehouse': frm.doc.warehouse,
+				'assigned_to': frm.doc.assigned_to_practitioner,
 				'is_completed': 0,
-				'warehouse': frm.doc.warehouse
 			},
 			freeze: true,
 			freeze_message: __('Fetching Medication Orders'),
@@ -113,7 +123,8 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 			method: 'erpnext.healthcare.doctype.inpatient_medication_tool.inpatient_medication_tool.get_medication_orders',
 			args: {
 				'date': frm.doc.date,
-				'is_completed': 1
+				'assigned_to': frm.doc.assigned_to_practitioner,
+				'is_completed': 1,
 			},
 			callback: function(r) {
 				if (r.message) {
