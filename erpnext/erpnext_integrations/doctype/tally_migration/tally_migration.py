@@ -82,19 +82,27 @@ class TallyMigration(Document):
 		return collection
 
 	def dump_processed_data(self, data):
-		for key, value in data.items():
-			if not value:
-				continue
+		doctype_content_map = {}
 
-			if key != "chart_of_accounts":
-				filename = key + ".csv"
-				doctype = value[0].get("doctype")
-				content = make_csv_for_data_import(doctype, value)
-			else:
-				filename = key + ".json"
-				content = json.dumps(value)
-			f = self.attach_file(filename, content)
-			setattr(self, key, f.file_url)
+		def make_doctype_content_map(data):
+			for docs in data:
+				if not docs: continue
+
+				if isinstance(docs, list) and isinstance(docs[0], list):
+					make_doctype_content_map(docs)
+				else:
+					doctype = docs[0].get("doctype")
+					filename = frappe.scrub(doctype) + ".csv"
+					content = make_csv_for_data_import(doctype, docs)
+					doctype_content_map.setdefault(doctype, []).append(content)
+
+		make_doctype_content_map(data)
+
+		for doctype, contents in doctype_content_map.items():
+			for i, content in enumerate(contents):
+				filename = frappe.scrub(doctype) + "{}.csv".format(i+1 if len(contents) > 1 else "")
+				f = self.attach_file(filename, content)
+				data_import_doc = self.make_data_import_doc(doctype, f.file_url)
 	
 	def attach_file(self, filename, content):
 		f = frappe.get_doc({
@@ -111,20 +119,16 @@ class TallyMigration(Document):
 			pass
 		return f
 	
-	def make_data_import_docs(self, data):
-		for key, value in data.items():
-			if not value:
-				continue
-
-			if key != "chart_of_accounts":
-				doc = frappe.get_doc({
-					"doctype": "Data Import",
-					"reference_doctype": value[0].get("doctype"),
-					"import_type": "Insert New Records",
-					"mute_emails": 1,
-					"import_file": self.get(key)
-				})
-				doc.insert()
+	def make_data_import_doc(self, doctype, file_url):
+		doc = frappe.get_doc({
+			"doctype": "Data Import",
+			"reference_doctype": doctype,
+			"import_type": "Insert New Records",
+			"mute_emails": 1,
+			"import_file": file_url
+		})
+		doc.insert()
+		return doc
 
 	def set_account_defaults(self):
 		self.default_cost_center, self.default_round_off_account = frappe.db.get_value("Company", self.erpnext_company, ["cost_center", "round_off_account"])
@@ -274,25 +278,52 @@ class TallyMigration(Document):
 						"links": links
 					})
 			return customers, suppliers, addresses
-		
-		def get_item_groups(collection):
-			item_groups = []
-			for item_group in collection.find_all("STOCKGROUP"):
-				parent_group = "All Item Groups"
-				if item_group.PARENT:
-					parent_group = item_group.PARENT.string.strip()
-					for group in item_groups:
-						if group.get("item_group_name") == parent_group:
-							group.setdefault("is_group", 1)
-							break
 
-				item_groups.append({
+		def get_item_group_list(collection):
+			'''
+				Make multiple document list according to the parent child relation.
+				i.e create parent group list first then make child group list
+				Spliting into multiple list will create multiple csv files to be imported in right order
+			'''
+
+			parent_child_map = {}
+			root_group = "All Item Groups"
+
+			for item_group in collection.find_all("STOCKGROUP"):
+				item_group_name = item_group.NAME.string.strip()
+				parent_group_name = item_group.PARENT.string.strip() if item_group.PARENT else root_group
+				parent_child_map.setdefault(parent_group_name, []).append(item_group_name)
+
+			def get_doc(name, parent):
+				return {
 					"doctype": "Item Group",
-					"item_group_name": item_group.NAME.string.strip(),
-					"parent_item_group": parent_group
-				})
+					"item_group_name": name,
+					"parent_item_group": parent
+				}
 			
-			return item_groups
+			def update_group_doc(ordered_list, name):
+				for docs in ordered_list:
+					[d.setdefault("is_group", 1) for d in docs if d.get("item_group_name") == name]
+			
+			def get_child_groups_of(parent_group):
+				children = parent_child_map.get(parent_group) or []
+				return [get_doc(group, parent_group) for group in children]
+			
+			def get_sequential_list(lst, parent_group):
+				docs = get_child_groups_of(parent_group)
+				if docs:
+					if parent_group != root_group: update_group_doc(lst, parent_group)
+					lst.append(docs)
+
+				children = parent_child_map.get(parent_group) or []
+				for child in children:
+					get_sequential_list(lst, child)
+				
+				return lst
+
+			item_group_list = get_sequential_list([], root_group)
+
+			return item_group_list
 
 		def get_stock_items_uoms(collection):
 			uoms = []
@@ -325,20 +356,12 @@ class TallyMigration(Document):
 
 			self.publish("Process Master Data", _("Processing Items and UOMs"), 4, 5)
 			items, uoms = get_stock_items_uoms(collection)
-			item_groups = get_item_groups(collection)
-			data = {
-				"chart_of_accounts": chart_of_accounts,
-				"customer": customers,
-				"supplier": suppliers, 
-				"address": addresses, 
-				"uom": uoms,
-				"item_group": item_groups,
-				"item": items
-			}
+			item_groups = get_item_group_list(collection)
+			data = [uoms, item_groups, items, customers, suppliers, addresses]
+			# chart_of_accounts
 
 			self.publish("Process Master Data", _("Done"), 5, 5)
 			self.dump_processed_data(data)
-			self.make_data_import_docs(data)
 
 			self.is_master_data_processed = 1
 
@@ -370,7 +393,7 @@ class TallyMigration(Document):
 
 			frappe.local.flags.ignore_chart_of_accounts = False
 			create_charts(company.name, custom_chart=json.loads(coa_file.get_content()))
-			company.create_default_warehouses()
+			company.on_update()
 
 		def create_parties_and_addresses(parties_file_url, addresses_file_url):
 			parties_file = frappe.get_doc("File", {"file_url": parties_file_url})
