@@ -10,6 +10,10 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 				frm.set_value('warehouse', r.inpatient_medication_warehouse);
 			}
 		});
+
+		frm.page.set_secondary_action(__('Refresh Orders'), function() {
+			frm.events.refresh_medication_orders(frm);
+		});
 	},
 
 	date: function(frm) {
@@ -93,6 +97,7 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 								indicator: 'green'
 							});
 							frm.pending_orders.orders_datatable.rowmanager.checkMap = [];
+							frm.pending_orders.orders_datatable.clearToastMessage();
 							frm.events.refresh_medication_orders(frm);
 						}
 					}
