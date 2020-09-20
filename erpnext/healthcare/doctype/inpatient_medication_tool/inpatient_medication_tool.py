@@ -41,31 +41,6 @@ class InpatientMedicationTool(Document):
 					+ '<br><br>' + _('Please enable Allow Negative Stock in Stock Settings or create Stock Entry to proceed.'),
 					NegativeStockError, title=_('Insufficient Stock'))
 
-	def make_material_receipt(self, orders):
-		stock_entry = frappe.new_doc('Stock Entry')
-		stock_entry.stock_entry_type = 'Material Receipt'
-		stock_entry.to_warehouse = self.warehouse
-		stock_entry.company = self.company
-		cost_center = frappe.get_cached_value('Company',  self.company,  'cost_center')
-		expense_account = get_account(None, 'expense_account', 'Healthcare Settings', self.company)
-
-		for item in orders:
-			if flt(item.get('available_qty')) < flt(item.get('dosage')):
-				se_child = stock_entry.append('items')
-				se_child.item_code = item.get('drug')
-				se_child.item_name = item.get('drug_name')
-				se_child.uom = frappe.db.get_value('Item', item.get('drug'), 'stock_uom')
-				se_child.stock_uom = se_child.uom
-				se_child.qty = flt(flt(item.get('dosage')) - flt(item.get('available_qty')))
-				se_child.t_warehouse = self.warehouse
-				# in stock uom
-				se_child.conversion_factor = 1
-				se_child.cost_center = cost_center
-				se_child.expense_account = expense_account
-
-		stock_entry.submit()
-		return stock_entry.name
-
 	def make_stock_entry(self, orders):
 		stock_entry = frappe.new_doc('Stock Entry')
 		stock_entry.stock_entry_type = 'Material Issue'
@@ -85,6 +60,10 @@ class InpatientMedicationTool(Document):
 			se_child.conversion_factor = 1
 			se_child.cost_center = cost_center
 			se_child.expense_account = expense_account
+			#references
+			se_child.patient = item.get('patient')
+			se_child.reference_dt = 'Inpatient Medication Order'
+			se_child.reference_dn = item.get('parent')
 
 		stock_entry.submit()
 		return stock_entry.name
@@ -113,7 +92,7 @@ def get_medication_orders(date, assigned_to=None, warehouse=None, is_completed=0
 	data = frappe.db.sql("""
 		SELECT
 			ip.inpatient_record, ip.patient, ip.patient_name,
-			entry.name, entry.drug, entry.drug_name, entry.dosage, entry.dosage_form, entry.time
+			entry.name, entry.parent, entry.drug, entry.drug_name, entry.dosage, entry.dosage_form, entry.time
 		FROM
 			`tabInpatient Medication Order` ip
 		INNER JOIN
@@ -126,7 +105,7 @@ def get_medication_orders(date, assigned_to=None, warehouse=None, is_completed=0
 			{0}
 		ORDER BY
 			entry.time
-	""".format(assignment_condition), values, as_dict=1, debug=1)
+	""".format(assignment_condition), values, as_dict=1)
 
 	for entry in data:
 		inpatient_record = entry.inpatient_record

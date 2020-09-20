@@ -49,6 +49,20 @@ data = {
 				'fieldname': 'reference_dn', 'label': 'Reference Name', 'fieldtype': 'Dynamic Link', 'options': 'reference_dt',
 				'insert_after': 'reference_dt'
 			}
+		],
+		'Stock Entry Detail': [
+			{
+				'fieldname': 'patient', 'label': 'Patient', 'fieldtype': 'Link', 'options': 'Patient',
+				'insert_after': 'po_detail'
+			},
+			{
+				'fieldname': 'reference_dt', 'label': 'Reference DocType', 'fieldtype': 'Link', 'options': 'DocType',
+				'insert_after': 'patient'
+			},
+			{
+				'fieldname': 'reference_dn', 'label': 'Reference Name', 'fieldtype': 'Dynamic Link', 'options': 'reference_dt',
+				'insert_after': 'reference_dt'
+			}
 		]
 	},
 	'on_setup': 'erpnext.healthcare.setup.setup_healthcare'
