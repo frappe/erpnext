@@ -11,7 +11,9 @@ $.extend(frappe.breadcrumbs.preferred, {
 	"Territory": "Selling",
 	"Sales Person": "Selling",
 	"Sales Partner": "Selling",
-	"Brand": "Stock"
+	"Brand": "Stock",
+	"Maintenance Schedule": "Support",
+	"Maintenance Visit": "Support"
 });
 
 $.extend(frappe.breadcrumbs.module_map, {
