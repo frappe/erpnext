@@ -46,7 +46,7 @@ class PlaidConnector():
 
 		try:
 			response = self.client.LinkToken.create(token_request)
-		except InvalidRequestError as e:
+		except InvalidRequestError:
 			frappe.log_error(frappe.get_traceback(), _("Plaid invalid request error"))
 			frappe.msgprint(_("Please check your Plaid client ID and secret values"))
 		except APIError as e:
