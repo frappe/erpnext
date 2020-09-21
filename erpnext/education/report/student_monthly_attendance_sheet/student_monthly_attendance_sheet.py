@@ -8,7 +8,6 @@ from frappe import msgprint, _
 from calendar import monthrange
 from erpnext.education.api import get_student_group_students
 from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list
-from erpnext.education.doctype.student_leave_application.student_leave_application import daterange
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 from erpnext.support.doctype.issue.issue import get_holidays
 
