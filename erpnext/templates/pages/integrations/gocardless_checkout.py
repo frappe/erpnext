@@ -64,7 +64,7 @@ def check_mandate(data, reference_doctype, reference_docname):
 
 	try:
 		redirect_flow = client.redirect_flows.create(params={
-							"description": _("Pay {0} {1}".format(data['amount'], data['currency'])),
+							"description": _("Pay {0} {1}").format(data['amount'], data['currency']),
 							"session_token": frappe.session.user,
 							"success_redirect_url": success_url,
 							"prefilled_customer": prefilled_customer

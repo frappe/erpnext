@@ -71,6 +71,15 @@ class PurchaseOrder(BuyingController):
 				"compare_fields": [["project", "="], ["item_code", "="],
 					["uom", "="], ["conversion_factor", "="]],
 				"is_child_table": True
+			},
+			"Material Request": {
+				"ref_dn_field": "material_request",
+				"compare_fields": [["company", "="]],
+			},
+			"Material Request Item": {
+				"ref_dn_field": "material_request_item",
+				"compare_fields": [["project", "="], ["item_code", "="]],
+				"is_child_table": True
 			}
 		})
 

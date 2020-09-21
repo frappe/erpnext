@@ -12,9 +12,6 @@ from frappe.email.inbox import link_communication_to_document
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import cint, comma_and, cstr, getdate, has_gravatar, nowdate, validate_email_address
 
-sender_field = "email_id"
-
-
 class Lead(SellingController):
 	def get_feed(self):
 		return '{0}: {1}'.format(_(self.status), self.lead_name)
@@ -117,10 +114,12 @@ class Lead(SellingController):
 	def set_lead_name(self):
 		if not self.lead_name:
 			# Check for leads being created through data import
-			if not self.company_name and not self.flags.ignore_mandatory:
+			if not self.company_name and not self.email_id and not self.flags.ignore_mandatory:
 				frappe.throw(_("A Lead requires either a person's name or an organization's name"))
-
-			self.lead_name = self.company_name
+			elif self.company_name:
+				self.lead_name = self.company_name
+			else:
+				self.lead_name = self.email_id.split("@")[0]
 
 	def set_title(self):
 		if self.organization_lead:
@@ -129,16 +128,23 @@ class Lead(SellingController):
 			self.title = self.lead_name
 
 	def create_address(self):
-		address_fields = ["address_title", "address_line1", "address_line2",
+		address_fields = ["address_type", "address_title", "address_line1", "address_line2",
 			"city", "county", "state", "country", "pincode"]
 		info_fields = ["email_id", "phone", "fax"]
 
 		# do not create an address if no fields are available,
 		# skipping country since the system auto-sets it from system defaults
-		if not any([self.get(field) for field in address_fields if field != "country"]):
+		address = frappe.new_doc("Address")
+
+		mandatory_fields = [ df.fieldname for df in address.meta.fields if df.reqd ]
+
+		if not all([self.get(field) for field in mandatory_fields]):
+			frappe.msgprint(_('Missing mandatory fields in address. \
+				{0} to create address' ).format("<a href='desk#Form/Address/New Address 1' \
+				> Click here </a>"),
+				alert=True, indicator='yellow')
 			return
 
-		address = frappe.new_doc("Address")
 		address.update({addr_field: self.get(addr_field) for addr_field in address_fields})
 		address.update({info_field: self.get(info_field) for info_field in info_fields})
 		address.insert()
@@ -149,7 +155,7 @@ class Lead(SellingController):
 		if not self.lead_name:
 			self.set_lead_name()
 
-		names = self.lead_name.split(" ")
+		names = self.lead_name.strip().split(" ")
 		if len(names) > 1:
 			first_name, last_name = names[0], " ".join(names[1:])
 		else:
@@ -205,7 +211,7 @@ class Lead(SellingController):
 			self.contact_doc.save()
 
 	def flush_address_and_contact_fields(self):
-		fields = ['address_line1', 'address_line2', 'address_title',
+		fields = ['address_type', 'address_line1', 'address_line2', 'address_title',
 			'city', 'county', 'country', 'fax', 'pincode', 'state']
 
 		for field in fields:

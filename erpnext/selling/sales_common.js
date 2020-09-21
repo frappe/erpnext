@@ -142,7 +142,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
 
 		// check if child doctype is Sales Order Item/Qutation Item and calculate the rate
-		if(in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item"]), cdt)
+		if(in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item", "POS Invoice Item"]), cdt)
 			this.apply_pricing_rule_on_item(item);
 		else
 			item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
@@ -228,9 +228,15 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	warehouse: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
+
+		if (item.serial_no && item.qty === item.serial_no.split(`\n`).length) {
+			return;
+		}
+
 		if (item.serial_no && !item.batch_no) {
 			item.serial_no = null;
 		}
+
 		var has_batch_no;
 		frappe.db.get_value('Item', {'item_code': item.item_code}, 'has_batch_no', (r) => {
 			has_batch_no = r && r.has_batch_no;
@@ -306,6 +312,11 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	batch_no: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
+
+		if (item.serial_no) {
+			return;
+		}
+
 		item.serial_no = null;
 		var has_serial_no;
 		frappe.db.get_value('Item', {'item_code': item.item_code}, 'has_serial_no', (r) => {
@@ -413,15 +424,20 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	*/
 	set_batch_number: function(cdt, cdn) {
 		const doc = frappe.get_doc(cdt, cdn);
-		if (doc && doc.has_batch_no) {
+		if (doc && doc.has_batch_no && doc.warehouse) {
 			this._set_batch_number(doc);
 		}
 	},
 
 	_set_batch_number: function(doc) {
+		let args = {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': flt(doc.qty) * flt(doc.conversion_factor)};
+		if (doc.has_serial_no && doc.serial_no) {
+			args['serial_no'] = doc.serial_no
+		}
+
 		return frappe.call({
 			method: 'erpnext.stock.doctype.batch.batch.get_batch_no',
-			args: {'item_code': doc.item_code, 'warehouse': doc.warehouse, 'qty': flt(doc.qty) * flt(doc.conversion_factor)},
+			args: args,
 			callback: function(r) {
 				if(r.message) {
 					frappe.model.set_value(doc.doctype, doc.name, 'batch_no', r.message);
@@ -478,13 +494,18 @@ frappe.ui.form.on(cur_frm.doctype, {
 		var dialog = new frappe.ui.Dialog({
 			title: __("Set as Lost"),
 			fields: [
-				{"fieldtype": "Table MultiSelect",
-				"label": __("Lost Reasons"),
-				"fieldname": "lost_reason",
-				"options": "Lost Reason Detail",
-				"reqd": 1},
-
-				{"fieldtype": "Text", "label": __("Detailed Reason"), "fieldname": "detailed_reason"},
+				{
+					"fieldtype": "Table MultiSelect",
+					"label": __("Lost Reasons"),
+					"fieldname": "lost_reason",
+					"options": frm.doctype === 'Opportunity' ? 'Opportunity Lost Reason Detail': 'Quotation Lost Reason Detail',
+					"reqd": 1
+				},
+				{
+					"fieldtype": "Text",
+					"label": __("Detailed Reason"),
+					"fieldname": "detailed_reason"
+				},
 			],
 			primary_action: function() {
 				var values = dialog.get_values();

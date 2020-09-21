@@ -8,14 +8,16 @@
  "engine": "InnoDB",
  "field_order": [
   "account_head",
-  "cost_center",
   "rate",
   "col_break1",
   "description",
   "section_break_6",
   "tax_amount",
   "column_break_8",
-  "total"
+  "total",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break"
  ],
  "fields": [
   {
@@ -71,7 +73,7 @@
    "label": "Amount",
    "oldfieldname": "tax_amount",
    "oldfieldtype": "Currency",
-   "options": "currency"
+   "options": "Company:company:default_currency"
   },
   {
    "columns": 2,
@@ -81,7 +83,7 @@
    "label": "Total",
    "oldfieldname": "total",
    "oldfieldtype": "Currency",
-   "options": "currency",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -91,11 +93,20 @@
   {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2019-12-11 13:50:02.883328",
+ "modified": "2020-05-11 19:01:26.611758",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Taxes and Charges",

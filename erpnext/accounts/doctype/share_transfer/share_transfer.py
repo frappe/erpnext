@@ -168,18 +168,20 @@ class ShareTransfer(Document):
 		return 'Outside'
 
 	def folio_no_validation(self):
-		shareholders = ['from_shareholder', 'to_shareholder']
-		shareholders = [shareholder for shareholder in shareholders if self.get(shareholder) is not '']
-		for shareholder in shareholders:
-			doc = self.get_shareholder_doc(self.get(shareholder))
+		shareholder_fields = ['from_shareholder', 'to_shareholder']
+		for shareholder_field in shareholder_fields:
+			shareholder_name = self.get(shareholder_field)
+			if not shareholder_name:
+				continue
+			doc = self.get_shareholder_doc(shareholder_name)
 			if doc.company != self.company:
 				frappe.throw(_('The shareholder does not belong to this company'))
 			if not doc.folio_no:
 				doc.folio_no = self.from_folio_no \
-					if (shareholder == 'from_shareholder') else self.to_folio_no
+					if (shareholder_field == 'from_shareholder') else self.to_folio_no
 				doc.save()
 			else:
-				if doc.folio_no and doc.folio_no != (self.from_folio_no if (shareholder == 'from_shareholder') else self.to_folio_no):
+				if doc.folio_no and doc.folio_no != (self.from_folio_no if (shareholder_field == 'from_shareholder') else self.to_folio_no):
 					frappe.throw(_('The folio numbers are not matching'))
 
 	def autoname_folio(self, shareholder, is_company=False):

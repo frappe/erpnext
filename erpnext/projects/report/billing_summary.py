@@ -53,7 +53,7 @@ def get_columns():
 def get_data(filters):
 	data = []
 	if(filters.from_date > filters.to_date):
-		frappe.msgprint(_(" From Date can not be greater than To Date"))
+		frappe.msgprint(_("From Date can not be greater than To Date"))
 		return data
 
 	timesheets = get_timesheets(filters)

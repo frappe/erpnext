@@ -7,7 +7,7 @@ from frappe import _, scrub
 from frappe.utils import getdate, nowdate, flt, cint, formatdate, cstr, now, time_diff_in_seconds
 from collections import OrderedDict
 from erpnext.accounts.utils import get_currency_precision
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
 #  This report gives a summary of all Outstanding Invoices considering the following
 
@@ -46,7 +46,7 @@ class ReceivablePayableReport(object):
 		self.get_columns()
 		self.get_data()
 		self.get_chart_data()
-		return self.columns, self.data, None, self.chart
+		return self.columns, self.data, None, self.chart, None, self.skip_total_row
 
 	def set_defaults(self):
 		if not self.filters.get("company"):
@@ -57,6 +57,12 @@ class ReceivablePayableReport(object):
 		self.party_type = self.filters.party_type
 		self.party_details = {}
 		self.invoices = set()
+		self.skip_total_row = 0
+
+		if self.filters.get('group_by_party'):
+			self.previous_party=''
+			self.total_row_map = {}
+			self.skip_total_row = 1
 
 	def get_data(self):
 		self.get_gl_entries()
@@ -102,6 +108,12 @@ class ReceivablePayableReport(object):
 				)
 			self.get_invoices(gle)
 
+			if self.filters.get('group_by_party'):
+				self.init_subtotal_row(gle.party)
+
+		if self.filters.get('group_by_party'):
+			self.init_subtotal_row('Total')
+
 	def get_invoices(self, gle):
 		if gle.voucher_type in ('Sales Invoice', 'Purchase Invoice'):
 			if self.filters.get("sales_person"):
@@ -110,6 +122,20 @@ class ReceivablePayableReport(object):
 						self.invoices.add(gle.voucher_no)
 			else:
 				self.invoices.add(gle.voucher_no)
+
+	def init_subtotal_row(self, party):
+		if not self.total_row_map.get(party):
+			self.total_row_map.setdefault(party, {
+				'party': party,
+				'bold': 1
+			})
+
+			for field in self.get_currency_fields():
+				self.total_row_map[party][field] = 0.0
+
+	def get_currency_fields(self):
+		return ['invoiced', 'paid', 'credit_note', 'outstanding', 'range1',
+			'range2', 'range3', 'range4', 'range5']
 
 	def update_voucher_balance(self, gle):
 		# get the row where this balance needs to be updated
@@ -134,6 +160,20 @@ class ReceivablePayableReport(object):
 			else:
 				# advance / unlinked payment or other adjustment
 				row.paid -= gle_balance
+
+	def update_sub_total_row(self, row, party):
+		total_row = self.total_row_map.get(party)
+
+		for field in self.get_currency_fields():
+			total_row[field] += row.get(field, 0.0)
+
+	def append_subtotal_row(self, party):
+		sub_total_row = self.total_row_map.get(party)
+
+		if sub_total_row:
+			self.data.append(sub_total_row)
+			self.data.append({})
+			self.update_sub_total_row(sub_total_row, 'Total')
 
 	def get_voucher_balance(self, gle):
 		if self.filters.get("sales_person"):
@@ -192,11 +232,23 @@ class ReceivablePayableReport(object):
 				else:
 					self.append_row(row)
 
+		if self.filters.get('group_by_party'):
+			self.append_subtotal_row(self.previous_party)
+			if self.data:
+				self.data.append(self.total_row_map.get('Total'))
+
 	def append_row(self, row):
 		self.allocate_future_payments(row)
 		self.set_invoice_details(row)
 		self.set_party_details(row)
 		self.set_ageing(row)
+
+		if self.filters.get('group_by_party'):
+			self.update_sub_total_row(row, row.party)
+			if self.previous_party and (self.previous_party != row.party):
+				self.append_subtotal_row(self.previous_party)
+			self.previous_party = row.party
+
 		self.data.append(row)
 
 	def set_invoice_details(self, row):
@@ -295,26 +347,28 @@ class ReceivablePayableReport(object):
 	def allocate_outstanding_based_on_payment_terms(self, row):
 		self.get_payment_terms(row)
 		for term in row.payment_terms:
-			term.outstanding = term.invoiced
 
 			# update "paid" and "oustanding" for this term
-			self.allocate_closing_to_term(row, term, 'paid')
+			if not term.paid:
+				self.allocate_closing_to_term(row, term, 'paid')
 
 			# update "credit_note" and "oustanding" for this term
 			if term.outstanding:
 				self.allocate_closing_to_term(row, term, 'credit_note')
+
+		row.payment_terms = sorted(row.payment_terms, key=lambda x: x['due_date'])
 
 	def get_payment_terms(self, row):
 		# build payment_terms for row
 		payment_terms_details = frappe.db.sql("""
 			select
 				si.name, si.party_account_currency, si.currency, si.conversion_rate,
-				ps.due_date, ps.payment_amount, ps.description
+				ps.due_date, ps.payment_amount, ps.description, ps.paid_amount
 			from `tab{0}` si, `tabPayment Schedule` ps
 			where
 				si.name = ps.parent and
 				si.name = %s
-			order by ps.due_date
+			order by ps.paid_amount desc, due_date
 		""".format(row.voucher_type), row.voucher_no, as_dict = 1)
 
 
@@ -340,10 +394,13 @@ class ReceivablePayableReport(object):
 			"invoiced": invoiced,
 			"invoice_grand_total": row.invoiced,
 			"payment_term": d.description,
-			"paid": 0.0,
+			"paid": d.paid_amount,
 			"credit_note": 0.0,
-			"outstanding": 0.0
+			"outstanding": invoiced - d.paid_amount
 		}))
+
+		if d.paid_amount:
+			row['paid'] -= d.paid_amount
 
 	def allocate_closing_to_term(self, row, term, key):
 		if row[key]:
@@ -480,7 +537,7 @@ class ReceivablePayableReport(object):
 
 	def get_ageing_data(self, entry_date, row):
 		# [0-30, 30-60, 60-90, 90-120, 120-above]
-		row.range1 = row.range2 = row.range3 = row.range4 = range5 = 0.0
+		row.range1 = row.range2 = row.range3 = row.range4 = row.range5 = 0.0
 
 		if not (self.age_as_on and entry_date):
 			return
@@ -492,7 +549,7 @@ class ReceivablePayableReport(object):
 			self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4 = 30, 60, 90, 120
 
 		for i, days in enumerate([self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4]):
-			if row.age <= days:
+			if cint(row.age) <= cint(days):
 				index = i
 				break
 
@@ -503,6 +560,15 @@ class ReceivablePayableReport(object):
 		# get all the GL entries filtered by the given filters
 
 		conditions, values = self.prepare_conditions()
+		order_by = self.get_order_by_condition()
+
+		if self.filters.show_future_payments:
+			values.insert(2, self.filters.report_date)
+
+			date_condition = """AND (posting_date <= %s
+				OR (against_voucher IS NULL AND DATE(creation) <= %s))"""
+		else:
+			date_condition = "AND posting_date <=%s"
 
 		if self.filters.get(scrub(self.party_type)):
 			select_fields = "debit_in_account_currency as debit, credit_in_account_currency as credit"
@@ -519,10 +585,8 @@ class ReceivablePayableReport(object):
 				docstatus < 2
 				and party_type=%s
 				and (party is not null and party != '')
-				and posting_date <= %s
-				{1}
-			order by posting_date, party"""
-			.format(select_fields, conditions), values, as_dict=True)
+				{1} {2} {3}"""
+			.format(select_fields, date_condition, conditions, order_by), values, as_dict=True)
 
 	def get_sales_invoices_or_customers_based_on_sales_person(self):
 		if self.filters.get("sales_person"):
@@ -553,9 +617,24 @@ class ReceivablePayableReport(object):
 		elif party_type_field=="supplier":
 			self.add_supplier_filters(conditions, values)
 
-		self.add_accounting_dimensions_filters(conditions, values)
+		if self.filters.cost_center:
+			self.get_cost_center_conditions(conditions)
 
+		self.add_accounting_dimensions_filters(conditions, values)
 		return " and ".join(conditions), values
+
+	def get_cost_center_conditions(self, conditions):
+		lft, rgt = frappe.db.get_value("Cost Center", self.filters.cost_center, ["lft", "rgt"])
+		cost_center_list = [center.name for center in frappe.get_list("Cost Center", filters = {'lft': (">=", lft), 'rgt': ("<=", rgt)})]
+
+		cost_center_string = '", "'.join(cost_center_list)
+		conditions.append('cost_center in ("{0}")'.format(cost_center_string))
+
+	def get_order_by_condition(self):
+		if self.filters.get('group_by_party'):
+			return "order by party, posting_date"
+		else:
+			return "order by posting_date, party"
 
 	def add_common_filters(self, conditions, values, party_type_field):
 		if self.filters.company:
@@ -574,8 +653,10 @@ class ReceivablePayableReport(object):
 		account_type = "Receivable" if self.party_type == "Customer" else "Payable"
 		accounts = [d.name for d in frappe.get_all("Account",
 			filters={"account_type": account_type, "company": self.filters.company})]
-		conditions.append("account in (%s)" % ','.join(['%s'] *len(accounts)))
-		values += accounts
+
+		if accounts:
+			conditions.append("account in (%s)" % ','.join(['%s'] *len(accounts)))
+			values += accounts
 
 	def add_customer_filters(self, conditions, values):
 		if self.filters.get("customer_group"):
@@ -611,13 +692,16 @@ class ReceivablePayableReport(object):
 					doctype=doctype, lft=lft, rgt=rgt, key=key)
 
 	def add_accounting_dimensions_filters(self, conditions, values):
-		accounting_dimensions = get_accounting_dimensions()
+		accounting_dimensions = get_accounting_dimensions(as_list=False)
 
 		if accounting_dimensions:
 			for dimension in accounting_dimensions:
-				if self.filters.get(dimension):
-					conditions.append("{0} = %s".format(dimension))
-					values.append(self.filters.get(dimension))
+				if self.filters.get(dimension.fieldname):
+					if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
+						self.filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
+							self.filters.get(dimension.fieldname))
+					conditions.append("{0} in %s".format(dimension.fieldname))
+					values.append(tuple(self.filters.get(dimension.fieldname)))
 
 	def get_gle_balance(self, gle):
 		# get the balance of the GL (debit - credit) or reverse balance based on report type
@@ -736,11 +820,13 @@ class ReceivablePayableReport(object):
 	def get_chart_data(self):
 		rows = []
 		for row in self.data:
-			values = [row.range1, row.range2, row.range3, row.range4, row.range5]
-			precision = cint(frappe.db.get_default("float_precision")) or 2
-			rows.append({
-				'values': [flt(val, precision) for val in values]
-			})
+			row = frappe._dict(row)
+			if not cint(row.bold):
+				values = [row.range1, row.range2, row.range3, row.range4, row.range5]
+				precision = cint(frappe.db.get_default("float_precision")) or 2
+				rows.append({
+					'values': [flt(val, precision) for val in values]
+				})
 
 		self.chart = {
 			"data": {

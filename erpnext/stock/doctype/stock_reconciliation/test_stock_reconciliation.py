@@ -34,11 +34,11 @@ class TestStockReconciliation(unittest.TestCase):
 		# [[qty, valuation_rate, posting_date,
 		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
 		input_data = [
-			[50, 1000, "2012-12-26", "12:00"],
-			[25, 900, "2012-12-26", "12:00"],
-			["", 1000, "2012-12-20", "12:05"],
-			[20, "", "2012-12-26", "12:05"],
-			[0, "", "2012-12-31", "12:10"]
+			[50, 1000],
+			[25, 900],
+			["", 1000],
+			[20, ""],
+			[0, ""]
 		]
 
 		for d in input_data:
@@ -47,13 +47,13 @@ class TestStockReconciliation(unittest.TestCase):
 			last_sle = get_previous_sle({
 				"item_code": "_Test Item",
 				"warehouse": "Stores - TCP1",
-				"posting_date": d[2],
-				"posting_time": d[3]
+				"posting_date": nowdate(),
+				"posting_time": nowtime()
 			})
 
 			# submit stock reconciliation
 			stock_reco = create_stock_reconciliation(qty=d[0], rate=d[1],
-				posting_date=d[2], posting_time=d[3], warehouse="Stores - TCP1",
+				posting_date=nowdate(), posting_time=nowtime(), warehouse="Stores - TCP1",
 				company=company, expense_account = "Stock Adjustment - TCP1")
 
 			# check stock value
@@ -68,8 +68,8 @@ class TestStockReconciliation(unittest.TestCase):
 				and valuation_rate == last_sle.get("valuation_rate"):
 					self.assertFalse(sle)
 			else:
-				self.assertEqual(sle[0].qty_after_transaction, qty_after_transaction)
-				self.assertEqual(sle[0].stock_value, qty_after_transaction * valuation_rate)
+				self.assertEqual(flt(sle[0].qty_after_transaction, 1), flt(qty_after_transaction, 1))
+				self.assertEqual(flt(sle[0].stock_value, 1), flt(qty_after_transaction * valuation_rate, 1))
 
 				# no gl entries
 				self.assertTrue(frappe.db.get_value("Stock Ledger Entry",
@@ -77,15 +77,9 @@ class TestStockReconciliation(unittest.TestCase):
 
 				acc_bal, stock_bal, wh_list = get_stock_and_account_balance("Stock In Hand - TCP1",
 					stock_reco.posting_date, stock_reco.company)
-				self.assertEqual(acc_bal, stock_bal)
+				self.assertEqual(flt(acc_bal, 1), flt(stock_bal, 1))
 
 				stock_reco.cancel()
-
-				self.assertFalse(frappe.db.get_value("Stock Ledger Entry",
-					{"voucher_type": "Stock Reconciliation", "voucher_no": stock_reco.name}))
-
-				self.assertFalse(frappe.db.get_value("GL Entry",
-					{"voucher_type": "Stock Reconciliation", "voucher_no": stock_reco.name}))
 
 	def test_get_items(self):
 		create_warehouse("_Test Warehouse Group 1", {"is_group": 1})
@@ -113,7 +107,6 @@ class TestStockReconciliation(unittest.TestCase):
 		sr = create_stock_reconciliation(item_code=serial_item_code,
 			warehouse = serial_warehouse, qty=5, rate=200)
 
-		# print(sr.name)
 		serial_nos = get_serial_nos(sr.items[0].serial_no)
 		self.assertEqual(len(serial_nos), 5)
 
@@ -133,7 +126,6 @@ class TestStockReconciliation(unittest.TestCase):
 		sr = create_stock_reconciliation(item_code=serial_item_code,
 			warehouse = serial_warehouse, qty=5, rate=300, serial_no = '\n'.join(serial_nos))
 
-		# print(sr.name)
 		serial_nos1 = get_serial_nos(sr.items[0].serial_no)
 		self.assertEqual(len(serial_nos1), 5)
 
@@ -154,10 +146,6 @@ class TestStockReconciliation(unittest.TestCase):
 		for d in to_delete_records:
 			stock_doc = frappe.get_doc("Stock Reconciliation", d)
 			stock_doc.cancel()
-
-		for d in serial_nos + serial_nos1:
-			if frappe.db.exists("Serial No", d):
-				frappe.delete_doc("Serial No", d)
 
 	def test_stock_reco_for_batch_item(self):
 		set_perpetual_inventory()
@@ -208,13 +196,13 @@ class TestStockReconciliation(unittest.TestCase):
 def insert_existing_sle(warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
-	make_stock_entry(posting_date="2012-12-15", posting_time="02:00", item_code="_Test Item",
+	make_stock_entry(posting_date=nowdate(), posting_time=nowtime(), item_code="_Test Item",
 		target=warehouse, qty=10, basic_rate=700)
 
-	make_stock_entry(posting_date="2012-12-25", posting_time="03:00", item_code="_Test Item",
+	make_stock_entry(posting_date=nowdate(), posting_time=nowtime(), item_code="_Test Item",
 		source=warehouse, qty=15)
 
-	make_stock_entry(posting_date="2013-01-05", posting_time="07:00", item_code="_Test Item",
+	make_stock_entry(posting_date=nowdate(), posting_time=nowtime(), item_code="_Test Item",
 		target=warehouse, qty=15, basic_rate=1200)
 
 def create_batch_or_serial_no_items():
@@ -240,6 +228,7 @@ def create_batch_or_serial_no_items():
 def create_stock_reconciliation(**args):
 	args = frappe._dict(args)
 	sr = frappe.new_doc("Stock Reconciliation")
+	sr.purpose = args.purpose or "Stock Reconciliation"
 	sr.posting_date = args.posting_date or nowdate()
 	sr.posting_time = args.posting_time or nowtime()
 	sr.set_posting_time = 1

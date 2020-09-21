@@ -174,15 +174,11 @@ def get_child_groups(item_group_name):
 			and show_in_website = 1""", {"lft": item_group.lft, "rgt": item_group.rgt})
 
 def get_child_item_groups(item_group_name):
-	child_item_groups = frappe.cache().hget("child_item_groups", item_group_name)
+	item_group = frappe.get_cached_value("Item Group",
+		item_group_name, ["lft", "rgt"], as_dict=1)
 
-	if not child_item_groups:
-		item_group = frappe.get_cached_doc("Item Group", item_group_name)
-
-		child_item_groups = [d.name for d in frappe.get_all('Item Group',
-			filters= {'lft': ('>=', item_group.lft),'rgt': ('>=', item_group.rgt)})]
-
-		frappe.cache().hset("child_item_groups", item_group_name, child_item_groups)
+	child_item_groups = [d.name for d in frappe.get_all('Item Group',
+		filters= {'lft': ('>=', item_group.lft),'rgt': ('<=', item_group.rgt)})]
 
 	return child_item_groups or {}
 

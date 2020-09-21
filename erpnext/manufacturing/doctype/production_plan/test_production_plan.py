@@ -62,9 +62,9 @@ class TestProductionPlan(unittest.TestCase):
 
 	def test_production_plan_for_existing_ordered_qty(self):
 		sr1 = create_stock_reconciliation(item_code="Raw Material Item 1",
-			target="_Test Warehouse - _TC", qty=1, rate=100)
+			target="_Test Warehouse - _TC", qty=1, rate=110)
 		sr2 = create_stock_reconciliation(item_code="Raw Material Item 2",
-			target="_Test Warehouse - _TC", qty=1, rate=100)
+			target="_Test Warehouse - _TC", qty=1, rate=120)
 
 		pln = create_production_plan(item_code='Test Production Item 1', ignore_existing_ordered_qty=0)
 		self.assertTrue(len(pln.mr_items), 1)
@@ -86,9 +86,9 @@ class TestProductionPlan(unittest.TestCase):
 
 	def test_production_plan_without_multi_level_for_existing_ordered_qty(self):
 		sr1 = create_stock_reconciliation(item_code="Raw Material Item 1",
-			target="_Test Warehouse - _TC", qty=1, rate=100)
+			target="_Test Warehouse - _TC", qty=1, rate=130)
 		sr2 = create_stock_reconciliation(item_code="Subassembly Item 1",
-			target="_Test Warehouse - _TC", qty=1, rate=100)
+			target="_Test Warehouse - _TC", qty=1, rate=140)
 
 		pln = create_production_plan(item_code='Test Production Item 1',
 			use_multi_level_bom=0, ignore_existing_ordered_qty=0)
@@ -192,9 +192,10 @@ def make_bom(**args):
 	args = frappe._dict(args)
 
 	bom = frappe.get_doc({
-		'doctype': "BOM",
+		'doctype': 'BOM',
 		'is_default': 1,
 		'item': args.item,
+		'currency': args.currency or 'USD',
 		'quantity': args.quantity or 1,
 		'company': args.company or '_Test Company'
 	})
@@ -212,3 +213,4 @@ def make_bom(**args):
 
 	bom.insert(ignore_permissions=True)
 	bom.submit()
+	return bom

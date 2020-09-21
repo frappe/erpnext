@@ -10,7 +10,6 @@
   "item_code",
   "uom",
   "packing_unit",
-  "min_qty",
   "column_break_17",
   "item_name",
   "brand",
@@ -62,13 +61,6 @@
    "fieldname": "packing_unit",
    "fieldtype": "Int",
    "label": "Packing Unit"
-  },
-  {
-   "default": "1",
-   "fieldname": "min_qty",
-   "fieldtype": "Int",
-   "in_list_view": 1,
-   "label": "Minimum Qty "
   },
   {
    "fieldname": "column_break_17",
@@ -180,7 +172,7 @@
    "default": "Today",
    "fieldname": "valid_from",
    "fieldtype": "Date",
-   "label": "Valid From "
+   "label": "Valid From"
   },
   {
    "default": "0",
@@ -195,7 +187,7 @@
   {
    "fieldname": "valid_upto",
    "fieldtype": "Date",
-   "label": "Valid Upto "
+   "label": "Valid Upto"
   },
   {
    "fieldname": "section_break_24",
@@ -216,7 +208,7 @@
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2019-12-31 03:11:09.702250",
+ "modified": "2020-07-06 22:31:32.943475",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
@@ -251,6 +243,7 @@
   }
  ],
  "quick_entry": 1,
+ "sort_field": "modified",
  "sort_order": "ASC",
  "title_field": "item_name",
  "track_changes": 1

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-02-22 01:27:39",
  "doctype": "DocType",
@@ -17,6 +18,7 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+  "project",
   "currency_section",
   "account_currency",
   "column_break_10",
@@ -31,7 +33,7 @@
   "reference_type",
   "reference_name",
   "reference_due_date",
-  "project",
+  "reference_detail_no",
   "col_break3",
   "is_advance",
   "user_remark",
@@ -267,11 +269,18 @@
    "fieldtype": "Link",
    "label": "Bank Account",
    "options": "Bank Account"
+  },
+  {
+   "fieldname": "reference_detail_no",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Reference Detail No"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-01-13 12:41:33.968025",
+ "links": [],
+ "modified": "2020-06-24 14:06:54.833738",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",

@@ -1,0 +1,119 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "beta": 1,
+ "creation": "2016-03-29 17:37:29.913583",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "engine": "InnoDB",
+ "field_order": [
+  "template_or_new_line",
+  "lab_test_template",
+  "lab_test_rate",
+  "lab_test_description",
+  "group_event",
+  "group_test_uom",
+  "secondary_uom",
+  "conversion_factor",
+  "allow_blank",
+  "column_break_8",
+  "group_test_normal_range"
+ ],
+ "fields": [
+  {
+   "default": "Add Test",
+   "fieldname": "template_or_new_line",
+   "fieldtype": "Select",
+   "options": "Add Test\nAdd New Line",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.template_or_new_line == 'Add Test'",
+   "fieldname": "lab_test_template",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_list_view": 1,
+   "label": "Test Name",
+   "options": "Lab Test Template"
+  },
+  {
+   "fetch_from": "lab_test_template.lab_test_rate",
+   "fieldname": "lab_test_rate",
+   "fieldtype": "Currency",
+   "label": "Rate",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fetch_from": "lab_test_template.lab_test_description",
+   "fieldname": "lab_test_description",
+   "fieldtype": "Data",
+   "ignore_xss_filter": 1,
+   "in_list_view": 1,
+   "label": "Description",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.template_or_new_line == 'Add New Line'",
+   "fieldname": "group_event",
+   "fieldtype": "Data",
+   "ignore_xss_filter": 1,
+   "in_list_view": 1,
+   "label": "Event"
+  },
+  {
+   "depends_on": "eval:doc.template_or_new_line =='Add New Line'",
+   "fieldname": "group_test_uom",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "UOM",
+   "options": "Lab Test UOM"
+  },
+  {
+   "depends_on": "eval:doc.template_or_new_line == 'Add New Line'",
+   "fieldname": "group_test_normal_range",
+   "fieldtype": "Long Text",
+   "ignore_xss_filter": 1,
+   "label": "Normal Range"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.template_or_new_line =='Add New Line'",
+   "fieldname": "secondary_uom",
+   "fieldtype": "Link",
+   "label": "Secondary UOM",
+   "options": "Lab Test UOM"
+  },
+  {
+   "depends_on": "secondary_uom",
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "Conversion Factor",
+   "mandatory_depends_on": "secondary_uom"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.template_or_new_line == 'Add New Line'",
+   "fieldname": "allow_blank",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Allow Blank"
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-07-30 12:36:03.082391",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Lab Test Group Template",
+ "owner": "Administrator",
+ "permissions": [],
+ "restrict_to_domain": "Healthcare",
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

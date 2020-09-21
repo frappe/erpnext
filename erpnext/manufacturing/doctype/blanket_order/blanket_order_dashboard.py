@@ -6,7 +6,7 @@ def get_data():
 		'fieldname': 'blanket_order',
 		'transactions': [
 			{
-				'items': ['Purchase Order', 'Sales Order']
+				'items': ['Purchase Order', 'Sales Order', 'Quotation']
 			}
 		]
 	}

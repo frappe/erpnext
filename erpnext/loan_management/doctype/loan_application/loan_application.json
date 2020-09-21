@@ -1,0 +1,279 @@
+{
+ "actions": [],
+ "autoname": "ACC-LOAP-.YYYY.-.#####",
+ "creation": "2019-08-29 17:46:49.201740",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "applicant_type",
+  "applicant",
+  "applicant_name",
+  "column_break_2",
+  "company",
+  "posting_date",
+  "status",
+  "section_break_4",
+  "loan_type",
+  "is_term_loan",
+  "loan_amount",
+  "is_secured_loan",
+  "rate_of_interest",
+  "column_break_7",
+  "description",
+  "loan_security_details_section",
+  "proposed_pledges",
+  "maximum_loan_amount",
+  "repayment_info",
+  "repayment_method",
+  "total_payable_amount",
+  "column_break_11",
+  "repayment_periods",
+  "repayment_amount",
+  "total_payable_interest",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "applicant_type",
+   "fieldtype": "Select",
+   "label": "Applicant Type",
+   "options": "Employee\nMember\nCustomer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "applicant",
+   "fieldtype": "Dynamic Link",
+   "in_global_search": 1,
+   "in_standard_filter": 1,
+   "label": "Applicant",
+   "options": "applicant_type",
+   "reqd": 1
+  },
+  {
+   "depends_on": "applicant",
+   "fieldname": "applicant_name",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Applicant Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Open\nApproved\nRejected",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break",
+   "label": "Loan Info"
+  },
+  {
+   "fieldname": "loan_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Loan Type",
+   "options": "Loan Type",
+   "reqd": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "loan_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Loan Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Reason"
+  },
+  {
+   "depends_on": "eval: doc.is_term_loan == 1",
+   "fieldname": "repayment_info",
+   "fieldtype": "Section Break",
+   "label": "Repayment Info"
+  },
+  {
+   "depends_on": "eval: doc.is_term_loan == 1",
+   "fetch_if_empty": 1,
+   "fieldname": "repayment_method",
+   "fieldtype": "Select",
+   "label": "Repayment Method",
+   "options": "\nRepay Fixed Amount per Period\nRepay Over Number of Periods"
+  },
+  {
+   "fetch_from": "loan_type.rate_of_interest",
+   "fieldname": "rate_of_interest",
+   "fieldtype": "Percent",
+   "label": "Rate of Interest",
+   "read_only": 1
+  },
+  {
+   "depends_on": "is_term_loan",
+   "fieldname": "total_payable_interest",
+   "fieldtype": "Currency",
+   "label": "Total Payable Interest",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "repayment_method",
+   "fieldname": "repayment_amount",
+   "fieldtype": "Currency",
+   "label": "Monthly Repayment Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "depends_on": "repayment_method",
+   "fieldname": "repayment_periods",
+   "fieldtype": "Int",
+   "label": "Repayment Period in Months"
+  },
+  {
+   "fieldname": "total_payable_amount",
+   "fieldtype": "Currency",
+   "label": "Total Payable Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Loan Application",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_secured_loan",
+   "fieldtype": "Check",
+   "label": "Is Secured Loan"
+  },
+  {
+   "depends_on": "eval:doc.is_secured_loan == 1",
+   "fieldname": "loan_security_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan Security Details"
+  },
+  {
+   "depends_on": "eval:doc.is_secured_loan == 1",
+   "fieldname": "proposed_pledges",
+   "fieldtype": "Table",
+   "label": "Proposed Pledges",
+   "options": "Proposed Pledge"
+  },
+  {
+   "fieldname": "maximum_loan_amount",
+   "fieldtype": "Currency",
+   "label": "Maximum Loan Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "loan_type.is_term_loan",
+   "fieldname": "is_term_loan",
+   "fieldtype": "Check",
+   "label": "Is Term Loan",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-03-01 10:21:44.413353",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Loan Application",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1
+  }
+ ],
+ "search_fields": "applicant_type, applicant, loan_type, loan_amount",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "timeline_field": "applicant",
+ "title_field": "applicant",
+ "track_changes": 1
+}

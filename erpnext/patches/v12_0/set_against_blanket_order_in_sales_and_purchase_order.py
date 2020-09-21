@@ -1,10 +1,11 @@
 import frappe
+
 def execute():
 
-	frappe.reload_doc('selling', 'doctype', frappe.scrub('Sales Order Item'))
-	frappe.reload_doc('buying', 'doctype', frappe.scrub('Purchase Order Item'))
+	frappe.reload_doc('selling', 'doctype', 'sales_order_item', force=True)
+	frappe.reload_doc('buying', 'doctype', 'purchase_order_item', force=True)
 
-	for doctype in ['Sales Order Item', 'Purchase Order Item']:
+	for doctype in ('Sales Order Item', 'Purchase Order Item'):
 		frappe.db.sql("""
 			UPDATE `tab{0}`
 			SET against_blanket_order = 1

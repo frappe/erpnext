@@ -8,8 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate, nowdate, flt
 from erpnext.hr.utils import set_employee_name
-from erpnext.hr.doctype.leave_application.leave_application import get_leave_balance_on
-from erpnext.hr.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
+from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
 from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry
 from erpnext.hr.doctype.leave_allocation.leave_allocation import get_unused_leaves
 
@@ -31,12 +30,15 @@ class LeaveEncashment(Document):
 		additional_salary = frappe.new_doc("Additional Salary")
 		additional_salary.company = frappe.get_value("Employee", self.employee, "company")
 		additional_salary.employee = self.employee
-		additional_salary.salary_component = frappe.get_value("Leave Type", self.leave_type, "earning_component")
+		earning_component = frappe.get_value("Leave Type", self.leave_type, "earning_component")
+		if not earning_component:
+			frappe.throw(_("Please set Earning Component for Leave type: {0}.".format(self.leave_type)))
+		additional_salary.salary_component = earning_component
 		additional_salary.payroll_date = self.encashment_date
 		additional_salary.amount = self.encashment_amount
+		additional_salary.ref_doctype = self.doctype
+		additional_salary.ref_docname = self.name
 		additional_salary.submit()
-
-		self.db_set("additional_salary", additional_salary.name)
 
 		# Set encashed leaves in Allocation
 		frappe.db.set_value("Leave Allocation", self.leave_allocation, "total_leaves_encashed",
@@ -63,6 +65,9 @@ class LeaveEncashment(Document):
 			frappe.throw(_("Leave Type {0} is not encashable").format(self.leave_type))
 
 		allocation = self.get_leave_allocation()
+
+		if not allocation:
+			frappe.throw(_("No Leaves Allocated to Employee: {0} for Leave Type: {1}").format(self.employee, self.leave_type))
 
 		self.leave_balance = allocation.total_leaves_allocated - allocation.carry_forwarded_leaves_count\
 			- get_unused_leaves(self.employee, self.leave_type, allocation.from_date, self.encashment_date)

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:project_name",
@@ -82,7 +83,6 @@
    "oldfieldname": "status",
    "oldfieldtype": "Select",
    "options": "Open\nCompleted\nCancelled",
-   "reqd": 1,
    "search_index": 1
   },
   {
@@ -435,16 +435,18 @@
   },
   {
    "depends_on": "collect_progress",
-   "description": "Message will sent to users to get their status on the project",
+   "description": "Message will be sent to the users to get their status on the Project",
    "fieldname": "message",
    "fieldtype": "Text",
-   "label": "Message"
+   "label": "Message",
+   "mandatory_depends_on": "collect_progress"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
+ "links": [],
  "max_attachments": 4,
- "modified": "2019-09-24 15:02:50.208301",
+ "modified": "2020-04-08 22:11:14.552615",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

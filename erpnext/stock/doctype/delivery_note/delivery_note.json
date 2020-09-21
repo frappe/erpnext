@@ -24,10 +24,10 @@
   "return_against",
   "customer_po_details",
   "po_no",
-  "section_break_18",
-  "pick_list",
   "column_break_17",
   "po_date",
+  "section_break_18",
+  "pick_list",
   "contact_info",
   "shipping_address_name",
   "shipping_address",
@@ -66,9 +66,9 @@
   "base_total",
   "base_net_total",
   "column_break_33",
+  "total_net_weight",
   "total",
   "net_total",
-  "total_net_weight",
   "taxes_section",
   "tax_category",
   "column_break_39",
@@ -115,6 +115,8 @@
   "campaign",
   "source",
   "column_break5",
+  "is_internal_customer",
+  "inter_company_reference",
   "per_billed",
   "customer_group",
   "territory",
@@ -173,7 +175,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "MAT-DN-.YYYY.-",
+   "options": "MAT-DN-.YYYY.-\nMAT-DN-RET-.YYYY.-",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -294,7 +296,6 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "po_no",
    "fieldname": "customer_po_details",
    "fieldtype": "Section Break",
    "label": "Customer PO Details"
@@ -302,7 +303,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "po_no",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "Customer's Purchase Order No",
    "no_copy": 1,
    "oldfieldname": "po_no",
@@ -316,7 +317,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.po_no",
    "fieldname": "po_date",
    "fieldtype": "Date",
    "label": "Customer's Purchase Order Date",
@@ -324,7 +324,6 @@
    "oldfieldtype": "Data",
    "print_hide": 1,
    "print_width": "100px",
-   "read_only": 1,
    "width": "100px"
   },
   {
@@ -802,6 +801,7 @@
    "fieldname": "base_in_words",
    "fieldtype": "Data",
    "label": "In Words (Company Currency)",
+   "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -852,6 +852,7 @@
    "fieldname": "in_words",
    "fieldtype": "Data",
    "label": "In Words",
+   "length": 240,
    "oldfieldname": "in_words_export",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -1234,13 +1235,27 @@
   {
    "fieldname": "section_break_18",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fetch_from": "customer.is_internal_customer",
+   "fieldname": "is_internal_customer",
+   "fieldtype": "Check",
+   "label": "Is Internal Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "inter_company_reference",
+   "fieldtype": "Link",
+   "label": "Inter Company Reference",
+   "options": "Purchase Receipt"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-30 19:17:13.122644",
+ "modified": "2020-08-03 23:18:47.739997",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

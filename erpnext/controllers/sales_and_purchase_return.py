@@ -74,7 +74,7 @@ def validate_returned_items(doc):
 	for d in doc.get("items"):
 		if d.item_code and (flt(d.qty) < 0 or flt(d.get('received_qty')) < 0):
 			if d.item_code not in valid_items:
-				frappe.throw(_("Row # {0}: Returned Item {1} does not exists in {2} {3}")
+				frappe.throw(_("Row # {0}: Returned Item {1} does not exist in {2} {3}")
 					.format(d.idx, d.item_code, doc.doctype, doc.return_against))
 			else:
 				ref = valid_items.get(d.item_code, frappe._dict())
@@ -213,7 +213,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 		doc.return_against = source.name
 		doc.ignore_pricing_rule = 1
 		doc.set_warehouse = ""
-		if doctype == "Sales Invoice":
+		if doctype == "Sales Invoice" or doctype == "POS Invoice":
 			doc.is_pos = source.is_pos
 
 			# look for Print Heading "Credit Note"
@@ -229,7 +229,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 				tax.tax_amount = -1 * tax.tax_amount
 
 		if doc.get("is_return"):
-			if doc.doctype == 'Sales Invoice':
+			if doc.doctype == 'Sales Invoice' or doc.doctype == 'POS Invoice':
 				doc.set('payments', [])
 				for data in source.payments:
 					paid_amount = 0.00
@@ -241,8 +241,12 @@ def make_return_doc(doctype, source_name, target_doc=None):
 						'mode_of_payment': data.mode_of_payment,
 						'type': data.type,
 						'amount': -1 * paid_amount,
-						'base_amount': -1 * base_paid_amount
+						'base_amount': -1 * base_paid_amount,
+						'account': data.account,
+						'default': data.default
 					})
+				if doc.is_pos:
+					doc.paid_amount = -1 * source.paid_amount
 			elif doc.doctype == 'Purchase Invoice':
 				doc.paid_amount = -1 * source.paid_amount
 				doc.base_paid_amount = -1 * source.base_paid_amount
@@ -266,6 +270,8 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.purchase_order = source_doc.purchase_order
 			target_doc.purchase_order_item = source_doc.purchase_order_item
 			target_doc.rejected_warehouse = source_doc.rejected_warehouse
+			target_doc.purchase_receipt_item = source_doc.name
+
 		elif doctype == "Purchase Invoice":
 			target_doc.received_qty = -1* source_doc.received_qty
 			target_doc.rejected_qty = -1* source_doc.rejected_qty
@@ -276,20 +282,24 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.rejected_warehouse = source_doc.rejected_warehouse
 			target_doc.po_detail = source_doc.po_detail
 			target_doc.pr_detail = source_doc.pr_detail
+			target_doc.purchase_invoice_item = source_doc.name
+
 		elif doctype == "Delivery Note":
 			target_doc.against_sales_order = source_doc.against_sales_order
 			target_doc.against_sales_invoice = source_doc.against_sales_invoice
 			target_doc.so_detail = source_doc.so_detail
 			target_doc.si_detail = source_doc.si_detail
 			target_doc.expense_account = source_doc.expense_account
+			target_doc.dn_detail = source_doc.name
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
-		elif doctype == "Sales Invoice":
+		elif doctype == "Sales Invoice" or doctype == "POS Invoice":
 			target_doc.sales_order = source_doc.sales_order
 			target_doc.delivery_note = source_doc.delivery_note
 			target_doc.so_detail = source_doc.so_detail
 			target_doc.dn_detail = source_doc.dn_detail
 			target_doc.expense_account = source_doc.expense_account
+			target_doc.sales_invoice_item = source_doc.name
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
 

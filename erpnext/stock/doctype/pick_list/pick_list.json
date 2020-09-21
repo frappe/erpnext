@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "naming_series:",
  "creation": "2019-07-11 16:03:13.681045",
  "doctype": "DocType",
@@ -44,7 +45,7 @@
    "options": "Warehouse"
   },
   {
-   "depends_on": "eval:doc.purpose==='Delivery against Sales Order'",
+   "depends_on": "eval:doc.purpose==='Delivery'",
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -59,6 +60,7 @@
    "options": "Work Order"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "locations",
    "fieldtype": "Table",
    "label": "Item Locations",
@@ -86,7 +88,7 @@
    "fieldname": "purpose",
    "fieldtype": "Select",
    "label": "Purpose",
-   "options": "Material Transfer for Manufacture\nMaterial Transfer\nDelivery against Sales Order"
+   "options": "Material Transfer for Manufacture\nMaterial Transfer\nDelivery"
   },
   {
    "depends_on": "eval:['Material Transfer', 'Material Issue'].includes(doc.purpose)",
@@ -111,7 +113,8 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-08-29 21:10:11.572387",
+ "links": [],
+ "modified": "2020-03-17 11:38:41.932875",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

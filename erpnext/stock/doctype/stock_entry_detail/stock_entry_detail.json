@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-03-29 18:22:12",
  "doctype": "DocType",
@@ -13,15 +14,16 @@
   "t_warehouse",
   "sec_break1",
   "item_code",
-  "item_group",
   "col_break2",
   "item_name",
   "section_break_8",
   "description",
   "column_break_10",
+  "item_group",
   "image",
   "image_view",
   "quantity_and_rate",
+  "set_basic_rate_manually",
   "qty",
   "basic_rate",
   "basic_amount",
@@ -177,6 +179,7 @@
    "bold": 1,
    "fieldname": "basic_rate",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Basic Rate (as per Stock UOM)",
    "oldfieldname": "incoming_rate",
    "oldfieldtype": "Currency",
@@ -419,6 +422,7 @@
    "options": "Item"
   },
   {
+   "collapsible": 1,
    "fieldname": "reference_section",
    "fieldtype": "Section Break",
    "label": "Reference"
@@ -465,7 +469,6 @@
    "fetch_from": "item_code.item_group",
    "fieldname": "item_group",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Item Group"
   },
   {
@@ -479,8 +482,7 @@
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
-   "options": "Project",
-   "read_only": 1
+   "options": "Project"
   },
   {
    "fieldname": "po_detail",
@@ -490,11 +492,21 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:parent.purpose===\"Repack\" && doc.t_warehouse",
+   "fieldname": "set_basic_rate_manually",
+   "fieldtype": "Check",
+   "label": "Set Basic Rate Manually",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-08-20 14:01:02.319754",
+ "links": [],
+ "modified": "2020-06-08 12:57:03.172887",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

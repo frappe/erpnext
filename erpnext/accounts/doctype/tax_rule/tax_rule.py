@@ -95,7 +95,7 @@ class TaxRule(Document):
 
 		if tax_rule:
 			if tax_rule[0].priority == self.priority:
-				frappe.throw(_("Tax Rule Conflicts with {0}".format(tax_rule[0].name)), ConflictingTaxRule)
+				frappe.throw(_("Tax Rule Conflicts with {0}").format(tax_rule[0].name), ConflictingTaxRule)
 
 	def validate_use_for_shopping_cart(self):
 		'''If shopping cart is enabled and no tax rule exists for shopping cart, enable this one'''

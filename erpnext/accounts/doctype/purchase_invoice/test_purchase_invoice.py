@@ -7,14 +7,16 @@ import unittest
 import frappe, erpnext
 import frappe.model
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-from frappe.utils import cint, flt, today, nowdate, add_days
+from frappe.utils import cint, flt, today, nowdate, add_days, getdate
 import frappe.defaults
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory, \
 	test_records as pr_test_records, make_purchase_receipt, get_taxes
 from erpnext.controllers.accounts_controller import get_payment_terms
 from erpnext.exceptions import InvalidCurrency
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction
-from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.projects.doctype.project.test_project import make_project
+from erpnext.accounts.doctype.account.test_account import get_inventory_account, create_account
+from erpnext.stock.doctype.item.test_item import create_item
 
 test_dependencies = ["Item", "Cost Center", "Payment Term", "Payment Terms Template"]
 test_ignore = ["Serial No"]
@@ -86,6 +88,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pe.submit()
 
 		pi_doc = frappe.get_doc('Purchase Invoice', pi_doc.name)
+		pi_doc.load_from_db()
+		self.assertTrue(pi_doc.status, "Paid")
 
 		self.assertRaises(frappe.LinkExistsError, pi_doc.cancel)
 		unlink_payment_on_cancel_of_invoice()
@@ -203,7 +207,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi.insert()
 		pi.submit()
+		pi.load_from_db()
 
+		self.assertTrue(pi.status, "Unpaid")
 		self.check_gle_for_pi(pi.name)
 
 	def check_gle_for_pi(self, pi):
@@ -234,6 +240,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi = frappe.copy_doc(test_records[0])
 		pi.insert()
+		pi.load_from_db()
+
+		self.assertTrue(pi.status, "Draft")
 		pi.naming_series = 'TEST-'
 
 		self.assertRaises(frappe.CannotChangeConstantError, pi.save)
@@ -248,6 +257,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi.get("taxes").pop(1)
 		pi.insert()
 		pi.submit()
+		pi.load_from_db()
+		self.assertTrue(pi.status, "Unpaid")
 
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
@@ -425,6 +436,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		)
 
 	def test_total_purchase_cost_for_project(self):
+		make_project({'project_name':'_Test Project'})
+
 		existing_purchase_cost = frappe.db.sql("""select sum(base_net_amount)
 			from `tabPurchase Invoice Item` where project = '_Test Project' and docstatus=1""")
 		existing_purchase_cost = existing_purchase_cost and existing_purchase_cost[0][0] or 0
@@ -599,6 +612,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 		# return entry
 		pi1 = make_purchase_invoice(is_return=1, return_against=pi.name, qty=-2, rate=50, update_stock=1)
 
+		pi.load_from_db()
+		self.assertTrue(pi.status, "Debit Note Issued")
+		pi1.load_from_db()
+		self.assertTrue(pi1.status, "Return")
+
 		actual_qty_2 = get_qty_after_transaction()
 		self.assertEqual(actual_qty_1 - 2, actual_qty_2)
 
@@ -771,6 +789,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import get_outstanding_amount
 
 		pi = make_purchase_invoice(item_code = "_Test Item", qty = (5 * -1), rate=500, is_return = 1)
+		pi.load_from_db()
+		self.assertTrue(pi.status, "Return")
 
 		outstanding_amount = get_outstanding_amount(pi.doctype,
 			pi.name, "Creditors - _TC", pi.supplier, "Supplier")
@@ -791,11 +811,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi_doc = frappe.get_doc('Purchase Invoice', pi.name)
 		self.assertEqual(pi_doc.outstanding_amount, 0)
 
-	def test_purchase_invoice_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+	def test_purchase_invoice_with_cost_center(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
-		accounts_settings.save()
 		cost_center = "_Test Cost Center for BS Account - _TC"
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
 
@@ -821,13 +838,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
-
-	def test_purchase_invoice_for_disable_allow_cost_center_in_entry_of_bs_account(self):
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
+	def test_purchase_invoice_without_cost_center(self):
 		cost_center = "_Test Cost Center - _TC"
 		pi =  make_purchase_invoice(credit_to="Creditors - _TC")
 
@@ -849,6 +860,104 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
+
+	def test_purchase_invoice_with_project_link(self):
+		project = make_project({
+			'project_name': 'Purchase Invoice Project',
+			'project_template_name': 'Test Project Template',
+			'start_date': '2020-01-01'
+		})
+		item_project = make_project({
+			'project_name': 'Purchase Invoice Item Project',
+			'project_template_name': 'Test Project Template',
+			'start_date': '2019-06-01'
+		})
+
+		pi = make_purchase_invoice(credit_to="Creditors - _TC" ,do_not_save=1)
+		pi.items[0].project = item_project.project_name
+		pi.project = project.project_name
+
+		pi.submit()
+
+		expected_values = {
+			"Creditors - _TC": {
+				"project": project.project_name
+			},
+			"_Test Account Cost for Goods Sold - _TC": {
+				"project": item_project.project_name
+			}
+		}
+
+		gl_entries = frappe.db.sql("""select account, cost_center, project, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Purchase Invoice' and voucher_no=%s
+			order by account asc""", pi.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account]["project"], gle.project)
+
+	def test_deferred_expense_via_journal_entry(self):
+		deferred_account = create_account(account_name="Deferred Expense",
+			parent_account="Current Assets - _TC", company="_Test Company")
+
+		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		acc_settings.book_deferred_entries_via_journal_entry = 1
+		acc_settings.submit_journal_entries = 1
+		acc_settings.save()
+
+		item = create_item("_Test Item for Deferred Accounting")
+		item.enable_deferred_expense = 1
+		item.deferred_expense_account = deferred_account
+		item.save()
+
+		pi = make_purchase_invoice(item=item.name, qty=1, rate=100, do_not_save=True)
+		pi.set_posting_time = 1
+		pi.posting_date = '2019-03-15'
+		pi.items[0].enable_deferred_expense = 1
+		pi.items[0].service_start_date = "2019-01-10"
+		pi.items[0].service_end_date = "2019-03-15"
+		pi.items[0].deferred_expense_account = deferred_account
+		pi.save()
+		pi.submit()
+
+		pda1 = frappe.get_doc(dict(
+			doctype='Process Deferred Accounting',
+			posting_date=nowdate(),
+			start_date="2019-01-01",
+			end_date="2019-03-31",
+			type="Expense",
+			company="_Test Company"
+		))
+
+		pda1.insert()
+		pda1.submit()
+
+		expected_gle = [
+			["_Test Account Cost for Goods Sold - _TC", 0.0, 33.85, "2019-01-31"],
+			[deferred_account, 33.85, 0.0, "2019-01-31"],
+			["_Test Account Cost for Goods Sold - _TC", 0.0, 43.08, "2019-02-28"],
+			[deferred_account, 43.08, 0.0, "2019-02-28"],
+			["_Test Account Cost for Goods Sold - _TC", 0.0, 23.07, "2019-03-15"],
+			[deferred_account, 23.07, 0.0, "2019-03-15"]
+		]
+
+		gl_entries = gl_entries = frappe.db.sql("""select account, debit, credit, posting_date
+			from `tabGL Entry`
+			where voucher_type='Journal Entry' and voucher_detail_no=%s and posting_date <= %s
+			order by posting_date asc, account asc""", (pi.items[0].name, pi.posting_date), as_dict=1)
+
+		for i, gle in enumerate(gl_entries):
+			self.assertEqual(expected_gle[i][0], gle.account)
+			self.assertEqual(expected_gle[i][1], gle.credit)
+			self.assertEqual(expected_gle[i][2], gle.debit)
+			self.assertEqual(getdate(expected_gle[i][3]), gle.posting_date)
+
+		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
+		acc_settings.book_deferred_entries_via_journal_entry = 0
+		acc_settings.submit_journal_entriessubmit_journal_entries = 0
+		acc_settings.save()
 
 
 def unlink_payment_on_cancel_of_invoice(enable=1):

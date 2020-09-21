@@ -57,6 +57,9 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 
 		frappe.cache().hset("fiscal_years", company, fiscal_years)
 
+	if not transaction_date and not fiscal_year:
+		return fiscal_years
+
 	if transaction_date:
 		transaction_date = getdate(transaction_date)
 
@@ -78,6 +81,23 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 	error_msg = _("""{0} {1} not in any active Fiscal Year.""").format(label, formatdate(transaction_date))
 	if verbose==1: frappe.msgprint(error_msg)
 	raise FiscalYearError(error_msg)
+
+@frappe.whitelist()
+def get_fiscal_year_filter_field(company=None):
+	field = {
+		"fieldtype": "Select",
+		"options": [],
+		"operator": "Between",
+		"query_value": True
+	}
+	fiscal_years = get_fiscal_years(company=company)
+	for fiscal_year in fiscal_years:
+		field["options"].append({
+			"label": fiscal_year.name,
+			"value": fiscal_year.name,
+			"query_value": [fiscal_year.year_start_date.strftime("%Y-%m-%d"), fiscal_year.year_end_date.strftime("%Y-%m-%d")]
+		})
+	return field
 
 def validate_fiscal_year(date, fiscal_year, company, label="Date", doc=None):
 	years = [f[0] for f in get_fiscal_years(date, label=_(label), company=company)]
@@ -102,7 +122,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		cost_center = frappe.form_dict.get("cost_center")
 
 
-	cond = []
+	cond = ["is_cancelled=0"]
 	if date:
 		cond.append("posting_date <= %s" % frappe.db.escape(cstr(date)))
 	else:
@@ -113,7 +133,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		acc = frappe.get_doc("Account", account)
 
 	try:
-		year_start_date = get_fiscal_year(date, verbose=0)[1]
+		year_start_date = get_fiscal_year(date, company=company, verbose=0)[1]
 	except FiscalYearError:
 		if getdate(date) > getdate(nowdate()):
 			# if fiscal year not found and the date is greater than today
@@ -124,14 +144,12 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 			# hence, assuming balance as 0.0
 			return 0.0
 
-	allow_cost_center_in_entry_of_bs_account = get_allow_cost_center_in_entry_of_bs_account()
-
 	if account:
 		report_type = acc.report_type
 	else:
 		report_type = ""
 
-	if cost_center and (allow_cost_center_in_entry_of_bs_account or report_type =='Profit and Loss'):
+	if cost_center and report_type == 'Profit and Loss':
 		cc = frappe.get_doc("Cost Center", cost_center)
 		if cc.is_group:
 			cond.append(""" exists (
@@ -188,7 +206,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		return flt(bal)
 
 def get_count_on(account, fieldname, date):
-	cond = []
+	cond = ["is_cancelled=0"]
 	if date:
 		cond.append("posting_date <= %s" % frappe.db.escape(cstr(date)))
 	else:
@@ -513,7 +531,7 @@ def remove_ref_doc_link_from_jv(ref_type, ref_no):
 			where reference_type=%s and reference_name=%s
 			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
 
-		frappe.msgprint(_("Journal Entries {0} are un-linked".format("\n".join(linked_jv))))
+		frappe.msgprint(_("Journal Entries {0} are un-linked").format("\n".join(linked_jv)))
 
 def remove_ref_doc_link_from_pe(ref_type, ref_no):
 	linked_pe = frappe.db.sql_list("""select parent from `tabPayment Entry Reference`
@@ -536,7 +554,7 @@ def remove_ref_doc_link_from_pe(ref_type, ref_no):
 				where name=%s""", (pe_doc.total_allocated_amount, pe_doc.base_total_allocated_amount,
 					pe_doc.unallocated_amount, now(), frappe.session.user, pe))
 
-		frappe.msgprint(_("Payment Entries {0} are un-linked".format("\n".join(linked_pe))))
+		frappe.msgprint(_("Payment Entries {0} are un-linked").format("\n".join(linked_pe)))
 
 @frappe.whitelist()
 def get_company_default(company, fieldname):
@@ -658,7 +676,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 	invoice_list = frappe.db.sql("""
 		select
 			voucher_no, voucher_type, posting_date, due_date,
-			ifnull(sum({dr_or_cr}), 0) as invoice_amount
+			ifnull(sum({dr_or_cr}), 0) as invoice_amount,
+			account_currency as currency
 		from
 			`tabGL Entry`
 		where
@@ -715,7 +734,8 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 						'invoice_amount': flt(d.invoice_amount),
 						'payment_amount': payment_amount,
 						'outstanding_amount': outstanding_amount,
-						'due_date': d.due_date
+						'due_date': d.due_date,
+						'currency': d.currency
 					})
 				)
 
@@ -767,10 +787,10 @@ def get_children(doctype, parent, company, is_root=False):
 		company_currency = frappe.get_cached_value('Company',  company,  "default_currency")
 		for each in acc:
 			each["company_currency"] = company_currency
-			each["balance"] = flt(get_balance_on(each.get("value"), in_account_currency=False))
+			each["balance"] = flt(get_balance_on(each.get("value"), in_account_currency=False, company=company))
 
 			if each.account_currency != company_currency:
-				each["balance_in_account_currency"] = flt(get_balance_on(each.get("value")))
+				each["balance_in_account_currency"] = flt(get_balance_on(each.get("value"), company=company))
 
 	return acc
 
@@ -817,48 +837,37 @@ def create_payment_gateway_account(gateway):
 		pass
 
 @frappe.whitelist()
-def update_number_field(doctype_name, name, field_name, number_value, company):
+def update_cost_center(docname, cost_center_name, cost_center_number, company, merge):
 	'''
-		doctype_name = Name of the DocType
-		name = Docname being referred
-		field_name = Name of the field thats holding the 'number' attribute
-		number_value = Numeric value entered in field_name
-
-		Stores the number entered in the dialog to the DocType's field.
-
 		Renames the document by adding the number as a prefix to the current name and updates
 		all transaction where it was present.
 	'''
-	doc_title = frappe.db.get_value(doctype_name, name, frappe.scrub(doctype_name)+"_name")
+	validate_field_number("Cost Center", docname, cost_center_number, company, "cost_center_number")
 
-	validate_field_number(doctype_name, name, number_value, company, field_name)
+	if cost_center_number:
+		frappe.db.set_value("Cost Center", docname, "cost_center_number", cost_center_number.strip())
+	else:
+		frappe.db.set_value("Cost Center", docname, "cost_center_number", "")
 
-	frappe.db.set_value(doctype_name, name, field_name, number_value)
+	frappe.db.set_value("Cost Center", docname, "cost_center_name", cost_center_name.strip())
 
-	if doc_title[0].isdigit():
-		separator = " - " if " - " in doc_title else " "
-		doc_title = doc_title.split(separator, 1)[1]
-
-	frappe.db.set_value(doctype_name, name, frappe.scrub(doctype_name)+"_name", doc_title)
-
-	new_name = get_autoname_with_number(number_value, doc_title, name, company)
-
-	if name != new_name:
-		frappe.rename_doc(doctype_name, name, new_name)
+	new_name = get_autoname_with_number(cost_center_number, cost_center_name, docname, company)
+	if docname != new_name:
+		frappe.rename_doc("Cost Center", docname, new_name, force=1, merge=merge)
 		return new_name
 
-def validate_field_number(doctype_name, name, number_value, company, field_name):
+def validate_field_number(doctype_name, docname, number_value, company, field_name):
 	''' Validate if the number entered isn't already assigned to some other document. '''
 	if number_value:
+		filters = {field_name: number_value, "name": ["!=", docname]}
 		if company:
-			doctype_with_same_number = frappe.db.get_value(doctype_name,
-				{field_name: number_value, "company": company, "name": ["!=", name]})
-		else:
-			doctype_with_same_number = frappe.db.get_value(doctype_name,
-				{field_name: number_value, "name": ["!=", name]})
+			filters["company"] = company
+
+		doctype_with_same_number = frappe.db.get_value(doctype_name, filters)
+
 		if doctype_with_same_number:
-			frappe.throw(_("{0} Number {1} already used in account {2}")
-				.format(doctype_name, number_value, doctype_with_same_number))
+			frappe.throw(_("{0} Number {1} is already used in {2} {3}")
+				.format(doctype_name, number_value, doctype_name.lower(), doctype_with_same_number))
 
 def get_autoname_with_number(number_value, doc_title, name, company):
 	''' append title with prefix as number and suffix as company's abbreviation separated by '-' '''
@@ -888,13 +897,64 @@ def get_coa(doctype, parent, is_root, chart=None):
 
 	return accounts
 
-def get_allow_cost_center_in_entry_of_bs_account():
-	def generator():
-		return cint(frappe.db.get_value('Accounts Settings', None, 'allow_cost_center_in_entry_of_bs_account'))
-	return frappe.local_cache("get_allow_cost_center_in_entry_of_bs_account", (), generator, regenerate_if_none=True)
-
 def get_stock_accounts(company):
 	return frappe.get_all("Account", filters = {
 		"account_type": "Stock",
 		"company": company
 	})
+
+def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
+		warehouse_account=None, company=None):
+	def _delete_gl_entries(voucher_type, voucher_no):
+		frappe.db.sql("""delete from `tabGL Entry`
+			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
+
+	if not warehouse_account:
+		warehouse_account = get_warehouse_account_map(company)
+
+	future_stock_vouchers = get_future_stock_vouchers(posting_date, posting_time, for_warehouses, for_items)
+	gle = get_voucherwise_gl_entries(future_stock_vouchers, posting_date)
+
+	for voucher_type, voucher_no in future_stock_vouchers:
+		existing_gle = gle.get((voucher_type, voucher_no), [])
+		voucher_obj = frappe.get_doc(voucher_type, voucher_no)
+		expected_gle = voucher_obj.get_gl_entries(warehouse_account)
+		if expected_gle:
+			if not existing_gle or not compare_existing_and_expected_gle(existing_gle, expected_gle):
+				_delete_gl_entries(voucher_type, voucher_no)
+				voucher_obj.make_gl_entries(gl_entries=expected_gle, repost_future_gle=False, from_repost=True)
+		else:
+			_delete_gl_entries(voucher_type, voucher_no)
+
+def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None):
+	future_stock_vouchers = []
+
+	values = []
+	condition = ""
+	if for_items:
+		condition += " and item_code in ({})".format(", ".join(["%s"] * len(for_items)))
+		values += for_items
+
+	if for_warehouses:
+		condition += " and warehouse in ({})".format(", ".join(["%s"] * len(for_warehouses)))
+		values += for_warehouses
+
+	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
+		from `tabStock Ledger Entry` sle
+		where timestamp(sle.posting_date, sle.posting_time) >= timestamp(%s, %s) {condition}
+		order by timestamp(sle.posting_date, sle.posting_time) asc, creation asc for update""".format(condition=condition),
+		tuple([posting_date, posting_time] + values), as_dict=True):
+			future_stock_vouchers.append([d.voucher_type, d.voucher_no])
+
+	return future_stock_vouchers
+
+def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
+	gl_entries = {}
+	if future_stock_vouchers:
+		for d in frappe.db.sql("""select * from `tabGL Entry`
+			where posting_date >= %s and voucher_no in (%s)""" %
+			('%s', ', '.join(['%s']*len(future_stock_vouchers))),
+			tuple([posting_date] + [d[1] for d in future_stock_vouchers]), as_dict=1):
+				gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
+
+	return gl_entries

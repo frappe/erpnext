@@ -172,6 +172,10 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Income Tax Slab",
+				},
+				{
+					"type": "doctype",
 					"name": "Salary Component",
 				},
 				{
@@ -208,6 +212,10 @@ def get_data():
 					"type": "doctype",
 					"name": "Employee Tax Exemption Proof Submission",
 					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Other Income",
 				},
 				{
 					"type": "doctype",
@@ -288,6 +296,10 @@ def get_data():
 					"type": "doctype",
 					"name": "Job Offer",
 					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Appointment Letter",
 				},
 				{
 					"type": "doctype",

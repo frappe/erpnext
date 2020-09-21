@@ -2,7 +2,9 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	frappe.reload_doctype('Salary Slip', 'Salary Component')
+	# frappe.reload_doctype('Salary Slip', 'Salary Component')
+	frappe.reload_doc("Payroll", "doctype", "Salary Slip")
+	frappe.reload_doc("Payroll", "doctype", "Salary Component")
 	salary_components = [['Arrear', "ARR"], ['Leave Encashment', 'LENC']]
 	for salary_component, salary_abbr in salary_components:
 		if not frappe.db.exists('Salary Component', salary_component):

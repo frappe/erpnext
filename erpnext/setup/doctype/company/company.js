@@ -34,6 +34,16 @@ frappe.ui.form.on("Company", {
 		frm.set_query("default_buying_terms", function() {
 			return { filters: { buying: 1 } };
 		});
+
+		frm.set_query("default_in_transit_warehouse", function() {
+			return {
+				filters:{
+					'warehouse_type' : 'Transit',
+					'is_group': 0,
+					'company': frm.doc.company
+				}
+			};
+		});
 	},
 
 	company_name: function(frm) {
@@ -107,6 +117,9 @@ frappe.ui.form.on("Company", {
 
 		erpnext.company.set_chart_of_accounts_options(frm.doc);
 
+		if (!frappe.user.has_role('System Manager')) {
+			frm.get_field("delete_company_transactions").hide();
+		}
 	},
 
 	make_default_tax_template: function(frm) {
@@ -134,7 +147,7 @@ frappe.ui.form.on("Company", {
 			var d = frappe.prompt({
 				fieldtype:"Data",
 				fieldname: "company_name",
-				label: __("Please re-type company name to confirm"),
+				label: __("Please enter the company name to confirm"),
 				reqd: 1,
 				description: __("Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone.")
 			},
@@ -261,7 +274,10 @@ erpnext.company.setup_queries = function(frm) {
 			["expenses_included_in_valuation",
 				{"root_type": "Expense", "account_type": "Expenses Included in Valuation"}],
 			["stock_received_but_not_billed",
-				{"root_type": "Liability", "account_type": "Stock Received But Not Billed"}]
+				{"root_type": "Liability", "account_type": "Stock Received But Not Billed"}],
+			["service_received_but_not_billed",
+				{"root_type": "Liability", "account_type": "Service Received But Not Billed"}],
+
 		], function(i, v) {
 			erpnext.company.set_custom_query(frm, v);
 		});

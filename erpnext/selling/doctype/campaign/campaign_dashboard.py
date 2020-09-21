@@ -8,6 +8,10 @@ def get_data():
 			{
 				'label': _('Email Campaigns'),
 				'items': ['Email Campaign']
+			},
+			{
+				'label': _('Social Media Campaigns'),
+				'items': ['Social Media Post']
 			}
-		],
+		]
 	}

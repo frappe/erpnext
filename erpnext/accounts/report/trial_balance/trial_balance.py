@@ -7,7 +7,7 @@ from frappe import _
 from frappe.utils import flt, getdate, formatdate, cstr
 from erpnext.accounts.report.financial_statements \
 	import filter_accounts, set_gl_entries_by_account, filter_out_zero_value_rows
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
 value_fields = ("opening_debit", "opening_credit", "debit", "credit", "closing_debit", "closing_credit")
 
@@ -69,6 +69,11 @@ def get_data(filters):
 	gl_entries_by_account = {}
 
 	opening_balances = get_opening_balances(filters)
+
+	#add filter inside list so that the query in financial_statements.py doesn't break
+	if filters.project:
+		filters.project = [filters.project]
+
 	set_gl_entries_by_account(filters.company, filters.from_date,
 		filters.to_date, min_lft, max_rgt, filters, gl_entries_by_account, ignore_closing_entries=not flt(filters.with_period_closing_entry))
 
@@ -102,6 +107,9 @@ def get_rootwise_opening_balances(filters, report_type):
 		additional_conditions += """ and cost_center in (select name from `tabCost Center`
 			where lft >= %s and rgt <= %s)""" % (lft, rgt)
 
+	if filters.project:
+		additional_conditions += " and project = %(project)s"
+
 	if filters.finance_book:
 		fb_conditions = " AND finance_book = %(finance_book)s"
 		if filters.include_default_book_entries:
@@ -109,24 +117,30 @@ def get_rootwise_opening_balances(filters, report_type):
 
 		additional_conditions += fb_conditions
 
-	accounting_dimensions = get_accounting_dimensions()
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
 
 	query_filters = {
 		"company": filters.company,
 		"from_date": filters.from_date,
 		"report_type": report_type,
 		"year_start_date": filters.year_start_date,
+		"project": filters.project,
 		"finance_book": filters.finance_book,
 		"company_fb": frappe.db.get_value("Company", filters.company, 'default_finance_book')
 	}
 
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
-			if filters.get(dimension):
-				additional_conditions += """ and {0} in (%({0})s) """.format(dimension)
+			if filters.get(dimension.fieldname):
+				if frappe.get_cached_value('DocType', dimension.document_type, 'is_tree'):
+					filters[dimension.fieldname] = get_dimension_with_children(dimension.document_type,
+						filters.get(dimension.fieldname))
+					additional_conditions += "and {0} in %({0})s".format(dimension.fieldname)
+				else:
+					additional_conditions += "and {0} in (%({0})s)".format(dimension.fieldname)
 
 				query_filters.update({
-					dimension: filters.get(dimension)
+					dimension.fieldname: filters.get(dimension.fieldname)
 				})
 
 	gle = frappe.db.sql("""
@@ -138,6 +152,7 @@ def get_rootwise_opening_balances(filters, report_type):
 			{additional_conditions}
 			and (posting_date < %(from_date)s or ifnull(is_opening, 'No') = 'Yes')
 			and account in (select name from `tabAccount` where report_type=%(report_type)s)
+			and is_cancelled = 0
 		group by account""".format(additional_conditions=additional_conditions), query_filters , as_dict=True)
 
 	opening = frappe._dict()

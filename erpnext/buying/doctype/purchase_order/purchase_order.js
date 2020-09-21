@@ -7,12 +7,6 @@ frappe.provide("erpnext.buying");
 
 frappe.ui.form.on("Purchase Order", {
 	setup: function(frm) {
-		frm.custom_make_buttons = {
-			'Purchase Receipt': 'Receipt',
-			'Purchase Invoice': 'Invoice',
-			'Stock Entry': 'Material to Supplier',
-			'Payment Entry': 'Payment'
-		}
 
 		frm.set_query("reserve_warehouse", "supplied_items", function() {
 			return {
@@ -27,15 +21,6 @@ frappe.ui.form.on("Purchase Order", {
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
 
-		frm.set_query("blanket_order", "items", function() {
-			return {
-				filters: {
-					"company": frm.doc.company,
-					"docstatus": 1
-				}
-			}
-		});
-
 		frm.set_query("expense_account", "items", function() {
 			return {
 				query: "erpnext.controllers.queries.get_expense_account",
@@ -43,20 +28,6 @@ frappe.ui.form.on("Purchase Order", {
 			}
 		});
 
-	},
-
-	refresh: function(frm) {
-		if(frm.doc.docstatus === 1 && frm.doc.status !== 'Closed'
-			&& flt(frm.doc.per_received) < 100 && flt(frm.doc.per_billed) < 100) {
-			frm.add_custom_button(__('Update Items'), () => {
-				erpnext.utils.update_child_items({
-					frm: frm,
-					child_docname: "items",
-					child_doctype: "Purchase Order Detail",
-					cannot_add_row: false,
-				})
-			});
-		}
 	},
 
 	onload: function(frm) {
@@ -85,6 +56,18 @@ frappe.ui.form.on("Purchase Order Item", {
 });
 
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
+	setup: function() {
+		this.frm.custom_make_buttons = {
+			'Purchase Receipt': 'Receipt',
+			'Purchase Invoice': 'Invoice',
+			'Stock Entry': 'Material to Supplier',
+			'Payment Entry': 'Payment',
+		}
+
+		this._super();
+
+	},
+
 	refresh: function(doc, cdt, cdn) {
 		var me = this;
 		this._super();
@@ -108,6 +91,16 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 		if(doc.docstatus == 1) {
 			if(!in_list(["Closed", "Delivered"], doc.status)) {
+				if(this.frm.doc.status !== 'Closed' && flt(this.frm.doc.per_received) < 100 && flt(this.frm.doc.per_billed) < 100) {
+					this.frm.add_custom_button(__('Update Items'), () => {
+						erpnext.utils.update_child_items({
+							frm: this.frm,
+							child_docname: "items",
+							child_doctype: "Purchase Order Detail",
+							cannot_add_row: false,
+						})
+					});
+				}
 				if (this.frm.has_perm("submit")) {
 					if(flt(doc.per_billed, 6) < 100 || flt(doc.per_received, 6) < 100) {
 						if (doc.status != "On Hold") {
@@ -132,14 +125,14 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			}
 			if(doc.status != "Closed") {
 				if (doc.status != "On Hold") {
-					if(flt(doc.per_received, 2) < 100 && allow_receipt) {
+					if(flt(doc.per_received) < 100 && allow_receipt) {
 						cur_frm.add_custom_button(__('Receipt'), this.make_purchase_receipt, __('Create'));
 						if(doc.is_subcontracted==="Yes" && me.has_unsupplied_items()) {
 							cur_frm.add_custom_button(__('Material to Supplier'),
 								function() { me.make_stock_entry(); }, __("Transfer"));
 						}
 					}
-					if(flt(doc.per_billed, 2) < 100)
+					if(flt(doc.per_billed) < 100)
 						cur_frm.add_custom_button(__('Invoice'),
 							this.make_purchase_invoice, __('Create'));
 
@@ -180,10 +173,20 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	get_items_from_open_material_requests: function() {
 		erpnext.utils.map_current_doc({
 			method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order_based_on_supplier",
+			args: {
+				supplier: this.frm.doc.supplier
+			},
+			source_doctype: "Material Request",
 			source_name: this.frm.doc.supplier,
+			target: this.frm,
+			setters: {
+				company: me.frm.doc.company
+			},
 			get_query_filters: {
 				docstatus: ["!=", 2],
-			}
+				supplier: this.frm.doc.supplier
+			},
+			get_query_method: "erpnext.stock.doctype.material_request.material_request.get_material_requests_based_on_supplier"
 		});
 	},
 
@@ -355,9 +358,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
 					source_doctype: "Material Request",
 					target: me.frm,
-					setters: {
-						company: me.frm.doc.company
-					},
+					setters: {},
 					get_query_filters: {
 						material_request_type: "Purchase",
 						docstatus: 1,
@@ -374,7 +375,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					source_doctype: "Supplier Quotation",
 					target: me.frm,
 					setters: {
-						company: me.frm.doc.company
+						supplier: me.frm.doc.supplier
 					},
 					get_query_filters: {
 						docstatus: 1,
@@ -489,7 +490,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						reference_doctype: me.frm.doctype,
 						reference_name: me.frm.docname,
 						content: __('Reason for hold: ')+data.reason_for_hold,
-						comment_email: frappe.session.user
+						comment_email: frappe.session.user,
+						comment_by: frappe.session.user_fullname
 					},
 					callback: function(r) {
 						if(!r.exc) {

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
@@ -7,6 +8,7 @@
  "doctype": "DocType",
  "document_type": "Document",
  "editable_grid": 1,
+ "email_append_to": 1,
  "engine": "InnoDB",
  "field_order": [
   "from_section",
@@ -14,6 +16,7 @@
   "opportunity_from",
   "party_name",
   "customer_name",
+  "source",
   "column_break0",
   "title",
   "opportunity_type",
@@ -22,6 +25,7 @@
   "sales_stage",
   "order_lost_reason",
   "mins_to_first_response",
+  "expected_closing",
   "next_contact",
   "contact_by",
   "contact_date",
@@ -46,10 +50,9 @@
   "contact_email",
   "contact_mobile",
   "more_info",
-  "source",
+  "company",
   "campaign",
   "column_break1",
-  "company",
   "transaction_date",
   "amended_from",
   "lost_reasons"
@@ -157,6 +160,11 @@
    "read_only": 1
   },
   {
+   "fieldname": "expected_closing",
+   "fieldtype": "Date",
+   "label": "Expected Closing Date"
+  },
+  {
    "collapsible": 1,
    "collapsible_depends_on": "contact_by",
    "fieldname": "next_contact",
@@ -208,7 +216,8 @@
   {
    "fieldname": "opportunity_amount",
    "fieldtype": "Currency",
-   "label": "Opportunity Amount"
+   "label": "Opportunity Amount",
+   "options": "currency"
   },
   {
    "default": "0",
@@ -245,6 +254,7 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
+   "mandatory_depends_on": "eval: doc.with_items == 1",
    "oldfieldname": "enquiry_details",
    "oldfieldtype": "Table",
    "options": "Opportunity Item"
@@ -320,6 +330,7 @@
    "fieldname": "contact_email",
    "fieldtype": "Data",
    "label": "Contact Email",
+   "options": "Email",
    "read_only": 1
   },
   {
@@ -333,7 +344,7 @@
    "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
-   "label": "Source",
+   "label": "More Information",
    "oldfieldtype": "Section Break",
    "options": "fa fa-file-text"
   },
@@ -400,7 +411,7 @@
    "fieldname": "lost_reasons",
    "fieldtype": "Table MultiSelect",
    "label": "Lost Reasons",
-   "options": "Lost Reason Detail",
+   "options": "Opportunity Lost Reason Detail",
    "read_only": 1
   },
   {
@@ -412,7 +423,8 @@
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
- "modified": "2019-09-30 12:58:37.385400",
+ "links": [],
+ "modified": "2020-08-11 17:34:35.066961",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",
@@ -444,9 +456,11 @@
   }
  ],
  "search_fields": "status,transaction_date,party_name,opportunity_type,territory,company",
+ "sender_field": "contact_email",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "subject_field": "title",
  "timeline_field": "party_name",
  "title_field": "title",
  "track_seen": 1,

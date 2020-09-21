@@ -47,6 +47,8 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	"""
 
 	args = process_args(args)
+	for_validate = process_string_args(for_validate)
+	overwrite_warehouse = process_string_args(overwrite_warehouse)
 	item = frappe.get_cached_doc("Item", args.item_code)
 	validate_item_details(args, item)
 
@@ -77,7 +79,11 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args))
 
-	if out.get("warehouse"):
+	if (args.get("doctype") == "Material Request" and
+		args.get("material_request_type") == "Material Transfer"):
+		out.update(get_bin_details(args.item_code, args.get("from_warehouse")))
+
+	elif out.get("warehouse"):
 		out.update(get_bin_details(args.item_code, out.warehouse))
 
 	# update args with out, if key or value not exists
@@ -162,6 +168,10 @@ def process_args(args):
 	set_transaction_type(args)
 	return args
 
+def process_string_args(args):
+	if isinstance(args, string_types):
+		args = json.loads(args)
+	return args
 
 @frappe.whitelist()
 def get_item_code(barcode=None, serial_no=None):
@@ -240,26 +250,13 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	item_group_defaults = get_item_group_defaults(item.name, args.company)
 	brand_defaults = get_brand_defaults(item.name, args.company)
 
-	if overwrite_warehouse or not args.warehouse:
-		warehouse = (
-			args.get("set_warehouse") or
-			item_defaults.get("default_warehouse") or
-			item_group_defaults.get("default_warehouse") or
-			brand_defaults.get("default_warehouse") or
-			args.warehouse
-		)
+	defaults = frappe._dict({
+		'item_defaults': item_defaults,
+		'item_group_defaults': item_group_defaults,
+		'brand_defaults': brand_defaults
+	})
 
-		if not warehouse:
-			defaults = frappe.defaults.get_defaults() or {}
-			warehouse_exists = frappe.db.exists("Warehouse", {
-				'name': defaults.default_warehouse,
-				'company': args.company
-			})
-			if defaults.get("default_warehouse") and warehouse_exists:
-				warehouse = defaults.default_warehouse
-
-	else:
-		warehouse = args.warehouse
+	warehouse = get_item_warehouse(item, args, overwrite_warehouse, defaults)
 
 	if args.get('doctype') == "Material Request" and not args.get('material_request_type'):
 		args['material_request_type'] = frappe.db.get_value('Material Request',
@@ -272,7 +269,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		expense_account = get_asset_category_account(fieldname = "fixed_asset_account", item = args.item_code, company= args.company)
 
 	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
-	if not args.uom:
+	if not args.get('uom'):
 		if args.get('doctype') in sales_doctypes:
 			args.uom = item.sales_uom if item.sales_uom else item.stock_uom
 		elif (args.get('doctype') in ['Purchase Order', 'Purchase Receipt', 'Purchase Invoice']) or \
@@ -292,7 +289,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"cost_center": get_default_cost_center(args, item_defaults, item_group_defaults, brand_defaults),
 		'has_serial_no': item.has_serial_no,
 		'has_batch_no': item.has_batch_no,
-		"batch_no": None,
+		"batch_no": args.get("batch_no"),
 		"uom": args.uom,
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
 		"qty": flt(args.qty) or 1.0,
@@ -314,7 +311,8 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"weight_uom":item.weight_uom,
 		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0,
 		"transaction_date": args.get("transaction_date"),
-		"against_blanket_order": args.get("against_blanket_order")
+		"against_blanket_order": args.get("against_blanket_order"),
+		"bom_no": item.get("default_bom")
 	})
 
 	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
@@ -354,6 +352,15 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		else:
 			out["manufacturer_part_no"] = None
 			out["manufacturer"] = None
+	else:
+		data = frappe.get_value("Item", item.name,
+			["default_item_manufacturer", "default_manufacturer_part_no"] , as_dict=1)
+
+		if data:
+			out.update({
+				"manufacturer": data.default_item_manufacturer,
+				"manufacturer_part_no": data.default_manufacturer_part_no
+			})
 
 	child_doctype = args.doctype + ' Item'
 	meta = frappe.get_meta(child_doctype)
@@ -362,13 +369,61 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 
 	return out
 
+def get_item_warehouse(item, args, overwrite_warehouse, defaults={}):
+	if not defaults:
+		defaults = frappe._dict({
+			'item_defaults' : get_item_defaults(item.name, args.company),
+			'item_group_defaults' : get_item_group_defaults(item.name, args.company),
+			'brand_defaults' : get_brand_defaults(item.name, args.company)
+		})
+
+	if overwrite_warehouse or not args.warehouse:
+		warehouse = (
+			args.get("set_warehouse") or
+			defaults.item_defaults.get("default_warehouse") or
+			defaults.item_group_defaults.get("default_warehouse") or
+			defaults.brand_defaults.get("default_warehouse") or
+			args.get('warehouse')
+		)
+
+		if not warehouse:
+			defaults = frappe.defaults.get_defaults() or {}
+			warehouse_exists = frappe.db.exists("Warehouse", {
+				'name': defaults.default_warehouse,
+				'company': args.company
+			})
+			if defaults.get("default_warehouse") and warehouse_exists:
+				warehouse = defaults.default_warehouse
+
+	else:
+		warehouse = args.get('warehouse')
+
+	return warehouse
+
 def update_barcode_value(out):
-	from erpnext.accounts.doctype.sales_invoice.pos import get_barcode_data
 	barcode_data = get_barcode_data([out])
 
 	# If item has one barcode then update the value of the barcode field
 	if barcode_data and len(barcode_data.get(out.item_code)) == 1:
 		out['barcode'] = barcode_data.get(out.item_code)[0]
+
+def get_barcode_data(items_list):
+	# get itemwise batch no data
+	# exmaple: {'LED-GRE': [Batch001, Batch002]}
+	# where LED-GRE is item code, SN0001 is serial no and Pune is warehouse
+
+	itemwise_barcode = {}
+	for item in items_list:
+		barcodes = frappe.db.sql("""
+			select barcode from `tabItem Barcode` where parent = %s
+		""", item.item_code, as_dict=1)
+
+		for barcode in barcodes:
+			if item.item_code not in itemwise_barcode:
+				itemwise_barcode.setdefault(item.item_code, [])
+			itemwise_barcode[item.item_code].append(barcode.get("barcode"))
+
+	return itemwise_barcode
 
 @frappe.whitelist()
 def get_item_tax_info(company, tax_category, item_codes):
@@ -381,7 +436,7 @@ def get_item_tax_info(company, tax_category, item_codes):
 			continue
 		out[item_code] = {}
 		item = frappe.get_cached_doc("Item", item_code)
-		get_item_tax_template({"tax_category": tax_category}, item, out[item_code])
+		get_item_tax_template({"company": company, "tax_category": tax_category}, item, out[item_code])
 		out[item_code]["item_tax_rate"] = get_item_tax_map(company, out[item_code].get("item_tax_template"), as_json=True)
 
 	return out
@@ -410,7 +465,8 @@ def _get_item_tax_template(args, taxes, out={}, for_validate=False):
 	taxes_with_no_validity = []
 
 	for tax in taxes:
-		if tax.valid_from:
+		tax_company = frappe.get_value("Item Tax Template", tax.item_tax_template, 'company')
+		if tax.valid_from and tax_company == args['company']:
 			# In purchase Invoice first preference will be given to supplier invoice date
 			# if supplier date is not present then posting date
 			validation_date = args.get('transaction_date') or args.get('bill_date') or args.get('posting_date')
@@ -418,7 +474,8 @@ def _get_item_tax_template(args, taxes, out={}, for_validate=False):
 			if getdate(tax.valid_from) <= getdate(validation_date):
 				taxes_with_validity.append(tax)
 		else:
-			taxes_with_no_validity.append(tax)
+			if tax_company == args['company']:
+				taxes_with_no_validity.append(tax)
 
 	if taxes_with_validity:
 		taxes = sorted(taxes_with_validity, key = lambda i: i.valid_from, reverse=True)
@@ -599,10 +656,14 @@ def get_item_price(args, item_code, ignore_party=False):
 		elif args.get("supplier"):
 			conditions += " and supplier=%(supplier)s"
 		else:
-			conditions += " and (customer is null or customer = '') and (supplier is null or supplier = '')"
+			conditions += "and (customer is null or customer = '') and (supplier is null or supplier = '')"
 
 	if args.get('transaction_date'):
 		conditions += """ and %(transaction_date)s between
+			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
+
+	if args.get('posting_date'):
+		conditions += """ and %(posting_date)s between
 			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
 
 	return frappe.db.sql(""" select name, price_list_rate, uom
@@ -625,6 +686,7 @@ def get_price_list_rate_for(args, item_code):
 			"supplier": args.get('supplier'),
 			"uom": args.get('uom'),
 			"transaction_date": args.get('transaction_date'),
+			"posting_date": args.get('posting_date'),
 	}
 
 	item_price_data = 0
@@ -973,6 +1035,7 @@ def get_default_bom(item_code=None):
 		if bom:
 			return bom
 
+@frappe.whitelist()
 def get_valuation_rate(item_code, company, warehouse=None):
 	item = get_item_defaults(item_code, company)
 	item_group = get_item_group_defaults(item_code, company)

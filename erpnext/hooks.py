@@ -13,7 +13,7 @@ source_link = "https://github.com/frappe/erpnext"
 app_logo_url = '/assets/erpnext/images/erp-icon.svg'
 
 
-develop_version = '12.x.x-develop'
+develop_version = '13.x.x-develop'
 
 app_include_js = "assets/js/erpnext.min.js"
 app_include_css = "assets/css/erpnext.css"
@@ -41,7 +41,7 @@ boot_session = "erpnext.startup.boot.boot_session"
 notification_config = "erpnext.startup.notifications.get_notification_config"
 get_help_messages = "erpnext.utilities.activation.get_help_messages"
 leaderboards = "erpnext.startup.leaderboard.get_leaderboards"
-
+filters_config = "erpnext.startup.filters.get_filters_config"
 
 on_session_creation = [
 	"erpnext.portal.utils.create_customer_or_supplier",
@@ -55,11 +55,7 @@ treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Grou
 update_website_context = ["erpnext.shopping_cart.utils.update_website_context", "erpnext.education.doctype.education_settings.education_settings.update_website_context"]
 my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
 
-email_append_to = ["Job Applicant", "Lead", "Opportunity", "Issue"]
-
 calendars = ["Task", "Work Order", "Leave Application", "Sales Order", "Holiday List", "Course Schedule"]
-
-
 
 domains = {
 	'Agriculture': 'erpnext.domains.agriculture',
@@ -238,12 +234,22 @@ doc_events = {
 		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
 	},
 	"Sales Invoice": {
-		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.regional.italy.utils.sales_invoice_on_submit"],
-		"on_cancel": "erpnext.regional.italy.utils.sales_invoice_on_cancel",
+		"on_submit": [
+			"erpnext.regional.create_transaction_log",
+			"erpnext.regional.italy.utils.sales_invoice_on_submit",
+			"erpnext.erpnext_integrations.taxjar_integration.create_transaction"
+		],
+		"on_cancel": [
+			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
+			"erpnext.erpnext_integrations.taxjar_integration.delete_transaction"
+		],
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
+	"Purchase Invoice": {
+		"validate": "erpnext.regional.india.utils.update_grand_total_for_rcm"
+	},
 	"Payment Entry": {
-		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.make_status_as_paid"],
+		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.update_payment_req_status", "erpnext.accounts.doctype.dunning.dunning.resolve_dunning"],
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	'Address': {
@@ -254,13 +260,17 @@ doc_events = {
 	},
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
-		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information"
+		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information",
+		"validate": "erpnext.crm.utils.update_lead_phone_numbers"
 	},
 	"Lead": {
 		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information"
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
+	},
+	('Quotation', 'Sales Order', 'Sales Invoice'): {
+		'validate': ["erpnext.erpnext_integrations.taxjar_integration.set_sales_tax"]
 	}
 }
 
@@ -273,7 +283,9 @@ auto_cancel_exempted_doctypes= [
 
 scheduler_events = {
 	"all": [
-		"erpnext.projects.doctype.project.project.project_status_update_reminder"
+		"erpnext.projects.doctype.project.project.project_status_update_reminder",
+		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.send_appointment_reminder",
+		"erpnext.crm.doctype.social_media_post.social_media_post.process_scheduled_social_media_posts"
 	],
 	"hourly": [
 		'erpnext.hr.doctype.daily_work_summary_group.daily_work_summary_group.trigger_emails',
@@ -308,18 +320,23 @@ scheduler_events = {
 		"erpnext.support.doctype.service_level_agreement.service_level_agreement.check_agreement_status",
 		"erpnext.crm.doctype.email_campaign.email_campaign.send_email_to_leads_or_contacts",
 		"erpnext.crm.doctype.email_campaign.email_campaign.set_email_campaign_status",
-		"erpnext.selling.doctype.quotation.quotation.set_expired_status"
+		"erpnext.selling.doctype.quotation.quotation.set_expired_status",
+		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_appointment_status",
+		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status",
+		"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_auto_email"
 	],
 	"daily_long": [
 		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
 		"erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry.process_expired_allocation",
-		"erpnext.hr.utils.generate_leave_encashment"
+		"erpnext.hr.utils.generate_leave_encashment",
+		"erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall.create_process_loan_security_shortfall",
+		"erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual.process_loan_interest_accrual_for_term_loans"
 	],
 	"monthly_long": [
-		"erpnext.accounts.deferred_revenue.convert_deferred_revenue_to_income",
-		"erpnext.accounts.deferred_revenue.convert_deferred_expense_to_expense",
-		"erpnext.hr.utils.allocate_earned_leaves"
+		"erpnext.accounts.deferred_revenue.process_deferred_accounting",
+		"erpnext.hr.utils.allocate_earned_leaves",
+		"erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual.process_loan_interest_accrual_for_demand_loans"
 	]
 }
 
@@ -346,6 +363,8 @@ get_site_info = 'erpnext.utilities.get_site_info'
 
 payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account"
 
+communication_doctypes = ["Customer", "Supplier"]
+
 regional_overrides = {
 	'France': {
 		'erpnext.tests.test_regional.test_method': 'erpnext.regional.france.utils.test_method'
@@ -356,7 +375,8 @@ regional_overrides = {
 		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_data': 'erpnext.regional.india.utils.get_itemised_tax_breakup_data',
 		'erpnext.accounts.party.get_regional_address_details': 'erpnext.regional.india.utils.get_regional_address_details',
 		'erpnext.hr.utils.calculate_annual_eligible_hra_exemption': 'erpnext.regional.india.utils.calculate_annual_eligible_hra_exemption',
-		'erpnext.hr.utils.calculate_hra_exemption_for_period': 'erpnext.regional.india.utils.calculate_hra_exemption_for_period'
+		'erpnext.hr.utils.calculate_hra_exemption_for_period': 'erpnext.regional.india.utils.calculate_hra_exemption_for_period',
+		'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_regional_gl_entries': 'erpnext.regional.india.utils.make_regional_gl_entries'
 	},
 	'United Arab Emirates': {
 		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data'

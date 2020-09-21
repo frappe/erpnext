@@ -12,22 +12,28 @@ frappe.listview_settings['Sales Invoice'].onload = function (doclist) {
 
 		for (let doc of selected_docs) {
 			if (doc.docstatus !== 1) {
-				frappe.throw(__("e-Way Bill JSON can only be generated from a submitted document"));
+				frappe.throw(__("E-Way Bill JSON can only be generated from a submitted document"));
 			}
 		}
 
-		var w = window.open(
-			frappe.urllib.get_full_url(
-				"/api/method/erpnext.regional.india.utils.generate_ewb_json?"
-				+ "dt=" + encodeURIComponent(doclist.doctype)
-				+ "&dn=" + encodeURIComponent(docnames)
-			)
-		);
-		if (!w) {
-			frappe.msgprint(__("Please enable pop-ups")); return;
-		}
-
+		frappe.call({
+			method: 'erpnext.regional.india.utils.generate_ewb_json',
+			args: {
+				'dt': doclist.doctype,
+				'dn': docnames
+			},
+			callback: function(r) {
+				if (r.message) {
+					const args = {
+						cmd: 'erpnext.regional.india.utils.download_ewb_json',
+						data: r.message,
+						docname: docnames
+					};
+					open_url_post(frappe.request.url, args);
+				}
+			}
+		});
 	};
 
-	doclist.page.add_actions_menu_item(__('Generate e-Way Bill JSON'), action, false);
+	doclist.page.add_actions_menu_item(__('Generate E-Way Bill JSON'), action, false);
 };

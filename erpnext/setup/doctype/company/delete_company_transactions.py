@@ -26,7 +26,8 @@ def delete_company_transactions(company_name):
 		tabDocField where fieldtype='Link' and options='Company'"""):
 		if doctype not in ("Account", "Cost Center", "Warehouse", "Budget",
 			"Party Account", "Employee", "Sales Taxes and Charges Template",
-			"Purchase Taxes and Charges Template", "POS Profile", 'BOM'):
+			"Purchase Taxes and Charges Template", "POS Profile", "BOM",
+			"Company", "Bank Account"):
 				delete_for_doctype(doctype, company_name)
 
 	# reset company values
@@ -108,8 +109,8 @@ def delete_lead_addresses(company_name):
 def delete_communications(doctype, company_name, company_fieldname):
 		reference_docs = frappe.get_all(doctype, filters={company_fieldname:company_name})
 		reference_doc_names = [r.name for r in reference_docs]
-		
+
 		communications = frappe.get_all("Communication", filters={"reference_doctype":doctype,"reference_name":["in", reference_doc_names]})
 		communication_names = [c.name for c in communications]
 
-		frappe.delete_doc("Communication", communication_names)
+		frappe.delete_doc("Communication", communication_names, ignore_permissions=True)

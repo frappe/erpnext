@@ -74,6 +74,20 @@ frappe.ui.form.on("Stock Reconciliation", {
 		, __("Get Items"), __("Update"));
 	},
 
+	posting_date: function(frm) {
+		frm.trigger("set_valuation_rate_and_qty_for_all_items");
+	},
+
+	posting_time: function(frm) {
+		frm.trigger("set_valuation_rate_and_qty_for_all_items");
+	},
+
+	set_valuation_rate_and_qty_for_all_items: function(frm) {
+		frm.doc.items.forEach(row => {
+			frm.events.set_valuation_rate_and_qty(frm, row.doctype, row.name);
+		});
+	},
+
 	set_valuation_rate_and_qty: function(frm, cdt, cdn) {
 		var d = frappe.model.get_doc(cdt, cdn);
 
@@ -227,7 +241,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	},
 
 	refresh: function() {
-		if(this.frm.doc.docstatus==1) {
+		if(this.frm.doc.docstatus > 0) {
 			this.show_stock_ledger();
 			if (erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 				this.show_general_ledger();

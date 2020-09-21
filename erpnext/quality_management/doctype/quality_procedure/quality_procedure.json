@@ -1,4 +1,6 @@
 {
+ "actions": [],
+ "allow_rename": 1,
  "autoname": "format:PRC-{quality_procedure_name}",
  "creation": "2018-10-06 00:06:29.756804",
  "doctype": "DocType",
@@ -69,10 +71,13 @@
    "reqd": 1
   }
  ],
- "modified": "2019-08-05 13:09:29.945082",
+ "is_tree": 1,
+ "links": [],
+ "modified": "2020-06-17 17:25:03.434953",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Procedure",
+ "nsm_parent_field": "parent_quality_procedure",
  "owner": "Administrator",
  "permissions": [
   {

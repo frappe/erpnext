@@ -149,10 +149,10 @@ class TestStockEntry(unittest.TestCase):
 
 		mr.cancel()
 
-		self.assertFalse(frappe.db.sql("""select * from `tabStock Ledger Entry`
+		self.assertTrue(frappe.db.sql("""select * from `tabStock Ledger Entry`
 			where voucher_type='Stock Entry' and voucher_no=%s""", mr.name))
 
-		self.assertFalse(frappe.db.sql("""select * from `tabGL Entry`
+		self.assertTrue(frappe.db.sql("""select * from `tabGL Entry`
 			where voucher_type='Stock Entry' and voucher_no=%s""", mr.name))
 
 	def test_material_issue_gl_entry(self):
@@ -177,12 +177,6 @@ class TestStockEntry(unittest.TestCase):
 			])
 		)
 		mi.cancel()
-
-		self.assertFalse(frappe.db.sql("""select name from `tabStock Ledger Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""", mi.name))
-
-		self.assertFalse(frappe.db.sql("""select name from `tabGL Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""", mi.name))
 
 	def test_material_transfer_gl_entry(self):
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
@@ -216,11 +210,6 @@ class TestStockEntry(unittest.TestCase):
 			)
 
 		mtn.cancel()
-		self.assertFalse(frappe.db.sql("""select * from `tabStock Ledger Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""", mtn.name))
-
-		self.assertFalse(frappe.db.sql("""select * from `tabGL Entry`
-			where voucher_type='Stock Entry' and voucher_no=%s""", mtn.name))
 
 	def test_repack_no_change_in_valuation(self):
 		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
@@ -424,7 +413,7 @@ class TestStockEntry(unittest.TestCase):
 	def test_serial_item_error(self):
 		se, serial_nos = self.test_serial_by_series()
 		if not frappe.db.exists('Serial No', 'ABCD'):
-			make_serialized_item("_Test Serialized Item", "ABCD\nEFGH")
+			make_serialized_item(item_code="_Test Serialized Item", serial_no="ABCD\nEFGH")
 
 		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Material Transfer"
@@ -544,10 +533,10 @@ class TestStockEntry(unittest.TestCase):
 		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto", '')
 
 		# test freeze_stocks_upto_days
-		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", 7)
+		frappe.db.set_value("Stock Settings", None, "stock_frozen_upto_days", -1)
 		se = frappe.copy_doc(test_records[0])
 		se.set_posting_time = 1
-		se.posting_date = add_days(nowdate(), -15)
+		se.posting_date = nowdate()
 		se.set_stock_entry_type()
 		se.insert()
 		self.assertRaises(StockFreezeError, se.submit)
@@ -744,37 +733,9 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_customer_provided_parts_se(self):
 		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
-		se = make_stock_entry(item_code='CUST-0987', purporse = 'Material Receipt', qty=4, to_warehouse = "_Test Warehouse - _TC")
+		se = make_stock_entry(item_code='CUST-0987', purpose = 'Material Receipt', qty=4, to_warehouse = "_Test Warehouse - _TC")
 		self.assertEqual(se.get("items")[0].allow_zero_valuation_rate, 1)
 		self.assertEqual(se.get("items")[0].amount, 0)
-
-	def test_goods_in_transit(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-		warehouse = "_Test Warehouse FG 1 - _TC"
-
-		if not frappe.db.exists('Warehouse', warehouse):
-			create_warehouse("_Test Warehouse FG 1")
-
-		outward_entry = make_stock_entry(item_code="_Test Item",
-			purpose="Send to Warehouse",
-			source="_Test Warehouse - _TC",
-			target="_Test Warehouse 1 - _TC", qty=50, basic_rate=100)
-
-		inward_entry1 = make_stock_in_entry(outward_entry.name)
-		inward_entry1.items[0].t_warehouse = warehouse
-		inward_entry1.items[0].qty = 25
-		inward_entry1.submit()
-
-		doc = frappe.get_doc('Stock Entry', outward_entry.name)
-		self.assertEqual(doc.per_transferred, 50)
-
-		inward_entry2 = make_stock_in_entry(outward_entry.name)
-		inward_entry2.items[0].t_warehouse = warehouse
-		inward_entry2.items[0].qty = 25
-		inward_entry2.submit()
-
-		doc = frappe.get_doc('Stock Entry', outward_entry.name)
-		self.assertEqual(doc.per_transferred, 100)
 
 	def test_gle_for_opening_stock_entry(self):
 		mr = make_stock_entry(item_code="_Test Item", target="Stores - TCP1", company="_Test Company with perpetual inventory",qty=50, basic_rate=100, expense_account="Stock Adjustment - TCP1", is_opening="Yes", do_not_save=True)
@@ -834,15 +795,29 @@ class TestStockEntry(unittest.TestCase):
 			])
 		)
 
-def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
+def make_serialized_item(**args):
+	args = frappe._dict(args)
 	se = frappe.copy_doc(test_records[0])
-	se.get("items")[0].item_code = item_code or "_Test Serialized Item With Series"
-	se.get("items")[0].serial_no = serial_no
+
+	if args.company:
+		se.company = args.company
+
+	se.get("items")[0].item_code = args.item_code or "_Test Serialized Item With Series"
+
+	if args.serial_no:
+		se.get("items")[0].serial_no = args.serial_no
+
+	if args.cost_center:
+		se.get("items")[0].cost_center = args.cost_center
+
+	if args.expense_account:
+		se.get("items")[0].expense_account = args.expense_account
+
 	se.get("items")[0].qty = 2
 	se.get("items")[0].transfer_qty = 2
 
-	if target_warehouse:
-		se.get("items")[0].t_warehouse = target_warehouse
+	if args.target_warehouse:
+		se.get("items")[0].t_warehouse = args.target_warehouse
 
 	se.set_stock_entry_type()
 	se.insert()

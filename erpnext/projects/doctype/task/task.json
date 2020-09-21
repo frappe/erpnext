@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "TASK-.YYYY.-.#####",
  "creation": "2013-01-29 19:25:50",
@@ -182,7 +183,8 @@
   {
    "fieldname": "progress",
    "fieldtype": "Percent",
-   "label": "% Progress"
+   "label": "% Progress",
+   "no_copy": 1
   },
   {
    "default": "0",
@@ -200,7 +202,6 @@
   {
    "fieldname": "description",
    "fieldtype": "Text Editor",
-   "in_preview": 1,
    "label": "Task Description",
    "oldfieldname": "description",
    "oldfieldtype": "Text Editor",
@@ -324,6 +325,7 @@
    "options": "Department"
   },
   {
+   "fetch_from": "project.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -356,16 +358,20 @@
    "fieldname": "completed_by",
    "fieldtype": "Link",
    "label": "Completed By",
+   "no_copy": 1,
    "options": "User"
   }
  ],
  "icon": "fa fa-check",
  "idx": 1,
+ "is_tree": 1,
+ "links": [],
  "max_attachments": 5,
- "modified": "2019-09-10 13:46:24.631754",
+ "modified": "2020-07-03 12:36:04.960457",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
+ "nsm_parent_field": "parent_task",
  "owner": "Administrator",
  "permissions": [
   {

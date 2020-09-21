@@ -68,13 +68,19 @@ class Quotation(SellingController):
 
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_sales_order():
+			get_lost_reasons = frappe.get_list('Quotation Lost Reason',
+			fields = ["name"])
+			lost_reasons_lst = [reason.get('name') for reason in get_lost_reasons]
 			frappe.db.set(self, 'status', 'Lost')
 
 			if detailed_reason:
 				frappe.db.set(self, 'order_lost_reason', detailed_reason)
 
 			for reason in lost_reasons_list:
-				self.append('lost_reasons', reason)
+				if reason.get('lost_reason') in lost_reasons_lst:
+					self.append('lost_reasons', reason)
+				else:
+					frappe.throw(_("Invalid lost reason {0}, please create a new lost reason").format(frappe.bold(reason.get('lost_reason'))))
 
 			self.update_opportunity()
 			self.update_lead()
@@ -93,6 +99,8 @@ class Quotation(SellingController):
 		self.update_lead()
 
 	def on_cancel(self):
+		if self.lost_reasons:
+			self.lost_reasons = []
 		super(Quotation, self).on_cancel()
 
 		#update enquiry status
@@ -149,6 +157,11 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	def update_item(obj, target, source_parent):
 		target.stock_qty = flt(obj.qty) * flt(obj.conversion_factor)
 
+		if obj.against_blanket_order:
+			target.against_blanket_order = obj.against_blanket_order
+			target.blanket_order = obj.blanket_order
+			target.blanket_order_rate = obj.blanket_order_rate
+
 	doclist = get_mapped_doc("Quotation", source_name, {
 			"Quotation": {
 				"doctype": "Sales Order",
@@ -182,12 +195,23 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 	return doclist
 
 def set_expired_status():
-	frappe.db.sql("""
-		UPDATE
-			`tabQuotation` SET `status` = 'Expired'
+	# filter out submitted non expired quotations whose validity has been ended
+	cond = "qo.docstatus = 1 and qo.status != 'Expired' and qo.valid_till < %s"
+	# check if those QUO have SO against it
+	so_against_quo = """
+		SELECT
+			so.name FROM `tabSales Order` so, `tabSales Order Item` so_item
 		WHERE
-			`status` not in ('Ordered', 'Expired', 'Lost', 'Cancelled') AND `valid_till` < %s
-		""", (nowdate()))
+			so_item.docstatus = 1 and so.docstatus = 1
+			and so_item.parent = so.name
+			and so_item.prevdoc_docname = qo.name"""
+
+	# if not exists any SO, set status as Expired
+	frappe.db.sql(
+		"""UPDATE `tabQuotation` qo SET qo.status = 'Expired' WHERE {cond} and not exists({so_against_quo})"""
+			.format(cond=cond, so_against_quo=so_against_quo),
+			(nowdate())
+		)
 
 @frappe.whitelist()
 def make_sales_invoice(source_name, target_doc=None):
@@ -261,9 +285,17 @@ def _make_customer(source_name, ignore_permissions=False):
 						return customer
 					else:
 						raise
-				except frappe.MandatoryError:
+				except frappe.MandatoryError as e:
+					mandatory_fields = e.args[0].split(':')[1].split(',')
+					mandatory_fields = [customer.meta.get_label(field.strip()) for field in mandatory_fields]
+
 					frappe.local.message_log = []
-					frappe.throw(_("Please create Customer from Lead {0}").format(lead_name))
+					lead_link = frappe.utils.get_link_to_form("Lead", lead_name)
+					message = _("Could not auto create Customer due to the following missing mandatory field(s):") + "<br>"
+					message += "<br><ul><li>" + "</li><li>".join(mandatory_fields) + "</li></ul>"
+					message += _("Please create Customer from Lead {0}.").format(lead_link)
+
+					frappe.throw(message, title=_("Mandatory Missing"))
 			else:
 				return customer_name
 		else:

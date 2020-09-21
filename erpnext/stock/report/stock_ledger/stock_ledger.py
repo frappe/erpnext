@@ -4,9 +4,9 @@
 from __future__ import unicode_literals
 
 import frappe
+from frappe.utils import cint, flt
 from erpnext.stock.utils import update_included_uom_in_report
 from frappe import _
-
 
 def execute(filters=None):
 	include_uom = filters.get("include_uom")
@@ -15,6 +15,7 @@ def execute(filters=None):
 	sl_entries = get_stock_ledger_entries(filters, items)
 	item_details = get_item_details(items, sl_entries, include_uom)
 	opening_row = get_opening_balance(filters, columns)
+	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 
 	data = []
 	conversion_factors = []
@@ -29,10 +30,10 @@ def execute(filters=None):
 		sle.update(item_detail)
 
 		if filters.get("batch_no"):
-			actual_qty += sle.actual_qty
+			actual_qty += flt(sle.actual_qty, precision)
 			stock_value += sle.stock_value_difference
 
-			if sle.voucher_type == 'Stock Reconciliation':
+			if sle.voucher_type == 'Stock Reconciliation' and not sle.actual_qty:
 				actual_qty = sle.qty_after_transaction
 				stock_value = sle.stock_value
 
@@ -45,19 +46,6 @@ def execute(filters=None):
 			"in_qty": max(sle.actual_qty, 0),
 			"out_qty": min(sle.actual_qty, 0)
 		})
-
-		# get the name of the item that was produced using this item
-		if sle.voucher_type == "Stock Entry":
-			purpose, work_order, fg_completed_qty = frappe.db.get_value(sle.voucher_type, sle.voucher_no, ["purpose", "work_order", "fg_completed_qty"])
-
-			if purpose == "Manufacture" and work_order:
-				finished_product = frappe.db.get_value("Work Order", work_order, "item_name")
-				finished_qty = fg_completed_qty
-
-				sle.update({
-					"finished_product": finished_product,
-					"finished_qty": finished_qty,
-				})
 
 		data.append(sle)
 
@@ -77,8 +65,6 @@ def get_columns():
 		{"label": _("In Qty"), "fieldname": "in_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Out Qty"), "fieldname": "out_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Balance Qty"), "fieldname": "qty_after_transaction", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Finished Product"), "fieldname": "finished_product", "width": 100},
-		{"label": _("Finished Qty"), "fieldname": "finished_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
 		{"label": _("Voucher #"), "fieldname": "voucher_no", "fieldtype": "Dynamic Link", "options": "voucher_type", "width": 150},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 150},
 		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
@@ -195,6 +181,9 @@ def get_sle_conditions(filters):
 		conditions.append("batch_no=%(batch_no)s")
 	if filters.get("project"):
 		conditions.append("project=%(project)s")
+
+	if not filters.get("show_cancelled_entries"):
+		conditions.append("is_cancelled = 0")
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 

@@ -1,16 +1,17 @@
-DocType: Tax Rule,Tax Rule,Regla Fiscal
-DocType: POS Profile,Account for Change Amount,Cuenta para el Cambio de Monto
-apps/erpnext/erpnext/stock/doctype/material_request/material_request.js,Bill of Materials,Lista de Materiales
-apps/erpnext/erpnext/accounts/doctype/sales_invoice/sales_invoice.py,'Update Stock' cannot be checked for fixed asset sale,"""Actualización de Existencia' no puede ser escogida para venta de activo fijo"
-DocType: Purchase Invoice,Tax ID,RUC
-DocType: BOM Item,Basic Rate (Company Currency),Taza Base (Divisa de la Empresa)
-DocType: Timesheet Detail,Bill,Factura
-DocType: Activity Cost,Billing Rate,Monto de Facturación
-apps/erpnext/erpnext/config/help.py,Opening Accounting Balance,Apertura de Saldos Contables
-apps/erpnext/erpnext/accounts/doctype/tax_rule/tax_rule.py,Tax Rule Conflicts with {0},Regla Fiscal en conflicto con {0}
-DocType: Tax Rule,Billing County,Municipio de Facturación
-DocType: Sales Invoice Timesheet,Billing Hours,Horas de Facturación
-DocType: Timesheet,Billing Details,Detalles de Facturación
-DocType: Tax Rule,Billing State,Región de Facturación
-DocType: Purchase Order Item,Billed Amt,Monto Facturado
-DocType: Item Tax Template Detail,Tax Rate,Tasa de Impuesto
+'Update Stock' cannot be checked for fixed asset sale,"""Actualización de Existencia' no puede ser escogida para venta de activo fijo",
+Bill,Factura,
+Bill of Materials,Lista de Materiales,
+Opening Accounting Balance,Apertura de Saldos Contables,
+Tax ID,RUC,
+Tax Rate,Tasa de Impuesto,
+Tax Rule Conflicts with {0},Regla Fiscal en conflicto con {0},
+Tax Id,RUC,
+Account for Change Amount,Cuenta para el Cambio de Monto,
+Billing Hours,Horas de Facturación,
+Tax Rule,Regla Fiscal,
+Billing County,Municipio de Facturación,
+Billing State,Región de Facturación,
+Billed Amt,Monto Facturado,
+Basic Rate (Company Currency),Taza Base (Divisa de la Empresa),
+Billing Rate,Monto de Facturación,
+Billing Details,Detalles de Facturación,

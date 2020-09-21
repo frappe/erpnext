@@ -55,27 +55,27 @@ def get_columns(group_wise_columns, filters):
 	columns = []
 	column_map = frappe._dict({
 		"parent": _("Sales Invoice") + ":Link/Sales Invoice:120",
-		"posting_date": _("Posting Date") + ":Date",
-		"posting_time": _("Posting Time"),
-		"item_code": _("Item Code") + ":Link/Item",
-		"item_name": _("Item Name"),
-		"item_group": _("Item Group") + ":Link/Item Group",
-		"brand": _("Brand"),
-		"description": _("Description"),
-		"warehouse": _("Warehouse") + ":Link/Warehouse",
-		"qty": _("Qty") + ":Float",
-		"base_rate": _("Avg. Selling Rate") + ":Currency/currency",
-		"buying_rate": _("Valuation Rate") + ":Currency/currency",
-		"base_amount": _("Selling Amount") + ":Currency/currency",
-		"buying_amount": _("Buying Amount") + ":Currency/currency",
-		"gross_profit": _("Gross Profit") + ":Currency/currency",
-		"gross_profit_percent": _("Gross Profit %") + ":Percent",
-		"project": _("Project") + ":Link/Project",
+		"posting_date": _("Posting Date") + ":Date:100",
+		"posting_time": _("Posting Time") + ":Data:100",
+		"item_code": _("Item Code") + ":Link/Item:100",
+		"item_name": _("Item Name") + ":Data:100",
+		"item_group": _("Item Group") + ":Link/Item Group:100",
+		"brand": _("Brand") + ":Link/Brand:100",
+		"description": _("Description") +":Data:100",
+		"warehouse": _("Warehouse") + ":Link/Warehouse:100",
+		"qty": _("Qty") + ":Float:80",
+		"base_rate": _("Avg. Selling Rate") + ":Currency/currency:100",
+		"buying_rate": _("Valuation Rate") + ":Currency/currency:100",
+		"base_amount": _("Selling Amount") + ":Currency/currency:100",
+		"buying_amount": _("Buying Amount") + ":Currency/currency:100",
+		"gross_profit": _("Gross Profit") + ":Currency/currency:100",
+		"gross_profit_percent": _("Gross Profit %") + ":Percent:100",
+		"project": _("Project") + ":Link/Project:100",
 		"sales_person": _("Sales person"),
-		"allocated_amount": _("Allocated Amount") + ":Currency/currency",
-		"customer": _("Customer") + ":Link/Customer",
-		"customer_group": _("Customer Group") + ":Link/Customer Group",
-		"territory": _("Territory") + ":Link/Territory"
+		"allocated_amount": _("Allocated Amount") + ":Currency/currency:100",
+		"customer": _("Customer") + ":Link/Customer:100",
+		"customer_group": _("Customer Group") + ":Link/Customer Group:100",
+		"territory": _("Territory") + ":Link/Territory:100"
 	})
 
 	for col in group_wise_columns.get(scrub(filters.group_by)):
@@ -85,7 +85,8 @@ def get_columns(group_wise_columns, filters):
 		"fieldname": "currency",
 		"label" : _("Currency"),
 		"fieldtype": "Link",
-		"options": "Currency"
+		"options": "Currency",
+		"hidden": 1
 	})
 
 	return columns
@@ -222,9 +223,9 @@ class GrossProfitGenerator(object):
 		# IMP NOTE
 		# stock_ledger_entries should already be filtered by item_code and warehouse and
 		# sorted by posting_date desc, posting_time desc
-		if item_code in self.non_stock_items:
+		if item_code in self.non_stock_items and (row.project or row.cost_center):
 			#Issue 6089-Get last purchasing rate for non-stock item
-			item_rate = self.get_last_purchase_rate(item_code)
+			item_rate = self.get_last_purchase_rate(item_code, row)
 			return flt(row.qty) * item_rate
 
 		else:
@@ -252,38 +253,34 @@ class GrossProfitGenerator(object):
 	def get_average_buying_rate(self, row, item_code):
 		args = row
 		if not item_code in self.average_buying_rate:
-			if item_code in self.non_stock_items:
-				self.average_buying_rate[item_code] = flt(frappe.db.sql("""
-					select sum(base_net_amount) / sum(qty * conversion_factor)
-					from `tabPurchase Invoice Item`
-					where item_code = %s and docstatus=1""", item_code)[0][0])
-			else:
-				args.update({
-					'voucher_type': row.parenttype,
-					'voucher_no': row.parent,
-					'allow_zero_valuation': True,
-					'company': self.filters.company
-				})
+			args.update({
+				'voucher_type': row.parenttype,
+				'voucher_no': row.parent,
+				'allow_zero_valuation': True,
+				'company': self.filters.company
+			})
 
-				average_buying_rate = get_incoming_rate(args)
-				self.average_buying_rate[item_code] =  flt(average_buying_rate)
+			average_buying_rate = get_incoming_rate(args)
+			self.average_buying_rate[item_code] =  flt(average_buying_rate)
 
 		return self.average_buying_rate[item_code]
 
-	def get_last_purchase_rate(self, item_code):
+	def get_last_purchase_rate(self, item_code, row):
+		condition = ''
+		if row.project:
+			condition += " AND a.project='%s'" % (row.project)
+		elif row.cost_center:
+			condition += " AND a.cost_center='%s'" % (row.cost_center)
 		if self.filters.to_date:
-			last_purchase_rate = frappe.db.sql("""
-			select (a.base_rate / a.conversion_factor)
-			from `tabPurchase Invoice Item` a
-			where a.item_code = %s and a.docstatus=1
-			and modified <= %s
-			order by a.modified desc limit 1""", (item_code,self.filters.to_date))
-		else:
-			last_purchase_rate = frappe.db.sql("""
-			select (a.base_rate / a.conversion_factor)
-			from `tabPurchase Invoice Item` a
-			where a.item_code = %s and a.docstatus=1
-			order by a.modified desc limit 1""", item_code)
+			condition += " AND modified='%s'" % (self.filters.to_date)
+
+		last_purchase_rate = frappe.db.sql("""
+		select (a.base_rate / a.conversion_factor)
+		from `tabPurchase Invoice Item` a
+		where a.item_code = %s and a.docstatus=1
+		{0}
+		order by a.modified desc limit 1""".format(condition), item_code)
+
 		return flt(last_purchase_rate[0][0]) if last_purchase_rate else 0
 
 	def load_invoice_items(self):
@@ -320,7 +317,8 @@ class GrossProfitGenerator(object):
 				`tabSales Invoice Item`.brand, `tabSales Invoice Item`.dn_detail,
 				`tabSales Invoice Item`.delivery_note, `tabSales Invoice Item`.stock_qty as qty,
 				`tabSales Invoice Item`.base_net_rate, `tabSales Invoice Item`.base_net_amount,
-				`tabSales Invoice Item`.name as "item_row", `tabSales Invoice`.is_return
+				`tabSales Invoice Item`.name as "item_row", `tabSales Invoice`.is_return,
+				`tabSales Invoice Item`.cost_center
 				{sales_person_cols}
 			from
 				`tabSales Invoice` inner join `tabSales Invoice Item`

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "naming_series:",
  "creation": "2018-07-09 17:23:29.518745",
  "doctype": "DocType",
@@ -10,6 +11,7 @@
   "bom_no",
   "workstation",
   "operation",
+  "operation_row_number",
   "column_break_4",
   "posting_date",
   "company",
@@ -99,8 +101,7 @@
    "fieldname": "for_quantity",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty To Manufacture",
-   "reqd": 1
+   "label": "Qty To Manufacture"
   },
   {
    "fieldname": "wip_warehouse",
@@ -122,6 +123,7 @@
    "options": "Employee"
   },
   {
+   "allow_bulk_edit": 1,
    "fieldname": "time_logs",
    "fieldtype": "Table",
    "label": "Time Logs",
@@ -264,8 +266,10 @@
   {
    "fetch_from": "work_order.production_item",
    "fieldname": "production_item",
-   "fieldtype": "Read Only",
-   "label": "Production Item"
+   "fieldtype": "Link",
+   "label": "Production Item",
+   "options": "Item",
+   "read_only": 1
   },
   {
    "fieldname": "barcode",
@@ -274,7 +278,8 @@
    "read_only": 1
   },
   {
-   "fetch_from": "work_order.item_name",
+   "fetch_from": "production_item.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "item_name",
    "fieldtype": "Read Only",
    "label": "Item Name"
@@ -287,10 +292,15 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "operation_row_number",
+   "fieldtype": "Select",
+   "label": "Operation Row Number"
   }
  ],
  "is_submittable": 1,
- "modified": "2019-12-03 13:08:57.926201",
+ "modified": "2020-08-24 15:21:21.398267",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
@@ -342,7 +352,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "title_field": "operation",

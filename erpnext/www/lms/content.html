@@ -59,25 +59,25 @@
 {% macro title() %}
 	<div class="mb-3">
 		<a href="/lms/course?name={{ course }}&program={{ program }}" class="text-muted">
-				Back to Course
+			{{_('Back to Course')}}
 		</a>
 	</div>
 	<div>
-		<h1>{{ content.name }} <span class="small text-muted">({{ position + 1 }}/{{length}})</span></h1>
+		<h2>{{ content.name }} <span class="small text-muted">({{ position + 1 }}/{{length}})</span></h2>
 	</div>
 {% endmacro %}
 
 {% macro navigation() %}
 		{% if previous %}
-			<a href="/lms/content?program={{ program }}&course={{ course }}&topic={{ topic }}&type={{ previous.content_type }}&content={{ previous.content }}" class='btn text-muted' style="box-shadow: none;">Previous</a>
+			<a href="/lms/content?program={{ program }}&course={{ course }}&topic={{ topic }}&type={{ previous.content_type }}&content={{ previous.content }}" class='btn text-muted' style="box-shadow: none;">{{_('Previous')}}</a>
 		{% else %}
-			<a href="/lms/course?name={{ course }}&program={{ program }}" class='btn text-muted' style="box-shadow: none;">Back to Course</a>
+			<a href="/lms/course?name={{ course }}&program={{ program }}" class='btn text-muted' style="box-shadow: none;">{{ _('Back to Course') }}</a>
 		{% endif %}
 
 		{% if next %}
-			<button id="nextButton" onclick="handle('/lms/content?program={{ program }}&course={{ course }}&topic={{ topic }}&type={{ next.content_type }}&content={{ next.content }}')" class='btn btn-primary' disabled="true">Next</button>
+			<button id="nextButton" onclick="handle('/lms/content?program={{ program }}&course={{ course }}&topic={{ topic }}&type={{ next.content_type }}&content={{ next.content }}')" class='btn btn-primary' disabled="true">{{_('Next')}}</button>
 		{% else %}
-			<button id="nextButton" onclick="handle('/lms/course?name={{ course }}&program={{ program }}')" class='btn btn-primary' disabled="true">Finish Topic</button>
+			<button id="nextButton" onclick="handle('/lms/course?name={{ course }}&program={{ program }}')" class='btn btn-primary' disabled="true">{{_('Finish Topic')}}</button>
 		{% endif %}
 {% endmacro %}
 
@@ -86,7 +86,7 @@
 	{{ title() }}
 	<div class="text-muted">
 		{% if content.duration %}
-			{{ content.duration }} Mins
+			{{ content.duration }} {{_('Mins')}}
 		{% endif %}
 
 		{% if content.publish_date and content.duration%}
@@ -94,7 +94,7 @@
 		{% endif %}
 
 		{% if content.publish_date %}
-			Published on {{ content.publish_date.strftime('%d, %b %Y') }}
+			{{_('Published on')}} {{ content.publish_date.strftime('%d, %b %Y') }}
 		{% endif %}
 	</div>
 </div>
@@ -109,13 +109,13 @@
 	{{ title() }}
 	<div class="text-muted">
 		{% if content.author or content.publish_date %}
-			Published
+			{{_('Published')}}
 		{% endif %}
 		{% if content.author %}
-			by {{ content.author }}
+			{{_('by')}} {{ content.author }}
 		{% endif %}
 		{% if content.publish_date %}
-			on {{ content.publish_date.strftime('%d, %b %Y') }}
+			{{_('on')}} {{ content.publish_date.strftime('%d, %b %Y') }}
 		{% endif %}
 	</div>
 </div>

@@ -24,9 +24,9 @@ def execute():
 			doc = frappe.get_doc("Purchase Receipt", d.name)
 
 			doc.docstatus = 2
-			doc.make_gl_entries_on_cancel(repost_future_gle=False)
+			doc.make_gl_entries_on_cancel()
 
 
 			# update gl entries for submit state of PR
 			doc.docstatus = 1
-			doc.make_gl_entries(repost_future_gle=False)
+			doc.make_gl_entries()

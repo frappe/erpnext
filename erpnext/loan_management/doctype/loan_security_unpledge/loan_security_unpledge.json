@@ -1,0 +1,181 @@
+{
+ "actions": [],
+ "autoname": "LSU-.{applicant}.-.#####",
+ "creation": "2019-09-21 13:23:16.117028",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "loan_details_section",
+  "loan",
+  "applicant_type",
+  "applicant",
+  "column_break_3",
+  "company",
+  "unpledge_time",
+  "status",
+  "loan_security_details_section",
+  "securities",
+  "more_information_section",
+  "reference_no",
+  "column_break_13",
+  "description",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "loan_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan  Details"
+  },
+  {
+   "fetch_from": "loan_application.applicant",
+   "fieldname": "applicant",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Applicant",
+   "options": "applicant_type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "loan",
+   "fieldtype": "Link",
+   "label": "Loan",
+   "options": "Loan",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Requested",
+   "depends_on": "eval:doc.docstatus == 1",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Requested\nApproved",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "unpledge_time",
+   "fieldtype": "Datetime",
+   "label": "Unpledge Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "loan_security_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan Security Details"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Loan Security Unpledge",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "securities",
+   "fieldtype": "Table",
+   "label": "Securities",
+   "options": "Unpledge",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "loan.applicant_type",
+   "fieldname": "applicant_type",
+   "fieldtype": "Select",
+   "label": "Applicant Type",
+   "options": "Employee\nMember\nCustomer",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "reference_no",
+   "fieldtype": "Data",
+   "label": "Reference No"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-09-04 22:39:57.756146",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Loan Security Unpledge",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "search_fields": "applicant",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "creation": "2017-05-29 21:35:13.136357",
@@ -22,9 +23,8 @@
   "account_details_section",
   "iban",
   "column_break_12",
-  "bank_account_no",
   "branch_code",
-  "swift_number",
+  "bank_account_no",
   "address_and_contact",
   "address_html",
   "website",
@@ -65,13 +65,13 @@
    "fieldname": "account_type",
    "fieldtype": "Link",
    "label": "Account Type",
-   "options": "Account Type"
+   "options": "Bank Account Type"
   },
   {
    "fieldname": "account_subtype",
    "fieldtype": "Link",
    "label": "Account Subtype",
-   "options": "Account Subtype"
+   "options": "Bank Account Subtype"
   },
   {
    "fieldname": "column_break_7",
@@ -82,7 +82,7 @@
    "default": "0",
    "fieldname": "is_default",
    "fieldtype": "Check",
-   "label": "Is the Default Account"
+   "label": "Is Default Account"
   },
   {
    "default": "0",
@@ -145,17 +145,6 @@
    "length": 30
   },
   {
-   "fieldname": "branch_code",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Branch Code"
-  },
-  {
-   "fieldname": "swift_number",
-   "fieldtype": "Data",
-   "label": "SWIFT number"
-  },
-  {
    "fieldname": "address_and_contact",
    "fieldtype": "Section Break",
    "label": "Address and Contact",
@@ -209,9 +198,16 @@
    "fieldtype": "Data",
    "label": "Mask",
    "read_only": 1
+  },
+  {
+   "fieldname": "branch_code",
+   "fieldtype": "Data",
+   "in_global_search": 1,
+   "label": "Branch Code"
   }
  ],
- "modified": "2019-10-02 01:34:12.417601",
+ "links": [],
+ "modified": "2020-07-17 13:59:50.795412",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",

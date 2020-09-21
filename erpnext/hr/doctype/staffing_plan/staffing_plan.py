@@ -57,8 +57,8 @@ class StaffingPlan(Document):
 			and sp.to_date >= %s and sp.from_date <= %s and sp.company = %s
 		""", (staffing_plan_detail.designation, self.from_date, self.to_date, self.company))
 		if overlap and overlap [0][0]:
-			frappe.throw(_("Staffing Plan {0} already exist for designation {1}"
-				.format(overlap[0][0], staffing_plan_detail.designation)))
+			frappe.throw(_("Staffing Plan {0} already exist for designation {1}")
+				.format(overlap[0][0], staffing_plan_detail.designation))
 
 	def validate_with_parent_plan(self, staffing_plan_detail):
 		if not frappe.get_cached_value('Company',  self.company,  "parent_company"):

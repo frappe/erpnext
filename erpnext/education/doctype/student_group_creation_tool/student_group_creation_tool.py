@@ -74,4 +74,4 @@ class StudentGroupCreationTool(Document):
 				student_group.append('students', student)
 			student_group.save()
 
-		frappe.msgprint(_("{0} Student Groups created.".format(l)))
+		frappe.msgprint(_("{0} Student Groups created.").format(l))

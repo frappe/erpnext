@@ -1,18 +1,18 @@
 {
-    "css/erpnext.css": [
-        "public/less/erpnext.less",
-        "public/less/hub.less",
-        "public/less/call_popup.less"
-    ],
-    "css/marketplace.css": [
-        "public/less/hub.less"
-    ],
-    "js/erpnext-web.min.js": [
-        "public/js/website_utils.js",
-        "public/js/shopping_cart.js"
-    ],
+	"css/erpnext.css": [
+		"public/less/erpnext.less",
+		"public/less/hub.less",
+		"public/less/call_popup.less"
+	],
+	"css/marketplace.css": [
+		"public/less/hub.less"
+	],
+	"js/erpnext-web.min.js": [
+		"public/js/website_utils.js",
+		"public/js/shopping_cart.js"
+	],
 	"css/erpnext-web.css": [
-        "public/scss/website.scss"
+		"public/scss/website.scss"
 	],
 	"js/marketplace.min.js": [
 		"public/js/hub/marketplace.js"
@@ -23,8 +23,6 @@
 		"public/js/queries.js",
 		"public/js/sms_manager.js",
 		"public/js/utils/party.js",
-		"public/js/templates/address_list.html",
-		"public/js/templates/contact_list.html",
 		"public/js/controllers/stock_controller.js",
 		"public/js/payment/payments.js",
 		"public/js/controllers/taxes_and_totals.js",
@@ -47,15 +45,15 @@
 		"public/js/templates/item_quick_entry.html",
 		"public/js/utils/item_quick_entry.js",
 		"public/js/utils/customer_quick_entry.js",
-        "public/js/education/student_button.html",
-        "public/js/education/assessment_result_tool.html",
-        "public/js/hub/hub_factory.js",
-        "public/js/call_popup/call_popup.js",
-        "public/js/utils/dimension_tree_filter.js"
-    ],
-    "js/item-dashboard.min.js": [
-        "stock/dashboard/item_dashboard.html",
-        "stock/dashboard/item_dashboard_list.html",
-        "stock/dashboard/item_dashboard.js"
-    ]
+		"public/js/education/student_button.html",
+		"public/js/education/assessment_result_tool.html",
+		"public/js/hub/hub_factory.js",
+		"public/js/call_popup/call_popup.js",
+		"public/js/utils/dimension_tree_filter.js"
+	],
+	"js/item-dashboard.min.js": [
+		"stock/dashboard/item_dashboard.html",
+		"stock/dashboard/item_dashboard_list.html",
+		"stock/dashboard/item_dashboard.js"
+	]
 }
