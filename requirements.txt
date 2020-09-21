@@ -3,7 +3,7 @@ frappe
 gocardless-pro==1.11.0
 googlemaps==3.1.1
 pandas==0.24.2
-plaid-python==3.4.0
+plaid-python==6.0.0
 PyGithub==1.44.1
 python-stdnum==1.12
 Unidecode==1.1.1
