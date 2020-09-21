@@ -20,7 +20,7 @@
   {
    "fetch_from": "question_link.question",
    "fieldname": "question",
-   "fieldtype": "Data",
+   "fieldtype": "Text Editor",
    "in_list_view": 1,
    "label": "Question",
    "read_only": 1
