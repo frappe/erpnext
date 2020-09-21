@@ -1,5 +1,5 @@
 {
- "actions": "",
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2016-02-25 01:24:07.224790",
@@ -14,7 +14,6 @@
   "transaction_date",
   "suppliers_section",
   "suppliers",
-  "get_suppliers_button",
   "items_section",
   "items",
   "link_to_mrs",
@@ -78,6 +77,7 @@
    "width": "50%"
   },
   {
+   "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -94,15 +94,10 @@
   {
    "fieldname": "suppliers",
    "fieldtype": "Table",
-   "label": "Supplier Detail",
+   "label": "Suppliers",
    "options": "Request for Quotation Supplier",
    "print_hide": 1,
    "reqd": 1
-  },
-  {
-   "fieldname": "get_suppliers_button",
-   "fieldtype": "Button",
-   "label": "Get Suppliers"
   },
   {
    "fieldname": "items_section",
@@ -137,6 +132,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "message_for_supplier",
    "fieldtype": "Text Editor",
    "in_list_view": 1,
@@ -233,9 +229,10 @@
   }
  ],
  "icon": "fa fa-shopping-cart",
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-25 14:37:21.140194",
+ "modified": "2020-09-21 13:01:03.235983",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",

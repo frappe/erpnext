@@ -70,7 +70,7 @@ class RequestforQuotation(BuyingController):
 				# make new user if required
 				update_password_link = self.update_supplier_contact(rfq_supplier, self.get_link())
 
-				self.update_supplier_part_no(rfq_supplier)
+				self.update_supplier_part_no(rfq_supplier.supplier)
 				self.supplier_rfq_mail(rfq_supplier, update_password_link, self.get_link())
 				rfq_supplier.email_sent = 1
 				rfq_supplier.save()
@@ -79,11 +79,11 @@ class RequestforQuotation(BuyingController):
 		# RFQ link for supplier portal
 		return get_url("/rfq/" + self.name)
 
-	def update_supplier_part_no(self, args):
-		self.vendor = args.supplier
+	def update_supplier_part_no(self, supplier):
+		self.vendor = supplier
 		for item in self.items:
 			item.supplier_part_no = frappe.db.get_value('Item Supplier',
-				{'parent': item.item_code, 'supplier': args.supplier}, 'supplier_part_no')
+				{'parent': item.item_code, 'supplier': supplier}, 'supplier_part_no')
 
 	def update_supplier_contact(self, rfq_supplier, link):
 		'''Create a new user for the supplier if not set in contact'''
@@ -289,16 +289,15 @@ def create_rfq_items(sq_doc, supplier, data):
 	})
 
 @frappe.whitelist()
-def get_pdf(doctype, name, supplier_idx):
-	doc = get_rfq_doc(doctype, name, supplier_idx)
+def get_pdf(doctype, name, supplier):
+	doc = get_rfq_doc(doctype, name, supplier)
 	if doc:
 		download_pdf(doctype, name, doc=doc)
 
-def get_rfq_doc(doctype, name, supplier_idx):
-	if cint(supplier_idx):
+def get_rfq_doc(doctype, name, supplier):
+	if supplier:
 		doc = frappe.get_doc(doctype, name)
-		args = doc.get('suppliers')[cint(supplier_idx) - 1]
-		doc.update_supplier_part_no(args)
+		doc.update_supplier_part_no(supplier)
 		return doc
 
 @frappe.whitelist()
