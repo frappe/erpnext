@@ -11,7 +11,6 @@ from erpnext import get_default_company
 from erpnext.education.api import get_student_group_students
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 
-
 class StudentAttendance(Document):
 	def validate(self):
 		self.validate_mandatory()
@@ -79,4 +78,7 @@ def get_holiday_list(company=None):
 	if not company:
 		company = get_default_company() or frappe.get_all('Company')[0].name
 
-	return frappe.get_cached_value('Company', company,  'default_holiday_list')
+	holiday_list = frappe.get_cached_value('Company', company,  'default_holiday_list')
+	if not holiday_list:
+		frappe.throw(_('Please set a default Holiday List for Company {0}').format(frappe.bold(get_default_company())))
+	return holiday_list

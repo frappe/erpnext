@@ -4,7 +4,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from erpnext import get_default_company
 from frappe import _
 from datetime import timedelta
 from frappe.utils import get_link_to_form, getdate, date_diff, flt
@@ -45,9 +44,6 @@ class StudentLeaveApplication(Document):
 
 	def validate_holiday_list(self):
 		holiday_list = get_holiday_list()
-		if not holiday_list:
-			frappe.throw(_('Please set a default Holiday List for Company {0}').format(frappe.bold(get_default_company())))
-
 		self.total_leave_days = get_number_of_leave_days(self.from_date, self.to_date, holiday_list)
 
 	def update_attendance(self):

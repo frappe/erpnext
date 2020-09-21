@@ -130,6 +130,6 @@ def mark_holidays(att_map, from_date, to_date, students_list):
 	for dt in daterange(getdate(from_date), getdate(to_date)):
 		if dt in holidays:
 			for student in students_list:
-				att_map[student][dt] = "Holiday"
+				att_map.setdefault(student, frappe._dict()).setdefault(dt, "Holiday")
 
 	return att_map
