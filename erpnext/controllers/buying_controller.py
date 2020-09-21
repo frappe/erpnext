@@ -16,6 +16,7 @@ from frappe.contacts.doctype.address.address import get_address_display
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.controllers.stock_controller import StockController
+from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 
 class BuyingController(StockController):
 	def __setup__(self):
@@ -589,22 +590,11 @@ class BuyingController(StockController):
 						"serial_no": cstr(d.serial_no).strip()
 					})
 					if self.is_return:
-						filters = {
-							"voucher_type": self.doctype,
-							"voucher_no": self.return_against,
-							"item_code": d.item_code
-						}
-
-						if (self.doctype == "Purchase Invoice" and self.update_stock
-							and d.get("purchase_invoice_item")):
-							filters["voucher_detail_no"] = d.purchase_invoice_item
-						elif self.doctype == "Purchase Receipt" and d.get("purchase_receipt_item"):
-							filters["voucher_detail_no"] = d.purchase_receipt_item
-
-						original_incoming_rate = frappe.db.get_value("Stock Ledger Entry", filters, "incoming_rate")
+						outgoing_rate = get_rate_for_return(self.doctype, self.name, d.item_code, self.return_against, item_row=d)
 
 						sle.update({
-							"outgoing_rate": original_incoming_rate
+							"outgoing_rate": outgoing_rate,
+							"recalculate_rate": 1
 						})
 					else:
 						val_rate_db_precision = 6 if cint(self.precision("valuation_rate", d)) <= 6 else 9
@@ -856,6 +846,7 @@ class BuyingController(StockController):
 			validate_item_type(self, "is_sub_contracted_item", "subcontracted")
 		else:
 			validate_item_type(self, "is_purchase_item", "purchase")
+
 
 def get_items_from_bom(item_code, bom, exploded_item=1):
 	doctype = "BOM Item" if not exploded_item else "BOM Explosion Item"
