@@ -1218,6 +1218,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			frappe.throw(_("Cannot set quantity less than received quantity"))
 
 		child_item.qty = flt(d.get("qty"))
+		if parent_doctype == "Purchase Order":
+			child_item.brand = frappe.db.get_value('Item', d.get('item_code'), "brand")
 		precision = child_item.precision("rate") or 2
 
 		if flt(child_item.billed_amt, precision) > flt(flt(d.get("rate")) * flt(d.get("qty")), precision):
