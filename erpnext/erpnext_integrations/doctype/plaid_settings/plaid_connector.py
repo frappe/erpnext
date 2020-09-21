@@ -46,7 +46,7 @@ class PlaidConnector():
 
 		try:
 			response = self.client.LinkToken.create(token_request)
-		except InvalidRequestError as e:
+		except InvalidRequestError:
 			frappe.log_error(frappe.get_traceback(), _("Plaid invalid request error"))
 			frappe.msgprint(_("Please check your Plaid client ID and secret values"))
 		except APIError as e:
@@ -72,10 +72,16 @@ class PlaidConnector():
 
 	def get_transactions(self, start_date, end_date, account_id=None):
 		self.auth()
-		account_ids = list(account_id) if account_id else None
+		kwargs = dict(
+			access_token=self.access_token,
+			start_date=start_date,
+			end_date=end_date
+		)
+		if account_id:
+			kwargs.update(dict(account_ids=[account_id]))
 
 		try:
-			response = self.client.Transactions.get(self.access_token, start_date=start_date, end_date=end_date, account_ids=account_ids)
+			response = self.client.Transactions.get(**kwargs)
 			transactions = response["transactions"]
 			while len(transactions) < response["total_transactions"]:
 				response = self.client.Transactions.get(self.access_token, start_date=start_date, end_date=end_date, offset=len(transactions))
