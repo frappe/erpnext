@@ -727,3 +727,4 @@ erpnext.patches.v13_0.drop_razorpay_payload_column
 erpnext.patches.v13_0.update_start_end_date_for_old_shift_assignment
 erpnext.patches.v13_0.setting_custom_roles_for_some_regional_reports
 erpnext.patches.v13_0.change_default_pos_print_format
+erpnext.patches.v13_0.set_youtube_video_id
