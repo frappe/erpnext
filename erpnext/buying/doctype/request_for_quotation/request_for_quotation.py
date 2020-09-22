@@ -164,23 +164,22 @@ class RequestforQuotation(BuyingController):
 	def update_rfq_supplier_status(self, sup_name=None):
 		for supplier in self.suppliers:
 			if sup_name == None or supplier.supplier == sup_name:
-				if supplier.quote_status != _('No Quote'):
-					quote_status = _('Received')
-					for item in self.items:
-						sqi_count = frappe.db.sql("""
-							SELECT
-								COUNT(sqi.name) as count
-							FROM
-								`tabSupplier Quotation Item` as sqi,
-								`tabSupplier Quotation` as sq
-							WHERE sq.supplier = %(supplier)s
-								AND sqi.docstatus = 1
-								AND sqi.request_for_quotation_item = %(rqi)s
-								AND sqi.parent = sq.name""",
-							{"supplier": supplier.supplier, "rqi": item.name}, as_dict=1)[0]
-						if (sqi_count.count) == 0:
-							quote_status = _('Pending')
-					supplier.quote_status = quote_status
+				quote_status = _('Received')
+				for item in self.items:
+					sqi_count = frappe.db.sql("""
+						SELECT
+							COUNT(sqi.name) as count
+						FROM
+							`tabSupplier Quotation Item` as sqi,
+							`tabSupplier Quotation` as sq
+						WHERE sq.supplier = %(supplier)s
+							AND sqi.docstatus = 1
+							AND sqi.request_for_quotation_item = %(rqi)s
+							AND sqi.parent = sq.name""",
+						{"supplier": supplier.supplier, "rqi": item.name}, as_dict=1)[0]
+					if (sqi_count.count) == 0:
+						quote_status = _('Pending')
+				supplier.quote_status = quote_status
 
 
 @frappe.whitelist()

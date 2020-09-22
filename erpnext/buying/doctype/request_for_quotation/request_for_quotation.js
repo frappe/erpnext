@@ -145,29 +145,6 @@ frappe.ui.form.on("Request for Quotation Supplier",{
 		})
 	},
 
-	no_quote: function(frm, cdt, cdn) {
-		var d = locals[cdt][cdn];
-		if (d.no_quote) {
-			if (d.quote_status != __('Received')) {
-				frappe.model.set_value(cdt, cdn, 'quote_status', 'No Quote');
-			} else {
-				frappe.msgprint(__("Cannot set a received RFQ to No Quote"));
-				frappe.model.set_value(cdt, cdn, 'no_quote', 0);
-			}
-		} else {
-			d.quote_status = __('Pending');
-			frm.call({
-				method:"update_rfq_supplier_status",
-				doc: frm.doc,
-				args: {
-					sup_name: d.supplier
-				},
-				callback: function(r) {
-					frm.refresh_field("suppliers");
-				}
-			});
-		}
-	}
 })
 
 erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.extend({
