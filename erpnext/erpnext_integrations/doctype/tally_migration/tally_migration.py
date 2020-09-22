@@ -103,6 +103,13 @@ class TallyMigration(Document):
 				filename = frappe.scrub(doctype) + "{}.csv".format(i+1 if len(contents) > 1 else "")
 				f = self.attach_file(filename, content)
 				data_import_doc = self.make_data_import_doc(doctype, f.file_url)
+				processed_doc = frappe.new_doc("Tally Migration Processed File", self, "processed_files")
+				processed_doc.doctype_name = doctype
+				processed_doc.processed_file_url = f.file_url
+				processed_doc.data_import = data_import_doc.name
+				processed_doc.no_of_documents = len(data_import_doc.get_importer().import_file.data)
+				processed_doc.db_insert()
+				self.append("processed_files", processed_doc.as_dict())
 	
 	def attach_file(self, filename, content):
 		f = frappe.get_doc({
@@ -226,7 +233,7 @@ class TallyMigration(Document):
 					for city, pincodes in cities.items():
 						if pincode in pincodes:
 							return city, state
-				return None, None
+				return "", ""
 
 			customers, suppliers, addresses = [], [], []
 			for account in collection.find_all("LEDGER"):
@@ -259,11 +266,12 @@ class TallyMigration(Document):
 					address = "\n".join([a.string.strip() for a in account.find_all("ADDRESS")])
 					tally_state = account.LEDSTATENAME.string.strip() if account.LEDSTATENAME else ""
 
-					pincode = account.PINCODE.string.strip() if account.PINCODE else None
-					pincode = str(pincode).replace("-", "").replace(" ", "")
+					pincode = account.PINCODE.string.strip() if account.PINCODE else ""
 					city, pincode_state = "", ""
 					if pincode:
+						pincode = str(pincode).replace("-", "").replace(" ", "")
 						city, pincode_state = get_city_state_from_pincode(cint(pincode))
+
 					addresses.append({
 						"doctype": "Address",
 						"address_line1": address[:140].strip(),
@@ -358,7 +366,6 @@ class TallyMigration(Document):
 			items, uoms = get_stock_items_uoms(collection)
 			item_groups = get_item_group_list(collection)
 			data = [uoms, item_groups, items, customers, suppliers, addresses]
-			# chart_of_accounts
 
 			self.publish("Process Master Data", _("Done"), 5, 5)
 			self.dump_processed_data(data)

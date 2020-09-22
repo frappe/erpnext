@@ -18,15 +18,8 @@
   "default_uom",
   "column_break_8",
   "processed_files_section",
-  "chart_of_accounts",
-  "customer",
-  "supplier",
-  "address",
-  "column_break_17",
-  "uom",
-  "item_group",
-  "item",
-  "vouchers",
+  "processed_files",
+  "processed_files_html",
   "accounts_section",
   "default_warehouse",
   "default_round_off_account",
@@ -89,24 +82,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "processed_files",
    "fieldname": "processed_files_section",
    "fieldtype": "Section Break",
-   "hidden": 1,
    "label": "Processed Files"
-  },
-  {
-   "fieldname": "chart_of_accounts",
-   "fieldtype": "Attach",
-   "label": "Chart of Accounts"
-  },
-  {
-   "fieldname": "column_break_17",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "vouchers",
-   "fieldtype": "Attach",
-   "label": "Vouchers"
   },
   {
    "depends_on": "is_master_data_imported",
@@ -229,39 +208,21 @@
    "reqd": 1
   },
   {
-   "fieldname": "customer",
-   "fieldtype": "Attach",
-   "label": "Customers"
+   "fieldname": "processed_files",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Processed Files",
+   "options": "Tally Migration Processed File"
   },
   {
-   "fieldname": "supplier",
-   "fieldtype": "Attach",
-   "label": "Suppliers"
-  },
-  {
-   "fieldname": "address",
-   "fieldtype": "Attach",
-   "label": "Addresses"
-  },
-  {
-   "fieldname": "uom",
-   "fieldtype": "Attach",
-   "label": "UOMs"
-  },
-  {
-   "fieldname": "item_group",
-   "fieldtype": "Attach",
-   "label": "Item Groups"
-  },
-  {
-   "fieldname": "item",
-   "fieldtype": "Attach",
-   "label": "Items"
+   "fieldname": "processed_files_html",
+   "fieldtype": "HTML"
   }
  ],
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-09-14 17:28:22.526149",
+ "modified": "2020-09-21 23:04:26.645231",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Tally Migration",

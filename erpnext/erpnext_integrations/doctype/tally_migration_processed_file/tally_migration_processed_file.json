@@ -1,0 +1,67 @@
+{
+ "actions": [],
+ "autoname": "field:data_import",
+ "creation": "2020-09-20 18:37:16.921500",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "doctype_name",
+  "processed_file_url",
+  "is_imported",
+  "no_of_documents",
+  "status",
+  "data_import"
+ ],
+ "fields": [
+  {
+   "fieldname": "doctype_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Doctype Name"
+  },
+  {
+   "fieldname": "processed_file_url",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Processed File URL"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_imported",
+   "fieldtype": "Check",
+   "label": "Is Imported"
+  },
+  {
+   "fetch_from": "data_import.status",
+   "fieldname": "status",
+   "fieldtype": "Data",
+   "label": "Status"
+  },
+  {
+   "fieldname": "data_import",
+   "fieldtype": "Link",
+   "label": "Data Import",
+   "options": "Data Import",
+   "unique": 1
+  },
+  {
+   "fieldname": "no_of_documents",
+   "fieldtype": "Int",
+   "label": "No. of Documents"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2020-09-21 20:47:27.839924",
+ "modified_by": "Administrator",
+ "module": "ERPNext Integrations",
+ "name": "Tally Migration Processed File",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

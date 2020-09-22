@@ -4,10 +4,47 @@
 frappe.provide("erpnext.tally_migration");
 
 frappe.ui.form.on("Tally Migration", {
+	setup(frm) {
+		frappe.realtime.on('data_import_refresh', ({ data_import }) => {
+			frm.import_in_progress = false;
+			frappe.db.get_doc('Data Import', data_import).then(doc => {
+				const { no_of_documents } = frm.doc.processed_files.find(f => f.data_import === data_import);
+				const { status } = doc;
+				const indicator = status === 'Success' ? 'green' : status === 'Error' ? 'red' : 'orange';
+				const message =  status === 'Success' ? `${no_of_documents} records imported sucessfully` : ``;
+
+				frm.events.update_data_import_status(frm, data_import, status, indicator, message);
+				frappe.model.set_value("Tally Migration Processed File", data_import, "status", status);
+				frappe.model.set_value("Tally Migration Processed File", data_import, "is_imported", status !== "Pending");
+				frm.save();
+			});
+		});
+		frappe.realtime.on('data_import_progress', data => {
+			frm.import_in_progress = true;
+
+			const { current, data_import, total } = data;
+			const status = "In Progress";
+			const indicator = "green";
+			const message = `Importing ${current} out of ${total} records.`;
+
+			frm.events.update_data_import_status(frm, data_import, status, indicator, message);
+		});
+	},
+
+	update_data_import_status(frm, data_import, status, indicator, message) {
+		const $wrapper = frm.get_field("processed_files_html").$wrapper;
+		const $status_col = $wrapper.find(`.data-import-status[data-import="${escape(data_import)}"]`);
+		$status_col.html(`
+			<span class="indicator ${indicator}"/> ${status}
+			<span class="text-muted small"> - ${message}</span>
+		`);
+	},
+
 	onload: function (frm) {
 		if (!frm.doc.erpnext_company && frappe.defaults.get_user_default("Company")) {
 			frm.set_value("erpnext_company", frappe.defaults.get_user_default("Company"));
 		}
+
 		let reload_status = true;
 		frappe.realtime.on("tally_migration_progress_update", function (data) {
 			if (reload_status) {
@@ -42,7 +79,9 @@ frappe.ui.form.on("Tally Migration", {
 	},
 
 	refresh: function (frm) {
-		frm.trigger("show_logs_preview");
+		frm.page.hide_icon_group();
+		frm.page.show_menu();
+		frm.trigger("show_processed_files");
 		erpnext.tally_migration.failed_import_log = JSON.parse(frm.doc.failed_import_log);
 		erpnext.tally_migration.fixed_errors_log = JSON.parse(frm.doc.fixed_errors_log);
 
@@ -76,16 +115,6 @@ frappe.ui.form.on("Tally Migration", {
 		}
 	},
 
-	erpnext_company: function (frm) {
-		// frappe.db.exists("Company", frm.doc.erpnext_company).then(exists => {
-		// 	if (exists) {
-		// 		frappe.msgprint(
-		// 			__("Company {0} already exists. Continuing will overwrite the Company and Chart of Accounts", [frm.doc.erpnext_company]),
-		// 		);
-		// 	}
-		// });
-	},
-
 	add_button: function (frm, label, method) {
 		frm.add_custom_button(
 			label,
@@ -100,253 +129,99 @@ frappe.ui.form.on("Tally Migration", {
 		);
 	},
 
-	render_html_table(frm, shown_logs, hidden_logs, field) {
-		if (shown_logs && shown_logs.length > 0) {
-			frm.toggle_display(field, true);
-		} else {
-			frm.toggle_display(field, false);
-			return
+	show_processed_files(frm) {
+		if (!frm.doc.processed_files?.length) return frm.get_field("processed_files_html").$wrapper.html('');
+		const data_import_names = frm.doc.processed_files.map(f => f.name);
+		
+		frappe.db.get_list("Data Import", {
+			filters: { name: ['in', data_import_names ]},
+			fields: ['status', 'reference_doctype as doctype_name', 'name as data_import', 'import_log', 'template_warnings'],
+			order_by: "creation"
+
+		}).then(res => {
+			const data = res.map((d, idx) => {
+				const warnings = JSON.parse(d.template_warnings || '[]').length;
+				const errors = JSON.parse(d.import_log || '[]').filter(d => !d.success).length;
+				const success = JSON.parse(d.import_log || '[]').filter(d => d.success).length;
+				const { status, data_import, doctype_name } = d;
+				return { idx, warnings, doctype_name, errors, success, status, data_import };
+			})
+			frm.events.render_processed_files_html(frm, data);
+		})
+	},
+
+	render_processed_files_html(frm, data=[]) {
+		const $wrapper = frm.get_field("processed_files_html").$wrapper;
+
+		if (!data.length) return $wrapper.html(``);
+
+		function get_import_row(data) {
+			const { idx, doctype_name, status, warnings, errors, success, data_import } = data;
+			const { no_of_documents: total } = frm.doc.processed_files.find(f => f.name === data_import);
+			const indicator = status === 'Success' ? 'green' : status === 'Error' ? 'red' : 'orange';
+
+			let message = __(`${total} record{0} will be imported`, [total > 1 ? 's' : '']);
+			if (status === 'Success') message = __(`${success} record{0} imported sucessfully`, [success > 1 ? 's' : '']);
+			if (warnings) message = __(`${warnings} warning{0} need to be reviewed.`, [warnings > 1 ? 's' : '']);
+			if (errors) message = __(`${errors} error{0} need to be fixed.`, [errors > 1 ? 's' : '']);
+			
+			const import_btn_label = status === 'Pending' && !warnings && !errors ? __("Start Import") : __("Retry");
+			const import_btn = `<button 
+				class='btn btn-default btn-xs' type='button' 
+				onclick='erpnext.tally_migration.import("${data_import}")'>
+				${import_btn_label}
+			</button>`;
+			const open_data_import_btn = `<a 
+				class='btn btn-default btn-xs' type='button' 
+				href="#Form/Data Import/${data_import}" target="_blank">
+				Open Data Import
+			</a>`;
+			const actions = status === 'Pending' && !warnings && !errors ? 
+				import_btn : status === 'Success' ? 
+				open_data_import_btn : 
+				import_btn + '<span class="margin-left"/>' + open_data_import_btn;
+
+			return (
+			`<tr>
+				<td>${idx + 1}</td>
+				<td><div>${doctype_name}</div></td>
+				<td>
+					<div class="data-import-status" data-import="${escape(data_import)}">
+						<span class="indicator ${indicator}" /> ${status}
+						<span class="text-muted small"> - ${message}</span>
+					</div>
+				</td>
+				<td><div>${actions}</div></td>
+			</tr>`);
 		}
-		let rows = erpnext.tally_migration.get_html_rows(shown_logs, field);
-		let rows_head, table_caption;
-
-		let table_footer = (hidden_logs && (hidden_logs.length > 0)) ? `<tr class="text-muted">
-				<td colspan="4">And ${hidden_logs.length} more others</td>
-			</tr>`: "";
-
-		if (field === "fixed_error_log_preview") {
-			rows_head = `<th width="75%">${__("Meta Data")}</th>
-			<th width="10%">${__("Unresolve")}</th>`
-			table_caption = "Resolved Issues"
-		} else {
-			rows_head = `<th width="75%">${__("Error Message")}</th>
-			<th width="10%">${__("Create")}</th>`
-			table_caption = "Error Log"
-		}
-
-		frm.get_field(field).$wrapper.html(`
+		
+		const table_caption = "Start importing your data";
+		const rows = data.map(d => get_import_row(d)).join("");
+		$wrapper.html(`
 			<table class="table table-bordered">
 				<caption>${table_caption}</caption>
 				<tr class="text-muted">
-					<th width="5%">${__("#")}</th>
-					<th width="10%">${__("DocType")}</th>
-					${rows_head}
+					<th width="7%">${__("Sr. No")}</th>
+					<th width="20%">${__("Document Type")}</th>
+					<th>${__("Status")}</th>
+					<th width="20%">${__("Actions")}</th>
 				</tr>
 				${rows}
-				${table_footer}
 			</table>
 		`);
-	},
-
-	show_error_summary(frm) {
-		let summary = erpnext.tally_migration.failed_import_log.reduce((summary, row) => {
-			if (row.doc) {
-				if (summary[row.doc.doctype]) {
-					summary[row.doc.doctype] += 1;
-				} else {
-					summary[row.doc.doctype] = 1;
-				}
-			}
-			return summary
-		}, {});
-		console.table(summary);
-	},
-
-	show_logs_preview(frm) {
-		let empty = "[]";
-		let import_log = frm.doc.failed_import_log || empty;
-		let completed_log = frm.doc.fixed_errors_log || empty;
-		let render_section = !(import_log === completed_log && import_log === empty);
-
-		frm.toggle_display("import_log_section", render_section);
-		if (render_section) {
-			frm.trigger("show_error_summary");
-			frm.trigger("show_errored_import_log");
-			frm.trigger("show_fixed_errors_log");
-		}
-	},
-
-	show_errored_import_log(frm) {
-		let import_log = erpnext.tally_migration.failed_import_log;
-		let logs = import_log.slice(0, 20);
-		let hidden_logs = import_log.slice(20);
-
-		frm.events.render_html_table(frm, logs, hidden_logs, "failed_import_preview");
-	},
-
-	show_fixed_errors_log(frm) {
-		let completed_log = erpnext.tally_migration.fixed_errors_log;
-		let logs = completed_log.slice(0, 20);
-		let hidden_logs = completed_log.slice(20);
-
-		frm.events.render_html_table(frm, logs, hidden_logs, "fixed_error_log_preview");
 	}
 });
 
-erpnext.tally_migration.getError = (traceback) => {
-	/* Extracts the Error Message from the Python Traceback or Solved error */
-	let is_multiline = traceback.trim().indexOf("\n") != -1;
-	let message;
+erpnext.tally_migration.import = (data_import) => {
+	if (cur_frm.import_in_progress) return;
 
-	if (is_multiline) {
-		let exc_error_idx = traceback.trim().lastIndexOf("\n") + 1
-		let error_line = traceback.substr(exc_error_idx)
-		let split_str_idx = (error_line.indexOf(':') > 0) ? error_line.indexOf(':') + 1 : 0;
-		message = error_line.slice(split_str_idx).trim();
-	} else {
-		message = traceback;
-	}
-
-	return message
-}
-
-erpnext.tally_migration.cleanDoc = (obj) => {
-	/* Strips all null and empty values of your JSON object */
-	let temp = obj;
-	$.each(temp, function(key, value){
-		if (value === "" || value === null){
-			delete obj[key];
-		} else if (Object.prototype.toString.call(value) === '[object Object]') {
-			erpnext.tally_migration.cleanDoc(value);
-		} else if ($.isArray(value)) {
-			$.each(value, function (k,v) { erpnext.tally_migration.cleanDoc(v); });
-		}
-	});
-	return temp;
-}
-
-erpnext.tally_migration.unresolve = (document) => {
-	/* Mark document migration as unresolved ie. move to failed error log */
-	let frm = cur_frm;
-	let failed_log = erpnext.tally_migration.failed_import_log;
-	let fixed_log = erpnext.tally_migration.fixed_errors_log;
-
-	let modified_fixed_log = fixed_log.filter(row => {
-		if (!frappe.utils.deep_equal(erpnext.tally_migration.cleanDoc(row.doc), document)) {
-			return row
-		}
-	});
-
-	failed_log.push({ doc: document, exc: `Marked unresolved on ${Date()}` });
-
-	frm.doc.failed_import_log = JSON.stringify(failed_log);
-	frm.doc.fixed_errors_log = JSON.stringify(modified_fixed_log);
-
-	frm.dirty();
-	frm.save();
-}
-
-erpnext.tally_migration.resolve = (document) => {
-	/* Mark document migration as resolved ie. move to fixed error log */
-	let frm = cur_frm;
-	let failed_log = erpnext.tally_migration.failed_import_log;
-	let fixed_log = erpnext.tally_migration.fixed_errors_log;
-
-	let modified_failed_log = failed_log.filter(row => {
-		if (!frappe.utils.deep_equal(erpnext.tally_migration.cleanDoc(row.doc), document)) {
-			return row
-		}
-	});
-	fixed_log.push({ doc: document, exc: `Solved on ${Date()}` });
-
-	frm.doc.failed_import_log = JSON.stringify(modified_failed_log);
-	frm.doc.fixed_errors_log = JSON.stringify(fixed_log);
-
-	frm.dirty();
-	frm.save();
-}
-
-erpnext.tally_migration.create_new_doc = (document) => {
-	/* Mark as resolved and create new document */
-	erpnext.tally_migration.resolve(document);
-	return frappe.call({
-		type: "POST",
-		method: 'erpnext.erpnext_integrations.doctype.tally_migration.tally_migration.new_doc',
-		args: {
-			document
-		},
-		freeze: true,
-		callback: function(r) {
-			if(!r.exc) {
-				frappe.model.sync(r.message);
-				frappe.get_doc(r.message.doctype, r.message.name).__run_link_triggers = true;
-				frappe.set_route("Form", r.message.doctype, r.message.name);
-			}
-		}
+	frappe.call({
+		method: 'frappe.core.doctype.data_import.data_import.form_start_import',
+		args: { data_import },
+		freeze: true
 	});
 }
 
-erpnext.tally_migration.get_html_rows = (logs, field) => {
-	let index = 0;
-	let rows = logs
-		.map(({ doc, exc }) => {
-			let id = frappe.dom.get_unique_id();
-			let traceback = exc;
-
-			let error_message = erpnext.tally_migration.getError(traceback);
-			index++;
-
-			let show_traceback = `
-				<button class="btn btn-default btn-xs m-3" type="button" data-toggle="collapse" data-target="#${id}-traceback" aria-expanded="false" aria-controls="${id}-traceback">
-					${__("Show Traceback")}
-				</button>
-				<div class="collapse margin-top" id="${id}-traceback">
-					<div class="well">
-						<pre style="font-size: smaller;">${traceback}</pre>
-					</div>
-				</div>`;
-
-			let show_doc = `
-				<button class='btn btn-default btn-xs m-3' type='button' data-toggle='collapse' data-target='#${id}-doc' aria-expanded='false' aria-controls='${id}-doc'>
-					${__("Show Document")}
-				</button>
-				<div class="collapse margin-top" id="${id}-doc">
-					<div class="well">
-						<pre style="font-size: smaller;">${JSON.stringify(erpnext.tally_migration.cleanDoc(doc), null, 1)}</pre>
-					</div>
-				</div>`;
-
-			let create_button = `
-				<button class='btn btn-default btn-xs m-3' type='button' onclick='erpnext.tally_migration.create_new_doc(${JSON.stringify(doc)})'>
-					${__("Create Document")}
-				</button>`
-
-			let mark_as_unresolved = `
-				<button class='btn btn-default btn-xs m-3' type='button' onclick='erpnext.tally_migration.unresolve(${JSON.stringify(doc)})'>
-					${__("Mark as unresolved")}
-				</button>`
-
-			if (field === "fixed_error_log_preview") {
-				return `<tr>
-							<td>${index}</td>
-							<td>
-								<div>${doc.doctype}</div>
-							</td>
-							<td>
-								<div>${error_message}</div>
-								<div>${show_doc}</div>
-							</td>
-							<td>
-								<div>${mark_as_unresolved}</div>
-							</td>
-						</tr>`;
-			} else {
-				return `<tr>
-							<td>${index}</td>
-							<td>
-								<div>${doc.doctype}</div>
-							</td>
-							<td>
-								<div>${error_message}</div>
-								<div>${show_traceback}</div>
-								<div>${show_doc}</div>
-							</td>
-							<td>
-								<div>${create_button}</div>
-							</td>
-						</tr>`;
-			}
-		}).join("");
-
-	return rows
+erpnext.tally_migration.open_data_import = (data_import) => {
+	frappe.set_route("Form", "Data Import", data_import);
 }
