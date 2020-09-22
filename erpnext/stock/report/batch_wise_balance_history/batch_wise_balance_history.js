@@ -9,13 +9,15 @@ frappe.query_reports["Batch-Wise Balance History"] = {
 			"fieldtype": "Date",
 			"width": "80",
 			"default": frappe.sys_defaults.year_start_date,
+			"reqd": 1
 		},
 		{
 			"fieldname":"to_date",
 			"label": __("To Date"),
 			"fieldtype": "Date",
 			"width": "80",
-			"default": frappe.datetime.get_today()
+			"default": frappe.datetime.get_today(),
+			"reqd": 1
 		}
 	]
 }

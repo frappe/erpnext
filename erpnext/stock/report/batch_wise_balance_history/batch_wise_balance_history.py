@@ -9,6 +9,9 @@ from frappe.utils import flt, cint, getdate
 def execute(filters=None):
 	if not filters: filters = {}
 
+	if filters.from_date > filters.to_date:
+		frappe.throw(_("From Date must be before To Date"))
+
 	float_precision = cint(frappe.db.get_default("float_precision")) or 3
 
 	columns = get_columns(filters)
