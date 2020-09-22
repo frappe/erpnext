@@ -83,8 +83,17 @@ class PaymentRequest(Document):
 
 		elif self.payment_channel == "Phone":
 			controller = get_payment_gateway_controller(self.payment_gateway)
-			print(vars(self))
-			controller.request_for_payment(**vars(self))
+			payment_record = dict(
+				reference_doctype=self.reference_doctype,
+				reference_docname=self.reference_name,
+				grand_total=self.grand_total,
+				sender=self.email_to,
+				payment_request_name=self.name,
+				currency=self.currency,
+				payment_gateway=self.payment_gateway
+			)
+			controller.validate_transaction_currency(self.currency)
+			controller.request_for_payment(**payment_record)
 
 	def on_cancel(self):
 		self.check_if_payment_entry_exists()
@@ -354,7 +363,6 @@ def make_payment_request(**args):
 def get_amount(ref_doc, payment_account=None):
 	"""get amount based on doctype"""
 	dt = ref_doc.doctype
-	print(dt)
 	if dt in ["Sales Order", "Purchase Order"]:
 		grand_total = flt(ref_doc.grand_total) - flt(ref_doc.advance_paid)
 
