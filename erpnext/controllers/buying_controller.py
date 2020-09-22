@@ -298,7 +298,7 @@ class BuyingController(StockController):
 					title=_("Limit Crossed"))
 
 			transferred_batch_qty_map = get_transferred_batch_qty_map(item.purchase_order, item.item_code)
-			backflushed_batch_qty_map = get_backflushed_batch_qty_map(item.purchase_order, item.item_code)
+			# backflushed_batch_qty_map = get_backflushed_batch_qty_map(item.purchase_order, item.item_code)
 
 			for raw_material in transferred_raw_materials + non_stock_items:
 				rm_item_key = (raw_material.rm_item_code, item.purchase_order)
@@ -330,6 +330,8 @@ class BuyingController(StockController):
 					set_serial_nos(raw_material, consumed_serial_nos, qty)
 
 				if raw_material.batch_nos:
+					backflushed_batch_qty_map = raw_material_data.get('consumed_batch', {})
+
 					batches_qty = get_batches_with_qty(raw_material.rm_item_code, raw_material.main_item_code,
 						qty, transferred_batch_qty_map, backflushed_batch_qty_map, item.purchase_order)
 					for batch_data in batches_qty:
@@ -913,7 +915,8 @@ def get_backflushed_subcontracted_raw_materials(purchase_orders):
 				backflushed_raw_materials_map.setdefault(pr_key, frappe._dict({
 					"qty": 0.0,
 					"serial_no": [],
-					"batch_no": []
+					"batch_no": [],
+					"consumed_batch": {}
 				}))
 
 			row = backflushed_raw_materials_map.get(pr_key)
@@ -922,6 +925,12 @@ def get_backflushed_subcontracted_raw_materials(purchase_orders):
 			for field in ["serial_no", "batch_no"]:
 				if data.get(field):
 					row[field].append(data.get(field))
+
+			if data.get("batch_no"):
+				if data.get("batch_no") in row.consumed_batch:
+					row.consumed_batch[data.get("batch_no")] += data.consumed_qty
+				else:
+					row.consumed_batch[data.get("batch_no")] = data.consumed_qty
 
 	return backflushed_raw_materials_map
 
@@ -1067,13 +1076,11 @@ def get_backflushed_batch_qty_map(purchase_order, fg_item):
 
 	return backflushed_batch_qty_map
 
-def get_batches_with_qty(item_code, fg_item, required_qty, transferred_batch_qty_map, backflushed_batch_qty_map, po):
+def get_batches_with_qty(item_code, fg_item, required_qty, transferred_batch_qty_map, backflushed_batches, po):
 	# Returns available batches to be backflushed based on requirements
 	transferred_batches = transferred_batch_qty_map.get((item_code, fg_item), {})
 	if not transferred_batches:
 		transferred_batches = transferred_batch_qty_map.get((item_code, po), {})
-
-	backflushed_batches = backflushed_batch_qty_map.get((item_code, fg_item), {})
 
 	available_batches = []
 
