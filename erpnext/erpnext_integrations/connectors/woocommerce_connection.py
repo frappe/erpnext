@@ -398,6 +398,8 @@ def create_patient_invoice(edited_line_items, patient_invoice_doc):
 					"item_code": test_kit,
 					"qty": 1,
 				})
+			else:
+				frappe.throw("Cannot find testkit for {}".format(item['item_code']))
 
 
 def backorder_validation(line_items, customer_code, woocommerce_settings, discount=None):
