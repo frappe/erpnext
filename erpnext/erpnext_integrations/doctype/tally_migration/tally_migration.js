@@ -131,6 +131,7 @@ frappe.ui.form.on("Tally Migration", {
 
 	hide_successful_imports(frm) {
 		frm.trigger("show_processed_files");
+		frm.save();
 	},
 
 	show_processed_files(frm) {

@@ -298,8 +298,8 @@ class TallyMigration(Document):
 			root_group = "All Item Groups"
 
 			for item_group in collection.find_all("STOCKGROUP"):
-				item_group_name = item_group.NAME.string.strip()
-				parent_group_name = item_group.PARENT.string.strip() if item_group.PARENT else root_group
+				item_group_name = item_group.NAME.string.strip().title()
+				parent_group_name = item_group.PARENT.string.strip().title() if item_group.PARENT else root_group
 				parent_child_map.setdefault(parent_group_name, []).append(item_group_name)
 
 			def get_doc(name, parent):
@@ -336,17 +336,17 @@ class TallyMigration(Document):
 		def get_stock_items_uoms(collection):
 			uoms = []
 			for uom in collection.find_all("UNIT"):
-				uoms.append({"doctype": "UOM", "uom_name": uom.NAME.string.strip()})
+				uoms.append({"doctype": "UOM", "uom_name": uom.NAME.string.strip().title()})
 
 			items = []
 			for item in collection.find_all("STOCKITEM"):
-				stock_uom = item.BASEUNITS.string.strip() if item.BASEUNITS else self.default_uom
+				stock_uom = item.BASEUNITS.string.strip().title() if item.BASEUNITS else self.default_uom
 				items.append({
 					"doctype": "Item",
 					"item_code" : item.NAME.string.strip(),
 					"stock_uom": stock_uom.strip(),
 					"is_stock_item": 1,
-					"item_group": item.PARENT.string.strip() if item.PARENT else "All Item Groups",
+					"item_group": item.PARENT.string.strip().title() if item.PARENT else "All Item Groups",
 					"item_defaults": [{"company": self.erpnext_company}]
 				})
 
