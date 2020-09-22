@@ -34,7 +34,7 @@ class TestPatientMedicalRecord(unittest.TestCase):
 		self.assertTrue(medical_rec)
 
 		template = create_lab_test_template(medical_department)
-		lab_test = create_lab_test(template, patient)
+		lab_test = create_lab_test(template.name, patient)
 		# check for lab test
 		medical_rec = frappe.db.exists('Patient Medical Record', {'status': 'Open', 'reference_name': lab_test.name})
 		self.assertTrue(medical_rec)
@@ -66,7 +66,7 @@ def create_vital_signs(appointment):
 
 def create_lab_test_template(medical_department):
 	if frappe.db.exists('Lab Test Template', 'Blood Test'):
-		return 'Blood Test'
+		return frappe.get_doc('Lab Test Template', 'Blood Test')
 
 	template = frappe.new_doc('Lab Test Template')
 	template.lab_test_name = 'Blood Test'
@@ -76,7 +76,7 @@ def create_lab_test_template(medical_department):
 	template.is_billable = 1
 	template.lab_test_rate = 2000
 	template.save()
-	return template.name
+	return template
 
 def create_lab_test(template, patient):
 	lab_test = frappe.new_doc('Lab Test')

@@ -28,7 +28,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 		// Trigger supplier event on load if supplier is available
 		// The reason for this is PI can be created from PR or PO and supplier is pre populated
-		if (this.frm.doc.supplier) {
+		if (this.frm.doc.supplier && this.frm.doc.__islocal) {
 			this.frm.trigger('supplier');
 		}
 	},
