@@ -19,6 +19,7 @@
   "column_break_8",
   "processed_files_section",
   "processed_files",
+  "hide_successful_imports",
   "processed_files_html",
   "accounts_section",
   "default_warehouse",
@@ -217,12 +218,18 @@
   {
    "fieldname": "processed_files_html",
    "fieldtype": "HTML"
+  },
+  {
+   "default": "0",
+   "fieldname": "hide_successful_imports",
+   "fieldtype": "Check",
+   "label": "Hide Successful Imports"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-09-21 23:04:26.645231",
+ "modified": "2020-09-22 18:14:15.047587",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Tally Migration",

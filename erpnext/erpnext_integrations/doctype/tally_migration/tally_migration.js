@@ -129,12 +129,17 @@ frappe.ui.form.on("Tally Migration", {
 		);
 	},
 
+	hide_successful_imports(frm) {
+		frm.trigger("show_processed_files");
+	},
+
 	show_processed_files(frm) {
 		if (!frm.doc.processed_files?.length) return frm.get_field("processed_files_html").$wrapper.html('');
 		const data_import_names = frm.doc.processed_files.map(f => f.name);
-		
+
+		const status_filter = frm.doc.hide_successful_imports ? ['not in', ['Success']] : ['not in', ['']];
 		frappe.db.get_list("Data Import", {
-			filters: { name: ['in', data_import_names ]},
+			filters: { name: ['in', data_import_names], status: status_filter },
 			fields: ['status', 'reference_doctype as doctype_name', 'name as data_import', 'import_log', 'template_warnings'],
 			order_by: "creation"
 
