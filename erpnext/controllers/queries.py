@@ -359,9 +359,21 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("is_return"):
 		having_clause = ""
 
+	meta = frappe.get_meta("Batch", cached=True)
+	searchfields = meta.get_search_fields()
+
+	search_columns = ''
+	if searchfields:
+		search_columns = ", " + ", ".join(searchfields)
+
 	if args.get('warehouse'):
+		searchfields = ['batch.' + field for field in searchfields]
+		if searchfields:
+			search_columns = ", " + ", ".join(searchfields)
+
 		batch_nos = frappe.db.sql("""select sle.batch_no, round(sum(sle.actual_qty),2), sle.stock_uom,
 				concat('MFG-',batch.manufacturing_date), concat('EXP-',batch.expiry_date)
+				{search_columns}
 			from `tabStock Ledger Entry` sle
 				INNER JOIN `tabBatch` batch on sle.batch_no = batch.name
 			where
@@ -377,6 +389,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 			group by batch_no {having_clause}
 			order by batch.expiry_date, sle.batch_no desc
 			limit %(start)s, %(page_len)s""".format(
+				search_columns = search_columns,
 				cond=cond,
 				match_conditions=get_match_cond(doctype),
 				having_clause = having_clause
@@ -384,7 +397,9 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 
 		return batch_nos
 	else:
-		return frappe.db.sql("""select name, concat('MFG-', manufacturing_date), concat('EXP-',expiry_date) from `tabBatch` batch
+		return frappe.db.sql("""select name, concat('MFG-', manufacturing_date), concat('EXP-',expiry_date)
+			{search_columns}
+			from `tabBatch` batch
 			where batch.disabled = 0
 			and item = %(item_code)s
 			and (name like %(txt)s
@@ -394,7 +409,7 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 			{0}
 			{match_conditions}
 			order by expiry_date, name desc
-			limit %(start)s, %(page_len)s""".format(cond, match_conditions=get_match_cond(doctype)), args)
+			limit %(start)s, %(page_len)s""".format(cond, search_columns = search_columns, match_conditions=get_match_cond(doctype)), args)
 
 
 @frappe.whitelist()
