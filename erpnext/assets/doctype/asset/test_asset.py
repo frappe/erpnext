@@ -374,19 +374,18 @@ class TestAsset(unittest.TestCase):
 		asset_name = frappe.db.get_value("Asset", {"purchase_receipt": pr.name}, 'name')
 		asset = frappe.get_doc('Asset', asset_name)
 		asset.calculate_depreciation = 1
-		asset.available_for_use_date = nowdate()
-		asset.purchase_date = nowdate()
+		asset.available_for_use_date = '2020-01-01'
+		asset.purchase_date = '2020-01-01'
 		asset.append("finance_books", {
 			"expected_value_after_useful_life": 10000,
 			"depreciation_method": "Straight Line",
-			"total_number_of_depreciations": 3,
-			"frequency_of_depreciation": 10,
-			"depreciation_start_date": nowdate()
+			"total_number_of_depreciations": 10,
+			"frequency_of_depreciation": 1
 		})
 		asset.insert()
 		asset.submit()
 
-		post_depreciation_entries(date=add_months(nowdate(), 10))
+		post_depreciation_entries(date=add_months('2020-01-01', 4))
 
 		scrap_asset(asset.name)
 
@@ -395,9 +394,9 @@ class TestAsset(unittest.TestCase):
 		self.assertTrue(asset.journal_entry_for_scrap)
 
 		expected_gle = (
-			("_Test Accumulated Depreciations - _TC", 30000.0, 0.0),
+			("_Test Accumulated Depreciations - _TC", 36000.0, 0.0),
 			("_Test Fixed Asset - _TC", 0.0, 100000.0),
-			("_Test Gain/Loss on Asset Disposal - _TC", 70000.0, 0.0)
+			("_Test Gain/Loss on Asset Disposal - _TC", 64000.0, 0.0)
 		)
 
 		gle = frappe.db.sql("""select account, debit, credit from `tabGL Entry`
@@ -469,8 +468,7 @@ class TestAsset(unittest.TestCase):
 			"expected_value_after_useful_life": 10000,
 			"depreciation_method": "Straight Line",
 			"total_number_of_depreciations": 3,
-			"frequency_of_depreciation": 10,
-			"depreciation_start_date": "2020-06-06"
+			"frequency_of_depreciation": 10
 		})
 		asset.insert()
 		accumulated_depreciation_after_full_schedule = \
