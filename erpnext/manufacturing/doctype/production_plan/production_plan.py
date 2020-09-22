@@ -422,14 +422,13 @@ class ProductionPlan(Document):
 			msgprint(_("No material request created"))
 
 @frappe.whitelist()
-def download_raw_materials(production_plan):
-	doc = frappe.get_doc('Production Plan', production_plan)
-	doc.check_permission()
-
+def download_raw_materials(doc):
 	item_list = [['Item Code', 'Description', 'Stock UOM', 'Required Qty', 'Warehouse',
 		'projected Qty', 'Actual Qty']]
 
-	doc = doc.as_dict()
+	if isinstance(doc, string_types):
+		doc = frappe._dict(json.loads(doc))
+
 	for d in get_items_for_material_requests(doc, ignore_existing_ordered_qty=True):
 		item_list.append([d.get('item_code'), d.get('description'), d.get('stock_uom'), d.get('quantity'),
 			d.get('warehouse'), d.get('projected_qty'), d.get('actual_qty')])
