@@ -1231,7 +1231,10 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 				transitions.append(transition.as_dict())
 
 		if not transitions:
-			frappe.throw(_("You do not have workflow access to update this document."), title=_("Insufficient Workflow Permissions"))
+			frappe.throw(
+				_("You are not allowed to update as per the conditions set in {} Workflow.").format(get_link_to_form("Workflow", workflow)),
+				title=_("Insufficient Permissions")
+			)
 
 	def get_new_child_item(item_row):
 		new_child_function = set_sales_order_defaults if parent_doctype == "Sales Order" else set_purchase_order_defaults
