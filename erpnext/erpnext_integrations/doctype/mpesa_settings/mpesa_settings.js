@@ -3,6 +3,5 @@
 
 frappe.ui.form.on('Mpesa Settings', {
 	// refresh: function(frm) {
-
 	// }
 });
