@@ -142,6 +142,23 @@ erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend(
 			frm: cur_frm
 		})
 	},
+
+	request_for_payment: function (frm) {
+		frm.save().then(() => {
+			frappe.dom.freeze();
+			frappe.call({
+				method: 'create_payment_request',
+				doc: frm.doc,
+			})
+				.fail(() => {
+					frappe.dom.unfreeze();
+					frappe.msgprint('Payment request failed');
+				})
+				.then(() => {
+					frappe.msgprint('Payment request sent successfully');
+				});
+		});
+	}
 })
 
 $.extend(cur_frm.cscript, new erpnext.selling.POSInvoiceController({ frm: cur_frm }))
