@@ -16,7 +16,7 @@
 ERPNext as a monolith includes the following areas for managing businesses:
 
 1. [Accounting](https://erpnext.com/open-source-accounting)
-1. [Inventory](https://erpnext.com/distribution/inventory-management-system)
+1. [Warehouse Management](https://erpnext.com/distribution/warehouse-management-system)
 1. [CRM](https://erpnext.com/open-source-crm)
 1. [Sales](https://erpnext.com/open-source-sales-purchase)
 1. [Purchase](https://erpnext.com/open-source-sales-purchase)

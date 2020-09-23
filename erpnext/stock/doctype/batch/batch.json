@@ -166,11 +166,11 @@
  "idx": 1,
  "image_field": "image",
  "max_attachments": 5,
- "modified": "2019-10-03 22:38:45.104056",
+ "modified": "2020-09-18 17:26:09.703215",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",
- "owner": "harshada@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "create": 1,
