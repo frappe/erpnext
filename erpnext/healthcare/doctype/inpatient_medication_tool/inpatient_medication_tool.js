@@ -91,27 +91,32 @@ frappe.ui.form.on('Inpatient Medication Tool', {
 		if (frm.doc.show_submit) {
 			frm.page.set_primary_action(__("Submit"), function() {
 				const orders = frm.events.get_completed_orders(frm);
-				frappe.call({
-					doc: frm.doc,
-					method: 'process_medication_orders',
-					args: {
-						"orders": orders
-					},
-					freeze: true,
-					freeze_message: __('Processing Medication Orders'),
-					callback: function(r) {
-						if (!r.exc && r.message === 'success') {
-							frappe.msgprint({
-								title: __(`Success`),
-								message: __(`Medication Orders Processed successfully`),
-								indicator: 'green'
-							});
-							frm.pending_orders.orders_datatable.rowmanager.checkMap = [];
-							frm.pending_orders.orders_datatable.clearToastMessage();
-							frm.events.refresh_medication_orders(frm);
-						}
+				frappe.confirm(
+					__("Do you want to process {0} medication order(s)?",	[orders.length]),
+					function() {
+						frappe.call({
+							doc: frm.doc,
+							method: 'process_medication_orders',
+							args: {
+								"orders": orders
+							},
+							freeze: true,
+							freeze_message: __('Processing Medication Orders'),
+							callback: function(r) {
+								if (!r.exc && r.message === 'success') {
+									frappe.msgprint({
+										title: __(`Success`),
+										message: __(`Medication Orders Processed successfully`),
+										indicator: 'green'
+									});
+									frm.pending_orders.orders_datatable.rowmanager.checkMap = [];
+									frm.pending_orders.orders_datatable.clearToastMessage();
+									frm.events.refresh_medication_orders(frm);
+								}
+							}
+						});
 					}
-				});
+				);
 			});
 		} else {
 			frm.page.clear_primary_action();
