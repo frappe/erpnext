@@ -40,6 +40,7 @@
    "in_list_view": 1,
    "label": "Patient Encounter",
    "options": "Patient Encounter",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -73,18 +74,21 @@
    "in_list_view": 1,
    "label": "Inpatient Record",
    "options": "Inpatient Record",
+   "read_only": 1,
    "reqd": 1
   },
   {
    "fieldname": "start_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Start Date"
+   "label": "Start Date",
+   "read_only": 1
   },
   {
    "fieldname": "end_date",
    "fieldtype": "Date",
-   "label": "End Date"
+   "label": "End Date",
+   "read_only": 1
   },
   {
    "fieldname": "medication_orders_section",
@@ -104,9 +108,10 @@
    "options": "HLC-IMO-.YYYY.-"
   }
  ],
+ "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-09-15 11:53:09.072096",
+ "modified": "2020-09-23 12:14:29.663015",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Medication Order",

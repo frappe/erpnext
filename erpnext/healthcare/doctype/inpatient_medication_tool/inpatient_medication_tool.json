@@ -26,12 +26,14 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval: doc.date && doc.company && doc.warehouse;",
    "description": "Select all the medication orders you want to process.",
    "fieldname": "section_break_2",
    "fieldtype": "Section Break",
    "label": "Pending Medication Orders"
   },
   {
+   "depends_on": "eval: doc.date && doc.company && doc.warehouse;",
    "fieldname": "completed_medication_order_section",
    "fieldtype": "Section Break",
    "label": "Completed Medication Orders"
@@ -65,6 +67,7 @@
    "label": "Completed Orders"
   },
   {
+   "depends_on": "eval: doc.date && doc.company && doc.warehouse;",
    "fieldname": "medication_stock_summary_section",
    "fieldtype": "Section Break",
    "label": "Medication Stock Summary"
@@ -85,7 +88,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-09-20 12:26:26.526695",
+ "modified": "2020-09-20 23:10:24.269197",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Medication Tool",

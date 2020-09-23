@@ -38,6 +38,10 @@ class PatientEncounter(Document):
 	def on_cancel(self):
 		if self.appointment:
 			frappe.db.set_value('Patient Appointment', self.appointment, 'status', 'Open')
+
+		if self.inpatient_record and self.drug_prescription:
+			delete_ip_medication_order(self)
+
 		delete_medical_record(self)
 
 	def set_title(self):
@@ -67,6 +71,8 @@ def create_ip_medication_order(encounter):
 					order.dosage_form = entry.dosage_form
 					order.date = date
 					order.time = dose.strength_time
+			doc.end_date = dates[-1]
+
 	doc.save(ignore_permissions=True)
 
 def get_prescription_dates(period, start_date):
@@ -114,7 +120,14 @@ def update_encounter_medical_record(encounter):
 		insert_encounter_to_medical_record(encounter)
 
 def delete_medical_record(encounter):
-	frappe.delete_doc_if_exists('Patient Medical Record', 'reference_name', encounter.name)
+	record = frappe.db.exists('Patient Medical Record', {'reference_name', encounter.name})
+	if record:
+		frappe.delete_doc('Patient Medical Record', record, force=1)
+
+def delete_ip_medication_order(encounter):
+	record = frappe.db.exists('Inpatient Medication Order', {'patient_encounter': encounter.name})
+	if record:
+		frappe.delete_doc('Inpatient Medication Order', record, force=1)
 
 def set_subject_field(encounter):
 	subject = frappe.bold(_('Healthcare Practitioner: ')) + encounter.practitioner + '<br>'
