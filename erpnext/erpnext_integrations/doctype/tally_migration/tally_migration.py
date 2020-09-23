@@ -92,7 +92,6 @@ class TallyMigration(Document):
 					make_doctype_content_map(docs)
 				else:
 					doctype = docs[0].get("doctype")
-					filename = frappe.scrub(doctype) + ".csv"
 					content = make_csv_for_data_import(doctype, docs)
 					doctype_content_map.setdefault(doctype, []).append(content)
 
@@ -101,15 +100,13 @@ class TallyMigration(Document):
 		for doctype, contents in doctype_content_map.items():
 			for i, content in enumerate(contents):
 				filename = frappe.scrub(doctype) + "{}.csv".format(i+1 if len(contents) > 1 else "")
-				f = self.attach_file(filename, content)
-				data_import_doc = self.make_data_import_doc(doctype, f.file_url)
-				processed_doc = frappe.new_doc("Tally Migration Processed File", self, "processed_files")
-				processed_doc.doctype_name = doctype
-				processed_doc.processed_file_url = f.file_url
-				processed_doc.data_import = data_import_doc.name
-				processed_doc.no_of_documents = len(data_import_doc.get_importer().import_file.data)
-				processed_doc.db_insert()
-				self.append("processed_files", processed_doc.as_dict())
+				file = self.attach_file(filename, content)
+				data_import = self.make_data_import_doc(doctype, file.file_url)
+				args = dict(
+					doctype_name=doctype, import_type='Data Import', data_import=data_import.name,
+					total=len(data_import.get_importer().import_file.data)
+				)
+				self.append_processed_file(args)
 	
 	def attach_file(self, filename, content):
 		f = frappe.get_doc({
@@ -125,6 +122,13 @@ class TallyMigration(Document):
 		except frappe.DuplicateEntryError:
 			pass
 		return f
+	
+	def append_processed_file(self, args):
+		doc = frappe.new_doc("Tally Migration Processed File", self, "processed_files")
+		doc.update(args)
+		doc.db_insert()
+		self.append("processed_files", doc.as_dict())
+		return doc
 	
 	def make_data_import_doc(self, doctype, file_url):
 		doc = frappe.get_doc({
@@ -365,10 +369,15 @@ class TallyMigration(Document):
 			self.publish("Process Master Data", _("Processing Items and UOMs"), 4, 5)
 			items, uoms = get_stock_items_uoms(collection)
 			item_groups = get_item_group_list(collection)
+
+			f = self.attach_file('chart_of_accounts.json', json.dumps(chart_of_accounts))
+			args = dict(doctype_name='Account', import_type='Custom', file_url=f.file_url, method='import_coa')
+			self.append_processed_file(args)
+
 			data = [uoms, item_groups, items, customers, suppliers, addresses]
+			self.dump_processed_data(data)
 
 			self.publish("Process Master Data", _("Done"), 5, 5)
-			self.dump_processed_data(data)
 
 			self.is_master_data_processed = 1
 
@@ -381,6 +390,15 @@ class TallyMigration(Document):
 
 	def publish(self, title, message, count, total):
 		frappe.publish_realtime("tally_migration_progress_update", {"title": title, "message": message, "count": count, "total": total})
+
+	def import_coa(self, file):
+		coa_file = frappe.get_doc("File", {"file_url": file})
+		unset_existing_data(self.erpnext_company)
+		create_charts(self.erpnext_company, custom_chart=json.loads(coa_file.get_content()))
+		company = frappe.get_doc("Company", self.erpnext_company)
+		company.validate()
+		company.on_update()
+		frappe.get_doc("Tally Migration Processed File", { "file_url": file }).db_set("status", "Success")
 
 	def _import_master_data(self):
 		def create_company_and_coa(coa_file_url):
