@@ -268,9 +268,9 @@ class GrossProfitGenerator(object):
 	def get_last_purchase_rate(self, item_code, row):
 		condition = ''
 		if row.project:
-			condition += " AND a.project='%s'" % (row.project)
+			condition += " AND a.project=%s" % (frappe.db.escape(row.project))
 		elif row.cost_center:
-			condition += " AND a.cost_center='%s'" % (row.cost_center)
+			condition += " AND a.cost_center=%s" % (frappe.db.escape(row.cost_center))
 		if self.filters.to_date:
 			condition += " AND modified='%s'" % (self.filters.to_date)
 
