@@ -118,27 +118,7 @@ class Account(NestedSet):
 			for d in frappe.db.get_values('Account', filters=filters, fieldname=["company", "name"], as_dict=True):
 				parent_acc_name_map[d["company"]] = d["name"]
 
-			if not parent_acc_name_map:
-				# map can be empty if only one descendant or all descendants without parent account exist(s)
-				# or if no descendants exist
-				if descendants:
-					frappe.throw(_("Parent Account {0} does not exist in any Child Company").format(frappe.bold(parent_acc_name)),
-						title=_("Account Missing"))
-				else:
-					# no descendants and empty map, nothing to sync
-					return
-
-			companies_missing_account = []
-			for company in descendants:
-				if not company in parent_acc_name_map:
-					companies_missing_account.append(company)
-
-			# If atleast any one of the descendants does not have the parent account, block transaction
-			if companies_missing_account:
-				message = _("Parent Account {0} does not exist in the following companies:").format(frappe.bold(parent_acc_name))
-				message += "<br><br><ul><li>" + "</li><li>".join(companies_missing_account) + "</li></ul>"
-				message += _("Please make sure the account exists in the child companies as well")
-				frappe.throw(message, title=_("Account Missing"))
+			if not parent_acc_name_map: return
 
 			self.create_account_for_child_company(parent_acc_name_map, descendants, parent_acc_name)
 
@@ -317,6 +297,23 @@ def update_account_number(name, account_name, account_number=None, from_descenda
 
 	old_acc_name, old_acc_number = frappe.db.get_value('Account', name, \
 				["account_name", "account_number"])
+
+	# check if account exists in parent company
+	ancestors = get_ancestors_of("Company", account.company)
+	allow_independent_account_creation = frappe.get_value("Company", account.company, "allow_account_creation_against_child_company")
+
+	if ancestors and not allow_independent_account_creation:
+		for ancestor in ancestors:
+			if frappe.db.get_value("Account", {'account_name': old_acc_name, 'company': ancestor}, 'name'):
+				# same account in parent company exists
+				allow_child_account_creation = _("Allow Account Creation Against Child Company")
+
+				message = _("Account {0} exists in parent company {1}.").format(frappe.bold(old_acc_name), frappe.bold(ancestor))
+				message += "<br>" + _("Renaming it is only allowed via parent company {0}, \
+					to avoid mismatch.").format(frappe.bold(ancestor)) + "<br><br>"
+				message += _("To overrule this, enable '{0}' in company {1}").format(allow_child_account_creation, frappe.bold(account.company))
+
+				frappe.throw(message, title=_("Rename Not Allowed"))
 
 	validate_account_number(name, account_number, account.company)
 	if account_number:
