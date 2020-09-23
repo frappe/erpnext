@@ -53,8 +53,8 @@ class Lead(SellingController):
 		if self.contact_date and getdate(self.contact_date) < getdate(nowdate()):
 			frappe.throw(_("Next Contact Date cannot be in the past"))
 
-		if self.ends_on and self.contact_date and\
-			(self.ends_on < self.contact_date):
+		if (self.ends_on and self.contact_date and
+			(getdate(self.ends_on) < getdate(self.contact_date))):
 			frappe.throw(_("Ends On date cannot be before Next Contact Date."))
 
 	def on_update(self):

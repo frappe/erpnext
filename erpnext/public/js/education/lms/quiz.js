@@ -29,7 +29,7 @@ class Quiz {
 			this.questions.push(question)
 			this.wrapper.appendChild(question_wrapper);
 		})
-		if (data.activity.is_complete) {
+		if (data.activity && data.activity.is_complete) {
 			this.disable()
 			let indicator = 'red'
 			let message = 'Your are not allowed to attempt the quiz again.'

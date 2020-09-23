@@ -112,6 +112,8 @@ frappe.ui.form.on("Fees", {
 				args: {
 					"dt": frm.doc.doctype,
 					"dn": frm.doc.name,
+					"party_type": "Student",
+					"party": frm.doc.student,
 					"recipient_id": frm.doc.student_email
 				},
 				callback: function(r) {
@@ -159,6 +161,7 @@ frappe.ui.form.on("Fees", {
 						$.each(r.message, function(i, d) {
 							var row = frappe.model.add_child(frm.doc, "Fee Component", "components");
 							row.fees_category = d.fees_category;
+							row.description = d.description;
 							row.amount = d.amount;
 						});
 					}

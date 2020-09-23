@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 import frappe.utils
-from frappe.utils import cstr, flt, getdate, cint, nowdate, add_days, get_link_to_form
+from frappe.utils import cstr, flt, getdate, cint, nowdate, add_days, get_link_to_form, strip_html
 from frappe import _
 from six import string_types
 from frappe.model.utils import get_fetch_values
@@ -34,7 +34,6 @@ class SalesOrder(SellingController):
 
 	def validate(self):
 		super(SalesOrder, self).validate()
-		self.validate_order_type()
 		self.validate_delivery_date()
 		self.validate_proj_cust()
 		self.validate_po()
@@ -99,9 +98,6 @@ class SalesOrder(SellingController):
 				if not res:
 					frappe.msgprint(_("Quotation {0} not of type {1}")
 						.format(d.prevdoc_docname, self.order_type))
-
-	def validate_order_type(self):
-		super(SalesOrder, self).validate_order_type()
 
 	def validate_delivery_date(self):
 		if self.order_type == 'Sales' and not self.skip_delivery_note:
@@ -500,7 +496,7 @@ def close_or_unclose_sales_orders(names, status):
 
 def get_requested_item_qty(sales_order):
 	return frappe._dict(frappe.db.sql("""
-		select sales_order_item, sum(stock_qty)
+		select sales_order_item, sum(qty)
 		from `tabMaterial Request Item`
 		where docstatus = 1
 			and sales_order = %s
@@ -511,16 +507,12 @@ def get_requested_item_qty(sales_order):
 def make_material_request(source_name, target_doc=None):
 	requested_item_qty = get_requested_item_qty(source_name)
 
-	def postprocess(source, doc):
-		doc.material_request_type = "Purchase"
-
 	def update_item(source, target, source_parent):
 		# qty is for packed items, because packed items don't have stock_qty field
-		qty = source.get("stock_qty") or source.get("qty")
+		qty = source.get("qty")
 		target.project = source_parent.project
 		target.qty = qty - requested_item_qty.get(source.name, 0)
-		target.conversion_factor = 1
-		target.stock_qty = qty - requested_item_qty.get(source.name, 0)
+		target.stock_qty = flt(target.qty) * flt(target.conversion_factor)
 
 	doc = get_mapped_doc("Sales Order", source_name, {
 		"Sales Order": {
@@ -541,14 +533,12 @@ def make_material_request(source_name, target_doc=None):
 			"doctype": "Material Request Item",
 			"field_map": {
 				"name": "sales_order_item",
-				"parent": "sales_order",
-				"stock_uom": "uom",
-				"stock_qty": "qty"
+				"parent": "sales_order"
 			},
 			"condition": lambda doc: not frappe.db.exists('Product Bundle', doc.item_code) and doc.stock_qty > requested_item_qty.get(doc.name, 0),
 			"postprocess": update_item
 		}
-	}, target_doc, postprocess)
+	}, target_doc)
 
 	return doc
 
@@ -645,7 +635,6 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			target.set_advances()
 
 	def set_missing_values(source, target):
-		target.is_pos = 0
 		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = True
 		target.run_method("set_missing_values")
@@ -879,7 +868,8 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 			 		],
 					"field_no_map": [
 						"rate",
-						"price_list_rate"
+						"price_list_rate",
+						"item_tax_template"
 					],
 					"postprocess": update_item,
 					"condition": lambda doc: doc.ordered_qty < doc.qty and doc.supplier == supplier and doc.item_code in selected_items
@@ -898,6 +888,7 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_supplier(doctype, txt, searchfield, start, page_len, filters):
 	supp_master_name = frappe.defaults.get_user_default("supp_master_name")
 	if supp_master_name == "Supplier Name":
@@ -1003,15 +994,20 @@ def make_raw_material_request(items, company, sales_order, project=None):
 	))
 	for item in raw_materials:
 		item_doc = frappe.get_cached_doc('Item', item.get('item_code'))
+
 		schedule_date = add_days(nowdate(), cint(item_doc.lead_time_days))
-		material_request.append('items', {
-		'item_code': item.get('item_code'),
-		'qty': item.get('quantity'),
-		'schedule_date': schedule_date,
-		'warehouse': item.get('warehouse'),
-		'sales_order': sales_order,
-		'project': project
+		row = material_request.append('items', {
+			'item_code': item.get('item_code'),
+			'qty': item.get('quantity'),
+			'schedule_date': schedule_date,
+			'warehouse': item.get('warehouse'),
+			'sales_order': sales_order,
+			'project': project
 		})
+
+		if not (strip_html(item.get("description")) and strip_html(item_doc.description)):
+			row.description = item_doc.item_name or item.get('item_code')
+
 	material_request.insert()
 	material_request.flags.ignore_permissions = 1
 	material_request.run_method("set_missing_values")
@@ -1047,7 +1043,7 @@ def create_pick_list(source_name, target_doc=None):
 		},
 	}, target_doc)
 
-	doc.purpose = 'Delivery against Sales Order'
+	doc.purpose = 'Delivery'
 
 	doc.set_item_locations()
 

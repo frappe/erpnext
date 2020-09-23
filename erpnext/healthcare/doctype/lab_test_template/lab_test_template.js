@@ -3,17 +3,17 @@
 
 frappe.ui.form.on("Lab Test Template",{
 	lab_test_name: function(frm) {
-		if(!frm.doc.lab_test_code)
+		if (!frm.doc.lab_test_code)
 			frm.set_value("lab_test_code", frm.doc.lab_test_name);
-		if(!frm.doc.lab_test_description)
+		if (!frm.doc.lab_test_description)
 			frm.set_value("lab_test_description", frm.doc.lab_test_name);
 	},
-	refresh :  function(frm){
+	refresh : function(frm) {
 		// Restrict Special, Grouped type templates in Child TestGroups
 		frm.set_query("lab_test_template", "lab_test_groups", function() {
 			return {
 				filters: {
-					lab_test_template_type:['in',['Single','Compound']]
+					lab_test_template_type: ['in',['Single','Compound']]
 				}
 			};
 		});
@@ -23,83 +23,44 @@ frappe.ui.form.on("Lab Test Template",{
 cur_frm.cscript.custom_refresh = function(doc) {
 	cur_frm.set_df_property("lab_test_code", "read_only", doc.__islocal ? 0 : 1);
 
-	if(!doc.__islocal) {
-		cur_frm.add_custom_button(__('Change Template Code'), function() {
-			change_template_code(cur_frm,doc);
-		} );
-		if(doc.disabled == 1){
-			cur_frm.add_custom_button(__('Enable Template'), function() {
-				enable_template(cur_frm);
-			} );
-		}
-		else{
-			cur_frm.add_custom_button(__('Disable Template'), function() {
-				disable_template(cur_frm);
-			} );
-		}
+	if (!doc.__islocal) {
+		cur_frm.add_custom_button(__("Change Template Code"), function() {
+			change_template_code(doc);
+		});
 	}
 };
 
-var disable_template = function(frm){
-	var doc = frm.doc;
-	frappe.call({
-		method: 		"erpnext.healthcare.doctype.lab_test_template.lab_test_template.disable_enable_test_template",
-		args: {status: 1, name: doc.name, is_billable: doc.is_billable},
-		callback: function(){
-			cur_frm.reload_doc();
-		}
-	});
-};
-
-var enable_template = function(frm){
-	var doc = frm.doc;
-	frappe.call({
-		method: 		"erpnext.healthcare.doctype.lab_test_template.lab_test_template.disable_enable_test_template",
-		args: {status: 0, name: doc.name, is_billable: doc.is_billable},
-		callback: function(){
-			cur_frm.reload_doc();
-		}
-	});
-};
-
-
-var change_template_code = function(frm,doc){
-	var d = new frappe.ui.Dialog({
+let change_template_code = function(doc) {
+	let d = new frappe.ui.Dialog({
 		title:__("Change Template Code"),
 		fields:[
 			{
 				"fieldtype": "Data",
-				"label": "Test Template Code",
-				"fieldname": "Test Code",
-				reqd:1
-			},
-			{
-				"fieldtype": "Button",
-				"label": __("Change Code"),
-				click: function() {
-					var values = d.get_values();
-					if(!values)
-						return;
-					change_test_code_from_template(values["Test Code"],doc);
-					d.hide();
-				}
+				"label": "Lab Test Template Code",
+				"fieldname": "lab_test_code",
+				reqd: 1
 			}
-		]
+		],
+		primary_action: function() {
+			let values = d.get_values();
+			if (values) {
+				frappe.call({
+					"method": "erpnext.healthcare.doctype.lab_test_template.lab_test_template.change_test_code_from_template",
+					"args": {lab_test_code: values.lab_test_code, doc: doc},
+					callback: function (data) {
+						frappe.set_route("Form", "Lab Test Template", data.message);
+					}
+				});
+			}
+			d.hide();
+		},
+		primary_action_label: __("Change Template Code")
 	});
 	d.show();
-	d.set_values({
-		'Test Code': doc.lab_test_code
-	});
 
-	var change_test_code_from_template = function(lab_test_code,doc){
-		frappe.call({
-			"method": "erpnext.healthcare.doctype.lab_test_template.lab_test_template.change_test_code_from_template",
-			"args": {lab_test_code: lab_test_code, doc: doc},
-			callback: function (data) {
-				frappe.set_route("Form", "Lab Test Template", data.message);
-			}
-		});
-	};
+	d.set_values({
+		"lab_test_code": doc.lab_test_code
+	});
 };
 
 frappe.ui.form.on("Lab Test Template", "lab_test_name", function(frm){
@@ -124,8 +85,8 @@ frappe.ui.form.on("Lab Test Template", "lab_test_description", function(frm){
 });
 
 frappe.ui.form.on("Lab Test Groups", "template_or_new_line", function (frm, cdt, cdn) {
-	var child = locals[cdt][cdn];
-	if(child.template_or_new_line =="Add new line"){
+	let child = locals[cdt][cdn];
+	if (child.template_or_new_line == "Add new line") {
 		frappe.model.set_value(cdt, cdn, 'lab_test_template', "");
 		frappe.model.set_value(cdt, cdn, 'lab_test_description', "");
 	}

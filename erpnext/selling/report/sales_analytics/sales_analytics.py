@@ -23,7 +23,14 @@ class Analytics(object):
 		self.get_columns()
 		self.get_data()
 		self.get_chart_data()
-		return self.columns, self.data, None, self.chart
+
+		# Skipping total row for tree-view reports
+		skip_total_row = 0
+
+		if self.filters.tree_type in ["Supplier Group", "Item Group", "Customer Group", "Territory"]:
+			skip_total_row = 1
+
+		return self.columns, self.data, None, self.chart, None, skip_total_row
 
 	def get_columns(self):
 		self.columns = [{
@@ -232,8 +239,10 @@ class Analytics(object):
 					self.entity_periodic_data.setdefault(d.parent, frappe._dict()).setdefault(period, 0.0)
 					self.entity_periodic_data[d.parent][period] += amount
 				total += amount
+
 			row["total"] = total
 			out = [row] + out
+
 		self.data = out
 
 	def get_periodic_data(self):

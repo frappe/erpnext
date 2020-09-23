@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:05",
@@ -75,9 +74,9 @@
   "base_total",
   "base_net_total",
   "column_break_32",
+  "total_net_weight",
   "total",
   "net_total",
-  "total_net_weight",
   "taxes_section",
   "taxes_and_charges",
   "column_break_38",
@@ -149,9 +148,9 @@
   "edit_printing_settings",
   "letter_head",
   "group_same_items",
-  "language",
-  "column_break_84",
   "select_print_heading",
+  "column_break_84",
+  "language",
   "more_information",
   "inter_company_invoice_reference",
   "customer_group",
@@ -373,7 +372,8 @@
    "no_copy": 1,
    "options": "Sales Invoice",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "column_break_21",
@@ -396,7 +396,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "po_no",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "Customer's Purchase Order",
    "no_copy": 1,
    "print_hide": 1
@@ -1493,6 +1493,7 @@
    "print_hide": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
    "label": "Subscription Section"
@@ -1568,8 +1569,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "links": [],
- "modified": "2019-12-30 19:15:59.580414",
+ "modified": "2020-07-01 12:41:29.484813",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

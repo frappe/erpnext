@@ -163,6 +163,7 @@
   },
   {
    "fetch_from": "driver.address",
+   "fetch_if_empty": 1,
    "fieldname": "driver_address",
    "fieldtype": "Link",
    "label": "Driver Address",
@@ -170,7 +171,8 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2019-09-27 15:43:01.975139",
+ "links": [],
+ "modified": "2020-01-26 22:37:14.824021",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Trip",

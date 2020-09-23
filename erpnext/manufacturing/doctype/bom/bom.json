@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "creation": "2013-01-22 15:11:38",
  "doctype": "DocType",
@@ -6,23 +7,25 @@
  "engine": "InnoDB",
  "field_order": [
   "item",
-  "quantity",
-  "set_rate_of_sub_assembly_item_based_on_bom",
+  "company",
+  "item_name",
+  "uom",
   "cb0",
   "is_active",
   "is_default",
   "allow_alternative_item",
-  "image",
-  "item_name",
-  "uom",
-  "currency_detail",
-  "company",
+  "set_rate_of_sub_assembly_item_based_on_bom",
   "project",
+  "quantity",
+  "image",
+  "currency_detail",
+  "currency",
   "conversion_rate",
   "column_break_12",
-  "currency",
   "rm_cost_as_per",
   "buying_price_list",
+  "price_list_currency",
+  "plc_conversion_rate",
   "section_break_21",
   "with_operations",
   "column_break_23",
@@ -176,7 +179,8 @@
   },
   {
    "fieldname": "currency_detail",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Currency and Price List"
   },
   {
    "fieldname": "company",
@@ -324,7 +328,7 @@
   },
   {
    "fieldname": "base_scrap_material_cost",
-   "fieldtype": "Data",
+   "fieldtype": "Currency",
    "label": "Scrap Material Cost(Company Currency)",
    "no_copy": 1,
    "options": "Company:company:default_currency",
@@ -477,13 +481,31 @@
   {
    "fieldname": "column_break_52",
    "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.rm_cost_as_per=='Price List'",
+   "fieldname": "plc_conversion_rate",
+   "fieldtype": "Float",
+   "label": "Price List Exchange Rate"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.rm_cost_as_per=='Price List'",
+   "fieldname": "price_list_currency",
+   "fieldtype": "Link",
+   "label": "Price List Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2019-11-22 14:35:12.142150",
+ "links": [],
+ "modified": "2020-05-05 14:29:32.634952",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

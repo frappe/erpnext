@@ -240,6 +240,7 @@
    "options": "Company",
    "print_width": "150px",
    "read_only": 1,
+   "search_index": 1,
    "width": "150px"
   },
   {
@@ -274,7 +275,7 @@
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
- "modified": "2019-11-27 12:17:31.522675",
+ "modified": "2020-02-25 22:53:33.504681",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",

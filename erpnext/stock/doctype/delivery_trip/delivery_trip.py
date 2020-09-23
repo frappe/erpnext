@@ -238,7 +238,7 @@ class DeliveryTrip(Document):
 		try:
 			directions = maps_client.directions(**directions_data)
 		except Exception as e:
-			frappe.throw(_(e))
+			frappe.throw(_(str(e)))
 
 		return directions[0] if directions else False
 

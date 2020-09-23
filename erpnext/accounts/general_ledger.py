@@ -45,8 +45,8 @@ def validate_accounting_period(gl_map):
 			}, as_dict=1)
 
 	if accounting_periods:
-		frappe.throw(_("You can't create accounting entries in the closed accounting period {0}")
-			.format(accounting_periods[0].name), ClosedAccountingPeriod)
+		frappe.throw(_("You cannot create or cancel any accounting entries within in the closed Accounting Period {0}")
+			.format(frappe.bold(accounting_periods[0].name)), ClosedAccountingPeriod)
 
 def process_gl_map(gl_map, merge_entries=True):
 	if merge_entries:
@@ -136,12 +136,14 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 
 
 def make_entry(args, adv_adj, update_outstanding, from_repost=False):
-	args.update({"doctype": "GL Entry"})
-	gle = frappe.get_doc(args)
+	gle = frappe.new_doc("GL Entry")
+	gle.update(args)
 	gle.flags.ignore_permissions = 1
 	gle.flags.from_repost = from_repost
-	gle.insert()
+	gle.validate()
+	gle.db_insert()
 	gle.run_method("on_update_with_args", adv_adj, update_outstanding, from_repost)
+	gle.flags.ignore_validate = True
 	gle.submit()
 
 def validate_account_for_perpetual_inventory(gl_map):
@@ -294,6 +296,7 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no), as_dict=True)
 
 	if gl_entries:
+		validate_accounting_period(gl_entries)
 		check_freezing_date(gl_entries[0]["posting_date"], adv_adj)
 
 	frappe.db.sql("""delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s""",

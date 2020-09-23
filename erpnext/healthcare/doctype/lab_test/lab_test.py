@@ -290,19 +290,23 @@ def insert_lab_test_to_medical_record(doc):
 		comment = ""
 		if item.lab_test_comment:
 			comment = str(item.lab_test_comment)
-		event = ""
+		table_row = item.lab_test_name
+
 		if item.lab_test_event:
-			event = item.lab_test_event
-		table_row = item.lab_test_name +" "+ event +" "+ item.result_value
+			table_row += " " + item.lab_test_event
+
+		if item.result_value:
+			table_row += " " + item.result_value
+
 		if item.normal_range:
 			table_row += " normal_range("+item.normal_range+")"
-		table_row += " "+comment
+		table_row += " " + comment
 
 	elif doc.special_test_items:
 		item = doc.special_test_items[0]
 
 		if item.lab_test_particulars and item.result_value:
-			table_row = item.lab_test_particulars +" "+ item.result_value
+			table_row = item.lab_test_particulars + " " + item.result_value
 
 	elif doc.sensitivity_test_items:
 		item = doc.sensitivity_test_items[0]

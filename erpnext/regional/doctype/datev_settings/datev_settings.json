@@ -28,6 +28,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Client ID",
+   "length": 5,
    "reqd": 1
   },
   {
@@ -42,6 +43,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Consultant ID",
+   "length": 7,
    "reqd": 1
   },
   {
@@ -57,7 +59,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2019-08-14 00:03:26.616460",
+ "modified": "2020-04-15 12:59:57.786506",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "DATEV Settings",

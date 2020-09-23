@@ -74,7 +74,7 @@
   }
  ],
  "image_field": "hero_image",
- "modified": "2019-06-12 12:34:23.748157",
+ "modified": "2020-03-29 12:50:27.677589",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Course",
@@ -101,6 +101,30 @@
    "read": 1,
    "report": 1,
    "role": "Instructor",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Education Manager",
    "share": 1,
    "write": 1
   }

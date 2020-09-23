@@ -16,12 +16,14 @@
   "item_group",
   "col_break2",
   "item_name",
+  "subcontracted_item",
   "section_break_8",
   "description",
   "column_break_10",
   "image",
   "image_view",
   "quantity_and_rate",
+  "set_basic_rate_manually",
   "qty",
   "basic_rate",
   "basic_amount",
@@ -55,7 +57,6 @@
   "material_request",
   "material_request_item",
   "original_item",
-  "subcontracted_item",
   "reference_section",
   "against_stock_entry",
   "ste_detail",
@@ -413,6 +414,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:parent.purpose == 'Send to Subcontractor'",
    "fieldname": "subcontracted_item",
    "fieldtype": "Link",
    "label": "Subcontracted Item",
@@ -479,8 +481,7 @@
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
-   "options": "Project",
-   "read_only": 1
+   "options": "Project"
   },
   {
    "fieldname": "po_detail",
@@ -490,11 +491,18 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:parent.purpose===\"Repack\" && doc.t_warehouse",
+   "fieldname": "set_basic_rate_manually",
+   "fieldtype": "Check",
+   "label": "Set Basic Rate Manually"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-08-20 14:01:02.319754",
+ "modified": "2020-09-04 12:12:35.668198",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

@@ -8,7 +8,7 @@ cur_frm.cscript.refresh = function(doc) {
 
 cur_frm.cscript.set_root_readonly = function(doc) {
 	// read-only for root customer group
-	if(!doc.parent_supplier_group) {
+	if(!doc.parent_supplier_group && !doc.__islocal) {
 		cur_frm.set_read_only();
 		cur_frm.set_intro(__("This is a root supplier group and cannot be edited."));
 	} else {
@@ -20,7 +20,8 @@ cur_frm.cscript.set_root_readonly = function(doc) {
 cur_frm.fields_dict['parent_supplier_group'].get_query = function() {
 	return {
 		filters: {
-			'is_group': 1
+			'is_group': 1,
+			'name': ['!=', cur_frm.doc.supplier_group_name]
 		}
 	};
 };

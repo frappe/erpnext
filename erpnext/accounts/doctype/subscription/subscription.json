@@ -155,7 +155,7 @@
    "fieldname": "apply_additional_discount",
    "fieldtype": "Select",
    "label": "Apply Additional Discount On",
-   "options": "\nGrand Total\nNet total"
+   "options": "\nGrand Total\nNet Total"
   },
   {
    "fieldname": "cb_2",
@@ -183,7 +183,8 @@
    "fieldname": "invoices",
    "fieldtype": "Table",
    "label": "Invoices",
-   "options": "Subscription Invoice"
+   "options": "Subscription Invoice",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -196,7 +197,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2019-07-25 18:45:38.579579",
+ "modified": "2020-08-27 23:30:02.504042",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",

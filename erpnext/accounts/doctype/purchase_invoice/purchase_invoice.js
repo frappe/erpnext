@@ -167,8 +167,16 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	make_comment_dialog_and_block_invoice: function(){
 		const me = this;
 
-		const title = __('Add Comment');
+		const title = __('Block Invoice');
 		const fields = [
+			{
+				fieldname: 'release_date',
+				read_only: 0,
+				fieldtype:'Date',
+				label: __('Release Date'),
+				default: me.frm.doc.release_date,
+				reqd: 1
+			},
 			{
 				fieldname: 'hold_comment',
 				read_only: 0,
@@ -187,7 +195,11 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			const dialog_data = me.dialog.get_values();
 			frappe.call({
 				'method': 'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.block_invoice',
-				'args': {'name': me.frm.doc.name, 'hold_comment': dialog_data.hold_comment},
+				'args': {
+					'name': me.frm.doc.name,
+					'hold_comment': dialog_data.hold_comment,
+					'release_date': dialog_data.release_date
+				},
 				'callback': (r) => me.frm.reload_doc()
 			});
 			me.dialog.hide();
@@ -249,10 +261,23 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				price_list: this.frm.doc.buying_price_list
 			}, function() {
 				me.apply_pricing_rule();
-
 				me.frm.doc.apply_tds = me.frm.supplier_tds ? 1 : 0;
+				me.frm.doc.tax_withholding_category = me.frm.supplier_tds;
 				me.frm.set_df_property("apply_tds", "read_only", me.frm.supplier_tds ? 0 : 1);
+				me.frm.set_df_property("tax_withholding_category", "hidden", me.frm.supplier_tds ? 0 : 1);
 			})
+	},
+
+	apply_tds: function(frm) {
+		var me = this;
+
+		if (!me.frm.doc.apply_tds) {
+			me.frm.set_value("tax_withholding_category", '');
+			me.frm.set_df_property("tax_withholding_category", "hidden", 1);
+		} else {
+			me.frm.set_value("tax_withholding_category", me.frm.supplier_tds);
+			me.frm.set_df_property("tax_withholding_category", "hidden", 0);
+		}
 	},
 
 	credit_to: function() {

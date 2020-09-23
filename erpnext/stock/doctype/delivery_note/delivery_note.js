@@ -121,12 +121,18 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			if (this.frm.doc.docstatus===0) {
 				this.frm.add_custom_button(__('Sales Order'),
 					function() {
+						if (!me.frm.doc.customer) {
+							frappe.throw({
+								title: __("Mandatory"),
+								message: __("Please Select a Customer")
+							});
+						}
 						erpnext.utils.map_current_doc({
 							method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
 							source_doctype: "Sales Order",
 							target: me.frm,
 							setters: {
-								customer: me.frm.doc.customer || undefined,
+								customer: me.frm.doc.customer,
 							},
 							get_query_filters: {
 								docstatus: 1,
@@ -267,6 +273,14 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				frappe.ui.form.is_saving = false;
 			}
 		})
+	},
+
+	to_warehouse: function() {
+		let packed_items_table = this.frm.doc["packed_items"];
+		this.autofill_warehouse(this.frm.doc["items"], "target_warehouse", this.frm.doc.to_warehouse);
+		if (packed_items_table && packed_items_table.length) {
+			this.autofill_warehouse(packed_items_table, "target_warehouse", this.frm.doc.to_warehouse);
+		}
 	}
 
 });

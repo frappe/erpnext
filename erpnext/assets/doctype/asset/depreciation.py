@@ -22,7 +22,7 @@ def post_depreciation_entries(date=None):
 def get_depreciable_assets(date):
 	return frappe.db.sql_list("""select a.name
 		from tabAsset a, `tabDepreciation Schedule` ds
-		where a.name = ds.parent and a.docstatus=1 and ds.schedule_date<=%s
+		where a.name = ds.parent and a.docstatus=1 and ds.schedule_date<=%s and a.calculate_depreciation = 1
 			and a.status in ('Submitted', 'Partially Depreciated')
 			and ifnull(ds.journal_entry, '')=''""", date)
 
@@ -58,7 +58,8 @@ def make_depreciation_entry(asset_name, date=None):
 				"account": accumulated_depreciation_account,
 				"credit_in_account_currency": d.depreciation_amount,
 				"reference_type": "Asset",
-				"reference_name": asset.name
+				"reference_name": asset.name,
+				"cost_center": ""
 			}
 
 			debit_entry = {
@@ -196,12 +197,14 @@ def get_gl_entries_on_asset_disposal(asset, selling_amount=0, finance_book=None)
 		{
 			"account": fixed_asset_account,
 			"credit_in_account_currency": asset.gross_purchase_amount,
-			"credit": asset.gross_purchase_amount
+			"credit": asset.gross_purchase_amount,
+			"cost_center": depreciation_cost_center
 		},
 		{
 			"account": accumulated_depr_account,
 			"debit_in_account_currency": accumulated_depr_amount,
-			"debit": accumulated_depr_amount
+			"debit": accumulated_depr_amount,
+			"cost_center": depreciation_cost_center
 		}
 	]
 

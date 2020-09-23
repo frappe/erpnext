@@ -69,6 +69,7 @@ class TestAccount(unittest.TestCase):
 			acc.account_name = "Accumulated Depreciation"
 			acc.parent_account = "Fixed Assets - _TC"
 			acc.company = "_Test Company"
+			acc.account_type = "Accumulated Depreciation"
 			acc.insert()
 
 		doc = frappe.get_doc("Account", "Securities and Deposits - _TC")
@@ -149,7 +150,7 @@ def _make_test_records(verbose):
 
 		# fixed asset depreciation
 		["_Test Fixed Asset", "Current Assets", 0, "Fixed Asset", None],
-		["_Test Accumulated Depreciations", "Current Assets", 0, None, None],
+		["_Test Accumulated Depreciations", "Current Assets", 0, "Accumulated Depreciation", None],
 		["_Test Depreciations", "Expenses", 0, None, None],
 		["_Test Gain/Loss on Asset Disposal", "Expenses", 0, None, None],
 

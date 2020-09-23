@@ -428,7 +428,7 @@ class update_entries_after(object):
 				frappe.get_desk_link(self.exceptions[0]["voucher_type"], self.exceptions[0]["voucher_no"]))
 
 		if self.verbose:
-			frappe.throw(msg, NegativeStockError, title='Insufficent Stock')
+			frappe.throw(msg, NegativeStockError, title='Insufficient Stock')
 		else:
 			raise NegativeStockError(msg)
 
@@ -460,7 +460,13 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 		conditions += " and " + previous_sle.get("warehouse_condition")
 
 	if check_serial_no and previous_sle.get("serial_no"):
-		conditions += " and serial_no like {}".format(frappe.db.escape('%{0}%'.format(previous_sle.get("serial_no"))))
+		serial_no = previous_sle.get("serial_no")
+		conditions += """ and (
+				serial_no = '{0}'
+				OR serial_no like '{0}\n%%'
+				OR serial_no like '%%\n{0}'
+				OR serial_no like '%%\n{0}\n%%'
+			) and actual_qty > 0""".format(serial_no)
 
 	if not previous_sle.get("posting_date"):
 		previous_sle["posting_date"] = "1900-01-01"
@@ -527,7 +533,16 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 	if not allow_zero_rate and not valuation_rate and raise_error_if_no_rate \
 			and cint(erpnext.is_perpetual_inventory_enabled(company)):
 		frappe.local.message_log = []
-		frappe.throw(_("Valuation rate not found for the Item {0}, which is required to do accounting entries for {1} {2}. If the item is transacting as a zero valuation rate item in the {1}, please mention that in the {1} Item table. Otherwise, please create an incoming stock transaction for the item or mention valuation rate in the Item record, and then try submiting / cancelling this entry.")
-			.format(item_code, voucher_type, voucher_no))
+		form_link = frappe.utils.get_link_to_form("Item", item_code)
+
+		message = _("Valuation Rate for the Item {0}, is required to do accounting entries for {1} {2}.").format(form_link, voucher_type, voucher_no)
+		message += "<br><br>" + _(" Here are the options to proceed:")
+		solutions = "<li>" + _("If the item is transacting as a Zero Valuation Rate item in this entry, please enable 'Allow Zero Valuation Rate' in the {0} Item table.").format(voucher_type) + "</li>"
+		solutions += "<li>" + _("If not, you can Cancel / Submit this entry ") + _("{0}").format(frappe.bold("after")) + _(" performing either one below:") + "</li>"
+		sub_solutions = "<ul><li>" + _("Create an incoming stock transaction for the Item.") + "</li>"
+		sub_solutions += "<li>" + _("Mention Valuation Rate in the Item master.") + "</li></ul>"
+		msg = message + solutions + sub_solutions + "</li>"
+
+		frappe.throw(msg=msg, title=_("Valuation Rate Missing"))
 
 	return valuation_rate

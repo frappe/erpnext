@@ -9,7 +9,7 @@ cur_frm.add_fetch('contact', 'email_id', 'email_id')
 frappe.ui.form.on("Request for Quotation",{
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'Supplier Quotation': 'Supplier Quotation'
+			'Supplier Quotation': 'Create'
 		}
 
 		frm.fields_dict["suppliers"].grid.get_field("contact").get_query = function(doc, cdt, cdn) {
@@ -166,7 +166,8 @@ frappe.ui.form.on("Request for Quotation",{
 				{	"fieldtype": "Select", "label": __("Supplier"),
 					"fieldname": "supplier",
 					"options": doc.suppliers.map(d => d.supplier),
-					"reqd": 1 },
+					"reqd": 1,
+					"default": doc.suppliers.length === 1 ? doc.suppliers[0].supplier_name : "" },
 				{	"fieldtype": "Button", "label": __('Create Supplier Quotation'),
 					"fieldname": "make_supplier_quotation", "cssClass": "btn-primary" },
 			]

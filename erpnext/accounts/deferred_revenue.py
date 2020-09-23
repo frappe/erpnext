@@ -159,7 +159,7 @@ def book_deferred_income_or_expense(doc, posting_date=None):
 			total_days, total_booking_days, account_currency)
 
 		make_gl_entries(doc, credit_account, debit_account, against,
-			amount, base_amount, end_date, project, account_currency, item.cost_center, item.name)
+			amount, base_amount, end_date, project, account_currency, item.cost_center, item)
 
 		if getdate(end_date) < getdate(posting_date) and not last_gl_entry:
 			_book_deferred_revenue_or_expense(item)
@@ -170,7 +170,7 @@ def book_deferred_income_or_expense(doc, posting_date=None):
 			_book_deferred_revenue_or_expense(item)
 
 def make_gl_entries(doc, credit_account, debit_account, against,
-	amount, base_amount, posting_date, project, account_currency, cost_center, voucher_detail_no):
+	amount, base_amount, posting_date, project, account_currency, cost_center, item):
 	# GL Entry for crediting the amount in the deferred expense
 	from erpnext.accounts.general_ledger import make_gl_entries
 
@@ -184,10 +184,10 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 			"credit": base_amount,
 			"credit_in_account_currency": amount,
 			"cost_center": cost_center,
-			"voucher_detail_no": voucher_detail_no,
+			"voucher_detail_no": item.name,
 			'posting_date': posting_date,
 			'project': project
-		}, account_currency)
+		}, account_currency, item=item)
 	)
 	# GL Entry to debit the amount from the expense
 	gl_entries.append(
@@ -197,10 +197,10 @@ def make_gl_entries(doc, credit_account, debit_account, against,
 			"debit": base_amount,
 			"debit_in_account_currency": amount,
 			"cost_center": cost_center,
-			"voucher_detail_no": voucher_detail_no,
+			"voucher_detail_no": item.name,
 			'posting_date': posting_date,
 			'project': project
-		}, account_currency)
+		}, account_currency, item=item)
 	)
 
 	if gl_entries:

@@ -15,7 +15,7 @@ def execute(filters=None):
 		dict(fieldtype='Data', label='GST Category', fieldname="gst_category", width=120),
 		dict(fieldtype='Data', label='Export Type', fieldname="export_type", width=120),
 		dict(fieldtype='Data', label='E-Commerce GSTIN', fieldname="ecommerce_gstin", width=130),
-		dict(fieldtype='Data', label='HSN Code', fieldname="hsn_code", width=120)
+		dict(fieldtype='Data', label='HSN Code', fieldname="gst_hsn_code", width=120)
 	], additional_query_columns=[
 		'customer_gstin',
 		'billing_address_gstin',

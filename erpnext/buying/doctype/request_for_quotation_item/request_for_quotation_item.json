@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2016-02-25 08:04:02.452958",
  "doctype": "DocType",
@@ -9,6 +10,7 @@
   "supplier_part_no",
   "column_break_3",
   "item_name",
+  "schedule_date",
   "section_break_5",
   "description",
   "item_group",
@@ -18,9 +20,11 @@
   "image_view",
   "quantity",
   "qty",
+  "stock_uom",
   "col_break2",
-  "schedule_date",
   "uom",
+  "conversion_factor",
+  "stock_qty",
   "warehouse_and_reference",
   "warehouse",
   "project_name",
@@ -33,7 +37,7 @@
  "fields": [
   {
    "bold": 1,
-   "columns": 3,
+   "columns": 2,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -98,7 +102,7 @@
   {
    "fieldname": "quantity",
    "fieldtype": "Section Break",
-   "label": "Quantity"
+   "label": "Quantity & Stock"
   },
   {
    "bold": 1,
@@ -129,12 +133,12 @@
   {
    "fieldname": "uom",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "UOM",
    "oldfieldname": "uom",
    "oldfieldtype": "Link",
    "options": "UOM",
    "print_width": "100px",
-   "read_only": 1,
    "reqd": 1,
    "width": "100px"
   },
@@ -144,7 +148,7 @@
    "label": "Warehouse and Reference"
   },
   {
-   "columns": 3,
+   "columns": 2,
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -202,6 +206,7 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "0",
    "fieldname": "page_break",
    "fieldtype": "Check",
    "label": "Page Break",
@@ -219,10 +224,36 @@
   {
    "fieldname": "section_break_23",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "UOM Conversion Factor",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "stock_qty",
+   "fieldtype": "Float",
+   "label": "Qty as per Stock UOM",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2019-05-01 17:50:23.703801",
+ "links": [],
+ "modified": "2020-06-12 19:10:36.333441",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation Item",
