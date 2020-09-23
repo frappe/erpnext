@@ -61,7 +61,7 @@ class Issue(Document):
 
 		if self.status in ["Closed", "Resolved"] and status not in ["Resolved", "Closed"]:
 			self.resolution_date = frappe.flags.current_time or now_datetime()
-			if frappe.db.get_value("Issue", self.name, "agreement_fulfilled") == "Ongoing":
+			if frappe.db.get_value("Issue", self.name, "agreement_status") == "Ongoing":
 				set_service_level_agreement_variance(issue=self.name)
 				self.update_agreement_status()
 			set_resolution_time(issue=self)
@@ -72,7 +72,7 @@ class Issue(Document):
 			self.resolution_date = None
 			self.reset_issue_metrics()
 			# enable SLA and variance on Reopen
-			self.agreement_fulfilled = "Ongoing"
+			self.agreement_status = "Ongoing"
 			set_service_level_agreement_variance(issue=self.name)
 
 		self.handle_hold_time(status)
@@ -113,39 +113,39 @@ class Issue(Document):
 					if not self.first_responded_on:
 						response_by = get_expected_time_for(parameter="response", service_level=priority, start_date_time=start_date_time)
 						response_by = add_to_date(response_by, seconds=round(last_hold_time))
-						response_by_variance = round(time_diff_in_hours(response_by, now_time))
+						response_by_variance = round(time_diff_in_seconds(response_by, now_time))
 						update_values['response_by'] = response_by
-						update_values['response_by_variance'] = response_by_variance + (last_hold_time // 3600)
+						update_values['response_by_variance'] = response_by_variance + last_hold_time
 
 					resolution_by = get_expected_time_for(parameter="resolution", service_level=priority, start_date_time=start_date_time)
 					resolution_by = add_to_date(resolution_by, seconds=round(last_hold_time))
-					resolution_by_variance = round(time_diff_in_hours(resolution_by, now_time))
+					resolution_by_variance = round(time_diff_in_seconds(resolution_by, now_time))
 					update_values['resolution_by'] = resolution_by
-					update_values['resolution_by_variance'] = resolution_by_variance + (last_hold_time // 3600)
+					update_values['resolution_by_variance'] = resolution_by_variance + last_hold_time
 					update_values['on_hold_since'] = None
 
 				self.db_set(update_values)
 
 	def update_agreement_status(self):
-		if self.service_level_agreement and self.agreement_fulfilled == "Ongoing":
+		if self.service_level_agreement and self.agreement_status == "Ongoing":
 			if frappe.db.get_value("Issue", self.name, "response_by_variance") < 0 or \
 				frappe.db.get_value("Issue", self.name, "resolution_by_variance") < 0:
 
-				self.agreement_fulfilled = "Failed"
+				self.agreement_status = "Failed"
 			else:
-				self.agreement_fulfilled = "Fulfilled"
+				self.agreement_status = "Fulfilled"
 
-	def update_agreement_fulfilled_on_custom_status(self):
+	def update_agreement_status_on_custom_status(self):
 		"""
 			Update Agreement Fulfilled status using Custom Scripts for Custom Issue Status
 		"""
 		if not self.first_responded_on: # first_responded_on set when first reply is sent to customer
-			self.response_by_variance = round(time_diff_in_hours(self.response_by, now_datetime()), 2)
+			self.response_by_variance = round(time_diff_in_seconds(self.response_by, now_datetime()), 2)
 
 		if not self.resolution_date: # resolution_date set when issue has been closed
-			self.resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_datetime()), 2)
+			self.resolution_by_variance = round(time_diff_in_seconds(self.resolution_by, now_datetime()), 2)
 
-		self.agreement_fulfilled = "Fulfilled" if self.response_by_variance > 0 and self.resolution_by_variance > 0 else "Failed"
+		self.agreement_status = "Fulfilled" if self.response_by_variance > 0 and self.resolution_by_variance > 0 else "Failed"
 
 	def create_communication(self):
 		communication = frappe.new_doc("Communication")
@@ -172,7 +172,7 @@ class Issue(Document):
 		replicated_issue = deepcopy(self)
 		replicated_issue.subject = subject
 		replicated_issue.issue_split_from = self.name
-		replicated_issue.mins_to_first_response = 0
+		replicated_issue.first_response_time = 0
 		replicated_issue.first_responded_on = None
 		replicated_issue.creation = now_datetime()
 
@@ -180,7 +180,7 @@ class Issue(Document):
 		if replicated_issue.service_level_agreement:
 			replicated_issue.service_level_agreement_creation = now_datetime()
 			replicated_issue.service_level_agreement = None
-			replicated_issue.agreement_fulfilled = "Ongoing"
+			replicated_issue.agreement_status = "Ongoing"
 			replicated_issue.response_by = None
 			replicated_issue.response_by_variance = None
 			replicated_issue.resolution_by = None
@@ -241,8 +241,8 @@ class Issue(Document):
 		self.response_by = get_expected_time_for(parameter="response", service_level=priority, start_date_time=start_date_time)
 		self.resolution_by = get_expected_time_for(parameter="resolution", service_level=priority, start_date_time=start_date_time)
 
-		self.response_by_variance = round(time_diff_in_hours(self.response_by, now_datetime()))
-		self.resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_datetime()))
+		self.response_by_variance = round(time_diff_in_seconds(self.response_by, now_datetime()))
+		self.resolution_by_variance = round(time_diff_in_seconds(self.resolution_by, now_datetime()))
 
 	def change_service_level_agreement_and_priority(self):
 		if self.service_level_agreement and frappe.db.exists("Issue", self.name) and \
@@ -271,7 +271,7 @@ class Issue(Document):
 
 		self.service_level_agreement_creation = now_datetime()
 		self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
-		self.agreement_fulfilled = "Ongoing"
+		self.agreement_status = "Ongoing"
 		self.save()
 
 	def reset_issue_metrics(self):
@@ -347,7 +347,7 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 def set_service_level_agreement_variance(issue=None):
 	current_time = frappe.flags.current_time or now_datetime()
 
-	filters = {"status": "Open", "agreement_fulfilled": "Ongoing"}
+	filters = {"status": "Open", "agreement_status": "Ongoing"}
 	if issue:
 		filters = {"name": issue}
 
@@ -358,13 +358,13 @@ def set_service_level_agreement_variance(issue=None):
 			variance = round(time_diff_in_hours(doc.response_by, current_time), 2)
 			frappe.db.set_value(dt="Issue", dn=doc.name, field="response_by_variance", val=variance, update_modified=False)
 			if variance < 0:
-				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_fulfilled", val="Failed", update_modified=False)
+				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_status", val="Failed", update_modified=False)
 
 		if not doc.resolution_date: # resolution_date set when issue has been closed
 			variance = round(time_diff_in_hours(doc.resolution_by, current_time), 2)
 			frappe.db.set_value(dt="Issue", dn=doc.name, field="resolution_by_variance", val=variance, update_modified=False)
 			if variance < 0:
-				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_fulfilled", val="Failed", update_modified=False)
+				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_status", val="Failed", update_modified=False)
 
 
 def set_resolution_time(issue):
