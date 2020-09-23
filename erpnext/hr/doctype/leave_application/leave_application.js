@@ -85,10 +85,6 @@ frappe.ui.form.on("Leave Application", {
 				frm.set_value('employee', perm['Employee'].map(perm_doc => perm_doc.doc)[0]);
 			}
 		}
-
-		if (frm.doc.docstatus) {
-			frm.set_df_property("status", "read_only", 1);
-		}
 	},
 
 	employee: function(frm) {
