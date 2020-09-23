@@ -84,11 +84,10 @@ class PaymentRequest(Document):
 		elif self.payment_channel == "Phone":
 			controller = get_payment_gateway_controller(self.payment_gateway)
 			payment_record = dict(
-				reference_doctype=self.reference_doctype,
-				reference_docname=self.reference_name,
+				reference_doctype="Payment Request",
+				reference_docname=self.name,
 				grand_total=self.grand_total,
 				sender=self.email_to,
-				payment_request_name=self.name,
 				currency=self.currency,
 				payment_gateway=self.payment_gateway
 			)
