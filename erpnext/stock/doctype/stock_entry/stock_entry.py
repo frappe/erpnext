@@ -96,7 +96,7 @@ class StockEntry(StockController):
 		self.update_quality_inspection()
 		if self.work_order and self.purpose == "Manufacture":
 			self.update_so_in_serial_number()
-		
+
 		if self.purpose == 'Material Transfer' and self.add_to_transit:
 			self.set_material_request_transfer_status('In Transit')
 		if self.purpose == 'Material Transfer' and self.outgoing_stock_entry:
@@ -205,7 +205,9 @@ class StockEntry(StockController):
 
 			for f in ("uom", "stock_uom", "description", "item_name", "expense_account",
 				"cost_center", "conversion_factor"):
-					if f in ["stock_uom", "conversion_factor"] or not item.get(f):
+					if f == "stock_uom" or not item.get(f):
+						item.set(f, item_details.get(f))
+					if f == 'conversion_factor' and item.uom == item_details.get('stock_uom'):
 						item.set(f, item_details.get(f))
 
 			if not item.transfer_qty and item.qty:
@@ -1370,7 +1372,7 @@ class StockEntry(StockController):
 		if self.outgoing_stock_entry:
 			parent_se = frappe.get_value("Stock Entry", self.outgoing_stock_entry, 'add_to_transit')
 
-		for item in self.items: 
+		for item in self.items:
 			material_request = item.material_request or None
 			if self.purpose == "Material Transfer" and material_request not in material_requests:
 				if self.outgoing_stock_entry and parent_se:
@@ -1430,7 +1432,7 @@ def make_stock_in_entry(source_name, target_doc=None):
 			if add_to_transit:
 				warehouse = frappe.get_value('Material Request Item', source_doc.material_request_item, 'warehouse')
 				target_doc.t_warehouse = warehouse
-		
+
 		target_doc.s_warehouse = source_doc.t_warehouse
 		target_doc.qty = source_doc.qty - source_doc.transferred_qty
 
