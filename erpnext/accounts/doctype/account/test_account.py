@@ -123,7 +123,7 @@ class TestAccount(unittest.TestCase):
 		# Rename account in parent company
 		update_account_number(acc.name, "Test Rename Sync Account", "1234")
 
-		# Check if renmamed in children
+		# Check if renamed in children
 		self.assertTrue(frappe.db.exists("Account", {'account_name': "Test Rename Sync Account", "company": "_Test Company 4", "account_number": "1234"}))
 		self.assertTrue(frappe.db.exists("Account", {'account_name': "Test Rename Sync Account", "company": "_Test Company 5", "account_number": "1234"}))
 
@@ -131,7 +131,7 @@ class TestAccount(unittest.TestCase):
 		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC4")
 		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC5")
 
-	def test_account_sync_with_missing_parent_account_in_child_company(self):
+	def test_child_company_account_rename_sync(self):
 		frappe.local.flags.pop("ignore_root_company_validation", None)
 
 		acc = frappe.new_doc("Account")
@@ -144,20 +144,19 @@ class TestAccount(unittest.TestCase):
 		self.assertTrue(frappe.db.exists("Account", {'account_name': "Test Group Account", "company": "_Test Company 4"}))
 		self.assertTrue(frappe.db.exists("Account", {'account_name': "Test Group Account", "company": "_Test Company 5"}))
 
+		# Try renaming child company account
 		acc_tc_5 = frappe.db.get_value('Account', {'account_name': "Test Group Account", "company": "_Test Company 5"})
-		# Rename group account in one child company
+		self.assertRaises(frappe.ValidationError, update_account_number, acc_tc_5, "Test Modified Account")
+
+		# Rename child company account with allow_account_creation_against_child_company enabled
+		frappe.db.set_value("Company", "_Test Company 5", "allow_account_creation_against_child_company", 1)
+
 		update_account_number(acc_tc_5, "Test Modified Account")
+		self.assertTrue(frappe.db.exists("Account", {'name': "Test Modified Account - _TC5", "company": "_Test Company 5"}))
 
-		# Add child account to test group account in parent company
-		# which will try to do the same in child company
-		acc = frappe.new_doc("Account")
-		acc.account_name = "Test Child Account"
-		acc.parent_account = "Test Group Account - _TC3"
-		acc.company = "_Test Company 3"
+		frappe.db.set_value("Company", "_Test Company 5", "allow_account_creation_against_child_company", 0)
 
-		self.assertRaises(frappe.ValidationError, acc.insert)
-
-		to_delete = ["Test Group Account - _TC3", "Test Group Account - _TC5", "Test Modified Account - _TC5"]
+		to_delete = ["Test Group Account - _TC3", "Test Group Account - _TC4", "Test Modified Account - _TC5"]
 		for doc in to_delete:
 			frappe.delete_doc("Account", doc)
 
