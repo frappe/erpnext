@@ -15,7 +15,7 @@
 		</div>
 		<div class="col-sm-3 text-right bold">
 			{% if doc.doctype == "Quotation" and not doc.docstatus %}
-				{{ _("Pending For Approval") }}
+				{{ _("Pending") }}
 			{% else %}
 				{{ doc.get_formatted("grand_total") }}
 			{% endif %}
