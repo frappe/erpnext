@@ -11,11 +11,19 @@
   "title",
   "provider",
   "url",
+  "youtube_video_id",
   "column_break_4",
   "publish_date",
   "duration",
+  "youtube_tracking_section",
+  "like_count",
+  "view_count",
+  "col_break",
+  "dislike_count",
+  "comment_count",
   "section_break_7",
-  "description"
+  "description",
+  "image"
  ],
  "fields": [
   {
@@ -37,7 +45,6 @@
   {
    "fieldname": "url",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "URL",
    "reqd": 1
   },
@@ -48,11 +55,12 @@
   {
    "fieldname": "publish_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Publish Date"
   },
   {
    "fieldname": "duration",
-   "fieldtype": "Data",
+   "fieldtype": "Duration",
    "label": "Duration"
   },
   {
@@ -62,13 +70,67 @@
   {
    "fieldname": "description",
    "fieldtype": "Text Editor",
-   "in_list_view": 1,
    "label": "Description",
    "reqd": 1
+  },
+  {
+   "fieldname": "like_count",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Likes",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "view_count",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Views",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dislike_count",
+   "fieldtype": "Float",
+   "label": "Dislikes",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "comment_count",
+   "fieldtype": "Float",
+   "label": "Comments",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Image",
+   "no_copy": 1
+  },
+  {
+   "depends_on": "eval:doc.provider==\"YouTube\"",
+   "fieldname": "youtube_tracking_section",
+   "fieldtype": "Section Break",
+   "label": "Youtube Statistics"
+  },
+  {
+   "fieldname": "youtube_video_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Youtube ID",
+   "read_only": 1
   }
  ],
+ "image_field": "image",
  "links": [],
- "modified": "2020-07-21 19:29:46.603734",
+ "modified": "2020-09-07 17:02:20.185794",
  "modified_by": "Administrator",
  "module": "Utilities",
  "name": "Video",
