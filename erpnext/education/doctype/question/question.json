@@ -13,7 +13,7 @@
  "fields": [
   {
    "fieldname": "question",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "in_list_view": 1,
    "label": "Question",
    "reqd": 1
