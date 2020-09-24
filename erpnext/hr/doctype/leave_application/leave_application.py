@@ -446,7 +446,7 @@ def get_leave_details(employee, date):
 
 		leave_allocation[d] = {
 			"total_leaves": total_allocated_leaves,
-			"expired_leaves": total_allocated_leaves - (remaining_leaves + leaves_taken),
+			"expired_leaves": max(total_allocated_leaves - (remaining_leaves + leaves_taken), 0),
 			"leaves_taken": leaves_taken,
 			"pending_leaves": leaves_pending,
 			"remaining_leaves": remaining_leaves}
