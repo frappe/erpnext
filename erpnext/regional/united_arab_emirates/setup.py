@@ -33,7 +33,8 @@ def make_custom_fields():
 				fieldtype='Select', insert_after='permit_no', print_hide=1,
 				options='Y\nN', default='N'),
 			dict(fieldname='claimable_reverse_charge', label='Claimable Reverse Charge (Percentage)',
-				insert_after='reverse_charge', fieldtype='Percent'),
+				insert_after='reverse_charge', fieldtype='Percent', print_hide=1,
+				depends_on="eval:doc.reverse_charge=='Y'", default='100.000'),
 		]
 
 	sales_invoice_fields = [
@@ -45,12 +46,12 @@ def make_custom_fields():
 				fetch_from='customer.customer_name_in_arabic', print_hide=1),
 			dict(fieldname='emirate', label='Emirate', insert_after='customer_address',
 				fieldtype='Read Only', fetch_from='customer_address.emirates'),
-			dict(fieldname='returns_column_break', fieldtype='Column Break',
-				insert_after='select_print_heading'),
+			# dict(fieldname='returns_column_break', fieldtype='Column Break',
+			# 	insert_after='select_print_heading'),
 			dict(fieldname='tourist_tax_return', label='Tax Refund provided to Tourists (AED)',
-				insert_after='returns_column_break', fieldtype='Currency',),
+				insert_after='permit_no', fieldtype='Currency', print_hide=1, default='0'),
 			dict(fieldname='standard_rated_expenses', label='Standard Rated Expenses (AED)',
-				insert_after='tourist_tax_return', fieldtype='Currency',),
+				insert_after='tourist_tax_return', fieldtype='Currency', print_hide=1, default='0'),
 		]
 
 	invoice_item_fields = [
