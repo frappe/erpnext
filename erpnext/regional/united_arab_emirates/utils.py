@@ -167,3 +167,13 @@ def make_regional_gl_entries(gl_entries, doc):
 					}, account_currency, item=tax)
 				)
 	return gl_entries
+
+def validate_returns(doc, method):
+	print("validate_returns")
+	country = frappe.get_cached_value('Company', doc.company, 'country')
+
+	if country != 'United Arab Emirates':
+		return
+
+	if flt(doc.tourist_tax_return) + flt(doc.standard_rated_expenses) > flt(doc.total_taxes_and_charges):
+		frappe.throw(_("The Total Returns(Tax Refund provided to Tourists (AED) + Standard Rated Expenses (AED)) should be less than the Total Taxes and Charges (Company Currency)"))
