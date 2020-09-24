@@ -275,6 +275,7 @@
    "read_only": 1
   },
   {
+   "fetch_from": "customer.tax_id",
    "fieldname": "tax_id",
    "fieldtype": "Data",
    "label": "Tax Id",
@@ -1891,7 +1892,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-07-29 17:36:59.854601",
+ "modified": "2020-09-22 23:41:21.499179",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
