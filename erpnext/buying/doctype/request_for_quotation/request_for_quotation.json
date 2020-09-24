@@ -17,7 +17,6 @@
   "get_suppliers_button",
   "items_section",
   "items",
-  "link_to_mrs",
   "supplier_response_section",
   "email_template",
   "message_for_supplier",
@@ -118,12 +117,6 @@
    "oldfieldtype": "Table",
    "options": "Request for Quotation Item",
    "reqd": 1
-  },
-  {
-   "depends_on": "eval:doc.docstatus===0 && (doc.items && doc.items.length)",
-   "fieldname": "link_to_mrs",
-   "fieldtype": "Button",
-   "label": "Link to Material Requests"
   },
   {
    "fieldname": "supplier_response_section",
@@ -235,7 +228,7 @@
  "icon": "fa fa-shopping-cart",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-25 14:37:21.140194",
+ "modified": "2020-09-24 13:53:56.066616",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",
