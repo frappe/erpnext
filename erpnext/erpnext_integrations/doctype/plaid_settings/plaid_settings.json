@@ -1,5 +1,4 @@
 {
- "actions": [],
  "creation": "2018-10-25 10:02:48.656165",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -12,7 +11,6 @@
   "plaid_client_id",
   "plaid_secret",
   "column_break_7",
-  "plaid_public_key",
   "plaid_env"
  ],
  "fields": [
@@ -42,12 +40,6 @@
    "label": "Plaid Secret"
   },
   {
-   "fieldname": "plaid_public_key",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Plaid Public Key"
-  },
-  {
    "fieldname": "plaid_env",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -69,8 +61,7 @@
   }
  ],
  "issingle": 1,
- "links": [],
- "modified": "2020-02-07 15:21:11.616231",
+ "modified": "2020-09-12 02:31:44.542385",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Plaid Settings",
