@@ -20,9 +20,6 @@ def make_custom_fields():
 			insert_after='group_same_items', print_hide=1, collapsible=1),
 		dict(fieldname='permit_no', label='Permit Number',
 			fieldtype='Data', insert_after='vat_section', print_hide=1),
-		dict(fieldname='reverse_charge', label='Reverse Charge Applicable',
-			fieldtype='Select', insert_after='permit_no', print_hide=1,
-			options='Y\nN', default='N')
 	]
 
 	purchase_invoice_fields = [
@@ -31,7 +28,12 @@ def make_custom_fields():
 				fetch_from='company.tax_id', print_hide=1),
 			dict(fieldname='supplier_name_in_arabic', label='Supplier Name in Arabic',
 				fieldtype='Read Only', insert_after='supplier_name',
-				fetch_from='supplier.supplier_name_in_arabic', print_hide=1)
+				fetch_from='supplier.supplier_name_in_arabic', print_hide=1),
+			dict(fieldname='reverse_charge', label='Reverse Charge Applicable',
+				fieldtype='Select', insert_after='permit_no', print_hide=1,
+				options='Y\nN', default='N'),
+			dict(fieldname='claimable_reverse_charge', label='Claimable Reverse Charge (Percentage)',
+				insert_after='reverse_charge', fieldtype='Percent'),
 		]
 
 	sales_invoice_fields = [
@@ -43,6 +45,12 @@ def make_custom_fields():
 				fetch_from='customer.customer_name_in_arabic', print_hide=1),
 			dict(fieldname='emirate', label='Emirate', insert_after='customer_address',
 				fieldtype='Read Only', fetch_from='customer_address.emirates'),
+			dict(fieldname='returns_column_break', fieldtype='Column Break',
+				insert_after='select_print_heading'),
+			dict(fieldname='tourist_tax_return', label='Tax Refund provided to Tourists (AED)',
+				insert_after='returns_column_break', fieldtype='Currency',),
+			dict(fieldname='standard_rated_expenses', label='Standard Rated Expenses (AED)',
+				insert_after='tourist_tax_return', fieldtype='Currency',),
 		]
 
 	invoice_item_fields = [
@@ -69,6 +77,10 @@ def make_custom_fields():
 		'Item': [
 			dict(fieldname='tax_code', label='Tax Code',
 				fieldtype='Data', insert_after='item_group'),
+			# dict(fieldname='is_zero_rated', label='Is Zero Rated',
+			# fieldtype='Check', insert_after='tax_code'),
+			# dict(fieldname='is_exempt', label='Is Exempt ',
+			# fieldtype='Check', insert_after='is_zero_rated')
 		],
 		'Customer': [
 			dict(fieldname='customer_name_in_arabic', label='Customer Name in Arabic',
