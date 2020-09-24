@@ -360,20 +360,14 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 cur_frm.add_fetch('project', 'cost_center', 'cost_center');
 
 erpnext.buying.link_to_mrs = function(frm) {
-	var my_items = [];
-	for (var i in frm.doc.items) {
-		if(!frm.doc.items[i].material_request){
-			my_items.push(frm.doc.items[i].item_code);
-		}
-	}
 	frappe.call({
 		method: "erpnext.buying.utils.get_linked_material_requests",
 		args:{
-			items: my_items
+			items: frm.doc.items.map((item) => {return item.item_code;})
 		},
 		callback: function(r) {
 			if(!r.message || r.message.length == 0) {
-				frappe.throw(__("No pending Material Requests found to link for the given items."))
+				frappe.throw({message: __("No pending Material Requests found to link for the given items."), title: __("Note")});
 			}
 			else {
 				var i = 0;
