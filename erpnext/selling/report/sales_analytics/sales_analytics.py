@@ -34,7 +34,7 @@ class Analytics(object):
 
 	def get_columns(self):
 		self.columns = [{
-				"label": _(self.filters.tree_type + " ID"),
+				"label": _(self.filters.tree_type),
 				"options": self.filters.tree_type if self.filters.tree_type != "Order Type" else "",
 				"fieldname": "entity",
 				"fieldtype": "Link" if self.filters.tree_type != "Order Type" else "Data",
@@ -96,6 +96,10 @@ class Analytics(object):
 				return
 			self.get_sales_transactions_based_on_order_type()
 			self.get_rows_by_group()
+
+		elif self.filters.tree_type == "Project":
+			self.get_sales_transactions_based_on_project()
+			self.get_rows()
 
 	def get_sales_transactions_based_on_order_type(self):
 		if self.filters["value_quantity"] == 'Value':
@@ -198,6 +202,24 @@ class Analytics(object):
 
 		self.get_groups()
 
+	def get_sales_transactions_based_on_project(self):
+		if self.filters["value_quantity"] == 'Value':
+			value_field = "base_net_total as value_field"
+		else:
+			value_field = "total_qty as value_field"
+
+		entity = "project as entity"
+
+		self.entries = frappe.get_all(self.filters.doc_type,
+			fields=[entity, value_field, self.date_field],
+			filters={
+				"docstatus": 1,
+				"company": self.filters.company,
+				"project": ["!=", ""],
+				self.date_field: ('between', [self.filters.from_date, self.filters.to_date])
+			}
+		)
+
 	def get_rows(self):
 		self.data = []
 		self.get_periodic_data()
@@ -205,7 +227,7 @@ class Analytics(object):
 		for entity, period_data in iteritems(self.entity_periodic_data):
 			row = {
 				"entity": entity,
-				"entity_name": self.entity_names.get(entity)
+				"entity_name": self.entity_names.get(entity) if hasattr(self, 'entity_names') else None
 			}
 			total = 0
 			for end_date in self.periodic_daterange:
