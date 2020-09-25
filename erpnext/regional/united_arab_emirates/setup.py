@@ -10,6 +10,7 @@ from erpnext.setup.setup_wizard.operations.taxes_setup import create_sales_tax
 def setup(company=None, patch=True):
 	make_custom_fields()
 	add_print_formats()
+	add_custom_roles_for_reports()
 
 	if company:
 		create_sales_tax(company)
@@ -127,3 +128,15 @@ def add_print_formats():
 
 	frappe.db.sql(""" update `tabPrint Format` set disabled = 0 where
 		name in('Simplified Tax Invoice', 'Detailed Tax Invoice', 'Tax Invoice') """)
+
+def add_custom_roles_for_reports():
+	if not frappe.db.get_value('Custom Role', dict(report='UAE VAT')):
+		frappe.get_doc(dict(
+			doctype='Custom Role',
+			report='UAE VAT',
+			roles= [
+				dict(role='Accounts User'),
+				dict(role='Accounts Manager'),
+				dict(role='Auditor')
+			]
+		)).insert()
