@@ -8,6 +8,7 @@
   "client_id",
   "client_secret",
   "public_key_file",
+  "public_key",
   "column_break_3",
   "gstin",
   "username",
@@ -54,12 +55,18 @@
    "fieldtype": "Password",
    "label": "Password",
    "reqd": 1
+  },
+  {
+   "fieldname": "public_key",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-09-25 21:19:17.159664",
+ "modified": "2020-09-25 21:24:00.404460",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "E Invoice Settings",
