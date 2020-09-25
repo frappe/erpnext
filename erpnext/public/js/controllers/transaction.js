@@ -1789,7 +1789,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	set_query_for_item_tax_template: function(doc, cdt, cdn) {
-
 		var item = frappe.get_doc(cdt, cdn);
 		if(!item.item_code) {
 			frappe.throw(__("Please enter Item Code to get item taxes"));
@@ -1797,7 +1796,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 			let filters = {
 				'item_code': item.item_code,
-				'valid_from': doc.transaction_date || doc.bill_date || doc.posting_date,
+				'valid_from': ["<=", doc.transaction_date || doc.bill_date || doc.posting_date],
 				'item_group': item.item_group,
 			}
 
