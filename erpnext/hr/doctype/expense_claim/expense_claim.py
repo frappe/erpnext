@@ -370,7 +370,7 @@ def get_expense_claim_account(expense_claim_type, company):
 @frappe.whitelist()
 def get_purchase_invoice_details(purchase_invoice):
 	details = frappe.db.get_value("Purchase Invoice", purchase_invoice,
-		["supplier", "credit_to", "letter_of_credit", "set_project"], as_dict=1)
+		["supplier", "credit_to", "letter_of_credit", "project"], as_dict=1)
 	if not details:
 		frappe.throw(_("Invalid Purchase Invoice {0}").format(purchase_invoice))
 
@@ -378,7 +378,7 @@ def get_purchase_invoice_details(purchase_invoice):
 		"account": details.credit_to,
 		"party_type": "Letter of Credit" if details.letter_of_credit else "Supplier",
 		"party": details.letter_of_credit or details.supplier,
-		"project": details.set_project
+		"project": details.project
 	})
 
 

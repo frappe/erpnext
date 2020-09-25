@@ -477,8 +477,8 @@ class AccountsController(TransactionBase):
 			'is_opening': self.get("is_opening") or "No",
 			'party_type': None,
 			'party': None,
-			'project': self.get("project") or self.get("set_project"),
-			'cost_center': self.get("cost_center"),
+			'project': item and item.get("project") or self.get("project"),
+			'cost_center': item and item.get("cost_center") or self.get("cost_center"),
 			'reference_no': self.get("reference_no") or self.get("cheque_no") or self.get("bill_no"),
 			'reference_date': self.get("reference_date") or self.get("cheque_date") or self.get("bill_date")
 		})

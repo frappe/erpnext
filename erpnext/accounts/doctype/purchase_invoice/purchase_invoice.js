@@ -137,8 +137,8 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		}
 
 		// sales order
-		if (doc.docstatus == 1 && !doc.is_return) {
-			this.frm.add_custom_button(__('Sales Order'), function() { me.make_sales_order() }, __("Make"));
+		if (doc.docstatus === 1 && !doc.is_return) {
+			this.frm.add_custom_button(__('Sales Order'), function() { me.make_sales_order() }, __("Create"));
 		}
 	},
 

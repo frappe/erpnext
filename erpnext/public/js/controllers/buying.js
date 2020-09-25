@@ -16,8 +16,19 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		frappe.ui.form.on(this.frm.doctype + " Item", {
 			items_add: function(frm, cdt, cdn) {
 				var item = frappe.get_doc(cdt, cdn);
-				if(!item.project && frm.doc.set_project) {
-					item.project = frm.doc.set_project;
+				if(!item.project && frm.doc.project) {
+					item.project = frm.doc.project;
+				}
+			}
+		});
+
+		frappe.ui.form.on(this.frm.doctype, {
+			project: function(frm) {
+				var me = this;
+				if (frm.doc.project) {
+					$.each(frm.doc.items || [], function (i, item) {
+						frappe.model.set_value(frm.doctype + " Item", item.name, "project", frm.doc.project);
+					});
 				}
 			}
 		});
@@ -249,28 +260,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 	},
 
-	set_project: function() {
-		var me = this;
-		if(this.frm.doc.set_project) {
-			$.each(this.frm.doc.items || [], function(i, item) {
-				frappe.model.set_value(me.frm.doctype + " Item", item.name, "project", me.frm.doc.set_project);
-			});
-		}
-	},
-
-	project: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-		if(item.project) {
-			$.each(this.frm.doc["items"] || [],
-				function(i, other_item) {
-					if(!other_item.project) {
-						other_item.project = item.project;
-						refresh_field("project", other_item.name, other_item.parentfield);
-					}
-				});
-		}
-	},
-
 	rejected_warehouse: function(doc, cdt) {
 		// trigger autofill_warehouse only if parent rejected_warehouse field is triggered
 		if (["Purchase Invoice", "Purchase Receipt"].includes(cdt)) {
@@ -453,8 +442,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			}
 		}
 });
-
-cur_frm.add_fetch('project', 'cost_center', 'cost_center');
 
 erpnext.buying.get_default_bom = function(frm) {
 	$.each(frm.doc["items"] || [], function(i, d) {

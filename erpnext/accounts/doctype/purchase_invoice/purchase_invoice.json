@@ -43,8 +43,8 @@
   "poa_address_display",
   "accounting_dimensions_section",
   "cost_center",
-  "set_project",
   "dimension_col_break",
+  "project",
   "sb_14",
   "on_hold",
   "release_date",
@@ -1351,10 +1351,11 @@
    "fieldtype": "Column Break"
   },
   {
-    "fieldname": "project",
-    "fieldtype": "Link",
-    "label": "Project",
-    "options": "Project"
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project",
+   "print_hide": 1
   },
   {
    "fieldname": "tax_withholding_category",
@@ -1432,14 +1433,6 @@
    "fieldtype": "Small Text",
    "label": "Port Of Arrival Address",
    "read_only": 1
-  },
-  {
-   "fieldname": "set_project",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Set Project",
-   "options": "Project",
-   "print_hide": 1
   },
   {
    "default": "0",
@@ -1697,7 +1690,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2020-09-21 12:22:09.164068",
+ "modified": "2020-09-25 23:14:29.351727",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

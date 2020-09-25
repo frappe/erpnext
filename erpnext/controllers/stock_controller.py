@@ -107,7 +107,7 @@ class StockController(AccountsController):
 							"cost_center": item_row.get('cost_center') or self.get("cost_center"),
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, precision),
-							"project": item_row.get("project") or self.get("project") or self.get("set_project"),
+							"project": item_row.get("project") or self.get("project"),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No"
 						}, item=item_row))
 					elif sle.warehouse not in warehouse_with_no_account:
@@ -279,7 +279,7 @@ class StockController(AccountsController):
 			"company": self.company,
 			"batch_no": cstr(d.get("batch_no")).strip(),
 			"serial_no": d.get("serial_no"),
-			"project": d.get("project") or self.get('project') or self.get('set_project'),
+			"project": d.get("project") or self.get('project'),
 			"is_cancelled": self.docstatus==2 and "Yes" or "No"
 		})
 

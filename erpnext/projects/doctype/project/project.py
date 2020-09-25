@@ -505,8 +505,6 @@ def make_against_project(project_name, dt):
 		doc.company = project.company
 	if doc.meta.has_field('project'):
 		doc.project = project_name
-	if doc.meta.has_field('set_project'):
-		doc.set_project = project_name
 
 	# Set customer
 	if project.customer:

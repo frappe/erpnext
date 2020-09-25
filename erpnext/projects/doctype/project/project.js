@@ -142,7 +142,6 @@ frappe.ui.form.on("Project", {
 						quotation_to: 'Customer',
 						party_type: 'Customer',
 						project: frm.doc.name,
-						set_project: frm.doc.name,
 						item_code: frm.doc.item_code,
 						serial_no: frm.doc.serial_no,
 						item_serial_no: frm.doc.serial_no
