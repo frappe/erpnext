@@ -7,14 +7,19 @@ frappe.ui.form.on('E Invoice Settings', {
 	},
 
 	show_fetch_token_btn(frm) {
-		frm.add_custom_button(__("Fetch Token"),
-			() => {
-				frm.call({
-					doc: frm.doc,
-					method: 'make_authentication_request',
-					freeze: true
-				});
-			}
-		);
+		const { token_expiry } = frm.doc;
+		const now = frappe.datetime.now_datetime();
+		const expiry_in_mins = moment(token_expiry).diff(now, "minute");
+		if (expiry_in_mins <= 1) {
+			frm.add_custom_button(__("Fetch Token"),
+				() => {
+					frm.call({
+						doc: frm.doc,
+						method: 'make_authentication_request',
+						freeze: true
+					});
+				}
+			);
+		}
 	}
 });

@@ -13,7 +13,10 @@
   "gstin",
   "username",
   "password",
-  "auto_refresh_token"
+  "auto_refresh_token",
+  "auth_token",
+  "token_expiry",
+  "sek"
  ],
  "fields": [
   {
@@ -69,12 +72,30 @@
    "fieldname": "auto_refresh_token",
    "fieldtype": "Check",
    "label": "Auto Refresh Token"
+  },
+  {
+   "fieldname": "auth_token",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "token_expiry",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "sek",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-09-25 21:32:36.553678",
+ "modified": "2020-09-25 21:57:58.187647",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "E Invoice Settings",
