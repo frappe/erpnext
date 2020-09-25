@@ -10,6 +10,7 @@ import frappe
 from frappe.utils import cstr
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_v1_5
+from frappe.utils.data import get_datetime
 from frappe.model.document import Document
 from frappe.integrations.utils import make_post_request
 
@@ -35,6 +36,9 @@ class EInvoiceSettings(Document):
 		enc_msg = cipher.encrypt(msg)
 		b64_enc_msg = base64.b64encode(enc_msg)
 		return b64_enc_msg.decode()
+	
+	def decrypt_sek(self, enc_sek, key):
+		return enc_sek
 
 	def make_authentication_request(self):
 		endpoint = 'https://einv-apisandbox.nic.in/eivital/v1.03/auth'
@@ -52,5 +56,17 @@ class EInvoiceSettings(Document):
 
 		res = make_post_request(endpoint, headers=headers, data=json.dumps({ 'data': payload }))
 
-		print(res)
+		self.extract_token_and_sek(res, appkey)
+
+	def extract_token_and_sek(self, response, appkey):
+		data = response.get('Data')
+		auth_token = data.get('AuthToken')
+		token_expiry = data.get('TokenExpiry')
+		enc_sek = data.get('Sek')
+		sek = self.decrypt_sek(enc_sek, appkey)
+
+		self.auth_token = auth_token
+		self.token_expiry = get_datetime(token_expiry)
+		self.sek = sek
+		self.save()
 
