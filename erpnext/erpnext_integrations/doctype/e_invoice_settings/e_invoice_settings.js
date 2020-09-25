@@ -4,6 +4,18 @@
 frappe.ui.form.on('E Invoice Settings', {
 	refresh: function(frm) {
 		frm.trigger("show_fetch_token_btn");
+		frm.add_custom_button(__("Get GSTIN Details"), 
+			() => {
+				frm.call({
+					doc: frm.doc,
+					method: 'get_gstin_details',
+					args: {
+						'gstin': '27AAACW8099E1ZX'
+					},
+					freeze: true,
+					callback: (res) => console.log(res)
+				});
+			});
 	},
 
 	show_fetch_token_btn(frm) {
@@ -16,7 +28,8 @@ frappe.ui.form.on('E Invoice Settings', {
 					frm.call({
 						doc: frm.doc,
 						method: 'make_authentication_request',
-						freeze: true
+						freeze: true,
+						callback: () => frm.refresh()
 					});
 				}
 			);
