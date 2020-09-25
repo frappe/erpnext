@@ -28,6 +28,10 @@ class RequestforQuotation(BuyingController):
 		super(RequestforQuotation, self).set_qty_as_per_stock_uom()
 		self.update_email_id()
 
+		if self.docstatus < 1:
+			# after amend and save, status still shows as cancelled, until submit
+			frappe.db.set(self, 'status', 'Draft')
+
 	def validate_duplicate_supplier(self):
 		supplier_list = [d.supplier for d in self.suppliers]
 		if len(supplier_list) != len(set(supplier_list)):
