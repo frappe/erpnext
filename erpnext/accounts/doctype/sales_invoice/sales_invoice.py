@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
-from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
+from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate, get_link_to_form
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date
 from frappe.model.mapper import get_mapped_doc
@@ -1372,7 +1372,7 @@ def get_bank_cash_account(mode_of_payment, company):
 		{"parent": mode_of_payment, "company": company}, "default_account")
 	if not account:
 		frappe.throw(_("Please set default Cash or Bank account in Mode of Payment {0}")
-			.format(mode_of_payment))
+			.format(get_link_to_form("Mode of Payment", mode_of_payment)), title=_("Missing Account"))
 	return {
 		"account": account
 	}
@@ -1612,18 +1612,16 @@ def update_multi_mode_option(doc, pos_profile):
 		payment.type = payment_mode.type
 
 	doc.set('payments', [])
-	if not pos_profile or not pos_profile.get('payments'):
-		for payment_mode in get_all_mode_of_payments(doc):
-			append_payment(payment_mode)
-		return
-
 	for pos_payment_method in pos_profile.get('payments'):
 		pos_payment_method = pos_payment_method.as_dict()
 
 		payment_mode = get_mode_of_payment_info(pos_payment_method.mode_of_payment, doc.company)
-		if payment_mode:
-			payment_mode[0].default = pos_payment_method.default
-			append_payment(payment_mode[0])
+		if not payment_mode:
+			frappe.throw(_("Please set default Cash or Bank account in Mode of Payment {0}")
+				.format(get_link_to_form("Mode of Payment", pos_payment_method.mode_of_payment)), title=_("Missing Account"))
+
+		payment_mode[0].default = pos_payment_method.default
+		append_payment(payment_mode[0])
 
 def get_all_mode_of_payments(doc):
 	return frappe.db.sql("""

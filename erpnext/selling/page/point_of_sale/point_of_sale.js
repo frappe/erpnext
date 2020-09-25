@@ -9,7 +9,7 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 		title: __('Point of Sale'),
 		single_column: true
 	});
-	// online
+
 	wrapper.pos = new erpnext.PointOfSale.Controller(wrapper);
 	window.cur_pos = wrapper.pos;
 };
