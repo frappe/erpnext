@@ -103,7 +103,7 @@ def add_assignments(events, start, end, conditions=None):
 			"doctype": "Shift Assignment",
 			"start_date": d.start_date,
 			"end_date": d.end_date if d.end_date else nowdate(),
-			"title": cstr(d.employee_name) + \
+			"title": cstr(d.employee_name) + ": "+ \
 				cstr(d.shift_type),
 			"docstatus": d.docstatus
 		}

@@ -417,7 +417,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var taxes_and_charges_field = frappe.meta.get_docfield(me.frm.doc.doctype, "taxes_and_charges",
 			me.frm.doc.name);
 
-		if (!this.frm.doc.taxes_and_charges && this.frm.doc.taxes) {
+		if (!this.frm.doc.taxes_and_charges && this.frm.doc.taxes && this.frm.doc.taxes.length > 0) {
 			return;
 		}
 
@@ -781,10 +781,23 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		else var date = this.frm.doc.transaction_date;
 
 		if (frappe.meta.get_docfield(this.frm.doctype, "shipping_address") &&
-			in_list(['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'], this.frm.doctype)){
+			in_list(['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'], this.frm.doctype)) {
 			erpnext.utils.get_shipping_address(this.frm, function(){
 				set_party_account(set_pricing);
 			})
+
+			// Get default company billing address in Purchase Invoice, Order and Receipt
+			frappe.call({
+				'method': 'frappe.contacts.doctype.address.address.get_default_address',
+				'args': {
+					'doctype': 'Company',
+					'name': this.frm.doc.company
+				},
+				'callback': function(r) {
+					me.frm.set_value('billing_address', r.message);
+				}
+			});
+
 		} else {
 			set_party_account(set_pricing);
 		}

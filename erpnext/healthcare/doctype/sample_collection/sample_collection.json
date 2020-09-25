@@ -9,8 +9,10 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
+  "patient_details_section",
   "naming_series",
   "patient",
+  "patient_name",
   "patient_age",
   "patient_sex",
   "column_break_4",
@@ -25,15 +27,17 @@
   "collected_by",
   "collected_time",
   "num_print",
-  "amended_from",
   "section_break_15",
-  "sample_details"
+  "sample_details",
+  "amended_from"
  ],
  "fields": [
   {
    "fetch_from": "patient.inpatient_record",
    "fieldname": "inpatient_record",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Inpatient Record",
    "options": "Inpatient Record",
    "read_only": 1
@@ -42,6 +46,8 @@
    "bold": 1,
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Series",
    "no_copy": 1,
    "options": "HLC-SC-.YYYY.-",
@@ -52,6 +58,8 @@
    "default": "0",
    "fieldname": "invoiced",
    "fieldtype": "Check",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Invoiced",
    "no_copy": 1,
    "read_only": 1,
@@ -61,41 +69,60 @@
    "fetch_from": "inpatient_record.patient",
    "fieldname": "patient",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "ignore_user_permissions": 1,
    "in_standard_filter": 1,
    "label": "Patient",
    "options": "Patient",
+   "reqd": 1,
    "search_index": 1
   },
   {
    "fieldname": "column_break_4",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "hide_days": 1,
+   "hide_seconds": 1
   },
   {
    "fieldname": "patient_age",
    "fieldtype": "Data",
-   "label": "Age"
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Age",
+   "read_only": 1
   },
   {
    "fetch_from": "patient.sex",
    "fieldname": "patient_sex",
-   "fieldtype": "Data",
-   "label": "Gender"
+   "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Gender",
+   "options": "Gender",
+   "read_only": 1
   },
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "in_standard_filter": 1,
    "label": "Company",
    "options": "Company"
   },
   {
    "fieldname": "section_break_6",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Sample Details"
   },
   {
    "fieldname": "sample",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "ignore_user_permissions": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
@@ -108,16 +135,23 @@
    "fetch_from": "sample.sample_uom",
    "fieldname": "sample_uom",
    "fieldtype": "Data",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "in_list_view": 1,
-   "label": "UOM"
+   "label": "UOM",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_10",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "hide_days": 1,
+   "hide_seconds": 1
   },
   {
    "fieldname": "collected_by",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "ignore_user_permissions": 1,
    "label": "Collected By",
    "options": "User"
@@ -125,20 +159,27 @@
   {
    "fieldname": "collected_time",
    "fieldtype": "Datetime",
-   "label": "Collected Time"
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "Collected On"
   },
   {
    "allow_on_submit": 1,
    "default": "1",
+   "description": "Number of prints required for labelling the samples",
    "fieldname": "num_print",
    "fieldtype": "Int",
-   "label": "No. of print",
+   "hide_days": 1,
+   "hide_seconds": 1,
+   "label": "No. of prints",
    "print_hide": 1,
    "report_hide": 1
   },
   {
    "fieldname": "amended_from",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Amended From",
    "no_copy": 1,
    "options": "Sample Collection",
@@ -147,25 +188,43 @@
   },
   {
    "fieldname": "section_break_15",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1
   },
   {
    "default": "0",
    "fieldname": "sample_qty",
    "fieldtype": "Float",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "in_list_view": 1,
    "label": "Quantity"
   },
   {
    "fieldname": "sample_details",
    "fieldtype": "Long Text",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "ignore_xss_filter": 1,
    "label": "Collection Details"
+  },
+  {
+   "fieldname": "patient_details_section",
+   "fieldtype": "Section Break",
+   "label": "Patient Details"
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-25 14:36:46.990469",
+ "modified": "2020-07-30 16:53:13.076104",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Sample Collection",
