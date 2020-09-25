@@ -14,7 +14,7 @@ from Crypto.Cipher import PKCS1_v1_5, AES
 from Crypto.Util.Padding import pad, unpad
 from frappe.utils.data import get_datetime
 from frappe.model.document import Document
-from frappe.integrations.utils import make_post_request
+from frappe.integrations.utils import make_post_request, make_get_request
 
 class EInvoiceSettings(Document):
 	def validate(self):
@@ -40,15 +40,18 @@ class EInvoiceSettings(Document):
 		return b64_enc_msg.decode()
 	
 	def aes_decrypt(self, enc_msg, key):
+		encode_as_b64 = True
 		if not (isinstance(key, bytes) or isinstance(key, bytearray)):
 			key = base64.b64decode(key)
+			encode_as_b64 = False
 
 		cipher = AES.new(key, AES.MODE_ECB)
 		b64_enc_msg = base64.b64decode(enc_msg)
 		msg_bytes = cipher.decrypt(b64_enc_msg)
 		msg_bytes = unpad(msg_bytes, AES.block_size) # due to ECB/PKCS5Padding
-		b64_msg_bytes = base64.b64encode(msg_bytes)
-		return b64_msg_bytes.decode()
+		if encode_as_b64:
+			msg_bytes = base64.b64encode(msg_bytes)
+		return msg_bytes.decode()
 
 	def make_authentication_request(self):
 		endpoint = 'https://einv-apisandbox.nic.in/eivital/v1.03/auth'
@@ -80,6 +83,21 @@ class EInvoiceSettings(Document):
 		self.token_expiry = get_datetime(token_expiry)
 		self.sek = sek
 		self.save()
+	
+	def get_gstin_details(self, gstin):
+		endpoint = 'https://einv-apisandbox.nic.in/eivital/v1.03/Master/gstin/{gstin}'.format(gstin=gstin)
+		headers = { 'content-type': 'application/json' }
+		headers.update(dict(client_id=self.client_id, client_secret=self.client_secret, user_name=self.username))
+		headers.update(dict(Gstin=self.gstin, AuthToken=self.auth_token))
+
+		res = make_get_request(endpoint, headers=headers)
+		self.handle_err_response(res)
+
+		enc_json = res.get('Data')
+		json_str = self.aes_decrypt(enc_json, self.sek)
+		data = json.loads(json_str)
+
+		return data
 
 	def handle_err_response(self, response):
 		if response.get('Status') == 0:
