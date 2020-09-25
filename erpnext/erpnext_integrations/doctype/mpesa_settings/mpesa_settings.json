@@ -9,10 +9,14 @@
   "payment_gateway_name",
   "consumer_key",
   "consumer_secret",
-  "column_break_4",
+  "initiator_name",
   "till_number",
+  "sandbox",
+  "column_break_4",
   "online_passkey",
-  "sandbox"
+  "security_credential",
+  "get_account_balance",
+  "account_balance"
  ],
  "fields": [
   {
@@ -58,11 +62,32 @@
    "fieldtype": "Password",
    "label": " Online PassKey",
    "reqd": 1
+  },
+  {
+   "fieldname": "initiator_name",
+   "fieldtype": "Data",
+   "label": "Initiator Name"
+  },
+  {
+   "fieldname": "security_credential",
+   "fieldtype": "Small Text",
+   "label": "Security Credential"
+  },
+  {
+   "fieldname": "account_balance",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Account Balance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "get_account_balance",
+   "fieldtype": "Button",
+   "label": "Get Account Balance"
   }
  ],
- "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-09-10 09:07:28.557461",
+ "modified": "2020-09-25 20:21:38.215494",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Mpesa Settings",
