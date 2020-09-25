@@ -37,8 +37,8 @@ class EInvoiceSettings(Document):
 		b64_enc_msg = base64.b64encode(enc_msg)
 		return b64_enc_msg.decode()
 	
-	def decrypt_sek(self, enc_sek, key):
-		return enc_sek
+	def aes_decrypt(self, msg, key):
+		return msg
 
 	def make_authentication_request(self):
 		endpoint = 'https://einv-apisandbox.nic.in/eivital/v1.03/auth'
@@ -55,6 +55,7 @@ class EInvoiceSettings(Document):
 		payload.update(dict(Password=enc_password, AppKey=enc_appkey))
 
 		res = make_post_request(endpoint, headers=headers, data=json.dumps({ 'data': payload }))
+		self.handle_err_response(res)
 
 		self.extract_token_and_sek(res, appkey)
 
@@ -63,10 +64,14 @@ class EInvoiceSettings(Document):
 		auth_token = data.get('AuthToken')
 		token_expiry = data.get('TokenExpiry')
 		enc_sek = data.get('Sek')
-		sek = self.decrypt_sek(enc_sek, appkey)
+		sek = self.aes_decrypt(enc_sek, appkey)
 
 		self.auth_token = auth_token
 		self.token_expiry = get_datetime(token_expiry)
 		self.sek = sek
 		self.save()
 
+	def handle_err_response(self, response):
+		if response.get('Status') == 0:
+			err_msg = response.get('ErrorDetails')[0].get('ErrorMessage')
+			frappe.throw(_(err_msg), title=_("API Request Failed"))
