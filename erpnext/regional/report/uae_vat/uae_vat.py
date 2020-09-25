@@ -41,12 +41,6 @@ def get_columns():
 			"label": "VAT Amount (AED)",
 			"fieldtype": "Currency",
 			"width": 100
-		},
-		{
-			"fieldname": "adjustment",
-			"label": "Adjustment (AED)",
-			"fieldtype": "Currency",
-			"width": 100
 		}
 	]
 
@@ -61,7 +55,12 @@ def get_data(filters = None):
 		Dict: Dictionary containing chart data
 	"""
 	data = []
-	data.append({"legend": f'VAT on Sales and All Other Outputs',})
+	data.append({
+		"no": '',
+		"legend": f'VAT on Sales and All Other Outputs',
+		"amount": '',
+		"vat_amount": ''
+		})
 	total_emiratewise = get_total_emiratewise(filters)
 	emirates = get_emirates()
 	amounts_by_emirate = {}
@@ -108,7 +107,30 @@ def get_data(filters = None):
 		}
 	)
 
-	data.append({"legend": f'VAT on Expenses and All Other Inputs'})
+	data.append(
+		{
+			"no": '4',
+			"legend": f'Zero Rated',
+			"amount": get_zero_rated_total(filters),
+			"vat_amount": "-"
+		}
+	)
+
+	data.append(
+		{
+			"no": '5',
+			"legend": f'Exempt Supplies',
+			"amount": get_exempt_total(filters),
+			"vat_amount": "-"
+		}
+	)
+
+	data.append({
+		"no": '',
+		"legend": f'VAT on Expenses and All Other Inputs',
+		"amount": '',
+		"vat_amount": ''
+		})
 	data.append(
 		{
 			"no": '9',
@@ -226,7 +248,7 @@ def get_reverse_charge_total(filters):
 		where
 		reverse_charge = "Y"
 		and docstatus = 1 {get_conditions(filters)} ;
-		""")[0][0]
+		""")[0][0] or 0
 
 def get_reverse_charge_tax(filters):
 	"""Returns the sum of the tax of each Purchase invoice made
@@ -246,7 +268,7 @@ def get_reverse_charge_tax(filters):
 		and `tabPurchase Invoice`.docstatus = 1
 		and `tabGL Entry`.docstatus = 1  {get_conditions_join(filters)}
 		and account in ("{'", "'.join(get_tax_accounts(filters['company']))}");
-		""")[0][0]
+		""")[0][0] or 0
 
 
 
@@ -292,7 +314,7 @@ def get_reverse_charge_recoverable_total(filters):
 		reverse_charge = "Y"
 		and claimable_reverse_charge > 0
 		and docstatus = 1 {get_conditions(filters)} ;
-		""")[0][0]
+		""")[0][0] or 0
 
 
 def get_reverse_charge_recoverable_tax(filters):
@@ -314,7 +336,7 @@ def get_reverse_charge_recoverable_tax(filters):
 		and `tabPurchase Invoice`.claimable_reverse_charge > 0
 		and `tabGL Entry`.docstatus = 1  {get_conditions_join(filters)}
 		and account in ("{'", "'.join(get_tax_accounts(filters['company']))}");
-		""")[0][0]
+		""")[0][0] or 0
 
 
 def get_standard_rated_expenses_total(filters):
@@ -340,7 +362,7 @@ def get_standard_rated_expenses_total(filters):
 		where
 		standard_rated_expenses > 0
 		and docstatus = 1 {get_conditions(filters)} ;
-		""")[0][0]
+		""")[0][0] or 0
 
 
 def get_standard_rated_expenses_tax(filters):
@@ -358,7 +380,7 @@ def get_standard_rated_expenses_tax(filters):
 		where
 		standard_rated_expenses > 0
 		and docstatus = 1 {get_conditions(filters)} ;
-		""")[0][0]
+		""")[0][0] or 0
 
 def get_tourist_tax_return_total(filters):
 	"""Returns the sum of the total of each Sales invoice with non zero tourist_tax_return
@@ -383,7 +405,7 @@ def get_tourist_tax_return_total(filters):
 		where
 		tourist_tax_return > 0
 		and docstatus = 1 {get_conditions(filters)} ;
-		""")[0][0]
+		""")[0][0] or 0
 
 
 def get_tourist_tax_return_tax(filters):
@@ -401,4 +423,37 @@ def get_tourist_tax_return_tax(filters):
 		where
 		tourist_tax_return > 0
 		and docstatus = 1 {get_conditions(filters)} ;
-		""")[0][0]
+		""")[0][0] or 0
+
+def get_zero_rated_total(filters):
+	"""Returns the sum of each Sales Invoice Item Amount which is zero rated
+
+	Args:
+		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
+
+	Returns:
+		Float: sum of each Sales Invoice Item Amount which is zero rated
+	"""
+	return frappe.db.sql(f"""
+		select sum(i.base_amount) as total from
+		`tabSales Invoice Item` i, `tabSales Invoice` s
+		where s.docstatus = 1 and i.parent = s.name and i.is_zero_rated = 1
+		{get_conditions(filters)} ;
+		""")[0][0] or 0
+
+
+def get_exempt_total(filters):
+	"""Returns the sum of each Sales Invoice Item Amount which is Vat Exempt
+
+	Args:
+		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
+
+	Returns:
+		Float: sum of each Sales Invoice Item Amount which is Vat Exempt
+	"""
+	return frappe.db.sql(f"""
+		select sum(i.base_amount) as total from
+		`tabSales Invoice Item` i, `tabSales Invoice` s
+		where s.docstatus = 1 and i.parent = s.name and i.is_exempt = 1
+		{get_conditions(filters)} ;
+		""")[0][0] or 0

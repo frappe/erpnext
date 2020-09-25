@@ -15,6 +15,13 @@ def setup(company=None, patch=True):
 		create_sales_tax(company)
 
 def make_custom_fields():
+	is_zero_rated = dict(fieldname='is_zero_rated', label='Is Zero Rated',
+		fieldtype='Check', fetch_from='item_code.is_zero_rated', insert_after='description',
+		print_hide=1)
+	is_exempt = dict(fieldname='is_exempt', label='Is Exempt',
+		fieldtype='Check', fetch_from='item_code.is_exempt', insert_after='is_zero_rated',
+		print_hide=1)
+
 	invoice_fields = [
 		dict(fieldname='vat_section', label='VAT Details', fieldtype='Section Break',
 			insert_after='group_same_items', print_hide=1, collapsible=1),
@@ -46,8 +53,6 @@ def make_custom_fields():
 				fetch_from='customer.customer_name_in_arabic', print_hide=1),
 			dict(fieldname='emirate', label='Emirate', insert_after='customer_address',
 				fieldtype='Read Only', fetch_from='customer_address.emirates'),
-			# dict(fieldname='returns_column_break', fieldtype='Column Break',
-			# 	insert_after='select_print_heading'),
 			dict(fieldname='tourist_tax_return', label='Tax Refund provided to Tourists (AED)',
 				insert_after='permit_no', fieldtype='Currency', print_hide=1, default='0'),
 			dict(fieldname='standard_rated_expenses', label='Standard Rated Expenses (AED)',
@@ -78,10 +83,12 @@ def make_custom_fields():
 		'Item': [
 			dict(fieldname='tax_code', label='Tax Code',
 				fieldtype='Data', insert_after='item_group'),
-			# dict(fieldname='is_zero_rated', label='Is Zero Rated',
-			# fieldtype='Check', insert_after='tax_code'),
-			# dict(fieldname='is_exempt', label='Is Exempt ',
-			# fieldtype='Check', insert_after='is_zero_rated')
+			dict(fieldname='is_zero_rated', label='Is Zero Rated',
+				fieldtype='Check', insert_after='tax_code',
+				print_hide=1),
+			dict(fieldname='is_exempt', label='Is Exempt ',
+				fieldtype='Check', insert_after='is_zero_rated',
+				print_hide=1)
 		],
 		'Customer': [
 			dict(fieldname='customer_name_in_arabic', label='Customer Name in Arabic',
@@ -101,7 +108,7 @@ def make_custom_fields():
 		'Sales Invoice': sales_invoice_fields + invoice_fields,
 		'Sales Order': sales_invoice_fields + invoice_fields,
 		'Delivery Note': sales_invoice_fields + invoice_fields,
-		'Sales Invoice Item': invoice_item_fields + delivery_date_field,
+		'Sales Invoice Item': invoice_item_fields + delivery_date_field + [is_zero_rated, is_exempt],
 		'Purchase Invoice Item': invoice_item_fields,
 		'Sales Order Item': invoice_item_fields,
 		'Delivery Note Item': invoice_item_fields,
