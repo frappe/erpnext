@@ -224,6 +224,7 @@ def update_outstanding_amt(voucher_type, voucher_no, account, party_type, party,
 	ref_doc = frappe.get_doc(voucher_type, voucher_no)
 	ref_doc.db_set(fieldname, bal)
 	ref_doc.set_status(update=True)
+	ref_doc.notify_update()
 
 def validate_frozen_account(account, adv_adj=None):
 	frozen_account = frappe.db.get_value("Account", account, "freeze_account")
