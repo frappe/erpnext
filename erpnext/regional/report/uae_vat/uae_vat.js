@@ -27,5 +27,15 @@ frappe.query_reports["UAE VAT"] = {
 			"reqd": 1,
 			"default": frappe.datetime.get_today()
 		},
-	]
+	],
+	"formatter": function(value, row, column, data, default_formatter) {
+		if (data
+			&& (data.legend=='VAT on Sales and All Other Outputs' || data.legend=='VAT on Expenses and All Other Inputs')
+			&& data.legend==value) {
+			value = $(`<span>${value}</span>`);
+			var $value = $(value).css("font-weight", "bold");
+			value = $value.wrap("<p></p>").parent().html();
+		}
+		return value;
+	},
 };
