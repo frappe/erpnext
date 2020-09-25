@@ -836,42 +836,30 @@
    "read_only": 1
   },
   {
-   "depends_on": "total_discount_after_taxes",
-   "fieldname": "total_after_taxes",
-   "fieldtype": "Currency",
-   "label": "Total After Taxes",
-   "options": "currency",
-   "print_hide": 1,
-   "read_only": 1
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "in_global_search": 1,
+   "in_standard_filter": 1,
+   "label": "Remarks"
   },
   {
-   "depends_on": "total_discount_after_taxes",
-   "fieldname": "total_discount_after_taxes",
-   "fieldtype": "Currency",
-   "label": "Total Discount After Taxes",
-   "options": "currency",
-   "print_hide": 1,
-   "read_only": 1
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
   },
   {
-   "depends_on": "total_discount_after_taxes",
-   "fieldname": "base_total_after_taxes",
-   "fieldtype": "Currency",
-   "force_currency_symbol": 1,
-   "label": "Total After Taxes (Company Currency)",
-   "options": "Company:company:default_currency",
-   "print_hide": 1,
-   "read_only": 1
+   "fieldname": "set_project",
+   "fieldtype": "Link",
+   "label": "Set Project",
+   "options": "Project",
+   "print_hide": 1
   },
   {
-   "depends_on": "total_discount_after_taxes",
-   "fieldname": "base_total_discount_after_taxes",
-   "fieldtype": "Currency",
-   "force_currency_symbol": 1,
-   "label": "Total Discount After Taxes (Company Currency)",
-   "options": "Company:company:default_currency",
-   "print_hide": 1,
-   "read_only": 1
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "total_alt_uom_qty",
@@ -880,37 +868,22 @@
    "read_only": 1
   },
   {
+   "fieldname": "column_break_38",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_40",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_break_43",
+   "fieldtype": "Column Break"
+  },
+  {
    "depends_on": "total_discount",
    "fieldname": "total_before_discount",
    "fieldtype": "Currency",
    "label": "Total Before Discount",
-   "options": "currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "depends_on": "total_discount",
-   "fieldname": "tax_exclusive_total_before_discount",
-   "fieldtype": "Currency",
-   "label": "Tax Exclusive Total Before Discount",
-   "options": "currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "depends_on": "total_discount",
-   "fieldname": "total_discount",
-   "fieldtype": "Currency",
-   "label": "Total Discount",
-   "options": "currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "depends_on": "total_discount",
-   "fieldname": "tax_exclusive_total_discount",
-   "fieldtype": "Currency",
-   "label": "Tax Exclusive Total Discount",
    "options": "currency",
    "print_hide": 1,
    "read_only": 1
@@ -926,12 +899,15 @@
    "read_only": 1
   },
   {
+   "fieldname": "column_break_46",
+   "fieldtype": "Column Break"
+  },
+  {
    "depends_on": "total_discount",
-   "fieldname": "base_tax_exclusive_total_before_discount",
+   "fieldname": "total_discount",
    "fieldtype": "Currency",
-   "force_currency_symbol": 1,
-   "label": "Tax Exclusive Total Before Discount (Company Currency)",
-   "options": "Company:company:default_currency",
+   "label": "Total Discount",
+   "options": "currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -946,6 +922,71 @@
    "read_only": 1
   },
   {
+   "fieldname": "column_break_53",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "tax_exclusive_totals_section",
+   "fieldtype": "Section Break",
+   "label": "Tax Exclusive Totals"
+  },
+  {
+   "depends_on": "eval:doc.tax_exclusive_total != doc.total",
+   "fieldname": "tax_exclusive_total",
+   "fieldtype": "Currency",
+   "label": "Tax Exclusive Total",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.tax_exclusive_total != doc.total",
+   "fieldname": "base_tax_exclusive_total",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Tax Exclusive Total (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_62",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "total_discount",
+   "fieldname": "tax_exclusive_total_before_discount",
+   "fieldtype": "Currency",
+   "label": "Tax Exclusive Total Before Discount",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "total_discount",
+   "fieldname": "base_tax_exclusive_total_before_discount",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Tax Exclusive Total Before Discount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_65",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "total_discount",
+   "fieldname": "tax_exclusive_total_discount",
+   "fieldtype": "Currency",
+   "label": "Tax Exclusive Total Discount",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "depends_on": "total_discount",
    "fieldname": "base_tax_exclusive_total_discount",
    "fieldtype": "Currency",
@@ -956,19 +997,15 @@
    "read_only": 1
   },
   {
-   "fieldname": "set_project",
-   "fieldtype": "Link",
-   "label": "Set Project",
-   "options": "Project",
-   "print_hide": 1
+   "fieldname": "column_break_71",
+   "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.tax_exclusive_total != doc.total",
-   "fieldname": "base_tax_exclusive_total",
+   "depends_on": "eval:doc.taxable_total != doc.net_total",
+   "fieldname": "taxable_total",
    "fieldtype": "Currency",
-   "force_currency_symbol": 1,
-   "label": "Tax Exclusive Total (Company Currency)",
-   "options": "Company:company:default_currency",
+   "label": "Net Taxable Total",
+   "options": "currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -983,87 +1020,50 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.tax_exclusive_total != doc.total",
-   "fieldname": "tax_exclusive_total",
-   "fieldtype": "Currency",
-   "label": "Tax Exclusive Total",
-   "options": "currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.taxable_total != doc.net_total",
-   "fieldname": "taxable_total",
-   "fieldtype": "Currency",
-   "label": "Net Taxable Total",
-   "options": "currency",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "remarks",
-   "fieldtype": "Small Text",
-   "in_global_search": 1,
-   "in_standard_filter": 1,
-   "label": "Remarks"
-  },
-  {
-   "fieldname": "column_break_21",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_15",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_27",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_38",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_40",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "col_break_43",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_46",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_53",
-   "fieldtype": "Column Break"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "tax_exclusive_totals_section",
-   "fieldtype": "Section Break",
-   "label": "Tax Exclusive Totals"
-  },
-  {
-   "fieldname": "column_break_62",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_65",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_71",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "section_break_74",
    "fieldtype": "Section Break"
   },
   {
+   "depends_on": "total_discount_after_taxes",
+   "fieldname": "total_after_taxes",
+   "fieldtype": "Currency",
+   "label": "Total After Taxes",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "total_discount_after_taxes",
+   "fieldname": "base_total_after_taxes",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Total After Taxes (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
    "fieldname": "column_break_84",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "total_discount_after_taxes",
+   "fieldname": "total_discount_after_taxes",
+   "fieldtype": "Currency",
+   "label": "Total Discount After Taxes",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "total_discount_after_taxes",
+   "fieldname": "base_total_discount_after_taxes",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Total Discount After Taxes (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break_96",

@@ -20,18 +20,6 @@
    "options": "Program"
   },
   {
-   "fieldname": "minimum_age",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Minimum Age"
-  },
-  {
-   "fieldname": "maximum_age",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Maximum Age"
-  },
-  {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
   },
@@ -46,6 +34,18 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Naming Series (for Student Applicant)"
+  },
+  {
+   "fieldname": "minimum_age",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Minimum Age"
+  },
+  {
+   "fieldname": "maximum_age",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Maximum Age"
   }
  ],
  "istable": 1,

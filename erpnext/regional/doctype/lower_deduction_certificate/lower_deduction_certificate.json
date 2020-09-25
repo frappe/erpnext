@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "field:certificate_no",
  "creation": "2020-03-10 23:12:10.072631",
  "doctype": "DocType",
@@ -125,7 +124,6 @@
    "reqd": 1
   }
  ],
- "links": [],
  "modified": "2020-04-23 23:04:41.203721",
  "modified_by": "Administrator",
  "module": "Regional",

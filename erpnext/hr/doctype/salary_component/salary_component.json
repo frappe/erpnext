@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:salary_component",
@@ -234,7 +233,6 @@
   }
  ],
  "icon": "fa fa-flag",
- "links": [],
  "modified": "2020-04-28 15:46:45.252945",
  "modified_by": "Administrator",
  "module": "HR",

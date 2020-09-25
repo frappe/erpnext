@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:location_name",
@@ -140,7 +139,6 @@
   }
  ],
  "is_tree": 1,
- "links": [],
  "modified": "2020-03-18 18:25:59.283057",
  "modified_by": "Administrator",
  "module": "Assets",

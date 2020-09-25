@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "HR-SSA-.YY.-.MM.-.#####",
  "creation": "2018-04-13 16:38:41.769237",
@@ -123,7 +122,6 @@
   }
  ],
  "is_submittable": 1,
- "links": [],
  "modified": "2020-04-25 18:24:23.617088",
  "modified_by": "Administrator",
  "module": "HR",

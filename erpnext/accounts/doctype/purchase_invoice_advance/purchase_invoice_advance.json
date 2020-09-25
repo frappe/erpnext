@@ -40,23 +40,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "reference_row",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Reference Row",
-   "no_copy": 1,
-   "oldfieldname": "jv_detail_no",
-   "oldfieldtype": "Date",
-   "print_hide": 1,
-   "print_width": "80px",
-   "read_only": 1,
-   "width": "80px"
-  },
-  {
-   "fieldname": "column_break_4",
-   "fieldtype": "Column Break"
-  },
-  {
    "columns": 4,
    "fieldname": "remarks",
    "fieldtype": "Small Text",
@@ -70,16 +53,17 @@
    "width": "150px"
   },
   {
-   "fieldname": "section_break_6",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "paid_amount",
-   "fieldtype": "Currency",
-   "label": "Paid Amount",
+   "fieldname": "reference_row",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Reference Row",
    "no_copy": 1,
-   "options": "party_account_currency",
-   "read_only": 1
+   "oldfieldname": "jv_detail_no",
+   "oldfieldtype": "Date",
+   "print_hide": 1,
+   "print_width": "80px",
+   "read_only": 1,
+   "width": "80px"
   },
   {
    "fieldname": "col_break1",
@@ -111,6 +95,22 @@
    "options": "party_account_currency",
    "print_width": "100px",
    "width": "100px"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "paid_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Amount",
+   "no_copy": 1,
+   "options": "party_account_currency",
+   "read_only": 1
   }
  ],
  "idx": 1,

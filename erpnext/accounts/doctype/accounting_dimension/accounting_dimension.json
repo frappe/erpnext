@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "field:label",
  "creation": "2019-05-04 18:13:37.002352",
  "doctype": "DocType",
@@ -47,7 +46,6 @@
    "options": "Accounting Dimension Detail"
   }
  ],
- "links": [],
  "modified": "2020-03-22 20:34:39.805728",
  "modified_by": "Administrator",
  "module": "Accounts",

@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "field:asset_name",
  "creation": "2017-10-19 16:50:22.879545",
  "doctype": "DocType",
@@ -102,7 +101,6 @@
    "reqd": 1
   }
  ],
- "links": [],
  "modified": "2020-05-28 20:28:32.993823",
  "modified_by": "Administrator",
  "module": "Assets",

@@ -19,6 +19,19 @@
  ],
  "fields": [
   {
+   "columns": 2,
+   "fieldname": "allocated_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Allocated Amount",
+   "no_copy": 1,
+   "oldfieldname": "allocated_amount",
+   "oldfieldtype": "Currency",
+   "options": "Company:company.default_currency",
+   "print_width": "120px",
+   "width": "120px"
+  },
+  {
    "fieldname": "advance_date",
    "fieldtype": "Date",
    "label": "Date",
@@ -101,19 +114,6 @@
   {
    "fieldname": "column_break_9",
    "fieldtype": "Column Break"
-  },
-  {
-   "columns": 2,
-   "fieldname": "allocated_amount",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Allocated Amount",
-   "no_copy": 1,
-   "oldfieldname": "allocated_amount",
-   "oldfieldtype": "Currency",
-   "options": "Company:company.default_currency",
-   "print_width": "120px",
-   "width": "120px"
   }
  ],
  "istable": 1,

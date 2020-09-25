@@ -61,6 +61,7 @@
  ],
  "quick_entry": 1,
  "restrict_to_domain": "Healthcare",
+ "sort_field": "modified",
  "sort_order": "ASC",
  "track_changes": 1
 }

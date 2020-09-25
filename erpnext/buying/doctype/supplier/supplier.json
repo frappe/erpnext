@@ -79,14 +79,6 @@
    "set_only_once": 1
   },
   {
-   "default": "Company",
-   "fieldname": "supplier_type",
-   "fieldtype": "Select",
-   "label": "Supplier Type",
-   "options": "Company\nIndividual\nAssociation Of Persons",
-   "reqd": 1
-  },
-  {
    "bold": 1,
    "fieldname": "supplier_name",
    "fieldtype": "Data",
@@ -98,17 +90,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "supplier_group",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Supplier Group",
-   "oldfieldname": "supplier_type",
-   "oldfieldtype": "Link",
-   "options": "Supplier Group",
-   "reqd": 1
-  },
-  {
    "fieldname": "country",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -116,8 +97,10 @@
    "options": "Country"
   },
   {
-   "fieldname": "column_break_7",
-   "fieldtype": "Column Break"
+   "fieldname": "default_bank_account",
+   "fieldtype": "Link",
+   "label": "Default Bank Account",
+   "options": "Bank Account"
   },
   {
    "allow_in_quick_entry": 1,
@@ -128,20 +111,6 @@
   },
   {
    "allow_in_quick_entry": 1,
-   "fieldname": "tax_cnic",
-   "fieldtype": "Data",
-   "in_standard_filter": 1,
-   "label": "CNIC"
-  },
-  {
-   "allow_in_quick_entry": 1,
-   "fieldname": "tax_strn",
-   "fieldtype": "Data",
-   "in_standard_filter": 1,
-   "label": "STRN"
-  },
-  {
-   "allow_in_quick_entry": 1,
    "fieldname": "tax_category",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -149,57 +118,16 @@
    "options": "Tax Category"
   },
   {
-   "fieldname": "column_break_13",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "default_price_list",
+   "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Default Price List",
-   "options": "Price List"
+   "label": "Tax Withholding Category",
+   "options": "Tax Withholding Category"
   },
   {
-   "fieldname": "default_currency",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "in_standard_filter": 1,
-   "label": "Billing Currency",
-   "no_copy": 1,
-   "options": "Currency"
-  },
-  {
-   "fieldname": "default_bank_account",
-   "fieldtype": "Link",
-   "label": "Default Bank Account",
-   "options": "Bank Account"
-  },
-  {
-   "fieldname": "language",
-   "fieldtype": "Link",
-   "label": "Print Language",
-   "options": "Language"
-  },
-  {
-   "fieldname": "image",
-   "fieldtype": "Attach Image",
-   "hidden": 1,
-   "label": "Image",
-   "no_copy": 1,
-   "print_hide": 1
-  },
-  {
-   "fieldname": "column_break0",
-   "fieldtype": "Column Break",
-   "width": "50%"
-  },
-  {
-   "bold": 1,
    "default": "0",
-   "fieldname": "disabled",
+   "fieldname": "is_transporter",
    "fieldtype": "Check",
-   "in_standard_filter": 1,
-   "label": "Disabled"
+   "label": "Is Transporter"
   },
   {
    "default": "0",
@@ -217,10 +145,56 @@
    "unique": 1
   },
   {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Image",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break0",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "supplier_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Supplier Group",
+   "oldfieldname": "supplier_type",
+   "oldfieldtype": "Link",
+   "options": "Supplier Group",
+   "reqd": 1
+  },
+  {
+   "default": "Company",
+   "fieldname": "supplier_type",
+   "fieldtype": "Select",
+   "label": "Supplier Type",
+   "options": "Company\nIndividual\nAssociation Of Persons",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pan",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "PAN"
+  },
+  {
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "label": "Print Language",
+   "options": "Language"
+  },
+  {
+   "bold": 1,
    "default": "0",
-   "fieldname": "is_transporter",
+   "fieldname": "disabled",
    "fieldtype": "Check",
-   "label": "Is Transporter"
+   "in_standard_filter": 1,
+   "label": "Disabled"
   },
   {
    "default": "0",
@@ -262,6 +236,22 @@
    "fieldtype": "Table",
    "label": "Allowed To Transact With",
    "options": "Allowed To Transact With"
+  },
+  {
+   "fieldname": "default_currency",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Billing Currency",
+   "no_copy": 1,
+   "options": "Currency"
+  },
+  {
+   "fieldname": "default_price_list",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Default Price List",
+   "options": "Price List"
   },
   {
    "fieldname": "payment_terms",
@@ -358,30 +348,14 @@
    "oldfieldtype": "Code"
   },
   {
-   "fieldname": "pan",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "PAN"
-  },
-  {
    "fieldname": "column_break_30",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "tax_withholding_category",
-   "fieldtype": "Link",
-   "label": "Tax Withholding Category",
-   "options": "Tax Withholding Category"
   },
   {
    "default": "0",
    "fieldname": "is_frozen",
    "fieldtype": "Check",
    "label": "Is Frozen"
-  },
-  {
-   "fieldname": "column_break_47",
-   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -394,6 +368,32 @@
    "fieldname": "allow_purchase_invoice_creation_without_purchase_receipt",
    "fieldtype": "Check",
    "label": "Allow Purchase Invoice Creation Without Purchase Receipt"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "tax_cnic",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "CNIC"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "tax_strn",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "STRN"
+  },
+  {
+   "fieldname": "column_break_47",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",

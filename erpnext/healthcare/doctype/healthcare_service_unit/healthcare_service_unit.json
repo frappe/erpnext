@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:healthcare_service_unit_name",
@@ -155,7 +154,6 @@
   }
  ],
  "is_tree": 1,
- "links": [],
  "modified": "2020-03-18 18:26:06.360941",
  "modified_by": "Administrator",
  "module": "Healthcare",

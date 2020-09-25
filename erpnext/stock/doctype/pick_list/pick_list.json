@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "naming_series:",
  "creation": "2019-07-11 16:03:13.681045",
  "doctype": "DocType",
@@ -113,7 +112,6 @@
   }
  ],
  "is_submittable": 1,
- "links": [],
  "modified": "2020-03-17 11:38:41.932875",
  "modified_by": "Administrator",
  "module": "Stock",

@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-01-10 16:34:16",
@@ -469,7 +468,6 @@
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,
- "links": [],
  "modified": "2019-12-04 11:20:04.695123",
  "modified_by": "Administrator",
  "module": "Manufacturing",

@@ -234,12 +234,6 @@
    "print_hide": 1
   },
   {
-   "default": "0",
-   "fieldname": "is_advance",
-   "fieldtype": "Check",
-   "label": "Is Advance"
-  },
-  {
    "fieldname": "total_amount_currency",
    "fieldtype": "Link",
    "hidden": 1,
@@ -485,6 +479,12 @@
   {
    "fieldname": "column_break_20",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_advance",
+   "fieldtype": "Check",
+   "label": "Is Advance"
   }
  ],
  "icon": "fa fa-file-text",

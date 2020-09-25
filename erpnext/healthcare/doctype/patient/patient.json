@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_copy": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -335,7 +334,6 @@
  ],
  "icon": "fa fa-user",
  "image_field": "image",
- "links": [],
  "max_attachments": 50,
  "modified": "2020-01-29 11:22:40.698125",
  "modified_by": "Administrator",

@@ -39,15 +39,6 @@
  ],
  "fields": [
   {
-   "allow_on_submit": 1,
-   "default": "{employee_name}",
-   "fieldname": "title",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Title",
-   "no_copy": 1
-  },
-  {
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "hidden": 1,
@@ -82,15 +73,6 @@
    "width": "150px"
   },
   {
-   "fieldname": "email_id",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Employee Email Id",
-   "oldfieldname": "email_id",
-   "oldfieldtype": "Data",
-   "print_hide": 1
-  },
-  {
    "fetch_from": "employee.department",
    "fieldname": "department",
    "fieldtype": "Link",
@@ -99,50 +81,8 @@
    "read_only": 1
   },
   {
-   "fieldname": "vehicle_log",
-   "fieldtype": "Link",
-   "label": "Vehicle Log",
-   "options": "Vehicle Log",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_5",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Amended From",
-   "no_copy": 1,
-   "oldfieldname": "amended_from",
-   "oldfieldtype": "Data",
-   "options": "Expense Claim",
-   "print_hide": 1,
-   "read_only": 1,
-   "report_hide": 1,
-   "width": "160px"
-  },
-  {
-   "fetch_from": "employee.company",
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "oldfieldname": "company",
-   "oldfieldtype": "Link",
-   "options": "Company",
-   "remember_last_selected_value": 1,
-   "reqd": 1
-  },
-  {
-   "default": "Today",
-   "fieldname": "posting_date",
-   "fieldtype": "Date",
-   "in_standard_filter": 1,
-   "label": "Posting Date",
-   "oldfieldname": "posting_date",
-   "oldfieldtype": "Date",
-   "reqd": 1
   },
   {
    "fieldname": "expense_approver",
@@ -158,24 +98,6 @@
    "no_copy": 1,
    "options": "Draft\nApproved\nRejected",
    "search_index": 1
-  },
-  {
-   "fieldname": "expense_details",
-   "fieldtype": "Section Break",
-   "oldfieldtype": "Section Break"
-  },
-  {
-   "fieldname": "expenses",
-   "fieldtype": "Table",
-   "label": "Expenses",
-   "oldfieldname": "expense_voucher_details",
-   "oldfieldtype": "Table",
-   "options": "Expense Claim Detail",
-   "reqd": 1
-  },
-  {
-   "fieldname": "sb1",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "total_claimed_amount",
@@ -202,6 +124,41 @@
    "width": "160px"
   },
   {
+   "fieldname": "expense_details",
+   "fieldtype": "Section Break",
+   "oldfieldtype": "Section Break"
+  },
+  {
+   "fieldname": "expenses",
+   "fieldtype": "Table",
+   "label": "Expenses",
+   "oldfieldname": "expense_voucher_details",
+   "oldfieldtype": "Table",
+   "options": "Expense Claim Detail",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sb1",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_standard_filter": 1,
+   "label": "Posting Date",
+   "oldfieldname": "posting_date",
+   "oldfieldtype": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle_log",
+   "fieldtype": "Link",
+   "label": "Vehicle Log",
+   "options": "Vehicle Log",
+   "read_only": 1
+  },
+  {
    "fieldname": "cb1",
    "fieldtype": "Column Break"
   },
@@ -213,6 +170,93 @@
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "{employee_name}",
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "email_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Employee Email Id",
+   "oldfieldname": "email_id",
+   "oldfieldtype": "Data",
+   "print_hide": 1
+  },
+  {
+   "fetch_from": "employee.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "oldfieldname": "company",
+   "oldfieldtype": "Link",
+   "options": "Company",
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "company.default_expense_claim_payable_account",
+   "fetch_if_empty": 1,
+   "fieldname": "payable_account",
+   "fieldtype": "Link",
+   "label": "Payable Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_details",
+   "fieldtype": "Section Break",
+   "label": "More Details"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nPaid\nUnpaid\nRejected\nSubmitted\nCancelled",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Amended From",
+   "no_copy": 1,
+   "oldfieldname": "amended_from",
+   "oldfieldtype": "Data",
+   "options": "Expense Claim",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1,
+   "width": "160px"
+  },
+  {
+   "depends_on": "eval:doc.employee && doc.payable_account",
+   "fieldname": "advance_payments",
+   "fieldtype": "Section Break",
+   "label": "Advance Payments"
+  },
+  {
+   "fieldname": "advances",
+   "fieldtype": "Table",
+   "label": "Advances",
+   "no_copy": 1,
+   "options": "Expense Claim Advance"
   },
   {
    "fieldname": "total_advance",
@@ -230,12 +274,6 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.employee && doc.payable_account",
-   "fieldname": "advance_payments",
-   "fieldtype": "Section Break",
-   "label": "Advance Payments"
-  },
-  {
    "fieldname": "get_advances",
    "fieldtype": "Button",
    "label": "Get Advances and Allocate"
@@ -245,44 +283,6 @@
    "fieldname": "allocate_advances_automatically",
    "fieldtype": "Check",
    "label": "Allocate Advances Automatically"
-  },
-  {
-   "fieldname": "advances",
-   "fieldtype": "Table",
-   "label": "Advances",
-   "no_copy": 1,
-   "options": "Expense Claim Advance"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "more_details",
-   "fieldtype": "Section Break",
-   "label": "More Details"
-  },
-  {
-   "fetch_from": "company.default_expense_claim_payable_account",
-   "fetch_if_empty": 1,
-   "fieldname": "payable_account",
-   "fieldtype": "Link",
-   "label": "Payable Account",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
-   "fieldname": "column_break_24",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "Draft",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
-   "label": "Status",
-   "no_copy": 1,
-   "options": "Draft\nPaid\nUnpaid\nRejected\nSubmitted\nCancelled",
-   "print_hide": 1,
-   "read_only": 1
   }
  ],
  "icon": "fa fa-money",

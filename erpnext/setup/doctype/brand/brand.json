@@ -29,6 +29,26 @@
    "unique": 1
   },
   {
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Description",
+   "oldfieldname": "description",
+   "oldfieldtype": "Text",
+   "width": "300px"
+  },
+  {
+   "fieldname": "defaults",
+   "fieldtype": "Section Break",
+   "label": "Defaults"
+  },
+  {
+   "fieldname": "brand_defaults",
+   "fieldtype": "Table",
+   "label": "Brand Defaults",
+   "options": "Item Default"
+  },
+  {
    "fieldname": "column_break_2",
    "fieldtype": "Column Break"
   },
@@ -56,26 +76,6 @@
    "fieldname": "description_section",
    "fieldtype": "Section Break",
    "label": "Description"
-  },
-  {
-   "fieldname": "description",
-   "fieldtype": "Text Editor",
-   "in_list_view": 1,
-   "label": "Description",
-   "oldfieldname": "description",
-   "oldfieldtype": "Text",
-   "width": "300px"
-  },
-  {
-   "fieldname": "defaults",
-   "fieldtype": "Section Break",
-   "label": "Defaults"
-  },
-  {
-   "fieldname": "brand_defaults",
-   "fieldtype": "Table",
-   "label": "Brand Defaults",
-   "options": "Item Default"
   }
  ],
  "icon": "fa fa-certificate",

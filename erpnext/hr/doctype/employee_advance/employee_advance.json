@@ -37,16 +37,6 @@
  ],
  "fields": [
   {
-   "allow_on_submit": 1,
-   "default": "{employee_name}",
-   "fieldname": "title",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Title",
-   "no_copy": 1,
-   "print_hide": 1
-  },
-  {
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "hidden": 1,
@@ -74,22 +64,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Employee Advance",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "label": "Company",
-   "options": "Company",
-   "reqd": 1
-  },
-  {
    "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
@@ -106,42 +80,6 @@
    "label": "Department",
    "options": "Department",
    "read_only": 1
-  },
-  {
-   "fieldname": "section_break_account",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "mode_of_payment",
-   "fieldtype": "Link",
-   "label": "Mode of Payment",
-   "options": "Mode of Payment"
-  },
-  {
-   "fieldname": "cost_center",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Cost Center",
-   "options": "Cost Center"
-  },
-  {
-   "fieldname": "column_break_10",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "in_global_search": 1,
-   "in_standard_filter": 1,
-   "label": "Project",
-   "options": "Project"
-  },
-  {
-   "fieldname": "task",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Task",
-   "options": "Task"
   },
   {
    "fieldname": "section_break_8",
@@ -175,25 +113,9 @@
    "read_only": 1
   },
   {
-   "fieldname": "returned_amount",
-   "fieldtype": "Currency",
-   "label": "Returned Amount",
-   "no_copy": 1,
-   "options": "Company:company:default_currency",
-   "read_only": 1
-  },
-  {
    "fieldname": "claimed_amount",
    "fieldtype": "Currency",
    "label": "Claimed Amount",
-   "no_copy": 1,
-   "options": "Company:company:default_currency",
-   "read_only": 1
-  },
-  {
-   "fieldname": "balance_amount",
-   "fieldtype": "Currency",
-   "label": "Balance Amount",
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
@@ -204,6 +126,34 @@
    "label": "More Information"
   },
   {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "no_copy": 1,
+   "options": "Draft\nUnpaid\nUnclaimed\nClaimed\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Employee Advance",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "advance_account",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -212,15 +162,65 @@
    "reqd": 1
   },
   {
-   "fieldname": "column_break_18",
+   "fieldname": "mode_of_payment",
+   "fieldtype": "Link",
+   "label": "Mode of Payment",
+   "options": "Mode of Payment"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "{employee_name}",
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "section_break_account",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "column_break_10",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "task",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Task",
+   "options": "Task"
+  },
+  {
+   "fieldname": "returned_amount",
+   "fieldtype": "Currency",
+   "label": "Returned Amount",
    "no_copy": 1,
-   "options": "Draft\nUnpaid\nUnclaimed\nClaimed\nCancelled",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "balance_amount",
+   "fieldtype": "Currency",
+   "label": "Balance Amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {

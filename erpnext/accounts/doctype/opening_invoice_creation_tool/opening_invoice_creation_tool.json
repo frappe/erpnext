@@ -15,25 +15,16 @@
  ],
  "fields": [
   {
-   "fieldname": "item_code",
-   "fieldtype": "Link",
-   "label": "Opening Invoice Item Code",
-   "options": "Item"
-  },
-  {
-   "allow_bulk_edit": 1,
-   "fieldname": "invoices",
-   "fieldtype": "Table",
-   "options": "Opening Invoice Creation Tool Item",
-   "reqd": 1
-  },
-  {
    "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "invoice_type",
@@ -44,8 +35,17 @@
    "reqd": 1
   },
   {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
+   "allow_bulk_edit": 1,
+   "fieldname": "invoices",
+   "fieldtype": "Table",
+   "options": "Opening Invoice Creation Tool Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Opening Invoice Item Code",
+   "options": "Item"
   },
   {
    "fieldname": "section_break_5",

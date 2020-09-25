@@ -44,12 +44,6 @@
    "oldfieldtype": "Currency"
   },
   {
-   "fieldname": "target_alt_uom_qty",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Target Contents Qty"
-  },
-  {
    "fieldname": "target_amount",
    "fieldtype": "Float",
    "in_filter": 1,
@@ -66,6 +60,12 @@
    "label": "Target Distribution",
    "options": "Monthly Distribution",
    "reqd": 1
+  },
+  {
+   "fieldname": "target_alt_uom_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Target Contents Qty"
   }
  ],
  "idx": 1,

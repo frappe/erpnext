@@ -1,5 +1,4 @@
 {
- "actions": [],
  "creation": "2019-05-26 00:10:00.248885",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -25,7 +24,6 @@
   }
  ],
  "istable": 1,
- "links": [],
  "modified": "2020-06-17 15:44:38.937915",
  "modified_by": "Administrator",
  "module": "Quality Management",

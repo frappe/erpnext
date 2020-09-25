@@ -1,5 +1,4 @@
 {
- "actions": [],
  "creation": "2016-06-30 15:32:36.385111",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -203,7 +202,6 @@
   }
  ],
  "istable": 1,
- "links": [],
  "modified": "2020-04-24 20:00:16.475295",
  "modified_by": "Administrator",
  "module": "HR",

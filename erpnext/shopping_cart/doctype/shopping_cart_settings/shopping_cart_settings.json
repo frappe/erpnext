@@ -60,12 +60,6 @@
   },
   {
    "default": "0",
-   "fieldname": "show_configure_button",
-   "fieldtype": "Check",
-   "label": "Show Configure Button"
-  },
-  {
-   "default": "0",
    "fieldname": "show_contact_us_button",
    "fieldtype": "Check",
    "label": "Show Contact Us Button"
@@ -159,6 +153,12 @@
    "fieldtype": "Link",
    "label": "Payment Gateway Account",
    "options": "Payment Gateway Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_configure_button",
+   "fieldtype": "Check",
+   "label": "Show Configure Button"
   }
  ],
  "icon": "fa fa-shopping-cart",

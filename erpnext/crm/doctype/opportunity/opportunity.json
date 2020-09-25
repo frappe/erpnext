@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
@@ -414,7 +413,6 @@
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
- "links": [],
  "modified": "2020-03-20 12:28:45.228994",
  "modified_by": "Administrator",
  "module": "CRM",

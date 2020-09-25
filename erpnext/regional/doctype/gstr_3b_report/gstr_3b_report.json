@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "format:GSTR3B-{month}-{year}-{company_address}",
  "creation": "2019-02-04 11:35:55.964639",
  "doctype": "DocType",
@@ -49,7 +48,6 @@
    "read_only": 1
   }
  ],
- "links": [],
  "modified": "2020-04-04 19:32:30.772908",
  "modified_by": "Administrator",
  "module": "Regional",

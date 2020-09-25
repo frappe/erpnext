@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:item_group_name",
@@ -80,24 +79,6 @@
   {
    "fieldname": "column_break_5",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "item_naming_by",
-   "fieldtype": "Select",
-   "label": "Item Naming By",
-   "options": "\nItem Code\nItem Name\nNaming Series"
-  },
-  {
-   "depends_on": "eval:doc.item_naming_by == \"Naming Series\"",
-   "fieldname": "item_naming_series",
-   "fieldtype": "Select",
-   "label": "Naming Series"
-  },
-  {
-   "fieldname": "show_item_code",
-   "fieldtype": "Select",
-   "label": "Show Item Code",
-   "options": "\nNo\nYes"
   },
   {
    "fieldname": "defaults",
@@ -201,13 +182,30 @@
    "options": "Item Group",
    "print_hide": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "item_naming_by",
+   "fieldtype": "Select",
+   "label": "Item Naming By",
+   "options": "\nItem Code\nItem Name\nNaming Series"
+  },
+  {
+   "depends_on": "eval:doc.item_naming_by == \"Naming Series\"",
+   "fieldname": "item_naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series"
+  },
+  {
+   "fieldname": "show_item_code",
+   "fieldtype": "Select",
+   "label": "Show Item Code",
+   "options": "\nNo\nYes"
   }
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
  "image_field": "image",
  "is_tree": 1,
- "links": [],
  "max_attachments": 3,
  "modified": "2020-03-18 18:25:59.979083",
  "modified_by": "Administrator",

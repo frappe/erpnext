@@ -26,6 +26,19 @@
  ],
  "fields": [
   {
+   "fieldname": "expense_date",
+   "fieldtype": "Date",
+   "label": "Expense Date",
+   "oldfieldname": "expense_date",
+   "oldfieldtype": "Date",
+   "print_width": "150px",
+   "width": "150px"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
    "columns": 2,
    "fieldname": "expense_type",
    "fieldtype": "Link",
@@ -39,17 +52,43 @@
    "width": "150px"
   },
   {
-   "fieldname": "column_break_2",
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Description",
+   "oldfieldname": "description",
+   "oldfieldtype": "Small Text",
+   "print_width": "300px",
+   "width": "300px"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_8",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "expense_date",
-   "fieldtype": "Date",
-   "label": "Expense Date",
-   "oldfieldname": "expense_date",
-   "oldfieldtype": "Date",
+   "fieldname": "sanctioned_amount",
+   "fieldtype": "Currency",
+   "label": "Sanctioned",
+   "oldfieldname": "sanctioned_amount",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
    "print_width": "150px",
    "width": "150px"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
   },
   {
    "fieldname": "section_break_1",
@@ -77,12 +116,6 @@
    "label": "Party",
    "options": "party_type",
    "read_only": 1
-  },
-  {
-   "fieldname": "cost_center",
-   "fieldtype": "Link",
-   "label": "Cost Center",
-   "options": "Cost Center"
   },
   {
    "fieldname": "column_break_7",
@@ -122,45 +155,12 @@
    "options": "Purchase Invoice"
   },
   {
-   "fieldname": "section_break_4",
-   "fieldtype": "Section Break"
-  },
-  {
-   "columns": 2,
-   "fieldname": "description",
-   "fieldtype": "Small Text",
-   "in_list_view": 1,
-   "label": "Description",
-   "oldfieldname": "description",
-   "oldfieldtype": "Small Text",
-   "print_width": "300px",
-   "width": "300px"
-  },
-  {
-   "fieldname": "section_break_6",
-   "fieldtype": "Section Break"
-  },
-  {
    "columns": 1,
    "fieldname": "claim_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Claimed",
    "oldfieldname": "claim_amount",
-   "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency",
-   "print_width": "150px",
-   "width": "150px"
-  },
-  {
-   "fieldname": "column_break_8",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "sanctioned_amount",
-   "fieldtype": "Currency",
-   "label": "Sanctioned",
-   "oldfieldname": "sanctioned_amount",
    "oldfieldtype": "Currency",
    "options": "Company:company:default_currency",
    "print_width": "150px",

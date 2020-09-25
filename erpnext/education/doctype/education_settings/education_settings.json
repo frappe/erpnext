@@ -1,5 +1,4 @@
 {
- "actions": [],
  "creation": "2017-04-05 13:33:04.519313",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -106,7 +105,6 @@
   }
  ],
  "issingle": 1,
- "links": [],
  "modified": "2020-05-07 19:50:22.430576",
  "modified_by": "Administrator",
  "module": "Education",

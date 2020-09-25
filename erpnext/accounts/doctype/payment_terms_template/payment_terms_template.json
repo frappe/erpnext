@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:template_name",
@@ -34,7 +33,6 @@
    "label": "Allocate Payment Based On Payment Terms"
   }
  ],
- "links": [],
  "modified": "2020-04-01 15:35:18.112619",
  "modified_by": "Administrator",
  "module": "Accounts",

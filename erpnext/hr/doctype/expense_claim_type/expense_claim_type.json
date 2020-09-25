@@ -24,12 +24,6 @@
    "unique": 1
   },
   {
-   "default": "0",
-   "fieldname": "requires_purchase_invoice",
-   "fieldtype": "Check",
-   "label": "Requires Purchase Invoice"
-  },
-  {
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description",
@@ -43,6 +37,12 @@
    "fieldtype": "Table",
    "label": "Accounts",
    "options": "Expense Claim Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "requires_purchase_invoice",
+   "fieldtype": "Check",
+   "label": "Requires Purchase Invoice"
   }
  ],
  "icon": "fa fa-flag",

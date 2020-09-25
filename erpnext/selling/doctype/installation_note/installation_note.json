@@ -67,15 +67,6 @@
    "search_index": 1
   },
   {
-   "bold": 1,
-   "fieldname": "customer_name",
-   "fieldtype": "Data",
-   "label": "Customer Name",
-   "oldfieldname": "customer_name",
-   "oldfieldtype": "Data",
-   "read_only": 1
-  },
-  {
    "depends_on": "customer",
    "fieldname": "customer_address",
    "fieldtype": "Link",
@@ -90,6 +81,15 @@
    "label": "Contact Person",
    "options": "Contact",
    "print_hide": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "oldfieldname": "customer_name",
+   "oldfieldtype": "Data",
+   "read_only": 1
   },
   {
    "fieldname": "address_display",
@@ -139,13 +139,6 @@
    "fieldtype": "Link",
    "label": "Customer Group",
    "options": "Customer Group",
-   "print_hide": 1
-  },
-  {
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "label": "Project",
-   "options": "Project",
    "print_hide": 1
   },
   {
@@ -231,6 +224,13 @@
    "oldfieldtype": "Table",
    "options": "Installation Note Item",
    "reqd": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-wrench",

@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "hash",
  "creation": "2013-03-29 18:22:12",
  "doctype": "DocType",
@@ -498,6 +497,13 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "depends_on": "eval:parent.purpose===\"Repack\" && doc.t_warehouse",
+   "fieldname": "set_basic_rate_manually",
+   "fieldtype": "Check",
+   "label": "Set Basic Rate Manually"
+  },
+  {
    "depends_on": "alt_uom",
    "fieldname": "alt_uom_size",
    "fieldtype": "Float",
@@ -526,20 +532,10 @@
    "fieldname": "hide_item_code",
    "fieldtype": "Check",
    "label": "Hide Item Code"
-  },
-  {
-   "default": "0",
-   "depends_on": "eval:parent.purpose===\"Repack\" && doc.t_warehouse",
-   "fieldname": "set_basic_rate_manually",
-   "fieldtype": "Check",
-   "label": "Set Basic Rate Manually",
-   "show_days": 1,
-   "show_seconds": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "links": [],
  "modified": "2020-06-08 12:57:03.172887",
  "modified_by": "Administrator",
  "module": "Stock",

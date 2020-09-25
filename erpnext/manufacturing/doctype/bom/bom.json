@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "creation": "2013-01-22 15:11:38",
  "doctype": "DocType",
@@ -507,7 +506,6 @@
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,
- "links": [],
  "modified": "2020-05-05 14:29:32.634952",
  "modified_by": "Administrator",
  "module": "Manufacturing",

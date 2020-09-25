@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:template",
@@ -79,8 +78,7 @@
    "depends_on": "is_billable",
    "fieldname": "rate",
    "fieldtype": "Float",
-   "label": "Rate",
-   "mandatory_depends_on": "is_billable"
+   "label": "Rate"
   },
   {
    "fieldname": "description",
@@ -169,7 +167,6 @@
    "read_only": 1
   }
  ],
- "links": [],
  "modified": "2020-02-27 16:32:55.780893",
  "modified_by": "Administrator",
  "module": "Healthcare",

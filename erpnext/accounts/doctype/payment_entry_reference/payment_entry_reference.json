@@ -1,5 +1,4 @@
 {
- "actions": [],
  "creation": "2016-06-01 16:55:32.196722",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -88,20 +87,19 @@
    "read_only": 1
   },
   {
-   "fieldname": "user_remark",
-   "fieldtype": "Small Text",
-   "in_global_search": 1,
-   "label": "User Remark"
-  },
-  {
    "fieldname": "payment_term",
    "fieldtype": "Link",
    "label": "Payment Term",
    "options": "Payment Term"
+  },
+  {
+   "fieldname": "user_remark",
+   "fieldtype": "Small Text",
+   "in_global_search": 1,
+   "label": "User Remark"
   }
  ],
  "istable": 1,
- "links": [],
  "modified": "2020-03-13 12:07:19.362539",
  "modified_by": "Administrator",
  "module": "Accounts",

@@ -588,12 +588,30 @@
    "read_only": 1
   },
   {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
    "fieldname": "user_remark",
    "fieldtype": "Small Text",
    "in_standard_filter": 1,
    "label": "User Remark",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "account_paid_from_type",
@@ -609,24 +627,6 @@
    "hidden": 1,
    "label": "Account Paid To Type",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_9",
-   "fieldtype": "Column Break"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "more_information_section",
-   "fieldtype": "Section Break",
-   "label": "More Information"
-  },
-  {
-   "fieldname": "column_break_20",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_19",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "column_break_39",

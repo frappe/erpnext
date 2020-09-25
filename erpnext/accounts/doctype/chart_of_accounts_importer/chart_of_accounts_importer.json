@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_copy": 1,
  "creation": "2019-02-01 12:24:34.761380",
  "description": "Import Chart of Accounts from a csv file",
@@ -49,7 +48,6 @@
  "hide_toolbar": 1,
  "in_create": 1,
  "issingle": 1,
- "links": [],
  "modified": "2020-02-28 08:49:11.422846",
  "modified_by": "Administrator",
  "module": "Accounts",

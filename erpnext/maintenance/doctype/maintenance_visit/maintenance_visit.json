@@ -109,14 +109,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "project",
-   "fieldtype": "Link",
-   "in_global_search": 1,
-   "label": "Project",
-   "options": "Project",
-   "print_hide": 1
-  },
-  {
    "fieldname": "column_break1",
    "fieldtype": "Column Break",
    "oldfieldtype": "Column Break",
@@ -279,6 +271,14 @@
    "fieldtype": "Link",
    "label": "Customer Group",
    "options": "Customer Group",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "label": "Project",
+   "options": "Project",
    "print_hide": 1
   }
  ],

@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:assessment_group_name",
@@ -63,7 +62,6 @@
   }
  ],
  "is_tree": 1,
- "links": [],
  "modified": "2020-03-18 18:26:07.834596",
  "modified_by": "Administrator",
  "module": "Education",

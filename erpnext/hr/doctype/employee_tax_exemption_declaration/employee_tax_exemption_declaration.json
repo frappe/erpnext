@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "HR-TAX-DEC-.YYYY.-.#####",
@@ -106,7 +105,6 @@
   }
  ],
  "is_submittable": 1,
- "links": [],
  "modified": "2020-03-18 14:56:25.625717",
  "modified_by": "Administrator",
  "module": "HR",

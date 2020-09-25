@@ -1,5 +1,4 @@
 {
- "actions": [],
  "creation": "2018-07-31 05:51:41.357047",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -212,7 +211,6 @@
   }
  ],
  "issingle": 1,
- "links": [],
  "modified": "2020-04-07 14:26:20.174848",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",

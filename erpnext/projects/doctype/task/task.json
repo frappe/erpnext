@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "TASK-.YYYY.-.#####",
  "creation": "2013-01-29 19:25:50",
@@ -363,7 +362,6 @@
  "icon": "fa fa-check",
  "idx": 1,
  "is_tree": 1,
- "links": [],
  "max_attachments": 5,
  "modified": "2020-03-18 18:26:04.788061",
  "modified_by": "Administrator",

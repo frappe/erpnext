@@ -49,12 +49,6 @@
    "options": "Price List"
   },
   {
-   "fieldname": "allow_zero_valuation_rate",
-   "fieldtype": "Select",
-   "label": "Allow Zero Valuation Rate",
-   "options": "\nNo\nYes"
-  },
-  {
    "fieldname": "purchase_defaults",
    "fieldtype": "Section Break",
    "label": "Purchase Defaults"
@@ -84,12 +78,6 @@
    "options": "Account"
   },
   {
-   "fieldname": "buying_apply_discount_after_taxes",
-   "fieldtype": "Select",
-   "label": "Apply Discount After Taxes For Purchase",
-   "options": "\nNo\nYes"
-  },
-  {
    "fieldname": "selling_defaults",
    "fieldtype": "Section Break",
    "label": "Sales Defaults"
@@ -102,12 +90,6 @@
    "options": "Cost Center"
   },
   {
-   "fieldname": "target_warehouse_validation",
-   "fieldtype": "Select",
-   "label": "Target Warehouse Validation",
-   "options": "\nMandatory\nNot Allowed"
-  },
-  {
    "fieldname": "column_break_12",
    "fieldtype": "Column Break"
   },
@@ -117,6 +99,24 @@
    "in_list_view": 1,
    "label": "Default Income Account",
    "options": "Account"
+  },
+  {
+   "fieldname": "allow_zero_valuation_rate",
+   "fieldtype": "Select",
+   "label": "Allow Zero Valuation Rate",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "buying_apply_discount_after_taxes",
+   "fieldtype": "Select",
+   "label": "Apply Discount After Taxes For Purchase",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "target_warehouse_validation",
+   "fieldtype": "Select",
+   "label": "Target Warehouse Validation",
+   "options": "\nMandatory\nNot Allowed"
   },
   {
    "fieldname": "selling_apply_discount_after_taxes",

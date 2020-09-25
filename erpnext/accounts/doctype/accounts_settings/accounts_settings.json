@@ -111,12 +111,6 @@
   },
   {
    "default": "0",
-   "fieldname": "allow_cost_center_in_entry_of_bs_account",
-   "fieldtype": "Check",
-   "label": "Allow Cost Center In Entry of Balance Sheet Account"
-  },
-  {
-   "default": "0",
    "fieldname": "add_taxes_from_item_tax_template",
    "fieldtype": "Check",
    "label": "Automatically Add Taxes and Charges from Item Tax Template"
@@ -190,6 +184,12 @@
    "fieldtype": "Link",
    "label": "Restrict Unlink Payment on Cancellation of Invoice To Role",
    "options": "Role"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_cost_center_in_entry_of_bs_account",
+   "fieldtype": "Check",
+   "label": "Allow Cost Center In Entry of Balance Sheet Account"
   },
   {
    "default": "0",

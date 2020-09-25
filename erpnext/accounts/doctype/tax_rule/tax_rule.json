@@ -79,12 +79,6 @@
    "options": "Purchase Taxes and Charges Template"
   },
   {
-   "default": "1",
-   "fieldname": "priority",
-   "fieldtype": "Int",
-   "label": "Priority"
-  },
-  {
    "fieldname": "filters",
    "fieldtype": "Section Break",
    "label": "Filters"
@@ -134,6 +128,12 @@
    "fieldtype": "Link",
    "label": "Billing Country",
    "options": "Country"
+  },
+  {
+   "fieldname": "tax_category",
+   "fieldtype": "Link",
+   "label": "Tax Category",
+   "options": "Tax Category"
   },
   {
    "fieldname": "column_break_2",
@@ -186,8 +186,29 @@
    "options": "Country"
   },
   {
-   "fieldname": "column_break_24",
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break",
+   "label": "Validity"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "column_break_7",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "default": "1",
+   "fieldname": "priority",
+   "fieldtype": "Int",
+   "label": "Priority"
   },
   {
    "fieldname": "company",
@@ -195,6 +216,10 @@
    "label": "Company",
    "options": "Company",
    "remember_last_selected_value": 1
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "transaction_type",
@@ -207,12 +232,6 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
-  },
-  {
-   "fieldname": "tax_category",
-   "fieldtype": "Link",
-   "label": "Tax Category",
-   "options": "Tax Category"
   },
   {
    "fieldname": "has_stin",
@@ -237,25 +256,6 @@
    "fieldtype": "Select",
    "label": "STRN",
    "options": "\nSet\nNot Set"
-  },
-  {
-   "fieldname": "section_break_4",
-   "fieldtype": "Section Break",
-   "label": "Validity"
-  },
-  {
-   "fieldname": "from_date",
-   "fieldtype": "Date",
-   "label": "From Date"
-  },
-  {
-   "fieldname": "column_break_7",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "to_date",
-   "fieldtype": "Date",
-   "label": "To Date"
   }
  ],
  "modified": "2020-03-03 15:34:42.608367",

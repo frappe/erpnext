@@ -467,6 +467,22 @@
    "options": "Customer Credit Limit"
   },
   {
+   "default": "0",
+   "fieldname": "so_required",
+   "fieldtype": "Check",
+   "label": "Allow Sales Invoice Creation Without Sales Order"
+  },
+  {
+   "default": "0",
+   "fieldname": "dn_required",
+   "fieldtype": "Check",
+   "label": "Allow Sales Invoice Creation Without Delivery Note"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
    "allow_in_quick_entry": 1,
    "fieldname": "tax_cnic",
    "fieldtype": "Data",
@@ -485,7 +501,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_60",
+   "fieldname": "column_break_24",
    "fieldtype": "Column Break"
   },
   {
@@ -493,28 +509,12 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_24",
+   "fieldname": "column_break_60",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "column_break_61",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_9",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "so_required",
-   "fieldtype": "Check",
-   "label": "Allow Sales Invoice Creation Without Sales Order"
-  },
-  {
-   "default": "0",
-   "fieldname": "dn_required",
-   "fieldtype": "Check",
-   "label": "Allow Sales Invoice Creation Without Delivery Note"
   }
  ],
  "icon": "fa fa-user",

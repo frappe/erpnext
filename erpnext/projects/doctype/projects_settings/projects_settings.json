@@ -12,18 +12,6 @@
  ],
  "fields": [
   {
-   "default": "Project Name",
-   "fieldname": "project_naming_by",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Project Naming By",
-   "options": "Project Name\nNaming Series"
-  },
-  {
-   "fieldname": "column_break_2",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
    "fieldname": "ignore_workstation_time_overlap",
    "fieldtype": "Check",
@@ -40,6 +28,18 @@
    "fieldname": "ignore_employee_time_overlap",
    "fieldtype": "Check",
    "label": "Ignore Employee Time Overlap"
+  },
+  {
+   "default": "Project Name",
+   "fieldname": "project_naming_by",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Project Naming By",
+   "options": "Project Name\nNaming Series"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
   }
  ],
  "issingle": 1,

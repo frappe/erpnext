@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-02-20 11:18:11",
@@ -246,7 +245,6 @@
  "icon": "fa fa-calendar",
  "idx": 1,
  "is_submittable": 1,
- "links": [],
  "max_attachments": 3,
  "modified": "2020-03-10 22:40:43.487721",
  "modified_by": "Administrator",

@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:company_name",
@@ -813,7 +812,6 @@
  "idx": 1,
  "image_field": "company_logo",
  "is_tree": 1,
- "links": [],
  "modified": "2020-03-22 18:26:03.145312",
  "modified_by": "Administrator",
  "module": "Setup",

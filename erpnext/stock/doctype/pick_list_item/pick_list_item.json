@@ -1,5 +1,4 @@
 {
- "actions": [],
  "creation": "2019-07-11 16:01:22.832885",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -180,7 +179,6 @@
   }
  ],
  "istable": 1,
- "links": [],
  "modified": "2020-03-13 19:08:21.995986",
  "modified_by": "Administrator",
  "module": "Stock",

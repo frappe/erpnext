@@ -1,5 +1,4 @@
 {
- "actions": [],
  "beta": 1,
  "creation": "2019-02-01 14:27:09.485238",
  "doctype": "DocType",
@@ -62,7 +61,6 @@
    "fieldname": "tally_creditors_account",
    "fieldtype": "Data",
    "label": "Tally Creditors Account",
-   "read_only_depends_on": "eval:doc.is_master_data_processed==1",
    "reqd": 1
   },
   {
@@ -75,7 +73,6 @@
    "fieldname": "tally_debtors_account",
    "fieldtype": "Data",
    "label": "Tally Debtors Account",
-   "read_only_depends_on": "eval:doc.is_master_data_processed==1",
    "reqd": 1
   },
   {
@@ -98,8 +95,7 @@
    "description": "Your Company set in ERPNext",
    "fieldname": "erpnext_company",
    "fieldtype": "Data",
-   "label": "ERPNext Company",
-   "read_only_depends_on": "eval:doc.is_master_data_processed==1"
+   "label": "ERPNext Company"
   },
   {
    "fieldname": "processed_files_section",
@@ -214,8 +210,7 @@
    "fieldname": "default_uom",
    "fieldtype": "Link",
    "label": "Default UOM",
-   "options": "UOM",
-   "read_only_depends_on": "eval:doc.is_master_data_imported==1"
+   "options": "UOM"
   },
   {
    "default": "[]",
@@ -253,7 +248,6 @@
    "label": "Fixed Error Log"
   }
  ],
- "links": [],
  "modified": "2020-04-28 00:29:18.039826",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",

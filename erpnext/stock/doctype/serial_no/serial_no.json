@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:serial_no",
@@ -426,7 +425,6 @@
  ],
  "icon": "fa fa-barcode",
  "idx": 1,
- "links": [],
  "modified": "2020-05-21 19:29:58.517772",
  "modified_by": "Administrator",
  "module": "Stock",

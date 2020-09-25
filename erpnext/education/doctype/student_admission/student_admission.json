@@ -33,12 +33,6 @@
    "unique": 1
   },
   {
-   "fieldname": "application_form_route",
-   "fieldtype": "Data",
-   "label": "Application Form Route",
-   "reqd": 1
-  },
-  {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
   },
@@ -85,6 +79,12 @@
    "fieldname": "introduction",
    "fieldtype": "Text Editor",
    "label": "Introduction"
+  },
+  {
+   "fieldname": "application_form_route",
+   "fieldtype": "Data",
+   "label": "Application Form Route",
+   "reqd": 1
   }
  ],
  "has_web_view": 1,

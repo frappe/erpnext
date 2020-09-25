@@ -27,55 +27,6 @@
  ],
  "fields": [
   {
-   "columns": 2,
-   "fieldname": "remarks",
-   "fieldtype": "Small Text",
-   "in_list_view": 1,
-   "label": "Remarks"
-  },
-  {
-   "depends_on": "eval:parent.invoice_type == \"Sales\"",
-   "fieldname": "sales_person",
-   "fieldtype": "Link",
-   "label": "Sales Person",
-   "options": "Sales Person"
-  },
-  {
-   "depends_on": "eval:parent.invoice_type == \"Sales\"",
-   "fieldname": "transaction_type",
-   "fieldtype": "Link",
-   "label": "Transaction Type",
-   "options": "Transaction Type"
-  },
-  {
-   "columns": 2,
-   "fieldname": "old_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Old Name"
-  },
-  {
-   "default": "1",
-   "fieldname": "qty",
-   "fieldtype": "Float",
-   "label": "Quantity"
-  },
-  {
-   "default": "Opening Invoice Item",
-   "fieldname": "item_name",
-   "fieldtype": "Data",
-   "label": "Item Name"
-  },
-  {
-   "columns": 1,
-   "default": "0",
-   "fieldname": "outstanding_amount",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Outstanding",
-   "reqd": 1
-  },
-  {
    "fieldname": "party_type",
    "fieldtype": "Link",
    "hidden": 1,
@@ -99,12 +50,8 @@
    "options": "Account"
   },
   {
-   "columns": 2,
-   "fieldname": "cost_center",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Cost Center",
-   "options": "Cost Center"
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
   },
   {
    "columns": 1,
@@ -119,8 +66,40 @@
    "label": "Due Date"
   },
   {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
+   "default": "Opening Invoice Item",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name"
+  },
+  {
+   "columns": 1,
+   "default": "0",
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Outstanding",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "label": "Quantity"
+  },
+  {
+   "columns": 2,
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "columns": 2,
+   "fieldname": "old_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Old Name"
   },
   {
    "fieldname": "section_break_6",
@@ -143,8 +122,29 @@
    "fieldtype": "Section Break"
   },
   {
+   "depends_on": "eval:parent.invoice_type == \"Sales\"",
+   "fieldname": "sales_person",
+   "fieldtype": "Link",
+   "label": "Sales Person",
+   "options": "Sales Person"
+  },
+  {
+   "depends_on": "eval:parent.invoice_type == \"Sales\"",
+   "fieldname": "transaction_type",
+   "fieldtype": "Link",
+   "label": "Transaction Type",
+   "options": "Transaction Type"
+  },
+  {
    "fieldname": "column_break_19",
    "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Remarks"
   }
  ],
  "istable": 1,

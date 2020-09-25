@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "naming_series:",
  "creation": "2017-10-29 11:53:09.523362",
  "doctype": "DocType",
@@ -295,7 +294,6 @@
  ],
  "icon": "fa fa-calendar",
  "is_submittable": 1,
- "links": [],
  "modified": "2019-12-04 15:58:50.940460",
  "modified_by": "Administrator",
  "module": "Manufacturing",
