@@ -7,9 +7,11 @@ import os
 import json
 import base64
 import frappe
+from frappe import _
 from frappe.utils import cstr
 from Crypto.PublicKey import RSA
-from Crypto.Cipher import PKCS1_v1_5
+from Crypto.Cipher import PKCS1_v1_5, AES
+from Crypto.Util.Padding import pad, unpad
 from frappe.utils.data import get_datetime
 from frappe.model.document import Document
 from frappe.integrations.utils import make_post_request
@@ -37,8 +39,16 @@ class EInvoiceSettings(Document):
 		b64_enc_msg = base64.b64encode(enc_msg)
 		return b64_enc_msg.decode()
 	
-	def aes_decrypt(self, msg, key):
-		return msg
+	def aes_decrypt(self, enc_msg, key):
+		if not (isinstance(key, bytes) or isinstance(key, bytearray)):
+			key = base64.b64decode(key)
+
+		cipher = AES.new(key, AES.MODE_ECB)
+		b64_enc_msg = base64.b64decode(enc_msg)
+		msg_bytes = cipher.decrypt(b64_enc_msg)
+		msg_bytes = unpad(msg_bytes, AES.block_size) # due to ECB/PKCS5Padding
+		b64_msg_bytes = base64.b64encode(msg_bytes)
+		return b64_msg_bytes.decode()
 
 	def make_authentication_request(self):
 		endpoint = 'https://einv-apisandbox.nic.in/eivital/v1.03/auth'
