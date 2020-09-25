@@ -381,7 +381,7 @@ def get_landed_cost_voucher(dt, dn):
 
 	lcv = frappe.new_doc("Landed Cost Voucher")
 	lcv.company = doc.company
-	lcv.project = doc.set_project
+	lcv.project = doc.get('set_project')
 	lcv.append("purchase_receipts", {
 		"receipt_document_type": dt,
 		"receipt_document": dn,

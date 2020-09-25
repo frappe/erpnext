@@ -99,7 +99,7 @@
   {
    "fieldname": "default_bank_account",
    "fieldtype": "Link",
-   "label": "Default Bank Account",
+   "label": "Default Company Bank Account",
    "options": "Bank Account"
   },
   {
@@ -399,7 +399,8 @@
  "icon": "fa fa-user",
  "idx": 370,
  "image_field": "image",
- "modified": "2020-08-15 13:08:47.377077",
+ "links": [],
+ "modified": "2020-06-17 23:28:30",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",

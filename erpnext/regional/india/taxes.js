@@ -10,6 +10,8 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 			frm.trigger('get_tax_template');
 		},
 		get_tax_template: function(frm) {
+			if (!frm.doc.company) return;
+
 			let party_details = {
 				'shipping_address': frm.doc.shipping_address || '',
 				'shipping_address_name': frm.doc.shipping_address_name || '',

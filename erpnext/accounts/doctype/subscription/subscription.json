@@ -183,7 +183,8 @@
    "fieldname": "invoices",
    "fieldtype": "Table",
    "label": "Invoices",
-   "options": "Subscription Invoice"
+   "options": "Subscription Invoice",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -196,7 +197,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2020-03-03 15:35:23.758075",
+ "modified": "2020-08-27 23:30:02.504042",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",

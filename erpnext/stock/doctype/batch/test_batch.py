@@ -241,3 +241,18 @@ class TestBatch(unittest.TestCase):
 			batch.insert()
 
 		return batch
+
+def make_new_batch(**args):
+	args = frappe._dict(args)
+
+	try:
+		batch = frappe.get_doc({
+			"doctype": "Batch",
+			"batch_id": args.batch_id,
+			"item": args.item_code,
+		}).insert()
+
+	except frappe.DuplicateEntryError:
+		batch = frappe.get_doc("Batch", args.batch_id)
+
+	return batch

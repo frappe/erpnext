@@ -40,6 +40,11 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			this.calculate_total_advance(update_paid_amount);
 		}
 
+		if (this.frm.doc.doctype == "Sales Invoice" && this.frm.doc.is_pos &&
+			this.frm.doc.is_return) {
+			this.update_paid_amount_for_return();
+		}
+
 		// Sales person's commission
 		if(in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"], this.frm.doc.doctype)) {
 			this.calculate_commission();
@@ -521,6 +526,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		} else if(tax.charge_type == "On Previous Row Total") {
 			current_tax_amount = (tax_rate / 100.0) *
 				this.frm.doc["taxes"][cint(tax.row_id) - 1].grand_total_for_current_item;
+		} else if (tax.charge_type == "On Item Quantity") {
+			current_tax_amount = tax_rate * item.qty;
 		}
 
 		this.set_item_wise_tax(item, tax, tax_rate, current_tax_amount);
@@ -775,7 +782,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			var actual_taxes_dict = {};
 
 			$.each(this.frm.doc["taxes"] || [], function(i, tax) {
-				if (tax.charge_type == "Actual" || tax.charge_type == "Weighted Distribution") {
+				if (in_list(["Actual", "Weighted Distribution", "On Item Quantity"], tax.charge_type)) {
 					var tax_amount = (tax.category == "Valuation") ? 0.0 : tax.tax_amount;
 					tax_amount *= (tax.add_deduct_tax == "Deduct") ? -1.0 : 1.0;
 					actual_taxes_dict[tax.idx] = tax_amount;
@@ -854,23 +861,58 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		}
 	},
 
-	set_default_payment: function(total_amount_to_pay, update_paid_amount){
+	update_paid_amount_for_return: function() {
+		var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
+
+		if(this.frm.doc.party_account_currency == this.frm.doc.currency) {
+			var total_amount_to_pay = flt((grand_total - this.frm.doc.total_advance
+				- this.frm.doc.write_off_amount), precision("grand_total"));
+		} else {
+			var total_amount_to_pay = flt(
+				(flt(grand_total*this.frm.doc.conversion_rate, precision("grand_total"))
+					- this.frm.doc.total_advance - this.frm.doc.base_write_off_amount),
+				precision("base_grand_total")
+			);
+		}
+
+		frappe.db.get_value('Sales Invoice Payment', {'parent': this.frm.doc.pos_profile, 'default': 1},
+			['mode_of_payment', 'account', 'type'], (value) => {
+				if (this.frm.is_dirty()) {
+					frappe.model.clear_table(this.frm.doc, 'payments');
+					if (value) {
+						let row = frappe.model.add_child(this.frm.doc, 'Sales Invoice Payment', 'payments');
+						row.mode_of_payment = value.mode_of_payment;
+						row.type = value.type;
+						row.account = value.account;
+						row.default = 1;
+						row.amount = total_amount_to_pay;
+					} else {
+						this.frm.set_value('is_pos', 1);
+					}
+					this.frm.refresh_fields();
+				}
+			}, 'Sales Invoice');
+
+		this.calculate_paid_amount();
+	},
+
+	set_default_payment: function(total_amount_to_pay, update_paid_amount) {
 		var me = this;
 		var payment_status = true;
-		if(this.frm.doc.is_pos && (update_paid_amount===undefined || update_paid_amount)){
-			$.each(this.frm.doc['payments'] || [], function(index, data){
+		if(this.frm.doc.is_pos && (update_paid_amount===undefined || update_paid_amount)) {
+			$.each(this.frm.doc['payments'] || [], function(index, data) {
 				if(data.default && payment_status && total_amount_to_pay > 0) {
 					data.base_amount = flt(total_amount_to_pay, precision("base_amount"));
 					data.amount = flt(total_amount_to_pay / me.frm.doc.conversion_rate, precision("amount"));
 					payment_status = false;
-				}else if(me.frm.doc.paid_amount){
+				} else if(me.frm.doc.paid_amount) {
 					data.amount = 0.0;
 				}
 			});
 		}
 	},
 
-	calculate_paid_amount: function(){
+	calculate_paid_amount: function() {
 		var me = this;
 		var paid_amount = 0.0;
 		var base_paid_amount = 0.0;

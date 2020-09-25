@@ -945,6 +945,8 @@ def get_outstanding_journal_entries(party_account, party_type, party, txt, start
 		"page_len": page_len
 	}, as_dict=1)
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_against_jv(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get("account") and filters.get("party_type") and filters.get("party"):
 		res = get_outstanding_journal_entries(filters.get("account"), filters.get("party_type"), filters.get("party"), txt, start, page_len)
@@ -1159,3 +1161,34 @@ def make_inter_company_journal_entry(name, voucher_type, company):
 	journal_entry.posting_date = nowdate()
 	journal_entry.inter_company_journal_entry_reference = name
 	return journal_entry.as_dict()
+
+@frappe.whitelist()
+def make_reverse_journal_entry(source_name, target_doc=None):
+	from frappe.model.mapper import get_mapped_doc
+
+	def update_accounts(source, target, source_parent):
+		target.reference_type = "Journal Entry"
+		target.reference_name = source_parent.name
+
+	doclist = get_mapped_doc("Journal Entry", source_name, {
+		"Journal Entry": {
+			"doctype": "Journal Entry",
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Journal Entry Account": {
+			"doctype": "Journal Entry Account",
+			"field_map": {
+				"account_currency": "account_currency",
+				"exchange_rate": "exchange_rate",
+				"debit_in_account_currency": "credit_in_account_currency",
+				"debit": "credit",
+				"credit_in_account_currency": "debit_in_account_currency",
+				"credit": "debit",
+			},
+			"postprocess": update_accounts,
+		},
+	}, target_doc)
+
+	return doclist 

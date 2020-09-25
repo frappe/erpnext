@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_guest_to_view": 1,
  "allow_rename": 1,
  "creation": "2016-09-13 03:05:27.154713",
@@ -9,12 +10,12 @@
  "field_order": [
   "title",
   "route",
-  "application_form_route",
   "column_break_3",
   "academic_year",
   "admission_start_date",
   "admission_end_date",
   "published",
+  "enable_admission_application",
   "section_break_5",
   "program_details",
   "introduction"
@@ -81,15 +82,16 @@
    "label": "Introduction"
   },
   {
-   "fieldname": "application_form_route",
-   "fieldtype": "Data",
-   "label": "Application Form Route",
-   "reqd": 1
+   "default": "0",
+   "fieldname": "enable_admission_application",
+   "fieldtype": "Check",
+   "label": "Enable Admission Application"
   }
  ],
  "has_web_view": 1,
  "is_published_field": "published",
- "modified": "2020-03-03 15:41:03.896827",
+ "links": [],
+ "modified": "2020-06-15 20:18:38.591626",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Student Admission",

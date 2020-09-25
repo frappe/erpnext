@@ -10,7 +10,7 @@
   "show_attachments",
   "show_price",
   "show_stock_availability",
-  "show_configure_button",
+  "enable_variants",
   "show_contact_us_button",
   "show_quantity_in_website",
   "show_apply_coupon_code_in_website",
@@ -94,8 +94,7 @@
    "in_list_view": 1,
    "label": "Company",
    "options": "Company",
-   "remember_last_selected_value": 1,
-   "reqd": 1
+   "remember_last_selected_value": 1
   },
   {
    "description": "Prices will not be shown if Price List is not set",
@@ -113,14 +112,12 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Default Customer Group",
-   "options": "Customer Group",
-   "reqd": 1
+   "options": "Customer Group"
   },
   {
    "fieldname": "quotation_series",
    "fieldtype": "Select",
-   "label": "Quotation Series",
-   "reqd": 1
+   "label": "Quotation Series"
   },
   {
    "collapsible": 1,
@@ -156,15 +153,15 @@
   },
   {
    "default": "0",
-   "fieldname": "show_configure_button",
+   "fieldname": "enable_variants",
    "fieldtype": "Check",
-   "label": "Show Configure Button"
+   "label": "Enable Variants"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 1,
  "issingle": 1,
- "modified": "2020-03-03 15:36:31.310020",
+ "modified": "2020-07-07 02:13:23.175604",
  "modified_by": "Administrator",
  "module": "Shopping Cart",
  "name": "Shopping Cart Settings",

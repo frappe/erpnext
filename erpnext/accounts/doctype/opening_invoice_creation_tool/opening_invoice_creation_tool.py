@@ -68,6 +68,9 @@ class OpeningInvoiceCreationTool(Document):
 		if not self.company:
 			frappe.throw(_("Please select the Company"))
 
+		company_details = frappe.get_cached_value('Company', self.company,
+			["default_currency", "default_letter_head"], as_dict=1) or {}
+
 		for row in self.invoices:
 			if not row.qty:
 				row.qty = 1.0

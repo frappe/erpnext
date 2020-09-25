@@ -253,6 +253,7 @@ class PurchaseReceipt(BuyingController):
 		from erpnext.accounts.general_ledger import process_gl_map
 
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
+		stock_rbnb_currency = get_account_currency(stock_rbnb)
 		landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
@@ -271,6 +272,15 @@ class PurchaseReceipt(BuyingController):
 
 					if not stock_value_diff:
 						continue
+
+					# If PR is sub-contracted and fg item rate is zero
+					# in that case if account for shource and target warehouse are same,
+					# then GL entries should not be posted
+					if flt(stock_value_diff) == flt(d.rm_supp_cost) \
+						and warehouse_account.get(self.supplier_warehouse) \
+						and warehouse_account[d.warehouse]["account"] == warehouse_account[self.supplier_warehouse]["account"]:
+							continue
+
 					gl_entries.append(self.get_gl_dict({
 						"account": warehouse_account[d.warehouse]["account"],
 						"against": stock_rbnb,
@@ -280,14 +290,14 @@ class PurchaseReceipt(BuyingController):
 					}, warehouse_account[d.warehouse]["account_currency"], item=d))
 
 					# stock received but not billed
-					stock_rbnb_currency = get_account_currency(stock_rbnb)
-					gl_entries.append(self.get_gl_dict({
-						"account": stock_rbnb,
-						"against": warehouse_account[d.warehouse]["account"],
-						"cost_center": d.cost_center,
-						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-						"credit": valuation_net_amount if self.taxes else valuation_net_amount + valuation_item_tax_amount
-					}, stock_rbnb_currency))
+					if valuation_net_amount:
+						gl_entries.append(self.get_gl_dict({
+							"account": stock_rbnb,
+							"against": warehouse_account[d.warehouse]["account"],
+							"cost_center": d.cost_center,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"credit": valuation_net_amount
+						}, stock_rbnb_currency, item=d))
 
 					negative_expense_to_be_booked += valuation_item_tax_amount
 
@@ -321,7 +331,7 @@ class PurchaseReceipt(BuyingController):
 						d.precision("base_net_amount"))
 
 					if divisional_loss:
-						if self.is_return or flt(d.item_tax_amount):
+						if self.is_return or valuation_item_tax_amount:
 							loss_account = expenses_included_in_valuation
 						else:
 							loss_account = stock_rbnb
@@ -598,7 +608,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		if len(target.get("items")) == 0:
-			frappe.throw(_("All items have already been invoiced"))
+			frappe.throw(_("All items have already been Invoiced/Returned"))
 
 		doc = frappe.get_doc(target)
 		doc.ignore_pricing_rule = 1

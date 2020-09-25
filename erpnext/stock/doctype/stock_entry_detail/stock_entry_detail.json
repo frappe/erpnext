@@ -19,6 +19,7 @@
   "item_group",
   "col_break2",
   "item_name",
+  "subcontracted_item",
   "section_break_8",
   "hide_item_code",
   "description",
@@ -60,7 +61,6 @@
   "material_request",
   "material_request_item",
   "original_item",
-  "subcontracted_item",
   "reference_section",
   "against_stock_entry",
   "ste_detail",
@@ -419,6 +419,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:parent.purpose == 'Send to Subcontractor'",
    "fieldname": "subcontracted_item",
    "fieldtype": "Link",
    "label": "Subcontracted Item",
@@ -536,7 +537,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-06-08 12:57:03.172887",
+ "modified": "2020-09-04 12:12:35.668198",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

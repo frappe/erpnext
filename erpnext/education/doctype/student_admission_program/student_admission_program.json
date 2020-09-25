@@ -1,12 +1,13 @@
 {
+ "actions": [],
  "creation": "2017-09-15 12:59:43.207923",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "program",
-  "minimum_age",
-  "maximum_age",
+  "min_age",
+  "max_age",
   "column_break_4",
   "application_fee",
   "applicant_naming_series"
@@ -17,39 +18,52 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Program",
-   "options": "Program"
+   "options": "Program",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_4",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "application_fee",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Application Fee"
+   "label": "Application Fee",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "applicant_naming_series",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Naming Series (for Student Applicant)"
+   "label": "Naming Series (for Student Applicant)",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
-   "fieldname": "minimum_age",
-   "fieldtype": "Date",
+   "fieldname": "min_age",
+   "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Minimum Age"
+   "label": "Minimum Age",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
-   "fieldname": "maximum_age",
-   "fieldtype": "Date",
+   "fieldname": "max_age",
+   "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Maximum Age"
+   "label": "Maximum Age",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "istable": 1,
- "modified": "2020-03-03 15:38:05.933360",
+ "links": [],
+ "modified": "2020-06-10 23:06:30.037404",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Student Admission Program",

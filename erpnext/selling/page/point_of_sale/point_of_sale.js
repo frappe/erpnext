@@ -286,7 +286,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 		if (in_list(['serial_no', 'batch_no'], field)) {
 			args[field] = value;
 		}
-		
+
 		// add to cur_frm
 		const item = this.frm.add_child('items', args);
 		frappe.flags.hide_serial_batch_dialog = true;
@@ -436,7 +436,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 	set_primary_action_in_modal() {
 		if (!this.frm.msgbox) {
 			this.frm.msgbox = frappe.msgprint(
-				`<a class="btn btn-primary" onclick="cur_frm.print_preview.printit(true)" style="margin-right: 5px;">
+				`<a class="btn btn-primary" style="margin-right: 5px;">
 					${__('Print')}</a>
 				<a class="btn btn-default">
 					${__('New')}</a>`
@@ -445,7 +445,14 @@ erpnext.pos.PointOfSale = class PointOfSale {
 			$(this.frm.msgbox.body).find('.btn-default').on('click', () => {
 				this.frm.msgbox.hide();
 				this.make_new_invoice();
-			})
+			});
+
+			$(this.frm.msgbox.body).find('.btn-primary').on('click', () => {
+				this.frm.msgbox.hide();
+				const frm = this.frm;
+				frm.print_preview.lang_code = frm.doc.language;
+				frm.print_preview.printit(true);
+			});
 		}
 	}
 
@@ -680,7 +687,10 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				if(this.frm.doc.docstatus != 1 ){
 					await this.frm.save();
 				}
-				this.frm.print_preview.printit(true);
+
+				const frm = this.frm;
+				frm.print_preview.lang_code = frm.doc.language;
+				frm.print_preview.printit(true);
 			});
 		}
 		if(this.frm.doc.items.length == 0){
@@ -937,8 +947,12 @@ class POSCart {
 					}
 				},
 				onchange: () => {
-					this.events.on_customer_change(this.customer_field.get_value());
-					this.events.get_loyalty_details();
+					let customer = this.customer_field.get_value();
+					frappe.db.get_value("Customer", customer, "language", (r) => {
+						this.frm.doc.language = r ? r.language : "en-US";
+						this.events.on_customer_change(customer);
+						this.events.get_loyalty_details();
+					});
 				}
 			},
 			parent: this.wrapper.find('.customer-field'),

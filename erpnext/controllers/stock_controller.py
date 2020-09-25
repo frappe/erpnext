@@ -93,7 +93,8 @@ class StockController(AccountsController):
 						gl_list.append(self.get_gl_dict({
 							"account": warehouse_account[sle.warehouse]["account"],
 							"against": item_row.expense_account,
-							"cost_center": item_row.cost_center or self.get("cost_center"),
+							"cost_center": item_row.get('cost_center') or self.get("cost_center"),
+							"project": item_row.get("project") or self.get("project"),
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"debit": flt(sle.stock_value_difference, precision),
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
@@ -103,7 +104,7 @@ class StockController(AccountsController):
 						gl_list.append(self.get_gl_dict({
 							"account": item_row.expense_account,
 							"against": warehouse_account[sle.warehouse]["account"],
-							"cost_center": item_row.cost_center or self.get("cost_center"),
+							"cost_center": item_row.get('cost_center') or self.get("cost_center"),
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, precision),
 							"project": item_row.get("project") or self.get("project") or self.get("set_project"),
@@ -247,10 +248,11 @@ class StockController(AccountsController):
 					_(self.doctype), self.name, item.get("item_code")))
 
 	def delete_auto_created_batches(self):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		for d in self.items:
 			if not d.batch_no: continue
 
-			serial_nos = [sr.name for sr in frappe.get_all("Serial No", {'batch_no': d.batch_no})]
+			serial_nos = get_serial_nos(d.serial_no)
 			if serial_nos:
 				frappe.db.set_value("Serial No", { 'name': ['in', serial_nos] }, "batch_no", None)
 
