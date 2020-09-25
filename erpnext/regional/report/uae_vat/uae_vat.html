@@ -1,0 +1,68 @@
+{%
+	var report_columns = report.get_columns_for_print();
+	report_columns = report_columns.filter(col => !col.hidden);
+
+	if (report_columns.length > 8) {
+		frappe.throw(__("Too many columns. Export the report and print it using a spreadsheet application."));
+	}
+%}
+
+<h1  style="margin-top:0; text-align: center;">{%= __(report.report_name) %}</h1>
+
+<h3  style="margin-top:0">{%= __("VAT on Sales and All Other Outputs") %}</h2>
+
+<table class="table table-bordered">
+
+    <thead>
+        {% for (let i=0; i<report_columns.length; i++) { %}
+            <th >{%= report_columns[i].label %}</th>
+        {% } %}
+    </thead>
+
+    <tbody>
+        {% for (let j=1; j<12; j++)  { %}
+        {%
+            var row = data[j];
+        %}
+        <tr >
+            {% for (let i=0; i<report_columns.length; i++) { %}
+                <td >
+                    {% const fieldname = report_columns[i].fieldname; %}
+                    {% if (!is_null(row[fieldname])) { %}
+                        {%= frappe.format(row[fieldname], report_columns[i], {}, row) %}
+                    {% } %}
+                </td>
+            {% } %}
+        </tr>
+        {% } %}
+    </tbody>
+</table>
+
+<h3  style="margin-top:0">{%= __("VAT on Expenses and All Other Inputs") %}</h2>
+
+<table  class="table table-bordered">
+    <thead>
+        {% for (let i=0; i<report_columns.length; i++) { %}
+            <th >{%= report_columns[i].label %}</th>
+        {% } %}
+    </thead>
+
+    <tbody>
+        {% for (let j=12; j<data.length; j++)  { %}
+        {%
+            var row = data[j];
+        %}
+        <tr >
+            {% for (let i=0; i<report_columns.length; i++) { %}
+                <td >
+                    {% const fieldname = report_columns[i].fieldname; %}
+                    {% if (!is_null(row[fieldname])) { %}
+                        {%= frappe.format(row[fieldname], report_columns[i], {}, row) %}
+                    {% } %}
+                </td>
+            {% } %}
+        </tr>
+        {% } %}
+    </tbody>
+
+</table>
