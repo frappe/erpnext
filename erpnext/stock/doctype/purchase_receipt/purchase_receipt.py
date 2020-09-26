@@ -254,7 +254,6 @@ class PurchaseReceipt(BuyingController):
 
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 		stock_rbnb_currency = get_account_currency(stock_rbnb)
-		landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
 		gl_entries = []
@@ -302,16 +301,15 @@ class PurchaseReceipt(BuyingController):
 					negative_expense_to_be_booked += valuation_item_tax_amount
 
 					# Amount added through landed-cost-voucher
-					if d.landed_cost_voucher_amount and landed_cost_entries:
-						for account, amount in iteritems(landed_cost_entries[(d.item_code, d.name)]):
-							gl_entries.append(self.get_gl_dict({
-								"account": account,
-								"against": warehouse_account[d.warehouse]["account"],
-								"cost_center": d.cost_center,
-								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-								"credit": flt(amount),
-								"project": d.project
-							}, item=d))
+					if flt(d.landed_cost_voucher_amount):
+						gl_entries.append(self.get_gl_dict({
+							"account": expenses_included_in_valuation,
+							"against": warehouse_account[d.warehouse]["account"],
+							"cost_center": d.cost_center,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"credit": flt(d.landed_cost_voucher_amount),
+							"project": d.project
+						}, item=d))
 
 					# sub-contracting warehouse
 					if flt(d.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):

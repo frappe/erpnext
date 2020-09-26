@@ -593,8 +593,6 @@ class PurchaseInvoice(BuyingController):
 		
 		billing_party_type, billing_party = self.get_billing_party()
 
-		landed_cost_entries = get_item_account_wise_additional_cost(self.name)
-
 		voucher_wise_stock_value = {}
 		if self.update_stock:
 			for d in frappe.get_all('Stock Ledger Entry',
@@ -628,16 +626,15 @@ class PurchaseInvoice(BuyingController):
 					)
 
 					# Amount added through landed-cost-voucher
-					if landed_cost_entries:
-						for account, amount in iteritems(landed_cost_entries[(item.item_code, item.name)]):
-							gl_entries.append(self.get_gl_dict({
-								"account": account,
-								"against": item.expense_account,
-								"cost_center": item.cost_center,
-								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-								"credit": flt(amount),
-								"project": item.project or self.project
-							}, item=item))
+					if flt(item.landed_cost_voucher_amount):
+						gl_entries.append(self.get_gl_dict({
+							"account": expenses_included_in_valuation,
+							"against": item.expense_account,
+							"cost_center": item.cost_center,
+							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+							"credit": flt(item.landed_cost_voucher_amount),
+							"project": item.project
+						}, item=item))
 
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):

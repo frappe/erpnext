@@ -535,7 +535,6 @@ erpnext.patches.v11_0.create_department_records_for_each_company
 erpnext.patches.v11_0.make_location_from_warehouse
 erpnext.patches.v11_0.make_asset_finance_book_against_old_entries
 erpnext.patches.v11_0.check_buying_selling_in_currency_exchange
-erpnext.patches.v11_0.move_item_defaults_to_child_table_for_multicompany #02-07-2018 #19-06-2019
 erpnext.patches.v11_0.refactor_erpnext_shopify #2018-09-07
 erpnext.patches.v11_0.rename_overproduction_percent_field
 erpnext.patches.v11_0.update_backflush_subcontract_rm_based_on_bom
@@ -604,7 +603,6 @@ erpnext.patches.v12_0.move_target_distribution_from_parent_to_child
 erpnext.patches.v12_0.stock_entry_enhancements
 erpnext.patches.v10_0.item_barcode_childtable_migrate # 16-02-2019 #25-06-2019
 erpnext.patches.v12_0.make_item_manufacturer
-erpnext.patches.v12_0.move_item_tax_to_item_tax_template
 erpnext.patches.v11_1.set_party_in_sle
 erpnext.patches.v11_1.set_sales_order_type
 erpnext.patches.v11_1.update_item_price_item_details
@@ -669,7 +667,6 @@ erpnext.patches.v12_0.set_received_qty_in_material_request_as_per_stock_uom
 erpnext.patches.v12_0.recalculate_requested_qty_in_bin
 erpnext.patches.v12_0.rename_mws_settings_fields
 erpnext.patches.v12_0.set_updated_purpose_in_pick_list
-erpnext.patches.v12_0.repost_stock_ledger_entries_for_target_warehouse
 erpnext.patches.v12_0.update_end_date_and_status_in_email_campaign
 erpnext.patches.v13_0.move_tax_slabs_from_payroll_period_to_income_tax_slab #123
 erpnext.patches.v12_0.remove_duplicate_leave_ledger_entries #2020-05-22

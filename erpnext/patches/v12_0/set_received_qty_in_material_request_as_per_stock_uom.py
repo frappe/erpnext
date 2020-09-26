@@ -2,6 +2,9 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
+	frappe.reload_doc('stock', 'doctype', 'purchase_receipt_item')
+	frappe.reload_doc('stock', 'doctype', 'purchase_receipt')
+
 	purchase_receipts = frappe.db.sql("""
 		SELECT
 			 parent from `tabPurchase Receipt Item`

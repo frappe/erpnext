@@ -53,6 +53,7 @@ def get_default_energy_point_rules():
 		'condition': rule.get('condition'),
 		'rule_name': rule.get('rule_name') or _('On {0} Creation').format(doctype),
 		'points': rule.get('points'),
-		'user_field': rule.get('user_field') or 'owner'
+		'user_field': rule.get('user_field') or 'owner',
+		'enabled': 0
 	} for doctype, rule in doctype_rule_map.items()]
 

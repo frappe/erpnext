@@ -2,6 +2,8 @@ import frappe
 from frappe.model.utils.rename_field import rename_field
 
 def execute():
+	frappe.db.sql("update tabItem set warranty_period = 0 where ifnull(warranty_period, '') = ''")
+
 	frappe.reload_doc("stock", "doctype", "item")
 	frappe.reload_doc("stock", "doctype", "stock_settings")
 	frappe.reload_doc("accounts", "doctype", "accounts_settings")
