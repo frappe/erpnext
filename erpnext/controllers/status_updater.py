@@ -85,6 +85,12 @@ status_map = {
 	"Bank Transaction": [
 		["Unreconciled", "eval:self.docstatus == 1 and self.unallocated_amount>0"],
 		["Reconciled", "eval:self.docstatus == 1 and self.unallocated_amount<=0"]
+	],
+	"POS Opening Entry": [
+		["Draft", None],
+		["Open", "eval:self.docstatus == 1 and not self.pos_closing_entry"],
+		["Closed", "eval:self.docstatus == 1 and self.pos_closing_entry"],
+		["Cancelled", "eval:self.docstatus == 2"],
 	]
 }
 
@@ -249,7 +255,7 @@ class StatusUpdater(Document):
 				args['second_source_condition'] = """ + ifnull((select sum(%(second_source_field)s)
 					from `tab%(second_source_dt)s`
 					where `%(second_join_field)s`="%(detail_id)s"
-					and (`tab%(second_source_dt)s`.docstatus=1) %(second_source_extra_cond)s), 0) """ % args
+					and (`tab%(second_source_dt)s`.docstatus=1) %(second_source_extra_cond)s FOR UPDATE), 0)""" % args
 
 			if args['detail_id']:
 				if not args.get("extra_cond"): args["extra_cond"] = ""

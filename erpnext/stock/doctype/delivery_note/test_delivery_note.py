@@ -537,11 +537,8 @@ class TestDeliveryNote(unittest.TestCase):
 		dt = make_delivery_trip(dn.name)
 		self.assertEqual(dn.name, dt.delivery_stops[0].delivery_note)
 
-	def test_delivery_note_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+	def test_delivery_note_with_cost_center(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
-		accounts_settings.save()
 		cost_center = "_Test Cost Center for BS Account - TCP1"
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company with perpetual inventory")
 
@@ -567,13 +564,8 @@ class TestDeliveryNote(unittest.TestCase):
 		}
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
 
-	def test_delivery_note_for_disable_allow_cost_center_in_entry_of_bs_account(self):
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
+	def test_delivery_note_cost_center_with_balance_sheet_account(self):
 		cost_center = "Main - TCP1"
 
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
@@ -583,7 +575,11 @@ class TestDeliveryNote(unittest.TestCase):
 		make_stock_entry(target="Stores - TCP1", qty=5, basic_rate=100)
 
 		stock_in_hand_account = get_inventory_account('_Test Company with perpetual inventory')
-		dn = create_delivery_note(company='_Test Company with perpetual inventory', warehouse='Stores - TCP1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1")
+		dn = create_delivery_note(company='_Test Company with perpetual inventory', warehouse='Stores - TCP1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1",
+			do_not_submit=1)
+
+		dn.get('items')[0].cost_center = None
+		dn.submit()
 
 		gl_entries = get_gl_entries("Delivery Note", dn.name)
 
@@ -593,7 +589,7 @@ class TestDeliveryNote(unittest.TestCase):
 				"cost_center": cost_center
 			},
 			stock_in_hand_account: {
-				"cost_center": None
+				"cost_center": cost_center
 			}
 		}
 		for i, gle in enumerate(gl_entries):

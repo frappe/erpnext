@@ -19,6 +19,10 @@ frappe.ui.form.on("Leave Application", {
 		frm.set_query("employee", erpnext.queries.employee);
 	},
 	onload: function(frm) {
+
+		// Ignore cancellation of doctype on cancel all.
+		frm.ignore_doctypes_on_cancel_all = ["Leave Ledger Entry"];
+
 		if (!frm.doc.posting_date) {
 			frm.set_value("posting_date", frappe.datetime.get_today());
 		}
@@ -40,6 +44,8 @@ frappe.ui.form.on("Leave Application", {
 	validate: function(frm) {
 		if (frm.doc.from_date == frm.doc.to_date && frm.doc.half_day == 1){
 			frm.doc.half_day_date = frm.doc.from_date;
+		}else if (frm.doc.half_day == 0){
+			frm.doc.half_day_date = "";
 		}
 		frm.toggle_reqd("half_day_date", frm.doc.half_day == 1);
 	},

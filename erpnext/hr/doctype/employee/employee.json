@@ -51,10 +51,14 @@
   "column_break_31",
   "grade",
   "branch",
+  "approvers_section",
+  "expense_approver",
+  "leave_approver",
+  "column_break_45",
+  "shift_request_approver",
   "attendance_and_leave_details",
   "leave_policy",
   "attendance_device_id",
-  "leave_approver",
   "column_break_44",
   "holiday_list",
   "default_shift",
@@ -62,7 +66,6 @@
   "salary_mode",
   "payroll_cost_center",
   "column_break_52",
-  "expense_approver",
   "bank_name",
   "bank_ac_no",
   "health_insurance_section",
@@ -410,6 +413,8 @@
    "options": "Branch"
   },
   {
+   "fetch_from": "grade.default_leave_policy",
+   "fetch_if_empty": 1,
    "fieldname": "leave_policy",
    "fieldtype": "Link",
    "label": "Leave Policy",
@@ -807,13 +812,34 @@
    "options": "User",
    "show_days": 1,
    "show_seconds": 1
+  },
+  {
+   "fieldname": "approvers_section",
+   "fieldtype": "Section Break",
+   "label": "Approvers",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "column_break_45",
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "shift_request_approver",
+   "fieldtype": "Link",
+   "label": "Shift Request Approver",
+   "options": "User",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2020-06-18 18:01:27.223535",
+ "modified": "2020-07-28 01:36:04.109189",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",

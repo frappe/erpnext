@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "format:FDBK-{#####}",
  "creation": "2019-05-26 21:23:05.308379",
  "doctype": "DocType",
@@ -53,12 +54,13 @@
   {
    "fieldname": "document_name",
    "fieldtype": "Dynamic Link",
-   "label": "Name",
+   "label": "Feedback By",
    "options": "document_type",
    "reqd": 1
   }
  ],
- "modified": "2019-05-28 15:16:01.161662",
+ "links": [],
+ "modified": "2020-07-03 15:50:58.589302",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Feedback",

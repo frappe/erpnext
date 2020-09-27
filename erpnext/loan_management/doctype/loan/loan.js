@@ -45,15 +45,6 @@ frappe.ui.form.on('Loan', {
 			});
 		})
 
-		frm.set_query('loan_security_pledge', function(doc, cdt, cdn) {
-			return {
-				filters: {
-					applicant: frm.doc.applicant,
-					docstatus: 1,
-					loan_application: frm.doc.loan_application || ''
-				}
-			};
-		});
 	},
 
 	refresh: function (frm) {
@@ -82,13 +73,10 @@ frappe.ui.form.on('Loan', {
 
 	loan_type: function(frm) {
 		frm.toggle_reqd("repayment_method", frm.doc.is_term_loan);
-		frm.toggle_display("repayment_method", 1 - frm.doc.is_term_loan);
-		frm.toggle_display("repayment_periods", s1 - frm.doc.is_term_loan);
+		frm.toggle_display("repayment_method", frm.doc.is_term_loan);
+		frm.toggle_display("repayment_periods", frm.doc.is_term_loan);
 	},
 
-	is_secured_loan: function(frm) {
-		frm.toggle_reqd("loan_security_pledge", frm.doc.is_secured_loan);
-	},
 
 	make_loan_disbursement: function (frm) {
 		frappe.call({
@@ -131,12 +119,10 @@ frappe.ui.form.on('Loan', {
 
 	create_loan_security_unpledge: function(frm) {
 		frappe.call({
-			method: "erpnext.loan_management.doctype.loan.loan.create_loan_security_unpledge",
+			method: "erpnext.loan_management.doctype.loan.loan.unpledge_security",
 			args : {
 				"loan": frm.doc.name,
-				"applicant_type": frm.doc.applicant_type,
-				"applicant": frm.doc.applicant,
-				"company": frm.doc.company
+				"as_dict": 1
 			},
 			callback: function(r) {
 				if (r.message)

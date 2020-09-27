@@ -8,12 +8,13 @@ from __future__ import unicode_literals
 import re
 from past.builtins import cmp
 import functools
+import math
 
 import frappe, erpnext
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
 from erpnext.accounts.utils import get_fiscal_year
 from frappe import _
-from frappe.utils import (flt, getdate, get_first_day, add_months, add_days, formatdate, cstr)
+from frappe.utils import (flt, getdate, get_first_day, add_months, add_days, formatdate, cstr, cint)
 
 from six import itervalues
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
@@ -45,10 +46,7 @@ def get_period_list(from_fiscal_year, to_fiscal_year, period_start_date, period_
 	start_date = year_start_date
 	months = get_months(year_start_date, year_end_date)
 
-	if (months // months_to_add) != (months / months_to_add):
-		months += months_to_add
-
-	for i in range(months // months_to_add):
+	for i in range(cint(math.ceil(months / months_to_add))):
 		period = frappe._dict({
 			"from_date": start_date
 		})
@@ -405,12 +403,12 @@ def set_gl_entries_by_account(
 				FROM `tabDistributed Cost Center`
 				WHERE cost_center IN %(cost_center)s
 				AND parent NOT IN %(cost_center)s
-				AND is_cancelled = 0
 				GROUP BY parent
 			) as DCC_allocation
 			WHERE company=%(company)s
 			{additional_conditions}
 			AND posting_date <= %(to_date)s
+			AND is_cancelled = 0
 			AND cost_center = DCC_allocation.parent
 			""".format(additional_conditions=additional_conditions.replace("and cost_center in %(cost_center)s ", ''))
 
@@ -425,7 +423,7 @@ def set_gl_entries_by_account(
 				distributed_cost_center_query=distributed_cost_center_query), gl_filters, as_dict=True) #nosec
 
 		if filters and filters.get('presentation_currency'):
-			convert_to_presentation_currency(gl_entries, get_currency(filters))
+			convert_to_presentation_currency(gl_entries, get_currency(filters), filters.get('company'))
 
 		for entry in gl_entries:
 			gl_entries_by_account.setdefault(entry.account, []).append(entry)

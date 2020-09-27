@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe, erpnext, math, json
 from frappe import _
 from six import string_types
-from frappe.utils import flt, add_months, cint, nowdate, getdate, today, date_diff, month_diff, add_days
+from frappe.utils import flt, add_months, cint, nowdate, getdate, today, date_diff, month_diff, add_days, get_last_day, get_datetime
 from frappe.model.document import Document
 from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
 from erpnext.assets.doctype.asset.depreciation \
@@ -35,11 +35,9 @@ class Asset(AccountsController):
 		if not self.booked_fixed_asset and self.validate_make_gl_entry():
 			self.make_gl_entries()
 
-	def before_cancel(self):
-		self.cancel_auto_gen_movement()
-
 	def on_cancel(self):
 		self.validate_cancellation()
+		self.cancel_movement_entries()
 		self.delete_depreciation_entries()
 		self.set_status()
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
@@ -84,6 +82,11 @@ class Asset(AccountsController):
 	def validate_in_use_date(self):
 		if not self.available_for_use_date:
 			frappe.throw(_("Available for use date is required"))
+
+		for d in self.finance_books:
+			if d.depreciation_start_date == self.available_for_use_date:
+				frappe.throw(_("Row #{}: Depreciation Posting Date should not be equal to Available for Use Date.").format(d.idx),
+					title=_("Incorrect Date"))
 
 	def set_missing_values(self):
 		if not self.asset_category:
@@ -134,22 +137,13 @@ class Asset(AccountsController):
 				Please do not book expense of multiple assets against one single Asset.")
 				.format(frappe.bold("equal"), "<br>"), title=_("Invalid Gross Purchase Amount"))
 
-	def cancel_auto_gen_movement(self):
-		movements = frappe.db.sql(
-			"""SELECT asm.name, asm.docstatus
-			FROM `tabAsset Movement` asm, `tabAsset Movement Item` asm_item
-			WHERE asm_item.parent=asm.name and asm_item.asset=%s and asm.docstatus=1""", self.name, as_dict=1)
-		if len(movements) > 1:
-			frappe.throw(_('Asset has multiple Asset Movement Entries which has to be \
-				cancelled manually to cancel this asset.'))
-		if movements:
-			movement = frappe.get_doc('Asset Movement', movements[0].get('name'))
-			movement.flags.ignore_validate = True
-			movement.cancel()
-
 	def make_asset_movement(self):
 		reference_doctype = 'Purchase Receipt' if self.purchase_receipt else 'Purchase Invoice'
 		reference_docname = self.purchase_receipt or self.purchase_invoice
+		transaction_date = getdate(self.purchase_date)
+		if reference_docname:
+			posting_date, posting_time = frappe.db.get_value(reference_doctype, reference_docname, ["posting_date", "posting_time"])
+			transaction_date = get_datetime("{} {}".format(posting_date, posting_time))
 		assets = [{
 			'asset': self.name,
 			'asset_name': self.asset_name,
@@ -161,7 +155,7 @@ class Asset(AccountsController):
 			'assets': assets,
 			'purpose': 'Receipt',
 			'company': self.company,
-			'transaction_date': getdate(nowdate()),
+			'transaction_date': transaction_date,
 			'reference_doctype': reference_doctype,
 			'reference_name': reference_docname
 		}).insert()
@@ -309,7 +303,7 @@ class Asset(AccountsController):
 		if not row.depreciation_start_date:
 			if not self.available_for_use_date:
 				frappe.throw(_("Row {0}: Depreciation Start Date is required").format(row.idx))
-			row.depreciation_start_date = self.available_for_use_date
+			row.depreciation_start_date = get_last_day(self.available_for_use_date)
 
 		if not self.is_existing_asset:
 			self.opening_accumulated_depreciation = 0
@@ -412,6 +406,16 @@ class Asset(AccountsController):
 			frappe.throw(_("There are active maintenance or repairs against the asset. You must complete all of them before cancelling the asset."))
 		if self.status not in ("Submitted", "Partially Depreciated", "Fully Depreciated"):
 			frappe.throw(_("Asset cannot be cancelled, as it is already {0}").format(self.status))
+
+	def cancel_movement_entries(self):
+		movements = frappe.db.sql(
+			"""SELECT asm.name, asm.docstatus
+			FROM `tabAsset Movement` asm, `tabAsset Movement Item` asm_item
+			WHERE asm_item.parent=asm.name and asm_item.asset=%s and asm.docstatus=1""", self.name, as_dict=1)
+
+		for movement in movements:
+			movement = frappe.get_doc('Asset Movement', movement.get('name'))
+			movement.cancel()
 
 	def delete_depreciation_entries(self):
 		for d in self.get("schedules"):

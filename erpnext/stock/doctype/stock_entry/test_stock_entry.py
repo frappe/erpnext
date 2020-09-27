@@ -413,7 +413,7 @@ class TestStockEntry(unittest.TestCase):
 	def test_serial_item_error(self):
 		se, serial_nos = self.test_serial_by_series()
 		if not frappe.db.exists('Serial No', 'ABCD'):
-			make_serialized_item("_Test Serialized Item", "ABCD\nEFGH")
+			make_serialized_item(item_code="_Test Serialized Item", serial_no="ABCD\nEFGH")
 
 		se = frappe.copy_doc(test_records[0])
 		se.purpose = "Material Transfer"
@@ -737,34 +737,6 @@ class TestStockEntry(unittest.TestCase):
 		self.assertEqual(se.get("items")[0].allow_zero_valuation_rate, 1)
 		self.assertEqual(se.get("items")[0].amount, 0)
 
-	def test_goods_in_transit(self):
-		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-		warehouse = "_Test Warehouse FG 1 - _TC"
-
-		if not frappe.db.exists('Warehouse', warehouse):
-			create_warehouse("_Test Warehouse FG 1")
-
-		outward_entry = make_stock_entry(item_code="_Test Item",
-			purpose="Send to Warehouse",
-			source="_Test Warehouse - _TC",
-			target="_Test Warehouse 1 - _TC", qty=50, basic_rate=100)
-
-		inward_entry1 = make_stock_in_entry(outward_entry.name)
-		inward_entry1.items[0].t_warehouse = warehouse
-		inward_entry1.items[0].qty = 25
-		inward_entry1.submit()
-
-		doc = frappe.get_doc('Stock Entry', outward_entry.name)
-		self.assertEqual(doc.per_transferred, 50)
-
-		inward_entry2 = make_stock_in_entry(outward_entry.name)
-		inward_entry2.items[0].t_warehouse = warehouse
-		inward_entry2.items[0].qty = 25
-		inward_entry2.submit()
-
-		doc = frappe.get_doc('Stock Entry', outward_entry.name)
-		self.assertEqual(doc.per_transferred, 100)
-
 	def test_gle_for_opening_stock_entry(self):
 		mr = make_stock_entry(item_code="_Test Item", target="Stores - TCP1", company="_Test Company with perpetual inventory",qty=50, basic_rate=100, expense_account="Stock Adjustment - TCP1", is_opening="Yes", do_not_save=True)
 
@@ -823,15 +795,29 @@ class TestStockEntry(unittest.TestCase):
 			])
 		)
 
-def make_serialized_item(item_code=None, serial_no=None, target_warehouse=None):
+def make_serialized_item(**args):
+	args = frappe._dict(args)
 	se = frappe.copy_doc(test_records[0])
-	se.get("items")[0].item_code = item_code or "_Test Serialized Item With Series"
-	se.get("items")[0].serial_no = serial_no
+
+	if args.company:
+		se.company = args.company
+
+	se.get("items")[0].item_code = args.item_code or "_Test Serialized Item With Series"
+
+	if args.serial_no:
+		se.get("items")[0].serial_no = args.serial_no
+
+	if args.cost_center:
+		se.get("items")[0].cost_center = args.cost_center
+
+	if args.expense_account:
+		se.get("items")[0].expense_account = args.expense_account
+
 	se.get("items")[0].qty = 2
 	se.get("items")[0].transfer_qty = 2
 
-	if target_warehouse:
-		se.get("items")[0].t_warehouse = target_warehouse
+	if args.target_warehouse:
+		se.get("items")[0].t_warehouse = args.target_warehouse
 
 	se.set_stock_entry_type()
 	se.insert()

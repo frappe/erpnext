@@ -13,7 +13,7 @@ source_link = "https://github.com/frappe/erpnext"
 app_logo_url = '/assets/erpnext/images/erp-icon.svg'
 
 
-develop_version = '12.x.x-develop'
+develop_version = '13.x.x-develop'
 
 app_include_js = "assets/js/erpnext.min.js"
 app_include_css = "assets/css/erpnext.css"
@@ -246,10 +246,10 @@ doc_events = {
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	"Purchase Invoice": {
-		"on_submit": "erpnext.regional.india.utils.make_reverse_charge_entries"
+		"validate": "erpnext.regional.india.utils.update_grand_total_for_rcm"
 	},
 	"Payment Entry": {
-		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.update_payment_req_status"],
+		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.update_payment_req_status", "erpnext.accounts.doctype.dunning.dunning.resolve_dunning"],
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	'Address': {
@@ -282,6 +282,11 @@ auto_cancel_exempted_doctypes= [
 ]
 
 scheduler_events = {
+	"cron": {
+		"0/30 * * * *": [
+			"erpnext.utilities.doctype.video.video.update_youtube_data",
+		]
+	},
 	"all": [
 		"erpnext.projects.doctype.project.project.project_status_update_reminder",
 		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.send_appointment_reminder",
@@ -322,7 +327,8 @@ scheduler_events = {
 		"erpnext.crm.doctype.email_campaign.email_campaign.set_email_campaign_status",
 		"erpnext.selling.doctype.quotation.quotation.set_expired_status",
 		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_appointment_status",
-		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status"
+		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status",
+		"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_auto_email"
 	],
 	"daily_long": [
 		"erpnext.setup.doctype.email_digest.email_digest.send",
@@ -374,7 +380,8 @@ regional_overrides = {
 		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_data': 'erpnext.regional.india.utils.get_itemised_tax_breakup_data',
 		'erpnext.accounts.party.get_regional_address_details': 'erpnext.regional.india.utils.get_regional_address_details',
 		'erpnext.hr.utils.calculate_annual_eligible_hra_exemption': 'erpnext.regional.india.utils.calculate_annual_eligible_hra_exemption',
-		'erpnext.hr.utils.calculate_hra_exemption_for_period': 'erpnext.regional.india.utils.calculate_hra_exemption_for_period'
+		'erpnext.hr.utils.calculate_hra_exemption_for_period': 'erpnext.regional.india.utils.calculate_hra_exemption_for_period',
+		'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_regional_gl_entries': 'erpnext.regional.india.utils.make_regional_gl_entries'
 	},
 	'United Arab Emirates': {
 		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data'
