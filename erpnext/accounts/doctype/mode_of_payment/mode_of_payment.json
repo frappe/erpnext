@@ -52,7 +52,7 @@
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Mode of Payment",
- "owner": "harshada@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "create": 1,
