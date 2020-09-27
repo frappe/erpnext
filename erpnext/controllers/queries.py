@@ -9,6 +9,7 @@ from frappe.utils import nowdate, getdate
 from collections import defaultdict
 from erpnext.stock.get_item_details import _get_item_tax_template
 from frappe.utils import unique
+from frappe.model.meta import get_field_precision
 
  # searches for active employees
 def employee_query(doctype, txt, searchfield, start, page_len, filters):
