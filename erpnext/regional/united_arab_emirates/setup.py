@@ -130,6 +130,8 @@ def add_print_formats():
 		name in('Simplified Tax Invoice', 'Detailed Tax Invoice', 'Tax Invoice') """)
 
 def add_custom_roles_for_reports():
+	"""Add Access Control to UAE VAT 21
+	"""
 	if not frappe.db.get_value('Custom Role', dict(report='UAE VAT 21')):
 		frappe.get_doc(dict(
 			doctype='Custom Role',
