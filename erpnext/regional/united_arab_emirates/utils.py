@@ -53,12 +53,13 @@ def get_tax_accounts(company):
 		tax_accounts: List of Tax Accounts for the company
 	"""
 	tax_accounts_dict = frappe._dict()
-	tax_accounts_list = frappe.get_all("Account",
-		filters={"account_type": "Tax", "company": company},
-		fields=["name"])
+	tax_accounts_list = frappe.get_all("UAE VAT Account",
+		filters={"parent": company},
+		fields=["Account"]
+		)
 
 	if not tax_accounts_list and not frappe.flags.in_test:
-		frappe.throw(_("Please create at least one Account of type Tax"))
+		frappe.throw(_(f'Please set Vat Accounts for Company: "{company}" in UAE VAT Setting'))
 	for d in tax_accounts_list:
 		for key, name in d.items():
 			tax_accounts_dict[name] = name
