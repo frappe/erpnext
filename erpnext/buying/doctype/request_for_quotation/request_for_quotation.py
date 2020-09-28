@@ -219,7 +219,7 @@ def get_supplier_contacts(doctype, txt, searchfield, start, page_len, filters):
 def make_supplier_quotation(source_name, for_supplier, target_doc=None):
 	def postprocess(source, target_doc):
 		target_doc.supplier = for_supplier
-		args = get_party_details(for_supplier, party_type="Supplier", ignore_permissions=True)
+		args = get_party_details(for_supplier, party_type="Supplier", company=source.company, ignore_permissions=True)
 		target_doc.currency = args.currency or get_party_account_currency('Supplier', for_supplier, source.company)
 		target_doc.buying_price_list = args.buying_price_list or frappe.db.get_value('Buying Settings', None, 'buying_price_list')
 		set_missing_values(source, target_doc)
