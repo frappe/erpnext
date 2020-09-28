@@ -1039,17 +1039,19 @@ class SalesInvoice(SellingController):
 		if flt(self.rounding_adjustment, self.precision("rounding_adjustment")) and self.base_rounding_adjustment:
 			round_off_account, round_off_cost_center = \
 				get_round_off_account_and_cost_center(self.company)
+			round_off_account_currency = get_account_currency(round_off_account)
 
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": round_off_account,
 					"against": self.customer,
-					"credit_in_account_currency": flt(self.rounding_adjustment,
-						self.precision("rounding_adjustment")),
+					"credit_in_account_currency": (flt(self.base_rounding_adjustment,
+						self.precision('base_rounding_adjustment')) if round_off_account_currency == self.company_currency
+						else flt(self.rounding_adjustment, self.precision("rounding_adjustment"))),
 					"credit": flt(self.base_rounding_adjustment,
 						self.precision("base_rounding_adjustment")),
 					"cost_center": self.cost_center or round_off_cost_center,
-				}, item=self))
+				}, round_off_account_currency, item=self))
 
 	def update_billing_status_in_dn(self, update_modified=True):
 		updated_delivery_notes = []
