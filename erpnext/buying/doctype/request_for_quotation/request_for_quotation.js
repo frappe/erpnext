@@ -247,8 +247,8 @@ frappe.ui.form.on("Request for Quotation",{
 
 		}
 
-		dialog.fields_dict.note.$wrapper.append(`<p class="small text-muted">This is a preview of the email to be sent. A PDF of this document will
-			automatically be attached with the mail.</p>`);
+		dialog.fields_dict.note.$wrapper.append(`<p class="small text-muted">This is a preview of the email to be sent. A PDF of the document will
+			automatically be attached with the email.</p>`);
 
 		dialog.set_value("subject", frm.doc.subject);
 		dialog.show();
