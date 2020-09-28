@@ -2,9 +2,7 @@ import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
 def create_custom_pos_fields():
-	"""
-		Create custom fields corresponding to POS Settings and POS Invoice
-	"""
+	"""Create custom fields corresponding to POS Settings and POS Invoice."""
 	pos_field = {
 		"POS Invoice": [
 			{
@@ -14,6 +12,13 @@ def create_custom_pos_fields():
 				"hidden": 1,
 				"insert_after": "contact_email"
 			},
+			{
+				"fieldname": "Mpesa Receipt Number",
+				"label": "mpesa_receipt_number",
+				"fieldtype": "Data",
+				"read_only": 1,
+				"insert_after": "company"
+			}
 		]
 	}
 	if not frappe.get_meta("POS Invoice").has_field("request_for_payment"):

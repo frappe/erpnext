@@ -6,6 +6,7 @@ import datetime
 class MpesaConnector():
 	def __init__(self, env="sandbox", app_key=None, app_secret=None, sandbox_url="https://sandbox.safaricom.co.ke",
 		live_url="https://safaricom.co.ke"):
+		"""Setup configuration for Mpesa connector and generate new access token."""
 		self.env = env
 		self.app_key = app_key
 		self.app_secret = app_secret
@@ -38,6 +39,7 @@ class MpesaConnector():
 					remarks=None, queue_timeout_url=None,result_url=None):
 		"""
 		This method uses Mpesa's Account Balance API to to enquire the balance on a M-Pesa BuyGoods (Till Number).
+
 		Args:
 			initiator (str): Username used to authenticate the transaction.
 			security_credential (str): Generate from developer portal.
@@ -73,6 +75,7 @@ class MpesaConnector():
 				 phone_number=None, description=None):
 		"""
 		This method uses Mpesa's Express API to initiate online payment on behalf of a customer.
+
 		Args:
 			business_shortcode (int): The short code of the organization.
 			passcode (str): Get from developer portal

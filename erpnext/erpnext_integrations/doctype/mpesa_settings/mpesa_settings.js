@@ -15,7 +15,6 @@ frappe.ui.form.on('Mpesa Settings', {
 	},
 
 	setup_account_balance_html: function(frm) {
-		console.log(frm.doc.account_balance)
 		$("div").remove(".form-dashboard-section.custom");
 		frm.dashboard.add_section(
 			frappe.render_template('account_balance', {
