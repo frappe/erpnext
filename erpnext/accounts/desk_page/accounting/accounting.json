@@ -79,6 +79,11 @@
    "hidden": 0,
    "label": "Profitability",
    "links": "[\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Gross Profit\",\n        \"name\": \"Gross Profit\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"GL Entry\"\n        ],\n        \"doctype\": \"GL Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Profitability Analysis\",\n        \"name\": \"Profitability Analysis\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Sales Invoice Trends\",\n        \"name\": \"Sales Invoice Trends\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Purchase Invoice Trends\",\n        \"name\": \"Purchase Invoice Trends\",\n        \"type\": \"report\"\n    }\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Value-Added Tax (VAT UAE)",
+   "links": "[\n    {\n        \"label\": \"UAE VAT Setting\",\n        \"name\": \"UAE VAT Setting\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"UAE VAT 21\",\n        \"name\": \"UAE VAT 21\",\n        \"type\": \"report\"\n    }\n]"
   }
  ],
  "category": "Modules",
@@ -98,7 +103,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Accounting",
- "modified": "2020-09-03 10:37:07.865801",
+ "modified": "2020-09-28 13:19:27.703992",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
