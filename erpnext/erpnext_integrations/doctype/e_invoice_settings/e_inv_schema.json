@@ -1,0 +1,52 @@
+{{
+    "Version": "1.01",
+    "TranDtls": {{
+        "TaxSch": "{trans_details.tax_scheme}",
+        "SupTyp": "{trans_details.supply_type}",
+        "RegRev": "{trans_details.reverse_charge}"
+    }},
+    "DocDtls": {{
+        "Typ": "{doc_details.invoice_type}",
+        "No": "{doc_details.invoice_name}",
+        "Dt": "{doc_details.invoice_date}"
+    }},
+    "SellerDtls": {{
+        "Gstin": "{seller_details.gstin}",
+        "LglNm": "{seller_details.legal_name}",
+        "TrdNm": "{seller_details.trade_name}",
+        "Loc": "{seller_details.location}",
+        "Pin": "{seller_details.pincode}",
+        "Stcd": "{seller_details.state_code}",
+        "Addr1": "{seller_details.address_line1}",
+        "Addr2": "{seller_details.address_line2}",
+        "Ph": "{seller_details.phone}",
+        "Em": "{seller_details.email}"
+    }},
+    "BuyerDtls": {{
+        "Gstin": "{buyer_details.gstin}",
+        "LglNm": "{buyer_details.legal_name}",
+        "TrdNm": "{buyer_details.trade_name}",
+        "Addr1": "{buyer_details.address_line1}",
+        "Addr2": "{buyer_details.address_line2}",
+        "Loc": "{buyer_details.location}",
+        "Pin": "{buyer_details.pincode}",
+        "Stcd": "{buyer_details.state_code}",
+        "Ph": "{buyer_details.phone}",
+        "Em": "{buyer_details.email}",
+        "Pos": "{buyer_details.place_of_supply}"
+    }},
+    "ItemList": [
+        {item_list}
+    ],
+    "ValDtls": {{
+        "AssVal": "{value_details.base_net_total}",
+        "CgstVal": "{value_details.total_cgst_amt}",
+        "SgstVal": "{value_details.total_sgst_amt}",
+        "IgstVal": "{value_details.total_igst_amt}",
+        "CesVal": "{value_details.total_cess_amt}",
+        "Discount": "{value_details.invoice_discount_amt}",
+        "RndOffAmt": "{value_details.round_off}",
+        "TotInvVal": "{value_details.base_grand_total}",
+        "TotInvValFc": "{value_details.grand_total}"
+    }}
+}}
