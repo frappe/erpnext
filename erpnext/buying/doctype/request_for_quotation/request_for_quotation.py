@@ -62,29 +62,15 @@ class RequestforQuotation(BuyingController):
 	def on_cancel(self):
 		frappe.db.set(self, 'status', 'Cancelled')
 
-	def get_supplier_email_preview(self, args):
-		rfq_suppliers = list(filter(lambda row: row.supplier == args.get('supplier'), self.suppliers))
-		rfq_supplier = rfq_suppliers[0].as_dict()
+	def get_supplier_email_preview(self, supplier):
+		# Returns formatted email preview as string
+		rfq_suppliers = list(filter(lambda row: row.supplier == supplier, self.suppliers))
+		rfq_supplier = rfq_suppliers[0]
 
 		update_password_link = self.update_supplier_contact(rfq_supplier, self.get_link())
 
-		full_name = get_user_fullname(frappe.session['user'])
-		if full_name == "Guest":
-			full_name = "Administrator"
+		message  = self.supplier_rfq_mail(rfq_supplier, update_password_link, self.get_link(), True)
 
-		args = {
-			'update_password_link': update_password_link,
-			'message': frappe.render_template(self.message_for_supplier, args),
-			'rfq_link': self.get_link(),
-			'user_fullname': full_name,
-			'supplier': rfq_supplier.supplier_name,
-			'salutation': args.get('salutation')
-		}
-		args.update(self.as_dict())
-
-		subject = _("Request for Quotation")
-		template = "templates/emails/request_for_quotation.html"
-		message = frappe.get_template(template).render(args)
 		return message
 
 	def send_to_supplier(self):
@@ -154,7 +140,7 @@ class RequestforQuotation(BuyingController):
 
 		return user, update_password_link
 
-	def supplier_rfq_mail(self, data, update_password_link, rfq_link):
+	def supplier_rfq_mail(self, data, update_password_link, rfq_link, preview=False):
 		full_name = get_user_fullname(frappe.session['user'])
 		if full_name == "Guest":
 			full_name = "Administrator"
@@ -163,13 +149,19 @@ class RequestforQuotation(BuyingController):
 			'update_password_link': update_password_link,
 			'message': frappe.render_template(self.message_for_supplier, data.as_dict()),
 			'rfq_link': rfq_link,
-			'user_fullname': full_name
+			'user_fullname': full_name,
+			'supplier_name' : data.get('supplier_name'),
+			'supplier_salutation' : self.salutation or 'Dear Mx.',
 		}
 
-		subject = _("Request for Quotation")
+		subject = self.subject or _("Request for Quotation")
 		template = "templates/emails/request_for_quotation.html"
 		sender = frappe.session.user not in STANDARD_USERS and frappe.session.user or None
 		message = frappe.get_template(template).render(args)
+
+		if preview:
+			return message
+
 		attachments = self.get_attachments()
 
 		self.send_email(data, sender, subject, message, attachments)
