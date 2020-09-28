@@ -352,12 +352,12 @@
  "issingle": 1, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2019-02-01 14:21:16.729848", 
+ "modified": "2020-09-18 17:26:09.703215", 
  "modified_by": "Administrator", 
  "module": "Hub Node", 
  "name": "Marketplace Settings", 
  "name_case": "", 
- "owner": "netchamp@rawcoderz.com", 
+ "owner": "Administrator", 
  "permissions": [
   {
    "amend": 0, 
