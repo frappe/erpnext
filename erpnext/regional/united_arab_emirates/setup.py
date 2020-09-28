@@ -130,10 +130,10 @@ def add_print_formats():
 		name in('Simplified Tax Invoice', 'Detailed Tax Invoice', 'Tax Invoice') """)
 
 def add_custom_roles_for_reports():
-	if not frappe.db.get_value('Custom Role', dict(report='UAE VAT')):
+	if not frappe.db.get_value('Custom Role', dict(report='UAE VAT 21')):
 		frappe.get_doc(dict(
 			doctype='Custom Role',
-			report='UAE VAT',
+			report='UAE VAT 21',
 			roles= [
 				dict(role='Accounts User'),
 				dict(role='Accounts Manager'),
