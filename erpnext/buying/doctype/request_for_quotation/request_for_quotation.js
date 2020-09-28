@@ -224,8 +224,17 @@ frappe.ui.form.on("Request for Quotation",{
 				{
 					label: __('Email'),
 					fieldtype: 'HTML',
-					fieldname: 'email_preview',
+					fieldname: 'email_preview'
 				},
+				{
+					fieldtype: 'Section Break',
+					fieldname: 'sec_break_2'
+				},
+				{
+					label: __('Note'),
+					fieldtype: 'HTML',
+					fieldname: 'note'
+				}
 			]
 		});
 
@@ -237,6 +246,10 @@ frappe.ui.form.on("Request for Quotation",{
 			});
 
 		}
+
+		dialog.fields_dict.note.$wrapper.append(`<p class="small text-muted">This is a preview of the email to be sent. A PDF of this document will
+			automatically be attached with the mail.</p>`);
+
 		dialog.set_value("subject", frm.doc.subject);
 		dialog.show();
 	}
