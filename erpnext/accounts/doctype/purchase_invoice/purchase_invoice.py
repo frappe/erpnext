@@ -992,15 +992,18 @@ class PurchaseInvoice(BuyingController):
 		if self.rounding_adjustment and self.base_rounding_adjustment:
 			round_off_account, round_off_cost_center = \
 				get_round_off_account_and_cost_center(self.company)
+			round_off_account_currency = get_account_currency(round_off_account)
 
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": round_off_account,
 					"against": billing_party,
-					"debit_in_account_currency": self.rounding_adjustment,
-					"debit": self.base_rounding_adjustment,
+					"debit_in_account_currency": (flt(self.base_rounding_adjustment,
+						self.precision("base_rounding_adjustment")) if round_off_account_currency == self.company_currency
+						else flt(self.rounding_adjustment, self.precision("rounding_adjustment"))),
+					"debit": flt(self.base_rounding_adjustment, self.precision("base_rounding_adjustment")),
 					"cost_center": self.cost_center or round_off_cost_center,
-				}, item=self))
+				}, round_off_account_currency, item=self))
 
 	def on_cancel(self):
 		super(PurchaseInvoice, self).on_cancel()
