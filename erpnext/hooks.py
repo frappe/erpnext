@@ -288,6 +288,11 @@ auto_cancel_exempted_doctypes= [
 ]
 
 scheduler_events = {
+	"cron": {
+		"0/30 * * * *": [
+			"erpnext.utilities.doctype.video.video.update_youtube_data",
+		]
+	},
 	"all": [
 		"erpnext.projects.doctype.project.project.project_status_update_reminder",
 		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.send_appointment_reminder",
