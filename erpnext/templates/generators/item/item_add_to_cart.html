@@ -11,7 +11,7 @@
 			<small class="text-muted">({{ product_info.price.formatted_price }} / {{ product_info.uom }})</small>
 		</h4>
 		{% else %}
-			{{ _("UOM") }} : {{ product_info.uom }}
+			{{ _("Unit of Measurement") }} : {{ product_info.uom }}
 		{% endif %}
 
 		{% if cart_settings.show_stock_availability %}
