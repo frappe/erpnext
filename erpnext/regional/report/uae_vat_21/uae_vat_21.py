@@ -8,7 +8,9 @@ from frappe import _
 
 def execute(filters=None):
 	columns = get_columns()
-	data, chart = get_data(filters)
+	data, emirates, amounts_by_emirate = get_data(filters)
+	chart = get_chart(emirates, amounts_by_emirate)
+
 	return columns, data, None, chart
 
 def get_columns():
@@ -71,8 +73,6 @@ def get_data(filters = None):
 				"amount": amount,
 				"vat_amount": vat
 			}
-
-	chart = get_chart_data(emirates, amounts_by_emirate)
 
 	for d, emirate in enumerate(emirates, 97):
 		if emirate in amounts_by_emirate:
@@ -148,10 +148,10 @@ def get_data(filters = None):
 		}
 	)
 
-	return data, chart
+	return data, emirates, amounts_by_emirate
 
 
-def get_chart_data(emirates, amounts_by_emirate):
+def get_chart(emirates, amounts_by_emirate):
 	"""Returns chart data
 
 	Args:
