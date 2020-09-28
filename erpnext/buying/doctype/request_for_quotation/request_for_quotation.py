@@ -63,25 +63,18 @@ class RequestforQuotation(BuyingController):
 		frappe.db.set(self, 'status', 'Cancelled')
 
 	def get_supplier_email_preview(self, supplier):
-		'''Returns formatted email preview as string'''
+		"""Returns formatted email preview as string"""
 		rfq_suppliers = list(filter(lambda row: row.supplier == supplier, self.suppliers))
 		rfq_supplier = rfq_suppliers[0]
 
 		self.validate_email_id(rfq_supplier)
 
-		update_password_link = ""
-		if not frappe.db.exists("User", rfq_supplier.email_id):
-			# user doesnt exist
-			# so (dummy) update password button, should be included for preview
-			# as it will be included in actual mail, on user creation
-			update_password_link = "#"
-
-		message  = self.supplier_rfq_mail(rfq_supplier, update_password_link, self.get_link(), True)
+		message  = self.supplier_rfq_mail(rfq_supplier, '', self.get_link(), True)
 
 		return message
 
 	def send_to_supplier(self):
-		'''Sends RFQ mail to involved suppliers'''
+		"""Sends RFQ mail to involved suppliers"""
 		for rfq_supplier in self.suppliers:
 			if rfq_supplier.send_email:
 				self.validate_email_id(rfq_supplier)
@@ -92,7 +85,8 @@ class RequestforQuotation(BuyingController):
 				self.update_supplier_part_no(rfq_supplier)
 				self.supplier_rfq_mail(rfq_supplier, update_password_link, self.get_link())
 				rfq_supplier.email_sent = 1
-				rfq_supplier.contact = contact
+				if not rfq_supplier.contact:
+					rfq_supplier.contact = contact
 				rfq_supplier.save()
 
 	def get_link(self):
@@ -119,10 +113,7 @@ class RequestforQuotation(BuyingController):
 		return update_password_link, contact
 
 	def link_supplier_contact(self, rfq_supplier, user):
-		'''
-			Create a new contact if no contact against Supplier.
-			If Contact exists, check if email and user id set
-		'''
+		"""If no Contact, create a new contact against Supplier. If Contact exists, check if email and user id set"""
 		if rfq_supplier.contact:
 			contact = frappe.get_doc("Contact", rfq_supplier.contact)
 		else:
