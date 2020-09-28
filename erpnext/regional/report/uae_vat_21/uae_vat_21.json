@@ -12,11 +12,11 @@
  "modified": "2020-09-10 08:51:02.298482",
  "modified_by": "Administrator",
  "module": "Regional",
- "name": "UAE VAT",
+ "name": "UAE VAT 21",
  "owner": "Administrator",
  "prepared_report": 0,
  "ref_doctype": "GL Entry",
- "report_name": "UAE VAT",
+ "report_name": "UAE VAT 21",
  "report_type": "Script Report",
  "roles": []
 }

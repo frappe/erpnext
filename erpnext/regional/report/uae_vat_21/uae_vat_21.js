@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["UAE VAT"] = {
+frappe.query_reports["UAE VAT 21"] = {
 	"filters": [
 		{
 			"fieldname": "company",
