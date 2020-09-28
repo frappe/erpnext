@@ -7,13 +7,14 @@ import os
 import json
 import base64
 import frappe
-from frappe import _
 from frappe.utils import cstr
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_v1_5, AES
 from Crypto.Util.Padding import pad, unpad
-from frappe.utils.data import get_datetime
 from frappe.model.document import Document
+from frappe import _, get_module_path, scrub
+from frappe.utils.data import get_datetime, cstr
+from erpnext.regional.india.utils import get_gst_accounts
 from frappe.integrations.utils import make_post_request, make_get_request
 
 class EInvoiceSettings(Document):
@@ -102,4 +103,138 @@ class EInvoiceSettings(Document):
 	def handle_err_response(self, response):
 		if response.get('Status') == 0:
 			err_msg = response.get('ErrorDetails')[0].get('ErrorMessage')
-			frappe.throw(_(err_msg), title=_("API Request Failed"))
+			frappe.throw(_(err_msg), title=_('API Request Failed'))
+
+	def get_schema(self, name):
+		schema_path = os.path.join(os.path.dirname(__file__), "{name}_schema.json".format(name=name))
+		with open(schema_path, 'r') as f:
+			return cstr(f.read())
+
+	def get_trans_details(self, invoice):
+		supply_type = ''
+		if invoice.gst_category == 'Registered Regular': supply_type = 'B2B'
+		elif invoice.gst_category == 'SEZ': supply_type = 'SEZWOP'
+		elif invoice.gst_category == 'Overseas': supply_type = 'EXPWOP'
+		elif invoice.gst_category == 'Deemed Export': supply_type = 'DEXP'
+
+		if not supply_type: 
+			return _('Invalid invoice transaction category.')
+
+		return frappe._dict(dict(
+			tax_scheme='GST', supply_type=supply_type, reverse_charge=invoice.reverse_charge
+		))
+
+	def get_doc_details(self, invoice):
+		invoice_type = 'CRN' if invoice.is_return else 'INV'
+		invoice_name = invoice.name
+		invoice_date = invoice.posting_date
+
+		return frappe._dict(dict(
+			invoice_type=invoice_type, invoice_name=invoice_name, invoice_date=invoice_date
+		))
+
+	def get_party_gstin_details(self, party_address):
+		gstin, address_line1, address_line2, phone, email_id = frappe.db.get_value(
+			"Address", party_address, ["gstin", "address_line1", "address_line2", "phone", "email_id"]
+		)
+		gstin_details = self.get_gstin_details(gstin)
+		legal_name = gstin_details.get('LegalName')
+		trade_name = gstin_details.get('TradeName')
+		location = gstin_details.get('AddrLoc')
+		state_code = gstin_details.get('StateCode')
+		pincode = gstin_details.get('AddrPncd')
+
+		return frappe._dict(dict(
+			gstin=gstin, legal_name=legal_name, trade_name=trade_name, location=location,
+			pincode=pincode, state_code=state_code, address_line1=address_line1,
+			address_line2=address_line2, email=email_id, phone=phone
+		))
+	
+	def get_item_list(self, invoice):
+		item_list = []
+		gst_accounts = get_gst_accounts(invoice.company)
+		gst_accounts_list = [d for accounts in gst_accounts.values() for d in accounts if d]
+
+		for d in invoice.items:
+			item_schema = self.get_schema("e_inv_item")
+			item = frappe._dict(dict())
+			item.update(d.as_dict())
+			item.sr_no = d.idx
+			item.description = d.item_name
+			item.is_service_item = "N" if frappe.db.get_value("Item", d.item_code, "is_stock_item") else "Y"
+			item.batch_expiry_date = frappe.db.get_value("Batch", d.batch_no, "expiry_date") if d.batch_no else None
+			item.tax_rate = 0
+			item.igst_amount = 0
+			item.cgst_amount = 0
+			item.sgst_amount = 0
+			item.cess_rate = 0
+			item.cess_amount = 0
+			for t in invoice.taxes:
+				if t.account_head in gst_accounts_list:
+					item_tax_detail = json.loads(t.item_wise_tax_detail).get(item.item_code)
+					if t.account_head in gst_accounts.cess_account:
+						item.cess_rate += item_tax_detail[0]
+						item.cess_amount += item_tax_detail[1]
+					elif t.account_head in gst_accounts.igst_account:
+						item.tax_rate += item_tax_detail[0]
+						item.igst_amount += item_tax_detail[1]
+					elif t.account_head in gst_accounts.sgst_account:
+						item.tax_rate += item_tax_detail[0]
+						item.sgst_amount += item_tax_detail[1]
+					elif t.account_head in gst_accounts.cgst_account:
+						item.tax_rate += item_tax_detail[0]
+						item.cgst_amount += item_tax_detail[1]
+			
+			item.total_value = item.base_amount + item.igst_amount + item.sgst_amount + item.cgst_amount + item.cess_amount
+			e_inv_item = item_schema.format(item=item)
+			item_list.append(e_inv_item)
+
+		return ", ".join(item_list)
+
+	def get_value_details(self, invoice):
+		gst_accounts = get_gst_accounts(invoice.company)
+		gst_accounts_list = [d for accounts in gst_accounts.values() for d in accounts if d]
+
+		value_details = frappe._dict(dict())
+		value_details.base_net_total = invoice.base_net_total
+		value_details.invoice_discount_amt = invoice.discount_amount
+		value_details.round_off = invoice.base_rounding_adjustment
+		value_details.base_grand_total = invoice.base_rounded_total
+		value_details.grand_total = invoice.rounded_total
+		value_details.total_cgst_amt = 0
+		value_details.total_sgst_amt = 0
+		value_details.total_igst_amt = 0
+		value_details.total_cess_amt = 0
+		for t in invoice.taxes:
+			if t.account_head in gst_accounts_list:
+				if t.account_head in gst_accounts.cess_account:
+					value_details.total_cess_amt += t.base_tax_amount
+				elif t.account_head in gst_accounts.igst_account:
+					value_details.total_igst_amt += t.base_tax_amount
+				elif t.account_head in gst_accounts.sgst_account:
+					value_details.total_sgst_amt += t.base_tax_amount
+				elif t.account_head in gst_accounts.cgst_account:
+					value_details.total_cgst_amt += t.base_tax_amount
+		
+		return value_details
+
+	def make_e_invoice(self, invoice):
+		schema = self.get_schema("e_inv")
+
+		trans_details = self.get_trans_details(invoice)
+		doc_details = self.get_doc_details(invoice)
+		seller_details = self.get_party_gstin_details(invoice.company_address)
+		buyer_details = self.get_party_gstin_details(invoice.customer_address)
+		place_of_supply = invoice.place_of_supply.split('-')[0]
+		buyer_details.update(dict(place_of_supply=place_of_supply))
+
+		item_list = self.get_item_list(invoice)
+		value_details = self.get_value_details(invoice)
+
+		e_invoice = schema.format(
+			trans_details=trans_details, doc_details=doc_details,
+			seller_details=seller_details, buyer_details=buyer_details,
+			item_list=item_list, value_details=value_details
+		)
+
+		return json.loads(e_invoice)

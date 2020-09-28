@@ -1,0 +1,25 @@
+{{
+    "SlNo": "{item.sr_no}",
+    "PrdDesc": "{item.description}",
+    "IsServc": "{item.is_service_item}",
+    "HsnCd": "{item.gst_hsn_code}",
+    "Barcde": "{item.barcode}",
+    "Unit": "{item.uom}",
+    "Qty": "{item.qty}",
+    "UnitPrice": "{item.base_rate}",
+    "TotAmt": "{item.base_amount}",
+    "Discount": "{item.discount_amount}",
+    "AssAmt": "{item.base_amount}",
+    "PrdSlNo": "{item.serial_no}",
+    "GstRt": "{item.tax_rate}",
+    "IgstAmt": "{item.igst_amount}",
+    "CgstAmt": "{item.cgst_amount}",
+    "SgstAmt": "{item.sgst_amount}",
+    "CesRt": "{item.cess_rate}",
+    "CesAmt": "{item.cess_amount}",
+    "TotItemVal": "{item.total_value}",
+    "BchDtls": {{
+        "Nm": "{item.batch_no}",
+        "ExpDt": "{item.batch_expiry_date}"
+    }}
+}}

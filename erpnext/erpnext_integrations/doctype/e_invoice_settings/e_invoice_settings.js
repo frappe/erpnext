@@ -10,7 +10,7 @@ frappe.ui.form.on('E Invoice Settings', {
 					doc: frm.doc,
 					method: 'get_gstin_details',
 					args: {
-						'gstin': '27AAACW8099E1ZX'
+						'gstin': '36AAECF1151A1ZC'
 					},
 					freeze: true,
 					callback: (res) => console.log(res)
