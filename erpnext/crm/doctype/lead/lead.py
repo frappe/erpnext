@@ -27,9 +27,6 @@ class Lead(SellingController):
 
 	def after_insert(self):
 		self.update_links()
-		# after the address and contact are created, flush the field values
-		# to avoid inconsistent reporting in case the documents are changed
-		self.flush_address_and_contact_fields()
 
 	def validate(self):
 		self.set_lead_name()
@@ -209,14 +206,6 @@ class Lead(SellingController):
 				"link_title": self.lead_name
 			})
 			self.contact_doc.save()
-
-	def flush_address_and_contact_fields(self):
-		fields = ['address_type', 'address_line1', 'address_line2', 'address_title',
-			'city', 'county', 'country', 'fax', 'pincode', 'state']
-
-		for field in fields:
-			self.set(field, None)
-
 
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):
