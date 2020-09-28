@@ -752,8 +752,10 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			if (total_for_discount_amount) {
 				$.each(this.frm.doc["items"] || [], function(i, item) {
 					distributed_amount = flt(me.frm.doc.discount_amount) * item.net_amount / total_for_discount_amount;
+					
 					item.net_amount = flt(item.net_amount - distributed_amount,
 						precision("base_amount", item));
+					item.taxable_amount = item.net_amount
 					net_total += item.net_amount;
 
 					// discount amount rounding loss adjustment if no taxes
@@ -765,7 +767,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 							precision("net_amount", item));
 					}
 					item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
-					me.set_in_company_currency(item, ["net_rate", "net_amount"]);
+					item.taxable_rate = item.net_rate
+					me.set_in_company_currency(item, ["net_rate", "net_amount", "taxable_rate", "taxable_amount"]);
 				});
 
 				this.discount_amount_applied = true;
