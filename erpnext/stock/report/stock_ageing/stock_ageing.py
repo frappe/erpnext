@@ -162,7 +162,7 @@ def get_fifo_queue(filters, sle=None):
 			if transferred_item_details.get(transferred_item_key):
 				batch = transferred_item_details[transferred_item_key][0]
 				fifo_queue.append(batch)
-				transferred_item_details[(transferred_item_key)].pop(0)
+				transferred_item_details[transferred_item_key].pop(0)
 			else:
 				if serial_no_list:
 					for serial_no in serial_no_list:
