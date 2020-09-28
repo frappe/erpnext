@@ -103,11 +103,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Accounting",
-<<<<<<< HEAD
  "modified": "2020-09-28 13:19:27.703992",
-=======
- "modified": "2020-09-09 11:45:33.766400",
->>>>>>> develop
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
