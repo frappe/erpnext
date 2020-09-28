@@ -600,7 +600,7 @@ class PurchaseInvoice(BuyingController):
 				voucher_wise_stock_value.setdefault(d.voucher_detail_no, d.stock_value_difference)
 
 		valuation_tax_accounts = [d.account_head for d in self.get("taxes")
-			if d.category in ('Valuation', 'Total and Valuation')
+			if d.category in ('Valuation', 'Valuation and Total')
 			and flt(d.base_tax_amount_after_discount_amount)]
 
 		for item in self.get("items"):
@@ -712,8 +712,8 @@ class PurchaseInvoice(BuyingController):
 									"account": self.stock_received_but_not_billed,
 									"against": billing_party,
 									"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
-									"remarks": self.remarks or "Accounting Entry for Stock",
-									"cost_center": self.cost_center,
+									"remarks": self.remarks,
+									"cost_center": item.cost_center or self.cost_center,
 									"project": item.project or self.project
 								}, item=item)
 							)
@@ -874,8 +874,6 @@ class PurchaseInvoice(BuyingController):
 				)
 			# accumulate valuation tax
 			if self.is_opening == "No" and tax.category in ("Valuation", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
-				if self.auto_accounting_for_stock and not tax.cost_center and not self.cost_center:
-					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
 				valuation_tax.setdefault(tax.name, 0)
 				valuation_tax[tax.name] += \
 					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.base_tax_amount_after_discount_amount)
@@ -901,7 +899,7 @@ class PurchaseInvoice(BuyingController):
 							"cost_center": tax.cost_center,
 							"against": billing_party,
 							"credit": applicable_amount,
-							"remarks": self.remarks or _("Accounting Entry for Stock"),
+							"remarks": self.remarks,
 						}, item=tax)
 					)
 
@@ -916,7 +914,7 @@ class PurchaseInvoice(BuyingController):
 							"cost_center": tax.cost_center,
 							"against": billing_party,
 							"credit": valuation_tax[tax.name],
-							"remarks": self.remarks or "Accounting Entry for Stock"
+							"remarks": self.remarks
 						}, item=tax)
 					)
 

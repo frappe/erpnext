@@ -255,6 +255,8 @@ class PurchaseReceipt(BuyingController):
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 		stock_rbnb_currency = get_account_currency(stock_rbnb)
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+		taxes_in_valuation = [d for d in self.taxes if d.category in ("Valuation", "Valuation and Total")\
+			and flt(d.base_tax_amount_after_discount_amount)]
 
 		gl_entries = []
 		warehouse_with_no_account = []
@@ -295,7 +297,7 @@ class PurchaseReceipt(BuyingController):
 							"against": warehouse_account[d.warehouse]["account"],
 							"cost_center": d.cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"credit": valuation_net_amount
+							"credit": valuation_net_amount if taxes_in_valuation else valuation_net_amount + valuation_item_tax_amount
 						}, stock_rbnb_currency, item=d))
 
 					negative_expense_to_be_booked += valuation_item_tax_amount
@@ -350,13 +352,10 @@ class PurchaseReceipt(BuyingController):
 		self.get_asset_gl_entry(gl_entries)
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
-		for tax in self.get("taxes"):
-			if tax.category in ("Valuation", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
-				if not tax.cost_center:
-					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
-				valuation_tax.setdefault(tax.name, 0)
-				valuation_tax[tax.name] += \
-					(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.base_tax_amount_after_discount_amount)
+		for tax in taxes_in_valuation:
+			valuation_tax.setdefault(tax.name, 0)
+			valuation_tax[tax.name] += \
+				(tax.add_deduct_tax == "Add" and 1 or -1) * flt(tax.base_tax_amount_after_discount_amount)
 
 		if negative_expense_to_be_booked and valuation_tax:
 			# Backward compatibility:
