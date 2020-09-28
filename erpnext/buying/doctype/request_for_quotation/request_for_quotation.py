@@ -62,6 +62,31 @@ class RequestforQuotation(BuyingController):
 	def on_cancel(self):
 		frappe.db.set(self, 'status', 'Cancelled')
 
+	def get_supplier_email_preview(self, args):
+		rfq_suppliers = list(filter(lambda row: row.supplier == args.get('supplier'), self.suppliers))
+		rfq_supplier = rfq_suppliers[0].as_dict()
+
+		update_password_link = self.update_supplier_contact(rfq_supplier, self.get_link())
+
+		full_name = get_user_fullname(frappe.session['user'])
+		if full_name == "Guest":
+			full_name = "Administrator"
+
+		args = {
+			'update_password_link': update_password_link,
+			'message': frappe.render_template(self.message_for_supplier, args),
+			'rfq_link': self.get_link(),
+			'user_fullname': full_name,
+			'supplier': rfq_supplier.supplier_name,
+			'salutation': args.get('salutation')
+		}
+		args.update(self.as_dict())
+
+		subject = _("Request for Quotation")
+		template = "templates/emails/request_for_quotation.html"
+		message = frappe.get_template(template).render(args)
+		return message
+
 	def send_to_supplier(self):
 		for rfq_supplier in self.suppliers:
 			if rfq_supplier.send_email:
