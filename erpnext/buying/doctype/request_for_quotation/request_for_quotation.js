@@ -213,7 +213,8 @@ frappe.ui.form.on("Request for Quotation",{
 					label: __('Subject'),
 					fieldtype: 'Data',
 					fieldname: 'subject',
-					read_only: 1
+					read_only: 1,
+					depends_on: 'subject'
 				},
 				{
 					fieldtype: 'Section Break',
@@ -229,12 +230,8 @@ frappe.ui.form.on("Request for Quotation",{
 		});
 
 		dialog.fields_dict['supplier'].df.onchange = () => {
-			var args = {
-				'supplier' : dialog.get_value('supplier'),
-				'salutation' : frm.doc.salutation || null,
-				'message' : frm.doc.message_for_supplier
-			}
-			frm.call('get_supplier_email_preview', args).then(result => {
+			var supplier = dialog.get_value('supplier');
+			frm.call('get_supplier_email_preview', {supplier: supplier}).then(result => {
 				dialog.fields_dict.email_preview.$wrapper.empty();
 				dialog.fields_dict.email_preview.$wrapper.append(result.message);
 			});

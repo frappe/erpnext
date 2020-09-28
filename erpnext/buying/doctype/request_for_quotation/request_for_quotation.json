@@ -245,14 +245,17 @@
    "fetch_if_empty": 1,
    "fieldname": "subject",
    "fieldtype": "Data",
-   "label": "Subject"
+   "label": "Subject",
+   "print_hide": 1
   },
   {
    "description": "Select a greeting for the receiver. E.g. Mr., Ms., etc.",
    "fieldname": "salutation",
    "fieldtype": "Link",
    "label": "Salutation",
-   "options": "Salutation"
+   "no_copy": 1,
+   "options": "Salutation",
+   "print_hide": 1
   },
   {
    "fieldname": "col_break_email_1",
@@ -273,7 +276,7 @@
  "icon": "fa fa-shopping-cart",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-28 14:25:31.357817",
+ "modified": "2020-09-28 17:37:10.313350",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",
