@@ -677,3 +677,4 @@ erpnext.patches.v12_0.set_multi_uom_in_rfq
 erpnext.patches.v12_0.update_state_code_for_daman_and_diu
 erpnext.patches.v12_0.rename_lost_reason_detail
 erpnext.patches.v12_0.update_leave_application_status
+erpnext.patches.v12_0.update_payment_entry_status

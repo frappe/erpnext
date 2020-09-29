@@ -224,6 +224,10 @@ erpnext.utils.set_taxes = function(frm, triggered_from_field) {
 		party = frm.doc.party_name;
 	}
 
+	if (!frm.doc.company) {
+		frappe.throw(_("Kindly select the company first"));
+	}
+
 	frappe.call({
 		method: "erpnext.accounts.party.set_taxes",
 		args: {

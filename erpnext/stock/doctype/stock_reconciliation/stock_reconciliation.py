@@ -45,6 +45,7 @@ class StockReconciliation(StockController):
 	def on_cancel(self):
 		self.delete_and_repost_sle()
 		self.make_gl_entries_on_cancel()
+		self.delete_auto_created_batches()
 
 	def remove_items_with_no_change(self):
 		"""Remove items if qty or rate is not changed"""
@@ -164,8 +165,11 @@ class StockReconciliation(StockController):
 			validate_is_stock_item(item_code, item.is_stock_item, verbose=0)
 
 			# item should not be serialized
-			if item.has_serial_no and not row.serial_no and not item.serial_no_series:
+			if item.has_serial_no and not row.serial_no and not item.serial_no_series and flt(row.qty) > 0:
 				raise frappe.ValidationError(_("Serial no(s) required for serialized item {0}").format(item_code))
+
+			if flt(row.qty) == 0 and row.serial_no:
+				row.serial_no = ''
 
 			# item managed batch-wise not allowed
 			if item.has_batch_no and not row.batch_no and not item.create_new_batch:
@@ -234,7 +238,7 @@ class StockReconciliation(StockController):
 			sl_entries = self.merge_similar_item_serial_nos(sl_entries)
 
 	def issue_existing_serial_and_batch(self, sl_entries):
-		from erpnext.stock.stock_ledger import get_previous_sle
+		from erpnext.stock.stock_ledger import get_stock_ledger_entries
 
 		for row in self.items:
 			serial_nos = get_serial_nos(row.serial_no) or []
@@ -260,12 +264,14 @@ class StockReconciliation(StockController):
 			for serial_no in serial_nos:
 				args = self.get_sle_for_items(row, [serial_no])
 
-				previous_sle = get_previous_sle({
+				previous_sle = get_stock_ledger_entries({
 					"item_code": row.item_code,
 					"posting_date": self.posting_date,
 					"posting_time": self.posting_time,
 					"serial_no": serial_no
-				})
+				}, "<", "desc", "limit 1")
+
+				previous_sle = previous_sle and previous_sle[0] or {}
 
 				if previous_sle and row.warehouse != previous_sle.get("warehouse"):
 					# If serial no exists in different warehouse
