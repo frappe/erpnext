@@ -63,7 +63,7 @@ class RequestforQuotation(BuyingController):
 		frappe.db.set(self, 'status', 'Cancelled')
 
 	def get_supplier_email_preview(self, supplier):
-		"""Returns formatted email preview as string"""
+		"""Returns formatted email preview as string."""
 		rfq_suppliers = list(filter(lambda row: row.supplier == supplier, self.suppliers))
 		rfq_supplier = rfq_suppliers[0]
 
@@ -74,7 +74,7 @@ class RequestforQuotation(BuyingController):
 		return message
 
 	def send_to_supplier(self):
-		"""Sends RFQ mail to involved suppliers"""
+		"""Sends RFQ mail to involved suppliers."""
 		for rfq_supplier in self.suppliers:
 			if rfq_supplier.send_email:
 				self.validate_email_id(rfq_supplier)
@@ -113,7 +113,7 @@ class RequestforQuotation(BuyingController):
 		return update_password_link, contact
 
 	def link_supplier_contact(self, rfq_supplier, user):
-		"""If no Contact, create a new contact against Supplier. If Contact exists, check if email and user id set"""
+		"""If no Contact, create a new contact against Supplier. If Contact exists, check if email and user id set."""
 		if rfq_supplier.contact:
 			contact = frappe.get_doc("Contact", rfq_supplier.contact)
 		else:
@@ -153,9 +153,17 @@ class RequestforQuotation(BuyingController):
 		if full_name == "Guest":
 			full_name = "Administrator"
 
+		# send document dict and some important data from suppliers row
+		# to render message_for_supplier from any template
+		doc_args = self.as_dict()
+		doc_args.update({
+			'supplier': data.get('supplier'),
+			'supplier_name': data.get('supplier_name')
+		})
+
 		args = {
 			'update_password_link': update_password_link,
-			'message': frappe.render_template(self.message_for_supplier, data.as_dict()),
+			'message': frappe.render_template(self.message_for_supplier, doc_args),
 			'rfq_link': rfq_link,
 			'user_fullname': full_name,
 			'supplier_name' : data.get('supplier_name'),
