@@ -382,6 +382,10 @@ def make_custom_fields(update=True):
 		}
 	]
 
+	si_einvoice_fields = [
+		dict(fieldname='irn', label='IRN', fieldtyp='Data', insert_after='customer')
+	]
+
 	custom_fields = {
 		'Address': [
 			dict(fieldname='gstin', label='Party GSTIN', fieldtype='Data',
@@ -394,7 +398,7 @@ def make_custom_fields(update=True):
 		'Purchase Invoice': purchase_invoice_gst_category + invoice_gst_fields + purchase_invoice_itc_fields + purchase_invoice_gst_fields,
 		'Purchase Order': purchase_invoice_gst_fields,
 		'Purchase Receipt': purchase_invoice_gst_fields,
-		'Sales Invoice': sales_invoice_gst_category + invoice_gst_fields + sales_invoice_shipping_fields + sales_invoice_gst_fields + si_ewaybill_fields,
+		'Sales Invoice': sales_invoice_gst_category + invoice_gst_fields + sales_invoice_shipping_fields + sales_invoice_gst_fields + si_ewaybill_fields + si_einvoice_fields,
 		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields + sales_invoice_shipping_fields,
 		'Sales Order': sales_invoice_gst_fields,
 		'Tax Category': inter_state_gst_field,
