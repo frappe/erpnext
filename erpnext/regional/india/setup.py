@@ -383,7 +383,10 @@ def make_custom_fields(update=True):
 	]
 
 	si_einvoice_fields = [
-		dict(fieldname='irn', label='IRN', fieldtyp='Data', insert_after='customer')
+		dict(fieldname='irn', label='IRN', fieldtype='Data', read_only=1, insert_after='customer'),
+		dict(fieldname='irn_cancelled', fieldtype='Check', hidden=1, read_only=1, default=0, allow_on_submit=1),
+		dict(fieldname='signed_einvoice', fieldtype='Code', options='JSON', hidden=1, read_only=1),
+		dict(fieldname='signed_qr_code', fieldtype='Code', options='JSON', hidden=1, read_only=1)
 	]
 
 	custom_fields = {
