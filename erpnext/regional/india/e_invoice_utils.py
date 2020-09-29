@@ -18,6 +18,14 @@ from erpnext.regional.india.utils import get_gst_accounts
 from frappe.utils.data import get_datetime, cstr, cint, format_date
 from frappe.integrations.utils import make_post_request, make_get_request
 
+def validate_einvoice_fields(doc):
+	if not doc.doctype in ['Sales Invoice', 'Purchase Invoice']: return
+
+	if doc.docstatus == 1 and doc._action == 'submit' and not doc.irn:
+		frappe.throw(_("You must generate IRN before submitting the document."), title=_("Missing IRN"))
+	elif doc.docstatus == 2 and doc._action == 'cancel' and not doc.irn_cancelled:
+		frappe.throw(_("You must cancel IRN before cancelling the document."), title=_("Not Allowed"))
+
 def get_einv_credentials():
 	return frappe.get_doc("E Invoice Settings")
 
@@ -66,7 +74,7 @@ def get_header(creds):
 	return headers
 
 @frappe.whitelist()
-def fetch_token(self):
+def fetch_token():
 	einv_creds = get_einv_credentials()
 
 	endpoint = 'https://einv-apisandbox.nic.in/eivital/v1.03/auth'
@@ -100,6 +108,16 @@ def extract_token_and_sek(response, appkey):
 	sek = aes_decrypt(enc_sek, appkey)
 	return auth_token, token_expiry, sek
 
+def attach_signed_json(invoice, data):
+	f = frappe.get_doc({
+		"doctype": "File",
+		"file_name": invoice.name + "e_invoice.json",
+		"attached_to_doctype": invoice.doctype,
+		"attached_to_name": invoice.name,
+		"content": json.dumps(data),
+		"is_private": True
+	}).insert()
+
 def get_gstin_details(gstin):
 	einv_creds = get_einv_credentials()
 
@@ -115,25 +133,28 @@ def get_gstin_details(gstin):
 
 	return data
 
-def generate_irn(invoice):
-	einv_creds = get_einv_credentials()
-
+@frappe.whitelist()
+def generate_irn(doctype, name):
 	endpoint = 'https://einv-apisandbox.nic.in/eicore/v1.03/Invoice'
+	einv_creds = get_einv_credentials()
 	headers = get_header(einv_creds)
 
+	invoice = frappe.get_doc(doctype, name)
 	e_invoice = make_e_invoice(invoice)
 
 	enc_e_invoice_json = aes_encrypt(e_invoice, einv_creds.sek)
 	payload = dict(Data=enc_e_invoice_json)
 
 	res = make_post_request(endpoint, headers=headers, data=json.dumps(payload))
-	handle_err_response(res)
+	res = handle_err_response(res)
 
 	enc_json = res.get('Data')
 	json_str = aes_decrypt(enc_json, einv_creds.sek)
 
 	data = json.loads(json_str)
 	handle_irn_response(data)
+
+	attach_signed_json(invoice, data['DecryptedSignedInvoice'])
 
 	return data
 
@@ -146,19 +167,20 @@ def get_irn_details(irn):
 	res = make_get_request(endpoint, headers=headers)
 	handle_err_response(res)
 
-	enc_json = res.get('Data')
-	json_str = aes_decrypt(enc_json, einv_creds.sek)
+	# enc_json = res.get('Data')
+	# json_str = aes_decrypt(enc_json, einv_creds.sek)
 
-	data = json.loads(json_str)
-	handle_irn_response(data)
+	# data = json.loads(json_str)
+	# handle_irn_response(data)
 
-	return data
+	return res
 
+@frappe.whitelist()
 def cancel_irn(irn, reason, remark=''):
 	einv_creds = get_einv_credentials()
 
 	endpoint = 'https://einv-apisandbox.nic.in/eicore/v1.03/Invoice/Cancel'
-	headers = get_header()
+	headers = get_header(einv_creds)
 
 	cancel_e_inv = json.dumps(dict(Irn=irn, CnlRsn=reason, CnlRem=remark))
 	enc_json = aes_encrypt(cancel_e_inv, einv_creds.sek)
@@ -183,9 +205,17 @@ def handle_err_response(response):
 		print(response)
 		err_msg = ""
 		for d in err_details:
+			err_code = d.get('ErrorCode')
+			if err_code == '2150':
+				irn = [d['Desc']['Irn'] for d in response.get('InfoDtls') if d['InfCd'] == 'DUPIRN']
+				response = get_irn_details(irn[0])
+				return response
+
 			err_msg += d.get('ErrorMessage')
 			err_msg += "<br>"
 		frappe.throw(_(err_msg), title=_('API Request Failed'))
+
+	return response
 
 def read_json(name):
 	file_path = os.path.join(os.path.dirname(__file__), "{name}.json".format(name=name))
@@ -219,7 +249,7 @@ def get_party_gstin_details(party_address):
 	gstin, address_line1, address_line2, phone, email_id = frappe.db.get_value(
 		"Address", party_address, ["gstin", "address_line1", "address_line2", "phone", "email_id"]
 	)
-	gstin_details = self.get_gstin_details(gstin)
+	gstin_details = get_gstin_details(gstin)
 	legal_name = gstin_details.get('LegalName')
 	trade_name = gstin_details.get('TradeName')
 	location = gstin_details.get('AddrLoc')
@@ -405,9 +435,9 @@ def run_e_invoice_validations(validations, e_invoice):
 
 			if isinstance(invoice_value, list):
 				for d in invoice_value:
-					self.run_e_invoice_validations(properties, d)
+					run_e_invoice_validations(properties, d)
 			else:
-				self.run_e_invoice_validations(properties, invoice_value)
+				run_e_invoice_validations(properties, invoice_value)
 				if not invoice_value:
 					e_invoice.pop(field, None)
 			continue
