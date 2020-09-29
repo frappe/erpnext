@@ -129,13 +129,17 @@ class EInvoiceSettings(Document):
 
 		invoice = frappe.get_doc("Sales Invoice", invoice)
 		e_invoice = self.make_e_invoice(invoice)
+
 		enc_e_invoice_json = self.aes_encrypt(e_invoice, self.sek)
 		payload = dict(Data=enc_e_invoice_json)
 
 		res = make_post_request(endpoint, headers=headers, data=json.dumps(payload))
 		self.handle_err_response(res)
 
-		data = json.loads(res)
+		enc_json = res.get('Data')
+		json_str = self.aes_decrypt(enc_json, self.sek)
+
+		data = json.loads(json_str)
 		self.handle_irn_response(data)
 
 		return data
@@ -178,8 +182,12 @@ class EInvoiceSettings(Document):
 
 	def handle_err_response(self, response):
 		if response.get('Status') == 0:
+			err_details = response.get('ErrorDetails')
 			print(response)
-			err_msg = response.get('ErrorDetails')[0].get('ErrorMessage')
+			err_msg = ""
+			for d in err_details:
+				err_msg += d.get('ErrorMessage')
+				err_msg += "<br>"
 			frappe.throw(_(err_msg), title=_('API Request Failed'))
 
 	def read_json(self, name):
@@ -220,11 +228,24 @@ class EInvoiceSettings(Document):
 		location = gstin_details.get('AddrLoc')
 		state_code = gstin_details.get('StateCode')
 		pincode = cint(gstin_details.get('AddrPncd'))
+		if state_code == 97:
+			pincode = 999999
 
 		return frappe._dict(dict(
 			gstin=gstin, legal_name=legal_name, trade_name=trade_name, location=location,
 			pincode=pincode, state_code=state_code, address_line1=address_line1,
 			address_line2=address_line2, email=email_id, phone=phone
+		))
+	
+	def get_overseas_address_details(self, party_address):
+		address_title, address_line1, address_line2, city, phone, email_id = frappe.db.get_value(
+			"Address", party_address, ["address_title", "address_line1", "address_line2", "city", "phone", "email_id"]
+		)
+
+		return frappe._dict(dict(
+			gstin='URP', legal_name=address_title, address_line1=address_line1,
+			address_line2=address_line2, email=email_id, phone=phone,
+			pincode=999999, state_code=96, place_of_supply=96, location=city
 		))
 	
 	def get_item_list(self, invoice):
@@ -295,6 +316,23 @@ class EInvoiceSettings(Document):
 					value_details.total_cgst_amt += t.base_tax_amount
 		
 		return value_details
+	
+	def get_payment_details(self, invoice):
+		payee_name = invoice.company
+		mode_of_payment = ", ".join([d.mode_of_payment for d in invoice.payments])
+		paid_amount = invoice.base_paid_amount
+		outstanding_amount = invoice.outstanding_amount
+
+		return frappe._dict(dict(
+			payee_name=payee_name, mode_of_payment=mode_of_payment,
+			paid_amount=paid_amount, outstanding_amount=outstanding_amount
+		))
+	
+	def get_return_doc_reference(self, invoice):
+		invoice_date = frappe.db.get_value("Sales Invoice", invoice.return_against, "posting_date")
+		return frappe._dict(dict(
+			invoice_name=invoice.return_against, invoice_date=invoice_date
+		))
 
 	def make_e_invoice(self, invoice):
 		schema = self.read_json("e_inv_schema")
@@ -304,17 +342,39 @@ class EInvoiceSettings(Document):
 		trans_details = self.get_trans_details(invoice)
 		doc_details = self.get_doc_details(invoice)
 		seller_details = self.get_party_gstin_details(invoice.company_address)
-		buyer_details = self.get_party_gstin_details(invoice.customer_address)
-		place_of_supply = invoice.place_of_supply.split('-')[0]
-		buyer_details.update(dict(place_of_supply=place_of_supply))
+
+		if invoice.gst_category == 'Overseas':
+			buyer_details = self.get_overseas_address_details(invoice.customer_address)
+		else:
+			buyer_details = self.get_party_gstin_details(invoice.customer_address)
+			place_of_supply = invoice.place_of_supply.split('-')[0]
+			buyer_details.update(dict(place_of_supply=place_of_supply))
 
 		item_list = self.get_item_list(invoice)
 		value_details = self.get_value_details(invoice)
 
+		dispatch_details = frappe._dict({})
+		period_details = frappe._dict({})
+		shipping_details = frappe._dict({})
+		export_details = frappe._dict({})
+		eway_bill_details = frappe._dict({})
+		if invoice.shipping_address_name and invoice.customer_address != invoice.shipping_address_name:
+			shipping_details = self.get_party_gstin_details(invoice.shipping_address_name)
+		
+		payment_details = frappe._dict({})
+		if invoice.is_pos and invoice.base_paid_amount:
+			payment_details = self.get_payment_details(invoice)
+		
+		prev_doc_details = frappe._dict({})
+		if invoice.is_return and invoice.return_against:
+			prev_doc_details = self.get_return_doc_reference(invoice)
+
 		e_invoice = schema.format(
-			trans_details=trans_details, doc_details=doc_details,
-			seller_details=seller_details, buyer_details=buyer_details,
-			item_list=item_list, value_details=value_details
+			trans_details=trans_details, doc_details=doc_details, dispatch_details=dispatch_details,
+			seller_details=seller_details, buyer_details=buyer_details, shipping_details=shipping_details,
+			item_list=item_list, value_details=value_details, payment_details=payment_details,
+			period_details=period_details, prev_doc_details=prev_doc_details,
+			export_details=export_details, eway_bill_details=eway_bill_details
 		)
 		e_invoice = json.loads(e_invoice)
 
@@ -339,7 +399,7 @@ class EInvoiceSettings(Document):
 
 			invoice_value = e_invoice.get(field)
 			if not invoice_value:
-				print(field, "Value undefined")
+				print(field, "value undefined")
 				continue
 
 			should_be_of_type = type_map[value.get('type').lower()]
@@ -351,9 +411,14 @@ class EInvoiceSettings(Document):
 						self.run_e_invoice_validations(properties, d)
 				else:
 					self.run_e_invoice_validations(properties, invoice_value)
+					if not invoice_value:
+						e_invoice.pop(field, None)
 				continue
 			
-			e_invoice[field] = None if invoice_value == "None" else invoice_value
+			if invoice_value == "None":
+				e_invoice.pop(field, None)
+				continue
+
 			e_invoice[field] = should_be_of_type(invoice_value) if e_invoice[field] else e_invoice[field]
 			
 			should_be_of_len = value.get('maxLength')
