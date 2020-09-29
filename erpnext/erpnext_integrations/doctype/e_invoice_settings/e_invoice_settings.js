@@ -16,6 +16,19 @@ frappe.ui.form.on('E Invoice Settings', {
 					callback: (res) => console.log(res)
 				});
 			});
+		
+		frm.add_custom_button(__("Generate IRN"), 
+			() => {
+				frm.call({
+					doc: frm.doc,
+					method: 'generate_irn',
+					args: {
+						'invoice': 'SINV-20-21-0044'
+					},
+					freeze: true,
+					callback: (res) => console.log(res)
+				});
+			});
 	},
 
 	show_fetch_token_btn(frm) {
