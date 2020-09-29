@@ -29,6 +29,19 @@ frappe.ui.form.on('E Invoice Settings', {
 					callback: (res) => console.log(res)
 				});
 			});
+		
+		frm.add_custom_button(__("Fetch IRN Details"), 
+			() => {
+				frm.call({
+					doc: frm.doc,
+					method: 'get_irn_details',
+					args: {
+						'irn': 'c63d9e180dfdaa9242e29e2e1e0a8d76f20e116ed3de179a2e9120f384e1b432'
+					},
+					freeze: true,
+					callback: (res) => console.log(res)
+				});
+			});
 	},
 
 	show_fetch_token_btn(frm) {
