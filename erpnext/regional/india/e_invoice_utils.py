@@ -65,6 +65,7 @@ def get_header(creds):
 	headers.update(dict(Gstin=creds.gstin, AuthToken=creds.auth_token))
 	return headers
 
+@frappe.whitelist()
 def fetch_token(self):
 	einv_creds = get_einv_credentials()
 
@@ -250,7 +251,7 @@ def get_item_list(invoice):
 	gst_accounts_list = [d for accounts in gst_accounts.values() for d in accounts if d]
 
 	for d in invoice.items:
-		item_schema = read_json("einv_item_schema")
+		item_schema = read_json("einv_item_template")
 		item = frappe._dict(dict())
 		item.update(d.as_dict())
 		item.sr_no = d.idx
@@ -331,7 +332,7 @@ def get_return_doc_reference(invoice):
 	))
 
 def make_e_invoice(invoice):
-	schema = read_json("einv_schema")
+	schema = read_json("einv_template")
 	validations = read_json("einv_validation")
 	validations = json.loads(validations)
 
