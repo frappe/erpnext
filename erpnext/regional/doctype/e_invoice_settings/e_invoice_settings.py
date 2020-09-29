@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils.data import cstr
 from frappe.model.document import Document
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 class EInvoiceSettings(Document):
 	def validate(self):
@@ -18,6 +19,8 @@ class EInvoiceSettings(Document):
 	def before_save(self):
 		if not self.public_key or self.has_value_changed('public_key_file'):
 			self.public_key = self.read_key_file()
+
+		make_property_setter("Sales Invoice", "irn", "reqd", self.enable, "Data")
 
 	def read_key_file(self):
 		key_file = frappe.get_doc('File', dict(attached_to_name=self.doctype, attached_to_field='public_key_file'))
