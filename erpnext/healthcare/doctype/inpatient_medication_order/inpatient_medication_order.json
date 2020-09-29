@@ -1,0 +1,152 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2020-09-14 18:33:56.715736",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "patient_details_section",
+  "naming_series",
+  "patient_encounter",
+  "patient",
+  "patient_name",
+  "patient_age",
+  "inpatient_record",
+  "column_break_6",
+  "company",
+  "practitioner",
+  "start_date",
+  "end_date",
+  "medication_orders_section",
+  "medication_orders",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "patient_details_section",
+   "fieldtype": "Section Break",
+   "label": "Patient Details"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "HLC-IMO-.YYYY.-"
+  },
+  {
+   "fieldname": "patient_encounter",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Patient Encounter",
+   "options": "Patient Encounter"
+  },
+  {
+   "fetch_from": "patient_encounter.patient",
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "patient_age",
+   "fieldtype": "Data",
+   "label": "Patient Age",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "inpatient_record",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Inpatient Record",
+   "options": "Inpatient Record",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient_encounter.practitioner",
+   "fieldname": "practitioner",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Healthcare Practitioner",
+   "options": "Healthcare Practitioner"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "medication_orders_section",
+   "fieldtype": "Section Break",
+   "label": "Medication Orders"
+  },
+  {
+   "fieldname": "medication_orders",
+   "fieldtype": "Table",
+   "label": "Medication Orders",
+   "options": "Inpatient Medication Order Entry"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Inpatient Medication Order",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-09-29 13:59:15.408220",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Inpatient Medication Order",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "patient_encounter, patient",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "patient",
+ "track_changes": 1
+}
