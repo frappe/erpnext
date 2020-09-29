@@ -367,7 +367,8 @@ def make_purchase_receipt(source_name, target_doc=None):
 			"doctype": "Purchase Receipt",
 			"field_map": {
 				"per_billed": "per_billed",
-				"supplier_warehouse":"supplier_warehouse"
+				"supplier_warehouse":"supplier_warehouse",
+				"remarks": "remarks"
 			},
 			"validation": {
 				"docstatus": ["=", 1],
@@ -424,7 +425,8 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			"doctype": "Purchase Invoice",
 			"field_map": {
 				"party_account_currency": "party_account_currency",
-				"supplier_warehouse":"supplier_warehouse"
+				"supplier_warehouse":"supplier_warehouse",
+				"remarks": "remarks",
 			},
 			"validation": {
 				"docstatus": ["=", 1],

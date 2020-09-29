@@ -1468,6 +1468,9 @@ def make_delivery_note(source_name, target_doc=None):
 			"doctype": "Delivery Note",
 			"validation": {
 				"docstatus": ["=", 1]
+			},
+			"field_map": {
+				"remarks": "remarks",
 			}
 		},
 		"Sales Invoice Item": {

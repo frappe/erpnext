@@ -721,6 +721,9 @@ def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_m
 			"doctype": "Delivery Note",
 			"validation": {
 				"docstatus": ["=", 1]
+			},
+			"field_map": {
+				"remarks": "remarks"
 			}
 		},
 		"Sales Taxes and Charges": {
@@ -785,7 +788,8 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			"doctype": "Sales Invoice",
 			"field_map": {
 				"party_account_currency": "party_account_currency",
-				"payment_terms_template": "payment_terms_template"
+				"payment_terms_template": "payment_terms_template",
+				"remarks": "remarks",
 			},
 			"validation": {
 				"docstatus": ["=", 1]
