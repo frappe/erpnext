@@ -36,13 +36,13 @@
 	</h6>
 {% } %}
 
-{% if (filters.cost_center || group.cost_center) { %}
+{% if ((filters.cost_center && filters.cost_center.length) || group.cost_center) { %}
 	<h6 class="text-center">
 		{%= __("Cost Center: ")%}{%= filters.cost_center || group.cost_center %}
 	</h6>
 {% } %}
 
-{% if (filters.project || group.project) { %}
+{% if ((filters.project && filters.project.length) || group.project) { %}
 	<h6 class="text-center">
 		{%= __("Project: ")%}{%= filters.project || group.project %}
 	</h6>
