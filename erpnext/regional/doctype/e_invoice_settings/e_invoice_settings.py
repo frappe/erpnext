@@ -20,8 +20,6 @@ class EInvoiceSettings(Document):
 		if not self.public_key or self.has_value_changed('public_key_file'):
 			self.public_key = self.read_key_file()
 
-		make_property_setter("Sales Invoice", "irn", "reqd", self.enable, "Data")
-
 	def read_key_file(self):
 		key_file = frappe.get_doc('File', dict(attached_to_name=self.doctype, attached_to_field='public_key_file'))
 		with open(key_file.get_full_path(), 'rb') as f:
