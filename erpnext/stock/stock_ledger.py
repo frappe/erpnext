@@ -258,8 +258,8 @@ class update_entries_after(object):
 	def get_incoming_value_for_serial_nos(self, sle, serial_nos):
 		# get rate from serial nos within same company
 		all_serial_nos = frappe.get_all("Serial No",
-				fields=["purchase_rate", "name", "company"],
-				filters = {'name': ('in', serial_nos)})
+			fields=["purchase_rate", "name", "company"],
+			filters = {'name': ('in', serial_nos)})
 
 		if not sle.is_cancelled:
 			incoming_values = sum([flt(d.purchase_rate) for d in all_serial_nos if d.company==sle.company])
