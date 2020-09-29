@@ -4,7 +4,7 @@
 frappe.ui.form.on('E Invoice Settings', {
 	refresh: function(frm) {
 		if (!frm.doc.enable) return;
-		
+
 		frm.trigger("show_fetch_token_btn");
 		frm.add_custom_button(__("Get GSTIN Details"), 
 			() => {
@@ -25,7 +25,7 @@ frappe.ui.form.on('E Invoice Settings', {
 					doc: frm.doc,
 					method: 'generate_irn',
 					args: {
-						'invoice': 'SINV-20-21-0044'
+						'invoice': 'SINV-20-21-0051'
 					},
 					freeze: true,
 					callback: (res) => console.log(res)
