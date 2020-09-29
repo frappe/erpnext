@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import os
+import re
 import json
 import base64
 import frappe
@@ -13,8 +14,8 @@ from Crypto.Cipher import PKCS1_v1_5, AES
 from Crypto.Util.Padding import pad, unpad
 from frappe.model.document import Document
 from frappe import _, get_module_path, scrub
-from frappe.utils.data import get_datetime, cstr
 from erpnext.regional.india.utils import get_gst_accounts
+from frappe.utils.data import get_datetime, cstr, cint, format_date
 from frappe.integrations.utils import make_post_request, make_get_request
 
 class EInvoiceSettings(Document):
@@ -53,6 +54,17 @@ class EInvoiceSettings(Document):
 		if encode_as_b64:
 			msg_bytes = base64.b64encode(msg_bytes)
 		return msg_bytes.decode()
+	
+	def aes_encrypt(self, msg, key):
+		if not (isinstance(key, bytes) or isinstance(key, bytearray)):
+			key = base64.b64decode(key)
+		
+		cipher = AES.new(key, AES.MODE_ECB)
+		bytes_msg = str.encode(msg)
+		padded_bytes_msg = pad(bytes_msg, AES.block_size)
+		enc_msg = cipher.encrypt(padded_bytes_msg)
+		b64_enc_msg = base64.b64encode(enc_msg)
+		return b64_enc_msg.decode()
 
 	def make_authentication_request(self):
 		endpoint = 'https://einv-apisandbox.nic.in/eivital/v1.03/auth'
@@ -85,11 +97,43 @@ class EInvoiceSettings(Document):
 		self.sek = sek
 		self.save()
 	
-	def get_gstin_details(self, gstin):
-		endpoint = 'https://einv-apisandbox.nic.in/eivital/v1.03/Master/gstin/{gstin}'.format(gstin=gstin)
+	def get_header(self):
 		headers = { 'content-type': 'application/json' }
 		headers.update(dict(client_id=self.client_id, client_secret=self.client_secret, user_name=self.username))
 		headers.update(dict(Gstin=self.gstin, AuthToken=self.auth_token))
+
+		return headers
+	
+	def get_gstin_details(self, gstin):
+		endpoint = 'https://einv-apisandbox.nic.in/eivital/v1.03/Master/gstin/{gstin}'.format(gstin=gstin)
+		headers = self.get_header()
+
+		res = make_get_request(endpoint, headers=headers)
+		self.handle_err_response(res)
+
+		enc_json = res.get('Data')
+		json_str = self.aes_decrypt(enc_json, self.sek)
+		data = json.loads(json_str)
+
+		return data
+	
+	def generate_irn(self, invoice):
+		endpoint = 'https://einv-apisandbox.nic.in/eicore/v1.03/Invoice'
+		headers = self.get_header()
+
+		invoice = frappe.get_doc("Sales Invoice", invoice)
+		e_invoice = self.make_e_invoice(invoice)
+		enc_e_invoice_json = self.aes_encrypt(e_invoice, self.sek)
+		payload = dict(Data=enc_e_invoice_json)
+
+		res = make_post_request(endpoint, headers=headers, data=json.dumps(payload))
+		self.handle_err_response(res)
+
+		return res
+	
+	def get_irn_detials(self, irn):
+		endpoint = 'https://einv-apisandbox.nic.in/eicore/v1.03/Invoice/irn/{irn}'.format(irn=irn)
+		headers = self.get_header()
 
 		res = make_get_request(endpoint, headers=headers)
 		self.handle_err_response(res)
@@ -102,12 +146,13 @@ class EInvoiceSettings(Document):
 
 	def handle_err_response(self, response):
 		if response.get('Status') == 0:
+			print(response)
 			err_msg = response.get('ErrorDetails')[0].get('ErrorMessage')
 			frappe.throw(_(err_msg), title=_('API Request Failed'))
 
-	def get_schema(self, name):
-		schema_path = os.path.join(os.path.dirname(__file__), "{name}_schema.json".format(name=name))
-		with open(schema_path, 'r') as f:
+	def read_json(self, name):
+		file_path = os.path.join(os.path.dirname(__file__), "{name}.json".format(name=name))
+		with open(file_path, 'r') as f:
 			return cstr(f.read())
 
 	def get_trans_details(self, invoice):
@@ -127,7 +172,7 @@ class EInvoiceSettings(Document):
 	def get_doc_details(self, invoice):
 		invoice_type = 'CRN' if invoice.is_return else 'INV'
 		invoice_name = invoice.name
-		invoice_date = invoice.posting_date
+		invoice_date = format_date(invoice.posting_date, 'dd/mm/yyyy')
 
 		return frappe._dict(dict(
 			invoice_type=invoice_type, invoice_name=invoice_name, invoice_date=invoice_date
@@ -142,7 +187,7 @@ class EInvoiceSettings(Document):
 		trade_name = gstin_details.get('TradeName')
 		location = gstin_details.get('AddrLoc')
 		state_code = gstin_details.get('StateCode')
-		pincode = gstin_details.get('AddrPncd')
+		pincode = cint(gstin_details.get('AddrPncd'))
 
 		return frappe._dict(dict(
 			gstin=gstin, legal_name=legal_name, trade_name=trade_name, location=location,
@@ -156,13 +201,14 @@ class EInvoiceSettings(Document):
 		gst_accounts_list = [d for accounts in gst_accounts.values() for d in accounts if d]
 
 		for d in invoice.items:
-			item_schema = self.get_schema("e_inv_item")
+			item_schema = self.read_json("e_inv_item_schema")
 			item = frappe._dict(dict())
 			item.update(d.as_dict())
 			item.sr_no = d.idx
 			item.description = d.item_name
 			item.is_service_item = "N" if frappe.db.get_value("Item", d.item_code, "is_stock_item") else "Y"
 			item.batch_expiry_date = frappe.db.get_value("Batch", d.batch_no, "expiry_date") if d.batch_no else None
+			item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
 			item.tax_rate = 0
 			item.igst_amount = 0
 			item.cgst_amount = 0
@@ -219,7 +265,9 @@ class EInvoiceSettings(Document):
 		return value_details
 
 	def make_e_invoice(self, invoice):
-		schema = self.get_schema("e_inv")
+		schema = self.read_json("e_inv_schema")
+		validations = self.read_json("e_inv_validation")
+		validations = json.loads(validations)
 
 		trans_details = self.get_trans_details(invoice)
 		doc_details = self.get_doc_details(invoice)
@@ -236,5 +284,55 @@ class EInvoiceSettings(Document):
 			seller_details=seller_details, buyer_details=buyer_details,
 			item_list=item_list, value_details=value_details
 		)
+		e_invoice = json.loads(e_invoice)
 
-		return json.loads(e_invoice)
+		self.run_e_invoice_validations(validations, e_invoice)
+
+		return json.dumps(e_invoice)
+	
+	def run_e_invoice_validations(self, validations, e_invoice):
+		type_map = {
+			"string": cstr,
+			"number": cint,
+			"object": dict,
+			"array": list
+		}
+		# validate root mandatory keys
+		mandatory_fields = validations.get('required')
+		if mandatory_fields and not set(mandatory_fields).issubset(set(e_invoice.keys())):
+			print("Mandatory condition failed")
+		
+		for field, value in validations.items():
+			if isinstance(value, list): value = value[0]
+
+			invoice_value = e_invoice.get(field)
+			if not invoice_value:
+				print(field, "Value undefined")
+				continue
+
+			should_be_of_type = type_map[value.get('type').lower()]
+			if should_be_of_type == dict:
+				properties = value.get('properties')
+
+				if isinstance(invoice_value, list):
+					for d in invoice_value:
+						self.run_e_invoice_validations(properties, d)
+				else:
+					self.run_e_invoice_validations(properties, invoice_value)
+				continue
+			
+			e_invoice[field] = None if invoice_value == "None" else invoice_value
+			e_invoice[field] = should_be_of_type(invoice_value) if e_invoice[field] else e_invoice[field]
+			
+			should_be_of_len = value.get('maxLength')
+			should_be_greater_than = value.get('minimum')
+			should_be_less_than = value.get('maximum')
+			pattern_str = value.get('pattern')
+			pattern = re.compile(pattern_str or "")
+
+			if should_be_of_type == 'string' and not len(invoice_value) <= should_be_of_len:
+				print("Max Length Exceeded", field, invoice_value)
+			if should_be_of_type == 'number' and not (should_be_greater_than <= invoice_value <= should_be_of_len):
+				print("Value too large", field, invoice_value)
+			if pattern_str and not pattern.match(invoice_value):
+				print("Pattern Mismatch", field, invoice_value)
