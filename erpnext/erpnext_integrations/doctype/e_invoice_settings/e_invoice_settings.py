@@ -154,6 +154,19 @@ class EInvoiceSettings(Document):
 		self.handle_irn_response(data)
 
 		return data
+
+	def cancel_irn(self, irn, reason, remark=''):
+		endpoint = 'https://einv-apisandbox.nic.in/eicore/v1.03/Invoice/Cancel'
+		headers = self.get_header()
+
+		cancel_e_inv = json.dumps(dict(Irn=irn, CnlRsn=reason, CnlRem=remark))
+		enc_json = self.aes_encrypt(cancel_e_inv, self.sek)
+		payload = dict(Data=enc_json)
+
+		res = make_post_request(endpoint, headers=headers, data=json.dumps(payload))
+		self.handle_err_response(res)
+
+		return res
 	
 	def handle_irn_response(self, data):
 		enc_signed_invoice = data['SignedInvoice']
