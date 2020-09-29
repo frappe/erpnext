@@ -140,9 +140,9 @@ def get_tds_amount(suppliers, net_total, company, tax_details, fiscal_year_detai
 		else:
 			tds_amount = _get_tds(net_total, tax_details.rate)
 	else:
-		supplier_credit_amount = frappe.get_all('Purchase Invoice Item',
-			fields = ['sum(net_amount)'],
-			filters = {'parent': ('in', vouchers), 'docstatus': 1}, as_list=1)
+		supplier_credit_amount = frappe.get_all('Purchase Invoice',
+			fields = ['sum(net_total)'],
+			filters = {'name': ('in', vouchers), 'docstatus': 1, "apply_tds": 1}, as_list=1)
 
 		supplier_credit_amount = (supplier_credit_amount[0][0]
 			if supplier_credit_amount and supplier_credit_amount[0][0] else 0)
