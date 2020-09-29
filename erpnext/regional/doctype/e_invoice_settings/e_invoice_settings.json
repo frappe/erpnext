@@ -22,6 +22,17 @@
  ],
  "fields": [
   {
+   "default": "0",
+   "fieldname": "enable",
+   "fieldtype": "Check",
+   "label": "Enable"
+  },
+  {
+   "depends_on": "enable",
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
    "fieldname": "client_id",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -39,6 +50,12 @@
    "fieldtype": "Attach",
    "label": "Public Key",
    "reqd": 1
+  },
+  {
+   "fieldname": "public_key",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "read_only": 1
   },
   {
    "fieldname": "column_break_3",
@@ -61,12 +78,6 @@
    "fieldtype": "Password",
    "label": "Password",
    "reqd": 1
-  },
-  {
-   "fieldname": "public_key",
-   "fieldtype": "Long Text",
-   "hidden": 1,
-   "read_only": 1
   },
   {
    "default": "0",
@@ -92,25 +103,14 @@
    "fieldtype": "Data",
    "hidden": 1,
    "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "enable",
-   "fieldtype": "Check",
-   "label": "Enable"
-  },
-  {
-   "depends_on": "enable",
-   "fieldname": "section_break_2",
-   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-09-29 14:06:36.385386",
+ "modified": "2020-09-29 17:05:33.512227",
  "modified_by": "Administrator",
- "module": "ERPNext Integrations",
+ "module": "Regional",
  "name": "E Invoice Settings",
  "owner": "Administrator",
  "permissions": [
