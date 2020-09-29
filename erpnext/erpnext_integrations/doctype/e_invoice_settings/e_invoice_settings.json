@@ -5,6 +5,8 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "enable",
+  "section_break_2",
   "client_id",
   "client_secret",
   "public_key_file",
@@ -90,12 +92,23 @@
    "fieldtype": "Data",
    "hidden": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "enable",
+   "fieldtype": "Check",
+   "label": "Enable"
+  },
+  {
+   "depends_on": "enable",
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-09-25 21:57:58.187647",
+ "modified": "2020-09-29 14:06:36.385386",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "E Invoice Settings",

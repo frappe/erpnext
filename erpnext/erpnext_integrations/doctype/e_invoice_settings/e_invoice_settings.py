@@ -9,7 +9,6 @@ import jwt
 import json
 import base64
 import frappe
-from frappe.utils import cstr
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_v1_5, AES
 from Crypto.Util.Padding import pad, unpad
@@ -21,7 +20,10 @@ from frappe.integrations.utils import make_post_request, make_get_request
 
 class EInvoiceSettings(Document):
 	def validate(self):
-		pass
+		mandatory_fields = ['client_id', 'client_secret', 'gstin', 'username', 'password', 'public_key']
+		for d in mandatory_fields:
+			if not self.get(d):
+				frappe.throw(_("{} is required").format(frappe.unscrub(d)), title=_("Missing Values"))
 	
 	def before_save(self):
 		if not self.public_key or self.has_value_changed('public_key_file'):
