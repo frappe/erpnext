@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import os
 import re
+import jwt
 import json
 import base64
 import frappe
@@ -65,6 +66,9 @@ class EInvoiceSettings(Document):
 		enc_msg = cipher.encrypt(padded_bytes_msg)
 		b64_enc_msg = base64.b64encode(enc_msg)
 		return b64_enc_msg.decode()
+	
+	def jwt_decrypt(self, token):
+		return jwt.decode(token, verify=False)
 
 	def make_authentication_request(self):
 		endpoint = 'https://einv-apisandbox.nic.in/eivital/v1.03/auth'
@@ -129,9 +133,12 @@ class EInvoiceSettings(Document):
 		res = make_post_request(endpoint, headers=headers, data=json.dumps(payload))
 		self.handle_err_response(res)
 
-		return res
+		data = json.loads(res)
+		self.handle_irn_response(data)
+
+		return data
 	
-	def get_irn_detials(self, irn):
+	def get_irn_details(self, irn):
 		endpoint = 'https://einv-apisandbox.nic.in/eicore/v1.03/Invoice/irn/{irn}'.format(irn=irn)
 		headers = self.get_header()
 
@@ -140,9 +147,19 @@ class EInvoiceSettings(Document):
 
 		enc_json = res.get('Data')
 		json_str = self.aes_decrypt(enc_json, self.sek)
+
 		data = json.loads(json_str)
+		self.handle_irn_response(data)
 
 		return data
+	
+	def handle_irn_response(self, data):
+		enc_signed_invoice = data['SignedInvoice']
+		enc_signed_qr_code = data['SignedQRCode']
+		signed_invoice = self.jwt_decrypt(enc_signed_invoice)['data']
+		signed_qr_code = self.jwt_decrypt(enc_signed_qr_code)['data']
+		data['DecryptedSignedInvoice'] = json.loads(signed_invoice)
+		data['DecryptedSignedQRCode'] = json.loads(signed_qr_code)
 
 	def handle_err_response(self, response):
 		if response.get('Status') == 0:
