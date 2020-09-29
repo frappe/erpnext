@@ -6,6 +6,7 @@
     "Barcde": "{item.barcode}",
     "Unit": "{item.uom}",
     "Qty": "{item.qty}",
+    "FreeQty": "{item.free_qty}",
     "UnitPrice": "{item.base_rate}",
     "TotAmt": "{item.base_amount}",
     "Discount": "{item.discount_amount}",
