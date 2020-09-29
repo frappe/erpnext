@@ -27,22 +27,25 @@
 			{% endif %}
 		</div>
 		{% endif %}
-		{% if product_info.price and (cart_settings.allow_items_not_in_stock or product_info.in_stock) %}
 		<div class="mt-3">
-			<a href="/cart"
-				class="btn btn-light btn-view-in-cart {% if not product_info.qty %}hidden{% endif %}"
-				role="button"
-			>
-				{{ _("View in Cart") }}
-			</a>
-			<button
-				data-item-code="{{item_code}}"
-				class="btn btn-outline-primary btn-add-to-cart {% if product_info.qty %}hidden{% endif %}"
-			>
-				{{ _("Add to Cart") }}
-			</button>
+			{% if product_info.price and (cart_settings.allow_items_not_in_stock or product_info.in_stock) %}
+				<a href="/cart"
+					class="btn btn-light btn-view-in-cart {% if not product_info.qty %}hidden{% endif %}"
+					role="button"
+				>
+					{{ _("View in Cart") }}
+				</a>
+				<button
+					data-item-code="{{item_code}}"
+					class="btn btn-outline-primary btn-add-to-cart {% if product_info.qty %}hidden{% endif %}"
+				>
+					{{ _("Add to Cart") }}
+				</button>
+			{% endif %}
+			{% if cart_settings.show_contact_us_button %}
+				{% include "templates/generators/item/item_inquiry.html" %}
+			{% endif %}
 		</div>
-		{% endif %}
 	</div>
 </div>
 

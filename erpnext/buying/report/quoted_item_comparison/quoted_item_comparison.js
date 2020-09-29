@@ -12,7 +12,22 @@ frappe.query_reports["Quoted Item Comparison"] = {
 			"reqd": 1
 		},
 		{
-			reqd: 1,
+			"fieldname":"from_date",
+			"label": __("From Date"),
+			"fieldtype": "Date",
+			"width": "80",
+			"reqd": 1,
+			"default": frappe.datetime.add_months(frappe.datetime.get_today(), -1),
+		},
+		{
+			"fieldname":"to_date",
+			"label": __("To Date"),
+			"fieldtype": "Date",
+			"width": "80",
+			"reqd": 1,
+			"default": frappe.datetime.get_today()
+		},
+		{
 			default: "",
 			options: "Item",
 			label: __("Item"),
@@ -45,13 +60,12 @@ frappe.query_reports["Quoted Item Comparison"] = {
 			}
 		},
 		{
-			fieldtype: "Link",
+			fieldtype: "MultiSelectList",
 			label: __("Supplier Quotation"),
-			options: "Supplier Quotation",
 			fieldname: "supplier_quotation",
 			default: "",
-			get_query: () => {
-				return { filters: { "docstatus": ["<", 2] } }
+			get_data: function(txt) {
+				return frappe.db.get_link_options('Supplier Quotation', txt, {'docstatus': ["<", 2]});
 			}
 		},
 		{
@@ -63,8 +77,29 @@ frappe.query_reports["Quoted Item Comparison"] = {
 			get_query: () => {
 				return { filters: { "docstatus": ["<", 2] } }
 			}
+		},
+		{
+			fieldtype: "Check",
+			label: __("Include Expired"),
+			fieldname: "include_expired",
+			default: 0
 		}
 	],
+
+	formatter: (value, row, column, data, default_formatter) => {
+		value = default_formatter(value, row, column, data);
+
+		if(column.fieldname === "valid_till" && data.valid_till){
+			if(frappe.datetime.get_diff(data.valid_till, frappe.datetime.nowdate()) <= 1){
+				value = `<div style="color:red">${value}</div>`;
+			}
+			else if (frappe.datetime.get_diff(data.valid_till, frappe.datetime.nowdate()) <= 7){
+				value = `<div style="color:darkorange">${value}</div>`;
+			}
+		}
+
+		return value;
+	},
 
 	onload: (report) => {
 		// Create a button for setting the default supplier
