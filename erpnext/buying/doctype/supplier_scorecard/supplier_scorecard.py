@@ -178,6 +178,7 @@ def make_all_scorecards(docname):
 			period_card = make_supplier_scorecard(docname, None)
 			period_card.start_date = start_date
 			period_card.end_date = end_date
+			period_card.insert(ignore_permissions=True)
 			period_card.submit()
 			scp_count = scp_count + 1
 			if start_date < first_start_date:

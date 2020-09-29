@@ -82,6 +82,7 @@ class SellingController(StockController):
 			party_details = _get_party_details(customer,
 				ignore_permissions=self.flags.ignore_permissions,
 				doctype=self.doctype, company=self.company,
+				posting_date=self.get('posting_date'),
 				fetch_payment_terms_template=fetch_payment_terms_template,
 				party_address=self.customer_address, shipping_address=self.shipping_address_name)
 			if not self.meta.get_field("sales_team"):
