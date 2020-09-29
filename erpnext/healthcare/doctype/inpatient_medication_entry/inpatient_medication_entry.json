@@ -1,0 +1,193 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2020-09-25 14:13:20.111906",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "company",
+  "column_break_3",
+  "posting_date",
+  "status",
+  "filters_section",
+  "item_code",
+  "assigned_to_practitioner",
+  "from_date",
+  "to_date",
+  "column_break_11",
+  "patient",
+  "practitioner",
+  "service_unit",
+  "select_medication_orders_section",
+  "get_medication_orders",
+  "warehouse",
+  "medication_orders",
+  "other_details_section",
+  "total_medication_orders",
+  "data_17",
+  "completed_medication_orders",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "HLC-IME-.YYYY.-"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nDraft\nSubmitted\nPending\nIn Process\nCompleted\nCancelled",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "filters_section",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code (Drug)",
+   "options": "Item"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient",
+   "options": "Patient"
+  },
+  {
+   "fieldname": "service_unit",
+   "fieldtype": "Link",
+   "label": "Healthcare Service Unit",
+   "options": "Healthcare Service Unit"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "other_details_section",
+   "fieldtype": "Section Break",
+   "label": "Other Details"
+  },
+  {
+   "fieldname": "total_medication_orders",
+   "fieldtype": "Float",
+   "label": "Total Medication Orders",
+   "read_only": 1
+  },
+  {
+   "fieldname": "data_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "completed_medication_orders",
+   "fieldtype": "Float",
+   "label": "Completed Medication Orders",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Inpatient Medication Entry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "practitioner",
+   "fieldtype": "Link",
+   "label": "Healthcare Practitioner",
+   "options": "Healthcare Practitioner"
+  },
+  {
+   "fieldname": "select_medication_orders_section",
+   "fieldtype": "Section Break",
+   "label": "Select Medication Orders"
+  },
+  {
+   "fieldname": "medication_orders",
+   "fieldtype": "Table",
+   "label": "Inpatient Medication Orders",
+   "options": "Inpatient Medication Entry Detail"
+  },
+  {
+   "fieldname": "get_medication_orders",
+   "fieldtype": "Button",
+   "label": "Get Pending Medication Orders"
+  },
+  {
+   "fieldname": "assigned_to_practitioner",
+   "fieldtype": "Link",
+   "label": "Assigned To",
+   "options": "User"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-09-29 16:55:18.064554",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Inpatient Medication Entry",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

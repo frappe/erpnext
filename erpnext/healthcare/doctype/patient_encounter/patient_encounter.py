@@ -53,6 +53,7 @@ def make_ip_medication_order(source_name, target_doc=None):
 						order.drug = entry.drug_code
 						order.drug_name = entry.drug_name
 						order.dosage = dose.strength
+						order.instructions = entry.comment
 						order.dosage_form = entry.dosage_form
 						order.date = date
 						order.time = dose.strength_time
