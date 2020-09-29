@@ -1074,6 +1074,7 @@
    "fieldname": "remarks",
    "fieldtype": "Small Text",
    "label": "Remarks",
+   "no_copy": 1,
    "print_hide": 1
   },
   {
@@ -1466,8 +1467,7 @@
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-07-15 12:49:42.095297",
+ "modified": "2020-09-29 14:45:37.060253",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

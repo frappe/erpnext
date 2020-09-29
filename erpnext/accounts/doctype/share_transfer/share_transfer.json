@@ -167,7 +167,8 @@
   {
    "fieldname": "remarks",
    "fieldtype": "Long Text",
-   "label": "Remarks"
+   "label": "Remarks",
+   "no_copy": 1
   },
   {
    "fieldname": "amended_from",
@@ -188,7 +189,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 15:34:50.319554",
+ "modified": "2020-09-29 14:45:40.509080",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Share Transfer",

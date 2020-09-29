@@ -196,7 +196,8 @@
   {
    "fieldname": "remarks",
    "fieldtype": "Small Text",
-   "label": "Remarks"
+   "label": "Remarks",
+   "no_copy": 1
   },
   {
    "fieldname": "column_break_20",
@@ -296,7 +297,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-08-24 15:21:21.398267",
+ "modified": "2020-09-29 14:45:43.144629",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
