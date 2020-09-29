@@ -603,6 +603,9 @@ def make_purchase_invoice(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	doc = frappe.get_doc('Purchase Receipt', source_name)
 
+	def get_pending_qty(source_doc):
+		return source_doc.qty - source_doc.billed_qty - source_doc.returned_qty
+
 	def set_missing_values(source, target):
 		if len(target.get("items")) == 0:
 			frappe.throw(_("All items have already been Invoiced/Returned"))
@@ -614,7 +617,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 		doc.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):
-		target_doc.qty = source_doc.qty - source_doc.billed_qty - source_doc.returned_qty
+		target_doc.qty = get_pending_qty(source_doc)
 		target_doc.received_qty = target_doc.qty
 
 	doclist = get_mapped_doc("Purchase Receipt", source_name,	{
@@ -641,7 +644,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"asset_category": 'asset_category'
 			},
 			"postprocess": update_item,
-			"filter": lambda d: d.qty <= 0 if not doc.get("is_return") else d.qty >= 0
+			"filter": lambda d: get_pending_qty(d) <= 0 if not doc.get("is_return") else get_pending_qty(d) >= 0
 		},
 		"Purchase Taxes and Charges": {
 			"doctype": "Purchase Taxes and Charges",
