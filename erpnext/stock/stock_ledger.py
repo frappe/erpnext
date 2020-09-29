@@ -258,30 +258,20 @@ class update_entries_after(object):
 	def get_incoming_value_for_serial_nos(self, sle, serial_nos):
 		# get rate from serial nos within same company
 		all_serial_nos = frappe.get_all("Serial No",
-			fields=["purchase_rate", "name", "company"],
-			filters = {'name': ('in', serial_nos)})
+				fields=["purchase_rate", "name", "company"],
+				filters = {'name': ('in', serial_nos)})
 
-		incoming_values = sum([flt(d.purchase_rate) for d in all_serial_nos if d.company==sle.company])
+		if not sle.is_cancelled:
+			incoming_values = sum([flt(d.purchase_rate) for d in all_serial_nos if d.company==sle.company])
+		else:
+			# Cancellation Entry so purchase rate is Serial No doctype will be 0
+			# get purchase rate from SLE
+			serial_nos = [d.name for d in all_serial_nos if d.company==sle.company]
+			incoming_values = get_rate_for_serial_nos(serial_nos, sle)
 
 		# Get rate for serial nos which has been transferred to other company
 		invalid_serial_nos = [d.name for d in all_serial_nos if d.company!=sle.company]
-		for serial_no in invalid_serial_nos:
-			incoming_rate = frappe.db.sql("""
-				select incoming_rate
-				from `tabStock Ledger Entry`
-				where
-					company = %s
-					and actual_qty > 0
-					and (serial_no = %s
-						or serial_no like %s
-						or serial_no like %s
-						or serial_no like %s
-					)
-				order by posting_date desc
-				limit 1
-			""", (sle.company, serial_no, serial_no+'\n%', '%\n'+serial_no, '%\n'+serial_no+'\n%'))
-
-			incoming_values += flt(incoming_rate[0][0]) if incoming_rate else 0
+		incoming_values += get_rate_for_serial_nos(invalid_serial_nos, sle)
 
 		return incoming_values
 
@@ -497,6 +487,30 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 			"for_update": for_update and "for update" or "",
 			"order": order
 		}, previous_sle, as_dict=1, debug=debug)
+
+def get_rate_for_serial_nos(serial_nos, sle):
+
+	incoming_values = 0
+	for serial_no in serial_nos:
+		incoming_rate = frappe.db.sql("""
+			select incoming_rate
+			from `tabStock Ledger Entry`
+			where
+				company = %s
+				and actual_qty > 0
+				and (serial_no = %s
+					or serial_no like %s
+					or serial_no like %s
+					or serial_no like %s
+				)
+			order by posting_date desc
+			limit 1
+		""", (sle.company, serial_no, serial_no+'\n%', '%\n'+serial_no, '%\n'+serial_no+'\n%'))
+
+		incoming_values += flt(incoming_rate[0][0]) if incoming_rate else 0
+
+	return incoming_values
+
 
 def get_sle_by_id(sle_id):
 	return frappe.db.get_all('Stock Ledger Entry',
