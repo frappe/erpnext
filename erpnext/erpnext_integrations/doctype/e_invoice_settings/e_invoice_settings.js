@@ -3,6 +3,8 @@
 
 frappe.ui.form.on('E Invoice Settings', {
 	refresh: function(frm) {
+		if (!frm.doc.enable) return;
+		
 		frm.trigger("show_fetch_token_btn");
 		frm.add_custom_button(__("Get GSTIN Details"), 
 			() => {
