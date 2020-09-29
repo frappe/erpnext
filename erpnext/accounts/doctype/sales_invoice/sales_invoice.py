@@ -225,8 +225,8 @@ class SalesInvoice(SellingController):
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
 
 	def before_cancel(self):
+		super(SalesInvoice, self).before_cancel()
 		self.update_time_sheet(None)
-
 
 	def on_cancel(self):
 		super(SalesInvoice, self).on_cancel()
