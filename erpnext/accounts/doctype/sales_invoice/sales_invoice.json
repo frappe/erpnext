@@ -19,6 +19,7 @@
   "is_return",
   "column_break1",
   "company",
+  "company_tax_id",
   "posting_date",
   "posting_time",
   "set_posting_time",
@@ -1940,13 +1941,20 @@
    "hide_seconds": 1,
    "label": "Is Internal Customer",
    "read_only": 1
+  },
+  {
+   "fetch_from": "company.tax_id",
+   "fieldname": "company_tax_id",
+   "fieldtype": "Data",
+   "label": "Company Tax ID",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-27 01:56:28.532140",
+ "modified": "2020-09-29 10:00:41.470858",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
