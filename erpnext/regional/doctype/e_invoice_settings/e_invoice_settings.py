@@ -21,6 +21,6 @@ class EInvoiceSettings(Document):
 			self.public_key = self.read_key_file()
 
 	def read_key_file(self):
-		key_file = frappe.get_doc('File', dict(attached_to_name=self.doctype, attached_to_field='public_key_file'))
+		key_file = frappe.get_doc('File', dict(attached_to_name=self.doctype))
 		with open(key_file.get_full_path(), 'rb') as f:
 			return cstr(f.read())
