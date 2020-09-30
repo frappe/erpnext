@@ -88,6 +88,8 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(len(si.get("items")), 1)
 
 		si.insert()
+		si.set('taxes', [])
+		si.save()
 
 		self.assertEqual(si.payment_schedule[0].payment_amount, 500.0)
 		self.assertEqual(si.payment_schedule[0].due_date, so.transaction_date)
