@@ -19,7 +19,8 @@ from frappe.utils.data import get_datetime, cstr, cint, format_date, flt
 from frappe.integrations.utils import make_post_request, make_get_request
 
 def validate_einvoice_fields(doc):
-	if not doc.doctype in ['Sales Invoice', 'Purchase Invoice']: return
+	e_invoice_enabled = frappe.db.get_value("E Invoice Settings", "E Invoice Settings", "enable")
+	if not doc.doctype in ['Sales Invoice', 'Purchase Invoice'] or not e_invoice_enabled: return
 
 	if doc.docstatus == 1 and doc._action == 'submit' and not doc.irn:
 		frappe.throw(_("You must generate IRN before submitting the document."), title=_("Missing IRN"))
