@@ -696,6 +696,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "total_net_weight",
    "fieldname": "total_net_weight",
    "fieldtype": "Float",
    "label": "Total Net Weight",
@@ -1478,6 +1479,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "total_alt_uom_qty",
    "fieldname": "total_alt_uom_qty",
    "fieldtype": "Float",
    "label": "Total Contents Quantity",
@@ -1693,7 +1695,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2020-10-01 02:23:42.271683",
+ "modified": "2020-10-01 02:40:05.008660",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

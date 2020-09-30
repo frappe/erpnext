@@ -617,6 +617,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "total_net_weight",
    "fieldname": "total_net_weight",
    "fieldtype": "Float",
    "label": "Total Net Weight",
@@ -1348,6 +1349,7 @@
    "label": "Get Latest Price"
   },
   {
+   "depends_on": "total_alt_uom_qty",
    "fieldname": "total_alt_uom_qty",
    "fieldtype": "Float",
    "label": "Total Contents Quantity",
@@ -1604,7 +1606,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-01 02:30:52.288485",
+ "modified": "2020-10-01 02:39:58.125843",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

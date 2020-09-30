@@ -655,6 +655,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "total_net_weight",
    "fieldname": "total_net_weight",
    "fieldtype": "Float",
    "label": "Total Net Weight",
@@ -1338,6 +1339,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "total_alt_uom_qty",
    "fieldname": "total_alt_uom_qty",
    "fieldtype": "Float",
    "label": "Total Contents Quantity",
@@ -1580,7 +1582,7 @@
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2020-10-01 02:23:39.640280",
+ "modified": "2020-10-01 02:39:59.421643",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
