@@ -9,8 +9,9 @@ import requests
 from frappe.utils.background_jobs import enqueue
 from frappe.desk.doctype.tag.tag import DocTags
 from erpnext.stock.get_item_details import get_bin_details
-from fxnmrnth.integration_req_log import log_integration_request
+from fxnmrnth.integration_req_log import log_integration_request, log_exceptions
 
+from erpnext.exceptions import PartyFrozen, PartyDisabled
 
 def verify_request():
 	woocommerce_settings = frappe.get_doc("Woocommerce Settings")
@@ -96,7 +97,15 @@ def order(*args, **kwargs):
 	try:
 		response = _order(woocommerce_settings, *args, **kwargs)
 		return response
-	except Exception:
+	except PartyFrozen as exc:
+		order = json.loads(frappe.request.data)
+		log_exceptions(order=order, status="Failed", internal_reason=str(exc))
+		return str(exc)
+	except PartyDisabled as exc:
+		order = json.loads(frappe.request.data)
+		log_exceptions(order=order, status="Failed", internal_reason=str(exc))
+		return str(exc)
+	else:
 		order = json.loads(frappe.request.data)
 		webhook_delivery_id = frappe.get_request_header("X-WC-Webhook-Delivery-ID")
 		log_integration_request(webhook_delivery_id=webhook_delivery_id, order=order, invoice_doc=None, status="Failed", data=json.dumps(order, indent=4), error=frappe.get_traceback(), woocommerce_settings=woocommerce_settings)
