@@ -25,7 +25,7 @@ frappe.ui.form.on('Inpatient Medication Order', {
 						"get_query": function () {
 							return {
 								filters: {'is_stock_item': 1}
-							}
+							};
 						}
 					},
 					{
@@ -63,9 +63,9 @@ frappe.ui.form.on('Inpatient Medication Order', {
 							freeze: true,
 							freeze_message: __('Adding Order Entries'),
 							callback: function() {
-								frm.refresh_field('medication_orders')
+								frm.refresh_field('medication_orders');
 							}
-						})
+						});
 					}
 				},
 			});
@@ -76,7 +76,6 @@ frappe.ui.form.on('Inpatient Medication Order', {
 	show_progress: function(frm) {
 		let bars = [];
 		let message = '';
-		let added_min = false;
 
 		// completed sessions
 		let title = __('{0} medication orders completed', [frm.doc.completed_orders]);
@@ -92,7 +91,6 @@ frappe.ui.form.on('Inpatient Medication Order', {
 		});
 		if (bars[0].width == '0%') {
 			bars[0].width = '0.5%';
-			added_min = 0.5;
 		}
 		message = title;
 		frm.dashboard.add_progress(__('Status'), bars, message);

@@ -26,7 +26,7 @@ frappe.ui.form.on('Inpatient Medication Entry', {
 			doc: frm.doc,
 			freeze: true,
 			freeze_message: __('Fetching Pending Medication Orders'),
-			callback: function(r) {
+			callback: function() {
 				refresh_field('medication_orders');
 			}
 		});

@@ -15,7 +15,7 @@ class InpatientMedicationEntry(Document):
 		self.validate_medication_orders()
 
 	def get_medication_orders(self):
-		"""Pull medication prescriptions from Patient Encounter for currently admitted patients based on selected filters"""
+		# pull inpatient medication orders based on selected filters
 		orders = get_pending_medication_orders(self)
 
 		if orders:
@@ -25,7 +25,7 @@ class InpatientMedicationEntry(Document):
 			frappe.msgprint(_('No pending medication orders found for selected criteria'))
 
 	def add_mo_to_table(self, orders):
-		"""Add medication orders in the child table"""
+		# Add medication orders in the child table
 		self.set('medication_orders', [])
 
 		for data in orders:
@@ -188,15 +188,15 @@ def get_pending_medication_orders(entry):
 
 	if entry.patient:
 		parent_filter += ' and ip.patient = %(patient)s'
-		values['patient'] = entry.patient
+		values['patient'] = frappe.db.escape(entry.patient)
 
 	if entry.practitioner:
 		parent_filter += ' and ip.practitioner = %(practitioner)s'
-		values['practitioner'] = entry.practitioner
+		values['practitioner'] = frappe.db.escape(entry.practitioner)
 
 	if entry.item_code:
 		child_filter += ' and entry.drug = %(item_code)s'
-		values['item_code'] = entry.item_code
+		values['item_code'] = frappe.db.escape(entry.item_code)
 
 	if entry.assigned_to_practitioner:
 		parent_filter += ' and ip._assign LIKE %(assigned_to)s'
