@@ -568,14 +568,14 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			fields: [
 				{
 					"fieldtype": "Check",
-					"label": __("Against Default Supplier (Drop Ship)"),
+					"label": __("Against Default Supplier"),
 					"fieldname": "against_default_supplier",
 					"default": 0
 				},
 				{
 					"fieldtype": "Link", "label": __("Default Supplier (optional)"),
 					"fieldname": "supplier", "options":"Supplier",
-					"description": __("Leave the field empty to make Purchase Orders for all Suppliers. If populated, Purchase Order will be made only for items belonging to selected Supplier."),
+					"description": __("If populated, Purchase Order will be made only for items belonging to selected Supplier. Leave the field empty to make Purchase Orders for all Suppliers."),
 					"get_query": function () {
 						return {
 							query:"erpnext.selling.doctype.sales_order.sales_order.get_supplier",
@@ -675,6 +675,27 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				})
 			}
 		});
+
+		dialog.fields_dict["against_default_supplier"].df.onchange = () => {
+			console.log("yo");
+			var against_default_supplier = dialog.get_value("against_default_supplier");
+			var items_for_po = dialog.get_value("items_for_po");
+
+			if (against_default_supplier) {
+				let items_with_supplier = items_for_po.filter((item) => item.supplier)
+
+				dialog.fields_dict["items_for_po"].df.data = items_with_supplier;
+				dialog.get_field("items_for_po").refresh();
+			} else {
+				let pending_items = me.frm.doc.items.map((item) =>{
+					item.pending_qty = (flt(item.stock_qty) - flt(item.ordered_qty)) / flt(item.conversion_factor);
+					return item;
+					}).filter((item) => {return item.pending_qty > 0;});
+
+				dialog.fields_dict["items_for_po"].df.data = pending_items;
+				dialog.get_field("items_for_po").refresh();
+			}
+		}
 
 		dialog.get_field("items_for_po").grid.only_sortable();
 		dialog.get_field("items_for_po").refresh();
