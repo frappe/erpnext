@@ -238,7 +238,11 @@ def get_trans_details(invoice):
 	))
 
 def get_doc_details(invoice):
-	invoice_type = 'CRN' if invoice.is_return else 'INV'
+	if invoice.doctype == 'Purchase Invoice' and invoice.is_return:
+		invoice_type = 'DBN'
+	else:
+		invoice_type = 'CRN' if invoice.is_return else 'INV'
+
 	invoice_name = invoice.name
 	invoice_date = format_date(invoice.posting_date, 'dd/mm/yyyy')
 
@@ -367,6 +371,24 @@ def get_return_doc_reference(invoice):
 		invoice_name=invoice.return_against, invoice_date=invoice_date
 	))
 
+def get_eway_bill_details(invoice):
+	if not invoice.distance:
+		frappe.throw(_("Distance is mandatory for E-Way Bill generation"), title=_("Missing Values"))
+
+	mode_of_transport = { 'Road': '1', 'Air': '2', 'Rail': '3', 'Ship': '4' }
+	vehicle_type = { 'Regular': 'R', 'Over Dimensional Cargo (ODC)': 'O' }
+
+	return frappe._dict(dict(
+		gstin=invoice.gst_transporter_id,
+		name=invoice.transporter_name,
+		mode_of_transport=mode_of_transport[invoice.mode_of_transport],
+		distance=invoice.distance,
+		document_name=invoice.lr_no,
+		document_date=format_date(invoice.lr_date, 'dd/mm/yyyy'),
+		vehicle_no=invoice.vehicle_no,
+		vehicle_type=vehicle_type[invoice.gst_vehicle_type]
+	))
+
 def make_e_invoice(invoice):
 	schema = read_json("einv_template")
 	validations = read_json("einv_validation")
@@ -385,12 +407,8 @@ def make_e_invoice(invoice):
 
 	item_list = get_item_list(invoice)
 	value_details = get_value_details(invoice)
-
-	dispatch_details = frappe._dict({})
-	period_details = frappe._dict({})
+	
 	shipping_details = frappe._dict({})
-	export_details = frappe._dict({})
-	eway_bill_details = frappe._dict({})
 	if invoice.shipping_address_name and invoice.customer_address != invoice.shipping_address_name:
 		shipping_details = get_party_gstin_details(invoice.shipping_address_name)
 	
@@ -401,6 +419,13 @@ def make_e_invoice(invoice):
 	prev_doc_details = frappe._dict({})
 	if invoice.is_return and invoice.return_against:
 		prev_doc_details = get_return_doc_reference(invoice)
+	
+	dispatch_details = frappe._dict({})
+	period_details = frappe._dict({})
+	export_details = frappe._dict({})
+	eway_bill_details = frappe._dict({})
+	if invoice.transporter:
+		eway_bill_details = get_eway_bill_details(invoice)
 
 	e_invoice = schema.format(
 		trans_details=trans_details, doc_details=doc_details, dispatch_details=dispatch_details,
