@@ -109,6 +109,7 @@
   "base_total_discount_after_taxes",
   "section_break_44",
   "coupon_code",
+  "column_break_103",
   "apply_discount_on",
   "additional_discount_percentage",
   "column_break_46",
@@ -135,6 +136,7 @@
   "terms",
   "print_settings",
   "letter_head",
+  "column_break_130",
   "select_print_heading",
   "column_break_73",
   "language",
@@ -265,6 +267,7 @@
    "default": "Sales",
    "fieldname": "order_type",
    "fieldtype": "Select",
+   "hidden": 1,
    "in_standard_filter": 1,
    "label": "Order Type",
    "oldfieldname": "order_type",
@@ -361,6 +364,7 @@
   {
    "fieldname": "territory",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Territory",
    "options": "Territory",
    "print_hide": 1
@@ -1239,13 +1243,21 @@
    "fieldname": "status_section",
    "fieldtype": "Section Break",
    "label": "Status"
+  },
+  {
+   "fieldname": "column_break_103",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_130",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2020-10-01 02:44:40.807210",
+ "modified": "2020-10-01 03:22:27.246527",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

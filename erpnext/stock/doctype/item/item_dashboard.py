@@ -36,7 +36,7 @@ def get_data():
 			},
 			{
 				'label': _('Work Done'),
-				'items': ['Work Order', 'Maintenance Visit', 'Warranty Claim', 'Project']
+				'items': ['Maintenance Visit', 'Warranty Claim', 'Project']
 			},
 			{
 				'label': _('Move'),

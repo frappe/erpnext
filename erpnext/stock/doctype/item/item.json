@@ -19,7 +19,6 @@
   "item_group",
   "brand",
   "item_source",
-  "default_supplier",
   "hs_code",
   "column_break0",
   "stock_uom",
@@ -45,6 +44,7 @@
   "section_break_31",
   "purchase_uom",
   "sales_uom",
+  "default_supplier",
   "column_break_34",
   "weight_uom",
   "weight_per_unit",
@@ -59,6 +59,7 @@
   "allow_alternative_item",
   "hide_in_price_list",
   "section_break_11",
+  "show_item_code",
   "image",
   "description",
   "sb_barcodes",
@@ -81,7 +82,6 @@
   "variant_based_on",
   "attributes",
   "defaults",
-  "show_item_code",
   "item_defaults",
   "purchase_details",
   "min_order_qty",
@@ -94,7 +94,6 @@
   "supplier_details",
   "delivered_by_supplier",
   "manufacturer",
-  "manufacturer_item_code",
   "manufacturer_part_no",
   "column_break2",
   "supplier_items",
@@ -256,6 +255,7 @@
    "default": "1",
    "fieldname": "is_stock_item",
    "fieldtype": "Check",
+   "in_standard_filter": 1,
    "label": "Maintain Stock",
    "oldfieldname": "is_stock_item",
    "oldfieldtype": "Select"
@@ -462,6 +462,7 @@
    "depends_on": "eval:doc.is_stock_item",
    "fieldname": "has_batch_no",
    "fieldtype": "Check",
+   "in_standard_filter": 1,
    "label": "Has Batch No",
    "no_copy": 1,
    "oldfieldname": "has_batch_no",
@@ -508,6 +509,7 @@
    "depends_on": "eval:doc.is_stock_item || doc.is_fixed_asset",
    "fieldname": "has_serial_no",
    "fieldtype": "Check",
+   "in_standard_filter": 1,
    "label": "Has Serial No",
    "no_copy": 1,
    "oldfieldname": "has_serial_no",
@@ -1077,7 +1079,7 @@
    "fieldname": "default_supplier",
    "fieldtype": "Link",
    "in_standard_filter": 1,
-   "label": "Supplier",
+   "label": "Default Supplier",
    "options": "Supplier"
   },
   {
@@ -1101,7 +1103,7 @@
    "depends_on": "alt_uom",
    "fieldname": "alt_uom_size",
    "fieldtype": "Float",
-   "label": "Container Size"
+   "label": "Per Unit"
   },
   {
    "fieldname": "section_break_31",
@@ -1146,11 +1148,6 @@
    "options": "Manufacturer"
   },
   {
-   "fieldname": "manufacturer_item_code",
-   "fieldtype": "Data",
-   "label": "Manufacturer SKU"
-  },
-  {
    "fieldname": "manufacturer_part_no",
    "fieldtype": "Data",
    "label": "Manufacturer Part Number"
@@ -1161,7 +1158,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-08-06 17:03:26.594319",
+ "modified": "2020-10-01 04:30:57.092328",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -1215,7 +1212,6 @@
    "role": "Manufacturing User"
   }
  ],
- "quick_entry": 1,
  "search_fields": "item_name,description,item_group,customer_code",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,

@@ -166,12 +166,6 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			fieldname: 'manufacturer_part_no',
 			hidden: 1,
 			reqd: 0
-		}, {
-			fieldtype: 'Data',
-			label: 'Manufacturer SKU',
-			fieldname: 'manufacturer_item_code',
-			hidden: 1,
-			reqd: 0
 		}];
 		return this.manufacturer_fields;
 	},

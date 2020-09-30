@@ -597,7 +597,7 @@
    "depends_on": "alt_uom",
    "fieldname": "alt_uom_size",
    "fieldtype": "Float",
-   "label": "Container Size",
+   "label": "Per Unit",
    "print_hide": 1,
    "read_only": 1
   },
@@ -921,7 +921,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-01 01:47:46.726943",
+ "modified": "2020-10-01 04:23:05.108017",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation Item",

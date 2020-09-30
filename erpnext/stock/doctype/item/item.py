@@ -596,7 +596,7 @@ class Item(WebsiteGenerator):
 		if self.alt_uom and self.alt_uom != self.stock_uom \
 				and (self.stock_uom, self.alt_uom) not in uom_conv_list and (self.alt_uom, self.stock_uom) not in uom_conv_list:
 			if not flt(self.alt_uom_size):
-				frappe.throw(_("Container Size is invalid"))
+				frappe.throw(_("'Per Unit' is invalid"))
 			ch = self.append('uom_conversion_graph', {})
 			ch.from_qty = 1.0
 			ch.from_uom = self.stock_uom

@@ -15,9 +15,6 @@
   "customer_name",
   "po_no",
   "po_date",
-  "tax_id",
-  "tax_cnic",
-  "tax_strn",
   "column_break1",
   "remarks",
   "column_break_28",
@@ -42,6 +39,10 @@
   "column_break_77",
   "source",
   "campaign",
+  "col_break_33",
+  "tax_id",
+  "tax_cnic",
+  "tax_strn",
   "section_break1",
   "sales_team",
   "contact_info",
@@ -135,6 +136,7 @@
   "loyalty_amount",
   "section_break_48",
   "coupon_code",
+  "column_break_129",
   "apply_discount_on",
   "additional_discount_percentage",
   "column_break_50",
@@ -162,6 +164,7 @@
   "terms",
   "printing_details",
   "letter_head",
+  "column_break_156",
   "select_print_heading",
   "column_break4",
   "language",
@@ -184,6 +187,7 @@
   "total_commission",
   "subscription_section",
   "from_date",
+  "column_break_178",
   "to_date",
   "column_break_108",
   "auto_repeat",
@@ -252,6 +256,7 @@
    "default": "Sales",
    "fieldname": "order_type",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Order Type",
    "oldfieldname": "order_type",
    "oldfieldtype": "Select",
@@ -439,6 +444,7 @@
   {
    "fieldname": "territory",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Territory",
    "options": "Territory",
    "print_hide": 1
@@ -1601,12 +1607,28 @@
   {
    "fieldname": "column_break_173",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_178",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_156",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_129",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col_break_33",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-01 02:44:41.861026",
+ "modified": "2020-10-01 04:09:50.029553",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

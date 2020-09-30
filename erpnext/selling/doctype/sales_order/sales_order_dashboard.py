@@ -20,20 +20,12 @@ def get_data():
 				'items': ['Sales Invoice', 'Pick List', 'Delivery Note']
 			},
 			{
-				'label': _('Purchasing'),
-				'items': ['Material Request', 'Purchase Order']
-			},
-			{
-				'label': _('Projects'),
-				'items': ['Project']
-			},
-			{
-				'label': _('Manufacturing'),
-				'items': ['Work Order']
+				'label': _('Procurement'),
+				'items': ['Material Request', 'Purchase Order', 'Work Order']
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Quotation', 'Auto Repeat']
+				'items': ['Quotation', 'Project', 'Auto Repeat']
 			},
 			{
 				'label': _('Payment'),

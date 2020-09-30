@@ -10,9 +10,6 @@
   "naming_series",
   "customer",
   "customer_name",
-  "tax_id",
-  "tax_cnic",
-  "tax_strn",
   "po_no",
   "po_date",
   "stin",
@@ -35,14 +32,23 @@
   "more_information",
   "transaction_type",
   "order_type",
-  "col_break23",
+  "column_break_31",
+  "project",
   "source",
   "campaign",
+  "col_break23",
+  "tax_id",
+  "tax_cnic",
+  "tax_strn",
   "inter_company_invoice_reference",
   "customer_group",
+  "section_break2",
+  "sales_team",
   "accounting_dimensions_section",
-  "project",
+  "debit_to",
+  "party_account_currency",
   "dimension_col_break",
+  "is_opening",
   "cost_center",
   "address_and_contact",
   "customer_address",
@@ -143,10 +149,11 @@
   "loyalty_redemption_cost_center",
   "section_break_49",
   "apply_discount_on",
-  "base_discount_amount",
   "column_break_51",
   "additional_discount_percentage",
+  "column_break_141",
   "discount_amount",
+  "base_discount_amount",
   "totals",
   "grand_total",
   "base_grand_total",
@@ -187,34 +194,33 @@
   "write_off_outstanding_amount_automatically",
   "column_break_74",
   "write_off_account",
+  "column_break_184",
   "write_off_cost_center",
   "terms_section_break",
   "tc_name",
   "terms",
   "edit_printing_settings",
   "letter_head",
+  "column_break_191",
   "select_print_heading",
   "column_break_84",
   "language",
   "group_same_items",
-  "more_info",
-  "debit_to",
-  "party_account_currency",
-  "is_opening",
-  "c_form_applicable",
-  "c_form_no",
-  "column_break8",
-  "is_discounted",
-  "status",
   "sales_team_section_break",
   "sales_partner",
   "column_break10",
   "commission_rate",
+  "column_break_207",
   "total_commission",
-  "section_break2",
-  "sales_team",
+  "sec_status",
+  "status",
+  "column_break_208",
+  "is_discounted",
+  "c_form_applicable",
+  "c_form_no",
   "subscription_section",
   "from_date",
+  "column_break_215",
   "to_date",
   "column_break_140",
   "auto_repeat",
@@ -482,6 +488,7 @@
   {
    "fieldname": "territory",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Territory",
    "options": "Territory",
    "print_hide": 1
@@ -1323,7 +1330,6 @@
   },
   {
    "collapsible": 1,
-   "depends_on": "customer",
    "fieldname": "more_information",
    "fieldtype": "Section Break",
    "label": "More Information"
@@ -1346,6 +1352,7 @@
   {
    "fieldname": "campaign",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Campaign",
    "oldfieldname": "campaign",
    "oldfieldtype": "Link",
@@ -1379,19 +1386,11 @@
   {
    "fieldname": "source",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Source",
    "oldfieldname": "source",
    "oldfieldtype": "Select",
    "options": "Lead Source",
-   "print_hide": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "more_info",
-   "fieldtype": "Section Break",
-   "label": "Accounting Details",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-file-text",
    "print_hide": 1
   },
   {
@@ -1441,12 +1440,6 @@
    "options": "C-Form",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break8",
-   "fieldtype": "Column Break",
-   "oldfieldtype": "Column Break",
-   "print_hide": 1
   },
   {
    "fieldname": "remarks",
@@ -1587,7 +1580,7 @@
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
+   "label": "Accounting Details"
   },
   {
    "fieldname": "dimension_col_break",
@@ -1642,6 +1635,7 @@
    "fetch_from": "transaction_type.order_type",
    "fieldname": "order_type",
    "fieldtype": "Select",
+   "hidden": 1,
    "in_standard_filter": 1,
    "label": "Order Type",
    "options": "\nSales\nMaintenance\nShopping Cart",
@@ -1893,12 +1887,46 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "fieldname": "column_break_141",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_207",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_184",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_191",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_215",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_31",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sec_status",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "fieldname": "column_break_208",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-10-01 02:44:43.261066",
+ "modified": "2020-10-01 04:05:32.572346",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
