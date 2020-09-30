@@ -48,6 +48,7 @@
    "fieldtype": "Link",
    "in_global_search": 1,
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Account",
    "oldfieldname": "account",
    "oldfieldtype": "Link",
@@ -80,6 +81,7 @@
    "description": "If Income or Expense",
    "fieldname": "cost_center",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Cost Center",
    "oldfieldname": "cost_center",
    "oldfieldtype": "Link",
@@ -96,6 +98,7 @@
    "fieldname": "party_type",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Party Type",
    "options": "DocType",
    "search_index": 1
@@ -105,6 +108,7 @@
    "fieldname": "party",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Party",
    "options": "party_type"
   },
@@ -202,6 +206,7 @@
   {
    "fieldname": "reference_type",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "Reference Type",
    "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting"
   },
@@ -209,6 +214,7 @@
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Reference Name",
    "options": "reference_type"
   },
@@ -221,6 +227,7 @@
   {
    "fieldname": "project",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Project",
    "options": "Project"
   },
@@ -299,7 +306,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:50:38.857218",
+ "modified": "2020-10-01 01:41:36.087510",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",

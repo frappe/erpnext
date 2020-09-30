@@ -120,6 +120,7 @@
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Item Code",
    "oldfieldname": "item_code",
    "oldfieldtype": "Link",
@@ -422,6 +423,7 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Warehouse",
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
@@ -431,6 +433,7 @@
   {
    "fieldname": "project",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Project",
    "options": "Project",
    "print_hide": 1
@@ -918,7 +921,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-08-21 18:40:24.355680",
+ "modified": "2020-10-01 01:47:46.726943",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation Item",

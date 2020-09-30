@@ -41,6 +41,7 @@
    "fieldtype": "Link",
    "in_global_search": 1,
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Item Code",
    "options": "Item",
    "reqd": 1
@@ -59,6 +60,7 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Warehouse",
    "options": "Warehouse",
    "reqd": 1
@@ -169,7 +171,7 @@
   }
  ],
  "istable": 1,
- "modified": "2020-03-03 15:35:17.858774",
+ "modified": "2020-10-01 01:41:48.331974",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",
