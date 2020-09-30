@@ -6,6 +6,9 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import flt, get_link_to_form
+from erpnext.stock.utils import get_latest_stock_qty
+from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_account
 
 class InpatientMedicationEntry(Document):
 	def get_medication_orders(self):
@@ -38,7 +41,68 @@ class InpatientMedicationEntry(Document):
 			})
 
 	def on_submit(self):
+		success_msg = ""
+		if self.update_stock:
+			allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+			if not allow_negative_stock:
+				self.check_stock_qty()
+
+			stock_entry = self.make_stock_entry()
+			success_msg += _('Stock Entry {0} created and ').format(
+				frappe.bold(get_link_to_form('Stock Entry', stock_entry)))
+
 		self.update_medication_orders()
+
+		success_msg += _('Inpatient Medication Orders updated successfully')
+		frappe.msgprint(success_msg, title=_('Success'), indicator='green')
+
+	def check_stock_qty(self):
+		from erpnext.stock.stock_ledger import NegativeStockError
+
+		drug_availability = dict()
+		for d in self.medication_orders:
+			if not drug_availability.get(d.drug_code):
+				drug_availability[d.drug_code] = 0
+			drug_availability[d.drug_code] += flt(d.dosage)
+
+		for drug, dosage in drug_availability.items():
+			available_qty = get_latest_stock_qty(drug, self.warehouse)
+
+			# validate qty
+			if flt(available_qty) < flt(dosage):
+				frappe.throw(_('Quantity not available for {0} in warehouse {1}').format(
+					frappe.bold(drug), frappe.bold(self.warehouse))
+					+ '<br><br>' + _('Available quantity is {0}, you need {1}').format(
+					frappe.bold(available_qty), frappe.bold(dosage))
+					+ '<br><br>' + _('Please enable Allow Negative Stock in Stock Settings or create Stock Entry to proceed.'),
+					NegativeStockError, title=_('Insufficient Stock'))
+
+	def make_stock_entry(self):
+		stock_entry = frappe.new_doc('Stock Entry')
+		stock_entry.stock_entry_type = 'Material Issue'
+		stock_entry.from_warehouse = self.warehouse
+		stock_entry.company = self.company
+		stock_entry.inpatient_medication_entry = self.name
+		cost_center = frappe.get_cached_value('Company',  self.company,  'cost_center')
+		expense_account = get_account(None, 'expense_account', 'Healthcare Settings', self.company)
+
+		for entry in self.medication_orders:
+			se_child = stock_entry.append('items')
+			se_child.item_code = entry.drug_code
+			se_child.item_name = entry.drug_name
+			se_child.uom = frappe.db.get_value('Item', entry.drug_code, 'stock_uom')
+			se_child.stock_uom = se_child.uom
+			se_child.qty = flt(entry.dosage)
+			# in stock uom
+			se_child.conversion_factor = 1
+			se_child.cost_center = cost_center
+			se_child.expense_account = expense_account
+			# references
+			se_child.patient = entry.patient
+			se_child.inpatient_medication_entry_child = entry.name
+
+		stock_entry.submit()
+		return stock_entry.name
 
 	def update_medication_orders(self):
 		# for marking order entries as completed

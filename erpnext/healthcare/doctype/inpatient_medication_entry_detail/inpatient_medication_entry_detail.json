@@ -15,6 +15,7 @@
   "drug_code",
   "drug_name",
   "dosage",
+  "available_qty",
   "dosage_form",
   "column_break_10",
   "instructions",
@@ -135,12 +136,21 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "available_qty",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Available Qty",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-09-30 11:44:33.660929",
+ "modified": "2020-09-30 14:48:23.648223",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Medication Entry Detail",
