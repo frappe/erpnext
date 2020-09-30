@@ -58,7 +58,8 @@
         "type": "string",
         "minLength": 1,
         "maxLength": 16,
-        "pattern": "^([A-Z1-9]{1}[A-Z0-9/-]{0,15})$"
+        "pattern": "^([A-Z1-9]{1}[A-Z0-9/-]{0,15})$",
+        "label": "Document Name"
       },
       "Dt": {
         "type": "string",
