@@ -21,6 +21,8 @@ erpnext.setup_einvoice_actions = (doctype) => {
 								frm.set_value('irn', res.message['Irn']);
 								frm.set_value('signed_einvoice', JSON.stringify(res.message['DecryptedSignedInvoice']));
 								frm.set_value('signed_qr_code', JSON.stringify(res.message['DecryptedSignedQRCode']));
+
+								if (res.message['EwbNo']) frm.set_value('ewaybill', res.message['EwbNo']);
 								frm.save();
 							}
 						})
