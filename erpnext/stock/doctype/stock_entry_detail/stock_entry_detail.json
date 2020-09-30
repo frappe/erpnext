@@ -474,7 +474,7 @@
    "fieldtype": "Link",
    "hidden": 1,
    "label": "Item Group",
-   "options": "Item"
+   "options": "Item Group"
   },
   {
    "fieldname": "reference_purchase_receipt",
@@ -538,8 +538,8 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-09-30 14:08:33.917632",
- "modified_by": "furqan.790@outlook.com",
+ "modified": "2020-09-30 21:06:38.175149",
+ "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",
  "owner": "Administrator",
