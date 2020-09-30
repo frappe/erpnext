@@ -28,7 +28,8 @@ erpnext.setup_einvoice_actions = (doctype) => {
 						})
 					}
 				)
-			} else if (frm.doc.docstatus == 1 && frm.doc.irn && !frm.doc.irn_cancelled) {
+			}
+			if (frm.doc.docstatus == 1 && frm.doc.irn && !frm.doc.irn_cancelled) {
 				frm.add_custom_button(
 					"Cancel IRN",
 					() => {
@@ -59,6 +60,38 @@ erpnext.setup_einvoice_actions = (doctype) => {
 					}
 				)
 			}
+			if (frm.doc.docstatus == 1 && frm.doc.irn && !frm.doc.irn_cancelled && !frm.doc.eway_bill_cancelled) {
+				frm.add_custom_button(
+					"Cancel E-Way Bill",
+					() => {
+						const d = new frappe.ui.Dialog({
+							title: __('Cancel E-Way Bill'),
+							fields: [
+								{ "label" : "Reason", "fieldname": "reason", "fieldtype": "Select", "reqd": 1, "default": "1-Duplicate",
+									"options": ["1-Duplicate", "2-Data Entry Error", "3-Order Cancelled", "4-Other"] },
+								{ "label": "Remark", "fieldname": "remark", "fieldtype": "Data", "reqd": 1 }
+							],
+							primary_action: function() {
+								const data = d.get_values();
+								frappe.call({
+									method: 'erpnext.regional.india.e_invoice_utils.cancel_eway_bill',
+									args: { eway_bill: frm.doc.ewaybill, reason: data.reason.split('-')[0], remark: data.remark },
+									freeze: true,
+									callback: () => {
+										frm.set_value('eway_bill_cancelled', 1);
+										frm.save("Update");
+										d.hide()
+									},
+									error: () => d.hide()
+								})
+							},
+							primary_action_label: __('Submit')
+						});
+						d.show();
+					}
+				)
+			}
 		}
+		
 	})
 }

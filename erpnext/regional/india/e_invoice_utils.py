@@ -192,6 +192,21 @@ def cancel_irn(irn, reason, remark=''):
 
 	return res
 
+@frappe.whitelist()
+def cancel_eway_bill(eway_bill, reason, remark=''):
+	einv_creds = get_einv_credentials()
+	endpoint = 'https://einv-apisandbox.nic.in/ewaybillapi/v1.03/ewayapi'
+	headers = get_header(einv_creds)
+
+	cancel_eway_bill_json = json.dumps(dict(ewbNo=eway_bill, cancelRsnCode=reason, cancelRmrk=remark))
+	enc_json = aes_encrypt(cancel_eway_bill_json, einv_creds.sek)
+	payload = dict(action="CANEWB", Data=enc_json)
+
+	res = make_post_request(endpoint, headers=headers, data=json.dumps(payload))
+	handle_err_response(res)
+
+	return res
+
 def handle_irn_response(data):
 	enc_signed_invoice = data['SignedInvoice']
 	enc_signed_qr_code = data['SignedQRCode']
