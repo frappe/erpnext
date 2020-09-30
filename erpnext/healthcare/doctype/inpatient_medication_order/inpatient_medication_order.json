@@ -52,9 +52,11 @@
    "fieldtype": "Link",
    "label": "Patient",
    "options": "Patient",
+   "read_only_depends_on": "patient_encounter",
    "reqd": 1
   },
   {
+   "fetch_from": "patient.patient_name",
    "fieldname": "patient_name",
    "fieldtype": "Data",
    "label": "Patient Name",
@@ -71,6 +73,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "patient.inpatient_record",
    "fieldname": "inpatient_record",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -85,13 +88,15 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Healthcare Practitioner",
-   "options": "Healthcare Practitioner"
+   "options": "Healthcare Practitioner",
+   "read_only_depends_on": "patient_encounter"
   },
   {
    "fieldname": "start_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Start Date"
+   "label": "Start Date",
+   "reqd": 1
   },
   {
    "fieldname": "end_date",
@@ -100,6 +105,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval: doc.patient && doc.start_date",
    "fieldname": "medication_orders_section",
    "fieldtype": "Section Break",
    "label": "Medication Orders"
@@ -163,7 +169,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-30 20:56:24.317669",
+ "modified": "2020-09-30 21:53:27.128591",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Medication Order",

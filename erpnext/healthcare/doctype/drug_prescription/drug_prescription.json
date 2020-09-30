@@ -43,7 +43,8 @@
    "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Dosage",
-   "options": "Prescription Dosage"
+   "options": "Prescription Dosage",
+   "reqd": 1
   },
   {
    "fieldname": "period",
@@ -51,14 +52,16 @@
    "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Period",
-   "options": "Prescription Duration"
+   "options": "Prescription Duration",
+   "reqd": 1
   },
   {
    "fieldname": "dosage_form",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Dosage Form",
-   "options": "Dosage Form"
+   "options": "Dosage Form",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_7",
@@ -100,12 +103,13 @@
    "default": "0",
    "fieldname": "usage_interval",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Dosage by Time Interval"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-09-29 13:08:30.798469",
+ "modified": "2020-09-30 23:32:09.495288",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Drug Prescription",
