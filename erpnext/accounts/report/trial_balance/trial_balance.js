@@ -76,8 +76,7 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"fieldname": "presentation_currency",
 				"label": __("Currency"),
 				"fieldtype": "Select",
-				"options": erpnext.get_presentation_currency_list(),
-				"default": frappe.defaults.get_user_default("currency")
+				"options": erpnext.get_presentation_currency_list()
 			},
 			{
 				"fieldname": "with_period_closing_entry",
