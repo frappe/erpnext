@@ -1349,7 +1349,7 @@
    "label": "Get Latest Price"
   },
   {
-   "depends_on": "total_alt_uom_qty",
+   "depends_on": "eval:doc.total_alt_uom_qty != doc.total_qty",
    "fieldname": "total_alt_uom_qty",
    "fieldtype": "Float",
    "label": "Total Contents Quantity",
@@ -1606,7 +1606,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-01 02:39:58.125843",
+ "modified": "2020-10-01 02:44:41.861026",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

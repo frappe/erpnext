@@ -1339,7 +1339,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "total_alt_uom_qty",
+   "depends_on": "eval:doc.total_alt_uom_qty != doc.total_qty",
    "fieldname": "total_alt_uom_qty",
    "fieldtype": "Float",
    "label": "Total Contents Quantity",
@@ -1582,7 +1582,7 @@
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2020-10-01 02:39:59.421643",
+ "modified": "2020-10-01 02:44:42.524330",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

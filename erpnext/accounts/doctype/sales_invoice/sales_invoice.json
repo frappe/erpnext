@@ -1673,7 +1673,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "total_alt_uom_qty",
+   "depends_on": "eval:doc.total_alt_uom_qty != doc.total_qty",
    "fieldname": "total_alt_uom_qty",
    "fieldtype": "Float",
    "label": "Total Contents Quantity",
@@ -1898,7 +1898,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-10-01 02:40:00.917186",
+ "modified": "2020-10-01 02:44:43.261066",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

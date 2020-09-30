@@ -1221,7 +1221,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "total_alt_uom_qty",
+   "depends_on": "eval:doc.total_alt_uom_qty != doc.total_qty",
    "fieldname": "total_alt_uom_qty",
    "fieldtype": "Float",
    "label": "Total Contents Quantity",
@@ -1472,7 +1472,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-01 02:40:02.355417",
+ "modified": "2020-10-01 02:44:44.065007",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
