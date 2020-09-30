@@ -84,7 +84,7 @@ def get_columns(invoice_list, additional_table_columns):
 		columns += additional_table_columns
 
 	columns += [
-		_("Supplier Group") + ":Link/Supplier Group:120", _("NTN") + "::80", _("Payable Account") + ":Link/Account:120",
+		_("Supplier Group") + ":Link/Supplier Group:120", _("Tax Id") + "::80", _("Payable Account") + ":Link/Account:120",
 		_("Mode of Payment") + ":Link/Mode of Payment:80", _("Project") + ":Link/Project:80",
 		_("Bill No") + "::120", _("Bill Date") + ":Date:80", _("Remarks") + "::150",
 		_("Purchase Order") + ":Link/Purchase Order:100",

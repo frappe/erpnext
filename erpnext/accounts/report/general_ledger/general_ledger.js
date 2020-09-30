@@ -181,7 +181,7 @@ frappe.query_reports["General Ledger"] = {
 		},
 		{
 			"fieldname":"tax_id",
-			"label": __("NTN"),
+			"label": __("Tax Id"),
 			"fieldtype": "Data",
 			"hidden": 1
 		}

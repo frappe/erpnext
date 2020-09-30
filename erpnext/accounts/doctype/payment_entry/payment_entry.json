@@ -343,6 +343,7 @@
    "label": "Reference"
   },
   {
+   "depends_on": "eval:doc.docstatus == 0",
    "fieldname": "get_outstanding_invoice",
    "fieldtype": "Button",
    "label": "Get Outstanding Invoice"
@@ -646,8 +647,8 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-08-18 10:09:49.633620",
- "modified_by": "Administrator",
+ "modified": "2020-09-30 17:06:47.472311",
+ "modified_by": "furqan.790@outlook.com",
  "module": "Accounts",
  "name": "Payment Entry",
  "owner": "Administrator",

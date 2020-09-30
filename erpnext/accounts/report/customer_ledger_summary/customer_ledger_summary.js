@@ -100,7 +100,7 @@ frappe.query_reports["Customer Ledger Summary"] = {
 		},
 		{
 			"fieldname":"tax_id",
-			"label": __("NTN"),
+			"label": __("Tax Id"),
 			"fieldtype": "Data",
 			"hidden": 1
 		},

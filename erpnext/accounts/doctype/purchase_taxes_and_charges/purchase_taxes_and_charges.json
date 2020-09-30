@@ -60,7 +60,7 @@
    "label": "Type",
    "oldfieldname": "charge_type",
    "oldfieldtype": "Select",
-   "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total\nOn Item Quantity",
+   "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total\nOn Item Quantity\nWeighted Distribution",
    "reqd": 1
   },
   {
@@ -228,8 +228,8 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-08-15 17:38:54.786803",
- "modified_by": "Administrator",
+ "modified": "2020-09-30 19:05:05.242309",
+ "modified_by": "furqan.790@outlook.com",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",
  "owner": "Administrator",
