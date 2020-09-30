@@ -3,6 +3,14 @@
 
 frappe.ui.form.on('Inpatient Medication Entry', {
 	refresh: function(frm) {
+		frm.set_query('item_code', () => {
+			return {
+				filters: {
+					is_stock_item: 1
+				}
+			};
+		});
+
 		frm.set_query('drug_code', 'medication_orders', () => {
 			return {
 				filters: {

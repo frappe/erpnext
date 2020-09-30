@@ -69,6 +69,7 @@
    "fieldname": "is_completed",
    "fieldtype": "Check",
    "label": "Is Order Completed",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -80,7 +81,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-09-29 17:08:01.880204",
+ "modified": "2020-09-30 14:03:26.755925",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Medication Order Entry",

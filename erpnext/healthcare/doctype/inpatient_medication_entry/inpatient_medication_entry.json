@@ -14,20 +14,20 @@
   "filters_section",
   "item_code",
   "assigned_to_practitioner",
-  "from_date",
-  "to_date",
-  "column_break_11",
   "patient",
   "practitioner",
   "service_unit",
+  "column_break_11",
+  "from_date",
+  "to_date",
+  "from_time",
+  "to_time",
   "select_medication_orders_section",
   "get_medication_orders",
-  "warehouse",
   "medication_orders",
-  "other_details_section",
-  "total_medication_orders",
-  "data_17",
-  "completed_medication_orders",
+  "section_break_18",
+  "update_stock",
+  "warehouse",
   "amended_from"
  ],
  "fields": [
@@ -75,9 +75,12 @@
    "options": "Item"
   },
   {
+   "depends_on": "update_stock",
+   "description": "Warehouse from where medication stock should be consumed",
    "fieldname": "warehouse",
    "fieldtype": "Link",
-   "label": "Warehouse",
+   "label": "Medication Warehouse",
+   "mandatory_depends_on": "update_stock",
    "options": "Warehouse"
   },
   {
@@ -107,27 +110,6 @@
    "label": "To Date"
   },
   {
-   "fieldname": "other_details_section",
-   "fieldtype": "Section Break",
-   "label": "Other Details"
-  },
-  {
-   "fieldname": "total_medication_orders",
-   "fieldtype": "Float",
-   "label": "Total Medication Orders",
-   "read_only": 1
-  },
-  {
-   "fieldname": "data_17",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "completed_medication_orders",
-   "fieldtype": "Float",
-   "label": "Completed Medication Orders",
-   "read_only": 1
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -154,21 +136,44 @@
    "options": "Inpatient Medication Entry Detail"
   },
   {
+   "depends_on": "eval:doc.docstatus!==1",
    "fieldname": "get_medication_orders",
    "fieldtype": "Button",
-   "label": "Get Pending Medication Orders"
+   "label": "Get Pending Medication Orders",
+   "print_hide": 1
   },
   {
    "fieldname": "assigned_to_practitioner",
    "fieldtype": "Link",
    "label": "Assigned To",
    "options": "User"
+  },
+  {
+   "fieldname": "section_break_18",
+   "fieldtype": "Section Break",
+   "label": "Stock Details"
+  },
+  {
+   "default": "1",
+   "fieldname": "update_stock",
+   "fieldtype": "Check",
+   "label": "Update Stock"
+  },
+  {
+   "fieldname": "from_time",
+   "fieldtype": "Time",
+   "label": "From Time"
+  },
+  {
+   "fieldname": "to_time",
+   "fieldtype": "Time",
+   "label": "To Time"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-29 16:55:18.064554",
+ "modified": "2020-09-30 14:17:22.834558",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Medication Entry",

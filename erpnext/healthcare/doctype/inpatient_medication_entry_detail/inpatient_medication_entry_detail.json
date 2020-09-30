@@ -19,7 +19,8 @@
   "column_break_10",
   "instructions",
   "references_section",
-  "patient_encounter"
+  "against_imo",
+  "against_imoe"
  ],
  "fields": [
   {
@@ -67,13 +68,6 @@
    "fieldtype": "Link",
    "label": "Dosage Form",
    "options": "Dosage Form"
-  },
-  {
-   "fieldname": "patient_encounter",
-   "fieldtype": "Link",
-   "label": "Patient Encounter",
-   "options": "Patient Encounter",
-   "read_only": 1
   },
   {
    "fetch_from": "patient.inpatient_record",
@@ -124,12 +118,29 @@
    "options": "Healthcare Service Unit",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "against_imo",
+   "fieldtype": "Link",
+   "label": "Against Inpatient Medication Order",
+   "no_copy": 1,
+   "options": "Inpatient Medication Order",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "against_imoe",
+   "fieldtype": "Data",
+   "label": "Against Inpatient Medication Order Entry",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-09-29 17:10:25.894424",
+ "modified": "2020-09-30 11:44:33.660929",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Medication Entry Detail",

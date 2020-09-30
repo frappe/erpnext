@@ -32,8 +32,40 @@ class InpatientMedicationEntry(Document):
 				'drug_code': data.drug,
 				'drug_name': data.drug_name,
 				'dosage': data.dosage,
-				'dosage_form': data.dosage_form
+				'dosage_form': data.dosage_form,
+				'against_imo': data.parent,
+				'against_imoe': data.name
 			})
+
+	def on_submit(self):
+		self.update_medication_orders()
+
+	def update_medication_orders(self):
+		# for marking order entries as completed
+		orders = []
+		# for storing how many entries have been completed in one Inpatient Medication Order
+		order_entry_map = dict()
+
+		for entry in self.medication_orders:
+			orders.append(entry.against_imoe)
+			parent = entry.against_imo
+			if not order_entry_map.get(parent):
+				order_entry_map[parent] = 0
+
+			order_entry_map[parent] += 1
+
+		# mark as completed
+		frappe.db.sql("""
+			UPDATE `tabInpatient Medication Order Entry`
+			SET is_completed = 1
+			WHERE name IN %(orders)s
+		""", {'orders': orders})
+
+		# update status and completed count
+		for order, count in order_entry_map.items():
+			medication_order = frappe.get_doc('Inpatient Medication Order', order)
+			medication_order.db_set('completed_orders', count)
+			medication_order.set_status()
 
 
 def get_pending_medication_orders(entry):
@@ -47,6 +79,14 @@ def get_pending_medication_orders(entry):
 	if entry.to_date:
 		child_filter += ' and entry.date <= %(to_date)s'
 		values['to_date'] = entry.to_date
+
+	if entry.from_time:
+		child_filter += ' and entry.time >= %(from_time)s'
+		values['from_time'] = entry.from_time
+
+	if entry.to_time:
+		child_filter += ' and entry.time <= %(to_time)s'
+		values['to_time'] = entry.to_time
 
 	if entry.patient:
 		parent_filter += ' and ip.patient = %(patient)s'
