@@ -11,6 +11,9 @@ from erpnext.stock.utils import get_latest_stock_qty
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_account
 
 class InpatientMedicationEntry(Document):
+	def validate(self):
+		self.validate_medication_orders()
+
 	def get_medication_orders(self):
 		"""Pull medication prescriptions from Patient Encounter for currently admitted patients based on selected filters"""
 		orders = get_pending_medication_orders(self)
@@ -41,20 +44,78 @@ class InpatientMedicationEntry(Document):
 			})
 
 	def on_submit(self):
+		self.validate_medication_orders()
 		success_msg = ""
 		if self.update_stock:
-			allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
-			if not allow_negative_stock:
-				self.check_stock_qty()
-
-			stock_entry = self.make_stock_entry()
+			stock_entry = self.process_stock()
 			success_msg += _('Stock Entry {0} created and ').format(
 				frappe.bold(get_link_to_form('Stock Entry', stock_entry)))
 
 		self.update_medication_orders()
-
 		success_msg += _('Inpatient Medication Orders updated successfully')
 		frappe.msgprint(success_msg, title=_('Success'), indicator='green')
+
+	def validate_medication_orders(self):
+		for entry in self.medication_orders:
+			docstatus, is_completed = frappe.db.get_value('Inpatient Medication Order Entry', entry.against_imoe,
+				['docstatus', 'is_completed'])
+
+			if docstatus == 2:
+				frappe.throw(_('Row {0}: Cannot create Inpatient Medication Entry against cancelled Inpatient Medication Order {1}').format(
+					entry.idx, get_link_to_form(entry.against_imo)))
+
+			if is_completed:
+				frappe.throw(_('Row {0}: This Medication Order is already marked as completed').format(
+					entry.idx))
+
+	def on_cancel(self):
+		self.update_medication_orders(on_cancel=True)
+
+	def process_stock(self):
+		allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+		if not allow_negative_stock:
+			self.check_stock_qty()
+
+		return self.make_stock_entry()
+
+	def update_medication_orders(self, on_cancel=False):
+		# for marking order completion status
+		orders = []
+		# orders mapped
+		order_entry_map = dict()
+
+		for entry in self.medication_orders:
+			orders.append(entry.against_imoe)
+			parent = entry.against_imo
+			if not order_entry_map.get(parent):
+				order_entry_map[parent] = 0
+
+			order_entry_map[parent] += 1
+
+		# mark completion status
+		is_completed = 1
+		if on_cancel:
+			is_completed = 0
+
+		frappe.db.sql("""
+			UPDATE `tabInpatient Medication Order Entry`
+			SET is_completed = %(is_completed)s
+			WHERE name IN %(orders)s
+		""", {'orders': orders, 'is_completed': is_completed})
+
+		# update status and completed orders count
+		for order, count in order_entry_map.items():
+			medication_order = frappe.get_doc('Inpatient Medication Order', order)
+			completed_orders = flt(count)
+			current_value = frappe.db.get_value('Inpatient Medication Order', order, 'completed_orders')
+
+			if on_cancel:
+				completed_orders = flt(current_value) - flt(count)
+			else:
+				completed_orders = flt(current_value) + flt(count)
+
+			medication_order.db_set('completed_orders', completed_orders)
+			medication_order.set_status()
 
 	def check_stock_qty(self):
 		from erpnext.stock.stock_ledger import NegativeStockError
@@ -103,33 +164,6 @@ class InpatientMedicationEntry(Document):
 
 		stock_entry.submit()
 		return stock_entry.name
-
-	def update_medication_orders(self):
-		# for marking order entries as completed
-		orders = []
-		# for storing how many entries have been completed in one Inpatient Medication Order
-		order_entry_map = dict()
-
-		for entry in self.medication_orders:
-			orders.append(entry.against_imoe)
-			parent = entry.against_imo
-			if not order_entry_map.get(parent):
-				order_entry_map[parent] = 0
-
-			order_entry_map[parent] += 1
-
-		# mark as completed
-		frappe.db.sql("""
-			UPDATE `tabInpatient Medication Order Entry`
-			SET is_completed = 1
-			WHERE name IN %(orders)s
-		""", {'orders': orders})
-
-		# update status and completed count
-		for order, count in order_entry_map.items():
-			medication_order = frappe.get_doc('Inpatient Medication Order', order)
-			medication_order.db_set('completed_orders', count)
-			medication_order.set_status()
 
 
 def get_pending_medication_orders(entry):
