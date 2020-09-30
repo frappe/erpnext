@@ -2,7 +2,11 @@ erpnext.setup_einvoice_actions = (doctype) => {
 	frappe.ui.form.on(doctype, {
 		refresh(frm) {
 			const einvoicing_enabled = frappe.db.get_value("E Invoice Settings", "E Invoice Settings", "enable");
-			if (!einvoicing_enabled) return;
+			const supply_type = frm.doc.gst_category;
+			if (!einvoicing_enabled 
+				|| !['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export'].includes(supply_type)) {
+				return;
+			}
 
 			if (frm.doc.docstatus == 0 && !frm.doc.irn && !frm.doc.__unsaved) {
 				frm.add_custom_button(
