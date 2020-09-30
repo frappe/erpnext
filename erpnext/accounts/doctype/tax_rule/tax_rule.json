@@ -242,7 +242,7 @@
   {
    "fieldname": "tax_id",
    "fieldtype": "Select",
-   "label": "NTN",
+   "label": "Tax Id",
    "options": "\nSet\nNot Set"
   },
   {
@@ -258,7 +258,7 @@
    "options": "\nSet\nNot Set"
   }
  ],
- "modified": "2020-03-03 15:34:42.608367",
+ "modified": "2020-03-03 15:34:42.608368",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Rule",
