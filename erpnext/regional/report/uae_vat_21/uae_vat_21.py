@@ -3,7 +3,6 @@
 
 from __future__ import unicode_literals
 import frappe
-from erpnext.regional.united_arab_emirates.utils import get_tax_accounts
 from frappe import _
 
 def execute(filters=None):
@@ -14,11 +13,7 @@ def execute(filters=None):
 	return columns, data, None, chart
 
 def get_columns():
-	"""Creates a list of dictionaries that are used to generate column headers of the data table
-
-	Returns:
-		List(Dict): list of dictionaries that are used to generate column headers of the data table
-	"""
+	"""Creates a list of dictionaries that are used to generate column headers of the data table."""
 	return [
 		{
 			"fieldname": "no",
@@ -47,22 +42,15 @@ def get_columns():
 	]
 
 def get_data(filters = None):
-	"""Returns the list of dictionaries. Each dictionary is a row in the datatable and chart data
-
-	Args:
-		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
-
-	Returns:
-		List(Dict): Each dictionary is a row in the datatable
-		Dict: Dictionary containing chart data
-	"""
+	"""Returns the list of dictionaries. Each dictionary is a row in the datatable and chart data."""
 	data = []
 	data.append({
 		"no": '',
-		"legend": f'VAT on Sales and All Other Outputs',
+		"legend": 'VAT on Sales and All Other Outputs',
 		"amount": '',
 		"vat_amount": ''
 		})
+
 	total_emiratewise = get_total_emiratewise(filters)
 	emirates = get_emirates()
 	amounts_by_emirate = {}
@@ -92,7 +80,7 @@ def get_data(filters = None):
 	data.append(
 		{
 			"no": '2',
-			"legend": f'Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme',
+			"legend": 'Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme',
 			"amount": (-1) * get_tourist_tax_return_total(filters),
 			"vat_amount": (-1) * get_tourist_tax_return_tax(filters)
 		}
@@ -101,7 +89,7 @@ def get_data(filters = None):
 	data.append(
 		{
 			"no": '3',
-			"legend": f'Supplies subject to the reverse charge provision',
+			"legend": 'Supplies subject to the reverse charge provision',
 			"amount": get_reverse_charge_total(filters),
 			"vat_amount": get_reverse_charge_tax(filters)
 		}
@@ -110,7 +98,7 @@ def get_data(filters = None):
 	data.append(
 		{
 			"no": '4',
-			"legend": f'Zero Rated',
+			"legend": 'Zero Rated',
 			"amount": get_zero_rated_total(filters),
 			"vat_amount": "-"
 		}
@@ -119,7 +107,7 @@ def get_data(filters = None):
 	data.append(
 		{
 			"no": '5',
-			"legend": f'Exempt Supplies',
+			"legend": 'Exempt Supplies',
 			"amount": get_exempt_total(filters),
 			"vat_amount": "-"
 		}
@@ -127,22 +115,24 @@ def get_data(filters = None):
 
 	data.append({
 		"no": '',
-		"legend": f'VAT on Expenses and All Other Inputs',
+		"legend": 'VAT on Expenses and All Other Inputs',
 		"amount": '',
 		"vat_amount": ''
 		})
+
 	data.append(
 		{
 			"no": '9',
-			"legend": f'Standard Rated Expenses',
+			"legend": 'Standard Rated Expenses',
 			"amount": get_standard_rated_expenses_total(filters),
 			"vat_amount": get_standard_rated_expenses_tax(filters)
 		}
 	)
+
 	data.append(
 		{
 			"no": '10',
-			"legend": f'Supplies subject to the reverse charge provision',
+			"legend": 'Supplies subject to the reverse charge provision',
 			"amount": get_reverse_charge_recoverable_total(filters),
 			"vat_amount": get_reverse_charge_recoverable_tax(filters)
 		}
@@ -152,15 +142,7 @@ def get_data(filters = None):
 
 
 def get_chart(emirates, amounts_by_emirate):
-	"""Returns chart data
-
-	Args:
-		emirates (List): List of Emirates
-		amounts_by_emirate (Dict): Vat and Tax amount by emirates with emirates as key
-
-	Returns:
-		[Dict]: Chart Data
-	"""
+	"""Returns chart data."""
 	labels = []
 	amount = []
 	vat_amount = []
@@ -186,6 +168,7 @@ def get_chart(emirates, amounts_by_emirate):
 	return chart
 
 def get_total_emiratewise(filters):
+	"""Returns Emiratewise Amount and Taxes."""
 	return frappe.db.sql(f"""
 		select emirate, sum(total), sum(total_taxes_and_charges) from `tabSales Invoice`
 		where docstatus = 1 {get_conditions(filters)}
@@ -193,11 +176,7 @@ def get_total_emiratewise(filters):
 		""", filters)
 
 def get_emirates():
-	"""Returns a List of emirates in the order that they are to be displayed
-
-	Returns:
-		List(String): List of emirates in the order that they are to be displayed
-	"""
+	"""Returns a List of emirates in the order that they are to be displayed."""
 	return [
 		'Abu Dhabi',
 		'Dubai',
@@ -209,14 +188,7 @@ def get_emirates():
 	]
 
 def get_conditions(filters):
-	"""The conditions to be used to filter data to calculate the total sale
-
-	Args:
-		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
-
-	Returns:
-		String: Concatenated list of conditions to be applied to calculate the total sale
-	"""
+	"""The conditions to be used to filter data to calculate the total sale."""
 	conditions = ""
 	for opts in (("company", " and company=%(company)s"),
 		("from_date", " and posting_date>=%(from_date)s"),
@@ -226,22 +198,8 @@ def get_conditions(filters):
 	return conditions
 
 def get_reverse_charge_total(filters):
-	"""Returns the sum of the total of each Purchase invoice made
-
-	Args:
-		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
-
-	Returns:
-		Float: sum of the total of each Purchase invoice made
-	"""
+	"""Returns the sum of the total of each Purchase invoice made."""
 	conditions = get_conditions(filters)
-	print("""
-		select sum(total)  from
-		`tabPurchase Invoice`
-		where
-		reverse_charge = "Y"
-		and docstatus = 1 {where_conditions} ;
-		""".format(where_conditions=conditions))
 	return frappe.db.sql("""
 		select sum(total)  from
 		`tabPurchase Invoice`
@@ -251,14 +209,7 @@ def get_reverse_charge_total(filters):
 		""".format(where_conditions=conditions), filters)[0][0] or 0
 
 def get_reverse_charge_tax(filters):
-	"""Returns the sum of the tax of each Purchase invoice made
-
-	Args:
-		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
-
-	Returns:
-		Float: sum of the tax of each Purchase invoice made
-	"""
+	"""Returns the sum of the tax of each Purchase invoice made."""
 	conditions = get_conditions_join(filters)
 	return frappe.db.sql("""
 		select sum(debit)  from
@@ -273,14 +224,7 @@ def get_reverse_charge_tax(filters):
 		""".format(where_conditions=conditions), filters)[0][0] or 0
 
 def get_conditions_join(filters):
-	"""The conditions to be used to filter data to calculate the total vat
-
-	Args:
-		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
-
-	Returns:
-		String: Concatenated list of conditions to be applied to calculate the total vat
-	"""
+	"""The conditions to be used to filter data to calculate the total vat."""
 	conditions = ""
 	for opts in (("company", " and `tabPurchase Invoice`.company=%(company)s"),
 		("from_date", " and `tabPurchase Invoice`.posting_date>=%(from_date)s"),
@@ -290,14 +234,7 @@ def get_conditions_join(filters):
 	return conditions
 
 def get_reverse_charge_recoverable_total(filters):
-	"""Returns the sum of the total of each Purchase invoice made with claimable reverse charge
-
-	Args:
-		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
-
-	Returns:
-		Float: sum of the total of each Purchase invoice made with claimable reverse charge
-	"""
+	"""Returns the sum of the total of each Purchase invoice made with claimable reverse charge."""
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select sum(total)  from
@@ -309,14 +246,7 @@ def get_reverse_charge_recoverable_total(filters):
 		""".format(where_conditions=conditions), filters)[0][0] or 0
 
 def get_reverse_charge_recoverable_tax(filters):
-	"""Returns the sum of the tax of each Purchase invoice made
-
-	Args:
-		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
-
-	Returns:
-		Float: sum of the tax of each Purchase invoice made
-	"""
+	"""Returns the sum of the tax of each Purchase invoice made."""
 	conditions = get_conditions_join(filters)
 	return frappe.db.sql("""
 		select sum(debit * `tabPurchase Invoice`.claimable_reverse_charge / 100)  from
@@ -332,14 +262,7 @@ def get_reverse_charge_recoverable_tax(filters):
 		""".format(where_conditions=conditions), filters)[0][0] or 0
 
 def get_standard_rated_expenses_total(filters):
-	"""Returns the sum of the total of each Purchase invoice made with claimable reverse charge
-
-	Args:
-		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
-
-	Returns:
-		Float: sum of the total of each Purchase invoice made with claimable reverse charge
-	"""
+	"""Returns the sum of the total of each Purchase invoice made with claimable reverse charge."""
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select sum(total)  from
@@ -350,14 +273,7 @@ def get_standard_rated_expenses_total(filters):
 		""".format(where_conditions=conditions), filters)[0][0] or 0
 
 def get_standard_rated_expenses_tax(filters):
-	"""Returns the sum of the tax of each Purchase invoice made
-
-	Args:
-		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
-
-	Returns:
-		Float: sum of the tax of each Purchase invoice made
-	"""
+	"""Returns the sum of the tax of each Purchase invoice made."""
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select sum(standard_rated_expenses)  from
@@ -368,14 +284,7 @@ def get_standard_rated_expenses_tax(filters):
 		""".format(where_conditions=conditions), filters)[0][0] or 0
 
 def get_tourist_tax_return_total(filters):
-	"""Returns the sum of the total of each Sales invoice with non zero tourist_tax_return
-
-	Args:
-		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
-
-	Returns:
-		Float: sum of the total of each Sales invoice with non zero tourist_tax_return
-	"""
+	"""Returns the sum of the total of each Sales invoice with non zero tourist_tax_return."""
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select sum(total)  from
@@ -386,14 +295,7 @@ def get_tourist_tax_return_total(filters):
 		""".format(where_conditions=conditions), filters)[0][0] or 0
 
 def get_tourist_tax_return_tax(filters):
-	"""Returns the sum of the tax of each Sales invoice with non zero tourist_tax_return
-
-	Args:
-		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
-
-	Returns:
-		Float: sum of the tax of each Sales invoice with non zero tourist_tax_return
-	"""
+	"""Returns the sum of the tax of each Sales invoice with non zero tourist_tax_return."""
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select sum(tourist_tax_return)  from
@@ -404,14 +306,7 @@ def get_tourist_tax_return_tax(filters):
 		""".format(where_conditions=conditions), filters)[0][0] or 0
 
 def get_zero_rated_total(filters):
-	"""Returns the sum of each Sales Invoice Item Amount which is zero rated
-
-	Args:
-		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
-
-	Returns:
-		Float: sum of each Sales Invoice Item Amount which is zero rated
-	"""
+	"""Returns the sum of each Sales Invoice Item Amount which is zero rated."""
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select sum(i.base_amount) as total from
@@ -421,14 +316,7 @@ def get_zero_rated_total(filters):
 		""".format(where_conditions=conditions), filters)[0][0] or 0
 
 def get_exempt_total(filters):
-	"""Returns the sum of each Sales Invoice Item Amount which is Vat Exempt
-
-	Args:
-		filters (Dict, optional): Dictionary consisting of the filters selected by the user. Defaults to None.
-
-	Returns:
-		Float: sum of each Sales Invoice Item Amount which is Vat Exempt
-	"""
+	"""Returns the sum of each Sales Invoice Item Amount which is Vat Exempt."""
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select sum(i.base_amount) as total from
