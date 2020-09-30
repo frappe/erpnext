@@ -21,7 +21,12 @@ frappe.ui.form.on('Inpatient Medication Order', {
 						label: __('Drug'),
 						fieldtype: 'Link',
 						options: 'Item',
-						reqd: 1
+						reqd: 1,
+						"get_query": function () {
+							return {
+								filters: {'is_stock_item': 1}
+							}
+						}
 					},
 					{
 						fieldname: 'dosage',
