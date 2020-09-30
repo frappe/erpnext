@@ -52,7 +52,7 @@ def get_tax_accounts(company):
 		)
 
 	if not tax_accounts_list and not frappe.flags.in_test:
-		frappe.throw(_(f'Please set Vat Accounts for Company: "{company}" in UAE VAT Setting'))
+		frappe.throw(_(f'Please set Vat Accounts for Company: "{company}" in UAE VAT Settings'))
 	for d in tax_accounts_list:
 		for key, name in d.items():
 			tax_accounts_dict[name] = name

@@ -7,7 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
-  "uae_vat_account"
+  "uae_vat_accounts"
  ],
  "fields": [
   {
@@ -20,19 +20,19 @@
    "unique": 1
   },
   {
-   "fieldname": "uae_vat_account",
+   "fieldname": "uae_vat_accounts",
    "fieldtype": "Table",
-   "label": "UAE VAT Account",
+   "label": "UAE VAT Accounts",
    "options": "UAE VAT Account",
    "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-09-28 12:19:11.493138",
+ "modified": "2020-09-30 20:08:18.764798",
  "modified_by": "Administrator",
  "module": "Regional",
- "name": "UAE VAT Setting",
+ "name": "UAE VAT Settings",
  "owner": "Administrator",
  "permissions": [
   {
