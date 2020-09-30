@@ -43,6 +43,7 @@
   {
    "allow_on_submit": 1,
    "columns": 2,
+   "default": "100",
    "fieldname": "allocated_percentage",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -84,7 +85,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:37:07.092260",
+ "modified": "2020-10-01 02:34:19.400605",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Team",
