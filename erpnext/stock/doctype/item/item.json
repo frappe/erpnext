@@ -19,7 +19,6 @@
   "item_group",
   "brand",
   "item_source",
-  "hs_code",
   "column_break0",
   "stock_uom",
   "alt_uom",
@@ -1083,13 +1082,6 @@
    "options": "Supplier"
   },
   {
-   "fieldname": "hs_code",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "HS Code",
-   "options": "HS Code"
-  },
-  {
    "allow_in_quick_entry": 1,
    "bold": 1,
    "fieldname": "alt_uom",
@@ -1158,7 +1150,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-10-01 04:30:57.092328",
+ "modified": "2020-10-01 04:42:57.963394",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

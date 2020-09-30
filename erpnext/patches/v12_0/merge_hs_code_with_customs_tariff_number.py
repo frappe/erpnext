@@ -1,0 +1,18 @@
+import frappe
+
+def execute():
+	if frappe.get_meta("Item").has_field("hs_code"):
+		frappe.db.sql("update `tabItem` set customs_tariff_number = hs_code")
+
+	frappe.reload_doc("stock", "doctype", "customs_tariff_number")
+
+	hs_codes = frappe.get_all("HS Code", fields=['name', 'description'])
+	for d in hs_codes:
+		if not frappe.db.exists("Customs Tariff Number", d.name):
+			doc = frappe.new_doc("Customs Tariff Number")
+			doc.description = d.description
+			doc.save()
+
+	frappe.db.sql("update `tabItem Tax` set parent = 'Customs Tariff Number' where parent = 'HS Code'")
+
+	frappe.delete_doc_if_exists("DocType", "HS Code")

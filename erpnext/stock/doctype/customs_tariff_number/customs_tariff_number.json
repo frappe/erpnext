@@ -7,7 +7,9 @@
  "engine": "InnoDB",
  "field_order": [
   "tariff_number",
-  "description"
+  "description",
+  "section_break_3",
+  "taxes"
  ],
  "fields": [
   {
@@ -24,9 +26,19 @@
    "in_list_view": 1,
    "label": "Description",
    "reqd": 1
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "taxes",
+   "fieldtype": "Table",
+   "label": "Taxes",
+   "options": "Item Tax"
   }
  ],
- "modified": "2020-03-03 15:41:09.183793",
+ "modified": "2020-10-01 04:40:05.656441",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Customs Tariff Number",
