@@ -471,9 +471,10 @@
   {
    "fetch_from": "item_code.item_group",
    "fieldname": "item_group",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Item Group"
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Item Group",
+   "options": "Item"
   },
   {
    "fieldname": "reference_purchase_receipt",
@@ -537,8 +538,8 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-09-04 12:12:35.668198",
- "modified_by": "Administrator",
+ "modified": "2020-09-30 14:08:33.917632",
+ "modified_by": "furqan.790@outlook.com",
  "module": "Stock",
  "name": "Stock Entry Detail",
  "owner": "Administrator",
