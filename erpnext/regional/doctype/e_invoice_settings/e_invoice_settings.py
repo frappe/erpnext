@@ -11,7 +11,7 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 
 class EInvoiceSettings(Document):
 	def validate(self):
-		mandatory_fields = ['client_id', 'client_secret', 'gstin', 'username', 'password', 'public_key']
+		mandatory_fields = ['client_id', 'client_secret', 'gstin', 'username', 'password', 'public_key_file']
 		for d in mandatory_fields:
 			if not self.get(d):
 				frappe.throw(_("{} is required").format(frappe.unscrub(d)), title=_("Missing Values"))
