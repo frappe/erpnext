@@ -166,7 +166,8 @@
    "description": "Any other remarks, noteworthy effort that should go in the records.",
    "fieldname": "remarks",
    "fieldtype": "Text",
-   "label": "Remarks"
+   "label": "Remarks",
+   "no_copy": 1
   },
   {
    "depends_on": "kra_template",
@@ -206,7 +207,7 @@
  "icon": "fa fa-thumbs-up",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-03-03 16:14:02.475563",
+ "modified": "2020-09-29 14:45:42.665909",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Appraisal",

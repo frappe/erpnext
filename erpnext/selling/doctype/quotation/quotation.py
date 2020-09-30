@@ -155,6 +155,9 @@ def _make_sales_order(source_name, target_doc=None, ignore_permissions=False):
 				"doctype": "Sales Order",
 				"validation": {
 					"docstatus": ["=", 1]
+				},
+				"field_map": {
+					"remarks": "remarks"
 				}
 			},
 			"Quotation Item": {
@@ -215,6 +218,9 @@ def _make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 				"doctype": "Sales Invoice",
 				"validation": {
 					"docstatus": ["=", 1]
+				},
+				"field_map": {
+					"remarks": "remarks"
 				}
 			},
 			"Quotation Item": {

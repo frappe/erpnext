@@ -96,11 +96,12 @@
    "fieldname": "user_remark",
    "fieldtype": "Small Text",
    "in_global_search": 1,
-   "label": "User Remark"
+   "label": "User Remark",
+   "no_copy": 1
   }
  ],
  "istable": 1,
- "modified": "2020-03-13 12:07:19.362539",
+ "modified": "2020-09-29 14:45:40.075712",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Reference",

@@ -473,6 +473,9 @@ def get_list_context(context=None):
 def make_sales_invoice(source_name, target_doc=None):
 	doc = frappe.get_doc('Delivery Note', source_name)
 
+	def get_pending_qty(source_doc):
+		return source_doc.qty - source_doc.billed_qty - source_doc.returned_qty
+
 	def set_missing_values(source, target):
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
@@ -494,7 +497,7 @@ def make_sales_invoice(source_name, target_doc=None):
 			target.update(get_fetch_values("Sales Invoice", 'company_address', target.company_address))
 
 	def update_item(source_doc, target_doc, source_parent):
-		target_doc.qty = source_doc.qty - source_doc.billed_qty - source_doc.returned_qty
+		target_doc.qty = get_pending_qty(source_doc)
 
 		if source_doc.serial_no and source_parent.per_billed > 0:
 			target_doc.serial_no = get_delivery_note_serial_no(source_doc.item_code,
@@ -504,7 +507,8 @@ def make_sales_invoice(source_name, target_doc=None):
 		"Delivery Note": {
 			"doctype": "Sales Invoice",
 			"field_map": {
-				"is_return": "is_return"
+				"is_return": "is_return",
+				"remarks": "remarks"
 			},
 			"validation": {
 				"docstatus": ["=", 1]
@@ -521,7 +525,7 @@ def make_sales_invoice(source_name, target_doc=None):
 				"cost_center": "cost_center"
 			},
 			"postprocess": update_item,
-			"filter": lambda d: d.qty <= 0 if not doc.get("is_return") else d.qty >= 0
+			"filter": lambda d: get_pending_qty(d) <= 0 if not doc.get("is_return") else get_pending_qty(d) > 0
 		},
 		"Sales Taxes and Charges": {
 			"doctype": "Sales Taxes and Charges",

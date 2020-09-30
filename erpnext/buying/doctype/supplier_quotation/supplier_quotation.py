@@ -121,6 +121,9 @@ def make_purchase_order(source_name, target_doc=None):
 			"doctype": "Purchase Order",
 			"validation": {
 				"docstatus": ["=", 1],
+			},
+			"field_map": {
+				"remarks": "remarks",
 			}
 		},
 		"Supplier Quotation Item": {
@@ -148,6 +151,7 @@ def make_quotation(source_name, target_doc=None):
 			"doctype": "Quotation",
 			"field_map": {
 				"name": "supplier_quotation",
+				"remarks": "remarks",
 			}
 		},
 		"Supplier Quotation Item": {

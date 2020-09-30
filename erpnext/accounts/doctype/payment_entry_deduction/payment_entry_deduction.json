@@ -43,11 +43,12 @@
    "fieldtype": "Small Text",
    "in_global_search": 1,
    "in_list_view": 1,
-   "label": "User Remark"
+   "label": "User Remark",
+   "no_copy": 1
   }
  ],
  "istable": 1,
- "modified": "2020-03-03 15:36:38.650424",
+ "modified": "2020-09-29 14:45:41.644271",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry Deduction",
