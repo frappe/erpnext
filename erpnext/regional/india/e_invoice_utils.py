@@ -15,7 +15,7 @@ from Crypto.Util.Padding import pad, unpad
 from frappe.model.document import Document
 from frappe import _, get_module_path, scrub
 from erpnext.regional.india.utils import get_gst_accounts
-from frappe.utils.data import get_datetime, cstr, cint, format_date
+from frappe.utils.data import get_datetime, cstr, cint, format_date, flt
 from frappe.integrations.utils import make_post_request, make_get_request
 
 def validate_einvoice_fields(doc):
@@ -289,6 +289,9 @@ def get_item_list(invoice):
 		item.is_service_item = "N" if frappe.db.get_value("Item", d.item_code, "is_stock_item") else "Y"
 		item.batch_expiry_date = frappe.db.get_value("Batch", d.batch_no, "expiry_date") if d.batch_no else None
 		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
+		item.unit_rate = item.base_price_list_rate if item.discount_amount else item.base_rate
+		item.total_amount = item.unit_rate * item.qty
+		item.discount_amount = item.discount_amount * item.qty
 		item.tax_rate = 0
 		item.igst_amount = 0
 		item.cgst_amount = 0
@@ -314,6 +317,8 @@ def get_item_list(invoice):
 		item.total_value = item.base_amount + item.igst_amount + item.sgst_amount + item.cgst_amount + item.cess_amount
 		e_inv_item = item_schema.format(item=item)
 		item_list.append(e_inv_item)
+
+		print(e_inv_item)
 
 	return ", ".join(item_list)
 
@@ -405,28 +410,25 @@ def make_e_invoice(invoice):
 	)
 	e_invoice = json.loads(e_invoice)
 
-	run_e_invoice_validations(validations, e_invoice)
+	error_msgs = run_e_invoice_validations(validations, e_invoice, [])
+	if error_msgs:
+		frappe.throw(_("{}").format("<br>".join(error_msgs)), title=_("E Invoice Validation"))
 
 	return json.dumps(e_invoice)
 
-def run_e_invoice_validations(validations, e_invoice):
+def run_e_invoice_validations(validations, e_invoice, error_msgs=[]):
 	type_map = {
 		"string": cstr,
 		"number": cint,
 		"object": dict,
 		"array": list
 	}
-	# validate root mandatory keys
-	mandatory_fields = validations.get('required')
-	if mandatory_fields and not set(mandatory_fields).issubset(set(e_invoice.keys())):
-		print("Mandatory condition failed")
 	
 	for field, value in validations.items():
 		if isinstance(value, list): value = value[0]
 
 		invoice_value = e_invoice.get(field)
 		if not invoice_value:
-			print(field, "value undefined")
 			continue
 
 		should_be_of_type = type_map[value.get('type').lower()]
@@ -435,28 +437,35 @@ def run_e_invoice_validations(validations, e_invoice):
 
 			if isinstance(invoice_value, list):
 				for d in invoice_value:
-					run_e_invoice_validations(properties, d)
+					run_e_invoice_validations(properties, d, error_msgs)
 			else:
-				run_e_invoice_validations(properties, invoice_value)
+				run_e_invoice_validations(properties, invoice_value, error_msgs)
+				# remove keys with empty dicts
 				if not invoice_value:
 					e_invoice.pop(field, None)
 			continue
 		
 		if invoice_value == "None":
+			# remove keys with empty values
 			e_invoice.pop(field, None)
 			continue
-
-		e_invoice[field] = should_be_of_type(invoice_value) if e_invoice[field] else e_invoice[field]
+		
+		# convert to int or str
+		e_invoice[field] = should_be_of_type(invoice_value)
 		
 		should_be_of_len = value.get('maxLength')
-		should_be_greater_than = value.get('minimum')
-		should_be_less_than = value.get('maximum')
+		should_be_greater_than = flt(value.get('minimum'))
+		should_be_less_than = flt(value.get('maximum'))
 		pattern_str = value.get('pattern')
 		pattern = re.compile(pattern_str or "")
 
-		if should_be_of_type == 'string' and not len(invoice_value) <= should_be_of_len:
-			print("Max Length Exceeded", field, invoice_value)
-		if should_be_of_type == 'number' and not (should_be_greater_than <= invoice_value <= should_be_of_len):
-			print("Value too large", field, invoice_value)
+		field_label = value.get("label") or field
+
+		if value.get('type').lower() == 'string' and len(invoice_value) > should_be_of_len:
+			error_msgs.append("{} should not exceed {} characters".format(field_label, should_be_of_len))
+		if value.get('type').lower() == 'number' and not (flt(invoice_value) <= should_be_less_than):
+			error_msgs.append("{} should be less than {}".format(field_label, should_be_less_than))
 		if pattern_str and not pattern.match(invoice_value):
-			print("Pattern Mismatch", field, invoice_value)
+			error_msgs.append("{} should match {}".format(field_label, pattern_str))
+	
+	return error_msgs
