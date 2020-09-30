@@ -4,7 +4,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 			const einvoicing_enabled = frappe.db.get_value("E Invoice Settings", "E Invoice Settings", "enable");
 			if (!einvoicing_enabled) return;
 
-			if (frm.doc.docstatus == 0 && !frm.doc.irn) {
+			if (frm.doc.docstatus == 0 && !frm.doc.irn && !frm.doc.__unsaved) {
 				frm.add_custom_button(
 					"Generate IRN",
 					() => {
@@ -30,7 +30,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 							title: __('Cancel IRN'),
 							fields: [
 								{ "label" : "Reason", "fieldname": "reason", "fieldtype": "Select", "reqd": 1, "default": "1-Duplicate",
-									"options": ["1-Duplicate", "2-Data entry mistake", "3-Order Cancelled", "4-Other"] },
+									"options": ["1-Duplicate", "2-Data Entry Error", "3-Order Cancelled", "4-Other"] },
 								{ "label": "Remark", "fieldname": "remark", "fieldtype": "Data", "reqd": 1 }
 							],
 							primary_action: function() {
