@@ -76,7 +76,7 @@
    "description": "If checked, the tax amount will be considered as already included in the Print Rate / Print Amount",
    "fieldname": "included_in_print_rate",
    "fieldtype": "Check",
-   "label": "Is this Tax included in Basic Rate?",
+   "label": "Inclusive",
    "report_hide": 1
   },
   {
@@ -228,8 +228,8 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-09-30 19:05:05.242309",
- "modified_by": "furqan.790@outlook.com",
+ "modified": "2020-10-01 02:46:21.936581",
+ "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",
  "owner": "Administrator",
