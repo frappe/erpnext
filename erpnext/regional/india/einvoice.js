@@ -43,12 +43,10 @@ erpnext.setup_einvoice_actions = (doctype) => {
 									method: 'erpnext.regional.india.e_invoice_utils.cancel_irn',
 									args: { irn: frm.doc.irn, reason: data.reason.split('-')[0], remark: data.remark },
 									freeze: true,
-									callback: (res) => {
-										if (res.message['Status'] == 1) {
-											frm.set_value('irn_cancelled', 1);
-											frm.save_or_update();
-										}
-										d.hide();
+									callback: () => {
+										frm.set_value('irn_cancelled', 1);
+										frm.save("Update");
+										d.hide()
 									},
 									error: () => d.hide()
 								})
