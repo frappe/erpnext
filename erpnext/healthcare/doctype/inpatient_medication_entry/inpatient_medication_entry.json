@@ -41,6 +41,7 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
@@ -52,6 +53,8 @@
   {
    "fieldname": "posting_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Posting Date",
    "reqd": 1
   },
@@ -133,7 +136,8 @@
    "fieldname": "medication_orders",
    "fieldtype": "Table",
    "label": "Inpatient Medication Orders",
-   "options": "Inpatient Medication Entry Detail"
+   "options": "Inpatient Medication Entry Detail",
+   "reqd": 1
   },
   {
    "depends_on": "eval:doc.docstatus!==1",
@@ -173,7 +177,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-30 14:17:22.834558",
+ "modified": "2020-09-30 19:55:33.151332",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Medication Entry",
