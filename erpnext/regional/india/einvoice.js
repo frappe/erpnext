@@ -45,7 +45,8 @@ erpnext.setup_einvoice_actions = (doctype) => {
 											frm.save_or_update();
 										}
 										d.hide();
-									}
+									},
+									error: () => d.hide()
 								})
 							},
 							primary_action_label: __('Submit')
