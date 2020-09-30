@@ -31,7 +31,7 @@ def update_itemised_tax_data(doc):
 		row.total_amount = flt((row.net_amount + row.tax_amount), row.precision("total_amount"))
 
 def get_account_currency(account):
-	"""Helper function to get account currency"""
+	"""Helper function to get account currency."""
 	if not account:
 		return
 	def generator():
@@ -44,14 +44,7 @@ def get_account_currency(account):
 	return frappe.local_cache("account_currency", account, generator)
 
 def get_tax_accounts(company):
-	"""Get the list of tax accounts for a specific company
-
-	Args:
-		company (String): Current Company set as default
-
-	Returns:
-		tax_accounts: List of Tax Accounts for the company
-	"""
+	"""Get the list of tax accounts for a specific company."""
 	tax_accounts_dict = frappe._dict()
 	tax_accounts_list = frappe.get_all("UAE VAT Account",
 		filters={"parent": company},
@@ -67,11 +60,7 @@ def get_tax_accounts(company):
 	return tax_accounts_dict
 
 def update_grand_total_for_rcm(doc, method):
-	"""If the Reverse Charge is Applicable subtract the tax amount from the grand total and update in the form
-
-	Args:
-		doc (Document): The document for the current Purchase Invoice
-	"""
+	"""If the Reverse Charge is Applicable subtract the tax amount from the grand total and update in the form."""
 	country = frappe.get_cached_value('Company', doc.company, 'country')
 
 	if country != 'United Arab Emirates':
@@ -102,14 +91,7 @@ def update_grand_total_for_rcm(doc, method):
 		update_totals(vat_tax, base_vat_tax, doc)
 
 def update_totals(vat_tax, base_vat_tax, doc):
-	"""Update the grand total values in the form
-
-	Args:
-		vat_tax (float): Vat Tax to be subtracted
-		base_vat_tax (float): Base Vat Tax to be subtracted
-		doc (Document):  The document for the current Purchase Invoice
-	"""
-
+	"""Update the grand total values in the form."""
 	doc.base_grand_total -= base_vat_tax
 	doc.grand_total -= vat_tax
 
@@ -130,16 +112,7 @@ def update_totals(vat_tax, base_vat_tax, doc):
 	doc.set_payment_schedule()
 
 def make_regional_gl_entries(gl_entries, doc):
-	"""This method is hooked to the make_regional_gl_entries in Purchase Invoice.
-	It appends the region specific general ledger entries to the list of GL Entries.
-
-	Args:
-		gl_entries (List): List of GL entries to be made
-		doc (Document): The document for the current Purchase Invoice
-
-	Returns:
-		List: Updates list of GL Entries
-	"""
+	"""Hooked to make_regional_gl_entries in Purchase Invoice.It appends the region specific general ledger entries to the list of GL Entries."""
 	country = frappe.get_cached_value('Company', doc.company, 'country')
 
 	if country != 'United Arab Emirates':
@@ -170,7 +143,7 @@ def make_regional_gl_entries(gl_entries, doc):
 	return gl_entries
 
 def validate_returns(doc, method):
-	print("validate_returns")
+	"""Sum of Tourist Returns and Standard Rated Expenses should be less than Total Tax."""
 	country = frappe.get_cached_value('Company', doc.company, 'country')
 
 	if country != 'United Arab Emirates':
