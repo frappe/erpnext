@@ -266,6 +266,7 @@ def repost_all_stock_vouchers():
 
 	frappe.flags.ignored_closed_or_disabled = 1
 	frappe.flags.do_not_update_reserved_qty = 1
+	frappe.flags.skip_duplicate_serial_no_validation = 1
 	frappe.db.auto_commit_on_many_writes = 1
 
 	print("Enabling Allow Negative Stock")

@@ -340,6 +340,9 @@ def validate_so_serial_no(sr, sales_order,):
 		be delivered""").format(sales_order, sr.item_code, sr.name))
 
 def has_duplicate_serial_no(sn, sle):
+	if frappe.flags.skip_duplicate_serial_no_validation:
+		return False
+
 	if (sn.warehouse and not sle.skip_serial_no_validaiton
 		and sle.voucher_type != 'Stock Reconciliation'):
 		return True
