@@ -378,7 +378,8 @@ def get_rfq_containing_supplier(doctype, txt, searchfield, start, page_len, filt
 			and rfq.company = '{1}'
 			{2}
 		order by rfq.transaction_date ASC
-		limit {3} offset {4} """ \
-		.format(filters.get("supplier"), filters.get("company"), conditions, page_len, start), as_dict=1)
+		limit %(page_len)s offset %(start)s """ \
+		.format(filters.get("supplier"), filters.get("company"), conditions),
+			{"page_len": page_len, "start": start}, as_dict=1)
 
 	return rfq_data
