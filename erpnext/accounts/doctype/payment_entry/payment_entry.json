@@ -76,11 +76,13 @@
   "reference_date",
   "clearance_date",
   "section_break_12",
-  "status",
-  "remarks",
-  "column_break_16",
   "letter_head",
+  "column_break_16",
   "print_heading",
+  "status_section",
+  "status",
+  "column_break_77",
+  "remarks",
   "subscription_section",
   "auto_repeat",
   "title"
@@ -644,11 +646,21 @@
   {
    "fieldname": "column_break_47",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "fieldname": "column_break_77",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2020-09-30 17:06:47.472311",
- "modified_by": "furqan.790@outlook.com",
+ "modified": "2020-10-01 05:40:42.337437",
+ "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
  "owner": "Administrator",

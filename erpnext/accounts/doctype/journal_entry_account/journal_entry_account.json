@@ -8,15 +8,16 @@
  "field_order": [
   "account",
   "account_type",
+  "bank_account",
   "balance",
   "col_break1",
-  "bank_account",
   "party_type",
   "party",
   "party_balance",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+  "project",
   "currency_section",
   "account_currency",
   "column_break_10",
@@ -30,13 +31,11 @@
   "reference",
   "reference_type",
   "reference_name",
-  "clearance_date",
-  "reference_due_date",
-  "project",
   "col_break3",
   "cheque_no",
   "cheque_date",
-  "is_advance",
+  "clearance_date",
+  "column_break_30",
   "user_remark",
   "against_account"
  ],
@@ -207,7 +206,7 @@
    "fieldname": "reference_type",
    "fieldtype": "Select",
    "in_standard_filter": 1,
-   "label": "Reference Type",
+   "label": "Against Document Type",
    "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting"
   },
   {
@@ -215,14 +214,8 @@
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Reference Name",
+   "label": "Against Document No",
    "options": "reference_type"
-  },
-  {
-   "depends_on": "eval:doc.reference_type&&!in_list(doc.reference_type, ['Expense Claim', 'Asset', 'Employee Loan', 'Employee Advance'])",
-   "fieldname": "reference_due_date",
-   "fieldtype": "Select",
-   "label": "Reference Due Date"
   },
   {
    "fieldname": "project",
@@ -234,16 +227,6 @@
   {
    "fieldname": "col_break3",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "is_advance",
-   "fieldtype": "Select",
-   "label": "Is Advance",
-   "no_copy": 1,
-   "oldfieldname": "is_advance",
-   "oldfieldtype": "Select",
-   "options": "No\nYes",
-   "print_hide": 1
   },
   {
    "fieldname": "user_remark",
@@ -302,11 +285,15 @@
    "label": "Reference Date",
    "no_copy": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "column_break_30",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-01 01:41:36.087510",
+ "modified": "2020-10-01 05:54:42.746562",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
