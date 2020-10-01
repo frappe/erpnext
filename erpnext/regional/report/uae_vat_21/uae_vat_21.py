@@ -17,27 +17,29 @@ def get_columns():
 	return [
 		{
 			"fieldname": "no",
-			"label": "No",
+			"label": _("No"),
 			"fieldtype": "Data",
 			"width": 50
 		},
 		{
 			"fieldname": "legend",
-			"label": "Legend",
+			"label": _("Legend"),
 			"fieldtype": "Data",
 			"width": 300
 		},
 		{
 			"fieldname": "amount",
-			"label": "Amount (AED)",
+			"label": _("Amount (AED)"),
 			"fieldtype": "Currency",
-			"width": 100
+			"width": 125,
+			"options": "currency"
 		},
 		{
 			"fieldname": "vat_amount",
-			"label": "VAT Amount (AED)",
+			"label": _("VAT Amount (AED)"),
 			"fieldtype": "Currency",
-			"width": 100
+			"width": 150,
+			"options": "currency"
 		}
 	]
 
@@ -46,7 +48,7 @@ def get_data(filters = None):
 	data = []
 	data.append({
 		"no": '',
-		"legend": 'VAT on Sales and All Other Outputs',
+		"legend": _('VAT on Sales and All Other Outputs'),
 		"amount": '',
 		"vat_amount": ''
 		})
@@ -64,14 +66,14 @@ def get_data(filters = None):
 
 	for d, emirate in enumerate(emirates, 97):
 		if emirate in amounts_by_emirate:
-			amounts_by_emirate[emirate]["no"] = f'1{chr(d)}'
-			amounts_by_emirate[emirate]["legend"] = f'Standard rated supplies in {emirate}'
+			amounts_by_emirate[emirate]["no"] = _(f'1{chr(d)}')
+			amounts_by_emirate[emirate]["legend"] = _(f'Standard rated supplies in {emirate}')
 			data.append(amounts_by_emirate[emirate])
 		else:
 			data.append(
 				{
-					"no": f'1{chr(d)}',
-					"legend": f'Standard rated supplies in {emirate}',
+					"no": _(f'1{chr(d)}'),
+					"legend": _(f'Standard rated supplies in {emirate}'),
 					"amount": 0,
 					"vat_amount": 0
 				}
@@ -79,8 +81,8 @@ def get_data(filters = None):
 
 	data.append(
 		{
-			"no": '2',
-			"legend": 'Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme',
+			"no": _('2'),
+			"legend": _('Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme'),
 			"amount": (-1) * get_tourist_tax_return_total(filters),
 			"vat_amount": (-1) * get_tourist_tax_return_tax(filters)
 		}
@@ -88,8 +90,8 @@ def get_data(filters = None):
 
 	data.append(
 		{
-			"no": '3',
-			"legend": 'Supplies subject to the reverse charge provision',
+			"no": _('3'),
+			"legend": _('Supplies subject to the reverse charge provision'),
 			"amount": get_reverse_charge_total(filters),
 			"vat_amount": get_reverse_charge_tax(filters)
 		}
@@ -97,8 +99,8 @@ def get_data(filters = None):
 
 	data.append(
 		{
-			"no": '4',
-			"legend": 'Zero Rated',
+			"no": _('4'),
+			"legend": _('Zero Rated'),
 			"amount": get_zero_rated_total(filters),
 			"vat_amount": "-"
 		}
@@ -106,16 +108,23 @@ def get_data(filters = None):
 
 	data.append(
 		{
-			"no": '5',
-			"legend": 'Exempt Supplies',
+			"no": _('5'),
+			"legend": _('Exempt Supplies'),
 			"amount": get_exempt_total(filters),
 			"vat_amount": "-"
 		}
 	)
 
 	data.append({
-		"no": '',
-		"legend": 'VAT on Expenses and All Other Inputs',
+		"no": _(''),
+		"legend": _(''),
+		"amount": '',
+		"vat_amount": ''
+		})
+
+	data.append({
+		"no": _(''),
+		"legend": _('VAT on Expenses and All Other Inputs'),
 		"amount": '',
 		"vat_amount": ''
 		})
@@ -123,7 +132,7 @@ def get_data(filters = None):
 	data.append(
 		{
 			"no": '9',
-			"legend": 'Standard Rated Expenses',
+			"legend": _('Standard Rated Expenses'),
 			"amount": get_standard_rated_expenses_total(filters),
 			"vat_amount": get_standard_rated_expenses_tax(filters)
 		}
@@ -131,8 +140,8 @@ def get_data(filters = None):
 
 	data.append(
 		{
-			"no": '10',
-			"legend": 'Supplies subject to the reverse charge provision',
+			"no": _('10'),
+			"legend": _('Supplies subject to the reverse charge provision'),
 			"amount": get_reverse_charge_recoverable_total(filters),
 			"vat_amount": get_reverse_charge_recoverable_tax(filters)
 		}
