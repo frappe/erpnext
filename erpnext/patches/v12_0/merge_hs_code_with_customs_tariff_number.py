@@ -1,6 +1,9 @@
 import frappe
 
 def execute():
+	if not frappe.db.exists("DocType", "HS Code"):
+		return
+
 	if frappe.get_meta("Item").has_field("hs_code"):
 		frappe.db.sql("update `tabItem` set customs_tariff_number = hs_code")
 
