@@ -785,7 +785,7 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_purchase_order_for_default_supplier(source_name, for_supplier=None, selected_items=[], target_doc=None):
+def make_purchase_order_for_default_supplier(source_name, selected_items=[], target_doc=None):
 	if isinstance(selected_items, string_types):
 		selected_items = json.loads(selected_items)
 
@@ -826,14 +826,11 @@ def make_purchase_order_for_default_supplier(source_name, for_supplier=None, sel
 		target.stock_qty = (flt(source.stock_qty) - flt(source.ordered_qty))
 		target.project = source_parent.project
 
-	suppliers =[]
-	if for_supplier:
-		suppliers.append(for_supplier)
-	else:
-		sales_order = frappe.get_doc("Sales Order", source_name)
-		for item in sales_order.items:
-			if item.supplier and item.supplier not in suppliers:
-				suppliers.append(item.supplier)
+	suppliers = [item.get('supplier') for item in selected_items if item.get('supplier') and item.get('supplier')]
+	suppliers = list(set(suppliers))
+
+	items_to_map = [item.get('item_code') for item in selected_items if item.get('item_code') and item.get('item_code')]
+	items_to_map = list(set(items_to_map))
 
 	if not suppliers:
 		frappe.throw(_("Please set a Supplier against the Items to be considered in the Purchase Order."))
@@ -873,24 +870,26 @@ def make_purchase_order_for_default_supplier(source_name, for_supplier=None, sel
 						"item_tax_template"
 					],
 					"postprocess": update_item,
-					"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.supplier == supplier and doc.item_code in selected_items
+					"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.supplier == supplier and doc.item_code in items_to_map
 				}
 			}, target_doc, set_missing_values)
-			if not for_supplier:
-				doc.insert()
+
+			doc.insert()
 		else:
 			suppliers =[]
 	if suppliers:
-		if not for_supplier:
-			frappe.db.commit()
+		frappe.db.commit()
 		return doc
 	else:
 		frappe.msgprint(_("Purchase Order already created for all Sales Order items"))
 
 @frappe.whitelist()
-def make_purchase_order(source_name, for_supplier=None, selected_items=[], target_doc=None):
+def make_purchase_order(source_name, selected_items=[], target_doc=None):
 	if isinstance(selected_items, string_types):
 		selected_items = json.loads(selected_items)
+
+	items_to_map = [item.get('item_code') for item in selected_items if item.get('item_code') and item.get('item_code')]
+	items_to_map = list(set(items_to_map))
 
 	def set_missing_values(source, target):
 		target.supplier = ""
@@ -943,42 +942,10 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 				"supplier"
 			],
 			"postprocess": update_item,
-			"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.item_code in selected_items
+			"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.item_code in items_to_map
 		}
 	}, target_doc, set_missing_values)
 	return doc
-
-@frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def get_supplier(doctype, txt, searchfield, start, page_len, filters):
-	supp_master_name = frappe.defaults.get_user_default("supp_master_name")
-	if supp_master_name == "Supplier Name":
-		fields = ["name", "supplier_group"]
-	else:
-		fields = ["name", "supplier_name", "supplier_group"]
-	fields = ", ".join(fields)
-
-	return frappe.db.sql("""select {field} from `tabSupplier`
-		where docstatus < 2
-			and ({key} like %(txt)s
-				or supplier_name like %(txt)s)
-			and name in (select supplier from `tabSales Order Item` where parent = %(parent)s)
-			and name not in (select supplier from `tabPurchase Order` po inner join `tabPurchase Order Item` poi
-			     on po.name=poi.parent where po.docstatus<2 and poi.sales_order=%(parent)s)
-		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			if(locate(%(_txt)s, supplier_name), locate(%(_txt)s, supplier_name), 99999),
-			name, supplier_name
-		limit %(start)s, %(page_len)s """.format(**{
-			'field': fields,
-			'key': frappe.db.escape(searchfield)
-		}), {
-			'txt': "%%%s%%" % txt,
-			'_txt': txt.replace("%", ""),
-			'start': start,
-			'page_len': page_len,
-			'parent': filters.get('parent')
-		})
 
 @frappe.whitelist()
 def make_work_orders(items, sales_order, company, project=None):

@@ -573,18 +573,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					"default": 0
 				},
 				{
-					"fieldtype": "Link", "label": __("Default Supplier (optional)"),
-					"fieldname": "supplier", "options":"Supplier",
-					"description": __("If populated, Purchase Order will be made only for items belonging to selected Supplier. Leave the field empty to make Purchase Orders for all Suppliers."),
-					"get_query": function () {
-						return {
-							query:"erpnext.selling.doctype.sales_order.sales_order.get_supplier",
-							filters: {'parent': me.frm.doc.name}
-						}
-					},
-					"depends_on": "eval:doc.against_default_supplier==1"
-				},
-				{
 					"fieldtype": "Section Break",
 					"label": "",
 					"fieldname": "sec_break_dialog",
@@ -642,10 +630,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				if(selected_items.length == 0) {
 					frappe.throw({message: 'Please select Items from the Table', title: __('Items Required'), indicator:'blue'})
 				}
-				let selected_items_list = []
-				for(let i in selected_items){
-					selected_items_list.push(selected_items[i].item_code)
-				}
+
 				dialog.hide();
 
 				var method = args.against_default_supplier ? "make_purchase_order_for_default_supplier" : "make_purchase_order"
@@ -654,13 +639,12 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					method: "erpnext.selling.doctype.sales_order.sales_order." + method,
 					args: {
 						"source_name": me.frm.doc.name,
-						"for_supplier": args.supplier,
-						"selected_items": selected_items_list
+						"selected_items": selected_items
 					},
 					freeze: true,
 					callback: function(r) {
 						if(!r.exc) {
-							if (!args.against_default_supplier || args.supplier) {
+							if (!args.against_default_supplier) {
 								frappe.model.sync(r.message);
 								frappe.set_route("Form", r.message.doctype, r.message.name);
 							}
