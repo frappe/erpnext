@@ -31,26 +31,42 @@ frappe.ui.form.on("Purchase Order", {
 	},
 
 	onload: function(frm) {
-		set_schedule_date(frm);
 		if (!frm.doc.transaction_date){
 			frm.set_value('transaction_date', frappe.datetime.get_today())
+		}
+
+		if (frm.doc.__islocal) {
+			frm.events.schedule_date(frm);
 		}
 
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
+	},
+
+	schedule_date: function (frm) {
+		if (frm.doc.schedule_date) {
+			$.each(frm.doc.items || [], function (i, d) {
+				d.schedule_date = frm.doc.schedule_date;
+			});
+			refresh_field("items");
+		}
 	}
 });
 
 frappe.ui.form.on("Purchase Order Item", {
-	schedule_date: function(frm, cdt, cdn) {
+	item_code: function(frm,cdt,cdn) {
 		var row = locals[cdt][cdn];
-		if (row.schedule_date) {
-			if(!frm.doc.schedule_date) {
-				erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "schedule_date");
-			} else {
-				set_schedule_date(frm);
-			}
+		if (frm.doc.schedule_date) {
+			row.schedule_date = frm.doc.schedule_date;
+			refresh_field("schedule_date", cdn, "items");
+		} else {
+			frm.script_manager.copy_from_first_row("items", row, ["schedule_date"]);
+		}
+	},
+	schedule_date: function(frm, cdt, cdn) {
+		if(!frm.doc.schedule_date) {
+			erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "schedule_date");
 		}
 	}
 });
@@ -449,16 +465,6 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		this.get_terms();
 	},
 
-	items_add: function(doc, cdt, cdn) {
-		var row = frappe.get_doc(cdt, cdn);
-		if(doc.schedule_date) {
-			row.schedule_date = doc.schedule_date;
-			refresh_field("schedule_date", cdn, "items");
-		} else {
-			this.frm.script_manager.copy_from_first_row("items", row, ["schedule_date"]);
-		}
-	},
-
 	unhold_purchase_order: function(){
 		cur_frm.cscript.update_status("Resume", "Draft")
 	},
@@ -507,14 +513,6 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	delivered_by_supplier: function(){
 		cur_frm.cscript.update_status('Deliver', 'Delivered')
 	},
-
-	items_on_form_rendered: function() {
-		set_schedule_date(this.frm);
-	},
-
-	schedule_date: function() {
-		set_schedule_date(this.frm);
-	}
 });
 
 // for backward compatibility: combine new and previous states
