@@ -262,6 +262,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:!doc.docstatus==1",
    "fieldname": "preview",
    "fieldtype": "Button",
    "label": "Preview Email"
@@ -276,7 +277,7 @@
  "icon": "fa fa-shopping-cart",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-28 17:37:10.313350",
+ "modified": "2020-10-01 14:54:50.888729",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",
