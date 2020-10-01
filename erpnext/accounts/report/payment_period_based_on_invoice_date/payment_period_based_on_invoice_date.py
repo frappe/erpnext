@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from erpnext.accounts.report.accounts_receivable.accounts_receivable import ReceivablePayableReport
+from erpnext.accounts.report.accounts_receivable.accounts_receivable import get_ageing_data
 from frappe.utils import getdate, flt
 
 
@@ -36,7 +36,11 @@ def execute(filters=None):
 		})
 
 		if d.against_voucher:
-			ReceivablePayableReport(filters).get_ageing_data(invoice.posting_date, d)
+			age, outstanding_range = get_ageing_data([30, 60, 90, 120], d.posting_date, invoice.posting_date,
+				payment_amount)
+			for i, age_range_value in enumerate(outstanding_range):
+				d["range{0}".format(i + 1)] = age_range_value
+				d["age"] = age
 
 		row = [
 			d.voucher_type, d.voucher_no, d.party_type, d.party, d.posting_date, d.against_voucher,
@@ -63,9 +67,9 @@ def get_columns(filters):
 		_("Payment Entry") + ":Dynamic Link/"+_("Payment Document")+":140",
 		_("Party Type") + "::100",
 		_("Party") + ":Dynamic Link/Party Type:140",
-		_("Posting Date") + ":Date:100",
+		_("Payment Date") + ":Date:100",
 		_("Invoice") + (":Link/Purchase Invoice:130" if filters.get("payment_type") == _("Outgoing") else ":Link/Sales Invoice:130"),
-		_("Invoice Posting Date") + ":Date:130",
+		_("Invoice Date") + ":Date:130",
 		_("Payment Due Date") + ":Date:130",
 		_("Debit") + ":Currency:120",
 		_("Credit") + ":Currency:120",
