@@ -123,16 +123,14 @@
   "column_break_115",
   "returned_qty",
   "installed_qty",
-  "accounting_details_section",
+  "accounting_dimensions_section",
   "expense_account",
   "allow_zero_valuation_rate",
-  "column_break_71",
-  "item_tax_template",
   "item_tax_rate",
   "item_tax_detail",
-  "accounting_dimensions_section",
-  "cost_center",
   "dimension_col_break",
+  "cost_center",
+  "item_tax_template",
   "reason_for_return_section_break",
   "reason_for_return",
   "section_break_72",
@@ -727,11 +725,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "accounting_details_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Details"
-  },
-  {
    "fieldname": "section_break_72",
    "fieldtype": "Section Break"
   },
@@ -742,14 +735,10 @@
    "label": "Image"
   },
   {
-   "fieldname": "column_break_71",
-   "fieldtype": "Column Break"
-  },
-  {
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
+   "label": "Accounting Details"
   },
   {
    "fieldname": "dimension_col_break",
@@ -1171,7 +1160,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-01 04:23:04.197674",
+ "modified": "2020-10-01 04:52:35.442031",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

@@ -12,22 +12,26 @@
   "stock_entry_type",
   "outgoing_stock_entry",
   "purpose",
+  "from_bom",
   "for_maintenance",
-  "company",
+  "inspection_required",
   "work_order",
   "purchase_order",
   "delivery_note_no",
   "sales_invoice_no",
   "pick_list",
   "purchase_receipt_no",
+  "column_break_14",
+  "remarks",
   "col2",
+  "company",
+  "amended_from",
   "posting_date",
   "posting_time",
   "set_posting_time",
-  "inspection_required",
-  "from_bom",
   "sb1",
   "bom_no",
+  "column_break_26",
   "fg_completed_qty",
   "cb1",
   "use_multi_level_bom",
@@ -64,17 +68,16 @@
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
-  "printing_settings",
-  "select_print_heading",
-  "letter_head",
-  "more_info",
   "is_opening",
-  "remarks",
-  "col5",
+  "printing_settings",
+  "letter_head",
+  "column_break_64",
+  "select_print_heading",
+  "more_info",
   "per_transferred",
+  "col5",
   "total_amount",
   "job_card",
-  "amended_from",
   "credit_note"
  ],
  "fields": [
@@ -549,7 +552,7 @@
   },
   {
    "fieldname": "remarks",
-   "fieldtype": "Text",
+   "fieldtype": "Small Text",
    "label": "Remarks",
    "no_copy": 1,
    "oldfieldname": "remarks",
@@ -611,7 +614,7 @@
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
+   "label": "Accounting Details"
   },
   {
    "fieldname": "dimension_col_break",
@@ -629,13 +632,27 @@
    "depends_on": "eval:in_list(['Material Receipt', 'Material Issue'], doc.purpose)",
    "fieldname": "for_maintenance",
    "fieldtype": "Check",
-   "label": "For Repairs and Maintenance"
+   "hidden": 1,
+   "label": "For Repairs and Maintenance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_64",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-09-07 23:29:35.939739",
+ "modified": "2020-10-01 05:17:45.318078",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
