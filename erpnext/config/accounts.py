@@ -21,16 +21,6 @@ def get_data():
 					"onboard": 1,
 				},
 				{
-					"type": "doctype",
-					"name": "Payment Entry",
-					"description": _("Bank/Cash transactions against party or for internal transfer")
-				},
-				{
-					"type": "doctype",
-					"name": "Payment Request",
-					"description": _("Payment Request"),
-				},
-				{
 					"type": "report",
 					"name": "Accounts Receivable",
 					"doctype": "Sales Invoice",
@@ -44,15 +34,9 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name": "Sales Register",
-					"doctype": "Sales Invoice",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Item-wise Sales Register",
 					"is_query_report": True,
-					"doctype": "Sales Invoice"
+					"name": "Customer Credit Balance",
+					"doctype": "Customer"
 				},
 				{
 					"type": "report",
@@ -84,11 +68,6 @@ def get_data():
 					"onboard": 1,
 				},
 				{
-					"type": "doctype",
-					"name": "Payment Entry",
-					"description": _("Bank/Cash transactions against party or for internal transfer")
-				},
-				{
 					"type": "report",
 					"name": "Accounts Payable",
 					"doctype": "Purchase Invoice",
@@ -99,18 +78,6 @@ def get_data():
 					"name": "Accounts Payable Summary",
 					"doctype": "Purchase Invoice",
 					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Purchase Register",
-					"doctype": "Purchase Invoice",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name": "Item-wise Purchase Register",
-					"is_query_report": True,
-					"doctype": "Purchase Invoice"
 				},
 				{
 					"type": "report",
@@ -146,16 +113,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Accounts Settings",
-				},
-				{
-					"type": "doctype",
 					"name": "Fiscal Year",
 					"description": _("Financial / accounting year.")
-				},
-				{
-					"type": "doctype",
-					"name": "Accounting Dimension",
 				},
 				{
 					"type": "doctype",
@@ -170,33 +129,37 @@ def get_data():
 					"name": "Payment Term",
 					"description": _("Payment Terms based on conditions")
 				},
+				{
+					"type": "doctype",
+					"name": "Payment Terms Template",
+					"description": _("Payment Terms Template")
+				},
 			]
 		},
 		{
-			"label": _("Banking and Payments"),
+			"label": _("Payments"),
 			"items": [
 				{
 					"type": "doctype",
-					"label": _("Match Payments with Invoices"),
+					"name": "Payment Entry",
+					"description": _("Bank/Cash transactions against party or for internal transfer")
+				},
+				{
+					"type": "doctype",
+					"name": "Payment Request",
+					"description": _("Payment Request"),
+				},
+				{
+					"type": "doctype",
+					"label": _("Payment Reconciliation / Allocation"),
 					"name": "Payment Reconciliation",
 					"description": _("Match non-linked Invoices and Payments.")
 				},
 				{
 					"type": "doctype",
-					"label": _("Invoice Discounting"),
-					"name": "Invoice Discounting",
-				},
-				{
-					"type": "doctype",
-					"label": _("Update Bank Transaction Dates"),
+					"label": _("Bank Reconciliation / Update Clearance Dates"),
 					"name": "Bank Reconciliation",
 					"description": _("Update bank payment dates with journals.")
-				},
-				{
-					"type": "doctype",
-					"label": _("Bank Transaction"),
-					"name": "Bank Transaction",
-					"doctype": "Bank Transaction"
 				},
 				{
 					"type": "report",
@@ -211,13 +174,10 @@ def get_data():
 					"doctype": "Journal Entry"
 				},
 				{
-					"type": "doctype",
-					"name": "Bank Guarantee"
-				},
-				{
-					"type": "doctype",
-					"name": "Cheque Print Template",
-					"description": _("Setup cheque dimensions for printing")
+					"type": "report",
+					"name": "Payment Period Based On Invoice Date",
+					"is_query_report": True,
+					"doctype": "Journal Entry"
 				},
 			]
 		},
@@ -238,15 +198,21 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Customer Ledger Summary",
-					"doctype": "Sales Invoice",
+					"doctype": "GL Entry",
 					"is_query_report": True,
 				},
 				{
 					"type": "report",
 					"name": "Supplier Ledger Summary",
-					"doctype": "Sales Invoice",
+					"doctype": "GL Entry",
 					"is_query_report": True,
-				}
+				},
+				{
+					"type": "report",
+					"name": "Employee Ledger Summary",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
 			]
 		},
 		{
@@ -281,6 +247,53 @@ def get_data():
 					"type": "doctype",
 					"name": "Tax Withholding Category",
 					"description": _("Tax Withholding rates to be applied on transactions.")
+				},
+			]
+		},
+		{
+			"label": _("Tax Reports"),
+			"items": [
+				{
+					"type": "report",
+					"name": "FBR Tax Report",
+					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "FBR Sales Tax Report",
+					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "SRB Service Tax Report",
+					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Sales Register",
+					"doctype": "Sales Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Item-wise Sales Register",
+					"is_query_report": True,
+					"doctype": "Sales Invoice"
+				},
+				{
+					"type": "report",
+					"name": "Purchase Register",
+					"doctype": "Purchase Invoice",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Item-wise Purchase Register",
+					"is_query_report": True,
+					"doctype": "Purchase Invoice"
 				},
 			]
 		},
@@ -323,6 +336,12 @@ def get_data():
 				{
 					"type": "report",
 					"name": "Trial Balance",
+					"doctype": "GL Entry",
+					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name": "Trial Balance for Party",
 					"doctype": "GL Entry",
 					"is_query_report": True,
 				},
@@ -397,6 +416,10 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
+					"name": "Accounts Settings",
+				},
+				{
+					"type": "doctype",
 					"name": "Payment Gateway Account",
 					"description": _("Setup Gateway accounts.")
 				},
@@ -410,6 +433,11 @@ def get_data():
 					"type": "doctype",
 					"name": "Mode of Payment",
 					"description": _("e.g. Bank, Cash, Credit Card")
+				},
+				{
+					"type": "doctype",
+					"name": "Cheque Print Template",
+					"description": _("Setup cheque dimensions for printing")
 				},
 			]
 		},
@@ -435,7 +463,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Bank Statement"),
+			"label": _("Banking"),
 			"items": [
 				{
 					"type": "doctype",
@@ -456,6 +484,21 @@ def get_data():
 					"label": _("Bank Statement Settings"),
 					"name": "Bank Statement Settings",
 				},
+				{
+					"type": "doctype",
+					"label": _("Invoice Discounting"),
+					"name": "Invoice Discounting",
+				},
+				{
+					"type": "doctype",
+					"label": _("Bank Transaction"),
+					"name": "Bank Transaction",
+					"doctype": "Bank Transaction"
+				},
+				{
+					"type": "doctype",
+					"name": "Bank Guarantee"
+				},
 			]
 		},
 		{
@@ -473,47 +516,17 @@ def get_data():
 					"doctype": "GL Entry",
 					"is_query_report": True,
 				},
-				{
-					"type": "report",
-					"name": "Sales Invoice Trends",
-					"is_query_report": True,
-					"doctype": "Sales Invoice"
-				},
-				{
-					"type": "report",
-					"name": "Purchase Invoice Trends",
-					"is_query_report": True,
-					"doctype": "Purchase Invoice"
-				},
 			]
 		},
 		{
-			"label": _("Reports"),
+			"label": _("Other Reports"),
 			"icon": "fa fa-table",
 			"items": [
-				{
-					"type": "report",
-					"name": "Trial Balance for Party",
-					"doctype": "GL Entry",
-					"is_query_report": True,
-				},
-				{
-					"type": "report",
-					"name": "Payment Period Based On Invoice Date",
-					"is_query_report": True,
-					"doctype": "Journal Entry"
-				},
 				{
 					"type": "report",
 					"name": "Sales Partners Commission",
 					"is_query_report": True,
 					"doctype": "Sales Invoice"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Customer Credit Balance",
-					"doctype": "Customer"
 				},
 				{
 					"type": "report",

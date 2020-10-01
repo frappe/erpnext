@@ -4,14 +4,27 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Sales"),
+			"label": _("Sales Transactions"),
 			"icon": "fa fa-star",
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Customer",
-					"description": _("Customer Database."),
+					"name": "Sales Order",
+					"description": _("Confirmed orders from Customers."),
 					"onboard": 1,
+					"dependencies": ["Item", "Customer"],
+				},
+				{
+					"type": "doctype",
+					"name": "Delivery Note",
+					"onboard": 1,
+					"dependencies": ["Item", "Customer"],
+				},
+				{
+					"type": "doctype",
+					"name": "Sales Invoice",
+					"description": _("Invoices for Costumers."),
+					"dependencies": ["Item", "Customer"],
 				},
 				{
 					"type": "doctype",
@@ -22,78 +35,53 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Sales Order",
-					"description": _("Confirmed orders from Customers."),
-					"onboard": 1,
-					"dependencies": ["Item", "Customer"],
-				},
-				{
-					"type": "doctype",
-					"name": "Sales Invoice",
-					"description": _("Invoices for Costumers."),
-					"onboard": 1,
-					"dependencies": ["Item", "Customer"],
-				},
-				{
-					"type": "doctype",
 					"name": "Blanket Order",
 					"description": _("Blanket Orders from Costumers."),
-					"onboard": 1,
 					"dependencies": ["Item", "Customer"],
-				},
-				{
-					"type": "doctype",
-					"name": "Sales Partner",
-					"description": _("Manage Sales Partners."),
-					"dependencies": ["Item"],
-				},
-				{
-					"type": "doctype",
-					"label": _("Sales Person"),
-					"name": "Sales Person",
-					"icon": "fa fa-sitemap",
-					"link": "Tree/Sales Person",
-					"description": _("Manage Sales Person Tree."),
-					"dependencies": ["Item", "Customer"],
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Territory Target Variance (Item Group-Wise)",
-					"route": "#query-report/Territory Target Variance Item Group-Wise",
-					"doctype": "Territory",
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Sales Person Target Variance (Item Group-Wise)",
-					"route": "#query-report/Sales Person Target Variance Item Group-Wise",
-					"doctype": "Sales Person",
-					"dependencies": ["Sales Person"],
 				},
 			]
 		},
 		{
-			"label": _("Items and Pricing"),
+			"label": _("Customers"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Customer",
+					"description": _("Customer Database."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"label": _("Customer Group"),
+					"name": "Customer Group",
+					"icon": "fa fa-sitemap",
+					"link": "Tree/Customer Group",
+					"description": _("Manage Customer Group Tree."),
+				},
+				{
+					"type": "doctype",
+					"name": "Lead Source",
+					"description": _("Track Leads by Lead Source.")
+				},
+				{
+					"type": "doctype",
+					"name": "Contact",
+					"description": _("All Contacts."),
+				},
+				{
+					"type": "doctype",
+					"name": "Address",
+					"description": _("All Addresses."),
+				},
+			]
+		},
+		{
+			"label": _("Items"),
 			"items": [
 				{
 					"type": "doctype",
 					"name": "Item",
 					"description": _("All Products or Services."),
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
-					"name": "Item Price",
-					"description": _("Multiple Item prices."),
-					"route": "#Report/Item Price",
-					"dependencies": ["Item", "Price List"],
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
-					"name": "Price List",
-					"description": _("Price List master."),
 					"onboard": 1,
 				},
 				{
@@ -107,10 +95,50 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Brand",
+				},
+				{
+					"type": "doctype",
 					"name": "Product Bundle",
 					"description": _("Bundle items at time of sale."),
 					"dependencies": ["Item"],
 				},
+			]
+		},
+		{
+			"label": _("Price List"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Price List",
+					"description": _("Price List master."),
+					"onboard": 1,
+				},
+				{
+					"type": "report",
+					"label": _("Price List Editor"),
+					"name": "Item Prices",
+					"is_query_report": True,
+					"dependencies": ["Item", "Price List"],
+					"onboard": 1
+				},
+				{
+					"type": "doctype",
+					"name": "Item Price",
+					"label": _("All Item Prices"),
+					"description": _("Multiple Item prices."),
+					"route": "#Report/Item Price",
+					"dependencies": ["Item", "Price List"],
+				},
+				{
+					"type": "doctype",
+					"name": "Price List Settings",
+				},
+			]
+		},
+		{
+			"label": _("Special Prices"),
+			"items": [
 				{
 					"type": "doctype",
 					"name": "Promotional Scheme",
@@ -157,29 +185,11 @@ def get_data():
 					"description": _("Tax template for selling transactions."),
 					"onboard": 1,
 				},
-				{
-					"type": "doctype",
-					"name": "Lead Source",
-					"description": _("Track Leads by Lead Source.")
-				},
-				{
-					"type": "doctype",
-					"label": _("Customer Group"),
-					"name": "Customer Group",
-					"icon": "fa fa-sitemap",
-					"link": "Tree/Customer Group",
-					"description": _("Manage Customer Group Tree."),
-				},
-				{
-					"type": "doctype",
-					"name": "Contact",
-					"description": _("All Contacts."),
-				},
-				{
-					"type": "doctype",
-					"name": "Address",
-					"description": _("All Addresses."),
-				},
+			]
+		},
+		{
+			"label": _("Targets and Tracking"),
+			"items": [
 				{
 					"type": "doctype",
 					"label": _("Territory"),
@@ -187,6 +197,46 @@ def get_data():
 					"icon": "fa fa-sitemap",
 					"link": "Tree/Territory",
 					"description": _("Manage Territory Tree."),
+				},
+				{
+					"type": "doctype",
+					"label": _("Sales Person"),
+					"name": "Sales Person",
+					"icon": "fa fa-sitemap",
+					"link": "Tree/Sales Person",
+					"description": _("Manage Sales Person Tree."),
+				},
+				{
+					"type": "doctype",
+					"name": "Sales Partner",
+					"description": _("Manage Sales Partners."),
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"label": _("Territory Target Variance"),
+					"name": "Territory Target Variance Based On Item Group",
+					"route": "#query-report/Territory Target Variance Based On Item Group",
+					"doctype": "Territory",
+					"dependencies": ["Territory"],
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"label": _("Sales Person Target Variance"),
+					"name": "Sales Person Target Variance Based On Item Group",
+					"route": "#query-report/Sales Person Target Variance Based On Item Group",
+					"doctype": "Sales Person",
+					"dependencies": ["Sales Person"],
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"label": _("Sales Partner Target Variance"),
+					"name": "Sales Partner Target Variance based on Item Group",
+					"route": "#query-report/Sales Partner Target Variance based on Item Group",
+					"doctype": "Sales Partner",
+					"dependencies": ["Sales Partner"],
 				},
 				{
 					"type": "doctype",
@@ -203,14 +253,12 @@ def get_data():
 					"type": "report",
 					"is_query_report": True,
 					"name": "Sales Analytics",
-					"doctype": "Sales Order",
 					"onboard": 1,
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Sales Details",
-					"doctype": "Sales Order",
 				},
 				{
 					"type": "page",
@@ -230,7 +278,6 @@ def get_data():
 					"type": "report",
 					"is_query_report": True,
 					"name": "Inactive Customers",
-					"doctype": "Sales Order"
 				},
 				{
 					"type": "report",
@@ -242,25 +289,12 @@ def get_data():
 					"type": "report",
 					"is_query_report": True,
 					"name": "Sales Person-wise Transaction Summary",
-					"doctype": "Sales Order"
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
 					"name": "Item-wise Sales History",
 					"doctype": "Item"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Quotation Trends",
-					"doctype": "Quotation"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Sales Order Trends",
-					"doctype": "Sales Order"
 				},
 			]
 		},
@@ -283,12 +317,6 @@ def get_data():
 					"route_options": {
 						"party_type": "Customer"
 					}
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "BOM Search",
-					"doctype": "BOM"
 				},
 				{
 					"type": "report",

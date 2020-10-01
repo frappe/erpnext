@@ -135,6 +135,15 @@ def get_data():
 					"description": _("Manage Territory Tree."),
 					"onboard": 1,
 				},
+				{
+					"type": "doctype",
+					"label": _("Sales Person"),
+					"name": "Sales Person",
+					"icon": "fa fa-sitemap",
+					"link": "Tree/Sales Person",
+					"description": _("Manage Sales Person Tree."),
+					"onboard": 1,
+				},
 			]
 		},
 		{

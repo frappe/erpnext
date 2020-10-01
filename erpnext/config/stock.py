@@ -43,6 +43,44 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Items"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Item",
+					"description": _("All Products or Services."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Item Group",
+					"icon": "fa fa-sitemap",
+					"label": _("Item Group"),
+					"link": "Tree/Item Group",
+					"description": _("Tree of Item Groups."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Product Bundle",
+					"description": _("Bundle items at time of sale."),
+					"dependencies": ["Item"],
+				},
+				{
+					"type": "doctype",
+					"name": "Item Alternative",
+				},
+				{
+					"type": "doctype",
+					"name": "Item Manufacturer",
+				},
+				{
+					"type": "doctype",
+					"name": "Item Attribute",
+				},
+			]
+		},
+		{
 			"label": _("Stock Reports"),
 			"items": [
 				{
@@ -113,43 +151,23 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Brand",
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
-					"name": "Item Attribute",
-				},
-				{
-					"type": "doctype",
 					"name": "Item Variant Settings",
 				},
 			]
 		},
 		{
-			"label": _("Items and Pricing"),
+			"label": _("Pricing"),
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Item",
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
-					"name": "Product Bundle",
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
-					"name": "Item Group",
-					"icon": "fa fa-sitemap",
-					"label": _("Item Group"),
-					"link": "Tree/Item Group",
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
 					"name": "Price List",
+				},
+				{
+					"type": "report",
+					"label": _("Price List Editor"),
+					"name": "Item Prices",
+					"is_query_report": True,
+					"dependencies": ["Item", "Price List"]
 				},
 				{
 					"type": "doctype",
@@ -162,18 +180,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Pricing Rule",
-				},
-				{
-					"type": "doctype",
-					"name": "Item Alternative",
-				},
-				{
-					"type": "doctype",
-					"name": "Item Manufacturer",
-				},
-				{
-					"type": "doctype",
-					"name": "Item Variant Settings",
 				},
 			]
 		},
@@ -262,20 +268,7 @@ def get_data():
 					"type": "report",
 					"is_query_report": True,
 					"name": "Stock Analytics",
-					"doctype": "Stock Entry",
 					"onboard": 1,
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Delivery Note Trends",
-					"doctype": "Delivery Note"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Purchase Receipt Trends",
-					"doctype": "Purchase Receipt"
 				},
 				{
 					"type": "report",
@@ -318,12 +311,6 @@ def get_data():
 					"is_query_report": True,
 					"name": "Batch Item Expiry Status",
 					"doctype": "Stock Ledger Entry"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Item Prices",
-					"doctype": "Price List"
 				},
 				{
 					"type": "report",

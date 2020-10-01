@@ -5,16 +5,9 @@ from frappe import _
 def get_data():
 	config =  [
 		{
-			"label": _("Purchasing"),
+			"label": _("Purchasing Transactions"),
 			"icon": "fa fa-star",
 			"items": [
-				{
-					"type": "doctype",
-					"name": "Material Request",
-					"onboard": 1,
-					"dependencies": ["Item"],
-					"description": _("Request for purchase."),
-				},
 				{
 					"type": "doctype",
 					"name": "Purchase Order",
@@ -24,14 +17,24 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Purchase Invoice",
-					"onboard": 1,
+					"name": "Purchase Receipt",
 					"dependencies": ["Item", "Supplier"]
 				},
 				{
 					"type": "doctype",
-					"name": "Request for Quotation",
+					"name": "Purchase Invoice",
+					"dependencies": ["Item", "Supplier"]
+				},
+				{
+					"type": "doctype",
+					"name": "Material Request",
 					"onboard": 1,
+					"dependencies": ["Item"],
+					"description": _("Request for purchase."),
+				},
+				{
+					"type": "doctype",
+					"name": "Request for Quotation",
 					"dependencies": ["Item", "Supplier"],
 					"description": _("Request for quotation."),
 				},
@@ -44,35 +47,49 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Items and Pricing"),
+			"label": _("Suppliers"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Supplier",
+					"onboard": 1,
+					"description": _("Supplier database."),
+				},
+				{
+					"type": "doctype",
+					"name": "Supplier Group",
+					"description": _("Supplier Group master.")
+				},
+				{
+					"type": "doctype",
+					"name": "Contact",
+					"description": _("All Contacts."),
+				},
+				{
+					"type": "doctype",
+					"name": "Address",
+					"description": _("All Addresses."),
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Address And Contacts",
+					"label": _("Supplier Addresses And Contacts"),
+					"reference_doctype": "Address",
+					"route_options": {
+						"party_type": "Supplier"
+					}
+				}
+			]
+		},
+		{
+			"label": _("Items"),
 			"items": [
 				{
 					"type": "doctype",
 					"name": "Item",
-					"onboard": 1,
 					"description": _("All Products or Services."),
-				},
-				{
-					"type": "doctype",
-					"name": "Item Price",
-					"description": _("Multiple Item prices."),
 					"onboard": 1,
-					"route": "#Report/Item Price"
-				},
-				{
-					"type": "doctype",
-					"name": "Price List",
-					"description": _("Price List master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Pricing Rule",
-					"description": _("Rules for applying pricing and discount.")
-				},
-				{
-					"type": "doctype",
-					"name": "Product Bundle",
-					"description": _("Bundle items at time of sale."),
 				},
 				{
 					"type": "doctype",
@@ -81,12 +98,64 @@ def get_data():
 					"label": _("Item Group"),
 					"link": "Tree/Item Group",
 					"description": _("Tree of Item Groups."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Brand",
+				},
+				{
+					"type": "doctype",
+					"name": "Product Bundle",
+					"description": _("Bundle items at time of sale."),
+					"dependencies": ["Item"],
+				},
+			]
+		},
+		{
+			"label": _("Pricing"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Price List",
+					"description": _("Price List master."),
+					"onboard": 1,
+				},
+				{
+					"type": "report",
+					"label": _("Price List Editor"),
+					"name": "Item Prices",
+					"is_query_report": True,
+					"dependencies": ["Item", "Price List"],
+					"onboard": 1,
+					"route_options": {
+						"buying_selling": "Buying"
+					}
+				},
+				{
+					"type": "doctype",
+					"name": "Item Price",
+					"label": _("All Item Prices"),
+					"description": _("Multiple Item prices."),
+					"route": "#Report/Item Price",
+					"dependencies": ["Item", "Price List"],
 				},
 				{
 					"type": "doctype",
 					"name": "Promotional Scheme",
 					"description": _("Rules for applying different promotional schemes.")
-				}
+				},
+				{
+					"type": "doctype",
+					"name": "Pricing Rule",
+					"description": _("Rules for applying pricing and discount."),
+					"dependencies": ["Item"],
+				},
+				{
+					"type": "doctype",
+					"name": "Shipping Rule",
+					"description": _("Rules for adding shipping costs."),
+				},
 			]
 		},
 		{
@@ -113,33 +182,6 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Supplier"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Supplier",
-					"onboard": 1,
-					"description": _("Supplier database."),
-				},
-				{
-					"type": "doctype",
-					"name": "Supplier Group",
-					"description": _("Supplier Group master.")
-				},
-				{
-					"type": "doctype",
-					"name": "Contact",
-					"description": _("All Contacts."),
-				},
-				{
-					"type": "doctype",
-					"name": "Address",
-					"description": _("All Addresses."),
-				},
-
-			]
-		},
-		{
 			"label": _("Key Reports"),
 			"icon": "fa fa-table",
 			"items": [
@@ -159,13 +201,6 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Purchase Order Trends",
-					"reference_doctype": "Purchase Order",
-					"onboard": 1,
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
 					"name": "Procurement Tracker",
 					"reference_doctype": "Purchase Order",
 					"onboard": 1,
@@ -177,16 +212,6 @@ def get_data():
 					"reference_doctype": "Material Request",
 					"onboard": 1,
 				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Address And Contacts",
-					"label": _("Supplier Addresses And Contacts"),
-					"reference_doctype": "Address",
-					"route_options": {
-						"party_type": "Supplier"
-					}
-				}
 			]
 		},
 		{
