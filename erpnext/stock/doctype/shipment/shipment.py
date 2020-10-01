@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 from frappe import _
+from frappe.utils import flt
 from frappe.model.document import Document
 from erpnext.accounts.party import get_party_shipping_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
@@ -32,7 +33,7 @@ class Shipment(Document):
 
 	def validate_weight(self):
 		for parcel in self.shipment_parcel:
-			if parcel.weight <= 0:
+			if flt(parcel.weight) <= 0:
 				frappe.throw(_('Parcel weight cannot be 0'))
 
 @frappe.whitelist()
@@ -52,12 +53,12 @@ def fetch_shipping_rates(pickup_from_type, delivery_to_type, pickup_address_name
 		if pickup_from_type != 'Company':
 			pickup_contact = get_contact(pickup_contact_name)
 		else:
-			pickup_contact = get_company_contact()
+			pickup_contact = get_company_contact(user=pickup_contact_name)
 		
 		if delivery_to_type != 'Company':
 			delivery_contact = get_contact(delivery_contact_name)
 		else:
-			delivery_contact = get_company_contact()
+			delivery_contact = get_company_contact(user=pickup_contact_name)
 		letmeship_prices = get_letmeship_available_services(
 			delivery_to_type=delivery_to_type,
 			pickup_address=pickup_address,
@@ -104,12 +105,12 @@ def create_shipment(shipment, pickup_from_type, delivery_to_type, pickup_address
 	if pickup_from_type != 'Company':
 		pickup_contact = get_contact(pickup_contact_name)
 	else:
-		pickup_contact = get_company_contact()
+		pickup_contact = get_company_contact(user=pickup_contact_name)
 	
 	if delivery_to_type != 'Company':
 		delivery_contact = get_contact(delivery_contact_name)
 	else:
-		delivery_contact = get_company_contact()
+		delivery_contact = get_company_contact(user=pickup_contact_name)
 	if service_info['service_provider'] == LETMESHIP_PROVIDER:
 		shipment_info = create_letmeship_shipment(
 			pickup_address=pickup_address,
@@ -150,12 +151,9 @@ def create_shipment(shipment, pickup_from_type, delivery_to_type, pickup_address
 		)
 
 	if shipment_info:
-		frappe.db.set_value('Shipment', shipment, 'service_provider', shipment_info.get('service_provider'))
-		frappe.db.set_value('Shipment', shipment, 'carrier', shipment_info.get('carrier'))
-		frappe.db.set_value('Shipment', shipment, 'carrier_service', shipment_info.get('carrier_service'))
-		frappe.db.set_value('Shipment', shipment, 'shipment_id', shipment_info.get('shipment_id'))
-		frappe.db.set_value('Shipment', shipment, 'shipment_amount', shipment_info.get('shipment_amount'))
-		frappe.db.set_value('Shipment', shipment, 'awb_number', shipment_info.get('awb_number'))
+		fields = ['service_provider', 'carrier', 'carrier_service', 'shipment_id', 'shipment_amount', 'awb_number']
+		for field in fields:
+			frappe.db.set_value('Shipment', shipment, field, shipment_info.get(field))
 		frappe.db.set_value('Shipment', shipment, 'status', 'Booked')
 		if delivery_notes:
 			update_delivery_note(delivery_notes=delivery_notes, shipment_info=shipment_info)
@@ -277,9 +275,17 @@ def get_contact(contact_name):
 		contact.phone = contact.mobile_no
 	return contact
 
+def match_parcel_service_type_carrier(shipment_prices, reference):
+	for idx, prices in enumerate(shipment_prices):
+		service_name = match_parcel_service_type_alias(prices.get(reference[0]), prices.get(reference[1]))
+		is_preferred = frappe.db.get_value('Parcel Service Type', service_name, 'show_in_preferred_services_list')
+		shipment_prices[idx].service_name = service_name
+		shipment_prices[idx].is_preferred = is_preferred
+	return shipment_prices
 
-def get_company_contact():
-	contact = frappe.db.get_value('User', frappe.session.user, [
+@frappe.whitelist()
+def get_company_contact(user):
+	contact = frappe.db.get_value('User', user, [
 		'first_name',
 		'last_name',
 		'email',
@@ -290,11 +296,3 @@ def get_company_contact():
 	if not contact.phone:
 		contact.phone = contact.mobile_no
 	return contact
-
-def match_parcel_service_type_carrier(shipment_prices, reference):
-	for idx, prices in enumerate(shipment_prices):
-		service_name = match_parcel_service_type_alias(prices.get(reference[0]), prices.get(reference[1]))
-		is_preferred = frappe.db.get_value('Parcel Service Type', service_name, 'show_in_preferred_services_list')
-		shipment_prices[idx].service_name = service_name
-		shipment_prices[idx].is_preferred = is_preferred
-	return shipment_prices

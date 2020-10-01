@@ -16,9 +16,7 @@ class SendCloud(Document):
 
 def get_sendcloud_available_services(delivery_address, shipment_parcel):
 	# Retrieve rates at SendCloud from specification stated.
-	enabled = frappe.db.get_single_value('SendCloud', 'enabled')
-	api_key = frappe.db.get_single_value('SendCloud', 'api_key')
-	api_secret = frappe.db.get_single_value('SendCloud', 'api_secret')
+	api_key, api_secret, enabled = frappe.db.get_value('SendCloud', 'SendCloud', ['enabled', 'api_key', 'api_secret'])
 	if not enabled or not api_key or not api_secret:
 		return []
 
@@ -40,6 +38,7 @@ def get_sendcloud_available_services(delivery_address, shipment_parcel):
 					available_services.append(available_service)
 		return available_services
 	except Exception as exc:
+		frappe.log_error(frappe.get_traceback())
 		frappe.msgprint(_('Error occurred on SendCloud: {0}').format(
 			str(exc)), indicator='orange', alert=True)
 
@@ -53,9 +52,7 @@ def create_sendcloud_shipment(
 	value_of_goods
 ):
 	# Create a transaction at SendCloud
-	enabled = frappe.db.get_single_value('SendCloud', 'enabled')
-	api_key = frappe.db.get_single_value('SendCloud', 'api_key')
-	api_secret = frappe.db.get_single_value('SendCloud', 'api_secret')
+	api_key, api_secret, enabled = frappe.db.get_value('SendCloud', 'SendCloud', ['enabled', 'api_key', 'api_secret'])
 	if not enabled or not api_key or not api_secret:
 		return []
 
@@ -105,6 +102,7 @@ def create_sendcloud_shipment(
 				'awb_number': awb_number
 			}
 	except Exception as exc:
+		frappe.log_error(frappe.get_traceback())
 		frappe.msgprint(_('Error occurred while creating Shipment: {0}').format(
 			str(exc)), indicator='orange', alert=True)
 
@@ -130,17 +128,15 @@ def get_sendcloud_tracking_data(shipment_id):
 		api_key = frappe.db.get_single_value('SendCloud', 'api_key')
 		api_secret = frappe.db.get_single_value('SendCloud', 'api_secret')
 		shipment_id_list = shipment_id.split(', ')
-		tracking_url = ''
 		awb_number = []
 		tracking_status = []
 		tracking_status_info = []
+		tracking_urls = []
 		for ship_id in shipment_id_list:
 			tracking_data_response = \
 				requests.get('https://panel.sendcloud.sc/api/v2/parcels/{id}'.format(id=ship_id), auth=(api_key, api_secret))
 			tracking_data = json.loads(tracking_data_response.text)
-			tracking_url_template = \
-				'<a href="{{ tracking_url }}" target="_blank"><b>{{ _("Click here to Track Shipment") }}</b></a><br>'
-			tracking_url += frappe.render_template(tracking_url_template, {'tracking_url': tracking_data['parcel']['tracking_url']})
+			tracking_urls.append(tracking_data['parcel']['tracking_url'])
 			awb_number.append(tracking_data['parcel']['tracking_number'])
 			tracking_status.append(tracking_data['parcel']['status']['message'])
 			tracking_status_info.append(tracking_data['parcel']['status']['message'])
@@ -148,9 +144,10 @@ def get_sendcloud_tracking_data(shipment_id):
 			'awb_number': ', '.join(awb_number),
 			'tracking_status': ', '.join(tracking_status),
 			'tracking_status_info': ', '.join(tracking_status_info),
-			'tracking_url': tracking_url
+			'tracking_url': ', '.join(tracking_urls)
 		}
 	except Exception as exc:
+		frappe.log_error(frappe.get_traceback())
 		frappe.msgprint(_('Error occurred while updating Shipment: {0}').format(
 			str(exc)), indicator='orange', alert=True)
 

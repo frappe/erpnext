@@ -575,22 +575,24 @@ def make_shipment(source_name, target_doc=None):
 		user = frappe.db.get_value("User", frappe.session.user, ['email', 'full_name', 'phone', 'mobile_no'], as_dict=1)
 		target.pickup_contact_email = user.email
 		pickup_contact_display = '{}'.format(user.full_name)
-		if user.email:
-			pickup_contact_display += '<br>' + user.email
-		if user.phone:
-			pickup_contact_display += '<br>' + user.phone
-		if user.mobile_no and not user.phone:
-			pickup_contact_display += '<br>' + user.mobile_no
+		if user:
+			if user.email:
+				pickup_contact_display += '<br>' + user.email
+			if user.phone:
+				pickup_contact_display += '<br>' + user.phone
+			if user.mobile_no and not user.phone:
+				pickup_contact_display += '<br>' + user.mobile_no
 		target.pickup_contact = pickup_contact_display
 
 		contact = frappe.db.get_value("Contact", source.contact_person, ['email_id', 'phone', 'mobile_no'], as_dict=1)
 		delivery_contact_display = '{}'.format(source.contact_display)
-		if contact.email_id:
-			delivery_contact_display += '<br>' + contact.email_id
-		if contact.phone:
-			delivery_contact_display += '<br>' + contact.phone
-		if contact.mobile_no and not contact.phone:
-			delivery_contact_display += '<br>' + contact.mobile_no
+		if contact:
+			if contact.email_id:
+				delivery_contact_display += '<br>' + contact.email_id
+			if contact.phone:
+				delivery_contact_display += '<br>' + contact.phone
+			if contact.mobile_no and not contact.phone:
+				delivery_contact_display += '<br>' + contact.mobile_no
 		target.delivery_contact = delivery_contact_display
 
 	doclist = get_mapped_doc("Delivery Note", source_name, 	{
@@ -612,7 +614,7 @@ def make_shipment(source_name, target_doc=None):
 			}
 		},
 		"Delivery Note Item": {
-			"doctype": "Shipment Delivery Notes",
+			"doctype": "Shipment Delivery Note",
 			"field_map": {
 				"name": "prevdoc_detail_docname",
 				"parent": "prevdoc_docname",

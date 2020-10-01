@@ -1,26 +1,18 @@
 {
  "actions": [],
- "autoname": "field:preset_name",
+ "autoname": "field:parcel_template_name",
  "creation": "2020-07-09 11:43:43.470339",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "preset_name",
+  "parcel_template_name",
   "length",
   "width",
   "height",
   "weight"
  ],
  "fields": [
-  {
-   "fieldname": "preset_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Preset Name",
-   "reqd": 1,
-   "unique": 1
-  },
   {
    "fieldname": "length",
    "fieldtype": "Int",
@@ -49,10 +41,18 @@
    "label": "Weight (kg)",
    "precision": "1",
    "reqd": 1
+  },
+  {
+   "fieldname": "parcel_template_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Parcel Template Name",
+   "reqd": 1,
+   "unique": 1
   }
  ],
  "links": [],
- "modified": "2020-07-10 12:53:22.772826",
+ "modified": "2020-09-28 12:51:00.320421",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Shipment Parcel Template",

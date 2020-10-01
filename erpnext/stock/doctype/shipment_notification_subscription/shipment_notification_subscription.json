@@ -30,7 +30,7 @@
  "modified": "2020-07-09 12:55:14.217387",
  "modified_by": "Administrator",
  "module": "Stock",
- "name": "Shipment Notification Subscriptions",
+ "name": "Shipment Notification Subscription",
  "owner": "Administrator",
  "permissions": [],
  "quick_entry": 1,

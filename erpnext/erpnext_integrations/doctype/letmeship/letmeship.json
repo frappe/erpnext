@@ -24,14 +24,14 @@
   },
   {
    "fieldname": "api_password",
-   "fieldtype": "Data",
+   "fieldtype": "Password",
    "label": "API Password",
    "read_only_depends_on": "eval:doc.enabled == 0"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-08-05 16:33:44.548230",
+ "modified": "2020-10-21 10:28:37.607717",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "LetMeShip",
