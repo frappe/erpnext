@@ -10,6 +10,7 @@ def get_data():
 		'fieldname': 'customer',
 		'non_standard_fieldnames': {
 			'Payment Entry': 'party',
+			'Journal Entry': 'party',
 			'Quotation': 'party_name',
 			'Opportunity': 'party_name'
 		},
@@ -26,8 +27,8 @@ def get_data():
 				'items': ['Sales Order', 'Delivery Note', 'Sales Invoice']
 			},
 			{
-				'label': _('Payments'),
-				'items': ['Payment Entry']
+				'label': _('Payments and Vouchers'),
+				'items': ['Payment Entry', 'Journal Entry']
 			},
 			{
 				'label': _('Support'),
