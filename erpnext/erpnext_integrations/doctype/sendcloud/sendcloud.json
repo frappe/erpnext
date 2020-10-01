@@ -24,7 +24,7 @@
   },
   {
    "fieldname": "api_secret",
-   "fieldtype": "Data",
+   "fieldtype": "Password",
    "label": "API Secret",
    "read_only_depends_on": "eval:doc.enabled == 0"
   }
@@ -32,7 +32,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-08-18 09:48:50.836233",
+ "modified": "2020-10-21 10:28:57.710549",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "SendCloud",

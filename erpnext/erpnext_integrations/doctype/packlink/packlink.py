@@ -72,6 +72,7 @@ def get_packlink_available_services(pickup_address, delivery_address, shipment_p
 
 		return available_services
 	except Exception as exc:
+		frappe.log_error(frappe.get_traceback())
 		frappe.msgprint(
 			_('Error occurred on Packlink: {0}')
 				.format(str(exc)), indicator='orange',
@@ -152,6 +153,7 @@ def create_packlink_shipment(pickup_address, delivery_address, shipment_parcel,
 				'awb_number': '',
 			}
 	except Exception as exc:
+		frappe.log_error(frappe.get_traceback())
 		frappe.msgprint(
 			_('Error occurred while creating Shipment: {0}')
 				.format(str(exc)),
@@ -215,6 +217,7 @@ def get_packlink_tracking_data(shipment_id):
 				'tracking_url': tracking_url
 			}
 	except Exception as exc:
+		frappe.log_error(frappe.get_traceback())
 		frappe.msgprint(_('Error occurred while updating Shipment: {0}').format(
 			str(exc)), indicator='orange', alert=True)
 	return []

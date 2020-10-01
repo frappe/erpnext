@@ -2,11 +2,6 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Shipment', {
-	setup: function(frm) {
-		if (frm.doc.__islocal) {
-			frm.trigger('pickup_type');
-		}
-	},
 	address_query: function(frm, link_doctype, link_name, is_your_company_address) {
 		return {
 			query: 'frappe.contacts.doctype.address.address.address_query',
@@ -99,7 +94,7 @@ frappe.ui.form.on('Shipment', {
 			}
 			return frm.events.contact_query(frm, link_doctype, link_name);
 		});
-		frm.set_query("delivery_note", "shipment_delivery_notes", function() {
+		frm.set_query("delivery_note", "shipment_delivery_note", function() {
 			let customer = '';
 			if (frm.doc.delivery_to_type == "Customer") {
 				customer = frm.doc.delivery_customer;
@@ -127,27 +122,22 @@ frappe.ui.form.on('Shipment', {
 		if (frm.doc.shipment_id) {
 			frm.add_custom_button(__('Print Shipping Label'), function() {
 				return frm.events.print_shipping_label(frm);
-			});
+			}, __('Tools'));
 			if (frm.doc.tracking_status != 'Delivered') {
 				frm.add_custom_button(__('Update Tracking'), function() {
 					return frm.events.update_tracking(frm, frm.doc.service_provider, frm.doc.shipment_id);
-				});
+				}, __('Tools'));
+
+				frm.add_custom_button(__('Track Status'), function() {
+					const urls = frm.doc.tracking_url.split(', ');
+					urls.forEach(url => window.open(url));
+				}, __('View'));
 			}
 		}
 		$('div[data-fieldname=pickup_address] > div > .clearfix').hide();
 		$('div[data-fieldname=pickup_contact] > div > .clearfix').hide();
 		$('div[data-fieldname=delivery_address] > div > .clearfix').hide();
 		$('div[data-fieldname=delivery_contact] > div > .clearfix').hide();
-
-		if (frm.doc.delivery_from_type != 'Company') {
-			frm.set_df_property("delivery_contact_name", "reqd", 1);
-		}
-		if (frm.doc.pickup_from_type != 'Company') {
-			frm.set_df_property("pickup_contact_name", "reqd", 1);
-		}
-		else {
-			frm.toggle_display("pickup_contact_name", false);
-		}
 	},
 	before_save: function(frm) {
 		if (frm.doc.delivery_to_type == 'Company') {
@@ -188,14 +178,10 @@ frappe.ui.form.on('Shipment', {
 	pickup_from_type: function(frm) {
 		if (frm.doc.pickup_from_type == 'Company') {
 			frm.set_value("pickup_company", frappe.defaults.get_default('company'));
-			frm.set_df_property("pickup_contact_name", "reqd", 0);
 			frm.set_value("pickup_customer", '');
 			frm.set_value("pickup_supplier", '');
-			frm.toggle_display("pickup_contact_name", false);
 		}
 		else {
-			frm.set_df_property("pickup_contact_name", "reqd", 1);
-			frm.toggle_display("pickup_contact_name", true);
 			frm.trigger('clear_pickup_fields');
 		}
 		if (frm.doc.pickup_from_type == 'Customer') {
@@ -206,20 +192,16 @@ frappe.ui.form.on('Shipment', {
 			frm.set_value("pickup_customer", '');
 			frm.set_value("pickup_company", '');
 		}
-		frm.events.remove_notific_child_table(frm, 'shipment_notification_subscriptions', 'Pickup');
-		frm.events.remove_notific_child_table(frm, 'shipment_status_update_subscriptions', 'Pickup');
+		frm.events.remove_notific_child_table(frm, 'shipment_notification_subscription', 'Pickup');
+		frm.events.remove_notific_child_table(frm, 'shipment_status_update_subscription', 'Pickup');
 	},
 	delivery_to_type: function(frm) {
 		if (frm.doc.delivery_to_type == 'Company') {
 			frm.set_value("delivery_company", frappe.defaults.get_default('company'));
-			frm.set_df_property("delivery_contact_name", "reqd", 0);
 			frm.set_value("delivery_customer", '');
 			frm.set_value("delivery_supplier", '');
-			frm.toggle_display("delivery_contact_name", false);
 		}
 		else {
-			frm.set_df_property("delivery_contact_name", "reqd", 1);
-			frm.toggle_display("delivery_contact_name", true);
 			frm.trigger('clear_delivery_fields');
 		}
 		if (frm.doc.delivery_to_type == 'Customer') {
@@ -229,13 +211,13 @@ frappe.ui.form.on('Shipment', {
 		if (frm.doc.delivery_to_type == 'Supplier') {
 			frm.set_value("delivery_customer", '');
 			frm.set_value("delivery_company", '');
-			frm.toggle_display("shipment_delivery_notes", false);
+			frm.toggle_display("shipment_delivery_note", false);
 		}
 		else {
-			frm.toggle_display("shipment_delivery_notes", true);
+			frm.toggle_display("shipment_delivery_note", true);
 		}
-		frm.events.remove_notific_child_table(frm, 'shipment_notification_subscriptions', 'Delivery');
-		frm.events.remove_notific_child_table(frm, 'shipment_status_update_subscriptions', 'Delivery');
+		frm.events.remove_notific_child_table(frm, 'shipment_notification_subscription', 'Delivery');
+		frm.events.remove_notific_child_table(frm, 'shipment_status_update_subscription', 'Delivery');
 	},
 	delivery_address_name: function(frm) {
 		if (frm.doc.delivery_to_type == 'Company') {
@@ -307,6 +289,51 @@ frappe.ui.form.on('Shipment', {
 			frm.events.get_contact_display(frm, frm.doc.pickup_contact_name, 'Pickup');
 		}
 	},
+	pickup_contact_person: function(frm) {
+		if (frm.doc.pickup_contact_person) {
+			frappe.call({
+				method: "erpnext.stock.doctype.shipment.shipment.get_company_contact",
+				args: { user: frm.doc.pickup_contact_person },
+				callback: function({ message }) {
+					const r = message;
+					let contact_display = `${r.first_name} ${r.last_name}`;
+					if (r.email) {
+						contact_display += `<br>${ r.email }`;
+						frm.set_value('pickup_contact_email', r.email);
+					}
+					if (r.phone) {
+						contact_display += `<br>${ r.phone }`;
+					}
+					if (r.mobile_no && !r.phone) {
+						contact_display += `<br>${ r.mobile_no }`;
+					}
+					frm.set_value('pickup_contact', contact_display);
+				}
+			});
+		} else {
+			if (frm.doc.pickup_from_type === 'Company') {
+				frappe.call({
+					method: "erpnext.stock.doctype.shipment.shipment.get_company_contact",
+					args: { user: frappe.session.user },
+					callback: function({ message }) {
+						const r = message;
+						let contact_display = `${r.first_name} ${r.last_name}`;
+						if (r.email) {
+							contact_display += `<br>${ r.email }`;
+							frm.set_value('pickup_contact_email', r.email);
+						}
+						if (r.phone) {
+							contact_display += `<br>${ r.phone }`;
+						}
+						if (r.mobile_no && !r.phone) {
+							contact_display += `<br>${ r.mobile_no }`;
+						}
+						frm.set_value('pickup_contact', contact_display);
+					}
+				});
+			}
+		}
+	},
 	set_company_contact: function(frm, delivery_type) {
 		frappe.db.get_value('User', { name: frappe.session.user }, ['full_name', 'last_name', 'email', 'phone', 'mobile_no'], (r) => {
 			if (!(r.last_name && r.email && (r.phone || r.mobile_no))) {
@@ -344,6 +371,7 @@ frappe.ui.form.on('Shipment', {
 				}
 			}
 		});
+		frm.set_value('pickup_contact_person', frappe.session.user);
 	},
 	pickup_company: function(frm) {
 		if (frm.doc.pickup_from_type == 'Company'  && frm.doc.pickup_company) {
@@ -372,14 +400,12 @@ frappe.ui.form.on('Shipment', {
 		}
 	},
 	pickup_customer: function(frm) {
-		frm.trigger('clear_pickup_fields');
 		if (frm.doc.pickup_customer) {
 			frm.events.set_address_name(frm,'Customer',frm.doc.pickup_customer, 'Pickup');
 			frm.events.set_contact_name(frm,'Customer',frm.doc.pickup_customer, 'Pickup');
 		}
 	},
 	pickup_supplier: function(frm) {
-		frm.trigger('clear_pickup_fields');
 		if (frm.doc.pickup_supplier) {
 			frm.events.set_address_name(frm,'Supplier',frm.doc.pickup_supplier, 'Pickup');
 			frm.events.set_contact_name(frm,'Supplier',frm.doc.pickup_supplier, 'Pickup');
@@ -438,7 +464,7 @@ frappe.ui.form.on('Shipment', {
 	},
 	pickup_date: function(frm) {
 		if (frm.doc.pickup_date < frappe.datetime.get_today()) {
-			frappe.throw(__("Pickup Date cannot be in the past"));
+			frappe.throw(__("Pickup Date cannot be before this day"));
 		}
 		if (frm.doc.pickup_date == frappe.datetime.get_today()) {
 			var pickup_time = frm.events.get_pickup_time(frm);
@@ -487,65 +513,63 @@ frappe.ui.form.on('Shipment', {
 		frm.set_value("pickup_to", pickup_to);
 	},
 	clear_pickup_fields: function(frm) {
-		frm.set_value("pickup_address_name", '');
-		frm.set_value("pickup_contact_name", '');
-		frm.set_value("pickup_address", '');
-		frm.set_value("pickup_contact", '');
-		frm.set_value("pickup_contact_email", '');
+		let fields = ["pickup_address_name", "pickup_contact_name", "pickup_address", "pickup_contact", "pickup_contact_email", "pickup_contact_person"];
+		for (let field of fields){
+			frm.set_value(field,  '');
+		}
 	},
 	clear_delivery_fields: function(frm) {
-		frm.set_value("delivery_address_name", '');
-		frm.set_value("delivery_contact_name", '');
-		frm.set_value("delivery_address", '');
-		frm.set_value("delivery_contact", '');
-		frm.set_value("delivery_contact_email", '');
+		let fields = ["delivery_address_name", "delivery_contact_name", "delivery_address", "delivery_contact", "delivery_contact_email"];
+		for (let field of fields){
+			frm.set_value(field,  '');
+		}
 	},
 	pickup_from_send_shipping_notification: function(frm, cdt, cdn) {
 		if (frm.doc.pickup_contact_email && frm.doc.pickup_from_send_shipping_notification
-				&& !validate_duplicate(frm, 'shipment_notification_subscriptions', frm.doc.pickup_contact_email, locals[cdt][cdn].idx)) {
-			let row = frappe.model.add_child(frm.doc, "Shipment Notification Subscriptions", "shipment_notification_subscriptions");
+				&& !validate_duplicate(frm, 'shipment_notification_subscription', frm.doc.pickup_contact_email, locals[cdt][cdn].idx)) {
+			let row = frappe.model.add_child(frm.doc, "Shipment Notification Subscription", "shipment_notification_subscription");
 			row.email = frm.doc.pickup_contact_email;
-			frm.refresh_fields("shipment_notification_subscriptions");
+			frm.refresh_fields("shipment_notification_subscription");
 		}
 		if (!frm.doc.pickup_from_send_shipping_notification) {
-			frm.events.remove_email_row(frm, 'shipment_notification_subscriptions', frm.doc.pickup_contact_email);
-			frm.refresh_fields("shipment_notification_subscriptions");
+			frm.events.remove_email_row(frm, 'shipment_notification_subscription', frm.doc.pickup_contact_email);
+			frm.refresh_fields("shipment_notification_subscription");
 		}
 	},
 	pickup_from_subscribe_to_status_updates: function(frm, cdt, cdn) {
 		if (frm.doc.pickup_contact_email && frm.doc.pickup_from_subscribe_to_status_updates
-				&& !validate_duplicate(frm, 'shipment_status_update_subscriptions', frm.doc.pickup_contact_email, locals[cdt][cdn].idx)) {
-			let row = frappe.model.add_child(frm.doc, "Shipment Status Update Subscriptions", "shipment_status_update_subscriptions");
+				&& !validate_duplicate(frm, 'shipment_status_update_subscription', frm.doc.pickup_contact_email, locals[cdt][cdn].idx)) {
+			let row = frappe.model.add_child(frm.doc, "Shipment Status Update Subscription", "shipment_status_update_subscription");
 			row.email = frm.doc.pickup_contact_email;
-			frm.refresh_fields("shipment_status_update_subscriptions");
+			frm.refresh_fields("shipment_status_update_subscription");
 		}
 		if (!frm.doc.pickup_from_subscribe_to_status_updates) {
-			frm.events.remove_email_row(frm, 'shipment_status_update_subscriptions', frm.doc.pickup_contact_email);
-			frm.refresh_fields("shipment_status_update_subscriptions");
+			frm.events.remove_email_row(frm, 'shipment_status_update_subscription', frm.doc.pickup_contact_email);
+			frm.refresh_fields("shipment_status_update_subscription");
 		}
 	},
 	delivery_to_send_shipping_notification: function(frm, cdt, cdn) {
 		if (frm.doc.delivery_contact_email && frm.doc.delivery_to_send_shipping_notification
-				&& !validate_duplicate(frm, 'shipment_notification_subscriptions', frm.doc.delivery_contact_email, locals[cdt][cdn].idx)){
-			let row = frappe.model.add_child(frm.doc, "Shipment Notification Subscriptions", "shipment_notification_subscriptions");
+				&& !validate_duplicate(frm, 'shipment_notification_subscription', frm.doc.delivery_contact_email, locals[cdt][cdn].idx)){
+			let row = frappe.model.add_child(frm.doc, "Shipment Notification Subscription", "shipment_notification_subscription");
 			row.email = frm.doc.delivery_contact_email;
-			frm.refresh_fields("shipment_notification_subscriptions");
+			frm.refresh_fields("shipment_notification_subscription");
 		}
 		if (!frm.doc.delivery_to_send_shipping_notification) {
-			frm.events.remove_email_row(frm, 'shipment_notification_subscriptions', frm.doc.delivery_contact_email);
-			frm.refresh_fields("shipment_notification_subscriptions");
+			frm.events.remove_email_row(frm, 'shipment_notification_subscription', frm.doc.delivery_contact_email);
+			frm.refresh_fields("shipment_notification_subscription");
 		}
 	},
 	delivery_to_subscribe_to_status_updates: function(frm, cdt, cdn) {
 		if (frm.doc.delivery_contact_email && frm.doc.delivery_to_subscribe_to_status_updates
-				&& !validate_duplicate(frm, 'shipment_status_update_subscriptions', frm.doc.delivery_contact_email, locals[cdt][cdn].idx)) {
-			let row = frappe.model.add_child(frm.doc, "Shipment Status Update Subscriptions", "shipment_status_update_subscriptions");
+				&& !validate_duplicate(frm, 'shipment_status_update_subscription', frm.doc.delivery_contact_email, locals[cdt][cdn].idx)) {
+			let row = frappe.model.add_child(frm.doc, "Shipment Status Update Subscription", "shipment_status_update_subscription");
 			row.email = frm.doc.delivery_contact_email;
-			frm.refresh_fields("shipment_status_update_subscriptions");
+			frm.refresh_fields("shipment_status_update_subscription");
 		}
 		if (!frm.doc.delivery_to_subscribe_to_status_updates) {
-			frm.events.remove_email_row(frm, 'shipment_status_update_subscriptions', frm.doc.delivery_contact_email);
-			frm.refresh_fields("shipment_status_update_subscriptions");
+			frm.events.remove_email_row(frm, 'shipment_status_update_subscription', frm.doc.delivery_contact_email);
+			frm.refresh_fields("shipment_status_update_subscription");
 		}
 	},
 	remove_email_row: function(frm, table, fieldname) {
@@ -589,7 +613,7 @@ frappe.ui.form.on('Shipment', {
 					shipment_parcel: frm.doc.shipment_parcel,
 					description_of_content: frm.doc.description_of_content,
 					pickup_date: frm.doc.pickup_date,
-					pickup_contact_name: frm.doc.pickup_contact_name,
+					pickup_contact_name: frm.doc.pickup_from_type === 'Company' ? frm.doc.pickup_contact_person : frm.doc.pickup_contact_name,
 					delivery_contact_name: frm.doc.delivery_contact_name,
 					value_of_goods: frm.doc.value_of_goods
 				},
@@ -639,7 +663,7 @@ frappe.ui.form.on('Shipment', {
 	},
 	update_tracking: function(frm, service_provider, shipment_id) {
 		let delivery_notes = [];
-		(frm.doc.shipment_delivery_notes || []).forEach((d) => {
+		(frm.doc.shipment_delivery_note || []).forEach((d) => {
 			delivery_notes.push(d.delivery_note);
 		});
 		frappe.call({
@@ -661,14 +685,13 @@ frappe.ui.form.on('Shipment', {
 	}
 });
 
-frappe.ui.form.on('Shipment Delivery Notes', {
+frappe.ui.form.on('Shipment Delivery Note', {
 	delivery_note: function(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 		if (row.delivery_note) {
 			let row_index = row.idx - 1;
-			if(validate_duplicate(frm, 'shipment_delivery_notes', row.delivery_note, row_index)) {
-				cur_frm.get_field('shipment_delivery_notes').grid.grid_rows[row_index].remove();
-				frappe.throw(__(`You have entered duplicate Delivery Notes. Please rectify and try again.`));
+			if(validate_duplicate(frm, 'shipment_delivery_note', row.delivery_note, row_index)) {
+				frappe.throw(__(`You have entered a duplicate Delivery Note on Row ${row.idx}. Please rectify and try again.`));
 			}
 		}
 	},
@@ -683,29 +706,27 @@ frappe.ui.form.on('Shipment Delivery Notes', {
 });
 
 var validate_duplicate =  function(frm, table, fieldname, index){
-	let duplicate = false;
-	$.each(frm.doc[table], function(i, detail) {
-		// Email duplicate validation
-		if(detail.email === fieldname && !(index === i)) {
-			duplicate = true;
-			return;
-		}
-
-		// Delivery Note duplicate validation
-		if(detail.delivery_note === fieldname && !(index === i)) {
-			duplicate = true;
-			return;
-		}
-	});
-	return duplicate;
+	return (
+		table === 'shipment_delivery_note'
+			? frm.doc[table].some((detail, i) => detail.delivery_note === fieldname && !(index === i))
+			: frm.doc[table].some((detail, i) => detail.email === fieldname && !(index === i))
+	);
 };
 
 function select_from_available_services(frm, available_services) {
 	var headers = [ __("Service Provider"), __("Carrier"), __("Carrier’s Service"), __("Price"), "" ];
 	cur_frm.render_available_services = function(d, headers, data){
+		const arranged_data = data.reduce((prev, curr) => {
+			if (curr.is_preferred) {
+				prev.preferred_services.push(curr);
+			} else {
+				prev.other_services.push(curr);
+			}
+			return prev;
+		}, { preferred_services: [], other_services: [] });
 		d.fields_dict.available_services.$wrapper.html(
 			frappe.render_template('shipment_service_selector',
-				{'header_columns': headers, 'data': data}
+				{'header_columns': headers, 'data': arranged_data}
 			)
 		);
 	};
@@ -722,18 +743,18 @@ function select_from_available_services(frm, available_services) {
 	cur_frm.render_available_services(d, headers, available_services);
 	let shipment_notific_email = [];
 	let tracking_notific_email = [];
-	(frm.doc.shipment_notification_subscriptions || []).forEach((d) => {
+	(frm.doc.shipment_notification_subscription || []).forEach((d) => {
 		if (!d.unsubscribed) {
 			shipment_notific_email.push(d.email);
 		}
 	});
-	(frm.doc.shipment_status_update_subscriptions || []).forEach((d) => {
+	(frm.doc.shipment_status_update_subscription || []).forEach((d) => {
 		if (!d.unsubscribed) {
 			tracking_notific_email.push(d.email);
 		}
 	});
 	let delivery_notes = [];
-	(frm.doc.shipment_delivery_notes || []).forEach((d) => {
+	(frm.doc.shipment_delivery_note || []).forEach((d) => {
 		delivery_notes.push(d.delivery_note);
 	});
 	cur_frm.select_row = function(service_data){
@@ -750,7 +771,7 @@ function select_from_available_services(frm, available_services) {
 				shipment_parcel: frm.doc.shipment_parcel,
 				description_of_content: frm.doc.description_of_content,
 				pickup_date: frm.doc.pickup_date,
-				pickup_contact_name: frm.doc.pickup_contact_name,
+				pickup_contact_name: frm.doc.pickup_from_type === 'Company' ? frm.doc.pickup_contact_person : frm.doc.pickup_contact_name,
 				delivery_contact_name: frm.doc.delivery_contact_name,
 				value_of_goods: frm.doc.value_of_goods,
 				service_data: service_data,
