@@ -38,7 +38,6 @@ class SellingController(StockController):
 	def validate(self):
 		super(SellingController, self).validate()
 		self.validate_items()
-		self.validate_target_warehouse()
 		self.validate_max_discount()
 		self.validate_selling_price()
 		self.set_qty_as_per_stock_uom()
@@ -425,16 +424,6 @@ class SellingController(StockController):
 					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
 				else:
 					chk_dupl_itm.append(f)
-
-	def validate_target_warehouse(self):
-		items = self.get("items") + (self.get("packed_items") or [])
-
-		for d in items:
-			if d.get("target_warehouse") and d.get("warehouse") == d.get("target_warehouse"):
-				warehouse = frappe.bold(d.get("target_warehouse"))
-				frappe.throw(_("Row {0}: Delivery Warehouse ({1}) and Customer Warehouse ({2}) can not be same")
-					.format(d.idx, warehouse, warehouse))
-
 	def validate_items(self):
 		# validate items to see if they have is_sales_item enabled
 		from erpnext.controllers.buying_controller import validate_item_type
@@ -442,8 +431,15 @@ class SellingController(StockController):
 
 	def validate_target_warehouse(self):
 		if frappe.get_meta(self.doctype + " Item").has_field("target_warehouse"):
-			for d in self.items:
-				if d.item_code:
+			items = self.get("items") + (self.get("packed_items") or [])
+
+			for d in items:
+				if d.get("target_warehouse") and d.get("warehouse") == d.get("target_warehouse"):
+					warehouse = frappe.bold(d.get("target_warehouse"))
+					frappe.throw(_("Row {0}: Source Warehouse ({1}) and Target Warehouse ({2}) can not be same")
+						.format(d.idx, warehouse, warehouse))
+
+				if d.get('item_code'):
 					target_warehouse_validation = get_target_warehouse_validation(d.item_code, self.transaction_type, self.company)
 
 					if target_warehouse_validation:
