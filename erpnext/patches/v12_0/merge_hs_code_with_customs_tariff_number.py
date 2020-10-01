@@ -13,6 +13,7 @@ def execute():
 	for d in hs_codes:
 		if not frappe.db.exists("Customs Tariff Number", d.name):
 			doc = frappe.new_doc("Customs Tariff Number")
+			doc.tariff_number = d.name
 			doc.description = d.description
 			doc.save()
 
