@@ -169,7 +169,7 @@ def adjust_qty_for_expired_items(data):
 
 
 def get_child_groups(item_group_name):
-	item_group = frappe.get_doc("Item Group", item_group_name)
+	item_group = frappe.get_cached_doc("Item Group", item_group_name)
 	return frappe.db.sql("""select name
 		from `tabItem Group` where lft>=%(lft)s and rgt<=%(rgt)s
 			and show_in_website = 1""", {"lft": item_group.lft, "rgt": item_group.rgt})
@@ -213,7 +213,7 @@ def get_parent_item_groups(item_group_name):
 	if not item_group_name:
 		return base_parents
 
-	item_group = frappe.get_doc("Item Group", item_group_name)
+	item_group = frappe.get_cached_doc("Item Group", item_group_name)
 	parent_groups = frappe.db.sql("""select name, route from `tabItem Group`
 		where lft <= %s and rgt >= %s
 		and show_in_website=1

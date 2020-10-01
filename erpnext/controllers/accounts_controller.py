@@ -1537,7 +1537,7 @@ def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname,
 	"""
 	p_doc = frappe.get_doc(parent_doctype, parent_doctype_name)
 	child_item = frappe.new_doc('Sales Order Item', p_doc, child_docname)
-	item = frappe.get_doc("Item", trans_item.get('item_code'))
+	item = frappe.get_cached_doc("Item", trans_item.get('item_code'))
 	child_item.item_code = item.item_code
 	child_item.item_name = item.item_name
 	child_item.description = item.description
@@ -1557,7 +1557,7 @@ def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docna
 	"""
 	p_doc = frappe.get_doc(parent_doctype, parent_doctype_name)
 	child_item = frappe.new_doc('Purchase Order Item', p_doc, child_docname)
-	item = frappe.get_doc("Item", trans_item.get('item_code'))
+	item = frappe.get_cached_doc("Item", trans_item.get('item_code'))
 	child_item.item_code = item.item_code
 	child_item.item_name = item.item_name
 	child_item.description = item.description

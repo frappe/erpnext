@@ -31,7 +31,7 @@ class ItemManufacturer(Document):
 	def manage_default_item_manufacturer(self, delete=False):
 		from frappe.model.utils import set_default
 
-		item = frappe.get_doc("Item", self.item_code)
+		item = frappe.get_cached_doc("Item", self.item_code)
 		default_manufacturer = item.default_item_manufacturer
 		default_part_no = item.default_manufacturer_part_no
 

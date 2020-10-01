@@ -67,7 +67,7 @@ def _reorder_item():
 			})
 
 	for item_code in items_to_consider:
-		item = frappe.get_doc("Item", item_code)
+		item = frappe.get_cached_doc("Item", item_code)
 
 		if item.variant_of and not item.get("reorder_levels"):
 			item.update_template_tables()
@@ -135,7 +135,7 @@ def create_material_request(material_requests):
 
 				for d in items:
 					d = frappe._dict(d)
-					item = frappe.get_doc("Item", d.item_code)
+					item = frappe.get_cached_doc("Item", d.item_code)
 					uom = item.stock_uom
 					conversion_factor = 1.0
 
