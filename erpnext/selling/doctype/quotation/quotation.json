@@ -491,6 +491,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.net_total != doc.total",
    "fieldname": "base_net_total",
    "fieldtype": "Currency",
    "force_currency_symbol": 1,
@@ -510,6 +511,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.net_total != doc.total",
    "fieldname": "net_total",
    "fieldtype": "Currency",
    "label": "Net Total",
@@ -1257,7 +1259,7 @@
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2020-10-01 03:22:27.246527",
+ "modified": "2020-10-02 00:54:13.727477",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

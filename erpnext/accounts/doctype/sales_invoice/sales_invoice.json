@@ -37,6 +37,7 @@
   "source",
   "campaign",
   "col_break23",
+  "cost_center",
   "tax_id",
   "tax_cnic",
   "tax_strn",
@@ -44,12 +45,6 @@
   "customer_group",
   "section_break2",
   "sales_team",
-  "accounting_dimensions_section",
-  "debit_to",
-  "party_account_currency",
-  "dimension_col_break",
-  "is_opening",
-  "cost_center",
   "address_and_contact",
   "customer_address",
   "address_display",
@@ -212,12 +207,16 @@
   "commission_rate",
   "column_break_207",
   "total_commission",
-  "sec_status",
-  "status",
+  "accounting_dimensions_section",
+  "debit_to",
+  "party_account_currency",
+  "dimension_col_break",
+  "is_opening",
   "column_break_208",
-  "is_discounted",
+  "status",
   "c_form_applicable",
   "c_form_no",
+  "is_discounted",
   "subscription_section",
   "from_date",
   "column_break_215",
@@ -284,6 +283,7 @@
    "fetch_from": "customer.tax_id",
    "fieldname": "tax_id",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Tax Id",
    "print_hide": 1,
    "read_only": 1
@@ -361,7 +361,7 @@
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "in_standard_filter": 1,
-   "label": "Date",
+   "label": "Posting Date",
    "no_copy": 1,
    "oldfieldname": "posting_date",
    "oldfieldtype": "Date",
@@ -521,7 +521,6 @@
   {
    "fieldname": "company_address_display",
    "fieldtype": "Small Text",
-   "hidden": 1,
    "label": "Company Address",
    "print_hide": 1,
    "read_only": 1
@@ -712,6 +711,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.net_total != doc.total",
    "fieldname": "base_net_total",
    "fieldtype": "Currency",
    "force_currency_symbol": 1,
@@ -735,6 +735,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.net_total != doc.total",
    "fieldname": "net_total",
    "fieldtype": "Currency",
    "label": "Net Total",
@@ -1590,6 +1591,7 @@
    "fetch_from": "customer.tax_cnic",
    "fieldname": "tax_cnic",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "CNIC",
    "read_only": 1
   },
@@ -1597,6 +1599,7 @@
    "fetch_from": "customer.tax_strn",
    "fieldname": "tax_strn",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "STRN",
    "read_only": 1
   },
@@ -1913,12 +1916,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "collapsible": 1,
-   "fieldname": "sec_status",
-   "fieldtype": "Section Break",
-   "label": "Status"
-  },
-  {
    "fieldname": "column_break_208",
    "fieldtype": "Column Break"
   }
@@ -1926,7 +1923,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-10-01 04:05:32.572346",
+ "modified": "2020-10-02 00:54:19.106154",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

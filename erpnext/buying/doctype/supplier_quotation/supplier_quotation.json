@@ -391,6 +391,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.net_total != doc.total",
    "fieldname": "base_net_total",
    "fieldtype": "Currency",
    "force_currency_symbol": 1,
@@ -414,6 +415,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.net_total != doc.total",
    "fieldname": "net_total",
    "fieldtype": "Currency",
    "label": "Net Total",
@@ -1081,7 +1083,7 @@
  "icon": "fa fa-shopping-cart",
  "idx": 29,
  "is_submittable": 1,
- "modified": "2020-10-01 02:44:41.348920",
+ "modified": "2020-10-02 00:54:14.708557",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",

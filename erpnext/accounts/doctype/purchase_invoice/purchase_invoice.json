@@ -256,6 +256,7 @@
    "fetch_from": "supplier.tax_id",
    "fieldname": "tax_id",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Tax Id",
    "print_hide": 1,
    "read_only": 1
@@ -664,6 +665,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.net_total != doc.total",
    "fieldname": "base_net_total",
    "fieldtype": "Currency",
    "force_currency_symbol": 1,
@@ -686,6 +688,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.net_total != doc.total",
    "fieldname": "net_total",
    "fieldtype": "Currency",
    "label": "Net Total",
@@ -1373,6 +1376,7 @@
    "fetch_from": "supplier.tax_cnic",
    "fieldname": "tax_cnic",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "CNIC",
    "print_hide": 1,
    "read_only": 1
@@ -1381,6 +1385,7 @@
    "fetch_from": "supplier.tax_strn",
    "fieldname": "tax_strn",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "STRN",
    "read_only": 1
   },
@@ -1695,7 +1700,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2020-10-01 02:44:45.410865",
+ "modified": "2020-10-02 00:54:23.603734",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

@@ -31,18 +31,18 @@
   "more_info",
   "transaction_type",
   "order_type",
-  "skip_delivery_note",
   "column_break_39",
   "project",
   "inter_company_order_reference",
   "party_account_currency",
   "column_break_77",
   "source",
-  "campaign",
   "col_break_33",
+  "campaign",
   "tax_id",
   "tax_cnic",
   "tax_strn",
+  "skip_delivery_note",
   "section_break1",
   "sales_team",
   "contact_info",
@@ -344,6 +344,7 @@
    "fetch_from": "customer.tax_id",
    "fieldname": "tax_id",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Tax Id",
    "read_only": 1,
    "width": "100px"
@@ -592,6 +593,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.net_total != doc.total",
    "fieldname": "base_net_total",
    "fieldtype": "Currency",
    "force_currency_symbol": 1,
@@ -615,6 +617,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.net_total != doc.total",
    "fieldname": "net_total",
    "fieldtype": "Currency",
    "label": "Net Total",
@@ -966,7 +969,8 @@
    "fieldname": "inter_company_order_reference",
    "fieldtype": "Link",
    "label": "Inter Company Order Reference",
-   "options": "Purchase Order"
+   "options": "Purchase Order",
+   "read_only": 1
   },
   {
    "fieldname": "project",
@@ -1002,6 +1006,7 @@
   {
    "fieldname": "campaign",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Campaign",
    "oldfieldname": "campaign",
    "oldfieldtype": "Link",
@@ -1250,12 +1255,14 @@
    "fieldname": "skip_delivery_note",
    "fieldtype": "Check",
    "label": "Skip Delivery Note",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fetch_from": "customer.tax_cnic",
    "fieldname": "tax_cnic",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "CNIC",
    "read_only": 1,
    "width": "100px"
@@ -1264,6 +1271,7 @@
    "fetch_from": "customer.tax_strn",
    "fieldname": "tax_strn",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "STRN",
    "read_only": 1,
    "width": "100px"
@@ -1283,7 +1291,7 @@
   },
   {
    "collapsible": 1,
-   "depends_on": "eval:doc.docstatus===0 && doc.credit_limit",
+   "depends_on": "eval:doc.docstatus===0 && doc.customer_credit_limit",
    "fieldname": "credit_limit_section",
    "fieldtype": "Section Break",
    "label": "Credit Limit"
@@ -1628,7 +1636,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-01 04:09:50.029553",
+ "modified": "2020-10-02 00:57:53.698404",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
