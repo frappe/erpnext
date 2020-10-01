@@ -368,7 +368,7 @@ class ReceivablePayableReport(object):
 				temp_outstanding_amt = outstanding_amount
 				temp_credit_note_amt = credit_note_amount
 
-				if abs(outstanding_amount) > 0.1/10**self.currency_precision:
+				if abs(outstanding_amount) >= 0.1/10**self.currency_precision:
 					if self.filters.based_on_payment_terms and self.payment_term_map.get(gle.voucher_no):
 						for d in self.payment_term_map.get(gle.voucher_no):
 							# Allocate payment amount based on payment terms(FIFO order)
