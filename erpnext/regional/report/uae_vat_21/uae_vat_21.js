@@ -18,7 +18,6 @@ frappe.query_reports["UAE VAT 21"] = {
 			"fieldtype": "Date",
 			"reqd": 1,
 			"default": frappe.datetime.add_months(frappe.datetime.get_today(), -3),
-			"width": "80"
 		},
 		{
 			"fieldname": "to_date",
