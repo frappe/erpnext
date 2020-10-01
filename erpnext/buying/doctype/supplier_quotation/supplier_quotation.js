@@ -62,8 +62,10 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 						transaction_date: null
 					},
 					get_query_filters: {
-						docstatus: 1,
-					}
+						supplier: me.frm.doc.supplier
+					},
+					get_query_method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_rfq_containing_supplier"
+
 				})
 			}, __("Get items from"));
 		}
