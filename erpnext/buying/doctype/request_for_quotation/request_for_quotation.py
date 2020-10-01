@@ -354,3 +354,31 @@ def get_supplier_tag():
 		frappe.cache().hset("Supplier", "Tags", tags)
 
 	return frappe.cache().hget("Supplier", "Tags")
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_rfq_containing_supplier(doctype, txt, searchfield, start, page_len, filters):
+	conditions = ""
+	if txt:
+		conditions += "and rfq.name like '%%"+txt+"%%' "
+
+	if filters.get("transaction_date"):
+		conditions += "and rfq.transaction_date = '{0}'".format(filters.get("transaction_date"))
+
+	rfq_data = frappe.db.sql("""
+		select
+			distinct rfq.name, rfq.transaction_date,
+			rfq.company
+		from
+			`tabRequest for Quotation` rfq, `tabRequest for Quotation Supplier` rfq_supplier
+		where
+			rfq.name = rfq_supplier.parent
+			and rfq_supplier.supplier = '{0}'
+			and rfq.docstatus = 1
+			and rfq.company = '{1}'
+			{2}
+		order by rfq.transaction_date ASC
+		limit {3} offset {4} """ \
+		.format(filters.get("supplier"), filters.get("company"), conditions, page_len, start), as_dict=1)
+
+	return rfq_data
