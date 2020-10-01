@@ -123,7 +123,7 @@ class FBRInvoiceWiseTaxes(object):
 		columns = [list(filter(lambda d: d['fieldname'] == f, all_columns))[0] for f in fieldnames]
 
 		if self.party_naming_by != "Naming Series":
-			columns = filter(lambda d: d['fieldname'] != 'party_name', columns)
+			columns = list(filter(lambda d: d['fieldname'] != 'party_name', columns))
 
 		return columns
 
@@ -190,7 +190,7 @@ class FBRInvoiceWiseTaxes(object):
 				for f in aggregate_fields:
 					self.customer_aggregate[d.party][f] += d[f]
 
-			return self.customer_aggregate.values()
+			return list(self.customer_aggregate.values())
 		else:
 			return self.invoices
 
