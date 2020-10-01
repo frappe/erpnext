@@ -13,11 +13,27 @@ frappe.ui.form.on("Delivery Note", {
 			'Installation Note': 'Installation Note',
 			'Sales Invoice': 'Sales Invoice',
 			'Delivery Note': 'Sales Return',
-		},
-		frm.set_indicator_formatter('item_code',
-			function(doc) {
-				return (doc.docstatus==1 || doc.qty<=doc.actual_qty) ? "green" : "orange"
-			})
+		};
+
+		frm.set_indicator_formatter('item_code', function(doc) {
+			if (doc.docstatus === 0) {
+				if (!doc.actual_qty) {
+					return "red";
+				} else if (doc.qty < doc.actual_qty) {
+					return "orange";
+				} else {
+					return "green";
+				}
+			} else {
+				if (!doc.billed_qty) {
+					return "orange";
+				} else if (doc.billed_qty < doc.qty) {
+					return "yellow";
+				} else {
+					return "green";
+				}
+			}
+		});
 
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);

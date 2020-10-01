@@ -18,8 +18,17 @@ frappe.ui.form.on("Purchase Order", {
 			}
 		});
 
-		frm.set_indicator_formatter('item_code',
-			function(doc) { return (doc.qty<=doc.received_qty) ? "green" : "orange" })
+		frm.set_indicator_formatter('item_code', function(doc) {
+			if (doc.docstatus === 1) {
+				if (!doc.received_qty) {
+					return "orange";
+				} else if (doc.received_qty < doc.qty) {
+					return "yellow";
+				} else {
+					return "green";
+				}
+			}
+		});
 
 		frm.set_query("expense_account", "items", function() {
 			return {

@@ -29,6 +29,18 @@ frappe.ui.form.on("Purchase Receipt", {
 			'Landed Cost Voucher': 'Landed Cost Voucher'
 		}
 
+		frm.set_indicator_formatter('item_code', function(doc) {
+			if (doc.docstatus === 1) {
+				if (!doc.billed_qty) {
+					return "orange";
+				} else if (doc.billed_qty < doc.qty) {
+					return "yellow";
+				} else {
+					return "green";
+				}
+			}
+		});
+
 		frm.set_query("expense_account", "items", function() {
 			return {
 				query: "erpnext.controllers.queries.get_expense_account",
