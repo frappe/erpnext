@@ -14,7 +14,7 @@ def execute():
 		if not frappe.db.exists("Customs Tariff Number", d.name):
 			doc = frappe.new_doc("Customs Tariff Number")
 			doc.tariff_number = d.name
-			doc.description = d.description
+			doc.description = d.description or d.name
 			doc.save()
 
 	frappe.db.sql("update `tabItem Tax` set parent = 'Customs Tariff Number' where parent = 'HS Code'")
