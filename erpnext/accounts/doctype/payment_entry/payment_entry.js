@@ -2,6 +2,8 @@
 // For license information, please see license.txt
 {% include "erpnext/public/js/controllers/accounts.js" %}
 
+cur_frm.cscript.tax_table = "Advance Taxes and Charges";
+
 frappe.ui.form.on('Payment Entry', {
 	onload: function(frm) {
 		if(frm.doc.__islocal) {
@@ -171,6 +173,8 @@ frappe.ui.form.on('Payment Entry', {
 			frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency));
 
 		frm.toggle_display("base_paid_amount", frm.doc.paid_from_account_currency != company_currency);
+		frm.toggle_display("base_total_taxes_and_charges", frm.doc.total_taxes_and_charges &&
+			(frm.doc.paid_from_account_currency != company_currency));
 
 		frm.toggle_display("base_received_amount", (
 			frm.doc.paid_to_account_currency != company_currency
@@ -807,12 +811,12 @@ frappe.ui.form.on('Payment Entry', {
 			if(frm.doc.payment_type == "Receive"
 				&& frm.doc.base_total_allocated_amount < frm.doc.base_received_amount + total_deductions
 				&& frm.doc.total_allocated_amount < frm.doc.paid_amount + (total_deductions / frm.doc.source_exchange_rate)) {
-					unallocated_amount = (frm.doc.base_received_amount + total_deductions
-						- frm.doc.base_total_allocated_amount) / frm.doc.source_exchange_rate;
+					unallocated_amount = (frm.doc.base_received_amount + total_deductions + frm.doc.base_total_taxes_and_charges
+						+ frm.doc.base_total_allocated_amount) / frm.doc.source_exchange_rate;
 			} else if (frm.doc.payment_type == "Pay"
 				&& frm.doc.base_total_allocated_amount < frm.doc.base_paid_amount - total_deductions
 				&& frm.doc.total_allocated_amount < frm.doc.received_amount + (total_deductions / frm.doc.target_exchange_rate)) {
-					unallocated_amount = (frm.doc.base_paid_amount - (total_deductions
+					unallocated_amount = (frm.doc.base_paid_amount + frm.doc.base_total_taxes_and_charges - (total_deductions
 						+ frm.doc.base_total_allocated_amount)) / frm.doc.target_exchange_rate;
 			}
 		}
@@ -838,7 +842,8 @@ frappe.ui.form.on('Payment Entry', {
 		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
 			function(d) { return flt(d.amount) }));
 
-		frm.set_value("difference_amount", difference_amount - total_deductions);
+		frm.set_value("difference_amount", difference_amount - total_deductions +
+			frm.doc.base_total_taxes_and_charges);
 
 		frm.events.hide_unhide_fields(frm);
 	},
@@ -960,7 +965,107 @@ frappe.ui.form.on('Payment Entry', {
 				}
 			});
 		}
-	}
+	},
+
+	sales_taxes_and_charges_template: function(frm) {
+		frm.trigger('fetch_taxes_from_template');
+	},
+
+	purchase_taxes_and_charges_template: function(frm) {
+		frm.trigger('fetch_taxes_from_template');
+	},
+
+	fetch_taxes_from_template: function(frm) {
+		let master_doctype = '';
+		let taxes_and_charges = '';
+
+		if (frm.doc.party_type == 'Supplier') {
+			master_doctype = 'Purchase Taxes and Charges Template';
+			taxes_and_charges = frm.doc.purchase_taxes_and_charges_template;
+		} else if (frm.doc.party_type == 'Customer') {
+			master_doctype = 'Sales Taxes and Charges Template';
+			taxes_and_charges = frm.doc.sales_taxes_and_charges_template;
+		}
+
+		if (!taxes_and_charges) {
+			return;
+		}
+
+		frappe.call({
+			method: "erpnext.controllers.accounts_controller.get_taxes_and_charges",
+			args: {
+				"master_doctype": master_doctype,
+				"master_name": taxes_and_charges
+			},
+			callback: function(r) {
+				if(!r.exc && r.message) {
+					// set taxes table
+					if(r.message) {
+						for (let tax of r.message) {
+							if (tax.charge_type === 'On Net Total') {
+								tax.charge_type = 'On Paid Amount';
+							}
+							me.frm.add_child("taxes", tax);
+						}
+						frm.trigger('calculate_taxes');
+						frm.events.set_unallocated_amount(frm);
+					}
+				}
+			}
+		});
+	},
+
+	calculate_taxes: function(frm) {
+		frm.doc.total_taxes_and_charges = 0.0;
+		frm.doc.base_total_taxes_and_charges = 0.0;
+
+		$.each(me.frm.doc["taxes"] || [], function(i, tax) {
+			let tax_rate = tax.rate;
+			let current_tax_amount = 0.0;
+
+			// To set row_id by default as previous row.
+			if(["On Previous Row Amount", "On Previous Row Total"].includes(tax.charge_type)) {
+				if (tax.idx === 1) {
+					frappe.throw(__("Cannot select charge type as 'On Previous Row Amount' or 'On Previous Row Total' for first row"));
+				}
+				if (!tax.row_id) {
+					tax.row_id = tax.idx - 1;
+				}
+			}
+
+			if(tax.charge_type == "Actual") {
+				current_tax_amount = flt(tax.tax_amount, precision("tax_amount", tax));
+			} else if(tax.charge_type == "On Paid Amount") {
+				current_tax_amount = (tax_rate / 100.0) * frm.doc.paid_amount;
+			} else if(tax.charge_type == "On Previous Row Amount") {
+				current_tax_amount = (tax_rate / 100.0) *
+					frm.doc["taxes"][cint(tax.row_id) - 1].tax_amount;
+
+			} else if(tax.charge_type == "On Previous Row Total") {
+				current_tax_amount = (tax_rate / 100.0) *
+					frm.doc["taxes"][cint(tax.row_id) - 1].total;
+			}
+
+			tax.tax_amount = current_tax_amount;
+			tax.base_tax_amount = tax.tax_amount * frm.doc.source_exchange_rate;
+
+			current_tax_amount *= (tax.add_deduct_tax == "Deduct") ? -1.0 : 1.0;
+
+			if(i==0) {
+				tax.total = flt(frm.doc.paid_amount + current_tax_amount, precision("total", tax));
+			} else {
+				tax.total = flt(frm.doc["taxes"][i-1].total + current_tax_amount, precision("total", tax));
+			}
+
+			tax.base_total = tax.total * frm.doc.source_exchange_rate;
+			frm.doc.total_taxes_and_charges += current_tax_amount;
+			frm.doc.base_total_taxes_and_charges += current_tax_amount * frm.doc.source_exchange_rate;
+
+			frm.refresh_field('taxes');
+			frm.refresh_field('total_taxes_and_charges');
+			frm.refresh_field('base_total_taxes_and_charges');
+		});
+	},
 });
 
 
@@ -1004,6 +1109,28 @@ frappe.ui.form.on('Payment Entry Reference', {
 
 	references_remove: function(frm) {
 		frm.events.set_total_allocated_amount(frm);
+	}
+})
+
+frappe.ui.form.on('Advance Taxes and Charges', {
+	rate: function(frm) {
+		frm.events.calculate_taxes(frm);
+		frm.events.set_unallocated_amount(frm);
+	},
+
+	tax_amount : function(frm) {
+		frm.events.calculate_taxes(frm);
+		frm.events.set_unallocated_amount(frm);
+	},
+
+	row_id: function(frm) {
+		frm.events.calculate_taxes(frm);
+		frm.events.set_unallocated_amount(frm);
+	},
+
+	taxes_remove: function(frm) {
+		frm.events.calculate_taxes(frm);
+		frm.events.set_unallocated_amount(frm);
 	}
 })
 

@@ -174,7 +174,7 @@ cur_frm.cscript.validate_taxes_and_charges = function(cdt, cdn) {
 		msg = __("Please select Charge Type first");
 		d.row_id = "";
 		d.rate = d.tax_amount = 0.0;
-	} else if((d.charge_type == 'Actual' || d.charge_type == 'On Net Total') && d.row_id) {
+	} else if((d.charge_type == 'Actual' || d.charge_type == 'On Net Total' || d.charge_type == 'On Paid Amount') && d.row_id) {
 		msg = __("Can refer row only if the charge type is 'On Previous Row Amount' or 'Previous Row Total'");
 		d.row_id = "";
 	} else if((d.charge_type == 'On Previous Row Amount' || d.charge_type == 'On Previous Row Total') && d.row_id) {
