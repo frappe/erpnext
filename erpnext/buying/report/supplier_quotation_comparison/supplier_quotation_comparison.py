@@ -44,7 +44,7 @@ def get_data(filters, conditions):
 	supplier_quotation_data = frappe.db.sql("""
 		SELECT
 			sqi.parent, sqi.item_code,
-			sqi.qty, sqi.stock_qty, sqi.rate,
+			sqi.qty, sqi.stock_qty, sqi.amount,
 			sqi.uom, sqi.stock_uom,
 			sqi.request_for_quotation,
 			sqi.lead_time_days, sq.supplier as supplier_name, sq.valid_till
@@ -85,7 +85,7 @@ def prepare_data(supplier_quotation_data, filters):
 			"supplier_name": "" if group_by_field=="supplier_name" else data.get("supplier_name"),
 			"quotation": data.get("parent"),
 			"qty": data.get("qty"),
-			"price": flt(data.get("rate") * exchange_rate, float_precision),
+			"price": flt(data.get("amount") * exchange_rate, float_precision),
 			"uom": data.get("uom"),
 			"stock_uom": data.get('stock_uom'),
 			"request_for_quotation": data.get("request_for_quotation"),
@@ -112,12 +112,12 @@ def prepare_data(supplier_quotation_data, filters):
 	suppliers = list(set(suppliers))
 	qty_list = list(set(qty_list))
 
-	highlight_min_price = group_by_field == "item_code"
+	highlight_min_price = group_by_field == "item_code" or filters.get("item_code")
 
 	# final data format for report view
 	for group in groups:
 		group_entries = group_wise_map[group] # all entries pertaining to item/supplier
-		group_entries[0].update({group_by_field : group})
+		group_entries[0].update({group_by_field : group}) # Add item/supplier name in first group row
 
 		if highlight_min_price:
 			prices = [group_entry["price_per_unit"] for group_entry in group_entries]
