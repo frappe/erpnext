@@ -251,6 +251,10 @@ def make_bom(**args):
 			'rate': item_doc.valuation_rate or args.rate,
 		})
 
-	bom.insert(ignore_permissions=True)
-	bom.submit()
+	if not args.do_not_save:
+		bom.insert(ignore_permissions=True)
+
+		if not args.do_not_submit:
+			bom.submit()
+
 	return bom
