@@ -214,14 +214,14 @@ def get_supplier_contacts(doctype, txt, searchfield, start, page_len, filters):
 		and `tabDynamic Link`.link_name like %(txt)s) and `tabContact`.name = `tabDynamic Link`.parent
 		limit %(start)s, %(page_len)s""", {"start": start, "page_len":page_len, "txt": "%%%s%%" % txt, "name": filters.get('supplier')})
 
-# This method is used to make supplier quotation from material request form.
 @frappe.whitelist()
-def make_supplier_quotation(source_name, for_supplier, target_doc=None):
+def make_supplier_quotation_from_rfq(source_name, target_doc=None, for_supplier=None):
 	def postprocess(source, target_doc):
-		target_doc.supplier = for_supplier
-		args = get_party_details(for_supplier, party_type="Supplier", ignore_permissions=True)
-		target_doc.currency = args.currency or get_party_account_currency('Supplier', for_supplier, source.company)
-		target_doc.buying_price_list = args.buying_price_list or frappe.db.get_value('Buying Settings', None, 'buying_price_list')
+		if for_supplier:
+			target_doc.supplier = for_supplier
+			args = get_party_details(for_supplier, party_type="Supplier", ignore_permissions=True)
+			target_doc.currency = args.currency or get_party_account_currency('Supplier', for_supplier, source.company)
+			target_doc.buying_price_list = args.buying_price_list or frappe.db.get_value('Buying Settings', None, 'buying_price_list')
 		set_missing_values(source, target_doc)
 
 	doclist = get_mapped_doc("Request for Quotation", source_name, {
