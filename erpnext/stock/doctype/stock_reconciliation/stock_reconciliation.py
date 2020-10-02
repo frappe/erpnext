@@ -523,7 +523,6 @@ def get_difference_account(purpose, company):
 	if purpose == 'Stock Reconciliation':
 		account = get_company_default(company, "stock_adjustment_account")
 	else:
-		account = frappe.db.get_value('Account', {'is_group': 0,
-			'company': company, 'account_type': 'Temporary'}, 'name')
+		account = get_company_default(company, "temporary_opening_account")
 
 	return account
