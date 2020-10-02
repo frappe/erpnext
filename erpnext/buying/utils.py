@@ -58,15 +58,15 @@ def validate_for_items(doc):
 			if d.meta.get_field(x):
 				d.set(x, f_lst[x])
 
-		item = frappe.db.sql("""select is_stock_item,
-			is_sub_contracted_item, end_of_life, disabled from `tabItem` where name=%s""",
-			d.item_code, as_dict=1)[0]
+		item = frappe.get_cached_value("Item", d.item_code, ['is_stock_item', 'is_sub_contracted_item', 'end_of_life',
+			'disabled'], as_dict=1)
 
 		validate_end_of_life(d.item_code, item.end_of_life, item.disabled)
 
 		# validate stock item
-		if item.is_stock_item==1 and d.qty and not d.warehouse and not d.get("delivered_by_supplier"):
-			frappe.throw(_("Warehouse is mandatory for stock Item {0} in row {1}").format(d.item_code, d.idx))
+		if doc.doctype not in ['Quotation', 'Supplier Quotation']:
+			if item.is_stock_item==1 and d.qty and not d.warehouse and not d.get("delivered_by_supplier"):
+				frappe.throw(_("Warehouse is mandatory for stock Item {0} in row {1}").format(d.item_code, d.idx))
 
 		items.append(cstr(d.item_code))
 

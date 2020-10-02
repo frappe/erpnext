@@ -14,15 +14,16 @@
   "column_break1",
   "remarks",
   "column_break_21",
-  "transaction_date",
   "amended_from",
+  "transaction_date",
   "naming_series",
   "more_info",
-  "set_project",
+  "project",
+  "column_break_14",
   "is_subcontracted",
   "column_break_57",
-  "status",
   "opportunity",
+  "status",
   "address_section",
   "supplier_address",
   "address_display",
@@ -100,6 +101,7 @@
   "base_total_discount_after_taxes",
   "section_break_41",
   "apply_discount_on",
+  "col_break_96",
   "additional_discount_percentage",
   "column_break_43",
   "discount_amount",
@@ -122,6 +124,7 @@
   "terms",
   "printing_settings",
   "letter_head",
+  "column_break_117",
   "select_print_heading",
   "column_break_72",
   "language",
@@ -173,11 +176,12 @@
   },
   {
    "bold": 1,
+   "depends_on": "eval:doc.supplier != doc.supplier_name",
    "fetch_from": "supplier.supplier_name",
    "fieldname": "supplier_name",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "label": "Name",
+   "label": "Supplier Name",
    "read_only": 1
   },
   {
@@ -777,6 +781,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "auto_repeat",
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
    "label": "Auto Repeat Section"
@@ -850,13 +855,6 @@
   {
    "fieldname": "column_break_21",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "set_project",
-   "fieldtype": "Link",
-   "label": "Set Project",
-   "options": "Project",
-   "print_hide": 1
   },
   {
    "fieldname": "column_break_15",
@@ -1078,12 +1076,31 @@
   {
    "fieldname": "section_break_99",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_117",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col_break_96",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 29,
  "is_submittable": 1,
- "modified": "2020-10-02 00:54:14.708557",
+ "modified": "2020-10-02 15:31:34.398213",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",

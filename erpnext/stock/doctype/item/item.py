@@ -1058,7 +1058,7 @@ def get_timeline_data(doctype, name):
 
 def validate_end_of_life(item_code, end_of_life=None, disabled=None, verbose=1):
 	if (not end_of_life) or (disabled is None):
-		end_of_life, disabled = frappe.db.get_value("Item", item_code, ["end_of_life", "disabled"])
+		end_of_life, disabled = frappe.get_cached_value("Item", item_code, ["end_of_life", "disabled"])
 
 	if end_of_life and end_of_life != "0000-00-00" and getdate(end_of_life) <= now_datetime().date():
 		msg = _("Item {0} has reached its end of life on {1}").format(item_code, formatdate(end_of_life))
@@ -1070,7 +1070,7 @@ def validate_end_of_life(item_code, end_of_life=None, disabled=None, verbose=1):
 
 def validate_is_stock_item(item_code, is_stock_item=None, verbose=1):
 	if not is_stock_item:
-		is_stock_item = frappe.db.get_value("Item", item_code, "is_stock_item")
+		is_stock_item = frappe.get_cached_value("Item", item_code, "is_stock_item")
 
 	if is_stock_item != 1:
 		msg = _("Item {0} is not a stock Item").format(item_code)

@@ -208,7 +208,6 @@
   {
    "fieldname": "stock_uom",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Stock UOM",
    "options": "UOM",
    "print_hide": 1,
@@ -242,6 +241,7 @@
   {
    "fieldname": "uom",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "UOM",
    "options": "UOM",
    "print_hide": 1,
@@ -921,7 +921,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-01 04:23:05.108017",
+ "modified": "2020-10-02 15:35:29.030288",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation Item",
