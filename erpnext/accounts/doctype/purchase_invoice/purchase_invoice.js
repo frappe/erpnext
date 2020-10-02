@@ -292,11 +292,6 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		erpnext.utils.get_party_account_details(this.frm);
 	},
 
-	transaction_type: function() {
-		this._super();
-		erpnext.utils.get_party_account_details(this.frm);
-	},
-
 	set_party_details: function() {
 		if(this.frm.updating_party_details)
 			return;

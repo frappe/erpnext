@@ -219,10 +219,10 @@ def get_party_account_details(party_type, party, company, transaction_type=None)
 	account = get_party_account(party_type, party, company, transaction_type)
 	cost_center = get_party_cost_center(party_type, party, company, transaction_type)
 
-	return {
+	return frappe._dict({
 		'account': account,
 		'cost_center': cost_center
-	}
+	})
 
 
 @frappe.whitelist()

@@ -202,7 +202,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.frm.set_query("expense_account", "items", function(doc) {
 				return {
 					filters: {
-						"company": doc.company
+						"company": doc.company,
+						"is_group": 0
 					}
 				};
 			});
@@ -1823,9 +1824,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-	update_item_defaults: function() {
+	get_item_defaults_args: function () {
 		var me = this;
 		var items = [];
+
 		$.each(this.frm.doc.items || [], function(i, item) {
 			if(item.item_code) {
 				items.push({
@@ -1840,43 +1842,79 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 		});
 
-		if(items.length) {
-			return this.frm.call({
+		return {
+			args: {
+				doctype: me.frm.doc.doctype,
+				company: me.frm.doc.company,
+				transaction_type_name: me.frm.doc.transaction_type,
+				customer: me.frm.doc.customer,
+				supplier: me.frm.doc.supplier,
+				project: me.frm.doc.project
+			},
+			items: items
+		};
+	},
+
+	update_item_defaults: function() {
+		var me = this;
+		var args = me.get_item_defaults_args();
+
+		if(args.items.length) {
+			return frappe.call({
 				method: "erpnext.stock.get_item_details.get_item_defaults_info",
-				args: {
-					args: {
-						doctype: me.frm.doc.doctype,
-						company: me.frm.doc.company,
-						transaction_type_name: me.frm.doc.transaction_type,
-						customer: me.frm.doc.customer,
-						supplier: me.frm.doc.supplier,
-						project: me.frm.doc.project
-					},
-					items: items
-				},
+				args: args,
 				callback: function(r) {
 					if(!r.exc) {
-						$.each(me.frm.doc.items || [], function(i, item) {
-							if(item.item_code && r.message.hasOwnProperty(item.name)) {
-								$.each(r.message[item.name] || {}, function (k ,v) {
-									item[k] = v;
-								});
-							}
-						});
-						me.frm.refresh_field('items');
+						me.set_item_defaults(r.message);
 					}
 				}
 			});
 		}
 	},
 
-	transaction_type: function() {
-		this.update_item_defaults();
-		erpnext.utils.set_taxes(this.frm, 'transaction_type');
+	set_item_defaults: function (items_dict) {
+		var me = this;
+		$.each(me.frm.doc.items || [], function(i, item) {
+			if(item.item_code && items_dict.hasOwnProperty(item.name)) {
+				$.each(items_dict[item.name] || {}, function (k ,v) {
+					item[k] = v;
+				});
+			}
+		});
+		me.frm.refresh_field('items');
 	},
 
-	cost_center: function() {
-		this.update_item_defaults();
+	transaction_type: function() {
+		var me = this;
+
+		var args = me.get_item_defaults_args();
+		args.args.letter_of_credit = me.frm.doc.letter_of_credit;
+
+		return frappe.call({
+			method: "erpnext.accounts.doctype.transaction_type.transaction_type.get_transaction_type_details",
+			args: args,
+			callback: function(r) {
+				if(!r.exc) {
+					me.set_item_defaults(r.message.items);
+
+					$.each(r.message.doc || {}, function (k, v) {
+						if (k === 'cost_center') {
+							me.frm.doc[k] = v;
+						} else {
+							me.frm.set_value(k, v);
+						}
+					});
+
+					erpnext.utils.set_taxes(me.frm, 'transaction_type');
+				}
+			}
+		});
+	},
+
+	cost_center: function(doc, cdt, cdn) {
+		if (cdt !== this.frm.doc.doctype) {
+			return;
+		}
 		erpnext.utils.set_taxes(this.frm, 'cost_center');
 	},
 
