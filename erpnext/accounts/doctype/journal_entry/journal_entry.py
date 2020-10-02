@@ -177,7 +177,7 @@ class JournalEntry(AccountsController):
 
 				if not (d.reference_type and d.reference_name) and diff < 0 and not cint(self.is_advance):
 					frappe.throw(_("Row {0}: No voucher is referenced in Receivable / Payable account {1}. "
-						"Please set 'Against Document' or check 'Is Advance' if you do not want to reference this entry against another voucher")
+						"Please set 'Against Document' or check mark 'Is Advance' if you do not want to reference this entry against another voucher")
 						.format(d.idx, d.account))
 
 	def check_credit_limit(self):

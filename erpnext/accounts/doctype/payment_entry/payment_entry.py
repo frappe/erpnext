@@ -65,6 +65,7 @@ class PaymentEntry(AccountsController):
 		self.set_status()
 
 	def before_submit(self):
+		self.validate_is_advance()
 		self.set_remarks()
 
 	def on_submit(self):
@@ -126,6 +127,12 @@ class PaymentEntry(AccountsController):
 			if invalid:
 				frappe.throw(_("Row #{0}: Allocated Amount of {1} against {2} is greater than its Outstanding Amount {3}.")
 					.format(d.idx, flt(d.allocated_amount), d.reference_name, flt(d.outstanding_amount)))
+
+	def validate_is_advance(self):
+		if self.unallocated_amount and not cint(self.is_advance):
+			frappe.throw(_("Payment is not completely allocated against invoices/vouchers. "
+				"Please allocate against oustanding invoices or check mark 'Is Advance' "
+				"if you do not want to reference this entry against another voucher"))
 
 	def delink_advance_entry_references(self):
 		for reference in self.references:

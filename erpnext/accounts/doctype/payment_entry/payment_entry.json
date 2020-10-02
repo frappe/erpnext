@@ -66,6 +66,8 @@
   "set_exchange_gain_loss",
   "column_break_36",
   "unallocated_amount",
+  "is_advance",
+  "column_break_63",
   "difference_amount",
   "write_off_difference_amount",
   "deductions_or_loss_section",
@@ -656,10 +658,20 @@
   {
    "fieldname": "column_break_77",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_advance",
+   "fieldtype": "Check",
+   "label": "Is Advance"
+  },
+  {
+   "fieldname": "column_break_63",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2020-10-01 05:40:42.337437",
+ "modified": "2020-10-02 23:17:48.617488",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
