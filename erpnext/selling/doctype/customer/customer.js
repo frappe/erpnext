@@ -34,6 +34,16 @@ frappe.ui.form.on("Customer", {
 				filters: filters
 			}
 		});
+		frm.set_query('cost_center', 'accounts', function(doc, cdt, cdn) {
+			var d  = locals[cdt][cdn];
+			var filters = {
+				'company': d.company,
+				"is_group": 0
+			};
+			return {
+				filters: filters
+			}
+		});
 
 		if (frm.doc.__islocal == 1) {
 			frm.set_value("represents_company", "");

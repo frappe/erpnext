@@ -17,6 +17,16 @@ frappe.ui.form.on("Supplier", {
 				}
 			}
 		});
+		frm.set_query('cost_center', 'accounts', function(doc, cdt, cdn) {
+			var d  = locals[cdt][cdn];
+			var filters = {
+				'company': d.company,
+				"is_group": 0
+			};
+			return {
+				filters: filters
+			}
+		});
 		frm.set_query("default_bank_account", function() {
 			return {
 				filters: {

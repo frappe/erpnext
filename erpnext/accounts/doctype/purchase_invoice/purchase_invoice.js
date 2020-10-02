@@ -285,11 +285,16 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 	},
 
 	supplier: function() {
-		this.set_party_details()
+		this.set_party_details();
 	},
 
 	letter_of_credit: function() {
-		this.set_party_details()
+		erpnext.utils.get_party_account_details(this.frm);
+	},
+
+	transaction_type: function() {
+		this._super();
+		erpnext.utils.get_party_account_details(this.frm);
 	},
 
 	set_party_details: function() {

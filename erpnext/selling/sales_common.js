@@ -77,6 +77,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 
+		if(this.frm.fields_dict.transaction_type) {
+			this.frm.set_query("transaction_type", function() {
+				return { filters: { selling: 1 } };
+			});
+		}
+
 		if(!this.frm.fields_dict["items"]) {
 			return;
 		}

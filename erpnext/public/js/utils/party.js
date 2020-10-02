@@ -97,6 +97,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 	args.tax_id = frm.doc.tax_id;
 	args.tax_cnic = frm.doc.tax_cnic;
 	args.tax_strn = frm.doc.tax_strn;
+	args.letter_of_credit = frm.doc.letter_of_credit;
 
 	if (frappe.meta.has_field(frm.doc.doctype, 'has_stin')) {
 		args["has_stin"] = cint(frm.doc.has_stin);
@@ -114,7 +115,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 					() => {
 						frm.updating_party_details = false;
 						if (callback) callback();
-						frm.refresh();
+						frm.refresh_fields();
 						erpnext.utils.add_item(frm);
 					}
 				]);
@@ -122,6 +123,49 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 		}
 	});
 }
+
+erpnext.utils.get_party_account_details = function (frm) {
+	if (!frm.doc.company) {
+		return;
+	}
+
+	var party_type;
+	var party;
+	var account_field;
+	if (frm.doc.letter_of_credit) {
+		party_type = "Letter of Credit";
+		party = frm.doc.letter_of_credit;
+		account_field = "credit_to";
+	} else if (frm.doc.supplier) {
+		party_type = "Supplier";
+		party = frm.doc.supplier;
+		account_field = "credit_to";
+	} else if (frm.doc.customer) {
+		party_type = "Customer";
+		party = frm.doc.customer;
+		account_field = "debit_to";
+	} else {
+		return;
+	}
+
+	frappe.call({
+		method: "erpnext.accounts.party.get_party_account_details",
+		args: {
+			company: frm.doc.company,
+			party_type: party_type,
+			party: party,
+			transaction_type: frm.doc.transaction_type
+		},
+		callback: function(r) {
+			if(!r.exc && r.message) {
+				frm.set_value(account_field, r.message.account);
+				if (r.message.cost_center) {
+					frm.set_value("cost_center", r.message.cost_center);
+				}
+			}
+		}
+	});
+};
 
 erpnext.utils.add_item = function(frm) {
 	if (frm.is_new()) {

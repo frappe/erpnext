@@ -23,6 +23,8 @@
   "schedule_date",
   "naming_series",
   "more_info",
+  "transaction_type",
+  "col_break_19",
   "project",
   "column_break_17",
   "payment_terms_template",
@@ -1493,12 +1495,22 @@
   {
    "fieldname": "column_break_167",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transaction_type",
+   "fieldtype": "Link",
+   "label": "Transaction Type",
+   "options": "Transaction Type"
+  },
+  {
+   "fieldname": "col_break_19",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-02 13:13:13.056266",
+ "modified": "2020-10-02 16:26:24.201127",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

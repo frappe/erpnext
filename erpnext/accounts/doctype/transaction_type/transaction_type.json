@@ -9,11 +9,12 @@
   "transaction_type_name",
   "selling",
   "buying",
-  "order_type",
   "column_break_3",
-  "default_cost_center",
+  "order_type",
   "sec_break_1",
-  "item_defaults"
+  "item_defaults",
+  "sec_billing_defaults",
+  "accounts"
  ],
  "fields": [
   {
@@ -26,16 +27,19 @@
    "default": "0",
    "fieldname": "selling",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Selling"
   },
   {
    "default": "0",
    "fieldname": "buying",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Buying"
   },
   {
    "default": "Sales",
+   "depends_on": "selling",
    "fieldname": "order_type",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -48,12 +52,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "default_cost_center",
-   "fieldtype": "Link",
-   "label": "Default Billing Cost Center",
-   "options": "Cost Center"
-  },
-  {
    "fieldname": "sec_break_1",
    "fieldtype": "Section Break",
    "label": "Item Defaults"
@@ -63,9 +61,20 @@
    "fieldtype": "Table",
    "label": "Item Defaults",
    "options": "Item Default"
+  },
+  {
+   "fieldname": "sec_billing_defaults",
+   "fieldtype": "Section Break",
+   "label": "Billing Defaults"
+  },
+  {
+   "fieldname": "accounts",
+   "fieldtype": "Table",
+   "label": "Billing Defaults",
+   "options": "Party Account"
   }
  ],
- "modified": "2020-10-02 16:31:49.391887",
+ "modified": "2020-10-02 17:18:19.310329",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transaction Type",

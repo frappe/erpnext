@@ -89,6 +89,14 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			});
 		}
 
+		if(this.frm.fields_dict.transaction_type) {
+			this.frm.set_query("transaction_type", function() {
+				return{
+					filters: { 'buying': 1 }
+				}
+			});
+		}
+
 		me.frm.set_query('supplier', erpnext.queries.supplier);
 		me.frm.set_query('contact_person', erpnext.queries.contact_query);
 		me.frm.set_query('supplier_address', erpnext.queries.address_query);

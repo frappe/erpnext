@@ -27,6 +27,8 @@
   "posting_time",
   "set_posting_time",
   "more_info",
+  "transaction_type",
+  "column_break_22",
   "project",
   "column_break4",
   "incoterms",
@@ -1475,12 +1477,22 @@
   {
    "fieldname": "column_break_122",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transaction_type",
+   "fieldtype": "Link",
+   "label": "Transaction Type",
+   "options": "Transaction Type"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
- "modified": "2020-10-02 13:25:50.652077",
+ "modified": "2020-10-02 17:19:33.817989",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

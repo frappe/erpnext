@@ -29,6 +29,8 @@
   "set_posting_time",
   "due_date",
   "more_info",
+  "transaction_type",
+  "column_break_25",
   "project",
   "column_break_63",
   "incoterms",
@@ -1717,12 +1719,22 @@
   {
    "fieldname": "column_break_199",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "transaction_type",
+   "fieldtype": "Link",
+   "label": "Transaction Type",
+   "options": "Transaction Type"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2020-10-02 13:42:41.774596",
+ "modified": "2020-10-02 17:19:55.862751",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

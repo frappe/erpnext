@@ -47,12 +47,18 @@ def _get_party_details(party=None, account=None, party_type="Customer", letter_o
 		frappe.throw(_("Not permitted for {0}").format(party), frappe.PermissionError)
 
 	if party or letter_of_credit:
-		account = get_party_account("Letter of Credit" if letter_of_credit else party_type,
-									letter_of_credit if letter_of_credit else party, company)
-		account_fieldname = "debit_to" if party_type=="Customer" else "credit_to"
+		billing_party_type = "Letter of Credit" if letter_of_credit else party_type
+		billing_party = letter_of_credit if letter_of_credit else party
+
+		account = get_party_account(billing_party_type, billing_party, company, transaction_type=transaction_type)
+		account_fieldname = "debit_to" if party_type == "Customer" else "credit_to"
 		party_details[account_fieldname] = account
 
-	party = frappe.get_doc(party_type, party)
+		billing_cost_center = get_party_cost_center(billing_party_type, billing_party, company, transaction_type=transaction_type)
+		if billing_cost_center:
+			party_details['cost_center'] = billing_cost_center
+
+	party = frappe.get_cached_doc(party_type, party)
 	currency = party.default_currency if party.get("default_currency") else get_company_currency(company)
 
 	party_address, shipping_address = set_address_details(party_details, party, party_type, doctype, company, party_address, company_address, shipping_address)
@@ -207,8 +213,20 @@ def set_due_date(party, party_type, company, posting_date, bill_date, doctype):
 
 	return out
 
+
 @frappe.whitelist()
-def get_party_account(party_type, party, company):
+def get_party_account_details(party_type, party, company, transaction_type=None):
+	account = get_party_account(party_type, party, company, transaction_type)
+	cost_center = get_party_cost_center(party_type, party, company, transaction_type)
+
+	return {
+		'account': account,
+		'cost_center': cost_center
+	}
+
+
+@frappe.whitelist()
+def get_party_account(party_type, party, company, transaction_type=None):
 	"""Returns the account for the given `party`.
 		Will first search in party (Customer / Supplier) record, if not found,
 		will search in group (Customer Group / Supplier Group),
@@ -219,8 +237,19 @@ def get_party_account(party_type, party, company):
 	if not party:
 		return
 
-	account = frappe.db.get_value("Party Account",
-		{"parenttype": party_type, "parent": party, "company": company}, "account")
+	account = None
+
+	if transaction_type:
+		transaction_type_doc = frappe.get_cached_doc("Transaction Type", transaction_type)
+		account_row = transaction_type_doc.get('accounts', filters={'company': company})
+		if account_row:
+			account = account_row[0].account
+
+	if not account:
+		party_doc = frappe.get_cached_doc(party_type, party)
+		account_row = party_doc.get('accounts', filters={'company': company})
+		if account_row:
+			account = account_row[0].account
 
 	if not account and party_type in ['Customer', 'Supplier']:
 		party_group_doctype = "Customer Group" if party_type=="Customer" else "Supplier Group"
@@ -241,9 +270,36 @@ def get_party_account(party_type, party, company):
 	existing_gle_currency = get_party_gle_currency(party_type, party, company)
 	if existing_gle_currency:
 		if account:
-			account_currency = frappe.db.get_value("Account", account, "account_currency", cache=True)
+			account_currency = frappe.get_cached_value("Account", account, "account_currency")
 		if (account and account_currency != existing_gle_currency) or not account:
 				account = get_party_gle_account(party_type, party, company)
+
+	return account
+
+
+def get_party_cost_center(party_type, party, company, transaction_type=None):
+	from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account
+	if not get_allow_cost_center_in_entry_of_bs_account():
+		return
+
+	if not company:
+		frappe.throw(_("Please select a Company"))
+	if not party:
+		return
+
+	account = None
+
+	if transaction_type:
+		transaction_type_doc = frappe.get_cached_doc("Transaction Type", transaction_type)
+		account_row = transaction_type_doc.get('accounts', filters={'company': company})
+		if account_row:
+			account = account_row[0].cost_center
+
+	if not account:
+		party_doc = frappe.get_cached_doc(party_type, party)
+		account_row = party_doc.get('accounts', filters={'company': company})
+		if account_row:
+			account = account_row[0].cost_center
 
 	return account
 
@@ -351,7 +407,7 @@ def get_due_date_from_template(template_name, posting_date, bill_date):
 	"""
 	due_date = getdate(bill_date or posting_date)
 
-	template = frappe.get_doc('Payment Terms Template', template_name)
+	template = frappe.get_cached_doc('Payment Terms Template', template_name)
 
 	for term in template.terms:
 		if term.due_date_based_on == 'Day(s) after invoice date':
@@ -587,7 +643,7 @@ def get_dashboard_info(party_type, party, loyalty_program=None):
 		group by company""", (party_type, party)))
 
 	for d in companies:
-		company_default_currency = frappe.db.get_value("Company", d.company, 'default_currency')
+		company_default_currency = frappe.get_cached_value("Company", d.company, 'default_currency')
 		party_account_currency = get_party_account_currency(party_type, party, d.company)
 
 		if party_account_currency==company_default_currency:

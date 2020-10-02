@@ -772,15 +772,19 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				var party = me.frm.doc[frappe.model.scrub(party_type)];
 				if(party && me.frm.doc.company) {
 					return frappe.call({
-						method: "erpnext.accounts.party.get_party_account",
+						method: "erpnext.accounts.party.get_party_account_details",
 						args: {
 							company: me.frm.doc.company,
 							party_type: party_type,
-							party: party
+							party: party,
+							transaction_type: me.frm.doc.transaction_type
 						},
 						callback: function(r) {
 							if(!r.exc && r.message) {
-								me.frm.set_value(party_account_field, r.message);
+								me.frm.set_value(party_account_field, r.message.account);
+								if (r.message.cost_center) {
+									me.frm.set_value("cost_center", r.message.cost_center);
+								}
 								set_pricing();
 							}
 						}

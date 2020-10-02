@@ -5,7 +5,8 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
-  "account"
+  "account",
+  "cost_center"
  ],
  "fields": [
   {
@@ -21,12 +22,18 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Account",
-   "options": "Account",
-   "reqd": 1
+   "options": "Account"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Cost Center",
+   "options": "Cost Center"
   }
  ],
  "istable": 1,
- "modified": "2020-03-03 15:45:01.825181",
+ "modified": "2020-10-02 16:48:38.152630",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Party Account",
