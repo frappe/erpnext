@@ -8405,6 +8405,6 @@ Unpaid Expense Claim,Tunggakan Beban Klaim,
 Warehouse wise Item Balance Age and Value,Gudang Item yang bijak Saldo Umur dan Nilai,
 Work Order Stock Report,Laporan Stock Pesanan Kerja,
 Work Orders in Progress,Perintah Kerja Sedang Berlangsung,
-Cash,Tunai,
-Training Program,Program Latihan,
-Reason for Leaving,Alasan Berhenti,
+Account,Cash,TunaiDocType: 
+Training Event,Training Program,Program Latihan
+Employee,Reason for Leaving,Alasan Berhenti
