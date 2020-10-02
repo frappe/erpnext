@@ -115,6 +115,7 @@ class Item(WebsiteGenerator):
 		self.validate_attributes()
 		self.validate_variant_attributes()
 		self.validate_variant_based_on_change()
+		self.validate_show_website()
 		self.validate_website_image()
 		self.make_thumbnail()
 		self.validate_fixed_asset()
@@ -202,6 +203,17 @@ class Item(WebsiteGenerator):
 		if not self.route:
 			return cstr(frappe.db.get_value('Item Group', self.item_group,
 					'route')) + '/' + self.scrub((self.item_name if self.item_name else self.item_code) + '-' + random_string(5))
+
+	def validate_show_website(self):
+		# check if the right 'show in website' is enabled
+		if self.variant_of and self.show_in_website:
+			show_in_website = frappe.bold(_("Show in Website"))
+			frappe.throw(_("Item {0} is a Variant. {1} cannot be enabled for an Item Variant.")
+				.format(frappe.bold(self.item_code), show_in_website))
+		elif not self.variant_of and self.show_variant_in_website:
+			show_variant_in_website = frappe.bold(_("Show in Website (Variant)"))
+			frappe.throw(_("Item {0} is a not Variant. {1} can only be enabled for an Item Variant.")
+				.format(frappe.bold(self.item_code), show_variant_in_website))
 
 	def validate_website_image(self):
 		if frappe.flags.in_import:
