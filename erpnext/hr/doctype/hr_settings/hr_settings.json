@@ -173,7 +173,7 @@
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2020-03-03 15:34:52.760397",
+ "modified": "2020-10-02 22:25:24.270879",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
@@ -190,5 +190,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "track_changes": 1
 }
