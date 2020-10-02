@@ -7,6 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "transaction_type_name",
+  "selling",
+  "buying",
   "order_type",
   "column_break_3",
   "default_cost_center",
@@ -19,6 +21,18 @@
    "fieldtype": "Data",
    "label": "Transaction Type Name",
    "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "selling",
+   "fieldtype": "Check",
+   "label": "Selling"
+  },
+  {
+   "default": "0",
+   "fieldname": "buying",
+   "fieldtype": "Check",
+   "label": "Buying"
   },
   {
    "default": "Sales",
@@ -51,9 +65,9 @@
    "options": "Item Default"
   }
  ],
- "modified": "2020-03-03 15:34:42.878175",
+ "modified": "2020-10-02 16:31:49.391887",
  "modified_by": "Administrator",
- "module": "Selling",
+ "module": "Accounts",
  "name": "Transaction Type",
  "owner": "Administrator",
  "permissions": [
