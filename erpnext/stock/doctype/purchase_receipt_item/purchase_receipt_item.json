@@ -25,13 +25,10 @@
   "column_break_2",
   "item_group",
   "brand",
-  "received_and_accepted",
-  "received_qty",
-  "col_break2",
-  "qty",
-  "col_break_40",
-  "rejected_qty",
   "quantity_and_rate_section",
+  "received_qty",
+  "qty",
+  "rejected_qty",
   "uom",
   "column_break_44",
   "conversion_factor",
@@ -125,7 +122,6 @@
   "purchase_order_item",
   "column_break_40",
   "quality_inspection",
-  "item_tax_template",
   "asset_location",
   "asset_category",
   "schedule_date",
@@ -145,14 +141,15 @@
   "serial_no",
   "column_break_48",
   "rejected_serial_no",
-  "expense_account",
   "include_exploded_items",
   "item_tax_rate",
   "item_tax_detail",
   "accounting_dimensions_section",
-  "project",
-  "dimension_col_break",
   "cost_center",
+  "item_tax_template",
+  "dimension_col_break",
+  "project",
+  "expense_account",
   "section_break_80",
   "page_break"
  ],
@@ -234,11 +231,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "received_and_accepted",
-   "fieldtype": "Section Break",
-   "label": "Received and Accepted"
-  },
-  {
    "bold": 1,
    "fieldname": "received_qty",
    "fieldtype": "Float",
@@ -270,11 +262,6 @@
    "print_hide": 1,
    "print_width": "100px",
    "width": "100px"
-  },
-  {
-   "fieldname": "col_break2",
-   "fieldtype": "Column Break",
-   "print_hide": 1
   },
   {
    "fieldname": "uom",
@@ -847,7 +834,7 @@
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
+   "label": "Accounting Details"
   },
   {
    "fieldname": "dimension_col_break",
@@ -900,10 +887,6 @@
    "fieldname": "hide_item_code",
    "fieldtype": "Check",
    "label": "Hide Item Code"
-  },
-  {
-   "fieldname": "col_break_40",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "quantity_and_rate_section",
@@ -1312,7 +1295,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-01 04:23:06.268005",
+ "modified": "2020-10-02 14:05:48.044886",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

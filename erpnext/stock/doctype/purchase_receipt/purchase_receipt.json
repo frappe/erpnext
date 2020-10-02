@@ -18,22 +18,22 @@
   "letter_of_credit",
   "column_break_10",
   "remarks",
-  "column_break1",
-  "posting_date",
-  "posting_time",
-  "set_posting_time",
   "is_return",
   "reopen_order",
   "return_against",
+  "column_break1",
+  "amended_from",
+  "posting_date",
+  "posting_time",
+  "set_posting_time",
   "more_info",
-  "set_project",
+  "project",
   "column_break4",
   "incoterms",
-  "range",
-  "amended_from",
   "section_break_14",
   "pol_address",
   "pol_address_display",
+  "col_break_27",
   "poa_address",
   "poa_address_display",
   "section_addresses",
@@ -60,6 +60,7 @@
   "get_latest_price",
   "sec_warehouse",
   "set_warehouse",
+  "column_break_53",
   "rejected_warehouse",
   "col_break_warehouse",
   "is_subcontracted",
@@ -127,6 +128,7 @@
   "base_total_discount_after_taxes",
   "section_break_42",
   "apply_discount_on",
+  "column_break_122",
   "additional_discount_percentage",
   "column_break_44",
   "discount_amount",
@@ -252,7 +254,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Date",
+   "label": "Received Date",
    "no_copy": 1,
    "oldfieldname": "posting_date",
    "oldfieldtype": "Date",
@@ -262,10 +264,9 @@
    "width": "100px"
   },
   {
-   "description": "Time at which materials were received",
    "fieldname": "posting_time",
    "fieldtype": "Time",
-   "label": "Posting Time",
+   "label": "Received Time",
    "no_copy": 1,
    "oldfieldname": "posting_time",
    "oldfieldtype": "Time",
@@ -527,6 +528,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "supplied_items",
    "fieldname": "get_current_stock",
    "fieldtype": "Button",
    "label": "Get current stock",
@@ -979,15 +981,6 @@
    "width": "150px"
   },
   {
-   "fieldname": "range",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Range",
-   "oldfieldname": "range",
-   "oldfieldtype": "Data",
-   "print_hide": 1
-  },
-  {
    "fieldname": "column_break4",
    "fieldtype": "Column Break",
    "oldfieldtype": "Column Break",
@@ -1152,13 +1145,6 @@
    "label": "Reopen Purchase Order"
   },
   {
-   "fieldname": "set_project",
-   "fieldtype": "Link",
-   "label": "Set Project",
-   "options": "Project",
-   "print_hide": 1
-  },
-  {
    "fieldname": "incoterms",
    "fieldtype": "Select",
    "label": "Incoterms",
@@ -1167,7 +1153,8 @@
   {
    "fieldname": "section_break_14",
    "fieldtype": "Section Break",
-   "hidden": 1
+   "hidden": 1,
+   "label": "Port Address"
   },
   {
    "fieldname": "pol_address",
@@ -1469,12 +1456,31 @@
   {
    "fieldname": "column_break_160",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_53",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_122",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
- "modified": "2020-10-02 00:54:22.086975",
+ "modified": "2020-10-02 13:25:50.652077",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

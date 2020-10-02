@@ -10,53 +10,46 @@
   "company",
   "supplier",
   "supplier_name",
-  "tax_id",
-  "tax_cnic",
-  "tax_strn",
+  "letter_of_credit",
+  "bill_no",
+  "bill_date",
   "naming_series",
   "column_break_5",
   "remarks",
   "is_return",
+  "reopen_order",
+  "return_against",
+  "is_paid",
   "apply_tds",
   "tax_withholding_category",
   "column_break_7",
+  "amended_from",
   "posting_date",
   "posting_time",
   "set_posting_time",
   "due_date",
-  "is_paid",
   "more_info",
-  "credit_to",
-  "party_account_currency",
-  "is_opening",
-  "against_expense_account",
-  "column_break_63",
-  "status",
-  "letter_of_credit",
-  "incoterms",
-  "amended_from",
-  "inter_company_invoice_reference",
-  "section_break_15",
-  "pol_address",
-  "pol_address_display",
-  "poa_address",
-  "poa_address_display",
-  "accounting_dimensions_section",
-  "cost_center",
-  "dimension_col_break",
   "project",
+  "column_break_63",
+  "incoterms",
+  "inter_company_invoice_reference",
+  "col_break_28",
+  "cost_center",
+  "tax_id",
+  "tax_cnic",
+  "tax_strn",
   "sb_14",
   "on_hold",
+  "column_break_35",
   "release_date",
   "cb_17",
   "hold_comment",
-  "supplier_invoice_details",
-  "bill_no",
-  "column_break_15",
-  "bill_date",
-  "returns",
-  "return_against",
-  "reopen_order",
+  "section_break_15",
+  "pol_address",
+  "pol_address_display",
+  "column_break_42",
+  "poa_address",
+  "poa_address_display",
   "section_addresses",
   "supplier_address",
   "address_display",
@@ -80,14 +73,16 @@
   "calculate_tax_on_company_currency",
   "get_latest_price",
   "sec_warehouse",
+  "update_stock",
+  "revalue_purchase_receipt",
+  "column_break_70",
   "set_warehouse",
+  "column_break_72",
   "rejected_warehouse",
   "col_break_warehouse",
   "is_subcontracted",
   "supplier_warehouse",
   "items_section",
-  "update_stock",
-  "revalue_purchase_receipt",
   "scan_barcode",
   "items",
   "pricing_rule_details",
@@ -181,6 +176,7 @@
   "base_write_off_amount",
   "column_break_61",
   "write_off_account",
+  "column_break_171",
   "write_off_cost_center",
   "advances_section",
   "allocate_advances_automatically",
@@ -194,12 +190,21 @@
   "terms",
   "printing_settings",
   "letter_head",
+  "column_break_183",
   "select_print_heading",
   "column_break_112",
   "language",
   "group_same_items",
+  "accounting_dimensions_section",
+  "credit_to",
+  "party_account_currency",
+  "dimension_col_break",
+  "is_opening",
+  "status",
+  "against_expense_account",
   "subscription_section",
   "from_date",
+  "column_break_199",
   "to_date",
   "column_break_114",
   "auto_repeat",
@@ -312,7 +317,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Date",
+   "label": "Posting Date",
    "oldfieldname": "posting_date",
    "oldfieldtype": "Date",
    "print_hide": 1,
@@ -379,13 +384,6 @@
    "label": "Reason For Putting On Hold"
   },
   {
-   "collapsible": 1,
-   "collapsible_depends_on": "bill_no",
-   "fieldname": "supplier_invoice_details",
-   "fieldtype": "Section Break",
-   "label": "Supplier Invoice Details"
-  },
-  {
    "fieldname": "bill_no",
    "fieldtype": "Data",
    "label": "Supplier Invoice No",
@@ -394,10 +392,7 @@
    "print_hide": 1
   },
   {
-   "fieldname": "column_break_15",
-   "fieldtype": "Column Break"
-  },
-  {
+   "depends_on": "bill_no",
    "fieldname": "bill_date",
    "fieldtype": "Date",
    "label": "Supplier Invoice Date",
@@ -405,12 +400,6 @@
    "oldfieldname": "bill_date",
    "oldfieldtype": "Date",
    "print_hide": 1
-  },
-  {
-   "depends_on": "return_against",
-   "fieldname": "returns",
-   "fieldtype": "Section Break",
-   "label": "Returns"
   },
   {
    "depends_on": "return_against",
@@ -1351,7 +1340,7 @@
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
-   "label": "Accounting Dimensions "
+   "label": "Accounting Details "
   },
   {
    "fieldname": "dimension_col_break",
@@ -1415,7 +1404,8 @@
   {
    "fieldname": "section_break_15",
    "fieldtype": "Section Break",
-   "hidden": 1
+   "hidden": 1,
+   "label": "Port Address"
   },
   {
    "fieldname": "pol_address",
@@ -1695,12 +1685,44 @@
   {
    "fieldname": "column_break_153",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_35",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_183",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col_break_28",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_42",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_70",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_72",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_171",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_199",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2020-10-02 00:54:23.603734",
+ "modified": "2020-10-02 13:42:41.774596",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

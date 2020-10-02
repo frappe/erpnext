@@ -11,29 +11,25 @@
   "company",
   "supplier",
   "supplier_name",
-  "column_break1",
-  "remarks",
-  "column_break_28",
-  "transaction_date",
-  "schedule_date",
   "order_confirmation_no",
   "order_confirmation_date",
-  "amended_from",
-  "naming_series",
-  "port_address_section",
-  "pol_address",
-  "pol_address_display",
-  "column_break_35",
-  "poa_address",
-  "poa_address_display",
-  "more_info",
-  "set_project",
+  "column_break1",
+  "remarks",
   "proforma_bill_no",
   "proforma_bill_date",
+  "column_break_28",
+  "amended_from",
+  "transaction_date",
+  "schedule_date",
+  "naming_series",
+  "more_info",
+  "project",
+  "column_break_17",
+  "payment_terms_template",
   "ref_sq",
-  "col_break_26",
   "party_account_currency",
   "inter_company_order_reference",
+  "column_break_23",
   "incoterms",
   "drop_ship",
   "customer",
@@ -54,6 +50,12 @@
   "col_break_address",
   "shipping_address",
   "shipping_address_display",
+  "port_address_section",
+  "pol_address",
+  "pol_address_display",
+  "column_break_35",
+  "poa_address",
+  "poa_address_display",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -134,6 +136,7 @@
   "base_total_discount_after_taxes",
   "discount_section",
   "apply_discount_on",
+  "col_break_132",
   "additional_discount_percentage",
   "column_break_45",
   "discount_amount",
@@ -154,7 +157,6 @@
   "base_rounding_adjustment",
   "disable_rounded_total",
   "payment_schedule_section",
-  "payment_terms_template",
   "payment_schedule",
   "terms_section_break",
   "tc_name",
@@ -169,12 +171,14 @@
   "per_returned",
   "column_break5",
   "letter_head",
+  "column_break_167",
   "select_print_heading",
   "column_break_86",
   "language",
   "group_same_items",
   "subscription_section",
   "from_date",
+  "column_break_170",
   "to_date",
   "column_break_97",
   "auto_repeat",
@@ -223,7 +227,6 @@
   },
   {
    "depends_on": "eval:doc.supplier && doc.docstatus===0 && (!(doc.items && doc.items.length) || (doc.items.length==1 && !doc.items[0].item_code))",
-   "description": "Fetch items based on Default Supplier.",
    "fieldname": "get_items_from_open_material_requests",
    "fieldtype": "Button",
    "label": "Get Items from Open Material Requests"
@@ -262,7 +265,8 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Date",
+   "label": "Order Date",
+   "no_copy": 1,
    "oldfieldname": "transaction_date",
    "oldfieldtype": "Date",
    "reqd": 1,
@@ -276,17 +280,18 @@
   },
   {
    "allow_on_submit": 1,
-   "depends_on": "eval:doc.docstatus===1",
    "fieldname": "order_confirmation_no",
    "fieldtype": "Data",
-   "label": "Order Confirmation No"
+   "label": "Order Confirmation No",
+   "no_copy": 1
   },
   {
    "allow_on_submit": 1,
    "depends_on": "eval:doc.order_confirmation_no",
    "fieldname": "order_confirmation_date",
    "fieldtype": "Date",
-   "label": "Order Confirmation Date"
+   "label": "Order Confirmation Date",
+   "no_copy": 1
   },
   {
    "fieldname": "amended_from",
@@ -499,7 +504,7 @@
    "fieldname": "is_subcontracted",
    "fieldtype": "Select",
    "in_standard_filter": 1,
-   "label": "Supply Raw Materials",
+   "label": "Supply Raw Materials (Is Subcontracted)",
    "options": "No\nYes",
    "print_hide": 1
   },
@@ -987,7 +992,8 @@
    "fieldname": "inter_company_order_reference",
    "fieldtype": "Link",
    "label": "Inter Company Order Reference",
-   "options": "Sales Order"
+   "options": "Sales Order",
+   "read_only": 1
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -1168,28 +1174,19 @@
    "read_only": 1
   },
   {
-   "fieldname": "set_project",
-   "fieldtype": "Link",
-   "label": "Set Project",
-   "options": "Project",
-   "print_hide": 1
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "proforma_bill_no",
    "fieldtype": "Data",
-   "label": "Proforma Invoice No"
+   "label": "Proforma Invoice No",
+   "no_copy": 1
   },
   {
    "allow_on_submit": 1,
    "depends_on": "proforma_bill_no",
    "fieldname": "proforma_bill_date",
    "fieldtype": "Date",
-   "label": "Proforma Invoice Date"
-  },
-  {
-   "fieldname": "col_break_26",
-   "fieldtype": "Column Break"
+   "label": "Proforma Invoice Date",
+   "no_copy": 1
   },
   {
    "fieldname": "incoterms",
@@ -1469,12 +1466,39 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_170",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col_break_132",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_167",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-02 00:54:20.675644",
+ "modified": "2020-10-02 13:13:13.056266",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

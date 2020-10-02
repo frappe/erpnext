@@ -21,13 +21,10 @@
   "manufacturer",
   "column_break_13",
   "manufacturer_part_no",
-  "section_break_16",
-  "received_qty",
-  "column_break_18",
-  "qty",
-  "column_break_20",
-  "rejected_qty",
   "quantity_and_rate",
+  "received_qty",
+  "qty",
+  "rejected_qty",
   "uom",
   "col_break2",
   "conversion_factor",
@@ -108,16 +105,13 @@
   "warehouse_section",
   "warehouse",
   "rejected_warehouse",
+  "column_break_100",
   "serial_no",
+  "allow_zero_valuation_rate",
   "col_br_wh",
   "quality_inspection",
   "batch_no",
   "rejected_serial_no",
-  "accounting",
-  "expense_account",
-  "col_break5",
-  "asset_location",
-  "asset_category",
   "deferred_expense_section",
   "deferred_expense_account",
   "service_stop_date",
@@ -126,21 +120,23 @@
   "service_start_date",
   "service_end_date",
   "reference",
+  "purchase_order",
+  "po_detail",
+  "asset_location",
   "bom",
-  "allow_zero_valuation_rate",
   "item_tax_rate",
   "item_tax_detail",
   "include_exploded_items",
   "col_break6",
-  "item_tax_template",
-  "purchase_order",
-  "po_detail",
   "purchase_receipt",
   "pr_detail",
+  "asset_category",
   "accounting_dimensions_section",
-  "project",
-  "dimension_col_break",
+  "expense_account",
   "cost_center",
+  "dimension_col_break",
+  "item_tax_template",
+  "project",
   "section_break_82",
   "page_break"
  ],
@@ -488,14 +484,9 @@
    "print_hide": 1
   },
   {
-   "fieldname": "accounting",
-   "fieldtype": "Section Break",
-   "label": "Accounting"
-  },
-  {
    "fieldname": "expense_account",
    "fieldtype": "Link",
-   "label": "Expense Head",
+   "label": "Expense Account",
    "oldfieldname": "expense_head",
    "oldfieldtype": "Link",
    "options": "Account",
@@ -509,10 +500,6 @@
    "label": "Item Tax Template",
    "options": "Item Tax Template",
    "print_hide": 1
-  },
-  {
-   "fieldname": "col_break5",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "project",
@@ -776,13 +763,14 @@
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
+   "label": "Accounting Details"
   },
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "manufacture_details",
    "fieldtype": "Section Break",
    "label": "Manufacture"
@@ -817,18 +805,6 @@
    "fieldname": "hide_item_code",
    "fieldtype": "Check",
    "label": "Hide Item Code"
-  },
-  {
-   "fieldname": "section_break_16",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_18",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_20",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "column_break_28",
@@ -1160,11 +1136,15 @@
    "label": "Item Tax Detail",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_100",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-01 04:23:04.641091",
+ "modified": "2020-10-02 14:11:20.853875",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

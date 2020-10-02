@@ -14,7 +14,7 @@
   "section_break_5",
   "hide_item_code",
   "description",
-  "col_break1",
+  "image_section",
   "image",
   "image_view",
   "section_break_12",
@@ -126,13 +126,11 @@
   "column_break_121",
   "billed_qty",
   "billed_amt",
-  "accounting_details",
-  "expense_account",
-  "column_break_68",
-  "item_tax_template",
   "accounting_dimensions_section",
-  "cost_center",
+  "expense_account",
+  "item_tax_template",
   "dimension_col_break",
+  "cost_center",
   "project",
   "section_break_72",
   "page_break",
@@ -212,10 +210,6 @@
    "print_width": "300px",
    "reqd": 1,
    "width": "300px"
-  },
-  {
-   "fieldname": "col_break1",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "image",
@@ -670,21 +664,11 @@
    "report_hide": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "accounting_details",
-   "fieldtype": "Section Break",
-   "label": "Accounting Details"
-  },
-  {
    "fieldname": "expense_account",
    "fieldtype": "Link",
    "label": "Expense Account",
    "options": "Account",
    "print_hide": 1
-  },
-  {
-   "fieldname": "column_break_68",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "cost_center",
@@ -718,7 +702,7 @@
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
-   "label": "Accounting Dimensions "
+   "label": "Accounting Details"
   },
   {
    "fieldname": "dimension_col_break",
@@ -1128,11 +1112,17 @@
    "label": "Item Tax Detail",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "image_section",
+   "fieldtype": "Section Break",
+   "label": "Image"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-01 04:23:06.845815",
+ "modified": "2020-10-02 13:05:04.148402",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

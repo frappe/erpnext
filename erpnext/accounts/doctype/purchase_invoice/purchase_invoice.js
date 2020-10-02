@@ -311,6 +311,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				me.frm.doc.apply_tds = me.frm.supplier_tds ? 1 : 0;
 				me.frm.doc.tax_withholding_category = me.frm.supplier_tds;
 				me.frm.set_df_property("apply_tds", "read_only", me.frm.supplier_tds ? 0 : 1);
+				me.frm.set_df_property("apply_tds", "hidden", me.frm.supplier_tds ? 0 : 1);
 				me.frm.set_df_property("tax_withholding_category", "hidden", me.frm.supplier_tds ? 0 : 1);
 			})
 	},
@@ -552,6 +553,7 @@ frappe.ui.form.on("Purchase Invoice", {
 			}
 			if(!frm.doc.__onload.supplier_tds) {
 				frm.set_df_property("apply_tds", "read_only", 1);
+				me.frm.set_df_property("apply_tds", "hidden", 1);
 			}
 		}
 
