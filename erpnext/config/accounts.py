@@ -98,17 +98,17 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Company",
-					"description": _("Company (not Customer or Supplier) master."),
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
 					"name": "Account",
 					"icon": "fa fa-sitemap",
 					"label": _("Chart of Accounts"),
 					"route": "#Tree/Account",
 					"description": _("Tree of financial accounts."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Company",
+					"description": _("Company (not Customer or Supplier) master."),
 					"onboard": 1,
 				},
 				{
@@ -165,19 +165,16 @@ def get_data():
 					"type": "report",
 					"name": "Bank Reconciliation Statement",
 					"is_query_report": True,
-					"doctype": "Journal Entry"
 				},
 				{
 					"type": "report",
 					"name": "Bank Clearance Summary",
 					"is_query_report": True,
-					"doctype": "Journal Entry"
 				},
 				{
 					"type": "report",
 					"name": "Payment Period Based On Invoice Date",
 					"is_query_report": True,
-					"doctype": "Journal Entry"
 				},
 			]
 		},
@@ -187,12 +184,14 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Journal Entry",
+					"onboard": 1,
 					"description": _("Accounting journal entries.")
 				},
 				{
 					"type": "report",
 					"name": "General Ledger",
 					"doctype": "GL Entry",
+					"onboard": 1,
 					"is_query_report": True,
 				},
 				{
@@ -446,15 +445,11 @@ def get_data():
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Subscriber",
+					"name": "Subscription"
 				},
 				{
 					"type": "doctype",
 					"name": "Subscription Plan",
-				},
-				{
-					"type": "doctype",
-					"name": "Subscription"
 				},
 				{
 					"type": "doctype",
