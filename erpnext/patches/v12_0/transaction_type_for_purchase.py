@@ -2,6 +2,7 @@ import frappe
 
 def execute():
 	frappe.reload_doc("accounts", "doctype", "transaction_type")
+	frappe.reload_doc("accounts", "doctype", "party_account")
 
 	frappe.db.sql("update `tabTransaction Type` set selling = 1 where buying = 0 and selling = 0")
 
