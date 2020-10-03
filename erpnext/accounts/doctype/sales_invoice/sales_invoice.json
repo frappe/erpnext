@@ -1926,6 +1926,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:(doc.is_pos && doc.is_consolidated)",
    "fieldname": "is_consolidated",
    "fieldtype": "Check",
    "label": "Is Consolidated",
@@ -1946,7 +1947,7 @@
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-27 01:56:28.532140",
+ "modified": "2020-10-03 17:33:12.376078",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
