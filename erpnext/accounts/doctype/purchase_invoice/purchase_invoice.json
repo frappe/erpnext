@@ -1404,6 +1404,7 @@
    "options": "\nCIF (Cost, Insurance and Freight)\nCIP (Carriage and Insurance Paid to)\nCFR (Cost and Freight)\nCPT (Carriage paid to)\nDAT (Delivered at Terminal)\nDAP (Delivered at Place)\nDDP (Delivery Duty Paid)\nEXW (Ex Works)\nFAS (Free Alongside Ship)\nFCA (Free Carrier)\nFOB (Free on Board)"
   },
   {
+   "collapsible": 1,
    "fieldname": "section_break_15",
    "fieldtype": "Section Break",
    "hidden": 1,
@@ -1734,7 +1735,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2020-10-03 14:12:27.690037",
+ "modified": "2020-10-04 03:45:59.695191",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

@@ -1140,6 +1140,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "port_address_section",
    "fieldtype": "Section Break",
    "hidden": 1,
@@ -1510,7 +1511,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-03 14:12:28.549311",
+ "modified": "2020-10-04 03:45:46.692180",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
