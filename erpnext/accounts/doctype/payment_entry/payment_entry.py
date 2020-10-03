@@ -129,7 +129,7 @@ class PaymentEntry(AccountsController):
 					.format(d.idx, flt(d.allocated_amount), d.reference_name, flt(d.outstanding_amount)))
 
 	def validate_is_advance(self):
-		if self.unallocated_amount and not cint(self.is_advance):
+		if self.unallocated_amount and not cint(self.is_advance) and self.payment_type != 'Internal Transfer':
 			frappe.throw(_("Payment is not completely allocated against invoices/vouchers. "
 				"Please allocate against oustanding invoices or check mark 'Is Advance' "
 				"if you do not want to reference this entry against another voucher"))

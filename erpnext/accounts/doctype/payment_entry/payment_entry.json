@@ -661,6 +661,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:(doc.paid_amount && doc.received_amount && doc.references)",
    "fieldname": "is_advance",
    "fieldtype": "Check",
    "label": "Is Advance"
@@ -671,7 +672,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-10-03 14:12:26.326508",
+ "modified": "2020-10-03 23:31:53.687921",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
