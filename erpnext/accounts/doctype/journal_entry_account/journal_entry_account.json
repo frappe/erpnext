@@ -96,7 +96,6 @@
   {
    "fieldname": "party_type",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Party Type",
    "options": "DocType",
@@ -293,7 +292,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-01 05:54:42.746562",
+ "modified": "2020-10-03 22:53:16.820994",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
