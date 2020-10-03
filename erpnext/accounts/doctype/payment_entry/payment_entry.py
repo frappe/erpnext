@@ -690,19 +690,28 @@ def get_outstanding_reference_documents(args):
 
 	date_fields_dict = {
 		'posting_date': ['from_posting_date', 'to_posting_date'],
-		'due_date': ['from_due_date', 'to_due_date']
+		'due_date': ['from_due_date', 'to_due_date'],
 	}
 
-	for fieldname, date_fields in date_fields_dict.items():
-		if args.get(date_fields[0]) and args.get(date_fields[1]):
-			condition += " and {0} between '{1}' and '{2}'".format(fieldname,
-				args.get(date_fields[0]), args.get(date_fields[1]))
+	for fieldname, (from_date_field, to_date_field) in date_fields_dict.items():
+		if args.get(from_date_field):
+			condition += " and {0} >= {1}".format(fieldname,
+				frappe.db.escape(args.get(from_date_field)))
+		if args.get(to_date_field):
+			condition += " and {0} <= {1}".format(fieldname,
+				frappe.db.escape(args.get(to_date_field)))
 
 	if args.get("company"):
 		condition += " and company = {0}".format(frappe.db.escape(args.get("company")))
 
 	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"),
 		args.get("party_account"), condition=condition, include_negative_outstanding=True)
+
+	if args.get("outstanding_amt_greater_than"):
+		outstanding_invoices = [i for i in outstanding_invoices if i["outstanding_amount"] > args.get("outstanding_amt_greater_than")]
+	
+	if args.get("outsstanding_amt_less_than"):
+		outstanding_invoices = [i for i in outstanding_invoices if i["outstanding_amount"] < args.get("outstanding_amt_less_than")]
 
 	for d in outstanding_invoices:
 		d["exchange_rate"] = 1
