@@ -233,7 +233,7 @@ def get_datev_csv(data, filters):
 		# M = Start of the fiscal year (Wirtschaftsjahresbeginn)
 		frappe.utils.formatdate(frappe.defaults.get_user_default("year_start_date"), "yyyyMMdd"),
 		# N = Length of account numbers (Sachkontenlänge)
-		"4",
+		str(filters.get('account_number_length', 4)),
 		# O = Transaction batch start date (YYYYMMDD)
 		frappe.utils.formatdate(filters.get('from_date'), "yyyyMMdd"),
 		# P = Transaction batch end date (YYYYMMDD)
@@ -507,6 +507,8 @@ def download_datev_csv(filters=None):
 		filters = json.loads(filters)
 
 	validate(filters)
+	filters['account_number_length'] = frappe.get_value('DATEV Settings', filters.get('company'), 'account_number_length')
+
 	data = get_gl_entries(filters, as_dict=1)
 
 	frappe.response['result'] = get_datev_csv(data, filters)
