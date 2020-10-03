@@ -7,8 +7,7 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "letter_head": "",
- "modified": "2019-06-17 12:45:56.359322",
+ "modified": "2020-10-03 14:32:30.038967",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delayed Order Report",
@@ -19,19 +18,19 @@
  "report_type": "Script Report",
  "roles": [
   {
+   "role": "Stock User"
+  },
+  {
+   "role": "Sales Manager"
+  },
+  {
+   "role": "Maintenance User"
+  },
+  {
    "role": "Accounts User"
   },
   {
    "role": "Sales User"
-  },
-  {
-   "role": "Stock Manager"
-  },
-  {
-   "role": "Stock User"
-  },
-  {
-   "role": "Maintenance User"
   }
  ]
 }

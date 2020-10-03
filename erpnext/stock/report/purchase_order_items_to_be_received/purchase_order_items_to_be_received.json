@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 3,
  "is_standard": "Yes",
- "modified": "2019-04-01 22:12:05.573343",
+ "modified": "2020-10-03 14:32:30.975891",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Order Items To Be Received",
@@ -19,13 +19,7 @@
  "report_type": "Query Report",
  "roles": [
   {
-   "role": "Stock Manager"
-  },
-  {
    "role": "Stock User"
-  },
-  {
-   "role": "Purchase User"
   },
   {
    "role": "Accounts User"
