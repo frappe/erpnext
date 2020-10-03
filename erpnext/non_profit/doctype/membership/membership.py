@@ -224,7 +224,8 @@ def trigger_razorpay_subscription(*args, **kwargs):
 		member.subscription_activated = 1
 		member.save(ignore_permissions=True)
 	except Exception as e:
-		log = frappe.log_error(e, "Error creating membership entry")
+		message = "{0}\n\n{1}\n\n{2}: {3}".format(e, frappe.get_traceback(), __("Payment ID"), payment.id)
+		log = frappe.log_error(message, _("Error creating membership entry for {0}").format(member.name))
 		notify_failure(log)
 		return { 'status': 'Failed', 'reason': e}
 
