@@ -137,7 +137,7 @@
  "icon": "fa fa-sitemap",
  "idx": 1,
  "is_tree": 1,
- "modified": "2020-08-15 13:08:50.775924",
+ "modified": "2020-10-03 14:12:21.780385",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Customer Group",
@@ -152,8 +152,6 @@
    "role": "Sales Manager"
   },
   {
-   "email": 1,
-   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Sales User"
@@ -173,12 +171,14 @@
    "write": 1
   },
   {
+   "export": 1,
    "permlevel": 1,
    "read": 1,
    "role": "Customer Master Manager",
    "write": 1
   },
   {
+   "export": 1,
    "permlevel": 1,
    "read": 1,
    "role": "Sales User"
@@ -187,6 +187,33 @@
    "permlevel": 1,
    "read": 1,
    "role": "Sales Manager"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User"
+  },
+  {
+   "export": 1,
+   "permlevel": 1,
+   "read": 1,
+   "role": "Sales User (Read Only)"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Stock User"
+  },
+  {
+   "export": 1,
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accounts User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)"
   }
  ],
  "search_fields": "parent_customer_group",

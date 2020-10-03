@@ -204,7 +204,7 @@
  "icon": "fa fa-money",
  "idx": 1,
  "is_tree": 1,
- "modified": "2020-03-18 18:26:03.992861",
+ "modified": "2020-10-03 14:12:19.073155",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
@@ -212,35 +212,21 @@
  "owner": "Administrator",
  "permissions": [
   {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "import": 1,
-   "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Accounts User",
-   "share": 1,
-   "write": 1
+   "role": "Accounts User"
   },
   {
-   "email": 1,
-   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Auditor"
   },
   {
-   "email": 1,
-   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Sales User"
   },
   {
-   "email": 1,
-   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Purchase User"
@@ -258,6 +244,11 @@
    "set_user_permissions": 1,
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)"
   }
  ],
  "search_fields": "account_number",

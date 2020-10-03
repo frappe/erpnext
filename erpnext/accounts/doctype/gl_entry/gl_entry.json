@@ -264,14 +264,13 @@
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
- "modified": "2020-03-28 16:22:33.766994",
+ "modified": "2020-10-03 14:12:23.386607",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "GL Entry",
  "owner": "Administrator",
  "permissions": [
   {
-   "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
@@ -288,9 +287,24 @@
   },
   {
    "export": 1,
+   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Auditor"
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User"
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)"
   }
  ],
  "quick_entry": 1,

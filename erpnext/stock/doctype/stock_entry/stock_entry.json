@@ -650,7 +650,7 @@
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-10-01 05:25:29.945417",
+ "modified": "2020-10-03 14:12:32.432208",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
@@ -714,6 +714,20 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "export": 1,
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User"
   }
  ],
  "search_fields": "posting_date, from_warehouse, to_warehouse, purpose, remarks",

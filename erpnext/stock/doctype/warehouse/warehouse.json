@@ -234,8 +234,7 @@
  "icon": "fa fa-building",
  "idx": 1,
  "is_tree": 1,
- "links": [],
- "modified": "2020-08-03 18:41:52.442502",
+ "modified": "2020-10-03 14:12:34.463432",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",
@@ -257,36 +256,34 @@
    "write": 1
   },
   {
-   "email": 1,
-   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Stock User"
   },
   {
-   "email": 1,
-   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Sales User"
   },
   {
-   "email": 1,
-   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Purchase User"
   },
   {
-   "email": 1,
-   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Accounts User"
   },
   {
    "read": 1,
+   "report": 1,
    "role": "Manufacturing User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)"
   }
  ],
  "show_name_in_global_search": 1,

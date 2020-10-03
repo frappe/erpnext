@@ -54,22 +54,12 @@
  ],
  "hide_toolbar": 1,
  "issingle": 1,
- "modified": "2020-03-09 12:29:49.262259",
+ "modified": "2020-10-03 14:12:26.133086",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Opening Invoice Creation Tool",
  "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
+ "permissions": [],
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

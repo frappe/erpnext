@@ -93,20 +93,20 @@
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2020-10-02 22:25:24.135121",
+ "modified": "2020-10-03 14:12:20.594059",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
  "owner": "Administrator",
  "permissions": [
   {
-   "create": 1,
-   "email": 1,
-   "print": 1,
    "read": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
+   "role": "System Manager"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "role": "Purchase User"
   }
  ],
  "sort_field": "modified",

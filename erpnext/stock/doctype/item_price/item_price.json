@@ -219,7 +219,7 @@
  ],
  "icon": "fa fa-flag",
  "idx": 1,
- "modified": "2020-10-01 16:30:04.470361",
+ "modified": "2020-10-03 14:12:24.801156",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",
@@ -251,6 +251,39 @@
    "role": "Supplier Master Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User"
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Item Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)"
   }
  ],
  "quick_entry": 1,

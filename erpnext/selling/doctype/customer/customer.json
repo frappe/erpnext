@@ -520,7 +520,7 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2020-08-15 13:08:50.279449",
+ "modified": "2020-10-03 14:12:21.443967",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -528,16 +528,12 @@
  "owner": "Administrator",
  "permissions": [
   {
-   "create": 1,
-   "email": 1,
-   "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Sales User",
-   "share": 1,
-   "write": 1
+   "role": "Sales User"
   },
   {
+   "export": 1,
    "permlevel": 1,
    "read": 1,
    "role": "Sales User"
@@ -564,14 +560,13 @@
    "write": 1
   },
   {
+   "export": 1,
    "permlevel": 1,
    "read": 1,
    "role": "Customer Master Manager",
    "write": 1
   },
   {
-   "email": 1,
-   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Stock User"
@@ -584,8 +579,6 @@
    "role": "Stock Manager"
   },
   {
-   "email": 1,
-   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Accounts User"
@@ -596,6 +589,23 @@
    "read": 1,
    "report": 1,
    "role": "Accounts Manager"
+  },
+  {
+   "export": 1,
+   "permlevel": 1,
+   "read": 1,
+   "role": "Sales User (Read Only)"
+  },
+  {
+   "export": 1,
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accounts User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)"
   }
  ],
  "quick_entry": 1,

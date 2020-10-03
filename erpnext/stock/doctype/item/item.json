@@ -1150,7 +1150,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-10-01 04:42:57.963394",
+ "modified": "2020-10-03 14:12:23.974910",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -1177,18 +1177,18 @@
    "role": "Stock Manager"
   },
   {
-   "email": 1,
-   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Stock User"
   },
   {
    "read": 1,
+   "report": 1,
    "role": "Sales User"
   },
   {
    "read": 1,
+   "report": 1,
    "role": "Purchase User"
   },
   {
@@ -1197,11 +1197,32 @@
   },
   {
    "read": 1,
+   "report": 1,
    "role": "Accounts User"
   },
   {
    "read": 1,
+   "report": 1,
    "role": "Manufacturing User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)"
+  },
+  {
+   "export": 1,
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "write": 1
+  },
+  {
+   "export": 1,
+   "permlevel": 1,
+   "read": 1,
+   "role": "Purchase User",
+   "write": 1
   }
  ],
  "search_fields": "item_name,description,item_group,customer_code",

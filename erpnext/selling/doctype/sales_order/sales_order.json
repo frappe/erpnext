@@ -1636,7 +1636,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-02 00:57:53.698404",
+ "modified": "2020-10-03 14:12:31.274588",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
@@ -1648,6 +1648,7 @@
    "create": 1,
    "delete": 1,
    "email": 1,
+   "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
@@ -1688,10 +1689,19 @@
    "write": 1
   },
   {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
    "email": 1,
+   "export": 1,
    "print": 1,
    "read": 1,
-   "role": "Accounts User"
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
   },
   {
    "read": 1,
@@ -1702,6 +1712,20 @@
    "permlevel": 1,
    "read": 1,
    "role": "Sales Manager",
+   "write": 1
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)"
+  },
+  {
+   "export": 1,
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accounts User",
    "write": 1
   }
  ],

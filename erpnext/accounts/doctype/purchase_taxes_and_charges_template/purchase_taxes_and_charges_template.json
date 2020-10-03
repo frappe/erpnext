@@ -75,18 +75,22 @@
  ],
  "icon": "fa fa-money",
  "idx": 1,
- "modified": "2020-08-15 13:08:49.782472",
+ "modified": "2020-10-03 14:12:29.756668",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges Template",
  "owner": "wasim@webnotestech.com",
  "permissions": [
   {
+   "create": 1,
+   "delete": 1,
    "email": 1,
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Purchase Manager"
+   "role": "Purchase Manager",
+   "share": 1,
+   "write": 1
   },
   {
    "create": 1,
@@ -101,7 +105,13 @@
   },
   {
    "read": 1,
+   "report": 1,
    "role": "Purchase User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User"
   }
  ],
  "sort_field": "modified",
