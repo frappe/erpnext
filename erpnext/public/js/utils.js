@@ -483,7 +483,7 @@ erpnext.utils.update_child_items = function(opts) {
 				callback: r => {
 					if(!r.exc) {
 						if (this.doc.conversion_factor == r.message.conversion_factor) return;
-						
+
 						const docname = this.doc.docname;
 						dialog.fields_dict.trans_items.df.data.some(doc => {
 							if (doc.docname == docname) {
@@ -683,6 +683,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			date_field: opts.date_field || undefined,
 			setters: opts.setters,
 			get_query: opts.get_query,
+			add_filters_group: 1,
 			action: function(selections, args) {
 				let values = selections;
 				if(values.length === 0){
