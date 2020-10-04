@@ -28,7 +28,6 @@ from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.healthcare.utils import manage_invoice_submit_cancel
 
 from six import iteritems
-from datetime import datetime, timedelta, date
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -74,7 +73,6 @@ class SalesInvoice(SellingController):
 	def validate(self):
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
-		self.discount_product()
 
 		if not self.is_pos:
 			self.so_dn_required()
@@ -137,150 +135,6 @@ class SalesInvoice(SellingController):
 
 		if self.redeem_loyalty_points and self.loyalty_program and self.loyalty_points:
 			validate_loyalty_points(self, self.loyalty_points)
-
-		self.exonerated_value()
-
-		if self.docstatus == 0:
-			self.validate_camps()
-
-		if self.docstatus == 1:
-			self.assign_cai()
-	
-	def validate_camps(self):
-		if not self.type_document:
-			frappe.throw(_("Type Document is required."))
-	
-	def exonerated_value(self):
-		if self.exonerated == 1:
-			if self.grand_total > self.total:
-				self.grand_total -= self.total_taxes_and_charges
-				self.outstanding_amount -= self.total_taxes_and_charges
-
-				payment_schedule = frappe.get_all("Payment Schedule", ["name", "payment_amount"], filters = {"parent": self.name})
-				
-				for payment in payment_schedule:
-					doc = frappe.get_doc("Payment Schedule", payment.name)
-					doc.payment_amount -= self.total_taxes_and_charges
-					doc.save()
-		else:
-			if self.grand_total == self.total: 
-				self.grand_total += self.total_taxes_and_charges
-				self.outstanding_amount += self.total_taxes_and_charges
-
-				payment_schedule = frappe.get_all("Payment Schedule", ["name"], filters = {"parent": self.name})
-
-				for payment in payment_schedule:
-					doc = frappe.get_doc("Payment Schedule", payment.name)
-					doc.payment_amount += self.total_taxes_and_charges
-					doc.save()
-
-	def discount_product(self):
-		total_discount = 0
-		for d in self.get('items'):
-			total_discount += d.qty * d.discount_amount
-			self.partial_discount = total_discount
-	
-	def initial_number(self, number):
-
-		if number >= 1 and number < 10:
-			return("0000000" + str(number))
-		elif number >= 10 and number < 100:
-			return("000000" + str(number))
-		elif number >= 100 and number < 1000:
-			return("00000" + str(number))
-		elif number >= 1000 and number < 10000:
-			return("0000" + str(number))
-		elif number >= 10000 and number < 100000:
-			return("000" + str(number))
-		elif number >= 100000 and number < 1000000:
-			return("00" + str(number))
-		elif number >= 1000000 and number < 10000000:
-			return("0" + str(number))
-		elif number >= 10000000:
-			return(str(number))
-
-	def assign_cai(self):
-		user = frappe.session.user
-		gcai_allocation = frappe.get_all("GCAI Allocation", ["branch", "pos"], filters = {"user": user, "company": self.company, "type_document": self.type_document})
-
-		if not gcai_allocation:
-			frappe.throw(_("The user {} does not have an assigned CAI".format(user)))
-
-		for item in gcai_allocation:
-			cais = frappe.get_all("GCAI", ["codedocument", "codebranch", "codepos","initial_range", "final_range", "current_numbering", "name", "cai", "due_date", "sucursal"], filters = {"company": self.company, "sucursal": item.branch, "pos_name": item.pos, "state": "Valid", "type_document": self.type_document})
-			
-			if not cais:
-				frappe.throw(_("There is no CAI available to generate this invoice."))
-
-			for cai in cais:
-				if str(cai.due_date) < str(datetime.now()):
-					self.validate_cai(cai.name)
-
-					if len(cais) == 1:
-						frappe.throw(_("The CAI {} arrived at its expiration day.".format(cai.cai)))
-					
-					continue
-									
-				if cai.current_numbering > cai.final_range:					
-					self.validate_cai(cai.name)
-
-					if len(cais) == 1:
-						frappe.throw(_("The CAI {} reached its limit numbering.".format(cai.cai)))
-					
-					continue
-
-				initial_range = self.initial_number(cai.initial_range)
-				final_range = self.initial_number(cai.final_range)
-				number = self.initial_number(cai.current_numbering)
-
-				self.pos = item.pos
-
-				self.due_date_cai = cai.due_date
-
-				self.cai = cai.cai
-
-				self.branch_office = cai.sucursal
-
-				self.authorized_range = "{} - {}".format(initial_range, final_range)
-
-				self.cashier = user
-
-				self.numeration = "{}-{}-{}-{}".format(cai.codebranch, cai.codepos, cai.codedocument, number)
-
-				doc = frappe.get_doc("GCAI", cai.name)
-				doc.current_numbering += 1 
-				doc.save()
-
-				amount = int(cai.final_range) - int(cai.current_numbering)
-				self.alerts(cai.due_date, amount)
-				break
-	
-	def alerts(self, date, amount):
-		gcai_setting = frappe.get_all("GCai Settings", ["expired_days", "expired_amount"])
-
-		if len(gcai_setting) > 0:
-			if amount <= gcai_setting[0].expired_amount:
-				frappe.msgprint(_("There are only {} numbers available for this CAI.".format(amount)))
-		
-			now = date.today()
-			days = timedelta(days=int(gcai_setting[0].expired_days))
-
-			sum_dates = now+days
-
-			if str(date) <= str(sum_dates):
-				for i in range(int(gcai_setting[0].expired_days)):		
-					now1 = date.today()
-					days1 = timedelta(days=i)
-
-					sum_dates1 = now1+days1
-					if str(date) == str(sum_dates1):
-						frappe.msgprint(_("This CAI expires in {} days.".format(i)))
-						break		
-					
-	def validate_cai(self, name):
-		doc_duedate = frappe.get_doc("GCAI", name)
-		doc_duedate.state = "{}".format("Expired")
-		doc_duedate.save()
 
 	def validate_fixed_asset(self):
 		for d in self.get("items"):
@@ -517,7 +371,6 @@ class SalesInvoice(SellingController):
 
 	def on_update(self):
 		self.set_paid_amount()
-		self.exonerated_value()
 
 	def set_paid_amount(self):
 		paid_amount = 0.0
@@ -852,9 +705,6 @@ class SalesInvoice(SellingController):
 			# if POS and amount is written off, updating outstanding amt after posting all gl entries
 			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account or
 				cint(self.redeem_loyalty_points)) else "Yes"
-
-			if self.exonerated == 1:
-				gl_entries.pop(1)
 
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
 				update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)
