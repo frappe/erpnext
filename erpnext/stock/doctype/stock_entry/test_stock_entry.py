@@ -17,6 +17,10 @@ from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.stock_entry.stock_entry import move_sample_to_retention_warehouse, make_stock_in_entry
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import OpeningEntryAccountError
 from six import iteritems
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.accounts.utils import get_stock_and_account_balance
+
+bom_test_records = frappe.get_test_records('BOM')
 
 def get_sle(**args):
 	condition, values = "", []
@@ -621,6 +625,52 @@ class TestStockEntry(unittest.TestCase):
 		s2.submit()
 		s2.cancel()
 
+	def test_stock_and_account_value_sync_on_manufacture_entry_cancel(self):
+		from erpnext.manufacturing.doctype.work_order.work_order \
+			import make_stock_entry as _make_stock_entry
+
+		make_item("_Test FG Item 3", {'has_serial_no': 1, 'serial_no_series':'ABCD.#####'})
+
+		bom_no = frappe.copy_doc(bom_test_records[0])
+		bom_no.items[0].source_warehouse = 'Stores - TCP1'
+		bom_no.items[1].source_warehouse = 'Stores - TCP1'
+		bom_no.item = '_Test FG Item 3'
+		bom_no.save()
+		bom_no.submit()
+
+		work_order = frappe.new_doc("Work Order")
+		work_order.update({
+			"company": "_Test Company with perpetual inventory",
+			"fg_warehouse": "Finished Goods - TCP1",
+			"production_item": "_Test FG Item 3",
+			"qty": 1.0,
+			"bom_no": bom_no.name,
+			"stock_uom": "_Test UOM",
+			"wip_warehouse": "Work In Progress - TCP1",
+			"additional_operating_cost": 1000
+		})
+		work_order.save()
+		work_order.submit()
+
+		se1 = make_stock_entry(company = '_Test Company with perpetual inventory', item_code="_Test Serialized Item With Series",
+			target="Work In Progress - TCP1", qty=50, basic_rate=100)
+		se2 = make_stock_entry(company = '_Test Company with perpetual inventory',
+			item_code="_Test Item 2", target="Work In Progress - TCP1", qty=50, basic_rate=20)
+
+		serial_nos = get_serial_nos(se1.get("items")[0].serial_no)
+
+		stock_entry = _make_stock_entry(work_order.name, "Manufacture", 1, as_dict=False)
+		stock_entry.items[0].serial_no = serial_nos[0]
+		stock_entry.save()
+		stock_entry.submit()
+
+		# cancel stock entry and check stock and account value sync
+		stock_entry.cancel()
+		account_bal, stock_bal, warehouse_list = get_stock_and_account_balance('Stock In Hand - TCP1',
+			getdate(), '_Test Company with perpetual inventory')
+
+		self.assertEqual(account_bal, stock_bal)
+
 	def test_retain_sample(self):
 		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 		from erpnext.stock.doctype.batch.batch import get_batch_qty
@@ -813,8 +863,8 @@ def make_serialized_item(**args):
 	if args.expense_account:
 		se.get("items")[0].expense_account = args.expense_account
 
-	se.get("items")[0].qty = 2
-	se.get("items")[0].transfer_qty = 2
+	se.get("items")[0].qty = args.qty or 2
+	se.get("items")[0].transfer_qty = args.qty or 2
 
 	if args.target_warehouse:
 		se.get("items")[0].t_warehouse = args.target_warehouse
