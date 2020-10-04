@@ -1321,6 +1321,7 @@ def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child
 	date_fieldname = "delivery_date" if child_doctype == "Sales Order Item" else "schedule_date"
 	child_item.update({date_fieldname: trans_item.get(date_fieldname) or p_doc.get(date_fieldname)})
 	child_item.uom = trans_item.get("uom") or item.stock_uom
+	child_item.warehouse = p_doc.set_warehouse
 	conversion_factor = flt(get_conversion_factor(item.item_code, child_item.uom).get("conversion_factor"))
 	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or conversion_factor
 	if child_doctype == "Purchase Order Item":
@@ -1359,6 +1360,12 @@ def validate_and_delete_children(parent, data):
 
 		d.cancel()
 		d.delete()
+		
+		from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
+		frappe.errprint(f"Item Code: {d.item_code}, Warehouse: {d.warehouse}")
+		update_bin_qty(d.item_code, d.warehouse, {
+			"ordered_qty": get_ordered_qty(d.item_code, d.warehouse)
+		})
 
 @frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
