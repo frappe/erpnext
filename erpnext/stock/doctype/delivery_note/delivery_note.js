@@ -339,9 +339,9 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 
 	to_warehouse: function() {
 		let packed_items_table = this.frm.doc["packed_items"];
-		this.autofill_warehouse(this.frm.doc["items"], "target_warehouse", this.frm.doc.to_warehouse);
+		this.autofill_warehouse(this.frm.doc["items"], "target_warehouse", this.frm.doc.to_warehouse, 1);
 		if (packed_items_table && packed_items_table.length) {
-			this.autofill_warehouse(packed_items_table, "target_warehouse", this.frm.doc.to_warehouse);
+			this.autofill_warehouse(packed_items_table, "target_warehouse", this.frm.doc.to_warehouse, 1);
 		}
 	}
 
