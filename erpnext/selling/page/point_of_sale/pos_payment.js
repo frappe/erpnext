@@ -175,21 +175,21 @@ erpnext.PointOfSale.Payment = class {
 		})
 
 		frappe.realtime.on("process_phone_payments", function(data) {
-			frappe.msgprint({message: 'help', title:'now'})
-			// frappe.dom.unfreeze();
-			// let message = data["ResultDesc"];
-			// let title = __("Payment Failed");
-			// const frm = me.events.get_frm();
+			frappe.dom.unfreeze();
+			let message = data["ResultDesc"];
+			let title = __("Payment Failed");
+			const frm = me.events.get_frm();
 
-			// if (data["ResultCode"] == 0) {
-			// 	title = __("Payment Received");
-			// 	$('[data-fieldname=request_for_payment]').text("Paid")
-			// }
+			if (data["ResultCode"] == 0) {
+				title = __("Payment Received");
+				$('[data-fieldname=request_for_payment]').text("Paid")
+				cur_pos.submit()
+			}
 
-			// frappe.msgprint({
-			// 	"message": message,
-			// 	"title": title
-			// });
+			frappe.msgprint({
+				"message": message,
+				"title": title
+			});
 		});
 
 		this.$payment_modes.on('click', '.shortcut', function(e) {

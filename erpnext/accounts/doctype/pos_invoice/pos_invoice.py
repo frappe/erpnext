@@ -316,8 +316,13 @@ class POSInvoice(SalesInvoice):
 
 	def create_payment_request(self):
 		for pay in self.payments:
-
 			if pay.type == "Phone":
+				if pay.amount <= 0:
+					frappe.throw(_("Payment amount cannot be less than or equal to 0"))
+
+				if not self.contact_mobile:
+					frappe.throw(_("Please enter the phone number first"))
+
 				payment_gateway = frappe.db.get_value("Payment Gateway Account", {
 					"payment_account": pay.account,
 				})

@@ -165,7 +165,7 @@ class PaymentRequest(Document):
 
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 
-		if self.reference_doctype == "Sales Invoice":
+		if self.reference_doctype in ["Sales Invoice", "POS Invoice"]:
 			party_account = ref_doc.debit_to
 		elif self.reference_doctype == "Purchase Invoice":
 			party_account = ref_doc.credit_to
@@ -180,8 +180,8 @@ class PaymentRequest(Document):
 		else:
 			party_amount = self.grand_total
 
-		payment_entry = get_payment_entry(self.reference_doctype, self.reference_name,
-			party_amount=party_amount, bank_account=self.payment_account, bank_amount=bank_amount)
+		payment_entry = get_payment_entry(self.reference_doctype, self.reference_name, party_amount=party_amount,
+			bank_account=self.payment_account, bank_amount=bank_amount, mode_of_payment=self.mode_of_payment)
 
 		payment_entry.update({
 			"reference_no": self.name,
@@ -269,7 +269,7 @@ class PaymentRequest(Document):
 
 			# if shopping cart enabled and in session
 			if (shopping_cart_settings.enabled and hasattr(frappe.local, "session")
-				and frappe.local.session.user != "Guest"):
+				and frappe.local.session.user != "Guest") and  self.payment_channel != "Phone":
 
 				success_url = shopping_cart_settings.payment_success_url
 				if success_url:
