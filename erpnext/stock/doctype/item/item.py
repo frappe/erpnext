@@ -827,9 +827,9 @@ class Item(WebsiteGenerator):
 
 	def recalculate_bin_qty(self, new_name):
 		from erpnext.stock.stock_balance import repost_stock
-		frappe.db.auto_commit_on_many_writes = 1
-		existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+		#frappe.db.auto_commit_on_many_writes = 1
+		#existing_allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
+		#frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 		repost_stock_for_warehouses = frappe.db.sql_list("""select distinct warehouse
 			from tabBin where item_code=%s""", new_name)
@@ -840,8 +840,8 @@ class Item(WebsiteGenerator):
 		for warehouse in repost_stock_for_warehouses:
 			repost_stock(new_name, warehouse)
 
-		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
-		frappe.db.auto_commit_on_many_writes = 0
+		#frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
+		#frappe.db.auto_commit_on_many_writes = 0
 
 	def copy_specification_from_item_group(self):
 		self.set("website_specifications", [])
