@@ -109,15 +109,13 @@ frappe.ui.form.on("Item", {
 			}, __("View"));
 		}
 
-		const stock_exists = (frm.doc.__onload
-			&& frm.doc.__onload.stock_exists) ? 1 : 0;
-
-		['is_stock_item', 'has_serial_no', 'has_batch_no', 'has_variants'].forEach((fieldname) => {
-			frm.set_df_property(fieldname, 'read_only', stock_exists);
-		});
-
 		const alt_uom_readonly = (!frm.doc.__islocal && frm.doc.alt_uom && flt(frm.doc.alt_uom_size)) ? 1 : 0;
 		frm.set_df_property('alt_uom_size', 'read_only', alt_uom_readonly);
+
+		const cant_change_fields = (frm.doc.__onload && frm.doc.__onload.cant_change_fields) || [];
+		cant_change_fields.forEach((fieldname) => {
+			frm.set_df_property(fieldname, 'read_only', 1);
+		});
 
 		frm.toggle_reqd('customer', frm.doc.is_customer_provided_item ? 1:0);
 	},

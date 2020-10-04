@@ -48,10 +48,16 @@ class Item(WebsiteGenerator):
 		no_cache=1
 	)
 
+	_cant_change_fields_bin = ["is_stock_item"]
+	_cant_change_fields_sle = ["has_serial_no", "has_batch_no", "valuation_method"]
+	_cant_change_fields_trn = ["stock_uom", "alt_uom", "alt_uom_size"]
+	_cant_change_fields = _cant_change_fields_bin + _cant_change_fields_sle + _cant_change_fields_trn
+
 	def onload(self):
 		super(Item, self).onload()
 
 		self.set_onload('stock_exists', self.stock_ledger_created())
+		self.set_onload('cant_change_fields', self.get_cant_change_fields())
 		self.set_asset_naming_series()
 
 	def set_asset_naming_series(self):
@@ -768,11 +774,10 @@ class Item(WebsiteGenerator):
 			if not frappe.db.exists("Item", new_name):
 				frappe.throw(_("Item {0} does not exist").format(new_name))
 
-			field_list = ["stock_uom", "is_stock_item", "has_serial_no", "has_batch_no"]
-			new_properties = [cstr(d) for d in frappe.db.get_value("Item", new_name, field_list)]
-			if new_properties != [cstr(self.get(fld)) for fld in field_list]:
+			new_properties = [cstr(d) for d in frappe.db.get_value("Item", new_name, self._cant_change_fields)]
+			if new_properties != [cstr(self.get(fld)) for fld in self._cant_change_fields]:
 				frappe.throw(_("To merge, following properties must be same for both items")
-									+ ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list]))
+									+ ": \n" + ", ".join([self.meta.get_label(fld) for fld in self._cant_change_fields]))
 
 	def after_rename(self, old_name, new_name, merge):
 		if merge:
@@ -999,41 +1004,55 @@ class Item(WebsiteGenerator):
 			for d in self.attributes:
 				d.variant_of = self.variant_of
 
+	def get_cant_change_fields(self):
+		fieldnames = []
+		for fieldname in self._cant_change_fields:
+			if self.check_if_cant_change_field(fieldname):
+				fieldnames.append(fieldname)
+
+		return fieldnames
+
 	def cant_change(self):
 		if not self.get("__islocal"):
-			fields = ("has_serial_no", "is_stock_item", "valuation_method", "has_batch_no")
+			before_save_values = frappe.db.get_value("Item", self.name, self._cant_change_fields, as_dict=True)
+			if not before_save_values.get('valuation_method') and self.get('valuation_method'):
+				before_save_values['valuation_method'] = frappe.db.get_single_value("Stock Settings", "valuation_method") or "FIFO"
 
-			values = frappe.db.get_value("Item", self.name, fields, as_dict=True)
-			if not values.get('valuation_method') and self.get('valuation_method'):
-				values['valuation_method'] = frappe.db.get_single_value("Stock Settings", "valuation_method") or "FIFO"
+			if before_save_values:
+				for field in self._cant_change_fields:
+					if cstr(self.get(field)) != cstr(before_save_values.get(field)) and self.check_if_cant_change_field(field):
+						frappe.throw(_("As there are existing transactions against item {0}, you can not change the value of {1}")
+							.format(self.name, frappe.bold(self.meta.get_label(field))))
 
-			if values:
-				for field in fields:
-					if cstr(self.get(field)) != cstr(values.get(field)):
-						if not self.check_if_linked_document_exists(field):
-							break # no linked document, allowed
-						else:
-							frappe.throw(_("As there are existing transactions against item {0}, you can not change the value of {1}").format(self.name, frappe.bold(self.meta.get_label(field))))
-
-	def check_if_linked_document_exists(self, field):
+	def check_if_cant_change_field(self, field):
+		link_doctypes_bin = ["Sales Order Item", "Purchase Order Item", "Material Request Item", "Work Order"]
 		linked_doctypes = ["Delivery Note Item", "Sales Invoice Item", "Purchase Receipt Item",
-			"Purchase Invoice Item", "Stock Entry Detail", "Stock Reconciliation Item"]
+			"Purchase Invoice Item", "Stock Entry Detail", "Stock Reconciliation Item"] + link_doctypes_bin
 
-		# For "Is Stock Item", following doctypes is important
-		# because reserved_qty, ordered_qty and requested_qty updated from these doctypes
-		if field == "is_stock_item":
-			linked_doctypes += ["Sales Order Item", "Purchase Order Item", "Material Request Item"]
+		if field in self._cant_change_fields_sle or field in self._cant_change_fields_bin:
+			if self.stock_ledger_created():
+				return True
 
-		for doctype in linked_doctypes:
-			if doctype in ("Purchase Invoice Item", "Sales Invoice Item",):
-				# If Invoice has Stock impact, only then consider it.
-				if self.stock_ledger_created():
+		if field in self._cant_change_fields_bin:
+			for doctype in link_doctypes_bin:
+				if self.check_if_linked_doctype_exists(doctype):
 					return True
 
-			elif frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}) or \
-				frappe.db.get_value("Production Order",
-					filters={"production_item": self.name, "docstatus": 1}):
-				return True
+		if field in self._cant_change_fields_trn:
+			for doctype in linked_doctypes:
+				if self.check_if_linked_doctype_exists(doctype):
+					return True
+
+	def check_if_linked_doctype_exists(self, doctype):
+		if not hasattr(self, "_linked_doctype_exists"):
+			self._linked_doctype_exists = {}
+
+		if doctype in self._linked_doctype_exists:
+			return self._linked_doctype_exists[doctype]
+
+		fieldname = "production_item" if doctype == "Work Order" else "item_code"
+		self._linked_doctype_exists[doctype] = frappe.db.get_value(doctype, filters={fieldname: self.name, "docstatus": 1})
+		return self._linked_doctype_exists[doctype]
 
 	def validate_auto_reorder_enabled_in_stock_settings(self):
 		if self.reorder_levels:
