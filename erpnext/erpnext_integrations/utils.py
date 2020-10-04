@@ -43,7 +43,7 @@ def get_webhook_address(connector_name, method, exclude_uri=False):
 
 	return server_url
 
-def create_mode_of_payment(gateway):
+def create_mode_of_payment(gateway, payment_type="General"):
 	payment_gateway_account = frappe.db.get_value("Payment Gateway Account", {
 			"payment_gateway": gateway
 		}, ['payment_account'])
@@ -53,11 +53,11 @@ def create_mode_of_payment(gateway):
 			"doctype": "Mode of Payment",
 			"mode_of_payment": gateway,
 			"enabled": 1,
-			"type": "General",
-			"account": {
+			"type": payment_type,
+			"accounts": [{
 				"doctype": "Mode of Payment Account",
 				"company": get_default_company(),
 				"default_account": payment_gateway_account
-			}
+			}]
 		})
 		mode_of_payment.insert(ignore_permissions=True)
