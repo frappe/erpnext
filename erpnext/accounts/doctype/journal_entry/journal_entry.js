@@ -209,10 +209,6 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 
 			if(in_list(["Sales Invoice", "Purchase Invoice", "Landed Cost Voucher", "Expense Claim"], jvd.reference_type)) {
 				out.filters.push([jvd.reference_type, "outstanding_amount", "!=", 0]);
-				// Filter by cost center
-				// if(jvd.cost_center) {
-				// 	out.filters.push([jvd.reference_type, "cost_center", "in", ["", jvd.cost_center]]);
-				// }
 				// account filter
 				if (jvd.reference_type == "Expense Claim") {
 					party_account_field = "payable_account";
