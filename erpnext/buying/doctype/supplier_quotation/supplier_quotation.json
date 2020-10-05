@@ -364,6 +364,7 @@
    "label": "Link to material requests"
   },
   {
+   "collapsible": 1,
    "fieldname": "pricing_rule_details",
    "fieldtype": "Section Break",
    "label": "Pricing Rules"
@@ -1100,7 +1101,7 @@
  "icon": "fa fa-shopping-cart",
  "idx": 29,
  "is_submittable": 1,
- "modified": "2020-10-03 14:12:33.866039",
+ "modified": "2020-10-05 12:52:56.383812",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",

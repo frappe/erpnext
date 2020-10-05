@@ -518,6 +518,7 @@
    "reqd": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "pricing_rule_details",
    "fieldtype": "Section Break",
    "label": "Pricing Rules"
@@ -1493,7 +1494,7 @@
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
- "modified": "2020-10-04 03:45:53.613827",
+ "modified": "2020-10-05 12:52:58.698912",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

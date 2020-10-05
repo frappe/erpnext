@@ -460,6 +460,7 @@
    "width": "40px"
   },
   {
+   "collapsible": 1,
    "fieldname": "pricing_rule_details",
    "fieldtype": "Section Break",
    "label": "Pricing Rules"
@@ -1259,7 +1260,7 @@
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2020-10-03 14:12:29.954043",
+ "modified": "2020-10-05 12:52:52.312762",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

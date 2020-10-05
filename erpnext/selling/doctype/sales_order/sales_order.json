@@ -558,6 +558,7 @@
    "reqd": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "pricing_rule_details",
    "fieldtype": "Section Break",
    "label": "Pricing Rules"
@@ -1636,7 +1637,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-03 14:12:31.274588",
+ "modified": "2020-10-05 12:52:56.383253",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
