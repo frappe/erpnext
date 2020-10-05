@@ -86,6 +86,7 @@ class PaymentRequest(Document):
 			payment_record = dict(
 				reference_doctype="Payment Request",
 				reference_docname=self.name,
+				payment_reference=self.reference_name,
 				grand_total=self.grand_total,
 				sender=self.email_to,
 				currency=self.currency,
@@ -154,10 +155,14 @@ class PaymentRequest(Document):
 		})
 
 	def set_as_paid(self):
-		payment_entry = self.create_payment_entry()
-		self.make_invoice()
+		if self.payment_channel == "Phone":
+			self.db_set("status", "Paid")
 
-		return payment_entry
+		else:
+			payment_entry = self.create_payment_entry()
+			self.make_invoice()
+
+			return payment_entry
 
 	def create_payment_entry(self, submit=True):
 		"""create entry"""
@@ -269,7 +274,7 @@ class PaymentRequest(Document):
 
 			# if shopping cart enabled and in session
 			if (shopping_cart_settings.enabled and hasattr(frappe.local, "session")
-				and frappe.local.session.user != "Guest") and  self.payment_channel != "Phone":
+				and frappe.local.session.user != "Guest") and self.payment_channel != "Phone":
 
 				success_url = shopping_cart_settings.payment_success_url
 				if success_url:
@@ -332,6 +337,7 @@ def make_payment_request(**args):
 			"payment_request_type": args.get("payment_request_type"),
 			"currency": ref_doc.currency,
 			"grand_total": grand_total,
+			"mode_of_payment": args.mode_of_payment,
 			"email_to": args.recipient_id or ref_doc.owner,
 			"subject": _("Payment Request for {0}").format(args.dn),
 			"message": gateway_account.get("message") or get_dummy_message(ref_doc),

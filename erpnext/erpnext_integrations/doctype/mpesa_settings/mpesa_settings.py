@@ -76,7 +76,7 @@ def generate_stk_push(**kwargs):
 
 		response = connector.stk_push(business_shortcode=mpesa_settings.till_number,
 			passcode=mpesa_settings.get_password("online_passkey"), amount=args.grand_total,
-			callback_url=callback_url, reference_code=args.payment_request_name,
+			callback_url=callback_url, reference_code=mpesa_settings.till_number,
 			phone_number=args.sender, description="POS Payment")
 
 		return response
@@ -100,14 +100,15 @@ def verify_transaction(**kwargs):
 	transaction_data = frappe._dict(loads(request.data))
 
 	if transaction_response['ResultCode'] == 0:
-		if transaction_data.reference_doctype and transaction_data.reference_docname:
+		if request.reference_doctype and request.reference_docname:
 			try:
-				doc = frappe.get_doc(transaction_data.reference_doctype,
-					transaction_data.reference_docname).run_method("on_payment_authorized", 'Completed')
+				doc = frappe.get_doc(request.reference_doctype,
+					request.reference_docname)
+				doc.run_method("on_payment_authorized", 'Completed')
 
 				item_response = transaction_response["CallbackMetadata"]["Item"]
 				mpesa_receipt = fetch_param_value(item_response, "MpesaReceiptNumber", "Name")
-				frappe.db.set_value("POS Invoice", doc.reference_docname, "mpesa_receipt_number", mpesa_receipt)
+				frappe.db.set_value("POS Invoice", doc.reference_name, "mpesa_receipt_number", mpesa_receipt)
 				request.process_response('output', transaction_response)
 			except Exception:
 				request.process_response('error', transaction_response)
@@ -116,8 +117,8 @@ def verify_transaction(**kwargs):
 	else:
 		request.process_response('error', transaction_response)
 
-	frappe.publish_realtime('process_phone_payment', after_commit=True, doctype=transaction_data.reference_doctype,
-		docname=transaction_data.reference_docname, user=request.owner, message=transaction_response)
+	frappe.publish_realtime('process_phone_payment', doctype="POS Invoice",
+		docname=transaction_data.payment_reference, user=request.owner, message=transaction_response)
 
 def get_account_balance(request_payload):
 	"""Call account balance API to send the request to the Mpesa Servers."""
