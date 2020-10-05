@@ -368,6 +368,8 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	searchfields = meta.get_search_fields()
 
 	search_columns = ''
+	search_cond = ''
+
 	if searchfields:
 		search_columns = ", " + ", ".join(searchfields)
 		search_cond = " or " + " or ".join([field + " like %(txt)s" for field in searchfields])
@@ -389,11 +391,11 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 				and sle.warehouse = %(warehouse)s
 				and (sle.batch_no like %(txt)s
 				or batch.expiry_date like %(txt)s
-				or batch.manufacturing_date like %(txt)s)
+				or batch.manufacturing_date like %(txt)s
+				{search_cond})
 				and batch.docstatus < 2
 				{cond}
 				{match_conditions}
-				{search_cond}
 			group by batch_no {having_clause}
 			order by batch.expiry_date, sle.batch_no desc
 			limit %(start)s, %(page_len)s""".format(
@@ -413,11 +415,12 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 			and item = %(item_code)s
 			and (name like %(txt)s
 			or expiry_date like %(txt)s
-			or manufacturing_date like %(txt)s)
+			or manufacturing_date like %(txt)s
+			{search_cond})
 			and docstatus < 2
 			{0}
 			{match_conditions}
-			{search_cond}
+
 			order by expiry_date, name desc
 			limit %(start)s, %(page_len)s""".format(cond, search_columns = search_columns,
 			search_cond = search_cond, match_conditions=get_match_cond(doctype)), args)
