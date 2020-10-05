@@ -1242,7 +1242,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		try:
 			doc.check_permission(perm_type)
 		except frappe.PermissionError:
-			actions = { 'create': 'add', 'write': 'update', 'cancel': 'remove' }
+			actions = { 'create': 'add', 'write': 'update'}
 
 			frappe.throw(_("You do not have permissions to {} items in a {}.")
 				.format(actions[perm_type], parent_doctype), title=_("Insufficient Permissions"))
@@ -1264,7 +1264,10 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 				transitions.append(transition.as_dict())
 
 		if not transitions:
-			frappe.throw(_("You do not have workflow access to update this document."), title=_("Insufficient Workflow Permissions"))
+			frappe.throw(
+				_("You are not allowed to update as per the conditions set in {} Workflow.").format(get_link_to_form("Workflow", workflow)),
+				title=_("Insufficient Permissions")
+			)
 
 	def get_new_child_item(item_row):
 		new_child_function = set_sales_order_defaults if parent_doctype == "Sales Order" else set_purchase_order_defaults
@@ -1282,7 +1285,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	sales_doctypes = ['Sales Order', 'Sales Invoice', 'Delivery Note', 'Quotation']
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 
-	check_doc_permissions(parent, 'cancel')
+	check_doc_permissions(parent, 'write')
 	validate_and_delete_children(parent, data)
 
 	for d in data:
