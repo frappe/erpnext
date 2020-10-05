@@ -370,11 +370,13 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	search_columns = ''
 	if searchfields:
 		search_columns = ", " + ", ".join(searchfields)
+		search_cond = " or " + " or ".join([field + " like %(txt)s" for field in searchfields])
 
 	if args.get('warehouse'):
 		searchfields = ['batch.' + field for field in searchfields]
 		if searchfields:
 			search_columns = ", " + ", ".join(searchfields)
+			search_cond = " or " + " or ".join([field + " like %(txt)s" for field in searchfields])
 
 		batch_nos = frappe.db.sql("""select sle.batch_no, round(sum(sle.actual_qty),2), sle.stock_uom,
 				concat('MFG-',batch.manufacturing_date), concat('EXP-',batch.expiry_date)
@@ -391,13 +393,15 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 				and batch.docstatus < 2
 				{cond}
 				{match_conditions}
+				{search_cond}
 			group by batch_no {having_clause}
 			order by batch.expiry_date, sle.batch_no desc
 			limit %(start)s, %(page_len)s""".format(
 				search_columns = search_columns,
 				cond=cond,
 				match_conditions=get_match_cond(doctype),
-				having_clause = having_clause
+				having_clause = having_clause,
+				search_cond = search_cond
 			), args)
 
 		return batch_nos
@@ -413,8 +417,10 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 			and docstatus < 2
 			{0}
 			{match_conditions}
+			{search_cond}
 			order by expiry_date, name desc
-			limit %(start)s, %(page_len)s""".format(cond, search_columns = search_columns, match_conditions=get_match_cond(doctype)), args)
+			limit %(start)s, %(page_len)s""".format(cond, search_columns = search_columns,
+			search_cond = search_cond, match_conditions=get_match_cond(doctype)), args)
 
 
 @frappe.whitelist()
