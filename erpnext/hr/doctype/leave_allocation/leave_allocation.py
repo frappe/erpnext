@@ -210,8 +210,8 @@ def get_unused_leaves(employee, leave_type, from_date, to_date):
 	leaves = frappe.get_all("Leave Ledger Entry", filters={
 		'employee': employee,
 		'leave_type': leave_type,
-		'from_date': ('>=', from_date),
-		'to_date': ('<=', to_date)
+		'from_date': ('<=', from_date),
+		'to_date': ('>=', to_date)
 		}, or_filters={
 			'is_expired': 0,
 			'is_carry_forward': 1
