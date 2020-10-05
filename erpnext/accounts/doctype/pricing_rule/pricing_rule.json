@@ -1,6 +1,5 @@
 {
  "allow_import": 1,
- "allow_rename": 1,
  "autoname": "field:title",
  "creation": "2014-02-21 15:02:51",
  "doctype": "DocType",
@@ -554,7 +553,7 @@
  ],
  "icon": "fa fa-gift",
  "idx": 1,
- "modified": "2020-10-03 14:12:26.964703",
+ "modified": "2020-10-03 14:12:26.964704",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",
