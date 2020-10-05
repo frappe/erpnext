@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from erpnext.hr.doctype.employee_group.test_employee_group import make_employee_group
 from erpnext.support.doctype.issue_priority.test_issue_priority import make_priorities
 
 class TestServiceLevelAgreement(unittest.TestCase):
