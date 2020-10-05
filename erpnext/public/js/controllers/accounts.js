@@ -120,7 +120,7 @@ frappe.ui.form.on('Salary Structure', {
 
 var get_payment_mode_account = function(frm, mode_of_payment, callback) {
 	if(!frm.doc.company) {
-		frappe.throw(__("Please select the Company first"));
+		frappe.throw({message:__("Please select a Company first."), title: __("Mandatory")});
 	}
 
 	if(!mode_of_payment) {

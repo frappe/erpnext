@@ -76,7 +76,7 @@ class Issue(Document):
 		replicated_issue = deepcopy(self)
 		replicated_issue.subject = subject
 		replicated_issue.issue_split_from = self.name
-		replicated_issue.mins_to_first_response = 0
+		replicated_issue.first_response_time = 0
 		replicated_issue.first_responded_on = None
 		replicated_issue.creation = now_datetime()
 
@@ -84,7 +84,7 @@ class Issue(Document):
 		if replicated_issue.service_level_agreement:
 			replicated_issue.service_level_agreement_creation = now_datetime()
 			replicated_issue.service_level_agreement = None
-			replicated_issue.agreement_fulfilled = "Ongoing"
+			replicated_issue.agreement_status = "Ongoing"
 			replicated_issue.response_by = None
 			replicated_issue.response_by_variance = None
 			replicated_issue.resolution_by = None
@@ -115,7 +115,6 @@ class Issue(Document):
 		}).insert(ignore_permissions=True)
 
 		return replicated_issue.name
-
 
 def get_list_context(context=None):
 	return {
