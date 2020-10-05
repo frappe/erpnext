@@ -1605,7 +1605,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "has_stin",
+   "depends_on": "eval:(doc.has_stin && (doc.set_posting_time || !doc.__islocal))",
    "fieldname": "stin",
    "fieldtype": "Int",
    "label": "Tax Invoice Number",
@@ -1617,6 +1617,7 @@
    "depends_on": "eval:!doc.has_stin || doc.__islocal",
    "fieldname": "has_stin",
    "fieldtype": "Check",
+   "in_standard_filter": 1,
    "label": "Is Tax Invoice",
    "set_only_once": 1
   },
@@ -1924,7 +1925,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-10-05 12:52:53.730401",
+ "modified": "2020-10-05 14:11:58.079072",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

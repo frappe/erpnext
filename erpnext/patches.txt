@@ -686,3 +686,4 @@ erpnext.patches.v12_0.merge_hs_code_with_customs_tariff_number
 erpnext.patches.v12_0.remove_tax_id_hidden_property_setter
 erpnext.patches.v12_0.transaction_type_for_purchase
 erpnext.patches.v12_0.update_pricing_rule_table
+erpnext.patches.v12_0.remove_stin_property_setter
