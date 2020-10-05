@@ -139,12 +139,12 @@ class FBRInvoiceWiseTaxes(object):
 		]
 
 		if self.party_naming_by != "Naming Series":
-			columns = filter(lambda d: d['fieldname'] != 'party_name', columns)
+			columns = list(filter(lambda d: d['fieldname'] != 'party_name', columns))
 
 		if cint(self.filters.for_export):
-			columns = filter(lambda d: not d.get("hide_for_export"), columns)
+			columns = list(filter(lambda d: not d.get("hide_for_export"), columns))
 		else:
-			columns = filter(lambda d: not d.get("hide_for_view"), columns)
+			columns = list(filter(lambda d: not d.get("hide_for_view"), columns))
 
 		return columns
 
@@ -186,7 +186,7 @@ class FBRInvoiceWiseTaxes(object):
 					and abs(base_tax_amount_after_discount_amount) > 0
 				group by parent, account_head
 			""".format(", ".join(['%s'] * len(invoices_map.keys())), ", ".join(['%s'] * len(tax_accounts))),
-				invoices_map.keys() + tax_accounts, as_dict=1)
+				list(invoices_map.keys()) + tax_accounts, as_dict=1)
 		else:
 			taxes = []
 
