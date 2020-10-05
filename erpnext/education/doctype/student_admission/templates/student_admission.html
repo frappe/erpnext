@@ -62,7 +62,7 @@
 							<td>{{ row.application_fee }}</td>
 							{%- if doc.enable_admission_application and frappe.utils.getdate(doc.admission_start_date) <= today -%}
 							<td>
-								<a class='btn btn-sm btn-primary' href='/student-applicant?new=1&student_admission={{doc.name}}&program={{row.program}}'>
+								<a class='btn btn-sm btn-primary' href='/student-applicant?new=1&student_admission={{doc.name}}&program={{row.program}}&academic_year={{academic_year}}'>
 									{{ _("Apply Now") }}
 								</a>
 							</td>
