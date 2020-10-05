@@ -1159,6 +1159,7 @@ def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docna
 	child_item.description = item.description
 	child_item.schedule_date = trans_item.get('schedule_date') or p_doc.schedule_date
 	child_item.uom = item.stock_uom
+	child_item.warehouse = p_doc.set_warehouse
 	child_item.conversion_factor = get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.base_rate = 1 # Initiallize value will update in parent validation
 	child_item.base_amount = 1 # Initiallize value will update in parent validation
@@ -1189,6 +1190,12 @@ def check_and_delete_children(parent, data):
 		d.cancel()
 		d.delete()
 
+		from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty
+		frappe.errprint(f"Item Code: {d.item_code}, Warehouse: {d.warehouse}")
+		update_bin_qty(d.item_code, d.warehouse, {
+			"ordered_qty": get_ordered_qty(d.item_code, d.warehouse)
+		})
+
 @frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
 	data = json.loads(trans_items)
@@ -1218,6 +1225,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			frappe.throw(_("Cannot set quantity less than received quantity"))
 
 		child_item.qty = flt(d.get("qty"))
+		if parent_doctype == "Purchase Order":
+			child_item.brand = frappe.db.get_value('Item', d.get('item_code'), "brand")
 		precision = child_item.precision("rate") or 2
 
 		if flt(child_item.billed_amt, precision) > flt(flt(d.get("rate")) * flt(d.get("qty")), precision):
