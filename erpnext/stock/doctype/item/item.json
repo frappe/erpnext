@@ -1148,7 +1148,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-10-04 22:08:10.175964",
+ "modified": "2020-10-05 15:42:27.895647",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -1175,16 +1175,19 @@
    "role": "Stock Manager"
   },
   {
+   "export": 1,
    "read": 1,
    "report": 1,
    "role": "Stock User"
   },
   {
+   "export": 1,
    "read": 1,
    "report": 1,
    "role": "Sales User"
   },
   {
+   "export": 1,
    "read": 1,
    "report": 1,
    "role": "Purchase User"
@@ -1194,6 +1197,7 @@
    "role": "Maintenance User"
   },
   {
+   "export": 1,
    "read": 1,
    "report": 1,
    "role": "Accounts User"
