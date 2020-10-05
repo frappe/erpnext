@@ -69,16 +69,11 @@ frappe.ui.form.on('Appraisal Goal', {
 		else {
 			frm.trigger('set_score_earned');
 		}
-<<<<<<< Updated upstream
 	},
 	per_weightage: function(frm) {
 		frm.trigger('set_score_earned');
 	},
 	goals_remove: function(frm) {
 		frm.trigger('set_score_earned');
-=======
-		refresh_field('score_earned', d.name, 'goals');
-	frm.trigger('calculate_total');
->>>>>>> Stashed changes
 	}
 });
