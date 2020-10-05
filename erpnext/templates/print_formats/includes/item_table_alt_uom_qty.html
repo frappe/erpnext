@@ -1,0 +1,4 @@
+{% if ((doc.alt_uom or doc.uom) and not doc.is_print_hide("alt_uom")) %}
+	<small class="pull-left">{{ _(doc.alt_uom or doc.uom) }}</small>
+{%- endif %}
+{{ doc.get_formatted("alt_uom_qty", doc) }}

@@ -8,9 +8,10 @@ from frappe.utils import cint
 def print_settings_for_item_table(doc):
 
 	doc.print_templates = {
-		"qty": "templates/print_formats/includes/item_table_qty.html"
+		"qty": "templates/print_formats/includes/item_table_qty.html",
+		"alt_uom_qty": "templates/print_formats/includes/item_table_alt_uom_qty.html"
 	}
-	doc.hide_in_print_layout = ["uom", "stock_uom"]
+	doc.hide_in_print_layout = ["uom", "stock_uom", "alt_uom"]
 
 	doc.flags.compact_item_print = cint(frappe.db.get_single_value("Print Settings", "compact_item_print"))
 
