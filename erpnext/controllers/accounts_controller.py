@@ -16,7 +16,7 @@ from erpnext.buying.utils import update_last_purchase_rate
 from erpnext.controllers.sales_and_purchase_return import validate_return
 from erpnext.accounts.party import get_party_account_currency, validate_party_frozen_disabled
 from erpnext.accounts.doctype.pricing_rule.utils import (apply_pricing_rule_on_transaction,
-	apply_pricing_rule_for_free_items, get_applied_pricing_rules)
+	apply_pricing_rule_for_free_items, get_applied_pricing_rules, update_pricing_rule_table)
 from erpnext.exceptions import InvalidCurrency
 from six import text_type
 import re
@@ -141,6 +141,7 @@ class AccountsController(TransactionBase):
 		validate_regional(self)
 		if self.doctype != 'Material Request':
 			apply_pricing_rule_on_transaction(self)
+			update_pricing_rule_table(self)
 
 	def validate_deferred_start_and_end_date(self):
 		for d in self.items:

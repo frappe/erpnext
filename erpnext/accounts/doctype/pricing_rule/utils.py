@@ -19,7 +19,7 @@ from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from frappe import _, throw
-from frappe.utils import cint, flt, get_datetime, get_link_to_form, getdate, today
+from frappe.utils import cint, flt, cstr, get_datetime, get_link_to_form, getdate, today
 
 
 class MultiplePricingRuleConflict(frappe.ValidationError): pass
@@ -469,6 +469,36 @@ def apply_pricing_rule_on_transaction(doc):
 				get_product_discount_rule(d, item_details, doc=doc)
 				apply_pricing_rule_for_free_items(doc, item_details.free_item_data)
 				doc.set_missing_values()
+
+def update_pricing_rule_table(doc):
+	if not doc.meta.has_field('pricing_rules'):
+		return
+
+	actual_pricing_rules = set()
+
+	for d in doc.items:
+		item_pricing_rules = get_applied_pricing_rules(d)
+		for pricing_rule in item_pricing_rules:
+			actual_pricing_rules.add((cstr(d.item_code), pricing_rule))
+
+	to_remove = []
+	for d in doc.pricing_rules:
+		if (cstr(d.item_code), d.pricing_rule) not in actual_pricing_rules:
+			to_remove.append(d)
+	for d in to_remove:
+		doc.remove(d)
+
+	existing_pricing_rules = set()
+	for d in doc.pricing_rules:
+		existing_pricing_rules.add((cstr(d.item_code), d.pricing_rule))
+
+	to_add = actual_pricing_rules - existing_pricing_rules
+	for item_code, pricing_rule in to_add:
+		doc.append('pricing_rules', {
+			'item_code': item_code,
+			'pricing_rule': pricing_rule,
+			'rule_applied': 1
+		})
 
 def get_applied_pricing_rules(pricing_rules):
 	if pricing_rules:
