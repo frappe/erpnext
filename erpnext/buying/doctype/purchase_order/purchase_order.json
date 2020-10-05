@@ -69,6 +69,8 @@
   "raw_material_details",
   "set_reserve_warehouse",
   "supplied_items",
+  "supplier_sourced_item_section",
+  "supplier_sourced_items",
   "taxes_section",
   "tax_category",
   "column_break_50",
@@ -1078,13 +1080,26 @@
    "fieldtype": "Small Text",
    "label": "Billing Address",
    "read_only": 1
+  },
+  {
+   "fieldname": "supplier_sourced_items",
+   "fieldtype": "Table",
+   "label": "Supplier Sourced Items",
+   "options": "Supplier Sourced Item",
+   "read_only": 1
+  },
+  {
+   "collapsible_depends_on": "supplier_sourced_items",
+   "fieldname": "supplier_sourced_item_section",
+   "fieldtype": "Section Break",
+   "label": "Supplier Sourced Item"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-14 14:36:12.418690",
+ "modified": "2020-10-05 21:57:55.657892",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

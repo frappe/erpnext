@@ -27,7 +27,6 @@ frappe.ui.form.on("Purchase Order", {
 				filters: {'company': frm.doc.company}
 			}
 		});
-
 	},
 
 	onload: function(frm) {
@@ -38,6 +37,14 @@ frappe.ui.form.on("Purchase Order", {
 
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
+		});
+	},
+
+	refresh: function(frm) {
+		// Set Supplier Sourced Item fields read only
+		let fields_read_only = ["item_code", "item_name", "operation", "description", "qty", "uom", "bom_no"];
+		fields_read_only.forEach(function(field) {
+			frappe.meta.get_docfield("Supplier Sourced Item", field, frm.doc.name).read_only = 1;
 		});
 	}
 });

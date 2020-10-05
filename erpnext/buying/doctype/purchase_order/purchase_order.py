@@ -19,6 +19,7 @@ from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
 	unlink_inter_company_doc
+from erpnext.manufacturing.doctype.bom.bom import get_supplier_sourced_items
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -58,6 +59,7 @@ class PurchaseOrder(BuyingController):
 		self.validate_bom_for_subcontracting_items()
 		self.create_raw_materials_supplied("supplied_items")
 		self.set_received_qty_for_drop_ship_items()
+		self.set_supplier_sourced_items_from_bom()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_order_reference)
 
 	def validate_with_previous_doc(self):
@@ -314,6 +316,30 @@ class PurchaseOrder(BuyingController):
 			self.db_set("per_received", flt(received_qty/total_qty) * 100, update_modified=False)
 		else:
 			self.db_set("per_received", 0, update_modified=False)
+
+	def set_supplier_sourced_items_from_bom(self):
+		for item in self.items:
+			if item.bom and item.qty:
+				supplier_sourced_items = get_supplier_sourced_items(item.bom, item.qty)
+				if not self.supplier_sourced_items:
+					self.set('supplier_sourced_items', supplier_sourced_items)
+				else:
+					existing_items = [d.item_code for d in self.supplier_sourced_items if d.bom_no == item.bom]
+					for sourced_item in supplier_sourced_items:
+						if sourced_item.item_code not in existing_items:
+							self.append('supplier_sourced_items', {
+								'item_code': sourced_item.item_code,
+								'item_name': sourced_item.item_name,
+								'description': sourced_item.description,
+								'operation': sourced_item.operation,
+								'qty': sourced_item.qty,
+								'uom': sourced_item.uom
+							})
+						else:
+							for new_sourced_item in self.supplier_sourced_items:
+								if new_sourced_item.item_code == sourced_item.item_code and\
+									new_sourced_item.bom_no == sourced_item.bom_no:
+									new_sourced_item.qty = sourced_item.qty
 
 def item_last_purchase_rate(name, conversion_rate, item_code, conversion_factor= 1.0):
 	"""get last purchase rate for an item"""

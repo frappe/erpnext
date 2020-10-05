@@ -791,7 +791,48 @@ class TestPurchaseOrder(unittest.TestCase):
 		# To test if the PO does NOT have a Blanket Order
 		self.assertEqual(po_doc.items[0].blanket_order, None)
 
+	def test_subcontractor_sourced_item(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+		item_code = "_Test Subcontracted FG Item 1"
 
+		if not frappe.db.exists('Item', item_code):
+			make_item(item_code, {
+				'is_stock_item': 1,
+				'is_sub_contracted_item': 1,
+				'stock_uom': 'Nos'
+			})
+
+		if not frappe.db.exists('Item', "Test Extra Item 1"):
+			make_item("Test Extra Item 1", {
+				'is_stock_item': 1,
+				'stock_uom': 'Nos'
+			})
+
+		if not frappe.db.exists('Item', "Test Extra Item 2"):
+			make_item("Test Extra Item 2", {
+				'is_stock_item': 1,
+				'stock_uom': 'Nos'
+			})
+
+		if not frappe.db.exists('Item', "Test Extra Item 3"):
+			make_item("Test Extra Item 3", {
+				'is_stock_item': 1,
+				'stock_uom': 'Nos'
+			})
+
+		if not frappe.db.get_value('BOM', {'item': item_code}, 'name'):
+			make_bom(item = item_code, raw_materials = ['Test Extra Item 3'],
+				supplier_sourced_items = ['Test Extra Item 1', 'Test Extra Item 2'])
+
+		po = create_purchase_order(item_code=item_code, qty=1,
+			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
+
+		name = frappe.db.get_value('BOM', {'item': item_code}, 'name')
+		bom = frappe.get_doc('BOM', name)
+
+		bom_items = sorted([d.item_code for d in bom.supplier_sourced_items])
+		supplied_items = sorted([d.item_code for d in po.supplier_sourced_items])
+		self.assertEquals(bom_items, supplied_items)
 
 
 def make_pr_against_po(po, received_qty=0):

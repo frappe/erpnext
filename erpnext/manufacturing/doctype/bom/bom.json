@@ -37,6 +37,8 @@
   "inspection_required",
   "quality_inspection_template",
   "items",
+  "has_supplier_sourced_items",
+  "supplier_sourced_items",
   "scrap_section",
   "scrap_items",
   "costing",
@@ -510,14 +512,28 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.has_supplier_sourced_items",
+   "fieldname": "supplier_sourced_items",
+   "fieldtype": "Table",
+   "label": "Supplier Sourced Items",
+   "options": "Supplier Sourced Item"
+  },
+  {
+   "default": "0",
+   "fieldname": "has_supplier_sourced_items",
+   "fieldtype": "Check",
+   "label": "Has Supplier Sourced Items"
   }
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
  "image_field": "image",
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-21 12:29:32.634952",
+ "modified": "2020-10-05 12:40:39.018004",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

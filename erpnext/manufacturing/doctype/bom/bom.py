@@ -992,3 +992,14 @@ def make_variant_bom(source_name, bom_no, item, variant_items, target_doc=None):
 	}, target_doc, postprocess)
 
 	return doc
+
+def get_supplier_sourced_items(bom, qty):
+	return frappe.db.sql("""
+			select
+				item_code, item_name, operation, description, idx,
+				(qty*%s) as qty, uom, parent as bom_no
+			from
+				`tabSupplier Sourced Item`
+			where
+				 parent = %s order by idx
+		""", (qty, bom), as_dict=1)

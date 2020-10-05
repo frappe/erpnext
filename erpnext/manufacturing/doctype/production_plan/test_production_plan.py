@@ -210,6 +210,14 @@ def make_bom(**args):
 			'stock_uom': item_doc.stock_uom,
 			'rate': item_doc.valuation_rate or args.rate,
 		})
+	if args.supplier_sourced_items:
+		bom.append('supplier_sourced_items', {
+			'item_code': item,
+			'qty': 1,
+			'uom': item_doc.stock_uom,
+			'stock_uom': item_doc.stock_uom,
+			'rate': item_doc.valuation_rate or args.rate,
+		})
 
 	bom.insert(ignore_permissions=True)
 	bom.submit()
