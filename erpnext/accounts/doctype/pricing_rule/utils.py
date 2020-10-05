@@ -477,7 +477,7 @@ def update_pricing_rule_table(doc):
 	actual_pricing_rules = set()
 
 	for d in doc.items:
-		item_pricing_rules = get_applied_pricing_rules(d)
+		item_pricing_rules = get_applied_pricing_rules(d.get('pricing_rules'))
 		for pricing_rule in item_pricing_rules:
 			actual_pricing_rules.add((cstr(d.item_code), pricing_rule))
 
