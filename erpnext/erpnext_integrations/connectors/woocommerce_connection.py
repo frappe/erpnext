@@ -62,6 +62,8 @@ def pre_process_payload(meta_data, billing):
 		# 	nab_reference_id = meta["value"]
 		elif meta["key"] == "pos_patient":
 			patient_name = meta["value"]
+		elif meta["key"] == "invoice_sending_option":
+			invoice_sending_option = meta["value"]
 		elif meta["key"] == "_pos_order_type":
 			pos_order_type = meta["value"]
 		else:
@@ -77,7 +79,7 @@ def pre_process_payload(meta_data, billing):
 		"temporary_delivery_address_line_5": billing.get('email')
 	}
 
-	return customer_code, pos_order_type, patient_name, delivery_option, temp_address
+	return customer_code, pos_order_type, patient_name, invoice_sending_option, delivery_option, temp_address
 
 def validate_customer_code_erpnext(customer_code):
 	if not customer_code :
@@ -137,7 +139,7 @@ def _order(woocommerce_settings, *args, **kwargs):
 	}
 
 	# pre-process to parse payload (parameter: meta_data, billing)
-	customer_code, pos_order_type, patient_name, delivery_option, temp_address = pre_process_payload(order.get('meta_data'), order.get('billing'))
+	customer_code, pos_order_type, patient_name, invoice_sending_option, delivery_option, temp_address = pre_process_payload(order.get('meta_data'), order.get('billing'))
 
 	# Validate customer code, output payment_category and accepts_backorders 
 	payment_category, accepts_backorders = validate_customer_code_erpnext(customer_code)
@@ -171,7 +173,8 @@ def _order(woocommerce_settings, *args, **kwargs):
 				if pos_order_type == "self":
 					new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, test_order=test_order)
 				else:
-					new_invoice, patient_invoice_doc = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=temp_address, delivery_option=delivery_option, test_order=test_order)
+					new_invoice, patient_invoice_doc = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=temp_address, delivery_option=delivery_option, invoice_sending_option=invoice_sending_option, test_order=test_order)
+					customer_accepts_backorder = 1
 
 			elif pos_order_type == "practitioner_order":
 				if create_backorder_doc_flag == 1:
@@ -187,15 +190,13 @@ def _order(woocommerce_settings, *args, **kwargs):
 
 	# Create a intergration request
 	try:
-		if pos_order_type != "on-behalf":
+		if invoice_sending_option != "send receipt to clinic":
 			patient_invoice_doc = None
-		else:
-			customer_accepts_backorder = 1
 
 		log_integration_request(webhook_delivery_id=webhook_delivery_id, order=order, invoice_doc=new_invoice, status="Completed", data=json.dumps(order, indent=4), reference_docname=new_invoice.name, woocommerce_settings=woocommerce_settings, test_order=test_order, customer_accepts_backorder=customer_accepts_backorder, patient_invoice_doc=patient_invoice_doc)
 
 		# for postman display only
-		if pos_order_type != "on-behalf":
+		if invoice_sending_option != "send receipt to clinic":
 			return "Sales invoice: {} created!".format(new_invoice.name)
 		else:
 			return "Sales invoice: {} created! \n Patient invoice: {}".format(new_invoice.name, patient_invoice_doc.name)
@@ -204,7 +205,7 @@ def _order(woocommerce_settings, *args, **kwargs):
 		frappe.throw(frappe.get_traceback())
 
 
-def create_sales_invoice(edited_line_items, order, customer_code, payment_category,  woocommerce_settings, order_type=None, temp_address=None, delivery_option=None, test_order=0):
+def create_sales_invoice(edited_line_items, order, customer_code, payment_category,  woocommerce_settings, order_type=None, temp_address=None, delivery_option=None, invoice_sending_option=None, test_order=0):
 	#Set Basic Info
 	date_created = order.get("date_created").split("T")[0]
 	customer_note = order.get('customer_note')
@@ -255,11 +256,8 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 	# create frappe doc for invoice
 	invoice_doc = frappe.get_doc(invoice_dict)
 
-	# Add Items, add test kit
-	if invoice_doc.order_type == "On Behalf":
-		customer_accepts_backorder = set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, woocommerce_settings, tax_rate, order_type=invoice_doc.order_type)
-	else:
-		customer_accepts_backorder = set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, woocommerce_settings, tax_rate)
+	# Add Items, add test kit based on invoice sending option
+	customer_accepts_backorder = set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, woocommerce_settings, tax_rate, invoice_sending_option=invoice_sending_option)
 
 	# Save 
 	invoice_doc.flags.ignore_mandatory = True
@@ -268,22 +266,24 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 	shipping_total = order.get('shipping_total')
 	shipping_tax = order.get('shipping_tax')
 
-	on_behalf_flag = 0
+
 
 	# adding handling fee
 	if test_order == 1:
 		# Hard code shipping tax
 		if invoice_doc.order_type == "On Behalf":
 			shipping_tax = 2
-			# create patient invoice with just test kit
-			patient_invoice_doc = frappe.get_doc(invoice_dict)
-			create_patient_invoice(edited_line_items, patient_invoice_doc)
-			# Save 
-			patient_invoice_doc.flags.ignore_mandatory = True
-			patient_invoice_doc.insert()
 
-			DocTags("Sales Invoice").add(patient_invoice_doc.name, "WC order on behalf of patient")
-			on_behalf_flag = 1
+			# Depending on invoice sending option
+			if invoice_sending_option == "send receipt to clinic":
+				# create patient invoice with just test kit
+				patient_invoice_doc = frappe.get_doc(invoice_dict)
+				create_patient_invoice(edited_line_items, patient_invoice_doc)
+				# Save 
+				patient_invoice_doc.flags.ignore_mandatory = True
+				patient_invoice_doc.insert()
+
+				DocTags("Sales Invoice").add(patient_invoice_doc.name, "WC order on behalf of patient")
 
 		invoice_doc.append("items",{
 			"item_code": "HAND-FEE",
@@ -331,13 +331,14 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 
 	DocTags("Sales Invoice").add(invoice_doc.name, "WooCommerce Order")
 
-	if on_behalf_flag == 1:
+	# if send receipt to clinic, we need to have two invoices, one for practitioner, one for patient
+	if invoice_sending_option == "send receipt to clinic":
 		return invoice_doc, patient_invoice_doc
 	else:
 		return invoice_doc, customer_accepts_backorder
-	
 
-def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, woocommerce_settings, tax_rate, order_type=None):
+
+def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, woocommerce_settings, tax_rate, invoice_sending_option=None):
 	"""
 		validated_item = {
 			"item_code": found_item.item_code,
@@ -374,10 +375,9 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
 			if item["item_group"] != "Tests":
 				item_tax = (item['rate'] * tax_rate) * item["qty"]
 
-			if item["item_group"] == "Tests" and order_type != "On Behalf":
+			if item["item_group"] == "Tests" and invoice_sending_option == "send receipt to patient":
 				test_kit = frappe.db.get_value("Item", item['item_code'], "test_kit")
 				if test_kit:
-					# test_kit_doc = frappe.get_doc("Item", item['item_code'])
 					invoice_doc.append("items", {
 						"item_code": test_kit,
 						"qty": 1,
