@@ -18,7 +18,7 @@ class TransactionBase(StatusUpdater):
 		if frappe.flags.in_import and self.posting_date:
 			self.set_posting_time = 1
 
-		if not getattr(self, 'set_posting_time', None):
+		if not getattr(self, 'set_posting_time', None) and not self.get('amended_from'):
 			now = now_datetime()
 			self.posting_date = now.strftime('%Y-%m-%d')
 			self.posting_time = now.strftime('%H:%M:%S.%f')
