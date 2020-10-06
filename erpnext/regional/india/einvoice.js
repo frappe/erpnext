@@ -7,27 +7,131 @@ erpnext.setup_einvoice_actions = (doctype) => {
 				|| !['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export'].includes(supply_type)) {
 				return;
 			}
+			// if (frm.doc.docstatus == 0 && !frm.doc.irn && !frm.doc.__unsaved) {
+			// 	frm.add_custom_button(
+			// 		"Generate IRN",
+			// 		() => {
+			// 			frappe.call({
+			// 				method: 'erpnext.regional.india.e_invoice_utils.generate_irn',
+			// 				args: { doctype: frm.doc.doctype, name: frm.doc.name },
+			// 				freeze: true,
+			// 				callback: (res) => {
+			// 					console.log(res.message);
+			// 					frm.set_value('irn', res.message['Irn']);
+			// 					frm.set_value('signed_einvoice', JSON.stringify(res.message['DecryptedSignedInvoice']));
+			// 					frm.set_value('signed_qr_code', JSON.stringify(res.message['DecryptedSignedQRCode']));
+
+			// 					if (res.message['EwbNo']) frm.set_value('ewaybill', res.message['EwbNo']);
+			// 					frm.save();
+			// 				}
+			// 			})
+			// 		}
+			// 	)
+			// }
+
+			// if (frm.doc.docstatus == 1 && frm.doc.irn && !frm.doc.irn_cancelled) {
+			// 	frm.add_custom_button(
+			// 		"Cancel IRN",
+			// 		() => {
+			// 			const d = new frappe.ui.Dialog({
+			// 				title: __('Cancel IRN'),
+			// 				fields: [
+			// 					{ "label" : "Reason", "fieldname": "reason", "fieldtype": "Select", "reqd": 1, "default": "1-Duplicate",
+			// 						"options": ["1-Duplicate", "2-Data Entry Error", "3-Order Cancelled", "4-Other"] },
+			// 					{ "label": "Remark", "fieldname": "remark", "fieldtype": "Data", "reqd": 1 }
+			// 				],
+			// 				primary_action: function() {
+			// 					const data = d.get_values();
+			// 					frappe.call({
+			// 						method: 'erpnext.regional.india.e_invoice_utils.cancel_irn',
+			// 						args: { irn: frm.doc.irn, reason: data.reason.split('-')[0], remark: data.remark },
+			// 						freeze: true,
+			// 						callback: () => {
+			// 							frm.set_value('irn_cancelled', 1);
+			// 							frm.save("Update");
+			// 							d.hide()
+			// 						},
+			// 						error: () => d.hide()
+			// 					})
+			// 				},
+			// 				primary_action_label: __('Submit')
+			// 			});
+			// 			d.show();
+			// 		}
+			// 	)
+			// }
+
+			// if (frm.doc.docstatus == 1 && frm.doc.irn && !frm.doc.irn_cancelled && !frm.doc.eway_bill_cancelled) {
+			// 	frm.add_custom_button(
+			// 		"Cancel E-Way Bill",
+			// 		() => {
+			// 			const d = new frappe.ui.Dialog({
+			// 				title: __('Cancel E-Way Bill'),
+			// 				fields: [
+			// 					{ "label" : "Reason", "fieldname": "reason", "fieldtype": "Select", "reqd": 1, "default": "1-Duplicate",
+			// 						"options": ["1-Duplicate", "2-Data Entry Error", "3-Order Cancelled", "4-Other"] },
+			// 					{ "label": "Remark", "fieldname": "remark", "fieldtype": "Data", "reqd": 1 }
+			// 				],
+			// 				primary_action: function() {
+			// 					const data = d.get_values();
+			// 					frappe.call({
+			// 						method: 'erpnext.regional.india.e_invoice_utils.cancel_eway_bill',
+			// 						args: { eway_bill: frm.doc.ewaybill, reason: data.reason.split('-')[0], remark: data.remark },
+			// 						freeze: true,
+			// 						callback: () => {
+			// 							frm.set_value('eway_bill_cancelled', 1);
+			// 							frm.save("Update");
+			// 							d.hide()
+			// 						},
+			// 						error: () => d.hide()
+			// 					})
+			// 				},
+			// 				primary_action_label: __('Submit')
+			// 			});
+			// 			d.show();
+			// 		}
+			// 	)
+			// }
 
 			if (frm.doc.docstatus == 0 && !frm.doc.irn && !frm.doc.__unsaved) {
 				frm.add_custom_button(
-					"Generate IRN",
+					"Download E-Invoice",
 					() => {
 						frappe.call({
-							method: 'erpnext.regional.india.e_invoice_utils.generate_irn',
+							method: 'erpnext.regional.india.e_invoice_utils.make_e_invoice',
 							args: { doctype: frm.doc.doctype, name: frm.doc.name },
 							freeze: true,
 							callback: (res) => {
-								console.log(res.message);
-								frm.set_value('irn', res.message['Irn']);
-								frm.set_value('signed_einvoice', JSON.stringify(res.message['DecryptedSignedInvoice']));
-								frm.set_value('signed_qr_code', JSON.stringify(res.message['DecryptedSignedQRCode']));
-
-								if (res.message['EwbNo']) frm.set_value('ewaybill', res.message['EwbNo']);
-								frm.save();
+								if (!res.exc) {
+									const args = {
+										cmd: 'erpnext.regional.india.e_invoice_utils.download_einvoice',
+										einvoice: res.message.einvoice,
+										name: frm.doc.name
+									};
+									open_url_post(frappe.request.url, args);
+								}
 							}
 						})
 					}
-				)
+				);
+			}
+			if (frm.doc.docstatus == 0 && !frm.doc.irn && !frm.doc.__unsaved) {
+				frm.add_custom_button(
+					"Upload Signed E-Invoice",
+					() => {
+						new frappe.ui.FileUploader({
+							method: 'erpnext.regional.india.e_invoice_utils.upload_einvoice',
+							allow_multiple: 0,
+							doctype: frm.doc.doctype,
+							docname: frm.doc.name,
+							on_success: (attachment, r) => {
+								if (!r.exc) {
+									frm.reload_doc();
+								}
+							}
+						});
+					}
+				);
 			}
 			if (frm.doc.docstatus == 1 && frm.doc.irn && !frm.doc.irn_cancelled) {
 				frm.add_custom_button(
@@ -36,62 +140,30 @@ erpnext.setup_einvoice_actions = (doctype) => {
 						const d = new frappe.ui.Dialog({
 							title: __('Cancel IRN'),
 							fields: [
-								{ "label" : "Reason", "fieldname": "reason", "fieldtype": "Select", "reqd": 1, "default": "1-Duplicate",
-									"options": ["1-Duplicate", "2-Data Entry Error", "3-Order Cancelled", "4-Other"] },
-								{ "label": "Remark", "fieldname": "remark", "fieldtype": "Data", "reqd": 1 }
+								{
+									"label" : "Reason", "fieldname": "reason",
+									"fieldtype": "Select", "reqd": 1, "default": "1-Duplicate",
+									"options": ["1-Duplicate", "2-Data Entry Error", "3-Order Cancelled", "4-Other"]
+								},
+								{
+									"label": "Remark", "fieldname": "remark", "fieldtype": "Data", "reqd": 1
+								}
 							],
 							primary_action: function() {
 								const data = d.get_values();
-								frappe.call({
-									method: 'erpnext.regional.india.e_invoice_utils.cancel_irn',
-									args: { irn: frm.doc.irn, reason: data.reason.split('-')[0], remark: data.remark },
-									freeze: true,
-									callback: () => {
-										frm.set_value('irn_cancelled', 1);
-										frm.save("Update");
-										d.hide()
-									},
-									error: () => d.hide()
-								})
+								const args = {
+									cmd: 'erpnext.regional.india.e_invoice_utils.download_cancel_einvoice',
+									irn: frm.doc.irn, reason: data.reason.split('-')[0], remark: data.remark, name: frm.doc.name
+								};
+								open_url_post(frappe.request.url, args);
+								d.hide();
 							},
-							primary_action_label: __('Submit')
+							primary_action_label: __('Download JSON')
 						});
 						d.show();
 					}
-				)
-			}
-			if (frm.doc.docstatus == 1 && frm.doc.irn && !frm.doc.irn_cancelled && !frm.doc.eway_bill_cancelled) {
-				frm.add_custom_button(
-					"Cancel E-Way Bill",
-					() => {
-						const d = new frappe.ui.Dialog({
-							title: __('Cancel E-Way Bill'),
-							fields: [
-								{ "label" : "Reason", "fieldname": "reason", "fieldtype": "Select", "reqd": 1, "default": "1-Duplicate",
-									"options": ["1-Duplicate", "2-Data Entry Error", "3-Order Cancelled", "4-Other"] },
-								{ "label": "Remark", "fieldname": "remark", "fieldtype": "Data", "reqd": 1 }
-							],
-							primary_action: function() {
-								const data = d.get_values();
-								frappe.call({
-									method: 'erpnext.regional.india.e_invoice_utils.cancel_eway_bill',
-									args: { eway_bill: frm.doc.ewaybill, reason: data.reason.split('-')[0], remark: data.remark },
-									freeze: true,
-									callback: () => {
-										frm.set_value('eway_bill_cancelled', 1);
-										frm.save("Update");
-										d.hide()
-									},
-									error: () => d.hide()
-								})
-							},
-							primary_action_label: __('Submit')
-						});
-						d.show();
-					}
-				)
+				);
 			}
 		}
-		
 	})
 }
