@@ -59,13 +59,15 @@
         "minLength": 1,
         "maxLength": 16,
         "pattern": "^([A-Z1-9]{1}[A-Z0-9/-]{0,15})$",
-        "label": "Document Name"
+        "label": "Document Name",
+        "validationMsg": "Document name should not be starting with 0, / and -"
       },
       "Dt": {
         "type": "string",
         "minLength": 10,
         "maxLength": 10,
-        "pattern": "[0-3][0-9]/[0-1][0-9]/[2][0][1-2][0-9]"
+        "pattern": "[0-3][0-9]/[0-1][0-9]/[2][0][1-2][0-9]",
+        "validationMsg": "Document Date is invalid"
       }
     },
     "required": ["Typ", "No", "Dt"]
@@ -77,7 +79,8 @@
         "type": "string",
         "minLength": 15,
         "maxLength": 15,
-        "pattern": "([0-9]{2}[0-9A-Z]{13})"
+        "pattern": "([0-9]{2}[0-9A-Z]{13})",
+        "validationMsg": "Seller GSTIN is invalid"
       },
       "LglNm": {
         "type": "string",
@@ -134,7 +137,8 @@
         "type": "string",
         "minLength": 3,
         "maxLength": 15,
-        "pattern": "^(([0-9]{2}[0-9A-Z]{13})|URP)$"
+        "pattern": "^(([0-9]{2}[0-9A-Z]{13})|URP)$",
+        "validationMsg": "Buyer GSTIN is invalid"
       },
       "LglNm": {
         "type": "string",
@@ -232,7 +236,8 @@
         "type": "string",
         "maxLength": 15,
         "minLength": 3,
-        "pattern": "^(([0-9]{2}[0-9A-Z]{13})|URP)$"
+        "pattern": "^(([0-9]{2}[0-9A-Z]{13})|URP)$",
+        "validationMsg": "Shipping Address GSTIN is invalid"
       },
       "LglNm": {
         "type": "string",
@@ -429,13 +434,15 @@
               "type": "string",
               "maxLength": 10,
               "minLength": 10,
-              "pattern": "[0-3][0-9]/[0-1][0-9]/[2][0][1-2][0-9]"
+              "pattern": "[0-3][0-9]/[0-1][0-9]/[2][0][1-2][0-9]",
+              "validationMsg": "Expiry Date is invalid"
             },
             "WrDt": {
               "type": "string",
               "maxLength": 10,
               "minLength": 10,
-              "pattern": "[0-3][0-9]/[0-1][0-9]/[2][0][1-2][0-9]"
+              "pattern": "[0-3][0-9]/[0-1][0-9]/[2][0][1-2][0-9]",
+              "validationMsg": "Warranty Date is invalid"
             }
           },
           "required": ["Nm"]
