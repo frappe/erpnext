@@ -76,6 +76,7 @@
 					{% if doc.purchase_receipts -%}
 						{{ row('GRN #', doc.purchase_receipts|join('<br />')) }}
 					{%- endif %}
+					{{ row('Against', doc.get('return_against')) }}
 				</div>
 			</div>
 		</div>

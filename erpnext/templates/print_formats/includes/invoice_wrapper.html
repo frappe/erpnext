@@ -71,6 +71,7 @@
 					{{ row('STRN', doc.tax_strn) }}
 					{{ row('NTN/CNIC', doc.tax_id or doc.tax_cnic) }}
 					{{ row('PO #', doc.po_no) }}
+					{{ row('Against', doc.get('return_against')) }}
 					{{ row('Original', '<div class="print-checkbox"></div>', value_border=False) }}
 					{{ row('Duplicate', '<div class="print-checkbox"></div>', value_border=False) }}
 				</div>
