@@ -1613,16 +1613,22 @@ def update_multi_mode_option(doc, pos_profile):
 		payment.type = payment_mode.type
 
 	doc.set('payments', [])
+	invalid_mode_of_payments = []
 	for pos_payment_method in pos_profile.get('payments'):
 		pos_payment_method = pos_payment_method.as_dict()
 
 		payment_mode = get_mode_of_payment_info(pos_payment_method.mode_of_payment, doc.company)
 		if not payment_mode:
-			frappe.throw(_("Please set default Cash or Bank account in Mode of Payment {0}")
-				.format(get_link_to_form("Mode of Payment", pos_payment_method.mode_of_payment)), title=_("Missing Account"))
+			invalid_mode_of_payments.append(get_link_to_form("Mode of Payment", pos_payment_method.mode_of_payment))
+			continue
 
 		payment_mode[0].default = pos_payment_method.default
 		append_payment(payment_mode[0])
+	
+	if invalid_mode_of_payments:
+			frappe.throw(_("Please set default Cash or Bank account in Mode of Payment{} {}")
+				.format("s" if len(invalid_mode_of_payments) > 1 else "", ", ".join(invalid_mode_of_payments)),
+				title=_("Missing Account"))
 
 def get_all_mode_of_payments(doc):
 	return frappe.db.sql("""
