@@ -49,13 +49,13 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				this.frm.add_custom_button(
 					__('Unblock Invoice'),
 					function() {me.unblock_invoice()},
-					__('Create')
+					__('Hold Invoice')
 				);
 			} else if (!doc.on_hold) {
 				this.frm.add_custom_button(
 					__('Block Invoice'),
 					function() {me.block_invoice()},
-					__('Create')
+					__('Hold Invoice')
 				);
 			}
 		}
@@ -70,6 +70,10 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			if(doc.outstanding_amount >= 0 || Math.abs(flt(doc.outstanding_amount)) < flt(doc.grand_total)) {
 				cur_frm.add_custom_button(__('Return / Debit Note'),
 					this.make_debit_note, __('Create'));
+			}
+
+			if (doc.update_stock) {
+				cur_frm.add_custom_button(__('Landed Cost Voucher'), this.make_landed_cost_voucher, __("Create"));
 			}
 
 			if(!doc.auto_repeat) {
@@ -523,7 +527,9 @@ frappe.ui.form.on("Purchase Invoice", {
 		frm.custom_make_buttons = {
 			'Purchase Invoice': 'Debit Note',
 			'Payment Entry': 'Payment',
-			'Sales Order': 'Sales Order'
+			'Sales Order': 'Sales Order',
+			'Auto Repeat': 'Subscription',
+			'Payment Request': 'Payment Request',
 		}
 
 		frm.fields_dict['items'].grid.get_field('deferred_expense_account').get_query = function(doc) {

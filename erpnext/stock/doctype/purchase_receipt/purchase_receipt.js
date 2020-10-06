@@ -26,7 +26,8 @@ frappe.ui.form.on("Purchase Receipt", {
 		frm.custom_make_buttons = {
 			'Purchase Receipt': 'Purchase Return',
 			'Purchase Invoice': 'Purchase Invoice',
-			'Landed Cost Voucher': 'Landed Cost Voucher'
+			'Landed Cost Voucher': 'Landed Cost Voucher',
+			'Auto Repeat': 'Subscription',
 		}
 
 		frm.set_indicator_formatter('item_code', function(doc) {
@@ -142,13 +143,15 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 					cur_frm.add_custom_button(__("Close"), this.close_purchase_receipt, __("Status"))
 				}
 
-				cur_frm.add_custom_button(__('Purchase Return'), this.make_purchase_return, __('Create'));
-
-				cur_frm.add_custom_button(__('Make Stock Entry'), cur_frm.cscript['Make Stock Entry'], __('Create'));
-
 				if(flt(this.frm.doc.per_completed) < 100) {
 					cur_frm.add_custom_button(__('Purchase Invoice'), this.make_purchase_invoice, __('Create'));
 				}
+
+				cur_frm.add_custom_button(__('Purchase Return'), this.make_purchase_return, __('Create'));
+
+				cur_frm.add_custom_button(__('Landed Cost Voucher'), this.make_landed_cost_voucher, __("Create"));
+
+				cur_frm.add_custom_button(__('Make Material Transfer'), cur_frm.cscript['Make Stock Entry'], __('Create'));
 				cur_frm.add_custom_button(__('Retention Stock Entry'), this.make_retention_stock_entry, __('Create'));
 
 				if(!this.frm.doc.auto_repeat) {
@@ -156,8 +159,6 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 						erpnext.utils.make_subscription(me.frm.doc.doctype, me.frm.doc.name)
 					}, __('Create'))
 				}
-
-				cur_frm.add_custom_button(__('Landed Cost Voucher'), this.make_landed_cost_voucher, __("Create"));
 
 				cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}

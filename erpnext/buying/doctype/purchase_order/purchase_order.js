@@ -83,10 +83,11 @@ frappe.ui.form.on("Purchase Order Item", {
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
 	setup: function() {
 		this.frm.custom_make_buttons = {
-			'Purchase Receipt': 'Receipt',
-			'Purchase Invoice': 'Invoice',
+			'Purchase Receipt': 'Purchase Receipt',
+			'Purchase Invoice': 'Purchase Invoice',
 			'Stock Entry': 'Material to Supplier',
-			'Payment Entry': 'Payment'
+			'Payment Entry': 'Payment',
+			'Auto Repeat': 'Subscription',
 		}
 
 		this._super();
@@ -151,14 +152,14 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			if(doc.status != "Closed") {
 				if (doc.status != "On Hold") {
 					if(flt(doc.per_received, 6) < 100 && allow_receipt) {
-						cur_frm.add_custom_button(__('Receipt'), this.make_purchase_receipt, __('Create'));
+						cur_frm.add_custom_button(__('Purchase Receipt'), this.make_purchase_receipt, __('Create'));
 						if(doc.is_subcontracted==="Yes" && me.has_unsupplied_items()) {
 							cur_frm.add_custom_button(__('Material to Supplier'),
 								function() { me.make_stock_entry(); }, __("Transfer"));
 						}
 					}
 					if(flt(doc.per_billed, 6) < 100)
-						cur_frm.add_custom_button(__('Invoice'),
+						cur_frm.add_custom_button(__('Purchase Invoice'),
 							this.make_purchase_invoice, __('Create'));
 
 					if(!doc.auto_repeat) {

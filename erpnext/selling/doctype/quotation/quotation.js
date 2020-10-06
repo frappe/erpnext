@@ -8,8 +8,9 @@ frappe.ui.form.on('Quotation', {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
 			'Sales Order': 'Sales Order',
-			'Sales Invoice': 'Sales Invoice'
-		},
+			'Sales Invoice': 'Sales Invoice',
+			'Auto Repeat': 'Subscription',
+		};
 
 		frm.set_query("quotation_to", function() {
 			return{

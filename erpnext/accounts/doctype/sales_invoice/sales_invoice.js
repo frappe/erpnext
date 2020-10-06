@@ -614,10 +614,12 @@ frappe.ui.form.on('Sales Invoice', {
 
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
-			'Sales Invoice': 'Sales Return',
+			'Sales Invoice': 'Return / Credit Note',
 			'Payment Request': 'Payment Request',
-			'Payment Entry': 'Payment'
-		},
+			'Invoice Discounting': 'Invoice Discounting',
+			'Payment Entry': 'Payment',
+			'Auto Repeat': 'Subscription'
+		};
 		frm.fields_dict["timesheets"].grid.get_field("time_sheet").get_query = function(doc, cdt, cdn){
 			return{
 				query: "erpnext.projects.doctype.timesheet.timesheet.get_timesheet",

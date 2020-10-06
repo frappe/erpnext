@@ -8,13 +8,15 @@ frappe.ui.form.on("Sales Order", {
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery Note',
 			'Pick List': 'Pick List',
-			'Sales Invoice': 'Invoice',
+			'Sales Invoice': 'Sales Invoice',
 			'Material Request': 'Material Request',
 			'Purchase Order': 'Purchase Order',
 			'Project': 'Project',
 			'Payment Entry': "Payment",
 			'Purchase Invoice': 'Purchase Invoice',
-			'Work Order': "Work Order"
+			'Work Order': "Work Order",
+			'Auto Repeat': "Subscription",
+			'Payment Request': "Payment Request",
 		}
 		frm.add_fetch('customer', 'tax_id', 'tax_id');
 
@@ -162,17 +164,17 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						}
 					}
 
-					this.frm.add_custom_button(__('Pick List'), () => this.create_pick_list(), __('Create'));
-
 					// delivery note
 					if(flt(doc.per_delivered, 6) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
 						this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note_based_on_delivery_date(), __('Create'));
 						this.frm.add_custom_button(__('Work Order'), () => this.make_work_order(), __('Create'));
 					}
 
+					this.frm.add_custom_button(__('Pick List'), () => this.create_pick_list(), __('Create'));
+
 					// sales invoice
 					if(flt(doc.per_completed, 6) < 100) {
-						this.frm.add_custom_button(__('Invoice'), () => me.make_sales_invoice(), __('Create'));
+						this.frm.add_custom_button(__('Sales Invoice'), () => me.make_sales_invoice(), __('Create'));
 					}
 
 					// material request
