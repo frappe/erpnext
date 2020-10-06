@@ -12,7 +12,9 @@
   "update",
   "update_series",
   "prefix",
+  "new_prefix",
   "current_value",
+  "last_current_value",
   "update_series_start"
  ],
  "fields": [
@@ -76,14 +78,27 @@
    "fieldtype": "Button",
    "label": "Update Series Number",
    "options": "update_series_start"
+  },
+  {
+   "depends_on": "eval: !doc.prefix",
+   "fieldname": "new_prefix",
+   "fieldtype": "Data",
+   "label": "New Prefix"
+  },
+  {
+   "fieldname": "last_current_value",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Last Current Value",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "icon": "fa fa-sort-by-order",
  "idx": 1,
  "issingle": 1,
- "modified": "2020-03-03 15:36:34.700590",
- "modified_by": "Administrator",
+ "modified": "2020-10-06 19:48:03.415306",
+ "modified_by": "furqan.790@outlook.com",
  "module": "Setup",
  "name": "Naming Series",
  "owner": "Administrator",
