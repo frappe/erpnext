@@ -1001,8 +1001,8 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 		order by pr.posting_date desc, pr.posting_time desc, pr.name desc
 		limit 1""", (item_code, cstr(doc_name)), as_dict=1)
 
-	
-	
+
+
 	purchase_order_date = getdate(last_purchase_order and last_purchase_order[0].transaction_date
 							   or "1900-01-01")
 	purchase_receipt_date = getdate(last_purchase_receipt and
@@ -1010,7 +1010,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 
 	if last_purchase_order and (purchase_order_date >= purchase_receipt_date or not last_purchase_receipt):
 		# use purchase order
-		
+
 		last_purchase = last_purchase_order[0]
 		purchase_date = purchase_order_date
 
@@ -1030,7 +1030,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 		"discount_percentage": flt(last_purchase.discount_percentage),
 		"purchase_date": purchase_date
 	})
-	
+
 
 	conversion_rate = flt(conversion_rate) or 1.0
 	out.update({
@@ -1069,8 +1069,7 @@ def invalidate_item_variants_cache_for_website(doc):
 
 	if item_code:
 		item_cache = ItemVariantsCacheManager(item_code)
-		item_cache.clear_cache()
-
+		item_cache.rebuild_cache()
 
 def check_stock_uom_with_bin(item, stock_uom):
 	if stock_uom == frappe.db.get_value("Item", item, "stock_uom"):
