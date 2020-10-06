@@ -1013,6 +1013,18 @@ class Item(WebsiteGenerator):
 		return fieldnames
 
 	def cant_change(self):
+		from frappe.model import numeric_fieldtypes
+
+		def has_changed(fieldname):
+			number_comparison = False
+			if self.meta.get_field(fieldname).fieldtype in numeric_fieldtypes:
+				number_comparison = True
+
+			if number_comparison:
+				return flt(self.get(field)) != flt(before_save_values.get(field))
+			else:
+				return self.get(field) != before_save_values.get(field)
+
 		if not self.get("__islocal"):
 			before_save_values = frappe.db.get_value("Item", self.name, self._cant_change_fields, as_dict=True)
 			if not before_save_values.get('valuation_method') and self.get('valuation_method'):
@@ -1020,7 +1032,7 @@ class Item(WebsiteGenerator):
 
 			if before_save_values:
 				for field in self._cant_change_fields:
-					if cstr(self.get(field)) != cstr(before_save_values.get(field)) and self.check_if_cant_change_field(field):
+					if has_changed(field) and self.check_if_cant_change_field(field):
 						frappe.throw(_("As there are existing transactions against item {0}, you can not change the value of {1}")
 							.format(self.name, frappe.bold(self.meta.get_label(field))))
 
