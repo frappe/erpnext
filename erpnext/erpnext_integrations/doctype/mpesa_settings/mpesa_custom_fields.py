@@ -13,8 +13,8 @@ def create_custom_pos_fields():
 				"insert_after": "contact_email"
 			},
 			{
-				"fieldname": "Mpesa Receipt Number",
-				"label": "mpesa_receipt_number",
+				"fieldname": "mpesa_receipt_number",
+				"label": "Mpesa Receipt Number",
 				"fieldtype": "Data",
 				"read_only": 1,
 				"insert_after": "company"
