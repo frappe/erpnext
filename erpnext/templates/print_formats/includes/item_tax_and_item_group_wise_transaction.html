@@ -36,7 +36,7 @@
 	<!-- Line Items -->
 	{%- for row in group_data['items'] -%}
 	<tr{% if row.page_break %} class="page-break"{% endif %}>
-		<td class="text-center">{{ row.idx }}</td>
+		<td class="text-center">{{ row.g_idx }}</td>
 
 		<td>
 			{{ format_item_name(row) }}

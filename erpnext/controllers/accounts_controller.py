@@ -1032,7 +1032,7 @@ class AccountsController(TransactionBase):
 		for item_tax_group in grouped.values():
 			for item_group_group in item_tax_group.item_groups.values():
 				for item in item_group_group['items']:
-					item.idx = item_idx
+					item.g_idx = item_idx
 					item_idx += 1
 
 		return grouped
