@@ -77,7 +77,7 @@ def generate_stk_push(**kwargs):
 		response = connector.stk_push(business_shortcode=mpesa_settings.till_number,
 			passcode=mpesa_settings.get_password("online_passkey"), amount=args.grand_total,
 			callback_url=callback_url, reference_code=mpesa_settings.till_number,
-			phone_number=args.sender, description="POS Payment")
+			phone_number=mobile_number, description="POS Payment")
 
 		return response
 
