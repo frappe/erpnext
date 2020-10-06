@@ -38,10 +38,12 @@
   "get_items",
   "section_break_12",
   "from_warehouse",
+  "source_warehouse_type",
   "source_warehouse_address",
   "source_address_display",
   "cb0",
   "to_warehouse",
+  "target_warehouse_type",
   "target_warehouse_address",
   "target_address_display",
   "sb0",
@@ -88,7 +90,7 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "{purpose}",
+   "default": "{stock_entry_type}",
    "fieldname": "title",
    "fieldtype": "Data",
    "hidden": 1,
@@ -111,7 +113,6 @@
   {
    "fieldname": "stock_entry_type",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Stock Entry Type",
    "options": "Stock Entry Type",
@@ -645,12 +646,30 @@
   {
    "fieldname": "column_break_26",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "stock_entry_type.source_warehouse_type",
+   "fieldname": "source_warehouse_type",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Source Warehouse Type Allowed",
+   "options": "Warehouse Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "stock_entry_type.target_warehouse_type",
+   "fieldname": "target_warehouse_type",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Target Warehouse Type Allowed",
+   "options": "Warehouse Type",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-10-03 14:12:32.432208",
+ "modified": "2020-10-07 00:44:07.418497",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

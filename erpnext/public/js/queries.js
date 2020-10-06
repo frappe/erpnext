@@ -108,13 +108,16 @@ $.extend(erpnext.queries, {
 		return { query: "erpnext.controllers.queries.employee_query" }
 	},
 
-	warehouse: function(doc) {
+	warehouse: function(doc, get_warehouse_filters) {
+		let filters = [
+			["Warehouse", "company", "in", ["", cstr(doc.company)]],
+			["Warehouse", "is_group", "=",0]
+		];
+		if (get_warehouse_filters) {
+			get_warehouse_filters(filters);
+		}
 		return {
-			filters: [
-				["Warehouse", "company", "in", ["", cstr(doc.company)]],
-				["Warehouse", "is_group", "=",0]
-
-			]
+			filters: filters
 		}
 	}
 });
@@ -126,9 +129,9 @@ erpnext.queries.setup_queries = function(frm, options, query_fn) {
 			{"fieldtype": "Link", "options": options});
 		$.each(link_fields, function(i, df) {
 			if(parentfield) {
-				frm.set_query(df.fieldname, parentfield, query_fn);
+				frm.set_query(df.fieldname, parentfield, query_fn.bind(me, df.fieldname));
 			} else {
-				frm.set_query(df.fieldname, query_fn);
+				frm.set_query(df.fieldname, query_fn.bind(me, df.fieldname));
 			}
 		});
 	};
