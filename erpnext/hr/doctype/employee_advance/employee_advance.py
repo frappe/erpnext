@@ -19,7 +19,7 @@ class EmployeeAdvance(Document):
 
 	def validate(self):
 		self.set_status()
-		self.validate_employee_advance_account()
+		# self.validate_employee_advance_account()
 
 	def on_cancel(self):
 		self.ignore_linked_doctypes = ('GL Entry')
@@ -38,12 +38,12 @@ class EmployeeAdvance(Document):
 		elif self.docstatus == 2:
 			self.status = "Cancelled"
 
-	def validate_employee_advance_account(self):
-		company_currency = erpnext.get_company_currency(self.company)
-		if (self.advance_account and
-			company_currency != frappe.db.get_value('Account', self.advance_account, 'account_currency')):
-			frappe.throw(_("Advance account currency should be same as company currency {0}")
-				.format(company_currency))
+	# def validate_employee_advance_account(self):
+	# 	company_currency = erpnext.get_company_currency(self.company)
+	# 	if (self.advance_account and
+	# 		company_currency != frappe.db.get_value('Account', self.advance_account, 'account_currency')):
+	# 		frappe.throw(_("Advance account currency should be same as company currency {0}")
+	# 			.format(company_currency))
 
 	def set_total_advance_paid(self):
 		paid_amount = frappe.db.sql("""
@@ -107,15 +107,38 @@ def make_bank_entry(dt, dn):
 	doc = frappe.get_doc(dt, dn)
 	payment_account = get_default_bank_cash_account(doc.company, account_type="Cash",
 		mode_of_payment=doc.mode_of_payment)
+	if not payment_account:
+		frappe.throw(_("Please set a Default Cash Account in Company defaults"))
+	multi_currency = 0
+	credit_in_account_currency = flt(doc.advance_amount)
+	company_currency = erpnext.get_company_currency(doc.company)
+
+	if payment_account.account_currency != doc.currency:
+		if return_account.account_currency != company_currency:
+			frappe.throw(_("""Account currency of default Cash or Bank account in Mode of Payment for 
+				account type: {0} for company: {1} is different than company currency: {2} and currency: {3} specified 
+				in employee advance {4}. Please set default Cash or Bank account in either currency: {5} or {6}""")
+			.format("Cash", doc.company, company_currency, doc.currency, doc.name, 
+				company_currency, doc.currency), title=_("Currency Mismatch"))
+		else:
+			multi_currency = 1
+			credit_in_account_currency = flt(doc.advance_amount) * flt(doc.exchange_rate)
+
+	# if doc.currency != payment_account.account_currency:
+	# 	multi_currency = 1
+	# 	credit_in_account_currency = flt(doc.advance_amount) * flt(doc.exchange_rate)
 
 	je = frappe.new_doc("Journal Entry")
 	je.posting_date = nowdate()
 	je.voucher_type = 'Bank Entry'
 	je.company = doc.company
 	je.remark = 'Payment against Employee Advance: ' + dn + '\n' + doc.purpose
+	je.multi_currency = multi_currency
 
 	je.append("accounts", {
 		"account": doc.advance_account,
+		"account_currency": doc.currency,
+		"exchange_rate": doc.exchange_rate,
 		"debit_in_account_currency": flt(doc.advance_amount),
 		"reference_type": "Employee Advance",
 		"reference_name": doc.name,
@@ -128,7 +151,7 @@ def make_bank_entry(dt, dn):
 	je.append("accounts", {
 		"account": payment_account.account,
 		"cost_center": erpnext.get_default_cost_center(doc.company),
-		"credit_in_account_currency": flt(doc.advance_amount),
+		"credit_in_account_currency": credit_in_account_currency,
 		"account_currency": payment_account.account_currency,
 		"account_type": payment_account.account_type
 	})
@@ -141,6 +164,7 @@ def create_return_through_additional_salary(doc):
 	doc = frappe._dict(json.loads(doc))
 	additional_salary = frappe.new_doc('Additional Salary')
 	additional_salary.employee = doc.employee
+	additional_salary.currency = doc.currency
 	additional_salary.amount = doc.paid_amount - doc.claimed_amount
 	additional_salary.company = doc.company
 	additional_salary.ref_doctype = doc.doctype
@@ -151,6 +175,24 @@ def create_return_through_additional_salary(doc):
 @frappe.whitelist()
 def make_return_entry(employee, company, employee_advance_name, return_amount,  advance_account, mode_of_payment=None):
 	return_account = get_default_bank_cash_account(company, account_type='Cash', mode_of_payment = mode_of_payment)
+	if not return_account:
+		frappe.throw(_("Please set a Default Cash Account in Company defaults"))
+	company_currency = erpnext.get_company_currency(company)
+
+	employee_advance_doc = frappe.get_doc("Employee Advance", employee_advance_name)
+	multi_currency = 0
+	exchange_rate = 1
+	
+	if return_account.account_currency != employee_advance_doc.currency:
+		if return_account.account_currency != company_currency:
+			frappe.throw(_("""Account currency of default Cash or Bank account in Mode of Payment for 
+				account type: {0} for company: {1} is different than company currency: {2} and currency: {3} specified 
+				in employee advance {4}. Please set default Cash or Bank account in either currency: {5} or {6}""")
+			.format("Cash", company, company_currency, employee_advance_doc.currency, employee_advance_name, 
+				company_currency, employee_advance_doc.currency), title=_("Currency Mismatch"))
+		else:
+			exchange_rate = employee_advance_doc.exchange_rate
+			multi_currency = 1
 
 	mode_of_payment_type = ''
 	if mode_of_payment:
@@ -165,10 +207,13 @@ def make_return_entry(employee, company, employee_advance_name, return_amount,  
 	je.voucher_type = '{} Entry'.format(mode_of_payment_type) if mode_of_payment_type else 'Cash Entry'
 	je.company = company
 	je.remark = 'Return against Employee Advance: ' + employee_advance_name
+	je.multi_currency = multi_currency
 
 	je.append('accounts', {
 		'account': advance_account,
 		'credit_in_account_currency': return_amount,
+		'account_currency': employee_advance_doc.currency,
+		'exchange_rate': exchange_rate,
 		'reference_type': 'Employee Advance',
 		'reference_name': employee_advance_name,
 		'party_type': 'Employee',
@@ -178,7 +223,7 @@ def make_return_entry(employee, company, employee_advance_name, return_amount,  
 
 	je.append("accounts", {
 		"account": return_account.account,
-		"debit_in_account_currency": return_amount,
+		"debit_in_account_currency": flt(return_amount) * exchange_rate,
 		"account_currency": return_account.account_currency,
 		"account_type": return_account.account_type
 	})

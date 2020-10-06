@@ -15,11 +15,15 @@ frappe.ui.form.on('Employee Advance', {
 		});
 
 		frm.set_query("advance_account", function() {
+			if (!frm.doc.employee) {
+				frappe.msgprint(__("Please select employee first"))
+			}
 			return {
 				filters: {
 					"root_type": "Asset",
 					"is_group": 0,
-					"company": frm.doc.company
+					"company": frm.doc.company,
+					"account_currency": frm.doc.currency,
 				}
 			};
 		});
@@ -48,7 +52,7 @@ frappe.ui.form.on('Employee Advance', {
 			frm.add_custom_button(
 				__("Expense Claim"),
 				function() {
-					frm.events.make_expense_claim(frm);
+					frm.events.make_expense_claim(frm); //Change this
 				},
 				__('Create')
 			);
@@ -59,11 +63,11 @@ frappe.ui.form.on('Employee Advance', {
 
 			if (frm.doc.repay_unclaimed_amount_from_salary == 0 && frappe.model.can_create("Journal Entry")){
 				frm.add_custom_button(__("Return"),  function() {
-					frm.trigger('make_return_entry');
+					frm.trigger('make_return_entry'); //Change this
 				}, __('Create'));
 			}else if (frm.doc.repay_unclaimed_amount_from_salary == 1 && frappe.model.can_create("Additional Salary")){
 				frm.add_custom_button(__("Deduction from salary"),  function() {
-					frm.events.make_deduction_via_additional_salary(frm)
+					frm.events.make_deduction_via_additional_salary(frm) //Change this
 				}, __('Create'));
 			}
 		}
@@ -138,7 +142,7 @@ frappe.ui.form.on('Employee Advance', {
 
 	employee: function (frm) {
 		if (frm.doc.employee) {
-			return frappe.call({
+			frappe.call({
 				method: "erpnext.hr.doctype.employee_advance.employee_advance.get_pending_amount",
 				args: {
 					"employee": frm.doc.employee,
@@ -148,6 +152,51 @@ frappe.ui.form.on('Employee Advance', {
 					frm.set_value("pending_amount",r.message);
 				}
 			});
+
+			frappe.call({
+				method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_payroll_payable_account_currency",
+				args: {
+					employee: frm.doc.employee,
+				},
+				callback: function(r) {
+					if(r.message) {
+						frm.set_value('currency', r.message);
+						frm.set_df_property('currency', 'hidden', 0);
+						frm.refresh_fields()
+					}
+				}
+			});
 		}
-	}
+	},
+
+	currency: function(frm) {
+		var from_currency = frm.doc.currency;
+		if (!frm.doc.company) {
+			var company_currency = erpnext.get_currency(frappe.defaults.get_default("Company"));
+		}
+		else {
+			var company_currency = erpnext.get_currency(frm.doc.company);
+		}
+		if(from_currency != company_currency) {
+			frappe.call({
+				method: "erpnext.setup.utils.get_exchange_rate",
+				args: {
+					from_currency: from_currency,
+					to_currency: company_currency,
+				},
+				callback: function(r) {
+					frm.set_value("exchange_rate", flt(r.message));
+					frm.set_df_property('exchange_rate', 'hidden', 0);
+					cur_frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
+						+ " = [?] " + company_currency);
+					frm.refresh_fields();
+				}
+			});
+		} else {
+			frm.set_value("exchange_rate", 1.0);
+			frm.set_df_property('exchange_rate', 'hidden', 1);
+			frm.set_df_property("exchange_rate", "description", "" );
+			frm.refresh_fields();
+		}
+	},
 });

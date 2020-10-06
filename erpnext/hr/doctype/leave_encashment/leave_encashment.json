@@ -19,9 +19,11 @@
   "encashable_days",
   "amended_from",
   "payroll",
-  "encashment_amount",
   "encashment_date",
-  "additional_salary"
+  "additional_salary",
+  "column_break_14",
+  "currency",
+  "encashment_amount"
  ],
  "fields": [
   {
@@ -109,6 +111,7 @@
    "in_list_view": 1,
    "label": "Encashment Amount",
    "no_copy": 1,
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -124,11 +127,26 @@
    "no_copy": 1,
    "options": "Additional Salary",
    "read_only": 1
+  },
+  {
+   "default": "Company:company:default_currency",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-16 11:51:57.732223",
+ "modified": "2020-09-24 19:21:56.856605",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Encashment",
