@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
+from frappe.utils import flt
 
 from erpnext.controllers.item_variant import (validate_is_incremental,
 	validate_item_attribute_value, InvalidItemAttributeValueError)
@@ -42,7 +43,7 @@ class ItemAttribute(Document):
 			if self.from_range is None or self.to_range is None:
 				frappe.throw(_("Please specify from/to range"))
 
-			elif self.from_range >= self.to_range:
+			elif flt(self.from_range) >= flt(self.to_range):
 				frappe.throw(_("From Range has to be less than To Range"))
 
 			if not self.increment:
