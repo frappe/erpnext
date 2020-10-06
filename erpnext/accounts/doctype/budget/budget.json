@@ -37,7 +37,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Budget Against",
-   "options": "Cost Center\nProject",
+   "options": "\nCost Center\nProject",
    "reqd": 1
   },
   {
@@ -195,7 +195,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-06 14:59:18.193848",
+ "modified": "2020-10-06 15:13:54.055854",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Budget",
