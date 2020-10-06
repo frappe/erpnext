@@ -100,6 +100,8 @@ class EmployeeBenefitApplication(Document):
 		if application:
 			frappe.throw(_("Employee {0} already submited an apllication {1} for the payroll period {2}").format(self.employee, application, self.payroll_period))
 
+	# def assign
+
 @frappe.whitelist()
 def get_max_benefits(employee, on_date):
 	sal_struct = get_assigned_salary_structure(employee, on_date)
@@ -115,7 +117,7 @@ def get_max_benefits_remaining(employee, on_date, payroll_period):
 	if max_benefits and max_benefits > 0:
 		have_depends_on_payment_days = False
 		per_day_amount_total = 0
-		payroll_period_days = get_payroll_period_days(on_date, on_date, employee)[0]
+		payroll_period_days = get_payroll_period_days(on_date, on_date, employee)[1]
 		payroll_period_obj = frappe.get_doc("Payroll Period", payroll_period)
 
 		# Get all salary slip flexi amount in the payroll period
@@ -240,3 +242,16 @@ def get_earning_components(doctype, txt, searchfield, start, page_len, filters):
 	else:
 		frappe.throw(_("Salary Structure not found for employee {0} and date {1}")
 			.format(filters['employee'], filters['date']))
+
+@frappe.whitelist()
+def get_earning_components_max_benefits(employee, date, earning_component):
+	salary_structure = get_assigned_salary_structure(employee, date)
+	amount = frappe.db.sql("""
+			select amount
+			from `tabSalary Detail`
+			where parent = %s and is_flexible_benefit = 1
+			and salary_component = %s
+			order by name
+		""", salary_structure, earning_component)
+
+	return amount if amount else 0

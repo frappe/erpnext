@@ -36,6 +36,20 @@ frappe.ui.form.on('Employee Benefit Application', {
 				filters: {date: frm.doc.date, employee: frm.doc.employee}
 			};
 		});
+		if (frm.doc.employee) {
+			frappe.call({
+				method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_payroll_payable_account_currency",
+				args: {
+					employee: frm.doc.employee,
+				},
+				callback: function(r) {
+					if(r.message) {
+						frm.set_value('currency', r.message);
+						frm.refresh_fields();
+					}
+				}
+			});
+		}
 	},
 
 	payroll_period: function(frm) {
@@ -56,6 +70,7 @@ frappe.ui.form.on('Employee Benefit Application', {
 });
 
 var get_max_benefits=function(frm, method, args) {
+	debugger;
 	frappe.call({
 		method: method,
 		args: args,
@@ -63,8 +78,11 @@ var get_max_benefits=function(frm, method, args) {
 			if(!data.exc){
 				if(data.message){
 					frm.set_value("max_benefits", data.message);
+				} else {
+					frm.set_value("max_benefits", 0);
 				}
 			}
+			frm.refresh_fields();
 		}
 	});
 };
@@ -82,14 +100,19 @@ var calculate_all = function(doc) {
 	var tbl = doc.employee_benefits || [];
 	var pro_rata_dispensed_amount = 0;
 	var total_amount = 0;
-	for(var i = 0; i < tbl.length; i++){
-		if(cint(tbl[i].amount) > 0) {
-			total_amount += flt(tbl[i].amount);
-		}
-		if(tbl[i].pay_against_benefit_claim != 1){
-			pro_rata_dispensed_amount += flt(tbl[i].amount);
+	if (doc.max_benefits == 0) {
+		doc.employee_benefits = []
+	} else {
+		for(var i = 0; i < tbl.length; i++){
+			if(cint(tbl[i].amount) > 0) {
+				total_amount += flt(tbl[i].amount);
+			}
+			if(tbl[i].pay_against_benefit_claim != 1){
+				pro_rata_dispensed_amount += flt(tbl[i].amount);
+			}
 		}
 	}
+	
 	doc.total_amount = total_amount;
 	doc.remaining_benefit = doc.max_benefits - total_amount;
 	doc.pro_rata_dispensed_amount = pro_rata_dispensed_amount;

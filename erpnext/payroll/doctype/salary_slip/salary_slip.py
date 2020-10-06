@@ -50,9 +50,9 @@ class SalarySlip(TransactionBase):
 
 		self.calculate_net_pay()
 
-		company_currency = erpnext.get_company_currency(self.company)
+		doc_currency = self.currency
 		total = self.net_pay if self.is_rounding_total_disabled() else self.rounded_total
-		self.total_in_words = money_in_words(total, company_currency)
+		self.total_in_words = money_in_words(total, doc_currency)
 
 		if frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet"):
 			max_working_hours = frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet")

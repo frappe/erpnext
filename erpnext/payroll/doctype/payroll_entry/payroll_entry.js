@@ -17,6 +17,17 @@ frappe.ui.form.on('Payroll Entry', {
 				}
 			};
 		});
+
+		frm.set_query("default_payroll_payable_account", function() {
+			return {
+				filters: {
+					"company": frm.doc.company,
+					"root_type": "Liability",
+					"is_group": 0,
+					"account_currency": frm.doc.currency
+				}
+			}
+		});
 	},
 
 	refresh: function(frm) {
@@ -137,6 +148,30 @@ frappe.ui.form.on('Payroll Entry', {
 
 	company: function (frm) {
 		frm.events.clear_employee_table(frm);
+	},
+
+	currency: function (frm) {
+		debugger;
+		if (!frm.doc.company) {
+			var company_currency = erpnext.get_currency(frappe.defaults.get_default("Company"));
+		}
+		else {
+			var company_currency = erpnext.get_currency(frm.doc.company);
+		}
+		if (frm.doc.currency) {
+			if (company_currency != frm.doc.currency) {
+				cur_frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
+				+ " = [?] " + company_currency);
+				cur_frm.set_df_property("exchange_rate", "hidden", 0);
+				frm.set_value('exchange_rate', null);
+			}
+			else {
+				cur_frm.set_df_property("exchange_rate", "description", "");
+				cur_frm.set_df_property("exchange_rate", "hidden", 1);
+				frm.doc.exchange_rate = 1;
+
+			}
+		}
 	},
 
 	department: function (frm) {

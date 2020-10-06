@@ -37,6 +37,19 @@ frappe.ui.form.on('Leave Encashment', {
 				doc: frm.doc,
 				callback: function(r) {
 					frm.refresh_fields();
+					frappe.call({
+						method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_payroll_payable_account_currency",
+						args: {
+							employee: frm.doc.employee,
+						},
+						callback: function(r) {
+							if(r.message) {
+								frm.set_value('currency', r.message);
+								frm.set_df_property('currency', 'hidden', 0);
+								frm.refresh_fields();
+							}
+						}
+					});
 				}
 			});
 		}

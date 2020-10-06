@@ -453,7 +453,7 @@ class PaymentEntry(AccountsController):
 				frappe.throw(_("Reference No and Reference Date is mandatory for Bank transaction"))
 
 	def set_remarks(self):
-		if self.custom_remarks: return
+		# if self.custom_remarks: return
 
 		if self.payment_type=="Internal Transfer":
 			remarks = [_("Amount {0} {1} transferred from {2} to {3}")
@@ -909,17 +909,19 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			exchange_rate = 1
 			outstanding_amount = get_outstanding_on_journal_entry(reference_name)
 	elif reference_doctype != "Journal Entry":
-		if party_account_currency == company_currency:
-			if ref_doc.doctype == "Expense Claim":
+		if ref_doc.doctype == "Expense Claim":
 				total_amount = flt(ref_doc.total_sanctioned_amount) + flt(ref_doc.total_taxes_and_charges)
-			elif ref_doc.doctype == "Employee Advance":
+		elif ref_doc.doctype == "Employee Advance":
 				total_amount = ref_doc.advance_amount
-			else:
+				exchange_rate = ref_doc.get("exchange_rate")
+		if not total_amount:
+			if party_account_currency == company_currency:
 				total_amount = ref_doc.base_grand_total
-			exchange_rate = 1
-		else:
-			total_amount = ref_doc.grand_total
+				exchange_rate = 1
+			else:
+				total_amount = ref_doc.grand_total
 
+		if not exchange_rate:
 			# Get the exchange rate from the original ref doc
 			# or get it based on the posting date of the ref doc
 			exchange_rate = ref_doc.get("conversion_rate") or \
