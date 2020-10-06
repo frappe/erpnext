@@ -179,6 +179,13 @@ def get_data():
 					"label": _("Terms and Conditions Template"),
 					"description": _("Template of terms or contract.")
 				},
+				{
+					"type": "doctype",
+					"name": "Transaction Type",
+					"route_options": {
+						"buying": 1
+					}
+				},
 			]
 		},
 		{

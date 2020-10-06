@@ -185,6 +185,13 @@ def get_data():
 					"description": _("Tax template for selling transactions."),
 					"onboard": 1,
 				},
+				{
+					"type": "doctype",
+					"name": "Transaction Type",
+					"route_options": {
+						"selling": 1
+					}
+				},
 			]
 		},
 		{

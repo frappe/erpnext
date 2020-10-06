@@ -160,6 +160,10 @@ def get_data():
 					"type": "doctype",
 					"name": "Stock Entry Type",
 				},
+				{
+					"type": "doctype",
+					"name": "Transaction Type",
+				},
 			]
 		},
 		{
