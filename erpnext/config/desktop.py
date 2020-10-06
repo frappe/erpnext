@@ -120,6 +120,15 @@ def get_data():
 			"description": "BOMS, work orders, operations, and timesheets."
 		},
 		{
+			"module_name": "Vehicles",
+			"category": "Domains",
+			"label": _("Vehicles"),
+			"color": "#7f8c8d",
+			"icon": "fa fa-car",
+			"type": "module",
+			"description": "Vehicles."
+		},
+		{
 			"module_name": "Retail",
 			"category": "Domains",
 			"label": _("Retail"),

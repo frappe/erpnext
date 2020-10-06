@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "license_plate",
   "make",
   "column_break_3",
@@ -31,10 +32,17 @@
   "column_break_21",
   "color",
   "wheels",
-  "doors",
-  "amended_from"
+  "doors"
  ],
  "fields": [
+  {
+   "default": "V-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "V-"
+  },
   {
    "fieldname": "license_plate",
    "fieldtype": "Data",
@@ -45,8 +53,9 @@
   },
   {
    "fieldname": "make",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Make",
+   "options": "Brand",
    "reqd": 1
   },
   {
@@ -182,20 +191,11 @@
    "fieldname": "doors",
    "fieldtype": "Int",
    "label": "Doors"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Vehicle",
-   "print_hide": 1,
-   "read_only": 1
   }
  ],
- "modified": "2020-03-03 15:42:28.689010",
+ "modified": "2020-10-04 22:52:32.102374",
  "modified_by": "Administrator",
- "module": "HR",
+ "module": "Vehicles",
  "name": "Vehicle",
  "owner": "Administrator",
  "permissions": [

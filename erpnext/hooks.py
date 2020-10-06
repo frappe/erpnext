@@ -73,6 +73,7 @@ domains = {
 	'Non Profit': 'erpnext.domains.non_profit',
 	'Retail': 'erpnext.domains.retail',
 	'Services': 'erpnext.domains.services',
+	'Vehicles': 'erpnext.domains.vehicles',
 }
 
 website_generators = ["Item Group", "Item", "BOM", "Sales Partner",
