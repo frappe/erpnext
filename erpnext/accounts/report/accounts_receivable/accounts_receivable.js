@@ -175,8 +175,15 @@ frappe.query_reports["Accounts Receivable"] = {
 			on_change: function() { return false; }
 		},
 		{
-			"fieldname":"show_sales_person",
-			"label": __("Show Sales Person"),
+			"fieldname":"show_sales_person_in_print",
+			"label": __("Show Sales Person In Print"),
+			"fieldtype": "Check",
+			"default": 1,
+			on_change: function() { return false; }
+		},
+		{
+			"fieldname":"show_delivery_note",
+			"label": __("Show Delivery Notes"),
 			"fieldtype": "Check",
 			"default": 1,
 			on_change: function() { return false; }
