@@ -36,7 +36,7 @@ def get_default_dashboards():
 		"Charts": [
 			{
 				"doctype": "Dashboard Chart",
-				"time_interval": "Quarterly",
+				"time_interval": "Monthly",
 				"chart_name": "Income",
 				"timespan": "Last Year",
 				"color": None,
@@ -50,7 +50,7 @@ def get_default_dashboards():
 			},
 			{
 				"doctype": "Dashboard Chart",
-				"time_interval": "Quarterly",
+				"time_interval": "Monthly",
 				"chart_name": "Expenses",
 				"timespan": "Last Year",
 				"color": None,
@@ -64,11 +64,11 @@ def get_default_dashboards():
 			},
 			{
 				"doctype": "Dashboard Chart",
-				"time_interval": "Quarterly",
+				"time_interval": "Monthly",
 				"chart_name": "Bank Balance",
 				"timespan": "Last Year",
 				"color": "#ffb868",
-				"filters_json": json.dumps({"company": company.name, "account": bank_account}),
+				"filters_json": json.dumps({"company": company.name, "account": bank_account, "accumulated_values": 1}),
 				"source": "Account Balance Timeline",
 				"chart_type": "Custom",
 				"timeseries": 1,

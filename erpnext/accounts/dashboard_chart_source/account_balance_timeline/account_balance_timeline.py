@@ -2,12 +2,12 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, json
+import frappe
 from frappe import _
-from frappe.utils import add_to_date, date_diff, getdate, nowdate, get_last_day, formatdate, get_link_to_form
-from erpnext.accounts.report.general_ledger.general_ledger import execute
+from frappe.utils import add_to_date, getdate, nowdate, formatdate, get_link_to_form, cint
 from frappe.core.page.dashboard.dashboard import cache_source, get_from_date_from_timespan
 from frappe.desk.doctype.dashboard_chart.dashboard_chart import get_period_ending
+from erpnext import get_company_currency
 
 from frappe.utils.nestedset import get_descendants_of
 
@@ -28,7 +28,7 @@ def get(chart_name = None, chart = None, no_cache = None, from_date = None, to_d
 	filters = frappe.parse_json(chart.filters_json)
 
 	account = filters.get("account")
-	company = filters.get("company")
+	accumulated_values = cint(filters.get('accumulated_values'))
 
 	if not account and chart_name:
 		frappe.throw(_("Account is not set for the dashboard chart {0}")
@@ -38,30 +38,34 @@ def get(chart_name = None, chart = None, no_cache = None, from_date = None, to_d
 		frappe.throw(_("Account {0} does not exists in the dashboard chart {1}")
 			.format(account, get_link_to_form("Dashboard Chart", chart_name)))
 
+	company = frappe.db.get_value("Account", account, "company")
+	company_currency = get_company_currency(company)
+
 	if not to_date:
 		to_date = nowdate()
 	if not from_date:
-		if timegrain in ('Monthly', 'Quarterly'):
-			from_date = get_from_date_from_timespan(to_date, timespan)
+		from_date = get_from_date_from_timespan(to_date, timespan)
 
 	# fetch dates to plot
 	dates = get_dates_from_timegrain(from_date, to_date, timegrain)
 
 	# get all the entries for this account and its descendants
-	gl_entries = get_gl_entries(account, get_period_ending(to_date, timegrain))
+	gl_entries = get_gl_entries(account, dates[0], dates[-1], timegrain, accumulated_values)
 
 	# compile balance values
-	result = build_result(account, dates, gl_entries)
+	result = build_result(account, dates, gl_entries, accumulated_values)
 
 	return {
 		"labels": [formatdate(r[0].strftime('%Y-%m-%d')) for r in result],
 		"datasets": [{
 			"name": account,
 			"values": [r[1] for r in result]
-		}]
+		}],
+		"fieldtype": "Currency",
+		"options": company_currency
 	}
 
-def build_result(account, dates, gl_entries):
+def build_result(account, dates, gl_entries, accumulated_values):
 	result = [[getdate(date), 0.0] for date in dates]
 	root_type = frappe.db.get_value('Account', account, 'root_type')
 
@@ -83,27 +87,49 @@ def build_result(account, dates, gl_entries):
 			r[1] = -1 * r[1]
 
 	# for balance sheet accounts, the totals are cumulative
-	if root_type in ('Asset', 'Liability', 'Equity'):
+	if accumulated_values:
 		for i, r in enumerate(result):
 			if i > 0:
 				r[1] = r[1] + result[i-1][1]
 
 	return result
 
-def get_gl_entries(account, to_date):
+def get_gl_entries(account, from_date, to_date, timegrain, accumulated_values):
 	child_accounts = get_descendants_of('Account', account, ignore_permissions=True)
 	child_accounts.append(account)
 
+	filters = [
+		dict(account=('in', child_accounts)),
+		dict(voucher_type=('!=', 'Period Closing Voucher')),
+		dict(posting_date=('<=', to_date))
+	]
+
+	if not accumulated_values:
+		from_date = get_from_date_for_accumulated_values(from_date, timegrain)
+		filters.append(dict(posting_date=('>=', from_date)))
+
 	return frappe.db.get_all('GL Entry',
 		fields = ['posting_date', 'debit', 'credit'],
-		filters = [
-			dict(posting_date = ('<', to_date)),
-			dict(account = ('in', child_accounts)),
-			dict(voucher_type = ('!=', 'Period Closing Voucher'))
-		],
+		filters = filters,
 		order_by = 'posting_date asc')
 
 def get_dates_from_timegrain(from_date, to_date, timegrain):
+	days, months, years = get_days_months_years(timegrain)
+
+	dates = [get_period_ending(from_date, timegrain)]
+	while getdate(dates[-1]) < getdate(to_date):
+		date = get_period_ending(add_to_date(dates[-1], years=years, months=months, days=days), timegrain)
+		dates.append(date)
+	return dates
+
+def get_from_date_for_accumulated_values(from_date, timegrain):
+	days, months, years = get_days_months_years(timegrain)
+	days -= 1
+
+	from_date = add_to_date(from_date, years=-years, months=-months, days=-days)
+	return from_date
+
+def get_days_months_years(timegrain):
 	days = months = years = 0
 	if "Daily" == timegrain:
 		days = 1
@@ -114,8 +140,4 @@ def get_dates_from_timegrain(from_date, to_date, timegrain):
 	elif "Quarterly" == timegrain:
 		months = 3
 
-	dates = [get_period_ending(from_date, timegrain)]
-	while getdate(dates[-1]) < getdate(to_date):
-		date = get_period_ending(add_to_date(dates[-1], years=years, months=months, days=days), timegrain)
-		dates.append(date)
-	return dates
+	return days, months, years
