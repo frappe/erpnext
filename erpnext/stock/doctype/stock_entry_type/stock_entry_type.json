@@ -21,6 +21,7 @@
    "fieldname": "purpose",
    "fieldtype": "Select",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Purpose",
    "options": "\nMaterial Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor\nSend to Warehouse\nReceive at Warehouse",
    "reqd": 1,
@@ -35,6 +36,8 @@
   {
    "fieldname": "is_opening",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Is Opening",
    "options": "\nNo\nYes"
   },
@@ -53,12 +56,16 @@
   {
    "fieldname": "source_warehouse_type",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Source Warehouse Type",
    "options": "Warehouse Type"
   },
   {
    "fieldname": "target_warehouse_type",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Target Warehouse Type",
    "options": "Warehouse Type"
   },
@@ -66,10 +73,12 @@
    "depends_on": "eval:doc.is_opening == 'Yes'",
    "fieldname": "posting_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Posting Date"
   }
  ],
- "modified": "2020-10-07 00:49:46.941520",
+ "modified": "2020-10-07 13:37:51.770778",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Type",
