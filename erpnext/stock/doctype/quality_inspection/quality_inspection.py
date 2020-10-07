@@ -10,6 +10,10 @@ from frappe.model.mapper import get_mapped_doc
 
 class QualityInspection(Document):
 	def validate(self):
+		if not frappe.db.exists(self.reference_type, self.reference_name):
+			frappe.throw(_("Cannot find {} named {}. Please select valid reference document type.")
+				.format(self.reference_type, self.reference_name), title=_("Invalid Reference"))
+
 		if not self.readings and self.item_code:
 			self.get_item_specification_details()
 
