@@ -10,14 +10,11 @@
 		{{ _('Configure') }}
 	</button>
 	{% endif %}
-	{% if cart_settings.show_contact_us_button | int %}
-	<button class="btn btn-link btn-inquiry" data-item-code="{{ doc.name }}">
-		{{ _('Contact Us') }}
-	</button>
+	{% if cart_settings.show_contact_us_button %}
+		{% include "templates/generators/item/item_inquiry.html" %}
 	{% endif %}
 </div>
 <script>
 {% include "templates/generators/item/item_configure.js" %}
-{% include "templates/generators/item/item_inquiry.js" %}
 </script>
 {% endif %}

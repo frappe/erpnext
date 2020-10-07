@@ -98,7 +98,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Accounting",
- "modified": "2020-06-19 12:42:44.054598",
+ "modified": "2020-09-09 11:45:33.766400",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
@@ -146,11 +146,6 @@
    "label": "Trial Balance",
    "link_to": "Trial Balance",
    "type": "Report"
-  },
-  {
-   "label": "Point of Sale",
-   "link_to": "point-of-sale",
-   "type": "Page"
   },
   {
    "label": "Dashboard",

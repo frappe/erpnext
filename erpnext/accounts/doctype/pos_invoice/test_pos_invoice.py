@@ -182,8 +182,9 @@ class TestPOSInvoice(unittest.TestCase):
 	def test_pos_returns_with_repayment(self):
 		pos = create_pos_invoice(qty = 10, do_not_save=True)
 
+		pos.set('payments', [])
 		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 500})
-		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 500})
+		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 500, 'default': 1})
 		pos.insert()
 		pos.submit()
 
@@ -200,8 +201,9 @@ class TestPOSInvoice(unittest.TestCase):
 			income_account = "Sales - _TC", expense_account = "Cost of Goods Sold - _TC", rate=105,
 			cost_center = "Main - _TC", do_not_save=True)
 
+		pos.set('payments', [])
 		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 50})
-		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 60})
+		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 60, 'default': 1})
 
 		pos.insert()
 		pos.submit()

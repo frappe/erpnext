@@ -371,12 +371,12 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-15 12:43:04.099803",
+ "modified": "2020-09-18 17:26:09.703215",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",
  "name_case": "Title Case",
- "owner": "harshada@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "amend": 1,
