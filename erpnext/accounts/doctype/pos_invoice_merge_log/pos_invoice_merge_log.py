@@ -96,7 +96,14 @@ class POSInvoiceMergeLog(Document):
 				loyalty_amount_sum += doc.loyalty_amount
 			
 			for item in doc.get('items'):
-				items.append(item)
+				found = False
+				for i in items:
+					if i.item_code == item.item_code and i.uom == item.uom and i.rate == item.rate:
+						found = True
+						i.qty = i.qty + item.qty
+						i.rate = (i.net_amount + item.net_amount) / i.qty
+				if not found:
+					items.append(item)
 			
 			for tax in doc.get('taxes'):
 				found = False
@@ -107,6 +114,7 @@ class POSInvoiceMergeLog(Document):
 						found = True
 				if not found:
 					tax.charge_type = 'Actual'
+					tax.included_in_print_rate = 0
 					taxes.append(tax)
 
 			for payment in doc.get('payments'):
@@ -127,6 +135,8 @@ class POSInvoiceMergeLog(Document):
 		invoice.set('items', items)
 		invoice.set('payments', payments)
 		invoice.set('taxes', taxes)
+		invoice.additional_discount_percentage = 0
+		invoice.discount_amount = 0.0
 
 		return invoice
 	

@@ -285,6 +285,72 @@ class TestPOSInvoice(unittest.TestCase):
 
 		after_redeem_lp_details = get_loyalty_program_details_with_points(inv.customer, company=inv.company, loyalty_program=inv.loyalty_program)
 		self.assertEqual(after_redeem_lp_details.loyalty_points, 9)
+	
+	def test_merging_into_sales_invoice_with_discount(self):
+		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
+		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
+
+		frappe.db.sql("delete from `tabPOS Invoice`")
+		test_user, pos_profile = init_user_and_profile()
+		pos_inv = create_pos_invoice(rate=300, additional_discount_percentage=10, do_not_submit=1)
+		pos_inv.append('payments', {
+			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 300
+		})
+		pos_inv.submit()
+
+		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
+		pos_inv2.append('payments', {
+			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 3200
+		})
+		pos_inv2.submit()
+
+		merge_pos_invoices()
+
+		pos_inv.load_from_db()
+		sales_invoice = frappe.get_doc("Sales Invoice", pos_inv.consolidated_invoice)
+		self.assertEqual(sales_invoice.grand_total, 3500)
+	
+	def test_merging_into_sales_invoice_with_discount_and_inclusive_tax(self):
+		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
+		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
+
+		frappe.db.sql("delete from `tabPOS Invoice`")
+		test_user, pos_profile = init_user_and_profile()
+		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
+		pos_inv.append('payments', {
+			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 300
+		})
+		pos_inv.append('taxes', {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 14,
+			'included_in_print_rate': 1
+		})
+		pos_inv.submit()
+
+		pos_inv2 = create_pos_invoice(rate=300, qty=2, do_not_submit=1)
+		pos_inv2.apply_discount_on = 'Net Total'
+		pos_inv2.additional_discount_percentage = 10
+		pos_inv2.append('payments', {
+			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 540
+		})
+		pos_inv2.append('taxes', {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 14,
+			'included_in_print_rate': 1
+		})
+		pos_inv2.submit()
+
+		merge_pos_invoices()
+
+		pos_inv.load_from_db()
+		sales_invoice = frappe.get_doc("Sales Invoice", pos_inv.consolidated_invoice)
+		self.assertEqual(sales_invoice.rounded_total, 840)
 
 def create_pos_invoice(**args):
 	args = frappe._dict(args)
@@ -294,6 +360,7 @@ def create_pos_invoice(**args):
 		pos_profile.save()
 
 	pos_inv = frappe.new_doc("POS Invoice")
+	pos_inv.update(args)
 	pos_inv.update_stock = 1
 	pos_inv.is_pos = 1
 	pos_inv.pos_profile = args.pos_profile or pos_profile.name
