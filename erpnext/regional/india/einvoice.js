@@ -157,7 +157,8 @@ erpnext.setup_einvoice_actions = (doctype) => {
 							primary_action_label: __('Download JSON')
 						});
 						d.show();
-					}, "E-Invoicing");
+				}, "E-Invoicing");
+				
 				frm.add_custom_button(
 					"Upload Cancel JSON",
 					() => {
