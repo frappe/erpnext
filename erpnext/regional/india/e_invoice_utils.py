@@ -464,7 +464,7 @@ def make_e_invoice(doctype, name):
 		else:
 			frappe.throw(_("{}").format(error_msgs[0]), title=_("E Invoice Validation Failed"))
 
-	return {'einvoice': json.dumps(e_invoice)}
+	return {'einvoice': json.dumps([e_invoice])}
 
 def validate_einvoice(validations, e_invoice, error_msgs=[]):
 	type_map = {
@@ -549,9 +549,18 @@ def download_cancel_einvoice():
 	reason = data['reason']
 	remark = data['remark']
 
-	cancel_einvoice = json.dumps(dict(Irn=irn, CnlRsn=reason, CnlRem=remark))
+	cancel_einvoice = json.dumps([dict(Irn=irn, CnlRsn=reason, CnlRem=remark)])
 
 	frappe.response['filename'] = "Cancel E-Invoice " + name + ".json"
 	frappe.response['filecontent'] = cancel_einvoice
 	frappe.response['content_type'] = 'application/json'
 	frappe.response['type'] = 'download'
+
+@frappe.whitelist()
+def download_cancel_ack():
+	cancel_ack = json.loads(frappe.local.uploaded_file)
+	data = frappe._dict(frappe.local.form_dict)
+	doctype = data['doctype']
+	name = data['docname']
+
+	frappe.db.set_value(doctype, name, "irn_cancelled", 1)
