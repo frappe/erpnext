@@ -73,7 +73,7 @@
 	</div>
 </div>
 
-{% if(filters.show_pdc_in_print) { %}
+{% if(filters.show_future_payments) { %}
 	{% var balance_row = data.slice(-1).pop();
 		var range1 = report.columns.find(d => d.fieldname == "range1").label;
 		var range2 = report.columns.find(d => d.fieldname == "range2").label;
@@ -147,21 +147,18 @@
 				<th style="width: 10%">{%= __("Date") %}</th>
 				<th style="width: 3%">{%= __("Age (Days)") %}</th>
 				<th style="width: 13%">{%= __("Reference") %}</th>
-				{% if(report.report_name === "Accounts Receivable" && filters.show_sales_person_in_print) { %}
-					<th style="width: 11%">{%= __("Sales Person") %}</th>
-				{% } %}
-				{% if(!filters.show_pdc_in_print) { %}
-					<th style="width: {% if filters.show_sales_person_in_print %}23%{% else %}34%{% endif %}">{%= (filters.customer || filters.supplier || group.party) ? __("Remarks"): __("Party") %}</th>
+				{% if(!filters.show_future_payments) { %}
+					<th style="width: 34%">{%= (filters.customer || filters.supplier || group.party) ? __("Remarks"): __("Party") %}</th>
 				{% } %}
 				<th style="width: 10%; text-align: right">{%= __("Invoiced Amount") %}</th>
-				{% if(!filters.show_pdc_in_print) { %}
+				{% if(!filters.show_future_payments) { %}
 					<th style="width: 10%; text-align: right">{%= __("Paid Amount") %}</th>
 					<th style="width: 10%; text-align: right">{%= report.report_name === "Accounts Receivable" ? __('Credit Note') : __('Debit Note') %}</th>
 				{% } %}
 				<th style="width: 10%; text-align: right">{%= __("Outstanding Amount") %}</th>
-				{% if(filters.show_pdc_in_print) { %}
+				{% if(filters.show_future_payments) { %}
 					{% if(report.report_name === "Accounts Receivable") { %}
-						<th style="width: 10%">{%= __("Customer LPO No.") %}</th>
+						<th style="width: 10%">{%= __("Customer PO No.") %}</th>
 					{% } %}
 					<th style="width: 10%">{%= __("PDC/LC Ref") %}</th>
 					<th style="width: 10%">{%= __("PDC/LC Amount") %}</th>
@@ -190,18 +187,16 @@
 						{% } %}
 					</td>
 					<td>
-						{% if(!filters.show_pdc_in_print) { %}
+						{% if(!filters.show_future_payments) { %}
 							{%= data[i]["voucher_type"] %}
 							<br>
 						{% } %}
 						{%= data[i]["voucher_no"] %}
 					</td>
 
-					{% if(report.report_name === "Accounts Receivable" && filters.show_sales_person_in_print) { %}
-					<td>{%= data[i]["sales_person"] %}</td>
-					{% } %}
+					
 
-					{% if(!filters.show_pdc_in_print) { %}
+					{% if(!filters.show_future_payments) { %}
 					<td>
 						{% if(data[i]["_isGroupTotal"]) { %}
 							<strong>{%= __("Total") %}</strong>
@@ -220,19 +215,25 @@
 							{% if (!filters.customer && !filters.supplier && !group.party) { %}{%= __("Remarks") %}:{% } %}
 							{%= data[i]["remarks"] %}
 						</div>
+							{% if(report.report_name === "Accounts Receivable" && filters.show_sales_person_in_print && data[i]["sales_person"] && !group.sales_person) { %}
+								<div>{%= __("Sales Person: ")%}{%= data[i]["sales_person"] %}</div>
+							{% } %}
+							{% if(report.report_name === "Accounts Receivable" && data[i]["delivery_note"] && filters.show_delivery_note_in_print) { %}
+								<div>{%= __("Delivery Note")%}: {%= data[i]["delivery_note"] %}</div>
+							{% } %}
 						{% } %}
 					</td>
 					{% } %}
 
 					<td style="text-align: right">{%= format_currency(data[i]["invoiced_amount"], data[i]["currency"]) %}</td>
 
-					{% if(!filters.show_pdc_in_print) { %}
+					{% if(!filters.show_future_payments) { %}
 						<td style="text-align: right">{%= format_currency(data[i]["paid_amount"], data[i]["currency"]) %}</td>
 						<td style="text-align: right">{%= format_currency(data[i]["return_amount"], data[i]["currency"]) %}</td>
 					{% } %}
 					<td style="text-align: right">{%= format_currency(data[i]["outstanding_amount"], data[i]["currency"]) %}</td>
 
-					{% if(filters.show_pdc_in_print) { %}
+					{% if(filters.show_future_payments) { %}
 						{% if(report.report_name === "Accounts Receivable") { %}
 							<td style="text-align: right">
 								{%= data[i]["po_no"] %}</td>
@@ -244,22 +245,20 @@
 				{% } else { %}
 					{% if(data[i]["invoiced_amount"] == null) { %}
 						{% var colspan = 5 %}
-						{% if(report.report_name === "Accounts Receivable" && filters.show_sales_person_in_print) { colspan++; } %}
-						{% if(!filters.show_pdc_in_print) { colspan += 3; } %}
-						{% if(filters.show_pdc_in_print) { %}
+						{% if(!filters.show_future_payments) { colspan += 3; } %}
+						{% if(filters.show_future_payments) { %}
 							{% colspan += 3; %}
 							{% if(report.report_name === "Accounts Receivable") { colspan++; } %}
 						{% } %}
 						<td colspan="{%= colspan %}"></td>
 					{% } else { %}
 						{% var colspan = 3 %}
-						{% if(report.report_name === "Accounts Receivable" && filters.show_sales_person_in_print) { colspan++; } %}
-						{% if(!filters.show_pdc_in_print) { colspan++; } %}
+						{% if(!filters.show_future_payments) { colspan++; } %}
 						<td colspan="{%= colspan %}" style="text-align: right"><b>{%= data[i]['voucher_type'] || __("Total") %}</b></td>
 						<td style="text-align: right">
 							{%= format_currency(data[i]["invoiced_amount"], data[i]["currency"] ) %}</td>
 
-						{% if(!filters.show_pdc_in_print) { %}
+						{% if(!filters.show_future_payments) { %}
 							<td style="text-align: right">
 								{%= format_currency(data[i]["paid_amount"], data[i]["currency"]) %}</td>
 							<td style="text-align: right">{%= format_currency(data[i]["return_amount"], data[i]["currency"]) %} </td>
@@ -267,7 +266,7 @@
 						<td style="text-align: right">
 							{%= format_currency(data[i]["outstanding_amount"], data[i]["currency"]) %}</td>
 
-						{% if(filters.show_pdc_in_print) { %}
+						{% if(filters.show_future_payments) { %}
 							{% if(report.report_name === "Accounts Receivable") { %}
 								<td style="text-align: right">
 									{%= data[i]["po_no"] %}</td>
