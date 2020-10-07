@@ -29,6 +29,7 @@
   "valuation_rate",
   "disabled",
   "is_stock_item",
+  "is_vehicle",
   "has_serial_no",
   "serial_no_series",
   "warranty_period",
@@ -1145,6 +1146,13 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
+   "fieldname": "is_vehicle",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Is Vehicle"
+  },
+  {
    "fieldname": "manufacture_uom",
    "fieldtype": "Link",
    "label": "Default Raw Material UOM",
@@ -1156,7 +1164,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-10-10 15:05:31.457765",
+ "modified": "2020-10-10 15:05:31.457766",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

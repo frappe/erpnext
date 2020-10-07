@@ -320,6 +320,17 @@ $.extend(erpnext.item, {
 			}
 		}
 
+		frm.fields_dict['brand'].get_query = function () {
+			if (frm.doc.is_vehicle) {
+				var filters = {};
+				filters.is_vehicle_maker = 1
+				return {
+					filters: filters
+				}
+			}
+
+		}
+
 		frm.fields_dict['deferred_revenue_account'].get_query = function() {
 			return {
 				filters: {

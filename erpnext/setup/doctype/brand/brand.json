@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "brand",
+  "is_vehicle_maker",
   "column_break_2",
   "item_naming_by",
   "item_naming_series",
@@ -76,11 +77,17 @@
    "fieldname": "description_section",
    "fieldtype": "Section Break",
    "label": "Description"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_vehicle_maker",
+   "fieldtype": "Check",
+   "label": "Is Vehicle Maker"
   }
  ],
  "icon": "fa fa-certificate",
  "idx": 1,
- "modified": "2020-03-03 15:36:34.950190",
+ "modified": "2020-10-04 22:19:35.439683",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Brand",

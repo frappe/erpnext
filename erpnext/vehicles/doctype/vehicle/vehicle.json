@@ -1,5 +1,5 @@
 {
- "autoname": "field:license_plate",
+ "autoname": "naming_series:",
  "creation": "2016-09-03 03:33:27.680331",
  "doctype": "DocType",
  "document_type": "Document",
@@ -7,11 +7,13 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
-  "license_plate",
+  "item_code",
   "make",
   "column_break_3",
+  "item_name",
   "model",
   "vehicle_details",
+  "license_plate",
   "last_odometer",
   "acquisition_date",
   "location",
@@ -52,11 +54,12 @@
    "unique": 1
   },
   {
+   "fetch_from": "item_code.brand",
    "fieldname": "make",
    "fieldtype": "Link",
    "label": "Make",
    "options": "Brand",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "column_break_3",
@@ -67,8 +70,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Model",
-   "reqd": 1
+   "label": "Model"
   },
   {
    "fieldname": "vehicle_details",
@@ -81,7 +83,6 @@
    "in_list_view": 1,
    "label": "Odometer Value (Last)",
    "no_copy": 1,
-   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -157,16 +158,14 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Fuel Type",
-   "options": "Petrol\nDiesel\nNatural Gas\nElectric",
-   "reqd": 1
+   "options": "Petrol\nDiesel\nNatural Gas\nElectric"
   },
   {
    "fieldname": "uom",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Fuel UOM",
-   "options": "UOM",
-   "reqd": 1
+   "options": "UOM"
   },
   {
    "fieldname": "carbon_check_date",
@@ -191,9 +190,23 @@
    "fieldname": "doors",
    "fieldtype": "Int",
    "label": "Doors"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
   }
  ],
- "modified": "2020-10-04 22:52:32.102374",
+ "modified": "2020-10-06 15:58:24.002532",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",

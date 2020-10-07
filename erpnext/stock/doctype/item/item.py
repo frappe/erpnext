@@ -50,7 +50,7 @@ class Item(WebsiteGenerator):
 
 	_cant_change_fields_bin = ["is_stock_item"]
 	_cant_change_fields_sle = ["has_serial_no", "has_batch_no", "valuation_method"]
-	_cant_change_fields_trn = ["stock_uom", "alt_uom", "alt_uom_size"]
+	_cant_change_fields_trn = ["stock_uom", "alt_uom", "alt_uom_size", "is_vehicle"]
 	_cant_change_fields = _cant_change_fields_bin + _cant_change_fields_sle + _cant_change_fields_trn
 
 	def onload(self):
@@ -650,6 +650,12 @@ class Item(WebsiteGenerator):
 				self.alt_uom_size = flt(1/flt(d.conversion_factor), self.precision("alt_uom_size"))
 
 	def validate_item_type(self):
+		if self.is_vehicle:
+			if not self.is_stock_item:
+				frappe.throw(_("'Maintain Stock' must be enabled for Vehicle Item"))
+			if not self.has_serial_no:
+				frappe.throw(_("'Has Serial No' must be enabled for Vehicle Item"))
+
 		if self.has_serial_no == 1 and self.is_stock_item == 0 and not self.is_fixed_asset:
 			msgprint(_("'Has Serial No' can not be 'Yes' for non-stock item"), raise_exception=1)
 
@@ -1006,9 +1012,11 @@ class Item(WebsiteGenerator):
 
 	def get_cant_change_fields(self):
 		fieldnames = []
-		for fieldname in self._cant_change_fields:
-			if self.check_if_cant_change_field(fieldname):
-				fieldnames.append(fieldname)
+
+		if not self.get("__islocal"):
+			for fieldname in self._cant_change_fields:
+				if self.check_if_cant_change_field(fieldname):
+					fieldnames.append(fieldname)
 
 		return fieldnames
 
