@@ -557,7 +557,7 @@ def download_cancel_einvoice():
 	frappe.response['type'] = 'download'
 
 @frappe.whitelist()
-def download_cancel_ack():
+def upload_cancel_ack():
 	cancel_ack = json.loads(frappe.local.uploaded_file)
 	data = frappe._dict(frappe.local.form_dict)
 	doctype = data['doctype']

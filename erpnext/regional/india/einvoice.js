@@ -162,7 +162,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 					"Upload Cancel JSON",
 					() => {
 						new frappe.ui.FileUploader({
-							method: 'erpnext.regional.india.e_invoice_utils.download_cancel_ack',
+							method: 'erpnext.regional.india.e_invoice_utils.upload_cancel_ack',
 							allow_multiple: 0,
 							doctype: frm.doc.doctype,
 							docname: frm.doc.name,
