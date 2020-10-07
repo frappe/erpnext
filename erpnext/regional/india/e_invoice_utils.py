@@ -538,8 +538,13 @@ def upload_einvoice():
 	doctype = data['doctype']
 	name = data['docname']
 
-	frappe.db.set_value(doctype, name, "irn", signed_einvoice.get("Irn"))
-	frappe.db.set_value(doctype, name, "ewaybill", signed_einvoice.get("EwbNo"))
+	enc_signed_invoice = signed_einvoice.get('SignedInvoice')
+	decrypted_signed_invoice = jwt_decrypt(enc_signed_invoice)['data']
+
+	frappe.db.set_value(doctype, name, 'irn', signed_einvoice.get('Irn'))
+	frappe.db.set_value(doctype, name, 'ewaybill', signed_einvoice.get('EwbNo'))
+	frappe.db.set_value(doctype, name, 'signed_qr_code', signed_einvoice.get('SignedQRCode'))
+	frappe.db.set_value(doctype, name, 'signed_einvoice', decrypted_signed_invoice)
 
 @frappe.whitelist()
 def download_cancel_einvoice():
