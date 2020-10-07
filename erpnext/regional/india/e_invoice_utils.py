@@ -15,8 +15,8 @@ from Crypto.Util.Padding import pad, unpad
 from frappe.model.document import Document
 from frappe import _, get_module_path, scrub
 from erpnext.regional.india.utils import get_gst_accounts
-from frappe.utils.data import get_datetime, cstr, cint, format_date, flt
 from frappe.integrations.utils import make_post_request, make_get_request
+from frappe.utils.data import get_datetime, cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime
 
 def validate_einvoice_fields(doc):
 	e_invoice_enabled = frappe.db.get_value("E Invoice Settings", "E Invoice Settings", "enable")
@@ -29,8 +29,13 @@ def validate_einvoice_fields(doc):
 	elif doc.docstatus == 2 and doc._action == 'cancel' and not doc.irn_cancelled:
 		frappe.throw(_("You must cancel IRN before cancelling the document."), title=_("Cancel Not Allowed"))
 
-def get_einv_credentials():
-	return frappe.get_doc("E Invoice Settings")
+def get_einv_credentials(for_token=False):
+	creds = frappe.get_doc("E Invoice Settings")
+	if not for_token and (not creds.token_expiry or time_diff_in_seconds(now_datetime(), creds.token_expiry) > 5.0):
+		fetch_token()
+		creds.load_from_db()
+	
+	return creds
 
 def rsa_encrypt(msg, key):
 	if not (isinstance(msg, bytes) or isinstance(msg, bytearray)):
@@ -78,7 +83,7 @@ def get_header(creds):
 
 @frappe.whitelist()
 def fetch_token():
-	einv_creds = get_einv_credentials()
+	einv_creds = get_einv_credentials(for_token=True)
 
 	endpoint = 'https://einv-apisandbox.nic.in/eivital/v1.03/auth'
 	headers = { 'content-type': 'application/json' }
@@ -270,11 +275,13 @@ def get_doc_details(invoice):
 def get_party_gstin_details(party_address):
 	address = frappe.get_all("Address", filters={"name": party_address}, fields=["*"])[0]
 
-	# gstin_details = get_gstin_details(gstin)
 	gstin = address.get('gstin')
-	legal_name = address.get('address_title')
-	# trade_name = gstin_details.get('TradeName')
-	location = address.get('city')
+	gstin_details = get_gstin_details(gstin)
+	# legal_name = address.get('address_title')
+	legal_name = gstin_details.get('LegalName')
+	trade_name = gstin_details.get('TradeName')
+	# location = address.get('city')
+	location = gstin_details.get('Loc')
 	state_code = address.get('gst_state_number')
 	pincode = cint(address.get('pincode'))
 	address_line1 = address.get('address_line1')
