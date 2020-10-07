@@ -19,6 +19,12 @@ frappe.ui.form.on('Material Request', {
 		frm.set_indicator_formatter('item_code',
 			function(doc) { return (doc.stock_qty<=doc.ordered_qty) ? "green" : "orange"; });
 
+		frm.set_query("from_warehouse", "items", function(doc) {
+			return {
+				filters: {'company': doc.company}
+			};
+		});
+
 	},
 
 	onload: function(frm) {
@@ -27,11 +33,24 @@ frappe.ui.form.on('Material Request', {
 
 		// set schedule_date
 		set_schedule_date(frm);
-		frm.fields_dict["items"].grid.get_field("warehouse").get_query = function(doc) {
+
+		frm.set_query("warehouse", "items", function(doc) {
 			return {
 				filters: {'company': doc.company}
 			};
-		};
+		});
+
+		frm.set_query("set_warehouse", function(doc){
+			return {
+				filters: {'company': doc.company}
+			};
+		});
+
+		frm.set_query("set_from_warehouse", function(doc){
+			return {
+				filters: {'company': doc.company}
+			};
+		});
 	},
 
 	onload_post_render: function(frm) {

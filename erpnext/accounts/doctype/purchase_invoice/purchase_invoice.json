@@ -25,6 +25,7 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+  "project",
   "sb_14",
   "on_hold",
   "release_date",
@@ -355,6 +356,7 @@
    "fieldname": "bill_date",
    "fieldtype": "Date",
    "label": "Supplier Invoice Date",
+   "no_copy": 1,
    "oldfieldname": "bill_date",
    "oldfieldtype": "Date",
    "print_hide": 1
@@ -962,8 +964,10 @@
   {
    "fieldname": "clearance_date",
    "fieldtype": "Date",
-   "hidden": 1,
-   "label": "Clearance Date"
+   "label": "Clearance Date",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "col_br_payments",
@@ -1287,6 +1291,12 @@
    "fieldtype": "Column Break"
   },
   {
+    "fieldname": "project",
+    "fieldtype": "Link",
+    "label": "Project",
+    "options": "Project"
+  },
+  {
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
    "hidden": 1,
@@ -1298,7 +1308,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2020-07-01 12:41:54.851217",
+ "modified": "2020-09-21 12:22:09.164068",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

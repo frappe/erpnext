@@ -617,8 +617,18 @@ class ReceivablePayableReport(object):
 		elif party_type_field=="supplier":
 			self.add_supplier_filters(conditions, values)
 
+		if self.filters.cost_center:
+			self.get_cost_center_conditions(conditions)
+
 		self.add_accounting_dimensions_filters(conditions, values)
 		return " and ".join(conditions), values
+
+	def get_cost_center_conditions(self, conditions):
+		lft, rgt = frappe.db.get_value("Cost Center", self.filters.cost_center, ["lft", "rgt"])
+		cost_center_list = [center.name for center in frappe.get_list("Cost Center", filters = {'lft': (">=", lft), 'rgt': ("<=", rgt)})]
+
+		cost_center_string = '", "'.join(cost_center_list)
+		conditions.append('cost_center in ("{0}")'.format(cost_center_string))
 
 	def get_order_by_condition(self):
 		if self.filters.get('group_by_party'):
@@ -643,8 +653,10 @@ class ReceivablePayableReport(object):
 		account_type = "Receivable" if self.party_type == "Customer" else "Payable"
 		accounts = [d.name for d in frappe.get_all("Account",
 			filters={"account_type": account_type, "company": self.filters.company})]
-		conditions.append("account in (%s)" % ','.join(['%s'] *len(accounts)))
-		values += accounts
+
+		if accounts:
+			conditions.append("account in (%s)" % ','.join(['%s'] *len(accounts)))
+			values += accounts
 
 	def add_customer_filters(self, conditions, values):
 		if self.filters.get("customer_group"):

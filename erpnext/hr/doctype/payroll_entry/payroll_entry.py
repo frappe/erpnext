@@ -290,6 +290,7 @@ class PayrollEntry(Document):
 				"account": default_payroll_payable_account,
 				"credit_in_account_currency": flt(payable_amount, precision),
 				"party_type": '',
+				"cost_center": self.cost_center
 			})
 
 			journal_entry.set("accounts", accounts)
@@ -574,6 +575,7 @@ def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progr
 		frappe.msgprint(_("Could not submit some Salary Slips"))
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""
 		select name from `tabPayroll Entry`

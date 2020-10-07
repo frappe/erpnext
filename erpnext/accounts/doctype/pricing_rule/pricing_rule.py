@@ -241,7 +241,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 
 	update_args_for_pricing_rule(args)
 
-	pricing_rules = (get_applied_pricing_rules(args)
+	pricing_rules = (get_applied_pricing_rules(args.get('pricing_rules'))
 		if for_validate and args.get("pricing_rules") else get_pricing_rules(args, doc))
 
 	if pricing_rules:
@@ -280,7 +280,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 
 		item_details.has_pricing_rule = 1
 
-		item_details.pricing_rules = ','.join([d.pricing_rule for d in rules])
+		item_details.pricing_rules = frappe.as_json([d.pricing_rule for d in rules])
 
 		if not doc: return item_details
 
@@ -369,8 +369,10 @@ def set_discount_amount(rate, item_details):
 			item_details.rate = rate
 
 def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
-	from erpnext.accounts.doctype.pricing_rule.utils import get_pricing_rule_items
-	for d in pricing_rules.split(','):
+	from erpnext.accounts.doctype.pricing_rule.utils import (get_applied_pricing_rules,
+		get_pricing_rule_items)
+
+	for d in get_applied_pricing_rules(pricing_rules):
 		if not d or not frappe.db.exists("Pricing Rule", d): continue
 		pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
 
@@ -393,7 +395,8 @@ def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
 			items = get_pricing_rule_items(pricing_rule)
 			item_details.apply_on = (frappe.scrub(pricing_rule.apply_rule_on_other)
 				if pricing_rule.apply_rule_on_other else frappe.scrub(pricing_rule.get('apply_on')))
-			item_details.applied_on_items = ','.join(items)
+			item_details.applied_on_items = json.dumps(items)
+			item_details.price_or_product_discount = pricing_rule.price_or_product_discount
 
 	item_details.pricing_rules = ''
 
@@ -437,14 +440,14 @@ def make_pricing_rule(doctype, docname):
 	return doc
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_item_uoms(doctype, txt, searchfield, start, page_len, filters):
 	items = [filters.get('value')]
 	if filters.get('apply_on') != 'Item Code':
 		field = frappe.scrub(filters.get('apply_on'))
+		items = [d.name for d in frappe.db.get_all("Item", filters={field: filters.get('value')})]
 
-		items = frappe.db.sql_list("""select name
-			from `tabItem` where {0} = %s""".format(field), filters.get('value'))
-
-	return frappe.get_all('UOM Conversion Detail',
-		filters = {'parent': ('in', items), 'uom': ("like", "{0}%".format(txt))},
-		fields = ["distinct uom"], as_list=1)
+	return frappe.get_all('UOM Conversion Detail', filters={
+			'parent': ('in', items),
+			'uom': ("like", "{0}%".format(txt))
+		}, fields = ["distinct uom"], as_list=1)

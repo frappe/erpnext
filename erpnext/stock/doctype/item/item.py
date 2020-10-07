@@ -13,7 +13,7 @@ from erpnext.controllers.item_variant import (ItemVariantExistsError,
 from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
 from frappe import _, msgprint
 from frappe.utils import (cint, cstr, flt, formatdate, get_timestamp, getdate,
-						  now_datetime, random_string, strip)
+						  now_datetime, random_string, strip, get_link_to_form)
 from frappe.utils.html_utils import clean_html
 from frappe.website.doctype.website_slideshow.website_slideshow import \
 	get_slideshow
@@ -634,6 +634,9 @@ class Item(WebsiteGenerator):
 									+ ": \n" + ", ".join([self.meta.get_label(fld) for fld in field_list]))
 
 	def after_rename(self, old_name, new_name, merge):
+		if merge:
+			self.validate_duplicate_item_in_stock_reconciliation(old_name, new_name)
+
 		if self.route:
 			invalidate_cache_for_item(self)
 			clear_cache(self.route)
@@ -655,6 +658,27 @@ class Item(WebsiteGenerator):
 
 					frappe.db.set_value(dt, d.name, "item_wise_tax_detail",
 											json.dumps(item_wise_tax_detail), update_modified=False)
+
+	def validate_duplicate_item_in_stock_reconciliation(self, old_name, new_name):
+		records = frappe.db.sql(""" SELECT parent, COUNT(*) as records
+			FROM `tabStock Reconciliation Item`
+			WHERE item_code = %s and docstatus = 1
+			GROUP By item_code, warehouse, parent
+			HAVING records > 1
+		""", new_name, as_dict=1)
+
+		if not records: return
+		document = _("Stock Reconciliation") if len(records) == 1 else _("Stock Reconciliations")
+
+		msg = _("The items {0} and {1} are present in the following {2} : <br>"
+			.format(frappe.bold(old_name), frappe.bold(new_name), document))
+
+		msg += ', '.join([get_link_to_form("Stock Reconciliation", d.parent) for d in records]) + "<br><br>"
+
+		msg += _("Note: To merge the items, create a separate Stock Reconciliation for the old item {0}"
+			.format(frappe.bold(old_name)))
+
+		frappe.throw(_(msg), title=_("Merge not allowed"))
 
 	def set_last_purchase_rate(self, new_name):
 		last_purchase_rate = get_last_purchase_details(new_name).get("base_net_rate", 0)
@@ -977,8 +1001,8 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 		order by pr.posting_date desc, pr.posting_time desc, pr.name desc
 		limit 1""", (item_code, cstr(doc_name)), as_dict=1)
 
-	
-	
+
+
 	purchase_order_date = getdate(last_purchase_order and last_purchase_order[0].transaction_date
 							   or "1900-01-01")
 	purchase_receipt_date = getdate(last_purchase_receipt and
@@ -986,7 +1010,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 
 	if last_purchase_order and (purchase_order_date >= purchase_receipt_date or not last_purchase_receipt):
 		# use purchase order
-		
+
 		last_purchase = last_purchase_order[0]
 		purchase_date = purchase_order_date
 
@@ -1006,7 +1030,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 		"discount_percentage": flt(last_purchase.discount_percentage),
 		"purchase_date": purchase_date
 	})
-	
+
 
 	conversion_rate = flt(conversion_rate) or 1.0
 	out.update({
@@ -1045,8 +1069,7 @@ def invalidate_item_variants_cache_for_website(doc):
 
 	if item_code:
 		item_cache = ItemVariantsCacheManager(item_code)
-		item_cache.clear_cache()
-
+		item_cache.rebuild_cache()
 
 def check_stock_uom_with_bin(item, stock_uom):
 	if stock_uom == frappe.db.get_value("Item", item, "stock_uom"):

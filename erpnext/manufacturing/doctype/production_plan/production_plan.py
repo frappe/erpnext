@@ -322,12 +322,13 @@ class ProductionPlan(Document):
 		work_orders = []
 		bom_data = {}
 
-		get_sub_assembly_items(item.get("bom_no"), bom_data)
+		get_sub_assembly_items(item.get("bom_no"), bom_data, item.get("qty"))
 
 		for key, data in bom_data.items():
 			data.update({
-				'qty': data.get("stock_qty") * item.get("qty"),
+				'qty': data.get("stock_qty"),
 				'production_plan': self.name,
+				'use_multi_level_bom': item.get("use_multi_level_bom"),
 				'company': self.company,
 				'fg_warehouse': item.get("fg_warehouse"),
 				'update_consumed_material_cost_in_project': 0
@@ -421,14 +422,13 @@ class ProductionPlan(Document):
 			msgprint(_("No material request created"))
 
 @frappe.whitelist()
-def download_raw_materials(production_plan):
-	doc = frappe.get_doc('Production Plan', production_plan)
-	doc.check_permission()
-
+def download_raw_materials(doc):
 	item_list = [['Item Code', 'Description', 'Stock UOM', 'Required Qty', 'Warehouse',
 		'projected Qty', 'Actual Qty']]
 
-	doc = doc.as_dict()
+	if isinstance(doc, string_types):
+		doc = frappe._dict(json.loads(doc))
+
 	for d in get_items_for_material_requests(doc, ignore_existing_ordered_qty=True):
 		item_list.append([d.get('item_code'), d.get('description'), d.get('stock_uom'), d.get('quantity'),
 			d.get('warehouse'), d.get('projected_qty'), d.get('actual_qty')])
@@ -724,7 +724,7 @@ def get_item_data(item_code):
 #		"description": item_details.get("description")
 	}
 
-def get_sub_assembly_items(bom_no, bom_data):
+def get_sub_assembly_items(bom_no, bom_data, to_produce_qty):
 	data = get_children('BOM', parent = bom_no)
 	for d in data:
 		if d.expandable:
@@ -741,6 +741,6 @@ def get_sub_assembly_items(bom_no, bom_data):
 				})
 
 			bom_item = bom_data.get(key)
-			bom_item["stock_qty"] += d.stock_qty / d.parent_bom_qty
+			bom_item["stock_qty"] += (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
 
-			get_sub_assembly_items(bom_item.get("bom_no"), bom_data)
+			get_sub_assembly_items(bom_item.get("bom_no"), bom_data, bom_item["stock_qty"])

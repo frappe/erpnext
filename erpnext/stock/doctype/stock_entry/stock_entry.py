@@ -196,7 +196,8 @@ class StockEntry(StockController):
 						item.set(f, item_details.get(f))
 
 			if not item.transfer_qty and item.qty:
-				item.transfer_qty = item.qty * item.conversion_factor
+				item.transfer_qty = flt(flt(item.qty) * flt(item.conversion_factor),
+				self.precision("transfer_qty", item))
 
 			if (self.purpose in ("Material Transfer", "Material Transfer for Manufacture")
 				and not item.serial_no
@@ -499,7 +500,7 @@ class StockEntry(StockController):
 						d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
 					elif self.purpose == "Repack" and total_fg_qty and not d.set_basic_rate_manually:
 						d.basic_rate = flt(raw_material_cost) / flt(total_fg_qty)
-						d.basic_amount = d.basic_rate * d.qty
+						d.basic_amount = d.basic_rate * flt(d.qty)
 
 	def distribute_additional_costs(self):
 		if self.purpose == "Material Issue":
@@ -555,8 +556,9 @@ class StockEntry(StockController):
 		qty_allowance = flt(frappe.db.get_single_value("Buying Settings",
 			"over_transfer_allowance"))
 
-		if (self.purpose == "Send to Subcontractor" and self.purchase_order and
-			backflush_raw_materials_based_on == 'BOM'):
+		if not (self.purpose == "Send to Subcontractor" and self.purchase_order): return
+
+		if (backflush_raw_materials_based_on == 'BOM'):
 			purchase_order = frappe.get_doc("Purchase Order", self.purchase_order)
 			for se_item in self.items:
 				item_code = se_item.original_item or se_item.item_code
@@ -593,6 +595,11 @@ class StockEntry(StockController):
 				if flt(total_supplied, precision) > flt(total_allowed, precision):
 					frappe.throw(_("Row {0}# Item {1} cannot be transferred more than {2} against Purchase Order {3}")
 						.format(se_item.idx, se_item.item_code, total_allowed, self.purchase_order))
+		elif backflush_raw_materials_based_on == "Material Transferred for Subcontract":
+			for row in self.items:
+				if not row.subcontracted_item:
+					frappe.throw(_("Row {0}: Subcontracted Item is mandatory for the raw material {1}")
+						.format(row.idx, frappe.bold(row.item_code)))
 
 	def validate_bom(self):
 		for d in self.get('items'):
@@ -795,6 +802,13 @@ class StockEntry(StockController):
 		if (args.get('s_warehouse', None) and args.get('qty') and
 			ret.get('has_batch_no') and not args.get('batch_no')):
 			args.batch_no = get_batch_no(args['item_code'], args['s_warehouse'], args['qty'])
+
+		if self.purpose == "Send to Subcontractor" and self.get("purchase_order") and args.get('item_code'):
+			subcontract_items = frappe.get_all("Purchase Order Item Supplied",
+				{"parent": self.purchase_order, "rm_item_code": args.get('item_code')}, "main_item_code")
+
+			if subcontract_items and len(subcontract_items) == 1:
+				ret["subcontracted_item"] = subcontract_items[0].main_item_code
 
 		return ret
 
@@ -1236,9 +1250,15 @@ class StockEntry(StockController):
 		#Update Supplied Qty in PO Supplied Items
 
 		frappe.db.sql("""UPDATE `tabPurchase Order Item Supplied` pos
-			SET pos.supplied_qty = (SELECT ifnull(sum(transfer_qty), 0) FROM `tabStock Entry Detail` sed
-			WHERE pos.name = sed.po_detail and sed.docstatus = 1)
-			WHERE pos.docstatus = 1 and pos.parent = %s""", self.purchase_order)
+			SET
+				pos.supplied_qty = IFNULL((SELECT ifnull(sum(transfer_qty), 0)
+					FROM
+						`tabStock Entry Detail` sed, `tabStock Entry` se
+					WHERE
+						(pos.name = sed.po_detail OR sed.subcontracted_item = pos.main_item_code)
+						AND sed.docstatus = 1 AND se.name = sed.parent and se.purchase_order = %(po)s
+				), 0)
+			WHERE pos.docstatus = 1 and pos.parent = %(po)s""", {"po": self.purchase_order})
 
 		#Update reserved sub contracted quantity in bin based on Supplied Item Details and
 		for d in self.get("items"):

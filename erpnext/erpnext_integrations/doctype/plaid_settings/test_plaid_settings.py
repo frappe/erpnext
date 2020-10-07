@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
-from __future__ import unicode_literals
 
-import unittest
-import frappe
-from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings import plaid_configuration, add_account_type, add_account_subtype, new_bank_transaction, add_bank_accounts
 import json
-from frappe.utils.response import json_handler
+import unittest
+
+import frappe
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+from erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings import (
+	add_account_subtype, add_account_type, add_bank_accounts,
+	new_bank_transaction, get_plaid_configuration)
+from frappe.utils.response import json_handler
+
 
 class TestPlaidSettings(unittest.TestCase):
 	def setUp(self):
@@ -31,7 +34,7 @@ class TestPlaidSettings(unittest.TestCase):
 
 	def test_plaid_disabled(self):
 		frappe.db.set_value("Plaid Settings", None, "enabled", 0)
-		self.assertTrue(plaid_configuration() == "disabled")
+		self.assertTrue(get_plaid_configuration() == "disabled")
 
 	def test_add_account_type(self):
 		add_account_type("brokerage")
@@ -64,7 +67,7 @@ class TestPlaidSettings(unittest.TestCase):
 				'mask': '0000',
 				'id': '6GbM6RRQgdfy3lAqGz4JUnpmR948WZFg8DjQK',
 				'name': 'Plaid Checking'
-				}],
+			}],
 			'institution': {
 				'institution_id': 'ins_6',
 				'name': 'Citi'
@@ -100,7 +103,7 @@ class TestPlaidSettings(unittest.TestCase):
 				'mask': '0000',
 				'id': '6GbM6RRQgdfy3lAqGz4JUnpmR948WZFg8DjQK',
 				'name': 'Plaid Checking'
-				}],
+			}],
 			'institution': {
 				'institution_id': 'ins_6',
 				'name': 'Citi'
