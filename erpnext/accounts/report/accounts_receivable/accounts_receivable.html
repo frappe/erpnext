@@ -218,8 +218,8 @@
 							{% if(report.report_name === "Accounts Receivable" && filters.show_sales_person_in_print && data[i]["sales_person"] && !group.sales_person) { %}
 								<div>{%= __("Sales Person: ")%}{%= data[i]["sales_person"] %}</div>
 							{% } %}
-							{% if(report.report_name === "Accounts Receivable" && data[i]["delivery_note"] && filters.show_delivery_note) { %}
-								<div>{%= __("Delivery Note(s): ")%}{%= data[i]["delivery_note"] %}</div>
+							{% if(report.report_name === "Accounts Receivable" && data[i]["delivery_note"] && filters.show_delivery_note_in_print) { %}
+								<div>{%= __("Delivery Note")%}: {%= data[i]["delivery_note"] %}</div>
 							{% } %}
 						{% } %}
 					</td>

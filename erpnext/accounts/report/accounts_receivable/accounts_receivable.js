@@ -178,14 +178,12 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldname":"show_sales_person_in_print",
 			"label": __("Show Sales Person In Print"),
 			"fieldtype": "Check",
-			"default": 1,
 			on_change: function() { return false; }
 		},
 		{
-			"fieldname":"show_delivery_note",
-			"label": __("Show Delivery Notes"),
+			"fieldname":"show_delivery_note_in_print",
+			"label": __("Show Delivery Notes In Print"),
 			"fieldtype": "Check",
-			"default": 1,
 			on_change: function() { return false; }
 		},
 		{
