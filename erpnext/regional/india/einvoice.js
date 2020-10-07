@@ -112,10 +112,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 								}
 							}
 						})
-					}
-				);
-			}
-			if (frm.doc.docstatus == 0 && !frm.doc.irn && !frm.doc.__unsaved) {
+				}, "E-Invoicing");
 				frm.add_custom_button(
 					"Upload Signed E-Invoice",
 					() => {
@@ -130,8 +127,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 								}
 							}
 						});
-					}
-				);
+				}, "E-Invoicing");
 			}
 			if (frm.doc.docstatus == 1 && frm.doc.irn && !frm.doc.irn_cancelled) {
 				frm.add_custom_button(
@@ -161,8 +157,22 @@ erpnext.setup_einvoice_actions = (doctype) => {
 							primary_action_label: __('Download JSON')
 						});
 						d.show();
-					}
-				);
+					}, "E-Invoicing");
+				frm.add_custom_button(
+					"Upload Cancel JSON",
+					() => {
+						new frappe.ui.FileUploader({
+							method: 'erpnext.regional.india.e_invoice_utils.download_cancel_ack',
+							allow_multiple: 0,
+							doctype: frm.doc.doctype,
+							docname: frm.doc.name,
+							on_success: (attachment, r) => {
+								if (!r.exc) {
+									frm.reload_doc();
+								}
+							}
+						});
+				}, "E-Invoicing");
 			}
 		}
 	})
