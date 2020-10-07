@@ -44,6 +44,7 @@
   "section_break_31",
   "purchase_uom",
   "sales_uom",
+  "manufacture_uom",
   "column_break_34",
   "weight_uom",
   "weight_per_unit",
@@ -1141,6 +1142,12 @@
   {
    "fieldname": "column_break_107",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "manufacture_uom",
+   "fieldtype": "Link",
+   "label": "Default Raw Material UOM",
+   "options": "UOM"
   }
  ],
  "has_web_view": 1,
@@ -1148,7 +1155,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-10-05 15:42:27.895647",
+ "modified": "2020-10-07 13:59:55.081219",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

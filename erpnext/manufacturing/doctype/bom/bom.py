@@ -89,7 +89,7 @@ class BOM(WebsiteGenerator):
 
 	def get_item_det(self, item_code):
 		item = frappe.db.sql("""select name, item_name, docstatus, description, image,
-			is_sub_contracted_item, stock_uom, default_bom, last_purchase_rate, include_item_in_manufacturing
+			is_sub_contracted_item, stock_uom, manufacture_uom, default_bom, last_purchase_rate, include_item_in_manufacturing
 			from `tabItem` where name=%s""", item_code, as_dict = 1)
 
 		if not item:
@@ -159,7 +159,7 @@ class BOM(WebsiteGenerator):
 			 'description'  : item and args['description'] or '',
 			 'image'		: item and args['image'] or '',
 			 'stock_uom'	: item and args['stock_uom'] or '',
-			 'uom'			: item and args['stock_uom'] or '',
+			 'uom'			: item and args.get('manufacture_uom') or args['stock_uom'] or '',
  			 'conversion_factor': 1,
 			 'bom_no'		: args['bom_no'],
 			 'rate'			: rate,
