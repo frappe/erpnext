@@ -9,7 +9,7 @@ from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from frappe.desk.query_report import group_report_data, hide_columns_if_filtered
-from six import iteritems
+from six import iteritems, string_types
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from collections import OrderedDict
 
@@ -25,9 +25,6 @@ def execute(filters=None):
 
 	for acc in frappe.db.sql("""select name, is_group from tabAccount""", as_dict=1):
 		account_details.setdefault(acc.name, acc)
-
-	if filters.get('party'):
-		filters.party = frappe.parse_json(filters.get("party"))
 
 	validate_filters(filters, account_details)
 
@@ -64,6 +61,11 @@ def validate_filters(filters, account_details):
 
 	if filters.get('cost_center'):
 		filters.cost_center = frappe.parse_json(filters.get('cost_center'))
+
+	if filters.get('party'):
+		# 	filters.party = frappe.parse_json(filters.get("party"))
+		if isinstance(filters.party, string_types):
+			filters.party = [filters.party]
 
 
 def validate_party(filters):

@@ -74,7 +74,8 @@ frappe.query_reports["General Ledger"] = {
 		{
 			"fieldname":"party",
 			"label": __("Party"),
-			"fieldtype": "MultiSelectList",
+			"fieldtype": "Dynamic Link",
+			"options": "party_type",
 			get_data: function(txt) {
 				if (!frappe.query_report.filters) return;
 
@@ -85,7 +86,8 @@ frappe.query_reports["General Ledger"] = {
 			},
 			on_change: function() {
 				var party_type = frappe.query_report.get_filter_value('party_type');
-				var parties = frappe.query_report.get_filter_value('party');
+				var party = frappe.query_report.get_filter_value('party');
+				var parties = party ? [party] : [];
 
 				if(!party_type || parties.length === 0 || parties.length > 1) {
 					frappe.query_report.set_filter_value('party_name', "");
