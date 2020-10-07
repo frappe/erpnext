@@ -47,6 +47,7 @@ def pre_process_payload(meta_data, billing):
 	pos_order_type = ""
 	patient_name = ""
 	delivery_option = ""
+	invoice_sending_option = ""
 	for meta in meta_data:
 		if meta["key"] == "user_practitioner":
 			if "-" in meta["value"]:
@@ -79,6 +80,7 @@ def pre_process_payload(meta_data, billing):
 		"temporary_delivery_address_line_5": billing.get('email')
 	}
 
+	
 	return customer_code, pos_order_type, patient_name, invoice_sending_option, delivery_option, temp_address
 
 def validate_customer_code_erpnext(customer_code):
