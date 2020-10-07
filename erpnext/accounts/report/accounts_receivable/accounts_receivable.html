@@ -215,7 +215,7 @@
 							{% if (!filters.customer && !filters.supplier && !group.party) { %}{%= __("Remarks") %}:{% } %}
 							{%= data[i]["remarks"] %}
 						</div>
-							{% if(report.report_name === "Accounts Receivable" && filters.show_sales_person_in_print && data[i]["sales_person"] && !group.sales_person) { %}
+							{% if(report.report_name === "Accounts Receivable" && filters.show_sales_person_in_print && data[i]["sales_person"] && !group.sales_person && !filters.sales_person) { %}
 								<div>{%= __("Sales Person: ")%}{%= data[i]["sales_person"] %}</div>
 							{% } %}
 							{% if(report.report_name === "Accounts Receivable" && data[i]["delivery_note"] && filters.show_delivery_note_in_print) { %}
