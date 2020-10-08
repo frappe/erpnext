@@ -156,7 +156,8 @@ def _order(woocommerce_settings, *args, **kwargs):
 		if pos_order_type == "patient_test_order":
 			# We don't need to use the backorder flag for test order
 			test_order = 1
-			new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option, test_order=test_order)
+			invoice_sending_option = "send receipt to patient" # this need to be added so that test kit is added for this type of orders
+			new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option, invoice_sending_option=invoice_sending_option, test_order=test_order)
 
 		elif pos_order_type == "patient_product_order":
 			# Cannot handle that for now as we need to check if the patient account exist or not in ERPNext
