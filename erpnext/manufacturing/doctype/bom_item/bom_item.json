@@ -123,7 +123,7 @@
    "label": "Quantity and Rate"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
@@ -266,7 +266,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:50:24.927484",
+ "modified": "2020-10-07 13:49:10.772015",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",

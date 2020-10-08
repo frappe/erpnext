@@ -18,5 +18,10 @@ frappe.dashboards.chart_sources["Account Balance Timeline"] = {
 			options: "Account",
 			reqd: 1
 		},
+		{
+			fieldname: "accumulated_values",
+			label: __("Accumulated Values"),
+			fieldtype: "Check",
+		},
 	]
 };

@@ -5,9 +5,10 @@
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
-  "item",
   "company",
+  "item",
   "item_name",
+  "quantity",
   "uom",
   "cb0",
   "is_active",
@@ -15,7 +16,6 @@
   "allow_alternative_item",
   "set_rate_of_sub_assembly_item_based_on_bom",
   "project",
-  "quantity",
   "image",
   "currency_detail",
   "currency",
@@ -81,6 +81,7 @@
    "search_index": 1
   },
   {
+   "depends_on": "eval:doc.item_name != doc.item",
    "fetch_from": "item.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
@@ -126,6 +127,7 @@
    "fieldname": "is_active",
    "fieldtype": "Check",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Is Active",
    "no_copy": 1,
    "oldfieldname": "is_active",
@@ -137,6 +139,7 @@
    "fieldname": "is_default",
    "fieldtype": "Check",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Is Default",
    "no_copy": 1,
    "oldfieldname": "is_default",
@@ -177,6 +180,7 @@
    "options": "Quality Inspection Template"
   },
   {
+   "collapsible": 1,
    "fieldname": "currency_detail",
    "fieldtype": "Section Break",
    "label": "Currency and Price List"
@@ -390,6 +394,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "section_break0",
    "fieldtype": "Section Break",
@@ -472,6 +477,8 @@
    "label": "Show Operations"
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "with_operations",
    "fieldname": "section_break_21",
    "fieldtype": "Section Break",
    "label": "Operations"
@@ -506,7 +513,7 @@
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2020-05-05 14:29:32.634952",
+ "modified": "2020-10-07 13:51:57.776330",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

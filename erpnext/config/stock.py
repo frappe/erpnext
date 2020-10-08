@@ -145,13 +145,24 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Warehouse Type",
+				},
+				{
+					"type": "doctype",
 					"name": "UOM",
 					"label": _("Unit of Measure") + " (UOM)",
-					"onboard": 1,
 				},
 				{
 					"type": "doctype",
 					"name": "Item Variant Settings",
+				},
+				{
+					"type": "doctype",
+					"name": "Stock Entry Type",
+				},
+				{
+					"type": "doctype",
+					"name": "Transaction Type",
 				},
 			]
 		},

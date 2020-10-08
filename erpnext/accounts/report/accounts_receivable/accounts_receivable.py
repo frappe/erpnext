@@ -1086,7 +1086,7 @@ def get_dn_details(party_type, voucher_nos):
 	if party_type == "Customer":
 		for si in frappe.db.sql("""
 			select
-				parent, GROUP_CONCAT(delivery_note SEPARATOR ', ') as dn
+				parent, GROUP_CONCAT(DISTINCT delivery_note SEPARATOR ', ') as dn
 			from
 				`tabSales Invoice Item`
 			where

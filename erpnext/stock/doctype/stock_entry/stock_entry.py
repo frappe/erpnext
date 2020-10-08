@@ -49,6 +49,7 @@ class StockEntry(StockController):
 			self.pro_doc = frappe.get_doc('Work Order', self.work_order)
 
 		self.validate_posting_time()
+		self.validate_stock_entry_type()
 		self.validate_purpose()
 		self.validate_item()
 		self.validate_customer_provided_item()
@@ -128,6 +129,28 @@ class StockEntry(StockController):
 		pro_doc = frappe.get_doc("Work Order", self.work_order)
 		if pro_doc.status == 'Completed':
 			frappe.throw(_("Cannot cancel transaction for Completed Work Order."))
+
+	def validate_stock_entry_type(self):
+		ste_type_doc = frappe.get_cached_doc("Stock Entry Type", self.stock_entry_type)
+		self.purpose = ste_type_doc.purpose
+
+		if ste_type_doc.posting_date:
+			self.posting_date = ste_type_doc.posting_date
+
+		if ste_type_doc.is_opening:
+			self.is_opening = ste_type_doc.is_opening
+
+		self.source_warehouse_type = ste_type_doc.source_warehouse_type
+		self.target_warehouse_type = ste_type_doc.target_warehouse_type
+		for d in self.items:
+			if self.source_warehouse_type and d.s_warehouse:
+				if frappe.get_cached_value("Warehouse", d.s_warehouse, "warehouse_type") != self.source_warehouse_type:
+					frappe.throw(_("Row #{0}: Source Warehouse must be of type {1} for Stock Entry Type {2}")
+						.format(d.idx, frappe.bold(self.source_warehouse_type), frappe.bold(self.stock_entry_type)))
+			if self.target_warehouse_type and d.t_warehouse:
+				if frappe.get_cached_value("Warehouse", d.t_warehouse, "warehouse_type") != self.target_warehouse_type:
+					frappe.throw(_("Row #{0}: Target Warehouse must be of type {1} for Stock Entry Type {2}")
+						.format(d.idx, frappe.bold(self.target_warehouse_type), frappe.bold(self.stock_entry_type)))
 
 	def validate_purpose(self):
 		valid_purposes = ["Material Issue", "Material Receipt", "Material Transfer",
@@ -803,11 +826,6 @@ class StockEntry(StockController):
 		# update uom
 		if args.get("uom") and for_update:
 			ret.update(get_uom_details(args.get('item_code'), args.get('uom'), args.get('qty')))
-
-		if self.purpose == 'Material Issue':
-			ret["expense_account"] = (item.get("expense_account") or brand_defaults.get("expense_account") or
-				item_group_defaults.get("expense_account") or
-				frappe.get_cached_value('Company',  self.company,  "default_expense_account"))
 
 		for company_field, field in {'stock_adjustment_account': 'expense_account',
 			'cost_center': 'cost_center'}.items():

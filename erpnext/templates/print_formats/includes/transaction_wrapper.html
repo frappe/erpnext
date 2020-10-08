@@ -23,7 +23,7 @@
 				{% if not no_letterhead %}
 					<h1 class="company-name" style="margin:0;padding:3px;border-bottom:#000 1px solid;">{{ doc.company }}</h1>
 				{% endif %}
-				<h4 style="margin:0;padding:3px;">{{ doc.select_print_heading or doc.purpose or doc.doctype }}{% if doc.docstatus == 0 %} (Draft){% endif %} - {{ frappe.original_name(doc) }}</h4>
+				<h4 style="margin:0;padding:3px;">{{ doc.select_print_heading or doc.get('stock_entry_type') or doc.get('purpose') or doc.doctype }}{% if doc.docstatus == 0 %} (Draft){% endif %} - {{ frappe.original_name(doc) }}</h4>
 			</div>
 
 			<p class="small text-center page-number visible-pdf">

@@ -727,6 +727,32 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		erpnext.utils.add_item(this.frm);
 	},
 
+	stock_entry_type: function () {
+		var me = this;
+		if (me.frm.doc.stock_entry_type) {
+			frappe.call({
+				method: "erpnext.stock.doctype.stock_entry_type.stock_entry_type.get_stock_entry_type_details",
+				args: {
+					stock_entry_type: me.frm.doc.stock_entry_type
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						me.frm.set_value(r.message);
+					}
+				}
+			});
+		}
+	},
+
+	get_warehouse_filters: function (fieldname, filters) {
+		if (this.frm.doc.source_warehouse_type && ['s_warehouse', 'from_warehouse'].includes(fieldname)) {
+			filters.push(['Warehouse', 'warehouse_type', '=', this.frm.doc.source_warehouse_type]);
+		}
+		if (this.frm.doc.target_warehouse_type && ['t_warehouse', 'to_warehouse'].includes(fieldname)) {
+			filters.push(['Warehouse', 'warehouse_type', '=', this.frm.doc.target_warehouse_type]);
+		}
+	},
+
 	scan_barcode: function() {
 		let transaction_controller= new erpnext.TransactionController({frm:this.frm});
 		transaction_controller.scan_barcode();

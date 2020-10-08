@@ -218,6 +218,7 @@
    "fieldname": "supplier",
    "fieldtype": "Link",
    "in_global_search": 1,
+   "in_standard_filter": 1,
    "label": "Supplier",
    "oldfieldname": "supplier",
    "oldfieldtype": "Link",
