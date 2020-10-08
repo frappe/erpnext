@@ -98,23 +98,26 @@ class POSInvoiceMergeLog(Document):
 			for item in doc.get('items'):
 				found = False
 				for i in items:
-					if i.item_code == item.item_code and i.uom == item.uom and i.rate == item.rate:
+					if (i.item_code == item.item_code and not i.serial_no and not i.batch_no and
+						i.uom == item.uom and i.net_rate == item.net_rate):
 						found = True
 						i.qty = i.qty + item.qty
-						i.rate = (i.net_amount + item.net_amount) / i.qty
 				if not found:
+					item.rate = item.net_rate
 					items.append(item)
 			
 			for tax in doc.get('taxes'):
 				found = False
 				for t in taxes:
-					if t.account_head == tax.account_head and t.cost_center == tax.cost_center and t.rate == tax.rate:
-						t.tax_amount = flt(t.tax_amount) + flt(tax.tax_amount)
-						t.base_tax_amount = flt(t.base_tax_amount) + flt(tax.base_tax_amount)
+					if t.account_head == tax.account_head and t.cost_center == tax.cost_center:
+						t.tax_amount = flt(t.tax_amount) + flt(tax.tax_amount_after_discount_amount)
+						t.base_tax_amount = flt(t.base_tax_amount) + flt(tax.base_tax_amount_after_discount_amount)
 						found = True
 				if not found:
 					tax.charge_type = 'Actual'
 					tax.included_in_print_rate = 0
+					tax.tax_amount = tax.tax_amount_after_discount_amount
+					tax.base_tax_amount = tax.base_tax_amount_after_discount_amount
 					taxes.append(tax)
 
 			for payment in doc.get('payments'):

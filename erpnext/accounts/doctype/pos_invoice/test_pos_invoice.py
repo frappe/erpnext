@@ -331,7 +331,6 @@ class TestPOSInvoice(unittest.TestCase):
 		pos_inv.submit()
 
 		pos_inv2 = create_pos_invoice(rate=300, qty=2, do_not_submit=1)
-		pos_inv2.apply_discount_on = 'Net Total'
 		pos_inv2.additional_discount_percentage = 10
 		pos_inv2.append('payments', {
 			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 540
