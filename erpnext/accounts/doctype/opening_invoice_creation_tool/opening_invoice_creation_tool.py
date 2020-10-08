@@ -181,7 +181,8 @@ class OpeningInvoiceCreationTool(Document):
 			"due_date": row.due_date,
 			"posting_date": row.posting_date,
 			frappe.scrub(party_type): row.party,
-			"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice"
+			"doctype": "Sales Invoice" if self.invoice_type == "Sales" else "Purchase Invoice",
+			"update_stock": 0
 		})
 
 		accounting_dimension = get_accounting_dimensions()

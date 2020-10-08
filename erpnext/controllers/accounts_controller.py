@@ -720,6 +720,21 @@ class AccountsController(TransactionBase):
 
 		return self._abbr
 
+	def raise_missing_debit_credit_account_error(self, party_type, party):
+		"""Raise an error if debit to/credit to account does not exist"""
+		db_or_cr = frappe.bold("Debit To") if self.doctype == "Sales Invoice" else frappe.bold("Credit To")
+		rec_or_pay = "Receivable" if self.doctype == "Sales Invoice" else "Payable"
+
+		link_to_party = frappe.utils.get_link_to_form(party_type, party)
+		link_to_company = frappe.utils.get_link_to_form("Company", self.company)
+
+		message = _("{0} Account not found against Customer {1}.").format(db_or_cr, frappe.bold(party) or '')
+		message += "<br>" + _("Please set one of the following:") + "<br>"
+		message += "<br><ul><li>" + _("'Account' in the Accounting section of Customer {0}").format(link_to_party) + "</li>"
+		message += "<li>" + _("'Default {0} Account' in Company {1}").format(rec_or_pay, link_to_company) + "</li></ul>"
+
+		frappe.throw(message, title=_("Account Missing"))
+
 	def validate_party(self):
 		party_type, party = self.get_party()
 		validate_party_frozen_disabled(party_type, party)
