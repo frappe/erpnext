@@ -384,6 +384,7 @@
    "fieldname": "set_posting_time",
    "fieldtype": "Check",
    "label": "Edit Posting Date and Time",
+   "no_copy": 1,
    "print_hide": 1
   },
   {
@@ -1932,8 +1933,8 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-10-08 21:49:58.124452",
- "modified_by": "furqan.790@outlook.com",
+ "modified": "2020-10-08 22:19:24.362229",
+ "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
  "name_case": "Title Case",

@@ -296,6 +296,7 @@
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Delivery Time",
+   "no_copy": 1,
    "oldfieldname": "posting_time",
    "oldfieldtype": "Time",
    "print_hide": 1,
@@ -309,6 +310,7 @@
    "fieldname": "set_posting_time",
    "fieldtype": "Check",
    "label": "Edit Posting Date and Time",
+   "no_copy": 1,
    "print_hide": 1
   },
   {
@@ -1598,7 +1600,7 @@
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2020-10-05 12:52:56.837284",
+ "modified": "2020-10-08 22:19:23.091703",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
