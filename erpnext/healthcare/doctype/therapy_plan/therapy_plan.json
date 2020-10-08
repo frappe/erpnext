@@ -9,6 +9,7 @@
   "naming_series",
   "patient",
   "patient_name",
+  "invoiced",
   "column_break_4",
   "company",
   "status",
@@ -114,10 +115,19 @@
    "fieldtype": "Link",
    "label": "Therapy Plan Template",
    "options": "Therapy Plan Template"
+  },
+  {
+   "default": "0",
+   "fieldname": "invoiced",
+   "fieldtype": "Check",
+   "label": "Invoiced",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2020-10-08 01:14:41.592428",
+ "modified": "2020-10-08 17:05:56.150529",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Plan",

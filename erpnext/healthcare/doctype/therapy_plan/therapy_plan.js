@@ -50,6 +50,11 @@ frappe.ui.form.on('Therapy Plan', {
 				}, __('Select Therapy Type'), __('Create'));
 			}, __('Create'));
 		}
+
+		if (frm.doc.therapy_plan_template) {
+			frappe.meta.get_docfield('Therapy Plan Detail', 'therapy_type', frm.doc.name).read_only = 1;
+			frappe.meta.get_docfield('Therapy Plan Detail', 'no_of_sessions', frm.doc.name).read_only = 1;
+		}
 	},
 
 	therapy_plan_template: function(frm) {
@@ -74,8 +79,6 @@ frappe.ui.form.on('Therapy Plan', {
 				}
 			});
 		}
-		frappe.meta.get_docfield('Therapy Plan Detail', 'therapy_type', frm.doc.name).read_only = 1;
-		frappe.meta.get_docfield('Therapy Plan Detail', 'no_of_sessions', frm.doc.name).read_only = 1;
 	},
 
 	show_progress_for_therapies: function(frm) {
