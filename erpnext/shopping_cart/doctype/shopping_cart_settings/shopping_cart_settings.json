@@ -27,6 +27,7 @@
   "enable_checkout",
   "payment_success_url",
   "column_break_11",
+  "save_quotations_as_draft",
   "payment_gateway_account"
  ],
  "fields": [
@@ -166,13 +167,20 @@
    "fieldname": "enable_variants",
    "fieldtype": "Check",
    "label": "Enable Variants"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.enable_checkout == 0",
+   "fieldname": "save_quotations_as_draft",
+   "fieldtype": "Check",
+   "label": "Save Quotations as Draft"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-08-02 18:21:43.873303",
+ "modified": "2020-09-24 16:28:07.192525",
  "modified_by": "Administrator",
  "module": "Shopping Cart",
  "name": "Shopping Cart Settings",
