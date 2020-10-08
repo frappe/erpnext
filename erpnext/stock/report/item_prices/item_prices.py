@@ -325,6 +325,17 @@ def get_columns(filters, price_lists):
 
 	return columns
 
+
+@frappe.whitelist()
+def set_multiple_item_pl_rate(effective_date, price_list, items):
+	if isinstance(items, string_types):
+		items = json.loads(items)
+
+	for item in items:
+		_set_item_pl_rate(effective_date, item.get('item_code'), price_list,
+			item.get('price_list_rate'), item.get('uom'), item.get('conversion_factor'))
+
+
 @frappe.whitelist()
 def set_item_pl_rate(effective_date, item_code, price_list, price_list_rate, uom=None, conversion_factor=None, filters=None):
 	effective_date = getdate(effective_date)

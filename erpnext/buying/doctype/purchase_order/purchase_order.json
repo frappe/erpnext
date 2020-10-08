@@ -77,6 +77,7 @@
   "items_section",
   "get_items_from_open_material_requests",
   "scan_barcode",
+  "update_item_prices",
   "items",
   "section_break_48",
   "pricing_rules",
@@ -278,7 +279,8 @@
    "allow_on_submit": 1,
    "fieldname": "schedule_date",
    "fieldtype": "Date",
-   "label": "Reqd By Date"
+   "label": "Reqd By Date",
+   "no_copy": 1
   },
   {
    "allow_on_submit": 1,
@@ -1506,13 +1508,19 @@
   {
    "fieldname": "col_break_19",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1",
+   "fieldname": "update_item_prices",
+   "fieldtype": "Button",
+   "label": "Update Price List"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-05 12:52:57.667055",
- "modified_by": "Administrator",
+ "modified": "2020-10-08 21:42:46.118655",
+ "modified_by": "furqan.790@outlook.com",
  "module": "Buying",
  "name": "Purchase Order",
  "owner": "Administrator",

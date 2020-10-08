@@ -76,6 +76,7 @@
   "set_warehouse",
   "items_section",
   "scan_barcode",
+  "update_item_prices",
   "items",
   "packing_list",
   "packed_items",
@@ -1920,13 +1921,19 @@
   {
    "fieldname": "column_break_208",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1",
+   "fieldname": "update_item_prices",
+   "fieldtype": "Button",
+   "label": "Update Price List"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-10-05 14:11:58.079072",
- "modified_by": "Administrator",
+ "modified": "2020-10-08 21:49:58.124452",
+ "modified_by": "furqan.790@outlook.com",
  "module": "Accounts",
  "name": "Sales Invoice",
  "name_case": "Title Case",
