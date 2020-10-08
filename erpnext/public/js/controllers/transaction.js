@@ -377,6 +377,108 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	update_item_prices: function() {
+		var me = this;
+		var frm = this.frm;
+
+		var rows;
+		var checked_rows = frm.fields_dict.items.grid.grid_rows.filter(row => row.doc.__checked );
+		if (checked_rows.length) {
+			rows = checked_rows;
+		} else {
+			rows = frm.fields_dict.items.grid.grid_rows;
+		}
+
+		rows = frm.fields_dict.items.grid.grid_rows
+			.filter(row => row.doc.item_code && (row.doc.price_list_rate || row.doc.rate))
+			.map(function(row) { return {
+				item_code: row.doc.item_code,
+				item_name: row.doc.item_name,
+				price_list_rate: row.doc.price_list_rate || row.doc.rate,
+				uom: row.doc.uom,
+				conversion_factor: row.doc.conversion_factor
+			}});
+
+		var price_list = frm.doc.selling_price_list || frm.doc.buying_price_list;
+		var date = frm.doc.transaction_date || frm.doc.posting_date;
+		this.data = [];
+
+		if (price_list && rows.length) {
+			var dialog = new frappe.ui.Dialog({
+				title: __("Update Price List {0}", [price_list]), fields: [
+					{label: __("Effective Date"), fieldname: "effective_date", fieldtype: "Date", default: date, reqd: 1},
+					{label: __("Item Prices"), fieldname: "items", fieldtype: "Table", data: this.data,
+						get_data: () => this.data,
+						cannot_add_rows: true, in_place_edit: true,
+						fields: [
+							{
+								label: __('Item Code'),
+								fieldname:"item_code",
+								fieldtype:'Link',
+								options: 'Item',
+								read_only: 1,
+								in_list_view: 1,
+								columns: 6,
+							},
+							{
+								label: __('Item Name'),
+								fieldname:"item_name",
+								fieldtype:'Data',
+								read_only: 1,
+								in_list_view: 0,
+								columns: 4,
+							},
+							{
+								label: __('UOM'),
+								fieldtype:'Link',
+								fieldname:"uom",
+								read_only: 1,
+								in_list_view: 1,
+								columns: 2,
+							},
+							{
+								label: __('New Rate'),
+								fieldtype:'Currency',
+								fieldname:"price_list_rate",
+								default: 0,
+								read_only: 1,
+								in_list_view: 1,
+								columns: 2,
+							},
+							{
+								label: __('Conversion Factor'),
+								fieldtype:'Float',
+								precision: 9,
+								fieldname:"conversion_factor",
+								read_only: 1
+							}
+						]
+					}
+				]
+			});
+
+			dialog.fields_dict.items.df.data = rows;
+			this.data = dialog.fields_dict.items.df.data;
+			dialog.fields_dict.items.grid.refresh();
+
+			dialog.show();
+			dialog.set_primary_action(__('Update Price List'), function() {
+				var updated_items = this.get_values()["items"];
+				return frappe.call({
+					method: "erpnext.stock.report.item_prices.item_prices.set_multiple_item_pl_rate",
+					args: {
+						effective_date: dialog.get_value('effective_date'),
+						items: updated_items,
+						price_list: price_list
+					},
+					callback: function() {
+						dialog.hide();
+					}
+				});
+			});
+		}
+	},
+
 	scan_barcode: function() {
 		let scan_barcode_field = this.frm.fields_dict["scan_barcode"];
 

@@ -86,6 +86,7 @@
   "supplier_warehouse",
   "items_section",
   "scan_barcode",
+  "update_item_prices",
   "items",
   "pricing_rule_details",
   "pricing_rules",
@@ -272,6 +273,7 @@
    "fieldname": "due_date",
    "fieldtype": "Date",
    "label": "Due Date",
+   "no_copy": 1,
    "oldfieldname": "due_date",
    "oldfieldtype": "Date"
   },
@@ -320,6 +322,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Posting Date",
+   "no_copy": 1,
    "oldfieldname": "posting_date",
    "oldfieldtype": "Date",
    "print_hide": 1,
@@ -341,6 +344,7 @@
    "fieldname": "set_posting_time",
    "fieldtype": "Check",
    "label": "Edit Posting Date and Time",
+   "no_copy": 1,
    "print_hide": 1
   },
   {
@@ -1731,13 +1735,19 @@
   {
    "fieldname": "column_break_25",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.docstatus==1",
+   "fieldname": "update_item_prices",
+   "fieldtype": "Button",
+   "label": "Update Price List"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2020-10-05 12:52:59.718722",
- "modified_by": "Administrator",
+ "modified": "2020-10-08 22:11:07.022653",
+ "modified_by": "furqan.790@outlook.com",
  "module": "Accounts",
  "name": "Purchase Invoice",
  "name_case": "Title Case",
