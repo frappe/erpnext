@@ -407,7 +407,7 @@ class TestWorkOrder(unittest.TestCase):
 		ste1 = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
 		self.assertEqual(len(ste1.items), 3)
 
-	def test_work_order_with_batch_size(self):
+	def test_operation_time_with_batch_size(self):
 		fg_item = "Test Batch Size Item For BOM"
 		rm1 = "Test Batch Size Item RM 1 For BOM"
 
