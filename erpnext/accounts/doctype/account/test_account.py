@@ -111,6 +111,17 @@ class TestAccount(unittest.TestCase):
 		self.assertEqual(acc_tc_4, "Test Sync Account - _TC4")
 		self.assertEqual(acc_tc_5, "Test Sync Account - _TC5")
 
+	def test_add_account_to_a_group(self):
+		frappe.db.set_value("Account", "Office Rent - _TC3", "is_group", 1)
+
+		acc = frappe.new_doc("Account")
+		acc.account_name = "Test Group Account"
+		acc.parent_account = "Office Rent - _TC3"
+		acc.company = "_Test Company 3"
+		self.assertRaises(frappe.ValidationError, acc.insert)
+
+		frappe.db.set_value("Account", "Office Rent - _TC3", "is_group", 0)
+
 def _make_test_records(verbose):
 	from frappe.test_runner import make_test_objects
 

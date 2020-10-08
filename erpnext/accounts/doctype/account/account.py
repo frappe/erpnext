@@ -162,9 +162,16 @@ class Account(NestedSet):
 
 	def create_account_for_child_company(self, parent_acc_name_map, descendants, parent_acc_name):
 		for company in descendants:
+			company_bold = frappe.bold(company)
+			parent_acc_name_bold = frappe.bold(parent_acc_name)
 			if not parent_acc_name_map.get(company):
-				frappe.throw(_("While creating account for child Company {0}, parent account {1} not found. Please create the parent account in corresponding COA")
-					.format(company, parent_acc_name))
+				frappe.throw(_("While creating account for Child Company {0}, parent account {1} not found. Please create the parent account in corresponding COA")
+					.format(company_bold, parent_acc_name_bold), title=_("Account Not Found"))
+			if (frappe.db.get_value("Account", self.parent_account, "is_group") 
+				and not frappe.db.get_value("Account", parent_acc_name_map[company], "is_group")):
+				frappe.throw(_("While creating account for Child Company {0}, parent account {1} is found \
+					as a ledger account.<br><br>Please convert the parent account in corresponding child company COA to a group account.")
+					.format(company_bold, parent_acc_name_bold), title=_("Invalid Parent Account"))
 
 			filters = {
 				"account_name": self.account_name,
