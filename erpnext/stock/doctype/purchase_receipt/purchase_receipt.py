@@ -289,6 +289,7 @@ class PurchaseReceipt(BuyingController):
 						if self.is_return or flt(d.item_tax_amount):
 							loss_account = expenses_included_in_valuation
 						else:
+							cogs_account = self.get_company_default("default_expense_account")
 							loss_account = cogs_account
 
 						gl_entries.append(self.get_gl_dict({
