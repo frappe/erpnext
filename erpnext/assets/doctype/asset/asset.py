@@ -465,10 +465,11 @@ class Asset(AccountsController):
 					return cint(d.idx) - 1
 
 	def validate_make_gl_entry(self):
+		if not is_cwip_accounting_enabled(self.asset_category): return False
 		purchase_document = self.get_purchase_document()
 		asset_bought_with_invoice = purchase_document == self.purchase_invoice
 		fixed_asset_account, cwip_account = self.get_asset_accounts()
-		cwip_enabled = is_cwip_accounting_enabled(self.asset_category)
+		cwip_enabled = True
 		# check if expense already has been booked in case of cwip was enabled after purchasing asset
 		expense_booked = False
 		cwip_booked = False
