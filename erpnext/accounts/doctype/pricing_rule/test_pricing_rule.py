@@ -429,7 +429,34 @@ class TestPricingRule(unittest.TestCase):
 		details = get_item_details(args)
 
 		self.assertTrue(details)
-
+	
+	def test_pricing_rule_for_condition(self):
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
+		
+		make_pricing_rule(selling=1, margin_type="Percentage", \
+			condition="customer=='_Test Customer 1' and is_return==0", discount_percentage=10)
+		
+		# Incorrect Customer and Correct is_return value
+		si = create_sales_invoice(do_not_submit=True, customer="_Test Customer 2", is_return=0)
+		si.items[0].price_list_rate = 1000
+		si.submit()
+		item = si.items[0]
+		self.assertEquals(item.rate, 100)
+		
+		# Correct Customer and Incorrect is_return value
+		si = create_sales_invoice(do_not_submit=True, customer="_Test Customer 1", is_return=1, qty=-1)
+		si.items[0].price_list_rate = 1000
+		si.submit()
+		item = si.items[0]
+		self.assertEquals(item.rate, 100)
+		
+		# Correct Customer and correct is_return value
+		si = create_sales_invoice(do_not_submit=True, customer="_Test Customer 1", is_return=0)
+		si.items[0].price_list_rate = 1000
+		si.submit()
+		item = si.items[0]
+		self.assertEquals(item.rate, 900)
+		
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
 
@@ -448,7 +475,8 @@ def make_pricing_rule(**args):
 		"discount_percentage": args.discount_percentage or 0.0,
 		"rate": args.rate or 0.0,
 		"margin_type": args.margin_type,
-		"margin_rate_or_amount": args.margin_rate_or_amount or 0.0
+		"margin_rate_or_amount": args.margin_rate_or_amount or 0.0,
+		"condition": args.condition or ''
 	})
 
 	apply_on = doc.apply_on.replace(' ', '_').lower()
