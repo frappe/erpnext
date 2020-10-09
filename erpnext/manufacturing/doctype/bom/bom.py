@@ -153,14 +153,20 @@ class BOM(WebsiteGenerator):
 			item and item[0].include_item_in_manufacturing or 0)
 		args.update(item[0])
 
+		if not args.get('uom') and args.get('manufacture_uom'):
+			args['uom'] = args.get('manufacture_uom')
+			args['conversion_factor'] = get_conversion_factor(item[0].name, args['uom']).get("conversion_factor") or 1
+			args['qty'] = flt(args.get('qty')) or 1
+			args['stock_qty'] = args['qty'] * args['conversion_factor']
+
 		rate = self.get_rm_rate(args)
 		ret_item = {
 			 'item_name'	: item and args['item_name'] or '',
 			 'description'  : item and args['description'] or '',
 			 'image'		: item and args['image'] or '',
 			 'stock_uom'	: item and args['stock_uom'] or '',
-			 'uom'			: item and args.get('manufacture_uom') or args['stock_uom'] or '',
- 			 'conversion_factor': 1,
+			 'uom'			: item and args.get('uom') or args['stock_uom'] or '',
+ 			 'conversion_factor': args.get('conversion_factor') or 1,
 			 'bom_no'		: args['bom_no'],
 			 'rate'			: rate,
 			 'qty'			: args.get("qty") or args.get("stock_qty") or 1,
