@@ -15,6 +15,21 @@ frappe.ui.form.on('Plaid Settings', {
 			frm.add_custom_button('Link a new bank account', () => {
 				new erpnext.integrations.plaidLink(frm);
 			});
+
+			frm.add_custom_button(__("Sync Now"), () => {
+				frappe.call({
+					method: "erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.enqueue_synchronization",
+					freeze: true,
+					callback: () => {
+						frappe.msgprint({
+							title: __("Sync Started"),
+							message: __(`The sync has started in the background, please check the
+								<a href="#List/Bank Transaction">Bank Transaction list</a> for new records.`),
+							alert: 1
+						})
+					}
+				})
+			}).addClass("btn-primary");
 		}
 	}
 });
