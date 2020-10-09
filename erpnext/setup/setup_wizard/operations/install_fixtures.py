@@ -459,6 +459,7 @@ def install_defaults(args=None):
 	stock_settings.auto_insert_price_list_rate_if_missing = 1
 	stock_settings.automatically_set_serial_nos_based_on_fifo = 1
 	stock_settings.set_qty_in_transactions_based_on_serial_no_input = 1
+	stock_settings.show_barcode_field = 0
 	stock_settings.save()
 
 	if args.bank_account:
