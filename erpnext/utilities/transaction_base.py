@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.share
 from frappe import _
-from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_datetime, get_link_to_form
+from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_datetime, get_link_to_form, date_diff, nowdate
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.accounts.utils import get_fiscal_year
 
@@ -29,7 +29,13 @@ class TransactionBase(StatusUpdater):
 			except ValueError:
 				frappe.throw(_('Invalid Posting Time'))
 
+		self.validate_future_posting()
 		self.validate_with_last_transaction_posting_time()
+	
+	def validate_future_posting(self):
+		if getattr(self, 'set_posting_time', None) and date_diff(self.posting_date, nowdate()) > 0:
+			msg = _("Posting future transactions are not allowed due to Immutable Ledger")
+			frappe.throw(msg, title=_("Future Posting Not Allowed"))
 
 	def add_calendar_event(self, opts, force=False):
 		if cstr(self.contact_by) != cstr(self._prev.contact_by) or \
