@@ -375,7 +375,8 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			"doctype": doctype + " Item",
 			"field_map": {
 				"serial_no": "serial_no",
-				"batch_no": "batch_no"
+				"batch_no": "batch_no",
+				"vehicle": "vehicle"
 			},
 			"postprocess": update_item
 		},

@@ -8,33 +8,73 @@
  "field_order": [
   "naming_series",
   "item_code",
-  "make",
-  "column_break_3",
   "item_name",
-  "model",
+  "column_break_3",
+  "item_group",
+  "brand",
+  "column_break_7",
+  "sales_order",
+  "warehouse",
+  "column_break_10",
+  "customer",
+  "customer_name",
   "vehicle_details",
+  "model",
   "license_plate",
-  "last_odometer",
-  "acquisition_date",
-  "location",
   "column_break_8",
   "chassis_no",
-  "vehicle_value",
+  "engine_no",
+  "column_break_16",
   "employee",
+  "last_odometer",
   "insurance_details",
   "insurance_company",
+  "column_break_19",
   "policy_no",
   "column_break_15",
   "start_date",
+  "column_break_23",
   "end_date",
   "additional_details",
   "fuel_type",
   "uom",
+  "column_break_30",
+  "color",
   "carbon_check_date",
   "column_break_21",
-  "color",
   "wheels",
-  "doors"
+  "doors",
+  "purchase_details",
+  "column_break2",
+  "purchase_document_type",
+  "purchase_document_no",
+  "column_break_41",
+  "purchase_date",
+  "purchase_time",
+  "column_break3",
+  "supplier",
+  "supplier_name",
+  "purchase_rate",
+  "delivery_details",
+  "delivery_document_type",
+  "delivery_document_no",
+  "column_break_50",
+  "delivery_date",
+  "delivery_time",
+  "column_break5",
+  "sales_invoice",
+  "warranty_amc_details",
+  "column_break6",
+  "maintenance_status",
+  "warranty_period",
+  "column_break7",
+  "warranty_expiry_date",
+  "column_break_64",
+  "amc_expiry_date",
+  "more_info",
+  "status",
+  "column_break_60",
+  "company"
  ],
  "fields": [
   {
@@ -50,16 +90,7 @@
    "fieldtype": "Data",
    "label": "License Plate",
    "no_copy": 1,
-   "reqd": 1,
    "unique": 1
-  },
-  {
-   "fetch_from": "item_code.brand",
-   "fieldname": "make",
-   "fieldtype": "Link",
-   "label": "Make",
-   "options": "Brand",
-   "read_only": 1
   },
   {
    "fieldname": "column_break_3",
@@ -68,7 +99,6 @@
   {
    "fieldname": "model",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Model"
   },
@@ -80,20 +110,9 @@
   {
    "fieldname": "last_odometer",
    "fieldtype": "Int",
-   "in_list_view": 1,
    "label": "Odometer Value (Last)",
    "no_copy": 1,
    "set_only_once": 1
-  },
-  {
-   "fieldname": "acquisition_date",
-   "fieldtype": "Date",
-   "label": "Acquisition Date"
-  },
-  {
-   "fieldname": "location",
-   "fieldtype": "Data",
-   "label": "Location"
   },
   {
    "fieldname": "column_break_8",
@@ -105,16 +124,8 @@
    "label": "Chassis No"
   },
   {
-   "fieldname": "vehicle_value",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Vehicle Value",
-   "print_hide_if_no_value": 1
-  },
-  {
    "fieldname": "employee",
    "fieldtype": "Link",
-   "in_standard_filter": 1,
    "label": "Employee",
    "options": "Employee"
   },
@@ -155,15 +166,12 @@
   {
    "fieldname": "fuel_type",
    "fieldtype": "Select",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "Fuel Type",
    "options": "Petrol\nDiesel\nNatural Gas\nElectric"
   },
   {
    "fieldname": "uom",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Fuel UOM",
    "options": "UOM"
   },
@@ -194,19 +202,330 @@
   {
    "fieldname": "item_code",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Item Code",
    "options": "Item",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
+   "depends_on": "eval:doc.item_name != doc.item_code",
    "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "label": "Item Name",
    "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Item Group",
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Warehouse",
+   "no_copy": 1,
+   "options": "Warehouse",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Sales Order",
+   "options": "Sales Order"
+  },
+  {
+   "fetch_from": "item_code.brand",
+   "fieldname": "brand",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Make",
+   "options": "Brand",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_details",
+   "fieldtype": "Section Break",
+   "label": "Purchase / Manufacture Details"
+  },
+  {
+   "fieldname": "column_break2",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "purchase_document_type",
+   "fieldtype": "Link",
+   "label": "Creation Document Type",
+   "no_copy": 1,
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_document_no",
+   "fieldtype": "Dynamic Link",
+   "label": "Creation Document No",
+   "no_copy": 1,
+   "options": "purchase_document_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_date",
+   "fieldtype": "Date",
+   "label": "Creation Date",
+   "no_copy": 1,
+   "oldfieldname": "purchase_date",
+   "oldfieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_time",
+   "fieldtype": "Time",
+   "label": "Creation Time",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "purchase_rate",
+   "fieldtype": "Currency",
+   "label": "Purchase Rate",
+   "no_copy": 1,
+   "oldfieldname": "purchase_rate",
+   "oldfieldtype": "Currency",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break3",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "no_copy": 1,
+   "options": "Supplier",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "depends_on": "eval:doc.supplier_name != doc.supplier",
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_details",
+   "fieldtype": "Section Break",
+   "label": "Delivery Details",
+   "oldfieldtype": "Column Break"
+  },
+  {
+   "fieldname": "delivery_document_type",
+   "fieldtype": "Link",
+   "label": "Delivery Document Type",
+   "no_copy": 1,
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_document_no",
+   "fieldtype": "Dynamic Link",
+   "label": "Delivery Document No",
+   "no_copy": 1,
+   "options": "delivery_document_type",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_date",
+   "fieldtype": "Date",
+   "label": "Delivery Date",
+   "no_copy": 1,
+   "oldfieldname": "delivery_date",
+   "oldfieldtype": "Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_time",
+   "fieldtype": "Time",
+   "label": "Delivery Time",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break5",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Customer",
+   "no_copy": 1,
+   "oldfieldname": "customer",
+   "oldfieldtype": "Link",
+   "options": "Customer",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "depends_on": "eval:doc.customer_name != doc.customer",
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "no_copy": 1,
+   "oldfieldname": "customer_name",
+   "oldfieldtype": "Data",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "warranty_amc_details",
+   "fieldtype": "Section Break",
+   "label": "Warranty / AMC Details"
+  },
+  {
+   "fieldname": "column_break6",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "maintenance_status",
+   "fieldtype": "Select",
+   "label": "Maintenance Status",
+   "oldfieldname": "maintenance_status",
+   "oldfieldtype": "Select",
+   "options": "\nUnder Warranty\nOut of Warranty\nUnder AMC\nOut of AMC",
+   "read_only": 1,
+   "search_index": 1,
+   "width": "150px"
+  },
+  {
+   "fieldname": "warranty_period",
+   "fieldtype": "Int",
+   "label": "Warranty Period (Days)",
+   "oldfieldname": "warranty_period",
+   "oldfieldtype": "Int",
+   "read_only": 1,
+   "width": "150px"
+  },
+  {
+   "fieldname": "column_break7",
+   "fieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "fieldname": "warranty_expiry_date",
+   "fieldtype": "Date",
+   "label": "Warranty Expiry Date",
+   "oldfieldname": "warranty_expiry_date",
+   "oldfieldtype": "Date",
+   "width": "150px"
+  },
+  {
+   "fieldname": "amc_expiry_date",
+   "fieldtype": "Date",
+   "label": "AMC Expiry Date",
+   "oldfieldname": "amc_expiry_date",
+   "oldfieldtype": "Date",
+   "width": "150px"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_info",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "remember_last_selected_value": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "\nActive\nInactive\nDelivered\nExpired",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_60",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "engine_no",
+   "fieldtype": "Data",
+   "label": "Engine No"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_30",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_41",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_50",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_64",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2020-10-06 15:58:24.002532",
+ "modified": "2020-10-09 04:53:05.445209",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
@@ -225,8 +544,7 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
- "search_fields": "license_plate,location,model",
+ "search_fields": "item_code, item_group, brand, warehouse, customer, sales_order",
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1

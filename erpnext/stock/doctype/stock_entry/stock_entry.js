@@ -69,6 +69,31 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		});
 
+		frm.set_query('vehicle', 'items', function(doc, cdt, cdn) {
+			var item = frappe.get_doc(cdt, cdn);
+			if (!item.item_code) {
+				frappe.throw(__("Please select Item first then select Vehicle"))
+			}
+
+			var filters = {};
+			filters.item_code = item.item_code;
+
+			if (doc.customer) {
+				filters['customer'] = ['in', [doc.customer, '']];
+			}
+
+			if (item.s_warehouse) {
+				filters['warehouse'] = item.s_warehouse;
+			} else if (item.t_warehouse) {
+				filters['warehouse'] = ['is', 'not set'];
+				filters['purchase_document_no'] = ['is', 'not set'];
+			}
+
+			return {
+				filters: filters
+			}
+		});
+
 		frm.set_query("expense_account", "additional_costs", function() {
 			return {
 				query: "erpnext.controllers.queries.tax_account_query",
@@ -573,7 +598,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 						});
 						refresh_field("items");
 
-						if (!d.serial_no) {
+						if (!d.serial_no && !d.is_vehicle) {
 							erpnext.stock.select_batch_and_serial_no(frm, d);
 						}
 					}

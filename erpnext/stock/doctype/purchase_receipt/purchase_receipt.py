@@ -641,7 +641,8 @@ def make_purchase_invoice(source_name, target_doc=None):
 				"purchase_order": "purchase_order",
 				"is_fixed_asset": "is_fixed_asset",
 				"asset_location": "asset_location",
-				"asset_category": 'asset_category'
+				"asset_category": 'asset_category',
+				"vehicle": "vehicle",
 			},
 			"postprocess": update_item,
 			"filter": lambda d: get_pending_qty(d) <= 0 if not doc.get("is_return") else get_pending_qty(d) >= 0

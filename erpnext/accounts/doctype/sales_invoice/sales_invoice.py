@@ -158,7 +158,6 @@ class SalesInvoice(SellingController):
 
 	def validate(self):
 		super(SalesInvoice, self).validate()
-		self.validate_auto_set_posting_time()
 
 		if not self.is_pos:
 			self.so_dn_required()
@@ -559,7 +558,7 @@ class SalesInvoice(SellingController):
 			},
 			"Delivery Note Item": {
 				"ref_dn_field": "dn_detail",
-				"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="]],
+				"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="], ["vehicle", "="]],
 				"is_child_table": True,
 				"allow_duplicate_prev_row_id": True
 			},
@@ -1086,6 +1085,9 @@ class SalesInvoice(SellingController):
 				if serial_no and frappe.db.get_value('Serial No', serial_no, 'item_code') == item.item_code:
 					frappe.db.set_value('Serial No', serial_no, 'sales_invoice', invoice)
 
+			if item.vehicle and item.is_vehicle:
+				frappe.db.set_value('Vehicle', item.vehicle, 'sales_invoice', invoice)
+
 	def validate_serial_numbers(self):
 		"""
 			validate serial number agains Delivery Note and Sales Invoice
@@ -1480,6 +1482,7 @@ def make_delivery_note(source_name, target_doc=None):
 				"name": "si_detail",
 				"parent": "against_sales_invoice",
 				"serial_no": "serial_no",
+				"vehicle": "vehicle",
 				"sales_order": "against_sales_order",
 				"so_detail": "so_detail",
 				"cost_center": "cost_center"

@@ -51,6 +51,7 @@ class StockEntry(StockController):
 		self.validate_posting_time()
 		self.validate_stock_entry_type()
 		self.validate_purpose()
+		self.validate_vehicle_item()
 		self.validate_item()
 		self.validate_customer_provided_item()
 		self.validate_qty()
@@ -784,7 +785,7 @@ class StockEntry(StockController):
 
 	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select i.name, i.stock_uom, i.description, i.image, i.item_name, i.item_group,
-				i.has_batch_no, i.sample_quantity, i.has_serial_no, i.allow_alternative_item,
+				i.has_batch_no, i.sample_quantity, i.has_serial_no, i.is_vehicle, i.allow_alternative_item,
 				id.expense_account, id.buying_cost_center,
 				i.alt_uom, i.alt_uom_size, i.show_item_code
 			from `tabItem` i LEFT JOIN `tabItem Default` id ON i.name=id.parent and id.company=%s
@@ -816,6 +817,7 @@ class StockEntry(StockController):
 			'basic_rate'			: 0,
 			'serial_no'				: '',
 			'has_serial_no'			: item.has_serial_no,
+			'is_vehicle'			: item.is_vehicle,
 			'has_batch_no'			: item.has_batch_no,
 			'sample_quantity'		: item.sample_quantity
 		})

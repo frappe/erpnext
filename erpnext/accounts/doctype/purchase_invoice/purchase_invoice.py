@@ -274,7 +274,7 @@ class PurchaseInvoice(BuyingController):
 			},
 			"Purchase Receipt Item": {
 				"ref_dn_field": "pr_detail",
-				"compare_fields": [["project", "="], ["item_code", "="], ["uom", "="]],
+				"compare_fields": [["project", "="], ["item_code", "="], ["uom", "="], ["vehicle", "="]],
 				"is_child_table": True
 			}
 		})

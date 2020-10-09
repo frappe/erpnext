@@ -372,8 +372,10 @@ def update_rate_in_serial_no_for_non_asset_items(receipt_document):
 		if item.serial_no:
 			serial_nos = get_serial_nos(item.serial_no)
 			if serial_nos:
-				frappe.db.sql("update `tabSerial No` set purchase_rate=%s where name in ({0})"
-					.format(", ".join(["%s"]*len(serial_nos))), tuple([item.valuation_rate] + serial_nos))
+				frappe.db.set_value("Serial No", {"name": ['in', serial_nos]}, "purchase_rate", item.valuation_rate)
+
+		if item.is_vehicle:
+			frappe.db.set_value("Vehicle", item.serial_no, "purchase_rate", item.valuation_rate)
 
 @frappe.whitelist()
 def get_landed_cost_voucher(dt, dn):

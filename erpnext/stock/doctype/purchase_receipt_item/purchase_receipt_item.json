@@ -7,6 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
+  "vehicle",
+  "is_vehicle",
   "col_break_2",
   "item_name",
   "section_break_4",
@@ -1291,11 +1293,28 @@
    "label": "Item Tax Detail",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "depends_on": "is_vehicle",
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Vehicle",
+   "no_copy": 1,
+   "options": "Vehicle"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_vehicle",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Vehicle",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-09 23:48:13.264914",
+ "modified": "2020-10-09 23:48:13.264915",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

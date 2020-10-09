@@ -44,7 +44,7 @@ def get_data():
 			},
 			{
 				'label': _('Traceability'),
-				'items': ['Serial No', 'Batch']
+				'items': ['Serial No', 'Vehicle', 'Batch']
 			},
 			{
 				'label': _('Manufacture'),

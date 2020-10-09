@@ -198,7 +198,7 @@ class DeliveryNote(SellingController):
 			},
 			"Sales Invoice Item": {
 				"ref_dn_field": "si_detail",
-				"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="]],
+				"compare_fields": [["item_code", "="], ["uom", "="], ["conversion_factor", "="], ["vehicle", "="]],
 				"is_child_table": True,
 				"allow_duplicate_prev_row_id": True
 			},
@@ -522,6 +522,7 @@ def make_sales_invoice(source_name, target_doc=None):
 				"so_detail": "so_detail",
 				"against_sales_order": "sales_order",
 				"serial_no": "serial_no",
+				"vehicle": "vehicle",
 				"cost_center": "cost_center"
 			},
 			"postprocess": update_item,

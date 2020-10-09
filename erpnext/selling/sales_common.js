@@ -96,6 +96,46 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 
+		if(this.frm.fields_dict["items"].grid.get_field('vehicle')) {
+			this.frm.set_query("vehicle", "items", function(doc, cdt, cdn) {
+				var item = frappe.get_doc(cdt, cdn);
+				if (!item.item_code) {
+					frappe.throw(__("Please select Item first then select Vehicle"))
+				}
+
+				var filters = {};
+				filters.item_code = item.item_code;
+
+				if (doc.customer) {
+					filters['customer'] = ['in', [doc.customer, '']];
+				}
+
+				if (doc.doctype === "Delivery Note" || (doc.doctype === "Sales Invoice" && doc.update_stock)) {
+					if (doc.is_return) {
+						filters['warehouse'] = ['is', 'not set'];
+						filters['delivery_document_no'] = ['is', 'set'];
+					} else {
+						if (item.warehouse) {
+							filters['warehouse'] = item.warehouse;
+						} else {
+							filters['warehouse'] = ['is', 'set'];
+						}
+					}
+				}
+
+				if (item.sales_order) {
+					filters['sales_order'] = ['in', [item.sales_order, '']];
+				}
+				if (doc.doctype === "Sales Invoice" && item.delivery_note) {
+					filters['delivery_document_type'] = 'Delivery Note';
+					filters['delivery_document_no'] = item.delivery_note;
+				}
+				return {
+					filters: filters
+				}
+			});
+		}
+
 		if(this.frm.fields_dict["packed_items"] &&
 			this.frm.fields_dict["packed_items"].grid.get_field('batch_no')) {
 			this.frm.set_query("batch_no", "packed_items", function(doc, cdt, cdn) {

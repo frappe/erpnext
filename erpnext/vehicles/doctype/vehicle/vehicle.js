@@ -5,7 +5,12 @@ frappe.provide("erpnext.vehicles");
 
 erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 	setup: function () {
-
+		this.frm.set_query("item_code", function() {
+			return {
+				query: "erpnext.controllers.queries.item_query",
+				filters: {'is_vehicle': 1}
+			};
+		});
 	},
 
 	refresh: function () {

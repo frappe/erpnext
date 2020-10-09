@@ -1,7 +1,12 @@
 from __future__ import unicode_literals
+import frappe
 from frappe import _
 
 def get_data():
+	reference_list = ['Purchase Order', 'Quality Inspection', 'Project']
+	if 'Vehicles' in frappe.get_active_domains():
+		reference_list.append('Vehicle')
+
 	return {
 		'fieldname': 'purchase_receipt_no',
 		'non_standard_fieldnames': {
@@ -15,6 +20,7 @@ def get_data():
 			'Purchase Order': ['items', 'purchase_order'],
 			'Project': ['items', 'project'],
 			'Quality Inspection': ['items', 'quality_inspection'],
+			'Vehicle': ['items', 'vehicle']
 		},
 		'transactions': [
 			{
@@ -23,7 +29,7 @@ def get_data():
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Purchase Order', 'Quality Inspection', 'Project']
+				'items': reference_list
 			},
 			{
 				'label': _('Returns'),

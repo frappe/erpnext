@@ -280,6 +280,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"warehouse": warehouse,
 		'has_serial_no': item.has_serial_no,
 		'has_batch_no': item.has_batch_no,
+		'is_vehicle': item.is_vehicle,
 		"batch_no": args.get("batch_no"),
 		"uom": args.uom,
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",

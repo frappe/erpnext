@@ -23,6 +23,7 @@ class StockController(AccountsController):
 			self.validate_inspection()
 		self.validate_serialized_batch()
 		self.validate_customer_provided_item()
+		self.validate_vehicle_item()
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if self.docstatus == 2:
@@ -424,6 +425,42 @@ class StockController(AccountsController):
 			# Customer Provided parts will have zero valuation rate
 			if frappe.get_cached_value('Item', d.item_code, 'is_customer_provided_item'):
 				d.allow_zero_valuation_rate = 1
+
+	def validate_vehicle_item(self):
+		for d in self.get('items'):
+			if not d.get('is_vehicle') and d.get('vehicle'):
+				d.vehicle = ''
+
+			if d.get('is_vehicle'):
+				is_receipt = (self.doctype == "Purchase Receipt"
+					or (self.doctype == "Purchase Invoice" and self.update_stock)
+					or (self.doctype == "Stock Entry" and d.get('t_warehouse') and not d.get('s_warehouse')))
+				if d.meta.has_field('vehicle') and not d.get('vehicle') and not is_receipt:
+					frappe.throw(_("Row #{0}: Vehicle must be set for Vehicle Item {1}").format(d.idx, d.item_code))
+
+				if d.qty > 1 and d.get('vehicle'):
+					frappe.throw(_("Row #{0}: Qty for Vehicle Item {1} ({2}) can not be greater than 1. "
+						"Please split rows instead of increasing qty").format(d.idx, d.item_code, d.vehicle))
+
+				if d.meta.has_field('serial_no'):
+					d.serial_no = d.vehicle
+
+
+def split_vehicle_items_by_qty(doc):
+	new_rows = []
+	for d in doc.items:
+		new_rows.append(d)
+		if d.qty > 1 and d.item_code and frappe.get_cached_value("Item", d.item_code, "is_vehicle"):
+			qty = cint(d.qty)
+			d.qty = 1
+
+			for i in range(qty - 1):
+				new_rows.append(frappe.copy_doc(d))
+
+	doc.items = new_rows
+	for i, d in enumerate(doc.items):
+		d.idx = i + 1
+
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None, company=None):

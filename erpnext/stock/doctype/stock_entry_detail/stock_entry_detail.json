@@ -13,6 +13,8 @@
   "t_warehouse",
   "sec_break1",
   "item_code",
+  "vehicle",
+  "is_vehicle",
   "item_group",
   "col_break2",
   "item_name",
@@ -547,11 +549,27 @@
   {
    "fieldname": "column_break_36",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "is_vehicle",
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Vehicle",
+   "no_copy": 1,
+   "options": "Vehicle"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_vehicle",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Vehicle",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-09 23:48:14.548532",
+ "modified": "2020-10-09 23:48:14.548533",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

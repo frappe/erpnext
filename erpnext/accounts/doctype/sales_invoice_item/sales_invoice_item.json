@@ -8,6 +8,8 @@
  "field_order": [
   "item_code",
   "customer_item_code",
+  "vehicle",
+  "is_vehicle",
   "column_break_3",
   "item_name",
   "description_section",
@@ -1194,11 +1196,28 @@
    "label": "Item Tax Detail",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "depends_on": "is_vehicle",
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Vehicle",
+   "no_copy": 1,
+   "options": "Vehicle"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_vehicle",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Vehicle",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-09 23:48:12.467099",
+ "modified": "2020-10-09 23:48:12.467100",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

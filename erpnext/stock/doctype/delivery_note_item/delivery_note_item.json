@@ -9,6 +9,8 @@
   "barcode",
   "sec_break_17",
   "item_code",
+  "vehicle",
+  "is_vehicle",
   "col_break1",
   "item_name",
   "customer_item_code",
@@ -1157,11 +1159,28 @@
    "label": "Item Tax Detail",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "depends_on": "is_vehicle",
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Vehicle",
+   "no_copy": 1,
+   "options": "Vehicle"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_vehicle",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Vehicle",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-09 23:48:10.264658",
+ "modified": "2020-10-09 23:48:10.264659",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

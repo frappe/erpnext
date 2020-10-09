@@ -15,6 +15,7 @@ from frappe.desk.notifications import clear_doctype_notifications
 from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.controllers.accounts_controller import get_default_taxes_and_charges
+from erpnext.controllers.stock_controller import split_vehicle_items_by_qty
 from frappe.automation.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.stock.doctype.item.item import get_item_defaults
@@ -614,6 +615,24 @@ def make_project(source_name, target_doc=None):
 
 	return doc
 
+def set_reserved_vehicles(source, target):
+	vehicles = frappe.get_all("Vehicle", fields=['name', 'item_code', 'warehouse'], filters={
+		'sales_order': source.name,
+		'delivery_document_no': ['is', 'not set'],
+		'warehouse': ['is', 'set'],
+	}, order_by="timestamp(purchase_date, purchase_time) desc")  # desc because popping from list
+
+	vehicle_map = {}
+	for d in vehicles:
+		vehicle_map.setdefault((d.item_code, d.warehouse), []).append(d.name)
+
+	for d in target.items:
+		key = (d.item_code, d.warehouse)
+		if key in vehicle_map:
+			item_vehicle_list = vehicle_map.get(key)
+			if item_vehicle_list:
+				d.vehicle = item_vehicle_list.pop()
+
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_mapping=False):
 	def set_missing_values(source, target):
@@ -621,13 +640,15 @@ def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_m
 
 		if not skip_item_mapping:
 			update_purchase_receipt_item_details(source, target)
+			split_vehicle_items_by_qty(target)
+			set_reserved_vehicles(source, target)
+
+		if warehouse:
+			target.set_warehouse = warehouse
 
 		target.run_method("set_missing_values")
 		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
-
-		if warehouse:
-			target.set_warehouse = warehouse
 
 		if source.company_address:
 			target.update({'company_address': source.company_address})
@@ -715,7 +736,6 @@ def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_m
 			row.idx = i + 1
 		target.items = updated_rows
 
-
 	mapper = {
 		"Sales Order": {
 			"doctype": "Delivery Note",
@@ -761,6 +781,9 @@ def make_sales_invoice(source_name, target_doc=None, ignore_permissions=False):
 			target.set_advances()
 
 	def set_missing_values(source, target):
+		split_vehicle_items_by_qty(target)
+		set_reserved_vehicles(source, target)
+
 		target.ignore_pricing_rule = 1
 		target.flags.ignore_permissions = True
 		target.run_method("set_missing_values")
