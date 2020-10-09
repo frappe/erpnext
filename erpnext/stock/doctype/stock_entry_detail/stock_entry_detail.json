@@ -261,6 +261,7 @@
    "label": "Qty as per Stock UOM",
    "oldfieldname": "transfer_qty",
    "oldfieldtype": "Currency",
+   "precision": "6",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1
@@ -550,7 +551,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-01 05:14:03.084287",
+ "modified": "2020-10-09 23:48:14.548532",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

@@ -263,6 +263,7 @@
    "fieldtype": "Float",
    "label": "Qty as per Stock UOM",
    "no_copy": 1,
+   "precision": "6",
    "print_hide": 1,
    "read_only": 1
   },
@@ -921,7 +922,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-02 15:35:29.030288",
+ "modified": "2020-10-09 23:48:11.618646",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation Item",

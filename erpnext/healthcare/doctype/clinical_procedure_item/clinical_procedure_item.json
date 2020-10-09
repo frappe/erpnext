@@ -94,6 +94,7 @@
    "fieldname": "transfer_qty",
    "fieldtype": "Float",
    "label": "Transfer Qty",
+   "precision": "6",
    "read_only": 1
   },
   {
@@ -107,7 +108,7 @@
   }
  ],
  "istable": 1,
- "modified": "2020-03-03 15:50:30.316277",
+ "modified": "2020-10-09 23:48:14.396692",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure Item",

@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "hash",
  "creation": "2016-02-25 08:04:02.452958",
  "doctype": "DocType",
@@ -247,13 +246,13 @@
    "fieldtype": "Float",
    "label": "Qty as per Stock UOM",
    "no_copy": 1,
+   "precision": "6",
    "print_hide": 1,
    "read_only": 1
   }
  ],
  "istable": 1,
- "links": [],
- "modified": "2020-06-12 19:10:36.333441",
+ "modified": "2020-10-09 23:48:13.061774",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation Item",

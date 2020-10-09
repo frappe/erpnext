@@ -151,6 +151,7 @@
    "label": "Stock Qty",
    "oldfieldname": "stock_qty",
    "oldfieldtype": "Currency",
+   "precision": "6",
    "read_only": 1
   },
   {
@@ -270,7 +271,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-09 17:07:24.334196",
+ "modified": "2020-10-09 23:48:14.203224",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",

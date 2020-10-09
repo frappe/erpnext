@@ -266,6 +266,7 @@
    "fieldtype": "Float",
    "label": "Qty as per Stock UOM",
    "no_copy": 1,
+   "precision": "6",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1160,7 +1161,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-01 04:52:35.442031",
+ "modified": "2020-10-09 23:48:10.264658",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

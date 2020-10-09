@@ -18,7 +18,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				if (parent.update_stock) {
 					if (!doc.actual_qty) {
 						return "red";
-					} else if (doc.actual_qty < doc.qty) {
+					} else if (doc.actual_qty < doc.stock_qty) {
 						return "orange";
 					} else {
 						return "green";

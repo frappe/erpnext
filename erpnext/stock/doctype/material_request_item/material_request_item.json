@@ -201,6 +201,7 @@
    "fieldtype": "Float",
    "label": "Stock Qty",
    "no_copy": 1,
+   "precision": "6",
    "print_hide": 1,
    "read_only": 1
   },
@@ -412,7 +413,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-04-16 09:00:00.992835",
+ "modified": "2020-10-09 23:48:11.164435",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",

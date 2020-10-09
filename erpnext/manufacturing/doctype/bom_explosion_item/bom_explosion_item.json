@@ -106,6 +106,7 @@
    "label": "Stock Qty",
    "oldfieldname": "qty",
    "oldfieldtype": "Currency",
+   "precision": "6",
    "read_only": 1
   },
   {
@@ -158,7 +159,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:38:02.922952",
+ "modified": "2020-10-09 23:48:09.641354",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Explosion Item",

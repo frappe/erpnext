@@ -670,7 +670,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				if (doc.docstatus === 0) {
 					if (!doc.actual_qty) {
 						return "red";
-					} else if (doc.actual_qty < doc.qty) {
+					} else if (doc.actual_qty < doc.transfer_qty) {
 						return "orange";
 					} else {
 						return "green";

@@ -281,6 +281,7 @@
    "fieldtype": "Float",
    "label": "Qty as per Stock UOM",
    "no_copy": 1,
+   "precision": "6",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1206,7 +1207,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-01 04:23:03.708880",
+ "modified": "2020-10-09 23:48:13.754655",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

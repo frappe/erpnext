@@ -256,6 +256,7 @@
    "fieldname": "stock_qty",
    "fieldtype": "Float",
    "label": "Stock Qty",
+   "precision": "6",
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1
@@ -795,7 +796,6 @@
    "fetch_from": "item_code.asset_category",
    "fieldname": "asset_category",
    "fieldtype": "Link",
-   "in_preview": 1,
    "label": "Asset Category",
    "options": "Asset Category",
    "read_only": 1
@@ -1144,7 +1144,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-02 14:11:20.853875",
+ "modified": "2020-10-09 23:48:12.007297",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
