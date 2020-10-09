@@ -12,9 +12,9 @@ from datetime import datetime
 from erpnext.support.doctype.issue.issue import get_holidays
 
 class ServiceLevelAgreement(Document):
-
 	def validate(self):
 		self.validate_doc()
+		self.validate_status_field()
 		self.check_priorities()
 		self.check_support_and_resolution()
 
@@ -80,6 +80,12 @@ class ServiceLevelAgreement(Document):
 
 			frappe.throw(_("Service Level Agreement for {0} {1} already exists.").format(frappe.bold(self.entity_type), \
 				frappe.bold(self.entity)))
+
+	def validate_status_field(self):
+		meta = frappe.get_meta(self.document_type)
+		if not meta.get_field("status"):
+			frappe.throw(_("The Document Type {0} must have a Status field to configure Service Level Agreement").format(
+				frappe.bold(self.document_type)))
 
 	def get_service_level_agreement_priority(self, priority):
 		priority = frappe.get_doc("Service Level Priority", {"priority": priority, "parent": self.name})
