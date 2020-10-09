@@ -598,7 +598,7 @@ class BOM(WebsiteGenerator):
 		frappe.db.sql("""delete from `tabBOM Explosion Item` where parent=%s""", self.name)
 		self.set('exploded_items', [])
 
-		for d in sorted(self.cur_exploded_items, key=itemgetter(0)):
+		for d in sorted(self.cur_exploded_items or [], key=itemgetter(0)):
 			ch = self.append('exploded_items', {})
 			for i in self.cur_exploded_items[d].keys():
 				ch.set(i, self.cur_exploded_items[d][i])
