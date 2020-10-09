@@ -616,11 +616,12 @@
   },
   {
    "fieldname": "last_purchase_rate",
-   "fieldtype": "Float",
+   "fieldtype": "Currency",
    "label": "Last Purchase Rate",
    "no_copy": 1,
    "oldfieldname": "last_purchase_rate",
    "oldfieldtype": "Currency",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -1155,7 +1156,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-10-07 13:59:55.081219",
+ "modified": "2020-10-09 17:09:54.767816",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

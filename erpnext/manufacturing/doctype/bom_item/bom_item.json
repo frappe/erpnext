@@ -179,6 +179,7 @@
    "in_list_view": 1,
    "label": "Rate",
    "options": "currency",
+   "permlevel": 1,
    "reqd": 1
   },
   {
@@ -187,6 +188,7 @@
    "force_currency_symbol": 1,
    "label": "Basic Rate (Company Currency)",
    "options": "Company:company:default_currency",
+   "permlevel": 1,
    "print_hide": 1,
    "read_only": 1
   },
@@ -202,6 +204,7 @@
    "oldfieldname": "amount_as_per_mar",
    "oldfieldtype": "Currency",
    "options": "currency",
+   "permlevel": 1,
    "print_width": "150px",
    "read_only": 1,
    "width": "150px"
@@ -212,6 +215,7 @@
    "force_currency_symbol": 1,
    "label": "Amount (Company Currency)",
    "options": "Company:company:default_currency",
+   "permlevel": 1,
    "print_hide": 1,
    "read_only": 1
   },
@@ -266,7 +270,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-07 13:49:10.772015",
+ "modified": "2020-10-09 17:07:24.334196",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",
