@@ -201,7 +201,7 @@
 						{% if(data[i]["_isGroupTotal"]) { %}
 							<strong>{%= __("Total") %}</strong>
 						{% } else if(!data[i]["posting_date"]) { %}
-							<strong>{%= frappe.utils.remove_wrapping_quotes(data[i]["party"]) %}</strong>
+							<strong>{%= remove_wrapping_quotes(data[i]["party"]) %}</strong>
 						{% } else { %}
 							{% if(!(filters.customer || filters.supplier || group.party)) { %}
 								{%= data[i]["party"] %}
