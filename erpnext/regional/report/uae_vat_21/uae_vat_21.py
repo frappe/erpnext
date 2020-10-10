@@ -277,7 +277,7 @@ def get_standard_rated_expenses_total(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select sum(total)  from
-		`tabSales Invoice`
+		`tabPurchase Invoice`
 		where
 		standard_rated_expenses > 0
 		and docstatus = 1 {where_conditions} ;
@@ -288,7 +288,7 @@ def get_standard_rated_expenses_tax(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select sum(standard_rated_expenses)  from
-		`tabSales Invoice`
+		`tabPurchase Invoice`
 		where
 		standard_rated_expenses > 0
 		and docstatus = 1 {where_conditions} ;

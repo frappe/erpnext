@@ -242,15 +242,13 @@ doc_events = {
 			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
 			"erpnext.erpnext_integrations.taxjar_integration.delete_transaction"
 		],
-		"validate": [
-			"erpnext.regional.united_arab_emirates.utils.validate_returns",
-		],
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	"Purchase Invoice": {
 		"validate": [
 			"erpnext.regional.india.utils.update_grand_total_for_rcm",
 			"erpnext.regional.united_arab_emirates.utils.update_grand_total_for_rcm",
+			"erpnext.regional.united_arab_emirates.utils.validate_returns"
 			]
 	},
 	"Payment Entry": {
