@@ -236,6 +236,7 @@
    "label": "Address and Contact"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "supplier_address",
    "fieldtype": "Link",
    "label": "Supplier Address",
@@ -243,6 +244,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "label": "Contact Person",
@@ -250,12 +252,14 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "address_display",
    "fieldtype": "Small Text",
    "label": "Address",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
    "in_global_search": 1,
@@ -263,12 +267,14 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_email",
    "fieldtype": "Data",
    "label": "Contact Email",
@@ -1102,7 +1108,7 @@
  "icon": "fa fa-shopping-cart",
  "idx": 29,
  "is_submittable": 1,
- "modified": "2020-10-08 22:19:27.156969",
+ "modified": "2020-10-10 17:55:53.508036",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",

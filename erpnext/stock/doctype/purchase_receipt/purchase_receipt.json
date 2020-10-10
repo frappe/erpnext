@@ -32,12 +32,6 @@
   "project",
   "column_break4",
   "incoterms",
-  "section_break_14",
-  "pol_address",
-  "pol_address_display",
-  "col_break_27",
-  "poa_address",
-  "poa_address_display",
   "section_addresses",
   "supplier_address",
   "address_display",
@@ -49,6 +43,12 @@
   "column_break_29",
   "shipping_address",
   "shipping_address_display",
+  "section_break_14",
+  "pol_address",
+  "pol_address_display",
+  "col_break_27",
+  "poa_address",
+  "poa_address_display",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -328,6 +328,7 @@
    "label": "Address and Contact"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "supplier_address",
    "fieldtype": "Link",
    "label": "Select Supplier Address",
@@ -335,6 +336,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "label": "Contact Person",
@@ -342,12 +344,14 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "address_display",
    "fieldtype": "Small Text",
    "label": "Address",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
    "in_global_search": 1,
@@ -355,12 +359,14 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_email",
    "fieldtype": "Small Text",
    "label": "Contact Email",
@@ -373,6 +379,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "shipping_address",
    "fieldtype": "Link",
    "label": "Select Shipping Address",
@@ -380,6 +387,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "shipping_address_display",
    "fieldtype": "Small Text",
    "label": "Shipping Address",
@@ -1163,6 +1171,7 @@
    "label": "Port Address"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "pol_address",
    "fieldtype": "Link",
    "label": "Port Of Loading",
@@ -1170,12 +1179,14 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "pol_address_display",
    "fieldtype": "Small Text",
    "label": "Port Of Loading Address",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "poa_address",
    "fieldtype": "Link",
    "label": "Port Of Arrival",
@@ -1183,6 +1194,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "poa_address_display",
    "fieldtype": "Small Text",
    "label": "Port Of Arrival Address",
@@ -1496,7 +1508,7 @@
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
- "modified": "2020-10-08 22:19:25.922796",
+ "modified": "2020-10-10 17:58:48.861499",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

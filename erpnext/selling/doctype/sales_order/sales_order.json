@@ -374,6 +374,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "label": "Contact Person",
@@ -381,6 +382,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
    "in_global_search": 1,
@@ -388,12 +390,14 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_email",
    "fieldtype": "Data",
    "hidden": 1,
@@ -403,12 +407,14 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "company_address_display",
    "fieldtype": "Small Text",
    "label": "Company Address",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "company_address",
    "fieldtype": "Link",
    "label": "Company Address Name",
@@ -1247,6 +1253,7 @@
    "label": "Update Auto Repeat Reference"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_phone",
    "fieldtype": "Data",
    "label": "Phone",
@@ -1644,8 +1651,8 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-08 21:46:23.586320",
- "modified_by": "furqan.790@outlook.com",
+ "modified": "2020-10-10 17:52:49.288536",
+ "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
  "owner": "Administrator",

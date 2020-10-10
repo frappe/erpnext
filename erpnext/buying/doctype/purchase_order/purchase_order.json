@@ -368,6 +368,7 @@
    "label": "Address and Contact"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "supplier_address",
    "fieldtype": "Link",
    "label": "Select Supplier Address",
@@ -375,6 +376,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "label": "Contact Person",
@@ -382,12 +384,14 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "address_display",
    "fieldtype": "Small Text",
    "label": "Address",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
    "in_global_search": 1,
@@ -395,12 +399,14 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_email",
    "fieldtype": "Small Text",
    "label": "Contact Email",
@@ -413,6 +419,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "shipping_address",
    "fieldtype": "Link",
    "label": "Select Shipping Address",
@@ -420,6 +427,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "shipping_address_display",
    "fieldtype": "Small Text",
    "label": "Shipping Address",
@@ -1149,6 +1157,7 @@
    "label": "Port Address"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "pol_address",
    "fieldtype": "Link",
    "label": "Port Of Loading",
@@ -1156,6 +1165,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "pol_address_display",
    "fieldtype": "Small Text",
    "label": "Port Of Loading Address",
@@ -1166,6 +1176,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "poa_address",
    "fieldtype": "Link",
    "label": "Port Of Arrival",
@@ -1173,6 +1184,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "poa_address_display",
    "fieldtype": "Small Text",
    "label": "Port Of Arrival Address",
@@ -1519,8 +1531,8 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-08 21:42:46.118655",
- "modified_by": "furqan.790@outlook.com",
+ "modified": "2020-10-10 17:57:03.467795",
+ "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
  "owner": "Administrator",

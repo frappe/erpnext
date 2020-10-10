@@ -370,6 +370,7 @@
    "options": "fa fa-bullhorn"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "shipping_address_name",
    "fieldtype": "Link",
    "label": "Shipping Address",
@@ -377,12 +378,14 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "shipping_address",
    "fieldtype": "Small Text",
    "label": "Shipping Address",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "label": "Contact Person",
@@ -390,6 +393,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
    "in_global_search": 1,
@@ -397,6 +401,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "hidden": 1,
@@ -404,6 +409,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_email",
    "fieldtype": "Data",
    "hidden": 1,
@@ -419,6 +425,7 @@
    "width": "50%"
   },
   {
+   "allow_on_submit": 1,
    "depends_on": "customer",
    "fieldname": "customer_address",
    "fieldtype": "Link",
@@ -435,18 +442,21 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "address_display",
    "fieldtype": "Small Text",
    "label": "Billing Address",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "company_address",
    "fieldtype": "Link",
    "label": "Company Address",
    "options": "Address"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "company_address_display",
    "fieldtype": "Small Text",
    "label": "Company Address",
@@ -1600,7 +1610,7 @@
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2020-10-08 22:19:23.091703",
+ "modified": "2020-10-10 17:53:44.656103",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

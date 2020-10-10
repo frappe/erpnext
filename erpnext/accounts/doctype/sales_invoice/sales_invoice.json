@@ -445,6 +445,7 @@
    "label": "Address and Contact"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "customer_address",
    "fieldtype": "Link",
    "label": "Customer Address",
@@ -452,12 +453,14 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "address_display",
    "fieldtype": "Small Text",
    "label": "Customer Address",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -466,12 +469,14 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
    "label": "Contact",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "hidden": 1,
@@ -479,6 +484,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_email",
    "fieldtype": "Data",
    "hidden": 1,
@@ -500,6 +506,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "shipping_address_name",
    "fieldtype": "Link",
    "label": "Shipping Address",
@@ -507,6 +514,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "shipping_address",
    "fieldtype": "Small Text",
    "label": "Shipping Address",
@@ -514,6 +522,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "company_address",
    "fieldtype": "Link",
    "label": "Company Address",
@@ -521,6 +530,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "company_address_display",
    "fieldtype": "Small Text",
    "label": "Company Address",
@@ -1933,7 +1943,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-10-08 22:19:24.362229",
+ "modified": "2020-10-10 17:54:30.737026",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

@@ -46,12 +46,6 @@
   "release_date",
   "cb_17",
   "hold_comment",
-  "section_break_15",
-  "pol_address",
-  "pol_address_display",
-  "column_break_42",
-  "poa_address",
-  "poa_address_display",
   "section_addresses",
   "supplier_address",
   "address_display",
@@ -63,6 +57,12 @@
   "col_break_address",
   "shipping_address",
   "shipping_address_display",
+  "section_break_15",
+  "pol_address",
+  "pol_address_display",
+  "column_break_42",
+  "poa_address",
+  "poa_address_display",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -424,6 +424,7 @@
    "label": "Address and Contact"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "supplier_address",
    "fieldtype": "Link",
    "label": "Select Supplier Address",
@@ -431,12 +432,14 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "address_display",
    "fieldtype": "Small Text",
    "label": "Address",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_person",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -445,18 +448,21 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
    "label": "Contact",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
    "label": "Mobile No",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "contact_email",
    "fieldtype": "Small Text",
    "label": "Contact Email",
@@ -469,6 +475,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "shipping_address",
    "fieldtype": "Link",
    "label": "Select Shipping Address",
@@ -476,6 +483,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "shipping_address_display",
    "fieldtype": "Small Text",
    "label": "Shipping Address",
@@ -1416,6 +1424,7 @@
    "label": "Port Address"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "pol_address",
    "fieldtype": "Link",
    "label": "Port Of Loading",
@@ -1423,12 +1432,14 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "pol_address_display",
    "fieldtype": "Small Text",
    "label": "Port Of Loading Address",
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "poa_address",
    "fieldtype": "Link",
    "label": "Port Of Arrival",
@@ -1436,6 +1447,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "poa_address_display",
    "fieldtype": "Small Text",
    "label": "Port Of Arrival Address",
@@ -1746,8 +1758,8 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2020-10-08 22:11:07.022653",
- "modified_by": "furqan.790@outlook.com",
+ "modified": "2020-10-10 18:00:40.414287",
+ "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
  "name_case": "Title Case",
