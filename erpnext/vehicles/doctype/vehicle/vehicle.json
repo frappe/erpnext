@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "image",
   "item_code",
   "item_name",
   "column_break_3",
@@ -88,6 +89,7 @@
   {
    "fieldname": "license_plate",
    "fieldtype": "Data",
+   "in_preview": 1,
    "label": "License Plate",
    "no_copy": 1,
    "unique": 1
@@ -202,7 +204,6 @@
   {
    "fieldname": "item_code",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Item Code",
    "options": "Item",
@@ -221,6 +222,7 @@
    "fetch_from": "item_code.item_group",
    "fieldname": "item_group",
    "fieldtype": "Link",
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Item Group",
    "options": "Item Group",
@@ -234,6 +236,7 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Warehouse",
    "no_copy": 1,
@@ -245,6 +248,7 @@
    "fieldname": "sales_order",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Sales Order",
    "options": "Sales Order"
@@ -380,6 +384,7 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Customer",
    "no_copy": 1,
@@ -523,9 +528,17 @@
   {
    "fieldname": "column_break_10",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "in_preview": 1,
+   "label": "Image"
   }
  ],
- "modified": "2020-10-09 04:53:05.445209",
+ "image_field": "image",
+ "modified": "2020-10-11 02:02:21.819042",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
@@ -545,7 +558,11 @@
   }
  ],
  "search_fields": "item_code, item_group, brand, warehouse, customer, sales_order",
+ "show_name_in_global_search": 1,
+ "show_preview_popup": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "track_changes": 1
+ "title_field": "item_name",
+ "track_changes": 1,
+ "track_seen": 1
 }

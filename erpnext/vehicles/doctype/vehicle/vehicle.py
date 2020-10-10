@@ -19,6 +19,9 @@ class Vehicle(Document):
 			if serial_no_series:
 				self.name = make_autoname(serial_no_series, "Serial No", item)
 
+	def onload(self):
+		self.copy_image_from_item()
+
 	def on_update(self):
 		self.update_vehicle_serial_no()
 
@@ -29,6 +32,10 @@ class Vehicle(Document):
 
 	def on_trash(self):
 		self.delete_serial_no_on_trash()
+
+	def copy_image_from_item(self):
+		if not self.image:
+			self.image = frappe.get_cached_value('Item', self.item_code, 'image')
 
 	def update_vehicle_serial_no(self):
 		if self.flags.from_serial_no:

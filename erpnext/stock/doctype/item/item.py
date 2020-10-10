@@ -154,7 +154,8 @@ class Item(WebsiteGenerator):
 		self.validate_name_with_item_group()
 		self.update_variants()
 		self.update_item_price()
-		self.update_serial_no_and_vehicle()
+		self.update_serial_no()
+		self.update_vehicle()
 		self.update_template_item()
 
 	def validate_description(self):
@@ -765,13 +766,19 @@ class Item(WebsiteGenerator):
 			where item_code=%s
 		""", (self.item_name, self.description, self.item_group, self.brand, self.name))
 
-	def update_serial_no_and_vehicle(self):
+	def update_serial_no(self):
 		if self.has_serial_no:
 			frappe.db.sql("update `tabSerial No` set item_name=%s, item_group=%s, brand=%s where item_code=%s",
 				(self.item_name, self.item_group, self.brand, self.name))
+
+	def update_vehicle(self):
 		if self.is_vehicle:
 			frappe.db.sql("update `tabVehicle` set item_name=%s, item_group=%s, brand=%s where item_code=%s",
 				(self.item_name, self.item_group, self.brand, self.name))
+
+			if self.image:
+				frappe.db.sql("update `tabVehicle` set image=%s where item_code=%s and image = '' or image is null",
+					(self.image, self.name))
 
 	def on_trash(self):
 		super(Item, self).on_trash()
