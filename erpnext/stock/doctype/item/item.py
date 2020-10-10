@@ -923,7 +923,7 @@ class Item(WebsiteGenerator):
 				frappe.throw(_("Item has variants."))
 
 	def validate_stock_exists_for_template_item(self):
-		if self.stock_ledger_created() and self._doc_before_save:
+		if self.stock_ledger_created() and self.get('_doc_before_save'):
 			if (cint(self._doc_before_save.has_variants) != cint(self.has_variants)
 				or self._doc_before_save.variant_of != self.variant_of):
 				frappe.throw(_("Cannot change Variant properties after stock transaction. You will have to make a new Item to do this.").format(self.name),
