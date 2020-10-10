@@ -9,6 +9,7 @@ import jwt
 import json
 import base64
 import frappe
+from six import string_types
 from Crypto.PublicKey import RSA
 from pyqrcode import create as qrcreate
 from Crypto.Cipher import PKCS1_v1_5, AES
@@ -20,23 +21,23 @@ from frappe.integrations.utils import make_post_request, make_get_request
 from frappe.utils.data import get_datetime, cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime
 
 def validate_einvoice_fields(doc):
-	e_invoice_enabled = frappe.db.get_value("E Invoice Settings", "E Invoice Settings", "enable")
-	if not doc.doctype in ['Sales Invoice', 'Purchase Invoice'] or not e_invoice_enabled: return
+	einvoicing_enabled = frappe.db.get_value('E Invoice Settings', 'E Invoice Settings', 'enable')
+	if not doc.doctype in ['Sales Invoice', 'Purchase Invoice'] or not einvoicing_enabled: return
 
 	if doc.docstatus == 0 and doc._action == 'save' and doc.irn:
-		frappe.throw(_("You cannot edit the invoice after generating IRN"), title=_("Edit Not Allowed"))
+		frappe.throw(_('You cannot edit the invoice after generating IRN'), title=_('Edit Not Allowed'))
 	elif doc.docstatus == 1 and doc._action == 'submit' and not doc.irn:
-		frappe.throw(_("You must generate IRN before submitting the document."), title=_("Missing IRN"))
+		frappe.throw(_('You must generate IRN before submitting the document.'), title=_('Missing IRN'))
 	elif doc.docstatus == 2 and doc._action == 'cancel' and not doc.irn_cancelled:
-		frappe.throw(_("You must cancel IRN before cancelling the document."), title=_("Cancel Not Allowed"))
+		frappe.throw(_('You must cancel IRN before cancelling the document.'), title=_('Cancel Not Allowed'))
 
-def get_einv_credentials(for_token=False):
-	creds = frappe.get_doc("E Invoice Settings")
-	if not for_token and (not creds.token_expiry or time_diff_in_seconds(now_datetime(), creds.token_expiry) > 5.0):
-		fetch_token()
-		creds.load_from_db()
-	
-	return creds
+def get_credentials():
+	doc = frappe.get_doc('E Invoice Settings')
+	if not doc.token_expiry or time_diff_in_seconds(now_datetime(), doc.token_expiry) > 5.0:
+		fetch_token(doc)
+		doc.load_from_db()
+
+	return doc
 
 def rsa_encrypt(msg, key):
 	if not (isinstance(msg, bytes) or isinstance(msg, bytearray)):
@@ -83,19 +84,20 @@ def get_header(creds):
 	return headers
 
 @frappe.whitelist()
-def fetch_token():
-	einv_creds = get_einv_credentials(for_token=True)
+def fetch_token(credentials=None):
+	if not credentials:
+		credentials = frappe.get_doc('E Invoice Settings')
 
 	endpoint = 'https://einv-apisandbox.nic.in/eivital/v1.03/auth'
 	headers = { 'content-type': 'application/json' }
-	headers.update(dict(client_id=einv_creds.client_id, client_secret=einv_creds.client_secret))
-	payload = dict(UserName=einv_creds.username, ForceRefreshAccessToken=bool(einv_creds.auto_refresh_token))
+	headers.update(dict(client_id=credentials.client_id, client_secret=credentials.client_secret))
+	payload = dict(UserName=credentials.username, ForceRefreshAccessToken=bool(credentials.auto_refresh_token))
 
 	appkey = bytearray(os.urandom(32))
-	enc_appkey = rsa_encrypt(appkey, einv_creds.public_key)
+	enc_appkey = rsa_encrypt(appkey, credentials.public_key)
 
-	password = einv_creds.get_password(fieldname='password')
-	enc_password = rsa_encrypt(password, einv_creds.public_key)
+	password = credentials.get_password(fieldname='password')
+	enc_password = rsa_encrypt(password, credentials.public_key)
 
 	payload.update(dict(Password=enc_password, AppKey=enc_appkey))
 
@@ -104,10 +106,10 @@ def fetch_token():
 
 	auth_token, token_expiry, sek = extract_token_and_sek(res, appkey)
 
-	einv_creds.auth_token = auth_token
-	einv_creds.token_expiry = get_datetime(token_expiry)
-	einv_creds.sek = sek
-	einv_creds.save()
+	credentials.auth_token = auth_token
+	credentials.token_expiry = get_datetime(token_expiry)
+	credentials.sek = sek
+	credentials.save()
 
 def extract_token_and_sek(response, appkey):
 	data = response.get('Data')
@@ -119,45 +121,45 @@ def extract_token_and_sek(response, appkey):
 
 def attach_signed_invoice(doctype, name, data):
 	f = frappe.get_doc({
-		"doctype": "File",
-		"file_name": "E-INV--{}.json".format(name),
-		"attached_to_doctype": doctype,
-		"attached_to_name": name,
-		"content": json.dumps(data),
-		"is_private": True
+		'doctype': 'File',
+		'file_name': 'E-INV--{}.json'.format(name),
+		'attached_to_doctype': doctype,
+		'attached_to_name': name,
+		'content': json.dumps(data),
+		'is_private': True
 	}).insert()
 
 def get_gstin_details(gstin):
-	einv_creds = get_einv_credentials()
+	credentials = get_credentials()
 
 	endpoint = 'https://einv-apisandbox.nic.in/eivital/v1.03/Master/gstin/{gstin}'.format(gstin=gstin)
-	headers = get_header(einv_creds)
+	headers = get_header(credentials)
 
 	res = make_get_request(endpoint, headers=headers)
 	handle_err_response(res)
 
-	enc_json = res.get('Data')
-	json_str = aes_decrypt(enc_json, einv_creds.sek)
-	data = json.loads(json_str)
+	enc_details = res.get('Data')
+	json_str = aes_decrypt(enc_details, credentials.sek)
+	details = json.loads(json_str)
 
-	return data
+	return details
 
 @frappe.whitelist()
 def generate_irn(doctype, name):
 	endpoint = 'https://einv-apisandbox.nic.in/eicore/v1.03/Invoice'
-	einv_creds = get_einv_credentials()
-	headers = get_header(einv_creds)
+	credentials = get_credentials()
+	headers = get_header(credentials)
 
-	e_invoice = make_e_invoice(doctype, name)
+	einvoice = make_einvoice(doctype, name)
 
-	enc_e_invoice_json = aes_encrypt(e_invoice, einv_creds.sek)
-	payload = dict(Data=enc_e_invoice_json)
+	enc_einvoice_json = aes_encrypt(einvoice, credentials.sek)
+	payload = dict(Data=enc_einvoice_json)
 
 	res = make_post_request(endpoint, headers=headers, data=json.dumps(payload))
 	res = handle_err_response(res)
 
 	enc_json = res.get('Data')
-	json_str = aes_decrypt(enc_json, einv_creds.sek)
+	json_str = aes_decrypt(enc_json, credentials.sek)
 
 	signed_einvoice = json.loads(json_str)
 	handle_irn_response(signed_einvoice)
@@ -170,10 +172,10 @@ def generate_irn(doctype, name):
 	return signed_einvoice
 
 def get_irn_details(irn):
-	einv_creds = get_einv_credentials()
+	credentials = get_credentials()
 
 	endpoint = 'https://einv-apisandbox.nic.in/eicore/v1.03/Invoice/irn/{irn}'.format(irn=irn)
-	headers = get_header(einv_creds)
+	headers = get_header(credentials)
 
 	res = make_get_request(endpoint, headers=headers)
 	handle_err_response(res)
@@ -182,13 +184,13 @@ def get_irn_details(irn):
 
 @frappe.whitelist()
 def cancel_irn(doctype, name, irn, reason, remark=''):
-	einv_creds = get_einv_credentials()
+	credentials = get_credentials()
 
 	endpoint = 'https://einv-apisandbox.nic.in/eicore/v1.03/Invoice/Cancel'
-	headers = get_header(einv_creds)
+	headers = get_header(credentials)
 
-	cancel_e_inv = json.dumps(dict(Irn=irn, CnlRsn=reason, CnlRem=remark))
-	enc_json = aes_encrypt(cancel_e_inv, einv_creds.sek)
+	cancel_einv = json.dumps(dict(Irn=irn, CnlRsn=reason, CnlRem=remark))
+	enc_json = aes_encrypt(cancel_einv, credentials.sek)
 	payload = dict(Data=enc_json)
 
 	res = make_post_request(endpoint, headers=headers, data=json.dumps(payload))
@@ -199,17 +201,20 @@ def cancel_irn(doctype, name, irn, reason, remark=''):
 	return res
 
 @frappe.whitelist()
-def cancel_eway_bill(eway_bill, reason, remark=''):
-	einv_creds = get_einv_credentials()
+def cancel_eway_bill(doctype, name, eway_bill, reason, remark=''):
+	credentials = get_credentials()
 	endpoint = 'https://einv-apisandbox.nic.in/ewaybillapi/v1.03/ewayapi'
-	headers = get_header(einv_creds)
+	headers = get_header(credentials)
 
 	cancel_eway_bill_json = json.dumps(dict(ewbNo=eway_bill, cancelRsnCode=reason, cancelRmrk=remark))
-	enc_json = aes_encrypt(cancel_eway_bill_json, einv_creds.sek)
-	payload = dict(action="CANEWB", Data=enc_json)
+	enc_json = aes_encrypt(cancel_eway_bill_json, credentials.sek)
+	payload = dict(action='CANEWB', Data=enc_json)
 
 	res = make_post_request(endpoint, headers=headers, data=json.dumps(payload))
 	handle_err_response(res)
+
+	frappe.db.set_value(doctype, name, 'ewaybill', '')
+	frappe.db.set_value(doctype, name, 'eway_bill_cancelled', 1)
 
 	return res
 
@@ -225,22 +230,28 @@ def handle_err_response(response):
 	if response.get('Status') == 0:
 		err_details = response.get('ErrorDetails')
 		print(response)
-		err_msg = ""
+		error_msgs = []
 		for d in err_details:
 			err_code = d.get('ErrorCode')
+
 			if err_code == '2150':
 				irn = [d['Desc']['Irn'] for d in response.get('InfoDtls') if d['InfCd'] == 'DUPIRN']
 				response = get_irn_details(irn[0])
 				return response
 
-			err_msg += d.get('ErrorMessage')
-			err_msg += "<br>"
-		frappe.throw(_(err_msg), title=_('API Request Failed'))
+			error_msgs.append(d.get('ErrorMessage'))
+
+		if error_msgs:
+			if len(error_msgs) > 1:
+				li = ['<li>'+ d +'</li>' for d in error_msgs]
+				frappe.throw(_("""<ul style='padding-left: 20px'>{}</ul>""").format(''.join(li)), title=_('API Request Failed'))
+			else:
+				frappe.throw(_('{}').format(error_msgs[0]), title=_('API Request Failed'))
 
 	return response
 
 def read_json(name):
-	file_path = os.path.join(os.path.dirname(__file__), "{name}.json".format(name=name))
+	file_path = os.path.join(os.path.dirname(__file__), '{name}.json'.format(name=name))
 	with open(file_path, 'r') as f:
 		return cstr(f.read())
 
@@ -267,12 +278,10 @@ def get_doc_details(invoice):
 	invoice_name = invoice.name
 	invoice_date = format_date(invoice.posting_date, 'dd/mm/yyyy')
 
-	return frappe._dict(dict(
-		invoice_type=invoice_type, invoice_name=invoice_name, invoice_date=invoice_date
-	))
+	return frappe._dict(dict(invoice_type=invoice_type, invoice_name=invoice_name, invoice_date=invoice_date))
 
-def get_party_gstin_details(party_address):
-	address = frappe.get_all("Address", filters={"name": party_address}, fields=["*"])[0]
+def get_party_gstin_details(address_name):
+	address = frappe.get_all('Address', filters={'name': address_name}, fields=['*'])[0]
 
 	gstin = address.get('gstin')
 	gstin_details = get_gstin_details(gstin)
@@ -281,8 +290,8 @@ def get_party_gstin_details(party_address):
 	location = gstin_details.get('AddrLoc')
 	state_code = gstin_details.get('StateCode')
 	pincode = cint(gstin_details.get('AddrPncd'))
-	address_line1 = "{} {}".format(gstin_details.get('AddrBno'), gstin_details.get('AddrFlno'))
-	address_line2 = "{} {}".format(gstin_details.get('AddrBnm'), gstin_details.get('AddrSt'))
+	address_line1 = '{} {}'.format(gstin_details.get('AddrBno'), gstin_details.get('AddrFlno'))
+	address_line2 = '{} {}'.format(gstin_details.get('AddrBnm'), gstin_details.get('AddrSt'))
 	email_id = address.get('email_id')
 	phone = address.get('phone')
 	if state_code == 97:
@@ -294,9 +303,9 @@ def get_party_gstin_details(party_address):
 		address_line2=address_line2, email=email_id, phone=phone
 	))
 
-def get_overseas_address_details(party_address):
+def get_overseas_address_details(address_name):
 	address_title, address_line1, address_line2, city, phone, email_id = frappe.db.get_value(
-		"Address", party_address, ["address_title", "address_line1", "address_line2", "city", "phone", "email_id"]
+		'Address', address_name, ['address_title', 'address_line1', 'address_line2', 'city', 'phone', 'email_id']
 	)
 
 	return frappe._dict(dict(
@@ -311,13 +320,13 @@ def get_item_list(invoice):
 	gst_accounts_list = [d for accounts in gst_accounts.values() for d in accounts if d]
 
 	for d in invoice.items:
-		item_schema = read_json("einv_item_template")
+		item_schema = read_json('einv_item_template')
 		item = frappe._dict(dict())
 		item.update(d.as_dict())
 		item.sr_no = d.idx
 		item.description = d.item_name
-		item.is_service_item = "N" if frappe.db.get_value("Item", d.item_code, "is_stock_item") else "Y"
-		item.batch_expiry_date = frappe.db.get_value("Batch", d.batch_no, "expiry_date") if d.batch_no else None
+		item.is_service_item = 'N' if frappe.db.get_value('Item', d.item_code, 'is_stock_item') else 'Y'
+		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
 		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
 		item.unit_rate = item.base_price_list_rate if item.discount_amount else item.base_rate
 		item.total_amount = item.unit_rate * item.qty
@@ -345,10 +354,10 @@ def get_item_list(invoice):
 					item.cgst_amount += item_tax_detail[1]
 		
 		item.total_value = item.base_amount + item.igst_amount + item.sgst_amount + item.cgst_amount + item.cess_amount
-		e_inv_item = item_schema.format(item=item)
-		item_list.append(e_inv_item)
+		einv_item = item_schema.format(item=item)
+		item_list.append(einv_item)
 
-	return ", ".join(item_list)
+	return ', '.join(item_list)
 
 def get_value_details(invoice):
 	gst_accounts = get_gst_accounts(invoice.company)
@@ -379,7 +388,7 @@ def get_value_details(invoice):
 
 def get_payment_details(invoice):
 	payee_name = invoice.company
-	mode_of_payment = ", ".join([d.mode_of_payment for d in invoice.payments])
+	mode_of_payment = ', '.join([d.mode_of_payment for d in invoice.payments])
 	paid_amount = invoice.base_paid_amount
 	outstanding_amount = invoice.outstanding_amount
 
@@ -389,14 +398,14 @@ def get_payment_details(invoice):
 	))
 
 def get_return_doc_reference(invoice):
-	invoice_date = frappe.db.get_value("Sales Invoice", invoice.return_against, "posting_date")
+	invoice_date = frappe.db.get_value('Sales Invoice', invoice.return_against, 'posting_date')
 	return frappe._dict(dict(
 		invoice_name=invoice.return_against, invoice_date=invoice_date
 	))
 
 def get_eway_bill_details(invoice):
 	if not invoice.distance:
-		frappe.throw(_("Distance is mandatory for E-Way Bill generation"), title=_("Missing Values"))
+		frappe.throw(_('Distance is mandatory for E-Way Bill generation'), title=_('E Invoice Validation Failed'))
 
 	mode_of_transport = { 'Road': '1', 'Air': '2', 'Rail': '3', 'Ship': '4' }
 	vehicle_type = { 'Regular': 'R', 'Over Dimensional Cargo (ODC)': 'O' }
@@ -413,13 +422,15 @@ def get_eway_bill_details(invoice):
 	))
 
 @frappe.whitelist()
-def make_e_invoice(doctype, name):
+def make_einvoice(doctype, name):
 	invoice = frappe.get_doc(doctype, name)
-	schema = read_json("einv_template")
-	validations = json.loads(read_json("einv_validation"))
+	schema = read_json('einv_template')
+	validations = json.loads(read_json('einv_validation'))
 
-	trans_details = get_trans_details(invoice)
+	item_list = get_item_list(invoice)
 	doc_details = get_doc_details(invoice)
+	value_details = get_value_details(invoice)
+	trans_details = get_trans_details(invoice)
 	seller_details = get_party_gstin_details(invoice.company_address)
 
 	if invoice.gst_category == 'Overseas':
@@ -428,99 +439,87 @@ def make_e_invoice(doctype, name):
 		buyer_details = get_party_gstin_details(invoice.customer_address)
 		place_of_supply = invoice.place_of_supply.split('-')[0]
 		buyer_details.update(dict(place_of_supply=place_of_supply))
-
-	item_list = get_item_list(invoice)
-	value_details = get_value_details(invoice)
 	
-	shipping_details = frappe._dict({})
+	shipping_details = payment_details = prev_doc_details = eway_bill_details = frappe._dict({})
 	if invoice.shipping_address_name and invoice.customer_address != invoice.shipping_address_name:
 		shipping_details = get_party_gstin_details(invoice.shipping_address_name)
 	
-	payment_details = frappe._dict({})
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
 	
-	prev_doc_details = frappe._dict({})
 	if invoice.is_return and invoice.return_against:
 		prev_doc_details = get_return_doc_reference(invoice)
 	
-	dispatch_details = frappe._dict({})
-	period_details = frappe._dict({})
-	export_details = frappe._dict({})
-	eway_bill_details = frappe._dict({})
 	if invoice.transporter:
 		eway_bill_details = get_eway_bill_details(invoice)
+	
+	# not yet implemented
+	dispatch_details = period_details = export_details = frappe._dict({})
 
-	e_invoice = schema.format(
+	einvoice = schema.format(
 		trans_details=trans_details, doc_details=doc_details, dispatch_details=dispatch_details,
 		seller_details=seller_details, buyer_details=buyer_details, shipping_details=shipping_details,
 		item_list=item_list, value_details=value_details, payment_details=payment_details,
 		period_details=period_details, prev_doc_details=prev_doc_details,
 		export_details=export_details, eway_bill_details=eway_bill_details
 	)
-	e_invoice = json.loads(e_invoice)
+	einvoice = json.loads(einvoice)
 
-	error_msgs = validate_einvoice(validations, e_invoice, [])
+	error_msgs = validate_einvoice(validations, einvoice, [])
 	if error_msgs:
 		if len(error_msgs) > 1:
-			li = ["<li>"+ d +"</li>" for d in error_msgs]
-			frappe.throw(_("""<ul style="padding-left: 20px">{}</ul>""").format("".join(li)), title=_("E Invoice Validation Failed"))
+			li = ['<li>'+ d +'</li>' for d in error_msgs]
+			frappe.throw("<ul style='padding-left: 20px'>{}</ul>".format(''.join(li)), title=_('E Invoice Validation Failed'))
 		else:
-			frappe.throw(_("{}").format(error_msgs[0]), title=_("E Invoice Validation Failed"))
+			frappe.throw(error_msgs[0], title=_('E Invoice Validation Failed'))
 
-	return {'einvoice': json.dumps([e_invoice])}
+	return {'einvoice': json.dumps([einvoice])}
 
-def validate_einvoice(validations, e_invoice, error_msgs=[]):
-	type_map = {
-		"string": cstr,
-		"number": cint,
-		"object": dict,
-		"array": list
-	}
+def validate_einvoice(validations, einvoice, error_msgs=[]):
+	type_map = { 'string': 'str', 'number': 'int', 'object': 'dict', 'array': 'list' }
 	
-	for field, value in validations.items():
-		if isinstance(value, list): value = value[0]
-
-		invoice_value = e_invoice.get(field)
+	for field, validation in validations.items():
+		invoice_value = einvoice.get(field)
 		if not invoice_value:
 			continue
 
-		should_be_of_type = type_map[value.get('type').lower()]
-		if should_be_of_type == dict:
-			properties = value.get('properties')
+		should_be_of_type = type_map[validation.get('type').lower()]
+		if should_be_of_type in ['dict', 'list']:
+			child_validations = validation.get('properties')
 
 			if isinstance(invoice_value, list):
 				for d in invoice_value:
-					validate_einvoice(properties, d, error_msgs)
+					validate_einvoice(child_validations, d, error_msgs)
 			else:
-				validate_einvoice(properties, invoice_value, error_msgs)
+				validate_einvoice(child_validations, invoice_value, error_msgs)
 				# remove keys with empty dicts
 				if not invoice_value:
-					e_invoice.pop(field, None)
+					einvoice.pop(field, None)
 			continue
 		
-		if invoice_value == "None":
+		if invoice_value == 'None':
 			# remove keys with empty values
-			e_invoice.pop(field, None)
+			einvoice.pop(field, None)
 			continue
 		
 		# convert to int or str
-		e_invoice[field] = should_be_of_type(invoice_value)
-		
-		should_be_of_len = value.get('maxLength')
-		should_be_greater_than = flt(value.get('minimum'))
-		should_be_less_than = flt(value.get('maximum'))
-		pattern_str = value.get('pattern')
-		pattern = re.compile(pattern_str or "")
+		function = eval('c' + should_be_of_type)
+		einvoice[field] = function(invoice_value)
 
-		field_label = value.get("label") or field
+		max_length = validation.get('maxLength')
+		minimum = flt(validation.get('minimum'))
+		maximum = flt(validation.get('maximum'))
+		pattern_str = validation.get('pattern')
+		pattern = re.compile(pattern_str or '')
 
-		if value.get('type').lower() == 'string' and len(invoice_value) > should_be_of_len:
-			error_msgs.append("{} should not exceed {} characters".format(field_label, should_be_of_len))
-		if value.get('type').lower() == 'number' and not (flt(invoice_value) <= should_be_less_than):
-			error_msgs.append("{} should be less than {}".format(field_label, should_be_less_than))
+		field_label = validation.get('label') or field
+
+		if should_be_of_type == 'str' and len(invoice_value) > max_length:
+			error_msgs.append(_('{} should not exceed {} characters').format(field_label, max_length))
+		if should_be_of_type == 'int' and not (flt(invoice_value) <= maximum):
+			error_msgs.append(_('{} should be less than {}').format(field_label, maximum))
 		if pattern_str and not pattern.match(invoice_value):
-			error_msgs.append(value.get('validationMsg'))
+			error_msgs.append(validation.get('validationMsg'))
 	
 	return error_msgs
 
@@ -539,7 +538,7 @@ def download_einvoice():
 	einvoice = data['einvoice']
 	name = data['name']
 
-	frappe.response['filename'] = "E-Invoice-" + name + ".json"
+	frappe.response['filename'] = 'E-Invoice-' + name + '.json'
 	frappe.response['filecontent'] = einvoice
 	frappe.response['content_type'] = 'application/json'
 	frappe.response['type'] = 'download'
@@ -563,7 +562,7 @@ def download_cancel_einvoice():
 
 	cancel_einvoice = json.dumps([dict(Irn=irn, CnlRsn=reason, CnlRem=remark)])
 
-	frappe.response['filename'] = "Cancel E-Invoice " + name + ".json"
+	frappe.response['filename'] = 'Cancel E-Invoice ' + name + '.json'
 	frappe.response['filecontent'] = cancel_einvoice
 	frappe.response['content_type'] = 'application/json'
 	frappe.response['type'] = 'download'
@@ -575,7 +574,7 @@ def upload_cancel_ack():
 	doctype = data['doctype']
 	name = data['docname']
 
-	frappe.db.set_value(doctype, name, "irn_cancelled", 1)
+	frappe.db.set_value(doctype, name, 'irn_cancelled', 1)
 
 def attach_qrcode_image(doctype, name):
 	qrcode = frappe.db.get_value(doctype, name, 'signed_qr_code')
@@ -583,12 +582,11 @@ def attach_qrcode_image(doctype, name):
 	if not qrcode: return
 
 	_file = frappe.get_doc({
-		"doctype": "File",
-		"file_name": "Signed_QR_{name}.png".format(name=name),
-		"attached_to_doctype": doctype,
-		"attached_to_name": name,
-		"attached_to_field": "qrcode_image",
-		"content": "qrcode"
+		'doctype': 'File',
+		'file_name': 'Signed_QR_{name}.png'.format(name=name),
+		'attached_to_doctype': doctype,
+		'attached_to_name': name,
+		'content': 'qrcode'
 	})
 	_file.save()
 	frappe.db.commit()
