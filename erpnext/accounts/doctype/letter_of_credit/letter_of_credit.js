@@ -3,6 +3,10 @@
 
 frappe.ui.form.on('Letter of Credit', {
 	refresh: function(frm) {
-		
+		// custom buttons
+		frm.add_custom_button(__('Accounting Ledger'), function() {
+			frappe.set_route('query-report', 'General Ledger',
+				{party_type:'Letter of Credit', party:frm.doc.name});
+		});
 	}
 });

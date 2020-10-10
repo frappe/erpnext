@@ -68,6 +68,11 @@ def get_data():
 					"onboard": 1,
 				},
 				{
+					"type": "doctype",
+					"name": "Letter of Credit",
+					"description": _("Letter of Credit database."),
+				},
+				{
 					"type": "report",
 					"name": "Accounts Payable",
 					"doctype": "Purchase Invoice",
