@@ -31,6 +31,7 @@
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
+   "in_standard_filter": 1,
    "label": "Disabled"
   },
   {
@@ -78,7 +79,7 @@
    "label": "Posting Date"
   }
  ],
- "modified": "2020-10-07 13:37:51.770778",
+ "modified": "2020-10-10 16:14:07.805734",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Type",
