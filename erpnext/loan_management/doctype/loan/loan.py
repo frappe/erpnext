@@ -9,6 +9,7 @@ from frappe import _
 from frappe.utils import flt, rounded, add_months, nowdate, getdate, now_datetime
 from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts
 
 class Loan(AccountsController):
 	def validate(self):
@@ -181,6 +182,19 @@ def get_monthly_repayment_amount(repayment_method, loan_amount, rate_of_interest
 	else:
 		monthly_repayment_amount = math.ceil(flt(loan_amount) / repayment_periods)
 	return monthly_repayment_amount
+
+@frappe.whitelist()
+def request_loan_closure(loan):
+	amounts = calculate_amounts(loan, getdate())
+
+	pending_amount = amounts['payable_amount'] + amounts['unaccrued_interest']
+
+	# checking greater than 0 as there may be some minor precision error
+	if pending_amount > 0:
+		frappe.throw(_("Cannot close loan as there is an outstanding of {0}").format(pending_amount))
+	else:
+		# update status as loan closure requested
+		frappe.db.set_value('Loan', loan, 'status', 'Loan Closure Requested')
 
 @frappe.whitelist()
 def get_loan_application(loan_application):
