@@ -10,6 +10,7 @@ import json
 import base64
 import frappe
 from Crypto.PublicKey import RSA
+from pyqrcode import create as qrcreate
 from Crypto.Cipher import PKCS1_v1_5, AES
 from Crypto.Util.Padding import pad, unpad
 from frappe.model.document import Document
@@ -116,12 +117,12 @@ def extract_token_and_sek(response, appkey):
 	sek = aes_decrypt(enc_sek, appkey)
 	return auth_token, token_expiry, sek
 
-def attach_signed_json(invoice, data):
+def attach_signed_invoice(doctype, name, data):
 	f = frappe.get_doc({
 		"doctype": "File",
-		"file_name": invoice.name + "e_invoice.json",
-		"attached_to_doctype": invoice.doctype,
-		"attached_to_name": invoice.name,
+		"file_name": name + "e_invoice.json",
+		"attached_to_doctype": doctype,
+		"attached_to_name": name,
 		"content": json.dumps(data),
 		"is_private": True
 	}).insert()
@@ -147,8 +148,7 @@ def generate_irn(doctype, name):
 	einv_creds = get_einv_credentials()
 	headers = get_header(einv_creds)
 
-	invoice = frappe.get_doc(doctype, name)
-	e_invoice = make_e_invoice(invoice)
+	e_invoice = make_e_invoice(doctype, name)
 
 	enc_e_invoice_json = aes_encrypt(e_invoice, einv_creds.sek)
 	payload = dict(Data=enc_e_invoice_json)
@@ -159,12 +159,15 @@ def generate_irn(doctype, name):
 	enc_json = res.get('Data')
 	json_str = aes_decrypt(enc_json, einv_creds.sek)
 
-	data = json.loads(json_str)
-	handle_irn_response(data)
+	signed_einvoice = json.loads(json_str)
+	handle_irn_response(signed_einvoice)
 
-	attach_signed_json(invoice, data['DecryptedSignedInvoice'])
+	update_einvoice_fields(doctype, name, signed_einvoice)
 
-	return data
+	attach_qrcode_image(doctype, name)
+	attach_signed_invoice(doctype, name, signed_einvoice['DecryptedSignedInvoice'])
+
+	return signed_einvoice
 
 def get_irn_details(irn):
 	einv_creds = get_einv_credentials()
@@ -175,16 +178,10 @@ def get_irn_details(irn):
 	res = make_get_request(endpoint, headers=headers)
 	handle_err_response(res)
 
-	# enc_json = res.get('Data')
-	# json_str = aes_decrypt(enc_json, einv_creds.sek)
-
-	# data = json.loads(json_str)
-	# handle_irn_response(data)
-
 	return res
 
 @frappe.whitelist()
-def cancel_irn(irn, reason, remark=''):
+def cancel_irn(doctype, name, irn, reason, remark=''):
 	einv_creds = get_einv_credentials()
 
 	endpoint = 'https://einv-apisandbox.nic.in/eicore/v1.03/Invoice/Cancel'
@@ -196,6 +193,8 @@ def cancel_irn(irn, reason, remark=''):
 
 	res = make_post_request(endpoint, headers=headers, data=json.dumps(payload))
 	handle_err_response(res)
+
+	frappe.db.set_value(doctype, name, 'irn_cancelled', 1)
 
 	return res
 
@@ -277,15 +276,13 @@ def get_party_gstin_details(party_address):
 
 	gstin = address.get('gstin')
 	gstin_details = get_gstin_details(gstin)
-	# legal_name = address.get('address_title')
 	legal_name = gstin_details.get('LegalName')
 	trade_name = gstin_details.get('TradeName')
-	# location = address.get('city')
-	location = gstin_details.get('Loc')
-	state_code = address.get('gst_state_number')
-	pincode = cint(address.get('pincode'))
-	address_line1 = address.get('address_line1')
-	address_line2 = address.get('address_line2')
+	location = gstin_details.get('AddrLoc')
+	state_code = gstin_details.get('StateCode')
+	pincode = cint(gstin_details.get('AddrPncd'))
+	address_line1 = "{} {}".format(gstin_details.get('AddrBno'), gstin_details.get('AddrFlno'))
+	address_line2 = "{} {}".format(gstin_details.get('AddrBnm'), gstin_details.get('AddrSt'))
 	email_id = address.get('email_id')
 	phone = address.get('phone')
 	if state_code == 97:
@@ -527,6 +524,15 @@ def validate_einvoice(validations, e_invoice, error_msgs=[]):
 	
 	return error_msgs
 
+def update_einvoice_fields(doctype, name, signed_einvoice):
+	enc_signed_invoice = signed_einvoice.get('SignedInvoice')
+	decrypted_signed_invoice = jwt_decrypt(enc_signed_invoice)['data']
+
+	frappe.db.set_value(doctype, name, 'irn', signed_einvoice.get('Irn'))
+	frappe.db.set_value(doctype, name, 'ewaybill', signed_einvoice.get('EwbNo'))
+	frappe.db.set_value(doctype, name, 'signed_qr_code', signed_einvoice.get('SignedQRCode').split('.')[1])
+	frappe.db.set_value(doctype, name, 'signed_einvoice', decrypted_signed_invoice)
+
 @frappe.whitelist()
 def download_einvoice():
 	data = frappe._dict(frappe.local.form_dict)
@@ -545,13 +551,7 @@ def upload_einvoice():
 	doctype = data['doctype']
 	name = data['docname']
 
-	enc_signed_invoice = signed_einvoice.get('SignedInvoice')
-	decrypted_signed_invoice = jwt_decrypt(enc_signed_invoice)['data']
-
-	frappe.db.set_value(doctype, name, 'irn', signed_einvoice.get('Irn'))
-	frappe.db.set_value(doctype, name, 'ewaybill', signed_einvoice.get('EwbNo'))
-	frappe.db.set_value(doctype, name, 'signed_qr_code', signed_einvoice.get('SignedQRCode'))
-	frappe.db.set_value(doctype, name, 'signed_einvoice', decrypted_signed_invoice)
+	update_einvoice_fields(doctype, name, signed_einvoice)
 
 @frappe.whitelist()
 def download_cancel_einvoice():
@@ -576,3 +576,24 @@ def upload_cancel_ack():
 	name = data['docname']
 
 	frappe.db.set_value(doctype, name, "irn_cancelled", 1)
+
+def attach_qrcode_image(doctype, name):
+	qrcode = frappe.db.get_value(doctype, name, 'signed_qr_code')
+
+	if not qrcode: return
+
+	_file = frappe.get_doc({
+		"doctype": "File",
+		"file_name": "Signed_QR_{name}.png".format(name=name),
+		"attached_to_doctype": doctype,
+		"attached_to_name": name,
+		"attached_to_field": "qrcode_image",
+		"content": "qrcode"
+	})
+	_file.save()
+	frappe.db.commit()
+	url = qrcreate(qrcode)
+	abs_file_path = os.path.abspath(_file.get_full_path())
+	url.png(abs_file_path, scale=2)
+
+	frappe.db.set_value(doctype, name, 'qrcode_image', _file.file_url)
