@@ -17,7 +17,7 @@ from frappe.model.document import Document
 from frappe import _, get_module_path, scrub
 from erpnext.regional.india.utils import get_gst_accounts
 from frappe.integrations.utils import make_post_request, make_get_request
-from frappe.utils.data import get_datetime, cstr, cint,format_date, flt, time_diff_in_seconds, now_datetime
+from frappe.utils.data import get_datetime, cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime
 
 def validate_einvoice_fields(doc):
 	e_invoice_enabled = frappe.db.get_value("E Invoice Settings", "E Invoice Settings", "enable")
@@ -120,7 +120,7 @@ def extract_token_and_sek(response, appkey):
 def attach_signed_invoice(doctype, name, data):
 	f = frappe.get_doc({
 		"doctype": "File",
-		"file_name": "E-INV--{}.json".format{name),
+		"file_name": "E-INV--{}.json".format(name),
 		"attached_to_doctype": doctype,
 		"attached_to_name": name,
 		"content": json.dumps(data),
