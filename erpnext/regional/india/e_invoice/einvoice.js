@@ -92,7 +92,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 					"Download E-Invoice",
 					() => {
 						frappe.call({
-							method: 'erpnext.regional.india.e_invoice.e_invoice_utils.make_e_invoice',
+							method: 'erpnext.regional.india.e_invoice.e_invoice_utils.make_einvoice',
 							args: { doctype: frm.doc.doctype, name: frm.doc.name },
 							freeze: true,
 							callback: (res) => {
