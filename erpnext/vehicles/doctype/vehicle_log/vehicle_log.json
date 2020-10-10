@@ -8,12 +8,12 @@
  "field_order": [
   "vehicle_section",
   "naming_series",
-  "license_plate",
+  "vehicle",
   "employee",
   "column_break_4",
   "column_break_7",
   "model",
-  "make",
+  "brand",
   "odometer_reading",
   "date",
   "odometer",
@@ -46,15 +46,6 @@
    "set_only_once": 1
   },
   {
-   "fieldname": "license_plate",
-   "fieldtype": "Link",
-   "in_global_search": 1,
-   "in_list_view": 1,
-   "label": "License Plate",
-   "options": "Vehicle",
-   "reqd": 1
-  },
-  {
    "fetch_from": "license_plate.employee",
    "fetch_if_empty": 1,
    "fieldname": "employee",
@@ -74,16 +65,18 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "license_plate.model",
+   "fetch_from": "vehicle.model",
    "fieldname": "model",
-   "fieldtype": "Read Only",
-   "label": "Model"
+   "fieldtype": "Data",
+   "label": "Model",
+   "read_only": 1
   },
   {
-   "fetch_from": "license_plate.make",
-   "fieldname": "make",
-   "fieldtype": "Read Only",
-   "label": "Make"
+   "fetch_from": "vehicle.brand",
+   "fieldname": "brand",
+   "fieldtype": "Data",
+   "label": "Make",
+   "read_only": 1
   },
   {
    "fieldname": "odometer_reading",
@@ -100,6 +93,18 @@
    "fieldname": "odometer",
    "fieldtype": "Int",
    "label": "Current Odometer value ",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle.last_odometer",
+   "fieldname": "last_odometer",
+   "fieldtype": "Int",
+   "label": "last Odometer Value ",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -155,22 +160,20 @@
    "read_only": 1
   },
   {
-   "fetch_from": "license_plate.last_odometer",
-   "fieldname": "last_odometer",
-   "fieldtype": "Int",
-   "label": "last Odometer Value ",
-   "read_only": 1,
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "options": "Vehicle",
    "reqd": 1
-  },
-  {
-   "fieldname": "column_break_12",
-   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-18 16:45:45.060761",
+ "modified": "2020-10-11 03:24:19.654708",
  "modified_by": "Administrator",
- "module": "HR",
+ "module": "Vehicles",
  "name": "Vehicle Log",
  "owner": "Administrator",
  "permissions": [

@@ -15,13 +15,13 @@ class VehicleLog(Document):
 			frappe.throw(_("Current Odometer Value should be greater than Last Odometer Value {0}").format(self.last_odometer))
 
 	def on_submit(self):
-		frappe.db.set_value("Vehicle", self.license_plate, "last_odometer", self.odometer)
+		frappe.db.set_value("Vehicle", self.vehicle, "last_odometer", self.odometer)
 
 	def on_cancel(self):
 		distance_travelled = self.odometer - self.last_odometer
 		if(distance_travelled > 0):
-			updated_odometer_value = int(frappe.db.get_value("Vehicle", self.license_plate, "last_odometer")) - distance_travelled
-			frappe.db.set_value("Vehicle", self.license_plate, "last_odometer", updated_odometer_value)
+			updated_odometer_value = int(frappe.db.get_value("Vehicle", self.vehicle, "last_odometer")) - distance_travelled
+			frappe.db.set_value("Vehicle", self.vehicle, "last_odometer", updated_odometer_value)
 
 @frappe.whitelist()
 def make_expense_claim(docname):

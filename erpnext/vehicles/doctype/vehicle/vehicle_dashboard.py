@@ -18,7 +18,7 @@ def get_data():
 			},
 			{
 				'label': ['Reference'],
-				'items': ['Serial No']
+				'items': ['Vehicle Log', 'Serial No']
 			},
 		]
 	}
