@@ -1,5 +1,5 @@
 {{
-    "Version": "1.01",
+    "Version": "1.1",
     "TranDtls": {{
         "TaxSch": "{trans_details.tax_scheme}",
         "SupTyp": "{trans_details.supply_type}",
