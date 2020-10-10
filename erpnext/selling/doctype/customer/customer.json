@@ -206,6 +206,7 @@
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
+   "in_standard_filter": 1,
    "label": "Disabled"
   },
   {
@@ -524,7 +525,7 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2020-10-10 15:43:55.588527",
+ "modified": "2020-10-10 17:32:20.968819",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

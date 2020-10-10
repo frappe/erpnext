@@ -242,6 +242,7 @@
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
+   "in_standard_filter": 1,
    "label": "Disabled"
   },
   {
