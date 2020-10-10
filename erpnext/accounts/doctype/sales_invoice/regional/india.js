@@ -1,5 +1,5 @@
 {% include "erpnext/regional/india/taxes.js" %}
-{% include "erpnext/regional/india/einvoice.js" %}
+{% include "erpnext/regional/india/e_invoice/einvoice.js" %}
 
 erpnext.setup_auto_gst_taxation('Sales Invoice');
 erpnext.setup_einvoice_actions('Sales Invoice')
