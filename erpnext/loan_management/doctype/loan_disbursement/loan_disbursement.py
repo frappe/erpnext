@@ -74,7 +74,7 @@ class LoanDisbursement(AccountsController):
 
 			if loan_details.status == "Disbursed" and not loan_details.is_term_loan:
 				process_loan_interest_accrual_for_demand_loans(posting_date=add_days(self.disbursement_date, -1),
-					loan=self.against_loan)
+					loan=self.against_loan, accrual_type="Disbursement")
 
 			if disbursed_amount > loan_details.loan_amount:
 				topup_amount = disbursed_amount - loan_details.loan_amount

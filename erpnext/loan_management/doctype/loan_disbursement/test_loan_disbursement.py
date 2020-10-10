@@ -60,8 +60,7 @@ class TestLoanDisbursement(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, make_loan_disbursement_entry, loan.name,
 			500000, first_date)
 
-		repayment_entry = create_repayment_entry(loan.name, self.applicant, add_days(get_last_day(nowdate()), 5),
-			"Regular Payment", 611095.89)
+		repayment_entry = create_repayment_entry(loan.name, self.applicant, add_days(get_last_day(nowdate()), 5), 611095.89)
 
 		repayment_entry.submit()
 		loan.reload()
