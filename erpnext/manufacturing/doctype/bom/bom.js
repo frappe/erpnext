@@ -434,7 +434,8 @@ var get_bom_material_detail= function(doc, cdt, cdn, scrap_items) {
 				"include_item_in_manufacturing": d.include_item_in_manufacturing,
 				"uom": d.uom,
 				"stock_uom": d.stock_uom,
-				"conversion_factor": d.conversion_factor
+				"conversion_factor": d.conversion_factor,
+				"sourced_by_supplier": d.sourced_by_supplier
 			},
 			callback: function(r) {
 				d = locals[cdt][cdn];
@@ -614,6 +615,22 @@ frappe.ui.form.on("BOM Item", "item_code", function(frm, cdt, cdn) {
 		d.allow_alternative_item = r.allow_alternative_item
 	})
 	refresh_field("allow_alternative_item", d.name, d.parentfield);
+});
+
+frappe.ui.form.on("BOM Item", "sourced_by_supplier", function(frm, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	if (d.sourced_by_supplier) {
+		d.rate = 0;
+		refresh_field("rate", d.name, d.parentfield);
+	}
+});
+
+frappe.ui.form.on("BOM Item", "rate", function(frm, cdt, cdn) {
+	var d = locals[cdt][cdn];
+	if (d.sourced_by_supplier) {
+		d.rate = 0;
+		refresh_field("rate", d.name, d.parentfield);
+	}
 });
 
 frappe.ui.form.on("BOM Operation", "operations_remove", function(frm) {
