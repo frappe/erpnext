@@ -21,6 +21,14 @@ frappe.ui.form.on('Loan', {
 			};
 		});
 
+		frm.set_query("loan_type", function () {
+			return {
+				"filters": {
+					"docstatus": 1
+				}
+			};
+		});
+
 		$.each(["penalty_income_account", "interest_income_account"], function(i, field) {
 			frm.set_query(field, function () {
 				return {
@@ -49,17 +57,19 @@ frappe.ui.form.on('Loan', {
 
 	refresh: function (frm) {
 		if (frm.doc.docstatus == 1) {
+			if (["Disbursed", "Partially Disbursed"].includes(frm.doc.status) && (!frm.doc.repay_from_salary)) {
+				frm.add_custom_button(__('Request Loan Closure'), function() {
+					frm.trigger("request_loan_closure");
+				},__('Status'));
+				frm.add_custom_button(__('Loan Repayment'), function() {
+					frm.trigger("make_repayment_entry");
+				},__('Create'));
+			}
+
 			if (frm.doc.status == "Sanctioned" || frm.doc.status == 'Partially Disbursed') {
 				frm.add_custom_button(__('Loan Disbursement'), function() {
 					frm.trigger("make_loan_disbursement");
 				},__('Create'));
-			}
-
-			if (["Disbursed", "Partially Disbursed"].includes(frm.doc.status) && (!frm.doc.repay_from_salary)) {
-				frm.add_custom_button(__('Loan Repayment'), function() {
-					frm.trigger("make_repayment_entry");
-				},__('Create'));
-
 			}
 
 			if (frm.doc.status == "Loan Closure Requested") {
@@ -115,6 +125,22 @@ frappe.ui.form.on('Loan', {
 				frappe.set_route("Form", doc.doctype, doc.name);
 			}
 		})
+	},
+
+	request_loan_closure: function(frm) {
+		frappe.confirm(__("Do you really want to close this loan"),
+			function() {
+				frappe.call({
+					args: {
+						'loan': frm.doc.name
+					},
+					method: "erpnext.loan_management.doctype.loan.loan.request_loan_closure",
+					callback: function() {
+						frm.reload_doc();
+					}
+				});
+			}
+		);
 	},
 
 	create_loan_security_unpledge: function(frm) {

@@ -15,7 +15,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 				frappe.route_options = {
 					voucher_no: frm.doc.name,
 					company: frm.doc.company,
-					from_date: frm.doc.posting_date,
+					from_date: moment(frm.doc.posting_date).format('YYYY-MM-DD'),
 					to_date: moment(frm.doc.modified).format('YYYY-MM-DD'),
 					show_cancelled_entries: frm.doc.docstatus === 2
 				};
