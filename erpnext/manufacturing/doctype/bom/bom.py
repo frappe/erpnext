@@ -237,6 +237,8 @@ class BOM(WebsiteGenerator):
 	def update_cost(self, update_parent=True, from_child_bom=False, save=True):
 		if self.docstatus == 2:
 			return
+		if self.docstatus != 1:
+			save = False
 
 		existing_bom_cost = self.total_cost
 
@@ -595,7 +597,9 @@ class BOM(WebsiteGenerator):
 
 	def add_exploded_items(self):
 		"Add items to Flat BOM table"
-		frappe.db.sql("""delete from `tabBOM Explosion Item` where parent=%s""", self.name)
+		if self.docstatus == 1:
+			frappe.db.sql("""delete from `tabBOM Explosion Item` where parent=%s""", self.name)
+
 		self.set('exploded_items', [])
 
 		for d in sorted(self.cur_exploded_items, key=itemgetter(0)):
@@ -605,7 +609,9 @@ class BOM(WebsiteGenerator):
 			ch.amount = flt(ch.stock_qty) * flt(ch.rate)
 			ch.qty_consumed_per_unit = flt(ch.stock_qty) / flt(self.quantity)
 			ch.docstatus = self.docstatus
-			ch.db_insert()
+
+			if self.docstatus == 1:
+				ch.db_insert()
 
 	def validate_bom_links(self):
 		if not self.is_active:
