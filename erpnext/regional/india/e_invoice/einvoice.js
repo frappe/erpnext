@@ -15,15 +15,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 			// 				method: 'erpnext.regional.india.e_invoice.e_invoice_utils.generate_irn',
 			// 				args: { doctype: frm.doc.doctype, name: frm.doc.name },
 			// 				freeze: true,
-			// 				callback: (res) => {
-			// 					console.log(res.message);
-			// 					frm.set_value('irn', res.message['Irn']);
-			// 					frm.set_value('signed_einvoice', JSON.stringify(res.message['DecryptedSignedInvoice']));
-			// 					frm.set_value('signed_qr_code', JSON.stringify(res.message['DecryptedSignedQRCode']));
-
-			// 					if (res.message['EwbNo']) frm.set_value('ewaybill', res.message['EwbNo']);
-			// 					frm.save();
-			// 				}
+			// 				callback: () => frm.reload_doc()
 			// 			})
 			// 		}
 			// 	)
@@ -44,13 +36,15 @@ erpnext.setup_einvoice_actions = (doctype) => {
 			// 					const data = d.get_values();
 			// 					frappe.call({
 			// 						method: 'erpnext.regional.india.e_invoice.e_invoice_utils.cancel_irn',
-			// 						args: { irn: frm.doc.irn, reason: data.reason.split('-')[0], remark: data.remark },
-			// 						freeze: true,
-			// 						callback: () => {
-			// 							frm.set_value('irn_cancelled', 1);
-			// 							frm.save("Update");
-			// 							d.hide()
+			// 						args: { 
+			// 							doctype: frm.doc.doctype,
+			// 							name: frm.doc.name,
+			// 							irn: frm.doc.irn,
+			// 							reason: data.reason.split('-')[0],
+			// 							remark: data.remark
 			// 						},
+			// 						freeze: true,
+			// 						callback: () => frm.reload_doc() || d.hide(),
 			// 						error: () => d.hide()
 			// 					})
 			// 				},
