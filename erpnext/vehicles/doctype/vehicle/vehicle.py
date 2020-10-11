@@ -212,7 +212,7 @@ def set_reserved_vehicles_from_po(source, target):
 		vehicle_map.setdefault(key, []).append(d.name)
 
 	for d in target.items:
-		row_sales_order = source.getone('items', filters={'name': d.purchase_order_item})
+		row_sales_order = source.getone('items', filters={'name': d.get('purchase_order_item') or d.get('po_detail')})
 		row_sales_order = row_sales_order.sales_order if row_sales_order else ""
 		key = (d.item_code, row_sales_order)
 		if key in vehicle_map:
