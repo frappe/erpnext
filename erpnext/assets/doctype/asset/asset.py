@@ -477,12 +477,10 @@ class Asset(AccountsController):
 		expense_booked = False
 		cwip_booked = False
 
-		if asset_bought_with_invoice:
-			expense_booked = frappe.db.sql("""SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s""",
-				(purchase_document, fixed_asset_account), as_dict=1)
-		else:
-			cwip_booked = frappe.db.sql("""SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s""",
-				(purchase_document, cwip_account), as_dict=1)
+		expense_booked = frappe.db.sql("""SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s""",
+			(purchase_document, fixed_asset_account), as_dict=1)
+		cwip_booked = frappe.db.sql("""SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s""",
+			(purchase_document, cwip_account), as_dict=1)
 
 		if cwip_enabled and (expense_booked or not cwip_booked):
 			# if expense has already booked from invoice or cwip is booked from receipt
