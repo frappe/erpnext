@@ -277,6 +277,8 @@ class SalesOrder(SellingController):
 			frappe.throw(_("Work Order {0} must be cancelled before cancelling this Sales Order")
 				.format(", ".join(pro_order)))
 
+
+
 	def check_modified_date(self):
 		mod_db = frappe.db.get_value("Sales Order", self.name, "modified")
 		date_diff = frappe.db.sql("select TIMEDIFF('%s', '%s')" %
@@ -970,7 +972,11 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 						"contact_email",
 						"contact_person",
 						"taxes_and_charges",
-						"currency"
+						"currency",
+						"transaction_type"
+					],
+					"field_map": [
+						['remarks', 'remarks']
 					],
 					"validation": {
 						"docstatus": ["=", 1]
