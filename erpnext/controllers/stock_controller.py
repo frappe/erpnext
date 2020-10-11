@@ -446,22 +446,6 @@ class StockController(AccountsController):
 					d.serial_no = d.vehicle
 
 
-def split_vehicle_items_by_qty(doc):
-	new_rows = []
-	for d in doc.items:
-		new_rows.append(d)
-		if d.qty > 1 and d.item_code and frappe.get_cached_value("Item", d.item_code, "is_vehicle"):
-			qty = cint(d.qty)
-			d.qty = 1
-
-			for i in range(qty - 1):
-				new_rows.append(frappe.copy_doc(d))
-
-	doc.items = new_rows
-	for i, d in enumerate(doc.items):
-		d.idx = i + 1
-
-
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None, company=None):
 	def _delete_gl_entries(voucher_type, voucher_no):

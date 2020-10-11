@@ -349,8 +349,9 @@ def close_or_unclose_purchase_orders(names, status):
 	frappe.local.message_log = []
 
 def set_missing_values(source, target):
-	from erpnext.controllers.stock_controller import split_vehicle_items_by_qty
+	from erpnext.vehicles.doctype.vehicle.vehicle import split_vehicle_items_by_qty, set_reserved_vehicles_from_po
 	split_vehicle_items_by_qty(target)
+	set_reserved_vehicles_from_po(source, target)
 
 	target.ignore_pricing_rule = 1
 	target.run_method("set_missing_values")

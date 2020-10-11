@@ -11,6 +11,11 @@ erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 				filters: {'is_vehicle': 1}
 			};
 		});
+		this.frm.set_query("sales_order", function() {
+			return {
+				filters: {'docstatus': ['!=', 2]}
+			};
+		});
 	},
 
 	refresh: function () {

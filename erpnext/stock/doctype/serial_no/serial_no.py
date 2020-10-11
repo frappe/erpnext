@@ -94,8 +94,15 @@ class SerialNo(StockController):
 		self.warranty_period = item.warranty_period
 
 	def update_customer_from_sales_order(self):
-		if self.sales_order and not (self.delivery_document_type and self.delivery_document_no):
-			self.customer = frappe.db.get_value("Sales Order", self.sales_order, "customer")
+		if self.sales_order:
+			so = frappe.db.get_value("Sales Order", self.sales_order, ["customer", "docstatus"], as_dict=1)
+
+			if so.docstatus == 2:
+				frappe.throw(_("Cannot set Sales Order as {0} because it is cancelled").format(self.sales_order))
+
+			if not (self.delivery_document_type and self.delivery_document_no):
+				self.customer = so.customer
+
 
 	def set_purchase_details(self, purchase_sle):
 		if purchase_sle:

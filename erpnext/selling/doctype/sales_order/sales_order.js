@@ -17,6 +17,7 @@ frappe.ui.form.on("Sales Order", {
 			'Work Order': "Work Order",
 			'Auto Repeat': "Subscription",
 			'Payment Request': "Payment Request",
+			'Vehicle': "Reserved Vehicles",
 		}
 		frm.add_fetch('customer', 'tax_id', 'tax_id');
 
@@ -168,6 +169,11 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					if(flt(doc.per_delivered, 6) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
 						this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note_based_on_delivery_date(), __('Create'));
 						this.frm.add_custom_button(__('Work Order'), () => this.make_work_order(), __('Create'));
+
+						var has_vehicles = doc.items.some(d => d.is_vehicle);
+						if (has_vehicles) {
+							this.frm.add_custom_button(__('Reserved Vehicles'), () => this.create_vehicles(), __('Create'));
+						}
 					}
 
 					this.frm.add_custom_button(__('Pick List'), () => this.create_pick_list(), __('Create'));
@@ -357,6 +363,89 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				}
 			}
 		});
+	},
+
+	create_vehicles: function () {
+		var me = this;
+		if (me.frm.doc.docstatus !== 1) {
+			return;
+		}
+
+		frappe.call({
+			method: "erpnext.vehicles.doctype.vehicle.vehicle.get_sales_order_vehicle_qty",
+			args: {
+				sales_order: me.frm.doc.name
+			},
+			callback: function (r) {
+				if (r.message) {
+					const fields = [{
+						label: 'Items',
+						fieldtype: 'Table',
+						fieldname: 'items',
+						fields: [{
+							fieldtype: 'Read Only',
+							fieldname: 'item_code',
+							label: __('Item Code'),
+							in_list_view: 1
+						}, {
+							fieldtype: 'Float',
+							fieldname: 'ordered_qty',
+							read_only: 1,
+							label: __('Ordered'),
+							in_list_view: 1
+						}, {
+							fieldtype: 'Float',
+							fieldname: 'reserved_qty',
+							read_only: 1,
+							label: __('Reserved'),
+							in_list_view: 1
+						}, {
+							fieldtype: 'Float',
+							fieldname: 'actual_qty',
+							read_only: 1,
+							label: __('In Stock'),
+							in_list_view: 1
+						}, {
+							fieldtype: 'Int',
+							fieldname: 'to_create_qty',
+							label: __('To Create'),
+							mandatory: 1,
+							in_list_view: 1
+						}],
+						data: r.message,
+						get_data: () => {
+							return r.message
+						}
+					}];
+
+					var d = new frappe.ui.Dialog({
+						title: __('Quantity of Reserved Vehicles to create'),
+						fields: fields,
+						size: 'large',
+						primary_action: function() {
+							var data = d.get_values().items;
+							var to_reserve_qty_map = {};
+							$.each(data || [], function (i, d) {
+								to_reserve_qty_map[d.item_code] = cint(d.to_create_qty);
+							});
+							frappe.call({
+								method: 'erpnext.vehicles.doctype.vehicle.vehicle.create_vehicle_from_so',
+								args: {
+									sales_order: me.frm.doc.name,
+									to_reserve_qty_map: to_reserve_qty_map
+								},
+								callback: function () {
+									d.hide();
+								},
+								freeze: true
+							});
+						},
+						primary_action_label: __('Create')
+					});
+					d.show();
+				}
+			}
+		})
 	},
 
 	order_type: function() {

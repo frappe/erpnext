@@ -13,11 +13,12 @@ def get_data():
 			'Material Request': ['items', 'material_request'],
 			'Supplier Quotation': ['items', 'supplier_quotation'],
 			'Project': ['items', 'project'],
+			'Sales Order': ['items', 'sales_order'],
 		},
 		'transactions': [
 			{
 				'label': _('Fulfilment'),
-				'items': ['Purchase Receipt', 'Purchase Invoice']
+				'items': ['Purchase Receipt', 'Purchase Invoice', 'Sales Order']
 			},
 			{
 				'label': _('Payment'),

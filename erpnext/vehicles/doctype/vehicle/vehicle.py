@@ -5,11 +5,22 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate, nowdate, cstr
+from frappe.utils import getdate, nowdate, cstr, cint
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
+from six import string_types
 
 class Vehicle(Document):
+	_copy_fields = [
+		'company',
+		'warehouse', 'sales_order',
+		'customer', 'customer_name',
+		'supplier', 'supplier_name',
+		'purchase_document_type', 'purchase_document_no', 'purchase_date', 'purchase_time', 'purchase_rate',
+		'delivery_document_type', 'delivery_document_no', 'delivery_date', 'delivery_time', 'sales_invoice',
+		'warranty_expiry_date', 'amc_expiry_date'
+	]
+
 	def autoname(self):
 		if self.flags.from_serial_no:
 			self.name = self.flags.from_serial_no
@@ -45,10 +56,17 @@ class Vehicle(Document):
 			if not frappe.db.exists("Serial No", self.name):
 				serial_no_doc = frappe.new_doc("Serial No")
 				serial_no_doc.flags.from_vehicle = self.name
+
+				for fieldname in self._copy_fields:
+					serial_no_doc.set(fieldname, self.get(fieldname))
+
+				serial_no_doc.item_code = self.item_code
 				serial_no_doc.serial_no = self.name
 				serial_no_doc.vehicle = self.name
-				serial_no_doc.item_code = self.item_code
 				serial_no_doc.insert()
+
+				self.update_reference_from_serial_no(serial_no_doc)
+				self.db_update()
 
 	def validate_item(self):
 		item = frappe.get_cached_doc("Item", self.item_code)
@@ -72,17 +90,7 @@ class Vehicle(Document):
 			serial_no_doc.flags.from_vehicle = self.name
 			serial_no_doc.save()
 
-		fields = [
-			'company',
-			'warehouse', 'sales_order',
-			'customer', 'customer_name',
-			'supplier', 'supplier_name',
-			'purchase_document_type', 'purchase_document_no', 'purchase_date', 'purchase_time', 'purchase_rate',
-			'delivery_document_type', 'delivery_document_no', 'delivery_date', 'delivery_time', 'sales_invoice',
-			'warranty_expiry_date', 'amc_expiry_date'
-		]
-
-		for f in fields:
+		for f in self._copy_fields:
 			self.set(f, serial_no_doc.get(f))
 
 	def delete_serial_no_on_trash(self):
@@ -109,3 +117,220 @@ class Vehicle(Document):
 			self.status = "Inactive"
 		else:
 			self.status = "Active"
+
+
+def split_vehicle_items_by_qty(doc):
+	new_rows = []
+	for d in doc.items:
+		new_rows.append(d)
+		if d.qty > 1 and d.item_code and frappe.get_cached_value("Item", d.item_code, "is_vehicle"):
+			qty = cint(d.qty)
+			d.qty = 1
+
+			for i in range(qty - 1):
+				new_rows.append(frappe.copy_doc(d))
+
+	doc.items = new_rows
+	for i, d in enumerate(doc.items):
+		d.idx = i + 1
+
+
+def get_reserved_vehicles(sales_order, additional_filters=None):
+	if isinstance(sales_order, list):
+		sales_order_cond = ['in', sales_order]
+	else:
+		sales_order_cond = sales_order
+
+	filters = {
+		'sales_order': sales_order_cond,
+	}
+	if additional_filters:
+		filters.update(additional_filters)
+
+	return frappe.get_all("Vehicle",
+		fields=[
+			'name', 'item_code', 'warehouse', 'sales_order',
+			'delivery_document_type', 'delivery_document_no',
+			'purchase_document_type', 'purchase_document_no',
+		],
+		filters=filters,
+		order_by="timestamp(purchase_date, purchase_time) desc")  # desc because popping from list
+
+
+def set_reserved_vehicles_from_so(source, target):
+	additional_filters = None
+	if target.doctype == "Delivery Note" or (target.doctype == "Sales Invoice" and target.update_stock):
+		additional_filters = {
+			'delivery_document_no': ['is', 'not set'],
+		}
+
+	def get_key(row):
+		return cstr(row.item_code), cstr(row.warehouse)
+
+	vehicles = get_reserved_vehicles(source.name, additional_filters)
+	if not vehicles:
+		return
+
+	vehicle_map = {}
+	for d in vehicles:
+		key = get_key(d)
+		vehicle_map.setdefault(key, []).append(d.name)
+
+	# set vehicles with warehouse first
+	for d in target.items:
+		key = get_key(d)
+		if key in vehicle_map:
+			item_vehicle_list = vehicle_map.get(key)
+			if item_vehicle_list:
+				d.vehicle = item_vehicle_list.pop()
+
+	# set vehicles without warehouse too
+	for d in target.items:
+		if d.vehicle:
+			continue
+
+		key = (d.item_code, "")
+		if key in vehicle_map:
+			item_vehicle_list = vehicle_map.get(key)
+			if item_vehicle_list:
+				d.vehicle = item_vehicle_list.pop()
+
+
+def set_reserved_vehicles_from_po(source, target):
+	sales_orders = [d.get('sales_order') for d in source.items if d.get('sales_order')]
+	additional_filters = None
+	if target.doctype == "Purchase Receipt" or (target.doctype == "Purchase Invoice" and target.update_stock):
+		additional_filters = {
+			'purchase_document_no': ['is', 'not set'],
+			'warehouse': ['is', 'not set'],
+		}
+
+	vehicles = get_reserved_vehicles(sales_orders, additional_filters)
+	vehicle_map = {}
+	for d in vehicles:
+		key = (d.item_code, d.sales_order)
+		vehicle_map.setdefault(key, []).append(d.name)
+
+	for d in target.items:
+		row_sales_order = source.getone('items', filters={'name': d.purchase_order_item})
+		row_sales_order = row_sales_order.sales_order if row_sales_order else ""
+		key = (d.item_code, row_sales_order)
+		if key in vehicle_map:
+			item_vehicle_list = vehicle_map.get(key)
+			if item_vehicle_list:
+				d.vehicle = item_vehicle_list.pop()
+
+
+@frappe.whitelist()
+def get_sales_order_vehicle_qty(sales_order):
+	vehicle_item_rows = frappe.db.sql("""
+		select item_code, sum(qty)
+		from `tabSales Order Item`
+		where docstatus = 1 and parent = %s and is_vehicle = 1
+		group by item_code
+	""", sales_order)
+
+	ordered_qty_map = dict(vehicle_item_rows) if vehicle_item_rows else {}
+	vehicle_item_codes = list(ordered_qty_map.keys())
+
+	if not vehicle_item_rows:
+		frappe.throw(_("No Vehicle Items found in {0}").format(sales_order))
+
+	actual_qty_map = frappe.db.sql("""
+		select item_code, sum(actual_qty)
+		from `tabBin`
+		where item_code in %s
+		group by item_code
+	""", [vehicle_item_codes])
+	actual_qty_map = dict(actual_qty_map) if actual_qty_map else {}
+
+	reserved_qty_map = get_reserved_vehicle_qty(sales_order)
+
+	result = {}
+	empty_dict = {"actual_qty": 0, "reserved_qty": 0, "ordered_qty": 0}
+
+	for item_code, reserved_qty in reserved_qty_map.items():
+		result.setdefault(item_code, empty_dict.copy())
+		result[item_code]['reserved_qty'] += reserved_qty
+
+	for item_code, actual_qty in actual_qty_map.items():
+		result.setdefault(item_code, empty_dict.copy())
+		result[item_code]['actual_qty'] += actual_qty
+
+	for item_code, ordered_qty in ordered_qty_map.items():
+		result.setdefault(item_code, empty_dict.copy())
+		result[item_code]['ordered_qty'] += ordered_qty
+
+	out = []
+	for item_code, qty_dict in result.items():
+		qty_dict['item_code'] = item_code
+		qty_dict['to_create_qty'] = qty_dict['ordered_qty'] - qty_dict['reserved_qty']
+		out.append(qty_dict)
+
+	return out
+
+
+def get_reserved_vehicle_qty(sales_order):
+	reserved_qty_map = frappe.db.sql("""
+		select item_code, count(name)
+		from `tabVehicle`
+		where sales_order = %s
+		group by item_code
+	""", sales_order)
+
+	reserved_qty_map = dict(reserved_qty_map) if reserved_qty_map else {}
+	return reserved_qty_map
+
+
+@frappe.whitelist()
+def create_vehicle_from_so(sales_order, to_reserve_qty_map=None):
+	if not to_reserve_qty_map:
+		to_reserve_qty_map = {}
+	elif isinstance(to_reserve_qty_map, string_types):
+		to_reserve_qty_map = frappe.parse_json(to_reserve_qty_map)
+
+	so_doc = frappe.get_doc("Sales Order", sales_order)
+	if so_doc.docstatus != 1:
+		frappe.throw(_("Sales Order must be submitted to create reserved Vehicles"))
+
+	ordered_qty_map = {}
+	update_to_reserve_qty = not to_reserve_qty_map
+	for d in so_doc.items:
+		if d.is_vehicle:
+			ordered_qty_map.setdefault(d.item_code, 0)
+			ordered_qty_map[d.item_code] += d.qty
+
+			if update_to_reserve_qty:
+				to_reserve_qty_map.setdefault(d.item_code, 0)
+				to_reserve_qty_map[d.item_code] += d.qty
+
+	reserved_qty_map = get_reserved_vehicle_qty(sales_order)
+	vehicle_item_codes = list(set([d.item_code for d in so_doc.items if d.item_code and d.is_vehicle and d.qty]))
+	vehicles_created = []
+
+	for item_code, to_reserve_qty in to_reserve_qty_map.items():
+		if item_code not in vehicle_item_codes:
+			frappe.throw(_("Cannot create reserved {0} Vehicle because it does not exist in this Sales Order")
+				.format(frappe.bold(item_code)))
+
+		to_reserve_qty = cint(to_reserve_qty)
+		existing_qty = cint(reserved_qty_map.get(item_code, 0))
+		ordered_qty = cint(ordered_qty_map.get(item_code, 0))
+
+		if to_reserve_qty + existing_qty > ordered_qty:
+			frappe.throw(_("Cannot create {0} reserved {1} Vehicles because it would exceed Ordered Qty {2}")
+				.format(frappe.bold(to_reserve_qty), frappe.bold(item_code), frappe.bold(ordered_qty)))
+
+		for i in range(to_reserve_qty):
+			vehicle_doc = frappe.new_doc("Vehicle")
+			vehicle_doc.item_code = item_code
+			vehicle_doc.sales_order = sales_order
+			vehicle_doc.save()
+
+			vehicles_created.append(vehicle_doc)
+
+	if not vehicles_created:
+		frappe.msgprint(_("Nothing to create").format(sales_order))
+	else:
+		links = [frappe.utils.get_link_to_form('Vehicle', d.name) for d in vehicles_created]
+		frappe.msgprint(_("Reserved Vehicles created: {0}").format(", ".join(links)))

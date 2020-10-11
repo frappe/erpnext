@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
+  "is_vehicle",
   "customer_item_code",
   "col_break1",
   "item_name",
@@ -1203,11 +1204,19 @@
    "label": "Item Tax Detail",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_vehicle",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Vehicle",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-09 23:48:13.754655",
+ "modified": "2020-10-11 19:34:33.721451",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",
