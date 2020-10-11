@@ -170,7 +170,8 @@ erpnext.PointOfSale.Payment = class {
 				me.selected_mode = me[`${mode}_control`];
 				const doc = me.events.get_frm().doc;
 				me.selected_mode?.$input?.get(0).focus();
-				!me.selected_mode?.get_value() ? me.selected_mode?.set_value(doc.grand_total - doc.paid_amount) : '';
+				const current_value = me.selected_mode?.get_value()
+				!current_value && doc.grand_total > doc.paid_amount ? me.selected_mode?.set_value(doc.grand_total - doc.paid_amount) : '';
 			}
 		})
 
