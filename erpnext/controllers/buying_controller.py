@@ -46,6 +46,7 @@ class BuyingController(StockController):
 		self.validate_warehouse()
 		self.set_supplier_address()
 		self.validate_asset_return()
+		self.validate_transaction_type()
 
 		if self.doctype=="Purchase Invoice":
 			self.validate_purchase_receipt_if_update_stock()
@@ -114,6 +115,11 @@ class BuyingController(StockController):
 		if self.is_return and len(not_cancelled_asset):
 			frappe.throw(_("{} has submitted assets linked to it. You need to cancel the assets to create purchase return.".format(self.return_against)),
 				title=_("Not Allowed"))
+
+	def validate_transaction_type(self):
+		if self.get('transaction_type'):
+			if not frappe.get_cached_value("Transaction Type", self.transaction_type, 'buying'):
+				frappe.throw(_("Transaction Type {0} is not allowed for purchase transactions").format(frappe.bold(self.transaction_type)))
 
 	def get_asset_items(self):
 		if self.doctype not in ['Purchase Order', 'Purchase Invoice', 'Purchase Receipt']:

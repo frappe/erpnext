@@ -48,6 +48,7 @@ class SellingController(StockController):
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
 		self.validate_applies_to_item()
+		self.validate_transaction_type()
 
 	def set_missing_values(self, for_validate=False):
 
@@ -448,6 +449,11 @@ class SellingController(StockController):
 							frappe.throw(_("Row #{0}: Target Warehouse must be set for Item {1}").format(d.idx, d.item_code))
 						if target_warehouse_validation == "Not Allowed" and d.target_warehouse:
 							frappe.throw(_("Row #{0}: Target Warehouse must be not set for Item {1}").format(d.idx, d.item_code))
+
+	def validate_transaction_type(self):
+		if self.get('transaction_type'):
+			if not frappe.get_cached_value("Transaction Type", self.transaction_type, 'selling'):
+				frappe.throw(_("Transaction Type {0} is not allowed for sales transactions").format(frappe.bold(self.transaction_type)))
 
 	def validate_applies_to_item(self):
 		if self.meta.has_field('applies_to_item') and not self.get('applies_to_item'):
