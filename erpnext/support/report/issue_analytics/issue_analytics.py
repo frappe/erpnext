@@ -24,7 +24,6 @@ class IssueAnalytics(object):
 		self.get_data()
 		self.get_chart_data()
 
-		chart = []
 		return self.columns, self.data, None, self.chart
 
 	def get_columns(self):
@@ -76,18 +75,7 @@ class IssueAnalytics(object):
 			})
 
 	def get_data(self):
-		if self.filters.based_on == 'Customer':
-			self.get_customer_wise_issues()
-
-		elif self.filters.based_on == 'Assigned To':
-			self.get_assignment_wise_issues()
-
-		elif self.filters.based_on == 'Issue Type':
-			self.get_issue_type_wise_issues()
-
-		elif self.filters.based_on == 'Issue Priority':
-			self.get_priority_wise_issues()
-
+		self.get_issues()
 		self.get_rows()
 
 	def get_period(self, date):
@@ -100,43 +88,38 @@ class IssueAnalytics(object):
 		elif self.filters.range == 'Quarterly':
 			period = 'Quarter ' + str(((date.month - 1) // 3) + 1)
 		else:
-			year = get_fiscal_year(date)
+			year = get_fiscal_year(date, self.filters.company)
 			period = str(year[0])
+
+		if getdate(self.filters.from_date).year != getdate(self.filters.to_date).year and self.filters.range != 'Yearly':
+			period += ' ' + str(date.year)
 
 		return period
 
-	def get_customer_wise_issues(self):
+	def get_issues(self):
 		filters = self.get_common_filters()
+		self.field_map = {
+			'Customer': 'customer',
+			'Issue Type': 'issue_type',
+			'Issue Priority': 'priority',
+			'Assigned To': '_assign'
+		}
 
 		self.entries = frappe.db.get_all('Issue',
-			fields=['customer', 'name', 'opening_date'],
-			filters=filters
-		)
-
-	def get_assignment_wise_issues(self):
-		filters = self.get_common_filters()
-		self.entries = frappe.db.get_all('Issue',
-			fields=['_assign', 'name', 'opening_date'],
-			filters=filters
-		)
-
-	def get_issue_type_wise_issues(self):
-		filters = self.get_common_filters()
-		self.entries = frappe.db.get_all('Issue',
-			fields=['issue_type', 'name', 'opening_date'],
-			filters=filters
-		)
-
-	def get_priority_wise_issues(self):
-		filters = self.get_common_filters()
-		self.entries = frappe.db.get_all('Issue',
-			fields=['priority', 'name', 'opening_date'],
+			fields=[self.field_map.get(self.filters.based_on), 'name', 'opening_date'],
 			filters=filters
 		)
 
 	def get_common_filters(self):
 		filters = {}
 		filters['opening_date'] = ('between', [self.filters.from_date, self.filters.to_date])
+
+		if self.filters.get('assigned_to'):
+			filters['_assign'] = ('like', '%' + self.filters.get('assigned_to') + '%')
+
+		for entry in ['company', 'status', 'priority', 'customer', 'project']:
+			if self.filters.get(entry):
+				filters[entry] = self.filters.get(entry)
 
 		return filters
 
@@ -170,23 +153,21 @@ class IssueAnalytics(object):
 
 		for d in self.entries:
 			period = self.get_period(d.get('opening_date'))
-			if self.filters.based_on == 'Customer':
-				self.issue_periodic_data.setdefault(d.customer, frappe._dict()).setdefault(period, 0.0)
-				self.issue_periodic_data[d.customer][period] += 1
 
-			elif self.filters.based_on == 'Assigned To':
+			if self.filters.based_on == 'Assigned To':
 				if d._assign:
 					for entry in json.loads(d._assign):
 						self.issue_periodic_data.setdefault(entry, frappe._dict()).setdefault(period, 0.0)
 						self.issue_periodic_data[entry][period] += 1
 
-			elif self.filters.based_on == 'Issue Type':
-				self.issue_periodic_data.setdefault(d.issue_type, frappe._dict()).setdefault(period, 0.0)
-				self.issue_periodic_data[d.issue_type][period] += 1
+			else:
+				field = self.field_map.get(self.filters.based_on)
+				value = d.get(field)
+				if not value:
+					value = _('Not Specified')
 
-			elif self.filters.based_on == 'Issue Priority':
-				self.issue_periodic_data.setdefault(d.priority, frappe._dict()).setdefault(period, 0.0)
-				self.issue_periodic_data[d.priority][period] += 1
+				self.issue_periodic_data.setdefault(value, frappe._dict()).setdefault(period, 0.0)
+				self.issue_periodic_data[value][period] += 1
 
 	def get_chart_data(self):
 		length = len(self.columns)
