@@ -328,8 +328,15 @@ $.extend(erpnext.item, {
 					filters: filters
 				}
 			}
-
 		}
+
+		frm.set_query("applicable_to", function (doc, cdt, cdn) {
+			if (!doc.__islocal) {
+				return {
+					filters: { 'name': ['!=', doc.name] }
+				}
+			}
+		});
 
 		frm.fields_dict['deferred_revenue_account'].get_query = function() {
 			return {

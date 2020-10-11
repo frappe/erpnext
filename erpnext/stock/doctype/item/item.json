@@ -73,6 +73,10 @@
   "end_of_life",
   "column_break1",
   "default_material_request_type",
+  "sec_applicable_to",
+  "applicable_to",
+  "column_break_66",
+  "applicable_to_all",
   "reorder_section",
   "reorder_levels",
   "serial_nos_and_batches",
@@ -1157,6 +1161,30 @@
    "fieldtype": "Link",
    "label": "Default Raw Material UOM",
    "options": "UOM"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "applicable_to",
+   "fieldname": "sec_applicable_to",
+   "fieldtype": "Section Break",
+   "label": "Applicable To"
+  },
+  {
+   "fieldname": "applicable_to",
+   "fieldtype": "Table MultiSelect",
+   "label": "Applicable To Items",
+   "no_copy": 1,
+   "options": "Item Applicable To"
+  },
+  {
+   "default": "0",
+   "fieldname": "applicable_to_all",
+   "fieldtype": "Check",
+   "label": "Applicable to All Items"
+  },
+  {
+   "fieldname": "column_break_66",
+   "fieldtype": "Column Break"
   }
  ],
  "has_web_view": 1,
@@ -1164,7 +1192,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-10-10 15:05:31.457766",
+ "modified": "2020-10-11 04:35:40.170776",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

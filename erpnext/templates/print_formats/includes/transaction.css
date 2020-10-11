@@ -22,6 +22,10 @@
 		padding: 0.1in;
 	}
 
+	.transaction-pf .sec-details:not(:first-child) {
+		margin-top: 10px;
+	}
+
 	.transaction-pf .sec-details .party {
 		width: 69%;
 		float: left;
@@ -42,6 +46,28 @@
 	}
 	.transaction-pf .doc .value {
 		width: 67%;
+	}
+
+	.transaction-pf .sec-details .applies-to-left {
+		width: 59%;
+		float: left;
+	}
+	.transaction-pf .applies-to-left .print-col {
+		width: 17%;
+	}
+	.transaction-pf .applies-to-left .value {
+		width: 82%;
+	}
+
+	.transaction-pf .sec-details .applies-to-right {
+		width: 40%;
+		float: right;
+	}
+	.transaction-pf .applies-to-right .print-col {
+		width: 35%;
+	}
+	.transaction-pf .applies-to-right .value {
+		width: 64%;
 	}
 
 	.transaction-pf .print-row {

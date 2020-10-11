@@ -216,6 +216,16 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		# scan description only if items are less than 50000
 		description_cond = 'or tabItem.description LIKE %(txt)s'
 
+	applicable_to_item_cond = ""
+	if filters.get('applicable_to_item'):
+		applicable_to_item = filters.get('applicable_to_item')
+		del filters['applicable_to_item']
+		applicable_to_item_cond = """and (tabItem.applicable_to_all = 1
+			or exists(select ap.name
+				from `tabItem Applicable To` ap
+				where ap.parent = tabItem.name and ap.applicable_to_item = {0}))
+		""".format(frappe.db.escape(applicable_to_item))
+
 	return frappe.db.sql("""select tabItem.name,
 		if(length(tabItem.item_name) > 40,
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name,
@@ -230,7 +240,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
 			and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
 				{description_cond})
-			{fcond} {mcond}
+			{fcond} {mcond} {applicable_to_item_cond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
@@ -241,7 +251,8 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			scond=searchfields,
 			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
 			mcond=get_match_cond(doctype).replace('%', '%%'),
-			description_cond = description_cond),
+			description_cond = description_cond,
+			applicable_to_item_cond=applicable_to_item_cond),
 			{
 				"today": nowdate(),
 				"txt": "%%%s%%" % txt,

@@ -47,6 +47,7 @@ class SellingController(StockController):
 		self.set_customer_address()
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
+		self.validate_applies_to_item()
 
 	def set_missing_values(self, for_validate=False):
 
@@ -447,6 +448,17 @@ class SellingController(StockController):
 							frappe.throw(_("Row #{0}: Target Warehouse must be set for Item {1}").format(d.idx, d.item_code))
 						if target_warehouse_validation == "Not Allowed" and d.target_warehouse:
 							frappe.throw(_("Row #{0}: Target Warehouse must be not set for Item {1}").format(d.idx, d.item_code))
+
+	def validate_applies_to_item(self):
+		if self.meta.has_field('applies_to_item') and not self.get('applies_to_item'):
+			self.applies_to_item_name = ''
+
+		if self.meta.has_field('applies_to_vehicle') and not self.get('applies_to_vehicle'):
+			self.vehicle_license_plate = ''
+			self.vehicle_chassis_no = ''
+			self.vehicle_engine_no = ''
+			self.vehicle_last_odometer = ''
+			self.vehicle_color = ''
 
 def set_default_income_account_for_item(obj):
 	for d in obj.get("items"):

@@ -79,6 +79,22 @@
 		</div>
 	</div>
 
+	{% if doc.get('applies_to_item') %}
+		<div class="sec-details clearfix">
+			<div class="applies-to-left">
+				{{ row('Product', doc.get('applies_to_item_name')) }}
+				{{ row('Vehicle Id', doc.get('applies_to_vehicle')) }}
+				{{ row('Color', doc.get('vehicle_color')) }}
+			</div>
+			<div class="applies-to-right">
+				{{ row('License Plate', doc.get_formatted('vehicle_license_plate')) }}
+				{{ row('Engine No', doc.get_formatted('vehicle_engine_no')) }}
+				{{ row('Chassis No', doc.get_formatted('vehicle_chassis_no')) }}
+				{{ row('Odometer Value', doc.get_formatted('vehicle_last_odometer')) }}
+			</div>
+		</div>
+	{% endif %}
+
 {% include template_file or 'templates/print_formats/includes/tax_exclusive_transaction.html' %}
 
 	<!-- Footer Section -->

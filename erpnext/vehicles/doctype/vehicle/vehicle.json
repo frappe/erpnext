@@ -400,6 +400,7 @@
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
+   "in_preview": 1,
    "label": "Customer Name",
    "no_copy": 1,
    "oldfieldname": "customer_name",
@@ -538,7 +539,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2020-10-11 02:02:21.819042",
+ "modified": "2020-10-11 04:57:22.726388",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",

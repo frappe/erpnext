@@ -83,15 +83,27 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 
+		if(this.frm.fields_dict.applies_to_vehicle) {
+			this.frm.set_query("applies_to_vehicle", function(doc) {
+				if (doc.applies_to_item) {
+					return {filters: {item_code: doc.applies_to_item}};
+				}
+			});
+		}
+
 		if(!this.frm.fields_dict["items"]) {
 			return;
 		}
 
 		if(this.frm.fields_dict["items"].grid.get_field('item_code')) {
-			this.frm.set_query("item_code", "items", function() {
+			this.frm.set_query("item_code", "items", function(doc) {
+				var filters = {'is_sales_item': 1};
+				if (doc.applies_to_item) {
+					filters.applicable_to_item = doc.applies_to_item;
+				}
 				return {
 					query: "erpnext.controllers.queries.item_query",
-					filters: {'is_sales_item': 1}
+					filters: filters
 				}
 			});
 		}
@@ -294,6 +306,22 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		var row = frappe.get_doc(cdt, cdn);
 		this.calculate_incentive(row);
 		refresh_field("incentives",row.name,row.parentfield);
+	},
+
+	applies_to_item: function () {
+		if (!this.frm.doc.applies_to_item) {
+			this.frm.set_value('applies_to_item_name', '');
+		}
+	},
+
+	applies_to_vehicle: function () {
+		if (!this.frm.doc.applies_to_vehicle) {
+			this.frm.set_value('vehicle_license_plate', '');
+			this.frm.set_value('vehicle_chassis_no', '');
+			this.frm.set_value('vehicle_engine_no', '');
+			this.frm.set_value('vehicle_last_odometer', '');
+			this.frm.set_value('vehicle_color', '');
+		}
 	},
 
 	warehouse: function(doc, cdt, cdn) {

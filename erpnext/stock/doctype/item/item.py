@@ -140,6 +140,7 @@ class Item(WebsiteGenerator):
 		self.validate_item_defaults()
 		self.validate_customer_provided_part()
 		self.validate_auto_reorder_enabled_in_stock_settings()
+		self.validate_applicable_to()
 		self.cant_change()
 		self.update_show_in_website()
 
@@ -1095,6 +1096,11 @@ class Item(WebsiteGenerator):
 			enabled = frappe.db.get_single_value('Stock Settings', 'auto_indent')
 			if not enabled:
 				frappe.msgprint(msg=_("You have to enable auto re-order in Stock Settings to maintain re-order levels."), title=_("Enable Auto Re-Order"), indicator="orange")
+
+	def validate_applicable_to(self):
+		for d in self.applicable_to:
+			if d.applicable_to_item == self.name:
+				frappe.throw(_("Row #{0}: Applicable To Item cannot be the same as this Item").format(d.idx))
 
 def get_timeline_data(doctype, name):
 	'''returns timeline data based on stock ledger entry'''
