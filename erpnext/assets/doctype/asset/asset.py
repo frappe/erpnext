@@ -465,21 +465,18 @@ class Asset(AccountsController):
 					return cint(d.idx) - 1
 
 	def validate_make_gl_entry(self):
-		if not is_cwip_accounting_enabled(self.asset_category): return False
 		purchase_document = self.get_purchase_document()
 		asset_bought_with_invoice = purchase_document == self.purchase_invoice
 		fixed_asset_account, cwip_account = self.get_asset_accounts()
-		cwip_enabled = True
+		cwip_enabled = is_cwip_accounting_enabled(self.asset_category)
 		# check if expense already has been booked in case of cwip was enabled after purchasing asset
 		expense_booked = False
 		cwip_booked = False
 
-		if asset_bought_with_invoice:
-			expense_booked = frappe.db.sql("""SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s""",
-				(purchase_document, fixed_asset_account), as_dict=1)
-		else:
-			cwip_booked = frappe.db.sql("""SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s""",
-				(purchase_document, cwip_account), as_dict=1)
+		expense_booked = frappe.db.sql("""SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s""",
+			(purchase_document, fixed_asset_account), as_dict=1)
+		cwip_booked = frappe.db.sql("""SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s""",
+			(purchase_document, cwip_account), as_dict=1)
 
 		if cwip_enabled and (expense_booked or not cwip_booked):
 			# if expense has already booked from invoice or cwip is booked from receipt
