@@ -22,8 +22,12 @@ class JournalEntry(AccountsController):
 		return self.voucher_type
 
 	def validate(self):
+		if self.voucher_type == 'Opening Entry':
+			self.is_opening = 'Yes'
+
 		if not self.is_opening:
 			self.is_opening='No'
+
 		self.clearance_date = None
 
 		self.validate_party()
