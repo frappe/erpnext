@@ -117,6 +117,8 @@ class BuyingController(StockController):
 				title=_("Not Allowed"))
 
 	def validate_transaction_type(self):
+		super(BuyingController, self).validate_transaction_type()
+
 		if self.get('transaction_type'):
 			if not frappe.get_cached_value("Transaction Type", self.transaction_type, 'buying'):
 				frappe.throw(_("Transaction Type {0} is not allowed for purchase transactions").format(frappe.bold(self.transaction_type)))

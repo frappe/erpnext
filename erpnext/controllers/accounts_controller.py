@@ -1193,6 +1193,24 @@ class AccountsController(TransactionBase):
 		else:
 			return frappe.db.get_single_value("Global Defaults", "disable_rounded_total")
 
+	def validate_transaction_type(self):
+		if self.get('transaction_type'):
+			doc = frappe.get_cached_doc("Transaction Type", self.get('transaction_type'))
+			dt_not_allowed = [d.document_type for d in doc.document_types_not_allowed]
+			if self.doctype in dt_not_allowed:
+				frappe.throw(_("Not allowed to create {0} for Transaction Type {1}")
+					.format(frappe.bold(self.doctype), frappe.bold(self.get('transaction_type'))))
+
+	def validate_zero_outstanding(self):
+		if self.get('transaction_type'):
+			validate_zero_outstanding = cint(frappe.get_cached_value('Transaction Type', self.get('transaction_type'),
+				'validate_zero_outstanding'))
+
+			if validate_zero_outstanding and self.outstanding_amount != 0:
+				frappe.throw(_("Outstanding Amount must be 0 for Transaction Type {0}")
+					.format(frappe.bold(self.get('transaction_type'))))
+
+
 @frappe.whitelist()
 def get_tax_rate(account_head):
 	return frappe.db.get_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)

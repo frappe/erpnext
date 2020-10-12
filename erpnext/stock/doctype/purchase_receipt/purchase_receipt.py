@@ -165,10 +165,16 @@ class PurchaseReceipt(BuyingController):
 			self.validate_rate_with_reference_doc([["Purchase Order", "purchase_order", "purchase_order_item"]])
 
 	def po_required(self):
-		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
+		po_required = frappe.get_cached_value("Buying Settings", None, 'po_required') == 'Yes'
+		if self.get('transaction_type'):
+			tt_po_required = frappe.get_cached_value('Transaction Type', self.get('transaction_type'), 'po_required')
+			if tt_po_required:
+				po_required = tt_po_required == 'Yes'
+
+		if po_required:
 			for d in self.get('items'):
 				if not d.purchase_order:
-					frappe.throw(_("Purchase Order number required for Item {0}").format(d.item_code))
+					frappe.throw(_("Purchase Order required for Item {0}").format(d.item_code))
 
 	def get_already_received_qty(self, po, po_detail):
 		qty = frappe.db.sql("""select sum(qty) from `tabPurchase Receipt Item`

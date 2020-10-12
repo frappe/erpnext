@@ -24,5 +24,28 @@ frappe.ui.form.on('Transaction Type', {
 				filters: filters
 			}
 		});
+		frm.set_query('document_types_not_allowed', function(doc, cdt, cdn) {
+			var already_selected = doc.document_types_not_allowed.map(d => d.document_type);
+
+			var document_types = [];
+			if (doc.selling) {
+				document_types.push('Quotation');
+				document_types.push('Sales Order');
+				document_types.push('Delivery Note');
+				document_types.push('Sales Invoice');
+			}
+			if (doc.buying) {
+				document_types.push('Supplier Quotation');
+				document_types.push('Purchase Order');
+				document_types.push('Purchase Receipt');
+				document_types.push('Purchase Invoice');
+			}
+			return {
+				filters: [
+					['name', 'in', document_types],
+					['name', 'not in', already_selected]
+				]
+			}
+		});
 	}
 });

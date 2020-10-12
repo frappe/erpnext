@@ -11,6 +11,15 @@
   "buying",
   "column_break_3",
   "order_type",
+  "sec_validations",
+  "document_types_not_allowed",
+  "allow_non_profit_and_loss_expense_account",
+  "validate_zero_outstanding",
+  "column_break_10",
+  "so_required",
+  "dn_required",
+  "po_required",
+  "pr_required",
   "sec_break_1",
   "item_defaults",
   "sec_billing_defaults",
@@ -72,9 +81,64 @@
    "fieldtype": "Table",
    "label": "Billing Defaults",
    "options": "Party Account"
+  },
+  {
+   "fieldname": "sec_validations",
+   "fieldtype": "Section Break",
+   "label": "Validations"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_non_profit_and_loss_expense_account",
+   "fieldtype": "Check",
+   "label": "Allow Non Profit and Loss Account as Expense Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "validate_zero_outstanding",
+   "fieldtype": "Check",
+   "label": "Must be Paid in Advance"
+  },
+  {
+   "fieldname": "document_types_not_allowed",
+   "fieldtype": "Table MultiSelect",
+   "label": "Document Types Not Allowed",
+   "options": "Transaction Type Document Type"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "selling",
+   "fieldname": "so_required",
+   "fieldtype": "Select",
+   "label": "Sales Order Required",
+   "options": "\nNo\nYes"
+  },
+  {
+   "depends_on": "selling",
+   "fieldname": "dn_required",
+   "fieldtype": "Select",
+   "label": "Delivery Note Required",
+   "options": "\nNo\nYes"
+  },
+  {
+   "depends_on": "buying",
+   "fieldname": "po_required",
+   "fieldtype": "Select",
+   "label": "Purchase Order Required",
+   "options": "\nNo\nYes"
+  },
+  {
+   "depends_on": "buying",
+   "fieldname": "pr_required",
+   "fieldtype": "Select",
+   "label": "Purchase Receipt Required",
+   "options": "\nNo\nYes"
   }
  ],
- "modified": "2020-10-02 17:18:19.310329",
+ "modified": "2020-10-12 13:58:08.300675",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transaction Type",

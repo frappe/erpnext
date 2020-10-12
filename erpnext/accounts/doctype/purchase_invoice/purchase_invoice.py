@@ -155,8 +155,7 @@ class PurchaseInvoice(BuyingController):
 		self.set_tax_withholding()
 
 		if not self.is_return:
-			self.po_required()
-			self.pr_required()
+			self.po_pr_required()
 			self.validate_supplier_invoice()
 
 		self.validate_update_stock_mandatory()
@@ -387,32 +386,39 @@ class PurchaseInvoice(BuyingController):
 
 		self.against_expense_account = ", ".join(against_accounts)
 
-	def po_required(self):
-		if frappe.db.get_value("Buying Settings", None, "po_required") == 'Yes':
+	def po_pr_required(self):
+		"""check in manage account if sales order / delivery note required or not."""
+		if self.is_return:
+			return
 
-			if frappe.get_value('Supplier', self.supplier, 'allow_purchase_invoice_creation_without_purchase_order'):
-				return
+		po_required = frappe.get_cached_value("Buying Settings", None, 'po_required') == 'Yes'
+		pr_required = frappe.get_cached_value("Buying Settings", None, 'pr_required') == 'Yes'
 
-			for d in self.get('items'):
-				if not d.purchase_order:
-					throw(_("""Purchase Order Required for item {0}
-						To submit the invoice without purchase order please set
-						{1} as {2} in {3}""").format(frappe.bold(d.item_code), frappe.bold(_('Purchase Order Required')),
-						frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings')))
+		if po_required and frappe.get_cached_value('Supplier', self.supplier, 'po_not_required'):
+			po_required = False
+		if pr_required and frappe.get_cached_value('Supplier', self.supplier, 'pr_not_required'):
+			pr_required = False
 
-	def pr_required(self):
-		stock_items = self.get_stock_items()
-		if frappe.db.get_value("Buying Settings", None, "pr_required") == 'Yes':
+		if self.get('transaction_type'):
+			tt_po_required = frappe.get_cached_value('Transaction Type', self.get('transaction_type'), 'po_required')
+			tt_pr_required = frappe.get_cached_value('Transaction Type', self.get('transaction_type'), 'pr_required')
+			if tt_po_required:
+				po_required = tt_po_required == 'Yes'
+			if tt_pr_required:
+				pr_required = tt_pr_required == 'Yes'
 
-			if frappe.get_value('Supplier', self.supplier, 'allow_purchase_invoice_creation_without_purchase_receipt'):
-				return
+		if not po_required and not pr_required:
+			return
 
-			for d in self.get('items'):
-				if not d.purchase_receipt and d.item_code in stock_items:
-					throw(_("""Purchase Receipt Required for item {0}
-						To submit the invoice without purchase receipt please set
-						{1} as {2} in {3}""").format(frappe.bold(d.item_code), frappe.bold(_('Purchase Receipt Required')),
-						frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings')))
+		for d in self.get('items'):
+			if not d.item_code:
+				continue
+
+			is_stock_item = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
+			if po_required and not d.get('purchase_order'):
+				frappe.throw(_("Purchase Order is mandatory for Item {0}").format(d.item_code))
+			if pr_required and not d.get('purchase_receipt') and is_stock_item:
+				frappe.throw(_("Purchase Receipt is mandatory for Item {0}").format(d.item_code))
 
 	def validate_write_off_account(self):
 		if self.write_off_amount and not self.write_off_account:
@@ -470,6 +476,8 @@ class PurchaseInvoice(BuyingController):
 
 		# this sequence because outstanding may get -negative
 		self.make_gl_entries()
+
+		self.validate_zero_outstanding()
 
 		self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)

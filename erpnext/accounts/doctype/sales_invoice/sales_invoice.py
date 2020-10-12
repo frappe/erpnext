@@ -284,6 +284,8 @@ class SalesInvoice(SellingController):
 		if self.redeem_loyalty_points and self.loyalty_points:
 			self.apply_loyalty_points()
 
+		self.validate_zero_outstanding()
+
 		# Healthcare Service Invoice.
 		domain_settings = frappe.get_doc('Domain Settings')
 		active_domains = [d.domain for d in domain_settings.active_domains]
@@ -602,20 +604,34 @@ class SalesInvoice(SellingController):
 		if self.is_return:
 			return
 
-		prev_doc_field_map = {'Sales Order': ['so_required', 'is_pos'],'Delivery Note': ['dn_required', 'update_stock']}
-		for key, value in iteritems(prev_doc_field_map):
-			if frappe.db.get_single_value('Selling Settings', value[0]) == 'Yes':
+		so_required = frappe.get_cached_value("Selling Settings", None, 'so_required') == 'Yes'
+		dn_required = frappe.get_cached_value("Selling Settings", None, 'dn_required') == 'Yes'
 
-				if frappe.get_value('Customer', self.customer, value[0]):
-					continue
+		if so_required and frappe.get_cached_value('Customer', self.customer, 'so_not_required'):
+			so_required = False
+		if dn_required and frappe.get_cached_value('Customer', self.customer, 'dn_not_required'):
+			dn_required = False
 
-				for d in self.get('items'):
-					if not d.item_code: continue
+		if self.get('transaction_type'):
+			tt_so_required = frappe.get_cached_value('Transaction Type', self.get('transaction_type'), 'so_required')
+			tt_dn_required = frappe.get_cached_value('Transaction Type', self.get('transaction_type'), 'dn_required')
+			if tt_so_required:
+				so_required = tt_so_required == 'Yes'
+			if tt_dn_required:
+				dn_required = tt_dn_required == 'Yes'
 
-					is_stock_item = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
-					if (d.item_code and is_stock_item ==1 and not d.get(key.lower().replace(' ', '_')) and not self.get(value[1])):
-						msgprint(_("{0} is mandatory for Item {1}").format(key, d.item_code), raise_exception=1)
+		if not so_required and not dn_required:
+			return
 
+		for d in self.get('items'):
+			if not d.item_code:
+				continue
+
+			is_stock_item = frappe.get_cached_value('Item', d.item_code, 'is_stock_item')
+			if so_required and not d.get('sales_order') and not self.get('is_pos'):
+				frappe.throw(_("Sales Order is mandatory for Item {0}").format(d.item_code))
+			if dn_required and not d.get('delivery_note') and is_stock_item and not self.get('is_pos'):
+				frappe.throw(_("Delivery Note is mandatory for Item {0}").format(d.item_code))
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""

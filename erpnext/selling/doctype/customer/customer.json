@@ -29,8 +29,8 @@
   "column_break_45",
   "default_currency",
   "default_price_list",
-  "so_required",
-  "dn_required",
+  "so_not_required",
+  "dn_not_required",
   "column_break_13",
   "gender",
   "language",
@@ -472,18 +472,6 @@
    "options": "Customer Credit Limit"
   },
   {
-   "default": "0",
-   "fieldname": "so_required",
-   "fieldtype": "Check",
-   "label": "Allow Sales Invoice Creation Without Sales Order"
-  },
-  {
-   "default": "0",
-   "fieldname": "dn_required",
-   "fieldtype": "Check",
-   "label": "Allow Sales Invoice Creation Without Delivery Note"
-  },
-  {
    "fieldname": "column_break_9",
    "fieldtype": "Column Break"
   },
@@ -520,12 +508,24 @@
   {
    "fieldname": "column_break_61",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "so_not_required",
+   "fieldtype": "Check",
+   "label": "Allow Sales Invoice Creation Without Sales Order"
+  },
+  {
+   "default": "0",
+   "fieldname": "dn_not_required",
+   "fieldtype": "Check",
+   "label": "Allow Sales Invoice Creation Without Delivery Note"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2020-10-10 17:32:20.968819",
+ "modified": "2020-10-12 13:35:38.033136",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

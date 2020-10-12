@@ -451,6 +451,8 @@ class SellingController(StockController):
 							frappe.throw(_("Row #{0}: Target Warehouse must be not set for Item {1}").format(d.idx, d.item_code))
 
 	def validate_transaction_type(self):
+		super(SellingController, self).validate_transaction_type()
+
 		if self.get('transaction_type'):
 			if not frappe.get_cached_value("Transaction Type", self.transaction_type, 'selling'):
 				frappe.throw(_("Transaction Type {0} is not allowed for sales transactions").format(frappe.bold(self.transaction_type)))
