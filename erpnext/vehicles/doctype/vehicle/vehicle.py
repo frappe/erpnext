@@ -39,6 +39,7 @@ class Vehicle(Document):
 	def validate(self):
 		self.validate_item()
 		self.update_reference_from_serial_no()
+		self.copy_image_from_item()
 		self.set_status()
 
 	def on_trash(self):
