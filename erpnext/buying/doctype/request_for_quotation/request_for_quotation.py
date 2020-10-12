@@ -214,14 +214,14 @@ def get_supplier_contacts(doctype, txt, searchfield, start, page_len, filters):
 		and `tabDynamic Link`.link_name like %(txt)s) and `tabContact`.name = `tabDynamic Link`.parent
 		limit %(start)s, %(page_len)s""", {"start": start, "page_len":page_len, "txt": "%%%s%%" % txt, "name": filters.get('supplier')})
 
-# This method is used to make supplier quotation from material request form.
 @frappe.whitelist()
-def make_supplier_quotation(source_name, for_supplier, target_doc=None):
+def make_supplier_quotation_from_rfq(source_name, target_doc=None, for_supplier=None):
 	def postprocess(source, target_doc):
-		target_doc.supplier = for_supplier
-		args = get_party_details(for_supplier, party_type="Supplier", ignore_permissions=True)
-		target_doc.currency = args.currency or get_party_account_currency('Supplier', for_supplier, source.company)
-		target_doc.buying_price_list = args.buying_price_list or frappe.db.get_value('Buying Settings', None, 'buying_price_list')
+		if for_supplier:
+			target_doc.supplier = for_supplier
+			args = get_party_details(for_supplier, party_type="Supplier", ignore_permissions=True)
+			target_doc.currency = args.currency or get_party_account_currency('Supplier', for_supplier, source.company)
+			target_doc.buying_price_list = args.buying_price_list or frappe.db.get_value('Buying Settings', None, 'buying_price_list')
 		set_missing_values(source, target_doc)
 
 	doclist = get_mapped_doc("Request for Quotation", source_name, {
@@ -354,3 +354,32 @@ def get_supplier_tag():
 		frappe.cache().hset("Supplier", "Tags", tags)
 
 	return frappe.cache().hget("Supplier", "Tags")
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_rfq_containing_supplier(doctype, txt, searchfield, start, page_len, filters):
+	conditions = ""
+	if txt:
+		conditions += "and rfq.name like '%%"+txt+"%%' "
+
+	if filters.get("transaction_date"):
+		conditions += "and rfq.transaction_date = '{0}'".format(filters.get("transaction_date"))
+
+	rfq_data = frappe.db.sql("""
+		select
+			distinct rfq.name, rfq.transaction_date,
+			rfq.company
+		from
+			`tabRequest for Quotation` rfq, `tabRequest for Quotation Supplier` rfq_supplier
+		where
+			rfq.name = rfq_supplier.parent
+			and rfq_supplier.supplier = '{0}'
+			and rfq.docstatus = 1
+			and rfq.company = '{1}'
+			{2}
+		order by rfq.transaction_date ASC
+		limit %(page_len)s offset %(start)s """ \
+		.format(filters.get("supplier"), filters.get("company"), conditions),
+			{"page_len": page_len, "start": start}, as_dict=1)
+
+	return rfq_data
