@@ -28,7 +28,7 @@
   {
    "hidden": 0,
    "label": "Reports",
-   "links": "[\n    {\n        \"dependencies\": [\n            \"Issue\"\n        ],\n        \"doctype\": \"Issue\",\n        \"is_query_report\": true,\n        \"label\": \"First Response Time for Issues\",\n        \"name\": \"First Response Time for Issues\",\n        \"type\": \"report\"\n    }\n]"
+   "links": "[\n    {\n        \"dependencies\": [\n            \"Issue\"\n        ],\n        \"doctype\": \"Issue\",\n        \"is_query_report\": true,\n        \"label\": \"First Response Time for Issues\",\n        \"name\": \"First Response Time for Issues\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Issue\"\n        ],\n        \"doctype\": \"Issue\",\n        \"is_query_report\": true,\n        \"label\": \"Issue Summary\",\n        \"name\": \"Issue Summary\",\n        \"type\": \"report\"\n    }\n]"
   }
  ],
  "category": "Modules",
@@ -43,7 +43,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Support",
- "modified": "2020-08-11 15:49:34.307341",
+ "modified": "2020-10-12 18:40:22.252915",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Support",
