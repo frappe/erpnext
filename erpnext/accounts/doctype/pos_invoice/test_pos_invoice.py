@@ -377,6 +377,26 @@ class TestPOSInvoice(unittest.TestCase):
 			'included_in_print_rate': 1
 		})
 		self.assertRaises(frappe.ValidationError, pos_inv.submit)
+
+		pos_inv2 = create_pos_invoice(rate=400, do_not_submit=1)
+		pos_inv2.append('payments', {
+			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 400
+		})
+		pos_inv2.append('taxes', {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 14,
+			'included_in_print_rate': 1
+		})
+		pos_inv2.submit()
+
+		merge_pos_invoices()
+
+		pos_inv2.load_from_db()
+		rounded_total = frappe.db.get_value("Sales Invoice", pos_inv2.consolidated_invoice, "rounded_total")
+		self.assertEqual(rounded_total, 400)
 		frappe.set_user("Administrator")
 		frappe.db.set_value("Selling Settings", "Selling Settings", "validate_selling_price", 0)
 
