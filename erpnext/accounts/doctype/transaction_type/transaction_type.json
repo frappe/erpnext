@@ -13,8 +13,9 @@
   "order_type",
   "sec_validations",
   "document_types_not_allowed",
-  "allow_non_profit_and_loss_expense_account",
+  "allocate_advances_automatically",
   "validate_zero_outstanding",
+  "allow_non_profit_and_loss_expense_account",
   "column_break_10",
   "so_required",
   "dn_required",
@@ -97,7 +98,7 @@
    "default": "0",
    "fieldname": "validate_zero_outstanding",
    "fieldtype": "Check",
-   "label": "Must be Paid in Advance"
+   "label": "Outstanding Amount Cannot Be Zero"
   },
   {
    "fieldname": "document_types_not_allowed",
@@ -136,9 +137,15 @@
    "fieldtype": "Select",
    "label": "Purchase Receipt Required",
    "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "allocate_advances_automatically",
+   "fieldtype": "Select",
+   "label": "Allocate Advances Automatically",
+   "options": "\nNo\nYes"
   }
  ],
- "modified": "2020-10-12 13:58:08.300675",
+ "modified": "2020-10-13 00:22:54.962704",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transaction Type",

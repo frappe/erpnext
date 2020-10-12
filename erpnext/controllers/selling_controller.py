@@ -48,7 +48,6 @@ class SellingController(StockController):
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
 		self.validate_applies_to_item()
-		self.validate_transaction_type()
 
 	def set_missing_values(self, for_validate=False):
 

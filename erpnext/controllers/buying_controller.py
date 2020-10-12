@@ -46,7 +46,6 @@ class BuyingController(StockController):
 		self.validate_warehouse()
 		self.set_supplier_address()
 		self.validate_asset_return()
-		self.validate_transaction_type()
 
 		if self.doctype=="Purchase Invoice":
 			self.validate_purchase_receipt_if_update_stock()

@@ -248,6 +248,8 @@ class AccountsController(TransactionBase):
 					self.set(fieldname, today())
 					break
 
+		self.validate_transaction_type()
+
 	def calculate_taxes_and_totals(self):
 		from erpnext.controllers.taxes_and_totals import calculate_taxes_and_totals
 		calculate_taxes_and_totals(self)
@@ -1200,6 +1202,9 @@ class AccountsController(TransactionBase):
 			if self.doctype in dt_not_allowed:
 				frappe.throw(_("Not allowed to create {0} for Transaction Type {1}")
 					.format(frappe.bold(self.doctype), frappe.bold(self.get('transaction_type'))))
+
+			if doc.allocate_advances_automatically and self.meta.has_field('allocate_advances_automatically'):
+				self.allocate_advances_automatically = cint(doc.allocate_advances_automatically == "Yes")
 
 	def validate_zero_outstanding(self):
 		if self.get('transaction_type'):
