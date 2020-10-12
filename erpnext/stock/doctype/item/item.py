@@ -984,9 +984,7 @@ class Item(WebsiteGenerator):
 				if self.stock_ledger_created():
 					return True
 
-			elif frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}) or \
-				frappe.db.get_value("Production Order",
-					filters={"production_item": self.name, "docstatus": 1}):
+			elif frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}):
 				return True
 
 	def validate_auto_reorder_enabled_in_stock_settings(self):
