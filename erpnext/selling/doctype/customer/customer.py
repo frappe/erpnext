@@ -129,7 +129,7 @@ class Customer(TransactionBase):
 				address = frappe.get_doc('Address', address_name.get('name'))
 				if not address.has_link('Customer', self.name):
 					address.append('links', dict(link_doctype='Customer', link_name=self.name))
-					address.save()
+					address.save(ignore_permissions=self.flags.ignore_permissions)
 
 			lead = frappe.db.get_value("Lead", self.lead_name, ["organization_lead", "lead_name", "email_id", "phone", "mobile_no", "gender", "salutation"], as_dict=True)
 
@@ -147,7 +147,7 @@ class Customer(TransactionBase):
 					contact = frappe.get_doc('Contact', contact_name.get('name'))
 					if not contact.has_link('Customer', self.name):
 						contact.append('links', dict(link_doctype='Customer', link_name=self.name))
-						contact.save()
+						contact.save(ignore_permissions=self.flags.ignore_permissions)
 
 			else:
 				lead.lead_name = lead.lead_name.lstrip().split(" ")

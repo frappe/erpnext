@@ -1209,7 +1209,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		try:
 			doc.check_permission(perm_type)
 		except frappe.PermissionError:
-			actions = { 'create': 'add', 'write': 'update', 'cancel': 'remove' }
+			actions = { 'create': 'add', 'write': 'update'}
 
 			frappe.throw(_("You do not have permissions to {} items in a {}.")
 				.format(actions[perm_type], parent_doctype), title=_("Insufficient Permissions"))
@@ -1252,7 +1252,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	sales_doctypes = ['Sales Order', 'Sales Invoice', 'Delivery Note', 'Quotation']
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 
-	check_doc_permissions(parent, 'cancel')
+	check_doc_permissions(parent, 'write')
 	validate_and_delete_children(parent, data)
 
 	for d in data:
@@ -1284,19 +1284,21 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		validate_quantity(child_item, d)
 
 		child_item.qty = flt(d.get("qty"))
-		precision = child_item.precision("rate") or 2
+		rate_precision = child_item.precision("rate") or 2
+		conv_fac_precision = child_item.precision("conversion_factor") or 2
+		qty_precision = child_item.precision("qty") or 2
 
-		if flt(child_item.billed_amt, precision) > flt(flt(d.get("rate")) * flt(d.get("qty")), precision):
+		if flt(child_item.billed_amt, rate_precision) > flt(flt(d.get("rate"), rate_precision) * flt(d.get("qty"), qty_precision), rate_precision):
 			frappe.throw(_("Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}.")
 						 .format(child_item.idx, child_item.item_code))
 		else:
-			child_item.rate = flt(d.get("rate"))
+			child_item.rate = flt(d.get("rate"), rate_precision)
 
 		if d.get("conversion_factor"):
 			if child_item.stock_uom == child_item.uom:
 				child_item.conversion_factor = 1
 			else:
-				child_item.conversion_factor = flt(d.get('conversion_factor'))
+				child_item.conversion_factor = flt(d.get('conversion_factor'), conv_fac_precision)
 
 		if d.get("delivery_date") and parent_doctype == 'Sales Order':
 			child_item.delivery_date = d.get('delivery_date')
