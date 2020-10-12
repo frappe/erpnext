@@ -120,11 +120,11 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-05-11 18:54:35.601592",
+ "modified": "2020-09-18 17:26:09.703215",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim Detail",
- "owner": "harshada@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC"
