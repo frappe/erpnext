@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.share
 from frappe import _
-from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_datetime, get_link_to_form
+from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_datetime, get_link_to_form, date_diff, nowdate
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.accounts.utils import get_fiscal_year
 
@@ -29,7 +29,27 @@ class TransactionBase(StatusUpdater):
 			except ValueError:
 				frappe.throw(_('Invalid Posting Time'))
 
+		self.validate_future_posting()
 		self.validate_with_last_transaction_posting_time()
+	
+	def is_stock_transaction(self):
+		if self.doctype not in ["Sales Invoice", "Purchase Invoice", "Stock Entry", "Stock Reconciliation",
+			"Delivery Note", "Purchase Receipt", "Fees"]:
+				return False
+
+		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
+			if not (self.get("update_stock") or self.get("is_pos")):
+				return False
+
+		return True
+	
+	def validate_future_posting(self):
+		if not self.is_stock_transaction():
+			return
+
+		if getattr(self, 'set_posting_time', None) and date_diff(self.posting_date, nowdate()) > 0:
+			msg = _("Posting future transactions are not allowed due to Immutable Ledger")
+			frappe.throw(msg, title=_("Future Posting Not Allowed"))
 
 	def add_calendar_event(self, opts, force=False):
 		if cstr(self.contact_by) != cstr(self._prev.contact_by) or \
@@ -162,13 +182,8 @@ class TransactionBase(StatusUpdater):
 
 	def validate_with_last_transaction_posting_time(self):
 
-		if self.doctype not in ["Sales Invoice", "Purchase Invoice", "Stock Entry", "Stock Reconciliation",
-			"Delivery Note", "Purchase Receipt", "Fees"]:
-				return
-
-		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
-			if not (self.get("update_stock") or self.get("is_pos")):
-				return
+		if not self.is_stock_transaction():
+			return
 
 		for item in self.get('items'):
 			last_transaction_time = frappe.db.sql("""

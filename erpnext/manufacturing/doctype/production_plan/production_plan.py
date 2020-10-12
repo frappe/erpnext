@@ -381,7 +381,6 @@ class ProductionPlan(Document):
 					"transaction_date": nowdate(),
 					"status": "Draft",
 					"company": self.company,
-					"requested_by": frappe.session.user,
 					'material_request_type': material_request_type,
 					'customer': item_doc.customer or ''
 				})
