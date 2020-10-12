@@ -81,15 +81,29 @@ class IssueSummary(object):
 			'width': 100
 		})
 
-		self.metrics = ['Average First Response Time', 'Average Response Time', 'Average Hold Time',
-			'Average Resolution Time', 'Average User Resolution Time']
+		self.sla_status_map = {
+			'SLA Failed': 'failed',
+			'SLA Fulfilled': 'fulfilled',
+			'SLA Ongoing': 'ongoing'
+		}
+
+		for label, fieldname in self.sla_status_map.items():
+			self.columns.append({
+				'label': _(label),
+				'fieldname': fieldname,
+				'fieldtype': 'Int',
+				'width': 100
+			})
+
+		self.metrics = ['Avg First Response Time', 'Avg Response Time', 'Avg Hold Time',
+			'Avg Resolution Time', 'Avg User Resolution Time']
 
 		for metric in self.metrics:
 			self.columns.append({
 				'label': _(metric),
 				'fieldname': scrub(metric),
 				'fieldtype': 'Duration',
-				'width': 200
+				'width': 170
 			})
 
 	def get_data(self):
@@ -107,7 +121,7 @@ class IssueSummary(object):
 
 		self.entries = frappe.db.get_all('Issue',
 			fields=[self.field_map.get(self.filters.based_on), 'name', 'opening_date', 'status', 'avg_response_time',
-				'first_response_time', 'total_hold_time', 'user_resolution_time', 'resolution_time'],
+				'first_response_time', 'total_hold_time', 'user_resolution_time', 'resolution_time', 'agreement_status'],
 			filters=filters
 		)
 
@@ -145,6 +159,10 @@ class IssueSummary(object):
 
 			row['total_issues'] = data.get('total_issues', 0.0)
 
+			for sla_status in self.sla_status_map.values():
+				value = flt(data.get(sla_status), 0.0)
+				row[sla_status] = value
+
 			for metric in self.metrics:
 				value = flt(data.get(scrub(metric)), 0.0)
 				row[scrub(metric)] = value
@@ -156,13 +174,16 @@ class IssueSummary(object):
 
 		for d in self.entries:
 			status = d.status
+			agreement_status = scrub(d.agreement_status)
 
 			if self.filters.based_on == 'Assigned To':
 				if d._assign:
 					for entry in json.loads(d._assign):
 						self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault(status, 0.0)
+						self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault(agreement_status, 0.0)
 						self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault('total_issues', 0.0)
 						self.issue_summary_data[entry][status] += 1
+						self.issue_summary_data[entry][agreement_status] += 1
 						self.issue_summary_data[entry]['total_issues'] += 1
 
 			else:
@@ -172,8 +193,10 @@ class IssueSummary(object):
 					value = _('Not Specified')
 
 				self.issue_summary_data.setdefault(value, frappe._dict()).setdefault(status, 0.0)
+				self.issue_summary_data.setdefault(value, frappe._dict()).setdefault(agreement_status, 0.0)
 				self.issue_summary_data.setdefault(value, frappe._dict()).setdefault('total_issues', 0.0)
 				self.issue_summary_data[value][status] += 1
+				self.issue_summary_data[value][agreement_status] += 1
 				self.issue_summary_data[value]['total_issues'] += 1
 
 		self.get_metrics_data()
@@ -181,8 +204,8 @@ class IssueSummary(object):
 	def get_metrics_data(self):
 		issues = []
 
-		metrics_list = ['average_response_time', 'average_first_response_time', 'average_hold_time',
-			'average_resolution_time', 'average_user_resolution_time']
+		metrics_list = ['avg_response_time', 'avg_first_response_time', 'avg_hold_time',
+			'avg_resolution_time', 'avg_user_resolution_time']
 
 		for entry in self.entries:
 			issues.append(entry.name)
@@ -198,11 +221,11 @@ class IssueSummary(object):
 							for metric in metrics_list:
 								self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault(metric, 0.0)
 
-							self.issue_summary_data[entry]['average_response_time'] += d.get('avg_response_time') or 0.0
-							self.issue_summary_data[entry]['average_first_response_time'] += d.get('first_response_time') or 0.0
-							self.issue_summary_data[entry]['average_hold_time'] += d.get('total_hold_time') or 0.0
-							self.issue_summary_data[entry]['average_resolution_time'] += d.get('resolution_time') or 0.0
-							self.issue_summary_data[entry]['average_user_resolution_time'] += d.get('user_resolution_time') or 0.0
+							self.issue_summary_data[entry]['avg_response_time'] += d.get('avg_response_time') or 0.0
+							self.issue_summary_data[entry]['avg_first_response_time'] += d.get('first_response_time') or 0.0
+							self.issue_summary_data[entry]['avg_hold_time'] += d.get('total_hold_time') or 0.0
+							self.issue_summary_data[entry]['avg_resolution_time'] += d.get('resolution_time') or 0.0
+							self.issue_summary_data[entry]['avg_user_resolution_time'] += d.get('user_resolution_time') or 0.0
 
 							if not assignment_map.get(entry):
 								assignment_map[entry] = 0
@@ -234,11 +257,11 @@ class IssueSummary(object):
 					for metric in metrics_list:
 						self.issue_summary_data.setdefault(value, frappe._dict()).setdefault(metric, 0.0)
 
-					self.issue_summary_data[value]['average_response_time'] = entry.get('avg_resp_time') or 0.0
-					self.issue_summary_data[value]['average_first_response_time'] = entry.get('avg_frt') or 0.0
-					self.issue_summary_data[value]['average_hold_time'] = entry.get('avg_hold_time') or 0.0
-					self.issue_summary_data[value]['average_resolution_time'] = entry.get('avg_resolution_time') or 0.0
-					self.issue_summary_data[value]['average_user_resolution_time'] = entry.get('avg_user_resolution_time') or 0.0
+					self.issue_summary_data[value]['avg_response_time'] = entry.get('avg_resp_time') or 0.0
+					self.issue_summary_data[value]['avg_first_response_time'] = entry.get('avg_frt') or 0.0
+					self.issue_summary_data[value]['avg_hold_time'] = entry.get('avg_hold_time') or 0.0
+					self.issue_summary_data[value]['avg_resolution_time'] = entry.get('avg_resolution_time') or 0.0
+					self.issue_summary_data[value]['avg_user_resolution_time'] = entry.get('avg_user_resolution_time') or 0.0
 
 	def get_chart_data(self):
 		if not self.data:
