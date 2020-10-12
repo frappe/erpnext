@@ -376,14 +376,9 @@ class TestPOSInvoice(unittest.TestCase):
 			"rate": 14,
 			'included_in_print_rate': 1
 		})
-		pos_inv.submit()
-
-		merge_pos_invoices()
-
-		pos_inv.load_from_db()
-		rounded_total = frappe.db.get_value("Sales Invoice", pos_inv.consolidated_invoice, "rounded_total")
-		self.assertEqual(rounded_total, 300)
+		self.assertRaises(frappe.ValidationError, pos_inv.submit)
 		frappe.set_user("Administrator")
+		frappe.db.set_value("Selling Settings", "Selling Settings", "validate_selling_price", 0)
 
 def create_pos_invoice(**args):
 	args = frappe._dict(args)
