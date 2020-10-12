@@ -7,6 +7,7 @@ import frappe
 import unittest, copy, time
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 
 class TestPOSInvoice(unittest.TestCase):
 	def test_timestamp_change(self):
@@ -307,8 +308,9 @@ class TestPOSInvoice(unittest.TestCase):
 		merge_pos_invoices()
 
 		pos_inv.load_from_db()
-		sales_invoice = frappe.get_doc("Sales Invoice", pos_inv.consolidated_invoice)
-		self.assertEqual(sales_invoice.grand_total, 3500)
+		rounded_total = frappe.db.get_value("Sales Invoice", pos_inv.consolidated_invoice, "rounded_total")
+		self.assertEqual(rounded_total, 3500)
+		frappe.set_user("Administrator")
 	
 	def test_merging_into_sales_invoice_with_discount_and_inclusive_tax(self):
 		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
@@ -348,8 +350,55 @@ class TestPOSInvoice(unittest.TestCase):
 		merge_pos_invoices()
 
 		pos_inv.load_from_db()
-		sales_invoice = frappe.get_doc("Sales Invoice", pos_inv.consolidated_invoice)
-		self.assertEqual(sales_invoice.rounded_total, 840)
+		rounded_total = frappe.db.get_value("Sales Invoice", pos_inv.consolidated_invoice, "rounded_total")
+		self.assertEqual(rounded_total, 840)
+		frappe.set_user("Administrator")
+
+	def test_merging_with_validate_selling_price(self):
+		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
+		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
+
+		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
+			frappe.db.set_value("Selling Settings", "Selling Settings", "validate_selling_price", 1)
+
+		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=1, basic_rate=300)
+		frappe.db.sql("delete from `tabPOS Invoice`")
+		test_user, pos_profile = init_user_and_profile()
+		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
+		pos_inv.append('payments', {
+			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 300
+		})
+		pos_inv.append('taxes', {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 14,
+			'included_in_print_rate': 1
+		})
+		self.assertRaises(frappe.ValidationError, pos_inv.submit)
+
+		pos_inv2 = create_pos_invoice(rate=400, do_not_submit=1)
+		pos_inv2.append('payments', {
+			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 400
+		})
+		pos_inv2.append('taxes', {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 14,
+			'included_in_print_rate': 1
+		})
+		pos_inv2.submit()
+
+		merge_pos_invoices()
+
+		pos_inv2.load_from_db()
+		rounded_total = frappe.db.get_value("Sales Invoice", pos_inv2.consolidated_invoice, "rounded_total")
+		self.assertEqual(rounded_total, 400)
+		frappe.set_user("Administrator")
+		frappe.db.set_value("Selling Settings", "Selling Settings", "validate_selling_price", 0)
 
 def create_pos_invoice(**args):
 	args = frappe._dict(args)
