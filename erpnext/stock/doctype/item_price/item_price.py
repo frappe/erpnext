@@ -48,20 +48,52 @@ class ItemPrice(Document):
 				self.item_code,["item_name", "description"])
 
 	def check_duplicates(self):
-		conditions = "where item_code=%(item_code)s and price_list=%(price_list)s and name != %(name)s"
+		conditions = """
+			where
+				item_code = %(item_code)s
+				and price_list = %(price_list)s
+				and name != %(name)s
+		"""
 
-		for field in ['uom', 'valid_from',
-			'valid_upto', 'packing_unit', 'customer', 'supplier']:
+		for field in [
+			"uom",
+			"valid_from",
+			"valid_upto",
+			"packing_unit",
+			"customer",
+			"supplier",
+		]:
 			if self.get(field):
-				conditions += " and {0} = %({1})s".format(field, field)
+				conditions += " and {0} = %({0})s ".format(field)
+			else:
+				conditions += """
+						and (
+							isnull({0})
+							or {0} = ''
+						)
+					""".format(
+					field
+				)
 
-		price_list_rate = frappe.db.sql("""
-			SELECT price_list_rate
-			FROM `tabItem Price`
-			  {conditions} """.format(conditions=conditions), self.as_dict())
+		price_list_rate = frappe.db.sql(
+			"""
+				select
+					price_list_rate
+				from
+					`tabItem Price`
+				{conditions}
+			""".format(
+				conditions=conditions
+			),
+			self.as_dict(),
+		)
 
-		if price_list_rate :
-			frappe.throw(_("Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, UOM, Qty and Dates."), ItemPriceDuplicateItem)
+		if price_list_rate:
+			frappe.throw(_("""
+				Item Price appears multiple times based on
+				Price List, Supplier/Customer, Currency, Item, UOM, Qty,
+				and Dates.
+			"""), ItemPriceDuplicateItem,)
 
 	def before_save(self):
 		if self.selling:
