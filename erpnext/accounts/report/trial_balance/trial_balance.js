@@ -73,6 +73,12 @@ frappe.require("assets/erpnext/js/financial_statements.js", function() {
 				"options": "Finance Book",
 			},
 			{
+				"fieldname": "presentation_currency",
+				"label": __("Currency"),
+				"fieldtype": "Select",
+				"options": erpnext.get_presentation_currency_list()
+			},
+			{
 				"fieldname": "with_period_closing_entry",
 				"label": __("Period Closing Entry"),
 				"fieldtype": "Check",
