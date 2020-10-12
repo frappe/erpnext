@@ -989,7 +989,6 @@ def make_raw_material_request(items, company, sales_order, project=None):
 		doctype = 'Material Request',
 		transaction_date = nowdate(),
 		company = company,
-		requested_by = frappe.session.user,
 		material_request_type = 'Purchase'
 	))
 	for item in raw_materials:
