@@ -66,21 +66,12 @@ class ItemPrice(Document):
 			if self.get(field):
 				conditions += " and {0} = %({0})s ".format(field)
 			else:
-				conditions += """
-						and (
-							isnull({0})
-							or {0} = ''
-						)
-					""".format(
-					field
-				)
+				conditions += "and (isnull({0}) or {0} = '')".format(field)
 
 		price_list_rate = frappe.db.sql(
 			"""
-				select
-					price_list_rate
-				from
-					`tabItem Price`
+				select price_list_rate
+				from `tabItem Price`
 				{conditions}
 			""".format(
 				conditions=conditions
@@ -89,11 +80,7 @@ class ItemPrice(Document):
 		)
 
 		if price_list_rate:
-			frappe.throw(_("""
-				Item Price appears multiple times based on
-				Price List, Supplier/Customer, Currency, Item, UOM, Qty,
-				and Dates.
-			"""), ItemPriceDuplicateItem,)
+			frappe.throw(_("Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, UOM, Qty, and Dates."), ItemPriceDuplicateItem,)
 
 	def before_save(self):
 		if self.selling:
