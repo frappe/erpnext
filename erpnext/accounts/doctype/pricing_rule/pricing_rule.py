@@ -6,9 +6,10 @@ from __future__ import unicode_literals
 import frappe
 import json
 import copy
+import re
+
 from frappe import throw, _
 from frappe.utils import flt, cint, getdate
-
 from frappe.model.document import Document
 
 from six import string_types
@@ -30,6 +31,7 @@ class PricingRule(Document):
 		self.validate_max_discount()
 		self.validate_price_list_with_currency()
 		self.validate_dates()
+		self.validate_condition()
 
 		if not self.margin_type: self.margin_rate_or_amount = 0.0
 
@@ -139,6 +141,10 @@ class PricingRule(Document):
 
 		if self.valid_from and self.valid_upto and getdate(self.valid_from) > getdate(self.valid_upto):
 			frappe.throw(_("Valid from date must be less than valid upto date"))
+
+	def validate_condition(self):
+		if self.condition and ("=" in self.condition) and re.match("""[\w\.:_]+\s*={1}\s*[\w\.@'"]+""", self.condition):
+			frappe.throw(_("Invalid condition expression"))
 
 #--------------------------------------------------------------------------------
 
