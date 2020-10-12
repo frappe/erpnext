@@ -179,6 +179,10 @@ class IssueSummary(object):
 
 	def get_metrics_data(self):
 		issues = []
+
+		metrics_list = ['average_response_time', 'average_first_response_time', 'average_hold_time',
+			'average_resolution_time', 'average_user_resolution_time']
+
 		for entry in self.entries:
 			issues.append(entry.name)
 
@@ -190,11 +194,8 @@ class IssueSummary(object):
 				for d in self.entries:
 					if d._assign:
 						for entry in json.loads(d._assign):
-							self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault('average_response_time', 0.0)
-							self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault('average_first_response_time', 0.0)
-							self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault('average_hold_time', 0.0)
-							self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault('average_resolution_time', 0.0)
-							self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault('average_user_resolution_time', 0.0)
+							for metric in metrics_list:
+								self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault(metric, 0.0)
 
 							self.issue_summary_data[entry]['average_response_time'] += d.get('avg_response_time') or 0.0
 							self.issue_summary_data[entry]['average_first_response_time'] += d.get('first_response_time') or 0.0
@@ -207,11 +208,8 @@ class IssueSummary(object):
 							assignment_map[entry] += 1
 
 				for entry in assignment_map:
-					self.issue_summary_data[entry]['average_response_time'] /= flt(assignment_map.get(entry))
-					self.issue_summary_data[entry]['average_first_response_time'] /= flt(assignment_map.get(entry))
-					self.issue_summary_data[entry]['average_hold_time'] /= flt(assignment_map.get(entry))
-					self.issue_summary_data[entry]['average_resolution_time'] /= flt(assignment_map.get(entry))
-					self.issue_summary_data[entry]['average_user_resolution_time'] /= flt(assignment_map.get(entry))
+					for metric in metrics_list:
+						self.issue_summary_data[entry][metric] /= flt(assignment_map.get(entry))
 
 			else:
 				data = frappe.db.sql("""
@@ -232,11 +230,8 @@ class IssueSummary(object):
 					if not value:
 						value = _('Not Specified')
 
-					self.issue_summary_data.setdefault(value, frappe._dict()).setdefault('average_response_time', 0.0)
-					self.issue_summary_data.setdefault(value, frappe._dict()).setdefault('average_first_response_time', 0.0)
-					self.issue_summary_data.setdefault(value, frappe._dict()).setdefault('average_hold_time', 0.0)
-					self.issue_summary_data.setdefault(value, frappe._dict()).setdefault('average_resolution_time', 0.0)
-					self.issue_summary_data.setdefault(value, frappe._dict()).setdefault('average_user_resolution_time', 0.0)
+					for metric in metrics_list:
+						self.issue_summary_data.setdefault(value, frappe._dict()).setdefault(metric, 0.0)
 
 					self.issue_summary_data[value]['average_response_time'] = entry.get('avg_resp_time') or 0.0
 					self.issue_summary_data[value]['average_first_response_time'] = entry.get('avg_frt') or 0.0
@@ -275,30 +270,30 @@ class IssueSummary(object):
 			closed_issues.append(entry.get('closed'))
 
 		self.chart = {
-			"data": {
+			'data': {
 				'labels': labels[:30],
 				'datasets': [
 					{
-						"name": "Open",
-						"values": open_issues[:30]
+						'name': 'Open',
+						'values': open_issues[:30]
 					},
 					{
-						"name": "Replied",
-						"values": replied_issues[:30]
+						'name': 'Replied',
+						'values': replied_issues[:30]
 					},
 					{
-						"name": "Resolved",
-						"values": resolved_issues[:30]
+						'name': 'Resolved',
+						'values': resolved_issues[:30]
 					},
 					{
-						"name": "Closed",
-						"values": closed_issues[:30]
+						'name': 'Closed',
+						'values': closed_issues[:30]
 					}
 				]
 			},
-			"type": "bar",
-			"barOptions": {
-				"stacked": True
+			'type': 'bar',
+			'barOptions': {
+				'stacked': True
 			}
 		}
 
