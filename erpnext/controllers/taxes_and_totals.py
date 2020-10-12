@@ -32,6 +32,9 @@ class calculate_taxes_and_totals(object):
 		if self.doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
 			self.calculate_total_advance()
 
+		if self.doc.doctype in ["Sales Order", "Purchase Order"] and self.doc.docstatus == 0:
+			self.advance_paid = 0
+
 		if self.doc.meta.get_field("other_charges_calculation"):
 			self.set_item_wise_tax_breakup()
 
