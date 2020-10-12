@@ -12,22 +12,21 @@
 {% endblock %}
 
 {% block header_actions %}
-<div class="dropdown">
-	<button class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-		<span>{{ _('Actions') }}</span>
-		<b class="caret"></b>
-	</button>
-	<ul class="dropdown-menu dropdown-menu-right" role="menu">
-		{% if doc.doctype == 'Purchase Order' %}
-		<a class="dropdown-item" href="/api/method/erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice_from_portal?purchase_order_name={{ doc.name }}" data-action="make_purchase_invoice">{{ _("Make Purchase Invoice") }}</a>
-		{% endif %}
-		<a class="dropdown-item" href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}&format={{ print_format }}'
-			target="_blank" rel="noopener noreferrer">
-			{{ _("Print") }}
-		</a>
-	</ul>
-</div>
-
+	<div class="dropdown">
+		<button class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+			<span>{{ _('Actions') }}</span>
+			<b class="caret"></b>
+		</button>
+		<ul class="dropdown-menu dropdown-menu-right" role="menu">
+			{% if doc.doctype == 'Purchase Order' %}
+			<a class="dropdown-item" href="/api/method/erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice_from_portal?purchase_order_name={{ doc.name }}" data-action="make_purchase_invoice">{{ _("Make Purchase Invoice") }}</a>
+			{% endif %}
+			<a class="dropdown-item" href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}&format={{ print_format }}'
+				target="_blank" rel="noopener noreferrer">
+				{{ _("Print") }}
+			</a>
+		</ul>
+	</div>
 {% endblock %}
 
 {% block page_content %}
@@ -35,7 +34,11 @@
 <div class="row transaction-subheading">
 	<div class="col-6">
 		<span class="indicator {{ doc.indicator_color or ("blue" if doc.docstatus==1 else "darkgrey") }}">
-			{{ _(doc.get('indicator_title')) or _(doc.status) or _("Submitted") }}
+			{% if doc.doctype == "Quotation" and not doc.docstatus %}
+				{{ _("Pending") }}
+			{% else %}
+				{{ _(doc.get('indicator_title')) or _(doc.status) or _("Submitted") }}
+			{% endif %}
 		</span>
 	</div>
 	<div class="col-6 text-muted text-right small">
@@ -95,7 +98,6 @@
 		</div>
 		{% endfor %}
 	</div>
-
 	<!-- taxes -->
 	<div class="order-taxes d-flex justify-content-end">
 		<table>

@@ -10,6 +10,7 @@ from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.doctype.item.item import set_item_default
 from frappe.contacts.doctype.address.address import get_address_display
+from erpnext.controllers.accounts_controller import get_taxes_and_charges
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -53,10 +54,10 @@ class SellingController(StockController):
 		super(SellingController, self).set_missing_values(for_validate)
 
 		# set contact and address details for customer, if they are not mentioned
-		self.set_missing_lead_customer_details()
+		self.set_missing_lead_customer_details(for_validate=for_validate)
 		self.set_price_list_and_item_details(for_validate=for_validate)
 
-	def set_missing_lead_customer_details(self):
+	def set_missing_lead_customer_details(self, for_validate=False):
 		customer, lead = None, None
 		if getattr(self, "customer", None):
 			customer = self.customer
@@ -81,6 +82,7 @@ class SellingController(StockController):
 			party_details = _get_party_details(customer,
 				ignore_permissions=self.flags.ignore_permissions,
 				doctype=self.doctype, company=self.company,
+				posting_date=self.get('posting_date'),
 				fetch_payment_terms_template=fetch_payment_terms_template,
 				party_address=self.customer_address, shipping_address=self.shipping_address_name)
 			if not self.meta.get_field("sales_team"):
@@ -92,6 +94,11 @@ class SellingController(StockController):
 			self.update_if_missing(get_lead_details(lead,
 				posting_date=self.get('transaction_date') or self.get('posting_date'),
 				company=self.company))
+
+		if self.get('taxes_and_charges') and not self.get('taxes') and not for_validate:
+			taxes = get_taxes_and_charges('Sales Taxes and Charges Template', self.taxes_and_charges)
+			for tax in taxes:
+				self.append('taxes', tax)
 
 	def set_price_list_and_item_details(self, for_validate=False):
 		self.set_price_list_currency("Selling")
