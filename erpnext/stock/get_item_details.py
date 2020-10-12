@@ -255,12 +255,6 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		args['material_request_type'] = frappe.db.get_value('Material Request',
 			args.get('name'), 'material_request_type', cache=True)
 
-	expense_account = None
-
-	if args.get('doctype') == 'Purchase Invoice' and item.is_fixed_asset:
-		from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
-		expense_account = get_asset_category_account(fieldname = "fixed_asset_account", item = args.item_code, company= args.company)
-
 	#Set the UOM to the Default Sales UOM or Default Purchase UOM if configured in the Item Master
 	if not args.get('uom'):
 		if args.get('doctype') in sales_doctypes:
@@ -537,6 +531,10 @@ def get_default_expense_account(args, item, item_group, brand, transaction_type)
 
 	if not account and args.company:
 		account = frappe.get_cached_value("Company", args.company, "default_expense_account")
+
+	if args.get('doctype') == 'Purchase Invoice' and item.is_fixed_asset:
+		from erpnext.assets.doctype.asset_category.asset_category import get_asset_category_account
+		account = get_asset_category_account(fieldname="fixed_asset_account", item=args.item_code, company=args.company)
 
 	return account or args.expense_account
 
