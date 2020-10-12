@@ -242,14 +242,8 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	brand_defaults = get_brand_defaults(item.name, args.company)
 	transaction_type_defaults = get_transaction_type_defaults(args.transaction_type_name, args.company)
 
-	defaults = frappe._dict({
-		'item_defaults': item_defaults,
-		'item_group_defaults': item_group_defaults,
-		'brand_defaults': brand_defaults,
-		'transaction_type_defaults': transaction_type_defaults
-	})
-
-	warehouse = get_item_warehouse(item, args, overwrite_warehouse, defaults)
+	warehouse = get_item_warehouse(item, args, overwrite_warehouse, item_defaults, item_group_defaults, brand_defaults,
+		transaction_type_defaults)
 
 	if args.get('doctype') == "Material Request" and not args.get('material_request_type'):
 		args['material_request_type'] = frappe.db.get_value('Material Request',
@@ -360,22 +354,24 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 
 	return out
 
-def get_item_warehouse(item, args, overwrite_warehouse, defaults={}):
-	if not defaults:
-		defaults = frappe._dict({
-			'item_defaults' : get_item_defaults(item.name, args.company),
-			'item_group_defaults' : get_item_group_defaults(item.name, args.company),
-			'brand_defaults' : get_brand_defaults(item.name, args.company),
-			'transaction_type_defaults': get_transaction_type_defaults(args.transaction_type_name, args.company)
-		})
+def get_item_warehouse(item, args, overwrite_warehouse, item_defaults=None, item_group_defaults=None, brand_defaults=None,
+		transaction_type_defaults=None):
+	if not item_defaults:
+		item_defaults = get_item_defaults(item.name, args.company)
+	if not item_group_defaults:
+		item_group_defaults = get_item_group_defaults(item.name, args.company)
+	if not brand_defaults:
+		brand_defaults = get_brand_defaults(item.name, args.company)
+	if not transaction_type_defaults:
+		transaction_type_defaults = get_transaction_type_defaults(args.transaction_type_name, args.company)
 
 	if overwrite_warehouse or not args.warehouse:
 		warehouse = (
 			args.get("set_warehouse") or
-			defaults.transaction_type_defaults.get("default_warehouse") or
-			defaults.item_defaults.get("default_warehouse") or
-			defaults.item_group_defaults.get("default_warehouse") or
-			defaults.brand_defaults.get("default_warehouse") or
+			transaction_type_defaults.get("default_warehouse") or
+			item_defaults.get("default_warehouse") or
+			item_group_defaults.get("default_warehouse") or
+			brand_defaults.get("default_warehouse") or
 			args.get('warehouse')
 		)
 
@@ -630,7 +626,7 @@ def get_hide_item_code(args, item):
 	return cint(show_item_code != "Yes" if show_item_code else args.get('hide_item_code'))
 
 @frappe.whitelist()
-def get_item_defaults_info(args, items):
+def get_item_defaults_info(args, items, set_warehouse=True):
 	"""
 	:param args: {
 		"doctype": "",
@@ -668,12 +664,14 @@ def get_item_defaults_info(args, items):
 			brand_defaults = get_brand_defaults(item_args.item_code, item_args.company)
 			transaction_type_defaults = get_transaction_type_defaults(item_args.transaction_type_name, item_args.company)
 
-			out[d['name']] = get_item_defaults_details(item_args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults)
+			out[d['name']] = get_item_defaults_details(item_args, item_defaults, item_group_defaults, brand_defaults,
+				transaction_type_defaults, set_warehouse=set_warehouse)
 
 	return out
 
 
-def get_item_defaults_details(args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults):
+def get_item_defaults_details(args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults,
+		set_warehouse=False):
 	"""
 	:param args: {
 			"doctype": "",
@@ -693,13 +691,19 @@ def get_item_defaults_details(args, item_defaults, item_group_defaults, brand_de
 	:return: dict
 	"""
 
-	return {
+	out = {
 		"income_account": get_default_income_account(args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults),
 		"expense_account": get_default_expense_account(args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults),
 		"cost_center": get_default_cost_center(args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults),
 		"apply_discount_after_taxes": get_default_apply_discount_after_taxes(args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults),
-		"allow_zero_valuation_rate": get_default_allow_zero_valuation_rate(args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults)
+		"allow_zero_valuation_rate": get_default_allow_zero_valuation_rate(args, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults),
 	}
+
+	if cint(set_warehouse):
+		item = frappe.get_cached_doc("Item", args.get("item_code"))
+		out['warehouse'] = get_item_warehouse(item, args, True, item_defaults, item_group_defaults, brand_defaults, transaction_type_defaults)
+
+	return out
 
 def get_price_list_rate(args, item_doc, out):
 	meta = frappe.get_meta(args.parenttype or args.doctype)

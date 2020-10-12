@@ -913,7 +913,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			set_party_account(set_pricing);
 		}
 
-		this.update_item_defaults();
+		this.update_item_defaults(false);
 
 		if(this.frm.doc.company) {
 			erpnext.last_selected_company = this.frm.doc.company;
@@ -1939,7 +1939,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					income_account: item.income_account,
 					expense_account: item.expense_account,
 					apply_discount_after_taxes: item.apply_discount_after_taxes,
-					allow_zero_valuation_rate: me.allow_zero_valuation_rate
+					allow_zero_valuation_rate: me.allow_zero_valuation_rate,
+					warehouse: item.warehouse
 				});
 			}
 		});
@@ -1951,15 +1952,17 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				transaction_type_name: me.frm.doc.transaction_type,
 				customer: me.frm.doc.customer,
 				supplier: me.frm.doc.supplier,
-				project: me.frm.doc.project
+				project: me.frm.doc.project,
+				set_warehouse: me.frm.doc.set_warehouse
 			},
 			items: items
 		};
 	},
 
-	update_item_defaults: function() {
+	update_item_defaults: function(set_warehouse) {
 		var me = this;
 		var args = me.get_item_defaults_args();
+		args['set_warehouse'] = cint(set_warehouse);
 
 		if(args.items.length) {
 			return frappe.call({
