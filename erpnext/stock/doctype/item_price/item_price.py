@@ -23,7 +23,7 @@ class ItemPrice(Document):
 
 	def validate_item(self):
 		if not frappe.db.exists("Item", self.item_code):
-			frappe.throw(_("Item {0} not found").format(self.item_code))
+			frappe.throw(_("Item {0} not found.").format(self.item_code))
 
 	def validate_dates(self):
 		if self.valid_from and self.valid_upto:
@@ -38,8 +38,7 @@ class ItemPrice(Document):
 
 			if not price_list_details:
 				link = frappe.utils.get_link_to_form('Price List', self.price_list)
-				frappe.throw("The price list {0} does not exists or disabled".
-					format(link))
+				frappe.throw("The price list {0} does not exist or is disabled".format(link))
 
 			self.buying, self.selling, self.currency = price_list_details
 
@@ -69,7 +68,7 @@ class ItemPrice(Document):
 			self.reference = self.customer
 		if self.buying:
 			self.reference = self.supplier
-		
+
 		if self.selling and not self.buying:
 			# if only selling then remove supplier
 			self.supplier = None
