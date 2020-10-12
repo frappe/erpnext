@@ -207,6 +207,7 @@ class PurchaseReceipt(BuyingController):
 		from erpnext.accounts.general_ledger import process_gl_map
 
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
+		stock_rbnb_currency = get_account_currency(stock_rbnb)
 		cogs_account = self.get_company_default("default_expense_account")
 		landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
@@ -243,7 +244,6 @@ class PurchaseReceipt(BuyingController):
 
 					# stock received but not billed
 					if d.base_net_amount:
-						stock_rbnb_currency = get_account_currency(stock_rbnb)
 						gl_entries.append(self.get_gl_dict({
 							"account": stock_rbnb,
 							"against": warehouse_account[d.warehouse]["account"],
@@ -289,6 +289,7 @@ class PurchaseReceipt(BuyingController):
 						if self.is_return or flt(d.item_tax_amount):
 							loss_account = expenses_included_in_valuation
 						else:
+							cogs_account = self.get_company_default("default_expense_account")
 							loss_account = cogs_account
 
 						gl_entries.append(self.get_gl_dict({

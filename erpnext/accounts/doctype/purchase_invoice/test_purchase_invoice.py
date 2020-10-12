@@ -939,7 +939,8 @@ def make_purchase_invoice(**args):
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"project": args.project,
 		"rejected_warehouse": args.rejected_warehouse or "",
-		"rejected_serial_no": args.rejected_serial_no or ""
+		"rejected_serial_no": args.rejected_serial_no or "",
+		"asset_location": args.location or ""
 	})
 
 	if args.get_taxes_and_charges:
