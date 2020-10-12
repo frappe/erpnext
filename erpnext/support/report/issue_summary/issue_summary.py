@@ -22,8 +22,9 @@ class IssueSummary(object):
 		self.get_columns()
 		self.get_data()
 		self.get_chart_data()
+		self.get_report_summary()
 
-		return self.columns, self.data, None, self.chart
+		return self.columns, self.data, None, self.chart, self.report_summary
 
 	def get_columns(self):
 		self.columns = []
@@ -240,17 +241,9 @@ class IssueSummary(object):
 					self.issue_summary_data[value]['average_user_resolution_time'] = entry.get('avg_user_resolution_time') or 0.0
 
 	def get_chart_data(self):
-		length = len(self.columns)
-		labels = [d.get('label') for d in self.columns[1:length]]
-		self.chart = {
-			'data': {
-				'labels': labels,
-				'datasets': []
-			},
-			'type': 'line'
-		}
+		if not self.data:
+			return None
 
-	def get_chart_data(self):
 		labels = []
 		open_issues = []
 		replied_issues = []
@@ -296,4 +289,46 @@ class IssueSummary(object):
 				'stacked': True
 			}
 		}
+
+	def get_report_summary(self):
+		if not self.data:
+			return None
+
+		open_issues = 0
+		replied = 0
+		resolved = 0
+		closed = 0
+
+		for entry in self.data:
+			open_issues += entry.get('open')
+			replied += entry.get('replied')
+			resolved += entry.get('resolved')
+			closed += entry.get('closed')
+
+		self.report_summary = [
+			{
+				'value': open_issues,
+				'indicator': 'Red',
+				'label': _('Open'),
+				'datatype': 'Int',
+			},
+			{
+				'value': replied,
+				'indicator': 'Grey',
+				'label': _('Replied'),
+				'datatype': 'Int',
+			},
+			{
+				'value': resolved,
+				'indicator': 'Green',
+				'label': _('Resolved'),
+				'datatype': 'Int',
+			},
+			{
+				'value': closed,
+				'indicator': 'Green',
+				'label': _('Closed'),
+				'datatype': 'Int',
+			}
+		]
 
