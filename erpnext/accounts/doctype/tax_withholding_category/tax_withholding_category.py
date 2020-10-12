@@ -106,6 +106,7 @@ def get_tds_amount(suppliers, net_total, company, tax_details, fiscal_year_detai
 			from `tabGL Entry`
 			where company = %s and
 			party in %s and fiscal_year=%s and credit > 0
+			and is_opening = 'No'
 		""", (company, tuple(suppliers), fiscal_year), as_dict=1)
 
 	vouchers = [d.voucher_no for d in entries]
@@ -192,6 +193,7 @@ def get_advance_vouchers(suppliers, fiscal_year=None, company=None, from_date=No
 		select distinct voucher_no
 		from `tabGL Entry`
 		where party in %s and %s and debit > 0
+		and is_opening = 'No'
 	""", (tuple(suppliers), condition)) or []
 
 def get_debit_note_amount(suppliers, year_start_date, year_end_date, company=None):
