@@ -53,6 +53,10 @@ def get_conditions(filters):
 	else:
 		frappe.throw(_("'To Date' is required"))
 
+	for field in ["item_code", "warehouse", "batch_no", "company"]:
+		if filters.get(field):
+			conditions += " and {0} = {1}".format(field, frappe.db.escape(filters.get(field)))
+
 	return conditions
 
 #get all details
