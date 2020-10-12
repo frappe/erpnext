@@ -177,7 +177,7 @@ class SellingController(StockController):
 			msg = (_("""Row #{}: Selling rate for item {} is lower than its {}. Selling {} should be atleast {}""")
 						.format(idx, frappe.bold(item_name), frappe.bold(ref_rate_field), bold_net_rate, frappe.bold(rate)))
 			msg += "<br><br>"
-			msg += (_("""You can alternatively disable selling price validation in {} to bypass this error.""")
+			msg += (_("""You can alternatively disable selling price validation in {} to bypass this validation.""")
 						.format(get_link_to_form("Selling Settings", "Selling Settings")))
 			frappe.throw(msg, title=_("Invalid Selling Price"))
 
