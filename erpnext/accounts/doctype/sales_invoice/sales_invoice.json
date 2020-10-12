@@ -1926,6 +1926,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:(doc.is_pos && doc.is_consolidated)",
    "fieldname": "is_consolidated",
    "fieldtype": "Check",
    "label": "Is Consolidated",
