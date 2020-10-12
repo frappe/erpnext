@@ -1334,24 +1334,26 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		validate_quantity(child_item, d)
 
 		child_item.qty = flt(d.get("qty"))
-		precision = child_item.precision("rate") or 2
+		rate_precision = child_item.precision("rate") or 2
+		conv_fac_precision = child_item.precision("conversion_factor") or 2
+		qty_precision = child_item.precision("qty") or 2
 
-		if flt(child_item.billed_amt, precision) > flt(flt(d.get("rate")) * flt(d.get("qty")), precision):
+		if flt(child_item.billed_amt, rate_precision) > flt(flt(d.get("rate"), rate_precision) * flt(d.get("qty"), qty_precision), rate_precision):
 			frappe.throw(_("Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}.")
 						 .format(child_item.idx, child_item.item_code))
 		else:
-			child_item.rate = flt(d.get("rate"))
+			child_item.rate = flt(d.get("rate"), rate_precision)
 
 		if d.get("conversion_factor"):
 			if child_item.stock_uom == child_item.uom:
 				child_item.conversion_factor = 1
 			else:
-				child_item.conversion_factor = flt(d.get('conversion_factor'))
+				child_item.conversion_factor = flt(d.get('conversion_factor'), conv_fac_precision)
 
 		if d.get("uom"):
 			child_item.uom = d.get("uom")
 			conversion_factor = flt(get_conversion_factor(child_item.item_code, child_item.uom).get("conversion_factor"))
-			child_item.conversion_factor = flt(d.get('conversion_factor')) or conversion_factor
+			child_item.conversion_factor = flt(d.get('conversion_factor'), conv_fac_precision) or conversion_factor
 
 		if d.get("delivery_date") and parent_doctype == 'Sales Order':
 			child_item.delivery_date = d.get('delivery_date')

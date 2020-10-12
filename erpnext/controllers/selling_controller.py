@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, flt, cstr, comma_or
+from frappe.utils import cint, flt, cstr, comma_or, get_link_to_form
 from frappe import _, throw
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
@@ -173,22 +173,26 @@ class SellingController(StockController):
 
 	def validate_selling_price(self):
 		def throw_message(idx, item_name, rate, ref_rate_field):
-			frappe.throw(_("""Row #{}: Selling rate for item {} is lower than its {}. Selling rate should be atleast {}""")
-				.format(idx, item_name, ref_rate_field, rate))
+			bold_net_rate = frappe.bold("net rate")
+			msg = (_("""Row #{}: Selling rate for item {} is lower than its {}. Selling {} should be atleast {}""")
+						.format(idx, frappe.bold(item_name), frappe.bold(ref_rate_field), bold_net_rate, frappe.bold(rate)))
+			msg += "<br><br>"
+			msg += (_("""You can alternatively disable selling price validation in {} to bypass this validation.""")
+						.format(get_link_to_form("Selling Settings", "Selling Settings")))
+			frappe.throw(msg, title=_("Invalid Selling Price"))
 
 		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
 			return
-
 		if hasattr(self, "is_return") and self.is_return:
 			return
 
 		for it in self.get("items"):
 			if not it.item_code:
 				continue
-
+			
 			last_purchase_rate, is_stock_item = frappe.get_cached_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
-			last_purchase_rate_in_sales_uom = last_purchase_rate / (it.conversion_factor or 1)
-			if flt(it.base_rate) < flt(last_purchase_rate_in_sales_uom):
+			last_purchase_rate_in_sales_uom = last_purchase_rate * (it.conversion_factor or 1)
+			if flt(it.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
 				throw_message(it.idx, frappe.bold(it.item_name), last_purchase_rate_in_sales_uom, "last purchase rate")
 
 			last_valuation_rate = frappe.db.sql("""
@@ -197,8 +201,8 @@ class SellingController(StockController):
 				ORDER BY posting_date DESC, posting_time DESC, creation DESC LIMIT 1
 				""", (it.item_code, it.warehouse))
 			if last_valuation_rate:
-				last_valuation_rate_in_sales_uom = last_valuation_rate[0][0] / (it.conversion_factor or 1)
-				if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate_in_sales_uom) \
+				last_valuation_rate_in_sales_uom = last_valuation_rate[0][0] * (it.conversion_factor or 1)
+				if is_stock_item and flt(it.base_net_rate) < flt(last_valuation_rate_in_sales_uom) \
 					and not self.get('is_internal_customer'):
 					throw_message(it.idx, frappe.bold(it.item_name), last_valuation_rate_in_sales_uom, "valuation rate")
 
