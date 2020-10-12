@@ -1,5 +1,5 @@
 {
- "add_total_row": 1,
+ "add_total_row": 0,
  "columns": [],
  "creation": "2020-10-12 01:01:55.181777",
  "disable_prepared_report": 0,
@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2020-10-12 01:01:55.181777",
+ "modified": "2020-10-12 14:54:55.655920",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Issue Summary",

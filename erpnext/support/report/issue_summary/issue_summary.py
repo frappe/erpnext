@@ -70,7 +70,25 @@ class IssueSummary(object):
 				'label': _(status),
 				'fieldname': scrub(status),
 				'fieldtype': 'Int',
-				'width': 120
+				'width': 80
+			})
+
+		self.columns.append({
+			'label': _('Total Issues'),
+			'fieldname': 'total_issues',
+			'fieldtype': 'Int',
+			'width': 100
+		})
+
+		self.metrics = ['Average First Response Time', 'Average Response Time', 'Average Hold Time',
+			'Average Resolution Time', 'Average User Resolution Time']
+
+		for metric in self.metrics:
+			self.columns.append({
+				'label': _(metric),
+				'fieldname': scrub(metric),
+				'fieldtype': 'Duration',
+				'width': 200
 			})
 
 	def get_data(self):
@@ -87,7 +105,8 @@ class IssueSummary(object):
 		}
 
 		self.entries = frappe.db.get_all('Issue',
-			fields=[self.field_map.get(self.filters.based_on), 'name', 'opening_date', 'status'],
+			fields=[self.field_map.get(self.filters.based_on), 'name', 'opening_date', 'status', 'avg_response_time',
+				'first_response_time', 'total_hold_time', 'user_resolution_time', 'resolution_time'],
 			filters=filters
 		)
 
@@ -108,7 +127,7 @@ class IssueSummary(object):
 		self.data = []
 		self.get_summary_data()
 
-		for entity, status_data in iteritems(self.issue_summary_data):
+		for entity, data in iteritems(self.issue_summary_data):
 			if self.filters.based_on == 'Customer':
 				row = {'customer': entity}
 			elif self.filters.based_on == 'Assigned To':
@@ -120,11 +139,14 @@ class IssueSummary(object):
 
 			total = 0
 			for status in self.statuses:
-				count = flt(status_data.get(status, 0.0))
+				count = flt(data.get(status, 0.0))
 				row[scrub(status)] = count
-				total += count
 
-			row['total'] = total
+			row['total_issues'] = data.get('total_issues', 0.0)
+
+			for metric in self.metrics:
+				value = flt(data.get(scrub(metric)), 0.0)
+				row[scrub(metric)] = value
 
 			self.data.append(row)
 
@@ -138,7 +160,9 @@ class IssueSummary(object):
 				if d._assign:
 					for entry in json.loads(d._assign):
 						self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault(status, 0.0)
+						self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault('total_issues', 0.0)
 						self.issue_summary_data[entry][status] += 1
+						self.issue_summary_data[entry]['total_issues'] += 1
 
 			else:
 				field = self.field_map.get(self.filters.based_on)
@@ -147,7 +171,78 @@ class IssueSummary(object):
 					value = _('Not Specified')
 
 				self.issue_summary_data.setdefault(value, frappe._dict()).setdefault(status, 0.0)
+				self.issue_summary_data.setdefault(value, frappe._dict()).setdefault('total_issues', 0.0)
 				self.issue_summary_data[value][status] += 1
+				self.issue_summary_data[value]['total_issues'] += 1
+
+		self.get_metrics_data()
+
+	def get_metrics_data(self):
+		issues = []
+		for entry in self.entries:
+			issues.append(entry.name)
+
+		field = self.field_map.get(self.filters.based_on)
+
+		if issues:
+			if self.filters.based_on == 'Assigned To':
+				assignment_map = frappe._dict()
+				for d in self.entries:
+					if d._assign:
+						for entry in json.loads(d._assign):
+							self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault('average_response_time', 0.0)
+							self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault('average_first_response_time', 0.0)
+							self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault('average_hold_time', 0.0)
+							self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault('average_resolution_time', 0.0)
+							self.issue_summary_data.setdefault(entry, frappe._dict()).setdefault('average_user_resolution_time', 0.0)
+
+							self.issue_summary_data[entry]['average_response_time'] += d.get('avg_response_time') or 0.0
+							self.issue_summary_data[entry]['average_first_response_time'] += d.get('first_response_time') or 0.0
+							self.issue_summary_data[entry]['average_hold_time'] += d.get('total_hold_time') or 0.0
+							self.issue_summary_data[entry]['average_resolution_time'] += d.get('resolution_time') or 0.0
+							self.issue_summary_data[entry]['average_user_resolution_time'] += d.get('user_resolution_time') or 0.0
+
+							if not assignment_map.get(entry):
+								assignment_map[entry] = 0
+							assignment_map[entry] += 1
+
+				for entry in assignment_map:
+					self.issue_summary_data[entry]['average_response_time'] /= flt(assignment_map.get(entry))
+					self.issue_summary_data[entry]['average_first_response_time'] /= flt(assignment_map.get(entry))
+					self.issue_summary_data[entry]['average_hold_time'] /= flt(assignment_map.get(entry))
+					self.issue_summary_data[entry]['average_resolution_time'] /= flt(assignment_map.get(entry))
+					self.issue_summary_data[entry]['average_user_resolution_time'] /= flt(assignment_map.get(entry))
+
+			else:
+				data = frappe.db.sql("""
+					SELECT
+						{0}, AVG(first_response_time) as avg_frt,
+						AVG(avg_response_time) as avg_resp_time,
+						AVG(total_hold_time) as avg_hold_time,
+						AVG(resolution_time) as avg_resolution_time,
+						AVG(user_resolution_time) as avg_user_resolution_time
+					FROM `tabIssue`
+					WHERE
+						name IN %(issues)s
+					GROUP BY {0}
+				""".format(field), {'issues': issues}, as_dict=1)
+
+				for entry in data:
+					value = entry.get(field)
+					if not value:
+						value = _('Not Specified')
+
+					self.issue_summary_data.setdefault(value, frappe._dict()).setdefault('average_response_time', 0.0)
+					self.issue_summary_data.setdefault(value, frappe._dict()).setdefault('average_first_response_time', 0.0)
+					self.issue_summary_data.setdefault(value, frappe._dict()).setdefault('average_hold_time', 0.0)
+					self.issue_summary_data.setdefault(value, frappe._dict()).setdefault('average_resolution_time', 0.0)
+					self.issue_summary_data.setdefault(value, frappe._dict()).setdefault('average_user_resolution_time', 0.0)
+
+					self.issue_summary_data[value]['average_response_time'] = entry.get('avg_resp_time') or 0.0
+					self.issue_summary_data[value]['average_first_response_time'] = entry.get('avg_frt') or 0.0
+					self.issue_summary_data[value]['average_hold_time'] = entry.get('avg_hold_time') or 0.0
+					self.issue_summary_data[value]['average_resolution_time'] = entry.get('avg_resolution_time') or 0.0
+					self.issue_summary_data[value]['average_user_resolution_time'] = entry.get('avg_user_resolution_time') or 0.0
 
 	def get_chart_data(self):
 		length = len(self.columns)
