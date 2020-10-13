@@ -324,7 +324,7 @@ def make_variant_item_code(template_item_code, template_item_name, variant):
 
 		abbr_or_value = cstr(attr.attribute_value) if item_attribute[0].numeric_values else item_attribute[0].abbr
 		abbreviations.append(abbr_or_value)
-		name_parts.append(attr.abbr if item_attribute[0].item_name_by == "Abbreviation" else attr.attribute_value)
+		name_parts.append(item_attribute[0].abbr if item_attribute[0].item_name_by == "Abbreviation" else attr.attribute_value)
 
 	if abbreviations:
 		variant.item_code = "{0}-{1}".format(template_item_code, "-".join(abbreviations))
