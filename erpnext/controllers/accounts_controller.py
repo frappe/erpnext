@@ -790,10 +790,10 @@ class AccountsController(TransactionBase):
 
 	def set_total_advance_paid(self):
 		if self.doctype == "Sales Order":
-			dr_or_cr = "credit_in_account_currency"
+			dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 			party = self.customer
 		else:
-			dr_or_cr = "debit_in_account_currency"
+			dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 			party = self.supplier
 
 		advance = frappe.db.sql("""
@@ -802,9 +802,12 @@ class AccountsController(TransactionBase):
 			from
 				`tabGL Entry`
 			where
-				against_voucher_type = %s and against_voucher = %s and party=%s
-				and docstatus = 1
-		""".format(dr_or_cr=dr_or_cr), (self.doctype, self.name, party), as_dict=1)
+				((against_voucher_type = %(doctype)s and against_voucher = %(name)s)
+					or (original_against_voucher_type = %(doctype)s and original_against_voucher = %(name)s))
+				and party=%(party)s
+		""".format(dr_or_cr=dr_or_cr), {
+			"doctype": self.doctype, "name": self.name, "party": party
+		}, as_dict=1)
 
 		if advance:
 			advance = advance[0]
@@ -829,7 +832,8 @@ class AccountsController(TransactionBase):
 				frappe.throw(_("Total advance ({0}) against Order {1} cannot be greater than the Grand Total ({2})")
 							 .format(formatted_advance_paid, self.name, formatted_order_total))
 
-			frappe.db.set_value(self.doctype, self.name, "advance_paid", advance_paid)
+			self.db_set("advance_paid", advance_paid)
+			self.notify_update()
 
 	@property
 	def company_abbr(self):

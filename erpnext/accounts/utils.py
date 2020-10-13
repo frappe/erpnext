@@ -490,6 +490,8 @@ def update_reference_in_journal_entry(d, jv_doc):
 			ch.cheque_no = jvd[0]["cheque_no"]
 			ch.cheque_date = jvd[0]["cheque_date"]
 			ch.user_remark = jvd[0]["user_remark"]
+			ch.original_reference_type = jvd[0]["original_reference_type"]
+			ch.original_reference_name = jvd[0]["original_reference_type"]
 
 			ch.set(d['dr_or_cr'], amount_in_account_currency)
 			ch.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit', amount_in_company_currency)
@@ -529,6 +531,12 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 	if d.voucher_detail_no:
 		existing_row = payment_entry.get("references", {"name": d["voucher_detail_no"]})[0]
 		original_row = existing_row.as_dict().copy()
+
+		reference_details.update({
+			"original_reference_doctype": existing_row.original_reference_doctype,
+			"original_reference_name": existing_row.original_reference_name
+		})
+
 		existing_row.update(reference_details)
 
 		if original_row.reference_doctype in ("Sales Order", "Purchase Order", "Employee Advance"):

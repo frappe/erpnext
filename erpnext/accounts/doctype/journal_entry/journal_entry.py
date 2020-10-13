@@ -35,6 +35,10 @@ class JournalEntry(AccountsController):
 			"timeline_name": party
 		}
 
+	def before_validate_links(self):
+		if self.docstatus == 0:
+			self.set_original_reference(unset=True)
+
 	def validate(self):
 		if not self.is_opening:
 			self.is_opening='No'
@@ -64,6 +68,7 @@ class JournalEntry(AccountsController):
 
 		self.validate_cheque_info()
 		self.create_remarks()
+		self.set_original_reference()
 
 	def on_submit(self):
 		self.check_credit_limit()
@@ -93,10 +98,14 @@ class JournalEntry(AccountsController):
 		return self.pay_to_recd_from or self.accounts[0].account
 
 	def update_advance_paid(self):
+		order_dts = ("Sales Order", "Purchase Order", "Employee Advance")
+
 		advance_paid = frappe._dict()
 		for d in self.get("accounts"):
-			if d.reference_type in ("Sales Order", "Purchase Order", "Employee Advance"):
+			if d.reference_type in order_dts:
 				advance_paid.setdefault(d.reference_type, []).append(d.reference_name)
+			elif d.original_reference_type in order_dts:
+				advance_paid.setdefault(d.original_reference_type, []).append(d.original_reference_name)
 
 		for voucher_type, order_list in iteritems(advance_paid):
 			for voucher_no in list(set(order_list)):
@@ -540,6 +549,11 @@ class JournalEntry(AccountsController):
 
 		self.remark = "\n".join(r) if r else "" # User Remarks is not mandatory
 
+	def set_original_reference(self, unset=False):
+		for d in self.accounts:
+			d.original_reference_type = "" if unset else d.reference_type
+			d.original_reference_name = "" if unset else d.reference_name
+
 	def set_print_format_fields(self):
 		bank_amount = party_amount = total_amount = 0.0
 		currency = bank_account_currency = party_account_currency = pay_to_recd_from= None
@@ -607,6 +621,8 @@ class JournalEntry(AccountsController):
 							d.precision("credit_in_account_currency")),
 						"against_voucher_type": d.reference_type,
 						"against_voucher": d.reference_name,
+						"original_against_voucher_type": d.original_reference_type,
+						"original_against_voucher": d.original_reference_name,
 						"remarks": d.user_remark or self.user_remark or self.remark,
 						"reference_no": d.cheque_no or self.bill_no,
 						"reference_date": d.cheque_date or self.bill_date,

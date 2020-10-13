@@ -220,6 +220,8 @@ def update_outstanding_amt(voucher_type, voucher_no, account, party_type, party,
 	elif voucher_type == "Employee Advance":
 		fieldname = "balance_amount"
 		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
+	elif voucher_type in ("Sales Order", "Purchase Order"):
+		fieldname = "advance_paid"
 	else:
 		return
 

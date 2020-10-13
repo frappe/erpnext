@@ -50,6 +50,10 @@ class PaymentEntry(AccountsController):
 			self.party_account = self.paid_to
 			self.party_account_currency = self.paid_to_account_currency
 
+	def before_validate_links(self):
+		if self.docstatus == 0:
+			self.set_original_reference(unset=True)
+
 	def validate(self):
 		self.setup_party_account_field()
 		self.set_missing_values()
@@ -72,6 +76,7 @@ class PaymentEntry(AccountsController):
 	def before_submit(self):
 		self.validate_is_advance()
 		self.set_remarks()
+		self.set_original_reference()
 
 	def on_submit(self):
 		self.setup_party_account_field()
@@ -499,6 +504,11 @@ class PaymentEntry(AccountsController):
 
 		self.set("remarks", "\n".join(remarks))
 
+	def set_original_reference(self, unset=False):
+		for d in self.references:
+			d.original_reference_doctype = "" if unset else d.reference_doctype
+			d.original_reference_name = "" if unset else d.reference_name
+
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		if self.payment_type in ("Receive", "Pay") and not self.get("party_account_field"):
 			self.setup_party_account_field()
@@ -539,6 +549,8 @@ class PaymentEntry(AccountsController):
 				gle.update({
 					"against_voucher_type": d.reference_doctype,
 					"against_voucher": d.reference_name,
+					"original_against_voucher_type": d.original_reference_doctype,
+					"original_against_voucher": d.original_reference_name,
 					"remarks": d.user_remark or self.user_remark or self.remarks
 				})
 
@@ -618,11 +630,14 @@ class PaymentEntry(AccountsController):
 				)
 
 	def update_advance_paid(self):
+		order_dts = ("Sales Order", "Purchase Order", "Employee Advance")
 		if self.payment_type in ("Receive", "Pay") and self.party:
 			for d in self.get("references"):
-				if flt(d.allocated_amount) \
-					and d.reference_doctype in ("Sales Order", "Purchase Order", "Employee Advance"):
+				if flt(d.allocated_amount):
+					if d.reference_doctype in order_dts:
 						frappe.get_doc(d.reference_doctype, d.reference_name).set_total_advance_paid()
+					elif d.original_reference_doctype in order_dts:
+						frappe.get_doc(d.original_reference_doctype, d.original_reference_name).set_total_advance_paid()
 
 	def update_expense_claim(self):
 		if self.payment_type in ("Pay") and self.party:
@@ -689,10 +704,10 @@ def get_outstanding_reference_documents(args):
 		condition += " and cost_center='%s'" % args.get("cost_center")
 
 	include_orders = False
-	'''party_account_type = erpnext.get_party_account_type(args.get("party_type"))
+	party_account_type = erpnext.get_party_account_type(args.get("party_type"))
 	if (args.get("payment_type") == "Receive" and party_account_type == "Receivable") \
 			or (args.get("payment_type") == "Pay" and party_account_type == "Payable"):
-		include_orders = True'''
+		include_orders = True
 
 	date_fields_dict = {
 		'posting_date': ['from_posting_date', 'to_posting_date'],
@@ -733,8 +748,8 @@ def get_outstanding_reference_documents(args):
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
 	orders_to_be_billed = []
 	if include_orders:
-		orders_to_be_billed = get_orders_to_be_billed(args.get("posting_date"),args.get("party_type"),
-			args.get("party"), party_account_currency, company_currency)
+		orders_to_be_billed = get_orders_to_be_billed(args.get("posting_date"), args.get("party_type"),
+			args.get("party"), party_account_currency, company_currency, filters=args)
 
 	outstanding_employee_advances = []
 	if args.get("party_type") == "Employee":
@@ -752,7 +767,7 @@ def get_outstanding_reference_documents(args):
 
 
 def get_orders_to_be_billed(posting_date, party_type, party,
-	company, party_account_currency, company_currency, cost_center=None, filters=None):
+	party_account_currency, company_currency, cost_center=None, filters=None):
 	if party_type == "Customer":
 		voucher_type = 'Sales Order'
 	elif party_type == "Supplier":
@@ -760,21 +775,21 @@ def get_orders_to_be_billed(posting_date, party_type, party,
 	else:
 		return []
 
-	# Add cost center condition
-	if voucher_type:
-		doc = frappe.get_doc({"doctype": voucher_type})
-		condition = ""
-		if doc and hasattr(doc, 'cost_center'):
-			condition = " and cost_center='%s'" % cost_center
+	if not filters:
+		filters = {}
+
+	condition = ""
 
 	ref_field = "base_grand_total" if party_account_currency == company_currency else "grand_total"
+	rounded_ref_field = "base_rounded_total" if party_account_currency == company_currency else "rounded_total"
 
 	orders = frappe.db.sql("""
 		select
 			name as voucher_no,
-			{ref_field} as invoice_amount,
-			({ref_field} - advance_paid) as outstanding_amount,
-			transaction_date as posting_date
+			IF({rounded_ref_field} = 0, {ref_field}, {rounded_ref_field}) as invoice_amount,
+			(IF({rounded_ref_field} = 0, {ref_field}, {rounded_ref_field}) - advance_paid) as outstanding_amount,
+			transaction_date as posting_date,
+			conversion_rate as exchange_rate
 		from
 			`tab{voucher_type}`
 		where
@@ -788,6 +803,7 @@ def get_orders_to_be_billed(posting_date, party_type, party,
 			transaction_date, name
 	""".format(**{
 		"ref_field": ref_field,
+		"rounded_ref_field": rounded_ref_field,
 		"voucher_type": voucher_type,
 		"party_type": scrub(party_type),
 		"condition": condition
@@ -795,13 +811,12 @@ def get_orders_to_be_billed(posting_date, party_type, party,
 
 	order_list = []
 	for d in orders:
-		if not (flt(d.outstanding_amount) >= flt(filters.get("outstanding_amt_greater_than"))
-			and flt(d.outstanding_amount) <= flt(filters.get("outstanding_amt_less_than"))):
+		if flt(filters.get("outstanding_amt_greater_than")) and flt(d.outstanding_amount) <= flt(filters.get("outstanding_amt_greater_than")):
+			continue
+		if flt(filters.get("outstanding_amt_less_than")) and flt(d.outstanding_amount) >= flt(filters.get("outstanding_amt_less_than")):
 			continue
 
 		d["voucher_type"] = voucher_type
-		# This assumes that the exchange rate required is the one in the SO
-		d["exchange_rate"] = get_exchange_rate(party_account_currency, company_currency, posting_date)
 		order_list.append(d)
 
 	return order_list
