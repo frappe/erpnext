@@ -11,7 +11,7 @@ from erpnext.accounts.party import get_party_account_currency
 from erpnext.exceptions import InvalidCurrency
 from erpnext.stock.doctype.material_request.material_request import make_request_for_quotation
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import \
-			 make_supplier_quotation as make_quotation_from_rfq
+			 make_supplier_quotation_from_rfq
 
 def work():
 	frappe.set_user(frappe.db.get_global('demo_purchase_user'))
@@ -44,7 +44,7 @@ def work():
 				rfq = frappe.get_doc('Request for Quotation', rfq.name)
 
 				for supplier in rfq.suppliers:
-					supplier_quotation = make_quotation_from_rfq(rfq.name, supplier.supplier)
+					supplier_quotation = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier.supplier)
 					supplier_quotation.save()
 					supplier_quotation.submit()
 
