@@ -655,11 +655,11 @@
 		},
 		"Italy VAT 10%":{
 			"account_name": "IVA 10%",
-			"tax_rate": 10.00,
+			"tax_rate": 10.00
 		},
 		"Italy VAT 4%":{
 			"account_name": "IVA 4%",
-			"tax_rate": 4.00,
+			"tax_rate": 4.00
 		}		
 	},
 
