@@ -428,7 +428,7 @@ class SalesInvoice(SellingController):
 			if pos.get('account_for_change_amount'):
 				self.account_for_change_amount = pos.get('account_for_change_amount')
 
-			for fieldname in ('naming_series', 'currency', 'letter_head', 'tc_name',
+			for fieldname in ('currency', 'letter_head', 'tc_name',
 				'company', 'select_print_heading', 'write_off_account', 'taxes_and_charges',
 				'write_off_cost_center', 'apply_discount_on', 'cost_center'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
