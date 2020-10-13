@@ -45,11 +45,11 @@
  ],
  "icon": "fa fa-credit-card",
  "idx": 1,
- "modified": "2019-08-14 14:58:42.079115",
- "modified_by": "sammish.thundiyil@gmail.com",
+ "modified": "2020-09-18 17:26:09.703215",
+ "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Mode of Payment",
- "owner": "harshada@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "create": 1,
