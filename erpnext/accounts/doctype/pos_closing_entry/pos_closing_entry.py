@@ -111,7 +111,8 @@ def make_closing_entry_from_opening(opening_entry):
 	closing_entry.net_total = 0
 	closing_entry.total_quantity = 0
 
-	invoices = get_pos_invoices(closing_entry.period_start_date, closing_entry.period_end_date, closing_entry.user)
+	invoices = get_pos_invoices(closing_entry.period_start_date, closing_entry.period_end_date,
+		closing_entry.pos_profile, closing_entry.user)
 
 	pos_transactions = []
 	taxes = []
