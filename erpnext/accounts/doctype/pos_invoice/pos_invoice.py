@@ -139,7 +139,8 @@ class POSInvoice(SalesInvoice):
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
 
 	def validate_change_account(self):
-		if frappe.db.get_value("Account", self.account_for_change_amount, "company") != self.company:
+		if self.change_amount and self.account_for_change_amount and \
+			frappe.db.get_value("Account", self.account_for_change_amount, "company") != self.company:
 			frappe.throw(_("The selected change account {} doesn't belongs to Company {}.").format(self.account_for_change_amount, self.company))
 
 	def validate_change_amount(self):
