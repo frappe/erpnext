@@ -282,11 +282,13 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 				# create patient invoice with just test kit
 				patient_invoice_doc = frappe.get_doc(invoice_dict)
 				create_patient_invoice(edited_line_items, patient_invoice_doc)
-				# Save 
-				patient_invoice_doc.flags.ignore_mandatory = True
-				patient_invoice_doc.insert()
 
-				DocTags("Sales Invoice").add(patient_invoice_doc.name, "WC order on behalf of patient")
+				if hasattr(patient_invoice_doc, "items"):
+					# Save 
+					patient_invoice_doc.flags.ignore_mandatory = True
+					patient_invoice_doc.insert()
+
+					DocTags("Sales Invoice").add(patient_invoice_doc.name, "WC order on behalf of patient")
 
 		invoice_doc.append("items",{
 			"item_code": "HAND-FEE",
