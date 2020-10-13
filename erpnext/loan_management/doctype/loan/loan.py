@@ -138,9 +138,12 @@ class Loan(AccountsController):
 				})
 
 	def unlink_loan_security_pledge(self):
-		frappe.db.sql("""UPDATE `tabLoan Security Pledge` SET
-			loan = '', status = 'Unpledged'
-			where name = %s """, (self.loan_security_pledge))
+		pledges = frappe.get_all('Loan Security Pledge', fields=['name'], filters={'loan': self.name})
+		pledge_list = [d.name for d in pledges]
+		if pledge_list:
+			frappe.db.sql("""UPDATE `tabLoan Security Pledge` SET
+				loan = '', status = 'Unpledged'
+				where name in (%s) """ % (', '.join(['%s']*len(pledge_list))), tuple(pledge_list))
 
 def update_total_amount_paid(doc):
 	total_amount_paid = 0
