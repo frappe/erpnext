@@ -264,7 +264,7 @@ def create_records():
 
 	# create an item
 	if not frappe.db.exists("Item", "Loyal Item"):
-		item = frappe.get_doc({
+		frappe.get_doc({
 			"doctype": "Item",
 			"item_code": "Loyal Item",
 			"item_name": "Loyal Item",

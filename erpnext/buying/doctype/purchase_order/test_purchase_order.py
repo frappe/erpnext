@@ -651,7 +651,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		make_subcontracted_item(item_code)
 
 		po = create_purchase_order(item_code=item_code, qty=1,
-			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
+			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC", include_exploded_items=1)
 
 		name = frappe.db.get_value('BOM', {'item': item_code}, 'name')
 		bom = frappe.get_doc('BOM', name)

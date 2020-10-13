@@ -223,29 +223,29 @@ class TestPOSInvoice(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-		se = make_serialized_item(company='_Test Company with perpetual inventory',
-			target_warehouse="Stores - TCP1", cost_center='Main - TCP1', expense_account='Cost of Goods Sold - TCP1')
+		se = make_serialized_item(company='_Test Company',
+			target_warehouse="Stores - _TC", cost_center='Main - _TC', expense_account='Cost of Goods Sold - _TC')
 
 		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
 
-		pos = create_pos_invoice(company='_Test Company with perpetual inventory', debit_to='Debtors - TCP1',
-			account_for_change_amount='Cash - TCP1', warehouse='Stores - TCP1', income_account='Sales - TCP1',
-			expense_account='Cost of Goods Sold - TCP1', cost_center='Main - TCP1',
+		pos = create_pos_invoice(company='_Test Company', debit_to='Debtors - _TC',
+			account_for_change_amount='Cash - _TC', warehouse='Stores - _TC', income_account='Sales - _TC',
+			expense_account='Cost of Goods Sold - _TC', cost_center='Main - _TC',
 			item=se.get("items")[0].item_code, rate=1000, do_not_save=1)
 
 		pos.get("items")[0].serial_no = serial_nos[0]
-		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - TCP1', 'amount': 1000})
+		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 1000})
 
 		pos.insert()
 		pos.submit()
 
-		pos2 = create_pos_invoice(company='_Test Company with perpetual inventory', debit_to='Debtors - TCP1',
-			account_for_change_amount='Cash - TCP1', warehouse='Stores - TCP1', income_account='Sales - TCP1',
-			expense_account='Cost of Goods Sold - TCP1', cost_center='Main - TCP1',
+		pos2 = create_pos_invoice(company='_Test Company', debit_to='Debtors - _TC',
+			account_for_change_amount='Cash - _TC', warehouse='Stores - _TC', income_account='Sales - _TC',
+			expense_account='Cost of Goods Sold - _TC', cost_center='Main - _TC',
 			item=se.get("items")[0].item_code, rate=1000, do_not_save=1)
 
 		pos2.get("items")[0].serial_no = serial_nos[0]
-		pos2.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - TCP1', 'amount': 1000})
+		pos2.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 1000})
 
 		self.assertRaises(frappe.ValidationError, pos2.insert)
 
