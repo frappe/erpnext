@@ -62,8 +62,7 @@ class Quotation(SellingController):
 			opportunity = self.opportunity
 
 		opp = frappe.get_doc("Opportunity", opportunity)
-		opp.set_status(status=status)
-		opp.set_status(update=True)
+		opp.set_status(status=status, update=True)
 
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_sales_order():

@@ -6,22 +6,23 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import getdate, cstr
+from frappe.utils import getdate, cstr, get_link_to_form
 
 class LabTest(Document):
+	def validate(self):
+		if not self.is_new():
+			self.set_secondary_uom_result()
+
 	def on_submit(self):
+		self.validate_result_values()
 		self.db_set('submitted_date', getdate())
 		self.db_set('status', 'Completed')
 		insert_lab_test_to_medical_record(self)
 
 	def on_cancel(self):
-		delete_lab_test_from_medical_record(self)
 		self.db_set('status', 'Cancelled')
+		delete_lab_test_from_medical_record(self)
 		self.reload()
-
-	def validate(self):
-		if not self.is_new():
-			self.set_secondary_uom_result()
 
 	def on_update(self):
 		if self.sensitivity_test_items:
@@ -51,7 +52,20 @@ class LabTest(Document):
 					item.secondary_uom_result = float(item.result_value) * float(item.conversion_factor)
 				except:
 					item.secondary_uom_result = ''
-					frappe.msgprint(_('Result for Secondary UOM not calculated for row #{0}'.format(item.idx)), title = _('Warning'))
+					frappe.msgprint(_('Row #{0}: Result for Secondary UOM not calculated'.format(item.idx)), title = _('Warning'))
+
+	def validate_result_values(self):
+		if self.normal_test_items:
+			for item in self.normal_test_items:
+				if not item.result_value and not item.allow_blank and item.require_result_value:
+					frappe.throw(_('Row #{0}: Please enter the result value for {1}').format(
+						item.idx, frappe.bold(item.lab_test_name)), title=_('Mandatory Results'))
+
+		if self.descriptive_test_items:
+			for item in self.descriptive_test_items:
+				if not item.result_value and not item.allow_blank and item.require_result_value:
+					frappe.throw(_('Row #{0}: Please enter the result value for {1}').format(
+						item.idx, frappe.bold(item.lab_test_particulars)), title=_('Mandatory Results'))
 
 
 def create_test_from_template(lab_test):
@@ -89,7 +103,7 @@ def create_multiple(doctype, docname):
 		lab_test_created = create_lab_test_from_encounter(docname)
 
 	if lab_test_created:
-		frappe.msgprint(_('Lab Test(s) {0} created'.format(lab_test_created)))
+		frappe.msgprint(_('Lab Test(s) {0} created successfully').format(lab_test_created), indicator='green')
 	else:
 		frappe.msgprint(_('No Lab Tests created'))
 
@@ -211,8 +225,9 @@ def create_sample_doc(template, patient, invoice, company = None):
 			'docstatus': 0,
 			'sample': template.sample
 		})
+
 		if sample_exists:
-			# Update Sample Collection by adding quantity
+			# update sample collection by adding quantity
 			sample_collection = frappe.get_doc('Sample Collection', sample_exists[0][0])
 			quantity = int(sample_collection.sample_qty) + int(template.sample_qty)
 			if template.sample_details:
@@ -238,7 +253,7 @@ def create_sample_doc(template, patient, invoice, company = None):
 			sample_collection.company = company
 
 			if template.sample_details:
-				sample_collection.sample_details = 'Test :' + (template.get('lab_test_name') or template.get('template')) + '\n' + 'Collection Detials:\n\t' + template.sample_details
+				sample_collection.sample_details = _('Test :') + (template.get('lab_test_name') or template.get('template')) + '\n' + 'Collection Detials:\n\t' + template.sample_details
 			sample_collection.save(ignore_permissions=True)
 
 		return sample_collection
@@ -248,26 +263,31 @@ def create_sample_collection(lab_test, template, patient, invoice):
 		sample_collection = create_sample_doc(template, patient, invoice, lab_test.company)
 		if sample_collection:
 			lab_test.sample = sample_collection.name
-
+			sample_collection_doc = get_link_to_form('Sample Collection', sample_collection.name)
+			frappe.msgprint(_('Sample Collection {0} has been created').format(sample_collection_doc),
+				title=_('Sample Collection'), indicator='green')
 	return lab_test
 
 def load_result_format(lab_test, template, prescription, invoice):
 	if template.lab_test_template_type == 'Single':
 		create_normals(template, lab_test)
+
 	elif template.lab_test_template_type == 'Compound':
 		create_compounds(template, lab_test, False)
+
 	elif template.lab_test_template_type == 'Descriptive':
 		create_descriptives(template, lab_test)
+
 	elif template.lab_test_template_type == 'Grouped':
 		# Iterate for each template in the group and create one result for all.
 		for lab_test_group in template.lab_test_groups:
 			# Template_in_group = None
 			if lab_test_group.lab_test_template:
-				template_in_group = frappe.get_doc('Lab Test Template',
-								lab_test_group.lab_test_template)
+				template_in_group = frappe.get_doc('Lab Test Template', lab_test_group.lab_test_template)
 				if template_in_group:
 					if template_in_group.lab_test_template_type == 'Single':
 						create_normals(template_in_group, lab_test)
+
 					elif template_in_group.lab_test_template_type == 'Compound':
 						normal_heading = lab_test.append('normal_test_items')
 						normal_heading.lab_test_name = template_in_group.lab_test_name
@@ -275,6 +295,7 @@ def load_result_format(lab_test, template, prescription, invoice):
 						normal_heading.allow_blank = 1
 						normal_heading.template = template_in_group.name
 						create_compounds(template_in_group, lab_test, True)
+
 					elif template_in_group.lab_test_template_type == 'Descriptive':
 						descriptive_heading = lab_test.append('descriptive_test_items')
 						descriptive_heading.lab_test_name = template_in_group.lab_test_name
@@ -282,6 +303,7 @@ def load_result_format(lab_test, template, prescription, invoice):
 						descriptive_heading.allow_blank = 1
 						descriptive_heading.template = template_in_group.name
 						create_descriptives(template_in_group, lab_test)
+
 			else: # Lab Test Group - Add New Line
 				normal = lab_test.append('normal_test_items')
 				normal.lab_test_name = lab_test_group.group_event
@@ -292,6 +314,7 @@ def load_result_format(lab_test, template, prescription, invoice):
 				normal.allow_blank = lab_test_group.allow_blank
 				normal.require_result_value = 1
 				normal.template = template.name
+
 	if template.lab_test_template_type != 'No Result':
 		if prescription:
 			lab_test.prescription = prescription
@@ -302,9 +325,10 @@ def load_result_format(lab_test, template, prescription, invoice):
 
 @frappe.whitelist()
 def get_employee_by_user_id(user_id):
-	emp_id = frappe.db.get_value('Employee', { 'user_id': user_id })
-	employee = frappe.get_doc('Employee', emp_id)
-	return employee
+	emp_id = frappe.db.exists('Employee', { 'user_id': user_id })
+	if emp_id:
+		return frappe.get_doc('Employee', emp_id)
+	return None
 
 def insert_lab_test_to_medical_record(doc):
 	table_row = False
@@ -325,7 +349,7 @@ def insert_lab_test_to_medical_record(doc):
 			table_row += ' ' + frappe.bold(_('Lab Test Result: ')) + item.result_value
 
 		if item.normal_range:
-			table_row += ' ' + _('Normal Range:') + item.normal_range
+			table_row += ' ' + _('Normal Range: ') + item.normal_range
 		table_row += ' ' + comment
 
 	elif doc.descriptive_test_items:
@@ -356,7 +380,7 @@ def insert_lab_test_to_medical_record(doc):
 	medical_record.save(ignore_permissions = True)
 
 def delete_lab_test_from_medical_record(self):
-	medical_record_id = frappe.db.sql('select name from `tabPatient Medical Record` where reference_name= %s', (self.name))
+	medical_record_id = frappe.db.sql('select name from `tabPatient Medical Record` where reference_name=%s', (self.name))
 
 	if medical_record_id and medical_record_id[0][0]:
 		frappe.delete_doc('Patient Medical Record', medical_record_id[0][0])
