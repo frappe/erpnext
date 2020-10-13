@@ -752,9 +752,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		rm_items = [
 			{"item_code":item_code,"rm_item_code":"Sub Contracted Raw Material 3","item_name":"_Test Item",
-				"qty":300,"warehouse":"_Test Warehouse - _TC", "stock_uom":"Nos"},
+				"qty":300,"warehouse":"_Test Warehouse - _TC", "stock_uom":"Nos", "name": po.supplied_items[0].name},
 			{"item_code":item_code,"rm_item_code":"Sub Contracted Raw Material 3","item_name":"_Test Item",
-				"qty":200,"warehouse":"_Test Warehouse - _TC", "stock_uom":"Nos"}
+				"qty":200,"warehouse":"_Test Warehouse - _TC", "stock_uom":"Nos", "name": po.supplied_items[0].name}
 		]
 
 		rm_item_string = json.dumps(rm_items)

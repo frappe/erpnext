@@ -1306,8 +1306,9 @@ class StockEntry(StockController):
 					FROM
 						`tabStock Entry Detail` sed, `tabStock Entry` se
 					WHERE
-						(pos.name = sed.po_detail OR sed.subcontracted_item = pos.main_item_code)
-						AND sed.docstatus = 1 AND se.name = sed.parent and se.purchase_order = %(po)s
+						pos.name = sed.po_detail AND pos.rm_item_code = sed.item_code
+						AND pos.parent = se.purchase_order AND sed.docstatus = 1
+						AND se.name = sed.parent and se.purchase_order = %(po)s
 				), 0)
 			WHERE pos.docstatus = 1 and pos.parent = %(po)s""", {"po": self.purchase_order})
 
