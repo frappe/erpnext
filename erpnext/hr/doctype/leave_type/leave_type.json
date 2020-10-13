@@ -21,6 +21,10 @@
   "allow_negative",
   "include_holiday",
   "is_compensatory",
+  "abbreviation_section",
+  "full_day_abbr",
+  "column_break_14",
+  "half_day_abbr",
   "carry_forward_section",
   "maximum_carry_forwarded_leaves",
   "expire_carry_forwarded_leaves_after_days",
@@ -208,6 +212,28 @@
    "fieldtype": "Float",
    "label": "Fraction of Daily Salary per Leave",
    "mandatory_depends_on": "eval:doc.is_ppl == 1"
+  },
+  {
+   "description": "The leave type abbreviation is used in the monthly attendance sheet.",
+   "fieldname": "abbreviation_section",
+   "fieldtype": "Section Break",
+   "label": "Abbreviation"
+  },
+  {
+   "fieldname": "full_day_abbr",
+   "fieldtype": "Data",
+   "label": "Full Day Leave abbreviation",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "half_day_abbr",
+   "fieldtype": "Data",
+   "label": "Half Day Leave abbreviation",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-flag",

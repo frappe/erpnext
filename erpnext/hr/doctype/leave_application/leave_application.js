@@ -16,6 +16,15 @@ frappe.ui.form.on("Leave Application", {
 			};
 		});
 
+		frm.set_query("remaining_half_day_status", function(){
+			return {
+				filters: {
+					is_half_day: 0,
+					is_leave: 0,
+				}
+			};
+		});
+
 		frm.set_query("employee", erpnext.queries.employee);
 	},
 	onload: function(frm) {

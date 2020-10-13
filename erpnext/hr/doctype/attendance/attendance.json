@@ -13,12 +13,15 @@
   "employee_name",
   "working_hours",
   "status",
+  "is_half_day",
+  "is_leave",
   "leave_type",
   "leave_application",
   "column_break0",
   "attendance_date",
   "company",
   "department",
+  "remaining_half_day_status",
   "attendance_request",
   "details_section",
   "shift",
@@ -33,12 +36,16 @@
   {
    "fieldname": "attendance_details",
    "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "oldfieldtype": "Section Break",
    "options": "Simple"
   },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Series",
    "no_copy": 1,
    "oldfieldname": "naming_series",
@@ -50,6 +57,8 @@
   {
    "fieldname": "employee",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "in_global_search": 1,
    "in_standard_filter": 1,
    "label": "Employee",
@@ -63,6 +72,8 @@
    "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "in_global_search": 1,
    "label": "Employee Name",
    "oldfieldname": "employee_name",
@@ -73,30 +84,35 @@
    "depends_on": "working_hours",
    "fieldname": "working_hours",
    "fieldtype": "Float",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Working Hours",
    "precision": "1",
    "read_only": 1
   },
   {
-   "default": "Present",
    "fieldname": "status",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nPresent\nAbsent\nOn Leave\nHalf Day\nWork From Home",
+   "options": "Attendance Status",
    "reqd": 1,
    "search_index": 1
   },
   {
-   "depends_on": "eval:in_list([\"On Leave\", \"Half Day\"], doc.status)",
+   "depends_on": "eval:doc.is_half_day || doc.is_leave",
    "fieldname": "leave_type",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "in_standard_filter": 1,
    "label": "Leave Type",
-   "mandatory_depends_on": "eval:in_list([\"On Leave\", \"Half Day\"], doc.status)",
+   "mandatory_depends_on": "eval:doc.is_half_day || doc.is_leave",
    "oldfieldname": "leave_type",
    "oldfieldtype": "Link",
    "options": "Leave Type"
@@ -104,6 +120,8 @@
   {
    "fieldname": "leave_application",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Leave Application",
    "no_copy": 1,
    "options": "Leave Application",
@@ -112,12 +130,16 @@
   {
    "fieldname": "column_break0",
    "fieldtype": "Column Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "oldfieldtype": "Column Break",
    "width": "50%"
   },
   {
    "fieldname": "attendance_date",
    "fieldtype": "Date",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "in_list_view": 1,
    "label": "Attendance Date",
    "oldfieldname": "attendance_date",
@@ -127,6 +149,8 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Company",
    "oldfieldname": "company",
    "oldfieldtype": "Link",
@@ -138,6 +162,8 @@
    "fetch_from": "employee.department",
    "fieldname": "department",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Department",
    "options": "Department",
    "read_only": 1
@@ -145,12 +171,16 @@
   {
    "fieldname": "shift",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Shift",
    "options": "Shift Type"
   },
   {
    "fieldname": "attendance_request",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Attendance Request",
    "options": "Attendance Request",
    "read_only": 1
@@ -158,6 +188,8 @@
   {
    "fieldname": "amended_from",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "ignore_user_permissions": 1,
    "label": "Amended From",
    "no_copy": 1,
@@ -169,23 +201,31 @@
    "default": "0",
    "fieldname": "late_entry",
    "fieldtype": "Check",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Late Entry"
   },
   {
    "default": "0",
    "fieldname": "early_exit",
    "fieldtype": "Check",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Early Exit"
   },
   {
    "fieldname": "details_section",
    "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Details"
   },
   {
    "depends_on": "shift",
    "fieldname": "in_time",
    "fieldtype": "Datetime",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "In Time",
    "read_only": 1
   },
@@ -193,23 +233,53 @@
    "depends_on": "shift",
    "fieldname": "out_time",
    "fieldtype": "Datetime",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Out Time",
    "read_only": 1
   },
   {
    "fieldname": "column_break_18",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "hide_days": 1,
+   "hide_seconds": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "status.is_half_day",
+   "fieldname": "is_half_day",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Is Half Day"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.is_half_day",
+   "fieldname": "remaining_half_day_status",
+   "fieldtype": "Link",
+   "label": "Remaining Half Day Status",
+   "options": "Attendance Status",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "status.is_leave",
+   "fieldname": "is_leave",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Is leave"
   }
  ],
  "icon": "fa fa-ok",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-18 17:26:09.703215",
+ "modified": "2020-10-09 14:07:21.560812",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",
- "owner": "Administrator",
+ "owner": "ashwini@webnotestech.com",
  "permissions": [
   {
    "cancel": 1,

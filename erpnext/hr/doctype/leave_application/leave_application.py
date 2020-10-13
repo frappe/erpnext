@@ -37,6 +37,10 @@ class LeaveApplication(Document):
 			self.validate_optional_leave()
 		self.validate_applicable_after()
 
+	def before_update_after_submit(self):
+		att = frappe.get_all("Attendance", filters = {"leave_application": self.name, "is_half_day": 1})[0].name
+		frappe.db.set_value("Attendance", att, "remaining_half_day_status", self.remaining_half_day_status)
+
 	def on_update(self):
 		if self.status == "Open" and self.docstatus < 1:
 			# notify leave approver about creation
@@ -152,6 +156,7 @@ class LeaveApplication(Document):
 					doc.leave_application = self.name
 					doc.status = status
 					doc.flags.ignore_validate = True
+					doc.remaining_half_day_status = self.remaining_half_day_status
 					doc.insert(ignore_permissions=True)
 					doc.submit()
 

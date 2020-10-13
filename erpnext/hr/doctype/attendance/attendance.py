@@ -17,6 +17,10 @@ class Attendance(Document):
 		self.validate_duplicate_record()
 		self.check_leave_record()
 
+	def before_update_after_submit(self):
+		if self.leave_application and self.is_half_day:
+			frappe.db.set_value("Leave Application", self.leave_application, "remaining_half_day_status", self.remaining_half_day_status)
+
 	def validate_attendance_date(self):
 		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
 
