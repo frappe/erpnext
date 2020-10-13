@@ -345,13 +345,14 @@ class Subscription(Document):
 			invoice.set_taxes()
 
 		# Due date
-		invoice.append(
-			'payment_schedule',
-			{
-				'due_date': add_days(invoice.posting_date, cint(self.days_until_due)),
-				'invoice_portion': 100
-			}
-		)
+		if self.days_until_due:
+			invoice.append(
+				'payment_schedule',
+				{
+					'due_date': add_days(invoice.posting_date, cint(self.days_until_due)),
+					'invoice_portion': 100
+				}
+			)
 
 		# Discounts
 		if self.additional_discount_percentage:
