@@ -1084,7 +1084,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-14 14:36:12.418690",
+ "modified": "2020-10-07 14:31:57.661221",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
@@ -1130,11 +1130,11 @@
    "write": 1
   }
  ],
- "search_fields": "status, transaction_date, supplier,grand_total",
+ "search_fields": "status, transaction_date, supplier, grand_total",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
  "timeline_field": "supplier",
- "title_field": "supplier",
+ "title_field": "supplier_name",
  "track_changes": 1
 }

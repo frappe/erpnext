@@ -181,17 +181,14 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		#stock raw materials in a warehouse before transfer
 		make_stock_entry(target="_Test Warehouse - _TC",
-			item_code="_Test Item Home Desktop 100", qty=1, basic_rate=100)
-		make_stock_entry(target="_Test Warehouse - _TC",
 			item_code = "Test Extra Item 1", qty=1, basic_rate=100)
 		make_stock_entry(target="_Test Warehouse - _TC",
-			item_code = "_Test Item", qty=1, basic_rate=100)
-
+			item_code = "_Test FG Item", qty=1, basic_rate=100)
 		rm_items = [
 			{
 				"item_code": item_code,
 				"rm_item_code": po.supplied_items[0].rm_item_code,
-				"item_name": "_Test Item",
+				"item_name": "_Test FG Item",
 				"qty": po.supplied_items[0].required_qty,
 				"warehouse": "_Test Warehouse - _TC",
 				"stock_uom": "Nos"
@@ -201,14 +198,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 				"rm_item_code": po.supplied_items[1].rm_item_code,
 				"item_name": "Test Extra Item 1",
 				"qty": po.supplied_items[1].required_qty,
-				"warehouse": "_Test Warehouse - _TC",
-				"stock_uom": "Nos"
-			},
-			{
-				"item_code": item_code,
-				"rm_item_code": po.supplied_items[2].rm_item_code,
-				"item_name": "_Test Item Home Desktop 100",
-				"qty": po.supplied_items[2].required_qty,
 				"warehouse": "_Test Warehouse - _TC",
 				"stock_uom": "Nos"
 			}
@@ -494,8 +483,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 			"expected_value_after_useful_life": 10,
 			"depreciation_method": "Straight Line",
 			"total_number_of_depreciations": 3,
-			"frequency_of_depreciation": 1,
-			"depreciation_start_date": frappe.utils.nowdate()
+			"frequency_of_depreciation": 1
 		})
 		asset.submit()
 
