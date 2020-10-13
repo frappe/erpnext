@@ -179,7 +179,7 @@ frappe.ui.form.on("Request for Quotation",{
 			dialog.hide();
 			return frappe.call({
 				type: "GET",
-				method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation",
+				method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation_from_rfq",
 				args: {
 					"source_name": doc.name,
 					"for_supplier": args.supplier
