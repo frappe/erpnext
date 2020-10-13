@@ -210,6 +210,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.customer = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.start = '2018-01-01'
+		subscription.days_until_due = 1
 		subscription.insert()
 		subscription.process()		# generate first invoice
 

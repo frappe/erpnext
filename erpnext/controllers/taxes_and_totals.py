@@ -629,22 +629,29 @@ class calculate_taxes_and_totals(object):
 		self.doc.other_charges_calculation = get_itemised_tax_breakup_html(self.doc)
 
 	def update_paid_amount_for_return(self, total_amount_to_pay):
-		default_mode_of_payment = frappe.db.get_value('Sales Invoice Payment',
-			{'parent': self.doc.pos_profile, 'default': 1},
-			['mode_of_payment', 'type', 'account'], as_dict=1)
+		existing_amount = 0
 
-		self.doc.payments = []
+		for payment in self.doc.payments:
+			existing_amount += payment.amount
 
-		if default_mode_of_payment:
-			self.doc.append('payments', {
-				'mode_of_payment': default_mode_of_payment.mode_of_payment,
-				'type': default_mode_of_payment.type,
-				'account': default_mode_of_payment.account,
-				'amount': total_amount_to_pay
-			})
-		else:
-			self.doc.is_pos = 0
-			self.doc.pos_profile = ''
+		# do not override user entered amount if equal to total_amount_to_pay
+		if existing_amount != total_amount_to_pay:
+			default_mode_of_payment = frappe.db.get_value('Sales Invoice Payment',
+				{'parent': self.doc.pos_profile, 'default': 1},
+				['mode_of_payment', 'type', 'account'], as_dict=1)
+
+			self.doc.payments = []
+
+			if default_mode_of_payment:
+				self.doc.append('payments', {
+					'mode_of_payment': default_mode_of_payment.mode_of_payment,
+					'type': default_mode_of_payment.type,
+					'account': default_mode_of_payment.account,
+					'amount': total_amount_to_pay
+				})
+			else:
+				self.doc.is_pos = 0
+				self.doc.pos_profile = ''
 
 		self.calculate_paid_amount()
 

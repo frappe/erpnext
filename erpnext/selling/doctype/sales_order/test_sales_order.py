@@ -88,6 +88,8 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(len(si.get("items")), 1)
 
 		si.insert()
+		si.set('taxes', [])
+		si.save()
 
 		self.assertEqual(si.payment_schedule[0].payment_amount, 500.0)
 		self.assertEqual(si.payment_schedule[0].due_date, so.transaction_date)
@@ -400,6 +402,22 @@ class TestSalesOrder(unittest.TestCase):
 
 		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 2, 'docname': so.items[0].name}])
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Sales Order', trans_item, so.name)
+	
+	def test_update_child_with_precision(self):
+		from frappe.model.meta import get_field_precision
+		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
+
+		precision = get_field_precision(frappe.get_meta("Sales Order Item").get_field("rate"))
+
+		make_property_setter("Sales Order Item", "rate", "precision", 7, "Currency")
+		so = make_sales_order(item_code= "_Test Item", qty=4, rate=200.34664)
+
+		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200.34669, 'qty' : 4, 'docname': so.items[0].name}])
+		update_child_qty_rate('Sales Order', trans_item, so.name)
+
+		so.reload()
+		self.assertEqual(so.items[0].rate, 200.34669)
+		make_property_setter("Sales Order Item", "rate", "precision", precision, "Currency")
 
 	def test_update_child_qty_rate_perm(self):
 		so = make_sales_order(item_code= "_Test Item", qty=4)
