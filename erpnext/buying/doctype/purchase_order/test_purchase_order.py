@@ -839,6 +839,59 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		update_backflush_based_on("BOM")
 
+	def test_supplied_qty_against_subcontracted_po(self):
+		item_code = "_Test Subcontracted FG Item 5"
+		make_item('Sub Contracted Raw Material 4', {
+			'is_stock_item': 1,
+			'is_sub_contracted_item': 1
+		})
+
+		make_subcontracted_item(item_code=item_code, raw_materials=["Sub Contracted Raw Material 4"])
+
+		update_backflush_based_on("Material Transferred for Subcontract")
+
+		order_qty = 250
+		po = create_purchase_order(item_code=item_code, qty=order_qty,
+			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC", do_not_save=True)
+
+		# Add same subcontracted items multiple times
+		po.append("items", {
+			"item_code": item_code,
+			"qty": order_qty,
+			"schedule_date": add_days(nowdate(), 1),
+			"warehouse": "_Test Warehouse - _TC"
+		})
+
+		po.set_missing_values()
+		po.submit()
+
+		# Material receipt entry for the raw materials which will be send to supplier
+		make_stock_entry(target="_Test Warehouse - _TC",
+			item_code = "Sub Contracted Raw Material 4", qty=500, basic_rate=100)
+
+		rm_items = [
+			{
+				"item_code":item_code,"rm_item_code":"Sub Contracted Raw Material 4","item_name":"_Test Item",
+				"qty":250,"warehouse":"_Test Warehouse - _TC", "stock_uom":"Nos", "name": po.supplied_items[0].name
+			},
+			{
+				"item_code":item_code,"rm_item_code":"Sub Contracted Raw Material 4","item_name":"_Test Item",
+				"qty":250,"warehouse":"_Test Warehouse - _TC", "stock_uom":"Nos", "name": po.supplied_items[1].name
+			},
+		]
+
+		# Raw Materials transfer entry from stores to supplier's warehouse
+		rm_item_string = json.dumps(rm_items)
+		se = frappe.get_doc(make_subcontract_transfer_entry(po.name, rm_item_string))
+		se.submit()
+
+		po_doc = frappe.get_doc("Purchase Order", po.name)
+		for row in po_doc.supplied_items:
+			# Valid that whether transferred quantity is matching with supplied qty or not in the purchase order
+			self.assertEqual(row.supplied_qty, 250.0)
+
+		update_backflush_based_on("BOM")
+
 	def test_advance_payment_entry_unlink_against_purchase_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 		frappe.db.set_value("Accounts Settings", "Accounts Settings",
