@@ -22,7 +22,7 @@ class Lead(SellingController):
 		load_address_and_contact(self)
 
 	def before_insert(self):
-		if self.address_type and self.address_title and self.address_line1 and self.city and self.country:
+		if self.address_title and self.address_type:
 			self.address_doc = self.create_address()
 		self.contact_doc = self.create_contact()
 
