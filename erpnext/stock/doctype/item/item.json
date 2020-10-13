@@ -470,7 +470,6 @@
    "fieldtype": "Check",
    "in_standard_filter": 1,
    "label": "Has Batch No",
-   "no_copy": 1,
    "oldfieldname": "has_batch_no",
    "oldfieldtype": "Select"
   },
@@ -517,7 +516,6 @@
    "fieldtype": "Check",
    "in_standard_filter": 1,
    "label": "Has Serial No",
-   "no_copy": 1,
    "oldfieldname": "has_serial_no",
    "oldfieldtype": "Select"
   },
@@ -1192,7 +1190,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-10-11 04:35:40.170776",
+ "modified": "2020-10-14 00:52:12.480263",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
