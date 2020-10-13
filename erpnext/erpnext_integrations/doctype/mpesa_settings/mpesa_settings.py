@@ -109,13 +109,13 @@ def verify_transaction(**kwargs):
 				item_response = transaction_response["CallbackMetadata"]["Item"]
 				mpesa_receipt = fetch_param_value(item_response, "MpesaReceiptNumber", "Name")
 				frappe.db.set_value("POS Invoice", doc.reference_name, "mpesa_receipt_number", mpesa_receipt)
-				request.process_response('output', transaction_response)
+				request.handle_success(transaction_response)
 			except Exception:
-				request.process_response('error', transaction_response)
+				request.handle_failure(transaction_response)
 				frappe.log_error(frappe.get_traceback())
 
 	else:
-		request.process_response('error', transaction_response)
+		request.handle_failure(transaction_response)
 
 	frappe.publish_realtime('process_phone_payment', doctype="POS Invoice",
 		docname=transaction_data.payment_reference, user=request.owner, message=transaction_response)
@@ -162,12 +162,12 @@ def process_balance_info(**kwargs):
 			ref_doc = frappe.get_doc(transaction_data.reference_doctype, transaction_data.reference_docname)
 			ref_doc.db_set("account_balance", balance_info)
 
-			request.process_response('output', account_balance_response)
+			request.handle_success(account_balance_response)
 		except:
-			request.process_response('error', account_balance_response)
+			request.handle_failure(account_balance_response)
 			frappe.log_error(title=_("Mpesa Account Balance Processing Error"), message=account_balance_response)
 	else:
-		request.process_response('error', account_balance_response)
+		request.handle_failure(account_balance_response)
 
 def convert_to_json(balance_info):
 	"""
