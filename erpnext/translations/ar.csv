@@ -316,12 +316,12 @@ Authorized Signatory,المخول بالتوقيع,
 Auto Material Requests Generated,إنشاء طلب مواد تلقائي,
 Auto Repeat,تكرار تلقائي,
 Auto repeat document updated,تكرار تلقائي للمستندات المحدثة,
-Automotive,سيارات,
+Automotive,سيارات,متحرك بطاقة ذاتية
 Available,متاح,
-Available Leaves,المغادارت المتوفرة,
+Available Leaves,المغادارت والاجازات المتاحة,
 Available Qty,الكمية المتاحة,
 Available Selling,المبيعات المتاحة,
-Available for use date is required,مطلوب متاح لتاريخ الاستخدام,
+Available for use date is required,مطلوب تاريخ متاح للاستخدام,
 Available slots,الفتحات المتاحة,
 Available {0},متاح {0},
 Available-for-use Date should be after purchase date,يجب أن يكون التاريخ متاحًا بعد تاريخ الشراء,
@@ -331,16 +331,16 @@ Avg Daily Outgoing,متوسط الصادرات اليومية,
 Avg. Buying Price List Rate,متوسط قائمة أسعار الشراء,
 Avg. Selling Price List Rate,متوسط قائمة أسعار البيع,
 Avg. Selling Rate,متوسط معدل البيع,
-BOM,فاتورة المواد,
-BOM Browser,BOM متصفح,
-BOM No,رقم قائمة المواد,
-BOM Rate,سعر قائمة المواد,
-BOM Stock Report,تقرير مخزون فاتورة المواد,
+BOM,قائمة مكونات المواد,
+BOM Browser,قائمة مكونات المواد متصفح,
+BOM No,رقم قائمة مكونات المواد,
+BOM Rate,سعر او معدل قائمة مكونات المواد,
+BOM Stock Report,تقرير مخزون قائمة مكونات المواد,
 BOM and Manufacturing Quantity are required,مطلوب، قائمة مكونات المواد و كمية التصنيع,
-BOM does not contain any stock item,فاتورة الموارد لا تحتوي على أي صنف مخزون,
-BOM {0} does not belong to Item {1},قائمة المواد {0} لا تنتمي إلى الصنف {1},
-BOM {0} must be active,فاتورة المواد {0} يجب أن تكون نشطة\n<br>\nBOM {0} must be active,
-BOM {0} must be submitted,فاتورة المواد {0} يجب أن تكون مسجلة\n<br>\nBOM {0} must be submitted,
+BOM does not contain any stock item,قائمة مكونات المواد لا تحتوي على أي صنف مخزون,
+BOM {0} does not belong to Item {1},قائمة مكونات المواد {0} لا تنتمي إلى الصنف {1},
+BOM {0} must be active,قائمة مكونات المواد {0} يجب أن تكون نشطة\n<br>\nBOM {0} must be active,
+BOM {0} must be submitted,قائمة مكونات المواد {0} يجب أن تكون مسجلة\n<br>\nBOM {0} must be submitted,
 Balance,الموازنة,
 Balance (Dr - Cr),الرصيد (مدين - دائن),
 Balance ({0}),الرصيد ({0}),
@@ -389,23 +389,23 @@ Bill Date,تاريخ الفاتورة,
 Bill No,رقم الفاتورة,
 Bill of Materials,فاتورة المواد,
 Bill of Materials (BOM),قوائم المواد,
-Billable Hours,ساعات للفوترة,
-Billed,توصف,
+Billable Hours,ساعات قابلة للفوترة,
+Billed,تمت الفوترة,
 Billed Amount,القيمة المقدم فاتورة بها,
 Billing,الفواتير,
-Billing Address,عنوان تقديم الفواتير,
+Billing Address,العنوان الذي ترسل به الفواتير,
 Billing Address is same as Shipping Address,عنوان الفواتير هو نفس عنوان الشحن,
 Billing Amount,قيمة الفواتير,
-Billing Status,الحالة الفواتير,
+Billing Status,حالة الفواتير,
 Billing currency must be equal to either default company's currency or party account currency,يجب أن تكون عملة الفوترة مساوية لعملة الشركة الافتراضية أو عملة حساب الطرف,
 Bills raised by Suppliers.,فواتير حولت من قبل الموردين.,
 Bills raised to Customers.,فواتير حولت للزبائن.,
 Biotechnology,التكنولوجيا الحيوية,
 Birthday Reminder,تذكير عيد ميلاد,
 Black,أسود,
-Blanket Orders from Costumers.,أوامر بطانية من العملاء.,
+Blanket Orders from Costumers.,أوامر شراء شاملة من العملاء.,
 Block Invoice,حظر الفاتورة,
-Boms,قوائم المواد,
+Boms,قوائم مكونات المواد,
 Bonus Payment Date cannot be a past date,لا يمكن أن يكون تاريخ الدفع المكافأ تاريخًا سابقًا,
 Both Trial Period Start Date and Trial Period End Date must be set,يجب تعيين كل من تاريخ بدء الفترة التجريبية وتاريخ انتهاء الفترة التجريبية,
 Both Warehouse must belong to same Company,يجب أن ينتمي المستودع إلى نفس الشركة\n<br>\nBoth Warehouse must belong to same Company,
@@ -504,9 +504,9 @@ Cash In Hand,النقدية الحاضرة,
 Cash or Bank Account is mandatory for making payment entry,الحساب النقدي أو البنكي مطلوب لعمل مدخل بيع <br>Cash or Bank Account is mandatory for making payment entry,
 Cashier Closing,إغلاق أمين الصندوق,
 Casual Leave,أجازة عادية,
-Category,فئة,
+Category,فئة,صنف
 Category Name,اسم التصنيف,
-Caution,الحذر,
+Caution,الحذر,تحذير
 Central Tax,الضريبة المركزية,
 Certification,شهادة,
 Cess,سيس,
@@ -627,7 +627,7 @@ Cost Center with existing transactions can not be converted to ledger,مركز �
 Cost Centers,مراكز التكلفة,
 Cost Updated,تم تحديث التكلفة\n<br>\nCost Updated,
 Cost as on,التكلفة كما في,
-Cost of Delivered Items,تكلفة البنود المسلمة,
+Cost of Delivered Items,تكلفة السلع والمواد المسلمة,
 Cost of Goods Sold,تكلفة البضاعة المباعة,
 Cost of Issued Items,تكلفة المواد المصروفة,
 Cost of New Purchase,تكلفة الشراء الجديد,
@@ -1300,7 +1300,7 @@ Insurance Start date should be less than Insurance End date,يجب أن يكون
 Integrated Tax,ضريبة متكاملة,
 Inter-State Supplies,اللوازم بين الدول,
 Interest Amount,مبلغ الفائدة,
-Interests,الإهتمامات,
+Interests,الإهتمامات او الفوائد,
 Intern,المتدرب,
 Internet Publishing,نشر على شبكة الإنترنت,
 Intra-State Supplies,اللوازم داخل الدولة,
@@ -1421,13 +1421,13 @@ Lab Test UOM,اختبار مختبر أوم,
 Lab Tests and Vital Signs,اختبارات المختبر وعلامات حيوية,
 Lab result datetime cannot be before testing datetime,لا يمكن أن يكون تاريخ نتيجة المختبر سابقا لتاريخ الفحص,
 Lab testing datetime cannot be before collection datetime,لا يمكن أن يكون وقت اختبار المختبر قبل تاريخ جمع البيانات,
-Label,ملصق,
+Label,ملصق,'طابع
 Laboratory,مختبر,
 Language Name,اسم اللغة,
 Large,كبير,
 Last Communication,آخر الاتصالات,
 Last Communication Date,تاريخ الاتصال الأخير,
-Last Name,اسم العائلة,
+Last Name,اسم العائلة او اللقب,
 Last Order Amount,قيمة آخر طلب,
 Last Order Date,تاريخ أخر أمر بيع,
 Last Purchase Price,سعر الشراء الأخير,
