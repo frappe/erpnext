@@ -264,7 +264,7 @@ class update_entries_after(object):
 		if not sle.is_cancelled:
 			incoming_values = sum([flt(d.purchase_rate) for d in all_serial_nos if d.company==sle.company])
 		else:
-			# Cancellation Entry so purchase rate is Serial No doctype will be 0
+			# Cancellation Entry so purchase rate in Serial No doctype will be 0
 			# get purchase rate from SLE
 			serial_nos = [d.name for d in all_serial_nos if d.company==sle.company]
 			incoming_values = get_rate_for_serial_nos(serial_nos, sle)
