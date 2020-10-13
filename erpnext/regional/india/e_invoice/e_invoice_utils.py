@@ -162,7 +162,7 @@ def generate_irn(doctype, name):
 	json_str = aes_decrypt(enc_json, credentials.sek)
 
 	signed_einvoice = json.loads(json_str)
-	handle_irn_response(signed_einvoice)
+	decrypt_irn_response(signed_einvoice)
 
 	update_einvoice_fields(doctype, name, signed_einvoice)
 
@@ -218,7 +218,7 @@ def cancel_eway_bill(doctype, name, eway_bill, reason, remark=''):
 
 	return res
 
-def handle_irn_response(data):
+def decrypt_irn_response(data):
 	enc_signed_invoice = data['SignedInvoice']
 	enc_signed_qr_code = data['SignedQRCode']
 	signed_invoice = jwt_decrypt(enc_signed_invoice)['data']
@@ -473,7 +473,7 @@ def make_einvoice(doctype, name):
 		else:
 			frappe.throw(error_msgs[0], title=_('E Invoice Validation Failed'))
 
-	return {'einvoice': json.dumps([einvoice])}
+	return json.dumps(einvoice)
 
 def validate_einvoice(validations, einvoice, error_msgs=[]):
 	type_map = { 'string': 'str', 'number': 'int', 'object': 'dict', 'array': 'list' }
