@@ -83,50 +83,30 @@ def check_matching_amount(bank_account, company, transaction):
 		"party", "party_type", "posting_date", "{0}".format(currency_field)], filters=[["paid_amount", "like", "{0}%".format(amount)],
 		["docstatus", "=", "1"], ["payment_type", "=", [payment_type, "Internal Transfer"]], ["ifnull(clearance_date, '')", "=", ""], ["{0}".format(account_from_to), "=", "{0}".format(bank_account)]])
 
-	if transaction.credit > 0:
-		journal_entries = frappe.db.sql("""
-			SELECT
-				'Journal Entry' as doctype, je.name, je.posting_date, je.cheque_no as reference_no,
-				je.pay_to_recd_from as party, je.cheque_date as reference_date, jea.debit_in_account_currency as paid_amount
-			FROM
-				`tabJournal Entry Account` as jea
-			JOIN
-				`tabJournal Entry` as je
-			ON
-				jea.parent = je.name
-			WHERE
-				(je.clearance_date is null or je.clearance_date='0000-00-00')
-			AND
-				jea.account = %s
-			AND
-				jea.debit_in_account_currency like %s
-			AND
-				je.docstatus = 1
-		""", (bank_account, amount), as_dict=True)
-	else:
-		journal_entries = frappe.db.sql("""
-			SELECT
-				'Journal Entry' as doctype, je.name, je.posting_date, je.cheque_no as reference_no,
-				jea.account_currency as currency, je.pay_to_recd_from as party, je.cheque_date as reference_date,
-				jea.credit_in_account_currency as paid_amount
-			FROM
-				`tabJournal Entry Account` as jea
-			JOIN
-				`tabJournal Entry` as je
-			ON
-				jea.parent = je.name
-			WHERE
-				(je.clearance_date is null or je.clearance_date='0000-00-00')
-			AND
-				jea.account = %(bank_account)s
-			AND
-				jea.credit_in_account_currency like %(txt)s
-			AND
-				je.docstatus = 1
-		""", {
-			'bank_account': bank_account,
-			'txt': '%%%s%%' % amount
-		}, as_dict=True)
+	jea_side = "debit" if transaction.credit > 0 else "credit"
+	journal_entries = frappe.db.sql(f"""
+		SELECT
+			'Journal Entry' as doctype, je.name, je.posting_date, je.cheque_no as reference_no,
+			jea.account_currency as currency, je.pay_to_recd_from as party, je.cheque_date as reference_date,
+			jea.{jea_side}_in_account_currency as paid_amount
+		FROM
+			`tabJournal Entry Account` as jea
+		JOIN
+			`tabJournal Entry` as je
+		ON
+			jea.parent = je.name
+		WHERE
+			(je.clearance_date is null or je.clearance_date='0000-00-00')
+		AND
+			jea.account = %(bank_account)s
+		AND
+			jea.{jea_side}_in_account_currency like %(txt)s
+		AND
+			je.docstatus = 1
+	""", {
+		'bank_account': bank_account,
+		'txt': '%%%s%%' % amount
+	}, as_dict=True)
 
 	if transaction.credit > 0:
 		sales_invoices = frappe.db.sql("""
