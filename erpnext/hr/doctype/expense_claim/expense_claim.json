@@ -13,26 +13,29 @@
   "department",
   "column_break_5",
   "expense_approver",
+  "status",
   "approval_status",
+  "posting_date",
   "is_paid",
   "expense_details",
   "expenses",
+  "section_break_12",
+  "total_claimed_amount",
+  "column_break_13",
+  "total_sanctioned_amount",
+  "total_amount_reimbursed",
   "sb1",
   "taxes",
   "transactions_section",
-  "total_sanctioned_amount",
   "total_taxes_and_charges",
-  "total_advance_amount",
   "column_break_17",
+  "advance_payments",
+  "advances",
+  "section_break_24",
+  "total_advance_amount",
+  "section_break_26",
   "grand_total",
-  "total_claimed_amount",
-  "total_amount_reimbursed",
   "section_break_16",
-  "posting_date",
-  "vehicle_log",
-  "task",
-  "cb1",
-  "remark",
   "title",
   "email_id",
   "accounting_details",
@@ -46,10 +49,11 @@
   "dimension_col_break",
   "cost_center",
   "more_details",
-  "status",
-  "amended_from",
-  "advance_payments",
-  "advances"
+  "task",
+  "vehicle_log",
+  "cb1",
+  "remark",
+  "amended_from"
  ],
  "fields": [
   {
@@ -145,6 +149,7 @@
   {
    "fieldname": "expense_details",
    "fieldtype": "Section Break",
+   "label": "Expense Details",
    "oldfieldtype": "Section Break"
   },
   {
@@ -159,6 +164,7 @@
   {
    "fieldname": "sb1",
    "fieldtype": "Section Break",
+   "label": "Expense Taxes and Charges",
    "options": "Simple"
   },
   {
@@ -231,6 +237,7 @@
    "print_hide": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "accounting_details",
    "fieldtype": "Section Break",
    "label": "Accounting Details"
@@ -325,6 +332,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -345,7 +353,8 @@
   },
   {
    "fieldname": "transactions_section",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hide_border": 1
   },
   {
    "fieldname": "grand_total",
@@ -365,13 +374,31 @@
    "label": "Total Taxes and Charges",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_12",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "section_break_24",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "fieldname": "section_break_26",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-18 17:26:09.703215",
+ "modified": "2020-10-13 13:04:56.450882",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",
