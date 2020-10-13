@@ -20,12 +20,14 @@ def after_install():
 	frappe.get_doc({'doctype': "Role", "role_name": "Analytics"}).insert()
 	set_single_defaults()
 	create_compact_item_print_custom_field()
+	create_print_uom_after_qty_custom_field()
 	create_print_zero_amount_taxes_custom_field()
 	add_all_roles_to("Administrator")
 	create_default_cash_flow_mapper_templates()
 	create_default_success_action()
 	create_default_energy_point_rules()
 	add_company_to_session_defaults()
+	add_standard_navbar_items()
 	frappe.db.commit()
 
 
@@ -62,6 +64,16 @@ def create_compact_item_print_custom_field():
 		'fieldtype': 'Check',
 		'default': 1,
 		'insert_after': 'with_letterhead'
+	})
+
+
+def create_print_uom_after_qty_custom_field():
+	create_custom_field('Print Settings', {
+		'label': _('Print UOM after Quantity'),
+		'fieldname': 'print_uom_after_quantity',
+		'fieldtype': 'Check',
+		'default': 0,
+		'insert_after': 'compact_item_print'
 	})
 
 
@@ -104,3 +116,45 @@ def add_company_to_session_defaults():
 		"ref_doctype": "Company"
 	})
 	settings.save()
+
+def add_standard_navbar_items():
+	navbar_settings = frappe.get_single("Navbar Settings")
+
+	erpnext_navbar_items = [
+		{
+			'item_label': 'Documentation',
+			'item_type': 'Route',
+			'route': 'https://erpnext.com/docs/user/manual',
+			'is_standard': 1
+		},
+		{
+			'item_label': 'User Forum',
+			'item_type': 'Route',
+			'route': 'https://discuss.erpnext.com',
+			'is_standard': 1
+		},
+		{
+			'item_label': 'Report an Issue',
+			'item_type': 'Route',
+			'route': 'https://github.com/frappe/erpnext/issues',
+			'is_standard': 1
+		}
+	]
+
+	current_nabvar_items = navbar_settings.help_dropdown
+	navbar_settings.set('help_dropdown', [])
+
+	for item in erpnext_navbar_items:
+		navbar_settings.append('help_dropdown', item)
+
+	for item in current_nabvar_items:
+		navbar_settings.append('help_dropdown', {
+			'item_label': item.item_label,
+			'item_type': item.item_type,
+			'route': item.route,
+			'action': item.action,
+			'is_standard': item.is_standard,
+			'hidden': item.hidden
+		})
+
+	navbar_settings.save()

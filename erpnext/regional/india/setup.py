@@ -73,6 +73,19 @@ def add_custom_roles_for_reports():
 				]
 			)).insert()
 
+	for report_name in ('HSN-wise-summary of outward supplies', 'GSTR-1', 'GSTR-2'):
+
+		if not frappe.db.get_value('Custom Role', dict(report=report_name)):
+			frappe.get_doc(dict(
+				doctype='Custom Role',
+				report=report_name,
+				roles= [
+					dict(role='Accounts User'),
+					dict(role='Accounts Manager'),
+					dict(role='Auditor')
+				]
+			)).insert()
+
 def add_permissions():
 	for doctype in ('GST HSN Code', 'GST Settings', 'GSTR 3B Report', 'Lower Deduction Certificate'):
 		add_permission(doctype, 'All', 0)

@@ -36,6 +36,8 @@ def process_loan_interest_accrual_for_demand_loans(posting_date=None, loan_type=
 
 	loan_process.submit()
 
+	return loan_process.name
+
 def process_loan_interest_accrual_for_term_loans(posting_date=None, loan_type=None, loan=None):
 
 	if not term_loan_accrual_pending(posting_date or nowdate()):
@@ -48,6 +50,8 @@ def process_loan_interest_accrual_for_term_loans(posting_date=None, loan_type=No
 	loan_process.loan = loan
 
 	loan_process.submit()
+
+	return loan_process.name
 
 def term_loan_accrual_pending(date):
 	pending_accrual = frappe.db.get_value('Repayment Schedule', {
