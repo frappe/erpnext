@@ -186,7 +186,7 @@ class PaymentRequest(Document):
 			party_amount = self.grand_total
 
 		payment_entry = get_payment_entry(self.reference_doctype, self.reference_name, party_amount=party_amount,
-			bank_account=self.payment_account, bank_amount=bank_amount, mode_of_payment=self.mode_of_payment)
+			bank_account=self.payment_account, bank_amount=bank_amount)
 
 		payment_entry.update({
 			"reference_no": self.name,
