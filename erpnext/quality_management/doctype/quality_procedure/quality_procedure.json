@@ -18,7 +18,6 @@
  ],
  "fields": [
   {
-   "depends_on": "eval: doc.is_group == 0",
    "fieldname": "parent_quality_procedure",
    "fieldtype": "Link",
    "label": "Parent Procedure",
@@ -73,7 +72,7 @@
  ],
  "is_tree": 1,
  "links": [],
- "modified": "2020-09-22 14:22:49.874515",
+ "modified": "2020-10-13 11:46:07.744194",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Procedure",
