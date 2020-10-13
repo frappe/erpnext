@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, unittest
 import frappe.defaults
-from frappe.utils import flt, nowdate, nowtime
+from frappe.utils import flt, nowdate, nowtime, getdate
 from erpnext.stock.doctype.serial_no.serial_no import *
 from erpnext import set_perpetual_inventory
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
@@ -654,7 +654,8 @@ class TestStockEntry(unittest.TestCase):
 
 		se1 = make_stock_entry(company = '_Test Company with perpetual inventory', item_code="_Test Serialized Item With Series",
 			target="Work In Progress - TCP1", qty=50, basic_rate=100)
-		se2 = make_stock_entry(company = '_Test Company with perpetual inventory',
+
+		make_stock_entry(company = '_Test Company with perpetual inventory',
 			item_code="_Test Item 2", target="Work In Progress - TCP1", qty=50, basic_rate=20)
 
 		serial_nos = get_serial_nos(se1.get("items")[0].serial_no)
