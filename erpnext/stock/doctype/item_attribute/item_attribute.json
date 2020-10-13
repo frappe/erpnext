@@ -9,6 +9,7 @@
  "field_order": [
   "attribute_name",
   "numeric_values",
+  "item_name_by",
   "section_break_4",
   "from_range",
   "increment",
@@ -66,10 +67,17 @@
    "fieldtype": "Table",
    "label": "Item Attribute Values",
    "options": "Item Attribute Value"
+  },
+  {
+   "default": "Value",
+   "fieldname": "item_name_by",
+   "fieldtype": "Select",
+   "label": "Item Name By",
+   "options": "Value\nAbbreviation"
   }
  ],
  "icon": "fa fa-edit",
- "modified": "2020-03-03 15:37:59.722183",
+ "modified": "2020-10-14 02:11:09.901739",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Attribute",
