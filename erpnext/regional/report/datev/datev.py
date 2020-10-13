@@ -522,9 +522,9 @@ def download_datev_csv(filters=None):
 
 	validate(filters)
 
-  filters['account_number_length'] = frappe.get_value('DATEV Settings', filters.get('company'), 'account_number_length')
+	filters['account_number_length'] = frappe.get_value('DATEV Settings', filters.get('company'), 'account_number_length')
 
-  fiscal_year = get_fiscal_year(date=filters.get('from_date'), company=filters.get('company'))
+	fiscal_year = get_fiscal_year(date=filters.get('from_date'), company=filters.get('company'))
 	filters['fiscal_year_start'] = fiscal_year[1]
 
 	data = get_gl_entries(filters, as_dict=1)
