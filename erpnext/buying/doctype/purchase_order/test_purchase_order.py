@@ -656,7 +656,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		name = frappe.db.get_value('BOM', {'item': item_code}, 'name')
 		bom = frappe.get_doc('BOM', name)
 
-		exploded_items = sorted([d.item_code for d in bom.exploded_items])
+		exploded_items = sorted([d.item_code for d in bom.exploded_items if not d.get('sourced_by_supplier')])
 		supplied_items = sorted([d.rm_item_code for d in po.supplied_items])
 		self.assertEquals(exploded_items, supplied_items)
 
@@ -664,7 +664,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC", include_exploded_items=0)
 
 		supplied_items1 = sorted([d.rm_item_code for d in po1.supplied_items])
-		bom_items = sorted([d.item_code for d in bom.items])
+		bom_items = sorted([d.item_code for d in bom.items if not d.get('sourced_by_supplier')])
 
 		self.assertEquals(supplied_items1, bom_items)
 

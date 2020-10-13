@@ -207,7 +207,6 @@ class TestBOM(unittest.TestCase):
 		supplied_items = sorted([d.rm_item_code for d in po.supplied_items])
 		self.assertEquals(bom_items, supplied_items)
 
-
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})
 
