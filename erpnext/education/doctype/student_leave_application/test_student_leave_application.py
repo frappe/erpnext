@@ -13,7 +13,6 @@ from erpnext.education.doctype.student.test_student import create_student
 class TestStudentLeaveApplication(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql("""delete from `tabStudent Leave Application`""")
-		frappe.db.sql("""delete from `tabHoliday List`""")
 		create_holiday_list()
 
 	def test_attendance_record_creation(self):
@@ -56,6 +55,10 @@ class TestStudentLeaveApplication(unittest.TestCase):
 		# check no attendance record created for a holiday
 		leave_application.submit()
 		self.assertIsNone(frappe.db.exists('Student Attendance', {'leave_application': leave_application.name, 'date': add_days(today, 1)}))
+
+	def tearDown(self):
+		company = get_default_company() or frappe.get_all('Company')[0].name
+		frappe.db.set_value('Company', company, 'default_holiday_list', '_Test Holiday List')
 
 
 def create_leave_application(from_date=None, to_date=None, mark_as_present=0, submit=1):
