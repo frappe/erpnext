@@ -220,7 +220,7 @@ class ExpenseClaim(AccountsController):
 			tax.total = flt(tax.tax_amount) + flt(self.total_sanctioned_amount)
 			self.total_taxes_and_charges += flt(tax.tax_amount)
 
-		self.grand_total = flt(self.total_sanctioned_amount) + flt(self.total_taxes_and_charges) - flt(self.total_advance_amount)
+		self.grand_total = flt(self.total_sanctioned_amount) + flt(self.total_taxes_and_charges)
 
 	def update_task(self):
 		task = frappe.get_doc("Task", self.task)

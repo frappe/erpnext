@@ -243,7 +243,7 @@ frappe.ui.form.on("Expense Claim", {
 	},
 
 	calculate_grand_total: function(frm) {
-		var grand_total = flt(frm.doc.total_sanctioned_amount) + flt(frm.doc.total_taxes_and_charges) - flt(frm.doc.total_advance_amount);
+		var grand_total = flt(frm.doc.total_sanctioned_amount) + flt(frm.doc.total_taxes_and_charges);
 		frm.set_value("grand_total", grand_total);
 		frm.refresh_fields();
 	},
