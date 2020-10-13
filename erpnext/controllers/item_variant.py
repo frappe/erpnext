@@ -306,6 +306,7 @@ def make_variant_item_code(template_item_code, template_item_name, variant):
 		return
 
 	abbreviations = []
+	values = []
 	for attr in variant.attributes:
 		item_attribute = frappe.db.sql("""select i.numeric_values, v.abbr
 			from `tabItem Attribute` i left join `tabItem Attribute Value` v
@@ -323,10 +324,11 @@ def make_variant_item_code(template_item_code, template_item_name, variant):
 
 		abbr_or_value = cstr(attr.attribute_value) if item_attribute[0].numeric_values else item_attribute[0].abbr
 		abbreviations.append(abbr_or_value)
+		values.append(attr.attribute_value)
 
 	if abbreviations:
 		variant.item_code = "{0}-{1}".format(template_item_code, "-".join(abbreviations))
-		variant.item_name = "{0}-{1}".format(template_item_name, "-".join(abbreviations))
+		variant.item_name = "{0} - {1}".format(template_item_name, " - ".join(values))
 
 @frappe.whitelist()
 def create_variant_doc_for_quick_entry(template, args):
