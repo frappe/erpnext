@@ -8,6 +8,7 @@ import unittest, copy, time
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 class TestPOSInvoice(unittest.TestCase):
 	def test_timestamp_change(self):
@@ -286,7 +287,7 @@ class TestPOSInvoice(unittest.TestCase):
 
 		after_redeem_lp_details = get_loyalty_program_details_with_points(inv.customer, company=inv.company, loyalty_program=inv.loyalty_program)
 		self.assertEqual(after_redeem_lp_details.loyalty_points, 9)
-	
+
 	def test_merging_into_sales_invoice_with_discount(self):
 		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
 		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
@@ -295,7 +296,7 @@ class TestPOSInvoice(unittest.TestCase):
 		test_user, pos_profile = init_user_and_profile()
 		pos_inv = create_pos_invoice(rate=300, additional_discount_percentage=10, do_not_submit=1)
 		pos_inv.append('payments', {
-			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 300
+			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 270
 		})
 		pos_inv.submit()
 
@@ -309,9 +310,9 @@ class TestPOSInvoice(unittest.TestCase):
 
 		pos_inv.load_from_db()
 		rounded_total = frappe.db.get_value("Sales Invoice", pos_inv.consolidated_invoice, "rounded_total")
-		self.assertEqual(rounded_total, 3500)
+		self.assertEqual(rounded_total, 3470)
 		frappe.set_user("Administrator")
-	
+
 	def test_merging_into_sales_invoice_with_discount_and_inclusive_tax(self):
 		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
 		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
@@ -361,7 +362,7 @@ class TestPOSInvoice(unittest.TestCase):
 		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
 			frappe.db.set_value("Selling Settings", "Selling Settings", "validate_selling_price", 1)
 
-		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=1, basic_rate=300)
+		make_purchase_receipt(item_code="_Test Item", warehouse="_Test Warehouse - _TC", qty=1, rate=300)
 		frappe.db.sql("delete from `tabPOS Invoice`")
 		test_user, pos_profile = init_user_and_profile()
 		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
@@ -413,8 +414,6 @@ def create_pos_invoice(**args):
 	pos_inv.is_pos = 1
 	pos_inv.pos_profile = args.pos_profile or pos_profile.name
 
-	pos_inv.set_missing_values()
-
 	if args.posting_date:
 		pos_inv.set_posting_time = 1
 	pos_inv.posting_date = args.posting_date or frappe.utils.nowdate()
@@ -427,6 +426,8 @@ def create_pos_invoice(**args):
 	pos_inv.currency=args.currency or "INR"
 	pos_inv.conversion_rate = args.conversion_rate or 1
 	pos_inv.account_for_change_amount = args.account_for_change_amount or "Cash - _TC"
+
+	pos_inv.set_missing_values()
 
 	pos_inv.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
