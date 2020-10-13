@@ -242,9 +242,12 @@ frappe.ui.form.on("Expense Claim", {
 		}
 	},
 
-	calculate_grand_total: function(frm) {
-		var grand_total = flt(frm.doc.total_sanctioned_amount) + flt(frm.doc.total_taxes_and_charges);
+	calculate_grand_total_and_outstanding_amount: function(frm) {
+		let grand_total = flt(frm.doc.total_sanctioned_amount) + flt(frm.doc.total_taxes_and_charges);
 		frm.set_value("grand_total", grand_total);
+
+		let outstanding_amount = flt(frm.doc.grand_total) - flt(frm.doc.total_advance_amount) - flt(frm.doc.total_amount_reimbursed);
+		frm.set_value("outstanding_amount", outstanding_amount);
 		frm.refresh_fields();
 	},
 
@@ -398,7 +401,7 @@ frappe.ui.form.on("Expense Claim Advance", {
 						child.advance_paid = r.message[0].paid_amount;
 						child.unclaimed_amount = flt(r.message[0].paid_amount) - flt(r.message[0].claimed_amount);
 						child.allocated_amount = flt(r.message[0].paid_amount) - flt(r.message[0].claimed_amount);
-						frm.trigger('calculate_grand_total');
+						frm.trigger('calculate_grand_total_and_outstanding_amount');
 						refresh_field("advances");
 					}
 				}
@@ -428,7 +431,7 @@ frappe.ui.form.on("Expense Taxes and Charges", {
 		(frm.doc.taxes || []).forEach(function(d) {
 			frm.doc.total_taxes_and_charges += d.tax_amount;
 		});
-		frm.trigger("calculate_grand_total");
+		frm.trigger("calculate_grand_total_and_outstanding_amount");
 	},
 
 	rate: function(frm, cdt, cdn) {

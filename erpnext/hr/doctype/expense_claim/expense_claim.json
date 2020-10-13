@@ -35,6 +35,7 @@
   "total_advance_amount",
   "section_break_26",
   "grand_total",
+  "outstanding_amount",
   "section_break_16",
   "title",
   "email_id",
@@ -392,13 +393,21 @@
   {
    "fieldname": "section_break_26",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Outstanding Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-13 13:04:56.450882",
+ "modified": "2020-10-13 13:55:42.908993",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",

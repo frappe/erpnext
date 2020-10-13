@@ -31,6 +31,7 @@ class ExpenseClaim(AccountsController):
 		self.set_payable_account()
 		self.set_cost_center()
 		self.calculate_taxes()
+		self.set_grand_total_and_outstanding_amount()
 		self.set_status()
 		if self.task and not self.project:
 			self.project = frappe.db.get_value("Task", self.task, "project")
@@ -220,7 +221,9 @@ class ExpenseClaim(AccountsController):
 			tax.total = flt(tax.tax_amount) + flt(self.total_sanctioned_amount)
 			self.total_taxes_and_charges += flt(tax.tax_amount)
 
+	def set_grand_total_and_outstanding_amount(self):
 		self.grand_total = flt(self.total_sanctioned_amount) + flt(self.total_taxes_and_charges)
+		self.outstanding_amount = flt(self.grand_total) - flt(self.total_advance_amount) - flt(self.total_amount_reimbursed)
 
 	def update_task(self):
 		task = frappe.get_doc("Task", self.task)
