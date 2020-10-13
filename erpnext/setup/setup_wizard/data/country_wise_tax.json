@@ -60,14 +60,10 @@
 	},
 
 	"Australia": {
-		"Australia GST1": {
+		"Australia GST": {
 			"account_name": "GST 10%",
 			"tax_rate": 10.00,
 			"default": 1
-		},
-		"Australia GST 2%": {
-			"account_name": "GST 2%",
-			"tax_rate": 2
 		}
 	},
 
