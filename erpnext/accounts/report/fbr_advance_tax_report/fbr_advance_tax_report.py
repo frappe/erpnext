@@ -176,7 +176,7 @@ class FBRInvoiceWiseTaxes(object):
 				row.rate += flt(tax.rate)
 				row.rate_count += 1
 
-		customer_details = self.get_customer_details(customer_rows.keys())
+		customer_details = self.get_customer_details(list(customer_rows.keys()))
 		for d in customer_rows.values():
 			d.update(customer_details.get(d.party, {}))
 
