@@ -14,7 +14,8 @@ from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import
 from erpnext.stock.doctype.item.test_item import set_item_variant_settings, make_item_variant, create_item
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
-from erpnext.stock.doctype.stock_entry.stock_entry import move_sample_to_retention_warehouse, make_stock_in_entry
+from erpnext.stock.doctype.stock_entry.stock_entry import (move_sample_to_retention_warehouse,
+	make_stock_in_entry, ExtraMaterialReceived)
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import OpeningEntryAccountError
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from six import iteritems
@@ -870,6 +871,30 @@ class TestStockEntry(unittest.TestCase):
 
 		doc = frappe.get_doc('Stock Entry', outward_entry.name)
 		self.assertEqual(doc.per_transferred, 100)
+
+	def test_raise_extra_transfer_materials(self):
+		from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+		warehouse = "_Test Warehouse FG 1 - _TC"
+
+		if not frappe.db.exists('Warehouse', warehouse):
+			create_warehouse("_Test Warehouse FG 1")
+
+		outward_entry = make_stock_entry(item_code="_Test Item",
+			purpose="Send to Warehouse",
+			source="_Test Warehouse - _TC",
+			target="_Test Warehouse 1 - _TC", qty=50, basic_rate=100)
+
+		inward_entry1 = make_stock_in_entry(outward_entry.name)
+		inward_entry1.items[0].t_warehouse = warehouse
+		inward_entry1.items[0].qty = 25
+		inward_entry1.submit()
+
+		inward_entry2 = make_stock_in_entry(outward_entry.name)
+		inward_entry2.items[0].t_warehouse = warehouse
+		inward_entry2.items[0].qty = 35
+
+		self.assertRaises(ExtraMaterialReceived, inward_entry2.submit)
+		print(inward_entry2.name)
 
 	def test_gle_for_opening_stock_entry(self):
 		mr = make_stock_entry(item_code="_Test Item", target="Stores - TCP1", company="_Test Company with perpetual inventory",qty=50, basic_rate=100, expense_account="Stock Adjustment - TCP1", is_opening="Yes", do_not_save=True)
