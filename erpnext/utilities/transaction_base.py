@@ -189,7 +189,8 @@ class TransactionBase(StatusUpdater):
 			last_transaction_time = frappe.db.sql("""
 				select MAX(timestamp(posting_date, posting_time)) as posting_time
 				from `tabStock Ledger Entry`
-				where docstatus = 1 and item_code = %s """, (item.item_code))[0][0]
+				where docstatus = 1 and item_code = %s
+				and company = %s""", (item.item_code, self.get('company')))[0][0]
 
 			cur_doc_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")
 
