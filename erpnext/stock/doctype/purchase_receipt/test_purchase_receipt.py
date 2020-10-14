@@ -6,7 +6,7 @@ import unittest
 import json
 import frappe, erpnext
 import frappe.defaults
-from frappe.utils import cint, flt, cstr, today, random_string
+from frappe.utils import cint, flt, cstr, today, random_string, add_days
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchase_invoice
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext import set_perpetual_inventory
@@ -664,6 +664,32 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		warehouse.account = ''
 		warehouse.save()
+
+	def test_backdated_purchase_receipt(self):
+		# make purchase receipt for default company
+		make_purchase_receipt(company="_Test Company 4", warehouse="Stores - _TC4")
+
+		# try to make another backdated PR
+		posting_date = add_days(today(), -1)
+		pr = make_purchase_receipt(company="_Test Company 4", warehouse="Stores - _TC4",
+			do_not_submit=True)
+
+		pr.set_posting_time = 1
+		pr.posting_date = posting_date
+
+		self.assertRaises(frappe.ValidationError, pr.save)
+
+		# make purchase receipt for other company backdated
+		pr = make_purchase_receipt(company="_Test Company 5", warehouse="Stores - _TC5",
+			do_not_submit=True)
+
+		pr.set_posting_time = 1
+		pr.posting_date = posting_date
+		pr.submit()
+
+		# Allowed to submit for other company's PR
+		self.assertEqual(pr.docstatus, 1)
+
 
 def get_sl_entries(voucher_type, voucher_no):
 	return frappe.db.sql(""" select actual_qty, warehouse, stock_value_difference

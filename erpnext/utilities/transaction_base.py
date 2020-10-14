@@ -31,7 +31,7 @@ class TransactionBase(StatusUpdater):
 
 		self.validate_future_posting()
 		self.validate_with_last_transaction_posting_time()
-	
+
 	def is_stock_transaction(self):
 		if self.doctype not in ["Sales Invoice", "Purchase Invoice", "Stock Entry", "Stock Reconciliation",
 			"Delivery Note", "Purchase Receipt", "Fees"]:
@@ -42,7 +42,7 @@ class TransactionBase(StatusUpdater):
 				return False
 
 		return True
-	
+
 	def validate_future_posting(self):
 		if not self.is_stock_transaction():
 			return
