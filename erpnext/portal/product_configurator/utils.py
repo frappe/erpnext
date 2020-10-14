@@ -378,7 +378,7 @@ def get_items(filters=None, search=None):
 
 	results = frappe.db.sql('''
 		SELECT
-			`tabItem`.`name`, `tabItem`.`item_name`,
+			`tabItem`.`name`, `tabItem`.`item_name`, `tabItem`.`item_code`,
 			`tabItem`.`website_image`, `tabItem`.`image`,
 			`tabItem`.`web_long_description`, `tabItem`.`description`,
 			`tabItem`.`route`

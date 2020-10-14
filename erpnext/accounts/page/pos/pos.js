@@ -1064,7 +1064,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					$(frappe.render_template("pos_item", {
 						item_code: escape(obj.name),
 						item_price: item_price,
-						title: obj.name || obj.item_name,
+						title: obj.name === obj.item_name ? obj.name : obj.item_name,
 						item_name: obj.name === obj.item_name ? "" : obj.item_name,
 						item_image: obj.image,
 						item_stock: __('Stock Qty') + ": " + me.get_actual_qty(obj),
@@ -1546,7 +1546,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		$.each(this.frm.doc.items || [], function (i, d) {
 			$(frappe.render_template("pos_bill_item_new", {
 				item_code: escape(d.item_code),
-				title: d.item_code || d.item_name,
+				title: d.item_code === d.item_name ? d.item_code : d.item_name,
 				item_name: (d.item_name === d.item_code || !d.item_name) ? "" : ("<br>" + d.item_name),
 				qty: d.qty,
 				discount_percentage: d.discount_percentage || 0.0,

@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from erpnext.accounts.doctype.tax_rule.tax_rule import IncorrectCustomerGroup, IncorrectSupplierType, ConflictingTaxRule, get_tax_template
+from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
+from erpnext.crm.doctype.opportunity.opportunity import make_quotation
 
 test_records = frappe.get_test_records('Tax Rule')
 
@@ -143,6 +145,23 @@ class TestTaxRule(unittest.TestCase):
 
 		self.assertEqual(get_tax_template("2015-01-01", {"customer":"_Test Customer", "billing_city": "Test City 1"}),
 			"_Test Sales Taxes and Charges Template 1 - _TC")
+
+	def test_taxes_fetch_via_tax_rule(self):
+		make_tax_rule(customer= "_Test Customer", billing_city = "_Test City",
+			sales_tax_template = "_Test Sales Taxes and Charges Template - _TC", save=1)
+
+		# create opportunity for customer
+		opportunity = make_opportunity(with_items=1)
+
+		# make quotation from opportunity
+		quotation = make_quotation(opportunity.name)
+		quotation.save()
+
+		self.assertEqual(quotation.taxes_and_charges, "_Test Sales Taxes and Charges Template - _TC")
+
+		# Check if accounts heads and rate fetched are also fetched from tax template or not
+		self.assertTrue(len(quotation.taxes) > 0)
+
 
 
 def make_tax_rule(**args):

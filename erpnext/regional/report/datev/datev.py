@@ -16,6 +16,7 @@ from csv import QUOTE_NONNUMERIC
 
 import frappe
 from frappe import _
+from erpnext.accounts.utils import get_fiscal_year
 import pandas as pd
 
 
@@ -30,19 +31,32 @@ def execute(filters=None):
 
 def validate(filters):
 	"""Make sure all mandatory filters and settings are present."""
-	if not filters.get('company'):
+	company = filters.get('company')
+	if not company:
 		frappe.throw(_('<b>Company</b> is a mandatory filter.'))
 
-	if not filters.get('from_date'):
+	from_date = filters.get('from_date')
+	if not from_date:
 		frappe.throw(_('<b>From Date</b> is a mandatory filter.'))
 
-	if not filters.get('to_date'):
+	to_date = filters.get('to_date')
+	if not to_date:
 		frappe.throw(_('<b>To Date</b> is a mandatory filter.'))
+
+	validate_fiscal_year(from_date, to_date, company)
 
 	try:
 		frappe.get_doc('DATEV Settings', filters.get('company'))
 	except frappe.DoesNotExistError:
 		frappe.throw(_('Please create <b>DATEV Settings</b> for Company <b>{}</b>.').format(filters.get('company')))
+
+
+def validate_fiscal_year(from_date, to_date, company):
+	from_fiscal_year = get_fiscal_year(date=from_date, company=company)
+	to_fiscal_year = get_fiscal_year(date=to_date, company=company)
+	if from_fiscal_year != to_fiscal_year:
+		frappe.throw(_('Dates {} and {} are not in the same fiscal year.').format(from_date, to_date))
+
 
 def get_columns():
 	"""Return the list of columns that will be shown in query report."""
@@ -231,9 +245,9 @@ def get_datev_csv(data, filters):
 		# L = Tax client number (Mandantennummer)
 		frappe.get_value("DATEV Settings", filters.get("company"), "client_number") or "",
 		# M = Start of the fiscal year (Wirtschaftsjahresbeginn)
-		frappe.utils.formatdate(frappe.defaults.get_user_default("year_start_date"), "yyyyMMdd"),
+		frappe.utils.formatdate(filters.get("fiscal_year_start"), "yyyyMMdd"),
 		# N = Length of account numbers (Sachkontenlänge)
-		"4",
+		str(filters.get('account_number_length', 4)),
 		# O = Transaction batch start date (YYYYMMDD)
 		frappe.utils.formatdate(filters.get('from_date'), "yyyyMMdd"),
 		# P = Transaction batch end date (YYYYMMDD)
@@ -507,6 +521,12 @@ def download_datev_csv(filters=None):
 		filters = json.loads(filters)
 
 	validate(filters)
+
+	filters['account_number_length'] = frappe.get_value('DATEV Settings', filters.get('company'), 'account_number_length')
+
+	fiscal_year = get_fiscal_year(date=filters.get('from_date'), company=filters.get('company'))
+	filters['fiscal_year_start'] = fiscal_year[1]
+
 	data = get_gl_entries(filters, as_dict=1)
 
 	frappe.response['result'] = get_datev_csv(data, filters)

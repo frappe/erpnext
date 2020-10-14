@@ -158,7 +158,7 @@ class GSTR3BReport(Document):
 
 		self.prepare_data("Sales Invoice", outward_supply_tax_amounts, "sup_details", "osup_det", ["Registered Regular"])
 		self.prepare_data("Sales Invoice", outward_supply_tax_amounts, "sup_details", "osup_zero", ["SEZ", "Deemed Export", "Overseas"])
-		self.prepare_data("Purchase Invoice", inward_supply_tax_amounts, "sup_details", "isup_rev", ["Unregistered", "Overseas"], reverse_charge="Y")
+		self.prepare_data("Purchase Invoice", inward_supply_tax_amounts, "sup_details", "isup_rev", ["Unregistered", "Overseas", "Registered Regular"], reverse_charge="Y")
 		self.report_dict["sup_details"]["osup_nil_exmp"]["txval"] = flt(self.get_nil_rated_supply_value(), 2)
 		self.set_itc_details(itc_details)
 
@@ -197,7 +197,7 @@ class GSTR3BReport(Document):
 			if d["ty"] == 'ISRC':
 				reverse_charge = "Y"
 				itc_type = 'All Other ITC'
-				gst_category = ['Unregistered', 'Overseas']
+				gst_category = ['Unregistered', 'Overseas', 'Registered Regular']
 			else:
 				reverse_charge = "N"
 
@@ -253,7 +253,7 @@ class GSTR3BReport(Document):
 	def get_total_taxable_value(self, doctype, reverse_charge):
 
 		return frappe._dict(frappe.db.sql("""
-			select gst_category, sum(net_total) as total
+			select gst_category, sum(base_net_total) as total
 			from `tab{doctype}`
 			where docstatus = 1 and month(posting_date) = %s
 			and year(posting_date) = %s and reverse_charge = %s
