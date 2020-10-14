@@ -57,8 +57,21 @@ erpnext.PointOfSale.Controller = class {
 				}
 			}
 		];
+		const fetch_pos_payment_methods = () => {
+			const pos_profile = dialog.fields_dict.pos_profile.get_value();
+			if (!pos_profile) return;
+			frappe.db.get_doc("POS Profile", pos_profile).then(({ payments }) => {
+				dialog.fields_dict.balance_details.df.data = [];
+				payments.forEach(pay => {
+					const { mode_of_payment } = pay;
+					dialog.fields_dict.balance_details.df.data.push({ mode_of_payment, opening_amount: '0' });
+				});
+				dialog.fields_dict.balance_details.grid.refresh();
+			});
+		}
 		const dialog = new frappe.ui.Dialog({
 			title: __('Create POS Opening Entry'),
+			static: true,
 			fields: [
 				{
 					fieldtype: 'Link', label: __('Company'), default: frappe.defaults.get_default('company'),
@@ -67,20 +80,7 @@ erpnext.PointOfSale.Controller = class {
 				{
 					fieldtype: 'Link', label: __('POS Profile'),
 					options: 'POS Profile', fieldname: 'pos_profile', reqd: 1,
-					onchange: () => {
-						const pos_profile = dialog.fields_dict.pos_profile.get_value();
-
-						if (!pos_profile) return;
-
-						frappe.db.get_doc("POS Profile", pos_profile).then(({ payments }) => {
-							dialog.fields_dict.balance_details.df.data = [];
-							payments.forEach(pay => {
-								const { mode_of_payment } = pay;
-								dialog.fields_dict.balance_details.df.data.push({ mode_of_payment, opening_amount: '0' });
-							});
-							dialog.fields_dict.balance_details.grid.refresh();
-						});
-					}
+					onchange: () => fetch_pos_payment_methods()
 				},
 				{
 					fieldname: "balance_details",
@@ -93,43 +93,20 @@ erpnext.PointOfSale.Controller = class {
 					fields: table_fields
 				}
 			],
-			primary_action: ({ company, pos_profile, balance_details }) => {
+			primary_action: async ({ company, pos_profile, balance_details }) => {
 				if (!balance_details.length) {
 					frappe.show_alert({
 						message: __("Please add Mode of payments and opening balance details."),
 						indicator: 'red'
 					})
-					frappe.utils.play_sound("error");
-					return;
+					return frappe.utils.play_sound("error");
 				}
-				frappe.dom.freeze();
-				return frappe.call("erpnext.selling.page.point_of_sale.point_of_sale.create_opening_voucher", 
-					{ pos_profile, company, balance_details })
-					.then((r) => {
-						frappe.dom.unfreeze();
-						dialog.hide();
-						if (r.message) {
-							this.prepare_app_defaults(r.message);
-						}
-					});
+				const method = "erpnext.selling.page.point_of_sale.point_of_sale.create_opening_voucher";
+				const res = await frappe.call({ method, args: { pos_profile, company, balance_details }, freeze:true });
+				!res.exc && this.prepare_app_defaults(res.message);
+				dialog.hide();
 			},
-			primary_action_label: __('Submit'),
-			secondary_action: () => {
-				if (frappe.get_route_str() != "point-of-sale") return;
-				
-				const args = {
-					message: __("You must create a POS Opening Entry to use Point of Sale."),
-					title: __("Mandatory Action"),
-					indicator: 'orange',
-					secondary_action: {
-						action: () => {
-							dialog.show();
-						}
-					}
-				}
-				frappe.msgprint(args);
-				frappe.msg_dialog.custom_onhide = () => args.secondary_action.action();
-			}
+			primary_action_label: __('Submit')
 		});
 		dialog.show();
 	}
