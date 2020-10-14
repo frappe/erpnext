@@ -68,7 +68,7 @@ def make_program_and_linked_courses(program_name, course_name_list):
 		program = frappe.get_doc("Program", program_name)
 	course_list = [make_course(course_name) for course_name in course_name_list]
 	for course in course_list:
-		program.append("courses", {"course": course})
+		program.append("courses", {"course": course, "required": 1})
 	program.save()
 	return program
 
