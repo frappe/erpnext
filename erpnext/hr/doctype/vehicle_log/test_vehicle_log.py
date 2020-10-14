@@ -11,8 +11,8 @@ from erpnext.hr.doctype.vehicle_log.vehicle_log import make_expense_claim
 
 class TestVehicleLog(unittest.TestCase):
 	def setUp(self):
-		self.employee_id = frappe.db.sql("""select name from `tabEmployee` where name='testdriver@example.com'""")
-		self.employee_id = employee_id[0][0] if self.employee_id else None
+		employee_id = frappe.db.sql("""select name from `tabEmployee` where name='testdriver@example.com'""")
+		self.employee_id = employee_id[0][0] if employee_id else None
 
 		if not self.employee_id:
 			self.employee_id = make_employee("testdriver@example.com", company="_Test Company")
@@ -20,7 +20,7 @@ class TestVehicleLog(unittest.TestCase):
 		self.license_plate = get_vehicle(self.employee_id)
 	
 	def tearDown(self):
-		frappe.db.sql("""delete from `tabEmployee` where name = %s""", (self.employee_id))
+		frappe.delete_doc("Employee", self.employee_id)
 		frappe.delete_doc("Vehicle", self.license_plate)
 
 	def test_make_vehicle_log_and_syncing_of_odometer_value(self):
@@ -69,8 +69,8 @@ class TestVehicleLog(unittest.TestCase):
 		fuel_expense = expense_claim.expenses[0].amount
 		self.assertEqual(fuel_expense, 50*500)
 
-		frappe.db.sql("delete from `tabExpense Claim` where name=%s", expense_claim.name)
-		frappe.db.sql("delete from `tabVehicle Log` where name=%s", vehicle_log.name)
+		frappe.delete_doc("Expense Claim", expense_claim.name)
+		frappe.delete_doc("Vehicle Log", vehicle_log.name)
 
 def get_vehicle(employee_id):
 	license_plate=random_string(10).upper()
