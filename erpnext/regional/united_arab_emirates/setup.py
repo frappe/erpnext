@@ -38,11 +38,11 @@ def make_custom_fields():
 			dict(fieldname='supplier_name_in_arabic', label='Supplier Name in Arabic',
 				fieldtype='Read Only', insert_after='supplier_name',
 				fetch_from='supplier.supplier_name_in_arabic', print_hide=1),
-			dict(fieldname='standard_rated_expenses', label='Standard Rated Expenses (AED)',
+			dict(fieldname='claimable_standard_rated_expenses', label='Claimable Standard Rated Expenses (AED)',
 				insert_after='permit_no', fieldtype='Currency', print_hide=1, default='0',
 				depends_on="eval:doc.reverse_charge=='N'",),
 			dict(fieldname='reverse_charge', label='Reverse Charge Applicable',
-				fieldtype='Select', insert_after='standard_rated_expenses', print_hide=1,
+				fieldtype='Select', insert_after='claimable_standard_rated_expenses', print_hide=1,
 				options='Y\nN', default='N'),
 			dict(fieldname='claimable_reverse_charge', label='Claimable Reverse Charge (Percentage)',
 				insert_after='reverse_charge', fieldtype='Percent', print_hide=1,
@@ -132,11 +132,11 @@ def add_print_formats():
 		name in('Simplified Tax Invoice', 'Detailed Tax Invoice', 'Tax Invoice') """)
 
 def add_custom_roles_for_reports():
-	"""Add Access Control to UAE VAT 21."""
-	if not frappe.db.get_value('Custom Role', dict(report='UAE VAT 21')):
+	"""Add Access Control to UAE VAT 201."""
+	if not frappe.db.get_value('Custom Role', dict(report='UAE VAT 201')):
 		frappe.get_doc(dict(
 			doctype='Custom Role',
-			report='UAE VAT 21',
+			report='UAE VAT 201',
 			roles= [
 				dict(role='Accounts User'),
 				dict(role='Accounts Manager'),
