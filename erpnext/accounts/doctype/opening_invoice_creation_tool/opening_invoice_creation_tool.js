@@ -45,7 +45,6 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 			let btn_primary = frm.page.btn_primary.get(0);
 			return frm.call({
 				doc: frm.doc,
-				freeze: true,
 				btn: $(btn_primary),
 				method: "make_invoices",
 				freeze_message: __("Creating {0} Invoice", [frm.doc.invoice_type])

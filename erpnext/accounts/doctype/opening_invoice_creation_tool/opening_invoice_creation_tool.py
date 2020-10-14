@@ -170,7 +170,7 @@ class OpeningInvoiceCreationTool(Document):
 		self.validate_company()
 		invoices = self.get_invoices()
 		if len(invoices) < 50:
-			self.start_import(invoices)
+			return start_import(invoices)
 		else:
 			from frappe.core.page.background_jobs.background_jobs import get_info
 			from frappe.utils.scheduler import is_scheduler_inactive
@@ -189,16 +189,18 @@ class OpeningInvoiceCreationTool(Document):
 					invoices=invoices,
 					now=frappe.conf.developer_mode or frappe.flags.in_test
 				)
-				return True
-		return False
 
 def start_import(invoices):
 	errors = 0
+	names = []
 	for idx, d in enumerate(invoices):
 		try:
 			publish(idx, len(invoices), d.doctype)
-			frappe.get_doc(d).insert().submit()
+			doc = frappe.get_doc(d)
+			doc.insert()
+			doc.submit()
 			frappe.db.commit()
+			names.append(doc.name)
 		except:
 			errors += 1
 			frappe.db.rollback()
@@ -208,6 +210,7 @@ def start_import(invoices):
 	if errors:
 		frappe.msgprint(_("You had {} errors while creating opening invoices. Check {} for more details")
 			.format(errors, "<a href='#List/Error Log' class='variant-click'>Error Log</a>"), indicator="red", title=_("Error Occured"))
+	return names
 
 def publish(index, total, doctype):
 	if total < 5: return
