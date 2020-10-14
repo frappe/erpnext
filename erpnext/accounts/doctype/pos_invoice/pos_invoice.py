@@ -108,7 +108,7 @@ class POSInvoice(SalesInvoice):
 				error_msg.append(msg)
 
 		if error_msg:
-			frappe.msgprint(error_msg, title=_("Item Unavailable"), as_list=True)
+			frappe.throw(error_msg, title=_("Item Unavailable"), as_list=True)
 
 	def validate_serialised_or_batched_item(self):
 		error_msg = []
