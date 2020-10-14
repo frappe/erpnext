@@ -29,7 +29,7 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 					frm.page.clear_indicator();
 					frm.dashboard.hide_progress(title);
 					frappe.msgprint(__("Opening {0} Invoice created", [frm.doc.invoice_type]));
-				}, 1500, data.title)
+				}, 1500, data.title);
 				return;
 			}
 
