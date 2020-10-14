@@ -35,7 +35,7 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 
 			frm.dashboard.show_progress(data.title, (data.count / data.total) * 100, data.message);
 			frm.page.set_indicator(__('In Progress'), 'orange');
-		})
+		});
 	},
 
 	refresh: function(frm) {
