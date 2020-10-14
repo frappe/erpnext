@@ -27,6 +27,10 @@ doctype_js = {
 	"Newsletter": "public/js/newsletter.js"
 }
 
+override_doctype_class = {
+    'Address': 'erpnext.accounts.custom.address.CustomAddress'
+}
+
 welcome_email = "erpnext.setup.utils.welcome_email"
 
 # setup wizard
