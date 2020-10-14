@@ -504,31 +504,7 @@ erpnext.PointOfSale.Controller = class {
 		if (this.pos_profile && !this.frm.doc.pos_profile) this.frm.doc.pos_profile = this.pos_profile;
 		if (!this.frm.doc.company) return;
 
-		return new Promise(resolve => {
-			return this.frm.call({
-				doc: this.frm.doc,
-				method: "set_missing_values",
-			}).then((r) => {
-				if(!r.exc) {
-					if (!this.frm.doc.pos_profile) {
-						frappe.dom.unfreeze();
-						this.raise_exception_for_pos_profile();
-					}
-					this.frm.trigger("update_stock");
-					this.frm.trigger('calculate_taxes_and_totals');
-					if(this.frm.doc.taxes_and_charges) this.frm.script_manager.trigger("taxes_and_charges");
-					frappe.model.set_default_values(this.frm.doc);
-					if (r.message) {
-						this.frm.pos_print_format = r.message.print_format || "";
-						this.frm.meta.default_print_format = r.message.print_format || "";
-						this.frm.allow_edit_rate = r.message.allow_edit_rate;
-						this.frm.allow_edit_discount = r.message.allow_edit_discount;
-						this.frm.doc.campaign = r.message.campaign;
-					}
-				}
-				resolve();
-			});
-		});
+		return this.frm.trigger("set_pos_data");
 	}
 
 	raise_exception_for_pos_profile() {

@@ -29,8 +29,7 @@ class POSInvoice(SalesInvoice):
 		# run on validate method of selling controller
 		super(SalesInvoice, self).validate()
 		self.validate_auto_set_posting_time()
-		self.validate_pos_paid_amount()
-		self.validate_pos_return()
+		self.validate_mode_of_payment()
 		self.validate_uom_is_integer("stock_uom", "stock_qty")
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_debit_to_acc()
@@ -40,11 +39,11 @@ class POSInvoice(SalesInvoice):
 		self.validate_item_cost_centers()
 		self.validate_serialised_or_batched_item()
 		self.validate_stock_availablility()
-		self.validate_return_items()
+		self.validate_return_items_qty()
 		self.set_status()
 		self.set_account_for_mode_of_payment()
 		self.validate_pos()
-		self.verify_payment_amount()
+		self.validate_payment_amount()
 		self.validate_loyalty_transaction()
 
 	def on_submit(self):
@@ -86,7 +85,6 @@ class POSInvoice(SalesInvoice):
 				if len(invalid_serial_nos) == 1:
 					msg = (_("Row #{}: Serial No. {} has already been transacted into another POS Invoice. Please select valid serial no.")
 								.format(d.idx, invalid_serial_nos))
-					error_msg.append(msg)
 				else:
 					msg = (_("Row #{}: Serial Nos. {} has already been transacted into another POS Invoice. Please select valid serial no.")
 								.format(d.idx, invalid_serial_nos))
@@ -96,9 +94,7 @@ class POSInvoice(SalesInvoice):
 					return
 
 				available_stock = get_stock_availability(d.item_code, d.warehouse)
-				item_code = frappe.bold(d.item_code)
-				warehouse = frappe.bold(d.warehouse)
-				qty = frappe.bold(d.qty)
+				item_code, warehouse, qty = frappe.bold(d.item_code), frappe.bold(d.warehouse), frappe.bold(d.qty)
 				if flt(available_stock) <= 0:
 					msg = (_('Row #{}: Item Code: {} is not available under warehouse {}.').format(d.idx, item_code, warehouse))
 				elif flt(available_stock) < flt(d.qty):
@@ -135,7 +131,7 @@ class POSInvoice(SalesInvoice):
 		if error_msg:
 			frappe.throw(error_msg, title=_("Invalid Item"), as_list=True)
 
-	def validate_return_items(self):
+	def validate_return_items_qty(self):
 		if not self.get("is_return"): return
 
 		for d in self.get("items"):
@@ -143,8 +139,8 @@ class POSInvoice(SalesInvoice):
 				frappe.throw(_("Row #{}: You cannot add postive quantities in a return invoice. Please remove item {} to complete the return.")
 					.format(d.idx, frappe.bold(d.item_code)), title=_("Invalid Item"))
 
-	def validate_pos_paid_amount(self):
-		if len(self.payments) == 0 and self.is_pos:
+	def validate_mode_of_payment(self):
+		if len(self.payments) == 0:
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
 
 	def validate_change_account(self):
@@ -162,20 +158,18 @@ class POSInvoice(SalesInvoice):
 		if flt(self.change_amount) and not self.account_for_change_amount:
 			msgprint(_("Please enter Account for Change Amount"), raise_exception=1)
 
-	def verify_payment_amount(self):
+	def validate_payment_amount(self):
+		total_amount_in_payments = 0
 		for entry in self.payments:
+			total_amount_in_payments += entry.amount
 			if not self.is_return and entry.amount < 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be positive").format(entry.idx))
 			if self.is_return and entry.amount > 0:
 				frappe.throw(_("Row #{0} (Payment Table): Amount must be negative").format(entry.idx))
 
-	def validate_pos_return(self):
-		if self.is_pos and self.is_return:
-			total_amount_in_payments = 0
-			for payment in self.payments:
-				total_amount_in_payments += payment.amount
+		if self.is_return:
 			invoice_total = self.rounded_total or self.grand_total
-			if total_amount_in_payments < invoice_total:
+			if total_amount_in_payments and total_amount_in_payments < invoice_total:
 				frappe.throw(_("Total payments amount can't be greater than {}").format(-invoice_total))
 
 	def validate_loyalty_transaction(self):
@@ -230,50 +224,37 @@ class POSInvoice(SalesInvoice):
 			pos_profile = get_pos_profile(self.company) or {}
 			self.pos_profile = pos_profile.get('name')
 
-		pos = {}
+		profile = {}
 		if self.pos_profile:
-			pos = frappe.get_doc('POS Profile', self.pos_profile)
+			profile = frappe.get_doc('POS Profile', self.pos_profile)
 
 		if not self.get('payments') and not for_validate:
-			update_multi_mode_option(self, pos)
+			update_multi_mode_option(self, profile)
 
-		if not self.account_for_change_amount:
-			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
-
-		if pos:
-			if not for_validate:
-				self.tax_category = pos.get("tax_category")
-
+		if profile:
 			if not for_validate and not self.customer:
-				self.customer = pos.customer
+				self.customer = profile.customer
 
-			self.ignore_pricing_rule = pos.ignore_pricing_rule
-			if pos.get('account_for_change_amount'):
-				self.account_for_change_amount = pos.get('account_for_change_amount')
-			if pos.get('warehouse'):
-				self.set_warehouse = pos.get('warehouse')
+			self.ignore_pricing_rule = profile.ignore_pricing_rule
+			self.account_for_change_amount = profile.get('account_for_change_amount') or self.account_for_change_amount
+			self.set_warehouse = profile.get('warehouse') or self.set_warehouse
 
 			for fieldname in ('naming_series', 'currency', 'letter_head', 'tc_name',
 				'company', 'select_print_heading', 'write_off_account', 'taxes_and_charges',
-				'write_off_cost_center', 'apply_discount_on', 'cost_center'):
-					if (not for_validate) or (for_validate and not self.get(fieldname)):
-						self.set(fieldname, pos.get(fieldname))
-
-			if pos.get("company_address"):
-				self.company_address = pos.get("company_address")
+				'write_off_cost_center', 'apply_discount_on', 'cost_center', 'tax_category',
+				'ignore_pricing_rule', 'company_address', 'update_stock'):
+					if not for_validate:
+						self.set(fieldname, profile.get(fieldname))
 
 			if self.customer:
 				customer_price_list, customer_group = frappe.db.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
 				customer_group_price_list = frappe.db.get_value("Customer Group", customer_group, 'default_price_list')
-				selling_price_list = customer_price_list or customer_group_price_list or pos.get('selling_price_list')
+				selling_price_list = customer_price_list or customer_group_price_list or profile.get('selling_price_list')
 			else:
-				selling_price_list = pos.get('selling_price_list')
+				selling_price_list = profile.get('selling_price_list')
 
 			if selling_price_list:
 				self.set('selling_price_list', selling_price_list)
-
-			if not for_validate:
-				self.update_stock = cint(pos.get("update_stock"))
 
 			# set pos values in items
 			for item in self.get("items"):
@@ -291,10 +272,13 @@ class POSInvoice(SalesInvoice):
 			if self.taxes_and_charges and not len(self.get("taxes")):
 				self.set_taxes()
 
-		return pos
+		if not self.account_for_change_amount:
+			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
+
+		return profile
 
 	def set_missing_values(self, for_validate=False):
-		pos = self.set_pos_fields(for_validate)
+		profile = self.set_pos_fields(for_validate)
 
 		if not self.debit_to:
 			self.debit_to = get_party_account("Customer", self.customer, self.company)
@@ -304,17 +288,15 @@ class POSInvoice(SalesInvoice):
 
 		super(SalesInvoice, self).set_missing_values(for_validate)
 
-		print_format = pos.get("print_format") if pos else None
+		print_format = profile.get("print_format") if profile else None
 		if not print_format and not cint(frappe.db.get_value('Print Format', 'POS Invoice', 'disabled')):
 			print_format = 'POS Invoice'
 
-		if pos:
+		if profile:
 			return {
 				"print_format": print_format,
-				"allow_edit_rate": pos.get("allow_user_to_edit_rate"),
-				"allow_edit_discount": pos.get("allow_user_to_edit_discount"),
-				"campaign": pos.get("campaign"),
-				"allow_print_before_pay": pos.get("allow_print_before_pay")
+				"campaign": profile.get("campaign"),
+				"allow_print_before_pay": profile.get("allow_print_before_pay")
 			}
 
 	def set_account_for_mode_of_payment(self):
