@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import time_diff_in_hours, flt
+from frappe.model.meta import get_field_precision
 
 def get_columns():
 	return [
@@ -136,6 +137,7 @@ def get_timesheet_details(filters, timesheet_list):
 	return timesheet_details_map
 
 def get_billable_and_total_duration(activity, start_time, end_time):
+	precision = frappe.get_precision("Timesheet Detail", "hours")
 	activity_duration = time_diff_in_hours(end_time, start_time)
 	billing_duration = 0.0
 	if activity.billable:
@@ -143,4 +145,4 @@ def get_billable_and_total_duration(activity, start_time, end_time):
 		if activity_duration != activity.billing_hours:
 			billing_duration = activity_duration * activity.billing_hours / activity.hours
 
-	return flt(activity_duration, 2), flt(billing_duration, 2)
+	return flt(activity_duration, precision), flt(billing_duration, precision)
