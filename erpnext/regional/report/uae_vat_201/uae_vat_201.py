@@ -68,14 +68,14 @@ def get_data(filters = None):
 
 	for d, emirate in enumerate(emirates, 97):
 		if emirate in amounts_by_emirate:
-			amounts_by_emirate[emirate]["no"] = _(f'1{chr(d)}')
-			amounts_by_emirate[emirate]["legend"] = _(f'Standard rated supplies in {emirate}')
+			amounts_by_emirate[emirate]["no"] = _('1{0}').format(chr(d))
+			amounts_by_emirate[emirate]["legend"] = _('Standard rated supplies in {0}').format(emirate)
 			data.append(amounts_by_emirate[emirate])
 		else:
 			data.append(
 				{
-					"no": _(f'1{chr(d)}'),
-					"legend": _(f'Standard rated supplies in {emirate}'),
+					"no": _('1{0}').format(chr(d)),
+					"legend": _('Standard rated supplies in {0}').format(emirate),
 					"amount": frappe.format(0, 'Currency'),
 					"vat_amount": frappe.format(0, 'Currency')
 				}
@@ -83,7 +83,7 @@ def get_data(filters = None):
 
 	data.append(
 		{
-			"no": _('2'),
+			"no": '2',
 			"legend": _('Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme'),
 			"amount": frappe.format((-1) * get_tourist_tax_return_total(filters), 'Currency'),
 			"vat_amount": frappe.format((-1) * get_tourist_tax_return_tax(filters), 'Currency')
@@ -92,7 +92,7 @@ def get_data(filters = None):
 
 	data.append(
 		{
-			"no": _('3'),
+			"no": '3',
 			"legend": _('Supplies subject to the reverse charge provision'),
 			"amount": frappe.format(get_reverse_charge_total(filters), 'Currency'),
 			"vat_amount": frappe.format(get_reverse_charge_tax(filters), 'Currency')
@@ -101,7 +101,7 @@ def get_data(filters = None):
 
 	data.append(
 		{
-			"no": _('4'),
+			"no": '4',
 			"legend": _('Zero Rated'),
 			"amount": frappe.format(get_zero_rated_total(filters), 'Currency'),
 			"vat_amount": "-"
@@ -110,7 +110,7 @@ def get_data(filters = None):
 
 	data.append(
 		{
-			"no": _('5'),
+			"no": '5',
 			"legend": _('Exempt Supplies'),
 			"amount": frappe.format(get_exempt_total(filters), 'Currency'),
 			"vat_amount": "-"
@@ -118,14 +118,14 @@ def get_data(filters = None):
 	)
 
 	data.append({
-		"no": _(''),
-		"legend": _(''),
+		"no": '',
+		"legend": '',
 		"amount": '',
 		"vat_amount": ''
 		})
 
 	data.append({
-		"no": _(''),
+		"no": '',
 		"legend": _('VAT on Expenses and All Other Inputs'),
 		"amount": '',
 		"vat_amount": ''
@@ -142,7 +142,7 @@ def get_data(filters = None):
 
 	data.append(
 		{
-			"no": _('10'),
+			"no": '10',
 			"legend": _('Supplies subject to the reverse charge provision'),
 			"amount": frappe.format(get_reverse_charge_recoverable_total(filters), 'Currency'),
 			"vat_amount": frappe.format(get_reverse_charge_recoverable_tax(filters), 'Currency')
