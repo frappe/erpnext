@@ -1,4 +1,5 @@
 import frappe
+from frappe import _
 from frappe.contacts.doctype.address.address import Address
 from frappe.contacts.address_and_contact import set_link_title
 from frappe.core.doctype.dynamic_link.dynamic_link import deduplicate_dynamic_links
@@ -11,12 +12,6 @@ class CustomAddress(Address):
 		set_link_title(self)
 		deduplicate_dynamic_links(self)
 
-	def validate_reference(self):
-		if self.is_your_company_address:
-			if not [row for row in self.links if row.link_doctype == "Company"]:
-				frappe.throw(_("Address needs to be linked to a Company. Please add a row for Company in the Links table below."),
-					title =_("Company not Linked"))
-	
 	def link_address(self):
 		"""Link address based on owner"""
 		if not self.links and not self.is_your_company_address:
@@ -27,5 +22,12 @@ class CustomAddress(Address):
 				for link in contact.links:
 					self.append('links', dict(link_doctype=link.link_doctype, link_name=link.link_name))
 				return True
-
 		return False
+
+	def validate_reference(self):
+		if self.is_your_company_address:
+			print('here')
+			if not [row for row in self.links if row.link_doctype == "Company"]:
+				frappe.throw(_("Address needs to be linked to a Company. Please add a row for Company in the Links table below."),
+					title =_("Company not Linked"))
+	
