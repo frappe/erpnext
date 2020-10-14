@@ -20,6 +20,7 @@ class InpatientMedicationEntry(Document):
 
 		if orders:
 			self.add_mo_to_table(orders)
+			return self
 		else:
 			self.set('medication_orders', [])
 			frappe.msgprint(_('No pending medication orders found for selected criteria'))

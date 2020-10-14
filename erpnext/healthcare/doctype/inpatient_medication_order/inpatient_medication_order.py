@@ -17,6 +17,7 @@ class InpatientMedicationOrder(Document):
 		self.set_status()
 
 	def on_submit(self):
+		self.validate_inpatient()
 		self.set_status()
 
 	def on_cancel(self):
