@@ -789,7 +789,7 @@ class Item(WebsiteGenerator):
 			frappe.delete_doc("Item", variant_of.name)
 
 	def before_rename(self, old_name, new_name, merge=False):
-		if self.item_name == old_name:
+		if self.item_name == old_name and self.item_naming_by == "Item Name":
 			frappe.db.set_value("Item", old_name, "item_name", new_name)
 
 		if merge:
