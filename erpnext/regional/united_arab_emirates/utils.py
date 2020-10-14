@@ -145,11 +145,7 @@ def make_regional_gl_entries(gl_entries, doc):
 def validate_returns(doc, method):
 	"""Standard Rated expenses should not be set when Reverse Charge Applicable is set."""
 	country = frappe.get_cached_value('Company', doc.company, 'country')
-	print("-"*50)
-	print(doc.reverse_charge)
-	print(flt(doc.standard_rated_expenses))
 	if country != 'United Arab Emirates':
 		return
-
-	if doc.reverse_charge == 'Y' and  flt(doc.standard_rated_expenses) != 0:
-		frappe.throw(_("Standard Rated expenses should not be set when Reverse Charge Applicable is Y"))
+	if doc.reverse_charge == 'Y' and  flt(doc.claimable_standard_rated_expenses) != 0:
+		frappe.throw(_("Claimable Standard Rated expenses should not be set when Reverse Charge Applicable is Y"))
