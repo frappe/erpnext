@@ -31,8 +31,8 @@ class POSClosingEntry(Document):
 		if user:
 			bold_already_exists = frappe.bold(_("already exists"))
 			bold_user = frappe.bold(self.user)
-			frappe.throw(_("POS Closing Entry {} against {} between selected period"
-				.format(bold_already_exists, bold_user)), title=_("Invalid Period"))
+			frappe.throw(_("POS Closing Entry {} against {} between selected period")
+				.format(bold_already_exists, bold_user), title=_("Invalid Period"))
 	
 	def validate_pos_invoices(self):
 		invalid_rows = []

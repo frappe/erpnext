@@ -948,8 +948,10 @@ def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, c
 	company_currency = frappe.get_cached_value('Company',  company,  "default_currency")
 
 	if not conversion_rate:
-		throw(_("{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.").format(
-			conversion_rate_label, currency, company_currency))
+		throw(
+			_("{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.")
+			.format(conversion_rate_label, currency, company_currency)
+		)
 
 
 def validate_taxes_and_charges(tax):

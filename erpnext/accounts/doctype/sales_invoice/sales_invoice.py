@@ -1140,8 +1140,10 @@ class SalesInvoice(SellingController):
 			where redeem_against=%s''', (lp_entry[0].name), as_dict=1)
 		if against_lp_entry:
 			invoice_list = ", ".join([d.invoice for d in against_lp_entry])
-			frappe.throw(_('''{} can't be cancelled since the Loyalty Points earned has been redeemed.
-				First cancel the {} No {}''').format(self.doctype, self.doctype, invoice_list))
+			frappe.throw(
+				_('''{} can't be cancelled since the Loyalty Points earned has been redeemed. First cancel the {} No {}''')
+				.format(self.doctype, self.doctype, invoice_list)
+			)
 		else:
 			frappe.db.sql('''delete from `tabLoyalty Point Entry` where invoice=%s''', (self.name))
 			# Set loyalty program

@@ -371,7 +371,7 @@ erpnext.PointOfSale.Controller = class {
 							this.order_summary.load_summary_of(this.frm.doc, true);
 							frappe.show_alert({
 								indicator: 'green',
-								message: __(`POS invoice ${r.doc.name} created succesfully`)
+								message: __(`POS invoice {0} created succesfully`, [r.doc.name])
 							});
 						});
 				}
@@ -538,11 +538,11 @@ erpnext.PointOfSale.Controller = class {
 
 	set_invoice_status() {
 		const [status, indicator] = frappe.listview_settings["POS Invoice"].get_indicator(this.frm.doc);
-		this.page.set_indicator(__(`${status}`), indicator);
+		this.page.set_indicator(status, indicator);
 	}
 
 	set_pos_profile_status() {
-		this.page.set_indicator(__(`${this.pos_profile}`), "blue");
+		this.page.set_indicator(this.pos_profile, "blue");
 	}
 
 	async on_cart_update(args) {
@@ -655,16 +655,21 @@ erpnext.PointOfSale.Controller = class {
 		const available_qty = (await this.get_available_stock(item_row.item_code, warehouse)).message;
 
 		frappe.dom.unfreeze();
+		const bold_item_code = item_row.item_code.bold();
+		const bold_warehouse = warehouse.bold();
+		const bold_available_qty = available_qty.toString().bold()
 		if (!(available_qty > 0)) {
 			frappe.model.clear_doc(item_row.doctype, item_row.name);
 			frappe.throw({
 				title: _("Not Available"),
-				message: __(`Item Code: ${item_row.item_code.bold()} is not available under warehouse ${warehouse.bold()}.`)
+				message: __(`Item Code: {0} is not available under warehouse {1}.`, [bold_item_code, bold_warehouse])
 			})
 		} else if (available_qty < qty_needed) {
 			frappe.show_alert({
-				message: __(`Stock quantity not enough for Item Code: ${item_row.item_code.bold()} under warehouse ${warehouse.bold()}. 
-					Available quantity ${available_qty.toString().bold()}.`),
+				message: __(
+					`Stock quantity not enough for Item Code: {0} under warehouse {1}. Available quantity {2}.`,
+					[bold_item_code, bold_warehouse, bold_available_qty]
+				),
 				indicator: 'orange'
 			});
 			frappe.utils.play_sound("error");
@@ -680,7 +685,7 @@ erpnext.PointOfSale.Controller = class {
 		if (res.message.includes(serial_no)) {
 			frappe.throw({
 				title: _("Not Available"),
-				message: __(`Serial No: ${serial_no.bold()} has already been transacted into another POS Invoice.`)
+				message: __(`Serial No: {0} has already been transacted into another POS Invoice.`, [serial_no.bold()])
 			});
 		}
 	}

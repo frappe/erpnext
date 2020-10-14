@@ -234,7 +234,11 @@ erpnext.PointOfSale.ItemDetails = class {
 							})
 						} else if (available_qty === 0) {
 							me.warehouse_control.set_value('');
-							frappe.throw(__(`Item Code: ${me.item_row.item_code.bold()} is not available under warehouse ${this.value.bold()}.`));
+							const bold_item_code = me.item_row.item_code.bold();
+							const bold_warehouse = this.value.bold();
+							frappe.throw(
+								__(`Item Code: {0} is not available under warehouse {1}.`, [bold_item_code, bold_warehouse])
+							);
 						}
 						me.actual_qty_control.set_value(available_qty);
 					});
@@ -387,10 +391,14 @@ erpnext.PointOfSale.ItemDetails = class {
 				let records_length = auto_fetched_serial_numbers.length;
 				if (!records_length) {
 					const warehouse = this.warehouse_control.get_value().bold();
-					frappe.msgprint(__(`Serial numbers unavailable for Item ${this.current_item.item_code.bold()} 
-						under warehouse ${warehouse}. Please try changing warehouse.`));
+					const item_code = this.current_item.item_code.bold();
+					frappe.msgprint(
+						__(`Serial numbers unavailable for Item {0} under warehouse {1}. Please try changing warehouse.`, [item_code, warehouse])
+					);
 				} else if (records_length < qty) {
-					frappe.msgprint(`Fetched only ${records_length} available serial numbers.`);
+					frappe.msgprint(
+						__(`Fetched only {0} available serial numbers.`, [records_length])
+					);
 					this.qty_control.set_value(records_length);
 				}
 				numbers = auto_fetched_serial_numbers.join(`\n`);

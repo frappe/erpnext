@@ -71,8 +71,9 @@ class POSInvoice(SalesInvoice):
 
 	def validate_stock_availablility(self):
 		allow_negative_stock = frappe.db.get_value('Stock Settings', None, 'allow_negative_stock')
-
+		error_msg = []
 		for d in self.get('items'):
+			msg = ""
 			if d.serial_no:
 				filters = { "item_code": d.item_code, "warehouse": d.warehouse }
 				if d.batch_no:
@@ -81,41 +82,58 @@ class POSInvoice(SalesInvoice):
 				serial_nos = get_serial_nos(d.serial_no)
 				invalid_serial_nos = [s for s in serial_nos if s in reserved_serial_nos]
 
-				if len(invalid_serial_nos):
-					multiple_nos = 's' if len(invalid_serial_nos) > 1 else ''
-					frappe.throw(_("Row #{}: Serial No{}. {} has already been transacted into another POS Invoice. \
-						Please select valid serial no.".format(d.idx, multiple_nos,
-						frappe.bold(', '.join(invalid_serial_nos)))), title=_("Not Available"))
+				invalid_serial_nos = frappe.bold(', '.join(invalid_serial_nos))
+				if len(invalid_serial_nos) == 1:
+					msg = (_("Row #{}: Serial No. {} has already been transacted into another POS Invoice. Please select valid serial no.")
+								.format(d.idx, invalid_serial_nos))
+					error_msg.append(msg)
+				else:
+					msg = (_("Row #{}: Serial Nos. {} has already been transacted into another POS Invoice. Please select valid serial no.")
+								.format(d.idx, invalid_serial_nos))
+
 			else:
 				if allow_negative_stock:
 					return
 
 				available_stock = get_stock_availability(d.item_code, d.warehouse)
-				if not (flt(available_stock) > 0):
-					frappe.throw(_('Row #{}: Item Code: {} is not available under warehouse {}.'
-						.format(d.idx, frappe.bold(d.item_code), frappe.bold(d.warehouse))), title=_("Not Available"))
+				item_code = frappe.bold(d.item_code)
+				warehouse = frappe.bold(d.warehouse)
+				qty = frappe.bold(d.qty)
+				if flt(available_stock) <= 0:
+					msg = (_('Row #{}: Item Code: {} is not available under warehouse {}.').format(d.idx, item_code, warehouse))
 				elif flt(available_stock) < flt(d.qty):
-					frappe.msgprint(_('Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. \
-						Available quantity {}.'.format(d.idx, frappe.bold(d.item_code),
-						frappe.bold(d.warehouse), frappe.bold(d.qty))), title=_("Not Available"))
+					msg = (_('Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. Available quantity {}.')
+								.format(d.idx, item_code, warehouse, qty))
+			if msg:
+				error_msg.append(msg)
+
+		if error_msg:
+			frappe.msgprint(error_msg, title=_("Item Unavailable"), as_list=True)
 
 	def validate_serialised_or_batched_item(self):
+		error_msg = []
 		for d in self.get("items"):
 			serialized = d.get("has_serial_no")
 			batched = d.get("has_batch_no")
 			no_serial_selected = not d.get("serial_no")
 			no_batch_selected = not d.get("batch_no")
 
-
+			msg = ""
+			item_code = frappe.bold(d.item_code)
 			if serialized and batched and (no_batch_selected or no_serial_selected):
-				frappe.throw(_('Row #{}: Please select a serial no and batch against item: {} or remove it to complete transaction.'
-						.format(d.idx, frappe.bold(d.item_code))), title=_("Invalid Item"))
+				msg = (_('Row #{}: Please select a serial no and batch against item: {} or remove it to complete transaction.')
+							.format(d.idx, item_code))
 			if serialized and no_serial_selected:
-				frappe.throw(_('Row #{}: No serial number selected against item: {}. Please select one or remove it to complete transaction.'
-						.format(d.idx, frappe.bold(d.item_code))), title=_("Invalid Item"))
+				msg = (_('Row #{}: No serial number selected against item: {}. Please select one or remove it to complete transaction.')
+							.format(d.idx, item_code))
 			if batched and no_batch_selected:
-				frappe.throw(_('Row #{}: No batch selected against item: {}. Please select a batch or remove it to complete transaction.'
-						.format(d.idx, frappe.bold(d.item_code))), title=_("Invalid Item"))
+				msg = (_('Row #{}: No batch selected against item: {}. Please select a batch or remove it to complete transaction.')
+							.format(d.idx, item_code))
+			if msg:
+				error_msg.append(msg)
+
+		if error_msg:
+			frappe.throw(error_msg, title=_("Invalid Item"), as_list=True)
 
 	def validate_return_items(self):
 		if not self.get("is_return"): return
@@ -158,7 +176,7 @@ class POSInvoice(SalesInvoice):
 				total_amount_in_payments += payment.amount
 			invoice_total = self.rounded_total or self.grand_total
 			if total_amount_in_payments < invoice_total:
-				frappe.throw(_("Total payments amount can't be greater than {}".format(-invoice_total)))
+				frappe.throw(_("Total payments amount can't be greater than {}").format(-invoice_total))
 
 	def validate_loyalty_transaction(self):
 		if self.redeem_loyalty_points and (not self.loyalty_redemption_account or not self.loyalty_redemption_cost_center):

@@ -352,9 +352,9 @@ erpnext.PointOfSale.Payment = class {
 			const me = this;
 			this[`${mode}_control`] = frappe.ui.form.make_control({
 				df: {
-					label: __(`${p.mode_of_payment}`),
+					label: p.mode_of_payment,
 					fieldtype: 'Currency',
-					placeholder: __(`Enter ${p.mode_of_payment} amount.`),
+					placeholder: __(`Enter {0} amount.`, [p.mode_of_payment]),
 					onchange: function() {
 						if (this.value || this.value == 0) {
 							frappe.model.set_value(p.doctype, p.name, 'amount', flt(this.value))
@@ -432,11 +432,11 @@ erpnext.PointOfSale.Payment = class {
 
 		let description, read_only, max_redeemable_amount;
 		if (!loyalty_points) {
-			description = __(`You don't have enough points to redeem.`);
+			description = __("You don't have enough points to redeem.");
 			read_only = true;
 		} else {
 			max_redeemable_amount = flt(flt(loyalty_points) * flt(conversion_factor), precision("loyalty_amount", doc))
-			description = __(`You can redeem upto ${format_currency(max_redeemable_amount)}.`);
+			description = __("You can redeem upto {0}.", [format_currency(max_redeemable_amount)]);
 			read_only = false;
 		}
 
@@ -456,9 +456,9 @@ erpnext.PointOfSale.Payment = class {
 
 		this['loyalty-amount_control'] = frappe.ui.form.make_control({
 			df: {
-				label: __('Redeem Loyalty Points'),
+				label: __("Redeem Loyalty Points"),
 				fieldtype: 'Currency',
-				placeholder: __(`Enter amount to be redeemed.`),
+				placeholder: __("Enter amount to be redeemed."),
 				options: 'company:currency',
 				read_only,
 				onchange: async function() {
@@ -466,7 +466,7 @@ erpnext.PointOfSale.Payment = class {
 
 					if (this.value > max_redeemable_amount) {
 						frappe.show_alert({
-							message: __(`You cannot redeem more than ${format_currency(max_redeemable_amount)}.`),
+							message: __("You cannot redeem more than {0}.", [format_currency(max_redeemable_amount)]),
 							indicator: "red"
 						});
 						frappe.utils.play_sound("submit");

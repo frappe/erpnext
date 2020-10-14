@@ -286,8 +286,10 @@ def validate_serial_no(sle, item_det):
 								if sle.voucher_type == "Sales Invoice":
 									if not frappe.db.exists("Sales Invoice Item", {"parent": sle.voucher_no,
 										"item_code": sle.item_code, "sales_order": sr.sales_order}):
-										frappe.throw(_("Cannot deliver Serial No {0} of item {1} as it is reserved \
-											to fullfill Sales Order {2}").format(sr.name, sle.item_code, sr.sales_order))
+										frappe.throw(
+											_("Cannot deliver Serial No {0} of item {1} as it is reserved to fullfill Sales Order {2}")
+											.format(sr.name, sle.item_code, sr.sales_order)
+										)
 								elif sle.voucher_type == "Delivery Note":
 									if not frappe.db.exists("Delivery Note Item", {"parent": sle.voucher_no,
 										"item_code": sle.item_code, "against_sales_order": sr.sales_order}):
@@ -296,8 +298,10 @@ def validate_serial_no(sle, item_det):
 										if not invoice or frappe.db.exists("Sales Invoice Item",
 											{"parent": invoice, "item_code": sle.item_code,
 											"sales_order": sr.sales_order}):
-											frappe.throw(_("Cannot deliver Serial No {0} of item {1} as it is reserved to \
-												fullfill Sales Order {2}").format(sr.name, sle.item_code, sr.sales_order))
+											frappe.throw(
+												_("Cannot deliver Serial No {0} of item {1} as it is reserved to fullfill Sales Order {2}")
+												.format(sr.name, sle.item_code, sr.sales_order)
+											)
 							# if Sales Order reference in Delivery Note or Invoice validate SO reservations for item
 							if sle.voucher_type == "Sales Invoice":
 								sales_order = frappe.db.get_value("Sales Invoice Item", {"parent": sle.voucher_no,
