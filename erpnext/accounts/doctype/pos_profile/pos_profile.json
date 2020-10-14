@@ -12,7 +12,6 @@
   "company",
   "country",
   "column_break_9",
-  "show_only_available_items",
   "update_stock",
   "ignore_pricing_rule",
   "warehouse",
@@ -291,16 +290,10 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "label": "Warehouse",
+   "mandatory_depends_on": "update_stock",
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
-   "options": "Warehouse",
-   "reqd": 1
-  },
-  {
-   "default": "1",
-   "fieldname": "update_stock",
-   "fieldtype": "Check",
-   "label": "Update Stock"
+   "options": "Warehouse"
   },
   {
    "default": "0",
@@ -310,16 +303,15 @@
   },
   {
    "default": "1",
-   "fieldname": "show_only_available_items",
+   "fieldname": "update_stock",
    "fieldtype": "Check",
-   "label": "Show only available items"
+   "label": "Update Stock"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
- "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-10-01 17:29:27.759088",
+ "modified": "2020-10-14 12:54:40.035985",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

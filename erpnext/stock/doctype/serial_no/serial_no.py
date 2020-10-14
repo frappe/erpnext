@@ -591,9 +591,8 @@ def fetch_serial_numbers(filters, qty, do_not_include=[]):
 		batch_no_condition = """and sr.batch_no in ({}) """.format(', '.join(["'%s'" % d for d in batch_nos]))
 
 	if expiry_date:
-		batch_join_selection = ", `tabBatch` batch"
-		batch_no_condition += "and sr.batch_no = batch.name "
-		expiry_date_cond = "and (batch.expiry_date is null or batch.expiry_date >= %(expiry_date)s) "
+		batch_join_selection = "LEFT JOIN `tabBatch` batch on sr.batch_no = batch.name "
+		expiry_date_cond = "AND ifnull(batch.expiry_date, '2500-12-31') >= %(expiry_date)s "
 		batch_no_condition += expiry_date_cond
 
 	excluded_sr_nos = ", ".join(["" + frappe.db.escape(sr) + "" for sr in do_not_include]) or "''"
@@ -603,8 +602,8 @@ def fetch_serial_numbers(filters, qty, do_not_include=[]):
 			sr.name not in ({excluded_sr_nos}) AND
 			sr.item_code = %(item_code)s AND 
 			sr.warehouse = %(warehouse)s AND
-			(sr.sales_invoice = '' OR sr.sales_invoice is NULL) AND
-			(sr.delivery_document_no = '' OR sr.delivery_document_no is NULL)
+			ifnull(sr.sales_invoice,'') = '' AND
+			ifnull(sr.delivery_document_no, '') = ''
 			{batch_no_condition}
 		ORDER BY
 			sr.creation
