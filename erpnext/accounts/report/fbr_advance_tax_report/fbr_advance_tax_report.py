@@ -112,7 +112,7 @@ class FBRInvoiceWiseTaxes(object):
 			})
 
 		if self.party_naming_by != "Naming Series":
-			columns = filter(lambda d: d['fieldname'] != 'party_name', columns)
+			columns = list(filter(lambda d: d['fieldname'] != 'party_name', columns))
 
 		return columns
 
