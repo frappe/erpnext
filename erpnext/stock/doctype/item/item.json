@@ -138,7 +138,6 @@
   "column_break_125",
   "full_width",
   "section_break_127",
-  "copy_from_item_page_template",
   "page_building_blocks",
   "website_content",
   "total_projected_qty",
@@ -1370,13 +1369,6 @@
    "hide_border": 1,
    "show_days": 1,
    "show_seconds": 1
-  },
-  {
-   "fieldname": "copy_from_item_page_template",
-   "fieldtype": "Button",
-   "label": "Copy From Item Page Template",
-   "show_days": 1,
-   "show_seconds": 1
   }
  ],
  "has_web_view": 1,
@@ -1386,7 +1378,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2020-08-29 20:03:30.641197",
+ "modified": "2020-10-14 15:20:07.546856",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

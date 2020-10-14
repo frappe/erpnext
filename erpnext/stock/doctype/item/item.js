@@ -216,28 +216,6 @@ frappe.ui.form.on("Item", {
 
 	set_meta_tags(frm) {
 		frappe.utils.set_meta_tag(frm.doc.route);
-	},
-
-	copy_from_item_page_template: function(frm) {
-		let d = new frappe.ui.Dialog({
-			title: __("Select Item Page Template"),
-			fields: [{
-				'fieldname': 'template',
-				'label': 'Item Page Template',
-				'fieldtype': 'Link',
-				'options': 'Item Page Template'
-			}],
-			primary_action(values) {
-				frappe.model.with_doc("Item Page Template", values.template).then((doc) => {
-					doc.web_page_block.map((template) => {
-						frm.add_child('page_building_blocks', template);
-						frm.refresh_field('page_building_blocks');
-					});
-				});
-				d.hide();
-			},
-		});
-		d.show();
 	}
 });
 
