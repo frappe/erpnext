@@ -13,8 +13,8 @@ frappe.ui.form.on("Address", {
 					filters: {
 						name: 'Company'
 					}
-				}
-			}
+				};
+			};
 			frm.refresh_field('links');
 		}
 		else{
