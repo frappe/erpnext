@@ -99,6 +99,7 @@ class PaymentReconciliation(Document):
 				and `tabGL Entry`.against_voucher_type = %(voucher_type)s
 				and `tab{doc}`.docstatus = 1 and `tabGL Entry`.party = %(party)s
 				and `tabGL Entry`.party_type = %(party_type)s and `tabGL Entry`.account = %(account)s
+				and `tabGL Entry`.is_cancelled = 0
 			GROUP BY `tab{doc}`.name
 			Having
 				amount > 0
