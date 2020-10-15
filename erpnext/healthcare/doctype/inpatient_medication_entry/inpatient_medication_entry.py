@@ -70,6 +70,7 @@ class InpatientMedicationEntry(Document):
 					entry.idx))
 
 	def on_cancel(self):
+		self.cancel_stock_entries()
 		self.update_medication_orders(on_cancel=True)
 
 	def process_stock(self):
@@ -166,6 +167,12 @@ class InpatientMedicationEntry(Document):
 		stock_entry.submit()
 		return stock_entry.name
 
+	def cancel_stock_entries(self):
+		stock_entries = frappe.get_all('Stock Entry', {'inpatient_medication_entry': self.name})
+		for entry in stock_entries:
+			doc = frappe.get_doc('Stock Entry', entry.name)
+			doc.cancel()
+
 
 def get_pending_medication_orders(entry):
 	parent_filter = child_filter = ''
@@ -189,15 +196,15 @@ def get_pending_medication_orders(entry):
 
 	if entry.patient:
 		parent_filter += ' and ip.patient = %(patient)s'
-		values['patient'] = frappe.db.escape(entry.patient)
+		values['patient'] = entry.patient
 
 	if entry.practitioner:
 		parent_filter += ' and ip.practitioner = %(practitioner)s'
-		values['practitioner'] = frappe.db.escape(entry.practitioner)
+		values['practitioner'] = entry.practitioner
 
 	if entry.item_code:
 		child_filter += ' and entry.drug = %(item_code)s'
-		values['item_code'] = frappe.db.escape(entry.item_code)
+		values['item_code'] = entry.item_code
 
 	if entry.assigned_to_practitioner:
 		parent_filter += ' and ip._assign LIKE %(assigned_to)s'

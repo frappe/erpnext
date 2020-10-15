@@ -3,6 +3,9 @@
 
 frappe.ui.form.on('Inpatient Medication Entry', {
 	refresh: function(frm) {
+		// Ignore cancellation of doctype on cancel all
+		frm.ignore_doctypes_on_cancel_all = ['Stock Entry'];
+
 		frm.set_query('item_code', () => {
 			return {
 				filters: {

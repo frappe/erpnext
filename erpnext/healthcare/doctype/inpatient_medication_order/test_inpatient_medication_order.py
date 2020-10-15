@@ -5,16 +5,15 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils import add_days, getdate, now_datetime, today
+from frappe.utils import add_days, getdate, now_datetime
 from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import create_patient, create_inpatient, get_healthcare_service_unit, mark_invoiced_inpatient_occupancy
 from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
-from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import get_pending_medication_orders
 
 class TestInpatientMedicationOrder(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql("""delete from `tabInpatient Record`""")
 
-	def test_manual_order_creation(self):
+	def test_order_creation(self):
 		patient = create_patient()
 		ipmo = create_ipmo(patient)
 
@@ -69,12 +68,14 @@ class TestInpatientMedicationOrder(unittest.TestCase):
 		self.assertEqual(ipmo.status, 'Pending')
 
 		filters = frappe._dict(from_date=getdate(), to_date=getdate(), from_time='', to_time='')
-		create_ipme(filters)
+		ipme = create_ipme(filters)
+		ipme.submit()
 		ipmo.reload()
 		self.assertEqual(ipmo.status, 'In Process')
 
 		filters = frappe._dict(from_date=add_days(getdate(), 1), to_date=add_days(getdate(), 1), from_time='', to_time='')
-		create_ipme(filters)
+		ipme = create_ipme(filters)
+		ipme.submit()
 		ipmo.reload()
 		self.assertEqual(ipmo.status, 'Completed')
 
@@ -100,12 +101,14 @@ class TestInpatientMedicationOrder(unittest.TestCase):
 
 def create_dosage_form():
 	if not frappe.db.exists('Dosage Form', 'Tablet'):
-		doc = frappe.get_doc({
+		frappe.get_doc({
 			'doctype': 'Dosage Form',
 			'dosage_form': 'Tablet'
 		}).insert()
 
-def create_drug():
+def create_drug(item=None):
+	if not item:
+		item = 'Dextromethorphan'
 	drug = frappe.db.exists('Item', {'item_code': 'Dextromethorphan'})
 	if not drug:
 		drug = frappe.get_doc({
@@ -115,7 +118,8 @@ def create_drug():
 			'item_group': 'Products',
 			'stock_uom': 'Nos',
 			'is_stock_item': 1,
-			'valuation_rate': 50
+			'valuation_rate': 50,
+			'opening_stock': 20
 		}).insert()
 
 def get_orders():
@@ -139,15 +143,16 @@ def create_ipmo(patient):
 
 	return ipmo
 
-def create_ipme(filters):
+def create_ipme(filters, update_stock=0):
 	ipme = frappe.new_doc('Inpatient Medication Entry')
 	ipme.company = '_Test Company'
 	ipme.posting_date = getdate()
-	ipme.update_stock = 0
+	ipme.update_stock = update_stock
+	if update_stock:
+		ipme.warehouse = 'Stores - _TC'
 	for key, value in filters.items():
 		ipme.set(key, value)
 	ipme = ipme.get_medication_orders()
-	ipme.submit()
 
 	return ipme
 
