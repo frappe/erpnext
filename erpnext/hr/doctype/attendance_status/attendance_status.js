@@ -2,7 +2,20 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Attendance Status', {
-	// refresh: function(frm) {
+	is_half_day: function(frm) {
+		frm.events.reset_values(["is_leave", "is_present"]);
+	},
+	is_leave: function(frm) {
+		frm.events.reset_values(["is_half_day", "is_present"]);
+	},
+	is_present: function(frm) {
+		frm.events.reset_values(["is_leave", "is_half_day"]);
+	},
 
-	// }
+	reset_values: function(fields) {
+		fields.forEach(field => {
+			cur_frm.set_value(field, 0);
+		});
+
+	}
 });

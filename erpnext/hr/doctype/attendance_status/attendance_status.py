@@ -3,8 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-# import frappe
+import frappe
+from frappe import _
 from frappe.model.document import Document
 
 class AttendanceStatus(Document):
-	pass
+	def validate(self):
+		if self.is_present and self.is_leave and self.is_half_day:
+			frappe.throw(_("Attendance status can be either Present, leave or Half day"))

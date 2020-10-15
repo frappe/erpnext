@@ -1,20 +1,24 @@
 {
  "actions": [],
  "autoname": "Prompt",
- "creation": "2020-10-09 12:00:29.304070",
+ "creation": "2020-10-13 13:32:52.133443",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "abbr",
+  "column_break_2",
   "is_half_day",
-  "is_leave"
+  "is_leave",
+  "is_present"
  ],
  "fields": [
   {
    "fieldname": "abbr",
    "fieldtype": "Data",
-   "label": "Abbreviation"
+   "in_list_view": 1,
+   "label": "Abbreviation",
+   "reqd": 1
   },
   {
    "default": "0",
@@ -23,14 +27,25 @@
    "label": "Is Half Day"
   },
   {
+   "default": "0",
    "fieldname": "is_leave",
-   "fieldtype": "Data",
-   "label": "Is leave"
+   "fieldtype": "Check",
+   "label": "Is Leave"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_present",
+   "fieldtype": "Check",
+   "label": "Is Present"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-10-09 12:00:29.304070",
+ "modified": "2020-10-15 13:55:10.414559",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance Status",
@@ -51,5 +66,6 @@
  ],
  "quick_entry": 1,
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }
