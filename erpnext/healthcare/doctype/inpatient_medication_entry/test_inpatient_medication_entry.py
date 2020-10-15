@@ -14,19 +14,21 @@ from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import g
 class TestInpatientMedicationEntry(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql("""delete from `tabInpatient Record`""")
-
-	def test_filters_for_fetching_pending_mo(self):
-		patient = create_patient()
+		frappe.db.sql("""delete from `tabInpatient Medication Order`""")
+		frappe.db.sql("""delete from `tabInpatient Medication Entry`""")
+		self.patient = create_patient()
 
 		# Admit
-		ip_record = create_inpatient(patient)
+		ip_record = create_inpatient(self.patient)
 		ip_record.expected_length_of_stay = 0
 		ip_record.save()
 		ip_record.reload()
 		service_unit = get_healthcare_service_unit()
 		admit_patient(ip_record, service_unit, now_datetime())
+		self.ip_record = ip_record
 
-		ipmo = create_ipmo(patient)
+	def test_filters_for_fetching_pending_mo(self):
+		ipmo = create_ipmo(self.patient)
 		ipmo.submit()
 		ipmo.reload()
 
@@ -37,7 +39,7 @@ class TestInpatientMedicationEntry(unittest.TestCase):
 			from_time='',
 			to_time='',
 			item_code='Dextromethorphan',
-			patient=patient
+			patient=self.patient
 		)
 
 		ipme = create_ipme(filters, update_stock=0)
@@ -46,26 +48,8 @@ class TestInpatientMedicationEntry(unittest.TestCase):
 		self.assertEqual(len(ipme.medication_orders), 3)
 		self.assertEqual(getdate(ipme.medication_orders[0].datetime), date)
 
-		# cleanup - Discharge
-		schedule_discharge(frappe.as_json({'patient': patient}))
-		ip_record.reload()
-		mark_invoiced_inpatient_occupancy(ip_record)
-
-		ip_record.reload()
-		discharge_patient(ip_record)
-
 	def test_ipme_with_stock_update(self):
-		patient = create_patient()
-
-		# Admit
-		ip_record = create_inpatient(patient)
-		ip_record.expected_length_of_stay = 0
-		ip_record.save()
-		ip_record.reload()
-		service_unit = get_healthcare_service_unit()
-		admit_patient(ip_record, service_unit, now_datetime())
-
-		ipmo = create_ipmo(patient)
+		ipmo = create_ipmo(self.patient)
 		ipmo.submit()
 		ipmo.reload()
 
@@ -76,7 +60,7 @@ class TestInpatientMedicationEntry(unittest.TestCase):
 			from_time='',
 			to_time='',
 			item_code='Dextromethorphan',
-			patient=patient
+			patient=self.patient
 		)
 
 		make_stock_entry()
@@ -95,18 +79,18 @@ class TestInpatientMedicationEntry(unittest.TestCase):
 
 		# check references
 		stock_entry = frappe.get_doc('Stock Entry', stock_entry)
-		self.assertEqual(stock_entry.items[0].patient, patient)
+		self.assertEqual(stock_entry.items[0].patient, self.patient)
 		self.assertEqual(stock_entry.items[0].inpatient_medication_entry_child, ipme.medication_orders[0].name)
 
-		# cleanup - Discharge
-		schedule_discharge(frappe.as_json({'patient': patient}))
-		ip_record.reload()
-		mark_invoiced_inpatient_occupancy(ip_record)
-
-		ip_record.reload()
-		discharge_patient(ip_record)
-
 	def tearDown(self):
+		# cleanup - Discharge
+		schedule_discharge(frappe.as_json({'patient': self.patient}))
+		self.ip_record.reload()
+		mark_invoiced_inpatient_occupancy(self.ip_record)
+
+		self.ip_record.reload()
+		discharge_patient(self.ip_record)
+
 		for entry in frappe.get_all('Inpatient Medication Entry'):
 			doc = frappe.get_doc('Inpatient Medication Entry', entry.name)
 			doc.cancel()

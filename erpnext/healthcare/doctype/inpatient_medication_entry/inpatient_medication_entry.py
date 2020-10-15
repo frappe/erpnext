@@ -81,19 +81,7 @@ class InpatientMedicationEntry(Document):
 		return self.make_stock_entry()
 
 	def update_medication_orders(self, on_cancel=False):
-		# for marking order completion status
-		orders = []
-		# orders mapped
-		order_entry_map = dict()
-
-		for entry in self.medication_orders:
-			orders.append(entry.against_imoe)
-			parent = entry.against_imo
-			if not order_entry_map.get(parent):
-				order_entry_map[parent] = 0
-
-			order_entry_map[parent] += 1
-
+		orders, order_entry_map = self.get_order_entry_map()
 		# mark completion status
 		is_completed = 1
 		if on_cancel:
@@ -118,6 +106,22 @@ class InpatientMedicationEntry(Document):
 
 			medication_order.db_set('completed_orders', completed_orders)
 			medication_order.set_status()
+
+	def get_order_entry_map(self):
+		# for marking order completion status
+		orders = []
+		# orders mapped
+		order_entry_map = dict()
+
+		for entry in self.medication_orders:
+			orders.append(entry.against_imoe)
+			parent = entry.against_imo
+			if not order_entry_map.get(parent):
+				order_entry_map[parent] = 0
+
+			order_entry_map[parent] += 1
+
+		return orders, order_entry_map
 
 	def check_stock_qty(self):
 		from erpnext.stock.stock_ledger import NegativeStockError
@@ -175,40 +179,7 @@ class InpatientMedicationEntry(Document):
 
 
 def get_pending_medication_orders(entry):
-	parent_filter = child_filter = ''
-	values = dict(company=entry.company)
-
-	if entry.from_date:
-		child_filter += ' and entry.date >= %(from_date)s'
-		values['from_date'] = entry.from_date
-
-	if entry.to_date:
-		child_filter += ' and entry.date <= %(to_date)s'
-		values['to_date'] = entry.to_date
-
-	if entry.from_time:
-		child_filter += ' and entry.time >= %(from_time)s'
-		values['from_time'] = entry.from_time
-
-	if entry.to_time:
-		child_filter += ' and entry.time <= %(to_time)s'
-		values['to_time'] = entry.to_time
-
-	if entry.patient:
-		parent_filter += ' and ip.patient = %(patient)s'
-		values['patient'] = entry.patient
-
-	if entry.practitioner:
-		parent_filter += ' and ip.practitioner = %(practitioner)s'
-		values['practitioner'] = entry.practitioner
-
-	if entry.item_code:
-		child_filter += ' and entry.drug = %(item_code)s'
-		values['item_code'] = entry.item_code
-
-	if entry.assigned_to_practitioner:
-		parent_filter += ' and ip._assign LIKE %(assigned_to)s'
-		values['assigned_to'] = '%' + entry.assigned_to_practitioner + '%'
+	filters, values = get_filters(entry)
 
 	data = frappe.db.sql("""
 		SELECT
@@ -225,10 +196,10 @@ def get_pending_medication_orders(entry):
 			ip.docstatus = 1 and
 			ip.company = %(company)s and
 			entry.is_completed = 0
-			{0} {1}
+			{0}
 		ORDER BY
 			entry.date, entry.time
-		""".format(parent_filter, child_filter), values, as_dict=1)
+		""".format(filters), values, as_dict=1)
 
 	for doc in data:
 		inpatient_record = doc.inpatient_record
@@ -238,6 +209,44 @@ def get_pending_medication_orders(entry):
 			data.remove(doc)
 
 	return data
+
+
+def get_filters(entry):
+	filters = ''
+	values = dict(company=entry.company)
+	if entry.from_date:
+		filters += ' and entry.date >= %(from_date)s'
+		values['from_date'] = entry.from_date
+
+	if entry.to_date:
+		filters += ' and entry.date <= %(to_date)s'
+		values['to_date'] = entry.to_date
+
+	if entry.from_time:
+		filters += ' and entry.time >= %(from_time)s'
+		values['from_time'] = entry.from_time
+
+	if entry.to_time:
+		filters += ' and entry.time <= %(to_time)s'
+		values['to_time'] = entry.to_time
+
+	if entry.patient:
+		filters += ' and ip.patient = %(patient)s'
+		values['patient'] = entry.patient
+
+	if entry.practitioner:
+		filters += ' and ip.practitioner = %(practitioner)s'
+		values['practitioner'] = entry.practitioner
+
+	if entry.item_code:
+		filters += ' and entry.drug = %(item_code)s'
+		values['item_code'] = entry.item_code
+
+	if entry.assigned_to_practitioner:
+		filters += ' and ip._assign LIKE %(assigned_to)s'
+		values['assigned_to'] = '%' + entry.assigned_to_practitioner + '%'
+
+	return filters, values
 
 
 def get_current_healthcare_service_unit(inpatient_record):
