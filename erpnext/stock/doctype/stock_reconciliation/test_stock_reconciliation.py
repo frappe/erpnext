@@ -244,7 +244,6 @@ class TestStockReconciliation(unittest.TestCase):
 
 		for doc in [sr, ste1, ste2, ste3, ste4]:
 			doc.cancel()
-			frappe.delete_doc(doc.doctype, doc.name)
 
 	def test_allow_negative_for_batch(self):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
@@ -275,7 +274,6 @@ class TestStockReconciliation(unittest.TestCase):
 
 		for doc in [sr, ste2, ste1]:
 			doc.cancel()
-			frappe.delete_doc(doc.doctype, doc.name)
 
 def insert_existing_sle(warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry

@@ -57,7 +57,7 @@ class StockReconciliation(StockController):
 
 			if ((item.qty is None or item.qty==item_dict.get("qty")) and
 				(item.valuation_rate is None or item.valuation_rate==item_dict.get("rate")) and
-				(not item.serial_no or (item.serial_no == item_dict.get("serial_nos")) )):
+				(not item.serial_no or not change_in_serial_nos(item, item_dict)) ):
 				return False
 			else:
 				# set default as current rates
@@ -69,8 +69,6 @@ class StockReconciliation(StockController):
 
 				if item_dict.get("serial_nos"):
 					item.current_serial_no = item_dict.get("serial_nos")
-					if self.purpose == "Stock Reconciliation":
-						item.serial_no = item.current_serial_no
 
 				item.current_qty = item_dict.get("qty")
 				item.current_valuation_rate = item_dict.get("rate")
@@ -530,3 +528,16 @@ def get_difference_account(purpose, company):
 			'company': company, 'account_type': 'Temporary'}, 'name')
 
 	return account
+
+def change_in_serial_nos(row, item_dict):
+	new_serial_nos = get_serial_nos(row.serial_no)
+	old_serial_nos = get_serial_nos(item_dict.get("serial_nos"))
+
+	if len(old_serial_nos) != len(new_serial_nos):
+		return True
+	else:
+		change_in_sn = (list(set(old_serial_nos) - set(new_serial_nos))
+			if len(old_serial_nos) > len(new_serial_nos) else list(set(new_serial_nos) - set(old_serial_nos)))
+
+		if change_in_sn:
+			return True
