@@ -104,7 +104,7 @@ frappe.listview_settings['Leave Policy Assignment'] = {
 					return {
 						filters: {
 							docstatus: ['=', 1],
-							already_allocated: ['=', 0]
+							leaves_allocated: ['=', 0]
 						}
 					};
 				},

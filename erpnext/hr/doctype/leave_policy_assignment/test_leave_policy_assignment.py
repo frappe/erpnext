@@ -13,7 +13,7 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 
 	def setUp(self):
 		for dt in ["Leave Application", "Leave Allocation", "Leave Policy Assignment", "Leave Ledger Entry"]:
-			frappe.db.sql("DELETE FROM `tab%s`" % dt) #nosec
+			frappe.db.sql("DELETE FROM `tab%s`" % dt)
 
 	def test_grant_leaves(self):
 		leave_period = get_leave_period()
@@ -36,7 +36,7 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 		leave_policy_assignment_doc.grant_leave_alloc_for_employee()
 		leave_policy_assignment_doc.reload()
 
-		self.assertEqual(leave_policy_assignment_doc.already_allocated, 1)
+		self.assertEqual(leave_policy_assignment_doc.leaves_allocated, 1)
 
 		leave_allocation = frappe.get_list("Leave Allocation", filters={
 			"employee": employee.name,
@@ -76,7 +76,7 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 
 
 		# every leave is allocated no more leave can be granted now
-		self.assertEqual(leave_policy_assignment_doc.already_allocated, 1)
+		self.assertEqual(leave_policy_assignment_doc.leaves_allocated, 1)
 
 		leave_allocation = frappe.get_list("Leave Allocation", filters={
 			"employee": employee.name,
@@ -94,6 +94,10 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 
 
 		# User are now allowed to grant leave
-		self.assertEqual(leave_policy_assignment_doc.already_allocated, 0)
+		self.assertEqual(leave_policy_assignment_doc.leaves_allocated, 0)
+
+	def tearDown(self):
+		for dt in ["Leave Application", "Leave Allocation", "Leave Policy Assignment", "Leave Ledger Entry"]:
+			frappe.db.sql("DELETE FROM `tab%s`" % dt)
 
 

@@ -62,7 +62,7 @@ class LeaveAllocation(Document):
 			"leave_policy_assignment": self.leave_policy_assignment
 		})
 		if len(allocations) == 0:
-			frappe.db.set_value("Leave Policy Assignment", self.leave_policy_assignment ,"already_allocated", 0)
+			frappe.db.set_value("Leave Policy Assignment", self.leave_policy_assignment ,"leaves_allocated", 0)
 
 	def validate_period(self):
 		if date_diff(self.to_date, self.from_date) <= 0:

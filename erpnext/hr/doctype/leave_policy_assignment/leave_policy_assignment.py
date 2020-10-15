@@ -19,30 +19,25 @@ class LeavePolicyAssignment(Document):
 
 	def set_dates(self):
 		if self.assignment_based_on == "Leave Period":
-			self.effective_from = frappe.db.get_value("Leave Period", self.leave_period, "from_date")
-			self.effective_to = frappe.db.get_value("Leave Period", self.leave_period, "to_date")
+			self.effective_from, self.effective_to = frappe.db.get_value("Leave Period", self.leave_period, ["from_date", "to_date"])
 		elif self.assignment_based_on == "Joining Date":
 			self.effective_from = frappe.db.get_value("Employee", self.employee, "date_of_joining")
 
 	def validate_policy_assignment_overlap(self):
-		leave_policy_assignments = frappe.db.sql("""
-			SELECT
-				name
-			FROM `tabLeave Policy Assignment`
-			WHERE
-				employee=%s
-				AND name <> %s
-				AND docstatus=1
-				AND effective_to >= %s
-				AND effective_from <= %s""",
-			(self.employee, self.name, self.effective_from, self.effective_to), as_dict = 1)
+		leave_policy_assignments = frappe.get_all("Leave Policy Assignment", filters = {
+			"employee": self.employee,
+			"name": ("!=", self.name),
+			"docstatus": 1,
+			"effective_to": (">=", self.effective_from),
+			"effective_from": ("<=", self.effective_to)
+		})
 
 		if len(leave_policy_assignments):
 			frappe.throw(_("Leave Policy: {0} already assigned for Employee {1} for period {2} to {3}")
 				.format(bold(self.leave_policy), bold(self.employee), bold(formatdate(self.effective_from)), bold(formatdate(self.effective_to))))
 
 	def grant_leave_alloc_for_employee(self):
-		if self.already_allocated:
+		if self.leaves_allocated:
 			frappe.throw(_("Leave already have been assigned for this Leave Policy Assignment"))
 		else:
 			leave_allocations = {}
@@ -60,7 +55,7 @@ class LeavePolicyAssignment(Document):
 
 				leave_allocations[leave_policy_detail.leave_type] = {"name": leave_allocation, "leaves": new_leaves_allocated}
 
-			self.db_set("already_allocated", 1)
+			self.db_set("leaves_allocated", 1)
 			return leave_allocations
 
 	def create_leave_allocation(self, leave_type, new_leaves_allocated, leave_type_details, date_of_joining):
@@ -69,14 +64,8 @@ class LeavePolicyAssignment(Document):
 		if self.carry_forward and not leave_type_details.get(leave_type).is_carry_forward:
 			carry_forward = 0
 
-		# Calculate leaves at pro-rata basis for employees joining after the beginning of the given leave period
-		if getdate(date_of_joining) > getdate(self.effective_from):
-			remaining_period = ((date_diff(self.effective_to, date_of_joining) + 1) / (date_diff(self.effective_to, self.effective_from) + 1))
-			new_leaves_allocated = ceil(new_leaves_allocated * remaining_period)
-
-		# Earned Leaves and Compensatory Leaves are allocated by scheduler, initially allocate 0
-		if leave_type_details.get(leave_type).is_earned_leave == 1 or leave_type_details.get(leave_type).is_compensatory == 1:
-			new_leaves_allocated = 0
+		new_leaves_allocated = self.get_new_leaves(leave_type, new_leaves_allocated,
+			leave_type_details, date_of_joining)
 
 		allocation = frappe.get_doc(dict(
 			doctype="Leave Allocation",
@@ -94,6 +83,18 @@ class LeavePolicyAssignment(Document):
 		allocation.submit()
 		return allocation.name, new_leaves_allocated
 
+	def get_new_leaves(self, leave_type, new_leaves_allocated, leave_type_details, date_of_joining):
+		# Calculate leaves at pro-rata basis for employees joining after the beginning of the given leave period
+		if getdate(date_of_joining) > getdate(self.effective_from):
+			remaining_period = ((date_diff(self.effective_to, date_of_joining) + 1) / (date_diff(self.effective_to, self.effective_from) + 1))
+			new_leaves_allocated = ceil(new_leaves_allocated * remaining_period)
+
+		# Earned Leaves and Compensatory Leaves are allocated by scheduler, initially allocate 0
+		if leave_type_details.get(leave_type).is_earned_leave == 1 or leave_type_details.get(leave_type).is_compensatory == 1:
+			new_leaves_allocated = 0
+
+		return new_leaves_allocated
+
 @frappe.whitelist()
 def grant_leave_for_multiple_employees(leave_policy_assignments):
 	leave_policy_assignments = json.loads(leave_policy_assignments)
@@ -105,9 +106,9 @@ def grant_leave_for_multiple_employees(leave_policy_assignments):
 			not_granted.append(assignment)
 
 		if len(not_granted):
-			msg = "Leave not Granted for Assignments:"+ bold(comma_and(not_granted)) + ". Please Check documents"
+			msg = _("Leave not Granted for Assignments:")+ bold(comma_and(not_granted)) + _(". Please Check documents")
 		else:
-			msg = "Leave granted Successfully"
+			msg = _("Leave granted Successfully")
 	frappe.msgprint(msg)
 
 @frappe.whitelist()
@@ -136,23 +137,20 @@ def create_assignment_for_multiple_employees(employees, data):
 	return docs_name
 
 
-def automatic_allocate_leaves_based_on_leave_policy():
+def automatically_allocate_leaves_based_on_leave_policy():
 	today = getdate()
-	automatic_allocate_leaves_based_on_leave_policy = frappe.db.get_single_value(
-		'HR Settings', 'automatic_allocate_leaves_based_on_leave_policy'
+	automatically_allocate_leaves_based_on_leave_policy = frappe.db.get_single_value(
+		'HR Settings', 'automatically_allocate_leaves_based_on_leave_policy'
 	)
 
 	pending_assignments = frappe.get_list(
 		"Leave Policy Assignment",
-		filters = {"docstatus": 1, "already_allocated": 0, "effective_from": today}
+		filters = {"docstatus": 1, "leaves_allocated": 0, "effective_from": today}
 	)
 
-	if len(pending_assignments) and automatic_allocate_leaves_based_on_leave_policy:
+	if len(pending_assignments) and automatically_allocate_leaves_based_on_leave_policy:
 		for assignment in pending_assignments:
-			try:
-				frappe.get_doc("Leave Policy Assignment", assignment.name).grant_leave_alloc_for_employee()
-			except:
-				pass
+			frappe.get_doc("Leave Policy Assignment", assignment.name).grant_leave_alloc_for_employee()
 
 
 def get_leave_type_details():

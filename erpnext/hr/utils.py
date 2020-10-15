@@ -475,8 +475,8 @@ def get_previous_claimed_amount(employee, payroll_period, non_pro_rata=False, co
 	return total_claimed_amount
 
 def grant_leaves_automatically():
-	automatic_allocate_leaves_based_on_leave_policy = frappe.db.get_singles_value("HR Settings", "automatic_allocate_leaves_based_on_leave_policy")
-	if automatic_allocate_leaves_based_on_leave_policy:
-		lpa = frappe.db.get_all("Leave Policy Assignment", filters={"effective_from": getdate(), "docstatus": 1, "already_allocated":0})
+	automatically_allocate_leaves_based_on_leave_policy = frappe.db.get_singles_value("HR Settings", "automatically_allocate_leaves_based_on_leave_policy")
+	if automatically_allocate_leaves_based_on_leave_policy:
+		lpa = frappe.db.get_all("Leave Policy Assignment", filters={"effective_from": getdate(), "docstatus": 1, "leaves_allocated":0})
 		for assignment in lpa:
 			frappe.get_doc("Leave Policy Assignment", assignment.name).grant_leave_alloc_for_employee()
