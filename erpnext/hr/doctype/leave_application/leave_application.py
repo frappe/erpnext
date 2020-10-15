@@ -496,6 +496,10 @@ def get_used_carry_forward_leave(employee, date, leave_type):
 		"Leave Type", leave_type,
 		["is_carry_forward", "expire_carry_forwarded_leaves_after_days"])
 
+	allocated_carry_forward = 0
+	unused_leaves = 0
+	carry_forward_expiry_date = None
+
 	if is_carry_forward:
 		allocations = frappe.get_list('Leave Allocation', filters = {
 				'from_date': ('<=', date),
@@ -506,12 +510,6 @@ def get_used_carry_forward_leave(employee, date, leave_type):
 				'unused_leaves': (">", 0),
 				'docstatus': 1
 			}, fields=["unused_leaves", "name", "from_date", "to_date"])
-
-		allocated_carry_forward = 0
-		unused_leaves = 0
-		carry_forward_expiry_date = None
-
-
 
 		for allocation in allocations:
 			applications = frappe.get_list('Leave application', filters = {
@@ -533,8 +531,7 @@ def get_used_carry_forward_leave(employee, date, leave_type):
 						allocated_carry_forward_to_date = carry_forward_expiry_date
 					allocated_carry_forward += date_diff(allocated_carry_forward_to_date, application.from_date) + 1
 
-		return allocated_carry_forward, carry_forward_expiry_date, unused_leaves
-	return 0, None, 0
+	return allocated_carry_forward, carry_forward_expiry_date, unused_leaves
 
 @frappe.whitelist()
 def get_leave_balance_on(employee, leave_type, date, to_date=None, consider_all_leaves_in_the_allocation_period=False):
