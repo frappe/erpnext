@@ -402,7 +402,7 @@ def make_custom_fields(update=True):
 			dict(fieldname='gst_state', label='GST State', fieldtype='Select',
 				options='\n'.join(states), insert_after='gstin'),
 			dict(fieldname='gst_state_number', label='GST State Number',
-				fieldtype='Data', insert_after='gst_state', read_only=1),
+				fieldtype='Int', insert_after='gst_state', read_only=1),
 		],
 		'Purchase Invoice': purchase_invoice_gst_category + invoice_gst_fields + purchase_invoice_itc_fields + purchase_invoice_gst_fields,
 		'Purchase Order': purchase_invoice_gst_fields,
