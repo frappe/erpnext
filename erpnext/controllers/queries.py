@@ -202,7 +202,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 
 	columns = ''
 	extra_searchfields = [field for field in searchfields
-		if not field in ["name", "item_group", "description"]]
+		if not field in ["name", "item_name", "item_group", "brand"]]
 
 	if extra_searchfields:
 		columns = ", " + ", ".join(extra_searchfields)
@@ -220,18 +220,26 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	if filters and filters.get('applicable_to_item'):
 		applicable_to_item = filters.get('applicable_to_item')
 		del filters['applicable_to_item']
+
+		variant_of = frappe.get_cached_value("Item", applicable_to_item, "variant_of")
+		if variant_of:
+			all_variants = frappe.db.sql_list("select name from `tabItem` where variant_of = %s", variant_of)
+			all_variants.append(variant_of)
+			applicable_to_item_match_cond = "ap.applicable_to_item in ({0})"\
+				.format(", ".join([frappe.db.escape(d) for d in all_variants]))
+		else:
+			applicable_to_item_match_cond = "ap.applicable_to_item = {0}".format(frappe.db.escape(applicable_to_item))
+
 		applicable_to_item_cond = """and (tabItem.applicable_to_all = 1
 			or exists(select ap.name
 				from `tabItem Applicable To` ap
-				where ap.parent = tabItem.name and ap.applicable_to_item = {0}))
-		""".format(frappe.db.escape(applicable_to_item))
+				where ap.parent = tabItem.name and {0}))
+		""".format(applicable_to_item_match_cond)
 
 	return frappe.db.sql("""select tabItem.name,
 		if(length(tabItem.item_name) > 40,
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name,
-		tabItem.brand, tabItem.item_group,
-		if(length(tabItem.description) > 40, \
-			concat(substr(tabItem.description, 1, 40), "..."), description) as description
+		tabItem.item_group, tabItem.brand
 		{columns}
 		from tabItem
 		where tabItem.docstatus < 2
