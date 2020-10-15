@@ -2005,6 +2005,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					$.each(r.message.doc || {}, function (k, v) {
 						if (k === 'cost_center') {
 							me.frm.doc[k] = v;
+							me.frm.refresh_field('cost_center');
 						} else {
 							me.frm.set_value(k, v);
 						}
