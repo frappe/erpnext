@@ -1,6 +1,7 @@
 {
  "action": "Create Entry",
  "creation": "2020-05-14 17:53:00.876946",
+ "description": "# Account Settings\n\nThis is a crucial piece of configuration. There are various account settings in ERPNext to restrict and configure actions in the Accounting module.\n\nThe following settings are avaialble for you to configure\n\n1. Account Freezing \n2. Credit and Overbilling\n3. Invoicing and Tax Automations\n4. Balance Sheet configurations\n\nThere's much more, you can check it all out in this step",
  "docstatus": 0,
  "doctype": "Onboarding Step",
  "idx": 0,
@@ -8,7 +9,7 @@
  "is_mandatory": 0,
  "is_single": 1,
  "is_skipped": 0,
- "modified": "2020-05-14 18:06:25.212923",
+ "modified": "2020-10-15 13:45:14.687458",
  "modified_by": "Administrator",
  "name": "Configure Account Settings",
  "owner": "Administrator",
