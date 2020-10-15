@@ -258,8 +258,8 @@
    "fieldname": "remaining_half_day_status",
    "fieldtype": "Link",
    "label": "Remaining Half Day Status",
-   "options": "Attendance Status",
-   "reqd": 1
+   "mandatory_depends_on": "eval:doc.is_half_day",
+   "options": "Attendance Status"
   },
   {
    "default": "0",
@@ -275,11 +275,11 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-09 14:07:21.560812",
+ "modified": "2020-10-13 12:54:08.471356",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",
- "owner": "ashwini@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "cancel": 1,
