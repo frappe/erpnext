@@ -217,7 +217,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		description_cond = 'or tabItem.description LIKE %(txt)s'
 
 	applicable_to_item_cond = ""
-	if filters.get('applicable_to_item'):
+	if filters and filters.get('applicable_to_item'):
 		applicable_to_item = filters.get('applicable_to_item')
 		del filters['applicable_to_item']
 		applicable_to_item_cond = """and (tabItem.applicable_to_all = 1
