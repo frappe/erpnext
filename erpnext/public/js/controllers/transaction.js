@@ -626,7 +626,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		this.frm.from_barcode = false;
-		if(item.item_code || item.barcode || item.serial_no) {
+		if(item.item_code || item.barcode || item.serial_no || item.vehicle) {
 			if(!this.validate_company_and_party()) {
 				this.frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
 			} else {
@@ -640,6 +640,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							hide_item_code: item.hide_item_code,
 							barcode: item.barcode,
 							serial_no: item.serial_no,
+							vehicle: item.vehicle,
 							batch_no: item.batch_no,
 							set_warehouse: me.frm.doc.set_warehouse,
 							warehouse: item.warehouse,
@@ -806,6 +807,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					frappe.model.set_value(item.doctype, item.name, "stock_qty", valid_serial_nos.length);
 				}
 			}
+		}
+	},
+
+	vehicle: function(doc, cdt, cdn) {
+		var item = frappe.get_doc(cdt, cdn);
+
+		if (item && item.vehicle) {
+			this.frm.trigger("item_code", cdt, cdn);
 		}
 	},
 

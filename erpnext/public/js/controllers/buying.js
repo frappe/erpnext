@@ -124,12 +124,11 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		if(this.frm.fields_dict["items"].grid.get_field('vehicle')) {
 			this.frm.set_query("vehicle", "items", function(doc, cdt, cdn) {
 				var item = frappe.get_doc(cdt, cdn);
-				if (!item.item_code) {
-					frappe.throw(__("Please select Item first then select Vehicle"))
-				}
 
 				var filters = {};
-				filters.item_code = item.item_code;
+				if (item.item_code) {
+					filters.item_code = item.item_code;
+				}
 
 				if (doc.doctype === "Purchase Receipt" || (doc.doctype === "Purchase Invoice" && doc.update_stock)) {
 					if (doc.is_return) {
