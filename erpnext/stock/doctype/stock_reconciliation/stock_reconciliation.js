@@ -109,6 +109,10 @@ frappe.ui.form.on("Stock Reconciliation", {
 					frappe.model.set_value(cdt, cdn, "current_amount", r.message.rate * r.message.qty);
 					frappe.model.set_value(cdt, cdn, "amount", r.message.rate * r.message.qty);
 					frappe.model.set_value(cdt, cdn, "current_serial_no", r.message.serial_nos);
+
+					if (frm.doc.purpose == "Stock Reconciliation") {
+						frappe.model.set_value(cdt, cdn, "serial_no", r.message.serial_nos);
+					}
 				}
 			});
 		}
