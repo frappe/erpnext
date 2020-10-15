@@ -729,3 +729,4 @@ erpnext.patches.v13_0.setting_custom_roles_for_some_regional_reports
 erpnext.patches.v13_0.rename_issue_doctype_fields
 erpnext.patches.v13_0.change_default_pos_print_format
 erpnext.patches.v13_0.set_youtube_video_id
+erpnext.patches.v13_0.print_uom_after_quantity_patch
