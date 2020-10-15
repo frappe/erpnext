@@ -316,12 +316,12 @@ Authorized Signatory,المخول بالتوقيع,
 Auto Material Requests Generated,إنشاء طلب مواد تلقائي,
 Auto Repeat,تكرار تلقائي,
 Auto repeat document updated,تكرار تلقائي للمستندات المحدثة,
-Automotive,سيارات,
+Automotive,سيارات,متحرك بطاقة ذاتية
 Available,متاح,
-Available Leaves,المغادارت المتوفرة,
+Available Leaves,المغادارت والاجازات المتاحة,
 Available Qty,الكمية المتاحة,
 Available Selling,المبيعات المتاحة,
-Available for use date is required,مطلوب متاح لتاريخ الاستخدام,
+Available for use date is required,مطلوب تاريخ متاح للاستخدام,
 Available slots,الفتحات المتاحة,
 Available {0},متاح {0},
 Available-for-use Date should be after purchase date,يجب أن يكون التاريخ متاحًا بعد تاريخ الشراء,
@@ -331,16 +331,16 @@ Avg Daily Outgoing,متوسط الصادرات اليومية,
 Avg. Buying Price List Rate,متوسط قائمة أسعار الشراء,
 Avg. Selling Price List Rate,متوسط قائمة أسعار البيع,
 Avg. Selling Rate,متوسط معدل البيع,
-BOM,فاتورة المواد,
-BOM Browser,BOM متصفح,
-BOM No,رقم قائمة المواد,
-BOM Rate,سعر قائمة المواد,
-BOM Stock Report,تقرير مخزون فاتورة المواد,
+BOM,قائمة مكونات المواد,
+BOM Browser,قائمة مكونات المواد متصفح,
+BOM No,رقم قائمة مكونات المواد,
+BOM Rate,سعر او معدل قائمة مكونات المواد,
+BOM Stock Report,تقرير مخزون قائمة مكونات المواد,
 BOM and Manufacturing Quantity are required,مطلوب، قائمة مكونات المواد و كمية التصنيع,
-BOM does not contain any stock item,فاتورة الموارد لا تحتوي على أي صنف مخزون,
-BOM {0} does not belong to Item {1},قائمة المواد {0} لا تنتمي إلى الصنف {1},
-BOM {0} must be active,فاتورة المواد {0} يجب أن تكون نشطة\n<br>\nBOM {0} must be active,
-BOM {0} must be submitted,فاتورة المواد {0} يجب أن تكون مسجلة\n<br>\nBOM {0} must be submitted,
+BOM does not contain any stock item,قائمة مكونات المواد لا تحتوي على أي صنف مخزون,
+BOM {0} does not belong to Item {1},قائمة مكونات المواد {0} لا تنتمي إلى الصنف {1},
+BOM {0} must be active,قائمة مكونات المواد {0} يجب أن تكون نشطة\n<br>\nBOM {0} must be active,
+BOM {0} must be submitted,قائمة مكونات المواد {0} يجب أن تكون مسجلة\n<br>\nBOM {0} must be submitted,
 Balance,الموازنة,
 Balance (Dr - Cr),الرصيد (مدين - دائن),
 Balance ({0}),الرصيد ({0}),
@@ -389,23 +389,23 @@ Bill Date,تاريخ الفاتورة,
 Bill No,رقم الفاتورة,
 Bill of Materials,فاتورة المواد,
 Bill of Materials (BOM),قوائم المواد,
-Billable Hours,ساعات للفوترة,
-Billed,توصف,
+Billable Hours,ساعات قابلة للفوترة,
+Billed,تمت الفوترة,
 Billed Amount,القيمة المقدم فاتورة بها,
 Billing,الفواتير,
-Billing Address,عنوان تقديم الفواتير,
+Billing Address,العنوان الذي ترسل به الفواتير,
 Billing Address is same as Shipping Address,عنوان الفواتير هو نفس عنوان الشحن,
 Billing Amount,قيمة الفواتير,
-Billing Status,الحالة الفواتير,
+Billing Status,حالة الفواتير,
 Billing currency must be equal to either default company's currency or party account currency,يجب أن تكون عملة الفوترة مساوية لعملة الشركة الافتراضية أو عملة حساب الطرف,
 Bills raised by Suppliers.,فواتير حولت من قبل الموردين.,
 Bills raised to Customers.,فواتير حولت للزبائن.,
 Biotechnology,التكنولوجيا الحيوية,
 Birthday Reminder,تذكير عيد ميلاد,
 Black,أسود,
-Blanket Orders from Costumers.,أوامر بطانية من العملاء.,
+Blanket Orders from Costumers.,أوامر شراء شاملة من العملاء.,
 Block Invoice,حظر الفاتورة,
-Boms,قوائم المواد,
+Boms,قوائم مكونات المواد,
 Bonus Payment Date cannot be a past date,لا يمكن أن يكون تاريخ الدفع المكافأ تاريخًا سابقًا,
 Both Trial Period Start Date and Trial Period End Date must be set,يجب تعيين كل من تاريخ بدء الفترة التجريبية وتاريخ انتهاء الفترة التجريبية,
 Both Warehouse must belong to same Company,يجب أن ينتمي المستودع إلى نفس الشركة\n<br>\nBoth Warehouse must belong to same Company,
@@ -504,9 +504,9 @@ Cash In Hand,النقدية الحاضرة,
 Cash or Bank Account is mandatory for making payment entry,الحساب النقدي أو البنكي مطلوب لعمل مدخل بيع <br>Cash or Bank Account is mandatory for making payment entry,
 Cashier Closing,إغلاق أمين الصندوق,
 Casual Leave,أجازة عادية,
-Category,فئة,
+Category,فئة,صنف
 Category Name,اسم التصنيف,
-Caution,الحذر,
+Caution,الحذر,تحذير
 Central Tax,الضريبة المركزية,
 Certification,شهادة,
 Cess,سيس,
@@ -627,7 +627,7 @@ Cost Center with existing transactions can not be converted to ledger,مركز �
 Cost Centers,مراكز التكلفة,
 Cost Updated,تم تحديث التكلفة\n<br>\nCost Updated,
 Cost as on,التكلفة كما في,
-Cost of Delivered Items,تكلفة البنود المسلمة,
+Cost of Delivered Items,تكلفة السلع والمواد المسلمة,
 Cost of Goods Sold,تكلفة البضاعة المباعة,
 Cost of Issued Items,تكلفة المواد المصروفة,
 Cost of New Purchase,تكلفة الشراء الجديد,
@@ -1300,7 +1300,7 @@ Insurance Start date should be less than Insurance End date,يجب أن يكون
 Integrated Tax,ضريبة متكاملة,
 Inter-State Supplies,اللوازم بين الدول,
 Interest Amount,مبلغ الفائدة,
-Interests,الإهتمامات,
+Interests,الإهتمامات او الفوائد,
 Intern,المتدرب,
 Internet Publishing,نشر على شبكة الإنترنت,
 Intra-State Supplies,اللوازم داخل الدولة,
@@ -1421,13 +1421,13 @@ Lab Test UOM,اختبار مختبر أوم,
 Lab Tests and Vital Signs,اختبارات المختبر وعلامات حيوية,
 Lab result datetime cannot be before testing datetime,لا يمكن أن يكون تاريخ نتيجة المختبر سابقا لتاريخ الفحص,
 Lab testing datetime cannot be before collection datetime,لا يمكن أن يكون وقت اختبار المختبر قبل تاريخ جمع البيانات,
-Label,ملصق,
+Label,ملصق,'طابع
 Laboratory,مختبر,
 Language Name,اسم اللغة,
 Large,كبير,
 Last Communication,آخر الاتصالات,
 Last Communication Date,تاريخ الاتصال الأخير,
-Last Name,اسم العائلة,
+Last Name,اسم العائلة او اللقب,
 Last Order Amount,قيمة آخر طلب,
 Last Order Date,تاريخ أخر أمر بيع,
 Last Purchase Price,سعر الشراء الأخير,
@@ -3130,7 +3130,6 @@ Total contribution percentage should be equal to 100,يجب أن تكون نسب
 Total flexible benefit component amount {0} should not be less than max benefits {1},يجب ألا يقل إجمالي مبلغ الفائدة المرنة {0} عن الحد الأقصى للمنافع {1},
 Total hours: {0},مجموع الساعات: {0},
 Total leaves allocated is mandatory for Leave Type {0},إجمالي الإجازات المخصصة إلزامي لنوع الإجازة {0},
-Total weightage assigned should be 100%. It is {0},يجب أن يكون مجموع الترجيح تعيين 100 ٪ . فمن {0},
 Total working hours should not be greater than max working hours {0},عدد ساعات العمل الكلي يجب ألا يكون أكثر من العدد الأقصى لساعات العمل {0},
 Total {0} ({1}),إجمالي {0} ({1}),
 "Total {0} for all items is zero, may be you should change 'Distribute Charges Based On'","إجمالي {0} لجميع العناصر هو صفر، قد يكون عليك تغيير 'توزيع الرسوم على أساس'\n<br>\nTotal {0} for all items is zero, may be you should change 'Distribute Charges Based On'",
@@ -3830,7 +3829,7 @@ Liabilities,المطلوبات,
 Loading...,تحميل ...,
 Loan Amount exceeds maximum loan amount of {0} as per proposed securities,يتجاوز مبلغ القرض الحد الأقصى لمبلغ القرض {0} وفقًا للأوراق المالية المقترحة,
 Loan Applications from customers and employees.,طلبات القروض من العملاء والموظفين.,
-Loan Disbursement,صرف قرض,
+Loan Disbursement,إنفاق تمويل,
 Loan Processes,عمليات القرض,
 Loan Security,ضمان القرض,
 Loan Security Pledge,تعهد ضمان القرض,
@@ -3997,6 +3996,7 @@ Refreshing,جاري التحديث,
 Release date must be in the future,يجب أن يكون تاريخ الإصدار في المستقبل,
 Relieving Date must be greater than or equal to Date of Joining,يجب أن يكون تاريخ التخفيف أكبر من أو يساوي تاريخ الانضمام,
 Rename,إعادة تسمية,
+Rename Not Allowed,إعادة تسمية غير مسموح به,
 Repayment Method is mandatory for term loans,طريقة السداد إلزامية للقروض لأجل,
 Repayment Start Date is mandatory for term loans,تاريخ بدء السداد إلزامي للقروض لأجل,
 Report Item,بلغ عن شيء,
@@ -4546,7 +4546,6 @@ Role that is allowed to submit transactions that exceed credit limits set.,ال�
 Check Supplier Invoice Number Uniqueness,التحقق من رقم الفتورة المرسلة من المورد مميز (ليس متكرر),
 Make Payment via Journal Entry,قم بالدفع عن طريق قيد دفتر اليومية,
 Unlink Payment on Cancellation of Invoice,إلغاء ربط الدفع على إلغاء الفاتورة,
-Unlink Advance Payment on Cancelation of Order,إلغاء ربط الدفع المقدم عند إلغاء الطلب,
 Book Asset Depreciation Entry Automatically,كتاب اهلاك الأُصُول المدخلة تلقائيا,
 Automatically Add Taxes and Charges from Item Tax Template,إضافة الضرائب والرسوم تلقائيا من قالب الضريبة البند,
 Automatically Fetch Payment Terms,جلب شروط الدفع تلقائيًا,
@@ -6481,7 +6480,6 @@ HR-APR-.YY.-.MM.,HR-APR-.YY.-.MM.,
 Appraisal Template,قالب التقييم,
 For Employee Name,لاسم الموظف,
 Goals,الأهداف,
-Calculate Total Score,حساب النتيجة الإجمالية,
 Total Score (Out of 5),مجموع نقاط (من 5),
 "Any other remarks, noteworthy effort that should go in the records.",أي ملاحظات أخرى، وجهود جديرة بالذكر يجب أن تدون في السجلات.,
 Appraisal Goal,الغاية من التقييم,
@@ -9603,3 +9601,11 @@ Email Sent to Supplier {0},تم إرسال بريد إلكتروني إلى ال
 "The Access to Request for Quotation From Portal is Disabled. To Allow Access, Enable it in Portal Settings.",تم تعطيل الوصول إلى طلب عرض الأسعار من البوابة. للسماح بالوصول ، قم بتمكينه في إعدادات البوابة.,
 Supplier Quotation {0} Created,تم إنشاء عرض أسعار المورد {0},
 Valid till Date cannot be before Transaction Date,صالح حتى التاريخ لا يمكن أن يكون قبل تاريخ المعاملة,
+Unlink Advance Payment on Cancellation of Order,إلغاء ربط الدفع المسبق عند إلغاء الطلب,
+"Simple Python Expression, Example: territory != 'All Territories'",تعبير بايثون بسيط ، مثال: إقليم! = &quot;كل الأقاليم&quot;,
+Sales Contributions and Incentives,مساهمات وحوافز المبيعات,
+Sourced by Supplier,مصدرها المورد,
+Total weightage assigned should be 100%.<br>It is {0},يجب أن يكون الوزن الإجمالي المخصص 100٪.<br> إنه {0},
+Account {0} exists in parent company {1}.,الحساب {0} موجود في الشركة الأم {1}.,
+"To overrule this, enable '{0}' in company {1}",لإلغاء هذا ، قم بتمكين &quot;{0}&quot; في الشركة {1},
+Invalid condition expression,تعبير شرط غير صالح,
