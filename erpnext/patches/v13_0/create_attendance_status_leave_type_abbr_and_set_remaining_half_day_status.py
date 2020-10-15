@@ -19,7 +19,9 @@ def execute():
             if status == "Half Day":
                 att_status.is_half_day = 1
             elif status == "On Leave":
-                att_status.is_leave == 1
+                att_status.is_leave = 1
+            elif status in ["Work From Home", "Present"]:
+                att_status.is_present = 1
 
             att_status.save()
 
@@ -42,4 +44,8 @@ def execute():
 
         frappe.db.set_value("Leave Type", leave_type.name, "full_day_abbr", full_day_abbr)
         frappe.db.set_value("Leave Type", leave_type.name, "half_day_abbr", half_day_abbr)
+
+    #setting default status to present for old records
+    frappe.db.sql("Update `tabAttendance` set remaining_half_day_status = 'Present' where status = 'Half Day' ")
+    frappe.db.sql("Update `tabLeave Application` set remaining_half_day_status = 'Present' where half_day = 1 ")
 
