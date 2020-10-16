@@ -190,6 +190,7 @@
    "reqd": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "tax_id",
    "fieldtype": "Data",
    "in_standard_filter": 1,
@@ -525,7 +526,7 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2020-10-12 13:35:38.033136",
+ "modified": "2020-10-16 22:43:01.417529",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
