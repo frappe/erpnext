@@ -1760,7 +1760,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2020-10-14 17:26:40.904988",
+ "modified": "2020-10-16 23:20:13.928341",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
@@ -1851,5 +1851,6 @@
  "sort_order": "DESC",
  "timeline_field": "supplier",
  "title_field": "title",
- "track_changes": 1
+ "track_changes": 1,
+ "track_seen": 1
 }

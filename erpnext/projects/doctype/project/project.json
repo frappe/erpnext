@@ -451,7 +451,7 @@
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
  "max_attachments": 4,
- "modified": "2020-04-09 14:17:15.524529",
+ "modified": "2020-10-16 23:20:48.155622",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
@@ -493,5 +493,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "timeline_field": "customer",
+ "track_changes": 1,
  "track_seen": 1
 }

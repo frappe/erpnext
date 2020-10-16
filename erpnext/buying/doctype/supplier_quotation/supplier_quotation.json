@@ -1108,7 +1108,7 @@
  "icon": "fa fa-shopping-cart",
  "idx": 29,
  "is_submittable": 1,
- "modified": "2020-10-10 17:55:53.508036",
+ "modified": "2020-10-16 23:20:00.326255",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
@@ -1191,5 +1191,7 @@
  "sort_field": "transaction_date",
  "sort_order": "DESC",
  "timeline_field": "supplier",
- "title_field": "title"
+ "title_field": "title",
+ "track_changes": 1,
+ "track_seen": 1
 }
