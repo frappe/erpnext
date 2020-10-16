@@ -237,7 +237,7 @@ erpnext.PointOfSale.ItemDetails = class {
 							const bold_item_code = me.item_row.item_code.bold();
 							const bold_warehouse = this.value.bold();
 							frappe.throw(
-								__(`Item Code: {0} is not available under warehouse {1}.`, [bold_item_code, bold_warehouse])
+								__('Item Code: {0} is not available under warehouse {1}.', [bold_item_code, bold_warehouse])
 							);
 						}
 						me.actual_qty_control.set_value(available_qty);
@@ -393,11 +393,12 @@ erpnext.PointOfSale.ItemDetails = class {
 					const warehouse = this.warehouse_control.get_value().bold();
 					const item_code = this.current_item.item_code.bold();
 					frappe.msgprint(
-						__(`Serial numbers unavailable for Item {0} under warehouse {1}. Please try changing warehouse.`, [item_code, warehouse])
+						__('Serial numbers unavailable for Item {0} under warehouse {1}. Please try changing warehouse.', 
+						[item_code, warehouse])
 					);
 				} else if (records_length < qty) {
 					frappe.msgprint(
-						__(`Fetched only {0} available serial numbers.`, [records_length])
+						__('Fetched only {0} available serial numbers.', [records_length])
 					);
 					this.qty_control.set_value(records_length);
 				}
