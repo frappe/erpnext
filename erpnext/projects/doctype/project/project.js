@@ -198,7 +198,7 @@ frappe.ui.form.on("Project", {
 				}
 			})
 		}
-	}
+	},
 
 	set_status: function(frm, status) {
 		frappe.confirm(__('Set Project and all Tasks to status {0}?', [status.bold()]), () => {

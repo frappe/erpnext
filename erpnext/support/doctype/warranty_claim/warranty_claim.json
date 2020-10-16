@@ -11,6 +11,7 @@
   "complaint_date",
   "column_break0",
   "customer",
+  "project",
   "serial_no",
   "section_break_7",
   "complaint",
@@ -358,11 +359,17 @@
    "options": "Warranty Claim",
    "print_hide": 1,
    "width": "150px"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   }
  ],
  "icon": "fa fa-bug",
  "idx": 1,
- "modified": "2020-03-03 16:15:08.019696",
+ "modified": "2020-10-16 23:29:52.948980",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Warranty Claim",

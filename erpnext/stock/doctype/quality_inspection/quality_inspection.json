@@ -8,6 +8,7 @@
  "field_order": [
   "naming_series",
   "report_date",
+  "project",
   "column_break_4",
   "inspection_type",
   "reference_type",
@@ -228,14 +229,18 @@
    "label": "Status",
    "options": "\nAccepted\nRejected",
    "reqd": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   }
  ],
  "icon": "fa fa-search",
  "idx": 1,
- "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-09-12 16:11:31.910508",
+ "modified": "2020-10-16 23:30:39.375904",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection",

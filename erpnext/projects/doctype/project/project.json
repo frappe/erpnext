@@ -7,6 +7,8 @@
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
+  "title",
   "project_name",
   "status",
   "project_type",
@@ -446,12 +448,25 @@
    "fieldtype": "Link",
    "label": "Item Code",
    "options": "Item"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "PROJ-"
+  },
+  {
+   "default": "{customer}",
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "max_attachments": 4,
- "modified": "2020-10-16 23:20:48.155622",
+ "modified": "2020-10-16 23:26:54.793817",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
@@ -493,6 +508,7 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "timeline_field": "customer",
+ "title_field": "title",
  "track_changes": 1,
  "track_seen": 1
 }
