@@ -10,7 +10,7 @@ class ERPNextAddress(Address):
 
 	def link_address(self):
 		"""Link address based on owner"""
-		if not self.is_your_company_address:
+		if self.is_your_company_address:
 			return
 
 		return super(ERPNextAddress, self).link_address()
