@@ -341,11 +341,12 @@ def validate_material_transfer_entry(sle_doc):
 		else:
 			sle_doc.skip_serial_no_validaiton = True
 
-def validate_so_serial_no(sr, sales_order,):
+def validate_so_serial_no(sr, sales_order):
 	if not sr.sales_order or sr.sales_order!= sales_order:
-		frappe.throw(_("""Sales Order {0} has reservation for item {1}, you can
-		only deliver reserved {1} against {0}. Serial No {2} cannot
-		be delivered""").format(sales_order, sr.item_code, sr.name))
+		msg = _("Sales Order {0} has reservation for item {1}")
+		msg += _(", you can only deliver reserved {1} against {0}.")
+		msg += _(" Serial No {2} cannot be delivered")
+		frappe.throw(msg.format(sales_order, sr.item_code, sr.name))
 
 def has_duplicate_serial_no(sn, sle):
 	if (sn.warehouse and not sle.skip_serial_no_validaiton

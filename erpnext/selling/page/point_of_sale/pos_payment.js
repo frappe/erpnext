@@ -9,8 +9,8 @@ erpnext.PointOfSale.Payment = class {
 	}
 
 	init_component() {
-        this.prepare_dom();
-        this.initialize_numpad();
+		this.prepare_dom();
+		this.initialize_numpad();
 		this.bind_events();
 		this.attach_shortcuts();
 		
@@ -18,32 +18,32 @@ erpnext.PointOfSale.Payment = class {
 
 	prepare_dom() {
 		this.wrapper.append(
-            `<section class="col-span-6 flex shadow rounded payment-section bg-white mx-h-70 h-100 d-none">
+			`<section class="col-span-6 flex shadow rounded payment-section bg-white mx-h-70 h-100 d-none">
 				<div class="flex flex-col p-16 pt-8 pb-8 w-full">
 					<div class="text-grey mb-6 payment-section no-select pointer">
 						PAYMENT METHOD<span class="octicon octicon-chevron-down collapse-indicator"></span>
 					</div>
 					<div class="payment-modes flex flex-wrap"></div>
 					<div class="invoice-details-section"></div>
-                    <div class="flex mt-auto justify-center w-full">
-                        <div class="flex flex-col justify-center flex-1 ml-4">
-                            <div class="flex w-full">
-                                <div class="totals-remarks items-end justify-end flex flex-1">
-                                    <div class="remarks text-md-0 text-grey mr-auto"></div>
-                                    <div class="totals flex justify-end pt-4"></div>
-                                </div>
-                                <div class="number-pad w-40 mb-4 ml-8 d-none"></div>
-                            </div>
-                            <div class="flex items-center justify-center mt-4 submit-order h-16 w-full rounded bg-primary text-md text-white no-select pointer text-bold">
-                                Complete Order
+					<div class="flex mt-auto justify-center w-full">
+						<div class="flex flex-col justify-center flex-1 ml-4">
+							<div class="flex w-full">
+								<div class="totals-remarks items-end justify-end flex flex-1">
+									<div class="remarks text-md-0 text-grey mr-auto"></div>
+									<div class="totals flex justify-end pt-4"></div>
+								</div>
+								<div class="number-pad w-40 mb-4 ml-8 d-none"></div>
+							</div>
+							<div class="flex items-center justify-center mt-4 submit-order h-16 w-full rounded bg-primary text-md text-white no-select pointer text-bold">
+								Complete Order
 							</div>
 							<div class="order-time flex items-center justify-end mt-2 pt-2 pb-2 w-full text-md-0 text-grey no-select pointer d-none"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>`
-        )
-        this.$component = this.wrapper.find('.payment-section');
+						</div>
+					</div>
+				</div>
+			</section>`
+		)
+		this.$component = this.wrapper.find('.payment-section');
 		this.$payment_modes = this.$component.find('.payment-modes');
 		this.$totals_remarks = this.$component.find('.totals-remarks');
 		this.$totals = this.$component.find('.totals');
@@ -179,10 +179,6 @@ erpnext.PointOfSale.Payment = class {
 			const value = $(this).attr('data-value');
 			me.selected_mode.set_value(value);
 		})
-
-		// this.$totals_remarks.on('click', '.remarks', () => {
-		// 	this.toggle_remarks_control();
-		// })
 
 		this.$component.on('click', '.submit-order', () => {
 			const doc = this.events.get_frm().doc;
@@ -354,7 +350,7 @@ erpnext.PointOfSale.Payment = class {
 				df: {
 					label: p.mode_of_payment,
 					fieldtype: 'Currency',
-					placeholder: __(`Enter {0} amount.`, [p.mode_of_payment]),
+					placeholder: __('Enter {0} amount.', [p.mode_of_payment]),
 					onchange: function() {
 						if (this.value || this.value == 0) {
 							frappe.model.set_value(p.doctype, p.name, 'amount', flt(this.value))
@@ -519,5 +515,5 @@ erpnext.PointOfSale.Payment = class {
 
 	toggle_component(show) {
 		show ? this.$component.removeClass('d-none') : this.$component.addClass('d-none');
-    }
+	}
  }
