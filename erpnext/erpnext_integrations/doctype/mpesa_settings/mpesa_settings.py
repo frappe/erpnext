@@ -43,8 +43,7 @@ class MpesaSettings(Document):
 		self.handle_api_response("ConversationID", payload, response)
 
 	def handle_api_response(self, global_id, request_dict, response):
-		"""Response received from API calls returns a global identifier for each transaction,
-			this code is returned during the callback"""
+		"""Response received from API calls returns a global identifier for each transaction, this code is returned during the callback."""
 		# check error response
 		if getattr(response, "requestId"):
 			req_name = getattr(response, "requestId")
@@ -91,7 +90,7 @@ def sanitize_mobile_number(number):
 
 @frappe.whitelist(allow_guest=True)
 def verify_transaction(**kwargs):
-	""" Verify the transaction result received via callback from stk """
+	"""Verify the transaction result received via callback from stk."""
 	transaction_response = frappe._dict(kwargs["Body"]["stkCallback"])
 	frappe.logger().debug(transaction_response)
 
@@ -139,8 +138,7 @@ def get_account_balance(request_payload):
 
 @frappe.whitelist(allow_guest=True)
 def process_balance_info(**kwargs):
-	"""Process and store account balance information received via callback
-		from the account balance API call."""
+	"""Process and store account balance information received via callback from the account balance API call."""
 	account_balance_response = frappe._dict(kwargs["Result"])
 
 	conversation_id = getattr(account_balance_response, "ConversationID", "")
@@ -164,7 +162,7 @@ def process_balance_info(**kwargs):
 
 			request.handle_success(account_balance_response)
 			frappe.publish_realtime("refresh_mpesa_dashboard")
-		except:
+		except Exception:
 			request.handle_failure(account_balance_response)
 			frappe.log_error(title=_("Mpesa Account Balance Processing Error"), message=account_balance_response)
 	else:
@@ -172,7 +170,7 @@ def process_balance_info(**kwargs):
 
 def convert_to_json(balance_info):
 	"""
-	Convert string to json
+	Convert string to json.
 
 	e.g: '''Working Account|KES|481000.00|481000.00|0.00|0.00'''
 	=> {'Working Account': {'current_balance': '481000.00',
@@ -192,7 +190,7 @@ def convert_to_json(balance_info):
 	return dumps(balance_dict)
 
 def fetch_param_value(response, key, key_field):
-	"""Fetch the specified key from list of dictionary. Key is identified via the key field"""
+	"""Fetch the specified key from list of dictionary. Key is identified via the key field."""
 	for param in response:
 		if param[key_field] == key:
 			return param["Value"]

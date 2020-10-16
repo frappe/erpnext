@@ -18,10 +18,7 @@ class MpesaConnector():
 
 	def authenticate(self):
 		"""
-		To make Mpesa API calls, you will need to authenticate your app. This method is used to fetch the access token
-		required by Mpesa. Mpesa supports client_credentials grant type. To authorize your API calls to Mpesa,
-		you will need a Basic Auth over HTTPS authorization token. The Basic Auth string is a base64 encoded string
-		of your app's client key and client secret.
+		This method is used to fetch the access token required by Mpesa.
 
 		Returns:
 			access_token (str): This token is to be used with the Bearer header for further API calls to Mpesa.
