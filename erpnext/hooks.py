@@ -28,7 +28,7 @@ doctype_js = {
 }
 
 override_doctype_class = {
-    'Address': 'erpnext.accounts.custom.address.CustomAddress'
+	'Address': 'erpnext.accounts.custom.address.ERPNextAddress'
 }
 
 welcome_email = "erpnext.setup.utils.welcome_email"
