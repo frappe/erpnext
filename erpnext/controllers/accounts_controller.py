@@ -1203,8 +1203,10 @@ class AccountsController(TransactionBase):
 				frappe.throw(_("Not allowed to create {0} for Transaction Type {1}")
 					.format(frappe.bold(self.doctype), frappe.bold(self.get('transaction_type'))))
 
-			if doc.allocate_advances_automatically and self.meta.has_field('allocate_advances_automatically'):
+			if self.meta.has_field('allocate_advances_automatically') and doc.allocate_advances_automatically:
 				self.allocate_advances_automatically = cint(doc.allocate_advances_automatically == "Yes")
+
+			
 
 	def validate_zero_outstanding(self):
 		if self.get('transaction_type'):
