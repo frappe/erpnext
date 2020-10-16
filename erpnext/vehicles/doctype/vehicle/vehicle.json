@@ -539,7 +539,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2020-10-11 04:57:22.726388",
+ "modified": "2020-10-16 18:25:46.566083",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
@@ -556,6 +556,51 @@
    "role": "Fleet Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Purchase User",
+   "share": 1
   }
  ],
  "search_fields": "item_code, item_group, brand, warehouse, customer, sales_order",
