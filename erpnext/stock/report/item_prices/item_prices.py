@@ -318,7 +318,7 @@ def get_columns(filters, price_lists):
 	show_amounts_role = frappe.db.get_single_value("Stock Settings", "restrict_amounts_in_report_to_role")
 	show_amounts = not show_amounts_role or show_amounts_role in frappe.get_roles()
 	if not show_amounts:
-		columns = filter(lambda d: not d.get('restricted'), columns)
+		columns = list(filter(lambda d: not d.get('restricted'), columns))
 		'''for c in columns:
 			if c.get('editable'):
 				del c['editable']'''
