@@ -55,7 +55,7 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 					})
 				}, __("Get items from"));
 
-			//Link Material Requests
+			// Link Material Requests
 			this.frm.add_custom_button(__('Link to Material Requests'),
 				function() {
 					erpnext.buying.link_to_mrs(me.frm);
