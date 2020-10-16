@@ -26,7 +26,7 @@ erpnext.PointOfSale.PastOrderList = class {
 					</div>
 				</div>
 			</section>`
-		)
+		);
 
 		this.$component = this.wrapper.find('.past-order-list');
 		this.$invoices_container = this.$component.find('.invoices-container');
@@ -45,7 +45,7 @@ erpnext.PointOfSale.PastOrderList = class {
 			const invoice_name = unescape($(this).attr('data-invoice-name'));
 
 			me.events.open_invoice_data(invoice_name);
-		})
+		});
 	}
 
 	make_filter_section() {
@@ -102,7 +102,7 @@ erpnext.PointOfSale.PastOrderList = class {
 					this.$invoices_container.append(invoice_html);
 				});
 			}
-	   });
+		});
 	}
 
 	get_invoice_html(invoice) {
@@ -125,6 +125,6 @@ erpnext.PointOfSale.PastOrderList = class {
 					<div class="f-shrink-0 text-grey ml-4">${posting_datetime}</div>
 				</div>
 			</div>`
-		)
+		);
 	}
-}
+};
