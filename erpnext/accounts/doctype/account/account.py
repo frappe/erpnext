@@ -171,9 +171,10 @@ class Account(NestedSet):
 					.format(company_bold, parent_acc_name_bold), title=_("Account Not Found"))
 			if (frappe.db.get_value("Account", self.parent_account, "is_group") 
 				and not frappe.db.get_value("Account", parent_acc_name_map[company], "is_group")):
-				frappe.throw(_("While creating account for Child Company {0}, parent account {1} is found \
-					as a ledger account.<br><br>Please convert the parent account in corresponding child company COA to a group account.")
-					.format(company_bold, parent_acc_name_bold), title=_("Invalid Parent Account"))
+				msg = _("While creating account for Child Company {0}, parent account {1} found as a ledger account.").format(company_bold, parent_acc_name_bold)
+				msg += "<br><br>"
+				msg = _("Please convert the parent account in corresponding child company to a group account.")
+				frappe.throw(msg), title=_("Invalid Parent Account"))
 
 			filters = {
 				"account_name": self.account_name,
