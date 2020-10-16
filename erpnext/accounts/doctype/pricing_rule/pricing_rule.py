@@ -49,9 +49,10 @@ class PricingRule(Document):
 			if self.apply_on == apply_on and len(self.get(field) or []) < 1:
 				throw(_("{0} is not added in the table").format(apply_on), frappe.MandatoryError)
 
-		tocheck = frappe.scrub(self.get("applicable_for", ""))
-		if tocheck and not self.get(tocheck):
-			throw(_("{0} is required").format(self.meta.get_label(tocheck)), frappe.MandatoryError)
+		if self.get("applicable_for", "") != None:
+			tocheck = frappe.scrub(self.get("applicable_for", ""))
+			if tocheck and not self.get(tocheck):
+				throw(_("{0} is required").format(self.meta.get_label(tocheck)), frappe.MandatoryError)
 
 		if self.apply_rule_on_other:
 			o_field = 'other_' + frappe.scrub(self.apply_rule_on_other)
