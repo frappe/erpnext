@@ -676,11 +676,38 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		pr.set_posting_time = 1
 		pr.posting_date = posting_date
+		pr.save()
 
-		self.assertRaises(frappe.ValidationError, pr.save)
+		self.assertRaises(frappe.ValidationError, pr.submit)
 
 		# make purchase receipt for other company backdated
 		pr = make_purchase_receipt(company="_Test Company 5", warehouse="Stores - _TC5",
+			do_not_submit=True)
+
+		pr.set_posting_time = 1
+		pr.posting_date = posting_date
+		pr.submit()
+
+		# Allowed to submit for other company's PR
+		self.assertEqual(pr.docstatus, 1)
+
+	def test_backdated_purchase_receipt_for_same_company_different_warehouse(self):
+			# make purchase receipt for default company
+		make_purchase_receipt(company="_Test Company 4", warehouse="Stores - _TC4")
+
+		# try to make another backdated PR
+		posting_date = add_days(today(), -1)
+		pr = make_purchase_receipt(company="_Test Company 4", warehouse="Stores - _TC4",
+			do_not_submit=True)
+
+		pr.set_posting_time = 1
+		pr.posting_date = posting_date
+		pr.save()
+
+		self.assertRaises(frappe.ValidationError, pr.submit)
+
+		# make purchase receipt for other company backdated
+		pr = make_purchase_receipt(company="_Test Company 4", warehouse="Finished Goods - _TC4",
 			do_not_submit=True)
 
 		pr.set_posting_time = 1
