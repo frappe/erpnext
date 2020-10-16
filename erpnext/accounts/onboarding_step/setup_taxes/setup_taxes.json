@@ -1,6 +1,7 @@
 {
  "action": "Create Entry",
  "creation": "2020-05-13 19:29:43.844463",
+ "description": "# Setting up Taxes\n\nOne of the primary motivators for compulsory use of accounting tools is the calculation of taxes. ERPNext allows you to make configurable tax templates that you can apply to your sales or purchase transactions.\n\nThe templates created from this form can be used in Sales Orders and Sales Invoices. The way ERPNext sets up taxes is via templates. Other types of charges that may apply to your invoices (like shipping, insurance etc.) can also be configured as taxes.\n\nFor Tax Accounts that you want to use in the tax templates, go to:\n\n`> Home > Accounting > Chart of Accounts`\n\nSelect an account and click on edit. Select the 'Account Type' as 'Tax' for the account.\nIn this step we will guide you towards making the sales and taxes template.",
  "docstatus": 0,
  "doctype": "Onboarding Step",
  "idx": 0,
@@ -8,7 +9,7 @@
  "is_mandatory": 0,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2020-05-14 17:40:16.014413",
+ "modified": "2020-10-15 13:21:17.333438",
  "modified_by": "Administrator",
  "name": "Setup Taxes",
  "owner": "Administrator",
