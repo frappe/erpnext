@@ -190,7 +190,7 @@ def get_items_list(pos_profile, company):
 			i.sales_uom, c.conversion_factor, it.item_tax_template, it.valid_from
 		from
 			`tabItem` i
-		left join `tabItem Default` id on id.parent = i.name and id.company = %s
+		left join `tabItem Default` id on id.parent = i.name and id.company = {company}
 		left join `tabItem Tax` it on it.parent = i.name
 		left join `tabUOM Conversion Detail` c on i.name = c.parent and i.sales_uom = c.uom
 		{bin_join}
@@ -199,7 +199,7 @@ def get_items_list(pos_profile, company):
 			{cond}
 			{bin_cond}
 		group by i.item_code
-		""".format(cond=cond, bin_join=bin_join, bin_cond=bin_cond), tuple([company] + args_list), as_dict=1)
+		""".format(company=frappe.db.escape(company), cond=cond, bin_join=bin_join, bin_cond=bin_cond), tuple(args_list), as_dict=1)
 
 
 def get_item_groups(pos_profile):
