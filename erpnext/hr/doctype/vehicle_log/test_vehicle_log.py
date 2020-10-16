@@ -20,8 +20,8 @@ class TestVehicleLog(unittest.TestCase):
 		self.license_plate = get_vehicle(self.employee_id)
 	
 	def tearDown(self):
-		frappe.delete_doc("Employee", self.employee_id)
-		frappe.delete_doc("Vehicle", self.license_plate)
+		frappe.delete_doc("Vehicle", self.license_plate, force=1)
+		frappe.delete_doc("Employee", self.employee_id, force=1)
 
 	def test_make_vehicle_log_and_syncing_of_odometer_value(self):
 		vehicle_log = frappe.get_doc({
@@ -69,6 +69,7 @@ class TestVehicleLog(unittest.TestCase):
 		fuel_expense = expense_claim.expenses[0].amount
 		self.assertEqual(fuel_expense, 50*500)
 
+		vehicle_log.cancel()
 		frappe.delete_doc("Expense Claim", expense_claim.name)
 		frappe.delete_doc("Vehicle Log", vehicle_log.name)
 
