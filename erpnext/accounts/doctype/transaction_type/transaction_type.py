@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import cint
 from frappe.model.document import Document
 import copy
 import json
@@ -61,10 +62,19 @@ def get_transaction_type_details(args, items):
 		"doc": frappe._dict()
 	})
 
-	if args.transaction_type_name and args.company:
-		transaction_type_defaults = get_transaction_type_defaults(args.transaction_type_name, args.company)
-		if transaction_type_defaults.get('default_warehouse'):
-			out.doc.set_warehouse = transaction_type_defaults.get('default_warehouse')
+	if args.transaction_type_name:
+		transaction_type_doc = frappe.get_cached_doc("Transaction Type", args.transaction_type_name)
+		if transaction_type_doc.allocate_advances_automatically:
+			out.doc.allocate_advances_automatically = cint(transaction_type_doc.allocate_advances_automatically == "Yes")
+		if transaction_type_doc.disable_rounded_total:
+			out.doc.disable_rounded_total = cint(transaction_type_doc.disable_rounded_total == "Yes")
+		if transaction_type_doc.calculate_tax_on_company_currency:
+			out.doc.calculate_tax_on_company_currency = cint(transaction_type_doc.calculate_tax_on_company_currency == "Yes")
+
+		if args.company:
+			transaction_type_defaults = get_transaction_type_defaults(args.transaction_type_name, args.company)
+			if transaction_type_defaults.get('default_warehouse'):
+				out.doc.set_warehouse = transaction_type_defaults.get('default_warehouse')
 
 	if account_field and party_type and party:
 		party_account_details = get_party_account_details(party_type, party, args.company,

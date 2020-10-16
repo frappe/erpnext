@@ -1206,7 +1206,12 @@ class AccountsController(TransactionBase):
 			if self.meta.has_field('allocate_advances_automatically') and doc.allocate_advances_automatically:
 				self.allocate_advances_automatically = cint(doc.allocate_advances_automatically == "Yes")
 
-			
+			if self.meta.has_field('disable_rounded_total') and doc.disable_rounded_total:
+				self.disable_rounded_total = cint(doc.disable_rounded_total == "Yes")
+
+			if self.meta.has_field('calculate_tax_on_company_currency') and doc.calculate_tax_on_company_currency:
+				self.calculate_tax_on_company_currency = cint(doc.calculate_tax_on_company_currency == "Yes")
+
 
 	def validate_zero_outstanding(self):
 		if self.get('transaction_type'):

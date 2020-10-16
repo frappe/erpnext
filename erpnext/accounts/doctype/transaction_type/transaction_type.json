@@ -13,9 +13,12 @@
   "order_type",
   "sec_validations",
   "document_types_not_allowed",
-  "allocate_advances_automatically",
+  "disable_rounded_total",
   "validate_zero_outstanding",
   "allow_non_profit_and_loss_expense_account",
+  "column_break_8",
+  "calculate_tax_on_company_currency",
+  "allocate_advances_automatically",
   "column_break_10",
   "so_required",
   "dn_required",
@@ -143,9 +146,25 @@
    "fieldtype": "Select",
    "label": "Allocate Advances Automatically",
    "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "calculate_tax_on_company_currency",
+   "fieldtype": "Select",
+   "label": "Calculate Taxes on Company Currency",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "disable_rounded_total",
+   "fieldtype": "Select",
+   "label": "Disable Rounded Total",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
   }
  ],
- "modified": "2020-10-13 00:22:54.962704",
+ "modified": "2020-10-16 22:54:28.702690",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transaction Type",
