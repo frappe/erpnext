@@ -403,7 +403,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 2, 'docname': so.items[0].name}])
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Sales Order', trans_item, so.name)
-	
+
 	def test_update_child_with_precision(self):
 		from frappe.model.meta import get_field_precision
 		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
@@ -437,7 +437,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Sales Order', trans_item, so.name)
 		test_user.remove_roles("Accounts User")
 		frappe.set_user("Administrator")
-	
+
 	def test_update_child_qty_rate_with_workflow(self):
 		from frappe.model.workflow import apply_workflow
 
@@ -599,12 +599,12 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.db.set_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing", 1)
 
 	def test_drop_shipping(self):
-		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order
+		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order_for_default_supplier, \
+			update_status as so_update_status
 		from erpnext.buying.doctype.purchase_order.purchase_order import update_status
 
-		make_stock_entry(target="_Test Warehouse - _TC", qty=10, rate=100)
+		# make items
 		po_item = make_item("_Test Item for Drop Shipping", {"is_stock_item": 1, "delivered_by_supplier": 1})
-
 		dn_item = make_item("_Test Regular Item", {"is_stock_item": 1})
 
 		so_items = [
@@ -626,80 +626,61 @@ class TestSalesOrder(unittest.TestCase):
 		]
 
 		if frappe.db.get_value("Item", "_Test Regular Item", "is_stock_item")==1:
-			make_stock_entry(item="_Test Regular Item", target="_Test Warehouse - _TC", qty=10, rate=100)
+			make_stock_entry(item="_Test Regular Item", target="_Test Warehouse - _TC", qty=2, rate=100)
 
-		#setuo existing qty from bin
-		bin = frappe.get_all("Bin", filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"},
-			fields=["ordered_qty", "reserved_qty"])
-
-		existing_ordered_qty = bin[0].ordered_qty if bin else 0.0
-		existing_reserved_qty = bin[0].reserved_qty if bin else 0.0
-
-		bin = frappe.get_all("Bin", filters={"item_code": dn_item.item_code,
-			"warehouse": "_Test Warehouse - _TC"}, fields=["reserved_qty"])
-
-		existing_reserved_qty_for_dn_item = bin[0].reserved_qty if bin else 0.0
-
-		#create so, po and partial dn
+		#create so, po and dn
 		so = make_sales_order(item_list=so_items, do_not_submit=True)
 		so.submit()
 
-		po = make_purchase_order(so.name, '_Test Supplier', selected_items=[so_items[0]['item_code']])
+		po = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[0]])
 		po.submit()
 
-		dn = create_dn_against_so(so.name, delivered_qty=1)
+		dn = create_dn_against_so(so.name, delivered_qty=2)
 
 		self.assertEqual(so.customer, po.customer)
 		self.assertEqual(po.items[0].sales_order, so.name)
 		self.assertEqual(po.items[0].item_code, po_item.item_code)
 		self.assertEqual(dn.items[0].item_code, dn_item.item_code)
-
-		#test ordered_qty and reserved_qty
-		bin = frappe.get_all("Bin", filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"},
-			fields=["ordered_qty", "reserved_qty"])
-
-		ordered_qty = bin[0].ordered_qty if bin else 0.0
-		reserved_qty = bin[0].reserved_qty if bin else 0.0
-
-		self.assertEqual(abs(flt(ordered_qty)), existing_ordered_qty)
-		self.assertEqual(abs(flt(reserved_qty)), existing_reserved_qty)
-
-		reserved_qty = frappe.db.get_value("Bin",
-					{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty")
-
-		self.assertEqual(abs(flt(reserved_qty)), existing_reserved_qty_for_dn_item + 1)
-
 		#test po_item length
 		self.assertEqual(len(po.items), 1)
 
-		#test per_delivered status
+		# test ordered_qty and reserved_qty for drop ship item
+		bin_po_item = frappe.get_all("Bin", filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"},
+			fields=["ordered_qty", "reserved_qty"])
+
+		ordered_qty = bin_po_item[0].ordered_qty if bin_po_item else 0.0
+		reserved_qty = bin_po_item[0].reserved_qty if bin_po_item else 0.0
+
+		# drop ship PO should not impact bin, test the same
+		self.assertEqual(abs(flt(ordered_qty)), 0)
+		self.assertEqual(abs(flt(reserved_qty)), 0)
+
+		# test per_delivered status
 		update_status("Delivered", po.name)
-		self.assertEqual(flt(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 2), 75.00)
+		self.assertEqual(flt(frappe.db.get_value("Sales Order", so.name, "per_delivered"), 2), 100.00)
+		po.load_from_db()
 
-		#test reserved qty after complete delivery
-		dn = create_dn_against_so(so.name, delivered_qty=1)
-		reserved_qty = frappe.db.get_value("Bin",
-			{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty")
-
-		self.assertEqual(abs(flt(reserved_qty)), existing_reserved_qty_for_dn_item)
-
-		#test after closing so
+		# test after closing so
 		so.db_set('status', "Closed")
 		so.update_reserved_qty()
 
-		bin = frappe.get_all("Bin", filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"},
+		# test ordered_qty and reserved_qty for drop ship item after closing so
+		bin_po_item = frappe.get_all("Bin", filters={"item_code": po_item.item_code, "warehouse": "_Test Warehouse - _TC"},
 			fields=["ordered_qty", "reserved_qty"])
 
-		ordered_qty = bin[0].ordered_qty if bin else 0.0
-		reserved_qty = bin[0].reserved_qty if bin else 0.0
+		ordered_qty = bin_po_item[0].ordered_qty if bin_po_item else 0.0
+		reserved_qty = bin_po_item[0].reserved_qty if bin_po_item else 0.0
 
-		self.assertEqual(abs(flt(ordered_qty)), existing_ordered_qty)
-		self.assertEqual(abs(flt(reserved_qty)), existing_reserved_qty)
+		self.assertEqual(abs(flt(ordered_qty)), 0)
+		self.assertEqual(abs(flt(reserved_qty)), 0)
 
-		reserved_qty = frappe.db.get_value("Bin",
-			{"item_code": dn_item.item_code, "warehouse": "_Test Warehouse - _TC"}, "reserved_qty")
-
-		self.assertEqual(abs(flt(reserved_qty)), existing_reserved_qty_for_dn_item)
+		# teardown
+		so_update_status("Draft", so.name)
+		dn.load_from_db()
+		dn.cancel()
+		po.cancel()
+		so.load_from_db()
+		so.cancel()
 
 	def test_reserved_qty_for_closing_so(self):
 		bin = frappe.get_all("Bin", filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
