@@ -175,7 +175,6 @@ erpnext.PointOfSale.Payment = class {
 		})
 
 		frappe.realtime.on("process_phone_payment", function(data) {
-			console.log('within')
 			frappe.dom.unfreeze();
 			let message = data["ResultDesc"];
 			let title = __("Payment Failed");

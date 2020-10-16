@@ -163,6 +163,7 @@ def process_balance_info(**kwargs):
 			ref_doc.db_set("account_balance", balance_info)
 
 			request.handle_success(account_balance_response)
+			frappe.publish_realtime("refresh_mpesa_dashboard")
 		except:
 			request.handle_failure(account_balance_response)
 			frappe.log_error(title=_("Mpesa Account Balance Processing Error"), message=account_balance_response)
