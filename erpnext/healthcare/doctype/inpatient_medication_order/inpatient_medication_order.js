@@ -8,6 +8,14 @@ frappe.ui.form.on('Inpatient Medication Order', {
 		}
 
 		frm.events.show_medication_order_button(frm);
+
+		frm.set_query('patient', () => {
+			return {
+				filters: {
+					'inpatient_record': ['!=', '']
+				}
+			}
+		});
 	},
 
 	show_medication_order_button: function(frm) {
