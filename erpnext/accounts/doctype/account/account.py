@@ -101,7 +101,7 @@ class Account(NestedSet):
 				return
 			if not frappe.db.get_value("Account",
 				{'account_name': self.account_name, 'company': ancestors[0]}, 'name'):
-				frappe.throw(_("Please add the account to root level Company - %s" % ancestors[0]))
+				frappe.throw(_("Please add the account to root level Company - {}").format(ancestors[0]))
 		elif self.parent_account:
 			descendants = get_descendants_of('Company', self.company)
 			if not descendants: return
@@ -169,12 +169,14 @@ class Account(NestedSet):
 			if not parent_acc_name_map.get(company):
 				frappe.throw(_("While creating account for Child Company {0}, parent account {1} not found. Please create the parent account in corresponding COA")
 					.format(company_bold, parent_acc_name_bold), title=_("Account Not Found"))
-			if (frappe.db.get_value("Account", self.parent_account, "is_group") 
+
+			# validate if parent of child company account to be added is a group
+			if (frappe.db.get_value("Account", self.parent_account, "is_group")
 				and not frappe.db.get_value("Account", parent_acc_name_map[company], "is_group")):
 				msg = _("While creating account for Child Company {0}, parent account {1} found as a ledger account.").format(company_bold, parent_acc_name_bold)
 				msg += "<br><br>"
 				msg = _("Please convert the parent account in corresponding child company to a group account.")
-				frappe.throw(msg), title=_("Invalid Parent Account"))
+				frappe.throw(msg, title=_("Invalid Parent Account"))
 
 			filters = {
 				"account_name": self.account_name,
@@ -317,8 +319,9 @@ def update_account_number(name, account_name, account_number=None, from_descenda
 				allow_child_account_creation = _("Allow Account Creation Against Child Company")
 
 				message = _("Account {0} exists in parent company {1}.").format(frappe.bold(old_acc_name), frappe.bold(ancestor))
-				message += "<br>" + _("Renaming it is only allowed via parent company {0}, \
-					to avoid mismatch.").format(frappe.bold(ancestor)) + "<br><br>"
+				message += "<br>"
+				message += _("Renaming it is only allowed via parent company {0}, to avoid mismatch.").format(frappe.bold(ancestor))
+				message += "<br><br>"
 				message += _("To overrule this, enable '{0}' in company {1}").format(allow_child_account_creation, frappe.bold(account.company))
 
 				frappe.throw(message, title=_("Rename Not Allowed"))
