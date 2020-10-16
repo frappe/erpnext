@@ -158,6 +158,7 @@
    "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Date",
    "oldfieldname": "transaction_date",
    "oldfieldtype": "Date",
@@ -791,6 +792,7 @@
   {
    "fieldname": "valid_till",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Valid Till"
   }
  ],
@@ -799,7 +801,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-24 15:18:29.073368",
+ "modified": "2020-10-16 15:18:29.073368",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",

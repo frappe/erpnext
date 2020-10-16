@@ -104,7 +104,7 @@
    "default": "1",
    "fieldname": "unlink_advance_payment_on_cancelation_of_order",
    "fieldtype": "Check",
-   "label": "Unlink Advance Payment on Cancelation of Order"
+   "label": "Unlink Advance Payment on Cancellation of Order"
   },
   {
    "default": "1",
@@ -223,9 +223,10 @@
  ],
  "icon": "icon-cog",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-08-03 20:13:26.043092",
+ "modified": "2020-10-07 14:58:50.325577",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

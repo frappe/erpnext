@@ -261,14 +261,14 @@
   {
    "fieldname": "create_chart_of_accounts_based_on",
    "fieldtype": "Select",
-   "label": "Create Chart Of Accounts Based On",
+   "label": "Create Chart of Accounts Based on",
    "options": "\nStandard Template\nExisting Company"
   },
   {
    "depends_on": "eval:doc.create_chart_of_accounts_based_on===\"Standard Template\"",
    "fieldname": "chart_of_accounts",
    "fieldtype": "Select",
-   "label": "Chart Of Accounts Template",
+   "label": "Chart of Accounts Template",
    "no_copy": 1
   },
   {
