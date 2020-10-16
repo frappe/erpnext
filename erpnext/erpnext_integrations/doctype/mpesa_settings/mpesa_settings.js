@@ -6,6 +6,12 @@ frappe.ui.form.on('Mpesa Settings', {
 		frm.events.setup_account_balance_html(frm);
 	},
 
+	refresh: function(frm) {
+		frappe.realtime.on("refresh_mpesa_dashboard", function(){
+			frm.reload_doc();
+		});
+	},
+
 	get_account_balance: function(frm) {
 		if (!frm.initiator_name && !frm.security_credentials) return;
 		frappe.call({
