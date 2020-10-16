@@ -26,7 +26,7 @@ erpnext.PointOfSale.Payment = class {
 					<div class="payment-modes flex flex-wrap"></div>
 					<div class="invoice-details-section"></div>
 					<div class="flex mt-auto justify-center w-full">
-							<div class="flex flex-col justify-center flex-1 ml-4">
+						<div class="flex flex-col justify-center flex-1 ml-4">
 							<div class="flex w-full">
 								<div class="totals-remarks items-end justify-end flex flex-1">
 									<div class="remarks text-md-0 text-grey mr-auto"></div>
@@ -198,10 +198,6 @@ erpnext.PointOfSale.Payment = class {
 			me.selected_mode.set_value(value);
 		})
 
-		// this.$totals_remarks.on('click', '.remarks', () => {
-		// 	this.toggle_remarks_control();
-		// })
-
 		this.$component.on('click', '.submit-order', () => {
 			const doc = this.events.get_frm().doc;
 			const paid_amount = doc.paid_amount;
@@ -372,7 +368,7 @@ erpnext.PointOfSale.Payment = class {
 				df: {
 					label: p.mode_of_payment,
 					fieldtype: 'Currency',
-					placeholder: __(`Enter {0} amount.`, [p.mode_of_payment]),
+					placeholder: __('Enter {0} amount.', [p.mode_of_payment]),
 					onchange: function() {
 						if (this.value || this.value == 0) {
 							frappe.model.set_value(p.doctype, p.name, 'amount', flt(this.value))
