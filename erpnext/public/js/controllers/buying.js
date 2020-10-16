@@ -363,54 +363,54 @@ erpnext.buying.link_to_mrs = function(frm) {
 	frappe.call({
 		method: "erpnext.buying.utils.get_linked_material_requests",
 		args:{
-			items: frm.doc.items.map((item) => {return item.item_code;})
+			items: frm.doc.items.map((item) => item.item_code)
 		},
 		callback: function(r) {
-			if(!r.message || r.message.length == 0) {
-				frappe.throw({message: __("No pending Material Requests found to link for the given items."), title: __("Note")});
+			if (!r.message || r.message.length == 0) {
+				frappe.throw({
+					message: __("No pending Material Requests found to link for the given items."),
+					title: __("Note")
+				});
 			}
-			else {
-				var i = 0;
-				var item_length = frm.doc.items.length;
-				while (i < item_length) {
-					var qty = frm.doc.items[i].qty;
-					(r.message[0] || []).forEach(function(d) {
-						if (d.qty > 0 && qty > 0 && frm.doc.items[i].item_code == d.item_code && !frm.doc.items[i].material_request_item)
+
+			var item_length = frm.doc.items.length;
+			for (let item of frm.doc.items) {
+				var qty = item.qty;
+				(r.message[0] || []).forEach(function(d) {
+					if (d.qty > 0 && qty > 0 && item.item_code == d.item_code && !item.material_request_item)
+					{
+						item.material_request = d.mr_name;
+						item.material_request_item = d.mr_item;
+						var my_qty = Math.min(qty, d.qty);
+						qty = qty - my_qty;
+						d.qty = d.qty - my_qty;
+						item.stock_qty = my_qty*item.conversion_factor;
+						item.qty = my_qty;
+
+						frappe.msgprint("Assigning " + d.mr_name + " to " + d.item_code + " (row " + item.idx + ")");
+						if (qty > 0)
 						{
-							frm.doc.items[i].material_request = d.mr_name;
-							frm.doc.items[i].material_request_item = d.mr_item;
-							var my_qty = Math.min(qty, d.qty);
-							qty = qty - my_qty;
-							d.qty = d.qty  - my_qty;
-							frm.doc.items[i].stock_qty = my_qty*frm.doc.items[i].conversion_factor;
-							frm.doc.items[i].qty = my_qty;
+							frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
+							var newrow = frappe.model.add_child(frm.doc, item.doctype, "items");
+							item_length++;
 
-							frappe.msgprint("Assigning " + d.mr_name + " to " + d.item_code + " (row " + frm.doc.items[i].idx + ")");
-							if (qty > 0)
+							for (var key in item)
 							{
-								frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
-								var newrow = frappe.model.add_child(frm.doc, frm.doc.items[i].doctype, "items");
-								item_length++;
-
-								for (var key in frm.doc.items[i])
-								{
-									newrow[key] = frm.doc.items[i][key];
-								}
-
-								newrow.idx = item_length;
-								newrow["stock_qty"] = newrow.conversion_factor*qty;
-								newrow["qty"] = qty;
-
-								newrow["material_request"] = "";
-								newrow["material_request_item"] = "";
-
+								newrow[key] = item[key];
 							}
+
+							newrow.idx = item_length;
+							newrow["stock_qty"] = newrow.conversion_factor*qty;
+							newrow["qty"] = qty;
+
+							newrow["material_request"] = "";
+							newrow["material_request_item"] = "";
+
 						}
-					});
-					i++;
-				}
-				refresh_field("items");
+					}
+				});
 			}
+			refresh_field("items");
 		}
 	});
 }
