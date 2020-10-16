@@ -83,7 +83,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 			} else if (!frm.doc.company || !frm.doc.party_type) {
 				frappe.throw({message: __("Please Select Both Company and Party Type First"), title: title});
 			}
-		}
+		};
 	},
 
 	refresh: function() {
