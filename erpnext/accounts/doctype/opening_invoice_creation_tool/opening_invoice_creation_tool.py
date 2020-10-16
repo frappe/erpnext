@@ -201,7 +201,7 @@ def start_import(invoices):
 			doc.submit()
 			frappe.db.commit()
 			names.append(doc.name)
-		except Exception as e:
+		except Exception:
 			errors += 1
 			frappe.db.rollback()
 			message = "\n".join(["Data:", dumps(d, default=str, indent=4), "--" * 50, "\nException:", traceback.format_exc()])
