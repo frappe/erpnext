@@ -32,7 +32,7 @@ class TestInpatientMedicationEntry(unittest.TestCase):
 		ipmo.submit()
 		ipmo.reload()
 
-		date = add_days(getdate(), 1)
+		date = add_days(getdate(), -1)
 		filters = frappe._dict(
 			from_date=date,
 			to_date=date,
@@ -53,7 +53,7 @@ class TestInpatientMedicationEntry(unittest.TestCase):
 		ipmo.submit()
 		ipmo.reload()
 
-		date = add_days(getdate(), 1)
+		date = add_days(getdate(), -1)
 		filters = frappe._dict(
 			from_date=date,
 			to_date=date,

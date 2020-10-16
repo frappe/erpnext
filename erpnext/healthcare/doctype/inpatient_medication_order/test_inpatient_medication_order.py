@@ -30,13 +30,13 @@ class TestInpatientMedicationOrder(unittest.TestCase):
 
 		# 3 dosages per day for 2 days
 		self.assertEqual(len(ipmo.medication_orders), 6)
-		self.assertEqual(ipmo.medication_orders[0].date, getdate())
+		self.assertEqual(ipmo.medication_orders[0].date, add_days(getdate(), -1))
 
 		prescription_dosage = frappe.get_doc('Prescription Dosage', '1-1-1')
 		for i in range(len(prescription_dosage.dosage_strength)):
 			self.assertEqual(ipmo.medication_orders[i].time, prescription_dosage.dosage_strength[i].strength_time)
 
-		self.assertEqual(ipmo.medication_orders[3].date, add_days(getdate(), 1))
+		self.assertEqual(ipmo.medication_orders[3].date, getdate())
 
 	def test_inpatient_validation(self):
 		# Discharge
@@ -59,13 +59,13 @@ class TestInpatientMedicationOrder(unittest.TestCase):
 
 		self.assertEqual(ipmo.status, 'Pending')
 
-		filters = frappe._dict(from_date=getdate(), to_date=getdate(), from_time='', to_time='')
+		filters = frappe._dict(from_date=add_days(getdate(), -1), to_date=add_days(getdate(), -1), from_time='', to_time='')
 		ipme = create_ipme(filters)
 		ipme.submit()
 		ipmo.reload()
 		self.assertEqual(ipmo.status, 'In Process')
 
-		filters = frappe._dict(from_date=add_days(getdate(), 1), to_date=add_days(getdate(), 1), from_time='', to_time='')
+		filters = frappe._dict(from_date=getdate(), to_date=getdate(), from_time='', to_time='')
 		ipme = create_ipme(filters)
 		ipme.submit()
 		ipmo.reload()
@@ -130,7 +130,7 @@ def create_ipmo(patient):
 	ipmo = frappe.new_doc('Inpatient Medication Order')
 	ipmo.patient = patient
 	ipmo.company = '_Test Company'
-	ipmo.start_date = getdate()
+	ipmo.start_date = add_days(getdate(), -1)
 	ipmo.add_order_entries(orders)
 
 	return ipmo

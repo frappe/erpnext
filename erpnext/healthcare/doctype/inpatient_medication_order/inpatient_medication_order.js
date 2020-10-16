@@ -14,7 +14,7 @@ frappe.ui.form.on('Inpatient Medication Order', {
 				filters: {
 					'inpatient_record': ['!=', '']
 				}
-			}
+			};
 		});
 	},
 
