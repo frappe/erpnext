@@ -22,8 +22,6 @@ frappe.ui.form.on("Request for Quotation",{
 	},
 
 	onload: function(frm) {
-		frm.add_fetch('email_template', 'response', 'message_for_supplier');
-
 		if(!frm.doc.message_for_supplier) {
 			frm.set_value("message_for_supplier", __("Please supply the specified items at the best possible rates"))
 		}
@@ -107,7 +105,7 @@ frappe.ui.form.on("Request for Quotation",{
 
 				return frappe.call({
 					type: "GET",
-					method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation",
+					method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.make_supplier_quotation_from_rfq",
 					args: {
 						"source_name": doc.name,
 						"for_supplier": args.supplier
@@ -124,6 +122,66 @@ frappe.ui.form.on("Request for Quotation",{
 		});
 
 		dialog.show()
+	},
+
+	preview: (frm) => {
+		let dialog = new frappe.ui.Dialog({
+			title: __('Preview Email'),
+			fields: [
+				{
+					label: __('Supplier'),
+					fieldtype: 'Select',
+					fieldname: 'supplier',
+					options: frm.doc.suppliers.map(row => row.supplier),
+					reqd: 1
+				},
+				{
+					fieldtype: 'Column Break',
+					fieldname: 'col_break_1',
+				},
+				{
+					label: __('Subject'),
+					fieldtype: 'Data',
+					fieldname: 'subject',
+					read_only: 1,
+					depends_on: 'subject'
+				},
+				{
+					fieldtype: 'Section Break',
+					fieldname: 'sec_break_1',
+					hide_border: 1
+				},
+				{
+					label: __('Email'),
+					fieldtype: 'HTML',
+					fieldname: 'email_preview'
+				},
+				{
+					fieldtype: 'Section Break',
+					fieldname: 'sec_break_2'
+				},
+				{
+					label: __('Note'),
+					fieldtype: 'HTML',
+					fieldname: 'note'
+				}
+			]
+		});
+
+		dialog.fields_dict['supplier'].df.onchange = () => {
+			var supplier = dialog.get_value('supplier');
+			frm.call('get_supplier_email_preview', {supplier: supplier}).then(result => {
+				dialog.fields_dict.email_preview.$wrapper.empty();
+				dialog.fields_dict.email_preview.$wrapper.append(result.message);
+			});
+
+		}
+
+		dialog.fields_dict.note.$wrapper.append(`<p class="small text-muted">This is a preview of the email to be sent. A PDF of the document will
+			automatically be attached with the email.</p>`);
+
+		dialog.set_value("subject", frm.doc.subject);
+		dialog.show();
 	}
 })
 

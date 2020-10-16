@@ -20,7 +20,12 @@
   "items",
   "link_to_mrs",
   "supplier_response_section",
+  "salutation",
   "email_template",
+  "col_break_email_1",
+  "subject",
+  "preview",
+  "sec_break_email_2",
   "message_for_supplier",
   "terms_section_break",
   "tc_name",
@@ -119,8 +124,10 @@
    "label": "Link to Material Requests"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "supplier_response_section",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Email Details"
   },
   {
    "fieldname": "email_template",
@@ -131,6 +138,8 @@
   },
   {
    "allow_on_submit": 1,
+   "fetch_from": "email_template.response",
+   "fetch_if_empty": 1,
    "fieldname": "message_for_supplier",
    "fieldtype": "Text Editor",
    "in_list_view": 1,
@@ -212,13 +221,46 @@
    "options": "Request for Quotation",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "email_template.subject",
+   "fetch_if_empty": 1,
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Subject",
+   "print_hide": 1
+  },
+  {
+   "description": "Select a greeting for the receiver. E.g. Mr., Ms., etc.",
+   "fieldname": "salutation",
+   "fieldtype": "Link",
+   "label": "Salutation",
+   "no_copy": 1,
+   "options": "Salutation",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "col_break_email_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:!doc.docstatus==1",
+   "fieldname": "preview",
+   "fieldtype": "Button",
+   "label": "Preview Email"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "sec_break_email_2",
+   "fieldtype": "Section Break",
+   "hide_border": 1
   }
  ],
  "icon": "fa fa-shopping-cart",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-24 17:49:09.561929",
+ "modified": "2020-10-16 17:49:09.561929",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",
