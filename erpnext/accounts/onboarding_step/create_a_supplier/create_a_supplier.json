@@ -1,6 +1,7 @@
 {
  "action": "Create Entry",
  "creation": "2020-05-14 22:09:10.043554",
+ "description": "## Let's add your Suppliers\n\nSuppliers are companies or individuals who provide you with products or services. A supplier may be distinguished from a contractor or subcontractor, who commonly adds specialized input to deliverables. A supplier is also known as a vendor. There are different types of suppliers based on the goods and products they supply.\n\nERPNext allows you to create your own categories of suppliers. These categories are known as Supplier Groups. For example, if your suppliers are mainly pharmaceutical companies and FMCG distributors, you can create a new Supplier Groups for them and name the groups accordingly.",
  "docstatus": 0,
  "doctype": "Onboarding Step",
  "idx": 0,
@@ -8,7 +9,7 @@
  "is_mandatory": 0,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2020-05-14 22:09:10.043554",
+ "modified": "2020-10-15 13:32:39.651700",
  "modified_by": "Administrator",
  "name": "Create a Supplier",
  "owner": "Administrator",
