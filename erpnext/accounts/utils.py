@@ -185,7 +185,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		# if bal is None, return 0
 		return flt(bal)
 
-def get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account, dr_or_cr=None):
+def get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account, dr_or_cr=None, include_original_references=False):
 	if not dr_or_cr:
 		if erpnext.get_party_account_type(party_type) == 'Receivable':
 			dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
@@ -198,13 +198,17 @@ def get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account,
 	else:
 		account_condition = "account = {0}".format(frappe.db.escape(account))
 
+	original_reference_cond = ""
+	if include_original_references:
+		original_reference_cond = "or (original_against_voucher_type=%(voucher_type)s and original_against_voucher=%(voucher_no)s)"
+
 	res = frappe.db.sql("""
 		select ifnull(sum({dr_or_cr}), 0)
 		from `tabGL Entry`
 		where party_type=%(party_type)s and party=%(party)s and {account_condition}
 			and ((voucher_type=%(voucher_type)s and voucher_no=%(voucher_no)s and (against_voucher is null or against_voucher=''))
-				or (against_voucher_type=%(voucher_type)s and against_voucher=%(voucher_no)s))
-	""".format(dr_or_cr=dr_or_cr, account_condition=account_condition),
+				or (against_voucher_type=%(voucher_type)s and against_voucher=%(voucher_no)s) {original_reference_cond})
+	""".format(dr_or_cr=dr_or_cr, account_condition=account_condition, original_reference_cond=original_reference_cond),
 	{"voucher_type": voucher_type, "voucher_no": voucher_no, "party_type": party_type, "party": party})
 
 	return flt(res[0][0]) if res else 0.0
@@ -513,9 +517,6 @@ def update_reference_in_journal_entry(d, jv_doc):
 	jv_doc.flags.ignore_validate_update_after_submit = True
 	jv_doc.save(ignore_permissions=True)
 
-	for dn, dt in set(to_update_advance_amount):
-		frappe.get_doc(dn, dt).set_total_advance_paid()
-
 def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 	reference_details = {
 		"reference_doctype": d.against_voucher_type,
@@ -569,9 +570,6 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 
 	if not do_not_save:
 		payment_entry.save(ignore_permissions=True)
-
-	for dn, dt in set(to_update_advance_amount):
-		frappe.get_doc(dn, dt).set_total_advance_paid()
 
 def unlink_ref_doc_from_payment_entries(ref_doc, validate_permission=False):
 	if validate_permission:

@@ -215,13 +215,21 @@ def update_outstanding_amt(voucher_type, voucher_no, account, party_type, party,
 	# Update outstanding amt on against voucher
 
 	dr_or_cr = None
+	include_original_references = False
+
 	if voucher_type in ["Sales Invoice", "Purchase Invoice", "Landed Cost Voucher", "Fees", "Expense Claim"]:
 		fieldname = "outstanding_amount"
 	elif voucher_type == "Employee Advance":
 		fieldname = "balance_amount"
+		include_original_references = True
 		dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 	elif voucher_type in ("Sales Order", "Purchase Order"):
 		fieldname = "advance_paid"
+		include_original_references = True
+		if voucher_type == "Sales Order":
+			dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
+		else:
+			dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 	else:
 		return
 
@@ -230,7 +238,8 @@ def update_outstanding_amt(voucher_type, voucher_no, account, party_type, party,
 		if receivable_accounts:
 			account = list(set([account] + receivable_accounts))
 
-	bal = get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account, dr_or_cr=dr_or_cr)
+	bal = get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account,
+		dr_or_cr=dr_or_cr, include_original_references=include_original_references)
 	ref_doc = frappe.get_doc(voucher_type, voucher_no)
 	ref_doc.db_set(fieldname, bal)
 	ref_doc.set_status(update=True)

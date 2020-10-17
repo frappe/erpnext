@@ -98,7 +98,7 @@ class JournalEntry(AccountsController):
 		return self.pay_to_recd_from or self.accounts[0].account
 
 	def update_advance_paid(self):
-		order_dts = ("Sales Order", "Purchase Order", "Employee Advance")
+		order_dts = ("Employee Advance",)
 
 		advance_paid = frappe._dict()
 		for d in self.get("accounts"):

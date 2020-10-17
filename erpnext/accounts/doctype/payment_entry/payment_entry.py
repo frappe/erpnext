@@ -630,7 +630,7 @@ class PaymentEntry(AccountsController):
 				)
 
 	def update_advance_paid(self):
-		order_dts = ("Sales Order", "Purchase Order", "Employee Advance")
+		order_dts = ("Employee Advance",)
 		if self.payment_type in ("Receive", "Pay") and self.party:
 			for d in self.get("references"):
 				if flt(d.allocated_amount):
