@@ -709,26 +709,19 @@ class PurchaseInvoice(BuyingController):
 
 			if self.auto_accounting_for_stock and self.is_opening == "No" and \
 				item.item_code in stock_items and item.item_tax_amount:
-					# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
-					if item.purchase_receipt and valuation_tax_accounts:
-						negative_expense_booked_in_pr = frappe.db.sql("""select name from `tabGL Entry`
-							where voucher_type='Purchase Receipt' and voucher_no=%s and account in %s""",
-							(item.purchase_receipt, valuation_tax_accounts))
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": self.stock_received_but_not_billed,
+								"against": billing_party,
+								"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
+								"remarks": self.remarks,
+								"cost_center": item.cost_center or self.cost_center,
+								"project": item.project or self.project
+							}, item=item)
+						)
 
-						if not negative_expense_booked_in_pr:
-							gl_entries.append(
-								self.get_gl_dict({
-									"account": self.stock_received_but_not_billed,
-									"against": billing_party,
-									"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
-									"remarks": self.remarks,
-									"cost_center": item.cost_center or self.cost_center,
-									"project": item.project or self.project
-								}, item=item)
-							)
-
-							self.negative_expense_to_be_booked += flt(item.item_tax_amount, \
-								item.precision("item_tax_amount"))
+						self.negative_expense_to_be_booked += flt(item.item_tax_amount, \
+							item.precision("item_tax_amount"))
 
 	def get_asset_gl_entry(self, gl_entries):
 		billing_party_type, billing_party = self.get_billing_party()
