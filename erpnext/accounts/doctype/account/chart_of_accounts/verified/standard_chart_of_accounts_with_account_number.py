@@ -55,11 +55,11 @@ def get():
                 _("Goods in Transit"): {
                     _("Letters of Credit"): {
                         "account_type": "Payable",
-                        "account_number": "1610"
+                        "account_number": "1710"
                     },
-                    "account_number": "1600"
+                    "account_number": "1700"
                 },
-                "account_number": "1100-1600"
+                "account_number": "1100-1700"
             },
             _("Fixed Assets"): {
                 _("Capital Equipments"): {
