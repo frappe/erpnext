@@ -25,15 +25,14 @@
   "column_break_27",
   "is_day_book_data_processed",
   "is_day_book_data_imported",
-  "processed_files_section",
-  "processed_files",
-  "hide_successful_imports",
-  "processed_files_html",
-  "import_log_section",
-  "failed_import_log",
-  "fixed_errors_log",
-  "failed_import_preview",
-  "fixed_error_log_preview"
+  "chart_of_accounts",
+  "error_log_section",
+  "hide_resolved_errors",
+  "error_log_html",
+  "masters",
+  "payload_length",
+  "is_chart_of_accounts_imported",
+  "error_log"
  ],
  "fields": [
   {
@@ -70,12 +69,6 @@
    "label": "Tally Debtors Account",
    "read_only_depends_on": "eval:doc.is_master_data_processed==1",
    "reqd": 1
-  },
-  {
-   "depends_on": "processed_files",
-   "fieldname": "processed_files_section",
-   "fieldtype": "Section Break",
-   "label": "Processed Files"
   },
   {
    "depends_on": "is_master_data_imported",
@@ -154,39 +147,10 @@
    "read_only_depends_on": "eval:doc.is_master_data_processed==1"
   },
   {
-   "default": "[]",
-   "fieldname": "failed_import_log",
-   "fieldtype": "Code",
-   "hidden": 1,
-   "options": "JSON"
-  },
-  {
-   "fieldname": "failed_import_preview",
-   "fieldtype": "HTML",
-   "label": "Failed Import Log"
-  },
-  {
-   "fieldname": "import_log_section",
-   "fieldtype": "Section Break",
-   "label": "Import Log"
-  },
-  {
    "fieldname": "default_round_off_account",
    "fieldtype": "Link",
    "label": "Default Round Off Account",
    "options": "Account"
-  },
-  {
-   "default": "[]",
-   "fieldname": "fixed_errors_log",
-   "fieldtype": "Code",
-   "hidden": 1,
-   "options": "JSON"
-  },
-  {
-   "fieldname": "fixed_error_log_preview",
-   "fieldtype": "HTML",
-   "label": "Fixed Error Log"
   },
   {
    "description": "Data will be imported to this Company",
@@ -198,27 +162,63 @@
    "reqd": 1
   },
   {
-   "fieldname": "processed_files",
-   "fieldtype": "Table",
+   "fieldname": "chart_of_accounts",
+   "fieldtype": "Data",
    "hidden": 1,
-   "label": "Processed Files",
-   "options": "Tally Migration Processed File"
+   "no_copy": 1,
+   "read_only": 1
   },
   {
-   "fieldname": "processed_files_html",
+   "fieldname": "masters",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_chart_of_accounts_imported",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "payload_length",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "[]",
+   "fieldname": "error_log",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:(doc.error_log != \"[]\")",
+   "fieldname": "error_log_section",
+   "fieldtype": "Section Break",
+   "label": "Error Log"
+  },
+  {
+   "fieldname": "error_log_html",
    "fieldtype": "HTML"
   },
   {
    "default": "0",
-   "fieldname": "hide_successful_imports",
+   "fieldname": "hide_resolved_errors",
    "fieldtype": "Check",
-   "label": "Hide Successful Imports"
+   "label": "Hide Resolved Errors"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-09-23 15:59:38.508581",
+ "modified": "2020-10-17 18:40:20.064902",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Tally Migration",

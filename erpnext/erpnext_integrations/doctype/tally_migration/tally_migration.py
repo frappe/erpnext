@@ -42,15 +42,12 @@ def new_doc(document):
 	return doc
 
 def get_pincode_city_map():
-	with open(os.path.join(os.path.dirname(__file__), "pincode_info.json"), "r") as local_info:
-		all_data = json.loads(local_info.read())
-	return all_data
+	with open(os.path.join(os.path.dirname(__file__), "pincode_info.json"), "r") as f:
+		return json.loads(f.read())
 
 class TallyMigration(Document):
 	def validate(self):
-		failed_import_log = json.loads(self.failed_import_log)
-		sorted_failed_import_log = sorted(failed_import_log, key=lambda row: row["doc"]["creation"])
-		self.failed_import_log = json.dumps(sorted_failed_import_log)
+		pass
 
 	def autoname(self):
 		if not self.name:
@@ -81,74 +78,32 @@ class TallyMigration(Document):
 		collection = master.BODY.IMPORTDATA.REQUESTDATA
 		return collection
 
-	def dump_processed_data(self, data):
-		doctype_content_map = {}
-
-		def make_doctype_content_map(data):
-			for docs in data:
-				if not docs: continue
-
-				if isinstance(docs, list) and isinstance(docs[0], list):
-					make_doctype_content_map(docs)
-				else:
-					doctype = docs[0].get("doctype")
-					content = make_csv_for_data_import(doctype, docs)
-					doctype_content_map.setdefault(doctype, []).append(content)
-
-		make_doctype_content_map(data)
-
-		for doctype, contents in doctype_content_map.items():
-			for i, content in enumerate(contents):
-				filename = frappe.scrub(doctype) + "{}.csv".format(i+1 if len(contents) > 1 else "")
-				file = self.attach_file(filename, content)
-				data_import = self.make_data_import_doc(doctype, file.file_url)
-				args = dict(
-					doctype_name=doctype, import_type='Data Import', data_import=data_import.name,
-					total=len(data_import.get_importer().import_file.data)
-				)
-				self.append_processed_file(args)
-	
-	def attach_file(self, filename, content):
+	def dump_processed_data(self, data, filename):
 		f = frappe.get_doc({
 			"doctype": "File",
-			"file_name":  filename,
+			"file_name": filename + ".json",
 			"attached_to_doctype": self.doctype,
 			"attached_to_name": self.name,
-			"content": content,
+			"content": json.dumps(data),
 			"is_private": True
 		})
 		try:
 			f.insert()
+			f.reload()
 		except frappe.DuplicateEntryError:
 			pass
-		return f
+		return f.name
 	
-	def append_processed_file(self, args):
-		doc = frappe.new_doc("Tally Migration Processed File", self, "processed_files")
-		doc.update(args)
-		doc.db_insert()
-		self.append("processed_files", doc.as_dict())
-		return doc
-	
-	def make_data_import_doc(self, doctype, file_url):
-		doc = frappe.get_doc({
-			"doctype": "Data Import",
-			"reference_doctype": doctype,
-			"import_type": "Insert New Records",
-			"mute_emails": 1,
-			"import_file": file_url
-		})
-		doc.insert()
-		return doc
+	def fetch_processed_data(self, filename):
+		file = frappe.get_doc("File", filename)
+		content = file.get_content()
+		return json.loads(content)
 
 	def set_account_defaults(self):
 		self.default_cost_center, self.default_round_off_account = frappe.db.get_value("Company", self.erpnext_company, ["cost_center", "round_off_account"])
 		self.default_warehouse = frappe.db.get_value("Stock Settings", "Stock Settings", "default_warehouse")
 
 	def _process_master_data(self):
-		def get_company_name(collection):
-			return collection.find_all("REMOTECMPINFO.LIST")[0].REMOTECMPNAME.string.strip()
-
 		def get_coa_customers_suppliers(collection):
 			root_type_map = {
 				"Application of Funds (Assets)": "Asset",
@@ -287,55 +242,32 @@ class TallyMigration(Document):
 						"gst_state": (pincode_state or tally_state).title(),
 						"pincode": pincode,
 						"city": city,
-						"links": links
+						"links": links,
+						"flags": { "ignore_mandatory": True }
 					})
 			return customers, suppliers, addresses
 
-		def get_item_group_list(collection):
-			'''
-				Make multiple document list according to the parent child relation.
-				i.e create parent group list first then make child group list
-				Spliting into multiple list will create multiple csv files to be imported in right order
-			'''
-
-			parent_child_map = {}
-			root_group = "All Item Groups"
+		def get_item_groups(collection):
+			root = "All Item Groups"
+			item_groups = []
 
 			for item_group in collection.find_all("STOCKGROUP"):
-				item_group_name = item_group.NAME.string.strip().title()
-				parent_group_name = item_group.PARENT.string.strip().title() if item_group.PARENT else root_group
-				parent_child_map.setdefault(parent_group_name, []).append(item_group_name)
+				group_name = item_group.NAME.string.strip().title()
+				parent = item_group.PARENT.string.strip().title() if item_group.PARENT else root
 
-			def get_doc(name, parent):
-				return {
+				if parent != root:
+					for d in item_groups:
+						if d.get("item_group_name") == group_name:
+							d.setdefault("is_group", 1)
+							break
+
+				item_groups.append({
 					"doctype": "Item Group",
-					"item_group_name": name,
+					"item_group_name": group_name,
 					"parent_item_group": parent
-				}
-			
-			def update_group_doc(ordered_list, name):
-				for docs in ordered_list:
-					[d.setdefault("is_group", 1) for d in docs if d.get("item_group_name") == name]
-			
-			def get_child_groups_of(parent_group):
-				children = parent_child_map.get(parent_group) or []
-				return [get_doc(group, parent_group) for group in children]
-			
-			def get_sequential_list(lst, parent_group):
-				docs = get_child_groups_of(parent_group)
-				if docs:
-					if parent_group != root_group: update_group_doc(lst, parent_group)
-					lst.append(docs)
+				})
 
-				children = parent_child_map.get(parent_group) or []
-				for child in children:
-					get_sequential_list(lst, child)
-				
-				return lst
-
-			item_group_list = get_sequential_list([], root_group)
-
-			return item_group_list
+			return item_groups
 
 		def get_stock_items_uoms(collection):
 			uoms = []
@@ -357,126 +289,141 @@ class TallyMigration(Document):
 			return items, uoms
 
 		try:
-			self.publish("Process Master Data", _("Reading Uploaded File"), 1, 5)
+			self.publish(_("Reading Uploaded File"), 0, 4)
 			collection = self.get_collection(self.master_data)
 
-			self.publish("Process Master Data", _("Processing Chart of Accounts and Parties"), 2, 5)
+			self.publish(_("Processing Chart of Accounts and Parties"), 1, 4)
 			chart_of_accounts, customer_ledgers, supplier_ledgers = get_coa_customers_suppliers(collection)
 
-			self.publish("Process Master Data", _("Processing Party Addresses"), 3, 5)
+			self.publish(_("Processing Party Addresses"), 2, 4)
 			customers, suppliers, addresses = get_parties_addresses(collection, customer_ledgers, supplier_ledgers)
 
-			self.publish("Process Master Data", _("Processing Items and UOMs"), 4, 5)
+			self.publish(_("Processing Items, UOMs and Groups"), 3, 4)
 			items, uoms = get_stock_items_uoms(collection)
-			item_groups = get_item_group_list(collection)
+			item_groups = get_item_groups(collection)
 
-			f = self.attach_file('chart_of_accounts.json', json.dumps(chart_of_accounts))
-			args = dict(doctype_name='Account', import_type='Custom', file_url=f.file_url, method='import_coa')
-			self.append_processed_file(args)
+			data = uoms + item_groups + items[:100] + customers + suppliers + addresses[:20]
 
-			data = [uoms, item_groups, items, customers, suppliers, addresses]
-			self.dump_processed_data(data)
+			coa = self.dump_processed_data(chart_of_accounts, filename="chart_of_accounts")
+			masters = self.dump_processed_data(data, filename="masters")
 
-			self.publish("Process Master Data", _("Done"), 5, 5)
+			self.publish(_("Done"), 4, 4)
 
-			self.is_master_data_processed = 1
+			self.update_field("chart_of_accounts", coa)
+			self.update_field("masters", masters)
+			self.update_field("payload_length", len(data))
+			self.update_field("is_master_data_processed", 1)
 
 		except:
-			self.publish("Process Master Data", _("Process Failed"), -1, 5)
+			self.publish(_("Process Failed"), -1, 4)
 			self.log()
 
 		finally:
 			self.set_status()
-
-	def publish(self, title, message, count, total):
-		frappe.publish_realtime("tally_migration_progress_update", {"title": title, "message": message, "count": count, "total": total})
-
-	def import_coa(self, file):
-		coa_file = frappe.get_doc("File", {"file_url": file})
-		unset_existing_data(self.erpnext_company)
-		create_charts(self.erpnext_company, custom_chart=json.loads(coa_file.get_content()))
+	
+	def import_coa(self):
+		coa = self.fetch_processed_data(self.chart_of_accounts)
 		company = frappe.get_doc("Company", self.erpnext_company)
-		company.validate()
+
+		frappe.local.flags.ignore_chart_of_accounts = True
+		unset_existing_data(self.erpnext_company)
+		create_charts(company.name, custom_chart=coa)
 		company.on_update()
-		frappe.get_doc("Tally Migration Processed File", { "file_url": file }).db_set("status", "Success")
+		company.validate()
+		frappe.local.flags.ignore_chart_of_accounts = False
+
+		self.update_field("is_chart_of_accounts_imported", 1)
 
 	def _import_master_data(self):
-		def create_company_and_coa(coa_file_url):
-			coa_file = frappe.get_doc("File", {"file_url": coa_file_url})
-			frappe.local.flags.ignore_chart_of_accounts = True
-
-			try:
-				company = frappe.get_doc({
-					"doctype": "Company",
-					"company_name": self.erpnext_company,
-					"default_currency": "INR",
-					"enable_perpetual_inventory": 0,
-				}).insert()
-			except frappe.DuplicateEntryError:
-				company = frappe.get_doc("Company", self.erpnext_company)
-				unset_existing_data(self.erpnext_company)
-
-			frappe.local.flags.ignore_chart_of_accounts = False
-			create_charts(company.name, custom_chart=json.loads(coa_file.get_content()))
-			company.on_update()
-
-		def create_parties_and_addresses(parties_file_url, addresses_file_url):
-			parties_file = frappe.get_doc("File", {"file_url": parties_file_url})
-			for party in json.loads(parties_file.get_content()):
-				try:
-					party_doc = frappe.get_doc(party)
-					party_doc.insert()
-				except:
-					self.log(party_doc)
-			addresses_file = frappe.get_doc("File", {"file_url": addresses_file_url})
-			for address in json.loads(addresses_file.get_content()):
-				try:
-					address_doc = frappe.get_doc(address)
-					address_doc.insert(ignore_mandatory=True)
-				except:
-					self.log(address_doc)
-
-		def create_items_uoms(items_file_url, uoms_file_url):
-			uoms_file = frappe.get_doc("File", {"file_url": uoms_file_url})
-			for uom in json.loads(uoms_file.get_content()):
-				if not frappe.db.exists(uom):
-					try:
-						uom_doc = frappe.get_doc(uom)
-						uom_doc.insert()
-					except:
-						self.log(uom_doc)
-
-			items_file = frappe.get_doc("File", {"file_url": items_file_url})
-			for item in json.loads(items_file.get_content()):
-				try:
-					item_doc = frappe.get_doc(item)
-					item_doc.insert()
-				except:
-					self.log(item_doc)
-
 		try:
-			self.publish("Import Master Data", _("Creating Company and Importing Chart of Accounts"), 1, 4)
-			create_company_and_coa(self.chart_of_accounts)
+			progress_total = self.payload_length + 1
 
-			self.publish("Import Master Data", _("Importing Parties and Addresses"), 2, 4)
-			create_parties_and_addresses(self.parties, self.addresses)
+			if not self.is_chart_of_accounts_imported:
+				self.publish(_("Importing Chart of Accounts"), 0, progress_total)
+				self.import_coa()
 
-			self.publish("Import Master Data", _("Importing Items and UOMs"), 3, 4)
-			create_items_uoms(self.items, self.uoms)
+			masters = self.fetch_processed_data(self.masters)
+			skipped_docs, error_log = self.start_import(masters)
 
-			self.publish("Import Master Data", _("Done"), 4, 4)
+			remaining_masters = self.dump_processed_data(skipped_docs, "masters")
+			self.update_field("masters", remaining_masters)
+			self.update_field("payload_length", len(skipped_docs))
 
-			self.set_account_defaults()
-			self.is_master_data_imported = 1
-			frappe.db.commit()
+			if not skipped_docs and not error_log:
+				self.publish(_("Master Data Import Complete"), 1, 1)
+				self.after_master_data_import()
+			else:
+				self.publish(_("Resolve Errors and Try Again"), 1, 1)
 
 		except:
-			self.publish("Import Master Data", _("Process Failed"), -1, 5)
+			self.publish(_("Process Failed"), -1, progress_total)
 			frappe.db.rollback()
 			self.log()
 
 		finally:
 			self.set_status()
+	
+	def after_master_data_import(self):
+		self.set_account_defaults()
+		self.update_field("is_master_data_imported", 1)
+	
+	def get_dependencies(self, doctype):
+		return {
+			"Item": set(("UOM", "Item Group")),
+			"Address": set(("Customer", "Supplier"))
+		}.get(doctype, set())
+	
+	def start_import(self, data):
+		error_log = json.loads(self.error_log)
+		error_log = [d for d in error_log if d["status"] == "Failed"]
+		progress_total = len(data)
+		skipped_docs = []
+
+		for i, doc in enumerate(data):
+			try:
+				doctype = doc['doctype']
+				dependent_on = self.get_dependencies(doctype)
+				errored_doctypes = set([d["doc"]["doctype"] for d in error_log])
+
+				if dependent_on & errored_doctypes:
+					skipped_docs.append(doc)
+					self.publish(_("Skipping {}").format(doctype), i + 1, progress_total)
+					continue
+				
+				self.publish(_("Importing {}").format(doctype), i + 1, progress_total)
+
+				flags = doc.pop("flags") if doc.get("flags") else {}
+				d = frappe.get_doc(doc)
+				d.flags.update(flags)
+				d.insert()
+				frappe.db.commit()
+			except Exception as e:
+				frappe.db.rollback()
+				error = str(e)
+
+				if len(e.args) == 3 and frappe.db.is_unique_key_violation(e.args[2]):
+					error = _("{0} named {1} already exists").format(doctype, frappe.bold(d.name))
+
+				error_log.append({ "doc": doc, "error": error, "status": "Failed" })
+
+		self.update_field("error_log", json.dumps(error_log))
+
+		return skipped_docs, error_log
+	
+	def publish(self, message, progress, total):
+		frappe.publish_realtime("tally_migration_progress_update", {
+			"title": "Tally Migration",
+			"progress": progress,
+			"total": total,
+			"user": frappe.session.user,
+			"message": message
+		})
+	
+	def set_status(self, status=""):
+		self.update_field("status", status)
+
+	def update_field(self, field, value):
+		self.db_set(field, value, update_modified=False, commit=True)
 
 	def _process_day_book_data(self):
 		def get_vouchers(collection):
@@ -743,7 +690,7 @@ class TallyMigration(Document):
 					"doc": doc,
 					"exc": traceback.format_exc()
 				})
-				self.failed_import_log = json.dumps(failed_import_log, separators=(',', ':'))
+				self.failed_import_log = json.dumps(failed_import_log, separators=(",", ":"))
 				self.save()
 				frappe.db.commit()
 
@@ -751,96 +698,3 @@ class TallyMigration(Document):
 			data = data or self.status
 			message = "\n".join(["Data:", json.dumps(data, default=str, indent=4), "--" * 50, "\nException:", traceback.format_exc()])
 			return frappe.log_error(title="Tally Migration Error", message=message)
-
-	def set_status(self, status=""):
-		self.status = status
-		self.save()
-
-
-def convert_fieldnames_to_labels(labelled_docs, doctype, docs):
-	'''Converts fieldnames to field labels for easier csv header creation. Also helps in mapping data to proper columns.'''
-	meta = frappe.get_meta(doctype)
-	for doc in docs:
-		labelled_doc = {}
-		for fieldname, value in doc.items():
-			if fieldname == "doctype": continue
-
-			label = meta.get_label(fieldname)
-			if isinstance(value, list) and value:
-				labelled_child_docs = convert_fieldnames_to_labels([], meta.get_options(fieldname), value)
-				labelled_doc[label] = labelled_child_docs
-				continue
-			labelled_doc[label] = doc[fieldname]
-		labelled_docs.append(labelled_doc)
-	return labelled_docs
-
-def make_header(header, labelled_docs, parent_label=None):
-	'''loop over every doc and child doc and extract unique labels (columns)'''
-	for doc in labelled_docs:
-		for label, value in doc.items():
-			if label == "doctype": continue
-
-			is_list = type(value) is list
-			col = "{} ({})".format(label, parent_label) if parent_label else label
-			if not is_list and col not in header:
-				header.append(col)
-			elif is_list and value:
-				make_header(header, value, label)
-
-	return ["ID"] + header
-
-def make_csv_rows_from_doc(header, doc, has_tables=False):
-	def get_single_row(doc):
-		row = ['' for d in header] # make empty row
-		for i, col in enumerate(header):
-			if doc.get(col):
-				row[i] = doc[col] # put doc value at proper header column
-		return row
-
-	if not has_tables:
-		return [get_single_row(doc)]
-
-	docs = split_nested_doc(doc)
-	rows = []
-	for d in docs:
-		rows.append(get_single_row(d))
-	return rows
-
-def split_nested_doc(doc):
-	dict_rows = [{}] # doc will be splitted into multiple dicts depening upon child items
-	child_tables = [label for label, value in doc.items() if isinstance(value, list) and len(value) > 1]
-
-	#make first row
-	for label, value in doc.items():
-		dict_row_one = dict_rows[0]
-		if isinstance(value, list) and value:
-			for child_label, child_value in value[0].items(): # only append values from first row of every child table
-				header_label = "{} ({})".format(child_label, label)
-				dict_row_one[header_label] = child_value
-		else:
-			dict_row_one[label] = value
-
-	# loop over child tables in the doc and make new dict for each row
-	for parent_label in child_tables:
-		child_docs = doc[parent_label][1:] # skip first row
-		for child_doc in child_docs:
-			dict_row = {}
-			for child_label, child_value in child_doc.items():
-				header_label = "{} ({})".format(child_label, parent_label)
-				dict_row[header_label] = child_value
-			dict_rows.append(row)
-
-	return dict_rows
-
-def make_csv_for_data_import(doctype, docs):
-	labelled_docs = convert_fieldnames_to_labels([], doctype, docs)
-	header = make_header([], labelled_docs)
-	has_tables = any([d for d in header if '(' in d])
-
-	csv_array = [header]
-	for doc in labelled_docs:
-		csv_array += make_csv_rows_from_doc(header, doc, has_tables)
-
-	csv_content = cstr(to_csv(csv_array))
-
-	return csv_content
