@@ -1002,6 +1002,7 @@ class PurchaseInvoice(BuyingController):
 			round_off_account, round_off_cost_center = \
 				get_round_off_account_and_cost_center(self.company)
 			round_off_account_currency = get_account_currency(round_off_account)
+			billing_party_type, billing_party = self.get_billing_party()
 
 			gl_entries.append(
 				self.get_gl_dict({
