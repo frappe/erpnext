@@ -813,7 +813,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	vehicle: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 
-		if (item && item.vehicle) {
+		if (item && item.vehicle && !item.item_code) {
 			this.frm.trigger("item_code", cdt, cdn);
 		}
 	},
@@ -2012,11 +2012,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					me.set_item_defaults(r.message.items);
 
 					$.each(r.message.doc || {}, function (k, v) {
-						if (k === 'cost_center') {
-							me.frm.doc[k] = v;
-							me.frm.refresh_field('cost_center');
-						} else {
-							me.frm.set_value(k, v);
+						if (me.frm.fields_dict[k]) {
+							if (k === 'cost_center') {
+								me.frm.doc[k] = v;
+								me.frm.refresh_field('cost_center');
+							} else {
+								me.frm.set_value(k, v);
+							}
 						}
 					});
 
