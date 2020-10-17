@@ -11,7 +11,7 @@ from frappe.core.doctype.communication.email import make
 
 from frappe.utils.print_format import report_to_pdf
 from frappe.utils.pdf import get_pdf
-from frappe.utils import today, add_days, add_months, getdate, format_date
+from frappe.utils import today, add_days, add_months, getdate, formatdate
 from frappe.utils.jinja import validate_template
 
 import copy
@@ -149,8 +149,8 @@ def get_recipients_and_cc(customer, doc):
 def get_context(customer, doc):
 	template_doc = copy.deepcopy(doc)
 	del template_doc.customers
-	template_doc.from_date = format_date(template_doc.from_date)
-	template_doc.to_date = format_date(template_doc.to_date)
+	template_doc.from_date = formatdate(template_doc.from_date)
+	template_doc.to_date = formatdate(template_doc.to_date)
 	return {
 		'doc': template_doc,
 		'customer': frappe.get_doc('Customer', customer),
@@ -265,7 +265,7 @@ def send_emails(document_name, from_scheduler=False):
 
 @frappe.whitelist()
 def send_auto_email():
-	selected = frappe.get_list('Process Statement Of Accounts', filters={'to_date': format_date(today()), 'enable_auto_email': 1})
+	selected = frappe.get_list('Process Statement Of Accounts', filters={'to_date': formatdate(today()), 'enable_auto_email': 1})
 	for entry in selected:
 		send_emails(entry.name, from_scheduler=True)
 	return True
