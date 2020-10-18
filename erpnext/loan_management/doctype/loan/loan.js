@@ -64,12 +64,13 @@ frappe.ui.form.on('Loan', {
 				frm.add_custom_button(__('Request Loan Closure'), function() {
 					frm.trigger("request_loan_closure");
 				},__('Status'));
+
 				frm.add_custom_button(__('Loan Repayment'), function() {
 					frm.trigger("make_repayment_entry");
 				},__('Create'));
 			}
 
-			if (frm.doc.status == "Sanctioned" || frm.doc.status == 'Partially Disbursed') {
+			if (["Sanctioned", "Partially Disbursed"].includes(frm.doc.status)) {
 				frm.add_custom_button(__('Loan Disbursement'), function() {
 					frm.trigger("make_loan_disbursement");
 				},__('Create'));
@@ -78,6 +79,12 @@ frappe.ui.form.on('Loan', {
 			if (frm.doc.status == "Loan Closure Requested") {
 				frm.add_custom_button(__('Loan Security Unpledge'), function() {
 					frm.trigger("create_loan_security_unpledge");
+				},__('Create'));
+			}
+
+			if (["Loan Closure Requested", "Disbursed", "Partially Disbursed"].includes(frm.doc.status)) {
+				frm.add_custom_button(__('Loan Write Off'), function() {
+					frm.trigger("make_loan_write_off_entry");
 				},__('Create'));
 			}
 		}
@@ -122,6 +129,22 @@ frappe.ui.form.on('Loan', {
 				"as_dict": 1
 			},
 			method: "erpnext.loan_management.doctype.loan.loan.make_repayment_entry",
+			callback: function (r) {
+				if (r.message)
+					var doc = frappe.model.sync(r.message)[0];
+				frappe.set_route("Form", doc.doctype, doc.name);
+			}
+		})
+	},
+
+	make_loan_write_off_entry: function(frm) {
+		frappe.call({
+			args: {
+				"loan": frm.doc.name,
+				"company": frm.doc.company,
+				"as_dict": 1
+			},
+			method: "erpnext.loan_management.doctype.loan.loan.make_loan_write_off",
 			callback: function (r) {
 				if (r.message)
 					var doc = frappe.model.sync(r.message)[0];

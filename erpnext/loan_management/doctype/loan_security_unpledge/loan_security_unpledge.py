@@ -42,10 +42,10 @@ class LoanSecurityUnpledge(Document):
 				"valid_upto": (">=", get_datetime())
 			}, as_list=1))
 
-		total_payment, principal_paid, interest_payable = frappe.get_value("Loan", self.loan, ['total_payment', 'total_principal_paid',
-			'total_interest_payable'])
+		total_payment, principal_paid, interest_payable, written_off_amount = frappe.get_value("Loan", self.loan, ['total_payment', 'total_principal_paid',
+			'total_interest_payable', 'written_off_amount'])
 
-		pending_principal_amount = flt(total_payment) - flt(interest_payable) - flt(principal_paid)
+		pending_principal_amount = flt(total_payment) - flt(interest_payable) - flt(principal_paid) - flt(written_off_amount)
 		security_value = 0
 
 		for security in self.securities:
