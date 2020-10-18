@@ -28,7 +28,7 @@ class FBRInvoiceWiseTaxes(object):
 
 		data = self.get_data()
 		columns = self.get_columns()
-		return columns, data
+		return columns, data, None, None, None, cint(self.filters.for_export)
 
 	def get_columns(self):
 		columns = [
@@ -186,7 +186,11 @@ class FBRInvoiceWiseTaxes(object):
 
 				d.business_name = d.party
 
-		return sorted(customer_rows.values(), key=lambda d: d.party)
+		result = sorted(customer_rows.values(), key=lambda d: d.party)
+		for i, d in enumerate(result):
+			d.sr_no = i+1
+
+		return result
 
 	def get_customer_details(self, customers):
 		if not customers:

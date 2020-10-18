@@ -26,10 +26,17 @@ class FBRInvoiceWiseTaxes(object):
 
 		data = self.get_data()
 		columns = self.get_columns()
-		return columns, data
+		return columns, data, None, None, None, cint(self.filters.for_export)
 
 	def get_columns(self):
 		columns = [
+			{
+				"label": _("Sr."),
+				"fieldtype": "Int",
+				"fieldname": "sr_no",
+				"width": 40,
+				"hide_for_view": 1
+			},
 			{
 				"label": _("NTN"),
 				"fieldtype": "Data",
@@ -198,6 +205,9 @@ class FBRInvoiceWiseTaxes(object):
 
 			if tax_field:
 				invoices_map[tax.invoice][tax_field] += flt(tax.amount)
+
+		for i, d in enumerate(self.invoices):
+			d.sr_no = i+1
 
 		return self.invoices
 
