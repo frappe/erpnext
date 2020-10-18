@@ -30,9 +30,9 @@ class BuyingController(StockController):
 			}
 
 	def get_feed(self):
-		if self.get("supplier_name"):
-			return _("From {0} | {1} {2}").format(self.supplier_name, self.currency,
-				self.grand_total)
+		if self.get("supplier_name") or self.get("supplier"):
+			return _("From {0} | {1} {2}").format(self.get("supplier_name") or self.get("supplier"), self.currency,
+				self.get_formatted("grand_total"))
 
 	def validate(self):
 		super(BuyingController, self).validate()

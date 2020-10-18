@@ -26,8 +26,9 @@ class SellingController(StockController):
 			}
 
 	def get_feed(self):
-		return _("To {0} | {1} {2}").format(self.customer_name, self.currency,
-			self.grand_total)
+		if self.get("customer_name") or self.get("customer"):
+			return _("To {0} | {1} {2}").format(self.get("customer_name") or self.get("customer"), self.currency,
+				self.get_formatted("grand_total"))
 
 	def onload(self):
 		super(SellingController, self).onload()

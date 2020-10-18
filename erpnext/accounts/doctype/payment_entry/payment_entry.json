@@ -672,7 +672,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-10-16 23:20:20.193408",
+ "modified": "2020-10-18 15:59:21.423955",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
@@ -722,6 +722,7 @@
  "show_name_in_global_search": 1,
  "sort_field": "posting_date",
  "sort_order": "DESC",
+ "timeline_field": "party",
  "title_field": "title",
  "track_changes": 1,
  "track_seen": 1

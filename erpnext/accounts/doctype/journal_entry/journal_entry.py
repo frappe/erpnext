@@ -18,7 +18,22 @@ class JournalEntry(AccountsController):
 		super(JournalEntry, self).__init__(*args, **kwargs)
 
 	def get_feed(self):
-		return self.voucher_type
+		parties = set()
+
+		for d in self.get('accounts', []):
+			if d.party_type and d.party:
+				parties.add((d.party_type, d.party))
+
+		parties = list(set(parties))
+		party_type = party = None
+		if len(parties) == 1:
+			party_type, party = parties[0]
+
+		return {
+			"subject": _("{0}: {1} {2}").format(self.voucher_type, self.company_currency, self.get_formatted("total_debit")),
+			"timeline_doctype": party_type,
+			"timeline_name": party
+		}
 
 	def validate(self):
 		if not self.is_opening:

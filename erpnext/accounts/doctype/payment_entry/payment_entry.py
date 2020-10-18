@@ -30,6 +30,11 @@ class PaymentEntry(AccountsController):
 		if not self.is_new():
 			self.setup_party_account_field()
 
+	def get_feed(self):
+		currency = self.paid_to_account_currency if self.payment_type == "Receive" else self.paid_from_account_currency
+		amount_field = "received_amount" if self.payment_type == "Receive" else "paid_amount"
+		return _("{0}: {1} {2}").format(self.payment_type, currency, self.get_formatted(amount_field))
+
 	def setup_party_account_field(self):
 		self.party_account_field = None
 		self.party_account = None
