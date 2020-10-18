@@ -31,8 +31,8 @@ class LoanRepayment(AccountsController):
 
 	def on_cancel(self):
 		self.mark_as_unpaid()
-		self.make_gl_entries(cancel=1)
 		self.ignore_linked_doctypes = ['GL Entry']
+		self.make_gl_entries(cancel=1)
 
 	def set_missing_values(self, amounts):
 		precision = cint(frappe.db.get_default("currency_precision")) or 2
@@ -235,7 +235,7 @@ class LoanRepayment(AccountsController):
 				"against": loan_details.loan_account + ", " + loan_details.interest_income_account
 						+ ", " + loan_details.penalty_income_account,
 				"debit": self.amount_paid,
-				"debit_in_account_currency": self.amount_paid ,
+				"debit_in_account_currency": self.amount_paid,
 				"against_voucher_type": "Loan",
 				"against_voucher": self.against_loan,
 				"remarks": _("Against Loan:") + self.against_loan,
@@ -344,9 +344,11 @@ def get_amounts(amounts, against_loan, posting_date):
 			final_due_date = add_days(due_date, loan_type_details.grace_period_in_days)
 
 	if against_loan_doc.status in ('Disbursed', 'Loan Closure Requested', 'Closed'):
-		pending_principal_amount = against_loan_doc.total_payment - against_loan_doc.total_principal_paid - against_loan_doc.total_interest_payable
+		pending_principal_amount = against_loan_doc.total_payment - against_loan_doc.total_principal_paid \
+			- against_loan_doc.total_interest_payable - against_loan_doc.written_off_amount
 	else:
-		pending_principal_amount = against_loan_doc.disbursed_amount
+		pending_principal_amount = against_loan_doc.disbursed_amount - against_loan_doc.total_principal_paid \
+			- against_loan_doc.total_interest_payable - against_loan_doc.written_off_amount
 
 	unaccrued_interest = 0
 	if due_date:
