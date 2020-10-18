@@ -3130,7 +3130,6 @@ Total contribution percentage should be equal to 100,کل درصد سهم بای
 Total flexible benefit component amount {0} should not be less than max benefits {1},مقدار کامپوننت منعطف انعطاف پذیر {0} نباید کمتر از مزایای حداکثر باشد {1},
 Total hours: {0},کل ساعت: {0},
 Total leaves allocated is mandatory for Leave Type {0},مجموع برگ ها اختصاص داده شده برای نوع ترک {0} اجباری است,
-Total weightage assigned should be 100%. It is {0},بین وزنها مجموع اختصاص داده باید 100٪ باشد. این {0},
 Total working hours should not be greater than max working hours {0},کل ساعات کار نباید از ساعات کار حداکثر است بیشتر {0},
 Total {0} ({1}),مجموع {0} ({1}),
 "Total {0} for all items is zero, may be you should change 'Distribute Charges Based On'",مجموع {0} برای همه موارد صفر است، ممکن است شما باید &#39;اتهامات بر اساس توزیع را تغییر,
@@ -3997,6 +3996,7 @@ Refreshing,تازه کردن,
 Release date must be in the future,تاریخ انتشار باید در آینده باشد,
 Relieving Date must be greater than or equal to Date of Joining,Relieve Date باید بیشتر یا مساوی تاریخ عضویت باشد,
 Rename,تغییر نام,
+Rename Not Allowed,تغییر نام مجاز نیست,
 Repayment Method is mandatory for term loans,روش بازپرداخت برای وام های کوتاه مدت الزامی است,
 Repayment Start Date is mandatory for term loans,تاریخ شروع بازپرداخت برای وام های کوتاه مدت الزامی است,
 Report Item,گزارش مورد,
@@ -4546,7 +4546,6 @@ Role that is allowed to submit transactions that exceed credit limits set.,نق�
 Check Supplier Invoice Number Uniqueness,بررسی تولید کننده فاکتور شماره منحصر به فرد,
 Make Payment via Journal Entry,پرداخت از طریق ورود مجله,
 Unlink Payment on Cancellation of Invoice,قطع ارتباط پرداخت در لغو فاکتور,
-Unlink Advance Payment on Cancelation of Order,پیوند پیش پرداخت را با لغو سفارش لغو پیوند دهید,
 Book Asset Depreciation Entry Automatically,کتاب دارایی ورودی استهلاک به صورت خودکار,
 Automatically Add Taxes and Charges from Item Tax Template,به طور خودکار مالیات و عوارض را از الگوی مالیات مورد اضافه کنید,
 Automatically Fetch Payment Terms,شرایط پرداخت به صورت خودکار را اخذ کنید,
@@ -6481,7 +6480,6 @@ HR-APR-.YY.-.MM.,HR-APR--YY.-MM.,
 Appraisal Template,ارزیابی الگو,
 For Employee Name,نام کارمند,
 Goals,اهداف,
-Calculate Total Score,محاسبه مجموع امتیاز,
 Total Score (Out of 5),نمره کل (از 5),
 "Any other remarks, noteworthy effort that should go in the records.",هر گونه اظهارات دیگر، تلاش قابل توجه است که باید در پرونده بروید.,
 Appraisal Goal,ارزیابی هدف,
@@ -9603,3 +9601,11 @@ Email Sent to Supplier {0},ایمیل به تأمین کننده ارسال شد
 "The Access to Request for Quotation From Portal is Disabled. To Allow Access, Enable it in Portal Settings.",دسترسی به درخواست قیمت از پورتال غیرفعال است. برای اجازه دسترسی ، آن را در تنظیمات پورتال فعال کنید.,
 Supplier Quotation {0} Created,قیمت عرضه کننده {0} ایجاد شد,
 Valid till Date cannot be before Transaction Date,معتبر تا تاریخ نمی تواند قبل از تاریخ معامله باشد,
+Unlink Advance Payment on Cancellation of Order,پیش پرداخت لغو سفارش را لغو پیوند کنید,
+"Simple Python Expression, Example: territory != 'All Territories'",بیان ساده پایتون ، مثال: Territory! = &#39;All Territories&#39;,
+Sales Contributions and Incentives,مشارکت ها و مشوق های فروش,
+Sourced by Supplier,منبع تأمین کننده,
+Total weightage assigned should be 100%.<br>It is {0},وزن کل اختصاص داده شده باید 100٪ باشد.<br> این {0} است,
+Account {0} exists in parent company {1}.,حساب {0} در شرکت مادر وجود دارد {1}.,
+"To overrule this, enable '{0}' in company {1}",برای کنار گذاشتن این مورد ، &quot;{0}&quot; را در شرکت {1} فعال کنید,
+Invalid condition expression,بیان شرط نامعتبر است,
