@@ -89,9 +89,10 @@ def calculate_accrual_amount_for_demand_loans(loan, posting_date, process_loan_i
 
 	if loan.status == 'Disbursed':
 		pending_principal_amount = flt(loan.total_payment) - flt(loan.total_interest_payable) \
-			- flt(loan.total_principal_paid)
+			- flt(loan.total_principal_paid) - flt(loan.written_off_amount)
 	else:
-		pending_principal_amount = loan.disbursed_amount
+		pending_principal_amount = flt(loan.disbursed_amount) - flt(loan.total_interest_payable) \
+			- flt(loan.total_principal_paid) - flt(loan.written_off_amount)
 
 	interest_per_day = get_per_day_interest(pending_principal_amount, loan.rate_of_interest, posting_date)
 	payable_interest = interest_per_day * no_of_days
@@ -128,7 +129,7 @@ def make_accrual_interest_entry_for_demand_loans(posting_date, process_loan_inte
 		open_loans = frappe.get_all("Loan",
 			fields=["name", "total_payment", "total_amount_paid", "loan_account", "interest_income_account",
 				"is_term_loan", "status", "disbursement_date", "disbursed_amount", "applicant_type", "applicant",
-				"rate_of_interest", "total_interest_payable", "total_principal_paid", "repayment_start_date"],
+				"rate_of_interest", "total_interest_payable", "written_off_amount", "total_principal_paid", "repayment_start_date"],
 			filters=query_filters)
 
 	for loan in open_loans:
@@ -239,5 +240,5 @@ def get_per_day_interest(principal_amount, rate_of_interest, posting_date=None):
 
 	precision = cint(frappe.db.get_default("currency_precision")) or 2
 
-	return flt((principal_amount * rate_of_interest) / (days_in_year(get_datetime(posting_date).year) * 100), 2)
+	return flt((principal_amount * rate_of_interest) / (days_in_year(get_datetime(posting_date).year) * 100), precision)
 
