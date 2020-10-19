@@ -7,6 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "abbr",
+  "applicable_for_leave_application",
+  "applicable_for_employee_checkins",
   "column_break_2",
   "is_half_day",
   "is_leave",
@@ -41,11 +43,27 @@
   {
    "fieldname": "column_break_2",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.is_half_day || doc.is_leave",
+   "description": "Will be used as default Status while <b>Attendance</b> creation during <b>Leave application approval</b>. ",
+   "fieldname": "applicable_for_leave_application",
+   "fieldtype": "Check",
+   "label": "Applicable for Leave Application"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: !doc.is_leave",
+   "description": "Will be used as default status while creation of attendance through <b>Shift Type</b> and <b>Employee Checkin</b> ",
+   "fieldname": "applicable_for_employee_checkins",
+   "fieldtype": "Check",
+   "label": "Applicable for Employee Checkins"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-10-15 13:55:10.414559",
+ "modified": "2020-10-19 13:53:58.108881",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance Status",
