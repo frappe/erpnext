@@ -37,7 +37,7 @@ frappe.query_reports["Batch-Wise Balance History"] = {
 					filters: {
 						"has_batch_no": 1
 					}
-				}
+				};
 			}
 		},
 		{
@@ -51,7 +51,7 @@ frappe.query_reports["Batch-Wise Balance History"] = {
 					filters: {
 						"company": company
 					}
-				}
+				};
 			}
 		},
 		{
@@ -65,7 +65,7 @@ frappe.query_reports["Batch-Wise Balance History"] = {
 					filters: {
 						"item": item_code
 					}
-				}
+				};
 			}
 		},
 	],
