@@ -683,6 +683,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 		where
 			party_type = %(party_type)s and party = %(party)s
 			and account = %(account)s and {dr_or_cr} > 0
+			and is_cancelled=0
 			{condition}
 			and ((voucher_type = 'Journal Entry'
 					and (against_voucher = '' or against_voucher is null))
@@ -705,6 +706,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 			and account = %(account)s
 			and {payment_dr_or_cr} > 0
 			and against_voucher is not null and against_voucher != ''
+			and is_cancelled=0
 		group by against_voucher_type, against_voucher
 	""".format(payment_dr_or_cr=payment_dr_or_cr), {
 		"party_type": party_type,
