@@ -245,14 +245,14 @@ def get_conditions_join(filters):
 	return conditions
 
 def get_reverse_charge_recoverable_total(filters):
-	"""Returns the sum of the total of each Purchase invoice made with claimable reverse charge."""
+	"""Returns the sum of the total of each Purchase invoice made with recoverable reverse charge."""
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select sum(total)  from
 		`tabPurchase Invoice`
 		where
 		reverse_charge = "Y"
-		and claimable_reverse_charge > 0
+		and recoverable_reverse_charge > 0
 		and docstatus = 1 {where_conditions} ;
 		""".format(where_conditions=conditions), filters)[0][0] or 0
 
@@ -260,26 +260,26 @@ def get_reverse_charge_recoverable_tax(filters):
 	"""Returns the sum of the tax of each Purchase invoice made."""
 	conditions = get_conditions_join(filters)
 	return frappe.db.sql("""
-		select sum(debit * `tabPurchase Invoice`.claimable_reverse_charge / 100)  from
+		select sum(debit * `tabPurchase Invoice`.recoverable_reverse_charge / 100)  from
 		`tabPurchase Invoice`  inner join `tabGL Entry`
 		on `tabGL Entry`.voucher_no = `tabPurchase Invoice`.name
 		where
 		`tabPurchase Invoice`.reverse_charge = "Y"
 		and `tabPurchase Invoice`.docstatus = 1
-		and `tabPurchase Invoice`.claimable_reverse_charge > 0
+		and `tabPurchase Invoice`.recoverable_reverse_charge > 0
 		and `tabGL Entry`.docstatus = 1
 		and account in (select account from `tabUAE VAT Account` where  parent=%(company)s)
 		{where_conditions} ;
 		""".format(where_conditions=conditions), filters)[0][0] or 0
 
 def get_standard_rated_expenses_total(filters):
-	"""Returns the sum of the total of each Purchase invoice made with claimable reverse charge."""
+	"""Returns the sum of the total of each Purchase invoice made with recoverable reverse charge."""
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select sum(total)  from
 		`tabPurchase Invoice`
 		where
-		claimable_standard_rated_expenses > 0
+		recoverable_standard_rated_expenses > 0
 		and docstatus = 1 {where_conditions} ;
 		""".format(where_conditions=conditions), filters)[0][0] or 0
 
@@ -287,10 +287,10 @@ def get_standard_rated_expenses_tax(filters):
 	"""Returns the sum of the tax of each Purchase invoice made."""
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
-		select sum(claimable_standard_rated_expenses)  from
+		select sum(recoverable_standard_rated_expenses)  from
 		`tabPurchase Invoice`
 		where
-		claimable_standard_rated_expenses > 0
+		recoverable_standard_rated_expenses > 0
 		and docstatus = 1 {where_conditions} ;
 		""".format(where_conditions=conditions), filters)[0][0] or 0
 
