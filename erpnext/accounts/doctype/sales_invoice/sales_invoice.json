@@ -19,6 +19,7 @@
   "is_return",
   "column_break1",
   "company",
+  "company_tax_id",
   "posting_date",
   "posting_time",
   "set_posting_time",
@@ -1825,7 +1826,7 @@
    "fieldtype": "Table",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Sales Team1",
+   "label": "Sales Contributions and Incentives",
    "oldfieldname": "sales_team",
    "oldfieldtype": "Table",
    "options": "Sales Team",
@@ -1926,6 +1927,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:(doc.is_pos && doc.is_consolidated)",
    "fieldname": "is_consolidated",
    "fieldtype": "Check",
    "label": "Is Consolidated",
@@ -1940,13 +1942,20 @@
    "hide_seconds": 1,
    "label": "Is Internal Customer",
    "read_only": 1
+  },
+  {
+   "fetch_from": "company.tax_id",
+   "fieldname": "company_tax_id",
+   "fieldtype": "Data",
+   "label": "Company Tax ID",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-27 01:56:28.532140",
+ "modified": "2020-10-09 15:59:57.544736",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
