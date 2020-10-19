@@ -147,5 +147,5 @@ def validate_returns(doc, method):
 	country = frappe.get_cached_value('Company', doc.company, 'country')
 	if country != 'United Arab Emirates':
 		return
-	if doc.reverse_charge == 'Y' and  flt(doc.claimable_standard_rated_expenses) != 0:
-		frappe.throw(_("Claimable Standard Rated expenses should not be set when Reverse Charge Applicable is Y"))
+	if doc.reverse_charge == 'Y' and  flt(doc.recoverable_standard_rated_expenses) != 0:
+		frappe.throw(_("Recoverable Standard Rated expenses should not be set when Reverse Charge Applicable is Y"))
