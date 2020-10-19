@@ -16,7 +16,9 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 	display_items_in_stock = 0
 
 	if pos_profile:
-		warehouse, display_items_in_stock = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'display_items_in_stock'])
+		warehouse, display_items_in_stock, hide_unavailable_items = frappe.db.get_value(
+			'POS Profile', pos_profile, ['warehouse', 'display_items_in_stock', 'hide_unavailable_items']
+		)
 
 	if not frappe.db.exists('Item Group', item_group):
 		item_group = get_root_of('Item Group')
@@ -37,24 +39,31 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 	lft, rgt = frappe.db.get_value('Item Group', item_group, ['lft', 'rgt'])
 	# locate function is used to sort by closest match from the beginning of the value
 
+	bin_join = bin_cond = ""
+	if hide_unavailable_items:
+		bin_join = ",`tabBin` b"
+		bin_cond = "and i.item_code = b.item_code and ifnull(b.actual_qty, 0) > 0 "
+		if warehouse:
+			bin_cond += "and b.warehouse = {}".format(frappe.db.escape(warehouse))
+
 	result = []
 
 	items_data = frappe.db.sql("""
 		SELECT
-			name AS item_code,
-			item_name,
-			stock_uom,
-			image AS item_image,
-			idx AS idx,
-			is_stock_item
+			i.name AS item_code,
+			i.item_name,
+			i.stock_uom,
+			i.image AS item_image,
+			i.idx AS idx,
+			i.is_stock_item
 		FROM
-			`tabItem`
+			`tabItem` i {bin_join}
 		WHERE
 			disabled = 0
-				AND has_variants = 0
-				AND is_sales_item = 1
-				AND item_group in (SELECT name FROM `tabItem Group` WHERE lft >= {lft} AND rgt <= {rgt})
-				AND {condition}
+				AND i.has_variants = 0
+				AND i.is_sales_item = 1
+				AND i.item_group in (SELECT name FROM `tabItem Group` WHERE lft >= {lft} AND rgt <= {rgt})
+				{condition} {bin_cond}
 		ORDER BY
 			idx desc
 		LIMIT
@@ -64,7 +73,9 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 			page_length=page_length,
 			lft=lft,
 			rgt=rgt,
-			condition=condition
+			condition=condition,
+			bin_join=bin_join,
+			bin_cond=bin_cond
 		), as_dict=1)
 
 	if items_data:
@@ -154,16 +165,16 @@ def search_serial_or_batch_or_barcode_number(search_value):
 
 def get_conditions(item_code, serial_no, batch_no, barcode):
 	if serial_no or batch_no or barcode:
-		return "name = {0}".format(frappe.db.escape(item_code))
+		return "and i.name = {0}".format(frappe.db.escape(item_code))
 
-	return """(name like {item_code}
-		or item_name like {item_code})""".format(item_code = frappe.db.escape('%' + item_code + '%'))
+	return ("""and (i.name like {item_code} or i.item_name like {item_code})"""
+				.format(item_code=frappe.db.escape('%' + item_code + '%')))
 
 def get_item_group_condition(pos_profile):
 	cond = "and 1=1"
 	item_groups = get_item_groups(pos_profile)
 	if item_groups:
-		cond = "and item_group in (%s)"%(', '.join(['%s']*len(item_groups)))
+		cond = "and i.item_group in (%s)"%(', '.join(['%s']*len(item_groups)))
 
 	return cond % tuple(item_groups)
 
