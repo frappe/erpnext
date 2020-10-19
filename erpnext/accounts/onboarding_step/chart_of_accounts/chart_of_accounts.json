@@ -1,6 +1,6 @@
 {
  "action": "Go to Page",
- "callback_message": "Great! Let's move to the next step!",
+ "callback_message": "You can continue with the onboarding after exploring this page",
  "callback_title": "Awesome Work",
  "creation": "2020-05-13 19:58:20.928127",
  "description": "# Chart Of Accounts\n\n**The Chart of Accounts is the blueprint of the accounts in your organization.**\n\nThe overall structure of your Chart of Accounts is based on a system of double entry\naccounting that has become a standard all over the world to quantify how a\ncompany is doing financially.\n\nChart of Accounts is a tree view of the names of the Accounts (Ledgers and\nGroups) that a Company requires to manage its books of accounts. ERPNext sets\nup a simple chart of accounts for each Company you create, but you can\nmodify it according to your needs and legal requirements.\n\nFor each company, Chart of Accounts signifies the way to classify the accounting entries, mostly\nbased on statutory (tax, compliance to government regulations) requirements.\n\nThe Chart of Accounts helps you to answer questions like:\n\n * What is your organization worth?\n * How much debt have you taken?\n * How much profit are you making (and hence paying tax)?\n * How much are you selling?\n * What is your expense break-up?\n",
@@ -12,7 +12,7 @@
  "is_mandatory": 0,
  "is_single": 0,
  "is_skipped": 0,
- "modified": "2020-10-15 13:12:04.771355",
+ "modified": "2020-10-19 14:25:31.427339",
  "modified_by": "Administrator",
  "name": "Chart Of Accounts",
  "owner": "Administrator",
