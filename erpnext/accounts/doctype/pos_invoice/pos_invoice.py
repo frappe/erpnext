@@ -77,6 +77,7 @@ class POSInvoice(SalesInvoice):
 				filters = { "item_code": d.item_code, "warehouse": d.warehouse }
 				if d.batch_no:
 					filters["batch_no"] = d.batch_no
+
 				reserved_serial_nos = get_pos_reserved_serial_nos(filters)
 				serial_nos = get_serial_nos(d.serial_no)
 				invalid_serial_nos = [s for s in serial_nos if s in reserved_serial_nos]
@@ -156,7 +157,7 @@ class POSInvoice(SalesInvoice):
 			self.base_change_amount = flt(self.base_paid_amount - base_grand_total + flt(self.base_write_off_amount))
 
 		if flt(self.change_amount) and not self.account_for_change_amount:
-			msgprint(_("Please enter Account for Change Amount"), raise_exception=1)
+			frappe.msgprint(_("Please enter Account for Change Amount"), raise_exception=1)
 
 	def validate_payment_amount(self):
 		total_amount_in_payments = 0
