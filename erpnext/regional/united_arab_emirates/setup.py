@@ -38,13 +38,13 @@ def make_custom_fields():
 			dict(fieldname='supplier_name_in_arabic', label='Supplier Name in Arabic',
 				fieldtype='Read Only', insert_after='supplier_name',
 				fetch_from='supplier.supplier_name_in_arabic', print_hide=1),
-			dict(fieldname='claimable_standard_rated_expenses', label='Claimable Standard Rated Expenses (AED)',
+			dict(fieldname='recoverable_standard_rated_expenses', label='Recoverable Standard Rated Expenses (AED)',
 				insert_after='permit_no', fieldtype='Currency', print_hide=1, default='0',
 				depends_on="eval:doc.reverse_charge=='N'",),
 			dict(fieldname='reverse_charge', label='Reverse Charge Applicable',
-				fieldtype='Select', insert_after='claimable_standard_rated_expenses', print_hide=1,
+				fieldtype='Select', insert_after='recoverable_standard_rated_expenses', print_hide=1,
 				options='Y\nN', default='N'),
-			dict(fieldname='claimable_reverse_charge', label='Claimable Reverse Charge (Percentage)',
+			dict(fieldname='recoverable_reverse_charge', label='Recoverable Reverse Charge (Percentage)',
 				insert_after='reverse_charge', fieldtype='Percent', print_hide=1,
 				depends_on="eval:doc.reverse_charge=='Y'", default='100.000'),
 		]
@@ -57,7 +57,7 @@ def make_custom_fields():
 				fieldtype='Read Only', insert_after='customer_name',
 				fetch_from='customer.customer_name_in_arabic', print_hide=1),
 			dict(fieldname='emirate', label='Emirate', insert_after='customer_address',
-				fieldtype='Read Only', fetch_from='customer_address.emirates'),
+				fieldtype='Read Only', fetch_from='customer_address.emirate'),
 			dict(fieldname='tourist_tax_return', label='Tax Refund provided to Tourists (AED)',
 				insert_after='permit_no', fieldtype='Currency', print_hide=1, default='0'),
 		]
@@ -102,7 +102,7 @@ def make_custom_fields():
 				fieldtype='Data', insert_after='supplier_name'),
 		],
 		'Address': [
-			dict(fieldname='emirates', label='Emirates', fieldtype='Select', insert_after='state',
+			dict(fieldname='emirate', label='Emirate', fieldtype='Select', insert_after='state',
 			options='Abu Dhabi\nAjman\nDubai\nFujairah\nRas Al Khaimah\nSharjah\nUmm Al Quwain')
 		],
 		'Purchase Invoice': purchase_invoice_fields + invoice_fields,
