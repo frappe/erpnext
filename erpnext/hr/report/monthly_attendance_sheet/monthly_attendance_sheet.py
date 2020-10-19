@@ -281,7 +281,7 @@ def get_status(attendance_detail, holiday_map, emp_holiday_list, day):
 
 	return status
 
-def get_attendance_status_abbr_map(get_abbr_map=0):
+def get_attendance_status_abbr_map(get_abbr_map=0, remove_hard_coded_status = 0):
 	statuses = frappe.get_all("Attendance Status", fields= ['name', 'abbr', 'is_half_day', 'is_leave', 'is_present'])
 	statuses_map = {}
 
@@ -294,8 +294,9 @@ def get_attendance_status_abbr_map(get_abbr_map=0):
 	for status in statuses:
 		statuses_map[status.name] = status
 
-	statuses_map["Weekly Off"] = {'abbr': "<b>WO</b>"}
-	statuses_map["Holiday"] = {'abbr': "<b>H</b>"}
+	if not remove_hard_coded_status:
+		statuses_map["Weekly Off"] = {'abbr': "<b>WO</b>"}
+		statuses_map["Holiday"] = {'abbr': "<b>H</b>"}
 	return statuses_map
 
 def get_leave_type_abbr(get_abbr=0):

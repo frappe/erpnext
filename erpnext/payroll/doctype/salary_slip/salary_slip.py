@@ -18,6 +18,8 @@ from erpnext.payroll.doctype.payroll_period.payroll_period import get_period_fac
 from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application import get_benefit_component_amount
 from erpnext.payroll.doctype.employee_benefit_claim.employee_benefit_claim import get_benefit_claim_amount, get_last_payroll_period_benefits
 from erpnext.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts, create_repayment_entry
+from erpnext.hr.report.monthly_attendance_sheet.monthly_attendance_sheet \
+	import get_attendance_status_abbr_map as get_attendance_map
 
 class SalarySlip(TransactionBase):
 	def __init__(self, *args, **kwargs):
@@ -352,53 +354,70 @@ class SalarySlip(TransactionBase):
 		lwp = 0
 		absent = 0
 
+		att_status_map = get_attendance_map(remove_hard_coded_status = 1)
+		status_list = att_status_map.keys()
+
 		daily_wages_fraction_for_half_day = \
 			flt(frappe.db.get_value("Payroll Settings", None, "daily_wages_fraction_for_half_day")) or 0.5
 
-		leave_types = frappe.get_all("Leave Type",
+		leave_types = dict(frappe.get_all("Leave Type",
 			or_filters=[["is_ppl", "=", 1], ["is_lwp", "=", 1]],
-			fields =["name", "is_lwp", "is_ppl", "fraction_of_daily_salary_per_leave", "include_holiday"])
+			fields =["name", "is_lwp", "is_ppl", "fraction_of_daily_salary_per_leave", "include_holiday"]))
 
 		leave_type_map = {}
 		for leave_type in leave_types:
 			leave_type_map[leave_type.name] = leave_type
 
-		attendances = frappe.db.sql('''
-			SELECT attendance_date, status, leave_type
-			FROM `tabAttendance`
-			WHERE
-				status in ("Absent", "Half Day", "On leave")
-				AND employee = %s
-				AND docstatus = 1
-				AND attendance_date between %s and %s
-		''', values=(self.employee, self.start_date, self.end_date), as_dict=1)
+		attendances = self.get_attendances(status_list)
 
 		for d in attendances:
-			if d.status in ('Half Day', 'On Leave') and d.leave_type and d.leave_type not in leave_type_map.keys():
+			is_half_day, is_leave, is_present, is_absent = self.get_att_status_flag(att_status_map, d.status)
+
+			if d.leave_type and d.leave_type not in leave_type_map.keys():
+				if is_half_day and d.remaining_half_day_status and att_status_map[d.remaining_half_day_status]["is_present"]:
+					# calculate remaining half day status if Not in LWP
+					absent += 0.5
 				continue
 
 			if formatdate(d.attendance_date, "yyyy-mm-dd") in holidays:
-				if d.status == "Absent" or \
+				if is_absent or \
 					(d.leave_type and d.leave_type in leave_type_map.keys() and not leave_type_map[d.leave_type]['include_holiday']):
 						continue
 
-			if d.leave_type:
-				fraction_of_daily_salary_per_leave = leave_type_map[d.leave_type]["fraction_of_daily_salary_per_leave"]
-
-			if d.status == "Half Day":
+			if is_half_day:
 				equivalent_lwp =  (1 - daily_wages_fraction_for_half_day)
-
 				if d.leave_type in leave_type_map.keys() and leave_type_map[d.leave_type]["is_ppl"]:
 					equivalent_lwp *= fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 1
 				lwp += equivalent_lwp
-			elif d.status == "On Leave" and d.leave_type and d.leave_type in leave_type_map.keys():
+				if d.remaining_half_day_status:
+					# calculate remaining half day status if LWP
+					if not att_status_map[d.remaining_half_day_status]["is_present"]:
+						absent += 0.5
+			elif is_leave and  d.leave_type and d.leave_type in leave_type_map.keys():
 				equivalent_lwp = 1
 				if leave_type_map[d.leave_type]["is_ppl"]:
 					equivalent_lwp *= fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 1
 				lwp += equivalent_lwp
-			elif d.status == "Absent":
+			elif is_absent:
 				absent += 1
 		return lwp, absent
+
+	def get_att_status_flag(self, att_status_map, status):
+		is_half_day = att_status_map[status]["is_half_day"]
+		is_leave = att_status_map[status]["is_leave"]
+		is_present = att_status_map[status]["is_present"]
+		is_absent = 0 if (is_half_day or is_leave or is_present) else 1
+		return is_half_day, is_leave, is_present, is_absent
+
+	def get_attendances(self, status_list):
+		return frappe.db.get_all("Attendance",
+			filters = {
+				"status": ("IN", status_list),
+				"employee": self.employee,
+				"docstatus": 1,
+				"attendance_date": ["between", (self.start_date, self.end_date)]
+			},
+			fields = ["attendance_date", "status", "leave_type", "remaining_half_day_status"])
 
 	def add_earning_for_hourly_wages(self, doc, salary_component, amount):
 		row_exists = False
