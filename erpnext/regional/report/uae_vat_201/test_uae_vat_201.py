@@ -64,6 +64,7 @@ class TestUaeVat201(TestCase):
 		self.assertEqual(amounts_by_emirate["Dubai"]["raw_amount"],200)
 		self.assertEqual(amounts_by_emirate["Dubai"]["raw_vat_amount"],10)
 
+		self.assertEqual(get_tourist_tax_return_total(filters),100)
 		self.assertEqual(get_tourist_tax_return_tax(filters),2)
 		self.assertEqual(get_reverse_charge_total(filters),250)
 		self.assertEqual(get_reverse_charge_tax(filters),12.5)
