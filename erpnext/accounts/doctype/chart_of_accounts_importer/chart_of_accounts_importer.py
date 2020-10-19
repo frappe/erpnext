@@ -2,15 +2,19 @@
 # Copyright (c) 2019, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
-from __future__ import unicode_literals
+import csv
+import os
+from collections import defaultdict
 from functools import reduce
-import frappe, csv, os
+
+import frappe
+from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import build_tree_from_json, create_charts
 from frappe import _
-from frappe.utils import cstr, cint
 from frappe.model.document import Document
+from frappe.utils import cint, cstr
 from frappe.utils.csvutils import UnicodeWriter
-from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts, build_tree_from_json
-from frappe.utils.xlsxutils import read_xlsx_file_from_attached_file, read_xls_file_from_attached_file
+from frappe.utils.xlsxutils import read_xls_file_from_attached_file, read_xlsx_file_from_attached_file
+
 
 class ChartofAccountsImporter(Document):
 	pass
@@ -121,6 +125,7 @@ def get_coa(doctype, parent, is_root=False, file_name=None):
 
 	return accounts
 
+
 def build_forest(data):
 	'''
 		converts list of list into a nested tree
@@ -157,24 +162,33 @@ def build_forest(data):
 						frappe.bold(parent_account)))
 				return [child] + parent_account_list
 
-	charts_map, paths = {}, []
+	charts_map = defaultdict(dict)
+	paths = []
 
 	line_no = 3
 	error_messages = []
 
-	for i in data:
-		account_name, dummy, account_number, is_group, account_type, root_type = i
+	for row in data:
+		account_name, parent_account, account_number, is_group, account_type, root_type, *others = row
 
 		if not account_name:
 			error_messages.append("Row {0}: Please enter Account Name".format(line_no))
 
-		charts_map[account_name] = {}
-		if cint(is_group) == 1: charts_map[account_name]["is_group"] = is_group
-		if account_type: charts_map[account_name]["account_type"] = account_type
-		if root_type: charts_map[account_name]["root_type"] = root_type
-		if account_number: charts_map[account_name]["account_number"] = account_number
-		path = return_parent(data, account_name)[::-1]
-		paths.append(path) # List of path is created
+		charts_map[account_name]["is_group"] = cint(is_group)
+		if account_type:
+			charts_map[account_name]["account_type"] = account_type
+		if root_type:
+			charts_map[account_name]["root_type"] = root_type
+		if account_number:
+			charts_map[account_name]["account_number"] = account_number
+		if others and others[0]:  # currency
+			charts_map[account_name]["account_currency"] = others[0]
+
+		# create a list of paths
+		path = return_parent(data, account_name)
+		path.reverse()
+		paths.append(path)
+
 		line_no += 1
 
 	if error_messages:
@@ -182,10 +196,12 @@ def build_forest(data):
 
 	out = {}
 	for path in paths:
-		for n, account_name in enumerate(path):
-			set_nested(out, path[:n+1], charts_map[account_name]) # setting the value of nested dictionary.
+		for n, account_name in enumerate(path, 1):
+			# setting the value of nested dictionary.
+			set_nested(out, path[:n], charts_map[account_name])
 
 	return out
+
 
 def build_response_as_excel(writer):
 	filename = frappe.generate_hash("", 10)
@@ -219,14 +235,14 @@ def download_template(file_type, template_type):
 	else:
 		build_response_as_excel(writer)
 
-def get_template(template_type):
 
-	fields = ["Account Name", "Parent Account", "Account Number", "Is Group", "Account Type", "Root Type"]
+def get_template(template_type):
+	fields = ["Account Name", "Parent Account", "Account Number", "Is Group", "Account Type", "Root Type", "Currency"]
 	writer = UnicodeWriter()
 	writer.writerow(fields)
 
 	if template_type == 'Blank Template':
-		for root_type in  get_root_types():
+		for root_type in get_root_types():
 			writer.writerow(['', '', '', 1, '', root_type])
 
 		for account in get_mandatory_group_accounts():
@@ -238,6 +254,7 @@ def get_template(template_type):
 		writer = get_sample_template(writer)
 
 	return writer
+
 
 def get_sample_template(writer):
 	template = [
