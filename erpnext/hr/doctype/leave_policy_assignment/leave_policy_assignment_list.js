@@ -2,7 +2,7 @@ frappe.listview_settings['Leave Policy Assignment'] = {
 	onload: function(list_view) {
 		let me = this;
 		list_view.page.add_inner_button( __("Bulk Leave Policy Assignment"), function(){
-			var d = new frappe.ui.form.MultiSelectDialog({
+			me.dialog = frappe.ui.form.MultiSelectDialog({
 				doctype: "Employee",
 				target: cur_list,
 				setters: {
@@ -92,8 +92,8 @@ frappe.listview_settings['Leave Policy Assignment'] = {
 			});
 		});
 
-		list_view.page.add_inner_button( __("Grant Leaves"), function(){
-			var dialog = new frappe.ui.form.MultiSelectDialog({
+		me.dialog = list_view.page.add_inner_button( __("Grant Leaves"), function(){
+			frappe.ui.form.MultiSelectDialog({
 				doctype: "Leave Policy Assignment",
 				target: cur_list,
 				setters: {
@@ -118,7 +118,7 @@ frappe.listview_settings['Leave Policy Assignment'] = {
 							leave_policy_assignments: leave_policy_assignments
 						}
 					});
-					cur_dialog.hide();
+					me.dialog.hide();
 				}
 			});
 		});

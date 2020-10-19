@@ -59,7 +59,7 @@ class LeavePolicyAssignment(Document):
 			return leave_allocations
 
 	def create_leave_allocation(self, leave_type, new_leaves_allocated, leave_type_details, date_of_joining):
-		''' Creates leave allocation for the given employee in the provided leave period '''
+		# Creates leave allocation for the given employee in the provided leave period
 		carry_forward = self.carry_forward
 		if self.carry_forward and not leave_type_details.get(leave_type).is_carry_forward:
 			carry_forward = 0
