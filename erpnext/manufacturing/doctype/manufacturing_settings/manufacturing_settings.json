@@ -93,7 +93,7 @@
   },
   {
    "default": "0",
-   "description": "Allow multiple material consumption against a Work Order",
+   "description": "Allow multiple material consumptions against a Work Order",
    "fieldname": "material_consumption",
    "fieldtype": "Check",
    "label": "Allow Multiple Material Consumption"
