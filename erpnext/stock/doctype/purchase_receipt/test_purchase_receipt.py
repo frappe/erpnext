@@ -619,6 +619,9 @@ class TestPurchaseReceipt(unittest.TestCase):
 		warehouse.account = '_Test Account Stock In Hand - TCP1'
 		warehouse.save()
 
+		# Update account type in account
+		frappe.db.set_value('Account', '_Test Account Stock In Hand - TCP1', 'account_type', 'Stock')
+
 		pr1 = make_purchase_receipt(warehouse = 'Work In Progress - TCP1',
 			company="_Test Company with perpetual inventory")
 
