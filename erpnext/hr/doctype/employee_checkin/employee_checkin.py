@@ -7,7 +7,7 @@ import frappe
 from frappe.utils import now, cint, get_datetime
 from frappe.model.document import Document
 from frappe import _
-
+from erpnext.hr.utils import get_applicable_status
 from erpnext.hr.doctype.shift_assignment.shift_assignment import get_actual_start_end_datetime_of_shift
 
 class EmployeeCheckin(Document):
@@ -72,7 +72,7 @@ def add_log_based_on_employee_field(employee_field_value, timestamp, device_id=N
 	return doc
 
 
-def mark_attendance_and_link_log(logs, attendance_status, attendance_date, working_hours=None, late_entry=False, early_exit=False, in_time=None, out_time=None, shift=None):
+def mark_attendance_and_link_log(logs, attendance_status,attendance_date, working_hours=None, late_entry=False, early_exit=False, in_time=None, out_time=None, shift=None):
 	"""Creates an attendance and links the attendance to the Employee Checkin.
 	Note: If attendance is already present for the given date, the logs are marked as skipped and no exception is thrown.
 
@@ -88,7 +88,7 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 			set skip_auto_attendance = %s
 			where name in %s""", ('1', log_names))
 		return None
-	elif attendance_status in ('Present', 'Absent', 'Half Day'):
+	else:
 		employee_doc = frappe.get_doc('Employee', employee)
 		if not frappe.db.exists('Attendance', {'employee':employee, 'attendance_date':attendance_date, 'docstatus':('!=', '2')}):
 			doc_dict = {
@@ -104,6 +104,13 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 				'in_time': in_time,
 				'out_time': out_time
 			}
+
+			hd_status, p_status, a_status = get_applicable_status()
+
+			if attendance_status == hd_status:
+				#half day checkins is not there it means he is absent for remaining half day
+				doc_dict["remaining_half_day_status"] = a_status
+
 			attendance = frappe.get_doc(doc_dict).insert()
 			attendance.submit()
 			frappe.db.sql("""update `tabEmployee Checkin`
@@ -115,14 +122,12 @@ def mark_attendance_and_link_log(logs, attendance_status, attendance_date, worki
 				set skip_auto_attendance = %s
 				where name in %s""", ('1', log_names))
 			return None
-	else:
-		frappe.throw(_('{} is an invalid Attendance Status.').format(attendance_status))
 
 
 def calculate_working_hours(logs, check_in_out_type, working_hours_calc_type):
 	"""Given a set of logs in chronological order calculates the total working hours based on the parameters.
 	Zero is returned for all invalid cases.
-	
+
 	:param logs: The List of 'Employee Checkin'.
 	:param check_in_out_type: One of: 'Alternating entries as IN and OUT during the same shift', 'Strictly based on Log Type in Employee Checkin'
 	:param working_hours_calc_type: One of: 'First Check-in and Last Check-out', 'Every Valid Check-in and Check-out'

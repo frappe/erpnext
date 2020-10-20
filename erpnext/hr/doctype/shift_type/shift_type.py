@@ -7,31 +7,54 @@ import itertools
 from datetime import timedelta
 
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.utils import cint, getdate, get_datetime
 from erpnext.hr.doctype.shift_assignment.shift_assignment import get_actual_start_end_datetime_of_shift, get_employee_shift
 from erpnext.hr.doctype.employee_checkin.employee_checkin import mark_attendance_and_link_log, calculate_working_hours
 from erpnext.hr.doctype.attendance.attendance import mark_attendance
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.hr.utils import get_applicable_status, get_attendance_statues
 
 class ShiftType(Document):
+	def validate(self):
+		statuses = get_attendance_statues()
+		check_hd_status = check_p_status = check_a_status = 0
+		for status in statuses:
+			if status.is_half_day:
+				check_hd_status = 1
+			if status.is_present:
+				check_p_status = 1
+			if not status.is_present and not status.is_leave and not status.is_half_day:
+				check_a_status = 1
+
+		if not(check_a_status and check_hd_status and check_p_status):
+			frappe.throw(_("Please set Applicable Status for Employee Checkin in Attendance Status"))
+
 	def process_auto_attendance(self):
 		if not cint(self.enable_auto_attendance) or not self.process_attendance_after or not self.last_sync_of_checkin:
 			return
-		filters = {
+
+		filters = self.get_filters_for_employee_checkins()
+		logs = frappe.db.get_list('Employee Checkin', fields="*", filters=filters, order_by="employee,time")
+
+		for key, group in itertools.groupby(logs, key=lambda x: (x['employee'], x['shift_actual_start'])):
+			single_shift_logs = list(group)
+			attendance_status, working_hours, late_entry, early_exit, in_time, out_time = self.get_attendance(single_shift_logs)
+
+			mark_attendance_and_link_log(single_shift_logs, attendance_status, key[1].date(), working_hours, late_entry, early_exit, in_time, out_time, self.name)
+
+		for employee in self.get_assigned_employee(self.process_attendance_after, True):
+			self.mark_absent_for_dates_with_no_attendance(employee)
+
+	def get_filters_for_employee_checkins(self):
+		return {
 			'skip_auto_attendance':'0',
 			'attendance':('is', 'not set'),
 			'time':('>=', self.process_attendance_after),
 			'shift_actual_end': ('<', self.last_sync_of_checkin),
 			'shift': self.name
 		}
-		logs = frappe.db.get_list('Employee Checkin', fields="*", filters=filters, order_by="employee,time")
-		for key, group in itertools.groupby(logs, key=lambda x: (x['employee'], x['shift_actual_start'])):
-			single_shift_logs = list(group)
-			attendance_status, working_hours, late_entry, early_exit, in_time, out_time = self.get_attendance(single_shift_logs)
-			mark_attendance_and_link_log(single_shift_logs, attendance_status, key[1].date(), working_hours, late_entry, early_exit, in_time, out_time, self.name)
-		for employee in self.get_assigned_employee(self.process_attendance_after, True):
-			self.mark_absent_for_dates_with_no_attendance(employee)
 
 	def get_attendance(self, logs):
 		"""Return attendance_status, working_hours, late_entry, early_exit, in_time, out_time
@@ -42,17 +65,20 @@ class ShiftType(Document):
 		"""
 		late_entry = early_exit = False
 		total_working_hours, in_time, out_time = calculate_working_hours(logs, self.determine_check_in_and_check_out, self.working_hours_calculation_based_on)
+
 		if cint(self.enable_entry_grace_period) and in_time and in_time > logs[0].shift_start + timedelta(minutes=cint(self.late_entry_grace_period)):
 			late_entry = True
 
 		if cint(self.enable_exit_grace_period) and out_time and out_time < logs[0].shift_end - timedelta(minutes=cint(self.early_exit_grace_period)):
 			early_exit = True
 
+		half_day_status, present_status, absent_status = get_applicable_status()
+
 		if self.working_hours_threshold_for_absent and total_working_hours < self.working_hours_threshold_for_absent:
-			return 'Absent', total_working_hours, late_entry, early_exit, in_time, out_time
+			return absent_status,total_working_hours, late_entry, early_exit, in_time, out_time
 		if self.working_hours_threshold_for_half_day and total_working_hours < self.working_hours_threshold_for_half_day:
-			return 'Half Day', total_working_hours, late_entry, early_exit, in_time, out_time
-		return 'Present', total_working_hours, late_entry, early_exit, in_time, out_time
+			return half_day_status, total_working_hours, late_entry, early_exit, in_time, out_time
+		return present_status, total_working_hours, late_entry, early_exit, in_time, out_time
 
 	def mark_absent_for_dates_with_no_attendance(self, employee):
 		"""Marks Absents for the given employee on working days in this shift which have no attendance marked.
@@ -125,3 +151,4 @@ def get_filtered_date_list(employee, start_date, end_date, filter_attendance=Tru
 		{"employee":employee, "start_date":start_date, "end_date":end_date, "holiday_list":holiday_list}, as_list=True)
 
 	return [getdate(date[0]) for date in dates]
+

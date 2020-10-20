@@ -67,12 +67,16 @@
    "fieldname": "from_date",
    "fieldtype": "Date",
    "label": "From Date",
-   "reqd": 1
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "to_date",
    "fieldtype": "Date",
-   "label": "To Date"
+   "label": "To Date",
+   "reqd": 1,
+   "set_only_once": 1
   },
   {
    "fieldname": "amended_from",
@@ -103,7 +107,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-10 17:59:31.550558",
+ "modified": "2020-10-20 15:14:21.949865",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Request",

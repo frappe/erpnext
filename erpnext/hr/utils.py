@@ -451,6 +451,24 @@ def calculate_hra_exemption_for_period(doc):
 	# Indian HRA Exemption Calculation
 	return {}
 
+def get_attendance_statues():
+	return frappe.db.get_all("Attendance Status", filters={
+		"applicable_for_employee_checkins": 1
+	}, fields=['name', 'is_half_day', 'is_present', 'is_leave'])
+
+def get_applicable_status():
+		statuses = get_attendance_statues()
+		hd_status = p_status = a_status = None
+		for status in statuses:
+			if status.is_half_day:
+				hd_status = status.name
+			if status.is_present:
+				p_status = status.name
+			if not status.is_present and not status.is_leave and not status.is_half_day:
+				a_status = status.name
+
+		return hd_status , p_status , a_status
+
 def get_previous_claimed_amount(employee, payroll_period, non_pro_rata=False, component=False):
 	total_claimed_amount = 0
 	query = """
