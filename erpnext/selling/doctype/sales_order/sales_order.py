@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 import frappe.utils
-from frappe.utils import cstr, flt, getdate, cint, nowdate, add_days, get_link_to_form
+from frappe.utils import cstr, flt, getdate, cint, nowdate, add_days, get_link_to_form, strip_html
 from frappe import _
 from six import string_types
 from frappe.model.utils import get_fetch_values
@@ -1015,15 +1015,20 @@ def make_raw_material_request(items, company, sales_order, project=None):
 	))
 	for item in raw_materials:
 		item_doc = frappe.get_cached_doc('Item', item.get('item_code'))
+
 		schedule_date = add_days(nowdate(), cint(item_doc.lead_time_days))
-		material_request.append('items', {
-		'item_code': item.get('item_code'),
-		'qty': item.get('quantity'),
-		'schedule_date': schedule_date,
-		'warehouse': item.get('warehouse'),
-		'sales_order': sales_order,
-		'project': project
+		row = material_request.append('items', {
+			'item_code': item.get('item_code'),
+			'qty': item.get('quantity'),
+			'schedule_date': schedule_date,
+			'warehouse': item.get('warehouse'),
+			'sales_order': sales_order,
+			'project': project
 		})
+
+		if not (strip_html(item.get("description")) and strip_html(item_doc.description)):
+			row.description = item_doc.item_name or item.get('item_code')
+
 	material_request.insert()
 	material_request.flags.ignore_permissions = 1
 	material_request.run_method("set_missing_values")
