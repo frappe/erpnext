@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import time_diff_in_hours, flt
-from frappe.model.meta import get_field_precision
 
 def get_columns():
 	return [
