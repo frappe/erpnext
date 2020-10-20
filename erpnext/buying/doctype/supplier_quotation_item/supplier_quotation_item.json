@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "hash",
  "creation": "2013-05-22 12:43:10",
  "doctype": "DocType",
@@ -237,7 +236,7 @@
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Rate ",
+   "label": "Rate",
    "oldfieldname": "import_rate",
    "oldfieldtype": "Currency",
    "options": "currency"
@@ -531,9 +530,9 @@
   }
  ],
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "istable": 1,
- "links": [],
- "modified": "2020-04-07 18:35:51.175947",
+ "modified": "2020-10-19 17:16:06.731729",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation Item",
