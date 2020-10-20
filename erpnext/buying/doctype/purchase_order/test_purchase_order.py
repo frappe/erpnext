@@ -17,6 +17,8 @@ from erpnext.stock.doctype.material_request.material_request import make_purchas
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 from erpnext.controllers.accounts_controller import update_child_qty_rate
 from erpnext.controllers.status_updater import OverAllowanceError
+from erpnext.stock.doctype.batch.test_batch import make_new_batch
+from erpnext.controllers.buying_controller import get_backflushed_subcontracted_raw_materials
 
 class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_receipt(self):
@@ -116,7 +118,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(po.get("items")[0].amount, 1400)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 3)
 
-	
+
 	def test_add_new_item_in_update_child_qty_rate(self):
 		po = create_purchase_order(do_not_save=1)
 		po.items[0].qty = 4
@@ -142,7 +144,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(len(po.get('items')), 2)
 		self.assertEqual(po.status, 'To Receive and Bill')
 
-	
+
 	def test_remove_item_in_update_child_qty_rate(self):
 		po = create_purchase_order(do_not_save=1)
 		po.items[0].qty = 4
@@ -182,6 +184,23 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.reload()
 		self.assertEquals(len(po.get('items')), 1)
 		self.assertEqual(po.status, 'To Receive and Bill')
+
+	def test_update_child_qty_rate_perm(self):
+		po = create_purchase_order(item_code= "_Test Item", qty=4)
+
+		user = 'test@example.com'
+		test_user = frappe.get_doc('User', user)
+		test_user.add_roles("Accounts User")
+		frappe.set_user(user)
+
+		# update qty
+		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7, 'docname': po.items[0].name}])
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Purchase Order', trans_item, po.name)
+
+		# add new item
+		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 100, 'qty' : 2}])
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Purchase Order', trans_item, po.name)
+		frappe.set_user("Administrator")
 
 	def test_update_qty(self):
 		po = create_purchase_order()
@@ -563,7 +582,7 @@ class TestPurchaseOrder(unittest.TestCase):
 
 	def test_exploded_items_in_subcontracted(self):
 		item_code = "_Test Subcontracted FG Item 1"
-		make_subcontracted_item(item_code)
+		make_subcontracted_item(item_code=item_code)
 
 		po = create_purchase_order(item_code=item_code, qty=1,
 			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
@@ -585,7 +604,7 @@ class TestPurchaseOrder(unittest.TestCase):
 
 	def test_backflush_based_on_stock_entry(self):
 		item_code = "_Test Subcontracted FG Item 1"
-		make_subcontracted_item(item_code)
+		make_subcontracted_item(item_code=item_code)
 		make_item('Sub Contracted Raw Material 1', {
 			'is_stock_item': 1,
 			'is_sub_contracted_item': 1
@@ -644,6 +663,76 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		update_backflush_based_on("BOM")
 
+	def test_backflushed_based_on_for_multiple_batches(self):
+		item_code = "_Test Subcontracted FG Item 2"
+		make_item('Sub Contracted Raw Material 2', {
+			'is_stock_item': 1,
+			'is_sub_contracted_item': 1
+		})
+
+		make_subcontracted_item(item_code=item_code, has_batch_no=1, create_new_batch=1,
+			raw_materials=["Sub Contracted Raw Material 2"])
+
+		update_backflush_based_on("Material Transferred for Subcontract")
+
+		order_qty = 500
+		po = create_purchase_order(item_code=item_code, qty=order_qty,
+			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
+
+		make_stock_entry(target="_Test Warehouse - _TC",
+			item_code = "Sub Contracted Raw Material 2", qty=552, basic_rate=100)
+
+		rm_items = [
+			{"item_code":item_code,"rm_item_code":"Sub Contracted Raw Material 2","item_name":"_Test Item",
+				"qty":552,"warehouse":"_Test Warehouse - _TC", "stock_uom":"Nos"}]
+
+		rm_item_string = json.dumps(rm_items)
+		se = frappe.get_doc(make_subcontract_transfer_entry(po.name, rm_item_string))
+		se.submit()
+
+		for batch in ["ABCD1", "ABCD2", "ABCD3", "ABCD4"]:
+			make_new_batch(batch_id=batch, item_code=item_code)
+
+		pr = make_purchase_receipt(po.name)
+
+		# partial receipt
+		pr.get('items')[0].qty = 30
+		pr.get('items')[0].batch_no = "ABCD1"
+
+		purchase_order = po.name
+		purchase_order_item = po.items[0].name
+
+		for batch_no, qty in {"ABCD2": 60, "ABCD3": 70, "ABCD4":40}.items():
+			pr.append("items", {
+				"item_code": pr.get('items')[0].item_code,
+				"item_name": pr.get('items')[0].item_name,
+				"uom": pr.get('items')[0].uom,
+				"stock_uom": pr.get('items')[0].stock_uom,
+				"warehouse": pr.get('items')[0].warehouse,
+				"conversion_factor": pr.get('items')[0].conversion_factor,
+				"cost_center": pr.get('items')[0].cost_center,
+				"rate": pr.get('items')[0].rate,
+				"qty": qty,
+				"batch_no": batch_no,
+				"purchase_order": purchase_order,
+				"purchase_order_item": purchase_order_item
+			})
+
+		pr.submit()
+
+		pr1 = make_purchase_receipt(po.name)
+		pr1.get('items')[0].qty = 300
+		pr1.get('items')[0].batch_no = "ABCD1"
+		pr1.save()
+
+		pr_key = ("Sub Contracted Raw Material 2", po.name)
+		consumed_qty = get_backflushed_subcontracted_raw_materials([po.name]).get(pr_key)
+
+		self.assertTrue(pr1.supplied_items[0].consumed_qty > 0)
+		self.assertTrue(pr1.supplied_items[0].consumed_qty,  flt(552.0) - flt(consumed_qty))
+
+		update_backflush_based_on("BOM")
+
 	def test_advance_payment_entry_unlink_against_purchase_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 		frappe.db.set_value("Accounts Settings", "Accounts Settings",
@@ -695,27 +784,33 @@ def make_pr_against_po(po, received_qty=0):
 	pr.submit()
 	return pr
 
-def make_subcontracted_item(item_code):
+def make_subcontracted_item(**args):
 	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
-	if not frappe.db.exists('Item', item_code):
-		make_item(item_code, {
+	args = frappe._dict(args)
+
+	if not frappe.db.exists('Item', args.item_code):
+		make_item(args.item_code, {
 			'is_stock_item': 1,
-			'is_sub_contracted_item': 1
+			'is_sub_contracted_item': 1,
+			'has_batch_no': args.get("has_batch_no") or 0
 		})
 
-	if not frappe.db.exists('Item', "Test Extra Item 1"):
-		make_item("Test Extra Item 1", {
-			'is_stock_item': 1,
-		})
+	if not args.raw_materials:
+		if not frappe.db.exists('Item', "Test Extra Item 1"):
+			make_item("Test Extra Item 1", {
+				'is_stock_item': 1,
+			})
 
-	if not frappe.db.exists('Item', "Test Extra Item 2"):
-		make_item("Test Extra Item 2", {
-			'is_stock_item': 1,
-		})
+		if not frappe.db.exists('Item', "Test Extra Item 2"):
+			make_item("Test Extra Item 2", {
+				'is_stock_item': 1,
+			})
 
-	if not frappe.db.get_value('BOM', {'item': item_code}, 'name'):
-		make_bom(item = item_code, raw_materials = ['_Test FG Item', 'Test Extra Item 1'])
+		args.raw_materials = ['_Test FG Item', 'Test Extra Item 1']
+
+	if not frappe.db.get_value('BOM', {'item': args.item_code}, 'name'):
+		make_bom(item = args.item_code, raw_materials = args.get("raw_materials"))
 
 def update_backflush_based_on(based_on):
 	doc = frappe.get_doc('Buying Settings')

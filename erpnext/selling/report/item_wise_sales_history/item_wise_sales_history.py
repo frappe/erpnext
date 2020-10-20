@@ -9,6 +9,9 @@ from frappe.utils.nestedset import get_descendants_of
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
+	if filters.from_date > filters.to_date:
+		frappe.throw(_('From Date cannot be greater than To Date'))
+	
 	columns = get_columns(filters)
 	data = get_data(filters)
 	return columns, data
@@ -96,7 +99,7 @@ def get_columns(filters):
 			"label": _("Customer Group"),
 			"fieldtype": "Link",
 			"fieldname": "customer_group",
-			"options": "customer Group",
+			"options": "Customer Group",
 			"width": 120
 		},
 		{

@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
@@ -402,7 +401,7 @@
    "fieldname": "lost_reasons",
    "fieldtype": "Table MultiSelect",
    "label": "Lost Reasons",
-   "options": "Lost Reason Detail",
+   "options": "Opportunity Lost Reason Detail",
    "read_only": 1
   },
   {
@@ -414,8 +413,7 @@
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
- "links": [],
- "modified": "2020-03-20 12:28:45.228994",
+ "modified": "2020-08-12 23:34:39.665513",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

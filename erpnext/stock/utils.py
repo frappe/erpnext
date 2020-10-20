@@ -96,11 +96,7 @@ def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None
 
 	if with_valuation_rate:
 		if with_serial_no:
-			serial_nos = last_entry.get("serial_no")
-
-			if (serial_nos and
-				len(get_serial_nos_data(serial_nos)) < last_entry.qty_after_transaction):
-				serial_nos = get_serial_nos_data_after_transactions(args)
+			serial_nos = get_serial_nos_data_after_transactions(args)
 
 			return ((last_entry.qty_after_transaction, last_entry.valuation_rate, serial_nos)
 				if last_entry else (0.0, 0.0, 0.0))
@@ -230,12 +226,12 @@ def get_valuation_method(item_code):
 
 def get_fifo_rate(previous_stock_queue, qty):
 	"""get FIFO (average) Rate from Queue"""
-	if qty >= 0:
+	if flt(qty) >= 0:
 		total = sum(f[0] for f in previous_stock_queue)
 		return sum(flt(f[0]) * flt(f[1]) for f in previous_stock_queue) / flt(total) if total else 0.0
 	else:
 		available_qty_for_outgoing, outgoing_cost = 0, 0
-		qty_to_pop = abs(qty)
+		qty_to_pop = abs(flt(qty))
 		while qty_to_pop and previous_stock_queue:
 			batch = previous_stock_queue[0]
 			if 0 < batch[0] <= qty_to_pop:

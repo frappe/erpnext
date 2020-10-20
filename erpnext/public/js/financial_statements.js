@@ -3,7 +3,7 @@ frappe.provide("erpnext.financial_statements");
 erpnext.financial_statements = {
 	"filters": get_filters(),
 	"formatter": function(value, row, column, data, default_formatter) {
-		if (column.fieldname=="account") {
+		if (data && column.fieldname=="account") {
 			value = data.account_name || value;
 
 			column.link_onclick =
@@ -13,7 +13,7 @@ erpnext.financial_statements = {
 
 		value = default_formatter(value, row, column, data);
 
-		if (!data.parent_account) {
+		if (data && !data.parent_account) {
 			value = $(`<span>${value}</span>`);
 
 			var $value = $(value).css("font-weight", "bold");
@@ -62,7 +62,7 @@ erpnext.financial_statements = {
 	}
 };
 
-function get_filters(){
+function get_filters() {
 	let filters = [
 		{
 			"fieldname":"company",
@@ -128,15 +128,6 @@ function get_filters(){
 			}
 		}
 	]
-
-	erpnext.dimension_filters.forEach((dimension) => {
-		filters.push({
-			"fieldname": dimension["fieldname"],
-			"label": __(dimension["label"]),
-			"fieldtype": "Link",
-			"options": dimension["document_type"]
-		});
-	});
 
 	return filters;
 }

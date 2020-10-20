@@ -72,7 +72,8 @@
    "fieldname": "reference_type",
    "fieldtype": "Select",
    "label": "Reference Type",
-   "options": "\nPurchase Receipt\nPurchase Invoice\nDelivery Note\nSales Invoice\nStock Entry"
+   "options": "\nPurchase Receipt\nPurchase Invoice\nDelivery Note\nSales Invoice\nStock Entry",
+   "reqd": 1
   },
   {
    "fieldname": "reference_name",
@@ -83,7 +84,8 @@
    "label": "Reference Name",
    "oldfieldname": "purchase_receipt_no",
    "oldfieldtype": "Link",
-   "options": "reference_type"
+   "options": "reference_type",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_7",
@@ -230,8 +232,10 @@
  ],
  "icon": "fa fa-search",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "modified": "2019-07-12 12:07:23.153698",
+ "links": [],
+ "modified": "2020-09-12 16:11:31.910508",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection",
