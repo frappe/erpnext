@@ -341,6 +341,7 @@ def create_purchase_invoices():
 
 	pi.recoverable_standard_rated_expenses = 1
 
+	pi.insert()
 	pi.submit()
 
 	pi = make_purchase_invoice(
@@ -366,6 +367,7 @@ def create_purchase_invoices():
 
 	pi.recoverable_reverse_charge = 100
 
+	pi.insert()
 	pi.submit()
 
 
