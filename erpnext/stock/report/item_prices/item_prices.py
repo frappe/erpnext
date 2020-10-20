@@ -47,7 +47,7 @@ def execute(filters=None):
 def get_printable_data(columns, data, filters):
 	item_groups = {}
 
-	data = filter(lambda d: d.print_in_price_list, data)
+	data = list(filter(lambda d: d.print_in_price_list, data))
 
 	for i in range(len(data)):
 		if not data[i].item_code:
