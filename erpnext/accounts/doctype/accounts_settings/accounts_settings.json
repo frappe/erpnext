@@ -214,7 +214,7 @@
   },
   {
    "default": "Days",
-   "description": "If \"Months\" is selected, then a fixed amount will be booked as deferred revenue or expense for each month irrespective of the number of days in a month. It will be prorated if deferred revenue or expense is not booked for an entire month",
+   "description": "If \"Months\" is selected, a fixed amount will be booked as deferred revenue or expense for each month irrespective of the number of days in a month. It will be prorated if deferred revenue or expense is not booked for an entire month",
    "fieldname": "book_deferred_entries_based_on",
    "fieldtype": "Select",
    "label": "Book Deferred Entries Based On",

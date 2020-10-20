@@ -38,7 +38,7 @@
   },
   {
    "default": "Naming Series",
-   "description": "Employee records are created using the selected field ",
+   "description": "Employee records are created using the selected field",
    "fieldname": "emp_created_by",
    "fieldtype": "Select",
    "label": "Employee Records to Be Created By",

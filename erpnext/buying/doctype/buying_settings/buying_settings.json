@@ -65,7 +65,7 @@
    "default": "0",
    "fieldname": "allow_multiple_items",
    "fieldtype": "Check",
-   "label": "Allow Item to Be Added Multiple Times in a Transaction"
+   "label": "Allow Item To Be Added Multiple Times in a Transaction"
   },
   {
    "fieldname": "subcontract",
