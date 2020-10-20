@@ -78,7 +78,7 @@ def get_chart(emirates, amounts_by_emirate):
 	return chart
 
 def append_vat_on_sales(data, filters):
-	"""Appends Sales and All Other Outputs"""
+	"""Appends Sales and All Other Outputs."""
 	append_data(data, '', _('VAT on Sales and All Other Outputs'), '', '')
 
 	emirates, amounts_by_emirate = standard_rated_expenses_emiratewise(data, filters)
@@ -102,7 +102,7 @@ def append_vat_on_sales(data, filters):
 	return emirates, amounts_by_emirate
 
 def standard_rated_expenses_emiratewise(data, filters):
-	""""Append emiratewise standard rated expenses and vat"""
+	"""Append emiratewise standard rated expenses and vat"""
 	total_emiratewise = get_total_emiratewise(filters)
 	emirates = get_emirates()
 	amounts_by_emirate = {}
@@ -129,7 +129,7 @@ def standard_rated_expenses_emiratewise(data, filters):
 
 
 def append_vat_on_expenses(data, filters):
-	"""Appends Expenses and All Other Inputs"""
+	"""Appends Expenses and All Other Inputs."""
 	append_data(data, '', _('VAT on Expenses and All Other Inputs'), '', '')
 	append_data(data, '9', _('Standard Rated Expenses'),
 		frappe.format(get_standard_rated_expenses_total(filters), 'Currency'),
