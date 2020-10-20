@@ -9,16 +9,17 @@
  "engine": "InnoDB",
  "field_order": [
   "employee",
+  "company",
   "employee_name",
   "department",
   "column_break_5",
-  "company",
   "from_date",
   "to_date",
   "half_day",
   "half_day_date",
+  "remaining_half_day_status",
   "reason_section",
-  "reason",
+  "status",
   "column_break_4",
   "explanation",
   "amended_from"
@@ -48,10 +49,12 @@
    "read_only": 1
   },
   {
+   "fetch_from": "employee.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
+   "read_only": 1,
    "remember_last_selected_value": 1,
    "reqd": 1
   },
@@ -83,20 +86,12 @@
    "depends_on": "half_day",
    "fieldname": "half_day_date",
    "fieldtype": "Date",
-   "label": "Half Day Date"
+   "label": "Half Day Date",
+   "mandatory_depends_on": "half_day"
   },
   {
    "fieldname": "reason_section",
-   "fieldtype": "Section Break",
-   "label": "Reason"
-  },
-  {
-   "fieldname": "reason",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Reason",
-   "options": "Work From Home\nOn Duty",
-   "reqd": 1
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "column_break_4",
@@ -115,11 +110,29 @@
    "options": "Attendance Request",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Attendance Status",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "half_day",
+   "fieldname": "remaining_half_day_status",
+   "fieldtype": "Link",
+   "label": "Remaining Half Day status",
+   "mandatory_depends_on": "half_day",
+   "options": "Attendance Status"
   }
  ],
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-16 11:49:26.943173",
+ "modified": "2020-10-20 12:20:22.536452",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance Request",

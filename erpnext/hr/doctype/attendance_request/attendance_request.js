@@ -3,12 +3,22 @@
 cur_frm.add_fetch('employee', 'company', 'company');
 
 frappe.ui.form.on('Attendance Request', {
-	half_day: function(frm) {
-		if(frm.doc.half_day == 1){
-			frm.set_df_property('half_day_date', 'reqd', true);
-		}
-		else{
-			frm.set_df_property('half_day_date', 'reqd', false);
-		}
-	}
+	setup: function(frm){
+		frm.set_query( "status", function() {
+			return {
+				filters: {
+					"is_leave": 0
+				}
+			};
+		});
+
+		frm.set_query("remaining_half_day_status", function(){
+			return {
+				filters: {
+					is_half_day: 0,
+					is_leave: 0,
+				}
+			};
+		});
+	},
 });

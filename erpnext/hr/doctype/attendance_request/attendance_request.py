@@ -37,11 +37,14 @@ class AttendanceRequest(Document):
 				attendance.employee = self.employee
 				attendance.employee_name = self.employee_name
 				if self.half_day and date_diff(getdate(self.half_day_date), getdate(attendance_date)) == 0:
-					attendance.status = "Half Day"
-				elif self.reason == "Work From Home":
-					attendance.status = "Work From Home"
+					half_day_status = frappe.get_all("Attendance Status", filters={
+						"applicable_for_attendance_request":1
+					})[0].name
+					attendance.status = half_day_status
+					attendance.remaining_half_day_status = self.remaining_half_day_status
 				else:
-					attendance.status = "Present"
+					attendance.status = self.status
+
 				attendance.attendance_date = attendance_date
 				attendance.company = self.company
 				attendance.attendance_request = self.name
