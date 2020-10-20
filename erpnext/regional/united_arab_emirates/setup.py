@@ -89,7 +89,7 @@ def make_custom_fields():
 			dict(fieldname='is_zero_rated', label='Is Zero Rated',
 				fieldtype='Check', insert_after='tax_code',
 				print_hide=1),
-			dict(fieldname='is_exempt', label='Is Exempt ',
+			dict(fieldname='is_exempt', label='Is Exempt',
 				fieldtype='Check', insert_after='is_zero_rated',
 				print_hide=1)
 		],
