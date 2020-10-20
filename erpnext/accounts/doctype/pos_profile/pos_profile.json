@@ -8,6 +8,7 @@
  "field_order": [
   "disabled",
   "section_break_2",
+  "naming_series",
   "customer",
   "company",
   "country",
@@ -290,10 +291,10 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "label": "Warehouse",
-   "mandatory_depends_on": "update_stock",
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "reqd": 1
   },
   {
    "default": "0",
@@ -305,13 +306,26 @@
    "default": "1",
    "fieldname": "update_stock",
    "fieldtype": "Check",
-   "label": "Update Stock"
+   "label": "Update Stock",
+   "read_only": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Series",
+   "no_copy": 1,
+   "oldfieldname": "naming_series",
+   "oldfieldtype": "Select",
+   "options": "[Select]",
+   "reqd": 1
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-10-14 12:54:40.035985",
+ "modified": "2020-10-20 12:50:23.870894",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
