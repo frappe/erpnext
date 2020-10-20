@@ -177,7 +177,7 @@
    "label": "Automatically Fetch Payment Terms"
   },
   {
-   "description": "The percentage you are allowed to bill more against the amount ordered. For example, If the order value is $100 for an item and tolerance is set as 10%, then you are allowed to bill up to $110 ",
+   "description": "The percentage you are allowed to bill more against the amount ordered. For example, if the order value is $100 for an item and tolerance is set as 10%, then you are allowed to bill up to $110 ",
    "fieldname": "over_billing_allowance",
    "fieldtype": "Currency",
    "label": "Over Billing Allowance (%)"
