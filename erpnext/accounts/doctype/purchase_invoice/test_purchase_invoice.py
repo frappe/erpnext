@@ -998,7 +998,7 @@ def make_purchase_invoice(**args):
 		'expense_account': args.expense_account or '_Test Account Cost for Goods Sold - _TC',
 		"conversion_factor": 1.0,
 		"serial_no": args.serial_no,
-		"stock_uom": "_Test UOM",
+		"stock_uom": args.uom or "_Test UOM",
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"project": args.project,
 		"rejected_warehouse": args.rejected_warehouse or "",

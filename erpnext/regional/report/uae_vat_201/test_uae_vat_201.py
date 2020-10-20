@@ -324,12 +324,14 @@ def create_purchase_invoices():
 	pi = make_purchase_invoice(
 			company="_Test Company UAE VAT",
 			supplier = '_Test UAE Supplier',
+			supplier_warehouse = '_Test UAE VAT Supplier Warehouse - _TCUV',
 			warehouse = '_Test UAE VAT Supplier Warehouse - _TCUV',
 			currency = 'AED',
 			cost_center = 'Main - _TCUV',
 			expense_account = 'Cost of Goods Sold - _TCUV',
 			item = "_Test UAE VAT Item",
 			do_not_save=1,
+			uom = "Nos"
 		)
 	pi.append("taxes", {
 			"charge_type": "On Net Total",
@@ -341,18 +343,19 @@ def create_purchase_invoices():
 
 	pi.recoverable_standard_rated_expenses = 1
 
-	pi.insert()
 	pi.submit()
 
 	pi = make_purchase_invoice(
 			company="_Test Company UAE VAT",
 			supplier = '_Test UAE Supplier',
+			supplier_warehouse = '_Test UAE VAT Supplier Warehouse - _TCUV',
 			warehouse = '_Test UAE VAT Supplier Warehouse - _TCUV',
 			currency = 'AED',
 			cost_center = 'Main - _TCUV',
 			expense_account = 'Cost of Goods Sold - _TCUV',
 			item = "_Test UAE VAT Item",
 			do_not_save=1,
+			uom = "Nos"
 		)
 
 	pi.append("taxes", {
@@ -367,7 +370,6 @@ def create_purchase_invoices():
 
 	pi.recoverable_reverse_charge = 100
 
-	pi.insert()
 	pi.submit()
 
 
