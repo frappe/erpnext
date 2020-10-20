@@ -102,7 +102,7 @@ def append_vat_on_sales(data, filters):
 	return emirates, amounts_by_emirate
 
 def standard_rated_expenses_emiratewise(data, filters):
-	"""Append emiratewise standard rated expenses and vat"""
+	"""Append emiratewise standard rated expenses and vat."""
 	total_emiratewise = get_total_emiratewise(filters)
 	emirates = get_emirates()
 	amounts_by_emirate = {}
