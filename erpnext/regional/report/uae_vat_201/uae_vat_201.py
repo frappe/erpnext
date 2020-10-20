@@ -46,109 +46,8 @@ def get_columns():
 def get_data(filters = None):
 	"""Returns the list of dictionaries. Each dictionary is a row in the datatable and chart data."""
 	data = []
-	data.append({
-		"no": '',
-		"legend": _('VAT on Sales and All Other Outputs'),
-		"amount": '',
-		"vat_amount": ''
-		})
-
-	total_emiratewise = get_total_emiratewise(filters)
-	emirates = get_emirates()
-	amounts_by_emirate = {}
-	for d in total_emiratewise:
-		emirate, amount, vat= d
-		amounts_by_emirate[emirate] = {
-				"legend": emirate,
-				"raw_amount": amount,
-				"raw_vat_amount": vat,
-				"amount": frappe.format(amount, 'Currency'),
-				"vat_amount": frappe.format(vat, 'Currency'),
-			}
-
-	for d, emirate in enumerate(emirates, 97):
-		if emirate in amounts_by_emirate:
-			amounts_by_emirate[emirate]["no"] = _('1{0}').format(chr(d))
-			amounts_by_emirate[emirate]["legend"] = _('Standard rated supplies in {0}').format(emirate)
-			data.append(amounts_by_emirate[emirate])
-		else:
-			data.append(
-				{
-					"no": _('1{0}').format(chr(d)),
-					"legend": _('Standard rated supplies in {0}').format(emirate),
-					"amount": frappe.format(0, 'Currency'),
-					"vat_amount": frappe.format(0, 'Currency')
-				}
-			)
-
-	data.append(
-		{
-			"no": '2',
-			"legend": _('Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme'),
-			"amount": frappe.format((-1) * get_tourist_tax_return_total(filters), 'Currency'),
-			"vat_amount": frappe.format((-1) * get_tourist_tax_return_tax(filters), 'Currency')
-		}
-	)
-
-	data.append(
-		{
-			"no": '3',
-			"legend": _('Supplies subject to the reverse charge provision'),
-			"amount": frappe.format(get_reverse_charge_total(filters), 'Currency'),
-			"vat_amount": frappe.format(get_reverse_charge_tax(filters), 'Currency')
-		}
-	)
-
-	data.append(
-		{
-			"no": '4',
-			"legend": _('Zero Rated'),
-			"amount": frappe.format(get_zero_rated_total(filters), 'Currency'),
-			"vat_amount": "-"
-		}
-	)
-
-	data.append(
-		{
-			"no": '5',
-			"legend": _('Exempt Supplies'),
-			"amount": frappe.format(get_exempt_total(filters), 'Currency'),
-			"vat_amount": "-"
-		}
-	)
-
-	data.append({
-		"no": '',
-		"legend": '',
-		"amount": '',
-		"vat_amount": ''
-		})
-
-	data.append({
-		"no": '',
-		"legend": _('VAT on Expenses and All Other Inputs'),
-		"amount": '',
-		"vat_amount": ''
-		})
-
-	data.append(
-		{
-			"no": '9',
-			"legend": _('Standard Rated Expenses'),
-			"amount": frappe.format(get_standard_rated_expenses_total(filters), 'Currency'),
-			"vat_amount": frappe.format(get_standard_rated_expenses_tax(filters), 'Currency')
-		}
-	)
-
-	data.append(
-		{
-			"no": '10',
-			"legend": _('Supplies subject to the reverse charge provision'),
-			"amount": frappe.format(get_reverse_charge_recoverable_total(filters), 'Currency'),
-			"vat_amount": frappe.format(get_reverse_charge_recoverable_tax(filters), 'Currency')
-		}
-	)
-
+	emirates, amounts_by_emirate = append_vat_on_sales(data, filters)
+	append_vat_on_expenses(data, filters)
 	return data, emirates, amounts_by_emirate
 
 
@@ -177,6 +76,73 @@ def get_chart(emirates, amounts_by_emirate):
 	chart["type"] = "bar"
 	chart["fieldtype"] = "Currency"
 	return chart
+
+def append_vat_on_sales(data, filters):
+	"""Appends Sales and All Other Outputs"""
+	append_data(data, '', _('VAT on Sales and All Other Outputs'), '', '')
+
+	emirates, amounts_by_emirate = standard_rated_expenses_emiratewise(data, filters)
+
+	append_data(data, '2', _('Tax Refunds provided to Tourists under the Tax Refunds for Tourists Scheme'),
+		frappe.format((-1) * get_tourist_tax_return_total(filters), 'Currency'),
+		frappe.format((-1) * get_tourist_tax_return_tax(filters), 'Currency'))
+
+	append_data(data, '3', _('Supplies subject to the reverse charge provision'),
+		frappe.format(get_reverse_charge_total(filters), 'Currency'),
+		frappe.format(get_reverse_charge_tax(filters), 'Currency'))
+
+	append_data(data, '4', _('Zero Rated'), 
+		frappe.format(get_zero_rated_total(filters), 'Currency'), "-")
+
+	append_data(data, '5', _('Exempt Supplies'),
+		frappe.format(get_exempt_total(filters), 'Currency'),"-")
+
+	append_data(data, '', '', '', '')
+	
+	return emirates, amounts_by_emirate
+
+def standard_rated_expenses_emiratewise(data, filters):
+	""""Append emiratewise standard rated expenses and vat"""
+	total_emiratewise = get_total_emiratewise(filters)
+	emirates = get_emirates()
+	amounts_by_emirate = {}
+	for d in total_emiratewise:
+		emirate, amount, vat= d
+		amounts_by_emirate[emirate] = {
+				"legend": emirate,
+				"raw_amount": amount,
+				"raw_vat_amount": vat,
+				"amount": frappe.format(amount, 'Currency'),
+				"vat_amount": frappe.format(vat, 'Currency'),
+			}
+
+	for d, emirate in enumerate(emirates, 97):
+		if emirate in amounts_by_emirate:
+			amounts_by_emirate[emirate]["no"] = _('1{0}').format(chr(d))
+			amounts_by_emirate[emirate]["legend"] = _('Standard rated supplies in {0}').format(emirate)
+			data.append(amounts_by_emirate[emirate])
+		else:
+			append_data(data, _('1{0}').format(chr(d)),
+				_('Standard rated supplies in {0}').format(emirate),
+				frappe.format(0, 'Currency'), frappe.format(0, 'Currency'))
+	return emirates, amounts_by_emirate
+
+
+def append_vat_on_expenses(data, filters):
+	"""Appends Expenses and All Other Inputs"""
+	append_data(data, '', _('VAT on Expenses and All Other Inputs'), '', '')
+	append_data(data, '9', _('Standard Rated Expenses'),
+		frappe.format(get_standard_rated_expenses_total(filters), 'Currency'),
+		frappe.format(get_standard_rated_expenses_tax(filters), 'Currency'))
+
+	append_data(data, '10', _('Supplies subject to the reverse charge provision'),
+		frappe.format(get_reverse_charge_recoverable_total(filters), 'Currency'),
+		frappe.format(get_reverse_charge_recoverable_tax(filters), 'Currency')
+)
+
+def append_data(data, no, legend, amount, vat_amount):
+	"""Returns data with appended value."""
+	data.append({"no": no, "legend":legend, "amount": amount, "vat_amount": vat_amount})
 
 def get_total_emiratewise(filters):
 	"""Returns Emiratewise Amount and Taxes."""
