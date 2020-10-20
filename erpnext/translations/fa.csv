@@ -521,7 +521,6 @@ Charge of type 'Actual' in row {0} cannot be included in Item Rate,شارژ از
 Chargeble,شارژ,
 Charges are updated in Purchase Receipt against each item,اتهامات در رسید خرید بر علیه هر یک از آیتم به روز شده,
 "Charges will be distributed proportionately based on item qty or amount, as per your selection",اتهامات خواهد شد توزیع متناسب در تعداد آیتم یا مقدار بر اساس، به عنوان در هر انتخاب شما,
-Chart Of Accounts,ساختار حسابها,
 Chart of Cost Centers,نمودار مراکز هزینه,
 Check all,بررسی همه,
 Checkout,وارسی,
@@ -581,7 +580,6 @@ Company {0} does not exist,شرکت {0} وجود ندارد,
 Compensatory Off,جبرانی فعال,
 Compensatory leave request days not in valid holidays,درخواست روز بازپرداخت جبران خسارت در تعطیلات معتبر,
 Complaint,شکایت,
-Completed Qty can not be greater than 'Qty to Manufacture',تکمیل تعداد نمی تواند بیشتر از &#39;تعداد برای تولید&#39;,
 Completion Date,تاریخ تکمیل,
 Computer,کامپیوتر,
 Condition,شرط,
@@ -2033,7 +2031,6 @@ Please select Category first,لطفا ابتدا دسته را انتخاب کن
 Please select Charge Type first,لطفا ابتدا شارژ نوع را انتخاب کنید,
 Please select Company,لطفا انتخاب کنید شرکت,
 Please select Company and Designation,لطفا شرکت و تعیین را انتخاب کنید,
-Please select Company and Party Type first,لطفا ابتدا شرکت و حزب نوع را انتخاب کنید,
 Please select Company and Posting Date to getting entries,لطفا شرکت و تاریخ ارسال را برای گرفتن نوشته انتخاب کنید,
 Please select Company first,لطفا ابتدا شرکت را انتخاب کنید,
 Please select Completion Date for Completed Asset Maintenance Log,لطفا تاریخ تکمیل را برای ورود به سیستم نگهداری دارایی تکمیل کنید,
@@ -2980,7 +2977,6 @@ The name of the institute for which you are setting up this system.,نام ای�
 The name of your company for which you are setting up this system.,نام شرکت خود را که برای آن شما راه اندازی این سیستم.,
 The number of shares and the share numbers are inconsistent,تعداد سهام و شماره سهم ناسازگار است,
 The payment gateway account in plan {0} is different from the payment gateway account in this payment request,حساب دروازه پرداخت در برنامه {0} متفاوت از حساب دروازه پرداخت در این درخواست پرداخت است,
-The request for quotation can be accessed by clicking on the following link,درخواست برای نقل قول می توان با کلیک بر روی لینک زیر قابل دسترسی,
 The selected BOMs are not for the same item,BOM ها انتخاب شده برای آیتم یکسان نیست,
 The selected item cannot have Batch,آیتم انتخاب شده می تواند دسته ای ندارد,
 The seller and the buyer cannot be the same,فروشنده و خریدار نمیتوانند یکسان باشند,
@@ -3130,7 +3126,6 @@ Total contribution percentage should be equal to 100,کل درصد سهم بای
 Total flexible benefit component amount {0} should not be less than max benefits {1},مقدار کامپوننت منعطف انعطاف پذیر {0} نباید کمتر از مزایای حداکثر باشد {1},
 Total hours: {0},کل ساعت: {0},
 Total leaves allocated is mandatory for Leave Type {0},مجموع برگ ها اختصاص داده شده برای نوع ترک {0} اجباری است,
-Total weightage assigned should be 100%. It is {0},بین وزنها مجموع اختصاص داده باید 100٪ باشد. این {0},
 Total working hours should not be greater than max working hours {0},کل ساعات کار نباید از ساعات کار حداکثر است بیشتر {0},
 Total {0} ({1}),مجموع {0} ({1}),
 "Total {0} for all items is zero, may be you should change 'Distribute Charges Based On'",مجموع {0} برای همه موارد صفر است، ممکن است شما باید &#39;اتهامات بر اساس توزیع را تغییر,
@@ -3544,7 +3539,6 @@ Company GSTIN,شرکت GSTIN,
 Company field is required,زمینه شرکت مورد نیاز است,
 Creating Dimensions...,ایجاد ابعاد ...,
 Duplicate entry against the item code {0} and manufacturer {1},ورودی کپی شده در برابر کد مورد {0} و سازنده {1},
-Import Chart Of Accounts from CSV / Excel files,وارد کردن نمودار حساب از پرونده های CSV / Excel,
 Invalid GSTIN! The input you've entered doesn't match the GSTIN format for UIN Holders or Non-Resident OIDAR Service Providers,GSTIN نامعتبر است! ورودی که وارد کردید با قالب GSTIN برای دارندگان UIN یا ارائه دهندگان خدمات OIDAR غیر مقیم مطابقت ندارد,
 Invoice Grand Total,تعداد کل فاکتور,
 Last carbon check date cannot be a future date,تاریخ آخرین بررسی کربن نمی تواند یک تاریخ آینده باشد,
@@ -3921,7 +3915,6 @@ Plaid authentication error,خطای تأیید اعتبار,
 Plaid public token error,خطای نشانه عمومی,
 Plaid transactions sync error,خطای همگام سازی معاملات کار شده,
 Please check the error log for details about the import errors,لطفاً جزئیات مربوط به خطاهای واردات را وارد کنید,
-Please click on the following link to set your new password,لطفا بر روی لینک زیر کلیک کنید برای تنظیم کلمه عبور جدید خود را,
 Please create <b>DATEV Settings</b> for Company <b>{}</b>.,لطفا ایجاد <b>DATEV تنظیمات</b> برای شرکت <b>{}.</b>,
 Please create adjustment Journal Entry for amount {0} ,لطفاً مبلغ ورود مجله تنظیم را برای مبلغ {0} ایجاد کنید,
 Please do not create more than 500 items at a time,لطفاً بیش از 500 مورد را همزمان ایجاد نکنید,
@@ -3997,6 +3990,7 @@ Refreshing,تازه کردن,
 Release date must be in the future,تاریخ انتشار باید در آینده باشد,
 Relieving Date must be greater than or equal to Date of Joining,Relieve Date باید بیشتر یا مساوی تاریخ عضویت باشد,
 Rename,تغییر نام,
+Rename Not Allowed,تغییر نام مجاز نیست,
 Repayment Method is mandatory for term loans,روش بازپرداخت برای وام های کوتاه مدت الزامی است,
 Repayment Start Date is mandatory for term loans,تاریخ شروع بازپرداخت برای وام های کوتاه مدت الزامی است,
 Report Item,گزارش مورد,
@@ -4043,7 +4037,6 @@ Search results for,نتایج جستجو برای,
 Select All,انتخاب همه,
 Select Difference Account,حساب کاربری تفاوت را انتخاب کنید,
 Select a Default Priority.,اولویت پیش فرض را انتخاب کنید.,
-Select a Supplier from the Default Supplier List of the items below.,تأمین کننده را از لیست پیش فرض تهیه کننده موارد زیر انتخاب کنید.,
 Select a company,شرکتی را انتخاب کنید,
 Select finance book for the item {0} at row {1},کتاب مالی را برای کالا {0} در ردیف {1 Select انتخاب کنید,
 Select only one Priority as Default.,فقط یک اولویت را به عنوان پیش فرض انتخاب کنید.,
@@ -4247,7 +4240,6 @@ Yes,بله,
 Actual ,واقعی,
 Add to cart,اضافه کردن به سبد,
 Budget,بودجه,
-Chart Of Accounts Importer,وارد کننده نمودار,
 Chart of Accounts,نمودار حساب,
 Customer database.,پایگاه داده مشتری.,
 Days Since Last order,روز پس از آخرین سفارش,
@@ -4546,7 +4538,6 @@ Role that is allowed to submit transactions that exceed credit limits set.,نق�
 Check Supplier Invoice Number Uniqueness,بررسی تولید کننده فاکتور شماره منحصر به فرد,
 Make Payment via Journal Entry,پرداخت از طریق ورود مجله,
 Unlink Payment on Cancellation of Invoice,قطع ارتباط پرداخت در لغو فاکتور,
-Unlink Advance Payment on Cancelation of Order,پیوند پیش پرداخت را با لغو سفارش لغو پیوند دهید,
 Book Asset Depreciation Entry Automatically,کتاب دارایی ورودی استهلاک به صورت خودکار,
 Automatically Add Taxes and Charges from Item Tax Template,به طور خودکار مالیات و عوارض را از الگوی مالیات مورد اضافه کنید,
 Automatically Fetch Payment Terms,شرایط پرداخت به صورت خودکار را اخذ کنید,
@@ -4940,7 +4931,6 @@ Closing Account Head,بستن سر حساب,
 POS Customer Group,POS و ضوابط گروه,
 POS Field,زمینه POS,
 POS Item Group,POS مورد گروه,
-[Select],[انتخاب],
 Company Address,آدرس شرکت,
 Update Stock,به روز رسانی سهام,
 Ignore Pricing Rule,نادیده گرفتن قانون قیمت گذاری,
@@ -6481,7 +6471,6 @@ HR-APR-.YY.-.MM.,HR-APR--YY.-MM.,
 Appraisal Template,ارزیابی الگو,
 For Employee Name,نام کارمند,
 Goals,اهداف,
-Calculate Total Score,محاسبه مجموع امتیاز,
 Total Score (Out of 5),نمره کل (از 5),
 "Any other remarks, noteworthy effort that should go in the records.",هر گونه اظهارات دیگر، تلاش قابل توجه است که باید در پرونده بروید.,
 Appraisal Goal,ارزیابی هدف,
@@ -6599,11 +6588,6 @@ Relieving Date,تسکین عضویت,
 Reason for Leaving,دلیلی برای ترک,
 Leave Encashed?,ترک نقد شدنی؟,
 Encashment Date,Encashment عضویت,
-Exit Interview Details,جزییات خروج مصاحبه,
-Held On,برگزار,
-Reason for Resignation,دلیل استعفای,
-Better Prospects,چشم انداز بهتر,
-Health Concerns,نگرانی های بهداشتی,
 New Workplace,جدید محل کار,
 HR-EAD-.YYYY.-,HR-EAD- .YYYY.-,
 Returned Amount,مقدار برگشت داده شد,
@@ -8239,9 +8223,6 @@ Landed Cost Help,فرود هزینه راهنما,
 Manufacturers used in Items,تولید کنندگان مورد استفاده در موارد,
 Limited to 12 characters,محدود به 12 کاراکتر,
 MAT-MR-.YYYY.-,MAT-MR- .YYYY.-,
-Set Warehouse,انبار را تنظیم کنید,
-Sets 'For Warehouse' in each row of the Items table.,مجموعه &quot;برای انبار&quot; را در هر ردیف از جدول موارد قرار می دهد.,
-Requested For,درخواست برای,
 Partially Ordered,تا حدی سفارش داده شده است,
 Transferred,منتقل شده,
 % Ordered,مرتب٪,
@@ -8690,8 +8671,6 @@ Material Request Warehouse,انبار درخواست مواد,
 Select warehouse for material requests,انبار را برای درخواست های مواد انتخاب کنید,
 Transfer Materials For Warehouse {0},انتقال مواد برای انبار {0},
 Production Plan Material Request Warehouse,طرح تولید انبار درخواست مواد,
-Set From Warehouse,تنظیم از انبار,
-Source Warehouse (Material Transfer),انبار منبع (انتقال مواد),
 Sets 'Source Warehouse' in each row of the items table.,&quot;انبار منبع&quot; را در هر ردیف از جدول موارد تنظیم می کند.,
 Sets 'Target Warehouse' in each row of the items table.,&quot;Target Warehouse&quot; را در هر ردیف از جدول موارد تنظیم می کند.,
 Show Cancelled Entries,نمایش مطالب لغو شده,
@@ -9157,7 +9136,6 @@ Professional Tax,مالیات حرفه ای,
 Is Income Tax Component,آیا م Taxلفه مالیات بر درآمد است,
 Component properties and references ,خصوصیات و منابع ملفه,
 Additional Salary ,حقوق اضافی,
-Condtion and formula,شرط و فرمول,
 Unmarked days,روزهای بدون علامت,
 Absent Days,روزهای غایب,
 Conditions and Formula variable and example,شرایط و متغیر فرمول و مثال,
@@ -9444,7 +9422,6 @@ Plaid invalid request error,خطای درخواست نامعتبر شطرنجی,
 Please check your Plaid client ID and secret values,لطفاً شناسه مشتری Plaid و مقادیر محرمانه خود را بررسی کنید,
 Bank transaction creation error,خطای ایجاد تراکنش بانکی,
 Unit of Measurement,واحد اندازه گیری,
-Row #{}: Selling rate for item {} is lower than its {}. Selling rate should be atleast {},ردیف شماره {}: نرخ فروش مورد {} کمتر از {} آن است. نرخ فروش باید حداقل باشد {},
 Fiscal Year {0} Does Not Exist,سال مالی {0} وجود ندارد,
 Row # {0}: Returned Item {1} does not exist in {2} {3},ردیف شماره {0}: مورد برگشت داده شده {1} در {2} {3} وجود ندارد,
 Valuation type charges can not be marked as Inclusive,هزینه های نوع ارزیابی را نمی توان به عنوان فراگیر علامت گذاری کرد,
@@ -9598,8 +9575,60 @@ Set Response Time and Resolution Time for Priority {0} in row {1}.,زمان پا
 Response Time for {0} priority in row {1} can't be greater than Resolution Time.,زمان پاسخ برای {0} اولویت در ردیف {1} نمی تواند بیشتر از زمان وضوح باشد.,
 {0} is not enabled in {1},{0} در {1} فعال نیست,
 Group by Material Request,گروه بندی براساس درخواست مواد,
-"Row {0}: For Supplier {0}, Email Address is Required to Send Email",ردیف {0}: برای تأمین کننده {0} ، آدرس ایمیل برای ارسال ایمیل لازم است,
 Email Sent to Supplier {0},ایمیل به تأمین کننده ارسال شد {0},
 "The Access to Request for Quotation From Portal is Disabled. To Allow Access, Enable it in Portal Settings.",دسترسی به درخواست قیمت از پورتال غیرفعال است. برای اجازه دسترسی ، آن را در تنظیمات پورتال فعال کنید.,
 Supplier Quotation {0} Created,قیمت عرضه کننده {0} ایجاد شد,
 Valid till Date cannot be before Transaction Date,معتبر تا تاریخ نمی تواند قبل از تاریخ معامله باشد,
+Unlink Advance Payment on Cancellation of Order,پیش پرداخت لغو سفارش را لغو پیوند کنید,
+"Simple Python Expression, Example: territory != 'All Territories'",بیان ساده پایتون ، مثال: Territory! = &#39;All Territories&#39;,
+Sales Contributions and Incentives,مشارکت ها و مشوق های فروش,
+Sourced by Supplier,منبع تأمین کننده,
+Total weightage assigned should be 100%.<br>It is {0},وزن کل اختصاص داده شده باید 100٪ باشد.<br> این {0} است,
+Account {0} exists in parent company {1}.,حساب {0} در شرکت مادر وجود دارد {1}.,
+"To overrule this, enable '{0}' in company {1}",برای کنار گذاشتن این مورد ، &quot;{0}&quot; را در شرکت {1} فعال کنید,
+Invalid condition expression,بیان شرط نامعتبر است,
+Please Select a Company First,لطفاً ابتدا یک شرکت را انتخاب کنید,
+Please Select Both Company and Party Type First,لطفا ابتدا هر دو نوع شرکت و مهمانی را انتخاب کنید,
+Provide the invoice portion in percent,قسمت فاکتور را به درصد ارائه دهید,
+Give number of days according to prior selection,با توجه به انتخاب قبلی ، تعداد روزها را بدهید,
+Email Details,جزئیات ایمیل,
+"Select a greeting for the receiver. E.g. Mr., Ms., etc.",یک تبریک برای گیرنده انتخاب کنید. مثلاً آقا ، خانم و غیره,
+Preview Email,پیش نمایش ایمیل,
+Please select a Supplier,لطفاً یک تامین کننده انتخاب کنید,
+Supplier Lead Time (days),زمان سرب تامین کننده (روزها),
+"Home, Work, etc.",خانه ، محل کار و غیره,
+Exit Interview Held On,مصاحبه خارج شد,
+Condition and formula,شرایط و فرمول,
+Sets 'Target Warehouse' in each row of the Items table.,&quot;Target Warehouse&quot; را در هر ردیف از جدول آیتم ها تنظیم می کند.,
+Sets 'Source Warehouse' in each row of the Items table.,&quot;منبع انبار&quot; را در هر ردیف از جدول آیتم ها تنظیم می کند.,
+POS Register,ثبت نام POS,
+"Can not filter based on POS Profile, if grouped by POS Profile",اگر براساس نمایه POS دسته بندی شود ، نمی توان براساس نمایه POS فیلتر کرد,
+"Can not filter based on Customer, if grouped by Customer",اگر براساس مشتری گروه بندی شده باشد ، نمی توان براساس مشتری فیلتر کرد,
+"Can not filter based on Cashier, if grouped by Cashier",اگر براساس صندوقدار دسته بندی شود نمی توان براساس صندوقدار فیلتر کرد,
+Payment Method,روش پرداخت,
+"Can not filter based on Payment Method, if grouped by Payment Method",اگر براساس روش پرداخت دسته بندی شود ، نمی توان براساس روش پرداخت فیلتر کرد,
+Supplier Quotation Comparison,مقایسه قیمت فروشنده,
+Price per Unit (Stock UOM),قیمت هر واحد (سهام UOM),
+Group by Supplier,گروه بندی توسط تأمین کننده,
+Group by Item,گروه بندی بر اساس مورد,
+Remember to set {field_label}. It is required by {regulation}.,فراموش نکنید که {field_label} را تنظیم کنید. این توسط {مقررات} لازم است.,
+Enrollment Date cannot be before the Start Date of the Academic Year {0},تاریخ ثبت نام نمی تواند قبل از تاریخ شروع سال تحصیلی باشد {0},
+Enrollment Date cannot be after the End Date of the Academic Term {0},تاریخ ثبت نام نمی تواند بعد از تاریخ پایان ترم تحصیلی باشد {0},
+Enrollment Date cannot be before the Start Date of the Academic Term {0},تاریخ ثبت نام نمی تواند قبل از تاریخ شروع ترم تحصیلی باشد {0},
+Posting future transactions are not allowed due to Immutable Ledger,ارسال معاملات در آینده به دلیل دفتر تغییر ناپذیر مجاز نیست,
+Future Posting Not Allowed,ارسال آینده مجاز نیست,
+"To enable Capital Work in Progress Accounting, ",برای فعال کردن سرمایه کار در حسابداری در حال پیشرفت ،,
+you must select Capital Work in Progress Account in accounts table,شما باید جدول Capital Work in Progress را در جدول حساب ها انتخاب کنید,
+You can also set default CWIP account in Company {},همچنین می توانید حساب پیش فرض CWIP را در شرکت تنظیم کنید {},
+The Request for Quotation can be accessed by clicking on the following button,با کلیک بر روی دکمه زیر می توان به درخواست برای قیمت گذاری دسترسی پیدا کرد,
+Regards,با احترام,
+Please click on the following button to set your new password,لطفاً برای تنظیم رمز ورود جدید خود بر روی دکمه زیر کلیک کنید,
+Update Password,رمز عبور را به روز کنید,
+Row #{}: Selling rate for item {} is lower than its {}. Selling {} should be atleast {},ردیف شماره {}: نرخ فروش مورد {} کمتر از {} آن است. فروش {} باید حداقل باشد {},
+You can alternatively disable selling price validation in {} to bypass this validation.,برای دور زدن این اعتبار سنجی ، می توانید اعتبار فروش قیمت را در {} غیرفعال کنید.,
+Invalid Selling Price,قیمت فروش نامعتبر است,
+Address needs to be linked to a Company. Please add a row for Company in the Links table.,آدرس باید به یک شرکت پیوند داده شود. لطفاً یک ردیف برای شرکت در جدول پیوندها اضافه کنید.,
+Company Not Linked,شرکت پیوندی ندارد,
+Import Chart of Accounts from CSV / Excel files,نمودار حساب ها را از پرونده های CSV / Excel وارد کنید,
+Completed Qty cannot be greater than 'Qty to Manufacture',تعداد تکمیل شده نمی تواند بزرگتر از &quot;تعداد تولید&quot; باشد,
+"Row {0}: For Supplier {1}, Email Address is Required to send an email",ردیف {0}: برای تامین کننده {1} ، برای ارسال نامه الکترونیکی آدرس ایمیل لازم است,
