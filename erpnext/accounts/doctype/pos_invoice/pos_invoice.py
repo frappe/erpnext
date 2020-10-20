@@ -243,7 +243,7 @@ class POSInvoice(SalesInvoice):
 			self.account_for_change_amount = profile.get('account_for_change_amount') or self.account_for_change_amount
 			self.set_warehouse = profile.get('warehouse') or self.set_warehouse
 
-			for fieldname in ('naming_series', 'currency', 'letter_head', 'tc_name',
+			for fieldname in ('currency', 'letter_head', 'tc_name',
 				'company', 'select_print_heading', 'write_off_account', 'taxes_and_charges',
 				'write_off_cost_center', 'apply_discount_on', 'cost_center', 'tax_category',
 				'ignore_pricing_rule', 'company_address', 'update_stock'):
