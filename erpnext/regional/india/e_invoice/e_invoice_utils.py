@@ -473,7 +473,7 @@ def make_einvoice(doctype, name):
 		else:
 			frappe.throw(error_msgs[0], title=_('E Invoice Validation Failed'))
 
-	return json.dumps(einvoice)
+	return {'einvoice': json.dumps([einvoice])}
 
 def validate_einvoice(validations, einvoice, error_msgs=[]):
 	type_map = { 'string': 'str', 'number': 'int', 'object': 'dict', 'array': 'list' }
@@ -503,8 +503,10 @@ def validate_einvoice(validations, einvoice, error_msgs=[]):
 			continue
 		
 		# convert to int or str
-		function = eval('c' + should_be_of_type)
-		einvoice[field] = function(invoice_value)
+		if should_be_of_type == 'str':
+			einvoice[field] = str(invoice_value)
+		elif should_be_of_type == 'int':
+			einvoice[field] = flt(invoice_value, 3)
 
 		max_length = validation.get('maxLength')
 		minimum = flt(validation.get('minimum'))
@@ -526,6 +528,12 @@ def validate_einvoice(validations, einvoice, error_msgs=[]):
 def update_einvoice_fields(doctype, name, signed_einvoice):
 	enc_signed_invoice = signed_einvoice.get('SignedInvoice')
 	decrypted_signed_invoice = jwt_decrypt(enc_signed_invoice)['data']
+
+	if json.loads(decrypted_signed_invoice)['DocDtls']['No'] != name:
+		frappe.throw(
+			_("Document number of uploaded Signed E-Invoice doesn't matches with Sales Invoice"),
+			title=_("Inappropriate E-Invoice")
+		)
 
 	frappe.db.set_value(doctype, name, 'irn', signed_einvoice.get('Irn'))
 	frappe.db.set_value(doctype, name, 'ewaybill', signed_einvoice.get('EwbNo'))
@@ -551,6 +559,7 @@ def upload_einvoice():
 	name = data['docname']
 
 	update_einvoice_fields(doctype, name, signed_einvoice)
+	attach_qrcode_image(doctype, name)
 
 @frappe.whitelist()
 def download_cancel_einvoice():
