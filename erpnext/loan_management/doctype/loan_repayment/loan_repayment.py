@@ -357,8 +357,8 @@ def get_amounts(amounts, against_loan, posting_date):
 		pending_days = date_diff(posting_date, against_loan_doc.disbursement_date) + 1
 
 	if pending_days > 0:
-		payable_principal_amount = flt(pending_principal_amount, precision)
-		per_day_interest = get_per_day_interest(payable_principal_amount, loan_type_details.rate_of_interest, posting_date)
+		principal_amount = flt(pending_principal_amount, precision)
+		per_day_interest = get_per_day_interest(principal_amount, loan_type_details.rate_of_interest, posting_date)
 		unaccrued_interest += (pending_days * flt(per_day_interest, precision))
 
 	amounts["pending_principal_amount"] = flt(pending_principal_amount, precision)
@@ -389,9 +389,11 @@ def calculate_amounts(against_loan, posting_date, payment_type=''):
 
 	amounts = get_amounts(amounts, against_loan, posting_date)
 
+	# update values for closure
 	if payment_type == 'Loan Closure':
-		amounts['payable_amount'] += amounts['unaccrued_interest']
+		amounts['payable_principal_amount'] = amounts['pending_principal_amount']
 		amounts['interest_amount'] += amounts['unaccrued_interest']
+		amounts['payable_amount'] = amounts['payable_principal_amount'] + amounts['interest_amount']
 
 	return amounts
 

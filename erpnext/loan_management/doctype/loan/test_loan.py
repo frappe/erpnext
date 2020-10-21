@@ -320,7 +320,7 @@ class TestLoan(unittest.TestCase):
 
 		amounts = amounts = calculate_amounts(loan.name, add_days(last_date, 6))
 		self.assertTrue(amounts['pending_principal_amount'] < 0)
-		self.assertTrue(amounts['payable_principal_amount'] < 0)
+		self.assertEquals(amounts['payable_principal_amount'], 0.0)
 		self.assertEqual(amounts['interest_amount'], 0)
 
 	def test_disbursal_check_with_shortfall(self):
@@ -706,7 +706,7 @@ def create_loan_security():
 			"haircut": 50.00,
 		}).insert(ignore_permissions=True)
 
-def create_loan_security_pledge(applicant, pledges, loan_application):
+def create_loan_security_pledge(applicant, pledges, loan_application=None, loan=None):
 
 	lsp = frappe.new_doc("Loan Security Pledge")
 	lsp.applicant_type = 'Customer'
@@ -714,11 +714,13 @@ def create_loan_security_pledge(applicant, pledges, loan_application):
 	lsp.company = "_Test Company"
 	lsp.loan_application = loan_application
 
+	if loan:
+		lsp.loan = loan
+
 	for pledge in pledges:
 		lsp.append('securities', {
 			"loan_security": pledge['loan_security'],
-			"qty": pledge['qty'],
-			"haircut": pledge['haircut']
+			"qty": pledge['qty']
 		})
 
 	lsp.save()
