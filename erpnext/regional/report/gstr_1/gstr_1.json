@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2019-06-30 19:33:59.769385",
+ "modified": "2019-09-03 19:33:59.769385",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "GSTR-1",
@@ -16,15 +16,5 @@
  "ref_doctype": "GL Entry",
  "report_name": "GSTR-1",
  "report_type": "Script Report",
- "roles": [
-  {
-   "role": "Accounts User"
-  },
-  {
-   "role": "Accounts Manager"
-  },
-  {
-   "role": "Auditor"
-  }
- ]
+ "roles": []
 }
