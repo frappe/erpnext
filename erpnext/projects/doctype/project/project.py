@@ -493,3 +493,18 @@ def set_project_status(project, status):
 
 	project.status = status
 	project.save()
+
+@frappe.whitelist()
+def unlink_sales_order(project_name):
+	# If project belongs to / is created from a specfic Sales Order
+	# unlink SO
+	project = frappe.get_doc("Project", project_name)
+
+	if frappe.db.exists("Sales Order", project_name) and frappe.db.get_value("Sales Order", project_name, "project"):
+		frappe.db.set_value("Sales Order", project_name, "project", '')
+
+		project.sales_order, project.customer = '', ''
+		project.save()
+		return project_name
+
+	return

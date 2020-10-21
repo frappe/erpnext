@@ -64,10 +64,6 @@ frappe.ui.form.on("Project", {
 
 	set_buttons: function(frm) {
 		if (!frm.is_new()) {
-			frm.add_custom_button(__('Duplicate Project with Tasks'), () => {
-				frm.events.create_duplicate(frm);
-			});
-
 			frm.add_custom_button(__('Completed'), () => {
 				frm.events.set_status(frm, 'Completed');
 			}, __('Set Status'));
@@ -75,6 +71,15 @@ frappe.ui.form.on("Project", {
 			frm.add_custom_button(__('Cancelled'), () => {
 				frm.events.set_status(frm, 'Cancelled');
 			}, __('Set Status'));
+
+			frm.add_custom_button(__('Duplicate Project with Tasks'), () => {
+				frm.events.create_duplicate(frm);
+			}, __('Tools'));
+
+			frm.add_custom_button(__('Unlink Sales Order'), () => {
+				frm.events.unlink_sales_order(frm);
+			}, __('Tools'));
+
 		}
 
 		if (frappe.model.can_read("Task")) {
@@ -83,7 +88,7 @@ frappe.ui.form.on("Project", {
 					"project": frm.doc.name
 				};
 				frappe.set_route("List", "Task", "Gantt");
-			});
+			}, __("Views"));
 
 			frm.add_custom_button(__("Kanban Board"), () => {
 				frappe.call('erpnext.projects.doctype.project.project.create_kanban_board_if_not_exists', {
@@ -91,8 +96,9 @@ frappe.ui.form.on("Project", {
 				}).then(() => {
 					frappe.set_route('List', 'Task', 'Kanban', frm.doc.project_name);
 				});
-			});
+			}, __("Views"));
 		}
+		frm.page.set_inner_btn_group_as_primary(__('Set Status'));
 	},
 
 	create_duplicate: function(frm) {
@@ -117,6 +123,27 @@ frappe.ui.form.on("Project", {
 				{project: frm.doc.name, status: status}).then(() => { /* page will auto reload */ });
 		});
 	},
+
+	unlink_sales_order: (frm) => {
+		frappe.call('erpnext.projects.doctype.project.project.unlink_sales_order', {
+			project_name: frm.doc.name
+		}).then((r) => {
+			if (r && r.message) {
+				frappe.show_alert({
+						message: __("Unlinked Sales Order {0}",
+							['<a href="#Form/Sales Order/'+r.message+'">' + r.message + '</a>']),
+						indicator: 'green'
+					});
+			}
+			else {
+				frappe.show_alert({
+					message: __("Nothing to Unlink"),
+					indicator: 'blue'
+				});
+			}
+			frm.reload_doc();
+		});
+	}
 
 });
 
