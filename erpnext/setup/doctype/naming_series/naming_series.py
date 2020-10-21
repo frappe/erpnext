@@ -165,6 +165,7 @@ def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True
 	if naming_series:
 		make_property_setter(doctype, "naming_series", "hidden", 0, "Check")
 		make_property_setter(doctype, "naming_series", "reqd", 1, "Check")
+		make_property_setter(doctype, fieldname, "depends_on", "", "Text")
 
 		# set values for mandatory
 		try:
@@ -180,6 +181,7 @@ def set_by_naming_series(doctype, fieldname, naming_series, hide_name_field=True
 	else:
 		make_property_setter(doctype, "naming_series", "reqd", 0, "Check")
 		make_property_setter(doctype, "naming_series", "hidden", 1, "Check")
+		make_property_setter(doctype, fieldname, "depends_on", "eval:doc.__islocal", "Text")
 
 		if hide_name_field:
 			make_property_setter(doctype, fieldname, "hidden", 0, "Check")
