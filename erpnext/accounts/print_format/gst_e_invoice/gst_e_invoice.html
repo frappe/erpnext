@@ -92,8 +92,8 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr>
-					{% for item in einvoice.ItemList %}
+				{% for item in einvoice.ItemList %}
+					<tr>
 						<td class="text-left" style="width: 3%;">{{ item.SlNo }}</td>
 						<td class="text-left">{{ item.PrdDesc }}</td>
 						<td class="text-left" style="width: 10%;">{{ item.HsnCd }}</td>
@@ -105,8 +105,8 @@
 						<td class="text-right" style="width: 7%;">{{ item.GstRt + item.CesRt }} %</td>
 						<td class="text-right" style="width: 5%;">{{ frappe.utils.fmt_money(0, None, "INR") }}</td>
 						<td class="text-right">{{ frappe.utils.fmt_money(item.TotItemVal, None, "INR") }}</td>
-					{% endfor %}
-				</tr>
+					</tr>
+				{% endfor %}
 			</tbody>
 		</table>
 	</div>
