@@ -73,21 +73,21 @@
    "description": "Will be used as default Status while <b>Attendance</b> creation through Document Type. ",
    "fieldname": "default_status_for_documents_section",
    "fieldtype": "Section Break",
-   "label": "Default status for Documents"
+   "label": "Status applicable for"
   },
   {
    "fieldname": "column_break_9",
    "fieldtype": "Column Break"
   },
   {
-   "description": "If Status is not Present, Half Day, or Leave. It Will be considered as Absent",
+   "description": "If Status is not Present, Half Day, or Leave. It Will be considered as Absent.",
    "fieldname": "section_break_1",
    "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-10-20 15:07:00.933838",
+ "modified": "2020-10-20 17:52:04.665330",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance Status",
