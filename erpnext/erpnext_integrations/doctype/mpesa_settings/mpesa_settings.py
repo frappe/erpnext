@@ -26,11 +26,19 @@ class MpesaSettings(Document):
 	def on_update(self):
 		create_custom_pos_fields()
 		create_payment_gateway('Mpesa-' + self.payment_gateway_name, settings='Mpesa Settings', controller=self.payment_gateway_name)
-		create_mode_of_payment('Mpesa-' + self.payment_gateway_name, payment_type="Phone")
 		call_hook_method('payment_gateway_enabled', gateway='Mpesa-' + self.payment_gateway_name, payment_channel="Phone")
 
+		# required to fetch the bank account details from the payment gateway account
+		frappe.db.commit()
+		create_mode_of_payment('Mpesa-' + self.payment_gateway_name, payment_type="Phone")
+
 	def request_for_payment(self, **kwargs):
-		response = frappe._dict(generate_stk_push(**kwargs))
+		if frappe.flags.in_test:
+			from erpnext.erpnext_integrations.doctype.mpesa_settings.test_mpesa_settings import get_payment_request_response_payload
+			response = frappe._dict(get_payment_request_response_payload())
+		else:
+			response = frappe._dict(generate_stk_push(**kwargs))
+
 		self.handle_api_response("CheckoutRequestID", kwargs, response)
 
 	def get_account_balance_info(self):
@@ -39,7 +47,13 @@ class MpesaSettings(Document):
 			reference_docname=self.name,
 			doc_details=vars(self)
 		)
-		response = frappe._dict(get_account_balance(payload))
+
+		if frappe.flags.in_test:
+			from erpnext.erpnext_integrations.doctype.mpesa_settings.test_mpesa_settings import get_test_account_balance_response
+			response = frappe._dict(get_test_account_balance_response())
+		else:
+			response = frappe._dict(get_account_balance(payload))
+
 		self.handle_api_response("ConversationID", payload, response)
 
 	def handle_api_response(self, global_id, request_dict, response):
@@ -92,7 +106,6 @@ def sanitize_mobile_number(number):
 def verify_transaction(**kwargs):
 	"""Verify the transaction result received via callback from stk."""
 	transaction_response = frappe._dict(kwargs["Body"]["stkCallback"])
-	frappe.logger().debug(transaction_response)
 
 	checkout_id = getattr(transaction_response, "CheckoutRequestID", "")
 	request = frappe.get_doc("Integration Request", checkout_id)
@@ -148,14 +161,13 @@ def process_balance_info(**kwargs):
 		return
 
 	transaction_data = frappe._dict(loads(request.data))
-	frappe.logger().debug(account_balance_response)
 
 	if account_balance_response["ResultCode"] == 0:
 		try:
 			result_params = account_balance_response["ResultParameters"]["ResultParameter"]
 
 			balance_info = fetch_param_value(result_params, "AccountBalance", "Key")
-			balance_info = convert_to_json(balance_info)
+			balance_info = format_string_to_json(balance_info)
 
 			ref_doc = frappe.get_doc(transaction_data.reference_doctype, transaction_data.reference_docname)
 			ref_doc.db_set("account_balance", balance_info)
@@ -168,15 +180,15 @@ def process_balance_info(**kwargs):
 	else:
 		request.handle_failure(account_balance_response)
 
-def convert_to_json(balance_info):
+def format_string_to_json(balance_info):
 	"""
-	Convert string to json.
+	Format string to json.
 
 	e.g: '''Working Account|KES|481000.00|481000.00|0.00|0.00'''
 	=> {'Working Account': {'current_balance': '481000.00',
 		'available_balance': '481000.00',
 		'reserved_balance': '0.00',
-		'uncleared_balance': '0.00'}
+		'uncleared_balance': '0.00'}}
 	"""
 	balance_dict = frappe._dict()
 	for account_info in balance_info.split("&"):
