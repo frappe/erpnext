@@ -8,7 +8,7 @@ import frappe
 import json
 from frappe import _
 from frappe.utils.formatters import format_value
-from frappe.utils import time_diff_in_hours, rounded
+from frappe.utils import time_diff_in_hours, rounded, getdate
 from six import string_types
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_income_account
 from erpnext.healthcare.doctype.fee_validity.fee_validity import create_fee_validity
@@ -717,3 +717,53 @@ def render_doc_as_html(doctype, docname, exclude_fields = []):
 		doc_html = "<div class='small'><div class='col-md-12 text-right'><a class='btn btn-default btn-xs' href='/app/Form/%s/%s'></a></div>" %(doctype, docname) + doc_html + '</div>'
 
 	return {'html': doc_html}
+
+
+def update_address_links(address, method):
+	'''
+	Hook validate Address
+	If Patient is linked in Address, also link the associated Customer
+	'''
+	if 'Healthcare' not in frappe.get_active_domains():
+		return
+
+	patient_links = list(filter(lambda link: link.get('link_doctype') == 'Patient', address.links))
+
+	for link in patient_links:
+		customer = frappe.db.get_value('Patient', link.get('link_name'), 'customer')
+		if customer and not address.has_link('Customer', customer):
+			address.append('links', dict(link_doctype = 'Customer', link_name = customer))
+
+
+def update_patient_email_and_phone_numbers(contact, method):
+	'''
+	Hook validate Contact
+	Update linked Patients' primary mobile and phone numbers
+	'''
+	if 'Healthcare' not in frappe.get_active_domains():
+		return
+
+	if contact.is_primary_contact and (contact.email_id or contact.mobile_no or contact.phone):
+		patient_links = list(filter(lambda link: link.get('link_doctype') == 'Patient', contact.links))
+
+		for link in patient_links:
+			contact_details = frappe.db.get_value('Patient', link.get('link_name'), ['email', 'mobile', 'phone'], as_dict=1)
+			if contact.email_id and contact.email_id != contact_details.get('email'):
+				frappe.db.set_value('Patient', link.get('link_name'), 'email', contact.email_id)
+			if contact.mobile_no and contact.mobile_no != contact_details.get('mobile'):
+				frappe.db.set_value('Patient', link.get('link_name'), 'mobile', contact.mobile_no)
+			if contact.phone and contact.phone != contact_details.get('phone'):
+				frappe.db.set_value('Patient', link.get('link_name'), 'phone', contact.phone)
+
+
+@frappe.whitelist()
+def make_healthcare_service_order(args):
+	healthcare_service_order = frappe.new_doc('Healthcare Service Order')
+	for key in args:
+		if key == 'order_date':
+			healthcare_service_order.set(key, getdate(args[key]))
+		elif key == 'expected_date':
+			healthcare_service_order.set(key, getdate(args[key]))
+		else:
+			healthcare_service_order.set(key, args[key] if args[key] else '')
+	healthcare_service_order.save(ignore_permissions=True)
