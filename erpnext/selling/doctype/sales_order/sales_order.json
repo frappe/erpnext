@@ -454,6 +454,7 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "territory",
    "fieldtype": "Link",
    "hidden": 1,
@@ -1682,7 +1683,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-11 04:00:31.091304",
+ "modified": "2020-10-22 15:35:37.149800",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
