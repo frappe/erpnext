@@ -121,7 +121,7 @@ class LandedCostVoucher(Document):
 			doc.set_landed_cost_voucher_amount()
 
 			# set valuation amount in pr item
-			doc.update_valuation_rate("items")
+			doc.update_valuation_rate(reset_outgoing_rate=False)
 
 			# db_update will update and save landed_cost_voucher_amount and voucher_amount in PR
 			for item in doc.get("items"):
