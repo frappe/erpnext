@@ -84,7 +84,6 @@ frappe.ui.form.on("Salary Slip", {
 
 	set_dynamic_labels: function(frm) {
 		var company_currency = frm.doc.company? erpnext.get_currency(frm.doc.company): frappe.defaults.get_default("currency");
-		// frm.events.set_exchange_rate(frm, company_currency);
 		if (frm.doc.currency && company_currency!=frm.doc.currency) {
 			frm.events.hide_loan_section(frm);
 		}
