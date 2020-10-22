@@ -658,7 +658,7 @@ erpnext.PointOfSale.Controller = class {
 
 		if (res.message.includes(serial_no)) {
 			frappe.throw({
-				title: _("Not Available"),
+				title: __("Not Available"),
 				message: __(`Serial No: {0} has already been transacted into another POS Invoice.`, [serial_no.bold()])
 			});
 		}

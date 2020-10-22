@@ -35,7 +35,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 		item_info = frappe.db.get_value(
 			"Item", data.get("item_code"), 
 			["name as item_code", "item_name", "description", "stock_uom", "image as item_image", "is_stock_item"]
-		)
+		, as_dict=1)
 		item_info.setdefault('serial_no', serial_no)
 		item_info.setdefault('batch_no', batch_no)
 		item_info.setdefault('barcode', barcode)
