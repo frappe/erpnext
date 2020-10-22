@@ -506,6 +506,95 @@ class TestSalesOrder(unittest.TestCase):
 		so.reload()
 		self.assertEqual(so.packed_items[0].qty, 8)
 
+	def test_update_child_with_tax_template(self):
+		"""
+			Test Action: Create a SO with one item having its tax account head already in the SO.
+			Add the same item + new item with tax template via Update Items.
+			Expected result: First Item's tax row is updated. New tax row is added for second Item.
+		"""
+		if not frappe.db.exists("Item", "Test Item with Tax"):
+			make_item("Test Item with Tax", {
+				'is_stock_item': 1,
+			})
+
+		if not frappe.db.exists("Item Tax Template", {"title": 'Test Update Items Template'}):
+			frappe.get_doc({
+				'doctype': 'Item Tax Template',
+				'title': 'Test Update Items Template',
+				'company': '_Test Company',
+				'taxes': [
+					{
+						'tax_type': "_Test Account Service Tax - _TC",
+						'tax_rate': 10,
+					}
+				]
+			}).insert()
+
+		new_item_with_tax = frappe.get_doc("Item", "Test Item with Tax")
+
+		new_item_with_tax.append("taxes", {
+			"item_tax_template": "Test Update Items Template",
+			"valid_from": nowdate()
+		})
+		new_item_with_tax.save()
+
+		tax_template = "_Test Account Excise Duty @ 10"
+		item =  "_Test Item Home Desktop 100"
+		if not frappe.db.exists("Item Tax", {"parent":item, "item_tax_template":tax_template}):
+			item_doc = frappe.get_doc("Item", item)
+			item_doc.append("taxes", {
+				"item_tax_template": tax_template,
+				"valid_from": nowdate()
+			})
+			item_doc.save()
+		else:
+			# update valid from
+			frappe.db.sql("""UPDATE `tabItem Tax` set valid_from = CURDATE()
+				where parent = %(item)s and item_tax_template = %(tax)s""",
+					{"item": item, "tax": tax_template})
+
+		so = make_sales_order(item_code=item, qty=1, do_not_save=1)
+
+		so.append("taxes", {
+			"account_head": "_Test Account Excise Duty - _TC",
+			"charge_type": "On Net Total",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Excise Duty",
+			"doctype": "Sales Taxes and Charges",
+			"rate": 10
+		})
+		so.insert()
+		so.submit()
+
+		self.assertEqual(so.taxes[0].tax_amount, 10)
+		self.assertEqual(so.taxes[0].total, 110)
+
+		old_stock_settings_value = frappe.db.get_single_value("Stock Settings", "default_warehouse")
+		frappe.db.set_value("Stock Settings", None, "default_warehouse", "_Test Warehouse - _TC")
+
+		items = json.dumps([
+			{'item_code' : item, 'rate' : 100, 'qty' : 1, 'docname': so.items[0].name},
+			{'item_code' : item, 'rate' : 200, 'qty' : 1}, # added item whose tax account head already exists in PO
+			{'item_code' : new_item_with_tax.name, 'rate' : 100, 'qty' : 1} # added item whose tax account head  is missing in PO
+		])
+		update_child_qty_rate('Sales Order', items, so.name)
+
+		so.reload()
+		self.assertEqual(so.taxes[0].tax_amount, 40)
+		self.assertEqual(so.taxes[0].total, 440)
+		self.assertEqual(so.taxes[1].account_head, "_Test Account Service Tax - _TC")
+		self.assertEqual(so.taxes[1].tax_amount, 40)
+		self.assertEqual(so.taxes[1].total, 480)
+
+		# teardown
+		frappe.db.sql("""UPDATE `tabItem Tax` set valid_from = NULL
+			where parent = %(item)s and item_tax_template = %(tax)s""", {"item": item, "tax": tax_template})
+		so.cancel()
+		so.delete()
+		new_item_with_tax.delete()
+		frappe.get_doc("Item Tax Template", "Test Update Items Template").delete()
+		frappe.db.set_value("Stock Settings", None, "default_warehouse", old_stock_settings_value)
+
 	def test_warehouse_user(self):
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
 		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
