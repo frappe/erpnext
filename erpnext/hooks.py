@@ -10,7 +10,7 @@ app_color = "#e74c3c"
 app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
-app_logo_url = '/assets/erpnext/images/erpnext-logo.svg'
+app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
 
 
 develop_version = '13.x.x-develop'
@@ -21,9 +21,14 @@ web_include_js = "assets/js/erpnext-web.min.js"
 web_include_css = "assets/css/erpnext-web.css"
 
 doctype_js = {
+	"Address": "public/js/address.js",
 	"Communication": "public/js/communication.js",
 	"Event": "public/js/event.js",
 	"Newsletter": "public/js/newsletter.js"
+}
+
+override_doctype_class = {
+	'Address': 'erpnext.accounts.custom.address.ERPNextAddress'
 }
 
 welcome_email = "erpnext.setup.utils.welcome_email"
@@ -74,7 +79,7 @@ website_generators = ["Item Group", "Item", "BOM", "Sales Partner",
 
 website_context = {
 	"favicon": 	"/assets/erpnext/images/favicon.png",
-	"splash_image": "/assets/erpnext/images/erp-icon.svg"
+	"splash_image": "/assets/erpnext/images/erpnext-logo.svg"
 }
 
 website_route_rules = [
