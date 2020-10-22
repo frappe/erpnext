@@ -130,7 +130,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 								if (!res.exc) {
 									const args = {
 										cmd: 'erpnext.regional.india.e_invoice.e_invoice_utils.download_einvoice',
-										einvoice: res.message.einvoice,
+										einvoice: JSON.stringify([res.message]),
 										name: name
 									};
 									open_url_post(frappe.request.url, args);
