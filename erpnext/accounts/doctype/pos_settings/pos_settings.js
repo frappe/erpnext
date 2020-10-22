@@ -7,10 +7,10 @@ frappe.ui.form.on('POS Settings', {
 	},
 
 	get_invoice_fields: function(frm) {
-		frappe.model.with_doctype("Sales Invoice", () => {
-			var fields = $.map(frappe.get_doc("DocType", "Sales Invoice").fields, function(d) {
+		frappe.model.with_doctype("POS Invoice", () => {
+			var fields = $.map(frappe.get_doc("DocType", "POS Invoice").fields, function(d) {
 				if (frappe.model.no_value_type.indexOf(d.fieldtype) === -1 ||
-					d.fieldtype === 'Table') {
+					['Table', 'Button'].includes(d.fieldtype)) {
 					return { label: d.label + ' (' + d.fieldtype + ')', value: d.fieldname };
 				} else {
 					return null;
@@ -25,7 +25,7 @@ frappe.ui.form.on('POS Settings', {
 frappe.ui.form.on("POS Field", {
 	fieldname: function(frm, doctype, name) {
 		var doc = frappe.get_doc(doctype, name);
-		var df = $.map(frappe.get_doc("DocType", "Sales Invoice").fields, function(d) {
+		var df = $.map(frappe.get_doc("DocType", "POS Invoice").fields, function(d) {
 			return doc.fieldname == d.fieldname ? d : null;
 		})[0];
 
