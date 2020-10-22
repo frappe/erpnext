@@ -128,7 +128,7 @@ function refresh_payments(d, frm, remove) {
 	d.payments.forEach(p => {
 		const payment = frm.doc.payment_reconciliation.find(pay => pay.mode_of_payment === p.mode_of_payment);
 		if (payment) {
-			if (!remove) payment.expected_amount += flt(p.amount);
+			if (!remove) payment.expected_amount += flt(d.grand_total);
 			else payment.expected_amount -= flt(p.amount);
 		} else {
 			frm.add_child("payment_reconciliation", {
