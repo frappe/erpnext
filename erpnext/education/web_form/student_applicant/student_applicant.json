@@ -70,19 +70,7 @@
    "show_in_filter": 0
   },
   {
-   "allow_read_on_all_link_options": 0,
-   "fieldname": "image",
-   "fieldtype": "Data",
-   "hidden": 0,
-   "label": "Image",
-   "max_length": 0,
-   "max_value": 0,
-   "read_only": 0,
-   "reqd": 0,
-   "show_in_filter": 0
-  },
-  {
-   "allow_read_on_all_link_options": 0,
+   "allow_read_on_all_link_options": 1,
    "fieldname": "program",
    "fieldtype": "Link",
    "hidden": 0,
@@ -95,7 +83,7 @@
    "show_in_filter": 0
   },
   {
-   "allow_read_on_all_link_options": 0,
+   "allow_read_on_all_link_options": 1,
    "fieldname": "academic_year",
    "fieldtype": "Link",
    "hidden": 0,
@@ -108,6 +96,19 @@
    "show_in_filter": 0
   },
   {
+   "allow_read_on_all_link_options": 1,
+   "fieldname": "academic_term",
+   "fieldtype": "Link",
+   "hidden": 0,
+   "label": "Academic Term",
+   "max_length": 0,
+   "max_value": 0,
+   "options": "Academic Term",
+   "read_only": 0,
+   "reqd": 0,
+   "show_in_filter": 0
+  },
+  {
    "allow_read_on_all_link_options": 0,
    "fieldname": "date_of_birth",
    "fieldtype": "Date",
@@ -115,6 +116,19 @@
    "label": "Date of Birth",
    "max_length": 0,
    "max_value": 0,
+   "read_only": 0,
+   "reqd": 0,
+   "show_in_filter": 0
+  },
+  {
+   "allow_read_on_all_link_options": 1,
+   "fieldname": "gender",
+   "fieldtype": "Link",
+   "hidden": 0,
+   "label": "Gender",
+   "max_length": 0,
+   "max_value": 0,
+   "options": "Gender",
    "read_only": 0,
    "reqd": 0,
    "show_in_filter": 0
@@ -141,7 +155,7 @@
    "max_length": 0,
    "max_value": 0,
    "read_only": 0,
-   "reqd": 0,
+   "reqd": 1,
    "show_in_filter": 0
   },
   {
@@ -202,19 +216,6 @@
    "label": "Pincode",
    "max_length": 0,
    "max_value": 0,
-   "read_only": 0,
-   "reqd": 0,
-   "show_in_filter": 0
-  },
-  {
-   "allow_read_on_all_link_options": 0,
-   "fieldname": "guardians",
-   "fieldtype": "Table",
-   "hidden": 0,
-   "label": "Guardians",
-   "max_length": 0,
-   "max_value": 0,
-   "options": "Student Guardian",
    "read_only": 0,
    "reqd": 0,
    "show_in_filter": 0
