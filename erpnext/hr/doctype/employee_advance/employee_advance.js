@@ -18,12 +18,13 @@ frappe.ui.form.on('Employee Advance', {
 			if (!frm.doc.employee) {
 				frappe.msgprint(__("Please select employee first"))
 			}
+			var company_currency = erpnext.get_currency(frm.doc.company);
 			return {
 				filters: {
 					"root_type": "Asset",
 					"is_group": 0,
 					"company": frm.doc.company,
-					"account_currency": frm.doc.currency,
+					"account_currency": ["in",[frm.doc.currency, company_currency]],
 				}
 			};
 		});
@@ -142,31 +143,37 @@ frappe.ui.form.on('Employee Advance', {
 
 	employee: function (frm) {
 		if (frm.doc.employee) {
-			frappe.call({
-				method: "erpnext.hr.doctype.employee_advance.employee_advance.get_pending_amount",
-				args: {
-					"employee": frm.doc.employee,
-					"posting_date": frm.doc.posting_date
-				},
-				callback: function(r) {
-					frm.set_value("pending_amount",r.message);
-				}
-			});
-
-			frappe.call({
-				method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_payroll_payable_account_currency",
-				args: {
-					employee: frm.doc.employee,
-				},
-				callback: function(r) {
-					if(r.message) {
-						frm.set_value('currency', r.message);
-						frm.set_df_property('currency', 'hidden', 0);
-						frm.refresh_fields()
-					}
-				}
-			});
+			frm.trigger('get_pending_amount');
+			frm.trigger('get_employee_currency');
 		}
+	},
+
+	get_pending_amount: function(frm) {
+		frappe.call({
+			method: "erpnext.hr.doctype.employee_advance.employee_advance.get_pending_amount",
+			args: {
+				"employee": frm.doc.employee,
+				"posting_date": frm.doc.posting_date
+			},
+			callback: function(r) {
+				frm.set_value("pending_amount",r.message);
+			}
+		});
+	},
+
+	get_employee_currency: function(frm) {
+		frappe.call({
+			method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_employee_currency",
+			args: {
+				employee: frm.doc.employee,
+			},
+			callback: function(r) {
+				if(r.message) {
+					frm.set_value('currency', r.message);
+					frm.refresh_fields();
+				}
+			}
+		});
 	},
 
 	currency: function(frm) {
@@ -177,26 +184,15 @@ frappe.ui.form.on('Employee Advance', {
 		else {
 			var company_currency = erpnext.get_currency(frm.doc.company);
 		}
-		if(from_currency != company_currency) {
-			frappe.call({
-				method: "erpnext.setup.utils.get_exchange_rate",
-				args: {
-					from_currency: from_currency,
-					to_currency: company_currency,
-				},
-				callback: function(r) {
-					frm.set_value("exchange_rate", flt(r.message));
-					frm.set_df_property('exchange_rate', 'hidden', 0);
-					cur_frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
-						+ " = [?] " + company_currency);
-					frm.refresh_fields();
-				}
-			});
-		} else {
+		if(from_currency == company_currency) {
 			frm.set_value("exchange_rate", 1.0);
 			frm.set_df_property('exchange_rate', 'hidden', 1);
 			frm.set_df_property("exchange_rate", "description", "" );
-			frm.refresh_fields();
+		} else {
+			frm.set_value("exchange_rate", '');
+			frm.set_df_property('exchange_rate', 'hidden', 0);
+			frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency + " = [?] " + company_currency);
 		}
+		frm.refresh_fields();
 	},
 });

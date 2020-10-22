@@ -282,7 +282,7 @@
    "depends_on": "company",
    "fieldname": "default_payroll_payable_account",
    "fieldtype": "Link",
-   "label": "Default Payroll Payable Account",
+   "label": "Payroll Payable Account",
    "options": "Account",
    "reqd": 1
   }
@@ -290,7 +290,7 @@
  "icon": "fa fa-cog",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-30 12:47:45.729777",
+ "modified": "2020-10-22 01:57:27.226066",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll Entry",

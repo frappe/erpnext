@@ -24,7 +24,6 @@ frappe.ui.form.on('Payroll Entry', {
 					"company": frm.doc.company,
 					"root_type": "Liability",
 					"is_group": 0,
-					"account_currency": frm.doc.currency
 				}
 			}
 		});
@@ -151,7 +150,6 @@ frappe.ui.form.on('Payroll Entry', {
 	},
 
 	currency: function (frm) {
-		debugger;
 		if (!frm.doc.company) {
 			var company_currency = erpnext.get_currency(frappe.defaults.get_default("Company"));
 		}

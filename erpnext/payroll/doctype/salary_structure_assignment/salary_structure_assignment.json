@@ -127,7 +127,7 @@
    "depends_on": "salary_structure",
    "fieldname": "default_payroll_payable_account",
    "fieldtype": "Link",
-   "label": "Default Payroll Payable Account",
+   "label": "Payroll Payable Account",
    "options": "Account"
   },
   {
@@ -145,7 +145,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-30 17:35:49.922227",
+ "modified": "2020-10-21 22:43:55.208492",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Structure Assignment",

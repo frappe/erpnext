@@ -73,42 +73,67 @@ frappe.ui.form.on("Salary Slip", {
 		var company = locals[':Company'][frm.doc.company];
 		if(!frm.doc.letter_head && company.default_letter_head) {
 			frm.set_value('letter_head', company.default_letter_head);
-		}
+		};
+		frm.trigger("set_dynamic_labels")
 	},
 
 	currency: function(frm) {
-		calculate_totals(frm.doc);
+		calculate_totals(frm);
 		frm.trigger("set_dynamic_labels")
-		frm.refresh()
 	},
 
 	set_dynamic_labels: function(frm) {
-		debugger;
-		frm.set_currency_labels(["hour_rate", "gross_pay", "total_deduction", "net_pay", "rounded_total", "total_in_words"],
-			frm.doc.currency);
-
-		// toggle fields
-		if(frappe.meta.get_docfield(cur_frm.doctype, "net_total"))
-			cur_frm.toggle_display("net_total", show);
-
-		frm.set_currency_labels(["amount", "default_amount", "additional_amount", "tax_on_flexible_benefit", "tax_on_additional_salary"],
-			frm.doc.currency, "earnings");
-
-		frm.set_currency_labels(["amount", "default_amount", "additional_amount", "tax_on_flexible_benefit", "tax_on_additional_salary"],
-			frm.doc.currency, "deductions");
-
+		var company_currency = frm.doc.company? erpnext.get_currency(frm.doc.company): frappe.defaults.get_default("currency");
+		// frm.events.set_exchange_rate(frm, company_currency);
+		if (frm.doc.currency && company_currency!=frm.doc.currency) {
+			frm.events.hide_loan_section(frm);
+		}
+		frm.events.change_form_labels(frm, company_currency);
+		frm.events.change_grid_labels(frm, company_currency);
 		frm.refresh_fields();
 	},
 
+	exchange_rate: function(frm) {
+		calculate_totals(frm);
+	},
+
+	hide_loan_section: function(frm) {
+		frm.set_df_property('section_break_43', 'hidden', 1);
+	},
+
+	change_form_labels: function(frm, company_currency) {
+		frm.set_currency_labels(["base_hour_rate", "base_gross_pay", "base_total_deduction", 
+			"base_net_pay", "base_rounded_total", "base_total_in_words"],
+			company_currency);
+
+		frm.set_currency_labels(["hour_rate", "gross_pay", "total_deduction", "net_pay", "rounded_total", "total_in_words"],
+			frm.doc.currency);
+
+		cur_frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
+			+ " = [?] " + company_currency);
+
+		// toggle fields
+		frm.toggle_display(["exchange_rate", "base_hour_rate", "base_gross_pay", "base_total_deduction", 
+			"base_net_pay", "base_rounded_total", "base_total_in_words"],
+			frm.doc.currency != company_currency);
+	},
+
+	change_grid_labels: function(frm, company_currency) {
+		frm.set_currency_labels(["amount", "default_amount", "additional_amount", "tax_on_flexible_benefit", 
+			"tax_on_additional_salary"], frm.doc.currency, "earnings");
+
+		frm.set_currency_labels(["amount", "default_amount", "additional_amount", "tax_on_flexible_benefit", 
+			"tax_on_additional_salary"], frm.doc.currency, "deductions");
+	},
+
 	refresh: function(frm) {
-		debugger;
-		frm.trigger("set_dynamic_labels")
 		frm.trigger("toggle_fields")
 
 		var salary_detail_fields = ["formula", "abbr", "statistical_component", "variable_based_on_taxable_salary"];
-		cur_frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields,false);
-		cur_frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields,false);
-		calculate_totals(frm.doc);
+		frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields,false);
+		frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields,false);
+		calculate_totals(frm);
+		frm.trigger("set_dynamic_labels")
 	},
 
 	salary_slip_based_on_timesheet: function(frm) {
@@ -145,104 +170,56 @@ frappe.ui.form.on("Salary Slip", {
 	},
 
 	get_emp_and_working_day_details: function(frm) {
-		debugger;
-		return frappe.call({
-			method: 'get_emp_and_working_day_details',
-			doc: frm.doc,
-			callback: function(r, rt) {
-				frm.refresh();
-				if (r.message){
-					frm.fields_dict.absent_days.set_description("Unmarked Days is treated as "+ r.message +". You can can change this in " + frappe.utils.get_form_link("Payroll Settings", "Payroll Settings", true));
+		if (frm.doc.employee) {
+			return frappe.call({
+				method: 'get_emp_and_working_day_details',
+				doc: frm.doc,
+				callback: function(r) {
+					if (r.message){
+						frm.fields_dict.absent_days.set_description("Unmarked Days is treated as "+ r.message +". You can can change this in " + frappe.utils.get_form_link("Payroll Settings", "Payroll Settings", true));
+					}
+					frm.refresh();
 				}
-			}
-		});
+			});
+		}
 	}
 });
 
 frappe.ui.form.on('Salary Slip Timesheet', {
-	time_sheet: function(frm, dt, dn) {
-		total_work_hours(frm, dt, dn);
+	time_sheet: function(frm) {
+		calculate_totals(frm);
 	},
-	timesheets_remove: function(frm, dt, dn) {
-		total_work_hours(frm, dt, dn);
+	timesheets_remove: function(frm) {
+		calculate_totals(frm);
 	}
 });
 
-
-cur_frm.cscript.amount = function(doc, cdt, cdn){
-	calculate_totals(doc, cdt, cdn);
-};
-
-// calculate total working hours, earnings based on hourly wages and totals
-var total_work_hours = function(frm, dt, dn) {
-	debugger;
-	var total_working_hours = 0.0;
-	$.each(frm.doc["timesheets"] || [], function(i, timesheet) {
-		total_working_hours += timesheet.working_hours;
-	});
-	frm.set_value('total_working_hours', total_working_hours);
-
-	var wages_amount = frm.doc.total_working_hours * frm.doc.hour_rate;
-
-	frappe.db.get_value('Salary Structure', {'name': frm.doc.salary_structure}, 'salary_component', (r) => {
-		var gross_pay = 0.0;
-		$.each(frm.doc["earnings"], function(i, earning) {
-			if (earning.salary_component == r.salary_component) {
-				earning.amount = wages_amount;
-				frm.refresh_fields('earnings');
-			}
-			gross_pay += earning.amount;
-		});
-		frm.set_value('gross_pay', gross_pay);
-
-		frm.doc.net_pay = flt(frm.doc.gross_pay) - flt(frm.doc.total_deduction);
-		frm.doc.rounded_total = Math.round(frm.doc.net_pay);
-		refresh_many(['net_pay', 'rounded_total']);
-	});
-}
-
-var calculate_totals = function(doc) {
-	debugger;
-	var tbl1 = doc.earnings || [];
-	var tbl2 = doc.deductions || [];
-
-	var total_earn = 0; var total_ded = 0;
-	for(var i = 0; i < tbl1.length; i++){
-		total_earn += flt(tbl1[i].amount);
+var calculate_totals = function(frm) {
+	if (frm.doc.earnings || frm.doc.deductions) {
+		frappe.call({
+			method: "set_totals",
+			doc: frm.doc,
+			callback: function(r) {
+				frm.refresh_fields()
+			}	
+		})
 	}
-	for(var j = 0; j < tbl2.length; j++){
-		total_ded += flt(tbl2[j].amount);
-	}
-	doc.gross_pay = total_earn;
-	doc.total_deduction = total_ded;
-	doc.net_pay = 0.0
-	if(doc.salary_slip_based_on_timesheet == 0){
-		doc.net_pay = flt(total_earn) - flt(total_ded) - flt(doc.total_loan_repayment);
-		doc.rounded_total = Math.round(doc.net_pay)
-	}
-	refresh_many(['gross_pay', 'total_deduction', 'net_pay', 'rounded_total']);
 }
-
-cur_frm.cscript.validate = function(doc, cdt, cdn) {
-	calculate_totals(doc);
-}
-
 
 frappe.ui.form.on('Salary Detail', {
 	amount: function(frm) {
-		calculate_totals(frm.doc);
+		calculate_totals(frm);
 	},
 
 	earnings_remove: function(frm) {
-		calculate_totals(frm.doc);
+		calculate_totals(frm);
 	},
 
 	deductions_remove: function(frm) {
-		calculate_totals(frm.doc);
+		calculate_totals(frm);
 	},
 
 	salary_component: function(frm, cdt, cdn) {
-		debugger;
 		var child = locals[cdt][cdn];
 		if(child.salary_component){
 			frappe.call({

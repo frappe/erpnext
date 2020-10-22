@@ -79,15 +79,8 @@ frappe.ui.form.on('Salary Structure', {
 	},
 
 	set_dynamic_labels: function(frm) {
-		debugger;
 		frm.set_currency_labels(["net_pay","hour_rate", "leave_encashment_amount_per_day", "max_benefits", "total_earning",
 			"total_deduction"], frm.doc.currency);
-
-		// toggle fields
-		frm.toggle_display(["total_earning", "total_deduction"], true);
-
-		if(frappe.meta.get_docfield(cur_frm.doctype, "net_pay"))
-			cur_frm.toggle_display("net_pay", true);
 
 		frm.set_currency_labels(["amount", "additional_amount", "tax_on_flexible_benefit", "tax_on_additional_salary"],
 			frm.doc.currency, "earnings");
@@ -255,7 +248,6 @@ cur_frm.cscript.amount = function(doc, cdt, cdn){
 };
 
 var calculate_totals = function(doc) {
-	debugger;
 	var tbl1 = doc.earnings || [];
 	var tbl2 = doc.deductions || [];
 

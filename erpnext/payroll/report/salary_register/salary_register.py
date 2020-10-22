@@ -2,18 +2,24 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe.utils import flt
 from frappe import _
 
 def execute(filters=None):
 	if not filters: filters = {}
-	salary_slips = get_salary_slips(filters)
+	currency = None
+	company_currency = None
+	if filters.get('currency'):
+		currency = filters.get('currency')
+	if filters.get("company"):
+		company_currency = erpnext.get_company_currency(filters.get("company"))
+	salary_slips = get_salary_slips(filters, company_currency)
 	if not salary_slips: return [], []
 
 	columns, earning_types, ded_types = get_columns(salary_slips)
-	ss_earning_map = get_ss_earning_map(salary_slips)
-	ss_ded_map = get_ss_ded_map(salary_slips)
+	ss_earning_map = get_ss_earning_map(salary_slips, currency, company_currency)
+	ss_ded_map = get_ss_ded_map(salary_slips,currency, company_currency)
 	doj_map = get_employee_doj_map()
 
 	data = []
@@ -30,14 +36,20 @@ def execute(filters=None):
 		for e in earning_types:
 			row.append(ss_earning_map.get(ss.name, {}).get(e))
 
-		row += [ss.gross_pay]
+		if currency == company_currency:
+			row += [flt(ss.gross_pay) * flt(ss.exchange_rate)]
+		else:
+			row += [ss.gross_pay]
 
 		for d in ded_types:
 			row.append(ss_ded_map.get(ss.name, {}).get(d))
 
 		row.append(ss.total_loan_repayment)
 
-		row += [ss.total_deduction, ss.net_pay]
+		if currency == company_currency:
+			row += [flt(ss.total_deduction) * flt(ss.exchange_rate), flt(ss.net_pay) * flt(ss.exchange_rate)]
+		else:
+			row += [ss.total_deduction, ss.net_pay]
 
 		data.append(row)
 
@@ -73,15 +85,15 @@ def get_columns(salary_slips):
 
 	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]
 
-def get_salary_slips(filters):
+def get_salary_slips(filters, company_currency):
 	filters.update({"from_date": filters.get("from_date"), "to_date":filters.get("to_date")})
-	conditions, filters = get_conditions(filters)
+	conditions, filters = get_conditions(filters, company_currency)
 	salary_slips = frappe.db.sql("""select * from `tabSalary Slip` where %s
 		order by employee""" % conditions, filters, as_dict=1)
 
 	return salary_slips or []
 
-def get_conditions(filters):
+def get_conditions(filters, company_currency):
 	conditions = ""
 	doc_status = {"Draft": 0, "Submitted": 1, "Cancelled": 2}
 
@@ -92,6 +104,8 @@ def get_conditions(filters):
 	if filters.get("to_date"): conditions += " and end_date <= %(to_date)s"
 	if filters.get("company"): conditions += " and company = %(company)s"
 	if filters.get("employee"): conditions += " and employee = %(employee)s"
+	if filters.get("currency") and filters.get("currency") != company_currency:
+		conditions += " and currency = %(currency)s"
 
 	return conditions, filters
 
@@ -103,26 +117,32 @@ def get_employee_doj_map():
 				FROM `tabEmployee`
 				"""))
 
-def get_ss_earning_map(salary_slips):
-	ss_earnings = frappe.db.sql("""select parent, salary_component, amount
-		from `tabSalary Detail` where parent in (%s)""" %
+def get_ss_earning_map(salary_slips, currency, company_currency):
+	ss_earnings = frappe.db.sql("""select sd.parent, sd.salary_component, sd.amount, ss.exchange_rate, ss.name
+		from `tabSalary Detail` sd, `tabSalary Slip` ss where sd.parent=ss.name and sd.parent in (%s)""" %
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=1)
 
 	ss_earning_map = {}
 	for d in ss_earnings:
 		ss_earning_map.setdefault(d.parent, frappe._dict()).setdefault(d.salary_component, [])
-		ss_earning_map[d.parent][d.salary_component] = flt(d.amount)
+		if currency == company_currency:
+			ss_earning_map[d.parent][d.salary_component] = flt(d.amount) * flt(d.exchange_rate if d.exchange_rate else 1)
+		else:
+			ss_earning_map[d.parent][d.salary_component] = flt(d.amount)
 
 	return ss_earning_map
 
-def get_ss_ded_map(salary_slips):
-	ss_deductions = frappe.db.sql("""select parent, salary_component, amount
-		from `tabSalary Detail` where parent in (%s)""" %
+def get_ss_ded_map(salary_slips, currency, company_currency):
+	ss_deductions = frappe.db.sql("""select sd.parent, sd.salary_component, sd.amount, ss.exchange_rate, ss.name
+		from `tabSalary Detail` sd, `tabSalary Slip` ss where sd.parent=ss.name and sd.parent in (%s)""" %
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=1)
 
 	ss_ded_map = {}
 	for d in ss_deductions:
 		ss_ded_map.setdefault(d.parent, frappe._dict()).setdefault(d.salary_component, [])
-		ss_ded_map[d.parent][d.salary_component] = flt(d.amount)
+		if currency == company_currency:
+			ss_ded_map[d.parent][d.salary_component] = flt(d.amount) * flt(d.exchange_rate if d.exchange_rate else 1)
+		else:
+			ss_ded_map[d.parent][d.salary_component] = flt(d.amount)
 
 	return ss_ded_map

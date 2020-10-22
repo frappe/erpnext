@@ -13,6 +13,9 @@ from erpnext.loan_management.doctype.loan_security_price.loan_security_price imp
 
 class LoanSecurityUnpledge(Document):
 	def validate(self):
+		if self.applicant_type == 'Employee':
+			from erpnext.loan_management.doctype.loan.loan import validate_employe_currency_with_company_currency
+			validate_employe_currency_with_company_currency(self.applicant, self.company)
 		self.validate_duplicate_securities()
 		self.validate_unpledge_qty()
 
