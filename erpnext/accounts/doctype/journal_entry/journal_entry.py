@@ -22,8 +22,12 @@ class JournalEntry(AccountsController):
 		return self.voucher_type
 
 	def validate(self):
+		if self.voucher_type == 'Opening Entry':
+			self.is_opening = 'Yes'
+
 		if not self.is_opening:
 			self.is_opening='No'
+
 		self.clearance_date = None
 
 		self.validate_party()
@@ -1023,7 +1027,7 @@ def make_inter_company_journal_entry(name, voucher_type, company):
 	return journal_entry.as_dict()
 
 @frappe.whitelist()
-def make_reverse_journal_entry(source_name, target_doc=None, ignore_permissions=False):
+def make_reverse_journal_entry(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 
 	def update_accounts(source, target, source_parent):
@@ -1049,6 +1053,6 @@ def make_reverse_journal_entry(source_name, target_doc=None, ignore_permissions=
 			},
 			"postprocess": update_accounts,
 		},
-	}, target_doc, ignore_permissions=ignore_permissions)
+	}, target_doc)
 
 	return doclist

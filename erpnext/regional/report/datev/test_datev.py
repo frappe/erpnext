@@ -1,32 +1,22 @@
 # coding=utf-8
 from __future__ import unicode_literals
 
-import os
-import json
 import zipfile
+import frappe
 from six import BytesIO
 from unittest import TestCase
-
-import frappe
-from frappe.utils import getdate, today, now_datetime, cstr
-from frappe.test_runner import make_test_objects
+from frappe.utils import today, now_datetime, cstr
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
 
 from erpnext.regional.report.datev.datev import validate
 from erpnext.regional.report.datev.datev import get_transactions
 from erpnext.regional.report.datev.datev import get_customers
 from erpnext.regional.report.datev.datev import get_suppliers
 from erpnext.regional.report.datev.datev import get_account_names
-from erpnext.regional.report.datev.datev import get_datev_csv
-from erpnext.regional.report.datev.datev import get_header
 from erpnext.regional.report.datev.datev import download_datev_csv
 
-from erpnext.regional.report.datev.datev_constants import DataCategory
-from erpnext.regional.report.datev.datev_constants import Transactions
-from erpnext.regional.report.datev.datev_constants import DebtorsCreditors
-from erpnext.regional.report.datev.datev_constants import AccountNames
-from erpnext.regional.report.datev.datev_constants import QUERY_REPORT_COLUMNS
+from erpnext.regional.germany.utils.datev.datev_csv import get_datev_csv, get_header
+from erpnext.regional.germany.utils.datev.datev_constants import Transactions, DebtorsCreditors, AccountNames
 
 def make_company(company_name, abbr):
 	if not frappe.db.exists("Company", company_name):

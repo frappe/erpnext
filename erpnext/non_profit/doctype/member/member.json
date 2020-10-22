@@ -111,6 +111,7 @@
    "options": "Supplier"
   },
   {
+   "depends_on": "eval:!doc.__islocal;",
    "fieldname": "address_contacts",
    "fieldtype": "Section Break",
    "label": "Address and Contact",
@@ -177,7 +178,7 @@
  ],
  "image_field": "image",
  "links": [],
- "modified": "2020-08-06 10:06:01.153564",
+ "modified": "2020-09-16 23:44:13.596948",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Member",
