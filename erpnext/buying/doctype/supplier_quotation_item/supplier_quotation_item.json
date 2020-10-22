@@ -241,7 +241,7 @@
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Rate ",
+   "label": "Rate",
    "oldfieldname": "import_rate",
    "oldfieldtype": "Currency",
    "options": "currency"
@@ -560,7 +560,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-10-01 16:34:39.703033",
+ "modified": "2020-10-19 12:36:26.913211",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation Item",
