@@ -132,7 +132,7 @@ def create_salary_structures_assignment(employee, salary_structure, default_payr
 			frappe.throw(_('Please set "Default Payroll Payable Account" in Company Defaults'))
 	account_currency = frappe.db.get_value('Account',  default_payroll_payable_account, 'account_currency')
 	if account_currency != salary_structure.currency:
-		frappe.throw(_("Account currency of  Account: {0} is different than what is specified in salary structure: {1}").format(self.default_payroll_payable_account, self.salary_structure))
+		frappe.throw(_("Account currency of  Account: {0} is different than what is specified in salary structure: {1}").format(default_payroll_payable_account, salary_structure))
 
 	assignment = frappe.new_doc("Salary Structure Assignment")
 	assignment.employee = employee

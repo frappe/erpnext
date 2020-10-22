@@ -20,10 +20,10 @@ frappe.query_reports["Salary Register"] = {
 			"width": "100px"
 		},
 		{
-			"fieldname": "currency", 
-			"fieldtype": "Link", 
-			"options": "Currency", 
-			"label": __("Currency"), 
+			"fieldname": "currency",
+			"fieldtype": "Link",
+			"options": "Currency",
+			"label": __("Currency"),
 			"default": erpnext.get_currency(frappe.defaults.get_default("Company")),
 			"width": "50px"
 		},

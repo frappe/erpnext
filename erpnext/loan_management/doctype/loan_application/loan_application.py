@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, math, erpnext
+import frappe, math
 from frappe import _
 from frappe.utils import flt, rounded, cint
 from frappe.model.mapper import get_mapped_doc

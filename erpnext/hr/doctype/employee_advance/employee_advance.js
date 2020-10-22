@@ -16,7 +16,7 @@ frappe.ui.form.on('Employee Advance', {
 
 		frm.set_query("advance_account", function() {
 			if (!frm.doc.employee) {
-				frappe.msgprint(__("Please select employee first"))
+				frappe.msgprint(__("Please select employee first"));
 			}
 			var company_currency = erpnext.get_currency(frm.doc.company);
 			return {
@@ -178,11 +178,12 @@ frappe.ui.form.on('Employee Advance', {
 
 	currency: function(frm) {
 		var from_currency = frm.doc.currency;
+		var company_currency;
 		if (!frm.doc.company) {
-			var company_currency = erpnext.get_currency(frappe.defaults.get_default("Company"));
+			company_currency = erpnext.get_currency(frappe.defaults.get_default("Company"));
 		}
 		else {
-			var company_currency = erpnext.get_currency(frm.doc.company);
+			company_currency = erpnext.get_currency(frm.doc.company);
 		}
 		if(from_currency == company_currency) {
 			frm.set_value("exchange_rate", 1.0);

@@ -104,7 +104,7 @@ var calculate_all = function(doc) {
 	var pro_rata_dispensed_amount = 0;
 	var total_amount = 0;
 	if (doc.max_benefits == 0) {
-		doc.employee_benefits = []
+		doc.employee_benefits = [];
 	} else {
 		for(var i = 0; i < tbl.length; i++){
 			if(cint(tbl[i].amount) > 0) {
@@ -115,7 +115,7 @@ var calculate_all = function(doc) {
 			}
 		}
 	}
-	
+
 	doc.total_amount = total_amount;
 	doc.remaining_benefit = doc.max_benefits - total_amount;
 	doc.pro_rata_dispensed_amount = pro_rata_dispensed_amount;

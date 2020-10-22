@@ -26,7 +26,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
 					disabled: 0,
 					currency: frm.doc.currency
 				}
-			}
+			};
 		});
 
 		frm.set_query("default_payroll_payable_account", function() {
