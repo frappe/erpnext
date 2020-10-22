@@ -398,6 +398,11 @@ def get_item_warehouse(item, args, overwrite_warehouse, defaults={}):
 	else:
 		warehouse = args.get('warehouse')
 
+	if not warehouse:
+		default_warehouse = frappe.db.get_single_value("Stock Settings", "default_warehouse")
+		if frappe.db.get_value("Warehouse", default_warehouse, "company") == args.company:
+			return default_warehouse
+
 	return warehouse
 
 def update_barcode_value(out):
