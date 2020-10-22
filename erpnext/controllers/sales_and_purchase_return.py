@@ -375,21 +375,21 @@ def get_rate_for_return(voucher_type, voucher_no, item_code, return_against=None
 		"voucher_no": return_against,
 		"item_code": item_code
 	}
-	incoming_reference_field_dict = {
+	return_against_item_fields = {
 		"Purchase Receipt": "purchase_receipt_item",
 		"Purchase Invoice": "purchase_invoice_item",
 		"Delivery Note": "dn_detail",
 		"Sales Invoice": "sales_invoice_item"
 	}
-	incoming_reference_field = incoming_reference_field_dict[voucher_type]
+	return_against_item_field = return_against_item_fields[voucher_type]
 
 	if item_row:
-		incoming_voucher_detail_no = item_row.get(incoming_reference_field)
+		reference_voucher_detail_no = item_row.get(return_against_item_field)
 	else:
-		incoming_voucher_detail_no = frappe.db.get_value(voucher_type + " Item", voucher_detail_no, incoming_reference_field)
+		reference_voucher_detail_no = frappe.db.get_value(voucher_type + " Item", voucher_detail_no, return_against_item_field)
 
-	if incoming_voucher_detail_no:
-		filters["voucher_detail_no"] = incoming_voucher_detail_no
+	if reference_voucher_detail_no:
+		filters["voucher_detail_no"] = reference_voucher_detail_no
 
 	if voucher_type in ("Purchase Receipt", "Purchase Invoice"):
 		select_field = "incoming_rate"
