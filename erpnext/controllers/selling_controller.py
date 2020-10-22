@@ -11,20 +11,15 @@ from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.doctype.item.item import set_item_default
 from frappe.contacts.doctype.address.address import get_address_display
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
+from erpnext.controllers.print_settings import print_settings_for_taxes
 
 from erpnext.controllers.stock_controller import StockController
 
 class SellingController(StockController):
 	def __setup__(self):
 		if hasattr(self, "taxes"):
-			self.flags.print_taxes_with_zero_amount = cint(frappe.db.get_single_value("Print Settings",
-				"print_taxes_with_zero_amount"))
-			self.flags.show_inclusive_tax_in_print = self.is_inclusive_tax()
+			print_settings_for_taxes(self)
 
-			self.print_templates = {
-				"total": "templates/print_formats/includes/total.html",
-				"taxes": "templates/print_formats/includes/taxes.html"
-			}
 
 	def get_feed(self):
 		return _("To {0} | {1} {2}").format(self.customer_name, self.currency,
@@ -189,7 +184,7 @@ class SellingController(StockController):
 		for it in self.get("items"):
 			if not it.item_code:
 				continue
-			
+
 			last_purchase_rate, is_stock_item = frappe.get_cached_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
 			last_purchase_rate_in_sales_uom = last_purchase_rate * (it.conversion_factor or 1)
 			if flt(it.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
