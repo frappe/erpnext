@@ -295,8 +295,7 @@
    "default": "0",
    "fieldname": "is_secured_loan",
    "fieldtype": "Check",
-   "label": "Is Secured Loan",
-   "read_only": 1
+   "label": "Is Secured Loan"
   },
   {
    "default": "0",
@@ -351,7 +350,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-21 09:12:26.809228",
+ "modified": "2020-10-22 11:03:43.697394",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
