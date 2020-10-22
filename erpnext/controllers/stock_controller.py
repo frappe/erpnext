@@ -52,7 +52,7 @@ class StockController(AccountsController):
 						frappe.throw(_("Row #{0}: Serial No {1} does not belong to Batch {2}")
 							.format(d.idx, serial_no_data.name, d.batch_no))
 
-			if d.qty > 0 and d.get("batch_no") and self.get("posting_date") and self.docstatus < 2:
+			if flt(d.qty) > 0.0 and d.get("batch_no") and self.get("posting_date") and self.docstatus < 2:
 				expiry_date = frappe.get_cached_value("Batch", d.get("batch_no"), "expiry_date")
 
 				if expiry_date and getdate(expiry_date) < getdate(self.posting_date):
@@ -301,14 +301,19 @@ class StockController(AccountsController):
 
 		return serialized_items
 
-	def get_incoming_rate_for_return(self, item_code, against_document):
+	def get_incoming_rate_for_return(self, item_code, against_document, against_document_no=None):
 		incoming_rate = 0.0
+		cond = ''
 		if against_document and item_code:
+			if against_document_no:
+				cond = " and voucher_detail_no = %s" %(frappe.db.escape(against_document_no))
+
 			incoming_rate = frappe.db.sql("""select abs(stock_value_difference / actual_qty)
 				from `tabStock Ledger Entry`
 				where voucher_type = %s and voucher_no = %s
-					and item_code = %s limit 1""",
+					and item_code = %s {0} limit 1""".format(cond),
 				(self.doctype, against_document, item_code))
+
 			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
 
 		return incoming_rate

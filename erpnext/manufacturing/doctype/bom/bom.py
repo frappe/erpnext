@@ -137,7 +137,8 @@ class BOM(WebsiteGenerator):
 				"qty": item.qty,
 				"uom": item.uom,
 				"stock_uom": item.stock_uom,
-				"conversion_factor": item.conversion_factor
+				"conversion_factor": item.conversion_factor,
+				"sourced_by_supplier": item.sourced_by_supplier
 			})
 			for r in ret:
 				if not item.get(r):
@@ -172,7 +173,8 @@ class BOM(WebsiteGenerator):
 			 'qty'			: args.get("qty") or args.get("stock_qty") or 1,
 			 'stock_qty'	: args.get("qty") or args.get("stock_qty") or 1,
 			 'base_rate'	: flt(rate) * (flt(self.conversion_rate) or 1),
-			 'include_item_in_manufacturing': cint(args['transfer_for_manufacture']) or 0
+			 'include_item_in_manufacturing': cint(args['transfer_for_manufacture']) or 0,
+			 'sourced_by_supplier'		: args['sourced_by_supplier'] or 0
 		}
 
 		return ret_item
@@ -191,8 +193,8 @@ class BOM(WebsiteGenerator):
 		if arg.get('scrap_items'):
 			rate = get_valuation_rate(arg)
 		elif arg:
-			#Customer Provided parts will have zero rate
-			if not frappe.db.get_value('Item', arg["item_code"], 'is_customer_provided_item'):
+			#Customer Provided parts and Supplier sourced parts will have zero rate
+			if not frappe.db.get_value('Item', arg["item_code"], 'is_customer_provided_item') and not arg.get('sourced_by_supplier'):
 				if arg.get('bom_no') and self.set_rate_of_sub_assembly_item_based_on_bom:
 					rate = flt(self.get_bom_unitcost(arg['bom_no'])) * (arg.get("conversion_factor") or 1)
 				else:
@@ -205,7 +207,6 @@ class BOM(WebsiteGenerator):
 						else:
 							frappe.msgprint(_("{0} not found for item {1}")
 								.format(self.rm_cost_as_per, arg["item_code"]), alert=True)
-
 		return flt(rate) * flt(self.plc_conversion_rate or 1) / (self.conversion_rate or 1)
 
 	def update_cost(self, update_parent=True, from_child_bom=False, save=True):
@@ -221,7 +222,8 @@ class BOM(WebsiteGenerator):
 				"qty": d.qty,
 				"uom": d.uom,
 				"stock_uom": d.stock_uom,
-				"conversion_factor": d.conversion_factor
+				"conversion_factor": d.conversion_factor,
+				"sourced_by_supplier": d.sourced_by_supplier
 			})
 
 			if rate:
@@ -494,8 +496,9 @@ class BOM(WebsiteGenerator):
 					'image'			: d.image,
 					'stock_uom'		: d.stock_uom,
 					'stock_qty'		: flt(d.stock_qty),
-					'rate'			: flt(d.base_rate) / flt(d.conversion_factor),
-					'include_item_in_manufacturing': d.include_item_in_manufacturing
+					'rate'			: flt(d.base_rate) / (flt(d.conversion_factor) or 1.0),
+					'include_item_in_manufacturing': d.include_item_in_manufacturing,
+					'sourced_by_supplier': d.sourced_by_supplier
 				}))
 
 	def company_currency(self):
@@ -521,6 +524,7 @@ class BOM(WebsiteGenerator):
 				bom_item.stock_qty,
 				bom_item.rate,
 				bom_item.include_item_in_manufacturing,
+				bom_item.sourced_by_supplier,
 				bom_item.stock_qty / ifnull(bom.quantity, 1) AS qty_consumed_per_unit
 			FROM `tabBOM Explosion Item` bom_item, tabBOM bom
 			WHERE
@@ -539,7 +543,8 @@ class BOM(WebsiteGenerator):
 				'stock_uom'				: d['stock_uom'],
 				'stock_qty'				: d['qty_consumed_per_unit'] * stock_qty,
 				'rate'					: flt(d['rate']),
-				'include_item_in_manufacturing': d.get('include_item_in_manufacturing', 0)
+				'include_item_in_manufacturing': d.get('include_item_in_manufacturing', 0),
+				'sourced_by_supplier': d.get('sourced_by_supplier', 0)
 			}))
 
 	def add_exploded_items(self):
@@ -679,7 +684,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
 			select_columns = """, bom_item.source_warehouse, bom_item.operation,
-				bom_item.include_item_in_manufacturing, bom_item.description, bom_item.rate,
+				bom_item.include_item_in_manufacturing, bom_item.description, bom_item.rate, bom_item.sourced_by_supplier,
 				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s limit 1) as idx""")
 
 		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom, "company": company }, as_dict=True)
@@ -692,7 +697,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 		query = query.format(table="BOM Item", where_conditions="", is_stock_item=is_stock_item,
 			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
 			select_columns = """, bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
-				bom_item.idx, bom_item.operation, bom_item.include_item_in_manufacturing,
+				bom_item.idx, bom_item.operation, bom_item.include_item_in_manufacturing, bom_item.sourced_by_supplier,
 				bom_item.description, bom_item.base_rate as rate """)
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 
