@@ -18,10 +18,16 @@ def execute():
 
             if status == "Half Day":
                 att_status.is_half_day = 1
+                att_status.applicable_for_employee_checkins = 1
+                att_status.applicable_for_leave_application = 1
+                att_status.applicable_for_attendance_request = 1
             elif status == "On Leave":
                 att_status.is_leave = 1
+                att_status.applicable_for_leave_application = 1
             elif status in ["Work From Home", "Present"]:
                 att_status.is_present = 1
+                if status = "Present":
+                    att_status.applicable_for_employee_checkins = 1
 
             att_status.save()
 

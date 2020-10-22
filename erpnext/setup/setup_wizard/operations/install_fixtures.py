@@ -65,15 +65,31 @@ def install(country=None):
 
 		# leave type
 		{'doctype': 'Leave Type', 'leave_type_name': _('Casual Leave'), 'name': _('Casual Leave'),
-			'allow_encashment': 1, 'is_carry_forward': 1, 'max_continuous_days_allowed': '3', 'include_holiday': 1},
+			'allow_encashment': 1, 'is_carry_forward': 1, 'max_continuous_days_allowed': '3', 'include_holiday': 1
+			'full_day_abbr': "CL", 'Half_day_abbr': "CLHD"},
 		{'doctype': 'Leave Type', 'leave_type_name': _('Compensatory Off'), 'name': _('Compensatory Off'),
-			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1, 'is_compensatory':1 },
+			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1, 'is_compensatory':1
+			'full_day_abbr': "CO", 'Half_day_abbr': "COHD"},
 		{'doctype': 'Leave Type', 'leave_type_name': _('Sick Leave'), 'name': _('Sick Leave'),
-			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1},
+			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1
+			'full_day_abbr': "SL", 'Half_day_abbr': "SLHD"},
 		{'doctype': 'Leave Type', 'leave_type_name': _('Privilege Leave'), 'name': _('Privilege Leave'),
-			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1},
+			'allow_encashment': 0, 'is_carry_forward': 0, 'include_holiday': 1
+			'full_day_abbr': "PL", 'Half_day_abbr': "PLHD"},
 		{'doctype': 'Leave Type', 'leave_type_name': _('Leave Without Pay'), 'name': _('Leave Without Pay'),
-			'allow_encashment': 0, 'is_carry_forward': 0, 'is_lwp':1, 'include_holiday': 1},
+			'allow_encashment': 0, 'is_carry_forward': 0, 'is_lwp':1, 'include_holiday': 1
+			'full_day_abbr': "LWP", 'Half_day_abbr': "LWPHD"},
+
+		# Attendance Status
+		{'doctype': 'Attendance Status', 'name': 'Present', 'abbr': 'P',
+			'is_present': 1, 'applicable_for_employee_checkins': 1}
+		{'doctype': 'Attendance Status', 'name': 'Work From Home', 'abbr': 'WFH',
+			'is_present': 1}
+		{'doctype': 'Attendance Status', 'name': 'On Leave', 'abbr': 'L',
+			'is_leave': 1, 'applicable_for_leave_application': 1}
+		{'doctype': 'Attendance Status', 'name': 'Half Day', 'abbr': 'HD',
+			'is_half_day': 1, 'applicable_for_employee_checkins': 1,
+			'applicable_for_leave_application': 1, 'applicable_for_attendance_request': 1}
 
 		# Employment Type
 		{'doctype': 'Employment Type', 'employee_type_name': _('Full-time')},
