@@ -12,6 +12,8 @@
   "item_name",
   "column_break_3",
   "lead_time_days",
+  "expected_delivery_date",
+  "is_free_item",
   "section_break_5",
   "description",
   "item_group",
@@ -19,20 +21,18 @@
   "col_break1",
   "image",
   "image_view",
-  "manufacture_details",
-  "manufacturer",
-  "column_break_15",
-  "manufacturer_part_no",
   "quantity_and_rate",
   "qty",
   "stock_uom",
-  "price_list_rate",
-  "discount_percentage",
-  "discount_amount",
   "col_break2",
   "uom",
   "conversion_factor",
   "stock_qty",
+  "sec_break_price_list",
+  "price_list_rate",
+  "discount_percentage",
+  "discount_amount",
+  "col_break_price_list",
   "base_price_list_rate",
   "sec_break1",
   "rate",
@@ -42,7 +42,6 @@
   "base_rate",
   "base_amount",
   "pricing_rules",
-  "is_free_item",
   "section_break_24",
   "net_rate",
   "net_amount",
@@ -56,7 +55,6 @@
   "weight_uom",
   "warehouse_and_reference",
   "warehouse",
-  "project",
   "prevdoc_doctype",
   "material_request",
   "sales_order",
@@ -65,13 +63,19 @@
   "material_request_item",
   "request_for_quotation_item",
   "item_tax_rate",
+  "manufacture_details",
+  "manufacturer",
+  "column_break_15",
+  "manufacturer_part_no",
+  "ad_sec_break",
+  "project",
   "section_break_44",
   "page_break"
  ],
  "fields": [
   {
    "bold": 1,
-   "columns": 4,
+   "columns": 2,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -107,7 +111,7 @@
   {
    "fieldname": "lead_time_days",
    "fieldtype": "Int",
-   "label": "Lead Time in days"
+   "label": "Supplier Lead Time (days)"
   },
   {
    "collapsible": 1,
@@ -162,7 +166,6 @@
   {
    "fieldname": "stock_uom",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Stock UOM",
    "options": "UOM",
    "print_hide": 1,
@@ -196,6 +199,7 @@
   {
    "fieldname": "uom",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "UOM",
    "options": "UOM",
    "print_hide": 1,
@@ -237,7 +241,7 @@
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Rate ",
+   "label": "Rate",
    "oldfieldname": "import_rate",
    "oldfieldtype": "Currency",
    "options": "currency"
@@ -286,14 +290,6 @@
    "fieldtype": "Small Text",
    "hidden": 1,
    "label": "Pricing Rules",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "is_free_item",
-   "fieldtype": "Check",
-   "label": "Is Free Item",
    "print_hide": 1,
    "read_only": 1
   },
@@ -528,12 +524,43 @@
   {
    "fieldname": "column_break_15",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sec_break_price_list",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_break_price_list",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "ad_sec_break",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "default": "0",
+   "depends_on": "is_free_item",
+   "fieldname": "is_free_item",
+   "fieldtype": "Check",
+   "label": "Is Free Item",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "bold": 1,
+   "fieldname": "expected_delivery_date",
+   "fieldtype": "Date",
+   "label": "Expected Delivery Date"
   }
  ],
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-04-07 18:35:51.175947",
+ "modified": "2020-10-19 12:36:26.913211",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation Item",
