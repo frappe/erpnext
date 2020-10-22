@@ -151,6 +151,7 @@ def generate_irn(doctype, name):
 	headers = get_header(credentials)
 
 	einvoice = make_einvoice(doctype, name)
+	einvoice = json.dumps(einvoice)
 
 	enc_einvoice_json = aes_encrypt(einvoice, credentials.sek)
 	payload = dict(Data=enc_einvoice_json)
@@ -230,7 +231,7 @@ def handle_err_response(response):
 	if response.get('Status') == 0:
 		err_details = response.get('ErrorDetails')
 		print(response)
-		error_msgs = []
+		errors = []
 		for d in err_details:
 			err_code = d.get('ErrorCode')
 
@@ -239,14 +240,14 @@ def handle_err_response(response):
 				response = get_irn_details(irn[0])
 				return response
 
-			error_msgs.append(d.get('ErrorMessage'))
+			errors.append(d.get('ErrorMessage'))
 
-		if error_msgs:
-			if len(error_msgs) > 1:
-				li = ['<li>'+ d +'</li>' for d in error_msgs]
+		if errors:
+			if len(errors) > 1:
+				li = ['<li>'+ d +'</li>' for d in errors]
 				frappe.throw(_("""<ul style='padding-left: 20px'>{}</ul>""").format(''.join(li)), title=_('API Request Failed'))
 			else:
-				frappe.throw(_('{}').format(error_msgs[0]), title=_('API Request Failed'))
+				frappe.throw(_('{}').format(errors[0]), title=_('API Request Failed'))
 
 	return response
 
@@ -425,7 +426,6 @@ def get_eway_bill_details(invoice):
 def make_einvoice(doctype, name):
 	invoice = frappe.get_doc(doctype, name)
 	schema = read_json('einv_template')
-	validations = json.loads(read_json('einv_validation'))
 
 	item_list = get_item_list(invoice)
 	doc_details = get_doc_details(invoice)
@@ -464,66 +464,62 @@ def make_einvoice(doctype, name):
 		export_details=export_details, eway_bill_details=eway_bill_details
 	)
 	einvoice = json.loads(einvoice)
-
-	error_msgs = validate_einvoice(validations, einvoice, [])
-	if error_msgs:
-		if len(error_msgs) > 1:
-			li = ['<li>'+ d +'</li>' for d in error_msgs]
+	
+	validations = json.loads(read_json('einv_validation'))
+	errors = validate_einvoice(validations, einvoice, [])
+	if errors:
+		if len(errors) > 1:
+			li = ['<li>'+ d +'</li>' for d in errors]
 			frappe.throw("<ul style='padding-left: 20px'>{}</ul>".format(''.join(li)), title=_('E Invoice Validation Failed'))
 		else:
-			frappe.throw(error_msgs[0], title=_('E Invoice Validation Failed'))
+			frappe.throw(errors[0], title=_('E Invoice Validation Failed'))
 
-	return {'einvoice': json.dumps([einvoice])}
+	return einvoice
 
-def validate_einvoice(validations, einvoice, error_msgs=[]):
-	type_map = { 'string': 'str', 'number': 'int', 'object': 'dict', 'array': 'list' }
-	
-	for field, validation in validations.items():
-		invoice_value = einvoice.get(field)
-		if not invoice_value:
-			continue
-
-		should_be_of_type = type_map[validation.get('type').lower()]
-		if should_be_of_type in ['dict', 'list']:
-			child_validations = validation.get('properties')
-
-			if isinstance(invoice_value, list):
-				for d in invoice_value:
-					validate_einvoice(child_validations, d, error_msgs)
-			else:
-				validate_einvoice(child_validations, invoice_value, error_msgs)
-				# remove keys with empty dicts
-				if not invoice_value:
-					einvoice.pop(field, None)
-			continue
-		
-		if invoice_value == 'None':
+def validate_einvoice(validations, einvoice, errors=[]):
+	for fieldname, field_validation in validations.items():
+		value = einvoice.get(fieldname, None)
+		if value in (None, "None", {}, []):
 			# remove keys with empty values
-			einvoice.pop(field, None)
+			einvoice.pop(fieldname, None)
+			continue
+
+		value_type = field_validation.get("type").lower()
+		if value_type in ['object', 'array']:
+			child_validations = field_validation.get('properties')
+
+			if isinstance(value, list):
+				for d in value:
+					validate_einvoice(child_validations, d, errors)
+			else:
+				validate_einvoice(child_validations, value, errors)
+				if not value:
+					# remove empty dicts
+					einvoice.pop(fieldname, None)
 			continue
 		
 		# convert to int or str
-		if should_be_of_type == 'str':
-			einvoice[field] = str(invoice_value)
-		elif should_be_of_type == 'int':
-			einvoice[field] = flt(invoice_value, 3)
+		if value_type == 'string':
+			einvoice[fieldname] = str(value)
+		elif value_type == 'number':
+			einvoice[fieldname] = flt(value, 2)
 
-		max_length = validation.get('maxLength')
-		minimum = flt(validation.get('minimum'))
-		maximum = flt(validation.get('maximum'))
-		pattern_str = validation.get('pattern')
+		max_length = field_validation.get('maxLength')
+		minimum = flt(field_validation.get('minimum'))
+		maximum = flt(field_validation.get('maximum'))
+		pattern_str = field_validation.get('pattern')
 		pattern = re.compile(pattern_str or '')
 
-		field_label = validation.get('label') or field
+		label = field_validation.get('label') or fieldname
 
-		if should_be_of_type == 'str' and len(invoice_value) > max_length:
-			error_msgs.append(_('{} should not exceed {} characters').format(field_label, max_length))
-		if should_be_of_type == 'int' and not (flt(invoice_value) <= maximum):
-			error_msgs.append(_('{} should be less than {}').format(field_label, maximum))
-		if pattern_str and not pattern.match(invoice_value):
-			error_msgs.append(validation.get('validationMsg'))
+		if value_type == 'string' and len(value) > max_length:
+			errors.append(_('{} should not exceed {} characters').format(fieldname_label, max_length))
+		if value_type == 'number' and not (flt(value) <= maximum):
+			errors.append(_('{} should be less than {}').format(label, maximum))
+		if pattern_str and not pattern.match(value):
+			errors.append(field_validation.get('validationMsg'))
 	
-	return error_msgs
+	return errors
 
 def update_einvoice_fields(doctype, name, signed_einvoice):
 	enc_signed_invoice = signed_einvoice.get('SignedInvoice')
