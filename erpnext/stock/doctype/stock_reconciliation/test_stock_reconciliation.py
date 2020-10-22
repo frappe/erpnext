@@ -131,7 +131,7 @@ class TestStockReconciliation(unittest.TestCase):
 		to_delete_records.append(sr.name)
 
 		sr = create_stock_reconciliation(item_code=serial_item_code,
-			warehouse = serial_warehouse, qty=5, rate=300, serial_no = '\n'.join(serial_nos))
+			warehouse = serial_warehouse, qty=5, rate=300)
 
 		# print(sr.name)
 		serial_nos1 = get_serial_nos(sr.items[0].serial_no)
@@ -358,6 +358,37 @@ class TestStockReconciliation(unittest.TestCase):
 		self.assertEqual(flt(stock_balance[0][0]), 0.15)
 
 		for doc in [sr, ste1, ste2, ste3, ste4]:
+			doc.cancel()
+			frappe.delete_doc(doc.doctype, doc.name)
+
+	def test_allow_negative_for_batch(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+		item_code = "Stock-Reco-batch-Item-5"
+		warehouse = "_Test Warehouse for Stock Reco5 - _TC"
+
+		create_warehouse("_Test Warehouse for Stock Reco5", {"is_group": 0,
+			"parent_warehouse": "_Test Warehouse Group - _TC", "company": "_Test Company"})
+
+		batch_item_doc = create_item(item_code, is_stock_item=1)
+		if not batch_item_doc.has_batch_no:
+			frappe.db.set_value("Item", item_code, {
+				"has_batch_no": 1,
+				"create_new_batch": 1,
+				"batch_number_series": "Test-C.####"
+			})
+
+		ste1=make_stock_entry(posting_date="2020-10-07", posting_time="02:00", item_code=item_code,
+			target=warehouse, qty=2, basic_rate=100)
+
+		batch_no = ste1.items[0].batch_no
+
+		ste2=make_stock_entry(posting_date="2020-10-09", posting_time="02:00", item_code=item_code,
+			source=warehouse, qty=2, basic_rate=100, batch_no=batch_no)
+
+		sr = create_stock_reconciliation(item_code=item_code,
+			warehouse = warehouse, batch_no=batch_no, rate=200)
+
+		for doc in [sr, ste2, ste1]:
 			doc.cancel()
 			frappe.delete_doc(doc.doctype, doc.name)
 

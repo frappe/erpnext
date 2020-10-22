@@ -162,10 +162,13 @@ class update_entries_after(object):
 
 			self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
 		else:
-			if sle.voucher_type=="Stock Reconciliation" and not sle.batch_no:
-				# assert
+			if sle.voucher_type=="Stock Reconciliation":
+				if sle.batch_no:
+					self.qty_after_transaction += flt(sle.actual_qty)
+				else:
+					self.qty_after_transaction = sle.qty_after_transaction
+
 				self.valuation_rate = sle.valuation_rate
-				self.qty_after_transaction = sle.qty_after_transaction
 				self.stock_queue = [[self.qty_after_transaction, self.valuation_rate]]
 				self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
 			else:

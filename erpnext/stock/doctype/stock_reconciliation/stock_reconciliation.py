@@ -68,6 +68,8 @@ class StockReconciliation(StockController):
 
 				if item_dict.get("serial_nos"):
 					item.current_serial_no = item_dict.get("serial_nos")
+					if self.purpose == "Stock Reconciliation" and not item.serial_no:
+						item.serial_no = item.current_serial_no
 
 				item.current_qty = item_dict.get("qty")
 				item.current_valuation_rate = item_dict.get("rate")
@@ -172,8 +174,9 @@ class StockReconciliation(StockController):
 				row.serial_no = ''
 
 			# item managed batch-wise not allowed
-			if item.has_batch_no and not row.batch_no and not item.create_new_batch:
-				raise frappe.ValidationError(_("Batch no is required for batched item {0}").format(item_code))
+			if item.has_batch_no and not row.batch_no and not frappe.flags.in_test:
+				if not item.create_new_batch or self.purpose != 'Opening Stock':
+					raise frappe.ValidationError(_("Batch no is required for the batched item {0}").format(item_code))
 
 			# docstatus should be < 2
 			validate_cancelled_item(item_code, item.docstatus, verbose=0)
@@ -191,10 +194,11 @@ class StockReconciliation(StockController):
 		serialized_items = False
 		for row in self.items:
 			item = frappe.get_cached_doc("Item", row.item_code)
-			if not (item.has_serial_no or item.has_batch_no):
-				if row.serial_no or row.batch_no:
+			if not (item.has_serial_no):
+				if row.serial_no:
 					frappe.throw(_("Row #{0}: Item {1} is not a Serialized/Batched Item. It cannot have a Serial No/Batch No against it.") \
 						.format(row.idx, frappe.bold(row.item_code)))
+
 				previous_sle = get_previous_sle({
 					"item_code": row.item_code,
 					"warehouse": row.warehouse,
@@ -217,7 +221,12 @@ class StockReconciliation(StockController):
 					or (not previous_sle and not row.qty)):
 						continue
 
-				sl_entries.append(self.get_sle_for_items(row))
+				sle_data = self.get_sle_for_items(row)
+
+				if row.batch_no:
+					sle_data.actual_qty = row.quantity_difference
+
+				sl_entries.append(sle_data)
 
 			else:
 				serialized_items = True
@@ -244,7 +253,7 @@ class StockReconciliation(StockController):
 			serial_nos = get_serial_nos(row.serial_no) or []
 
 			# To issue existing serial nos
-			if row.current_qty and (row.current_serial_no or row.batch_no):
+			if row.current_qty and (row.current_serial_no):
 				args = self.get_sle_for_items(row)
 				args.update({
 					'actual_qty': -1 * row.current_qty,

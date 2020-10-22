@@ -169,7 +169,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					}
 
 					// project
-					if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
+					if(flt(doc.per_delivered, 2) < 100) {
 							this.frm.add_custom_button(__('Project'), () => this.make_project(), __('Create'));
 					}
 
