@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import datetime
 from frappe.model.document import Document
-from frappe.utils import getdate, get_time, flt
+from frappe.utils import get_time, flt
 from frappe.model.mapper import get_mapped_doc
 from frappe import _
 from frappe.utils import cstr, getdate, get_link_to_form

@@ -76,7 +76,7 @@ frappe.ui.form.on('Therapy Plan', {
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route('Form', doclist[0].doctype, doclist[0].name);
 			}
-		})
+		});
 	},
 
 	therapy_plan_template: function(frm) {
