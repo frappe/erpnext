@@ -133,7 +133,7 @@ class update_entries_after(object):
 		self.valuation_method = get_valuation_method(self.item_code)
 		self.new_items = {}
 
-		self.build(args.get('sle_id'))
+		self.build()
 
 	def initialize_previous_data(self, args):
 		"""
@@ -169,12 +169,13 @@ class update_entries_after(object):
 			"stock_value_difference": 0.0
 		})
 
-	def build(self, sle_id):
-		if sle_id:
-			sle = get_sle_by_id(sle_id)
-			print("Posting SLE", sle.voucher_no)
+	def build(self):
+		if self.args.get("sle_id"):
+			sl_entries = self.get_sle_against_voucher()
+			print("Posting SLE", self.args.voucher_no)
 
-			self.process_sle(sle)
+			for sle in sl_entries:
+				self.process_sle(sle)
 		else:
 			print("-------------Reposting future entries--------------")
 			# includes current entry!
@@ -218,6 +219,22 @@ class update_entries_after(object):
 
 		self.update_bin()
 
+	def get_sle_against_voucher(self):
+		return frappe.db.sql("""
+			select
+				*, timestamp(posting_date, posting_time) as "timestamp"
+			from
+				`tabStock Ledger Entry`
+			where
+				item_code = %(item_code)s
+				and warehouse = %(warehouse)s
+				and voucher_type = %(voucher_type)s
+				and voucher_no = %(voucher_no)s
+			order by
+				creation ASC
+			for update
+		""", self.args, as_dict=1)
+
 	def process_sle(self, sle):
 		# previous sle data for this warehouse
 		self.wh_data = self.data[sle.warehouse]
@@ -230,7 +247,7 @@ class update_entries_after(object):
 				return
 
 		# Get dynamic incoming/outgoing rate
-		self.set_dynamic_incoming_outgoing_rate(sle)
+		self.get_dynamic_incoming_outgoing_rate(sle)
 		
 		if sle.serial_no:
 			self.get_serialized_values(sle)
@@ -289,7 +306,8 @@ class update_entries_after(object):
 		else:
 			return True
 
-	def set_dynamic_incoming_outgoing_rate(self, sle):
+	def get_dynamic_incoming_outgoing_rate(self, sle):
+		# Get updated incoming/outgoing rate from transaction
 		if sle.recalculate_rate:
 			rate = self.get_incoming_outgoing_rate_from_transaction(sle)
 			print("set_dynamic_incoming_outgoing_rate", rate)
@@ -305,34 +323,72 @@ class update_entries_after(object):
 			rate = frappe.db.get_value("Stock Entry Detail", sle.voucher_detail_no, "valuation_rate")
 		# Sales and Purchase Return
 		elif sle.voucher_type in ("Purchase Receipt", "Purchase Invoice", "Delivery Note", "Sales Invoice"):
-			from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
-			rate = get_rate_for_return(sle.voucher_type, sle.voucher_no, sle.item_code, voucher_detail_no=sle.voucher_detail_no)
+			if frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_return"):
+				from erpnext.controllers.sales_and_purchase_return import get_rate_for_return # don't move this import to top
+				rate = get_rate_for_return(sle.voucher_type, sle.voucher_no, sle.item_code, voucher_detail_no=sle.voucher_detail_no)
+			else:
+				if sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
+					rate_field = "valuation_rate" 
+				else:
+					rate_field = "incoming_rate"
+
+				# check in item table
+				item_code, incoming_rate = frappe.db.get_value(sle.voucher_type + " Item",
+					sle.voucher_detail_no, ["item_code", rate_field])
+				if item_code == sle.item_code:
+					rate = incoming_rate
 
 		return rate
 
 	def update_outgoing_rate_on_transaction(self, sle):
 		"""
-			Update outgoing rate in Stock Entry, Delivery Note and Sales Invoice
+			Update outgoing rate in Stock Entry, Delivery Note, Sales Invoice and Sales Return
 			In case of Stock Entry, also calculate FG Item rate and total incoming/outgoing amount
 		"""
-		if flt(sle.actual_qty) < 0 and sle.voucher_detail_no:
+		if sle.actual_qty and sle.voucher_detail_no:
 			outgoing_rate = abs(flt(sle.stock_value_difference)) / abs(sle.actual_qty)
+			print("update_outgoing_rate_on_transaction", outgoing_rate)
 
-			if sle.voucher_type == "Stock Entry":
-				print("update_outgoing_rate_on_transaction", outgoing_rate)
-				frappe.db.set_value("Stock Entry Detail", sle.voucher_detail_no, "basic_rate", outgoing_rate)
+			if flt(sle.actual_qty) < 0 and sle.voucher_type == "Stock Entry":
+				self.update_rate_on_stock_entry(sle, outgoing_rate)
+			elif sle.voucher_type in ("Delivery Note", "Sales Invoice"):
+				self.update_rate_on_delivery_and_sales_return(sle, outgoing_rate)
+			elif flt(sle.actual_qty) < 0 and sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
+				self.update_rate_on_purchase_receipt(sle, outgoing_rate)
 
-				# Calculate FG Item rate and total incoming/outgoing amount
-				stock_entry = frappe.get_doc("Stock Entry", sle.voucher_no)
-				stock_entry.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
-				stock_entry.db_update()
-				for d in stock_entry.items:
-					d.db_update()
+	def update_rate_on_stock_entry(self, sle, outgoing_rate):
+		frappe.db.set_value("Stock Entry Detail", sle.voucher_detail_no, "basic_rate", outgoing_rate)
 
-			# elif sle.voucher_type == "Delivery Note":
-			# 	frappe.db.set_value("Delivery Note Item", sle.voucher_detail_no, "outgoing_rate", outgoing_rate)
-			# elif sle.voucher_type == "Sales Invoice":
-			# 	frappe.db.set_value("Sales Invoice Item", sle.voucher_detail_no, "outgoing_rate", outgoing_rate)
+		# Update outgoing item's rate, recalculate FG Item's rate and total incoming/outgoing amount
+		stock_entry = frappe.get_cached_doc("Stock Entry", sle.voucher_no)
+		stock_entry.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
+		stock_entry.db_update()
+		for d in stock_entry.items:
+			d.db_update()
+	
+	def update_rate_on_delivery_and_sales_return(self, sle, outgoing_rate):
+		# Update item's incoming rate on transaction
+		item_code = frappe.db.get_value(sle.voucher_type + " Item", sle.voucher_detail_no, "item_code")
+		if item_code == sle.item_code:
+			frappe.db.set_value(sle.voucher_type + " Item", sle.voucher_detail_no, "incoming_rate", outgoing_rate)
+		else:
+			# packed item
+			frappe.db.set_value("Packed Item",
+				{"parent_detail_docname": sle.voucher_detail_no, "item_code": sle.item_code},
+				"incoming_rate", outgoing_rate)
+
+	def update_rate_on_purchase_receipt(self, sle, outgoing_rate):
+		if frappe.db.exists(sle.voucher_type + " Item", sle.voucher_detail_no):
+			frappe.db.set_value(sle.voucher_type + " Item", sle.voucher_detail_no, "base_net_rate", outgoing_rate)
+		else:
+			frappe.db.set_value("Purchase Receipt Item Supplied", sle.voucher_detail_no, "rate", outgoing_rate)
+
+		# Recalculate subcontracted item's rate in case of subcontracted purchase receipt/invoice
+		if frappe.db.get_value(sle.voucher_type, sle.voucher_no, "is_subcontracted"):
+			doc = frappe.get_cached_doc(sle.voucher_type, sle.voucher_no)
+			doc.update_valuation_rate(reset_outgoing_rate=False)
+			for d in (doc.items + doc.supplied_items):
+				d.db_update()
 
 	def get_serialized_values(self, sle):
 		incoming_rate = flt(sle.incoming_rate)
@@ -643,11 +699,6 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 			"for_update": for_update and "for update" or "",
 			"order": order
 		}, previous_sle, as_dict=1, debug=debug)
-
-def get_sle_by_id(sle_id):
-	return frappe.db.get_all('Stock Ledger Entry',
-		fields=['*', 'timestamp(posting_date, posting_time) as timestamp'],
-		filters={'name': sle_id})[0]
 
 def get_sle_by_voucher_detail_no(voucher_detail_no, excluded_sle=None):
 	return frappe.db.get_value('Stock Ledger Entry',

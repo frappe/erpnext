@@ -19,13 +19,13 @@ from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delive
 
 class TestStockLedgerEntry(unittest.TestCase):
 	def setUp(self):
-		make_item("_Test Item for Reposting")
-		make_item("_Test Finished Item for Reposting")
-		set_perpetual_inventory(0, "_Test Company with perpetual inventory")
-		frappe.db.set_value("Item", "_Test Item for Reposting", "valuation_method", "FIFO")
+		items = create_items()
 
-		frappe.db.sql("delete from `tabStock Ledger Entry` where item_code in ('_Test Item for Reposting', '_Test Finished Item for Reposting')")
-		frappe.db.sql("delete from `tabBin` where item_code in ('_Test Item for Reposting', '_Test Finished Item for Reposting')")
+		# delete SLE and BINs for all items
+		frappe.db.sql("delete from `tabStock Ledger Entry` where item_code in (%s)" % (', '.join(['%s']*len(items))), items)
+		frappe.db.sql("delete from `tabBin` where item_code in (%s)" % (', '.join(['%s']*len(items))), items)
+
+		set_perpetual_inventory(0, "_Test Company with perpetual inventory")
 
 	def test_item_cost_reposting(self):
 		company = "_Test Company with perpetual inventory"
@@ -153,17 +153,18 @@ class TestStockLedgerEntry(unittest.TestCase):
 			warehouse="Stores - TCP1", item_code=item_code, qty=5, rate=100)
 
 		#Delivery Note: Qty = 5, Rate = 150
-		dn = create_delivery_note(item_code=item_code, qty=5, rate=750, warehouse="Stores - TCP1",
+		dn = create_delivery_note(item_code=item_code, qty=5, rate=150, warehouse="Stores - TCP1",
 			company=company, expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
 
 		# check outgoing_rate for DN
 		outgoing_rate = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Delivery Note",
 			"voucher_no": dn.name}, "stock_value_difference") / 5)
 
+		self.assertEqual(dn.items[0].incoming_rate, 100)
 		self.assertEqual(outgoing_rate, 100)
 
 		# Return Entry: Qty = -2, Rate = 150
-		return_dn = create_delivery_note(is_return=1, return_against=dn.name, item_code=item_code, qty=-2, rate=750,
+		return_dn = create_delivery_note(is_return=1, return_against=dn.name, item_code=item_code, qty=-2, rate=150,
 			company=company, warehouse="Stores - TCP1", expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
 
 		# check incoming rate for Return entry
@@ -171,13 +172,14 @@ class TestStockLedgerEntry(unittest.TestCase):
 			{"voucher_type": "Delivery Note", "voucher_no": return_dn.name},
 			["incoming_rate", "stock_value_difference"])
 
+		self.assertEqual(return_dn.items[0].incoming_rate, 100)
 		self.assertEqual(incoming_rate, 100)
 		self.assertEqual(stock_value_difference, 200)
 
 		#-------------------------------
 
 		# Landed Cost Voucher to update the rate of incoming Purchase Return: Additional cost = 50
-		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
+		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
 
 		# Repost future SLE for Purchase Receipt
 		repost_future_sle("Purchase Receipt", pr.name)
@@ -186,8 +188,10 @@ class TestStockLedgerEntry(unittest.TestCase):
 		# check outgoing_rate for DN after reposting
 		outgoing_rate = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Delivery Note",
 			"voucher_no": dn.name}, "stock_value_difference") / 5)
-
 		self.assertEqual(outgoing_rate, 110)
+
+		dn.reload()
+		self.assertEqual(dn.items[0].incoming_rate, 110)
 
 		# check incoming rate for Return entry after reposting
 		incoming_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
@@ -197,6 +201,121 @@ class TestStockLedgerEntry(unittest.TestCase):
 		self.assertEqual(incoming_rate, 110)
 		self.assertEqual(stock_value_difference, 220)
 
+		return_dn.reload()
+		self.assertEqual(return_dn.items[0].incoming_rate, 110)
+
+		# Cleanup data
+		return_dn.cancel()
+		dn.cancel()
+		lcv.cancel()
+		pr.cancel()
+
+	def test_reposting_of_sales_return_for_packed_item(self):
+		company = "_Test Company with perpetual inventory"
+		packed_item_code="_Test Item for Reposting"
+		bundled_item = "_Test Bundled Item for Reposting"
+		create_product_bundle_item(bundled_item, [[packed_item_code, 4]])
+
+		# Purchase Return: Qty = 50, Rate = 100
+		pr = make_purchase_receipt(company=company, posting_date='2020-04-10',
+			warehouse="Stores - TCP1", item_code=packed_item_code, qty=50, rate=100)
+
+		#Delivery Note: Qty = 5, Rate = 150
+		dn = create_delivery_note(item_code=bundled_item, qty=5, rate=150, warehouse="Stores - TCP1",
+			company=company, expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
+
+		# check outgoing_rate for DN
+		outgoing_rate = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Delivery Note",
+			"voucher_no": dn.name}, "stock_value_difference") / 20)
+
+		self.assertEqual(dn.packed_items[0].incoming_rate, 100)
+		self.assertEqual(outgoing_rate, 100)
+
+		# Return Entry: Qty = -2, Rate = 150
+		return_dn = create_delivery_note(is_return=1, return_against=dn.name, item_code=bundled_item, qty=-2, rate=150,
+			company=company, warehouse="Stores - TCP1", expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
+
+		# check incoming rate for Return entry
+		incoming_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
+			{"voucher_type": "Delivery Note", "voucher_no": return_dn.name},
+			["incoming_rate", "stock_value_difference"])
+
+		self.assertEqual(return_dn.packed_items[0].incoming_rate, 100)
+		self.assertEqual(incoming_rate, 100)
+		self.assertEqual(stock_value_difference, 800)
+
+		#-------------------------------
+
+		# Landed Cost Voucher to update the rate of incoming Purchase Return: Additional cost = 50
+		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
+
+		# Repost future SLE for Purchase Receipt
+		repost_future_sle("Purchase Receipt", pr.name)
+
+
+		# check outgoing_rate for DN after reposting
+		outgoing_rate = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Delivery Note",
+			"voucher_no": dn.name}, "stock_value_difference") / 20)
+		self.assertEqual(outgoing_rate, 101)
+
+		dn.reload()
+		self.assertEqual(dn.packed_items[0].incoming_rate, 101)
+
+		# check incoming rate for Return entry after reposting
+		incoming_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
+			{"voucher_type": "Delivery Note", "voucher_no": return_dn.name},
+			["incoming_rate", "stock_value_difference"])
+
+		self.assertEqual(incoming_rate, 101)
+		self.assertEqual(stock_value_difference, 808)
+
+		return_dn.reload()
+		self.assertEqual(return_dn.packed_items[0].incoming_rate, 101)
+
+		# Cleanup data
+		return_dn.cancel()
+		dn.cancel()
+		lcv.cancel()
+		pr.cancel()
+
+	def test_sub_contracted_item_costing(self):
+		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
+
+		company = "_Test Company with perpetual inventory"
+		rm_item_code="_Test Item for Reposting"
+		subcontracted_item = "_Test Subcontracted Item for Reposting"
+
+		bom = make_bom(item = subcontracted_item, raw_materials =[rm_item_code], currency="INR")
+		
+		# Purchase raw materials on supplier warehouse: Qty = 50, Rate = 100
+		pr = make_purchase_receipt(company=company, posting_date='2020-04-10',
+			warehouse="Stores - TCP1", item_code=rm_item_code, qty=10, rate=100)
+
+		# Purchase Receipt for subcontracted item
+		pr1 = make_purchase_receipt(company=company, posting_date='2020-04-20',
+			warehouse="Finished Goods - TCP1", supplier_warehouse="Stores - TCP1",
+			item_code=subcontracted_item, qty=10, rate=20, is_subcontracted="Yes")
+
+		self.assertEqual(pr1.items[0].valuation_rate, 120)
+
+		# Update raw material's valuation via LCV, Additional cost = 50
+		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
+
+		# Repost future SLE for Purchase Receipt
+		repost_future_sle("Purchase Receipt", pr.name)
+
+		pr1.reload()
+		self.assertEqual(pr1.items[0].valuation_rate, 125)
+
+		# check outgoing_rate for DN after reposting
+		incoming_rate = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
+			"voucher_no": pr1.name, "item_code": subcontracted_item}, "incoming_rate")
+		self.assertEqual(incoming_rate, 125)
+
+		# cleanup data
+		pr1.cancel()
+		lcv.cancel()
+		pr.cancel()
 
 
 def create_repack_entry(**args):
@@ -230,3 +349,30 @@ def create_repack_entry(**args):
 	repack.submit()
 
 	return repack
+
+def create_product_bundle_item(new_item_code, packed_items):
+	if not frappe.db.exists("Product Bundle", new_item_code):
+		item = frappe.new_doc("Product Bundle")
+		item.new_item_code = new_item_code
+
+		for d in packed_items:
+			item.append("items", {
+				"item_code": d[0],
+				"qty": d[1]
+			})
+
+		item.save()
+
+def create_items():
+	items = ["_Test Item for Reposting", "_Test Finished Item for Reposting",
+		"_Test Subcontracted Item for Reposting", "_Test Bundled Item for Reposting"]
+	for d in items:
+		properties = {"valuation_method": "FIFO"}
+		if d == "_Test Bundled Item for Reposting":
+			properties.update({"is_stock_item": 0})
+		elif d == "_Test Subcontracted Item for Reposting":
+			properties.update({"is_sub_contracted_item": 1})
+
+		make_item(d, properties=properties)
+
+	return items
