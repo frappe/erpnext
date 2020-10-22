@@ -210,21 +210,21 @@ def make_loan_interest_accrual_entry(args):
 
 
 def get_no_of_days_for_interest_accural(loan, posting_date):
-	last_interest_accrual_date = get_last_accural_date_in_current_month(loan)
+	last_interest_accrual_date = get_last_accural_date(loan.name)
 
 	no_of_days = date_diff(posting_date or nowdate(), last_interest_accrual_date) + 1
 
 	return no_of_days
 
-def get_last_accural_date_in_current_month(loan):
+def get_last_accural_date(loan):
 	last_posting_date = frappe.db.sql(""" SELECT MAX(posting_date) from `tabLoan Interest Accrual`
-		WHERE loan = %s""", (loan.name))
+		WHERE loan = %s""", (loan))
 
 	if last_posting_date[0][0]:
 		# interest for last interest accrual date is already booked, so add 1 day
 		return add_days(last_posting_date[0][0], 1)
 	else:
-		return loan.disbursement_date
+		return frappe.db.get_value('Loan', loan, 'disbursement_date')
 
 def days_in_year(year):
 	days = 365
