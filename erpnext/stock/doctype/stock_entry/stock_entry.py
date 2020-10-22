@@ -453,7 +453,9 @@ class StockEntry(StockController):
 			if not d.basic_rate:
 				d.basic_rate = get_valuation_rate(d.item_code, d.t_warehouse,
 					self.doctype, self.name, d.allow_zero_valuation_rate,
-					currency=erpnext.get_company_currency(self.company), company=self.company)
+					currency=erpnext.get_company_currency(self.company), company=self.company,
+					raise_error_if_no_rate=raise_error_if_no_rate)
+
 			d.basic_rate = flt(d.basic_rate, d.precision("basic_rate"))
 			d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
 
