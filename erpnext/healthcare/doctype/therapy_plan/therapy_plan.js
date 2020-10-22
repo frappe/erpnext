@@ -49,12 +49,34 @@ frappe.ui.form.on('Therapy Plan', {
 					});
 				}, __('Select Therapy Type'), __('Create'));
 			}, __('Create'));
+
+			if (frm.doc.therapy_plan_template && !frm.doc.invoiced) {
+				frm.add_custom_button(__('Sales Invoice'), function() {
+					frm.trigger('make_sales_invoice');
+				}, __('Create'));
+			}
 		}
 
 		if (frm.doc.therapy_plan_template) {
 			frappe.meta.get_docfield('Therapy Plan Detail', 'therapy_type', frm.doc.name).read_only = 1;
 			frappe.meta.get_docfield('Therapy Plan Detail', 'no_of_sessions', frm.doc.name).read_only = 1;
 		}
+	},
+
+	make_sales_invoice: function(frm) {
+		frappe.call({
+			args: {
+				'reference_name': frm.doc.name,
+				'patient': frm.doc.patient,
+				'company': frm.doc.company,
+				'therapy_plan_template': frm.doc.therapy_plan_template
+			},
+			method: 'erpnext.healthcare.doctype.therapy_plan.therapy_plan.make_sales_invoice',
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route('Form', doclist[0].doctype, doclist[0].name);
+			}
+		})
 	},
 
 	therapy_plan_template: function(frm) {
