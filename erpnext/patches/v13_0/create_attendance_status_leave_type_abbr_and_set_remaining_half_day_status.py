@@ -2,6 +2,11 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
+
+    frappe.reload_doc("HR", "doctype", 'Attendance Status')
+    frappe.reload_doc("HR", "doctype", 'Leave Application')
+    frappe.reload_doc("HR", "doctype", 'Attendance')
+
     statuses = {
         "Present": "P",
         "Absent": "A",
@@ -26,7 +31,7 @@ def execute():
                 att_status.applicable_for_leave_application = 1
             elif status in ["Work From Home", "Present"]:
                 att_status.is_present = 1
-                if status = "Present":
+                if status == "Present":
                     att_status.applicable_for_employee_checkins = 1
 
             att_status.save()

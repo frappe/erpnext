@@ -329,6 +329,8 @@ def get_columns(filters):
 		frappe.throw(_("To date can not less than From date"))
 	if frappe.utils.date_diff(to_date, from_date) > 62:
 		frappe.throw(_("Please select interval period less than 2 months"))
+	if to_date.year != from_date.year:
+		frappe.throw(_("Please select Date having same interval"))
 	days = get_days_columns(to_date, from_date)
 
 	if not filters.summarized_view:
