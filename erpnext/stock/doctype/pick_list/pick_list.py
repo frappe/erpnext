@@ -24,6 +24,9 @@ class PickList(Document):
 		for item in self.locations:
 			if not frappe.get_cached_value('Item', item.item_code, 'has_serial_no'):
 				continue
+			if not item.serial_no:
+				frappe.throw(_("Row #{0}: {1} does not have any available serial numbers in {2}".format(
+					frappe.bold(item.idx), frappe.bold(item.item_code), frappe.bold(item.warehouse))))
 			if len(item.serial_no.split('\n')) == item.picked_qty:
 				continue
 			frappe.throw(_('For item {0} at row {1}, count of serial numbers does not match with the picked quantity')
@@ -116,11 +119,13 @@ def get_items_with_location_and_quantity(item_doc, item_location_map):
 		if item_location.serial_no:
 			serial_nos = '\n'.join(item_location.serial_no[0: cint(stock_qty)])
 
+		auto_set_serial_no = frappe.db.get_single_value("Stock Settings", "automatically_set_serial_nos_based_on_fifo")
+
 		locations.append(frappe._dict({
 			'qty': qty,
 			'stock_qty': stock_qty,
 			'warehouse': item_location.warehouse,
-			'serial_no': serial_nos,
+			'serial_no': serial_nos if auto_set_serial_no else item_doc.serial_no,
 			'batch_no': item_location.batch_no
 		}))
 
@@ -203,6 +208,7 @@ def get_available_item_locations_for_batched_item(item_code, from_warehouses, re
 			sle.batch_no = batch.name
 			and sle.`item_code`=%(item_code)s
 			and sle.`company` = %(company)s
+			and batch.disabled = 0
 			and IFNULL(batch.`expiry_date`, '2200-01-01') > %(today)s
 			{warehouse_condition}
 		GROUP BY

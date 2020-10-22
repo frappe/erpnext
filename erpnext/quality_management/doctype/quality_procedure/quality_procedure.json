@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_rename": 1,
  "autoname": "format:PRC-{quality_procedure_name}",
  "creation": "2018-10-06 00:06:29.756804",
  "doctype": "DocType",
@@ -20,8 +21,7 @@
    "fieldname": "parent_quality_procedure",
    "fieldtype": "Link",
    "label": "Parent Procedure",
-   "options": "Quality Procedure",
-   "read_only": 1
+   "options": "Quality Procedure"
   },
   {
    "default": "0",
@@ -72,7 +72,7 @@
  ],
  "is_tree": 1,
  "links": [],
- "modified": "2020-03-18 18:26:05.511984",
+ "modified": "2020-10-12 16:14:11.167537",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Procedure",

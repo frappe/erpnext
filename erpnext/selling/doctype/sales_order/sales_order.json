@@ -281,6 +281,7 @@
    "width": "100px"
   },
   {
+   "fetch_from": "customer.tax_id",
    "fieldname": "tax_id",
    "fieldtype": "Data",
    "label": "Tax Id",
@@ -1138,6 +1139,7 @@
   },
   {
    "allow_on_submit": 1,
+   "collapsible": 1,
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
    "label": "Auto Repeat Section",
@@ -1195,7 +1197,7 @@
  "idx": 105,
  "in_create": 1,
  "is_submittable": 1,
- "modified": "2020-06-17 15:27:32.932722",
+ "modified": "2020-07-01 12:39:57.698621",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

@@ -169,9 +169,11 @@ class ReceivablePayableReport(object):
 
 	def append_subtotal_row(self, party):
 		sub_total_row = self.total_row_map.get(party)
-		self.data.append(sub_total_row)
-		self.data.append({})
-		self.update_sub_total_row(sub_total_row, 'Total')
+
+		if sub_total_row:
+			self.data.append(sub_total_row)
+			self.data.append({})
+			self.update_sub_total_row(sub_total_row, 'Total')
 
 	def get_voucher_balance(self, gle):
 		if self.filters.get("sales_person"):
@@ -232,7 +234,8 @@ class ReceivablePayableReport(object):
 
 		if self.filters.get('group_by_party'):
 			self.append_subtotal_row(self.previous_party)
-			self.data.append(self.total_row_map.get('Total'))
+			if self.data:
+				self.data.append(self.total_row_map.get('Total'))
 
 	def append_row(self, row):
 		self.allocate_future_payments(row)
@@ -536,7 +539,7 @@ class ReceivablePayableReport(object):
 
 	def get_ageing_data(self, entry_date, row):
 		# [0-30, 30-60, 60-90, 90-120, 120-above]
-		row.range1 = row.range2 = row.range3 = row.range4 = range5 = 0.0
+		row.range1 = row.range2 = row.range3 = row.range4 = row.range5 = 0.0
 
 		if not (self.age_as_on and entry_date):
 			return
@@ -560,7 +563,15 @@ class ReceivablePayableReport(object):
 
 		conditions, values = self.prepare_conditions()
 		order_by = self.get_order_by_condition()
-		
+
+		if self.filters.show_future_payments:
+			values.insert(2, self.filters.report_date)
+
+			date_condition = """AND (posting_date <= %s
+				OR (against_voucher IS NULL AND DATE(creation) <= %s))"""
+		else:
+			date_condition = "AND posting_date <=%s"
+
 		select_fields = "debit_in_account_currency as debit, credit_in_account_currency as credit"
 		# if self.filters.get(scrub(self.party_type)):
 		# 	select_fields = "debit_in_account_currency as debit, credit_in_account_currency as credit"
@@ -577,9 +588,8 @@ class ReceivablePayableReport(object):
 				docstatus < 2
 				and party_type=%s
 				and (party is not null and party != '')
-				and posting_date <= %s
-				{1} {2}"""
-			.format(select_fields, conditions, order_by), values, as_dict=True)
+				{1} {2} {3}"""
+			.format(select_fields, date_condition, conditions, order_by), values, as_dict=True)
 
 	def get_sales_invoices_or_customers_based_on_sales_person(self):
 		if self.filters.get("sales_person"):
@@ -610,8 +620,18 @@ class ReceivablePayableReport(object):
 		elif party_type_field=="supplier":
 			self.add_supplier_filters(conditions, values)
 
+		if self.filters.cost_center:
+			self.get_cost_center_conditions(conditions)
+
 		self.add_accounting_dimensions_filters(conditions, values)
 		return " and ".join(conditions), values
+
+	def get_cost_center_conditions(self, conditions):
+		lft, rgt = frappe.db.get_value("Cost Center", self.filters.cost_center, ["lft", "rgt"])
+		cost_center_list = [center.name for center in frappe.get_list("Cost Center", filters = {'lft': (">=", lft), 'rgt': ("<=", rgt)})]
+
+		cost_center_string = '", "'.join(cost_center_list)
+		conditions.append('cost_center in ("{0}")'.format(cost_center_string))
 
 	def get_order_by_condition(self):
 		if self.filters.get('group_by_party'):
@@ -636,8 +656,10 @@ class ReceivablePayableReport(object):
 		account_type = "Receivable" if self.party_type == "Customer" else "Payable"
 		accounts = [d.name for d in frappe.get_all("Account",
 			filters={"account_type": account_type, "company": self.filters.company})]
-		conditions.append("account in (%s)" % ','.join(['%s'] *len(accounts)))
-		values += accounts
+
+		if accounts:
+			conditions.append("account in (%s)" % ','.join(['%s'] *len(accounts)))
+			values += accounts
 
 	def add_customer_filters(self, conditions, values):
 		if self.filters.get("customer_group"):

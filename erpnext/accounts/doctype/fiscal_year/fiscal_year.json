@@ -5,9 +5,11 @@
  "description": "**Fiscal Year** represents a Financial Year. All accounting entries and other major transactions are tracked against **Fiscal Year**.",
  "doctype": "DocType",
  "document_type": "Setup",
+ "engine": "InnoDB",
  "field_order": [
   "year",
   "disabled",
+  "is_short_year",
   "year_start_date",
   "year_end_date",
   "companies",
@@ -36,6 +38,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Year Start Date",
+   "no_copy": 1,
    "oldfieldname": "year_start_date",
    "oldfieldtype": "Date",
    "reqd": 1
@@ -63,11 +66,19 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "description": "Less than 12 months.",
+   "fieldname": "is_short_year",
+   "fieldtype": "Check",
+   "label": "Is Short Year",
+   "set_only_once": 1
   }
  ],
  "icon": "fa fa-calendar",
  "idx": 1,
- "modified": "2020-03-04 12:57:26.431944",
+ "modified": "2020-10-03 18:22:04.161315",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Fiscal Year",

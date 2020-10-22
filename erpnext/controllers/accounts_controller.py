@@ -7,6 +7,7 @@ import json
 from frappe import _, throw
 from frappe.utils import (today, flt, cint, fmt_money, formatdate,
 	getdate, add_days, add_months, get_last_day, nowdate, get_link_to_form)
+from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied, WorkflowPermissionError
 from erpnext.stock.get_item_details import get_conversion_factor, get_item_details
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
@@ -19,7 +20,8 @@ from erpnext.accounts.doctype.pricing_rule.utils import (apply_pricing_rule_on_t
 from erpnext.exceptions import InvalidCurrency
 from six import text_type
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
-from erpnext.stock.get_item_details import get_item_warehouse
+from erpnext.stock.get_item_details import get_item_warehouse, _get_item_tax_template, get_item_tax_map
+from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
 force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules")
 
@@ -324,7 +326,7 @@ class AccountsController(TransactionBase):
 				apply_pricing_rule_for_free_items(self, pricing_rule_args.get('free_item_data'))
 
 		elif pricing_rule_args.get("validate_applied_rule"):
-			for pricing_rule in get_applied_pricing_rules(item):
+			for pricing_rule in get_applied_pricing_rules(item.get('pricing_rules')):
 				pricing_rule_doc = frappe.get_cached_doc("Pricing Rule", pricing_rule)
 				for field in ['discount_percentage', 'discount_amount', 'rate']:
 					if item.get(field) < pricing_rule_doc.get(field):
@@ -957,7 +959,7 @@ def validate_inclusive_tax(tax, doc):
 			# all rows about the reffered tax should be inclusive
 			_on_previous_row_error("1 - %d" % (tax.row_id,))
 		elif tax.get("category") == "Valuation":
-			frappe.throw(_("Valuation type charges can not marked as Inclusive"))
+			frappe.throw(_("Valuation type charges can not be marked as Inclusive"))
 
 
 def set_balance_in_account_currency(gl_dict, account_currency=None, conversion_rate=None, company_currency=None):
@@ -1014,6 +1016,7 @@ def get_advance_journal_entries(party_type, party, party_account, amount_field,
 def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 		order_list=None, include_unallocated=True, against_all_orders=False, limit=None):
 	party_account_field = "paid_from" if party_type == "Customer" else "paid_to"
+	currency_field = "paid_from_account_currency" if party_type == "Customer" else "paid_to_account_currency"
 	payment_type = "Receive" if party_type == "Customer" else "Pay"
 	payment_entries_against_order, unallocated_payment_entries = [], []
 	limit_cond = "limit %s" % limit if limit else ""
@@ -1030,14 +1033,15 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 			select
 				"Payment Entry" as reference_type, t1.name as reference_name,
 				t1.remarks, t2.allocated_amount as amount, t2.name as reference_row,
-				t2.reference_name as against_order, t1.posting_date
+				t2.reference_name as against_order, t1.posting_date,
+				t1.{0} as currency
 			from `tabPayment Entry` t1, `tabPayment Entry Reference` t2
 			where
-				t1.name = t2.parent and t1.{0} = %s and t1.payment_type = %s
+				t1.name = t2.parent and t1.{1} = %s and t1.payment_type = %s
 				and t1.party_type = %s and t1.party = %s and t1.docstatus = 1
-				and t2.reference_doctype = %s {1}
-			order by t1.posting_date {2}
-		""".format(party_account_field, reference_condition, limit_cond),
+				and t2.reference_doctype = %s {2}
+			order by t1.posting_date {3}
+		""".format(currency_field, party_account_field, reference_condition, limit_cond),
 													  [party_account, payment_type, party_type, party,
 													   order_doctype] + order_list, as_dict=1)
 
@@ -1127,6 +1131,43 @@ def get_supplier_block_status(party_name):
 	}
 	return info
 
+def set_child_tax_template_and_map(item, child_item, parent_doc):
+	args = {
+			'item_code': item.item_code,
+			'posting_date': parent_doc.transaction_date,
+			'tax_category': parent_doc.get('tax_category'),
+			'company': parent_doc.get('company')
+		}
+
+	child_item.item_tax_template = _get_item_tax_template(args, item.taxes)
+	if child_item.get("item_tax_template"):
+		child_item.item_tax_rate = get_item_tax_map(parent_doc.get('company'), child_item.item_tax_template, as_json=True)
+
+def add_taxes_from_tax_template(child_item, parent_doc):
+	add_taxes_from_item_tax_template = frappe.db.get_single_value("Accounts Settings", "add_taxes_from_item_tax_template")
+
+	if child_item.get("item_tax_rate") and add_taxes_from_item_tax_template:
+		tax_map = json.loads(child_item.get("item_tax_rate"))
+		for tax_type in tax_map:
+			tax_rate = flt(tax_map[tax_type])
+			taxes = parent_doc.get('taxes') or []
+			# add new row for tax head only if missing
+			found = any(tax.account_head == tax_type for tax in taxes)
+			if not found:
+				tax_row = parent_doc.append("taxes", {})
+				tax_row.update({
+					"description" : str(tax_type).split(' - ')[0],
+					"charge_type" : "On Net Total",
+					"account_head" : tax_type,
+					"rate" : tax_rate
+				})
+				if parent_doc.doctype == "Purchase Order":
+					tax_row.update({
+						"category" : "Total",
+						"add_deduct_tax" : "Add"
+					})
+				tax_row.db_insert()
+
 def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, trans_item):
 	"""
 	Returns a Sales Order Item child item containing the default values
@@ -1138,8 +1179,10 @@ def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname,
 	child_item.item_name = item.item_name
 	child_item.description = item.description
 	child_item.delivery_date = trans_item.get('delivery_date') or p_doc.delivery_date
+	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.uom = item.stock_uom
-	child_item.conversion_factor = get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
+	set_child_tax_template_and_map(item, child_item, p_doc)
+	add_taxes_from_tax_template(child_item, p_doc)
 	child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
 	if not child_item.warehouse:
 		frappe.throw(_("Cannot find {} for item {}. Please set the same in Item Master or Stock Settings.")
@@ -1158,14 +1201,17 @@ def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docna
 	child_item.item_name = item.item_name
 	child_item.description = item.description
 	child_item.schedule_date = trans_item.get('schedule_date') or p_doc.schedule_date
+	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.uom = item.stock_uom
 	child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
-	child_item.conversion_factor = get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
+	# child_item.conversion_factor = get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.base_rate = 1 # Initiallize value will update in parent validation
 	child_item.base_amount = 1 # Initiallize value will update in parent validation
+	set_child_tax_template_and_map(item, child_item, p_doc)
+	add_taxes_from_tax_template(child_item, p_doc)
 	return child_item
 
-def check_and_delete_children(parent, data):
+def validate_and_delete_children(parent, data):
 	deleted_children = []
 	updated_item_names = [d.get("docname") for d in data]
 	for item in parent.items:
@@ -1183,7 +1229,7 @@ def check_and_delete_children(parent, data):
 
 		if parent.doctype == "Purchase Order" and flt(d.received_qty):
 			frappe.throw(_("Row #{0}: Cannot delete item {1} which has already been received").format(d.idx, d.item_code))
-		
+
 		if flt(d.billed_amt):
 			frappe.throw(_("Row #{0}: Cannot delete item {1} which has already been billed.").format(d.idx, d.item_code))
 
@@ -1198,42 +1244,109 @@ def check_and_delete_children(parent, data):
 
 @frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
-	data = json.loads(trans_items)
+	def check_doc_permissions(doc, perm_type='create'):
+		try:
+			doc.check_permission(perm_type)
+		except frappe.PermissionError:
+			actions = { 'create': 'add', 'write': 'update'}
 
-	sales_doctypes = ['Sales Order', 'Sales Invoice', 'Delivery Note', 'Quotation']
-	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
+			frappe.throw(_("You do not have permissions to {} items in a {}.")
+				.format(actions[perm_type], parent_doctype), title=_("Insufficient Permissions"))
 
-	check_and_delete_children(parent, data)
+	def validate_workflow_conditions(doc):
+		workflow = get_workflow_name(doc.doctype)
+		if not workflow:
+			return
 
-	for d in data:
-		new_child_flag = False
-		if not d.get("docname"):
-			new_child_flag = True
-			if parent_doctype == "Sales Order":
-				child_item  = set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, d)
-			if parent_doctype == "Purchase Order":
-				child_item = set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, d)
-		else:
-			child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
-			if flt(child_item.get("rate")) == flt(d.get("rate")) and flt(child_item.get("qty")) == flt(d.get("qty")):
-				continue
+		workflow_doc = frappe.get_doc("Workflow", workflow)
+		current_state = doc.get(workflow_doc.workflow_state_field)
+		roles = frappe.get_roles()
 
+		transitions = []
+		for transition in workflow_doc.transitions:
+			if transition.next_state == current_state and transition.allowed in roles:
+				if not is_transition_condition_satisfied(transition, doc):
+					continue
+				transitions.append(transition.as_dict())
+
+		if not transitions:
+			frappe.throw(
+				_("You are not allowed to update as per the conditions set in {} Workflow.").format(get_link_to_form("Workflow", workflow)),
+				title=_("Insufficient Permissions")
+			)
+
+	def get_new_child_item(item_row):
+		new_child_function = set_sales_order_defaults if parent_doctype == "Sales Order" else set_purchase_order_defaults
+		return new_child_function(parent_doctype, parent_doctype_name, child_docname, item_row)
+
+	def validate_quantity(child_item, d):
 		if parent_doctype == "Sales Order" and flt(d.get("qty")) < flt(child_item.delivered_qty):
 			frappe.throw(_("Cannot set quantity less than delivered quantity"))
 
 		if parent_doctype == "Purchase Order" and flt(d.get("qty")) < flt(child_item.received_qty):
 			frappe.throw(_("Cannot set quantity less than received quantity"))
 
+	data = json.loads(trans_items)
+
+	sales_doctypes = ['Sales Order', 'Sales Invoice', 'Delivery Note', 'Quotation']
+	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
+
+	check_doc_permissions(parent, 'write')
+	validate_and_delete_children(parent, data)
+
+	for d in data:
+		new_child_flag = False
+		if not d.get("docname"):
+			new_child_flag = True
+			check_doc_permissions(parent, 'create')
+			child_item = get_new_child_item(d)
+		else:
+			check_doc_permissions(parent, 'write')
+			child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
+
+			prev_rate, new_rate = flt(child_item.get("rate")), flt(d.get("rate"))
+			prev_qty, new_qty = flt(child_item.get("qty")), flt(d.get("qty"))
+			prev_con_fac, new_con_fac = flt(child_item.get("conversion_factor")), flt(d.get("conversion_factor"))
+
+			if parent_doctype == 'Sales Order':
+				prev_date, new_date = child_item.get("delivery_date"), d.get("delivery_date")
+			elif parent_doctype == 'Purchase Order':
+				prev_date, new_date = child_item.get("schedule_date"), d.get("schedule_date")
+
+			rate_unchanged = prev_rate == new_rate
+			qty_unchanged = prev_qty == new_qty
+			conversion_factor_unchanged = prev_con_fac == new_con_fac
+			date_unchanged = prev_date == new_date if prev_date and new_date else False # in case of delivery note etc
+			if rate_unchanged and qty_unchanged and conversion_factor_unchanged and date_unchanged:
+				continue
+
+		validate_quantity(child_item, d)
+
 		child_item.qty = flt(d.get("qty"))
+
 		if parent_doctype == "Purchase Order":
 			child_item.brand = frappe.db.get_value('Item', d.get('item_code'), "brand")
-		precision = child_item.precision("rate") or 2
+		rate_precision = child_item.precision("rate") or 2
+		conv_fac_precision = child_item.precision("conversion_factor") or 2
+		qty_precision = child_item.precision("qty") or 2
 
-		if flt(child_item.billed_amt, precision) > flt(flt(d.get("rate")) * flt(d.get("qty")), precision):
+		if flt(child_item.billed_amt, rate_precision) > flt(flt(d.get("rate"), rate_precision) * flt(d.get("qty"), qty_precision), rate_precision):
 			frappe.throw(_("Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}.")
 						 .format(child_item.idx, child_item.item_code))
 		else:
-			child_item.rate = flt(d.get("rate"))
+			child_item.rate = flt(d.get("rate"), rate_precision)
+
+		if d.get("conversion_factor"):
+			if child_item.stock_uom == child_item.uom:
+				child_item.conversion_factor = 1
+			else:
+				child_item.conversion_factor = flt(d.get('conversion_factor'), conv_fac_precision)
+
+		if d.get("delivery_date") and parent_doctype == 'Sales Order':
+			child_item.delivery_date = d.get('delivery_date')
+
+		if d.get("schedule_date") and parent_doctype == 'Purchase Order':
+			child_item.schedule_date = d.get('schedule_date')
 
 		if flt(child_item.price_list_rate):
 			if flt(child_item.rate) > flt(child_item.price_list_rate):
@@ -1270,6 +1383,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	parent.set_qty_as_per_stock_uom()
 	parent.calculate_taxes_and_totals()
 	if parent_doctype == "Sales Order":
+		make_packing_list(parent)
 		parent.set_gross_profit()
 	frappe.get_doc('Authorization Control').validate_approving_authority(parent.doctype,
 		parent.company, parent.base_grand_total)
@@ -1298,6 +1412,9 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		parent.update_project()
 		parent.update_prevdoc_status('submit')
 		parent.update_delivery_status()
+
+	parent.reload()
+	validate_workflow_conditions(parent)
 
 	parent.update_blanket_order()
 	parent.update_billing_percentage()

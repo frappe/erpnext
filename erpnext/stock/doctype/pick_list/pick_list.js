@@ -31,10 +31,16 @@ frappe.ui.form.on('Pick List', {
 			};
 		});
 		frm.set_query('item_code', 'locations', () => {
+			return erpnext.queries.item({ "is_stock_item": 1 });
+		});
+		frm.set_query('batch_no', 'locations', (frm, cdt, cdn) => {
+			const row = locals[cdt][cdn];
 			return {
+				query: 'erpnext.controllers.queries.get_batch_no',
 				filters: {
-					is_stock_item: 1
-				}
+					item_code: row.item_code,
+					warehouse: row.warehouse
+				},
 			};
 		});
 	},

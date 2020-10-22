@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -102,6 +101,7 @@
   "bill_no",
   "bill_date",
   "more_info",
+  "project",
   "status",
   "amended_from",
   "range",
@@ -1059,13 +1059,20 @@
    "fieldname": "scan_barcode",
    "fieldtype": "Data",
    "label": "Scan Barcode"
+  },
+  {
+   "description": "Track this Purchase Receipt against any Project",
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-17 13:06:26.970288",
+ "modified": "2020-07-15 12:49:42.095297",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

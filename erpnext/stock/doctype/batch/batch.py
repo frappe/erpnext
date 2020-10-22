@@ -143,7 +143,7 @@ class Batch(Document):
 
 
 @frappe.whitelist()
-def get_batch_qty(batch_no=None, warehouse=None, item_code=None):
+def get_batch_qty(batch_no=None, warehouse=None, item_code=None, posting_date=None, posting_time=None):
 	"""Returns batch actual qty if warehouse is passed,
 		or returns dict of qty by warehouse if warehouse is None
 
@@ -155,9 +155,14 @@ def get_batch_qty(batch_no=None, warehouse=None, item_code=None):
 
 	out = 0
 	if batch_no and warehouse:
+		cond = ""
+		if posting_date and posting_time:
+			cond = " and timestamp(posting_date, posting_time) <= timestamp('{0}', '{1}')".format(posting_date,
+				posting_time)
+
 		out = float(frappe.db.sql("""select sum(actual_qty)
 			from `tabStock Ledger Entry`
-			where warehouse=%s and batch_no=%s""",
+			where warehouse=%s and batch_no=%s {0}""".format(cond),
 			(warehouse, batch_no))[0][0] or 0)
 
 	if batch_no and not warehouse:

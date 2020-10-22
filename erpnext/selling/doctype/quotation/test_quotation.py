@@ -108,6 +108,10 @@ class TestQuotation(unittest.TestCase):
 		sales_order.transaction_date = nowdate()
 		sales_order.insert()
 
+		# Remove any unknown taxes if applied
+		sales_order.set('taxes', [])
+		sales_order.save()
+
 		self.assertEqual(sales_order.payment_schedule[0].payment_amount, 8906.00)
 		self.assertEqual(sales_order.payment_schedule[0].due_date, getdate(quotation.transaction_date))
 		self.assertEqual(sales_order.payment_schedule[1].payment_amount, 8906.00)

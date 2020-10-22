@@ -162,10 +162,13 @@ class update_entries_after(object):
 
 			self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
 		else:
-			if sle.voucher_type=="Stock Reconciliation" and not sle.batch_no:
-				# assert
+			if sle.voucher_type=="Stock Reconciliation":
+				if sle.batch_no:
+					self.qty_after_transaction += flt(sle.actual_qty)
+				else:
+					self.qty_after_transaction = sle.qty_after_transaction
+
 				self.valuation_rate = sle.valuation_rate
-				self.qty_after_transaction = sle.qty_after_transaction
 				self.stock_queue = [[self.qty_after_transaction, self.valuation_rate]]
 				self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
 			else:
@@ -460,7 +463,13 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 		conditions += " and " + previous_sle.get("warehouse_condition")
 
 	if check_serial_no and previous_sle.get("serial_no"):
-		conditions += " and serial_no like {}".format(frappe.db.escape('%{0}%'.format(previous_sle.get("serial_no"))))
+		serial_no = previous_sle.get("serial_no")
+		conditions += """ and (
+				serial_no = '{0}'
+				OR serial_no like '{0}\n%%'
+				OR serial_no like '%%\n{0}'
+				OR serial_no like '%%\n{0}\n%%'
+			) and actual_qty > 0""".format(serial_no)
 
 	if not previous_sle.get("posting_date"):
 		previous_sle["posting_date"] = "1900-01-01"
