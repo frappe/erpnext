@@ -1321,8 +1321,10 @@ class StockEntry(StockController):
 				for sr in get_serial_nos(item.serial_no):
 					sales_order = frappe.db.get_value("Serial No", sr, "sales_order")
 					if sales_order:
-						frappe.throw(_("Item {0} (Serial No: {1}) cannot be consumed as is reserverd\
-						 to fullfill Sales Order {2}.").format(item.item_code, sr, sales_order))
+						msg = (_("(Serial No: {0}) cannot be consumed as it's reserverd to fullfill Sales Order {1}.")
+							.format(sr, sales_order))
+
+						frappe.throw(_("Item {0} {1}").format(item.item_code, msg))
 
 	def update_transferred_qty(self):
 		if self.purpose == 'Material Transfer' and self.outgoing_stock_entry:
