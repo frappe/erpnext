@@ -1157,6 +1157,11 @@ def add_taxes_from_tax_template(child_item, parent_doc):
 					"account_head" : tax_type,
 					"rate" : tax_rate
 				})
+				if parent_doc.doctype == "Purchase Order":
+					tax_row.update({
+						"category" : "Total",
+						"add_deduct_tax" : "Add"
+					})
 				tax_row.db_insert()
 
 def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, trans_item):
