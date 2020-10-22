@@ -125,7 +125,8 @@ class PayrollEntry(Document):
 				"posting_date": self.posting_date,
 				"deduct_tax_for_unclaimed_employee_benefits": self.deduct_tax_for_unclaimed_employee_benefits,
 				"deduct_tax_for_unsubmitted_tax_exemption_proof": self.deduct_tax_for_unsubmitted_tax_exemption_proof,
-				"payroll_entry": self.name
+				"payroll_entry": self.name,
+				"exchange_rate": self.exchange_rate
 			})
 			if len(emp_list) > 30:
 				frappe.enqueue(create_salary_slips_for_employees, timeout=600, employees=emp_list, args=args)
@@ -205,21 +206,10 @@ class PayrollEntry(Document):
 			account_dict[(account, key[1])] = account_dict.get((account, key[1]), 0) + amount
 		return account_dict
 
-	def get_default_payroll_payable_account(self):
-		payroll_payable_account = frappe.get_cached_value('Company',
-			{"company_name": self.company},  "default_payroll_payable_account")
-
-		if not payroll_payable_account:
-			frappe.throw(_("Please set Default Payroll Payable Account in Company {0}")
-				.format(self.company))
-
-		return payroll_payable_account
-
 	def make_accrual_jv_entry(self):
 		self.check_permission('write')
 		earnings = self.get_salary_component_total(component_type = "earnings") or {}
 		deductions = self.get_salary_component_total(component_type = "deductions") or {}
-		# default_payroll_payable_account = self.get_default_payroll_payable_account()
 		default_payroll_payable_account = self.default_payroll_payable_account
 		jv_name = ""
 		precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
@@ -329,7 +319,6 @@ class PayrollEntry(Document):
 				self.create_journal_entry(salary_slip_total, "salary")
 
 	def create_journal_entry(self, je_payment_amount, user_remark):
-		# default_payroll_payable_account = self.get_default_payroll_payable_account()
 		default_payroll_payable_account = self.default_payroll_payable_account
 		precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
 
@@ -528,6 +517,25 @@ def create_salary_slips_for_employees(employees, args, publish_progress=True):
 			if publish_progress:
 				frappe.publish_progress(count*100/len(set(employees) - set(salary_slips_exists_for)),
 					title = _("Creating Salary Slips..."))
+		else:
+			salary_slip_name = frappe.db.sql(
+				'''SELECT 
+						name 
+					FROM
+						`tabSalary Slip` 
+					WHERE 
+						company=%s
+					AND 
+						start_date >= %s 
+					AND 
+						end_date <= %s
+					AND 
+						employee = %s
+				''', (args.company, args.start_date, args.end_date, emp), as_dict=True)
+
+			salary_slip_doc = frappe.get_doc('Salary Slip', salary_slip_name[0].name)
+			salary_slip_doc.exchange_rate = args.exchange_rate
+			salary_slip_doc.set_base_amounts_after_exchange_rate_change()
 
 	payroll_entry = frappe.get_doc("Payroll Entry", args.payroll_entry)
 	payroll_entry.db_set("salary_slips_created", 1)

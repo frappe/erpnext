@@ -6,8 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
-  "default_account",
-  "account_currency"
+  "account"
  ],
  "fields": [
   {
@@ -19,24 +18,16 @@
   },
   {
    "description": "Default Bank / Cash account will be automatically updated in Salary Journal Entry when this mode is selected.",
-   "fieldname": "default_account",
+   "fieldname": "account",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Default Account",
+   "label": "Account",
    "options": "Account"
-  },
-  {
-   "fetch_from": "default_account.account_currency",
-   "fieldname": "account_currency",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Account Currency",
-   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-09-30 13:50:06.809353",
+ "modified": "2020-10-18 17:57:57.110257",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Salary Component Account",

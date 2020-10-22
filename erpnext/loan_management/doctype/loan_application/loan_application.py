@@ -3,7 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, math
+import frappe, math, erpnext
 from frappe import _
 from frappe.utils import flt, rounded, cint
 from frappe.model.mapper import get_mapped_doc
@@ -16,6 +16,9 @@ from six import string_types
 
 class LoanApplication(Document):
 	def validate(self):
+		if self.applicant_type == 'Employee':
+			from erpnext.loan_management.doctype.loan.loan import validate_employe_currency_with_company_currency
+			validate_employe_currency_with_company_currency(self.applicant, self.company)
 		self.set_pledge_amount()
 		self.set_loan_amount()
 		self.validate_loan_amount()

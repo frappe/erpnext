@@ -23,37 +23,44 @@ frappe.ui.form.on('Additional Salary', {
 	},
 
 	employee: function(frm) {
-		debugger;
 		if (frm.doc.employee) {
-			frappe.call({
-				method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_payroll_payable_account_currency",
-				args: {
-					employee: frm.doc.employee,
-				},
-				callback: function(r) {
-					if(r.message) {
-						frm.set_value('currency', r.message);
-						frm.set_df_property('currency', 'hidden', 0);
-					}
-				}
-			});
-			frappe.call({
-				method: "frappe.client.get_value",
-				args:{
-					doctype: "Employee",
-					fieldname: "company",
-					filters:{
-						name: frm.doc.employee
-					}
-				},
-				callback: function(data) {
-					if(data.message){
-						frm.set_value("company", data.message.company);
-					}
-				}
-			});
+			frm.trigger('set_company');
+			frm.trigger('get_employee_currency');
 		} else {
 			frm.set_value("company", null);
 		}
+	},
+
+	set_company: function(frm) {
+		frappe.call({
+			method: "frappe.client.get_value",
+			args:{
+				doctype: "Employee",
+				fieldname: "company",
+				filters:{
+					name: frm.doc.employee
+				}
+			},
+			callback: function(data) {
+				if(data.message){
+					frm.set_value("company", data.message.company);
+				}
+			}
+		});
+	},
+
+	get_employee_currency: function(frm) {
+		frappe.call({
+			method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_employee_currency",
+			args: {
+				employee: frm.doc.employee,
+			},
+			callback: function(r) {
+				if(r.message) {
+					frm.set_value('currency', r.message);
+					frm.refresh_fields();
+				}
+			}
+		});
 	},
 });

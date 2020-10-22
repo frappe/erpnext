@@ -14,7 +14,7 @@ frappe.ui.form.on('Employee Benefit Claim', {
 		frm.set_value("earning_component", null);
 		if (frm.doc.employee) {
 			frappe.call({
-				method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_payroll_payable_account_currency",
+				method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_employee_currency",
 				args: {
 					employee: frm.doc.employee,
 				},

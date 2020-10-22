@@ -19,6 +19,7 @@
   "payroll_entry",
   "company",
   "currency",
+  "exchange_rate",
   "letter_head",
   "section_break_10",
   "start_date",
@@ -39,6 +40,7 @@
   "column_break_20",
   "total_working_hours",
   "hour_rate",
+  "base_hour_rate",
   "section_break_26",
   "bank_name",
   "bank_account_no",
@@ -53,8 +55,10 @@
   "deductions",
   "totals",
   "gross_pay",
+  "base_gross_pay",
   "column_break_25",
   "total_deduction",
+  "base_total_deduction",
   "loan_repayment",
   "loans",
   "section_break_43",
@@ -64,10 +68,14 @@
   "total_loan_repayment",
   "net_pay_info",
   "net_pay",
+  "base_net_pay",
   "column_break_53",
   "rounded_total",
+  "base_rounded_total",
   "section_break_55",
   "total_in_words",
+  "column_break_69",
+  "base_total_in_words",
   "section_break_75",
   "amended_from"
  ],
@@ -374,6 +382,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "eval:doc.docstatus != 0",
    "fieldname": "section_break_43",
    "fieldtype": "Section Break"
   },
@@ -411,7 +420,6 @@
    "label": "net pay info"
   },
   {
-   "description": "Gross Pay - Total Deduction - Loan Repayment",
    "fieldname": "net_pay",
    "fieldtype": "Currency",
    "label": "Net Pay",
@@ -505,7 +513,6 @@
    "read_only": 1
   },
   {
-   "description": "Net Pay (in words) will be visible once you save the Salary Slip.",
    "fieldname": "total_in_words",
    "fieldtype": "Data",
    "label": "Total in words",
@@ -515,13 +522,69 @@
   {
    "fieldname": "section_break_75",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "base_hour_rate",
+   "fieldtype": "Currency",
+   "label": "Hour Rate (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide_if_no_value": 1
+  },
+  {
+   "fieldname": "base_gross_pay",
+   "fieldtype": "Currency",
+   "label": "Gross Pay (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "1.0",
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Exchange Rate",
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "base_total_deduction",
+   "fieldtype": "Currency",
+   "label": "Total Deduction (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_net_pay",
+   "fieldtype": "Currency",
+   "label": "Net Pay (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fieldname": "base_rounded_total",
+   "fieldtype": "Currency",
+   "label": "Rounded Total (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_total_in_words",
+   "fieldtype": "Data",
+   "label": "Total in words (Company Currency)",
+   "length": 240,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_69",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-30 17:31:21.909671",
+ "modified": "2020-10-21 23:02:59.400249",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",

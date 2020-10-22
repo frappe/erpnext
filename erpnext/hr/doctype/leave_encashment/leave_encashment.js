@@ -23,6 +23,7 @@ frappe.ui.form.on('Leave Encashment', {
 	},
 	employee: function(frm) {
 		frm.trigger("get_leave_details_for_encashment");
+		frm.trigger('get_employee_currency');
 	},
 	leave_type: function(frm) {
 		frm.trigger("get_leave_details_for_encashment");
@@ -37,21 +38,23 @@ frappe.ui.form.on('Leave Encashment', {
 				doc: frm.doc,
 				callback: function(r) {
 					frm.refresh_fields();
-					frappe.call({
-						method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_payroll_payable_account_currency",
-						args: {
-							employee: frm.doc.employee,
-						},
-						callback: function(r) {
-							if(r.message) {
-								frm.set_value('currency', r.message);
-								frm.set_df_property('currency', 'hidden', 0);
-								frm.refresh_fields();
-							}
-						}
-					});
 				}
 			});
 		}
-	}
+	},
+
+	get_employee_currency: function(frm) {
+		frappe.call({
+			method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_employee_currency",
+			args: {
+				employee: frm.doc.employee,
+			},
+			callback: function(r) {
+				if(r.message) {
+					frm.set_value('currency', r.message);
+					frm.refresh_fields();
+				}
+			}
+		});
+	},
 });
