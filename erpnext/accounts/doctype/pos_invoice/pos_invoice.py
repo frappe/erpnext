@@ -69,6 +69,9 @@ class POSInvoice(SalesInvoice):
 			against_psi_doc.make_loyalty_point_entry()
 
 	def validate_stock_availablility(self):
+		if self.is_return:
+			return
+
 		allow_negative_stock = frappe.db.get_value('Stock Settings', None, 'allow_negative_stock')
 		error_msg = []
 		for d in self.get('items'):
@@ -137,8 +140,24 @@ class POSInvoice(SalesInvoice):
 
 		for d in self.get("items"):
 			if d.get("qty") > 0:
-				frappe.throw(_("Row #{}: You cannot add postive quantities in a return invoice. Please remove item {} to complete the return.")
-					.format(d.idx, frappe.bold(d.item_code)), title=_("Invalid Item"))
+				frappe.throw(
+					_("Row #{}: You cannot add postive quantities in a return invoice. Please remove item {} to complete the return.")
+					.format(d.idx, frappe.bold(d.item_code)), title=_("Invalid Item")
+				)
+			if d.get("serial_no"):
+				serial_nos = get_serial_nos(d.serial_no)
+				for sr in serial_nos:
+					serial_no_exists = frappe.db.exists("POS Invoice Item", {
+						"parent": self.return_against, 
+						"serial_no": ["like", d.get("serial_no")]
+					})
+					if not serial_no_exists:
+						bold_return_against = frappe.bold(self.return_against)
+						bold_serial_no = frappe.bold(sr)
+						frappe.throw(
+							_("Row #{}: Serial No {} cannot be returned since it was not transacted in original invoice {}")
+							.format(d.idx, bold_serial_no, bold_return_against)
+						)
 
 	def validate_mode_of_payment(self):
 		if len(self.payments) == 0:
