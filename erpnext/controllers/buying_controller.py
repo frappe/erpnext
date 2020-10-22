@@ -13,6 +13,7 @@ from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock.doctype.stock_entry.stock_entry import get_used_alternative_items
 from erpnext.stock.doctype.serial_no.serial_no import get_auto_serial_nos, auto_make_serial_nos, get_serial_nos
 from frappe.contacts.doctype.address.address import get_address_display
+from erpnext.controllers.print_settings import print_settings_for_taxes
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.controllers.stock_controller import StockController
@@ -20,14 +21,7 @@ from erpnext.controllers.stock_controller import StockController
 class BuyingController(StockController):
 	def __setup__(self):
 		if hasattr(self, "taxes"):
-			self.flags.print_taxes_with_zero_amount = cint(frappe.db.get_single_value("Print Settings",
-				 "print_taxes_with_zero_amount"))
-			self.flags.show_inclusive_tax_in_print = self.is_inclusive_tax()
-
-			self.print_templates = {
-				"total": "templates/print_formats/includes/total.html",
-				"taxes": "templates/print_formats/includes/taxes.html"
-			}
+			print_settings_for_taxes(self)
 
 	def get_feed(self):
 		if self.get("supplier_name"):
