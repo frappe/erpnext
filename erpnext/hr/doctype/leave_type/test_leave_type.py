@@ -20,6 +20,8 @@ def create_leave_type(**args):
         "is_lwp": args.is_lwp or 0,
         "is_ppl":args.is_ppl or 0,
         "is_carry_forward": args.is_carry_forward or 0,
+        "full_day_abbr": args.full_day_abbr or "TLT",
+        "half_day_abbr": args.half_day_abbr or "TLTHD",
         "expire_carry_forwarded_leaves_after_days": args.expire_carry_forwarded_leaves_after_days or 0,
         "encashment_threshold_days": args.encashment_threshold_days or 5,
         "earning_component": "Leave Encashment"

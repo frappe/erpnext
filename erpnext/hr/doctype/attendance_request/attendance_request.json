@@ -120,7 +120,6 @@
    "reqd": 1
   },
   {
-   "default": "0",
    "depends_on": "half_day",
    "fieldname": "remaining_half_day_status",
    "fieldtype": "Link",
@@ -132,7 +131,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-20 12:20:22.536452",
+ "modified": "2020-10-22 16:37:46.044498",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance Request",
