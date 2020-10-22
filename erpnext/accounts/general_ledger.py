@@ -171,7 +171,7 @@ def validate_account_for_perpetual_inventory(gl_map):
 					frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
 						.format(account), StockAccountInvalidTransaction)
 
-			elif account_bal != stock_bal:
+			elif abs(account_bal - stock_bal) > 0.1:
 				precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
 					currency=frappe.get_cached_value('Company',  gl_map[0].company,  "default_currency"))
 
