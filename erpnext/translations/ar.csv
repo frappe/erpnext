@@ -316,7 +316,7 @@ Authorized Signatory,المخول بالتوقيع,
 Auto Material Requests Generated,إنشاء طلب مواد تلقائي,
 Auto Repeat,تكرار تلقائي,
 Auto repeat document updated,تكرار تلقائي للمستندات المحدثة,
-Automotive,سيارات,متحرك بطاقة ذاتية
+Automotive,سيارات,
 Available,متاح,
 Available Leaves,المغادارت والاجازات المتاحة,
 Available Qty,الكمية المتاحة,
@@ -335,10 +335,10 @@ BOM,قائمة مكونات المواد,
 BOM Browser,قائمة مكونات المواد متصفح,
 BOM No,رقم قائمة مكونات المواد,
 BOM Rate,سعر او معدل قائمة مكونات المواد,
-BOM Stock Report,تقرير مخزون قائمة مكونات المواد,
+BOM Stock Report,تقرير مخزون فاتورة المواد,
 BOM and Manufacturing Quantity are required,مطلوب، قائمة مكونات المواد و كمية التصنيع,
-BOM does not contain any stock item,قائمة مكونات المواد لا تحتوي على أي صنف مخزون,
-BOM {0} does not belong to Item {1},قائمة مكونات المواد {0} لا تنتمي إلى الصنف {1},
+BOM does not contain any stock item,فاتورة الموارد لا تحتوي على أي صنف مخزون,
+BOM {0} does not belong to Item {1},قائمة المواد {0} لا تنتمي إلى الصنف {1},
 BOM {0} must be active,قائمة مكونات المواد {0} يجب أن تكون نشطة\n<br>\nBOM {0} must be active,
 BOM {0} must be submitted,قائمة مكونات المواد {0} يجب أن تكون مسجلة\n<br>\nBOM {0} must be submitted,
 Balance,الموازنة,
@@ -405,7 +405,7 @@ Birthday Reminder,تذكير عيد ميلاد,
 Black,أسود,
 Blanket Orders from Costumers.,أوامر شراء شاملة من العملاء.,
 Block Invoice,حظر الفاتورة,
-Boms,قوائم مكونات المواد,
+Boms,قوائم المواد,
 Bonus Payment Date cannot be a past date,لا يمكن أن يكون تاريخ الدفع المكافأ تاريخًا سابقًا,
 Both Trial Period Start Date and Trial Period End Date must be set,يجب تعيين كل من تاريخ بدء الفترة التجريبية وتاريخ انتهاء الفترة التجريبية,
 Both Warehouse must belong to same Company,يجب أن ينتمي المستودع إلى نفس الشركة\n<br>\nBoth Warehouse must belong to same Company,
@@ -504,9 +504,9 @@ Cash In Hand,النقدية الحاضرة,
 Cash or Bank Account is mandatory for making payment entry,الحساب النقدي أو البنكي مطلوب لعمل مدخل بيع <br>Cash or Bank Account is mandatory for making payment entry,
 Cashier Closing,إغلاق أمين الصندوق,
 Casual Leave,أجازة عادية,
-Category,فئة,صنف
+Category,فئة,
 Category Name,اسم التصنيف,
-Caution,الحذر,تحذير
+Caution,الحذر,
 Central Tax,الضريبة المركزية,
 Certification,شهادة,
 Cess,سيس,
@@ -521,7 +521,6 @@ Charge of type 'Actual' in row {0} cannot be included in Item Rate,الرسوم 
 Chargeble,Chargeble,
 Charges are updated in Purchase Receipt against each item,تحديث الرسوم في اضافة المشتريات لكل صنف,
 "Charges will be distributed proportionately based on item qty or amount, as per your selection",وسيتم توزيع تستند رسوم متناسب على الكمية البند أو كمية، حسب اختيارك,
-Chart Of Accounts,الشجرة المحاسبية,
 Chart of Cost Centers,دليل مراكز التكلفة,
 Check all,حدد الكل,
 Checkout,دفع,
@@ -581,7 +580,6 @@ Company {0} does not exist,الشركة {0} غير موجودة,
 Compensatory Off,تعويض,
 Compensatory leave request days not in valid holidays,أيام طلب الإجازة التعويضية ليست في أيام العطل الصالحة,
 Complaint,شكوى,
-Completed Qty can not be greater than 'Qty to Manufacture',"الكمية المصنعة لا يمكن أن تكون أكبر من ""كمية التصنيع""",
 Completion Date,تاريخ الانتهاء,
 Computer,الحاسوب,
 Condition,الحالة,
@@ -1421,13 +1419,13 @@ Lab Test UOM,اختبار مختبر أوم,
 Lab Tests and Vital Signs,اختبارات المختبر وعلامات حيوية,
 Lab result datetime cannot be before testing datetime,لا يمكن أن يكون تاريخ نتيجة المختبر سابقا لتاريخ الفحص,
 Lab testing datetime cannot be before collection datetime,لا يمكن أن يكون وقت اختبار المختبر قبل تاريخ جمع البيانات,
-Label,ملصق,'طابع
+Label,ملصق,
 Laboratory,مختبر,
 Language Name,اسم اللغة,
 Large,كبير,
 Last Communication,آخر الاتصالات,
 Last Communication Date,تاريخ الاتصال الأخير,
-Last Name,اسم العائلة او اللقب,
+Last Name,اسم العائلة,
 Last Order Amount,قيمة آخر طلب,
 Last Order Date,تاريخ أخر أمر بيع,
 Last Purchase Price,سعر الشراء الأخير,
@@ -2033,7 +2031,6 @@ Please select Category first,الرجاء تحديد التصنيف أولا\n<b
 Please select Charge Type first,يرجى تحديد نوع الرسوم أولا,
 Please select Company,الرجاء اختيار شركة \n<br>\nPlease select Company,
 Please select Company and Designation,يرجى تحديد الشركة والتسمية,
-Please select Company and Party Type first,يرجى تحديد الشركة ونوع الطرف المعني أولا,
 Please select Company and Posting Date to getting entries,يرجى تحديد الشركة وتاريخ النشر للحصول على إدخالات,
 Please select Company first,الرجاء تحديد الشركة أولا\n<br>\nPlease select Company first,
 Please select Completion Date for Completed Asset Maintenance Log,يرجى تحديد تاريخ الانتهاء لاستكمال سجل صيانة الأصول,
@@ -2980,7 +2977,6 @@ The name of the institute for which you are setting up this system.,اسم ال�
 The name of your company for which you are setting up this system.,اسم الشركة التي كنت تقوم بإعداد هذا النظام.,
 The number of shares and the share numbers are inconsistent,عدد الأسهم وأعداد الأسهم غير متناسقة,
 The payment gateway account in plan {0} is different from the payment gateway account in this payment request,يختلف حساب بوابة الدفع في الخطة {0} عن حساب بوابة الدفع في طلب الدفع هذا,
-The request for quotation can be accessed by clicking on the following link,طلب للحصول على الاقتباس يمكن الوصول إليها من خلال النقر على الرابط التالي,
 The selected BOMs are not for the same item,قواائم المواد المحددة ليست لنفس البند,
 The selected item cannot have Batch,العنصر المحدد لا يمكن أن يكون دفعة,
 The seller and the buyer cannot be the same,البائع والمشتري لا يمكن أن يكون هو نفسه,
@@ -3543,7 +3539,6 @@ Company GSTIN,شركة غستين,
 Company field is required,حقل الشركة مطلوب,
 Creating Dimensions...,إنشاء الأبعاد ...,
 Duplicate entry against the item code {0} and manufacturer {1},إدخال مكرر مقابل رمز العنصر {0} والشركة المصنعة {1},
-Import Chart Of Accounts from CSV / Excel files,استيراد الرسم البياني للحسابات من ملفات CSV / Excel,
 Invalid GSTIN! The input you've entered doesn't match the GSTIN format for UIN Holders or Non-Resident OIDAR Service Providers,GSTIN غير صالح! لا يتطابق الإدخال الذي أدخلته مع تنسيق GSTIN لحاملي UIN أو مزودي خدمة OIDAR غير المقيمين,
 Invoice Grand Total,الفاتورة الكبرى المجموع,
 Last carbon check date cannot be a future date,لا يمكن أن يكون تاريخ فحص الكربون الأخير تاريخًا مستقبلاً,
@@ -3920,7 +3915,6 @@ Plaid authentication error,خطأ مصادقة منقوشة,
 Plaid public token error,خطأ رمزي عام منقوش,
 Plaid transactions sync error,خطأ في مزامنة المعاملات المنقوشة,
 Please check the error log for details about the import errors,الرجاء التحقق من سجل الأخطاء للحصول على تفاصيل حول أخطاء الاستيراد,
-Please click on the following link to set your new password,الرجاء الضغط على الرابط التالي لتعيين كلمة المرور الجديدة,
 Please create <b>DATEV Settings</b> for Company <b>{}</b>.,الرجاء إنشاء <b>إعدادات DATEV</b> للشركة <b>{}</b> .,
 Please create adjustment Journal Entry for amount {0} ,الرجاء إنشاء تعديل إدخال دفتر اليومية للمبلغ {0},
 Please do not create more than 500 items at a time,يرجى عدم إنشاء أكثر من 500 عنصر في وقت واحد,
@@ -4043,7 +4037,6 @@ Search results for,نتائج البحث عن,
 Select All,تحديد الكل,
 Select Difference Account,حدد حساب الفرق,
 Select a Default Priority.,حدد أولوية افتراضية.,
-Select a Supplier from the Default Supplier List of the items below.,حدد موردًا من قائمة الموردين الافتراضية للعناصر أدناه.,
 Select a company,اختر شركة,
 Select finance book for the item {0} at row {1},حدد دفتر تمويل للعنصر {0} في الصف {1},
 Select only one Priority as Default.,حدد أولوية واحدة فقط كإعداد افتراضي.,
@@ -4247,7 +4240,6 @@ Yes,نعم,
 Actual ,فعلي,
 Add to cart,أضف إلى السلة,
 Budget,ميزانية,
-Chart Of Accounts Importer,الرسم البياني للحسابات المستورد,
 Chart of Accounts,الشجرة المحاسبية,
 Customer database.,قاعدة بيانات العملاء.,
 Days Since Last order,الأيام منذ آخر طلب,
@@ -4939,7 +4931,6 @@ Closing Account Head,اقفال حساب المركز الرئيسي,
 POS Customer Group,مجموعة عملاء نقطة البيع,
 POS Field,نقاط البيع الميدانية,
 POS Item Group,مجموعة المواد لنقطة البيع,
-[Select],[اختر ],
 Company Address,عنوان الشركة,
 Update Stock,تحديث المخزون,
 Ignore Pricing Rule,تجاهل (قاعدة التسعير),
@@ -6597,11 +6588,6 @@ Relieving Date,تاريخ المغادرة,
 Reason for Leaving,سبب ترك العمل,
 Leave Encashed?,إجازات مصروفة نقداً؟,
 Encashment Date,تاريخ التحصيل,
-Exit Interview Details,تفاصيل مقابلة مغادرة الشركة,
-Held On,عقدت في,
-Reason for Resignation,سبب الاستقالة,
-Better Prospects,آفاق أفضل,
-Health Concerns,شؤون صحية,
 New Workplace,مكان العمل الجديد,
 HR-EAD-.YYYY.-,HR-EAD-.YYYY.-,
 Returned Amount,المبلغ المرتجع,
@@ -8237,9 +8223,6 @@ Landed Cost Help,هبطت التكلفة مساعدة,
 Manufacturers used in Items,الشركات المصنعة المستخدمة في الاصناف,
 Limited to 12 characters,تقتصر على 12 حرفا,
 MAT-MR-.YYYY.-,MAT-MR-.YYYY.-,
-Set Warehouse,تعيين المستودع,
-Sets 'For Warehouse' in each row of the Items table.,يعيّن &quot;للمستودع&quot; في كل صف من جدول السلع.,
-Requested For,طلب لل,
 Partially Ordered,طلبت جزئيًا,
 Transferred,نقل,
 % Ordered,٪ تم طلبها,
@@ -8688,8 +8671,6 @@ Material Request Warehouse,مستودع طلب المواد,
 Select warehouse for material requests,حدد المستودع لطلبات المواد,
 Transfer Materials For Warehouse {0},نقل المواد للمستودع {0},
 Production Plan Material Request Warehouse,مستودع طلب مواد خطة الإنتاج,
-Set From Warehouse,تعيين من المستودع,
-Source Warehouse (Material Transfer),مستودع المصدر (نقل المواد),
 Sets 'Source Warehouse' in each row of the items table.,يعيّن &quot;مستودع المصدر&quot; في كل صف من جدول العناصر.,
 Sets 'Target Warehouse' in each row of the items table.,يعيّن &quot;المستودع المستهدف&quot; في كل صف من جدول العناصر.,
 Show Cancelled Entries,إظهار الإدخالات الملغاة,
@@ -9155,7 +9136,6 @@ Professional Tax,الضريبة المهنية,
 Is Income Tax Component,هو مكون ضريبة الدخل,
 Component properties and references ,خصائص المكونات والمراجع,
 Additional Salary ,الراتب الإضافي,
-Condtion and formula,الشرط والصيغة,
 Unmarked days,أيام غير محددة,
 Absent Days,أيام الغياب,
 Conditions and Formula variable and example,متغير الشروط والصيغة والمثال,
@@ -9442,7 +9422,6 @@ Plaid invalid request error,خطأ طلب غير صالح منقوشة,
 Please check your Plaid client ID and secret values,يرجى التحقق من معرّف عميل Plaid والقيم السرية,
 Bank transaction creation error,خطأ في إنشاء معاملة البنك,
 Unit of Measurement,وحدة قياس,
-Row #{}: Selling rate for item {} is lower than its {}. Selling rate should be atleast {},Row # {}: معدل بيع العنصر {} أقل من {}. يجب أن يكون معدل البيع على الأقل {},
 Fiscal Year {0} Does Not Exist,السنة المالية {0} غير موجودة,
 Row # {0}: Returned Item {1} does not exist in {2} {3},الصف رقم {0}: العنصر الذي تم إرجاعه {1} غير موجود في {2} {3},
 Valuation type charges can not be marked as Inclusive,لا يمكن تحديد رسوم نوع التقييم على أنها شاملة,
@@ -9596,7 +9575,6 @@ Set Response Time and Resolution Time for Priority {0} in row {1}.,عيّن وق
 Response Time for {0} priority in row {1} can't be greater than Resolution Time.,لا يمكن أن يكون وقت الاستجابة {0} للأولوية في الصف {1} أكبر من وقت الحل.,
 {0} is not enabled in {1},{0} غير ممكّن في {1},
 Group by Material Request,تجميع حسب طلب المواد,
-"Row {0}: For Supplier {0}, Email Address is Required to Send Email",الصف {0}: للمورد {0} ، عنوان البريد الإلكتروني مطلوب لإرسال بريد إلكتروني,
 Email Sent to Supplier {0},تم إرسال بريد إلكتروني إلى المورد {0},
 "The Access to Request for Quotation From Portal is Disabled. To Allow Access, Enable it in Portal Settings.",تم تعطيل الوصول إلى طلب عرض الأسعار من البوابة. للسماح بالوصول ، قم بتمكينه في إعدادات البوابة.,
 Supplier Quotation {0} Created,تم إنشاء عرض أسعار المورد {0},
@@ -9609,3 +9587,48 @@ Total weightage assigned should be 100%.<br>It is {0},يجب أن يكون ال�
 Account {0} exists in parent company {1}.,الحساب {0} موجود في الشركة الأم {1}.,
 "To overrule this, enable '{0}' in company {1}",لإلغاء هذا ، قم بتمكين &quot;{0}&quot; في الشركة {1},
 Invalid condition expression,تعبير شرط غير صالح,
+Please Select a Company First,الرجاء تحديد شركة أولاً,
+Please Select Both Company and Party Type First,الرجاء تحديد نوع الشركة والحزب أولاً,
+Provide the invoice portion in percent,قم بتوفير جزء الفاتورة بالنسبة المئوية,
+Give number of days according to prior selection,أعط عدد الأيام حسب الاختيار المسبق,
+Email Details,تفاصيل البريد الإلكتروني,
+"Select a greeting for the receiver. E.g. Mr., Ms., etc.",حدد تحية للمتلقي. على سبيل المثال السيد ، السيدة ، إلخ.,
+Preview Email,معاينة البريد الإلكتروني,
+Please select a Supplier,الرجاء اختيار مورد,
+Supplier Lead Time (days),مهلة المورد (أيام),
+"Home, Work, etc.",المنزل والعمل وما إلى ذلك.,
+Exit Interview Held On,أجريت مقابلة الخروج,
+Condition and formula,الشرط والصيغة,
+Sets 'Target Warehouse' in each row of the Items table.,يعيّن &quot;المستودع المستهدف&quot; في كل صف من جدول السلع.,
+Sets 'Source Warehouse' in each row of the Items table.,يعيّن &quot;مستودع المصدر&quot; في كل صف من جدول السلع.,
+POS Register,سجل نقاط البيع,
+"Can not filter based on POS Profile, if grouped by POS Profile",لا يمكن التصفية بناءً على ملف تعريف نقطة البيع ، إذا تم تجميعها حسب ملف تعريف نقطة البيع,
+"Can not filter based on Customer, if grouped by Customer",لا يمكن التصفية بناءً على العميل ، إذا تم تجميعه بواسطة العميل,
+"Can not filter based on Cashier, if grouped by Cashier",لا يمكن التصفية على أساس Cashier ، إذا تم تجميعها بواسطة Cashier,
+Payment Method,طريقة الدفع او السداد,
+"Can not filter based on Payment Method, if grouped by Payment Method",لا يمكن التصفية بناءً على طريقة الدفع ، إذا تم تجميعها حسب طريقة الدفع,
+Supplier Quotation Comparison,مقارنة عروض أسعار الموردين,
+Price per Unit (Stock UOM),السعر لكل وحدة (المخزون UOM),
+Group by Supplier,تجميع حسب المورد,
+Group by Item,تجميع حسب البند,
+Remember to set {field_label}. It is required by {regulation}.,تذكر أن تقوم بتعيين {field_label}. مطلوب بموجب {لائحة}.,
+Enrollment Date cannot be before the Start Date of the Academic Year {0},لا يمكن أن يكون تاريخ التسجيل قبل تاريخ بدء العام الأكاديمي {0},
+Enrollment Date cannot be after the End Date of the Academic Term {0},لا يمكن أن يكون تاريخ التسجيل بعد تاريخ انتهاء الفصل الدراسي {0},
+Enrollment Date cannot be before the Start Date of the Academic Term {0},لا يمكن أن يكون تاريخ التسجيل قبل تاريخ بدء الفصل الدراسي {0},
+Posting future transactions are not allowed due to Immutable Ledger,لا يُسمح بنشر المعاملات المستقبلية بسبب دفتر الأستاذ غير القابل للتغيير,
+Future Posting Not Allowed,النشر في المستقبل غير مسموح به,
+"To enable Capital Work in Progress Accounting, ",لتمكين محاسبة الأعمال الرأسمالية الجارية ،,
+you must select Capital Work in Progress Account in accounts table,يجب عليك تحديد حساب رأس المال قيد التقدم في جدول الحسابات,
+You can also set default CWIP account in Company {},يمكنك أيضًا تعيين حساب CWIP الافتراضي في الشركة {},
+The Request for Quotation can be accessed by clicking on the following button,يمكن الوصول إلى طلب عرض الأسعار من خلال النقر على الزر التالي,
+Regards,مع تحياتي,
+Please click on the following button to set your new password,الرجاء النقر فوق الزر التالي لتعيين كلمة المرور الجديدة,
+Update Password,تطوير كلمة السر,
+Row #{}: Selling rate for item {} is lower than its {}. Selling {} should be atleast {},Row # {}: معدل بيع العنصر {} أقل من {}. يجب بيع {} على الأقل {},
+You can alternatively disable selling price validation in {} to bypass this validation.,يمكنك بدلاً من ذلك تعطيل التحقق من سعر البيع في {} لتجاوز هذا التحقق.,
+Invalid Selling Price,سعر البيع غير صالح,
+Address needs to be linked to a Company. Please add a row for Company in the Links table.,يجب ربط العنوان بشركة. الرجاء إضافة صف للشركة في جدول الروابط.,
+Company Not Linked,شركة غير مرتبطة,
+Import Chart of Accounts from CSV / Excel files,استيراد مخطط الحسابات من ملفات CSV / Excel,
+Completed Qty cannot be greater than 'Qty to Manufacture',لا يمكن أن تكون الكمية المكتملة أكبر من &quot;الكمية إلى التصنيع&quot;,
+"Row {0}: For Supplier {1}, Email Address is Required to send an email",الصف {0}: للمورد {1} ، مطلوب عنوان البريد الإلكتروني لإرسال بريد إلكتروني,
