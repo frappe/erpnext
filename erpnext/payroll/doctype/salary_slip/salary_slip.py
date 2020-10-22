@@ -426,7 +426,6 @@ class SalarySlip(TransactionBase):
 		if self.hour_rate:
 			base_hour_rate = flt(self.hour_rate) * flt(self.exchange_rate)
 			self.db_set("base_hour_rate", base_hour_rate)
-		doc_currency = self.currency
 		company_currency = erpnext.get_company_currency(self.company)
 		base_total = base_net_pay if self.is_rounding_total_disabled() else base_rounded_total
 		base_total_in_words = money_in_words(base_total, company_currency)

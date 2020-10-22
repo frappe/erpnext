@@ -25,7 +25,7 @@ frappe.ui.form.on('Payroll Entry', {
 					"root_type": "Liability",
 					"is_group": 0,
 				}
-			}
+			};
 		});
 	},
 
@@ -150,11 +150,12 @@ frappe.ui.form.on('Payroll Entry', {
 	},
 
 	currency: function (frm) {
+		var company_currency
 		if (!frm.doc.company) {
-			var company_currency = erpnext.get_currency(frappe.defaults.get_default("Company"));
+			company_currency = erpnext.get_currency(frappe.defaults.get_default("Company"));
 		}
 		else {
-			var company_currency = erpnext.get_currency(frm.doc.company);
+			company_currency = erpnext.get_currency(frm.doc.company);
 		}
 		if (frm.doc.currency) {
 			if (company_currency != frm.doc.currency) {
