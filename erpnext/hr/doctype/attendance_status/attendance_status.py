@@ -20,7 +20,7 @@ class AttendanceStatus(Document):
 		documents = []
 		references = []
 		if not self.is_leave and self.applicable_for_employee_checkins:
-			att_status = self.get_duplicate(["is_present", "is_half_day"], "applicable_for_leave_application")
+			att_status = self.get_duplicate(["is_present", "is_half_day", "is_leave"], "applicable_for_leave_application")
 			if att_status:
 				documents.append(att_status)
 				references.append("Employee Checkin")
