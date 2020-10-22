@@ -14,13 +14,15 @@ def get_field_filter_data():
 	for f in fields:
 		doctype = f.get_link_doctype()
 
-		# apply enable/disable filter
+		# apply enable/disable/show_in_website filter
 		meta = frappe.get_meta(doctype)
 		filters = {}
 		if meta.has_field('enabled'):
 			filters['enabled'] = 1
 		if meta.has_field('disabled'):
 			filters['disabled'] = 0
+		if meta.has_field('show_in_website'):
+			filters['show_in_website'] = 1
 
 		values = [d.name for d in frappe.get_all(doctype, filters)]
 		filter_data.append([f, values])
@@ -378,7 +380,7 @@ def get_items(filters=None, search=None):
 
 	results = frappe.db.sql('''
 		SELECT
-			`tabItem`.`name`, `tabItem`.`item_name`,
+			`tabItem`.`name`, `tabItem`.`item_name`, `tabItem`.`item_code`,
 			`tabItem`.`website_image`, `tabItem`.`image`,
 			`tabItem`.`web_long_description`, `tabItem`.`description`,
 			`tabItem`.`route`

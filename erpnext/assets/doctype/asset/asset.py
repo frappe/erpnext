@@ -84,6 +84,11 @@ class Asset(AccountsController):
 		if not self.available_for_use_date:
 			frappe.throw(_("Available for use date is required"))
 
+		for d in self.finance_books:
+			if d.depreciation_start_date == self.available_for_use_date:
+				frappe.throw(_("Row #{}: Depreciation Posting Date should not be equal to Available for Use Date.").format(d.idx),
+					title=_("Incorrect Date"))
+
 	def set_missing_values(self):
 		if not self.asset_category:
 			self.asset_category = frappe.get_cached_value("Item", self.item_code, "asset_category")
@@ -312,7 +317,7 @@ class Asset(AccountsController):
 		if not row.depreciation_start_date:
 			if not self.available_for_use_date:
 				frappe.throw(_("Row {0}: Depreciation Start Date is required").format(row.idx))
-			row.depreciation_start_date = self.available_for_use_date
+			row.depreciation_start_date = get_last_day(self.available_for_use_date)
 
 		if not self.is_existing_asset:
 			self.opening_accumulated_depreciation = 0
@@ -465,29 +470,37 @@ class Asset(AccountsController):
 	
 	def validate_make_gl_entry(self):
 		purchase_document = self.get_purchase_document()
-		asset_bought_with_invoice = purchase_document == self.purchase_invoice
-		fixed_asset_account, cwip_account = self.get_asset_accounts()
-		cwip_enabled = is_cwip_accounting_enabled(self.asset_category)
-		# check if expense already has been booked in case of cwip was enabled after purchasing asset
-		expense_booked = False
-		cwip_booked = False
-
-		if asset_bought_with_invoice:
-			expense_booked = frappe.db.sql("""SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s""",
-				(purchase_document, fixed_asset_account), as_dict=1)
-		else:
-			cwip_booked = frappe.db.sql("""SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s""",
-				(purchase_document, cwip_account), as_dict=1)
-
-		if cwip_enabled and (expense_booked or not cwip_booked):
-			# if expense has already booked from invoice or cwip is booked from receipt
+		if not purchase_document:
 			return False
-		elif not cwip_enabled and (not expense_booked or cwip_booked):
-			# if cwip is disabled but expense hasn't been booked yet
-			return True
-		elif cwip_enabled:
-			# default condition
-			return True
+
+		asset_bought_with_invoice = (purchase_document == self.purchase_invoice)
+		fixed_asset_account = self.get_fixed_asset_account()
+		
+		cwip_enabled = is_cwip_accounting_enabled(self.asset_category)
+		cwip_account = self.get_cwip_account(cwip_enabled=cwip_enabled)
+
+		query = """SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s"""
+		if asset_bought_with_invoice:
+			# with invoice purchase either expense or cwip has been booked
+			expense_booked = frappe.db.sql(query, (purchase_document, fixed_asset_account), as_dict=1)
+			if expense_booked:
+				# if expense is already booked from invoice then do not make gl entries regardless of cwip enabled/disabled
+				return False
+
+			cwip_booked = frappe.db.sql(query, (purchase_document, cwip_account), as_dict=1)
+			if cwip_booked:
+				# if cwip is booked from invoice then make gl entries regardless of cwip enabled/disabled
+				return True
+		else:
+			# with receipt purchase either cwip has been booked or no entries have been made
+			if not cwip_account:
+				# if cwip account isn't available do not make gl entries
+				return False
+
+			cwip_booked = frappe.db.sql(query, (purchase_document, cwip_account), as_dict=1)
+			# if cwip is not booked from receipt then do not make gl entries
+			# if cwip is booked from receipt then make gl entries
+			return cwip_booked
 
 	def get_purchase_document(self):
 		asset_bought_with_invoice = self.purchase_invoice and frappe.db.get_value('Purchase Invoice', self.purchase_invoice, 'update_stock')
@@ -495,20 +508,25 @@ class Asset(AccountsController):
 
 		return purchase_document
 	
-	def get_asset_accounts(self):
-		fixed_asset_account = get_asset_category_account('fixed_asset_account', asset=self.name,
-					asset_category = self.asset_category, company = self.company)
+	def get_fixed_asset_account(self):
+		return get_asset_category_account('fixed_asset_account', None, self.name, None, self.asset_category, self.company)
+	
+	def get_cwip_account(self, cwip_enabled=False):
+		cwip_account = None
+		try:
+			cwip_account = get_asset_account("capital_work_in_progress_account", self.name, self.asset_category, self.company)
+		except:
+			# if no cwip account found in category or company and "cwip is enabled" then raise else silently pass
+			if cwip_enabled:
+				raise
 
-		cwip_account = get_asset_account("capital_work_in_progress_account",
-			self.name, self.asset_category, self.company)
-		
-		return fixed_asset_account, cwip_account
+		return cwip_account
 
 	def make_gl_entries(self):
 		gl_entries = []
 
 		purchase_document = self.get_purchase_document()
-		fixed_asset_account, cwip_account = self.get_asset_accounts()
+		fixed_asset_account, cwip_account = self.get_fixed_asset_account(), self.get_cwip_account()
 
 		if (purchase_document and self.purchase_receipt_amount and self.available_for_use_date <= nowdate()):
 
