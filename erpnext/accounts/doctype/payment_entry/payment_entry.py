@@ -959,7 +959,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
 
 	party_type = set_party_type(dt)
-	party_account = set_party_account(dt, doc, party_type)
+	party_account = set_party_account(dt, dn, doc, party_type)
 	exchange_rate = 1
 	party_account_currency = set_party_account_currency(dt, party_account, doc)
 	if party_account_currency != doc.currency:
@@ -1062,7 +1062,7 @@ def set_party_type(dt):
 		party_type = "Student"
 	return party_type
 
-def set_party_account(dt, doc, party_type):
+def set_party_account(dt, dn, doc, party_type):
 	if dt == "Sales Invoice":
 		party_account = get_party_account_based_on_invoice_discounting(dn) or doc.debit_to
 	elif dt == "Purchase Invoice":
