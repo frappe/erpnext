@@ -58,7 +58,7 @@ frappe.ui.form.on("Instructor", {
 				filters: {
 					"program": d.program
 				}
-			}
+			};
 		});
 	}
 });
