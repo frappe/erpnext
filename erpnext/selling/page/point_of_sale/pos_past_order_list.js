@@ -76,11 +76,9 @@ erpnext.PointOfSale.PastOrderList = class {
 		this.status_field.toggle_label(false);
 		this.status_field.set_value('Draft');
 	}
-	
+
 	toggle_component(show) {
-		show ? 
-		this.$component.removeClass('d-none') && this.refresh_list() :
-		this.$component.addClass('d-none');
+		show ? this.$component.removeClass('d-none') && this.refresh_list() : this.$component.addClass('d-none');
 	}
 
 	refresh_list() {

@@ -393,8 +393,7 @@ erpnext.PointOfSale.ItemDetails = class {
 					const warehouse = this.warehouse_control.get_value().bold();
 					const item_code = this.current_item.item_code.bold();
 					frappe.msgprint(
-						__('Serial numbers unavailable for Item {0} under warehouse {1}. Please try changing warehouse.', 
-						[item_code, warehouse])
+						__('Serial numbers unavailable for Item {0} under warehouse {1}. Please try changing warehouse.', [item_code, warehouse])
 					);
 				} else if (records_length < qty) {
 					frappe.msgprint(
