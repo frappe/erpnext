@@ -5,11 +5,15 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.utils import cint, flt
 from erpnext.healthcare.doctype.therapy_type.therapy_type import make_item_price
 
 class TherapyPlanTemplate(Document):
 	def after_insert(self):
 		self.create_item_from_template()
+
+	def validate(self):
+		self.set_totals()
 
 	def on_update(self):
 		doc_before_save = self.get_doc_before_save()
@@ -20,6 +24,17 @@ class TherapyPlanTemplate(Document):
 
 		if doc_before_save.therapy_types != self.therapy_types:
 			self.update_item_price()
+
+	def set_totals(self):
+		total_sessions = 0
+		total_amount = 0
+
+		for entry in self.therapy_types:
+			total_sessions += cint(entry.no_of_sessions)
+			total_amount += flt(entry.amount)
+
+		self.total_sessions = total_sessions
+		self.total_amount = total_amount
 
 	def create_item_from_template(self):
 		uom = frappe.db.exists('UOM', 'Nos') or frappe.db.get_single_value('Stock Settings', 'stock_uom')
