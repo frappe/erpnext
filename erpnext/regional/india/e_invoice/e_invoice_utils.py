@@ -16,8 +16,8 @@ from Crypto.Cipher import PKCS1_v1_5, AES
 from Crypto.Util.Padding import pad, unpad
 from frappe.model.document import Document
 from frappe import _, get_module_path, scrub
-from erpnext.regional.india.utils import get_gst_accounts
 from frappe.integrations.utils import make_post_request, make_get_request
+from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply
 from frappe.utils.data import get_datetime, cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime
 
 def validate_einvoice_fields(doc):
@@ -33,6 +33,9 @@ def validate_einvoice_fields(doc):
 
 def get_credentials():
 	doc = frappe.get_doc('E Invoice Settings')
+	if not doc.enable:
+		frappe.throw(_("To setup E Invoicing you need to enable E Invoice Settings first."), title=_("E Invoicing Disabled"))
+
 	if not doc.token_expiry or time_diff_in_seconds(now_datetime(), doc.token_expiry) > 5.0:
 		fetch_token(doc)
 		doc.load_from_db()
@@ -437,7 +440,8 @@ def make_einvoice(doctype, name):
 		buyer_details = get_overseas_address_details(invoice.customer_address)
 	else:
 		buyer_details = get_party_gstin_details(invoice.customer_address)
-		place_of_supply = invoice.place_of_supply.split('-')[0]
+		place_of_supply = get_place_of_supply(invoice, doctype) or invoice.billing_address_gstin
+		place_of_supply = place_of_supply[:2]
 		buyer_details.update(dict(place_of_supply=place_of_supply))
 	
 	shipping_details = payment_details = prev_doc_details = eway_bill_details = frappe._dict({})
@@ -513,7 +517,7 @@ def validate_einvoice(validations, einvoice, errors=[]):
 		label = field_validation.get('label') or fieldname
 
 		if value_type == 'string' and len(value) > max_length:
-			errors.append(_('{} should not exceed {} characters').format(fieldname_label, max_length))
+			errors.append(_('{} should not exceed {} characters').format(label, max_length))
 		if value_type == 'number' and not (flt(value) <= maximum):
 			errors.append(_('{} should be less than {}').format(label, maximum))
 		if pattern_str and not pattern.match(value):
