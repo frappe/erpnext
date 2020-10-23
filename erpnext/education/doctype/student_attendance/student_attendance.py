@@ -31,6 +31,14 @@ class StudentAttendance(Document):
 		if getdate(self.date) > getdate():
 			frappe.throw(_('Attendance cannot be marked for future dates.'))
 
+		if self.student_group:
+			academic_year = frappe.db.get_value('Student Group', self.student_group, 'academic_year')
+			if academic_year:
+				year_start_date, year_end_date = frappe.db.get_value('Academic Year', academic_year, ['year_start_date', 'year_end_date'])
+				if year_start_date and year_end_date:
+					if getdate(self.date) < getdate(year_start_date) or getdate(self.date) > getdate(year_end_date):
+						frappe.throw(_('Attendance cannot be marked outside of Academic Year {0}').format(academic_year))
+
 	def set_student_group(self):
 		if self.course_schedule:
 			self.student_group = frappe.db.get_value('Course Schedule', self.course_schedule, 'student_group')
