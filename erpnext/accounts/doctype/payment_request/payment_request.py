@@ -393,6 +393,10 @@ def get_amount(ref_doc, payment_account=None):
 		frappe.throw(_("Payment Entry is already created"))
 
 def get_existing_payment_request_amount(ref_dt, ref_dn):
+	"""
+	Get the existing payment request which are unpaid or partially paid for payment channel other than Phone
+	and get the summation of existing paid payment request for Phone payment channel.
+	"""
 	existing_payment_request_amount = frappe.db.sql("""
 		select sum(grand_total)
 		from `tabPayment Request`
@@ -400,7 +404,9 @@ def get_existing_payment_request_amount(ref_dt, ref_dn):
 			reference_doctype = %s
 			and reference_name = %s
 			and docstatus = 1
-			and status = 'Paid'
+			and (status != 'Paid'
+			or (payment_channel = 'Phone'
+				and status = 'Paid'))
 	""", (ref_dt, ref_dn))
 	return flt(existing_payment_request_amount[0][0]) if existing_payment_request_amount else 0
 
