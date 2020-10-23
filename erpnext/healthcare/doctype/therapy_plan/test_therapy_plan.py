@@ -11,6 +11,9 @@ from erpnext.healthcare.doctype.therapy_plan.therapy_plan import make_therapy_se
 from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_healthcare_docs, create_patient
 
 class TestTherapyPlan(unittest.TestCase):
+	def setUp(self):
+		create_price_list()
+
 	def test_creation_on_encounter_submission(self):
 		patient, medical_department, practitioner = create_healthcare_docs()
 		encounter = create_encounter(patient, medical_department, practitioner)
@@ -93,3 +96,14 @@ def create_therapy_plan_template():
 		template_name = template.name
 
 	return template_name
+
+def create_price_list():
+	if not frappe.db.exists('Price List', 'Healthcare Price List'):
+		frappe.get_doc({
+			'doctype': 'Price List',
+			'price_list_name': 'Healthcare Price List',
+			'selling': 1,
+			'buying': 1,
+			'enabled': 1,
+			'currency': 'INR'
+		}).insert()
