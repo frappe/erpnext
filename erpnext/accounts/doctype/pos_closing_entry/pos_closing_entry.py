@@ -113,12 +113,12 @@ def make_closing_entry_from_opening(opening_entry):
 		for p in d.payments:
 			existing_pay = [pay for pay in payments if pay.mode_of_payment == p.mode_of_payment]
 			if existing_pay:
-				existing_pay[0].expected_amount += flt(d.grand_total);
+				existing_pay[0].expected_amount += flt(p.amount-d.change_amount);
 			else:
 				payments.append(frappe._dict({
 					'mode_of_payment': p.mode_of_payment,
 					'opening_amount': 0,
-					'expected_amount': p.amount
+					'expected_amount': p.amount-d.change_amount
 				}))
 
 	closing_entry.set("pos_transactions", pos_transactions)
