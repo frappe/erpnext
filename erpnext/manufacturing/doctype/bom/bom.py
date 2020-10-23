@@ -55,10 +55,11 @@ class BOM(WebsiteGenerator):
 			conflicting_bom = frappe.get_doc("BOM", name)
 
 			if conflicting_bom.item != self.item:
+				msg = (_("A BOM with name {0} already exists for item {1}.")
+					.format(frappe.bold(name), frappe.bold(conflicting_bom.item)))
 
-				frappe.throw(_("""A BOM with name {0} already exists for item {1}.
-					<br> Did you rename the item? Please contact Administrator / Tech support
-				""").format(frappe.bold(name), frappe.bold(conflicting_bom.item)))
+				frappe.throw(_("{0}{1} Did you rename the item? Please contact Administrator / Tech support")
+					.format(msg, "<br>"))
 
 		self.name = name
 

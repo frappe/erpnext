@@ -204,8 +204,8 @@ class JobCard(Document):
 			total_completed_qty = bold(_("Total Completed Qty"))
 			qty_to_manufacture = bold(_("Qty to Manufacture"))
 
-			frappe.throw(_("The {0} ({1}) must be equal to {2} ({3})"
-				.format(total_completed_qty, bold(self.total_completed_qty), qty_to_manufacture,bold(self.for_quantity))))
+			frappe.throw(_("The {0} ({1}) must be equal to {2} ({3})")
+				.format(total_completed_qty, bold(self.total_completed_qty), qty_to_manufacture,bold(self.for_quantity)))
 
 	def update_work_order(self):
 		if not self.work_order:
