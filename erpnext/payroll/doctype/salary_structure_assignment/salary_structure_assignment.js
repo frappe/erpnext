@@ -29,7 +29,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
 			};
 		});
 
-		frm.set_query("default_payroll_payable_account", function() {
+		frm.set_query("payroll_payable_account", function() {
 			var company_currency = erpnext.get_currency(frm.doc.company);
 			return {
 				filters: {

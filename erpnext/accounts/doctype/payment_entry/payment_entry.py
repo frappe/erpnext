@@ -962,7 +962,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	party_account = set_party_account(dt, dn, doc, party_type)
 	exchange_rate = 1
 	party_account_currency = set_party_account_currency(dt, party_account, doc)
-	if party_account_currency != doc.currency:
+	if dt != 'Expense Claim' and party_account_currency != doc.currency:
 		exchange_rate = doc.get('exchange_rate', 1)
 	payment_type = set_payment_type(dt, doc)
 	grand_total, outstanding_amount = set_grand_total_and_outstanding_amount(party_amount, dt, party_account_currency, doc, exchange_rate)

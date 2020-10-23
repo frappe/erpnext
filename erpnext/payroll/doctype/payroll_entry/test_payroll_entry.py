@@ -4,9 +4,11 @@ from __future__ import unicode_literals
 import unittest
 import erpnext
 import frappe
+import random
 from dateutil.relativedelta import relativedelta
 from erpnext.accounts.utils import get_fiscal_year, getdate, nowdate
 from frappe.utils import add_months
+from frappe.utils.make_random import get_random
 from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_start_end_dates, get_end_date
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.payroll.doctype.salary_slip.test_salary_slip import get_salary_component_account, \
@@ -34,10 +36,30 @@ class TestPayrollEntry(unittest.TestCase):
 				get_salary_component_account(data.name)
 
 		employee = frappe.db.get_value("Employee", {'company': company})
-		make_salary_structure("_Test Salary Structure", "Monthly", employee, company=company)
+		company_doc = frappe.get_doc('Company', company)
+		make_salary_structure("_Test Salary Structure", "Monthly", employee, company=company, currency=company_doc.default_currency)
 		dates = get_start_end_dates('Monthly', nowdate())
 		if not frappe.db.get_value("Salary Slip", {"start_date": dates.start_date, "end_date": dates.end_date}):
-			make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date)
+			make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date, payable_account=company_doc.default_payroll_payable_account,
+				currency=company_doc.default_currency)
+
+
+	def test_multi_currency_payroll_entry(self): # pylint: disable=no-self-use
+		company = erpnext.get_default_company()
+		for data in frappe.get_all('Salary Component', fields = ["name"]):
+			if not frappe.db.get_value('Salary Component Account',
+				{'parent': data.name, 'company': company}, 'name'):
+				get_salary_component_account(data.name)
+
+		employee = frappe.db.get_value("Employee", {'company': company})
+		company_doc = frappe.get_doc('Company', company)
+		currency = frappe.db.get_value("Currency", {'currency_name':  ('not in',[company_doc.default_currency]), 'enabled': 1}, 'currency_name')
+		exchange_rate = random.random()*100
+		make_salary_structure("_Test Multi Currency Salary Structure", "Monthly", employee, company=company, currency=currency)
+		dates = get_start_end_dates('Monthly', nowdate())
+		if not frappe.db.get_value("Salary Slip", {"start_date": dates.start_date, "end_date": dates.end_date}):
+			make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date, payable_account=company_doc.default_payroll_payable_account,
+				currency=currency, exchange_rate=exchange_rate)
 
 	def test_payroll_entry_with_employee_cost_center(self): # pylint: disable=no-self-use
 		for data in frappe.get_all('Salary Component', fields = ["name"]):
@@ -56,9 +78,9 @@ class TestPayrollEntry(unittest.TestCase):
 			department="cc - _TC", company="_Test Company")
 		employee2 = make_employee("test_employee2@example.com", payroll_cost_center="_Test Cost Center 2 - _TC",
 			department="cc - _TC", company="_Test Company")
-
-		make_salary_structure("_Test Salary Structure 1", "Monthly", employee1, company="_Test Company")
-		make_salary_structure("_Test Salary Structure 2", "Monthly", employee2, company="_Test Company")
+		company_doc = frappe.get_doc('Company', '_Test Company')
+		make_salary_structure("_Test Salary Structure 1", "Monthly", employee1, company="_Test Company", currency=company_doc.default_currency)
+		make_salary_structure("_Test Salary Structure 2", "Monthly", employee2, company="_Test Company", currency=company_doc.default_currency)
 
 		if not frappe.db.exists("Account", "_Test Payroll Payable - _TC"):
 			create_account(account_name="_Test Payroll Payable",
@@ -68,8 +90,8 @@ class TestPayrollEntry(unittest.TestCase):
 
 		dates = get_start_end_dates('Monthly', nowdate())
 		if not frappe.db.get_value("Salary Slip", {"start_date": dates.start_date, "end_date": dates.end_date}):
-			pe = make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date,
-				department="cc - _TC", company="_Test Company", payment_account="Cash - _TC", cost_center="Main - _TC")
+			pe = make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date, payable_account=company_doc.default_payroll_payable_account,
+				currency=company_doc.default_currency, department="cc - _TC", company="_Test Company", payment_account="Cash - _TC", cost_center="Main - _TC")
 			je = frappe.db.get_value("Salary Slip", {"payroll_entry": pe.name}, "journal_entry")
 			je_entries = frappe.db.sql("""
 				select account, cost_center, debit, credit
@@ -121,7 +143,7 @@ class TestPayrollEntry(unittest.TestCase):
 		employee_doc.save()
 
 		salary_structure = "Test Salary Structure for Loan"
-		make_salary_structure(salary_structure, "Monthly", employee=employee_doc.name, company="_Test Company")
+		make_salary_structure(salary_structure, "Monthly", employee=employee_doc.name, company="_Test Company", currency=company_doc.default_currency)
 
 		loan = create_loan(applicant, "Car Loan", 280000, "Repay Over Number of Periods", 20, posting_date=add_months(nowdate(), -1))
 		loan.repay_from_salary = 1
@@ -133,8 +155,8 @@ class TestPayrollEntry(unittest.TestCase):
 
 
 		dates = get_start_end_dates('Monthly', nowdate())
-		make_payroll_entry(company="_Test Company", start_date=dates.start_date,
-			end_date=dates.end_date, branch=branch, cost_center="Main - _TC", payment_account="Cash - _TC")
+		make_payroll_entry(company="_Test Company", start_date=dates.start_date, payable_account=company_doc.default_payroll_payable_account,
+			currency=company_doc.default_currency, end_date=dates.end_date, branch=branch, cost_center="Main - _TC", payment_account="Cash - _TC")
 
 		name = frappe.db.get_value('Salary Slip',
 			{'posting_date': nowdate(), 'employee': applicant}, 'name')
@@ -165,6 +187,9 @@ def make_payroll_entry(**args):
 	payroll_entry.payroll_frequency = "Monthly"
 	payroll_entry.branch = args.branch or None
 	payroll_entry.department = args.department or None
+	payroll_entry.payroll_payable_account = args.payable_account
+	payroll_entry.currency = args.currency
+	payroll_entry.exchange_rate = args.exchange_rate or 1
 
 	if args.cost_center:
 		payroll_entry.cost_center = args.cost_center

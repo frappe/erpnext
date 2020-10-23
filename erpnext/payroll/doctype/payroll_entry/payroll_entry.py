@@ -59,7 +59,7 @@ class PayrollEntry(Document):
 
 		if sal_struct:
 			cond += "and t2.salary_structure IN %(sal_struct)s "
-			cond += "and t2.default_payroll_payable_account = %(default_payroll_payable_account)s "
+			cond += "and t2.payroll_payable_account = %(payroll_payable_account)s "
 			cond += "and %(from_date)s >= t2.from_date"
 			emp_list = frappe.db.sql("""
 				select
@@ -70,7 +70,7 @@ class PayrollEntry(Document):
 					t1.name = t2.employee
 					and t2.docstatus = 1
 			%s order by t2.from_date desc
-			""" % cond, {"sal_struct": tuple(sal_struct), "from_date": self.end_date, "default_payroll_payable_account": self.default_payroll_payable_account}, as_dict=True)
+			""" % cond, {"sal_struct": tuple(sal_struct), "from_date": self.end_date, "payroll_payable_account": self.payroll_payable_account}, as_dict=True)
 			return emp_list
 
 	def fill_employee_details(self):
@@ -163,10 +163,10 @@ class PayrollEntry(Document):
 
 	def get_salary_component_account(self, salary_component):
 		account = frappe.db.get_value("Salary Component Account",
-			{"parent": salary_component, "company": self.company}, "default_account")
+			{"parent": salary_component, "company": self.company}, "account")
 
 		if not account:
-			frappe.throw(_("Please set default account in Salary Component {0}")
+			frappe.throw(_("Please set account in Salary Component {0}")
 				.format(salary_component))
 
 		return account
@@ -210,7 +210,7 @@ class PayrollEntry(Document):
 		self.check_permission('write')
 		earnings = self.get_salary_component_total(component_type = "earnings") or {}
 		deductions = self.get_salary_component_total(component_type = "deductions") or {}
-		default_payroll_payable_account = self.default_payroll_payable_account
+		payroll_payable_account = self.payroll_payable_account
 		jv_name = ""
 		precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
 
@@ -255,9 +255,9 @@ class PayrollEntry(Document):
 					})
 
 			# Payable amount
-			exchange_rate, conversion_rate = self.get_exchange_rate(default_payroll_payable_account, company_currency, currencies)
+			exchange_rate, conversion_rate = self.get_exchange_rate(payroll_payable_account, company_currency, currencies)
 			accounts.append({
-				"account": default_payroll_payable_account,
+				"account": payroll_payable_account,
 				"credit_in_account_currency": flt((payable_amount * conversion_rate), precision),
 				"exchange_rate": flt(exchange_rate),
 				"party_type": '',
@@ -268,7 +268,7 @@ class PayrollEntry(Document):
 			if len(currencies) > 1:
 				multi_currency = 1
 			journal_entry.multi_currency = multi_currency
-			journal_entry.title = default_payroll_payable_account
+			journal_entry.title = payroll_payable_account
 			journal_entry.save()
 
 			try:
@@ -319,7 +319,7 @@ class PayrollEntry(Document):
 				self.create_journal_entry(salary_slip_total, "salary")
 
 	def create_journal_entry(self, je_payment_amount, user_remark):
-		default_payroll_payable_account = self.default_payroll_payable_account
+		payroll_payable_account = self.payroll_payable_account
 		precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
 
 		accounts = []
@@ -335,9 +335,9 @@ class PayrollEntry(Document):
 				"exchange_rate": flt(exchange_rate),
 			})
 
-		exchange_rate, conversion_rate = self.get_exchange_rate(default_payroll_payable_account, company_currency, currencies)
+		exchange_rate, conversion_rate = self.get_exchange_rate(payroll_payable_account, company_currency, currencies)
 		accounts.append({
-				"account": default_payroll_payable_account,
+				"account": payroll_payable_account,
 				"debit_in_account_currency": flt(je_payment_amount * conversion_rate, precision),
 				"exchange_rate": flt(exchange_rate),
 				"reference_type": self.doctype,
