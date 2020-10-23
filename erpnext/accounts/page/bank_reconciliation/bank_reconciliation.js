@@ -1,7 +1,8 @@
 frappe.provide("erpnext.accounts");
 
 frappe.pages['bank-reconciliation'].on_page_load = function(wrapper) {
-	new erpnext.accounts.bankReconciliation(wrapper);
+	// Assign to a global variable for ease of access in web console
+	erpnext.accounts.bankRecTopLevel = new erpnext.accounts.bankReconciliation(wrapper);
 }
 
 erpnext.accounts.bankReconciliation = class BankReconciliation {
@@ -18,13 +19,18 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		this.make();
 	}
 
+	display_empty_state() {
+		const empty_state = __("Upload a bank statement, link or reconcile a bank account");
+		this.$main_section.append(`<div class="flex justify-center align-center text-muted"
+			style="height: 50vh; display: flex;"><h5 class="text-muted">${empty_state}</h5></div>`);
+	}
+
 	make() {
 		const me = this;
 
 		me.$main_section = $(`<div class="reconciliation page-main-content"></div>`).appendTo(me.page.main);
-		const empty_state = __("Upload a bank statement, link or reconcile a bank account")
-		me.$main_section.append(`<div class="flex justify-center align-center text-muted"
-			style="height: 50vh; display: flex;"><h5 class="text-muted">${empty_state}</h5></div>`)
+		me.display_empty_state();
+		me.company = null;
 
 		me.page.add_field({
 			fieldtype: 'Link',
@@ -32,11 +38,14 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 			fieldname: 'company',
 			options: "Company",
 			onchange: function() {
-				if (this.value) {
-					me.company = this.value;
-				} else {
-					me.company = null;
+				if (this.value != me.company) {
+					me.company = this.value || null;
+					me.page.fields_dict.bank_account.set_input(null);
 					me.bank_account = null;
+					me.page.hide_menu();
+					me.clear_page_content();
+					me.page.clear_secondary_action();
+					me.display_empty_state();
 				}
 			}
 		})
@@ -58,12 +67,17 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 				}
 			},
 			onchange: function() {
-				if (this.value) {
-					me.bank_account = this.value;
-					me.add_actions();
-				} else {
-					me.bank_account = null;
-					me.page.hide_actions_menu();
+				if (this.value != me.bank_account) {
+					if (this.value) {
+						me.bank_account = this.value;
+						me.add_actions();
+					} else {
+						me.bank_account = null;
+						me.page.hide_menu();
+					}
+					if (erpnext.accounts.ReconciliationList) {
+						erpnext.accounts.ReconciliationList.filter_area.refresh_list_view();
+					}
 				}
 			}
 		})
@@ -107,6 +121,13 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		const me = this;
 		$(me.page.body).find('.frappe-list').remove();
 		me.$main_section.empty();
+		const fd = me.page.fields_dict;
+		for (let key in fd) {
+			if (key != "bank_account" && key != "company" && fd[key]) {
+				fd[key].wrapper.remove();
+				delete fd[key];
+			}
+		}
 	}
 
 	make_reconciliation_tool() {
@@ -114,7 +135,12 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 		frappe.model.with_doctype("Bank Transaction", () => {
 			erpnext.accounts.ReconciliationList = new erpnext.accounts.ReconciliationTool({
 				parent: me.parent,
-				doctype: "Bank Transaction"
+				doctype: "Bank Transaction",
+				custom_filter_configs: [{
+					fieldname: "_ignore_all",
+					fieldtype: "Check",
+					hidden: 1
+				}]
 			});
 		})
 	}
@@ -167,8 +193,10 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 			})
 		}
 		catch(err) {
-			let msg = __("Your file could not be processed. It should be a standard CSV or XLSX file with headers in the first row.");
-			frappe.throw(msg)
+			let msg = __("Your file could not be processed by ERPNext.")
+				+ __("<br>It should be a standard CSV or XLSX file.")
+				+ __("<br>The headers should be in the first row.");
+			frappe.throw(msg);
 		}
 
 	}
@@ -258,8 +286,7 @@ erpnext.accounts.ReconciliationTool = class ReconciliationTool extends frappe.vi
 
 		this.page_title = __("Bank Reconciliation");
 		this.doctype = 'Bank Transaction';
-		this.fields = ['date', 'description', 'debit', 'credit', 'currency']
-
+		this.fields = ['date', 'description', 'debit', 'credit', 'currency', 'unallocated_amount'];
 	}
 
 	setup_view() {
@@ -267,10 +294,6 @@ erpnext.accounts.ReconciliationTool = class ReconciliationTool extends frappe.vi
 	}
 
 	setup_side_bar() {
-		//
-	}
-
-	make_standard_filters() {
 		//
 	}
 
@@ -302,8 +325,14 @@ erpnext.accounts.ReconciliationTool = class ReconciliationTool extends frappe.vi
 		const me = this;
 		this.$result.find('.list-row-container').remove();
 		$('[data-fieldname="name"]').remove();
-		me.data.map((value) => {
+		me.data.forEach((value) => {
 			const row = $('<div class="list-row-container">').data("data", value).appendTo(me.$result).get(0);
+			value.company = me.page.fields_dict.company.value;
+			const tot = value.credit + value.debit;
+			value.amount_described = (value.credit > 0 ? "Cr " : "Dr ") + format_currency(tot, value.currency);
+			if (tot != value.unallocated_amount) {
+				value.amount_described += " (" + value.unallocated_amount + ")";
+			}
 			new erpnext.accounts.ReconciliationRow(row, value);
 		})
 	}
@@ -330,6 +359,11 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 
 	bind_events() {
 		const me = this;
+
+		frappe.db.get_value("Bank Account", me.data.bank_account, "account", (r) => {
+			me.gl_account = r.account;
+		});
+
 		$(me.row).on('click', '.clickable-section', function() {
 			me.bank_entry = $(this).attr("data-name");
 			me.show_dialog($(this).attr("data-name"));
@@ -361,9 +395,12 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 		const paid_amount = me.data.credit > 0 ? me.data.credit : me.data.debit;
 		const payment_type = me.data.credit > 0 ? "Receive": "Pay";
 		const party_type = me.data.credit > 0 ? "Customer": "Supplier";
-
-		frappe.new_doc("Payment Entry", {"payment_type": payment_type, "paid_amount": paid_amount,
-			"party_type": party_type, "paid_from": me.data.bank_account})
+		const amount_field = me.data.credit > 0 ? "received_amount" : "paid_amount";
+		const account_field = me.data.credit > 0 ? "paid_to" : "paid_from";
+		let payment_template = {payment_type: payment_type, party_type: party_type};
+		payment_template[amount_field] = paid_amount;
+		payment_template[account_field] = me.gl_account;
+		frappe.new_doc("Payment Entry", payment_template);
 	}
 
 	new_invoice() {
@@ -380,10 +417,6 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 
 	show_dialog(data) {
 		const me = this;
-
-		frappe.db.get_value("Bank Account", me.data.bank_account, "account", (r) => {
-			me.gl_account = r.account;
-		})
 
 		frappe.xcall('erpnext.accounts.page.bank_reconciliation.bank_reconciliation.get_linked_payments',
 			{ bank_transaction: data, freeze: true, freeze_message: __("Finding linked payments") }
@@ -453,7 +486,8 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 						}
 					} else if (dt === "Sales Invoice") {
 						return {
-							query: "erpnext.accounts.page.bank_reconciliation.bank_reconciliation.sales_invoices_query"
+							query: "erpnext.accounts.page.bank_reconciliation.bank_reconciliation.sales_invoices_query",
+							filters: { "bank_account": this.data.bank_account }
 						}
 					} else if (dt === "Purchase Invoice") {
 						return {
@@ -496,17 +530,9 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 			size: "large"
 		});
 
-		const proposals_wrapper = me.dialog.fields_dict.payment_proposals.$wrapper;
-		if (data && data.length > 0) {
-			proposals_wrapper.append(frappe.render_template("linked_payment_header"));
-			data.map(value => {
-				proposals_wrapper.append(frappe.render_template("linked_payment_row", value))
-			})
-		} else {
-			const empty_data_msg = __("ERPNext could not find any matching payment entry")
-			proposals_wrapper.append(`<div class="text-center"><h5 class="text-muted">${empty_data_msg}</h5></div>`)
-		}
-
+		me.display_entries(me.dialog.fields_dict.payment_proposals.$wrapper, data,
+			__("ERPNext could not find any matching payment entry")
+		);
 		$(me.dialog.body).on('click', '.reconciliation-btn', (e) => {
 			const payment_entry = $(e.target).attr('data-name');
 			const payment_doctype = $(e.target).attr('data-doctype');
@@ -523,61 +549,167 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 		me.dialog.show();
 	}
 
+	display_entries(wrap, entries, empty_message) {
+		const me = this;
+		if (entries && entries.length > 0) {
+			wrap.append(frappe.render_template("linked_payment_header"));
+			entries.forEach(entry => {
+				entry.btn_class = "btn-primary";
+				if (entry.posting_date && entry.posting_date > me.data.date) {
+					entry.btn_class = "btn-warning";
+				}
+				wrap.append(frappe.render_template("linked_payment_row", entry));
+				if (!entry.subentries) {
+					return;
+				}
+				entry.subentries.forEach(subentry => {
+					subentry.display_name = " > " + subentry.name;
+					subentry.btn_class = "btn-info";
+					wrap.append(frappe.render_template("linked_payment_row", subentry));
+				});
+			});
+		} else {
+			wrap.append(`<div class="text-center"><h5 class="text-muted">${empty_message}</h5></div>`);
+		}
+	}
+
 	display_payment_details(event) {
 		const me = this;
-		if (event.value) {
-			let dt = me.dialog.fields_dict.payment_doctype.value;
-			me.dialog.fields_dict['payment_details'].$wrapper.empty();
-			frappe.db.get_doc(dt, event.value)
-			.then(doc => {
-				let displayed_docs = []
-				let payment = []
-				if (dt === "Payment Entry") {
-					payment.currency = doc.payment_type == "Receive" ? doc.paid_to_account_currency : doc.paid_from_account_currency;
-					payment.doctype = dt
-					payment.posting_date = doc.posting_date;
-					payment.party = doc.party;
-					payment.reference_no = doc.reference_no;
-					payment.reference_date = doc.reference_date;
-					payment.paid_amount = doc.paid_amount;
-					payment.name = doc.name;
-					displayed_docs.push(payment);
-				} else if (dt === "Journal Entry") {
-					doc.accounts.forEach(payment => {
-						if (payment.account === me.gl_account) {
-							payment.doctype = dt;
-							payment.posting_date = doc.posting_date;
-							payment.party = doc.pay_to_recd_from;
-							payment.reference_no = doc.cheque_no;
-							payment.reference_date = doc.cheque_date;
-							payment.currency = payment.account_currency;
-							payment.paid_amount = payment.credit > 0 ? payment.credit : payment.debit;
-							payment.name = doc.name;
-							displayed_docs.push(payment);
-						}
-					})
-				} else if (dt === "Sales Invoice") {
-					doc.payments.forEach(payment => {
-						if (payment.clearance_date === null || payment.clearance_date === "") {
-							payment.doctype = dt;
-							payment.posting_date = doc.posting_date;
-							payment.party = doc.customer;
-							payment.reference_no = doc.remarks;
-							payment.currency = doc.currency;
-							payment.paid_amount = payment.amount;
-							payment.name = doc.name;
-							displayed_docs.push(payment);
-						}
-					})
-				}
-
-				const details_wrapper = me.dialog.fields_dict.payment_details.$wrapper;
-				details_wrapper.append(frappe.render_template("linked_payment_header"));
-				displayed_docs.forEach(payment => {
-					details_wrapper.append(frappe.render_template("linked_payment_row", payment));
-				})
-			})
+		if (!(event.value)) {
+			return;
 		}
+		const details_wrapper = this.dialog.fields_dict.payment_details.$wrapper;
+		details_wrapper.empty();
+		this.generate_detail_docs(event.value).then(detail_docs => {
+			me.display_entries(details_wrapper, detail_docs,
+				__("No payments found associated with ") + event.value
+			);
+		});
+	}
 
+	async generate_detail_docs(doc_name) {
+		const me = this;
+		let dt = me.dialog.fields_dict.payment_doctype.value;
+		let displayed_docs = [];
+		let doc = 0;
+		if (dt === "Journal Entry") {
+			doc = await frappe.db.get_doc("Journal Entry", doc_name);
+			let total_amount = 0.0;
+			doc.accounts.forEach(payment => {
+				if (payment.account === me.gl_account && !payment.clearance_date) {
+					payment.doctype = "Journal Entry Account";
+					payment.posting_date = doc.posting_date;
+					payment.party = doc.pay_to_recd_from;
+					payment.reference_no = doc.cheque_no;
+					payment.reference_date = doc.cheque_date;
+					payment.currency = payment.account_currency;
+					payment.pymt_amount = me.data.credit > 0 ? payment.debit-payment.credit : payment.credit-payment.debit;
+					total_amount += payment.pymt_amount;
+					payment.display_name = doc.name;
+					displayed_docs.push(payment);
+				}
+			});
+			if (displayed_docs.length > 1) {
+				doc.doctype = "Journal Entry";
+				doc.display_name = doc.name;
+				doc.party = doc.pay_to_recd_from;
+				doc.reference_no = doc.cheque_no;
+				doc.reference_date = doc.cheque_date;
+				doc.currency = displayed_docs[1].currency;
+				doc.pymt_amount = total_amount;
+				doc.subentries = displayed_docs;
+				return [doc];
+			}
+			return displayed_docs;
+		}
+		if (dt === "Sales Invoice") {
+			doc = await frappe.db.get_doc("Sales Invoice", doc_name);
+			let total_amount = 0.0;
+			doc.payments.forEach(payment => {
+				if (payment.account === me.gl_account && !payment.clearance_date ) {
+					payment.doctype = "Sales Invoice Payment";
+					payment.posting_date = doc.posting_date;
+					payment.party = doc.customer;
+					payment.reference_no = doc.remarks;
+					payment.currency = doc.currency;
+					payment.pymt_amount = payment.amount;
+					total_amount += payment.pymt_amount;
+					payment.display_name = doc.name;
+					displayed_docs.push(payment);
+				}
+			});
+			doc.party = doc.customer_name;
+			doc.reference_no = doc.remarks;
+			doc.pymt_amount = total_amount;
+			if (displayed_docs.length > 1) {
+				doc.subentries = displayed_docs;
+				return [doc];
+			} else if (displayed_docs.length == 1) {
+				return displayed_docs;
+			}
+			// else no internal Sales Invoice Payment lines. So maybe there are
+			// associated Payment Entry records; drop through and the code below
+			// will handle that case.
+		}
+		if (dt === "Purchase Invoice") {
+			doc = await frappe.db.get_doc("Purchase Invoice", doc_name);
+			doc.pymt_amount = doc.paid_amount;
+			doc.party = doc.supplier_name;
+			doc.reference_no = doc.bill_no;
+			doc.display_name = doc.name;
+			if (doc.cash_bank_account === me.gl_account) {
+				return [doc];
+			}
+			// else there may be associated Payment Entry records; drop through
+			// and the code below will handle that case.
+		}
+		let pay_ents = [];
+		if (dt === "Payment Entry") {
+			pay_ents.push(await frappe.db.get_doc("Payment Entry", doc_name));
+		} else {
+			pay_ents = await frappe.db.get_list("Payment Entry", {
+				filters: {"reference_name": doc_name},
+				fields: [
+					"name", "payment_type", "paid_to", "paid_to_account_currency",
+					"paid_from", "paid_from_account_currency", "posting_date", "party",
+					"reference_no", "reference_date", "paid_amount", "received_amount"
+				]
+			});
+		}
+		let total_amount = 0.0;
+		pay_ents.forEach(payment => {
+			if (payment.clearance_date) {
+				return; // works like continue in this context
+			}
+			if (payment.paid_to === me.gl_account) {
+				// Should we assert here that the payment_type is "Receive" or does it
+				// not matter?
+				payment.currency = payment.paid_to_account_currency;
+				payment.pymt_amount = payment.received_amount;
+			} else if (payment.paid_from === me.gl_account) {
+				payment.currency = payment.paid_from_account_currency;
+				payment.pymt_amount = payment.paid_amount;
+			} else {
+				// Somehow the account doesn't match at all
+				return;
+			}
+			payment.doctype = "Payment Entry";
+			payment.display_name = payment.name;
+			total_amount += payment.pymt_amount;
+			displayed_docs.push(payment);
+		});
+		if (displayed_docs.length < 2) {
+			return displayed_docs;
+		}
+		if (!doc) {
+			doc = await frappe.db.get_doc(dt, doc_name);
+			if (dt === "Expense Claim") {
+				doc.party = doc.employee_name;
+			}
+			doc.display_name = name;
+		}
+		doc.pymt_amount = total_amount;
+		doc.subentries = displayed_docs;
+		return [doc];
 	}
 }

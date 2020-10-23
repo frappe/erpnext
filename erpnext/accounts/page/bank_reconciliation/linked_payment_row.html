@@ -1,7 +1,7 @@
 <div class="list-row">
 	<div>
 		<div class="col-xs-3 col-sm-2 ellipsis">
-			{{ name }}
+			{{ display_name }}
 		</div>
 		<div class="col-xs-3 col-sm-2 ellipsis">
 			{% if (typeof reference_date !== "undefined") %}
@@ -13,7 +13,7 @@
 			{% endif %}
 		</div>
 		<div class="col-sm-2 ellipsis hidden-xs">
-			{{ format_currency(paid_amount, currency) }}
+			{{ format_currency(pymt_amount, currency) }}
 		</div>
 		<div class="col-sm-2 ellipsis hidden-xs">
 			{% if (typeof party !== "undefined") %}
@@ -29,7 +29,7 @@
 		</div>
 		<div class="col-xs-2 col-sm-2">
 			<div class="text-right margin-bottom">
-				<button class="btn btn-primary btn-xs reconciliation-btn" data-doctype="{{ doctype }}" data-name="{{ name }}">{{ __("Reconcile") }}</button>
+				<button class="btn {{btn_class}} btn-xs reconciliation-btn" data-doctype="{{ doctype }}" data-name="{{ name }}">{{ __("Reconcile") }}</button>
 			</div>
 		</div>
 	</div>

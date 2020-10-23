@@ -23,19 +23,18 @@ class BankClearance(Document):
 		if not self.include_reconciled_entries:
 			condition = "and (clearance_date IS NULL or clearance_date='0000-00-00')"
 
-		journal_entries = frappe.db.sql("""
+		journal_entry_accounts = frappe.db.sql("""
 			select
-				"Journal Entry" as payment_document, t1.name as payment_entry,
+				"Journal Entry Account" as payment_document, t2.name as payment_entry,
 				t1.cheque_no as cheque_number, t1.cheque_date,
-				sum(t2.debit_in_account_currency) as debit, sum(t2.credit_in_account_currency) as credit,
-				t1.posting_date, t2.against_account, t1.clearance_date, t2.account_currency
+				t2.debit_in_account_currency as debit, t2.credit_in_account_currency as credit,
+				t1.posting_date, t2.against_account, t2.clearance_date, t2.account_currency
 			from
 				`tabJournal Entry` t1, `tabJournal Entry Account` t2
 			where
 				t2.parent = t1.name and t2.account = %(account)s and t1.docstatus=1
 				and t1.posting_date >= %(from)s and t1.posting_date <= %(to)s
 				and ifnull(t1.is_opening, 'No') = 'No' {condition}
-			group by t2.account, t1.name
 			order by t1.posting_date ASC, t1.name DESC
 		""".format(condition=condition), {"account": self.account, "from": self.from_date, "to": self.to_date}, as_dict=1)
 
@@ -47,7 +46,7 @@ class BankClearance(Document):
 				"Payment Entry" as payment_document, name as payment_entry,
 				reference_no as cheque_number, reference_date as cheque_date,
 				if(paid_from=%(account)s, paid_amount, 0) as credit,
-				if(paid_from=%(account)s, 0, received_amount) as debit,
+				if(paid_to=%(account)s, 0, received_amount) as debit,
 				posting_date, ifnull(party,if(paid_from=%(account)s,paid_to,paid_from)) as against_account, clearance_date,
 				if(paid_to=%(account)s, paid_to_account_currency, paid_from_account_currency) as account_currency
 			from `tabPayment Entry`
@@ -88,7 +87,7 @@ class BankClearance(Document):
 					pi.posting_date ASC, pi.name DESC
 			""", {"account": self.account, "from": self.from_date, "to": self.to_date}, as_dict=1)
 
-		entries = sorted(list(payment_entries) + list(journal_entries + list(pos_sales_invoices) + list(pos_purchase_invoices)),
+		entries = sorted(payment_entries + journal_entry_accounts + pos_sales_invoices + pos_purchase_invoices,
 			key=lambda k: k['posting_date'] or getdate(nowdate()))
 
 		self.set('payment_entries', [])

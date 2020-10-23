@@ -28,8 +28,6 @@ class JournalEntry(AccountsController):
 		if not self.is_opening:
 			self.is_opening='No'
 
-		self.clearance_date = None
-
 		self.validate_party()
 		self.validate_entries_for_advance()
 		self.validate_multi_currency()
@@ -340,7 +338,10 @@ class JournalEntry(AccountsController):
 						currency=account_currency)
 
 				if flt(voucher_total) < (flt(order.advance_paid) + total):
-					frappe.throw(_("Advance paid against {0} {1} cannot be greater than Grand Total {2}").format(reference_type, reference_name, formatted_voucher_total))
+					frappe.throw(_("Advance paid against {0} {1} cannot be greater than Grand Total {2}").format(
+						reference_type, reference_name,
+						formatted_voucher_total
+					))
 
 	def validate_invoices(self):
 		"""Validate totals and docstatus for invoices"""

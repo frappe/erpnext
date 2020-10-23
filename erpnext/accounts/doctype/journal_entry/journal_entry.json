@@ -33,7 +33,6 @@
   "total_amount",
   "total_amount_in_words",
   "reference",
-  "clearance_date",
   "remark",
   "paid_loan",
   "inter_company_journal_entry_reference",
@@ -277,16 +276,6 @@
    "fieldtype": "Section Break",
    "label": "Reference",
    "options": "fa fa-pushpin"
-  },
-  {
-   "fieldname": "clearance_date",
-   "fieldtype": "Date",
-   "label": "Clearance Date",
-   "no_copy": 1,
-   "oldfieldname": "clearance_date",
-   "oldfieldtype": "Date",
-   "read_only": 1,
-   "search_index": 1
   },
   {
    "fieldname": "remark",

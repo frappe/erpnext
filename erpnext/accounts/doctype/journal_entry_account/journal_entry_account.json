@@ -37,7 +37,11 @@
   "col_break3",
   "is_advance",
   "user_remark",
-  "against_account"
+  "against_account",
+  "clear_sec",
+  "clearance_date",
+  "clear_col",
+  "reconciled_with"
  ],
  "fields": [
   {
@@ -194,6 +198,31 @@
    "read_only": 1
   },
   {
+    "fieldname": "clear_sec",
+    "fieldtype": "Section Break",
+    "label": "Clearance Information"
+  },
+  {
+    "fieldname": "clearance_date",
+    "fieldtype": "Date",
+    "label": "Clearance Date",
+    "no_copy": 1,
+    "read_only": 1,
+    "search_index": 1
+  },
+  {
+    "fieldname": "clear_col",
+    "fieldtype": "Column Break"
+  },
+  {
+    "fieldname": "reconciled_with",
+    "fieldtype": "Link",
+    "label": "Reconciled With",
+    "options": "Bank Transaction",
+    "read_only": 1,
+    "no_copy": 1
+  },
+  {
    "fieldname": "reference",
    "fieldtype": "Section Break",
    "label": "Reference"
@@ -280,7 +309,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-06-24 14:06:54.833738",
+ "modified": "2020-10-20 13:05:53.722627",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
