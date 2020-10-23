@@ -127,7 +127,7 @@
    "default": "0",
    "fieldname": "show_inclusive_tax_in_print",
    "fieldtype": "Check",
-   "label": "Show Inclusive Tax In Print"
+   "label": "Show Inclusive Tax in Print"
   },
   {
    "fieldname": "column_break_12",
@@ -137,7 +137,7 @@
    "default": "0",
    "fieldname": "show_payment_schedule_in_print",
    "fieldtype": "Check",
-   "label": "Show Payment Schedule In Print"
+   "label": "Show Payment Schedule in Print"
   },
   {
    "fieldname": "currency_exchange_section",
