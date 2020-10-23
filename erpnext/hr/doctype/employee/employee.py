@@ -218,7 +218,7 @@ class Employee(NestedSet):
 
 	def validate_preferred_email(self):
 		if self.prefered_contact_email and not self.get(scrub(self.prefered_contact_email)):
-			frappe.msgprint(_("Please enter " + self.prefered_contact_email))
+			frappe.msgprint(_("Please enter {0}").format(self.prefered_contact_email))
 
 	def validate_onboarding_process(self):
 		employee_onboarding = frappe.get_all("Employee Onboarding",
