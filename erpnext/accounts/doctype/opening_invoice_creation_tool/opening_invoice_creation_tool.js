@@ -6,7 +6,7 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 		frm.set_query('party_type', 'invoices', function(doc, cdt, cdn) {
 			return {
 				filters: {
-					'name': ['in', 'Customer,Supplier']
+					'name': ['in', 'Customer, Supplier']
 				}
 			};
 		});
@@ -14,29 +14,46 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 		if (frm.doc.company) {
 			frm.trigger('setup_company_filters');
 		}
+
+		frappe.realtime.on('opening_invoice_creation_progress', data => {
+			if (!frm.doc.import_in_progress) {
+				frm.dashboard.reset();
+				frm.doc.import_in_progress = true;
+			}
+			if (data.user != frappe.session.user) return;
+			if (data.count == data.total) {
+				setTimeout((title) => {
+					frm.doc.import_in_progress = false;
+					frm.clear_table("invoices");
+					frm.refresh_fields();
+					frm.page.clear_indicator();
+					frm.dashboard.hide_progress(title);
+					frappe.msgprint(__("Opening {0} Invoice created", [frm.doc.invoice_type]));
+				}, 1500, data.title);
+				return;
+			}
+
+			frm.dashboard.show_progress(data.title, (data.count / data.total) * 100, data.message);
+			frm.page.set_indicator(__('In Progress'), 'orange');
+		});
 	},
 
 	refresh: function(frm) {
 		frm.disable_save();
-		frm.trigger("make_dashboard");
+		!frm.doc.import_in_progress && frm.trigger("make_dashboard");
 		frm.page.set_primary_action(__('Create Invoices'), () => {
 			let btn_primary = frm.page.btn_primary.get(0);
 			return frm.call({
 				doc: frm.doc,
-				freeze: true,
 				btn: $(btn_primary),
 				method: "make_invoices",
-				freeze_message: __("Creating {0} Invoice", [frm.doc.invoice_type]),
-				callback: (r) => {
-					if(!r.exc){
-						frappe.msgprint(__("Opening {0} Invoice created", [frm.doc.invoice_type]));
-						frm.clear_table("invoices");
-						frm.refresh_fields();
-						frm.reload_doc();
-					}
-				}
+				freeze_message: __("Creating {0} Invoice", [frm.doc.invoice_type])
 			});
 		});
+
+		if (frm.doc.create_missing_party) {
+			frm.set_df_property("party", "fieldtype", "Data", frm.doc.name, "invoices");
+		}
 	},
 
 	setup_company_filters: function(frm) {
