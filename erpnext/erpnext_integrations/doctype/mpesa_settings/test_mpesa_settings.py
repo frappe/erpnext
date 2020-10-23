@@ -10,7 +10,7 @@ from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_inv
 
 class TestMpesaSettings(unittest.TestCase):
 	def test_creation_of_payment_gateway(self):
-		mpesa_doc = create_mpesa_settings(payment_gateway_name="_Test")
+		create_mpesa_settings(payment_gateway_name="_Test")
 
 		mode_of_payment = frappe.get_doc("Mode of Payment", "Mpesa-_Test")
 		self.assertTrue(frappe.db.exists("Payment Gateway Account", {'payment_gateway': "Mpesa-_Test"}))
@@ -41,7 +41,7 @@ class TestMpesaSettings(unittest.TestCase):
 		}))
 
 	def test_processing_of_callback_payload(self):
-		mpesa_doc = create_mpesa_settings(payment_gateway_name="Payment")
+		create_mpesa_settings(payment_gateway_name="Payment")
 		mpesa_account = frappe.db.get_value("Payment Gateway Account", {"payment_gateway": 'Mpesa-Payment'}, "payment_account")
 		frappe.db.set_value("Account", mpesa_account, "account_currency", "KES")
 
@@ -73,7 +73,7 @@ def create_mpesa_settings(payment_gateway_name="Express"):
 	if frappe.db.exists("Mpesa Settings", payment_gateway_name):
 		return frappe.get_doc("Mpesa Settings", payment_gateway_name)
 
-	doc = frappe.get_doc(dict(
+	doc = frappe.get_doc(dict( #nosec
 		doctype="Mpesa Settings",
 		payment_gateway_name=payment_gateway_name,
 		consumer_key="5sMu9LVI1oS3oBGPJfh3JyvLHwZOdTKn",

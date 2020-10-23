@@ -13,7 +13,9 @@ frappe.ui.form.on('Mpesa Settings', {
 	},
 
 	get_account_balance: function(frm) {
-		if (!frm.initiator_name && !frm.security_credentials) return;
+		if (!frm.initiator_name && !frm.security_credentials) {
+			frappe.throw(__("Please set the initiator name and the security credential"));
+		}
 		frappe.call({
 			method: "get_account_balance_info",
 			doc: frm.doc
