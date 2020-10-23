@@ -164,7 +164,8 @@ class InpatientMedicationEntry(Document):
 
 	def make_stock_entry(self):
 		stock_entry = frappe.new_doc('Stock Entry')
-		stock_entry.stock_entry_type = 'Material Issue'
+		stock_entry.purpose = 'Material Issue'
+		stock_entry.set_stock_entry_type()
 		stock_entry.from_warehouse = self.warehouse
 		stock_entry.company = self.company
 		stock_entry.inpatient_medication_entry = self.name
