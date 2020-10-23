@@ -28,7 +28,7 @@ class StudentAttendance(Document):
 				frappe.bold('Course Schedule')), title=_('Mandatory Fields'))
 
 	def validate_date(self):
-		if getdate(self.date) > getdate():
+		if not self.leave_application and getdate(self.date) > getdate():
 			frappe.throw(_('Attendance cannot be marked for future dates.'))
 
 		if self.student_group:
