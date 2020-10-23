@@ -24,8 +24,10 @@ class LoanRepayment(AccountsController):
 		self.validate_amount()
 		self.allocate_amounts(amounts)
 
-	def on_submit(self):
+	def before_submit(self):
 		self.book_unaccrued_interest()
+
+	def on_submit(self):
 		self.update_paid_amount()
 		self.make_gl_entries()
 
@@ -99,7 +101,8 @@ class LoanRepayment(AccountsController):
 				self.append('repayment_details', {
 					'loan_interest_accrual': lia.name,
 					'paid_interest_amount': flt(self.total_interest_paid - self.interest_payable, precision),
-					'paid_principal_amount': 0.0
+					'paid_principal_amount': 0.0,
+					'accrual_type': 'Repayment'
 				})
 
 	def update_paid_amount(self):
@@ -123,12 +126,20 @@ class LoanRepayment(AccountsController):
 	def mark_as_unpaid(self):
 		loan = frappe.get_doc("Loan", self.against_loan)
 
+		no_of_repayments = len(self.repayment_details)
+
 		for payment in self.repayment_details:
 			frappe.db.sql(""" UPDATE `tabLoan Interest Accrual`
 				SET paid_principal_amount = `paid_principal_amount` - %s,
 					paid_interest_amount = `paid_interest_amount` - %s
 				WHERE name = %s""",
 				(payment.paid_principal_amount, payment.paid_interest_amount, payment.loan_interest_accrual))
+
+			# Cancel repayment interest accrual
+			# checking idx as a preventive measure, repayment accrual will always be the last entry
+			if payment.accrual_type == 'Repayment' and payment.idx == no_of_repayments:
+				lia_doc = frappe.get_doc('Loan Interest Accrual', payment.loan_interest_accrual)
+				lia_doc.cancel()
 
 		frappe.db.sql(""" UPDATE `tabLoan` SET total_amount_paid = %s, total_principal_paid = %s
 			WHERE name = %s """, (loan.total_amount_paid - self.amount_paid,
