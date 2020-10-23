@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
-from frappe.utils import get_link_to_form
+from frappe.utils import get_link_to_form, formatdate
 from erpnext import get_default_company
 from erpnext.education.api import get_student_group_students
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
@@ -72,7 +72,8 @@ class StudentAttendance(Document):
 	def validate_is_holiday(self):
 		holiday_list = get_holiday_list()
 		if is_holiday(holiday_list, self.date):
-			frappe.throw(_('Attendance cannot be marked for {0} as it is a holiday.').format(frappe.bold(self.date)))
+			frappe.throw(_('Attendance cannot be marked for {0} as it is a holiday.').format(
+				frappe.bold(formatdate(self.date))))
 
 def get_holiday_list(company=None):
 	if not company:

@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cstr, cint, getdate
+from frappe.utils import cstr, cint, getdate, formatdate
 from frappe import msgprint, _
 from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
@@ -19,7 +19,7 @@ def execute(filters=None):
 
 	holiday_list = get_holiday_list()
 	if is_holiday(holiday_list, filters.get("date")):
-		msgprint(_("No attendance has been marked for {0} as it is a Holiday").format(frappe.bold(filters.get("date"))))
+		msgprint(_("No attendance has been marked for {0} as it is a Holiday").format(frappe.bold(formatdate(filters.get("date")))))
 
 
 	absent_students = get_absent_students(date)
