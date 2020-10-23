@@ -274,7 +274,7 @@ erpnext.PointOfSale.ItemCart = class {
 		});
 		frappe.ui.keys.on("escape", () => {
 			const item_cart_visible = this.$component.is(":visible");
-			if (item_cart_visible && this.discount_field?.parent.is(":visible")) {
+			if (item_cart_visible && this.discount_field && this.discount_field.parent.is(":visible")) {
 				this.discount_field.set_value(0);
 			}
 		});

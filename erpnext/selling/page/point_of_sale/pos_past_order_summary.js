@@ -173,19 +173,17 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	}
 
 	get_taxes_html(doc) {
+		const taxes = doc.taxes.map((t, i) => {
+			let margin_left = '';
+			if (i !== 0) margin_left = 'ml-2';
+			return `<span class="pl-2 pr-2 ${margin_left}">${t.description} @${t.rate}%</span>`;
+		}).join('');
+
 		return `
 			<div class="total-summary-wrapper flex items-center justify-between h-12 pr-4 pl-4 border-b-grey">
 				<div class="flex">
 					<div class="text-md-0 text-dark-grey text-bold w-fit">Tax Charges</div>
-					<div class="flex ml-6 text-dark-grey">
-					${
-						doc.taxes.map((t, i) => {
-							let margin_left = '';
-							if (i !== 0) margin_left = 'ml-2';
-							return `<span class="pl-2 pr-2 ${margin_left}">${t.description} @${t.rate}%</span>`;
-						}).join('')
-					}
-					</div>
+					<div class="flex ml-6 text-dark-grey">${taxes}</div>
 				</div>
 				<div class="flex flex-col text-right">
 					<div class="text-md-0 text-dark-grey text-bold">
@@ -315,9 +313,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	}
 
 	toggle_component(show) {
-		show ?
-		this.$component.removeClass('d-none') :
-		this.$component.addClass('d-none');
+		show ? this.$component.removeClass('d-none') : this.$component.addClass('d-none');
 	}
 
 	send_email() {

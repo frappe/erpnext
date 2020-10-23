@@ -371,7 +371,7 @@ erpnext.PointOfSale.Controller = class {
 							this.order_summary.load_summary_of(this.frm.doc, true);
 							frappe.show_alert({
 								indicator: 'green',
-								message: __(`POS invoice {0} created succesfully`, [r.doc.name])
+								message: __('POS invoice {0} created succesfully', [r.doc.name])
 							});
 						});
 				}
@@ -659,7 +659,7 @@ erpnext.PointOfSale.Controller = class {
 		if (res.message.includes(serial_no)) {
 			frappe.throw({
 				title: __("Not Available"),
-				message: __(`Serial No: {0} has already been transacted into another POS Invoice.`, [serial_no.bold()])
+				message: __('Serial No: {0} has already been transacted into another POS Invoice.', [serial_no.bold()])
 			});
 		}
 	}
