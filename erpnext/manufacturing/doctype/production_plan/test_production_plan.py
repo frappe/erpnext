@@ -237,7 +237,9 @@ def make_bom(**args):
 		'item': args.item,
 		'currency': args.currency or 'USD',
 		'quantity': args.quantity or 1,
-		'company': args.company or '_Test Company'
+		'company': args.company or '_Test Company',
+		'routing': args.routing,
+		'with_operations': args.with_operations or 0
 	})
 
 	for item in args.raw_materials:
