@@ -1117,7 +1117,10 @@ class StockEntry(StockController):
 				for d in backflushed_materials.get(item.item_code):
 					if d.get(item.warehouse):
 						if (qty > req_qty):
-							qty-= d.get(item.warehouse)
+							qty = (qty/trans_qty) * flt(self.fg_completed_qty)
+
+			if cint(frappe.get_cached_value('UOM', item.stock_uom, 'must_be_whole_number')):
+				qty = frappe.utils.ceil(qty)
 
 			if qty > 0:
 				self.add_to_stock_entry_detail({
@@ -1320,8 +1323,10 @@ class StockEntry(StockController):
 				for sr in get_serial_nos(item.serial_no):
 					sales_order = frappe.db.get_value("Serial No", sr, "sales_order")
 					if sales_order:
-						frappe.throw(_("Item {0} (Serial No: {1}) cannot be consumed as is reserverd\
-						 to fullfill Sales Order {2}.").format(item.item_code, sr, sales_order))
+						msg = (_("(Serial No: {0}) cannot be consumed as it's reserverd to fullfill Sales Order {1}.")
+							.format(sr, sales_order))
+
+						frappe.throw(_("Item {0} {1}").format(item.item_code, msg))
 
 	def update_transferred_qty(self):
 		if self.purpose == 'Material Transfer' and self.outgoing_stock_entry:
