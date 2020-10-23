@@ -33,13 +33,26 @@ class TherapyPlan(Document):
 		self.db_set('total_sessions', total_sessions)
 		self.db_set('total_sessions_completed', total_sessions_completed)
 
+	def set_therapy_details_from_template(self):
+		# Add therapy types in the child table
+		self.set('therapy_plan_details', [])
+		therapy_plan_template = frappe.get_doc('Therapy Plan Template', self.therapy_plan_template)
+
+		for data in therapy_plan_template.therapy_types:
+			self.append('therapy_plan_details', {
+				'therapy_type': data.therapy_type,
+				'no_of_sessions': data.no_of_sessions
+			})
+		return self
+
 
 @frappe.whitelist()
-def make_therapy_session(therapy_plan, patient, therapy_type):
+def make_therapy_session(therapy_plan, patient, therapy_type, company):
 	therapy_type = frappe.get_doc('Therapy Type', therapy_type)
 
 	therapy_session = frappe.new_doc('Therapy Session')
 	therapy_session.therapy_plan = therapy_plan
+	therapy_session.company = company
 	therapy_session.patient = patient
 	therapy_session.therapy_type = therapy_type.name
 	therapy_session.duration = therapy_type.default_duration

@@ -108,7 +108,8 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "fieldname": "therapy_plan_template",
@@ -127,7 +128,7 @@
   }
  ],
  "links": [],
- "modified": "2020-10-08 17:05:56.150529",
+ "modified": "2020-10-23 01:27:42.128855",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Plan",

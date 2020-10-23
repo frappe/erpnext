@@ -37,7 +37,8 @@ frappe.ui.form.on('Therapy Plan', {
 						args: {
 							therapy_plan: frm.doc.name,
 							patient: frm.doc.patient,
-							therapy_type: data.therapy_type
+							therapy_type: data.therapy_type,
+							company: frm.doc.company
 						},
 						freeze: true,
 						callback: function(r) {
@@ -82,22 +83,12 @@ frappe.ui.form.on('Therapy Plan', {
 	therapy_plan_template: function(frm) {
 		if (frm.doc.therapy_plan_template) {
 			frappe.call({
-				method: 'frappe.client.get',
-				args: {
-					doctype: 'Therapy Plan Template',
-					name: frm.doc.therapy_plan_template
-				},
+				method: 'set_therapy_details_from_template',
+				doc: frm.doc,
 				freeze: true,
-				callback: function(r) {
-					if (r.message) {
-						frm.doc.therapy_plan_details = [];
-						$.each(r.message.therapy_types, (_i, e) => {
-							let child = frm.add_child('therapy_plan_details');
-							child.therapy_type = e.therapy_type;
-							child.no_of_sessions = e.no_of_sessions;
-						});
-						refresh_field('therapy_plan_details');
-					}
+				freeze_message: __('Fetching Template Details'),
+				callback: function() {
+					refresh_field('therapy_plan_details');
 				}
 			});
 		}
