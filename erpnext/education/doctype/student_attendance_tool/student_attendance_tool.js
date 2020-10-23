@@ -52,6 +52,8 @@ frappe.ui.form.on('Student Attendance Tool', {
 	},
 
 	date: function(frm) {
+		if (frm.doc.date > frappe.datetime.get_today())
+			frappe.throw(__("Cannot mark attendance for future dates."));
 		frm.trigger("student_group");
 	},
 

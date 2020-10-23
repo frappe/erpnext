@@ -6,13 +6,13 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
-from frappe.utils import get_link_to_form
+from frappe.utils import get_link_to_form, getdate
 from erpnext.education.api import get_student_group_students
-
 
 class StudentAttendance(Document):
 	def validate(self):
 		self.validate_mandatory()
+		self.validate_date()
 		self.set_date()
 		self.set_student_group()
 		self.validate_student()
@@ -26,6 +26,10 @@ class StudentAttendance(Document):
 		if not (self.student_group or self.course_schedule):
 			frappe.throw(_('{0} or {1} is mandatory').format(frappe.bold('Student Group'),
 				frappe.bold('Course Schedule')), title=_('Mandatory Fields'))
+
+	def validate_date(self):
+		if getdate(self.date) > getdate():
+			frappe.throw(_('Attendance cannot be marked for future dates.'))
 
 	def set_student_group(self):
 		if self.course_schedule:
