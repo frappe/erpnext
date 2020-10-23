@@ -131,7 +131,7 @@ frappe.ui.form.on('Salary Structure', {
 				{fieldname:'department', fieldtype:'Link', options: 'Department', label: __('Department')},
 				{fieldname:'designation', fieldtype:'Link', options: 'Designation', label: __('Designation')},
 				{fieldname:"employee", fieldtype: "Link", options: "Employee", label: __("Employee")},
-				{fieldname:"default_payroll_payable_account", fieldtype: "Link", options: "Account", filters: {"company": frm.doc.company, "root_type": "Liability", "is_group": 0, "account_currency": frm.doc.currency}, label: __("Default Payroll Payable Account")},
+				{fieldname:"payroll_payable_account", fieldtype: "Link", options: "Account", filters: {"company": frm.doc.company, "root_type": "Liability", "is_group": 0, "account_currency": frm.doc.currency}, label: __("Payroll Payable Account")},
 				{fieldname:'base_variable', fieldtype:'Section Break'},
 				{fieldname:'from_date', fieldtype:'Date', label: __('From Date'), "reqd": 1},
 				{fieldname:'income_tax_slab', fieldtype:'Link', label: __('Income Tax Slab'), options: 'Income Tax Slab'},

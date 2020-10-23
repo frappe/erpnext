@@ -45,7 +45,8 @@ class TestLeaveEncashment(unittest.TestCase):
 			employee=self.employee,
 			leave_type="_Test Leave Type Encashment",
 			leave_period=self.leave_period.name,
-			payroll_date=today()
+			payroll_date=today(),
+			currency="INR"
 		)).insert()
 
 		self.assertEqual(leave_encashment.leave_balance, 10)
@@ -65,7 +66,8 @@ class TestLeaveEncashment(unittest.TestCase):
 			employee=self.employee,
 			leave_type="_Test Leave Type Encashment",
 			leave_period=self.leave_period.name,
-			payroll_date=today()
+			payroll_date=today(),
+			currency="INR"
 		)).insert()
 
 		leave_encashment.submit()

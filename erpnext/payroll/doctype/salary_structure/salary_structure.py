@@ -89,25 +89,25 @@ class SalaryStructure(Document):
 
 	@frappe.whitelist()
 	def assign_salary_structure(self, grade=None, department=None, designation=None,employee=None,
-			default_payroll_payable_account=None, from_date=None, base=None, variable=None, income_tax_slab=None):
+			payroll_payable_account=None, from_date=None, base=None, variable=None, income_tax_slab=None):
 		employees = self.get_employees(company= self.company, grade= grade,department= department,designation= designation,name=employee)
 
 		if employees:
 			if len(employees) > 20:
 				frappe.enqueue(assign_salary_structure_for_employees, timeout=600,
 					employees=employees, salary_structure=self,
-					default_payroll_payable_account=default_payroll_payable_account,
+					payroll_payable_account=payroll_payable_account,
 					from_date=from_date, base=base, variable=variable, income_tax_slab=income_tax_slab)
 			else:
 				assign_salary_structure_for_employees(employees, self,
-					default_payroll_payable_account=default_payroll_payable_account, 
+					payroll_payable_account=payroll_payable_account, 
 					from_date=from_date, base=base, variable=variable, income_tax_slab=income_tax_slab)
 		else:
 			frappe.msgprint(_("No Employee Found"))
 
 
 
-def assign_salary_structure_for_employees(employees, salary_structure, default_payroll_payable_account=None, from_date=None, base=None, variable=None, income_tax_slab=None):
+def assign_salary_structure_for_employees(employees, salary_structure, payroll_payable_account=None, from_date=None, base=None, variable=None, income_tax_slab=None):
 	salary_structures_assignments = []
 	existing_assignments_for = get_existing_assignments(employees, salary_structure, from_date)
 	count=0
@@ -117,7 +117,7 @@ def assign_salary_structure_for_employees(employees, salary_structure, default_p
 		count +=1
 
 		salary_structures_assignment = create_salary_structures_assignment(employee,
-			salary_structure, default_payroll_payable_account, from_date, base, variable, income_tax_slab)
+			salary_structure, payroll_payable_account, from_date, base, variable, income_tax_slab)
 		salary_structures_assignments.append(salary_structures_assignment)
 		frappe.publish_progress(count*100/len(set(employees) - set(existing_assignments_for)), title = _("Assigning Structures..."))
 
@@ -125,21 +125,21 @@ def assign_salary_structure_for_employees(employees, salary_structure, default_p
 		frappe.msgprint(_("Structures have been assigned successfully"))
 
 
-def create_salary_structures_assignment(employee, salary_structure, default_payroll_payable_account, from_date, base, variable, income_tax_slab=None):
-	if not default_payroll_payable_account:
-		default_payroll_payable_account = frappe.db.get_value('Company', salary_structure.company, 'default_payroll_payable_account')
-		if not default_payroll_payable_account:
+def create_salary_structures_assignment(employee, salary_structure, payroll_payable_account, from_date, base, variable, income_tax_slab=None):
+	if not payroll_payable_account:
+		payroll_payable_account = frappe.db.get_value('Company', salary_structure.company, 'payroll_payable_account')
+		if not payroll_payable_account:
 			frappe.throw(_('Please set "Default Payroll Payable Account" in Company Defaults'))
-	account_currency = frappe.db.get_value('Account',  default_payroll_payable_account, 'account_currency')
+	account_currency = frappe.db.get_value('Account',  payroll_payable_account, 'account_currency')
 	if account_currency != salary_structure.currency:
-		frappe.throw(_("Account currency of  Account: {0} is different than what is specified in salary structure: {1}").format(default_payroll_payable_account, salary_structure))
+		frappe.throw(_("Account currency of  Account: {0} is different than what is specified in salary structure: {1}").format(payroll_payable_account, salary_structure))
 
 	assignment = frappe.new_doc("Salary Structure Assignment")
 	assignment.employee = employee
 	assignment.salary_structure = salary_structure.name
 	assignment.company = salary_structure.company
 	assignment.currency = salary_structure.currency
-	assignment.default_payroll_payable_account = default_payroll_payable_account
+	assignment.payroll_payable_account = payroll_payable_account
 	assignment.from_date = from_date
 	assignment.base = base
 	assignment.variable = variable

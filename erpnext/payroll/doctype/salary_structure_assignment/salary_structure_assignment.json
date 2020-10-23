@@ -11,7 +11,7 @@
   "employee_name",
   "department",
   "company",
-  "default_payroll_payable_account",
+  "payroll_payable_account",
   "column_break_6",
   "designation",
   "salary_structure",
@@ -124,13 +124,6 @@
    "options": "Income Tax Slab"
   },
   {
-   "depends_on": "salary_structure",
-   "fieldname": "default_payroll_payable_account",
-   "fieldtype": "Link",
-   "label": "Payroll Payable Account",
-   "options": "Account"
-  },
-  {
    "default": "Company:company:default_currency",
    "depends_on": "eval:(doc.docstatus==1 || doc.salary_structure)",
    "fetch_from": "salary_structure.currency",
@@ -141,11 +134,18 @@
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "depends_on": "salary_structure",
+   "fieldname": "payroll_payable_account",
+   "fieldtype": "Link",
+   "label": "Payroll Payable Account",
+   "options": "Account"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-21 22:43:55.208492",
+ "modified": "2020-10-23 13:20:29.906934",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Structure Assignment",

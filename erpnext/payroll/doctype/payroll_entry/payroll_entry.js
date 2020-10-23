@@ -18,7 +18,7 @@ frappe.ui.form.on('Payroll Entry', {
 			};
 		});
 
-		frm.set_query("default_payroll_payable_account", function() {
+		frm.set_query("payroll_payable_account", function() {
 			return {
 				filters: {
 					"company": frm.doc.company,
