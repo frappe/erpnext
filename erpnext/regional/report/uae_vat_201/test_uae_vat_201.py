@@ -21,7 +21,7 @@ from erpnext.regional.report.uae_vat_201.uae_vat_201 import (
 	get_reverse_charge_recoverable_tax
 	)
 
-
+test_dependencies = ["Territory", "Customer Group", "Supplier Group", "Item"]
 
 class TestUaeVat201(TestCase):
 	def setUp(self):
