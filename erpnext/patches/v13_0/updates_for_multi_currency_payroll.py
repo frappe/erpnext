@@ -9,20 +9,20 @@ def execute():
 	default_payroll_payable_account = frappe.db.get_value('Company', erpnext.get_company_currency(company), 'default_payroll_payable_account')
 	frappe.reload_doc('accounts', 'doctype', 'salary_component_account')
 	frappe.reload_doc('hr', 'doctype', 'employee_advance')
-	frappe.reload_doc('hr', 'doctype', 'leave_enchashment')
+	frappe.reload_doc('hr', 'doctype', 'leave_encashment')
 
 	doctype_list = [
-		'additional_salary'
-		'employee_benefit_application'
-		'employee_benefit_claim'
-		'employee_incentive'
-		'employee_tax_exemption_declaration'
-		'employee_tax_exemption_proof_submission'
-		'income_tax_slab'
-		'payroll_entry'
-		'retention_bonus'
-		'salary_structure'
-		'salary_structure_assignment'
+		'additional_salary',
+		'employee_benefit_application',
+		'employee_benefit_claim',
+		'employee_incentive',
+		'employee_tax_exemption_declaration',
+		'employee_tax_exemption_proof_submission',
+		'income_tax_slab',
+		'payroll_entry',
+		'retention_bonus',
+		'salary_structure',
+		'salary_structure_assignment',
 		'salary_slip'
 	]
 
