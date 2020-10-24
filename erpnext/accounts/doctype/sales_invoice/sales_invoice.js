@@ -463,7 +463,7 @@ $.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_
 // Hide Fields
 // ------------
 cur_frm.cscript.hide_fields = function(doc) {
-	var parent_fields = ['project', 'due_date', 'is_opening', 'source', 'total_advance', 'get_advances',
+	var parent_fields = ['due_date', 'is_opening', 'source', 'total_advance', 'get_advances',
 		'advances', 'from_date', 'to_date'];
 
 	if(cint(doc.is_pos) == 1) {
